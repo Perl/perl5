@@ -1886,15 +1886,14 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 STATIC void
 S_incline(pTHX_ const char *s, const char *end)
 {
+    PERL_ARGS_ASSERT_INCLINE;
+    assert(end >= s);
+
     const char *t;
     const char *n;
     const char *e;
     line_t line_num;
     UV uv;
-
-    PERL_ARGS_ASSERT_INCLINE;
-
-    assert(end >= s);
 
     COPLINE_INC_WITH_HERELINES;
     if (!PL_rsfp && !PL_parser->filtered && PL_lex_state == LEX_NORMAL
@@ -2855,6 +2854,10 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
                                           const bool is_utf8,
                                           const char ** error_msg)
 {
+    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
+    assert(e >= s);
+    assert(s > (char *) 3);
+
     /* <s> points to first character of interior of \N{}, <e> to one beyond the
      * interior, hence to the "}".  Finds what the name resolves to, returning
      * an SV* containing it; NULL if no valid one found.
@@ -2874,12 +2877,6 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
      * context of what's failing*/
     const char* context = s - 3;
     STRLEN context_len = e - context + 1; /* include all of \N{...} */
-
-
-    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
-
-    assert(e >= s);
-    assert(s > (char *) 3);
 
     while (s < e && isBLANK(*s)) {
         s++;

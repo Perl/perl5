@@ -612,12 +612,12 @@ Perl_delimcpy_no_escape(char *to, const char *to_end,
                         const char *from, const char *from_end,
                         const int delim, I32 *retlen)
 {
+    PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
+
     const char * delim_pos;
     ptrdiff_t from_len = from_end - from;
     ptrdiff_t to_len = to_end - to;
     SSize_t copy_len;
-
-    PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
 
     assert(from_len >= 0);
     assert(to_len >= 0);
@@ -717,13 +717,13 @@ Perl_delimcpy(char *to, const char *to_end,
               const char *from, const char *from_end,
               const int delim, I32 *retlen)
 {
-    const char * const orig_to = to;
-    ptrdiff_t copy_len = 0;
-    bool stopped_early = FALSE;     /* Ran out of room to copy to */
-
     PERL_ARGS_ASSERT_DELIMCPY;
     assert(from_end >= from);
     assert(to_end >= to);
+
+    const char * const orig_to = to;
+    ptrdiff_t copy_len = 0;
+    bool stopped_early = FALSE;     /* Ran out of room to copy to */
 
     /* Don't use the loop for the trivial case of the first character being the
      * delimiter; otherwise would have to worry inside the loop about backing
@@ -1099,6 +1099,9 @@ a littlestr of "ab\n", SvTAIL matches as:
 char *
 Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U32 flags)
 {
+    PERL_ARGS_ASSERT_FBM_INSTR;
+    assert(bigend >= big);
+
     unsigned char *s;
     STRLEN l;
     const unsigned char *little = (const unsigned char *)SvPV_const(littlestr,l);
@@ -1106,10 +1109,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
     const I32 multiline = flags & FBMrf_MULTILINE;
     bool valid = SvVALID(littlestr);
     bool tail = valid ? cBOOL(SvTAIL(littlestr)) : FALSE;
-
-    PERL_ARGS_ASSERT_FBM_INSTR;
-
-    assert(bigend >= big);
 
     if ((STRLEN)(bigend - big) < littlelen) {
         if (     tail

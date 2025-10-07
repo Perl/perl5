@@ -724,6 +724,10 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
 STRLEN
 Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_;
+    assert(e > s);
+    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
+
     SSize_t len, full_len;
 
     /* An internal helper function.
@@ -751,12 +755,6 @@ Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
      *  determined with just the first one or two bytes.
      *
      */
-
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_;
-
-    assert(e > s);
-    assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
-
     full_len = UTF8SKIP(s);
 
     len = e - s;
@@ -841,6 +839,10 @@ Size_t
 Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
                         const bool require_partial)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_;
+    assert(s0 < e);
+    assert(*s0 == I8_TO_NATIVE_UTF8(0xFF));
+
     /* This is called to determine if the UTF-8 sequence starting at s0 and
      * continuing for up to one full character of bytes, but looking no further
      * than 'e - 1', is legal.  *s0 must be 0xFF (or whatever the native
@@ -866,11 +868,6 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
 
     const U8 *s = s0 + 1;
     const U8 *send = e;
-
-    PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_;
-
-    assert(s0 < e);
-    assert(*s0 == I8_TO_NATIVE_UTF8(0xFF));
 
     send = s + MIN(UTF8_MAXBYTES - 1, e - s);
     while (s < send) {
@@ -4247,6 +4244,9 @@ STATIC UV
 S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_TURKIC_FC;
+    assert(e > p);
+
     /* Returns 0 if the foldcase of the input UTF-8 encoded sequence from
      * p0..e-1 according to Turkic rules is the same as for non-Turkic.
      * Otherwise, it returns the first code point of the Turkic foldcased
@@ -4256,9 +4256,6 @@ S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
      * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
      * I WITH DOT ABOVE form a case pair, as do 'I' and LATIN SMALL LETTER
      * DOTLESS I */
-
-    PERL_ARGS_ASSERT_TURKIC_FC;
-    assert(e > p);
 
     if (UNLIKELY(*p == 'I')) {
         *lenp = 2;
@@ -4282,14 +4279,14 @@ STATIC UV
 S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_TURKIC_LC;
+    assert(e > p0);
+
     /* Returns 0 if the lowercase of the input UTF-8 encoded sequence from
      * p0..e-1 according to Turkic rules is the same as for non-Turkic.
      * Otherwise, it returns the first code point of the Turkic lowercased
      * sequence, and the entire sequence will be stored in *ustrp.  ustrp will
      * contain *lenp bytes */
-
-    PERL_ARGS_ASSERT_TURKIC_LC;
-    assert(e > p0);
 
     /* A 'I' requires context as to what to do */
     if (UNLIKELY(*p0 == 'I')) {
@@ -4328,6 +4325,9 @@ STATIC UV
 S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_TURKIC_UC;
+    assert(e > p);
+
     /* Returns 0 if the upper or title-case of the input UTF-8 encoded sequence
      * from p0..e-1 according to Turkic rules is the same as for non-Turkic.
      * Otherwise, it returns the first code point of the Turkic upper or
@@ -4337,9 +4337,6 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
      * Turkic differs only from non-Turkic in that 'i' and LATIN CAPITAL LETTER
      * I WITH DOT ABOVE form a case pair, as do 'I' and LATIN SMALL LETTER
      * DOTLESS I */
-
-    PERL_ARGS_ASSERT_TURKIC_UC;
-    assert(e > p);
 
     if (*p == 'i') {
         *lenp = 2;
