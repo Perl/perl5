@@ -12168,7 +12168,7 @@ S_optimize_regclass(pTHX_
             Size_t high_len = uv_to_utf8(high_utf8, highest_cp) - high_utf8;
 
             /* If the lowest and highest are the same, we can get an exact
-             * first byte instead of a just minimum or even a sequence of exact
+             * first byte instead of just a minimum or even a sequence of exact
              * leading bytes.  We signal these with different regnodes */
             if (low_utf8[0] == high_utf8[0]) {
                 Size_t len = find_first_differing_byte_pos(low_utf8,
