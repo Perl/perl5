@@ -3,13 +3,11 @@ __END__
 join,
 EXPECT
 Not enough arguments for join or string at - line 1, near "join,"
-Execution of - aborted due to compilation errors.
 ########
 # NAME my $<special>
 my $!;
 EXPECT
 Can't use global $! in "my" at - line 1, near "my $!"
-Execution of - aborted due to compilation errors.
 ########
 # NAME my $<non-ASCII> doesn't output garbage
 # \xB6 is same character in all three EBCDIC pages and Latin1
@@ -70,90 +68,76 @@ use feature 'bitwise';
 @a &= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise and (&) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME Num-specific |= on @array
 use feature 'bitwise';
 @a |= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise or (|) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME Num-specific ^= on @array
 use feature 'bitwise';
 @a ^= 1;
 EXPECT
 Can't modify array dereference in numeric bitwise xor (^) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME &.= on @array
 use feature 'bitwise';
 @a &.= 1;
 EXPECT
 Can't modify array dereference in string bitwise and (&.) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME |.= on @array
 use feature 'bitwise';
 @a |.= 1;
 EXPECT
 Can't modify array dereference in string bitwise or (|.) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME ^.= on @array
 use feature 'bitwise';
 @a ^.= 1;
 EXPECT
 Can't modify array dereference in string bitwise xor (^.) at - line 2, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME substr %h in scalar assignment
 substr(%h,0) = 3;
 EXPECT
 Can't modify hash dereference in substr at - line 1, near "3;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME substr %h in list assignment
 (substr %h,0) = 3;
 EXPECT
 Can't modify hash dereference in substr at - line 1, near "3;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME vec %h in scalar assignment
 vec(%h,1,1) = 3;
 EXPECT
 Can't modify hash dereference in vec at - line 1, near "3;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME vec %h in list assignment
 (vec %h,1,1) = 3;
 EXPECT
 Can't modify hash dereference in vec at - line 1, near "3;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME Can't declare conditional
 my($a?$b:$c)
 EXPECT
 Can't declare conditional expression in "my" at - line 1, at EOF
-Execution of - aborted due to compilation errors.
 ########
 # NAME Can't declare do block
 my(do{})
 EXPECT
 Can't declare do block in "my" at - line 1, at EOF
-Execution of - aborted due to compilation errors.
 ########
 # NAME ($_, state $x) = ...
 ($_, CORE::state $x) = ();
 EXPECT
 Initialization of state variables in list currently forbidden at - line 1, near ");"
-Execution of - aborted due to compilation errors.
 ########
 # NAME my $y; ($y, state $x) = ...
 my $y; ($y, CORE::state $x) = ();
 EXPECT
 Initialization of state variables in list currently forbidden at - line 1, near ");"
-Execution of - aborted due to compilation errors.
 ########
 # NAME delete BAD
 delete $x;
@@ -180,43 +164,36 @@ exists argument is not a subroutine name at - line 1.
 push FRED;
 EXPECT
 Type of arg 1 to push must be array (not constant item) at - line 1, near "FRED;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME pop BAREWORD
 pop FRED;
 EXPECT
 Type of arg 1 to pop must be array (not constant item) at - line 1, near "FRED;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME shift BAREWORD
 shift FRED;
 EXPECT
 Type of arg 1 to shift must be array (not constant item) at - line 1, near "FRED;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME unshift BAREWORD
 unshift FRED;
 EXPECT
 Type of arg 1 to unshift must be array (not constant item) at - line 1, near "FRED;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME keys BAREWORD
 @a = keys FRED ;
 EXPECT
 Type of arg 1 to keys must be hash or array (not constant item) at - line 1, near "FRED ;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME values BAREWORD
 @a = values FRED ;
 EXPECT
 Type of arg 1 to values must be hash or array (not constant item) at - line 1, near "FRED ;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME each BAREWORD
 @a = each FRED ;
 EXPECT
 Type of arg 1 to each must be hash or array (not constant item) at - line 1, near "FRED ;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME better messages for array-ops on non-arrays
 push %a, 1;
@@ -236,7 +213,6 @@ Type of arg 1 to push must be array (not ref-to-glob cast) at - line 5, near "1;
 Type of arg 1 to pop must be array (not ref-to-glob cast) at - line 6, near "*a;"
 Type of arg 1 to shift must be array (not ref-to-glob cast) at - line 7, near "*a;"
 Type of arg 1 to unshift must be array (not ref-to-glob cast) at - line 8, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 # NAME better messages for array-ops on non-arrays (part 2)
 # to check PADHV without hitting the reported error limit
@@ -250,7 +226,6 @@ Type of arg 1 to push must be array (not private hash) at - line 3, near "1;"
 Type of arg 1 to pop must be array (not private hash) at - line 4, near "%a;"
 Type of arg 1 to shift must be array (not private hash) at - line 5, near "%a;"
 Type of arg 1 to unshift must be array (not private hash) at - line 6, near "1;"
-Execution of - aborted due to compilation errors.
 ########
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -307,7 +282,6 @@ sub xx {
 }
 EXPECT
 Missing comma after first argument to return at - line 2, near "5;"
-Execution of - aborted due to compilation errors.
 ########
 # subsequent use VERSION to 5.39
 use v5.20;
@@ -333,7 +307,6 @@ no warnings 'experimental::keyword_any';
 any length, qw( a b c )
 EXPECT
 syntax error at - line 4, near "any length"
-Execution of - aborted due to compilation errors.
 ########
 # all with deferred LIST expression
 use feature 'keyword_all';
@@ -341,4 +314,3 @@ no warnings 'experimental::keyword_all';
 all length, qw( a b c )
 EXPECT
 syntax error at - line 4, near "all length"
-Execution of - aborted due to compilation errors.

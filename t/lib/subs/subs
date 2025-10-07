@@ -6,7 +6,6 @@ sub Fred {}
 EXPECT
 Number found where operator expected (Do you need to predeclare "Fred"?) at - line 3, near "Fred 1"
 syntax error at - line 3, near "Fred 1"
-Execution of - aborted due to compilation errors.
 ########
 
 # Error - not predeclaring a sub in time
@@ -16,7 +15,6 @@ sub Fred {}
 EXPECT
 Number found where operator expected (Do you need to predeclare "Fred"?) at - line 3, near "Fred 1"
 syntax error at - line 3, near "Fred 1"
-Execution of - aborted due to compilation errors.
 ########
 
 # AOK
@@ -88,7 +86,6 @@ sub Frèd {}
 EXPECT
 Number found where operator expected (Do you need to predeclare "Frèd"?) at - line 5, near "Frèd 1"
 syntax error at - line 5, near "Frèd 1"
-Execution of - aborted due to compilation errors.
 ########
 
 # Error - not predeclaring a sub in time
@@ -100,4 +97,3 @@ sub ふれど {}
 EXPECT
 Number found where operator expected (Do you need to predeclare "ふれど"?) at - line 5, near "ふれど 1"
 syntax error at - line 5, near "ふれど 1"
-Execution of - aborted due to compilation errors.

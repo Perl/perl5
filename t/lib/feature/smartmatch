@@ -13,7 +13,6 @@ my $y = "b" ~~ @x;
 EXPECT
 OPTION fatal
 syntax error at - line 3, near ""b" ~"
-Execution of - aborted due to compilation errors.
 ########
 # NAME explicit enable
 use feature "smartmatch";
@@ -35,7 +34,6 @@ my $y = "b" ~~ @x;
 EXPECT
 OPTION fatal
 syntax error at - line 3, near ""b" ~"
-Execution of - aborted due to compilation errors.
 ########
 # NAME implicit disable then enable
 use v5.41;
@@ -67,7 +65,6 @@ OPTION fatal
 switch is not enabled
 smartmatch is enabled
 syntax error at - line 13, near ") {"
-Execution of - aborted due to compilation errors.
 ########
 # NAME smartmatch and switch features independent
 use feature "switch";
@@ -93,4 +90,3 @@ OPTION fatal
 switch is enabled
 smartmatch is not enabled
 syntax error at - line 18, near ""b" ~"
-Execution of - aborted due to compilation errors.

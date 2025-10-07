@@ -1491,7 +1491,7 @@ sub run_multiple_progs {
                                : (switches => [$switch])
                                 );
         my $status = $?;
-        $results =~ s/\n+$//;
+
         # allow expected output to be written as if $prog is on STDIN
         $results =~ s/$::tempfile_regexp/-/g;
         if ($^O eq 'VMS') {
@@ -1506,6 +1506,12 @@ sub run_multiple_progs {
         $results =~ s/^(syntax|parse) error/syntax error/mig;
         # allow all tests to run when there are leaks
         $results =~ s/Scalars leaked: \d+\n//g;
+
+        # avoid repetition in test expectation files, as this is a common message
+        $results =~ s/^Execution of - aborted due to compilation errors\.\n//m;
+
+        # trim multiple trailing blanks
+        $results =~ s/\n+$//;
 
         $expected =~ s/\n+$//;
         my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;

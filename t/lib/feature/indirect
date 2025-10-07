@@ -25,7 +25,6 @@ EXPECT
 OPTIONS fatal
 Bareword found where operator expected (Do you need to predeclare "new"?) at - line 19, near "new Foo"
 syntax error at - line 19, near "new Foo"
-Execution of - aborted due to compilation errors.
 ########
 # NAME METHOD BLOCK
 use feature 'say';
@@ -61,7 +60,6 @@ my $z = new { $class };
 EXPECT
 OPTIONS fatal
 syntax error at - line 29, near "new { "
-Execution of - aborted due to compilation errors.
 ########
 # NAME METHOD SCALAR
 use feature 'say';
@@ -98,7 +96,6 @@ EXPECT
 OPTIONS fatal
 Scalar found where operator expected (Do you need to predeclare "new"?) at - line 29, near "new $class"
 syntax error at - line 29, near "new $class"
-Execution of - aborted due to compilation errors.
 ########
 # NAME FUNCMETH SCALAR
 use feature 'say';
@@ -135,4 +132,3 @@ EXPECT
 OPTIONS fatal
 Scalar found where operator expected (Do you need to predeclare "new"?) at - line 29, near "new $class"
 syntax error at - line 29, near "new $class "
-Execution of - aborted due to compilation errors.

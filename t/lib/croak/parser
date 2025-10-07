@@ -4,4 +4,3 @@ sub all (&@);
 all { $_->[0] } map { [ }
 EXPECT
 syntax error at - line 2, near "[ }"
-Execution of - aborted due to compilation errors.
