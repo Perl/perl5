@@ -1327,10 +1327,14 @@ sub setup_multiple_progs {
 
         open my $fh, '<', $file or die "Cannot open $file: $!\n" ;
         my $found;
+        my $preamble = "";
         while (<$fh>) {
             if (/^__END__/) {
                 $found = $found + 1; # don't use ++
                 last;
+            }
+            if (/^#\s+PREAMBLE\s+(.*)$/) {
+                $preamble .= "$1\n";
             }
         }
         # This is an internal error, and should never happen. All bar one of
@@ -1346,6 +1350,12 @@ sub setup_multiple_progs {
             unless $found;
 
         my ($t, @p) = _setup_one_file($fh, $file);
+        if (length $preamble) {
+            # @p consists of ($linenumber, $source) pairs, so we only want
+            # to prepend the preamble to the odd numbered elements.
+            # Additionally, the first two elements are (0, $filename).
+            $_ = $preamble . $_ for @p[ grep { $_ % 2 } 2 .. $#p ];
+        }
         $tests += $t;
         push @prgs, @p;
 
