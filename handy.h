@@ -2965,31 +2965,34 @@ last-inclusive range.
  CPAN::Unpack show any users outside the core.
 
 =for apidoc_section $warning
-=for apidoc dm||deprecate|U32 category|"message"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
-given category with an appropriate message. The C<message> argument must
-be a C string. The string " is deprecated" will automatically be added
-to the end of the C<message>.
+=for apidoc   dm||deprecate|U32 category|"message"
+=for apidoc_item||deprecate_disappears_in|U32 category|"when"|"message"
+=for apidoc_item||deprecate_fatal_in|U32 category|"when"|"message"
 
-=for apidoc dm||deprecate_disappears_in|U32 category|"when"|"message"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
-given category with an appropriate message that the construct referred
-to by the message will disappear in a specific release.  The C<when> and
-C<message> arguments must be a C string.  The C<when> string is expected
-to be of the form "5.40", with no minor element in the version.  The actual
-message output will be the result of the following expression C<message
-" is deprecated, and will disappear in Perl " when> which is why C<message>
-and C<when> must be literal C strings.
+These each are wrappers around Perl_ck_warner_d() to produce a deprecated
+warning in the single category given by C<category>, with an appropriate
+message.
 
-=for apidoc dm||deprecate_fatal_in|U32 category|"when"|"message"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
-given category with an appropriate message that the construct referred
-to by the message will become fatal in a specific release.  The C<when>
-and C<message> arguments must be a C string.  The C<when> string is expected
-to be of the form "5.40", with no minor element in the version.  The actual
-message output will be the result of the following expression C<message " is
-deprecated, and will become fatal in Perl " when> which is why C<message>
-and C<when> must be literal C strings.
+They differ in the details of the message output, but all use as a base, the
+C<message> argument, which must be a literal C string enclosed in
+double-quotes.
+
+In plain C<deprecate>, the string " is deprecated" will automatically be
+added to the end of C<message>, yielding
+
+ <message> is deprecated
+
+The other two take a third argument C<when>, which is a literal C string in the
+form like "5.40".  C<when> indicates in what release the axe is scheduled to
+fall.
+
+In C<<deprecate_disappears_in>, the actual message output will be of the form:
+
+ <message> is deprecated, and will disappear in Perl <when>
+
+In C<deprecate_fatal_in>, the message will be of the form:
+
+ <message> is deprecated, and will become fatal in Perl <when>
 
 =cut
 */
