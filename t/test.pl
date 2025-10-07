@@ -1359,10 +1359,11 @@ sub run_multiple_progs {
     my $up = shift;
     my @prgs;
     if ($up) {
-	# The tests in lib run in a temporary subdirectory of t, and always
-	# pass in a list of "programs" to run
-	@prgs = @_;
-    } else {
+        # The tests in lib run in a temporary subdirectory of t, and always
+        # pass in a list of "programs" to run
+        @prgs = @_;
+    }
+    else {
         # The tests below t run in t and pass in a file handle. In theory we
         # can pass (caller)[1] as the second argument to report errors with
         # the filename of our caller, as the handle is always DATA. However,
@@ -1380,7 +1381,8 @@ sub run_multiple_progs {
     if (! eval {require Config; 1}) {
         warn "test.pl had problems loading Config: $@";
         $taint_disabled = '';
-    } else {
+    }
+    else {
         $taint_disabled = $Config::Config{taint_disabled};
     }
 
@@ -1388,7 +1390,8 @@ sub run_multiple_progs {
 
     my $count_failures = 0;
     my ($file, $line);
-  PROGRAM:
+
+    PROGRAM:
     while (defined ($line = shift @prgs)) {
         $_ = shift @prgs;
         unless ($line) {
@@ -1396,14 +1399,14 @@ sub run_multiple_progs {
             if (defined $file) {
                 print "# From $file\n";
             }
-	    next;
-	}
-	my $switch = "";
-	my @temps ;
-	my @temp_path;
-	if (s/^(\s*-\w+)//) {
-	    $switch = $1;
-	}
+            next;
+        }
+        my $switch = "";
+        my @temps ;
+        my @temp_path;
+        if (s/^(\s*-\w+)//) {
+            $switch = $1;
+        }
 
         s/^# NOTE.*\n//mg; # remove any NOTE comments in the content
 
@@ -1412,192 +1415,194 @@ sub run_multiple_progs {
         # tests.
         s/([<=>])CONFLICT\1/$1 x 7/ge;
 
-	my ($prog, $expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
+        my ($prog, $expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
 
-	my %reason;
-	foreach my $what (qw(skip todo)) {
-	    $prog =~ s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
-	    # If the SKIP reason starts ? then it's taken as a code snippet to
-	    # evaluate. This provides the flexibility to have conditional SKIPs
-	    if ($reason{$what} && $reason{$what} =~ s/^\?//) {
-		my $temp = eval $reason{$what};
-		if ($@) {
-		    die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
-		}
-		$reason{$what} = $temp;
-	    }
-	}
+        my %reason;
+        foreach my $what (qw(skip todo)) {
+            $prog =~ s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
+            # If the SKIP reason starts ? then it's taken as a code snippet to
+            # evaluate. This provides the flexibility to have conditional SKIPs
+            if ($reason{$what} && $reason{$what} =~ s/^\?//) {
+                my $temp = eval $reason{$what};
+                if ($@) {
+                    die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
+                }
+                $reason{$what} = $temp;
+            }
+        }
 
-    my $name = '';
-    if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
-        $name = $1;
-    } elsif (defined $file) {
-        $name = "test from $file at line $line";
-    }
+        my $name = '';
+        if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
+            $name = $1;
+        }
+        elsif (defined $file) {
+            $name = "test from $file at line $line";
+        }
 
         if ($switch=~/[Tt]/ and $taint_disabled eq "define") {
             $reason{skip} ||= "This perl does not support taint";
         }
 
-	if ($reason{skip}) {
-	SKIP:
-	  {
-	    skip($name ? "$name - $reason{skip}" : $reason{skip}, 1);
-	  }
-	  next PROGRAM;
-	}
+        if ($reason{skip}) {
+        SKIP:
+            {
+                skip($name ? "$name - $reason{skip}" : $reason{skip}, 1);
+            }
+            next PROGRAM;
+        }
 
-	if ($prog =~ /--FILE--/) {
-	    my @files = split(/\n?--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
-	    shift @files ;
-	    die "Internal error: test $_ didn't split into pairs, got " .
-		scalar(@files) . "[" . join("%%%%", @files) ."]\n"
-		    if @files % 2;
-	    while (@files > 2) {
-		my $filename = shift @files;
-		my $code = shift @files;
-		push @temps, $filename;
-		if ($filename =~ m#(.*)/# && $filename !~ m#^\.\./#) {
-		    require File::Path;
-		    File::Path::mkpath($1);
-		    push(@temp_path, $1);
-		}
-		open my $fh, '>', $filename or die "Cannot open $filename: $!\n";
-		print $fh $code;
-		close $fh or die "Cannot close $filename: $!\n";
-	    }
-	    shift @files;
-	    $prog = shift @files;
-	}
+        if ($prog =~ /--FILE--/) {
+            my @files = split(/\n?--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
+            shift @files ;
+            die "Internal error: test $_ didn't split into pairs, got " .
+                scalar(@files) . "[" . join("%%%%", @files) ."]\n"
+                    if @files % 2;
+            while (@files > 2) {
+                my $filename = shift @files;
+                my $code = shift @files;
+                push @temps, $filename;
+                if ($filename =~ m#(.*)/# && $filename !~ m#^\.\./#) {
+                    require File::Path;
+                    File::Path::mkpath($1);
+                    push(@temp_path, $1);
+                }
+                open my $fh, '>', $filename or die "Cannot open $filename: $!\n";
+                print $fh $code;
+                close $fh or die "Cannot close $filename: $!\n";
+            }
+            shift @files;
+            $prog = shift @files;
+        }
 
-	open my $fh, '>', $tmpfile or die "Cannot open >$tmpfile: $!";
-	print $fh q{
+        open my $fh, '>', $tmpfile or die "Cannot open >$tmpfile: $!";
+        print $fh q{
         BEGIN {
             push @INC, '.';
             open STDERR, '>&', STDOUT
               or die "Can't dup STDOUT->STDERR: $!;";
         }
-	};
-	print $fh "\n#line 1\n";  # So the line numbers don't get messed up.
-	print $fh $prog,"\n";
-	close $fh or die "Cannot close $tmpfile: $!";
-	my $results = runperl( stderr => 1, progfile => $tmpfile,
-			       stdin => undef, $up
-			       ? (switches => ["-I$up/lib", $switch], nolib => 1)
-			       : (switches => [$switch])
-			        );
-	my $status = $?;
-	$results =~ s/\n+$//;
-	# allow expected output to be written as if $prog is on STDIN
-	$results =~ s/$::tempfile_regexp/-/g;
-	if ($^O eq 'VMS') {
-	    # some tests will trigger VMS messages that won't be expected
-	    $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+        };
+        print $fh "\n#line 1\n";  # So the line numbers don't get messed up.
+        print $fh $prog,"\n";
+        close $fh or die "Cannot close $tmpfile: $!";
+        my $results = runperl( stderr => 1, progfile => $tmpfile,
+                               stdin => undef, $up
+                               ? (switches => ["-I$up/lib", $switch], nolib => 1)
+                               : (switches => [$switch])
+                                );
+        my $status = $?;
+        $results =~ s/\n+$//;
+        # allow expected output to be written as if $prog is on STDIN
+        $results =~ s/$::tempfile_regexp/-/g;
+        if ($^O eq 'VMS') {
+            # some tests will trigger VMS messages that won't be expected
+            $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
 
-	    # pipes double these sometimes
-	    $results =~ s/\n\n/\n/g;
-	}
-	# bison says 'parse error' instead of 'syntax error',
-	# various yaccs may or may not capitalize 'syntax'.
-	$results =~ s/^(syntax|parse) error/syntax error/mig;
-	# allow all tests to run when there are leaks
-	$results =~ s/Scalars leaked: \d+\n//g;
+            # pipes double these sometimes
+            $results =~ s/\n\n/\n/g;
+        }
+        # bison says 'parse error' instead of 'syntax error',
+        # various yaccs may or may not capitalize 'syntax'.
+        $results =~ s/^(syntax|parse) error/syntax error/mig;
+        # allow all tests to run when there are leaks
+        $results =~ s/Scalars leaked: \d+\n//g;
 
-	$expected =~ s/\n+$//;
-	my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
-	# any special options? (OPTIONS foo bar zap)
-	my $option_regex = 0;
-	my $option_random = 0;
-	my $fatal = $FATAL;
-	if ($expected =~ s/^OPTIONS? (.+)(?:\n|\Z)//) {
-	    foreach my $option (split(' ', $1)) {
-		if ($option eq 'regex') { # allow regular expressions
-		    $option_regex = 1;
-		}
-		elsif ($option eq 'random') { # all lines match, but in any order
-		    $option_random = 1;
-		}
-		elsif ($option eq 'fatal') { # perl should fail
-		    $fatal = 1;
-		}
+        $expected =~ s/\n+$//;
+        my $prefix = ($results =~ s#^PREFIX(\n|$)##) ;
+        # any special options? (OPTIONS foo bar zap)
+        my $option_regex = 0;
+        my $option_random = 0;
+        my $fatal = $FATAL;
+        if ($expected =~ s/^OPTIONS? (.+)(?:\n|\Z)//) {
+            foreach my $option (split(' ', $1)) {
+                if ($option eq 'regex') { # allow regular expressions
+                    $option_regex = 1;
+                }
+                elsif ($option eq 'random') { # all lines match, but in any order
+                    $option_random = 1;
+                }
+                elsif ($option eq 'fatal') { # perl should fail
+                    $fatal = 1;
+                }
                 elsif ($option eq 'nonfatal') {
                     # used to turn off default fatal
                     $fatal = 0;
                 }
-		else {
-		    die "$0: Unknown OPTION '$option'\n";
-		}
-	    }
-	}
-	die "$0: can't have OPTION regex and random\n"
-	    if $option_regex + $option_random > 1;
-	my $ok = 0;
-	if ($results =~ s/^SKIPPED\n//) {
-	    print "$results\n" ;
-	    $ok = 1;
-	}
-	else {
-	    if ($option_random) {
-	        my @got = sort split "\n", $results;
-	        my @expected = sort split "\n", $expected;
-
-	        $ok = "@got" eq "@expected";
-	    }
-	    elsif ($option_regex) {
-	        $ok = $results =~ /^$expected/;
-	    }
-	    elsif ($prefix) {
-	        $ok = $results =~ /^\Q$expected/;
-	    }
-	    else {
-	        $ok = $results eq $expected;
-	    }
-
-	    if ($ok && $fatal && !($status >> 8)) {
-		$ok = 0;
-	    }
-	}
-
-	local $::TODO = $reason{todo};
-
-	unless ($ok) {
-        my $err_line = '';
-        $err_line   .= "FILE: $file ; line $line\n" if defined $file;
-        $err_line   .= "PROG: $switch\n$prog\n" .
-			           "EXPECTED:\n$expected\n";
-        $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
-        $err_line   .= "GOT:\n$results\n";
-        $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
-        if ($::TODO) {
-            $err_line =~ s/^/# /mg;
-            print $err_line;  # Harness can't filter it out from STDERR.
+                else {
+                    die "$0: Unknown OPTION '$option'\n";
+                }
+            }
+        }
+        die "$0: can't have OPTION regex and random\n"
+            if $option_regex + $option_random > 1;
+        my $ok = 0;
+        if ($results =~ s/^SKIPPED\n//) {
+            print "$results\n" ;
+            $ok = 1;
         }
         else {
-            print STDERR $err_line;
-            ++$count_failures;
-            die "PERL_TEST_ABORT_FIRST_FAILURE set Test Failure"
-                if $ENV{PERL_TEST_ABORT_FIRST_FAILURE};
+            if ($option_random) {
+                my @got = sort split "\n", $results;
+                my @expected = sort split "\n", $expected;
+
+                $ok = "@got" eq "@expected";
+            }
+            elsif ($option_regex) {
+                $ok = $results =~ /^$expected/;
+            }
+            elsif ($prefix) {
+                $ok = $results =~ /^\Q$expected/;
+            }
+            else {
+                $ok = $results eq $expected;
+            }
+
+            if ($ok && $fatal && !($status >> 8)) {
+                $ok = 0;
+            }
         }
-    }
+
+        local $::TODO = $reason{todo};
+
+        unless ($ok) {
+            my $err_line = '';
+            $err_line   .= "FILE: $file ; line $line\n" if defined $file;
+            $err_line   .= "PROG: $switch\n$prog\n" .
+                                       "EXPECTED:\n$expected\n";
+            $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
+            $err_line   .= "GOT:\n$results\n";
+            $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
+            if ($::TODO) {
+                $err_line =~ s/^/# /mg;
+                print $err_line;  # Harness can't filter it out from STDERR.
+            }
+            else {
+                print STDERR $err_line;
+                ++$count_failures;
+                die "PERL_TEST_ABORT_FIRST_FAILURE set Test Failure"
+                    if $ENV{PERL_TEST_ABORT_FIRST_FAILURE};
+            }
+        }
 
         if (defined $file) {
             _ok($ok, "at $file line $line", $name);
-        } else {
+        }
+        else {
             # We don't have file and line number data for the test, so report
             # errors as coming from our caller.
             local $Level = $Level + 1;
             ok($ok, $name);
         }
 
-	foreach (@temps) {
-	    unlink $_ if $_;
-	}
-	foreach (@temp_path) {
-	    File::Path::rmtree $_ if -d $_;
-	}
+        foreach (@temps) {
+            unlink $_ if $_;
+        }
+        foreach (@temp_path) {
+            File::Path::rmtree $_ if -d $_;
+        }
     }
 
-    if ( $count_failures ) {
+    if ($count_failures) {
         print STDERR <<'EOS';
 #
 # Note: 'run_multiple_progs' run has one or more failures
@@ -1607,7 +1612,6 @@ sub run_multiple_progs {
 #
 EOS
     }
-
 
     return;
 }
