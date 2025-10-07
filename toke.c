@@ -1887,7 +1887,6 @@ STATIC void
 S_incline(pTHX_ const char *s, const char *end)
 {
     PERL_ARGS_ASSERT_INCLINE;
-    assert(end >= s);
 
     const char *t;
     const char *n;
@@ -2855,7 +2854,6 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
                                           const char ** error_msg)
 {
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
-    assert(e >= s);
     assert(s > (char *) 3);
 
     /* <s> points to first character of interior of \N{}, <e> to one beyond the

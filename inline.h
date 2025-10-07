@@ -3030,8 +3030,6 @@ Perl_utf8_hop_overshoot(const U8 *s, SSize_t off,
 {
     PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT;
 
-    assert(s <= end);
-
     if (off >= 0) {
         return utf8_hop_forward_overshoot(s, off, end, remaining);
     }

@@ -1021,8 +1021,8 @@ CTp	|Signal_t|csighandler3	|int sig				\
 				|NULLOK Siginfo_t *info 		\
 				|NULLOK void *uap
 ATdmp	|bool	|c9strict_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 EXp	|regexp_engine const *|current_re_engine
@@ -1095,17 +1095,17 @@ Rp	|SV *	|defelem_target |NN SV *sv				\
 				|NULLOK MAGIC *mg
 : Used in op.c, perl.c
 px	|void	|delete_eval_scope
-ATdp	|char * |delimcpy	|NN char *to				\
-				|NN const char *to_end			\
-				|NN const char *from			\
-				|NN const char *from_end		\
+ATdp	|char * |delimcpy	|SPTR char *to				\
+				|EPTRQ const char *to_end		\
+				|SPTR const char *from			\
+				|EPTRQ const char *from_end		\
 				|const int delim			\
 				|NN I32 *retlen
 ETXdp	|char * |delimcpy_no_escape					\
-				|NN char *to				\
-				|NN const char *to_end			\
-				|NN const char *from			\
-				|NN const char *from_end		\
+				|SPTR char *to				\
+				|EPTRQ const char *to_end		\
+				|SPTR const char *from			\
+				|EPTRQ const char *from_end		\
 				|const int delim			\
 				|NN I32 *retlen
 Cp	|void	|despatch_signals
@@ -1282,8 +1282,8 @@ AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
 EMTpx	|Size_t |expected_size	|UV size
 ATdmp	|bool	|extended_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 Adfp	|void	|fatal_warner	|U32 err				\
@@ -1291,8 +1291,8 @@ Adfp	|void	|fatal_warner	|U32 err				\
 				|...
 Adp	|void	|fbm_compile	|NN SV *sv				\
 				|U32 flags
-ARdp	|char * |fbm_instr	|NN unsigned char *big			\
-				|NN unsigned char *bigend		\
+ARdp	|char * |fbm_instr	|SPTR unsigned char *big		\
+				|EPTRQ unsigned char *bigend		\
 				|NN SV *littlestr			\
 				|U32 flags
 Adhp	|SV *	|filter_add	|NULLOK filter_t funcp			\
@@ -1356,8 +1356,8 @@ Adfp	|char * |form		|NN const char *pat			\
 p	|void	|free_tied_hv_pool
 Cp	|void	|free_tmps
 ERXp	|SV *	|get_and_check_backslash_N_name 			\
-				|NN const char *s			\
-				|NN const char *e			\
+				|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|const bool is_utf8			\
 				|NN const char **error_msg
 AOdp	|AV *	|get_av 	|NN const char *name			\
@@ -1754,8 +1754,8 @@ p	|bool	|io_close	|NN IO *io				\
 				|bool is_explicit			\
 				|bool warn_on_fail
 ARTdip	|Size_t |isC9_STRICT_UTF8_CHAR					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ARTdmp	|bool	|is_c9strict_utf8_string				\
 				|NN const U8 *s 			\
 				|STRLEN len
@@ -1781,8 +1781,8 @@ ARdip	|bool	|is_safe_syscall|NN const char *pv			\
 				|NN const char *what			\
 				|NN const char *op_name
 ARTdip	|Size_t |isSTRICT_UTF8_CHAR					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ARTdmp	|bool	|is_strict_utf8_string					\
 				|NN const U8 *s 			\
 				|STRLEN len
@@ -1801,14 +1801,14 @@ CRp	|bool	|is_uni_perl_idcont_					\
 				|UV c
 CRp	|bool	|is_uni_perl_idstart_					\
 				|UV c
-ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
-				|NN const U8 * const e
+ARTdip	|Size_t |isUTF8_CHAR	|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ATdmp	|STRLEN |is_utf8_char_buf					\
-				|NN const U8 *buf			\
-				|NN const U8 *buf_end
+				|SPTR const U8 *buf			\
+				|EPTRQ const U8 *buf_end
 ARTdip	|Size_t |isUTF8_CHAR_flags					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e		\
 				|const U32 flags
 CPRTp	|STRLEN |is_utf8_char_helper_					\
 				|SPTR const U8 * const s		\
@@ -2494,11 +2494,10 @@ dp	|CV *	|newXS_len_flags|NULLOK const char *name		\
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO *|nextargv	|NN GV *gv				\
 				|bool nomagicopen
-AMPTdp	|char * |ninstr 	|NN const char *big			\
-				|NN const char *bigend			\
-				|NN const char *little			\
-				|NN const char *lend
-
+AMPTdp	|char * |ninstr 	|SPTR const char *big			\
+				|EPTRQ const char *bigend		\
+				|SPTR const char *little		\
+				|EPTRQ const char *lend
 p	|void	|no_bareword_filehandle 				\
 				|NN const char *fhname
 Tefpr	|void	|noperl_die	|NN const char *pat			\
@@ -2926,10 +2925,10 @@ Admp	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
 Admp	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
-APTdp	|char * |rninstr	|NN const char *big			\
-				|NN const char *bigend			\
-				|NN const char *little			\
-				|NN const char *lend
+APTdp	|char * |rninstr	|SPTR const char *big			\
+				|EPTRQ const char *bigend		\
+				|SPTR const char *little		\
+				|EPTRQ const char *lend
 p	|void	|rpeep		|NULLOK OP *o
 Adipx	|void	|rpp_context	|NN SV **mark				\
 				|U8 gimme				\
@@ -3195,8 +3194,8 @@ dopx	|PerlIO *|start_glob	|NN SV *tmpglob 			\
 Adp	|I32	|start_subparse |I32 is_format				\
 				|U32 flags
 ATdmp	|bool	|strict_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 CRp	|NV	|str_to_version |NN SV *sv
@@ -3829,14 +3828,14 @@ ARTdip	|U8 *	|utf8_hop_overshoot					\
 				|MPTR const U8 *s			\
 				|SSize_t off				\
 				|SPTR const U8 * const start		\
-				|NN const U8 * const end		\
+				|EPTRQ const U8 * const end		\
 				|NULLOK SSize_t *remaining
 ARTdmp	|U8 *	|utf8_hop_safe	|MPTR const U8 *s			\
 				|SSize_t off				\
 				|SPTR const U8 * const start		\
-				|NN const U8 * const end
-ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
-				|NN const U8 *e
+				|EPTRQ const U8 * const end
+ARdp	|STRLEN |utf8_length	|SPTR const U8 *s0			\
+				|EPTRQ const U8 *e
 ATdmp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
@@ -3897,47 +3896,47 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
 				|NN Size_t *newlen
-ATdmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
-				|NN const U8 * const e			\
+ATdmp	|bool	|utf8_to_uv	|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 AMdip	|UV	|utf8_to_uvchr_buf					\
-				|NN const U8 *s 			\
-				|NN const U8 *send			\
+				|SPTR const U8 *s			\
+				|EPTRQ const U8 *send			\
 				|NULLOK STRLEN *retlen
 ATdmp	|bool	|utf8_to_uv_errors					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors
 ATdmp	|bool	|utf8_to_uv_flags					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags
-ATdip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
-				|NN const U8 *e 			\
+ATdip	|bool	|utf8_to_uv_msgs|SPTR const U8 * const s0		\
+				|EPTRQ const U8 *e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 CTp	|bool	|utf8_to_uv_msgs_helper_				\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 ATdip	|UV	|utf8_to_uv_or_die					\
-				|NN const U8 * const s			\
-				|NN const U8 *e 			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 *e			\
 				|NULLOK Size_t *advance_p
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
@@ -3986,8 +3985,8 @@ EXdpx	|bool	|validate_proto |NN SV *name				\
 				|bool warn				\
 				|bool curstash
 Adp	|bool	|valid_identifier_pve					\
-				|NN const char *s			\
-				|NN const char *end			\
+				|SPTR const char *s			\
+				|EPTRQ const char *end			\
 				|U32 flags
 Adp	|bool	|valid_identifier_pvn					\
 				|NN const char *s			\
@@ -4521,24 +4520,24 @@ ERXp	|SV *	|_setup_canned_invlist					\
 ERXp	|const char *|form_alien_digit_msg				\
 				|const U8 which 			\
 				|const STRLEN valids_len		\
-				|NN const char * const first_bad	\
-				|NN const char * const send		\
+				|SPTR const char * const first_bad	\
+				|EPTR const char * const send		\
 				|const bool UTF 			\
 				|const bool braced
 ERXp	|bool	|grok_bslash_c	|const char source			\
 				|NN U8 *result				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn
-ERXp	|bool	|grok_bslash_o	|NN char **s				\
-				|NN const char * const send		\
+ERXp	|bool	|grok_bslash_o	|SPTR char **s				\
+				|EPTRQ const char * const send		\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\
 				|const bool strict			\
 				|const bool allow_UV_MAX		\
 				|const bool utf8
-ERXp	|bool	|grok_bslash_x	|NN char **s				\
-				|NN const char * const send		\
+ERXp	|bool	|grok_bslash_x	|SPTR char **s				\
+				|EPTRQ const char * const send		\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\
@@ -4837,8 +4836,8 @@ S	|void	|new_collate	|NN const char *newcoll 		\
 				|bool force
 #     if defined(DEBUGGING)
 S	|void	|print_collxfrm_input_and_return			\
-				|NN const char *s			\
-				|NN const char *e			\
+				|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|NULLOK const char *xbuf		\
 				|const STRLEN xlen			\
 				|const bool is_utf8
@@ -4903,8 +4902,8 @@ S	|const char *|find_locale_from_environment			\
 # endif /* defined(USE_LOCALE) */
 # if defined(USE_LOCALE) || defined(DEBUGGING)
 S	|const char *|get_displayable_string				\
-				|NN const char * const s		\
-				|NN const char * const e		\
+				|SPTR const char * const s		\
+				|EPTRQ const char * const e		\
 				|const bool is_utf8
 # endif
 #endif /* defined(PERL_IN_LOCALE_C) */
@@ -5506,8 +5505,8 @@ ETi	|Size_t |find_first_differing_byte_pos				\
 				|const Size_t max
 ES	|U32	|get_quantifier_value					\
 				|NN RExC_state_t *pRExC_state		\
-				|NN const char *start			\
-				|NN const char *end
+				|SPTR const char *start 		\
+				|EPTRQ const char *end
 ES	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		\
 				|NULLOK regnode_offset *nodep		\
 				|NULLOK UV *code_point_p		\
@@ -5694,8 +5693,8 @@ ETXp	|UV	|to_fold_latin1_|const U8 c				\
 				|const unsigned int flags
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-ERTXp	|bool	|regcurly	|NN const char *s			\
-				|NN const char *e			\
+ERTXp	|bool	|regcurly	|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|NULLOK const char *result[5]
 #endif
 #if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
@@ -5824,20 +5823,20 @@ EWi	|void	|capture_clear	|NN regexp *rex 			\
 				|NN const char *str
 ERS	|char * |find_byclass	|NN regexp *prog			\
 				|NN const regnode *c			\
-				|NN char *s				\
-				|NN const char *strend			\
+				|SPTR char *s				\
+				|EPTRQ const char *strend		\
 				|NULLOK regmatch_info *reginfo
 ERST	|U8 *	|find_next_masked					\
-				|NN U8 *s				\
-				|NN const U8 *send			\
+				|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 byte				\
 				|const U8 mask
-ERST	|U8 *	|find_span_end	|NN U8 *s				\
-				|NN const U8 *send			\
+ERST	|U8 *	|find_span_end	|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 span_byte
 ERST	|U8 *	|find_span_end_mask					\
-				|NN U8 *s				\
-				|NN const U8 *send			\
+				|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 span_byte			\
 				|const U8 mask
 Ei	|I32	|foldEQ_latin1_s2_folded				\
@@ -6057,20 +6056,20 @@ S	|STRLEN |sv_pos_b2u_midway					\
 S	|STRLEN |sv_pos_u2b_cached					\
 				|NN SV * const sv			\
 				|NN MAGIC ** const mgp			\
-				|NN const U8 * const start		\
-				|NN const U8 * const send		\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const send		\
 				|STRLEN uoffset 			\
 				|STRLEN uoffset0			\
 				|STRLEN boffset0
 ST	|STRLEN |sv_pos_u2b_forwards					\
-				|NN const U8 * const start		\
-				|NN const U8 * const send		\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const send		\
 				|NN STRLEN * const uoffset		\
 				|NN bool * const at_end 		\
 				|NN bool *canonical_position
 ST	|STRLEN |sv_pos_u2b_midway					\
-				|NN const U8 * const start		\
-				|NN const U8 *send			\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 *send			\
 				|STRLEN uoffset 			\
 				|const STRLEN uend
 i	|void	|sv_unglob	|NN SV * const sv			\
@@ -6146,10 +6145,10 @@ S	|char * |force_word	|NN char *start 			\
 				|int check_keyword			\
 				|int allow_pack
 RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
-				|NN const char *s			\
-				|NN const char * const e
-S	|void	|incline	|NN const char *s			\
-				|NN const char *end
+				|SPTR const char *s			\
+				|EPTRQ const char * const e
+S	|void	|incline	|SPTR const char *s			\
+				|EPTRQ const char *end
 S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
@@ -6171,8 +6170,8 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|STRLEN typelen 			\
 				|NULLOK const char **error_msg
 S	|void	|parse_ident	|NN char **s				\
-				|NN char **d				\
-				|NN char * const e			\
+				|SPTR char **d				\
+				|EPTRQ char * const e			\
 				|int allow_package			\
 				|bool is_utf8				\
 				|bool check_dollar
