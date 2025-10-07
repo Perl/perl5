@@ -619,9 +619,6 @@ Perl_delimcpy_no_escape(char *to, const char *to_end,
     ptrdiff_t to_len = to_end - to;
     SSize_t copy_len;
 
-    assert(from_len >= 0);
-    assert(to_len >= 0);
-
     /* Look for the first delimiter in the source */
     delim_pos = (const char *) memchr(from, delim, from_len);
 
@@ -718,8 +715,6 @@ Perl_delimcpy(char *to, const char *to_end,
               const int delim, I32 *retlen)
 {
     PERL_ARGS_ASSERT_DELIMCPY;
-    assert(from_end >= from);
-    assert(to_end >= to);
 
     const char * const orig_to = to;
     ptrdiff_t copy_len = 0;
@@ -1100,7 +1095,6 @@ char *
 Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U32 flags)
 {
     PERL_ARGS_ASSERT_FBM_INSTR;
-    assert(bigend >= big);
 
     unsigned char *s;
     STRLEN l;

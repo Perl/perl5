@@ -627,7 +627,6 @@ STATIC U8 *
 S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 {
     PERL_ARGS_ASSERT_FIND_SPAN_END;
-    assert(send >= s);
 
     /* Returns the position of the first byte in the sequence between 's' and
      * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
@@ -700,7 +699,6 @@ STATIC U8 *
 S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 {
     PERL_ARGS_ASSERT_FIND_NEXT_MASKED;
-    assert(send >= s);
     assert((byte & mask) == byte);
 
     /* Returns the position of the first byte in the sequence between 's'
@@ -777,7 +775,6 @@ STATIC U8 *
 S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
 {
     PERL_ARGS_ASSERT_FIND_SPAN_END_MASK;
-    assert(send >= s);
     assert((span_byte & mask) == span_byte);
 
     /* Returns the position of the first byte in the sequence between 's' and
