@@ -245,7 +245,6 @@ EXPECT
 tie FH, 'main';
 EXPECT
 Can't modify constant item in tie at - line 3, near "'main';"
-Execution of - aborted due to compilation errors.
 ########
 
 # localizing tied hash slices

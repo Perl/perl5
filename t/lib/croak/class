@@ -96,7 +96,6 @@ class XXX {
 }
 EXPECT
 Global symbol "$self" requires explicit package name (did you forget to declare "my $self"?) at - line 5.
-Execution of - aborted due to compilation errors.
 ########
 # This test is known to leak: see GH #20812.
 no warnings 'experimental::class';

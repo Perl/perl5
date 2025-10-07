@@ -90,14 +90,12 @@ EXPECT
 qr/[\N{}]/;
 EXPECT
 Unknown charname '' at - line 2, within pattern
-Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #123417]
 # OPTION fatal
 qr/\N{}/;
 EXPECT
 Unknown charname '' at - line 2, within pattern
-Execution of - aborted due to compilation errors.
 ########
 # NAME [perl #131868]
 use warnings;

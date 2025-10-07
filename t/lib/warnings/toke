@@ -210,7 +210,6 @@ OPTION fatal
 Unknown regexp modifier "/e" at - line 2, near "=~ "
 Unknown regexp modifier "/q" at - line 2, near "=~ "
 Unknown regexp modifier "/q" at - line 3, near "=~ "
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use utf8;
@@ -225,7 +224,6 @@ Unknown regexp modifier "/ネ" at - line 4, near "=~ "
 Unknown regexp modifier "/q" at - line 4, near "=~ "
 Unknown regexp modifier "/ネ" at - line 5, near "=~ "
 Unknown regexp modifier "/q" at - line 5, near "=~ "
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings 'syntax' ;
@@ -265,7 +263,6 @@ Reversed %= operator at - line 6.
 Reversed &= operator at - line 7.
 Reversed .= operator at - line 8.
 syntax error at - line 8, near "=."
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 no warnings 'syntax' ;
@@ -281,7 +278,6 @@ $a =< 2 ;
 $a =/ 2 ;
 EXPECT
 syntax error at - line 8, near "=."
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings 'syntax' ;
@@ -1462,7 +1458,6 @@ use warnings;
 $a =~ ?rand?; # ? is not a regex match
 EXPECT
 syntax error at - line 3, near "=~ ?"
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 BEGIN {
@@ -1493,7 +1488,6 @@ my $a = "\c{ack}";
 EXPECT
 OPTION fatal
 Use ";" instead of "\c{" at - line 9, within string
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 BEGIN {
@@ -1507,14 +1501,12 @@ my $a = "\c{ack}";
 EXPECT
 OPTION fatal
 Sequence "\c{" invalid at - line 9, within string
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 my $a = "\câ";
 EXPECT
 OPTION fatal
 Character following "\c" must be printable ASCII at - line 2, within string
-Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings 'syntax' ;
@@ -1716,7 +1708,6 @@ use utf8;
 my $a = qr ̂foobar̂;
 EXPECT
 Use of unassigned code point or non-standalone grapheme for a delimiter is not allowed at - line 8, near "= "
-Execution of - aborted due to compilation errors.
 ########
 # NAME  [perl #130567] Assertion failure
 BEGIN {
@@ -1742,7 +1733,6 @@ BEGIN{$0="";$^H=hex join""=>A00000}p?
 EXPECT
 OPTION fatal
 syntax error at - line 1, at EOF
-Execution of - aborted due to compilation errors.
 ########
 # NAME  [perl #130655]
 use utf8;
@@ -1861,7 +1851,6 @@ foo bar;
 EXPECT
 warn: Bareword found where operator expected (Do you need to predeclare "foo"?) at - line 3, near "foo bar"
 syntax error at - line 3, near "foo bar"
-Execution of - aborted due to compilation errors.
 ########
 # NAME SIG assign heuristic warning [github #22145]
 use warnings;
