@@ -8581,19 +8581,37 @@ S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
 
 /*
 =for apidoc      sv_eq
+=for apidoc_item sv_streq
 =for apidoc_item sv_eq_flags
+=for apidoc_item sv_streq_flags
 
-These each return a boolean indicating whether or not the strings in the two
-SVs are equal.  If S<C<'use bytes'>> is in effect, the comparison is
-byte-by-byte; otherwise character-by-character.  Each will coerce its args to
-strings if necessary.
+These each return a boolean indicating if the strings in the two SV arguments
+are identical, coercing them to strings if necessary, basically behaving like
+the Perl code S<C<$sv1 eq $sv2>>.
 
-They differ only in that C<sv_eq> always processes get magic, while
-C<sv_eq_flags> processes get magic only when the C<flags> parameter has the
-C<SV_GMAGIC> bit set.
+A NULL SV is treated as C<undef>.
 
-These functions do not handle operator overloading.  For versions that do,
-see instead C<L</sv_streq>> or C<L</sv_streq_flags>>.
+The comparison is character-by-character, based on the UTF8ness of each SV,
+unless S<C<use bytes>> is in effect, in which case the comparison is
+byte-by-byte.
+
+C<sv_eq> and C<sv_streq> always perform 'get' magic.
+C<sv_eq_flags> and C<sv_streq_flags> perform 'get' magic only if C<flags> has
+the C<SV_GMAGIC> bit set.
+
+C<sv_eq> and C<sv_eq_flags> do not check for overloading, always using regular
+string comparison.
+
+C<sv_streq> always checks for, and if present, handles C<eq> overloading.  If
+not present, regular string comparison is used instead.
+
+C<sv_streq_flags> normally checks for, and if present, handles C<eq>
+overloading, but setting the C<SV_SKIP_OVERLOAD> bit set in C<flags> causes it
+to use regular string comparison.
+
+Otherwise, the functions behave identically.
+
+=for apidoc Amnh||SV_SKIP_OVERLOAD
 
 =cut
 */
@@ -8648,32 +8666,6 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     else
         return 0;
 }
-
-/*
-=for apidoc      sv_streq
-=for apidoc_item sv_streq_flags
-
-These each return a boolean indicating whether the strings in the two SVs are
-identical.
-
-C<sv_streq_flags> is the more general form, having a C<flags> argument that
-affects its behavior in two ways.  It coerces its args to strings if necessary,
-treating a C<NULL> argument as C<undef>.  It correctly handles the UTF8 flag.
-
-If C<flags> has the C<SV_GMAGIC> bit set, 'get' magic will be handled.
-
-If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
-C<eq> overloading will be made. If such overloading does not exist or the
-flag is set, then regular string comparison will be used instead.
-
-C<sv_streq> merely calls C<sv_streq_flags> with C<flags> set to just
-C<SV_GMAGIC>. This function basically behaves like the Perl code
-S<C<$sv1 eq $sv2>>.
-
-=for apidoc Amnh||SV_SKIP_OVERLOAD
-
-=cut
-*/
 
 bool
 Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
