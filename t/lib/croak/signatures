@@ -1,0 +1,221 @@
+# PREAMBLE use feature 'signatures';
+__END__
+# NAME optional without default expression
+sub t024 ($a =) { }
+EXPECT
+Optional parameter lacks default expression at - line 2, near "=) "
+########
+# NAME mandatory follows optional
+sub t030 ($a = 222, $b) { }
+EXPECT
+Mandatory parameter follows optional parameter at - line 2, near "$b) "
+########
+# NAME mandatory follows optional twice
+sub t031 ($a = 222, $b = 333, $c, $d) { }
+EXPECT
+Mandatory parameter follows optional parameter at - line 2, near "$c,"
+Mandatory parameter follows optional parameter at - line 2, near "$d) "
+########
+# NAME slurpy array with default
+sub t136 (@abc = 222) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "222) "
+########
+# NAME slurpy array with empty default
+sub t137 (@abc =) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "=) "
+########
+# NAME anonymous slurpy array with default
+sub t138 (@ = 222) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "222) "
+########
+# NAME anonymous slurpy array with empty default
+sub t139 (@ =) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "=) "
+########
+# NAME slurpy hash with default
+sub t140 (%abc = 222) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "222) "
+########
+# NAME slurpy hash with empty default
+sub t141 (%abc =) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "=) "
+########
+# NAME anonymous slurpy hash with default
+sub t142 (% = 222) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "222) "
+########
+# NAME anonymous slurpy hash with empty default
+sub t143 (% =) { }
+EXPECT
+A slurpy parameter may not have a default value at - line 2, near "=) "
+########
+sub t059 (@a, $b) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$b) "
+########
+sub t060 (@a, $b = 222) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "222) "
+########
+sub t061 (@a, @b) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "@b) "
+########
+sub t062 (@a, %b) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "%b) "
+########
+sub t063 (@, $b) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$b) "
+########
+sub t064 (@, $b = 222) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "222) "
+########
+sub t065 (@, @b) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "@b) "
+########
+sub t066 (@, %b) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "%b) "
+########
+sub t067 (@a, $) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$) "
+########
+sub t068 (@a, $ = 222) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "222) "
+########
+sub t069 (@a, @) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "@) "
+########
+sub t070 (@a, %) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "%) "
+########
+sub t071 (@, $) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$) "
+########
+sub t072 (@, $ = 222) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "222) "
+########
+sub t073 (@, @) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "@) "
+########
+sub t074 (@, %) { }
+EXPECT
+Multiple slurpy parameters not allowed at - line 2, near "%) "
+########
+sub t075 (%a, $b) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$b) "
+########
+sub t076 (%, $b) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$b) "
+########
+sub t077 ($a, @b, $c) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$c) "
+########
+sub t078 ($a, %b, $c) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$c) "
+########
+sub t079 ($a, @b, $c, $d) { }
+EXPECT
+Slurpy parameter not last at - line 2, near "$c,"
+Slurpy parameter not last at - line 2, near "$d) "
+########
+sub t082 (, $a) { }
+EXPECT
+syntax error at - line 2, near "(,"
+########
+sub t083 (,) { }
+EXPECT
+syntax error at - line 2, near "(,"
+########
+# NAME comment in signature is OK
+sub t088 ($ #foo
+a) { }
+
+sub t090 (@ #foo
+a) { }
+
+sub t092 (% #foo
+a) { }
+EXPECT
+OPTIONS nonfatal
+########
+sub t089 ($#foo
+a) { }
+EXPECT
+'#' not allowed immediately following a sigil in a subroutine signature at - line 2, near "($"
+syntax error at - line 3, near "a"
+########
+sub t091 (@#foo
+a) { }
+EXPECT
+'#' not allowed immediately following a sigil in a subroutine signature at - line 2, near "(@"
+syntax error at - line 3, near "a"
+########
+sub t093 (%#foo
+a) { }
+EXPECT
+'#' not allowed immediately following a sigil in a subroutine signature at - line 2, near "(%"
+syntax error at - line 3, near "a"
+########
+sub t094 (123) { }
+EXPECT
+A signature parameter must start with '$', '@' or '%' at - line 2, near "(1"
+syntax error at - line 2, near "(123"
+########
+sub t095 ($a, 123) { }
+EXPECT
+A signature parameter must start with '$', '@' or '%' at - line 2, near ", 1"
+syntax error at - line 2, near ", 123"
+########
+no warnings; sub t096 ($a 123) { }
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 2, near "($a 123"
+syntax error at - line 2, near "($a 123"
+########
+sub t097 ($a { }) { }
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 2, near "($a { }"
+syntax error at - line 2, near "($a { }"
+########
+sub t098 ($a; $b) { }
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 2, near "($a; "
+syntax error at - line 2, near "($a; "
+########
+sub t099 ($$) { }
+EXPECT
+Illegal character following sigil in a subroutine signature at - line 2, near "($"
+syntax error at - line 2, near "$$) "
+########
+# NAME global @_ in signature
+sub t101 (@_) { }
+EXPECT
+Can't use global @_ in subroutine signature at - line 2, near "(@_"
+########
+# NAME global %_ in signature
+sub t102 (%_) { }
+EXPECT
+Can't use global %_ in subroutine signature at - line 2, near "(%_"
+
