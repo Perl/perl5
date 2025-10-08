@@ -6171,7 +6171,7 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|NULLOK const char **error_msg
 S	|void	|parse_ident	|NN char **s				\
 				|SPTR char **d				\
-				|EPTRQ char * const e			\
+				|EPTR char * const e			\
 				|int allow_package			\
 				|bool is_utf8				\
 				|bool check_dollar

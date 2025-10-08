@@ -10331,7 +10331,8 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
             * the code path that triggers the "Bad name after" warning
             * when looking for barewords.
             */
-           && !(check_dollar && (*s)[2] == '$')) {
+           && !(check_dollar && (*s)[2] == '$'))
+        {
             *(*d)++ = *(*s)++;
             *(*d)++ = *(*s)++;
         }
@@ -10395,6 +10396,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
     }
     *d = '\0';
     d = dest;
+
     if (*d) {
         /* Either a digit variable, or parse_ident() found an identifier
            (anything valid as a bareword), so job done and return.  */
@@ -10417,6 +10419,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
            Using ' as a leading package separator isn't allowed. :: is.   */
         return s;
     }
+
     /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}  */
     if (*s == '{') {
         bracket = s - SvPVX(PL_linestr);
@@ -10426,7 +10429,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
             s = skipspace(s);
         }
     }
-
 
     /* Extract the first character of the variable name from 's' and
      * copy it, null terminated into 'd'. Note that this does not
@@ -10439,28 +10441,22 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
      *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
      *          2) '{'
      *     The final case currently doesn't get this far in the program, so we
-     *     don't test for it.  If that were to change, it would be ok to allow it.
+     *     don't test for it.  If that were to change, it would be ok to allow
+     *     it.
      *  b) When not under Unicode rules, any upper Latin1 character
      *  c) Otherwise, when unicode rules are used, all XIDS characters.
      *
-     *      Because all ASCII characters have the same representation whether
-     *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
-     *      '{' without knowing if is UTF-8 or not. */
+     * Because all ASCII characters have the same representation whether
+     * encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
+     * '{' without knowing if is UTF-8 or not. */
 
-    if ((s <= PL_bufend - ((is_utf8)
-                          ? UTF8SKIP(s)
-                          : 1))
-        && (
-            isGRAPH_A(*s)
-            ||
-            ( is_utf8
-              ? isIDFIRST_utf8_safe(s, PL_bufend)
-              : (isGRAPH_L1(*s)
-                 && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))
-                )
-            )
-        )
-    ){
+    if (   (s <= PL_bufend - ((is_utf8) ? UTF8SKIP(s) : 1))
+        && (  isGRAPH_A(*s)
+            || (is_utf8
+               ? isIDFIRST_utf8_safe(s, PL_bufend)
+               : (   isGRAPH_L1(*s)
+                  && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))))))
+    {
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;
@@ -10474,7 +10470,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
         }
     }
 
-    /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
+    /* special case to handle ${10}, ${11} the same way we handle $1 etc */
     if (isDIGIT(*d)) {
         bool is_zero= *d == '0' ? TRUE : FALSE;
         char *digit_start= d;
@@ -10504,8 +10500,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
         bool skip;
         char *s2;
         /* If we were processing {...} notation then...  */
-        if (isIDFIRST_lazy_if_safe(d, e, is_utf8)
-            || (!isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
+        if (   isIDFIRST_lazy_if_safe(d, e, is_utf8)
+            || (  ! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
                  && isWORDCHAR(*s))
         ) {
             /* note we have to check for a normal identifier first,
