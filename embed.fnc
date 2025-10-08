@@ -3209,6 +3209,11 @@ p	|void	|sub_crush_depth|NN CV *cv
 : Used in perly.y
 p	|void	|subsignature_append_fence_op				\
 				|NN OP *o
+p	|void	|subsignature_append_named				\
+				|NN const char *paramname		\
+				|PADOFFSET padix			\
+				|OPCODE defmode 			\
+				|NULLOK OP *defexpr
 p	|void	|subsignature_append_positional 			\
 				|PADOFFSET padix			\
 				|OPCODE defmode 			\

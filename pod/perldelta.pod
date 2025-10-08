@@ -27,6 +27,21 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Named Parameters in Signatures
+
+This adds a major new ability to subroutine signatures, allowing callers
+to pass parameters by name/value pairs rather than by position.
+
+    sub f ($x, $y, :$alpha, :$beta = undef) { ... }
+
+    f( 123, 456, alpha => 789 );
+
+Originally specified in
+L<PPC0024|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0024-signature-named-parameters.md>.
+
+This feature is currently considered B<experimental>, and is described in
+further detail in L<perlsub/Signatures>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security

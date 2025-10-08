@@ -4370,6 +4370,12 @@ Perl_subsignature_append_fence_op(pTHX_ OP *o)
         assert(o)
 
 PERL_CALLCONV void
+Perl_subsignature_append_named(pTHX_ const char *paramname, PADOFFSET padix, OPCODE defmode, OP *defexpr)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_NAMED \
+        assert(paramname)
+
+PERL_CALLCONV void
 Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *defexpr)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_POSITIONAL

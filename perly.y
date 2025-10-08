@@ -142,6 +142,7 @@
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil sigvar
 %type <opval> sigscalarelem optsigscalardefault sigslurpelem
+%type <ival>  optcolon
 %type <opval> sigelem siglist optsiglist subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
@@ -1103,16 +1104,32 @@ sigslurpelem: sigslurpsigil sigvar
                         }
         ;
 
+optcolon:       %empty
+                        { $$ = 0; }
+        |       PERLY_COLON
+                        { $$ = ':'; }
+        ;
+
 /* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
 sigscalarelem:
-                PERLY_DOLLAR sigvar
+                optcolon PERLY_DOLLAR sigvar
                         {
-                            subsignature_append_positional($sigvar, 0, NULL);
+                            if($optcolon) {
+                                PADNAME *pn = PadnamelistARRAY(PL_comppad_name)[$sigvar];
+                                subsignature_append_named(PadnamePV(pn)+1, $sigvar, 0, NULL);
+                            }
+                            else
+                                subsignature_append_positional($sigvar, 0, NULL);
                             $$ = NULL;
                         }
-        |       PERLY_DOLLAR sigvar ASSIGNOP optsigscalardefault
+        |       optcolon PERLY_DOLLAR sigvar ASSIGNOP optsigscalardefault
                         {
-                            subsignature_append_positional($sigvar, $ASSIGNOP, $optsigscalardefault);
+                            if($optcolon) {
+                                PADNAME *pn = PadnamelistARRAY(PL_comppad_name)[$sigvar];
+                                subsignature_append_named(PadnamePV(pn)+1, $sigvar, $ASSIGNOP, $optsigscalardefault);
+                            }
+                            else
+                                subsignature_append_positional($sigvar, $ASSIGNOP, $optsigscalardefault);
                             $$ = NULL;
                         }
         ;

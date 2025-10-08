@@ -1193,12 +1193,31 @@ struct op_argcheck_aux {
 
 /* for OP_MULTIPARAM */
 
+struct op_multiparam_named_aux {
+    const char *namepv;
+    STRLEN      namelen;
+    U32         namehash;
+    PADOFFSET   padix;
+
+    bool is_required : 1;
+};
+
 struct op_multiparam_aux {
+    /* This struct will be allocated in one big chunk, containing this header
+     * itself, followed an array whose size is given by n_positional. The
+     * pointer at the end will point into the same malloc block
+     */
     size_t min_args;     /* = the number of mandatory scalar parameters */
-    size_t n_positional; /* = the number of mandatory + optional scalar parameters, not counting a final slurpy */
+    size_t n_positional; /* = the number of mandatory + optional positional scalar parameters, not counting a final slurpy */
+    size_t n_named;      /* = the number of (mandatory or optional) named scalar parameters */
     char  slurpy;
-    PADOFFSET *param_padix; /* points at storage allocated along with the struct itself, immediately following */
     PADOFFSET slurpy_padix;
+
+    /* The following points at storage allocated along with the struct itself, immediately afterwards */
+    PADOFFSET *param_padix;
+
+    /* The following may be separately allocated */
+    struct op_multiparam_named_aux *named;
 };
 
 #define MI_INIT_WORKAROUND_PACK "Module::Install::DSL"

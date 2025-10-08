@@ -1227,7 +1227,17 @@ Perl_op_clear(pTHX_ OP *o)
         break;
 
     case OP_MULTIPARAM:
-        PerlMemShared_free(cUNOP_AUXo->op_aux);
+        {
+            struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUXo->op_aux;
+            if(aux->named) {
+                for(size_t namedix = 0; namedix < aux->n_named; namedix++) {
+                    struct op_multiparam_named_aux *named = aux->named + namedix;
+                    PerlMemShared_free((void *)named->namepv);
+                }
+                PerlMemShared_free(aux->named);
+            }
+            PerlMemShared_free(aux);
+        }
         break;
 
     case OP_MULTICONCAT:
@@ -16721,7 +16731,8 @@ Perl_rcpv_copy(pTHX_ char *pv) {
 /* Subroutine signature parsing */
 
 struct yy_parser_signature_param {
-    size_t     argix;        /* positional index of the param */
+    size_t     argix;        /* positional params: index of the param */
+    SV        *paramname;    /* named params: name of the param */
     PADOFFSET  padix;        /* pad index of the var holding the param */
     OP        *defcop;
     OPCODE     defmode;
@@ -16737,9 +16748,10 @@ struct yy_parser_signature {
      * parameter. Here, while it is exactly one *parameter*, it may account
      * zero or more arguments.
      */
-    UV          next_argix; /* the argument index of the next parameter we add */
-    UV          opt_params; /* number of optional scalar parameters */
-    char        slurpy;     /* the sigil of the slurpy var (or null) */
+    UV          next_argix;   /* the argument index of the next parameter we add */
+    UV          opt_params;   /* number of optional positional scalar parameters */
+    UV          named_params; /* number of named scalar parameters */
+    char        slurpy;       /* the sigil of the slurpy var (or null) */
 
     UV          nparams;     /* number of elements of the following array that are in use */
     UV          params_size; /* number of elements we could store in the following array */
@@ -16757,6 +16769,8 @@ destroy_subsignature_context(pTHX_ void *p)
         for(size_t parami = 0; parami < signature->nparams; parami++) {
             struct yy_parser_signature_param *param = signature->params + parami;
 
+            if(param->paramname)
+                SvREFCNT_dec(param->paramname);
             if(param->defcop)
                 op_free(param->defcop);
             if(param->defexpr)
@@ -16787,6 +16801,7 @@ S_subsignature_push_param(pTHX)
     signature->nparams++;
 
     param->argix = 0;
+    param->paramname = NULL;
     param->padix = 0;
     param->defcop = NULL;
     param->defmode = 0;
@@ -16852,6 +16867,38 @@ Perl_subsignature_append_fence_op(pTHX_ OP *o)
         signature->fenceops = newLISTOP(OP_LINESEQ, 0, o, NULL);
 }
 
+#define subsignature_param_add_defexpr(param, defmode, defexpr)  S_subsignature_param_add_defexpr(aTHX_ param, defmode, defexpr)
+static void
+S_subsignature_param_add_defexpr(pTHX_ struct yy_parser_signature_param *param, OPCODE defmode, OP *defexpr)
+{
+    if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
+    {
+        /* caller passed in newOP(OP_NULL, 0), so we should not leak it */
+        op_free(defexpr);
+
+        defexpr = newOP(OP_STUB, OPf_WANT_SCALAR);
+
+        /* handle '$=' special case */
+        if(param->padix)
+            yyerror("Optional parameter lacks default expression");
+    }
+
+    /* generate the COP here so the line number is correct */
+    param->defcop = newSTATEOP(0, NULL, NULL);
+
+    param->defmode = defmode;
+    param->defexpr = defexpr;
+    scalar(defexpr);
+
+    if(!param->padix) {
+        /* A defaulting expression with anonymous var still needs to be
+         * conditional. We'll just have to allocate a pad temporary to
+         * store the value in anyway, so OP_PARAMTEST can check it.
+         */
+        param->padix = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, NULL, NULL);
+    }
+}
+
 /* Appends another positional scalar parameter to the accumulated set of
  * subroutine params. `padix` may be zero, but if not it must be the pad
  * index of a scalar pad lexical to store the incoming argument value into.
@@ -16875,6 +16922,11 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
 
     if(!defexpr && signature->opt_params) {
         yyerror("Mandatory parameter follows optional parameter");
+        return;
+    }
+
+    if(signature->named_params) {
+        yyerror("Positional parameter follows named parameter");
         return;
     }
 
@@ -16902,36 +16954,75 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
 
     if(defexpr) {
         signature->opt_params++;
-
-        if(defexpr->op_type == OP_NULL && !(defexpr->op_flags & OPf_KIDS))
-        {
-            /* caller passed in newOP(OP_NULL, 0), so we should not leak it */
-            op_free(defexpr);
-
-            defexpr = newOP(OP_STUB, OPf_WANT_SCALAR);
-
-            /* handle '$=' special case */
-            if(padix)
-                yyerror("Optional parameter lacks default expression");
-        }
-
-        /* generate the COP here so the line number is correct */
-        param->defcop = newSTATEOP(0, NULL, NULL);
-
-        param->defmode = defmode;
-        param->defexpr = defexpr;
-        scalar(defexpr);
-
-        if(!padix) {
-            /* A defaulting expression with anonymous var still needs to be
-             * conditional. We'll just have to allocate a pad temporary to
-             * store the value in anyway, so OP_PARAMTEST can check it.
-             */
-            param->padix = pad_add_name_pvn("$", 1, padadd_NO_DUP_CHECK, NULL, NULL);
-        }
+        subsignature_param_add_defexpr(param, defmode, defexpr);
     }
 
     assert(param->padix || param->defexpr);
+}
+
+/* Appends another named scalar parameter to the accumulated set of subroutine
+ * params. `padix` gives the pad index of a scalar pad lexical to store the
+ * incoming argument value into. It must not be zero, as "anonymous" named
+ * parameters are not allowed (in any case it's hard to imagine how that would
+ * be parsed ;) ).
+ * If `defexpr` is not NULL, it gives a defaulting expression to be evaluated
+ * if required, according to `defmode` - one of zero, `OP_DORASSIGN` or
+ * `OP_ORASSIGN`.
+ */
+
+void
+Perl_subsignature_append_named(pTHX_ const char *paramname, PADOFFSET padix, OPCODE defmode, OP *defexpr)
+{
+    PERL_ARGS_ASSERT_SUBSIGNATURE_APPEND_NAMED;
+    assert(padix);
+
+    assert(PL_parser);
+    yy_parser_signature *signature = PL_parser->signature;
+    assert(signature);
+
+    if(!signature->named_params)
+        /* Only warn about the first one to avoid noise on multiple */
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__SIGNATURE_NAMED_PARAMETERS),
+                "Named parameters in signatures are experimental");
+
+    if(signature->slurpy) {
+        yyerror("Slurpy parameter not last");
+        return;
+    }
+
+    if(!defexpr && signature->opt_params) {
+        yyerror("Mandatory parameter follows optional parameter");
+        return;
+    }
+
+    SV *namesv = newSVpvn_utf8(paramname, strlen(paramname), true);
+
+    for(size_t parami = 0; parami < signature->named_params; parami++) {
+        struct yy_parser_signature_param *param = signature->params + parami;
+
+        if(!param->paramname || !sv_streq(param->paramname, namesv))
+            continue;
+
+        SvREFCNT_dec(namesv);
+        yyerror("Duplicated subroutine parameter name");
+        return;
+    }
+
+    struct yy_parser_signature_param *param = subsignature_push_param();
+    param->paramname = namesv;
+
+    signature->named_params++;
+
+    param->padix = padix;
+
+    intro_my(); /* introduce the new pad variable now */
+
+    if(defexpr) {
+        subsignature_param_add_defexpr(param, defmode, defexpr);
+    }
+
+    assert(param->padix);
+    assert(param->paramname);
 }
 
 /* Appends a final slurpy parameter to the accumulated set of subroutine
@@ -16969,6 +17060,40 @@ Perl_subsignature_append_slurpy(pTHX_ I32 sigil, PADOFFSET padix)
     param->padix = padix;
 }
 
+#define subsignature_build_defop(param)  S_subsignature_build_defop(aTHX_ param)
+static OP *
+S_subsignature_build_defop(pTHX_ struct yy_parser_signature_param *param)
+{
+    OP *defexpr = param->defexpr;
+    assert(defexpr);
+    OP *defexpr_start = LINKLIST(defexpr);
+
+    /* Need to build OP_PARAMTEST[ other: OP_PARAMSTORE[ default-expr ] ] */
+    OP *paramstore = newUNOP(OP_PARAMSTORE, 0, defexpr);
+    OP *paramtest = (OP *)alloc_LOGOP(OP_PARAMTEST, paramstore, defexpr_start);
+
+    paramtest->op_flags |= OPf_WANT_VOID;
+    paramtest->op_targ = paramstore->op_targ = param->padix;
+
+    if(param->defmode == OP_DORASSIGN)
+        paramtest->op_private |= OPpPARAM_IF_UNDEF;
+    if(param->defmode == OP_ORASSIGN)
+        paramtest->op_private |= OPpPARAM_IF_FALSE;
+
+    defexpr->op_next = paramstore;
+
+    /* Wrap both in an outer OP_NULL so we can point both ->op_next
+     * pointers within into it
+     */
+    OP *o = newUNOP(OP_NULL, 0, paramtest);
+
+    paramstore->op_next = o;
+    paramtest->op_next = o;
+    o->op_next = paramtest; /* set start of o */
+
+    return o;
+}
+
 /* Called from perly.y on encountering the closing `)` of a subroutine
  * signature. This creates the optree fragment responsible for processing all
  * the accumulated subroutine params, to be inserted at the start of the
@@ -16990,13 +17115,29 @@ Perl_subsignature_finish(pTHX)
             newSTATEOP(0, NULL, NULL));
 
     size_t end_argix = signature->next_argix;
+    size_t n_named   = signature->named_params;
 
+    /* This allocates two sections in one chunk:
+     *   the op_multiparam_aux header
+     *   an array of end_argix * PADOFFSETs
+     */
     struct op_multiparam_aux *aux = (struct op_multiparam_aux *)PerlMemShared_malloc(
-            sizeof(struct op_multiparam_aux) + (end_argix * sizeof(PADOFFSET)));
-    aux->param_padix = (PADOFFSET *)((char *)aux + sizeof(struct op_multiparam_aux));
+            sizeof(struct op_multiparam_aux) +
+                (end_argix * sizeof(PADOFFSET)));
+
+    aux->param_padix = (PADOFFSET *)(
+        (char *)aux + sizeof(struct op_multiparam_aux));
+
+    if(n_named) {
+        aux->named = (struct op_multiparam_named_aux *)PerlMemShared_malloc(
+            n_named * sizeof(struct op_multiparam_named_aux));
+    }
+    else
+        aux->named = NULL;
 
     aux->min_args     = end_argix - signature->opt_params;
     aux->n_positional = end_argix;
+    aux->n_named      = signature->named_params;
     aux->slurpy       = signature->slurpy;
     aux->slurpy_padix = 0;
 
@@ -17021,12 +17162,19 @@ Perl_subsignature_finish(pTHX)
 
     struct yy_parser_signature_param *params = signature->params;
     size_t max_argix = 0;
+    size_t namedix = 0;
 
-    for(size_t parami = 0; parami < signature->nparams; parami++) {
+    size_t parami = 0;
+
+    /* Collect up the positional scalar params */
+    for(/**/; parami < signature->nparams; parami++) {
         struct yy_parser_signature_param *param = params + parami;
 
         size_t argix    = param->argix;
         PADOFFSET padix = param->padix;
+
+        if(param->paramname || argix >= aux->n_positional)
+            break;
 
         while(max_argix < argix) {
             aux->param_padix[max_argix] = 0;
@@ -17043,46 +17191,16 @@ Perl_subsignature_finish(pTHX)
 
             aux->param_padix[argix] = padix;
 
-            OP *defexpr = param->defexpr;
-            assert(defexpr);
-            OP *defexpr_start = LINKLIST(defexpr);
-
-            /* Need to build OP_PARAMTEST[ other: OP_PARAMSTORE[ default-expr ] ] */
-            OP *paramstore;
-            OP *paramtest = (OP *)alloc_LOGOP(OP_PARAMTEST,
-                paramstore = newUNOP(OP_PARAMSTORE, 0, defexpr),
-                defexpr_start);
-
-            paramtest->op_flags |= OPf_WANT_VOID;
-            paramtest->op_targ = paramstore->op_targ = padix;
-
-            if(param->defmode == OP_DORASSIGN)
-                paramtest->op_private |= OPpPARAM_IF_UNDEF;
-            if(param->defmode == OP_ORASSIGN)
-                paramtest->op_private |= OPpPARAM_IF_FALSE;
-
-            defexpr->op_next = paramstore;
-
-            /* Wrap both in an outer OP_NULL so we can point both ->op_next
-             * pointers within into it
-             */
-            OP *o = newUNOP(OP_NULL, 0, paramtest);
-
-            paramstore->op_next = o;
-            paramtest->op_next = o;
-            o->op_next = paramtest; /* set start of o */
-
             sigops = op_append_elem(OP_LINESEQ, sigops,
                     param->defcop);
             param->defcop = NULL;
 
             sigops = op_append_elem(OP_LINESEQ, sigops,
-                    o);
+                    subsignature_build_defop(param));
             param->defexpr = NULL;
         }
         else {
-            /* This is the final slurpy */
-            aux->slurpy_padix = padix;
+            NOT_REACHED;
         }
 
         max_argix = argix + 1;
@@ -17091,6 +17209,54 @@ Perl_subsignature_finish(pTHX)
     while(max_argix < end_argix) {
         aux->param_padix[max_argix] = 0;
         max_argix++;
+    }
+
+    /* Collect up the named params */
+    for(/**/; parami < signature->nparams; parami++) {
+        struct yy_parser_signature_param *param = params + parami;
+
+        if(!param->paramname)
+            /* this is final slurpy */
+            break;
+
+        /* For now, build the named param array in iteration order. We'll
+         * sort it at the end.
+         */
+        STRLEN namelen;
+        char *namepv = SvPVutf8(param->paramname, namelen);
+        U32 namehash;
+        PERL_HASH(namehash, namepv, namelen);
+
+        struct op_multiparam_named_aux *named = aux->named + namedix;
+        namedix++;
+
+        named->namepv   = savesharedpv(namepv);
+        named->namelen  = namelen;
+        named->namehash = namehash;
+        named->padix    = param->padix;
+
+        if(param->defexpr) {
+            named->is_required = false;
+
+            sigops = op_append_elem(OP_LINESEQ, sigops,
+                    param->defcop);
+            param->defcop = NULL;
+
+            sigops = op_append_elem(OP_LINESEQ, sigops,
+                    subsignature_build_defop(param));
+            param->defexpr = NULL;
+        }
+        else
+            named->is_required = true;
+    }
+
+    /* The final slurpy */
+    if(parami < signature->nparams) {
+        struct yy_parser_signature_param *param = params + parami;
+
+        assert(param->argix >= aux->n_positional);
+
+        aux->slurpy_padix = param->padix;
     }
 
     /* a nextstate at the end handles context correctly for an empty sub body */

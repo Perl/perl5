@@ -445,8 +445,77 @@ If there are multiple optional positional parameters and not enough
 arguments are supplied to fill them all, they will be filled from left
 to right.
 
-After positional parameters, additional arguments may be captured in a
-slurpy parameter.  The simplest form of this is just an array variable:
+Since Perl 5.43.5, a signature may also declare named parameters.  Like
+positional parameters, these are lexical variables which will contain values
+passed by the caller when the subroutine is invoked.  Whereas positional
+parameters take their values from the corresponding position in the list
+passed by the caller, named parameters are matched by name-value pairs
+from the caller.  The passed-in name matches with the variable name of the
+parameter but the order of the pairs is not significant.
+
+Named parameters in signatures are currently considered B<experimental>, and
+their behaviour may change in future releases of Perl.  Uses of named
+parameters in a signature will currently emit a warning in the
+C<experimental::signature_named_parameters> category.
+
+Named parameters are declared with a prefixed C<:> symbol in front of the
+variable sigil and name.  This symbol is not part of the variable's name
+within the body of the subroutine.  Named parameters may only be declared
+after any positional parameters; further positional parameters are not
+allowed after any named ones.
+
+    sub foo (:$alpha, :$beta) {
+        print "The value of alpha was $alpha\n";
+    }
+
+To invoke this function, the caller must pass pairs of names and values to
+provide values for the parameters.  Each name must match the name of one of
+the variables, omitting its leading C<$> sigil.  The order of these values
+is not important; both of the following lines will cause the same behaviour:
+
+    foo(alpha => "A", beta => "B");
+    foo(beta => "B", alpha => "A");
+
+It is not important where these parameter names come from in the caller.  In
+simple cases they could be literal strings such as the previous example, or
+they could themselves come from other variables.  Expanding a hash variable
+into the caller list provides a convenient way to collect multiple variables
+at once.
+
+    my %params = (
+        alpha => "X",
+        beta  => "Y",
+    );
+    foo(%params);
+
+As with positional parameters, named parameters may be declared with a
+defaulting expression to provide a value to assign into the variable if the
+caller does not provide a value.  Any parameters that do not have a
+defaulting expression become mandatory; an exception is raised if the caller
+does not provide an associated value.
+
+    sub foo (:$x, :$y = 123) { ... }
+
+    foo(y => 456);  # will complain that 'x' is missing
+    foo(x => 789);  # is allowed, $y will take its default value
+
+Any of the C<=>, C<//=> or C<||=> operators may be used to provide the
+defaulting expression, with the same semantics as for positional parameters.
+
+The defaulting expressions for optional named parameters are invoked in order
+left to right, as required.  As with positional parameters, each expression
+can see and make use of the values assigned to any previous parameter.
+
+If the subroutine already declares any optional positional parameters, then
+all named parameters must also be optional.  It would not make sense to
+require a mandatory named parameter after any optional positional ones, as
+there would be no way for the caller to provide a value for it.  However, if
+the subroutine does not declare any optional positional parameters, then any
+named ones may be freely mixed between mandatory and optional, since they are
+processed by name and not position.
+
+After positional or named parameters, additional arguments may be captured
+in a slurpy parameter.  The simplest form of this is just an array variable:
 
     sub foo ($filter, @inputs) {
         print $filter->($_) foreach @inputs;
@@ -481,10 +550,28 @@ it be even, even though they're not being put into a variable.
     }
 
 A slurpy parameter, either array or hash, must be the last thing in the
-signature.  It may follow mandatory and optional positional parameters;
-it may also be the only thing in the signature.  Slurpy parameters cannot
-have default values: if no arguments are supplied for them then you get
-an empty array or empty hash.
+signature.  It may follow mandatory and optional positional and named
+parameters; it may also be the only thing in the signature.  Slurpy
+parameters cannot have default values: if no arguments are supplied for
+them then you get an empty array or empty hash.
+
+The presence of a slurpy parameter will alter the behaviour of a subroutine
+that uses named parameters, when dealing with a name passed from the caller
+that does not match any named parameter declared by that subroutine.
+
+Without a slurpy parameter, any additional unrecognised names will cause an
+exception to be thrown.  If a slurpy is used, then these unrecognised names
+and values will be collected there instead.
+
+    sub foo (:$x, @rest) { ... }
+
+    foo(x => "one", y => "two");   # @rest will be ("y", "two")
+
+Z<>
+
+    sub foo (:$x, %rest) { ... }
+
+    foo(x => "one", y => "two");   # %rest will be (y => "two")
 
 A signature may be entirely empty, in which case all it does is check
 that the caller passed no arguments:
@@ -492,6 +579,28 @@ that the caller passed no arguments:
     sub foo () {
         return 123;
     }
+
+To summarize: a signature contains, in order:
+
+=over 2
+
+=item *
+
+zero or more mandatory positional scalar parameters
+
+=item *
+
+zero or more optional positional scalar parameters
+
+=item *
+
+zero or more mandatory or optional named scalar parameters
+
+=item *
+
+zero or one slurpy array or hash parameter
+
+=back
 
 Prior to Perl 5.36 these were considered experimental, and emitted a
 warning in the C<experimental::signatures> category. From Perl 5.36
