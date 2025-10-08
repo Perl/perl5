@@ -24,3 +24,8 @@ Use of uninitialized value $a in addition (+) at - line 5.
 Use of uninitialized value $a in addition (+) at - line 6.
 Use of uninitialized value $a in addition (+) at - line 8.
 Use of uninitialized value $a in addition (+) at - line 9.
+########
+# NAME named parameters provoke warning
+sub f (:$alpha, :$beta) { }
+EXPECT
+Named parameters in signatures are experimental at - line 3.

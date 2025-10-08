@@ -248,6 +248,15 @@ sigil; for example:
 
     sub foo ($x, $, $y = 1, @z) {}
 
+=item A named signature parameter must start with '$'
+
+(F) Each subroutine signature parameter declaration that declares a named
+parameter must start with a scalar variable sigil; for example:
+
+    sub foo (:$x, :$y, :$z) {}
+
+Array and hash variables are not permitted as named parameters.
+
 =item A slurpy parameter may not have a default value
 
 (F) Only scalar subroutine signature parameters may have a default value;
@@ -2347,6 +2356,12 @@ already been freed.
 (W unpack) You have applied the same modifier more than once after a
 type in a pack template.  See L<perlfunc/pack>.
 
+=item Duplicated subroutine parameter name
+
+(F) You have attempted to use a subroutine parameter name a second time.
+
+    sub f ( :$name, :$name ) { ... }
+
 =item each on anonymous %s will always start from the beginning
 
 (W syntax) You called L<each|perlfunc/each> on an anonymous hash or
@@ -3944,6 +3959,10 @@ caller to omit an earlier one and pass a later one.  If you want to act
 as if the parameters are filled from right to left, declare the rightmost
 optional and then shuffle the parameters around in the subroutine's body.
 
+When using named parameters, no named parameter may be made mandatory if
+there exist any optional I<positional> parameters, though any named
+parameters may be freely mixed between mandatory and optional.
+
 =item Matched non-Unicode code point 0x%X against Unicode property; may
 not be portable
 
@@ -4131,6 +4150,16 @@ L<perlfunc/require EXPR> and L<perlfunc/do EXPR>.
 (F) A C<%{^HOOK}{require__before}> hook rewrote the name of the file being
 compiled with C<require> or C<do> with an empty string an undefined value
 which is forbidden.  See L<perlvar/%{^HOOK}> and L<perlfunc/require EXPR>.
+
+=item Missing required named parameter '%s' to subroutine '%s'
+
+(F) A subroutine was invoked that uses a signature that declares a
+non-optional named parameter, but the caller did not provide a value associated
+with that name.  The caller of the subroutine is presumably at fault.
+
+The message attempts to include the name of the called subroutine.  If
+the subroutine has been aliased, the subroutine's original name will be
+shown, regardless of what name the caller used.
 
 =item Missing right brace on \%c{} in regex; marked by S<<-- HERE> in m/%s/
 
@@ -4330,6 +4359,23 @@ format) are considered the same; if a program uses $c only once
 but also uses any of the others it will not trigger this warning.
 Symbols beginning with an underscore and symbols using special
 identifiers (q.v. L<perldata>) are exempt from this warning.
+
+=item Named parameters in signatures are experimental
+
+(S experimental::signature_named_parameters)  This warning is emitted if you
+use a named parameter as part of a subroutine signature.  This ability is
+currently considered experimental and its behaviour may change in future
+releases of Perl.
+
+=item Named parameters must actually have a name
+
+(F) An attempt was made to declare a named subroutine parameter using the
+anonymous scalar notation
+
+    sub foo (:$, ...)
+
+As named parameters must actually have a declared name in order to match it
+against the argument values passed by the caller, this is not allowed.
 
 =item Need exactly 3 octal digits in regex; marked by S<<-- HERE> in m/%s/
 
@@ -5431,6 +5477,12 @@ fine from VMS' perspective, it's probably not what you intended.
 =item 'P' must have an explicit size in unpack
 
 (F) The unpack format P must have an explicit size, not "*".
+
+=item Positional parameter follows named parameter
+
+(F) An attempt was made to declare a positional parameter in a subroutine
+signature after adding named parameters.  All of the positional parameters
+must be declared before any named ones.
 
 =item POSIX class [:%s:] unknown in regex; marked by S<<-- HERE> in m/%s/
 
@@ -7465,6 +7517,17 @@ whereabouts in the regular expression the escape was discovered.
 
 (F) You attempted to add a named attribute to a C<field> definition, but
 perl does not recognise the name of the requested attribute.
+
+=item Unrecognized named parameter '%s' to subroutine '%s'
+
+(F) A subroutine was invoked that uses a signature that declares named parameters but has no
+slurpy parameter, and the caller provided a name that did not
+match any declared named parameter.  The caller of the subroutine is
+presumably at fault.
+
+The message attempts to include the name of the called subroutine.  If
+the subroutine has been aliased, the subroutine's original name will be
+shown, regardless of what name the caller used.
 
 =item Unrecognised parameters for "%s" constructor: %s
 

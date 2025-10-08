@@ -29,6 +29,7 @@ like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
 
 
 use feature "signatures";
+no warnings 'experimental::signature_named_parameters';
 
 sub t001 { $a || "z" }
 is prototype(\&t001), undef;
@@ -922,6 +923,88 @@ like $@, _create_mismatch_regexp('main::t084', 3, 2);
 is eval("t084(456, 789, 987, 654)"), undef;
 like $@, _create_mismatch_regexp('main::t084', 4, 2);
 is $a, 123;
+
+sub tnamed01 (:$alpha, :$beta) { "alpha=$alpha beta=$beta"; }
+is prototype(\&tnamed01), undef;
+is eval("tnamed01(alpha => 123, beta => 456)"), "alpha=123 beta=456";
+is eval("tnamed01(beta => 654, alpha => 321)"), "alpha=321 beta=654";
+is eval("tnamed01(alpha => 1)"), undef;
+like $@, qr/^Missing required named parameter 'beta' to subroutine 'main::tnamed01' at /;
+is eval("tnamed01(alpha => 1, beta => 2, gamma => 3)"), undef;
+like $@, qr/^Unrecognized named parameter 'gamma' to subroutine 'main::tnamed01' at /;
+is eval("tnamed01(alpha => 1, beta => 2, beta => 3, beta => 4)"), "alpha=1 beta=4";
+is eval("tnamed01(alpha => 'first', beta => 456, alpha => 'second')"), "alpha=second beta=456",
+    "last value wins";
+
+sub tnamed02 (:$alpha = "A", :$beta = "B") { "alpha=$alpha beta=$beta"; }
+is prototype(\&tnamed02), undef;
+is eval("tnamed02(alpha => 98, beta => 76)"), "alpha=98 beta=76";
+is eval("tnamed02(alpha => 98)"), "alpha=98 beta=B";
+is eval("tnamed02(beta => 76)"), "alpha=A beta=76";
+is eval("tnamed02()"), "alpha=A beta=B";
+
+sub tnamed03 ($a, $b, :$x, :$y) { "a=$a b=$b x=$x y=$y"; }
+is prototype(\&tnamed03), undef;
+is eval("tnamed03(12, 34, x => 'X', y => 'Y')"), "a=12 b=34 x=X y=Y";
+
+sub tnamed04 (:$x, :$y, @rest) { "x=$x y=$y <@rest>"; }
+is prototype(\&tnamed04), undef;
+is eval("tnamed04(w => 'W', x => 'X', y => 'Y', z => 'Z')"), "x=X y=Y <w W z Z>";
+is eval("tnamed04(w => 'W', x => 'X', y => 'Y', 'single')"), "x=X y=Y <w W single>";
+
+sub tnamed05 (:$x, :$y, %rest) { "x=$x y=$y " . join(",", map { "$_=$rest{$_}" } sort keys %rest); }
+is prototype(\&tnamed05), undef;
+is eval("tnamed05(w => 'W', x => 'X', y => 'Y', z => 'Z')"), "x=X y=Y w=W,z=Z";
+is eval("tnamed05(w => 'W', x => 'X', y => 'Y', 'single')"), undef;
+like $@, qr{^Odd name/value argument for subroutine 'main::tnamed05' at };
+
+sub tnamed06 (:$x, :$y, @) { "x=$x y=$y"; }
+is prototype(\&tnamed06), undef;
+is eval("tnamed06(w => 'W', x => 'X', y => 'Y', z => 'Z')"), "x=X y=Y";
+is eval("tnamed06(w => 'W', x => 'X', y => 'Y', 'single')"), "x=X y=Y";
+
+sub tnamed07 (:$x, :$y, %) { "x=$x y=$y"; }
+is prototype(\&tnamed07), undef;
+is eval("tnamed07(w => 'W', x => 'X', y => 'Y', z => 'Z')"), "x=X y=Y";
+
+# Unicode handling of parameter names
+{
+    use utf8;
+
+    sub tnamed08 (:$ĉevaloj) { return "$ĉevaloj horses"; }
+
+    is eval("tnamed08(ĉevaloj => 1)"), "1 horses";
+
+    is eval("tnamed08()"), undef;
+    like $@, qr/^Missing required named parameter 'ĉevaloj' to subroutine 'main::tnamed08' at /;
+
+    is eval("tnamed08(ŝafoj => 5)"), undef;
+    like $@, qr/^Unrecognized named parameter 'ŝafoj' to subroutine 'main::tnamed08' at /;
+}
+
+# Handling of Unicode parameter names from non-utf8 contexts
+{
+    use utf8;
+
+    sub tnamed09 (:$café) { return $café; }
+}
+{
+    no utf8;
+
+    # "café" = "caf\x{e9}"
+    my $nonutf8 = "caf\x{e9}";
+    is eval('tnamed09($nonutf8, "Ritz")'), "Ritz";
+    ok !utf8::is_utf8($nonutf8), 'Non-UTF8 parameter names do not get upgraded in caller';
+}
+
+# Named params in anonymous subs
+{
+    my $tnamed10 = sub (:$x) { return "x=$x"; };
+    is $tnamed10->(x => 123), "x=123";
+
+    my $tnamed11 = sub (:$x, :$y, @rest) { return "x=$x y=$y <@rest>"; };
+    is $tnamed11->(x => 123, y => 456, z => 789), "x=123 y=456 <z 789>";
+}
 
 sub t085
     (

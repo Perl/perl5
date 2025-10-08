@@ -5486,6 +5486,14 @@ yyl_sigvar(pTHX_ char *s)
     U8 sigil;
 
     s = skipspace(s);
+
+    bool is_named = false;
+    if(*s == ':') {
+        is_named = true;
+        s++;
+        s = skipspace(s);
+    }
+
     sigil = *s++;
     PL_bufptr = s; /* for error reporting */
     switch (sigil) {
@@ -5502,6 +5510,10 @@ yyl_sigvar(pTHX_ char *s)
             yyerror("'#' not allowed immediately following a sigil in a subroutine signature");
             break;
         }
+        if (is_named && sigil != '$') {
+            yyerror("A named signature parameter must start with '$'");
+            break;
+        }
         s = skipspace(s);
         if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
             char *dest = PL_tokenbuf + 1;
@@ -5512,6 +5524,10 @@ yyl_sigvar(pTHX_ char *s)
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
         else {
+            if (is_named) {
+                yyerror("Named parameters must actually have a name");
+                break;
+            }
             *PL_tokenbuf = 0;
             PL_in_my = 0;
         }
@@ -5573,12 +5589,21 @@ yyl_sigvar(pTHX_ char *s)
 
     default:
         PL_in_my = 0;
-        yyerror("A signature parameter must start with '$', '@' or '%'");
+        if(is_named)
+            yyerror("A named signature parameter must start with '$'");
+        else
+            yyerror("A signature parameter must start with '$', '@' or '%'");
         /* very crude error recovery: skip to likely next signature
          * element */
         while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
             s++;
         break;
+    }
+
+    if (!PL_parser->error_count && is_named) {
+        assert(sigil == '$');
+        force_next(PERLY_DOLLAR);
+        TOKEN (PERLY_COLON);
     }
 
     switch (sigil) {

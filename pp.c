@@ -7901,7 +7901,9 @@ PP(pp_multiparam)
     assert(!SvMAGICAL(defav));
     size_t argc = (AvFILLp(defav) + 1);
 
-    S_check_argc(aTHX_ argc, nparams, nparams - aux->min_args, slurpy);
+    S_check_argc(aTHX_ argc, nparams, nparams - aux->min_args,
+            /* if there's no slurpy but we have named params, claim it to be '%' for argcheck */
+            slurpy ? slurpy : aux->n_named ? '%' : 0);
 
     size_t parami;
     for(parami = 0; parami < nparams; parami++) {
@@ -7934,64 +7936,183 @@ PP(pp_multiparam)
         SvSetMagicSV(*padentry, val);
     }
 
-    if(!slurpy || !aux->slurpy_padix)
+    if((!slurpy || !aux->slurpy_padix) && !aux->n_named)
         return PL_op->op_next;
 
-    /* Now we know we have a slurpy */
-    SV **padentry = &PAD_SVl(aux->slurpy_padix);
-    save_clearsv(padentry);
+    /* Now we know we have a slurpy, named params, or both */
+    SV **slurpypad = NULL;
 
-    if(slurpy == '@') {
-        AV *av = (AV *)*padentry;
-        assert(SvTYPE(av) == SVt_PVAV);
+    if(aux->slurpy_padix) {
+        /* Prepare the slurpy xV */
+        slurpypad = &PAD_SVl(aux->slurpy_padix);
+        save_clearsv(slurpypad);
 
-        if(av_count(av)) {
-            /* see "target should be empty" comments in pp_argelem above */
-            av_refresh_elements_range(defav, parami, parami + argc);
-            av_clear(av);
+        if(slurpy == '@') {
+            AV *av = (AV *)*slurpypad;
+            assert(SvTYPE(av) == SVt_PVAV);
+
+            if(av_count(av)) {
+                /* see "target should be empty" comments in pp_argelem above */
+                av_refresh_elements_range(defav, parami, parami + argc);
+                av_clear(av);
+            }
+
+            av_extend(av, argc);
         }
+        else if(slurpy == '%') {
+            HV *hv = (HV *)*slurpypad;
+            assert(SvTYPE(hv) == SVt_PVHV);
 
-        av_extend(av, argc);
+            if(SvRMAGICAL(hv) || HvUSEDKEYS(hv) > 0) {
+                /* see "target should be empty" comments in pp_argelem above */
+                av_refresh_elements_range(defav, parami, parami + argc);
+                hv_clear(hv);
+            }
 
-        size_t avidx = 0;
-        for(; argc; parami++, argc--) {
-            SV **valp = av_fetch(defav, parami, FALSE);
-            SV *val = valp ? *valp : &PL_sv_undef;
-
-            assert(TAINTING_get || !TAINT_get);
-            if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
-                TAINT_NOT;
-
-            av_store(av, avidx++, newSVsv(val));
+            assert((argc % 2) == 0);
         }
     }
-    else if(slurpy == '%') {
-        HV *hv = (HV *)*padentry;
-        assert(SvTYPE(hv) == SVt_PVHV);
 
-        if(SvRMAGICAL(hv) || HvUSEDKEYS(hv) > 0) {
-            /* see "target should be empty" comments in pp_argelem above */
-            av_refresh_elements_range(defav, parami, parami + argc);
-            hv_clear(hv);
+    size_t n_named = aux->n_named;
+    if(n_named) {
+        /* Initially mark the pad slot for every named parameter variable as
+         * PADSTALE, so afterwards we can detect missing ones
+         */
+        for(size_t namedix = 0; namedix < n_named; namedix++) {
+            struct op_multiparam_named_aux *named = aux->named + namedix;
+            SvPADSTALE_on(PAD_SVl(named->padix));
         }
-
-        assert((argc % 2) == 0);
 
         while(argc) {
             SV **svp;
 
-            svp = av_fetch(defav, parami, FALSE); parami++;
-            SV *key = svp ? *svp : &PL_sv_undef;
-            svp = av_fetch(defav, parami, FALSE); parami++;
-            SV *val = svp ? *svp : &PL_sv_undef;
-            argc -= 2;
+            svp = av_fetch(defav, parami, FALSE); parami++; argc--;
+            SV *name = svp ? *svp : &PL_sv_undef;
 
-            if (UNLIKELY(SvGMAGICAL(key)))
-                key = sv_mortalcopy(key);
+            SV *val = NULL;
+            if(argc) {
+                svp = av_fetch(defav, parami, FALSE); parami++; argc--;
+                val = svp ? *svp : &PL_sv_undef;
+            }
 
-            hv_store_ent(hv, key, newSVsv(val), 0);
-            if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
-                TAINT_NOT;
+            STRLEN namelen;
+            const char *namepv = SvPV(name, namelen);
+            /* namepv / namelen are always UTF-8 */
+            if(!SvUTF8(name))
+                namepv = (const char *)bytes_to_utf8_temp_pv((const U8 *)namepv, &namelen);
+
+            U32 namehash;
+            PERL_HASH(namehash, namepv, namelen);
+
+            PADOFFSET padix = 0;
+            for(size_t namedix = 0; namedix < n_named; namedix++) {
+                struct op_multiparam_named_aux *named = aux->named + namedix;
+
+                if(named->namehash != namehash || named->namelen != namelen)
+                    continue;
+                if(!strnEQ(named->namepv, namepv, namelen))
+                    continue;
+
+                padix = named->padix;
+                break;
+            }
+
+            if(padix) {
+                SV **padentry = &PAD_SVl(padix);
+                save_clearsv(padentry);
+
+                assert(TAINTING_get || !TAINT_get);
+                if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                    TAINT_NOT;
+
+                if(!val)
+                    val = &PL_sv_undef;
+
+                SvPADSTALE_off(*padentry);
+                SvSetMagicSV(*padentry, val);
+            }
+            else if(slurpy && !slurpypad) {
+                /* unnamed slurpy just ignores extra values */
+            }
+            else if(slurpypad && slurpy == '@') {
+                AV *av = (AV *)*slurpypad;
+
+                assert(TAINTING_get || !TAINT_get);
+                if (UNLIKELY(TAINT_get) && !SvTAINTED(name))
+                    TAINT_NOT;
+                av_push(av, newSVsv(name));
+
+                if(val) {
+                    if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                        TAINT_NOT;
+                    av_push(av, newSVsv(val));
+                }
+            }
+            else if(slurpypad && slurpy == '%') {
+                HV *hv = (HV *)*slurpypad;
+
+                if (UNLIKELY(SvGMAGICAL(name)))
+                    name = sv_mortalcopy(name);
+
+                assert(val); /* this must have passed the argc parity check */
+                if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                    TAINT_NOT;
+                hv_store_ent(hv, name, newSVsv(val), 0);
+            }
+            else {
+                // TODO: Consider collecting up all the names of unrecognised
+                // in one string
+                croak_caller("Unrecognized named parameter '%" UTF8f "' to subroutine '%" SVf "'",
+                    UTF8fARG(true, namelen, namepv), S_find_runcv_name());
+            }
+        }
+
+        for(size_t namedix = 0; namedix < n_named; namedix++) {
+            struct op_multiparam_named_aux *named = aux->named + namedix;
+            if(!named->is_required || !SvPADSTALE(PAD_SVl(named->padix)))
+                continue;
+
+            // TODO: Consider collecting up all the names of missing
+            // parameters in one string
+            croak_caller("Missing required named parameter '%" UTF8f "' to subroutine '%" SVf "'",
+                    UTF8fARG(true, named->namelen, named->namepv), S_find_runcv_name());
+        }
+    }
+
+    if(argc && slurpypad) {
+        if(slurpy == '@') {
+            AV *av = (AV *)*slurpypad;
+            size_t avidx = 0;
+            while(argc) {
+                SV **valp = av_fetch(defav, parami, FALSE); parami++;
+                SV *val = valp ? *valp : &PL_sv_undef;
+                argc -= 1;
+
+                assert(TAINTING_get || !TAINT_get);
+                if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                    TAINT_NOT;
+
+                av_store(av, avidx++, newSVsv(val));
+            }
+        }
+        else if(slurpy == '%') {
+            HV *hv = (HV *)*slurpypad;
+            while(argc) {
+                SV **svp;
+
+                svp = av_fetch(defav, parami, FALSE); parami++;
+                SV *key = svp ? *svp : &PL_sv_undef;
+                svp = av_fetch(defav, parami, FALSE); parami++;
+                SV *val = svp ? *svp : &PL_sv_undef;
+                argc -= 2;
+
+                if (UNLIKELY(SvGMAGICAL(key)))
+                    key = sv_mortalcopy(key);
+
+                hv_store_ent(hv, key, newSVsv(val), 0);
+                if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+                    TAINT_NOT;
+            }
         }
     }
 

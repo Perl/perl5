@@ -1804,6 +1804,11 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
                 S_opdump_indent(aTHX_ o, level, bar, file, "  PARAM [%zd] ANON\n",
                         i);
         }
+        for(size_t i = 0; i < aux->n_named; i++) {
+            struct op_multiparam_named_aux *named = aux->named + i;
+            S_opdump_indent(aTHX_ o, level, bar, file, "  NAMEDPARAM <%.*s> PADIX = %" UVuf "%s\n",
+                    named->namelen, named->namepv, named->padix, named->is_required ? "" : " OPT");
+        }
 
         if(aux->slurpy)
             S_opdump_indent(aTHX_ o, level, bar, file, "SLURPY = '%c' PADIX = %" UVuf "\n",

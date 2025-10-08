@@ -16,6 +16,18 @@ EXPECT
 Mandatory parameter follows optional parameter at - line 2, near "$c,"
 Mandatory parameter follows optional parameter at - line 2, near "$d) "
 ########
+# NAME named parameter without a name
+no warnings 'experimental::signature_named_parameters';
+sub f (:$) { }
+EXPECT
+Named parameters must actually have a name at - line 3, near "(:$"
+########
+# NAME positional after named
+no warnings 'experimental::signature_named_parameters';
+sub f (:$x, $y) { }
+EXPECT
+Positional parameter follows named parameter at - line 3, near "$y) "
+########
 # NAME slurpy array with default
 sub t136 (@abc = 222) { }
 EXPECT
@@ -60,9 +72,26 @@ sub t059 (@a, $b) { }
 EXPECT
 Slurpy parameter not last at - line 2, near "$b) "
 ########
+no warnings 'experimental::signature_named_parameters';
+sub t059 (@a, :$b) { }
+EXPECT
+Slurpy parameter not last at - line 3, near ":$b) "
+########
 sub t060 (@a, $b = 222) { }
 EXPECT
 Slurpy parameter not last at - line 2, near "222) "
+########
+# NAME duplicated named parameter
+no warnings 'experimental::signature_named_parameters';
+sub f (:$x, :$x) { }
+EXPECT
+Duplicated subroutine parameter name at - line 3, near ":$x) "
+########
+# NAME mandatory named after optional positional
+no warnings 'experimental::signature_named_parameters';
+sub f ($x = 1, :$y) { }
+EXPECT
+Mandatory parameter follows optional parameter at - line 3, near ":$y) "
 ########
 sub t061 (@a, @b) { }
 EXPECT
@@ -194,6 +223,26 @@ EXPECT
 Illegal operator following parameter in a subroutine signature at - line 2, near "($a 123"
 syntax error at - line 2, near "($a 123"
 ########
+sub t096_named (:$a :$b) { }
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 2, near "(:$a :"
+syntax error at - line 2, near "(:$a :"
+########
+sub named (:@x) { }
+EXPECT
+A named signature parameter must start with '$' at - line 2, near "(:@"
+syntax error at - line 2, near ":@x"
+########
+sub named (:%x) { }
+EXPECT
+A named signature parameter must start with '$' at - line 2, near "(:%"
+syntax error at - line 2, near ":%x"
+########
+sub t094_named (:123) { }
+EXPECT
+A named signature parameter must start with '$' at - line 2, near "(:1"
+syntax error at - line 2, near "(:123"
+########
 sub t097 ($a { }) { }
 EXPECT
 Illegal operator following parameter in a subroutine signature at - line 2, near "($a { }"
@@ -228,3 +277,17 @@ Can't use global %_ in subroutine signature at - line 2, near "(%_"
 sub t101 ($1) { }
 EXPECT
 Illegal operator following parameter in a subroutine signature at - line 2, near "($1"
+########
+# NAME missing required named
+no warnings 'experimental::signature_named_parameters';
+sub f (:$alpha, :$beta) { }  ## line 3
+f(alpha => 123);             ## line 4
+EXPECT
+Missing required named parameter 'beta' to subroutine 'main::f' at - line 4.
+########
+# NAME unrecognised named
+no warnings 'experimental::signature_named_parameters';
+sub f (:$alpha) { }             ## line 3
+f(alpha => 123, gamma => 456);  ## line 4
+EXPECT
+Unrecognized named parameter 'gamma' to subroutine 'main::f' at - line 4.

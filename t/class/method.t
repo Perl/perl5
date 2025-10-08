@@ -26,14 +26,18 @@ no warnings 'experimental::class';
     # Turn off the 'signatures' feature to prove that 'method' is always
     # signatured even without it
     no feature 'signatures';
+    no warnings 'experimental::signature_named_parameters';
 
     class Testcase2 {
         method retfirst ( $x = 123 ) { return $x; }
+        method retnamed ( :$named = 456 ) { return $named; }
     }
 
     my $obj = Testcase2->new;
     is($obj->retfirst,      123, 'method signature params work');
     is($obj->retfirst(456), 456, 'method signature params skip $self');
+
+    is($obj->retnamed(named => 789), 789, 'method signature supports named parameters');
 
     # argument counts take account of implicit $self
     my $e = eval { $obj->retfirst(1, 2) } ? undef : $@;
