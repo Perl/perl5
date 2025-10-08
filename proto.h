@@ -9421,7 +9421,7 @@ S_force_version(pTHX_ char *s, int guessing);
         assert(s)
 
 STATIC char *
-S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack);
+S_force_word(pTHX_ char *start, int token, U32 flags);
 # define PERL_ARGS_ASSERT_FORCE_WORD            \
         assert(start)
 
