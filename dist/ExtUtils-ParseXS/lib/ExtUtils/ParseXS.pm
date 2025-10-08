@@ -178,6 +178,9 @@ BEGIN {
 
   # File-scoped parsing state:
 
+  'AST',                # the Node::XS_file object representing the AST
+                        # tree for the whole XS file
+
   'typemaps_object',    # An ExtUtils::Typemaps object: the result of
                         # reading in the standard (or other) typemap.
 
@@ -403,6 +406,14 @@ sub process_file {
   $self->{config_allow_inout}         = $Options{inout};
   $self->{config_allow_exceptions}    = $Options{except};
   $self->{config_optimize}            = $Options{optimize};
+
+
+  my $AST = $self->{AST} = ExtUtils::ParseXS::Node::XS_file->new();
+  $AST->parse($self)
+    or $self->death("Failed to parse XS file\n");
+
+  $AST->as_code($self);
+
 
   # Identify the version of xsubpp used
   print <<EOM;

@@ -368,6 +368,30 @@ sub as_code { }
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::XS_file;
+
+# Top-level AST node representing an entire XS file
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::xsub;
 
 # Process an entire XSUB definition
