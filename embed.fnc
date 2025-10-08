@@ -6142,8 +6142,7 @@ S	|char * |force_version	|NN char *s				\
 				|int guessing
 S	|char * |force_word	|NN char *start 			\
 				|int token				\
-				|int check_keyword			\
-				|int allow_pack
+				|U32 flags
 RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
 				|SPTR const char *s			\
 				|EPTRQ const char * const e

@@ -173,6 +173,10 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 */
 #define YYL_RETRY (-1)
 
+/* Bits in the flags parameter of various functions */
+#define CHECK_KEYWORD               (1 << 0)
+#define ALLOW_PACKAGE               (1 << 1)
+
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
     "KNOWNEXT",
@@ -244,7 +248,7 @@ static const char* const lex_state_names[] = {
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define PHASERBLOCK(f) return (pl_yylval.ival=f, PL_expect = XBLOCK, PL_bufptr = s, REPORT((int)PHASER))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (PL_bufptr = force_word(s,BAREWORD,TRUE,FALSE), \
+#define LOOPX(f) return (PL_bufptr = force_word(s, BAREWORD, CHECK_KEYWORD), \
                          pl_yylval.ival=f, \
                          PL_expect = PL_nexttoke ? XOPERATOR : XTERM, \
                          REPORT((int)LOOPEX))
@@ -2269,10 +2273,12 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  */
 
 STATIC char *
-S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
+S_force_word(pTHX_ char *start, int token, U32 flags)
 {
     char *s;
     STRLEN len;
+    const bool check_keyword = flags & CHECK_KEYWORD;
+    const bool allow_pack    = flags & ALLOW_PACKAGE;
 
     PERL_ARGS_ASSERT_FORCE_WORD;
 
@@ -5393,12 +5399,12 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
             force_next(BAREWORD);
         }
         else if (*s == 'v') {
-            s = force_word(s,BAREWORD,FALSE,TRUE);
+            s = force_word(s, BAREWORD, ALLOW_PACKAGE);
             s = force_version(s, FALSE);
         }
     }
     else {
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = force_version(s, FALSE);
     }
     pl_yylval.ival = is_use;
@@ -6131,7 +6137,7 @@ yyl_hyphen(pTHX_ char *s)
             s++;
 
         if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
-            s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
+            s = force_word(PL_bufptr, BAREWORD, 0);
             DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
             OPERATOR(PERLY_MINUS);              /* unary minus */
         }
@@ -6213,7 +6219,7 @@ yyl_hyphen(pTHX_ char *s)
                 TOKEN(ARROW);
             }
             if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-                s = force_word(s,METHCALL0,FALSE,TRUE);
+                s = force_word(s, METHCALL0, ALLOW_PACKAGE);
                 TOKEN(ARROW);
             }
             else if (*s == '$')
@@ -6592,7 +6598,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                 d++;
             if (*d == '}') {
                 const char minus = (PL_tokenbuf[0] == '-');
-                s = force_word(s + minus, BAREWORD, FALSE, TRUE);
+                s = force_word(s + minus, BAREWORD, ALLOW_PACKAGE);
                 if (minus)
                     force_next(PERLY_MINUS);
             }
@@ -7323,7 +7329,7 @@ yyl_require(pTHX_ char *s, I32 orig_keyword)
             || (s = force_version(s, TRUE), *s == 'v'))
     {
         *PL_tokenbuf = '\0';
-        s = force_word(s,BAREWORD,TRUE,TRUE);
+        s = force_word(s, BAREWORD, CHECK_KEYWORD | ALLOW_PACKAGE);
         if (isIDFIRST_lazy_if_safe(PL_tokenbuf,
                                    C_ARRAY_END(PL_tokenbuf),
                                    UTF))
@@ -8294,7 +8300,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_class:
         ck_warner_d(packWARN(WARN_EXPERIMENTAL__CLASS), "class is experimental");
 
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = skipspace(s);
         s = force_strict_version(s);
         PL_expect = XATTRBLOCK;
@@ -8774,7 +8780,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOP(OP_PACK,XTERM);
 
     case KEY_package:
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = skipspace(s);
         s = force_strict_version(s);
         PREBLOCK(KW_PACKAGE);
@@ -8957,7 +8963,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         checkcomma(s,PL_tokenbuf,"subroutine name");
         s = skipspace(s);
         PL_expect = XTERM;
-        s = force_word(s,BAREWORD,TRUE,TRUE);
+        s = force_word(s, BAREWORD, CHECK_KEYWORD | ALLOW_PACKAGE);
         LOP(OP_SORT,XREF);
 
     case KEY_split:

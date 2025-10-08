@@ -1680,7 +1680,7 @@
 #     define force_next(a)                      S_force_next(aTHX_ a)
 #     define force_strict_version(a)            S_force_strict_version(aTHX_ a)
 #     define force_version(a,b)                 S_force_version(aTHX_ a,b)
-#     define force_word(a,b,c,d)                S_force_word(aTHX_ a,b,c,d)
+#     define force_word(a,b,c)                  S_force_word(aTHX_ a,b,c)
 #     define get_and_check_backslash_N_name_wrapper(a,b) S_get_and_check_backslash_N_name_wrapper(aTHX_ a,b)
 #     define incline(a,b)                       S_incline(aTHX_ a,b)
 #     define intuit_method(a,b,c)               S_intuit_method(aTHX_ a,b,c)
