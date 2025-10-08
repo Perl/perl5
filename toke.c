@@ -5247,7 +5247,7 @@ yyl_sigvar(pTHX_ char *s)
     case '$':
     case '@':
     case '%':
-        /* spot stuff that looks like an prototype */
+        /* spot stuff that looks like a prototype */
         if (memCHRs("$:@%&*;\\[]", *s)) {
             yyerror("Illegal character following sigil in a subroutine signature");
             break;
