@@ -170,6 +170,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 /* Bits in the flags parameter of various functions */
 #define CHECK_KEYWORD               (1 << 0)
 #define ALLOW_PACKAGE               (1 << 1)
+#define CHECK_DOLLAR                (1 << 2)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -5262,8 +5263,7 @@ yyl_sigvar(pTHX_ char *s)
             char *dest = PL_tokenbuf + 1;
             /* read var name, including sigil, into PL_tokenbuf */
             PL_tokenbuf[0] = sigil;
-            parse_ident(&s, &dest, C_ARRAY_END(PL_tokenbuf),
-                0, cBOOL(UTF), FALSE);
+            parse_ident(&s, &dest, C_ARRAY_END(PL_tokenbuf), cBOOL(UTF), 0);
             *dest = '\0';
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
@@ -10291,8 +10291,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 }
 
 STATIC void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
-                    bool is_utf8, bool check_dollar)
+S_parse_ident(pTHX_ char **s, char **d, char * const e, bool is_utf8,
+                    U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
@@ -10317,10 +10317,12 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
      * variable path.  Each iteration of the loop below picks up one segment
      * of the path.  If the apostrophe is allowed as a package separator, it
      * is converted to "::", so later code doesn't have to concern itself with
-     * this possibility.
-     *
-     * 'check_dollar' is used to look for and stop parsing before the dollar
+     * this possibility. */
+    const bool allow_package = flags & ALLOW_PACKAGE;
+
+    /* 'check_dollar' is used to look for and stop parsing before the dollar
      * in things like Foo::$bar */
+    const bool check_dollar = flags & CHECK_DOLLAR;
 
     while (*s < PL_bufend) {
         if (*d >= e)
@@ -10394,7 +10396,8 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
 
-    parse_ident(&s, &d, e, allow_package, is_utf8, TRUE);
+    parse_ident(&s, &d, e, is_utf8,
+                (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
     *d = '\0';
     *slp = d - dest;
     return s;
@@ -10435,7 +10438,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
             croak(ident_var_zero_multi_digit);
     }
     else {  /* See if it is a "normal" identifier */
-        parse_ident(&s, &d, e, 1, is_utf8, FALSE);
+        parse_ident(&s, &d, e, is_utf8, ALLOW_PACKAGE);
     }
     *d = '\0';
     d = dest;
@@ -10556,7 +10559,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
                    (the later check for } being at the expected point will trap
                    cases where this doesn't pan out.)  */
                 d += advance;
-                parse_ident(&s, &d, e, 1, is_utf8, TRUE);
+                parse_ident(&s, &d, e, is_utf8, ( ALLOW_PACKAGE
+                                                 |CHECK_DOLLAR));
                 *d = '\0';
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */

@@ -6171,9 +6171,8 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 S	|void	|parse_ident	|NN char **s				\
 				|SPTR char **d				\
 				|EPTR char * const e			\
-				|int allow_package			\
 				|bool is_utf8				\
-				|bool check_dollar
+				|U32 flags
 S	|int	|pending_ident
 RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s
