@@ -10628,7 +10628,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
     if (isSPACE(*s) || !*s)
         s = skipspace(s);
     if (isDIGIT(*s)) { /* handle $0 and $1 $2 and $10 and etc */
-        bool is_zero= *s == '0' ? TRUE : FALSE;
+        bool is_zero = *s == '0';
         char *digit_start= d;
         *d++ = *s++;
         while (s < PL_bufend && isDIGIT(*s)) {
@@ -10720,7 +10720,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
 
     /* special case to handle ${10}, ${11} the same way we handle $1 etc */
     if (isDIGIT(*d)) {
-        bool is_zero= *d == '0' ? TRUE : FALSE;
+        bool is_zero = *d == '0';
         char *digit_start= d;
         while (s < PL_bufend && isDIGIT(*s)) {
             d++;
