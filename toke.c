@@ -10633,16 +10633,15 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
         else if (stop_at_first_non_digit && isDIGIT_A(*s)) {
             bool is_zero = *s == '0';
             char *digit_start= *d;
-            *(*d)++ = *s++;
 
             /* Stop at the first non-digit */
-            while (s < s_end && isDIGIT(*s)) {
+            do {
+                *(*d)++ = *s++;
+
                 if (*d >= e) {
                     goto too_long;
                 }
-
-                *(*d)++ = *s++;
-            }
+            } while (isDIGIT_A(*s));
 
             /* Leading zeros are not permitted */
             if (is_zero && *d - digit_start > 1)
