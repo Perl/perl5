@@ -26,3 +26,5 @@ warnings.h linguist-generated
 *.t linguist-language=Perl
 *.h linguist-language=C
 *.fnc linguist-language=Text
+*.inc linguist-language=C
+cpan/Math-BigInt/t/*.inc linguist-language=Perl
