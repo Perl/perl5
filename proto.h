@@ -9469,7 +9469,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
 STATIC void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
-        assert(s); assert(d); assert(*d); assert(e); assert(*d <= e)
+        assert(s); assert(d); assert(*d); assert(e); assert(*d < e)
 
 STATIC int
 S_pending_ident(pTHX);
