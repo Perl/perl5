@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item AIX
 
-XXX
+Thread-safe locale handling has been turned off on all releases due to
+apparent bugs in the underlying operating system support.
 
 =back
 
