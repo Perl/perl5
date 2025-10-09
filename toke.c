@@ -10351,12 +10351,13 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             }
 
             /* Here we have found the end of the identifier */
-            if (*d + (t - s) > e)
+            Size_t this_length = t - s;
+            if (*d + this_length > e)
                 croak("%s", ident_too_long);
 
             /* And copy the whole thing in one operation */
-            Copy(s, *d, t - s, char);
-            *d += t - s;
+            Copy(s, *d, this_length, char);
+            *d += this_length;
             s = t;
         }
         else if ( isWORDCHAR_A(*s) ) {
