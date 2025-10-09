@@ -10544,29 +10544,65 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
     PERL_ARGS_ASSERT_PARSE_IDENT;
     assert(*s <= PL_bufend);
 
+    /* This function parses the string pointed to by '*s' (whose upper bound
+     * is 'send') looking for an identifier.  It stops at the first character
+     * that isn't in one of the types of identifiers looked for, which are:
+     *
+     * 1) A normal identifier whose first character matches IDFIRST followed
+     *    by any number of characters which match IDCONT.
+     * 2) An identifier that begins with an ASCII digit followed by any number
+     *    of ASCII \w characters
+     *
+     * The function copies the identifier into the destination starting at *d
+     * (whose upper bound is 'e') and advances *d to point to just beyond the
+     * end of the identifier.  The reason it needs to copy is that it may
+     * convert apostrophe package separators into double colons.
+     *
+     * The function croaks if there is not enough room for the entire source
+     * identifier to be copied.
+     *
+     * When 'allow_package' is non-zero, the function parses a full package
+     * variable path.  Each iteration of the loop below picks up one segment
+     * of the path.  If the apostrophe is allowed as a package separator, it
+     * is converted to "::", so later code doesn't have to concern itself with
+     * this possibility.
+     *
+     * 'check_dollar' is used to look for and stop parsing before the dollar
+     * in things like Foo::$bar */
+
     while (*s < PL_bufend) {
         if (*d >= e)
             croak("%s", ident_too_long);
+
+        /* For non-UTF8, variables that match ASCII \w are a superset of
+         * variables that start with IDFIRST, so we have to look at the
+         * Unicode definition only when UTF-8 is in effect.  We have to check
+         * for the subset before checking for the superset. */
         Size_t advance;
         if (is_utf8 && (advance = isIDFIRST_utf8_safe(*s, PL_bufend))) {
-             /* The UTF-8 case must come first, otherwise things
-             * like c\N{COMBINING TILDE} would start failing, as the
-             * isWORDCHAR_A case below would gobble the 'c' up.
-             */
 
+            /* Find the end of the identifier by accumulating characters until
+             * find a non-identifier character */
             char *t = *s + advance;
             while ((advance = isIDCONT_utf8_safe((const U8*) t,
                                                  (const U8*) PL_bufend)))
             {
                 t += advance;
             }
+
+            /* Here we have found the end of the identifier */
             if (*d + (t - *s) > e)
                 croak("%s", ident_too_long);
+
+            /* And copy the whole thing in one operation */
             Copy(*s, *d, t - *s, char);
             *d += t - *s;
             *s = t;
         }
         else if ( isWORDCHAR_A(**s) ) {
+
+            /* This is the superset; it accepts \w+, including an initial
+             * digit */
             do {
                 *(*d)++ = *(*s)++;
             } while (isWORDCHAR_A(**s) && *d < e);
@@ -10575,7 +10611,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
                  && **s == '\''
                  && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
                  && isIDFIRST_lazy_if_safe((*s)+1, PL_bufend, is_utf8))
-        {
+        {   /* Convert the apostrophe to "::" */
             *(*d)++ = ':';
             *(*d)++ = ':';
             (*s)++;
@@ -10590,7 +10626,8 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
             *(*d)++ = *(*s)++;
             *(*d)++ = *(*s)++;
         }
-        else
+        else    /* None of the above means have come to the end of any
+                   identifier*/
             break;
     }
     return;
