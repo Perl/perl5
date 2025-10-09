@@ -704,4 +704,7 @@ case "$osvers" in
     ;;
 esac
 
+# GH #23825
+d_duplocale='undef'
+
 # EOF
