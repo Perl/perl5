@@ -5504,7 +5504,8 @@ yyl_sigvar(pTHX_ char *s)
             char *dest = PL_tokenbuf + 1;
             /* read var name, including sigil, into PL_tokenbuf */
             PL_tokenbuf[0] = sigil;
-            parse_ident(&s, &dest, C_ARRAY_END(PL_tokenbuf), cBOOL(UTF), 0);
+            s = parse_ident(s, PL_bufend, &dest, C_ARRAY_END(PL_tokenbuf),
+                            cBOOL(UTF), 0);
             *dest = '\0';
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
@@ -10537,15 +10538,16 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     return SvREFCNT_inc_simple_NN(sv);
 }
 
-STATIC void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, bool is_utf8,
-                    U32 flags)
+STATIC char *
+S_parse_ident(pTHX_ char *s, char * const s_end,
+                    char **d, char * const e,
+                    bool is_utf8, U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
     assert(*s <= PL_bufend);
 
     /* This function parses the string pointed to by '*s' (whose upper bound
-     * is 'send') looking for an identifier.  It stops at the first character
+     * is 's_end') looking for an identifier.  It stops at the first character
      * that isn't in one of the types of identifiers looked for, which are:
      *
      * 1) A normal identifier whose first character matches IDFIRST followed
@@ -10557,6 +10559,10 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, bool is_utf8,
      * (whose upper bound is 'e') and advances *d to point to just beyond the
      * end of the identifier.  The reason it needs to copy is that it may
      * convert apostrophe package separators into double colons.
+     *
+     * Upon success, it returns the position in s just beyond where the
+     * identifier ends in the input.  If no identifier was found, the return
+     * will be the the input 's' unchanged.
      *
      * The function croaks if there is not enough room for the entire source
      * identifier to be copied.
@@ -10572,7 +10578,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, bool is_utf8,
      * in things like Foo::$bar */
     const bool check_dollar = flags & CHECK_DOLLAR;
 
-    while (*s < PL_bufend) {
+    while (s < s_end) {
         if (*d >= e)
             croak("%s", ident_too_long);
 
@@ -10581,58 +10587,58 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, bool is_utf8,
          * Unicode definition only when UTF-8 is in effect.  We have to check
          * for the subset before checking for the superset. */
         Size_t advance;
-        if (is_utf8 && (advance = isIDFIRST_utf8_safe(*s, PL_bufend))) {
+        if (is_utf8 && (advance = isIDFIRST_utf8_safe(s, s_end))) {
 
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
-            char *t = *s + advance;
+            char *t = s + advance;
             while ((advance = isIDCONT_utf8_safe((const U8*) t,
-                                                 (const U8*) PL_bufend)))
+                                                 (const U8*) s_end)))
             {
                 t += advance;
             }
 
             /* Here we have found the end of the identifier */
-            if (*d + (t - *s) > e)
+            if (*d + (t - s) > e)
                 croak("%s", ident_too_long);
 
             /* And copy the whole thing in one operation */
-            Copy(*s, *d, t - *s, char);
-            *d += t - *s;
-            *s = t;
+            Copy(s, *d, t - s, char);
+            *d += t - s;
+            s = t;
         }
-        else if ( isWORDCHAR_A(**s) ) {
+        else if ( isWORDCHAR_A(*s) ) {
 
             /* This is the superset; it accepts \w+, including an initial
              * digit */
             do {
-                *(*d)++ = *(*s)++;
-            } while (isWORDCHAR_A(**s) && *d < e);
+                *(*d)++ = *s++;
+            } while (isWORDCHAR_A(*s) && *d < e);
         }
         else if (   allow_package
-                 && **s == '\''
+                 && *s == '\''
                  && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
-                 && isIDFIRST_lazy_if_safe((*s)+1, PL_bufend, is_utf8))
+                 && isIDFIRST_lazy_if_safe(s + 1, s_end, is_utf8))
         {   /* Convert the apostrophe to "::" */
             *(*d)++ = ':';
             *(*d)++ = ':';
-            (*s)++;
+            s++;
         }
-        else if (allow_package && **s == ':' && (*s)[1] == ':'
+        else if (allow_package && *s == ':' && s[1] == ':'
            /* Disallow things like Foo::$bar. For the curious, this is
             * the code path that triggers the "Bad name after" warning
             * when looking for barewords.
             */
-           && !(check_dollar && (*s)[2] == '$'))
+           && !(check_dollar && s[2] == '$'))
         {
-            *(*d)++ = *(*s)++;
-            *(*d)++ = *(*s)++;
+            *(*d)++ = *s++;
+            *(*d)++ = *s++;
         }
         else    /* None of the above means have come to the end of any
                    identifier*/
             break;
     }
-    return;
+    return s;
 }
 
 char *
@@ -10644,8 +10650,8 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
 
-    parse_ident(&s, &d, e, is_utf8,
-                (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                    (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
     *d = '\0';
     *slp = d - dest;
     return s;
@@ -10686,7 +10692,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
             croak(ident_var_zero_multi_digit);
     }
     else {  /* See if it is a "normal" identifier */
-        parse_ident(&s, &d, e, is_utf8, ALLOW_PACKAGE);
+        s = parse_ident(s, PL_bufend, &d, e, is_utf8, ALLOW_PACKAGE);
     }
     *d = '\0';
     d = dest;
@@ -10807,8 +10813,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
                    (the later check for } being at the expected point will trap
                    cases where this doesn't pan out.)  */
                 d += advance;
-                parse_ident(&s, &d, e, is_utf8, ( ALLOW_PACKAGE
-                                                 |CHECK_DOLLAR));
+                s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                                (ALLOW_PACKAGE | CHECK_DOLLAR));
                 *d = '\0';
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
