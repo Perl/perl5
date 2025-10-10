@@ -401,22 +401,6 @@ mechanism that makes all field initializer expressions appear within the same
 CV on ADJUST blocks as well, merging them all into a single CV per class. This
 will make it faster to invoke if a class has more than one of them.
 
-=item * More accessor generator attributes
-
-Attributes to request that other kinds of accessor methods be generated for
-fields. Likely C<:writer>.
-
-    class X {
-        field $name :writer;
-    }
-
-Equivalent to
-
-    class X {
-        field $name;
-        method set_name ($new) { $name = $new; return $self; }
-    }
-
 =item * Metaprogramming
 
 An extension of the metaprogramming API (currently proposed by
