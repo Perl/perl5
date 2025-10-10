@@ -408,12 +408,6 @@ sub process_file {
   $self->{config_optimize}            = $Options{optimize};
 
 
-  my $AST = $self->{AST} = ExtUtils::ParseXS::Node::XS_file->new();
-  $AST->parse($self)
-    or $self->death("Failed to parse XS file\n");
-
-  $AST->as_code($self);
-
   # Open the input file (using $self->{in_filename} which
   # is a basename'd $Options{filename} due to chdir above)
   {
@@ -424,71 +418,23 @@ sub process_file {
         or die "cannot open $self->{in_filename}: $!\n";
   }
 
-  # ----------------------------------------------------------------
-  # Process the first (C language) half of the XS file, up until the first
-  # MODULE: line
-  # ----------------------------------------------------------------
+  my $AST = $self->{AST} = ExtUtils::ParseXS::Node::XS_file->new();
+  $AST->parse($self)
+    or $self->death("Failed to parse XS file\n");
 
-  FIRSTMODULE:
-  while (readline($self->{in_fh})) {
-    if (/^=/) {
-      my $podstartline = $.;
-      do {
-        if (/^=cut\s*$/) {
-          # We can't just write out a /* */ comment, as our embedded
-          # POD might itself be in a comment. We can't put a /**/
-          # comment inside #if 0, as the C standard says that the source
-          # file is decomposed into preprocessing characters in the stage
-          # before preprocessing commands are executed.
-          # I don't want to leave the text as barewords, because the spec
-          # isn't clear whether macros are expanded before or after
-          # preprocessing commands are executed, and someone pathological
-          # may just have defined one of the 3 words as a macro that does
-          # something strange. Multiline strings are illegal in C, so
-          # the "" we write must be a string literal. And they aren't
-          # concatenated until 2 steps later, so we are safe.
-          #     - Nicholas Clark
-          print("#if 0\n  \"Skipped embedded POD.\"\n#endif\n");
-          printf("#line %d \"%s\"\n", $. + 1, escape_file_for_line_directive($self->{in_pathname}))
-            if $self->{config_WantLineNumbers};
-          next FIRSTMODULE;
-        }
+  # At this point, $_ should hold the first MODULE line
 
-      } while (readline($self->{in_fh}));
+  $self->{lastline}    = $_;
+  $self->{lastline_no} = $.;
+  $self->{XS_parse_stack_top_if_idx} = 0;
+  my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
 
-      # At this point $. is at end of file so die won't state the start
-      # of the problem, and as we haven't yet read any lines &death won't
-      # show the correct line in the message either.
-      die ("Error: Unterminated pod in $self->{in_filename}, line $podstartline\n")
-        unless $self->{lastline};
-    }
-
-    last if ($self->{PACKAGE_name}, $self->{PREFIX_pattern}) =
-      /^MODULE\s*=\s*[\w:]+(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
-
-    print $_;
-  }
-
-  unless (defined $_) {
-    warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
-    exit 0; # Not a fatal error for the caller process
-  }
-
-  print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
-    if $self->{config_WantLineNumbers};
+  $AST->as_code($self);
 
   standard_XS_defs();
 
   print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
     if $self->{config_WantLineNumbers};
-
-  $self->{lastline}    = $_;
-  $self->{lastline_no} = $.;
-
-  $self->{XS_parse_stack_top_if_idx} = 0;
-
-  my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
-
 
   # ----------------------------------------------------------------
   # Main loop: for each iteration, read in a paragraph's worth of XSUB

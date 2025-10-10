@@ -362,6 +362,20 @@ sub parse_keywords {
     return @kids;
 }
 
+# return (module, package, prefix) values if the line
+# is a valid 'MODULE = ...' line
+
+sub is_xs_module_line {
+    my __PACKAGE__       $self  = shift;
+    my                   $line  = shift;
+
+    $line =~
+        /^      MODULE  \s* = \s*   [\w:]+
+        (?: \s+ PACKAGE \s* = \s* ( [\w:]+ ) )?
+        (?: \s+ PREFIX  \s* = \s* ( \S+    ) )?
+        \s* $/x;
+}
+
 
 sub as_code { }
 
@@ -374,6 +388,7 @@ package ExtUtils::ParseXS::Node::XS_file;
 
 BEGIN { $build_subclass->(
     'preamble',   # Node::preamble object which emits preamble C code
+    'C_part',     # the C part of the XS file, before the first MODULE
 )};
 
 sub parse {
@@ -391,6 +406,15 @@ sub parse {
     $preamble->parse($pxs, $self)
         or return;
     push @{$self->{kids}}, $preamble;
+
+    # Process the first (C language) half of the XS file, up until the first
+    # MODULE: line
+
+    my $C_part = ExtUtils::ParseXS::Node::C_part->new();
+    $self->{C_part} = $C_part;
+    $C_part->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $C_part;
 
     1;
 }
@@ -446,6 +470,171 @@ EOM
                                             $self->{file}) . "\"\n")
         if $pxs->{config_WantLineNumbers};
 }
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part;
+
+# A node representing the C part of the XS file - i.e. everything
+# before the first MODULE line
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = 1;
+    $self->{file}    = $pxs->{in_pathname};
+
+    # Read in lines until the first MODULE line, creating a list of
+    # Node::C_part_code and Node::C_part_POD nodes as children.
+    # Returns with $_ holding the (unprocessed) next line (or undef for
+    # EOF)
+
+    $_ = readline($pxs->{in_fh});
+
+    while (defined $_) {
+        return 1 if $self->is_xs_module_line($_);
+
+        my $node = 
+            /^=/ ? ExtUtils::ParseXS::Node::C_part_POD->new()
+                 : ExtUtils::ParseXS::Node::C_part_code->new();
+
+        # Read in next block of code or POD lines
+        $node->parse($pxs)
+            or return;
+        push @{$self->{kids}}, $node;
+    }
+
+    warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
+    exit 0; # Not a fatal error for the caller process
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+
+    print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_POD;
+
+# A node representing a section of POD within the C part of the XS file
+
+BEGIN { $build_subclass->(
+    'pod_lines', # array of lines containing pod, including start and end
+                 # '=foo' lines
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = $.;
+    $self->{file}    = $pxs->{in_pathname};
+
+    # This method is called with $_ holding the first line of POD
+    # and returns with $_ holding the (unprocessed) next line
+
+    do {
+        push @{$self->{pod_lines}}, $_;
+        if (/^=cut\s*$/) {
+            $_ = readline($pxs->{in_fh});
+            return 1;
+        }
+    } while (readline($pxs->{in_fh}));
+
+    # At this point $. is at end of file so die won't state the start
+    # of the problem, and as we haven't yet read any lines &death won't
+    # show the correct line in the message either.
+    die (  "Error: Unterminated pod in $pxs->{in_filename}, "
+         . "line $self->{line_no}\n");
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit something in the C file to indicate that a section of POD has
+    # been elided, while maintaining the correct lines numbers using
+    # #line.
+    #
+    # We can't just write out a /* */ comment, as our embedded POD might
+    # itself be in a comment. We can't put a /**/ comment inside #if 0, as
+    # the C standard says that the source file is decomposed into
+    # preprocessing characters in the stage before preprocessing commands
+    # are executed.
+    #
+    # I don't want to leave the text as barewords, because the spec isn't
+    # clear whether macros are expanded before or after preprocessing
+    # commands are executed, and someone pathological may just have
+    # defined one of the 3 words as a macro that does something strange.
+    # Multiline strings are illegal in C, so the "" we write must be a
+    # string literal. And they aren't concatenated until 2 steps later, so
+    # we are safe.
+    #     - Nicholas Clark
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |#if 0
+        |  "Skipped embedded POD."
+        |#endif
+EOF
+
+    printf("#line %d \"%s\"\n",
+                $self->{line_no} + @{$self->{pod_lines}},
+                ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                    $pxs->{in_pathname}))
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_code;
+
+# A node representing a section of C code within the C part of the XS file
+
+BEGIN { $build_subclass->(
+    'code_lines', # array of lines containing C code
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = $.;
+    $self->{file}    = $pxs->{in_pathname};
+
+    # This method is called with $_ holding the first line of C code
+    # and returns with $_ holding the (unprocessed) next line
+
+    do {
+        return 1 if $self->is_xs_module_line($_);
+        return 1 if /^=/;
+        push @{$self->{code_lines}}, $_;
+    } while (readline($pxs->{in_fh}));
+
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    print @{$self->{code_lines}};
+}
+
 
 
 # ======================================================================
