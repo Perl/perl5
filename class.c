@@ -38,14 +38,16 @@ Perl_newSVobject(pTHX_ Size_t fieldcount)
     SV *sv = newSV_type(SVt_PVOBJ);
 
     if (fieldcount) {
+        ObjectMAXFIELD(sv) = fieldcount - 1;
         Newx(ObjectFIELDS(sv), fieldcount, SV *);
         Zero(ObjectFIELDS(sv), fieldcount, SV *);
     }
+#ifdef DEBUGGING
     else {
-        ObjectFIELDS(sv) = NULL;
+        assert(!ObjectFIELDS(sv));
+        assert(ObjectMAXFIELD(sv) == -1);
     }
-    ObjectMAXFIELD(sv) = fieldcount - 1;
-
+#endif
     return sv;
 }
 
