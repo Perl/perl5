@@ -1696,8 +1696,6 @@ PP(pp_eq)
 }
 
 
-/* also used for: pp_i_preinc() */
-
 PP(pp_preinc)
 {
     SV *sv = *PL_stack_sp;
@@ -1716,8 +1714,6 @@ PP(pp_preinc)
     return NORMAL;
 }
 
-
-/* also used for: pp_i_predec() */
 
 PP(pp_predec)
 {

@@ -1149,8 +1149,7 @@ PP(pp_undef)
 static OP *
 S_postincdec_common(pTHX_ SV *sv, SV *targ)
 {
-    const bool inc =
-        PL_op->op_type == OP_POSTINC || PL_op->op_type == OP_I_POSTINC;
+    const bool inc = PL_op->op_type == OP_POSTINC;
 
     SvGETMAGIC(sv);
     if (SvROK(sv))
@@ -1169,8 +1168,6 @@ S_postincdec_common(pTHX_ SV *sv, SV *targ)
     return NORMAL;
 }
 
-
-/* also used for: pp_i_postinc() */
 
 PP(pp_postinc)
 {
@@ -1194,8 +1191,6 @@ PP(pp_postinc)
     return S_postincdec_common(aTHX_ sv, TARG);
 }
 
-
-/* also used for: pp_i_postdec() */
 
 PP(pp_postdec)
 {
@@ -3130,6 +3125,211 @@ PP(pp_i_negate)
     }
 }
 
+#define SvIsSimpleIV(sv) ((SvFLAGS(sv) & (                           \
+                                 SVf_THINKFIRST|SVs_GMG|SVf_ROK|     \
+                                 SVf_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK| \
+                                    SVf_POK|SVp_POK)) == SVf_IOK)
+
+PP(pp_i_preinc)
+{
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(SvIsSimpleIV(sv))) {
+        IV iv = SvIVX(sv);
+        SvIV_set(sv, (IV)((UV)iv + 1));
+    } else {
+        SvGETMAGIC(sv);
+
+        /* This should now be comparable to sv_inc_nomg */
+
+        if (SvTHINKFIRST(sv)) {
+            if (SvREADONLY(sv)) {
+                croak_no_modify();
+            }
+            if (SvROK(sv)) {
+                IV i;
+                if (SvAMAGIC(sv) && AMG_CALLunary(sv, inc_amg))
+                    goto wrap_up;
+                SV *wot = sv_2num(sv);
+                i = SvIV(wot);
+                sv_setiv(sv, i);
+            }
+            else sv_force_normal_flags(sv, 0);
+        }
+
+        if (LIKELY(sv->sv_flags & (SVp_NOK|SVp_IOK))) {
+            IV iv = SvIV_nomg(sv);
+            sv_setiv(sv, (IV)((UV)iv + 1));
+        } else {
+            sv_inc_nomg(sv);
+            if (SvNOK(sv)) { /* $x = "1.1"; ++$x; */
+                IV iv = SvIV_nomg(sv);
+                sv_setiv(sv, iv);
+            }
+        }
+    }
+
+  wrap_up:
+    SvSETMAGIC(sv);
+    return NORMAL;
+}
+
+PP(pp_i_postinc)
+{
+    dTARGET;
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(SvIsSimpleIV(sv))) {
+        IV iv = SvIVX(sv);
+        SvIV_set(sv, (IV)((UV)iv + 1));
+        TARGi(iv, 0); /* arg not GMG, so can't be tainted */
+        rpp_replace_1_1_NN(TARG);
+        return NORMAL;
+    } else {
+        SvGETMAGIC(sv);
+        if (SvROK(sv))
+            TARG = sv_newmortal();
+        sv_setsv_flags(TARG, sv, SV_DO_COW_SVSETSV);
+
+        /* This should now be comparable to sv_inc_nomg */
+
+        if (SvTHINKFIRST(sv)) {
+            if (SvREADONLY(sv)) {
+                croak_no_modify();
+            }
+            if (SvROK(sv)) {
+                IV i;
+                if (SvAMAGIC(sv) && AMG_CALLunary(sv, inc_amg))
+                    goto wrap_up;
+                SV *wot = sv_2num(sv);
+                i = SvIV(wot);
+                sv_setiv(sv, i);
+            }
+            else sv_force_normal_flags(sv, 0);
+        }
+
+        if (LIKELY(sv->sv_flags & (SVp_NOK|SVp_IOK))) {
+            IV iv = SvIV_nomg(sv);
+            sv_setiv(sv, (IV)((UV)iv + 1));
+        } else {
+            sv_inc_nomg(sv);
+            if (SvNOK(sv)) { /* $x = "1.1"; $x++; */
+                IV iv = SvIV_nomg(sv);
+                sv_setiv(sv, iv);
+            }
+        }
+
+      wrap_up:
+        SvSETMAGIC(sv);
+
+        /* This is a special case, as per pp_postinc */
+        if (!SvOK(TARG))
+            sv_setiv(TARG, 0);
+
+        SvSETMAGIC(TARG);
+        rpp_replace_1_1_NN(TARG);
+        return NORMAL;
+    }
+}
+
+PP(pp_i_predec)
+{
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(SvIsSimpleIV(sv))) {
+        IV iv = SvIVX(sv);
+        SvIV_set(sv, (IV)((UV)iv - 1));
+    }
+    else {
+        SvGETMAGIC(sv);
+
+        /* This should now be comparable to sv_dec_nomg */
+
+        if (SvTHINKFIRST(sv)) {
+            if (SvREADONLY(sv)) {
+                croak_no_modify();
+            }
+            if (SvROK(sv)) {
+                IV i;
+                if (SvAMAGIC(sv) && AMG_CALLunary(sv, dec_amg))
+                    goto wrap_up;
+                SV *wot = sv_2num(sv);
+                i = SvIV(wot);
+                sv_setiv(sv, i);
+            }
+            else sv_force_normal_flags(sv, 0);
+        }
+        if (LIKELY(sv->sv_flags & (SVp_NOK|SVp_IOK))) {
+            IV iv = SvIV_nomg(sv);
+            sv_setiv(sv, (IV)((UV)iv - 1));
+        } else {
+            sv_dec_nomg(sv);
+            if (SvNOK(sv)) { /* $x = "1.1"; --$x; */
+                IV iv = SvIV_nomg(sv);
+                sv_setiv(sv, iv);
+            }
+        }
+    }
+
+  wrap_up:
+    SvSETMAGIC(sv);
+    return NORMAL;
+}
+
+PP(pp_i_postdec)
+{
+    dTARGET;
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(SvIsSimpleIV(sv))) {
+        IV iv = SvIVX(sv);
+        SvIV_set(sv, (IV)((UV)iv - 1));
+        TARGi(iv, 0); /* arg not GMG, so can't be tainted */
+        rpp_replace_1_1_NN(TARG);
+        return NORMAL;
+    } else {
+        SvGETMAGIC(sv);
+        if (SvROK(sv))
+            TARG = sv_newmortal();
+        sv_setsv_flags(TARG, sv, SV_DO_COW_SVSETSV);
+
+        /* This should now be comparable to sv_dec_nomg */
+
+        if (SvTHINKFIRST(sv)) {
+            if (SvREADONLY(sv)) {
+                croak_no_modify();
+            }
+            if (SvROK(sv)) {
+                IV i;
+                if (SvAMAGIC(sv) && AMG_CALLunary(sv, dec_amg))
+                    goto wrap_up;
+                SV *wot = sv_2num(sv);
+                i = SvIV(wot);
+                sv_setiv(sv, i);
+            }
+            else sv_force_normal_flags(sv, 0);
+        }
+        if (LIKELY(sv->sv_flags & (SVp_NOK|SVp_IOK))) {
+            IV iv = SvIV_nomg(sv);
+            sv_setiv(sv, (IV)((UV)iv - 1));
+        } else {
+            sv_dec_nomg(sv);
+            if (SvNOK(sv)) { /* $x = "1.1"; $x--; */
+                IV iv = SvIV_nomg(sv);
+                sv_setiv(sv, iv);
+            }
+        }
+
+      wrap_up:
+        SvSETMAGIC(sv);
+
+        SvSETMAGIC(TARG);
+        rpp_replace_1_1_NN(TARG);
+        return NORMAL;
+    }
+}
+
+#undef SvIsSimpleIV(sv)
 
 /* High falutin' math. */
 
