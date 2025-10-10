@@ -79,7 +79,6 @@ use ExtUtils::ParseXS::Utilities qw(
   valid_proto_string
   process_typemaps
   map_type
-  standard_XS_defs
   analyze_preprocessor_statement
   set_cond
   Warn
@@ -430,11 +429,6 @@ sub process_file {
   my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
 
   $AST->as_code($self);
-
-  standard_XS_defs();
-
-  print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
-    if $self->{config_WantLineNumbers};
 
   # ----------------------------------------------------------------
   # Main loop: for each iteration, read in a paragraph's worth of XSUB

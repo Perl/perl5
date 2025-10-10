@@ -389,6 +389,8 @@ package ExtUtils::ParseXS::Node::XS_file;
 BEGIN { $build_subclass->(
     'preamble',   # Node::preamble object which emits preamble C code
     'C_part',     # the C part of the XS file, before the first MODULE
+    'C_part_postamble',# Node::C_part_postamble object which emits
+                  # boilerplate code following the C code
 )};
 
 sub parse {
@@ -415,6 +417,16 @@ sub parse {
     $C_part->parse($pxs, $self)
         or return;
     push @{$self->{kids}}, $C_part;
+
+    # "Parse" the start of the file. Doesn't actually consume any lines:
+    # just a placeholder for emitting postamble later
+
+    my $C_part_postamble = ExtUtils::ParseXS::Node::C_part_postamble->new();
+    $self->{C_part_postamble} = $C_part_postamble;
+    $C_part_postamble->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $C_part_postamble;
+
 
     1;
 }
@@ -635,6 +647,42 @@ sub as_code {
     print @{$self->{code_lines}};
 }
 
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_postamble;
+
+# AST node representing the boilerplate C code postamble following any
+# initial C code contained within the C part of the XS file.
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method to emit the postamble into the C
+# file.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = 1;
+    $self->{file}    = $pxs->{in_pathname};
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit boilerplate postamble following any code passed through from
+    # the 'C' part of the XS file
+
+    ExtUtils::ParseXS::Utilities::standard_XS_defs();
+
+    print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+        if $pxs->{config_WantLineNumbers};
+}
 
 
 # ======================================================================
