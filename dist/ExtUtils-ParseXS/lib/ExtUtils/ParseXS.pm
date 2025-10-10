@@ -445,7 +445,7 @@ sub process_file {
     #    $self->{XS_parse_stack_top_if_idx}
     #    $self->{bootcode_early}
     #    $self->{bootcode_later}
-    while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
+    while (@{$self->{line}} && $self->{line}[0] =~ /^#/) {
       my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
       $node->parse($self);
       $node->as_code($self);
