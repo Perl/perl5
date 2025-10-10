@@ -10292,7 +10292,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 }
 
 STATIC char *
-S_parse_ident(pTHX_ char *s, char * const s_end,
+S_parse_ident(pTHX_ const char *s, const char * const s_end,
                     char **d, char * const e,
                     bool is_utf8, U32 flags)
 {
@@ -10343,7 +10343,7 @@ S_parse_ident(pTHX_ char *s, char * const s_end,
 
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
-            char *t = s + advance;
+            const char *t = s + advance;
             while ((advance = isIDCONT_utf8_safe((const U8*) t,
                                                  (const U8*) s_end)))
             {
@@ -10390,7 +10390,11 @@ S_parse_ident(pTHX_ char *s, char * const s_end,
                    identifier*/
             break;
     }
-    return s;
+
+    /* Cast away const, because many of our callers don't have it; this
+     * function declares it as const so as to indicate that it doesn't change
+     * it, and it can be called using a const parameter */
+    return (char *) s;
 }
 
 char *

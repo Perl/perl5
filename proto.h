@@ -9462,7 +9462,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
         assert(key); assert(sv)
 
 STATIC char *
-S_parse_ident(pTHX_ char *s, char * const s_end, char **d, char * const e, bool is_utf8, U32 flags);
+S_parse_ident(pTHX_ const char *s, const char * const s_end, char **d, char * const e, bool is_utf8, U32 flags);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
         assert(s); assert(s_end); assert(d); assert(*d); assert(e); \
         assert(s <= s_end); assert(*d < e)

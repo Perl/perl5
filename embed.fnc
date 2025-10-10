@@ -6168,8 +6168,8 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|NULLOK const char *type		\
 				|STRLEN typelen 			\
 				|NULLOK const char **error_msg
-S	|char * |parse_ident	|SPTR char *s				\
-				|EPTRQ char * const s_end		\
+S	|char * |parse_ident	|SPTR const char *s			\
+				|EPTRQ const char * const s_end 	\
 				|SPTR char **d				\
 				|EPTR char * const e			\
 				|bool is_utf8				\
