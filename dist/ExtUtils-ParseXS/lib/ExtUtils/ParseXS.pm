@@ -438,20 +438,17 @@ sub process_file {
 
  PARAGRAPH:
   while ($self->fetch_para()) {
+
     # Process and emit any initial C-preprocessor lines and blank
     # lines.  Also, keep track of #if/#else/#endif nesting, updating:
     #    $self->{XS_parse_stack}
     #    $self->{XS_parse_stack_top_if_idx}
     #    $self->{bootcode_early}
     #    $self->{bootcode_later}
-
     while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
-      my $ln = shift(@{ $self->{line} });
-      print $ln, "\n";
-      next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
-      my $statement = $+;
-      # update global tracking of #if/#else etc
-      $self->analyze_preprocessor_statement($statement);
+      my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
+      $node->parse($self);
+      $node->as_code($self);
     }
 
     next PARAGRAPH unless @{ $self->{line} };

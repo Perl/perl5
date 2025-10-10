@@ -687,6 +687,45 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::global_cpp_line;
+
+# AST node representing a single C-preprocessor line in file (global)
+# scope. (A "single" line can actually include embedded "\\\n"'s from line
+# continuations).
+
+BEGIN { $build_subclass->(
+    'cpp_line',  # the text of the "#  foo" CPP line
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my $ln = $self->{cpp_line} = shift(@{$pxs->{line}});
+
+    # Update global tracking of *conditional* CPP directives;s
+    # i.e. #if/#else etc
+
+    return 1 unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
+    my $directive = $+; # one of "if", "elsif", "else", "endif"
+    $pxs->analyze_preprocessor_statement($directive);
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    print $self->{cpp_line}, "\n";
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::xsub;
 
 # Process an entire XSUB definition
