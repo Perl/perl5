@@ -7,7 +7,7 @@ BEGIN {
     require Config;
 }
 
-plan 19;
+plan 31;
 
 # compile time evaluation
 
@@ -86,3 +86,39 @@ SKIP:
 
 is(1+"0x10", 1, "check string '0x' prefix not treated as hex");
 is(1+"0b10", 1, "check string '0b' prefix not treated as binary");
+
+# Test the !SvOK(TARG) special paths in pp_*inc (and absence of them in pp_*dec)
+{
+    no warnings 'uninitialized';
+    my ($x, $y);
+
+    no integer;
+    $x = undef; ++$x;
+    is $x, 1, 'PREINC coerces undef to zero';
+
+    $x = undef; --$x;
+    is $x, -1, 'PREDEC coerces undef to zero';
+
+    $x = undef; $y = $x++;
+    is $x, 1, 'POSTINC coerces undef to zero when incrementing';
+    is $y, 0, 'POSTINC pushes pushes zero not undef onto the stack';
+
+    $x = undef; $y = $x--;
+    is $x, -1, 'POSTDEC coerces undef to zero when decrementing';
+    ok !defined($y), 'POSTDEC pushes undef prior to coercing it to zero';
+
+    use integer;
+    $x = undef; ++$x;
+    is $x, 1, 'PREINC coerces undef to zero';
+
+    $x = undef; --$x;
+    is $x, -1, 'PREDEC coerces undef to zero';
+
+    $x = undef; $y = $x++;
+    is $x, 1, 'POSTINC coerces undef to zero when incrementing';
+    is $y, 0, 'POSTINC pushes pushes zero not undef onto the stack';
+
+    $x = undef; $y = $x--;
+    is $x, -1, 'POSTDEC coerces undef to zero when decrementing';
+    ok !defined($y), 'POSTDEC pushes undef prior to coercing it to zero';
+}

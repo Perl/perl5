@@ -443,4 +443,67 @@ EOC
     } # SKIP
 }
 
+{
+    # Dedicated postinc, preinc, postdec, predec OPs were late additions.
+
+    no integer;
+    # Set up some NVs
+    my ($w, $x, $y, $z) = (3.3, 3.3, 3.3, 3.3);
+    # Set largest supported positive/negative IVs
+    my $max = ~0 >> 1;
+    my $min = -(~0 >> 1)-1;
+    # Set up some UVs. (7 is an arbitrary choice.)
+    my ($r, $s, $t, $u) = ($max + 7, $max + 7, $max + 7, $max + 7);
+    # Have to use "0 + " to ensure the postinc/dec OPs are generated.
+    # Silence the associated warnings.
+    no warnings qw(void);
+
+    use integer;
+    0 + $w++;
+    cmp_ok($w, '==', 4, "NV i_postinc");
+    ++$x;
+    cmp_ok($x, '==', 4, "NV i_preinc");
+    0 + $y--;
+    cmp_ok($y, '==', 2, "NV i_postdec");
+    --$z;
+    cmp_ok($z, '==', 2, "NV i_predec");
+
+    no integer;
+    $w = $x = $max;
+    $y = $z = $min;
+
+    use integer;
+    0 + $w++;
+    cmp_ok($w, '==', $min, "IV_MAX i_postinc");
+    ++$x;
+    cmp_ok($x, '==', $min, "IV_MAX i_preinc");
+    0 + $y--;
+    cmp_ok($y, '==', $max, "IV_MIN i_postdec");
+    --$z;
+    cmp_ok($z, '==', $max, "IV_MIN i_predec");
+
+    0 + $r++;
+    cmp_ok($r, '==', $min + 7, "UV over IV_MAX, i_postinc");
+    ++$s;
+    cmp_ok($s, '==', $min + 7, "UV over IV_MAX, i_preinc");
+    0 + $t--;
+    cmp_ok($t, '==', $min + 5, "UV over IV_MAX, i_postdec");
+    --$u;
+    cmp_ok($u, '==', $min + 5, "UV over IV_MAX, i_predec");
+
+    my $n1 = my $n2 = my $n3 = my $n4 = "1.1";
+
+    my $r1 = ++$n1; my $r2 = $n2++;
+    is $n1, 2, 'PREINC coerces PV -> NV, then NV -> IV';
+    is $r1, 2, 'PREINC returns the resulting IV';
+    is $n2, 2, 'POSTINC coerces PV -> NV, then NV -> IV';
+    is $r2, 1.1, 'POSTINC returns the coerced NV';
+
+    my $r3 = --$n3; my $r4 = $n4--;
+    is $n3, 0, 'PREDEC coerces PV -> NV, then NV -> IV';
+    is $r3, 0, 'PREDEC returns the resulting IV';
+    is $n4, 0, 'POSTDEC coerces PV -> NV, then NV -> IV';
+    is $r4, 1.1, 'POSTDEC returns the coerced NV';
+}
+
 done_testing();
