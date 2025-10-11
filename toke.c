@@ -5265,7 +5265,6 @@ yyl_sigvar(pTHX_ char *s)
             PL_tokenbuf[0] = sigil;
             s = parse_ident(s, PL_bufend, &dest, C_ARRAY_END(PL_tokenbuf),
                             cBOOL(UTF), 0);
-            *dest = '\0';
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
         else {
@@ -10309,8 +10308,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      *
      * The function copies the identifier into the destination starting at *d
      * (whose upper bound is 'e') and advances *d to point to just beyond the
-     * end of the identifier.  The reason it needs to copy is that it may
-     * convert apostrophe package separators into double colons.
+     * end of the identifier, setting **d to a NUL character.  The reason it
+     * needs to copy is that it may convert apostrophe package separators into
+     * double colons.
      *
      * Upon success, it returns the position in s just beyond where the
      * identifier ends in the input.  If no identifier was found, the return
@@ -10392,6 +10392,8 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             break;
     }
 
+    **d = '\0';
+
     /* Cast away const, because many of our callers don't have it; this
      * function declares it as const so as to indicate that it doesn't change
      * it, and it can be called using a const parameter */
@@ -10409,7 +10411,6 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
 
     s = parse_ident(s, PL_bufend, &d, e, is_utf8,
                     (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
-    *d = '\0';
     *slp = d - dest;
     return s;
 }
@@ -10447,11 +10448,11 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
         }
         if (is_zero && d - digit_start > 1)
             croak(ident_var_zero_multi_digit);
+        *d = '\0';
     }
     else {  /* See if it is a "normal" identifier */
         s = parse_ident(s, PL_bufend, &d, e, is_utf8, ALLOW_PACKAGE);
     }
-    *d = '\0';
     d = dest;
 
     if (*d) {
@@ -10572,7 +10573,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
                 d += advance;
                 s = parse_ident(s, PL_bufend, &d, e, is_utf8,
                                 (ALLOW_PACKAGE | CHECK_DOLLAR));
-                *d = '\0';
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
                 d++;
