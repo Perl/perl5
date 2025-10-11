@@ -4701,6 +4701,24 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+=for apidoc new_block_statement
+
+Returns a C<OP *> representing block as statement.
+Block is a loop that happens once.
+
+Available since: v5.44
+
+=cut
+*/
+
+OP*
+Perl_new_block_statement (pTHX_ OP *block, OP *cont)
+{
+    PERL_ARGS_ASSERT_NEW_BLOCK_STATEMENT;
+
+    return newWHILEOP (0, 1, NULL, NULL, block, cont, 0);
+}
+/*
 =for apidoc_section $scope
 
 =for apidoc blockhook_register
