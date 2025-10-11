@@ -6174,6 +6174,11 @@ S	|char * |parse_ident	|SPTR const char *s			\
 				|EPTR char * const e			\
 				|bool is_utf8				\
 				|U32 flags
+S	|char * |parse_ident_no_copy					\
+				|SPTR const char *s			\
+				|EPTR const char * const s_end		\
+				|bool is_utf8				\
+				|U32 flags
 S	|int	|pending_ident
 RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s
