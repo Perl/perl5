@@ -10284,7 +10284,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     return SvREFCNT_inc_simple_NN(sv);
 }
 
-PERL_STATIC_INLINE void
+STATIC void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
                     bool is_utf8, bool check_dollar)
 {
