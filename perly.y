@@ -281,9 +281,7 @@ bare_statement_class_declaration
 		subattrlist
 		PERLY_SEMICOLON
 		{
-			package($package);
-			if ($version)
-				package_version($version);
+			package ($package, $version);
 			$$ = NULL;
 			class_setup_stash(PL_curstash);
 			if ($subattrlist) {
@@ -300,11 +298,7 @@ bare_statement_class_definition
 		PERLY_BRACE_OPEN
 		remember
 		{
-			package($package);
-
-			if ($version) {
-				package_version($version);
-			}
+			package ($package, $version);
 			class_setup_stash(PL_curstash);
 			if ($subattrlist) {
 				class_apply_attributes(PL_curstash, $subattrlist);
@@ -553,9 +547,7 @@ bare_statement_package_declaration
 		 * When the parser pops them back out again they appear swapped
 		 */
 		{
-			package($package);
-			if ($version)
-				package_version($version);
+			package ($package, $version);
 			$$ = NULL;
 		}
 	;
@@ -567,10 +559,7 @@ bare_statement_package_definition
 		PERLY_BRACE_OPEN
 		remember
 		{
-			package($package);
-			if ($version) {
-				package_version($version);
-			}
+			package ($package, $version);
 		}
 		stmtseq
 		PERLY_BRACE_CLOSE
