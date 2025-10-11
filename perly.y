@@ -269,8 +269,7 @@ bare_statement_block
 	:	block
 		cont
 		{
-			/* a block is a loop that happens once */
-			$$ = newWHILEOP(0, 1, NULL, NULL, $block, $cont, 0);
+			$$ = new_block_statement ($block, $cont);
 		}
 	;
 
@@ -307,8 +306,7 @@ bare_statement_class_definition
 		stmtseq
 		PERLY_BRACE_CLOSE
 		{
-			/* a block is a loop that happens once */
-			$$ = newWHILEOP(0, 1, NULL, NULL, block_end($remember, $stmtseq), NULL, 0);
+			$$ = new_block_statement (block_end ($remember, $stmtseq), NULL);
 			if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 				parser->copline = (line_t)$PERLY_BRACE_OPEN;
 		}
@@ -564,8 +562,7 @@ bare_statement_package_definition
 		stmtseq
 		PERLY_BRACE_CLOSE
 		{
-			/* a block is a loop that happens once */
-			$$ = newWHILEOP(0, 1, NULL, NULL, block_end($remember, $stmtseq), NULL, 0);
+            $$ = new_block_statement (block_end ($remember, $stmtseq), NULL);
 			if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 				parser->copline = (line_t)$PERLY_BRACE_OPEN;
 		}

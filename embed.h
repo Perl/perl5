@@ -1109,6 +1109,7 @@
 #   define newSVavdefelem(a,b,c)                Perl_newSVavdefelem(aTHX_ a,b,c)
 #   define newXS_deffile(a,b)                   Perl_newXS_deffile(aTHX_ a,b)
 #   define newXS_len_flags(a,b,c,d,e,f,g)       Perl_newXS_len_flags(aTHX_ a,b,c,d,e,f,g)
+#   define new_block_statement(a,b)             Perl_new_block_statement(aTHX_ a,b)
 #   define nextargv(a,b)                        Perl_nextargv(aTHX_ a,b)
 #   define no_bareword_filehandle(a)            Perl_no_bareword_filehandle(aTHX_ a)
 #   define noperl_die                           Perl_noperl_die

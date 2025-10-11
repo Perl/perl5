@@ -2292,6 +2292,9 @@ ARdp	|OP *	|newBINOP	|I32 type				\
 				|I32 flags				\
 				|NULLOK OP *first			\
 				|NULLOK OP *last
+dp	|OP *	|new_block_statement					\
+				|NN OP *block				\
+				|NULLOK OP *cont
 ARdp	|OP *	|newCONDOP	|I32 flags				\
 				|NN OP *first				\
 				|NULLOK OP *trueop			\

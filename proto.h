@@ -3177,6 +3177,12 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len, XSUBADDR_t subaddr, con
 #define PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS        \
         assert(subaddr)
 
+PERL_CALLCONV OP *
+Perl_new_block_statement(pTHX_ OP *block, OP *cont)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_NEW_BLOCK_STATEMENT    \
+        assert(block)
+
 PERL_CALLCONV PERL_SI *
 Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
         __attribute__warn_unused_result__;
