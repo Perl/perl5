@@ -9500,7 +9500,7 @@ S_scan_heredoc(pTHX_ char *s)
         assert(s)
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary);
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags);
 # define PERL_ARGS_ASSERT_SCAN_IDENT            \
         assert(s); assert(dest); assert(dest_end); assert(dest < dest_end)
 
