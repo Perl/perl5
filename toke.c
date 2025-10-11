@@ -10372,24 +10372,16 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             } while (isWORDCHAR_A(*s));
         }
         else if (   allow_package
-                 && *s == '\''
-                 && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
-                 && isIDFIRST_lazy_if_safe(s + 1, s_end, is_utf8))
-        {   /* Convert the apostrophe to "::" */
-            if (*d >= e - 2) {
-                goto too_long;
-            }
-
-            *(*d)++ = ':';
-            *(*d)++ = ':';
-            s++;
-        }
-        else if (allow_package && *s == ':' && s[1] == ':'
-           /* Disallow things like Foo::$bar. For the curious, this is
-            * the code path that triggers the "Bad name after" warning
-            * when looking for barewords.
-            */
-           && !(check_dollar && s[2] == '$'))
+                 && (   (   *s == '\''
+                         && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
+                         && isIDFIRST_lazy_if_safe(s+1, s_end, is_utf8))
+                            /* Below we convert the apostrophe to "::" */
+                     || (   *s == ':' && s[1] == ':'
+                            /* Disallow things like Foo::$bar. For the
+                             * curious, this is the code path that triggers
+                             * the "Bad name after" warning when looking for
+                             * barewords. */
+                          && !(check_dollar && s[2] == '$'))))
         {
             if (*d >= e - 2) {
                 goto too_long;
@@ -10397,7 +10389,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
 
             *(*d)++ = ':';
             *(*d)++ = ':';
-            s += 2;
+            s += (*s == ':') ? 2 : 1;
         }
         else    /* None of the above means have come to the end of any
                    identifier*/
