@@ -2556,9 +2556,8 @@ px	|OP *	|op_unscope	|NULLOK OP *o
 ARdpx	|OP *	|op_wrap_finally|NN OP *block				\
 				|NN OP *finally
 : Used in perly.y
-p	|void	|package	|NN OP *o
-: Used in perly.y
-p	|void	|package_version|NN OP *v
+dp	|void	|package	|NN OP *name				\
+				|NULLOK OP *version
 Adp	|void	|packlist	|NN SV *cat				\
 				|NN const char *pat			\
 				|NN const char *patend			\

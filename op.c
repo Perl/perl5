@@ -6100,7 +6100,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
                                ? 2  /* Otherwise, minimum of 2 hex digits */\
                                : NUM_HEX_CHARS(num)))))))
 
-/* To make evident, Configure with `-DDEBUGGING`, build, run 
+/* To make evident, Configure with `-DDEBUGGING`, build, run
  *  `./perl -Ilib -Dy t/op/tr.t`
  */
 void
@@ -8223,12 +8223,10 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
     return CHECKOP(type, pvop);
 }
 
-void
-Perl_package(pTHX_ OP *o)
+STATIC void
+S_set_package_name(pTHX_ OP *o)
 {
     SV *const sv = cSVOPo->op_sv;
-
-    PERL_ARGS_ASSERT_PACKAGE;
 
     SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
@@ -8243,15 +8241,35 @@ Perl_package(pTHX_ OP *o)
     op_free(o);
 }
 
-void
-Perl_package_version( pTHX_ OP *v )
+STATIC void
+S_set_package_version( pTHX_ OP *v )
 {
     U32 savehints = PL_hints;
-    PERL_ARGS_ASSERT_PACKAGE_VERSION;
+
     PL_hints &= ~HINT_STRICT_VARS;
     sv_setsv( GvSV(gv_fetchpvs("VERSION", GV_ADDMULTI, SVt_PV)), cSVOPx(v)->op_sv );
     PL_hints = savehints;
     op_free(v);
+}
+
+/*
+=for apidoc package
+
+Function sets current stash name and if $version is not NULL, sets it as C<$VERSION>.
+
+It combines former C<package> and C<package_version> into single call.
+
+=cut
+*/
+
+void
+Perl_package (pTHX_ OP *name, OP *version)
+{
+    PERL_ARGS_ASSERT_PACKAGE;
+
+    S_set_package_name (aTHX_ name);
+    if (version)
+        S_set_package_version (aTHX_ version);
 }
 
 /* Extract the first two components of a "version" object as two 8bit integers
@@ -16846,7 +16864,7 @@ Perl_subsignature_append_positional(pTHX_ PADOFFSET padix, OPCODE defmode, OP *d
     signature->next_argix++;
 
     if(!padix && !defexpr)
-        /* This param has no var and no defaulting expression. There's 
+        /* This param has no var and no defaulting expression. There's
          * nothing else for us to do here.
          */
         return;

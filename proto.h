@@ -3343,16 +3343,10 @@ Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
         assert(ctx); assert(pat)
 
 PERL_CALLCONV void
-Perl_package(pTHX_ OP *o)
+Perl_package(pTHX_ OP *name, OP *version)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PACKAGE                \
-        assert(o)
-
-PERL_CALLCONV void
-Perl_package_version(pTHX_ OP *v)
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_PACKAGE_VERSION        \
-        assert(v)
+        assert(name)
 
 PERL_CALLCONV void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist);
