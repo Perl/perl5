@@ -4698,8 +4698,13 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 {
     PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS;
 
+    const bool mark_args_utf8 =
+        (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale)
+        && (PL_unicode & PERL_UNICODE_ARGV_FLAG);
+
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
+        const I32 flags = GV_ADD | (mark_args_utf8 ? SVf_UTF8 : 0);
         for (; argc > 0 && **argv == '-'; argc--,argv++) {
             char *s;
             if (!argv[0][1])
@@ -4710,11 +4715,16 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
             }
             if ((s = strchr(argv[0], '='))) {
                 const char *const start_name = argv[0] + 1;
-                sv_setpv(GvSV(gv_fetchpvn_flags(start_name, s - start_name,
-                                                TRUE, SVt_PV)), s + 1);
+                SV *const sv = GvSV(gv_fetchpvn_flags(start_name, s - start_name,
+                                                      flags, SVt_PV));
+                sv_setpv(sv, s + 1);
+                if (mark_args_utf8)
+                    SvUTF8_on(sv);
+                else
+                    SvUTF8_off(sv);
             }
             else
-                sv_setiv(GvSV(gv_fetchpv(argv[0]+1, GV_ADD, SVt_PV)),1);
+                sv_setiv(GvSV(gv_fetchpv(argv[0]+1, flags, SVt_PV)), 1);
         }
     }
     if ((PL_argvgv = gv_fetchpvs("ARGV", GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
@@ -4724,12 +4734,10 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
         for (; argc > 0; argc--,argv++) {
             SV * const sv = newSVpv(argv[0],0);
             av_push(GvAV(PL_argvgv),sv);
-            if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
-                 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
-                      SvUTF8_on(sv);
-            }
+            if (mark_args_utf8)
+                SvUTF8_on(sv);
             if (PL_unicode & PERL_UNICODE_WIDESYSCALLS_FLAG) /* Sarathy? */
-                 (void)sv_utf8_decode(sv);
+                (void)sv_utf8_decode(sv);
         }
     }
 
