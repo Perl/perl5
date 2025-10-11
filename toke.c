@@ -173,6 +173,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define CHECK_DOLLAR                (1 << 2)
 #define IDFIRST_ONLY                (1 << 3)
 #define STOP_AT_FIRST_NON_DIGIT     (1 << 4)
+#define CHECK_ONLY                  (1 << 5)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -10327,7 +10328,13 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * identifier ends in the input.  If no identifier was found, the return
      * will be the the input 's' unchanged.
      *
-     * If the identifier is illegal, the function croaks.
+     * If the identifier is illegal, the function croaks unless this flag is
+     * passed in: */
+    const bool check_only = flags & CHECK_ONLY;
+
+    /* In this case NULL is returned instead of croaking, and the contents
+     * of '*d' are undefined.
+     *
      * The possible reasons for failure are:
      *  1) There is not enough room for the entire source identifier to be
      *     copied
@@ -10396,8 +10403,12 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             } while (isDIGIT_A(*s));
 
             /* Leading zeros are not permitted */
-            if (is_zero && *d - digit_start > 1)
+            if (is_zero && *d - digit_start > 1) {
+                if (check_only) {
+                    return NULL;
+                }
                 croak(ident_var_zero_multi_digit);
+            }
 
             break;
         }
@@ -10446,6 +10457,10 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
     return (char *) s;
 
   too_long:
+    if (check_only) {
+        return NULL;
+    }
+
     croak("%s", ident_too_long);
 }
 
