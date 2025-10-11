@@ -172,6 +172,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define ALLOW_PACKAGE               (1 << 1)
 #define CHECK_DOLLAR                (1 << 2)
 #define IDFIRST_ONLY                (1 << 3)
+#define STOP_AT_FIRST_NON_DIGIT     (1 << 4)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -10305,10 +10306,16 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * 1) A normal identifier whose first character matches IDFIRST followed
      *    by any number of characters which match IDCONT.
      * 2) An identifier that begins with an ASCII digit followed by any number
-     *    of ASCII \w characters.  This type can be prohibited, so that
-     *    anything that doesn't match type 1) is not considered an identifier.
-     */
+     *    of ASCII \w characters.  As a special case of this, it can
+     *    optionally stop parsing at the first non-digit, returning just the
+     *    initial digits.  */
+    const bool stop_at_first_non_digit = flags & STOP_AT_FIRST_NON_DIGIT;
+
+     /*    This type of identifier can be completely prohibited, so that
+      *    anything that doesn't match type 1) is not considered to be an
+      *    identifier. */
     const bool idfirst_only = flags & IDFIRST_ONLY;
+    assert((stop_at_first_non_digit && idfirst_only) == 0);
 
     /* The function copies the identifier into the destination starting at *d
      * (whose upper bound is 'e') and advances *d to point to just beyond the
@@ -10320,8 +10327,12 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * identifier ends in the input.  If no identifier was found, the return
      * will be the the input 's' unchanged.
      *
-     * The function croaks if there is not enough room for the entire source
-     * identifier to be copied.
+     * If the identifier is illegal, the function croaks.
+     * The possible reasons for failure are:
+     *  1) There is not enough room for the entire source identifier to be
+     *     copied
+     *  2) 'stop_at_first_non_digit' is in effect and the identifier name has
+     *     leading zeros
      *
      * When 'allow_package' is non-zero, the function parses a full package
      * variable path.  Each iteration of the loop below picks up one segment
@@ -10370,6 +10381,26 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             /* And copy the whole thing in one operation */
             Copy(this_start, *d, this_length, char);
             *d += this_length;
+        }
+        else if (stop_at_first_non_digit && isDIGIT_A(*s)) {
+            bool is_zero = *s == '0';
+            char *digit_start= *d;
+            *(*d)++ = *s++;
+
+            /* Stop at the first non-digit */
+            while (s < s_end && isDIGIT(*s)) {
+                if (*d >= e) {
+                    goto too_long;
+                }
+
+                *(*d)++ = *s++;
+            }
+
+            /* Leading zeros are not permitted */
+            if (is_zero && *d - digit_start > 1)
+                croak(ident_var_zero_multi_digit);
+
+            break;
         }
         else if (! idfirst_only && isWORDCHAR_A(*s) ) {
 
@@ -10456,26 +10487,14 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
 
     if (isSPACE(*s) || !*s)
         s = skipspace(s);
-    if (isDIGIT(*s)) { /* handle $0 and $1 $2 and $10 and etc */
-        bool is_zero = *s == '0';
-        char *digit_start= d;
-        *d++ = *s++;
-        while (s < PL_bufend && isDIGIT(*s)) {
-            if (d >= e)
-                croak("%s", ident_too_long);
-            *d++ = *s++;
-        }
-        if (is_zero && d - digit_start > 1)
-            croak(ident_var_zero_multi_digit);
-        *d = '\0';
-    }
-    else {  /* See if it is a "normal" identifier */
-        s = parse_ident(s, PL_bufend, &d, e, is_utf8, ALLOW_PACKAGE);
-    }
+
+    /* See if it is a "normal" identifier */
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                    (ALLOW_PACKAGE | STOP_AT_FIRST_NON_DIGIT));
     d = dest;
 
     if (*d) {
-        /* Either a digit variable, or parse_ident() found an identifier
+        /* Here parse_ident() found a digit variable or an identifier
            (anything valid as a bareword), so job done and return.  */
         if (PL_lex_state != LEX_NORMAL)
             PL_lex_state = LEX_INTERPENDMAYBE;
