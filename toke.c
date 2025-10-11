@@ -10395,8 +10395,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
                 goto too_long;
             }
 
-            *(*d)++ = *s++;
-            *(*d)++ = *s++;
+            *(*d)++ = ':';
+            *(*d)++ = ':';
+            s += 2;
         }
         else    /* None of the above means have come to the end of any
                    identifier*/
