@@ -10416,12 +10416,10 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
         s++;
     while (s < PL_bufend && isSPACE(*s))
         s++;
-    Size_t advance;
-    if ((advance = isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))) {
+
+    if ((isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))) {
         const char * const w = s;
-        s += advance;
-        while ((advance = isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF)))
-            s += advance;
+        s = parse_ident_no_copy(s, PL_bufend, cBOOL(UTF), IDFIRST_ONLY);
         while (s < PL_bufend && isSPACE(*s))
             s++;
         if (*s == ',') {
