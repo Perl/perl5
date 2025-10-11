@@ -1,8 +1,7 @@
-package charnames;
-use strict;
-use warnings;
-our $VERSION = '1.50';
-use unicore::Name;    # mktables-generated algorithmically-defined names
+package charnames 1.51;
+
+use v5.40;
+
 use _charnames ();    # The submodule for this where most of the work gets done
 
 use bytes ();          # for $bytes::hint_bits
@@ -15,32 +14,14 @@ use re "/aa";          # Everything in here should be ASCII
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
 
-sub import
-{
-  shift; ## ignore class name
-  _charnames->import(@_);
-}
+*import  = \&_charnames::import;
+*viacode = \&_charnames::viacode;
 
-# Cache of already looked-up values.  This is set to only contain
-# official values, and user aliases can't override them, so scoping is
-# not an issue.
-my %viacode;
-
-sub viacode {
-  return _charnames::viacode(@_);
-}
-
-sub vianame
-{
-  if (@_ != 1) {
-    _charnames::carp "charnames::vianame() expects one name argument";
-    return ()
-  }
+sub vianame ($arg) {
 
   # Looks up the character name and returns its ordinal if
   # found, undef otherwise.
 
-  my $arg = shift;
   return () unless length $arg;
 
   if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
@@ -61,17 +42,11 @@ sub vianame
   return _charnames::lookup_name($arg, 1, 1);
 } # vianame
 
-sub string_vianame {
+sub string_vianame ($arg) {
 
   # Looks up the character name and returns its string representation if
   # found, undef otherwise.
 
-  if (@_ != 1) {
-    _charnames::carp "charnames::string_vianame() expects one name argument";
-    return;
-  }
-
-  my $arg = shift;
   return () unless length $arg;
 
   if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
@@ -89,7 +64,6 @@ sub string_vianame {
   return _charnames::lookup_name($arg, 0, 1);
 } # string_vianame
 
-1;
 __END__
 
 =encoding utf8

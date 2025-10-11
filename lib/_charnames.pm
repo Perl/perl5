@@ -3,10 +3,10 @@
 # subject to change or removal at any time without notice.  Don't use it
 # directly.  Use the public <charnames> module instead.
 
-package _charnames;
-use strict;
-use warnings;
-our $VERSION = '1.50';
+package _charnames 1.51;
+
+use v5.40;
+
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -130,35 +130,25 @@ my $decimal_qr = qr/^[1-9]\d*$/;
 # Returns the hex number in $1.
 my $hex_qr = qr/^(?:[Uu]\+|0[xX])?([[:xdigit:]]+)$/;
 
-sub croak
-{
-  require Carp; goto &Carp::croak;
-} # croak
+sub croak { require Carp; goto &Carp::croak }
+sub carp  { require Carp; goto &Carp::carp  }
 
-sub carp
-{
-  require Carp; goto &Carp::carp;
-} # carp
-
-sub populate_txt()
-{
+my sub populate_txt {
   return if $txt;
 
   $txt = do "unicore/Name.pl";
   Internals::SvREADONLY($txt, 1);
 }
 
-sub alias (@) # Set up a single alias
-{
+my sub alias (%aliases) { # Set up aliases
   my @errors;
   my $nbsp = chr utf8::unicode_to_native(0xA0);
 
-  my $alias = ref $_[0] ? $_[0] : { @_ };
-  foreach my $name (sort keys %$alias) {  # Sort only because it helps having
-                                          # deterministic output for
-                                          # t/lib/charnames/alias
-    my $value = $alias->{$name};
-    next unless defined $value;          # Omit if screwed up.
+  foreach my $name (sort keys %aliases) {  # Sort only because it helps having
+                                           # deterministic output for
+                                           # t/lib/charnames/alias
+
+    my $value = $aliases{$name} // next;   # Omit if screwed up.
 
     # Is slightly slower to just after this statement see if it is
     # decimal, since we already know it is after having converted from
@@ -223,8 +213,7 @@ sub alias (@) # Set up a single alias
   return;
 } # alias
 
-sub not_legal_use_bytes_msg {
-  my ($name, $utf8) = @_;
+sub not_legal_use_bytes_msg ($name, $utf8) {
   my $return;
 
   if (length($utf8) == 1) {
@@ -235,10 +224,9 @@ sub not_legal_use_bytes_msg {
   return $return . " above 0xFF with 'use bytes' in effect";
 }
 
-sub alias_file ($)  # Reads a file containing alias definitions
-{
+my sub alias_file ($arg) { # Reads a file containing alias definitions
   require File::Spec;
-  my ($arg, $file) = @_;
+  my $file;
   if (-f $arg && File::Spec->file_name_is_absolute ($arg)) {
     $file = $arg;
   }
@@ -271,9 +259,7 @@ my %dummy_H = (
               );
 
 
-sub lookup_name ($$$;$) {
-  my ($name, $wants_ord, $runtime, $regex_loose) = @_;
-  $regex_loose //= 0;
+sub lookup_name ($name, $wants_ord, $runtime, $regex_loose //= 0) {
 
   # Lookup the name or sequence $name in the tables.  If $wants_ord is false,
   # returns the string equivalent of $name; if true, returns the ordinal value
@@ -502,7 +488,7 @@ sub lookup_name ($$$;$) {
 
               # Use original name to find its input casing, but ignore the
               # script part of that to make the determination.
-              $save_input = $name if ! defined $save_input;
+              $save_input //= $name;
               $name =~ s/.*?://;
               $name_has_uppercase = $name =~ /[[:upper:]]/;
           }
@@ -616,8 +602,8 @@ sub lookup_name ($$$;$) {
   if (@off) {
     $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
   }
-  else {
-    $name = (defined $save_input) ? $save_input : $_[0];
+  elsif (defined $save_input) {
+    $name = $save_input;
   }
 
   if ($wants_ord) {
@@ -638,21 +624,21 @@ sub lookup_name ($$$;$) {
 
 } # lookup_name
 
-sub charnames {
+sub charnames ($arg) {
 
   # For \N{...}.  Looks up the character name and returns the string
   # representation of it.
 
   # The first 0 arg means wants a string returned; the second that we are in
   # compile time
-  return lookup_name($_[0], 0, 0);
+  return lookup_name($arg, 0, 0);
 }
 
-sub _loose_regcomp_lookup {
+sub _loose_regcomp_lookup ($arg) {
   # For use only by regcomp.c to compile \p{name=...}
   # khw thinks it best to not do :short matching, and only official names.
   # But that is only a guess, and if demand warrants, could be changed
-  return lookup_name($_[0], 0, 1,
+  return lookup_name($arg, 0, 1,
                      1  # Always use :loose matching
                     );
 }
@@ -665,13 +651,10 @@ sub _get_names_info {
   return ( \$txt, \@charnames::code_points_ending_in_code_point );
 }
 
-sub import
-{
-  shift; ## ignore class name
-
+sub import ($, @import) {
   populate_txt() unless $txt;
 
-  if (not @_) {
+  if (not @import) {
     carp("'use charnames' needs explicit imports list");
   }
   $^H{charnames} = \&charnames ;
@@ -682,18 +665,18 @@ sub import
   # that copies fields from the runtime structure
 
   ##
-  ## fill %h keys with our @_ args.
+  ## fill %h keys with our @import args.
   ##
   my ($promote, %h, @args) = (0);
-  while (my $arg = shift) {
+  while (my $arg = shift @import) {
     if ($arg eq ":alias") {
-      @_ or
+      @import or
         croak ":alias needs an argument in charnames";
-      my $alias = shift;
+      my $alias = shift @import;
       if (ref $alias) {
         ref $alias eq "HASH" or
           croak "Only HASH reference supported as argument to :alias";
-        alias ($alias);
+        alias (%$alias);
         $promote = 1;
         next;
       }
@@ -750,9 +733,9 @@ sub import
   # input underscores, blanks, and dashes.  Then convert so will match a blank
   # between any characters.
   if ($^H{charnames_loose}) {
-    for (my $i = 0; $i < @scripts; $i++) {
-      $scripts[$i] =~ s/[_ -]//g;
-      $scripts[$i] =~ s/ ( [^\\] ) (?= . ) /$1\\ ?/gx;
+    for (@scripts) {
+      s/[_ -]//g;
+      s/ ( [^\\] ) (?= . ) /$1\\ ?/gx;
     }
   }
 
@@ -786,16 +769,9 @@ my $no_name_code_points_re = join "|", map { sprintf("%05X",
                                             0x80, 0x81, 0x84, 0x99;
 $no_name_code_points_re = qr/$no_name_code_points_re/;
 
-sub viacode {
+sub viacode ($arg) {
 
   # Returns the name of the code point argument
-
-  if (@_ != 1) {
-    carp "charnames::viacode() expects one argument";
-    return;
-  }
-
-  my $arg = shift;
 
   # This is derived from Unicode::UCD, where it is nearly the same as the
   # function _getcode(), but here it makes sure that even a hex argument
@@ -855,7 +831,7 @@ sub viacode {
 
   # See if there is a user name for it, before giving up completely.
   # First get the scoped aliases, give up if have none.
-  my $H_ref = (caller(1))[10];
+  my $H_ref = (caller 0)[10];
   return if ! defined $return
               && (! defined $H_ref
                   || ! exists $H_ref->{charnames_stringified_inverse_ords});
@@ -878,7 +854,5 @@ sub viacode {
   return;
 
 } # viacode
-
-1;
 
 # ex: set ts=8 sts=2 sw=2 et:
