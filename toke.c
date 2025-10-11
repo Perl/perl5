@@ -10338,26 +10338,31 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
          * for the subset before checking for the superset. */
         Size_t advance;
         if (is_utf8 && (advance = isIDFIRST_utf8_safe(s, s_end))) {
+            const char *this_start = s;
+            s += advance;
 
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
-            const char *t = s + advance;
-            while ((advance = isIDCONT_utf8_safe((const U8*) t,
-                                                 (const U8*) s_end)))
-            {
-                t += advance;
+            while (s < s_end) {
+                    advance = isIDCONT_utf8_safe((const U8*) s,
+                                                    (const U8*) s_end);
+                    if (advance == 0) { /* Not an identifier character */
+                        break;
+                    }
+
+                s += advance;
             }
 
             /* Here we have found the end of the identifier */
-            Size_t this_length = t - s;
+            Size_t this_length = s - this_start;
+
             if (*d + this_length >= e) {
                 goto too_long;
             }
 
             /* And copy the whole thing in one operation */
-            Copy(s, *d, this_length, char);
+            Copy(this_start, *d, this_length, char);
             *d += this_length;
-            s = t;
         }
         else if ( isWORDCHAR_A(*s) ) {
 
