@@ -11987,14 +11987,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     if (*d == '$' && d[1]) d++;
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
-    Size_t advance;
-    while (   (advance = isWORDCHAR_lazy_if_safe(d, e, UTF))
-           || (advance = (   *d == ':'
-                          || (   *d == '\''
-                              && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED))))
-    {
-        d += advance;
-    }
+    d = parse_ident_no_copy(d, e, cBOOL(UTF), ALLOW_PACKAGE);
 
     /* If we've tried to read what we allow filehandles to look like, and
        there's still text left, then it must be a glob() and not a getline.
