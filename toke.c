@@ -10815,17 +10815,11 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
 
     /* special case to handle ${10}, ${11} the same way we handle $1 etc */
     if (isDIGIT(*d)) {
-        bool is_zero = *d == '0';
-        char *digit_start= d;
-        while (s < PL_bufend && isDIGIT(*s)) {
-            d++;
-            if (d >= e)
-                croak("%s", ident_too_long);
-            *d= *s++;
-        }
-        if (is_zero && d - digit_start >= 1) /* d points at the last digit */
-            croak(ident_var_zero_multi_digit);
-        d[1] = '\0';
+        s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
+                        STOP_AT_FIRST_NON_DIGIT);
+
+        /* The code below is expecting d to point to the final digit */
+        d--;
     }
 
     /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
