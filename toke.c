@@ -10331,8 +10331,6 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
     const bool check_dollar = flags & CHECK_DOLLAR;
 
     while (s < s_end) {
-        if (*d >= e)
-            croak("%s", ident_too_long);
 
         /* For non-UTF8, variables that match ASCII \w are a superset of
          * variables that start with IDFIRST, so we have to look at the
@@ -10352,8 +10350,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
 
             /* Here we have found the end of the identifier */
             Size_t this_length = t - s;
-            if (*d + this_length > e)
-                croak("%s", ident_too_long);
+            if (*d + this_length >= e) {
+                goto too_long;
+            }
 
             /* And copy the whole thing in one operation */
             Copy(s, *d, this_length, char);
@@ -10366,13 +10365,21 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
              * digit */
             do {
                 *(*d)++ = *s++;
-            } while (isWORDCHAR_A(*s) && *d < e);
+
+                if (*d >= e) {
+                    goto too_long;
+                }
+            } while (isWORDCHAR_A(*s));
         }
         else if (   allow_package
                  && *s == '\''
                  && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
                  && isIDFIRST_lazy_if_safe(s + 1, s_end, is_utf8))
         {   /* Convert the apostrophe to "::" */
+            if (*d >= e - 2) {
+                goto too_long;
+            }
+
             *(*d)++ = ':';
             *(*d)++ = ':';
             s++;
@@ -10384,6 +10391,10 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             */
            && !(check_dollar && s[2] == '$'))
         {
+            if (*d >= e - 2) {
+                goto too_long;
+            }
+
             *(*d)++ = *s++;
             *(*d)++ = *s++;
         }
@@ -10398,6 +10409,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * function declares it as const so as to indicate that it doesn't change
      * it, and it can be called using a const parameter */
     return (char *) s;
+
+  too_long:
+    croak("%s", ident_too_long);
 }
 
 char *
