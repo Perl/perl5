@@ -180,6 +180,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define IDFIRST_ONLY                (1 << 3)
 #define STOP_AT_FIRST_NON_DIGIT     (1 << 4)
 #define CHECK_ONLY                  (1 << 5)
+#define CHECK_UNARY                 (1 << 6)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -4746,7 +4747,7 @@ S_intuit_more(pTHX_ char *s, char *e,
                  *
                  * khw: If what follows can't be an identifier, say it is too
                  * long or is $001, then it must be a charclass */
-                scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), FALSE);
+                scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), 0);
                 len = strlen(tmpbuf);
 
                 /* khw: This only looks at global variables; lexicals came
@@ -5606,8 +5607,7 @@ yyl_dollar(pTHX_ char *s)
             || memCHRs("{$:+-@", s[2])))
     {
         PL_tokenbuf[0] = '@';
-        s = scan_ident(s + 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf),
-                       FALSE);
+        s = scan_ident(s + 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), 0);
         S_warn_expect_operator(aTHX_ "Array length", s, POP_OLDBUFPTR);
         if (!PL_tokenbuf[1])
             PREREF(DOLSHARP);
@@ -5617,7 +5617,7 @@ yyl_dollar(pTHX_ char *s)
     }
 
     PL_tokenbuf[0] = '$';
-    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), 0);
     S_warn_expect_operator(aTHX_ "Scalar", s, POP_OLDBUFPTR);
     if (!PL_tokenbuf[1]) {
         if (s == PL_bufend)
@@ -6282,7 +6282,7 @@ yyl_star(pTHX_ char *s)
         POSTDEREF(PERLY_STAR);
 
     if (PL_expect != XOPERATOR) {
-        s = scan_ident(s, PL_tokenbuf, C_ARRAY_END(PL_tokenbuf), TRUE);
+        s = scan_ident(s, PL_tokenbuf, C_ARRAY_END(PL_tokenbuf), CHECK_UNARY);
         PL_expect = XOPERATOR;
         force_ident(PL_tokenbuf, PERLY_STAR);
         if (!*PL_tokenbuf)
@@ -6330,7 +6330,7 @@ yyl_percent(pTHX_ char *s)
         POSTDEREF(PERLY_PERCENT_SIGN);
 
     PL_tokenbuf[0] = '%';
-    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), 0);
     pl_yylval.ival = 0;
     if (!PL_tokenbuf[1]) {
         PREREF(PERLY_PERCENT_SIGN);
@@ -6867,7 +6867,8 @@ yyl_ampersand(pTHX_ char *s)
     }
 
     PL_tokenbuf[0] = '&';
-    s = scan_ident(s - 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), TRUE);
+    s = scan_ident(s - 1, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf),
+                   CHECK_UNARY);
     pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 
     if (PL_tokenbuf[1])
@@ -6952,7 +6953,7 @@ yyl_snail(pTHX_ char *s)
     if (PL_expect == XPOSTDEREF)
         POSTDEREF(PERLY_SNAIL);
     PL_tokenbuf[0] = '@';
-    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), FALSE);
+    s = scan_ident(s, PL_tokenbuf + 1, C_ARRAY_END(PL_tokenbuf), 0);
     S_warn_expect_operator(aTHX_ "Array", s, POP_OLDBUFPTR);
     pl_yylval.ival = 0;
     if (!PL_tokenbuf[1]) {
@@ -10757,7 +10758,7 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
  * specific variable name.
  */
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
+S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 {
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
@@ -10768,6 +10769,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
     char * const e = dest_end - 3;    /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
     line_t orig_copline = 0, tmp_copline = 0;
+    const bool chk_unary = (flags & CHECK_UNARY);
+
 
     if (isSPACE(*s) || !*s)
         s = skipspace(s);

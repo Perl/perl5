@@ -6194,7 +6194,7 @@ RS	|char * |scan_heredoc	|NN char *s
 S	|char * |scan_ident	|NN char *s				\
 				|SPTR char *dest			\
 				|EPTR char *dest_end			\
-				|bool chk_unary
+				|U32 flags
 RS	|char * |scan_inputsymbol					\
 				|NN char *start
 RS	|char * |scan_pat	|NN char *start 			\
