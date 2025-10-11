@@ -10712,6 +10712,22 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
     croak("%s", ident_too_long);
 }
 
+PERL_STATIC_INLINE char *
+S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end,
+                      bool is_utf8, U32 flags)
+{
+    PERL_ARGS_ASSERT_PARSE_IDENT_NO_COPY;
+
+    /* This just wraps parse_ident for functions that call it and don't need
+     * the actual identifier string returned.  For example, they might just
+     * want to test if the input is valid. */
+
+    char scratch[ PERL_IDENTIFIER_LENGTH ];
+    char * dest = scratch;
+
+    return parse_ident(s, s_end, &dest, C_ARRAY_END(scratch), is_utf8, flags);
+}
+
 char *
 Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
