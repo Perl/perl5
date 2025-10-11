@@ -366,6 +366,25 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+The C<-CA> flag (or equivalently, the C<PERL_UNICODE=A> environment setting)
+tells perl to treat command-line arguments as UTF-8 strings. (See L<perlrun>
+for details.) However, this did not extend to the global variables implicitly
+created by the C<-s> option:
+
+ $ perl -CA -s -e 'printf "%vx\n", $_ for $foo, $ARGV[0]' -- -foo=é é
+ c3.a9
+ e9
+
+Here C<$foo> would end up containing the two-byte UTF-8 representation of
+"LATIN SMALL LETTER E WITH ACUTE", but C<$ARGV[0]> would contain a single
+codepoint corresponding to U+00E9.
+
+This has been fixed: If C<-CA> is in effect, options parsed by C<-s> are
+treated as UTF-8, too. In the example above, C<$foo> and C<$ARGV[0]> now both
+contain C<chr(0xE9)>. [GH #23377]
+
+=item *
+
 We have long claimed to support identifiers up to about 255 characters
 long.  However this was actually true only for identifiers that
 consisted of only ASCII characters.  The real upper limit was as few as
