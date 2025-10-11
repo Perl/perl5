@@ -177,6 +177,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define CHECK_KEYWORD               (1 << 0)
 #define ALLOW_PACKAGE               (1 << 1)
 #define CHECK_DOLLAR                (1 << 2)
+#define IDFIRST_ONLY                (1 << 3)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -10552,9 +10553,12 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * 1) A normal identifier whose first character matches IDFIRST followed
      *    by any number of characters which match IDCONT.
      * 2) An identifier that begins with an ASCII digit followed by any number
-     *    of ASCII \w characters
-     *
-     * The function copies the identifier into the destination starting at *d
+     *    of ASCII \w characters.  This type can be prohibited, so that
+     *    anything that doesn't match type 1) is not considered an identifier.
+     */
+    const bool idfirst_only = flags & IDFIRST_ONLY;
+
+    /* The function copies the identifier into the destination starting at *d
      * (whose upper bound is 'e') and advances *d to point to just beyond the
      * end of the identifier, setting **d to a NUL character.  The reason it
      * needs to copy is that it may convert apostrophe package separators into
@@ -10585,15 +10589,18 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
          * Unicode definition only when UTF-8 is in effect.  We have to check
          * for the subset before checking for the superset. */
         Size_t advance;
-        if (is_utf8 && (advance = isIDFIRST_utf8_safe(s, s_end))) {
+        if (   (advance = isIDFIRST_lazy_if_safe(s, s_end, is_utf8))
+            && (is_utf8 || idfirst_only))
+        {
             const char *this_start = s;
             s += advance;
 
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
             while (s < s_end) {
-                    advance = isIDCONT_utf8_safe((const U8*) s,
-                                                    (const U8*) s_end);
+                    advance = isIDCONT_lazy_if_safe((const U8*) s,
+                                                    (const U8*) s_end,
+                                                    is_utf8);
                     if (advance == 0) { /* Not an identifier character */
                         break;
                     }
@@ -10612,7 +10619,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             Copy(this_start, *d, this_length, char);
             *d += this_length;
         }
-        else if ( isWORDCHAR_A(*s) ) {
+        else if (! idfirst_only && isWORDCHAR_A(*s) ) {
 
             /* This is the superset; it accepts \w+, including an initial
              * digit */
