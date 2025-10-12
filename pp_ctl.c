@@ -3753,7 +3753,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 
         sv_setpvn_fresh(tmpstr, s, t - s);
         /* not breakable until we compile a COP for it */
-        SvIV_set(tmpstr, 0);
+        assert(SvIVX(tmpstr) == 0);
         SvIOK_on(tmpstr);
         av_store(array, line++, tmpstr);
         s = t;

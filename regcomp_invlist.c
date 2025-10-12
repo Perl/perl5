@@ -357,8 +357,8 @@ Perl_new_invlist_C_array_(pTHX_ const UV* const list)
      * of the list proper, so start it just after them */
     SvPV_set(invlist, (char *) (list + HEADER_LENGTH));
 
-    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
-                               shouldn't touch it */
+    assert(SvLEN(invlist) == 0);  /* Means we own the contents, and the system
+                                     shouldn't touch it */
 
     *(get_invlist_offset_addr(invlist)) = offset;
 
