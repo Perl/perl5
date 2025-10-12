@@ -1500,12 +1500,13 @@ Perl_sv_grow_fresh(pTHX_ SV *const sv, STRLEN newlen)
     if (newlen < PERL_STRLEN_NEW_MIN)
         newlen = PERL_STRLEN_NEW_MIN;
 
-    s = (char*)safemalloc(newlen);
-    SvPV_set(sv, s);
-
     /* No PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC here, since many strings */
     /* will never be grown once set. Let the real sv_grow worry about that. */
     SvLEN_set(sv, newlen);
+
+    s = (char*)safemalloc(newlen);
+    SvPV_set(sv, s);
+
     return s;
 }
 
