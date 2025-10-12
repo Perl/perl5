@@ -6305,6 +6305,11 @@ Perl_newSVpvz(pTHX_ const STRLEN len)
 {
     SV *sv = newSV_type(SVt_PV);
     sv_grow_fresh(sv, len + 1);
+
+    /* Some ASSUMEs which may help the compiler avoid unnecessary work */
+    ASSUME(SvCUR(sv) == 0);
+    ASSUME(SvFLAGS(sv) == SVt_PV);
+    ASSUME(!TAINT_get);
     (void) sv_setpv_freshbuf(sv);
 
     return sv;
