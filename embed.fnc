@@ -3142,8 +3142,8 @@ Adp	|char * |scan_vstring	|SPTR const char *s			\
 				|EPTR const char * const e		\
 				|NN SV *sv
 EXpx	|char * |scan_word	|NN char *s				\
-				|SPTR char *dest			\
-				|EPTR char *dest_end			\
+				|NN char *dest				\
+				|STRLEN destlen 			\
 				|int allow_package			\
 				|NN STRLEN *slp
 Cp	|U32	|seed
