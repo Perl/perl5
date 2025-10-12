@@ -6275,10 +6275,14 @@ Perl_newSV(pTHX_ const STRLEN len)
 {
     SV *sv;
 
-    if (!len)
-        new_SV(sv);
-    else {
-        sv = newSV_type(SVt_PV);
+    new_SV(sv);
+    if (len) {
+        SvFLAGS(sv) = SVt_PV;
+        SvANY(sv) = new_XPV();
+
+        SvCUR_set(sv, 0);
+        SvLEN_set(sv, 0);
+
         sv_grow_fresh(sv, len + 1);
     }
     return sv;
