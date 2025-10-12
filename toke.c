@@ -14104,34 +14104,8 @@ Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags)
     if(end <= s)
         return false;
 
-    if(flags & SVf_UTF8) {
-        if(!isIDFIRST_utf8_safe((U8 *)s, (U8 *)end))
-            return false;
-
-        while(s < end) {
-            s += UTF8SKIP((U8 *)s);
-            if(s == end)
-                break;
-            if(!isIDCONT_utf8_safe((U8 *)s, (U8 *)end))
-                return false;
-        }
-        return true;
-    }
-    else {
-        if(!isIDFIRST(s[0]))
-            return false;
-
-        while(s < end) {
-            s += 1;
-            if(s == end)
-                break;
-            if(!isIDCONT(s[0]))
-                return false;
-        }
-        return true;
-    }
-
-    return false;
+    return end == parse_ident_no_copy(s, end, cBOOL(flags & SVf_UTF8),
+                                      IDFIRST_ONLY);
 }
 
 /*
