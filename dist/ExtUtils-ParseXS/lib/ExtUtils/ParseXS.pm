@@ -544,7 +544,10 @@ sub process_file {
     }
 
     if ($self->check_keyword("BOOT")) {
-      $self->BOOT_handler();
+      my $node  = ExtUtils::ParseXS::Node::BOOT->new();
+      unshift @{$self->{line}}, $_;
+      $node->parse($self);
+      $node->as_code($self);
       # BOOT: is a file-scoped keyword which consumes all the lines
       # following it in the current paragraph (as opposed to just until
       # the next keyword, like CODE: etc).
@@ -833,32 +836,6 @@ sub check_keyword {
   $_ = shift(@{ $self->{line} }) while !/\S/ && @{ $self->{line} };
 
   s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
-}
-
-
-# Handle BOOT: keyword.
-# Save all the remaining lines in the paragraph to the bootcode_later
-# array, and prepend a '#line' if necessary.
-
-sub BOOT_handler {
-  my ExtUtils::ParseXS $self = shift;
-
-  # Check all the @{ $self->{line}} lines for balance: all the
-  # #if, #else, #endif etc within the BOOT should balance out.
-  $self->check_conditional_preprocessor_statements();
-
-  # prepend a '#line' directive if needed
-  if (   $self->{config_WantLineNumbers}
-      && $self->{line}->[0] !~ /^\s*#\s*line\b/)
-  {
-    push @{ $self->{bootcode_later} },
-       sprintf "#line %d \"%s\"\n",
-         $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }],
-         escape_file_for_line_directive($self->{in_pathname});
-  }
-
-  # Save all the BOOT lines plus trailing empty line to be emitted later.
-  push @{ $self->{bootcode_later} }, "$_\n" for @{ $self->{line} }, "";
 }
 
 

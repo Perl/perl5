@@ -726,6 +726,84 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::BOOT;
+
+# Store the code lines associated with the BOOT keyword
+#
+# Note that unlike other codeblock-like Node classes, BOOT consumes
+# *all* lines remaining in the current paragraph, rather than stopping
+# at the next keyword, if any.
+# It's also file-scoped rather than XSUB-scoped.
+
+BEGIN { $build_subclass->(
+    'lines', # Array ref of all code lines making up the BOOT
+)};
+
+
+# Consume all the remaining lines and store in @$lines.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Check all the @{$pxs->{line}} lines for balance: all the
+    # #if, #else, #endif etc within the BOOT should balance out.
+    ExtUtils::ParseXS::check_conditional_preprocessor_statements();
+
+    # Suck in all remaining lines
+
+    $self->{lines} = [ @{$pxs->{line}} ];
+    @{$pxs->{line}} = ();
+
+    # Ignore any text following the keyword on the same line.
+    # XXX this quietly ignores any such text - really it should
+    # warn, but not yet for backwards compatibility.
+    shift @{$self->{lines}};
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+
+    # Save all the BOOT lines to be emitted later.
+    push @{$pxs->{bootcode_later}}, $self->boot_code($pxs);
+}
+
+
+sub boot_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+
+    my @lines;
+
+    # Prepend a '#line' directive if not already present
+    if (   $pxs->{config_WantLineNumbers}
+        && @{$self->{lines}}
+        && $self->{lines}[0] !~ /^\s*#\s*line\b/
+    )
+    {
+        push @lines,
+            sprintf "#line %d \"%s\"\n",
+                $self->{line_no} + 1,
+                ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                        $self->{file});
+    }
+
+    # Save all the BOOT lines (plus trailing empty line) to be emitted
+    # later.
+    push @lines, "$_\n" for @{$self->{lines}}, "";
+
+    return @lines;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::xsub;
 
 # Process an entire XSUB definition
