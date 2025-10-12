@@ -3570,7 +3570,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
         SvPV_set(value, (char *) he->refcounted_he_data + 1);
         SvCUR_set(value, he->refcounted_he_val.refcounted_he_u_len);
         /* This stops anything trying to free it  */
-        SvLEN_set(value, 0);
+        assert(SvLEN(value) == 0);
         SvPOK_on(value);
         SvREADONLY_on(value);
         if ((he->refcounted_he_data[0] & HVrhek_typemask) == HVrhek_PV_UTF8)
