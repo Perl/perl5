@@ -11199,10 +11199,11 @@ Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
         const U32 refcnt = SvREFCNT(rv);
         SvREFCNT(rv) = 0;
         sv_clear(rv);
-        SvFLAGS(rv) = 0;
+        SvFLAGS(rv) = SVt_IV;
         SvREFCNT(rv) = refcnt;
 
-        sv_upgrade(rv, SVt_IV);
+        SET_SVANY_FOR_BODYLESS_IV(rv);
+        SvIV_set(rv, 0);
     } else if (SvROK(rv)) {
         SvREFCNT_dec(SvRV(rv));
     } else {
