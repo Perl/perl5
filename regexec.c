@@ -3863,10 +3863,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            S_cleanup_regmatch_info_aux has executed (registered by
            SAVEDESTRUCTOR_X below).  S_cleanup_regmatch_info_aux modifies
            magic belonging to this SV.
-           Not newSVsv, either, as it does not COW.
         */
-        reginfo->sv = newSV_type(SVt_NULL);
-        SvSetSV_nosteal(reginfo->sv, sv);
+        reginfo->sv = newSVsv_flags(sv, SV_GMAGIC|SV_NOSTEAL|SV_DO_COW_SVSETSV);
         SAVEFREESV(reginfo->sv);
     }
 
