@@ -10379,13 +10379,11 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     sv = newSV_type(SVt_PV);
     /* The logic for this is inlined in S_mro_get_linear_isa_dfs(), so if it
        changes here, update it there too.  */
-    SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
+    SvFLAGS(sv) |= SVf_POK | SVp_POK | SVf_IsCOW |
+                   (is_utf8 ? SVf_UTF8 : 0);
     SvCUR_set(sv, len);
-    SvLEN_set(sv, 0);
-    SvIsCOW_on(sv);
-    SvPOK_on(sv);
-    if (is_utf8)
-        SvUTF8_on(sv);
+    assert(SvLEN(sv) ==0);
+    SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     return sv;
 }
 
