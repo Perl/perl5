@@ -10563,9 +10563,7 @@ SV *
 Perl_newSVbool(pTHX_ bool bool_val)
 {
     PERL_ARGS_ASSERT_NEWSVBOOL;
-    SV *sv = newSVsv(bool_val ? &PL_sv_yes : &PL_sv_no);
-
-    return sv;
+    return (bool_val ? newSV_true() : newSV_false());
 }
 
 /*
@@ -10579,7 +10577,18 @@ SV *
 Perl_newSV_true(pTHX)
 {
     PERL_ARGS_ASSERT_NEWSV_TRUE;
-    SV *sv = newSVsv(&PL_sv_yes);
+
+    /* Equivalent to: SV *sv = newSVsv(&PL_sv_yes); */
+    SV *sv;
+    new_SV(sv);
+    SvFLAGS(sv) = SVt_PVNV|SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK
+            |SVf_POK|SVp_POK|SVf_IsCOW|SVppv_STATIC;
+    SvPV_set(sv, (char*)PL_Yes);
+    SvANY(sv) = new_XPVNV();
+    SvCUR_set(sv, 1);
+    SvLEN_set(sv, 0);
+    SvIV_set(sv, 1);
+    SvNV_set(sv, 1);
 
     return sv;
 }
@@ -10596,7 +10605,18 @@ SV *
 Perl_newSV_false(pTHX)
 {
     PERL_ARGS_ASSERT_NEWSV_FALSE;
-    SV *sv = newSVsv(&PL_sv_no);
+
+    /* Equivalent to: SV *sv = newSVsv(&PL_sv_no); */
+    SV *sv;
+    new_SV(sv);
+    SvFLAGS(sv) = SVt_PVNV|SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK
+            |SVf_POK|SVp_POK|SVf_IsCOW|SVppv_STATIC;
+    SvPV_set(sv, (char*)PL_No);
+    SvANY(sv) = new_XPVNV();
+    SvCUR_set(sv, 0);
+    SvLEN_set(sv, 0);
+    SvIV_set(sv, 0);
+    SvNV_set(sv, 0);
 
     return sv;
 }
