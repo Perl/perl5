@@ -6165,25 +6165,25 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
      defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
      defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SSize_t
-Perl__invlist_search(SV * const invlist, const UV cp)
+Perl_invlist_search_(SV * const invlist, const UV cp)
         __attribute__warn_unused_result__;
 # endif
 # if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV *
-Perl__add_range_to_invlist(pTHX_ SV *invlist, UV start, UV end)
+Perl_add_range_to_invlist_(pTHX_ SV *invlist, UV start, UV end)
         __attribute__warn_unused_result__;
 PERL_CALLCONV void
-Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **i);
+Perl_invlist_intersection_maybe_complement_2nd_(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **i);
 PERL_CALLCONV void
-Perl__invlist_invert(pTHX_ SV * const invlist);
+Perl_invlist_invert_(pTHX_ SV * const invlist);
 PERL_CALLCONV void
-Perl__invlist_union_maybe_complement_2nd(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **output);
+Perl_invlist_union_maybe_complement_2nd_(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **output);
 PERL_CALLCONV SV *
-Perl__new_invlist(pTHX_ IV initial_size)
+Perl_new_invlist_(pTHX_ IV initial_size)
         __attribute__warn_unused_result__;
 PERL_CALLCONV SV *
-Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0, UV **other_elements_ptr)
+Perl_setup_canned_invlist_(pTHX_ const STRLEN size, const UV element0, UV **other_elements_ptr)
         __attribute__warn_unused_result__;
 # endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) ||
            defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C) */
@@ -6212,14 +6212,14 @@ Perl_form_cp_too_large_msg(pTHX_ const U8 which, const char *string, const Size_
 # if defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_REGCOMP_ANY)
 PERL_CALLCONV void
-Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char * const indent, SV * const invlist);
+Perl_invlist_dump_(pTHX_ PerlIO *file, I32 level, const char * const indent, SV * const invlist);
 # endif
 # if defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
      defined(PERL_IN_UTF8_C)
 PERL_CALLCONV bool
-Perl__invlistEQ(pTHX_ SV * const a, SV * const b, const bool complement_b);
+Perl_invlistEQ_(pTHX_ SV * const a, SV * const b, const bool complement_b);
 PERL_CALLCONV SV *
-Perl__new_invlist_C_array(pTHX_ const UV * const list)
+Perl_new_invlist_C_array_(pTHX_ const UV * const list)
         __attribute__warn_unused_result__;
 # endif
 # if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
@@ -6865,7 +6865,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
     defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
     defined(PERL_IN_UTF8_C)
 
-# define PERL_ARGS_ASSERT__INVLIST_SEARCH       \
+# define PERL_ARGS_ASSERT_INVLIST_SEARCH_       \
         assert(invlist)
 
 #endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        ||
@@ -6878,29 +6878,29 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 #endif
 #if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
-# define PERL_ARGS_ASSERT__ADD_RANGE_TO_INVLIST
+# define PERL_ARGS_ASSERT_ADD_RANGE_TO_INVLIST_
 
 /* PERL_CALLCONV void
-_invlist_intersection(pTHX_ SV * const a, SV * const b, SV **i); */
+invlist_intersection_(pTHX_ SV * const a, SV * const b, SV **i); */
 
-# define PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND \
+# define PERL_ARGS_ASSERT_INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND_ \
         assert(b); assert(i)
 
-# define PERL_ARGS_ASSERT__INVLIST_INVERT       \
+# define PERL_ARGS_ASSERT_INVLIST_INVERT_       \
         assert(invlist)
 
 /* PERL_CALLCONV void
-_invlist_subtract(pTHX_ SV * const a, SV * const b, SV **result); */
+invlist_subtract_(pTHX_ SV * const a, SV * const b, SV **result); */
 
 /* PERL_CALLCONV void
-_invlist_union(pTHX_ SV * const a, SV * const b, SV **output); */
+invlist_union_(pTHX_ SV * const a, SV * const b, SV **output); */
 
-# define PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND \
+# define PERL_ARGS_ASSERT_INVLIST_UNION_MAYBE_COMPLEMENT_2ND_ \
         assert(b); assert(output)
 
-# define PERL_ARGS_ASSERT__NEW_INVLIST
+# define PERL_ARGS_ASSERT_NEW_INVLIST_
 
-# define PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST \
+# define PERL_ARGS_ASSERT_SETUP_CANNED_INVLIST_ \
         assert(other_elements_ptr)
 
 #endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) ||
@@ -6962,7 +6962,7 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv)
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
-# define PERL_ARGS_ASSERT__INVLIST_DUMP         \
+# define PERL_ARGS_ASSERT_INVLIST_DUMP_         \
         assert(file); assert(indent); assert(invlist)
 
 #endif
@@ -7867,10 +7867,10 @@ S_validate_suid(pTHX_ PerlIO *rsfp);
 #endif /* defined(PERL_IN_PERL_C) */
 #if defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
     defined(PERL_IN_UTF8_C)
-# define PERL_ARGS_ASSERT__INVLISTEQ            \
+# define PERL_ARGS_ASSERT_INVLISTEQ_            \
         assert(a); assert(b)
 
-# define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY  \
+# define PERL_ARGS_ASSERT_NEW_INVLIST_C_ARRAY_  \
         assert(list)
 
 #endif
@@ -8704,7 +8704,7 @@ Perl_regcurly(const char *s, const char *e, const char *result[5])
 
 #endif /* defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING) */
 #if defined(PERL_IN_REGCOMP_INVLIST_C) && !defined(PERL_EXT_RE_BUILD)
-# define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST \
+# define PERL_ARGS_ASSERT_APPEND_RANGE_TO_INVLIST_ \
         assert(invlist)
 
 STATIC void
@@ -8717,15 +8717,15 @@ S_initialize_invlist_guts(pTHX_ SV *invlist, const Size_t initial_size);
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
 STATIC void
-S__append_range_to_invlist(pTHX_ SV * const invlist, const UV start, const UV end);
+S_append_range_to_invlist_(pTHX_ SV * const invlist, const UV start, const UV end);
 STATIC void
 S_invlist_replace_list_destroys_src(pTHX_ SV *dest, SV *src);
 # endif
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
-#   define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT \
+#   define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR \
         assert(invlist)
 
-#   define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR \
+#   define PERL_ARGS_ASSERT_INVLIST_ARRAY_INIT_ \
         assert(invlist)
 
 #   define PERL_ARGS_ASSERT_INVLIST_CLEAR       \
@@ -8744,11 +8744,11 @@ S_invlist_replace_list_destroys_src(pTHX_ SV *dest, SV *src);
         assert(invlist)
 
 #   if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_STATIC_INLINE UV *
-S__invlist_array_init(SV * const invlist, const bool will_have_0)
-        __attribute__warn_unused_result__;
 PERL_STATIC_INLINE IV *
 S_get_invlist_previous_index_addr(SV *invlist)
+        __attribute__warn_unused_result__;
+PERL_STATIC_INLINE UV *
+S_invlist_array_init_(SV * const invlist, const bool will_have_0)
         __attribute__warn_unused_result__;
 PERL_STATIC_INLINE void
 S_invlist_clear(pTHX_ SV *invlist);
@@ -10499,17 +10499,17 @@ S_my_memrchr(const char *s, const char c, const STRLEN len);
        defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
        defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
        defined(PERL_IN_UTF8_C)
-PERL_STATIC_INLINE bool
-S__invlist_contains_cp(SV * const invlist, const UV cp)
-        __attribute__warn_unused_result__;
-PERL_STATIC_INLINE UV
-S__invlist_len(SV * const invlist)
-        __attribute__warn_unused_result__;
 PERL_STATIC_INLINE bool *
 S_get_invlist_offset_addr(SV *invlist)
         __attribute__warn_unused_result__;
 PERL_STATIC_INLINE UV *
 S_invlist_array(SV * const invlist)
+        __attribute__warn_unused_result__;
+PERL_STATIC_INLINE bool
+S_invlist_contains_cp_(SV * const invlist, const UV cp)
+        __attribute__warn_unused_result__;
+PERL_STATIC_INLINE UV
+S_invlist_len_(SV * const invlist)
         __attribute__warn_unused_result__;
 PERL_STATIC_INLINE bool
 S_is_invlist(const SV * const invlist)
@@ -10542,16 +10542,16 @@ S_get_regex_charset_name(const U32 flags, STRLEN * const lenp);
      defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
      defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
      defined(PERL_IN_UTF8_C)
-#   define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP \
-        assert(invlist)
-
-#   define PERL_ARGS_ASSERT__INVLIST_LEN        \
-        assert(invlist)
-
 #   define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR \
         assert(invlist)
 
 #   define PERL_ARGS_ASSERT_INVLIST_ARRAY       \
+        assert(invlist)
+
+#   define PERL_ARGS_ASSERT_INVLIST_CONTAINS_CP_ \
+        assert(invlist)
+
+#   define PERL_ARGS_ASSERT_INVLIST_LEN_        \
         assert(invlist)
 
 #   define PERL_ARGS_ASSERT_IS_INVLIST

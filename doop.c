@@ -375,7 +375,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
 
         /* Look the code point up in the data structure for this tr/// to get
          * what it maps to */
-        i = _invlist_search(from_invlist, from);
+        i = invlist_search_(from_invlist, from);
         assert(i >= 0);
 
         if (map[i] != (UV) TR_UNLISTED) {
@@ -491,7 +491,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 
         /* Look the code point up in the data structure for this tr/// to get
          * what it maps to */
-        i = _invlist_search(from_invlist, from);
+        i = invlist_search_(from_invlist, from);
         assert(i >= 0);
 
         to = map[i];

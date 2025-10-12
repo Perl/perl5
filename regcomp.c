@@ -6802,7 +6802,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else /* regular fold; see if actually is in a fold */
                      if (   (ender < 256 && ! IS_IN_SOME_FOLD_L1(ender))
                          || (ender > 255
-                            && ! _invlist_contains_cp(PL_in_some_fold, ender)))
+                            && ! invlist_contains_cp_(PL_in_some_fold, ender)))
                 {
                     /* Here, folding, but the character isn't in a fold.
                      *
@@ -7513,7 +7513,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             node_type = EXACTFLU8;
                         }
                         else if (UNLIKELY(
-                             _invlist_contains_cp(PL_HasMultiCharFold, ender)))
+                             invlist_contains_cp_(PL_HasMultiCharFold, ender)))
                         {
                             /* A character that folds to more than one will
                              * match multiple characters, so can't be SIMPLE.
@@ -7660,11 +7660,11 @@ Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         /* Done with loop; remove any code points that are in the bitmap from
          * *invlist_ptr */
         if (change_invlist) {
-            _invlist_subtract(*invlist_ptr, PL_InBitmap, invlist_ptr);
+            invlist_subtract_(*invlist_ptr, PL_InBitmap, invlist_ptr);
         }
 
         /* If have completely emptied it, remove it completely */
-        if (_invlist_len(*invlist_ptr) == 0) {
+        if (invlist_len_(*invlist_ptr) == 0) {
             SvREFCNT_dec_NN(*invlist_ptr);
             *invlist_ptr = NULL;
         }
@@ -8960,16 +8960,16 @@ redo_curchar:
 
                 switch (stacked_operator) {
                     case '&':
-                        _invlist_intersection(lhs, rhs, &rhs);
+                        invlist_intersection_(lhs, rhs, &rhs);
                         break;
 
                     case '|':
                     case '+':
-                        _invlist_union(lhs, rhs, &rhs);
+                        invlist_union_(lhs, rhs, &rhs);
                         break;
 
                     case '-':
-                        _invlist_subtract(lhs, rhs, &rhs);
+                        invlist_subtract_(lhs, rhs, &rhs);
                         break;
 
                     case '^':   /* The union minus the intersection */
@@ -8977,9 +8977,9 @@ redo_curchar:
                         SV* i = NULL;
                         SV* u = NULL;
 
-                        _invlist_union(lhs, rhs, &u);
-                        _invlist_intersection(lhs, rhs, &i);
-                        _invlist_subtract(u, i, &rhs);
+                        invlist_union_(lhs, rhs, &u);
+                        invlist_intersection_(lhs, rhs, &i);
+                        invlist_subtract_(u, i, &rhs);
                         SvREFCNT_dec_NN(i);
                         SvREFCNT_dec_NN(u);
                         break;
@@ -9045,7 +9045,7 @@ redo_curchar:
                                 "preceding operand", curchar);
                     }
 
-                    _invlist_invert(current);
+                    invlist_invert_(current);
 
                     only_to_avoid_leaks = av_pop(stack);
                     SvREFCNT_dec(only_to_avoid_leaks);
@@ -10088,8 +10088,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                              * if the match would return true, except don't
                              * warn for \p{All}, which has exactly one element
                              * = 0 */
-                            (_invlist_contains_cp(prop_definition, 0x110000)
-                                && (! (_invlist_len(prop_definition) == 1
+                            (invlist_contains_cp_(prop_definition, 0x110000)
+                                && (! (invlist_len_(prop_definition) == 1
                                        && *invlist_array(prop_definition) == 0))))
                         {
                             warn_super = true;
@@ -10097,12 +10097,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
-                            _invlist_union_complement_2nd(properties,
+                            invlist_union_complement_2nd_(properties,
                                                           prop_definition,
                                                           &properties);
                         }
                         else {
-                            _invlist_union(properties, prop_definition, &properties);
+                            invlist_union_(properties, prop_definition, &properties);
                         }
                     }
                 }
@@ -10282,7 +10282,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * trust that the locale is well behaved, we leave this to
                  * runtime to sort out) */
                 if (POSIXL_TEST(posixl, namedclass ^ 1)) {
-                    cp_list = _add_range_to_invlist(cp_list, 0, UV_MAX);
+                    cp_list = add_range_to_invlist_(cp_list, 0, UV_MAX);
                     POSIXL_ZERO(posixl);
                     has_runtime_dependency &= ~HAS_L_RUNTIME_DEPENDENCY;
                     anyof_flags &= ~ANYOF_MATCHES_POSIXL;
@@ -10301,7 +10301,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Get the list of the above-Latin1 code points this
                      * matches */
-                    _invlist_intersection_maybe_complement_2nd(PL_AboveLatin1,
+                    invlist_intersection_maybe_complement_2nd_(PL_AboveLatin1,
                                             PL_XPosix_ptrs[classnum],
 
                                             /* Odd numbers are complements,
@@ -10316,7 +10316,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         cp_list = scratch_list;
                     }
                     else {
-                        _invlist_union(cp_list, scratch_list, &cp_list);
+                        invlist_union_(cp_list, scratch_list, &cp_list);
                         SvREFCNT_dec_NN(scratch_list);
                     }
                     continue;   /* Go get next character */
@@ -10341,7 +10341,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             classnum = CC_BLANK_;
                         }
 
-                        _invlist_union_maybe_complement_2nd(
+                        invlist_union_maybe_complement_2nd_(
                                 cp_list,
                                 PL_XPosix_ptrs[classnum],
                                 namedclass % 2 != 0,    /* Complement if odd
@@ -10363,7 +10363,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * runtime differences under /d.  So we can special case
                      * these, and avoid some extra work below, and at runtime.
                      * */
-                    _invlist_union_maybe_complement_2nd(
+                    invlist_union_maybe_complement_2nd_(
                                                      simple_posixes,
                                                       ((AT_LEAST_ASCII_RESTRICTED)
                                                        ? PL_Posix_ptrs[classnum]
@@ -10376,7 +10376,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV** posixes_ptr = namedclass % 2 == 0
                                        ? &posixes
                                        : &nposixes;
-                    _invlist_union_maybe_complement_2nd(
+                    invlist_union_maybe_complement_2nd_(
                                                      *posixes_ptr,
                                                      PL_XPosix_ptrs[classnum],
                                                      namedclass % 2 != 0,
@@ -10498,7 +10498,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * See [perl #89750] */
         if (FOLD && allow_mutiple_chars && value == prevvalue) {
             if (    value == LATIN_SMALL_LETTER_SHARP_S
-                || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
+                || (value > 255 && invlist_contains_cp_(PL_HasMultiCharFold,
                                                         value)))
             {
                 /* Here <value> is indeed a multi-char fold.  Get what it is */
@@ -10630,7 +10630,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                              * algorithm is just to check if both end points
                              * are in the same series, which is the same range.
                              * */
-                            index_start = _invlist_search(
+                            index_start = invlist_search_(
                                                     PL_XPosix_ptrs[CC_DIGIT_],
                                                     prevvalue);
 
@@ -10639,7 +10639,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             if (   index_start >= 0
                                 && ELEMENT_RANGE_MATCHES_INVLIST(index_start)
                                 && (index_final =
-                                    _invlist_search(PL_XPosix_ptrs[CC_DIGIT_],
+                                    invlist_search_(PL_XPosix_ptrs[CC_DIGIT_],
                                                     value)) != index_start
                                 && index_final >= 0
                                 && ELEMENT_RANGE_MATCHES_INVLIST(index_final))
@@ -10684,7 +10684,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* Deal with this element of the class */
 
 #ifndef EBCDIC
-        cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+        cp_foldable_list = add_range_to_invlist_(cp_foldable_list,
                                                     prevvalue, value);
 #else
         /* On non-ASCII platforms, for ranges that span all of 0..255, and ones
@@ -10698,7 +10698,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 || (isUPPER_A(prevvalue)
                                     && isUPPER_A(value)))))))
         {
-            cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+            cp_foldable_list = add_range_to_invlist_(cp_foldable_list,
                                                         prevvalue, value);
         }
         else {
@@ -10716,7 +10716,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 cp_foldable_list = add_cp_to_invlist(cp_foldable_list, LATIN1_TO_NATIVE(j));
             }
             if (value > 255) {
-                cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+                cp_foldable_list = add_range_to_invlist_(cp_foldable_list,
                                                             256, value);
             }
         }
@@ -10867,7 +10867,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * be checked.  Get the intersection of this class and all the
              * possible characters that are foldable.  This can quickly narrow
              * down a large class */
-            _invlist_intersection(PL_in_some_fold, cp_foldable_list,
+            invlist_intersection_(PL_in_some_fold, cp_foldable_list,
                                   &fold_intersection);
 
             /* Now look at the foldable characters in this class individually */
@@ -10981,7 +10981,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         /* Now that we have finished adding all the folds, there is no reason
          * to keep the foldable list separate */
-        _invlist_union(cp_list, cp_foldable_list, &cp_list);
+        invlist_union_(cp_list, cp_foldable_list, &cp_list);
         SvREFCNT_dec_NN(cp_foldable_list);
     }
 
@@ -10991,7 +10991,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (simple_posixes) {   /* These are the classes known to be unaffected by
                                /a, /aa, and /d */
         if (cp_list) {
-            _invlist_union(cp_list, simple_posixes, &cp_list);
+            invlist_union_(cp_list, simple_posixes, &cp_list);
             SvREFCNT_dec_NN(simple_posixes);
         }
         else {
@@ -11005,7 +11005,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * 'nposixes' to the main list */
             if (posixes) {
                 if (cp_list) {
-                    _invlist_union(cp_list, posixes, &cp_list);
+                    invlist_union_(cp_list, posixes, &cp_list);
                     SvREFCNT_dec_NN(posixes);
                 }
                 else {
@@ -11014,7 +11014,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             if (nposixes) {
                 if (cp_list) {
-                    _invlist_union(cp_list, nposixes, &cp_list);
+                    invlist_union_(cp_list, nposixes, &cp_list);
                     SvREFCNT_dec_NN(nposixes);
                 }
                 else {
@@ -11037,7 +11037,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  * matched regardless, so can just be added to the
                  * unconditional list */
                 if (cp_list) {
-                    _invlist_union(cp_list, nposixes, &cp_list);
+                    invlist_union_(cp_list, nposixes, &cp_list);
                     SvREFCNT_dec_NN(nposixes);
                     nposixes = NULL;
                 }
@@ -11046,13 +11046,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
 
                 /* Likewise for 'posixes' */
-                _invlist_union(posixes, cp_list, &cp_list);
+                invlist_union_(posixes, cp_list, &cp_list);
                 SvREFCNT_dec(posixes);
 
                 /* Likewise for anything else in the range that matched only
                  * under UTF-8 */
                 if (upper_latin1_only_utf8_matches) {
-                    _invlist_union(cp_list,
+                    invlist_union_(cp_list,
                                    upper_latin1_only_utf8_matches,
                                    &cp_list);
                     SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
@@ -11062,9 +11062,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* If we don't match all the upper Latin1 characters regardless
                  * of UTF-8ness, we have to set a flag to match the rest when
                  * not in UTF-8 */
-                _invlist_subtract(only_non_utf8_list, cp_list,
+                invlist_subtract_(only_non_utf8_list, cp_list,
                                   &only_non_utf8_list);
-                if (_invlist_len(only_non_utf8_list) != 0) {
+                if (invlist_len_(only_non_utf8_list) != 0) {
                     anyof_flags |= ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared;
                 }
                 SvREFCNT_dec_NN(only_non_utf8_list);
@@ -11078,21 +11078,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  *
                  * First calculate what they are */
                 SV* nonascii_but_latin1_properties = NULL;
-                _invlist_intersection(posixes, PL_UpperLatin1,
+                invlist_intersection_(posixes, PL_UpperLatin1,
                                       &nonascii_but_latin1_properties);
 
                 /* And add them to the final list of such characters. */
-                _invlist_union(upper_latin1_only_utf8_matches,
+                invlist_union_(upper_latin1_only_utf8_matches,
                                nonascii_but_latin1_properties,
                                &upper_latin1_only_utf8_matches);
 
                 /* Remove them from what now becomes the unconditional list */
-                _invlist_subtract(posixes, nonascii_but_latin1_properties,
+                invlist_subtract_(posixes, nonascii_but_latin1_properties,
                                   &posixes);
 
                 /* And add those unconditional ones to the final list */
                 if (cp_list) {
-                    _invlist_union(cp_list, posixes, &cp_list);
+                    invlist_union_(cp_list, posixes, &cp_list);
                     SvREFCNT_dec_NN(posixes);
                     posixes = NULL;
                 }
@@ -11105,10 +11105,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* Get rid of any characters from the conditional list that we
                  * now know are matched unconditionally, which may make that
                  * list empty */
-                _invlist_subtract(upper_latin1_only_utf8_matches,
+                invlist_subtract_(upper_latin1_only_utf8_matches,
                                   cp_list,
                                   &upper_latin1_only_utf8_matches);
-                if (_invlist_len(upper_latin1_only_utf8_matches) == 0) {
+                if (invlist_len_(upper_latin1_only_utf8_matches) == 0) {
                     SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
                     upper_latin1_only_utf8_matches = NULL;
                 }
@@ -11142,7 +11142,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                ^ (UNICODE_IS_SUPER(invlist_highest(cp_list))));
             }
 
-            _invlist_union(properties, cp_list, &cp_list);
+            invlist_union_(properties, cp_list, &cp_list);
             SvREFCNT_dec_NN(properties);
         }
         else {
@@ -11177,19 +11177,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
          * other components.  Remove them, and clean up the list if it goes to
          * 0 elements */
         if (only_utf8_locale_list && cp_list) {
-            _invlist_subtract(only_utf8_locale_list, cp_list,
+            invlist_subtract_(only_utf8_locale_list, cp_list,
                               &only_utf8_locale_list);
 
-            if (_invlist_len(only_utf8_locale_list) == 0) {
+            if (invlist_len_(only_utf8_locale_list) == 0) {
                 SvREFCNT_dec_NN(only_utf8_locale_list);
                 only_utf8_locale_list = NULL;
             }
         }
         if (    only_utf8_locale_list
             || (    cp_list
-                && (   _invlist_contains_cp(cp_list,
+                && (   invlist_contains_cp_(cp_list,
                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE)
-                    || _invlist_contains_cp(cp_list,
+                    || invlist_contains_cp_(cp_list,
                                             LATIN_SMALL_LETTER_DOTLESS_I))))
         {
             has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
@@ -11203,8 +11203,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             /* In a Turkish locale these could match, notify the run-time code
              * to check for that */
-            if (   _invlist_contains_cp(cp_list, 'I')
-                || _invlist_contains_cp(cp_list, 'i'))
+            if (   invlist_contains_cp_(cp_list, 'I')
+                || invlist_contains_cp_(cp_list, 'i'))
             {
                 anyof_flags |= ANYOFL_FOLD|ANYOF_HAS_EXTRA_RUNTIME_MATCHES;
             }
@@ -11225,7 +11225,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         &&   invert
         && ! has_runtime_dependency)
     {
-        _invlist_invert(cp_list);
+        invlist_invert_(cp_list);
 
         /* Clear the invert flag since have just done it here */
         invert = false;
@@ -11315,7 +11315,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * */
     if (upper_latin1_only_utf8_matches) {
         if (cp_list) {
-            _invlist_union(cp_list,
+            invlist_union_(cp_list,
                            upper_latin1_only_utf8_matches,
                            &cp_list);
             SvREFCNT_dec_NN(upper_latin1_only_utf8_matches);
@@ -11458,12 +11458,12 @@ S_optimize_regclass(pTHX_
              * the constructed node list is inverted, and restricted to only
              * the above latin1 code points, which are the only ones known at
              * compile time */
-            _invlist_intersection_maybe_complement_2nd(
+            invlist_intersection_maybe_complement_2nd_(
                                                 PL_AboveLatin1,
                                                 PL_XPosix_ptrs[classnum],
                                                 already_inverted,
                                                 &class_above_latin1);
-            are_equivalent = _invlistEQ(class_above_latin1, cp_list, false);
+            are_equivalent = invlistEQ_(class_above_latin1, cp_list, false);
             SvREFCNT_dec_NN(class_above_latin1);
 
             if (are_equivalent) {
@@ -11587,7 +11587,7 @@ S_optimize_regclass(pTHX_
             else {  /* /i, larger code point.  Since we are under /i, and have
                        just this code point, we know that it can't fold to
                        something else, so PL_InMultiCharFold applies to it */
-                op = (_invlist_contains_cp(PL_InMultiCharFold, lowest_cp))
+                op = (invlist_contains_cp_(PL_InMultiCharFold, lowest_cp))
                          ? EXACTFU_REQ8
                          : EXACT_REQ8;
                 }
@@ -11595,7 +11595,7 @@ S_optimize_regclass(pTHX_
                 value = lowest_cp;
         }
         else if (  ! (has_runtime_dependency & ~HAS_D_RUNTIME_DEPENDENCY)
-                 && _invlist_contains_cp(PL_in_some_fold, lowest_cp))
+                 && invlist_contains_cp_(PL_in_some_fold, lowest_cp))
         {
             /* Here, the only runtime dependency, if any, is from /d, and the
              * class matches more than one code point, and the lowest code
@@ -11648,7 +11648,7 @@ S_optimize_regclass(pTHX_
                 }
             }
             else if (  ! upper_latin1_only_utf8_matches
-                     || (   _invlist_len(upper_latin1_only_utf8_matches) == 2
+                     || (   invlist_len_(upper_latin1_only_utf8_matches) == 2
                          && PL_fold_latin1[
                            invlist_highest(upper_latin1_only_utf8_matches)]
                          == lowest_cp))
@@ -11693,7 +11693,7 @@ S_optimize_regclass(pTHX_
                                                             &first_fold,
                                                             &remaining_folds);
                 Size_t folds_count = folds_to_this_cp_count + 1;
-                SV * fold_list = _new_invlist(folds_count);
+                SV * fold_list = new_invlist_(folds_count);
                 unsigned int i;
 
                 /* If there are UTF-8 dependent matches, create a temporary
@@ -11702,9 +11702,9 @@ S_optimize_regclass(pTHX_
                 SV ** use_this_list = &cp_list;
 
                 if (upper_latin1_only_utf8_matches) {
-                    all_cp_list = _new_invlist(0);
+                    all_cp_list = new_invlist_(0);
                     use_this_list = &all_cp_list;
-                    _invlist_union(cp_list,
+                    invlist_union_(cp_list,
                                    upper_latin1_only_utf8_matches,
                                    use_this_list);
                 }
@@ -11724,7 +11724,7 @@ S_optimize_regclass(pTHX_
 
                 /* If the fold list is identical to what's in this ANYOF node,
                  * the node can be represented by an EXACTFish one instead */
-                if (_invlistEQ(*use_this_list, fold_list,
+                if (invlistEQ_(*use_this_list, fold_list,
                                0 /* Don't complement */ )
                 ) {
 
@@ -11739,7 +11739,7 @@ S_optimize_regclass(pTHX_
                      * are folding, and if not, if it is not part of a
                      * multi-char fold.  */
                     if (lowest_cp > 255) {    /* Highish code point */
-                        if (FOLD || ! _invlist_contains_cp(
+                        if (FOLD || ! invlist_contains_cp_(
                                                    PL_InMultiCharFold, folded))
                         {
                             op = (LOC)
@@ -11870,7 +11870,7 @@ S_optimize_regclass(pTHX_
          * that works we will instead later generate an NANYOFM, and invert
          * back when through */
         if (highest_cp > max_permissible) {
-            _invlist_invert(cp_list);
+            invlist_invert_(cp_list);
             inverted = 1;
         }
 
@@ -11946,7 +11946,7 @@ S_optimize_regclass(pTHX_
         }
 
         if (inverted) {
-            _invlist_invert(cp_list);
+            invlist_invert_(cp_list);
         }
 
         if (op != END) {
@@ -12017,9 +12017,9 @@ S_optimize_regclass(pTHX_
 
                         /* /d classes don't match anything non-ASCII below 256
                          * unconditionally (which cp_list contains) */
-                        _invlist_intersection(cp_list, PL_UpperLatin1,
+                        invlist_intersection_(cp_list, PL_UpperLatin1,
                                                        &intersection);
-                        if (_invlist_len(intersection) != 0) {
+                        if (invlist_len_(intersection) != 0) {
                             continue;
                         }
 
@@ -12031,7 +12031,7 @@ S_optimize_regclass(pTHX_
                          * we check below that these are identical to what the
                          * tested class should match */
                         if (upper_latin1_only_utf8_matches) {
-                            _invlist_union(
+                            invlist_union_(
                                         d_invlist,
                                         upper_latin1_only_utf8_matches,
                                         &d_invlist);
@@ -12054,7 +12054,7 @@ S_optimize_regclass(pTHX_
                      * ('*our_code_points') precisely matches those of the
                      * class we are currently checking against
                      * ('*official_code_points'). */
-                    if (_invlistEQ(*our_code_points,
+                    if (invlistEQ_(*our_code_points,
                                    *official_code_points,
                                    try_inverted))
                     {
@@ -12371,7 +12371,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             }
 
             /* If the inversion lists aren't equivalent, can't share */
-            if (cp_list && ! _invlistEQ(cp_list,
+            if (cp_list && ! invlistEQ_(cp_list,
                                         *stored_cp_list_ptr,
                                         false /* don't complement */))
             {
@@ -12389,7 +12389,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 continue;
             }
 
-            if (only_utf8_locale_list && ! _invlistEQ(
+            if (only_utf8_locale_list && ! invlistEQ_(
                                          only_utf8_locale_list,
                                          *stored_only_utf8_locale_list_ptr,
                                          false /* don't complement */))
@@ -12531,7 +12531,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
                     }
 
                     if (invlist) {
-                        _invlist_union(invlist, prop_definition, &invlist);
+                        invlist_union_(invlist, prop_definition, &invlist);
                         SvREFCNT_dec_NN(prop_definition);
                     }
                     else {
@@ -12602,7 +12602,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
                      * up to the next \n */
                     if (   *(si_string + len) == '\n') {
                         if (count) {    /* 2nd code point on line */
-                            *output_invlist = _add_range_to_invlist(*output_invlist, prev_cp, cp);
+                            *output_invlist = add_range_to_invlist_(*output_invlist, prev_cp, cp);
                         }
                         else {
                             *output_invlist = add_cp_to_invlist(*output_invlist, cp);
@@ -12678,7 +12678,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
                 *output_invlist = invlist_clone(invlist, NULL);
             }
             else {
-                _invlist_union(*output_invlist, invlist, output_invlist);
+                invlist_union_(*output_invlist, invlist, output_invlist);
             }
         }
 
@@ -13180,7 +13180,7 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n) {
     /* Returns an inversion list of all the code points matched by the
      * ANYOFM/NANYOFM node 'n' */
 
-    SV * cp_list = _new_invlist(-1);
+    SV * cp_list = new_invlist_(-1);
     const U8 lowest = (U8) ARG1u(n);
     unsigned int i;
     U8 count = 0;
@@ -13202,7 +13202,7 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n) {
     }
 
     if (OP(n) == NANYOFM) {
-        _invlist_invert(cp_list);
+        invlist_invert_(cp_list);
     }
     return cp_list;
 }
@@ -13955,79 +13955,79 @@ Perl_init_uniprops(pTHX)
 
     /* Set up the inversion list interpreter-level variables */
 
-    PL_XPosix_ptrs[CC_ASCII_] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
-    PL_XPosix_ptrs[CC_ALPHANUMERIC_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALNUM]);
-    PL_XPosix_ptrs[CC_ALPHA_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALPHA]);
-    PL_XPosix_ptrs[CC_BLANK_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXBLANK]);
-    PL_XPosix_ptrs[CC_CASED_] =  _new_invlist_C_array(uni_prop_ptrs[UNI_CASED]);
-    PL_XPosix_ptrs[CC_CNTRL_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXCNTRL]);
-    PL_XPosix_ptrs[CC_DIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXDIGIT]);
-    PL_XPosix_ptrs[CC_GRAPH_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXGRAPH]);
-    PL_XPosix_ptrs[CC_LOWER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXLOWER]);
-    PL_XPosix_ptrs[CC_PRINT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPRINT]);
-    PL_XPosix_ptrs[CC_PUNCT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPUNCT]);
-    PL_XPosix_ptrs[CC_SPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXSPACE]);
-    PL_XPosix_ptrs[CC_UPPER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXUPPER]);
-    PL_XPosix_ptrs[CC_VERTSPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_VERTSPACE]);
-    PL_XPosix_ptrs[CC_WORDCHAR_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXWORD]);
-    PL_XPosix_ptrs[CC_XDIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXXDIGIT]);
+    PL_XPosix_ptrs[CC_ASCII_] = new_invlist_C_array_(uni_prop_ptrs[UNI_ASCII]);
+    PL_XPosix_ptrs[CC_ALPHANUMERIC_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXALNUM]);
+    PL_XPosix_ptrs[CC_ALPHA_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXALPHA]);
+    PL_XPosix_ptrs[CC_BLANK_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXBLANK]);
+    PL_XPosix_ptrs[CC_CASED_] =  new_invlist_C_array_(uni_prop_ptrs[UNI_CASED]);
+    PL_XPosix_ptrs[CC_CNTRL_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXCNTRL]);
+    PL_XPosix_ptrs[CC_DIGIT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXDIGIT]);
+    PL_XPosix_ptrs[CC_GRAPH_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXGRAPH]);
+    PL_XPosix_ptrs[CC_LOWER_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXLOWER]);
+    PL_XPosix_ptrs[CC_PRINT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXPRINT]);
+    PL_XPosix_ptrs[CC_PUNCT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXPUNCT]);
+    PL_XPosix_ptrs[CC_SPACE_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXSPACE]);
+    PL_XPosix_ptrs[CC_UPPER_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXUPPER]);
+    PL_XPosix_ptrs[CC_VERTSPACE_] = new_invlist_C_array_(uni_prop_ptrs[UNI_VERTSPACE]);
+    PL_XPosix_ptrs[CC_WORDCHAR_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXWORD]);
+    PL_XPosix_ptrs[CC_XDIGIT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_XPOSIXXDIGIT]);
 
-    PL_Posix_ptrs[CC_ASCII_] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
-    PL_Posix_ptrs[CC_ALPHANUMERIC_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALNUM]);
-    PL_Posix_ptrs[CC_ALPHA_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALPHA]);
-    PL_Posix_ptrs[CC_BLANK_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXBLANK]);
+    PL_Posix_ptrs[CC_ASCII_] = new_invlist_C_array_(uni_prop_ptrs[UNI_ASCII]);
+    PL_Posix_ptrs[CC_ALPHANUMERIC_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXALNUM]);
+    PL_Posix_ptrs[CC_ALPHA_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXALPHA]);
+    PL_Posix_ptrs[CC_BLANK_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXBLANK]);
     PL_Posix_ptrs[CC_CASED_] = PL_Posix_ptrs[CC_ALPHA_];
-    PL_Posix_ptrs[CC_CNTRL_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXCNTRL]);
-    PL_Posix_ptrs[CC_DIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXDIGIT]);
-    PL_Posix_ptrs[CC_GRAPH_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXGRAPH]);
-    PL_Posix_ptrs[CC_LOWER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXLOWER]);
-    PL_Posix_ptrs[CC_PRINT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPRINT]);
-    PL_Posix_ptrs[CC_PUNCT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPUNCT]);
-    PL_Posix_ptrs[CC_SPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXSPACE]);
-    PL_Posix_ptrs[CC_UPPER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXUPPER]);
+    PL_Posix_ptrs[CC_CNTRL_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXCNTRL]);
+    PL_Posix_ptrs[CC_DIGIT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXDIGIT]);
+    PL_Posix_ptrs[CC_GRAPH_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXGRAPH]);
+    PL_Posix_ptrs[CC_LOWER_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXLOWER]);
+    PL_Posix_ptrs[CC_PRINT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXPRINT]);
+    PL_Posix_ptrs[CC_PUNCT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXPUNCT]);
+    PL_Posix_ptrs[CC_SPACE_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXSPACE]);
+    PL_Posix_ptrs[CC_UPPER_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXUPPER]);
     PL_Posix_ptrs[CC_VERTSPACE_] = NULL;
-    PL_Posix_ptrs[CC_WORDCHAR_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXWORD]);
-    PL_Posix_ptrs[CC_XDIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXXDIGIT]);
+    PL_Posix_ptrs[CC_WORDCHAR_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXWORD]);
+    PL_Posix_ptrs[CC_XDIGIT_] = new_invlist_C_array_(uni_prop_ptrs[UNI_POSIXXDIGIT]);
 
-    PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
-    PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
-    PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
-    PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
-    PL_SCX_invlist = _new_invlist_C_array(_Perl_SCX_invlist);
+    PL_GCB_invlist = new_invlist_C_array_(_Perl_GCB_invlist);
+    PL_SB_invlist = new_invlist_C_array_(_Perl_SB_invlist);
+    PL_WB_invlist = new_invlist_C_array_(_Perl_WB_invlist);
+    PL_LB_invlist = new_invlist_C_array_(_Perl_LB_invlist);
+    PL_SCX_invlist = new_invlist_C_array_(_Perl_SCX_invlist);
 
-    PL_InBitmap = _new_invlist_C_array(InBitmap_invlist);
-    PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
-    PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
-    PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
+    PL_InBitmap = new_invlist_C_array_(InBitmap_invlist);
+    PL_AboveLatin1 = new_invlist_C_array_(AboveLatin1_invlist);
+    PL_Latin1 = new_invlist_C_array_(Latin1_invlist);
+    PL_UpperLatin1 = new_invlist_C_array_(UpperLatin1_invlist);
 
-    PL_Assigned_invlist = _new_invlist_C_array(uni_prop_ptrs[UNI_ASSIGNED]);
+    PL_Assigned_invlist = new_invlist_C_array_(uni_prop_ptrs[UNI_ASSIGNED]);
 
-    PL_utf8_perl_idstart = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_IDSTART]);
-    PL_utf8_perl_idcont = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_IDCONT]);
+    PL_utf8_perl_idstart = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_IDSTART]);
+    PL_utf8_perl_idcont = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_IDCONT]);
 
-    PL_utf8_charname_begin = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_CHARNAME_BEGIN]);
-    PL_utf8_charname_continue = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_CHARNAME_CONTINUE]);
+    PL_utf8_charname_begin = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_CHARNAME_BEGIN]);
+    PL_utf8_charname_continue = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_CHARNAME_CONTINUE]);
 
-    PL_in_some_fold = _new_invlist_C_array(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
-    PL_HasMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
+    PL_in_some_fold = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_ANY_FOLDS]);
+    PL_HasMultiCharFold = new_invlist_C_array_(uni_prop_ptrs[
                                             UNI__PERL_FOLDS_TO_MULTI_CHAR]);
-    PL_InMultiCharFold = _new_invlist_C_array(uni_prop_ptrs[
+    PL_InMultiCharFold = new_invlist_C_array_(uni_prop_ptrs[
                                             UNI__PERL_IS_IN_MULTI_CHAR_FOLD]);
-    PL_utf8_toupper = _new_invlist_C_array(Uppercase_Mapping_invlist);
-    PL_utf8_tolower = _new_invlist_C_array(Lowercase_Mapping_invlist);
-    PL_utf8_totitle = _new_invlist_C_array(Titlecase_Mapping_invlist);
-    PL_utf8_tofold = _new_invlist_C_array(Case_Folding_invlist);
-    PL_utf8_tosimplefold = _new_invlist_C_array(Simple_Case_Folding_invlist);
-    PL_utf8_foldclosures = _new_invlist_C_array(_Perl_IVCF_invlist);
-    PL_utf8_mark = _new_invlist_C_array(uni_prop_ptrs[UNI_M]);
-    PL_CCC_non0_non230 = _new_invlist_C_array(_Perl_CCC_non0_non230_invlist);
-    PL_Private_Use = _new_invlist_C_array(uni_prop_ptrs[UNI_CO]);
+    PL_utf8_toupper = new_invlist_C_array_(Uppercase_Mapping_invlist);
+    PL_utf8_tolower = new_invlist_C_array_(Lowercase_Mapping_invlist);
+    PL_utf8_totitle = new_invlist_C_array_(Titlecase_Mapping_invlist);
+    PL_utf8_tofold = new_invlist_C_array_(Case_Folding_invlist);
+    PL_utf8_tosimplefold = new_invlist_C_array_(Simple_Case_Folding_invlist);
+    PL_utf8_foldclosures = new_invlist_C_array_(_Perl_IVCF_invlist);
+    PL_utf8_mark = new_invlist_C_array_(uni_prop_ptrs[UNI_M]);
+    PL_CCC_non0_non230 = new_invlist_C_array_(_Perl_CCC_non0_non230_invlist);
+    PL_Private_Use = new_invlist_C_array_(uni_prop_ptrs[UNI_CO]);
 
 #  ifdef UNI_XIDC
     /* The below are used only by deprecated functions.  They could be removed */
-    PL_utf8_xidcont  = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDC]);
-    PL_utf8_idcont   = _new_invlist_C_array(uni_prop_ptrs[UNI_IDC]);
-    PL_utf8_xidstart = _new_invlist_C_array(uni_prop_ptrs[UNI_XIDS]);
+    PL_utf8_xidcont  = new_invlist_C_array_(uni_prop_ptrs[UNI_XIDC]);
+    PL_utf8_idcont   = new_invlist_C_array_(uni_prop_ptrs[UNI_IDC]);
+    PL_utf8_xidstart = new_invlist_C_array_(uni_prop_ptrs[UNI_XIDS]);
 #  endif
 }
 
@@ -14049,7 +14049,7 @@ Perl_get_prop_definition(pTHX_ const int table_index)
     PERL_ARGS_ASSERT_GET_PROP_DEFINITION;
 
     /* Create and return the inversion list */
-    return _new_invlist_C_array(uni_prop_ptrs[table_index]);
+    return new_invlist_C_array_(uni_prop_ptrs[table_index]);
 }
 
 const char * const *
@@ -14392,8 +14392,8 @@ S_handle_user_defined_property(pTHX_
 #  endif
 
         /* Here, this line contains a legal range */
-        this_definition = sv_2mortal(_new_invlist(2));
-        this_definition = _add_range_to_invlist(this_definition, min, max);
+        this_definition = sv_2mortal(new_invlist_(2));
+        this_definition = add_range_to_invlist_(this_definition, min, max);
         goto calculate;
 
       check_if_property:
@@ -14443,19 +14443,19 @@ S_handle_user_defined_property(pTHX_
 
         switch (op) {
             case '+':
-                _invlist_union(running_definition, this_definition,
+                invlist_union_(running_definition, this_definition,
                                                         &running_definition);
                 break;
             case '-':
-                _invlist_subtract(running_definition, this_definition,
+                invlist_subtract_(running_definition, this_definition,
                                                         &running_definition);
                 break;
             case '&':
-                _invlist_intersection(running_definition, this_definition,
+                invlist_intersection_(running_definition, this_definition,
                                                         &running_definition);
                 break;
             case '!':
-                _invlist_union_complement_2nd(running_definition,
+                invlist_union_complement_2nd_(running_definition,
                                         this_definition, &running_definition);
                 break;
             default:
@@ -14475,7 +14475,7 @@ S_handle_user_defined_property(pTHX_
         /* If the expansion was empty, the answer isn't nothing: its an empty
          * inversion list */
         if (running_definition == NULL) {
-            running_definition = _new_invlist(1);
+            running_definition = new_invlist_(1);
         }
 
         return running_definition;
@@ -14917,7 +14917,7 @@ S_parse_uniprop_string(pTHX_
                                                            user_defined_ptr,
                                                            msg,
                                                            level + 1);
-                        _invlist_union(prop_definition, sub_invlist,
+                        invlist_union_(prop_definition, sub_invlist,
                                        &prop_definition);
                     }
 
@@ -15922,10 +15922,10 @@ S_parse_uniprop_string(pTHX_
 
                 /* For now, as a safety measure, make sure that it doesn't
                  * override non-private use code points */
-                _invlist_intersection(pu_invlist, PL_Private_Use, &pu_invlist);
+                invlist_intersection_(pu_invlist, PL_Private_Use, &pu_invlist);
 
                 /* Add it to the list to be returned */
-                _invlist_union(prop_definition, pu_invlist,
+                invlist_union_(prop_definition, pu_invlist,
                                &expanded_prop_definition);
                 prop_definition = expanded_prop_definition;
                 cloned = true;
@@ -15938,7 +15938,7 @@ S_parse_uniprop_string(pTHX_
         if (! cloned) {
            prop_definition = sv_2mortal(invlist_clone(prop_definition, NULL));
         }
-        _invlist_invert(prop_definition);
+        invlist_invert_(prop_definition);
     }
     return prop_definition;
 
@@ -16393,15 +16393,15 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
         SV * subtract = get_prop_definition(UNI_CC);
 
-        _invlist_subtract(empty_names, subtract, &empty_names);
+        invlist_subtract_(empty_names, subtract, &empty_names);
         SvREFCNT_dec_NN(empty_names_ref);
         SvREFCNT_dec_NN(subtract);
 
         subtract = get_prop_definition(UNI_CF);
-        _invlist_subtract(empty_names, subtract, &empty_names);
+        invlist_subtract_(empty_names, subtract, &empty_names);
         SvREFCNT_dec_NN(subtract);
 
-        _invlist_union(*prop_definition, empty_names, prop_definition);
+        invlist_union_(*prop_definition, empty_names, prop_definition);
         found_matches = true;
         SvREFCNT_dec_NN(empty_names);
     }
@@ -16425,7 +16425,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
             (void) handle_names_wildcard(empties_pat, strlen(empties_pat), &empties);
 
-            _invlist_union_complement_2nd(*prop_definition, empties, prop_definition);
+            invlist_union_complement_2nd_(*prop_definition, empties, prop_definition);
             SvREFCNT_dec_NN(empties);
 
             found_matches = true;

@@ -2444,7 +2444,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             if (type == SVt_INVLIST) {
                 PerlIO_printf(file, "\n");
                 /* 4 blanks indents 2 beyond the PV, etc */
-                _invlist_dump(file, level, "    ", sv);
+                invlist_dump_(file, level, "    ", sv);
             }
             else {
                 PerlIO_printf(file, "%s", pv_display_for_dump(d, ptr, SvCUR(sv),

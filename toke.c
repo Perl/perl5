@@ -2969,7 +2969,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
         }
         else {
             Size_t advance;
-            if (! _invlist_contains_cp(PL_utf8_charname_begin,
+            if (! invlist_contains_cp_(PL_utf8_charname_begin,
                                        utf8_to_uv_or_die((const U8 *) s,
                                                          (const U8 *) e,
                                                          &advance)))
@@ -2998,7 +2998,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
             }
             else {
                 Size_t advance;
-                if (! _invlist_contains_cp(PL_utf8_charname_continue,
+                if (! invlist_contains_cp_(PL_utf8_charname_continue,
                                            utf8_to_uv_or_die((const U8 *) s,
                                                              (const U8 *) e,
                                                              &advance)))

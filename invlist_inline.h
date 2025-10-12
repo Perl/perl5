@@ -45,12 +45,12 @@ S_get_invlist_offset_addr(SV* invlist)
 }
 
 PERL_STATIC_INLINE UV
-S__invlist_len(SV* const invlist)
+S_invlist_len_(SV* const invlist)
 {
     /* Returns the current number of elements stored in the inversion list's
      * array */
 
-    PERL_ARGS_ASSERT__INVLIST_LEN;
+    PERL_ARGS_ASSERT_INVLIST_LEN_;
 
     assert(is_invlist(invlist));
 
@@ -60,13 +60,13 @@ S__invlist_len(SV* const invlist)
 }
 
 PERL_STATIC_INLINE bool
-S__invlist_contains_cp(SV* const invlist, const UV cp)
+S_invlist_contains_cp_(SV* const invlist, const UV cp)
 {
     /* Does <invlist> contain code point <cp> as part of the set? */
 
-    IV index = _invlist_search(invlist, cp);
+    IV index = invlist_search_(invlist, cp);
 
-    PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP;
+    PERL_ARGS_ASSERT_INVLIST_CONTAINS_CP_;
 
     return index >= 0 && ELEMENT_RANGE_MATCHES_INVLIST(index);
 }
@@ -82,7 +82,7 @@ S_invlist_array(SV* const invlist)
 
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
-    assert(_invlist_len(invlist));
+    assert(invlist_len_(invlist));
 
     /* The very first element always contains zero, The array begins either
      * there, or if the inversion list is offset, at the element after it.
@@ -128,7 +128,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 
 PERL_STATIC_INLINE SV*
 S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
-    return _add_range_to_invlist(invlist, cp, cp);
+    return add_range_to_invlist_(invlist, cp, cp);
 }
 
 PERL_STATIC_INLINE UV
@@ -139,7 +139,7 @@ S_invlist_highest(SV* const invlist)
      * 0, or if the list is empty.  If this distinction matters to you, check
      * for emptiness before calling this function */
 
-    UV len = _invlist_len(invlist);
+    UV len = invlist_len_(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_HIGHEST;
@@ -172,7 +172,7 @@ S_invlist_highest_range_start(SV* const invlist)
      * distinction matters to you, check for emptiness before calling this
      * function. */
 
-    UV len = _invlist_len(invlist);
+    UV len = invlist_len_(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_HIGHEST_RANGE_START;
@@ -249,7 +249,7 @@ S_invlist_iternext(SV* invlist, UV* start, UV* end)
      * will start over at the beginning of the list */
 
     STRLEN* pos = get_invlist_iter_addr(invlist);
-    UV len = _invlist_len(invlist);
+    UV len = invlist_len_(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
@@ -356,7 +356,7 @@ S_invlist_lowest(SV* const invlist)
      * 0, or if the list is empty.  If this distinction matters to you, check
      * for emptiness before calling this function */
 
-    UV len = _invlist_len(invlist);
+    UV len = invlist_len_(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_LOWEST;
