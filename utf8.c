@@ -3560,19 +3560,19 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 bool
 Perl_is_uni_FOO_(pTHX_ const U8 classnum, const UV c)
 {
-    return _invlist_contains_cp(PL_XPosix_ptrs[classnum], c);
+    return invlist_contains_cp_(PL_XPosix_ptrs[classnum], c);
 }
 
 bool
 Perl_is_uni_perl_idcont_(pTHX_ UV c)
 {
-    return _invlist_contains_cp(PL_utf8_perl_idcont, c);
+    return invlist_contains_cp_(PL_utf8_perl_idcont, c);
 }
 
 bool
 Perl_is_uni_perl_idstart_(pTHX_ UV c)
 {
-    return _invlist_contains_cp(PL_utf8_perl_idstart, c);
+    return invlist_contains_cp_(PL_utf8_perl_idstart, c);
 }
 
 UV
@@ -3927,7 +3927,7 @@ STATIC Size_t
 S_is_utf8_in_invlist(pTHX_ const U8 * p, const U8 * e, SV * const invlist)
 {
     Size_t advance;
-    if (_invlist_contains_cp(invlist, utf8_to_uv_or_die(p, e, &advance))) {
+    if (invlist_contains_cp_(invlist, utf8_to_uv_or_die(p, e, &advance))) {
         return advance;
     }
 
@@ -3994,7 +3994,7 @@ S_to_case_cp_list(pTHX_
 
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [perl #133365] */
-    index = _invlist_search(invlist, original);
+    index = invlist_search_(invlist, original);
     base = invmap[index];
 
     /* Most likely, the case change will contain just a single code point */
@@ -4144,7 +4144,7 @@ Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
 
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [GH #16624] */
-    SSize_t index = _invlist_search(PL_utf8_foldclosures, cp);
+    SSize_t index = invlist_search_(PL_utf8_foldclosures, cp);
     assert(index >= 0);
     I32 base = _Perl_IVCF_invmap[index];
 
@@ -4305,7 +4305,7 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
              * modifier with a ccc of 230 may intervene */
             Size_t advance;
             cp = utf8_to_uv_or_die(p, e, &advance);
-            if (! _invlist_contains_cp(PL_CCC_non0_non230, cp)) {
+            if (! invlist_contains_cp_(PL_CCC_non0_non230, cp)) {
                 break;
             }
 

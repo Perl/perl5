@@ -92,12 +92,12 @@ typedef struct regexp_paren_pair {
 } regexp_paren_pair;
 
 #  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
-#    define _invlist_union(a, b, output) _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
-#    define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
+#    define invlist_union_(a, b, output) invlist_union_maybe_complement_2nd_(a, b, FALSE, output)
+#    define invlist_intersection_(a, b, output) invlist_intersection_maybe_complement_2nd_(a, b, FALSE, output)
 
 /* Subtracting b from a leaves in a everything that was there that isn't in b,
  * that is the intersection of a with b's complement */
-#    define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
+#    define invlist_subtract_(a, b, output) invlist_intersection_maybe_complement_2nd_(a, b, TRUE, output)
 #  endif
 
 /* record the position of a (?{...}) within a pattern */

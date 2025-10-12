@@ -6110,7 +6110,7 @@ Perl_invmap_dump(pTHX_ SV* invlist, UV *map)
 
     const unsigned int indent = 4;
 
-    UV len = _invlist_len(invlist);
+    UV len = invlist_len_(invlist);
     UV * array = invlist_array(invlist);
 
     if (len == 0) {
@@ -6567,7 +6567,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * automatically keeps it sorted as we go along */
     if (complement) {
         UV start, end;
-        SV * inverted_tlist = _new_invlist(tlen);
+        SV * inverted_tlist = new_invlist_(tlen);
         Size_t temp_len;
 
         DEBUG_y(PerlIO_printf(Perl_debug_log,
@@ -6602,14 +6602,14 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                     t_cp_end = valid_utf8_to_uv(t, &t_char_len);
                     t += t_char_len;
 
-                    inverted_tlist = _add_range_to_invlist(inverted_tlist,
+                    inverted_tlist = add_range_to_invlist_(inverted_tlist,
                                                       t_cp, t_cp_end);
                 }
             }
         } /* End of parse through tstr */
 
         /* The inversion list is done; now invert it */
-        _invlist_invert(inverted_tlist);
+        invlist_invert_(inverted_tlist);
 
         /* Now go through the inverted list and create a new tstr for the rest
          * of the routine to use.  Since the UTF-8 version can have ranges, and
@@ -6657,10 +6657,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         rstr_utf8  = tstr_utf8;
     }
 
-    t_invlist = _new_invlist(1);
+    t_invlist = new_invlist_(1);
 
     /* Initialize to a single range */
-    t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
+    t_invlist = add_range_to_invlist_(t_invlist, 0, UV_MAX);
 
     /* Below, we parse the (potentially adjusted) input, creating the inversion
      * map.  This is done in two passes.  The first pass is just to determine
@@ -6695,7 +6695,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                      invmap_dump(t_invlist, r_map));
 
             /* In the second pass, we start with a single range */
-            t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
+            t_invlist = add_range_to_invlist_(t_invlist, 0, UV_MAX);
             len = 1;
             t_array = invlist_array(t_invlist);
         }
@@ -6881,7 +6881,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
              * the return value is the index into the list's array of the range
              * that contains <cp>, that is, 'i' such that
              *      array[i] <= cp < * array[i+1] */
-            j = _invlist_search(t_invlist, t_cp);
+            j = invlist_search_(t_invlist, t_cp);
             assert(j >= 0);
             i = j;
 

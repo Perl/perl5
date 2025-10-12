@@ -1850,11 +1850,11 @@
        defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
        defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
        defined(PERL_IN_UTF8_C)
-#     define _invlist_contains_cp               S__invlist_contains_cp
-#     define _invlist_len                       S__invlist_len
-#     define _invlist_search                    Perl__invlist_search
 #     define get_invlist_offset_addr            S_get_invlist_offset_addr
 #     define invlist_array                      S_invlist_array
+#     define invlist_contains_cp_               S_invlist_contains_cp_
+#     define invlist_len_                       S_invlist_len_
+#     define invlist_search_                    Perl_invlist_search_
 #     define is_invlist                         S_is_invlist
 #   endif
 #   if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
@@ -1866,12 +1866,12 @@
 #   endif
 #   if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
        defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
-#     define _add_range_to_invlist(a,b,c)       Perl__add_range_to_invlist(aTHX_ a,b,c)
-#     define _invlist_intersection_maybe_complement_2nd(a,b,c,d) Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
-#     define _invlist_invert(a)                 Perl__invlist_invert(aTHX_ a)
-#     define _invlist_union_maybe_complement_2nd(a,b,c,d) Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
-#     define _new_invlist(a)                    Perl__new_invlist(aTHX_ a)
-#     define _setup_canned_invlist(a,b,c)       Perl__setup_canned_invlist(aTHX_ a,b,c)
+#     define add_range_to_invlist_(a,b,c)       Perl_add_range_to_invlist_(aTHX_ a,b,c)
+#     define invlist_intersection_maybe_complement_2nd_(a,b,c,d) Perl_invlist_intersection_maybe_complement_2nd_(aTHX_ a,b,c,d)
+#     define invlist_invert_(a)                 Perl_invlist_invert_(aTHX_ a)
+#     define invlist_union_maybe_complement_2nd_(a,b,c,d) Perl_invlist_union_maybe_complement_2nd_(aTHX_ a,b,c,d)
+#     define new_invlist_(a)                    Perl_new_invlist_(aTHX_ a)
+#     define setup_canned_invlist_(a,b,c)       Perl_setup_canned_invlist_(aTHX_ a,b,c)
 #   endif
 #   if defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
        defined(PERL_IN_TOKE_C)
@@ -1886,7 +1886,7 @@
 #   endif
 #   if defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
        defined(PERL_IN_REGCOMP_ANY)
-#     define _invlist_dump(a,b,c,d)             Perl__invlist_dump(aTHX_ a,b,c,d)
+#     define invlist_dump_(a,b,c,d)             Perl_invlist_dump_(aTHX_ a,b,c,d)
 #   endif
 #   if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #     define gv_stashsvpvn_cached(a,b,c,d)      Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
@@ -1899,8 +1899,8 @@
 #   endif
 #   if defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
        defined(PERL_IN_UTF8_C)
-#     define _invlistEQ(a,b,c)                  Perl__invlistEQ(aTHX_ a,b,c)
-#     define _new_invlist_C_array(a)            Perl__new_invlist_C_array(aTHX_ a)
+#     define invlistEQ_(a,b,c)                  Perl_invlistEQ_(aTHX_ a,b,c)
+#     define new_invlist_C_array_(a)            Perl_new_invlist_C_array_(aTHX_ a)
 #   endif
 #   if defined(PERL_IN_PP_C)   || defined(PERL_IN_REGCOMP_ANY) || \
        defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
@@ -2006,9 +2006,9 @@
 #     define regdump_intflags(a,b)              S_regdump_intflags(aTHX_ a,b)
 #   endif
 #   if defined(PERL_IN_REGCOMP_INVLIST_C) && !defined(PERL_EXT_RE_BUILD)
-#     define _append_range_to_invlist(a,b,c)    S__append_range_to_invlist(aTHX_ a,b,c)
-#     define _invlist_array_init                S__invlist_array_init
+#     define append_range_to_invlist_(a,b,c)    S_append_range_to_invlist_(aTHX_ a,b,c)
 #     define get_invlist_previous_index_addr    S_get_invlist_previous_index_addr
+#     define invlist_array_init_                S_invlist_array_init_
 #     define invlist_clear(a)                   S_invlist_clear(aTHX_ a)
 #     define invlist_max                        S_invlist_max
 #     define invlist_previous_index             S_invlist_previous_index

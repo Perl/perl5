@@ -565,10 +565,10 @@ struct RExC_state_t {
 #define namedclass_to_classnum(class)  ((int) ((class) / 2))
 #define classnum_to_namedclass(classnum)  ((classnum) * 2)
 
-#define _invlist_union_complement_2nd(a, b, output) \
-                        _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
-#define _invlist_intersection_complement_2nd(a, b, output) \
-                 _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
+#define invlist_union_complement_2nd_(a, b, output) \
+                        invlist_union_maybe_complement_2nd_(a, b, TRUE, output)
+#define invlist_intersection_complement_2nd_(a, b, output) \
+                 invlist_intersection_maybe_complement_2nd_(a, b, TRUE, output)
 
 /* We add a marker if we are deferring expansion of a property that is both
  * 1) potentially user-defined; and

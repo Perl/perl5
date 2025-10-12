@@ -783,25 +783,25 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (start < NUM_ANYOF_CODE_POINTS) {
                 if (end < NUM_ANYOF_CODE_POINTS) {
                     bitmap_range_not_in_bitmap
-                          = _add_range_to_invlist(bitmap_range_not_in_bitmap,
+                          = add_range_to_invlist_(bitmap_range_not_in_bitmap,
                                                   start, end);
                 }
                 else {
                     bitmap_range_not_in_bitmap
-                          = _add_range_to_invlist(bitmap_range_not_in_bitmap,
+                          = add_range_to_invlist_(bitmap_range_not_in_bitmap,
                                                   start, NUM_ANYOF_CODE_POINTS);
                     start = NUM_ANYOF_CODE_POINTS;
                 }
             }
 
             if (start >= NUM_ANYOF_CODE_POINTS) {
-                nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+                nonbitmap_invlist = add_range_to_invlist_(nonbitmap_invlist,
                                                 ANYOFRbase(o),
                                                 ANYOFRbase(o) + ANYOFRdelta(o));
             }
         }
         else if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(o)) {
-            nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+            nonbitmap_invlist = add_range_to_invlist_(nonbitmap_invlist,
                                                       NUM_ANYOF_CODE_POINTS,
                                                       UV_MAX);
         }
@@ -816,11 +816,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              * resolved when this call was done; or much more likely because
              * there are matches that require UTF-8 to be valid, and so aren't
              * in the bitmap (or ANYOFR).  This is teased apart later */
-            _invlist_intersection(nonbitmap_invlist,
+            invlist_intersection_(nonbitmap_invlist,
                                   PL_InBitmap,
                                   &bitmap_range_not_in_bitmap);
             /* Leave just the things that don't fit into the bitmap */
-            _invlist_subtract(nonbitmap_invlist,
+            invlist_subtract_(nonbitmap_invlist,
                               PL_InBitmap,
                               &nonbitmap_invlist);
         }
@@ -882,14 +882,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                  * everything above the lower display should also match, but
                  * there is no indication of that.  Add this range so the code
                  * below will add it to the display */
-                _invlist_union_complement_2nd(nonbitmap_invlist,
+                invlist_union_complement_2nd_(nonbitmap_invlist,
                                               PL_InBitmap,
                                               &nonbitmap_invlist);
             }
         }
 
         /* And, finally, add the above-the-bitmap stuff */
-        if (nonbitmap_invlist && _invlist_len(nonbitmap_invlist)) {
+        if (nonbitmap_invlist && invlist_len_(nonbitmap_invlist)) {
             SV* contents;
 
             /* See if truncation size is overridden */
@@ -907,8 +907,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              * there are unresolved items, where the inversion has to be
              * delayed until runtime */
             if (inverted && ! unresolved) {
-                _invlist_invert(nonbitmap_invlist);
-                _invlist_subtract(nonbitmap_invlist, PL_InBitmap, &nonbitmap_invlist);
+                invlist_invert_(nonbitmap_invlist);
+                invlist_subtract_(nonbitmap_invlist, PL_InBitmap, &nonbitmap_invlist);
             }
 
             contents = invlist_contents(nonbitmap_invlist,
@@ -977,7 +977,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         sv_catpvf(sv, "[%s", PL_colors[0]);
         if (op == NANYOFM) {
-            _invlist_invert(cp_list);
+            invlist_invert_(cp_list);
         }
 
         put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, true);
@@ -1353,17 +1353,17 @@ S_put_charclass_bitmap_innards_common(pTHX_
         sv_catsv(output, posixes);
     }
 
-    if (only_utf8 && _invlist_len(only_utf8)) {
+    if (only_utf8 && invlist_len_(only_utf8)) {
         sv_catpvf(output, "%s{utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8);
     }
 
-    if (not_utf8 && _invlist_len(not_utf8)) {
+    if (not_utf8 && invlist_len_(not_utf8)) {
         sv_catpvf(output, "%s{not utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, not_utf8);
     }
 
-    if (only_utf8_locale && _invlist_len(only_utf8_locale)) {
+    if (only_utf8_locale && invlist_len_(only_utf8_locale)) {
         sv_catpvf(output, "%s{utf8 locale}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8_locale);
 
@@ -1376,7 +1376,7 @@ S_put_charclass_bitmap_innards_common(pTHX_
             UV start, end;
             SV* above_bitmap = NULL;
 
-            _invlist_subtract(only_utf8_locale, PL_InBitmap, &above_bitmap);
+            invlist_subtract_(only_utf8_locale, PL_InBitmap, &above_bitmap);
 
             invlist_iterinit(above_bitmap);
             while (invlist_iternext(above_bitmap, &start, &end)) {
@@ -1476,7 +1476,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
         invlist = invlist_clone(nonbitmap_invlist, NULL);
     }
     else {  /* Worst case size is every other code point is matched */
-        invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
+        invlist = new_invlist_(NUM_ANYOF_CODE_POINTS / 2);
     }
 
     if (flags) {
@@ -1486,8 +1486,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
              * nonbitmap list are precisely the ones that match only when the
              * target is UTF-8 (they should all be non-ASCII). */
             if (flags & ANYOF_HAS_EXTRA_RUNTIME_MATCHES) {
-                _invlist_intersection(invlist, PL_UpperLatin1, &only_utf8);
-                _invlist_subtract(invlist, only_utf8, &invlist);
+                invlist_intersection_(invlist, PL_UpperLatin1, &only_utf8);
+                invlist_subtract_(invlist, only_utf8, &invlist);
             }
 
             /* And this flag for matching all non-ASCII 0xFF and below */
@@ -1528,7 +1528,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                      i < NUM_ANYOF_CODE_POINTS && BITMAP_TEST(bitmap, i);
                      i++)
                 { /* empty */ }
-                invlist = _add_range_to_invlist(invlist, start, i-1);
+                invlist = add_range_to_invlist_(invlist, start, i-1);
             }
         }
     }
@@ -1538,10 +1538,10 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      * This could happen if the code that populates these misses some
      * duplication. */
     if (only_utf8) {
-        _invlist_subtract(only_utf8, invlist, &only_utf8);
+        invlist_subtract_(only_utf8, invlist, &only_utf8);
     }
     if (not_utf8) {
-        _invlist_subtract(not_utf8, invlist, &not_utf8);
+        invlist_subtract_(not_utf8, invlist, &not_utf8);
     }
 
     if (only_utf8_locale_invlist) {
@@ -1550,7 +1550,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
          * modifying it */
         only_utf8_locale = invlist_clone(only_utf8_locale_invlist, NULL);
 
-        _invlist_subtract(only_utf8_locale, invlist, &only_utf8_locale);
+        invlist_subtract_(only_utf8_locale, invlist, &only_utf8_locale);
 
         /* And, it can get really weird for us to try outputting an inverted
          * form of this list when it has things above the bitmap, so don't even
@@ -1600,15 +1600,15 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
         /* For the unconditional inversion list, we have to add in all the
          * conditional code points, so that when inverted, they will be gone
          * from it */
-        _invlist_union(only_utf8, invlist, &invlist);
-        _invlist_union(not_utf8, invlist, &invlist);
-        _invlist_union(only_utf8_locale, invlist, &invlist);
-        _invlist_invert(invlist);
-        _invlist_intersection(invlist, PL_InBitmap, &invlist);
+        invlist_union_(only_utf8, invlist, &invlist);
+        invlist_union_(not_utf8, invlist, &invlist);
+        invlist_union_(only_utf8_locale, invlist, &invlist);
+        invlist_invert_(invlist);
+        invlist_intersection_(invlist, PL_InBitmap, &invlist);
 
         if (only_utf8) {
-            _invlist_invert(only_utf8);
-            _invlist_intersection(only_utf8, PL_UpperLatin1, &only_utf8);
+            invlist_invert_(only_utf8);
+            invlist_intersection_(only_utf8, PL_UpperLatin1, &only_utf8);
         }
         else if (not_utf8) {
 
@@ -1620,8 +1620,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
         }
 
         if (only_utf8_locale) {
-            _invlist_invert(only_utf8_locale);
-            _invlist_intersection(only_utf8_locale,
+            invlist_invert_(only_utf8_locale);
+            invlist_intersection_(only_utf8_locale,
                                   PL_InBitmap,
                                   &only_utf8_locale);
         }

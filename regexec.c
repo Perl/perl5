@@ -617,7 +617,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
         case CC_ENUM_XDIGIT_:    return is_XDIGIT_high(character);
         case CC_ENUM_VERTSPACE_: return is_VERTWS_high(character);
         default:
-            return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
+            return invlist_contains_cp_(PL_XPosix_ptrs[classnum],
                                         utf8_to_uv_or_die(character, e, NULL));
     }
     NOT_REACHED; /* NOTREACHED */
@@ -2182,7 +2182,7 @@ STMT_START {                                                                \
 #ifdef DEBUGGING
 static IV
 S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
-  IV cp_out = _invlist_search(invlist, cp_in);
+  IV cp_out = invlist_search_(invlist, cp_in);
   assert(cp_out >= 0);
   return cp_out;
 }
@@ -2190,7 +2190,7 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
         invmap[S_get_break_val_cp_checked(invlist, cp)]
 #else
 #  define generic_GET_BREAK_VAL_CP_CHECKED_(invlist, invmap, cp) \
-        invmap[_invlist_search(invlist, cp)]
+        invmap[invlist_search_(invlist, cp)]
 #endif
 
 /* Takes a pointer to an inversion list, a pointer to its corresponding
@@ -2401,7 +2401,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         anyofh_list = GET_ANYOFH_INVLIST(prog, c);
         REXEC_FBC_UTF8_CLASS_SCAN(
               (   (U8) NATIVE_UTF8_TO_I8(*s) >= ANYOF_FLAGS(c)
-               && _invlist_contains_cp(anyofh_list,
+               && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) s,
                                                          (U8 *) strend,
                                                          NULL))));
@@ -2415,7 +2415,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
             anyofh_list = GET_ANYOFH_INVLIST(prog, c);
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
-                   _invlist_contains_cp(anyofh_list,
+                   invlist_contains_cp_(anyofh_list,
                                            utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL)));
@@ -2443,7 +2443,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     (   inRANGE(NATIVE_UTF8_TO_I8(*s),
                                 LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)),
                                 HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(c)))
-                   && _invlist_contains_cp(anyofh_list,
+                   && invlist_contains_cp_(anyofh_list,
                                            utf8_to_uv_or_die((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL))));
@@ -2456,7 +2456,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         ((struct regnode_anyofhs *) c)->string,
                         /* Note FLAGS is the string length in this regnode */
                         ((struct regnode_anyofhs *) c)->string + FLAGS(c),
-                        _invlist_contains_cp(anyofh_list,
+                        invlist_contains_cp_(anyofh_list,
                                              utf8_to_uv_or_die((U8 *) s,
                                                                (U8 *) strend,
                                                                NULL)));
@@ -3204,7 +3204,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         switch (classnum) {
           default:
             REXEC_FBC_UTF8_CLASS_SCAN(
-                        to_complement ^ cBOOL(_invlist_contains_cp(
+                        to_complement ^ cBOOL(invlist_contains_cp_(
                                                 PL_XPosix_ptrs[classnum],
                                                 utf8_to_uv_or_die((U8 *) s,
                                                                 (U8 *) strend,
@@ -7789,7 +7789,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   NEXTCHR_IS_EOS
                 ||   ANYOF_FLAGS(scan) > NATIVE_UTF8_TO_I8(*locinput)
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
-                || ! _invlist_contains_cp(anyofh_list,
+                || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
@@ -7804,7 +7804,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   NEXTCHR_IS_EOS
                 ||   ANYOF_FLAGS(scan) != (U8) *locinput
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
-                || ! _invlist_contains_cp(anyofh_list,
+                || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
@@ -7834,7 +7834,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                              LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(scan)),
                              HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(scan)))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
-                || ! _invlist_contains_cp(anyofh_list,
+                || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
@@ -7850,7 +7850,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ||   loceol - locinput < FLAGS(scan)
                 ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
-                || ! _invlist_contains_cp(anyofh_list,
+                || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
                                                             (U8 *) loceol,
                                                             NULL)))
@@ -8037,7 +8037,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 switch (classnum) {
                     default:
                         if (! (to_complement
-                           ^ cBOOL(_invlist_contains_cp(
+                           ^ cBOOL(invlist_contains_cp_(
                                       PL_XPosix_ptrs[classnum],
                                       utf8_to_uv_or_die((U8 *) locinput,
                                                         (U8 *) reginfo->strend,
@@ -10752,7 +10752,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         while (  hardcount < max
                && scan < this_eol
                && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-               && _invlist_contains_cp(anyofh_list,
+               && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
                                                          &advance)))
@@ -10768,7 +10768,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         while (   hardcount < max
                && scan < this_eol
                && (U8) *scan == ANYOF_FLAGS(p)
-               && _invlist_contains_cp(anyofh_list,
+               && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
                                                          &advance)))
@@ -10798,7 +10798,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                           LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)),
                           HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)))
                && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-               && _invlist_contains_cp(anyofh_list,
+               && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
                                                          &advance)))
@@ -10813,7 +10813,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         while (   hardcount < max
                && scan + FLAGS(p) < this_eol
                && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
-               && _invlist_contains_cp(anyofh_list,
+               && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
                                                          &advance)))
@@ -10966,7 +10966,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
           default:
             while (   hardcount < max && scan < this_eol
                    && to_complement
-                    ^ cBOOL(_invlist_contains_cp(PL_XPosix_ptrs[classnum],
+                    ^ cBOOL(invlist_contains_cp_(PL_XPosix_ptrs[classnum],
                        utf8_to_uv_or_die((U8 *) scan, (U8 *) this_eol, NULL))))
             {
                 scan += UTF8SKIP(scan);
@@ -11224,7 +11224,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                                                       &only_utf8_locale, NULL);
                 if (definition) {
                     /* Most likely is the outside-the-bitmap inversion list. */
-                    if (_invlist_contains_cp(definition, c)) {
+                    if (invlist_contains_cp_(definition, c)) {
                         match = true;
                     }
                     else /* Failing that, hardcode the two tests for a Turkic
@@ -11235,13 +11235,13 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                         /* Turkish locales have these hard-coded rules
                          * overriding normal ones */
                         if (*p == 'i') {
-                            if (_invlist_contains_cp(definition,
+                            if (invlist_contains_cp_(definition,
                                          LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
                             {
                                 match = true;
                             }
                         }
-                        else if (_invlist_contains_cp(definition,
+                        else if (invlist_contains_cp_(definition,
                                                  LATIN_SMALL_LETTER_DOTLESS_I))
                         {
                             match = true;
@@ -11253,7 +11253,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     && UNLIKELY(IN_UTF8_CTYPE_LOCALE)
                     && ! match)
                 {
-                    match = _invlist_contains_cp(only_utf8_locale, c);
+                    match = invlist_contains_cp_(only_utf8_locale, c);
                 }
             }
 
@@ -11661,7 +11661,7 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
 
     /* Otherwise, unassigned code points are forbidden */
     if (UNLIKELY(! ELEMENT_RANGE_MATCHES_INVLIST(
-                                    _invlist_search(PL_Assigned_invlist, cp))))
+                                    invlist_search_(PL_Assigned_invlist, cp))))
     {
         return false;
     }
@@ -11871,7 +11871,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         }
         else {
             script_of_char = _Perl_SCX_invmap[
-                                       _invlist_search(PL_SCX_invlist, cp)];
+                                       invlist_search_(PL_SCX_invlist, cp)];
         }
 
         /* We arbitrarily accept a single unassigned character, but not in
@@ -12092,7 +12092,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         }
         else {  /* Need to look up if this character is a digit or not */
             SSize_t index_of_zero_of_char;
-            index_of_zero_of_char = _invlist_search(decimals_invlist, cp);
+            index_of_zero_of_char = invlist_search_(decimals_invlist, cp);
             if (     UNLIKELY(index_of_zero_of_char < 0)
                 || ! ELEMENT_RANGE_MATCHES_INVLIST(index_of_zero_of_char))
             {

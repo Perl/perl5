@@ -88,7 +88,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
     SSize_t bytelen = STR_LEN(node);
     UV uc;
     /* Start out big enough for 2 separate code points */
-    SV* invlist = _new_invlist(4);
+    SV* invlist = new_invlist_(4);
 
     PERL_ARGS_ASSERT_MAKE_EXACTF_INVLIST;
 
@@ -104,14 +104,14 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
          *  plus several other things; and making sure we have all the
          *  possibilities is hard. */
         if (is_MULTI_CHAR_FOLD_latin1_safe(s, s + bytelen)) {
-            invlist = _add_range_to_invlist(invlist, 0, UV_MAX);
+            invlist = add_range_to_invlist_(invlist, 0, UV_MAX);
         }
         else {
             /* Any Latin1 range character can potentially match any
              * other depending on the locale, and in Turkic locales, 'I' and
              * 'i' can match U+130 and U+131 */
             if (OP(node) == EXACTFL) {
-                _invlist_union(invlist, PL_Latin1, &invlist);
+                invlist_union_(invlist, PL_Latin1, &invlist);
                 if (isALPHA_FOLD_EQ(uc, 'I')) {
                     invlist = add_cp_to_invlist(invlist,
                                                 LATIN_SMALL_LETTER_DOTLESS_I);
@@ -190,7 +190,7 @@ S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
          * multi-char fold  */
 
         if (is_MULTI_CHAR_FOLD_utf8_safe(s, e)) {
-            invlist = _add_range_to_invlist(invlist, 0, UV_MAX);
+            invlist = add_range_to_invlist_(invlist, 0, UV_MAX);
         }
         else {  /* Single char fold */
             unsigned int k;
@@ -310,7 +310,7 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
     assert(is_ANYOF_SYNTHETIC(ssc));
 
     /* mortalize so won't leak */
-    ssc->invlist = sv_2mortal(_add_range_to_invlist(NULL, 0, UV_MAX));
+    ssc->invlist = sv_2mortal(add_range_to_invlist_(NULL, 0, UV_MAX));
     ANYOF_FLAGS(ssc) |= SSC_MATCHES_EMPTY_STRING;  /* Plus matches empty */
 }
 
@@ -441,8 +441,8 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Look at the data structure created by S_set_ANYOF_arg() */
     if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)) {
-        invlist = sv_2mortal(_new_invlist(1));
-        invlist = _add_range_to_invlist(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
+        invlist = sv_2mortal(new_invlist_(1));
+        invlist = add_range_to_invlist_(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
     }
     else if (ANYOF_HAS_AUX(node)) {
         const U32 n = ARG1u(node);
@@ -454,8 +454,8 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
             /* Here there are things that won't be known until runtime -- we
              * have to assume it could be anything */
-            invlist = sv_2mortal(_new_invlist(1));
-            return _add_range_to_invlist(invlist, 0, UV_MAX);
+            invlist = sv_2mortal(new_invlist_(1));
+            return add_range_to_invlist_(invlist, 0, UV_MAX);
         }
         else if (ary[INVLIST_INDEX]) {
 
@@ -472,7 +472,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     if (! invlist) {
-        invlist = sv_2mortal(_new_invlist(0));
+        invlist = sv_2mortal(new_invlist_(0));
     }
 
     /* An ANYOF node contains a bitmap for the first NUM_ANYOF_CODE_POINTS
@@ -486,7 +486,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * have to do this here before we add the unconditionally matched code
      * points */
     if (flags & ANYOF_INVERT) {
-        _invlist_intersection_complement_2nd(invlist,
+        invlist_intersection_complement_2nd_(invlist,
                                              PL_UpperLatin1,
                                              &invlist);
     }
@@ -502,7 +502,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                 {
                     /* empty */
                 }
-                invlist = _add_range_to_invlist(invlist, start, i-1);
+                invlist = add_range_to_invlist_(invlist, start, i-1);
                 new_node_has_latin1 = true;
             }
         }
@@ -516,39 +516,39 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         &&  OP(node) == ANYOFD
         && (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared))
     {
-        _invlist_union(invlist, PL_UpperLatin1, &invlist);
+        invlist_union_(invlist, PL_UpperLatin1, &invlist);
     }
 
     /* Similarly for these */
     if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)) {
-        _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
+        invlist_union_complement_2nd_(invlist, PL_InBitmap, &invlist);
     }
 
     if (flags & ANYOF_INVERT) {
-        _invlist_invert(invlist);
+        invlist_invert_(invlist);
     }
     else if (flags & ANYOFL_FOLD) {
         if (new_node_has_latin1) {
 
             /* These folds are potential in Turkic locales */
-            if (_invlist_contains_cp(invlist, 'i')) {
+            if (invlist_contains_cp_(invlist, 'i')) {
                 invlist = add_cp_to_invlist(invlist,
                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE);
             }
-            if (_invlist_contains_cp(invlist, 'I')) {
+            if (invlist_contains_cp_(invlist, 'I')) {
                 invlist = add_cp_to_invlist(invlist,
                                                 LATIN_SMALL_LETTER_DOTLESS_I);
             }
 
             /* Under /li, any 0-255 could fold to any other 0-255, depending on
              * the locale.  We can skip this if there are no 0-255 at all. */
-            _invlist_union(invlist, PL_Latin1, &invlist);
+            invlist_union_(invlist, PL_Latin1, &invlist);
         }
         else {
-            if (_invlist_contains_cp(invlist, LATIN_SMALL_LETTER_DOTLESS_I)) {
+            if (invlist_contains_cp_(invlist, LATIN_SMALL_LETTER_DOTLESS_I)) {
                 invlist = add_cp_to_invlist(invlist, 'I');
             }
-            if (_invlist_contains_cp(invlist,
+            if (invlist_contains_cp_(invlist,
                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
             {
                 invlist = add_cp_to_invlist(invlist, 'i');
@@ -560,7 +560,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * deferred until after the non-UTF-8 locale ones are taken care of just
      * above, or it leads to wrong results under ANYOF_INVERT */
     if (only_utf8_locale_invlist) {
-        _invlist_union_maybe_complement_2nd(invlist,
+        invlist_union_maybe_complement_2nd_(invlist,
                                             only_utf8_locale_invlist,
                                             flags & ANYOF_INVERT,
                                             &invlist);
@@ -845,7 +845,7 @@ S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert2nd)
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
-    _invlist_union_maybe_complement_2nd(ssc->invlist,
+    invlist_union_maybe_complement_2nd_(ssc->invlist,
                                         invlist,
                                         invert2nd,
                                         &ssc->invlist);
@@ -860,7 +860,7 @@ S_ssc_intersection(pTHX_ regnode_ssc *ssc,
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
-    _invlist_intersection_maybe_complement_2nd(ssc->invlist,
+    invlist_intersection_maybe_complement_2nd_(ssc->invlist,
                                                invlist,
                                                invert2nd,
                                                &ssc->invlist);
@@ -873,7 +873,7 @@ S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
-    ssc->invlist = _add_range_to_invlist(ssc->invlist, start, end);
+    ssc->invlist = add_range_to_invlist_(ssc->invlist, start, end);
 }
 
 STATIC void
@@ -881,7 +881,7 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 {
     /* AND just the single code point 'cp' into the SSC 'ssc' */
 
-    SV* cp_list = _new_invlist(2);
+    SV* cp_list = new_invlist_(2);
 
     PERL_ARGS_ASSERT_SSC_CP_AND;
 
@@ -2948,7 +2948,7 @@ Perl_study_chunk(pTHX_
 
                 case REG_ANY:
                     {
-                        SV* REG_ANY_invlist = _new_invlist(2);
+                        SV* REG_ANY_invlist = new_invlist_(2);
                         REG_ANY_invlist = add_cp_to_invlist(REG_ANY_invlist,
                                                             '\n');
                         if (flags & SCF_DO_STCLASS_OR) {
@@ -3024,7 +3024,7 @@ Perl_study_chunk(pTHX_
                   {
                     SV* cp_list = NULL;
 
-                    cp_list = _add_range_to_invlist(cp_list,
+                    cp_list = add_range_to_invlist_(cp_list,
                                         ANYOFRbase(scan),
                                         ANYOFRbase(scan) + ANYOFRdelta(scan));
 
@@ -3055,7 +3055,7 @@ Perl_study_chunk(pTHX_
                         }
                         /* No individual code points can now match */
                         data->start_class->invlist
-                                                = sv_2mortal(_new_invlist(0));
+                                                = sv_2mortal(new_invlist_(0));
                     }
                     else {
                         int complement = namedclass + ((invert) ? -1 : 1);
@@ -3101,7 +3101,7 @@ Perl_study_chunk(pTHX_
                      * invert, we want to get rid of all of them so that the
                      * inversion will match all */
                     if (OP(scan) == NPOSIXD) {
-                        _invlist_subtract(my_invlist, PL_UpperLatin1,
+                        invlist_subtract_(my_invlist, PL_UpperLatin1,
                                           &my_invlist);
                     }
 

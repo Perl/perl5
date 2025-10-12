@@ -4530,7 +4530,7 @@ PP_wrapped(pp_uc, 1, 0)
             if (UNLIKELY(in_iota_subscript)) {
                 UV cp = utf8_to_uv_or_die(s, send, &this_len);
 
-                if (! _invlist_contains_cp(PL_utf8_mark, cp)) {
+                if (! invlist_contains_cp_(PL_utf8_mark, cp)) {
 
                     /* A non-mark.  Time to output the iota subscript */
                     *d++ = UTF8_TWO_BYTE_HI(GREEK_CAPITAL_LETTER_IOTA);

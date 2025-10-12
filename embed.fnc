@@ -4460,11 +4460,11 @@ RS	|Size_t |do_trans_simple|NN SV * const sv			\
 ERTi	|bool * |get_invlist_offset_addr				\
 				|NN SV *invlist
 ERTi	|UV *	|invlist_array	|NN SV * const invlist
-ERTi	|bool	|_invlist_contains_cp					\
+ERTi	|bool	|invlist_contains_cp_					\
 				|NN SV * const invlist			\
 				|const UV cp
-ERTi	|UV	|_invlist_len	|NN SV * const invlist
-ERTXp	|SSize_t|_invlist_search|NN SV * const invlist			\
+ERTi	|UV	|invlist_len_	|NN SV * const invlist
+ERTXp	|SSize_t|invlist_search_|NN SV * const invlist			\
 				|const UV cp
 ERTi	|bool	|is_invlist	|NULLOK const SV * const invlist
 #endif
@@ -4482,34 +4482,34 @@ Ei	|void	|invlist_set_len|NN SV * const invlist			\
 #endif
 #if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
-ERXp	|SV *	|_add_range_to_invlist					\
+ERXp	|SV *	|add_range_to_invlist_					\
 				|NULLOK SV *invlist			\
 				|UV start				\
 				|UV end
-m	|void	|_invlist_intersection					\
+m	|void	|invlist_intersection_					\
 				|NN SV * const a			\
 				|NN SV * const b			\
 				|NN SV **i
-EXp	|void	|_invlist_intersection_maybe_complement_2nd		\
+EXp	|void	|invlist_intersection_maybe_complement_2nd_		\
 				|NULLOK SV * const a			\
 				|NN SV * const b			\
 				|const bool complement_b		\
 				|NN SV **i
-EXp	|void	|_invlist_invert|NN SV * const invlist
-m	|void	|_invlist_subtract					\
+EXp	|void	|invlist_invert_|NN SV * const invlist
+m	|void	|invlist_subtract_					\
 				|NN SV * const a			\
 				|NN SV * const b			\
 				|NN SV **result
-m	|void	|_invlist_union |NULLOK SV * const a			\
+m	|void	|invlist_union_ |NULLOK SV * const a			\
 				|NN SV * const b			\
 				|NN SV **output
-EXp	|void	|_invlist_union_maybe_complement_2nd			\
+EXp	|void	|invlist_union_maybe_complement_2nd_			\
 				|NULLOK SV * const a			\
 				|NN SV * const b			\
 				|const bool complement_b		\
 				|NN SV **output
-ERXp	|SV *	|_new_invlist	|IV initial_size
-ERXp	|SV *	|_setup_canned_invlist					\
+ERXp	|SV *	|new_invlist_	|IV initial_size
+ERXp	|SV *	|setup_canned_invlist_					\
 				|const STRLEN size			\
 				|const UV element0			\
 				|NN UV **other_elements_ptr
@@ -4573,7 +4573,7 @@ opx	|void	|hv_kill_backrefs					\
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
-EXp	|void	|_invlist_dump	|NN PerlIO *file			\
+EXp	|void	|invlist_dump_	|NN PerlIO *file			\
 				|I32 level				\
 				|NN const char * const indent		\
 				|NN SV * const invlist
@@ -5194,10 +5194,10 @@ So	|void	|validate_suid	|NN PerlIO *rsfp
 #endif /* defined(PERL_IN_PERL_C) */
 #if defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
     defined(PERL_IN_UTF8_C)
-EXp	|bool	|_invlistEQ	|NN SV * const a			\
+EXp	|bool	|invlistEQ_	|NN SV * const a			\
 				|NN SV * const b			\
 				|const bool complement_b
-ERXp	|SV *	|_new_invlist_C_array					\
+ERXp	|SV *	|new_invlist_C_array_					\
 				|NN const UV * const list
 #endif
 #if defined(PERL_IN_PP_C)
@@ -5730,7 +5730,7 @@ ES	|void	|regdump_intflags					\
 				|const U32 flags
 #endif
 #if defined(PERL_IN_REGCOMP_INVLIST_C) && !defined(PERL_EXT_RE_BUILD)
-ES	|void	|_append_range_to_invlist				\
+ES	|void	|append_range_to_invlist_				\
 				|NN SV * const invlist			\
 				|const UV start 			\
 				|const UV end
@@ -5739,7 +5739,7 @@ ERTi	|IV *	|get_invlist_previous_index_addr			\
 S	|void	|initialize_invlist_guts				\
 				|NN SV *invlist 			\
 				|const Size_t initial_size
-ERTi	|UV *	|_invlist_array_init					\
+ERTi	|UV *	|invlist_array_init_					\
 				|NN SV * const invlist			\
 				|const bool will_have_0
 Ei	|void	|invlist_clear	|NN SV *invlist
