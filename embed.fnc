@@ -158,28 +158,111 @@
 :   that performs parameter sanity validation.  If the function is named
 :   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
 :   should place a call to that macro in foo() before any other code.  It will
-:   automatically expand to whatever checking is currently generated for foo
+:   automatically expand to whatever checking is currently generated for 'foo'
 :   (often none).  These are in the form of assert() calls, so they are only
 :   activated for DEBUGGING builds.
 :
-:   You must specify what checking is needed for all pointer arguments.  If the
-:   pointer is allowed to point to NULL, prefix that argument with 'NULLOK'
-:   (following the template of the many entries in this file that have that).
-:   If it can't be NULL, use 'NN' (again many entries herein do that).
-:   The reason for this requirement is to tell the maintainers that you have
-:   considered the question about the argument, and this is the answer.
+:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
+:   functions.  But a porting test enforces that a non-empty one does get
+:   included.  The call should be at the top of your function so that the
+:   sanity checks have passed before anything tries to use an argument.  When
+:   writing a new function, add the macro even if not required, and you'll
+:   never have to go back and add one later when more checks do get added.
 :
-:   For a numeric argument, you may specify that it can't be 0 by using 'NZ'
+:   (Much of the perl core was written assuming the ARGS_ASSERT macro needed to
+:   be placed after any declarations because of the C89 Standard.  That is no
+:   longer true with C99; feel free when modifying code in the vicinity to move
+:   this call to the very beginning of the function.)
+:
+:   The contents of ARGS_ASSERT are determined by
+:	1)  constraints you give in this file.  Each such constraint is
+:	    positioned in the input between the '|' that marks the beginning of
+:	    a parameter definition, and the the definition itself, like
+:		|NN const char * const name
+:	2)  the internal logic used by code that reads this file.
+:	3)  explicit asserts that you add in this file.
+:
+:   Sections below give more details of each item.  For readability,
+:   constraints are split into two sections, one for pointer parameters, and
+:   one for the rest.
+:
+: *** Pointer Parameter Constraints
+:
+:   Every pointer parameter must have a constraint; one of the following:
+:
+:   NN	    means the called function is expecting this pointer parameter to be
+:	    non-NULL, and likely is not equipped to handle it being NULL.
+:   NULLOK  means the called function definitely can handle this parameter
+:	    being NULL.  The reason you need to specify this at all is to tell
+:	    future maintainers that you have considered the question about the
+:	    parameter, and this is the answer.
+:   SPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to a position in a character string, which the called
+:	    function is not to look behind.  If a parameter is marked with this
+:	    constraint, another parameter to the function must be marked with
+:	    one of the constraints below in this list.
+:   EPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to the position one byte beyond the end of a character
+:	    string.  The called function is not to look at the byte in that
+:	    position or any higher ones.  If a parameter is marked with this
+:	    constraint, another parameter to the function must be marked with
+:	    SPTR, or MPTR (described just below).  It also is fine to have
+:	    both an SPTR parameter and an MPTR one.
+:   MPTR    means that not only must this pointer parameter be non-NULL, it
+:	    points to a position somewhere in the middle of a character string.
+:	    If a parameter is marked with this constraint, another parameter to
+:	    the function must be marked with one of SPTR, EPTR, or EPTRQ
+:	    (described just below).  It also is fine to have both an SPTR
+:	    parameter and an EPTR (or EPTRQ) one.
+:   EPTRQ   is like EPTR, but the called function is equpped to handle the case
+:	    where the input SPTR and/or MPTR are equal to this parameter; they
+:	    don't have to be strictly less than it.  If a parameter is marked
+:	    with this constraint, no parameter may be marked as EPTR.
+:
+:   To summarize, either
+:	    SPTR <= MPTR <  EPTR
+:   or
+:	    SPTR <= MPTR <= EPTRQ
+:   In each equation all three or any two of the constraints must be present.
+:
+:   When only two constraints are present and one of them is either EPTR or
+:   EPTRQ, the difference between the remaining SPTR or MPTR becomes somewhat
+:   fuzzy; the generated assertion will be the same whichever constraint is
+:   used.  You should choose the one that makes the most sense for the
+:   semantics of the parameter.  For example, there are currently some
+:   functions with parameters named 'curpos', and no SPTR parameter exists.
+:   The name of the parameter clearly indicates it isn't necessarily the
+:   starting position of the string, so using MPTR as the constraint makes the
+:   most sense.
+:
+:   The parameters for the function can be in any order, except if a function
+:   has multiple different character strings, all the parameters for the first
+:   string must be positioned in the function call before any of the parameters
+:   for the second, and so forth.  (This accommodates the very few existing
+:   functions that have multiple strings passed to them, without needing to
+:   create a more general mechanism, like possibly SPTR1..EPTR1, SPTR2..EPTR2.)
+:
+: *** Non-pointer Parameter Constraints
+:
+:   Only a single constraint is currently available to you to use; it is for
+:   parameters that are some sort of integer
+:
+:   NZ	    means the called function is expecting this parameter to be
+:	    non-zero, and is not equipped to handle it being 0.
+:
+: *** Automatically generated checks
 :
 :   regen/embed.pl may automatically add further checking for any argument as
-:   it deems desirable.  You can override this by specifying 'NOCHECK'
+:   it deems desirable.  You can disable this by specifying 'NOCHECK' for the
+:   parameter
 :
-:	Currently this further checking is just for pointer parameters that
-:	point to AVs, CVs or HVs.  The check is that the SV being pointed to is
-:	of the intended type, by inspecting its SvTYPE(). For some functions
-:	this check may be inappropriate, as in rare cases the arguments passed
-:	may not be of the correct type. As already mentioned, NOCHECK
-:	suppresses this check.
+:   Currently this further checking is just for pointer parameters that point
+:   to AVs, CVs or HVs.  The check is that the SV being pointed to is of the
+:   intended type, by inspecting its SvTYPE(). For some functions this check
+:   may be inappropriate, as in rare cases the arguments passed may not be of
+:   the correct type. As already mentioned, NOCHECK suppresses this check.
+:
+: *** Your custom checks
 :
 :   You can specify your own checking beyond these by adding any number of
 :   assert() calls to any given entry after its final argument.  Whatever you
@@ -189,18 +272,7 @@
 :   will make it less visible to a maintainer than keeping it in the function
 :   it applies to
 :
-:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
-:   functions.  But a porting test enforces that a non-empty one is included.
-:   The call should be at the top of your function so that the sanity checks
-:   have passed before anything tries to use an argument.  When writing a new
-:   function, add the macro even if not required, and you'll never have to go
-:   back and add one later when more checks do get added
-:
 : AUTOMATIC DOCUMENTATION GENERATION
-:
-: Just below is a description of the relevant parts of the automatic
-: documentation generation system which heavily involves this file.  Below that
-: is a description of all the flags used in this file.
 :
 : Scattered around the perl source are lines of the form:
 :
@@ -949,8 +1021,8 @@ CTp	|Signal_t|csighandler3	|int sig				\
 				|NULLOK Siginfo_t *info 		\
 				|NULLOK void *uap
 ATdmp	|bool	|c9strict_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 EXp	|regexp_engine const *|current_re_engine
@@ -1023,17 +1095,17 @@ Rp	|SV *	|defelem_target |NN SV *sv				\
 				|NULLOK MAGIC *mg
 : Used in op.c, perl.c
 px	|void	|delete_eval_scope
-ATdp	|char * |delimcpy	|NN char *to				\
-				|NN const char *to_end			\
-				|NN const char *from			\
-				|NN const char *from_end		\
+ATdp	|char * |delimcpy	|SPTR char *to				\
+				|EPTRQ const char *to_end		\
+				|SPTR const char *from			\
+				|EPTRQ const char *from_end		\
 				|const int delim			\
 				|NN I32 *retlen
 ETXdp	|char * |delimcpy_no_escape					\
-				|NN char *to				\
-				|NN const char *to_end			\
-				|NN const char *from			\
-				|NN const char *from_end		\
+				|SPTR char *to				\
+				|EPTRQ const char *to_end		\
+				|SPTR const char *from			\
+				|EPTRQ const char *from_end		\
 				|const int delim			\
 				|NN I32 *retlen
 Cp	|void	|despatch_signals
@@ -1210,8 +1282,8 @@ AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
 EMTpx	|Size_t |expected_size	|UV size
 ATdmp	|bool	|extended_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 Adfp	|void	|fatal_warner	|U32 err				\
@@ -1219,8 +1291,8 @@ Adfp	|void	|fatal_warner	|U32 err				\
 				|...
 Adp	|void	|fbm_compile	|NN SV *sv				\
 				|U32 flags
-ARdp	|char * |fbm_instr	|NN unsigned char *big			\
-				|NN unsigned char *bigend		\
+ARdp	|char * |fbm_instr	|SPTR unsigned char *big		\
+				|EPTRQ unsigned char *bigend		\
 				|NN SV *littlestr			\
 				|U32 flags
 Adhp	|SV *	|filter_add	|NULLOK filter_t funcp			\
@@ -1274,8 +1346,8 @@ Adpx	|void	|forbid_outofblock_ops					\
 				|NN const char *blockname
 p	|void	|force_locale_unlock
 Cp	|void	|force_out_malformed_utf8_message_			\
-				|NN const U8 * const p			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|U32 flags				\
 				|const bool die_here
 Adfp	|char * |form		|NN const char *pat			\
@@ -1284,8 +1356,8 @@ Adfp	|char * |form		|NN const char *pat			\
 p	|void	|free_tied_hv_pool
 Cp	|void	|free_tmps
 ERXp	|SV *	|get_and_check_backslash_N_name 			\
-				|NN const char *s			\
-				|NN const char *e			\
+				|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|const bool is_utf8			\
 				|NN const char **error_msg
 AOdp	|AV *	|get_av 	|NN const char *name			\
@@ -1682,8 +1754,8 @@ p	|bool	|io_close	|NN IO *io				\
 				|bool is_explicit			\
 				|bool warn_on_fail
 ARTdip	|Size_t |isC9_STRICT_UTF8_CHAR					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ARTdmp	|bool	|is_c9strict_utf8_string				\
 				|NN const U8 *s 			\
 				|STRLEN len
@@ -1709,8 +1781,8 @@ ARdip	|bool	|is_safe_syscall|NN const char *pv			\
 				|NN const char *what			\
 				|NN const char *op_name
 ARTdip	|Size_t |isSTRICT_UTF8_CHAR					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ARTdmp	|bool	|is_strict_utf8_string					\
 				|NN const U8 *s 			\
 				|STRLEN len
@@ -1729,22 +1801,22 @@ CRp	|bool	|is_uni_perl_idcont_					\
 				|UV c
 CRp	|bool	|is_uni_perl_idstart_					\
 				|UV c
-ARTdip	|Size_t |isUTF8_CHAR	|NN const U8 * const s0 		\
-				|NN const U8 * const e
+ARTdip	|Size_t |isUTF8_CHAR	|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e
 ATdmp	|STRLEN |is_utf8_char_buf					\
-				|NN const U8 *buf			\
-				|NN const U8 *buf_end
+				|SPTR const U8 *buf			\
+				|EPTRQ const U8 *buf_end
 ARTdip	|Size_t |isUTF8_CHAR_flags					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e		\
 				|const U32 flags
 CPRTp	|STRLEN |is_utf8_char_helper_					\
-				|NN const U8 * const s			\
-				|NN const U8 *e 			\
+				|SPTR const U8 * const s		\
+				|EPTR const U8 *e			\
 				|const U32 flags
 CPRTp	|Size_t |is_utf8_FF_helper_					\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e		\
 				|const bool require_partial
 ATdmp	|bool	|is_utf8_fixed_width_buf_flags				\
 				|NN const U8 * const s			\
@@ -1762,18 +1834,18 @@ ATdip	|bool	|is_utf8_fixed_width_buf_loclen_flags			\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
 CRp	|Size_t |is_utf8_FOO_	|const U8 classnum			\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 ARTdip	|bool	|is_utf8_invariant_string_loc				\
 				|NN const U8 * const s			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep
 CRp	|Size_t |is_utf8_perl_idcont_					\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 CRp	|Size_t |is_utf8_perl_idstart_					\
-				|NN const U8 *p 			\
-				|NN const U8 * const e
+				|SPTR const U8 *p			\
+				|EPTR const U8 * const e
 ARTdmp	|bool	|is_utf8_string |NN const U8 *s 			\
 				|STRLEN len
 ARTdip	|bool	|is_utf8_string_flags					\
@@ -1801,11 +1873,11 @@ ATdip	|bool	|is_utf8_string_loclen_flags				\
 				|NULLOK STRLEN *el			\
 				|const U32 flags
 APTdmp	|bool	|is_utf8_valid_partial_char				\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e
 ARTdip	|bool	|is_utf8_valid_partial_char_flags			\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTR const U8 * const e		\
 				|const U32 flags
 
 : Used in perly.y
@@ -1867,8 +1939,8 @@ CTopr	|void	|locale_panic	|NN const char *msg				\
 p	|OP *	|localize	|NN OP *o				\
 				|I32 lex
 CTp	|UV	|long_valid_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e
+				|SPTR const U8 * const s		\
+				|EPTR const U8 * const e
 ARdp	|I32	|looks_like_number					\
 				|NN SV * const sv
 CRTip	|unsigned|lsbit_pos32	|U32 word
@@ -2422,11 +2494,10 @@ dp	|CV *	|newXS_len_flags|NULLOK const char *name		\
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO *|nextargv	|NN GV *gv				\
 				|bool nomagicopen
-AMPTdp	|char * |ninstr 	|NN const char *big			\
-				|NN const char *bigend			\
-				|NN const char *little			\
-				|NN const char *lend
-
+AMPTdp	|char * |ninstr 	|SPTR const char *big			\
+				|EPTRQ const char *bigend		\
+				|SPTR const char *little		\
+				|EPTRQ const char *lend
 p	|void	|no_bareword_filehandle 				\
 				|NN const char *fhname
 Tefpr	|void	|noperl_die	|NN const char *pat			\
@@ -2636,9 +2707,9 @@ Fop	|void	|populate_isa	|NN const char *name			\
 Adhp	|REGEXP *|pregcomp	|NN SV * const pattern			\
 				|const U32 flags
 Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
-				|NN char *stringarg			\
-				|NN char *strend			\
-				|NN char *strbeg			\
+				|MPTR char *stringarg			\
+				|EPTR char *strend			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\
 				|U32 nosave
@@ -2749,9 +2820,9 @@ Xdp	|struct refcounted_he *|refcounted_he_new_sv			\
 				|U32 flags
 Cp	|void	|regdump	|NN const regexp *r
 Cp	|I32	|regexec_flags	|NN REGEXP * const rx			\
-				|NN char *stringarg			\
+				|MPTR char *stringarg			\
 				|NN char *strend			\
-				|NN char *strbeg			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *sv				\
 				|NULLOK void *data			\
@@ -2817,8 +2888,8 @@ EXp	|REGEXP *|reg_temp_copy |NULLOK REGEXP *dsv			\
 				|NN REGEXP *ssv
 Cp	|char * |re_intuit_start|NN REGEXP * const rx			\
 				|NULLOK SV *sv				\
-				|NN const char * const strbeg		\
-				|NN char *strpos			\
+				|SPTR const char * const strbeg 	\
+				|MPTR char *strpos			\
 				|NN char *strend			\
 				|const U32 flags			\
 				|NULLOK re_scream_pos_data *data
@@ -2854,10 +2925,10 @@ Admp	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
 Admp	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
-APTdp	|char * |rninstr	|NN const char *big			\
-				|NN const char *bigend			\
-				|NN const char *little			\
-				|NN const char *lend
+APTdp	|char * |rninstr	|SPTR const char *big			\
+				|EPTRQ const char *bigend		\
+				|SPTR const char *little		\
+				|EPTRQ const char *lend
 p	|void	|rpeep		|NULLOK OP *o
 Adipx	|void	|rpp_context	|NN SV **mark				\
 				|U8 gimme				\
@@ -3067,12 +3138,12 @@ Adp	|const char *|scan_version					\
 				|NN const char *s			\
 				|NN SV *rv				\
 				|bool qv
-Adp	|char * |scan_vstring	|NN const char *s			\
-				|NN const char * const e		\
+Adp	|char * |scan_vstring	|SPTR const char *s			\
+				|EPTR const char * const e		\
 				|NN SV *sv
 EXpx	|char * |scan_word	|NN char *s				\
-				|NN char *dest				\
-				|NN char *dest_end			\
+				|SPTR char *dest			\
+				|EPTR char *dest_end			\
 				|int allow_package			\
 				|NN STRLEN *slp
 Cp	|U32	|seed
@@ -3123,8 +3194,8 @@ dopx	|PerlIO *|start_glob	|NN SV *tmpglob 			\
 Adp	|I32	|start_subparse |I32 is_format				\
 				|U32 flags
 ATdmp	|bool	|strict_utf8_to_uv					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 CRp	|NV	|str_to_version |NN SV *sv
@@ -3686,27 +3757,27 @@ Cp	|UV	|to_uni_upper	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
 Cp	|UV	|to_utf8_fold_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|U8 flags
 
 Cp	|UV	|to_utf8_lower_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_title_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
 Cp	|UV	|to_utf8_upper_flags_					\
-				|NN const U8 *p 			\
-				|NN const U8 *e 			\
+				|SPTR const U8 *p			\
+				|EPTR const U8 *e			\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
@@ -3736,13 +3807,13 @@ ARdip	|IV	|utf8_distance	|NN const U8 *a 			\
 				|NN const U8 *b
 ARTdip	|U8 *	|utf8_hop	|NN const U8 *s 			\
 				|SSize_t off
-ARTdmp	|U8 *	|utf8_hop_back	|NN const U8 *s 			\
+ARTdmp	|U8 *	|utf8_hop_back	|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start
+				|SPTR const U8 * const start
 ARTdip	|U8 *	|utf8_hop_back_overshoot				\
-				|NN const U8 *s 			\
+				|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
+				|SPTR const U8 * const start		\
 				|NULLOK SSize_t *remaining
 ARTdmp	|U8 *	|utf8_hop_forward					\
 				|NN const U8 *s 			\
@@ -3754,17 +3825,17 @@ ARTdip	|U8 *	|utf8_hop_forward_overshoot				\
 				|NN const U8 * const end		\
 				|NULLOK SSize_t *remaining
 ARTdip	|U8 *	|utf8_hop_overshoot					\
-				|NN const U8 *s 			\
+				|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
-				|NN const U8 * const end		\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const end		\
 				|NULLOK SSize_t *remaining
-ARTdmp	|U8 *	|utf8_hop_safe	|NN const U8 *s 			\
+ARTdmp	|U8 *	|utf8_hop_safe	|MPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const start		\
-				|NN const U8 * const end
-ARdp	|STRLEN |utf8_length	|NN const U8 *s0			\
-				|NN const U8 *e
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const end
+ARdp	|STRLEN |utf8_length	|SPTR const U8 *s0			\
+				|EPTRQ const U8 *e
 ATdmp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\
@@ -3825,47 +3896,47 @@ EMXp	|U8 *	|utf16_to_utf8_reversed 				\
 				|NN U8 *d				\
 				|Size_t bytelen 			\
 				|NN Size_t *newlen
-ATdmp	|bool	|utf8_to_uv	|NN const U8 * const s			\
-				|NN const U8 * const e			\
+ATdmp	|bool	|utf8_to_uv	|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
 AMdip	|UV	|utf8_to_uvchr_buf					\
-				|NN const U8 *s 			\
-				|NN const U8 *send			\
+				|SPTR const U8 *s			\
+				|EPTRQ const U8 *send			\
 				|NULLOK STRLEN *retlen
 ATdmp	|bool	|utf8_to_uv_errors					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors
 ATdmp	|bool	|utf8_to_uv_flags					\
-				|NN const U8 * const s			\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags
-ATdip	|bool	|utf8_to_uv_msgs|NN const U8 * const s0 		\
-				|NN const U8 *e 			\
+ATdip	|bool	|utf8_to_uv_msgs|SPTR const U8 * const s0		\
+				|EPTRQ const U8 *e			\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 CTp	|bool	|utf8_to_uv_msgs_helper_				\
-				|NN const U8 * const s0 		\
-				|NN const U8 * const e			\
+				|SPTR const U8 * const s0		\
+				|EPTRQ const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p		\
 				|U32 flags				\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
 ATdip	|UV	|utf8_to_uv_or_die					\
-				|NN const U8 * const s			\
-				|NN const U8 *e 			\
+				|SPTR const U8 * const s		\
+				|EPTRQ const U8 *e			\
 				|NULLOK Size_t *advance_p
 CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
@@ -3914,8 +3985,8 @@ EXdpx	|bool	|validate_proto |NN SV *name				\
 				|bool warn				\
 				|bool curstash
 Adp	|bool	|valid_identifier_pve					\
-				|NN const char *s			\
-				|NN const char *end			\
+				|SPTR const char *s			\
+				|EPTRQ const char *end			\
 				|U32 flags
 Adp	|bool	|valid_identifier_pvn					\
 				|NN const char *s			\
@@ -4449,24 +4520,24 @@ ERXp	|SV *	|_setup_canned_invlist					\
 ERXp	|const char *|form_alien_digit_msg				\
 				|const U8 which 			\
 				|const STRLEN valids_len		\
-				|NN const char * const first_bad	\
-				|NN const char * const send		\
+				|SPTR const char * const first_bad	\
+				|EPTR const char * const send		\
 				|const bool UTF 			\
 				|const bool braced
 ERXp	|bool	|grok_bslash_c	|const char source			\
 				|NN U8 *result				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn
-ERXp	|bool	|grok_bslash_o	|NN char **s				\
-				|NN const char * const send		\
+ERXp	|bool	|grok_bslash_o	|SPTR char **s				\
+				|EPTRQ const char * const send		\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\
 				|const bool strict			\
 				|const bool allow_UV_MAX		\
 				|const bool utf8
-ERXp	|bool	|grok_bslash_x	|NN char **s				\
-				|NN const char * const send		\
+ERXp	|bool	|grok_bslash_x	|SPTR char **s				\
+				|EPTRQ const char * const send		\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\
@@ -4545,9 +4616,9 @@ S	|void	|maybe_multimagic_gv					\
 S	|bool	|parse_gv_stash_name					\
 				|NN HV **stash				\
 				|NN GV **gv				\
-				|NN const char **name			\
+				|MPTR const char **name 		\
 				|NN STRLEN *len 			\
-				|NN const char *nambeg			\
+				|SPTR const char *nambeg		\
 				|STRLEN full_len			\
 				|const U32 is_utf8			\
 				|const I32 add
@@ -4765,8 +4836,8 @@ S	|void	|new_collate	|NN const char *newcoll 		\
 				|bool force
 #     if defined(DEBUGGING)
 S	|void	|print_collxfrm_input_and_return			\
-				|NN const char *s			\
-				|NN const char *e			\
+				|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|NULLOK const char *xbuf		\
 				|const STRLEN xlen			\
 				|const bool is_utf8
@@ -4831,8 +4902,8 @@ S	|const char *|find_locale_from_environment			\
 # endif /* defined(USE_LOCALE) */
 # if defined(USE_LOCALE) || defined(DEBUGGING)
 S	|const char *|get_displayable_string				\
-				|NN const char * const s		\
-				|NN const char * const e		\
+				|SPTR const char * const s		\
+				|EPTRQ const char * const e		\
 				|const bool is_utf8
 # endif
 #endif /* defined(PERL_IN_LOCALE_C) */
@@ -5226,8 +5297,8 @@ ST	|char	|first_symbol	|NN const char *pat			\
 				|NN const char *patend
 RS	|const char *|get_num	|NN const char *patptr			\
 				|NN SSize_t *lenptr
-S	|const char *|group_end |NN const char *patptr			\
-				|NN const char *patend			\
+S	|const char *|group_end |SPTR const char *patptr		\
+				|EPTR const char *patend		\
 				|char ender
 RS	|SV *	|is_an_int	|NN const char *s			\
 				|STRLEN l
@@ -5249,8 +5320,8 @@ S	|SV **	|pack_rec	|NN SV *cat				\
 RS	|char * |sv_exp_grow	|NN SV *sv				\
 				|STRLEN needed
 S	|SSize_t|unpack_rec	|NN struct tempsym *symptr		\
-				|NN const char *s			\
-				|NN const char *strbeg			\
+				|MPTR const char *s			\
+				|SPTR const char *strbeg		\
 				|NN const char *strend			\
 				|NULLOK const char **new_s
 #endif /* defined(PERL_IN_PP_PACK_C) */
@@ -5422,9 +5493,9 @@ ERST	|int	|edit_distance	|NN const UV *src			\
 				|const SSize_t maxDistance
 ES	|I32	|execute_wildcard					\
 				|NN REGEXP * const prog 		\
-				|NN char *stringarg			\
+				|MPTR char *stringarg			\
 				|NN char *strend			\
-				|NN char *strbeg			\
+				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\
 				|U32 nosave
@@ -5434,8 +5505,8 @@ ETi	|Size_t |find_first_differing_byte_pos				\
 				|const Size_t max
 ES	|U32	|get_quantifier_value					\
 				|NN RExC_state_t *pRExC_state		\
-				|NN const char *start			\
-				|NN const char *end
+				|SPTR const char *start 		\
+				|EPTRQ const char *end
 ES	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		\
 				|NULLOK regnode_offset *nodep		\
 				|NULLOK UV *code_point_p		\
@@ -5609,9 +5680,9 @@ Ep	|void	|populate_invlist_from_bitmap				\
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_TOKE_C)
-ERp	|bool	|is_grapheme	|NN const U8 *strbeg			\
-				|NN const U8 *s 			\
-				|NN const U8 *strend			\
+ERp	|bool	|is_grapheme	|SPTR const U8 *strbeg			\
+				|MPTR const U8 *s			\
+				|EPTR const U8 *strend			\
 				|const UV cp
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
@@ -5622,8 +5693,8 @@ ETXp	|UV	|to_fold_latin1_|const U8 c				\
 				|const unsigned int flags
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-ERTXp	|bool	|regcurly	|NN const char *s			\
-				|NN const char *e			\
+ERTXp	|bool	|regcurly	|SPTR const char *s			\
+				|EPTRQ const char *e			\
 				|NULLOK const char *result[5]
 #endif
 #if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
@@ -5721,30 +5792,30 @@ ES	|void	|unwind_scan_frames					\
 				|NN void *p
 #endif /* defined(PERL_IN_REGCOMP_STUDY_C) */
 #if defined(PERL_IN_REGEXEC_C)
-ERS	|LB_enum|advance_one_LB |NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|LB_enum|advance_one_LB |MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
-ERS	|SB_enum|advance_one_SB |NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|SB_enum|advance_one_SB |MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
-ERS	|WB_enum|advance_one_WB_|NN U8 **curpos 			\
-				|NN const U8 * const strend		\
+ERS	|WB_enum|advance_one_WB_|MPTR U8 **curpos			\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target 		\
 				|const bool skip_Extend_Format
-ERS	|GCB_enum|backup_one_GCB|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|GCB_enum|backup_one_GCB|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
-ERS	|LB_enum|backup_one_LB_ |NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|LB_enum|backup_one_LB_ |SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target 		\
 				|bool skip_CM_ZWJ
-ERS	|SB_enum|backup_one_SB	|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+ERS	|SB_enum|backup_one_SB	|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
 ERS	|WB_enum|backup_one_WB_but_over_Extend_FO			\
 				|NN WB_enum *previous			\
-				|NN const U8 * const strbeg		\
-				|NN U8 **curpos 			\
+				|SPTR const U8 * const strbeg		\
+				|MPTR U8 **curpos			\
 				|const bool utf8_target
 EWi	|void	|capture_clear	|NN regexp *rex 			\
 				|U16 from_ix				\
@@ -5752,20 +5823,20 @@ EWi	|void	|capture_clear	|NN regexp *rex 			\
 				|NN const char *str
 ERS	|char * |find_byclass	|NN regexp *prog			\
 				|NN const regnode *c			\
-				|NN char *s				\
-				|NN const char *strend			\
+				|SPTR char *s				\
+				|EPTRQ const char *strend		\
 				|NULLOK regmatch_info *reginfo
 ERST	|U8 *	|find_next_masked					\
-				|NN U8 *s				\
-				|NN const U8 *send			\
+				|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 byte				\
 				|const U8 mask
-ERST	|U8 *	|find_span_end	|NN U8 *s				\
-				|NN const U8 *send			\
+ERST	|U8 *	|find_span_end	|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 span_byte
 ERST	|U8 *	|find_span_end_mask					\
-				|NN U8 *s				\
-				|NN const U8 *send			\
+				|SPTR U8 *s				\
+				|EPTRQ const U8 *send			\
 				|const U8 span_byte			\
 				|const U8 mask
 Ei	|I32	|foldEQ_latin1_s2_folded				\
@@ -5775,31 +5846,31 @@ Ei	|I32	|foldEQ_latin1_s2_folded				\
 ERS	|bool	|isFOO_lc	|const U8 classnum			\
 				|const U8 character
 ERS	|bool	|isFOO_utf8_lc	|const U8 classnum			\
-				|NN const U8 *character 		\
-				|NN const U8 *e
+				|SPTR const U8 *character		\
+				|EPTR const U8 *e
 ERS	|bool	|isGCB		|const GCB_enum before			\
 				|const GCB_enum after			\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
 				|const bool utf8_target
 ERS	|bool	|isLB		|LB_enum before 			\
 				|LB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERS	|bool	|isSB		|SB_enum before 			\
 				|SB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERS	|bool	|isWB		|WB_enum previous			\
 				|WB_enum before 			\
 				|WB_enum after				\
-				|NN const U8 * const strbeg		\
-				|NN const U8 * const curpos		\
-				|NN const U8 * const strend		\
+				|SPTR const U8 * const strbeg		\
+				|MPTR const U8 * const curpos		\
+				|EPTR const U8 * const strend		\
 				|const bool utf8_target
 ERST	|I32	|reg_check_named_buff_matched				\
 				|NN const regexp *rex			\
@@ -5820,8 +5891,8 @@ ERST	|U8 *	|reghopmaybe3	|NN U8 *s				\
 				|NN const U8 * const lim
 ERS	|bool	|reginclass	|NULLOK regexp * const prog		\
 				|NN const regnode * const n		\
-				|NN const U8 * const p			\
-				|NN const U8 * const p_end		\
+				|SPTR const U8 * const p		\
+				|EPTR const U8 * const p_end		\
 				|bool const utf8_target
 ERS	|SSize_t|regmatch	|NN regmatch_info *reginfo		\
 				|NN char *startpos			\
@@ -5978,27 +6049,27 @@ S	|const char *|sv_display|NN SV * const sv			\
 				|STRLEN tmpbuf_size
 S	|bool	|sv_2iuv_common |NN SV * const sv
 S	|STRLEN |sv_pos_b2u_midway					\
-				|NN const U8 * const s			\
-				|NN const U8 * const target		\
+				|SPTR const U8 * const s		\
+				|MPTR const U8 * const target		\
 				|NN const U8 *end			\
 				|STRLEN endu
 S	|STRLEN |sv_pos_u2b_cached					\
 				|NN SV * const sv			\
 				|NN MAGIC ** const mgp			\
-				|NN const U8 * const start		\
-				|NN const U8 * const send		\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const send		\
 				|STRLEN uoffset 			\
 				|STRLEN uoffset0			\
 				|STRLEN boffset0
 ST	|STRLEN |sv_pos_u2b_forwards					\
-				|NN const U8 * const start		\
-				|NN const U8 * const send		\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 * const send		\
 				|NN STRLEN * const uoffset		\
 				|NN bool * const at_end 		\
 				|NN bool *canonical_position
 ST	|STRLEN |sv_pos_u2b_midway					\
-				|NN const U8 * const start		\
-				|NN const U8 *send			\
+				|SPTR const U8 * const start		\
+				|EPTRQ const U8 *send			\
 				|STRLEN uoffset 			\
 				|const STRLEN uend
 i	|void	|sv_unglob	|NN SV * const sv			\
@@ -6074,10 +6145,10 @@ S	|char * |force_word	|NN char *start 			\
 				|int check_keyword			\
 				|int allow_pack
 RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
-				|NN const char *s			\
-				|NN const char * const e
-S	|void	|incline	|NN const char *s			\
-				|NN const char *end
+				|SPTR const char *s			\
+				|EPTRQ const char * const e
+S	|void	|incline	|SPTR const char *s			\
+				|EPTRQ const char *end
 S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
@@ -6099,8 +6170,8 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|STRLEN typelen 			\
 				|NULLOK const char **error_msg
 S	|void	|parse_ident	|NN char **s				\
-				|NN char **d				\
-				|NN char * const e			\
+				|SPTR char **d				\
+				|EPTRQ char * const e			\
 				|int allow_package			\
 				|bool is_utf8				\
 				|bool check_dollar
@@ -6109,8 +6180,8 @@ RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s
 RS	|char * |scan_heredoc	|NN char *s
 S	|char * |scan_ident	|NN char *s				\
-				|NN char *dest				\
-				|NN char *dest_end			\
+				|SPTR char *dest			\
+				|EPTR char *dest_end			\
 				|bool chk_unary
 RS	|char * |scan_inputsymbol					\
 				|NN char *start
@@ -6175,8 +6246,8 @@ RS	|UV	|check_locale_boundary_crossing 			\
 				|NN U8 * const ustrp			\
 				|NN STRLEN *lenp
 RTi	|int	|does_utf8_overflow					\
-				|NN const U8 * const s			\
-				|NN const U8 *e
+				|SPTR const U8 * const s		\
+				|EPTR const U8 *e
 RTi	|int	|isFF_overlong	|NN const U8 * const s			\
 				|const STRLEN len
 RTi	|SSize_t|is_utf8_overlong					\
@@ -6206,16 +6277,16 @@ S	|UV	|to_utf8_case_	|const UV original				\
 				|NULLOK const U32 * const * const aux_tables	\
 				|NULLOK const U8 * const aux_table_lengths	\
 				|NN const char * const normal
-S	|UV	|turkic_fc	|NN const U8 * const p			\
-				|NN const U8 * const e			\
+S	|UV	|turkic_fc	|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
-S	|UV	|turkic_lc	|NN const U8 * const p0 		\
-				|NN const U8 * const e			\
+S	|UV	|turkic_lc	|SPTR const U8 * const p0		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
-S	|UV	|turkic_uc	|NN const U8 * const p			\
-				|NN const U8 * const e			\
+S	|UV	|turkic_uc	|SPTR const U8 * const p		\
+				|EPTR const U8 * const e		\
 				|NN U8 *ustrp				\
 				|NN STRLEN *lenp
 RS	|char * |unexpected_non_continuation_text			\

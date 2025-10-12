@@ -725,7 +725,6 @@ STRLEN
 Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
 {
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_;
-    assert(e > s);
     assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     SSize_t len, full_len;
@@ -755,6 +754,7 @@ Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
      *  determined with just the first one or two bytes.
      *
      */
+
     full_len = UTF8SKIP(s);
 
     len = e - s;
@@ -840,7 +840,6 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
                         const bool require_partial)
 {
     PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_;
-    assert(s0 < e);
     assert(*s0 == I8_TO_NATIVE_UTF8(0xFF));
 
     /* This is called to determine if the UTF-8 sequence starting at s0 and
@@ -4245,7 +4244,6 @@ S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TURKIC_FC;
-    assert(e > p);
 
     /* Returns 0 if the foldcase of the input UTF-8 encoded sequence from
      * p0..e-1 according to Turkic rules is the same as for non-Turkic.
@@ -4280,7 +4278,6 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TURKIC_LC;
-    assert(e > p0);
 
     /* Returns 0 if the lowercase of the input UTF-8 encoded sequence from
      * p0..e-1 according to Turkic rules is the same as for non-Turkic.
@@ -4326,7 +4323,6 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TURKIC_UC;
-    assert(e > p);
 
     /* Returns 0 if the upper or title-case of the input UTF-8 encoded sequence
      * from p0..e-1 according to Turkic rules is the same as for non-Turkic.
