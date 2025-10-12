@@ -10290,54 +10290,45 @@ SV if C<hek> is NULL.
 SV *
 Perl_newSVhek(pTHX_ const HEK *const hek)
 {
-    if (!hek) {
-        SV *sv;
+    SV *sv = newSV_type(SVt_PV);
 
-        new_SV(sv);
-        return sv;
-    }
-
-    if (HEK_LEN(hek) == HEf_SVKEY) {
-        return newSVsv(*(SV**)HEK_KEY(hek));
-    } else {
-        const int flags = HEK_FLAGS(hek);
-        if (flags & HVhek_WASUTF8) {
-            /* Trouble :-)
-               Andreas would like keys he put in as utf8 to come back as utf8
-            */
-            STRLEN utf8_len = HEK_LEN(hek);
-            SV * const sv = newSV_type(SVt_PV);
-            char *as_utf8 = (char *)bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
-            /* bytes_to_utf8() allocates a new string, which we can repurpose: */
-            sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
-            SvUTF8_on (sv);
-            return sv;
-        } else if (flags & HVhek_NOTSHARED) {
-            /* A hash that isn't using shared hash keys has to have
-               the flag in every key so that we know not to try to call
-               share_hek_hek on it.  */
-
-            SV * const sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
-            if (HEK_UTF8(hek))
+    if (LIKELY(hek)) {
+        if (HEK_LEN(hek) != HEf_SVKEY) {
+            const int flags = HEK_FLAGS(hek);
+            if (LIKELY(!(flags & (HVhek_WASUTF8|HVhek_NOTSHARED)))) {
+                /* This will be overwhelmingly the most common case.  */
+                /* Inline most of newSVpvn_share(), because share_hek_hek() is far
+                   more efficient than sharepvn().  */
+                SvFLAGS(sv) = SVt_PV | SVf_POK | SVp_POK | SVf_IsCOW |
+                               (HEK_UTF8(hek) ? SVf_UTF8 : 0);
+                SvCUR_set(sv, HEK_LEN(hek));
+                SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
+                assert(SvLEN(sv) == 0); /* SVt_PV should be initialized with this value */
+                return sv;
+            } else if (flags & HVhek_WASUTF8) {
+                /* Trouble :-)
+                   Andreas would like keys he put in as utf8 to come back as utf8
+                */
+                STRLEN utf8_len = HEK_LEN(hek);
+                char *as_utf8 = (char *)bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
+                /* bytes_to_utf8() allocates a new string, which we can repurpose: */
+                sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
                 SvUTF8_on (sv);
-            return sv;
-        }
-        /* This will be overwhelmingly the most common case.  */
-        {
-            /* Inline most of newSVpvn_share(), because share_hek_hek() is far
-               more efficient than sharepvn().  */
-            SV *sv = newSV_type(SVt_PV);
-
-            SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
-            SvCUR_set(sv, HEK_LEN(hek));
-            SvLEN_set(sv, 0);
-            SvIsCOW_on(sv);
-            SvPOK_on(sv);
-            if (HEK_UTF8(hek))
-                SvUTF8_on(sv);
+                return sv;
+            } else {
+                assert(flags & HVhek_NOTSHARED);
+                sv_setpvn_fresh(sv,HEK_KEY(hek),HEK_LEN(hek));
+                if (HEK_UTF8(hek))
+                    SvUTF8_on (sv);
+                return sv;
+            }
+        } else {
+            /* (HEK_LEN(hek) == HEf_SVKEY) is comparatively more rare nowadays */
+            sv_setsv_flags(sv, *(SV**)HEK_KEY(hek), SV_GMAGIC|SV_NOSTEAL);
             return sv;
         }
     }
+    return sv;
 }
 
 /*
