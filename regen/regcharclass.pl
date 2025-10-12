@@ -1911,4 +1911,4 @@ HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 => UTF8 :only_ebcdic_platform safe
 0x1 - 0x0
-# Alows fails on EBCDIC; there are no ED Hanguls there
+# Always fails on EBCDIC; there are no ED Hanguls there

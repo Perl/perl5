@@ -3854,6 +3854,6 @@
  * 03640d8ad18fc65de766f2034a927f7442960e998d3243845ca9b9fe31bfe1ab lib/unicore/mktables
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 2a984ef37eb37e718ed25d472988745196816f9147d6ee6822a8efeafda340e5 regen/regcharclass.pl
+ * 38d9a9c62ad1d5ec57c14db96c218daf68576d2e675605d84f96829c2da3e590 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
