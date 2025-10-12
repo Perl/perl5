@@ -9147,7 +9147,7 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 static char *
 S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
 {
-    SV * const tsv = newSV_type(SVt_NULL);
+    SV * const tsv = newSV_type(SVt_PV);
     ENTER;
     SAVEFREESV(tsv);
     sv_gets(tsv, fp, 0);
