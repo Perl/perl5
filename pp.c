@@ -3855,7 +3855,7 @@ PP(pp_index)
                  * the routine that contains the new byte string, and donate it
                  * to temp to ensure it will get free()d */
                 if (free_little_p) {
-                    little = temp = newSV_type(SVt_NULL);
+                    little = temp = newSV_type(SVt_PV);
                     sv_usepvn(temp, (char *) little_p, llen);
                     little_p = SvPVX_const(little);
                 }
