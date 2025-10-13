@@ -3888,6 +3888,46 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::FALLBACK;
+
+# Process the 'FALLBACK' keyword.
+# Its main effect is to update $pxs->{map_package_to_fallback_string} with
+# the fallback value for the current package. That is later used to plant
+# boot code to set ${package}::() to a true/false/undef value.
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'value', # Str: TRUE, FALSE or UNDEF
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    # The rest of the current line should contain either TRUE,
+    # FALSE or UNDEF, but we also secretly allow 0 or 1 and lower/mixed
+    # case.
+
+    my $s = $self->{text};
+
+    $s = 'TRUE'  if $s eq '1';
+    $s = 'FALSE' if $s eq '0';
+    $s = uc($s);
+
+    $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF")
+        unless $s =~ /^(TRUE|FALSE|UNDEF)$/;
+
+    $self->{value} = $s;
+    $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}} = $s;
+
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::enable;
 
 # Base class for keywords which accept ENABLE/DISABLE as an argument

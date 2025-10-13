@@ -205,7 +205,7 @@ BEGIN {
   'map_package_to_fallback_string', # Hash: for every package, maps it to
                         # the overload fallback state for that package (if
                         # specified). Each value is one of the strings
-                        # "&PL_sv_yes", "&PL_sv_no", "&PL_sv_undef".
+                        # "TRUE", "FALSE", "UNDEF".
 
   'proto_behaviour_specified', # Bool: prototype behaviour has been
                         # specified by the -prototypes switch and/or
@@ -728,8 +728,13 @@ EOF
       # Set ${'Foo::()'} to the fallback value for each overloaded
       # package 'Foo' (or undef if not specified).
       # But see the 'XXX' comments above about fallback and $().
-      my $fallback =     $self->{map_package_to_fallback_string}->{$package}
-                     || "&PL_sv_undef";
+
+      my $fallback = $self->{map_package_to_fallback_string}{$package};
+      $fallback = 'UNDEF' unless defined $fallback;
+      $fallback =    $fallback eq 'TRUE'  ? '&PL_sv_yes'
+                   : $fallback eq 'FALSE' ? '&PL_sv_no'
+                   :                        '&PL_sv_undef';
+
       print Q(<<"EOF");
         |    /* The magic for overload gets a GV* via gv_fetchmeth as */
         |    /* mentioned above, and looks in the SV* slot of it for */
@@ -851,30 +856,6 @@ sub ST {
   my ($self, $num) = @_;
   return "ST(" . ($num-1) . ")" if defined $num;
   return '/* not a parameter */';
-}
-
-
-sub FALLBACK_handler {
-  my ExtUtils::ParseXS $self = shift;
-  my ($setting) = @_;
-
-  # the rest of the current line should contain either TRUE,
-  # FALSE or UNDEF
-
-  trim_whitespace($setting);
-  $setting = uc($setting);
-
-  my %map = (
-    TRUE => "&PL_sv_yes", 1 => "&PL_sv_yes",
-    FALSE => "&PL_sv_no", 0 => "&PL_sv_no",
-    UNDEF => "&PL_sv_undef",
-  );
-
-  # check for valid FALLBACK value
-  $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{$setting};
-
-  $self->{map_package_to_fallback_string}->{$self->{PACKAGE_name}}
-      = $map{$setting};
 }
 
 
