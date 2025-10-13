@@ -859,25 +859,6 @@ sub ST {
 }
 
 
-sub REQUIRE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  # the rest of the current line should contain a version number
-  my ($ver) = @_;
-
-  trim_whitespace($ver);
-
-  $self->death("Error: REQUIRE expects a version number")
-    unless $ver;
-
-  # check that the version number is of the form n.n
-  $self->death("Error: REQUIRE: expected a number, got '$ver'")
-    unless $ver =~ /^\d+(\.\d*)?/;
-
-  $self->death("Error: xsubpp $ver (or better) required--this is only $VERSION.")
-    unless $VERSION >= $ver;
-}
-
-
 # Push an entry on the @{ $self->{XS_parse_stack} } array containing the
 # current file state, in preparation for INCLUDEing a new file. (Note that
 # it doesn't handle type => 'if' style entries, only file entries.)

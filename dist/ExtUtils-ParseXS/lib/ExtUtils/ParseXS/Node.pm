@@ -3928,6 +3928,42 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::REQUIRE;
+
+# Process the 'REQUIRE' keyword.
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'version', # Str: the minimum version allowed, e.g.'1.23'
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    my $ver = $self->{text};
+
+    $pxs->death("Error: REQUIRE expects a version number")
+        unless length $ver;
+
+    # check that the version number is of the form n.n
+    $pxs->death("Error: REQUIRE: expected a number, got '$ver'")
+        unless $ver =~ /^\d+(\.\d*)?/;
+
+    my $got = $ExtUtils::ParseXS::VERSION;
+    $pxs->death("Error: xsubpp $ver (or better) required--this is only $got.")
+        unless $got >= $ver;
+
+    $self->{version} = $ver;
+
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::enable;
 
 # Base class for keywords which accept ENABLE/DISABLE as an argument
