@@ -11,7 +11,7 @@
  * This is "source level" stdio compatibility mode.
  * We try and #define stdio functions in terms of PerlIO.
  */
-#define _CANNOT "CANNOT"
+#define CANNOT_ "CANNOT"
 #undef FILE
 #define FILE			PerlIO
 #undef clearerr
@@ -88,8 +88,8 @@
 #define fread(b,s,c,f)		PerlIO_read(f,b,(s*c))
 #define fwrite(b,s,c,f)		PerlIO_write(f,b,(s*c))
 #else
-#define fread(b,s,c,f)		_CANNOT fread
-#define fwrite(b,s,c,f)		_CANNOT fwrite
+#define fread(b,s,c,f)		CANNOT_ fread
+#define fwrite(b,s,c,f)		CANNOT_ fwrite
 #endif
 #define fseek(f,o,w)		PerlIO_seek(f,o,w)
 #define ftell(f)		PerlIO_tell(f)
@@ -102,25 +102,25 @@
 #define popen(c,m)		my_popen(c,m)
 #define pclose(f)		my_pclose(f)
 
-#define fsetpos(f,p)		_CANNOT _fsetpos_
-#define fgetpos(f,p)		_CANNOT _fgetpos_
+#define fsetpos(f,p)		CANNOT_ _fsetpos_
+#define fgetpos(f,p)		CANNOT_ _fgetpos_
 
-#define __filbuf(f)		_CANNOT __filbuf_
-#define _filbuf(f)		_CANNOT _filbuf_
-#define __flsbuf(c,f)		_CANNOT __flsbuf_
-#define _flsbuf(c,f)		_CANNOT _flsbuf_
-#define getw(f)			_CANNOT _getw_
-#define putw(v,f)		_CANNOT _putw_
+#define __filbuf(f)		CANNOT_ __filbuf_
+#define _filbuf(f)		CANNOT_ _filbuf_
+#define __flsbuf(c,f)		CANNOT_ __flsbuf_
+#define _flsbuf(c,f)		CANNOT_ _flsbuf_
+#define getw(f)			CANNOT_ _getw_
+#define putw(v,f)		CANNOT_ _putw_
 #if SFIO_VERSION < 20000101L
-#define flockfile(f)		_CANNOT _flockfile_
-#define ftrylockfile(f)		_CANNOT _ftrylockfile_
-#define funlockfile(f)		_CANNOT _funlockfile_
+#define flockfile(f)		CANNOT_ _flockfile_
+#define ftrylockfile(f)		CANNOT_ _ftrylockfile_
+#define funlockfile(f)		CANNOT_ _funlockfile_
 #endif
-#define freopen(p,m,f)		_CANNOT _freopen_
-#define setbuf(f,b)		_CANNOT _setbuf_
-#define setvbuf(f,b,x,s)	_CANNOT _setvbuf_
-#define fscanf			_CANNOT _fscanf_
-#define fgets(s,n,f)		_CANNOT _fgets_
+#define freopen(p,m,f)		CANNOT_ _freopen_
+#define setbuf(f,b)		CANNOT_ _setbuf_
+#define setvbuf(f,b,x,s)	CANNOT_ _setvbuf_
+#define fscanf			CANNOT_ _fscanf_
+#define fgets(s,n,f)		CANNOT_ _fgets_
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
