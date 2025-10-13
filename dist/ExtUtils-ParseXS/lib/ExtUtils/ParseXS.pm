@@ -523,7 +523,7 @@ sub process_file {
     # INCLUDE ones, which open a new file and skip any leading blank
     # lines.
 
-    while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
+    while (my $kwd = $self->check_keyword("BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
 
       my $class = "ExtUtils::ParseXS::Node::$kwd";
       if ($class->can('parse')) {
@@ -541,17 +541,6 @@ sub process_file {
 
       next PARAGRAPH unless @{ $self->{line} };
       $_ = shift(@{ $self->{line} });
-    }
-
-    if ($self->check_keyword("BOOT")) {
-      my $node  = ExtUtils::ParseXS::Node::BOOT->new();
-      unshift @{$self->{line}}, $_;
-      $node->parse($self);
-      $node->as_code($self);
-      # BOOT: is a file-scoped keyword which consumes all the lines
-      # following it in the current paragraph (as opposed to just until
-      # the next keyword, like CODE: etc).
-      next PARAGRAPH;
     }
 
     # ----------------------------------------------------------------
