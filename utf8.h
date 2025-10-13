@@ -895,11 +895,11 @@ implementation of the latter. */
  * directly anywhere else.  'translate_function' is either NATIVE_TO_LATIN1
  * (which works for code points up through 0xFF) or NATIVE_TO_UNI which works
  * for any code point */
-#define __BASE_TWO_BYTE_HI(c, translate_function)                               \
+#define BASE_TWO_BYTE_HI_(c, translate_function)                               \
            (assert(! UVCHR_IS_INVARIANT(c)),                                    \
             I8_TO_NATIVE_UTF8((translate_function(c) >> UTF_ACCUMULATION_SHIFT) \
                               | UTF_START_MARK(2)))
-#define __BASE_TWO_BYTE_LO(c, translate_function)                               \
+#define BASE_TWO_BYTE_LO_(c, translate_function)                               \
              (assert(! UVCHR_IS_INVARIANT(c)),                                  \
               I8_TO_NATIVE_UTF8((translate_function(c) & UTF_CONTINUATION_MASK) \
                                  | UTF_CONTINUATION_MARK))
@@ -907,15 +907,15 @@ implementation of the latter. */
 /* The next two macros should not be used.  They were designed to be usable as
  * the case label of a switch statement, but this doesn't work for EBCDIC.  Use
  * regen/unicode_constants.pl instead */
-#define UTF8_TWO_BYTE_HI_nocast(c)  __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)
-#define UTF8_TWO_BYTE_LO_nocast(c)  __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)
+#define UTF8_TWO_BYTE_HI_nocast(c)  BASE_TWO_BYTE_HI_(c, NATIVE_TO_UNI)
+#define UTF8_TWO_BYTE_LO_nocast(c)  BASE_TWO_BYTE_LO_(c, NATIVE_TO_UNI)
 
 /* The next two macros are used when the source should be a single byte
  * character; checked for under DEBUGGING */
 #define UTF8_EIGHT_BIT_HI(c) (assert(FITS_IN_8_BITS(c)),                    \
-                             ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+                             ( BASE_TWO_BYTE_HI_(c, NATIVE_TO_LATIN1)))
 #define UTF8_EIGHT_BIT_LO(c) (assert(FITS_IN_8_BITS(c)),                    \
-                             (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
+                             (BASE_TWO_BYTE_LO_(c, NATIVE_TO_LATIN1)))
 
 /* These final two macros in the series are used when the source can be any
  * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
@@ -926,11 +926,11 @@ implementation of the latter. */
 #define UTF8_TWO_BYTE_HI(c)                                                    \
        (assert((sizeof(c) ==  1)                                               \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE)),             \
-        (__BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
+        (BASE_TWO_BYTE_HI_(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
        (assert((sizeof(c) ==  1)                                               \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE)),             \
-        (__BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
+        (BASE_TWO_BYTE_LO_(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */
