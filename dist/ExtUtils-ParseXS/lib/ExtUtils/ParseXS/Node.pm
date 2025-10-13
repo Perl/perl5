@@ -1,6 +1,7 @@
 package ExtUtils::ParseXS::Node;
 use strict;
 use warnings;
+use Symbol;
 
 our $VERSION = '3.61';
 
@@ -3969,6 +3970,175 @@ sub parse {
 
     $self->{version} = $ver;
 
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::include;
+
+# Common base class for the 'INCLUDE' and 'INCLUDE_COMMAND' keywords
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'is_cmd',       # Bool: is INCLUDE_COMMAND
+    'inc_filename', # Str:  the file/command to be included
+    'old_filename', # Str:  the previous file
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    my $f      = $self->{text};
+    my $is_cmd = $self->{is_cmd};
+
+    if ($is_cmd) {
+        $f = ExtUtils::ParseXS::QuoteArgs($f) if $^O eq 'VMS';
+
+        $pxs->death("INCLUDE_COMMAND: command missing")
+            unless length $f;
+
+        $pxs->death("INCLUDE_COMMAND: pipes are illegal")
+            if $f =~ /^\s*\|/ or $f =~ /\|\s*$/;
+    }
+    else {
+        $pxs->death("INCLUDE: filename missing")
+            unless length $f;
+
+        $pxs->death("INCLUDE: output pipe is illegal")
+            if $f =~ /^\s*\|/;
+
+        # simple minded recursion detector
+        $pxs->death("INCLUDE loop detected")
+            if $pxs->{IncludedFiles}{$f};
+
+        ++$pxs->{IncludedFiles}->{$f} unless $f =~ /\|\s*$/;
+
+        if ($f =~ /\|\s*$/ && $f =~ /^\s*perl\s/) {
+            $pxs->Warn(
+                  "The INCLUDE directive with a command is discouraged."
+                . " Use INCLUDE_COMMAND instead! In particular using 'perl'"
+                . " in an 'INCLUDE: ... |' directive is not guaranteed to pick"
+                . " up the correct perl. The INCLUDE_COMMAND directive allows"
+                . " the use of \$^X as the currently running perl, see"
+                . " 'perldoc perlxs' for details."
+            );
+        }
+    }
+
+    $pxs->push_parse_stack($is_cmd ? (IsPipe => 1) : ());
+
+    $pxs->{in_fh} = Symbol::gensym();
+
+    # Open the new file / pipe
+
+    if ($is_cmd) {
+        # Expand the special token '$^X' into the full path of the
+        # currently running perl interpreter
+        my $X = $pxs->_safe_quote($^X); # quotes if has spaces
+        $f =~ s/^\s*\$\^X/$X/;
+
+        open ($pxs->{in_fh}, "-|", $f)
+            or $pxs->death(
+                "Cannot run command '$f' to include its output: $!");
+    }
+    else {
+        open($pxs->{in_fh}, $f)
+            or $pxs->death("Cannot open '$f': $!");
+    }
+
+    $self->{old_filename} = $pxs->{in_filename};
+    $self->{inc_filename} = $f;
+    $pxs->{in_filename} = $f;
+
+    my $path = $f;
+    if ($is_cmd) {
+        #$path =~ s/\"/\\"/g; # Fails? See CPAN RT #53938: MinGW Broken after 2.21
+        $path =~ s/\\/\\\\/g; # Works according to reporter of #53938
+    }
+    else {
+        $path = ($^O =~ /^mswin/i)
+                      # See CPAN RT #61908: gcc doesn't like
+                      # backslashes on win32?
+                    ? "$pxs->{dir}/$path"
+                    : File::Spec->catfile($pxs->{dir}, $path);
+    }
+    $pxs->{in_pathname} = $path;
+
+    # Prime the pump by reading the first non-blank line
+
+    # skip leading blank lines
+    while (readline($pxs->{in_fh})) {
+        last unless /^\s*$/;
+    }
+
+    $pxs->{lastline} = $_;
+    $pxs->{lastline_no} = $.;
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+
+    my $comment = $self->{is_cmd}
+        ?   "INCLUDE_COMMAND:  Including output of"
+        :   "INCLUDE:  Including";
+
+    $comment .= " '$self->{inc_filename}' from '$self->{old_filename}'";
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |
+        |/* $comment */
+        |
+EOF
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INCLUDE;
+
+# Process the 'INCLUDE' keyword. Most processing is actually done by the
+# parent 'include' class which handles INCLUDE_COMMAND too.
+
+BEGIN { $build_subclass->(-parent => 'include',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->{is_cmd} = 0;
+    $self->SUPER::parse($pxs); # main parsing done by Node::include
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INCLUDE_COMMAND;
+
+# Process the 'INCLUDE_COMMAND' keyword. Most processing is actually done
+# by the parent 'include' class which handles INCLUDE too.
+
+BEGIN { $build_subclass->(-parent => 'include',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->{is_cmd} = 1;
+    $self->SUPER::parse($pxs); # main parsing done by Node::include
     1;
 }
 

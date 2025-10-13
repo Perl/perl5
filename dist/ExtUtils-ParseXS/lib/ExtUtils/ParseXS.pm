@@ -883,67 +883,6 @@ sub push_parse_stack {
 }
 
 
-sub INCLUDE_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  # the rest of the current line should contain a valid filename
-
-  trim_whitespace($_);
-
-  $self->death("INCLUDE: filename missing")
-    unless $_;
-
-  $self->death("INCLUDE: output pipe is illegal")
-    if /^\s*\|/;
-
-  # simple minded recursion detector
-  $self->death("INCLUDE loop detected")
-    if $self->{IncludedFiles}->{$_};
-
-  ++$self->{IncludedFiles}->{$_} unless /\|\s*$/;
-
-  if (/\|\s*$/ && /^\s*perl\s/) {
-    Warn( $self, "The INCLUDE directive with a command is discouraged." .
-          " Use INCLUDE_COMMAND instead! In particular using 'perl'" .
-          " in an 'INCLUDE: ... |' directive is not guaranteed to pick" .
-          " up the correct perl. The INCLUDE_COMMAND directive allows" .
-          " the use of \$^X as the currently running perl, see" .
-          " 'perldoc perlxs' for details.");
-  }
-
-  $self->push_parse_stack();
-
-  $self->{in_fh} = Symbol::gensym();
-
-  # open the new file
-  open($self->{in_fh}, $_) or $self->death("Cannot open '$_': $!");
-
-  print Q(<<"EOF");
-    |
-    |/* INCLUDE:  Including '$_' from '$self->{in_filename}' */
-    |
-EOF
-
-  $self->{in_filename} = $_;
-  $self->{in_pathname} = ( $^O =~ /^mswin/i )
-                            # See CPAN RT #61908: gcc doesn't like
-                            # backslashes on win32?
-                          ? qq($self->{dir}/$self->{in_filename})
-                          : File::Spec->catfile($self->{dir}, $self->{in_filename});
-
-  # Prime the pump by reading the first
-  # non-blank line
-
-  # skip leading blank lines
-  while (readline($self->{in_fh})) {
-    last unless /^\s*$/;
-  }
-
-  $self->{lastline} = $_;
-  $self->{lastline_no} = $.;
-}
-
-
 # Quote a command-line to be suitable for VMS
 
 sub QuoteArgs {
@@ -977,58 +916,6 @@ sub QuoteArgs {
       }
       return $command;
   }
-}
-
-
-sub INCLUDE_COMMAND_handler {
-  my ExtUtils::ParseXS $self = shift;
-  $_ = shift;
-  # the rest of the current line should contain a valid command
-
-  trim_whitespace($_);
-
-  $_ = QuoteArgs($_) if $^O eq 'VMS';
-
-  $self->death("INCLUDE_COMMAND: command missing")
-    unless $_;
-
-  $self->death("INCLUDE_COMMAND: pipes are illegal")
-    if /^\s*\|/ or /\|\s*$/;
-
-  $self->push_parse_stack( IsPipe => 1 );
-
-  $self->{in_fh} = Symbol::gensym();
-
-  # If $^X is used in INCLUDE_COMMAND, we know it's supposed to be
-  # the same perl interpreter as we're currently running
-  my $X = $self->_safe_quote($^X); # quotes if has spaces
-  s/^\s*\$\^X/$X/;
-
-  # open the new file
-  open ($self->{in_fh}, "-|", $_)
-    or $self->death( $self, "Cannot run command '$_' to include its output: $!");
-
-  print Q(<<"EOF");
-    |
-    |/* INCLUDE_COMMAND:  Including output of '$_' from '$self->{in_filename}' */
-    |
-EOF
-
-  $self->{in_filename} = $_;
-  $self->{in_pathname} = $self->{in_filename};
-  #$self->{in_pathname} =~ s/\"/\\"/g; # Fails? See CPAN RT #53938: MinGW Broken after 2.21
-  $self->{in_pathname} =~ s/\\/\\\\/g; # Works according to reporter of #53938
-
-  # Prime the pump by reading the first
-  # non-blank line
-
-  # skip leading blank lines
-  while (readline($self->{in_fh})) {
-    last unless /^\s*$/;
-  }
-
-  $self->{lastline} = $_;
-  $self->{lastline_no} = $.;
 }
 
 
