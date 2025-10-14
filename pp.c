@@ -4147,15 +4147,15 @@ PP(pp_crypt)
     }
 #  ifdef USE_ITHREADS
 #    ifdef HAS_CRYPT_R
-    if (!PL_reentrant_buffer->_crypt_struct_buffer) {
+    if (!PL_reentrant_buffer->crypt_struct_buffer) {
       /* This should be threadsafe because in ithreads there is only
        * one thread per interpreter.  If this would not be true,
        * we would need a mutex to protect this malloc. */
-        PL_reentrant_buffer->_crypt_struct_buffer =
+        PL_reentrant_buffer->crypt_struct_buffer =
           (struct crypt_data *)safemalloc(sizeof(struct crypt_data));
 #      if defined(__GLIBC__) || defined(__EMX__)
-        if (PL_reentrant_buffer->_crypt_struct_buffer) {
-            PL_reentrant_buffer->_crypt_struct_buffer->initialized = 0;
+        if (PL_reentrant_buffer->crypt_struct_buffer) {
+            PL_reentrant_buffer->crypt_struct_buffer->initialized = 0;
         }
 #      endif
     }

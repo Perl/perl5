@@ -55,83 +55,83 @@ Perl_reentrant_size(pTHX) {
 #  define REENTRANTUSUALSIZE	4096	/* Make something up. */
 
 #  ifdef HAS_ASCTIME_R
-        PL_reentrant_buffer->_asctime_size = 26;
+        PL_reentrant_buffer->asctime_size = 26;
 #  endif /* HAS_ASCTIME_R */
 
 #  ifdef HAS_CRYPT_R
 #  endif /* HAS_CRYPT_R */
 
 #  ifdef HAS_CTIME_R
-        PL_reentrant_buffer->_ctime_size = 26;
+        PL_reentrant_buffer->ctime_size = 26;
 #  endif /* HAS_CTIME_R */
 
 #  ifdef HAS_GETGRNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
-        PL_reentrant_buffer->_grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
-        if (PL_reentrant_buffer->_grent_size == (size_t) -1)
-                PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
+        if (PL_reentrant_buffer->grent_size == (size_t) -1)
+                PL_reentrant_buffer->grent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-        PL_reentrant_buffer->_grent_size = SIABUFSIZ;
+        PL_reentrant_buffer->grent_size = SIABUFSIZ;
 #    elif defined(__sgi)
-        PL_reentrant_buffer->_grent_size = BUFSIZ;
+        PL_reentrant_buffer->grent_size = BUFSIZ;
 #    else
-        PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->grent_size = REENTRANTUSUALSIZE;
 #    endif
 #  endif /* HAS_GETGRNAM_R */
 
 #  ifdef HAS_GETHOSTBYNAME_R
 #  if !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        PL_reentrant_buffer->_hostent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->hostent_size = REENTRANTUSUALSIZE;
 #  endif
 #  endif /* HAS_GETHOSTBYNAME_R */
 
 #  ifdef HAS_GETLOGIN_R
-        PL_reentrant_buffer->_getlogin_size = REENTRANTSMALLSIZE;
+        PL_reentrant_buffer->getlogin_size = REENTRANTSMALLSIZE;
 #  endif /* HAS_GETLOGIN_R */
 
 #  ifdef HAS_GETNETBYNAME_R
 #  if !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        PL_reentrant_buffer->_netent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->netent_size = REENTRANTUSUALSIZE;
 #  endif
 #  endif /* HAS_GETNETBYNAME_R */
 
 #  ifdef HAS_GETPROTOBYNAME_R
 #  if !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        PL_reentrant_buffer->_protoent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->protoent_size = REENTRANTUSUALSIZE;
 #  endif
 #  endif /* HAS_GETPROTOBYNAME_R */
 
 #  ifdef HAS_GETPWNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-        PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-        if (PL_reentrant_buffer->_pwent_size == (size_t) -1)
-                PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+        if (PL_reentrant_buffer->pwent_size == (size_t) -1)
+                PL_reentrant_buffer->pwent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-        PL_reentrant_buffer->_pwent_size = SIABUFSIZ;
+        PL_reentrant_buffer->pwent_size = SIABUFSIZ;
 #    elif defined(__sgi)
-        PL_reentrant_buffer->_pwent_size = BUFSIZ;
+        PL_reentrant_buffer->pwent_size = BUFSIZ;
 #    else
-        PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->pwent_size = REENTRANTUSUALSIZE;
 #    endif
 #  endif /* HAS_GETPWNAM_R */
 
 #  ifdef HAS_GETSERVBYNAME_R
 #  if !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-        PL_reentrant_buffer->_servent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->servent_size = REENTRANTUSUALSIZE;
 #  endif
 #  endif /* HAS_GETSERVBYNAME_R */
 
 #  ifdef HAS_GETSPNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
-        PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
-        if (PL_reentrant_buffer->_spent_size == (size_t) -1)
-                PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+        if (PL_reentrant_buffer->spent_size == (size_t) -1)
+                PL_reentrant_buffer->spent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
-        PL_reentrant_buffer->_spent_size = SIABUFSIZ;
+        PL_reentrant_buffer->spent_size = SIABUFSIZ;
 #    elif defined(__sgi)
-        PL_reentrant_buffer->_spent_size = BUFSIZ;
+        PL_reentrant_buffer->spent_size = BUFSIZ;
 #    else
-        PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->spent_size = REENTRANTUSUALSIZE;
 #    endif
 #  endif /* HAS_GETSPNAM_R */
 
@@ -144,25 +144,25 @@ Perl_reentrant_size(pTHX) {
 #  ifdef HAS_READDIR_R
         /* This is the size Solaris recommends.
          * (though we go static, should use pathconf() instead) */
-        PL_reentrant_buffer->_readdir_size = sizeof(struct dirent) + MAXPATHLEN + 1;
+        PL_reentrant_buffer->readdir_size = sizeof(struct dirent) + MAXPATHLEN + 1;
 #  endif /* HAS_READDIR_R */
 
 #  ifdef HAS_READDIR64_R
         /* This is the size Solaris recommends.
          * (though we go static, should use pathconf() instead) */
-        PL_reentrant_buffer->_readdir64_size = sizeof(struct dirent64) + MAXPATHLEN + 1;
+        PL_reentrant_buffer->readdir64_size = sizeof(struct dirent64) + MAXPATHLEN + 1;
 #  endif /* HAS_READDIR64_R */
 
 #  ifdef HAS_SETLOCALE_R
-        PL_reentrant_buffer->_setlocale_size = REENTRANTSMALLSIZE;
+        PL_reentrant_buffer->setlocale_size = REENTRANTSMALLSIZE;
 #  endif /* HAS_SETLOCALE_R */
 
 #  ifdef HAS_STRERROR_R
-        PL_reentrant_buffer->_strerror_size = 1024;
+        PL_reentrant_buffer->strerror_size = 1024;
 #  endif /* HAS_STRERROR_R */
 
 #  ifdef HAS_TTYNAME_R
-        PL_reentrant_buffer->_ttyname_size = REENTRANTSMALLSIZE;
+        PL_reentrant_buffer->ttyname_size = REENTRANTSMALLSIZE;
 #  endif /* HAS_TTYNAME_R */
 
 
@@ -183,66 +183,66 @@ Perl_reentrant_init(pTHX) {
         Perl_reentrant_size(aTHX);
 
 #  ifdef HAS_ASCTIME_R
-        Newx(PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
+        Newx(PL_reentrant_buffer->asctime_buffer, PL_reentrant_buffer->asctime_size, char);
 #  endif /* HAS_ASCTIME_R */
 
 #  ifdef HAS_CRYPT_R
 #  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
-        PL_reentrant_buffer->_crypt_struct_buffer = 0;
+        PL_reentrant_buffer->crypt_struct_buffer = 0;
 #  endif
 #  endif /* HAS_CRYPT_R */
 
 #  ifdef HAS_CTIME_R
-        Newx(PL_reentrant_buffer->_ctime_buffer, PL_reentrant_buffer->_ctime_size, char);
+        Newx(PL_reentrant_buffer->ctime_buffer, PL_reentrant_buffer->ctime_size, char);
 #  endif /* HAS_CTIME_R */
 
 #  ifdef HAS_GETGRNAM_R
 #   ifdef USE_GRENT_FPTR
-        PL_reentrant_buffer->_grent_fptr = NULL;
+        PL_reentrant_buffer->grent_fptr = NULL;
 #   endif
-        Newx(PL_reentrant_buffer->_grent_buffer, PL_reentrant_buffer->_grent_size, char);
+        Newx(PL_reentrant_buffer->grent_buffer, PL_reentrant_buffer->grent_size, char);
 #  endif /* HAS_GETGRNAM_R */
 
 #  ifdef HAS_GETHOSTBYNAME_R
 #  if !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Newx(PL_reentrant_buffer->_hostent_buffer, PL_reentrant_buffer->_hostent_size, char);
+        Newx(PL_reentrant_buffer->hostent_buffer, PL_reentrant_buffer->hostent_size, char);
 #  endif
 #  endif /* HAS_GETHOSTBYNAME_R */
 
 #  ifdef HAS_GETLOGIN_R
-        Newx(PL_reentrant_buffer->_getlogin_buffer, PL_reentrant_buffer->_getlogin_size, char);
+        Newx(PL_reentrant_buffer->getlogin_buffer, PL_reentrant_buffer->getlogin_size, char);
 #  endif /* HAS_GETLOGIN_R */
 
 #  ifdef HAS_GETNETBYNAME_R
 #  if !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Newx(PL_reentrant_buffer->_netent_buffer, PL_reentrant_buffer->_netent_size, char);
+        Newx(PL_reentrant_buffer->netent_buffer, PL_reentrant_buffer->netent_size, char);
 #  endif
 #  endif /* HAS_GETNETBYNAME_R */
 
 #  ifdef HAS_GETPROTOBYNAME_R
 #  if !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Newx(PL_reentrant_buffer->_protoent_buffer, PL_reentrant_buffer->_protoent_size, char);
+        Newx(PL_reentrant_buffer->protoent_buffer, PL_reentrant_buffer->protoent_size, char);
 #  endif
 #  endif /* HAS_GETPROTOBYNAME_R */
 
 #  ifdef HAS_GETPWNAM_R
 #   ifdef USE_PWENT_FPTR
-        PL_reentrant_buffer->_pwent_fptr = NULL;
+        PL_reentrant_buffer->pwent_fptr = NULL;
 #   endif
-        Newx(PL_reentrant_buffer->_pwent_buffer, PL_reentrant_buffer->_pwent_size, char);
+        Newx(PL_reentrant_buffer->pwent_buffer, PL_reentrant_buffer->pwent_size, char);
 #  endif /* HAS_GETPWNAM_R */
 
 #  ifdef HAS_GETSERVBYNAME_R
 #  if !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-        Newx(PL_reentrant_buffer->_servent_buffer, PL_reentrant_buffer->_servent_size, char);
+        Newx(PL_reentrant_buffer->servent_buffer, PL_reentrant_buffer->servent_size, char);
 #  endif
 #  endif /* HAS_GETSERVBYNAME_R */
 
 #  ifdef HAS_GETSPNAM_R
 #   ifdef USE_SPENT_FPTR
-        PL_reentrant_buffer->_spent_fptr = NULL;
+        PL_reentrant_buffer->spent_fptr = NULL;
 #   endif
-        Newx(PL_reentrant_buffer->_spent_buffer, PL_reentrant_buffer->_spent_size, char);
+        Newx(PL_reentrant_buffer->spent_buffer, PL_reentrant_buffer->spent_size, char);
 #  endif /* HAS_GETSPNAM_R */
 
 #  ifdef HAS_GMTIME_R
@@ -252,23 +252,23 @@ Perl_reentrant_init(pTHX) {
 #  endif /* HAS_LOCALTIME_R */
 
 #  ifdef HAS_READDIR_R
-        PL_reentrant_buffer->_readdir_struct = (struct dirent*)safemalloc(PL_reentrant_buffer->_readdir_size);
+        PL_reentrant_buffer->readdir_struct = (struct dirent*)safemalloc(PL_reentrant_buffer->readdir_size);
 #  endif /* HAS_READDIR_R */
 
 #  ifdef HAS_READDIR64_R
-        PL_reentrant_buffer->_readdir64_struct = (struct dirent64*)safemalloc(PL_reentrant_buffer->_readdir64_size);
+        PL_reentrant_buffer->readdir64_struct = (struct dirent64*)safemalloc(PL_reentrant_buffer->readdir64_size);
 #  endif /* HAS_READDIR64_R */
 
 #  ifdef HAS_SETLOCALE_R
-        Newx(PL_reentrant_buffer->_setlocale_buffer, PL_reentrant_buffer->_setlocale_size, char);
+        Newx(PL_reentrant_buffer->setlocale_buffer, PL_reentrant_buffer->setlocale_size, char);
 #  endif /* HAS_SETLOCALE_R */
 
 #  ifdef HAS_STRERROR_R
-        Newx(PL_reentrant_buffer->_strerror_buffer, PL_reentrant_buffer->_strerror_size, char);
+        Newx(PL_reentrant_buffer->strerror_buffer, PL_reentrant_buffer->strerror_size, char);
 #  endif /* HAS_STRERROR_R */
 
 #  ifdef HAS_TTYNAME_R
-        Newx(PL_reentrant_buffer->_ttyname_buffer, PL_reentrant_buffer->_ttyname_size, char);
+        Newx(PL_reentrant_buffer->ttyname_buffer, PL_reentrant_buffer->ttyname_size, char);
 #  endif /* HAS_TTYNAME_R */
 
 
@@ -286,57 +286,57 @@ Perl_reentrant_free(pTHX) {
 #ifdef USE_REENTRANT_API
 
 #  ifdef HAS_ASCTIME_R
-        Safefree(PL_reentrant_buffer->_asctime_buffer);
+        Safefree(PL_reentrant_buffer->asctime_buffer);
 #  endif /* HAS_ASCTIME_R */
 
 #  ifdef HAS_CRYPT_R
 #  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
-        Safefree(PL_reentrant_buffer->_crypt_struct_buffer);
+        Safefree(PL_reentrant_buffer->crypt_struct_buffer);
 #  endif
 #  endif /* HAS_CRYPT_R */
 
 #  ifdef HAS_CTIME_R
-        Safefree(PL_reentrant_buffer->_ctime_buffer);
+        Safefree(PL_reentrant_buffer->ctime_buffer);
 #  endif /* HAS_CTIME_R */
 
 #  ifdef HAS_GETGRNAM_R
-        Safefree(PL_reentrant_buffer->_grent_buffer);
+        Safefree(PL_reentrant_buffer->grent_buffer);
 #  endif /* HAS_GETGRNAM_R */
 
 #  ifdef HAS_GETHOSTBYNAME_R
 #  if !(GETHOSTBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Safefree(PL_reentrant_buffer->_hostent_buffer);
+        Safefree(PL_reentrant_buffer->hostent_buffer);
 #  endif
 #  endif /* HAS_GETHOSTBYNAME_R */
 
 #  ifdef HAS_GETLOGIN_R
-        Safefree(PL_reentrant_buffer->_getlogin_buffer);
+        Safefree(PL_reentrant_buffer->getlogin_buffer);
 #  endif /* HAS_GETLOGIN_R */
 
 #  ifdef HAS_GETNETBYNAME_R
 #  if !(GETNETBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Safefree(PL_reentrant_buffer->_netent_buffer);
+        Safefree(PL_reentrant_buffer->netent_buffer);
 #  endif
 #  endif /* HAS_GETNETBYNAME_R */
 
 #  ifdef HAS_GETPROTOBYNAME_R
 #  if !(GETPROTOBYNAME_R_PROTO == REENTRANT_PROTO_I_CSD)
-        Safefree(PL_reentrant_buffer->_protoent_buffer);
+        Safefree(PL_reentrant_buffer->protoent_buffer);
 #  endif
 #  endif /* HAS_GETPROTOBYNAME_R */
 
 #  ifdef HAS_GETPWNAM_R
-        Safefree(PL_reentrant_buffer->_pwent_buffer);
+        Safefree(PL_reentrant_buffer->pwent_buffer);
 #  endif /* HAS_GETPWNAM_R */
 
 #  ifdef HAS_GETSERVBYNAME_R
 #  if !(GETSERVBYNAME_R_PROTO == REENTRANT_PROTO_I_CCSD)
-        Safefree(PL_reentrant_buffer->_servent_buffer);
+        Safefree(PL_reentrant_buffer->servent_buffer);
 #  endif
 #  endif /* HAS_GETSERVBYNAME_R */
 
 #  ifdef HAS_GETSPNAM_R
-        Safefree(PL_reentrant_buffer->_spent_buffer);
+        Safefree(PL_reentrant_buffer->spent_buffer);
 #  endif /* HAS_GETSPNAM_R */
 
 #  ifdef HAS_GMTIME_R
@@ -346,23 +346,23 @@ Perl_reentrant_free(pTHX) {
 #  endif /* HAS_LOCALTIME_R */
 
 #  ifdef HAS_READDIR_R
-        Safefree(PL_reentrant_buffer->_readdir_struct);
+        Safefree(PL_reentrant_buffer->readdir_struct);
 #  endif /* HAS_READDIR_R */
 
 #  ifdef HAS_READDIR64_R
-        Safefree(PL_reentrant_buffer->_readdir64_struct);
+        Safefree(PL_reentrant_buffer->readdir64_struct);
 #  endif /* HAS_READDIR64_R */
 
 #  ifdef HAS_SETLOCALE_R
-        Safefree(PL_reentrant_buffer->_setlocale_buffer);
+        Safefree(PL_reentrant_buffer->setlocale_buffer);
 #  endif /* HAS_SETLOCALE_R */
 
 #  ifdef HAS_STRERROR_R
-        Safefree(PL_reentrant_buffer->_strerror_buffer);
+        Safefree(PL_reentrant_buffer->strerror_buffer);
 #  endif /* HAS_STRERROR_R */
 
 #  ifdef HAS_TTYNAME_R
-        Safefree(PL_reentrant_buffer->_ttyname_buffer);
+        Safefree(PL_reentrant_buffer->ttyname_buffer);
 #  endif /* HAS_TTYNAME_R */
 
 
@@ -438,11 +438,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_hostent_size <=
+            if (PL_reentrant_buffer->hostent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_hostent_buffer,
-                    &PL_reentrant_buffer->_hostent_size, char);
+            RenewDouble(PL_reentrant_buffer->hostent_buffer,
+                    &PL_reentrant_buffer->hostent_size, char);
             switch (key) {
                 case KEY_gethostbyaddr:
                     host_addr = va_arg(ap, char *);
@@ -473,11 +473,11 @@ Perl_reentrant_retry(const char *f, ...)
             Gid_t gid;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_grent_size <=
+            if (PL_reentrant_buffer->grent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_grent_buffer,
-                    &PL_reentrant_buffer->_grent_size, char);
+            RenewDouble(PL_reentrant_buffer->grent_buffer,
+                    &PL_reentrant_buffer->grent_size, char);
             switch (key) {
                 case KEY_getgrnam:
                     name = va_arg(ap, char *);
@@ -510,11 +510,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_netent_size <=
+            if (PL_reentrant_buffer->netent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_netent_buffer,
-                    &PL_reentrant_buffer->_netent_size, char);
+            RenewDouble(PL_reentrant_buffer->netent_buffer,
+                    &PL_reentrant_buffer->netent_size, char);
             switch (key) {
                 case KEY_getnetbyaddr:
                     net = va_arg(ap, Netdb_net_t);
@@ -543,12 +543,12 @@ Perl_reentrant_retry(const char *f, ...)
             char * name;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_pwent_size <=
+            if (PL_reentrant_buffer->pwent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 
 #    endif
-            RenewDouble(PL_reentrant_buffer->_pwent_buffer,
-                    &PL_reentrant_buffer->_pwent_size, char);
+            RenewDouble(PL_reentrant_buffer->pwent_buffer,
+                    &PL_reentrant_buffer->pwent_size, char);
             switch (key) {
                 case KEY_getpwnam:
                     name = va_arg(ap, char *);
@@ -582,12 +582,12 @@ Perl_reentrant_retry(const char *f, ...)
             char * name;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_spent_size <=
+            if (PL_reentrant_buffer->spent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 
 #    endif
-            RenewDouble(PL_reentrant_buffer->_spent_buffer,
-                    &PL_reentrant_buffer->_spent_size, char);
+            RenewDouble(PL_reentrant_buffer->spent_buffer,
+                    &PL_reentrant_buffer->spent_size, char);
             switch (key) {
                 case KEY_getspnam:
                     name = va_arg(ap, char *);
@@ -610,11 +610,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_protoent_size <=
+            if (PL_reentrant_buffer->protoent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_protoent_buffer,
-                    &PL_reentrant_buffer->_protoent_size, char);
+            RenewDouble(PL_reentrant_buffer->protoent_buffer,
+                    &PL_reentrant_buffer->protoent_size, char);
             switch (key) {
                 case KEY_getprotobyname:
                     name = va_arg(ap, char *);
@@ -643,11 +643,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_servent_size <=
+            if (PL_reentrant_buffer->servent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_servent_buffer,
-                    &PL_reentrant_buffer->_servent_size, char);
+            RenewDouble(PL_reentrant_buffer->servent_buffer,
+                    &PL_reentrant_buffer->servent_size, char);
             switch (key) {
                 case KEY_getservbyname:
                     name = va_arg(ap, char *);
