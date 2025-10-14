@@ -529,6 +529,7 @@ bare_statement_if
 		mblock
 		else
 		{
+                        ($mblock)->op_flags |= OPf_PARENS;
 			$$ = block_end($remember, newCONDOP(0, $mexpr, op_scope($mblock), $else));
 			parser->copline = (line_t)$KW_IF;
 		}
@@ -701,6 +702,7 @@ bare_statement_unless
 		mblock
 		else
 		{
+                        ($mblock)->op_flags |= OPf_PARENS;
 			$$ = block_end($remember, newCONDOP(0, $mexpr, $else, op_scope($mblock)));
 			parser->copline = (line_t)$KW_UNLESS;
 		}
@@ -970,6 +972,7 @@ else
 			}
 	|	KW_ELSIF PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock else[else.recurse]
 			{ parser->copline = (line_t)$KW_ELSIF;
+                            ($mblock)->op_flags |= OPf_PARENS;
 			    $$ = newCONDOP(0,
 				newSTATEOP(OPf_SPECIAL,NULL,$mexpr),
 				op_scope($mblock), $[else.recurse]);
