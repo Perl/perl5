@@ -162,7 +162,6 @@ sub generate_proto_h {
         }
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
@@ -203,6 +202,8 @@ sub generate_proto_h {
             die_at_end "$plain_func: u flag only usable with m"
                                                             if $flags =~ /u/;
         }
+
+        my $args_assert_line = ( $flags !~ /m/ );
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
