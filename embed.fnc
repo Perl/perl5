@@ -1699,9 +1699,6 @@ Ampx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK SV *val 			\
 				|U32 hash				\
 				|int flags
-Admp	|SV **	|hv_stores	|NULLOK HV *hv				\
-				|"key"					\
-				|NULLOK SV *val
 Admp	|void	|hv_undef	|NULLOK HV *hv
 Xop	|void	|hv_undef_flags |NULLOK HV *hv				\
 				|U32 flags
