@@ -3559,7 +3559,7 @@ PERL_CALLCONV Signal_t
 Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
 
-/* PERL_CALLCONV const char * const
+/* PERL_CALLCONV const char *
 Perl_phase_name(pTHX_ enum perl_phase phase); */
 
 PERL_CALLCONV void
