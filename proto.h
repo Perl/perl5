@@ -1705,9 +1705,6 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash); */
 /* PERL_CALLCONV SV **
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags); */
 
-/* PERL_CALLCONV SV **
-Perl_hv_stores(pTHX_ HV *hv, const char * const key, SV *val); */
-
 /* PERL_CALLCONV void
 Perl_hv_undef(pTHX_ HV *hv); */
 
