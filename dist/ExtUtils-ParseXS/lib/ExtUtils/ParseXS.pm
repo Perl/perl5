@@ -503,10 +503,6 @@ sub process_file {
 
     $self->{file_SCOPE_enabled} = 0;
 
-    # Process next line
-
-    $_ = shift(@{ $self->{line} });
-
     # ----------------------------------------------------------------
     # Process file-scoped keywords
     # ----------------------------------------------------------------
@@ -518,26 +514,27 @@ sub process_file {
     # the relevant Node::FOO::Parse() method if it finds any of the
     # file-scoped keywords in the passed pattern.
 
-    while (my $kwd = $self->check_keyword("BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
+    my $tmp_obj = ExtUtils::ParseXS::Node::XS_file->new();
+    $tmp_obj->parse_keywords(
+            $self,
+            undef, undef, # xsub and xbody: not needed for non XSUB keywords
+            undef,  # implies process as many keywords as possible
+             "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
+          . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE"
 
-      my $class = "ExtUtils::ParseXS::Node::$kwd";
-      my $node  = $class->new();
-      unshift @{$self->{line}}, $_;
-      $node->parse($self);
-      $node->as_code($self) if $class->can('as_code');
-      next PARAGRAPH unless @{ $self->{line} };
-      $_ = shift(@{ $self->{line} });
-    }
+        );
+    $tmp_obj->as_code($self);
+
+
+    next PARAGRAPH unless @{ $self->{line} };
 
     # ----------------------------------------------------------------
     # Parse and code-emit an XSUB
     # ----------------------------------------------------------------
 
-    unshift @{$self->{line}}, $_;
     my $xsub = ExtUtils::ParseXS::Node::xsub->new();
     $xsub->parse($self)
       or next PARAGRAPH;
-    $_ = shift @{$self->{line}};
 
     $xsub->as_code($self);
     $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
@@ -796,27 +793,6 @@ sub report_error_count {
   }
 }
 *errors = \&report_error_count;
-
-
-# $self->check_keyword("FOO|BAR")
-#
-# Return a keyword if the next non-blank line matches one of the passed
-# keywords, or return undef otherwise.
-#
-# Expects $_ to be set to the current line. Skip any initial blank lines,
-# (consuming @{$self->{line}} and updating $_).
-#
-# Then if it matches FOO: etc, strip the keyword and any comment from the
-# line (leaving any argument in $_) and return the keyword. Return false
-# otherwise.
-
-sub check_keyword {
-  my ExtUtils::ParseXS $self = shift;
-  # skip blank lines
-  $_ = shift(@{ $self->{line} }) while !/\S/ && @{ $self->{line} };
-
-  s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
-}
 
 
 # ST(): helper function for the various INPUT / OUTPUT code emitting
