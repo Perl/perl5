@@ -4020,13 +4020,13 @@ sub generate_proto_h {
         my $never_returns = ( $flags =~ /r/ );
         my $binarycompat = ( $flags =~ /b/ );
         my $has_mflag = ( $flags =~ /m/ );
-        my $args_assert_line = ! $has_mflag;
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /E/ );
         my @asserts;
         my @attrs;
         my $func;
+        my $args_assert_line = ! $has_mflag;
 
         if (! $can_ignore && $retval eq 'void') {
             warn "It is nonsensical to require the return value of a void"
