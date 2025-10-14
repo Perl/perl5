@@ -773,12 +773,13 @@ sub embed_h {
 
     my $lines;
     foreach (@$funcs) {
-        if ($_->{type} ne "content") {
-            $lines .= $_->{line};
+        my $object = $_;
+        if ($object->{type} ne "content") {
+            $lines .= $object->{line};
             next;
         }
-        my $level= $_->{level};
-        my $embed= $_->{embed} or next;
+        my $level= $object->{level};
+        my $embed= $object->{embed} or next;
         my ($flags,$retval,$func,$args) =
                                    @{$embed}{qw(flags return_type name args)};
         my $full_name = full_name($func, $flags);
