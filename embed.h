@@ -1829,15 +1829,6 @@
 #     define quadmath_format_needed             Perl_quadmath_format_needed
 #     define quadmath_format_valid              Perl_quadmath_format_valid
 #   endif
-#   if defined(USE_THREADS)
-#     define Perl_do_aexec(mTHX,a,b,c)          do_aexec(a,b,c)
-#     define Perl_my_lstat(mTHX)                my_lstat()
-#     define Perl_my_stat(mTHX)                 my_stat()
-#   else
-#     define Perl_do_aexec                      do_aexec
-#     define Perl_my_lstat                      my_lstat
-#     define Perl_my_stat                       my_stat
-#   endif
 #   if defined(WIN32)
 #     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
 #   else
