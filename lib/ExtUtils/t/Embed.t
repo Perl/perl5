@@ -170,6 +170,7 @@ __END__
 
 /* perl_test.c */
 
+#define PERL_NO_SHORT_NAMES
 #include <EXTERN.h>
 #include <perl.h>
 
@@ -201,6 +202,21 @@ int main(int argc, char **argv, char **env) {
     perl_parse(my_perl, NULL, (sizeof(cmds)/sizeof(char *))-1, (char **)cmds, env);
 
     my_puts("ok 4");
+
+#ifdef newAV
+# error newAV shouldnt be defined
+#endif
+#ifdef newSV
+# error newSV shouldnt be defined
+#endif
+#ifdef av_count
+# error av_count shouldnt be defined
+#endif
+
+    AV* av = Perl_newAV(aTHX);
+    SV * sptr = Perl_newSV(aTHX_ 10);
+
+    Perl_save_aelem(aTHX_ av, 0, &sptr);
 
     fflush(stdout);
 

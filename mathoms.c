@@ -35,9 +35,6 @@
  * Perl_foo(...) had been replaced by a macro.  But see the 'm' flag discussion
  * in embed.fnc for a better way to handle this.
  *
- * This file can't just be cleaned out periodically, because that would break
- * builds with -DPERL_NO_SHORT_NAMES
- *
  * NOTE: ALL FUNCTIONS IN THIS FILE should have an entry with the 'b' flag in
  * embed.fnc.
  *

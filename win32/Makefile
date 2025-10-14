@@ -673,8 +673,9 @@ MICROCORE_SRC	=		\
 		..\gv.c		\
 		..\mro_core.c	\
 		..\hv.c		\
-		..\locale.c	\
 		..\keywords.c	\
+		..\locale.c	\
+		..\long_names.c	\
 		..\mathoms.c    \
 		..\mg.c		\
 		..\numeric.c	\
