@@ -203,7 +203,9 @@ sub generate_proto_h {
                                                             if $flags =~ /u/;
         }
 
-        my $args_assert_line = ( $flags !~ /m/ );
+        # A macro only gets assertions for it if it is to get Perl_ added to
+        # it.
+        my $args_assert_line = ! $has_mflag || $flags =~ tr/mp// > 1;
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -383,7 +385,10 @@ sub generate_proto_h {
                     }
                     my $argname = $1;
 
-                    if (defined $argname && (! $has_mflag || $binarycompat)) {
+                    if (defined $argname && (   ! $has_mflag
+                                             || $binarycompat
+                                             || $args_assert_line))
+                    {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
                         }
