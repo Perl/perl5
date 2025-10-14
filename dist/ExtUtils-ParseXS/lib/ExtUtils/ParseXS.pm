@@ -192,6 +192,10 @@ BEGIN {
                         # the top element of the stack, since that also
                         # includes elements for each INCLUDE etc.
 
+  'cpp_next_tmp_define',# the next string like XSubPPtmpAAAA
+                        # to use as CPP defines for distringuishing
+                        # similar calls to newXS() etc
+
   'MODULE_cname',       # MODULE canonical name (i.e. after s/\W/_/g).
   'PACKAGE_name',       # PACKAGE name.
   'PACKAGE_C_name',     #             Ditto, but with tr/:/_/.
@@ -426,125 +430,14 @@ sub process_file {
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
   $self->{XS_parse_stack_top_if_idx} = 0;
-  my $cpp_next_tmp_define = 'XSubPPtmpAAAA';
+  $self->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
 
   $AST->as_code($self);
 
-  # ----------------------------------------------------------------
-  # Main loop: for each iteration, read in a paragraph's worth of XSUB
-  # definition or XS/CPP directives into @{ $self->{line} }, then try to
-  # interpret those lines.
-  # ----------------------------------------------------------------
 
- PARAGRAPH:
-  while ($self->fetch_para()) {
-
-    # Process and emit any initial C-preprocessor lines and blank
-    # lines.  Also, keep track of #if/#else/#endif nesting, updating:
-    #    $self->{XS_parse_stack}
-    #    $self->{XS_parse_stack_top_if_idx}
-    #    $self->{bootcode_early}
-    #    $self->{bootcode_later}
-    while (@{$self->{line}} && $self->{line}[0] =~ /^#/) {
-      my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
-      $node->parse($self);
-      $node->as_code($self);
-    }
-
-    next PARAGRAPH unless @{ $self->{line} };
-
-    if (   $self->{XS_parse_stack_top_if_idx}
-        && !$self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{varname})
-    {
-      # We are inside an #if, but have not yet #defined its xsubpp variable.
-      #
-      # At the start of every '#if ...' which is external to an XSUB,
-      # we emit '#define XSubPPtmpXXXX 1', for increasing XXXX.
-      # Later, when emitting initialisation code in places like a boot
-      # block, it can then be made conditional via, e.g.
-      #    #if XSubPPtmpXXXX
-      #        newXS(...);
-      #    #endif
-      # So that only the defined XSUBs get added to the symbol table.
-      print "#define $cpp_next_tmp_define 1\n\n";
-      push(@{ $self->{bootcode_early} }, "#if $cpp_next_tmp_define\n");
-      push(@{ $self->{bootcode_later} }, "#if $cpp_next_tmp_define\n");
-      $self->{XS_parse_stack}->[$self->{XS_parse_stack_top_if_idx}]{varname}
-          = $cpp_next_tmp_define++;
-    }
-
-    # This will die on something like
-    #
-    #   |    CODE:
-    #   |        foo();
-    #   |
-    #   |#define X
-    #   |        bar();
-    #
-    # due to the define starting at column 1 and being preceded by a blank
-    # line: so the define and bar() aren't parsed as part of the CODE
-    # block.
-
-    $self->death(
-      "Code is not inside a function"
-        ." (maybe last function was ended by a blank line "
-        ." followed by a statement on column one?)")
-      if $self->{line}->[0] =~ /^\s/;
-
-    # The SCOPE keyword can appear both in file scope (just before an
-    # XSUB) and as an XSUB keyword. This field maintains the state of the
-    # former: reset it at the start of processing any file-scoped
-    # keywords just before the XSUB (i.e. without any blank lines, e.g.
-    #     SCOPE: ENABLE
-    #     int
-    #     foo(...)
-    # These semantics may not be particularly sensible, but they maintain
-    # backwards compatibility for now.
-
-    $self->{file_SCOPE_enabled} = 0;
-
-    # ----------------------------------------------------------------
-    # Process file-scoped keywords
-    # ----------------------------------------------------------------
-
-    # Note that MODULE and TYPEMAP will already have been processed by
-    # fetch_para().
-    #
-    # This loop repeatedly: skips any blank lines and then calls
-    # the relevant Node::FOO::Parse() method if it finds any of the
-    # file-scoped keywords in the passed pattern.
-
-    my $tmp_obj = ExtUtils::ParseXS::Node::XS_file->new();
-    $tmp_obj->parse_keywords(
-            $self,
-            undef, undef, # xsub and xbody: not needed for non XSUB keywords
-            undef,  # implies process as many keywords as possible
-             "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
-          . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE"
-
-        );
-    $tmp_obj->as_code($self);
-
-
-    next PARAGRAPH unless @{ $self->{line} };
-
-    # ----------------------------------------------------------------
-    # Parse and code-emit an XSUB
-    # ----------------------------------------------------------------
-
-    my $xsub = ExtUtils::ParseXS::Node::xsub->new();
-    $xsub->parse($self)
-      or next PARAGRAPH;
-
-    $xsub->as_code($self);
-    $self->{seen_an_XSUB} = 1; # encountered at least one XSUB
-
-    # ----------------------------------------------------------------
-    # end of XSUB
-    # ----------------------------------------------------------------
-
-  } # END 'PARAGRAPH' 'while' loop
-
+  my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
+  $cpp_scope->parse($self);
+  $cpp_scope->as_code($self);
 
   # ----------------------------------------------------------------
   # End of main loop and at EOF: all paragraphs (and thus XSUBs) have now
