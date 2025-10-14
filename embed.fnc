@@ -2691,7 +2691,7 @@ CTp	|Signal_t|perly_sighandler					\
 				|bool safe
 
 Admp	|const char * const|phase_name					\
-				|enum perl_phase
+				|enum perl_phase phase
 Adp	|void	|pmop_dump	|NULLOK PMOP *pm
 : Used in perly.y
 p	|OP *	|pmruntime	|NN OP *o				\
