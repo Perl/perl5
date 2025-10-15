@@ -4287,7 +4287,21 @@ sub parse {
         }
     }
 
-    $pxs->push_parse_stack($is_cmd ? (IsPipe => 1) : ());
+    {
+        # Save the current file context.
+        push(@{ $pxs->{XS_parse_stack} }, {
+                        type            => 'file',
+                        LastLine        => $pxs->{lastline},
+                        LastLineNo      => $pxs->{lastline_no},
+                        Line            => $pxs->{line},
+                        LineNo          => $pxs->{line_no},
+                        Filename        => $pxs->{in_filename},
+                        Filepathname    => $pxs->{in_pathname},
+                        Handle          => $pxs->{in_fh},
+                        IsPipe          =>    $is_cmd
+                                           || scalar($pxs->{in_filename} =~ /\|\s*$/),
+                      });
+    }
 
     #XXX
     my $old_lines = $pxs->{line};
@@ -4349,10 +4363,41 @@ sub parse {
     $cpp_scope->parse($pxs);
     push @{$self->{kids}}, $cpp_scope;
 
-    $pxs->PopFile();
+    {
+        my $data     = pop @{ $pxs->{XS_parse_stack} };
+        my $ThisFile = $pxs->{in_filename};
+        my $isPipe   = $data->{IsPipe};
+
+        --$pxs->{IncludedFiles}->{$pxs->{in_filename}}
+            unless $isPipe;
+
+        close $pxs->{in_fh};
+
+        $pxs->{in_fh}         = $data->{Handle};
+        # $in_filename is the leafname, which for some reason is used for diagnostic
+        # messages, whereas $in_pathname is the full pathname, and is used for
+        # #line directives.
+        $pxs->{in_filename}   = $data->{Filename};
+        $pxs->{in_pathname} = $data->{Filepathname};
+        $pxs->{lastline}   = $data->{LastLine};
+        $pxs->{lastline_no} = $data->{LastLineNo};
+        @{ $pxs->{line} }       = @{ $data->{Line} };
+        @{ $pxs->{line_no} }    = @{ $data->{LineNo} };
+
+        if ($isPipe and $? ) {
+            --$pxs->{lastline_no};
+            print STDERR "Error reading from pipe '$ThisFile': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
+            exit 1;
+        }
+
+        print ExtUtils::ParseXS::Q(<<"EOF");
+        |
+        |/* INCLUDE: Returning to '$self->{old_filename}' from '$ThisFile' */
+        |
+EOF
+    }
     #XXX
     $pxs->{line} = $old_lines;
-
 
     # XXX tmp prematurely emit code
     $cpp_scope->as_code($pxs);

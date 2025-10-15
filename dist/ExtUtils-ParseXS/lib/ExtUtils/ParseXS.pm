@@ -714,30 +714,6 @@ sub ST {
 }
 
 
-# Push an entry on the @{ $self->{XS_parse_stack} } array containing the
-# current file state, in preparation for INCLUDEing a new file. (Note that
-# it doesn't handle type => 'if' style entries, only file entries.)
-
-sub push_parse_stack {
-  my ExtUtils::ParseXS $self = shift;
-  my %args = @_;
-  # Save the current file context.
-  push(@{ $self->{XS_parse_stack} }, {
-          type            => 'file',
-          LastLine        => $self->{lastline},
-          LastLineNo      => $self->{lastline_no},
-          Line            => $self->{line},
-          LineNo          => $self->{line_no},
-          Filename        => $self->{in_filename},
-          Filepathname    => $self->{in_pathname},
-          Handle          => $self->{in_fh},
-          IsPipe          => scalar($self->{in_filename} =~ /\|\s*$/),
-          %args,
-         });
-
-}
-
-
 # Quote a command-line to be suitable for VMS
 
 sub QuoteArgs {
@@ -771,51 +747,6 @@ sub QuoteArgs {
       }
       return $command;
   }
-}
-
-
-# Pop the type => 'file' entry off the top of the @{ $self->{XS_parse_stack} }
-# array following the end of processing an INCLUDEd file, and restore the
-# former state.
-
-sub PopFile {
-  my ExtUtils::ParseXS $self = shift;
-
-  return 0 unless $self->{XS_parse_stack}->[-1]{type} eq 'file';
-
-  my $data     = pop @{ $self->{XS_parse_stack} };
-  my $ThisFile = $self->{in_filename};
-  my $isPipe   = $data->{IsPipe};
-
-  --$self->{IncludedFiles}->{$self->{in_filename}}
-    unless $isPipe;
-
-  close $self->{in_fh};
-
-  $self->{in_fh}         = $data->{Handle};
-  # $in_filename is the leafname, which for some reason is used for diagnostic
-  # messages, whereas $in_pathname is the full pathname, and is used for
-  # #line directives.
-  $self->{in_filename}   = $data->{Filename};
-  $self->{in_pathname} = $data->{Filepathname};
-  $self->{lastline}   = $data->{LastLine};
-  $self->{lastline_no} = $data->{LastLineNo};
-  @{ $self->{line} }       = @{ $data->{Line} };
-  @{ $self->{line_no} }    = @{ $data->{LineNo} };
-
-  if ($isPipe and $? ) {
-    --$self->{lastline_no};
-    print STDERR "Error reading from pipe '$ThisFile': $! in $self->{in_filename}, line $self->{lastline_no}\n" ;
-    exit 1;
-  }
-
-  print Q(<<"EOF");
-    |
-    |/* INCLUDE: Returning to '$self->{in_filename}' from '$ThisFile' */
-    |
-EOF
-
-  return 1;
 }
 
 
