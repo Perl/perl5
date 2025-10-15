@@ -793,7 +793,8 @@ package ExtUtils::ParseXS::Node::cpp_scope;
 # does its own fetch_para() calls).
 
 BEGIN { $build_subclass->(
-    'type',      # what sort of scope: 'main', 'include' or 'if'
+    'type',      # Str:  what sort of scope: 'main', 'include' or 'if'
+    'is_cmd',    # Bool: for include type, it's INCLUDE_COMMAND
 )};
 
 sub parse {
@@ -4288,6 +4289,10 @@ sub parse {
 
     $pxs->push_parse_stack($is_cmd ? (IsPipe => 1) : ());
 
+    #XXX
+    my $old_lines = $pxs->{line};
+    $pxs->{line} = [];
+
     $pxs->{in_fh} = Symbol::gensym();
 
     # Open the new file / pipe
@@ -4323,20 +4328,35 @@ sub parse {
                     ? "$pxs->{dir}/$path"
                     : File::Spec->catfile($pxs->{dir}, $path);
     }
-    $pxs->{in_pathname} = $path;
+    $pxs->{in_pathname} = $self->{file} = $path;
 
     # Prime the pump by reading the first non-blank line
-
-    # skip leading blank lines
     while (readline($pxs->{in_fh})) {
         last unless /^\s*$/;
     }
 
     $pxs->{lastline} = $_;
-    $pxs->{lastline_no} = $.;
+    chomp $pxs->{lastline};
+    $pxs->{lastline_no} = $self->{line_no} = $.;
 
     # XXX tmp prematurely emit code
     $self->XXX_as_code($pxs);
+
+    my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({
+                        type   => 'include',
+                        is_cmd =>  $self->{is_cmd},
+                    });
+    $cpp_scope->parse($pxs);
+    push @{$self->{kids}}, $cpp_scope;
+
+    $pxs->PopFile();
+    #XXX
+    $pxs->{line} = $old_lines;
+
+
+    # XXX tmp prematurely emit code
+    $cpp_scope->as_code($pxs);
+    pop @{$self->{kids}};
 
     1;
 }

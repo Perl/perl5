@@ -1023,9 +1023,10 @@ sub fetch_para {
   $self->death("Error: Unterminated '#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XS_parse_stack}->[-1]{type} eq 'if';
 
+  return 0 if not defined $self->{lastline}; # EOF
+
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
-  return $self->PopFile() if not defined $self->{lastline}; # EOF
 
   if ($self->{lastline} =~
       /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/)
