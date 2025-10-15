@@ -773,45 +773,65 @@ Perl_SvPADSTALE_off(SV *sv)
 =for apidoc         SvIV
 =for apidoc_item    SvIV_nomg
 =for apidoc_item m||SvIVx
+=for apidoc_item m||SvIVX
+=for apidoc_item m||SvIVXx
 
-These each coerce the given SV to IV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
-C<L</sv_setiv>> to make sure it does).
+These each return the IV contained in the given SV.
 
-As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+C<SvIVX> returns the raw value in the SV's IV slot, without checks or
+conversions.  Only use when you are sure C<SvIOK> is true.
+C<SvIVXx> is a synonym for C<SvIVX>.
 
-C<SvIVx> is now identical to C<SvIV>, but prior to 5.37.1, it was the only form
-guaranteed to evaluate C<sv> only once.
+In the other forms, conversions may be performed to yield a IV.  The returned
+value in many circumstances will get stored in C<sv>'s IV slot, but not in all
+cases.  (Use C<L</sv_setiv>> to make sure it does).
+All forms except C<SvIVX> now behave identically, except C<SvIV_nomg> does not
+perform 'get_magic'.
 
-C<SvIV_nomg> is the same as C<SvIV>, but does not perform 'get' magic.
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.  (Prior to
+5.37.1, C<SvIVx> was the only form guaranteed to evaluate C<sv> only once.)
 
 =for apidoc         SvNV
 =for apidoc_item    SvNV_nomg
-=for apidoc_item m||SvNVx
+=for apidoc_item m ||SvNVx
+=for apidoc_item m ||SvNVX
+=for apidoc_item m||SvNVXx
 
-These each coerce the given SV to NV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
-C<L</sv_setnv>> to make sure it does).
+These each return the NV contained in the given SV.
 
-As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+C<SvNVX> returns the raw value in the SV's NV slot, without checks or
+conversions.  Only use when you are sure C<SvNOK> is true.
+C<SvNVXx> is a synonym for C<SvNVX>.
 
-C<SvNVx> is now identical to C<SvNV>, but prior to 5.37.1, it was the only form
-guaranteed to evaluate C<sv> only once.
+In the other forms, conversions may be performed to yield a NV.  The returned
+value in many circumstances will get stored in C<sv>'s NV slot, but not in all
+cases.  (Use C<L</sv_setnv>> to make sure it does).
+All forms except C<SvNVX> now behave identically, except C<SvNV_nomg> does not
+perform 'get_magic'.
 
-C<SvNV_nomg> is the same as C<SvNV>, but does not perform 'get' magic.
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.  (Prior to
+5.37.1, C<SvNVx> was the only form guaranteed to evaluate C<sv> only once.)
 
-=for apidoc         SvUV
-=for apidoc_item    SvUV_nomg
-=for apidoc_item m||SvUVx
+=for apidoc          SvUV
+=for apidoc_item     SvUV_nomg
+=for apidoc_item  m||SvUVx
+=for apidoc_item  m||SvUVX
+=for apidoc_item  m||SvUVXx
 
-These each coerce the given SV to UV and return it.  The returned value in many
-circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use
-C<L</sv_setuv>> to make sure it does).
+These each return the UV contained in the given SV.
 
-As of 5.37.1, all are guaranteed to evaluate C<sv> only once.
+C<SvUVX> returns the raw value in the SV's UV slot, without checks or
+conversions.  Only use when you are sure C<SvUOK> is true.
+C<SvUVXx> is a synonym for C<SvUVX>.
 
-C<SvUVx> is now identical to C<SvUV>, but prior to 5.37.1, it was the only form
-guaranteed to evaluate C<sv> only once.
+In the other forms, conversions may be performed to yield a UV.  The returned
+value in many circumstances will get stored in C<sv>'s UV slot, but not in all
+cases.  (Use C<L</sv_setuv>> to make sure it does).
+All forms except C<SvUVX> now behave identically, except C<SvUV_nomg> does not
+perform 'get_magic'.
+
+As of 5.37.1, all are guaranteed to evaluate C<sv> only once.  (Prior to
+5.37.1, C<SvUVx> was the only form guaranteed to evaluate C<sv> only once.)
 
 =cut
 */
