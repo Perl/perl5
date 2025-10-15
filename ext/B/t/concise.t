@@ -10,7 +10,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 167;
+plan tests => 169;
 
 require_ok("B::Concise");
 
@@ -479,7 +479,40 @@ like $out, qr/$end/, 'OP_AND has op_other';
 $out =~ $end;
 my $next = $1;
 
-# Check it points to a PUSHMARK
+# Check it points to an ENTER...
+$end = <<'EOF';
+OP \(<NEXT>\)
+	op_next		0x\w+
+	op_sibling	0x\w+
+	op_ppaddr	PL_ppaddr\[OP_ENTER\]
+EOF
+
+$end =~ s/<NEXT>/$next/;
+
+like $out, qr/$end/, 'OP_AND->op_other points correctly (1/3)';
+
+$end =~ s/\top_next\t\t0x\\w\+/\top_next\t\t\(0x\\w\+\)/;
+
+$out =~ $end;
+my $next = $1;
+
+# Then a NEXTSTATE...
+$end = <<'EOF';
+COP \(<NEXT>\)
+	op_next		0x\w+
+	op_sibling	0x\w+
+	op_ppaddr	PL_ppaddr\[OP_NEXTSTATE\]
+EOF
+
+$end =~ s/<NEXT>/$next/;
+
+like $out, qr/$end/, 'OP_AND->op_other points correctly (2/3)';
+
+$end =~ s/\top_next\t\t0x\\w\+/\top_next\t\t\(0x\\w\+\)/;
+$out =~ $end;
+my $next = $1;
+
+# Then finally a PUSHMARK...
 $end = <<'EOF';
 OP \(<NEXT>\)
 	op_next		0x\w+
@@ -489,7 +522,7 @@ EOF
 
 $end =~ s/<NEXT>/$next/;
 
-like $out, qr/$end/, 'OP_AND->op_other points correctly';
+like $out, qr/$end/, 'OP_AND->op_other points correctly (3/3)';
 
 # test nextstate hints display
 
