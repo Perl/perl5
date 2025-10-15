@@ -380,7 +380,7 @@ int amigaos_kill(Pid_t pid, int signal)
                 }
         }
         IExec->ReleaseSemaphore(&fork_array_sema);
-        /* Allow the C library to work out which signals are realy valid */
+        /* Allow the C library to work out which signals are really valid */
         if(thistask)
         {
                 /* A quirk in newlib kill handling means it's better to call raise() rather than kill on out own task. */
