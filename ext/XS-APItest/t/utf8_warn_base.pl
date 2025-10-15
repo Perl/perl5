@@ -1097,7 +1097,7 @@ foreach my $test (@tests) {
                                           |$::UNICODE_DISALLOW_SURROGATE;
       $controlling_warning_category = 'non_unicode';
 
-      if ($will_overflow) {  # This is realy a malformation
+      if ($will_overflow) {  # This is really a malformation
           $non_cp_trailing_text = "if you see this, there is an error";
           $cp_message_qr = qr/\Q$non_cp_trailing_text\E/;
           $initially_malformed = 1;
