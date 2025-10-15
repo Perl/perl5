@@ -6367,6 +6367,7 @@ t/op/hashwarn.t				See if warnings for bad hash assignments work
 t/op/heredoc.t				See if heredoc edge and corner cases work
 t/op/hexfp.t				See if hexadecimal float literals work
 t/op/hook/require.t			See if require hooks work properly.
+t/op/if.t				See if "if" blocks get ENTER/LEAVE wrapping
 t/op/inc.t				See if inc/dec of integers near 32 bit limit work
 t/op/inccode.t				See if coderefs work in @INC
 t/op/inccode-tie.t			See if tie to @INC works

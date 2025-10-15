@@ -33,13 +33,13 @@ checkOptree ( name	=> '-basic sub {if shift print then,else}',
 # 5                 <;> nextstate(main 1589 optree_samples.t:20) v ->6
 # 8                 <@> print sK ->9
 # 6                    <0> pushmark s ->7
-# 7                    <$> const(PV "then") s ->8
+# 7                    <$> const[PV "then"] s ->8
 # g              <@> leave KP ->a
 # b                 <0> enter ->c
 # c                 <;> nextstate(main 1591 optree_samples.t:21) v ->d
 # f                 <@> print sK ->g
 # d                    <0> pushmark s ->e
-# e                    <$> const(PV "else") s ->f
+# e                    <$> const[PV "else"] s ->f
 EOT_EOT
 # a  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->a
@@ -84,13 +84,13 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 # 8                 <;> nextstate(main 1598 optree_samples.t:65) v ->9
 # b                 <@> print sK ->c
 # 9                    <0> pushmark s ->a
-# a                    <$> const(PV "foo") s ->b
+# a                    <$> const[PV "foo"] s ->b
 # j              <@> leave KP ->d
 # e                 <0> enter ->f
 # f                 <;> nextstate(main 1600 optree_samples.t:66) v ->g
 # i                 <@> print sK ->j
 # g                    <0> pushmark s ->h
-# h                    <$> const(PV "bar") s ->i
+# h                    <$> const[PV "bar"] s ->i
 EOT_EOT
 # d  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->d
@@ -129,14 +129,14 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 # 4      <0> enter 
 # 5      <;> nextstate(main 1606 optree_samples.t:121) v
 # 6      <0> pushmark s
-# 7      <$> const(PV "then") s
+# 7      <$> const[PV "then"] s
 # 8      <@> print sK
 # 9      <@> leave KP
 #            goto a
 # b  <0> enter 
 # c  <;> nextstate(main 1608 optree_samples.t:122) v
 # d  <0> pushmark s
-# e  <$> const(PV "else") s
+# e  <$> const[PV "else"] s
 # f  <@> print sK
 # g  <@> leave KP
 # a  <1> leavesub[1 ref] K/REFC,1
@@ -177,14 +177,14 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 # 7      <0> enter 
 # 8      <;> nextstate(main 1615 optree_samples.t:160) v
 # 9      <0> pushmark s
-# a      <$> const(PV "foo") s
+# a      <$> const[PV "foo"] s
 # b      <@> print sK
 # c      <@> leave KP
 #            goto d
 # e  <0> enter 
 # f  <;> nextstate(main 1617 optree_samples.t:161) v
 # g  <0> pushmark s
-# h  <$> const(PV "bar") s
+# h  <$> const[PV "bar"] s
 # i  <@> print sK
 # j  <@> leave KP
 # d  <1> leavesub[1 ref] K/REFC,1
