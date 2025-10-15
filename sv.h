@@ -892,7 +892,7 @@ Only use when you are sure C<SvIOK> is true.  See also C<L</SvIV>>.
 
 =for apidoc Am|UV|SvUVX|SV* sv
 Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure C<SvIOK> is true.  See also C<L</SvUV>>.
+Only use when you are sure C<SvUOK> is true.  See also C<L</SvUV>>.
 
 =for apidoc AmD|UV|SvUVXx|SV* sv
 This is an unnecessary synonym for L</SvUVX>
