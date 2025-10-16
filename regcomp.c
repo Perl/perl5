@@ -2516,14 +2516,16 @@ Perl_reg_qr_package(pTHX_ REGEXP * const rx)
 STATIC SV*
 S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 {
+    PERL_ARGS_ASSERT_REG_SCAN_NAME;
+    assert (RExC_parse <= RExC_end);
+
     char *name_start = RExC_parse;
     SV* sv_name;
 
-    PERL_ARGS_ASSERT_REG_SCAN_NAME;
-
-    assert (RExC_parse <= RExC_end);
     Size_t advance;
-    if (RExC_parse == RExC_end) NOOP;
+    if (RExC_parse == RExC_end) {
+        NOOP;
+    }
     else if ((advance = isIDFIRST_lazy_if_safe(RExC_parse, RExC_end, UTF))) {
          /* Note that the code here assumes well-formed UTF-8.  Skip IDFIRST by
           * using do...while */
