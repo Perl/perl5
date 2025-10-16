@@ -8773,6 +8773,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_our:
     case KEY_my:
     case KEY_state:
+        PL_hints |= HINT_BLOCK_SCOPE;
         return yyl_my(aTHX_ s, key);
 
     case KEY_next:
