@@ -184,9 +184,9 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a}',
 	      bcopts	=> '-exec',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main -437 optree.t:254) v:>,<,%
+1  <;> nextstate(main -437 optree.t:254) v:>,<,%,{
 2  <0> padav[@a:-437,-436] vM/LVINTRO
-3  <;> nextstate(main -436 optree.t:256) v:>,<,%
+3  <;> nextstate(main -436 optree.t:256) v:>,<,%,{
 4  <0> pushmark s
 5  <0> pushmark s
 6  <0> padav[@a:-437,-436] l
@@ -196,9 +196,9 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a}',
 a  <2> aassign[t2] KS/COM_AGG
 b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 427 optree_sort.t:172) v:>,<,%
+# 1  <;> nextstate(main 427 optree_sort.t:172) v:>,<,%,{
 # 2  <0> padav[@a:427,428] vM/LVINTRO
-# 3  <;> nextstate(main 428 optree_sort.t:173) v:>,<,%
+# 3  <;> nextstate(main 428 optree_sort.t:173) v:>,<,%,{
 # 4  <0> pushmark s
 # 5  <0> pushmark s
 # 6  <0> padav[@a:427,428] l
@@ -241,9 +241,9 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; push @a, 1}',
 	      debug	=> 0,
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main -437 optree.t:325) v:>,<,%
+1  <;> nextstate(main -437 optree.t:325) v:>,<,%,{
 2  <0> padav[@a:-437,-436] vM/LVINTRO
-3  <;> nextstate(main -436 optree.t:325) v:>,<,%
+3  <;> nextstate(main -436 optree.t:325) v:>,<,%,{
 4  <0> pushmark s
 5  <0> pushmark s
 6  <0> padav[@a:-437,-436] lRM*
@@ -255,9 +255,9 @@ b  <$> const[IV 1] s
 c  <@> push[t3] sK/2
 d  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 429 optree_sort.t:219) v:>,<,%
+# 1  <;> nextstate(main 429 optree_sort.t:219) v:>,<,%,{
 # 2  <0> padav[@a:429,430] vM/LVINTRO
-# 3  <;> nextstate(main 430 optree_sort.t:220) v:>,<,%
+# 3  <;> nextstate(main 430 optree_sort.t:220) v:>,<,%,{
 # 4  <0> pushmark s
 # 5  <0> pushmark s
 # 6  <0> padav[@a:429,430] lRM*
@@ -276,9 +276,9 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; 1}',
 	      debug	=> 0,
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main -437 optree.t:325) v:>,<,%
+1  <;> nextstate(main -437 optree.t:325) v:>,<,%,{
 2  <0> padav[@a:-437,-436] vM/LVINTRO
-3  <;> nextstate(main -436 optree.t:325) v:>,<,%
+3  <;> nextstate(main -436 optree.t:325) v:>,<,%,{
 4  <0> pushmark s
 5  <0> pushmark s
 6  <0> padav[@a:-437,-436] lRM*
@@ -287,9 +287,9 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; 1}',
 9  <$> const[IV 1] s
 a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 431 optree_sort.t:250) v:>,<,%
+# 1  <;> nextstate(main 431 optree_sort.t:250) v:>,<,%,{
 # 2  <0> padav[@a:431,432] vM/LVINTRO
-# 3  <;> nextstate(main 432 optree_sort.t:251) v:>,<,%
+# 3  <;> nextstate(main 432 optree_sort.t:251) v:>,<,%,{
 # 4  <0> pushmark s
 # 5  <0> pushmark s
 # 6  <0> padav[@a:431,432] lRM*
