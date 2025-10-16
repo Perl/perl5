@@ -170,5 +170,25 @@ for (my $i=0; $i<=$#false_conditionals; $i++) {
         "RT #133543: my() in false conditional: $false_conditionals[$i]");
 }
 
+# GH #23867
+{
+    package TickTick {
+        my $counter = 0;
+        sub DESTROY { $counter++ }
+        for (0..1) {
+            if ($_) {
+                my $kaboom_true = bless [];
+            } else {
+                my $kaboom_else = bless [];
+            }
+            if ($_) {
+                main::is($counter, 2, 'Block scope applied to "my" within an if/elseif block');
+            } else {
+                main::is($counter, 1, 'Block scope applied to "my" within an else block');
+            }
+        }
+    }
+}
+
 #Variable number of tests due to the way the while/for loops are tested now
 done_testing();
