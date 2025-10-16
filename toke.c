@@ -10628,6 +10628,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * parsed a portion of an identifier.  Therefore it should be able to
      * accept the first character being an IDCont, and not necessarily an
      * IDFIRST.  The 'IDCONT_first_OK' flag is used to indicate this */
+    const char * error = NULL;  /* Pointer to any error message */
 
     while (s < s_end) {
 
@@ -10684,10 +10685,8 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
 
             /* Leading zeros are not permitted */
             if (is_zero && *d - digit_start > 1) {
-                if (check_only) {
-                    return NULL;
-                }
-                croak(ident_var_zero_multi_digit);
+                error = ident_var_zero_multi_digit;
+                goto found_error;
             }
 
             /* This option only applies to the first component in a
@@ -10747,11 +10746,17 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
     return (char *) s;
 
   too_long:
+    error = ident_too_long;
+        /* FALLTHROUGH */
+
+  found_error:
+
     if (check_only) {
         return NULL;
     }
 
-    croak("%s", ident_too_long);
+    croak("%s", error);
+
 }
 
 PERL_STATIC_INLINE char *
