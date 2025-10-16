@@ -10219,7 +10219,7 @@ C<strlen()>, (which means if you use this option, that C<s> can't have embedded
 C<NUL> characters and has to have a terminating C<NUL> byte).
 
 This function can cause reliability issues if you are likely to pass in
-empty strings that are not null terminated, because it will run
+empty strings that are not NUL terminated, because it will run
 strlen on the string and potentially run past valid memory.
 
 Using L</newSVpvn> is a safer alternative for non C<NUL> terminated strings.
