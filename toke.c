@@ -10546,7 +10546,6 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
                     bool is_utf8, U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
-    assert(*s <= PL_bufend);
 
     /* This function parses the string pointed to by '*s' (whose upper bound
      * is 's_end') looking for an identifier.  It stops at the first character
