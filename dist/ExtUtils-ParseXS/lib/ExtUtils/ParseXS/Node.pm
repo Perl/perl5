@@ -4287,29 +4287,23 @@ sub parse {
         }
     }
 
-    {
-        # Save the current file context.
-        push(@{ $pxs->{XS_parse_stack} }, {
-                        type            => 'file',
-                        LastLine        => $pxs->{lastline},
-                        LastLineNo      => $pxs->{lastline_no},
-                        Line            => $pxs->{line},
-                        LineNo          => $pxs->{line_no},
-                        Filename        => $pxs->{in_filename},
-                        Filepathname    => $pxs->{in_pathname},
-                        Handle          => $pxs->{in_fh},
-                        IsPipe          =>    $is_cmd
-                                           || scalar($pxs->{in_filename} =~ /\|\s*$/),
-                      });
-    }
+    # XXX tmp: maintain state for #if scope processing
+    push @{$pxs->{XS_parse_stack}}, { type => 'file' };
 
-    #XXX
-    my $old_lines = $pxs->{line};
-    $pxs->{line} = [];
+    # Save the current file context.
 
-    $pxs->{in_fh} = Symbol::gensym();
+    my @save_keys = qw(in_fh in_filename in_pathname
+                       lastline lastline_no line line_no);
+    my @saved =  @$pxs{@save_keys};
+
+    my $isPipe = $is_cmd || $pxs->{in_filename} =~ /\|\s*$/;
+
+    $pxs->{line}    = [];
+    $pxs->{line_no} = [];
 
     # Open the new file / pipe
+
+    $pxs->{in_fh} = Symbol::gensym();
 
     if ($is_cmd) {
         # Expand the special token '$^X' into the full path of the
@@ -4356,6 +4350,8 @@ sub parse {
     # XXX tmp prematurely emit code
     $self->XXX_as_code($pxs);
 
+    # Parse included file
+
     my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({
                         type   => 'include',
                         is_cmd =>  $self->{is_cmd},
@@ -4363,41 +4359,30 @@ sub parse {
     $cpp_scope->parse($pxs);
     push @{$self->{kids}}, $cpp_scope;
 
-    {
-        my $data     = pop @{ $pxs->{XS_parse_stack} };
-        my $ThisFile = $pxs->{in_filename};
-        my $isPipe   = $data->{IsPipe};
+    --$pxs->{IncludedFiles}->{$pxs->{in_filename}}
+        unless $isPipe;
 
-        --$pxs->{IncludedFiles}->{$pxs->{in_filename}}
-            unless $isPipe;
+    close $pxs->{in_fh};
 
-        close $pxs->{in_fh};
+    # Restore the current file context.
 
-        $pxs->{in_fh}         = $data->{Handle};
-        # $in_filename is the leafname, which for some reason is used for diagnostic
-        # messages, whereas $in_pathname is the full pathname, and is used for
-        # #line directives.
-        $pxs->{in_filename}   = $data->{Filename};
-        $pxs->{in_pathname} = $data->{Filepathname};
-        $pxs->{lastline}   = $data->{LastLine};
-        $pxs->{lastline_no} = $data->{LastLineNo};
-        @{ $pxs->{line} }       = @{ $data->{Line} };
-        @{ $pxs->{line_no} }    = @{ $data->{LineNo} };
+    @$pxs{@save_keys} = @saved;
 
-        if ($isPipe and $? ) {
-            --$pxs->{lastline_no};
-            print STDERR "Error reading from pipe '$ThisFile': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
-            exit 1;
-        }
-
-        print ExtUtils::ParseXS::Q(<<"EOF");
-        |
-        |/* INCLUDE: Returning to '$self->{old_filename}' from '$ThisFile' */
-        |
-EOF
+    if ($isPipe and $? ) {
+        --$pxs->{lastline_no};
+        print STDERR "Error reading from pipe '$self->{inc_filename}': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
+        exit 1;
     }
-    #XXX
-    $pxs->{line} = $old_lines;
+
+    # XXX tmp: maintain state for #if scope processing
+    pop @{$pxs->{XS_parse_stack}};
+
+    # XXX this needs to go in as_code()
+    print ExtUtils::ParseXS::Q(<<"EOF");
+    |
+    |/* INCLUDE: Returning to '$self->{old_filename}' from '$self->{inc_filename}' */
+    |
+EOF
 
     # XXX tmp prematurely emit code
     $cpp_scope->as_code($pxs);
