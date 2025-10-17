@@ -9421,7 +9421,7 @@ S_force_version(pTHX_ char *s, int guessing);
         assert(s)
 
 STATIC char *
-S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack);
+S_force_word(pTHX_ char *start, int token, U32 flags);
 # define PERL_ARGS_ASSERT_FORCE_WORD            \
         assert(start)
 
@@ -9466,10 +9466,16 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
 # define PERL_ARGS_ASSERT_NEW_CONSTANT          \
         assert(key); assert(sv)
 
-STATIC void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
+STATIC char *
+S_parse_ident(pTHX_ const char *s, const char * const s_end, char **d, char * const e, bool is_utf8, U32 flags);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
-        assert(s); assert(d); assert(*d); assert(e); assert(*d <= e)
+        assert(s); assert(s_end); assert(d); assert(*d); assert(e); \
+        assert(s <= s_end); assert(*d < e)
+
+STATIC char *
+S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end, bool is_utf8, U32 flags);
+# define PERL_ARGS_ASSERT_PARSE_IDENT_NO_COPY   \
+        assert(s); assert(s_end); assert(s < s_end)
 
 STATIC int
 S_pending_ident(pTHX);

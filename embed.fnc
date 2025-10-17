@@ -6142,8 +6142,7 @@ S	|char * |force_version	|NN char *s				\
 				|int guessing
 S	|char * |force_word	|NN char *start 			\
 				|int token				\
-				|int check_keyword			\
-				|int allow_pack
+				|U32 flags
 RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
 				|SPTR const char *s			\
 				|EPTRQ const char * const e
@@ -6177,12 +6176,17 @@ So	|SV *	|new_constant	|NULLOK const char *s			\
 				|NULLOK const char *type		\
 				|STRLEN typelen 			\
 				|NULLOK const char **error_msg
-S	|void	|parse_ident	|NN char **s				\
+S	|char * |parse_ident	|SPTR const char *s			\
+				|EPTRQ const char * const s_end 	\
 				|SPTR char **d				\
-				|EPTRQ char * const e			\
-				|int allow_package			\
+				|EPTR char * const e			\
 				|bool is_utf8				\
-				|bool check_dollar
+				|U32 flags
+S	|char * |parse_ident_no_copy					\
+				|SPTR const char *s			\
+				|EPTR const char * const s_end		\
+				|bool is_utf8				\
+				|U32 flags
 S	|int	|pending_ident
 RS	|char * |scan_const	|NN char *start
 RS	|char * |scan_formline	|NN char *s

@@ -10,6 +10,7 @@
  */
 
 #define YYEMPTY		(-2)
+#define PERL_IDENTIFIER_LENGTH  (256 * MAX_UNICODE_UTF8_BYTES)
 
 typedef struct {
     YYSTYPE val;    /* semantic value */
@@ -112,7 +113,7 @@ typedef struct yy_parser {
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
     U8		lex_flags;
     COP		*saved_curcop;	/* the previous PL_curcop */
-    char	tokenbuf[ 256 * MAX_UNICODE_UTF8_BYTES ];
+    char	tokenbuf[ PERL_IDENTIFIER_LENGTH ];
     line_t	herelines;	/* number of lines in here-doc */
     line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
 

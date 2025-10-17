@@ -173,6 +173,14 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 */
 #define YYL_RETRY (-1)
 
+/* Bits in the flags parameter of various functions */
+#define CHECK_KEYWORD               (1 << 0)
+#define ALLOW_PACKAGE               (1 << 1)
+#define CHECK_DOLLAR                (1 << 2)
+#define IDFIRST_ONLY                (1 << 3)
+#define STOP_AT_FIRST_NON_DIGIT     (1 << 4)
+#define CHECK_ONLY                  (1 << 5)
+
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
     "KNOWNEXT",
@@ -244,7 +252,7 @@ static const char* const lex_state_names[] = {
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define PHASERBLOCK(f) return (pl_yylval.ival=f, PL_expect = XBLOCK, PL_bufptr = s, REPORT((int)PHASER))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (PL_bufptr = force_word(s,BAREWORD,TRUE,FALSE), \
+#define LOOPX(f) return (PL_bufptr = force_word(s, BAREWORD, CHECK_KEYWORD), \
                          pl_yylval.ival=f, \
                          PL_expect = PL_nexttoke ? XOPERATOR : XTERM, \
                          REPORT((int)LOOPEX))
@@ -2269,10 +2277,12 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  */
 
 STATIC char *
-S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
+S_force_word(pTHX_ char *start, int token, U32 flags)
 {
     char *s;
     STRLEN len;
+    const bool check_keyword = flags & CHECK_KEYWORD;
+    const bool allow_pack    = flags & ALLOW_PACKAGE;
 
     PERL_ARGS_ASSERT_FORCE_WORD;
 
@@ -5393,12 +5403,12 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
             force_next(BAREWORD);
         }
         else if (*s == 'v') {
-            s = force_word(s,BAREWORD,FALSE,TRUE);
+            s = force_word(s, BAREWORD, ALLOW_PACKAGE);
             s = force_version(s, FALSE);
         }
     }
     else {
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = force_version(s, FALSE);
     }
     pl_yylval.ival = is_use;
@@ -5497,9 +5507,8 @@ yyl_sigvar(pTHX_ char *s)
             char *dest = PL_tokenbuf + 1;
             /* read var name, including sigil, into PL_tokenbuf */
             PL_tokenbuf[0] = sigil;
-            parse_ident(&s, &dest, C_ARRAY_END(PL_tokenbuf),
-                0, cBOOL(UTF), FALSE);
-            *dest = '\0';
+            s = parse_ident(s, PL_bufend, &dest, C_ARRAY_END(PL_tokenbuf),
+                            cBOOL(UTF), 0);
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
         else {
@@ -6131,7 +6140,7 @@ yyl_hyphen(pTHX_ char *s)
             s++;
 
         if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
-            s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
+            s = force_word(PL_bufptr, BAREWORD, 0);
             DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
             OPERATOR(PERLY_MINUS);              /* unary minus */
         }
@@ -6213,7 +6222,7 @@ yyl_hyphen(pTHX_ char *s)
                 TOKEN(ARROW);
             }
             if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-                s = force_word(s,METHCALL0,FALSE,TRUE);
+                s = force_word(s, METHCALL0, ALLOW_PACKAGE);
                 TOKEN(ARROW);
             }
             else if (*s == '$')
@@ -6592,7 +6601,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                 d++;
             if (*d == '}') {
                 const char minus = (PL_tokenbuf[0] == '-');
-                s = force_word(s + minus, BAREWORD, FALSE, TRUE);
+                s = force_word(s + minus, BAREWORD, ALLOW_PACKAGE);
                 if (minus)
                     force_next(PERLY_MINUS);
             }
@@ -7323,7 +7332,7 @@ yyl_require(pTHX_ char *s, I32 orig_keyword)
             || (s = force_version(s, TRUE), *s == 'v'))
     {
         *PL_tokenbuf = '\0';
-        s = force_word(s,BAREWORD,TRUE,TRUE);
+        s = force_word(s, BAREWORD, CHECK_KEYWORD | ALLOW_PACKAGE);
         if (isIDFIRST_lazy_if_safe(PL_tokenbuf,
                                    C_ARRAY_END(PL_tokenbuf),
                                    UTF))
@@ -8294,7 +8303,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_class:
         ck_warner_d(packWARN(WARN_EXPERIMENTAL__CLASS), "class is experimental");
 
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = skipspace(s);
         s = force_strict_version(s);
         PL_expect = XATTRBLOCK;
@@ -8774,7 +8783,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOP(OP_PACK,XTERM);
 
     case KEY_package:
-        s = force_word(s,BAREWORD,FALSE,TRUE);
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
         s = skipspace(s);
         s = force_strict_version(s);
         PREBLOCK(KW_PACKAGE);
@@ -8957,7 +8966,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         checkcomma(s,PL_tokenbuf,"subroutine name");
         s = skipspace(s);
         PL_expect = XTERM;
-        s = force_word(s,BAREWORD,TRUE,TRUE);
+        s = force_word(s, BAREWORD, CHECK_KEYWORD | ALLOW_PACKAGE);
         LOP(OP_SORT,XREF);
 
     case KEY_split:
@@ -10531,62 +10540,192 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     return SvREFCNT_inc_simple_NN(sv);
 }
 
-PERL_STATIC_INLINE void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
-                    bool is_utf8, bool check_dollar)
+STATIC char *
+S_parse_ident(pTHX_ const char *s, const char * const s_end,
+                    char **d, char * const e,
+                    bool is_utf8, U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
     assert(*s <= PL_bufend);
 
-    while (*s < PL_bufend) {
-        if (*d >= e)
-            croak("%s", ident_too_long);
-        Size_t advance;
-        if (is_utf8 && (advance = isIDFIRST_utf8_safe(*s, PL_bufend))) {
-             /* The UTF-8 case must come first, otherwise things
-             * like c\N{COMBINING TILDE} would start failing, as the
-             * isWORDCHAR_A case below would gobble the 'c' up.
-             */
+    /* This function parses the string pointed to by '*s' (whose upper bound
+     * is 's_end') looking for an identifier.  It stops at the first character
+     * that isn't in one of the types of identifiers looked for, which are:
+     *
+     * 1) A normal identifier whose first character matches IDFIRST followed
+     *    by any number of characters which match IDCONT.
+     * 2) An identifier that begins with an ASCII digit followed by any number
+     *    of ASCII \w characters.  As a special case of this, it can
+     *    optionally stop parsing at the first non-digit, returning just the
+     *    initial digits.  */
+    const bool stop_at_first_non_digit = flags & STOP_AT_FIRST_NON_DIGIT;
 
-            char *t = *s + advance;
-            while ((advance = isIDCONT_utf8_safe((const U8*) t,
-                                                 (const U8*) PL_bufend)))
-            {
-                t += advance;
+     /*    This type of identifier can be completely prohibited, so that
+      *    anything that doesn't match type 1) is not considered to be an
+      *    identifier. */
+    const bool idfirst_only = flags & IDFIRST_ONLY;
+    assert((stop_at_first_non_digit && idfirst_only) == 0);
+
+    /* The function copies the identifier into the destination starting at *d
+     * (whose upper bound is 'e') and advances *d to point to just beyond the
+     * end of the identifier, setting **d to a NUL character.  The reason it
+     * needs to copy is that it may convert apostrophe package separators into
+     * double colons.
+     *
+     * Upon success, it returns the position in s just beyond where the
+     * identifier ends in the input.  If no identifier was found, the return
+     * will be the the input 's' unchanged.
+     *
+     * If the identifier is illegal, the function croaks unless this flag is
+     * passed in: */
+    const bool check_only = flags & CHECK_ONLY;
+
+    /* In this case NULL is returned instead of croaking, and the contents
+     * of '*d' are undefined.
+     *
+     * The possible reasons for failure are:
+     *  1) There is not enough room for the entire source identifier to be
+     *     copied
+     *  2) 'stop_at_first_non_digit' is in effect and the identifier name has
+     *     leading zeros
+     *
+     * When 'allow_package' is non-zero, the function parses a full package
+     * variable path.  Each iteration of the loop below picks up one segment
+     * of the path.  If the apostrophe is allowed as a package separator, it
+     * is converted to "::", so later code doesn't have to concern itself with
+     * this possibility. */
+    const bool allow_package = flags & ALLOW_PACKAGE;
+
+    /* 'check_dollar' is used to look for and stop parsing before the dollar
+     * in things like Foo::$bar */
+    const bool check_dollar = flags & CHECK_DOLLAR;
+
+    while (s < s_end) {
+
+        /* For non-UTF8, variables that match ASCII \w are a superset of
+         * variables that start with IDFIRST, so we have to look at the
+         * Unicode definition only when UTF-8 is in effect.  We have to check
+         * for the subset before checking for the superset. */
+        Size_t advance;
+        if (   (advance = isIDFIRST_lazy_if_safe(s, s_end, is_utf8))
+            && (is_utf8 || idfirst_only))
+        {
+            const char *this_start = s;
+            s += advance;
+
+            /* Find the end of the identifier by accumulating characters until
+             * find a non-identifier character */
+            while (s < s_end) {
+                    advance = isIDCONT_lazy_if_safe((const U8*) s,
+                                                    (const U8*) s_end,
+                                                    is_utf8);
+                    if (advance == 0) { /* Not an identifier character */
+                        break;
+                    }
+
+                s += advance;
             }
-            if (*d + (t - *s) > e)
-                croak("%s", ident_too_long);
-            Copy(*s, *d, t - *s, char);
-            *d += t - *s;
-            *s = t;
+
+            /* Here we have found the end of the identifier */
+            Size_t this_length = s - this_start;
+
+            if (*d + this_length >= e) {
+                goto too_long;
+            }
+
+            /* And copy the whole thing in one operation */
+            Copy(this_start, *d, this_length, char);
+            *d += this_length;
         }
-        else if ( isWORDCHAR_A(**s) ) {
+        else if (stop_at_first_non_digit && isDIGIT_A(*s)) {
+            bool is_zero = *s == '0';
+            char *digit_start= *d;
+
+            /* Stop at the first non-digit */
             do {
-                *(*d)++ = *(*s)++;
-            } while (isWORDCHAR_A(**s) && *d < e);
+                *(*d)++ = *s++;
+
+                if (*d >= e) {
+                    goto too_long;
+                }
+            } while (isDIGIT_A(*s));
+
+            /* Leading zeros are not permitted */
+            if (is_zero && *d - digit_start > 1) {
+                if (check_only) {
+                    return NULL;
+                }
+                croak(ident_var_zero_multi_digit);
+            }
+
+            break;
+        }
+        else if (! idfirst_only && isWORDCHAR_A(*s) ) {
+
+            /* This is the superset; it accepts \w+, including an initial
+             * digit */
+            do {
+                *(*d)++ = *s++;
+
+                if (*d >= e) {
+                    goto too_long;
+                }
+            } while (isWORDCHAR_A(*s));
         }
         else if (   allow_package
-                 && **s == '\''
-                 && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
-                 && isIDFIRST_lazy_if_safe((*s)+1, PL_bufend, is_utf8))
+                 && (   (   *s == '\''
+                         && FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
+                         && isIDFIRST_lazy_if_safe(s+1, s_end, is_utf8))
+                            /* Below we convert the apostrophe to "::" */
+                     || (   *s == ':' && s[1] == ':'
+                            /* Disallow things like Foo::$bar. For the
+                             * curious, this is the code path that triggers
+                             * the "Bad name after" warning when looking for
+                             * barewords. */
+                          && !(check_dollar && s[2] == '$'))))
         {
+            if (*d >= e - 2) {
+                goto too_long;
+            }
+
             *(*d)++ = ':';
             *(*d)++ = ':';
-            (*s)++;
+            s += (*s == ':') ? 2 : 1;
         }
-        else if (allow_package && **s == ':' && (*s)[1] == ':'
-           /* Disallow things like Foo::$bar. For the curious, this is
-            * the code path that triggers the "Bad name after" warning
-            * when looking for barewords.
-            */
-           && !(check_dollar && (*s)[2] == '$')) {
-            *(*d)++ = *(*s)++;
-            *(*d)++ = *(*s)++;
-        }
-        else
+        else    /* None of the above means have come to the end of any
+                   identifier*/
             break;
     }
-    return;
+
+    **d = '\0';
+
+    /* Cast away const, because many of our callers don't have it; this
+     * function declares it as const so as to indicate that it doesn't change
+     * it, and it can be called using a const parameter */
+    return (char *) s;
+
+  too_long:
+    if (check_only) {
+        return NULL;
+    }
+
+    croak("%s", ident_too_long);
+}
+
+PERL_STATIC_INLINE char *
+S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end,
+                      bool is_utf8, U32 flags)
+{
+    PERL_ARGS_ASSERT_PARSE_IDENT_NO_COPY;
+
+    /* This just wraps parse_ident for functions that call it and don't need
+     * the actual identifier string returned.  For example, they might just
+     * want to test if the input is valid. */
+
+    char scratch[ PERL_IDENTIFIER_LENGTH ];
+    char * dest = scratch;
+
+    return parse_ident(s, s_end, &dest, C_ARRAY_END(scratch), is_utf8, flags);
 }
 
 char *
@@ -10598,8 +10737,8 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
 
-    parse_ident(&s, &d, e, allow_package, is_utf8, TRUE);
-    *d = '\0';
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                    (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
     *slp = d - dest;
     return s;
 }
@@ -10626,25 +10765,14 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
 
     if (isSPACE(*s) || !*s)
         s = skipspace(s);
-    if (isDIGIT(*s)) { /* handle $0 and $1 $2 and $10 and etc */
-        bool is_zero= *s == '0' ? TRUE : FALSE;
-        char *digit_start= d;
-        *d++ = *s++;
-        while (s < PL_bufend && isDIGIT(*s)) {
-            if (d >= e)
-                croak("%s", ident_too_long);
-            *d++ = *s++;
-        }
-        if (is_zero && d - digit_start > 1)
-            croak(ident_var_zero_multi_digit);
-    }
-    else {  /* See if it is a "normal" identifier */
-        parse_ident(&s, &d, e, 1, is_utf8, FALSE);
-    }
-    *d = '\0';
+
+    /* See if it is a "normal" identifier */
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                    (ALLOW_PACKAGE | STOP_AT_FIRST_NON_DIGIT));
     d = dest;
+
     if (*d) {
-        /* Either a digit variable, or parse_ident() found an identifier
+        /* Here parse_ident() found a digit variable or an identifier
            (anything valid as a bareword), so job done and return.  */
         if (PL_lex_state != LEX_NORMAL)
             PL_lex_state = LEX_INTERPENDMAYBE;
@@ -10665,6 +10793,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
            Using ' as a leading package separator isn't allowed. :: is.   */
         return s;
     }
+
     /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}  */
     if (*s == '{') {
         bracket = s - SvPVX(PL_linestr);
@@ -10674,7 +10803,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
             s = skipspace(s);
         }
     }
-
 
     /* Extract the first character of the variable name from 's' and
      * copy it, null terminated into 'd'. Note that this does not
@@ -10687,28 +10815,22 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
      *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
      *          2) '{'
      *     The final case currently doesn't get this far in the program, so we
-     *     don't test for it.  If that were to change, it would be ok to allow it.
+     *     don't test for it.  If that were to change, it would be ok to allow
+     *     it.
      *  b) When not under Unicode rules, any upper Latin1 character
      *  c) Otherwise, when unicode rules are used, all XIDS characters.
      *
-     *      Because all ASCII characters have the same representation whether
-     *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
-     *      '{' without knowing if is UTF-8 or not. */
+     * Because all ASCII characters have the same representation whether
+     * encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
+     * '{' without knowing if is UTF-8 or not. */
 
-    if ((s <= PL_bufend - ((is_utf8)
-                          ? UTF8SKIP(s)
-                          : 1))
-        && (
-            isGRAPH_A(*s)
-            ||
-            ( is_utf8
-              ? isIDFIRST_utf8_safe(s, PL_bufend)
-              : (isGRAPH_L1(*s)
-                 && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))
-                )
-            )
-        )
-    ){
+    if (   (s <= PL_bufend - ((is_utf8) ? UTF8SKIP(s) : 1))
+        && (  isGRAPH_A(*s)
+            || (is_utf8
+               ? isIDFIRST_utf8_safe(s, PL_bufend)
+               : (   isGRAPH_L1(*s)
+                  && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))))))
+    {
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;
@@ -10722,19 +10844,13 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
         }
     }
 
-    /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
+    /* special case to handle ${10}, ${11} the same way we handle $1 etc */
     if (isDIGIT(*d)) {
-        bool is_zero= *d == '0' ? TRUE : FALSE;
-        char *digit_start= d;
-        while (s < PL_bufend && isDIGIT(*s)) {
-            d++;
-            if (d >= e)
-                croak("%s", ident_too_long);
-            *d= *s++;
-        }
-        if (is_zero && d - digit_start >= 1) /* d points at the last digit */
-            croak(ident_var_zero_multi_digit);
-        d[1] = '\0';
+        s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
+                        STOP_AT_FIRST_NON_DIGIT);
+
+        /* The code below is expecting d to point to the final digit */
+        d--;
     }
 
     /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
@@ -10752,8 +10868,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
         bool skip;
         char *s2;
         /* If we were processing {...} notation then...  */
-        if (isIDFIRST_lazy_if_safe(d, e, is_utf8)
-            || (!isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
+        if (   isIDFIRST_lazy_if_safe(d, e, is_utf8)
+            || (  ! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
                  && isWORDCHAR(*s))
         ) {
             /* note we have to check for a normal identifier first,
@@ -10765,8 +10881,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, bool chk_unary)
                    (the later check for } being at the expected point will trap
                    cases where this doesn't pan out.)  */
                 d += advance;
-                parse_ident(&s, &d, e, 1, is_utf8, TRUE);
-                *d = '\0';
+                s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                                (ALLOW_PACKAGE | CHECK_DOLLAR));
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
                 d++;
@@ -14236,34 +14352,8 @@ Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags)
     if(end <= s)
         return false;
 
-    if(flags & SVf_UTF8) {
-        if(!isIDFIRST_utf8_safe((U8 *)s, (U8 *)end))
-            return false;
-
-        while(s < end) {
-            s += UTF8SKIP((U8 *)s);
-            if(s == end)
-                break;
-            if(!isIDCONT_utf8_safe((U8 *)s, (U8 *)end))
-                return false;
-        }
-        return true;
-    }
-    else {
-        if(!isIDFIRST(s[0]))
-            return false;
-
-        while(s < end) {
-            s += 1;
-            if(s == end)
-                break;
-            if(!isIDCONT(s[0]))
-                return false;
-        }
-        return true;
-    }
-
-    return false;
+    return end == parse_ident_no_copy(s, end, cBOOL(flags & SVf_UTF8),
+                                      IDFIRST_ONLY);
 }
 
 /*
