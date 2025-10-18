@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc( qw(../lib) );
 }
 
-plan( tests => 55 );
+plan( tests => 56 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -356,3 +356,22 @@ is runperl(
    ),
    "*main::main::\n",
    "[perl #129869] lookup %:: by name after clearing %::";
+
+is runperl(
+    prog => 'no strict q|refs|;
+             Stash->can(q|Trash|);
+             my $full_method = q|Stash::Trash|;
+             # Save method
+             my $mocked = \&{$full_method};
+             # Replace method
+             *{$full_method} = sub {};
+             # Restore original method
+             *{$full_method} = $mocked;
+             # Stash::Trash should now be undefined
+             my $coderef = sub { Stash::Trash() };
+             $coderef->();
+    ',
+    stderr => 1,
+   ),
+   "Undefined subroutine &Stash::Trash called at -e line 11.\n",
+   "[GH#23855], [GH#23856] Don't assume GvCVGEN(gv) value";

@@ -669,7 +669,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
            get hairy. */
         cv = MUTABLE_CV(newSV_type(SVt_PVCV));
         GvCV_set(gv,cv);
-        assert(GvCVGEN(gv) == 0);
+        GvCVGEN(gv) = 0;
         CvISXSUB_on(cv);
         CvXSUB(cv) = core_xsub;
         PoisonPADLIST(cv);
