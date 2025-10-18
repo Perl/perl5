@@ -952,7 +952,12 @@ package ExtUtils::ParseXS::Node::global_cpp_line;
 # continuations).
 
 BEGIN { $build_subclass->(
-    'cpp_line',  # the text of the "#  foo" CPP line
+    'cpp_line',  # Str:  the full text of the "#  foo" CPP line
+    'directive', # Str:  one of 'define', 'endif' etc
+    'rest',      # Str:  the rest of the line following the directive
+    'is_cond',   # Bool: it's an ifdef/else/endif etc
+    'is_if',     # Bool: it's an if/ifdef/ifndef
+    'is_endif'   # Bool: it's an endif
 )};
 
 sub parse {
@@ -961,14 +966,22 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no
 
-    my $ln = $self->{cpp_line} = shift(@{$pxs->{line}});
+    my $line = shift @{$pxs->{line}};
 
-    # Update global tracking of *conditional* CPP directives;s
+    my ($directive, $rest) = $line =~ /^ \# \s* (\w+) (?:\s+ (.*) \s* $)?/sx
+        or $pxs->death("Internal error: can't parse CPP line: $line\n");
+    $rest = '' unless defined $rest;
+    my $is_cond  = $directive =~ /^(if|ifdef|ifndef|elsif|else|endif)$/;
+    my $is_if    = $directive =~ /^(if|ifdef|ifndef)$/;
+    my $is_endif = $directive =~ /^endif$/;
+    @$self{qw(cpp_line directive rest is_cond is_if is_endif)}
+        = ($line, $directive, $rest, $is_cond, $is_if, $is_endif);
+
+    # Update global tracking of *conditional* CPP directives;
     # i.e. #if/#else etc
 
-    return 1 unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
-    my $directive = $+; # one of "if", "elsif", "else", "endif"
-    $pxs->analyze_preprocessor_statement($directive);
+    return 1 unless $is_cond;
+    $pxs->analyze_preprocessor_statement($is_if ? 'if' : $directive);
 
     1;
 }
