@@ -5232,6 +5232,87 @@ EOF
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
+{
+    # Test C-preprocessor parsing
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "CPP basic",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |
+                |short foo()
+                |
+                |#elif USE_LONG
+                |
+                |long foo()
+                |
+                |#else
+                |
+                |int foo()
+                |
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+
+                         .*
+
+                        ^ \s* short \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#elif\ USE_LONG \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+
+                         .*
+
+                        ^ \s* long \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#else \n
+                        ^ \#define\ XSubPPtmpAAAC\ 1 \n
+
+                         .*
+
+                        ^ \s* int \s+ RETVAL; \s* \n
+
+                         .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc definitions"
+            ],
+
+            [ 0, 0, qr{
+                        ^ \#if\ XSubPPtmpAAAA \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAB \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAC \n
+                        .* newXS .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc boot usage"
+            ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 
 {
     # Check for correct package name; i.e. use the current package name,

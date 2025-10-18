@@ -971,7 +971,7 @@ sub parse {
     my ($directive, $rest) = $line =~ /^ \# \s* (\w+) (?:\s+ (.*) \s* $)?/sx
         or $pxs->death("Internal error: can't parse CPP line: $line\n");
     $rest = '' unless defined $rest;
-    my $is_cond  = $directive =~ /^(if|ifdef|ifndef|elsif|else|endif)$/;
+    my $is_cond  = $directive =~ /^(if|ifdef|ifndef|elif|else|endif)$/;
     my $is_if    = $directive =~ /^(if|ifdef|ifndef)$/;
     my $is_endif = $directive =~ /^endif$/;
     @$self{qw(cpp_line directive rest is_cond is_if is_endif)}
