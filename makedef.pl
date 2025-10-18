@@ -813,7 +813,6 @@ unless ($Config{d_wcrtomb}) {
 	    # within the block, as the *first* definition may have flags which
 	    # mean "don't export"
 	    next if $seen{$func}++;
-	    # Should we also skip adding the Perl_ prefix if $flags =~ /o/ ?
 	    $func = "Perl_$func" if ($flags =~ /[psX]/ && $func !~ /^Perl_/);
 	    ++$export{$func} unless exists $skip{$func};
 	}
