@@ -3258,29 +3258,40 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             const char *real_start = s;
 #endif
             STRLEN maxlen = trie->maxlen;
-            SV *sv_points;
             U8 **points; /* map of where we were in the input string
                             when reading a given char. For ASCII this
                             is unnecessary overhead as the relationship
                             is always 1:1, but for Unicode, especially
                             case folded Unicode this is not true. */
+
+            /* For a shorter maxlen, points are stored in a stack buffer. */
+            /* The choice of STACK_POINTS_MAX here is rather arbitrary.
+             * When building perl and running test_harness, maxlen rarely
+             * goes above 8, but presumbaly there are good business cases
+             * where a somewhat larger value is common. */
+            enum { STACK_POINTS_MAX = 32 };
+            U8 *points_stack[STACK_POINTS_MAX];
+            /* Otherwise, a more costly heap allocation is used. */
+            bool used_heap = false;
+
             U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
             U8 *bitmap = NULL;
-
+            U8 **points_heap = NULL;
 
             DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-            /* We can't just allocate points here. We need to wrap it in
-             * an SV so it gets freed properly if there is a croak while
-             * running the match */
-            ENTER;
-            SAVETMPS;
-            sv_points = newSV(maxlen * sizeof(U8 *));
-            SvCUR_set(sv_points,
-                maxlen * sizeof(U8 *));
-            SvPOK_on(sv_points);
-            sv_2mortal(sv_points);
-            points = (U8**)SvPV_nolen(sv_points );
+            if (maxlen <= STACK_POINTS_MAX) {
+                points = points_stack;
+            } else {
+                used_heap = true;
+                /* In case of a die event, the allocation will be freed
+                   as the savestack is unwound. */
+                ENTER;
+                Newx(points_heap, maxlen, U8*);
+                SAVEFREEPV(points_heap);
+                points = points_heap;
+            }
+
             if ( trie_type != trie_utf8_fold
                  && (trie->bitmap || OP(c)==AHOCORASICKC) )
             {
@@ -3464,8 +3475,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         );
                     });
                     if (reginfo->intuit || regtry(reginfo, &s)) {
-                        FREETMPS;
-                        LEAVE;
+                        if (used_heap) {
+                            LEAVE;
+                        }
                         goto got_it;
                     }
                     if (s < reginfo->strend) {
@@ -3482,8 +3494,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     break;
                 }
             }
-            FREETMPS;
-            LEAVE;
+            if (used_heap) {
+                LEAVE;
+            }
         }
         break;
 
