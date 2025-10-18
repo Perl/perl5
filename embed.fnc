@@ -2150,6 +2150,7 @@ p	|int	|mode_from_discipline					\
 
 : Used in sv.c and hv.c
 Cop	|void * |more_bodies	|const svtype sv_type
+Cp	|SV *	|more_sv
 Cp	|const char *|moreswitches					\
 				|NN const char *s
 Adp	|void	|mortal_destructor_sv					\
@@ -6036,7 +6037,6 @@ S	|void	|glob_assign_glob					\
 				|NN SV * const ssv			\
 				|const int dtype
 S	|bool	|glob_2number	|NN GV * const gv
-Cp	|SV *	|more_sv
 S	|void	|not_a_number	|NN SV * const sv
 S	|void	|not_incrementable					\
 				|NN SV * const sv

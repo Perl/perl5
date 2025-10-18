@@ -63,10 +63,6 @@
         ++PL_sv_count;                                  \
     } STMT_END
 
-/* Perl_more_sv lives in sv.c, we don't want to inline it.
- * but the function declaration seems to be needed. */
-SV* Perl_more_sv(pTHX);
-
 /* new_SV(): return a new, empty SV head */
 PERL_STATIC_INLINE SV*
 Perl_new_sv(pTHX_ const char *file, int line, const char *func)

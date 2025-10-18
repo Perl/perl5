@@ -375,6 +375,7 @@
 # define mg_set(a)                              Perl_mg_set(aTHX_ a)
 # define mg_size(a)                             Perl_mg_size(aTHX_ a)
 # define mini_mktime                            Perl_mini_mktime
+# define more_sv()                              Perl_more_sv(aTHX)
 # define moreswitches(a)                        Perl_moreswitches(aTHX_ a)
 # define mortal_destructor_sv(a,b)              Perl_mortal_destructor_sv(aTHX_ a,b)
 # define mortal_getenv                          Perl_mortal_getenv
@@ -1667,6 +1668,54 @@
 #     define save_pushptri32ptr(a,b,c,d)        S_save_pushptri32ptr(aTHX_ a,b,c,d)
 #     define save_scalar_at(a,b)                S_save_scalar_at(aTHX_ a,b)
 #   endif
+#   if defined(PERL_IN_SV_C)
+#     define F0convert                          S_F0convert
+#     define anonymise_cv_maybe(a,b)            S_anonymise_cv_maybe(aTHX_ a,b)
+#     define assert_uft8_cache_coherent(a,b,c,d) S_assert_uft8_cache_coherent(aTHX_ a,b,c,d)
+#     define croak_sv_setsv_flags(a,b)          S_croak_sv_setsv_flags(aTHX_ a,b)
+#     define curse(a,b)                         S_curse(aTHX_ a,b)
+#     define expect_number(a)                   S_expect_number(aTHX_ a)
+#     define find_array_subscript(a,b)          S_find_array_subscript(aTHX_ a,b)
+#     define find_hash_subscript(a,b)           S_find_hash_subscript(aTHX_ a,b)
+#     define find_uninit_var(a,b,c,d)           S_find_uninit_var(aTHX_ a,b,c,d)
+#     define glob_2number(a)                    S_glob_2number(aTHX_ a)
+#     define glob_assign_glob(a,b,c)            S_glob_assign_glob(aTHX_ a,b,c)
+#     define not_a_number(a)                    S_not_a_number(aTHX_ a)
+#     define not_incrementable(a)               S_not_incrementable(aTHX_ a)
+#     define ptr_table_find                     S_ptr_table_find
+#     define sv_2iuv_common(a)                  S_sv_2iuv_common(aTHX_ a)
+#     define sv_add_arena(a,b,c)                S_sv_add_arena(aTHX_ a,b,c)
+#     define sv_display(a,b,c)                  S_sv_display(aTHX_ a,b,c)
+#     define sv_pos_b2u_midway(a,b,c,d)         S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
+#     define sv_pos_u2b_cached(a,b,c,d,e,f,g)   S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
+#     define sv_pos_u2b_forwards                S_sv_pos_u2b_forwards
+#     define sv_pos_u2b_midway                  S_sv_pos_u2b_midway
+#     define sv_unglob(a,b)                     S_sv_unglob(aTHX_ a,b)
+#     define utf8_mg_len_cache_update(a,b,c)    S_utf8_mg_len_cache_update(aTHX_ a,b,c)
+#     define utf8_mg_pos_cache_update(a,b,c,d,e) S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
+#     define visit(a,b,c)                       S_visit(aTHX_ a,b,c)
+#     if defined(DEBUGGING)
+#       define del_sv(a)                        S_del_sv(aTHX_ a)
+#       define sv_mark_arenas()                 Perl_sv_mark_arenas(aTHX)
+#       define sv_sweep_arenas()                Perl_sv_sweep_arenas(aTHX)
+#     endif
+#     if !defined(NV_PRESERVES_UV)
+#       if defined(DEBUGGING)
+#         define sv_2iuv_non_preserve(a,b)      S_sv_2iuv_non_preserve(aTHX_ a,b)
+#       else
+#         define sv_2iuv_non_preserve(a)        S_sv_2iuv_non_preserve(aTHX_ a)
+#       endif
+#     endif
+#     if defined(PERL_DEBUG_READONLY_COW)
+#       define sv_buf_to_rw(a)                  S_sv_buf_to_rw(aTHX_ a)
+#     endif
+#     if defined(USE_ITHREADS)
+#       define sv_dup_common(a,b)               S_sv_dup_common(aTHX_ a,b)
+#       define sv_dup_hvaux(a,b,c)              S_sv_dup_hvaux(aTHX_ a,b,c)
+#       define sv_dup_inc_multiple(a,b,c,d)     S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
+#       define unreferenced_to_tmp_stack(a)     S_unreferenced_to_tmp_stack(aTHX_ a)
+#     endif
+#   endif /* defined(PERL_IN_SV_C) */
 #   if defined(PERL_IN_TOKE_C)
 #     define ao(a)                              S_ao(aTHX_ a)
 #     define check_unary()                      S_check_unary(aTHX)
@@ -2119,57 +2168,6 @@
 #     define get_regclass_aux_data(a,b,c,d,e,f) Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
 #   endif
 # endif /* defined(PERL_IN_REGEX_ENGINE) */
-# if defined(PERL_IN_SV_C)
-#   define more_sv()                            Perl_more_sv(aTHX)
-#   if defined(PERL_CORE)
-#     define F0convert                          S_F0convert
-#     define anonymise_cv_maybe(a,b)            S_anonymise_cv_maybe(aTHX_ a,b)
-#     define assert_uft8_cache_coherent(a,b,c,d) S_assert_uft8_cache_coherent(aTHX_ a,b,c,d)
-#     define croak_sv_setsv_flags(a,b)          S_croak_sv_setsv_flags(aTHX_ a,b)
-#     define curse(a,b)                         S_curse(aTHX_ a,b)
-#     define expect_number(a)                   S_expect_number(aTHX_ a)
-#     define find_array_subscript(a,b)          S_find_array_subscript(aTHX_ a,b)
-#     define find_hash_subscript(a,b)           S_find_hash_subscript(aTHX_ a,b)
-#     define find_uninit_var(a,b,c,d)           S_find_uninit_var(aTHX_ a,b,c,d)
-#     define glob_2number(a)                    S_glob_2number(aTHX_ a)
-#     define glob_assign_glob(a,b,c)            S_glob_assign_glob(aTHX_ a,b,c)
-#     define not_a_number(a)                    S_not_a_number(aTHX_ a)
-#     define not_incrementable(a)               S_not_incrementable(aTHX_ a)
-#     define ptr_table_find                     S_ptr_table_find
-#     define sv_2iuv_common(a)                  S_sv_2iuv_common(aTHX_ a)
-#     define sv_add_arena(a,b,c)                S_sv_add_arena(aTHX_ a,b,c)
-#     define sv_display(a,b,c)                  S_sv_display(aTHX_ a,b,c)
-#     define sv_pos_b2u_midway(a,b,c,d)         S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
-#     define sv_pos_u2b_cached(a,b,c,d,e,f,g)   S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
-#     define sv_pos_u2b_forwards                S_sv_pos_u2b_forwards
-#     define sv_pos_u2b_midway                  S_sv_pos_u2b_midway
-#     define sv_unglob(a,b)                     S_sv_unglob(aTHX_ a,b)
-#     define utf8_mg_len_cache_update(a,b,c)    S_utf8_mg_len_cache_update(aTHX_ a,b,c)
-#     define utf8_mg_pos_cache_update(a,b,c,d,e) S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
-#     define visit(a,b,c)                       S_visit(aTHX_ a,b,c)
-#     if defined(DEBUGGING)
-#       define del_sv(a)                        S_del_sv(aTHX_ a)
-#       define sv_mark_arenas()                 Perl_sv_mark_arenas(aTHX)
-#       define sv_sweep_arenas()                Perl_sv_sweep_arenas(aTHX)
-#     endif
-#     if !defined(NV_PRESERVES_UV)
-#       if defined(DEBUGGING)
-#         define sv_2iuv_non_preserve(a,b)      S_sv_2iuv_non_preserve(aTHX_ a,b)
-#       else
-#         define sv_2iuv_non_preserve(a)        S_sv_2iuv_non_preserve(aTHX_ a)
-#       endif
-#     endif
-#     if defined(PERL_DEBUG_READONLY_COW)
-#       define sv_buf_to_rw(a)                  S_sv_buf_to_rw(aTHX_ a)
-#     endif
-#     if defined(USE_ITHREADS)
-#       define sv_dup_common(a,b)               S_sv_dup_common(aTHX_ a,b)
-#       define sv_dup_hvaux(a,b,c)              S_sv_dup_hvaux(aTHX_ a,b,c)
-#       define sv_dup_inc_multiple(a,b,c,d)     S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
-#       define unreferenced_to_tmp_stack(a)     S_unreferenced_to_tmp_stack(aTHX_ a)
-#     endif
-#   endif /* defined(PERL_CORE) */
-# endif /* defined(PERL_IN_SV_C) */
 # if defined(PERL_MEM_LOG)
 #   define mem_log_alloc                        Perl_mem_log_alloc
 #   define mem_log_del_sv                       Perl_mem_log_del_sv

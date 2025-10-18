@@ -2524,6 +2524,10 @@ PERL_CALLCONV void *
 Perl_more_bodies(pTHX_ const svtype sv_type);
 #define PERL_ARGS_ASSERT_MORE_BODIES
 
+PERL_CALLCONV SV *
+Perl_more_sv(pTHX);
+#define PERL_ARGS_ASSERT_MORE_SV
+
 PERL_CALLCONV const char *
 Perl_moreswitches(pTHX_ const char *s);
 #define PERL_ARGS_ASSERT_MORESWITCHES           \
@@ -9228,10 +9232,6 @@ STATIC void
 S_glob_assign_glob(pTHX_ SV * const dsv, SV * const ssv, const int dtype);
 # define PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB      \
         assert(dsv); assert(ssv)
-
-PERL_CALLCONV SV *
-Perl_more_sv(pTHX);
-# define PERL_ARGS_ASSERT_MORE_SV
 
 STATIC void
 S_not_a_number(pTHX_ SV * const sv);
