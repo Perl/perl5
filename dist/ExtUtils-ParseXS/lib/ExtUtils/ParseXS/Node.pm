@@ -793,14 +793,15 @@ package ExtUtils::ParseXS::Node::cpp_scope;
 # does its own fetch_para() calls).
 
 BEGIN { $build_subclass->(
-    'type',      # Str:  what sort of scope: 'main', 'include' or 'if'
-    'is_cmd',    # Bool: for include type, it's INCLUDE_COMMAND
+    'type',       # Str:  what sort of scope: 'main', 'include' or 'if'
+    'is_cmd',     # Bool: for include type, it's INCLUDE_COMMAND
+    'guard_name', # Str:  the name of the XSubPPtmpAAAA guard define
+    'seen_xsubs', # Hash: the names of any XSUBs seen in this scope
 )};
 
 sub parse {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
-
 
     # ----------------------------------------------------------------
     # Main loop: for each iteration, read in a paragraph's worth of XSUB
@@ -808,56 +809,92 @@ sub parse {
     # interpret those lines.
     # ----------------------------------------------------------------
 
-    my $iters;
-
   PARAGRAPH:
-    while ($pxs->fetch_para()) {
+    while ( ($pxs->{line} && @{$pxs->{line}}) || $pxs->fetch_para()) {
 
-        if (!$iters++) {
-            # set file/line_no after first call to fetch_para()
+        if (   !defined($self->{line_no})
+            && defined $pxs->{line_no}[0]
+        ) {
+            # set file/line_no after line number info is available:
+            # typically after the first call to fetch_para()
             $self->SUPER::parse($pxs);
         }
 
-        # Process and emit any initial C-preprocessor lines and blank
+        # Process any initial C-preprocessor lines and blank
         # lines. Note that any non-CPP lines starting with '#' will
         # already have been filtered out by fetch_para().
         #
-        # Also, keep track of #if/#else/#endif nesting, updating:
-        #    $pxs->{XS_parse_stack}
-        #    $pxs->{XS_parse_stack_top_if_idx}
-        #    $pxs->{bootcode_early}
-        #    $pxs->{bootcode_later}
+        # Also, keep track of #if/#else/#endif nesting.
+
         while (@{$pxs->{line}} && $pxs->{line}[0] =~ /^#/) {
             my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
             $node->parse($pxs);
             push @{$self->{kids}}, $node;
 
-            # XXX tmp prematurely emit code
-            $_->as_code($pxs, $self) for @{$self->{kids}};
-            @{$self->{kids}} = ();
-        }
+            next unless $node->{is_cond};
+
+            # Parse branches of a CPP conditionals within a nested scope
+
+            if (not $node->{is_if}) {
+                $pxs->death("Error: '". $node->{directive}
+                                . "' with no matching 'if'")
+                    if $self->{type} ne 'if';
+
+                # we should already be within a nested scope; this
+                # CPP condition keyword just ends that scope. Our
+                # (recursive) caller will handle processing any further
+                # branches if it's an elif/else rather than endif
+
+                return 1
+            }
+
+            # So it's an 'if'/'ifdef' etc node. Start a new
+            # Node::cpp_scope sub-parse to handle that branch and then any
+            # other branches of the same conditional.
+
+            while (1) {
+                # Parse the branch in new scope
+                my $scope = ExtUtils::ParseXS::Node::cpp_scope->new(
+                                                {type => 'if'});
+                $scope->parse($pxs)
+                    or return 1;
+
+                # Sub-parsing of that branch should have terminated
+                # at an elif/endif line rather than falling off the
+                # end of the file
+                my $last = $scope->{kids}[-1];
+                unless (
+                       defined $last
+                    && $last->isa(
+                            'ExtUtils::ParseXS::Node::global_cpp_line')
+                    &&  $last->{is_cond}
+                    && !$last->{is_if}
+                ) {
+                    $pxs->death("Error: Unterminated '#if/#ifdef/#ifndef'")
+                }
+
+                # Move the CPP line which terminated the branch from
+                # the end of the inner scope to the current scope
+                pop @{$scope->{kids}};
+                push @{$self->{kids}}, $scope, $last;
+
+                if (grep { ref($_) !~ /::global_cpp_line$/ }
+                        @{$scope->{kids}} )
+                {
+                    # the inner scope has some content, so needs
+                    # a '#define XSubPPtmpAAAA 1'-style guard
+                    $scope->{guard_name} = $pxs->{cpp_next_tmp_define}++;
+                }
+
+                # any more branches to process of current if?
+                last if $last->{is_endif};
+            } # while 1
+        } # while /^#/
+
+        # skip blank lines
+        shift @{$pxs->{line}} while @{$pxs->{line}} && $pxs->{line}[0] !~ /\S/;
 
         next PARAGRAPH unless @{ $pxs->{line} };
-
-        if (   $pxs->{XS_parse_stack_top_if_idx}
-                && !$pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{varname})
-        {
-            # We are inside an #if, but have not yet #defined its xsubpp variable.
-            #
-            # At the start of every '#if ...' which is external to an XSUB,
-            # we emit '#define XSubPPtmpXXXX 1', for increasing XXXX.
-            # Later, when emitting initialisation code in places like a boot
-            # block, it can then be made conditional via, e.g.
-            #    #if XSubPPtmpXXXX
-            #        newXS(...);
-            #    #endif
-            # So that only the defined XSUBs get added to the symbol table.
-            print "#define $pxs->{cpp_next_tmp_define} 1\n\n";
-            push(@{ $pxs->{bootcode_early} }, "#if $pxs->{cpp_next_tmp_define}\n");
-            push(@{ $pxs->{bootcode_later} }, "#if $pxs->{cpp_next_tmp_define}\n");
-            $pxs->{XS_parse_stack}->[$pxs->{XS_parse_stack_top_if_idx}]{varname}
-                    = $pxs->{cpp_next_tmp_define}++;
-        }
 
         # This will die on something like
         #
@@ -910,6 +947,9 @@ sub parse {
               . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE"
             );
 
+        # skip blank lines
+        shift @{$pxs->{line}} while @{$pxs->{line}} && $pxs->{line}[0] !~ /\S/;
+
         next PARAGRAPH unless @{ $pxs->{line} };
 
         # ----------------------------------------------------------------
@@ -921,15 +961,28 @@ sub parse {
             or next PARAGRAPH;
         push @{$self->{kids}}, $xsub;
 
+        # Check for a duplicate function definition in this scope
+        {
+            my $name = $xsub->{decl}{full_C_name};
+            if ($self->{seen_xsubs}{$name}) {
+                (my $short = $name) =~ s/^$pxs->{PACKAGE_C_name}_//;
+                $pxs->Warn(  "Warning: duplicate function definition "
+                       . "'$short' detected");
+            }
+            $self->{seen_xsubs}{$name} = 1;
+        }
+
+
+
+        # should just be a fake END token left
+        die "Internal error: bad END token\n"
+            unless $pxs->{line}
+                  && @{$pxs->{line}} == 1
+                  && $pxs->{line}[0] eq "$ExtUtils::ParseXS::END:";
+        pop @{$pxs->{line}};
+
         $pxs->{seen_an_XSUB} = 1; # encountered at least one XSUB
-
-        # XXX tmp prematurely emit code
-        $_->as_code($pxs, $self) for @{$self->{kids}};
-        @{$self->{kids}} = ();
-
     } # END 'PARAGRAPH' 'while' loop
-    # XXX tmp prematurely emit code
-    $_->as_code($pxs, $self) for @{$self->{kids}};
 
     1;
 }
@@ -938,8 +991,21 @@ sub as_code {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
-    # XXX tmp prematurely emit code
-    # XXX $_->as_code($pxs, $self) for @{$self->{kids}};
+    my $g = $self->{guard_name};
+
+    if (defined $g) {
+        print "#define $g 1\n\n" if defined $g;
+        push @{$pxs->{bootcode_early}}, "#if $g\n";
+        push @{$pxs->{bootcode_later}}, "#if $g\n";
+    }
+
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+
+    if (defined $g) {
+        push @{$pxs->{bootcode_early}}, "#endif\n";
+        push @{$pxs->{bootcode_later}}, "#endif\n";
+    }
+
 }
 
 
@@ -976,12 +1042,6 @@ sub parse {
     my $is_endif = $directive =~ /^endif$/;
     @$self{qw(cpp_line directive rest is_cond is_if is_endif)}
         = ($line, $directive, $rest, $is_cond, $is_if, $is_endif);
-
-    # Update global tracking of *conditional* CPP directives;
-    # i.e. #if/#else etc
-
-    return 1 unless $is_cond;
-    $pxs->analyze_preprocessor_statement($is_if ? 'if' : $directive);
 
     1;
 }
@@ -1647,15 +1707,6 @@ sub parse {
     # $self->{full_perl_name} "BAR::BAZ::bar"
     # $self->{full_C_name}    "BAR__BAZ_bar"
     # $params_text            "param1, param2, param3"
-
-    # Check for a duplicate function definition, but ignoring multiple
-    # definitions within the branches of an #if/#else/#endif
-    for my $tmp (@{ $pxs->{XS_parse_stack} }) {
-        next unless defined $tmp->{functions}{$full_cname};
-        $pxs->Warn(  "Warning: duplicate function definition "
-                   . "'$clean_func_name' detected");
-        last;
-    }
 
     # mark C function name as used
     $pxs->{XS_parse_stack}->
@@ -4360,9 +4411,6 @@ sub parse {
     chomp $pxs->{lastline};
     $pxs->{lastline_no} = $self->{line_no} = $.;
 
-    # XXX tmp prematurely emit code
-    $self->XXX_as_code($pxs);
-
     # Parse included file
 
     my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({
@@ -4390,24 +4438,11 @@ sub parse {
     # XXX tmp: maintain state for #if scope processing
     pop @{$pxs->{XS_parse_stack}};
 
-    # XXX this needs to go in as_code()
-    print ExtUtils::ParseXS::Q(<<"EOF");
-    |
-    |/* INCLUDE: Returning to '$self->{old_filename}' from '$self->{inc_filename}' */
-    |
-EOF
-
-    # XXX tmp prematurely emit code
-    $cpp_scope->as_code($pxs);
-    pop @{$self->{kids}};
-
     1;
 }
 
 
-# XXX tmp prematurely emit code
-sub as_code {}
-sub XXX_as_code {
+sub as_code {
     my __PACKAGE__                    $self  = shift;
     my ExtUtils::ParseXS              $pxs   = shift;
 
@@ -4422,6 +4457,15 @@ sub XXX_as_code {
         |/* $comment */
         |
 EOF
+
+    $_->as_code($pxs) for @{$self->{kids}};
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+    |
+    |/* INCLUDE: Returning to '$self->{old_filename}' from '$self->{inc_filename}' */
+    |
+EOF
+
 }
 
 

@@ -318,8 +318,7 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
     $stderr = PrimitiveCapture::capture_stderr(sub {
       $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
     });
-    TODO: {
-      local $TODO = 'GH 19661';
+    {
       unlike $stderr,
         qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
@@ -330,8 +329,7 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
     $stderr = PrimitiveCapture::capture_stderr(sub {
       $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
     });
-    TODO: {
-      local $TODO = 'GH 19661';
+    {
       unlike $stderr,
         qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
@@ -5319,8 +5317,21 @@ EOF
                 |long foo()
                 |#endif
 EOF
-            [ 1, 0, qr{Warning: duplicate function definition},
-                    "got expected warning"  ],
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                        ^ \#if\ USE_LONG \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
         ],
 
         [
@@ -5331,8 +5342,17 @@ EOF
                 |#endif
                 |long foo()
 EOF
-            [ 1, 0, qr{Warning: duplicate function definition},
-                    "got expected warning"  ],
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                      }smx,
+                    "ifdefs in order"  ],
         ],
 
         [
@@ -5399,12 +5419,12 @@ EOF
 EOF
             [ 0, 0, qr{
                         ^ \#ifdef\ C1 \n
-                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
                          .*
                         ^ \s* short \s+ RETVAL; \s* \n
                          .*
                         ^ \#ifdef\ C2 \n
-                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
                          .*
                         ^ \s* long \s+ RETVAL; \s* \n
                          .*
@@ -5428,6 +5448,8 @@ EOF
 EOF
             [ 0, 0, qr{
                         ^ \#ifdef\ C1 \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                        ^ \s* \n
                         ^ \#\ \ ifdef\ C2 \n
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
                          .*
@@ -5463,9 +5485,9 @@ EOF
             [ 0, 0, qr{
                         ^ \#ifdef\ C1 \n
                          .*
-                        ^ \#define\ BLAH1\n
-                         .*
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \#define\ BLAH1\n
                          .*
                         ^ \s* short \s+ RETVAL; \s* \n
                          .*

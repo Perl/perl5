@@ -432,12 +432,11 @@ sub process_file {
   $self->{XS_parse_stack_top_if_idx} = 0;
   $self->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
 
-  $AST->as_code($self);
-
-
   my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
   $cpp_scope->parse($self);
-  $cpp_scope->as_code($self);
+  push @{$AST->{kids}}, $cpp_scope;
+
+  $AST->as_code($self);
 
   # ----------------------------------------------------------------
   # End of main loop and at EOF: all paragraphs (and thus XSUBs) have now
@@ -949,10 +948,6 @@ sub _maybe_parse_typemap_block {
 
 sub fetch_para {
   my ExtUtils::ParseXS $self = shift;
-
-  # unmatched #if at EOF
-  $self->death("Error: Unterminated '#if/#ifdef/#ifndef'")
-    if !defined $self->{lastline} && $self->{XS_parse_stack}->[-1]{type} eq 'if';
 
   return 0 if not defined $self->{lastline}; # EOF
 
