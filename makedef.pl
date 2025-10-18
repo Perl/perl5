@@ -794,7 +794,9 @@ unless ($Config{d_wcrtomb}) {
 {
     my %seen;
     my ($embed_array) = setup_embed($ARGS{TARG_DIR});
-    my $excludedre = $define{'NO_MATHOMS'} ? qr/[emiIsb]/ : qr/[emiIs]/;
+    my $excludedre = 'eiIms';
+    $excludedre .= 'b' if $define{'NO_MATHOMS'};
+    $excludedre = qr/[$excludedre]/;
 
     foreach my $entry (@$embed_array) {
         my $embed= $entry->{embed}
