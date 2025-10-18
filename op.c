@@ -12320,7 +12320,7 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
     PERL_ARGS_ASSERT_NEWSTUB;
     assert(!GvCVu(gv));
     GvCV_set(gv, cv);
-    assert(GvCVGEN(gv) == 0);
+    GvCVGEN(gv) = 0;
     if (!fake && GvSTASH(gv) && HvENAME_HEK(GvSTASH(gv)))
         gv_method_changed(gv);
     if (SvFAKE(gv)) {
