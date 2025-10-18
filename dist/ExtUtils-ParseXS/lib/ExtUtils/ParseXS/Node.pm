@@ -19,6 +19,7 @@ ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
     $foo->parse(...)
         or die;
     $foo->as_code(...);
+    $foo->as_concise(1);
 
 =head1 DESCRIPTION
 
@@ -94,6 +95,9 @@ The parse() and as_code() methods for some subclasses may have additional
 parameters.
 
 Some subclasses may have additional helper methods.
+
+The as_concise() method returns a line-per-node string representation of
+the node and any children. It is intended mainly for debugging.
 
 =head2 Class Hierachy
 
@@ -379,6 +383,72 @@ sub is_xs_module_line {
 
 
 sub as_code { }
+
+
+# as_concise(): for debugging:
+#
+# Return a string representing a concise line-per-node representation
+# of the node and any children, in the spirit of 'perl -MO=Concise'.
+# Intended to be human- rather than machine-readable.
+#
+# The single optional parameter, depth, is for indentation purposes
+
+sub as_concise {
+    my __PACKAGE__  $self  = shift;
+    my $depth =  shift;
+    $depth = 0 unless defined $depth;
+
+    my $f = $self->{file};
+    $f = '??' unless defined $f;
+    $f =~ s{^.*/}{};
+    substr($f,0,10) = '' if length($f) > 10;
+
+    my $l = $self->{line_no};
+    $l = defined $l ? sprintf("%-3d", $l) : '?? ';
+
+    my $s = sprintf "%-15s", "$f:$l";
+    $s .= ('  ' x $depth);
+
+    my $class = ref $self;
+    $class =~ s/^.*:://g;
+    $s .= "${class}: ";
+
+    my @kv;
+
+    for my $key (sort grep !/^(file|line_no|kids)$/, keys %$self) {
+        my $v = $self->{$key};
+
+        # some basic pretty-printing
+
+        if (!defined $v) {
+            $v = '-';
+        }
+        elsif (ref $v) {
+            $v = "[ref]";
+        }
+        elsif ($v =~ /^-?\d+(\.\d+)?$/) {
+            # leave as-is
+        }
+        else {
+            $v = "$v";
+            $v =~ s/"/\\"/g;
+            my $max = 20;
+            substr($v, $max) = '...' if length($v) > $max;
+            $v = qq("$v");
+        }
+
+        push @kv, "$key=$v";
+    }
+
+    $s .= join '; ', @kv;
+    $s .= "\n";
+
+    if ($self->{kids}) {
+        $s .= $_->as_concise($depth+1) for @{$self->{kids}};
+    }
+
+    $s;
+}
 
 
 # ======================================================================
