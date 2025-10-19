@@ -10933,26 +10933,26 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
              * be conflated with a control character identifier. */
             if (advance) {
 
-                /* Now parse the normal identifier.
-                 *
-                 * khw: The code below is buggy because we already have parsed
-                 * and copied the first character of it.  The next character
-                 * could be any IDCONT one, not just an IDFIRST */
+                /* Now parse the normal identifier.  But note, we already have
+                 * parsed and copied the first character of it.  That means we
+                 * are jumping into the middle; so tell that to parse_ident.
+                 * */
                 d += advance;
                 s = parse_ident(s, PL_bufend, &d, e, is_utf8,
-                                (ALLOW_PACKAGE | CHECK_DOLLAR));
+                                (ALLOW_PACKAGE|CHECK_DOLLAR)|IDCONT_first_OK);
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
 
                 /* Now parse the control character identifier.  Again, we have
-                 * already copied the first character. */
+                 * already copied the first character.  This routine is
+                 * sufficiently chummy with parse_ident to know that when we
+                 * say the string isn't UTF-8, it will do the right thing in
+                 * looking only for ASCII \w characters as identifier
+                 * continuations */
                 d++;
-                while (isWORDCHAR(*s) && d < e) {
-                    *d++ = *s++;
-                }
-                if (d >= e)
-                    croak("%s", ident_too_long);
-                *d = '\0';
+                s = parse_ident(s, PL_bufend, &d, e,
+                                false,  /* Don't allow UTF-8 */
+                                IDCONT_first_OK);
             }
 
             tmp_copline = CopLINE(PL_curcop);
