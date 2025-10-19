@@ -10852,7 +10852,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      * encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
      * '{' without knowing if is UTF-8 or not. */
 
-    if (   (s <= PL_bufend - ((is_utf8) ? UTF8SKIP(s) : 1))
+    if (    s < PL_bufend
         && (  isGRAPH_A(*s)
             || (is_utf8 ? isIDFIRST_utf8_safe(s, PL_bufend)
                         : (isGRAPH_L1(*s) && LIKELY((U8) *s != SHY_NATIVE)))))
