@@ -4743,12 +4743,13 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * changed since the code was first added */
                 char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
 
-                /* khw: scan_ident shouldn't be used as-is.  It has side
-                 * effects and can end up calling this function recursively.
-                 *
-                 * khw: If what follows can't be an identifier, say it is too
-                 * long or is $001, then it must be a charclass */
-                scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), 0);
+                if (! scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), CHECK_ONLY))
+                {
+                    /* An illegal identifier means this can't be a subscript;
+                     * it's an error or it could be a charclass */
+                    return false;
+                }
+
                 len = strlen(tmpbuf);
 
                 /* khw: This only looks at global variables; lexicals came
