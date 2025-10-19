@@ -10851,10 +10851,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 
     if (   (s <= PL_bufend - ((is_utf8) ? UTF8SKIP(s) : 1))
         && (  isGRAPH_A(*s)
-            || (is_utf8
-               ? isIDFIRST_utf8_safe(s, PL_bufend)
-               : (   isGRAPH_L1(*s)
-                  && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))))))
+            || (is_utf8 ? isIDFIRST_utf8_safe(s, PL_bufend)
+                        : (isGRAPH_L1(*s) && LIKELY((U8) *s != SHY_NATIVE)))))
     {
         if (is_utf8) {
         const STRLEN skip = UTF8SKIP(s);
