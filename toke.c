@@ -10852,22 +10852,16 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      * encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
      * '{' without knowing if is UTF-8 or not. */
 
+    STRLEN advance = 1;
     if (    s < PL_bufend
         && (  isGRAPH_A(*s)
-            || (is_utf8 ? isIDFIRST_utf8_safe(s, PL_bufend)
+            || (is_utf8 ? (advance = isIDFIRST_utf8_safe(s, PL_bufend))
                         : (isGRAPH_L1(*s) && LIKELY((U8) *s != SHY_NATIVE)))))
     {
-        if (is_utf8) {
-        const STRLEN skip = UTF8SKIP(s);
         STRLEN i;
-        d[skip] = '\0';
-        for ( i = 0; i < skip; i++ )
+        d[advance] = '\0';
+        for ( i = 0; i < advance; i++ )
             d[i] = *s++;
-        }
-        else {
-            *d = *s++;
-            d[1] = '\0';
-        }
     }
 
     /* 'd' has not been advanced, but if 's' pointed to a legal identifier
