@@ -10768,13 +10768,17 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
  * It returns a pointer into the input buffer pointing to just after all the
  * bytes this function consumed; or croaks if an invalid identifier is found.
  *
- * XXX: This function has subtle implications on parsing, and
- * changing how it behaves can cause a variable to change from
- * being a run time rv2sv call or a compile time binding to a
- * specific variable name.
+ * XXX: This function normally has subtle implications on parsing, and
+ * changing how it behaves can cause a variable to change from being a run
+ * time rv2sv call or a compile time binding to a specific variable name.
  *
- * Use the CHECK_UNARY flag to cause this to look for ambiguities with unary
- * operators.
+ * However, it can be called with the CHECK_ONLY flag which keeps it from
+ * making any changes besides populating the memory 'dest' points to.  If the
+ * identifier is illegal, it returns NULL instead of croaking.
+ *
+ * And use the CHECK_UNARY flag to cause this to look for ambiguities with
+ * unary operators.  This is silently overriden if CHECK_ONLY is also
+ * specified.
  */
 STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
@@ -10791,22 +10795,29 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
     char * const e = dest_end - 3;    /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
     line_t orig_copline = 0, tmp_copline = 0;
-    const bool chk_unary = (flags & CHECK_UNARY);
 
+    /* Leave the flag in its position, so can pass this on without needing to
+     * anything extra */
+    const U32 check_only = flags & CHECK_ONLY;
+
+    const bool chk_unary = ! check_only && (flags & CHECK_UNARY);
 
     if (isSPACE(*s) || !*s)
         s = skipspace(s);
 
     /* See if it is a "normal" identifier */
     s = parse_ident(s, PL_bufend, &d, e, is_utf8,
-                    (ALLOW_PACKAGE | STOP_AT_FIRST_NON_DIGIT));
-    d = dest;
+                    (ALLOW_PACKAGE | STOP_AT_FIRST_NON_DIGIT | check_only));
+    if (s == NULL) {
+        return NULL;
+    }
 
+    d = dest;
     if (*d) {
 
         /* Here parse_ident() found a digit variable or an identifier
            (anything valid as a bareword), so job done and return.  */
-        if (PL_lex_state != LEX_NORMAL)
+        if (! check_only && PL_lex_state != LEX_NORMAL)
             PL_lex_state = LEX_INTERPENDMAYBE;
         return s;
     }
@@ -10860,7 +10871,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      * Because all ASCII characters have the same representation whether
      * encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
      * '{' without knowing if is UTF-8 or not. */
-
     STRLEN advance = 1;
     if (    s < PL_bufend
         && (  isGRAPH_A(*s)
@@ -10883,7 +10893,10 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
     if (isDIGIT(*d)) {
         assert(bracket != NO_BRACE);
         s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
-                        STOP_AT_FIRST_NON_DIGIT);
+                        STOP_AT_FIRST_NON_DIGIT | check_only);
+        if (s == NULL) {
+            return NULL;
+        }
 
         /* The code below is expecting d to point to the final digit */
         d--;
@@ -10913,7 +10926,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      */
 
     if (bracket == NO_BRACE) {
-        if (     PL_lex_state == LEX_INTERPNORMAL
+        if (   ! check_only
+            &&   PL_lex_state == LEX_INTERPNORMAL
             && ! PL_lex_brackets
             && ! intuit_more(s, PL_bufend, FROM_IDENT, NULL, 0))
         PL_lex_state = LEX_INTERPEND;
@@ -10939,7 +10953,10 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                  * */
                 d += advance;
                 s = parse_ident(s, PL_bufend, &d, e, is_utf8,
-                                (ALLOW_PACKAGE|CHECK_DOLLAR)|IDCONT_first_OK);
+                                (  ALLOW_PACKAGE
+                                 | CHECK_DOLLAR
+                                 | IDCONT_first_OK
+                                 | check_only));
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
 
@@ -10955,12 +10972,23 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                                 IDCONT_first_OK);
             }
 
+            if (s == NULL) {    /* Can't be NULL unless is check_only */
+                return NULL;
+            }
+
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
                 s = skipspace(s);
             }
 
             if (*s == '[' || (*s == '{' && strNE(dest, "sub"))) {
+
+                /* In this branch, 's' is not changed further.  If only
+                 * checking validity, return now before any state changes */
+                if (check_only) {
+                    return s;
+                }
+
                 /* ${foo[0]} and ${foo{bar}} and ${^CAPTURE[0]} notation.  */
 
                 if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
@@ -11004,6 +11032,12 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
              * restore the state such that the next thing to process is the
              * opening '{' and let the parser handle it */
             s = SvPVX(PL_linestr) + bracket;
+
+            /* The final change to 's' has just been made.  If only validity
+             * checking, return before making any state changes */
+            if (check_only) {
+                return s;
+            }
             CopLINE_set(PL_curcop, orig_copline);
             PL_parser->herelines = herelines;
             *dest = '\0';
@@ -11013,6 +11047,13 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
             if (skip)
                 s = skipspace(s);
             s++;
+
+            /* The final change to 's' has just been made.  If only validity
+             * checking, return before making any state changes */
+            if (check_only) {
+                return s;
+            }
+
             if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
                 PL_lex_state = LEX_INTERPEND;
                 PL_expect = XREF;
