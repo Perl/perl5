@@ -10773,7 +10773,10 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
     I32 herelines = PL_parser->herelines;
-    SSize_t bracket = -1;
+
+#define NO_BRACE -1
+    SSize_t bracket = NO_BRACE;
+
     char funny = *s++;
     char *d = dest;
     char * const e = dest_end - 3;    /* two-character token, ending NUL */
@@ -10905,7 +10908,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      *   4) *d is NUL for anything else.
      */
 
-    if (bracket != -1) {          /* Found a '{' */
+    if (bracket != NO_BRACE) {    /* Found a '{' */
         bool skip;
         char *s2;
 
