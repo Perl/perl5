@@ -10557,7 +10557,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      *    of ASCII \w characters.  As a special case of this, it can
      *    optionally stop parsing at the first non-digit, returning just the
      *    initial digits.  */
-    const bool stop_at_first_non_digit = flags & STOP_AT_FIRST_NON_DIGIT;
+    bool stop_at_first_non_digit = flags & STOP_AT_FIRST_NON_DIGIT;
 
      /*    This type of identifier can be completely prohibited, so that
       *    anything that doesn't match type 1) is not considered to be an
@@ -10657,6 +10657,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
                 croak(ident_var_zero_multi_digit);
             }
 
+            /* This option only applies to the first component in a
+             * multi-component package variable name.  So quit the loop before
+             * trying to find a package separator */
             break;
         }
         else if (! idfirst_only && isWORDCHAR_A(*s) ) {
@@ -10690,6 +10693,13 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             *(*d)++ = ':';
             *(*d)++ = ':';
             s += (*s == ':') ? 2 : 1;
+
+            /* This option only applies to the first component in a
+             * multi-component package variable name.  For example, in
+             * "SWISH::3::", the '3' is not the first component, and so the
+             * option needs to be turned off before the next loop iteration
+             * parses it. */
+            stop_at_first_non_digit = false;
         }
         else    /* None of the above means have come to the end of any
                    identifier*/
