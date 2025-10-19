@@ -10750,12 +10750,22 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     return s;
 }
 
-/* scan s and extract an identifier ($var) from it if possible
- * into dest.
+/* scan 's' and extract an identifier ($var) from it into 'dest' if possible.
+ *
+ * Unlike S_parse_ident which looks for the more usual types of identifiers
+ * (and which this calls if needed), this looks for every possible identifier
+ * type, such as punctuation ones.
+ *
+ * It returns a pointer into the input buffer pointing to just after all the
+ * bytes this function consumed; or croaks if an invalid identifier is found.
+ *
  * XXX: This function has subtle implications on parsing, and
  * changing how it behaves can cause a variable to change from
  * being a run time rv2sv call or a compile time binding to a
  * specific variable name.
+ *
+ * Use the CHECK_UNARY flag to cause this to look for ambiguities with unary
+ * operators.
  */
 STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
@@ -10781,6 +10791,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
     d = dest;
 
     if (*d) {
+
         /* Here parse_ident() found a digit variable or an identifier
            (anything valid as a bareword), so job done and return.  */
         if (PL_lex_state != LEX_NORMAL)
@@ -10788,7 +10799,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         return s;
     }
 
-    /* Here, it is not a run-of-the-mill identifier name */
+    /* Here, it is not a run-of-the-mill identifier name; maybe not an
+     * identifier at all.  Note *d is a NUL */
 
     if (*s == '$' && s[1]
         && (   isIDFIRST_lazy_if_safe(s+1, PL_bufend, is_utf8)
@@ -10803,9 +10815,12 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         return s;
     }
 
-    /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}  */
+    /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}
+     * Skip to the first non-space past the brace */
     if (*s == '{') {
+        /* 'bracket' becomes the offset from the beginning of this chunk */
         bracket = s - SvPVX(PL_linestr);
+
         s++;
         orig_copline = CopLINE(PL_curcop);
         if (s < PL_bufend && isSPACE(*s)) {
@@ -10813,11 +10828,12 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         }
     }
 
-    /* Extract the first character of the variable name from 's' and
-     * copy it, null terminated into 'd'. Note that this does not
-     * involve checking for just IDFIRST characters, as it allows the
-     * '^' for ${^FOO} type variable names, and it allows all the
-     * characters that are legal in a single character variable name.
+    /* Here, 's' points to the next "interesting" character.
+     * Extract the first character of the potential variable name from 's' and
+     * copy it, NUL terminated, into 'd'. Note that this does not involve
+     * checking for just IDFIRST characters, as it allows the '^' for ${^FOO}
+     * type variable names, and it allows all the characters that are legal in
+     * a single character variable name.
      *
      * The legal ones are any of:
      *  a) all ASCII characters except:
@@ -10841,11 +10857,11 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                   && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))))))
     {
         if (is_utf8) {
-            const STRLEN skip = UTF8SKIP(s);
-            STRLEN i;
-            d[skip] = '\0';
-            for ( i = 0; i < skip; i++ )
-                d[i] = *s++;
+        const STRLEN skip = UTF8SKIP(s);
+        STRLEN i;
+        d[skip] = '\0';
+        for ( i = 0; i < skip; i++ )
+            d[i] = *s++;
         }
         else {
             *d = *s++;
@@ -10853,7 +10869,13 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         }
     }
 
-    /* special case to handle ${10}, ${11} the same way we handle $1 etc */
+    /* 'd' has not been advanced, but if 's' pointed to a legal identifier
+     * character, it has been advanced to the next character, and the
+     * character it previously pointed to has been copied to where 'd'
+     * continues to point to.
+     *
+     * If that copied character is a digit, it means we have something like
+     * ${10}, ${1547}, etc.  Handle those the same way we handle $1, etc */
     if (isDIGIT(*d)) {
         s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
                         STOP_AT_FIRST_NON_DIGIT);
@@ -10861,39 +10883,60 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         /* The code below is expecting d to point to the final digit */
         d--;
     }
-
-    /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
-    else if (*d == '^' && *s && isCONTROLVAR(*s)) {
+    else  /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
+      if (*d == '^' && *s && isCONTROLVAR(*s)) {
         *d = toCTRL(*s);
         s++;
     }
-    /* Warn about ambiguous code after unary operators if {...} notation isn't
-       used.  There's no difference in ambiguity; it's merely a heuristic
-       about when not to warn.  */
-    else if (chk_unary && bracket == -1)
+    else  /* Warn about ambiguous code after unary operators if {...} notation
+             isn't used.  There's no difference in ambiguity; it's merely a
+             heuristic about when not to warn.  */
+      if (chk_unary && bracket == -1) {
         check_unary();
+    }
 
-    if (bracket != -1) {
+    /* Here, 's' points to the next "interesting" character to be parsed. And
+     * *d points to the first byte of the final so-far parsed and copied
+     * character.  This is one of four things:
+     *   1) The only byte of the final character of an all-digit numeric
+     *      variable inside braces. e.g. if the input is ${ 123 }, '123' has
+     *      been copied to 'dest', and 'd' points to the '3'.  We don't know
+     *      yet if there is a closing brace.
+     *   2) A control character
+     *   3) The first (or only) byte of some other identifier
+     *   4) *d is NUL for anything else.
+     */
+
+    if (bracket != -1) {          /* Found a '{' */
         bool skip;
         char *s2;
-        /* If we were processing {...} notation then...  */
+
+        /* Handle the interior of braces.  First look to see if the character
+         * pointed to by 'd' is legal as the start of an identifier.
+         * If it isn't a normal identifier, it could be a control-character
+         * one.  Those have to be followed by a \w character.  Prefer a normal
+         * identifier, as UTF-8 strings could erroneously be conflated with a
+         * control character identifier. */
         if (   isIDFIRST_lazy_if_safe(d, e, is_utf8)
             || (  ! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
                  && isWORDCHAR(*s))
         ) {
-            /* note we have to check for a normal identifier first,
-             * as it handles utf8 symbols, and only after that has
-             * been ruled out can we look at the caret words */
             Size_t advance;
             if ((advance = isIDFIRST_lazy_if_safe(d, e, is_utf8) )) {
-                /* if it starts as a valid identifier, assume that it is one.
-                   (the later check for } being at the expected point will trap
-                   cases where this doesn't pan out.)  */
+
+                /* Now parse the normal identifier.
+                 *
+                 * khw: The code below is buggy because we already have parsed
+                 * and copied the first character of it.  The next character
+                 * could be any IDCONT one, not just an IDFIRST */
                 d += advance;
                 s = parse_ident(s, PL_bufend, &d, e, is_utf8,
                                 (ALLOW_PACKAGE | CHECK_DOLLAR));
             }
             else { /* caret word: ${^Foo} ${^CAPTURE[0]} */
+
+                /* Now parse the control character identifier.  Again, we have
+                 * already copied the first character. */
                 d++;
                 while (isWORDCHAR(*s) && d < e) {
                     *d++ = *s++;
@@ -10902,12 +10945,15 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                     croak("%s", ident_too_long);
                 *d = '\0';
             }
+
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
                 s = skipspace(s);
             }
-            if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
+
+            if (*s == '[' || (*s == '{' && strNE(dest, "sub"))) {
                 /* ${foo[0]} and ${foo{bar}} and ${^CAPTURE[0]} notation.  */
+
                 if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
                     const char * const brack =
                         (const char *)
@@ -10929,6 +10975,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
+
         if ((skip = s < PL_bufend && isSPACE(*s))) {
             /* Avoid incrementing line numbers or resetting PL_linestart,
                in case we have to back up.  */
@@ -10939,10 +10986,9 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         else
             s2 = s;
 
-        /* Expect to find a closing } after consuming any trailing whitespace.
-         */
-        if (*s2 == '}') {
-            /* Now increment line numbers if applicable.  */
+        /* Expect to find a closing '}' after consuming any trailing
+         * whitespace. */
+        if (*s2 == '}') {   /* Now increment line numbers if applicable. */
             if (skip)
                 s = skipspace(s);
             s++;
@@ -10971,9 +11017,10 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
             }
         }
         else {
-            /* Didn't find the closing } at the point we expected, so restore
-               state such that the next thing to process is the opening { and */
-            s = SvPVX(PL_linestr) + bracket; /* let the parser handle it */
+            /* Didn't find the closing '}' at the point we expected, so
+             * restore the state such that the next thing to process is the
+             * opening '{" and let the parser handle it */
+            s = SvPVX(PL_linestr) + bracket;
             CopLINE_set(PL_curcop, orig_copline);
             PL_parser->herelines = herelines;
             *dest = '\0';
@@ -10984,6 +11031,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
              && !PL_lex_brackets
              && !intuit_more(s, PL_bufend, FROM_IDENT, NULL, 0))
         PL_lex_state = LEX_INTERPEND;
+
     return s;
 }
 
