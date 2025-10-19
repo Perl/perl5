@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..191\n";
+print "1..192\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -666,6 +666,11 @@ is $@, "", 'substr keys assignment';
     eval 'm(@{if(0){sub d{]]])}return';
     like $@, qr/^syntax error at \(eval \d+\) line 1, near "\{\]"/,
         'RT #130815: null pointer deref';
+}
+
+{   # GH #23861
+    eval 'my @foo = keys %SWISH::3::;';
+    is ($@, "", "Handles all numeric package component after ::");
 }
 
 # Add new tests HERE (above this line)
