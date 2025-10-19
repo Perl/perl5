@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..192\n";
+print "1..193\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -671,6 +671,18 @@ is $@, "", 'substr keys assignment';
 {   # GH #23861
     eval 'my @foo = keys %SWISH::3::;';
     is ($@, "", "Handles all numeric package component after ::");
+}
+
+{
+    my $expected = "this is the way the identifier ends; not with a bang";
+    my $result;
+    eval "use utf8; my \$e\x{1df8}claire = '$expected'; \$result = \${e\x{1df8}claire}";
+    if ($@) {
+        failed($@, "no error", "Didn't crash");
+    }
+    else {
+        is ($result, $expected, "Parser can handle a continuation as 2nd char");
+    }
 }
 
 # Add new tests HERE (above this line)
