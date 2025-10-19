@@ -10878,6 +10878,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      * If that copied character is a digit, it means we have something like
      * ${10}, ${1547}, etc.  Handle those the same way we handle $1, etc */
     if (isDIGIT(*d)) {
+        assert(bracket != NO_BRACE);
         s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
                         STOP_AT_FIRST_NON_DIGIT);
 
