@@ -211,6 +211,15 @@ if ($define{MULTIPLICITY} && (   $define{USE_POSIX_2008_LOCALE}
     $define{USE_PERL_SWITCH_LOCALE_CONTEXT} = 1;
 }
 
+# enable PERL_COPY_ON_WRITE by default
+$define{PERL_COPY_ON_WRITE} = 1 unless $define{PERL_NO_COW};
+if ($define{PERL_COPY_ON_WRITE}) {
+    $define{PERL_ANY_COW} = 1;
+}
+else {
+    $define{PERL_SAWAMPERSAND} = 1;
+}
+
 # perl.h logic duplication ends
 #==========================================================================
 
@@ -369,10 +378,6 @@ else {
 		    perl_alloc_using
 		    perl_clone_using
 			 );
-}
-
-if (!$define{'PERL_COPY_ON_WRITE'} || $define{'PERL_NO_COW'}) {
-    ++$skip{Perl_sv_setsv_cow};
 }
 
 unless ($define{PERL_SAWAMPERSAND}) {
