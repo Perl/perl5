@@ -1325,6 +1325,17 @@ typedef enum {
 #  endif
 #endif  /* End of USE_LOCALE */
 
+/* enable PERL_COPY_ON_WRITE by default */
+#if !defined(PERL_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+#  define PERL_COPY_ON_WRITE
+#endif
+
+#ifdef PERL_COPY_ON_WRITE
+#  define PERL_ANY_COW
+#else
+# define PERL_SAWAMPERSAND
+#endif
+
 /* end of makedef.pl logic duplication
  * ========================================================================= */
 
@@ -3216,17 +3227,6 @@ typedef struct padname PADNAME;
 /* always enable PERL_OP_PARENT  */
 #if !defined(PERL_OP_PARENT)
 #  define PERL_OP_PARENT
-#endif
-
-/* enable PERL_COPY_ON_WRITE by default */
-#if !defined(PERL_COPY_ON_WRITE) && !defined(PERL_NO_COW)
-#  define PERL_COPY_ON_WRITE
-#endif
-
-#ifdef PERL_COPY_ON_WRITE
-#  define PERL_ANY_COW
-#else
-# define PERL_SAWAMPERSAND
 #endif
 
 #if defined(PERL_DEBUG_READONLY_OPS) && !defined(USE_ITHREADS)
