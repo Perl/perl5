@@ -10604,8 +10604,8 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
          * Unicode definition only when UTF-8 is in effect.  We have to check
          * for the subset before checking for the superset. */
         Size_t advance;
-        if (   (advance = isIDFIRST_lazy_if_safe(s, s_end, is_utf8))
-            && (is_utf8 || idfirst_only))
+        if (   (is_utf8 || idfirst_only)
+            && (advance = isIDFIRST_lazy_if_safe(s, s_end, is_utf8)))
         {
             const char *this_start = s;
             s += advance;
