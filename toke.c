@@ -181,6 +181,7 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #define STOP_AT_FIRST_NON_DIGIT     (1 << 4)
 #define CHECK_ONLY                  (1 << 5)
 #define CHECK_UNARY                 (1 << 6)
+#define IDCONT_first_OK             (1 << 7)
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -10597,6 +10598,11 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * in things like Foo::$bar */
     const bool check_dollar = flags & CHECK_DOLLAR;
 
+    /* There is a use case for calling this function in the middle of having
+     * parsed a portion of an identifier.  Therefore it should be able to
+     * accept the first character being an IDCont, and not necessarily an
+     * IDFIRST.  The 'IDCONT_first_OK' flag is used to indicate this */
+
     while (s < s_end) {
 
         /* For non-UTF8, variables that match ASCII \w are a superset of
@@ -10605,7 +10611,10 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
          * for the subset before checking for the superset. */
         Size_t advance;
         if (   (is_utf8 || idfirst_only)
-            && (advance = isIDFIRST_lazy_if_safe(s, s_end, is_utf8)))
+            && (advance = (flags & IDCONT_first_OK)
+                          ? isIDCONT_lazy_if_safe((U8 *) s, (U8 *) s_end,
+                                                  is_utf8)
+                          : isIDFIRST_lazy_if_safe(s, s_end, is_utf8)))
         {
             const char *this_start = s;
             s += advance;
