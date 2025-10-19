@@ -10996,7 +10996,17 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 
         /* Expect to find a closing '}' after consuming any trailing
          * whitespace. */
-        if (*s2 == '}') {   /* Now increment line numbers if applicable. */
+        if (*s2 != '}') {
+            /* Didn't find the closing '}' at the point we expected, so
+             * restore the state such that the next thing to process is the
+             * opening '{' and let the parser handle it */
+            s = SvPVX(PL_linestr) + bracket;
+            CopLINE_set(PL_curcop, orig_copline);
+            PL_parser->herelines = herelines;
+            *dest = '\0';
+            PL_parser->sub_no_recover = TRUE;
+        }
+        else {  /* Now increment line numbers if applicable.  */
             if (skip)
                 s = skipspace(s);
             s++;
@@ -11023,16 +11033,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                     CopLINE_set(PL_curcop, orig_copline);
                 }
             }
-        }
-        else {
-            /* Didn't find the closing '}' at the point we expected, so
-             * restore the state such that the next thing to process is the
-             * opening '{" and let the parser handle it */
-            s = SvPVX(PL_linestr) + bracket;
-            CopLINE_set(PL_curcop, orig_copline);
-            PL_parser->herelines = herelines;
-            *dest = '\0';
-            PL_parser->sub_no_recover = TRUE;
         }
     }
 
