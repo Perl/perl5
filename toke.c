@@ -10912,17 +10912,17 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
     else {  /* Found a '{' */
 
         /* Handle the interior of braces.  First look to see if the character
-         * pointed to by 'd' is legal as the start of an identifier.
-         * If it isn't a normal identifier, it could be a control-character
-         * one.  Those have to be followed by a \w character.  Prefer a normal
-         * identifier, as UTF-8 strings could erroneously be conflated with a
-         * control character identifier. */
-        if (   isIDFIRST_lazy_if_safe(d, e, is_utf8)
-            || (  ! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
-                 && isWORDCHAR(*s))
-        ) {
-            Size_t advance;
-            if ((advance = isIDFIRST_lazy_if_safe(d, e, is_utf8) )) {
+         * pointed to by 'd' is legal as the start of an identifier. */
+        Size_t advance = isIDFIRST_lazy_if_safe(d, e, is_utf8);
+
+        /* If it isn't a normal identifier, it could be a control-character
+         * one.  Those have to be followed by a \w character. */
+        if (advance || ( ! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
+                        && isWORDCHAR(*s)))
+        {
+            /* Prefer a normal identifier, as UTF-8 strings could erroneously
+             * be conflated with a control character identifier. */
+            if (advance) {
 
                 /* Now parse the normal identifier.
                  *
