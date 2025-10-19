@@ -10916,8 +10916,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         PL_lex_state = LEX_INTERPEND;
     }
     else {  /* Found a '{' */
-        bool skip;
-        char *s2;
 
         /* Handle the interior of braces.  First look to see if the character
          * pointed to by 'd' is legal as the start of an identifier.
@@ -10984,6 +10982,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
 
+        char *s2;
+        bool skip;
         if ((skip = s < PL_bufend && isSPACE(*s))) {
             /* Avoid incrementing line numbers or resetting PL_linestart,
                in case we have to back up.  */
