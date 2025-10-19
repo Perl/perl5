@@ -2,6 +2,9 @@
 #
 # Create the export list for perl.
 #
+# WARNING: This file duplicates information from some of its source files, and
+# must be kept in sync with changes to them.
+#
 # Needed by WIN32 and OS/2 for creating perl.dll,
 # and by AIX for creating libperl.a when -Duseshrplib is in effect,
 # and by VMS for creating perlshr.exe.
@@ -19,7 +22,7 @@
 #    perlvars.h
 #    regen/opcodes
 #
-# plus long lists of function names hard-coded directly in this script.
+# plus long lists of function names (sadly) hard-coded directly in this script.
 #
 # Writes the result to STDOUT.
 #
@@ -37,7 +40,7 @@ use warnings;
 
 my $fold;
 my %ARGS;
-my %define;
+our %define;
 BEGIN {
     %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
 
@@ -282,15 +285,6 @@ sub readvar {
 if (PLATFORM ne 'os2') {
     ++$skip{$_} foreach qw(
 		     PL_opsave
-		     Perl_dump_fds
-		     Perl_my_bcopy
-		     Perl_my_bzero
-		     Perl_my_chsize
-		     Perl_my_htonl
-		     Perl_my_memcmp
-		     Perl_my_memset
-		     Perl_my_ntohl
-		     Perl_my_swap
 			 );
     if (PLATFORM eq 'vms') {
 	++$skip{PL_statusvalue_posix};
@@ -319,48 +313,16 @@ if (PLATFORM ne 'vms') {
 			PL_sig_ignoring
 			PL_sig_defaulting
 			 );
-    if (PLATFORM ne 'win32') {
-	++$skip{$_} foreach qw(
-			    Perl_do_spawn
-			    Perl_do_spawn_nowait
-			    Perl_do_aspawn
-			     );
-    }
-}
-
-if (PLATFORM ne 'win32') {
-    ++$skip{$_} foreach qw(
-		    Perl_get_context
-		    Perl_get_win32_message_utf8ness
-		    Perl_Win_utf8_string_to_wstring
-		    Perl_Win_wstring_to_utf8_string
-			 );
-}
-
-unless ($define{UNLINK_ALL_VERSIONS}) {
-    ++$skip{Perl_unlnk};
 }
 
 unless ($define{'DEBUGGING'}) {
     ++$skip{$_} foreach qw(
-		    Perl_debop
-		    Perl_debprofdump
-		    Perl_debstack
-		    Perl_debstackptrs
-		    Perl_pad_sv
-		    Perl_pad_setsv
-		    Perl_set_padlist
-		    Perl_hv_assert
 		    PL_watchaddr
 		    PL_watchok
 			 );
 }
 
 if ($define{'PERL_IMPLICIT_SYS'}) {
-    ++$skip{$_} foreach qw(
-		    Perl_my_popen
-		    Perl_my_pclose
-			 );
     ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
     ++$export{perl_clone_host} if $define{USE_ITHREADS};
 }
@@ -375,8 +337,6 @@ else {
 		    PL_Dir
 		    PL_Sock
 		    PL_Proc
-		    perl_alloc_using
-		    perl_clone_using
 			 );
 }
 
@@ -390,10 +350,6 @@ unless ($define{'USE_REENTRANT_API'}) {
 
 if ($define{'MYMALLOC'}) {
     try_symbols(qw(
-		    Perl_dump_mstats
-		    Perl_get_mstats
-		    Perl_strdup
-		    Perl_putenv
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
 		    ));
@@ -404,8 +360,6 @@ if ($define{'MYMALLOC'}) {
 else {
     ++$skip{$_} foreach qw(
 		    PL_malloc_mutex
-		    Perl_dump_mstats
-		    Perl_get_mstats
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
 			 );
@@ -436,37 +390,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_stashpadix
 		    PL_stashpadmax
                     PL_veto_switch_non_tTHX_context
-		    Perl_alloccopstash
-		    Perl_allocfilegv
-		    Perl_clone_params_del
-		    Perl_clone_params_new
-		    Perl_parser_dup
-		    Perl_dirp_dup
-		    Perl_cx_dup
-		    Perl_si_dup
-		    Perl_any_dup
-		    Perl_ss_dup
-		    Perl_fp_dup
-		    Perl_gp_dup
-		    Perl_he_dup
-		    Perl_mg_dup
-		    Perl_re_dup_guts
-		    Perl_sv_dup
-		    Perl_sv_dup_inc
-		    Perl_rvpv_dup
-		    Perl_hek_dup
-		    Perl_sys_intern_dup
-		    perl_clone
-		    perl_clone_using
-		    Perl_stashpv_hvname_match
-		    Perl_regdupe_internal
-		    Perl_newPADOP
 			 );
-}
-
-unless ($define{'USE_THREADS'}) {
-    ++$skip{Perl_thread_locale_init};
-    ++$skip{Perl_thread_locale_term};
 }
 
 if (!$define{USE_ITHREADS} || $define{WIN32}) {
@@ -495,13 +419,6 @@ unless ($define{USE_PL_CUR_LC_ALL})
     );
 }
 
-unless ($define{USE_PERL_SWITCH_LOCALE_CONTEXT})
-{
-    ++$skip{$_} foreach qw(
-        Perl_switch_locale_context
-    );
-}
-
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
                     PL_cur_locale_obj
@@ -510,31 +427,7 @@ unless ($define{'MULTIPLICITY'}) {
 		    PL_my_cxt_size
 		    PL_my_cxt_keys
 		    PL_my_cxt_keys_size
-		    Perl_croak_nocontext
-		    Perl_die_nocontext
-		    Perl_deb_nocontext
-		    Perl_form_nocontext
-		    Perl_load_module_nocontext
-		    Perl_mess_nocontext
-		    Perl_warn_nocontext
-		    Perl_warner_nocontext
-		    Perl_newSVpvf_nocontext
-		    Perl_sv_catpvf_nocontext
-		    Perl_sv_setpvf_nocontext
-		    Perl_sv_catpvf_mg_nocontext
-		    Perl_sv_setpvf_mg_nocontext
-		    Perl_my_cxt_init
-		    Perl_my_cxt_index
 			 );
-}
-
-unless ($define{'USE_DTRACE'}) {
-    ++$skip{$_} foreach qw(
-                    Perl_dtrace_probe_call
-                    Perl_dtrace_probe_load
-                    Perl_dtrace_probe_op
-                    Perl_dtrace_probe_phase
-                );
 }
 
 unless ($define{'DEBUG_LEAKING_SCALARS'}) {
@@ -543,10 +436,6 @@ unless ($define{'DEBUG_LEAKING_SCALARS'}) {
 
 unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
     ++$skip{PL_dumper_fd};
-}
-
-unless ($define{'PERL_DONT_CREATE_GVSV'}) {
-    ++$skip{Perl_gv_SVadd};
 }
 
 unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
@@ -560,11 +449,6 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
 unless ($define{'PERL_MEM_LOG'}) {
     ++$skip{$_} foreach qw(
                     PL_mem_log
-                    Perl_mem_log_alloc
-                    Perl_mem_log_realloc
-                    Perl_mem_log_free
-                    Perl_mem_log_new_sv
-                    Perl_mem_log_del_sv
                 );
 }
 
@@ -602,11 +486,6 @@ if (PLATFORM eq 'vms' && !$define{KILL_BY_SIGPRC}) {
     ++$skip{PL_sig_handlers_initted} unless !$define{HAS_SIGACTION};
 }
 
-if ($define{'HAS_STRNLEN'})
-{
-    ++$skip{Perl_my_strnlen};
-}
-
 unless ($define{USE_LOCALE_COLLATE}) {
     ++$skip{$_} foreach qw(
 		    PL_collation_ix
@@ -614,8 +493,6 @@ unless ($define{USE_LOCALE_COLLATE}) {
 		    PL_collation_standard
 		    PL_collxfrm_base
 		    PL_collxfrm_mult
-		    Perl_sv_collxfrm
-		    Perl_sv_collxfrm_flags
                     PL_strxfrm_NUL_replacement
                     PL_strxfrm_is_behaved
                     PL_strxfrm_max_cp
@@ -649,37 +526,16 @@ unless (   ! $define{HAS_NL_LANGINFO}
                               );
     }
 
-unless ($define{'USE_C_BACKTRACE'}) {
-    ++$skip{Perl_get_c_backtrace_dump};
-    ++$skip{Perl_dump_c_backtrace};
-}
-
 unless ($define{HAVE_INTERP_INTERN}) {
     ++$skip{$_} foreach qw(
-		    Perl_sys_intern_clear
-		    Perl_sys_intern_dup
-		    Perl_sys_intern_init
 		    PL_sys_intern
 			 );
 }
-
-if ($define{HAS_SIGNBIT}) {
-    ++$skip{Perl_signbit};
-}
-
 ++$skip{PL_op_exec_cnt}
     unless $define{PERL_TRACE_OPS};
 
 ++$skip{PL_hash_chars}
     unless $define{PERL_USE_SINGLE_CHAR_HASH_CACHE};
-
-unless ($define{PERL_RC_STACK}) {
-    ++$skip{$_} foreach qw(
-		    Perl_pp_wrap
-		    Perl_xs_wrap
-                    Perl_runops_wrap
-			 );
-}
 
 # functions from *.sym files
 
@@ -773,12 +629,6 @@ push @syms, 'perlio.sym';
 # PerlIO with layers - export implementation
 try_symbols(@layer_syms, 'perlsio_binmode');
 
-
-unless ($define{'USE_QUADMATH'}) {
-  ++$skip{Perl_quadmath_format_needed};
-  ++$skip{Perl_quadmath_format_single};
-}
-
 unless ($Config{d_mbrlen}) {
     ++$skip{PL_mbrlen_ps};
 }
@@ -819,7 +669,66 @@ unless ($Config{d_wcrtomb}) {
 	    # mean "don't export"
 	    next if $seen{$func}++;
 	    $func = "Perl_$func" if ($flags =~ /[psX]/ && $func !~ /^Perl_/);
-	    ++$export{$func} unless exists $skip{$func};
+
+            # If no conditions, export unconditionally.
+            if ($entry->{cond}->@* == 0) {
+                ++$export{$func} unless exists $skip{$func};
+            }
+            else {
+                # Replace what the HeaderLine object thinks is the output line
+                # with this trailing portion of a condition, with a marker
+                $entry->{line} =
+             ") { ++\$export{$func} unless exists \$skip{$func} }MAKEDEF_XXX";
+
+                # And get HeaderParser to surround that with any #if's that it
+                # found when parsing embed.fnc
+                my $hp= HeaderParser->new();
+                my $group = $hp->group_content([$entry]);
+                my $lines = $hp->lines_as_str($group);
+
+                # What that returns is something like
+                #   #if defined(USE_THREADS
+                #   ) { ++$export{foo} }MAKEDEF_XXX
+                #   #endif
+
+                #  The #if may have continuations; get rid of them; they
+                #  confuse perl
+                $lines =~ s/ \\ $ //mxg;
+
+                # Get rid of everything after the marker
+                $lines =~ s/ MAKEDEF_XXX .* //xs;
+
+                # Convert the C conditional(s) to be like
+                #   $define{USE_THREADS}
+                $lines =~ s: \b defined \( ( [^)]+ ) \) :\$define{$1}:xg;
+
+                # And change the #if so that the result (on a single line)
+                # looks like
+                #   if ($define{USE_THREADS} { ++export{foo}; }
+                $lines =~ s/ \#if / if ( /x;
+
+                # Unfortunately, we have to deal specially with some functions
+                # that have both the E and X flags.
+                my $is_EX = $flags =~ tr/EX// > 1;
+
+                # These should be visible to Perl extensions, so they need to
+                # be exported.  And the regular expression handling is quite
+                # special.  That is turned into a special module that has
+                # copies of the related .c files, and those need access to
+                # certain functions that normally aren't enabled outside those
+                # .c files.   What we do here is to locally override these few
+                # %define entries for just these flags.  (It might be that
+                # this could globally be done, but it is safer to restrict it
+                # to here.)
+                local $define{PERL_EXT} = 1 if $is_EX;
+                local $define{PERL_IN_REGCOMP_C} = 1 if $is_EX;
+                local $define{PERL_IN_REGEXEC_C} = 1 if $is_EX;
+                local $define{PERL_IN_REGCOMP_ANY} = 1 if $is_EX;
+
+                # And eval to do the export depending on the conditions
+                eval $lines;
+                die "eval '$lines' failed: $@" if $@;
+            }
 	}
     }
 }
