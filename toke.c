@@ -10909,7 +10909,13 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      *   4) *d is NUL for anything else.
      */
 
-    if (bracket != NO_BRACE) {    /* Found a '{' */
+    if (bracket == NO_BRACE) {
+        if (     PL_lex_state == LEX_INTERPNORMAL
+            && ! PL_lex_brackets
+            && ! intuit_more(s, PL_bufend, FROM_IDENT, NULL, 0))
+        PL_lex_state = LEX_INTERPEND;
+    }
+    else {  /* Found a '{' */
         bool skip;
         char *s2;
 
@@ -11029,10 +11035,6 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
             PL_parser->sub_no_recover = TRUE;
         }
     }
-    else if (   PL_lex_state == LEX_INTERPNORMAL
-             && !PL_lex_brackets
-             && !intuit_more(s, PL_bufend, FROM_IDENT, NULL, 0))
-        PL_lex_state = LEX_INTERPEND;
 
     return s;
 }
