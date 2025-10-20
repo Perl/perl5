@@ -5233,4 +5233,167 @@ EOF
 }
 
 
+{
+    # Check for correct package name; i.e. use the current package name,
+    # not the last one seen in the file.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOTM
+        |foo_t T_FOO
+        |INPUT
+        |T_FOO
+        |    $var = in_foo($arg, "$Package")
+        |OUTPUT
+        |T_FOO
+        |    out_foo($arg, $var, "$Package")
+        |EOTM
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'typemap: $Package: one package',
+            [ Q(<<'EOF') ],
+                |foo_t foo(foo_t a1)
+EOF
+
+            [ 0, 0, qr{
+                        foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
+                        .*
+                        \Qout_foo(RETVALSV, RETVAL, "Foo")\E
+                      }smx,
+                "has corrrect Package"
+            ],
+        ],
+        [
+            'typemap: $Package: two packages',
+            [ Q(<<'EOF') ],
+                |foo_t foo(foo_t a1)
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{
+                        foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
+                        .*
+                        \Qout_foo(RETVALSV, RETVAL, "Foo")\E
+                      }smx,
+                "has corrrect Package"
+            ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Check for correct package name in boot code; i.e. use the current
+    # package name, not the last one seen in the file.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'attr: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |ATTRS: myattr(x)
+EOF
+
+            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'attr: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |ATTRS: myattr(x)
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+                "has corrrect package"
+            ],
+        ],
+
+        [
+            'interface: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |INTERFACE: abc
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'interface: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |INTERFACE: abc
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+
+        [
+            'overload: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |OVERLOAD: cmp
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'overload: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |OVERLOAD: cmp
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
 done_testing;

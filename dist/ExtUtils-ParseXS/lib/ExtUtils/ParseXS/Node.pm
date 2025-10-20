@@ -888,8 +888,13 @@ BEGIN { $build_subclass->(
                                #    "2": empty prototype
                                #    other: a specific prototype.
 
+    # Misc
+
     'SCOPE_enabled',           # Bool: "SCOPE: ENABLE" seen, in either the
                                # file or XSUB part of the XS file
+
+    'PACKAGE_name',            # value of $pxs->{PACKAGE_name} at parse time
+    'PACKAGE_C_name',          # value of $pxs->{PACKAGE_C_name} at parse time
 
 )};
 
@@ -899,6 +904,10 @@ sub parse {
     my ExtUtils::ParseXS  $pxs    = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
+
+    # record what package we're in
+    $self->{PACKAGE_name}   = $pxs->{PACKAGE_name};
+    $self->{PACKAGE_C_name} = $pxs->{PACKAGE_C_name};
 
     # Initially inherit the prototype behaviour for the XSUB from the
     # global PROTOTYPES default
@@ -1209,7 +1218,7 @@ EOF
         my $attrs = "@{$self->{attributes}}";
         push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
           |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
-          |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
+          |        apply_attrs_string("$self->{PACKAGE_name}", cv, "$attrs", 0);
 EOF
         $pxs->{need_boot_cv} = 1;
     }
@@ -1222,7 +1231,7 @@ EOF
                 %{ $self->{map_interface_name_short_to_original} })
         {
             my $value = $self->{map_interface_name_short_to_original}{$yname};
-            $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
+            $yname = "$self->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
 
             my $macro = $self->{interface_macro_set};
             $macro = 'XSINTERFACE_FUNC_SET' unless defined $macro;
@@ -1259,9 +1268,9 @@ EOF
 
     for my $operator (sort keys %{ $self->{overload_name_seen} })
     {
-        $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
-            = $pxs->{PACKAGE_C_name};
-        my $overload = "$pxs->{PACKAGE_name}\::($operator";
+        $pxs->{map_overloaded_package_to_C_package}->{$self->{PACKAGE_name}}
+            = $self->{PACKAGE_C_name};
+        my $overload = "$self->{PACKAGE_name}\::($operator";
         push(@code,
         "        (void)$newXS(\"$overload\", XS_$cname$file_arg$proto_arg);\n");
     }
@@ -1789,6 +1798,7 @@ sub lookup_input_typemap {
         func_name      => $xsub->{decl}{name},
         full_perl_name => $xsub->{decl}{full_perl_name},
         full_C_name    => $xsub->{decl}{full_C_name},
+        Package        => $xsub->{PACKAGE_name},
     };
 
     # The type looked up in the eval is Foo__Bar rather than Foo::Bar
@@ -2088,6 +2098,7 @@ sub lookup_output_typemap {
             func_name       => $xsub->{decl}{name},
             full_perl_name  => $xsub->{decl}{full_perl_name},
             full_C_name     => $xsub->{decl}{full_C_name},
+            Package         => $xsub->{PACKAGE_name},
         };
 
 
