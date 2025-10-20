@@ -17,7 +17,6 @@ our (@ISA, @EXPORT_OK);
   process_typemaps
   map_type
   standard_XS_defs
-  analyze_preprocessor_statement
   set_cond
   Warn
   WarnHint
@@ -43,7 +42,6 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     process_typemaps
     map_type
     standard_XS_defs
-    analyze_preprocessor_statement
     set_cond
     Warn
     blurt
@@ -483,92 +481,6 @@ EOF
   return 1;
 }
 
-=head2 C<analyze_preprocessor_statement()>
-
-=over 4
-
-=item * Purpose
-
-Process a CPP conditional line (C<#if> etc), to keep track of conditional
-nesting. In particular, it updates C<< @{$self->{XS_parse_stack}} >> which
-contains the current list of nested conditions, and
-C<< $self->{XS_parse_stack_top_if_idx} >> which indicates the most recent
-C<if> in that stack. So an C<#if> pushes, an C<#endif> pops, an C<#else>
-modifies etc. Each element is a hash of the form:
-
-  {
-    type      => 'if',
-    varname   => 'XSubPPtmpAAAA', # maintained by caller
-
-                  # XS functions defined within this branch of the
-                  # conditional (maintained by caller)
-    functions =>  {
-                    'Foo::Bar::baz' => 1,
-                    ...
-                  }
-                  # XS functions seen within any previous branch
-    other_functions => {... }
-
-It also updates C<< $self->{bootcode_early} >> and
-C<< $self->{bootcode_late} >> with extra CPP directives.
-
-=item * Arguments
-
-      $self->analyze_preprocessor_statement($statement);
-
-=back
-
-=cut
-
-sub analyze_preprocessor_statement {
-  my ExtUtils::ParseXS $self = shift;
-  my ($statement) = @_;
-
-  my $ix = $self->{XS_parse_stack_top_if_idx};
-
-  if ($statement eq 'if') {
-    # #if or #ifdef
-    $ix = @{ $self->{XS_parse_stack} };
-    push(@{ $self->{XS_parse_stack} }, {type => 'if'});
-  }
-  else {
-    # An #else/#elsif/#endif.
-
-    $self->death("Error: '$statement' with no matching 'if'")
-      if $self->{XS_parse_stack}->[-1]{type} ne 'if';
-
-    if ($self->{XS_parse_stack}->[-1]{varname}) {
-      # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
-      push(@{ $self->{bootcode_early} }, "#endif\n");
-      push(@{ $self->{bootcode_later} }, "#endif\n");
-    }
-
-    my(@fns) = keys %{$self->{XS_parse_stack}->[-1]{functions}};
-
-    if ($statement ne 'endif') {
-      # Add current functions to the hash of functions seen in previous
-      # branch limbs, then reset for this next limb of the branch.
-      @{$self->{XS_parse_stack}->[-1]{other_functions}}{@fns} = (1) x @fns;
-      @{$self->{XS_parse_stack}->[-1]}{qw(varname functions)} = ('', {});
-    }
-    else {
-      # #endif - pop stack and update new top entry
-      my($tmp) = pop(@{ $self->{XS_parse_stack} });
-      0 while (--$ix
-           && $self->{XS_parse_stack}->[$ix]{type} ne 'if');
-
-      # For all functions declared within any limb of the just-popped
-      # if/endif, mark them as having appeared within this limb of the
-      # outer nested branch.
-      push(@fns, keys %{$tmp->{other_functions}});
-      @{$self->{XS_parse_stack}->[$ix]{functions}}{@fns}  =  (1) x @fns;
-    }
-  }
-
-  $self->{XS_parse_stack_top_if_idx} = $ix;
-}
-
-
 =head2 C<set_cond()>
 
 =over 4
@@ -776,8 +688,6 @@ sub check_conditional_preprocessor_statements {
       }
       elsif (!$cpplevel) {
         $self->Warn("Warning: #else/elif/endif without #if in this function");
-        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-          if $self->{XS_parse_stack}->[-1]{type} eq 'if';
         return;
       }
       elsif ($cpp =~ /^\#\s*endif/) {

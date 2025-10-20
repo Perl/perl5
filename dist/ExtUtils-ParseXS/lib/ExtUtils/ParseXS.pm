@@ -79,14 +79,12 @@ use ExtUtils::ParseXS::Utilities qw(
   valid_proto_string
   process_typemaps
   map_type
-  analyze_preprocessor_statement
   set_cond
   Warn
   WarnHint
   current_line_number
   blurt
   death
-  check_conditional_preprocessor_statements
   escape_file_for_line_directive
   report_typemap_failure
 );
@@ -184,13 +182,6 @@ BEGIN {
                         # reading in the standard (or other) typemap.
 
   'error_count',        # Num: count of number of errors seen so far.
-
-  'XS_parse_stack',     # Array of hashes: nested INCLUDE and #if states.
-
-  'XS_parse_stack_top_if_idx', # Index of the current top-most '#if' on the
-                        # XS_parse_stack. Note that it's not necessarily
-                        # the top element of the stack, since that also
-                        # includes elements for each INCLUDE etc.
 
   'cpp_next_tmp_define',# the next string like XSubPPtmpAAAA
                         # to use as CPP defines for distringuishing
@@ -320,13 +311,6 @@ sub process_file {
     $ExtUtils::ParseXS::VMS_SymSet = ExtUtils::XSSymSet->new(28);
   }
 
-  # XS_parse_stack is an array of hashes. Each hash records the current
-  # state when a new file is INCLUDEd, or when within a (possibly nested)
-  # file-scoped #if / #ifdef.
-  # The 'type' field of each hash is either 'file' for INCLUDE, or 'if'
-  # for within an #if / #endif.
-  @{ $self->{XS_parse_stack} } = ({type => 'none'});
-
   $self->{bootcode_early} = [];
   $self->{bootcode_later} = [];
 
@@ -429,7 +413,6 @@ sub process_file {
 
   $self->{lastline}    = $_;
   $self->{lastline_no} = $.;
-  $self->{XS_parse_stack_top_if_idx} = 0;
   $self->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
 
   my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});

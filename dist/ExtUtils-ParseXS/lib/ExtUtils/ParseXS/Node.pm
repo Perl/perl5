@@ -1081,7 +1081,7 @@ sub parse {
 
     # Check all the @{$pxs->{line}} lines for balance: all the
     # #if, #else, #endif etc within the BOOT should balance out.
-    ExtUtils::ParseXS::check_conditional_preprocessor_statements();
+    ExtUtils::ParseXS::Utilities::check_conditional_preprocessor_statements();
 
     # Suck in all remaining lines
 
@@ -1267,7 +1267,7 @@ sub parse {
 
     # Check all the @{ $pxs->{line}} lines for balance: all the
     # #if, #else, #endif etc within the XSUB should balance out.
-    ExtUtils::ParseXS::check_conditional_preprocessor_statements();
+    ExtUtils::ParseXS::Utilities::check_conditional_preprocessor_statements();
 
     # ----------------------------------------------------------------
     # Each iteration of this loop will process 1 optional CASE: line,
@@ -1707,10 +1707,6 @@ sub parse {
     # $self->{full_perl_name} "BAR::BAZ::bar"
     # $self->{full_C_name}    "BAR__BAZ_bar"
     # $params_text            "param1, param2, param3"
-
-    # mark C function name as used
-    $pxs->{XS_parse_stack}->
-        [$pxs->{XS_parse_stack_top_if_idx}]{functions}{$full_cname}++;
 
     # ----------------------------------------------------------------
     # Process the XSUB's signature.
@@ -4351,9 +4347,6 @@ sub parse {
         }
     }
 
-    # XXX tmp: maintain state for #if scope processing
-    push @{$pxs->{XS_parse_stack}}, { type => 'file' };
-
     # Save the current file context.
 
     my @save_keys = qw(in_fh in_filename in_pathname
@@ -4434,9 +4427,6 @@ sub parse {
         print STDERR "Error reading from pipe '$self->{inc_filename}': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
         exit 1;
     }
-
-    # XXX tmp: maintain state for #if scope processing
-    pop @{$pxs->{XS_parse_stack}};
 
     1;
 }
