@@ -49,25 +49,23 @@
 # define sv_setptrref(rv,ptr)                   sv_setref_iv(rv,NULL,PTR2IV(ptr))
 # if !defined(PERL_NOCOMPAT)
 
-/* Compatibility for various misnamed functions.  All functions
-   in the API that begin with "perl_" (not "Perl_") take an explicit
-   interpreter context pointer.
-   The following are not like that, but since they had a "perl_"
-   prefix in previous versions, we provide compatibility macros.
- */
-#   define perl_atexit(a,b)                     call_atexit(a,b)
-#   define perl_call_argv(a,b,c)                call_argv(a,b,c)
-#   define perl_call_method(a,b)                call_method(a,b)
-#   define perl_call_pv(a,b)                    call_pv(a,b)
-#   define perl_call_sv(a,b)                    call_sv(a,b)
-#   define perl_eval_pv(a,b)                    eval_pv(a,b)
-#   define perl_eval_sv(a,b)                    eval_sv(a,b)
-#   define perl_get_av(a,b)                     get_av(a,b)
-#   define perl_get_cv(a,b)                     get_cv(a,b)
-#   define perl_get_hv(a,b)                     get_hv(a,b)
-#   define perl_get_sv(a,b)                     get_sv(a,b)
-#   define perl_init_i18nl10n(a)                init_i18nl10n(a)
-#   define perl_require_pv(a)                   require_pv(a)
+/* Compatibility for this renamed function. */
+#   define perl_atexit(a,b)                     Perl_call_atexit(aTHX_ a,b)
+
+/* Compatibility for these functions that had a 'perl_' prefix before
+ * 'Perl_' became the standard */
+#   define perl_call_argv(a,b,c)                Perl_call_argv(aTHX_ a,b,c)
+#   define perl_call_method(a,b)                Perl_call_method(aTHX_ a,b)
+#   define perl_call_pv(a,b)                    Perl_call_pv(aTHX_ a,b)
+#   define perl_call_sv(a,b)                    Perl_call_sv(aTHX_ a,b)
+#   define perl_eval_pv(a,b)                    Perl_eval_pv(aTHX_ a,b)
+#   define perl_eval_sv(a,b)                    Perl_eval_sv(aTHX_ a,b)
+#   define perl_get_av(a,b)                     Perl_get_av(aTHX_ a,b)
+#   define perl_get_cv(a,b)                     Perl_get_cv(aTHX_ a,b)
+#   define perl_get_hv(a,b)                     Perl_get_hv(aTHX_ a,b)
+#   define perl_get_sv(a,b)                     Perl_get_sv(aTHX_ a,b)
+#   define perl_init_i18nl10n(a)                Perl_init_i18nl10n(aTHX_ a)
+#   define perl_require_pv(a)                   Perl_require_pv(aTHX_ a)
 
 /* Before C99, macros could not wrap varargs functions. This
    provides a set of compatibility functions that don't take an

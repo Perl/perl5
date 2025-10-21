@@ -55,6 +55,7 @@ my @have_compatibility_macros = qw(
                                   );
 my %has_compat_macro;
 $has_compat_macro{$_} = 1 for @have_compatibility_macros;
+my %perl_compats;   # Have 'perl_' prefix
 
 my $unflagged_pointers;
 my @az = ('a'..'z');
@@ -848,7 +849,19 @@ sub embed_h {
                         die "Can't use W without other args (currently)";
                     }
                 }
-                $ret .= ")\n";
+                $ret .= ")";
+
+                # For functions that have an old 'perl_' name, create an entry
+                # here while we have all the information, for output later
+                # (when not under NO_SHORT_NAMES)
+                if ($flags =~ /O/) {
+                    my $extra_entry = $ret;
+                    $extra_entry =~ s/define /define perl_/;
+                    $perl_compats{$extra_entry} = 1;
+                }
+
+                $ret .= "\n";
+
                 if($has_compat_macro{$func}) {
                     # Make older ones available only when !MULTIPLICITY or
                     # PERL_CORE or PERL_WANT_VARARGS.  These should not be
@@ -860,6 +873,7 @@ sub embed_h {
                          . $ret
                          . "#${ind}endif\n";
                 }
+
             }
             $ret = "#${ind}ifndef NO_MATHOMS\n$ret#${ind}endif\n"
                                                              if $flags =~ /b/;
@@ -915,25 +929,15 @@ sub generate_embed_h {
 
     #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT)
 
-    /* Compatibility for various misnamed functions.  All functions
-       in the API that begin with "perl_" (not "Perl_") take an explicit
-       interpreter context pointer.
-       The following are not like that, but since they had a "perl_"
-       prefix in previous versions, we provide compatibility macros.
-     */
-    #  define perl_atexit(a,b)          call_atexit(a,b)
+    /* Compatibility for this renamed function. */
+    #  define perl_atexit(a,b)          Perl_call_atexit(aTHX_ a,b)
+
+    /* Compatibility for these functions that had a 'perl_' prefix before
+     * 'Perl_' became the standard */
     END
 
-    foreach (@$all) {
-        my $embed= $_->{embed} or next;
-        my ($flags, $retval, $func, $args) =
-                                @{$embed}{qw(flags return_type name args)};
-        next unless $flags =~ /O/;
-
-        my $alist = join ",", @az[0..$#$args];
-        my $ret = "#  define perl_$func($alist) ";
-        print $em add_indent($ret,"$func($alist)\n");
-    }
+    # These have been saved up for now
+    print $em map { "$_\n" } sort keys %perl_compats;
 
     print $em <<~'END';
 
