@@ -1,7 +1,7 @@
 package Time::Seconds;
 use strict;
 
-our $VERSION = '1.3701';
+our $VERSION = '1.38';
 
 use Exporter 5.57 'import';
 
@@ -226,7 +226,7 @@ seconds only, so you cannot, for example, do this: C<print ONE_WEEK-E<gt>minutes
 
 The following methods are available:
 
-    my $val = Time::Seconds->new(SECONDS)
+    my $val = Time::Seconds->new(SECONDS);
     $val->seconds;
     $val->minutes;
     $val->hours;

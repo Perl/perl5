@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use Test::More tests => 129;
-my $is_linux = ($^O =~ /linux/);
+my $is_linux = ( $^O =~ /linux/ );
 
 BEGIN { use_ok('Time::Piece'); }
 
@@ -427,7 +427,7 @@ my @known_localtime = localtime(1753440879);
     is( $tp3->mday, 15, "No format, object defaults: Day parsed correctly" );
     is( $tp3->mon,  3,  "No format, object defaults: Month parsed correctly" );
     is( $tp3->year, 2025, "No format, object defaults: Parsed year overrides" );
-    is( $tp3->hour, 14,   "No format, object defaults: Hour parsed correctly" );
+    is( $tp3->min,  30, "No format, object defaults: Minute parsed correctly" );
     is( $tp3->[Time::Piece::c_islocal], 1, "No format, object copied local" );
 }
 

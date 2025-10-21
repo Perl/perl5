@@ -48,6 +48,11 @@ sub check_parsed
     );
     cmp_ok( $parsed->strftime(), 'eq', $t->strftime(),
         'Outputs formatted as default match' );
+    cmp_ok(
+        $parsed->datetime(), 'eq',
+        $t->strftime("%Y-%m-%dT%H:%M:%S"),
+        'datetime() matches strftime()'
+    );
 }
 
 my @dates = (
@@ -68,6 +73,7 @@ for my $time (
     time(),        # Now, whenever that might be
     1451606400,    # 2016-01-01 00:00
     1451653500,    # 2016-01-01 13:05
+    1449014400,    # 2015-12-02 00:00
   )
 {
     my $t = gmtime($time);
@@ -94,6 +100,7 @@ for my $time (
     time(),        # Now, whenever that might be
     1451606400,    # 2016-01-01 00:00
     1451653500,    # 2016-01-01 13:05
+    1449014400,    # 2015-12-02 00:00
   )
 {
     my $t = localtime($time);
@@ -115,4 +122,4 @@ for my $time (
 
 }
 
-done_testing(136);
+done_testing(234);
