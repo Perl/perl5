@@ -5308,6 +5308,208 @@ EOF
                 "has corrrect XSubPPtmpAAAA etc boot usage"
             ],
         ],
+
+        [
+            "CPP two independent branches",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |#endif
+                |#if USE_LONG
+                |long foo()
+                |#endif
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP one branch, one main",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |#endif
+                |long foo()
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP two in one branch",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |
+                |long foo()
+                |#endif
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP two in main",
+            [ Q(<<'EOF') ],
+                |short foo()
+                |
+                |long foo()
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP nested conditions",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |
+                |short foo()
+                |
+                |#ifdef C2
+                |
+                |long foo()
+                |
+                |#endif
+                |
+                |int foo()
+                |
+                |#endif
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP nested conditions, different fns",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |
+                |short foo()
+                |
+                |#ifdef C2
+                |
+                |long bar()
+                |
+                |#endif
+                |
+                |int baz()
+                |
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#ifdef\ C2 \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                         .*
+                        ^ \s* int \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP with indentation",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#  ifdef C2
+                |long bar()
+                |#  endif
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                        ^ \#\ \ ifdef\ C2 \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#\ \ endif \n
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP: trivial branch",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#define BLAH1
+                |#endif
+EOF
+            [ 0, 1, qr{XSubPPtmpAAA}, "no guard"  ],
+        ],
+
+        [
+            "CPP: guard and other CPP ordering",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#define BLAH1
+                |
+                |short foo()
+                |
+                |#endif
+EOF
+
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                         .*
+                        ^ \#define\ BLAH1\n
+                         .*
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP balanced else",
+            [ Q(<<'EOF') ],
+                |#else
+                |
+                |short foo()
+EOF
+            [ 1, 0, qr{Error: 'else' with no matching 'if'},
+                    "got expected err"  ],
+        ],
+
+        [
+            "CPP balanced if",
+            [ Q(<<'EOF') ],
+                |#ifdef
+                |
+                |short foo()
+EOF
+            [ 1, 0, qr{Error: Unterminated '#if/#ifdef/#ifndef'},
+                    "got expected err"  ],
+        ],
+
+        [
+            "stray CPP / indented XSUB",
+            [ Q(<<'EOF') ],
+                |#define FOO
+                |  int
+EOF
+            [ 1, 0, qr{\QCode is not inside a function\E
+                       \Q (maybe last function was ended by a blank line \E
+                       \Q followed by a statement on column one?)\E
+                      }x,
+                    "got expected err"  ],
+        ],
+
+
     );
 
     test_many($preamble, undef, \@test_fns);
