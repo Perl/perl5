@@ -318,7 +318,7 @@ Scan the given files for tests to be run by run_multiple_progs().
 This is currently only used by F<t/lib/common.pl> which itself is used
 by most tests that use run_multiple_progs() on other files.
 
-Test files parsed by setup_multiple_progs() ignore any lines until a
+Test files parsed by setup_multiple_progs() ignore most lines until a
 C<__END__> line is found.
 
 So in general, just use F<t/lib/common.pl>, see F<t/lib/croak.t> and
@@ -774,9 +774,17 @@ C<PERL_RUNPERL_DEBUG>
     OPTIONS fatal
     Time to die at - line 1.
 
-Test files parsed by setup_multiple_progs() ignore any lines until a
+Test files parsed by setup_multiple_progs() ignore most lines until a
 C<__END__> line is found.  This includes any test file based on
 F<t/lib/common.pl>.
+
+The lines that aren't ignored here by setup_multiple_progs() have the
+form:
+
+  /^#\s+PREAMBLE\s+(.*)$/
+
+where each matching line (excluding the C<# PREAMBLE>) is prepended to
+the code for each test case.
 
 Tests are separated by lines containing exactly eight C<#>.
 
