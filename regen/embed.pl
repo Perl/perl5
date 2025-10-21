@@ -846,9 +846,9 @@ sub embed_h {
                 $ret .= ")\n";
                 if($has_compat_macro{$func}) {
                     # Make older ones available only when !MULTIPLICITY or
-                    # PERL_CORE or PERL_WANT_VARARGS These should not be done
-                    # uncondtionally because existing code might call e.g.
-                    # warn() without aTHX in scope.
+                    # PERL_CORE or PERL_WANT_VARARGS.  These should not be
+                    # done unconditionally because existing code might call
+                    # e.g.  warn() without aTHX in scope.
                     $ret = "#${ind}if !defined(MULTIPLICITY)"
                          . " || defined(PERL_CORE)"
                          . " || defined(PERL_WANT_VARARGS)\n"
