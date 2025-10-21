@@ -1459,14 +1459,21 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
 #  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
 #  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
 
-/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
- * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
- * optimized out completely on a 32-bit system, and its mask gets optimized out
- * on a 64-bit system */
-#  define PERL_IS_SUBWORD_ADDR(x) (1 & (       PTR2nat(x)                     \
-                                      |   (  PTR2nat(x) >> 1)                 \
-                                      | ( ( (PTR2nat(x)                       \
-                                           & PERL_WORD_BOUNDARY_MASK) >> 2))))
+/* Given an address of a byte 'x', how many bytes away is that address to the
+ * following closest full word boundary. */
+#  define BYTES_REMAINING_IN_WORD(x)                                        \
+              ( (PERL_WORDSIZE - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))    \
+               & PERL_WORD_BOUNDARY_MASK)
+/* For example, consider two addresses in an 8 byte word size (the dots are
+ * don't cares):
+ *      0b...............010                0b...............000
+ *      ((8 - (0b1101010 & 0x7)) & 0x7)     ((8 - (0b1101000 & 0x7)) & 0x7)
+ *      ((8 - 0b10) & 0x7)                  ((8 - 0) & 0x7)
+ *      (6 & 0x7)                           (8 & 0x7)
+ *      6                                   0                              */
+
+/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1 */
+#  define PERL_IS_SUBWORD_ADDR(x) (BYTES_REMAINING_IN_WORD(x) != 0)
 
 /*
 =for apidoc      is_utf8_invariant_string
@@ -2116,6 +2123,7 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
 #  undef PERL_COUNT_MULTIPLIER
 #  undef PERL_WORD_BOUNDARY_MASK
 #  undef PERL_VARIANTS_WORD_MASK
+#  undef BYTES_REMAINING_IN_WORD
 #endif
 
 #define is_utf8_string(s, len)  is_utf8_string_loclen(s, len, NULL, NULL)
