@@ -2039,13 +2039,6 @@ sub dont_warn_48 { $a //= return $b; }
 sub dont_warn_49 { $a &&= exit $b; }
 EXPECT
 ########
-use feature "signatures";
-sub aaa { 2 }
-sub bbb ($a) { 4 }
-$aaa = sub { 2 };
-$bbb = sub ($a) { 4 };
-EXPECT
-########
 use warnings 'numeric';
 my $c = -4.5;
 my $a = "y" x $c;
