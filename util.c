@@ -4703,7 +4703,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 #endif /* NO_PERL_HASH_ENV */
     {
         for( i = 0; i < PERL_HASH_SEED_BYTES; i++ ) {
-            seed_buffer[i] = (unsigned char)(Perl_internal_drand48() * (U8_MAX+1));
+            seed_buffer[i] = (unsigned char)(Perl_drand01_internal() * (U8_MAX+1));
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS
@@ -5757,7 +5757,7 @@ S_my_mkostemp(char *templte, int flags) {
     do {
         int i;
         for (i = 1; i <= 6; ++i) {
-            templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
+            templte[len-i] = TEMP_FILE_CH[(int)(Perl_drand01_internal() * TEMP_FILE_CH_COUNT)];
         }
 #ifdef VMS
         if (delete_on_close) {
@@ -5825,6 +5825,8 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 
     return NULL;
 }
+
+#ifndef PERL_USE_WELL512A_RNG
 
 /*
  * This code is derived from drand48() implementation from FreeBSD,
@@ -5923,6 +5925,66 @@ Perl_drand48_r(perl_drand48_t *random_state)
     }
 #endif
 }
+
+#else
+
+void
+Perl_wellrng512a_init_r(U32 *random_state, U32 seed)
+{
+    PERL_ARGS_ASSERT_WELLRNG512A_INIT_R;
+    random_state[0] = seed;
+    if (!seed) seed |= 1;
+    for (int i=1; i<16; i++) {
+        /* we take a 32 bit seed and use a Marsaglia Xorshift randomizer
+         * to turn it into a buffer worth of state. So we only support
+         * 2**32 sequences, but they will all be different */
+        PERL_XORSHIFT32_A(seed);
+        random_state[i] = seed;
+    }
+    random_state[16] = 0;
+}
+
+U32
+Perl_wellrng512a_u_r(U32 *random_state)
+{
+    PERL_ARGS_ASSERT_WELLRNG512A_U_R;
+
+    const U32 WELL512a_MASK = 0xDA442D24UL;
+    U32 index = random_state[16];
+    U32 a = random_state[index];
+    U32 c = random_state[ ( index + 13 ) & 15 ];
+    U32 b = a ^ c ^ ( a << 16 ) ^ ( c << 15 );
+    c = random_state[ ( index + 9 ) & 15 ];
+    c ^= ( c >> 11 );
+    a = random_state[index] = b ^ c;
+    U32 d = a ^ ( (a << 5 ) & WELL512a_MASK );
+    index = (index + 15) & 15;
+    random_state[16] = index;
+    a = random_state[index];
+    random_state[index] =  a ^ b ^ d ^ ( a << 2 ) ^ ( b << 18 ) ^ ( c << 28 );
+
+    return random_state[index];
+}
+
+double
+Perl_drand01_wellrng512a_r(U32 *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND01_WELLRNG512A_R;
+
+#ifdef PERL_DRAND48_QUAD
+    U64 i = Perl_wellrng512a_u_r(random_state);
+    i = (i << 32) | Perl_wellrng512a_u_r(random_state);
+    i = i >> 11;
+    return ldexp((double)i, -53);
+#else
+    U32 a = Perl_wellrng512a_u_r(random_state);
+    U32 b = Perl_wellrng512a_u_r(random_state) >> 11;
+    return ldexp((double)a,-32) + ldexp((double)b,-53);
+#endif
+}
+
+#endif
+
 
 #ifdef USE_C_BACKTRACE
 

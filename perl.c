@@ -288,7 +288,7 @@ perl_construct(pTHXx)
     /* This is NOT the state used for C<rand()>, this is only
      * used in internal functionality */
 #ifdef NO_PERL_INTERNAL_RAND_SEED
-    Perl_drand48_init_r(&PL_internal_random_state, seed());
+    Perl_drand01_init_r(PL_PTR_RANDOM_STATE_INTERNAL, seed());
 #else
     {
         UV seed;
@@ -301,7 +301,7 @@ perl_construct(pTHXx)
             /* use a randomly generated seed */
             seed = seed();
         }
-        Perl_drand48_init_r(&PL_internal_random_state, (U32)seed);
+        Perl_drand01_init_r(PL_PTR_RANDOM_STATE_INTERNAL, (U32)seed);
     }
 #endif
 
@@ -2071,6 +2071,10 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
                              " PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES"
 #  endif
+#  ifdef PERL_USE_WELL512A_RNG
+                             " PERL_USE_WELL512A_RNG"
+#  endif
+
 #  ifdef SILENT_NO_TAINT_SUPPORT
                              " SILENT_NO_TAINT_SUPPORT"
 #  endif
@@ -2476,7 +2480,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (TAINT_get &&
         PerlProc_getuid() == PerlProc_geteuid() &&
         PerlProc_getgid() == PerlProc_getegid()) {
-        Perl_drand48_init_r(&PL_internal_random_state, seed());
+        Perl_drand01_init_r(PL_PTR_RANDOM_STATE_INTERNAL, seed());
     }
 #endif
     if (DEBUG_h_TEST)

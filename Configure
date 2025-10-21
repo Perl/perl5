@@ -439,9 +439,6 @@ d_dlopen=''
 d_dlsymun=''
 d_dosuid=''
 d_suidsafe=''
-d_drand48_r=''
-drand48_r_proto=''
-d_drand48proto=''
 d_dup2=''
 d_dup3=''
 d_eaccess=''
@@ -730,8 +727,6 @@ d_sched_yield=''
 sched_yield=''
 d_ptrdiff_t=''
 d_qgcvt=''
-d_random_r=''
-random_r_proto=''
 d_readdir64_r=''
 readdir64_r_proto=''
 d_readdir=''
@@ -850,10 +845,6 @@ socketlib=''
 d_socklen_t=''
 d_socks5_init=''
 d_sqrtl=''
-d_srand48_r=''
-srand48_r_proto=''
-d_srandom_r=''
-srandom_r_proto=''
 d_sresgproto=''
 d_sresuproto=''
 d_stat=''
@@ -1282,10 +1273,8 @@ quadkind=''
 quadtype=''
 uquadtype=''
 drand01=''
-randbits=''
 randfunc=''
 randseedtype=''
-seedfunc=''
 installscript=''
 scriptdir=''
 scriptdirexp=''
@@ -4704,7 +4693,7 @@ esac
 # to fail hard and early.
 #
 # Annoyingly -std=c99 will cause gcc to tell glibc not to define prototypes for
-# syscall, drand48 etc when including <unistd.h>, which messes up our build.
+# syscall, etc when including <unistd.h>, which messes up our build.
 # I guess we *could* loop round trying -std=c99 first with checks both for the
 # prototype found and the code compiling (because -std=gnu99 might do other
 # things we don't want, particularly on non-GCC compilers) but
@@ -12697,52 +12686,6 @@ $rm -f fred fred.* dyna.$dlext dyna.* tmp-dyna.*
 set d_dlsymun
 eval $setvar
 
-: see if drand48_r exists
-set drand48_r d_drand48_r
-eval $inlibc
-case "$d_drand48_r" in
-"$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_drand48_r_proto:$usethreads" in
-	":define")	d_drand48_r_proto=define
-		set d_drand48_r_proto drand48_r $hdrs
-		eval $hasproto ;;
-	*)	;;
-	esac
-	case "$d_drand48_r_proto" in
-	define)
-	case "$drand48_r_proto" in
-	''|0) try='int drand48_r(struct drand48_data*, double*);'
-	./protochk "$extern_C $try" $hdrs && drand48_r_proto=I_ST ;;
-	esac
-	case "$drand48_r_proto" in
-	''|0)	d_drand48_r=undef
-		drand48_r_proto=0
-		echo "Disabling drand48_r, cannot determine prototype." >&4 ;;
-	* )	case "$drand48_r_proto" in
-		REENTRANT_PROTO*) ;;
-		*) drand48_r_proto="REENTRANT_PROTO_$drand48_r_proto" ;;
-		esac
-		echo "Prototype: $try" ;;
-	esac
-	;;
-	*)	case "$usethreads" in
-		define) echo "drand48_r has no prototype, not using it." >&4 ;;
-		esac
-		d_drand48_r=undef
-		drand48_r_proto=0
-		;;
-	esac
-	;;
-*)	drand48_r_proto=0
-	;;
-esac
-
-: see if prototype for drand48 is available
-echo " "
-set d_drand48proto drand48 $i_stdlib stdlib.h $i_unistd unistd.h
-eval $hasproto
-
 : see if dup2 exists
 set dup2 d_dup2
 eval $inlibc
@@ -18105,55 +18048,6 @@ $rm_try
 set d_ptrdiff_t
 eval $setvar
 
-: see if random_r exists
-set random_r d_random_r
-eval $inlibc
-case "$d_random_r" in
-"$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_random_r_proto:$usethreads" in
-	":define")	d_random_r_proto=define
-		set d_random_r_proto random_r $hdrs
-		eval $hasproto ;;
-	*)	;;
-	esac
-	case "$d_random_r_proto" in
-	define)
-	case "$random_r_proto" in
-	''|0) try='int random_r(int*, struct random_data*);'
-	./protochk "$extern_C $try" $hdrs && random_r_proto=I_iS ;;
-	esac
-	case "$random_r_proto" in
-	''|0) try='int random_r(long*, struct random_data*);'
-	./protochk "$extern_C $try" $hdrs && random_r_proto=I_lS ;;
-	esac
-	case "$random_r_proto" in
-	''|0) try='int random_r(struct random_data*, int32_t*);'
-	./protochk "$extern_C $try" $hdrs && random_r_proto=I_St ;;
-	esac
-	case "$random_r_proto" in
-	''|0)	d_random_r=undef
-		random_r_proto=0
-		echo "Disabling random_r, cannot determine prototype." >&4 ;;
-	* )	case "$random_r_proto" in
-		REENTRANT_PROTO*) ;;
-		*) random_r_proto="REENTRANT_PROTO_$random_r_proto" ;;
-		esac
-		echo "Prototype: $try" ;;
-	esac
-	;;
-	*)	case "$usethreads" in
-		define) echo "random_r has no prototype, not using it." >&4 ;;
-		esac
-		d_random_r=undef
-		random_r_proto=0
-		;;
-	esac
-	;;
-*)	random_r_proto=0
-	;;
-esac
-
 : see if readdir and friends exist
 set readdir d_readdir
 eval $inlibc
@@ -19362,88 +19256,6 @@ eval $hasproto
 : see if socks5_init exists
 set socks5_init d_socks5_init
 eval $inlibc
-
-: see if srand48_r exists
-set srand48_r d_srand48_r
-eval $inlibc
-case "$d_srand48_r" in
-"$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_srand48_r_proto:$usethreads" in
-	":define")	d_srand48_r_proto=define
-		set d_srand48_r_proto srand48_r $hdrs
-		eval $hasproto ;;
-	*)	;;
-	esac
-	case "$d_srand48_r_proto" in
-	define)
-	case "$srand48_r_proto" in
-	''|0) try='int srand48_r(long, struct drand48_data*);'
-	./protochk "$extern_C $try" $hdrs && srand48_r_proto=I_LS ;;
-	esac
-	case "$srand48_r_proto" in
-	''|0)	d_srand48_r=undef
-		srand48_r_proto=0
-		echo "Disabling srand48_r, cannot determine prototype." >&4 ;;
-	* )	case "$srand48_r_proto" in
-		REENTRANT_PROTO*) ;;
-		*) srand48_r_proto="REENTRANT_PROTO_$srand48_r_proto" ;;
-		esac
-		echo "Prototype: $try" ;;
-	esac
-	;;
-	*)	case "$usethreads" in
-		define) echo "srand48_r has no prototype, not using it." >&4 ;;
-		esac
-		d_srand48_r=undef
-		srand48_r_proto=0
-		;;
-	esac
-	;;
-*)	srand48_r_proto=0
-	;;
-esac
-
-: see if srandom_r exists
-set srandom_r d_srandom_r
-eval $inlibc
-case "$d_srandom_r" in
-"$define")
-	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_srandom_r_proto:$usethreads" in
-	":define")	d_srandom_r_proto=define
-		set d_srandom_r_proto srandom_r $hdrs
-		eval $hasproto ;;
-	*)	;;
-	esac
-	case "$d_srandom_r_proto" in
-	define)
-	case "$srandom_r_proto" in
-	''|0) try='int srandom_r(unsigned int, struct random_data*);'
-	./protochk "$extern_C $try" $hdrs && srandom_r_proto=I_TS ;;
-	esac
-	case "$srandom_r_proto" in
-	''|0)	d_srandom_r=undef
-		srandom_r_proto=0
-		echo "Disabling srandom_r, cannot determine prototype." >&4 ;;
-	* )	case "$srandom_r_proto" in
-		REENTRANT_PROTO*) ;;
-		*) srandom_r_proto="REENTRANT_PROTO_$srandom_r_proto" ;;
-		esac
-		echo "Prototype: $try" ;;
-	esac
-	;;
-	*)	case "$usethreads" in
-		define) echo "srandom_r has no prototype, not using it." >&4 ;;
-		esac
-		d_srandom_r=undef
-		srandom_r_proto=0
-		;;
-	esac
-	;;
-*)	srandom_r_proto=0
-	;;
-esac
 
 : see if prototype for setresgid is available
 echo " "
@@ -21356,12 +21168,6 @@ case "$ccflags" in
 	ccflags="`echo $ccflags | sed -e 's/-Drandbits=[0-9][0-9]*/ /'`"
 	;;
 esac
-
-randfunc=Perl_drand48
-drand01="Perl_drand48()"
-seedfunc="Perl_drand48_init"
-randbits=48
-randseedtype=U32
 
 : Probe whether dtrace builds an object, as newer Illumos requires an input
 : object file that uses at least one of the probes defined in the .d file
@@ -25050,8 +24856,6 @@ d_double_style_cray='$d_double_style_cray'
 d_double_style_ibm='$d_double_style_ibm'
 d_double_style_ieee='$d_double_style_ieee'
 d_double_style_vax='$d_double_style_vax'
-d_drand48_r='$d_drand48_r'
-d_drand48proto='$d_drand48proto'
 d_dup2='$d_dup2'
 d_dup3='$d_dup3'
 d_duplocale='$d_duplocale'
@@ -25338,7 +25142,6 @@ d_pwquota='$d_pwquota'
 d_qgcvt='$d_qgcvt'
 d_quad='$d_quad'
 d_querylocale='$d_querylocale'
-d_random_r='$d_random_r'
 d_re_comp='$d_re_comp'
 d_readdir64_r='$d_readdir64_r'
 d_readdir='$d_readdir'
@@ -25435,8 +25238,6 @@ d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_socks5_init='$d_socks5_init'
 d_sqrtl='$d_sqrtl'
-d_srand48_r='$d_srand48_r'
-d_srandom_r='$d_srandom_r'
 d_sresgproto='$d_sresgproto'
 d_sresuproto='$d_sresuproto'
 d_stat='$d_stat'
@@ -25544,7 +25345,6 @@ doublemantbits='$doublemantbits'
 doublenanbytes='$doublenanbytes'
 doublesize='$doublesize'
 drand01='$drand01'
-drand48_r_proto='$drand48_r_proto'
 dtrace='$dtrace'
 dtraceobject='$dtraceobject'
 dtracexnolibs='$dtracexnolibs'
@@ -25882,9 +25682,7 @@ procselfexe='$procselfexe'
 ptrsize='$ptrsize'
 quadkind='$quadkind'
 quadtype='$quadtype'
-randbits='$randbits'
 randfunc='$randfunc'
-random_r_proto='$random_r_proto'
 randseedtype='$randseedtype'
 ranlib='$ranlib'
 rd_nodata='$rd_nodata'
@@ -25917,7 +25715,6 @@ sched_yield='$sched_yield'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'
 sed='$sed'
-seedfunc='$seedfunc'
 selectminbits='$selectminbits'
 selecttype='$selecttype'
 sendmail='$sendmail'
@@ -25972,8 +25769,6 @@ socksizetype='$socksizetype'
 sort='$sort'
 spackage='$spackage'
 spitshell='$spitshell'
-srand48_r_proto='$srand48_r_proto'
-srandom_r_proto='$srandom_r_proto'
 src='$src'
 ssizetype='$ssizetype'
 st_dev_sign='$st_dev_sign'
@@ -26228,4 +26023,3 @@ $rm -f kit*isdone ark*isdone
 $rm -rf UU
 
 : End of Configure
-

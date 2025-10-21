@@ -1144,27 +1144,6 @@
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
 
-/* HAS_DRAND48_R:
- *	This symbol, if defined, indicates that the drand48_r routine
- *	is available to drand48 re-entrantly.
- */
-/* DRAND48_R_PROTO:
- *	This symbol encodes the prototype of drand48_r.
- *	It is zero if d_drand48_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
- *	is defined.
- */
-/*#define HAS_DRAND48_R	   / **/
-#define DRAND48_R_PROTO 0	   /**/
-
-/* HAS_DRAND48_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the drand48() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern double drand48(void);
- */
-/*#define HAS_DRAND48_PROTO     / **/
-
 /* HAS_ENDGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for finalizing sequential access of the group database.
@@ -2004,19 +1983,6 @@
 #define SCHED_YIELD	undef	/**/
 /*#define HAS_SCHED_YIELD	/ **/
 
-/* HAS_RANDOM_R:
- *	This symbol, if defined, indicates that the random_r routine
- *	is available to random re-entrantly.
- */
-/* RANDOM_R_PROTO:
- *	This symbol encodes the prototype of random_r.
- *	It is zero if d_random_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
- *	is defined.
- */
-/*#define HAS_RANDOM_R	   / **/
-#define RANDOM_R_PROTO 0	   /**/
-
 /* HAS_READDIR_R:
  *	This symbol, if defined, indicates that the readdir_r routine
  *	is available to readdir re-entrantly.
@@ -2256,32 +2222,6 @@
  *	available to do long double square roots.
  */
 /*#define HAS_SQRTL		/ **/
-
-/* HAS_SRAND48_R:
- *	This symbol, if defined, indicates that the srand48_r routine
- *	is available to srand48 re-entrantly.
- */
-/* SRAND48_R_PROTO:
- *	This symbol encodes the prototype of srand48_r.
- *	It is zero if d_srand48_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
- *	is defined.
- */
-/*#define HAS_SRAND48_R	   / **/
-#define SRAND48_R_PROTO 0	   /**/
-
-/* HAS_SRANDOM_R:
- *	This symbol, if defined, indicates that the srandom_r routine
- *	is available to srandom re-entrantly.
- */
-/* SRANDOM_R_PROTO:
- *	This symbol encodes the prototype of srandom_r.
- *	It is zero if d_srandom_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
- *	is defined.
- */
-/*#define HAS_SRANDOM_R	   / **/
-#define SRANDOM_R_PROTO 0	   /**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -3243,31 +3183,6 @@
  *	sizeof(char *).
  */
 #define PTRSIZE 4		/**/
-
-/* Drand01:
- *	This macro is to be used to generate uniformly distributed
- *	random numbers over the range [0., 1.[.  You may have to supply
- *	an 'extern double drand48();' in your program since SunOS 4.1.3
- *	doesn't provide you with anything relevant in its headers.
- *	See HAS_DRAND48_PROTO.
- */
-/* Rand_seed_t:
- *	This symbol defines the type of the argument of the
- *	random seed function.
- */
-/* seedDrand01:
- *	This symbol defines the macro to be used in seeding the
- *	random number generator (see Drand01).
- */
-/* RANDBITS:
- *	This symbol indicates how many bits are produced by the
- *	function used to generate normalized random numbers.
- *	Values include 15, 16, 31, and 48.
- */
-#define Drand01()		(rand() / (double) ((unsigned long)1 << 15))		/**/
-#define Rand_seed_t		unsigned		/**/
-#define seedDrand01(x)	srand((Rand_seed_t)x)	/**/
-#define RANDBITS		15		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.

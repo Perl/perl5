@@ -1216,31 +1216,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define PTRSIZE $ptrsize		/**/
 
-/* Drand01:
- *	This macro is to be used to generate uniformly distributed
- *	random numbers over the range [0., 1.[.  You may have to supply
- *	an 'extern double drand48();' in your program since SunOS 4.1.3
- *	doesn't provide you with anything relevant in its headers.
- *	See HAS_DRAND48_PROTO.
- */
-/* Rand_seed_t:
- *	This symbol defines the type of the argument of the
- *	random seed function.
- */
-/* seedDrand01:
- *	This symbol defines the macro to be used in seeding the
- *	random number generator (see Drand01).
- */
-/* RANDBITS:
- *	This symbol indicates how many bits are produced by the
- *	function used to generate normalized random numbers.
- *	Values include 15, 16, 31, and 48.
- */
-#define Drand01()		$drand01		/**/
-#define Rand_seed_t		$randseedtype		/**/
-#define seedDrand01(x)	$seedfunc((Rand_seed_t)x)	/**/
-#define RANDBITS		$randbits		/**/
-
 /* SSize_t:
  *	This symbol holds the type used by functions that return
  *	a count of bytes or an error condition.  It must be a signed type.
@@ -4467,14 +4442,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usesocks	USE_SOCKS		/**/
 #endif
 
-/* HAS_DRAND48_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the drand48() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern double drand48(void);
- */
-#$d_drand48proto	HAS_DRAND48_PROTO	/**/
-
 /* HAS_GETHOST_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
  *	prototypes for gethostent(), gethostbyname(), and
@@ -4609,19 +4576,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ctime_r HAS_CTIME_R	/**/
 #define CTIME_R_PROTO $ctime_r_proto	/**/
-
-/* HAS_DRAND48_R:
- *	This symbol, if defined, indicates that the drand48_r routine
- *	is available to drand48 re-entrantly.
- */
-/* DRAND48_R_PROTO:
- *	This symbol encodes the prototype of drand48_r.
- *	It is zero if d_drand48_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
- *	is defined.
- */
-#$d_drand48_r HAS_DRAND48_R	/**/
-#define DRAND48_R_PROTO $drand48_r_proto	/**/
 
 /* HAS_ENDGRENT_R:
  *	This symbol, if defined, indicates that the endgrent_r routine
@@ -5069,19 +5023,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define SCHED_YIELD	$sched_yield	/**/
 #$d_sched_yield HAS_SCHED_YIELD	/**/
 
-/* HAS_RANDOM_R:
- *	This symbol, if defined, indicates that the random_r routine
- *	is available to random re-entrantly.
- */
-/* RANDOM_R_PROTO:
- *	This symbol encodes the prototype of random_r.
- *	It is zero if d_random_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
- *	is defined.
- */
-#$d_random_r HAS_RANDOM_R	/**/
-#define RANDOM_R_PROTO $random_r_proto	/**/
-
 /* HAS_READDIR64_R:
  *	This symbol, if defined, indicates that the readdir64_r routine
  *	is available to readdir64 re-entrantly.
@@ -5198,32 +5139,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setservent_r HAS_SETSERVENT_R	/**/
 #define SETSERVENT_R_PROTO $setservent_r_proto	/**/
-
-/* HAS_SRAND48_R:
- *	This symbol, if defined, indicates that the srand48_r routine
- *	is available to srand48 re-entrantly.
- */
-/* SRAND48_R_PROTO:
- *	This symbol encodes the prototype of srand48_r.
- *	It is zero if d_srand48_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
- *	is defined.
- */
-#$d_srand48_r HAS_SRAND48_R	/**/
-#define SRAND48_R_PROTO $srand48_r_proto	/**/
-
-/* HAS_SRANDOM_R:
- *	This symbol, if defined, indicates that the srandom_r routine
- *	is available to srandom re-entrantly.
- */
-/* SRANDOM_R_PROTO:
- *	This symbol encodes the prototype of srandom_r.
- *	It is zero if d_srandom_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
- *	is defined.
- */
-#$d_srandom_r HAS_SRANDOM_R	/**/
-#define SRANDOM_R_PROTO $srandom_r_proto	/**/
 
 /* HAS_STRERROR_R:
  *	This symbol, if defined, indicates that the strerror_r routine

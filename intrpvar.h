@@ -1014,17 +1014,24 @@ PERLVARA(I, op_exec_cnt, OP_max+2, UV)  /* Counts of executed OPs of the given t
                                            for profiling in DEBUGGING mode. */
 #endif
 
-PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
-
 PERLVARI(I, dump_re_max_len, STRLEN, 60)
+
+#ifndef PERL_USE_WELL512A_RNG
+PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
+#else
+PERLVARA(I, random_state, PL_RANDOM_STATE_LENGTH, PL_RANDOM_STATE_TYPE)
+#endif
 
 /* For internal uses of randomness, this ensures the sequence of
  * random numbers returned by rand() isn't modified by perl's internal
  * use of randomness.
  * This is important if the user has called srand() with a seed.
  */
-
-PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
+#ifndef PERL_USE_WELL512A_RNG
+PERLVAR(I, random_state_internal, PL_RANDOM_STATE_TYPE)
+#else
+PERLVARA(I, random_state_internal, PL_RANDOM_STATE_LENGTH, PL_RANDOM_STATE_TYPE)
+#endif
 
 PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 

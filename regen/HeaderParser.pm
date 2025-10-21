@@ -1616,6 +1616,14 @@ sub HeaderLine::new {
     return bless \%self, $class;
 }
 sub HeaderLine::cond        { $_[0]->{cond} }                             # AoA
+sub HeaderLine::cond_as_str {
+    my $cond= $_[0]->cond;
+    return "" unless $cond;
+    join " && ", map {
+        @$_ == 1 ? $_->[0] :
+        "( " . join(" && ", @$_) . " )"
+    } @$cond;
+}
 sub HeaderLine::type        { $_[0]->{type} }
 sub HeaderLine::type_is     { return $_[0]->type eq $_[1] ? 1 : 0 }
 sub HeaderLine::sub_type    { $_[0]->{sub_type} }

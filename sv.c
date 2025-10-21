@@ -16325,7 +16325,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_globhook		= proto_perl->Iglobhook;
 
     PL_srand_called	= proto_perl->Isrand_called;
-    Copy(&(proto_perl->Irandom_state), &PL_random_state, 1, PL_RANDOM_STATE_TYPE);
+    Copy(PL_PTR_PROTO_RANDOM_STATE, PL_PTR_RANDOM_STATE,
+            PL_RANDOM_STATE_LENGTH, PL_RANDOM_STATE_TYPE);
+    Copy(PL_PTR_PROTO_RANDOM_STATE_INTERNAL, PL_PTR_RANDOM_STATE_INTERNAL,
+            PL_RANDOM_STATE_LENGTH, PL_RANDOM_STATE_TYPE);
     PL_srand_override   = proto_perl->Isrand_override;
     PL_srand_override_next = proto_perl->Isrand_override_next;
 

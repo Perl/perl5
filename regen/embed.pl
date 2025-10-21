@@ -707,11 +707,15 @@ sub readvars {
     foreach my $line_data (@{$hp->lines}) {
         #next unless $line_data->is_content;
         my $line= $line_data->line;
+	my $cond= $line_data->cond_as_str();
         if ($line=~m/^\s*PERLVARA?I?C?\(\s*$pre\s*,\s*(\w+)/){
-            $seen{$1}++
-                and
-                die_at_end "duplicate symbol $1 while processing $file line "
-                       . ($line_data->start_line_num) . "\n"
+	    my $sym = $1;
+	    my $with_cond = $cond ? " with condition $cond" : "";
+	    if ($seen{$sym}{$cond}++) {
+                die_at_end "duplicate symbol '$sym'$with_cond "
+                       . "while processing $file line "
+                       . ($line_data->start_line_num) . "\n";
+	    }
         }
     }
     my @keys= sort { lc($a) cmp lc($b) ||

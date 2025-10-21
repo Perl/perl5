@@ -732,17 +732,6 @@ d_double_style_vax (longdblfio.U):
 	This variable conditionally defines the symbol DOUBLE_STYLE_VAX,
 	which indicates that the double is the 64-bit VAX format D or G.
 
-d_drand48_r (d_drand48_r.U):
-	This variable conditionally defines the HAS_DRAND48_R symbol,
-	which indicates to the C program that the drand48_r()
-	routine is available.
-
-d_drand48proto (d_drand48proto.U):
-	This variable conditionally defines the HAS_DRAND48_PROTO symbol,
-	which indicates to the C program that the system provides
-	a prototype for the drand48() function.  Otherwise, it is
-	up to the program to supply one.
-
 d_dup2 (d_dup2.U):
 	This variable conditionally defines HAS_DUP2 if dup2() is
 	available to duplicate file descriptors.
@@ -2148,11 +2137,6 @@ d_querylocale (d_newlocale.U):
 	indicates to the C program that the querylocale() routine is available
 	to return the name of the locale for a category mask.
 
-d_random_r (d_random_r.U):
-	This variable conditionally defines the HAS_RANDOM_R symbol,
-	which indicates to the C program that the random_r()
-	routine is available.
-
 d_re_comp (d_regcmp.U):
 	This variable conditionally defines the HAS_RECOMP symbol, which
 	indicates to the C program that the re_comp() routine is available
@@ -2586,16 +2570,6 @@ d_socks5_init (d_socks5_init.U):
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
 	indicates to the C program that the sqrtl() routine is available.
-
-d_srand48_r (d_srand48_r.U):
-	This variable conditionally defines the HAS_SRAND48_R symbol,
-	which indicates to the C program that the srand48_r()
-	routine is available.
-
-d_srandom_r (d_srandom_r.U):
-	This variable conditionally defines the HAS_SRANDOM_R symbol,
-	which indicates to the C program that the srandom_r()
-	routine is available.
 
 d_sresgproto (d_sresgproto.U):
 	This variable conditionally defines the HAS_SETRESGID_PROTO symbol,
@@ -3086,19 +3060,6 @@ doublenanbytes (infnan.U):
 doublesize (doublesize.U):
 	This variable contains the value of the DOUBLESIZE symbol, which
 	indicates to the C program how many bytes there are in a double.
-
-drand01 (randfunc.U):
-	Indicates the macro to be used to generate normalized
-	random numbers.  Uses randfunc, often divided by
-	(double) (((unsigned long) 1 << randbits)) in order to
-	normalize the result.
-	In C programs, the macro 'Drand01' is mapped to drand01.
-
-drand48_r_proto (d_drand48_r.U):
-	This variable encodes the prototype of drand48_r.
-	It is zero if d_drand48_r is undef, and one of the
-	REENTRANT_PROTO_T_ABC macros of reentr.h if d_drand48_r
-	is defined.
 
 dtrace (usedtrace.U):
 	This variable holds the location of the dtrace executable.
@@ -4845,25 +4806,6 @@ quadtype (quadtype.U):
 	This variable defines Quad_t to be something like long, int,
 	long long, int64_t, or whatever type is used for 64-bit integers.
 
-randbits (randfunc.U):
-	Indicates how many bits are produced by the function used to
-	generate normalized random numbers.
-
-randfunc (randfunc.U):
-	Indicates the name of the random number function to use.
-	Values include drand48, random, and rand. In C programs,
-	the 'Drand01' macro is defined to generate uniformly distributed
-	random numbers over the range [0., 1.[ (see drand01 and nrand).
-
-random_r_proto (d_random_r.U):
-	This variable encodes the prototype of random_r.
-	It is zero if d_random_r is undef, and one of the
-	REENTRANT_PROTO_T_ABC macros of reentr.h if d_random_r
-	is defined.
-
-randseedtype (randfunc.U):
-	Indicates the type of the argument of the seedfunc.
-
 ranlib (orderlib.U):
 	This variable is set to the pathname of the ranlib program, if it is
 	needed to generate random libraries.  Set to ":" if ar can generate
@@ -4935,10 +4877,6 @@ sed (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the sed program.  After Configure runs,
 	the value is reset to a plain "sed" and is not useful.
-
-seedfunc (randfunc.U):
-	Indicates the random number generating seed function.
-	Values include srand48, srandom, and srand.
 
 selectminbits (selectminbits.U):
 	This variable holds the minimum number of bits operated by select.
@@ -5332,18 +5270,6 @@ sPRIXU64 (quadfio.U):
 	format 64-bit hExADECimAl numbers (format 'X') for output.
 	The 'U' in the name is to separate this from sPRIx64 so that even
 	case-blind systems can see the difference.
-
-srand48_r_proto (d_srand48_r.U):
-	This variable encodes the prototype of srand48_r.
-	It is zero if d_srand48_r is undef, and one of the
-	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
-	is defined.
-
-srandom_r_proto (d_srandom_r.U):
-	This variable encodes the prototype of srandom_r.
-	It is zero if d_srandom_r is undef, and one of the
-	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srandom_r
-	is defined.
 
 src (src.U):
 	This variable holds the (possibly relative) path of the package source.
