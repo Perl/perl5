@@ -620,9 +620,11 @@
 :
 :   'O'  Has a perl_ compatibility macro.
 :
-:        The really OLD name for API funcs.
+:        The really OLD name for API funcs.  These now also require the 'p'
+:	 flag so as to generate a modern name.  Obviously no new entries
+:	 should get this flag.
 :
-:        autodoc.pl adds a note that the perl_ form of this function is
+:        autodoc.pl adds a note that the 'perl_' form of this function is
 :        deprecated.
 :
 :   'o'  Has no Perl_foo or S_foo compatibility macro:

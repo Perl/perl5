@@ -155,6 +155,11 @@ sub generate_proto_h {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
 
+        if ($flags =~ /O/) {
+            die_at_end "$plain_func: O flag requires p flag" if $flags !~ /p/;
+            die_at_end "$plain_func: O flag forbids T flag" if $flags =~ /T/;
+        }
+
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
