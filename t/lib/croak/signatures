@@ -209,6 +209,11 @@ EXPECT
 Illegal character following sigil in a subroutine signature at - line 2, near "($"
 syntax error at - line 2, near "$$) "
 ########
+# NAME global $_ in signature
+sub t101 ($_) { }
+EXPECT
+Can't use global $_ in subroutine signature at - line 2, near "($_"
+########
 # NAME global @_ in signature
 sub t101 (@_) { }
 EXPECT
@@ -218,4 +223,8 @@ Can't use global @_ in subroutine signature at - line 2, near "(@_"
 sub t102 (%_) { }
 EXPECT
 Can't use global %_ in subroutine signature at - line 2, near "(%_"
-
+########
+# NAME global $1 in signature
+sub t101 ($1) { }
+EXPECT
+Illegal operator following parameter in a subroutine signature at - line 2, near "($1"

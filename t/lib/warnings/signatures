@@ -1,0 +1,26 @@
+# PREAMBLE use warnings;
+# PREAMBLE use feature 'signatures';
+__END__
+########
+# NAME simple usage does not provoke warnings
+sub aaa { 2 }
+sub bbb ($a) { 4 }
+$aaa = sub { 2 };
+$bbb = sub ($a) { 4 };
+EXPECT
+########
+# NAME warnings from default expressions come from the correct line
+sub multiline1 (
+    $a,
+    $b = $a + 1,
+    $c = $a + 1)
+{
+    my $d = $a + 1;
+    my $e = $a + 1;
+}
+multiline1(undef);
+EXPECT
+Use of uninitialized value $a in addition (+) at - line 5.
+Use of uninitialized value $a in addition (+) at - line 6.
+Use of uninitialized value $a in addition (+) at - line 8.
+Use of uninitialized value $a in addition (+) at - line 9.
