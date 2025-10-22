@@ -94,9 +94,12 @@ sub as_pod ( $tree ) {
     return join '', $handler->{$name}->( $directive, $attr, @nodes );
 }
 
+sub pod_excerpt ( $tree, $begin, $end ) {
+    return as_pod( [ Document => {}, $tree->@[ $begin .. $end ] ] );
+}
+
 # CONTENT MANIPULATION SUBROUTINES
 
-# copy the whole section content
 sub copy_section ( $master, $title, $delta ) {
     my ( $master_pos, $delta_pos ) = find_pos_in( $master, $delta, $title );
 
@@ -106,6 +109,23 @@ sub copy_section ( $master, $title, $delta ) {
     # inject the whole section from the delta
     splice @$master, $master_pos + 1,
       0, $delta->@[ $delta_pos + 1 .. $end_pos ];
+}
+
+sub remove_identical ( $master, $title, $template ) {
+    my ( $master_pos, $template_pos ) =
+      find_pos_in( $master, $template, $title );
+
+    # find the end of the section in both
+    my $master_end_pos   = next_header_pos( $master,   1, $master_pos ) - 1;
+    my $template_end_pos = next_header_pos( $template, 1, $template_pos ) - 1;
+
+    # drop the section from the master if it's identical
+    # to that in the template
+    if ( pod_excerpt( $master, $master_pos, $master_end_pos ) eq
+        pod_excerpt( $template, $template_pos, $template_end_pos ) )
+    {
+        splice @$master, $master_pos, $master_end_pos - $master_pos + 1;
+    }
 }
 
 # map each section to an action
@@ -148,19 +168,17 @@ sub tree_for ($string) {
     $parser->parse_string_document($string)->root;
 }
 
-sub merge_into ( $master, $delta, $file ) {
-
-    # loop over the =head1 sections
+sub loop_head1 ( $master, $tree, $file, $cb ) {
     for my $title (
         map $_->[2],                                  # grab the title
         grep ref eq 'ARRAY' && $_->[0] eq 'head1',    # of the =head1
-        @$delta                                       # of the delta
+        @$tree                                        # of the tree
       )
     {
         die "Unexpected section '=head1 $title' in $file\n"
           unless exists $ACTION_FOR{$title};
         next if $ACTION_FOR{$title} eq 'skip';
-        copy_section( $master, $title, $delta );
+        $cb->( $master, $title, $tree );
     }
 }
 
@@ -194,8 +212,24 @@ sub main (@argv) {
       )
     {
         my ( $file, $delta ) = @$file_tree;
-        merge_into( $master, $delta, $file );
+        loop_head1(
+            $master, $delta, $file,
+            sub ( $master, $title, $delta ) {
+                copy_section( $master, $title, $delta );
+            }
+        );
     }
+
+    # find all sections in the template identical to those
+    # in the master and remove them (from the master)
+    my $template_file = 'Porting/perldelta_template.pod';
+    my $template      = tree_for( slurp($template_file) );
+    loop_head1(
+        $master, $template, $template_file,
+        sub ( $master, $title, $template ) {
+            remove_identical( $master, $title, $template );
+        }
+    );
 
     # save the result
     open my $fh, '>:utf8', $final_delta
