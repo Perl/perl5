@@ -164,7 +164,11 @@ sub merge_into ( $master, $delta, $file ) {
     }
 }
 
-sub slurp { return do { local @ARGV = @_; local $/; <> } }
+sub slurp ($file) {
+    open my $fh, '<:utf8', $file
+      or die "Can't open $file for reading: $!";
+    return do { local $/; <$fh> };
+}
 
 # MAIN PROGRAM
 
@@ -194,7 +198,7 @@ sub main (@argv) {
     }
 
     # save the result
-    open my $fh, '>', $final_delta
+    open my $fh, '>:utf8', $final_delta
       or die "Can't open $final_delta for writing: $!";
     print $fh as_pod($master);
 
