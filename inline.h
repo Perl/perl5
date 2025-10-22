@@ -1472,9 +1472,6 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
  *      (6 & 0x7)                           (8 & 0x7)
  *      6                                   0                              */
 
-/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1 */
-#  define PERL_IS_SUBWORD_ADDR(x) (BYTES_REMAINING_IN_WORD(x) != 0)
-
 /* Some tasks that are byte-oriented can be done as well a full word-at-a-time,
  * running 8 times faster on an 8-byte word, for example.  But there is
  * generally extra setup required to do this, and byte-at-a-time must be used
