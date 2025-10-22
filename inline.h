@@ -2062,10 +2062,10 @@ C<L<perlapi/is_utf8_invariant_string_loc>>,
 PERL_STATIC_INLINE Size_t
 S_variant_under_utf8_count(const U8* const s, const U8* const e)
 {
+    PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT;
+
     const U8* x = s;
     Size_t count = 0;
-
-    PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT;
 
 #  ifndef EBCDIC
 
