@@ -3090,7 +3090,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
         }
     }
 
-    /* Do the straggler bytes beyond what the loop above did */
+    /* Do the straggler bytes beyond the final word boundary */
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
