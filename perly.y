@@ -121,6 +121,7 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <opval> clause_mexpr
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -395,9 +396,7 @@ bare_statement_for_itervars
 		remember
 		KW_MY
 		my_scalar
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -410,9 +409,7 @@ bare_statement_for_itervars
 		PERLY_PAREN_OPEN
 		my_list_of_itervars
 		PERLY_PAREN_CLOSE
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -426,9 +423,7 @@ bare_statement_for_itervars
 	|	KW_FOR
 		remember
 		scalar
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -443,9 +438,7 @@ bare_statement_for_itervars
 			parser->in_my = 0;
 			$<opval>$ = my($my_var);
 		}[variable]
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -468,9 +461,7 @@ bare_statement_for_itervars
 		remember
 		REFGEN
 		refgen_topic
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -488,9 +479,7 @@ bare_statement_for_itervars
 		}
 	|	KW_FOR
 		remember
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
@@ -518,9 +507,7 @@ bare_statement_format
 bare_statement_given
 	:	KW_GIVEN
 		remember
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		{
 			$$ = block_end($remember, newGIVENOP($mexpr, op_scope($mblock), 0));
@@ -531,9 +518,7 @@ bare_statement_given
 bare_statement_if
 	:	KW_IF
 		remember
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		else
 		{
@@ -698,9 +683,7 @@ bare_statement_try_catch
 bare_statement_unless
 	:	KW_UNLESS
 		remember
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		else
 		{
@@ -746,9 +729,7 @@ bare_statement_utilize
 bare_statement_when
 	:	KW_WHEN
 		remember
-		PERLY_PAREN_OPEN
-		mexpr
-		PERLY_PAREN_CLOSE
+		clause_mexpr[mexpr]
 		mblock
 		{
 			$$ = block_end($remember, newWHENOP($mexpr, op_scope($mblock)));
@@ -775,6 +756,15 @@ bare_statement_yadayada
 		{
 			/* diag_listed_as: Unimplemented */
 			$$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0), newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+		}
+	;
+
+clause_mexpr
+	:	PERLY_PAREN_OPEN
+		mexpr
+		PERLY_PAREN_CLOSE
+		{
+			$$ = $mexpr;
 		}
 	;
 
@@ -1012,7 +1002,7 @@ else
 			  ($mblock)->op_flags |= OPf_PARENS;
 			  $$ = op_scope($mblock);
 			}
-	|	KW_ELSIF PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock else[else.recurse]
+	|	KW_ELSIF clause_mexpr[mexpr] mblock else[else.recurse]
 			{ parser->copline = (line_t)$KW_ELSIF;
 			    $$ = newCONDOP(OPpSTATEMENT<<8,
 				newSTATEOP(OPf_SPECIAL,NULL,$mexpr),
