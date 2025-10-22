@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.43.4
 
 =head1 DESCRIPTION
@@ -17,77 +14,38 @@ L<perl5433delta>, which describes differences between 5.43.2 and 5.43.3.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here. If L<Module::CoreList> is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>. A paragraph summary
-for important changes should then be added by hand. In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any content here.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
+L<attributes> has been upgraded from version 0.36 to 0.37.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.87 to 1.88.
+
+=item *
+
 L<feature> has been upgraded from version 1.99 to 2.00.  Split POD and code
 and add C<__END__>.  Avoids I/O and parsing 22KB of POD in C<use feature;>.
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Module::CoreList> has been upgraded from version 5.20250923 to 5.20251022.
 
 =item *
 
-XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any content here.
-
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here. Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release. Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
-
-=over 4
+L<SelectSaver> has been upgraded from version 1.02 to 1.03.
 
 =item *
 
-XXX
+L<Time::Piece> has been upgraded from version 1.3701 to 1.38.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.46 to 1.47.
 
 =back
 
@@ -125,7 +83,7 @@ codepoint corresponding to U+00E9.
 
 This has been fixed: If C<-CA> is in effect, options parsed by C<-s> are
 treated as UTF-8, too. In the example above, C<$foo> and C<$ARGV[0]> now both
-contain C<chr(0xE9)>. [GH #23377]
+contain C<chr(0xE9)>. [L<GH #23377|https://github.com/Perl/perl5/issues/23377>]
 
 =item *
 
