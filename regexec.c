@@ -636,7 +636,6 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
                           - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
     {
-        PERL_UINTMAX_T span_word;
 
         /* Process per-byte until reach word boundary.  XXX This loop could be
          * eliminated if we knew that this platform had fast unaligned reads */
@@ -648,7 +647,7 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
         }
 
         /* Create a word filled with the bytes we are spanning */
-        span_word = PERL_COUNT_MULTIPLIER * span_byte;
+        PERL_UINTMAX_T span_word = PERL_COUNT_MULTIPLIER * span_byte;
 
         /* Process per-word as long as we have at least a full word left */
         do {
@@ -712,7 +711,6 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
                           - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
     {
-        PERL_UINTMAX_T word, mask_word;
 
         while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
             if (((*s) & mask) == byte) {
@@ -721,8 +719,8 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
             s++;
         }
 
-        word      = PERL_COUNT_MULTIPLIER * byte;
-        mask_word = PERL_COUNT_MULTIPLIER * mask;
+        PERL_UINTMAX_T word = PERL_COUNT_MULTIPLIER * byte;
+        PERL_UINTMAX_T mask_word = PERL_COUNT_MULTIPLIER * mask;
 
         do {
             PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
@@ -787,7 +785,6 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
                           - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
     {
-        PERL_UINTMAX_T span_word, mask_word;
 
         while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
             if (((*s) & mask) != span_byte) {
@@ -796,8 +793,8 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
             s++;
         }
 
-        span_word = PERL_COUNT_MULTIPLIER * span_byte;
-        mask_word = PERL_COUNT_MULTIPLIER * mask;
+        PERL_UINTMAX_T span_word = PERL_COUNT_MULTIPLIER * span_byte;
+        PERL_UINTMAX_T mask_word = PERL_COUNT_MULTIPLIER * mask;
 
         do {
             PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
