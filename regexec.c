@@ -632,14 +632,9 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
      * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
      * */
 
-    if ((STRLEN) (send - s) >= PERL_WORDSIZE
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        /* Process per-byte until reach word boundary.  XXX This loop could be
-         * eliminated if we knew that this platform had fast unaligned reads */
-        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP_BINMODE(s, send, 1);
+    if (per_byte_end) {
+        while (s < per_byte_end ) {
             if (*s != span_byte) {
                 return s;
             }
@@ -705,14 +700,9 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
      * returns 'send' if none found.  It uses word-level operations instead of
      * byte to speed up the process */
 
-#ifndef EBCDIC
-
-    if ((STRLEN) (send - s) >= PERL_WORDSIZE
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s, send, 1);
+    if (per_byte_end) {
+        while (s < per_byte_end ) {
             if (((*s) & mask) == byte) {
                 return s;
             }
@@ -757,8 +747,6 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
         } while (s + PERL_WORDSIZE <= send);
     }
 
-#endif
-
     while (s < send) {
         if (((*s) & mask) == byte) {
             return s;
@@ -781,12 +769,9 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
      * function.  Returns 'send' if none found.  Works like find_span_end(),
      * except for the AND */
 
-    if ((STRLEN) (send - s) >= PERL_WORDSIZE
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-                          - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP_BINMODE(s, send, 1);
+    if (per_byte_end) {
+        while (s < per_byte_end ) {
             if (((*s) & mask) != span_byte) {
                 return s;
             }

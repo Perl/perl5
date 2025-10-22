@@ -2635,13 +2635,8 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
      * cachegrind).  The number isn't critical, as at these sizes, the total
      * time spent isn't large either way */
 
-#ifndef EBCDIC
-
-    if (e - s0 < 96)
-
-#endif
-
-    {
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s0, e, 12);
+    if (! per_byte_end) {
         while (s < e) { /* Count characters directly */
 
             /* Take extra care to not exceed 'e' (which would be undefined
@@ -2670,21 +2665,14 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         return s - s0;
     }
 
-#ifndef EBCDIC
-
     /* Count continuations, word-at-a-time.
      *
      * We need to stop before the final start character in order to
      * preserve the limited error checking that's always been done */
     const U8 * e_limit = e - UTF8_MAXBYTES;
 
-    /* Points to the first byte >=s which is positioned at a word boundary.  If
-     * s is on a word boundary, it is s, otherwise it is to the next word. */
-    const U8 * partial_word_end = s + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-                                    - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK);
-
     /* Process up to a full word boundary. */
-    while (s < partial_word_end) {
+    while (s < per_byte_end ) {
         const Size_t skip = UTF8SKIP(s);
 
         continuations += skip - 1;
@@ -2692,8 +2680,8 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     }
 
     /* Adjust back down any overshoot */
-    continuations -= s - partial_word_end;
-    s = partial_word_end;
+    continuations -= s - per_byte_end;
+    s = per_byte_end;
 
     do { /* Process per-word */
 
@@ -2741,8 +2729,6 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
         break;
     }
-
-#  endif
 
     if (LIKELY(e == s)) {
         return s - s0 - continuations;
@@ -3014,15 +3000,11 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
     Size_t invariant_length = first_variant - s0;
     Size_t variant_count = 0;
 
-#ifndef EBCDIC      /* The below relies on the bit patterns of UTF-8 */
-
-    /* Do a first pass through the string to see if it actually is translatable
-     * into bytes, and if so, how big the result is.  On long strings this is
-     * done a word at a time, so is relatively quick. (There is some
-     * start-up/tear-down overhead with the per-word algorithm, so no real gain
+    /* There is some start-up/tear-down overhead with this, so no real gain
      * unless the remaining portion of the string is long enough.  The current
-     * value is just a guess.)  On EBCDIC, it's always per-byte. */
-    if ((send - s) > (ptrdiff_t) (5 * PERL_WORDSIZE)) {
+     * value is just a guess. */
+    U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s, send, 5);
+    if (per_byte_end) {
 
         /* If the string contains any start byte besides C2 and C3, then it
          * isn't translatable into bytes */
@@ -3031,15 +3013,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
         const PERL_UINTMAX_T C2_mask = PERL_COUNT_MULTIPLIER * 0xC2;
         const PERL_UINTMAX_T FE_mask = PERL_COUNT_MULTIPLIER * 0xFE;
 
-        /* Points to the first byte >=s which is positioned at a word boundary.
-         * If s is on a word boundary, it is s, otherwise it is the first byte
-         * of the next word. */
-        U8 * partial_word_end = s + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(s)
-                                - (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK);
-
-        /* Here there is at least a full word beyond the first word boundary.
-         * Process up to that boundary. */
-        while (s < partial_word_end) {
+        while (s < per_byte_end ) {
             if (! UTF8_IS_INVARIANT(*s)) {
                 if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
                     return false;
@@ -3053,7 +3027,7 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
         }
 
         /* Adjust back down any overshoot */
-        s = partial_word_end;
+        s = per_byte_end;
 
         /* Process per-word */
         do {
@@ -3116,7 +3090,6 @@ Perl_utf8_to_bytes_(pTHX_ U8 **s_ptr, STRLEN *lenp, void ** free_me,
         }
     }
 
-#endif
     /* Do the straggler bytes beyond what the loop above did */
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
