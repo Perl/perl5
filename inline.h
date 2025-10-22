@@ -1475,6 +1475,48 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
 /* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1 */
 #  define PERL_IS_SUBWORD_ADDR(x) (BYTES_REMAINING_IN_WORD(x) != 0)
 
+/* Some tasks that are byte-oriented can be done as well a full word-at-a-time,
+ * running 8 times faster on an 8-byte word, for example.  But there is
+ * generally extra setup required to do this, and byte-at-a-time must be used
+ * anyway to get to the next word boundary.  This macro calculates whether the
+ * trade-off is worth doing.  If not, it returns NULL; if so, it returns a
+ * pointer to the first byte of the next word.  Code using this is typically
+ * structured like:
+ *      U8 * next_word_boundary = WORTH_PER_LOOP()
+ *      if (next_word_boundary) {
+ *          loop per-byte until next_word_boundary
+ *          loop per-word until less than a word left before upper boundary
+ *      }
+ *      loop per-byte until reach final boundary
+ *
+ * 's' is the current position in the string
+ * 'e' is the upper string bound
+ * 'full_words_needed' is the caller's determination of where to make the
+ *      trade-off between per-byte and per-word.  Only if the number of words
+ *      in the input string is at least this many, does the macro return
+ *      non-NULL.
+ *
+ * Because of EBCDIC, there are two forms of this macro.
+ * WORTH_PER_WORD_LOOP_BINMODE() is for use when the data being examined is
+ * not dependent on the character set.  The more usual form is plain
+ * WORTH_PER_WORD_LOOP() for character data.  Because EBCDIC needs an extra
+ * transformation, per-word operations are not appropriate on it, so the macro
+ * always returns NULL, meaning don't use a per-word loop on an EBCDIC
+ * platform. */
+#  define WORTH_PER_WORD_LOOP_BINMODE(s, e, full_words_needed)      \
+       /* Note multiple evaluations of 's' */                       \
+       ( ( ( (s) + BYTES_REMAINING_IN_WORD(s)                       \
+                 + (full_words_needed) * PERL_WORDSIZE) < (e) )     \
+        ? ((s) + BYTES_REMAINING_IN_WORD(s))                        \
+        : NULL)
+
+#  ifdef EBCDIC
+#    define WORTH_PER_WORD_LOOP(s, e, f)  NULL
+#  else
+#    define WORTH_PER_WORD_LOOP(s, e, f)                \
+        WORTH_PER_WORD_LOOP_BINMODE(s, e, f)
+#  endif
+
 /*
 =for apidoc      is_utf8_invariant_string
 =for apidoc_item is_utf8_invariant_string_loc
