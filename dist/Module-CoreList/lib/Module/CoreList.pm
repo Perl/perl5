@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20251020';
+our $VERSION = '5.20251022';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -448,7 +448,7 @@ sub changes_between {
     5.040003 => '2025-08-03',
     5.043002 => '2025-08-20',
     5.043003 => '2025-09-23',
-    5.043004 => '2025-10-20',
+    5.043004 => '2025-10-22',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -23883,10 +23883,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.043004 => {
         delta_from => 5.043003,
         changed => {
+            'B::Deparse'            => '1.88',
             'B::Op_private'         => '5.043004',
             'Config'                => '5.043004',
-            'Module::CoreList'      => '5.20251020',
-            'Module::CoreList::Utils'=> '5.20251020',
+            'Module::CoreList'      => '5.20251022',
+            'Module::CoreList::Utils'=> '5.20251022',
+            'SelectSaver'           => '1.03',
+            'Time::Piece'           => '1.38',
+            'Time::Seconds'         => '1.38',
+            'XS::APItest'           => '1.47',
+            'attributes'            => '0.37',
+            'feature'               => '2.00',
         },
         removed => {
         }
