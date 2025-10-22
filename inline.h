@@ -1361,7 +1361,7 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
     /* Note that this is branchless except for the switch() jump table, and
      * checking that the caller wants a *retlen returned.
      *
-     * There is wasted effort for length 1 inputs of initializing 'uv' to 0 
+     * There is wasted effort for length 1 inputs of initializing 'uv' to 0
      * and calculating 'full_shift' (unless the compiler optimizes that out).
      * Benchmarks indicate this is acceptable.
      * See GH #23690 */
@@ -3307,7 +3307,7 @@ Perl_utf8_to_uv_msgs(const U8 * const s0,
          *
          * The terminology of the dfa refers to a 'class'.  The variable 'type'
          * would have been named 'class' except that is a reserved word in C++
-         * 
+         *
          * The table can be a U16 on EBCDIC platforms, so 'state' is declared
          * as U16; 'type' is likely to never occupy more than 5 bits.  */
         PERL_UINT_FAST8_T type = PL_strict_utf8_dfa_tab[*s];
@@ -4781,7 +4781,7 @@ extracted from C<sv> using L</C<SvPV_const>>.  C<sv> must not be NULL.
 Memory deallocation
 
 To prevent memory leaks, the memory allocated for the new string needs to be
-freed when no longer needed.  
+freed when no longer needed.
 
 =over
 
