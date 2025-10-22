@@ -1573,25 +1573,13 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
         len = strlen((const char *)s);
     }
 
-
-#ifndef EBCDIC
-
     /* Do the word-at-a-time iff there is at least one usable full word.  That
      * means that after advancing to a word boundary, there still is at least a
-     * full word left.  The number of bytes needed to advance is 'wordsize -
-     * offset' unless offset is 0. */
-    if ((STRLEN) (send - x) >= PERL_WORDSIZE
+     * full word left. */
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(x, send, 1);
 
-                            /* This term is wordsize if subword; 0 if not */
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
-
-                            /* 'offset' */
-                          - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        /* Process per-byte until reach word boundary.  XXX This loop could be
-         * eliminated if we knew that this platform had fast unaligned reads */
-        while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
+    if (per_byte_end) {
+        while (x < per_byte_end ) {
             if (! UTF8_IS_INVARIANT(*x)) {
                 if (ep) {
                     *ep = x;
@@ -1632,8 +1620,6 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
         } while (x + PERL_WORDSIZE <= send);
     }
-
-#endif      /* End of ! EBCDIC */
 
     /* Process per-byte.  (Can't use libc functions like strpbrk() because
      * input isn't necessarily a C string) */
@@ -2116,18 +2102,11 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
     const U8* x = s;
     Size_t count = 0;
 
-#  ifndef EBCDIC
-
     /* Test if the string is long enough to use word-at-a-time.  (Logic is the
      * same as for is_utf8_invariant_string()) */
-    if ((STRLEN) (e - x) >= PERL_WORDSIZE
-                          + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
-                          - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
-    {
-
-        /* Process per-byte until reach word boundary.  XXX This loop could be
-         * eliminated if we knew that this platform had fast unaligned reads */
-        while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
+    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(x, e, 1);
+    if (per_byte_end) {
+        while (x < per_byte_end ) {
             count += ! UTF8_IS_INVARIANT(*x++);
         }
 
@@ -2142,8 +2121,6 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
             x += PERL_WORDSIZE;
         } while (x + PERL_WORDSIZE <= e);
     }
-
-#  endif
 
     /* Process per-byte */
     while (x < e) {
