@@ -395,39 +395,44 @@ bare_statement_for_itervars
 	:	KW_FOR
 		remember
 		KW_MY
-		my_scalar
+		my_scalar[itervars]
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
-			$$ = block_end($remember, newFOROP(0, $my_scalar, $mexpr, $mblock, $cont));
+			$$ = block_end($remember, newFOROP(0, $itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
 		remember
 		KW_MY
 		PERLY_PAREN_OPEN
-		my_list_of_itervars
+		my_list_of_itervars[itervars]
+    	{
+			if ($itervars->op_type == OP_PADSV)
+				/* degenerate case of 1 var: for my ($x) ....
+				   Flag it so it can be special-cased in newFOROP */
+				$itervars->op_flags |= OPf_PARENS;
+        }
 		PERLY_PAREN_CLOSE
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
-			if ($my_list_of_itervars->op_type == OP_PADSV)
-				/* degenerate case of 1 var: for my ($x) ....
-				   Flag it so it can be special-cased in newFOROP */
-				$my_list_of_itervars->op_flags |= OPf_PARENS;
-			$$ = block_end($remember, newFOROP(0, $my_list_of_itervars, $mexpr, $mblock, $cont));
+			$$ = block_end($remember, newFOROP(0, $itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
 		remember
 		scalar
+		{
+			$<opval>$ = op_lvalue ($scalar, OP_ENTERLOOP);
+		}[itervars]
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
-			$$ = block_end($remember, newFOROP(0, op_lvalue($scalar, OP_ENTERLOOP), $mexpr, $mblock, $cont));
+			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
@@ -436,45 +441,30 @@ bare_statement_for_itervars
 		my_var
 		{
 			parser->in_my = 0;
-			$<opval>$ = my($my_var);
-		}[variable]
+			$<opval>$ = op_lvalue(
+				newUNOP(OP_REFGEN, 0, my ($my_var)),
+				OP_ENTERLOOP
+			);
+		}[itervars]
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
-			$$ = block_end(
-				$remember,
-				newFOROP(
-					0,
-					op_lvalue(
-						newUNOP(OP_REFGEN, 0, $<opval>variable),
-						OP_ENTERLOOP
-					),
-					$mexpr,
-					$mblock,
-					$cont
-				)
-			);
+			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
 		remember
 		REFGEN
 		refgen_topic
+		{
+			$<opval>$ = op_lvalue (newUNOP(OP_REFGEN, 0, $refgen_topic), OP_ENTERLOOP);
+		}[itervars]
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
-			$$ = block_end (
-				$remember,
-				newFOROP (
-					0,
-					op_lvalue (newUNOP(OP_REFGEN, 0, $refgen_topic), OP_ENTERLOOP),
-					$mexpr,
-					$mblock,
-					$cont
-				)
-			);
+			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
