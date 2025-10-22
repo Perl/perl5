@@ -1515,16 +1515,15 @@ C<L</is_utf8_string>> and C<L</is_utf8_fixed_width_buf_flags>>.
 PERL_STATIC_INLINE bool
 Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 {
-    const U8* send;
-    const U8* x = s;
-
     PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING_LOC;
+
+    const U8* send = s + len;
+    const U8* x = s;
 
     if (len == 0) {
         len = strlen((const char *)s);
     }
 
-    send = s + len;
 
 #ifndef EBCDIC
 
