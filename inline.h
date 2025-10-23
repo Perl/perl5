@@ -2055,8 +2055,20 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
 
     return (unsigned int) word;
 
-#  else
-#    error Unexpected byte order
+#else   /* Unhandled byte-order; the compiler knows which comes first */
+
+    const U8 * bytes = (U8 *) &word;
+    for (unsigned int i = 0; i <  sizeof(word); i++) {
+        if (bytes[i]) {
+            return i;
+        }
+    }
+
+    assert(0);
+
+    /* If all else fails, it's better to return something than just random */
+    return 0;
+
 #  endif
 
 }
