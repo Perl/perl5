@@ -38,7 +38,12 @@ typedef struct
  CV *UTF8;
 } PerlIOVia;
 
-static const MGVTBL PerlIOVia_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
+/* An empty hook structure just for the purpose of marking an SV */
+static const struct MagicFunctions magicfuncs_perlio = {
+    .ver   = 2,
+    .shape = MGv2s_BASE,
+    .debug_name = "PerlIO::via/tag",
+};
 
 #define MYMethod(x) #x,&s->x
 
@@ -134,7 +139,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     IV code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
 
     if (arg && SvTYPE(arg) >= SVt_PVMG
-        && mg_findext(arg, PERL_MAGIC_ext, &PerlIOVia_tag)) {
+        && (bool)sv_magicv2_find_by_funcs(arg, &magicfuncs_perlio)) {
         return code;
     }
 
@@ -618,7 +623,7 @@ PerlIOVia_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
      * object. */
     if (param) {
         SV *sv = newSV(0);
-        sv_magicext(sv, NULL, PERL_MAGIC_ext, &PerlIOVia_tag, 0, 0);
+        sv_magicv2_add(sv, &magicfuncs_perlio, 0, NULL);
         return sv;
     }
 
