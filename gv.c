@@ -2101,11 +2101,11 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             S_maybe_add_coresub(aTHX_ 0, gv, name, len);
         }
     }
-    else if (stash != PL_defstash) { /* not the main stash */
-        /* We only have to check for a few names here: a, b, EXPORT, ISA
-           and VERSION. All the others apply only to the main stash or to
-           CORE (which is checked right after this). */
+    else if (len > 1) {
             switch (*name) {
+
+          /* Each in first set doesn't require this to be the main stash */
+
             case 'E':
                 if (
                     len >= 6 && name[1] == 'X' &&
@@ -2129,17 +2129,15 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     GvMULTI_on(gv_AVadd(gv));
                     break;
                 }
-                /* FALLTHROUGH */
-            case 'b':
-                if (len == 1 && sv_type == SVt_PV)
-                    GvMULTI_on(gv);
                 goto try_core;
 
             default:
+
+            /* The remainder apply only to the main stash */
+            if (stash != PL_defstash) {
                 goto try_core;
             }
-    }
-    else if (len > 1) {
+
             switch (*name) {
             case 'A':
                 if (memEQs(name, len, "ARGV")) {
@@ -2147,21 +2145,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 }
                 else if (memEQs(name, len, "ARGVOUT")) {
                     GvMULTI_on(gv);
-                }
-                break;
-            case 'E':
-                if (
-                    len >= 6 && name[1] == 'X' &&
-                    (memEQs(name, len, "EXPORT")
-                    ||memEQs(name, len, "EXPORT_OK")
-                    ||memEQs(name, len, "EXPORT_FAIL")
-                    ||memEQs(name, len, "EXPORT_TAGS"))
-                )
-                    GvMULTI_on(gv);
-                break;
-            case 'I':
-                if (memEQs(name, len, "ISA")) {
-                    gv_magicalize_isa(gv);
                 }
                 break;
             case 'S':
@@ -2194,10 +2177,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                             sv_setsv(*init, &PL_sv_undef);
                     }
                 }
-                break;
-            case 'V':
-                if (memEQs(name, len, "VERSION"))
-                    GvMULTI_on(gv);
                 break;
             case '\003':        /* $^CHILD_ERROR_NATIVE */
                 if (memEQs(name, len, "\003HILD_ERROR_NATIVE"))
@@ -2300,10 +2279,17 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 paren = (SSize_t)(I32)uv;
                 goto storeparen;
             }
-            }
-    } else {
-        /* Names of length 1.  (Or 0. But name is NUL terminated, so that will
-           be case '\0' in this switch statement (ie a default case)  */
+        }
+        }
+    }
+    else if (   stash == PL_defstash         /* Names of length 1. */
+             || *name == 'a' || *name == 'b')
+    {
+        /* All but the above two length 1 names have to be in the main stash.
+         *
+         * Note that nothing failing here can apply to CORE, because the
+         * minimum length (for things like 'uc') is 2. */
+
         switch (*name) {
         case '&':		/* $& */
             paren = RX_BUFF_IDX_FULLMATCH;
@@ -2458,10 +2444,12 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             SvREFCNT_dec(sv);
         }
         break;
-        case 'a':
+
+        case 'a':  /* The len > 1 case was handled above */
         case 'b':
             if (sv_type == SVt_PV)
                 GvMULTI_on(gv);
+            break;
         }
     }
 
