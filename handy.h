@@ -1542,8 +1542,9 @@ or casts
 #  define CC_BINDIGIT_                 23
 #  define CC_OCTDIGIT_                 24
 #  define CC_MNEMONIC_CNTRL_           25
+#  define CC_MAGICAL_                  26
 
-/* Unused: 26-31
+/* Unused: 27-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
