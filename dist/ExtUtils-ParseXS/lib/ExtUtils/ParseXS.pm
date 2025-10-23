@@ -311,18 +311,8 @@ sub process_file {
     $ExtUtils::ParseXS::VMS_SymSet = ExtUtils::XSSymSet->new(28);
   }
 
-  $self->{bootcode_early} = [];
-  $self->{bootcode_later} = [];
-
-  # hash of package name => package C name
-  $self->{map_overloaded_package_to_C_package} = {};
-  # hashref of package name => fallback setting
-  $self->{map_package_to_fallback_string}     = {};
-  $self->{error_count}  = 0; # count
-
-  # Most of the 1500 lines below uses these globals.  We'll have to
-  # clean this up sometime, probably.  For now, we just pull them out
-  # of %Options.  -Ken
+  # Most of the parser uses these globals.  We'll have to clean this up
+  # sometime, probably.  For now, we just pull them out of %Options. -Ken
 
   $self->{config_RetainCplusplusHierarchicalTypes} = $Options{hiertype};
   $self->{PROTOTYPES_value} = $Options{prototypes};
@@ -409,9 +399,6 @@ sub process_file {
   $AST->parse($self)
     or $self->death("Failed to parse XS file\n");
   $AST->as_code($self);
-
-  warn("Please specify prototyping behavior for $self->{in_filename} (see perlxs manual)\n")
-    unless $self->{proto_behaviour_specified};
 
   chdir($orig_cwd);
   select($orig_fh);

@@ -474,6 +474,17 @@ sub parse {
     $self->{line_no} = 1;
     $self->{file}    = $pxs->{in_pathname};
 
+    $pxs->{bootcode_early} = [];
+    $pxs->{bootcode_later} = [];
+
+    # Hash of package name => package C name
+    $pxs->{map_overloaded_package_to_C_package} = {};
+
+    # Hashref of package name => fallback setting
+    $pxs->{map_package_to_fallback_string} = {};
+
+    $pxs->{error_count}  = 0;
+
     # Initialise the sequence of guard defines used by cpp_scope
     $pxs->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
 
@@ -536,6 +547,10 @@ sub parse {
     push @{$self->{kids}}, $boot_xsub;
     $boot_xsub->parse($pxs)
         or return;
+
+    warn(   "Please specify prototyping behavior for "
+          . "$pxs->{in_filename} (see perlxs manual)\n")
+        unless $pxs->{proto_behaviour_specified};
 
     1;
 }
