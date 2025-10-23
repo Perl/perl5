@@ -462,6 +462,7 @@ BEGIN { $build_subclass->(
     'C_part',     # the C part of the XS file, before the first MODULE
     'C_part_postamble',# Node::C_part_postamble object which emits
                   # boilerplate code following the C code
+    'cpp_scope',  # node holding all the XS part of the main file
 )};
 
 sub parse {
@@ -470,6 +471,9 @@ sub parse {
 
     $self->{line_no} = 1;
     $self->{file}    = $pxs->{in_pathname};
+
+    # Initialise the sequence of guard defines used by cpp_scope
+    $pxs->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
 
     # "Parse" the start of the file. Doesn't actually consume any lines:
     # just a placeholder for emitting preamble later
@@ -489,8 +493,8 @@ sub parse {
         or return;
     push @{$self->{kids}}, $C_part;
 
-    # "Parse" the start of the file. Doesn't actually consume any lines:
-    # just a placeholder for emitting postamble later
+    # "Parse" the bit following any C code. Doesn't actually consume any
+    # lines: just a placeholder for emitting postamble code.
 
     my $C_part_postamble = ExtUtils::ParseXS::Node::C_part_postamble->new();
     $self->{C_part_postamble} = $C_part_postamble;
@@ -498,6 +502,17 @@ sub parse {
         or return;
     push @{$self->{kids}}, $C_part_postamble;
 
+    # At this point, $_ should hold the first MODULE line
+
+    $pxs->{lastline}    = $_;
+    $pxs->{lastline_no} = $.;
+
+    # Parse the XS half of the file
+
+    my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
+    $self->{cpp_scope} = $cpp_scope;
+    $cpp_scope->parse($pxs);
+    push @{$self->{kids}}, $cpp_scope;
 
     1;
 }

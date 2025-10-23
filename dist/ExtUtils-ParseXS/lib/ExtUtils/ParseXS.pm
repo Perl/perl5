@@ -408,17 +408,6 @@ sub process_file {
   my $AST = $self->{AST} = ExtUtils::ParseXS::Node::XS_file->new();
   $AST->parse($self)
     or $self->death("Failed to parse XS file\n");
-
-  # At this point, $_ should hold the first MODULE line
-
-  $self->{lastline}    = $_;
-  $self->{lastline_no} = $.;
-  $self->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
-
-  my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
-  $cpp_scope->parse($self);
-  push @{$AST->{kids}}, $cpp_scope;
-
   $AST->as_code($self);
 
   # ----------------------------------------------------------------
