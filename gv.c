@@ -2086,11 +2086,14 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 
     PERL_ARGS_ASSERT_GV_MAGICALIZE;
 
+    if (len == 0) {
+        return false;
+    }
+
     if (stash != PL_defstash) { /* not the main stash */
         /* We only have to check for a few names here: a, b, EXPORT, ISA
            and VERSION. All the others apply only to the main stash or to
            CORE (which is checked right after this). */
-        if (len) {
             switch (*name) {
             case 'E':
                 if (
@@ -2124,7 +2127,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 goto try_core;
             }
             goto ret;
-        }
       try_core:
         if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
           /* Avoid null warning: */
