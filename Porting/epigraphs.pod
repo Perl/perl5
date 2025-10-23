@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.4 - Helen Keller 1903, quoting John Richard Green 1870
+
+L<Announced on 2025-10-23 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2025/10/msg270412.html>
+
+Green, the historian, tells us that the world is moved along, not only
+by the mighty shoves of its heroes, but also by the aggregate of the
+tiny pushes of each honest worker; and that thought alone suffices to
+guide me in this dark world and wide.
+
 =head2 v5.43.3 - Doc Brown, "Back to the Future"
 
 L<Announced on 2025-09-23 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/09/msg270333.html>
