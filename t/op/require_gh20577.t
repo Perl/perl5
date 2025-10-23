@@ -12,18 +12,18 @@ eval <<'EOF' or die $@;
 {
     my %fatpacked;
 
-    $fatpacked{"Test1.pm"} = <<'TEST1';
-  package Test1;
+    $fatpacked{"TestModule1.pm"} = <<'TEST1';
+  package TestModule1;
   sub import {
-      my $filename = 'Test2.pm';
+      my $filename = 'TestModule2.pm';
       $INC{$filename} = "the_test_file";
   }
   1;
 TEST1
 
-    $fatpacked{"Test2.pm"} = <<'TEST2';
-  package Test2;
-  use Test1;
+    $fatpacked{"TestModule2.pm"} = <<'TEST2';
+  package TestModule2;
+  use TestModule1;
   1;
 TEST2
 
@@ -45,14 +45,14 @@ TEST2
 EOF
 
 ok(UNIVERSAL::isa($INC[0],"FatPacked"), '$INC[0] starts FatPacked');
-ok(!exists $INC{"Test1.pm"}, 'Test1.pm not in %INC');
-ok(!exists $INC{"Test2.pm"}, 'Test2.pm not in %INC');
-my $ok= eval "use Test2; 1";
+ok(!exists $INC{"TestModule1.pm"}, 'TestModule1.pm not in %INC');
+ok(!exists $INC{"TestModule2.pm"}, 'TestModule2.pm not in %INC');
+my $ok= eval "use TestModule2; 1";
 my $err= !$ok ? $@ : undef;
-is($err,undef,"No error loading Test2");
-is($ok,1,"Loaded Test2 successfully");
+is($err,undef,"No error loading TestModule2");
+is($ok,1,"Loaded TestModule2 successfully");
 ok(UNIVERSAL::isa($INC[0],"FatPacked"), '$INC[0] is still FatPacked');
-ok(UNIVERSAL::isa($INC{"Test1.pm"},"FatPacked"), '$INC{"Test1.pm"} is still FatPacked');
-is($INC{"Test2.pm"},"the_test_file", '$INC{"Test2.pm"} is as expected');
-is($INC[0],$INC{"Test1.pm"},'Same object in @INC and %INC');
+ok(UNIVERSAL::isa($INC{"TestModule1.pm"},"FatPacked"), '$INC{"TestModule1.pm"} is still FatPacked');
+is($INC{"TestModule2.pm"},"the_test_file", '$INC{"TestModule2.pm"} is as expected');
+is($INC[0],$INC{"TestModule1.pm"},'Same object in @INC and %INC');
 done_testing();
