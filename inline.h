@@ -2008,13 +2008,20 @@ Perl_single_1bit_pos32(U32 word)
 
 }
 
-#ifndef EBCDIC
+/* Returns the byte number of the lowest numbered-byte whose uppermost bit is
+ * set */
+#define first_upper_bit_set_byte_number(word) Perl_variant_byte_number(word)
 
 PERL_STATIC_INLINE unsigned int
 Perl_variant_byte_number(PERL_UINTMAX_T word)
 {
-    /* This returns the position in a word (0..7) of the first variant byte in
-     * it.  This is a helper function.  Note that there are no branches */
+    /* This returns the position in a word (0..7) of the first byte whose
+     * uppermost bit is set.  On ASCII boxes, this is equivalent to the first
+     * byte whose representation is different in UTF-8 vs not, hence the name
+     * and text in the comments.  It was only later that this was used for
+     * binary data, not tied to the character set.
+     *
+     * This is a helper function.  Note that there are no branches */
 
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
@@ -2023,7 +2030,7 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      * word */
     assert(word);
 
-#  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
@@ -2036,7 +2043,7 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      * to 0..7 */
     return (unsigned int) ((word + 1) >> 3) - 1;
 
-#  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
     /* Bytes are stored like
      *  Byte1 Byte2  ... Byte8
@@ -2069,11 +2076,10 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* If all else fails, it's better to return something than just random */
     return 0;
 
-#  endif
+#endif
 
 }
 
-#endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 
 /*

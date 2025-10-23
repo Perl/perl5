@@ -5699,16 +5699,6 @@ Perl_dump_sv_child(pTHX_ SV *sv)
         assert(sv)
 
 #endif
-#if !defined(EBCDIC)
-
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE unsigned int
-Perl_variant_byte_number(PERL_UINTMAX_T word)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_VARIANT_BYTE_NUMBER
-
-# endif
-#endif
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 PERL_CALLCONV I32
 Perl_my_chsize(pTHX_ int fd, Off_t length)
@@ -10389,6 +10379,11 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_VALID_UTF8_TO_UV      \
         assert(s)
+
+PERL_STATIC_INLINE unsigned int
+Perl_variant_byte_number(PERL_UINTMAX_T word)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_VARIANT_BYTE_NUMBER
 
 PERL_STATIC_INLINE void
 Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx);
