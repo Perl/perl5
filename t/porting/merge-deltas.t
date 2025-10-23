@@ -1,10 +1,13 @@
+#!perl -w
+BEGIN {
+    chdir "t" if -d "t";
+    require './test.pl';
+    @INC = "../lib";
+}
 use v5.36;
-use Test2::V0;
-
-my $root = -f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext' ? '.' : '..';
 
 # load the script
-do("$root/Porting/merge-deltas.pl") or die $@ || $!;
+do("../Porting/merge-deltas.pl") or die $@ || $!;
 
 # tree_for & as_pod
 {
@@ -18,39 +21,28 @@ do("$root/Porting/merge-deltas.pl") or die $@ || $!;
     =cut
     POD
 
-    # just a single test: we're not testing Pod::Simple::SimpleTree
-    is(
-        tree_for($pod),
-        [
-            Document => { start_line => 1 },
-            [ head2 => { start_line => 1 }, 'CVE-2025-12345' ],
-            [ Para  => { start_line => 3 }, 'Some CVE was fixed.' ],
-            [ Para  => { start_line => 5 }, 'Found by some person.' ],
-        ],
-        'tree_for'
-    );
-
     # as_pod round-trips basic POD
-    is( as_pod( tree_for($pod) ), $pod, 'as_pod' );
+    is( as_pod( tree_for($pod) ), $pod, 'as_pod( tree_pod ) round-trips' );
 }
 
 # loop_head1
 {
-    my $template_file = "$root/Porting/perldelta_template.pod";
+    my $template_file = "../Porting/perldelta_template.pod";
     my $template      = tree_for( slurp($template_file) );
 
     # loop_head1 dies on unexpected =head1
     # the callback is only run on the unskipped sections
     ok(
-        lives {
+        eval {
             loop_head1(
                 [],
                 $template,
                 $template_file,
                 sub ( $master, $title, $template ) {
-                    is( $title, L(), "=head1 $title" );
+                    ok( $title, "=head1 $title" );
                 }
             );
+            1;
         },
         'loop_head1'
     );
