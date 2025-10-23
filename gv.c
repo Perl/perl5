@@ -2090,6 +2090,20 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         return false;
     }
 
+    if (! generic_isCC_(*name, CC_MAGICAL_)) {
+
+        /* If not a magical variable, it could be for CORE */
+      try_core:
+        if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
+          /* Avoid null warning: */
+          const char * const stashname = HvNAME(stash); assert(stashname);
+          if (strBEGINs(stashname, "CORE"))
+            S_maybe_add_coresub(aTHX_ 0, gv, name, len);
+        }
+
+        goto ret;
+    }
+
     if (stash != PL_defstash) { /* not the main stash */
         /* We only have to check for a few names here: a, b, EXPORT, ISA
            and VERSION. All the others apply only to the main stash or to
@@ -2127,31 +2141,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 goto try_core;
             }
             goto ret;
-      try_core:
-        if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
-          /* Avoid null warning: */
-          const char * const stashname = HvNAME(stash); assert(stashname);
-          if (strBEGINs(stashname, "CORE"))
-            S_maybe_add_coresub(aTHX_ 0, gv, name, len);
-        }
     }
     else if (len > 1) {
-#ifndef EBCDIC
-        if (*name > 'V' ) {
-            NOOP;
-            /* Nothing else to do.
-               The compiler will probably turn the switch statement into a
-               branch table. Make sure we avoid even that small overhead for
-               the common case of lower case variable names.  (On EBCDIC
-               platforms, we can't just do:
-                 if (NATIVE_TO_ASCII(*name) > NATIVE_TO_ASCII('V') ) {
-               because cases like '\027' in the switch statement below are
-               C1 (non-ASCII) controls on those platforms, so the remapping
-               would make them larger than 'V')
-             */
-        } else
-#endif
-        {
             switch (*name) {
             case 'A':
                 if (memEQs(name, len, "ARGV")) {
@@ -2313,7 +2304,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 goto storeparen;
             }
             }
-        }
     } else {
         /* Names of length 1.  (Or 0. But name is NUL terminated, so that will
            be case '\0' in this switch statement (ie a default case)  */
