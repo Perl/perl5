@@ -1,8 +1,10 @@
 use v5.36;
 use Test2::V0;
 
+my $root = -f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext' ? '.' : '..';
+
 # load the script
-do('./Porting/merge-deltas.pl') or die $@ || $!;
+do("$root/Porting/merge-deltas.pl") or die $@ || $!;
 
 # tree_for & as_pod
 {
@@ -34,7 +36,7 @@ do('./Porting/merge-deltas.pl') or die $@ || $!;
 
 # loop_head1
 {
-    my $template_file = 'Porting/perldelta_template.pod';
+    my $template_file = "$root/Porting/perldelta_template.pod";
     my $template      = tree_for( slurp($template_file) );
 
     # loop_head1 dies on unexpected =head1
