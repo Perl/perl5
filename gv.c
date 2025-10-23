@@ -2102,36 +2102,36 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         }
     }
     else if (len > 1) {
-            switch (*name) {
+        switch (*name) {
 
           /* Each in first set doesn't require this to be the main stash */
 
-            case 'E':
-                if (
-                    len >= 6 && name[1] == 'X' &&
-                    (memEQs(name, len, "EXPORT")
+          case 'E':
+            if (   (len >= 6 && name[1] == 'X')
+                && (  memEQs(name, len, "EXPORT")
                     ||memEQs(name, len, "EXPORT_OK")
                     ||memEQs(name, len, "EXPORT_FAIL")
-                    ||memEQs(name, len, "EXPORT_TAGS"))
-                )
-                    GvMULTI_on(gv);
+                    ||memEQs(name, len, "EXPORT_TAGS")))
+            {
+                GvMULTI_on(gv);
+            }
+            break;
+          case 'I':
+            if (memEQs(name, len, "ISA"))
+                gv_magicalize_isa(gv);
+            break;
+          case 'V':
+            if (memEQs(name, len, "VERSION"))
+                GvMULTI_on(gv);
+            break;
+          case 'a':
+            if (stash == PL_debstash && memEQs(name, len, "args")) {
+                GvMULTI_on(gv_AVadd(gv));
                 break;
-            case 'I':
-                if (memEQs(name, len, "ISA"))
-                    gv_magicalize_isa(gv);
-                break;
-            case 'V':
-                if (memEQs(name, len, "VERSION"))
-                    GvMULTI_on(gv);
-                break;
-            case 'a':
-                if (stash == PL_debstash && memEQs(name, len, "args")) {
-                    GvMULTI_on(gv_AVadd(gv));
-                    break;
-                }
-                goto try_core;
+            }
+            goto try_core;
 
-            default:
+          default:
 
             /* The remainder apply only to the main stash */
             if (stash != PL_defstash) {
@@ -2139,7 +2139,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             }
 
             switch (*name) {
-            case 'A':
+              case 'A':
                 if (memEQs(name, len, "ARGV")) {
                     IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
                 }
@@ -2147,7 +2147,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     GvMULTI_on(gv);
                 }
                 break;
-            case 'S':
+              case 'S':
                 if (memEQs(name, len, "SIG")) {
                     HV *hv;
                     I32 i;
@@ -2178,7 +2178,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     }
                 }
                 break;
-            case '\003':        /* $^CHILD_ERROR_NATIVE */
+              case '\003':        /* $^CHILD_ERROR_NATIVE */
                 if (memEQs(name, len, "\003HILD_ERROR_NATIVE"))
                     goto magicalize;
                                 /* @{^CAPTURE} %{^CAPTURE} */
@@ -2192,41 +2192,42 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     require_tie_mod_s(gv, '+', "Tie::Hash::NamedCapture",0);
 
                 } else          /* %{^CAPTURE_ALL} */
-                if (memEQs(name, len, "\003APTURE_ALL")) {
+                  if (memEQs(name, len, "\003APTURE_ALL")) {
                     require_tie_mod_s(gv, '-', "Tie::Hash::NamedCapture",0);
                 }
                 break;
-            case '\005':        /* ${^ENCODING} */
+              case '\005':        /* ${^ENCODING} */
                 if (memEQs(name, len, "\005NCODING"))
                     goto magicalize;
                 break;
-            case '\007':        /* ${^GLOBAL_PHASE} */
+              case '\007':        /* ${^GLOBAL_PHASE} */
                 if (memEQs(name, len, "\007LOBAL_PHASE"))
                     goto ro_magicalize;
                 break;
-            case '\010':        /* %{^HOOK} */
+              case '\010':        /* %{^HOOK} */
                 if (memEQs(name, len, "\010OOK")) {
                     GvMULTI_on(gv);
                     HV *hv = GvHVn(gv);
                     hv_magic(hv, NULL, PERL_MAGIC_hook);
                 }
                 break;
-            case '\014':
-                if ( memEQs(name, len, "\014AST_FH") ||               /* ${^LAST_FH} */
-                     memEQs(name, len, "\014AST_SUCCESSFUL_PATTERN")) /* ${^LAST_SUCCESSFUL_PATTERN} */
+              case '\014':
+                if (   memEQs(name, len, "\014AST_FH")  /* ${^LAST_FH} */
+                    || memEQs(name, len, "\014AST_SUCCESSFUL_PATTERN"))
+                                        /* ${^LAST_SUCCESSFUL_PATTERN} */
                     goto ro_magicalize;
                 break;
-            case '\015':        /* ${^MATCH} */
+              case '\015':        /* ${^MATCH} */
                 if (memEQs(name, len, "\015ATCH")) {
                     paren = RX_BUFF_IDX_CARET_FULLMATCH;
                     goto storeparen;
                 }
                 break;
-            case '\017':        /* ${^OPEN} */
+              case '\017':        /* ${^OPEN} */
                 if (memEQs(name, len, "\017PEN"))
                     goto magicalize;
                 break;
-            case '\020':        /* ${^PREMATCH}  ${^POSTMATCH} */
+              case '\020':        /* ${^PREMATCH}  ${^POSTMATCH} */
                 if (memEQs(name, len, "\020REMATCH")) {
                     paren = RX_BUFF_IDX_CARET_PREMATCH;
                     goto storeparen;
@@ -2236,15 +2237,15 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     goto storeparen;
                 }
                 break;
-            case '\023':
+              case '\023':
                 if (memEQs(name, len, "\023AFE_LOCALES"))
                     goto ro_magicalize;
                 break;
-            case '\024':	/* ${^TAINT} */
+              case '\024':	/* ${^TAINT} */
                 if (memEQs(name, len, "\024AINT"))
                     goto ro_magicalize;
                 break;
-            case '\025':	/* ${^UNICODE}, ${^UTF8LOCALE} */
+              case '\025':	/* ${^UNICODE}, ${^UTF8LOCALE} */
                 if (memEQs(name, len, "\025NICODE"))
                     goto ro_magicalize;
                 if (memEQs(name, len, "\025TF8LOCALE"))
@@ -2252,7 +2253,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 if (memEQs(name, len, "\025TF8CACHE"))
                     goto magicalize;
                 break;
-            case '\027':	/* $^WARNING_BITS */
+              case '\027':	/* $^WARNING_BITS */
                 if (memEQs(name, len, "\027ARNING_BITS"))
                     goto magicalize;
 #ifdef WIN32
@@ -2260,16 +2261,16 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     goto magicalize;
 #endif
                 break;
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            {
+              case '1':
+              case '2':
+              case '3':
+              case '4':
+              case '5':
+              case '6':
+              case '7':
+              case '8':
+              case '9':
+               {
                 /* Ensures that we have an all-digit variable, ${"1foo"} fails
                    this test  */
                 UV uv;
@@ -2278,8 +2279,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 /* XXX why are we using a SSize_t? */
                 paren = (SSize_t)(I32)uv;
                 goto storeparen;
+               }
             }
-        }
         }
     }
     else if (   stash == PL_defstash         /* Names of length 1. */
@@ -2291,59 +2292,57 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
          * minimum length (for things like 'uc') is 2. */
 
         switch (*name) {
-        case '&':		/* $& */
+          case '&':		/* $& */
             paren = RX_BUFF_IDX_FULLMATCH;
             goto sawampersand;
-        case '`':		/* $` */
+          case '`':		/* $` */
             paren = RX_BUFF_IDX_PREMATCH;
             goto sawampersand;
-        case '\'':		/* $' */
+          case '\'':		/* $' */
             paren = RX_BUFF_IDX_POSTMATCH;
-        sawampersand:
+          sawampersand:
 #ifdef PERL_SAWAMPERSAND
-            if (!(
-                sv_type == SVt_PVAV ||
-                sv_type == SVt_PVHV ||
-                sv_type == SVt_PVCV ||
-                sv_type == SVt_PVFM ||
-                sv_type == SVt_PVIO
-                )) { PL_sawampersand |=
-                        (*name == '`')
-                            ? SAWAMPERSAND_LEFT
-                            : (*name == '&')
-                                ? SAWAMPERSAND_MIDDLE
-                                : SAWAMPERSAND_RIGHT;
-                }
+            if (! (   sv_type == SVt_PVAV
+                   || sv_type == SVt_PVHV
+                   || sv_type == SVt_PVCV
+                   || sv_type == SVt_PVFM
+                   || sv_type == SVt_PVIO))
+            {
+                PL_sawampersand |= (*name == '`') ? SAWAMPERSAND_LEFT
+                                 : (*name == '&') ? SAWAMPERSAND_MIDDLE
+                                 :                  SAWAMPERSAND_RIGHT;
+            }
 #endif
             goto storeparen;
-        case '1':               /* $1 */
-        case '2':               /* $2 */
-        case '3':               /* $3 */
-        case '4':               /* $4 */
-        case '5':               /* $5 */
-        case '6':               /* $6 */
-        case '7':               /* $7 */
-        case '8':               /* $8 */
-        case '9':               /* $9 */
+
+          case '1':               /* $1 */
+          case '2':               /* $2 */
+          case '3':               /* $3 */
+          case '4':               /* $4 */
+          case '5':               /* $5 */
+          case '6':               /* $6 */
+          case '7':               /* $7 */
+          case '8':               /* $8 */
+          case '9':               /* $9 */
             paren = *name - '0';
 
-        storeparen:
+          storeparen:
             /* Flag the capture variables with a NULL mg_ptr
                Use mg_len for the array index to lookup.  */
             sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL, paren);
             break;
 
-        case ':':		/* $: */
+          case ':':		/* $: */
             sv_setpv(GvSVn(gv),PL_chopset);
             goto magicalize;
 
-        case '?':		/* $? */
+          case '?':		/* $? */
 #ifdef COMPLEX_STATUS
             SvUPGRADE(GvSVn(gv), SVt_PVLV);
 #endif
             goto magicalize;
 
-        case '!':		/* $! */
+          case '!':		/* $! */
             GvMULTI_on(gv);
             /* If %! has been used, automatically load Errno.pm. */
 
@@ -2354,8 +2353,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 require_tie_mod_s(gv, '!', "Errno", 1);
 
             break;
-        case '-':		/* $-, %-, @- */
-        case '+':		/* $+, %+, @+ */
+          case '-':		/* $-, %-, @- */
+          case '+':		/* $+, %+, @+ */
             GvMULTI_on(gv); /* no used once warnings here */
             {   /* $- $+ */
                 sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
@@ -2374,79 +2373,80 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 SvREADONLY_on(av);
             }
             break;
-        case '*':		/* $* */
-        case '#':		/* $# */
-        if (sv_type == SVt_PV)
-            /* diag_listed_as: $* is no longer supported as of Perl 5.30 */
-            croak("$%c is no longer supported as of Perl 5.30", *name);
-        break;
-        case '\010':	/* $^H */
+          case '*':		/* $* */
+          case '#':		/* $# */
+            if (sv_type == SVt_PV)
+                /* diag_listed_as: $* is no longer supported as of Perl 5.30 */
+                croak("$%c is no longer supported as of Perl 5.30", *name);
+            break;
+          case '\010':	/* $^H */
             {
                 HV *const hv = GvHVn(gv);
                 hv_magic(hv, NULL, PERL_MAGIC_hints);
             }
             goto magicalize;
-        case '\023':	/* $^S */
-        ro_magicalize:
+          case '\023':	/* $^S */
+          ro_magicalize:
             SvREADONLY_on(GvSVn(gv));
             /* FALLTHROUGH */
-        case '0':		/* $0 */
-        case '^':		/* $^ */
-        case '~':		/* $~ */
-        case '=':		/* $= */
-        case '%':		/* $% */
-        case '.':		/* $. */
-        case '(':		/* $( */
-        case ')':		/* $) */
-        case '<':		/* $< */
-        case '>':		/* $> */
-        case '\\':		/* $\ */
-        case '/':		/* $/ */
-        case '|':		/* $| */
-        case '$':		/* $$ */
-        case '[':		/* $[ */
-        case '\001':	/* $^A */
-        case '\003':	/* $^C */
-        case '\004':	/* $^D */
-        case '\005':	/* $^E */
-        case '\006':	/* $^F */
-        case '\011':	/* $^I, NOT \t in EBCDIC */
-        case '\016':	/* $^N */
-        case '\017':	/* $^O */
-        case '\020':	/* $^P */
-        case '\024':	/* $^T */
-        case '\027':	/* $^W */
-        magicalize:
+          case '0':		/* $0 */
+          case '^':		/* $^ */
+          case '~':		/* $~ */
+          case '=':		/* $= */
+          case '%':		/* $% */
+          case '.':		/* $. */
+          case '(':		/* $( */
+          case ')':		/* $) */
+          case '<':		/* $< */
+          case '>':		/* $> */
+          case '\\':		/* $\ */
+          case '/':		/* $/ */
+          case '|':		/* $| */
+          case '$':		/* $$ */
+          case '[':		/* $[ */
+          case '\001':	/* $^A */
+          case '\003':	/* $^C */
+          case '\004':	/* $^D */
+          case '\005':	/* $^E */
+          case '\006':	/* $^F */
+          case '\011':	/* $^I, NOT \t in EBCDIC */
+          case '\016':	/* $^N */
+          case '\017':	/* $^O */
+          case '\020':	/* $^P */
+          case '\024':	/* $^T */
+          case '\027':	/* $^W */
+          magicalize:
             sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
             break;
 
-        case '\014':	/* $^L */
+          case '\014':	/* $^L */
             sv_setpvs(GvSVn(gv),"\f");
             break;
-        case ';':		/* $; */
+          case ';':		/* $; */
             sv_setpvs(GvSVn(gv),"\034");
             break;
-        case ']':		/* $] */
-        {
+          case ']':		/* $] */
+           {
             SV * const sv = GvSV(gv);
             if (!sv_derived_from(PL_patchlevel, "version"))
                 upg_version(PL_patchlevel, TRUE);
             GvSV(gv) = vnumify(PL_patchlevel);
             SvREADONLY_on(GvSV(gv));
             SvREFCNT_dec(sv);
-        }
-        break;
-        case '\026':	/* $^V */
-        {
+            break;
+           }
+
+          case '\026':	/* $^V */
+           {
             SV * const sv = GvSV(gv);
             GvSV(gv) = new_version(PL_patchlevel);
             SvREADONLY_on(GvSV(gv));
             SvREFCNT_dec(sv);
-        }
-        break;
+            break;
+           }
 
-        case 'a':  /* The len > 1 case was handled above */
-        case 'b':
+          case 'a':  /* The len > 1 case was handled above */
+          case 'b':
             if (sv_type == SVt_PV)
                 GvMULTI_on(gv);
             break;
@@ -2455,10 +2455,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 
     /* Return true if we actually did something.  */
     return GvAV(gv) || GvHV(gv) || GvIO(gv) || GvCV(gv)
-        || ( GvSV(gv) && (
-                           SvOK(GvSV(gv)) || SvMAGICAL(GvSV(gv))
-                         )
-           );
+       || (GvSV(gv) && (SvOK(GvSV(gv)) || SvMAGICAL(GvSV(gv))));
 }
 
 /* If we do ever start using this later on in the file, we need to make
