@@ -2100,11 +2100,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
           if (strBEGINs(stashname, "CORE"))
             S_maybe_add_coresub(aTHX_ 0, gv, name, len);
         }
-
-        goto ret;
     }
-
-    if (stash != PL_defstash) { /* not the main stash */
+    else if (stash != PL_defstash) { /* not the main stash */
         /* We only have to check for a few names here: a, b, EXPORT, ISA
            and VERSION. All the others apply only to the main stash or to
            CORE (which is checked right after this). */
@@ -2140,7 +2137,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             default:
                 goto try_core;
             }
-            goto ret;
     }
     else if (len > 1) {
             switch (*name) {
@@ -2298,7 +2294,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                    this test  */
                 UV uv;
                 if (!grok_atoUV(name, &uv, NULL) || uv > I32_MAX)
-                    goto ret;
+                    break;
                 /* XXX why are we using a SSize_t? */
                 paren = (SSize_t)(I32)uv;
                 goto storeparen;
@@ -2468,7 +2464,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
         }
     }
 
-   ret:
     /* Return true if we actually did something.  */
     return GvAV(gv) || GvHV(gv) || GvIO(gv) || GvCV(gv)
         || ( GvSV(gv) && (
