@@ -464,6 +464,7 @@ BEGIN { $build_subclass->(
                   # boilerplate code following the C code
     'cpp_scope',  # node holding all the XS part of the main file
     'pre_boot',   # node holding code after user XSUBs but before boot XSUB
+    'boot_xsub',  # node holding code which generates the boot XSUB
 )};
 
 sub parse {
@@ -526,6 +527,14 @@ sub parse {
     $self->{pre_boot} = $pre_boot;
     push @{$self->{kids}}, $pre_boot;
     $pre_boot->parse($pxs)
+        or return;
+
+    # Emit the boot XSUB initialization routine
+
+    my $boot_xsub = ExtUtils::ParseXS::Node::boot_xsub->new();
+    $self->{boot_xsub} = $boot_xsub;
+    push @{$self->{kids}}, $boot_xsub;
+    $boot_xsub->parse($pxs)
         or return;
 
     1;
@@ -1237,6 +1246,197 @@ EOF
             |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
 EOF
     }
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::boot_xsub;
+
+# AST node representing C code that is emitted to create the boo XSUB.
+#
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit the boot_Foo__Bar() C function / XSUB
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |#ifdef __cplusplus
+        |extern "C" [[
+        |#endif
+EOF
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |XS_EXTERNAL(boot_$pxs->{MODULE_cname}); /* prototype to pass -Wmissing-prototypes */
+        |XS_EXTERNAL(boot_$pxs->{MODULE_cname})
+        |[[
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |    dVAR; dXSARGS;
+        |#else
+        |    dVAR; ${\($pxs->{VERSIONCHECK_value} ? 'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
+        |#endif
+EOF
+
+    # Declare a 'file' var for passing to newXS() and variants.
+    #
+    # If there is no $pxs->{seen_an_XSUB} then there are no xsubs
+    # in this .xs so 'file' is unused, so silence warnings.
+    #
+    # 'file' can also be unused in other circumstances: in particular,
+    # newXS_deffile() doesn't take a file parameter. So suppress any
+    # 'unused var' warning always.
+    #
+    # Give it the correct 'const'ness: Under 5.8.x and lower, newXS() is
+    # declared in proto.h as expecting a non-const file name argument. If
+    # the wrong qualifier is used, it causes breakage with C++ compilers and
+    # warnings with recent gcc.
+
+    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{seen_an_XSUB};
+        |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+        |    char* file = __FILE__;
+        |#else
+        |    const char* file = __FILE__;
+        |#endif
+        |
+        |    PERL_UNUSED_VAR(file);
+EOF
+
+    # Emit assorted declarations
+
+    print ExtUtils::ParseXS::Q(<<"EOF");
+        |
+        |    PERL_UNUSED_VAR(cv); /* -W */
+        |    PERL_UNUSED_VAR(items); /* -W */
+EOF
+
+    if ($pxs->{VERSIONCHECK_value}) {
+        print ExtUtils::ParseXS::Q(<<"EOF") ;
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |    XS_VERSION_BOOTCHECK;
+        |#  ifdef XS_APIVERSION_BOOTCHECK
+        |    XS_APIVERSION_BOOTCHECK;
+        |#  endif
+        |#endif
+        |
+EOF
+
+    } else {
+        print ExtUtils::ParseXS::Q(<<"EOF") ;
+            |#if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
+            |  XS_APIVERSION_BOOTCHECK;
+            |#endif
+            |
+EOF
+
+    }
+
+    # Declare a 'cv' var within a scope small enough to be visible just to
+    # newXS() calls which need to do further processing of the cv: in
+    # particular, when emitting one of:
+    #      XSANY.any_i32 = $value;
+    #      XSINTERFACE_FUNC_SET(cv, $value);
+
+    if ($pxs->{need_boot_cv}) {
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |    [[
+            |        CV * cv;
+            |
+EOF
+    }
+
+    # More overload stuff
+
+    if (keys %{ $pxs->{map_overloaded_package_to_C_package} }) {
+        # Emit just once if any overloads:
+        # Before 5.10, PL_amagic_generation used to need setting to at least a
+        # non-zero value to tell perl that any overloading was present.
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |    /* register the overloading (type 'A') magic */
+            |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+            |    PL_amagic_generation++;
+            |#endif
+EOF
+
+        for my $package (sort keys %{ $pxs->{map_overloaded_package_to_C_package} }) {
+            # Emit once for each package with overloads:
+            # Set ${'Foo::()'} to the fallback value for each overloaded
+            # package 'Foo' (or undef if not specified).
+            # But see the 'XXX' comments above about fallback and $().
+
+            my $fallback = $pxs->{map_package_to_fallback_string}{$package};
+            $fallback = 'UNDEF' unless defined $fallback;
+            $fallback =    $fallback eq 'TRUE'  ? '&PL_sv_yes'
+                                      : $fallback eq 'FALSE' ? '&PL_sv_no'
+                                      :                        '&PL_sv_undef';
+
+            print ExtUtils::ParseXS::Q(<<"EOF");
+                |    /* The magic for overload gets a GV* via gv_fetchmeth as */
+                |    /* mentioned above, and looks in the SV* slot of it for */
+                |    /* the "fallback" status. */
+                |    sv_setsv(
+                |        get_sv( "${package}::()", TRUE ),
+                |        $fallback
+                |    );
+EOF
+
+        }
+    }
+
+    # Emit any boot code associated with newXS().
+
+    print @{ $pxs->{bootcode_early} };
+
+    # Emit closing scope for the 'CV *cv' declaration
+
+    if ($pxs->{need_boot_cv}) {
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |    ]]
+EOF
+    }
+
+    # Emit any lines derived from BOOT: sections
+
+    if (@{ $pxs->{bootcode_later} }) {
+        print "\n    /* Initialisation Section */\n\n";
+        print @{$pxs->{bootcode_later}};
+        print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+            if $pxs->{config_WantLineNumbers};
+        print "\n    /* End of Initialisation Section */\n\n";
+    }
+
+    # Emit code to call any UNITCHECK blocks and return true. Since 5.22,
+    # this is been put into a separate function.
+    print ExtUtils::ParseXS::Q(<<'EOF');
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |#  if PERL_VERSION_GE(5, 9, 0)
+        |    if (PL_unitcheckav)
+        |        call_list(PL_scopestack_ix, PL_unitcheckav);
+        |#  endif
+        |    XSRETURN_YES;
+        |#else
+        |    Perl_xs_boot_epilog(aTHX_ ax);
+        |#endif
+        |]]
+        |
+        |#ifdef __cplusplus
+        |]]
+        |#endif
+EOF
 }
 
 
