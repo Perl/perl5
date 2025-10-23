@@ -245,6 +245,11 @@ This library provides functions used in checking and sorting the F<MANIFEST>.
 
 This script sorts the files in F<MANIFEST>.
 
+=head2 F<merge-deltas.pl>
+
+This script merges the various perldeltas for the development releases
+into the final perldelta for the stable release.
+
 =head2 F<mksample>
 
 This script regenerates F<Porting/config.sh> and F<Porting/config_H>.
