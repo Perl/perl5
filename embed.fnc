@@ -4010,6 +4010,8 @@ CRTdip	|UV	|valid_utf8_to_uv					\
 CRTdmp	|UV	|valid_utf8_to_uvchr					\
 				|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
+CRTip	|unsigned int|variant_byte_number				\
+				|PERL_UINTMAX_T word
 Adp	|int	|vcmp		|NN SV *lhv				\
 				|NN SV *rhv
 Adpr	|void	|vcroak 	|NULLOK const char *pat 		\
@@ -4107,10 +4109,6 @@ TXp	|void	|set_padlist	|NN CV *cv				\
 #if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 : Used in sv.c
 p	|void	|dump_sv_child	|NN SV *sv
-#endif
-#if !defined(EBCDIC)
-CRTip	|unsigned int|variant_byte_number				\
-				|PERL_UINTMAX_T word
 #endif
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 ARdp	|I32	|my_chsize	|int fd 				\

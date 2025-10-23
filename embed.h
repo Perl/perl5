@@ -848,6 +848,7 @@
 # define valid_identifier_sv(a)                 Perl_valid_identifier_sv(aTHX_ a)
 # define valid_utf8_to_uv                       Perl_valid_utf8_to_uv
 # define Perl_valid_utf8_to_uvchr               valid_utf8_to_uvchr
+# define variant_byte_number                    Perl_variant_byte_number
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)
 # define vdeb(a,b)                              Perl_vdeb(aTHX_ a,b)
@@ -873,9 +874,6 @@
 # if defined(DEBUGGING)
 #   define pad_setsv(a,b)                       Perl_pad_setsv(aTHX_ a,b)
 #   define pad_sv(a)                            Perl_pad_sv(aTHX_ a)
-# endif
-# if !defined(EBCDIC)
-#   define variant_byte_number                  Perl_variant_byte_number
 # endif
 # if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 #   define my_chsize(a,b)                       Perl_my_chsize(aTHX_ a,b)
