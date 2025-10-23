@@ -411,65 +411,6 @@ sub process_file {
   $AST->as_code($self);
 
   # ----------------------------------------------------------------
-  # End of main loop and at EOF: all paragraphs (and thus XSUBs) have now
-  # been read in and processed.  Do any final post-processing.
-  # ----------------------------------------------------------------
-
-  # Process any overloading.
-  #
-  # For each package FOO which has had at least one overloaded method
-  # specified:
-  #   - create a stub XSUB in that package called nil;
-  #   - generate code to be added to the boot XSUB which links that XSUB
-  #     to the symbol table entry *{"FOO::()"}.  This mimics the action in
-  #     overload::import() which creates the stub method as a quick way to
-  #     check whether an object is overloaded (including via inheritance),
-  #     by doing $self->can('()').
-  #   - Further down, we add a ${"FOO:()"} scalar containing the value of
-  #     'fallback' (or undef if not specified).
-  #
-  # XXX In 5.18.0, this arrangement was changed in overload.pm, but hasn't
-  # been updated here. The *() glob was being used for two different
-  # purposes: a sub to do a quick check of overloadability, and a scalar
-  # to indicate what 'fallback' value was specified (even if it wasn't
-  # specified). The commits:
-  #   v5.16.0-87-g50853fa94f
-  #   v5.16.0-190-g3866ea3be5
-  #   v5.17.1-219-g79c9643d87
-  # changed this so that overloadability is checked by &((, while fallback
-  # is checked by $() (and not present unless specified by 'fallback'
-  # as opposed to the always being present, but sometimes undef).
-  # Except that, in the presence of fallback, &() is added too for
-  # backcompat reasons (which I don't fully understand - DAPM).
-  # See overload.pm's import() and OVERLOAD() methods for more detail.
-  #
-  # So this code needs updating to match.
-
-  for my $package (sort keys %{ $self->{map_overloaded_package_to_C_package} })
-  {
-    # make them findable with fetchmethod
-    my $packid = $self->{map_overloaded_package_to_C_package}->{$package};
-    print Q(<<"EOF");
-      |XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
-      |XS_EUPXS(XS_${packid}_nil)
-      |{
-      |   dXSARGS;
-      |   PERL_UNUSED_VAR(items);
-      |   XSRETURN_EMPTY;
-      |}
-      |
-EOF
-
-    unshift(@{ $self->{bootcode_early} }, Q(<<"EOF"));
-      |   /* Making a sub named "${package}::()" allows the package */
-      |   /* to be findable via fetchmethod(), and causes */
-      |   /* overload::Overloaded("$package") to return true. */
-      |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
-EOF
-  }
-
-
-  # ----------------------------------------------------------------
   # Emit the boot XSUB initialization routine
   # ----------------------------------------------------------------
 

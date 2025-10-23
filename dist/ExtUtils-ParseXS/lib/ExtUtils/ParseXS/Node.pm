@@ -463,6 +463,7 @@ BEGIN { $build_subclass->(
     'C_part_postamble',# Node::C_part_postamble object which emits
                   # boilerplate code following the C code
     'cpp_scope',  # node holding all the XS part of the main file
+    'pre_boot',   # node holding code after user XSUBs but before boot XSUB
 )};
 
 sub parse {
@@ -513,6 +514,19 @@ sub parse {
     $self->{cpp_scope} = $cpp_scope;
     $cpp_scope->parse($pxs);
     push @{$self->{kids}}, $cpp_scope;
+
+    # Now at EOF: all paragraphs (and thus XSUBs) have now been read in
+    # and processed. Do any final post-processing.
+
+    # "Parse" the bit following any C code. Doesn't actually consume any
+    # lines: just a placeholder for emitting any code which should follow
+    # user XSUBs but which comes before the boot XSUB
+
+    my $pre_boot = ExtUtils::ParseXS::Node::pre_boot->new();
+    $self->{pre_boot} = $pre_boot;
+    push @{$self->{kids}}, $pre_boot;
+    $pre_boot->parse($pxs)
+        or return;
 
     1;
 }
@@ -1145,6 +1159,84 @@ sub boot_code {
     push @lines, "$_\n" for @{$self->{lines}}, "";
 
     return @lines;
+}
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::pre_boot;
+
+# AST node representing C code that is emitted after all user-defined
+# XSUBs but before the boot XSUB. (This currently consists of
+#  'Foo::Bar::()' XSUBs for any packages which have overloading.)
+#
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # For each package FOO which has had at least one overloaded method
+    # specified:
+    #   - create a stub XSUB in that package called nil;
+    #   - generate code to be added to the boot XSUB which links that XSUB
+    #     to the symbol table entry *{"FOO::()"}.  This mimics the action in
+    #     overload::import() which creates the stub method as a quick way to
+    #     check whether an object is overloaded (including via inheritance),
+    #     by doing $self->can('()').
+    #   - Further down, we add a ${"FOO:()"} scalar containing the value of
+    #     'fallback' (or undef if not specified).
+    #
+    # XXX In 5.18.0, this arrangement was changed in overload.pm, but hasn't
+    # been updated here. The *() glob was being used for two different
+    # purposes: a sub to do a quick check of overloadability, and a scalar
+    # to indicate what 'fallback' value was specified (even if it wasn't
+    # specified). The commits:
+    #   v5.16.0-87-g50853fa94f
+    #   v5.16.0-190-g3866ea3be5
+    #   v5.17.1-219-g79c9643d87
+    # changed this so that overloadability is checked by &((, while fallback
+    # is checked by $() (and not present unless specified by 'fallback'
+    # as opposed to the always being present, but sometimes undef).
+    # Except that, in the presence of fallback, &() is added too for
+    # backcompat reasons (which I don't fully understand - DAPM).
+    # See overload.pm's import() and OVERLOAD() methods for more detail.
+    #
+    # So this code needs updating to match.
+
+    for my $package (sort keys %{$pxs->{map_overloaded_package_to_C_package}})
+    {
+        # make them findable with fetchmethod
+        my $packid = $pxs->{map_overloaded_package_to_C_package}{$package};
+        print ExtUtils::ParseXS::Q(<<"EOF");
+            |XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_${packid}_nil)
+            |{
+            |   dXSARGS;
+            |   PERL_UNUSED_VAR(items);
+            |   XSRETURN_EMPTY;
+            |}
+            |
+EOF
+
+        unshift(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+            |   /* Making a sub named "${package}::()" allows the package */
+            |   /* to be findable via fetchmethod(), and causes */
+            |   /* overload::Overloaded("$package") to return true. */
+            |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
+EOF
+    }
 }
 
 
