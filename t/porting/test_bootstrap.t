@@ -39,7 +39,7 @@ while (my $file = <$fh>) {
     # but exclude this file from that test.
     unlike(
         $contents,
-        qr/use\s+Test::(?:Simple|More)/,
+        qr/use\s+(?:Test::(?:Simple|More|Builder)|Test2)/,
         "$file doesn't use Test::Simple or Test::More"
     ) unless ($file =~ m|porting/test_bootstrap\.t|);
     next unless $file =~ m!^base/! or $file =~ m!^comp!;
