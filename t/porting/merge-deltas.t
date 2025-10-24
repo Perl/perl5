@@ -25,7 +25,36 @@ do("../Porting/merge-deltas.pl") or die $@ || $!;
     is( as_pod( tree_for($pod) ), $pod, 'as_pod( tree_pod ) round-trips' );
 }
 
-# loop_head1
+# loop_head1 (with unexpected head1)
+{
+    my $template = tree_for( <<~ 'POD' );
+    =head1 Unexpected
+
+    =cut
+    POD
+
+    # loop_head1 dies on unexpected =head1
+    # the callback is only run on the unskipped sections
+    ok(
+        !eval {
+            loop_head1(
+                [],
+                $template,
+                'bogus_delta.pod',
+                sub {}
+            );
+            1;
+        },
+        'loop_head1 dies on unexpected =head1'
+    );
+    is(
+        $@,
+        "Unexpected section '=head1 Unexpected' in bogus_delta.pod\n",
+        '.. expected error message for loop_head1'
+    );
+}
+
+# loop_head1 test contents of template have not changed
 {
     my $template_file = "../Porting/perldelta_template.pod";
     my $template      = tree_for( slurp($template_file) );
