@@ -2133,7 +2133,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             case 'b':
                 if (len == 1 && sv_type == SVt_PV)
                     GvMULTI_on(gv);
-                /* FALLTHROUGH */
+                goto try_core;
+
             default:
                 goto try_core;
             }
