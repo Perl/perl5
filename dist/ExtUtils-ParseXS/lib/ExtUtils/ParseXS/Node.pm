@@ -1782,8 +1782,6 @@ sub parse {
         or return;
     push @{$self->{kids}}, $decl;
 
-    $_ = '';
-
     # Check all the @{ $pxs->{line}} lines for balance: all the
     # #if, #else, #endif etc within the XSUB should balance out.
     ExtUtils::ParseXS::Utilities::check_conditional_preprocessor_statements();
