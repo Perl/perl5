@@ -218,13 +218,6 @@ BEGIN {
 
   'need_boot_cv',       # must declare 'cv' within the boot function
 
-  'bootcode_early',     # Array of code lines to emit early in boot XSUB:
-                        # typically newXS() calls
-
-  'bootcode_later',     # Array of code lines to emit later on in boot XSUB:
-                        # typically lines from a BOOT: XS file section
-
-
   # Per-XSUB parsing state:
 
   'file_SCOPE_enabled',        # Bool: the current state of the file-scope
