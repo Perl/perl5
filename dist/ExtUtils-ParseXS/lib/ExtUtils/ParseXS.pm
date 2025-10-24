@@ -103,10 +103,8 @@ our $AUTHOR_WARNINGS;
 $AUTHOR_WARNINGS = ($ENV{AUTHOR_WARNINGS} || 0)
     unless defined $AUTHOR_WARNINGS;
 
-# "impossible" keyword (multiple newline)
-our $END = "!End!\n\n";
 # Match an XS Keyword
-our $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . "|$END)\\s*:";
+our $BLOCK_regexp = '\s*(' . $ExtUtils::ParseXS::Constants::XSKeywordsAlternation . ")\\s*:";
 
 
 # All the valid fields of an ExtUtils::ParseXS hash object. The 'use

@@ -1210,12 +1210,8 @@ sub parse {
 
 
 
-        # should just be a fake END token left
-        die "Internal error: bad END token\n"
-            unless $pxs->{line}
-                  && @{$pxs->{line}} == 1
-                  && $pxs->{line}[0] eq "$ExtUtils::ParseXS::END:";
-        pop @{$pxs->{line}};
+        die "Internal error: unexpectedly not at EOF\n"
+                  if @{$pxs->{line}};
 
         $pxs->{seen_an_XSUB} = 1; # encountered at least one XSUB
     } # END 'PARAGRAPH' 'while' loop
@@ -1786,13 +1782,6 @@ sub parse {
         or return;
     push @{$self->{kids}}, $decl;
 
-    # Append a fake EOF-keyword line. This makes it easy to do "all lines
-    # until the next keyword" style loops, since the fake END line (which
-    # includes a \n so it can't appear in the wild) is also matched as a
-    # keyword.
-    push(@{ $pxs->{line} }, "$ExtUtils::ParseXS::END:");
-    push(@{ $pxs->{line_no} }, $pxs->{line_no}->[-1]);
-
     $_ = '';
 
     # Check all the @{ $pxs->{line}} lines for balance: all the
@@ -1810,7 +1799,7 @@ sub parse {
     my $case_had_cond;       # the previous CASE had a condition
 
     # Repeatedly look for CASE or XSUB body.
-    while (@{ $pxs->{line} }) {
+    while (1) {
         # Parse a CASE statement if present.
         my ($case) =
             $self->parse_keywords(
@@ -1830,10 +1819,10 @@ sub parse {
         else {
             $seen_bare_xbody = 1;
             if ($num++) {
-                my $l = $pxs->{line}[0];
                 # After the first CASE+body, we should only encounter
                 # further CASE+bodies or end-of-paragraph
-                last if $l eq "$ExtUtils::ParseXS::END:";
+                last unless @{$pxs->{line}};
+                my $l = $pxs->{line}[0];
                 $pxs->death(
                     $l =~ /^$ExtUtils::ParseXS::BLOCK_regexp/o
                             ? "Error: misplaced '$1:'"
@@ -5701,8 +5690,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
     $xsub->{seen_PPCODE} = 1;
-    # The only thing left should be the special "!End!\n\n" token.
-    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}} > 1;
+    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}};
     1;
 }
 
