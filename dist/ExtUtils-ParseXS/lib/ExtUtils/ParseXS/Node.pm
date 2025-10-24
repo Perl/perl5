@@ -1254,7 +1254,7 @@ sub as_code {
             |
 EOF
 
-        unshift(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
+        push(@{ $pxs->{bootcode_early} }, ExtUtils::ParseXS::Q(<<"EOF"));
             |   /* Making a sub named "${package}::()" allows the package */
             |   /* to be findable via fetchmethod(), and causes */
             |   /* overload::Overloaded("$package") to return true. */
