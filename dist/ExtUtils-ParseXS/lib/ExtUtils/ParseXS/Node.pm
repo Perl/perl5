@@ -520,6 +520,7 @@ sub parse {
         or return;
     push @{$self->{kids}}, $preamble;
 
+
     # Process the first (C language) half of the XS file, up until the first
     # MODULE: line
 
@@ -537,11 +538,6 @@ sub parse {
     $C_part_postamble->parse($pxs, $self)
         or return;
     push @{$self->{kids}}, $C_part_postamble;
-
-    # At this point, $_ should hold the first MODULE line
-
-    $pxs->{lastline}    = $_;
-    $pxs->{lastline_no} = $.;
 
     # Parse the XS half of the file
 
@@ -650,16 +646,18 @@ sub parse {
 
     # Read in lines until the first MODULE line, creating a list of
     # Node::C_part_code and Node::C_part_POD nodes as children.
-    # Returns with $_ holding the (unprocessed) next line (or undef for
-    # EOF)
+    # Returns with $pxs->{lastline} holding the (unprocessed) next line
+    # (or undef for EOF)
 
-    $_ = readline($pxs->{in_fh});
+    $pxs->{lastline}    =  readline($pxs->{in_fh});
+    $pxs->{lastline_no} = $.;
 
-    while (defined $_) {
-        return 1 if $self->is_xs_module_line($_);
+    while (defined $pxs->{lastline}) {
+        return 1 if $self->is_xs_module_line($pxs->{lastline});
 
         my $node = 
-            /^=/ ? ExtUtils::ParseXS::Node::C_part_POD->new()
+            $pxs->{lastline} =~ /^=/
+                 ? ExtUtils::ParseXS::Node::C_part_POD->new()
                  : ExtUtils::ParseXS::Node::C_part_code->new();
 
         # Read in next block of code or POD lines
@@ -699,19 +697,22 @@ sub parse {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
-    $self->{line_no} = $.;
+    $self->{line_no} = $pxs->{lastline_no};
     $self->{file}    = $pxs->{in_pathname};
 
-    # This method is called with $_ holding the first line of POD
-    # and returns with $_ holding the (unprocessed) next line
+    # This method is called with $pxs->{lastline} holding the first line
+    # of POD and returns with $pxs->{lastline} holding the (unprocessed)
+    # next line following the =cut line
 
-    do {
-        push @{$self->{pod_lines}}, $_;
-        if (/^=cut\s*$/) {
-            $_ = readline($pxs->{in_fh});
-            return 1;
-        }
-    } while (readline($pxs->{in_fh}));
+    my $cut;
+    while (1) {
+        push @{$self->{pod_lines}}, $pxs->{lastline};
+        $pxs->{lastline}    = readline($pxs->{in_fh});
+        $pxs->{lastline_no} = $.;
+        return 1 if $cut;
+        last unless defined $pxs->{lastline};
+        $cut = $pxs->{lastline} =~ /^=cut\s*$/;
+    }
 
     # At this point $. is at end of file so die won't state the start
     # of the problem, and as we haven't yet read any lines &death won't
@@ -772,17 +773,23 @@ sub parse {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
-    $self->{line_no} = $.;
+    $self->{line_no} = $pxs->{lastline_no};
     $self->{file}    = $pxs->{in_pathname};
 
-    # This method is called with $_ holding the first line of C code
-    # and returns with $_ holding the (unprocessed) next line
+    # This method is called with $pxs->{lastline} holding the first line
+    # of (possibly) C code and returns with $pxs->{lastline} holding the
+    # first (unprocessed) line which isn't C code (i.e. its the start of
+    # POD or a MODULE line)
 
-    do {
-        return 1 if $self->is_xs_module_line($_);
-        return 1 if /^=/;
-        push @{$self->{code_lines}}, $_;
-    } while (readline($pxs->{in_fh}));
+    my $cut;
+    while (1) {
+        return 1 if $self->is_xs_module_line($pxs->{lastline});
+        return 1 if $pxs->{lastline} =~ /^=/;
+        push @{$self->{code_lines}}, $pxs->{lastline};
+        $pxs->{lastline}    = readline($pxs->{in_fh});
+        $pxs->{lastline_no} = $.;
+        last unless defined $pxs->{lastline};
+    }
 
     1;
 }
@@ -813,7 +820,7 @@ sub parse {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
-    $self->{line_no} = 1;
+    $self->{line_no} = $pxs->{lastline_no};
     $self->{file}    = $pxs->{in_pathname};
     1;
 }
