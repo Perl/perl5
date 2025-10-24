@@ -906,6 +906,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     }
 
     nextchar = *remaining;
+
+    assert(generic_isCC_(*mg->mg_ptr, CC_MAGICAL_));
+
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
         if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
@@ -3015,6 +3018,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         }
         return 0;
     }
+
+    assert(generic_isCC_(*mg->mg_ptr, CC_MAGICAL_));
 
     switch (*mg->mg_ptr) {
     case '\001':	/* ^A */
