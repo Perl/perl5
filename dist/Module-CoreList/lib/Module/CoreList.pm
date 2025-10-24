@@ -23904,6 +23904,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.043005',
             'Config'                => '5.043005',
+            'Module::CoreList'      => '5.20251120',
+            'Module::CoreList::Utils'=> '5.20251120',
         },
         removed => {
         }
