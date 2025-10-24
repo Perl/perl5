@@ -3,7 +3,6 @@
 =head1 NAME
 
 release_managers_guide - Releasing a new version of perl 5.x
-
 Note that things change at each release, so there may be new things not
 covered here, or tools may need updating.
 
@@ -101,6 +100,9 @@ this guide is not written with that in mind and as a result several
 key steps are missing. If you do use your own fork then extra care
 needs to be taken when setting/pushing the tag and doing the merge
 (do B<not> use a PR).
+
+As you follow these steps, please record notes of anything that you found
+to be unclear; improving this guide is an important part of releasing.
 
 =head2 Release types
 
@@ -964,13 +966,19 @@ Build perl, then make sure it passes its own test suite, and installs:
 
  $ make test install
 
+For an odd-numbered version, perl will install itself as
+C</tmp/perl-5.X.Y-pretest/bin/perl5.X.Y> rather than
+C</tmp/perl-5.X.Y-pretest/bin/perl>.
+
 Check that the output of C</tmp/perl-5.X.Y-pretest/bin/perl -v> and
 C</tmp/perl-5.X.Y-pretest/bin/perl -V> are as expected,
 especially as regards version numbers, patch and/or RC levels, and @INC
-paths. Note that as they have been built from a git working
-directory, they will still identify themselves using git tags and
-commits. (Note that for an odd-numbered version, perl will install
-itself as C<perl5.X.Y>). C<perl -v> will identify itself as:
+paths.
+
+Note that as they have been built from a git working directory, they
+will still identify themselves using git tags and commits.
+
+C<perl -v> (or C<perl5.X.Y -v>) will identify itself as:
 
  This is perl 5, version X, subversion Y (v5.X.Y (v5.XX.Z-NNN-gdeadbeef))
 
