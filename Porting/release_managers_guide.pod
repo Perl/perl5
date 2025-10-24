@@ -478,8 +478,17 @@ time can save you from having to work out the details during the actual
 release process.
 
 Read F<Porting/how_to_write_a_perldelta.pod>, and try to make sure that
-every section it lists is, if necessary, populated and complete. Copy
-edit the whole document.
+every section it lists is, if necessary, populated and complete.
+
+In the case of a BLEAD-FINAL, all perldeltas from the 5.X series must be
+merged into F<pod/perldelta.pod>. The process starts with
+
+    ./perl -Ilib Porting/merge-deltas.pl
+
+The resulting F<pod/perldelta.pod> will need to be edited.  In particular,
+lists will need to be merged.  Sections which were describe changes which
+were reverted will need to be removed.  Some items may benefit from being
+merged into a new summary.
 
 You won't be able to automatically fill in the "Updated Modules" section until
 after L<Module::CoreList> is updated (as described below in
