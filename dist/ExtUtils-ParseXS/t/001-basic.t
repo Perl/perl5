@@ -5701,4 +5701,70 @@ EOF
     test_many($preamble, 'boot_Foo', \@test_fns);
 }
 
+{
+    # Test reporting of bad syntax on MODULE lines.
+
+    my $preamble = Q(<<'EOF');
+EOF
+
+    my @test_fns = (
+        [
+            '1st MODULE PKG',
+            [ Q(<<'EOF') ],
+                |MODULE = X PKG = Y
+                |
+                |PROTOTYPES:  DISABLE
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '1st MODULE colon',
+            [ Q(<<'EOF') ],
+                |MODULE: X PACKAGE = Y
+                |
+                |PROTOTYPES:  DISABLE
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '2nd MODULE PKG',
+            [ Q(<<'EOF') ],
+                |MODULE = Foo PACKAGE = Foo
+                |
+                |PROTOTYPES:  DISABLE
+                |
+                |MODULE = X PKG = Y
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '2nd MODULE colon',
+            [ Q(<<'EOF') ],
+                |MODULE = Foo PACKAGE = Foo
+                |
+                |PROTOTYPES:  DISABLE
+                |
+                |MODULE: X PACKAGE = Y
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+                "got expected err msg"
+            ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 done_testing;

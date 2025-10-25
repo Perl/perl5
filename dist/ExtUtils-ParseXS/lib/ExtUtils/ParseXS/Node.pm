@@ -370,21 +370,6 @@ sub parse_keywords {
     return @kids;
 }
 
-# return (module, package, prefix) values if the line
-# is a valid 'MODULE = ...' line
-
-sub is_xs_module_line {
-    my __PACKAGE__       $self  = shift;
-    my                   $line  = shift;
-
-    $line =~
-        /^      MODULE  \s* = \s*   [\w:]+
-        (?: \s+ PACKAGE \s* = \s* ( [\w:]+ ) )?
-        (?: \s+ PREFIX  \s* = \s* ( \S+    ) )?
-        \s* $/x;
-}
-
-
 sub as_code { }
 
 # Most node types inherit this: just continue walking the tree
@@ -646,14 +631,15 @@ sub parse {
 
     # Read in lines until the first MODULE line, creating a list of
     # Node::C_part_code and Node::C_part_POD nodes as children.
-    # Returns with $pxs->{lastline} holding the (unprocessed) next line
-    # (or undef for EOF)
+    # Returns with $pxs->{lastline} holding the next line (i.e. the MODULE
+    # line) or errors out if not found
 
     $pxs->{lastline}    =  readline($pxs->{in_fh});
     $pxs->{lastline_no} = $.;
 
     while (defined $pxs->{lastline}) {
-        return 1 if $self->is_xs_module_line($pxs->{lastline});
+        return 1 if ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
+                                                            $pxs->{lastline});
 
         my $node = 
             $pxs->{lastline} =~ /^=/
@@ -783,7 +769,8 @@ sub parse {
 
     my $cut;
     while (1) {
-        return 1 if $self->is_xs_module_line($pxs->{lastline});
+        return 1 if ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
+                                                            $pxs->{lastline});
         return 1 if $pxs->{lastline} =~ /^=/;
         push @{$self->{code_lines}}, $pxs->{lastline};
         $pxs->{lastline}    = readline($pxs->{in_fh});

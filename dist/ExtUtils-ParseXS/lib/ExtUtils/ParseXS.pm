@@ -523,8 +523,6 @@ sub _process_module_xs_line {
 
   $self->{PACKAGE_class} = $self->{PACKAGE_name};
   $self->{PACKAGE_class} .= "::" if $self->{PACKAGE_class} ne "";
-
-  $self->{lastline} = "";
 }
 
 
@@ -674,14 +672,24 @@ sub fetch_para {
   my ExtUtils::ParseXS $self = shift;
 
   return 0 if not defined $self->{lastline}; # EOF
+  chomp $self->{lastline}; # may not already have been for first MODULE line
 
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
 
-  if ($self->{lastline} =~
-      /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/)
+  if (ExtUtils::ParseXS::Utilities::looks_like_MODULE_line($self->{lastline}))
   {
+    $self->{lastline} =~
+              /^
+                        MODULE  \s* = \s* ([\w:]+)
+                (?: \s+ PACKAGE \s* = \s* ([\w:]+))?
+                (?: \s+ PREFIX  \s* = \s* (\S+))?
+                \s*
+              $/x
+      or $self->death("Error: unparseable MODULE line: '$self->{lastline}'");
+
     $self->_process_module_xs_line($1, $2, $3);
+    $self->{lastline} = "";
   }
 
   # count how many #ifdef levels we see in this paragraph

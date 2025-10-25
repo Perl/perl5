@@ -25,6 +25,7 @@ our (@ISA, @EXPORT_OK);
   check_conditional_preprocessor_statements
   escape_file_for_line_directive
   report_typemap_failure
+  looks_like_MODULE_line
 );
 
 =head1 NAME
@@ -362,7 +363,11 @@ The current line number.
 
 sub current_line_number {
   my ExtUtils::ParseXS $self = shift;
-  my $line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
+  # NB: until the first MODULE line is encountered, $self->{line_no} etc
+  # won't have been populated
+  my $line_number = @{$self->{line_no}}
+        ? $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1]
+        : $self->{lastline_no};
   return $line_number;
 }
 
@@ -587,6 +592,27 @@ sub report_typemap_failure {
   $self->$error_method($err);
   return();
 }
+
+=head2 C<looks like_MODULE_line($line)>
+
+Returns true if the passed line looks like an attempt to be a MODULE line.
+Note that it doesn't check for valid syntax. This allows the caller to do
+its own parsing of the line, providing some sort of 'invalid MODULE line'
+check. As compared with thinking that its not a MODULE line if its syntax
+is slightly off, leading instead to some weird error about a bad start to
+an XSUB or something.
+
+In particular, a line starting C<MODULE:> returns true, because it's
+likely to be an attempt by the programmer to write a MODULE line, even
+though it's invalid syntax.
+
+=cut
+
+sub looks_like_MODULE_line {
+  my $line  = shift;
+  $line =~ /^MODULE\s*[=:]/;
+}
+
 
 
 1;
