@@ -1280,6 +1280,41 @@
 #define is_HANGUL_ED_utf8_safe(s,e)                                         \
 ( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x80, 0x9F) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 )
 
+/*
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+
+	\p{_Perl_Word_But_NonCont}
+*/
+/*** GENERATED CODE ***/
+#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xCD == ((const U8*)s)[0] ) ?\
+	    ( ( 0xBA == ((const U8*)s)[1] ) ? 2 : 0 )                       \
+	: ( 0xD2 == ((const U8*)s)[0] ) ?                                   \
+	    ( ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x88, 0x89) ) ? 2 : 0 )\
+	: ( 0xE1 == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xE2 == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x83 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x9D, 0xA0) || inRANGE_helper_(U8, ((const U8*)s)[2], 0xA2, 0xA4) ) ? 3 : 0 )\
+	    : ( 0x92 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xB6, 0xBF) ) ? 3 : 0 )\
+	    : ( 0x93 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xA9) ) ? 3 : 0 )\
+	    : ( ( 0xB8 == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xEA == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x99 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xB0, 0xB2) ) ) ? 3 : 0 )\
+	: ( 0xEF == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0xB1 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x9E, 0xA3) ) ? 3 : 0 )\
+	    : ( 0xB7 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xBA, 0xBB) ) ? 3 : 0 )\
+	    : ( ( 0xB9 == ((const U8*)s)[1] ) && ( ( ((const U8*)s)[2] & 0xF1 ) == 0xB0 ) ) ? 3 : 0 )\
+	: ( ( 0xF0 == ((const U8*)s)[0] ) && ( 0x9F == ((const U8*)s)[1] ) ) ? ( ( 0x84 == ((const U8*)s)[2] ) ?\
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xB0, 0xBF) ) ? 4 : 0 )\
+		: ( 0x85 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x80, 0x89) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x90, 0xA9) || inRANGE_helper_(U8, ((const U8*)s)[3], 0xB0, 0xBF) ) ? 4 : 0 )\
+		: ( ( 0x86 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x80, 0x89) ) ) ? 4 : 0 ) : 0 ) : 0 )
+
 #endif	/* ASCII/Latin1 */
 
 #if 'A' == 193 /* EBCDIC 1047 */ \
@@ -2537,6 +2572,49 @@
 /*** GENERATED CODE ***/
 #define is_HANGUL_ED_utf8_safe(s,e)                                         \
 ( 0 )
+
+/*
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+
+	\p{_Perl_Word_But_NonCont}
+*/
+/*** GENERATED CODE ***/
+#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xB2 == ((const U8*)s)[0] ) ?\
+	    ( ( 0x69 == ((const U8*)s)[1] ) ? 2 : 0 )                       \
+	: ( 0xB8 == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x45 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 )\
+	: ( 0xBE == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x64 == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xCA == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x47 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x71, 0x73) ) ? 3 : 0 )\
+	    : ( ( 0x48 == ((const U8*)s)[1] ) && ( 0x41 == ((const U8*)s)[2] || inRANGE_helper_(U8, ((const U8*)s)[2], 0x43, 0x45) ) ) ? 3 : 0 )\
+	: ( 0xCB == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x46 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x65, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x73) ) ? 3 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x59) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x73) ) ? 3 : 0 )\
+	    : ( ( 0x48 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) ) ) ? 3 : 0 )\
+	: ( 0xCD == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x58 == ((const U8*)s)[1] ) && ( 0x56 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xDD == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x4A == ((const U8*)s)[1] ) ?                               \
+		( ( ( 0x62 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) ) ) ? 4 : 0 )\
+	    : ( 0x73 == ((const U8*)s)[1] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ? 4 : 0 )\
+		: ( 0x44 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x44) ) ? 4 : 0 )\
+		: ( 0x56 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x69, 0x6A) ) ? 4 : 0 )\
+		: ( ( 0x62 == ((const U8*)s)[2] ) && ( ((const U8*)s)[3] == 0x57 || ((const U8*)s)[3] == 0x59 || ((const U8*)s)[3] == 0x63 || ( ( ((const U8*)s)[3] & 0xFD ) == 0x65 ) || ((const U8*)s)[3] == 0x69 || ( ( ((const U8*)s)[3] & 0xFD ) == 0x70 ) ) ) ? 4 : 0 )\
+	    : 0 )                                                           \
+	: ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x70 == ((const U8*)s)[1] ) ) ? ( ( 0x4A == ((const U8*)s)[2] ) ?\
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x73) ) ? 4 : 0 )\
+		: ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x52) ) ?  \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x73) ) ? 4 : 0 )\
+		: ( ( 0x53 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) ) ) ? 4 : 0 ) : 0 ) : 0 )
 
 #endif	/* EBCDIC 1047 */
 
@@ -3796,6 +3874,49 @@
 #define is_HANGUL_ED_utf8_safe(s,e)                                         \
 ( 0 )
 
+/*
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+
+	\p{_Perl_Word_But_NonCont}
+*/
+/*** GENERATED CODE ***/
+#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xB1 == ((const U8*)s)[0] ) ?\
+	    ( ( 0x68 == ((const U8*)s)[1] ) ? 2 : 0 )                       \
+	: ( 0xB7 == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x45 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 )\
+	: ( 0xBE == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x63 == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xCA == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x47 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x72) ) ? 3 : 0 )\
+	    : ( ( 0x48 == ((const U8*)s)[1] ) && ( 0x41 == ((const U8*)s)[2] || inRANGE_helper_(U8, ((const U8*)s)[2], 0x43, 0x45) ) ) ? 3 : 0 )\
+	: ( 0xCB == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x46 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x64, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x72) ) ? 3 : 0 )\
+	    : ( 0x47 == ((const U8*)s)[1] ) ?                               \
+		( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x59) || 0x5F == ((const U8*)s)[2] || inRANGE_helper_(U8, ((const U8*)s)[2], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x70, 0x72) ) ? 3 : 0 )\
+	    : ( ( 0x48 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x4A) ) ) ? 3 : 0 )\
+	: ( 0xCD == ((const U8*)s)[0] ) ?                                   \
+	    ( ( ( 0x58 == ((const U8*)s)[1] ) && ( 0x56 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+	: ( 0xDD == ((const U8*)s)[0] ) ?                                   \
+	    ( ( 0x4A == ((const U8*)s)[1] ) ?                               \
+		( ( ( 0x5F == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) ) ) ? 4 : 0 )\
+	    : ( 0x72 == ((const U8*)s)[1] ) ?                               \
+		( ( 0x43 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ? 4 : 0 )\
+		: ( 0x44 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x44) ) ? 4 : 0 )\
+		: ( 0x56 == ((const U8*)s)[2] ) ?                           \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x68, 0x69) ) ? 4 : 0 )\
+		: ( ( 0x5F == ((const U8*)s)[2] ) && ( ((const U8*)s)[3] == 0x57 || ((const U8*)s)[3] == 0x59 || ((const U8*)s)[3] == 0x62 || ( ( ((const U8*)s)[3] & 0xFD ) == 0x64 ) || ( ( ((const U8*)s)[3] & 0xFD ) == 0x68 ) || ((const U8*)s)[3] == 0x71 ) ) ? 4 : 0 )\
+	    : 0 )                                                           \
+	: ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x6A == ((const U8*)s)[1] ) ) ? ( ( 0x4A == ((const U8*)s)[2] ) ?\
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || 0x5F == ((const U8*)s)[3] || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x72) ) ? 4 : 0 )\
+		: ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x52) ) ?  \
+		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || 0x5F == ((const U8*)s)[3] || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x72) ) ? 4 : 0 )\
+		: ( ( 0x53 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) ) ) ? 4 : 0 ) : 0 ) : 0 )
+
 #endif	/* EBCDIC 037 */
 
 #endif /* PERL_REGCHARCLASS_H_ */
@@ -3851,9 +3972,9 @@
  * dad3ef492d198d6f1dde4922b175f7371a27dfe62fce489f3e04807015a4c682 lib/unicore/extracted/DLineBreak.txt
  * 7c83684d3336b698381745b78a971c3e1242cb3fcac58604469086c19b6edcee lib/unicore/extracted/DNumType.txt
  * 139b976bdc288be01c80f018523da769cf2845109b5a7f0f8a432db64bfedcfa lib/unicore/extracted/DNumValues.txt
- * 03640d8ad18fc65de766f2034a927f7442960e998d3243845ca9b9fe31bfe1ab lib/unicore/mktables
+ * e3ac360c03d18779fea6d6497fbbe53798135da55e3764d3c9f90a79bbf7e8b5 lib/unicore/mktables
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 38d9a9c62ad1d5ec57c14db96c218daf68576d2e675605d84f96829c2da3e590 regen/regcharclass.pl
+ * c69302dfdce9f1ed257a5e4ca20e305ffd32f78220e4d219fddb72557680e770 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */

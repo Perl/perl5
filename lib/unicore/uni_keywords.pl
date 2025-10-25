@@ -17,6 +17,7 @@
     '_perl_problematic_locale_folds' => 1324,
     '_perl_quotemeta' => 1325,
     '_perl_surrogate' => 1326,
+    '_perl_word_but_noncont' => 1327,
     'adlm' => 1,
     'aegeannumbers' => 2,
     'age=10' => 3,
@@ -1424,7 +1425,7 @@
 # dad3ef492d198d6f1dde4922b175f7371a27dfe62fce489f3e04807015a4c682 lib/unicore/extracted/DLineBreak.txt
 # 7c83684d3336b698381745b78a971c3e1242cb3fcac58604469086c19b6edcee lib/unicore/extracted/DNumType.txt
 # 139b976bdc288be01c80f018523da769cf2845109b5a7f0f8a432db64bfedcfa lib/unicore/extracted/DNumValues.txt
-# 03640d8ad18fc65de766f2034a927f7442960e998d3243845ca9b9fe31bfe1ab lib/unicore/mktables
+# e3ac360c03d18779fea6d6497fbbe53798135da55e3764d3c9f90a79bbf7e8b5 lib/unicore/mktables
 # 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
 # 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
 # 8abaee16c84c1a61a69a77b6e8963675d99f515f3c2a34e449faeb9bfdec861a regen/mk_PL_charclass.pl

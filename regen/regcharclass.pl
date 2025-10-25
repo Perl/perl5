@@ -1912,3 +1912,7 @@ HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 => UTF8 :only_ebcdic_platform safe
 0x1 - 0x0
 # Always fails on EBCDIC; there are no ED Hanguls there
+
+WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+=> generic : safe
+\p{_Perl_Word_But_NonCont}
