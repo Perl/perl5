@@ -208,6 +208,11 @@ shown above.
 my $open_brace  = '{';
 my $close_brace = '}';
 
+# values for parse_keywords() flags
+# (Can't assume 'constant.pm' is present yet)
+
+my $keywords_flag_MODULE              = 1;
+my $keywords_flag_NOT_IMPLEMENTED_YET = 2;
 
 # Utility sub to handle all the boilerplate of declaring a Node subclass,
 # including setting up @INC and @FIELDS. Intended to be called from within
@@ -327,6 +332,10 @@ sub parse {
 # If $max is defined, it specifies the maximum number of keywords to
 # process. This value is typically passed as undef (unlimited) or 1
 # (just grab the next keyword).
+# $flags can contain  $keywords_flag_MODULE or
+# keywords_flag_NOT_IMPLEMENTED_YET to indicate to match one of those
+# keywords too (whose syntax is slightly different from 'KEY:' and
+# so need special handling
 
 sub parse_keywords {
     my __PACKAGE__       $self  = shift;
@@ -335,24 +344,39 @@ sub parse_keywords {
     my                   $xbody = shift;
     my $max                     = shift; # max number of keywords to process
     my $pat                     = shift;
-    my $do_notimplemented       = shift;
+    my $flags                   = shift;
+
+    $flags = 0 unless defined $flags;
 
     my $n = 0;
     my @kids;
     while (@{$pxs->{line}}) {
         my $line = shift @{$pxs->{line}};
         next unless $line =~ /\S/;
-        # extract/delete recognised keyword and any following comment
-        unless (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
-                or (   $do_notimplemented
+
+        # extract/delete recognised keyword and any following text
+        my $keyword;
+
+        if (   ($flags & $keywords_flag_MODULE)
+            && ExtUtils::ParseXS::Utilities::looks_like_MODULE_line($line)
+           )
+        {
+            $keyword = 'MODULE';
+        }
+        elsif  (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
+                or (   ($flags & $keywords_flag_NOT_IMPLEMENTED_YET)
                     && $line =~ s/^(\s*)(NOT_IMPLEMENTED_YET)/$1/
                    )
-        ) {
+               )
+        {
+            $keyword = $2
+        }
+        else {
             # stop at unrecognised line
             unshift @{$pxs->{line}}, $line;
             last;
         }
-        my $keyword = $2;
+
         unshift @{$pxs->{line}}, $line;
         # create a node for the keyword and parse any lines associated
         # with it.
@@ -1167,7 +1191,8 @@ sub parse {
                 undef, undef, # xsub and xbody: not needed for non XSUB keywords
                 undef,  # implies process as many keywords as possible
                  "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
-              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE"
+              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE",
+                $keywords_flag_MODULE,
             );
 
         # skip blank lines
@@ -4252,7 +4277,7 @@ sub parse {
                         $pxs, $xsub, $xbody,
                         1, # match at most one keyword
                         "CODE|PPCODE",
-                        1, # also match NOT_IMPLEMENTED_YET
+                        $keywords_flag_NOT_IMPLEMENTED_YET,
                     );
 
     # Didn't find a CODE keyword or similar, so auto-generate a call
@@ -4525,6 +4550,54 @@ sub parse {
     my $s = shift @{$pxs->{line}};
     ExtUtils::ParseXS::Utilities::trim_whitespace($s);
     $self->{text} = $s;
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::MODULE;
+
+# Process a MODULE keyword, e.g.
+#
+# MODULE = Foo PACKAGE = Foo::Bar PREFIX = foo_
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'module',   # Str
+    'package',  # Str: may be ''
+    'prefix',   # Str: may be ''
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my $line = $self->{text};
+    my ($module, $pkg, $prefix) = $line =~
+                            /^
+                                        MODULE  \s* = \s* ([\w:]+)
+                                (?: \s+ PACKAGE \s* = \s* ([\w:]+))?
+                                (?: \s+ PREFIX  \s* = \s* (\S+))?
+                                \s*
+                            $/x
+        or $pxs->death("Error: unparseable MODULE line: '$line'");
+
+    $self->{module} = $module;
+    ($pxs->{MODULE_cname} = $module) =~ s/\W/_/g;
+
+    $self->{package} = $pxs->{PACKAGE_name} = defined($pkg) ? $pkg : '';
+
+    $self->{prefix} = $prefix = defined($prefix) ? $prefix : '';
+    $pxs->{PREFIX_pattern} = quotemeta($prefix);
+
+    ($pxs->{PACKAGE_C_name} = $pxs->{PACKAGE_name}) =~ tr/:/_/;
+
+    $pxs->{PACKAGE_class} = $pxs->{PACKAGE_name};
+    $pxs->{PACKAGE_class} .= "::" if $pxs->{PACKAGE_class} ne "";
+
     1;
 }
 

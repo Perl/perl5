@@ -508,24 +508,6 @@ sub Q {
 }
 
 
-# Process "MODULE = Foo ..." lines and update global state accordingly
-
-sub _process_module_xs_line {
-  my ExtUtils::ParseXS $self = shift;
-  my ($module, $pkg, $prefix) = @_;
-
-  ($self->{MODULE_cname} = $module) =~ s/\W/_/g;
-
-  $self->{PACKAGE_name} = defined($pkg) ? $pkg : '';
-  $self->{PREFIX_pattern} = quotemeta( defined($prefix) ? $prefix : '' );
-
-  ($self->{PACKAGE_C_name} = $self->{PACKAGE_name}) =~ tr/:/_/;
-
-  $self->{PACKAGE_class} = $self->{PACKAGE_name};
-  $self->{PACKAGE_class} .= "::" if $self->{PACKAGE_class} ne "";
-}
-
-
 # Skip any embedded POD sections, reading in lines from {in_fh} as necessary.
 
 sub _maybe_skip_pod {
@@ -676,21 +658,6 @@ sub fetch_para {
 
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
-
-  if (ExtUtils::ParseXS::Utilities::looks_like_MODULE_line($self->{lastline}))
-  {
-    $self->{lastline} =~
-              /^
-                        MODULE  \s* = \s* ([\w:]+)
-                (?: \s+ PACKAGE \s* = \s* ([\w:]+))?
-                (?: \s+ PREFIX  \s* = \s* (\S+))?
-                \s*
-              $/x
-      or $self->death("Error: unparseable MODULE line: '$self->{lastline}'");
-
-    $self->_process_module_xs_line($1, $2, $3);
-    $self->{lastline} = "";
-  }
 
   # count how many #ifdef levels we see in this paragraph
   # decrementing when we see an endif. if we see an elsif
