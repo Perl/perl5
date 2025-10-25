@@ -75,6 +75,18 @@ my @z_offset_tests = (
     [ "-0100", 10, 11, 30, "UTC-1" ],
     [ "-0500", 10, 15, 30, "UTC-5" ],
     [ "-0730", 10, 18, 0,  "UTC-7:30" ],
+
+    # ISO 8601 [+-]HH format (verify existing support)
+    [ "+00", 10, 10, 30, "UTC (HH format)" ],
+    [ "+05", 10, 5,  30, "UTC+5 (HH format)" ],
+    [ "-08", 10, 18, 30, "UTC-8 (HH format)" ],
+
+    # ISO 8601 [+-]HH:MM format (new support)
+    [ "+00:00", 10, 10, 30, "UTC (HH:MM format)" ],
+    [ "+01:00", 10, 9,  30, "UTC+1 (HH:MM format)" ],
+    [ "+05:30", 10, 5,  0,  "UTC+5:30 (HH:MM format)" ],
+    [ "-01:00", 10, 11, 30, "UTC-1 (HH:MM format)" ],
+    [ "-07:30", 10, 18, 0,  "UTC-7:30 (HH:MM format)" ],
 );
 
 for my $test (@z_offset_tests) {
@@ -450,4 +462,4 @@ with_tz(
     }
 );
 
-done_testing(234);
+done_testing(290);

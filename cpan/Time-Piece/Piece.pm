@@ -19,7 +19,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.38';
+our $VERSION = '1.39';
 
 XSLoader::load( 'Time::Piece', $VERSION );
 
@@ -100,24 +100,6 @@ sub new {
     }
 
     return bless $self, ref($class) || $class;
-}
-
-sub parse {
-    my $proto = shift;
-    my $class = ref($proto) || $proto;
-    my @components;
-
-    warnings::warnif("deprecated", 
-        "parse() is deprecated, use strptime() instead.");
-
-    if (@_ > 1) {
-        @components = @_;
-    }
-    else {
-        @components = shift =~ /(\d+)$DATE_SEP(\d+)$DATE_SEP(\d+)(?:(?:T|\s+)(\d+)$TIME_SEP(\d+)(?:$TIME_SEP(\d+)))/;
-        @components = reverse(@components[0..5]);
-    }
-    return $class->new( timelocal(@components ));
 }
 
 sub _mktime {
@@ -791,6 +773,14 @@ sub compare {
     return $lhs <=> $rhs;
 }
 
+sub add_days {
+    my ( $time, $num_days ) = @_;
+
+    croak("add_days requires a number of days") unless defined($num_days);
+
+    return add( $time, $num_days * ONE_DAY );
+}
+
 sub add_months {
     my ($time, $num_months) = @_;
 
@@ -1089,6 +1079,9 @@ the actual offset including any DST adjustment.
 
     $t->is_leap_year        # true if it's a leap year
     $t->month_last_day      # 28-31
+    $t->add_days            # Add days
+    $t->add_months          # Add months
+    $t->add_years           # Add years
 
 =head2 Global Configuration
 
@@ -1122,6 +1115,7 @@ The following are valid ($t1 and $t2 are Time::Piece objects):
     $t1 - $t2; # returns Time::Seconds object
     $t1 - 42; # returns Time::Piece object
     $t1 + 533; # returns Time::Piece object
+    $t1->add_days(2); # returns Time::Piece object
 
 B<Note:> All arithmetic uses epoch seconds (UTC). When daylight saving time
 (DST) changes occur:
@@ -1213,40 +1207,6 @@ The default format string is C<"%a, %d %b %Y %H:%M:%S %Z">, so these are equival
     my $t1 = Time::Piece->strptime($string);
     my $t2 = Time::Piece->strptime($string, "%a, %d %b %Y %H:%M:%S %Z");
 
-=head2 Handling Partial Dates
-
-When parsing incomplete date strings, you can provide defaults for missing
-components in several ways:
-
-B<Array Reference> - Standard time components (as returned by localtime):
-
-    my @defaults = localtime();
-    my $t = Time::Piece->strptime("15 Mar", "%d %b",
-                                  { defaults => \@defaults });
-
-B<Hash Reference> - Specify only needed components:
-
-    my $t = Time::Piece->strptime("15 Mar", "%d %b",
-                                  { defaults => {
-                                      year => 2023,
-                                      hour => 14,
-                                      min  => 30
-                                  } });
-
-Valid keys: C<sec>, C<min>, C<hour>, C<mday>, C<mon>, C<year>, C<wday>, C<yday>, C<isdst>
-
-B<Note>: For the C<year> parameter numbers less than 1000 are treated as an
-offset from 1900. Whereas numbers larger than 1000 are treated as the actual year.
-
-B<Time::Piece Object> - Uses all components from the object:
-
-    my $base = localtime();
-    my $t = Time::Piece->strptime("15 Mar", "%d %b",
-                                  { defaults => $base });
-
-B<Note:> In all cases, parsed values always override defaults. Only missing
-components use default values.
-
 =head2 GMT vs Local Time
 
 By default, C<strptime> returns GMT objects when called as a class method:
@@ -1266,37 +1226,6 @@ To get local time objects, you can:
     my $local = localtime();
     Time::Piece->strptime($string, $format, { defaults => $local })
 
-=head3 Locale Considerations
-
-By default, C<strptime> only parses English day and month names, while
-C<strftime> uses your system locale. This can cause parsing failures for
-non-English dates.
-
-To parse localized dates, call C<Time::Piece-E<gt>use_locale()> to build
-a list of your locale's day and month names:
-
-    # Enable locale-aware parsing (global setting)
-    Time::Piece->use_locale();
-
-    # Now strptime can parse names in your system locale
-    my $t = Time::Piece->strptime("15 Marzo 2024", "%d %B %Y");
-
-B<Note:> This is a global change affecting all Time::Piece instances.
-
-You can also override the day/month names manually:
-
-    my @days = qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
-    my $spanish_day = localtime->day(@days);
-
-    my @months = qw( Enero Febrero Marzo Abril Mayo Junio
-                     Julio Agosto Septiembre Octubre Noviembre Diciembre );
-    print localtime->month(@months);
-
-Set globally with:
-
-    Time::Piece::day_list(@days);
-    Time::Piece::mon_list(@months);
-
 =head2 Timezone Parsing with %z and %Z
 
 Time::Piece's C<strptime()> function has some limited support for parsing timezone
@@ -1307,7 +1236,8 @@ Consider the current implementation somewhat "alpha" and in need of feedback.
 
 =head3 Numeric Offsets (%z)
 
-The C<%z> specifier parses numeric timezone offsets (format: C<+HHMM> or C<-HHMM>):
+The C<%z> specifier parses numeric timezone offsets
+(format: C<[+-]HHMM>, C<[+-]HH:MM>, or C<[+-]HH>):
 
     my $t = Time::Piece->strptime("2024-01-15 15:30:00 +0500",
                                   "%Y-%m-%d %H:%M:%S %z");
@@ -1348,8 +1278,80 @@ Other timezone names are parsed B<but ignored>:
                                    "%Y-%m-%d %H:%M:%S %Z");
     print $t2->hour;  # prints 10 (PST ignored - no adjustment)
 
+    # Parse and convert to local timezone
+    my $t3 = Time::Piece->strptime("2024-01-15 15:30:00 UTC",
+                                  "%Y-%m-%d %H:%M:%S %Z",
+                                  { islocal => 1 });
+    print $t3->hour;  # prints 10:30 UTC converted to your local timezone
+
+
 B<Note:> Full timezone name support is not currently implemented. For reliable
 timezone handling beyond GMT/UTC, consider using the L<DateTime> module.
+
+=head2 Handling Partial Dates
+
+When parsing incomplete date strings, you can provide defaults for missing
+components in several ways:
+
+B<Array Reference> - Standard time components (as returned by localtime):
+
+    my @defaults = localtime();
+    my $t = Time::Piece->strptime("15 Mar", "%d %b",
+                                  { defaults => \@defaults });
+
+B<Hash Reference> - Specify only needed components:
+
+    my $t = Time::Piece->strptime("15 Mar", "%d %b",
+                                  { defaults => {
+                                      year => 2023,
+                                      hour => 14,
+                                      min  => 30
+                                  } });
+
+Valid keys: C<sec>, C<min>, C<hour>, C<mday>, C<mon>, C<year>, C<wday>, C<yday>, C<isdst>
+
+B<Note>: For the C<year> parameter numbers less than 1000 are treated as an
+offset from 1900. Whereas numbers larger than 1000 are treated as the actual year.
+
+B<Time::Piece Object> - Uses all components from the object:
+
+    my $base = localtime();
+    my $t = Time::Piece->strptime("15 Mar", "%d %b",
+                                  { defaults => $base });
+
+B<Note:> In all cases, parsed values always override defaults. Only missing
+components use default values.
+
+=head2 Locale Considerations
+
+By default, C<strptime> only parses English day and month names, while
+C<strftime> uses your system locale. This can cause parsing failures for
+non-English dates.
+
+To parse localized dates, call C<Time::Piece-E<gt>use_locale()> to build
+a list of your locale's day and month names:
+
+    # Enable locale-aware parsing (global setting)
+    Time::Piece->use_locale();
+
+    # Now strptime can parse names in your system locale
+    my $t = Time::Piece->strptime("15 Marzo 2024", "%d %B %Y");
+
+B<Note:> This is a global change affecting all Time::Piece instances.
+
+You can also override the day/month names manually:
+
+    my @days = qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
+    my $spanish_day = localtime->day(@days);
+
+    my @months = qw( Enero Febrero Marzo Abril Mayo Junio
+                     Julio Agosto Septiembre Octubre Noviembre Diciembre );
+    print localtime->month(@months);
+
+Set globally with:
+
+    Time::Piece::day_list(@days);
+    Time::Piece::mon_list(@months);
 
 =head1 Global Overriding
 

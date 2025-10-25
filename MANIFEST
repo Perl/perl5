@@ -3183,7 +3183,6 @@ cpan/Time-Piece/t/10overload.t				Test file related to Time::Piece
 cpan/Time-Piece/t/11strptime_defaults.t			Time-Piece
 cpan/Time-Piece/t/12strptime_timezones.t		Time-Piece
 cpan/Time-Piece/t/13date_arithmetic_edge_cases.t	Time-Piece
-cpan/Time-Piece/t/99legacy.t				Test file related to Time::Piece
 cpan/Time-Piece/t/lib/Time/Piece/Twin.pm		Module related to Time::Piece
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate.xs			Unicode::Collate

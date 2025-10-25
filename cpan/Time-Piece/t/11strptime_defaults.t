@@ -5,6 +5,10 @@ my $is_linux = ( $^O =~ /linux/ );
 
 BEGIN { use_ok('Time::Piece'); }
 
+# Start with a known TZ
+$ENV{TZ} = "EST5EDT4,M3.2.0/2,M11.1.0/2";
+Time::Piece::_tzset();
+
 # Using known epoch 1753440879 = Friday, July 25, 2025 10:54:39 AM GMT
 my @known_gmtime    = gmtime(1753440879);  # (39, 54, 10, 25, 6, 125, 5, 206, 0)
 my @known_localtime = localtime(1753440879);

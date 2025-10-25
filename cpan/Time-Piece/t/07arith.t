@@ -1,4 +1,4 @@
-use Test::More tests => 43;
+use Test::More tests => 52;
 
 BEGIN { use_ok('Time::Piece'); use_ok('Time::Seconds'); }
 
@@ -81,3 +81,20 @@ is($s2->seconds,  0, 'Subtract one Time::Seconds object from another');
 
 eval { $s2 = $s2 + $t; };
 like($@, qr/Can't use non Seconds object in operator overload/);
+
+# Tests for add_days
+$t = Time::Piece->strptime( "01 01 2024", "%d %m %Y" );
+my $t10 = $t->add_days(59);
+is( $t10->year, 2024 );
+is( $t10->mon,  2 );
+is( $t10->mday, 29 );
+
+my $t11 = $t->add_days(-366);
+is( $t11->year, 2022 );
+is( $t11->mon,  12 );
+is( $t11->mday, 31 );
+
+my $t12 = $t->add_days(366);
+is( $t12->year, 2025 );
+is( $t12->mon,  1 );
+is( $t12->mday, 1 );
