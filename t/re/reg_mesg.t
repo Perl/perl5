@@ -547,6 +547,7 @@ my @death_utf8 = mark_as_utf8(
  '/[\cネ]/' => "Character following \"\\c\" must be printable ASCII {#} m/[\\cネ{#}]/",
  '/\b{ネ}/' => "'ネ' is an unknown bound type {#} m/\\b{ネ{#}}/",
  '/\B{ネ}/' => "'ネ' is an unknown bound type {#} m/\\B{ネ{#}}/",
+ '/ネ(?<‿name>match)ネ/; #no latin1' => 'Group name must start with a non-digit word character {#} m/ネ(?<‿{#}name>match)ネ/',
 );
 push @death, @death_utf8;
 
