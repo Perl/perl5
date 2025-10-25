@@ -5767,4 +5767,32 @@ EOF
     test_many($preamble, undef, \@test_fns);
 }
 
+
+{
+    # Test reporting of bad syntax on TYPEMAP lines.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'TYPEMAP syntax err',
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <EOF
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
+                "got expected err msg"
+            ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 done_testing;

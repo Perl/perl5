@@ -533,8 +533,13 @@ sub _maybe_parse_typemap_block {
 
   # This is special cased from the usual paragraph-handler logic
   # due to the HEREdoc-ish syntax.
-  if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/)
-  {
+  return unless $self->{lastline} =~ /^TYPEMAP\s*:/;
+
+  $self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/
+    or $self->death("Error: unparseable TYPEMAP line: '$self->{lastline}'");
+
+
+
     my $end_marker = quotemeta(defined($1) ? $2 : $3);
 
     # Scan until we find $end_marker alone on a line.
@@ -554,7 +559,6 @@ sub _maybe_parse_typemap_block {
     $self->{typemaps_object}->merge(typemap => $tmap, replace => 1);
 
     $self->{lastline} = "";
-  }
 }
 
 
