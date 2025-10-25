@@ -485371,6 +485371,56 @@ static const UV UNI__PERL_SURROGATE_invlist[] = {  /* for all charsets */
 	0xE000
 };
 
+static const UV UNI__PERL_WORD_BUT_NONCONT_invlist[] = {  /* for all charsets */
+	43,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0x0,
+	0x37A,
+	0x37B,
+	0x488,
+	0x48A,
+	0x1ABE,
+	0x1ABF,
+	0x20DD,
+	0x20E1,
+	0x20E2,
+	0x20E5,
+	0x24B6,
+	0x24EA,
+	0x2E2F,
+	0x2E30,
+	0xA670,
+	0xA673,
+	0xFC5E,
+	0xFC64,
+	0xFDFA,
+	0xFDFC,
+	0xFE70,
+	0xFE71,
+	0xFE72,
+	0xFE73,
+	0xFE74,
+	0xFE75,
+	0xFE76,
+	0xFE77,
+	0xFE78,
+	0xFE79,
+	0xFE7A,
+	0xFE7B,
+	0xFE7C,
+	0xFE7D,
+	0xFE7E,
+	0xFE7F,
+	0x1F130,
+	0x1F14A,
+	0x1F150,
+	0x1F16A,
+	0x1F170,
+	0x1F18A
+};
+
 const char * const deprecated_property_msgs[] = {
 	"",
 	"Surrogates should never appear in well-formed text, and therefore shouldn't be the basis for line breaking",
@@ -486711,10 +486761,11 @@ typedef enum {
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS,
 	UNI__PERL_QUOTEMETA,
-	UNI__PERL_SURROGATE
+	UNI__PERL_SURROGATE,
+	UNI__PERL_WORD_BUT_NONCONT
 } binary_invlist_enum;
 
-#define MAX_UNI_KEYWORD_INDEX UNI__PERL_SURROGATE
+#define MAX_UNI_KEYWORD_INDEX UNI__PERL_WORD_BUT_NONCONT
 
 #endif	/* defined(PERL_IN_REGCOMP_C) */
 
@@ -488047,7 +488098,8 @@ static const UV * const uni_prop_ptrs[] = {
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDEDS_START_invlist,
 	UNI__PERL_PROBLEMATIC_LOCALE_FOLDS_invlist,
 	UNI__PERL_QUOTEMETA_invlist,
-	UNI__PERL_SURROGATE_invlist
+	UNI__PERL_SURROGATE_invlist,
+	UNI__PERL_WORD_BUT_NONCONT_invlist
 };
 
 #endif	/* (defined(PERL_IN_REGCOMP_C) && ! defined(PERL_IN_XSUB_RE)) */
@@ -492658,7 +492710,7 @@ static const U8 WB_dfa_table[] = {
  * dad3ef492d198d6f1dde4922b175f7371a27dfe62fce489f3e04807015a4c682 lib/unicore/extracted/DLineBreak.txt
  * 7c83684d3336b698381745b78a971c3e1242cb3fcac58604469086c19b6edcee lib/unicore/extracted/DNumType.txt
  * 139b976bdc288be01c80f018523da769cf2845109b5a7f0f8a432db64bfedcfa lib/unicore/extracted/DNumValues.txt
- * 03640d8ad18fc65de766f2034a927f7442960e998d3243845ca9b9fe31bfe1ab lib/unicore/mktables
+ * e3ac360c03d18779fea6d6497fbbe53798135da55e3764d3c9f90a79bbf7e8b5 lib/unicore/mktables
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 8abaee16c84c1a61a69a77b6e8963675d99f515f3c2a34e449faeb9bfdec861a regen/mk_PL_charclass.pl

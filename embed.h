@@ -26,6 +26,7 @@
 #if defined(PERL_DO_UNDEFS)
 # if !defined(PERL_CORE)
 #   undef CC_UNDERSCORE_
+#   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef sv_2num
 #   undef SvRVx

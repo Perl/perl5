@@ -15727,6 +15727,19 @@ END
         }
     }
 
+    # This gives the code points that are in \w but not IDContinue.  That such
+    # exist may be surprising.
+    my $idc = property_ref("XIDC") // property_ref("IDC") // $Word;
+    $perl->add_match_table('_Perl_Word_but_NonCont',
+                                           Perl_Extension => 1,
+                                           Fate => $INTERNAL_ONLY,
+
+                                           # Initialize to what's common in
+                                           # all Unicode releases.
+                                           Initialize =>
+                                                ( $Word - $idc->table('Y'))
+                           );
+
     # Here done with all the basic stuff.  Ready to populate the information
     # about each character if annotating them.
     if ($annotate) {
