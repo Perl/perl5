@@ -176,7 +176,7 @@ my @death =
  '/(?/' => 'Sequence (? incomplete {#} m/(?{#}/',
 
  '/(?;x/' => 'Sequence (?;...) not recognized {#} m/(?;{#}x/',
- '/(?<;x/' => 'Group name must start with a non-digit word character {#} m/(?<;{#}x/',
+ '/(?<;name>match)/' => 'Group name must start with a non-digit word character {#} m/(?<;{#}name>match)/',
  '/(?\ix/' => 'Sequence (?\...) not recognized {#} m/(?\{#}ix/',
  '/(?\mx/' => 'Sequence (?\...) not recognized {#} m/(?\{#}mx/',
  '/(?\:x/' => 'Sequence (?\...) not recognized {#} m/(?\{#}:x/',
@@ -222,7 +222,7 @@ my @death =
  '/\g{-abc}/' => 'Group name must start with a non-digit word character {#} m/\g{-{#}abc}/',
  '/\g{1-1}/'  => 'Sequence \g{... not terminated {#} m/\g{1{#}-1}/',
  '/\g{ -1 foo }/'  => 'Sequence \g{... not terminated {#} m/\g{ -1 {#}foo }/',
- '/(?<;x/' => 'Group name must start with a non-digit word character {#} m/(?<;{#}x/',
+ '/(?<;name>match)/' => 'Group name must start with a non-digit word character {#} m/(?<;{#}name>match)/',
 
  'my $m = "\\\"; $m =~ $m', => 'Trailing \ in regex m/\/',
 
@@ -310,7 +310,7 @@ my @death =
  'm/(?&a/'  => 'Sequence (?&... not terminated {#} m/(?&a{#}/',
  'm/(?P=/' => 'Sequence ?P=... not terminated {#} m/(?P={#}/',
  "m/(?'/"  => "Sequence (?'... not terminated {#} m/(?'{#}/",
- "m/(?</"  => "Sequence (?<... not terminated {#} m/(?<{#}/",
+ "m/(?<name)/"  => "Sequence (?<... not terminated {#} m/(?<name{#})/",
  'm/(?&/'  => 'Sequence (?&... not terminated {#} m/(?&{#}/',
  'm/(?(</' => 'Sequence (?(<... not terminated {#} m/(?(<{#}/',
  "m/(?('/" => "Sequence (?('... not terminated {#} m/(?('{#}/",
@@ -485,7 +485,7 @@ my @death_utf8 = mark_as_utf8(
  '/ネ(?/' => 'Sequence (? incomplete {#} m/ネ(?{#}/',
 
  '/ネ(?;ネ/' => 'Sequence (?;...) not recognized {#} m/ネ(?;{#}ネ/',
- '/ネ(?<;ネ/' => 'Group name must start with a non-digit word character {#} m/ネ(?<;{#}ネ/',
+ '/ネ(?<;name>match)ネ/' => 'Group name must start with a non-digit word character {#} m/ネ(?<;{#}name>match)ネ/',
  '/ネ(?\ixネ/' => 'Sequence (?\...) not recognized {#} m/ネ(?\{#}ixネ/',
  '/ネ(?^lu:ネ)/' => 'Regexp modifiers "l" and "u" are mutually exclusive {#} m/ネ(?^lu{#}:ネ)/',
 '/ネ(?lil:ネ)/' => 'Regexp modifier "l" may not appear twice {#} m/ネ(?lil{#}:ネ)/',
