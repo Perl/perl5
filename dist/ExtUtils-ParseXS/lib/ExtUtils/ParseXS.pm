@@ -508,23 +508,6 @@ sub Q {
 }
 
 
-# Skip any embedded POD sections, reading in lines from {in_fh} as necessary.
-
-sub _maybe_skip_pod {
-  my ExtUtils::ParseXS $self = shift;
-
-  while ($self->{lastline} =~ /^=/) {
-    while ($self->{lastline} = readline($self->{in_fh})) {
-      last if ($self->{lastline} =~ /^=cut\s*$/);
-    }
-    $self->death("Error: Unterminated pod") unless defined $self->{lastline};
-    $self->{lastline} = readline($self->{in_fh});
-    chomp $self->{lastline};
-    $self->{lastline} =~ s/^\s+$//;
-  }
-}
-
-
 # fetch_para(): private helper method for process_file().
 #
 # Read in all the lines associated with the next XSUB, or associated with
@@ -633,7 +616,20 @@ sub fetch_para {
   my $if_level = 0;
 
   for (;;) {
-    $self->_maybe_skip_pod;
+
+    # Skip any embedded POD sections, reading in lines from {in_fh} as
+    # necessary.
+
+    while ($self->{lastline} =~ /^=/) {
+      while ($self->{lastline} = readline($self->{in_fh})) {
+        last if ($self->{lastline} =~ /^=cut\s*$/);
+      }
+      $self->death("Error: Unterminated pod")
+        unless defined $self->{lastline};
+      $self->{lastline} = readline($self->{in_fh});
+      chomp $self->{lastline};
+      $self->{lastline} =~ s/^\s+$//;
+    }
 
     # if present, extract out a TYPEMAP block as a paragraph
     if ($self->{lastline} =~ /^TYPEMAP\s*:/) {
