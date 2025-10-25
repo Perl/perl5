@@ -2881,9 +2881,19 @@ has since been undefined.
 =item Group name must start with a non-digit word character in regex; marked by 
 S<<-- HERE> in m/%s/
 
-(F) Group names must follow the rules for perl identifiers, meaning
-they must start with a non-digit word character.  A common cause of
-this error is using (?&0) instead of (?0).  See L<perlre>.
+(F) Group names must follow the rules for Perl identifiers, meaning
+they must start with a character that matches C<\p{XID_Start}> plus the
+underscore.  This means the first character may not be a digit.
+Subsequent characters must match C<\p{XID_Continue}>.
+
+A common cause of this error is using (?&0) instead of (?0).
+
+This message was formulated before Perl supported Unicode; so it is
+not accurate for Unicode characters outside the ASCII-range.  There are
+many word characters in Unicode that may not start a group name, and a
+few that may not be a continuation character.
+
+See L<perlre>.
 
 =item ()-group starts with a count
 
