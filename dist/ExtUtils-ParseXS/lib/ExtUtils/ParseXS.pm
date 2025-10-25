@@ -525,43 +525,6 @@ sub _maybe_skip_pod {
 }
 
 
-# Strip out and parse embedded TYPEMAP blocks (which use a HEREdoc-alike
-# block syntax).
-
-sub _maybe_parse_typemap_block {
-  my ExtUtils::ParseXS $self = shift;
-
-  # This is special cased from the usual paragraph-handler logic
-  # due to the HEREdoc-ish syntax.
-  return unless $self->{lastline} =~ /^TYPEMAP\s*:/;
-
-  $self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/
-    or $self->death("Error: unparseable TYPEMAP line: '$self->{lastline}'");
-
-
-
-    my $end_marker = quotemeta(defined($1) ? $2 : $3);
-
-    # Scan until we find $end_marker alone on a line.
-    my @tmaplines;
-    while (1) {
-      $self->{lastline} = readline($self->{in_fh});
-      $self->death("Error: Unterminated TYPEMAP section") if not defined $self->{lastline};
-      last if $self->{lastline} =~ /^$end_marker\s*$/;
-      push @tmaplines, $self->{lastline};
-    }
-
-    my $tmap = ExtUtils::Typemaps->new(
-      string        => join("", @tmaplines),
-      lineno_offset => 1 + ($self->current_line_number() || 0),
-      fake_filename => $self->{in_filename},
-    );
-    $self->{typemaps_object}->merge(typemap => $tmap, replace => 1);
-
-    $self->{lastline} = "";
-}
-
-
 # fetch_para(): private helper method for process_file().
 #
 # Read in all the lines associated with the next XSUB, or associated with
@@ -672,7 +635,35 @@ sub fetch_para {
   for (;;) {
     $self->_maybe_skip_pod;
 
-    $self->_maybe_parse_typemap_block;
+    # if present, extract out a TYPEMAP block as a paragraph
+    if ($self->{lastline} =~ /^TYPEMAP\s*:/) {
+
+      # Return what we have already and process this line on the
+      # next call; that way something like a previous BOOT: won't
+      # run on into the TYPEMAP: lines
+      return 1 if @{$self->{line}};
+
+      $self->{lastline} =~
+          /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/
+      or $self->death("Error: unparseable TYPEMAP line: '$self->{lastline}'");
+
+      my $end_marker = quotemeta(defined($1) ? $2 : $3);
+
+      # Scan until we find $end_marker alone on a line.
+      my $last;
+      while (1) {
+        unless ($last) {
+          push @{$self->{line}},    $self->{lastline};
+          push @{$self->{line_no}}, $.;
+        }
+        $self->{lastline} = readline($self->{in_fh});
+        last if $last;
+        $self->death("Error: Unterminated TYPEMAP section")
+                              unless  defined $self->{lastline};
+        $last = $self->{lastline} =~ /^$end_marker\s*$/;
+      }
+      return 1;
+    }
 
     my $final;
 

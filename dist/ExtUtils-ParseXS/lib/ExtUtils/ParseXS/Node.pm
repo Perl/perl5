@@ -1058,7 +1058,6 @@ sub parse {
 
   PARAGRAPH:
     while ( ($pxs->{line} && @{$pxs->{line}}) || $pxs->fetch_para()) {
-
         if (   !defined($self->{line_no})
             && defined $pxs->{line_no}[0]
         ) {
@@ -1191,7 +1190,7 @@ sub parse {
                 undef, undef, # xsub and xbody: not needed for non XSUB keywords
                 undef,  # implies process as many keywords as possible
                  "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
-              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE",
+              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP",
                 $keywords_flag_MODULE,
             );
 
@@ -1375,6 +1374,46 @@ sub as_boot_code {
 
     return [], \@lines;
 }
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::TYPEMAP;
+
+# Process the lines associated with the TYPEMAP keyword
+#
+# fetch_para() will have already processed the <<EOF logic
+# and read all the lines up to, but not including, the EOF line.
+
+BEGIN { $build_subclass->(
+    'lines', # Array ref of all lines making up the TYPEMAP section
+)};
+
+
+# Feed all the lines to ExtUtils::Typemaps.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    shift @{$pxs->{line}}; # skip the 'TYPEMAP:' line
+
+    # Suck in all remaining lines
+    $self->{lines} = $pxs->{line};
+    $pxs->{line} = [];
+
+    my $tmap = ExtUtils::Typemaps->new(
+        string        => join("", @{$self->{lines}}),
+        lineno_offset => 1 + ($pxs->current_line_number() || 0),
+        fake_filename => $pxs->{in_filename},
+    );
+
+    $pxs->{typemaps_object}->merge(typemap => $tmap, replace => 1);
+
+    1;
+}
+
 
 # ======================================================================
 
