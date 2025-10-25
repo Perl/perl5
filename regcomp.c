@@ -2533,8 +2533,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
                  && (advance = isWORDCHAR_utf8_safe( (U8 *) RExC_parse,
                                                      (U8 *) RExC_end)));
     } else {
-        RExC_parse_inc_by(1); /* so the <- from the vFAIL is after the offending
-                         character */
+        /* so the <- from the vFAIL is after the offending character */
+        RExC_parse_inc_safe();
         vFAIL("Group name must start with a non-digit word character");
     }
     sv_name = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
