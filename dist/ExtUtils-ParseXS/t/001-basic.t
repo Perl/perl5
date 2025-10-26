@@ -87,7 +87,10 @@ sub test_many {
         my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
 
         my $text = $preamble;
-        $text .= "$_\n" for @$xsub_lines;
+        for (@$xsub_lines) {
+            $text .= $_;
+            $text .= "\n" unless /\n\z/;
+        }
 
         tie *FH, 'Capture';
         my $pxs = ExtUtils::ParseXS->new;
@@ -5789,6 +5792,34 @@ EOF
             [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
                 "got expected err msg"
             ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+
+{
+    # Test POD
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "POD at EOF doesn't warn",
+            [ Q(<<'EOF') ],
+                |void foo()
+                |
+                |=pod
+                |=cut
+EOF
+
+            [ 0, 0, qr{XS}, "no undef warning" ],
         ],
     );
 

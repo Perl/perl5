@@ -626,6 +626,7 @@ sub fetch_para {
       $self->death("Error: Unterminated pod")
         unless defined $self->{lastline};
       $self->{lastline} = readline($self->{in_fh});
+      return 0 unless defined $self->{lastline};
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
     }
