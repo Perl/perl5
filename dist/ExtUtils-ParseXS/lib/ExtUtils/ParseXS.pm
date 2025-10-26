@@ -635,7 +635,7 @@ sub fetch_para {
       # Return what we have already and process this line on the
       # next call; that way something like a previous BOOT: won't
       # run on into the TYPEMAP: lines
-      return 1 if @{$self->{line}};
+      last if @{$self->{line}};
 
       $self->{lastline} =~
           /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/
@@ -643,21 +643,21 @@ sub fetch_para {
 
       my $end_marker = quotemeta(defined($1) ? $2 : $3);
 
-      # Scan until we find $end_marker alone on a line.
-      my $last;
-      while (1) {
-        unless ($last) {
-          push @{$self->{line}},    $self->{lastline};
-          push @{$self->{line_no}}, $.;
-        }
-        $self->{lastline} = readline($self->{in_fh});
-        last if $last;
-        $self->death("Error: Unterminated TYPEMAP section")
-                              unless  defined $self->{lastline};
+      # Add the 'TYPEMAP:' line
+      push @{$self->{line}},    $self->{lastline};
+      push @{$self->{line_no}}, $.;
+
+      # Accumulate lines until we find $end_marker alone on a line.
+      while ($self->{lastline} = readline($self->{in_fh})) {
+        last if $self->{lastline} =~ /^$end_marker\s*$/;
         chomp $self->{lastline};
-        $last = $self->{lastline} =~ /^$end_marker\s*$/;
+        push @{$self->{line}},    $self->{lastline};
+        push @{$self->{line_no}}, $.;
       }
-      return 1;
+      $self->death("Error: Unterminated TYPEMAP section")
+        unless defined $self->{lastline};
+      $final = 1;
+      goto read_next_line;
     }
 
     if ($self->{lastline} =~ /^\s*#/

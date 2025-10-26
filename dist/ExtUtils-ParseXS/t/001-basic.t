@@ -5793,6 +5793,20 @@ EOF
                 "got expected err msg"
             ],
         ],
+        [
+            "line continuation directly after TYPEMAP",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |
+                |foo_t T_FOO
+                |
+                |EOF
+                |void foo(int i, \
+                |         int j)
+EOF
+
+            [ 0, 0, qr{XS}, "no errs" ],
+        ],
     );
 
     test_many($preamble, undef, \@test_fns);
