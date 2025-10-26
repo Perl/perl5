@@ -10743,7 +10743,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
 
     /* Cast away const, because many of our callers don't have it; this
      * function declares it as const so as to indicate that it doesn't change
-     * it, and it can be called using a const parameter */
+     * it, and that it can be called using a const parameter */
     return (char *) s;
 
   too_long:
