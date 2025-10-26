@@ -604,7 +604,6 @@ sub fetch_para {
   my ExtUtils::ParseXS $self = shift;
 
   return 0 if not defined $self->{lastline}; # EOF
-  chomp $self->{lastline}; # may not already have been for first MODULE line
 
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();

@@ -662,8 +662,14 @@ sub parse {
     $pxs->{lastline_no} = $.;
 
     while (defined $pxs->{lastline}) {
-        return 1 if ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
-                                                            $pxs->{lastline});
+        if (ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
+                                                    $pxs->{lastline}))
+        {
+            # the fetch_para() regime in place in the XS part of the file
+            # expects this to have been chomped
+            chomp $pxs->{lastline};
+            return 1;
+        }
 
         my $node = 
             $pxs->{lastline} =~ /^=/
