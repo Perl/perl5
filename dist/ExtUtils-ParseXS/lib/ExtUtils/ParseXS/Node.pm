@@ -1410,7 +1410,7 @@ sub parse {
     $pxs->{line} = [];
 
     my $tmap = ExtUtils::Typemaps->new(
-        string        => join("", @{$self->{lines}}),
+        string        => join("", map "$_\n", @{$self->{lines}}),
         lineno_offset => 1 + ($pxs->current_line_number() || 0),
         fake_filename => $pxs->{in_filename},
     );

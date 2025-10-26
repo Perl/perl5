@@ -655,6 +655,7 @@ sub fetch_para {
         last if $last;
         $self->death("Error: Unterminated TYPEMAP section")
                               unless  defined $self->{lastline};
+        chomp $self->{lastline};
         $last = $self->{lastline} =~ /^$end_marker\s*$/;
       }
       return 1;
