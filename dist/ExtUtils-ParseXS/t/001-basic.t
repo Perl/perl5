@@ -5821,6 +5821,17 @@ EOF
 
             [ 0, 0, qr{XS}, "no undef warning" ],
         ],
+        [
+            "line continuation directly after POD",
+            [ Q(<<'EOF') ],
+                |=pod
+                |=cut
+                |void foo(int i, \
+                |         int j)
+EOF
+
+            [ 0, 0, qr{XS}, "no errs" ],
+        ],
     );
 
     test_many($preamble, undef, \@test_fns);

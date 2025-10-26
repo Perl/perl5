@@ -616,6 +616,8 @@ sub fetch_para {
 
   for (;;) {
 
+    my $final;
+
     # Skip an embedded POD section
 
     if ($self->{lastline} =~ /^=/) {
@@ -624,11 +626,7 @@ sub fetch_para {
       }
       $self->death("Error: Unterminated pod")
         unless defined $self->{lastline};
-      $self->{lastline} = readline($self->{in_fh});
-      return 0 unless defined $self->{lastline};
-      chomp $self->{lastline};
-      $self->{lastline} =~ s/^\s+$//;
-      next;
+      goto read_next_line;
     }
 
     # if present, extract out a TYPEMAP block as a paragraph
@@ -687,7 +685,6 @@ sub fetch_para {
 
     # A general line: process it
 
-    my $final;
 
     # Blank line followed by char in column 1. Start of next XSUB?
     last if    $self->{lastline} =~ /^\S/
