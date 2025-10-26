@@ -662,18 +662,14 @@ sub fetch_para {
       return 1;
     }
 
-    my $final;
-
-    # Process this line unless it looks like a '#', comment
-
-    if ($self->{lastline} !~ /^\s*#/ # not a CPP directive
+    if ($self->{lastline} =~ /^\s*#/
            # CPP directives:
            #   ANSI:    if ifdef ifndef elif else endif define undef
            #              line error pragma
            #   gcc:    warning include_next
            #   obj-c:  import
            #   others: ident (gcc notes that some cpps have this one)
-        || $self->{lastline} =~ /^\#[ \t]*
+        && $self->{lastline} !~ /^\#[ \t]*
                                   (?:
                                         (?:if|ifn?def|elif|else|endif|elifn?def|
                                            define|undef|pragma|error|
@@ -683,14 +679,22 @@ sub fetch_para {
                                         \s* ["<] .* [>"]
                                  )
                                 /x
-    )
-    {
+    ) {
+      # A line starting with # but not a CPP directive?
+      # Must be a code comment. Skip it.
+      goto read_next_line;
+    }
+
+    # A general line: process it
+
+    my $final;
+
       # Blank line followed by char in column 1. Start of next XSUB?
       last if    $self->{lastline} =~ /^\S/
               && @{ $self->{line} }
               && $self->{line}->[-1] eq "";
 
-      # processes CPP conditionals
+      # analyse CPP conditionals
       if ($self->{lastline}
             =~/^#[ \t]*(if|ifn?def|elif|else|endif|elifn?def)\b/)
       {
@@ -721,8 +725,9 @@ sub fetch_para {
 
       push(@{ $self->{line} }, $self->{lastline});
       push(@{ $self->{line_no} }, $self->{lastline_no});
-    } # end of processing non-comment lines
 
+
+  read_next_line:
     # Read next line and continuation lines
     last unless defined($self->{lastline} = readline($self->{in_fh}));
     $self->{lastline_no} = $.;
