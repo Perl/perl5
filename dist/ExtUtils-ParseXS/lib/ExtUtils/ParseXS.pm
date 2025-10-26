@@ -616,10 +616,9 @@ sub fetch_para {
 
   for (;;) {
 
-    # Skip any embedded POD sections, reading in lines from {in_fh} as
-    # necessary.
+    # Skip an embedded POD section
 
-    while ($self->{lastline} =~ /^=/) {
+    if ($self->{lastline} =~ /^=/) {
       while ($self->{lastline} = readline($self->{in_fh})) {
         last if ($self->{lastline} =~ /^=cut\s*$/);
       }
@@ -629,6 +628,7 @@ sub fetch_para {
       return 0 unless defined $self->{lastline};
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
+      next;
     }
 
     # if present, extract out a TYPEMAP block as a paragraph
