@@ -6529,6 +6529,30 @@ PP(pp_unshift)
     return NORMAL;
 }
 
+/* Some pp_reverse helpers for MSVC:*/
+#ifdef _MSC_VER
+#  pragma intrinsic(_byteswap_ushort, _byteswap_ulong, _byteswap_uint64)
+#  define S_bswap16(_x) _byteswap_ushort(_x)
+#  define S_bswap32(_x) _byteswap_ulong(_x)
+#  define S_bswap64(_x) _byteswap_uint64(_x)
+PERL_STATIC_FORCE_INLINE void *
+    S_memcpy(void *dest, const void *src,size_t count);
+#else
+#  define S_bswap16(_x) _swab_16_(_x)
+#  define S_bswap32(_x) _swab_32_(_x)
+#  define S_bswap64(_x) _swab_64_(_x)
+#  define S_memcpy(_d,_s,_n) memcpy((_d),(_s),(_n))
+#endif
+/* this pragma can't be push/pop-ed vs whatever the cmd line to cl.exe was */
+#ifdef _MSC_VER
+#  pragma intrinsic(memcpy)
+void *
+S_memcpy(void *dest, const void *src, size_t count)
+{
+    return memcpy(dest, src, count);
+}
+#endif
+
 PP_wrapped(pp_reverse, 0, 1)
 {
     dSP; dMARK;
@@ -6846,6 +6870,12 @@ PP_wrapped(pp_reverse, 0, 1)
     }
     RETURN;
 }
+
+/* Undefine some pp_reverse helpers */
+#undef S_memcpy
+#undef S_bswap16
+#undef S_bswap32
+#undef S_bswap64
 
 PP_wrapped(pp_split,
               (   (PL_op->op_private & OPpSPLIT_ASSIGN)
