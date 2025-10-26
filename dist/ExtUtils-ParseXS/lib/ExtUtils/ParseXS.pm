@@ -689,42 +689,42 @@ sub fetch_para {
 
     my $final;
 
-      # Blank line followed by char in column 1. Start of next XSUB?
-      last if    $self->{lastline} =~ /^\S/
-              && @{ $self->{line} }
-              && $self->{line}->[-1] eq "";
+    # Blank line followed by char in column 1. Start of next XSUB?
+    last if    $self->{lastline} =~ /^\S/
+            && @{ $self->{line} }
+            && $self->{line}->[-1] eq "";
 
-      # analyse CPP conditionals
-      if ($self->{lastline}
-            =~/^#[ \t]*(if|ifn?def|elif|else|endif|elifn?def)\b/)
-      {
-        my $type = $1;
-        if ($type =~ /^if/) {  # if, ifdef, ifndef
-          if (@{$self->{line}}) {
-            # increment level
-            $if_level++;
-          } else {
-            $final = 1;
-          }
-        } elsif ($type eq "endif") {
-          if ($if_level) { # are we in an if that was started in this paragraph?
-            $if_level--;   # yep- so decrement to end this if block
-          } else {
-            $final = 1;
-          }
-        } elsif (!$if_level) {
-          # not in an #ifdef from this paragraph, thus
-          # this directive should not be part of this paragraph.
+    # analyse CPP conditionals
+    if ($self->{lastline}
+          =~/^#[ \t]*(if|ifn?def|elif|else|endif|elifn?def)\b/)
+    {
+      my $type = $1;
+      if ($type =~ /^if/) {  # if, ifdef, ifndef
+        if (@{$self->{line}}) {
+          # increment level
+          $if_level++;
+        } else {
           $final = 1;
         }
+      } elsif ($type eq "endif") {
+        if ($if_level) { # are we in an if that was started in this paragraph?
+          $if_level--;   # yep- so decrement to end this if block
+        } else {
+          $final = 1;
+        }
+      } elsif (!$if_level) {
+        # not in an #ifdef from this paragraph, thus
+        # this directive should not be part of this paragraph.
+        $final = 1;
       }
+    }
 
-      if ($final and @{$self->{line}}) {
-        return 1;
-      }
+    if ($final and @{$self->{line}}) {
+      return 1;
+    }
 
-      push(@{ $self->{line} }, $self->{lastline});
-      push(@{ $self->{line_no} }, $self->{lastline_no});
+    push(@{ $self->{line} }, $self->{lastline});
+    push(@{ $self->{line_no} }, $self->{lastline_no});
 
 
   read_next_line:
