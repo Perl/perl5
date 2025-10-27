@@ -4771,11 +4771,71 @@ S_intuit_more(pTHX_ char *s, char *e,
                 return false;
             }
 
-            /* khw: Using \w here misses the possibility of lots of other
-             * syntaxes of variables, like $::foo or ${foo}, that scan_ident
-             * looks for.
-             */
-            if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
+            /* If there is extra stuff in the source, like braces, it means
+             * this is almost definitely intended to be an identifier */
+            const bool is_embraced = memchr(s, '{', s_after_ident - s);
+
+            const bool is_multichar = len > 1;
+
+            /* Numeric identifier names are special */
+            if (isDIGIT_A(tmpbuf[1+0])) {
+
+                /* &41 and &6b are illegal subroutine names so is an error or
+                 * a charclass */
+                if (tmpbuf[0] == '&') {
+                    return false;
+                }
+
+                /* scan_ident will stop at the first non-digit, which is
+                 * pointed to by 's_after_indent'.  If that is a \w, we would
+                 * have something like $456x, which is an illegal identifer,
+                 * so is an error or a charclass */
+                if ( ! is_embraced
+                    && isWORDCHAR_lazy_if_safe(s_after_ident,
+                                               PL_bufend, UTF))
+                {
+                    return false;
+                }
+
+                /* We don't get here if this potential identifier starts with
+                 * leading zeros, due to the logic in scan_ident. */
+                assert(len == 1 || tmpbuf[1+0] != '0');
+
+                /* The chances are vanishingly small that someone is going to
+                 * want [$0] to expand to the program's name in a character
+                 * class -- this would mean to match on any character in the
+                 * its file path.  But, what would the program's name be doing
+                 * as part of a subscript either?  The only likely scenario is
+                 * that this is meant to be a charclass matching either '$' or
+                 * '0'.  */
+                if (tmpbuf[1+0] == '0') {
+                    return false;
+                }
+
+                /* Here it is either something like $1 which is supposed to
+                 * match either dollar or 1, or it is supposed to expand to
+                 * what is in $1 left over from a capturing group from the
+                 * previous pattern match.  In the latter case, it could be
+                 * either a part of wanting to calculate a subscript, or to
+                 * use as the contents of as part of the character class.
+                 * Larger (unembraced) numbers are much less likely to have
+                 * had capturing groups, so they lean more towards a
+                 * charclass.  weight 100 is what this function has
+                 * traditionally used for len>1; khw thinks there is no bias
+                 * one way or the other for length 1 ones; but has chosen 100
+                 * for embraced identifiers
+                 *
+                 * XXX long enough identifiers could probably return false
+                 * immediately here, rather than using weights. */
+                if (is_embraced || is_multichar) {
+                    weight -= 100;
+                }
+            }   /* Below is not a digit */
+            else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
+
+                /* khw: Using \w here misses the possibility of lots of other
+                 * syntaxes of variables, like $::foo or ${foo}, that
+                 * scan_ident looks for. */
 
                 /* khw: This only looks at global variables; lexicals came
                  * later, and this hasn't been updated.  Ouch!! */
