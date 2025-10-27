@@ -608,15 +608,17 @@ sub fetch_para {
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
 
-  # count how many #ifdef levels we see in this paragraph
-  # decrementing when we see an endif. if we see an elsif
-  # or endif without a corresponding #ifdef then we don't
-  # consider it part of this paragraph.
-  my $if_level = 0;
+  my $if_level = 0; # current depth of #if/#endif nesting
+
+  # Main loop: for each iteration, process the current line,
+  # then maybe read in the next line and continue. Handle some special
+  # cases like POD in their own little loop which may read multiple
+  # lines.
 
   for (;;) {
 
-    my $final;
+    my $final; # if true, end loop after reading in the next line
+
 
     # Skip an embedded POD section
 
@@ -629,7 +631,8 @@ sub fetch_para {
       goto read_next_line;
     }
 
-    # if present, extract out a TYPEMAP block as a paragraph
+
+    # If present, extract out a TYPEMAP block as a paragraph
     if ($self->{lastline} =~ /^TYPEMAP\s*:/) {
 
       # Return what we have already and process this line on the
@@ -660,6 +663,9 @@ sub fetch_para {
       goto read_next_line;
     }
 
+
+    # Strip code comment lines
+
     if ($self->{lastline} =~ /^\s*#/
            # CPP directives:
            #   ANSI:    if ifdef ifndef elif else endif define undef
@@ -683,18 +689,51 @@ sub fetch_para {
       goto read_next_line;
     }
 
-    # A general line: process it
-
 
     # Blank line followed by char in column 1. Start of next XSUB?
+
     last if    $self->{lastline} =~ /^\S/
             && @{ $self->{line} }
             && $self->{line}->[-1] eq "";
 
-    # analyse CPP conditionals
+
+    # Must be a general line (e.g. file-scoped keyword or CPP directive):
+    # process it.
+
+    # Analyse a CPP conditional line and if appropriate, make this line
+    # the last line of the current paragraph, or the first line of the
+    # next paragraph.
+
     if ($self->{lastline}
           =~/^#[ \t]*(if|ifn?def|elif|else|endif|elifn?def)\b/)
     {
+      # Allow a CPP conditional to directly precede or follow an XSUB
+      # without the usual required blank line, e.g.
+      #
+      #    #if X
+      #    void foo()
+      #       CODE:
+      #       ...
+      #    #  if Y
+      #       ...
+      #    #  endif
+      #       ...
+      #    #else
+      #       ...
+      #
+      # This is achieved by keeping track of CPP conditional nesting, to
+      # determine whether the conditional (e.g. the #else above) is part
+      # of the current paragraph, or is paired with something outside it.
+      # In this example, the #if Y / #endif are internal to the paragraph,
+      # while the #else is external and therefore indicates the end of the
+      # current paragraph and so we should stop, even though "\n\n\S"
+      # hasn't been encountered.
+      #
+      # Similarly we stop at the external '#if X', although here it is
+      # trickier to distinguish internal from external. For #if's, we
+      # achieve this by stopping if the #if is the first line in the
+      # putative paragraph; otherwise treat it as internal.
+
       my $type = $1;
       if ($type =~ /^if/) {  # if, ifdef, ifndef
         if (@{$self->{line}}) {
@@ -725,7 +764,10 @@ sub fetch_para {
 
 
   read_next_line:
-    # Read next line and continuation lines
+    # Read next line and any continuation lines into $self->{lastline_no},
+    # ready for the next iteration, or if $final, to be ready for the next
+    # call to fetch_para().
+
     last unless defined($self->{lastline} = readline($self->{in_fh}));
     $self->{lastline_no} = $.;
     my $tmp_line;
