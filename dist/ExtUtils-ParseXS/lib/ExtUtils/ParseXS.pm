@@ -735,28 +735,22 @@ sub fetch_para {
       # putative paragraph; otherwise treat it as internal.
 
       my $type = $1;
-      if ($type =~ /^if/) {  # if, ifdef, ifndef
-        if (@{$self->{line}}) {
-          # increment level
-          $if_level++;
-        } else {
-          $final = 1;
-        }
-      } elsif ($type eq "endif") {
-        if ($if_level) { # are we in an if that was started in this paragraph?
-          $if_level--;   # yep- so decrement to end this if block
-        } else {
-          $final = 1;
-        }
-      } elsif (!$if_level) {
-        # not in an #ifdef from this paragraph, thus
-        # this directive should not be part of this paragraph.
+
+      if (!@{$self->{line}}) {
+        # Treat a conditional starting the paragraph as a one-line
+        # paragraph
         $final = 1;
       }
-    }
+      else {
+        # Handle conditionals appearing in, or just after, an XSUB
 
-    if ($final and @{$self->{line}}) {
-      return 1;
+        $if_level++ if $type =~ /^if/; #  if, ifdef, ifndef
+        # If we're in a conditional that didn't start in this paragraph,
+        # return everything up to, but not including, this line, which
+        # will instead form the first line of the *next* paragraph
+        return 1 if !$if_level;
+        $if_level-- if $type eq "endif";
+      }
     }
 
     push(@{ $self->{line} }, $self->{lastline});
