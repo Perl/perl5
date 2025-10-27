@@ -508,28 +508,32 @@ sub Q {
 }
 
 
-# fetch_para(): private helper method for process_file().
+# fetch_para(): private helper method for Node::cpp_scope::parse().
 #
-# Read in all the lines associated with the next XSUB, or associated with
-# the next contiguous block of file-scoped XS or CPP directives.
+# Read in all the lines associated with the next XSUB, BOOT or TYPEMAP,
+# or associated with the next contiguous block of file-scoped XS or
+# C-preprocessor directives. The caller relies on the paragraph
+# demarcation to indicate the end of the XSUB, TYPEMAP or BOOT. For other
+# types of line, it doesn't matter how they are split.
 #
-# More precisely, read lines (and their line numbers) up to (but not
+# More precisely, it reads lines (and their line numbers) up to (but not
 # including) the start of the next XSUB or similar, into:
 #
 #   @{ $self->{line}    }
 #   @{ $self->{line_no} }
 #
-# It assumes that $self->{lastline} contains the next line to process,
-# and that further lines can be read from $self->{in_fh} as necessary.
+# It skips lines which contain POD or XS comments.
+#
+# It assumes that, on entry, $self->{lastline} contains the next line to
+# process, and that further lines can be read from $self->{in_fh} as
+# necessary. On return, it leaves the first unprocessed line in
+# $self->{lastline}: typically the first line of the next XSUB. At EOF,
+# lastline will be left undef and fetch_para() returns false.
 #
 # Multiple lines which are read in that end in '\' are concatenated
 # together into a single line, whose line number is set to
 # their first line. The two characters '\' and '\n' are kept in the
 # concatenated string.
-#
-# On return, it leaves the first unprocessed line in $self->{lastline}:
-# typically the first line of the next XSUB. At EOF, lastline will be
-# left undef.
 #
 # In general, it stops just before the first line which matches /^\S/ and
 # which was preceded by a blank line. This line is often the start of the
@@ -540,9 +544,9 @@ sub Q {
 #    |    ....
 #    |    stuff
 #    |                    [blank line]
-#    |PROTOTYPES: ENABLED
+#    |PROTOTYPES: ENABLE
 #    |#define FOO 1
-#    |SCOPE: ENABLE
+#    |PHASER DISCOMBOBULARISE
 #    |#define BAR 1
 #    |                    [blank line]
 #    |int
@@ -560,42 +564,40 @@ sub Q {
 # keywords, and just blindly reads in lines until it finds a suitable
 # place to break. It generally relies on the caller to handle most of the
 # syntax and semantics and error reporting. For example, the block of four
-# lines above from 'PROTOTYPES' onwards isn't valid XS, but is blindly
+# lines above from 'PROTOTYPES:' onwards isn't valid XS, but is blindly
 # returned by fetch_para().
 #
 # It often returns zero lines - the caller will have to handle this.
 #
-# There are a few exceptions where certain lines starting in column 1
-# *are* interpreted by this function (and conversely where /\\$/ *isn't*
-# processed):
+# The following items are handled specially by fetch_para().
 #     
 # POD:        Discard all lines between /^='/../^=cut/, then continue.
 #
-# MODULE:     If this appears as the first line, it is processed and
-#             discarded, then line reading continues.
+# #comment    Discard any line starting with /^\s*#/ which doesn't look
+#             like a C preprocessor directive,
 #
-# TYPEMAP:    Process a 'heredoc' typemap, discard all processed lines,
-#             then continue.
+# TYPEMAP:    Return the typemap 'heredoc' lines as a paragraph, but with
+#             the final line (e.g. "EOF") missing. Line continuations,
+#             i.e. '\' aren't processed.
 #
-# /^\s*#/     Discard such lines unless they look like a CPP directive,
-#             on the assumption that they are code comments. Then, in
-#             particular:
+# BOOT:       BOOT is NOT handled specially; the normal rules for ending
+#             a paragraph will determine where the BOOT code ends.
 #
-# #if etc:    For anything which is part of a CPP conditional: if it
-#             is external to the current chunk of code (e.g. an #endif
-#             which isn't matched by an earlier #if/ifdef/ifndef within
-#             the current chunk) then processing stops before that line.
+# #if etc:    C preprocessor conditional directives are analysed to
+#             determine whether they are internal or external to the
+#             current paragraph. This allows XSUBs and similar to be
+#             closely cuddled by #if/#endif etc without needing to be
+#             separated by a blank line. Typically, any such directives
+#             immediately preceding an XSUB will be returned as one-line
+#             paragraphs.
 #
-#             Nested if/elsif/else's etc within the chunk are passed
-#             through and processing continues. An #if/ifdef/ifdef on the
-#             first line is treated as external and is returned as a
-#             single line.
-#
-#             It is assumed the caller will handle any processing or
-#             nesting of external conditionals.
+#             Note that this CPP-line analysis is completely independent
+#             of a similar analysis done in Node::cpp_scope::parse(),
+#             which is concerned with splitting the tree into separate
+#             sections where multiple XSUBs with the same name can appear.
 #
 #             CPP directives (like #define) which aren't concerned with
-#             conditions are just passed through.
+#             conditions are just passed through without any analysis.
 #
 # It removes any trailing blank lines from the list of returned lines.
 
