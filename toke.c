@@ -4722,6 +4722,7 @@ S_intuit_more(pTHX_ char *s, char *e,
           case '@':
           case '&':
           case '$':
+           {
 
             /* Each additional occurrence of one of these three strongly
              * indicates it is a subscript */
@@ -4747,7 +4748,6 @@ S_intuit_more(pTHX_ char *s, char *e,
              * khw: $z-a is definitely a subscript
              */
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
-                Size_t len;
 
                 /* khw: where did the magic number 4 come from?.  This buffer
                  * was 4 times as large as tokenbuf in 1997, and had not
@@ -4765,7 +4765,7 @@ S_intuit_more(pTHX_ char *s, char *e,
                     return false;
                 }
 
-                len = strlen(tmpbuf + 1);
+                Size_t len = strlen(tmpbuf + 1);
 
                 /* khw: This only looks at global variables; lexicals came
                  * later, and this hasn't been updated.  Ouch!! */
@@ -4819,6 +4819,7 @@ S_intuit_more(pTHX_ char *s, char *e,
          /* else {  We don't weight any other case }*/
 
             break;
+           }
 
           /* khw:  [:blank:] strongly indicates a charclass */
           /* khw: Z-A definitely subscript
