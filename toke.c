@@ -4751,22 +4751,26 @@ S_intuit_more(pTHX_ char *s, char *e,
 
                 /* khw: where did the magic number 4 come from?.  This buffer
                  * was 4 times as large as tokenbuf in 1997, and had not
-                 * changed since the code was first added */
-                char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
+                 * changed since the code was first added.
+                 *
+                 * (Reserve tmpbuf[0] for future commits, hence +1 in most of
+                 * the tmpbuf references below) */
+                char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 + 1 ];
 
-                if (! scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), CHECK_ONLY))
+                if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
+                                 CHECK_ONLY))
                 {
                     /* An illegal identifier means this can't be a subscript;
                      * it's an error or it could be a charclass */
                     return false;
                 }
 
-                len = strlen(tmpbuf);
+                len = strlen(tmpbuf + 1);
 
                 /* khw: This only looks at global variables; lexicals came
                  * later, and this hasn't been updated.  Ouch!! */
                 if (   len > 1
-                    && gv_fetchpvn_flags(tmpbuf,
+                    && gv_fetchpvn_flags(tmpbuf + 1,
                                          len,
                                          UTF ? SVf_UTF8 : 0,
                                          SVt_PV))
