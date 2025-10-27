@@ -4749,9 +4749,13 @@ S_intuit_more(pTHX_ char *s, char *e,
             char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) + 1 ];
             tmpbuf[0] = s[0];
 
-            if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
-                             CHECK_ONLY))
-            {
+            /* scan_ident returns NULL if the input looks like an identifier
+             * that is illegal, e.g., it is too long or is like $001. */
+            char * s_after_ident = scan_ident(s, tmpbuf + 1,
+                                              C_ARRAY_END(tmpbuf),
+                                              CHECK_ONLY);
+            if (s_after_ident == NULL) {
+
                 /* An illegal identifier means this can't be a subscript;
                  * it's an error or it could be a charclass */
                 return false;
