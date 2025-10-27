@@ -229,6 +229,19 @@ TODO: {
 }
 
 TODO: {
+    local $::TODO = "GH 15654";
+    my $results = fresh_perl(<<~'EOF', {});
+        %: = *: = *:::::: = *x; *:::: = *::;
+        EOF
+    is($?, 0, 'perl exited normally; [GH 15654]');
+
+    $results = fresh_perl(<<~'EOF', {});
+        %y = *y = *:::::: = *x; *:::: = *::;
+        EOF
+    is($?, 0, 'perl exited normally; [GH 15654]');
+}
+
+TODO: {
     local $::TODO = "GH 16008";
     my $results = fresh_perl(<<~'EOF', {} );
         open my $h, ">", \my $x;
