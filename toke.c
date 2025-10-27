@@ -4744,13 +4744,9 @@ S_intuit_more(pTHX_ char *s, char *e,
              * khw: $z-a is definitely a subscript
              */
 
-            /* khw: where did the magic number 4 come from?.  This buffer was
-             * 4 times as large as tokenbuf in 1997, and had not changed since
-             * the code was first added.
-             *
-             * Place the sigil in tmpbuf[0], hence the identifier starts in
+            /* Place the sigil in tmpbuf[0], hence the identifier starts in
              * tmpbuf[1] */
-            char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 + 1 ];
+            char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) + 1 ];
             tmpbuf[0] = s[0];
 
             if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
