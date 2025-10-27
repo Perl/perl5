@@ -1056,14 +1056,20 @@ sub parse {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
-    # ----------------------------------------------------------------
-    # Main loop: for each iteration, read in a paragraph's worth of XSUB
-    # definition or XS/CPP directives into @{ $self->{line} }, then try to
-    # interpret those lines.
-    # ----------------------------------------------------------------
+    # Main loop: for each iteration, parse the next 'thing' in the current
+    # paragraph, such as a C preprocessor directive, a contiguous block of
+    # file-scoped keywords, or an XSUB. When the current paragraph runs
+    # out, read in another one. XSUBs, TYPEMAP and BOOT will consume
+    # all lines until the end of the current paragraph.
+    #
+    # C preprocessor conditionals such as #if may trigger recursive
+    # calls to process each branch until the matching #endif. These may
+    # cross paragraph boundaries.
 
-  PARAGRAPH:
-    while ( ($pxs->{line} && @{$pxs->{line}}) || $pxs->fetch_para()) {
+    while ( ($pxs->{line} && @{$pxs->{line}}) || $pxs->fetch_para())
+    {
+        next unless @{$pxs->{line}}; # fetch_para() can return zero lines
+
         if (   !defined($self->{line_no})
             && defined $pxs->{line_no}[0]
         ) {
@@ -1072,13 +1078,18 @@ sub parse {
             $self->SUPER::parse($pxs);
         }
 
-        # Process any initial C-preprocessor lines and blank
-        # lines. Note that any non-CPP lines starting with '#' will
-        # already have been filtered out by fetch_para().
-        #
-        # Also, keep track of #if/#else/#endif nesting.
+        # skip blank line
+        shift @{$pxs->{line}}, next  if $pxs->{line}[0] !~ /\S/;
 
-        while (@{$pxs->{line}} && $pxs->{line}[0] =~ /^#/) {
+        # Process a C-preprocessor line. Note that any non-CPP lines
+        # starting with '#' will already have been filtered out by
+        # fetch_para().
+        #
+        # If its a #if or similar, then recursively process each branch
+        # as a separate cpp_scope object until the matching #endif is
+        # reached.
+
+        if ($pxs->{line}[0] =~ /^#/) {
             my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
             $node->parse($pxs);
             push @{$self->{kids}}, $node;
@@ -1105,7 +1116,7 @@ sub parse {
             # other branches of the same conditional.
 
             while (1) {
-                # Parse the branch in new scope
+                # For each iteration, parse the next branch in a new scope
                 my $scope = ExtUtils::ParseXS::Node::cpp_scope->new(
                                                 {type => 'if'});
                 $scope->parse($pxs)
@@ -1141,12 +1152,9 @@ sub parse {
                 # any more branches to process of current if?
                 last if $last->{is_endif};
             } # while 1
-        } # while /^#/
 
-        # skip blank lines
-        shift @{$pxs->{line}} while @{$pxs->{line}} && $pxs->{line}[0] !~ /\S/;
-
-        next PARAGRAPH unless @{ $pxs->{line} };
+            next;
+        }
 
         # die if the next line is indented: all file-scoped things (CPP,
         # keywords, XSUB starts) are supposed to start on column 1
@@ -1189,20 +1197,17 @@ sub parse {
         $pxs->{file_SCOPE_enabled} = 0;
 
         # Process file-scoped keywords
-
-        # ----------------------------------------------------------------
-        # Process file-scoped keywords
-        # ----------------------------------------------------------------
-
         #
         # This loop repeatedly: skips any blank lines and then calls
         # the relevant Node::FOO::parse() method if it finds any of the
         # file-scoped keywords in the passed pattern.
         #
-        # Note due to the looping within parse_keywords() rather than
+        # Note: due to the looping within parse_keywords() rather than
         # looping here, only the first keyword in a contiguous block
-        # gets the 'start at column 1' check above enforced. This is
-        # a bug, maintained for backwards compatibility.
+        # gets the 'start at column 1' check above enforced.
+        # This is a bug, maintained for backwards compatibility: see the
+        # comments below referring to SCOPE for other bits of code needed
+        # to enforce this compatibility.
 
         $self->parse_keywords(
                 $pxs,
@@ -1212,19 +1217,20 @@ sub parse {
               . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP",
                 $keywords_flag_MODULE,
             );
+        # XXX we could have an 'or next' here if not for SCOPE backcompat
+        # and also delete the following 'skip blank line' and 'next unless
+        # @line' lines
 
         # skip blank lines
         shift @{$pxs->{line}} while @{$pxs->{line}} && $pxs->{line}[0] !~ /\S/;
 
-        next PARAGRAPH unless @{ $pxs->{line} };
+        next unless @{$pxs->{line}};
 
-        # ----------------------------------------------------------------
-        # Parse and code-emit an XSUB
-        # ----------------------------------------------------------------
+        # Parse an XSUB
 
         my $xsub = ExtUtils::ParseXS::Node::xsub->new();
         $xsub->parse($pxs)
-            or next PARAGRAPH;
+            or next;
         push @{$self->{kids}}, $xsub;
 
         # Check for a duplicate function definition in this scope
@@ -1238,13 +1244,14 @@ sub parse {
             $self->{seen_xsubs}{$name} = 1;
         }
 
-
-
+        # xsub->parse() should have consumed all the remaining
+        # lines in the current paragraph.
         die "Internal error: unexpectedly not at EOF\n"
                   if @{$pxs->{line}};
 
         $pxs->{seen_an_XSUB} = 1; # encountered at least one XSUB
-    } # END 'PARAGRAPH' 'while' loop
+
+    } # END main 'while' loop
 
     1;
 }
