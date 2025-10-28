@@ -196,7 +196,7 @@ The defaults in the C<gmake> makefile are set up to build with MinGW/gcc.
 
 =item *
 
-Edit the F<GNUmakefile> (or F<Makefile>, if you're using F<nmake>) and change
+Edit the F<GNUmakefile> (or F<Makefile>, if you're using C<nmake>) and change
 the values of C<INST_DRV> and C<INST_TOP>. You can also enable various build
 flags. These are explained in the makefiles.
 
