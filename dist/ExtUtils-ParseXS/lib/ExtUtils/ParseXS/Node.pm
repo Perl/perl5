@@ -1148,17 +1148,27 @@ sub parse {
 
         next PARAGRAPH unless @{ $pxs->{line} };
 
-        # This will die on something like
+        # die if the next line is indented: all file-scoped things (CPP,
+        # keywords, XSUB starts) are supposed to start on column 1
+        # (although see the comment below about multiple parse_keywords()
+        # iterations sneaking in indented keywords).
         #
+        # The text of the error message is based around a common reason
+        # for an indented line to appear in file scope: this is due to an
+        # XSUB being prematurely truncated by fetch_para(). For example in
+        # the code below, the coder wants the foo and bar lines to both be
+        # part of the same CODE block. But the XS parser sees the blank
+        # line followed by the '#ifdef' on column 1 as terminating the
+        # current XSUB. So the bar() line is treated as being in file
+        # scope and dies because it is indented.
+        #
+        #   |int f()
         #   |    CODE:
         #   |        foo();
         #   |
-        #   |#define X
+        #   |#ifdef USE_BAR
         #   |        bar();
-        #
-        # due to the define starting at column 1 and being preceded by a blank
-        # line: so the define and bar() aren't parsed as part of the CODE
-        # block.
+        #   |#endif
 
         $pxs->death(
             "Code is not inside a function"
@@ -1184,12 +1194,15 @@ sub parse {
         # Process file-scoped keywords
         # ----------------------------------------------------------------
 
-        # Note that MODULE and TYPEMAP will already have been processed by
-        # fetch_para().
         #
         # This loop repeatedly: skips any blank lines and then calls
         # the relevant Node::FOO::parse() method if it finds any of the
         # file-scoped keywords in the passed pattern.
+        #
+        # Note due to the looping within parse_keywords() rather than
+        # looping here, only the first keyword in a contiguous block
+        # gets the 'start at column 1' check above enforced. This is
+        # a bug, maintained for backwards compatibility.
 
         $self->parse_keywords(
                 $pxs,
