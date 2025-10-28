@@ -14,7 +14,7 @@ These are instructions for building Perl under Windows 7 and later.
 
 =head1 DESCRIPTION
 
-Before you start, you should glance through the README file
+Before you start, you should glance through the F<README> file
 found in the top-level directory to which the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
@@ -22,13 +22,13 @@ which this software is being distributed.
 Also make sure you read L</BUGS AND CAVEATS> below for the
 known limitations of this port.
 
-The INSTALL file in the perl top-level has much information that is
+The F<INSTALL> file in the perl top-level has much information that is
 only relevant to people building Perl on Unix-like systems.  In
 particular, you can safely ignore any information that talks about
-"Configure".
+F<Configure>.
 
 You may also want to look at one other option for building a perl that
-will work on Windows: the README.cygwin file, which give a different
+will work on Windows: the F<README.cygwin> file, which give a different
 set of rules to build a perl for Windows.  This method will probably
 enable you to build a more Unix-compatible perl, but you will also
 need to download and use various other build-time and run-time support
@@ -59,7 +59,7 @@ Delivers gcc toolchain building 32-bit executables (which can be used both 32 an
 
 Delivers gcc toolchain targeting both 64-bit Windows and 32-bit Windows
 platforms (despite the project name "mingw-w64" they are not only 64-bit
-oriented). They deliver the native gcc compilers and cross-compilers
+oriented). They deliver the native GCC compilers and cross-compilers
 that are also supported by perl's makefile.
 
 =back
@@ -74,9 +74,9 @@ down compiler (no java, or gfortran) suitable for building perl available at:
 L<https://strawberryperl.com/package/kmx/64_gcctoolchain/>
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
-operating system, then you should set the WIN64 environment variable to "undef".
-Also, the trimmed down compiler only passes tests when USE_ITHREADS *= define
-(as opposed to undef) and when the CFG *= Debug line is commented out.
+operating system, then you should set the C<WIN64> environment variable to C<undef>.
+Also, the trimmed down compiler only passes tests when C<USE_ITHREADS *= define>
+(as opposed to C<undef>) and when the C<CFG *= Debug> line is commented out.
 
 This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
@@ -197,7 +197,7 @@ The defaults in the C<gmake> makefile are set up to build with MinGW/gcc.
 =item *
 
 Edit the F<GNUmakefile> (or F<Makefile>, if you're using F<nmake>) and change
-the values of I<INST_DRV> and C<INST_TOP>. You can also enable various build
+the values of C<INST_DRV> and C<INST_TOP>. You can also enable various build
 flags. These are explained in the makefiles.
 
 Note that it is generally not a good idea to try to build a C<perl> with
@@ -253,7 +253,7 @@ is the most commonly launched program during the build and later testing.
 
 =head2 Testing Perl on Windows
 
-Type "gmake test" (or "nmake test").  This will run most
+Type C<gmake test> (or C<nmake test>).  This will run most
 of the tests from the testsuite (many tests will be skipped).
 
 There should be no test failures.
@@ -272,7 +272,7 @@ native "cmd.exe", or if you are building from a path that contains
 spaces.  So don't do that.
 
 If you are running the tests from a emacs shell window, you may see
-failures in op/stat.t.  Run "gmake test-notty" in that case.
+failures in F<op/stat.t>.  Run C<gmake test-notty> in that case.
 
 Furthermore, you should make sure that during C<make test> you do not
 have any GNU tool packages in your path: some toolkits like Unixutils
@@ -291,7 +291,7 @@ Please report any other failures as described under L</BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Windows
 
-Type "gmake install" ("nmake install").  This will
+Type C<gmake install> (C<nmake install>).  This will
 put the newly built perl and the libraries under whatever C<INST_TOP>
 points to in the Makefile.  It will also install the pod documentation
 under C<$INST_TOP\$INST_VER\lib\pod> and HTML versions of the same
