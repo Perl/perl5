@@ -552,7 +552,8 @@ sub parse {
 
     my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
     $self->{cpp_scope} = $cpp_scope;
-    $cpp_scope->parse($pxs);
+    $cpp_scope->parse($pxs)
+        or return;
     push @{$self->{kids}}, $cpp_scope;
 
     # Now at EOF: all paragraphs (and thus XSUBs) have now been read in
@@ -1091,7 +1092,8 @@ sub parse {
 
         if ($pxs->{line}[0] =~ /^#/) {
             my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
-            $node->parse($pxs);
+            $node->parse($pxs)
+                or next;
             push @{$self->{kids}}, $node;
 
             next unless $node->{is_cond};
@@ -1120,7 +1122,7 @@ sub parse {
                 my $scope = ExtUtils::ParseXS::Node::cpp_scope->new(
                                                 {type => 'if'});
                 $scope->parse($pxs)
-                    or return 1;
+                    or next;
 
                 # Sub-parsing of that branch should have terminated
                 # at an elif/endif line rather than falling off the
@@ -1909,7 +1911,8 @@ sub parse {
         # Parse the XSUB's body
 
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
-        $xbody->parse($pxs, $self);
+        $xbody->parse($pxs, $self)
+            or return;
 
         if (defined $case) {
             # make the xbody a child of the CASE
@@ -2305,7 +2308,8 @@ sub parse {
 
     my $params = $self->{params} = ExtUtils::ParseXS::Node::Params->new();
 
-    $params->parse($pxs, $xsub, $params_text);
+    $params->parse($pxs, $xsub, $params_text)
+        or return;
     $self->{params} = $params;
     push @{$self->{kids}}, $params;
 
@@ -4350,7 +4354,8 @@ sub parse {
 
     my $autocall = ExtUtils::ParseXS::Node::autocall->new();
     # mainly a NOOP, but sets line number etc and flags that autocall seen
-    $autocall->parse($pxs, $xsub, $xbody);
+    $autocall->parse($pxs, $xsub, $xbody)
+        or return;
     push @{$self->{kids}}, $autocall;
 
     1;
@@ -5047,7 +5052,8 @@ sub parse {
                         type   => 'include',
                         is_cmd =>  $self->{is_cmd},
                     });
-    $cpp_scope->parse($pxs);
+    $cpp_scope->parse($pxs)
+        or return;
     push @{$self->{kids}}, $cpp_scope;
 
     --$pxs->{IncludedFiles}->{$pxs->{in_filename}}
