@@ -11,12 +11,11 @@ on EBCDIC based computers.
 
 Portions of this document that are still incomplete are marked with XXX.
 
-Early Perl versions worked on some EBCDIC machines, but the last known
-version that ran on EBCDIC was v5.8.7, until v5.22, when the Perl core
-again works on z/OS.  Theoretically, it could work on OS/400 or Siemens'
-BS2000  (or their successors), but this is untested.  In v5.22 and 5.24,
-not all
-the modules found on CPAN but shipped with core Perl work on z/OS.
+Early Perl versions worked on some EBCDIC machines, but after v5.8.7,
+until v5.22, it likely didn't.  Theoretically, it could work on OS/400
+or Siemens' BS2000  (or their successors), but this is untested.  In
+v5.22 and 5.24, not all the modules found on CPAN but shipped with core
+Perl work on z/OS.
 
 If you want to use Perl on a non-z/OS EBCDIC machine, please let us know
 at L<https://github.com/Perl/perl5/issues>.
@@ -35,7 +34,7 @@ If your code just uses the 52 letters A-Z and a-z, plus SPACE, the
 digits 0-9, and the punctuation characters that Perl uses, plus a few
 controls that are denoted by escape sequences like C<\n> and C<\t>, then
 there's nothing special about using Perl, and your code may very well
-work on an ASCII machine without change.
+work on an EBCDIC machine without change.
 
 But if you write code that uses C<\005> to mean a TAB or C<\xC1> to mean
 an "A", or C<\xDF> to mean a "E<yuml>" (small C<"y"> with a diaeresis),
@@ -95,7 +94,7 @@ Most are for European languages, but there are also ones for Arabic,
 Greek, Hebrew, and Thai.  There are good references on the web about
 all these.
 
-=head2 Latin 1 (ISO 8859-1)
+=head3 Latin 1 (ISO 8859-1)
 
 A particular 8-bit extension to ASCII that includes grave and acute
 accented Latin characters.  Languages that can employ ISO 8859-1
@@ -108,6 +107,19 @@ quotation marks.  This set is based on Western European extensions
 to ASCII and is commonly encountered in World Wide Web work.
 In IBM character code set identification terminology, ISO 8859-1 is
 also known as CCSID 819 (or sometimes 0819 or even 00819).
+
+Unicode uses ASCII plus Latin 1 as its base, adding many many more
+characters.
+
+=head3 Other ISO 8859-1 encodings
+
+Every one of these encodings include every character in ASCII (encoded
+identically); the differences are in the additional characters added,
+which are tailored for the language(s) the encoding is designed to
+support.
+
+To access these, the locale system of Perl must be used.  See
+L<perllocale>.
 
 =head2 EBCDIC
 
@@ -127,7 +139,8 @@ Some IBM EBCDIC character sets may be known by character code set
 identification numbers (CCSID numbers) or code page numbers.
 
 Perl can be compiled on platforms that run any of three commonly used EBCDIC
-character sets, listed below.
+character sets, listed below.  (And it should be easy to add additional
+ones, except for the inevitable glitches that could crop up.)
 
 =head3 The 13 variant characters
 
@@ -146,6 +159,18 @@ mistakenly and silently choose one of the three.
 The Line Feed (LF) character is actually a 14th variant character, and
 Perl checks for that as well.
 
+These variant characters are the main reason that EBCDIC can't be
+handled by Perl's L<locale system|perllocale>.  All the characters are
+used all over the place in Perl programs.  When you type one of them in
+at your keyboard, its meaning must be what you expect it to be; which
+could easily be violated if another code page is in use.  Therefore the
+Perl interpreter must be compiled for a particular code page.
+
+(The implementation is mostly table driven.  If a new code page needed
+to be added, simply add a new table to F<regen/charset_translations.pl>
+that translates from ASCII to the new page, and then regenerate.  And
+then go deal with any glitches.
+
 =head3 EBCDIC code sets recognized by Perl
 
 =over
@@ -157,6 +182,9 @@ characters (i.e. ISO 8859-1) to an EBCDIC set.  0037 is used
 in North American English locales on the OS/400 operating system
 that runs on AS/400 computers.  CCSID 0037 differs from ISO 8859-1
 in 236 places; in other words they agree on only 20 code point values.
+All but one of those is a control character.  The only printable
+character that has the same ordinal number in this code page (and the
+others below) as ASCII is the PILCROW SIGN, C<E<182>>.
 
 =item B<1047>
 
@@ -168,10 +196,11 @@ and from ISO 8859-1 in 236.
 
 =item B<POSIX-BC>
 
-The EBCDIC code page in use on Siemens' BS2000 system is distinct from
-1047 and 0037.  It is identified below as the POSIX-BC set.
-Like 0037 and 1047, it is the same as ISO 8859-1 in 20 code point
-values.
+This code page is no longer generated (although it would be easy to
+re-enable it).  The Siemens' BS2000 systems which used it have been
+discontinued.  It is distinct from 1047 and 0037, and is identified
+below as the POSIX-BC set.  Like 0037 and 1047, it is the same as ISO
+8859-1 in 20 code point values.
 
 =back
 
