@@ -9,12 +9,24 @@ use warnings;
 # to be used for example by Module::Build without having to shell out to
 # xsubpp. It also makes it easier to test the individual components.
 #
-# The bulk of this file is taken up with the process_file() method which
-# does the whole job of reading in a .xs file and outputting a .c file. It
-# in turn relies on fetch_para() to read chunks of lines from the input,
-# and on various ExtUtils::ParseXS::Node::FOO::parse() methods which build
-# up an AST representing the parsed XS file. Then a bunch of as_code()
-# methods walk that tree, emitting C code.
+# The main function in this file is process_file(), which oversees the
+# whole job of reading in a .xs file, parsing it into an Abstract Syntax
+# Tree (AST), then walking the tree to generate C code and output it to a
+# .c file.
+#
+# Most of the actual logic is in the ExtUtils::ParseXS::Node::FOO
+# subclasses, which hold the nodes of the AST. The parse() methods of
+# these subclasses do a top-down recursive-descent parse of the input
+# file, building the AST; while the as_code() methods walk the tree,
+# emitting C code.
+#
+# The main parsing loop is contained in the Node::cpp_scope::parse()
+# method, which in turn relies on fetch_para() to read a paragraph's worth
+# of lines from the input while stripping out any POD or XS comments. It
+# is fetch_para() which decides where an XSUB, BOOT or TYPEMAP block ends,
+# mainly by using a blank line followed by character in column 1 as the
+# delimiter (except for TYPEMAP, where it looks for the matching EOF-style
+# string).
 #
 # The remainder of this file mainly consists of helper functions and
 # functions to help with outputting stuff.

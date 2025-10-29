@@ -11,7 +11,7 @@ ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
 
 =head1 SYNOPSIS
 
-    # Create a node to represent the Foo part of an XSUB; then
+    # Create a node to represent the Foo part of an XS file; then
     # top-down parse it into a subtree; then top-down emit the
     # contents of the subtree as C code.
 
@@ -19,15 +19,11 @@ ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
     $foo->parse(...)
         or die;
     $foo->as_code(...);
-    $foo->as_concise(1);
+    print STDERR $foo->as_concise(1); # for debugging
 
 =head1 DESCRIPTION
 
 This API is currently private and subject to change.
-
-Node that as of May 2025, this is a Work In Progress. An AST is created
-for each parsed XSUB, but those nodes aren't yet linked into a
-higher-level tree representing the whole XS file.
 
 The C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
 state for the nodes of an Abstract Syntax Tree (AST), which represents the
@@ -51,29 +47,42 @@ children; however, both C<INPUT_line> and C<OUTPUT_line> have an
 C<ioparam> field which points to the C<IO_Param> object associated with
 this line, which is located elsewhere in the tree.
 
-The various C<foo_part> nodes divide the parsing of the main body of the
+The various C<foo_part> nodes divide the parsing of the main body of an
 XSUB into sections where different sets of keywords are allowable, and
 where various bits of code can be conveniently emitted.
 
 =head2 Methods
 
-There are two main methods, in addition to new(), which are present in all
-subclasses. First, parse() consumes lines from the source to satisfy the
-construct being parsed. It may itself create objects of lower-level
-constructs and call parse on them. For example, C<Node::xbody::parse()>
-may create a C<Node::input_part> node and call parse() on it, which will
-create C<Node::INPUT> or C<Node::PREINIT> nodes as appropriate, and so on.
+There are two main methods in addition to C<new()>, which are present in
+all subclasses. First, C<parse()> consumes lines from the source to
+satisfy the construct being parsed. It may itself create objects of
+lower-level constructs and call parse on them. For example,
+C<Node::xbody::parse()> may create a C<Node::input_part> node and call
+C<parse()> on it, which will create C<Node::INPUT> or C<Node::PREINIT>
+nodes as appropriate, and so on.
 
-Secondly, as_code() descends its sub-tree, outputting the tree as C code.
+Secondly, C<as_code()> descends its sub-tree, outputting the tree as C
+code.
 
-Some nodes also have an as_boot_code() method for adding any code to
-the boot XSUB. This returns two array refs, one containing a list of code lines to be inserted early into the boot XSUB, and a second for later lines.
+The C<as_concise()> method returns a line-per-node string representation
+of the node and any children. Most node classes just inherit this method
+from the base C<Node> class. It is intended mainly for debugging.
+
+Some nodes also have an C<as_boot_code()> method for adding any code to
+the boot XSUB. This returns two array refs, one containing a list of code
+lines to be inserted early into the boot XSUB, and a second for later
+lines.
+
+Finally, in the IO_Param subclass, C<as_code()> is replaced with
+C<as_input_code> and C<as_output_code()>, since that node may need to
+generate I<two> sets of C code; one to assign a Perl argument to a C
+variable, and the other to return the value of a variable to Perl.
 
 Note that parsing and code-generation are done as two separate phases;
-parse() should only build a tree and never emit code.
+C<parse()> should only build a tree and never emit code.
 
-In addition to C<$self>, both these methods are always provided with
-these three parameters:
+In addition to C<$self>, methods may commonly have some of these
+parameters:
 
 =over
 
@@ -85,22 +94,21 @@ lines read in from the source file for the current paragraph.
 
 =item C<$xsub>
 
-The current C<ExtUtils::ParseXS::xsub> node being processed.
+For nodes related to parsing an XSUB, the current
+C<ExtUtils::ParseXS::xsub> node being processed.
 
 =item C<$xbody>
 
-The current C<ExtUtils::ParseXS::xbody> node being processed. Note that
-in the presence of a C<CASE> keyword, an XSUB can have multiple bodies.
+For nodes related to parsing an XSUB, the current
+C<ExtUtils::ParseXS::xbody> node being processed. Note that in the
+presence of a C<CASE> keyword, an XSUB can have multiple bodies.
 
 =back
 
-The parse() and as_code() methods for some subclasses may have additional
-parameters.
+The C<parse()> and C<as_code()> methods for some subclasses may have
+parameters in addition to those.
 
-Some subclasses may have additional helper methods.
-
-The as_concise() method returns a line-per-node string representation of
-the node and any children. It is intended mainly for debugging.
+Some subclasses may also have additional helper methods.
 
 =head2 Class Hierachy
 
@@ -112,6 +120,18 @@ next keyword, and emit that code, possibly wrapped in C<#line> directives.
 This common behaviour is provided by the C<codeblock> class.
 
     Node
+        XS_file
+        preamble
+        C_part
+        C_part_POD
+        C_part_code
+        C_part_postamble
+        cpp_scope
+        global_cpp_line
+        BOOT
+        TYPEMAP
+        pre_boot
+        boot_xsub
         xsub
         xsub_decl
         ReturnType
@@ -126,6 +146,12 @@ This common behaviour is provided by the C<codeblock> class.
         cleanup_part
         autocall
         oneline
+            MODULE
+            REQUIRE
+            FALLBACK
+            include
+                INCLUDE
+                INCLUDE_COMMAND
             NOT_IMPLEMENTED_YET
             CASE
             enable
@@ -160,9 +186,44 @@ This common behaviour is provided by the C<codeblock> class.
 
 =head2 Abstract Syntax Tree structure
 
+A typical XS file might compile to a tree with a node structure similar to
+the following. Note that this is unrelated to the inheritance hierarchy
+shown above. In this example, the XS file includes another file, and has a
+couple of XSUBs within a C<#if/#else/#endif>. Note that a C<cpp_scope>
+node is the parent of all the nodes within the same branch of an C<#if>,
+or in the absence of C<#if>, within the same file.
+
+    XS_file
+        preamble
+        C_part
+            C_part_POD
+            C_part_code
+        C_part_postamble
+        cpp_scope: type="main"
+            MODULE
+            PROTOTYPES
+            BOOT
+            TYPEMAP
+            INCLUDE
+                cpp_scope: type="include"
+                    xsub
+                        ...
+            global_cpp_line: directive="ifdef"
+            cpp_scope: type="if"
+                xsub
+                    ...
+            global_cpp_line: directive="else"
+            cpp_scope: type="if"
+                xsub
+                    ...
+            global_cpp_line: directive="endif"
+            xsub
+                ...
+        pre_boot
+        boot_xsub
+
 A typical XSUB might compile to a tree with a structure similar to the
-following. Note that this is unrelated to the inheritance hierarchy
-shown above.
+following.
 
     xsub
         xsub_decl
