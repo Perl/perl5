@@ -21,77 +21,11 @@
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
- * (like warn instead of Perl_warn) for the API are not defined.
- * Not defining the short forms is a good thing for cleaner embedding.
- * BEWARE that a bunch of macros don't have long names, so either must be
- * added or don't use them if you define this symbol */
+/* When this symbol is defined, we undef various symbols we have defined
+ * earlier when this file was #included with this symbol undefined */
+#if !defined(PERL_DO_UNDEFS)
 
-#if !defined(MULTIPLICITY)
-/* undefined symbols, point them back at the usual ones */
-# define Perl_deb_nocontext                     Perl_deb
-# define Perl_form_nocontext                    Perl_form
-# define Perl_load_module_nocontext             Perl_load_module
-# define Perl_mess_nocontext                    Perl_mess
-# define Perl_newSVpvf_nocontext                Perl_newSVpvf
-# define Perl_sv_catpvf_nocontext               Perl_sv_catpvf
-# define Perl_sv_catpvf_mg_nocontext            Perl_sv_catpvf_mg
-# define Perl_sv_setpvf_nocontext               Perl_sv_setpvf
-# define Perl_sv_setpvf_mg_nocontext            Perl_sv_setpvf_mg
-# define Perl_warn_nocontext                    Perl_warn
-# define Perl_warner_nocontext                  Perl_warner
-#endif /* !defined(MULTIPLICITY) */
-#if !defined(PERL_CORE)
-/* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
- * disable them.
- */
-# define sv_setptrobj(rv,ptr,name)              sv_setref_iv(rv,name,PTR2IV(ptr))
-# define sv_setptrref(rv,ptr)                   sv_setref_iv(rv,NULL,PTR2IV(ptr))
-# if !defined(PERL_NOCOMPAT)
-
-/* Compatibility for this renamed function. */
-#   define perl_atexit(a,b)                     Perl_call_atexit(aTHX_ a,b)
-
-/* Compatibility for these functions that had a 'perl_' prefix before
- * 'Perl_' became the standard */
-#   define perl_call_argv(a,b,c)                Perl_call_argv(aTHX_ a,b,c)
-#   define perl_call_method(a,b)                Perl_call_method(aTHX_ a,b)
-#   define perl_call_pv(a,b)                    Perl_call_pv(aTHX_ a,b)
-#   define perl_call_sv(a,b)                    Perl_call_sv(aTHX_ a,b)
-#   define perl_eval_pv(a,b)                    Perl_eval_pv(aTHX_ a,b)
-#   define perl_eval_sv(a,b)                    Perl_eval_sv(aTHX_ a,b)
-#   define perl_get_av(a,b)                     Perl_get_av(aTHX_ a,b)
-#   define perl_get_cv(a,b)                     Perl_get_cv(aTHX_ a,b)
-#   define perl_get_hv(a,b)                     Perl_get_hv(aTHX_ a,b)
-#   define perl_get_sv(a,b)                     Perl_get_sv(aTHX_ a,b)
-#   define perl_init_i18nl10n(a)                Perl_init_i18nl10n(aTHX_ a)
-#   define perl_require_pv(a)                   Perl_require_pv(aTHX_ a)
-
-/* Before C99, macros could not wrap varargs functions. This
-   provides a set of compatibility functions that don't take an
-   extra argument but grab the context pointer using the macro dTHX.
- */
-
-#   if  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && \
-       !defined(PERL_WANT_VARARGS)
-#     define deb                                Perl_deb_nocontext
-#     define form                               Perl_form_nocontext
-#     define load_module                        Perl_load_module_nocontext
-#     define mess                               Perl_mess_nocontext
-#     define newSVpvf                           Perl_newSVpvf_nocontext
-#     define sv_catpvf                          Perl_sv_catpvf_nocontext
-#     define sv_catpvf_mg                       Perl_sv_catpvf_mg_nocontext
-#     define sv_setpvf                          Perl_sv_setpvf_nocontext
-#     define sv_setpvf_mg                       Perl_sv_setpvf_mg_nocontext
-#     define warn                               Perl_warn_nocontext
-#     define warner                             Perl_warner_nocontext
-#   endif /*  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) &&
-             !defined(PERL_WANT_VARARGS) */
-# endif /* !defined(PERL_NOCOMPAT) */
-#endif /* !defined(PERL_CORE) */
-#if !defined(PERL_NO_SHORT_NAMES)
-
-/* Hide global symbols */
+/* Create short name macros that hide any need for thread context */
 
 # define AvFILL_(a)                             Perl_AvFILL_(aTHX_ a)
 # define Gv_AMupdate(a,b)                       Perl_Gv_AMupdate(aTHX_ a,b)
@@ -908,7 +842,20 @@
 #   define sv_setpvf_nocontext                  Perl_sv_setpvf_nocontext
 #   define warn_nocontext                       Perl_warn_nocontext
 #   define warner_nocontext                     Perl_warner_nocontext
-# endif /* defined(MULTIPLICITY) */
+# else /* if !defined(MULTIPLICITY) */
+/* undefined symbols, point them back at the usual ones */
+#   define Perl_deb_nocontext                   Perl_deb
+#   define Perl_form_nocontext                  Perl_form
+#   define Perl_load_module_nocontext           Perl_load_module
+#   define Perl_mess_nocontext                  Perl_mess
+#   define Perl_newSVpvf_nocontext              Perl_newSVpvf
+#   define Perl_sv_catpvf_nocontext             Perl_sv_catpvf
+#   define Perl_sv_catpvf_mg_nocontext          Perl_sv_catpvf_mg
+#   define Perl_sv_setpvf_nocontext             Perl_sv_setpvf
+#   define Perl_sv_setpvf_mg_nocontext          Perl_sv_setpvf_mg
+#   define Perl_warn_nocontext                  Perl_warn
+#   define Perl_warner_nocontext                Perl_warner
+# endif /* !defined(MULTIPLICITY) */
 # if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
       defined(PERL_WANT_VARARGS)
 #   define deb(...)                             Perl_deb(aTHX_ __VA_ARGS__)
@@ -1834,7 +1781,52 @@
 #   else
 #     define do_exec3(a,b,c)                    Perl_do_exec3(aTHX_ a,b,c)
 #   endif
-# endif /* defined(PERL_CORE) */
+# else /* if !defined(PERL_CORE) */
+/* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
+ * disable them.
+ */
+#   define sv_setptrobj(rv,ptr,name)            sv_setref_iv(rv,name,PTR2IV(ptr))
+#   define sv_setptrref(rv,ptr)                 sv_setref_iv(rv,NULL,PTR2IV(ptr))
+#   if !defined(PERL_NOCOMPAT)
+
+/* Compatibility for this renamed function. */
+#     define perl_atexit(a,b)                   Perl_call_atexit(aTHX_ a,b)
+
+/* Compatibility for these functions that had a 'perl_' prefix before
+ * 'Perl_' became the standard */
+#     define perl_call_argv(a,b,c)              Perl_call_argv(aTHX_ a,b,c)
+#     define perl_call_method(a,b)              Perl_call_method(aTHX_ a,b)
+#     define perl_call_pv(a,b)                  Perl_call_pv(aTHX_ a,b)
+#     define perl_call_sv(a,b)                  Perl_call_sv(aTHX_ a,b)
+#     define perl_eval_pv(a,b)                  Perl_eval_pv(aTHX_ a,b)
+#     define perl_eval_sv(a,b)                  Perl_eval_sv(aTHX_ a,b)
+#     define perl_get_av(a,b)                   Perl_get_av(aTHX_ a,b)
+#     define perl_get_cv(a,b)                   Perl_get_cv(aTHX_ a,b)
+#     define perl_get_hv(a,b)                   Perl_get_hv(aTHX_ a,b)
+#     define perl_get_sv(a,b)                   Perl_get_sv(aTHX_ a,b)
+#     define perl_init_i18nl10n(a)              Perl_init_i18nl10n(aTHX_ a)
+#     define perl_require_pv(a)                 Perl_require_pv(aTHX_ a)
+
+/* Before C99, macros could not wrap varargs functions. This
+   provides a set of compatibility functions that don't take an
+   extra argument but grab the context pointer using the macro dTHX.
+ */
+
+#     if defined(MULTIPLICITY) && !defined(PERL_WANT_VARARGS)
+#       define deb                              Perl_deb_nocontext
+#       define form                             Perl_form_nocontext
+#       define load_module                      Perl_load_module_nocontext
+#       define mess                             Perl_mess_nocontext
+#       define newSVpvf                         Perl_newSVpvf_nocontext
+#       define sv_catpvf                        Perl_sv_catpvf_nocontext
+#       define sv_catpvf_mg                     Perl_sv_catpvf_mg_nocontext
+#       define sv_setpvf                        Perl_sv_setpvf_nocontext
+#       define sv_setpvf_mg                     Perl_sv_setpvf_mg_nocontext
+#       define warn                             Perl_warn_nocontext
+#       define warner                           Perl_warner_nocontext
+#     endif /* defined(MULTIPLICITY) && !defined(PERL_WANT_VARARGS) */
+#   endif /* !defined(PERL_NOCOMPAT) */
+# endif /* !defined(PERL_CORE) */
 # if defined(PERL_CORE) || defined(PERL_EXT)
 #   define append_utf8_from_native_byte         Perl_append_utf8_from_native_byte
 #   define av_reify(a)                          Perl_av_reify(aTHX_ a)
@@ -2474,6 +2466,6 @@
 # else
 #   define get_context                          Perl_get_context
 # endif
-#endif /* !defined(PERL_NO_SHORT_NAMES) */
+#endif /* !defined(PERL_DO_UNDEFS) */
 
 /* ex: set ro ft=c: */
