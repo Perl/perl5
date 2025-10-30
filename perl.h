@@ -9354,6 +9354,12 @@ END_EXTERN_C
 
 */
 
+/* #including a second time causes it to #undef any unwanted symbols to avoid
+ * polluting the user name space */
+#  define PERL_DO_UNDEFS
+#  include "embed.h"
+#  undef PERL_DO_UNDEFS
+
 #endif /* Include guard */
 
 /*
