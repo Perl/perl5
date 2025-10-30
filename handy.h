@@ -457,7 +457,7 @@ a string/length pair.
 
 
 /*
-=for apidoc_defn mx|void|lex_stuff_pvs|"pv"|U32 flags
+=for apidoc_defn Emx|void|lex_stuff_pvs|"pv"|U32 flags
 
 =cut
 */
