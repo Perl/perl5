@@ -4490,7 +4490,7 @@ ERXp	|SV *	|add_range_to_invlist_					\
 				|NULLOK SV *invlist			\
 				|UV start				\
 				|UV end
-m	|void	|invlist_intersection_					\
+Em	|void	|invlist_intersection_					\
 				|NN SV * const a			\
 				|NN SV * const b			\
 				|NN SV **i
@@ -4500,11 +4500,11 @@ EXp	|void	|invlist_intersection_maybe_complement_2nd_		\
 				|const bool complement_b		\
 				|NN SV **i
 EXp	|void	|invlist_invert_|NN SV * const invlist
-m	|void	|invlist_subtract_					\
+Em	|void	|invlist_subtract_					\
 				|NN SV * const a			\
 				|NN SV * const b			\
 				|NN SV **result
-m	|void	|invlist_union_ |NULLOK SV * const a			\
+Em	|void	|invlist_union_ |NULLOK SV * const a			\
 				|NN SV * const b			\
 				|NN SV **output
 EXp	|void	|invlist_union_maybe_complement_2nd_			\

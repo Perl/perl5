@@ -6162,10 +6162,16 @@ Perl_invlist_search_(SV * const invlist, const UV cp)
 PERL_CALLCONV SV *
 Perl_add_range_to_invlist_(pTHX_ SV *invlist, UV start, UV end)
         __attribute__warn_unused_result__;
+/* PERL_CALLCONV void
+invlist_intersection_(pTHX_ SV * const a, SV * const b, SV **i); */
 PERL_CALLCONV void
 Perl_invlist_intersection_maybe_complement_2nd_(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **i);
 PERL_CALLCONV void
 Perl_invlist_invert_(pTHX_ SV * const invlist);
+/* PERL_CALLCONV void
+invlist_subtract_(pTHX_ SV * const a, SV * const b, SV **result); */
+/* PERL_CALLCONV void
+invlist_union_(pTHX_ SV * const a, SV * const b, SV **output); */
 PERL_CALLCONV void
 Perl_invlist_union_maybe_complement_2nd_(pTHX_ SV * const a, SV * const b, const bool complement_b, SV **output);
 PERL_CALLCONV SV *
