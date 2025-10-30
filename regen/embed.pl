@@ -59,8 +59,6 @@ my %has_compat_macro;
 $has_compat_macro{$_} = 1 for @have_compatibility_macros;
 my %perl_compats;   # Have 'perl_' prefix
 
-my $unflagged_pointers;
-
 #
 # See database of global and static function prototypes in embed.fnc
 # This is used to generate prototype headers under various configurations,
@@ -131,6 +129,10 @@ my %type_asserts = (
     # We don't check GV*s for now because too many functions
     # take non-initialised GV pointers
 );
+
+# Pointer arguments that erroneously don't indicate whether they can be NULL,
+# etc.
+my $unflagged_pointers;
 
 # generate proto.h
 sub generate_proto_h {
