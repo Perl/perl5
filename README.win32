@@ -14,7 +14,7 @@ These are instructions for building Perl under Windows 7 and later.
 
 =head1 DESCRIPTION
 
-Before you start, you should glance through the README file
+Before you start, you should glance through the F<README> file
 found in the top-level directory to which the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
@@ -22,13 +22,13 @@ which this software is being distributed.
 Also make sure you read L</BUGS AND CAVEATS> below for the
 known limitations of this port.
 
-The INSTALL file in the perl top-level has much information that is
+The F<INSTALL> file in the perl top-level has much information that is
 only relevant to people building Perl on Unix-like systems.  In
 particular, you can safely ignore any information that talks about
-"Configure".
+F<Configure>.
 
 You may also want to look at one other option for building a perl that
-will work on Windows: the README.cygwin file, which give a different
+will work on Windows: the F<README.cygwin> file, which give a different
 set of rules to build a perl for Windows.  This method will probably
 enable you to build a more Unix-compatible perl, but you will also
 need to download and use various other build-time and run-time support
@@ -43,23 +43,23 @@ following compilers on the Intel x86 and x86_64 architectures:
 
       Microsoft Visual C++    Visual C++ 2015 (version 14.0) or later
       Intel C++ Compiler      (experimental)
-      Gcc by mingw.org        gcc version 3.4.5-5.3.0
-      Gcc by mingw-w64.org    gcc version 4.4.3 or later
+      GCC by mingw.org        GCC version 3.4.5-5.3.0
+      GCC by mingw-w64.org    GCC version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
-delivering complete gcc toolchain for MS Windows:
+delivering complete GCC toolchain for MS Windows:
 
 =over 4
 
 =item L<https://osdn.net/projects/mingw/>
 
-Delivers gcc toolchain building 32-bit executables (which can be used both 32 and 64 bit Windows platforms)
+Delivers GCC toolchain building 32-bit executables (which can be used both 32 and 64 bit Windows platforms)
 
 =item L<https://mingw-w64.org>
 
-Delivers gcc toolchain targeting both 64-bit Windows and 32-bit Windows
-platforms (despite the project name "mingw-w64" they are not only 64-bit
-oriented). They deliver the native gcc compilers and cross-compilers
+Delivers GCC toolchain targeting both 64-bit Windows and 32-bit Windows
+platforms (despite the project name I<mingw-w64> they are not only 64-bit
+oriented). They deliver the native GCC compilers and cross-compilers
 that are also supported by perl's makefile.
 
 =back
@@ -74,9 +74,9 @@ down compiler (no java, or gfortran) suitable for building perl available at:
 L<https://strawberryperl.com/package/kmx/64_gcctoolchain/>
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
-operating system, then you should set the WIN64 environment variable to "undef".
-Also, the trimmed down compiler only passes tests when USE_ITHREADS *= define
-(as opposed to undef) and when the CFG *= Debug line is commented out.
+operating system, then you should set the C<WIN64> environment variable to C<undef>.
+Also, the trimmed down compiler only passes tests when C<USE_ITHREADS *= define>
+(as opposed to C<undef>) and when the C<CFG *= Debug> line is commented out.
 
 This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
@@ -90,14 +90,14 @@ See L</Usage Hints for Perl on Windows> below for general hints about this.
 =item Make
 
 You need a "make" program to build the sources.  If you are using
-Visual C++, you can use nmake supplied with Visual C++.
-You may also use gmake instead of nmake.  Builds using gcc need
-gmake. nmake is not supported for gcc builds.  Parallel building is only
-supported with gmake, not nmake.
+Visual C++, you can use C<nmake> supplied with Visual C++.
+You may also use C<gmake> instead of C<nmake>.  Builds using GCC need
+C<gmake>. C<nmake> is not supported for GCC builds.  Parallel building is only
+supported with C<gmake>, not C<nmake>.
 
 =item Command Shell
 
-Use the default "cmd" shell that comes with Windows.  Some versions of the
+Use the default C<cmd> shell that comes with Windows.  Some versions of the
 popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
 shell.
@@ -116,7 +116,7 @@ compiler product, these batch files will already be in your C<PATH>
 environment variable so you may just type them without an absolute path into
 your console. If you need to find the absolute path to the batch file, it is
 usually found somewhere like
-C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC.
+F<C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC>.
 With some newer Microsoft C products (released after ~2004), the installer will
 put a shortcut in the start menu to launch a new console window with the
 console already set up for your target architecture (x86-32 or x86-64 or IA64).
@@ -151,14 +151,14 @@ This is also referred to as I<Build Tools for Visual Studio>.
 
 =item GCC
 
-Perl can be compiled with gcc from MinGW (version 3.4.5 or later) or from
+Perl can be compiled with GCC from MinGW (version 3.4.5 or later) or from
 MinGW64 (version 4.4.3 or later).  It can be downloaded here:
 
 L<https://osdn.net/projects/mingw/>
 L<https://www.mingw-w64.org/>
 
-You also need gmake. Usually it comes with MinGW but its executable may have
-a different name, such as mingw32-make.exe.
+You also need C<gmake>. Usually it comes with MinGW but its executable may have
+a different name, such as F<mingw32-make.exe>.
 
 Note that the MinGW build currently fails with version 6.3.0 or later.
 
@@ -192,12 +192,12 @@ Make sure you are in the F<win32> subdirectory under the perl toplevel.
 This directory contains a F<Makefile> that will work with
 versions of C<nmake> that come with Visual C++, and
 a GNU make F<GNUmakefile> that will work for all supported compilers.
-The defaults in the C<gmake> makefile are set up to build with MinGW/gcc.
+The defaults in the C<gmake> makefile are set up to build with MinGW/GCC.
 
 =item *
 
-Edit the F<GNUmakefile> (or F<Makefile>, if you're using F<nmake>) and change
-the values of I<INST_DRV> and C<INST_TOP>. You can also enable various build
+Edit the F<GNUmakefile> (or F<Makefile>, if you're using C<nmake>) and change
+the values of C<INST_DRV> and C<INST_TOP>. You can also enable various build
 flags. These are explained in the makefiles.
 
 Note that it is generally not a good idea to try to build a C<perl> with
@@ -213,7 +213,7 @@ should be the directory that contains the F<bin>, F<include> and
 F<lib> directories.
 
 If building with the cross-compiler provided by
-mingw-w64.org you'll need to uncomment the line that sets
+L<https://mingw-w64.org> you'll need to uncomment the line that sets
 C<GCCCROSS> in the F<GNUmakefile>. Do this only if it's the cross-compiler,
 ie. only if the F<bin> folder doesn't contain a F<gcc.exe>. (The cross-compiler
 does not provide a F<gcc.exe>, F<g++.exe>, F<ar.exe>, etc. Instead, all of these
@@ -253,7 +253,7 @@ is the most commonly launched program during the build and later testing.
 
 =head2 Testing Perl on Windows
 
-Type "gmake test" (or "nmake test").  This will run most
+Type C<gmake test> (or C<nmake test>).  This will run most
 of the tests from the testsuite (many tests will be skipped).
 
 There should be no test failures.
@@ -263,8 +263,8 @@ may crash (after all its tests have passed). This is due to a regression in the
 Universal CRT introduced in the Windows 10 April 2018 Update, and will be fixed
 in the May 2019 Update, as explained here: L<https://developercommunity.visualstudio.com/content/problem/519486/setlocalelc-numeric-iso-latin-16-fails-then-succee.html>.
 
-If you build with certain versions (e.g. 4.8.1) of gcc from mingw then
-F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those gcc builds:
+If you build with certain versions (e.g. 4.8.1) of GCC from MinGW then
+F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those GCC builds:
 see L<https://sourceforge.net/p/mingw/bugs/2152/>.
 
 Some test failures may occur if you use a command shell other than the
@@ -272,7 +272,7 @@ native "cmd.exe", or if you are building from a path that contains
 spaces.  So don't do that.
 
 If you are running the tests from a emacs shell window, you may see
-failures in op/stat.t.  Run "gmake test-notty" in that case.
+failures in F<op/stat.t>.  Run C<gmake test-notty> in that case.
 
 Furthermore, you should make sure that during C<make test> you do not
 have any GNU tool packages in your path: some toolkits like Unixutils
@@ -291,7 +291,7 @@ Please report any other failures as described under L</BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Windows
 
-Type "gmake install" ("nmake install").  This will
+Type C<gmake install> (C<nmake install>).  This will
 put the newly built perl and the libraries under whatever C<INST_TOP>
 points to in the Makefile.  It will also install the pod documentation
 under C<$INST_TOP\$INST_VER\lib\pod> and HTML versions of the same
@@ -770,7 +770,7 @@ and borrowed from the Hip Communications port that was available
 at the time.  Various people have made numerous and sundry hacks
 since then.
 
-GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
+GCC/MinGW32 support was added in 5.005 (Nick Ing-Simmons).
 
 Support for PERL_OBJECT was added in 5.005 (ActiveState Tool Corp).
 
