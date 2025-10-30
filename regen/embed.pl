@@ -28,6 +28,8 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
+my @az = ('a'..'z');
+
 # This program has historically generated compatibility macros for a few
 # functions of the form Perl_FOO(pTHX_ ...).  Those macros would be named
 # FOO(...), and would expand outside the core to Perl_FOO_nocontext(...)
@@ -58,7 +60,6 @@ $has_compat_macro{$_} = 1 for @have_compatibility_macros;
 my %perl_compats;   # Have 'perl_' prefix
 
 my $unflagged_pointers;
-my @az = ('a'..'z');
 
 #
 # See database of global and static function prototypes in embed.fnc
