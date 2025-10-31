@@ -4163,9 +4163,12 @@ which is forbidden.  See L<perlvar/%{^HOOK}> and L<perlfunc/require EXPR>.
 
 =item Missing required named parameter '%s' to subroutine '%s'
 
-(F) A subroutine was invoked that uses a signature that declares a
-non-optional named parameter, but the caller did not provide a value associated
-with that name.  The caller of the subroutine is presumably at fault.
+=item Missing required named parameters '%s' to subroutine '%s'
+
+(F) A subroutine was invoked that uses a signature that declares at least
+one non-optional named parameter, but the caller did not provide a value
+associated with that name.  The caller of the subroutine is presumably at
+fault.
 
 The message attempts to include the name of the called subroutine.  If
 the subroutine has been aliased, the subroutine's original name will be
@@ -7530,10 +7533,12 @@ perl does not recognise the name of the requested attribute.
 
 =item Unrecognized named parameter '%s' to subroutine '%s'
 
-(F) A subroutine was invoked that uses a signature that declares named parameters but has no
-slurpy parameter, and the caller provided a name that did not
-match any declared named parameter.  The caller of the subroutine is
-presumably at fault.
+=item Unrecognized named parameters '%s' to subroutine '%s'
+
+(F) A subroutine was invoked that uses a signature that declares named
+parameters but has no slurpy parameter, and the caller provided at least one
+name that did not match any declared named parameter.  The caller of the
+subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine.  If
 the subroutine has been aliased, the subroutine's original name will be

@@ -7890,6 +7890,27 @@ PP(pp_argcheck)
     return NORMAL;
 }
 
+/* Helper function for collecting up hash key names for a human-readable
+ * error message string
+ */
+#define accumulate_error_names(n_errorsp, error_namesp, namepv, namelen)  S_accumulate_error_names(aTHX_ n_errorsp, error_namesp, namepv, namelen)
+STATIC void
+S_accumulate_error_names(pTHX_ size_t *n_errorsp, SV **error_namesp, const char *namepv, STRLEN namelen)
+{
+    size_t n_errors = ++(*n_errorsp);
+
+    SV *error_names = (*error_namesp);
+    if(!error_names)
+        error_names = (*error_namesp) = newSVpvs_flags("", SVs_TEMP);
+
+    if(n_errors <= 5) {
+        /* Only bother collecting up the first 5 */
+        if(n_errors > 1)
+            sv_catpvs(error_names, ", ");
+        sv_catpvf(error_names, "'%" UTF8f "'", UTF8fARG(true, namelen, namepv));
+    }
+}
+
 PP(pp_multiparam)
 {
     struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUX->op_aux;
@@ -7983,6 +8004,9 @@ PP(pp_multiparam)
             SvPADSTALE_on(PAD_SVl(named->padix));
         }
 
+        size_t n_errors = 0;
+        SV *error_names = NULL;
+
         while(argc) {
             SV **svp;
 
@@ -8060,11 +8084,16 @@ PP(pp_multiparam)
                 hv_store_ent(hv, name, newSVsv(val), 0);
             }
             else {
-                // TODO: Consider collecting up all the names of unrecognised
-                // in one string
-                croak_caller("Unrecognized named parameter '%" UTF8f "' to subroutine '%" SVf "'",
-                    UTF8fARG(true, namelen, namepv), S_find_runcv_name());
+                accumulate_error_names(&n_errors, &error_names, namepv, namelen);
             }
+        }
+
+        if(n_errors) {
+            if(n_errors > 5)
+                sv_catpvs(error_names, ", ...");
+            /* diag_listed_as: Unrecognized named parameter '%s' to subroutine '%s' */
+            croak_caller("Unrecognized named parameter%s %" SVf " to subroutine '%" SVf "'",
+                n_errors > 1 ? "s" : "", SVfARG(error_names), SVfARG(S_find_runcv_name()));
         }
 
         for(size_t namedix = 0; namedix < n_named; namedix++) {
@@ -8072,10 +8101,15 @@ PP(pp_multiparam)
             if(!named->is_required || !SvPADSTALE(PAD_SVl(named->padix)))
                 continue;
 
-            // TODO: Consider collecting up all the names of missing
-            // parameters in one string
-            croak_caller("Missing required named parameter '%" UTF8f "' to subroutine '%" SVf "'",
-                    UTF8fARG(true, named->namelen, named->namepv), S_find_runcv_name());
+            accumulate_error_names(&n_errors, &error_names, named->namepv, named->namelen);
+        }
+
+        if(n_errors) {
+            if(n_errors > 5)
+                sv_catpvs(error_names, ", ...");
+            /* diag_listed_as: Missing required named parameter '%s' to subroutine '%s' */
+            croak_caller("Missing required named parameter%s %" SVf " to subroutine '%" SVf "'",
+                n_errors > 1 ? "s" : "", SVfARG(error_names), SVfARG(S_find_runcv_name()));
         }
     }
 
