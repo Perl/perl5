@@ -285,9 +285,30 @@ f(alpha => 123);             ## line 4
 EXPECT
 Missing required named parameter 'beta' to subroutine 'main::f' at - line 4.
 ########
+# NAME multiple missing required named
+no warnings 'experimental::signature_named_parameters';
+sub f (:$alpha, :$beta) { }  ## line 3
+f();                         ## line 4
+EXPECT
+Missing required named parameters 'alpha', 'beta' to subroutine 'main::f' at - line 4.
+########
 # NAME unrecognised named
 no warnings 'experimental::signature_named_parameters';
 sub f (:$alpha) { }             ## line 3
 f(alpha => 123, gamma => 456);  ## line 4
 EXPECT
 Unrecognized named parameter 'gamma' to subroutine 'main::f' at - line 4.
+########
+# NAME multiple unrecognised named
+no warnings 'experimental::signature_named_parameters';
+sub f (:$alpha) { }                           ## line 3
+f(alpha => 123, gamma => 456, delta => 789);  ## line 4
+EXPECT
+Unrecognized named parameters 'gamma', 'delta' to subroutine 'main::f' at - line 4.
+########
+# NAME multiple unrecognised named limiting
+no warnings 'experimental::signature_named_parameters';
+sub f (:$alpha) { }           ## line 3
+f(alpha => 123, 'a' .. 'z');  ## line 4
+EXPECT
+Unrecognized named parameters 'a', 'c', 'e', 'g', 'i', ... to subroutine 'main::f' at - line 4.
