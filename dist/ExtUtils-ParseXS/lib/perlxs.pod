@@ -15,10 +15,8 @@ perlxs - the XS Language Reference Manual
     /* Standard boilerplate: */
 
     /* For efficiency, always define PERL_NO_GET_CONTEXT: not enabled by
-     * default for backwards compatibility. For details, see
-     * L<perlguts|perlguts/
-         How multiple interpreters and concurrency are supported>
-     */
+     * default for backwards compatibility. For details, see "How multiple
+     * interpreters and concurrency are supported" in perlguts. */
     #define PERL_NO_GET_CONTEXT
 
     #include "EXTERN.h"
@@ -359,7 +357,7 @@ more complex XSUBs, or when debugging.
 
 Note that much of the L<data passing overview|/Overview of how data is
 passed to and from an XSUB> part of this document is just a summary of
-the parts of of perlguts which are most relevant to writing XS code,
+the parts of perlguts which are most relevant to writing XS code,
 possibly saving you from having to actually read that document.
 
 =item *
@@ -372,12 +370,12 @@ instead of C<fread()>.
 =item *
 
 L<perlcall>: this describes how to call Perl functions and do the
-equivalent of C<eval ""> from C.
+equivalent of C<eval {}> from C.
 
 =item *
 
 L<perlembed>: this describes how to embed a complete Perl interpreter
-within another application.
+within another application and do the equivalent of C<eval ""> from C.
 
 =back
 
@@ -409,7 +407,7 @@ When XSUBs are being used as a thin wrapper between Perl and the functions
 in a particular C library, the XSUB definitions in the XS file are often
 just a couple of lines, consisting of a declaration of the name,
 parameters and return type. The XS parser will do almost all the heavy
-lifting for you,
+lifting for you.
 
 XS is optional; in principle you can write your own C code directly, or
 use other systems such as C<Inline::C> or SWIG. For creating simple
@@ -593,18 +591,23 @@ compiler error messages report from the correct location).
 The XS parser doesn't recognise C comments, so don't use them apart from
 in C code (e.g. not in an XSUB signature). More generally, the XS parser
 doesn't understand C syntax or semantics; it just uses crude regexes to
-parse the XS file. For example in an XSUB declaration like
+parse the XS file. For example the parser can handle an XSUB declaration
+like this:
 
     int
     foo(int a, char *b = "),")
 
-the parser just extracts out everything between (...) and splits on
+Here, the parser just extracts out everything between (...) and splits on
 commas, with just enough intelligence to ignore commas etc within matching
 pairs of double-quotes. The parser doesn't understand C type declaration
 syntax; for example it typically just extracts everything before what
 appears to be a parameter name, and assumes that it must be the type. That
 "type" will later be looked up in a typemap, and if no entry is found,
-will only then raise an error.
+will only then raise an error. So it will fail to correctly parse the
+following parameters:
+
+    int
+    foo(int a /* not-a-comment */, this is seen as a type!! b)
 
 In addition, the XS parser has historically been very permissive, even to
 the point of accepting nonsense as input. Since around F<xsubpp> releases
@@ -646,6 +649,8 @@ understand what's happening behind the scenes.
 
 =head3 Perl OPs
 
+(This next paragraph is definitely only for background on debugging.)
+
 An C<OP> is is a data structure within the perl interpreter. It is used to
 hold the nodes within a tree structure created when the perl source is
 compiled. It usually represents a single operation within the perl source,
@@ -653,9 +658,11 @@ such as an add, or a function call. The structure has various flags and
 data, and a pointer to a C function (called the PP function) which is used
 to implement the actions of that OP. The main loop of the perl interpreter
 consists of calling the PP function associated with the current OP
-(C<PL_op>) and then updating it, typically to C<< PL_op->op_next >>. In
-particular, the C<OP_ENTERSUB> performs (or at least starts) a function
-call.
+(C<PL_op>) and then updating it, typically to C<< PL_op->op_next >>.
+
+In particular, the C<OP_ENTERSUB> OP, via a call to C<pp_enterub()>,
+performs (or at least starts) a function call, including any calls to XS
+functions
 
 =head3 SVs and the Perl interpreter's argument stack
 
@@ -720,7 +727,7 @@ When relying on XS to generate all the boilerplate code, reference count
 bookkeeping is usually handled for you automatically. Once you start
 handling this yourself, then there are some specific considerations.
 
-Functions which create a new SV, such as as C<newSViv(i)>, return an SV
+Functions which create a new SV, such as C<newSViv(i)>, return an SV
 that has an initial C<SvREFCNT()> of I<one>. This is actually one too
 high, since there are not yet any pointers to this SV stored anywhere. The
 expectation is that the SV will shortly be embedded somewhere - such as
@@ -737,7 +744,7 @@ Since such new SVs already have a reference count of one, when embedding
 them it should be done in a way which doesn't increase its reference
 count. For example, this modifies C<sv> to be a reference to a
 newly-created SV holding an integer value, i.e. the perl equivalent of
-C<$sv =\99>:
+C<$sv = \99>:
 
     sv_setrv_noinc(sv, newSViv(99));
 
@@ -761,18 +768,20 @@ isn't embedded anywhere apart from on the stack (which doesn't hold a
 reference count to it), then if the code croaks, the SV on the stack will
 leak. To avoid this, there is a separate I<temps> stack in the Perl
 interpreter. Items on this stack I<are> reference counted. Typically the
-temps stack is reset at start of each statement, back to some particular
-level. Each SV above this level has its reference count decremented.
-Putting an SV on the temps stack is referred to as I<mortalising> it. It
-is common to create a new SV and mortalise it at the same time: here are
-some examples:
+temps stack is reset at the start of each statement, back to some
+particular level. Each SV above this level has its reference count
+decremented. Putting an SV on the temps stack is referred to as
+I<mortalising> it. It is common to create a new SV and mortalise it at the
+same time: here are some examples:
 
     SV *sv_99  = sv_2mortal(newSViv(99));
     SV *sv_abc = newSVpvn_flags("abc", 3, SVs_TEMP);
 
 Many OPs have an SV attached to them called a I<PADTMP>. This SV has a
-lifetime which is the same as the sub which the OP is a part of, and
-usually has a reference count of one. It is used by many OPs to avoid
+long lifetime which is the same as the sub which the OP is a part of
+(typically it is created when a named sub is compiled and freed when that
+sub is deleted, often at the end of the execution of the program),
+and usually has a reference count of one. It is used by many OPs to avoid
 having to create (and later free) a temporary SV to return a value. For
 example the C<ADD> op in C<$a + $b> typically extracts the integer values
 of its two arguments, calculates its sum, sets its C<PADTMP> to that value
@@ -807,7 +816,11 @@ of characters in a string (it is typically just an alias for C<Size_t>).
 
 =head3 The SV scalar value structure
 
-As mentioned above, almost runtime data within the perl interpreter is
+(Again there is a lot of detail in this section that you may not need to
+know when just creating simple XSUBs, but is useful background for
+debugging.)
+
+As mentioned above, almost all runtime data within the perl interpreter is
 stored in an SV (scalar value) structure. The head of an SV structure
 consists of three or four words: a reference count; a type and flags; a
 pointer to a body; and since perl 5.10.0, a general payload field. There
@@ -817,10 +830,11 @@ the body is capable of holding; the actual "type" of the SV (IV, NV, PV,
 RV etc) is mostly indicated by what flags are set.
 
 Simple SVs may not have a body. Undefined values typically don't have one.
-Also, some IV, NV, and RV values are stored directly in the payload field,
-with the body pointer pointing back to the head with a suitable offset so
-that the SV appears to have a body with an IV or whatever at a suitable
-offset.
+Also, some IV, NV, and RV values are stored directly in the payload field.
+In this case the body pointer is faked up to point back to the head, but
+with a suitable offset so that an attempt to access the IV field (for
+example) within the "body" actually reads the IV value in the head's
+payload field.
 
 For SVs which have a body, the payload field in the head is usually used
 to store one common value which would otherwise have to be stored in the
@@ -860,7 +874,7 @@ macro, this first checks C<SvIOK(sv)>, and if not true, calls a function
 which calculates the integer value from its current string value. The
 effect of this call is to update the SV's type and body to C<SVt_PVIV>
 which is capable of holding both a string I<and> and integer value, and
-then to set the C<SVf_IOK> flag in addition to the C<SVf_POK>.
+then to set the C<SVf_IOK> flag in addition to the C<SVf_POK> flag.
 
 Finally, the C<undef> frees the string and turns off the C<SVf_IOK> and
 C<SVf_POK> flags, but leaves the body type as C<SVt_PVIV>. (Hence why an
@@ -869,8 +883,8 @@ body type.)
 
 Note that you should never directly access fields using macros like
 C<SvIVX()> (the C<X> implies direct) I<unless> you have just tested for
-C<SvIOK()>. In general, always use macros such as C<SvIV()>, which will do
-any checking and conversion for you.
+the corresponding flag, e.g. C<SvIOK()>. In general, always use macros
+such as C<SvIV()>, which will do any checking and conversion for you.
 
 There is a further complication with SVs: they can have one or more items
 of I<magic> attached to them. These are small payloads, along with a
@@ -919,37 +933,36 @@ skip a second magic call with variants like C<SvIV_nomg()>. For example:
         /* fall-back to treating it as an integer value */
     }
 
-
 A Perl reference is just another type of scalar. It is indicated by
 C<SvROK()> being true, and the pointer to the referent SV is accessed
 using C<SvRV()>.
 
-The equivalent of C<SvIV()> for strings is
+The equivalent of C<SvIV()> for strings is C<SvPV()> (and variants, such
+as C<SvPVutf8>):
 
     STRLEN len;
     char *pv = SvPV(sv, len);
 
-(and variants) which both retrieves a string pointer and sets C<len> to
-its length. Note that there is no guarantee that after this call
-C<SvPOK(sv)> is true, nor that C<pv == SvPVX(sv)>. For example, C<sv> may
-be a reference to a blessed object with an overloaded stringify (C<"">)
-method.  In which case, behind the scenes there may be a temporary SV
-containing the result of the call to the method, with C<pv> pointing to
-I<that> SV's string buffer. C<sv> remains a reference. Similarly, a
-non-overloaded reference to an array may return a temporary string like
-C<"ARRAY(0x12345678)">.
+which both retrieves a string pointer and sets C<len> to its length. Note
+that there is no guarantee that after this call C<SvPOK(sv)> is true, nor
+that C<pv == SvPVX(sv)>. For example, C<sv> may be a reference to a
+blessed object with an overloaded stringify (C<"">) method.  In which
+case, behind the scenes there may be a temporary SV containing the result
+of the call to the method, with C<pv> pointing to I<that> SV's string
+buffer; C<sv> remains a reference. Similarly, a non-overloaded reference
+to an array may return a temporary string like C<"ARRAY(0x12345678)">.
 
-If you need to coerce an SV to a string (e.g. before modifying its string
-value) then use C<SvPV_force()> or one of its variants. For example if
-used on an array reference, the SV will be converted from a reference into
-a plain string SV with an C<SvPVX()> value of C<"ARRAY(0x12345678)">, and
-the array's reference count decremented.
+If you need to coerce an SV to a string (e.g. before directly modifying
+its string buffer) then use C<SvPV_force()> or one of its variants. For
+example if used on an array reference, the SV will be converted from a
+reference into a plain string SV with an C<SvPVX()> value of
+C<"ARRAY(0x12345678)">, and the array's reference count decremented.
 
 Once an SV has been coerced into a PV (C<SvPOK(sv)> is true), then
 C<SvLEN(sv)> represents the size of the allocated buffer, while
 C<SvCUR(sv)> represents the current length (in bytes) of the string. Note
 that with Unicode, C<SvCUR(sv)> may not necessarily equal the value
-returned by the  Perl built-in C<length(sv)>, which is the length in
+returned by the Perl built-in C<length(sv)>, which is the length in
 I<characters>. That can be obtained using the C<sv_len_utf8(sv)> function.
 See L</Unicode and UTF-8> below for more details.
 
@@ -964,9 +977,10 @@ Perl type, rather than just indicating what sort of body they have.
 
 An important thing to note is that AVs and HVs are never directly pushed
 onto the stack when calling and returning from subroutines and XSUBs.
-Instead where necessary, references to them are pushed. You will likely
-first spot such an error when you start getting "Bizarre copy of ..."
-error messages.
+Instead where necessary, references (RVs) to them are pushed: either
+automatically via suitable typemaps, or using C<newRV()> or similar. You
+will likely first spot such an error when you start getting "Bizarre copy
+of ..." error messages.
 
 =head3 Unicode and UTF-8
 
@@ -1044,7 +1058,7 @@ by a blank line. It gives the XSUB's return type, its name, and its
 parameters (including any default values). While it is modelled on C
 syntax, it is actually XS syntax (so for example C</* ... */> isn't
 recognised). The return type and name must both start on column one,
-although The XS parser actually allows both to be on the same line, such
+although the XS parser actually allows both to be on the same line, such
 as
 
     short baz(...)
@@ -1083,6 +1097,10 @@ added to to all XSUBs.  Note that the naming convention for Perl
 interpreter macros is that ones starting with a C<d> are declarations; they
 go in places where a variable can be declared, and typically declare one
 or more variables and possibly their initialisations.
+
+C<dVAR> is mostly a no-op; it used to be needed for some obscure Perl
+interpreter configurations and is still emitted for
+backwards compatibility.
 
 C<dXSARGS> pops one index off the mark stack and sets up some auto
 variables to allow the arguments on the stack to be accessed:
@@ -1126,9 +1144,12 @@ C<PREINIT> blocks, followed by C<RETVAL> and then any parameters defined
 completely within the signature (i.e. which don't use an C<INPUT> section
 to specify their type).
 
-Perls before 5.36 used C89 compiler semantics, which didn't allow variable
-declarations after statements. To work round this, the C<PREINIT> keyword
-allows you to inject additional variable declaration code.
+Note that C<INPUT> sections are generally obsolete these days, and
+C<PREINIT> is rarely needed. Perls before 5.36 used C89 compiler
+semantics, which didn't allow variable declarations after statements. CPAN
+modules, depending on if/how they set compiler flags, may still default
+to C89. To work around this, the C<PREINIT> keyword allows you to inject
+additional variable declaration code early in the function.
 
 Following on from the input part, the main body of the function is output;
 this is copied exactly as-is from the C<CODE> or C<PPCODE> section, if
@@ -1223,8 +1244,9 @@ value. For example:
         RETVAL
 
 The C<XSRETURN_UNDEF> macro causes the address of the special Perl SV
-C<PL_sv_undef>  to be stored at C<ST(0)> (this is the same value that the
-Perl function C<undef> returns), and then to immediately return.
+C<PL_sv_undef> to be stored at C<ST(0)> (which is the same value that the
+Perl function C<undef> returns), and then makes the XSUB return
+immediately.
 
 If using autocall, then you can instead return early in a C<POSTCALL>
 section:
@@ -1304,7 +1326,7 @@ This is faster than copying.
 But in addition, for I<any> C<$arg = ...> template (not just the template
 for C<SV*>), the XS compiler makes one further assumption: that the
 expression to the right of the assign evaluates to an SV with a reference
-count count I<one too high>, and so in addition, the XS compiler emits:
+count I<one too high>, and so in addition, the XS compiler emits:
 
     sv_2mortal(RETVAL);
 
@@ -1316,7 +1338,8 @@ see the discussion on this in L<An SV's reference count>
 However, if the SV comes from elsewhere, for example via a Perl array
 lookup, then its reference count doesn't need to be adjusted, and so the
 mortalising will cause it to be prematurely freed. In this case, you need
-to artificially increase the SV's reference count.
+to artificially increase the SV's reference count: typically using
+C<SvREFCNT_inc()>, as shown below.
 
 The previous example showed creating a new SV using C<newSVpv()>; here's an
 example where the SV pre-exists in an array:
@@ -1362,7 +1385,7 @@ from that.
 
 Sometimes you want to return a non-scalar SV, such as an AV, HV or CV.
 However, these aren't allowed directly on the argument stack. You are
-supposed instead to return a I<reference> to the AV: a bit like a Perl sub
+supposed to instead return a I<reference> to the AV: a bit like a Perl sub
 returning C<\@foo>.
 
 The standard typemaps can create this reference for you automatically. So
@@ -1425,9 +1448,12 @@ individually onto the stack in a C<PPCODE> block. See L</Returning a
 list> below.
 
 Finally, the C C<SVREF> type in the standard typemap is a way of creating
-and returning a reference to a scalar (as opposed to the C<SV*> type,
-which just returns a scalar). In this case you have to tell the C compiler
-that C<SVREF> is just another name for C<SV*>:
+and returning a I<reference> to a scalar. This is in contrast to the
+C<SV*> type, which just returns a scalar.
+
+Note that unlike C<SV> etc, C<SVREF> isn't a standard built-in Perl type:
+it exists purely as an entry in a typemap. So In this case you have to
+tell the C compiler that C<SVREF> is just another name for C<SV*>:
 
     typedef SV *SVREF;
 
@@ -1441,8 +1467,9 @@ Then in an XSUB like
       OUTPUT:
         RETVAL
 
-C<RETVAL> will be declared with type C<SVREF>, and the XSUB will return a
-reference to an integer: the perl equivalent of C<my $x = 9; return \$x>.
+C<RETVAL> will be declared with type C<SVREF> (hence the need for the
+typedef above), and the XSUB will return a reference the C<RETVAL> SV.
+This XSUB is the equivalent of the perl C<my $x = 9; return \$x>.
 
 =head3 Updating arguments and returning multiple values.
 
@@ -1507,7 +1534,7 @@ XSUB is ignored, except that declaring it C<void> suppresses the
 declaration of a C<RETVAL> variable.
 
 The C<EXTEND()> macro makes sure that there are at least that many free
-slots on the stack (its first argument should always be C<SP>).  The
+slots on the stack (its first argument should always be C<SP>). The
 C<mPUSHi()> macro creates a new SV, mortalises it, sets its value to the
 integer C<i>, and pushes it on the stack.
 
@@ -1539,6 +1566,14 @@ dereferencing the argument and croaking if it's not actually a reference.
 The C<PUSHs()> macro simply pushes an SV onto the stack, without any
 mortalising or copying. Any "holes" in the array are filled with undefs.
 
+Note that there is a C<XPUSHs()> macro which combines a push with an
+C<EXTEND(1)>; but if you know at the start how many items are to be
+pushed, it is more efficient to do a single large extend first.
+
+Note also that there is always guaranteed to be one allocated slot on the
+stack when an XSUB is called, even if it has no arguments. So for the
+particular case of returning a single value, no extend is necessary.
+
 =head2 Bootstrapping
 
 In addition to the C<XS_Foo__Bar_baz()> C function generated for each XSUB
@@ -1569,12 +1604,12 @@ to:
     package Foo::Bar;
     our $VERSION = '1.01';
     require XSLoader;
-    XSLoader::load(__PACKAGE__, $VERSION);
+    XSLoader::load();
 
 This causes the F<Bar.so> or F<Bar.dll> file to be dynamically linked in
-and then the C<boot_Foo__Bar()> function called. This boilerplate code is
-typically created automatically with F<h2xs> when you first create the
-skeleton of a new distribution. See L<perlxstut> for more details.
+and then the C<boot_Foo__Bar()> function to be called. This boilerplate
+code is typically created automatically with F<h2xs> when you first create
+the skeleton of a new distribution. See L<perlxstut> for more details.
 
 =head1 REFERENCE MANUAL
 
@@ -1663,7 +1698,7 @@ Known C</^#/> C preprocessor directives, which are passed through as-is.
 Conditional ones, such as C<#if> and C<#else>, have some basic analysis
 performed on them which, in particular, allows two variants of the same
 XSUB to be declared without raising a "duplicate XSUB" warning. This
-warning suppression only works for the if/else/endif form. For example
+warning suppression only works when an else branch is present. For example
 this works:
 
     #ifdef USE_2ARG
@@ -1709,7 +1744,8 @@ file-scoped keyword too, but is described further down as an XSUB keyword.
 The C<REQUIRE> keyword is used to indicate the minimum version of the
 C<ExtUtils::ParseXS> XS compiler (and its F<xsubpp> wrapper) needed to
 compile the XS module. It is expected to be a floating-point number of the
-form C<\d+\.\d+/>. It is analogous to the perl C<use v5.xx>.
+form C</\d+\.\d+/>. It is analogous to the way that C<use v5.xx> indicates
+the minimum version of the perl interpreter needed in a Perl program.
 
 =head3 The VERSIONCHECK: Keyword
 
@@ -1879,12 +1915,18 @@ C<TYPEMAP:> entries, in order.
 
 =back
 
-The most recently-applied entries take precedence, so for example you can
+The most recently applied entries take precedence, so for example you can
 use C<TYPEMAP:> to individually override specific C<TYPEMAP>, C<INPUT>, or
 C<OUTPUT> entries in the system typemap. In general, typemap changes
-affect any subsequent XSUBs within the file, until further updates.  Note
-however that due a quirk in parsing, it is possible for a C<TYPEMAP:>
-entry immediately I<after> an XSUB to affect that XSUB.
+affect any subsequent XSUBs within the file, until further updates.
+
+Note however that, due to a quirk in parsing, it is possible for a
+C<TYPEMAP:> block which comes I<immediately after> an XSUB to affect any
+entries used by that XSUB, as if the  block had appeared just before the
+XSUB. If all such typemap blocks are placed near the start of an XS file,
+then this won't be an issue. Indeed, it can only be a possible issue if
+you want typemap meanings to change during the course of an XS file (which
+is rare).
 
 The C<TYPEMAP> keyword syntax is intended to mimic Perl's "heredoc"
 syntax, and the keyword must be followed by one of these three forms:
@@ -2038,8 +2080,8 @@ for more details.
 
 =head3 An XSUB's name
 
-The name of the XSUB is usually put on the line following the type, in
-which case it must be on column one. It is permissible for both the return
+The name of the XSUB is usually put on the line following the return type,
+in which case it must be on column one. It is permissible for both the
 type and name to be on the same line.
 
 The name can be any valid Perl subroutine name. The C<PACKAGE> value from
@@ -2047,8 +2089,8 @@ the most recent C<MODULE> declaration is used to give the XSUB it's
 fully-qualified Perl name.
 
 If the name includes the package separator, C<::>, then it is treated as
-as a C++ method declaration, and various extra bits of processing take
-place, such as declaring an implicit C<THIS> parameter. The XSUB's I<Perl>
+a C++ method declaration, and various extra bits of processing take place,
+such as declaring an implicit C<THIS> parameter. The XSUB's I<Perl>
 package name is still determined by the current XS package, and not the
 C++ class name. See L</"Using XS With C++"> for more details.
 
@@ -2104,8 +2146,8 @@ New style (recommended for new code):
       CODE:
         ...
 
-Generally there no reason to use the old style any more, apart from a few
-obscure features that can be specified on an INPUT line but not in the
+Generally there is no reason to use the old style any more, apart from a
+few obscure features that can be specified on an INPUT line but not in the
 signature.
 
 
@@ -2190,6 +2232,11 @@ to assist in declaring XSUBs which are passed and return Perl objects.
 See L</T_PTROBJ and opaque handles> for an example of this using
 the common C<T_PTROBJ> typemap type.
 
+Note that any check on whether the passed Perl object is of the correct
+class is down to to the implementation in the particular typemap: for
+example, C<T_PTROBJ> will croak unless the passed SV argument is blessed
+into the C<Foo::Bar> or derived class.
+
 =head3 XSUB Parameter Placeholders
 
 Sometimes you want to skip an argument. There are two supported techniques
@@ -2230,8 +2277,8 @@ may croak with:
 
     Usage: Foo::Bar::foo(a, SV*, c) at ...
 
-Placeholders can't be used with autocall unless you use C<C_ARGS> to
-override the missing argument. For example:
+Placeholders can't be used with autocall unless you use L<C_ARGS|/The
+C_ARGS: Keyword> to override the missing argument. For example:
 
     void
     foo(int a, b, char *c)
@@ -2239,8 +2286,8 @@ override the missing argument. For example:
 
 =head3 Updating and returning parameter values: the IN_OUT etc keywords
 
-               int i
     IN         int i
+               int i
     IN_OUT     int i
     IN_OUTLIST int i
     OUT        int i
@@ -2284,9 +2331,9 @@ In the absence of a modifier, it defaults to C<IN>.
 
 =item *
 
-The text of the modifier has up to two parts, separated by an underscore.
-The input part comes first and can have the value C<''> or C<IN>, while
-the output part can be one of C<''>, C<OUT>, or C<OUTLIST>.
+The text of the modifier has one or two parts, separated by an underscore.
+The input part comes first and, if present, must have the value C<IN>;
+while the output part, if present, can be one of C<OUT> or C<OUTLIST>.
 
 =item *
 
@@ -2299,7 +2346,7 @@ value.
 
 =item *
 
-An output part of C<''> (the default) means nothing is done to return the
+An absent output part (the default) means nothing is done to return the
 value of the auto variable.
 
 =item *
@@ -2349,8 +2396,8 @@ examples below, where the perl code C<real_foo(\$i)> stands in for the C
 autocall C<foo(&i)>.
 
 
-       int i             sub foo {
-    IN int i                  my $i = $_[N];
+    IN int i             sub foo {
+       int i                  my $i = $_[N];
                               real_foo($i);
                          }
 
@@ -2370,6 +2417,7 @@ autocall C<foo(&i)>.
                               my $i;
                               real_foo(\$i);
                               $_[N] = $i;
+                         }
 
     OUTLIST int i        sub foo {
                               my $i; # NB $_[N] is not consumed
@@ -2648,7 +2696,7 @@ might be translated into C code similar to:
 
 Usually you could dispense with C<PREINIT> by just wrapping the code in
 C<CODE> blocks in braces, but it may be necessary if the ordering of the
-variable initialisations is sensitive, e.g. if it affected by some
+variable initialisations is sensitive, e.g. if it is affected by some
 changing global state.
 
 =head3 The INPUT: Keyword
@@ -2828,10 +2876,10 @@ the scope of the keyword within the XS file, not to the scope generated by
 the keyword). For the first, it may appear anywhere in the input part or
 the XSUB. For the latter, it may appear anywhere in file scope, but due to
 a long-standing parser bug, the keyword's state is reset at the start of
-each XSUB, so it will only have any effect if appears just before a XSUB
-declaration and as part of the same paragraph (i.e. with no intervening
-blank lines), such as in the example above. It will only affect the single
-following XSUB.
+each XSUB, so it will only have any effect if it appears just before a
+XSUB declaration and as part of the same paragraph (i.e. with no
+intervening blank lines), such as in the example above. It will only
+affect the single following XSUB.
 
 The XSUB-scoped form has been available since F<xsubpp> 1.9506, but was
 broken in release 2.21 and fixed in 3.58. The file-scoped form has been
@@ -2853,15 +2901,15 @@ shown here. Even better, just don't use it at all.
 Following an XSUB's input part, an optional init part follows. This
 consists solely of the C<INIT> keyword described below, plus the keywords
 described in L<XSUB Generic Keywords> and L<Sharing XSUB bodies>, plus the
-L<C_ARGS|/The C_ARGS: Keyword>, L<INTERFACE|/The INTERFACE: Keyword> and
-L<INTERFACE_MACRO|/The INTERFACE_MACRO: Keyword> keywords.
+L<C_ARGS|/The C_ARGS: Keyword>.
 
 =head3 The INIT: Keyword
 
-The C<INIT> keyword allows arbitrary initialisation code to inserted after
-any variable declarations (and their initialisations), but before the main
-body of code. It is primarily intended for use when the main body is an
-autocall to a C function. For example these two XSUBs are equivalent:
+The C<INIT> keyword allows arbitrary initialisation code to be inserted
+after any variable declarations (and their initialisations), but before
+the main body of code. It is primarily intended for use when the main body
+is an autocall to a C function. For example these two XSUBs are
+equivalent:
 
     int
     foo(int i)
@@ -2897,7 +2945,7 @@ a body which croaks.
 
 Only one of these keywords may appear in this part, and at most once; and
 no other keywords are recognised in this part (although such keywords
-could be instead be processed in the tail or head of the preceding and
+could instead be processed in the tail or head of the preceding and
 following init and output parts).
 
 In the absence of any of those three keywords, the XS compiler will
@@ -2906,13 +2954,13 @@ XSUB.
 
 =head3 Auto-calling a C function
 
-In the absence of any explicit main body code via C<CODE> or C<PPCODE>,
-the XS parser will generate a body for you automatically (this is referred
-to as C<autocall> in this document). In its most basic form, the parser
-assumes that the XSUB will be a simple wrapper for a C function of the
-same name, with the same parameters and return type as the XSUB. So for
-example, these two XSUB definitions are equivalent, but the first is an
-autocall with less boilerplate needed:
+In the absence of any explicit main body code via C<CODE>, C<PPCODE> or
+C<NOT_IMPLEMENTED_YET>, the XS parser will generate a body for you
+automatically (this is referred to as C<autocall> in this document). In
+its most basic form, the parser assumes that the XSUB will be a simple
+wrapper for a C function of the same name, with the same parameters and
+return type as the XSUB. So for example, these two XSUB definitions are
+equivalent, but the first is an autocall with less boilerplate needed:
 
     int
     foo(char *s, short flags)
@@ -3259,9 +3307,9 @@ XSUB bodies> may also appear in this part.
 =head3 The POSTCALL: Keyword
 
 The C<POSTCALL> keyword allows a block of code to be inserted directly after
-any autocall or C<CODE>/C<PPCODE> code block (although it's really only of
-use with autocall). It's typically used for cleaning up the return value
-from the autocall. For example these two XSUBs are equivalent:
+any autocall or C<CODE> code block (although it's really only of use with
+autocall). It's typically used for cleaning up the return value from the
+autocall. For example these two XSUBs are equivalent:
 
     int
     foo(int a)
@@ -3348,8 +3396,8 @@ C<SETMAGIC: DISABLE>; in the example at the start of this section, C<arg0>
 and C<arg2> will have set magic, while C<arg1> won't. The C<SETMAGIC>
 setting remains in force until another C<SETMAGIC>, or notionally until
 the end of the current C<OUTPUT> block. In fact the current setting will
-carry over into any further C<OUTPUT> declarations within in the same
-XSUB, or since F<xsubpp> 3.58, only into any declarations within the same
+carry over into any further C<OUTPUT> declarations within the same XSUB,
+or since F<xsubpp> 3.58, only into any declarations within the same
 C<CASE> branch.
 
 The current setting of C<SETMAGIC> is ignored for C<RETVAL>, which is
@@ -3388,7 +3436,22 @@ right arguments are used (such as C<ST(0)>). Basically this feature has a
 design flaw and should probably be avoided. Since F<xsubpp> 3.01 it's been
 possible to have locally defined typemaps using the L<TYPEMAP|/The
 TYPEMAP: Keyword> keyword which is probably a better way to modify how
-values are returned.
+values are returned, for example,
+
+    typedef int myint
+    ...
+    TYPEMAP: <<EOF
+    myint   T_MYINT
+    INPUT
+    T_MYINT
+        $var = ($type)my_getiv($arg)
+    OUTPUT
+    T_MYINT
+        my_setiv($arg, (IV)$var);
+    EOF
+
+    int
+    foo2(IN_OUT myint abc)
 
 =head2 The XSUB Cleanup Part
 
@@ -3487,12 +3550,13 @@ example above is approximately equivalent to this Perl code:
 The rest of the line following the keyword, plus any further lines until
 the next keyword, are interpreted as a space-separated list of overloaded
 operators. There is no check that they are valid operator names. The names
-and symbols will eventually end up within double-quoted strings
-in the C file, so double-quotes need to be escaped; in particular:
+and symbols will eventually end up within double-quoted strings in the C
+file, so double-quotes need to be escaped; in particular:
 
       OVERLOAD: \"\"
 
-This could be regarded as a bug.
+This could be regarded as an implementation bug, but we're stuck with it
+now.
 
 XSUBs used for overload methods are invoked with the same arguments as
 Perl subroutines would be: for example, an overloaded binary operator will
@@ -3502,7 +3566,9 @@ operator; the second being the other operand (which may or may not be an
 object); and third, a swap flag. See L<overload> for the full details
 of how these functions will be called, with what arguments. Note that
 C<swap> can in fact be undef in addition to false, to indicate an assign
-overload such as C<+=>.
+overload such as C<+=>. If this difference is important to your code, then
+declare C<swap> as type C<SV*> so that you can use SvOK() and SvTRUE()
+on it.
 
 Bitwise operator methods sometimes take extra arguments: in
 particular under C<use feature 'bitwise'>. So you may want to use an
@@ -3566,11 +3632,11 @@ returns the value of an object when used in a numeric context (such as for
 the C<printf> above). The ellipsis is added to ignore the extra two
 arguments passed to an overload method.
 
-The original C<mynum_add()> method which, via aliasing, handled all four
-of the arithmetic operations, is now split into four separate XSUBs, since
-C<ALIAS> and C<OVERLOAD> doesn't mix.
+The C<mynum_add()> method from the C<T_PTROBJ> example which, via
+aliasing, handled all four of the arithmetic operations, is now split into
+four separate XSUBs, since C<ALIAS> and C<OVERLOAD> don't mix.
 
-The main change to each arithmetic XSUB part from adding the C<OVERLOAD>
+The main change to each arithmetic XSUB, apart from adding the C<OVERLOAD>
 keyword, is that there is an extra C<swap> parameter. There's no real need
 to use it for addition and multiplication, but it is important for the
 non-commutative subtraction and division operations.
@@ -3628,7 +3694,9 @@ to be rewritten more cleanly as:
     debug()
       ATTRS: lvalue
       PPCODE:
-        # return $Foo::Bar::DEBUG, creating it if not already present:
+        # return $Foo::Bar::DEBUG, creating it if not already present
+        # (NB: XPUSHs() not needed here as the stack always has one
+        # allocated slot available when an XSUB is called):
         PUSHs(GvSV(gv_fetchpvs("Foo::Bar::DEBUG", GV_ADD, SVt_IV)));
 
 The C<ATTRS> keyword allows you to apply subroutine attributes to an XSUB
@@ -3771,7 +3839,7 @@ aliases.
 
 See L<INTERFACE|/The INTERFACE: Keyword> below for an alternative to
 C<ALIAS> which is more suited for autocall. Note that C<ALIAS> should not
-be used together with either of C<INTERFACE> or C<ATTRS>.
+be used together with any of C<ATTRS>, C<INTERFACE>, or C<OVERLOAD>.
 
 =head3 The INTERFACE: Keyword
 
@@ -4109,18 +4177,18 @@ for a general discussion about returning one or more values from an XSUB,
 where typemaps can sometimes be of use (and sometimes aren't).
 
 Standard signed C int types such as C<int>, C<long> and C<short>, are all
-mapped to to the C<T_IV> XS type. Integer-like Perl types such C<IV> and
+mapped to the C<T_IV> XS type. Integer-like Perl types such as C<IV> and
 C<I32> are also mapped to this. If a parameter is declared as something
 mapping to C<T_IV>, then the C<IV> value of the passed SV will be
 extracted (perhaps first converting a string value like C<"123"> to an
 IV), then that value will be cast to the final C type, with the usual C
 rules for casting between integer types. Conversely, when returning a
-value, the C value is first cast to C<IV>, then the SV is set to that
-IV value.
+value, the C value is first cast to C<IV>, then the SV is set to that IV
+value.
 
 Similarly, common C and Perl unsigned types map to C<T_UV>, and values
 are converted back and forth via C<(UV)> casts. A few unsigned types such
-as C<I16> and C<U32> are instead mapped to C<T_U_SHORT> and C<T_U_LONG> XS
+as C<U16> and C<U32> are instead mapped to C<T_U_SHORT> and C<T_U_LONG> XS
 types, but these have the same effect as C<T_UV>.
 
 The C<unsigned char> type is treated similarly to other C<T_UV> types, but
@@ -4157,13 +4225,17 @@ A common interface arrangement for C libraries is that some sort of
 I<create> function creates and returns a handle, which is a pointer to
 some opaque data. Other function calls are then passed that handle as an
 argument, until finally some sort of destroy function frees the handle and
-its data. The C<T_PTROBJ> typemap is one common method for mapping Perl
-objects to such C library handles. Behind the scenes, it uses blessed
-scalar objects with the scalar's integer value set to the address of the
-handle. The C<INPUT> code template of the C<T_PTROBJ> typemap retrieves the
-pointer from the scalar object referred to by a passed RV argument, while
-the C<OUTPUT> template creates a new blessed RV-to-SV with the handle
-address stored in it.
+its data.
+
+The C<T_PTROBJ> typemap is one common method for mapping Perl objects to
+such C library handles; see L<perlxstypemap/T_PTROBJ>. Behind the scenes,
+it uses blessed scalar objects with the scalar's integer value set to the
+address of the handle. The C<INPUT> code template of the C<T_PTROBJ>
+typemap first checks that the passed SV argument is an RV referring to an
+object blessed into the Perl class (or a derived class) associated with
+the parameter's declared type, and then retrieves the pointer from the
+integer value of that object. The C<OUTPUT> template creates a new blessed
+RV-to-SV with the handle address stored in it.
 
 For the purposes of an example, we'll create here a minimal example C
 library called C<mynum>, which we'll then proceed to wrap using XS. This
@@ -4309,7 +4381,8 @@ C<($i13 + $i7)/$i2>.
 Note that, as a very special case, the XS compiler translates the XS
 typemap name using C<s/OBJ$/REF/> when looking up INPUT typemap entries
 for an XSUB named C<DESTROY>. So for such subs, the C<T_PTRREF> typemap
-entry will be used instead.
+entry will be used instead. This typemap is similar to C<T_PTROBJ>, except
+that the class of the object isn't set or checked.
 
 =head2 Using XS With C++
 
@@ -4317,7 +4390,7 @@ entry will be used instead.
 
     # Class methods
 
-    int
+    X::Y*
     X::Y::new(int i)
 
     static int
@@ -4509,7 +4582,7 @@ Then create a C<.xs> file like this:
     void
     Paint::color::DESTROY()
 
-In the C part of the XS file (or this case, the C++ part), a trivial
+In the C part of the XS file (or in this case, the C++ part), a trivial
 example C++ class is defined. This would more typically be a pre-existing
 library with just the appropriate C<#include>. The example includes a
 namespace to make it clearer when something is a namespace, class name or
@@ -4544,7 +4617,7 @@ The typemap also includes an INPUT definition for C<T_PKG_REF>, which is
 an I<exact> copy of C<T_PTRREF>. This is needed because, as an
 optimisation, the XS parser automatically renames an INPUT typemap using
 C<s/OBJ$/REF/> if the name of the XSUB is C<DESTROY>, on the grounds that
-it's not necessary to to check that the object is the right class.
+it's not necessary to check that the object is the right class.
 
 Finally the XS file includes a few XSUBs which are wrappers around the
 class's methods.
@@ -4637,14 +4710,14 @@ the names of up to three blind mice.
         RETVAL
 
     char *
-    get_mouse_name(int index)
+    get_mouse_name(int mouse_num)
       PREINIT:
         dMY_CXT;
       CODE:
-        if (index > MY_CXT.count)
+        if (mouse_num < 1 || mouse_num > MY_CXT.count)
             croak("There are only %d blind mice.", MY_CXT.count);
         else
-            RETVAL = MY_CXT.name[index - 1];
+            RETVAL = MY_CXT.name[mouse_num - 1];
       OUTPUT:
         RETVAL
 
