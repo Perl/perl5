@@ -366,7 +366,8 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+S<C<use 5.42>> now turns on S<C<use source::encoding "ascii">> for the
+remainder of the line (besides subsequent lines). [GH #23881]
 
 =back
 
