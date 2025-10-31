@@ -34,7 +34,7 @@ if (fresh_perl_like(<<~'EOT',
                  my $var = "¶";
                  EOT
                 qr/Use of non-ASCII character 0x[[:xdigit:]]{2} illegal/,
-                { }, ">= 'use 5.39' implies use source::encoding 'ascii'")
+                { }, ">= 'use 5.41' implies use source::encoding 'ascii'")
    ) {
     fresh_perl_is(<<~'EOT',
                     use v5.41.0;
