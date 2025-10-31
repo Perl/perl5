@@ -8341,6 +8341,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         else {
             PL_hints &= ~HINT_ASCII_ENCODING;
         }
+        notify_parser_that_encoding_changed();
 
         PL_prevailing_version = shortver;
     }
