@@ -1009,6 +1009,8 @@ AMdfpr	|void	|croak		|NULLOK const char *pat 		\
 Tfpr	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...
 CTrs	|void	|croak_memory_wrap
+ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\
+				|...
 Tpr	|void	|croak_no_mem
 Tpr	|void	|croak_no_mem_ext					\
 				|NN const char *context 		\
@@ -1112,6 +1114,8 @@ ETXdp	|char * |delimcpy_no_escape					\
 				|NN I32 *retlen
 Cp	|void	|despatch_signals
 AMdfpr	|OP *	|die		|NULLOK const char *pat 		\
+				|...
+ATdfpr	|OP *	|die_nocontext	|NULLOK const char *pat 		\
 				|...
 Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
@@ -4212,11 +4216,7 @@ pr	|int	|magic_regdatum_set					\
 				|NN MAGIC *mg
 #endif
 #if defined(MULTIPLICITY)
-ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\
-				|...
 ATdfp	|void	|deb_nocontext	|NN const char *pat			\
-				|...
-ATdfpr	|OP *	|die_nocontext	|NULLOK const char *pat 		\
 				|...
 ATdfp	|char * |form_nocontext |NN const char *pat			\
 				|...

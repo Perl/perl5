@@ -172,6 +172,7 @@
 # define cop_store_label(a,b,c,d)               Perl_cop_store_label(aTHX_ a,b,c,d)
 # define croak_memory_wrap                      Perl_croak_memory_wrap
 # define croak_no_modify                        Perl_croak_no_modify
+# define croak_nocontext                        Perl_croak_nocontext
 # define croak_sv(a)                            Perl_croak_sv(aTHX_ a)
 # define croak_xs_usage                         Perl_croak_xs_usage
 # define csighandler1                           Perl_csighandler1
@@ -192,6 +193,7 @@
 # define debstackptrs()                         Perl_debstackptrs(aTHX)
 # define delimcpy                               Perl_delimcpy
 # define despatch_signals()                     Perl_despatch_signals(aTHX)
+# define die_nocontext                          Perl_die_nocontext
 # define die_sv(a)                              Perl_die_sv(aTHX_ a)
 # define do_close(a,b)                          Perl_do_close(aTHX_ a,b)
 # define do_gv_dump(a,b,c,d)                    Perl_do_gv_dump(aTHX_ a,b,c,d)
@@ -895,9 +897,7 @@
 #   endif
 # endif
 # if defined(MULTIPLICITY)
-#   define croak_nocontext                      Perl_croak_nocontext
 #   define deb_nocontext                        Perl_deb_nocontext
-#   define die_nocontext                        Perl_die_nocontext
 #   define form_nocontext                       Perl_form_nocontext
 #   define load_module_nocontext                Perl_load_module_nocontext
 #   define mess_nocontext                       Perl_mess_nocontext

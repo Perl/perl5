@@ -575,6 +575,12 @@ Perl_croak_no_modify(void)
 #define PERL_ARGS_ASSERT_CROAK_NO_MODIFY
 
 PERL_CALLCONV_NO_RET void
+Perl_croak_nocontext(const char *pat, ...)
+        __attribute__noreturn__
+        __attribute__format__null_ok__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_CROAK_NOCONTEXT
+
+PERL_CALLCONV_NO_RET void
 Perl_croak_popstack(void)
         __attribute__noreturn__;
 #define PERL_ARGS_ASSERT_CROAK_POPSTACK
@@ -777,6 +783,12 @@ Perl_die(pTHX_ const char *pat, ...)
         __attribute__noreturn__
         __attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_DIE
+
+PERL_CALLCONV_NO_RET OP *
+Perl_die_nocontext(const char *pat, ...)
+        __attribute__noreturn__
+        __attribute__format__null_ok__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_DIE_NOCONTEXT
 
 PERL_CALLCONV_NO_RET OP *
 Perl_die_sv(pTHX_ SV *baseex)
@@ -5858,23 +5870,11 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 
 #endif
 #if defined(MULTIPLICITY)
-PERL_CALLCONV_NO_RET void
-Perl_croak_nocontext(const char *pat, ...)
-        __attribute__noreturn__
-        __attribute__format__null_ok__(__printf__,1,2);
-# define PERL_ARGS_ASSERT_CROAK_NOCONTEXT
-
 PERL_CALLCONV void
 Perl_deb_nocontext(const char *pat, ...)
         __attribute__format__(__printf__,1,2);
 # define PERL_ARGS_ASSERT_DEB_NOCONTEXT         \
         assert(pat)
-
-PERL_CALLCONV_NO_RET OP *
-Perl_die_nocontext(const char *pat, ...)
-        __attribute__noreturn__
-        __attribute__format__null_ok__(__printf__,1,2);
-# define PERL_ARGS_ASSERT_DIE_NOCONTEXT
 
 PERL_CALLCONV char *
 Perl_form_nocontext(const char *pat, ...)
