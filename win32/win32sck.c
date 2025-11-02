@@ -780,6 +780,7 @@ win32_getnetent(void)
 struct netent *
 win32_getnetbyname(char *name) 
 {
+    PERL_UNUSED_ARG(name);
     win32_croak_not_implemented("getnetbyname");
     return (struct netent *)NULL;
 }
@@ -787,6 +788,8 @@ win32_getnetbyname(char *name)
 struct netent *
 win32_getnetbyaddr(long net, int type) 
 {
+    PERL_UNUSED_ARG(net);
+    PERL_UNUSED_ARG(type);
     win32_croak_not_implemented("getnetbyaddr");
     return (struct netent *)NULL;
 }
@@ -808,6 +811,7 @@ win32_getservent(void)
 void
 win32_sethostent(int stayopen)
 {
+    PERL_UNUSED_ARG(stayopen);
     win32_croak_not_implemented("sethostent");
 }
 
@@ -815,6 +819,7 @@ win32_sethostent(int stayopen)
 void
 win32_setnetent(int stayopen)
 {
+    PERL_UNUSED_ARG(stayopen);
     win32_croak_not_implemented("setnetent");
 }
 
@@ -822,6 +827,7 @@ win32_setnetent(int stayopen)
 void
 win32_setprotoent(int stayopen)
 {
+    PERL_UNUSED_ARG(stayopen);
     win32_croak_not_implemented("setprotoent");
 }
 
@@ -829,6 +835,7 @@ win32_setprotoent(int stayopen)
 void
 win32_setservent(int stayopen)
 {
+    PERL_UNUSED_ARG(stayopen);
     win32_croak_not_implemented("setservent");
 }
 

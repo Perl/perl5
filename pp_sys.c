@@ -5558,6 +5558,7 @@ PP_wrapped(pp_shostent, 1, 0)
 {
     dSP;
     const int stayopen = TOPi;
+    PERL_UNUSED_VAR(stayopen);
     switch(PL_op->op_type) {
     case OP_SHOSTENT:
 #ifdef HAS_SETHOSTENT

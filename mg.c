@@ -3803,6 +3803,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
             /* Not clear if this will work */
             /* XXX not clear if this should be protected by 'if (safe)'
              * too */
+            PERL_UNUSED_ARG(safe);
 
             (void)rsignal(sig, SIG_IGN);
             (void)rsignal(sig, PL_csighandlerp);
