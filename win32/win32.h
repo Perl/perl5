@@ -133,7 +133,8 @@
 #    define NOMEMMGR          /* GUI IPC RPC malloc buffers */
 #    define NOMENUS           /* GUI Menu obj */
 #    define NOMETAFILE        /* file format for half rendered graphics */
-#    define NOMINMAX          /* "Macros min(a,b) and max(a,b)" OBSOL/UNIMPL/FUT */
+#    undef NOMINMAX           /* "Macros min(a,b) and max(a,b)" OBSOL/UNIMPL/FUT */
+#    define NOMINMAX
 #    define NOMSG             /* GUI Message loop */
 /* #define NONLS              "Wide" Code Page conversion APIs */
 /* OBSOL/UNIMPL/FUT "OpenFile(), OemToAnsi, AnsiToOem" etc */
