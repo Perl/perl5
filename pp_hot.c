@@ -359,7 +359,7 @@ PP(pp_aelemfastlex_store)
 
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >=0 && key <= AvFILLp(av)) {
-        targ = AvARRAY(av)[key];
+        targ = AvARRAY(av)[ (U8) key ];
     }
     /* ... else do it the hard way */
     if (!targ) {
@@ -2033,7 +2033,7 @@ PP(pp_aelemfast)
 
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
-        sv = AvARRAY(av)[key];
+        sv = AvARRAY(av)[ (U8) key ];
         if (sv)
             goto ret;
         if (!lval) {
