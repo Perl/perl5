@@ -210,7 +210,7 @@ VMem::VMem(void)
 {
 #ifdef _USE_LINKED_LIST
     InitializeCriticalSection(&m_cs);
-#endif _USE_LINKED_LIST
+#endif /* _USE_LINKED_LIST */
     m_lRefCount =  1;
     return;
 }
