@@ -2,6 +2,8 @@
 /* Copyright (C) 1993 Eric Young - see README for more details */
 #include <stdio.h>
 #include <errno.h>
+#include "EXTERN.h"
+#include "perl.h"
 
 /* Eric Young.
  * This version of crypt has been developed from my MIT compatible
@@ -466,12 +468,10 @@ unsigned const char cov_2char[64]={
 };
 
 /* the salt for classic DES crypt (which is all we implement here)
-   permits [./0-9A-Za-z], since '.' and '/' immediately precede
-   '0' we don't need individual checks for '.' and '/' 
+   permits [./0-9A-Za-z], since '.' and '/' are adjacent, we don't need
+   individual checks for them
 */
-#define good_for_salt(c) \
-    ((c) >= '.' && (c) <= '9' || (c) >= 'A' && (c) <= 'Z' ||  \
-     (c) >= 'a' && (c) <= 'z')
+#define good_for_salt(c) (isALPHANUMERIC(c) || inRANGE((c), '.', '/'))
 
 char *
 des_fcrypt(const char *buf, const char *salt, char *buff)
