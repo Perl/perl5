@@ -998,8 +998,8 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 =for apidoc      grok_number
 =for apidoc_item grok_number_flags
 
-Look for a number in the C<len> bytes starting at C<pv>.  If one isn't found,
-return 0; otherwise return its type (and optionally its value).  In
+Look for a base 10 number in the C<len> bytes starting at C<pv>.  If one isn't
+found, return 0; otherwise return its type (and optionally its value).  In
 C<grok_number> all C<len> bytes must be either leading C<L</isSPACE>>
 characters or part of the number.  The same is true in C<grok_number_flags>
 unless C<flags> contains the C<PERL_SCAN_TRAILING> bit, which allows for
