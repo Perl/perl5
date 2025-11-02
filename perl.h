@@ -7972,6 +7972,12 @@ START_EXTERN_C
 #  include "inline.h"
 #  include "sv_inline.h"
 
+/* #including a second time causes it to #undef any unwanted symbols to avoid
+ * polluting the user name space */
+#  define PERL_DO_UNDEF_SHORT_NAMES
+#  include "embed.h"
+#  undef PERL_DO_UNDEF_SHORT_NAMES
+
 END_EXTERN_C
 
 #endif

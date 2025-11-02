@@ -396,6 +396,9 @@ unless ($define{'USE_ITHREADS'}) {
 if (!$define{USE_ITHREADS} || $define{WIN32}) {
     ++$skip{PL_main_thread};
 }
+if ($define{USE_ITHREADS}) {
+    ++$skip{Perl_CopFILEGV_set};
+}
 
 unless ($define{USE_POSIX_2008_LOCALE})
 {
@@ -658,7 +661,12 @@ unless ($Config{d_wcrtomb}) {
             or next;
 	my ($flags, $retval, $func, $args) = @{$embed}{qw(flags return_type name args)};
 	next unless $func;
-	if (($flags =~ /[AXC]/ && $flags !~ $excludedre)
+
+        # We don't export symbols that have unorthodox calling conventions
+        next if $flags =~ /u/;
+
+	if (   ($flags =~ /[AXC]/ && (   $flags !~ $excludedre
+                                      || $flags =~ tr/mp// > 1))
             || (!$define{'NO_MATHOMS'} && $flags =~ /b/))
         {
 	    # public API, so export

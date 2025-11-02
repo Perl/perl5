@@ -60,7 +60,12 @@ my %perl_compats;   # Have 'perl_' prefix
 my $unflagged_pointers;
 my @az = ('a'..'z');
 
-#
+my %need_longs;     # For long function names
+
+# List of short names to keep out of user name space if PERL_NO_SHORT_NAMES is
+# defined
+my %undefs;
+
 # See database of global and static function prototypes in embed.fnc
 # This is used to generate prototype headers under various configurations,
 # export symbols lists for different platforms, and macros to provide an
@@ -162,7 +167,6 @@ sub generate_proto_h {
         }
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
@@ -191,11 +195,22 @@ sub generate_proto_h {
                 die_at_end
                           "$plain_func: m and S flags are mutually exclusive";
             }
+
+            # Don't generate a prototype for a macro that is not usable by the
+            # outside world.
+            next unless $flags =~ /[ACE]/;
+
+            # Nor one that is weird, which would likely be a syntax error.
+            next if $flags =~ /u/;
         }
         else {
             die_at_end "$plain_func: u flag only usable with m"
                                                             if $flags =~ /u/;
         }
+
+        # A macro only gets assertions for it if it is to get Perl_ added to
+        # it.
+        my $args_assert_line = ! $has_mflag || $flags =~ tr/mp// > 1;
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -367,14 +382,18 @@ sub generate_proto_h {
 
                     my $temp_arg = $arg;
                     $temp_arg =~ s/\*//g;
-                    $temp_arg =~ s/\s*\bstruct\b\s*/ /g;
+                    $temp_arg =~
+                              s/ \s* \b ( struct | enum | union ) \b \s*/ /xg;
                     if ( ($temp_arg ne "...")
                         && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
                         die_at_end "$func: $arg ($n) doesn't have a name\n";
                     }
                     my $argname = $1;
 
-                    if (defined $argname && (! $has_mflag || $binarycompat)) {
+                    if (defined $argname && (   ! $has_mflag
+                                             || $binarycompat
+                                             || $args_assert_line))
+                    {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
                         }
@@ -611,7 +630,6 @@ sub generate_proto_h {
             $ret .= join( "\n", map { (" " x 8) . $_ } @attrs );
         }
         $ret .= ";";
-        $ret = "/* $ret */" if $has_mflag;
 
         # Hide the prototype from non-authorized code.  This acts kind of like
         # __attribute__visibility__("hidden") for cases where that can't be
@@ -739,6 +757,7 @@ sub add_indent {
 
 sub indent_define {
     my ($from, $to, $indent, $width) = @_;
+    $undefs{$from} = $to;   # Potentially keep from user name space
     $indent = '' unless defined $indent;
     my $ret= "#${indent}define $from";
     add_indent($ret,"$to\n",$width);
@@ -759,12 +778,13 @@ sub embed_h {
 
     my $lines;
     foreach (@$funcs) {
-        if ($_->{type} ne "content") {
-            $lines .= $_->{line};
+        my $object = $_;
+        if ($object->{type} ne "content") {
+            $lines .= $object->{line};
             next;
         }
-        my $level= $_->{level};
-        my $embed= $_->{embed} or next;
+        my $level= $object->{level};
+        my $embed= $object->{embed} or next;
         my ($flags,$retval,$func,$args) =
                                    @{$embed}{qw(flags return_type name args)};
         my $full_name = full_name($func, $flags);
@@ -777,41 +797,13 @@ sub embed_h {
 
         if ($flags =~ tr/mp// > 1) {    # Has both m and p
 
-            # Yields
-            #   #define Perl_func  func
-            # which works when there is no thread context.
-            $ret = indent_define($full_name, $func, $ind);
-
-            if ($flags !~ /[T]/) {
-
-                # But when there is the possibility of a thread context
-                # parameter, $ret works only on non-threaded builds
-                my $no_thread_full_define = $ret;
-
-                # And we have to do more when there are threads.  First,
-                # convert the input argument list to 'a', 'b' ....  This keeps
-                # us from having to worry about all the extra stuff in the
-                # input list; stuff like the type declarations, things like
-                # NULLOK, and pointers '*'.
-                my $argname = 'a';
-                my @stripped_args;
-                push @stripped_args, $argname++ for $args->@*;
-                my $arglist = join ",", @stripped_args;
-
-                # In the threaded case, the Perl_ form is expecting an aTHX
-                # first argument.  Use mTHX to match that, which isn't passed
-                # on to the short form name, as that is expecting an implicit
-                # aTHX.  The non-threaded case just uses what we generated
-                # above for the /T/ flag case.
-                my $mTHX_ = "mTHX";
-                $mTHX_ .= ',' if $arglist ne "";
-                $ret = "#${ind}ifdef USE_THREADS\n"
-                     . "#${ind}  define $full_name($mTHX_$arglist)"
-                     .           "  $func($arglist)\n"
-                     . "#${ind}else\n"
-                     . "$ind  $no_thread_full_define" # No \n because no chomp
-                     . "#${ind}endif\n";
-            }
+            # In this case, the implementation already uses another macro, so
+            # the short name is already defined to expand to that.  We need to
+            # instead to generate a Perl_ named function that calls that
+            # macro, and user name space, if the build asks for that.
+            $object->{guard} = $guard;
+            $need_longs{$full_name} = $object;
+            $undefs{$func} = 1;
         }
         elsif ($flags !~ /[omM]/) {
             my $argc = scalar @$args;
@@ -837,6 +829,7 @@ sub embed_h {
                     $use_va_list ? ("__VA_ARGS__") : ());
                 $ret = "#${ind}define $func($paramlist) ";
                 add_indent($ret,full_name($func, $flags) . "(aTHX");
+                $undefs{$func} = 1; # Potentially keep from user name space
                 if ($replacelist) {
                     $ret .= ($flags =~ /m/) ? "," : "_ ";
                     $ret .= $replacelist;
@@ -899,15 +892,12 @@ sub generate_embed_h {
     print $em <<~'END';
     /* (Doing namespace management portably in C is really gross.) */
 
-    /* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
-     * (like warn instead of Perl_warn) for the API are not defined.
-     * Not defining the short forms is a good thing for cleaner embedding.
-     * BEWARE that a bunch of macros don't have long names, so either must be
-     * added or don't use them if you define this symbol */
+    /* When this symbol is defined, we undef all the short name symbols we
+     * have defined before when this file was #included with the symbol
+     * undefined */
+    #if ! defined(PERL_DO_UNDEF_SHORT_NAMES)
 
-    #ifndef PERL_NO_SHORT_NAMES
-
-    /* Hide global symbols */
+    /* Create short name macros that hide any need for thread context */
 
     END
 
@@ -916,8 +906,6 @@ sub generate_embed_h {
     embed_h($em, '#if defined(PERL_CORE)', $core);
 
     print $em <<~'END';
-
-    #endif      /* #ifndef PERL_NO_SHORT_NAMES */
 
     #if !defined(PERL_CORE)
     /* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
@@ -945,9 +933,7 @@ sub generate_embed_h {
        provides a set of compatibility functions that don't take an
        extra argument but grab the context pointer using the macro dTHX.
      */
-    #if defined(MULTIPLICITY)           \
-     && !defined(PERL_NO_SHORT_NAMES)   \
-     && !defined(PERL_WANT_VARARGS)
+    #if defined(MULTIPLICITY) && !defined(PERL_WANT_VARARGS)
     END
 
     foreach (@have_compatibility_macros) {
@@ -960,14 +946,27 @@ sub generate_embed_h {
     #endif /* !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) */
 
     #if !defined(MULTIPLICITY)
-    /* undefined symbols, point them back at the usual ones */
+        /* undefined symbols, point them back at the usual ones */
     END
 
     foreach (@have_compatibility_macros) {
         print $em indent_define("Perl_${_}_nocontext", "Perl_$_", "  ");
     }
 
+    print $em <<~EOT;
+        #endif    /* !defined(MULTIPLICITY) */
+        #elif defined(PERL_NO_SHORT_NAMES) && ! defined(PERL_CORE)
+        EOT
+
+    # We undefine all elements on the list of symbol names to keep from user
+    # name space if PERL_NO_SHORT_NAMES is in effect (which requests this),
+    # but override it if are compiling the core.
+    for my $name ( sort { lc $a cmp lc $b } keys %undefs) {
+        print $em "#undef $name\n";
+    }
+
     print $em "#endif\n";
+
     close $em;
 
     normalize_and_print('embed.h',$embed_buffer)
@@ -1005,12 +1004,90 @@ sub generate_embedvar_h {
         unless $error_count;
 }
 
+sub generate_long_names_c {
+    my $longs = shift;
+    my $fh = open_print_header("long_names.c");
+
+    print $fh <<~'EOT';
+        /* This file is automatically generated by embed.pl.  It contains
+           functions with names that begin with "Perl_" that otherwise
+           wouldn't be defined.  Its existence allows PERL_NO_SHORT_NAMES to
+           work */
+
+        #include "EXTERN.h"
+        #define PERL_IN_LONG_NAMES_C
+        #include "perl.h"
+
+        EOT
+
+    for my $full_name (sort keys %{$longs}) {
+        my $parser_object = $longs->{$full_name};
+        my $entry = $parser_object->{embed};
+
+        # Store the definition of this function into @lines.  It may have to
+        # have an #if guarding it.
+        my @lines;
+        push @lines, $parser_object->{guard} if $parser_object->{guard};
+
+        my $name = $entry->{name};
+        my $return_type = $entry->{return_type};
+
+        # First in the actual definition is its return type
+        push @lines, $return_type;
+
+        # Then the function name, and prototype
+        push @lines, "$full_name(";
+        $lines[-1] .= "pTHX" unless $entry->{flags} =~ /T/;
+        if ($entry->{args}->@*) {
+            $lines[-1] .=  '_ ' unless $entry->{flags} =~ /T/;
+            $lines[-1] .=  join ", ", @{$entry->{args}};
+        }
+        $lines[-1] .=  ")";
+
+        # Then the beginning of its definition
+        push @lines, <<~EOT;
+            {
+                PERL_ARGS_ASSERT_\U$name;
+            EOT
+
+        # Then the definition, which is to just call the short name macro.
+        # Since this is compiled as part of the core, the short name is
+        # available
+        push @lines, " " x 4;
+        $lines[-1] .= "return " if $return_type ne 'void';
+        $lines[-1] .= "$name(";
+
+        # For each parameter, we need just its name.  This assumes the
+        # parameter name is the final \w+ chars
+        $lines[-1] .= join ", ", map { s/ .*? (\w+) $ /$1/rx }
+                                        @{$entry->{args}} if @{$entry->{args}};
+        $lines[-1] .= ");";
+
+        # Finally the closing brace< and any guard #endif
+        push @lines, "}";
+        push @lines, "#endif" if $entry->{guard};
+
+        # Replace what the HeaderLine object thinks is the output line with
+        # the ones just calculated.
+        $parser_object->{line} = join "\n", @lines;
+
+        # And get HeaderParser to surround that with any #if's that it found
+        # when parsing embed.fnc
+        my $hp= HeaderParser->new();
+        my $group = $hp->group_content([$parser_object]);
+        print $fh $hp->lines_as_str($group), "\n";;
+    }
+
+    read_only_bottom_close_and_rename($fh) if ! $error_count;
+}
+
 sub update_headers {
     my ($all, $api, $ext, $core) = setup_embed(); # see regen/embed_lib.pl
     generate_proto_h($all);
     die_at_end "$unflagged_pointers pointer arguments to clean up\n"
                                                        if $unflagged_pointers;
     generate_embed_h($all, $api, $ext, $core);
+    generate_long_names_c(\%need_longs);
     generate_embedvar_h();
     die "$error_count errors found" if $error_count;
 }

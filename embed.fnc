@@ -1117,7 +1117,7 @@ Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
 pr	|void	|die_unwind	|NN SV *msv
 : FIXME
-mp	|bool	|do_aexec	|NULLOK SV *really			\
+m	|bool	|do_aexec	|NULLOK SV *really			\
 				|NN SV **mark				\
 				|NN SV **sp
 : Used in pp_sys.c
@@ -1699,9 +1699,6 @@ Ampx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK SV *val 			\
 				|U32 hash				\
 				|int flags
-Admp	|SV **	|hv_stores	|NULLOK HV *hv				\
-				|"key"					\
-				|NULLOK SV *val
 Admp	|void	|hv_undef	|NULLOK HV *hv
 Xop	|void	|hv_undef_flags |NULLOK HV *hv				\
 				|U32 flags
@@ -2210,7 +2207,7 @@ Adpr	|void	|my_exit	|U32 status
 Adpr	|void	|my_failure_exit
 Cdp	|I32	|my_fflush_all
 CTdp	|Pid_t	|my_fork
-mp	|I32	|my_lstat
+m	|I32	|my_lstat
 Xp	|I32	|my_lstat_flags |NULLOK const U32 flags
 RTop	|int	|my_mkostemp_cloexec					\
 				|NN char *templte			\
@@ -2231,7 +2228,7 @@ CTdp	|int	|my_socketpair	|int family				\
 				|int type				\
 				|int protocol				\
 				|int fd[2]
-mp	|I32	|my_stat
+m	|I32	|my_stat
 Xp	|I32	|my_stat_flags	|NULLOK const U32 flags
 p	|const char *|my_strerror					\
 				|const int errnum			\
@@ -2692,8 +2689,7 @@ CTp	|Signal_t|perly_sighandler					\
 				|NULLOK void *uap			\
 				|bool safe
 
-Admp	|const char * const|phase_name					\
-				|enum perl_phase
+Admp	|const char *|phase_name|enum perl_phase phase
 Adp	|void	|pmop_dump	|NULLOK PMOP *pm
 : Used in perly.y
 p	|OP *	|pmruntime	|NN OP *o				\

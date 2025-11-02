@@ -21,77 +21,1941 @@
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
- * (like warn instead of Perl_warn) for the API are not defined.
- * Not defining the short forms is a good thing for cleaner embedding.
- * BEWARE that a bunch of macros don't have long names, so either must be
- * added or don't use them if you define this symbol */
+/* When this symbol is defined, we undef all the short name symbols we
+ * have defined before when this file was #included with the symbol
+ * undefined */
+#if defined(PERL_DO_UNDEF_SHORT_NAMES)
+# if !defined(PERL_CORE) && defined(PERL_NO_SHORT_NAMES)
+#   undef abort_execution
+#   undef add_above_Latin1_folds
+#   undef add_cp_to_invlist
+#   undef add_multi_match
+#   undef add_range_to_invlist_
+#   undef add_utf16_textfilter
+#   undef adjust_size_and_find_bucket
+#   undef advance_one_LB
+#   undef advance_one_SB
+#   undef advance_one_WB_
+#   undef alloc_LOGOP
+#   undef alloccopstash
+#   undef allocmy
+#   undef amagic_applies
+#   undef amagic_call
+#   undef amagic_cmp
+#   undef amagic_cmp_desc
+#   undef amagic_cmp_locale
+#   undef amagic_cmp_locale_desc
+#   undef amagic_deref_call
+#   undef amagic_i_ncmp
+#   undef amagic_i_ncmp_desc
+#   undef amagic_is_enabled
+#   undef amagic_ncmp
+#   undef amagic_ncmp_desc
+#   undef anonymise_cv_maybe
+#   undef any_dup
+#   undef ao
+#   undef append_range_to_invlist_
+#   undef append_utf8_from_native_byte
+#   undef apply
+#   undef apply_attrs
+#   undef apply_attrs_my
+#   undef apply_attrs_string
+#   undef apply_builtin_cv_attributes
+#   undef argvout_final
+#   undef assert_uft8_cache_coherent
+#   undef assignment_type
+#   undef atfork_child
+#   undef atfork_lock
+#   undef atfork_unlock
+#   undef av_clear
+#   undef av_count
+#   undef av_delete
+#   undef av_dump
+#   undef av_exists
+#   undef av_extend
+#   undef av_extend_guts
+#   undef av_fetch
+#   undef av_fetch_simple
+#   undef av_fill
+#   undef av_len
+#   undef av_make
+#   undef av_new_alloc
+#   undef av_nonelem
+#   undef av_pop
+#   undef av_push
+#   undef av_push_simple
+#   undef av_reify
+#   undef av_remove_offset
+#   undef av_shift
+#   undef av_store
+#   undef av_store_simple
+#   undef av_undef
+#   undef av_unshift
+#   undef AvFILL_
+#   undef backup_one_GCB
+#   undef backup_one_LB_
+#   undef backup_one_SB
+#   undef backup_one_WB_but_over_Extend_FO
+#   undef bad_type_gv
+#   undef bad_type_pv
+#   undef bind_match
+#   undef block_end
+#   undef block_gimme
+#   undef block_start
+#   undef bool_setlocale_2008_i
+#   undef boot_core_builtin
+#   undef boot_core_mro
+#   undef boot_core_PerlIO
+#   undef boot_core_UNIVERSAL
+#   undef build_infix_plugin
+#   undef byte_dump_string_
+#   undef bytes_cmp_utf8
+#   undef bytes_from_utf8
+#   undef bytes_to_utf8
+#   undef bytes_to_utf8_free_me
+#   undef bytes_to_utf8_temp_pv
+#   undef c9strict_utf8_to_uv
+#   undef calculate_LC_ALL_string
+#   undef call_argv
+#   undef call_atexit
+#   undef call_list
+#   undef call_method
+#   undef call_pv
+#   undef call_sv
+#   undef caller_cx
+#   undef cando
+#   undef capture_clear
+#   undef cast_i32
+#   undef cast_iv
+#   undef cast_ulong
+#   undef cast_uv
+#   undef change_engine_size
+#   undef check_hash_fields_and_hekify
+#   undef check_locale_boundary_crossing
+#   undef check_regnode_after
+#   undef check_type_and_open
+#   undef check_unary
+#   undef check_utf8_print
+#   undef checkcomma
+#   undef ck_anoncode
+#   undef ck_backtick
+#   undef ck_bitop
+#   undef ck_classname
+#   undef ck_cmp
+#   undef ck_concat
+#   undef ck_defined
+#   undef ck_delete
+#   undef ck_each
+#   undef ck_entersub_args_list
+#   undef ck_entersub_args_proto
+#   undef ck_entersub_args_proto_or_list
+#   undef ck_eof
+#   undef ck_eval
+#   undef ck_exec
+#   undef ck_exists
+#   undef ck_ftst
+#   undef ck_fun
+#   undef ck_glob
+#   undef ck_grep
+#   undef ck_helemexistsor
+#   undef ck_index
+#   undef ck_isa
+#   undef ck_join
+#   undef ck_length
+#   undef ck_lfun
+#   undef ck_listiob
+#   undef ck_match
+#   undef ck_method
+#   undef ck_null
+#   undef ck_open
+#   undef ck_prototype
+#   undef ck_readline
+#   undef ck_refassign
+#   undef ck_repeat
+#   undef ck_require
+#   undef ck_return
+#   undef ck_rfun
+#   undef ck_rvconst
+#   undef ck_sassign
+#   undef ck_scmp
+#   undef ck_select
+#   undef ck_shift
+#   undef ck_smartmatch
+#   undef ck_sort
+#   undef ck_spair
+#   undef ck_split
+#   undef ck_stringify
+#   undef ck_subr
+#   undef ck_substr
+#   undef ck_svconst
+#   undef ck_tell
+#   undef ck_trunc
+#   undef ck_trycatch
+#   undef ck_warner
+#   undef ck_warner_d
+#   undef ckwarn_common
+#   undef class_add_ADJUST
+#   undef class_add_field
+#   undef class_apply_attributes
+#   undef class_apply_field_attributes
+#   undef class_cleanup_definition
+#   undef class_prepare_initfield_parse
+#   undef class_prepare_method_parse
+#   undef class_seal_stash
+#   undef class_set_field_defop
+#   undef class_setup_stash
+#   undef class_wrap_method_body
+#   undef clear_defarray
+#   undef clear_defarray_simple
+#   undef clear_placeholders
+#   undef clear_special_blocks
+#   undef closest_cop
+#   undef cmp_desc
+#   undef cmp_locale_desc
+#   undef cmpchain_extend
+#   undef cmpchain_finish
+#   undef cmpchain_start
+#   undef cntrl_to_mnemonic
+#   undef compile_wildcard
+#   undef compute_EXACTish
+#   undef construct_ahocorasick_from_trie
+#   undef cop_disable_warning
+#   undef cop_enable_warning
+#   undef cop_fetch_label
+#   undef cop_file_avn
+#   undef cop_free
+#   undef cop_has_warning
+#   undef cop_store_label
+#   undef CopFILEGV_set
+#   undef core_prototype
+#   undef coresub_op
+#   undef create_eval_scope
+#   undef croak_caller
+#   undef croak_kw_unless_class
+#   undef croak_memory_wrap
+#   undef croak_no_mem
+#   undef croak_no_mem_ext
+#   undef croak_no_modify
+#   undef croak_nocontext
+#   undef croak_popstack
+#   undef croak_sv
+#   undef croak_sv_setsv_flags
+#   undef croak_xs_usage
+#   undef csighandler
+#   undef csighandler1
+#   undef csighandler3
+#   undef current_re_engine
+#   undef curse
+#   undef custom_op_get_field
+#   undef cv_ckproto_len_flags
+#   undef cv_clone
+#   undef cv_clone_into
+#   undef cv_const_sv
+#   undef cv_const_sv_or_av
+#   undef cv_dump
+#   undef cv_forget_slab
+#   undef cv_get_call_checker
+#   undef cv_get_call_checker_flags
+#   undef cv_name
+#   undef cv_set_call_checker
+#   undef cv_set_call_checker_flags
+#   undef cv_undef
+#   undef cv_undef_flags
+#   undef cvgv_set
+#   undef cvstash_set
+#   undef cx_dump
+#   undef cx_dup
+#   undef cx_popblock
+#   undef cx_popeval
+#   undef cx_popformat
+#   undef cx_popgiven
+#   undef cx_poploop
+#   undef cx_popsub
+#   undef cx_popsub_args
+#   undef cx_popsub_common
+#   undef cx_popwhen
+#   undef cx_pushblock
+#   undef cx_pusheval
+#   undef cx_pushformat
+#   undef cx_pushgiven
+#   undef cx_pushloop_for
+#   undef cx_pushloop_plain
+#   undef cx_pushsub
+#   undef cx_pushtry
+#   undef cx_pushwhen
+#   undef cx_topblock
+#   undef cxinc
+#   undef deb
+#   undef deb_curcv
+#   undef deb_nocontext
+#   undef deb_stack_all
+#   undef deb_stack_n
+#   undef debop
+#   undef debprof
+#   undef debprofdump
+#   undef debstack
+#   undef debstackptrs
+#   undef debug_hash_seed
+#   undef debug_peep
+#   undef debug_show_study_flags
+#   undef debug_start_match
+#   undef debug_studydata
+#   undef defelem_target
+#   undef del_sv
+#   undef delete_eval_scope
+#   undef delimcpy
+#   undef delimcpy_no_escape
+#   undef despatch_signals
+#   undef destroy_matcher
+#   undef die_nocontext
+#   undef die_sv
+#   undef die_unwind
+#   undef dirp_dup
+#   undef div128
+#   undef do_aexec5
+#   undef do_aspawn
+#   undef do_chomp
+#   undef do_close
+#   undef do_delete_local
+#   undef do_dump_pad
+#   undef do_eof
+#   undef do_exec
+#   undef do_exec3
+#   undef do_gv_dump
+#   undef do_gvgv_dump
+#   undef do_hv_dump
+#   undef do_ipcctl
+#   undef do_ipcget
+#   undef do_join
+#   undef do_magic_dump
+#   undef do_msgrcv
+#   undef do_msgsnd
+#   undef do_ncmp
+#   undef do_oddball
+#   undef do_op_dump
+#   undef do_open
+#   undef do_open6
+#   undef do_open_raw
+#   undef do_openn
+#   undef do_pmop_dump
+#   undef do_print
+#   undef do_readline
+#   undef do_seek
+#   undef do_semop
+#   undef do_shmio
+#   undef do_smartmatch
+#   undef do_spawn
+#   undef do_spawn_nowait
+#   undef do_sprintf
+#   undef do_sv_dump
+#   undef do_sysseek
+#   undef do_tell
+#   undef do_trans
+#   undef do_trans_complex
+#   undef do_trans_count
+#   undef do_trans_count_invmap
+#   undef do_trans_invmap
+#   undef do_trans_simple
+#   undef do_uniprop_match
+#   undef do_vecget
+#   undef do_vecset
+#   undef do_vop
+#   undef docatch
+#   undef does_utf8_overflow
+#   undef doeval_compile
+#   undef dofile
+#   undef dofindlabel
+#   undef doform
+#   undef doing_taint
+#   undef dooneliner
+#   undef doopen_pm
+#   undef doparseform
+#   undef dopoptoeval
+#   undef dopoptogivenfor
+#   undef dopoptolabel
+#   undef dopoptoloop
+#   undef dopoptosub_at
+#   undef dopoptowhen
+#   undef doref
+#   undef dounwind
+#   undef dowantarray
+#   undef dump_all
+#   undef dump_all_perl
+#   undef dump_c_backtrace
+#   undef dump_eval
+#   undef dump_exec_pos
+#   undef dump_form
+#   undef dump_indent
+#   undef dump_mstats
+#   undef dump_packsubs
+#   undef dump_packsubs_perl
+#   undef dump_regex_sets_structures
+#   undef dump_sub
+#   undef dump_sub_perl
+#   undef dump_sv_child
+#   undef dump_trie
+#   undef dump_trie_interim_list
+#   undef dump_trie_interim_table
+#   undef dump_vindent
+#   undef dumpuntil
+#   undef dup_attrlist
+#   undef edit_distance
+#   undef emulate_langinfo
+#   undef eval_pv
+#   undef eval_sv
+#   undef exec_failed
+#   undef execute_wildcard
+#   undef expect_number
+#   undef extended_utf8_to_uv
+#   undef external_call_langinfo
+#   undef F0convert
+#   undef fatal_warner
+#   undef fbm_compile
+#   undef fbm_instr
+#   undef filter_add
+#   undef filter_del
+#   undef filter_gets
+#   undef filter_read
+#   undef finalize_op
+#   undef finalize_optree
+#   undef find_and_forget_pmops
+#   undef find_array_subscript
+#   undef find_beginning
+#   undef find_byclass
+#   undef find_default_stash
+#   undef find_first_differing_byte_pos
+#   undef find_hash_subscript
+#   undef find_in_my_stash
+#   undef find_lexical_cv
+#   undef find_locale_from_environment
+#   undef find_next_masked
+#   undef find_runcv
+#   undef find_runcv_where
+#   undef find_rundefsv
+#   undef find_script
+#   undef find_span_end
+#   undef find_span_end_mask
+#   undef find_uninit_var
+#   undef finish_export_lexical
+#   undef first_symbol
+#   undef fixup_errno_string
+#   undef fold_constants
+#   undef foldEQ
+#   undef foldEQ_latin1
+#   undef foldEQ_latin1_s2_folded
+#   undef foldEQ_locale
+#   undef foldEQ_utf8
+#   undef foldEQ_utf8_flags
+#   undef forbid_outofblock_ops
+#   undef forbid_setid
+#   undef force_ident
+#   undef force_ident_maybe_lex
+#   undef force_list
+#   undef force_locale_unlock
+#   undef force_next
+#   undef force_out_malformed_utf8_message_
+#   undef force_strict_version
+#   undef force_version
+#   undef force_word
+#   undef forget_pmop
+#   undef form
+#   undef form_alien_digit_msg
+#   undef form_cp_too_large_msg
+#   undef form_nocontext
+#   undef fp_dup
+#   undef free_tied_hv_pool
+#   undef free_tmps
+#   undef gen_constant_list
+#   undef get_and_check_backslash_N_name
+#   undef get_and_check_backslash_N_name_wrapper
+#   undef get_ANYOF_cp_list_for_ssc
+#   undef get_ANYOFHbbm_contents
+#   undef get_ANYOFM_contents
+#   undef get_aux_mg
+#   undef get_av
+#   undef get_c_backtrace
+#   undef get_c_backtrace_dump
+#   undef get_category_index_helper
+#   undef get_context
+#   undef get_cv
+#   undef get_cvn_flags
+#   undef get_debug_opts
+#   undef get_deprecated_property_msg
+#   undef get_displayable_string
+#   undef get_displayable_tr_operand
+#   undef get_hash_seed
+#   undef get_hv
+#   undef get_invlist_iter_addr
+#   undef get_invlist_offset_addr
+#   undef get_invlist_previous_index_addr
+#   undef get_LC_ALL_display
+#   undef get_locale_string_utf8ness_i
+#   undef get_mstats
+#   undef get_no_modify
+#   undef get_num
+#   undef get_op_descs
+#   undef get_op_names
+#   undef get_opargs
+#   undef get_ppaddr
+#   undef get_prop_definition
+#   undef get_prop_values
+#   undef get_quantifier_value
+#   undef get_re_gclass_aux_data
+#   undef get_regclass_aux_data
+#   undef get_regex_charset_name
+#   undef get_sv
+#   undef get_vtbl
+#   undef get_win32_message_utf8ness
+#   undef getcwd_sv
+#   undef getenv_len
+#   undef gimme_V
+#   undef give_perl_locale_control
+#   undef glob_2number
+#   undef glob_assign_glob
+#   undef gp_dup
+#   undef gp_free
+#   undef gp_ref
+#   undef grok_atoUV
+#   undef grok_bin_oct_hex
+#   undef grok_bslash_c
+#   undef grok_bslash_N
+#   undef grok_bslash_o
+#   undef grok_bslash_x
+#   undef grok_infnan
+#   undef grok_number
+#   undef grok_number_flags
+#   undef grok_numeric_radix
+#   undef group_end
+#   undef gv_add_by_type
+#   undef Gv_AMupdate
+#   undef gv_autoload_pv
+#   undef gv_autoload_pvn
+#   undef gv_autoload_sv
+#   undef gv_AVadd
+#   undef gv_check
+#   undef gv_const_sv
+#   undef gv_dump
+#   undef gv_efullname3
+#   undef gv_efullname4
+#   undef gv_fetchfile
+#   undef gv_fetchfile_flags
+#   undef gv_fetchmeth
+#   undef gv_fetchmeth_autoload
+#   undef gv_fetchmeth_internal
+#   undef gv_fetchmeth_pv
+#   undef gv_fetchmeth_pv_autoload
+#   undef gv_fetchmeth_pvn
+#   undef gv_fetchmeth_pvn_autoload
+#   undef gv_fetchmeth_sv
+#   undef gv_fetchmeth_sv_autoload
+#   undef gv_fetchmethod
+#   undef gv_fetchmethod_autoload
+#   undef gv_fetchmethod_pv_flags
+#   undef gv_fetchmethod_pvn_flags
+#   undef gv_fetchmethod_sv_flags
+#   undef gv_fetchpv
+#   undef gv_fetchpvn_flags
+#   undef gv_fetchsv
+#   undef gv_fullname3
+#   undef gv_fullname4
+#   undef gv_handler
+#   undef gv_HVadd
+#   undef gv_init
+#   undef gv_init_pv
+#   undef gv_init_pvn
+#   undef gv_init_sv
+#   undef gv_init_svtype
+#   undef gv_IOadd
+#   undef gv_is_in_main
+#   undef gv_magicalize
+#   undef gv_magicalize_isa
+#   undef gv_name_set
+#   undef gv_override
+#   undef gv_setref
+#   undef gv_stashpv
+#   undef gv_stashpvn
+#   undef gv_stashpvn_internal
+#   undef gv_stashsv
+#   undef gv_stashsvpvn_cached
+#   undef gv_SVadd
+#   undef gv_try_downgrade
+#   undef handle_named_backref
+#   undef handle_names_wildcard
+#   undef handle_possible_posix
+#   undef handle_regex_sets
+#   undef handle_user_defined_property
+#   undef he_dup
+#   undef hek_dup
+#   undef hsplit
+#   undef hv_auxinit
+#   undef hv_bucket_ratio
+#   undef hv_clear
+#   undef hv_clear_placeholders
+#   undef hv_common
+#   undef hv_common_key_len
+#   undef hv_copy_hints_hv
+#   undef hv_delayfree_ent
+#   undef hv_delete
+#   undef hv_delete_common
+#   undef hv_delete_ent
+#   undef hv_dump
+#   undef hv_ename_add
+#   undef hv_ename_delete
+#   undef hv_exists
+#   undef hv_exists_ent
+#   undef hv_fetch
+#   undef hv_fetch_ent
+#   undef hv_free_ent
+#   undef hv_free_ent_ret
+#   undef hv_free_entries
+#   undef hv_iterinit
+#   undef hv_iterkey
+#   undef hv_iterkeysv
+#   undef hv_iternext
+#   undef hv_iternext_flags
+#   undef hv_iternextsv
+#   undef hv_iterval
+#   undef hv_ksplit
+#   undef hv_magic
+#   undef hv_magic_check
+#   undef hv_name_set
+#   undef hv_notallowed
+#   undef hv_pushkv
+#   undef hv_rand_set
+#   undef hv_scalar
+#   undef hv_store
+#   undef hv_store_ent
+#   undef hv_store_flags
+#   undef hv_undef
+#   undef ibcmp
+#   undef ibcmp_locale
+#   undef ibcmp_utf8
+#   undef import_builtin_bundle
+#   undef incline
+#   undef incpush
+#   undef incpush_if_exists
+#   undef incpush_use_sep
+#   undef ingroup
+#   undef init_argv_symbols
+#   undef init_constants
+#   undef init_debugger
+#   undef init_i18nl10n
+#   undef init_ids
+#   undef init_interp
+#   undef init_main_stash
+#   undef init_named_cv
+#   undef init_perllib
+#   undef init_postdump_symbols
+#   undef init_predump_symbols
+#   undef init_stacks
+#   undef init_tm
+#   undef init_uniprops
+#   undef initialize_invlist_guts
+#   undef inplace_aassign
+#   undef instr
+#   undef intro_my
+#   undef ints_to_tm
+#   undef intuit_method
+#   undef intuit_more
+#   undef inverse_folds_
+#   undef invert
+#   undef invlist_array
+#   undef invlist_array_init_
+#   undef invlist_clear
+#   undef invlist_clone
+#   undef invlist_contains_cp_
+#   undef invlist_contents
+#   undef invlist_dump_
+#   undef invlist_extend
+#   undef invlist_highest
+#   undef invlist_highest_range_start
+#   undef invlist_intersection_maybe_complement_2nd_
+#   undef invlist_invert_
+#   undef invlist_is_iterating
+#   undef invlist_iterfinish
+#   undef invlist_iterinit
+#   undef invlist_iternext
+#   undef invlist_len_
+#   undef invlist_lowest
+#   undef invlist_max
+#   undef invlist_previous_index
+#   undef invlist_replace_list_destroys_src
+#   undef invlist_search_
+#   undef invlist_set_len
+#   undef invlist_set_previous_index
+#   undef invlist_trim
+#   undef invlist_union_maybe_complement_2nd_
+#   undef invlistEQ_
+#   undef invmap_dump
+#   undef invoke_exception_hook
+#   undef io_close
+#   undef is_an_int
+#   undef is_c9strict_utf8_string
+#   undef is_c9strict_utf8_string_loc
+#   undef is_c9strict_utf8_string_loclen
+#   undef is_codeset_name_UTF8
+#   undef is_existing_identifier
+#   undef is_fork_open
+#   undef is_grapheme
+#   undef is_handle_constructor
+#   undef is_in_locale_category_
+#   undef is_invlist
+#   undef is_locale_utf8
+#   undef is_lvalue_sub
+#   undef is_safe_syscall
+#   undef is_ssc_worth_it
+#   undef is_standard_filehandle_name
+#   undef is_strict_utf8_string
+#   undef is_strict_utf8_string_loc
+#   undef is_strict_utf8_string_loclen
+#   undef is_uni_FOO_
+#   undef is_uni_perl_idcont_
+#   undef is_uni_perl_idstart_
+#   undef is_utf8_char_buf
+#   undef is_utf8_char_helper_
+#   undef is_utf8_FF_helper_
+#   undef is_utf8_fixed_width_buf_flags
+#   undef is_utf8_fixed_width_buf_loc_flags
+#   undef is_utf8_fixed_width_buf_loclen_flags
+#   undef is_utf8_FOO_
+#   undef is_utf8_invariant_string_loc
+#   undef is_utf8_non_invariant_string
+#   undef is_utf8_overlong
+#   undef is_utf8_perl_idcont_
+#   undef is_utf8_perl_idstart_
+#   undef is_utf8_string
+#   undef is_utf8_string_flags
+#   undef is_utf8_string_loc
+#   undef is_utf8_string_loc_flags
+#   undef is_utf8_string_loclen
+#   undef is_utf8_string_loclen_flags
+#   undef is_utf8_valid_partial_char
+#   undef is_utf8_valid_partial_char_flags
+#   undef isa_lookup
+#   undef isC9_STRICT_UTF8_CHAR
+#   undef isFF_overlong
+#   undef isFOO_lc
+#   undef isFOO_utf8_lc
+#   undef isGCB
+#   undef isinfnan
+#   undef isinfnansv
+#   undef isLB
+#   undef isSB
+#   undef isSCRIPT_RUN
+#   undef isSTRICT_UTF8_CHAR
+#   undef isUTF8_CHAR
+#   undef isUTF8_CHAR_flags
+#   undef isWB
+#   undef jmaybe
+#   undef join_exact
+#   undef keyword
+#   undef langinfo_sv_i
+#   undef leave_adjust_stacks
+#   undef leave_scope
+#   undef less_dicey_bool_setlocale_r
+#   undef less_dicey_setlocale_r
+#   undef lex_bufutf8
+#   undef lex_discard_to
+#   undef lex_grow_linestr
+#   undef lex_next_chunk
+#   undef lex_peek_unichar
+#   undef lex_read_space
+#   undef lex_read_to
+#   undef lex_read_unichar
+#   undef lex_start
+#   undef lex_stuff_pv
+#   undef lex_stuff_pvn
+#   undef lex_stuff_sv
+#   undef lex_unstuff
+#   undef list
+#   undef listkids
+#   undef load_charnames
+#   undef load_module
+#   undef load_module_nocontext
+#   undef localize
+#   undef long_valid_utf8_to_uv
+#   undef looks_like_bool
+#   undef looks_like_number
+#   undef lop
+#   undef lossless_NV_to_IV
+#   undef lsbit_pos32
+#   undef lsbit_pos64
+#   undef magic_clear_all_env
+#   undef magic_cleararylen_p
+#   undef magic_clearenv
+#   undef magic_clearhint
+#   undef magic_clearhints
+#   undef magic_clearhook
+#   undef magic_clearhookall
+#   undef magic_clearisa
+#   undef magic_clearpack
+#   undef magic_clearsig
+#   undef magic_copycallchecker
+#   undef magic_dump
+#   undef magic_existspack
+#   undef magic_freearylen_p
+#   undef magic_freecollxfrm
+#   undef magic_freedestruct
+#   undef magic_freemglob
+#   undef magic_freeovrld
+#   undef magic_freeutf8
+#   undef magic_get
+#   undef magic_getarylen
+#   undef magic_getdebugvar
+#   undef magic_getdefelem
+#   undef magic_getnkeys
+#   undef magic_getpack
+#   undef magic_getpos
+#   undef magic_getsig
+#   undef magic_getsubstr
+#   undef magic_gettaint
+#   undef magic_getuvar
+#   undef magic_getvec
+#   undef magic_killbackrefs
+#   undef magic_methcall1
+#   undef magic_methpack
+#   undef magic_nextpack
+#   undef magic_regdata_cnt
+#   undef magic_regdatum_get
+#   undef magic_regdatum_set
+#   undef magic_scalarpack
+#   undef magic_set
+#   undef magic_set_all_env
+#   undef magic_setarylen
+#   undef magic_setcollxfrm
+#   undef magic_setdbline
+#   undef magic_setdebugvar
+#   undef magic_setdefelem
+#   undef magic_setenv
+#   undef magic_sethint
+#   undef magic_sethook
+#   undef magic_sethookall
+#   undef magic_setisa
+#   undef magic_setlvref
+#   undef magic_setmglob
+#   undef magic_setnkeys
+#   undef magic_setnonelem
+#   undef magic_setpack
+#   undef magic_setpos
+#   undef magic_setregexp
+#   undef magic_setsig
+#   undef magic_setsigall
+#   undef magic_setsubstr
+#   undef magic_settaint
+#   undef magic_setutf8
+#   undef magic_setuvar
+#   undef magic_setvec
+#   undef magic_sizepack
+#   undef magic_wipepack
+#   undef make_exactf_invlist
+#   undef make_matcher
+#   undef make_trie
+#   undef malloc_good_size
+#   undef malloced_size
+#   undef markstack_grow
+#   undef matcher_matches_sv
+#   undef maybe_multimagic_gv
+#   undef mayberelocate
+#   undef mbtowc_
+#   undef measure_struct
+#   undef mem_collxfrm_
+#   undef mem_log_alloc
+#   undef mem_log_common
+#   undef mem_log_del_sv
+#   undef mem_log_free
+#   undef mem_log_new_sv
+#   undef mem_log_realloc
+#   undef mess
+#   undef mess_alloc
+#   undef mess_nocontext
+#   undef mess_sv
+#   undef mg_clear
+#   undef mg_copy
+#   undef mg_dup
+#   undef mg_find
+#   undef mg_find_mglob
+#   undef mg_findext
+#   undef mg_free
+#   undef mg_free_type
+#   undef mg_freeext
+#   undef mg_get
+#   undef mg_localize
+#   undef mg_magical
+#   undef mg_set
+#   undef mg_size
+#   undef mini_mktime
+#   undef minus_v
+#   undef missingterm
+#   undef mode_from_discipline
+#   undef modkids
+#   undef more_sv
+#   undef moreswitches
+#   undef mortal_destructor_sv
+#   undef mortal_getenv
+#   undef mortal_svfunc_x
+#   undef mortalized_pv_copy
+#   undef move_proto_attr
+#   undef mro_clean_isarev
+#   undef mro_gather_and_rename
+#   undef mro_get_linear_isa
+#   undef mro_get_linear_isa_dfs
+#   undef mro_isa_changed_in
+#   undef mro_meta_dup
+#   undef mro_method_changed_in
+#   undef mro_package_moved
+#   undef msbit_pos32
+#   undef msbit_pos64
+#   undef mul128
+#   undef multiconcat_stringify
+#   undef multideref_stringify
+#   undef my_atof
+#   undef my_atof3
+#   undef my_attrs
+#   undef my_bytes_to_utf8
+#   undef my_chsize
+#   undef my_clearenv
+#   undef my_dirfd
+#   undef my_exit
+#   undef my_exit_jump
+#   undef my_failure_exit
+#   undef my_fflush_all
+#   undef my_fork
+#   undef my_kid
+#   undef my_localeconv
+#   undef my_lstat_flags
+#   undef my_memrchr
+#   undef my_pclose
+#   undef my_popen
+#   undef my_popen_list
+#   undef my_setenv
+#   undef my_setlocale_debug_string_i
+#   undef my_socketpair
+#   undef my_stat_flags
+#   undef my_strerror
+#   undef my_strftime
+#   undef my_strlcat
+#   undef my_strlcpy
+#   undef my_strnlen
+#   undef my_strtod
+#   undef my_unexec
+#   undef native_querylocale_i
+#   undef need_utf8
+#   undef new_collate
+#   undef new_ctype
+#   undef new_he
+#   undef new_invlist_
+#   undef new_invlist_C_array_
+#   undef new_LC_ALL
+#   undef new_logop
+#   undef new_msg_hv
+#   undef new_numeric
+#   undef new_stackinfo
+#   undef new_stackinfo_flags
+#   undef new_version
+#   undef newANONATTRSUB
+#   undef newANONHASH
+#   undef newANONLIST
+#   undef newANONSUB
+#   undef newARGDEFELEMOP
+#   undef newASSIGNOP
+#   undef newATTRSUB
+#   undef newATTRSUB_x
+#   undef newAV
+#   undef newAV_alloc_x
+#   undef newAV_alloc_xz
+#   undef newAV_mortal
+#   undef newAVav
+#   undef newAVhv
+#   undef newAVREF
+#   undef newBINOP
+#   undef newCONDOP
+#   undef newCONSTSUB
+#   undef newCONSTSUB_flags
+#   undef newCVREF
+#   undef newDEFEROP
+#   undef newDEFSVOP
+#   undef newFORM
+#   undef newFOROP
+#   undef newGIVENOP
+#   undef newGIVWHENOP
+#   undef newGVgen
+#   undef newGVgen_flags
+#   undef newGVOP
+#   undef newGVREF
+#   undef newHV
+#   undef newHVhv
+#   undef newHVREF
+#   undef newIO
+#   undef newLISTOP
+#   undef newLISTOPn
+#   undef newLOGOP
+#   undef newLOOPEX
+#   undef newLOOPOP
+#   undef newMETHOP
+#   undef newMETHOP_internal
+#   undef newMETHOP_named
+#   undef newMYSUB
+#   undef newNULLLIST
+#   undef newOP
+#   undef newPADNAMELIST
+#   undef newPADNAMEouter
+#   undef newPADNAMEpvn
+#   undef newPADOP
+#   undef newPADxVOP
+#   undef newPMOP
+#   undef newPROG
+#   undef newPVOP
+#   undef newRANGE
+#   undef newRV
+#   undef newRV_noinc
+#   undef newSLICEOP
+#   undef newSTATEOP
+#   undef newSTUB
+#   undef newSUB
+#   undef newSV
+#   undef newSV_false
+#   undef newSV_true
+#   undef newSV_type
+#   undef newSV_type_mortal
+#   undef newSVavdefelem
+#   undef newSVbool
+#   undef newSVhek
+#   undef newSVhek_mortal
+#   undef newSViv
+#   undef newSVnv
+#   undef newSVOP
+#   undef newSVpv
+#   undef newSVpv_share
+#   undef newSVpvf
+#   undef newSVpvf_nocontext
+#   undef newSVpvn
+#   undef newSVpvn_flags
+#   undef newSVpvn_share
+#   undef newSVpvz
+#   undef newSVREF
+#   undef newSVrv
+#   undef newSVsv
+#   undef newSVsv_flags
+#   undef newSVsv_flags_NN
+#   undef newSVsv_nomg
+#   undef newSVuv
+#   undef newTRYCATCHOP
+#   undef newUNOP
+#   undef newUNOP_AUX
+#   undef newWHENOP
+#   undef newWHILEOP
+#   undef newXS
+#   undef newXS_deffile
+#   undef newXS_flags
+#   undef newXS_len_flags
+#   undef next_symbol
+#   undef nextargv
+#   undef nextchar
+#   undef no_bareword_allowed
+#   undef no_bareword_filehandle
+#   undef no_fh_allowed
+#   undef noperl_die
+#   undef noshutdownhook
+#   undef not_a_number
+#   undef not_incrementable
+#   undef nothreadhook
+#   undef notify_parser_that_encoding_changed
+#   undef nuke_stacks
+#   undef num_overflow
+#   undef oopsAV
+#   undef oopsHV
+#   undef op_append_elem
+#   undef op_append_list
+#   undef op_class
+#   undef op_clear
+#   undef op_contextualize
+#   undef op_convert_list
+#   undef op_dump
+#   undef op_force_list
+#   undef op_free
+#   undef op_integerize
+#   undef op_linklist
+#   undef op_lvalue
+#   undef op_null
+#   undef op_parent
+#   undef op_prepend_elem
+#   undef op_prune_chain_head
+#   undef op_refcnt_lock
+#   undef op_refcnt_unlock
+#   undef op_relocate_sv
+#   undef op_scope
+#   undef op_sibling_splice
+#   undef op_std_init
+#   undef op_unscope
+#   undef op_varname
+#   undef op_wrap_finally
+#   undef opdump_printf
+#   undef open_script
+#   undef openn_cleanup
+#   undef openn_setup
+#   undef opmethod_stash
+#   undef opslab_force_free
+#   undef opslab_free
+#   undef opslab_free_nopad
+#   undef opslab_slot_offset
+#   undef optimize_op
+#   undef optimize_optree
+#   undef optimize_regclass
+#   undef output_check_environment_warning
+#   undef output_non_portable
+#   undef output_posix_warnings
+#   undef pack_rec
+#   undef package
+#   undef package_version
+#   undef packlist
+#   undef pad_add_anon
+#   undef pad_add_name_pv
+#   undef pad_add_name_pvn
+#   undef pad_add_name_sv
+#   undef pad_add_weakref
+#   undef pad_alloc
+#   undef pad_alloc_name
+#   undef pad_block_start
+#   undef pad_check_dup
+#   undef pad_findlex
+#   undef pad_findmy_pv
+#   undef pad_findmy_pvn
+#   undef pad_findmy_sv
+#   undef pad_fixup_inner_anons
+#   undef pad_free
+#   undef pad_leavemy
+#   undef pad_new
+#   undef pad_push
+#   undef pad_reset
+#   undef pad_setsv
+#   undef pad_sv
+#   undef pad_swipe
+#   undef pad_tidy
+#   undef padlist_dup
+#   undef padlist_store
+#   undef padname_dup
+#   undef PadnameIN_SCOPE
+#   undef padnamelist_dup
+#   undef padnamelist_fetch
+#   undef padnamelist_store
+#   undef parse_arithexpr
+#   undef parse_barestmt
+#   undef parse_block
+#   undef parse_body
+#   undef parse_fullexpr
+#   undef parse_fullstmt
+#   undef parse_gv_stash_name
+#   undef parse_ident
+#   undef parse_ident_no_copy
+#   undef parse_label
+#   undef parse_LC_ALL_string
+#   undef parse_listexpr
+#   undef parse_lparen_question_flags
+#   undef parse_stmtseq
+#   undef parse_subsignature
+#   undef parse_termexpr
+#   undef parse_unicode_opts
+#   undef parse_uniprop_string
+#   undef parser_dup
+#   undef parser_free
+#   undef parser_free_nexttoke_ops
+#   undef path_is_searchable
+#   undef peep
+#   undef pending_ident
+#   undef Perl_deb_nocontext
+#   undef Perl_form_nocontext
+#   undef Perl_load_module_nocontext
+#   undef Perl_mess_nocontext
+#   undef Perl_newSVpvf_nocontext
+#   undef Perl_sv_catpvf_mg_nocontext
+#   undef Perl_sv_catpvf_nocontext
+#   undef Perl_sv_setpvf_mg_nocontext
+#   undef Perl_sv_setpvf_nocontext
+#   undef Perl_warn_nocontext
+#   undef Perl_warner_nocontext
+#   undef PerlEnv_putenv
+#   undef PerlIO_clearerr
+#   undef PerlIO_close
+#   undef PerlIO_eof
+#   undef PerlIO_error
+#   undef PerlIO_fileno
+#   undef PerlIO_fill
+#   undef PerlIO_flush
+#   undef PerlIO_get_base
+#   undef PerlIO_get_bufsiz
+#   undef PerlIO_get_cnt
+#   undef PerlIO_get_ptr
+#   undef PerlIO_read
+#   undef PerlIO_restore_errno
+#   undef PerlIO_save_errno
+#   undef PerlIO_seek
+#   undef PerlIO_set_cnt
+#   undef PerlIO_set_ptrcnt
+#   undef PerlIO_setlinebuf
+#   undef PerlIO_stderr
+#   undef PerlIO_stdin
+#   undef PerlIO_stdout
+#   undef PerlIO_tell
+#   undef PerlIO_unread
+#   undef PerlIO_write
+#   undef PerlLIO_dup2_cloexec
+#   undef PerlLIO_dup_cloexec
+#   undef PerlLIO_open3_cloexec
+#   undef PerlLIO_open_cloexec
+#   undef PerlProc_pipe_cloexec
+#   undef PerlSock_accept_cloexec
+#   undef PerlSock_socket_cloexec
+#   undef PerlSock_socketpair_cloexec
+#   undef perly_sighandler
+#   undef phase_name
+#   undef pidgone
+#   undef pm_description
+#   undef pmop_dump
+#   undef pmruntime
+#   undef pmtrans
+#   undef pop_scope
+#   undef pop_stackinfo
+#   undef populate_anyof_bitmap_from_invlist
+#   undef populate_bitmap_from_invlist
+#   undef populate_hash_from_C_localeconv
+#   undef populate_hash_from_localeconv
+#   undef populate_invlist_from_bitmap
+#   undef pregcomp
+#   undef pregexec
+#   undef pregfree
+#   undef pregfree2
+#   undef prepare_export_lexical
+#   undef prescan_version
+#   undef print_collxfrm_input_and_return
+#   undef printbuf
+#   undef process_special_blocks
+#   undef ptr_hash
+#   undef ptr_table_fetch
+#   undef ptr_table_find
+#   undef ptr_table_free
+#   undef ptr_table_new
+#   undef ptr_table_split
+#   undef ptr_table_store
+#   undef push_scope
+#   undef push_stackinfo
+#   undef put_charclass_bitmap_innards
+#   undef put_charclass_bitmap_innards_common
+#   undef put_charclass_bitmap_innards_invlist
+#   undef put_code_point
+#   undef put_range
+#   undef pv_display
+#   undef pv_display_flags
+#   undef pv_escape
+#   undef pv_pretty
+#   undef pv_uni_display
+#   undef qerror
+#   undef quadmath_format_needed
+#   undef quadmath_format_valid
+#   undef querylocale_2008_i
+#   undef rck_elide_nothing
+#   undef rcpv_copy
+#   undef rcpv_free
+#   undef rcpv_new
+#   undef re_compile
+#   undef re_croak
+#   undef re_dup_guts
+#   undef re_exec_indentf
+#   undef re_indentf
+#   undef re_intuit_start
+#   undef re_intuit_string
+#   undef re_op_compile
+#   undef re_printf
+#   undef reentrant_free
+#   undef reentrant_init
+#   undef reentrant_retry
+#   undef reentrant_size
+#   undef ref_array_or_hash
+#   undef refcounted_he_chain_2hv
+#   undef refcounted_he_fetch_pv
+#   undef refcounted_he_fetch_pvn
+#   undef refcounted_he_fetch_sv
+#   undef refcounted_he_free
+#   undef refcounted_he_inc
+#   undef refcounted_he_new_pv
+#   undef refcounted_he_new_pvn
+#   undef refcounted_he_new_sv
+#   undef refcounted_he_value
+#   undef refkids
+#   undef refto
+#   undef reg
+#   undef reg1node
+#   undef reg2node
+#   undef reg_add_data
+#   undef reg_check_named_buff_matched
+#   undef reg_la_NOTHING
+#   undef reg_la_OPFAIL
+#   undef reg_named_buff
+#   undef reg_named_buff_all
+#   undef reg_named_buff_exists
+#   undef reg_named_buff_fetch
+#   undef reg_named_buff_firstkey
+#   undef reg_named_buff_iter
+#   undef reg_named_buff_nextkey
+#   undef reg_named_buff_scalar
+#   undef reg_node
+#   undef reg_numbered_buff_fetch
+#   undef reg_numbered_buff_fetch_flags
+#   undef reg_numbered_buff_length
+#   undef reg_numbered_buff_store
+#   undef reg_qr_package
+#   undef reg_scan_name
+#   undef reg_skipcomment
+#   undef reg_temp_copy
+#   undef regatom
+#   undef regbranch
+#   undef regclass
+#   undef regcp_restore
+#   undef regcppop
+#   undef regcppush
+#   undef regcurly
+#   undef regdump
+#   undef regdump_extflags
+#   undef regdump_intflags
+#   undef regdupe_internal
+#   undef regex_set_precedence
+#   undef regexec_flags
+#   undef regfree_internal
+#   undef reghop3
+#   undef reghopmaybe3
+#   undef reginclass
+#   undef reginitcolors
+#   undef reginsert
+#   undef regmatch
+#   undef regnext
+#   undef regnode_after
+#   undef regnode_guts
+#   undef regnode_guts_debug
+#   undef regpiece
+#   undef regpnode
+#   undef regprop
+#   undef regrepeat
+#   undef regtail
+#   undef regtail_study
+#   undef regtry
+#   undef release_RExC_state
+#   undef repeatcpy
+#   undef report_evil_fh
+#   undef report_redefined_cv
+#   undef report_uninit
+#   undef report_wrongway_fh
+#   undef require_pv
+#   undef require_tie_mod
+#   undef restore_magic
+#   undef resume_compcv_and_save
+#   undef resume_compcv_final
+#   undef rninstr
+#   undef rpeep
+#   undef rpp_context
+#   undef rpp_extend
+#   undef rpp_invoke_xs
+#   undef rpp_is_lone
+#   undef rpp_obliterate_stack_to
+#   undef rpp_pop_1_norc
+#   undef rpp_popfree_1
+#   undef rpp_popfree_1_NN
+#   undef rpp_popfree_2
+#   undef rpp_popfree_2_NN
+#   undef rpp_popfree_to
+#   undef rpp_popfree_to_NN
+#   undef rpp_push_1
+#   undef rpp_push_1_norc
+#   undef rpp_push_2
+#   undef rpp_push_IMM
+#   undef rpp_replace_1_1
+#   undef rpp_replace_1_1_NN
+#   undef rpp_replace_1_IMM_NN
+#   undef rpp_replace_2_1
+#   undef rpp_replace_2_1_COMMON
+#   undef rpp_replace_2_1_NN
+#   undef rpp_replace_2_IMM_NN
+#   undef rpp_replace_at
+#   undef rpp_replace_at_NN
+#   undef rpp_replace_at_norc
+#   undef rpp_replace_at_norc_NN
+#   undef rpp_stack_is_rc
+#   undef rpp_try_AMAGIC_1
+#   undef rpp_try_AMAGIC_2
+#   undef rpp_xpush_1
+#   undef rpp_xpush_2
+#   undef rpp_xpush_IMM
+#   undef rsignal
+#   undef rsignal_restore
+#   undef rsignal_save
+#   undef rsignal_state
+#   undef run_body
+#   undef run_user_filter
+#   undef runops_debug
+#   undef runops_standard
+#   undef runops_wrap
+#   undef rv2cv_op_cv
+#   undef rvpv_dup
+#   undef rxres_free
+#   undef rxres_restore
+#   undef rxres_save
+#   undef safesyscalloc
+#   undef safesysfree
+#   undef safesysmalloc
+#   undef safesysrealloc
+#   undef same_dirent
+#   undef save_adelete
+#   undef save_aelem
+#   undef save_aelem_flags
+#   undef save_alloc
+#   undef save_aptr
+#   undef save_ary
+#   undef save_bool
+#   undef save_clearsv
+#   undef save_delete
+#   undef save_destructor
+#   undef save_destructor_x
+#   undef save_freeop
+#   undef save_freepv
+#   undef save_freercpv
+#   undef save_freesv
+#   undef save_generic_pvref
+#   undef save_generic_svref
+#   undef save_gp
+#   undef save_hash
+#   undef save_hdelete
+#   undef save_hek_flags
+#   undef save_helem
+#   undef save_helem_flags
+#   undef save_hints
+#   undef save_hptr
+#   undef save_I16
+#   undef save_I32
+#   undef save_I8
+#   undef save_int
+#   undef save_item
+#   undef save_iv
+#   undef save_lines
+#   undef save_magic_flags
+#   undef save_mortalizesv
+#   undef save_op
+#   undef save_padsv_and_mortalize
+#   undef save_pptr
+#   undef save_pushi32ptr
+#   undef save_pushptr
+#   undef save_pushptri32ptr
+#   undef save_pushptrptr
+#   undef save_rcpv
+#   undef save_re_context
+#   undef save_scalar
+#   undef save_scalar_at
+#   undef save_set_svflags
+#   undef save_shared_pvref
+#   undef save_sptr
+#   undef save_strlen
+#   undef save_svref
+#   undef save_to_buffer
+#   undef save_vptr
+#   undef savepv
+#   undef savepvn
+#   undef savesharedpv
+#   undef savesharedpvn
+#   undef savesharedsvpv
+#   undef savestack_grow
+#   undef savestack_grow_cnt
+#   undef savesvpv
+#   undef sawparens
+#   undef scalar
+#   undef scalar_mod_type
+#   undef scalarboolean
+#   undef scalarkids
+#   undef scalarvoid
+#   undef scan_bin
+#   undef scan_commit
+#   undef scan_const
+#   undef scan_formline
+#   undef scan_heredoc
+#   undef scan_hex
+#   undef scan_ident
+#   undef scan_inputsymbol
+#   undef scan_num
+#   undef scan_oct
+#   undef scan_pat
+#   undef scan_str
+#   undef scan_subst
+#   undef scan_trans
+#   undef scan_version
+#   undef scan_vstring
+#   undef scan_word
+#   undef search_const
+#   undef seed
+#   undef sequence_num
+#   undef set_ANYOF_arg
+#   undef set_caret_X
+#   undef set_context
+#   undef set_numeric_standard
+#   undef set_numeric_underlying
+#   undef set_padlist
+#   undef set_regex_pv
+#   undef set_save_buffer_min_size
+#   undef setdefout
+#   undef setfd_cloexec
+#   undef setfd_cloexec_for_nonsysfd
+#   undef setfd_cloexec_or_inhexec_by_sysfdness
+#   undef setfd_inhexec
+#   undef setfd_inhexec_for_sysfd
+#   undef setlocale_failure_panic_via_i
+#   undef setup_canned_invlist_
+#   undef share_hek
+#   undef share_hek_flags
+#   undef should_warn_nl
+#   undef should_we_output_Debug_r
+#   undef si_dup
+#   undef sighandler
+#   undef sighandler1
+#   undef sighandler3
+#   undef simplify_sort
+#   undef single_1bit_pos32
+#   undef single_1bit_pos64
+#   undef size_to_psize
+#   undef skip_to_be_ignored_text
+#   undef skipspace_flags
+#   undef Slab_Alloc
+#   undef Slab_Free
+#   undef Slab_to_ro
+#   undef Slab_to_rw
+#   undef sortcv
+#   undef sortcv_stacked
+#   undef sortcv_xsub
+#   undef sortsv
+#   undef sortsv_flags
+#   undef sortsv_flags_impl
+#   undef space_join_names_mortal
+#   undef ss_dup
+#   undef ssc_add_range
+#   undef ssc_and
+#   undef ssc_anything
+#   undef ssc_clear_locale
+#   undef ssc_cp_and
+#   undef ssc_finalize
+#   undef ssc_init
+#   undef ssc_intersection
+#   undef ssc_is_anything
+#   undef ssc_is_cp_posixl_init
+#   undef ssc_or
+#   undef ssc_union
+#   undef stack_grow
+#   undef start_subparse
+#   undef str_to_version
+#   undef strftime8
+#   undef strftime_tm
+#   undef strict_utf8_to_uv
+#   undef study_chunk
+#   undef sub_crush_depth
+#   undef sublex_done
+#   undef sublex_push
+#   undef sublex_start
+#   undef subsignature_append_fence_op
+#   undef subsignature_append_positional
+#   undef subsignature_append_slurpy
+#   undef subsignature_finish
+#   undef subsignature_start
+#   undef suspend_compcv
+#   undef sv_2bool
+#   undef sv_2bool_flags
+#   undef sv_2cv
+#   undef sv_2io
+#   undef sv_2iuv_common
+#   undef sv_2iuv_non_preserve
+#   undef sv_2iv
+#   undef sv_2iv_flags
+#   undef sv_2mortal
+#   undef sv_2num
+#   undef sv_2nv_flags
+#   undef sv_2pv
+#   undef sv_2pv_flags
+#   undef sv_2pv_nolen
+#   undef sv_2pvbyte
+#   undef sv_2pvbyte_flags
+#   undef sv_2pvbyte_nolen
+#   undef sv_2pvutf8
+#   undef sv_2pvutf8_flags
+#   undef sv_2pvutf8_nolen
+#   undef sv_2uv
+#   undef sv_2uv_flags
+#   undef sv_add_arena
+#   undef sv_backoff
+#   undef sv_bless
+#   undef sv_buf_to_ro
+#   undef sv_buf_to_rw
+#   undef sv_can_swipe_pv_buf
+#   undef sv_cat_decode
+#   undef sv_catpv
+#   undef sv_catpv_flags
+#   undef sv_catpv_mg
+#   undef sv_catpvf
+#   undef sv_catpvf_mg
+#   undef sv_catpvf_mg_nocontext
+#   undef sv_catpvf_nocontext
+#   undef sv_catpvn
+#   undef sv_catpvn_flags
+#   undef sv_catpvn_mg
+#   undef sv_catsv
+#   undef sv_catsv_flags
+#   undef sv_catsv_mg
+#   undef sv_chop
+#   undef sv_clean_all
+#   undef sv_clean_objs
+#   undef sv_clear
+#   undef sv_cmp_flags
+#   undef sv_cmp_locale_flags
+#   undef sv_collxfrm
+#   undef sv_collxfrm_flags
+#   undef sv_copypv
+#   undef sv_copypv_flags
+#   undef sv_copypv_nomg
+#   undef sv_dec
+#   undef sv_dec_nomg
+#   undef sv_del_backref
+#   undef sv_derived_from
+#   undef sv_derived_from_hv
+#   undef sv_derived_from_pv
+#   undef sv_derived_from_pvn
+#   undef sv_derived_from_sv
+#   undef sv_derived_from_svpvn
+#   undef sv_destroyable
+#   undef sv_display
+#   undef sv_does
+#   undef sv_does_pv
+#   undef sv_does_pvn
+#   undef sv_does_sv
+#   undef sv_dump
+#   undef sv_dump_depth
+#   undef sv_dup
+#   undef sv_dup_common
+#   undef sv_dup_hvaux
+#   undef sv_dup_inc
+#   undef sv_dup_inc_multiple
+#   undef sv_eq
+#   undef sv_eq_flags
+#   undef sv_exp_grow
+#   undef sv_force_normal
+#   undef sv_force_normal_flags
+#   undef sv_free
+#   undef sv_free_arenas
+#   undef sv_get_backrefs
+#   undef sv_gets
+#   undef sv_grow
+#   undef sv_grow_fresh
+#   undef sv_i_ncmp
+#   undef sv_i_ncmp_desc
+#   undef sv_inc
+#   undef sv_inc_nomg
+#   undef sv_insert
+#   undef sv_insert_flags
+#   undef sv_isa
+#   undef sv_isa_sv
+#   undef sv_isobject
+#   undef sv_langinfo
+#   undef sv_len
+#   undef sv_len_utf8
+#   undef sv_len_utf8_nomg
+#   undef sv_magic
+#   undef sv_magicext
+#   undef sv_magicext_mglob
+#   undef sv_mark_arenas
+#   undef sv_mortalcopy
+#   undef sv_mortalcopy_flags
+#   undef sv_ncmp
+#   undef sv_ncmp_desc
+#   undef sv_newmortal
+#   undef sv_newref
+#   undef sv_nosharing
+#   undef sv_numeq
+#   undef sv_numeq_flags
+#   undef sv_only_taint_gmagic
+#   undef sv_or_pv_pos_u2b
+#   undef sv_peek
+#   undef sv_pos_b2u
+#   undef sv_pos_b2u_flags
+#   undef sv_pos_b2u_midway
+#   undef sv_pos_u2b
+#   undef sv_pos_u2b_cached
+#   undef sv_pos_u2b_flags
+#   undef sv_pos_u2b_forwards
+#   undef sv_pos_u2b_midway
+#   undef sv_pv
+#   undef sv_pvbyte
+#   undef sv_pvbyten_force
+#   undef sv_pvbyten_force_wrapper
+#   undef sv_pvn_force
+#   undef sv_pvn_force_flags
+#   undef sv_pvutf8
+#   undef sv_pvutf8n_force
+#   undef sv_pvutf8n_force_wrapper
+#   undef sv_recode_to_utf8
+#   undef sv_ref
+#   undef sv_reftype
+#   undef sv_regex_global_pos_clear
+#   undef sv_regex_global_pos_get
+#   undef sv_regex_global_pos_set
+#   undef sv_replace
+#   undef sv_report_used
+#   undef sv_reset
+#   undef sv_resetpvn
+#   undef sv_rvunweaken
+#   undef sv_rvweaken
+#   undef sv_set_bool
+#   undef sv_set_false
+#   undef sv_set_true
+#   undef sv_set_undef
+#   undef sv_sethek
+#   undef sv_setiv
+#   undef sv_setiv_mg
+#   undef sv_setnv
+#   undef sv_setnv_mg
+#   undef sv_setpv
+#   undef sv_setpv_bufsize
+#   undef sv_setpv_freshbuf
+#   undef sv_setpv_mg
+#   undef sv_setpvf
+#   undef sv_setpvf_mg
+#   undef sv_setpvf_mg_nocontext
+#   undef sv_setpvf_nocontext
+#   undef sv_setpvn
+#   undef sv_setpvn_fresh
+#   undef sv_setpvn_mg
+#   undef sv_setref_iv
+#   undef sv_setref_nv
+#   undef sv_setref_pv
+#   undef sv_setref_pvn
+#   undef sv_setref_uv
+#   undef sv_setrv_inc
+#   undef sv_setrv_inc_mg
+#   undef sv_setrv_noinc
+#   undef sv_setrv_noinc_mg
+#   undef sv_setsv
+#   undef sv_setsv_cow
+#   undef sv_setsv_flags
+#   undef sv_setsv_mg
+#   undef sv_setuv
+#   undef sv_setuv_mg
+#   undef sv_streq
+#   undef sv_streq_flags
+#   undef sv_strftime_common
+#   undef sv_strftime_ints
+#   undef sv_strftime_tm
+#   undef sv_string_from_errnum
+#   undef sv_sweep_arenas
+#   undef sv_taint
+#   undef sv_tainted
+#   undef sv_true
+#   undef sv_unglob
+#   undef sv_uni_display
+#   undef sv_unmagic
+#   undef sv_unmagicext
+#   undef sv_unref
+#   undef sv_unref_flags
+#   undef sv_untaint
+#   undef sv_upgrade
+#   undef sv_usepvn
+#   undef sv_usepvn_flags
+#   undef sv_usepvn_mg
+#   undef sv_utf8_decode
+#   undef sv_utf8_downgrade
+#   undef sv_utf8_downgrade_flags
+#   undef sv_utf8_downgrade_nomg
+#   undef sv_utf8_encode
+#   undef sv_utf8_upgrade
+#   undef sv_utf8_upgrade_flags
+#   undef sv_utf8_upgrade_flags_grow
+#   undef sv_utf8_upgrade_nomg
+#   undef sv_vcatpvf
+#   undef sv_vcatpvf_mg
+#   undef sv_vcatpvfn
+#   undef sv_vcatpvfn_flags
+#   undef sv_vsetpvf
+#   undef sv_vsetpvf_mg
+#   undef sv_vsetpvfn
+#   undef sv_vstring_get
+#   undef SvAMAGIC_off
+#   undef SvAMAGIC_on
+#   undef SvGETMAGIC
+#   undef SvIV
+#   undef SvIV_nomg
+#   undef SvNV
+#   undef SvNV_nomg
+#   undef SvPV_helper
+#   undef SvPVXtrue
+#   undef SvREFCNT_dec_ret_NULL
+#   undef SvREFCNT_dec_set_NULL
+#   undef SvTRUE
+#   undef SvTRUE_common
+#   undef SvTRUE_NN
+#   undef SvTRUE_nomg
+#   undef SvUV
+#   undef SvUV_nomg
+#   undef swallow_bom
+#   undef switch_argstack
+#   undef switch_to_global_locale
+#   undef sync_locale
+#   undef sys_intern_clear
+#   undef sys_intern_dup
+#   undef sys_intern_init
+#   undef taint_env
+#   undef taint_proper
+#   undef thread_locale_init
+#   undef thread_locale_term
+#   undef tied_method
+#   undef tmps_grow_p
+#   undef to_byte_substr
+#   undef to_case_cp_list
+#   undef to_fold_latin1_
+#   undef to_lower_latin1
+#   undef to_uni_fold
+#   undef to_uni_fold_flags_
+#   undef to_uni_lower
+#   undef to_uni_title
+#   undef to_uni_upper
+#   undef to_upper_title_latin1_
+#   undef to_utf8_case_
+#   undef to_utf8_fold_flags_
+#   undef to_utf8_lower_flags_
+#   undef to_utf8_substr
+#   undef to_utf8_title_flags_
+#   undef to_utf8_upper_flags_
+#   undef tokenize_use
+#   undef tokeq
+#   undef tokereport
+#   undef too_few_arguments_pv
+#   undef too_many_arguments_pv
+#   undef translate_substr_offsets
+#   undef traverse_op_tree
+#   undef turkic_fc
+#   undef turkic_lc
+#   undef turkic_uc
+#   undef uiv_2buf
+#   undef unexpected_non_continuation_text
+#   undef unlnk
+#   undef unpack_rec
+#   undef unpackstring
+#   undef unreferenced_to_tmp_stack
+#   undef unshare_hek
+#   undef unshare_hek_or_pvn
+#   undef unsharepvn
+#   undef unwind_handler_stack
+#   undef unwind_paren
+#   undef unwind_scan_frames
+#   undef update_debugger_info
+#   undef update_PL_curlocales_i
+#   undef upg_version
+#   undef usage
+#   undef use_curlocale_scratch
+#   undef utf16_textfilter
+#   undef utf16_to_utf8_base
+#   undef utf8_distance
+#   undef utf8_hop
+#   undef utf8_hop_back
+#   undef utf8_hop_back_overshoot
+#   undef utf8_hop_forward
+#   undef utf8_hop_forward_overshoot
+#   undef utf8_hop_overshoot
+#   undef utf8_hop_safe
+#   undef utf8_length
+#   undef utf8_mg_len_cache_update
+#   undef utf8_mg_pos_cache_update
+#   undef utf8_to_bytes
+#   undef utf8_to_bytes_
+#   undef utf8_to_bytes_new_pv
+#   undef utf8_to_bytes_overwrite
+#   undef utf8_to_bytes_temp_pv
+#   undef utf8_to_utf16_base
+#   undef utf8_to_uv
+#   undef utf8_to_uv_errors
+#   undef utf8_to_uv_flags
+#   undef utf8_to_uv_msgs
+#   undef utf8_to_uv_msgs_helper_
+#   undef utf8_to_uv_or_die
+#   undef utf8_to_uvchr
+#   undef utf8_to_uvuni
+#   undef utf8n_to_uvchr
+#   undef utf8n_to_uvchr_error
+#   undef utf8n_to_uvchr_msgs
+#   undef utf8n_to_uvuni
+#   undef utilize
+#   undef uv_to_utf8
+#   undef uv_to_utf8_flags
+#   undef uv_to_utf8_msgs
+#   undef uvchr_to_utf8
+#   undef uvchr_to_utf8_flags
+#   undef uvchr_to_utf8_flags_msgs
+#   undef uvoffuni_to_utf8_flags
+#   undef uvoffuni_to_utf8_flags_msgs
+#   undef uvuni_to_utf8
+#   undef valid_identifier_pve
+#   undef valid_identifier_pvn
+#   undef valid_identifier_sv
+#   undef valid_utf8_to_uv
+#   undef valid_utf8_to_uvchr
+#   undef validate_proto
+#   undef variant_byte_number
+#   undef variant_under_utf8_count
+#   undef varname
+#   undef vcmp
+#   undef vcroak
+#   undef vdeb
+#   undef vfatal_warner
+#   undef vform
+#   undef visit
+#   undef vivify_defelem
+#   undef vivify_ref
+#   undef vload_module
+#   undef vmess
+#   undef vnewSVpvf
+#   undef vnormal
+#   undef vnumify
+#   undef voidnonfinal
+#   undef vstringify
+#   undef vverify
+#   undef vwarn
+#   undef vwarner
+#   undef wait4pid
+#   undef warn
+#   undef warn_elem_scalar_context
+#   undef warn_expect_operator
+#   undef warn_nocontext
+#   undef warn_not_dirhandle
+#   undef warn_on_first_deprecated_use
+#   undef warn_sv
+#   undef warner
+#   undef warner_nocontext
+#   undef watch
+#   undef whichsig
+#   undef whichsig_pv
+#   undef whichsig_pvn
+#   undef whichsig_sv
+#   undef win32_setlocale
+#   undef Win_byte_string_to_wstring
+#   undef Win_wstring_to_byte_string
+#   undef with_queued_errors
+#   undef wrap_infix_plugin
+#   undef wrap_keyword_plugin
+#   undef wrap_op_checker
+#   undef wrap_wsetlocale
+#   undef write_to_stderr
+#   undef xs_boot_epilog
+#   undef XS_builtin_indexed
+#   undef yyerror
+#   undef yyerror_non_ascii_message
+#   undef yyerror_pv
+#   undef yyerror_pvn
+#   undef yylex
+#   undef yyparse
+#   undef yyquit
+#   undef yyunlex
+#   undef yywarn
+# endif /* !defined(PERL_CORE) && defined(PERL_NO_SHORT_NAMES) */
+#else /* if !defined(PERL_DO_UNDEF_SHORT_NAMES) */
 
-#if !defined(MULTIPLICITY)
-/* undefined symbols, point them back at the usual ones */
-# define Perl_deb_nocontext                     Perl_deb
-# define Perl_form_nocontext                    Perl_form
-# define Perl_load_module_nocontext             Perl_load_module
-# define Perl_mess_nocontext                    Perl_mess
-# define Perl_newSVpvf_nocontext                Perl_newSVpvf
-# define Perl_sv_catpvf_nocontext               Perl_sv_catpvf
-# define Perl_sv_catpvf_mg_nocontext            Perl_sv_catpvf_mg
-# define Perl_sv_setpvf_nocontext               Perl_sv_setpvf
-# define Perl_sv_setpvf_mg_nocontext            Perl_sv_setpvf_mg
-# define Perl_warn_nocontext                    Perl_warn
-# define Perl_warner_nocontext                  Perl_warner
-#endif /* !defined(MULTIPLICITY) */
-#if !defined(PERL_CORE)
-/* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
- * disable them.
- */
-# define sv_setptrobj(rv,ptr,name)              sv_setref_iv(rv,name,PTR2IV(ptr))
-# define sv_setptrref(rv,ptr)                   sv_setref_iv(rv,NULL,PTR2IV(ptr))
-# if !defined(PERL_NOCOMPAT)
-
-/* Compatibility for this renamed function. */
-#   define perl_atexit(a,b)                     Perl_call_atexit(aTHX_ a,b)
-
-/* Compatibility for these functions that had a 'perl_' prefix before
- * 'Perl_' became the standard */
-#   define perl_call_argv(a,b,c)                Perl_call_argv(aTHX_ a,b,c)
-#   define perl_call_method(a,b)                Perl_call_method(aTHX_ a,b)
-#   define perl_call_pv(a,b)                    Perl_call_pv(aTHX_ a,b)
-#   define perl_call_sv(a,b)                    Perl_call_sv(aTHX_ a,b)
-#   define perl_eval_pv(a,b)                    Perl_eval_pv(aTHX_ a,b)
-#   define perl_eval_sv(a,b)                    Perl_eval_sv(aTHX_ a,b)
-#   define perl_get_av(a,b)                     Perl_get_av(aTHX_ a,b)
-#   define perl_get_cv(a,b)                     Perl_get_cv(aTHX_ a,b)
-#   define perl_get_hv(a,b)                     Perl_get_hv(aTHX_ a,b)
-#   define perl_get_sv(a,b)                     Perl_get_sv(aTHX_ a,b)
-#   define perl_init_i18nl10n(a)                Perl_init_i18nl10n(aTHX_ a)
-#   define perl_require_pv(a)                   Perl_require_pv(aTHX_ a)
-
-/* Before C99, macros could not wrap varargs functions. This
-   provides a set of compatibility functions that don't take an
-   extra argument but grab the context pointer using the macro dTHX.
- */
-
-#   if  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) && \
-       !defined(PERL_WANT_VARARGS)
-#     define deb                                Perl_deb_nocontext
-#     define form                               Perl_form_nocontext
-#     define load_module                        Perl_load_module_nocontext
-#     define mess                               Perl_mess_nocontext
-#     define newSVpvf                           Perl_newSVpvf_nocontext
-#     define sv_catpvf                          Perl_sv_catpvf_nocontext
-#     define sv_catpvf_mg                       Perl_sv_catpvf_mg_nocontext
-#     define sv_setpvf                          Perl_sv_setpvf_nocontext
-#     define sv_setpvf_mg                       Perl_sv_setpvf_mg_nocontext
-#     define warn                               Perl_warn_nocontext
-#     define warner                             Perl_warner_nocontext
-#   endif /*  defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES) &&
-             !defined(PERL_WANT_VARARGS) */
-# endif /* !defined(PERL_NOCOMPAT) */
-#endif /* !defined(PERL_CORE) */
-#if !defined(PERL_NO_SHORT_NAMES)
-
-/* Hide global symbols */
+/* Create short name macros that hide any need for thread context */
 
 # define AvFILL_(a)                             Perl_AvFILL_(aTHX_ a)
 # define Gv_AMupdate(a,b)                       Perl_Gv_AMupdate(aTHX_ a,b)
@@ -146,7 +2010,6 @@
 # define bytes_to_utf8(a,b)                     Perl_bytes_to_utf8(aTHX_ a,b)
 # define bytes_to_utf8_free_me(a,b,c)           Perl_bytes_to_utf8_free_me(aTHX_ a,b,c)
 # define bytes_to_utf8_temp_pv(a,b)             Perl_bytes_to_utf8_temp_pv(aTHX_ a,b)
-# define Perl_c9strict_utf8_to_uv               c9strict_utf8_to_uv
 # define call_argv(a,b,c)                       Perl_call_argv(aTHX_ a,b,c)
 # define call_atexit(a,b)                       Perl_call_atexit(aTHX_ a,b)
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
@@ -217,7 +2080,6 @@
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
-# define Perl_extended_utf8_to_uv               extended_utf8_to_uv
 # define fatal_warner(a,...)                    Perl_fatal_warner(aTHX_ a,__VA_ARGS__)
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
 # define fbm_instr(a,b,c,d)                     Perl_fbm_instr(aTHX_ a,b,c,d)
@@ -305,41 +2167,29 @@
 # define init_i18nl10n(a)                       Perl_init_i18nl10n(aTHX_ a)
 # define init_stacks()                          Perl_init_stacks(aTHX)
 # define init_tm(a)                             Perl_init_tm(aTHX_ a)
-# define Perl_instr                             instr
 # define intro_my()                             Perl_intro_my(aTHX)
 # define isC9_STRICT_UTF8_CHAR                  Perl_isC9_STRICT_UTF8_CHAR
 # define isSTRICT_UTF8_CHAR                     Perl_isSTRICT_UTF8_CHAR
 # define isUTF8_CHAR                            Perl_isUTF8_CHAR
 # define isUTF8_CHAR_flags                      Perl_isUTF8_CHAR_flags
-# define Perl_is_c9strict_utf8_string           is_c9strict_utf8_string
-# define Perl_is_c9strict_utf8_string_loc       is_c9strict_utf8_string_loc
 # define is_c9strict_utf8_string_loclen         Perl_is_c9strict_utf8_string_loclen
 # define is_in_locale_category_(a,b)            Perl_is_in_locale_category_(aTHX_ a,b)
 # define is_lvalue_sub()                        Perl_is_lvalue_sub(aTHX)
 # define is_safe_syscall(a,b,c,d)               Perl_is_safe_syscall(aTHX_ a,b,c,d)
-# define Perl_is_strict_utf8_string             is_strict_utf8_string
-# define Perl_is_strict_utf8_string_loc         is_strict_utf8_string_loc
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen
 # define is_uni_FOO_(a,b)                       Perl_is_uni_FOO_(aTHX_ a,b)
 # define is_uni_perl_idcont_(a)                 Perl_is_uni_perl_idcont_(aTHX_ a)
 # define is_uni_perl_idstart_(a)                Perl_is_uni_perl_idstart_(aTHX_ a)
 # define is_utf8_FF_helper_                     Perl_is_utf8_FF_helper_
 # define is_utf8_FOO_(a,b,c)                    Perl_is_utf8_FOO_(aTHX_ a,b,c)
-# define Perl_is_utf8_char_buf                  is_utf8_char_buf
 # define is_utf8_char_helper_                   Perl_is_utf8_char_helper_
-# define Perl_is_utf8_fixed_width_buf_flags     is_utf8_fixed_width_buf_flags
-# define Perl_is_utf8_fixed_width_buf_loc_flags is_utf8_fixed_width_buf_loc_flags
 # define is_utf8_fixed_width_buf_loclen_flags   Perl_is_utf8_fixed_width_buf_loclen_flags
 # define is_utf8_invariant_string_loc           Perl_is_utf8_invariant_string_loc
 # define is_utf8_perl_idcont_(a,b)              Perl_is_utf8_perl_idcont_(aTHX_ a,b)
 # define is_utf8_perl_idstart_(a,b)             Perl_is_utf8_perl_idstart_(aTHX_ a,b)
-# define Perl_is_utf8_string                    is_utf8_string
 # define is_utf8_string_flags                   Perl_is_utf8_string_flags
-# define Perl_is_utf8_string_loc                is_utf8_string_loc
-# define Perl_is_utf8_string_loc_flags          is_utf8_string_loc_flags
 # define is_utf8_string_loclen                  Perl_is_utf8_string_loclen
 # define is_utf8_string_loclen_flags            Perl_is_utf8_string_loclen_flags
-# define Perl_is_utf8_valid_partial_char        is_utf8_valid_partial_char
 # define is_utf8_valid_partial_char_flags       Perl_is_utf8_valid_partial_char_flags
 # define isinfnan                               Perl_isinfnan
 # define leave_adjust_stacks(a,b,c,d)           Perl_leave_adjust_stacks(aTHX_ a,b,c,d)
@@ -663,7 +2513,6 @@
 # define stack_grow(a,b,c)                      Perl_stack_grow(aTHX_ a,b,c)
 # define start_subparse(a,b)                    Perl_start_subparse(aTHX_ a,b)
 # define str_to_version(a)                      Perl_str_to_version(aTHX_ a)
-# define Perl_strict_utf8_to_uv                 strict_utf8_to_uv
 # define suspend_compcv(a)                      Perl_suspend_compcv(aTHX_ a)
 # define sv_2bool_flags(a,b)                    Perl_sv_2bool_flags(aTHX_ a,b)
 # define sv_2cv(a,b,c,d)                        Perl_sv_2cv(aTHX_ a,b,c,d)
@@ -819,26 +2668,18 @@
 # define upg_version(a,b)                       Perl_upg_version(aTHX_ a,b)
 # define utf8_distance(a,b)                     Perl_utf8_distance(aTHX_ a,b)
 # define utf8_hop                               Perl_utf8_hop
-# define Perl_utf8_hop_back                     utf8_hop_back
 # define utf8_hop_back_overshoot                Perl_utf8_hop_back_overshoot
-# define Perl_utf8_hop_forward                  utf8_hop_forward
 # define utf8_hop_forward_overshoot             Perl_utf8_hop_forward_overshoot
 # define utf8_hop_overshoot                     Perl_utf8_hop_overshoot
-# define Perl_utf8_hop_safe                     utf8_hop_safe
 # define utf8_length(a,b)                       Perl_utf8_length(aTHX_ a,b)
 # define utf8_to_bytes(a,b)                     Perl_utf8_to_bytes(aTHX_ a,b)
 # define utf8_to_bytes_(a,b,c,d)                Perl_utf8_to_bytes_(aTHX_ a,b,c,d)
 # define utf8_to_bytes_new_pv(a,b,c)            Perl_utf8_to_bytes_new_pv(aTHX_ a,b,c)
 # define utf8_to_bytes_overwrite(a,b)           Perl_utf8_to_bytes_overwrite(aTHX_ a,b)
 # define utf8_to_bytes_temp_pv(a,b)             Perl_utf8_to_bytes_temp_pv(aTHX_ a,b)
-# define Perl_utf8_to_uv                        utf8_to_uv
-# define Perl_utf8_to_uv_errors                 utf8_to_uv_errors
-# define Perl_utf8_to_uv_flags                  utf8_to_uv_flags
 # define utf8_to_uv_msgs                        Perl_utf8_to_uv_msgs
 # define utf8_to_uv_msgs_helper_                Perl_utf8_to_uv_msgs_helper_
 # define utf8_to_uv_or_die                      Perl_utf8_to_uv_or_die
-# define Perl_utf8n_to_uvchr                    utf8n_to_uvchr
-# define Perl_utf8n_to_uvchr_error              utf8n_to_uvchr_error
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uv_to_utf8(a,b)                        Perl_uv_to_utf8(aTHX_ a,b)
 # define uv_to_utf8_flags(a,b,c)                Perl_uv_to_utf8_flags(aTHX_ a,b,c)
@@ -847,7 +2688,6 @@
 # define valid_identifier_pvn(a,b,c)            Perl_valid_identifier_pvn(aTHX_ a,b,c)
 # define valid_identifier_sv(a)                 Perl_valid_identifier_sv(aTHX_ a)
 # define valid_utf8_to_uv                       Perl_valid_utf8_to_uv
-# define Perl_valid_utf8_to_uvchr               valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)
 # define vdeb(a,b)                              Perl_vdeb(aTHX_ a,b)
@@ -910,7 +2750,20 @@
 #   define sv_setpvf_nocontext                  Perl_sv_setpvf_nocontext
 #   define warn_nocontext                       Perl_warn_nocontext
 #   define warner_nocontext                     Perl_warner_nocontext
-# endif /* defined(MULTIPLICITY) */
+# else /* if !defined(MULTIPLICITY) */
+    /* undefined symbols, point them back at the usual ones */
+#   define Perl_deb_nocontext                   Perl_deb
+#   define Perl_form_nocontext                  Perl_form
+#   define Perl_load_module_nocontext           Perl_load_module
+#   define Perl_mess_nocontext                  Perl_mess
+#   define Perl_newSVpvf_nocontext              Perl_newSVpvf
+#   define Perl_sv_catpvf_nocontext             Perl_sv_catpvf
+#   define Perl_sv_catpvf_mg_nocontext          Perl_sv_catpvf_mg
+#   define Perl_sv_setpvf_nocontext             Perl_sv_setpvf
+#   define Perl_sv_setpvf_mg_nocontext          Perl_sv_setpvf_mg
+#   define Perl_warn_nocontext                  Perl_warn
+#   define Perl_warner_nocontext                Perl_warner
+# endif /* !defined(MULTIPLICITY) */
 # if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
       defined(PERL_WANT_VARARGS)
 #   define deb(...)                             Perl_deb(aTHX_ __VA_ARGS__)
@@ -1831,21 +3684,57 @@
 #     define quadmath_format_needed             Perl_quadmath_format_needed
 #     define quadmath_format_valid              Perl_quadmath_format_valid
 #   endif
-#   if defined(USE_THREADS)
-#     define Perl_do_aexec(mTHX,a,b,c)          do_aexec(a,b,c)
-#     define Perl_my_lstat(mTHX)                my_lstat()
-#     define Perl_my_stat(mTHX)                 my_stat()
-#   else
-#     define Perl_do_aexec                      do_aexec
-#     define Perl_my_lstat                      my_lstat
-#     define Perl_my_stat                       my_stat
-#   endif
 #   if defined(WIN32)
 #     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
 #   else
 #     define do_exec3(a,b,c)                    Perl_do_exec3(aTHX_ a,b,c)
 #   endif
-# endif /* defined(PERL_CORE) */
+# else /* if !defined(PERL_CORE) */
+/* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
+ * disable them.
+ */
+#   define sv_setptrobj(rv,ptr,name)            sv_setref_iv(rv,name,PTR2IV(ptr))
+#   define sv_setptrref(rv,ptr)                 sv_setref_iv(rv,NULL,PTR2IV(ptr))
+#   if !defined(PERL_NOCOMPAT)
+
+/* Compatibility for this renamed function. */
+#     define perl_atexit(a,b)                   Perl_call_atexit(aTHX_ a,b)
+
+/* Compatibility for these functions that had a 'perl_' prefix before
+ * 'Perl_' became the standard */
+#     define perl_call_argv(a,b,c)              Perl_call_argv(aTHX_ a,b,c)
+#     define perl_call_method(a,b)              Perl_call_method(aTHX_ a,b)
+#     define perl_call_pv(a,b)                  Perl_call_pv(aTHX_ a,b)
+#     define perl_call_sv(a,b)                  Perl_call_sv(aTHX_ a,b)
+#     define perl_eval_pv(a,b)                  Perl_eval_pv(aTHX_ a,b)
+#     define perl_eval_sv(a,b)                  Perl_eval_sv(aTHX_ a,b)
+#     define perl_get_av(a,b)                   Perl_get_av(aTHX_ a,b)
+#     define perl_get_cv(a,b)                   Perl_get_cv(aTHX_ a,b)
+#     define perl_get_hv(a,b)                   Perl_get_hv(aTHX_ a,b)
+#     define perl_get_sv(a,b)                   Perl_get_sv(aTHX_ a,b)
+#     define perl_init_i18nl10n(a)              Perl_init_i18nl10n(aTHX_ a)
+#     define perl_require_pv(a)                 Perl_require_pv(aTHX_ a)
+
+/* Before C99, macros could not wrap varargs functions. This
+   provides a set of compatibility functions that don't take an
+   extra argument but grab the context pointer using the macro dTHX.
+ */
+
+#     if defined(MULTIPLICITY) && !defined(PERL_WANT_VARARGS)
+#       define deb                              Perl_deb_nocontext
+#       define form                             Perl_form_nocontext
+#       define load_module                      Perl_load_module_nocontext
+#       define mess                             Perl_mess_nocontext
+#       define newSVpvf                         Perl_newSVpvf_nocontext
+#       define sv_catpvf                        Perl_sv_catpvf_nocontext
+#       define sv_catpvf_mg                     Perl_sv_catpvf_mg_nocontext
+#       define sv_setpvf                        Perl_sv_setpvf_nocontext
+#       define sv_setpvf_mg                     Perl_sv_setpvf_mg_nocontext
+#       define warn                             Perl_warn_nocontext
+#       define warner                           Perl_warner_nocontext
+#     endif /* defined(MULTIPLICITY) && !defined(PERL_WANT_VARARGS) */
+#   endif /* !defined(PERL_NOCOMPAT) */
+# endif /* !defined(PERL_CORE) */
 # if defined(PERL_CORE) || defined(PERL_EXT)
 #   define append_utf8_from_native_byte         Perl_append_utf8_from_native_byte
 #   define av_reify(a)                          Perl_av_reify(aTHX_ a)
@@ -2246,12 +4135,7 @@
          defined(PERL_IN_SV_C) )
 #     define mem_collxfrm_(a,b,c,d)             Perl_mem_collxfrm_(aTHX_ a,b,c,d)
 #   endif
-#   if defined(USE_THREADS)
-#     define Perl_sv_collxfrm(mTHX,a,b)         sv_collxfrm(a,b)
-#   else
-#     define Perl_sv_collxfrm                   sv_collxfrm
-#   endif
-# endif /* defined(USE_LOCALE_COLLATE) */
+# endif
 # if defined(USE_PERLIO)
 #   define PerlIO_clearerr(a)                   Perl_PerlIO_clearerr(aTHX_ a)
 #   define PerlIO_close(a)                      Perl_PerlIO_close(aTHX_ a)
@@ -2277,206 +4161,9 @@
 #   define PerlIO_write(a,b,c)                  Perl_PerlIO_write(aTHX_ a,b,c)
 # endif /* defined(USE_PERLIO) */
 # if defined(USE_THREADS)
-#   define Perl_SvREFCNT_dec_set_NULL(mTHX,a)   SvREFCNT_dec_set_NULL(a)
-#   define Perl_do_open(mTHX,a,b,c,d,e,f,g)     do_open(a,b,c,d,e,f,g)
-#   define Perl_foldEQ_utf8(mTHX,a,b,c,d,e,f,g,h) foldEQ_utf8(a,b,c,d,e,f,g,h)
-#   define Perl_gv_AVadd(mTHX,a)                gv_AVadd(a)
-#   define Perl_gv_HVadd(mTHX,a)                gv_HVadd(a)
-#   define Perl_gv_IOadd(mTHX,a)                gv_IOadd(a)
-#   define Perl_gv_efullname3(mTHX,a,b,c)       gv_efullname3(a,b,c)
-#   define Perl_gv_fetchmeth(mTHX,a,b,c,d)      gv_fetchmeth(a,b,c,d)
-#   define Perl_gv_fetchmeth_autoload(mTHX,a,b,c,d) gv_fetchmeth_autoload(a,b,c,d)
-#   define Perl_gv_fetchmethod(mTHX,a,b)        gv_fetchmethod(a,b)
-#   define Perl_gv_fullname3(mTHX,a,b,c)        gv_fullname3(a,b,c)
-#   define Perl_gv_init(mTHX,a,b,c,d,e)         gv_init(a,b,c,d,e)
-#   define Perl_hv_delete(mTHX,a,b,c,d)         hv_delete(a,b,c,d)
-#   define Perl_hv_delete_ent(mTHX,a,b,c,d)     hv_delete_ent(a,b,c,d)
-#   define Perl_hv_exists(mTHX,a,b,c)           hv_exists(a,b,c)
-#   define Perl_hv_exists_ent(mTHX,a,b,c)       hv_exists_ent(a,b,c)
-#   define Perl_hv_fetch(mTHX,a,b,c,d)          hv_fetch(a,b,c,d)
-#   define Perl_hv_fetch_ent(mTHX,a,b,c,d)      hv_fetch_ent(a,b,c,d)
-#   define Perl_hv_iternext(mTHX,a)             hv_iternext(a)
-#   define Perl_hv_magic(mTHX,a,b,c)            hv_magic(a,b,c)
-#   define Perl_hv_store(mTHX,a,b,c,d,e)        hv_store(a,b,c,d,e)
-#   define Perl_hv_store_ent(mTHX,a,b,c,d)      hv_store_ent(a,b,c,d)
-#   define Perl_hv_store_flags(mTHX,a,b,c,d,e,f) hv_store_flags(a,b,c,d,e,f)
-#   define Perl_hv_stores(mTHX,a,b,c)           hv_stores(a,b,c)
-#   define Perl_hv_undef(mTHX,a)                hv_undef(a)
-#   define Perl_ibcmp(mTHX,a,b,c)               ibcmp(a,b,c)
-#   define Perl_ibcmp_locale(mTHX,a,b,c)        ibcmp_locale(a,b,c)
-#   define Perl_ibcmp_utf8(mTHX,a,b,c,d,e,f,g,h) ibcmp_utf8(a,b,c,d,e,f,g,h)
-#   define Perl_newATTRSUB(mTHX,a,b,c,d,e)      newATTRSUB(a,b,c,d,e)
-#   define Perl_newAV(mTHX)                     newAV()
-#   define Perl_newAV_alloc_x(mTHX,a)           newAV_alloc_x(a)
-#   define Perl_newAV_alloc_xz(mTHX,a)          newAV_alloc_xz(a)
-#   define Perl_newAV_mortal(mTHX)              newAV_mortal()
-#   define Perl_newGVgen(mTHX,a)                newGVgen(a)
-#   define Perl_newHV(mTHX)                     newHV()
-#   define Perl_newIO(mTHX)                     newIO()
-#   define Perl_newSUB(mTHX,a,b,c,d)            newSUB(a,b,c,d)
-#   define Perl_newSVsv(mTHX,a)                 newSVsv(a)
-#   define Perl_newSVsv_nomg(mTHX,a)            newSVsv_nomg(a)
-#   define Perl_op_lvalue(mTHX,a,b)             op_lvalue(a,b)
-#   define Perl_phase_name(mTHX,a)              phase_name(a)
-#   define Perl_resume_compcv_and_save(mTHX,a)  resume_compcv_and_save(a)
-#   define Perl_resume_compcv_final(mTHX,a)     resume_compcv_final(a)
-#   define Perl_save_aelem(mTHX,a,b,c)          save_aelem(a,b,c)
-#   define Perl_save_freeop(mTHX,a)             save_freeop(a)
-#   define Perl_save_freepv(mTHX,a)             save_freepv(a)
-#   define Perl_save_freesv(mTHX,a)             save_freesv(a)
-#   define Perl_save_helem(mTHX,a,b,c)          save_helem(a,b,c)
-#   define Perl_save_mortalizesv(mTHX,a)        save_mortalizesv(a)
-#   define Perl_save_op(mTHX)                   save_op()
-#   define Perl_sv_2bool(mTHX,a)                sv_2bool(a)
-#   define Perl_sv_2iv(mTHX,a)                  sv_2iv(a)
-#   define Perl_sv_2pv(mTHX,a,b)                sv_2pv(a,b)
-#   define Perl_sv_2pv_nolen(mTHX,a)            sv_2pv_nolen(a)
-#   define Perl_sv_2pvbyte(mTHX,a,b)            sv_2pvbyte(a,b)
-#   define Perl_sv_2pvbyte_nolen(mTHX,a)        sv_2pvbyte_nolen(a)
-#   define Perl_sv_2pvutf8(mTHX,a,b)            sv_2pvutf8(a,b)
-#   define Perl_sv_2pvutf8_nolen(mTHX,a)        sv_2pvutf8_nolen(a)
-#   define Perl_sv_2uv(mTHX,a)                  sv_2uv(a)
-#   define Perl_sv_catpvn(mTHX,a,b,c)           sv_catpvn(a,b,c)
-#   define Perl_sv_catpvn_mg(mTHX,a,b,c)        sv_catpvn_mg(a,b,c)
-#   define Perl_sv_catsv(mTHX,a,b)              sv_catsv(a,b)
-#   define Perl_sv_catsv_mg(mTHX,a,b)           sv_catsv_mg(a,b)
-#   define Perl_sv_copypv(mTHX,a,b)             sv_copypv(a,b)
-#   define Perl_sv_copypv_nomg(mTHX,a,b)        sv_copypv_nomg(a,b)
-#   define Perl_sv_eq(mTHX,a,b)                 sv_eq(a,b)
-#   define Perl_sv_force_normal(mTHX,a)         sv_force_normal(a)
-#   define Perl_sv_insert(mTHX,a,b,c,d,e)       sv_insert(a,b,c,d,e)
-#   define Perl_sv_mortalcopy(mTHX,a)           sv_mortalcopy(a)
-#   define Perl_sv_numeq(mTHX,a,b)              sv_numeq(a,b)
-#   define Perl_sv_pv(mTHX,a)                   sv_pv(a)
-#   define Perl_sv_pvbyte(mTHX,a)               sv_pvbyte(a)
-#   define Perl_sv_pvn_force(mTHX,a,b)          sv_pvn_force(a,b)
-#   define Perl_sv_pvutf8(mTHX,a)               sv_pvutf8(a)
-#   define Perl_sv_setsv(mTHX,a,b)              sv_setsv(a,b)
-#   define Perl_sv_streq(mTHX,a,b)              sv_streq(a,b)
-#   define Perl_sv_taint(mTHX,a)                sv_taint(a)
-#   define Perl_sv_unref(mTHX,a)                sv_unref(a)
-#   define Perl_sv_usepvn(mTHX,a,b,c)           sv_usepvn(a,b,c)
-#   define Perl_sv_usepvn_mg(mTHX,a,b,c)        sv_usepvn_mg(a,b,c)
-#   define Perl_sv_utf8_downgrade(mTHX,a,b)     sv_utf8_downgrade(a,b)
-#   define Perl_sv_utf8_downgrade_nomg(mTHX,a,b) sv_utf8_downgrade_nomg(a,b)
-#   define Perl_sv_utf8_upgrade(mTHX,a)         sv_utf8_upgrade(a)
-#   define Perl_sv_utf8_upgrade_flags(mTHX,a,b) sv_utf8_upgrade_flags(a,b)
-#   define Perl_sv_utf8_upgrade_nomg(mTHX,a)    sv_utf8_upgrade_nomg(a)
-#   define Perl_to_uni_fold(mTHX,a,b,c)         to_uni_fold(a,b,c)
-#   define Perl_uv_to_utf8_msgs(mTHX,a,b,c,d)   uv_to_utf8_msgs(a,b,c,d)
-#   define Perl_uvchr_to_utf8(mTHX,a,b)         uvchr_to_utf8(a,b)
-#   define Perl_uvchr_to_utf8_flags(mTHX,a,b,c) uvchr_to_utf8_flags(a,b,c)
-#   define Perl_uvchr_to_utf8_flags_msgs(mTHX,a,b,c,d) uvchr_to_utf8_flags_msgs(a,b,c,d)
-#   define Perl_uvoffuni_to_utf8_flags(mTHX,a,b,c) uvoffuni_to_utf8_flags(a,b,c)
-#   define Perl_whichsig(mTHX,a)                whichsig(a)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
-#   if defined(PERL_DONT_CREATE_GVSV)
-#     define Perl_gv_SVadd(mTHX,a)              gv_SVadd(a)
-#   endif
-#   if !defined(USE_ITHREADS)
-#     define Perl_CopFILEGV_set(mTHX,a,b)       CopFILEGV_set(a,b)
-#   endif
-# else /* if !defined(USE_THREADS) */
-#   define Perl_SvREFCNT_dec_set_NULL           SvREFCNT_dec_set_NULL
-#   define Perl_do_open                         do_open
-#   define Perl_foldEQ_utf8                     foldEQ_utf8
-#   define Perl_gv_AVadd                        gv_AVadd
-#   define Perl_gv_HVadd                        gv_HVadd
-#   define Perl_gv_IOadd                        gv_IOadd
-#   define Perl_gv_efullname3                   gv_efullname3
-#   define Perl_gv_fetchmeth                    gv_fetchmeth
-#   define Perl_gv_fetchmeth_autoload           gv_fetchmeth_autoload
-#   define Perl_gv_fetchmethod                  gv_fetchmethod
-#   define Perl_gv_fullname3                    gv_fullname3
-#   define Perl_gv_init                         gv_init
-#   define Perl_hv_delete                       hv_delete
-#   define Perl_hv_delete_ent                   hv_delete_ent
-#   define Perl_hv_exists                       hv_exists
-#   define Perl_hv_exists_ent                   hv_exists_ent
-#   define Perl_hv_fetch                        hv_fetch
-#   define Perl_hv_fetch_ent                    hv_fetch_ent
-#   define Perl_hv_iternext                     hv_iternext
-#   define Perl_hv_magic                        hv_magic
-#   define Perl_hv_store                        hv_store
-#   define Perl_hv_store_ent                    hv_store_ent
-#   define Perl_hv_store_flags                  hv_store_flags
-#   define Perl_hv_stores                       hv_stores
-#   define Perl_hv_undef                        hv_undef
-#   define Perl_ibcmp                           ibcmp
-#   define Perl_ibcmp_locale                    ibcmp_locale
-#   define Perl_ibcmp_utf8                      ibcmp_utf8
-#   define Perl_newATTRSUB                      newATTRSUB
-#   define Perl_newAV                           newAV
-#   define Perl_newAV_alloc_x                   newAV_alloc_x
-#   define Perl_newAV_alloc_xz                  newAV_alloc_xz
-#   define Perl_newAV_mortal                    newAV_mortal
-#   define Perl_newGVgen                        newGVgen
-#   define Perl_newHV                           newHV
-#   define Perl_newIO                           newIO
-#   define Perl_newSUB                          newSUB
-#   define Perl_newSVsv                         newSVsv
-#   define Perl_newSVsv_nomg                    newSVsv_nomg
-#   define Perl_op_lvalue                       op_lvalue
-#   define Perl_phase_name                      phase_name
-#   define Perl_resume_compcv_and_save          resume_compcv_and_save
-#   define Perl_resume_compcv_final             resume_compcv_final
-#   define Perl_save_aelem                      save_aelem
-#   define Perl_save_freeop                     save_freeop
-#   define Perl_save_freepv                     save_freepv
-#   define Perl_save_freesv                     save_freesv
-#   define Perl_save_helem                      save_helem
-#   define Perl_save_mortalizesv                save_mortalizesv
-#   define Perl_save_op                         save_op
-#   define Perl_sv_2bool                        sv_2bool
-#   define Perl_sv_2iv                          sv_2iv
-#   define Perl_sv_2pv                          sv_2pv
-#   define Perl_sv_2pv_nolen                    sv_2pv_nolen
-#   define Perl_sv_2pvbyte                      sv_2pvbyte
-#   define Perl_sv_2pvbyte_nolen                sv_2pvbyte_nolen
-#   define Perl_sv_2pvutf8                      sv_2pvutf8
-#   define Perl_sv_2pvutf8_nolen                sv_2pvutf8_nolen
-#   define Perl_sv_2uv                          sv_2uv
-#   define Perl_sv_catpvn                       sv_catpvn
-#   define Perl_sv_catpvn_mg                    sv_catpvn_mg
-#   define Perl_sv_catsv                        sv_catsv
-#   define Perl_sv_catsv_mg                     sv_catsv_mg
-#   define Perl_sv_copypv                       sv_copypv
-#   define Perl_sv_copypv_nomg                  sv_copypv_nomg
-#   define Perl_sv_eq                           sv_eq
-#   define Perl_sv_force_normal                 sv_force_normal
-#   define Perl_sv_insert                       sv_insert
-#   define Perl_sv_mortalcopy                   sv_mortalcopy
-#   define Perl_sv_numeq                        sv_numeq
-#   define Perl_sv_pv                           sv_pv
-#   define Perl_sv_pvbyte                       sv_pvbyte
-#   define Perl_sv_pvn_force                    sv_pvn_force
-#   define Perl_sv_pvutf8                       sv_pvutf8
-#   define Perl_sv_setsv                        sv_setsv
-#   define Perl_sv_streq                        sv_streq
-#   define Perl_sv_taint                        sv_taint
-#   define Perl_sv_unref                        sv_unref
-#   define Perl_sv_usepvn                       sv_usepvn
-#   define Perl_sv_usepvn_mg                    sv_usepvn_mg
-#   define Perl_sv_utf8_downgrade               sv_utf8_downgrade
-#   define Perl_sv_utf8_downgrade_nomg          sv_utf8_downgrade_nomg
-#   define Perl_sv_utf8_upgrade                 sv_utf8_upgrade
-#   define Perl_sv_utf8_upgrade_flags           sv_utf8_upgrade_flags
-#   define Perl_sv_utf8_upgrade_nomg            sv_utf8_upgrade_nomg
-#   define Perl_to_uni_fold                     to_uni_fold
-#   define Perl_uv_to_utf8_msgs                 uv_to_utf8_msgs
-#   define Perl_uvchr_to_utf8                   uvchr_to_utf8
-#   define Perl_uvchr_to_utf8_flags             uvchr_to_utf8_flags
-#   define Perl_uvchr_to_utf8_flags_msgs        uvchr_to_utf8_flags_msgs
-#   define Perl_uvoffuni_to_utf8_flags          uvoffuni_to_utf8_flags
-#   define Perl_whichsig                        whichsig
-#   if defined(PERL_DONT_CREATE_GVSV)
-#     define Perl_gv_SVadd                      gv_SVadd
-#   endif
-#   if !defined(USE_ITHREADS)
-#     define Perl_CopFILEGV_set                 CopFILEGV_set
-#   endif
-# endif /* !defined(USE_THREADS) */
+# endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)
 #   define do_spawn(a)                          Perl_do_spawn(aTHX_ a)
@@ -2487,6 +4174,6 @@
 # else
 #   define get_context                          Perl_get_context
 # endif
-#endif /* !defined(PERL_NO_SHORT_NAMES) */
+#endif /* !defined(PERL_DO_UNDEF_SHORT_NAMES) */
 
 /* ex: set ro ft=c: */
