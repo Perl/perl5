@@ -476,6 +476,11 @@ is not important; both of the following lines will cause the same behaviour:
     foo(alpha => "A", beta => "B");
     foo(beta => "B", alpha => "A");
 
+If a function declares both positional and named parameters, then
+callers must provide values for all positional parameters before
+providing values for named parameters, even if the positional
+parameters have default values.
+
 It is not important where these parameter names come from in the caller.  In
 simple cases they could be literal strings such as the previous example, or
 they could themselves come from other variables.  Expanding a hash variable
@@ -507,12 +512,10 @@ left to right, as required.  As with positional parameters, each expression
 can see and make use of the values assigned to any previous parameter.
 
 If the subroutine already declares any optional positional parameters, then
-all named parameters must also be optional.  It would not make sense to
-require a mandatory named parameter after any optional positional ones, as
-there would be no way for the caller to provide a value for it.  However, if
-the subroutine does not declare any optional positional parameters, then any
-named ones may be freely mixed between mandatory and optional, since they are
-processed by name and not position.
+all named parameters must also be optional.  However, if the subroutine does
+not declare any optional positional parameters, then any named ones may be
+freely mixed between mandatory and optional, since they are processed by
+name and not position.
 
 After positional or named parameters, additional arguments may be captured
 in a slurpy parameter.  The simplest form of this is just an array variable:
@@ -1644,7 +1647,7 @@ example, satisfies C<\%>:
     my %hash
     $hashref->%*
     %{ expr }
-    (expr)->*%
+    (expr)->%*
 
 The value passed as part of C<@_> will be a
 reference to the actual argument given in the subroutine call,
