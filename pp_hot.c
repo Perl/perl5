@@ -1590,7 +1590,7 @@ PP(pp_readline)
         SvGETMAGIC(arg);
 
         /* unrolled tryAMAGICunTARGETlist(iter_amg, 0) */
-        SV *tmpsv;
+        SV *tmpsv = NULL;
         U8 gimme = GIMME_V;
         if (UNLIKELY(SvAMAGIC(arg) &&
             (tmpsv = amagic_call(arg, &PL_sv_undef, iter_amg,
