@@ -61,28 +61,33 @@ inline void MEMODSlx(char *str, long x)
    Even though perl links with ucrtbase.dll, there is alot of overhead for
    using ::new() operator. Just implement our own ::new(), more C-style. */
 #define VMEM_H_NEW_OP \
-    void* operator new(size_t size) noexcept {  \
-      void * p = (void*)win32_malloc(size); \
-      if(!p) noperl_die("%s%s","Out of memory in perl:", "???"); return p; }; \
-    void* operator new[](size_t size) noexcept { \
-      void * p = (void*)win32_malloc(size); \
-      if(!p) noperl_die("%s%s","Out of memory in perl:", "???"); return p; }; \
-    void* operator new( size_t size, int block_use, \
-                          char const* file_name, int line_number) noexcept { \
-        UNREFERENCED_PARAMETER(block_use); \
-        UNREFERENCED_PARAMETER(file_name); \
-        UNREFERENCED_PARAMETER(line_number); \
-        void * p = (void*)win32_malloc(size); \
-        if(!p) noperl_die("%s%s","Out of memory in perl:", "???"); return p; \
-    }; \
-    void* operator new[]( size_t size, int block_use, \
-                          char const* file_name, int line_number) noexcept { \
-        UNREFERENCED_PARAMETER(block_use); \
-        UNREFERENCED_PARAMETER(file_name); \
-        UNREFERENCED_PARAMETER(line_number); \
-         void * p = (void*)win32_malloc(size); \
-         if(!p) noperl_die("%s%s","Out of memory in perl:", "???"); return p; }; \
-    void operator delete (void* p) noexcept { win32_free(p); return; }; \
+    void* operator new(size_t size) noexcept {                              \
+        void * p = (void*)win32_malloc(size);                               \
+        if (!p) noperl_die("%s%s","Out of memory in perl:", "???");         \
+        return p;                                                           \
+    };                                                                      \
+    void* operator new[](size_t size) noexcept {                            \
+        void * p = (void*)win32_malloc(size);                               \
+        if (!p) noperl_die("%s%s","Out of memory in perl:", "???");         \
+        return p; };                                                        \
+    void* operator new( size_t size, int block_use,                         \
+                          char const* file_name, int line_number) noexcept {\
+        UNREFERENCED_PARAMETER(block_use);                                  \
+        UNREFERENCED_PARAMETER(file_name);                                  \
+        UNREFERENCED_PARAMETER(line_number);                                \
+        void * p = (void*)win32_malloc(size);                               \
+        if(!p) noperl_die("%s%s","Out of memory in perl:", "???");          \
+        return p;                                                           \
+    };                                                                      \
+    void* operator new[]( size_t size, int block_use,                       \
+                          char const* file_name, int line_number) noexcept {\
+        UNREFERENCED_PARAMETER(block_use);                                  \
+        UNREFERENCED_PARAMETER(file_name);                                  \
+        UNREFERENCED_PARAMETER(line_number);                                \
+        void * p = (void*)win32_malloc(size);                               \
+        if(!p) noperl_die("%s%s","Out of memory in perl:", "???");          \
+        return p; };                                                        \
+    void operator delete (void* p) noexcept { win32_free(p); return; };     \
     void operator delete[] (void* p) noexcept { win32_free(p);  return; }
 
 
