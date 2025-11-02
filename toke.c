@@ -12458,7 +12458,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     const char *lastub = NULL;		/* position of last underbar */
     static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
-    I32 shift; /* shift per digit for hex/oct/bin, hoisted here for fp */
+    I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
 #define WARN_ABOUT_UNDERSCORE() \
         do { \
             if (!warned_about_underscore) { \
