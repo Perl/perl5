@@ -53,6 +53,7 @@ $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_VMS      = $^O eq 'VMS';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
+$Is_ZOS      = $^O eq 'os390';
 
 $PERL =
    ($Is_VMS     ? $^X      :
@@ -827,8 +828,8 @@ SKIP: {
         if $Is_MSWin32 && is_miniperl;
 
  SKIP: {
-	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
-	    if $ENV{PERL_VALGRIND} || $Is_VMS;
+	skip("clearing \%ENV is not safe when running under valgrind or on VMS or on z/OS in ASCII mode")
+	    if $ENV{PERL_VALGRIND} || $Is_VMS || ($Is_ZOS && ord "A" == 65);
 
 	    $PATH = $ENV{PATH};
 	    $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
