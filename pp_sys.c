@@ -392,7 +392,7 @@ PP(pp_glob)
 
     /* unrolled
       tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL)); */
-    SV *tmpsv;
+    SV *tmpsv = NULL;
     U8 gimme = GIMME_V;
     if (UNLIKELY(SvAMAGIC(arg) &&
         (tmpsv = amagic_call(arg, &PL_sv_undef, iter_amg,
