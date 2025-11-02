@@ -4406,7 +4406,9 @@ S_init_ids(pTHX)
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
-#ifndef PERL_IMPLICIT_SYS
+#ifdef PERL_IMPLICIT_SYS
+    PERL_UNUSED_ARG(envp);
+#else
     /* If we have PERL_IMPLICIT_SYS we can't call getuid() et alia
      * before we have an interpreter-- and the whole point of this
      * function is to be called at such an early stage.  If you are on

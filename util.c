@@ -2940,6 +2940,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 static Signal_t
 sig_trap(int signo)
 {
+    PERL_UNUSED_ARG(signo);
     PL_sig_trapped++;
 }
 
