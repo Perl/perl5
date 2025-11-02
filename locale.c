@@ -1474,7 +1474,9 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
         }
     }
 
-    const char * msg;
+    /* Some compilers don't realize all paths initialize this */
+    const char * msg = NULL;
+
     const char * display_start = s;
     const char * display_end = e;
 
