@@ -376,23 +376,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                      )
 
 {
-    const char *s0 = start;
-    const char *s;
-    STRLEN len = *len_p;
-    STRLEN bytes_so_far;    /* How many real digits have been processed */
-    UV value = 0;
-    NV value_nv = 0;
-    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
-    const UV max_div= UV_MAX / base;    /* Value above which, the next digit
-                                           processed would overflow */
-    const I32 input_flags = *flags;
-    const bool allow_underscores =
-                                cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
-    bool overflowed = FALSE;
-
-    /* In overflows, this keeps track of how much to multiply the overflowed NV
-     * by as we continue to parse the remaining digits */
-    NV factor = 0;
+    PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
+    ASSUME(inRANGE(shift, 1, 4) && shift != 2);
 
     /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
      * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
@@ -410,12 +395,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
      *      ...
      */
 
-    PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
-
-    ASSUME(inRANGE(shift, 1, 4) && shift != 2);
-
+    const I32 input_flags = *flags;
     /* Clear output flags; unlikely to find a problem that sets them */
     *flags = 0;
+
+    const bool allow_underscores =
+             cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
+    const char * s = start;
+    const char * s0 = s; /* Where the significant digits start */
+    STRLEN len = *len_p;
 
     if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
 
@@ -435,6 +423,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     }
 
     s = s0; /* s0 potentially advanced from 'start' */
+    UV value = 0;
 
     /* Unroll the loop so that the first 8 digits are branchless except for the
      * switch.  A ninth hex one overflows a 32 bit word. */
@@ -488,9 +477,19 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
           break;
     }
 
-    bytes_so_far = s - s0;
-    factor = shift << bytes_so_far;
+    /* How many real digits have been processed */
+    STRLEN bytes_so_far = s - s0;
+
+    /* In overflows, this keeps track of how much to multiply the overflowed NV
+     * by as we continue to parse the remaining digits */
+    NV factor = shift << bytes_so_far;
     len -= bytes_so_far;
+
+    bool overflowed = FALSE;
+    NV value_nv = 0;
+    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    const UV max_div= UV_MAX / base;    /* Value above which, the next digit
+                                           processed would overflow */
 
     for (; len--; s++) {
         if (generic_isCC_(*s, class_bit)) {
