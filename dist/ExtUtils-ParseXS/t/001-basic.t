@@ -466,7 +466,7 @@ EOF_CONTENT
         or die "Failed to open '$file' for read:$!";
     my $pod_version = "";
     while (defined(my $line= readline($fh))) {
-        if ($line=~/\(also known as C<xsubpp>\)\s+(\d+\.\d+)/) {
+        if ($line=~/\QThis document covers features supported by F<xsubpp> \E(\d+\.\d+)/) {
             $pod_version = $1;
             last;
         }

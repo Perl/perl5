@@ -78,8 +78,32 @@ Various old practices, such as "K&R" XSUB function signature declarations,
 are no longer encouraged; but much old code will still be using them, so
 be cautious when using old code as examples for writing new code.
 
-The syntax described in this document is valid for Perl installations back
-to 5.8.0 unless otherwise specified.
+=head2 Version numbers
+
+Unless otherwise specified, the syntax described in this document is valid
+at least as far back as the 1.9508 version of the XS parser utility
+F<xsubpp>, which was bundled with Perl release 5.8.0.
+
+In F<xsubpp> version 2.09_01, the bulk of the code for this utility was
+split out into a separate module, L<ExtUtils::ParseXS>. This module
+inherited the version numbering scheme of F<xsubpp>, and since then, the
+latter just uses the version number of the F<ParseXS.pm> which gets
+loaded. This splitting out means that a newer version of
+F<ExtUtils::ParseXS> can be installed via CPAN into an older Perl
+installation, allowing newer XS syntax to be used with older Perls.
+
+(Between 1.98_01 and 2.09_01, F<ExtUtils::ParseXS> existed as a separate
+fork of F<xsubpp>, with some changes ported back and forwards with the
+perl distribution's F<xsubpp>, in a confusing manner.)
+
+This document refers to changes in XS syntax by reference to F<xsubpp>
+version numbers. This should be understood as usually mapping directly to
+the same version number of F<ExtUtils::ParseXS>. To determine which
+version of this module was bundled with which release of Perl, you can use
+the F<corelist> utility which is usually a part of the Perl installation,
+e.g.
+
+    corelist -a ExtUtils::ParseXS
 
 =head1 THE FORMAL SYNTAX OF AN XS FILE
 
@@ -197,7 +221,7 @@ accurately specify where line breaks can occur.
                      | xbody_generic_key
                      | c_args
                      | interface_macro
-                     | "SCOPE:" enable  // Only in perl 5.44.0 onwards.
+                     | "SCOPE:" enable  // Only in xsubpp 3.58 onwards.
 
  input_line        = C_type
                      "&" ?
@@ -422,7 +446,7 @@ forth between Perl arguments and C auto variables.
 
 There is a standard system typemap file which contains rules for common C
 and Perl types, but you can add your own typemap file in addition, and
-from perl 5.16.0 onwards you can also add typemap declarations inline
+from F<xsubpp> 3.01 onwards you can also add typemap declarations inline
 within the XS file. You can either just add mappings from new C types to
 existing XS types to make use of existing templates, or you can add new
 templates too. As an example of the former, if you're using a C header
@@ -583,9 +607,9 @@ appears to be a parameter name, and assumes that it must be the type. That
 will only then raise an error.
 
 In addition, the XS parser has historically been very permissive, even to
-the point of accepting nonsense as input. Since Perl 5.44, more things are
-likely to warn or raise errors during XS parsing, rather than silently
-generating a non-compilable C code file.
+the point of accepting nonsense as input. Since around F<xsubpp> releases
+3.54-3.61, more things are likely to warn or raise errors during XS
+parsing, rather than silently generating a non-compilable C code file.
 
 As mentioned earlier, an XSUB definition typically starts with C</\n\n\S/>
 and continues until the next C</\n\n\S/>. The XSUB definition consists of
@@ -1373,9 +1397,9 @@ count one too high, it will leak. This why the C<sv_2mortal()> is
 required.  Conversely for a pre-existing AV, the mortalisation isn't
 required.
 
-Since perl 5.16, there are a set of alternative XS types which can be used
-for AVs etc which I<don't> increment the reference count of the AV when
-being pointed to from the new RV. These can be enabled by mapping the
+Since F<xsubpp> 3.06, there are a set of alternative XS types which can be
+used for AVs etc which I<don't> increment the reference count of the AV
+when being pointed to from the new RV. These can be enabled by mapping the
 C<AV*> etc C types to these new XS types:
 
     TYPEMAP: <<EOF
@@ -1779,12 +1803,13 @@ See L<perlsub/Prototypes> for more information about Perl prototypes.
 
     EXPORT_XSUB_SYMBOLS: ENABLE | DISABLE
 
-This keyword is present since 5.16.0, and its value is disabled by
+This keyword is present since F<xsubpp> 3.04, and its value is disabled by
 default.
 
-Before 5.16.0, the C function which implemented an XSUB was exported.
-Since 5.16.0, it is declared C<static>. The old behaviour can be restored
-by enabling it. You are very unlikely to have a need for this keyword.
+Before 3.04, the C function which implemented an XSUB was exported. Since
+3.04, it is declared C<static> by default. The old behaviour can be
+restored by enabling it. You are very unlikely to have a need for this
+keyword.
 
 =head3 The INCLUDE: Keyword
 
@@ -1810,7 +1835,7 @@ parser.
 
     INCLUDE_COMMAND: $^X -e '...'
 
-Since 5.14.0.
+Since F<xsubpp> 2.2205.
 
 Similar to C<INCLUDE: some_command|> except that the C<|> is implicit, and
 it converts the special token C<$^X>, if present, to the path of the perl
@@ -1828,7 +1853,7 @@ interpreter which is running the XS parser.
             my_sv_setiv($arg, (IV)$var);
     EOF
 
-Since 5.16.0.
+Since F<xsubpp> 3.01.
 
 Typemaps are mappings and code templates which allow the XS parser to
 automatically generate code snippets which convert between Perl and C
@@ -1896,7 +1921,7 @@ next keyword or possible start of a new XSUB (C</\n\n\S/>).
 
     FALLBACK: TRUE | FALSE | UNDEF
 
-Since 5.8.1.
+Since F<xsubpp> 2.09_01.
 
 It defaults to C<UNDEF> for each package. It sets the default fallback
 handling behaviour for overloaded methods in the current package (i.e.
@@ -2194,9 +2219,9 @@ treated specially. A bug in the XS parser meant that it used to skip any
 parameter declaration which wasn't parsable. This inadvertently made many
 things de facto placeholder declarations. A common usage was C<SV*>, which
 is now officially treated as a placeholder for backwards compatibility.
-Any other bare types without a parameter name are errors since
-C<ExtUtils::ParseXS> 3.57. Note that the C<SV*> text will appear in any
-C<usage()> error message. For example,
+Any other bare types without a parameter name are errors since F<xsubpp>
+3.57. Note that the C<SV*> text will appear in any C<usage()> error
+message. For example,
 
     void
     foo(int a, SV*, char *c)
@@ -2581,9 +2606,10 @@ allowed.
 
 It is sometimes needed because in traditional C, all variable
 declarations must come before any statements. While this is no longer a
-restriction in the perl interpreter source since 5.36.0, the C compiler
-flags used when compiling XS code may be different and so, depending on
-the compiler, it may still be necessary to preserve the correct ordering.
+restriction in the perl interpreter source since Perl 5.36.0, the C
+compiler flags used when compiling XS code may be different and so,
+depending on the compiler, it may still be necessary to preserve the
+correct ordering.
 
 Any variable declarations generated by C<INPUT> and lines from C<PREINIT>
 are output in the same order they appear in the XS source, followed by any
@@ -2807,9 +2833,9 @@ declaration and as part of the same paragraph (i.e. with no intervening
 blank lines), such as in the example above. It will only affect the single
 following XSUB.
 
-The XSUB-scoped form has been available since perl-5.004, but was broken
-by perl-5.12.0 (F<xsubpp> v2.21) and fixed in perl-5.44.0 (F<xsubpp>
-v3.58). The file-scoped form has been available since perl-5.12.0 .
+The XSUB-scoped form has been available since F<xsubpp> 1.9506, but was
+broken in release 2.21 and fixed in 3.58. The file-scoped form has been
+available since 2.21.
 
 To support potentially complex type mappings, if an C<INPUT> typemap entry
 contains a code comment like C</* SCOPE */>, then scoping will be
@@ -3323,8 +3349,8 @@ and C<arg2> will have set magic, while C<arg1> won't. The C<SETMAGIC>
 setting remains in force until another C<SETMAGIC>, or notionally until
 the end of the current C<OUTPUT> block. In fact the current setting will
 carry over into any further C<OUTPUT> declarations within in the same
-XSUB, or since Perl 5.40.0, only into any declarations within the same
-case C<CASE> branch.
+XSUB, or since F<xsubpp> 3.58, only into any declarations within the same
+C<CASE> branch.
 
 The current setting of C<SETMAGIC> is ignored for C<RETVAL>, which is
 usually setting the value of a fresh temporary SV which won't have any
@@ -3359,7 +3385,7 @@ or similar. This can be overridden; for example
 But importantly, unlike the similar syntax in C<INPUT> lines, the override
 text is I<not> variable expanded. It is thus tricky to ensure that the
 right arguments are used (such as C<ST(0)>). Basically this feature has a
-design flaw and should probably be avoided. Since 5.16.0 it's been
+design flaw and should probably be avoided. Since F<xsubpp> 3.01 it's been
 possible to have locally defined typemaps using the L<TYPEMAP|/The
 TYPEMAP: Keyword> keyword which is probably a better way to modify how
 values are returned.
@@ -3723,9 +3749,8 @@ the same value, e.g.
       divide   = DIVIDE
       division = DIVISION
 
-Since Perl 5.38.0 or C<ExtUtils::ParseXS> 3.51, alias values may refer to
-other alias names (or to the main function name) by using C<< => >> rather
-than the C<=> symbol:
+Since F<xsubpp> 3.51, alias values may refer to other alias names (or to
+the main function name) by using C<< => >> rather than the C<=> symbol:
 
     ALIAS:
       divide   =  3
@@ -3804,15 +3829,15 @@ function; in the example above, it doesn't cause a Perl function called
 C<arith()> to be created.
 
 See L</T_PTROBJ and opaque handles> for a complete example using
-C<INTERFACE> with the C<T_PTROBJ> typemap. But note that before Perl
-5.44.0 (F<ExtUtils::ParseXS> 3.60), C<INTERFACE> would not work properly
-on XSUBs used with Perlish return types (as used by C<T_PTROBJ>), such as
+C<INTERFACE> with the C<T_PTROBJ> typemap. But note that before F<xsubpp>
+3.60, C<INTERFACE> would not work properly on XSUBs used with Perlish
+return types (as used by C<T_PTROBJ>), such as
 
     Foo::Bar
     foo(...)
         ....
 
-This has mostly been fixed in 5.44.0 onwards, but may generate invalid C
+This has mostly been fixed in 3.60 onwards, but may generate invalid C
 code (in particular, invalid function pointer casts) for XSUBs having a
 C<C_ARGS> keyword, unless the value of C<C_ARGS> is a simple list of
 parameter names.
@@ -3970,9 +3995,9 @@ after variable expansion, generate C code to convert back and forth
 between Perl arguments and C auto variables.
 
 There is a standard system typemap file bundled with Perl for common C and
-Perl types, but in addition, you can add your own typemap file. From Perl
-5.16.0 onwards you can also include extra typemap declarations in-line
-within the XS file.
+Perl types, but in addition, you can add your own typemap file. From
+F<xsubpp> 3.01 onwards you can also include extra typemap declarations
+in-line within the XS file.
 
 =head3 Locations and ordering of typemap processing
 
@@ -4015,13 +4040,12 @@ command line switches, or programmatically by an array passed as:
 These files are read in order, and the parser dies if any explicitly
 listed file is not found.
 
-Prior to Perl 5.10.0 and Perl 5.8.9, C<@INC> wasn't searched, and standard
-files were searched for and processed I<before> any explicit ones. From
-Perl 5.10.0 onwards, standard files were processed I<after> any explicit
-ones. From Perl 5.44.0 (F<ExtUtils::ParseXS> 3.60) onwards, explicit files
-are again processed last, and thus take priority over standard files.
-In Perl 5.16.0 onwards, C<TYPEMAP> sections are then processed in order
-after all files have been processed.
+Prior to F<xsubpp> 2.09_01, C<@INC> wasn't searched, and standard files
+were searched for and processed I<before> any explicit ones. From 2.09_01
+onwards, standard files were processed I<after> any explicit ones. From
+3.60 onwards, explicit files are again processed last, and thus take
+priority over standard files. Separately, in 3.01 onwards, C<TYPEMAP>
+sections are then processed in order after all files have been processed.
 
 Note also that F<ExtUtils::MakeMaker> usually invokes F<xsubpp> with two
 C<-typemap> arguments: the first being the system typemap and the second
@@ -4264,8 +4288,8 @@ using aliasing:
             mynum_multiply
             mynum_divide
 
-but note that C<INTERFACE> only supports Perlish return types such
-as C<My::Num> from Perl 5.44.0 (F<ExtUtils::ParseXS> 3.60) onwards.
+but note that C<INTERFACE> only supports Perlish return types such as
+C<My::Num> from F<xsubpp> 3.60 onwards.
 
 This XS module might be accessed from Perl using code like this:
 
@@ -4356,7 +4380,7 @@ could be written longhand as:
         OUTPUT:
             RETVAL
 
-Note that the type of C<THIS> (and, since Perl 5.42, C<CLASS>) can be
+Note that the type of C<THIS> (and, since F<xsubpp> 3.55, C<CLASS>) can be
 overridden with a line in an C<INPUT> section:
 
     int
@@ -4849,12 +4873,11 @@ this model, the less likely conflicts will occur.
 
 =head1 XS VERSION
 
-This document covers features supported by C<ExtUtils::ParseXS>
-(also known as C<xsubpp>) 3.60.
+This document covers features supported by F<xsubpp> 3.60.
 
 =head1 AUTHOR DIAGNOSTICS
 
-As of version 3.49 a few parser warnings are disabled by default. While
+As of F<xsubpp> 3.49, a few parser warnings are disabled by default. While
 developing you can set C<$ENV{AUTHOR_WARNINGS}> to true in your
 environment or in your Makefile.PL, or set
 C<$ExtUtils::ParseXS::AUTHOR_WARNINGS> to true via code, or pass C<<
