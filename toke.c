@@ -12499,9 +12499,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     /* We use the first character to decide what type of number this is */
 
-    switch (*s) {
-    /* if it starts with a v, it could be a v-string */
-    case 'v':
+    if (*s == 'v') {
     vstring:
         sv = newSV(5); /* preallocate storage space */
         ENTER_with_name("scan_vstring");
@@ -12509,12 +12507,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         s = scan_vstring(s, PL_bufend, sv);
         SvREFCNT_inc_simple_void_NN(sv);
         LEAVE_with_name("scan_vstring");
-        break;
 
     /* if it starts with a 0, it could be an octal number, a decimal in
        0.13 disguise, or a hexadecimal number, or a binary number. */
-    case '0':
-        {
+    }
+    else if (*s == '0') {
           /* variables:
              u		holds the "number so far"
              overflowed	was the number more than we can hold?
@@ -12856,16 +12853,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             else if (PL_hints & HINT_NEW_BINARY)
                 sv = new_constant(start, s - start, "binary",
                                   sv, NULL, NULL, 0, NULL);
-        }
-        break;
+    }
+    else if (isDIGIT_A(*s) || *s == '.') {
+      decimal:
 
     /*
       handle decimal numbers.
       we're also sent here when we read a 0 as the first digit
     */
-    case '1': case '2': case '3': case '4': case '5':
-    case '6': case '7': case '8': case '9': case '.':
-      decimal:
         d = PL_tokenbuf;
         e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punctuation */
         floatit = FALSE;
@@ -13080,9 +13075,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
                                 key, keylen, sv, NULL, NULL, 0, NULL);
         }
-        break;
-
-    default:
+    }
+    else {
         croak("panic: scan_num, *s=%c", *s);
     }
 
