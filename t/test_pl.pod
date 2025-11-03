@@ -208,6 +208,55 @@ tests are produced:
 
 =over
 
+=item assume $message, %arguments
+
+    assume q (the answer to life, the universe, and everything)
+        => expect => q (42)
+        => eval   => eval_code q {
+            42
+        };
+
+    assume q (it fails to calculate the ultimate question)
+        => throws => qr (^ 42 \b)x
+        => eval   => eval_code q {
+            die 42
+        };
+
+A smart assertion that combines code evaluation with value comparison.
+
+The assertion evaluates code, verifies the evaluation status, and checks
+the expected value in a single call.
+
+The expected evaluation status is determined by the presence of the
+named argument C<throws>.
+
+When the expected value is a scalar, the assertion acts like C<it>;
+otherwise, it behaves like C<like>.
+
+Named arguments:
+
+=over
+
+=item diag
+
+When specified, the assertion uses this value as an additional diagnostic message.
+
+=item eval
+
+The string to be evaluated. Within this string, the variable C<$result> is available
+and is initialised to an empty string.
+
+=item expect
+
+When provided, this value is used for comparison if the code evaluates without error.
+
+=item throws
+
+When provided, the evaluation is expected to fail, and C<$@> is used for the
+value comparison.
+
+=back
+
 =item within($got, $expected, $range, $name)
 
 Check C<$got> is within a numeric range.
@@ -378,6 +427,26 @@ Return or set the current test number.
 This can be used when dealing with forked processes to ensure child
 and parent test numbers are sequential.  See F<t/io/socket.t> for an
 example.
+
+=item eval_this_code
+
+Takes the first argument as a string to be evaluated and prepends it with the
+C<#line> pragma. This ensures that reports contain the file and line number
+relative to the test file itself.
+
+Returns the modified string and the remainder of its arguments.
+
+The reported location will be relative to where C<eval_this_code> is called.
+While this may differ slightly from the exact line, it provides a better
+approximation than a standard C<eval>.
+
+Instead of:
+
+    foo at (eval 10) line 11.
+
+The output will be:
+
+    foo at t/some-file.t line 17.
 
 =item todo_skip($reason, $count);
 

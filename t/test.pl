@@ -41,6 +41,11 @@ our $TODO = 0;
 our $NO_ENDING = 0;
 our $Tests_Are_Passing = 1;
 
+sub diag;
+sub fail;
+sub is;
+sub like;
+
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
     local($\, $", $,) = (undef, ' ', '');
@@ -50,6 +55,88 @@ sub _print {
 sub _print_stderr {
     local($\, $", $,) = (undef, ' ', '');
     print STDERR @_;
+}
+
+sub assume {
+	my ($message, %args) = @_;
+
+    local $Level = $Level + 1;
+
+	# Single assert function which:
+	# - detects whether code should successed or faile
+	# - detect comparison method: `is` / `like`
+
+	# Accept named arguments:
+	#
+	# diag => scalar
+	# - additional diagnostic message
+	#
+	# eval => code
+	# - code to evaluate
+	# - code is evaluated with known and initialized variable: `my $result = q ()`
+	#
+	# expect => string / regex
+	# - when specified it expects evaluated code to not fail and validates result
+	# - when not specified it just expect evaluated to not fail
+	# - accepts string (acting as `is`) or regex (acting as `like`)
+	#
+	# throws => string / regex
+	# - when specified it expects evaluated code to fail and validates failure ($@)
+	# - accepts string (acting as `is`) or regex (acting as `like`)
+
+	my $got;
+	my $lives = eval qq {
+		do {
+			use strict;
+			use warnings;
+			my \$result = q ();
+			\$got = do {\n$args{eval}; };
+		};
+		1;
+	};
+	my $error = $@;
+
+	if (exists $args{throws}) {
+		if ($lives) {
+			fail $message;
+			diag q (Expected to fail but it lives);
+			diag $args{diag}
+				if exists $args{diag}
+				;
+			return 0;
+		}
+
+		return ref $args{throws}
+			? like $@, $args{throws}, $message
+			: is   $@, $args{throws}, $message
+			;
+	}
+
+	unless ($lives) {
+		fail $message;
+
+		diag q (Expected to live but it died:);
+		diag $args{diag}
+			if exists $args{diag}
+			;
+		diag $error =~ s (^) (  )rmg;
+
+		return 0;
+	}
+
+	return ref $args{expect}
+		? like $got, $args{expect}, $message
+		: is   $got, $args{expect}, $message
+		;
+}
+
+sub eval_this_code {
+    my (undef, $filename, $lineno) = caller;
+
+    return (
+		qq (\n#line $lineno "$filename"\n) . shift,
+		@_,
+	);
 }
 
 sub plan {
