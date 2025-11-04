@@ -2063,10 +2063,8 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
 }
 
 /* gv_magicalize only turns on the SVf_READONLY flag, not SVf_PROTECT.  So
-   redefine SvREADONLY_on for that purpose.  We don’t use it later on in
-   this file.  */
-#undef SvREADONLY_on
-#define SvREADONLY_on(sv) (SvFLAGS(sv) |= SVf_READONLY)
+   make a special-purpose macro just for that. */
+#define SvREADONLY_NOPROTECT_on(sv) (SvFLAGS(sv) |= SVf_READONLY)
 
 /* gv_magicalize() is called by gv_fetchpvn_flags when creating
  * a new GV.
@@ -2187,7 +2185,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     const Size_t n = *name;
 
                     sv_magic(MUTABLE_SV(av), (SV*)n, PERL_MAGIC_regdata, NULL, 0);
-                    SvREADONLY_on(av);
+                    SvREADONLY_NOPROTECT_on(av);
 
                     require_tie_mod_s(gv, '+', "Tie::Hash::NamedCapture",0);
 
@@ -2359,7 +2357,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             {   /* $- $+ */
                 sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
                 if (*name == '+')
-                    SvREADONLY_on(GvSVn(gv));
+                    SvREADONLY_NOPROTECT_on(GvSVn(gv));
             }
             {   /* %- %+ */
                 if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
@@ -2370,7 +2368,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 const Size_t n = *name;
 
                 sv_magic(MUTABLE_SV(av), (SV*)n, PERL_MAGIC_regdata, NULL, 0);
-                SvREADONLY_on(av);
+                SvREADONLY_NOPROTECT_on(av);
             }
             break;
           case '*':		/* $* */
@@ -2387,7 +2385,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             goto magicalize;
           case '\023':	/* $^S */
           ro_magicalize:
-            SvREADONLY_on(GvSVn(gv));
+            SvREADONLY_NOPROTECT_on(GvSVn(gv));
             /* FALLTHROUGH */
           case '0':		/* $0 */
           case '^':		/* $^ */
@@ -2431,7 +2429,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             if (!sv_derived_from(PL_patchlevel, "version"))
                 upg_version(PL_patchlevel, TRUE);
             GvSV(gv) = vnumify(PL_patchlevel);
-            SvREADONLY_on(GvSV(gv));
+            SvREADONLY_NOPROTECT_on(GvSV(gv));
             SvREFCNT_dec(sv);
             break;
            }
@@ -2440,7 +2438,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
            {
             SV * const sv = GvSV(gv);
             GvSV(gv) = new_version(PL_patchlevel);
-            SvREADONLY_on(GvSV(gv));
+            SvREADONLY_NOPROTECT_on(GvSV(gv));
             SvREFCNT_dec(sv);
             break;
            }
@@ -2457,10 +2455,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
     return GvAV(gv) || GvHV(gv) || GvIO(gv) || GvCV(gv)
        || (GvSV(gv) && (SvOK(GvSV(gv)) || SvMAGICAL(GvSV(gv))));
 }
-
-/* If we do ever start using this later on in the file, we need to make
-   sure we don’t accidentally use the wrong definition.  */
-#undef SvREADONLY_on
 
 /* This function is called when the stash already holds the GV of the magic
  * variable we're looking for, but we need to check that it has the correct
