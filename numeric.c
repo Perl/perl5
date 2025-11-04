@@ -429,8 +429,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     /* Unroll the loop so that the first 8 digits are branchless except for the
      * switch.  A ninth hex one overflows a 32 bit word. */
     switch (e - s) {
-      case 0:
-          return 0;
       default:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
@@ -470,7 +468,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
-
+          /* FALLTHROUGH */
+      case 0:
           if (LIKELY(s >= e)) {
               return value;
           }
