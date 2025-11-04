@@ -12477,7 +12477,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
      * which will probably mean horrible loss of precision due to
      * multiple fp operations. */
     bool hexfp = FALSE;
-    int total_bits = 0;
     int significant_bits = 0;
 #if NVSIZE == 8 && defined(HAS_QUAD) && defined(Uquad_t)
 #  define HEXFP_UQUAD
@@ -12616,8 +12615,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         assert(shift >= 0);
                         x = u << shift;	/* make room for the digit */
 
-                        total_bits += shift;
-
                         if ((x >> shift) != u
                             && !(PL_hints & HINT_NEW_BINARY)) {
                             overflowed = TRUE;
@@ -12755,8 +12752,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     }
                 }
 
-                if ((total_bits > 0 || significant_bits > 0) &&
-                    isALPHA_FOLD_EQ(*h, 'p')) {
+                if (   (has_digs || significant_bits > 0)
+                    && isALPHA_FOLD_EQ(*h, 'p'))
+                {
                     bool negexp = FALSE;
                     h++;
                     if (*h == '+')
