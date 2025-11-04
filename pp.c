@@ -8021,12 +8021,12 @@ PP(pp_multiparam)
                 SV **padentry = &PAD_SVl(padix);
                 save_clearsv(padentry);
 
+                if(!val)
+                    val = &PL_sv_undef;
+
                 assert(TAINTING_get || !TAINT_get);
                 if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
                     TAINT_NOT;
-
-                if(!val)
-                    val = &PL_sv_undef;
 
                 SvPADSTALE_off(*padentry);
                 SvSetMagicSV(*padentry, val);

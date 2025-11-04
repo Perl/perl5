@@ -1589,6 +1589,25 @@ EOPERL
         'thread cloning during signature parse does not crash');
 }
 
+SKIP:
+{
+    skip "No taint support", 1
+      if exists $Config{taint_support} && !$Config{taint_support};
+    # https://github.com/Perl/perl5/pull/23871#discussion_r2488103875
+    $ENV{BAD} = "x";
+    fresh_perl_is(<<'CODE', "ok\n",
+no warnings "experimental::signature_named_parameters";
+use feature "signatures";
+sub foo (:$x, @y) {
+    print "ok\n";
+}
+foo("$ENV{BAD}");
+CODE
+                  {
+                   switches => [ "-t" ],
+                  }, "crash in named parameter handling");
+}
+
 done_testing;
 
 1;
