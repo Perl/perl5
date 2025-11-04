@@ -355,21 +355,35 @@ TODO: {
 TODO: {
     local $::TODO = 'GH 18669';
 
-    my $results = fresh_perl(<<~'EOF', {});
-        my $x = { arr => undef };
+    my $x = { arr => undef };
+    eval {
         push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ new } }, "mana");
-        print $x->{ new }[0];
-        EOF
-    is($?, 0, "No assertion failure; GH 18669");
-    is($results, 'mana', 'push on non-existent hash entry from ternary autovivifies array ref; GH 18669');
+    };
+    unlike(
+        $@,
+        qr/Not an ARRAY reference/,
+        "push on non-existent hash entry does not throw 'Not an ARRAY reference' error; GH 18669"
+    );
+    is(
+        eval { $x->{ new }[0] },
+        'mana',
+        'push on non-existent hash entry from ternary autovivifies array ref; GH 18669'
+    );
 
-    $results = fresh_perl(<<~'EOF', {});
-        my $x = { arr => undef };
+    my $x = { arr => undef };
+    eval {
         push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ arr } }, "mana");
-        print $x->{ arr }[0];
-        EOF
-    is($?, 0, "No assertion failure; GH 18669");
-    is($results, 'mana', 'push on undef hash entry from ternary autovivifies array ref; GH 18669');
+    };
+    unlike(
+        $@,
+        qr/Not an ARRAY reference/,
+        "push on undef hash entry does not throw 'Not an ARRAY reference' error; GH 18669"
+    );
+    is(
+        eval { $x->{ arr }[0] },
+        'mana',
+        'push on undef hash entry from ternary autovivifies array ref; GH 18669'
+    );
 
 }
 
