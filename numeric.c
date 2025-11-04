@@ -402,7 +402,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     const bool allow_underscores =
              cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
     const char * s = start;
-    const char * s0 = s; /* Where the significant digits start */
     const char * e = start + *len_p;
 
     if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
@@ -411,19 +410,19 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
            for compatibility silently suffer "b" and "0b" as valid binary; "x"
            and "0x" as valid hex numbers. */
         if (e - s > 1) {
-            if (isALPHA_FOLD_EQ(s0[0], prefix)) {
-                s0++;
+            if (isALPHA_FOLD_EQ(s[0], prefix)) {
+                s++;
             }
             else if (   e - s > 2
-                     && s0[0] == '0'
-                     && (isALPHA_FOLD_EQ(s0[1], prefix)))
+                     && s[0] == '0'
+                     && (isALPHA_FOLD_EQ(s[1], prefix)))
             {
-                s0+=2;
+                s += 2;
             }
         }
     }
 
-    s = s0; /* s0 potentially advanced from 'start' */
+    const char * const s0 = s; /* Where the significant digits start */
     UV value = 0;
 
     /* Unroll the loop so that the first 8 digits are branchless except for the
