@@ -403,21 +403,22 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
              cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
     const char * s = start;
     const char * s0 = s; /* Where the significant digits start */
-    STRLEN len = *len_p;
+    const char * e = start + *len_p;
 
     if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
 
         /* strip off leading b or 0b; x or 0x.
            for compatibility silently suffer "b" and "0b" as valid binary; "x"
            and "0x" as valid hex numbers. */
-        if (len >= 1) {
+        if (e - s > 1) {
             if (isALPHA_FOLD_EQ(s0[0], prefix)) {
                 s0++;
-                len--;
             }
-            else if (len >= 2 && s0[0] == '0' && (isALPHA_FOLD_EQ(s0[1], prefix))) {
+            else if (   e - s > 2
+                     && s0[0] == '0'
+                     && (isALPHA_FOLD_EQ(s0[1], prefix)))
+            {
                 s0+=2;
-                len-=2;
             }
         }
     }
@@ -427,7 +428,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     /* Unroll the loop so that the first 8 digits are branchless except for the
      * switch.  A ninth hex one overflows a 32 bit word. */
-    switch (len) {
+    switch (e - s) {
       case 0:
           return 0;
       default:
@@ -468,12 +469,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
       case 1:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
+          s++;
 
-          if (LIKELY(len <= 8)) {
+          if (LIKELY(s >= e)) {
               return value;
           }
 
-          s++;
           break;
     }
 
@@ -483,7 +484,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
     NV factor = shift << bytes_so_far;
-    len -= bytes_so_far;
 
     bool overflowed = FALSE;
     NV value_nv = 0;
@@ -491,7 +491,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     const UV max_div= UV_MAX / base;    /* Value above which, the next digit
                                            processed would overflow */
 
-    for (; len--; s++) {
+    for (; s < e; s++) {
         if (generic_isCC_(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
@@ -540,7 +540,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
         }
 
         if (   *s == '_'
-            && len
+            && s < e - 1
             && allow_underscores
             && generic_isCC_(s[1], class_bit)
 
@@ -550,7 +550,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                 || UNLIKELY((input_flags & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)
                                         != PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)))
         {
-            --len;
             ++s;
             goto redo;
         }
