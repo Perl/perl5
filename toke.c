@@ -12488,8 +12488,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV hexfp_nv = 0.0;
 #endif
     int hexfp_exp = 0;
-    UV high_non_zero = 0; /* highest digit */
-    int non_zero_integer_digits = 0;
     bool new_octal = FALSE;     /* octal with "0o" prefix */
 
     PERL_ARGS_ASSERT_SCAN_NUM;
@@ -12643,12 +12641,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         n += (NV) b;
                     }
 
-                    if (high_non_zero == 0 && b > 0)
-                        high_non_zero = b;
-
-                    if (high_non_zero)
-                        non_zero_integer_digits++;
-
                     /* this could be hexfp, but peek ahead
                      * to avoid matching ".." */
                     if (UNLIKELY(HEXFP_PEEK(s))) {
@@ -12674,23 +12666,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                  * detection will shortly be more thorough with the
                  * underbar checks. */
                 const char* h = s;
-                significant_bits = non_zero_integer_digits * shift;
+                significant_bits = (u == 0) ? 0 : msbit_pos(u) + 1;
 #ifdef HEXFP_UQUAD
                 hexfp_uquad = u;
 #else /* HEXFP_NV */
                 hexfp_nv = u;
 #endif
-                /* Ignore the leading zero bits of
-                 * the high (first) non-zero digit. */
-                if (high_non_zero) {
-                    if (high_non_zero < 0x8)
-                        significant_bits--;
-                    if (high_non_zero < 0x4)
-                        significant_bits--;
-                    if (high_non_zero < 0x2)
-                        significant_bits--;
-                }
-
                 if (*h == '.') {
 #ifdef HEXFP_NV
                     NV nv_mult = 1.0;
