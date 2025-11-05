@@ -8313,7 +8313,11 @@ EXTERN_C int flock(int fd, int op);
 
 /* Number scan flags.  All are used for input, the ones used for output are so
  * marked */
-#define PERL_SCAN_ALLOW_UNDERSCORES   0x01 /* grok_??? accept _ in numbers */
+
+/* grok_??? accept a stand-alone underscore initially or between digits in
+ * numbers */
+#define PERL_SCAN_ALLOW_UNDERSCORES   0x01
+
 #define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
 
 /* grok_??? input: ignored; output: found overflow */
@@ -8324,21 +8328,21 @@ EXTERN_C int flock(int fd, int op);
  * PERL_SCAN_NOTIFY_ILLDIGIT. */
 #define PERL_SCAN_SILENT_ILLDIGIT     0x08
 
-#define PERL_SCAN_TRAILING            0x10 /* grok_number_flags() allow trailing
-                                              and set IS_NUMBER_TRAILING */
+/* grok_number_flags() allow trailing and set IS_NUMBER_TRAILING */
+#define PERL_SCAN_TRAILING            0x10
 
 /* These are considered experimental, so not exposed publicly */
 #if defined(PERL_CORE) || defined(PERL_EXT)
 /* grok_??? don't warn about very large numbers which are <= UV_MAX;
  * output: found such a number */
-#  define PERL_SCAN_SILENT_NON_PORTABLE 0x20
+#  define PERL_SCAN_SILENT_NON_PORTABLE             0x20
 
 /* If this is set on input, and no illegal digit is found, it will be cleared
  * on output; otherwise unchanged */
-#  define PERL_SCAN_NOTIFY_ILLDIGIT 0x40
+#  define PERL_SCAN_NOTIFY_ILLDIGIT                 0x40
 
 /* Don't warn on overflow; output flag still set */
-#  define PERL_SCAN_SILENT_OVERFLOW 0x80
+#  define PERL_SCAN_SILENT_OVERFLOW                 0x80
 
 /* Forbid a leading underscore, which the other one doesn't */
 #  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES (0x100|PERL_SCAN_ALLOW_UNDERSCORES)
