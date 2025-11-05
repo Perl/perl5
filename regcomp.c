@@ -5352,7 +5352,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             I32 flags = PERL_SCAN_SILENT_OVERFLOW
                       | PERL_SCAN_SILENT_ILLDIGIT
                       | PERL_SCAN_NOTIFY_ILLDIGIT
-                      | PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES
+                      | PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY
                       | PERL_SCAN_DISALLOW_PREFIX;
             STRLEN len = e - RExC_parse;
             NV overflow_value;

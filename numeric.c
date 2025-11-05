@@ -401,7 +401,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     const bool allow_underscores =
              cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
-                                  |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES));
+                                  |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
     const char * s = start;
     const char * e = start + *len_p;
 
@@ -557,7 +557,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                  * set */
             && (   LIKELY(s > s0)
                 || UNLIKELY(! (  input_flags
-                               & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES))))
+                               & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY))))
         {
             ++s;
 
