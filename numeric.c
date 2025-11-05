@@ -400,7 +400,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     *flags = 0;
 
     const bool allow_underscores =
-             cBOOL(input_flags & PERL_SCAN_ALLOW_UNDERSCORES);
+             cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
+                                  |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES));
     const char * s = start;
     const char * e = start + *len_p;
 
@@ -555,8 +556,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                 /* Don't allow a leading underscore if the only-medial bit is
                  * set */
             && (   LIKELY(s > s0)
-                || UNLIKELY((input_flags & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)
-                                        != PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)))
+                || UNLIKELY(! (  input_flags
+                               & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES))))
         {
             ++s;
 
