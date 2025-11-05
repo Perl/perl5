@@ -427,6 +427,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     /* Unroll the loop so that the first 8 digits are branchless except for the
      * switch.  A ninth hex one overflows a 32 bit word. */
+  redo_switch:
     switch (e - s) {
       default:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
@@ -471,6 +472,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
       case 0:
           if (LIKELY(s >= e)) {
               return value;
+          }
+
+          /* If we get here, and the accumulated value is still 0, it is
+           * because there are more leading zeros than the cases of this
+           * switch(),  These are common enough with these kinds of
+           * binary-style numbers that it is worth this extra conditional to
+           * continue absorbing them via the switch. */
+          if (value == 0) {
+              goto redo_switch;
           }
 
           break;
@@ -549,7 +559,16 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                                         != PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES)))
         {
             ++s;
-            goto redo;
+
+            /* To get here with the value so-far being 0 means we've only had
+             * leading zeros, then an underscore.  We can continue with the
+             * branchless switch() instead of this loop */
+            if (value == 0) {
+                goto redo_switch;
+            }
+            else {
+                goto redo;
+            }
         }
 
         if (*s) {
