@@ -8344,8 +8344,8 @@ EXTERN_C int flock(int fd, int op);
 /* Don't warn on overflow; output flag still set */
 #  define PERL_SCAN_SILENT_OVERFLOW                 0x80
 
-/* Forbid a leading underscore, which the other one doesn't */
-#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES        0x100
+/* grok_??? accept a stand-alone underscore between digits only in numbers */
+#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY   0x100
 
 #endif
 
