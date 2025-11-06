@@ -534,9 +534,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
             if (! overflowed) {
                 overflowed = TRUE;
-                if (   ! (input_flags & PERL_SCAN_SILENT_OVERFLOW)
-                    &&    ckWARN_d(WARN_OVERFLOW))
-                {
+                if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
+                    *flags |= PERL_SCAN_SILENT_OVERFLOW;
+                }
+                else if (ckWARN_d(WARN_OVERFLOW)) {
                     warner(packWARN(WARN_OVERFLOW),
                            "Integer overflow in %s number",
                            (base == 16) ? "hexadecimal"
@@ -608,10 +609,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
 
     if (LIKELY(! overflowed)) {
 #if UVSIZE > 4
-        if (      UNLIKELY(value > 0xffffffff)
-            && ! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))
-        {
-            output_non_portable(base);
+        if (UNLIKELY(value > 0xffffffff)) {
+            if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
+                output_non_portable(base);
+            }
             *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
         }
 #endif
