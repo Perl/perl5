@@ -370,7 +370,7 @@ TODO: {
         'push on non-existent hash entry from ternary autovivifies array ref; GH 18669'
     );
 
-    my $x = { arr => undef };
+    $x = { arr => undef };
     eval {
         push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ arr } }, "mana");
     };
