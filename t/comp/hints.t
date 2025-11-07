@@ -204,7 +204,7 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
     print "# got: $w" if $w;
 }
 
-# Setting ${^WARNING_HINTS} to its own value should not change things.
+# Setting ${^WARNING_BITS} to its own value should not change things.
 {
     my $w;
     local $SIG{__WARN__} = sub { $w++ };
