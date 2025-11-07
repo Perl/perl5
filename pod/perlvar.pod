@@ -643,8 +643,8 @@ fact the above code is equivalent to
     BEGIN { $n+=2 }
     BEGIN { $n+=1 }
 
-which makes it obvious why a ${^MAX_EVAL_BEGIN_DEPTH} of 1 would not
-block this code.
+which makes it obvious why a ${^MAX_NESTED_EVAL_BEGIN_BLOCKS} of 1
+would not block this code.
 
 Only C<BEGIN>'s executed inside of an C<eval> or C<require> (possibly via
 C<use>) are affected.
