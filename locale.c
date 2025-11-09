@@ -8154,11 +8154,12 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
 /*
 =for apidoc_section $time
-=for apidoc      sv_strftime_tm
-=for apidoc_item sv_strftime_ints
+=for apidoc      sv_strftime_ints
+=for apidoc_item sv_strftime_tm
 =for apidoc_item my_strftime
 
-These implement the libc strftime().
+These implement libc strftime(), overcoming various deficiencies it has; you
+will come to regret sooner or later using it directly instead of these.
 
 On failure, they return NULL, and set C<errno> to C<EINVAL>.
 
@@ -8167,70 +8168,154 @@ handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
 result.  Only if the current C<LC_TIME> locale is a UTF-8 one (and S<C<use
 bytes>> is not in effect) will the result be marked as UTF-8.
 
+For these, the caller assumes ownership of the returned SV with a reference
+count of 1.
+
 C<my_strftime> is kept for backwards compatibility.  Knowing if its result
 should be considered UTF-8 or not requires significant extra logic.
 
 Note that all three functions are always executed in the underlying
 C<LC_TIME> locale of the program, giving results based on that locale.
 
+The stringified C<fmt> parameter in all is the same as the system libc
+C<strftime>.  The available conversion specifications vary by platform.  These
+days, every specification listed in the ANSI C99 standard should be usable
+everywhere.  These are C<a A b B c d H I j m M p S U w W x X y Y Z %>. 
+
+But note that the B<results> of some of the conversion specifiers are
+non-portable.  For example, the specifiers C<a A b B c p Z> change according
+to the locale settings of the user, and both how to set locales (the
+locale names) and what output to expect are not standardized.
+The specifier C<c> changes according to the timezone settings of the
+user and the timezone computation rules of the operating system.
+The C<Z> specifier is notoriously unportable since the names of
+timezones are not standardized. Sticking to the numeric specifiers is the
+safest route.
+
+At the time of this writing, for example, C<%s> is not available on
+Windows-like systems.
+
 The functions differ as follows:
 
-C<sv_strftime_tm> takes a pointer to a filled-in S<C<struct tm>> parameter.  It
-ignores the values of the C<wday> and C<yday> fields in it.  The other fields
-give enough information to accurately calculate these values, and are used for
-that purpose.
-
-The caller assumes ownership of the returned SV with a reference count of 1.
-
-C<sv_strftime_ints> takes a bunch of integer parameters that together
-completely define a given time.  It calculates the S<C<struct tm>> to pass to
-libc strftime(), and calls that function.
-
-The value of C<isdst> is used as follows:
-
 =over
 
-=item 0
+=item *
 
-No daylight savings time is in effect
-
-=item E<gt>0
-
-Check if daylight savings time is in effect, and adjust the results
-accordingly.
-
-=item E<lt>0
-
-This value is reserved for internal use by the L<POSIX> module for backwards
-compatibility purposes.
-
-=back
-
-The caller assumes ownership of the returned SV with a reference count of 1.
-
-C<my_strftime> is like C<sv_strftime_ints> except that:
-
-=over
-
-=item The C<fmt> parameter and the return are S<C<char *>> instead of
-S<C<SV *>>.
-
-This means the UTF-8ness of the result is unspecified.  The result MUST be
+The C<fmt> parameter and the return from C<my_strftime> are S<C<char *>>
+instead of the S<C<SV *>> in the other two functions.  This means the
+UTF-8ness of the format and result are unspecified.  The result MUST be
 arranged to be FREED BY THE CALLER).
 
-=item The C<is_dst> parameter is ignored.
+=item *
 
-Daylight savings time is never considered to be in effect.
+C<sv_strftime_ints> and C<my_strftime> take a bunch of integer parameters that
+together completely define a given time.  They calculate the S<C<struct tm>>
+to pass to libc strftime(), and call that function.  See below for the meaning
+of the parameters.
 
-=item It has extra parameters C<yday> and C<wday> that are ignored.
+C<sv_strftime_tm> takes a pointer to an already filled-in S<C<struct tm>>
+parameter, so avoids that calculation.
 
-These exist only for historical reasons; the values for the corresponding
-fields in S<C<struct tm>> are calculated from the other arguments.
+=item *
+
+C<my_strftime> takes two extra parameters that are ignored, being kept only
+for historical reasons.  These are C<wday> and C<yday>.
 
 =back
 
-Note that all three functions are always executed in the underlying C<LC_TIME>
-locale of the program, giving results based on that locale.
+The C99 Standard calls for S<C<struct tm>> to contain at least these fields:
+
+ int tm_sec;    // seconds after the minute — [0, 60]
+ int tm_min;    // minutes after the hour — [0, 59]
+ int tm_hour;   // hours since midnight — [0, 23]
+ int tm_mday;   // day of the month — [1, 31]
+ int tm_mon;    // months since January — [0, 11]
+ int tm_year;   // years since 1900
+ int tm_wday;   // days since Sunday — [0, 6]
+ int tm_yday;   // days since January 1 — [0, 365]
+ int tm_isdst;  // Daylight Saving Time flag
+
+C<tm_wday> and C<tm_yday> are output only; the other fields give enough
+information to accurately calculate these, and are internally used for that
+purpose.
+
+The numbers enclosed in the square brackets above give the maximum legal
+ranges for values in the corresponding field.  Those ranges are restricted for
+some inputs. For example, not all months have 31 days, but all hours have 60
+minutes.  If you set a number that is outside the corresponding range, perl
+and the libc functions will automatically normalize it to be inside the range,
+adjusting other values as necessary.  For example, specifying February 29, is
+the same as saying March 1 for non-leap years; and using a minute value of 60
+will instead change that to a 0, and increment the hour, which in turn, if the
+hour was 23, will roll it over to 0 it and increment the day, and so on.
+
+Each parameter to C<sv_strftime_ints> and C<my_strftime> populates the
+similarly-named field in this structure.
+
+A value of 60 is legal for C<tm_sec>, but only for those moments when an
+official leap second has been declared.  It is undefined behavior to use them
+otherwise, and the behavior does vary depending on the implementation.
+Some implementations take your word for it that this is a leap second, leaving
+it as the 61st second of the given minute; some roll it over to be the 0th
+second of the following minute; some treat it as 0.  Some non-conforming
+implementations always roll it over to the next minute, regardless of whether
+an actual leap second is occurring or not.  (And yes, it is a real problem
+that different computers have a different conception of what the current time
+is; you can search the internet for details.)
+
+There is no limit (outside the size of C<int>) for the value of C<tm_year>,
+but sufficiently negative values (for earlier than 1900) may have different
+results on different systems and locales.  Some libc implementations may know
+when a given locale adopted the Greorian calendar, and adjust for that.
+Others will not.  (And some countries didn't adopt the Gregorian calendar
+until after 1900.)  Probably all implementations assume modern time zones go
+back forever, before they were actually invented, starting in the last half of
+the 19th century.
+
+The treatment of the C<isdst> field has varied over previous Perl versions,
+and has been buggy (both by perl and by some libc implementations), but is now
+aligned, as best we can, with the POSIX Standard, as follows:
+
+=over
+
+=item C<is_dist> is 0
+
+The function is to assume that daylight savings time is not in effect.  This
+should now always work properly, as perl uses its own implementation in this
+case, avoiding non-conforming libc ones.
+
+=item C<is_dist> is E<gt>0
+
+The function is to assume that daylight savings time is in effect, though some
+underlying libc implementations treat this as a hint instead of a mandate.
+
+=item C<is_dist> is E<lt>0
+
+The function is to itself try to calculate if daylight savings time is in
+effect.  More recent libc implementations are better at this than earlier
+ones.
+
+=back
+
+Some libc implementations have extra fields in S<C<struct tm>>.  The two that
+perl handles are:
+
+  int tm_gmtoff;            // Seconds East of UTC [%z]
+  const char * tm_zone;     // Timezone abbreviation [%Z]
+
+These are both output only.  Using the respective conversion specifications
+(enclosed in the square brackets) in the C<fmt> parameter is a portable way to
+gain access to these values, working both on systems that have and don't have
+these fields.
+
+Example, in the C<C> locale:
+
+ my_strftime( "%A, %B %d, %Y", 0, 0, 0, 12, 11, 95, 0, 0, -1 );
+
+returns
+
+ "Tuesday, December 12, 1995"
+
 =cut
  */
 
