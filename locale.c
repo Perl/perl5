@@ -8415,7 +8415,7 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
         const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
         MKTIME_LOCK;
 
-        /* which_tm points to an auxiliary copy if we ran mini_mktime().
+        /* 'which_tm' points to an auxiliary copy if we ran mini_mktime().
          * Otherwise it points to the passed-in one which now gets populated
          * directly. */
         (void) mktime(which_tm);
