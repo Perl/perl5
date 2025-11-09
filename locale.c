@@ -8363,20 +8363,22 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     mytm->tm_year = year;
 
     struct tm * which_tm = mytm;
-    struct tm aux_tm;
 
 #ifndef HAS_MKTIME
 
     mini_mktime(mytm);
 
 #else
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+#    define ALWAYS_RUN_MKTIME
+
+    struct tm aux_tm;
+
+#  endif
 
     /* On platforms that have either of these two fields, we have to run the
      * libc mktime() in order to set them, as mini_mktime() doesn't deal with
      * them.  [perl #18238] */
-#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
-#    define ALWAYS_RUN_MKTIME
-#  endif
 
     /* When isdst is 0, it means to consider daylight savings time as never
      * being in effect.  Many libc implementations of mktime() do not allow
