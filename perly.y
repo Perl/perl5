@@ -103,6 +103,8 @@
 %type <opval> bare_statement_expression
 %type <opval> bare_statement_field_declaration
 %type <opval> bare_statement_for
+%type <opval> bare_statement_for_cstyle
+%type <opval> bare_statement_for_itervars
 %type <opval> bare_statement_format
 %type <opval> bare_statement_given
 %type <opval> bare_statement_if
@@ -348,6 +350,12 @@ bare_statement_field_declaration
 	;
 
 bare_statement_for
+	:	bare_statement_for_cstyle
+	|	bare_statement_for_itervars
+	;
+
+bare_statement_for_cstyle
+	/* C-style for loop: for ( initialize; condition; iterate ) { ... } */
 	:	KW_FOR
 		remember
 		PERLY_PAREN_OPEN
@@ -379,7 +387,11 @@ bare_statement_for
 			$$ = block_end($remember, forop);
 			parser->copline = (line_t)$KW_FOR;
 		}
-	|	KW_FOR
+	;
+
+bare_statement_for_itervars
+	/* for loop iterating over list using iterate variables */
+	:	KW_FOR
 		remember
 		KW_MY
 		my_scalar
