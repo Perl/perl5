@@ -8271,15 +8271,8 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
     const char * locale = "C";
 #endif
 
-    /* A negative 'isdst' triggers backwards compatibility mode for
-     * POSIX::strftime(), in which 0 is always passed to ints_to_tm() so that
-     * the possibility of daylight savings time is never considered,  But, a 1
-     * is eventually passed to libc strftime() so that it returns the results
-     * it always has for a non-zero 'isdst'.  See GH #22351 */
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year,
-                              MAX(0, isdst));
-    mytm.tm_isdst = MIN(1, abs(isdst));
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, isdst);
     return sv_strftime_common(fmt, locale, &mytm);
 }
 
@@ -8387,30 +8380,35 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     if (isdst == 0) {
         mini_mktime(mytm);
 
-#  ifndef ALWAYS_RUN_MKTIME
+#  ifdef ALWAYS_RUN_MKTIME
 
-    /* When we don't always need libc mktime(), we call it only when we didn't
-     * call mini_mktime() */
-    } else {
-
-#  else
         /* Here will have to run libc mktime() in order to get the values of
          * some fields that mini_mktime doesn't populate.  We don't want
-         * mktime's side effect of looking for dst, so we have to have a
-         * separate tm structure from which we copy just those fields into the
-         * returned structure.  Initialize its values.  mytm should now be a
-         * normalized version of the input. */
+         * mktime's side effect of looking for dst (because isdst==0), so we
+         * have to have a separate tm structure from which we copy just those
+         * fields into the structure we return.  Initialize its values, which
+         * have now been normalized by mini_mktime. */
         aux_tm = *mytm;
-        aux_tm.tm_isdst = isdst;
         which_tm = &aux_tm;
+
+#  endif
+
+    }
+
+#  ifndef ALWAYS_RUN_MKTIME
+
+    else {  /* Don't run libc mktime if both:
+                1) we ran mini_mktime above; and
+                2) we don't have to always run libc mktime */
 
 #  endif
 
         /* Here, we need to run libc mktime(), either because we want to take
          * dst into consideration, or because it calculates one or two fields
-         * that we need that mini_mktime() doesn't handle.
-         *
-         * Unlike mini_mktime(), it does consider the locale, so have to switch
+         * that we need that mini_mktime() doesn't handle. */
+        which_tm->tm_isdst = isdst;
+
+        /* Unlike mini_mktime(), it does consider the locale, so have to switch
          * to the correct one. */
         const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
         MKTIME_LOCK;
@@ -8422,9 +8420,12 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
 
         MKTIME_UNLOCK;
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+
+#  ifndef ALWAYS_RUN_MKTIME
+
     }
 
-#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+#  else
 
     /* And use the saved libc values for tm_gmtoff and tm_zone if we used an
      * auxiliary struct to get them */
