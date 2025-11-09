@@ -5017,8 +5017,8 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
 
             /* Add this character to the list of possible matches */
             if (utf8_target) {
-                uv_to_utf8(matches[(U8) m->count], fold_from);
-                lengths[m->count] = UVCHR_SKIP(fold_from);
+                uv_to_utf8(matches[ (PERL_UINT_FAST8_T) m->count ], fold_from);
+                lengths[ (PERL_UINT_FAST8_T) m->count ] = UVCHR_SKIP(fold_from);
                 m->count++;
             }
             else { /* Non-UTF8 target: no code point above 255 can appear in it
@@ -5027,17 +5027,17 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                     continue;
                 }
 
-                matches[m->count][0] = fold_from;
-                lengths[m->count] = 1;
+                matches[ (PERL_UINT_FAST8_T) m->count ][0] = fold_from;
+                lengths[ (PERL_UINT_FAST8_T) m->count ] = 1;
                 m->count++;
             }
 
             /* Update min and mlengths */
-            if (m->min_length > lengths[m->count-1]) {
-                m->min_length = lengths[m->count-1];
+            if (m->min_length > lengths[ (PERL_UINT_FAST8_T) m->count - 1 ]) {
+                m->min_length = lengths[ (PERL_UINT_FAST8_T) m->count - 1 ];
             }
 
-            if (m->max_length < lengths[m->count-1]) {
+            if (m->max_length < lengths[ (PERL_UINT_FAST8_T) m->count - 1 ]) {
                 index_of_longest = m->count - 1;
                 m->max_length = lengths[index_of_longest];
             }
