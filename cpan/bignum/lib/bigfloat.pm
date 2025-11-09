@@ -345,7 +345,7 @@ sub import {
         # "3141592653589793238462643383279502884197169399375105820974944592307".
 
         integer => sub {
-            #printf "Value '%s' handled by the 'integer' sub.\n", $_[0];
+            printf "# Value '%s' handled by the 'integer' sub.\n", $_[0];
             my $str = shift;
             return $obj_class -> new($str);
         },
@@ -356,7 +356,7 @@ sub import {
         # "0x3.14p+2" (hexadecimal).
 
         float => sub {
-            #printf "# Value '%s' handled by the 'float' sub.\n", $_[0];
+            printf "# Value '%s' handled by the 'float' sub.\n", $_[0];
             _float_constant(shift);
         },
 
@@ -365,7 +365,7 @@ sub import {
         # (binary), "0314" and "0o314" (octal), and "0x314" (hexadecimal).
 
         binary => sub {
-            #printf "# Value '%s' handled by the 'binary' sub.\n", $_[0];
+            printf "# Value '%s' handled by the 'binary' sub.\n", $_[0];
             my $str = shift;
             return $obj_class -> new($str) if $str =~ /^0[XxBb]/;
             $obj_class -> from_oct($str);
