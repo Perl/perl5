@@ -76,6 +76,7 @@ consent of the Steering Council.)
   Florian Ragwitz <rafl@debian.org>
   Jesse Luehrs <doy@cpan.org>
   Jesse Vincent <jesse@cpan.org>
+  Karen Etheridge <ether@cpan.org>
   Leon Brocard <acme@astray.com>
   Matt Trout <mst@shadowcat.co.uk>
   Matthew Horsfall <wolfsage@gmail.com>
