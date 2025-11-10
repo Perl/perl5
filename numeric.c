@@ -513,7 +513,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                     /* Note XDIGIT_VALUE() is branchless, works on binary
                      * and octal as well, so can be used here, without
                      * slowing those down */
-                factor *= 1 << shift;
+                factor *= base;
                 continue;
             }
 
@@ -530,7 +530,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
              * 'value_nv' eventually, either when all digits are gone, or we
              * have overflowed this fresh start. */
             value = XDIGIT_VALUE(*s);
-            factor = 1 << shift;
+            factor = base;
 
             if (! overflowed) {
                 overflowed = TRUE;
