@@ -497,8 +497,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
     bool overflowed = FALSE;
     NV value_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
-    const UV max_div= UV_MAX / base;    /* Value above which, the next digit
-                                           processed would overflow */
 
     for (; s < e; s++) {
         if (generic_isCC_(*s, class_bit)) {
@@ -507,9 +505,16 @@ Perl_grok_bin_oct_hex(pTHX_ const char *start,
                With gcc seems to be much straighter code than old scan_hex.
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
-          redo:
-            if (LIKELY(value <= max_div)) {
-                value = (value << shift) | XDIGIT_VALUE(*s);
+          redo: ;
+
+            /* Make room for the next digit */
+            UV tentative_value = value << shift;
+
+            /* If shiftng back doesn't yield the previous value, it was
+             * because a bit got shifted off the left end, so overflowed.
+             * But if it worked, add the new digit. */
+            if (LIKELY((tentative_value >> shift) == value)) {
+                value = tentative_value | XDIGIT_VALUE(*s);
                     /* Note XDIGIT_VALUE() is branchless, works on binary
                      * and octal as well, so can be used here, without
                      * slowing those down */
