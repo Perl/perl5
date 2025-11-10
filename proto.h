@@ -1263,7 +1263,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
         assert(start); assert(len_p); assert(flags)
 
 PERL_CALLCONV UV
-Perl_grok_bin_oct_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result, const unsigned shift, const U8 lookup_bit, const char prefix);
+Perl_grok_bin_oct_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, const unsigned shift, const U8 lookup_bit, const char prefix);
 #define PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX       \
         assert(start); assert(len_p); assert(flags)
 

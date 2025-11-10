@@ -365,7 +365,7 @@ S_output_non_portable(pTHX_ const U8 base)
 }
 
 UV
-Perl_grok_bin_oct_hex(pTHX_ const char *start,
+Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
