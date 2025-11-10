@@ -12431,13 +12431,24 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
   side-effects: builds ops for the constant in pl_yylval.op
 
   Read a number in any of the formats that Perl accepts:
+  (\x below stands for a hexademical character [0-9A-Fa-f]
+   underscores may separate any two digits.  Multiple sequential underscores
+   are tolerated, but warned about)
 
-  \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee][\+\-]?(\d(_?\d)*)	12 12.34 12.
-  \.\d(_?\d)*[Ee][\+\-]?(\d(_?\d)*)			.34
-  0b[01](_?[01])*                                       binary integers
-  0o?[0-7](_?[0-7])*                                    octal integers
-  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*                         hexadecimal integers
-  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*(?:\.\d*)?p[+-]?[0-9]+   hexadecimal floats
+  0b  [0-1] (_* [0-1] )*       binary integers
+  0o? [0-7] (_* [0-7] )*       octal integers
+      \d    (_* \d    )*       decimal integers
+  0x  \x    (_* \x    )*       hexadecimal integers
+
+  And decimal or hex floats
+                      |-----------|                     |--------------|
+    \d (_* \d )* ( \. ( \d (_* \d )* )? )? ( [Ee] [-+]? ( \d (_* \d )* ) )?
+                   \.   \d (_* \d )        ( [Ee] [-+]? ( \d (_* \d)*  ) )?
+  0x\x (_* \x )* ( \. ( \x (_* \x )* )? )? ( [Pp] [-+]? ( \d (_* \d )* ) )?
+       |______|  |______________________|  |_____________________________|
+
+  In the floating syntax above, at least one of the optional portions (the
+  fractional part or the exponent part) must be present.
 
   Like most scan_ routines, it uses the PL_tokenbuf buffer to hold the
   thing it reads.
