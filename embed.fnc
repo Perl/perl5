@@ -1404,7 +1404,7 @@ AMdp	|UV	|grok_bin	|NN const char *start			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
 Cp	|UV	|grok_bin_oct_hex					\
-				|NN const char *start			\
+				|NN const char * const start		\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
