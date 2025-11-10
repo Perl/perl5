@@ -219,17 +219,30 @@ Perl_cast_uv(NV f)
 void
 Perl_output_non_portable(pTHX_ const U8 base)
 {
-    /* Display the proper message for a number in the given input base not
-     * fitting in 32 bits */
-    const char * which = (base == 2)
-                      ? "Binary number > 0b11111111111111111111111111111111"
-                      : (base == 8)
-                        ? "Octal number > 037777777777"
-                        : "Hexadecimal number > 0xffffffff";
-
     PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
 
-    /* Also there are listings for the other two.  That's because, since they
+    /* Display the proper message for a number in the given input base not
+     * fitting in 32 bits */
+    const char * which;
+    switch (base) {
+      case 2:
+        which = "Binary number > 0b11111111111111111111111111111111";
+        break;
+      case 8:
+        which = "Octal number > 037777777777";
+        break;
+      case 10:
+        which = "Decimal number > 4294967295 (0xffff_ffff)";
+        return;
+        break;
+      case 16:
+        which = "Hexadecimal number > 0xffffffff";
+        break;
+      default:
+        croak("panic: Unexpected numeric base %d", base);
+    }
+
+    /* Also there are listings for the other tXXXwo.  That's because, since they
      * are the first word, it would be hard for a user to find them there
      * starting with a %s */
     /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
