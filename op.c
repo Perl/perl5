@@ -3774,7 +3774,13 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
             break;
 
         case OP_COND_EXPR:
+            /* OP_COND_EXPR is the only op where we have to propagate
+             * context to *both* branches. Recurse on the first branch,
+             * then iterate on the second branch.
+             */
             o = OpSIBLING(cUNOPo->op_first);
+            doref(o, type, set_op_ref);
+            o = OpSIBLING(o);
             continue;
 
         case OP_RV2SV:
@@ -3847,22 +3853,12 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
             break;
         } /* switch */
 
-        while (1) {
-            if (o == top_op)
-                return scalar(top_op); /* at top; no parents/siblings to try */
-            if (OpHAS_SIBLING(o)) {
-                o = o->op_sibparent;
-                /* Normally skip all siblings and go straight to the parent;
-                 * the only op that requires two children to be processed
-                 * is OP_COND_EXPR */
-                if (!OpHAS_SIBLING(o)
-                        && o->op_sibparent->op_type == OP_COND_EXPR)
-                    break;
-                continue;
-            }
-            o = o->op_sibparent; /* try parent's next sibling */
-        }
+        /* whole tree has been scanned for ref stuff; now propagate
+         * scalar context */
+        return scalar(top_op);
+
     } /* while */
+
 }
 
 

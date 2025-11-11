@@ -353,41 +353,6 @@ TODO: {
 }
 
 TODO: {
-    local $::TODO = 'GH 18669';
-
-    my $x = { arr => undef };
-    eval {
-        push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ new } }, "mana");
-    };
-    unlike(
-        $@,
-        qr/Not an ARRAY reference/,
-        "push on non-existent hash entry does not throw 'Not an ARRAY reference' error; GH 18669"
-    );
-    is(
-        eval { $x->{ new }[0] },
-        'mana',
-        'push on non-existent hash entry from ternary autovivifies array ref; GH 18669'
-    );
-
-    $x = { arr => undef };
-    eval {
-        push(@{ $x->{ decide } ? $x->{ not_here } : $x->{ arr } }, "mana");
-    };
-    unlike(
-        $@,
-        qr/Not an ARRAY reference/,
-        "push on undef hash entry does not throw 'Not an ARRAY reference' error; GH 18669"
-    );
-    is(
-        eval { $x->{ arr }[0] },
-        'mana',
-        'push on undef hash entry from ternary autovivifies array ref; GH 18669'
-    );
-
-}
-
-TODO: {
     local $::TODO = 'GH 19378';
     fresh_perl_like(
         <<~'HERE',
