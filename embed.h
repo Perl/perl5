@@ -1336,6 +1336,7 @@
 #   define oopsAV(a)                            Perl_oopsAV(aTHX_ a)
 #   define oopsHV(a)                            Perl_oopsHV(aTHX_ a)
 #   define op_unscope(a)                        Perl_op_unscope(aTHX_ a)
+#   define output_non_portable(a)               Perl_output_non_portable(aTHX_ a)
 #   define package(a,b)                         Perl_package(aTHX_ a,b)
 #   define pad_add_weakref(a)                   Perl_pad_add_weakref(aTHX_ a)
 #   define pad_block_start(a)                   Perl_pad_block_start(aTHX_ a)
@@ -1687,9 +1688,6 @@
 #     define mro_clean_isarev(a,b,c,d,e,f)      S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)
 #     define mro_gather_and_rename(a,b,c,d,e)   S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
 #     define mro_get_linear_isa_dfs(a,b)        S_mro_get_linear_isa_dfs(aTHX_ a,b)
-#   endif
-#   if defined(PERL_IN_NUMERIC_C)
-#     define output_non_portable(a)             S_output_non_portable(aTHX_ a)
 #   endif
 #   if defined(PERL_IN_OP_C)
 #     define apply_attrs(a,b,c)                 S_apply_attrs(aTHX_ a,b,c)

@@ -2577,6 +2577,8 @@ Adp	|OP *	|op_sibling_splice					\
 px	|OP *	|op_unscope	|NULLOK OP *o
 ARdpx	|OP *	|op_wrap_finally|NN OP *block				\
 				|NN OP *finally
+p	|void	|output_non_portable					\
+				|const U8 shift
 : Used in perly.y
 dp	|void	|package	|NN OP *name				\
 				|NULLOK OP *version
@@ -4987,10 +4989,6 @@ S	|void	|mro_gather_and_rename					\
 Sd	|AV *	|mro_get_linear_isa_dfs 				\
 				|NN HV *stash				\
 				|U32 level
-#endif
-#if defined(PERL_IN_NUMERIC_C)
-S	|void	|output_non_portable					\
-				|const U8 shift
 #endif
 #if defined(PERL_IN_OP_C)
 S	|void	|apply_attrs	|NN HV *stash				\
