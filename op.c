@@ -3764,12 +3764,8 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
                 op_null(cLISTOPx(cUNOPo->op_first)->op_first);
                 o->op_flags |= OPf_SPECIAL;
             }
-            else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
-                o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
-                                  : type == OP_RV2HV ? OPpDEREF_HV
-                                  : OPpDEREF_SV);
-                o->op_flags |= OPf_MOD;
-            }
+            else
+                goto set_cxt;
 
             break;
 
@@ -3787,14 +3783,19 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
             if (type == OP_DEFINED)
                 o->op_flags |= OPf_SPECIAL;		/* don't create GV */
             /* FALLTHROUGH */
+        case OP_AELEM:
+        case OP_HELEM:
         case OP_PADSV:
+        set_cxt:
+            /* if the parent wants an SV/AV/HV ref, set flags indicating
+             * that this op should autovivify such a value if need be */
             if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
                 o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
                                   : type == OP_RV2HV ? OPpDEREF_HV
                                   : OPpDEREF_SV);
                 o->op_flags |= OPf_MOD;
             }
-            if (o->op_flags & OPf_KIDS) {
+            if (o->op_flags & OPf_KIDS && o->op_type != OP_ENTERSUB) {
                 type = o->op_type;
                 o = cUNOPo->op_first;
                 continue;
@@ -3825,18 +3826,6 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
                 break;
              o = cBINOPo->op_first;
             continue;
-
-        case OP_AELEM:
-        case OP_HELEM:
-            if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
-                o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
-                                  : type == OP_RV2HV ? OPpDEREF_HV
-                                  : OPpDEREF_SV);
-                o->op_flags |= OPf_MOD;
-            }
-            type = o->op_type;
-            o = cBINOPo->op_first;
-            continue;;
 
         case OP_SCOPE:
         case OP_LEAVE:
