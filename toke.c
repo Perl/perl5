@@ -12501,7 +12501,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     switch (*s) {
     default:
-        croak("panic: scan_num, *s=%d", *s);
+        croak("panic: scan_num, *s=%c", *s);
 
     /* if it starts with a 0, it could be an octal number, a decimal in
        0.13 disguise, or a hexadecimal number, or a binary number. */
