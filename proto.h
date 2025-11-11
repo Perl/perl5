@@ -3343,6 +3343,11 @@ Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
         assert(ctx); assert(pat)
 
 PERL_CALLCONV void
+Perl_output_non_portable(pTHX_ const U8 shift)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE
+
+PERL_CALLCONV void
 Perl_package(pTHX_ OP *name, OP *version)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PACKAGE                \
@@ -7451,12 +7456,6 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level);
         assert(stash); assert(SvTYPE(stash) == SVt_PVHV)
 
 #endif /* defined(PERL_IN_MRO_C) */
-#if defined(PERL_IN_NUMERIC_C)
-STATIC void
-S_output_non_portable(pTHX_ const U8 shift);
-# define PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE
-
-#endif
 #if defined(PERL_IN_OP_C)
 STATIC void
 S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs);

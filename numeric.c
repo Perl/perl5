@@ -216,8 +216,8 @@ Perl_cast_uv(NV f)
   return f > 0 ? UV_MAX : 0 /* NaN */;
 }
 
-STATIC void
-S_output_non_portable(pTHX_ const U8 base)
+void
+Perl_output_non_portable(pTHX_ const U8 base)
 {
     /* Display the proper message for a number in the given input base not
      * fitting in 32 bits */
