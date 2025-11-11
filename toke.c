@@ -12471,14 +12471,16 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
     I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
-#define WARN_ABOUT_UNDERSCORE() \
-        do { \
-            if (!warned_about_underscore) { \
-                warned_about_underscore = 1; \
-                ck_warner(packWARN(WARN_SYNTAX), \
+
+#define WARN_ABOUT_UNDERSCORE()                         \
+        STMT_START {                                    \
+            if (!warned_about_underscore) {             \
+                warned_about_underscore = 1;            \
+                ck_warner(packWARN(WARN_SYNTAX),        \
                           "Misplaced _ in number");     \
-            } \
-        } while(0)
+            }                                           \
+        } STMT_END
+
     /* Hexadecimal floating point.
      *
      * In many places (where we have quads and NV is IEEE 754 double)
