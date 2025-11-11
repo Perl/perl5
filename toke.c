@@ -12456,7 +12456,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
-    const char *lastub = NULL;		/* position of last underbar */
     static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
     I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
@@ -12468,6 +12467,45 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 ck_warner(packWARN(WARN_SYNTAX),        \
                           "Misplaced _ in number");     \
             }                                           \
+        } STMT_END
+
+/* Call this when we're not expecting an underscore, but are willing to
+ * tolerate one if found, but raising a warning about it.  It absorbs any
+ * adjacent underscores up to PL_bufend, advancing 's' to point to the byte
+ * after the final underscore */
+#define SUFFER_AN_UNDERSCORE_HERE(s)                        \
+        STMT_START {                                        \
+            if (*(s) == '_') {                              \
+                WARN_ABOUT_UNDERSCORE();                    \
+                                                            \
+                /* Absorb any adjacent underscores */       \
+                do {                                        \
+                    (s)++;                                  \
+                } while ((s) < PL_bufend && *(s) == '_');   \
+            }                                               \
+        } STMT_END
+
+/* Call this when we're not expecting an underscore in the previous byte
+ * position, but are willing to tolerate one if found, but raising a warning
+ * about it. */
+#define SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s)            \
+        STMT_START {                                        \
+            if (*((s) - 1) == '_') {                        \
+                WARN_ABOUT_UNDERSCORE();                    \
+            }                                               \
+        } STMT_END
+
+/* Call this when we have an underscore, and a single one is fine.  Tolerate
+ * adjacent subsequent ones, but raise a warning if any are found.  It
+ * advances 's' to point to the byte after the final underscore */
+#define HANDLE_UNDERSCORE(s)                            \
+        STMT_START {                                    \
+            assert(*(s) == '_');                        \
+            (s)++;                                      \
+                                                        \
+            /* Any underscore adjacent to this one is   \
+             * wrong */                                 \
+            SUFFER_AN_UNDERSCORE_HERE(s);               \
         } STMT_END
 
     /* Hexadecimal floating point.
@@ -12556,10 +12594,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             }
         }
 
-        if (*s == '_') {
-            WARN_ABOUT_UNDERSCORE();
-           lastub = s++;
-        }
+        SUFFER_AN_UNDERSCORE_HERE(s);
 
         /* read the rest of the number */
         for (;;) {
@@ -12575,9 +12610,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             /* _ are ignored -- but warned about if consecutive */
             case '_':
-                if (lastub && s == lastub + 1)
-                    WARN_ABOUT_UNDERSCORE();
-                lastub = s++;
+                HANDLE_UNDERSCORE(s);
                 break;
 
             /* 8 and 9 are not octal */
@@ -12656,8 +12689,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
       out:
 
                 /* final misplaced underbar check */
-                if (s[-1] == '_')
-                    WARN_ABOUT_UNDERSCORE();
+                SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
 
                 if (UNLIKELY(HEXFP_PEEK(s))) {
                     /* Do sloppy (on the underbars) but quick detection
@@ -12893,9 +12925,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                if -w is on
             */
             if (*s == '_') {
-                if (lastub && s == lastub + 1)
-                    WARN_ABOUT_UNDERSCORE();
-                lastub = s++;
+                HANDLE_UNDERSCORE(s);
             }
             else {
                 /* check for end of fixed-length buffer */
@@ -12907,8 +12937,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 
         /* final misplaced underbar check */
-        if (lastub && s == lastub + 1)
-            WARN_ABOUT_UNDERSCORE();
+        if (s > start) {  /* Can get here without advancing s */
+            SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
+        }
 
         /* read a decimal portion if there is one.  avoid
            3..5 being interpreted as the number 3. followed
@@ -12918,31 +12949,25 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             floatit = TRUE;
             *d++ = *s++;
 
-            if (*s == '_') {
-                WARN_ABOUT_UNDERSCORE();
-                lastub = s;
-            }
+            SUFFER_AN_UNDERSCORE_HERE(s);
 
             /* copy, ignoring underbars, until we run out of digits.
             */
-            for (;    isDIGIT_or_UNDERSCORE(*s)
-                   || UNLIKELY(hexfp && isXDIGIT(*s));
-                 s++)
+            while (   isDIGIT_or_UNDERSCORE(*s)
+                   || UNLIKELY(hexfp && isXDIGIT(*s)))
             {
                 /* fixed length buffer check */
                 if (d >= e)
                     croak("%s", number_too_long);
                 if (*s == '_') {
-                   if (lastub && s == lastub + 1)
-                        WARN_ABOUT_UNDERSCORE();
-                   lastub = s;
+                    HANDLE_UNDERSCORE(s);
                 }
                 else
-                    *d++ = *s;
+                    *d++ = *s++;
             }
-            /* fractional part ending in underbar? */
-            if (s[-1] == '_')
-                WARN_ABOUT_UNDERSCORE();
+
+            SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
+
             if (*s == '.' && isDIGIT(s[1])) {
                 /* oops, it's really a v-string, but without the "v" */
                 s = start;
@@ -12973,20 +12998,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 
             /* stray preinitial _ */
-            if (*s == '_') {
-                WARN_ABOUT_UNDERSCORE();
-                lastub = s++;
-            }
+            SUFFER_AN_UNDERSCORE_HERE(s);
 
             /* allow positive or negative exponent */
             if (*s == '+' || *s == '-')
                 *d++ = *s++;
 
             /* stray initial _ */
-            if (*s == '_') {
-                WARN_ABOUT_UNDERSCORE();
-                lastub = s++;
-            }
+            SUFFER_AN_UNDERSCORE_HERE(s);
 
             /* read digits of exponent */
             while (isDIGIT_or_UNDERSCORE(*s)) {
@@ -12996,13 +13015,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         croak("%s", number_too_long);
                     *d++ = *s++;
                 }
-                else {
-                   if (   (lastub && s == lastub + 1)
-                       || ! isDIGIT_or_UNDERSCORE(s[1]))
-                        WARN_ABOUT_UNDERSCORE();
-                   lastub = s++;
+                else {  /* Must be an underscore */
+                    HANDLE_UNDERSCORE(s);
                 }
             }
+
+            SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
 
             if (!exp_digits) {
                 /* no exponent digits, the [eEpP] could be for something else,
