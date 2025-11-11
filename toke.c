@@ -12467,7 +12467,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
-    const char *lastub = NULL;		/* position of last underbar */
     static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
     I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
@@ -12492,7 +12491,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                                             \
                 /* Absorb any adjacent underscores */       \
                 do {                                        \
-                    lastub = (s);                           \
                     (s)++;                                  \
                 } while ((s) < PL_bufend && *(s) == '_');   \
             }                                               \
@@ -12514,9 +12512,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #define HANDLE_UNDERSCORE(s)                            \
         STMT_START {                                    \
             assert(*(s) == '_');                        \
-            if ((s) == lastub + 1) {                    \
-                WARN_ABOUT_UNDERSCORE();                \
-            }                                           \
             (s)++;                                      \
                                                         \
             /* Any underscore adjacent to this one is   \
