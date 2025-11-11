@@ -376,6 +376,16 @@ used to be parsed incorrectly.
 
 XXX
 
+=item *
+
+Perl 5.42.0 does not handle the transition to/from daylight savings time
+properly.  The time and/or timezone can be off by an hour in the
+intervals surrounding such transitions.  This is a regression from
+earlier releases, and is now fixed.  This bug was evident from perl
+space in the L<POSIX/strftime> function, and in XS code with any of
+L<perlapi/my_strftime>, L<perlapi/sv_strftime_ints>, or
+L<perlapi/sv_strftime_tm>.
+
 =back
 
 =head1 Known Problems
