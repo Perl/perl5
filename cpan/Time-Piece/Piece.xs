@@ -317,6 +317,26 @@ my_mini_mktime(struct tm *ptm)
     ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
+static struct tm
+safe_localtime(pTHX_ const time_t *tp)
+{
+    struct tm *result = localtime(tp);
+    if (!result) {
+        croak("localtime failed for invalid time value");
+    }
+    return *result;
+}
+
+static struct tm
+safe_gmtime(pTHX_ const time_t *tp)
+{
+    struct tm *result = gmtime(tp);
+    if (!result) {
+        croak("gmtime failed for invalid time value");
+    }
+    return *result;
+}
+
 #   if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
 #       define strncasecmp(x,y,n) strnicmp(x,y,n)
 #   endif
@@ -424,14 +444,6 @@ label:
 			tm->tm_year = i * 100 - 1900;
 			break;
 
-		case 'c':
-			/* NOTE: c_fmt is intentionally ignored */
-
-			buf = _strptime(aTHX_ buf, "%a %d %b %Y %I:%M:%S %p %Z", tm, got_GMT, locales);
-			if (buf == 0)
-				return NULL;
-			break;
-
 		case 'D':
 			buf = _strptime(aTHX_ buf, "%m/%d/%y", tm, got_GMT, locales);
 			if (buf == 0)
@@ -485,18 +497,6 @@ label:
 		
 		case 'T':
 			buf = _strptime(aTHX_ buf, "%H:%M:%S", tm, got_GMT, locales);
-			if (buf == 0)
-				return NULL;
-			break;
-
-		case 'X':
-			buf = _strptime(aTHX_ buf, "%I:%M:%S %p", tm, got_GMT, locales);
-			if (buf == 0)
-				return NULL;
-			break;
-
-		case 'x':
-			buf = _strptime(aTHX_ buf, "%a %d %b %Y", tm, got_GMT, locales);
 			if (buf == 0)
 				return NULL;
 			break;
@@ -645,30 +645,42 @@ label:
 			AV* weekday_av = (AV*)SvRV(*weekday_sv);
 			AV* wday_av = (AV*)SvRV(*wday_sv);
 
+			/* Use longest-match to handle ambiguous prefixes
+				(e.g., "Cuma" vs "Cumartesi" in Turkish) */
+			int best_match = -1;
+			size_t best_len = 0;
+
 			for (i = 0; i <= av_len(weekday_av); i++) {
-				if (c == 'A') {
-					SV** day_sv = av_fetch(weekday_av, i, 0);
-					if (day_sv && SvPOK(*day_sv)) {
-						char* day_str = SvPV(*day_sv, len);
-						if (strncasecmp(buf, day_str, len) == 0)
-							break;
+				SV** day_sv;
+
+				/* Try full weekday name */
+				day_sv = av_fetch(weekday_av, i, 0);
+				if (day_sv && SvPOK(*day_sv)) {
+					char* day_str = SvPV(*day_sv, len);
+					if (len > best_len && strncasecmp(buf, day_str, len) == 0) {
+						best_match = i;
+						best_len = len;
 					}
-				} else {
-					SV** day_sv = av_fetch(wday_av, i, 0);
-					if (day_sv && SvPOK(*day_sv)) {
-						char* day_str = SvPV(*day_sv, len);
-						if (strncasecmp(buf, day_str, len) == 0)
-							break;
+				}
+
+				/* Try abbreviated weekday name */
+				day_sv = av_fetch(wday_av, i, 0);
+				if (day_sv && SvPOK(*day_sv)) {
+					char* day_str = SvPV(*day_sv, len);
+					if (len > best_len && strncasecmp(buf, day_str, len) == 0) {
+						best_match = i;
+						best_len = len;
 					}
 				}
 			}
-			if (i > av_len(weekday_av)) {
+
+			if (best_match < 0) {
 				warn("Failed parsing weekday names");
 				return NULL;
 			}
 
-			tm->tm_wday = i;
-			buf += len;
+			tm->tm_wday = best_match;
+			buf += best_len;
 			}
 			break;
 
@@ -758,31 +770,42 @@ label:
 			AV* month_av = (AV*)SvRV(*month_sv);
 			AV* mon_av = (AV*)SvRV(*mon_sv);
 
-			for (i = 0; i <= av_len(month_av); i++) {
+			/* Use longest-match to handle ambiguous prefixes
+				(e.g., "1" vs "10" in Japanese) */
+			int best_match = -1;
+			size_t best_len = 0;
 
-				if (c == 'B') {
-					SV** month_sv_item = av_fetch(month_av, i, 0);
-					if (month_sv_item && SvPOK(*month_sv_item)) {
-						char* month_str = SvPV(*month_sv_item, len);
-						if (strncasecmp(buf, month_str, len) == 0)
-							break;
+			for (i = 0; i <= av_len(month_av); i++) {
+				SV** month_sv_item;
+
+				/* Try full month name */
+				month_sv_item = av_fetch(month_av, i, 0);
+				if (month_sv_item && SvPOK(*month_sv_item)) {
+					char* month_str = SvPV(*month_sv_item, len);
+					if (len > best_len && strncasecmp(buf, month_str, len) == 0) {
+						best_match = i;
+						best_len = len;
 					}
-				} else {
-					SV** mon_sv_item = av_fetch(mon_av, i, 0);
-					if (mon_sv_item && SvPOK(*mon_sv_item)) {
-						char* mon_str = SvPV(*mon_sv_item, len);
-						if (strncasecmp(buf, mon_str, len) == 0)
-							break;
+				}
+
+				/* Try abbreviated month name */
+				month_sv_item = av_fetch(mon_av, i, 0);
+				if (month_sv_item && SvPOK(*month_sv_item)) {
+					char* month_str = SvPV(*month_sv_item, len);
+					if (len > best_len && strncasecmp(buf, month_str, len) == 0) {
+						best_match = i;
+						best_len = len;
 					}
 				}
 			}
-			if (i > av_len(month_av)) {
+
+			if (best_match < 0) {
 				warn("Failed parsing month name");
 				return NULL;
 			}
 
-			tm->tm_mon = i;
-			buf += len;
+			tm->tm_mon = best_match;
+			buf += best_len;
 			}
 			break;
 
@@ -825,7 +848,7 @@ label:
 			buf = cp;
 			Zero(&mytm, 1, struct tm);
 
-			mytm = *gmtime(&t);
+			mytm = safe_gmtime(aTHX_ &t);
 			*got_GMT = 1;
 
             tm->tm_sec    = mytm.tm_sec;
@@ -1015,9 +1038,9 @@ _strftime(fmt, epoch, islocal = 1)
         size_t len;
 
         if(islocal == 1)
-            mytm = *localtime(&epoch);
+            mytm = safe_localtime(aTHX_ &epoch);
         else
-            mytm = *gmtime(&epoch);
+            mytm = safe_gmtime(aTHX_ &epoch);
 
         len = strftime(tmpbuf, TP_BUF_SIZE, fmt, &mytm);
         /*
@@ -1140,7 +1163,7 @@ _strptime ( string, format, islocal, localization, defaults_ref )
        if (got_GMT == 1 && islocal == 1) {
            time_t t;
            t = my_timegm(&mytm);
-           mytm = *localtime(&t);
+           mytm = safe_localtime(aTHX_ &t);
        }
 
        return_11part_tm(aTHX_ SP, &mytm);
@@ -1153,7 +1176,7 @@ _mini_mktime(int sec, int min, int hour, int mday, int mon, int year)
        time_t t;
   PPCODE:
        t = 0;
-       mytm = *gmtime(&t);
+       mytm = safe_gmtime(aTHX_ &t);
 
        mytm.tm_sec = sec;
        mytm.tm_min = min;
@@ -1172,8 +1195,8 @@ _crt_localtime(time_t sec)
     PREINIT:
         struct tm mytm;
     PPCODE:
-        if(ix) mytm = *gmtime(&sec);
-        else mytm = *localtime(&sec);
+        if(ix) mytm = safe_gmtime(aTHX_ &sec);
+        else mytm = safe_localtime(aTHX_ &sec);
         /* Need to get: $s,$n,$h,$d,$m,$y */
 
         EXTEND(SP, 10);
@@ -1203,7 +1226,7 @@ _get_localization()
         char buf[TP_BUF_SIZE];
         size_t i;
         time_t t = 1325386800; /*1325386800 = Sun, 01 Jan 2012 03:00:00 GMT*/
-        struct tm mytm = *gmtime(&t);
+        struct tm mytm = safe_gmtime(aTHX_ &t);
      CODE:
 
         for(i = 0; i < 7; ++i){

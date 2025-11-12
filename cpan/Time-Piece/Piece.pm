@@ -19,7 +19,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 
 XSLoader::load( 'Time::Piece', $VERSION );
 
@@ -462,16 +462,6 @@ sub month_last_day {
 }
 
 my $strftime_trans_map = {
-    'c' => sub {
-        my ( $format ) = @_;
-        if($LOCALE->{PM} && $LOCALE->{AM}){
-            $format =~ s/%c/%a %d %b %Y %I:%M:%S %p/;
-        }
-        else{
-            $format =~ s/%c/%a %d %b %Y %H:%M:%S/;
-        }
-        return $format;
-    },
     'e' => sub {
         my ( $format, $time ) = @_;
         my $day = sprintf( "%2d", $time->[c_mday] );
@@ -543,22 +533,9 @@ my $strftime_trans_map = {
     },
     'V' => sub {
         my ( $format, $time ) = @_;
-        my $week = sprintf( "%02d", $time->week() );
-        $format =~ s/%V/$week/ if $IS_WIN32;
-        return $format;
-    },
-    'x' => sub {
-        my ( $format ) = @_;
-        $format =~ s/%x/%a %d %b %Y/;
-        return $format;
-    },
-    'X' => sub {
-        my ( $format ) = @_;
-        if($LOCALE->{PM} && $LOCALE->{AM}){
-            $format =~ s/%X/%I:%M:%S %p/;
-        }
-        else{
-            $format =~ s/%X/%H:%M:%S/;
+        if ($IS_WIN32) {
+            my $week = sprintf( "%02d", $time->week() );
+            $format =~ s/%V/$week/;
         }
         return $format;
     },
@@ -670,6 +647,26 @@ sub mon_list {
     my @old = @MON_LIST;
     if (@_) {
         @MON_LIST = @_;
+        &Time::Piece::_default_locale();
+    }
+    return @old;
+}
+
+sub fullday_list {
+    shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
+    my @old = @FULLDAY_LIST;
+    if (@_) {
+        @FULLDAY_LIST = @_;
+        &Time::Piece::_default_locale();
+    }
+    return @old;
+}
+
+sub fullmon_list {
+    shift if ref($_[0]) && $_[0]->isa(__PACKAGE__); # strip first if called as a method
+    my @old = @FULLMON_LIST;
+    if (@_) {
+        @FULLMON_LIST = @_;
         &Time::Piece::_default_locale();
     }
     return @old;
@@ -1046,6 +1043,24 @@ The following methods are available on the object:
                             # of the full POSIX extension)
     $t->strftime()          # "Tue, 29 Feb 2000 12:34:56 GMT"
 
+=head3 strftime Format Flags
+
+The C<strftime> method calls your system's native C<strftime()> implementation,
+so the supported format flags and their behavior will depend on your platform.
+
+B<Platform Variability:> Some format flags behave differently or may be missing
+entirely on certain platforms. The following flags are known to have
+platform-specific issues: C<%e>, C<%D>, C<%F>, C<%k>, C<%l>, C<%P>, C<%r>, C<%R>,
+C<%s>, C<%T>, C<%u>, C<%V>, C<%z>, and C<%Z>.
+
+To mitigate these differences, C<Time::Piece> includes a special translation layer
+that attempts to unify behavior across platforms. For example, C<%F> is not
+available on some Microsoft platforms, so it is automatically converted to
+C<"%Y-%m-%d"> internally before calling the system's C<strftime()>.
+
+For a complete list of format flags supported by your system, consult your
+platform's C<strftime(3)> manual page (C<man strftime> on Unix-like systems).
+
 =head2 Epoch and Calendar Calculations
 
     $t->epoch               # seconds since the epoch
@@ -1085,10 +1100,12 @@ the actual offset including any DST adjustment.
 
 =head2 Global Configuration
 
-    $t->time_separator($s)  # set the default separator (default ":")
-    $t->date_separator($s)  # set the default separator (default "-")
-    $t->day_list(@days)     # set the default weekdays
-    $t->mon_list(@days)     # set the default months
+    $t->time_separator($s)     # set the default separator (default ":")
+    $t->date_separator($s)     # set the default separator (default "-")
+    $t->day_list(@days)        # set the names used by wdayname()
+    $t->mon_list(@months)      # set the names used by month()
+    $t->fullday_list(@days)    # set the names used by fullday()
+    $t->fullmon_list(@months)  # set the names used by fullmonth()
 
 =head2 Parsing
 
@@ -1207,6 +1224,58 @@ The default format string is C<"%a, %d %b %Y %H:%M:%S %Z">, so these are equival
     my $t1 = Time::Piece->strptime($string);
     my $t2 = Time::Piece->strptime($string, "%a, %d %b %Y %H:%M:%S %Z");
 
+=head2 Supported Format Flags
+
+C<Time::Piece> uses a custom C<strptime()> implementation that supports the
+following format flags:
+
+    Flag  Description
+    ----  -----------
+    %%    Literal '%' character
+    %a    Abbreviated weekday name (Mon, Tue, etc.)
+    %A    Full weekday name (Monday, Tuesday, etc.)
+    %b    Abbreviated month name (Jan, Feb, etc.)
+    %B    Full month name (January, February, etc.)
+    %C    Century number (00-99)
+    %d    Day of month (01-31)
+    %D    Equivalent to %m/%d/%y
+    %e    Day of month ( 1-31, space-padded)
+    %F    Equivalent to %Y-%m-%d (ISO 8601 date format)
+    %h    Abbreviated month name (same as %b)
+    %H    Hour in 24-hour format (00-23)
+    %I    Hour in 12-hour format (01-12)
+    %j    Day of year (001-366)
+    %k    Hour in 24-hour format ( 0-23, space-padded)
+    %l    Hour in 12-hour format ( 1-12, space-padded)
+    %m    Month number (01-12)
+    %M    Minute (00-59)
+    %n    Any whitespace
+    %p    AM/PM indicator
+    %P    Alt AM/PM indicator
+    %r    Time in AM/PM format (%I:%M:%S %p, or %H:%M:%S if locale has no AM/PM)
+    %R    Equivalent to %H:%M
+    %s    Seconds since Unix epoch (1970-01-01 00:00:00 UTC)
+    %S    Second (00-60, allowing for leap seconds)
+    %t    Any whitespace (same as %n)
+    %T    Equivalent to %H:%M:%S
+    %u    Weekday as number (1-7, Monday = 1)
+    %w    Weekday as number (0-6, Sunday = 0)
+    %y    Year within century (00-99). Values 00-68 are 2000-2068, 69-99 are 1969-1999
+    %Y    Year with century (e.g., 2024)
+    %z    Timezone offset (+HHMM, -HHMM, +HH:MM, or -HH:MM)
+    %Z    Timezone name (only GMT and UTC recognized; others parsed but ignored)
+
+B<Unsupported Locale Flags:> The format flags C<%c>, C<%x>, and C<%X> are B<not>
+supported as they are highly locale-dependent and have inconsistent formats
+across systems. However, you can construct equivalent formats using the individual
+flags listed above. For example, C<%c> is typically equivalent to something like:
+
+    "%a %b %e %H:%M:%S %Y"   # e.g., "Tue Feb 29 12:34:56 2000"
+
+B<Note:> C<%U>, C<%V>, and C<%W> (week number formats) are parsed but not fully
+implemented in the strptime logic, as they require additional date components
+to calculate the actual date.
+
 =head2 GMT vs Local Time
 
 By default, C<strptime> returns GMT objects when called as a class method:
@@ -1225,6 +1294,9 @@ To get local time objects, you can:
     # Pass a local Time::Piece object as defaults
     my $local = localtime();
     Time::Piece->strptime($string, $format, { defaults => $local })
+
+The islocal and defaults options were added in version 1.37; the instance
+method can be used for compatibility with previous versions.
 
 =head2 Timezone Parsing with %z and %Z
 
@@ -1341,17 +1413,29 @@ B<Note:> This is a global change affecting all Time::Piece instances.
 
 You can also override the day/month names manually:
 
-    my @days = qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
+    # Abbreviated day names
+    my @days = qw( Dom Lun Mar Mie Jue Vie Sab );
     my $spanish_day = localtime->day(@days);
 
-    my @months = qw( Enero Febrero Marzo Abril Mayo Junio
-                     Julio Agosto Septiembre Octubre Noviembre Diciembre );
+    # Full day names
+    my @fulldays = qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
+    my $spanish_fullday = localtime->fullday(@fulldays);
+
+    # Abbreviated month names
+    my @months = qw( Ene Feb Mar Abr May Jun Jul Ago Sep Oct Nov Dic );
     print localtime->month(@months);
+
+    # Full month names
+    my @fullmonths = qw( Enero Febrero Marzo Abril Mayo Junio
+                         Julio Agosto Septiembre Octubre Noviembre Diciembre );
+    print localtime->fullmonth(@fullmonths);
 
 Set globally with:
 
     Time::Piece::day_list(@days);
     Time::Piece::mon_list(@months);
+    Time::Piece::fullday_list(@fulldays);
+    Time::Piece::fullmon_list(@fullmonths);
 
 =head1 Global Overriding
 

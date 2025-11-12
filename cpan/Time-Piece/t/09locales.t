@@ -29,8 +29,51 @@ $t->day_list(@frdays);
 cmp_ok( $t->day,     'eq', &Time::Piece::_locale()->{wday}[ $t->_wday ] );
 cmp_ok( $t->fullday, 'eq', &Time::Piece::_locale()->{weekday}[ $t->_wday ] );
 
+# Test fullday_list() method
+my @original_fulldays = $t->fullday_list();
+is( scalar(@original_fulldays), 7, 'fullday_list() returns 7 days' );
 
-#load local locale
+my @custom_fulldays =
+  qw( Domingo Lunes Martes Miercoles Jueves Viernes Sabado );
+$t->fullday_list(@custom_fulldays);
+cmp_ok(
+    $t->fullday, 'eq',
+    &Time::Piece::_locale()->{weekday}[ $t->_wday ],
+    'fullday() returns custom full day name from locale'
+);
+cmp_ok(
+    $t->fullday, 'eq',
+    $custom_fulldays[ $t->_wday ],
+    'fullday() returns correct custom full day name'
+);
+
+# Test fullmon_list() method
+my @original_fullmons = $t->fullmon_list();
+is( scalar(@original_fullmons), 12, 'fullmon_list() returns 12 months' );
+
+my @custom_fullmons =
+  qw( Enero Febrero Marzo Abril Mayo Junio Julio Agosto Septiembre Octubre Noviembre Diciembre );
+$t->fullmon_list(@custom_fullmons);
+cmp_ok(
+    $t->fullmonth, 'eq',
+    &Time::Piece::_locale()->{month}[ $t->_mon ],
+    'fullmonth() returns custom full month name from locale'
+);
+cmp_ok(
+    $t->fullmonth, 'eq',
+    $custom_fullmons[ $t->_mon ],
+    'fullmonth() returns correct custom full month name'
+);
+
+# Test strptime with custom full day and month names
+# Using 2013-07-09 which is a Tuesday (Martes) in July (Julio)
+my $parsed_both = $t->strptime( 'Martes, 9 Julio 2013', '%A, %d %B %Y' );
+cmp_ok( $parsed_both->_wday, '==', 2, 'strptime parses custom full day name' );
+cmp_ok( $parsed_both->_mon, '==', 6, 'strptime parses custom full month name' );
+cmp_ok( $parsed_both->mday, '==', 9, 'strptime parses day of month' );
+cmp_ok( $parsed_both->year, '==', 2013, 'strptime parses year' );
+
+#load local locale from system
 Time::Piece->use_locale();
 
 #test reverse parsing
@@ -86,7 +129,7 @@ for my $time (
         eval { $parsed = $t->strptime( $t_str, $strp_format ); };
 
         if ($@) {
-            warn("strptime failed with time $t_str and format $strp_format");
+            warn("gmtime strptime failed with time $t_str and format $strp_format");
             warn($@);
             next;
         }
@@ -98,9 +141,9 @@ for my $time (
 
 for my $time (
     time(),        # Now, whenever that might be
-    1451606400,    # 2016-01-01 00:00
-    1451653500,    # 2016-01-01 13:05
-    1449014400,    # 2015-12-02 00:00
+    1451606430,    # 2016-01-01 00:00:30
+    1451653530,    # 2016-01-01 13:05:30
+    1449014430,    # 2015-12-02 00:00:30
   )
 {
     my $t = localtime($time);
@@ -112,7 +155,7 @@ for my $time (
         eval { $parsed = $t->strptime( $t_str, $strp_format ); };
 
         if ($@) {
-            warn("strptime failed with time $t_str and format $strp_format");
+            warn("local strptime failed with time $t_str and format $strp_format");
             warn($@);
             next;
         }
@@ -122,4 +165,4 @@ for my $time (
 
 }
 
-done_testing(234);
+done_testing(244);
