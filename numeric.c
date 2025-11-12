@@ -521,7 +521,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             continue;
         }
 
-        if (   *s == '_'
+        if (   UNLIKELY(*s == '_')
             && s < e - 1
             && allow_underscores
             && generic_isCC_(s[1], class_bit)
@@ -537,7 +537,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             /* To get here with the value so-far being 0 means we've only had
              * leading zeros, then an underscore.  We can continue with the
              * branchless switch() instead of this loop */
-            if (value == 0) {
+            if (UNLIKELY(value == 0)) {
                 goto redo_switch;
             }
             else {
