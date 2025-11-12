@@ -3254,13 +3254,13 @@ Perl_runops_debug(pTHX)
 }
 
 
-/* print the names of the n lexical vars starting at pad offset off */
+/* Print the names of the n lexical vars starting at pad offset off
+ * in the specified CV */
 
 STATIC void
-S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
+S_deb_padvar_cv(pTHX_ CV *cv, PADOFFSET off, int n, bool paren)
 {
     PADNAME *sv;
-    CV * const cv = deb_curcv(cxstack_ix);
     PADNAMELIST *comppad = NULL;
     int i;
 
@@ -3281,6 +3281,16 @@ S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
     }
     if (paren)
         PerlIO_printf(Perl_debug_log, ")");
+}
+
+
+/* Print the names of the n lexical vars starting at pad offset off n the
+ * currently executing CV */
+
+STATIC void
+S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
+{
+    S_deb_padvar_cv(aTHX_ deb_curcv(cxstack_ix), off, n, paren);
 }
 
 
