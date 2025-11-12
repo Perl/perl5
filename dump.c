@@ -1285,7 +1285,9 @@ S_sequence_num(pTHX_ const OP *o)
 }
 
 
-
+/* forward declaration */
+STATIC void
+S_deb_padvar_cv(pTHX_ CV *cv, PADOFFSET off, int n, bool paren);
 
 
 const struct flag_to_name op_flags_names[] = {
@@ -1379,9 +1381,39 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
         }
     }
 
-    if (o->op_targ && optype != OP_NULL)
-            S_opdump_indent(aTHX_ o, level, bar, file, "TARG = %ld\n",
-                (long)o->op_targ);
+    if (o->op_targ && optype != OP_NULL) {
+        S_opdump_indent(aTHX_ o, level, bar, file, "TARG = %ld",
+            (long)o->op_targ);
+
+        /* Display the names of the lexical variables (if any)
+         * associated with op_targ */
+        int n = 1;
+
+        switch (o->op_type) {
+        case OP_PADRANGE:
+            n = o->op_private & OPpPADRANGE_COUNTMASK;
+            /* FALLTHROUGH */
+        case OP_PADSV:
+        case OP_PADAV:
+        case OP_PADHV:
+        case OP_ARGELEM:
+        case OP_PADSV_STORE:
+        case OP_AELEMFAST_LEX:
+          do_lex:
+            PerlIO_puts(file, " ");
+            S_deb_padvar_cv(aTHX_ S_get_cv_from_op(aTHX_ o, rootcv),
+                              o->op_targ,
+                              n, 1);
+            break;
+
+        default:
+            if (   (PL_opargs[o->op_type] & OA_TARGLEX)
+                && (o->op_private & OPpTARGET_MY))
+              goto do_lex;
+        }
+
+        PerlIO_puts(file, "\n");
+    }
 
     if (o->op_flags || o->op_slabbed || o->op_savefree || o->op_static) {
         SV * const tmpsv = newSVpvs("");
