@@ -3152,9 +3152,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\027':	/* ^W & $^WARNING_BITS */
         if (*(mg->mg_ptr+1) == '\0') {
             if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-                i = SvIV(sv);
                 PL_dowarn = (PL_dowarn & ~G_WARN_ON)
-                                | (i ? G_WARN_ON : G_WARN_OFF) ;
+                                | (SvTRUE_NN(sv) ? G_WARN_ON : G_WARN_OFF) ;
             }
         }
         else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
