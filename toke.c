@@ -12573,21 +12573,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
          * when in octal mode.
          */
         NV n = 0.0;
-        UV u = 0;
-        bool overflowed = FALSE;
         bool just_zero  = TRUE;	/* just plain 0 or binary number? */
         bool has_digs = FALSE;
-        static const NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
         static const char* const bases[5] =
           { "", "binary", "", "octal", "hexadecimal" };
 
         /* check for hex */
+        U8 type_bit;
         if (isALPHA_FOLD_EQ(s[1], 'x')) {
             shift = 4;
+            type_bit = CC_XDIGIT_;
             s += 2;
             just_zero = FALSE;
         } else if (isALPHA_FOLD_EQ(s[1], 'b')) {
             shift = 1;
+            type_bit = CC_BINDIGIT_;
             s += 2;
             just_zero = FALSE;
         }
@@ -12597,6 +12597,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         /* so it must be octal */
         else {
             shift = 3;
+            type_bit = CC_OCTDIGIT_;
             s++;
             if (isALPHA_FOLD_EQ(*s, 'o')) {
                 s++;
@@ -12607,99 +12608,54 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
         SUFFER_AN_UNDERSCORE_HERE(s);
 
-        /* read the rest of the number */
-        for (;;) {
-            /* x is used in the overflow test,
-               b is the digit we're adding on. */
-            UV x, b;
-
-            switch (*s) {
-
-            /* if we don't mention it, we're done */
-            default:
-                goto out;
-
-            /* _ are ignored -- but warned about if consecutive */
-            case '_':
-                HANDLE_UNDERSCORE(s);
-                break;
-
-            /* 8 and 9 are not octal */
-            case '8': case '9':
-                if (shift == 3)
-                    yyerror(form("Illegal octal digit '%c'", *s));
-                /* FALLTHROUGH */
-
-            /* octal digits */
-            case '2': case '3': case '4':
-            case '5': case '6': case '7':
-                if (shift == 1)
-                    yyerror(form("Illegal binary digit '%c'", *s));
-                /* FALLTHROUGH */
-
-            case '0': case '1':
-                b = *s++ & 15;		/* ASCII digit -> value of digit */
-                goto digit;
-
-            /* hex digits */
-            case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-            case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-                /* make sure they said 0x */
-                if (shift != 4)
-                    goto out;
-                b = (*s++ & 7) + 9;
-
-                /* Prepare to put the digit we have onto the end
-                   of the number so far.  We check for overflows.
-                */
-
-              digit:
-                just_zero = FALSE;
-                has_digs = TRUE;
-                if (!overflowed) {
-                    assert(shift >= 0);
-                    x = u << shift;	/* make room for the digit */
-
-                    if ((x >> shift) != u
-                        && !(PL_hints & HINT_NEW_BINARY)) {
-                        overflowed = TRUE;
-                        n = (NV) u;
-                        ck_warner_d(packWARN(WARN_OVERFLOW),
-                                    "Integer overflow in %s number",
-                                    bases[shift]);
-                    } else
-                        u = x | b;		/* add the digit to the end */
-                }
-                if (overflowed) {
-                    n *= nvshift[shift];
-                    /* If an NV has not enough bits in its
-                     * mantissa to represent an UV this summing of
-                     * small low-order numbers is a waste of time
-                     * (because the NV cannot preserve the
-                     * low-order bits anyway): we could just
-                     * remember when did we overflow and in the
-                     * end just multiply n by the right
-                     * amount. */
-                    n += (NV) b;
-                }
-
-                /* this could be hexfp, but peek ahead
-                 * to avoid matching ".." */
-                if (UNLIKELY(HEXFP_PEEK(s))) {
-                    goto out;
-                }
-
-                break;
-            }
+        /* Call function to parse the integer portion.  If this value is
+         * overloaded, let the overloading deal with overflow */
+        I32 call_flags = 0;
+        if (PL_hints & HINT_NEW_BINARY) {
+            call_flags |= PERL_SCAN_SILENT_OVERFLOW;
         }
 
-      /* if we get here, we had success: make a scalar value from
-         the number.
-      */
-      out:
+        call_flags |= (
+                        /* We have positioned the parse to be past any prefix
+                         * or initial underscores */
+                        PERL_SCAN_DISALLOW_PREFIX
+                       |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY
 
+                        /* We raise a warning on these */
+                       |PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES
+
+                        /* We will handle these ourselves */
+                       |PERL_SCAN_SILENT_NON_PORTABLE
+                       |PERL_SCAN_SILENT_ILLDIGIT
+                       |PERL_SCAN_NOTIFY_ILLDIGIT
+                      );
+
+        I32 returned_flags = call_flags;
+        STRLEN len = PL_bufend - s;
+        UV u = grok_bin_oct_hex(s, &len, &returned_flags, &n,
+                                shift, type_bit,
+                               '?' /* unused here by callee */
+                               );
+        if (len > 0) {
+            if (u != 0 || len > 1) {
+                just_zero = false;
+            }
+            has_digs = true;
+            s += len;
+        }
+
+        if (s < PL_bufend) {    /* Potentially more to the number */
+            if (isDIGIT_A(*s)) {
+                if (shift == 1) {
+                    yyerror(form("Illegal binary digit '%c'", *s));
+                }
+                else {
+                    yyerror(form("Illegal octal digit '%c'", *s));
+                }
+            }
+            else {
                 /* final misplaced underbar check */
-                SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
+                SUFFER_AN_UNDERSCORE_HERE(s);
 
                 if (UNLIKELY(HEXFP_PEEK(s))) {
                     /* Do sloppy (on the underbars) but quick detection
@@ -12857,6 +12813,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         }
                     }
                 }
+            }
 
             if (!just_zero && !has_digs) {
                 /* 0x, 0o or 0b with no digits, treat it as an error.
@@ -12872,19 +12829,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                   bases[shift]));
                 PL_bufptr = oldbp;
             }
+        }
 
-            if (overflowed) {
-                if (n > 4294967295.0)
-                    output_non_portable(1 << shift);
-                sv = newSVnv(n);
+        if (returned_flags & PERL_SCAN_SILENT_OVERFLOW) {
+            if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
+                output_non_portable(1 << shift);
             }
-            else {
-#if UVSIZE > 4
-                if (u > 0xffffffff)
-                    output_non_portable(1 << shift);
-#endif
-                sv = newSVuv(u);
+            sv = newSVnv(n);
+        }
+        else {
+            if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
+                output_non_portable(1 << shift);
             }
+            sv = newSVuv(u);
+        }
+
         if (just_zero && (PL_hints & HINT_NEW_INTEGER))
             sv = new_constant(start, s - start, "integer",
                               sv, NULL, NULL, 0, NULL);
