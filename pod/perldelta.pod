@@ -384,6 +384,18 @@ manager will later use a regex to expand these into links.
 S<C<use 5.42>> now turns on S<C<use source::encoding "ascii">> for the
 remainder of the line (besides subsequent lines). [GH #23881]
 
+=item *
+
+Since 5.32.0, the second branch of a ternary condition operator wasn't
+getting the correct autovivification context applied. For example in
+something like
+
+    @{ $cond ? $h{foo} : $h{bar} } = ...;
+
+the first branch would correctly autovivify C<$h{foo}> to an array ref,
+but the second branch might incorrectly autovivify C<$h{bar}> to a hash
+ref. [GH #18669].
+
 =back
 
 =head1 Known Problems
