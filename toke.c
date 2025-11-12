@@ -12632,9 +12632,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
         I32 returned_flags = call_flags;
         STRLEN len = PL_bufend - s;
-        UV u = grok_bin_oct_hex(s, &len, &returned_flags, &n,
-                                shift, type_bit,
-                               '?' /* unused here by callee */
+        UV u = grok_uint_by_base(s, &len, &returned_flags, &n, NULL,
+                                UV_BITS, shift-1, shift-1, type_bit,
+                               0
                                );
         if (len > 0) {
             if (u != 0 || len > 1) {
@@ -12832,16 +12832,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 
         if (returned_flags & PERL_SCAN_SILENT_OVERFLOW) {
-            if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
-                output_non_portable(1 << shift);
-            }
             sv = newSVnv(n);
         }
         else {
-            if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
-                output_non_portable(1 << shift);
-            }
             sv = newSVuv(u);
+        }
+
+        if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
+            output_non_portable(1 << shift);
         }
 
         if (just_zero && (PL_hints & HINT_NEW_INTEGER))
