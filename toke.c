@@ -12542,14 +12542,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         static const NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
         static const char* const bases[5] =
           { "", "binary", "", "octal", "hexadecimal" };
-        static const char* const Bases[5] =
-          { "", "Binary", "", "Octal", "Hexadecimal" };
-        static const char* const maxima[5] =
-          { "",
-            "0b11111111111111111111111111111111",
-            "",
-            "037777777777",
-            "0xffffffff" };
 
         /* check for hex */
         if (isALPHA_FOLD_EQ(s[1], 'x')) {
@@ -12851,19 +12843,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             if (overflowed) {
                 if (n > 4294967295.0)
-                    ck_warner(packWARN(WARN_PORTABLE),
-                              "%s number > %s non-portable",
-                              Bases[shift],
-                              new_octal ? "0o37777777777" : maxima[shift]);
+                    output_non_portable(1 << shift);
                 sv = newSVnv(n);
             }
             else {
 #if UVSIZE > 4
                 if (u > 0xffffffff)
-                    ck_warner(packWARN(WARN_PORTABLE),
-                              "%s number > %s non-portable",
-                              Bases[shift],
-                              new_octal ? "0o37777777777" : maxima[shift]);
+                    output_non_portable(1 << shift);
 #endif
                 sv = newSVuv(u);
             }
