@@ -12542,6 +12542,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     bool new_octal = FALSE;     /* octal with "0o" prefix */
 
     PERL_ARGS_ASSERT_SCAN_NUM;
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: hints=%x, %s\n", __FILE__, (long) __LINE__, PL_hints, start));
 
     /* Make sure "int" is wide enough to hold exponent of NV.
        We use "int" (rather than I32 etc.) to be compatible with ldexp() */
@@ -12842,12 +12843,18 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             output_non_portable(1 << shift);
         }
 
-        if (just_zero && (PL_hints & HINT_NEW_INTEGER))
+        if (just_zero && (PL_hints & HINT_NEW_INTEGER)) {
             sv = new_constant(start, s - start, "integer",
                               sv, NULL, NULL, 0, NULL);
-        else if (PL_hints & HINT_NEW_BINARY)
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
+            DEBUG_U(sv_dump(sv));
+        }
+        else if (PL_hints & HINT_NEW_BINARY) {
             sv = new_constant(start, s - start, "binary",
                               sv, NULL, NULL, 0, NULL);
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
+            DEBUG_U(sv_dump(sv));
+        }
     }
     else if (isDIGIT_A(*s) || *s == '.') {
       decimal:
@@ -13067,6 +13074,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     else
         lvalp->opval = NULL;
 
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: returning %s\n", __FILE__, (long) __LINE__, s));
+    DEBUG_U(sv_dump(sv));
     return (char *)s;
 }
 
