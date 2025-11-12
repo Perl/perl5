@@ -169,3 +169,8 @@ EXPECT
 Use of uninitialized value $s in hash element at - line 13.
 Use of uninitialized value $_[0] in defined operator at - line 10.
 defined
+########
+# NAME undefined $^W shouldn't warn
+use warnings;
+undef $^W
+EXPECT

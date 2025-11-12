@@ -197,7 +197,7 @@ SKIP:
         my $warn = '';
         local $SIG{__WARN__} = sub { $warn .= "@_\n" };
         reset "\cW";
-        like($warn, qr/uninitialized/, "magic tries to SvIV() the new value");
+        is($warn, "", 'no warnings resetting $^W');
         $warn = '';
         is($^W, 0, q"check $^W has been zeroed");
         is($warn, '', "should be no more warnings");
