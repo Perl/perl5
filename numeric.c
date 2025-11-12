@@ -314,12 +314,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     const char * s = start + offset;
     const char * e = start + *len_p;
 
-    /* Where the significant digits start */
-    const char * const s0 = s;
-    UV value = 0;
+    const char * const s0 = s;  /* Where the significant digits start */
+    UV value = 0;               /* Running total */
 
-    /* Unroll the loop so that the first 8 digits are branchless except for the
-     * switch.  A ninth hex one overflows a 32 bit word. */
+    /* Unroll the loop so that numbers with 8 or fewer digits can be handled
+     * with the minimum amount of work.  Anything higher would require extra
+     * overhead to deal with the possibility of generating portability
+     * warnings for numbers above 32 bits, which is reached at 8 digits in
+     * base 16. */
   redo_switch:
     switch (e - s) {
       default:
@@ -377,7 +379,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           }
 
           break;
-    }
+    }   /* End of switch on the first so-many characters */
 
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
@@ -387,6 +389,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     NV value_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
+    /* Loop through the characters */
     for (; s < e; s++) {
         if (generic_isCC_(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
@@ -403,10 +406,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
              * because a bit got shifted off the left end, so overflowed.
              * But if it worked, add the new digit. */
             if (LIKELY((tentative_value >> shift) == value)) {
+                /* Note XDIGIT_VALUE() is branchless, works on binary and
+                 * octal as well, so can be used here, without noticeably
+                 * slowing those down (it does have unnecessary shifts, ANDSs,
+                 * and additions for those) */
                 value = tentative_value | XDIGIT_VALUE(*s);
-                    /* Note XDIGIT_VALUE() is branchless, works on binary
-                     * and octal as well, so can be used here, without
-                     * slowing those down */
                 factor *= base;
                 continue;
             }
@@ -420,9 +424,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             value_nv += (NV) value;
 
             /* Then we keep accumulating digits, until all are parsed.  We
-             * start over using the current input value.  This will be added to
-             * 'value_nv' eventually, either when all digits are gone, or we
-             * have overflowed this fresh start. */
+             * start over using the current input value as the initial digit.
+             * This will be added to 'value_nv' eventually, either when all
+             * digits are gone, or we have overflowed this fresh start.  This
+             * method uses the fewest floating point multiplications possible,
+             * losing the least precision. */
             value = XDIGIT_VALUE(*s);
             factor = base;
 
@@ -441,16 +447,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 }
             }
             continue;
-        }
+        } /* End of handling legal digit */
 
+        /* Handle non-trailing underscores when those are accepted */
         if (   UNLIKELY(*s == '_')
             && s < e - 1
             && allow_underscores
             && generic_isCC_(s[1], class_bit)
-
-                /* Don't allow a leading underscore if the only-medial bit is
-                 * set */
             && (   LIKELY(s > s0)
+                   /* Including initial underscores if those are accepted */
                 || UNLIKELY(! (  input_flags
                                & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY))))
         {
@@ -467,7 +472,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             }
         }
 
-        if (*s) {
+        /* We get here when done with the parse, or it got interrupted by a
+         * non-digit or a digit that is outside the bounds of the base, like a
+         * digit 2 in a binary number */
+        if (*s) {   /* *s is to keep a terminating NUL from warning */
+
             if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
                 &&    ckWARN(WARN_DIGIT))
             {
@@ -485,7 +494,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                      * scanning as soon as non-octal characters are seen,
                      * complain only if someone seems to want to use the digits
                      * eight and nine.  Since we know it is not octal, then if
-                     * isDIGIT, must be an 8 or 9). */
+                     * isDIGIT, must be an 8 or 9). khw: XXX why not DWIM for
+                     * other bases as well? */
                     warner(packWARN(WARN_DIGIT),
                            "Illegal octal digit '%c' ignored", *s);
                 }
@@ -496,9 +506,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             }
         }
 
+        /* Error, so quit parsing */
         break;
-    }
+    }   /* End of parsing loop */
 
+    /* s here points to e or to the first illegal character */
     *len_p = s - start;
 
     if (LIKELY(! overflowed)) {
