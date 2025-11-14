@@ -135,9 +135,9 @@
 %type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
 %type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
-%type <opval> subattrlist myattrlist myattrterm myterm
+%type <opval> subattrlist attrlist optattrlist myattrterm myterm
 %type <pval>  fieldvar /* pval is PADNAME */
-%type <opval> optfieldattrlist fielddecl
+%type <opval> fielddecl
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil sigvar
@@ -278,14 +278,14 @@ bare_statement_class_declaration
 	:	KW_CLASS
 		BAREWORD[version]
 		BAREWORD[package]
-		subattrlist
+		optattrlist
 		PERLY_SEMICOLON
 		{
 			package ($package, $version);
 			$$ = NULL;
 			class_setup_stash(PL_curstash);
-			if ($subattrlist) {
-				class_apply_attributes(PL_curstash, $subattrlist);
+			if ($optattrlist) {
+				class_apply_attributes(PL_curstash, $optattrlist);
 			}
 		}
 	;
@@ -294,14 +294,14 @@ bare_statement_class_definition
 	:	KW_CLASS
 		BAREWORD[version]
 		BAREWORD[package]
-		subattrlist
+		optattrlist
 		PERLY_BRACE_OPEN
 		remember
 		{
 			package ($package, $version);
 			class_setup_stash(PL_curstash);
-			if ($subattrlist) {
-				class_apply_attributes(PL_curstash, $subattrlist);
+			if ($optattrlist) {
+				class_apply_attributes(PL_curstash, $optattrlist);
 			}
 		}
 		stmtseq
@@ -1062,13 +1062,17 @@ subattrlist
 			{ $$ = NULL; }
 	;
 
-/* List of attributes for a "my" variable declaration */
-myattrlist:	COLONATTR THING
+/* List of attributes for some other kind of declaration (variables, classes) */
+attrlist:	COLONATTR THING
 			{ $$ = $THING; }
 	|	COLONATTR
 			{ $$ = NULL; }
 	;
 
+optattrlist
+	:	empty
+	|	attrlist
+	;
 
 
 /* --------------------------------------
@@ -1708,12 +1712,12 @@ term[product]	:	termbinop
 
 /* "my" declarations, with optional attributes */
 myattrterm
-	:	KW_MY myterm myattrlist
-			{ $$ = my_attrs($myterm,$myattrlist); }
+	:	KW_MY myterm attrlist
+			{ $$ = my_attrs($myterm,$attrlist); }
 	|	KW_MY myterm
 			{ $$ = localize($myterm,1); }
-	|	KW_MY REFGEN myterm myattrlist
-			{ $$ = newUNOP(OP_REFGEN, 0, my_attrs($myterm,$myattrlist)); }
+	|	KW_MY REFGEN myterm attrlist
+			{ $$ = newUNOP(OP_REFGEN, 0, my_attrs($myterm,$attrlist)); }
 	|	KW_MY REFGEN term[operand]
 			{ $$ = newUNOP(OP_REFGEN, 0, localize($operand,1)); }
 	;
@@ -1750,27 +1754,19 @@ fieldvar:	scalar	%prec PERLY_PAREN_OPEN
 			}
 	;
 
-optfieldattrlist:
-		COLONATTR THING
-			{ $$ = $THING; }
-	|	COLONATTR
-			{ $$ = NULL; }
-	|	empty
-	;
-
 fielddecl
-	:	KW_FIELD fieldvar optfieldattrlist
+	:	KW_FIELD fieldvar optattrlist
 			{
 			  parser->in_my = 0;
-			  if($optfieldattrlist)
-			    class_apply_field_attributes((PADNAME *)$fieldvar, $optfieldattrlist);
+			  if($optattrlist)
+			    class_apply_field_attributes((PADNAME *)$fieldvar, $optattrlist);
 			  $$ = newOP(OP_NULL, 0);
 			}
-	|	KW_FIELD fieldvar optfieldattrlist ASSIGNOP
+	|	KW_FIELD fieldvar optattrlist ASSIGNOP
 			{
 			  parser->in_my = 0;
-			  if($optfieldattrlist)
-			    class_apply_field_attributes((PADNAME *)$fieldvar, $optfieldattrlist);
+			  if($optattrlist)
+			    class_apply_field_attributes((PADNAME *)$fieldvar, $optattrlist);
 			  ENTER;
 			  class_prepare_initfield_parse();
 			}
