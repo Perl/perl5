@@ -36,7 +36,7 @@ use Test2::Util qw/
 {
     for my $try (\&try, Test2::Util->can('_manual_try'), Test2::Util->can('_local_try')) {
         my ($ok, $err) = $try->(sub { die "xxx" });
-        ok(!$ok, "cought exception");
+        ok(!$ok, "caught exception");
         like($err, qr/xxx/, "expected exception");
 
         ($ok, $err) = $try->(sub { 0 });

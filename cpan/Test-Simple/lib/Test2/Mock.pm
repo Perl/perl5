@@ -2,7 +2,7 @@ package Test2::Mock;
 use strict;
 use warnings;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 use Carp qw/croak confess/;
 our @CARP_NOT = (__PACKAGE__);
@@ -425,7 +425,7 @@ sub _inject {
             && (reftype($orig) ne 'SCALAR' || defined($$orig));
 
         $syms->{"$sig$sym"} ||= [];
-        push @{$syms->{"$sig$sym"}} => $orig; # Might be undef, thats expected
+        push @{$syms->{"$sig$sym"}} => $orig; # Might be undef, that's expected
 
         if ($self->{+_TRACK} && $sig eq '&') {
             my $sub_tracker  = $self->{+SUB_TRACKING};

@@ -39,7 +39,7 @@ intercept {
 };
 isa_ok($one, $CLASS);
 
-is($one->hub->ast, exact_ref($one), "Can retrieve AST fromthe hub");
+is($one->hub->ast, exact_ref($one), "Can retrieve AST from the hub");
 
 like(
     $one,

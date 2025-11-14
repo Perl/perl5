@@ -13,7 +13,7 @@ use Test2::API qw(context release);
 use Scalar::Util qw( weaken refaddr );
 use B qw( svref_2object );
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 our @EXPORT = qw(
    is_refcount

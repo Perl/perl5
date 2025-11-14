@@ -2,7 +2,7 @@ package Test2::Manual::Tooling::Nesting;
 use strict;
 use warnings;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 1;
 
@@ -51,7 +51,7 @@ The naive way to do this is to write a C<check_class()> function like this:
 This will appear to work fine, and you might not notice any problems,
 I<so long as the tests are passing.>
 
-=head2 WHATS WRONG WITH IT?
+=head2 WHAT'S WRONG WITH IT?
 
 The problems with the naive approach become obvious if things start to fail.
 The diagnostics that tell you what file and line the failure occurred on will be

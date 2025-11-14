@@ -2,7 +2,7 @@ package Test2::Env;
 use strict;
 use warnings;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 1;
 
@@ -80,8 +80,8 @@ Test2 sets this variable when tests are running.
 
 =head1 TEST2_ENABLE_PLUGINS
 
-This can be used to force plugins to be loaded whent he Test2 API is loaded. It
-takes a list of one or more plugin names seperated by comma. If the module name
+This can be used to force plugins to be loaded when the Test2 API is loaded. It
+takes a list of one or more plugin names separated by comma. If the module name
 does not have a '+' in front of it then the C<Test2::Plugin::> namespace is
 assumed and added. If a '+' is present at the start of a module name it will be
 stripped and no further modification will be made.
@@ -98,7 +98,7 @@ Set by Test2 when tests are running.
 =head1 TS_MAX_DELTA
 
 Used to determine how many max lines of output will be provided when is() finds
-a deep data strucgture mismatch.
+a deep data structure mismatch.
 
 =head1 SOURCE
 

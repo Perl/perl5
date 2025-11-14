@@ -16,7 +16,7 @@ use Test::Tester::Delegate;
 
 require Exporter;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 our @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
 our @ISA = qw( Exporter );
@@ -137,7 +137,8 @@ sub cmp_result
 	my ($result, $expect, $name) = @_;
 
 	my $sub_name = $result->{name};
-	$sub_name = "" unless defined($name);
+	$name = "" unless defined($name);
+	$sub_name = "" unless defined $sub_name;
 
 	my $desc = "subtest '$sub_name' of '$name'";
 

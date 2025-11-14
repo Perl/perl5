@@ -2,7 +2,7 @@ package Test2::Manual::Anatomy::Hubs;
 use strict;
 use warnings;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 1;
 

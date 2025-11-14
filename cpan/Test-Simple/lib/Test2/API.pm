@@ -10,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 
 my $INST;
@@ -946,7 +946,7 @@ documentation for details on how to best use it.
 
 =head1 ENVIRONMENT VARIABLES
 
-See L<Test2::Env> for a list of meaningul environment variables.
+See L<Test2::Env> for a list of meaningful environment variables.
 
 =head1 MAIN API EXPORTS
 
@@ -1585,7 +1585,7 @@ which case new strings will be passed in. These are purely informative, you can
 =item test2_add_pending_diag($diag1, $diag2)
 
 Add a diagnostics message that will be issued the next time a context in which
-a failure occured is released.
+a failure occurred is released.
 
 This can also be thought of like this: "If the next bit causes a failed
 assertion, add this diagnostics message".

@@ -2,7 +2,7 @@ package Test2::API::InterceptResult;
 use strict;
 use warnings;
 
-our $VERSION = '1.302214';
+our $VERSION = '1.302215';
 
 use Scalar::Util qw/blessed/;
 use Test2::Util  qw/pkg_to_file/;
@@ -483,7 +483,7 @@ These are essentially:
     $events->grep(causes_failure => @{$PARAMS{args}})
 
 B<Note:> C<causes_fail()> and C<causes_failure()> are both aliases for
-eachother in events, so these methods are effectively aliases here as well.
+each other in events, so these methods are effectively aliases here as well.
 
 It returns a new instance containing only the events that cause failure.
 
