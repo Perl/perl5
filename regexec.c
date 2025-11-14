@@ -298,6 +298,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
                 depth, retval, PL_savestack_ix);
     });
 
+    DEBUG_STATE_r(
+        Perl_re_exec_indentf(aTHX_
+            "savestack: regcppush filled in range [%" IVdf "..%" IVdf ")\n",
+                depth, (IV)retval, (IV)PL_savestack_ix
+        )
+    );
+
     return retval;
 }
 
@@ -305,22 +312,26 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 #define REGCP_SET(cp)                                           \
     DEBUG_STATE_r(                                              \
         Perl_re_exec_indentf( aTHX_                             \
-            "Setting an EVAL scope, savestack = %" IVdf ",\n",  \
+            "savestack: snapping ix=%" IVdf "\n",               \
             depth, (IV)PL_savestack_ix                          \
         )                                                       \
     );                                                          \
     cp = PL_savestack_ix
 
+/* REGCP_UNWIND(cp): unwind savestack back to marked index,
+ * but without restoring regcppush()ed data (leave_scope() treats
+ * SAVEt_REGCONTEXT as a NOOP)
+ */
+
 #define REGCP_UNWIND(cp)                                        \
     DEBUG_STATE_r(                                              \
-        if (cp != PL_savestack_ix)                              \
-            Perl_re_exec_indentf( aTHX_                         \
-                "Clearing an EVAL scope, savestack = %"         \
-                IVdf "..%" IVdf "\n",                           \
-                depth, (IV)(cp), (IV)PL_savestack_ix            \
-            )                                                   \
+        Perl_re_exec_indentf( aTHX_                             \
+            "savestack: freeing in range [%"                    \
+            IVdf "..%" IVdf ")\n",                              \
+            depth, (IV)(cp), (IV)PL_savestack_ix                \
+        )                                                       \
     );                                                          \
-    regcpblow(cp)
+    LEAVE_SCOPE(cp)
 
 /* set the start and end positions of capture ix */
 #define CLOSE_ANY_CAPTURE(rex, ix, s, e)                                    \
@@ -403,6 +414,10 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
 {
     UV i;
     U32 paren;
+#ifdef DEBUGGING
+    I32 orig_ix = PL_savestack_ix;
+#endif
+
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGCPPOP;
@@ -491,6 +506,14 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
                 "finished regcppop at %" IVdf "\n",
                 depth, PL_savestack_ix);
     });
+
+    DEBUG_STATE_r(
+        Perl_re_exec_indentf(aTHX_
+            "savestack: regcppop freed in range [%" IVdf "..%" IVdf ")\n",
+                depth, (IV)(PL_savestack_ix), (IV)orig_ix
+        )
+    );
+
 }
 
 /* restore the parens and associated vars at savestack position ix,
@@ -499,15 +522,25 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
 STATIC void
 S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p comma_pDEPTH)
 {
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
     I32 tmpix = PL_savestack_ix;
     PERL_ARGS_ASSERT_REGCP_RESTORE;
 
+    DEBUG_STATE_r(
+        Perl_re_exec_indentf( aTHX_
+            "savestack: regcp_restore: ix was %" IVdf "\n",
+            depth, (IV)PL_savestack_ix);
+    );
     PL_savestack_ix = ix;
     regcppop(rex, maxopenparen_p);
     PL_savestack_ix = tmpix;
+    DEBUG_STATE_r(
+        Perl_re_exec_indentf( aTHX_
+            "savestack: regcp_restore: reset ix=%" IVdf "\n",
+            depth, (IV)PL_savestack_ix);
+    );
 }
 
-#define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
 STATIC bool
 S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
@@ -8723,7 +8756,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 SV *save_sv= GvSV(PL_replgv);
                 SV *replsv;
                 SvREFCNT_inc(save_sv);
-                regcpblow(ST.cp); /* LEAVE in disguise */
+                REGCP_UNWIND(ST.cp); /* LEAVE in disguise */
                 /* don't move this initialization up */
                 replsv = GvSV(PL_replgv);
                 sv_setsv(replsv, save_sv);
@@ -8990,7 +9023,7 @@ NULL
 
             ST.prev_curlyx= cur_curlyx;
             cur_curlyx = st;
-            ST.cp = PL_savestack_ix;
+            REGCP_SET(ST.cp);
 
             /* these fields contain the state of the current curly.
              * they are accessed by subsequent WHILEMs */
@@ -9013,7 +9046,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case CURLYX_end_fail: /* just failed to match all of A*B */
-            regcpblow(ST.cp);
+            REGCP_UNWIND(ST.cp); /* LEAVE in disguise */
             cur_curlyx = ST.prev_curlyx;
             sayNO;
             NOT_REACHED; /* NOTREACHED */
