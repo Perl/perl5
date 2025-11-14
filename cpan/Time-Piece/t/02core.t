@@ -1,4 +1,4 @@
-use Test::More tests => 103;
+use Test::More tests => 113;
 
 my $is_qnx = ($^O eq 'qnx');
 my $is_vos = ($^O eq 'vos');
@@ -235,3 +235,24 @@ $s = Time::Seconds->new(130);
 is($s->pretty, '2 minutes, 10 seconds');
 $s = Time::Seconds->new(7330);
 is($s->pretty, '2 hours, 2 minutes, 10 seconds', "Format correct");
+
+my $t_frac = Time::Piece->strptime("2000-02-29T13:34:56.123", '%Y-%m-%dT%H:%M:%S.%f');
+cmp_ok($t_frac->epoch, '==', 951831296, "Fractional seconds with 3 digits parsed correctly");
+cmp_ok($t_frac->sec, '==', 56, "Seconds correct with 3 digit fractional");
+
+$t_frac = Time::Piece->strptime("2000-02-29T13:34:56.123456", '%Y-%m-%dT%H:%M:%S.%f');
+cmp_ok($t_frac->epoch, '==', 951831296, "Fractional seconds with 6 digits parsed correctly");
+cmp_ok($t_frac->sec, '==', 56, "Seconds correct with 6 digit fractional");
+
+$t_frac = Time::Piece->strptime("2000-02-29T13:34:56.1Z", '%Y-%m-%dT%H:%M:%S.%fZ');
+cmp_ok($t_frac->epoch, '==', 951831296, "Fractional seconds with 1 digit parsed correctly");
+cmp_ok($t_frac->sec, '==', 56, "Seconds correct with 1 digit fractional");
+
+my $gmt_obj = gmtime(951831296);
+my $local_obj = $gmt_obj->to_localtime();
+cmp_ok($local_obj->epoch, '==', 951831296, 'to_localtime preserves epoch');
+cmp_ok($local_obj->[Time::Piece::c_islocal], '==', 1, 'to_localtime sets islocal flag');
+
+my $gmt2 = $local_obj->to_gmtime();
+cmp_ok($gmt2->epoch, '==', 951831296, 'to_gmtime preserves epoch');
+cmp_ok($gmt2->[Time::Piece::c_islocal], '==', 0, 'to_gmtime clears islocal flag');

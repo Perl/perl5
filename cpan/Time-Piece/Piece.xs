@@ -758,6 +758,19 @@ label:
 					ptr++;
 			break;
 
+		case 'f':
+			if (!isDIGIT((unsigned char)*buf))
+				return NULL;
+
+			len = 6;
+			for (i = 0; len && *buf != 0 && isDIGIT((unsigned char)*buf); buf++) {
+				i *= 10;
+				i += *buf - '0';
+				len--;
+			}
+			/* Value is discarded - fractional seconds not stored */
+			break;
+
 		case 'B':
 		case 'b':
 		case 'h':
