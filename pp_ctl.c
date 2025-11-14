@@ -3250,6 +3250,7 @@ PP(pp_goto)
     I32 ix;
     PERL_CONTEXT *cx;
     OP *enterops[GOTO_DEPTH];
+    bool into_construct = FALSE;
     const char *label = NULL;
     STRLEN label_len = 0;
     U32 label_flags = 0;
@@ -3652,9 +3653,7 @@ PP(pp_goto)
                     ? 2
                     : 1;
             if (enterops[i])
-                deprecate_fatal_in(WARN_DEPRECATED__GOTO_CONSTRUCT,
-                        "5.42",
-                        "Use of \"goto\" to jump into a construct");
+                into_construct = TRUE;
         }
 
         /* pop unwanted frames */
@@ -3685,6 +3684,12 @@ PP(pp_goto)
             PL_op = oldop;
         }
     }
+
+    if (into_construct)
+        deprecate_fatal_in(WARN_DEPRECATED__GOTO_CONSTRUCT,
+                "5.42",
+                "Use of \"goto\" to jump into a construct");
+
 
     if (do_dump) {
 #ifdef VMS
