@@ -8242,7 +8242,6 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
     PERL_ARGS_ASSERT_MY_STRFTIME;
     PERL_UNUSED_ARG(wday);
     PERL_UNUSED_ARG(yday);
-    PERL_UNUSED_ARG(isdst);
 
 #ifdef USE_LOCALE_TIME
     const char * locale = querylocale_c(LC_TIME);
@@ -8251,7 +8250,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 #endif
 
     struct tm  mytm;
-    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, isdst);
     if (! strftime_tm(fmt, PL_scratch_langinfo, locale, &mytm)) {
         return NULL;
     }
