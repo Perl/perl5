@@ -1,23 +1,20 @@
 __END__
 # NAME goto into foreach
-no warnings 'deprecated';
 goto f;
 foreach(1){f:}
 EXPECT
-Can't "goto" into the middle of a foreach loop at - line 3.
+Can't "goto" into the middle of a foreach loop at - line 2.
 ########
 # NAME goto into given
-no warnings 'deprecated';
 goto f;
 CORE::given(1){f:}
 EXPECT
-Can't "goto" into a "given" block at - line 3.
+Can't "goto" into a "given" block at - line 2.
 ########
 # NAME goto from given topic expression
-no warnings 'deprecated';
 CORE::given(goto f){f:}
 EXPECT
-Can't "goto" into a "given" block at - line 2.
+Can't "goto" into a "given" block at - line 1.
 ########
 # NAME goto into expression
 eval { goto a; 1 + do { a: } }; warn $@;
