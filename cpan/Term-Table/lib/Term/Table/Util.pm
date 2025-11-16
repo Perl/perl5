@@ -2,18 +2,24 @@ package Term::Table::Util;
 use strict;
 use warnings;
 
+use List::Util qw/max/;
 use Config qw/%Config/;
 
-our $VERSION = '0.025';
+our $VERSION = '0.027';
 
 use base 'Exporter';
 our @EXPORT_OK = qw/term_size USE_GCS USE_TERM_READKEY USE_TERM_SIZE_ANY uni_length/;
 
 sub DEFAULT_SIZE() { 80 }
 
-my $IO;
+my @IO;
+my @TIO;
 BEGIN {
-    open($IO, '>&', *STDOUT) or die "Could not clone STDOUT";
+    for my $fh (\*STDOUT, \*STDERR, \*STDIN) {
+        open(my $io, '>&', $fh) or next;
+        push @IO => $io;
+        push @TIO => $io if -t $io;
+    }
 }
 
 sub try(&) {
@@ -28,40 +34,44 @@ my ($tsa) = try { require Term::Size::Any; Term::Size::Any->import('chars') };
 my ($trk) = try { require Term::ReadKey };
 $trk &&= Term::ReadKey->can('GetTerminalSize');
 
-if (!-t $IO) {
-    *USE_TERM_READKEY  = sub() { 0 };
-    *USE_TERM_SIZE_ANY = sub() { 0 };
-    *term_size         = sub {
-        return $ENV{TABLE_TERM_SIZE} if $ENV{TABLE_TERM_SIZE};
-        return DEFAULT_SIZE;
-    };
-}
-elsif ($tsa) {
+if ($tsa) {
     *USE_TERM_READKEY  = sub() { 0 };
     *USE_TERM_SIZE_ANY = sub() { 1 };
     *_term_size        = sub {
-        my $size = chars($IO);
-        return DEFAULT_SIZE if !$size;
-        return DEFAULT_SIZE if $size < DEFAULT_SIZE;
+        my $size = max map { chars($_) // DEFAULT_SIZE } @IO;
+
+        if (!$size || $size < DEFAULT_SIZE) {
+            return $ENV{COLUMNS} if $ENV{COLUMNS} && $ENV{COLUMNS} > DEFAULT_SIZE;
+            return DEFAULT_SIZE;
+        }
+
         return $size;
     };
 }
-elsif ($trk) {
+elsif ($trk && @TIO) {
     *USE_TERM_READKEY  = sub() { 1 };
     *USE_TERM_SIZE_ANY = sub() { 0 };
     *_term_size        = sub {
-        my $total;
+        my @totals;
         try {
             my @warnings;
             {
                 local $SIG{__WARN__} = sub { push @warnings => @_ };
-                ($total) = Term::ReadKey::GetTerminalSize($IO);
+                for my $io (@TIO) {
+                    my ($total) = Term::ReadKey::GetTerminalSize($io);
+                    push @totals => $total;
+                }
             }
             @warnings = grep { $_ !~ m/Unable to get Terminal Size/ } @warnings;
             warn @warnings if @warnings;
         };
-        return DEFAULT_SIZE if !$total;
-        return DEFAULT_SIZE if $total < DEFAULT_SIZE;
+        my $total = @totals ? max(@totals) : 0;
+
+        if (!$total || $total < DEFAULT_SIZE) {
+            return $ENV{COLUMNS} if $ENV{COLUMNS} && $ENV{COLUMNS} > DEFAULT_SIZE;
+            return DEFAULT_SIZE;
+        }
+
         return $total;
     };
 }
@@ -70,6 +80,7 @@ else {
     *USE_TERM_SIZE_ANY = sub() { 0 };
     *term_size         = sub {
         return $ENV{TABLE_TERM_SIZE} if $ENV{TABLE_TERM_SIZE};
+        return $ENV{COLUMNS} if $ENV{COLUMNS} && $ENV{COLUMNS} > DEFAULT_SIZE;
         return DEFAULT_SIZE;
     };
 }

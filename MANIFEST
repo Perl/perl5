@@ -2325,6 +2325,8 @@ cpan/Term-Table/t/Table.t			Term-Table
 cpan/Term-Table/t/Table/Cell.t			Term-Table
 cpan/Term-Table/t/Table/CellStack.t		Term-Table
 cpan/Term-Table/t/Table/LineBreak.t		Term-Table
+cpan/Term-Table/t/Term-ReadKey.t		Term-Table
+cpan/Term-Table/t/Term-Size-Any.t		Term-Table
 cpan/Test-Harness/bin/prove					The prove harness utility
 cpan/Test-Harness/lib/App/Prove.pm				Gubbins for the prove utility
 cpan/Test-Harness/lib/App/Prove/State.pm			Gubbins for the prove utility

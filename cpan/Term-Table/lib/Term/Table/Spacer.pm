@@ -2,7 +2,7 @@ package Term::Table::Spacer;
 use strict;
 use warnings;
 
-our $VERSION = '0.025';
+our $VERSION = '0.027';
 
 sub new { bless {}, $_[0] }
 
