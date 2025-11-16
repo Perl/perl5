@@ -20,26 +20,24 @@ EXPECT
 Can't "goto" into a "given" block at - line 2.
 ########
 # NAME goto into expression
-no warnings 'deprecated';
 eval { goto a; 1 + do { a: } }; warn $@;
 eval { goto b; meth { b: }   }; warn $@;
 eval { goto c; map { c: } () }; warn $@;
 eval { goto d; f(do { d: })  }; die  $@;
 EXPECT
+Can't "goto" into a binary or list expression at - line 1.
 Can't "goto" into a binary or list expression at - line 2.
 Can't "goto" into a binary or list expression at - line 3.
 Can't "goto" into a binary or list expression at - line 4.
-Can't "goto" into a binary or list expression at - line 5.
 ########
 # NAME dump with computed label
-no warnings 'deprecated';
 my $label = "foo";
 CORE::dump $label;
 EXPECT
-Can't find label foo at - line 3.
+Can't find label foo at - line 2.
 ########
 # NAME when outside given
-use 5.01; no warnings 'deprecated';
+use 5.01;
 when(undef){}
 EXPECT
 Can't "when" outside a topicalizer at - line 2.
