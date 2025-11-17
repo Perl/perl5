@@ -198,6 +198,19 @@ own named feature.
 The ticket for this experiment is
 L<[perl #22794]|https://github.com/Perl/perl5/issues/22794>.
 
+=item Named parameters in subroutine signatures
+
+Introduced in Perl 5.43.5.
+
+Using this feature triggers warnings in the category
+C<experimental::signature_named_parameters>.
+
+This feature enables parameters in subroutine signatures that are matched by
+name rather than by position, and is documented in L<perlsub/Signatures>.
+
+The ticket for this experiment is
+L<[perl #23945]|https://github.com/Perl/perl5/issues/23945>.
+
 =back
 
 =head2 Accepted features
