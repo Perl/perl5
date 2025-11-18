@@ -467,12 +467,12 @@ When doing a MAINT release, check that perlgov lists the I<current>
 Perl Steering Council and Core Team members, in case they have changed
 since the corresponding stable release has been shipped.
 
-=for checklist skip MAINT BLEAD-POINT RC
+=for checklist skip MAINT BLEAD-POINT
 
 =head3 Merge BLEAD-POINT perldeltas
 
-All perldeltas from the 5.X series must be
-merged into F<pod/perldelta.pod>. The process starts with
+When doing the first RC for BLEAD-FINAL, all perldeltas from the 5.X series
+must be merged into F<pod/perldelta.pod>. The process starts with
 
     ./perl -Ilib Porting/merge-deltas.pl
 
