@@ -830,6 +830,7 @@ the strings?).
  Ether      5.43.2       2025-Aug-20
  Thibault   5.43.3       2025-Sep-23
  Eric       5.43.4       2025-Oct-22
+ Thibault   5.43.5       2025-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
