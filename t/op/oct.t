@@ -5,8 +5,9 @@
 chdir 't' if -d 't';
 require './test.pl';
 use strict;
+no warnings 'overflow';
 
-plan(tests => 79);
+plan(tests => 81);
 
 foreach(['0b1_0101', 0b101_01],
 	['0b10_101', 0_2_5],
@@ -58,6 +59,8 @@ foreach(['0b1_0101', 0b101_01],
         # Additional syntax for octals
         ["0o7_654_321", 2054353],
         ["O4567", 0o4_567],
+        # Overflow approximation
+        ["52" x 32, 4184734490257787175890526282138444277401570296309356341930],
        ) {
     my ($string, $value) = @$_;
     my $result = oct $string;
@@ -95,6 +98,8 @@ foreach(['01_234', 0b_1001000110100],
 	# Allow uppercase base markers (#76296)
 	["0XCAFE",   0xCAFE],
 	["XCAFE",    0xCAFE],
+        # Overflow approximation
+        ["5" x 48, 2092367245128893587945263141069222138700785148154678170965],
        ) {
     my ($string, $value) = @$_;
     my $result = hex $string;
