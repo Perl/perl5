@@ -8754,6 +8754,60 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 }
 
 /*
+
+=for apidoc      sv_numne
+=for apidoc_item sv_numne_flags
+
+These each return a boolean indicating if the numbers in the two SV arguments
+are different, coercing them to numbers if necessary, basically behaving like
+the Perl code S<C<$sv1 != $sv2>>.
+
+A NULL SV is treated as C<undef>.
+
+C<sv_numne> always performs 'get' magic.  C<sv_numne_flags> performs 'get'
+magic only if C<flags> has the C<SV_GMAGIC> bit set.
+
+C<sv_numne> always checks for, and if present, handles C<!=> overloading.  If
+not present, regular numerical comparison will be used instead.
+C<sv_numne_flags> normally does the same, but setting the C<SV_SKIP_OVERLOAD>
+bit set in C<flags> causes it to use regular numerical comparison.
+
+Otherwise, the functions behave identically.
+
+=for apidoc Amnh||SV_SKIP_OVERLOAD
+
+=cut
+*/
+
+bool
+Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMNE_FLAGS;
+
+    if(flags & SV_GMAGIC) {
+        if(sv1)
+            SvGETMAGIC(sv1);
+        if(sv2)
+            SvGETMAGIC(sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!sv1)
+        sv1 = &PL_sv_undef;
+    if(!sv2)
+        sv2 = &PL_sv_undef;
+
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
+        SV *ret = amagic_call(sv1, sv2, ne_amg, 0);
+        if(ret)
+            return SvTRUE(ret);
+    }
+
+    return do_ncmp(sv1, sv2) != 0;
+}
+
+/*
 =for apidoc      sv_cmp
 =for apidoc_item sv_cmp_flags
 

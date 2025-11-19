@@ -3436,6 +3436,11 @@ Admp	|bool	|sv_numeq	|NULLOK SV *sv1 			\
 Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
+Admp	|bool	|sv_numne	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numne_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
 Adip	|NV	|SvNV		|NN SV *sv
 Adp	|NV	|sv_2nv_flags	|NN SV * const sv			\
 				|const I32 flags

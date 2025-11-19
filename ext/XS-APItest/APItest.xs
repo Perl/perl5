@@ -5044,6 +5044,12 @@ sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
         RETVAL
 
 bool
+sv_numne(SV *sv1, SV *sv2)
+
+bool
+sv_numne_flags(SV *sv1, SV *sv2, U32 flags)
+
+bool
 sv_streq(SV *sv1, SV *sv2)
     CODE:
         RETVAL = sv_streq(sv1, sv2);

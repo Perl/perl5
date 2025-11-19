@@ -4794,6 +4794,13 @@ PERL_CALLCONV bool
 Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS
 
+/* PERL_CALLCONV bool
+Perl_sv_numne(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV bool
+Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMNE_FLAGS
+
 PERL_CALLCONV char *
 Perl_sv_peek(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_PEEK
