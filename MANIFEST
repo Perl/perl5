@@ -991,9 +991,6 @@ cpan/Encode/ucm/viscii.ucm				Unicode Character Map
 cpan/Encode/Unicode/Makefile.PL				Encode extension
 cpan/Encode/Unicode/Unicode.pm				Encode extension
 cpan/Encode/Unicode/Unicode.xs				Encode extension
-cpan/experimental/lib/experimental.pm	Module related to experimental
-cpan/experimental/lib/stable.pm		Module related to experimental
-cpan/experimental/t/basic.t		Test file related to experimental
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
@@ -4145,6 +4142,9 @@ dist/encoding-warnings/t/4-lexical.t		tests for encoding::warnings
 dist/Env/lib/Env.pm			Map environment into ordinary variables
 dist/Env/t/array.t			See if Env works for arrays
 dist/Env/t/env.t			See if Env works
+dist/experimental/lib/experimental.pm	Module related to experimental
+dist/experimental/lib/stable.pm		Module related to experimental
+dist/experimental/t/basic.t		Test file related to experimental
 dist/Exporter/Changes			History of changes for Exporter
 dist/Exporter/lib/Exporter.pm		Exporter base class
 dist/Exporter/lib/Exporter/Heavy.pm	Complicated routines for Exporter
