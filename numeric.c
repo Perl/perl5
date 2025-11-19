@@ -487,12 +487,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           break;
     }
 
-    /* How many real digits have been processed */
-    STRLEN bytes_so_far = s - s0;
-
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
-    NV factor = shift << bytes_so_far;
+    NV factor = 0.0;
 
     bool overflowed = FALSE;
     NV value_nv = 0;
