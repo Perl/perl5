@@ -8730,22 +8730,56 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
 
 =for apidoc      sv_numeq
 =for apidoc_item sv_numeq_flags
+=for apidoc_item sv_numne
+=for apidoc_item sv_numne_flags
 
-These each return a boolean indicating if the numbers in the two SV arguments
-are identical, coercing them to numbers if necessary, basically behaving like
-the Perl code S<C<$sv1 == $sv2>>.
+These return a boolean that is the result of the corresponding numeric
+comparison:
+
+=over
+
+=item C<sv_numeq>
+
+=item C<sv_numeq_flags>
+
+Numeric equality, the same as S<C<$sv1 == $sv2>>.
+
+=item C<sv_numne>
+
+=item C<sv_numne_flags>
+
+Numeric inequality, the same as S<C<$sv1 != $sv2>>.
+
+=back
+
+Beware that in the presence of overloading C<==> may not be a strict
+inverse of C<!=>.
+
+The non-C<_flags> suffix versions of these functions always perform
+get magic and handle the appropriate type of overloading.  See
+L<overload> for details.
+
+These each return a boolean indicating if the numbers in the two SV
+arguments are equal or not equal, coercing them to numbers if
+necessary, basically behaving like the Perl code.
 
 A NULL SV is treated as C<undef>.
 
-C<sv_numeq> always performs 'get' magic.  C<sv_numeq_flags> performs 'get'
-magic only if C<flags> has the C<SV_GMAGIC> bit set.
+The C<_flags> variants of these functions accept these flags:
 
-C<sv_numeq> always checks for, and if present, handles C<==> overloading.  If
-not present, regular numerical comparison will be used instead.
-C<sv_numeq_flags> normally does the same, but setting the C<SV_SKIP_OVERLOAD>
-bit set in C<flags> causes it to use regular numerical comparison.
+=over
 
-Otherwise, the functions behave identically.
+=item C<SV_GMAGIC>
+
+Perform 'get' magic on both C<sv1> amd C<sv2> if this flag is set,
+otherwise 'get' magic is ignored.
+
+=item C<SV_SKIP_OVERLOAD>
+
+Skip any operator overloading implemented for this type and operator.
+Be aware that numeric, C<+0>, overloading will still be applied, unless in the scope of C<no overloading;>.
+
+=back
 
 =for apidoc Amnh||SV_SKIP_OVERLOAD
 
@@ -8763,32 +8797,6 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 
     return do_ncmp(sv1, sv2) == 0;
 }
-
-/*
-
-=for apidoc      sv_numne
-=for apidoc_item sv_numne_flags
-
-These each return a boolean indicating if the numbers in the two SV arguments
-are different, coercing them to numbers if necessary, basically behaving like
-the Perl code S<C<$sv1 != $sv2>>.
-
-A NULL SV is treated as C<undef>.
-
-C<sv_numne> always performs 'get' magic.  C<sv_numne_flags> performs 'get'
-magic only if C<flags> has the C<SV_GMAGIC> bit set.
-
-C<sv_numne> always checks for, and if present, handles C<!=> overloading.  If
-not present, regular numerical comparison will be used instead.
-C<sv_numne_flags> normally does the same, but setting the C<SV_SKIP_OVERLOAD>
-bit set in C<flags> causes it to use regular numerical comparison.
-
-Otherwise, the functions behave identically.
-
-=for apidoc Amnh||SV_SKIP_OVERLOAD
-
-=cut
-*/
 
 bool
 Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
