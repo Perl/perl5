@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.75';
+$VERSION = '1.76';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -189,6 +189,7 @@ my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 # the experiments were successful (or abandoned),
 # so no warning bit is needed anymore
 my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
+  deprecated::goto_construct
   deprecated::smartmatch
   experimental::lexical_subs
   experimental::postderef

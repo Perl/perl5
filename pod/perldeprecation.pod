@@ -69,12 +69,10 @@ prevailing version to another.
 
 Category: "deprecated::subsequent_use_version"
 
-=head2 Perl 5.42
-
 =head3 Goto Block Construct
 
-C<goto LABEL;> will produce a deprecated warning when jumping into the body
-of a loop or other block construct from outside. For instance
+C<goto LABEL;> now produces an exception when jumping into the body of a loop
+or other block construct from outside. For instance
 
     while (should_loop($x)) {
         LABEL:
@@ -82,11 +80,15 @@ of a loop or other block construct from outside. For instance
     }
     goto LABEL;
 
-will produce a warning that this behavior is deprecated. In general you should
-just avoid doing this; the people that maintain your code will be grateful for
-your restraint.
+now throws an exception indicating that this behavior is no longer permitted.
 
 Category: "deprecated::goto_construct"
+
+=head2 Perl 5.42
+
+There were no deprecations or fatalizations in Perl 5.42.  (There were
+deprecations we I<planned> to do in Perl 5.42 but failed to carry out; they
+have been re-scheduled.)
 
 =head2 Perl 5.40
 

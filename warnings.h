@@ -82,94 +82,93 @@
 
 /* Warnings Categories added in Perl 5.011003 */
 
-#define WARN_DEPRECATED__GOTO_CONSTRUCT	 48
-#define WARN_DEPRECATED__UNICODE_PROPERTY_NAME 49
+#define WARN_DEPRECATED__UNICODE_PROPERTY_NAME 48
 
 /* Warnings Categories added in Perl 5.013 */
 
-#define WARN_NON_UNICODE		 50
-#define WARN_NONCHAR			 51
-#define WARN_SURROGATE			 52
+#define WARN_NON_UNICODE		 49
+#define WARN_NONCHAR			 50
+#define WARN_SURROGATE			 51
 
 /* Warnings Categories added in Perl 5.017 */
 
-#define WARN_EXPERIMENTAL		 53
-#define WARN_EXPERIMENTAL__REGEX_SETS	 54
+#define WARN_EXPERIMENTAL		 52
+#define WARN_EXPERIMENTAL__REGEX_SETS	 53
 
 /* Warnings Categories added in Perl 5.019 */
 
-#define WARN_SYSCALLS			 55
+#define WARN_SYSCALLS			 54
 
 /* Warnings Categories added in Perl 5.021 */
 
-#define WARN_EXPERIMENTAL__RE_STRICT	 56
-#define WARN_EXPERIMENTAL__REFALIASING	 57
-#define WARN_LOCALE			 58
-#define WARN_MISSING			 59
-#define WARN_REDUNDANT			 60
+#define WARN_EXPERIMENTAL__RE_STRICT	 55
+#define WARN_EXPERIMENTAL__REFALIASING	 56
+#define WARN_LOCALE			 57
+#define WARN_MISSING			 58
+#define WARN_REDUNDANT			 59
 
 /* Warnings Categories added in Perl 5.025 */
 
-#define WARN_EXPERIMENTAL__DECLARED_REFS 61
+#define WARN_EXPERIMENTAL__DECLARED_REFS 60
 
 /* Warnings Categories added in Perl 5.025011 */
 
-#define WARN_DEPRECATED__DOT_IN_INC	 62
+#define WARN_DEPRECATED__DOT_IN_INC	 61
 
 /* Warnings Categories added in Perl 5.027 */
 
-#define WARN_SHADOW			 63
+#define WARN_SHADOW			 62
 
 /* Warnings Categories added in Perl 5.029 */
 
-#define WARN_EXPERIMENTAL__PRIVATE_USE	 64
-#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 65
-#define WARN_EXPERIMENTAL__VLB		 66
+#define WARN_EXPERIMENTAL__PRIVATE_USE	 63
+#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 64
+#define WARN_EXPERIMENTAL__VLB		 65
 
 /* Warnings Categories added in Perl 5.033 */
 
-#define WARN_EXPERIMENTAL__TRY		 67
+#define WARN_EXPERIMENTAL__TRY		 66
 
 /* Warnings Categories added in Perl 5.035 */
 
-#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 68
-#define WARN_EXPERIMENTAL__BUILTIN	 69
-#define WARN_EXPERIMENTAL__DEFER	 70
-#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 71
-#define WARN_SCALAR			 72
+#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 67
+#define WARN_EXPERIMENTAL__BUILTIN	 68
+#define WARN_EXPERIMENTAL__DEFER	 69
+#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 70
+#define WARN_SCALAR			 71
 
 /* Warnings Categories added in Perl 5.035009 */
 
-#define WARN_DEPRECATED__VERSION_DOWNGRADE 73
+#define WARN_DEPRECATED__VERSION_DOWNGRADE 72
 
 /* Warnings Categories added in Perl 5.03501 */
 
-#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 74
+#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 73
 
 /* Warnings Categories added in Perl 5.037 */
 
-#define WARN_EXPERIMENTAL__CLASS	 75
+#define WARN_EXPERIMENTAL__CLASS	 74
 
 /* Warnings Categories added in Perl 5.039002 */
 
-#define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 76
+#define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 75
 
 /* Warnings Categories added in Perl 5.039008 */
 
-#define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 77
+#define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 76
 
 /* Warnings Categories added in Perl 5.041 */
 
-#define WARN_EXPERIMENTAL__KEYWORD_ALL	 78
-#define WARN_EXPERIMENTAL__KEYWORD_ANY	 79
+#define WARN_EXPERIMENTAL__KEYWORD_ALL	 77
+#define WARN_EXPERIMENTAL__KEYWORD_ANY	 78
 
 /* Warnings Categories added in Perl 5.043 */
 
-#define WARN_EXPERIMENTAL__SIGNATURE_NAMED_PARAMETERS 80
-#define WARNsize			 21
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
-#define WARN_DEFAULTstring		 "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x05\x00\x15\x14\x55\x55\x54\x55\x01"
+#define WARN_EXPERIMENTAL__SIGNATURE_NAMED_PARAMETERS 79
+#define WARNsize			 20
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARN_DEFAULTstring		 "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x01\x40\x05\x45\x55\x15\x55\x55"
 
 #define isLEXWARN_on \
         cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -329,7 +328,6 @@ category parameters passed.
 =for apidoc Amnh||WARN_VOID
 =for apidoc Amnh||WARN_IMPRECISION
 =for apidoc Amnh||WARN_ILLEGALPROTO
-=for apidoc Amnh||WARN_DEPRECATED__GOTO_CONSTRUCT
 =for apidoc Amnh||WARN_DEPRECATED__UNICODE_PROPERTY_NAME
 =for apidoc Amnh||WARN_NON_UNICODE
 =for apidoc Amnh||WARN_NONCHAR

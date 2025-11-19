@@ -47,7 +47,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=over 4
+
+=item *
+
+Using C<goto> to jump into the body of a loop or other block construct from
+outside is no longer permitted. [L<GH #23618|https://github.com/Perl/perl5/issues/23618>]
+
+=back
 
 =head2 Module removals
 

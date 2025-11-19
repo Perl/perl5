@@ -7923,6 +7923,12 @@ For speed and efficiency reasons, Perl internally does not do full
 reference-counting of iterated items, hence deleting such an item in the
 middle of an iteration causes Perl to see a freed value.
 
+=item Use of "goto" to jump into a construct is no longer permitted
+
+(F) You have used C<goto LABEL;> or C<goto EXPR;> in an attempt to jump into
+the body of a loop or other block construct from the outside. As of Perl 5.44,
+this throws an exception.
+
 =item Use of /g modifier is meaningless in split
 
 (W regexp) You used the /g modifier on the pattern for a C<split>
