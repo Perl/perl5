@@ -396,6 +396,10 @@ the first branch would correctly autovivify C<$h{foo}> to an array ref,
 but the second branch might incorrectly autovivify C<$h{bar}> to a hash
 ref. [GH #18669].
 
+=item *
+
+Don't warn about jumping into a construct if we're DIE-ing [L<GH #23922|https://github.com/Perl/perl5/pull/23922>]
+
 =back
 
 =head1 Known Problems
