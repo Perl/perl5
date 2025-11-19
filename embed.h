@@ -1906,6 +1906,7 @@
 #     define sv_2iuv_common(a)                  S_sv_2iuv_common(aTHX_ a)
 #     define sv_add_arena(a,b,c)                S_sv_add_arena(aTHX_ a,b,c)
 #     define sv_display(a,b,c)                  S_sv_display(aTHX_ a,b,c)
+#     define sv_numcmp_common(a,b,c,d,e)        S_sv_numcmp_common(aTHX_ a,b,c,d,e)
 #     define sv_pos_b2u_midway(a,b,c,d)         S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #     define sv_pos_u2b_cached(a,b,c,d,e,f,g)   S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
 #     define sv_pos_u2b_forwards                S_sv_pos_u2b_forwards

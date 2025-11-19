@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 use XS::APItest;
 
 my $four = 4;
@@ -10,6 +10,10 @@ ok !sv_numeq($four, 5), '$four != 5';
 my $six_point_five = 6.5; # an exact float, so == is fine
 ok  sv_numeq($six_point_five, 6.5), '$six_point_five == 6.5';
 ok !sv_numeq($six_point_five, 6.6), '$six_point_five != 6.6';
+
+# NULLs
+ok sv_numeq(undef, 0), "NULL sv1";
+ok sv_numeq(0, undef), "NULL sv2";
 
 # GMAGIC
 "10" =~ m/(\d+)/;

@@ -6077,6 +6077,12 @@ S	|const char *|sv_display|NN SV * const sv			\
 				|NN char *tmpbuf			\
 				|STRLEN tmpbuf_size
 S	|bool	|sv_2iuv_common |NN SV * const sv
+S	|bool	|sv_numcmp_common					\
+				|NULLOK SV **sv1			\
+				|NULLOK SV **sv2			\
+				|const U32 flags			\
+				|int method				\
+				|NN bool *result
 S	|STRLEN |sv_pos_b2u_midway					\
 				|SPTR const U8 * const s		\
 				|MPTR const U8 * const target		\

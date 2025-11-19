@@ -8699,6 +8699,33 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     return sv_eq_flags(sv1, sv2, 0);
 }
 
+PERL_STATIC_INLINE bool
+S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
+                   int method, bool *result) {
+    if(flags & SV_GMAGIC) {
+        if(*sv1)
+            SvGETMAGIC(*sv1);
+        if(*sv2)
+            SvGETMAGIC(*sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!*sv1)
+        *sv1 = &PL_sv_undef;
+    if(!*sv2)
+        *sv2 = &PL_sv_undef;
+
+    SV *sv_result;
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+       (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) &&
+       (sv_result = amagic_call(*sv1, *sv2, method, 0))) {
+        *result = SvTRUE(sv_result);
+        return true;
+    }
+
+    return false;
+}
+
 /*
 
 =for apidoc      sv_numeq
@@ -8730,25 +8757,9 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS;
 
-    if(flags & SV_GMAGIC) {
-        if(sv1)
-            SvGETMAGIC(sv1);
-        if(sv2)
-            SvGETMAGIC(sv2);
-    }
-
-    /* Treat NULL as undef */
-    if(!sv1)
-        sv1 = &PL_sv_undef;
-    if(!sv2)
-        sv2 = &PL_sv_undef;
-
-    if(!(flags & SV_SKIP_OVERLOAD) &&
-            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
-        SV *ret = amagic_call(sv1, sv2, eq_amg, 0);
-        if(ret)
-            return SvTRUE(ret);
-    }
+    bool result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, eq_amg, &result)))
+        return result;
 
     return do_ncmp(sv1, sv2) == 0;
 }
@@ -8784,25 +8795,10 @@ Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_NUMNE_FLAGS;
 
-    if(flags & SV_GMAGIC) {
-        if(sv1)
-            SvGETMAGIC(sv1);
-        if(sv2)
-            SvGETMAGIC(sv2);
-    }
 
-    /* Treat NULL as undef */
-    if(!sv1)
-        sv1 = &PL_sv_undef;
-    if(!sv2)
-        sv2 = &PL_sv_undef;
-
-    if(!(flags & SV_SKIP_OVERLOAD) &&
-            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
-        SV *ret = amagic_call(sv1, sv2, ne_amg, 0);
-        if(ret)
-            return SvTRUE(ret);
-    }
+    bool result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ne_amg, &result)))
+        return result;
 
     return do_ncmp(sv1, sv2) != 0;
 }

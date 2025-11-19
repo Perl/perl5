@@ -1640,6 +1640,8 @@ signal_thread_start(void *arg) {
 #  define hwm_checks_enabled() false
 #endif
 
+typedef SV *nullable_SV;
+
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
@@ -5028,26 +5030,36 @@ test_HvNAMEf_QUOTEDPREFIX(sv)
     OUTPUT:
         RETVAL
 
+TYPEMAP: <<HERE
+
+nullable_SV	T_NULLABLE_SV
+
+INPUT
+
+T_NULLABLE_SV
+    $var = $arg == &PL_sv_undef ? NULL : $arg;
+
+HERE
 
 bool
-sv_numeq(SV *sv1, SV *sv2)
+sv_numeq(nullable_SV sv1, nullable_SV sv2)
     CODE:
         RETVAL = sv_numeq(sv1, sv2);
     OUTPUT:
         RETVAL
 
 bool
-sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
+sv_numeq_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
     CODE:
         RETVAL = sv_numeq_flags(sv1, sv2, flags);
     OUTPUT:
         RETVAL
 
 bool
-sv_numne(SV *sv1, SV *sv2)
+sv_numne(nullable_SV sv1, nullable_SV sv2)
 
 bool
-sv_numne_flags(SV *sv1, SV *sv2, U32 flags)
+sv_numne_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
 
 bool
 sv_streq(SV *sv1, SV *sv2)
