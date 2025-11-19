@@ -3683,10 +3683,7 @@ PP(pp_goto)
     }
 
     if (into_construct)
-        deprecate_fatal_in(WARN_DEPRECATED__GOTO_CONSTRUCT,
-                "5.42",
-                "Use of \"goto\" to jump into a construct");
-
+        croak("Use of \"goto\" to jump into a construct is no longer permitted");
 
     if (do_dump) {
 #ifdef VMS
