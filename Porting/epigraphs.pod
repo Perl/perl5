@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.5 - Jean Giono
+
+L<Announced on 2025-11-20 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/11/msg270513.html>
+
+He who despises himself will never be happy.
+
 =head2 v5.43.4 - Helen Keller 1903, quoting John Richard Green 1870
 
 L<Announced on 2025-10-23 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2025/10/msg270412.html>
