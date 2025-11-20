@@ -3473,7 +3473,6 @@ PP(pp_goto)
                 PUSHMARK(mark);
                 rpp_invoke_xs(cv);
                 LEAVE;
-                goto finish;
             }
             else {
                 PADLIST * const padlist = CvPADLIST(cv);
@@ -3529,8 +3528,8 @@ PP(pp_goto)
                     }
                 }
                 retop = CvSTART(cv);
-                goto finish;
             }
+            goto finish;
         }
         else {
             /* goto EXPR */
