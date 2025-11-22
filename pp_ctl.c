@@ -2388,7 +2388,7 @@ PP_wrapped(pp_caller, MAXARG, 0)
             mPUSHs(newSVsv(cx->blk_eval.old_namesv));
             PUSHs(&PL_sv_yes);
         }
-        /* eval BLOCK (try blocks have old_namesv == 0) */
+        /* eval BLOCK (eval blocks have old_namesv == 0) */
         else {
             PUSHs(&PL_sv_undef);
             PUSHs(&PL_sv_undef);
