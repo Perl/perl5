@@ -26,7 +26,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
 <commit votes="mauke ether tonyc" id="96673a4bb36a" issue="23405" pull="23429" desc="newFOROP: fix crash when optimizing 2-var for over builtin::indexed"/>
-<commit votes="mauke khw" id="5695970362d3" issue="23511" pull="23514" desc="class.c: gracefully handle reader definition after 'strict' error"/>
+<commit votes="mauke khw" id="4e22a3d0e5f9" issue="23511" pull="23514" desc="class.c: gracefully handle reader definition after 'strict' error"/>
 
 </div>
 
@@ -37,7 +37,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="khw" id="bb8d1c31a6a7d1437d7efa65ee4ef55badc277b9" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
+<commit votes="khw" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
 
 </div>
 
@@ -47,7 +47,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="mauke khw" id="21ba535de624" issue="23825" pull="23829" desc="Turn off POSIX 2008 locales on AIX"/>
+<commit votes="mauke khw" id="1f9d9f8d5ef1" issue="23825" pull="23829" desc="Turn off POSIX 2008 locales on AIX"/>
 
 </div>
 
