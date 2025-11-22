@@ -136,7 +136,7 @@ FORL2: for($y=1; 1;) {
   goto FORL2;
 }
 
-# Does goto work correctly within a try block?
+# Does goto work correctly within a eval block?
 #  (BUG ID 20000313.004) - [perl #2359]
 my $ok = 0;
 eval {
@@ -144,7 +144,7 @@ eval {
   goto LABEL20;
   LABEL20: $ok = 1 if $variable;
 };
-ok($ok, 'works correctly within a try block');
+ok($ok, 'works correctly within a eval block');
 is($@, "", '...and $@ not set');
 
 # And within an eval-string?
