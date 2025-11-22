@@ -2886,6 +2886,8 @@ PP(pp_return)
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
                 /* diag_listed_as: Can't "%s" out of a "finally" block */
+                /* GH 23948: probably not reachable from test suite, but
+                 * possibly from XS code; retain */
                 croak("Can't \"%s\" out of a \"%s\" block",
                         "return", S_defer_blockname(&cxstack[i]));
         }

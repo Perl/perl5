@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 29;
+plan 32;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -300,3 +300,28 @@ no warnings 'experimental::defer';
 
     is($ok, "ok", 'eval{die} inside defer does not stop runloop');
 }
+
+# [GH #23948]
+{
+    use warnings;
+    no warnings 'experimental';
+
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, "@_" };
+
+    my $err = '';
+    for (1) {
+        defer {
+            eval 'last'; $err = $@; chomp $err;
+        }
+    }
+    is(scalar @warnings, 1, "Got exactly one warning");
+    like($warnings[0],
+        qr/Exiting eval via last at/,
+        "Got expected warning: exiting eval via last");
+    like(
+        $err,
+        qr/Can't "last" out of a "defer" block at \(eval \d+\) line 1\./,
+        "Got expected exception: last out of defer block");
+}
+
