@@ -2881,7 +2881,7 @@ PP(pp_return)
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
         I32 i;
-        /* Check for  defer { return; } */
+        /* Check for defer { return; } */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
@@ -3053,7 +3053,7 @@ S_unwind_loop(pTHX)
 
     if (cxix < cxstack_ix) {
         I32 i;
-        /* Check for  defer { last ... } etc */
+        /* Check for defer { last ... } etc */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
@@ -3310,7 +3310,7 @@ PP(pp_goto)
             else if (CxMULTICALL(cx))
                 DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 
-            /* Check for  defer { goto &...; } */
+            /* Check for defer { goto &...; } */
             for(ix = cxstack_ix; ix > cxix; ix--) {
                 if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
                     /* diag_listed_as: Can't "%s" out of a "defer" block */
