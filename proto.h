@@ -4802,6 +4802,34 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS
 
 /* PERL_CALLCONV bool
+Perl_sv_numge(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV bool
+Perl_sv_numge_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMGE_FLAGS
+
+/* PERL_CALLCONV bool
+Perl_sv_numgt(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV bool
+Perl_sv_numgt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMGT_FLAGS
+
+/* PERL_CALLCONV bool
+Perl_sv_numle(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV bool
+Perl_sv_numle_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMLE_FLAGS
+
+/* PERL_CALLCONV bool
+Perl_sv_numlt(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV bool
+Perl_sv_numlt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMLT_FLAGS
+
+/* PERL_CALLCONV bool
 Perl_sv_numne(pTHX_ SV *sv1, SV *sv2); */
 
 PERL_CALLCONV bool

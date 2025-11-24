@@ -3441,6 +3441,26 @@ Admp	|bool	|sv_numeq	|NULLOK SV *sv1 			\
 Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
+Admp	|bool	|sv_numge	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numge_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numgt	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numgt_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numle	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numle_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numlt	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numlt_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
 Admp	|bool	|sv_numne	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|bool	|sv_numne_flags |NULLOK SV *sv1 			\

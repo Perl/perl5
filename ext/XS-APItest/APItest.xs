@@ -5068,6 +5068,30 @@ I32
 sv_numcmp_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
 
 bool
+sv_numle(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numle_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numlt(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numlt_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numge(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numge_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numgt(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numgt_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
 sv_streq(SV *sv1, SV *sv2)
     CODE:
         RETVAL = sv_streq(sv1, sv2);

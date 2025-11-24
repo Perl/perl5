@@ -934,6 +934,10 @@
 # define sv_nosharing(a)                        Perl_sv_nosharing(aTHX_ a)
 # define sv_numcmp_flags(a,b,c)                 Perl_sv_numcmp_flags(aTHX_ a,b,c)
 # define sv_numeq_flags(a,b,c)                  Perl_sv_numeq_flags(aTHX_ a,b,c)
+# define sv_numge_flags(a,b,c)                  Perl_sv_numge_flags(aTHX_ a,b,c)
+# define sv_numgt_flags(a,b,c)                  Perl_sv_numgt_flags(aTHX_ a,b,c)
+# define sv_numle_flags(a,b,c)                  Perl_sv_numle_flags(aTHX_ a,b,c)
+# define sv_numlt_flags(a,b,c)                  Perl_sv_numlt_flags(aTHX_ a,b,c)
 # define sv_numne_flags(a,b,c)                  Perl_sv_numne_flags(aTHX_ a,b,c)
 # define sv_peek(a)                             Perl_sv_peek(aTHX_ a)
 # define sv_pos_b2u(a,b)                        Perl_sv_pos_b2u(aTHX_ a,b)
@@ -2604,6 +2608,10 @@
 #   define Perl_sv_mortalcopy(mTHX,a)           sv_mortalcopy(a)
 #   define Perl_sv_numcmp(mTHX,a,b)             sv_numcmp(a,b)
 #   define Perl_sv_numeq(mTHX,a,b)              sv_numeq(a,b)
+#   define Perl_sv_numge(mTHX,a,b)              sv_numge(a,b)
+#   define Perl_sv_numgt(mTHX,a,b)              sv_numgt(a,b)
+#   define Perl_sv_numle(mTHX,a,b)              sv_numle(a,b)
+#   define Perl_sv_numlt(mTHX,a,b)              sv_numlt(a,b)
 #   define Perl_sv_numne(mTHX,a,b)              sv_numne(a,b)
 #   define Perl_sv_pv(mTHX,a)                   sv_pv(a)
 #   define Perl_sv_pvbyte(mTHX,a)               sv_pvbyte(a)
@@ -2710,6 +2718,10 @@
 #   define Perl_sv_mortalcopy                   sv_mortalcopy
 #   define Perl_sv_numcmp                       sv_numcmp
 #   define Perl_sv_numeq                        sv_numeq
+#   define Perl_sv_numge                        sv_numge
+#   define Perl_sv_numgt                        sv_numgt
+#   define Perl_sv_numle                        sv_numle
+#   define Perl_sv_numlt                        sv_numlt
 #   define Perl_sv_numne                        sv_numne
 #   define Perl_sv_pv                           sv_pv
 #   define Perl_sv_pvbyte                       sv_pvbyte

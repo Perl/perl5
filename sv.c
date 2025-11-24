@@ -8736,6 +8736,14 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
 =for apidoc_item sv_numeq_flags
 =for apidoc_item sv_numne
 =for apidoc_item sv_numne_flags
+=for apidoc_item sv_numge
+=for apidoc_item sv_numge_flags
+=for apidoc_item sv_numgt
+=for apidoc_item sv_numgt_flags
+=for apidoc_item sv_numle
+=for apidoc_item sv_numle_flags
+=for apidoc_item sv_numlt
+=for apidoc_item sv_numlt_flags
 
 These return a boolean that is the result of the corresponding numeric
 comparison:
@@ -8754,17 +8762,42 @@ Numeric equality, the same as S<C<$sv1 == $sv2>>.
 
 Numeric inequality, the same as S<C<$sv1 != $sv2>>.
 
+=item C<sv_numle>
+
+=item C<sv_numle_flags>
+
+Numeric less than or equal, the same as S<C<$sv1 E<lt>= $sv2>>.
+
+=item C<sv_numlt>
+
+=item C<sv_numlt_flags>
+
+Numeric less than, the same as S<C<$sv1 E<lt> $sv2>>.
+
+=item C<sv_numge>
+
+=item C<sv_numge_flags>
+
+Numeric greater than or equal, the same as S<C<$sv1 E<gt>= $sv2>>.
+
+=item C<sv_numgt>
+
+=item C<sv_numgt_flags>
+
+Numeric greater than, the same as S<C<$sv1 E<gt> $sv2>>.
+
 =back
 
-Beware that in the presence of overloading C<==> may not be a strict
-inverse of C<!=>.
+Beware that in the presence of overloading the comparisons might not
+have their normal properties, eg. C< sv_numeq(sv1, sv2) > might be
+different to C< !sv_numne(sv1, sv2) >.
 
 The non-C<_flags> suffix versions of these functions always perform
 get magic and handle the appropriate type of overloading.  See
 L<overload> for details.
 
 These each return a boolean indicating if the numbers in the two SV
-arguments are equal or not equal, coercing them to numbers if
+arguments satisfy the given relationship, coercing them to numbers if
 necessary, basically behaving like the Perl code.
 
 A NULL SV is treated as C<undef>.
@@ -8807,12 +8840,63 @@ Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_NUMNE_FLAGS;
 
-
     SV *result;
     if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ne_amg, &result)))
         return SvTRUE(result);
 
     return do_ncmp(sv1, sv2) != 0;
+}
+
+bool
+Perl_sv_numle_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMLE_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, le_amg, &result)))
+        return SvTRUE(result);
+
+    return do_ncmp(sv1, sv2) <= 0;
+}
+
+bool
+Perl_sv_numlt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMLT_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, lt_amg, &result)))
+        return SvTRUE(result);
+
+    return do_ncmp(sv1, sv2) < 0;
+}
+
+bool
+Perl_sv_numge_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMGE_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ge_amg, &result)))
+        return SvTRUE(result);
+
+    I32 cmp = do_ncmp(sv1, sv2);
+
+    return cmp != 2 && cmp >= 0;
+}
+
+bool
+Perl_sv_numgt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMGT_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, gt_amg, &result)))
+        return SvTRUE(result);
+
+    I32 cmp = do_ncmp(sv1, sv2);
+
+    return cmp != 2 && cmp > 0;
 }
 
 /*
