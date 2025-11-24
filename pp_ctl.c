@@ -3310,14 +3310,6 @@ PP(pp_goto)
             else if (CxMULTICALL(cx))
                 DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 
-            /* Check for defer { goto &...; } */
-            for(ix = cxstack_ix; ix > cxix; ix--) {
-                if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
-                    /* diag_listed_as: Can't "%s" out of a "defer" block */
-                    croak("Can't \"%s\" out of a \"%s\" block",
-                            "goto", S_defer_blockname(&cxstack[ix]));
-            }
-
             /* First do some returnish stuff. */
 
             SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
