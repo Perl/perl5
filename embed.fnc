@@ -6452,7 +6452,7 @@ Adp	|bool	|dump_c_backtrace					\
 				|NN PerlIO *fp				\
 				|int max_depth				\
 				|int skip
-dm	|void	|free_c_backtrace					\
+dmo	|void	|free_c_backtrace					\
 				|NN Perl_c_backtrace *bt
 dp	|Perl_c_backtrace *|get_c_backtrace				\
 				|int max_depth				\
