@@ -332,7 +332,7 @@ REGEX_SET   REGEX_SET,  depth p S ; Regex set, temporary node used in pre-optimi
 #
 #
 TRIE            next:FAIL
-EVAL            B,postponed_AB:FAIL
+EVAL            B,postponed_A,postponed_B:FAIL
 CURLYX          end:FAIL
 WHILEM          A_pre,A_min,A_max,B_min,B_max:FAIL
 BRANCH          next:FAIL

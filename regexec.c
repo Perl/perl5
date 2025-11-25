@@ -6671,7 +6671,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     /* mark_state piggy backs on the yes_state logic so that when we unwind
        the stack on success we can update the mark_state as we go */
     regmatch_state *mark_state = NULL; /* last mark state we have seen */
-    regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
+    regmatch_state *cur_eval = NULL; /* most recent EVAL_postponed_A state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
     bool no_final = 0;      /* prevent failure from backtracking? */
@@ -8719,15 +8719,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.prev_eval = cur_eval;
                 cur_eval = st;
                 /* now continue from first node in postoned RE */
-                PUSH_YES_STATE_GOTO(EVAL_postponed_AB, startpoint, locinput,
+                PUSH_YES_STATE_GOTO(EVAL_postponed_A, startpoint, locinput,
                                     loceol, script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
         }
 
-        case EVAL_postponed_AB: /* cleanup after a successful (??{A})B */
+        case EVAL_postponed_A: /* cleanup the A part after a
+                                  successful (??{A})B */
+        case EVAL_postponed_B: /* cleanup the B part after a
+                                  successful (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
-                Perl_re_exec_indentf( aTHX_  "EVAL_AB cur_eval = %p prev_eval = %p\n",
+                Perl_re_exec_indentf( aTHX_  "EVAL_postponed_A/B cur_eval = %p prev_eval = %p\n",
                     depth, cur_eval, ST.prev_eval);
             });
 
@@ -8744,7 +8747,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 rex->recurse_locinput[CUR_EVAL.close_paren - 1] = VAL;  \
             }
 
-            SET_RECURSE_LOCINPUT("EVAL_AB[before]", CUR_EVAL.prev_recurse_locinput);
+            SET_RECURSE_LOCINPUT("EVAL_postponed_A/B[before]", CUR_EVAL.prev_recurse_locinput);
 
             rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
@@ -8771,7 +8774,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if ( nochange_depth )
                 nochange_depth--;
 
-            SET_RECURSE_LOCINPUT("EVAL_AB[after]", cur_eval->locinput);
+            SET_RECURSE_LOCINPUT("EVAL_postponed_A/B[after]", cur_eval->locinput);
             sayYES;
 
 
@@ -8780,7 +8783,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             regcppop(rex, &maxopenparen);
             sayNO;
 
-        case EVAL_postponed_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
+        case EVAL_postponed_A_fail: /* unsuccessfully ran A in (??{A})B */
+        case EVAL_postponed_B_fail: /* unsuccessfully ran B in (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB_fail cur_eval = %p prev_eval = %p\n",
@@ -9902,7 +9906,7 @@ NULL
 
                 SET_RECURSE_LOCINPUT("FAKE-END[after]", cur_eval->locinput);
 
-                PUSH_YES_STATE_GOTO(EVAL_postponed_AB,          /* match B */
+                PUSH_YES_STATE_GOTO(EVAL_postponed_B,          /* match B */
                                     st->u.eval.prev_eval->u.eval.B,
                                     locinput, loceol, script_run_begin);
             }
