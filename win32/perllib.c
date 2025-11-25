@@ -261,8 +261,10 @@ EXTERN_C		/* GCC in C++ mode mangles the name, otherwise */
 BOOL APIENTRY
 DllMain(HINSTANCE hModule,	/* DLL module handle */
         DWORD fdwReason,	/* reason called */
-        LPVOID)                 /* reserved */
+        LPVOID lpvReserved)	/* reserved */
 { 
+    PERL_UNUSED_ARG(lpvReserved);
+
     switch (fdwReason) {
         /* The DLL is attaching to a process due to process
          * initialization or a call to LoadLibrary.
