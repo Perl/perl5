@@ -8701,7 +8701,7 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 
 PERL_STATIC_INLINE bool
 S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
-                   int method, bool *result) {
+                   int method, SV **result) {
     if(flags & SV_GMAGIC) {
         if(*sv1)
             SvGETMAGIC(*sv1);
@@ -8715,11 +8715,10 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
     if(!*sv2)
         *sv2 = &PL_sv_undef;
 
-    SV *sv_result;
+    /* FIXME: do_ncmp doesn't handle "+0" overloads well */
     if(!(flags & SV_SKIP_OVERLOAD) &&
        (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) &&
-       (sv_result = amagic_call(*sv1, *sv2, method, 0))) {
-        *result = SvTRUE(sv_result);
+       (*result = amagic_call(*sv1, *sv2, method, 0))) {
         return true;
     }
 
@@ -8791,9 +8790,9 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS;
 
-    bool result;
+    SV *result;
     if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, eq_amg, &result)))
-        return result;
+        return SvTRUE(result);
 
     return do_ncmp(sv1, sv2) == 0;
 }
@@ -8804,11 +8803,84 @@ Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     PERL_ARGS_ASSERT_SV_NUMNE_FLAGS;
 
 
-    bool result;
+    SV *result;
     if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ne_amg, &result)))
-        return result;
+        return SvTRUE(result);
 
     return do_ncmp(sv1, sv2) != 0;
+}
+
+/*
+=for apidoc      sv_numcmp
+=for apidoc_item sv_numcmp_flags
+
+This returns an integer indicating the ordering of the two SV
+arguments, coercing them to numbers if necessary, basically behaving
+like the Perl code S<C<$sv1 <=> $sv2 >>.
+
+A NULL SV is treated as C<undef>.
+
+This will return one of the following values:
+
+=over
+
+=item *
+
+C<1> - C<sv2> is numerically greater than C<sv1>
+
+=item *
+
+C<0> - C<sv1> and C<sv2> are numerically equal.
+
+=item *
+
+C<-1> - C<sv2> is numerically less than C<sv1>
+
+=item *
+
+C<2> - C<sv1> and C<sv2> are not numerically comparable, probably
+because one of them is C<NaN>, though overloads can extend that.
+
+=back
+
+C<sv_numcmp> always performs 'get' magic.  C<sv_numcmp_flags> performs
+'get' magic on if C<flags> has the C<SV_GMAGIC> bit set.
+
+C<sv_numcmp> always checks for, and if present, handles C<< <=> >>
+overloading.  If not present, regular numerical comparison will be
+used instead.
+C<sv_numcmp_flags> normally does the same, but if the
+C<SV_SKIP_OVERLOAD> bit is set in C<flags> any C<< <=> >> overloading
+is ignored and a regular numerical comparison is done instead.
+
+=cut
+*/
+
+#define SANE_ORDERING_RESULT(val) \
+    ((val) < 0 ? -1 : (val) > 0 ? 1 : 0)
+
+I32
+Perl_sv_numcmp_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMCMP_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ncmp_amg, &result))) {
+        /* Similar to what sort() does in amagic_ncmp() */
+        if (SvIOK(result) && !SvIsUV(result)) {
+            IV i = SvIVX(result);
+            return SANE_ORDERING_RESULT(i);
+        }
+        else if (!SvOK(result)) {
+            return 2;
+        }
+        else {
+            NV nv = SvNV(result);
+            return SANE_ORDERING_RESULT(nv);
+        }
+    }
+
+    return do_ncmp(sv1, sv2);
 }
 
 /*

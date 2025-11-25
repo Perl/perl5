@@ -1,11 +1,23 @@
 #!perl
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 use XS::APItest;
+use Config;
 
 my $four = 4;
 ok  sv_numeq($four, 4), '$four == 4';
 ok !sv_numeq($four, 5), '$four != 5';
+
+SKIP:
+{
+    no warnings 'experimental';
+    my $nan = eval { builtin::nan };
+    defined $nan
+      or skip "No NAN", 2;
+    my $nan = 0+"NaN";
+    ok !sv_numeq($nan, 0),  '$nan != 0';
+    ok !sv_numeq($nan, $nan), '$nan != $nan';
+}
 
 my $six_point_five = 6.5; # an exact float, so == is fine
 ok  sv_numeq($six_point_five, 6.5), '$six_point_five == 6.5';

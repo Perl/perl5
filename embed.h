@@ -932,6 +932,7 @@
 # define sv_newmortal()                         Perl_sv_newmortal(aTHX)
 # define sv_newref(a)                           Perl_sv_newref(aTHX_ a)
 # define sv_nosharing(a)                        Perl_sv_nosharing(aTHX_ a)
+# define sv_numcmp_flags(a,b,c)                 Perl_sv_numcmp_flags(aTHX_ a,b,c)
 # define sv_numeq_flags(a,b,c)                  Perl_sv_numeq_flags(aTHX_ a,b,c)
 # define sv_numne_flags(a,b,c)                  Perl_sv_numne_flags(aTHX_ a,b,c)
 # define sv_peek(a)                             Perl_sv_peek(aTHX_ a)
@@ -2601,6 +2602,7 @@
 #   define Perl_sv_force_normal(mTHX,a)         sv_force_normal(a)
 #   define Perl_sv_insert(mTHX,a,b,c,d,e)       sv_insert(a,b,c,d,e)
 #   define Perl_sv_mortalcopy(mTHX,a)           sv_mortalcopy(a)
+#   define Perl_sv_numcmp(mTHX,a,b)             sv_numcmp(a,b)
 #   define Perl_sv_numeq(mTHX,a,b)              sv_numeq(a,b)
 #   define Perl_sv_numne(mTHX,a,b)              sv_numne(a,b)
 #   define Perl_sv_pv(mTHX,a)                   sv_pv(a)
@@ -2706,6 +2708,7 @@
 #   define Perl_sv_force_normal                 sv_force_normal
 #   define Perl_sv_insert                       sv_insert
 #   define Perl_sv_mortalcopy                   sv_mortalcopy
+#   define Perl_sv_numcmp                       sv_numcmp
 #   define Perl_sv_numeq                        sv_numeq
 #   define Perl_sv_numne                        sv_numne
 #   define Perl_sv_pv                           sv_pv

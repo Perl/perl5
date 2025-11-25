@@ -5061,6 +5061,12 @@ sv_numne(nullable_SV sv1, nullable_SV sv2)
 bool
 sv_numne_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
 
+I32
+sv_numcmp(nullable_SV sv1, nullable_SV sv2)
+
+I32
+sv_numcmp_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
 bool
 sv_streq(SV *sv1, SV *sv2)
     CODE:

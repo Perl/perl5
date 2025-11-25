@@ -4787,6 +4787,13 @@ PERL_CALLCONV void
 Perl_sv_nosharing(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_NOSHARING
 
+/* PERL_CALLCONV I32
+Perl_sv_numcmp(pTHX_ SV *sv1, SV *sv2); */
+
+PERL_CALLCONV I32
+Perl_sv_numcmp_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMCMP_FLAGS
+
 /* PERL_CALLCONV bool
 Perl_sv_numeq(pTHX_ SV *sv1, SV *sv2); */
 
@@ -9237,7 +9244,7 @@ S_sv_display(pTHX_ SV * const sv, char *tmpbuf, STRLEN tmpbuf_size);
         assert(sv); assert(tmpbuf)
 
 STATIC bool
-S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags, int method, bool *result);
+S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags, int method, SV **result);
 # define PERL_ARGS_ASSERT_SV_NUMCMP_COMMON      \
         assert(result)
 

@@ -2323,6 +2323,7 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
 #define sv_numeq(sv1, sv2) sv_numeq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_numne(sv1, sv2) sv_numne_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numcmp(sv1, sv2) sv_numcmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_streq(sv1, sv2) sv_streq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_collxfrm_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
