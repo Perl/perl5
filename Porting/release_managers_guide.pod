@@ -1177,6 +1177,8 @@ Bootstrap the CPAN client on the clean install:
 
  $ bin/cpan5.X.Y
 
+=for checklist skip BLEAD-POINT
+
 =head4 Install the Inline module with CPAN and test it
 
 Try installing a popular CPAN module that's reasonably complex and that
@@ -1189,13 +1191,50 @@ Check that your perl can run this:
 
  $ bin/perl -lwe "use Inline C => q[int f() { return 42;}]; print f"
  42
- $
+
+=for checklist skip RC MAINT BLEAD-FINAL
+
+=head4 Install the Inline module with CPAN and test it
+
+Try installing a popular CPAN module that's reasonably complex and that
+has dependencies; for example:
+
+ CPAN> install Inline::C
+ CPAN> quit
+
+Check that your perl can run this:
+
+ $ bin/perl5.X.Y -lwe "use Inline C => q[int f() { return 42;}]; print f"
+ 42
+
+=for checklist skip BLEAD-POINT
 
 =head4 Make sure that perlbug works
 
 Test L<perlbug> with the following:
 
  $ bin/perlbug
+ ...
+ Subject: test bug report
+ Local perl administrator [yourself]:
+ Editor [vi]:
+ Module:
+ Category [core]:
+ Severity [low]:
+ (edit report)
+ Action (Send/Display/Edit/Subject/Save to File): f
+ Name of file to save message in [perlbug.rep]:
+
+Then carefully examine the output (in F<perlbug.rep]>), especially
+the "Locally applied patches" section.
+
+=for checklist skip RC MAINT BLEAD-FINAL
+
+=head4 Make sure that perlbug works
+
+Test L<perlbug> with the following:
+
+ $ bin/perlbug5.X.Y
  ...
  Subject: test bug report
  Local perl administrator [yourself]:
