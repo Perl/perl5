@@ -21,7 +21,9 @@ two numbers for equality, and S<C<$x eq $y>> compares two strings.
 There are a few exceptions though: The operator C<x> can be either string
 repetition or list repetition, depending on the type of the left
 operand, and C<&>, C<|>, C<^> and C<~> can be either string or numeric bit
-operations.
+operations (unless C<use v5.28> or later, or L<feature/"The 'bitwise' feature">
+is in effect, in which case a different version of each operator exists
+for manipulating strings).
 
 =head2 Operator Precedence and Associativity
 X<operator, precedence> X<precedence> X<associativity>
