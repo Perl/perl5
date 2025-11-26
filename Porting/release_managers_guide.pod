@@ -1121,11 +1121,19 @@ paths.
 Note that the results may be different without a F<.git/> directory,
 which is why you should test from the tarball.
 
+=for checklist skip BLEAD-POINT
+
 =head4 Run the Installation Verification Procedure utility
 
  $ bin/perlivp
+ ...
+ All tests successful.
+ $
 
- # Or, perhaps:
+=for checklist skip RC MAINT BLEAD-FINAL
+
+=head4 Run the Installation Verification Procedure utility
+
  $ bin/perlivp5.X.Y
  ...
  All tests successful.
