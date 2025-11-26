@@ -1161,13 +1161,20 @@ performing these actions:
 
  $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
 
+=for checklist skip BLEAD-POINT
+
 =head4 Bootstrap the CPAN client
 
 Bootstrap the CPAN client on the clean install:
 
  $ bin/cpan
 
- # Or, perhaps:
+=for checklist skip RC MAINT BLEAD-FINAL
+
+=head4 Bootstrap the CPAN client
+
+Bootstrap the CPAN client on the clean install:
+
  $ bin/cpan5.X.Y
 
 =head4 Install the Inline module with CPAN and test it
