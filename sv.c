@@ -8821,39 +8821,27 @@ comparison:
 
 =over
 
-=item C<sv_numeq>
-
-=item C<sv_numeq_flags>
+=item C<sv_numeq>, C<sv_numeq_flags>
 
 Numeric equality, the same as S<C<$sv1 == $sv2>>.
 
-=item C<sv_numne>
-
-=item C<sv_numne_flags>
+=item C<sv_numne>, C<sv_numne_flags>
 
 Numeric inequality, the same as S<C<$sv1 != $sv2>>.
 
-=item C<sv_numle>
-
-=item C<sv_numle_flags>
+=item C<sv_numle>, C<sv_numle_flags>
 
 Numeric less than or equal, the same as S<C<$sv1 E<lt>= $sv2>>.
 
-=item C<sv_numlt>
-
-=item C<sv_numlt_flags>
+=item C<sv_numlt>, C<sv_numlt_flags>
 
 Numeric less than, the same as S<C<$sv1 E<lt> $sv2>>.
 
-=item C<sv_numge>
-
-=item C<sv_numge_flags>
+=item C<sv_numge>, C<sv_numge_flags>
 
 Numeric greater than or equal, the same as S<C<$sv1 E<gt>= $sv2>>.
 
-=item C<sv_numgt>
-
-=item C<sv_numgt_flags>
+=item C<sv_numgt>, C<sv_numgt_flags>
 
 Numeric greater than, the same as S<C<$sv1 E<gt> $sv2>>.
 
