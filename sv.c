@@ -8715,11 +8715,16 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
     if(!*sv2)
         *sv2 = &PL_sv_undef;
 
-    /* FIXME: do_ncmp doesn't handle "+0" overloads well */
     if(!(flags & SV_SKIP_OVERLOAD) &&
-       (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) &&
-       (*result = amagic_call(*sv1, *sv2, method, 0))) {
-        return true;
+       (SvAMAGIC(*sv1) || SvAMAGIC(*sv2))) {
+        if ((*result = amagic_call(*sv1, *sv2, method, 0)))
+            return true;
+
+        /* normally handled by try_amagic_bin */
+        if (SvROK(*sv1))
+            *sv1 = sv_2num(*sv1);
+        if (SvROK(*sv2))
+            *sv2 = sv_2num(*sv2);
     }
 
     return false;

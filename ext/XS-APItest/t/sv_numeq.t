@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 15;
+use Test::More tests => 22;
 use XS::APItest;
 use Config;
 
@@ -49,4 +49,24 @@ ok  sv_numeq_flags($1, 10, SV_GMAGIC), 'sv_numeq_flags with SV_GMAGIC does';
     ok !sv_numeq_flags($obj, 10, SV_SKIP_OVERLOAD), 'AlwaysTen is not 10 with SV_SKIP_OVERLOAD'
 }
 
+# +0 overloading with large numbers and using fallback
+{
+    my $big = ~0;
+    my $bigm1 = $big-1;
+    package MyBigNum {
+        use overload "0+" => sub { $_[0][0] },
+          fallback => 1;
+    }
+    my $o1 = bless [ $big   ], "MyBigNum";
+    my $o2 = bless [ $big   ], "MyBigNum";
+    my $o3 = bless [ $bigm1 ], "MyBigNum";
 
+    ok $o1 == $o2, "perl op gets it right";
+    ok $o1 == $big, "perl op still gets it right for left overload";
+    ok !($o1 == $o3), "perl op still gets it right for different values";
+    ok sv_numeq($o1, $o2), "sv_numeq two overloads";
+    ok !sv_numeq($o1, $o3), "sv_numeq two different overloads"
+      or diag sprintf "%x vs %x", $o1, $o3;
+    ok sv_numeq($o1, $big), "sv_numeq left overload";
+    ok sv_numeq($bigm1, $o3), "sv_numeq right overload";
+}

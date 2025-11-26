@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 15;
+use Test::More tests => 22;
 use XS::APItest;
 use Config;
 
@@ -45,4 +45,25 @@ ok !sv_numne_flags($1, 11, SV_GMAGIC), 'sv_numne_flags with SV_GMAGIC does';
     ok  sv_numne(11, $obj), 'AlwayeTwelve is not 11 on the right';
 
     ok !sv_numne_flags($obj, 11, SV_SKIP_OVERLOAD), 'AlwaysTwelve is 12 with SV_SKIP_OVERLOAD'
+}
+
+# +0 overloading with large numbers and using fallback
+{
+    my $big = ~0;
+    my $bigm1 = $big-1;
+    package MyBigNum {
+        use overload "0+" => sub { $_[0][0] },
+          fallback => 1;
+    }
+    my $o1 = bless [ $big   ], "MyBigNum";
+    my $o2 = bless [ $big   ], "MyBigNum";
+    my $o3 = bless [ $bigm1 ], "MyBigNum";
+
+    ok !($o1 != $o2), "perl op gets it right";
+    ok $o1 != $bigm1, "perl op still gets it right for left overload";
+    ok $o1 != $o3, "perl op still gets it right for different values";
+    ok !sv_numne($o1, $o2), "sv_numne two overloads";
+    ok sv_numne($o1, $o3), "sv_numne two different overloads";
+    ok !sv_numne($o1, $big), "sv_numne left overload";
+    ok !sv_numne($bigm1, $o3), "sv_numne right overload";
 }
