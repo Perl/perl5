@@ -8705,7 +8705,7 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
     if(flags & SV_GMAGIC) {
         if(*sv1)
             SvGETMAGIC(*sv1);
-        if(*sv2)
+        if(*sv2 && (!*sv1 || *sv1 != *sv2))
             SvGETMAGIC(*sv2);
     }
 
