@@ -3596,6 +3596,9 @@ PP(pp_goto)
                 DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
             case CXt_DEFER:
                 /* diag_listed_as: Can't "%s" out of a "defer" block */
+                /* GH #23965: Retain in case of any hypothetical
+                 * XS-constructed optrees which bypass the compile-time check.
+                 * */
                 DIE(aTHX_ "Can't \"%s\" out of a \"%s\" block", "goto", S_defer_blockname(cx));
             default:
                 if (ix)
