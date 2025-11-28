@@ -5,7 +5,7 @@ use warnings;
 use List::Util qw/max/;
 use Config qw/%Config/;
 
-our $VERSION = '0.027';
+our $VERSION = '0.028';
 
 use base 'Exporter';
 our @EXPORT_OK = qw/term_size USE_GCS USE_TERM_READKEY USE_TERM_SIZE_ANY uni_length/;
@@ -38,7 +38,7 @@ if ($tsa) {
     *USE_TERM_READKEY  = sub() { 0 };
     *USE_TERM_SIZE_ANY = sub() { 1 };
     *_term_size        = sub {
-        my $size = max map { chars($_) // DEFAULT_SIZE } @IO;
+        my $size = max map { chars($_) || DEFAULT_SIZE } @IO;
 
         if (!$size || $size < DEFAULT_SIZE) {
             return $ENV{COLUMNS} if $ENV{COLUMNS} && $ENV{COLUMNS} > DEFAULT_SIZE;

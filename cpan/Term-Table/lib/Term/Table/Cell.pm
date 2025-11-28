@@ -2,7 +2,7 @@ package Term::Table::Cell;
 use strict;
 use warnings;
 
-our $VERSION = '0.027';
+our $VERSION = '0.028';
 
 use Term::Table::LineBreak();
 use Term::Table::Util qw/uni_length/;
