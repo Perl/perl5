@@ -1440,8 +1440,20 @@ Perl_leave_scope(pTHX_ I32 base)
 
                         if (SvTYPE(sv) == SVt_PVHV && HvHasAUX(sv))
                             Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-                        else if(SvOOK(sv))
-                            sv_backoff(sv);
+                        else if(SvOOK(sv)) {
+                            /* Inlined sv_backoff() - the buffer contents are
+                             * defunct and there's no need to copy them. All that
+                             * is needed is resetting SvLEN and the SvPVX pointer. */
+                            assert(SvTYPE(sv) != SVt_PVHV); /* the branch above */
+                            assert(SvTYPE(sv) != SVt_PVAV);
+
+                            STRLEN delta;
+                            SvOOK_offset(sv, delta);
+
+                            SvLEN_set(sv, SvLEN(sv) + delta);
+                            SvPV_set(sv, SvPVX(sv) - delta);
+                            SvFLAGS(sv) &= ~SVf_OOK;
+                        }
 
                         if (SvMAGICAL(sv)) {
                             /* note that backrefs (either in HvAUX or magic)
