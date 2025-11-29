@@ -1336,6 +1336,8 @@ wrapper instead.
 
 /* prior to 5.000 stable, this function returned the new OOK-less SvFLAGS
    prior to 5.23.4 this function always returned 0
+   prior to 5.43.x, the contents of the string buffer were always copied
+      down to the start of the buffer. Now, this only happens if SvOK(sv)
 */
 
 void
@@ -1355,7 +1357,11 @@ Perl_sv_backoff(SV *const sv)
     SvLEN_set(sv, SvLEN(sv) + delta);
     SvPV_set(sv, SvPVX(sv) - delta);
     SvFLAGS(sv) &= ~SVf_OOK;
-    Move(s, SvPVX(sv), SvCUR(sv)+1, char);
+
+    /* Don't copy a buffer if the contents are already defunct. */
+    if (SvOK(sv))
+        Move(s, SvPVX(sv), SvCUR(sv)+1, char);
+
     return;
 }
 
