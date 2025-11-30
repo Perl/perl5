@@ -512,21 +512,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
              * losing the least precision. */
             value = XDIGIT_VALUE(*s);
             factor = base;
-
-            if (! overflowed) {
-                overflowed = TRUE;
-                if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
-                    *flags |= PERL_SCAN_SILENT_OVERFLOW;
-                }
-                else if (ckWARN_d(WARN_OVERFLOW)) {
-                    warner(packWARN(WARN_OVERFLOW),
-                           "Integer overflow in %s number",
-                           (base == 16) ? "hexadecimal"
-                                        : (base == 2)
-                                          ? "binary"
-                                          : "octal");
-                }
-            }
+            overflowed = TRUE;
             continue;
         } /* End of handling legal digit */
 
@@ -559,6 +545,20 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
          * loop */
         break;
     }   /* End of parsing loop */
+
+    if (UNLIKELY(overflowed)) {
+        if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
+            *flags |= PERL_SCAN_SILENT_OVERFLOW;
+        }
+        else if (ckWARN_d(WARN_OVERFLOW)) {
+            warner(packWARN(WARN_OVERFLOW),
+                    "Integer overflow in %s number",
+                    (base == 16) ? "hexadecimal"
+                                : (base == 2)
+                                    ? "binary"
+                                    : "octal");
+        }
+    }
 
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
         if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
