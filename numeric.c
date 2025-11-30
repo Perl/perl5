@@ -381,9 +381,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           break;
     }   /* End of switch on the first so-many characters */
 
-    /* In overflows, this keeps track of how much to multiply the overflowed NV
-     * by as we continue to parse the remaining digits */
-    NV factor = 0.0;
+    /* The loop below accumulates the integral running total of the result,
+     * digit by digit.  If this total overflows, it is added to an NV
+     * approximation, and the loop starts over, looking at the next batch of
+     * digits, until they overflow, and so on.
+     *
+     * This variable counts the number of digits seen in the current batch.
+     * (This initial value is irrelevant (exists to silence a compiler
+     * warning), as the first batch will end up being multiplied by zero.) */
+    Size_t batch_digit_count = 0;
 
     /* As long as the running total is less than this, the next digit will
      * fit. */
@@ -409,16 +415,21 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
                 value = (value << shift) | XDIGIT_VALUE(*s);
-                factor *= base;
+                batch_digit_count++;
                 continue;
             }
 
             /* Bah. We are about to overflow.  Instead, add the unoverflowed
              * value to an NV that contains an approximation to the correct
-             * value.  Each time through the loop we have increased 'factor' so
-             * that it gives how much the current approximation needs to
-             * effectively be shifted to make room for this new value */
-            value_nv *= factor;
+             * value.  Each time through the loop we have incremented
+             * 'batch_digit_count' so that it gives how many digits the
+             * current approximation needs to effectively be shifted to make
+             * room for this new value */
+#ifdef Perl_ldexp
+                value_nv = Perl_ldexp(value_nv, batch_digit_count * shift);
+#else
+                value_nv *= Perl_pow(base, batch_digit_count);
+#endif
             value_nv += (NV) value;
 
             /* Then we keep accumulating digits, until all are parsed.  We
@@ -428,7 +439,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
              * method uses the fewest floating point multiplications possible,
              * losing the least precision. */
             value = XDIGIT_VALUE(*s);
-            factor = base;
+            batch_digit_count = 1;
 
             if (! overflowed) {
                 overflowed = TRUE;
@@ -524,7 +535,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }
 
     /* Overflowed: Calculate the final overflow approximation */
-    value_nv *= factor;
+#ifdef Perl_ldexp
+        value_nv = Perl_ldexp(value_nv, batch_digit_count * shift);
+#else
+        value_nv *= Perl_pow(base, batch_digit_count);
+#endif
     value_nv += (NV) value;
 
     output_non_portable(base);
