@@ -535,41 +535,39 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
         /* We get here when done with the parse, or it got interrupted by a
          * non-digit or a digit that is outside the bounds of the base, like a
-         * digit 2 in a binary number */
-        if (*s) {   /* *s is to keep a terminating NUL from warning */
+         * digit 2 in a binary number.  In either case, we are done with the
+         * loop */
+        break;
+    }   /* End of parsing loop */
 
-            if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
-                &&    ckWARN(WARN_DIGIT))
-            {
-                if (base != 8) {
-                    warner(packWARN(WARN_DIGIT),
-                           "Illegal %s digit '%c' ignored",
-                           ((base == 2)
-                            ? "binary"
-                            : "hexadecimal"),
-                           *s);
-                }
-                else if (isDIGIT(*s)) { /* octal base */
-
-                    /* Allow \octal to work the DWIM way (that is, stop
-                     * scanning as soon as non-octal characters are seen,
-                     * complain only if someone seems to want to use the digits
-                     * eight and nine.  Since we know it is not octal, then if
-                     * isDIGIT, must be an 8 or 9). khw: XXX why not DWIM for
-                     * other bases as well? */
-                    warner(packWARN(WARN_DIGIT),
-                           "Illegal octal digit '%c' ignored", *s);
-                }
+    if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
+        if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
+            &&    ckWARN(WARN_DIGIT))
+        {
+            if (base != 8) {
+                warner(packWARN(WARN_DIGIT),
+                        "Illegal %s digit '%c' ignored",
+                        ((base == 2)
+                        ? "binary"
+                        : "hexadecimal"),
+                        *s);
             }
+            else if (isDIGIT(*s)) { /* octal base */
 
-            if (input_flags & PERL_SCAN_NOTIFY_ILLDIGIT) {
-                *flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
+                /* Allow \octal to work the DWIM way (that is, stop scanning
+                 * as soon as non-octal characters are seen, complain only if
+                 * someone seems to want to use the digits eight and nine.
+                 * Since we know it is not octal, then if isDIGIT, must be an
+                 * 8 or 9). khw: XXX why not DWIM for other bases as well? */
+                warner(packWARN(WARN_DIGIT),
+                        "Illegal octal digit '%c' ignored", *s);
             }
         }
 
-        /* Error, so quit parsing */
-        break;
-    }   /* End of parsing loop */
+        if (input_flags & PERL_SCAN_NOTIFY_ILLDIGIT) {
+            *flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
+        }
+    }
 
     /* s here points to e or to the first illegal character */
     *len_p = s - start;
