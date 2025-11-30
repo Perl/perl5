@@ -351,6 +351,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     UV accumulated = 0;         /* Running total */
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
+#define MULTIPLY_BY_BASE(value)  ((value) << shift)
+
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
      * overhead to deal with the possibility of generating portability
@@ -381,37 +383,37 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         /* FALLTHROUGH */
       case 7:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 6:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 5:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 4:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 3:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 2:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 1:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 0:
@@ -445,7 +447,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     /* Here s points to a legal digit.  We can save some operations by
      * accumulating it now, and positioning the loop to start on the next
      * character (whose value is unknown here). */
-    accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+    accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
     s++;
 
   loop: ;
@@ -490,7 +492,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
          * well, so can be used here, without noticeably slowing those down
          * (it does have unnecessary shifts, ANDSs, and additions for those)
          * */
-        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
         s++;
     }   /* End of parsing loop */
 
@@ -608,7 +610,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         {
             U8 this_digit_value = XDIGIT_VALUE(*t);
             this_batch_accumulated += this_digit_value * this_batch_factor;
-            this_batch_factor <<= shift;
+            this_batch_factor = MULTIPLY_BY_BASE(this_batch_factor);
             t--;
             continue;
         }
