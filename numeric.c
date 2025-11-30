@@ -385,6 +385,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * by as we continue to parse the remaining digits */
     NV factor = 0.0;
 
+    /* As long as the running total is less than this, the next digit will
+     * fit. */
+    UV max_div = UV_MAX >> shift;
+
     bool overflowed = FALSE;
     NV value_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
@@ -398,19 +402,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
           redo: ;
-
-            /* Make room for the next digit */
-            UV tentative_value = value << shift;
-
-            /* If shiftng back doesn't yield the previous value, it was
-             * because a bit got shifted off the left end, so overflowed.
-             * But if it worked, add the new digit. */
-            if (LIKELY((tentative_value >> shift) == value)) {
+            /* If there is room for this digit, accumulate it and repeat */
+            if (LIKELY(value <= max_div)) {
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
-                value = tentative_value | XDIGIT_VALUE(*s);
+                value = (value << shift) | XDIGIT_VALUE(*s);
                 factor *= base;
                 continue;
             }
