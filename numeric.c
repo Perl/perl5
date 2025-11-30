@@ -465,6 +465,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     NV value_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
+    /* Value above which, the next digit processed would overflow */
+    UV max_div = UV_MAX >> shift;
+
     for (; s < e; s++) {
         if (generic_isCC_(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
@@ -473,19 +476,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
           redo: ;
-
-            /* Make room for the next digit */
-            UV tentative_value = value << shift;
-
-            /* If shiftng back doesn't yield the previous value, it was
-             * because a bit got shifted off the left end, so overflowed.
-             * But if it worked, add the new digit. */
-            if (LIKELY((tentative_value >> shift) == value)) {
+            if (LIKELY(value <= max_div)) {
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
-                value = tentative_value | XDIGIT_VALUE(*s);
+                value = (value << shift) | XDIGIT_VALUE(*s);
                 factor *= base;
                 continue;
             }
