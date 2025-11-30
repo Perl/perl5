@@ -122,27 +122,6 @@ my @unresolved_visibility_overrides = qw(
     _
     ABORT
     ABS_IV_MIN
-    ACCEPT
-    ACCEPT_t8
-    ACCEPT_t8_p8
-    ACCEPT_t8_pb
-    ACCEPT_tb
-    ACCEPT_tb_p8
-    ACCEPT_tb_pb
-    AHOCORASICK
-    AHOCORASICKC
-    AHOCORASICKC_t8
-    AHOCORASICKC_t8_p8
-    AHOCORASICKC_t8_pb
-    AHOCORASICKC_tb
-    AHOCORASICKC_tb_p8
-    AHOCORASICKC_tb_pb
-    AHOCORASICK_t8
-    AHOCORASICK_t8_p8
-    AHOCORASICK_t8_pb
-    AHOCORASICK_tb
-    AHOCORASICK_tb_p8
-    AHOCORASICK_tb_pb
     ALIGNED_TYPE
     ALIGNED_TYPE_NAME
     ALL_PARENS_COUNTED
@@ -165,232 +144,12 @@ my @unresolved_visibility_overrides = qw(
     AMT_AMAGIC_off
     AMT_AMAGIC_on
     AMTf_AMAGIC
-    anchored_end_shift
-    anchored_offset
-    anchored_substr
-    anchored_utf8
     ANGSTROM_SIGN
-    ANY_FEATURE_BITS_SET
-    ANYOF
-    ANYOF_ALNUM
-    ANYOF_ALNUML
-    ANYOF_ALPHA
-    ANYOF_ALPHANUMERIC
-    ANYOF_ASCII
-    ANYOF_BIT
-    ANYOF_BITMAP
-    ANYOF_BITMAP_BYTE
-    ANYOF_BITMAP_CLEAR
-    ANYOF_BITMAP_CLEARALL
-    ANYOF_BITMAP_SET
-    ANYOF_BITMAP_SETALL
-    ANYOF_BITMAP_SIZE
-    ANYOF_BITMAP_TEST
-    ANYOF_BITMAP_ZERO
-    ANYOF_BLANK
-    ANYOF_CASED
-    ANYOF_CLASS_OR
-    ANYOF_CLASS_SETALL
-    ANYOF_CLASS_TEST_ANY_SET
-    ANYOF_CNTRL
-    ANYOF_COMMON_FLAGS
-    ANYOFD
-    ANYOF_DIGIT
-    ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
-    ANYOFD_t8
-    ANYOFD_t8_p8
-    ANYOFD_t8_pb
-    ANYOFD_tb
-    ANYOFD_tb_p8
-    ANYOFD_tb_pb
-    ANYOF_FLAGS
-    ANYOF_FLAGS_ALL
-    ANYOF_GRAPH
-    ANYOFH
-    ANYOF_HAS_AUX
-    ANYOF_HAS_EXTRA_RUNTIME_MATCHES
-    ANYOFHb
-    ANYOFHbbm
-    ANYOFHbbm_t8
-    ANYOFHbbm_t8_p8
-    ANYOFHbbm_t8_pb
-    ANYOFHbbm_tb
-    ANYOFHbbm_tb_p8
-    ANYOFHbbm_tb_pb
-    ANYOFHb_t8
-    ANYOFHb_t8_p8
-    ANYOFHb_t8_pb
-    ANYOFHb_tb
-    ANYOFHb_tb_p8
-    ANYOFHb_tb_pb
-    ANYOF_HORIZWS
-    ANYOFHr
-    ANYOFHr_t8
-    ANYOFHr_t8_p8
-    ANYOFHr_t8_pb
-    ANYOFHr_tb
-    ANYOFHr_tb_p8
-    ANYOFHr_tb_pb
-    ANYOFHs
-    ANYOFHs_t8
-    ANYOFHs_t8_p8
-    ANYOFHs_t8_pb
-    ANYOFHs_tb
-    ANYOFHs_tb_p8
-    ANYOFHs_tb_pb
-    ANYOFH_t8
-    ANYOFH_t8_p8
-    ANYOFH_t8_pb
-    ANYOFH_tb
-    ANYOFH_tb_p8
-    ANYOFH_tb_pb
-    ANYOF_INVERT
-    ANYOFL
-    ANYOFL_FOLD
-    ANYOF_LOCALE_FLAGS
-    ANYOF_LOWER
-    ANYOFL_t8
-    ANYOFL_t8_p8
-    ANYOFL_t8_pb
-    ANYOFL_tb
-    ANYOFL_tb_p8
-    ANYOFL_tb_pb
-    ANYOFL_UTF8_LOCALE_REQD
-    ANYOFM
-    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP
-    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE
-    ANYOF_MATCHES_NONE_OUTSIDE_BITMAP
-    ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
-    ANYOF_MATCHES_POSIXL
-    ANYOF_MAX
-    ANYOFM_t8
-    ANYOFM_t8_p8
-    ANYOFM_t8_pb
-    ANYOFM_tb
-    ANYOFM_tb_p8
-    ANYOFM_tb_pb
-    ANYOF_NALNUM
-    ANYOF_NALNUML
-    ANYOF_NALPHA
-    ANYOF_NALPHANUMERIC
-    ANYOF_NASCII
-    ANYOF_NBLANK
-    ANYOF_NCASED
-    ANYOF_NCNTRL
-    ANYOF_NDIGIT
-    ANYOF_NGRAPH
-    ANYOF_NHORIZWS
-    ANYOF_NLOWER
-    ANYOF_NPRINT
-    ANYOF_NPUNCT
-    ANYOF_NSPACE
-    ANYOF_NSPACEL
-    ANYOF_NUPPER
-    ANYOF_NVERTWS
-    ANYOF_NWORDCHAR
-    ANYOF_NXDIGIT
-    ANYOF_ONLY_HAS_BITMAP
-    ANYOF_ONLY_HAS_BITMAP_MASK
-    ANYOFPOSIXL
-    ANYOF_POSIXL_AND
-    ANYOF_POSIXL_BITMAP
-    ANYOF_POSIXL_CLEAR
-    ANYOF_POSIXL_MAX
-    ANYOF_POSIXL_OR
-    ANYOF_POSIXL_SET
-    ANYOF_POSIXL_SETALL
-    ANYOF_POSIXL_SET_TO_BITMAP
-    ANYOF_POSIXL_SSC_TEST_ALL_SET
-    ANYOF_POSIXL_SSC_TEST_ANY_SET
-    ANYOFPOSIXL_t8
-    ANYOFPOSIXL_t8_p8
-    ANYOFPOSIXL_t8_pb
-    ANYOFPOSIXL_tb
-    ANYOFPOSIXL_tb_p8
-    ANYOFPOSIXL_tb_pb
-    ANYOF_POSIXL_TEST
-    ANYOF_POSIXL_TEST_ALL_SET
-    ANYOF_POSIXL_TEST_ANY_SET
-    ANYOF_POSIXL_ZERO
-    ANYOF_PRINT
-    ANYOF_PUNCT
-    ANYOFR
-    ANYOFRb
-    ANYOFRbase
-    ANYOFR_BASE_BITS
-    ANYOFRb_t8
-    ANYOFRb_t8_p8
-    ANYOFRb_t8_pb
-    ANYOFRb_tb
-    ANYOFRb_tb_p8
-    ANYOFRb_tb_pb
-    ANYOFRdelta
-    ANYOFR_t8
-    ANYOFR_t8_p8
-    ANYOFR_t8_pb
-    ANYOFR_tb
-    ANYOFR_tb_p8
-    ANYOFR_tb_pb
-    ANYOF_SPACE
-    ANYOF_SPACEL
-    ANYOF_t8
-    ANYOF_t8_p8
-    ANYOF_t8_pb
-    ANYOF_tb
-    ANYOF_tb_p8
-    ANYOF_tb_pb
-    ANYOF_UNIPROP
-    ANYOF_UPPER
-    ANYOF_VERTWS
-    ANYOF_WARN_SUPER__shared
-    ANYOF_WORDCHAR
-    ANYOF_XDIGIT
     ARABIC_DECIMAL_SEPARATOR_UTF8
     ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE
     ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s
     ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL
-    ARG1a
-    ARG1a_LOC
-    ARG1a_SET
-    ARG1b
-    ARG1b_LOC
-    ARG1b_SET
-    ARG1i
-    ARG1i_LOC
-    ARG1i_SET
-    ARG1u
-    ARG1u_LOC
-    ARG1u_SET
-    ARG2a
-    ARG2a_LOC
-    ARG2a_SET
-    ARG2b
-    ARG2b_LOC
-    ARG2b_SET
-    ARG2i
-    ARG2i_LOC
-    ARG2i_SET
-    ARG2u
-    ARG2u_LOC
-    ARG2u_SET
-    ARG3a
-    ARG3a_LOC
-    ARG3a_SET
-    ARG3b
-    ARG3b_LOC
-    ARG3b_SET
-    ARG3i
-    ARG3i_LOC
-    ARG3i_SET
-    ARG3u
-    ARG3u_LOC
-    ARG3u_SET
-    ARGp
-    ARGp_BYTES_LOC
-    ARGp_SET
-    ARG__SET
     ARGTARG
-    ARG_VALUE
     ASCII_FOLD_RESTRICTED
     ASCII_MORE_RESTRICT_PAT_MODS
     ASCII_PLATFORM_UTF8_MAXBYTES
@@ -413,8 +172,6 @@ my @unresolved_visibility_overrides = qw(
     AT_LEAST_ASCII_RESTRICTED
     AT_LEAST_UNI_SEMANTICS
     AvARYLEN
-    av_dup
-    av_dup_inc
     AvMAX
     AvREAL
     AvREALISH
@@ -437,9 +194,6 @@ my @unresolved_visibility_overrides = qw(
     BhkFLAGS
     BIT_BUCKET
     BIT_DIGITS
-    BITMAP_BIT
-    BITMAP_BYTE
-    BITMAP_TEST
     blk_eval
     blk_format
     blk_gimme
@@ -458,71 +212,8 @@ my @unresolved_visibility_overrides = qw(
     BmPREVIOUS
     BmRARE
     BmUSEFUL
-    BOL
-    BOL_t8
-    BOL_t8_p8
-    BOL_t8_pb
-    BOL_tb
-    BOL_tb_p8
-    BOL_tb_pb
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
-    BOUND
-    BOUNDA
-    BOUNDA_t8
-    BOUNDA_t8_p8
-    BOUNDA_t8_pb
-    BOUNDA_tb
-    BOUNDA_tb_p8
-    BOUNDA_tb_pb
-    BOUNDL
-    BOUNDL_t8
-    BOUNDL_t8_p8
-    BOUNDL_t8_pb
-    BOUNDL_tb
-    BOUNDL_tb_p8
-    BOUNDL_tb_pb
-    BOUND_t8
-    BOUND_t8_p8
-    BOUND_t8_pb
-    BOUND_tb
-    BOUND_tb_p8
-    BOUND_tb_pb
-    BOUNDU
-    BOUNDU_t8
-    BOUNDU_t8_p8
-    BOUNDU_t8_pb
-    BOUNDU_tb
-    BOUNDU_tb_p8
-    BOUNDU_tb_pb
-    BRANCH
-    BRANCHJ
-    BRANCHJ_t8
-    BRANCHJ_t8_p8
-    BRANCHJ_t8_pb
-    BRANCHJ_tb
-    BRANCHJ_tb_p8
-    BRANCHJ_tb_pb
-    BRANCH_next
-    BRANCH_next_fail
-    BRANCH_next_fail_t8
-    BRANCH_next_fail_t8_p8
-    BRANCH_next_fail_t8_pb
-    BRANCH_next_fail_tb
-    BRANCH_next_fail_tb_p8
-    BRANCH_next_fail_tb_pb
-    BRANCH_next_t8
-    BRANCH_next_t8_p8
-    BRANCH_next_t8_pb
-    BRANCH_next_tb
-    BRANCH_next_tb_p8
-    BRANCH_next_tb_pb
-    BRANCH_t8
-    BRANCH_t8_p8
-    BRANCH_t8_pb
-    BRANCH_tb
-    BRANCH_tb_p8
-    BRANCH_tb_pb
     BSD_GETPGRP
     BSD_SETPGRP
     BYTES_REMAINING_IN_WORD
@@ -826,13 +517,8 @@ my @unresolved_visibility_overrides = qw(
     cGVOPx_gv
     CHANGE_MULTICALL_FLAGS
     CHARSET_PAT_MODS
-    check_end_shift
     CHECK_MALLOC_TAINT
     CHECK_MALLOC_TOO_LATE_FOR
-    check_offset_max
-    check_offset_min
-    check_substr
-    check_utf8
     child_offset_bits
     CHR_SVLEN
     ckDEAD
@@ -855,7 +541,6 @@ my @unresolved_visibility_overrides = qw(
     CLANG_DIAG_RESTORE_STMT
     classnum_to_namedclass
     CLEAR_ARGARRAY
-    CLEARFEATUREBITS
     CLEAR_OPTSTART
     cLISTOP
     cLISTOPo
@@ -870,22 +555,8 @@ my @unresolved_visibility_overrides = qw(
     cLOOP
     cLOOPo
     cLOOPx
-    CLOSE
-    CLOSE_t8
-    CLOSE_t8_p8
-    CLOSE_t8_pb
-    CLOSE_tb
-    CLOSE_tb_p8
-    CLOSE_tb_pb
-    CLUMP
     CLUMP_2IV
     CLUMP_2UV
-    CLUMP_t8
-    CLUMP_t8_p8
-    CLUMP_t8_pb
-    CLUMP_tb
-    CLUMP_tb_p8
-    CLUMP_tb_pb
     cMETHOP
     cMETHOP_meth
     cMETHOPo
@@ -898,27 +569,6 @@ my @unresolved_visibility_overrides = qw(
     COMBINING_DOT_ABOVE_UTF8
     COMBINING_GRAVE_ACCENT_UTF8
     COMBINING_GREEK_YPOGEGRAMMENI_UTF8
-    COMMIT
-    COMMIT_next
-    COMMIT_next_fail
-    COMMIT_next_fail_t8
-    COMMIT_next_fail_t8_p8
-    COMMIT_next_fail_t8_pb
-    COMMIT_next_fail_tb
-    COMMIT_next_fail_tb_p8
-    COMMIT_next_fail_tb_pb
-    COMMIT_next_t8
-    COMMIT_next_t8_p8
-    COMMIT_next_t8_pb
-    COMMIT_next_tb
-    COMMIT_next_tb_p8
-    COMMIT_next_tb_pb
-    COMMIT_t8
-    COMMIT_t8_p8
-    COMMIT_t8_pb
-    COMMIT_tb
-    COMMIT_tb_p8
-    COMMIT_tb_pb
     CONTINUE_PAT_MOD
     COP_FEATURE_SIZE
     CopFEATURES_setfrom
@@ -972,127 +622,6 @@ my @unresolved_visibility_overrides = qw(
     cUNOP_AUXx
     cUNOPo
     cUNOPx
-    CURLY
-    CURLY_B_max
-    CURLY_B_max_fail
-    CURLY_B_max_fail_t8
-    CURLY_B_max_fail_t8_p8
-    CURLY_B_max_fail_t8_pb
-    CURLY_B_max_fail_tb
-    CURLY_B_max_fail_tb_p8
-    CURLY_B_max_fail_tb_pb
-    CURLY_B_max_t8
-    CURLY_B_max_t8_p8
-    CURLY_B_max_t8_pb
-    CURLY_B_max_tb
-    CURLY_B_max_tb_p8
-    CURLY_B_max_tb_pb
-    CURLY_B_min
-    CURLY_B_min_fail
-    CURLY_B_min_fail_t8
-    CURLY_B_min_fail_t8_p8
-    CURLY_B_min_fail_t8_pb
-    CURLY_B_min_fail_tb
-    CURLY_B_min_fail_tb_p8
-    CURLY_B_min_fail_tb_pb
-    CURLY_B_min_t8
-    CURLY_B_min_t8_p8
-    CURLY_B_min_t8_pb
-    CURLY_B_min_tb
-    CURLY_B_min_tb_p8
-    CURLY_B_min_tb_pb
-    CURLYM
-    CURLYM_A
-    CURLYM_A_fail
-    CURLYM_A_fail_t8
-    CURLYM_A_fail_t8_p8
-    CURLYM_A_fail_t8_pb
-    CURLYM_A_fail_tb
-    CURLYM_A_fail_tb_p8
-    CURLYM_A_fail_tb_pb
-    CURLYM_A_t8
-    CURLYM_A_t8_p8
-    CURLYM_A_t8_pb
-    CURLYM_A_tb
-    CURLYM_A_tb_p8
-    CURLYM_A_tb_pb
-    CURLYM_B
-    CURLYM_B_fail
-    CURLYM_B_fail_t8
-    CURLYM_B_fail_t8_p8
-    CURLYM_B_fail_t8_pb
-    CURLYM_B_fail_tb
-    CURLYM_B_fail_tb_p8
-    CURLYM_B_fail_tb_pb
-    CURLYM_B_t8
-    CURLYM_B_t8_p8
-    CURLYM_B_t8_pb
-    CURLYM_B_tb
-    CURLYM_B_tb_p8
-    CURLYM_B_tb_pb
-    CURLYM_t8
-    CURLYM_t8_p8
-    CURLYM_t8_pb
-    CURLYM_tb
-    CURLYM_tb_p8
-    CURLYM_tb_pb
-    CURLYN
-    CURLYN_t8
-    CURLYN_t8_p8
-    CURLYN_t8_pb
-    CURLYN_tb
-    CURLYN_tb_p8
-    CURLYN_tb_pb
-    CURLY_t8
-    CURLY_t8_p8
-    CURLY_t8_pb
-    CURLY_tb
-    CURLY_tb_p8
-    CURLY_tb_pb
-    CURLYX
-    CURLYX_end
-    CURLYX_end_fail
-    CURLYX_end_fail_t8
-    CURLYX_end_fail_t8_p8
-    CURLYX_end_fail_t8_pb
-    CURLYX_end_fail_tb
-    CURLYX_end_fail_tb_p8
-    CURLYX_end_fail_tb_pb
-    CURLYX_end_t8
-    CURLYX_end_t8_p8
-    CURLYX_end_t8_pb
-    CURLYX_end_tb
-    CURLYX_end_tb_p8
-    CURLYX_end_tb_pb
-    CURLYX_t8
-    CURLYX_t8_p8
-    CURLYX_t8_pb
-    CURLYX_tb
-    CURLYX_tb_p8
-    CURLYX_tb_pb
-    CURRENT_FEATURE_BUNDLE
-    CURRENT_HINTS
-    CUTGROUP
-    CUTGROUP_next
-    CUTGROUP_next_fail
-    CUTGROUP_next_fail_t8
-    CUTGROUP_next_fail_t8_p8
-    CUTGROUP_next_fail_t8_pb
-    CUTGROUP_next_fail_tb
-    CUTGROUP_next_fail_tb_p8
-    CUTGROUP_next_fail_tb_pb
-    CUTGROUP_next_t8
-    CUTGROUP_next_t8_p8
-    CUTGROUP_next_t8_pb
-    CUTGROUP_next_tb
-    CUTGROUP_next_tb_p8
-    CUTGROUP_next_tb_pb
-    CUTGROUP_t8
-    CUTGROUP_t8_p8
-    CUTGROUP_t8_pb
-    CUTGROUP_tb
-    CUTGROUP_tb_p8
-    CUTGROUP_tb_pb
     CvANON
     CvANONCONST
     CvANONCONST_off
@@ -1116,8 +645,6 @@ my @unresolved_visibility_overrides = qw(
     CvCVGV_RC_off
     CvCVGV_RC_on
     CvDEPTHunsafe
-    cv_dup
-    cv_dup_inc
     CvDYNFILE
     CvDYNFILE_off
     CvDYNFILE_on
@@ -1198,14 +725,10 @@ my @unresolved_visibility_overrides = qw(
     CvSIGNATURE
     CvSIGNATURE_off
     CvSIGNATURE_on
-    CvSLABBED
-    CvSLABBED_off
-    CvSLABBED_on
     CvSPECIAL
     CvSPECIAL_off
     CvSPECIAL_on
     CvSTASH_set
-    CV_UNDEF_KEEP_NAME
     CvUNIQUE
     CvUNIQUE_off
     CvUNIQUE_on
@@ -1244,14 +767,12 @@ my @unresolved_visibility_overrides = qw(
     CXp_MULTICALL
     CXp_ONCE
     CX_POP_SAVEARRAY
-    CX_POPSUBST
     CXp_REAL
     CXp_SUB_RE
     CXp_SUB_RE_FAKE
     CXp_TRY
     CXp_TRYBLOCK
     CX_PUSHSUB_GET_LVALUE_MASK
-    CX_PUSHSUBST
     CxREALEVAL
     cxstack_max
     CXt_DEFER
@@ -1271,32 +792,23 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_B
     DEBUG_B_FLAG
     DEBUG_B_TEST
-    DEBUG_BUFFERS_r
     DEBUG_c
     DEBUG_C
     DEBUG_c_FLAG
     DEBUG_C_FLAG
-    DEBUG_COMPILE_r
     DEBUG_c_TEST
     DEBUG_C_TEST
     DEBUG_D
     DEBUG_DB_RECURSE_FLAG
     DEBUG_D_FLAG
     DEBUG_D_TEST
-    DEBUG_DUMP_PRE_OPTIMIZE_r
-    DEBUG_DUMP_r
-    DEBUG_EXECUTE_r
-    DEBUG_EXTRA_r
     DEBUG_f
     DEBUG_f_FLAG
-    DEBUG_FLAGS_r
     DEBUG_f_TEST
-    DEBUG_GPOS_r
     DEBUG_h_FLAG
     DEBUG_h_TEST
     DEBUG_i
     DEBUG_i_FLAG
-    DEBUG_INTUIT_r
     DEBUG_i_TEST
     DEBUG_J_FLAG
     DEBUG_J_TEST
@@ -1311,19 +823,15 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_m
     DEBUG_M
     DEBUG_MASK
-    DEBUG_MATCH_r
     DEBUG_m_FLAG
     DEBUG_M_FLAG
     DEBUG_m_TEST
     DEBUG_M_TEST
     DEBUG_o
     DEBUG_o_FLAG
-    DEBUG_OPTIMISE_MORE_r
-    DEBUG_OPTIMISE_r
     DEBUG_o_TEST
     DEBUG_p
     DEBUG_P
-    DEBUG_PARSE_r
     DEBUG_PEEP
     DEBUG_p_FLAG
     DEBUG_P_FLAG
@@ -1347,22 +855,14 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_s_FLAG
     DEBUG_S_FLAG
     DEBUG_SHOW_STUDY_FLAG
-    DEBUG_STACK_r
-    DEBUG_STATE_r
     DEBUG_s_TEST
     DEBUG_S_TEST
     DEBUG_STUDYDATA
     DEBUG_t
     DEBUG_T
-    DEBUG_TEST_r
     DEBUG_t_FLAG
     DEBUG_T_FLAG
     DEBUG_TOP_FLAG
-    DEBUG_TRIE_COMPILE_MORE_r
-    DEBUG_TRIE_COMPILE_r
-    DEBUG_TRIE_EXECUTE_MORE_r
-    DEBUG_TRIE_EXECUTE_r
-    DEBUG_TRIE_r
     DEBUG_t_TEST
     DEBUG_T_TEST
     DEBUG_u
@@ -1389,29 +889,15 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_y_TEST
     DEBUG_yv
     DEBUG_yv_TEST
-    DECLARE_AND_GET_RE_DEBUG_FLAGS
-    DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX
     DEFAULT_PAT_MOD
     DEFERRED_COULD_BE_OFFICIAL_MARKERc
     DEFERRED_COULD_BE_OFFICIAL_MARKERs
     DEFERRED_USER_DEFINED_INDEX
-    DEFINEP
-    DEFINEP_t8
-    DEFINEP_t8_p8
-    DEFINEP_t8_pb
-    DEFINEP_tb
-    DEFINEP_tb_p8
-    DEFINEP_tb_pb
     del_body_by_type
     DEL_NATIVE
     DEPENDS_PAT_MOD
     DEPENDS_PAT_MODS
     DEPENDS_SEMANTICS
-    deprecate
-    deprecate_disappears_in
-    DEPRECATED_OPENING_NON_UTF8_BRACKETS
-    DEPRECATED_OPENING_UTF8_BRACKETS
-    deprecate_fatal_in
     DIE
     DISABLE_LC_NUMERIC_CHANGES
     dJMPENV
@@ -1467,7 +953,6 @@ my @unresolved_visibility_overrides = qw(
     dTOPnv
     dTOPss
     dTOPuv
-    DUMP_FEATURE_BITS
     DUMPUNTIL
     DUP_WARNINGS
     dXSUB_SYS
@@ -1477,22 +962,8 @@ my @unresolved_visibility_overrides = qw(
     ELEMENT_RANGE_MATCHES_INVLIST
     EMBEDMYMALLOC
     EMULATE_THREAD_SAFE_LOCALES
-    END
     ENDGRENT_R_HAS_FPTR
-    ENDLIKE
-    ENDLIKE_t8
-    ENDLIKE_t8_p8
-    ENDLIKE_t8_pb
-    ENDLIKE_tb
-    ENDLIKE_tb_p8
-    ENDLIKE_tb_pb
     ENDPWENT_R_HAS_FPTR
-    END_t8
-    END_t8_p8
-    END_t8_pb
-    END_tb
-    END_tb_p8
-    END_tb_pb
     ENV_INIT
     environ
     ENV_LOCK
@@ -1502,148 +973,13 @@ my @unresolved_visibility_overrides = qw(
     ENVr_LOCALEr_UNLOCK
     ENV_TERM
     ENV_UNLOCK
-    EOL
-    EOL_t8
-    EOL_t8_p8
-    EOL_t8_pb
-    EOL_tb
-    EOL_tb_p8
-    EOL_tb_pb
-    EOS
-    EOS_t8
-    EOS_t8_p8
-    EOS_t8_pb
-    EOS_tb
-    EOS_tb_p8
-    EOS_tb_pb
     ESC_NATIVE
-    EVAL
-    EVAL_B
-    EVAL_B_fail
-    EVAL_B_fail_t8
-    EVAL_B_fail_t8_p8
-    EVAL_B_fail_t8_pb
-    EVAL_B_fail_tb
-    EVAL_B_fail_tb_p8
-    EVAL_B_fail_tb_pb
-    EVAL_B_t8
-    EVAL_B_t8_p8
-    EVAL_B_t8_pb
-    EVAL_B_tb
-    EVAL_B_tb_p8
-    EVAL_B_tb_pb
-    EVAL_FLAGS_MASK
     EVAL_INEVAL
     EVAL_INREQUIRE
     EVAL_KEEPERR
     EVAL_NULL
-    EVAL_OPTIMISTIC_FLAG
-    EVAL_postponed_AB
-    EVAL_postponed_AB_fail
-    EVAL_postponed_AB_fail_t8
-    EVAL_postponed_AB_fail_t8_p8
-    EVAL_postponed_AB_fail_t8_pb
-    EVAL_postponed_AB_fail_tb
-    EVAL_postponed_AB_fail_tb_p8
-    EVAL_postponed_AB_fail_tb_pb
-    EVAL_postponed_AB_t8
-    EVAL_postponed_AB_t8_p8
-    EVAL_postponed_AB_t8_pb
-    EVAL_postponed_AB_tb
-    EVAL_postponed_AB_tb_p8
-    EVAL_postponed_AB_tb_pb
     EVAL_RE_REPARSING
-    EVAL_t8
-    EVAL_t8_p8
-    EVAL_t8_pb
-    EVAL_tb
-    EVAL_tb_p8
-    EVAL_tb_pb
     EVAL_WARNONLY
-    EXACT
-    EXACTF
-    EXACTFAA
-    EXACTFAA_NO_TRIE
-    EXACTFAA_NO_TRIE_t8
-    EXACTFAA_NO_TRIE_t8_p8
-    EXACTFAA_NO_TRIE_t8_pb
-    EXACTFAA_NO_TRIE_tb
-    EXACTFAA_NO_TRIE_tb_p8
-    EXACTFAA_NO_TRIE_tb_pb
-    EXACTFAA_t8
-    EXACTFAA_t8_p8
-    EXACTFAA_t8_pb
-    EXACTFAA_tb
-    EXACTFAA_tb_p8
-    EXACTFAA_tb_pb
-    EXACTFL
-    EXACTFL_t8
-    EXACTFL_t8_p8
-    EXACTFL_t8_pb
-    EXACTFL_tb
-    EXACTFL_tb_p8
-    EXACTFL_tb_pb
-    EXACTFLU8
-    EXACTFLU8_t8
-    EXACTFLU8_t8_p8
-    EXACTFLU8_t8_pb
-    EXACTFLU8_tb
-    EXACTFLU8_tb_p8
-    EXACTFLU8_tb_pb
-    EXACTF_t8
-    EXACTF_t8_p8
-    EXACTF_t8_pb
-    EXACTF_tb
-    EXACTF_tb_p8
-    EXACTF_tb_pb
-    EXACTFU
-    EXACTFUP
-    EXACTFUP_t8
-    EXACTFUP_t8_p8
-    EXACTFUP_t8_pb
-    EXACTFUP_tb
-    EXACTFUP_tb_p8
-    EXACTFUP_tb_pb
-    EXACTFU_REQ8
-    EXACTFU_REQ8_t8
-    EXACTFU_REQ8_t8_p8
-    EXACTFU_REQ8_t8_pb
-    EXACTFU_REQ8_tb
-    EXACTFU_REQ8_tb_p8
-    EXACTFU_REQ8_tb_pb
-    EXACTFU_S_EDGE
-    EXACTFU_S_EDGE_t8
-    EXACTFU_S_EDGE_t8_p8
-    EXACTFU_S_EDGE_t8_pb
-    EXACTFU_S_EDGE_tb
-    EXACTFU_S_EDGE_tb_p8
-    EXACTFU_S_EDGE_tb_pb
-    EXACTFU_t8
-    EXACTFU_t8_p8
-    EXACTFU_t8_pb
-    EXACTFU_tb
-    EXACTFU_tb_p8
-    EXACTFU_tb_pb
-    EXACTL
-    EXACTL_t8
-    EXACTL_t8_p8
-    EXACTL_t8_pb
-    EXACTL_tb
-    EXACTL_tb_p8
-    EXACTL_tb_pb
-    EXACT_REQ8
-    EXACT_REQ8_t8
-    EXACT_REQ8_t8_p8
-    EXACT_REQ8_t8_pb
-    EXACT_REQ8_tb
-    EXACT_REQ8_tb_p8
-    EXACT_REQ8_tb_pb
-    EXACT_t8
-    EXACT_t8_p8
-    EXACT_t8_pb
-    EXACT_tb
-    EXACT_tb_p8
-    EXACT_tb_pb
     EXEC_PAT_MOD
     EXEC_PAT_MODS
     EXPECT
@@ -1653,11 +989,6 @@ my @unresolved_visibility_overrides = qw(
     EXTEND_SKIP
     EXT_MGVTBL
     EXT_PAT_MODS
-    EXTRA_CLOSING_NON_UTF8_BRACKETS
-    EXTRA_CLOSING_UTF8_BRACKETS
-    EXTRA_OPENING_NON_UTF8_BRACKETS
-    EXTRA_OPENING_UTF8_BRACKETS
-    EXTRA_SIZE
     FAIL
     FAIL2
     FAIL3
@@ -1665,7 +996,6 @@ my @unresolved_visibility_overrides = qw(
     FAKE_DEFAULT_SIGNAL_HANDLERS
     FAKE_PERSISTENT_SIGNAL_HANDLERS
     FALSE
-    FATAL_ABOVE_FF_MSG
     F_atan2_amg
     FBMcf_TAIL
     FBMcf_TAIL_DOLLAR
@@ -1674,97 +1004,6 @@ my @unresolved_visibility_overrides = qw(
     FBMcf_TAIL_Z
     FBMrf_MULTILINE
     F_cos_amg
-    FEATURE_APOS_AS_NAME_SEP_BIT
-    FEATURE_APOS_AS_NAME_SEP_INDEX
-    FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
-    FEATURE_BAREWORD_FILEHANDLES_BIT
-    FEATURE_BAREWORD_FILEHANDLES_INDEX
-    FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED
-    FEATURE_BITWISE_BIT
-    FEATURE_BITWISE_INDEX
-    FEATURE_BITWISE_IS_ENABLED
-    FEATURE_BUNDLE_510
-    FEATURE_BUNDLE_511
-    FEATURE_BUNDLE_515
-    FEATURE_BUNDLE_523
-    FEATURE_BUNDLE_527
-    FEATURE_BUNDLE_535
-    FEATURE_BUNDLE_537
-    FEATURE_BUNDLE_539
-    FEATURE_BUNDLE_541
-    FEATURE_BUNDLE_CUSTOM
-    FEATURE_BUNDLE_DEFAULT
-    FEATURE_CLASS_BIT
-    FEATURE_CLASS_INDEX
-    FEATURE_CLASS_IS_ENABLED
-    FEATURE_DEFER_BIT
-    FEATURE_DEFER_INDEX
-    FEATURE_DEFER_IS_ENABLED
-    FEATURE_EVALBYTES_BIT
-    FEATURE_EVALBYTES_INDEX
-    FEATURE_EVALBYTES_IS_ENABLED
-    FEATURE_FC_BIT
-    FEATURE_FC_INDEX
-    FEATURE_FC_IS_ENABLED
-    FEATURE_INDIRECT_BIT
-    FEATURE_INDIRECT_INDEX
-    FEATURE_INDIRECT_IS_ENABLED
-    FEATURE_ISA_BIT
-    FEATURE_ISA_INDEX
-    FEATURE_ISA_IS_ENABLED
-    FEATURE_IS_ENABLED_MASK
-    FEATURE_KEYWORD_ALL_BIT
-    FEATURE_KEYWORD_ALL_INDEX
-    FEATURE_KEYWORD_ALL_IS_ENABLED
-    FEATURE_KEYWORD_ANY_BIT
-    FEATURE_KEYWORD_ANY_INDEX
-    FEATURE_KEYWORD_ANY_IS_ENABLED
-    FEATURE_MODULE_TRUE_BIT
-    FEATURE_MODULE_TRUE_INDEX
-    FEATURE_MODULE_TRUE_IS_ENABLED
-    FEATURE_MORE_DELIMS_BIT
-    FEATURE_MORE_DELIMS_INDEX
-    FEATURE_MORE_DELIMS_IS_ENABLED
-    FEATURE_MULTIDIMENSIONAL_BIT
-    FEATURE_MULTIDIMENSIONAL_INDEX
-    FEATURE_MULTIDIMENSIONAL_IS_ENABLED
-    FEATURE_MYREF_BIT
-    FEATURE_MYREF_INDEX
-    FEATURE_MYREF_IS_ENABLED
-    FEATURE_POSTDEREF_QQ_BIT
-    FEATURE_POSTDEREF_QQ_INDEX
-    FEATURE_POSTDEREF_QQ_IS_ENABLED
-    FEATURE_REFALIASING_BIT
-    FEATURE_REFALIASING_INDEX
-    FEATURE_REFALIASING_IS_ENABLED
-    FEATURE_SAY_BIT
-    FEATURE_SAY_INDEX
-    FEATURE_SAY_IS_ENABLED
-    FEATURE_SIGNATURES_BIT
-    FEATURE_SIGNATURES_INDEX
-    FEATURE_SIGNATURES_IS_ENABLED
-    FEATURE_SMARTMATCH_BIT
-    FEATURE_SMARTMATCH_INDEX
-    FEATURE_SMARTMATCH_IS_ENABLED
-    FEATURE_STATE_BIT
-    FEATURE_STATE_INDEX
-    FEATURE_STATE_IS_ENABLED
-    FEATURE___SUB___BIT
-    FEATURE___SUB___INDEX
-    FEATURE___SUB___IS_ENABLED
-    FEATURE_SWITCH_BIT
-    FEATURE_SWITCH_INDEX
-    FEATURE_SWITCH_IS_ENABLED
-    FEATURE_TRY_BIT
-    FEATURE_TRY_INDEX
-    FEATURE_TRY_IS_ENABLED
-    FEATURE_UNICODE_BIT
-    FEATURE_UNICODE_INDEX
-    FEATURE_UNICODE_IS_ENABLED
-    FEATURE_UNIEVAL_BIT
-    FEATURE_UNIEVAL_INDEX
-    FEATURE_UNIEVAL_IS_ENABLED
-    FETCHFEATUREBITSHH
     F_exp_amg
     FF_0DECIMAL
     FF_BLANK
@@ -1785,29 +1024,14 @@ my @unresolved_visibility_overrides = qw(
     FF_NEWLINE
     FF_SKIP
     FF_SPACE
-    FILL_ADVANCE_NODE
-    FILL_ADVANCE_NODE_2ui_ARG
-    FILL_ADVANCE_NODE_ARG1u
-    FILL_ADVANCE_NODE_ARGp
-    FILL_NODE
     FILTER_DATA
     FILTER_ISREADER
     FILTER_READ
-    FIND_RUNCV_level_eq
-    FIND_RUNCV_padid_eq
-    FIRST_BYTE
-    FIRST_NON_ASCII_DECIMAL_DIGIT
     first_upper_bit_set_byte_number
     FIT_ARENA
     FIT_ARENA0
     FIT_ARENAn
     FITS_IN_8_BITS
-    FLAGS
-    float_end_shift
-    float_max_offset
-    float_min_offset
-    float_substr
-    float_utf8
     F_log_amg
     FmLINES
     FOLD
@@ -1893,7 +1117,6 @@ my @unresolved_visibility_overrides = qw(
     GETPWUID_LOCK
     GETPWUID_R_HAS_PTR
     GETPWUID_UNLOCK
-    GET_REGCLASS_AUX_DATA
     GETSERVBYNAME_LOCK
     GETSERVBYNAME_R_HAS_BUFFER
     GETSERVBYNAME_R_HAS_PTR
@@ -1917,37 +1140,9 @@ my @unresolved_visibility_overrides = qw(
     GMTIME_LOCK
     GMTIME_UNLOCK
     G_NODEBUG
-    GOSUB
-    GOSUB_t8
-    GOSUB_t8_p8
-    GOSUB_t8_pb
-    GOSUB_tb
-    GOSUB_tb_p8
-    GOSUB_tb_pb
-    GPOS
-    GPOS_t8
-    GPOS_t8_p8
-    GPOS_t8_pb
-    GPOS_tb
-    GPOS_tb_p8
-    GPOS_tb_pb
     GREEK_CAPITAL_LETTER_MU
     GREEK_SMALL_LETTER_MU
     G_RE_REPARSING
-    GROUPP
-    GROUPPN
-    GROUPPN_t8
-    GROUPPN_t8_p8
-    GROUPPN_t8_pb
-    GROUPPN_tb
-    GROUPPN_tb_p8
-    GROUPPN_tb_pb
-    GROUPP_t8
-    GROUPP_t8_p8
-    GROUPP_t8_pb
-    GROUPP_tb
-    GROUPP_tb_p8
-    GROUPP_tb_pb
     G_UNDEF_FILL
     Gv_AMG
     GvASSUMECV
@@ -1959,8 +1154,6 @@ my @unresolved_visibility_overrides = qw(
     GvCVGEN
     GvCV_set
     GvCVu
-    gv_dup
-    gv_dup_inc
     GvEGV
     GvEGVx
     GvENAME
@@ -2095,8 +1288,6 @@ my @unresolved_visibility_overrides = qw(
     HEK_WASUTF8_off
     HEK_WASUTF8_on
     HeNEXT
-    HIGHEST_ANYOF_HRx_BYTE
-    HIGHEST_CASE_CHANGING_CP
     HINT_ALL_STRICT
     HINT_ASCII_ENCODING
     HINT_BLOCK_SCOPE
@@ -2105,7 +1296,6 @@ my @unresolved_visibility_overrides = qw(
     HINT_EXPLICIT_STRICT_SUBS
     HINT_EXPLICIT_STRICT_VARS
     HINT_FEATURE_MASK
-    HINT_FEATURE_SHIFT
     HINT_FILETEST_ACCESS
     HINT_INTEGER
     HINT_LEXICAL_IO_IN
@@ -2123,9 +1313,7 @@ my @unresolved_visibility_overrides = qw(
     HINT_RE_TAINT
     HINTS_DEFAULT
     HINTS_REFCNT_INIT
-    HINTS_REFCNT_LOCK
     HINTS_REFCNT_TERM
-    HINTS_REFCNT_UNLOCK
     HINT_STRICT_REFS
     HINT_STRICT_SUBS
     HINT_STRICT_VARS
@@ -2157,15 +1345,11 @@ my @unresolved_visibility_overrides = qw(
     HvAMAGIC_on
     HvARRAY
     HvAUX
-    HVAUX_ARENA_ROOT_IX
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
     HvAUXf_SCAN_STASH
     HV_DELETE
-    hv_deletehek
     HV_DISABLE_UVAR_XKEY
-    hv_dup
-    hv_dup_inc
     HvEITER
     HvEITER_get
     HvEITER_set
@@ -2173,9 +1357,7 @@ my @unresolved_visibility_overrides = qw(
     HvENAME_HEK
     HvENAME_HEK_NN
     HvENAMELEN_get
-    hv_existshek
     HV_FETCH_EMPTY_HE
-    hv_fetchhek
     HV_FETCH_ISEXISTS
     HV_FETCH_ISSTORE
     HV_FETCH_JUST_SV
@@ -2204,13 +1386,6 @@ my @unresolved_visibility_overrides = qw(
     HvPLACEHOLDERS_get
     HvPLACEHOLDERS_set
     HvRAND_get
-    HVrhek_delete
-    HVrhek_IV
-    HVrhek_PV
-    HVrhek_PV_UTF8
-    HVrhek_typemask
-    HVrhek_undef
-    HVrhek_UV
     HvRITER
     HvRITER_get
     HvRITER_set
@@ -2218,7 +1393,6 @@ my @unresolved_visibility_overrides = qw(
     HvSHAREKEYS_off
     HvSHAREKEYS_on
     HvSTASH_IS_CLASS
-    hv_storehek
     HvTOTALKEYS
     HvUSEDKEYS
     HYPHEN_UTF8
@@ -2229,34 +1403,6 @@ my @unresolved_visibility_overrides = qw(
     I32_MIN
     I8_TO_NATIVE
     I8_TO_NATIVE_UTF8
-    IFMATCH
-    IFMATCH_A
-    IFMATCH_A_fail
-    IFMATCH_A_fail_t8
-    IFMATCH_A_fail_t8_p8
-    IFMATCH_A_fail_t8_pb
-    IFMATCH_A_fail_tb
-    IFMATCH_A_fail_tb_p8
-    IFMATCH_A_fail_tb_pb
-    IFMATCH_A_t8
-    IFMATCH_A_t8_p8
-    IFMATCH_A_t8_pb
-    IFMATCH_A_tb
-    IFMATCH_A_tb_p8
-    IFMATCH_A_tb_pb
-    IFMATCH_t8
-    IFMATCH_t8_p8
-    IFMATCH_t8_pb
-    IFMATCH_tb
-    IFMATCH_tb_p8
-    IFMATCH_tb_pb
-    IFTHEN
-    IFTHEN_t8
-    IFTHEN_t8_p8
-    IFTHEN_t8_pb
-    IFTHEN_tb
-    IFTHEN_tb_p8
-    IFTHEN_tb_pb
     IGNORE_PAT_MOD
     I_LIMITS
     ILLEGAL_UTF8_BYTE
@@ -2278,13 +1424,6 @@ my @unresolved_visibility_overrides = qw(
     IN_SOME_LOCALE_FORM
     IN_SOME_LOCALE_FORM_COMPILETIME
     IN_SOME_LOCALE_FORM_RUNTIME
-    INSUBP
-    INSUBP_t8
-    INSUBP_t8_p8
-    INSUBP_t8_pb
-    INSUBP_tb
-    INSUBP_tb_p8
-    INSUBP_tb_pb
     INT32_MIN
     INT_64_T
     INT_PAT_MODS
@@ -2293,8 +1432,6 @@ my @unresolved_visibility_overrides = qw(
     IN_UTF8_TURKIC_LOCALE
     INVLIST_INDEX
     IoANY
-    io_dup
-    io_dup_inc
     IOf_ARGV
     IOf_DIDTOP
     IOf_FAKE_DIRP
@@ -2328,8 +1465,6 @@ my @unresolved_visibility_overrides = qw(
     isALPHANUMERIC_uni
     isALPHAU
     isALPHA_uni
-    is_ANYOF_SYNTHETIC
-    IS_ANYOF_TRIE
     isASCII_LC_utf8
     isASCII_uni
     ISA_VERSION_OBJ
@@ -2341,16 +1476,12 @@ my @unresolved_visibility_overrides = qw(
     isCHARNAME_CONT
     isCNTRL_LC_utf8
     isCNTRL_uni
-    isDEBUG_WILDCARD
     isDIGIT_LC_utf8
     isDIGIT_uni
-    isEXACTFish
-    isEXACT_REQ8
     is_FOLDS_TO_MULTI_utf8
     isGRAPH_LC_utf8
     isGRAPH_uni
     isGV
-    isGV_or_RVCV
     isGV_with_GP_off
     isGV_with_GP_on
     is_HANGUL_ED_utf8_safe
@@ -2371,7 +1502,6 @@ my @unresolved_visibility_overrides = qw(
     is_LNBREAK_utf8_safe
     isLOWER_LC_utf8
     isLOWER_uni
-    isMNEMONIC_CNTRL
     is_MULTI_CHAR_FOLD_latin1_safe
     is_MULTI_CHAR_FOLD_utf8_safe
     isNON_BRACE_QUANTIFIER
@@ -2398,7 +1528,6 @@ my @unresolved_visibility_overrides = qw(
     is_posix_UPPER
     is_posix_WORDCHAR
     is_posix_XDIGIT
-    isPOWER_OF_2
     isPRINT_LC_utf8
     isPRINT_uni
     is_PROBLEMATIC_LOCALE_FOLD_cp
@@ -2426,7 +1555,6 @@ my @unresolved_visibility_overrides = qw(
     is_THREE_CHAR_FOLD_HEAD_utf8_safe
     is_THREE_CHAR_FOLD_latin1_safe
     is_THREE_CHAR_FOLD_utf8_safe
-    IS_TRIE_AC
     isU8_ALPHA_LC
     isU8_ALPHANUMERIC_LC
     isU8_ASCII_LC
@@ -2475,27 +1603,6 @@ my @unresolved_visibility_overrides = qw(
     kCOP
     KEEPCOPY_PAT_MOD
     KEEPCOPY_PAT_MODS
-    KEEPS
-    KEEPS_next
-    KEEPS_next_fail
-    KEEPS_next_fail_t8
-    KEEPS_next_fail_t8_p8
-    KEEPS_next_fail_t8_pb
-    KEEPS_next_fail_tb
-    KEEPS_next_fail_tb_p8
-    KEEPS_next_fail_tb_pb
-    KEEPS_next_t8
-    KEEPS_next_t8_p8
-    KEEPS_next_t8_pb
-    KEEPS_next_tb
-    KEEPS_next_tb_p8
-    KEEPS_next_tb_pb
-    KEEPS_t8
-    KEEPS_t8_p8
-    KEEPS_t8_pb
-    KEEPS_tb
-    KEEPS_tb_p8
-    KEEPS_tb_pb
     KELVIN_SIGN
     KERNEL
     KEY_abs
@@ -2807,37 +1914,10 @@ my @unresolved_visibility_overrides = qw(
     LC_NUMERIC_UNLOCK
     LDBL_DIG
     LEAVE_SCOPE
-    LEXACT
-    LEXACT_REQ8
-    LEXACT_REQ8_t8
-    LEXACT_REQ8_t8_p8
-    LEXACT_REQ8_t8_pb
-    LEXACT_REQ8_tb
-    LEXACT_REQ8_tb_p8
-    LEXACT_REQ8_tb_pb
-    LEXACT_t8
-    LEXACT_t8_p8
-    LEXACT_t8_pb
-    LEXACT_tb
-    LEXACT_tb_p8
-    LEXACT_tb_pb
-    LEX_DONT_CLOSE_RSFP
-    LEX_EVALBYTES
-    LEX_IGNORE_UTF8_HINTS
     LEX_NOTPARSING
-    LEX_START_COPIED
-    LEX_START_FLAGS
-    LEX_START_SAME_FILTER
     LF_NATIVE
     LIB_INVARG
     LINE_Tf
-    LNBREAK
-    LNBREAK_t8
-    LNBREAK_t8_p8
-    LNBREAK_t8_pb
-    LNBREAK_tb
-    LNBREAK_tb_p8
-    LNBREAK_tb_pb
     LOC
     LOCALE_INIT
     LOCALE_LOCK
@@ -2850,13 +1930,6 @@ my @unresolved_visibility_overrides = qw(
     LOCALTIME_LOCK
     LOCALTIME_UNLOCK
     LOCK_LC_NUMERIC_STANDARD
-    LOGICAL
-    LOGICAL_t8
-    LOGICAL_t8_p8
-    LOGICAL_t8_pb
-    LOGICAL_tb
-    LOGICAL_tb_p8
-    LOGICAL_tb_pb
     LONGDOUBLE_BIG_ENDIAN
     LONGDOUBLE_DOUBLEDOUBLE
     LONG_DOUBLE_EQUALS_DOUBLE
@@ -2864,22 +1937,7 @@ my @unresolved_visibility_overrides = qw(
     LONGDOUBLE_MIX_ENDIAN
     LONGDOUBLE_VAX_ENDIAN
     LONGDOUBLE_X86_80_BIT
-    LONGJMP
-    LONGJMP_t8
-    LONGJMP_t8_p8
-    LONGJMP_t8_pb
-    LONGJMP_tb
-    LONGJMP_tb_p8
-    LONGJMP_tb_pb
-    LOOKBEHIND_END
-    LOOKBEHIND_END_t8
-    LOOKBEHIND_END_t8_p8
-    LOOKBEHIND_END_t8_pb
-    LOOKBEHIND_END_tb
-    LOOKBEHIND_END_tb_p8
-    LOOKBEHIND_END_tb_pb
     LOOP_PAT_MODS
-    LOWEST_ANYOF_HRx_BYTE
     lsbit_pos
     LvFLAGS
     LVf_NEG_LEN
@@ -2894,7 +1952,6 @@ my @unresolved_visibility_overrides = qw(
     MADE_EXACT_TRIE
     MADE_JUMP_TRIE
     MADE_TRIE
-    magic_sethint_feature
     MALFORMED_UTF8_DIE
     MALFORMED_UTF8_WARN
     MALLOC_CHECK_TAINT
@@ -2907,32 +1964,9 @@ my @unresolved_visibility_overrides = qw(
     MARKER2
     MARK_NAUGHTY
     MARK_NAUGHTY_EXP
-    MARKPOINT
-    MARKPOINT_next
-    MARKPOINT_next_fail
-    MARKPOINT_next_fail_t8
-    MARKPOINT_next_fail_t8_p8
-    MARKPOINT_next_fail_t8_pb
-    MARKPOINT_next_fail_tb
-    MARKPOINT_next_fail_tb_p8
-    MARKPOINT_next_fail_tb_pb
-    MARKPOINT_next_t8
-    MARKPOINT_next_t8_p8
-    MARKPOINT_next_t8_pb
-    MARKPOINT_next_tb
-    MARKPOINT_next_tb_p8
-    MARKPOINT_next_tb_pb
-    MARKPOINT_t8
-    MARKPOINT_t8_p8
-    MARKPOINT_t8_pb
-    MARKPOINT_tb
-    MARKPOINT_tb_p8
-    MARKPOINT_tb_pb
-    MAX_ANYOF_HRx_BYTE
     MAXARG
     MAXARG3
     MAX_CHARSET_NAME_LENGTH
-    MAX_FEATURE_LEN
     MAX_FOLD_FROMS
     MAX_LEGAL_CP
     MAX_MATCHES
@@ -2943,16 +1977,6 @@ my @unresolved_visibility_overrides = qw(
     MAX_UNICODE_UTF8
     MAX_UNICODE_UTF8_BYTES
     MAX_UTF8_TWO_BYTE
-    MAYBE_DEREF_GV
-    MAYBE_DEREF_GV_flags
-    MAYBE_DEREF_GV_nomg
-    MBOL
-    MBOL_t8
-    MBOL_t8_p8
-    MBOL_t8_pb
-    MBOL_tb
-    MBOL_tb_p8
-    MBOL_tb_pb
     MDEREF_ACTION_MASK
     MDEREF_AV_gvav_aelem
     MDEREF_AV_gvsv_vivify_rv2av_aelem
@@ -2991,16 +2015,7 @@ my @unresolved_visibility_overrides = qw(
     MEM_WRAP_CHECK
     MEM_WRAP_CHECK_1
     MEM_WRAP_CHECK_s
-    MEOL
-    MEOL_t8
-    MEOL_t8_p8
-    MEOL_t8_pb
-    MEOL_tb
-    MEOL_tb_p8
-    MEOL_tb_pb
     MEXTEND
-    MgBYTEPOS
-    MgBYTEPOS_set
     MGf_BYTES
     MGf_GSKIP
     MGf_MINMATCH
@@ -3018,21 +2033,11 @@ my @unresolved_visibility_overrides = qw(
     MICRO_SIGN_NATIVE
     MICRO_SIGN_UTF8
     MI_INIT_WORKAROUND_PACK
-    MINMOD
-    MINMOD_t8
-    MINMOD_t8_p8
-    MINMOD_t8_pb
-    MINMOD_tb
-    MINMOD_tb_p8
-    MINMOD_tb_pb
     MIN_OFFUNI_VARIANT_CP
     Mkdir
     MKTIME_LOCK
     MKTIME_UNLOCK
     M_PAT_MODS
-    MPH_BUCKETS
-    MPH_RSHIFT
-    MPH_VALt
     msbit_pos
     MSPAGAIN
     MSVC_DIAG_IGNORE
@@ -3044,34 +2049,14 @@ my @unresolved_visibility_overrides = qw(
     MULTILINE_PAT_MOD
     MUST_RESTART
     MUTEX_INIT_NEEDS_MUTEX_ZEROED
-    my
     my_binmode
     MY_CXT_INDEX
     MY_CXT_INIT_ARG
     MY_CXT_INIT_INTERP
     my_lstat
     my_stat
-    N0
-    N1
-    N10
-    N11
-    N2
-    N3
-    N4
-    N5
-    N6
-    N7
-    N8
-    N9
     namedclass_to_classnum
     NAN_COMPARE_BROKEN
-    NANYOFM
-    NANYOFM_t8
-    NANYOFM_t8_p8
-    NANYOFM_t8_pb
-    NANYOFM_tb
-    NANYOFM_tb_p8
-    NANYOFM_tb_pb
     NATIVE8_TO_UNI
     NATIVE_BYTE_IS_INVARIANT
     NATIVE_SKIP
@@ -3081,34 +2066,6 @@ my @unresolved_visibility_overrides = qw(
     NATIVE_UTF8_TO_I8
     nBIT_MASK
     nBIT_UMAX
-    NBOUND
-    NBOUNDA
-    NBOUNDA_t8
-    NBOUNDA_t8_p8
-    NBOUNDA_t8_pb
-    NBOUNDA_tb
-    NBOUNDA_tb_p8
-    NBOUNDA_tb_pb
-    NBOUNDL
-    NBOUNDL_t8
-    NBOUNDL_t8_p8
-    NBOUNDL_t8_pb
-    NBOUNDL_tb
-    NBOUNDL_tb_p8
-    NBOUNDL_tb_pb
-    NBOUND_t8
-    NBOUND_t8_p8
-    NBOUND_t8_pb
-    NBOUND_tb
-    NBOUND_tb_p8
-    NBOUND_tb_pb
-    NBOUNDU
-    NBOUNDU_t8
-    NBOUNDU_t8_p8
-    NBOUNDU_t8_pb
-    NBOUNDU_tb
-    NBOUNDU_tb_p8
-    NBOUNDU_tb_pb
     NBSP_NATIVE
     NBSP_UTF8
     NEED_UTF8
@@ -3135,13 +2092,9 @@ my @unresolved_visibility_overrides = qw(
     new_XPVNV
     Newz
     NEXT_LINE_CHAR
-    NEXT_OFF
     NOARENA
     NOCAPTURE_PAT_MOD
     NOCAPTURE_PAT_MODS
-    NODE_ALIGN
-    NODE_ALIGN_FILL
-    NODE_STEP_REGNODE
     NO_ENV_ARRAY_IN_MAIN
     NO_ENVIRON_ARRAY
     NofAMmeth
@@ -3154,42 +2107,7 @@ my @unresolved_visibility_overrides = qw(
     NORETURN_FUNCTION_END
     NORMAL
     NOTE3
-    NOTHING
-    NOTHING_t8
-    NOTHING_t8_p8
-    NOTHING_t8_pb
-    NOTHING_tb
-    NOTHING_tb_p8
-    NOTHING_tb_pb
     NOT_REACHED
-    NPOSIXA
-    NPOSIXA_t8
-    NPOSIXA_t8_p8
-    NPOSIXA_t8_pb
-    NPOSIXA_tb
-    NPOSIXA_tb_p8
-    NPOSIXA_tb_pb
-    NPOSIXD
-    NPOSIXD_t8
-    NPOSIXD_t8_p8
-    NPOSIXD_t8_pb
-    NPOSIXD_tb
-    NPOSIXD_tb_p8
-    NPOSIXD_tb_pb
-    NPOSIXL
-    NPOSIXL_t8
-    NPOSIXL_t8_p8
-    NPOSIXL_t8_pb
-    NPOSIXL_tb
-    NPOSIXL_tb_p8
-    NPOSIXL_tb_pb
-    NPOSIXU
-    NPOSIXU_t8
-    NPOSIXU_t8_p8
-    NPOSIXU_t8_pb
-    NPOSIXU_tb
-    NPOSIXU_tb_p8
-    NPOSIXU_tb_pb
     ntohi
     ntohl
     ntohs
@@ -3200,7 +2118,6 @@ my @unresolved_visibility_overrides = qw(
     Nullhek
     Nullop
     NUM_ANYOF_CODE_POINTS
-    NUM_CLASSES
     NV_BIG_ENDIAN
     NV_DIG
     NV_EPSILON
@@ -3276,7 +2193,6 @@ my @unresolved_visibility_overrides = qw(
     OCTAL_VALUE
     OFFUNI_IS_INVARIANT
     OFFUNISKIP
-    OLD_CURRENT_HINTS
     ONCE_PAT_MOD
     ONCE_PAT_MODS
     ONE_IF_EBCDIC_ZERO_IF_NOT
@@ -3289,23 +2205,6 @@ my @unresolved_visibility_overrides = qw(
     OP_CHECK_MUTEX_TERM
     OP_CHECK_MUTEX_UNLOCK
     OPCODE
-    OPEN
-    OPEN_t8
-    OPEN_t8_p8
-    OPEN_t8_pb
-    OPEN_tb
-    OPEN_tb_p8
-    OPEN_tb_pb
-    OPERAND
-    OPERANDl
-    OPERANDs
-    OPFAIL
-    OPFAIL_t8
-    OPFAIL_t8_p8
-    OPFAIL_t8_pb
-    OPFAIL_tb
-    OPFAIL_tb_p8
-    OPFAIL_tb_pb
     OPf_FOLDED
     OPf_KNOW
     OPf_LIST
@@ -3329,7 +2228,6 @@ my @unresolved_visibility_overrides = qw(
     OP_IS_SOCKET
     OP_IS_STAT
     OP_LVALUE_NO_CROAK
-    OpMySLAB
     OP_SIBLING
     OPpALLOW_FAKE
     OPpARG1_MASK
@@ -3478,19 +2376,6 @@ my @unresolved_visibility_overrides = qw(
     OpREFCNT_set
     OP_REFCNT_TERM
     OP_REFCNT_UNLOCK
-    OpSLAB
-    OpslabREFCNT_dec
-    OpslabREFCNT_dec_padok
-    OpSLOT
-    OPSLOT_HEADER
-    OpSLOToff
-    OPTIMIZED
-    OPTIMIZED_t8
-    OPTIMIZED_t8_p8
-    OPTIMIZED_t8_pb
-    OPTIMIZED_tb
-    OPTIMIZED_tb_p8
-    OPTIMIZED_tb_pb
     OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
@@ -3501,7 +2386,6 @@ my @unresolved_visibility_overrides = qw(
     OP_TYPE_IS_OR_WAS_NN
     OpTYPE_set
     OutCopFILE
-    O_VMS_DELETEONCLOSE
     padadd_FIELD
     padadd_NO_DUP_CHECK
     padadd_OUR
@@ -3569,18 +2453,10 @@ my @unresolved_visibility_overrides = qw(
     PARENT_FAKELEX_FLAGS
     PARENT_PAD_INDEX
     PAREN_UNSET
-    PARNO
     PATCHLEVEL
     Pause
     PBITVAL
     PBYTE
-    PLUS
-    PLUS_t8
-    PLUS_t8_p8
-    PLUS_t8_pb
-    PLUS_tb
-    PLUS_tb_p8
-    PLUS_tb_pb
     PMf_BASE_SHIFT
     PMf_CHARSET
     PMf_CODELIST_PRIVATE
@@ -3623,79 +2499,17 @@ my @unresolved_visibility_overrides = qw(
     POPpconstx
     POPSTACK
     POPSTACK_TO
-    POSIXA
-    POSIXA_t8
-    POSIXA_t8_p8
-    POSIXA_t8_pb
-    POSIXA_tb
-    POSIXA_tb_p8
-    POSIXA_tb_pb
     POSIX_CC_COUNT
-    POSIXD
-    POSIXD_t8
-    POSIXD_t8_p8
-    POSIXD_t8_pb
-    POSIXD_tb
-    POSIXD_tb_p8
-    POSIXD_tb_pb
-    POSIXL
-    POSIXL_CLEAR
-    POSIXL_SET
-    POSIXL_t8
-    POSIXL_t8_p8
-    POSIXL_t8_pb
-    POSIXL_tb
-    POSIXL_tb_p8
-    POSIXL_tb_pb
-    POSIXL_TEST
-    POSIXL_ZERO
     POSIX_SETLOCALE_LOCK
     POSIX_SETLOCALE_UNLOCK
-    POSIXU
-    POSIXU_t8
-    POSIXU_t8_p8
-    POSIXU_t8_pb
-    POSIXU_tb
-    POSIXU_tb_p8
-    POSIXU_tb_pb
     POSTPONED
     PP
     PP_wrapped
-    PREGf_ANCH
-    PREGf_ANCH_GPOS
-    PREGf_ANCH_MBOL
-    PREGf_ANCH_SBOL
-    PREGf_CUTGROUP_SEEN
-    PREGf_GPOS_FLOAT
-    PREGf_GPOS_SEEN
-    PREGf_IMPLICIT
-    PREGf_NAUGHTY
-    PREGf_NOSCAN
-    PREGf_PESSIMIZE_SEEN
-    PREGf_RECURSE_SEEN
-    PREGf_SKIP
-    PREGf_USE_RE_EVAL
-    PREGf_VERBARG_SEEN
-    prepare_SV_for_RV
     PRESCAN_VERSION
     PREV_RANGE_MATCHES_INVLIST
     PRINTF_FORMAT_NULL_OK
     PRIVSHIFT
     ProgLen
-    PRUNE
-    PRUNE_t8
-    PRUNE_t8_p8
-    PRUNE_t8_pb
-    PRUNE_tb
-    PRUNE_tb_p8
-    PRUNE_tb_pb
-    PSEUDO
-    PSEUDO_t8
-    PSEUDO_t8_p8
-    PSEUDO_t8_pb
-    PSEUDO_tb
-    PSEUDO_tb_p8
-    PSEUDO_tb_pb
     pthread_addr_t
     pthread_attr_init
     pthread_condattr_default
@@ -3731,35 +2545,9 @@ my @unresolved_visibility_overrides = qw(
     pWARN_STD
     QR_PAT_MODS
     QUESTION_MARK_CTRL
-    RANGE_INDICATOR
     RCPVf_ALLOW_EMPTY
     RCPVf_NO_COPY
     RCPVf_USE_STRLEN
-    REAL_COP_FEATURE_SIZE
-    RE_COMPILE_RECURSION_INIT
-    RE_COMPILE_RECURSION_LIMIT
-    RE_DEBUG_COMPILE_DUMP
-    RE_DEBUG_COMPILE_FLAGS
-    RE_DEBUG_COMPILE_MASK
-    RE_DEBUG_COMPILE_OPTIMISE
-    RE_DEBUG_COMPILE_PARSE
-    RE_DEBUG_COMPILE_TEST
-    RE_DEBUG_COMPILE_TRIE
-    RE_DEBUG_EXECUTE_INTUIT
-    RE_DEBUG_EXECUTE_MASK
-    RE_DEBUG_EXECUTE_MATCH
-    RE_DEBUG_EXECUTE_TRIE
-    RE_DEBUG_EXTRA_BUFFERS
-    RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE
-    RE_DEBUG_EXTRA_GPOS
-    RE_DEBUG_EXTRA_MASK
-    RE_DEBUG_EXTRA_OPTIMISE
-    RE_DEBUG_EXTRA_STACK
-    RE_DEBUG_EXTRA_STATE
-    RE_DEBUG_EXTRA_TRIE
-    RE_DEBUG_EXTRA_WILDCARD
-    RE_DEBUG_FLAG
-    RE_DEBUG_FLAGS
     REENABLE_LC_NUMERIC_CHANGES
     REENTRANT_PROTO_B_B
     REENTRANT_PROTO_B_BI
@@ -3835,165 +2623,20 @@ my @unresolved_visibility_overrides = qw(
     REENTRANT_PROTO_V_H
     REENTRANT_PROTO_V_ID
     REENTR_MEMZERO
-    ref
-    REF
     REFCOUNTED_HE_EXISTS
-    refcounted_he_fetch_pvs
     REFCOUNTED_HE_KEY_UTF8
-    refcounted_he_new_pvs
-    REFF
-    REFFA
-    REFFAN
-    REFFAN_t8
-    REFFAN_t8_p8
-    REFFAN_t8_pb
-    REFFAN_tb
-    REFFAN_tb_p8
-    REFFAN_tb_pb
-    REFFA_t8
-    REFFA_t8_p8
-    REFFA_t8_pb
-    REFFA_tb
-    REFFA_tb_p8
-    REFFA_tb_pb
-    REFFL
-    REFFLN
-    REFFLN_t8
-    REFFLN_t8_p8
-    REFFLN_t8_pb
-    REFFLN_tb
-    REFFLN_tb_p8
-    REFFLN_tb_pb
-    REFFL_t8
-    REFFL_t8_p8
-    REFFL_t8_pb
-    REFFL_tb
-    REFFL_tb_p8
-    REFFL_tb_pb
-    REFFN
-    REFFN_t8
-    REFFN_t8_p8
-    REFFN_t8_pb
-    REFFN_tb
-    REFFN_tb_p8
-    REFFN_tb_pb
-    REFF_t8
-    REFF_t8_p8
-    REFF_t8_pb
-    REFF_tb
-    REFF_tb_p8
-    REFF_tb_pb
-    REFFU
-    REFFUN
-    REFFUN_t8
-    REFFUN_t8_p8
-    REFFUN_t8_pb
-    REFFUN_tb
-    REFFUN_tb_p8
-    REFFUN_tb_pb
-    REFFU_t8
-    REFFU_t8_p8
-    REFFU_t8_pb
-    REFFU_tb
-    REFFU_tb_p8
-    REFFU_tb_pb
-    REF_HE_KEY
-    REFN
-    REF_next
-    REF_next_fail
-    REF_next_fail_t8
-    REF_next_fail_t8_p8
-    REF_next_fail_t8_pb
-    REF_next_fail_tb
-    REF_next_fail_tb_p8
-    REF_next_fail_tb_pb
-    REF_next_t8
-    REF_next_t8_p8
-    REF_next_t8_pb
-    REF_next_tb
-    REF_next_tb_p8
-    REF_next_tb_pb
-    REFN_t8
-    REFN_t8_p8
-    REFN_t8_pb
-    REFN_tb
-    REFN_tb_p8
-    REFN_tb_pb
-    REF_t8
-    REF_t8_p8
-    REF_t8_pb
-    REF_tb
-    REF_tb_p8
-    REF_tb_pb
-    REG_ANY
-    REG_ANY_t8
-    REG_ANY_t8_p8
-    REG_ANY_t8_pb
-    REG_ANY_tb
-    REG_ANY_tb_p8
-    REG_ANY_tb_pb
-    REG_CUTGROUP_SEEN
     RegexLengthToShowInErrorMessages
-    REGEX_SET
-    REGEX_SET_t8
-    REGEX_SET_t8_p8
-    REGEX_SET_t8_pb
-    REGEX_SET_tb
-    REGEX_SET_tb_p8
-    REGEX_SET_tb_pb
-    REG_EXTFLAGS_NAME_SIZE
     REG_FETCH_ABSOLUTE
-    REG_GPOS_SEEN
-    REG_INTFLAGS_NAME_SIZE
-    REG_LB_SEEN
-    REG_LOOKBEHIND_SEEN
-    REG_MAGIC
-    REGMATCH_STATE_MAX
-    REGNODE_AFTER
-    REGNODE_AFTER_opcode
-    REGNODE_AFTER_PLUS
-    REGNODE_AFTER_PLUS_DEBUG
-    REGNODE_AFTER_type
-    REGNODE_AFTER_varies
-    REGNODE_ARG_LEN
-    REGNODE_ARG_LEN_VARIES
-    REGNODE_BBM_BITMAP_LEN
-    REGNODE_BEFORE
-    REGNODE_BEFORE_BASE
-    REGNODE_BEFORE_BASE_DEBUG
     REGNODE_GUTS
-    REGNODE_MAX
-    REGNODE_NAME
     REG_NODE_NUM
-    REGNODE_OFF_BY_ARG
     REGNODE_OFFSET
     REGNODE_p
-    REGNODE_SIMPLE
     REGNODE_STEP_OVER
-    REGNODE_TYPE
-    REGNODE_VARIES
-    REG_PESSIMIZE_SEEN
-    REG_RECURSE_SEEN
-    REG_RUN_ON_COMMENT_SEEN
     REGTAIL
     REGTAIL_STUDY
-    REG_TOP_LEVEL_BRANCHES_SEEN
-    REG_UNBOUNDED_QUANTIFIER_SEEN
-    REG_UNFOLDED_MULTI_SEEN
-    REG_VERBARG_SEEN
     reg_warn_non_literal_string
-    REG_ZERO_LEN_SEEN
-    RENUM
-    RENUM_t8
-    RENUM_t8_p8
-    RENUM_t8_pb
-    RENUM_tb
-    RENUM_tb_p8
-    RENUM_tb_pb
     REPORT_LOCATION
     REPORT_LOCATION_ARGS
-    RE_PV_COLOR_DECL
-    RE_PV_QUOTED_DECL
     REQUIRE_BRANCHJ
     REQUIRE_PARENS_PASS
     REQUIRE_UNI_RULES
@@ -4003,14 +2646,9 @@ my @unresolved_visibility_overrides = qw(
     RESTART_PARSE
     RESTORE_ERRNO
     RESTORE_WARNINGS
-    RE_SV_DUMPLEN
-    RE_SV_ESCAPE
-    RE_SV_TAIL
     RETPUSHNO
     RETPUSHUNDEF
     RETPUSHYES
-    RE_TRIE_MAXBUF_INIT
-    RE_TRIE_MAXBUF_NAME
     RETSETNO
     RETSETTARG
     RETSETUNDEF
@@ -4120,10 +2758,7 @@ my @unresolved_visibility_overrides = qw(
     RsSNARF
     RUNOPS_DEFAULT
     RV2CVOPCV_FLAG_MASK
-    RV2CVOPCV_MAYBE_NAME_GV
     RV2CVOPCV_RETURN_STUB
-    RX_ANCHORED_SUBSTR
-    RX_ANCHORED_UTF8
     RX_CHECK_SUBSTR
     RX_COMPFLAGS
     RX_ENGINE
@@ -4134,8 +2769,6 @@ my @unresolved_visibility_overrides = qw(
     RXf_EVAL_SEEN
     RXf_INTUIT_TAIL
     RXf_IS_ANCHORED
-    RX_FLOAT_SUBSTR
-    RX_FLOAT_UTF8
     RXf_MATCH_UTF8
     RXf_PMf_CHARSET
     RXf_PMf_COMPILETIME
@@ -4152,11 +2785,6 @@ my @unresolved_visibility_overrides = qw(
     RXf_USE_INTUIT_ML
     RXf_USE_INTUIT_NOML
     RX_GOFS
-    RXi_GET
-    RXi_GET_DECL
-    RXi_GET_DECL_NULL
-    RX_INTFLAGS
-    RXi_SET
     RX_ISTAINTED
     RX_LASTCLOSEPAREN
     RX_LASTPAREN
@@ -4186,7 +2814,6 @@ my @unresolved_visibility_overrides = qw(
     RXp_EXTFLAGS
     RXp_GOFS
     RXp_HAS_CUTGROUP
-    RXp_INTFLAGS
     RXp_ISTAINTED
     RXp_LASTCLOSEPAREN
     RXp_LASTPAREN
@@ -4241,14 +2868,6 @@ my @unresolved_visibility_overrides = qw(
     RX_WRAPPED_const
     RX_ZERO_LEN
     safefree
-    SAFE_TRIE_NODENUM
-    SANY
-    SANY_t8
-    SANY_t8_p8
-    SANY_t8_pb
-    SANY_tb
-    SANY_tb_p8
-    SANY_tb_pb
     SAVEADELETE
     SAVECLEARSV
     SAVECOMPILEWARNINGS
@@ -4261,10 +2880,8 @@ my @unresolved_visibility_overrides = qw(
     SAVECOPSTASH_FREE
     SAVECURCOPWARNINGS
     SAVE_ERRNO
-    SAVEFEATUREBITS
     SAVEFREECOPHH
     SAVEFREEPADNAME
-    SAVE_FREE_REXC_STATE
     SAVEGENERICPV
     SAVEHDELETE
     SAVEHINTS
@@ -4338,18 +2955,6 @@ my @unresolved_visibility_overrides = qw(
     SAWAMPERSAND_LEFT
     SAWAMPERSAND_MIDDLE
     SAWAMPERSAND_RIGHT
-    sb_dstr
-    sb_iters
-    sb_m
-    sb_maxiters
-    SBOL
-    SBOL_t8
-    SBOL_t8_p8
-    SBOL_t8_pb
-    SBOL_tb
-    SBOL_tb_p8
-    SBOL_tb_pb
-    sb_orig
     SBOX32_MIX3
     SBOX32_MIX4
     SBOX32_STATE_BITS
@@ -4359,13 +2964,6 @@ my @unresolved_visibility_overrides = qw(
     SBOX32_WARN4
     SBOX32_WARN5
     SBOX32_WARN6
-    sb_rflags
-    sb_rx
-    sb_rxres
-    sb_rxtainted
-    sb_s
-    sb_strend
-    sb_targ
     sC
     SCAN_DEF
     SCAN_REPL
@@ -4382,14 +2980,6 @@ my @unresolved_visibility_overrides = qw(
     SCF_WHILEM_VISITED_POS
     Semctl
     semun
-    SEOL
-    SEOL_t8
-    SEOL_t8_p8
-    SEOL_t8_pb
-    SEOL_tb
-    SEOL_tb_p8
-    SEOL_tb_pb
-    set_ANYOF_SYNTHETIC
     SETGRENT_R_HAS_FPTR
     SETi
     SET_MARK_OFFSET
@@ -4403,7 +2993,6 @@ my @unresolved_visibility_overrides = qw(
     setregid
     setreuid
     SETs
-    setSTR_LEN
     SET_SVANY_FOR_BODYLESS_IV
     SET_SVANY_FOR_BODYLESS_NV
     SETTARG
@@ -4428,53 +3017,14 @@ my @unresolved_visibility_overrides = qw(
     SINGLE_PAT_MOD
     SIPHASH_SEED_STATE
     SIPROUND
-    S_iv_add_may_overflow
-    S_iv_mul_may_overflow
-    S_iv_sub_may_overflow
     S_IWOTH
     S_IXOTH
-    SIZE_ALIGN
     Size_t_MAX
-    SKIP
     SKIP_IF_CHAR
-    SKIP_next
-    SKIP_next_fail
-    SKIP_next_fail_t8
-    SKIP_next_fail_t8_p8
-    SKIP_next_fail_t8_pb
-    SKIP_next_fail_tb
-    SKIP_next_fail_tb_p8
-    SKIP_next_fail_tb_pb
-    SKIP_next_t8
-    SKIP_next_t8_p8
-    SKIP_next_t8_pb
-    SKIP_next_tb
-    SKIP_next_tb_p8
-    SKIP_next_tb_pb
-    SKIP_t8
-    SKIP_t8_p8
-    SKIP_t8_pb
-    SKIP_tb
-    SKIP_tb_p8
-    SKIP_tb_pb
     SLOPPYDIVIDE
     socketpair
     S_PAT_MODS
     specialWARN
-    SRCLOSE
-    SRCLOSE_t8
-    SRCLOSE_t8_p8
-    SRCLOSE_t8_pb
-    SRCLOSE_tb
-    SRCLOSE_tb_p8
-    SRCLOSE_tb_pb
-    SROPEN
-    SROPEN_t8
-    SROPEN_t8_p8
-    SROPEN_t8_pb
-    SROPEN_tb
-    SROPEN_tb_p8
-    SROPEN_tb_pb
     SS_ACCVIO
     SS_ADD_BOOL
     SS_ADD_DPTR
@@ -4490,7 +3040,6 @@ my @unresolved_visibility_overrides = qw(
     SSCHECK
     ssc_init_zero
     ssc_match_all_cp
-    SSC_MATCHES_EMPTY_STRING
     SS_DEVOFFLINE
     SSGROW
     SS_IVCHAN
@@ -4516,13 +3065,6 @@ my @unresolved_visibility_overrides = qw(
     SSPUSHUV
     Stack_off_t_MAX
     STANDARD_C
-    STAR
-    STAR_t8
-    STAR_t8_p8
-    STAR_t8_pb
-    STAR_tb
-    STAR_tb_p8
-    STAR_tb_pb
     StashHANDLER
     Stat
     Stat_t
@@ -4545,40 +3087,9 @@ my @unresolved_visibility_overrides = qw(
     STRFMON_UNLOCK
     STRFTIME_LOCK
     STRFTIME_UNLOCK
-    STRING
-    STRINGl
-    STRINGs
-    STR_LEN
-    STR_LENl
-    STR_LENs
-    STRLENs
-    STR_LEN_U8
-    STR_SZ
     STRUCT_OFFSET
     STRUCT_SV
-    SUBST_TAINT_BOOLRET
-    SUBST_TAINT_PAT
-    SUBST_TAINT_REPL
-    SUBST_TAINT_RETAINT
-    SUBST_TAINT_STR
     SUBVERSION
-    SUCCEED
-    SUCCEED_t8
-    SUCCEED_t8_p8
-    SUCCEED_t8_pb
-    SUCCEED_tb
-    SUCCEED_tb_p8
-    SUCCEED_tb_pb
-    SUSPEND
-    SUSPEND_t8
-    SUSPEND_t8_p8
-    SUSPEND_t8_pb
-    SUSPEND_tb
-    SUSPEND_tb_p8
-    SUSPEND_tb_pb
-    S_uv_add_overflow
-    S_uv_mul_overflow
-    S_uv_sub_overflow
     sv_2bool_nomg
     sv_2nv
     sv_2pv_nomg
@@ -4592,49 +3103,12 @@ my @unresolved_visibility_overrides = qw(
     SvCOMPILED
     SvCOMPILED_off
     SvCOMPILED_on
-    SV_CONST
-    SV_CONST_BINMODE
-    SV_CONST_CLEAR
-    SV_CONST_CLOSE
-    SV_CONST_DELETE
-    SV_CONST_DESTROY
-    SV_CONST_EOF
-    SV_CONST_EXISTS
-    SV_CONST_EXTEND
-    SV_CONST_FETCH
-    SV_CONST_FETCHSIZE
-    SV_CONST_FILENO
-    SV_CONST_FIRSTKEY
-    SV_CONST_GETC
-    SV_CONST_NEXTKEY
-    SV_CONST_OPEN
-    SV_CONST_POP
-    SV_CONST_PRINT
-    SV_CONST_PRINTF
-    SV_CONST_PUSH
-    SV_CONST_READ
-    SV_CONST_READLINE
     SV_CONST_RETURN
-    SV_CONST_SCALAR
     SV_CONSTS_COUNT
-    SV_CONST_SEEK
-    SV_CONST_SHIFT
-    SV_CONST_SPLICE
-    SV_CONST_STORE
-    SV_CONST_STORESIZE
-    SV_CONST_TELL
-    SV_CONST_TIEARRAY
-    SV_CONST_TIEHANDLE
-    SV_CONST_TIEHASH
-    SV_CONST_TIESCALAR
-    SV_CONST_UNSHIFT
-    SV_CONST_UNTIE
-    SV_CONST_WRITE
     SV_COW_OTHER_PVS
     SV_COW_REFCNT_MAX
     SV_COW_SHARED_HASH_KEYS
     SvDESTROYABLE
-    sv_dup_inc_NN
     SvEND_set
     SvENDx
     SvFAKE
@@ -4655,7 +3129,6 @@ my @unresolved_visibility_overrides = qw(
     SVf_READONLY
     SVf_ROK
     SVf_THINKFIRST
-    SvGID
     SvGMAGICAL
     SvGMAGICAL_off
     SvGMAGICAL_on
@@ -4698,7 +3171,6 @@ my @unresolved_visibility_overrides = qw(
     SvOK_off_exc_UV
     SvOKp
     SvOOK_on
-    sv_or_pv_len_utf8
     SvOURSTASH
     SvOURSTASH_set
     SvPADMY
@@ -4760,10 +3232,8 @@ my @unresolved_visibility_overrides = qw(
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on
-    sv_setgid
     SvSetSV_and
     SvSetSV_nosteal_and
-    sv_setuid
     SVs_GMG
     SvSHARED_HEK_FROM_PV
     SvSMAGICAL
@@ -4776,7 +3246,6 @@ my @unresolved_visibility_overrides = qw(
     SvTEMP
     SvTEMP_off
     SvTEMP_on
-    SVt_FIRST
     SvTHINKFIRST
     SvTIED_mg
     SVt_MASK
@@ -4784,7 +3253,6 @@ my @unresolved_visibility_overrides = qw(
     SvTRUEx_nomg
     SVt_RV
     SVTYPEMASK
-    SvUID
     SV_UNDEF_RETURNS_NULL
     SvUOK_nog
     SvUOK_nogthink
@@ -4798,22 +3266,12 @@ my @unresolved_visibility_overrides = qw(
     SYSTEM_GMTIME_MIN
     SYSTEM_LOCALTIME_MAX
     SYSTEM_LOCALTIME_MIN
-    TAIL
-    TAIL_t8
-    TAIL_t8_p8
-    TAIL_t8_pb
-    TAIL_tb
-    TAIL_tb_p8
-    TAIL_tb_pb
     TARGi
     TARGn
     TARGu
     tC
     THREAD_CREATE_NEEDS_STACK
     tI
-    TIED_METHOD_ARGUMENTS_ON_STACK
-    TIED_METHOD_MORTALIZE_NOT_NEEDED
-    TIED_METHOD_SAY
     toCTRL
     toFOLD_LC
     toFOLD_uni
@@ -4843,52 +3301,9 @@ my @unresolved_visibility_overrides = qw(
     toUPPER_LC
     toUPPER_uni
     toUSE_UNI_CHARSET_NOT_DEPENDS
-    TR_DELETE
-    TRIE
-    TRIE_BITMAP
-    TRIE_BITMAP_BYTE
-    TRIE_BITMAP_CLEAR
-    TRIE_BITMAP_SET
-    TRIE_BITMAP_TEST
-    TRIEC
-    TRIE_CHARCOUNT
-    TRIEC_t8
-    TRIEC_t8_p8
-    TRIEC_t8_pb
-    TRIEC_tb
-    TRIEC_tb_p8
-    TRIEC_tb_pb
-    TRIE_next
-    TRIE_next_fail
-    TRIE_next_fail_t8
-    TRIE_next_fail_t8_p8
-    TRIE_next_fail_t8_pb
-    TRIE_next_fail_tb
-    TRIE_next_fail_tb_p8
-    TRIE_next_fail_tb_pb
-    TRIE_next_t8
-    TRIE_next_t8_p8
-    TRIE_next_t8_pb
-    TRIE_next_tb
-    TRIE_next_tb_p8
-    TRIE_next_tb_pb
-    TRIE_NODEIDX
-    TRIE_NODENUM
     TRIE_STCLASS
     TRIE_STUDY_OPT
-    TRIE_t8
-    TRIE_t8_p8
-    TRIE_t8_pb
-    TRIE_tb
-    TRIE_tb_p8
-    TRIE_tb_pb
-    TRIE_WORDS_OFFSET
-    TR_OOB
-    TR_R_EMPTY
-    TR_SPECIAL_HANDLING
     TRUE
-    TR_UNLISTED
-    TR_UNMAPPED
     TRYAGAIN
     tryAMAGICbin_MG
     tryAMAGICunDEREF
@@ -4912,11 +3327,9 @@ my @unresolved_visibility_overrides = qw(
     U8_MIN
     U8TO32_LE
     U8TO64_LE
-    UCHARAT
     U_I
     UINT
     U_L
-    UNICODE_ALLOW_ABOVE_IV_MAX
     UNICODE_ALLOW_ANY
     UNICODE_ALLOW_SUPER
     UNICODE_ALLOW_SURROGATE
@@ -4942,13 +3355,6 @@ my @unresolved_visibility_overrides = qw(
     UNI_SEMANTICS
     UNISKIP
     UNKNOWN_ERRNO_MSG
-    UNLESSM
-    UNLESSM_t8
-    UNLESSM_t8_p8
-    UNLESSM_t8_pb
-    UNLESSM_tb
-    UNLESSM_tb_p8
-    UNLESSM_tb_pb
     UNLINK
     UNLOCK_LC_NUMERIC_STANDARD
     UNOP_AUX_item_sv
@@ -5066,13 +3472,6 @@ my @unresolved_visibility_overrides = qw(
     UV_MAX_P1
     UV_MAX_P1_HALF
     VCMP
-    VERB
-    VERB_t8
-    VERB_t8_p8
-    VERB_t8_pb
-    VERB_tb
-    VERB_tb_p8
-    VERB_tb_pb
     vFAIL
     vFAIL2
     vFAIL2utf8f
@@ -5082,7 +3481,6 @@ my @unresolved_visibility_overrides = qw(
     VNORMAL
     VNUMIFY
     VOL
-    VOLATILE_REF
     VSTRINGIFY
     vTHX
     VT_NATIVE
@@ -5111,87 +3509,8 @@ my @unresolved_visibility_overrides = qw(
     WARNsize
     what_MULTI_CHAR_FOLD_latin1_safe
     what_MULTI_CHAR_FOLD_utf8_safe
-    WHILEM
-    WHILEM_A_max
-    WHILEM_A_max_fail
-    WHILEM_A_max_fail_t8
-    WHILEM_A_max_fail_t8_p8
-    WHILEM_A_max_fail_t8_pb
-    WHILEM_A_max_fail_tb
-    WHILEM_A_max_fail_tb_p8
-    WHILEM_A_max_fail_tb_pb
-    WHILEM_A_max_t8
-    WHILEM_A_max_t8_p8
-    WHILEM_A_max_t8_pb
-    WHILEM_A_max_tb
-    WHILEM_A_max_tb_p8
-    WHILEM_A_max_tb_pb
-    WHILEM_A_min
-    WHILEM_A_min_fail
-    WHILEM_A_min_fail_t8
-    WHILEM_A_min_fail_t8_p8
-    WHILEM_A_min_fail_t8_pb
-    WHILEM_A_min_fail_tb
-    WHILEM_A_min_fail_tb_p8
-    WHILEM_A_min_fail_tb_pb
-    WHILEM_A_min_t8
-    WHILEM_A_min_t8_p8
-    WHILEM_A_min_t8_pb
-    WHILEM_A_min_tb
-    WHILEM_A_min_tb_p8
-    WHILEM_A_min_tb_pb
-    WHILEM_A_pre
-    WHILEM_A_pre_fail
-    WHILEM_A_pre_fail_t8
-    WHILEM_A_pre_fail_t8_p8
-    WHILEM_A_pre_fail_t8_pb
-    WHILEM_A_pre_fail_tb
-    WHILEM_A_pre_fail_tb_p8
-    WHILEM_A_pre_fail_tb_pb
-    WHILEM_A_pre_t8
-    WHILEM_A_pre_t8_p8
-    WHILEM_A_pre_t8_pb
-    WHILEM_A_pre_tb
-    WHILEM_A_pre_tb_p8
-    WHILEM_A_pre_tb_pb
-    WHILEM_B_max
-    WHILEM_B_max_fail
-    WHILEM_B_max_fail_t8
-    WHILEM_B_max_fail_t8_p8
-    WHILEM_B_max_fail_t8_pb
-    WHILEM_B_max_fail_tb
-    WHILEM_B_max_fail_tb_p8
-    WHILEM_B_max_fail_tb_pb
-    WHILEM_B_max_t8
-    WHILEM_B_max_t8_p8
-    WHILEM_B_max_t8_pb
-    WHILEM_B_max_tb
-    WHILEM_B_max_tb_p8
-    WHILEM_B_max_tb_pb
-    WHILEM_B_min
-    WHILEM_B_min_fail
-    WHILEM_B_min_fail_t8
-    WHILEM_B_min_fail_t8_p8
-    WHILEM_B_min_fail_t8_pb
-    WHILEM_B_min_fail_tb
-    WHILEM_B_min_fail_tb_p8
-    WHILEM_B_min_fail_tb_pb
-    WHILEM_B_min_t8
-    WHILEM_B_min_t8_p8
-    WHILEM_B_min_t8_pb
-    WHILEM_B_min_tb
-    WHILEM_B_min_tb_p8
-    WHILEM_B_min_tb_pb
-    WHILEM_t8
-    WHILEM_t8_p8
-    WHILEM_t8_pb
-    WHILEM_tb
-    WHILEM_tb_p8
-    WHILEM_tb_pb
     WIN32SCK_IS_STDSCK
     withinCOUNT
-    with_tp_UTF8ness
-    with_t_UTF8ness
     WORTH_PER_WORD_LOOP
     WORTH_PER_WORD_LOOP_BINMODE
     WSETLOCALE_LOCK
@@ -5405,9 +3724,6 @@ my @unresolved_visibility_overrides = qw(
     SV_HEAD_
     SV_HEAD_DEBUG_
     SV_HEAD_UNION_
-    _swab_16_
-    _swab_32_
-    _swab_64_
     toFOLD_utf8_flags_
     toLOWER_utf8_flags_
     TOO_LATE_FOR_
@@ -6602,6 +4918,46 @@ sub find_undefs {
     }
     close $mf or die "Can't close MANIFEST: $!";
 
+
+    # A symbol can't be visible if it is guarded by #ifdef's that evaluate to
+    # false.
+    #
+    # One type of such #ifdef follows the convention in perl's source code
+    # that a C file, 'foo.c', will #define a symbol at the beginning named
+    # PERL_IN_FOO_C.  And some otherwise global symbols in header files will
+    # be protected from being visible from outside foo.c by
+    #   #ifdef PERL_IN_FOO_C
+    #   #  define x
+    #   #  define y
+    #   #    ...
+    #   #endif
+    #
+    # 'x', 'y', ... need not be #undefined, as they aren't visible outside the
+    # C files that are permitted to see them.  Below we look at every symbol
+    # that has potential global scope to see if there are #ifdef's that
+    # conditionally #define it and which evaluate to false.  We know that all
+    # the PERL_IN_FOO_C symbols will be false.  reduce_conds() looks at the
+    # totality of the #ifdefs guarding a symbol and determines if they
+    # evaluate, as a whole, to false or not.  We don't know the value of many
+    # of the conditions, but generally, the ones that guard visibility will be
+    # enough to rule out a symbol being globally visible.
+    my %constraints;
+    for my $c (@c_list) {
+        my $c_prime = $c =~ s/[.]/_/r;
+        $constraints{ "PERL_IN_\U$c_prime" } = 0;
+    }
+
+    # There are also these three symbols that guard visibility.  A symbol that
+    # is visible when all three are 0, is globally visible.
+    $constraints{PERL_CORE} = 0;
+    $constraints{PERL_EXT} = 0;
+    $constraints{PERL_EXT_RE_BUILD} = 0;
+
+    # Match any of these.  HeaderParser creates this canonical form for all
+    # conditionals.
+    my $constraints_re = join "|", keys %constraints;
+    $constraints_re = qr/ \b defined \( ( $constraints_re ) \) /x;
+
     # There are a few cases where we redefine a system function to use the
     # 64-bit equivalent one that has a different name.  They currenty all look
     # like this.  These symbols would show up as #defines that shouldn't have
@@ -6636,8 +4992,8 @@ sub find_undefs {
                 next if $name =~ / ^ PL_ /x;
                 next if $name =~ /perl/i;
 
-                # Presume that we are to keep this out of the user's namespace
-                $always_undefs{$name} = 1;
+                next unless $line->reduce_conds($constraints_re,
+                                                \%constraints);
 
                 # Often perl has code to make sure various symbols that are
                 # always expected by the system to be defined, in fact are.
