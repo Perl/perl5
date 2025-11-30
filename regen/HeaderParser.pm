@@ -1304,6 +1304,169 @@ sub _best_path {
     return ($best, $rest);
 }
 
+sub HeaderLine::reduce_conds { 
+
+    # Reduce the preprocessor conditionals that guard the HeaderLine $self
+    # object, given a hash that says the values of certain preprocessor
+    # conditions, and a corresponding regular expression pattern that matches
+    # any of those conditions.
+    #
+    # This currently returns 0 if the conditionals as a whole evaluate to
+    # false; and 1 if they might evaluate to true.
+
+    my ($self, $constraints_pat, $constraints_ref) = @_;
+
+    # Short cut the common case of there being no conditions in effect.
+    return 1 if $self->{cond}->@* == 0;
+
+    # We need a copy so we don't destroy the input.
+    my @cond = copy_aoa($self->{cond});
+
+    return _reduce_conds(\@cond, $constraints_pat, $constraints_ref);
+}
+
+sub _reduce_conds {
+    my ($cond_ref, $constraints_pat, $constraints_ref, $recursed) = @_;
+
+    # This does the heavy lifting for HeaderLine::reduce_conds().  It
+    # recursively descends the array $cond_ref of conditions.  These have been
+    # normalized by HeaderParser so that each element is ANDed with all the
+    # other ones.  Hence if any element evaluates to false, the whole array
+    # must.
+    #
+    # Each leaf node will have a series of conditionals (typically linked by
+    # '||') , each of which has been normalized by HeaderParser to look like
+    # either of;
+    #    defined(foo)
+    #   !defined(foo)
+    # All the ones of these that match $constraints_pat are substituted by
+    # their corresponding value in %constraints_ref, which will be either 0 or
+    # 1.  The result is looked at to see if it has to evaluate to 0 or not.
+
+    # At leaf nodes, just change all defined(foo) whose values of foo are
+    # known to be those values, reducing them to "#if 0" or "#if 1".
+    if (ref $cond_ref ne "ARRAY") {
+        die "Expecting an array at top-level call" unless $recursed;
+
+        $cond_ref =~ s/$constraints_pat/$constraints_ref->{$1}/g;
+        reduce_ones_and_zeros(\$cond_ref);
+
+        # Assume 1 if doesn't evaluate completely to 0.
+        return $cond_ref ne '0';
+    }
+
+    # Here, the conditions are in an array.  We recurse to handle each
+    # element of the array.
+    for my $cond ($cond_ref->@*) {
+        return 0 unless _reduce_conds($cond,
+                                      $constraints_pat,
+                                      $constraints_ref,
+                                      ($recursed // 0) + 1  # is recursed
+                                     );
+    }
+
+    # Didn't do an early return.  Nothing conclusively evaluated to 0.
+    return 1;
+}
+
+sub reduce_ones_and_zeros {
+    my $ref = shift;
+
+    # This reduces as much as possible a symbolic C preprocessor expression
+    # that hopefully has terms that are either 0 or 1.  We know that anything
+    # ANDed with 0 is 0 and anything OR'd with 1 is 1, for example.  By
+    # repeating these and other rules, until nothing more changes, we reduce
+    # it as much as possible, given what is known.  In many cases that this is
+    # called in, the value gets down to simply 0 or 1.
+    #
+    # This is simplistic, not knowing about precedence, for example.  khw took
+    # it from Devel::PPPort.  But it works well enough.  HeaderParser could be
+    # enlisted to make it work better.
+    my $any_changed = 0;
+
+    if (ref $ref eq 'ARRAY') {
+        foreach my $element ($ref->@*) {
+            $any_changed |= reduce_ones_and_zeros(\$element)
+                                    if $element =~ / ^ # \s* (?: if | el ) /x;
+        }
+
+        return $any_changed;
+    }
+
+    my $changed;
+    do {
+        $changed = 0;
+
+        # (0) -> 0
+        $changed |= $$ref =~ s/ \( \s* 0 \s* \) /0/xg;
+
+        # !0 -> 1
+        $changed |= $$ref =~ s/ ! \s* 0 \b /1/xg;
+
+        # '|| 0 ||' -> ||
+        $changed |= $$ref =~ s/ \s* \|\| \s* 0 \s* \|\| /||/xg;
+
+        # '^ 0 || foo' -> foo
+        # '(0 || foo' -> (foo
+        $changed |= $$ref =~ s/ ^  \s* 0 \s* \|\| \s* //xg;
+        $changed |= $$ref =~ s/ \( \s* 0 \s* \|\| \s* /(/xg;
+
+        # 'foo || 0 ) ' -> foo
+        # 'foo || 0 $ ' -> foo
+        $changed |= $$ref =~ s/ \s* \|\| \s* 0 \s* (?= $ | \) ) //xg;
+
+        # '^ 0 && foo' doesn't work because of precedence: '0 && anything || 1'
+        # Similarly for 'foo && 0 $'
+
+        # (1) -> 1
+        $changed |= $$ref =~ s/ \( \s* 1 \s* \) /1/xg;
+
+        # !1 -> 0
+        $changed |= $$ref =~ s/ ! \s* 1 \b /0/xg;
+
+        # '&& 1 &&' -> &&
+        $changed |= $$ref =~ s/ \s* && \s* 1 \s* && /&&/xg;
+
+        # '^ 1 && foo' -> foo
+        # '^ 1 || foo' -> 1     # Works cause || lower precedence than &&
+        $changed |= $$ref =~ s/ ^ \s* 1 \s* && \s* //xg;
+        #$changed |= $$ref =~ s/ ^ \s* 1 \s* \|\| .* /1/xg;
+
+        # '(1 && foo' -> (foo
+        $changed |= $$ref =~ s/ \( \s* 1 \s* && \s* /(/xg;
+
+        # 'foo && 1 [ )$ ] ' -> foo
+        $changed |= $$ref =~ s/ \s* && \s* 1 \s* (?= $ | \) ) //xg;
+
+        # There are other things that could be reduced, but looking for
+        # just the defined(foo) case doesn't involve fancy parsing,
+        # and catches just about everything
+
+        # 'defined(foo) && 0' -> 0
+        $changed |= $$ref
+                    =~ s/ (?: ! \s*)? \b defined \s* \(\w+\)
+                                            \s* && \s* 0 \b /0/xg;
+
+        # 'defined(foo) || 1' -> 1
+        $changed |= $$ref
+                    =~ s/ (?: ! \s*)? \b defined \s* \(\w+\)
+                                            \s* \|\| \s* 1 \b /1/xg;
+
+        # '0 && defined(foo)'  -> 0
+        $changed |= $$ref
+                    =~ s/ \b 0 \s* && \s* (?: ! \s*)? defined
+                                                \s* \(\w+\) /0/xg;
+
+        # '1 || defined(foo)'  -> 1
+        $changed |= $$ref
+                    =~ s/ \b 1 \s* \|\| \s* (?: ! \s*)? defined
+                                                \s* \(\w+\) /1/xg;
+        $any_changed |= $changed;
+    } while ($changed);
+
+    return $any_changed;
+}
+
 # This builds a group content tree from a set of lines. each content line in
 # the original file is added to the file based on the conditions that apply to
 # the content.
