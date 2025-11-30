@@ -23,7 +23,13 @@
 
 /* When this symbol is defined, we undef various symbols we have defined
  * earlier when this file was #included with this symbol undefined */
-#if !defined(PERL_DO_UNDEFS)
+#if defined(PERL_DO_UNDEFS)
+# if !defined(PERL_CORE) && !defined(PERL_EXT)
+#   undef invlist_intersection_
+#   undef invlist_subtract_
+#   undef invlist_union_
+# endif
+#else
 
 /* Create short name macros that hide any need for thread context */
 

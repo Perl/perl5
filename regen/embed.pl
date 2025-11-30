@@ -3650,10 +3650,7 @@ my @unresolved_visibility_overrides = qw(
     HAS_IGNORED_LOCALE_CATEGORIES_
     HIGHEST_REGCOMP_DOT_H_SYNC_
     inRANGE_helper_
-    invlist_intersection_
     invlist_intersection_complement_2nd_
-    invlist_subtract_
-    invlist_union_
     invlist_union_complement_2nd_
     is_MULTI_CHAR_FOLD_utf8_safe_part0_
     is_MULTI_CHAR_FOLD_utf8_safe_part1_
