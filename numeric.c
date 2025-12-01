@@ -547,6 +547,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }   /* End of parsing loop */
 
     if (UNLIKELY(overflowed)) {
+
+        /* Calculate the final overflow approximation */
+        value_nv *= factor;
+        value_nv += (NV) value;
+
+        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+               |  PERL_SCAN_SILENT_NON_PORTABLE;
+
+        if (result)
+            *result = value_nv;
+
         if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
             *flags |= PERL_SCAN_SILENT_OVERFLOW;
         }
@@ -604,16 +615,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         return value;
     }
 
-    /* Overflowed: Calculate the final overflow approximation */
-    value_nv *= factor;
-    value_nv += (NV) value;
-
+    /* Overflowed */
     output_non_portable(base);
-
-    *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
-           |  PERL_SCAN_SILENT_NON_PORTABLE;
-    if (result)
-        *result = value_nv;
     return UV_MAX;
 }
 
