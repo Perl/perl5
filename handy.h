@@ -2554,16 +2554,18 @@ typedef U32 line_t;
 /* Converts a character KNOWN to represent a hexadecimal digit (0-9, A-F, or
  * a-f) to its numeric value without using any branches.  The input is
  * validated only by an assert() in DEBUGGING builds.
- *
  * It works by right shifting and isolating the bit that is 0 for the digits,
  * and 1 for at least the alphas A-F, a-f.  The bit is shifted to the ones
  * position, and then to the eights position.  Both are added together to form
  * 0 if the input is '0'-'9' and to form 9 if alpha.  This is added to the
  * final four bits of the input to form the correct value. */
-#define XDIGIT_VALUE(c) (assert(isXDIGIT(c)),                               \
-           ((NATIVE_TO_LATIN1(c) >> 6) & 1)  /* 1 if alpha; 0 if not */     \
-         + ((NATIVE_TO_LATIN1(c) >> 3) & 8)  /* 8 if alpha; 0 if not */     \
-         + ((c) & 0xF))   /* 0-9 if input valid hex digit */
+
+#define XDIGIT_VALUE(c)                                                     \
+        (assert(isXDIGIT(c)),                                               \
+         ( (  (NATIVE_TO_LATIN1(c) & 0x40) >> 3) /* 8 if alpha; 0 if not */ \
+            | (NATIVE_TO_LATIN1(c) & 0x40) >> 6) /* 1 if alpha; 0 if not */ \
+                                       /* After OR: 9 if alpha, 0 if not */ \
+          + ((c) & 0xF))                 /* 0-9 if input valid hex digit */
 
 /* The argument is a string pointer, which is advanced. */
 #define READ_XDIGIT(s)  ((s)++, XDIGIT_VALUE(*((s) - 1)))
