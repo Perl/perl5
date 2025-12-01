@@ -342,8 +342,15 @@ don't, so that you can portably take advantage of this C99 feature.
 #  define isPOWER_OF_2(n) ((n) && ((n) & ((n)-1)) == 0)
 #endif
 
-/* Returns a mask with the lowest n bits set */
-#define nBIT_MASK(n) ((UINTMAX_C(1) << (n)) - 1)
+/* Returns a mask with the lowest n bits set.  Avoids undefined behavior if n
+ * is, say, 64 on a 64-bit system, by:
+ *  1) shifting only 63 yielding 1000000...000
+ *  2) subtracting 1, yielding   0111111...111
+ *  3) shifting by 1, yielding   1111111...110
+ *  4) adding the final bit yielding all 1's */
+#define nBIT_MASK(n)                                                        \
+            (((n) == 0) ? 0 : (((UINTMAX_C(1) << ((n) - 1)) - 1) << 1) | 1)
+                            //  |_________________________|
 
 /* The largest unsigned number that will fit into n bits */
 #define nBIT_UMAX(n)  nBIT_MASK(n)
