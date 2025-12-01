@@ -569,6 +569,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                                     ? "binary"
                                     : "octal");
         }
+
+        value = UV_MAX;
     }
 
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
@@ -600,9 +602,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
     }
 
-    /* s here points to e or to the first illegal character */
-    *len_p = s - start;
-
     if (LIKELY(! overflowed)) {
 #if UVSIZE > 4
         if (UNLIKELY(value > 0xffffffff)) {
@@ -612,12 +611,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
         }
 #endif
-        return value;
+    }
+    else { /* Overflowed */
+        output_non_portable(base);
     }
 
-    /* Overflowed */
-    output_non_portable(base);
-    return UV_MAX;
+    /* s here points to e or to the first illegal character */
+    *len_p = s - start;
+    return value;
 }
 
 /*
