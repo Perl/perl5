@@ -247,6 +247,7 @@
 # define gp_ref(a)                              Perl_gp_ref(aTHX_ a)
 # define grok_atoUV                             Perl_grok_atoUV
 # define grok_bin(a,b,c,d)                      Perl_grok_bin(aTHX_ a,b,c,d)
+# define grok_bin_hex(a,b,c,d,e,f,g)            Perl_grok_bin_hex(aTHX_ a,b,c,d,e,f,g)
 # define grok_bin_oct_hex(a,b,c,d,e,f,g)        Perl_grok_bin_oct_hex(aTHX_ a,b,c,d,e,f,g)
 # define grok_hex(a,b,c,d)                      Perl_grok_hex(aTHX_ a,b,c,d)
 # define grok_infnan(a,b)                       Perl_grok_infnan(aTHX_ a,b)

@@ -3861,8 +3861,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     PERL_ARGS_ASSERT_GROK_BIN;
 
-    return grok_bin_oct_hex(start, len_p, flags, result,
-                            1, CC_BINDIGIT_, 'b');
+    return grok_bin_hex(start, len_p, flags, result, 1, CC_BINDIGIT_, 'b');
 }
 
 PERL_STATIC_INLINE UV
@@ -3870,8 +3869,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     PERL_ARGS_ASSERT_GROK_HEX;
 
-    return grok_bin_oct_hex(start, len_p, flags, result,
-                            4, CC_XDIGIT_, 'x');
+    return grok_bin_hex(start, len_p, flags, result, 4, CC_XDIGIT_, 'x');
 }
 
 PERL_STATIC_INLINE UV
@@ -3880,8 +3878,7 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     PERL_ARGS_ASSERT_GROK_OCT;
 
     *flags |= PERL_SCAN_DISALLOW_PREFIX;
-    return grok_bin_oct_hex(start, len_p, flags, result,
-                            3, CC_OCTDIGIT_, '\0');
+    return grok_bin_oct_hex(start, len_p, flags, result, 3, CC_OCTDIGIT_, 0);
 }
 
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */

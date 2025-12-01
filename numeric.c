@@ -237,6 +237,43 @@ S_output_non_portable(pTHX_ const U8 base)
 }
 
 UV
+Perl_grok_bin_hex(pTHX_ const char * const start,
+                        STRLEN *len_p,
+                        I32 *flags,
+                        NV *result,
+                        const unsigned shift,
+                        const U8 lookup_bit,
+                        const char prefix
+                 )
+{
+    PERL_ARGS_ASSERT_GROK_BIN_HEX;
+
+    U8 offset = 0;
+
+    if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
+        const char * e = start + *len_p;
+
+        /* strip off leading b or 0b; x or 0x.
+           for compatibility silently suffer "b" and "0b" as valid binary; "x"
+           and "0x" as valid hex numbers. */
+        if (e - start > 1) {
+            if (isALPHA_FOLD_EQ(start[0], prefix)) {
+                offset = 1;
+            }
+            else if (   e - start > 2
+                     && start[0] == '0'
+                     && (isALPHA_FOLD_EQ(start[1], prefix)))
+            {
+                offset = 2;
+            }
+        }
+    }
+
+    return grok_bin_oct_hex(start, len_p, flags, result,
+                            shift, lookup_bit, offset);
+}
+
+UV
 Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
@@ -244,7 +281,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         const unsigned shift, /* 1 for binary; 3 for octal;
                                                  4 for hex */
                         const U8 class_bit,
-                        const char prefix
+                        const U8 offset
                      )
 
 {
@@ -274,28 +311,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     const bool allow_underscores =
              cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
                                   |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
-    const char * s = start;
+    const char * s = start + offset;
     const char * e = start + *len_p;
 
-    if (!(input_flags & PERL_SCAN_DISALLOW_PREFIX)) {
-
-        /* strip off leading b or 0b; x or 0x.
-           for compatibility silently suffer "b" and "0b" as valid binary; "x"
-           and "0x" as valid hex numbers. */
-        if (e - s > 1) {
-            if (isALPHA_FOLD_EQ(s[0], prefix)) {
-                s++;
-            }
-            else if (   e - s > 2
-                     && s[0] == '0'
-                     && (isALPHA_FOLD_EQ(s[1], prefix)))
-            {
-                s += 2;
-            }
-        }
-    }
-
-    const char * const s0 = s; /* Where the significant digits start */
+    /* Where the significant digits start */
+    const char * const s0 = s;
     UV value = 0;
 
     /* Unroll the loop so that the first 8 digits are branchless except for the

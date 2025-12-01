@@ -1403,6 +1403,13 @@ Adip	|UV	|grok_bin	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
+Cp	|UV	|grok_bin_hex	|NN const char * const start		\
+				|NN STRLEN *len_p			\
+				|NN I32 *flags				\
+				|NULLOK NV *result			\
+				|const unsigned shift			\
+				|const U8 lookup_bit			\
+				|const char prefix
 Cp	|UV	|grok_bin_oct_hex					\
 				|NN const char * const start		\
 				|NN STRLEN *len_p			\
@@ -1410,7 +1417,7 @@ Cp	|UV	|grok_bin_oct_hex					\
 				|NULLOK NV *result			\
 				|const unsigned shift			\
 				|const U8 lookup_bit			\
-				|const char prefix
+				|const U8 offset
 Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
