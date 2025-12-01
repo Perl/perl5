@@ -381,6 +381,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           break;
     }   /* End of switch on the first so-many characters */
 
+#ifdef Perl_ldexp
+#  define multiply_by_exponent(nv, digits)                                  \
+            STMT_START { nv = Perl_ldexp(nv, digits * shift); } STMT_END
+#else
+#  define multiply_by_exponent(nv, digits)                                  \
+                   STMT_START { nv *= Perl_pow(base, digits); } STMT_END
+#endif
+
     /* The loop below accumulates the integral running total of the result,
      * digit by digit.  If this total overflows, it is added to an NV
      * approximation, and the loop starts over, looking at the next batch of
@@ -425,11 +433,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
              * 'batch_digit_count' so that it gives how many digits the
              * current approximation needs to effectively be shifted to make
              * room for this new value */
-#ifdef Perl_ldexp
-                value_nv = Perl_ldexp(value_nv, batch_digit_count * shift);
-#else
-                value_nv *= Perl_pow(base, batch_digit_count);
-#endif
+            multiply_by_exponent(value_nv, batch_digit_count);
             value_nv += (NV) value;
 
             /* Then we keep accumulating digits, until all are parsed.  We
@@ -535,11 +539,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }
 
     /* Overflowed: Calculate the final overflow approximation */
-#ifdef Perl_ldexp
-        value_nv = Perl_ldexp(value_nv, batch_digit_count * shift);
-#else
-        value_nv *= Perl_pow(base, batch_digit_count);
-#endif
+    multiply_by_exponent(value_nv, batch_digit_count);
     value_nv += (NV) value;
 
     output_non_portable(base);
