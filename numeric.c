@@ -217,9 +217,13 @@ Perl_cast_uv(NV f)
 }
 
 /*
-=for apidoc grok_bin
+=for apidoc      grok_bin
+=for apidoc_item grok_hex
+=for apidoc_item grok_oct
 
-converts a string representing a binary number to numeric form.
+These each convert a string representing a number to numeric form.  The
+number is binary in C<grok_bin>, octal in C<grok_oct>, and hexadecimal in
+C<grok_hex>.
 
 On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
 conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
@@ -229,18 +233,50 @@ encountering an invalid character (except NUL) will also trigger a warning.  On
 return C<*len_p> is set to the length of the scanned string, and C<*flags>
 gives output flags.
 
-If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_bin>
-returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes an approximation of the correct value into C<*result> (which is an
-NV; or the approximation is discarded if C<result> is NULL).
+If the value is S<E<lt>= C<UV_MAX>>, it is returned as a UV, the output flags are
+clear, and nothing is written to C<*result>.  If the value is S<E<gt>
+C<UV_MAX>>:
 
-The binary number may optionally be prefixed with C<"0b"> or C<"b"> unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.
+=over
+
+=item *
+
+C<UV_MAX> is returned
+
+=item *
+
+C<PERL_SCAN_GREATER_THAN_UV_MAX> is set in C<*flags>.
+
+=item *
+
+If C<result> is not null, an approximation of the correct value is written
+into C<*result> (which is an NV).
+
+=back
+
+Unless C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry:
+
+=over
+
+=item For C<grok_bin>
+
+the input string may optionally be prefixed with C<"0b"> or plain C<"b">
+
+=item For C<grok_hex>
+
+the input string may optionally be prefixed with C<"0x"> or plain C<"x">
+unless
+
+=item For C<grok_oct>
+
+this flag is ignored; there is no optional prefix.  The typical C<0> prefix is
+just part of the number.
+
+=back
 
 If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
-digits may be separated from each other by a single underscore; also a single
-leading underscore is accepted.
+digits may be separated from each other by a single underscore, and also a
+single leading underscore is accepted.
 
 =for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
 =for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
@@ -249,9 +285,9 @@ leading underscore is accepted.
 
 =cut
 
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
-which suppresses any message for non-portable numbers that are still valid
-on this platform.
+Not available externally yet because experimental is
+C<PERL_SCAN_SILENT_NON_PORTABLE which suppresses any message for non-portable
+numbers that are still valid on this platform.
  */
 
 UV
@@ -262,39 +298,6 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     return grok_bin(start, len_p, flags, result);
 }
 
-/*
-=for apidoc grok_hex
-
-converts a string representing a hex number to numeric form.
-
-On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
-scan stops at the end of the string, or at just before the first invalid
-character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
-encountering an invalid character (except NUL) will also trigger a warning.  On
-return C<*len_p> is set to the length of the scanned string, and C<*flags>
-gives output flags.
-
-If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_hex>
-returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes an approximation of the correct value into C<*result> (which is an
-NV; or the approximation is discarded if C<result> is NULL).
-
-The hex number may optionally be prefixed with C<"0x"> or C<"x"> unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry.
-
-If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
-digits may be separated from each other by a single underscore; also a single
-leading underscore is accepted.
-
-=cut
-
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
-which suppresses any message for non-portable numbers, but which are valid
-on this platform.  But, C<*flags>  will have the corresponding flag bit set.
- */
-
 UV
 Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
@@ -302,39 +305,6 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 
     return grok_hex(start, len_p, flags, result);
 }
-
-/*
-=for apidoc grok_oct
-
-converts a string representing an octal number to numeric form.
-
-On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
-scan stops at the end of the string, or at just before the first invalid
-character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
-encountering an invalid character (except NUL) will also trigger a warning.  On
-return C<*len_p> is set to the length of the scanned string, and C<*flags>
-gives output flags.
-
-If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to C<*result>.  If the value is > C<UV_MAX>, C<grok_oct>
-returns C<UV_MAX>, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
-and writes an approximation of the correct value into C<*result> (which is an
-NV; or the approximation is discarded if C<result> is NULL).
-
-If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
-digits may be separated from each other by a single underscore; also a single
-leading underscore is accepted.
-
-The C<PERL_SCAN_DISALLOW_PREFIX> flag is always treated as being set for
-this function.
-
-=cut
-
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
-which suppresses any message for non-portable numbers, but which are valid
-on this platform.
- */
 
 UV
 Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
