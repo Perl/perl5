@@ -5851,4 +5851,32 @@ EOF
     test_many($preamble, undef, \@test_fns);
 }
 
+{
+    # Test standard C file preamble
+    # check that a few standard lines are present
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "C preamble",
+            [ Q(<<'EOF') ],
+                |void foo()
+EOF
+
+            [ 0, 0, qr{#ifndef PERL_UNUSED_VAR}, "PERL_UNUSED_VAR" ],
+            [ 0, 0, qr{#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE},
+                        "PERL_ARGS_ASSERT_CROAK_XS_USAGE" ],
+            [ 0, 0, qr{#ifdef newXS_flags}, "newXS_flags" ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 done_testing;
