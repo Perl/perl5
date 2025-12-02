@@ -348,6 +348,19 @@ well.
 
 =item *
 
+C<Perl_sv_backoff>, which undoes the OOK string offset mechanism now only
+moves the string buffer contents to the start of the buffer if `SvOK(sv)`
+is true. Historically, the buffer contents were always moved, but if the
+buffer contents are defunct and no longer required, doing that incurs an
+unnecessary cost proportional to the size of the shifted contents.
+
+(The assumption in this change is that `SvOK(sv)` is a valid indicator of
+whether the string buffer contents are "live" or not.)
+
+See GH#23967 for an example of where such a copy was noticeable.
+
+=item *
+
 XXX
 
 =back
