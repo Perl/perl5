@@ -3290,6 +3290,8 @@ PP(pp_goto)
                     gv_efullname3(tmpstr, gv, NULL);
                     DIE(aTHX_ "Goto undefined subroutine &%" SVf, SVfARG(tmpstr));
                 }
+                /* GH-23969: This exception should be retained because it can
+                 * be reached from XS code. */
                 DIE(aTHX_ "Goto undefined subroutine");
             }
 
@@ -3369,6 +3371,8 @@ PP(pp_goto)
                     DIE(aTHX_ "Goto undefined subroutine &%" SVf,
                                SVfARG(tmpstr));
                 }
+                /* GH-23969: This exception should be retained because it can
+                 * be reached from XS code. */
                 DIE(aTHX_ "Goto undefined subroutine");
             }
 
