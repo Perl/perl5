@@ -8717,7 +8717,7 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
 
     if(!(flags & SV_SKIP_OVERLOAD) &&
        (SvAMAGIC(*sv1) || SvAMAGIC(*sv2))) {
-        if ((*result = amagic_call(*sv1, *sv2, method, 0)))
+        if ((*result = amagic_call(*sv1, *sv2, method, AMGf_force_scalar)))
             return true;
 
         /* normally handled by try_amagic_bin */

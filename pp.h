@@ -653,14 +653,15 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             (void)Perl_tmps_grow_p(aTHX_ eMiX);			\
     } STMT_END
 
-#define AMGf_noright	1
-#define AMGf_noleft	2
-#define AMGf_assign	4       /* op supports mutator variant, e.g. $x += 1 */
-#define AMGf_unary	8
-#define AMGf_numeric	0x10	/* for Perl_try_amagic_bin */
+#define AMGf_noright	  1
+#define AMGf_noleft	  2
+#define AMGf_assign	  4    /* op supports mutator variant, e.g. $x += 1 */
+#define AMGf_unary	  8
+#define AMGf_numeric	  0x0010   /* for Perl_try_amagic_bin */
 
-#define AMGf_want_list	0x40
-#define AMGf_numarg	0x80
+#define AMGf_want_list	  0x0040
+#define AMGf_numarg	  0x0080
+#define AMGf_force_scalar 0x0100
 
 
 /* do SvGETMAGIC on the stack args before checking for overload */
