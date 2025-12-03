@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw '../lib ../cpan/Math-BigInt/lib');
 }
 
-plan tests => 14724;
+plan tests => 14726;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2065,4 +2065,11 @@ SKIP:
 	$x = eval { pack "[(][)]" };
 	like("$@", qr{Mismatched brackets in template},
 			"should match brackets correctly even without recursion");
+}
+
+{ # see discussion in #23980
+    ok !eval { my $x = pack "C["; 1 },
+      "pack throws with no closing ]";
+    like $@, qr/No group ending character '\]' found in template/,
+      "check the message";
 }
