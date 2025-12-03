@@ -5306,7 +5306,7 @@ ST	|char	|first_symbol	|NN const char *pat			\
 RS	|const char *|get_num	|NN const char *patptr			\
 				|NN SSize_t *lenptr
 S	|const char *|group_end |SPTR const char *patptr		\
-				|EPTR const char *patend		\
+				|EPTRQ const char *patend		\
 				|char ender
 RS	|SV *	|is_an_int	|NN const char *s			\
 				|STRLEN l

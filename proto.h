@@ -8090,7 +8090,7 @@ S_get_num(pTHX_ const char *patptr, SSize_t *lenptr)
 STATIC const char *
 S_group_end(pTHX_ const char *patptr, const char *patend, char ender);
 # define PERL_ARGS_ASSERT_GROUP_END             \
-        assert(patptr); assert(patend); assert(patptr < patend)
+        assert(patptr); assert(patend); assert(patptr <= patend)
 
 STATIC SV *
 S_is_an_int(pTHX_ const char *s, STRLEN l)
