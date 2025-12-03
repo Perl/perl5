@@ -442,6 +442,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (NONE,  ANDOP),
     DEBUG_TOKEN (NONE,  ARROW),
     DEBUG_TOKEN (OPNUM, ASSIGNOP),
+    DEBUG_TOKEN (OPVAL, ATTRLIST),
     DEBUG_TOKEN (OPNUM, BITANDOP),
     DEBUG_TOKEN (OPNUM, BITOROP),
     DEBUG_TOKEN (OPNUM, BLKLSTOP),
@@ -6523,7 +6524,7 @@ yyl_colon(pTHX_ char *s)
         }
         if (attrs) {
             NEXTVAL_NEXTTOKE.opval = attrs;
-            force_next(THING);
+            force_next(ATTRLIST);
         }
         TOKEN(COLONATTR);
     }

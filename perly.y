@@ -81,7 +81,7 @@
 %token <ival> KW_METHOD_named KW_METHOD_anon
 
 /* Tokens emitted in other situations */
-%token <opval> BAREWORD METHCALL0 METHCALL THING PMFUNC PRIVATEREF QWLIST
+%token <opval> BAREWORD METHCALL0 METHCALL ATTRLIST THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <opval> LABEL PROTOTYPE
@@ -1051,9 +1051,9 @@ proto
 /* Optional list of subroutine attributes */
 subattrlist
 	:	empty
-	|	COLONATTR THING
+	|	COLONATTR ATTRLIST
 			{
-			  OP *attrlist = $THING;
+			  OP *attrlist = $ATTRLIST;
 			  if(attrlist && !PL_parser->sig_seen)
 			      attrlist = apply_builtin_cv_attributes(PL_compcv, attrlist);
 			  $$ = attrlist;
@@ -1063,8 +1063,8 @@ subattrlist
 	;
 
 /* List of attributes for some other kind of declaration (variables, classes) */
-attrlist:	COLONATTR THING
-			{ $$ = $THING; }
+attrlist:	COLONATTR ATTRLIST
+			{ $$ = $ATTRLIST; }
 	|	COLONATTR
 			{ $$ = NULL; }
 	;
