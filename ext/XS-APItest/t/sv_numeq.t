@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 22;
+use Test::More tests => 23;
 use XS::APItest;
 use Config;
 
@@ -46,7 +46,8 @@ ok  sv_numeq_flags($1, 10, SV_GMAGIC), 'sv_numeq_flags with SV_GMAGIC does';
     ok  sv_numeq(10, $obj), 'AlwaysTen is 10 on the right';
     ok !sv_numeq(11, $obj), 'AlwaysTen is not 11 on the right';
 
-    ok !sv_numeq_flags($obj, 10, SV_SKIP_OVERLOAD), 'AlwaysTen is not 10 with SV_SKIP_OVERLOAD'
+    ok !sv_numeq_flags($obj, 10, SV_SKIP_OVERLOAD), 'AlwaysTen is not 10 with SV_SKIP_OVERLOAD';
+    ok !sv_numeq_flags($obj, 123456, SV_SKIP_OVERLOAD), 'AlwaysTen is not its overloaded numeric value with SV_SKIP_OVERLOAD';
 }
 
 # +0 overloading with large numbers and using fallback

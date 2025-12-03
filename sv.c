@@ -2763,23 +2763,30 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 }
 
 /*
-=for apidoc sv_2num
+=for apidoc      sv_2num_flags
+=for apidoc_item sv_2num
+X<SV_SKIP_OVERLOAD>
 
 Return an SV with the numeric value of the source SV, doing any necessary
 reference or overload conversion.  The caller is expected to have handled
 get-magic already.
 
+For sv_2num_flags() you can set C<SV_SKIP_OVERLOAD> in flags to avoid
+any numeric context overloading.
+
 =cut
 */
 
 SV *
-Perl_sv_2num(pTHX_ SV *const sv)
+Perl_sv_2num_flags(pTHX_ SV *const sv, int flags)
 {
-    PERL_ARGS_ASSERT_SV_2NUM;
+    PERL_ARGS_ASSERT_SV_2NUM_FLAGS;
+
+    assert((flags & ~SV_SKIP_OVERLOAD) == 0);
 
     if (!SvROK(sv))
         return sv;
-    if (SvAMAGIC(sv)) {
+    if (SvAMAGIC(sv) && !(flags & SV_SKIP_OVERLOAD)) {
         SV * const tmpsv = AMG_CALLunary(sv, numer_amg);
         TAINT_IF(tmpsv && SvTAINTED(tmpsv));
         if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
@@ -8715,16 +8722,20 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
     if(!*sv2)
         *sv2 = &PL_sv_undef;
 
-    if(!(flags & SV_SKIP_OVERLOAD) &&
-       (SvAMAGIC(*sv1) || SvAMAGIC(*sv2))) {
-        if ((*result = amagic_call(*sv1, *sv2, method, AMGf_force_scalar)))
-            return true;
+    if (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) {
+        if (!(flags & SV_SKIP_OVERLOAD)) {
+            if ((*result = amagic_call(*sv1, *sv2, method, AMGf_force_scalar)))
+                return true;
+        }
 
-        /* normally handled by try_amagic_bin */
+        /* Normally handled by try_amagic_bin
+           This will do the normal RV to UV conversion
+           with SV_SKIP_OVERLOAD.
+         */
         if (SvROK(*sv1))
-            *sv1 = sv_2num(*sv1);
+            *sv1 = sv_2num_flags(*sv1, flags & SV_SKIP_OVERLOAD);
         if (SvROK(*sv2))
-            *sv2 = sv_2num(*sv2);
+            *sv2 = sv_2num_flags(*sv2, flags & SV_SKIP_OVERLOAD);
     }
 
     return false;
@@ -8814,7 +8825,6 @@ otherwise 'get' magic is ignored.
 =item C<SV_SKIP_OVERLOAD>
 
 Skip any operator overloading implemented for this type and operator.
-Be aware that numeric, C<+0>, overloading will still be applied, unless in the scope of C<no overloading;>.
 
 =back
 

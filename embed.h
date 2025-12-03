@@ -283,6 +283,7 @@
 #   undef case_9_SBOX32
 #   undef CC_UNDERSCORE_
 #   undef isFOO_or_UNDERSCORE_
+#   undef sv_2num
 #   undef USE_STDIO
 #   if !defined(PERL_EXT)
 #     undef invlist_intersection_
@@ -1392,7 +1393,7 @@
 #   define subsignature_append_slurpy(a,b)      Perl_subsignature_append_slurpy(aTHX_ a,b)
 #   define subsignature_finish()                Perl_subsignature_finish(aTHX)
 #   define subsignature_start()                 Perl_subsignature_start(aTHX)
-#   define sv_2num(a)                           Perl_sv_2num(aTHX_ a)
+#   define sv_2num_flags(a,b)                   Perl_sv_2num_flags(aTHX_ a,b)
 #   define sv_clean_all()                       Perl_sv_clean_all(aTHX)
 #   define sv_clean_objs()                      Perl_sv_clean_objs(aTHX)
 #   define sv_del_backref(a,b)                  Perl_sv_del_backref(aTHX_ a,b)
@@ -2055,6 +2056,11 @@
 #   if defined(USE_QUADMATH)
 #     define quadmath_format_needed             Perl_quadmath_format_needed
 #     define quadmath_format_valid              Perl_quadmath_format_valid
+#   endif
+#   if defined(USE_THREADS)
+#     define Perl_sv_2num(mTHX,a)               sv_2num(a)
+#   else
+#     define Perl_sv_2num                       sv_2num
 #   endif
 #   if defined(WIN32)
 #     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)

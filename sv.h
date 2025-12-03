@@ -2311,6 +2311,7 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 
 =cut
 */
+#define sv_2num(sv) sv_2num_flags(sv, 0)
 #define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
@@ -2365,6 +2366,10 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 */
 #define sv_catpvn_nomg_maybeutf8(dsv, sstr, len, is_utf8) \
         sv_catpvn_flags(dsv, sstr, len, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
+
+#if defined(PERL_CORE)
+#define sv_2num(sv) sv_2num_flags(sv, 0)
+#endif
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 # define sv_or_pv_len_utf8(sv, pv, bytelen)	      \

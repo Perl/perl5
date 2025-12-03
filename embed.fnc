@@ -3430,7 +3430,7 @@ ARdp	|SV *	|sv_newmortal
 Cdp	|SV *	|sv_newref	|NULLOK SV * const sv
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 : Used in pp.c, pp_hot.c, sv.c
-dpx	|SV *	|sv_2num	|NN SV * const sv
+dmp	|SV *	|sv_2num	|NN SV * const sv
 Admp	|I32	|sv_numcmp	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|I32	|sv_numcmp_flags|NULLOK SV *sv1 			\
@@ -3441,6 +3441,8 @@ Admp	|bool	|sv_numeq	|NULLOK SV *sv1 			\
 Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
+dpx	|SV *	|sv_2num_flags	|NN SV * const sv			\
+				|int flags
 Admp	|bool	|sv_numge	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|bool	|sv_numge_flags |NULLOK SV *sv1 			\

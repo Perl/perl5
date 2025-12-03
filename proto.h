@@ -4406,9 +4406,9 @@ Perl_sv_2mortal(pTHX_ SV * const sv);
 #define PERL_ARGS_ASSERT_SV_2MORTAL
 
 PERL_CALLCONV SV *
-Perl_sv_2num(pTHX_ SV * const sv)
+Perl_sv_2num_flags(pTHX_ SV * const sv, int flags)
         __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_SV_2NUM                \
+#define PERL_ARGS_ASSERT_SV_2NUM_FLAGS          \
         assert(sv)
 
 PERL_CALLCONV NV
