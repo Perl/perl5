@@ -893,7 +893,7 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 139: /* subattrlist: COLONATTR THING  */
+  case 139: /* subattrlist: COLONATTR ATTRLIST  */
 #line 1055 "perly.y"
                         {
 			  OP *attrlist = (ps[0].val.opval);
@@ -910,7 +910,7 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 141: /* attrlist: COLONATTR THING  */
+  case 141: /* attrlist: COLONATTR ATTRLIST  */
 #line 1067 "perly.y"
                         { (yyval.opval) = (ps[0].val.opval); }
 
@@ -2299,6 +2299,6 @@ case 2: /* @1: %empty  */
     
 
 /* Generated from:
- * 57cc742fa623ae44e0575b737db1c674688361cd405620798cf50de0d81cadfc perly.y
+ * 8444cada5b7e31b67a9eec8f91fdf7511e00378bd03fb2bc726dc0ff958643de perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */
