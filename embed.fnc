@@ -2713,7 +2713,7 @@ Adhp	|REGEXP *|pregcomp	|NN SV * const pattern			\
 				|const U32 flags
 Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
 				|MPTR char *stringarg			\
-				|EPTR char *strend			\
+				|EPTRQ char *strend			\
 				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\

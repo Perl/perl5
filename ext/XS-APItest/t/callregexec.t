@@ -1,6 +1,6 @@
 #!perl
 
-# test CALLREGEXEC()
+# test CALLREGEXEC() and pregexec()
 # (currently it just checks that it handles non-\0 terminated strings;
 # full tests haven't been added yet)
 
@@ -10,7 +10,7 @@ use strict;
 use XS::APItest;
 *callregexec = *XS::APItest::callregexec;
 
-use Test::More tests => 48;
+use Test::More tests => 75;
 
 # Test that the regex engine can handle strings without terminating \0
 # XXX This is by no means comprehensive; it doesn't test all ops, nor all
@@ -34,6 +34,8 @@ sub try {
     my $bytes = do { use bytes; length $str1 };
     ok  !!$exp == !!callregexec($re, 0, $bytes, 0, $str, 0),
 	    "$desc callregexec";
+    ok  !!$exp == !!callpregexec($re, 0, $bytes, 0, $str, 0),
+	    "$desc callpregexec";
 }
 
 
@@ -62,4 +64,5 @@ sub try {
     try "ab\t",        qr/^.+\h/,         0, 'HORIZWS';
     try "abx",         qr/^.+\H/,         1, 'NHORIZWS';
     try "abx",         qr/a.*x/,          0, 'CURLY';
+    try "",            qr/x?/,            1, 'empty';
 }

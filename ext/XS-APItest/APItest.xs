@@ -4780,6 +4780,29 @@ CODE:
 OUTPUT:
     RETVAL
 
+ # provide access to pregexec, except replace pointers within the
+ # string with offsets from the start of the string
+
+I32
+callpregexec(SV *prog, STRLEN stringarg, STRLEN strend, I32 minend, SV *sv, U32 nosave)
+CODE:
+    {
+        STRLEN len;
+        char *strbeg;
+        if (SvROK(prog))
+            prog = SvRV(prog);
+        strbeg = SvPV_force(sv, len);
+        RETVAL = pregexec((REGEXP *)prog,
+                            strbeg + stringarg,
+                            strbeg + strend,
+                            strbeg,
+                            minend,
+                            sv,
+                            nosave);
+    }
+OUTPUT:
+    RETVAL
+
 void
 lexical_import(SV *name, CV *cv)
     CODE:

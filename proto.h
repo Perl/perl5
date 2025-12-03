@@ -3607,7 +3607,7 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char *stringarg, char *strend, char *st
 #define PERL_ARGS_ASSERT_PREGEXEC               \
         assert(prog); assert(stringarg); assert(strend); assert(strbeg); \
         assert(screamer); assert(strbeg <= stringarg); \
-        assert(stringarg < strend)
+        assert(stringarg <= strend)
 
 PERL_CALLCONV void
 Perl_pregfree(pTHX_ REGEXP *r);
