@@ -375,14 +375,14 @@ Set by the L<perlfunc/exit> operator.
 
 =back
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =for apidoc Amnh||PERL_EXIT_EXPECTED
 =for apidoc Amnh||PERL_EXIT_ABORT
 =for apidoc Amnh||PERL_EXIT_DESTRUCT_END
 =for apidoc Amnh||PERL_EXIT_WARN
-
-On threaded perls, each thread has an independent copy of this variable;
-each initialized at creation time with the current value of the creating
-thread's copy.
 
 =cut
 */
