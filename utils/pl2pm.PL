@@ -40,7 +40,7 @@ print OUT <<'!NO!SUBS!';
 
 =head1 NAME
 
-pl2pm - Rough tool to translate Perl4 .pl files to Perl5 .pm modules.
+pl2pm - Rough tool to translate Perl4 .pl files to Perl5 .pm modules
 
 =head1 SYNOPSIS
 
