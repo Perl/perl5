@@ -2410,8 +2410,10 @@ typedef UVTYPE UV;
 #define Size_t_MAX (~(Size_t)0)
 #define SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
 
-#define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
+#define IV_BITS (IVSIZE * CHARBITS)
+#define IV_DIG (BIT_DIGITS(IV_BITS))
+#define UV_BITS (UVSIZE * CHARBITS)
+#define UV_DIG (BIT_DIGITS(UV_BITS))
 
 #ifndef NO_PERL_PRESERVE_IVUV
 #define PERL_PRESERVE_IVUV	/* We like our integers to stay integers. */
