@@ -415,6 +415,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     NV value_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
+    /* A flag tells us to not overflow, but instead discard the rest */
+    bool discard_instead_of_overflow = false;
+
+    if (UNLIKELY(input_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW)) {
+        discard_instead_of_overflow = true;
+    }
+    Size_t discarded_count = 0; /* How many digits get discarded */
+
     /* Loop through the characters */
     for (; s < e; s++) {
         if (generic_isCC_(*s, class_bit)) {
@@ -435,6 +443,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 continue;
             }
 
+            /* Don't overflow if we are in the special mode to otherwise
+             * discard overflowing digits */
+            if (UNLIKELY(discarded_count)) {
+                discarded_count++;
+                continue;
+            }
+
 #ifndef NV_PRESERVES_UV
             /* Code before the loop has set things up so that we get here even
              * if the next digit wouldn't overflow the integer, but would
@@ -452,7 +467,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 goto redo;
             }
 #endif
-            /* Bah. We are about to overflow.  Instead, we place the
+            /* Bah. We are about to overflow.  If the caller wants us to
+             * instead discard the remaining digits, do so. */
+            if (discard_instead_of_overflow) {
+
+                /* Note to the caller that this happened. */
+                *flags |= PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+                discarded_count = 1;
+                continue;
+            }
+
+            /* Here, we really would overflow.  Instead, we place the
              * unoverflowed value in an NV.  Then we set 'value' to the current
              * digit and continue parsing, eventually adding the resultant
              * value to the NV.  If there are sufficiently many digits, this
