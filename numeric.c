@@ -399,9 +399,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * warning), as the first batch will end up being multiplied by zero.) */
     Size_t batch_digit_count = 0;
 
+#ifdef NV_PRESERVES_UV
     /* As long as the running total is less than this, the next digit will
      * fit. */
     UV max_div = UV_MAX >> shift;
+#else
+    UV max_div = nBIT_UMAX(NV_PRESERVES_UV_BITS) >> shift;
+
+    /* We set a checkpoint when we reach the first batch's limit */
+    UV checkpoint_value = 0;
+    const char * checkpoint_s = NULL;
+#endif
 
     bool overflowed = FALSE;
     NV value_nv = 0;
@@ -427,14 +435,54 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 continue;
             }
 
-            /* Bah. We are about to overflow.  Instead, add the unoverflowed
-             * value to an NV that contains an approximation to the correct
-             * value.  Each time through the loop we have incremented
-             * 'batch_digit_count' so that it gives how many digits the
-             * current approximation needs to effectively be shifted to make
-             * room for this new value */
-            multiply_by_exponent(value_nv, batch_digit_count);
-            value_nv += (NV) value;
+#ifndef NV_PRESERVES_UV
+            /* Code before the loop has set things up so that we get here even
+             * if the next digit wouldn't overflow the integer, but would
+             * overflow the mantissa of an NV.  Set a checkpoint to come back
+             * to, should the remaining input end up overflowing the integer.
+             * See below for why. */
+            if (checkpoint_value == 0) {
+                checkpoint_value = value;
+                checkpoint_s = s;
+
+                /* But, for the remaining batches, use all available bits in
+                 * the integer.  This may reduce the number of batches needed,
+                 * hence fewer floating point operations. */
+                max_div = UV_MAX >> shift;
+                goto redo;
+            }
+#endif
+            /* Bah. We are about to overflow.  Instead, we place the
+             * unoverflowed value in an NV.  Then we set 'value' to the current
+             * digit and continue parsing, eventually adding the resultant
+             * value to the NV.  If there are sufficiently many digits, this
+             * can happen multiple times. */
+
+#ifndef NV_PRESERVES_UV
+            /* To minimize precision loss, the algorithm here works as much as
+             * possible on lossless integers.  But to get here on the first
+             * batch on platforms where the signifcand of an NV has fewer bits
+             * than a UV, the value we already have won't fit an NV
+             * losslessly.  But that's why we earlier set a checkpoint to
+             * point to the position in the parse just before where the
+             * signifcand would overflow, and saved the running total in
+             * effect at that point.  Retreat to that checkpoint to set the
+             * first batch to be lossless, and reparse so that the second
+             * batch begins there. */
+            if (value_nv == 0.0) {
+                value_nv = (NV) checkpoint_value;
+                s = checkpoint_s;
+            }
+            else
+#endif
+            {
+                /* Each time through the loop we have incremented
+                 * 'batch_digit_count' so that it gives how many digits the
+                 * current approximation needs to effectively be shifted to
+                 * make room for this new value */
+                multiply_by_exponent(value_nv, batch_digit_count);
+                value_nv += (NV) value;
+            }
 
             /* Then we keep accumulating digits, until all are parsed.  We
              * start over using the current input value as the initial digit.
