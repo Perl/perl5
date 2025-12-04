@@ -2008,9 +2008,6 @@ PP(pp_subtract)
 
 }
 
-
-#define IV_BITS (IVSIZE * 8)
-
 /* Taking the right operand of bitwise shift operators, returns an int
  * indicating the shift amount clipped to the range [-IV_BITS, +IV_BITS].
  */
