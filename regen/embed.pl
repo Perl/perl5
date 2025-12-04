@@ -3817,21 +3817,17 @@ sub generate_proto_h {
                 else {  # Look for constraints about this argument
 
                     my $ptr_type;   # E, M, and S are the three types
-                                    # corresponding respectively to EPTR(Q)?,
+                                    # corresponding respectively to EPTR,
                                     # MPTR, and SPTR
-                    my $equal = ""; # EPTRQ is just an EPTR with this set to
-                                    # "="
-                    if ($arg =~ s/ \b ( [EMS] ) PTR (Q)? \b //x) {;
-                        $ptr_type = $1;
-                        if (defined $2) {
-                            die_at_end ": $func: Q only valid with EPTR"
-                                                          if $ptr_type ne 'E';
-                            $equal = "=";
-                        }
-                        elsif ($ptr_type eq 'M') {
-                            # A middle position always is <=
-                            $equal = "=";
-                        }
+                    my $equal = ""; # set to "=" if can be equal to previous
+                                    # pointer, empty if not
+                    if ($arg =~ s/ \b ( EPTRgt | EPTRge | MPTR | SPTR ) \b //x)
+                    {
+                        my $name = $1;
+                        $ptr_type = substr($name, 0, 1);
+                        $equal = "=" if $ptr_type eq 'M'
+                                     or (   $ptr_type eq 'E'
+                                         && substr($name, -1, 1) eq 'e');
                     }
 
                     # A $ptr_type is a specialized 'nn'
@@ -3850,7 +3846,7 @@ sub generate_proto_h {
                     # times
                     die_at_end
                            ":$func: $arg Use only one of NN (including"
-                         . " EPTR, EPTRQ, MPTR, SPTR), NULLOK, or NZ"
+                         . " EPTRge, EPTRgt, MPTR, SPTR), NULLOK, or NZ"
                                                if 0 + $nn + $nz + $nullok > 1;
 
                     push( @nonnull, $n ) if $nn;
@@ -3862,8 +3858,8 @@ sub generate_proto_h {
                     # pointer.
                     if ($args_assert_line && $arg =~ /\*/) {
                         if ($nn + $nullok == 0) {
-                            warn "$func: $arg needs one of: NN, EPTR, EPTRQ,"
-                               . " MPTR, SPTR, or NULLOK\n";
+                            warn "$func: $arg needs one of: NN, EPTRge,"
+                               . " EPTRgt, MPTR, SPTR, or NULLOK\n";
                             ++$unflagged_pointers;
                         }
 
