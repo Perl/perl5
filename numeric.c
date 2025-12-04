@@ -526,6 +526,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         break;
     }   /* End of parsing loop */
 
+    bool do_non_portable_output = false;
+
     if (UNLIKELY(overflowed)) {
 
         /* Calculate the final overflow approximation */
@@ -551,6 +553,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
 
         value = UV_MAX;
+        do_non_portable_output = true;
+    }
+    else {
+#if UVSIZE > 4
+        if (UNLIKELY(value > 0xffffffff)) {
+            if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
+                do_non_portable_output = true;
+            }
+            *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+        }
+#endif
     }
 
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
@@ -582,17 +595,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
     }
 
-    if (LIKELY(! overflowed)) {
-#if UVSIZE > 4
-        if (UNLIKELY(value > 0xffffffff)) {
-            if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
-                output_non_portable(base);
-            }
-            *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
-        }
-#endif
-    }
-    else { /* Overflowed */
+    if (UNLIKELY(do_non_portable_output)) {
         output_non_portable(base);
     }
 
