@@ -2978,6 +2978,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 =for apidoc      get_cv
 =for apidoc_item get_cvn_flags
 =for apidoc_item get_cvs
+=for apidoc_flag GV_ADD
 
 These return the CV of the specified Perl subroutine.  C<flags> are passed to
 C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
@@ -2991,8 +2992,6 @@ name is given by the C<name> parameter, which must be a NUL-terminated C
 string.  With C<get_cvn_flags>, the name is also given by the C<name>
 parameter, but it is a Perl string (possibly containing embedded NUL bytes),
 and its length in bytes is contained in the C<len> parameter.
-
-=for apidoc Amnh||GV_ADD
 
 =cut
 */
@@ -3136,6 +3135,8 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 /* May be called with any of a CV, a GV, or an SV containing the name. */
 /*
 =for apidoc call_sv
+=for apidoc_flag G_METHOD
+=for apidoc_flag G_METHOD_NAMED
 
 Performs a callback to the Perl sub specified by the SV.
 
@@ -3153,9 +3154,6 @@ Some other values are treated specially for internal use and should
 not be depended on.
 
 See L<perlcall>.
-
-=for apidoc Amnh||G_METHOD
-=for apidoc Amnh||G_METHOD_NAMED
 
 =cut
 */
@@ -3317,6 +3315,8 @@ Perl_call_sv(pTHX_ SV *sv, I32 arg_flags)
 
 /*
 =for apidoc eval_sv
+=for apidoc_flag G_RETHROW
+=for apidoc_flag G_USEHINTS
 
 Tells Perl to C<eval> the string in the SV.  It supports the same flags
 as C<call_sv>, with the obvious exception of C<G_EVAL>.  See L<perlcall>.
@@ -3328,8 +3328,6 @@ By default the code is compiled and executed with the default hints,
 such as strict and features.  Set C<G_USEHINTS> in flags to use the
 current hints from C<PL_curcop>.
 
-=for apidoc Amnh||G_RETHROW
-=for apidoc Amnh||G_USEHINTS
 =cut
 */
 

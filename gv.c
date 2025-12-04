@@ -335,6 +335,7 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *stash)
 =for apidoc_item gv_init_pv
 =for apidoc_item gv_init_pvn
 =for apidoc_item gv_init_sv
+=for apidoc_flag GV_ADDMULTI
 
 These each convert a scalar into a typeglob.  This is an incoercible typeglob;
 assigning a reference to it will assign to one of its slots, instead of
@@ -377,8 +378,6 @@ C<gv_init> is the old form of C<gv_init_pvn>.  It does not work with UTF-8
 strings, as it has no flags parameter.  Setting the C<multi> parameter to
 non-zero has the same effect as setting the C<GV_ADDMULTI> flag in the other
 forms.
-
-=for apidoc Amnh||GV_ADDMULTI
 
 =cut
 */
@@ -736,6 +735,8 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 =for apidoc_item gv_fetchmeth_pvn_autoload
 =for apidoc_item gv_fetchmeth_sv
 =for apidoc_item gv_fetchmeth_sv_autoload
+=for apidoc_flag GV_SUPER
+=for apidoc_flag GV_NOUNIVERSAL
 
 These each look for a glob with name C<name>, containing a defined subroutine,
 returning the GV of that glob if found, or C<NULL> if not.
@@ -821,9 +822,6 @@ the name is the PV extracted from that, using C<L</SvPV>>.  If the SV is marked
 as being in UTF-8, the extracted PV will also be.  Including C<SVf_UTF8> in
 C<flags> will force the name to be considered to be UTF-8 even if the SV is
 not so marked.
-
-=for apidoc Amnh||GV_SUPER
-=for apidoc Amnh||GV_NOUNIVERSAL
 
 =cut
 */
@@ -1307,6 +1305,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 =for apidoc_item gv_autoload_pvn
 =for apidoc_item gv_autoload_sv
 =for apidoc_item gv_autoload4
+=for apidoc_flag GV_AUTOLOAD_ISMETHOD
+=for apidoc_flag SVf_UTF8
+=for apidoc_flag GV_SUPER
 
 These each search for an C<AUTOLOAD> method, returning NULL if not found, or
 else returning a pointer to its GV, while setting the package
@@ -1344,9 +1345,6 @@ to indicate, if set, to skip searching for the name in C<stash>.
 
 =cut
 
-=for apidoc Amnh||GV_AUTOLOAD_ISMETHOD
-=for apidoc Amnh||SVf_UTF8
-=for apidoc Amnh||GV_SUPER
 */
 
 GV*
@@ -1582,6 +1580,12 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
 =for apidoc_item gv_stashpvn
 =for apidoc_item gv_stashpvs
 =for apidoc_item gv_stashsv
+=for apidoc_flag GV_ADD
+=for apidoc_flag GV_NOADD_NOINIT
+=for apidoc_flag GV_NOINIT
+=for apidoc_flag GV_NOEXPAND
+=for apidoc_flag GV_ADDMG
+=for apidoc_flag SVf_UTF8
 
 Note C<gv_stashsv> is strongly preferred for performance reasons.
 
@@ -1612,13 +1616,6 @@ Flags may be one of:
  SVf_UTF8         The name is in UTF-8
 
 The most important of which are probably C<GV_ADD> and C<SVf_UTF8>.
-
-=for apidoc Amnh||GV_ADD
-=for apidoc Amnh||GV_NOADD_NOINIT
-=for apidoc Amnh||GV_NOINIT
-=for apidoc Amnh||GV_NOEXPAND
-=for apidoc Amnh||GV_ADDMG
-=for apidoc Amnh||SVf_UTF8
 
 =cut
 */
@@ -1678,7 +1675,8 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
 }
 
 /*
-=for apidoc gv_stashsvpvn_cached
+=for apidoc        gv_stashsvpvn_cached
+=for apidoc_flag E|GV_CACHE_ONLY
 
 Returns a pointer to the stash for a specified package, possibly
 cached.  Implements both L<perlapi/C<gv_stashpvn>> and
@@ -1691,8 +1689,6 @@ cache; see L<perlapi/C<gv_stashpvn>> for details on the other C<flags>.
 
 Note it is strongly preferred for C<namesv> to be non-null, for performance
 reasons.
-
-=for apidoc Emnh||GV_CACHE_ONLY
 
 =cut
 */
@@ -2505,6 +2501,15 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
 =for apidoc_item gv_fetchpvs
 =for apidoc_item gv_fetchsv
 =for apidoc_item gv_fetchsv_nomg
+=for apidoc_flag GV_ADD
+=for apidoc_flag GV_ADDMG
+=for apidoc_flag GV_ADDMULTI
+=for apidoc_flag GV_ADDWARN
+=for apidoc_flag GV_NOINIT
+=for apidoc_flag GV_NOADD_NOINIT
+=for apidoc_flag GV_NOTQUAL
+=for apidoc_flag GV_NO_SVGMAGIC
+=for apidoc_flag SVf_UTF8
 
 These all return the GV of type C<sv_type> whose name is given by the inputs,
 or NULL if no GV of that name and type could be found.  See L<perlguts/Stashes
@@ -2552,16 +2557,6 @@ the input C<name> SV.  The only difference between these two forms is that
 'get' magic is normally done on C<name> in C<gv_fetchsv>, and always skipped
 with C<gv_fetchsv_nomg>.  Including C<GV_NO_SVGMAGIC> in the C<flags> parameter
 to C<gv_fetchsv> makes it behave identically to C<gv_fetchsv_nomg>.
-
-=for apidoc Amnh||GV_ADD
-=for apidoc Amnh||GV_ADDMG
-=for apidoc Amnh||GV_ADDMULTI
-=for apidoc Amnh||GV_ADDWARN
-=for apidoc Amnh||GV_NOINIT
-=for apidoc Amnh||GV_NOADD_NOINIT
-=for apidoc Amnh||GV_NOTQUAL
-=for apidoc Amnh||GV_NO_SVGMAGIC
-=for apidoc Amnh||SVf_UTF8
 
 =cut
 */
@@ -3656,7 +3651,11 @@ Perl_try_amagic_bin(pTHX_ int method, int flags)
 
 
 /*
-=for apidoc amagic_deref_call
+=for apidoc      amagic_deref_call
+=for apidoc_flag AMGf_noleft
+=for apidoc_flag AMGf_noright
+=for apidoc_flag AMGf_unary
+=for apidoc_flag AMGf_assign
 
 Perform C<method> overloading dereferencing on C<ref>, returning the
 dereferenced result.  C<method> must be one of the dereference operations given
@@ -3723,7 +3722,13 @@ Perl_amagic_is_enabled(pTHX_ int method)
 }
 
 /*
-=for apidoc amagic_call
+=for apidoc      amagic_call
+=for apidoc_flag AMGf_noleft
+=for apidoc_flag AMGf_noright
+=for apidoc_flag AMGf_unary
+=for apidoc_flag AMGf_assign
+=for apidoc_flag AMGf_force_scalar
+=for apidoc_flag AMGf_force_overload
 
 Perform the overloaded (active magic) operation given by C<method>.
 C<method> is one of the values found in F<overload.h>.
@@ -3759,13 +3764,6 @@ forces amagic_call() to use scalar context.
 Perform overloading even in the context of C<no overloading;>.
 
 =back
-
-=for apidoc Amnh||AMGf_noleft
-=for apidoc Amnh||AMGf_noright
-=for apidoc Amnh||AMGf_unary
-=for apidoc Amnh||AMGf_assign
-=for apidoc Amnh||AMGf_force_scalar
-=for apidoc Amnh||AMGf_force_overload
 
 =cut
 */

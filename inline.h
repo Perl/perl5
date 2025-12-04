@@ -3787,6 +3787,10 @@ S_uv_mul_overflow (UV auv, UV buv, UV *const result)
 =for apidoc      grok_bin
 =for apidoc_item grok_hex
 =for apidoc_item grok_oct
+=for apidoc_flag PERL_SCAN_ALLOW_UNDERSCORES
+=for apidoc_flag PERL_SCAN_DISALLOW_PREFIX
+=for apidoc_flag PERL_SCAN_GREATER_THAN_UV_MAX
+=for apidoc_flag PERL_SCAN_SILENT_ILLDIGIT
 
 These each convert a string representing a number to numeric form.  The
 number is binary in C<grok_bin>, octal in C<grok_oct>, and hexadecimal in
@@ -3843,11 +3847,6 @@ just part of the number.
 If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
 digits may be separated from each other by a single underscore, and also a
 single leading underscore is accepted.
-
-=for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
-=for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
-=for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
-=for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
 
 =cut
 

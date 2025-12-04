@@ -202,6 +202,7 @@ typedef struct refcounted_he COPHH;
 =for apidoc_item|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
 =for apidoc_item|SV *|cophh_fetch_pvs|const COPHH *cophh|           "key"                      |U32 flags
 =for apidoc_item|SV *|cophh_fetch_sv |const COPHH *cophh|        SV *key              |U32 hash|U32 flags
+=for apidoc_flag COPHH_KEY_UTF8
 
 These look up the entry in the cop hints hash C<cophh> with the key specified by
 C<key> (and C<keylen> in the C<pvn> form), returning that value as a mortal
@@ -225,8 +226,6 @@ It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
 whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
 cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
 the octets.
-
-=for apidoc Amnh||COPHH_KEY_UTF8
 
 =cut
 

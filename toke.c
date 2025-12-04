@@ -1195,6 +1195,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 =for apidoc_item lex_stuff_pvn
 =for apidoc_item lex_stuff_pvs
 =for apidoc_item lex_stuff_sv
+=for apidoc_flag LEX_STUFF_UTF8
 
 These each insert characters into the lexer buffer
 (L</PL_parser-E<gt>linestr>),
@@ -1222,8 +1223,6 @@ according to whether or not C<sv> has its UTF-8 flag set.
 
 In all three forms, the characters are recoded for the lexer buffer, according
 to how the buffer is currently being interpreted (L</lex_bufutf8>).
-
-=for apidoc Amnh||LEX_STUFF_UTF8
 
 =cut
 */
@@ -1458,7 +1457,8 @@ Perl_notify_parser_that_encoding_changed(pTHX)
 }
 
 /*
-=for apidoc lex_next_chunk
+=for apidoc      lex_next_chunk
+=for apidoc_flag LEX_KEEP_PREVIOUS
 
 Reads in the next chunk of text to be lexed, appending it to
 L</PL_parser-E<gt>linestr>.  This should be called when lexing code has
@@ -1475,8 +1475,6 @@ consumed, then it will not be discarded regardless of the flag.
 
 Returns true if some new text was added to the buffer, or false if the
 buffer has reached the end of the input text.
-
-=for apidoc Amnh||LEX_KEEP_PREVIOUS
 
 =cut
 */
@@ -14051,7 +14049,9 @@ S_parse_expr(pTHX_ I32 fakeeof, U32 flags)
 }
 
 /*
-=for apidoc parse_arithexpr
+=for apidoc      parse_arithexpr
+=for apidoc_flag PARSE_OPTIONAL
+
 
 Parse a Perl arithmetic expression.  This may contain operators of precedence
 down to the bit shift operators.  The expression must be followed (and thus
@@ -14072,8 +14072,6 @@ tree is returned anyway.  The error is reflected in the parser state,
 normally resulting in a single exception at the top level of parsing
 which covers all the compilation errors that occurred.  Some compilation
 errors, however, will throw an exception immediately.
-
-=for apidoc Amnh||PARSE_OPTIONAL
 
 =cut
 

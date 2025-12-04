@@ -136,6 +136,11 @@ const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
 /*
 =for apidoc      uv_to_utf8_msgs
 =for apidoc_item uvchr_to_utf8_flags_msgs
+=for apidoc_flag UNICODE_GOT_SURROGATE
+=for apidoc_flag UNICODE_GOT_NONCHAR
+=for apidoc_flag UNICODE_GOT_SUPER
+=for apidoc_flag UNICODE_GOT_PERL_EXTENDED
+
 
 These functions are identical.  THEY SHOULD BE USED IN ONLY VERY SPECIALIZED
 CIRCUMSTANCES.  The C<uv_to_utf8_msgs> spelling is preferred in new code.
@@ -370,6 +375,20 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 =for apidoc_item uv_to_utf8_flags
 =for apidoc_item uvchr_to_utf8
 =for apidoc_item uvchr_to_utf8_flags
+=for apidoc_flag UNICODE_DISALLOW_ABOVE_31_BIT
+=for apidoc_flag UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UNICODE_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc_flag UNICODE_DISALLOW_NONCHAR
+=for apidoc_flag UNICODE_DISALLOW_PERL_EXTENDED
+=for apidoc_flag UNICODE_DISALLOW_SUPER
+=for apidoc_flag UNICODE_DISALLOW_SURROGATE
+=for apidoc_flag UNICODE_WARN_ABOVE_31_BIT
+=for apidoc_flag UNICODE_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UNICODE_WARN_ILLEGAL_INTERCHANGE
+=for apidoc_flag UNICODE_WARN_NONCHAR
+=for apidoc_flag UNICODE_WARN_PERL_EXTENDED
+=for apidoc_flag UNICODE_WARN_SUPER
+=for apidoc_flag UNICODE_WARN_SURROGATE
 
 These each add the UTF-8 representation of the native code point C<uv> to the
 end of the string C<d>; C<d> should have at least C<UVCHR_SKIP(uv)+1> (up to
@@ -442,21 +461,6 @@ C<UNICODE_DISALLOW_ABOVE_31_BIT> is usable instead of the more accurately named
 C<UNICODE_DISALLOW_PERL_EXTENDED>.  The names are misleading because on EBCDIC
 platforms,these flags can apply to code points that actually do fit in 31 bits.
 The new names accurately describe the situation in all cases.
-
-=for apidoc Amnh||UNICODE_DISALLOW_ABOVE_31_BIT
-=for apidoc Amnh||UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UNICODE_DISALLOW_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UNICODE_DISALLOW_NONCHAR
-=for apidoc Amnh||UNICODE_DISALLOW_PERL_EXTENDED
-=for apidoc Amnh||UNICODE_DISALLOW_SUPER
-=for apidoc Amnh||UNICODE_DISALLOW_SURROGATE
-=for apidoc Amnh||UNICODE_WARN_ABOVE_31_BIT
-=for apidoc Amnh||UNICODE_WARN_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UNICODE_WARN_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UNICODE_WARN_NONCHAR
-=for apidoc Amnh||UNICODE_WARN_PERL_EXTENDED
-=for apidoc Amnh||UNICODE_WARN_SUPER
-=for apidoc Amnh||UNICODE_WARN_SURROGATE
 
 =cut
 */
@@ -1248,6 +1252,22 @@ will result in simpler, more robust code.
 
 =for apidoc      utf8_to_uv_flags
 =for apidoc_item utf8n_to_uvchr
+=for apidoc_flag UTF8_ALLOW_ANY
+=for apidoc_flag UTF8_CHECK_ONLY
+=for apidoc_flag UTF8_DIE_IF_MALFORMED
+=for apidoc_flag UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc_flag UTF8_DISALLOW_NONCHAR
+=for apidoc_flag UTF8_DISALLOW_PERL_EXTENDED
+=for apidoc_flag UTF8_DISALLOW_SUPER
+=for apidoc_flag UTF8_DISALLOW_SURROGATE
+=for apidoc_flag UTF8_FORCE_WARN_IF_MALFORMED
+=for apidoc_flag UTF8_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UTF8_WARN_ILLEGAL_INTERCHANGE
+=for apidoc_flag UTF8_WARN_NONCHAR
+=for apidoc_flag UTF8_WARN_PERL_EXTENDED
+=for apidoc_flag UTF8_WARN_SUPER
+=for apidoc_flag UTF8_WARN_SURROGATE
 
 These functions are extensions of C<L</utf8_to_uv>>, where you need
 more control over what UTF-8 sequences are acceptable.  These functions are
@@ -1411,6 +1431,38 @@ of the croak is displayed.
 =for apidoc_item utf8n_to_uvchr_msgs
 =for apidoc_item utf8_to_uv_errors
 =for apidoc_item utf8n_to_uvchr_error
+=for apidoc_flag UTF8_ALLOW_ANY
+=for apidoc_flag UTF8_ALLOW_CONTINUATION
+=for apidoc_flag UTF8_ALLOW_EMPTY
+=for apidoc_flag UTF8_ALLOW_LONG
+=for apidoc_flag UTF8_ALLOW_NON_CONTINUATION
+=for apidoc_flag UTF8_ALLOW_OVERFLOW
+=for apidoc_flag UTF8_ALLOW_SHORT
+=for apidoc_flag UTF8_CHECK_ONLY
+=for apidoc_flag UTF8_DIE_IF_MALFORMED
+=for apidoc_flag UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+=for apidoc_flag UTF8_DISALLOW_NONCHAR
+=for apidoc_flag UTF8_DISALLOW_PERL_EXTENDED
+=for apidoc_flag UTF8_DISALLOW_SUPER
+=for apidoc_flag UTF8_DISALLOW_SURROGATE
+=for apidoc_flag UTF8_FORCE_WARN_IF_MALFORMED
+=for apidoc_flag UTF8_GOT_CONTINUATION
+=for apidoc_flag UTF8_GOT_EMPTY
+=for apidoc_flag UTF8_GOT_LONG
+=for apidoc_flag UTF8_GOT_NONCHAR
+=for apidoc_flag UTF8_GOT_NON_CONTINUATION
+=for apidoc_flag UTF8_GOT_OVERFLOW
+=for apidoc_flag UTF8_GOT_PERL_EXTENDED
+=for apidoc_flag UTF8_GOT_SHORT
+=for apidoc_flag UTF8_GOT_SUPER
+=for apidoc_flag UTF8_GOT_SURROGATE
+=for apidoc_flag UTF8_WARN_ILLEGAL_C9_INTERCHANGE
+=for apidoc_flag UTF8_WARN_ILLEGAL_INTERCHANGE
+=for apidoc_flag UTF8_WARN_NONCHAR
+=for apidoc_flag UTF8_WARN_PERL_EXTENDED
+=for apidoc_flag UTF8_WARN_SUPER
+=for apidoc_flag UTF8_WARN_SURROGATE
 
 These functions are extensions of C<L</utf8_to_uv_flags>> and
 C<L</utf8n_to_uvchr>>.  They are used for the highly specialized purpose of
@@ -1602,37 +1654,6 @@ lexical warnings state (or not) when choosing what to do with the returned
 messages.
 
 The caller, of course, is responsible for freeing any returned AV.
-
-=for apidoc Amnh||UTF8_ALLOW_CONTINUATION
-=for apidoc Amnh||UTF8_ALLOW_EMPTY
-=for apidoc Amnh||UTF8_ALLOW_LONG
-=for apidoc Amnh||UTF8_ALLOW_NON_CONTINUATION
-=for apidoc Amnh||UTF8_ALLOW_OVERFLOW
-=for apidoc Amnh||UTF8_ALLOW_SHORT
-=for apidoc Amnh||UTF8_CHECK_ONLY
-=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UTF8_DISALLOW_NONCHAR
-=for apidoc Amnh||UTF8_DISALLOW_PERL_EXTENDED
-=for apidoc Amnh||UTF8_DISALLOW_SUPER
-=for apidoc Amnh||UTF8_DISALLOW_SURROGATE
-=for apidoc Amnh||UTF8_GOT_CONTINUATION
-=for apidoc Amnh||UTF8_GOT_EMPTY
-=for apidoc Amnh||UTF8_GOT_LONG
-=for apidoc Amnh||UTF8_GOT_NONCHAR
-=for apidoc Amnh||UTF8_GOT_NON_CONTINUATION
-=for apidoc Amnh||UTF8_GOT_OVERFLOW
-=for apidoc Amnh||UTF8_GOT_PERL_EXTENDED
-=for apidoc Amnh||UTF8_GOT_SHORT
-=for apidoc Amnh||UTF8_GOT_SUPER
-=for apidoc Amnh||UTF8_GOT_SURROGATE
-=for apidoc Amnh||UTF8_WARN_ILLEGAL_C9_INTERCHANGE
-=for apidoc Amnh||UTF8_WARN_ILLEGAL_INTERCHANGE
-=for apidoc Amnh||UTF8_WARN_NONCHAR
-=for apidoc Amnh||UTF8_WARN_PERL_EXTENDED
-=for apidoc Amnh||UTF8_WARN_SUPER
-=for apidoc Amnh||UTF8_WARN_SURROGATE
-
 =cut
 */
 
@@ -4701,6 +4722,12 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 
 /*
 =for apidoc pv_uni_display
+=for apidoc_flag UNI_DISPLAY_BACKSLASH
+=for apidoc_flag UNI_DISPLAY_BACKSPACE
+=for apidoc_flag UNI_DISPLAY_ISPRINT
+=for apidoc_flag UNI_DISPLAY_QQ
+=for apidoc_flag UNI_DISPLAY_REGEX
+=for apidoc_flag C|UNI_DISPLAY_TR
 
 Build to the scalar C<dsv> a displayable version of the UTF-8 encoded string
 C<spv>, length C<len>, the displayable version being at most C<pvlim> bytes
@@ -4741,11 +4768,6 @@ The pointer to the PV of the C<dsv> is returned.
 
 See also L</sv_uni_display>.
 
-=for apidoc Amnh||UNI_DISPLAY_BACKSLASH
-=for apidoc Amnh||UNI_DISPLAY_BACKSPACE
-=for apidoc Amnh||UNI_DISPLAY_ISPRINT
-=for apidoc Amnh||UNI_DISPLAY_QQ
-=for apidoc Amnh||UNI_DISPLAY_REGEX
 
 =for apidoc Cmn||UNI_DISPLAY_TR
 
@@ -4823,7 +4845,13 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
 }
 
 /*
-=for apidoc sv_uni_display
+=for apidoc      sv_uni_display
+=for apidoc_flag UNI_DISPLAY_BACKSLASH
+=for apidoc_flag UNI_DISPLAY_BACKSPACE
+=for apidoc_flag UNI_DISPLAY_ISPRINT
+=for apidoc_flag UNI_DISPLAY_QQ
+=for apidoc_flag UNI_DISPLAY_REGEX
+=for apidoc_flag C|UNI_DISPLAY_TR
 
 Build to the scalar C<dsv> a displayable version of the scalar C<sv>,
 the displayable version being at most C<pvlim> bytes long
@@ -4848,7 +4876,13 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 }
 
 /*
-=for apidoc foldEQ_utf8
+=for apidoc        foldEQ_utf8
+=for apidoc_flag C|FOLDEQ_UTF8_NOMIX_ASCII
+=for apidoc_flag C|FOLDEQ_LOCALE
+=for apidoc_flag C|FOLDEQ_S1_ALREADY_FOLDED
+=for apidoc_flag C|FOLDEQ_S1_FOLDS_SANE
+=for apidoc_flag C|FOLDEQ_S2_ALREADY_FOLDED
+=for apidoc_flag C|FOLDEQ_S2_FOLDS_SANE
 
 Returns true if the leading portions of the strings C<s1> and C<s2> (either or
 both of which may be in UTF-8) are the same case-insensitively; false
@@ -4888,13 +4922,6 @@ beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
 L<https://www.unicode.org/reports/tr21/> (Case Mappings).
-
-=for apidoc Cmnh||FOLDEQ_UTF8_NOMIX_ASCII
-=for apidoc Cmnh||FOLDEQ_LOCALE
-=for apidoc Cmnh||FOLDEQ_S1_ALREADY_FOLDED
-=for apidoc Cmnh||FOLDEQ_S1_FOLDS_SANE
-=for apidoc Cmnh||FOLDEQ_S2_ALREADY_FOLDED
-=for apidoc Cmnh||FOLDEQ_S2_FOLDS_SANE
 
 =cut */
 

@@ -637,6 +637,12 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 
 /*
 =for apidoc grok_infnan
+=for apidoc_flag IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc_flag IS_NUMBER_INFINITY
+=for apidoc_flag IS_NUMBER_IN_UV
+=for apidoc_flag IS_NUMBER_NAN
+=for apidoc_flag IS_NUMBER_NEG
+=for apidoc_flag IS_NUMBER_NOT_INT
 
 Helper for C<grok_number()>, accepts various ways of spelling "infinity"
 or "not a number", and returns one of the following flag combinations:
@@ -652,13 +658,6 @@ possibly |-ed with C<IS_NUMBER_TRAILING>.
 If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and C<*sp> will not move.
-
-=for apidoc Amnh||IS_NUMBER_GREATER_THAN_UV_MAX
-=for apidoc Amnh||IS_NUMBER_INFINITY
-=for apidoc Amnh||IS_NUMBER_IN_UV
-=for apidoc Amnh||IS_NUMBER_NAN
-=for apidoc Amnh||IS_NUMBER_NEG
-=for apidoc Amnh||IS_NUMBER_NOT_INT
 
 =cut
 */
@@ -913,6 +912,14 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 
 =for apidoc      grok_number
 =for apidoc_item grok_number_flags
+=for apidoc_flag IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc_flag IS_NUMBER_INFINITY
+=for apidoc_flag IS_NUMBER_IN_UV
+=for apidoc_flag IS_NUMBER_NAN
+=for apidoc_flag IS_NUMBER_NEG
+=for apidoc_flag IS_NUMBER_NOT_INT
+=for apidoc_flag IS_NUMBER_TRAILING
+=for apidoc_flag PERL_SCAN_TRAILING
 
 Look for a base 10 number in the C<len> bytes starting at C<pv>.  If one isn't
 found, return 0; otherwise return its type (and optionally its value).  In
@@ -956,15 +963,6 @@ value.  Otherwise, it could well have been zapped with garbage.
 In C<grok_number_flags> when C<flags> contains the C<PERL_SCAN_TRAILING>
 bit, and trailing non-numeric text was found, the returned type will include
 the C<IS_NUMBER_TRAILING> bit.
-
-=for apidoc Amnh||IS_NUMBER_GREATER_THAN_UV_MAX
-=for apidoc Amnh||IS_NUMBER_INFINITY
-=for apidoc Amnh||IS_NUMBER_IN_UV
-=for apidoc Amnh||IS_NUMBER_NAN
-=for apidoc Amnh||IS_NUMBER_NEG
-=for apidoc Amnh||IS_NUMBER_NOT_INT
-=for apidoc Amnh||IS_NUMBER_TRAILING
-=for apidoc Amnh||PERL_SCAN_TRAILING
 
 =cut
  */
