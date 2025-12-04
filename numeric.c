@@ -644,24 +644,19 @@ Perl_grok_uint_by_base(pTHX_
         if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
             &&    ckWARN(WARN_DIGIT))
         {
-            if (base != 8) {
+            /* Allow \octal to work the DWIM way (that is, stop scanning as
+             * soon as non-octal characters are seen, complain only if someone
+             * seems to want to use the digits eight and nine.  Since we know
+             * it is not octal, then if isDIGIT, must be an 8 or 9). khw: XXX
+             * why not DWIM for other bases as well? */
+            if (base != 8 || isDIGIT(*s)) {
                 warner(packWARN(WARN_DIGIT),
-                        "Illegal %s digit '%c' ignored",
-                          (  (base == 2)  ? "binary"
-                           : (base == 16) ? "hexadecimal"
-                           :                "unexpected base"),
-                          *s);
-                        
-            }
-            else if (isDIGIT(*s)) { /* octal base */
-
-                /* Allow \octal to work the DWIM way (that is, stop scanning
-                 * as soon as non-octal characters are seen, complain only if
-                 * someone seems to want to use the digits eight and nine.
-                 * Since we know it is not octal, then if isDIGIT, must be an
-                 * 8 or 9). khw: XXX why not DWIM for other bases as well? */
-                warner(packWARN(WARN_DIGIT),
-                        "Illegal octal digit '%c' ignored", *s);
+                       "Illegal %s digit '%c' ignored",
+                         (  (base == 2)  ? "binary"
+                          : (base == 8)  ? "octal"
+                          : (base == 16) ? "hexadecimal"
+                          :                "unexpected base"),
+                         *s);
             }
         }
 
