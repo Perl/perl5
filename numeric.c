@@ -608,20 +608,24 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         if (result)
             *result = value_nv;
 
-        if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
-            *flags |= PERL_SCAN_SILENT_OVERFLOW;
-        }
-        else if (ckWARN_d(WARN_OVERFLOW)) {
-            warner(packWARN(WARN_OVERFLOW),
-                           "Integer overflow in %s number",
-                           (base == 16) ? "hexadecimal" :
-                           (base == 8)  ? "octal" :
-                           (base == 2)  ? "binary"
-                                        : "unexpected base");
+        if (base != 10) {
+            do_non_portable_output = true;
+
+            if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
+                *flags |= PERL_SCAN_SILENT_OVERFLOW;
+            }
+            else if (ckWARN_d(WARN_OVERFLOW)) {
+                warner(packWARN(WARN_OVERFLOW),
+                               "Integer overflow in %s number",
+                               (base == 16) ? "hexadecimal" :
+                               (base == 8)  ? "octal" :
+                               (base == 2)  ? "binary"
+                                            : "unexpected base");
+            }
         }
 
         value = UV_MAX;
-        do_non_portable_output = true;
+
     }
     else {
 #if UVSIZE > 4
@@ -1175,114 +1179,32 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 
   /* next must be digit or the radix separator or beginning of infinity/nan */
   if (LIKELY(isDIGIT(*s))) {
-    /* UVs are at least 32 bits, so the first 9 decimal digits cannot
-       overflow.  */
-    UV value = *s - '0';    /* Process this first (perhaps only) digit */
-    int digit;
+    STRLEN len = send - s;
+    I32 grok_int_flags = PERL_SCAN_SILENT_ILLDIGIT
+                       | PERL_SCAN_SILENT_NON_PORTABLE
+                       | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW
+              ;
+    UV value = grok_bin_oct_hex(s, &len, &grok_int_flags, NULL,
+                                3, 1, CC_DIGIT_, 0);
+    s += len;
 
-    s++;
+    if (grok_int_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW) {
+        numtype |= IS_NUMBER_GREATER_THAN_UV_MAX;
+    }
+    else {
+        // dent XXX
 
-    switch(send - s) {
-      default:      /* 8 or more remaining characters */
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 7:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 6:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 5:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 4:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 3:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 2:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 1:
-        digit = *s - '0';
-        if (UNLIKELY(! inRANGE(digit, 0, 9))) break;
-        value = value * 10 + digit;
-        s++;
-        /* FALLTHROUGH */
-      case 0:       /* This case means the string consists of just the one
-                       digit we already have processed */
-
-        /* If we got here by falling through other than the default: case, we
-         * have processed the whole string, and know it consists entirely of
-         * digits, and can't have overflowed. */
-        if (s >= send) {
-            if (valuep)
-              *valuep = value;
-            return numtype|IS_NUMBER_IN_UV;
-        }
-
-        /* Here, there are extra characters beyond the first 9 digits.  Use a
-         * loop to accumulate any remaining digits, until we get a non-digit or
-         * would overflow.  Note that leading zeros could cause us to get here
-         * without being close to overflowing.
-         *
-         * (The conditional 's >= send' above could be eliminated by making the
-         * default: in the switch to instead be 'case 8:', and process longer
-         * strings separately by using the loop below.  This would penalize
-         * these inputs by the extra instructions needed for looping.  That
-         * could be eliminated by copying the unwound code from above to handle
-         * the firt 9 digits of these.  khw didn't think this saving of a
-         * single conditional was worth it.) */
-        do {
-            digit = *s - '0';
-            if (! inRANGE(digit, 0, 9)) goto mantissa_done;
-            if (       value < uv_max_div_10
-                || (   value == uv_max_div_10
-                    && digit <= uv_max_mod_10))
-            {
-                value = value * 10 + digit;
-                s++;
-            }
-            else { /* value would overflow.  skip the remaining digits, don't
-                      worry about setting *valuep.  */
-                do {
-                    s++;
-                } while (s < send && isDIGIT(*s));
-                numtype |=
-                    IS_NUMBER_GREATER_THAN_UV_MAX;
-                goto skip_value;
-            }
-        } while (s < send);
-    }   /* End switch on input length */
-
-  mantissa_done:
     numtype |= IS_NUMBER_IN_UV;
-    if (valuep)
-      *valuep = value;
 
-  skip_value:
+    if (valuep) {
+        *valuep = value;
+    }
+
+    if (s >= send) {
+        return numtype;
+    }
+    }
+
     if (GROK_NUMERIC_RADIX(&s, send)) {
       numtype |= IS_NUMBER_NOT_INT;
       while (s < send && isDIGIT(*s))  /* optional digits after the radix */
