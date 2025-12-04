@@ -430,10 +430,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
+                UV save_value = value;
                 value = (value << shift) | XDIGIT_VALUE(*s);
+                DEBUG_U(PerlIO_printf(Perl_debug_log, "%ld\n", (long) value - save_value));
                 batch_digit_count++;
                 continue;
             }
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%ld: %ld\n", (long) __LINE__, (long) value));
 
 #ifndef NV_PRESERVES_UV
             /* Code before the loop has set things up so that we get here even
