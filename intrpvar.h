@@ -349,6 +349,10 @@ PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 /*
 =for apidoc_section $embedding
 =for apidoc Amn|U8|PL_exit_flags
+=for apidoc_flag PERL_EXIT_EXPECTED
+=for apidoc_flag PERL_EXIT_ABORT
+=for apidoc_flag PERL_EXIT_DESTRUCT_END
+=for apidoc_flag PERL_EXIT_WARN
 
 Contains flags controlling perl's behaviour on exit():
 
@@ -378,11 +382,6 @@ Set by the L<perlfunc/exit> operator.
 On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.
-
-=for apidoc Amnh||PERL_EXIT_EXPECTED
-=for apidoc Amnh||PERL_EXIT_ABORT
-=for apidoc Amnh||PERL_EXIT_DESTRUCT_END
-=for apidoc Amnh||PERL_EXIT_WARN
 
 =cut
 */

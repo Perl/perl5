@@ -21,7 +21,9 @@
 /*
 =for apidoc_section $pad
 
-=for apidoc Amx|PADLIST *|CvPADLIST|CV *cv
+=for apidoc      Amx|PADLIST *|CvPADLIST|CV *cv
+=for apidoc_flag SVs_PADSTALE
+
 
 CV's can have CvPADLIST(cv) set to point to a PADLIST.  This is the CV's
 scratchpad, which stores lexical variables and opcode temporary and
@@ -120,8 +122,6 @@ to be generated in evals, such as
 
 For state vars, C<SVs_PADSTALE> is overloaded to mean 'not yet initialised',
 but this internal state is stored in a separate pad entry.
-
-=for apidoc Amnh||SVs_PADSTALE
 
 =for apidoc AmnxU|PADNAMELIST *|PL_comppad_name
 
@@ -946,6 +946,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 =for apidoc_item pad_findmy_pvn
 =for apidoc_item pad_findmy_pvs
 =for apidoc_item pad_findmy_sv
+=for apidoc_flag NOT_IN_PAD
 
 Given the name of a lexical variable, including its leading sigil, these find
 its position in the currently compiling pad, returning that offset, or
@@ -974,8 +975,6 @@ In C<pad_findmy_sv>, the variable name is taken from the SV parameter using
 C<L</SvPVutf8>()>.
 
 C<flags> is reserved and must be zero.
-
-=for apidoc Amnh||NOT_IN_PAD
 
 =cut
 */
@@ -2295,7 +2294,8 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
 }
 
 /*
-=for apidoc cv_name
+=for apidoc      cv_name
+=for apidoc_flag CV_NAME_NOTQUAL
 
 Returns an SV containing the name of the CV, mainly for use in error
 reporting.  The CV may actually be a GV instead, in which case the returned
@@ -2309,8 +2309,6 @@ mortal.
 If C<flags> has the C<CV_NAME_NOTQUAL> bit set, then the package name will not be
 included.  If the first argument is neither a CV nor a GV, this flag is
 ignored (subject to change).
-
-=for apidoc Amnh||CV_NAME_NOTQUAL
 
 =cut
 */
@@ -2805,14 +2803,13 @@ Perl_newPADNAMEpvn(const char *s, STRLEN len)
 }
 
 /*
-=for apidoc newPADNAMEouter
+=for apidoc      newPADNAMEouter
+=for apidoc_flag PADNAMEf_OUTER
 
 Constructs and returns a new pad name.  Only use this function for names
 that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  C<outer> is
 the outer pad name that this one mirrors.  The returned pad name has the
 C<PADNAMEf_OUTER> flag already set.
-
-=for apidoc Amnh||PADNAMEf_OUTER
 
 =cut
 */

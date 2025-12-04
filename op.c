@@ -5887,6 +5887,7 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 
 /*
 =for apidoc newUNOP
+=for apidoc_flag OPf_KIDS
 
 Constructs, checks, and returns an op of any unary type.  C<type> is
 the opcode.  C<flags> gives the eight bits of C<op_flags>, except that
@@ -5895,8 +5896,6 @@ bits, the eight bits of C<op_private>, except that the bit with value 1
 is automatically set.  C<first> supplies an optional op to be the direct
 child of the unary op; it is consumed by this function and become part
 of the constructed op tree.
-
-=for apidoc Amnh||OPf_KIDS
 
 =cut
 */
@@ -8528,6 +8527,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 =for apidoc      load_module
 =for apidoc_item load_module_nocontext
+=for apidoc_flag PERL_LOADMOD_DENY
+=for apidoc_flag PERL_LOADMOD_NOIMPORT
+=for apidoc_flag PERL_LOADMOD_IMPORT_OPS
 
 These load the module whose name is pointed to by the string part of C<name>.
 Note that the actual module name, not its filename, should be given.
@@ -8555,10 +8557,6 @@ If C<PERL_LOADMOD_DENY> is set, the module is loaded as if with C<no> rather
 than C<use>.
 
 __PLAIN_vs_NOCONTEXT_wording__(load_module)
-
-=for apidoc Amnh||PERL_LOADMOD_DENY
-=for apidoc Amnh||PERL_LOADMOD_NOIMPORT
-=for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
 
 =for apidoc vload_module
 Like C<L</load_module>> but the arguments are a C<va_list>.
@@ -14868,6 +14866,10 @@ Perl_ck_join(pTHX_ OP *o)
 
 /*
 =for apidoc rv2cv_op_cv
+=for apidoc_flag OPpEARLY_CV
+=for apidoc_flag OPpENTERSUB_AMPER
+=for apidoc_flag RV2CVOPCV_MARK_EARLY
+=for apidoc_flag RV2CVOPCV_RETURN_NAME_GV
 
 Examines an op, which is expected to identify a subroutine at runtime,
 and attempts to determine at compile time which subroutine it identifies.
@@ -14901,11 +14903,6 @@ Normally this is just the C<CvGV> of the subroutine, but for an anonymous
 referencing GV.  The resulting C<GV*> is cast to C<CV*> to be returned.
 A null pointer is returned as usual if there is no statically-determinable
 subroutine.
-
-=for apidoc Amnh||OPpEARLY_CV
-=for apidoc Amnh||OPpENTERSUB_AMPER
-=for apidoc Amnh||RV2CVOPCV_MARK_EARLY
-=for apidoc Amnh||RV2CVOPCV_RETURN_NAME_GV
 
 =cut
 */
@@ -15461,6 +15458,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
 /*
 =for apidoc cv_get_call_checker_flags
+=for apidoc_flag CALL_CHECKER_REQUIRE_GV
 
 Retrieves the function that will be used to fix up a call to C<cv>.
 Specifically, the function is applied to an C<entersub> op tree for a
@@ -15505,8 +15503,6 @@ recorded requirements.
 C<gflags> is a bitset passed into C<cv_get_call_checker_flags>, in which
 only the C<CALL_CHECKER_REQUIRE_GV> bit currently has a defined meaning
 (for which see above).  All other bits should be clear.
-
-=for apidoc Amnh||CALL_CHECKER_REQUIRE_GV
 
 =for apidoc cv_get_call_checker
 

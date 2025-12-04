@@ -277,7 +277,10 @@ Perl_free_tmps(pTHX)
 }
 
 /*
-=for apidoc save_scalar_at
+=for apidoc      save_scalar_at
+=for apidoc_flag SAVEf_KEEPOLDELEM
+=for apidoc_flag SAVEf_SETMAGIC
+
 
 A helper function for localizing the SV referenced by C<*sptr>.
 
@@ -290,9 +293,6 @@ If there is such magic, and C<SAVEf_SETMAGIC> is set in in C<flags>, 'set'
 magic will be processed on the new scalar.  If unset, 'set' magic will be
 skipped.  The latter typically means that assignment will soon follow (I<e.g.>,
 S<C<'local $x = $y'>>), and that will handle the magic.
-
-=for apidoc Amnh ||SAVEf_KEEPOLDELEM
-=for apidoc Amnh ||SAVEf_SETMAGIC
 
 =cut
 */
@@ -939,6 +939,8 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
 =for apidoc_section $callback
 =for apidoc      save_aelem
 =for apidoc_item save_aelem_flags
+=for apidoc_flag SAVEf_KEEPOLDELEM
+=for apidoc_flag SAVEf_SETMAGIC
 
 These each arrange for the value of the array element C<av[idx]> to be restored
 at the end of the enclosing I<pseudo-block>.

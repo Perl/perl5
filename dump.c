@@ -99,6 +99,19 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
 
 /*
 =for apidoc pv_escape
+=for apidoc_flag   PERL_PV_ESCAPE_ALL
+=for apidoc_flag   PERL_PV_ESCAPE_FIRSTCHAR
+=for apidoc_flag   PERL_PV_ESCAPE_NOBACKSLASH
+=for apidoc_flag   PERL_PV_ESCAPE_NOCLEAR
+=for apidoc_flag   PERL_PV_ESCAPE_NONASCII
+=for apidoc_flag   PERL_PV_ESCAPE_QUOTE
+=for apidoc_flag   PERL_PV_ESCAPE_RE
+=for apidoc_flag   PERL_PV_ESCAPE_UNI
+=for apidoc_flag   PERL_PV_ESCAPE_UNI_DETECT
+=for apidoc_flag   PERL_PV_ESCAPE_NON_WC
+=for apidoc_flag C|PERL_PV_PRETTY_REGPROP
+=for apidoc_flag C|PERL_PV_PRETTY_DUMP
+=for apidoc_flag C|PERL_PV_PRETTY_NOCLEAR
 
 Escapes at most the first C<count> chars of C<pv> and puts the results into
 C<dsv> such that the size of the escaped string will not exceed C<max> chars
@@ -140,24 +153,6 @@ backslashed sequences, whereas C<"%"> is not a particularly common
 character in patterns.
 
 Returns a pointer to the escaped text as held by C<dsv>.
-
-=for apidoc Amnh||PERL_PV_ESCAPE_ALL
-=for apidoc Amnh||PERL_PV_ESCAPE_FIRSTCHAR
-=for apidoc Amnh||PERL_PV_ESCAPE_NOBACKSLASH
-=for apidoc Amnh||PERL_PV_ESCAPE_NOCLEAR
-=for apidoc Amnh||PERL_PV_ESCAPE_NONASCII
-=for apidoc Amnh||PERL_PV_ESCAPE_QUOTE
-=for apidoc Amnh||PERL_PV_ESCAPE_RE
-=for apidoc Amnh||PERL_PV_ESCAPE_UNI
-=for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
-=for apidoc Amnh||PERL_PV_ESCAPE_NON_WC
-
-=cut
-
-Unused or not for public use
-=for apidoc Cmnh||PERL_PV_PRETTY_REGPROP
-=for apidoc Cmnh||PERL_PV_PRETTY_DUMP
-=for apidoc Cmnh||PERL_PV_PRETTY_NOCLEAR
 
 =cut
 */
@@ -334,7 +329,10 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     return dsv ? SvPVX(dsv) : NULL;
 }
 /*
-=for apidoc pv_pretty
+=for apidoc      pv_pretty
+=for apidoc_flag PERL_PV_PRETTY_QUOTE
+=for apidoc_flag PERL_PV_PRETTY_LTGT
+=for apidoc_flag PERL_PV_PRETTY_ELLIPSES
 
 Converts a string into something presentable, handling escaping via
 C<pv_escape()> and supporting quoting and ellipses.
@@ -354,10 +352,6 @@ is non-null then it will be inserted after the escaped text but before
 any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by C<dsv>.
-
-=for apidoc Amnh||PERL_PV_PRETTY_QUOTE
-=for apidoc Amnh||PERL_PV_PRETTY_LTGT
-=for apidoc Amnh||PERL_PV_PRETTY_ELLIPSES
 
 =cut           
 */

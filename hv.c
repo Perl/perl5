@@ -2639,6 +2639,7 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 /*
 =for apidoc      hv_name_set
 =for apidoc_item hv_name_sets
+=for apidoc_flag HV_NAME_SETALL
 
 These each set the name of stash C<hv> to the specified name.
 
@@ -2655,8 +2656,6 @@ otherwise not.
 
 If C<HV_NAME_SETALL> is set in C<flags>, both the name and the effective name
 are set.
-
-=for apidoc Amnh||HV_NAME_SETALL
 
 =cut
 */
@@ -2926,7 +2925,8 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv) {
 /*
 hv_iternext is implemented as a macro in hv.h
 
-=for apidoc hv_iternext
+=for apidoc      hv_iternext
+=for apidoc_flag HV_ITERNEXT_WANTPLACEHOLDERS
 
 Returns entries from a hash iterator.  See C<L</hv_iterinit>>.
 
@@ -2949,8 +2949,6 @@ Currently a placeholder is implemented with a value that is
 C<&PL_sv_placeholder>.  Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
 insufficiently abstracted for any change to be tidy.
-
-=for apidoc Amnh||HV_ITERNEXT_WANTPLACEHOLDERS
 
 =cut
 */
