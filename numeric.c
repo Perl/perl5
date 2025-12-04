@@ -554,6 +554,58 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
   overflowed: ;
 
+    /* We are about to overflow. 's' points to the first overflowing digit.
+     * Honor a caller's request to discard the overflowing digits instead. */
+    if (UNLIKELY(input_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW)) {
+
+        /* Return that it actually happened */
+        *flags |= PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+
+        /* When discarding, we round the undiscarded result to even.  In some
+         * cases, whether to round isn't known until the final discarded digit
+         * is processed.  This enum keeps track of that */
+        enum {
+                dont_round,
+                yes_round_up,
+                round_to_even_if_half
+        } to_round = dont_round;
+
+        if (accumulated < UV_MAX) { /* Can't round up if already at max */
+            uint_fast8_t this_digit_value = XDIGIT_VALUE(*s);
+            to_round = (this_digit_value < base / 2) ? dont_round
+                     : (this_digit_value > base / 2) ? yes_round_up
+                     : round_to_even_if_half; /* Exactly half */
+        }
+
+        /* Find end of input, seeing if need to round */
+        s++;
+        while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+            if (   UNLIKELY(*s == '_')
+                && (   ! allow_underscores
+                    || ! underscore_valid(s, e, lookup_bit)))
+            {
+                break;
+            }
+
+            /* If result is no longer exactly half, set to round up */
+            if (to_round == round_to_even_if_half && *s != '0') {
+                to_round = yes_round_up;
+            }
+
+            s++;
+        }
+
+        if (   to_round == yes_round_up
+                /* When the final non-zero digit was exactly half the base, we
+                 * round towards even, meaning don't change if already even */
+            || (to_round == round_to_even_if_half && isODD(accumulated)))
+        {
+            accumulated++;
+        }
+
+        goto finish;
+    }
+
     /* Bah. We are about to overflow.  Instead compute an approximation to the
      * correct value.
      *

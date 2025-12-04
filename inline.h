@@ -3781,6 +3781,8 @@ S_uv_mul_overflow (UV auv, UV buv, UV *const result)
 
 /* grok_??? accept a stand-alone underscore between digits only in numbers */
 #  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY   0x100
+
+#  define PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW     0x200
 #endif
 
 /*
