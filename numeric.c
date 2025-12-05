@@ -1354,17 +1354,15 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
         numtype |= IS_NUMBER_GREATER_THAN_UV_MAX;
     }
     else {
-        // dent XXX
+        numtype |= IS_NUMBER_IN_UV;
 
-    numtype |= IS_NUMBER_IN_UV;
+        if (valuep) {
+            *valuep = value;
+        }
 
-    if (valuep) {
-        *valuep = value;
-    }
-
-    if (s >= send) {
-        return numtype;
-    }
+        if (s >= send) {
+            return numtype;
+        }
     }
 
     if (GROK_NUMERIC_RADIX(&s, send)) {
