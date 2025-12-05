@@ -3746,6 +3746,144 @@ S_uv_mul_overflow (UV auv, UV buv, UV *const result)
 
 #endif
 
+/* Number scan flags.  All are used for input, the ones used for output are so
+ * marked */
+
+/* grok_??? accept a stand-alone underscore initially or between digits in
+ * numbers */
+#define PERL_SCAN_ALLOW_UNDERSCORES   0x01
+
+#define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
+
+/* grok_??? input: ignored; output: found overflow */
+#define PERL_SCAN_GREATER_THAN_UV_MAX 0x04
+
+/* grok_??? don't warn about illegal digits.  To preserve total backcompat,
+ * this isn't set on output if one is found.  Instead, see
+ * PERL_SCAN_NOTIFY_ILLDIGIT. */
+#define PERL_SCAN_SILENT_ILLDIGIT     0x08
+
+/* grok_number_flags() allow trailing and set IS_NUMBER_TRAILING */
+#define PERL_SCAN_TRAILING            0x10
+
+/* These are considered experimental, so not exposed publicly */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+/* grok_??? don't warn about very large numbers which are <= UV_MAX;
+ * output: found such a number */
+#  define PERL_SCAN_SILENT_NON_PORTABLE             0x20
+
+/* If this is set on input, and no illegal digit is found, it will be cleared
+ * on output; otherwise unchanged */
+#  define PERL_SCAN_NOTIFY_ILLDIGIT                 0x40
+
+/* Don't warn on overflow; output flag still set */
+#  define PERL_SCAN_SILENT_OVERFLOW                 0x80
+
+/* grok_??? accept a stand-alone underscore between digits only in numbers */
+#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY   0x100
+#endif
+
+/*
+=for apidoc      grok_bin
+=for apidoc_item grok_hex
+=for apidoc_item grok_oct
+
+These each convert a string representing a number to numeric form.  The
+number is binary in C<grok_bin>, octal in C<grok_oct>, and hexadecimal in
+C<grok_hex>.
+
+On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
+conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
+scan stops at the end of the string, or at just before the first invalid
+character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
+encountering an invalid character (except NUL) will also trigger a warning.  On
+return C<*len_p> is set to the length of the scanned string, and C<*flags>
+gives output flags.
+
+If the value is S<E<lt>= C<UV_MAX>>, it is returned as a UV, the output flags are
+clear, and nothing is written to C<*result>.  If the value is S<E<gt>
+C<UV_MAX>>:
+
+=over
+
+=item *
+
+C<UV_MAX> is returned
+
+=item *
+
+C<PERL_SCAN_GREATER_THAN_UV_MAX> is set in C<*flags>.
+
+=item *
+
+If C<result> is not null, an approximation of the correct value is written
+into C<*result> (which is an NV).
+
+=back
+
+Unless C<PERL_SCAN_DISALLOW_PREFIX> is set in C<*flags> on entry:
+
+=over
+
+=item For C<grok_bin>
+
+the input string may optionally be prefixed with C<"0b"> or plain C<"b">
+
+=item For C<grok_hex>
+
+the input string may optionally be prefixed with C<"0x"> or plain C<"x">
+
+=item For C<grok_oct>
+
+this flag is ignored; there is no optional prefix.  The typical C<0> prefix is
+just part of the number.
+
+=back
+
+If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in C<*flags> then any or all pairs of
+digits may be separated from each other by a single underscore, and also a
+single leading underscore is accepted.
+
+=for apidoc Amnh||PERL_SCAN_ALLOW_UNDERSCORES
+=for apidoc Amnh||PERL_SCAN_DISALLOW_PREFIX
+=for apidoc Amnh||PERL_SCAN_GREATER_THAN_UV_MAX
+=for apidoc Amnh||PERL_SCAN_SILENT_ILLDIGIT
+
+=cut
+
+Not available externally yet because experimental is
+C<PERL_SCAN_SILENT_NON_PORTABLE which suppresses any message for non-portable
+numbers that are still valid on this platform.
+ */
+
+PERL_STATIC_INLINE UV
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+{
+    PERL_ARGS_ASSERT_GROK_BIN;
+
+    return grok_bin_oct_hex(start, len_p, flags, result,
+                            1, CC_BINDIGIT_, 'b');
+}
+
+PERL_STATIC_INLINE UV
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+{
+    PERL_ARGS_ASSERT_GROK_HEX;
+
+    return grok_bin_oct_hex(start, len_p, flags, result,
+                            4, CC_XDIGIT_, 'x');
+}
+
+PERL_STATIC_INLINE UV
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+{
+    PERL_ARGS_ASSERT_GROK_OCT;
+
+    *flags |= PERL_SCAN_DISALLOW_PREFIX;
+    return grok_bin_oct_hex(start, len_p, flags, result,
+                            3, CC_OCTDIGIT_, '\0');
+}
+
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
 
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)

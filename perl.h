@@ -8079,14 +8079,6 @@ C<strtoul>.
 #   define Atoul(s)	Strtoul(s, NULL, 10)
 #endif
 
-#define grok_bin(s,lp,fp,rp)                                                \
-                    grok_bin_oct_hex(s, lp, fp, rp, 1, CC_BINDIGIT_, 'b')
-#define grok_oct(s,lp,fp,rp)                                                \
-                    (*(fp) |= PERL_SCAN_DISALLOW_PREFIX,                    \
-                    grok_bin_oct_hex(s, lp, fp, rp, 3, CC_OCTDIGIT_, '\0'))
-#define grok_hex(s,lp,fp,rp)                                                \
-                    grok_bin_oct_hex(s, lp, fp, rp, 4, CC_XDIGIT_, 'x')
-
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"
 #endif
@@ -8312,45 +8304,6 @@ EXTERN_C int flock(int fd, int op);
 =cut
 */
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
-
-/* Number scan flags.  All are used for input, the ones used for output are so
- * marked */
-
-/* grok_??? accept a stand-alone underscore initially or between digits in
- * numbers */
-#define PERL_SCAN_ALLOW_UNDERSCORES   0x01
-
-#define PERL_SCAN_DISALLOW_PREFIX     0x02 /* grok_??? reject 0x in hex etc */
-
-/* grok_??? input: ignored; output: found overflow */
-#define PERL_SCAN_GREATER_THAN_UV_MAX 0x04
-
-/* grok_??? don't warn about illegal digits.  To preserve total backcompat,
- * this isn't set on output if one is found.  Instead, see
- * PERL_SCAN_NOTIFY_ILLDIGIT. */
-#define PERL_SCAN_SILENT_ILLDIGIT     0x08
-
-/* grok_number_flags() allow trailing and set IS_NUMBER_TRAILING */
-#define PERL_SCAN_TRAILING            0x10
-
-/* These are considered experimental, so not exposed publicly */
-#if defined(PERL_CORE) || defined(PERL_EXT)
-/* grok_??? don't warn about very large numbers which are <= UV_MAX;
- * output: found such a number */
-#  define PERL_SCAN_SILENT_NON_PORTABLE             0x20
-
-/* If this is set on input, and no illegal digit is found, it will be cleared
- * on output; otherwise unchanged */
-#  define PERL_SCAN_NOTIFY_ILLDIGIT                 0x40
-
-/* Don't warn on overflow; output flag still set */
-#  define PERL_SCAN_SILENT_OVERFLOW                 0x80
-
-/* grok_??? accept a stand-alone underscore between digits only in numbers */
-#  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY   0x100
-
-#endif
-
 
 /* to let user control profiling */
 #ifdef PERL_GPROF_CONTROL
