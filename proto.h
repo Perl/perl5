@@ -4212,9 +4212,9 @@ Perl_scan_hex(pTHX_ const char *start, STRLEN len, STRLEN *retlen);
         assert(start); assert(retlen)
 
 PERL_CALLCONV char *
-Perl_scan_num(pTHX_ const char *s, YYSTYPE *lvalp);
+Perl_scan_num(pTHX_ const char *start, YYSTYPE *lvalp);
 #define PERL_ARGS_ASSERT_SCAN_NUM               \
-        assert(s); assert(lvalp)
+        assert(start); assert(lvalp)
 
 PERL_CALLCONV NV
 Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen);
