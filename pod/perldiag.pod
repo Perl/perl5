@@ -7544,7 +7544,7 @@ The message attempts to include the name of the called subroutine.  If
 the subroutine has been aliased, the subroutine's original name will be
 shown, regardless of what name the caller used.
 
-=item Unrecognised parameters for "%s" constructor: %s
+=item Unrecognized parameters for "%s" constructor: %s
 
 (F) You called new on a class but supplied a parameter name that
 didn't match a class field name.
