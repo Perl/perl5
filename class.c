@@ -238,7 +238,7 @@ XS(injected_constructor)
         while((he = hv_iternext(params)))
             sv_catpvf(paramnames, ", %" SVf, SVfARG(HeSVKEY_force(he)));
 
-        croak("Unrecognised parameters for %" HvNAMEf_QUOTEDPREFIX " constructor: %" SVf,
+        croak("Unrecognized parameters for %" HvNAMEf_QUOTEDPREFIX " constructor: %" SVf,
                 HvNAMEfARG(stash), SVfARG(paramnames));
     }
 
