@@ -1399,7 +1399,7 @@ Cp	|GP *	|gp_ref 	|NULLOK GP *gp
 ATdp	|bool	|grok_atoUV	|NN const char *pv			\
 				|NN UV *valptr				\
 				|NULLOK const char **endptr
-AMdp	|UV	|grok_bin	|NN const char *start			\
+Adip	|UV	|grok_bin	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
@@ -1411,7 +1411,7 @@ Cp	|UV	|grok_bin_oct_hex					\
 				|const unsigned shift			\
 				|const U8 lookup_bit			\
 				|const char prefix
-AMdp	|UV	|grok_hex	|NN const char *start			\
+Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
@@ -1428,7 +1428,7 @@ Adp	|int	|grok_number_flags					\
 ARdp	|bool	|grok_numeric_radix					\
 				|NN const char **sp			\
 				|NN const char *send
-AMdp	|UV	|grok_oct	|NN const char *start			\
+Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result

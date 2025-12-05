@@ -1258,18 +1258,8 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char **endptr);
         assert(pv); assert(valptr)
 
 PERL_CALLCONV UV
-Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
-#define PERL_ARGS_ASSERT_GROK_BIN               \
-        assert(start); assert(len_p); assert(flags)
-
-PERL_CALLCONV UV
 Perl_grok_bin_oct_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, const unsigned shift, const U8 lookup_bit, const char prefix);
 #define PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX       \
-        assert(start); assert(len_p); assert(flags)
-
-PERL_CALLCONV UV
-Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
-#define PERL_ARGS_ASSERT_GROK_HEX               \
         assert(start); assert(len_p); assert(flags)
 
 PERL_CALLCONV int
@@ -1292,11 +1282,6 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX     \
         assert(sp); assert(send)
-
-PERL_CALLCONV UV
-Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
-#define PERL_ARGS_ASSERT_GROK_OCT               \
-        assert(start); assert(len_p); assert(flags)
 
 /* PERL_CALLCONV GV *
 Perl_gv_AVadd(pTHX_ GV *gv); */
@@ -9958,6 +9943,21 @@ PERL_STATIC_INLINE MGVTBL *
 Perl_get_vtbl(pTHX_ int vtbl_id)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_GET_VTBL
+
+PERL_STATIC_INLINE UV
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+# define PERL_ARGS_ASSERT_GROK_BIN              \
+        assert(start); assert(len_p); assert(flags)
+
+PERL_STATIC_INLINE UV
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+# define PERL_ARGS_ASSERT_GROK_HEX              \
+        assert(start); assert(len_p); assert(flags)
+
+PERL_STATIC_INLINE UV
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+# define PERL_ARGS_ASSERT_GROK_OCT              \
+        assert(start); assert(len_p); assert(flags)
 
 PERL_STATIC_INLINE void *
 Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32, const int action, SV *val, const U32 hash);
