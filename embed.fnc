@@ -3127,7 +3127,7 @@ Adp	|NV	|scan_bin	|NN const char *start			\
 Adp	|NV	|scan_hex	|NN const char *start			\
 				|STRLEN len				\
 				|NN STRLEN *retlen
-Cp	|char * |scan_num	|NN const char *s			\
+Cp	|char * |scan_num	|NN const char *start			\
 				|NN YYSTYPE *lvalp
 Adp	|NV	|scan_oct	|NN const char *start			\
 				|STRLEN len				\
