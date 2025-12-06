@@ -287,8 +287,10 @@ Perl_grok_uint_by_base(pTHX_
                        const unsigned shift1,
                        const unsigned shift2,
 
-                       const U8 class_bit,
+                       /* bit to pass to generic_isCC_() for lookup */
+                       const U8 lookup_bit,
                        const U8 offset
+
                       )
 {
     PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;
@@ -345,42 +347,42 @@ Perl_grok_uint_by_base(pTHX_
   redo_switch:
     switch (e - s) {
       default:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 6:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 5:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 4:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 3:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 2:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 1:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
@@ -463,7 +465,7 @@ Perl_grok_uint_by_base(pTHX_
 
     /* Loop through the characters */
     for (; s < e; s++) {
-        if (generic_isCC_(*s, class_bit)) {
+        if (generic_isCC_(*s, lookup_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
                With gcc seems to be much straighter code than old scan_hex.
@@ -568,7 +570,7 @@ Perl_grok_uint_by_base(pTHX_
         if (   UNLIKELY(*s == '_')
             && s < e - 1
             && allow_underscores
-            && generic_isCC_(s[1], class_bit)
+            && generic_isCC_(s[1], lookup_bit)
             && (   LIKELY(s > s0)
                    /* Including initial underscores if those are accepted */
                 || UNLIKELY(! (  input_flags
