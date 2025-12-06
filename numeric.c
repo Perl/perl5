@@ -566,34 +566,35 @@ Perl_grok_uint_by_base(pTHX_
             continue;
         } /* End of handling legal digit */
 
-        /* Handle non-trailing underscores when those are accepted */
-        if (   UNLIKELY(*s == '_')
-            && s < e - 1
-            && allow_underscores
-            && generic_isCC_(s[1], lookup_bit)
-            && (   LIKELY(s > s0)
-                   /* Including initial underscores if those are accepted */
-                || UNLIKELY(! (  input_flags
-                               & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY))))
+        /* The only other character potentially acceptable is an underscore;
+         * and it can't be the final character, and there must be a flag
+         * allowing it */
+        if (   *s != '_'
+            || s >= e - 1
+            || ! allow_underscores)
         {
-            ++s;
+            break;
+        }
+
+        /* An acceptable initial underscore has to have the right flag */
+        if (s == s0 && ( input_flags
+                        & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY))
+        {
+            break;
+        }
+
+        /* And the character following it must be a legal digit */
+        if (! generic_isCC_(s[1], lookup_bit)) {
+            break;
+        }
 
             /* To get here with the value so-far being 0 means we've only had
              * leading zeros, then an underscore.  We can continue with the
              * branchless switch() instead of this loop */
             if (UNLIKELY(value == 0)) {
+                s++;
                 goto redo_switch;
             }
-            else {
-                goto redo;
-            }
-        }
-
-        /* We get here when done with the parse, or it got interrupted by a
-         * non-digit or a digit that is outside the bounds of the base, like a
-         * digit 2 in a binary number.  In either case, we are done with the
-         * loop */
-        break;
     }   /* End of parsing loop */
 
     bool do_non_portable_output = false;
