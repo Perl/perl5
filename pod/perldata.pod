@@ -448,12 +448,14 @@ integer formats:
  0b011011            # binary
  0x1.999ap-4         # hexadecimal floating point (the 'p' is required)
  07.65p2             # octal floating point (the 'p' is required)
- 0o7.65p2            # alternative octal floating point
+ 0o7.65p2            # alternative octal floating point ('p' still
+                     # required)
  0b101.01p-1         # binary floating point (the 'p' is required)
 
 You are allowed to use underscores (underbars) in numeric literals
-between digits for legibility (but not multiple underscores in a row:
-C<23__500> is not legal; C<23_500> is).
+between digits for legibility (multiple underscores in a row are
+tolerated but warn:
+C<23__500> warns; C<23_500> is fine, doesn't warn).
 You could, for example, group binary
 digits by threes (as for a Unix-style mode argument such as 0b110_100_100)
 or by fours (to represent nibbles, as in 0b1010_0110) or in other groups.
@@ -468,14 +470,20 @@ characters such as newline, tab, etc., as well as some more exotic
 forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
 X<string, literal>
 
-Hexadecimal, octal, or binary, representations in string literals
+Hexadecimal, octal, or binary representations in string literals
 (e.g. '0xff') are not automatically converted to their integer
 representation.  The hex() and oct() functions make these conversions
 for you.  See L<perlfunc/hex> and L<perlfunc/oct> for more details.
 
 Hexadecimal floating point can start just like a hexadecimal literal,
 and it can be followed by an optional fractional hexadecimal part,
-but it must be followed by C<p>, an optional sign, and a power of two.
+but it must be followed by C<p>, an optional sign, and an exponent.  The
+digits in the exponent are interpreted as being base 10 (digits 0-9 are
+accepted), but the actual value is two raised to that power.  Thus
+
+   5e2 == 5 * 10-squared == 500
+ 0x5p2 == 5 *  2-squared ==  20
+
 The format is useful for accurately presenting floating point values,
 avoiding conversions to or from decimal floating point, and therefore
 avoiding possible loss in precision.  Notice that while most current
@@ -485,7 +493,25 @@ rounding modes, which can differ between CPUs, operating systems,
 and compilers, and which Perl doesn't control.
 
 Octal and binary floating point numbers use the same format as hexadecimal
-floating point numbers, but limited to binary and octal digits, respectively.
+floating point numbers, but the digits in their integer and fractional
+components are limited to binary and octal, respectively.
+
+Capital 'P' may be used to signify a binary-style exponent, besides
+lowercase 'p'; just as capital 'E' can be used instead of 'e' for
+10-based.  Here are some examples:
+
+ 05p2       # 20
+ 05.0P2     # 20
+ 05.P2      # 20
+ 0b101p2    # 20
+ 0x5e2      # Illegal
+ 05e2       # Illegal
+ 5p2        # Illegal
+
+Like the corresponding integers, hex, octal, and binary, float
+representations in string literals are not automatically converted to
+their floating point.  Use C<eval> for this.  (This limitation is due to
+ambiguity with the dot being interpreted as the concatenation operator.)
 
 You can also embed newlines directly in your strings, i.e., they can end
 on a different line than they begin.  This is nice, but if you forget
