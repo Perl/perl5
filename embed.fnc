@@ -1411,15 +1411,6 @@ Cp	|UV	|grok_bin_hex	|NN const char * const start		\
 				|const unsigned shift2			\
 				|const U8 lookup_bit			\
 				|const char prefix
-Cp	|UV	|grok_bin_oct_hex					\
-				|NN const char * const start		\
-				|NN STRLEN *len_p			\
-				|NN I32 *flags				\
-				|NULLOK NV *result			\
-				|const unsigned shift1			\
-				|const unsigned shift2			\
-				|const U8 lookup_bit			\
-				|const U8 offset
 Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
@@ -1441,6 +1432,15 @@ Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
+Cdp	|UV	|grok_uint_by_base					\
+				|NN const char * const start		\
+				|NN STRLEN *len_p			\
+				|NN I32 *flags				\
+				|NULLOK NV *result			\
+				|unsigned shift1			\
+				|unsigned shift2			\
+				|const U8 lookup_bit			\
+				|const U8 offset
 Adp	|GV *	|gv_add_by_type |NULLOK GV *gv				\
 				|svtype type
 Adp	|int	|Gv_AMupdate	|NN HV *stash				\

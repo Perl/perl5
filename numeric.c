@@ -270,28 +270,28 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
         }
     }
 
-    return grok_bin_oct_hex(start, len_p, flags, result,
-                            shift1, shift2, lookup_bit, offset);
+    return grok_uint_by_base(start, len_p, flags, result,
+                             shift1, shift2, lookup_bit, offset);
 }
 
 UV
-Perl_grok_bin_oct_hex(pTHX_ const char * const start,
-                        STRLEN *len_p,
-                        I32 *flags,
-                        NV *result,
+Perl_grok_uint_by_base(pTHX_
+                       const char * const start,
+                       STRLEN *len_p,
+                       I32 *flags,
+                       NV *result,
 
-                        /* Each of the shift parameters is 0 for binary; 2 for
-                         * octal; 3 for hex.  For decimal shift1 is 3, shift2
-                         * is 1 */
-                        const unsigned shift1,
-                        const unsigned shift2,
+                       /* Each of the shift parameters is 0 for binary; 2 for
+                        * octal; 3 for hex.  For decimal shift1 is 3, shift2
+                        * is 1 */
+                       const unsigned shift1,
+                       const unsigned shift2,
 
-                        const U8 class_bit,
-                        const U8 offset
-                     )
-
+                       const U8 class_bit,
+                       const U8 offset
+                      )
 {
-    PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
+    PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;
     ASSUME(inRANGE(shift1, 0, 3) && shift1 != 1);
     ASSUME(shift2 == shift1 || (shift1 == 3 && shift2 == 1));
 
@@ -1184,8 +1184,8 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                        | PERL_SCAN_SILENT_NON_PORTABLE
                        | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW
               ;
-    UV value = grok_bin_oct_hex(s, &len, &grok_int_flags, NULL,
-                                3, 1, CC_DIGIT_, 0);
+    UV value = grok_uint_by_base(s, &len, &grok_int_flags, NULL,
+                                 3, 1, CC_DIGIT_, 0);
     s += len;
 
     if (grok_int_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW) {
