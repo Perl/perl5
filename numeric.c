@@ -398,6 +398,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }   /* End of switch on the first so-many characters */
 
     const U8 shift = shift1 + 1;
+    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+
 #ifdef Perl_ldexp
 #  define multiply_by_exponent(nv, digits)                                  \
             STMT_START { nv = Perl_ldexp(nv, digits * shift); } STMT_END
@@ -430,7 +432,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     bool overflowed = FALSE;
     NV value_nv = 0;
-    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
     /* A flag tells us to not overflow, but instead discard the rest */
     bool discard_instead_of_overflow = false;
