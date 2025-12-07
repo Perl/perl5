@@ -1439,8 +1439,8 @@ Cdp	|UV	|grok_uint_by_base					\
 				|NULLOK NV *result			\
 				|NULLOK STRLEN *digit_count		\
 				|U8 max_permissible_bits		\
-				|unsigned shift1			\
-				|unsigned shift2			\
+				|uint_fast8_t shift1			\
+				|uint_fast8_t shift2			\
 				|const U8 lookup_bit			\
 				|const U8 offset
 Adp	|GV *	|gv_add_by_type |NULLOK GV *gv				\

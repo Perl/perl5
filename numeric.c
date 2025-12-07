@@ -274,7 +274,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
                              UV_BITS, shift1, shift2, lookup_bit, offset);
 }
 
-UV
+uintmax_t
 Perl_grok_uint_by_base(pTHX_
                        const char * const start,
                        STRLEN *len_p,
@@ -286,13 +286,13 @@ Perl_grok_uint_by_base(pTHX_
                        /* Each of the shift parameters is 0 for binary; 2 for
                         * octal; 3 for hex.  For decimal shift1 is 3, shift2
                         * is 1 */
-                       const unsigned shift1,
-                       const unsigned shift2,
+                       uint_fast8_t shift1,
+                       uint_fast8_t shift2,
 
                        /* bit to pass to generic_isCC_() for lookup */
-                       const U8 lookup_bit,
-                       const U8 offset
+                       U8 lookup_bit,
 
+                       U8 offset
                       )
 {
     PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;
@@ -388,7 +388,7 @@ mode requires the input string to be NUL-terminated.
     const char * e = start + *len_p;
 
     const char * const s0 = s;  /* Where the significant digits start */
-    UV value = 0;               /* Running total */
+    uintmax_t value = 0;        /* Running total */
 
     /* MULTIPLY_BY_BASE(value) multiplies 'value' by any of the accepted
      * bases, using two shifts and an add instead of a multiplication.  If
@@ -401,7 +401,6 @@ mode requires the input string to be NUL-terminated.
      * For the divisible-by-2 bases, shift by 1 less than expected, yielding a
      * result of half the desired amount; do it again; then add them */
 #define MULTIPLY_BY_BASE(value)  (((value) << shift1) + ((value) << shift2))
-
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -510,25 +509,25 @@ mode requires the input string to be NUL-terminated.
     Size_t batch_digit_count = 0;
 
     /* Value, above which, the next digit processed would overflow */
-    const UV max_permissible_uint = nBIT_UMAX(max_permissible_bits);
+    const uintmax_t max_permissible_uint = nBIT_UMAX(max_permissible_bits);
 
     /* In order to use precise integral values as long as possible, set the
      * first batch to not overflow either an integer or an NV mantissa.
      * (Further comments below.) */
-    const UV batch1_max_uint =        MIN(max_permissible_uint,
+    const uintmax_t batch1_max_uint = MIN(max_permissible_uint,
                                           nBIT_UMAX(NV_PRESERVES_UV_BITS));
 
     /* We set a checkpoint when we reach the first batch's limit */
-    UV checkpoint_value = 0;
+    uintmax_t checkpoint_value = 0;
     const char * checkpoint_s = NULL;
 
     /* As long as the running total is less than this, the next digit will
      * fit. */
-    UV max_div = batch1_max_uint / base;
+    uintmax_t max_div = batch1_max_uint / base;
 
     /* When the running total equals 'max_div', the next digit will fit if it
      * is <= this */
-    UV final_digit_max = batch1_max_uint - MULTIPLY_BY_BASE(max_div);
+    uint_fast8_t final_digit_max = batch1_max_uint - MULTIPLY_BY_BASE(max_div);
 
     bool overflowed = FALSE;
     NV value_nv = 0;
