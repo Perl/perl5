@@ -3008,6 +3008,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
  * character accordingly.  On some platforms (e.g. UNICOS) it is however best
  * to use the native implementation of atof, as long as you accept that the
  * current underlying locale will affect the radix character.  Perl's version
+ * XXX
  * uses a dot for a radix, execpt within the lexical scope of a Perl C<use
  * locale> statement.
  *
@@ -8078,6 +8079,8 @@ C<strtoul>.
 #ifndef Atoul
 #   define Atoul(s)	Strtoul(s, NULL, 10)
 #endif
+
+#define UINTMAX_BITS 64
 
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"

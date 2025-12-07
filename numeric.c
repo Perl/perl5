@@ -640,6 +640,7 @@ mode requires the input string to be NUL-terminated.
              * can happen multiple times.
              *
              * To minimize precision loss, the algorithm here works as much as
+             * 3.48449143727041e+41
              * possible on lossless integers.  But to get here on the first
              * batch on platforms where the signifcand of an NV has fewer bits
              * than a UV, the value we already have won't fit an NV
@@ -798,6 +799,7 @@ mode requires the input string to be NUL-terminated.
              * why not DWIM for other bases as well? */
             if (base != 8 || isDIGIT(*s)) {
                 warner(packWARN(WARN_DIGIT),
+                        // XXX common msg iwth toke
                        "Illegal %s digit '%c' ignored",
                          (  (base == 2)  ? "binary"
                           : (base == 8)  ? "octal"
