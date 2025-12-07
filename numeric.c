@@ -466,6 +466,14 @@ Perl_grok_uint_by_base(pTHX_
         discard_instead_of_overflow = true;
     }
     Size_t discarded_count = 0; /* How many digits get discarded */
+    /* When discarding, we round the undiscarded result.  In some cases,
+     * whether to round isn't known until the final discarded digit is
+     * processed.  This enum keeps track of that */
+    enum {
+            dont_round,
+            yes_round,
+            round_if_not_zero
+    } to_round = dont_round;
 
     const bool allow_underscores =
              cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
@@ -499,6 +507,9 @@ Perl_grok_uint_by_base(pTHX_
              * discard overflowing digits */
             if (UNLIKELY(discarded_count)) {
                 discarded_count++;
+                if (to_round == round_if_not_zero && this_digit_value != 0) {
+                    to_round = yes_round;
+                }
                 continue;
             }
 
@@ -526,6 +537,25 @@ Perl_grok_uint_by_base(pTHX_
 
                 /* Note to the caller that this happened. */
                 *flags |= PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+
+                /* This digit (and maybe the remaining ones) however are
+                 * looked at to round the result (exactly half rounds towards
+                 * even). */
+                U8 half = base / 2;
+                if (this_digit_value > half) {
+                    to_round = yes_round;
+                }
+                else if (this_digit_value < half) {
+                    to_round = dont_round;
+                }
+                else {
+                    /* Here, this digit is exactly half.  But we need to look
+                     * at the rest of the digits yet to be parsed to know if
+                     * the whole thing is exactly half or not.  If any are
+                     * non-zero, then the whole thing is above half. */
+                    to_round = round_if_not_zero;
+                }
+
                 discarded_count = 1;
                 continue;
             }
@@ -639,6 +669,19 @@ Perl_grok_uint_by_base(pTHX_
 
     }
     else {
+
+        /* Round up if can, and the situation calls for it.  To get here with
+         * 'to_round' set to 'round_if_not_zero' means that the the first
+         * discarded digit was exactly half the number base, and that all the
+         * remaining digits were 0.  That means that what got discarded is
+         * exactly half the final digit.  We round towards 0 in that event */
+        if (   to_round != dont_round
+            && value < UV_MAX
+            && (to_round == yes_round || (value & 1) == 1))
+        {
+            value++;
+        }
+
 #if UVSIZE > 4
         if (UNLIKELY(value > 0xffffffff)) {
             if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
