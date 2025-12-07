@@ -317,9 +317,6 @@ Perl_grok_uint_by_base(pTHX_
     /* Clear output flags; unlikely to find a problem that sets them */
     *flags = 0;
 
-    const bool allow_underscores =
-             cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
-                                  |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
     const char * s = start + offset;
     const char * e = start + *len_p;
 
@@ -462,6 +459,10 @@ Perl_grok_uint_by_base(pTHX_
         discard_instead_of_overflow = true;
     }
     Size_t discarded_count = 0; /* How many digits get discarded */
+
+    const bool allow_underscores =
+             cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
+                                  |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
 
     /* Loop through the characters */
     for (; s < e; s++) {
