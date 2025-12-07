@@ -12890,25 +12890,118 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             }
         }
 
-        /* read next group of digits and _ and copy into d */
-        while (isDIGIT(*s)
-               || *s == '_'
-               || UNLIKELY(hexfp && isXDIGIT(*s)))
-        {
-            /* skip underscores, checking for misplaced ones
-               if -w is on
-            */
-            if (*s == '_') {
-                HANDLE_UNDERSCORE(s);
+        /* If there are any digits left over, it is because they aren't in the
+         * correct base */
+        if (isDIGIT_A(*s)) {
+            yyerror(form("Illegal %s digit '%c' ignored", bases[shift2], *s));
+            goto out;
+        }
+
+        /* A non-decimal constant needs to have an exponent */ 
+        if (base != 10 && ! COULD_BE_EXPONENT(s, PL_bufend, 'p')) {
+            s = dot_position;
+            has_digs = false;
+            goto out;
+        }
+
+        floatit = true;     /* This is to be floating point */
+
+#ifndef ALWAYS_USE_NV
+
+        if (frac) {
+            /* Modify 'u' to combine the earlier found integral portion, plus
+             * the fraction to form an integer with a negative exponent to
+             * yield the original.  So 1.23 becomes 123e-2.  This allows the
+             * input value to be kept as an integer with no loss of precision
+             * for longer than alternative algorithms. */
+            if (u == 0) {
+                u = frac;
+                preliminary_exponent -= (base == 10) ? frac_digit_count
+                                                     : frac_digit_count * shift;
+            }
+            else if (base != 10) {
+                 
+                /* For a binary base, everything is precise.  We ignore any
+                 * low-order frac bits that would cause overflow when
+                 * combined with the integral part.  Each digit occupies
+                 * 'shift' bits.  Note that this automatically takes into
+                 * account leading zeros in the fraction. */
+                U8 frac_bits_count = frac_digit_count * shift;
+
+                /* Truncate the fraction to not occupy more bits than
+                 * .1x returned as 1, really needs to be returned as 1000
+                 * maybe append as many bits as necessary to get to even
+                 * multiple of shift or to frac_bits_count, but this is not a
+                 * string;
+                 * available */
+                uint_fast8_t frac_shift = MAX(0,
+                                              frac_bits_count - available_bits);
+
+                /* Round the fraction by adding to it 1/2 the base to the
+                 * digit that will be final one after the operation */
+                // XXX round towards even
+                //frac += (base / 2) << (frac_shift - 1); wrong at least for
+                //base 2
+                frac >>= frac_shift;
+                frac_bits_count -= frac_shift;
+
+                /* Then make room in the integral part for the fraction */
+                u <<= frac_bits_count;
+
+                /* Combine them, and adjust the exponent */
+                u |= frac;
+                preliminary_exponent -= frac_bits_count;
             }
             else {
-                /* check for end of fixed-length buffer */
-                if (d >= e)
-                    croak("%s", number_too_long);
-                /* if we're ok, copy the character */
-                *d++ = *s++;
+                do {
+
+                /* Base 10 is not precise, and we can't just use shifts to
+                 * multiply and divide.  Instead we do an actual multiply of
+                 * the integral part by enough 10's to make room for the
+                 * fractional digits. */
+
+                    /* Earlier, we ignored the digits in the fraction past the
+                     * XXX no longer true?
+                     * precision of the word size.  But for base 10, this
+                     * isn't quite precise: we may still have a little too
+                     * many.  Back off until we don't overflow.  This is done
+                     * by truncating one-by-one the final remaining fractional
+                     * digit (with rounding), until we have a reasonable
+                     * result */
+                    uintmax_t multiplier = Perl_pow(10.0, frac_digit_count);
+
+                    /* If frac_digit_count is too high, it could overflow a
+                     * word, and leave it 0.  But if not, it could still
+                     * overflow.  We check for this by multiplying 'u' and see
+                     * if dividing back gives the original result.  If so,
+                     * there was enough room in the word to hold the
+                     * multiplied 'u', and we can quit. */
+                    if (multiplier) {
+                        uintmax_t temp = u * multiplier;
+                        if (temp / multiplier == u) {
+                            u = temp;
+                            break;
+                        }
+                    }
+
+                    /* But here, there isn't enough space to hold this many
+                     * digits in the fractional part plus the integral
+                     * portion.  Knock off the final fractional digit and try
+                     * again */
+                    frac += 10 / 2; //round
+                    frac /= 10;
+                } while (--frac_digit_count > 0);
+
+                /* Here, 'u' has been multiplied by just enough powers of 10
+                 * to allow the fraction to be added to the space just made
+                 * available.  In our example of 1.23, the 1 has been
+                 * multiplied by 100, so 23 can be added to it, and the
+                 * exponent adjusted downward to compensate. */
+                u += frac;
+                preliminary_exponent -= frac_digit_count;
             }
         }
+#endif
 
         /* final misplaced underbar check */
         SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
