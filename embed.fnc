@@ -1437,6 +1437,7 @@ Cdp	|UV	|grok_uint_by_base					\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
+				|NULLOK STRLEN *digit_count		\
 				|U8 max_permissible_bits		\
 				|unsigned shift1			\
 				|unsigned shift2			\

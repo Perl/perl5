@@ -270,7 +270,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
         }
     }
 
-    return grok_uint_by_base(start, len_p, flags, result,
+    return grok_uint_by_base(start, len_p, flags, result, NULL,
                              UV_BITS, shift1, shift2, lookup_bit, offset);
 }
 
@@ -280,6 +280,7 @@ Perl_grok_uint_by_base(pTHX_
                        STRLEN *len_p,
                        I32 *flags,
                        NV *result,
+                       Size_t *digit_count,
                        U8 max_permissible_bits,
 
                        /* Each of the shift parameters is 0 for binary; 2 for
@@ -409,6 +410,11 @@ mode requires the input string to be NUL-terminated.
      * base 16. */
   redo_switch:
     switch (e - s) {
+      case -1:
+          assert(digit_count);
+          e += *digit_count;
+          break;
+
       default: /* More potential digits than fit in 32 bits */
 
           /* Leading zeros are common enough to deserve a special case when
@@ -810,6 +816,10 @@ mode requires the input string to be NUL-terminated.
 
     if (UNLIKELY(do_non_portable_output)) {
         output_non_portable(base);
+    }
+
+    if (UNLIKELY(digit_count)) {
+      *digit_count = s - s0 - underscore_count - discarded_count;
     }
 
     /* s here points to e or to the first illegal character */
@@ -1324,7 +1334,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                        | PERL_SCAN_SILENT_NON_PORTABLE
                        | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW
               ;
-    UV value = grok_uint_by_base(s, &len, &grok_int_flags, NULL,
+    UV value = grok_uint_by_base(s, &len, &grok_int_flags, NULL, NULL,
                                  UV_BITS, 3, 1, CC_DIGIT_, 0);
     s += len;
 
