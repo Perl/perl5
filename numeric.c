@@ -626,13 +626,13 @@ Perl_grok_uint_by_base(pTHX_
             break;
         }
 
-            /* To get here with the value so-far being 0 means we've only had
-             * leading zeros, then an underscore.  We can continue with the
-             * branchless switch() instead of this loop */
-            if (UNLIKELY(value == 0)) {
-                s++;
-                goto redo_switch;
-            }
+        /* To get here with the value so-far being 0 means we've only had
+         * leading zeros, then an underscore.  We can continue with the
+         * branchless switch() instead of this loop */
+        if (UNLIKELY(value == 0)) {
+            s++;
+            goto redo_switch;
+        }
     }   /* End of parsing loop */
 
     bool do_non_portable_output = false;
