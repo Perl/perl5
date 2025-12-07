@@ -3778,11 +3778,17 @@ S_uv_mul_overflow (UV auv, UV buv, UV *const result)
 
 /* Don't warn on overflow; output flag still set */
 #  define PERL_SCAN_SILENT_OVERFLOW                 0x80
+//XXX
 
 /* grok_??? accept a stand-alone underscore between digits only in numbers */
 #  define PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY   0x100
 
 #  define PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW     0x200
+
+/* grok_??? If this is set on input, for acceptable underscores, accept
+ * multiple consecutive ones as well.  If none found, it will be cleared on
+ * output; otherwise unchanged */
+#  define PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES  0x400
 #endif
 
 /*

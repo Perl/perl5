@@ -478,6 +478,7 @@ Perl_grok_uint_by_base(pTHX_
     const bool allow_underscores =
              cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
                                   |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
+    Size_t underscore_count = 0; /* How many underscores have been seen */
 
     /* Loop through the characters */
     for (; s < e; s++) {
@@ -621,17 +622,43 @@ Perl_grok_uint_by_base(pTHX_
             break;
         }
 
-        /* And the character following it must be a legal digit */
-        if (! generic_isCC_(s[1], lookup_bit)) {
+        /* Advance past all adjacent underscores */
+        SSize_t adjacent_count = -1;
+        do {
+            s++;
+            adjacent_count++;
+        } while (s < e && *s == '_');
+
+        /* The character after the final underscore must be a legal digit.
+         * (Trailing underscores are not accepted) */
+        if (s >= e || ! generic_isCC_(*s, lookup_bit)) {
+
+            /* Back up to final non-underscore */
+            s -= adjacent_count;
             break;
         }
+
+        /* And multiple consecutive underscores are tolerated only with the
+         * proper flag, and if accepted, always notify the caller via a
+         * flag */
+        if (   adjacent_count > 0
+            && ! (input_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES))
+        {
+            *flags |= PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES;
+            break;
+        }
+
+        /* Here the underscore was acceptable. */
+        underscore_count += 1 + adjacent_count;
 
         /* To get here with the value so-far being 0 means we've only had
          * leading zeros, then an underscore.  We can continue with the
          * branchless switch() instead of this loop */
         if (UNLIKELY(value == 0)) {
-            s++;
             goto redo_switch;
+        }
+        else {
+            goto redo;
         }
     }   /* End of parsing loop */
 
