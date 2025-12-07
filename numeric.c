@@ -289,7 +289,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
         }
     }
 
-    return grok_bin_oct_hex(start, len_p, flags, result,
+    return grok_uint_by_base(start, len_p, flags, result,
                             base, lookup_bit, offset);
 }
 
@@ -300,7 +300,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
 
 
 UV
-Perl_grok_bin_oct_hex(pTHX_ const char * const start, 
+Perl_grok_uint_by_base(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
@@ -310,25 +310,85 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                      )
 
 {
-    PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
+    PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;
     ASSUME(   base == 10
            || (isPOWER_OF_2(base) && inRANGE(base, 2, 16) && base != 4));
 
-    /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
-     * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
-     * find the numeric value of a digit.  That requires more instructions than
-     * OCTAL_VALUE would, but gives the same result for the narrowed range of
-     * octal digits; same for binary.  If it were ever critical to squeeze more
-     * performance from this, the function could become grok_hex, and a regen
-     * perl script could scan it and write out two edited copies for the other
-     * two functions.  That would improve the performance of all three
-     * somewhat.  Besides eliminating XDIGIT_VALUE for the other two, extra
-     * parameters are now passed to this to avoid conditionals.  Those could
-     * become declared consts, like:
-     *      const U8 base = 16;
-     *      const U8 base = 8;
-     *      ...
-     */
+/*
+
+=for apidoc      grok_uint_by_base
+
+Parses a string purportedly containing ASCII digit characters in the numeric
+base passed in as 'base', and translates it to a non-negative integer, if
+possible, which it returns.  The base is any of 2, 8, 10, or 16.  The string
+to be parsed starts at 'start' and has length *len_p bytes.  If *len_p is 0, 0
+is returned without complaint.
+
+It stops parsing when it reaches *len_p bytes, or at the first illegal
+character.  Legal characters include any digit in the given base and, if
+permitted by flags, underscores in restricted positions. It returns in
+*len_p the actual number of bytes parsed.  If it stopped parsing early,
+it raises a warning unless the caller has set the PERL_SCAN_SILENT_ILLDIGIT
+bit in *flags.  The flag is cleared if no illegal character is found,
+otherwise it will remain set on output.
+
+If the resultant integer won't fit in a UV, UV_MAX is returned, and *flags
+will contain the PERL_SCAN_NUMBER_OVERFLOWED bit. If 'result' is not NULL, an
+NV approximation to the full integer will be placed into *result.  And for
+bases 2, 8, 16, it raises a warning unless the caller has set the
+PERL_SCAN_SILENT_OVERFLOW bit in *flags.
+
+Note that *result is not changed unless overflow occurs.
+
+For non-base10 operations, by default, a warning is raised for numbers
+that don't overflow but exceed 32 bits in width.  This is suppressed if
+the caller has set the PERL_SCAN_SILENT_NON_PORTABLE bit in *flags.
+
+The function can silently accept (and otherwise ignore) underscores as well as
+digits if the caller has set the PERL_SCAN_ALLOW_UNDERSCORES bit in *flags.
+These are a single underscore between any two digits, and additionally an
+initial underscore.
+
+The function takes great care to make any overflowing approximation as
+accurate as possible given the platform's limitations.
+
+Attention has been paid to maximizing performance, but some compromises
+have been made because it is the unification of grok_bin, grok_oct,
+grok_hex and grok_decimal (if that existed).  The unification was done
+because over time, patches had been applied to one or another of the
+individual functions, causing them to drift apart.  Another solution
+would be to have a regen script that starts with a single template and
+customizes each one.  Here are the compromises that could matter.
+
+=over
+
+=item *
+
+Each digit calculation uses XDIGIT_VALUE(), which, to accomodate hex values,
+has extra bit operations not otherwise needed.  This macro replaces a
+subtraction with 2 shifts, 2 additions, and 3 masks
+
+=item *
+
+To accommodate base 10, each digit calculation uses an integer multiply and an
+addition instead of a bitwise shift and 'or'.
+
+=item *
+
+The main switch() statement could have more case statements for non-hex bases.
+
+=back
+
+There is a special mode that functions as an alternative to overflowing.  It
+is triggered by the caller setting PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW into
+*flags.  Should overflow otherwise occur, subsequent digits are instead simply
+discarded, while rounding the result towards even.
+
+=cut
+
+Other compromises kick in only when the result is within a digit of overflowing.
+
+*/
 
 #if UVSIZE > 4
     I32 input_flags = *flags;
@@ -1267,8 +1327,8 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                        | PERL_SCAN_SILENT_NON_PORTABLE
                        | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW
               ;
-    UV value = grok_bin_oct_hex(s, &len, &grok_int_flags, NULL,
-                                10, CC_mask_(CC_DIGIT_), 0);
+    UV value = grok_uint_by_base(s, &len, &grok_int_flags, NULL,
+                                 10, CC_mask_(CC_DIGIT_), 0);
     s += len;
 
     if (grok_int_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW) {

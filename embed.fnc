@@ -1469,14 +1469,6 @@ Cp	|UV	|grok_bin_hex	|NN const char * const start		\
 				|uint_fast8_t base			\
 				|const U32 lookup_bit			\
 				|const char prefix
-Cp	|UV	|grok_bin_oct_hex					\
-				|NN const char * const start		\
-				|NN STRLEN *len_p			\
-				|NN I32 *flags				\
-				|NULLOK NV *result			\
-				|uint_fast8_t base			\
-				|const U32 lookup_bit			\
-				|uint_fast8_t offset
 Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
@@ -1498,6 +1490,14 @@ Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
+Cdp	|UV	|grok_uint_by_base					\
+				|NN const char * const start		\
+				|NN STRLEN *len_p			\
+				|NN I32 *flags				\
+				|NULLOK NV *result			\
+				|uint_fast8_t base			\
+				|const U32 lookup_bit			\
+				|uint_fast8_t offset
 Adp	|GV *	|gv_add_by_type |NULLOK GV *gv				\
 				|svtype type
 Adp	|int	|Gv_AMupdate	|NN HV *stash				\

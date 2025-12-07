@@ -1659,15 +1659,6 @@ Perl_grok_bin_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV 
 #define PERL_ARGS_ASSERT_GROK_BIN_HEX           \
         assert(start); assert(len_p); assert(flags)
 
-PERL_CALLCONV UV
-Perl_grok_bin_oct_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, uint_fast8_t base, const U32 lookup_bit, uint_fast8_t offset)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_1)
-        Perl_attribute_nonnull_(pTHX_2)
-        Perl_attribute_nonnull_(pTHX_3);
-#define PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX       \
-        assert(start); assert(len_p); assert(flags)
-
 PERL_CALLCONV int
 Perl_grok_infnan(pTHX_ const char **sp, const char *send)
         Perl_attribute_nonnull_aTHX_
@@ -1698,6 +1689,15 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX     \
         assert(sp); assert(*sp); assert(send); assert(*sp <= send)
+
+PERL_CALLCONV UV
+Perl_grok_uint_by_base(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, uint_fast8_t base, const U32 lookup_bit, uint_fast8_t offset)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2)
+        Perl_attribute_nonnull_(pTHX_3);
+#define PERL_ARGS_ASSERT_GROK_UINT_BY_BASE      \
+        assert(start); assert(len_p); assert(flags)
 
 PERL_CALLCONV GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
