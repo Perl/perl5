@@ -271,7 +271,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
     }
 
     return grok_uint_by_base(start, len_p, flags, result,
-                             shift1, shift2, lookup_bit, offset);
+                             UV_BITS, shift1, shift2, lookup_bit, offset);
 }
 
 UV
@@ -280,6 +280,7 @@ Perl_grok_uint_by_base(pTHX_
                        STRLEN *len_p,
                        I32 *flags,
                        NV *result,
+                       U8 max_permissible_bits,
 
                        /* Each of the shift parameters is 0 for binary; 2 for
                         * octal; 3 for hex.  For decimal shift1 is 3, shift2
@@ -437,16 +438,18 @@ Perl_grok_uint_by_base(pTHX_
      * warning), as the first batch will end up being multiplied by zero.) */
     Size_t batch_digit_count = 0;
 
-#ifdef NV_PRESERVES_UV
     /* Value, above which, the next digit processed would overflow */
-    UV batch1_max_uint = UV_MAX;
-#else
-    UV batch1_max_uint = nBIT_UMAX(NV_PRESERVES_UV_BITS);
+    const UV max_permissible_uint = nBIT_UMAX(max_permissible_bits);
+
+    /* In order to use precise integral values as long as possible, set the
+     * first batch to not overflow either an integer or an NV mantissa.
+     * (Further comments below.) */
+    const UV batch1_max_uint =        MIN(max_permissible_uint,
+                                          nBIT_UMAX(NV_PRESERVES_UV_BITS));
 
     /* We set a checkpoint when we reach the first batch's limit */
     UV checkpoint_value = 0;
     const char * checkpoint_s = NULL;
-#endif
 
     /* As long as the running total is less than this, the next digit will
      * fit. */
@@ -514,7 +517,6 @@ Perl_grok_uint_by_base(pTHX_
                 continue;
             }
 
-#ifndef NV_PRESERVES_UV
             /* Code before the loop has set things up so that we get here even
              * if the next digit wouldn't overflow the integer, but would
              * overflow the mantissa of an NV.  Set a checkpoint to come back
@@ -527,11 +529,12 @@ Perl_grok_uint_by_base(pTHX_
                 /* But, for the remaining batches, use all available bits in
                  * the integer.  This may reduce the number of batches needed,
                  * hence fewer floating point operations. */
-                max_div = UV_MAX / base;
-                final_digit_max = UV_MAX - MULTIPLY_BY_BASE(max_div);
+                max_div = max_permissible_uint / base;
+                final_digit_max = max_permissible_uint
+                                - MULTIPLY_BY_BASE(max_div);
                 goto redo;
             }
-#endif
+
             /* Bah. We are about to overflow.  If the caller wants us to
              * instead discard the remaining digits, do so. */
             if (discard_instead_of_overflow) {
@@ -565,10 +568,9 @@ Perl_grok_uint_by_base(pTHX_
              * unoverflowed value in an NV.  Then we set 'value' to the current
              * digit and continue parsing, eventually adding the resultant
              * value to the NV.  If there are sufficiently many digits, this
-             * can happen multiple times. */
-
-#ifndef NV_PRESERVES_UV
-            /* To minimize precision loss, the algorithm here works as much as
+             * can happen multiple times.
+             *
+             * To minimize precision loss, the algorithm here works as much as
              * possible on lossless integers.  But to get here on the first
              * batch on platforms where the signifcand of an NV has fewer bits
              * than a UV, the value we already have won't fit an NV
@@ -578,13 +580,11 @@ Perl_grok_uint_by_base(pTHX_
              * effect at that point.  Retreat to that checkpoint to set the
              * first batch to be lossless, and reparse so that the second
              * batch begins there. */
-            if (value_nv == 0.0) {
+            if (value_nv == 0.0 && checkpoint_value != 0) {
                 value_nv = (NV) checkpoint_value;
                 s = checkpoint_s;
             }
-            else
-#endif
-            {
+            else {
                 /* Each time through the loop we have incremented
                  * 'batch_digit_count' so that it gives how many digits the
                  * current approximation needs to effectively be shifted to
@@ -692,8 +692,7 @@ Perl_grok_uint_by_base(pTHX_
             }
         }
 
-        value = UV_MAX;
-
+        value = max_permissible_uint;
     }
     else {
 
@@ -1261,7 +1260,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                        | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW
               ;
     UV value = grok_uint_by_base(s, &len, &grok_int_flags, NULL,
-                                 3, 1, CC_DIGIT_, 0);
+                                 UV_BITS, 3, 1, CC_DIGIT_, 0);
     s += len;
 
     if (grok_int_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW) {

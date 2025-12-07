@@ -254,7 +254,7 @@
 # define grok_number_flags(a,b,c,d)             Perl_grok_number_flags(aTHX_ a,b,c,d)
 # define grok_numeric_radix(a,b)                Perl_grok_numeric_radix(aTHX_ a,b)
 # define grok_oct(a,b,c,d)                      Perl_grok_oct(aTHX_ a,b,c,d)
-# define grok_uint_by_base(a,b,c,d,e,f,g,h)     Perl_grok_uint_by_base(aTHX_ a,b,c,d,e,f,g,h)
+# define grok_uint_by_base(a,b,c,d,e,f,g,h,i)   Perl_grok_uint_by_base(aTHX_ a,b,c,d,e,f,g,h,i)
 # define gv_add_by_type(a,b)                    Perl_gv_add_by_type(aTHX_ a,b)
 # define gv_autoload_pv(a,b,c)                  Perl_gv_autoload_pv(aTHX_ a,b,c)
 # define gv_autoload_pvn(a,b,c,d)               Perl_gv_autoload_pvn(aTHX_ a,b,c,d)
