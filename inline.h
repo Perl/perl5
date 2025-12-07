@@ -3856,6 +3856,12 @@ single leading underscore is accepted.
 Not available externally yet because experimental is
 C<PERL_SCAN_SILENT_NON_PORTABLE which suppresses any message for non-portable
 numbers that are still valid on this platform.
+
+These are chummy with the functions that actually do the implementation in that
+they know to pass two parameters which each contain the number of bits that a
+digit of the given type occupies, minus 1; and they know that that function
+requires a bit position to lookup if a character is a member of that type 
+
  */
 
 PERL_STATIC_INLINE UV
@@ -3863,7 +3869,8 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     PERL_ARGS_ASSERT_GROK_BIN;
 
-    return grok_bin_hex(start, len_p, flags, result, 1, CC_BINDIGIT_, 'b');
+    return grok_bin_hex(start, len_p, flags, result, 1-1, 1-1,
+                        CC_BINDIGIT_, 'b');
 }
 
 PERL_STATIC_INLINE UV
@@ -3871,7 +3878,8 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
     PERL_ARGS_ASSERT_GROK_HEX;
 
-    return grok_bin_hex(start, len_p, flags, result, 4, CC_XDIGIT_, 'x');
+    return grok_bin_hex(start, len_p, flags, result, 4-1, 4-1,
+                        CC_XDIGIT_, 'x');
 }
 
 PERL_STATIC_INLINE UV
@@ -3880,7 +3888,8 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     PERL_ARGS_ASSERT_GROK_OCT;
 
     *flags |= PERL_SCAN_DISALLOW_PREFIX;
-    return grok_bin_oct_hex(start, len_p, flags, result, 3, CC_OCTDIGIT_, 0);
+    return grok_bin_oct_hex(start, len_p, flags, result, 3-1 , 3-1 ,
+                            CC_OCTDIGIT_, 0);
 }
 
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */

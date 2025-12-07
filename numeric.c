@@ -241,7 +241,8 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
-                        const unsigned shift,
+                        const unsigned shift1,
+                        const unsigned shift2,
                         const U8 lookup_bit,
                         const char prefix
                  )
@@ -270,7 +271,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
     }
 
     return grok_bin_oct_hex(start, len_p, flags, result,
-                            shift, lookup_bit, offset);
+                            shift1, shift2, lookup_bit, offset);
 }
 
 UV
@@ -278,15 +279,20 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
-                        const unsigned shift, /* 1 for binary; 3 for octal;
-                                                 4 for hex */
+
+                        /* Each of the shift parameters is 0 for binary; 2 for
+                         * octal; 3 for hex */
+                        const unsigned shift1,
+                        const unsigned shift2,
+
                         const U8 class_bit,
                         const U8 offset
                      )
 
 {
     PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
-    ASSUME(inRANGE(shift, 1, 4) && shift != 2);
+    ASSUME(inRANGE(shift1, 0, 3) && shift1 != 1);
+    ASSUME(shift2 == shift1);
 
     /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
      * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
@@ -317,7 +323,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     const char * const s0 = s;  /* Where the significant digits start */
     UV value = 0;               /* Running total */
 
-#define MULTIPLY_BY_BASE(value)  ((value) << shift)
+    /* MULTIPLY_BY_BASE(value) multiplies 'value' by any of the accepted
+     * bases, using two shifts and an add instead of a multiplication.  If
+     * integer multiplication is fast, it could be simply written as
+     *      (value * base)
+     *
+     * Shift by 1 less than expected, yielding a result of half the desired
+     * amount; do it again; then add them */
+#define MULTIPLY_BY_BASE(value)  (((value) << shift1) + ((value) << shift2))
+
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -383,6 +397,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           break;
     }   /* End of switch on the first so-many characters */
 
+    const U8 shift = shift1 + 1;
 #ifdef Perl_ldexp
 #  define multiply_by_exponent(nv, digits)                                  \
             STMT_START { nv = Perl_ldexp(nv, digits * shift); } STMT_END

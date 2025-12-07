@@ -1407,7 +1407,8 @@ Cp	|UV	|grok_bin_hex	|NN const char * const start		\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
-				|const unsigned shift			\
+				|const unsigned shift1			\
+				|const unsigned shift2			\
 				|const U8 lookup_bit			\
 				|const char prefix
 Cp	|UV	|grok_bin_oct_hex					\
@@ -1415,7 +1416,8 @@ Cp	|UV	|grok_bin_oct_hex					\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
-				|const unsigned shift			\
+				|const unsigned shift1			\
+				|const unsigned shift2			\
 				|const U8 lookup_bit			\
 				|const U8 offset
 Adip	|UV	|grok_hex	|NN const char *start			\
