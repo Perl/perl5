@@ -343,7 +343,21 @@ Perl_grok_uint_by_base(pTHX_
      * base 16. */
   redo_switch:
     switch (e - s) {
-      default:
+      default: /* More potential digits than fit in 32 bits */
+
+          /* Leading zeros are common enough to deserve a special case when
+           * there are more digits than we handle in the switch.  Strip them
+           * off, and try again */
+          if (LIKELY(*s != '0')) {
+              break;
+          }
+
+          do {
+              s++;
+          } while (*s == '0');
+          goto redo_switch;
+
+      case 8:
           if (UNLIKELY(! generic_isCC_(*s, lookup_bit)))  break;
           value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
@@ -384,21 +398,14 @@ Perl_grok_uint_by_base(pTHX_
           s++;
           /* FALLTHROUGH */
       case 0:
-          if (LIKELY(s >= e)) {
-              return value;
-          }
-
-          /* If we get here, and the accumulated value is still 0, it is
-           * because there are more leading zeros than the cases of this
-           * switch(),  These are common enough with the binary-style numbers
-           * that it is worth this extra conditional to continue absorbing
-           * them via the switch. */
-          if (value == 0) {
-              goto redo_switch;
-          }
-
-          break;
+          return value;
     }   /* End of switch on the first so-many characters */
+
+    /* To get here, there have to be more digits in the input than the
+     * switch() above handles, or there was an unexpected character in the
+     * input (including an underscore, which is optionally acceptable).  We
+     * process with a loop.  But first, some setup that was postponed
+     * to here so as to make the common case above as fast as possible */
 
     /* 2, 8, 10, or 16 */
     const PERL_UINT_FAST8_T base = (1 << shift1) + (1 << shift2);
