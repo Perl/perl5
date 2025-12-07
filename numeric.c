@@ -450,13 +450,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                (khw suspects that adding a LIKELY() just above would do the
                same thing) */
           redo: ;
-            /* If there is room for this digit, accumulate it and repeat */
-            if (LIKELY(value <= max_div)) {
+            U8 this_digit_value = XDIGIT_VALUE(*s);
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
-                value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
+            /* If there is room for this digit, accumulate it and repeat */
+            if (LIKELY(value <= max_div)) {
+                value = MULTIPLY_BY_BASE(value) + this_digit_value;
                 batch_digit_count++;
                 continue;
             }
