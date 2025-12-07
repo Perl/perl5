@@ -383,37 +383,37 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         /* FALLTHROUGH */
       case 7:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 6:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 5:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 4:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 3:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 2:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 1:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 0:
@@ -447,7 +447,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     /* Here s points to a legal digit.  We can save some operations by
      * accumulating it now, and positioning the loop to start on the next
      * character (whose value is unknown here). */
-    accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+    accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
     s++;
 
   loop: ;
@@ -492,7 +492,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
          * well, so can be used here, without noticeably slowing those down
          * (it does have unnecessary shifts, ANDSs, and additions for those)
          * */
-        accumulated = MULTIPLY_BY_BASE(accumulated) | XDIGIT_VALUE(*s);
+        accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
     }   /* End of parsing loop */
 
