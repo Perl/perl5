@@ -297,22 +297,87 @@ Perl_grok_uint_by_base(pTHX_
     PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;
     ASSUME(inRANGE(shift1, 0, 3) && shift1 != 1);
     ASSUME(shift2 == shift1 || (shift1 == 3 && shift2 == 1));
+    //assert(max_permissible_bits >= UV_BITS || e - s == -1);
 
-    /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
-     * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
-     * find the numeric value of a digit.  That requires more instructions than
-     * OCTAL_VALUE would, but gives the same result for the narrowed range of
-     * octal digits; same for binary.  If it were ever critical to squeeze more
-     * performance from this, the function could become grok_hex, and a regen
-     * perl script could scan it and write out two edited copies for the other
-     * two functions.  That would improve the performance of all three
-     * somewhat.  Besides eliminating XDIGIT_VALUE for the other two, extra
-     * parameters are now passed to this to avoid conditionals.  Those could
-     * become declared consts, like:
-     *      const U8 base = 16;
-     *      const U8 base = 8;
-     *      ...
-     */
+/*
+
+=for apidoc      grok_uint_by_base
+
+Parses a string purportedly containing ASCII digit characters in the numeric
+base passed in as 'base', and translates it to a non-negative integer, if
+possible, which it returns.  The base is any of 2, 8, 10, or 16.  The string
+to be parsed starts at 'start' and has length *len_p bytes.  If *len_p is 0, 0
+is returned without complaint.
+
+It stops parsing when it reaches *len_p bytes, or at the first
+character that isn't a legal digit in the given base, returning in
+*len_p the actual number of bytes parsed.  If it stopped parsing early,
+it raises a warning unless the caller has set the
+NUL
+PERL_SCAN_SILENT_ILLDIGIT bit in *flags.  If the caller has also set
+the PERL_SCAN_NOTIFY_ILLDIGIT bit in *flags, it will remain set on
+output (cleared if no illegal character is encountered).
+
+If the resultant integer occupies more than 'max_permissible_bits', the
+function returns the maximum integer that does fit, and sets into *result
+an NV approximation to the full integer (if 'result' is not NULL).  It
+also sets the PERL_SCAN_NUMBER_OVERFLOWED bit in *flags.  And for bases
+2, 8, 16, it raises a warning unless the caller has set the
+PERL_SCAN_SILENT_OVERFLOW bit in *flags.
+
+Note that *result is not changed unless overflow occurs.
+
+For non-base10 operations, by default, a warning is raised for numbers
+that don't overflow but exceed 32 bits in width.  This is suppressed if
+the caller has set the PERL_SCAN_SILENT_NON_PORTABLE bit in *flags.
+
+The function can accept underscores as well as digits if certain other
+flags are passed in in *flags, as follows:
+
+PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY
+     The function silently accepts and otherwise ignores a single
+     underscore between any two digits.
+PERL_SCAN_ALLOW_UNDERSCORES
+     The function silently accepts and otherwise ignores a single
+     underscore between any two digits, and additionally it silently
+     accepts an initial underscore.
+PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES
+     Wherever a single underscore is accepted by the previous two
+     flags, also accept multiple sequential underscores.  But should
+     any such be encountered, the bit will remain set on output in
+     *flags (cleared if none found).
+
+The function takes great care to make any overflowing approximation as
+accurate as possible given the platform's limitations.
+
+Attention has been paid to maximizing performance, but some compromises
+have been made because it is the unification of grok_bin, grok_oct,
+grok_hex and grok_decimal (if that existed).  The unification was done
+because over time, patches had been applied to one or another of the
+individual functions, causing them to drift apart.  Another solution
+would be to have a regen script that starts with the a single template
+and customizes each one.  Here are the compromises that could matter.
+
+     Each digit calculation uses XDIGIT_VALUE(), which, to accomodate
+     hex values, has extra bit operations not otherwise needed.  We get
+     rid of a subtraction, replacing it with 2 shifts, 2 additions, and
+     3 masks
+
+     Each digit calculation has an extra shift and add to accommodate
+     decimal values.  And an 'or' has been replaced by an add.
+
+     switch
+
+There is a special mode that functions as an alternative to
+overflowing.  It is triggered by
+and then only if overflow would otherwise occur.  Instead of
+overflowing, subsequent digits are instead simply discarded, though the
+first one rounds the final non-overflowed value towards even.  This
+mode requires the input string to be NUL-terminated.
+
+=cut
+
+ */
 
     const I32 input_flags = *flags;
     /* Clear output flags; unlikely to find a problem that sets them */
