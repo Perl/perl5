@@ -328,42 +328,42 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     switch (e - s) {
       default:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 6:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 5:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 4:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 3:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 2:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 1:
           if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
-          value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+          value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 0:
@@ -440,7 +440,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
-                value = MULTIPLY_BY_BASE(value) | XDIGIT_VALUE(*s);
+                value = MULTIPLY_BY_BASE(value) + XDIGIT_VALUE(*s);
                 batch_digit_count++;
                 continue;
             }
