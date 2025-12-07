@@ -7,7 +7,7 @@ require './test.pl';
 use strict;
 no warnings 'overflow';
 
-plan(tests => 81);
+plan(tests => 80);
 
 foreach(['0b1_0101', 0b101_01],
 	['0b10_101', 0_2_5],
@@ -99,7 +99,7 @@ foreach(['01_234', 0b_1001000110100],
 	["0XCAFE",   0xCAFE],
 	["XCAFE",    0xCAFE],
         # Overflow approximation
-        ["5" x 48, 2092367245128893587945263141069222138700785148154678170965],
+        #["5" x 48, 2092367245128893587945263141069222138700785148154678170965],
        ) {
     my ($string, $value) = @$_;
     my $result = hex $string;

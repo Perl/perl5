@@ -3894,7 +3894,7 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     PERL_ARGS_ASSERT_GROK_OCT;
 
     *flags |= PERL_SCAN_DISALLOW_PREFIX;
-    return grok_uint_by_base(start, len_p, flags, result, NULL,
+    return grok_uint_by_base(start, (SSize_t *) len_p, flags, result, NULL,
                              UV_BITS, 3-1, 3-1, CC_OCTDIGIT_, 0);
 }
 

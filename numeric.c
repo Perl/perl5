@@ -283,14 +283,14 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
         }
     }
 
-    return grok_uint_by_base(start, len_p, flags, result, NULL,
+    return grok_uint_by_base(start, (SSize_t *) len_p, flags, result, NULL,
                              UV_BITS, shift1, shift2, lookup_bit, offset);
 }
 
 uintmax_t
 Perl_grok_uint_by_base(pTHX_
                        const char * const start,
-                       STRLEN *len_p,
+                       SSize_t *len_p,
                        I32 *flags,
                        NV *result,
                        Size_t *digit_count,
@@ -372,15 +372,23 @@ individual functions, causing them to drift apart.  Another solution
 would be to have a regen script that starts with the a single template
 and customizes each one.  Here are the compromises that could matter.
 
-     Each digit calculation uses XDIGIT_VALUE(), which, to accomodate
-     hex values, has extra bit operations not otherwise needed.  We get
-     rid of a subtraction, replacing it with 2 shifts, 2 additions, and
-     3 masks
+=over
 
-     Each digit calculation has an extra shift and add to accommodate
-     decimal values.  And an 'or' has been replaced by an add.
+=item *
+Each digit calculation uses XDIGIT_VALUE(), which, to accomodate hex values,
+has extra bit operations not otherwise needed.  We get rid of a subtraction,
+replacing it with 2 shifts, 2 additions, and 3 masks
 
-     switch
+=item *
+
+Each digit calculation has an extra shift and add to accommodate decimal
+values.  And an 'or' has been replaced by an add.
+
+=item *
+
+The switch() statement could have more case statements for non-hex bases
+
+=back
 
 There is a special mode that functions as an alternative to
 overflowing.  It is triggered by
@@ -402,6 +410,7 @@ mode requires the input string to be NUL-terminated.
 
     const char * const s0 = s;  /* Where the significant digits start */
     uintmax_t value = 0;        /* Running total */
+    Size_t underscore_count = 0; /* How many underscores have been seen */
 
     /* MULTIPLY_BY_BASE(value) multiplies 'value' by any of the accepted
      * bases, using two shifts and an add instead of a multiplication.  If
@@ -424,7 +433,7 @@ mode requires the input string to be NUL-terminated.
     switch (e - s) {
       case -1:
           assert(digit_count);
-          e += *digit_count;
+          e = s + *digit_count;
           break;
 
       default: /* More potential digits than fit in 32 bits */
@@ -564,8 +573,6 @@ mode requires the input string to be NUL-terminated.
     const bool allow_underscores =
              cBOOL(input_flags & ( PERL_SCAN_ALLOW_UNDERSCORES
                                   |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY));
-    Size_t underscore_count = 0; /* How many underscores have been seen */
-
     /* Loop through the characters */
     for (; s < e; s++) {
         if (LIKELY(generic_isCC_(*s, lookup_bit))) {
@@ -705,33 +712,36 @@ mode requires the input string to be NUL-terminated.
         }
 
         /* Advance past all adjacent underscores */
-        SSize_t adjacent_count = -1;
+        const char * first_underscore_pos = s;
         do {
             s++;
-            adjacent_count++;
         } while (s < e && *s == '_');
 
         /* The character after the final underscore must be a legal digit.
          * (Trailing underscores are not accepted) */
         if (s >= e || ! generic_isCC_(*s, lookup_bit)) {
 
-            /* Back up to final non-underscore */
-            s -= adjacent_count;
+            /* Back up to include the final non-underscore (so that the first
+             * underscore will be the next character to be parsed */
+            s = first_underscore_pos;
             break;
         }
+
+        Size_t sequence_count = s - first_underscore_pos;
 
         /* And multiple consecutive underscores are tolerated only with the
          * proper flag, and if accepted, always notify the caller via a
          * flag */
-        if (   adjacent_count > 0
-            && ! (input_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES))
-        {
+        if (sequence_count > 1) {
+            if (! (input_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES)) {
+                break;
+            }
+
             *flags |= PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES;
-            break;
         }
 
         /* Here the underscore was acceptable. */
-        underscore_count += 1 + adjacent_count;
+        underscore_count += sequence_count;
 
         /* To get here with the value so-far being 0 means we've only had
          * leading zeros, then an underscore.  We can continue with the
@@ -1341,7 +1351,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 
   /* next must be digit or the radix separator or beginning of infinity/nan */
   if (LIKELY(isDIGIT(*s))) {
-    STRLEN len = send - s;
+    SSize_t len = send - s;
     I32 grok_int_flags = PERL_SCAN_SILENT_ILLDIGIT
                        | PERL_SCAN_SILENT_NON_PORTABLE
                        | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW

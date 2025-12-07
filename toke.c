@@ -133,11 +133,6 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 
 #define SPACE_OR_TAB(c) isBLANK_A(c)
 
-#define HEXFP_PEEK(s)     \
-    (((s[0] == '.') && \
-      (isXDIGIT(s[1]) || isALPHA_FOLD_EQ(s[1], 'p'))) || \
-     isALPHA_FOLD_EQ(s[0], 'p'))
-
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -4542,7 +4537,7 @@ S_intuit_more(pTHX_ char *s, char *e,
      * 'scariness', and lack of comments.  khw has gone through and done some
      * cleanup, while finding various instances of problematic behavior.
      * Rather than change this base-level function immediately, khw has added
-     * commentary to those areas. 
+     * commentary to those areas.
      *
      * khw: $0 in square brackets is never going to mean the expansion of $0.
      * How could that help in calculating a subscript?  And one would never
@@ -12426,50 +12421,77 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
 /*
   scan_num
-  takes: pointer to position in buffer
+  takes: pointer to position in NUL-terminated buffer of a potential number;
+         after any potential '+' or '-'.
   returns: pointer to new position in buffer
   side-effects: builds ops for the constant in pl_yylval.op
 
-  Read a number in any of the formats that Perl accepts:
-  (\x below stands for a hexademical character [0-9A-Fa-f]
-   underscores may separate any two digits.  Multiple sequential underscores
-   are tolerated, but warned about)
+  It handles both integers and floating point, trying to get the best
+  precision possible in the latter case.  If there is an integer type on this
+  platform that is at least as wide as a floating point mantissa, it uses
+  integer arithmetic for as long as possible, converting to floating only in
+  the final step.
 
-  0b  [0-1] (_* [0-1] )*       binary integers
-  0o? [0-7] (_* [0-7] )*       octal integers
-      \d    (_* \d    )*       decimal integers
-  0x  \x    (_* \x    )*       hexadecimal integers
+  The overall flow is:
+    Parse any integral part
+    Parse any fractional part
+    Combine these if found both
+    Parse any exponent part
+    Combine everything
 
-  And decimal or hex floats
-                      |-----------|                     |--------------|
-    \d (_* \d )* ( \. ( \d (_* \d )* )? )? ( [Ee] [-+]? ( \d (_* \d )* ) )?
-                   \.   \d (_* \d )        ( [Ee] [-+]? ( \d (_* \d)*  ) )?
-  0x\x (_* \x )* ( \. ( \x (_* \x )* )? )? ( [Pp] [-+]? ( \d (_* \d )* ) )?
-       |______|  |______________________|  |_____________________________|
+  The formats that Perl accepts are:
 
-  In the floating syntax above, at least one of the optional portions (the
-  fractional part or the exponent part) must be present.
+  (\x below stands for a hexademical character [0-9A-Fa-f].)
 
-  Like most scan_ routines, it uses the PL_tokenbuf buffer to hold the
-  thing it reads.
+  INTEGERS:
 
-  If it reads a number without a decimal point or an exponent, it will
-  try converting the number to an integer and see if it can do so
-  without loss of precision.
+          0                       treated as decimal
+  0b  _* [0-1] (_* [0-1] )*       binary integers
+  0o? _* [0-7] (_* [0-7] )*       octal integers
+         [1-9] (_* [0-9] )*       decimal integers
+  0x  _*   \x  (_*   \x  )*       hexadecimal integers
+
+  Note that these are unsigned.  The caller must have absorbed any sign and
+  handle it outside here.
+
+  Underscores may separate any two digits and the initial type indicator from
+  the first digit.  However, more than one sequential underscore is warned
+  about.
+
+  FLOATS:
+                    \.   \d (_* \d )        ( [Ee] [-+]? ( \d (_* \d)*  ) )?
+                       |-----------|                     |--------------|
+  decimal-  ( \. _! ( \d (_* \d )* )? )? ( _! [Ee] _! [-+]? ( \d (_* \d )* ) )?
+  integer   |______________________|  |_____________________________|
+
+  At least one of: fractional part or exponent part must be present.
+
+  We also accept what are called hexadecimal floats, though any of the binary
+  types work.
+
+  other-integer ( \. (other-integer)? )? [Pp] [-+]? ( \d (_* \d )* )
+                |_____________________|             |______________|
+
+  Note that the exponent must be present.
+ *    num fails because it wants non-zero to evaluate to non-zero, no matter
+ *      how far down
+ *  oct fails because rounding difference
+ *  hexfp fails
+
 */
 
 char *
 Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 {
-    const char *s = start;	/* current position in buffer */
-    char *d;			/* destination in temp buffer */
-    char *e;			/* end of temp buffer */
-    NV nv;				/* number read, as a double */
-    SV *sv = NULL;			/* place to put the converted number */
-    bool floatit;			/* boolean: int or float? */
-    static const char* const number_too_long = "Number too long";
+    PERL_ARGS_ASSERT_SCAN_NUM;
+    assert(start < PL_bufend);
+
+    /* Make sure "int" is wide enough to hold exponent of NV.
+       We use "int" (rather than I32 etc.) to be compatible with ldexp() */
+    STATIC_ASSERT_STMT((INT_MIN / 10) < NV_MIN_EXP);
+    STATIC_ASSERT_STMT(NV_MAX_EXP < (INT_MAX / 10));
+
     bool warned_about_underscore = 0;
-    I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
 
 #define WARN_ABOUT_UNDERSCORE()                         \
         STMT_START {                                    \
@@ -12519,6 +12541,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             SUFFER_AN_UNDERSCORE_HERE(s);               \
         } STMT_END
 
+    const char *s = start;	/* current position in buffer */
+
     /* Hexadecimal floating point.
      *
      * In many places (where we have quads and NV is IEEE 754 double)
@@ -12528,28 +12552,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
      * using long doubles), in which case we have to resort to NV,
      * which will probably mean horrible loss of precision due to
      * multiple fp operations. */
-    bool hexfp = FALSE;
     int significant_bits = 0;
-#if NVSIZE == 8 && defined(HAS_QUAD) && defined(Uquad_t)
-#  define HEXFP_UQUAD
-    Uquad_t hexfp_uquad = 0;
-    int hexfp_frac_bits = 0;
-#else
-#  define HEXFP_NV
-    NV hexfp_nv = 0.0;
-#endif
-    int hexfp_exp = 0;
-    bool new_octal = FALSE;     /* octal with "0o" prefix */
 
-    PERL_ARGS_ASSERT_SCAN_NUM;
-    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: hints=%x, %s\n", __FILE__, (long) __LINE__, PL_hints, start));
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "\n%s: %ld: %s\nhints=%x\n", __FILE__, (long) __LINE__, start, PL_hints));
 
-    /* Make sure "int" is wide enough to hold exponent of NV.
-       We use "int" (rather than I32 etc.) to be compatible with ldexp() */
-    STATIC_ASSERT_STMT((INT_MIN / 10) < NV_MIN_EXP);
-    STATIC_ASSERT_STMT(NV_MAX_EXP < (INT_MAX / 10));
-
-    /* We use the first character to decide what type of number this is */
+    SV *sv = NULL;			/* place to put the converted number */
 
     if (*s == 'v') {
       vstring:
@@ -12559,29 +12566,52 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         s = scan_vstring(s, PL_bufend, sv);
         SvREFCNT_inc_simple_void_NN(sv);
         LEAVE_with_name("scan_vstring");
+
+      done: /* make the op for the constant and return */
+
+        if (sv)
+            lvalp->opval = newSVOP(OP_CONST, 0, sv);
+        else
+            lvalp->opval = NULL;
+
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: returning %s", __FILE__, (long) __LINE__, s));
+        DEBUG_U(sv_dump(sv));
+        return (char *)s;
     }
-    else if (*s == '0') {
 
-        /* if it starts with a 0, it could be an octal number, a decimal in
-           0.13 disguise, or a hexadecimal number, or a binary number.
-         *
-         * variables:
-         * u		holds the "number so far"
-         * overflowed	was the number more than we can hold?
+    if (! isDIGIT(*s) && *s != '.') {
+        croak("panic: scan_num, *s=%c", *s);
+    }
+    
+    /* Here it looks like it could be a regular number.  Figure out which
+     * type.  Everything is decimal unless it starts with a zero.  But even
+     * so, 0.123 and 0e1 are decimal as well. */
 
-         * Shift is used when we add a digit.  It also serves as an "are
-         * we in octal/hex/binary?" indicator to disallow hex characters
-         * when in octal mode.
-         */
-        NV n = 0.0;
-        bool just_zero  = TRUE;	/* just plain 0 or binary number? */
-        bool has_digs = FALSE;
-        static const char* const bases[5] =
-          { "", "binary", "", "octal", "hexadecimal" };
-
-        /* check for hex */
-        U8 type_bit;
-        if (isALPHA_FOLD_EQ(s[1], 'x')) {
+    bool just_zero  = TRUE;	/* just plain 0? */
+    bool has_digs = FALSE;      /* Found any digits yet? */
+    U8 shift;                  /* XXX many bits per digit for hex/oct/bin */
+    U8 shift1;                  /* XXX many bits per digit for hex/oct/bin */
+    U8 shift2;                  /* how many bits per digit for hex/oct/bin */
+    static const char* const bases[4] =
+                            { "binary", "decimal", "octal", "hexadecimal" };
+    U32 type_bit;               /* what type of digit to look for, used by
+                                   generic_isCC_() */
+    char after_underscores;     /* The character immediately following any
+                                   underscores after a '0'; used so can
+                                   tolerate things like 0__.123 */
+    if (   *s != '0'
+            /* '0 _* . x+' and '0 _* e' are decimal */
+        || ((after_underscores = *(s + 1 + strspn(s + 1, "_"))),
+               after_underscores == '.'
+            || isALPHA_FOLD_EQ(after_underscores, 'e')))
+    {
+        shift1 = 3;
+        shift2 = 1;
+        type_bit = CC_DIGIT_;
+        just_zero = false;
+    }
+    else {
+            if (isALPHA_FOLD_EQ(s[1], 'x')) {
             shift = 4;
             type_bit = CC_XDIGIT_;
             s += 2;
@@ -12592,308 +12622,274 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             s += 2;
             just_zero = FALSE;
         }
-        /* check for a decimal in disguise */
-        else if (s[1] == '.' || isALPHA_FOLD_EQ(s[1], 'e'))
-            goto decimal;
-        /* so it must be octal */
-        else {
+        else { /* Starts with 0 but not hex nor binary; assume is octal for
+                  now */
             shift = 3;
             type_bit = CC_OCTDIGIT_;
             s++;
-            if (isALPHA_FOLD_EQ(*s, 'o')) {
+            if (isALPHA_FOLD_EQ(*s, 'o')) {     /* definitely octal */
                 s++;
                 just_zero = FALSE;
-                new_octal = TRUE;
             }
         }
 
-        SUFFER_AN_UNDERSCORE_HERE(s);
+        shift1 = shift2 = shift - 1;
+    }
 
-        /* Call function to parse the integer portion.  If this value is
-         * overloaded, let the overloading deal with overflow */
-        I32 call_flags = 0;
-        if (PL_hints & HINT_NEW_BINARY) {
-            call_flags |= PERL_SCAN_SILENT_OVERFLOW;
-        }
+    /* 2=binary; 8=octal; 10=decimal; 16=hex */
+    U8 base = (1 << shift1) + (1 << shift2);
 
-        call_flags |= (
-                        /* We have positioned the parse to be past any prefix
-                         * or initial underscores */
-                        PERL_SCAN_DISALLOW_PREFIX
-                       |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY
+    SUFFER_AN_UNDERSCORE_HERE(s);
 
-                        /* We raise a warning on these */
-                       |PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES
+    /* Set flags that will be passed to the function we call that parses the
+     * integer components.  If the HINT indicates this value is overloaded,
+     * don't worry about overflow here; let the overloading code deal with
+     * overflow */
+    I32 call_flags = 0;
+    if (PL_hints & HINT_NEW_BINARY) {
+        call_flags |= PERL_SCAN_SILENT_OVERFLOW;
+    }
 
-                        /* We will handle these ourselves */
-                       |PERL_SCAN_SILENT_NON_PORTABLE
-                       |PERL_SCAN_SILENT_ILLDIGIT
-                       |PERL_SCAN_NOTIFY_ILLDIGIT
-                      );
+    call_flags |= (
+                     /* We have positioned the parse to be past any prefix or
+                      * initial underscores */
+                     PERL_SCAN_DISALLOW_PREFIX
+                    |PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY
 
-        I32 returned_flags = call_flags;
-        STRLEN len = PL_bufend - s;
-        UV u = grok_uint_by_base(s, &len, &returned_flags, &n, NULL,
-                                UV_BITS, shift-1, shift-1, type_bit,
-                               0
-                               );
+                     /* We raise a warning on these */
+                    |PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES
+
+                     /* We will handle these ourselves */
+                    |PERL_SCAN_SILENT_NON_PORTABLE
+                    |PERL_SCAN_SILENT_ILLDIGIT
+                    |PERL_SCAN_NOTIFY_ILLDIGIT
+                  );
+
+    I32 integral_flags_return;
+    NV n;
+    uintmax_t u;
+    n = u = 0;
+    bool floatit = false;;			/* boolean: int or float? */
+    bool underflowed = false;
+
+    /* Parse the integral part, but not if none is there */
+    if (*s == '.') {
+        /* function didn't get called so pretend returned 0 */
+        integral_flags_return = 0;
+    }
+    else {
+        integral_flags_return = call_flags;
+        SSize_t len = PL_bufend - s;
+        u = grok_uint_by_base(s, &len, &integral_flags_return, &n,
+                              NULL, /* Don't care how many digits here */
+                              UINTMAX_BITS, shift1, shift2, type_bit,
+                              0);
         if (len > 0) {
             if (u != 0 || len > 1) {
+                /* Note that it was more than just a 0 */
                 just_zero = false;
             }
             has_digs = true;
             s += len;
         }
+        else if (just_zero) {
 
-        if (s < PL_bufend) {    /* Potentially more to the number */
-            if (isDIGIT_A(*s)) {
-                if (shift == 1) {
-                    yyerror(form("Illegal binary digit '%c'", *s));
-                }
-                else {
-                    yyerror(form("Illegal octal digit '%c'", *s));
-                }
-            }
-            else {
-                /* final misplaced underbar check */
-                SUFFER_AN_UNDERSCORE_HERE(s);
-
-                if (UNLIKELY(HEXFP_PEEK(s))) {
-                    /* Do sloppy (on the underbars) but quick detection
-                     * (and value construction) for hexfp, the decimal
-                     * detection will shortly be more thorough with the
-                     * underbar checks. */
-                    const char* h = s;
-                    significant_bits = (u == 0) ? 0 : msbit_pos(u) + 1;
-#ifdef HEXFP_UQUAD
-                    hexfp_uquad = u;
-#else /* HEXFP_NV */
-                    hexfp_nv = u;
-#endif
-                    if (*h == '.') {
-#ifdef HEXFP_NV
-                        NV nv_mult = 1.0;
-#endif
-                        bool accumulate = TRUE;
-                        U8 b = 0; /* silence compiler warning */
-                        int lim = 1 << shift;
-                        for (h++;
-                             (   (   isXDIGIT(*h)
-                                  && (b = XDIGIT_VALUE(*h)) < lim)
-                              || *h == '_');
-                             h++)
-                        {
-                            if (isXDIGIT(*h)) {
-                                significant_bits += shift;
-#ifdef HEXFP_UQUAD
-                                if (accumulate) {
-                                    if (significant_bits < NV_MANT_DIG) {
-                                        /* We are in the long "run" of xdigits,
-                                         * accumulate the full four bits. */
-                                        assert(shift >= 0);
-                                        hexfp_uquad <<= shift;
-                                        hexfp_uquad |= b;
-                                        hexfp_frac_bits += shift;
-                                    } else if (   significant_bits - shift
-                                               < NV_MANT_DIG)
-                                    {
-                                        /* We are at a hexdigit either at,
-                                         * or straddling, the edge of mantissa.
-                                         * We will try grabbing as many as
-                                         * possible bits. */
-                                        int tail =
-                                          significant_bits - NV_MANT_DIG;
-                                        if (tail <= 0)
-                                           tail += shift;
-                                        assert(tail >= 0);
-                                        hexfp_uquad <<= tail;
-                                        assert((shift - tail) >= 0);
-                                        hexfp_uquad |= b >> (shift - tail);
-                                        hexfp_frac_bits += tail;
-
-                                        /* Ignore the trailing zero bits
-                                         * of the last non-zero xdigit.
-                                         *
-                                         * The assumption here is that if
-                                         * one has input of e.g. the xdigit
-                                         * eight (0x8), there is only one
-                                         * bit being input, not the full
-                                         * four bits.  Conversely, if one
-                                         * specifies a zero xdigit, the
-                                         * assumption is that one really
-                                         * wants all those bits to be zero. */
-                                        if (b) {
-                                            if ((b & 0x1) == 0x0) {
-                                                significant_bits--;
-                                                if ((b & 0x2) == 0x0) {
-                                                    significant_bits--;
-                                                    if ((b & 0x4) == 0x0) {
-                                                        significant_bits--;
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        accumulate = FALSE;
-                                    }
-                                } else {
-                                    /* Keep skipping the xdigits, and
-                                     * accumulating the significant bits,
-                                     * but do not shift the uquad
-                                     * (which would catastrophically drop
-                                     * high-order bits) or accumulate the
-                                     * xdigits anymore. */
-                                }
-#else /* HEXFP_NV */
-                                if (accumulate) {
-                                    nv_mult /= nvshift[shift];
-                                    if (nv_mult > 0.0)
-                                        hexfp_nv += b * nv_mult;
-                                    else
-                                        accumulate = FALSE;
-                                }
-#endif
-                            }
-                            if (significant_bits >= NV_MANT_DIG)
-                                accumulate = FALSE;
-                        }
-                    }
-
-                    if (   (has_digs || significant_bits > 0)
-                        && isALPHA_FOLD_EQ(*h, 'p'))
-                    {
-                        bool negexp = FALSE;
-                        h++;
-                        if (*h == '+')
-                            h++;
-                        else if (*h == '-') {
-                            negexp = TRUE;
-                            h++;
-                        }
-                        if (isDIGIT(*h)) {
-                            while (isDIGIT(*h) || *h == '_') {
-                                if (isDIGIT(*h)) {
-                                    hexfp_exp *= 10;
-                                    hexfp_exp += *h - '0';
-#ifdef NV_MIN_EXP
-                                    if (negexp
-                                        && -hexfp_exp < NV_MIN_EXP - 1) {
-                                        /* NOTE: this means that the exponent
-                                         * underflow warning happens for the
-                                         * IEEE 754 subnormals (denormals),
-                                         * because DBL_MIN_EXP etc are the
-                                         * lowest possible binary (or, rather,
-                                         * DBL_RADIX-base) exponent for
-                                         * normals, not subnormals.
-                                         *
-                                         * This may or may not be a good
-                                         * thing. */
-                                        ck_warner(packWARN(WARN_OVERFLOW),
-                                      "Hexadecimal float: exponent underflow");
-                                        break;
-                                    }
-#endif
-#ifdef NV_MAX_EXP
-                                    if (!negexp
-                                        && hexfp_exp > NV_MAX_EXP - 1) {
-                                        ck_warner(packWARN(WARN_OVERFLOW),
-                                      "Hexadecimal float: exponent overflow");
-                                        break;
-                                    }
-#endif
-                                }
-                                h++;
-                            }
-                            if (negexp)
-                                hexfp_exp = -hexfp_exp;
-#ifdef HEXFP_UQUAD
-                            hexfp_exp -= hexfp_frac_bits;
-#endif
-                            hexfp = TRUE;
-                            goto decimal;
-                        }
-                    }
-                }
-            }
-
-            if (!just_zero && !has_digs) {
-                /* 0x, 0o or 0b with no digits, treat it as an error.
-                   Originally this backed up the parse before the b or
-                   x, but that has the potential for silent changes in
-                   behaviour, like for: "0x.3" and "0x+$foo".
-                */
-                const char *d = s;
-                char *oldbp = PL_bufptr;
-                if (*d) ++d; /* so the user sees the bad non-digit */
-                PL_bufptr = (char *)d; /* so yyerror reports the context */
-                yyerror(form("No digits found for %s literal",
-                                  bases[shift]));
-                PL_bufptr = oldbp;
-            }
+            /* Here, nothing was found beyond a zero that we had already
+             * noticed.  Treat as a decimal */
+            has_digs = true;
+            type_bit = CC_DIGIT_;
+            shift1 = 3;
+            shift2 = 1;
+            base = 10;
         }
 
-        if (returned_flags & PERL_SCAN_SILENT_OVERFLOW) {
-            sv = newSVnv(n);
-        }
-        else {
-            sv = newSVuv(u);
+        if (integral_flags_return & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES) {
+            WARN_ABOUT_UNDERSCORE();
         }
 
-        if (returned_flags & PERL_SCAN_SILENT_NON_PORTABLE) {
-            output_non_portable(1 << shift);
+        /* final misplaced underbar check */
+        SUFFER_AN_UNDERSCORE_HERE(s);
+
+        /* If got to the end of the input, this is entirely an integer; skip
+         * looking for a fractional part or exponent */
+        if (s >= PL_bufend) {
+            goto out;
         }
 
-        if (just_zero && (PL_hints & HINT_NEW_INTEGER)) {
-            sv = new_constant(start, s - start, "integer",
-                              sv, NULL, NULL, 0, NULL);
-            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
-            DEBUG_U(sv_dump(sv));
+        /* But if what remains is a digit, it must be because it isn't a legal
+         * digit in this base.  This is a bit ambiguous: all digits are legal
+         * in bases 10 and 16.  In bases 2 and 8, what might have been
+         * intended to be a hex digit instead here ends the number without an
+         * error.  If so, it might be a legal construct, or an error would be
+         * raised outside this function */
+        if (isDIGIT_A(*s)) {
+            yyerror(form("Illegal %s digit '%c'", bases[shift2], *s));
+            goto out;
         }
-        else if (PL_hints & HINT_NEW_BINARY) {
-            sv = new_constant(start, s - start, "binary",
-                              sv, NULL, NULL, 0, NULL);
-            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
-            DEBUG_U(sv_dump(sv));
+        
+        /* Now peek ahead to see if there is a potential fraction or exponent
+         * following this integer.  Use this macro that looks for a likely
+         * exponent; it rejects most illegal values, but accepts illegal
+         * multiple signs (which will come out later).  'type' is one of
+         * [eEpP] */
+#       define COULD_BE_EXPONENT(s, e, type)                                \
+            (   (s) + 1 < (e)                                               \
+             && isALPHA_FOLD_EQ(*(s), type)                                 \
+                /* Note doesn't check for buffer overflow past e */         \
+             && isDIGIT(* (s + 1 + strspn((const char *) s + 1, "+-_"))))
+
+        if ( ! (    
+                    (   base == 10
+                        /* For base 10, we need either:
+                         *     1) a single dot and either or both a digit
+                         *        before it or after it */
+                     && (   (   *s == '.'
+                             && (s + 1 >= PL_bufend || s[1] != '.')
+                             && (has_digs || isDIGIT(s[1])))
+                             /* or 2) digits followed by an exponent */
+                         || (has_digs && COULD_BE_EXPONENT(s, PL_bufend,
+                                                           'e'))))
+
+                 || (    base != 10
+                            /* For the other bases, we need either:
+                             *     1) an exponent precededed by digits */
+                     && (   (has_digs && COULD_BE_EXPONENT(s, PL_bufend, 'p'))
+                            /*  or 2) a dot followed by:
+                             *          a) a digit of the proper type 
+                             *          b) a hexadecimal exponent  */
+                         || (   *s == '.'
+                             && (   generic_isCC_(s[1], type_bit)
+                                 || COULD_BE_EXPONENT(s + 1, PL_bufend,
+                                                      'p')))))))
+        {   /* Here what follows can't be a fraction nor exponent. */
+            goto out;
         }
     }
-    else if (isDIGIT_A(*s) || *s == '.') {
-      decimal:
 
-        /* handle decimal numbers.
-           we're also sent here when we read a 0 as the first digit
-         */
-        d = PL_tokenbuf;
-        e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punctuation */
-        floatit = FALSE;
-        if (hexfp) {
-            floatit = TRUE;
-            *d++ = '0';
-            switch (shift) {
-            case 4:
-                *d++ = 'x';
-                s = start + 2;
-                break;
-            case 3:
-                if (new_octal) {
-                    *d++ = 'o';
-                    s = start + 2;
-                    break;
-                }
-                s = start + 1;
-                break;
-            case 1:
-                *d++ = 'b';
-                s = start + 2;
-                break;
-            default:
-                NOT_REACHED; /* NOTREACHED */
+    /* Done with any integral part.  Now look for any fraction, then exponent.
+     * */
+
+    significant_bits = (u == 0) ? 0 : msbit_pos(u) + 1;
+    int preliminary_exponent;
+    preliminary_exponent = 0;
+
+    if (*s == '.') {
+
+        /* In case this is a false positive and have to back up. */
+        const char * dot_position;
+        dot_position = s;
+        uintmax_t frac;
+        Size_t frac_digit_count;
+
+        s++;
+        SUFFER_AN_UNDERSCORE_HERE(s);
+
+        U8 available_bits;
+
+        /* Here, have a decimal point.  We might have any of things like:
+         * 125.  125.0  125.0000  125.321  125.0000321  1250000.321  .321
+         *
+         * Absorb the fraction. */
+
+#if NV_PRESERVES_UV_BITS > UINTMAX_BITS
+#  define ALWAYS_USE_NV
+#endif
+#ifdef ALWAYS_USE_NV
+        n = u;
+#else
+        if (n)
+#endif
+
+        /* Here, the integral value is stored as an NV; either because it
+         * overflowed, or there is more space in an NV mantissa than an
+         * integer */
+        {
+            /* Parse the fraction */
+            SSize_t len = PL_bufend - s;
+            I32 frac_flags = call_flags;
+            NV frac_NV = 0;
+            frac_digit_count = 0;
+            frac = grok_uint_by_base(s, &len, &frac_flags,
+                                     &frac_NV,
+                                     &frac_digit_count,
+                                     UINTMAX_BITS, shift1, shift2, type_bit, 0);
+
+            if (frac_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES) {
+                WARN_ABOUT_UNDERSCORE();
+            }
+
+            /* Convert an integer return into an NV */
+            // XXX
+            if (frac_NV == 0.0) {
+                frac_NV = frac;
+            }
+
+            /* 32.1 is 32 + 1e-1;  32.01 is 32 + 1e-2 */
+            n += frac_NV / Perl_pow((base == 10) ? 10 : 2, frac_digit_count);
+        }
+
+#ifndef ALWAYS_USE_NV
+        else {
+            /* Absorb the fraction, treating it as an integer for now.  The
+             * goal is to raise both the integral part and this fraction to as
+             * high a power as necessary so they can be added together to form
+             * an integer that has a correspondingly negative exponent.  So
+             * 125.321 would become 125321e-3.  This keeps out any precision
+             * loss.
+             *
+             * But the fraction may have so many digits that doing this would
+             * overflow.  Instead, we discard the least significant fraction
+             * digits.  First find how many bits are available to include the
+             * fraction without precision loss */
+            available_bits = UINTMAX_BITS - significant_bits;
+
+            /* Now read the the fraction, for as many digits as can fit (but not
+             * beyond the buffer end */
+
+            SSize_t len = -1;
+            frac_digit_count = PL_bufend - s;
+            I32 frac_flags = call_flags | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+            frac = grok_uint_by_base(s, &len, &frac_flags,
+                                     /* Don't care about overflow, since is <
+                                      * 1 */
+                                     NULL,
+                                     &frac_digit_count,
+                                     available_bits,
+                                     shift1, shift2, type_bit, 0);
+
+            if (frac_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES) {
+                WARN_ABOUT_UNDERSCORE();
+            }
+
+            /* The other returnable flags are not relevant to us since this is a
+             * fraction, so that even if it overflows, it is still < 1.
+             * final value, and hence get discarded.
+             */
+            //*flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
+            //*flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+            //|  PERL_SCAN_SILENT_NON_PORTABLE;
+            // portability we don't care, as it's bugous.  above nv_
+            // max is just equiv to nv_max XXX maybe
+            if (len) {
+                has_digs = true;
+                s += len;
             }
         }
+#endif
+
+        /* Here is the end of the fraction component.  If it is a second dot,
+         * it has to be a vstring (or an error) */
+        if (*s == '.') {
+            s = start;
+            goto vstring;
+        }
+
+        SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
 
         /* If there are any digits left over, it is because they aren't in the
          * correct base */
         if (isDIGIT_A(*s)) {
-            yyerror(form("Illegal %s digit '%c' ignored", bases[shift2], *s));
+            yyerror(form("Illegal %s digit '%c'", bases[shift2], *s));
             goto out;
         }
 
@@ -12922,28 +12918,16 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             else if (base != 10) {
                  
                 /* For a binary base, everything is precise.  We ignore any
+u = 572957795130823 2088;
+n = u
+n = 5.72957795130823 17e+18
+    1 23456789112345 67892123456789312345678941234567895123456789612345678971234567898
+                
                  * low-order frac bits that would cause overflow when
                  * combined with the integral part.  Each digit occupies
                  * 'shift' bits.  Note that this automatically takes into
                  * account leading zeros in the fraction. */
                 U8 frac_bits_count = frac_digit_count * shift;
-
-                /* Truncate the fraction to not occupy more bits than
-                 * .1x returned as 1, really needs to be returned as 1000
-                 * maybe append as many bits as necessary to get to even
-                 * multiple of shift or to frac_bits_count, but this is not a
-                 * string;
-                 * available */
-                uint_fast8_t frac_shift = MAX(0,
-                                              frac_bits_count - available_bits);
-
-                /* Round the fraction by adding to it 1/2 the base to the
-                 * digit that will be final one after the operation */
-                // XXX round towards even
-                //frac += (base / 2) << (frac_shift - 1); wrong at least for
-                //base 2
-                frac >>= frac_shift;
-                frac_bits_count -= frac_shift;
 
                 /* Then make room in the integral part for the fraction */
                 u <<= frac_bits_count;
@@ -12953,7 +12937,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 preliminary_exponent -= frac_bits_count;
             }
             else {
-                do {
 
                 /* Base 10 is not precise, and we can't just use shifts to
                  * multiply and divide.  Instead we do an actual multiply of
@@ -12968,29 +12951,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                      * by truncating one-by-one the final remaining fractional
                      * digit (with rounding), until we have a reasonable
                      * result */
-                    uintmax_t multiplier = Perl_pow(10.0, frac_digit_count);
-
-                    /* If frac_digit_count is too high, it could overflow a
-                     * word, and leave it 0.  But if not, it could still
-                     * overflow.  We check for this by multiplying 'u' and see
-                     * if dividing back gives the original result.  If so,
-                     * there was enough room in the word to hold the
-                     * multiplied 'u', and we can quit. */
-                    if (multiplier) {
-                        uintmax_t temp = u * multiplier;
-                        if (temp / multiplier == u) {
-                            u = temp;
-                            break;
-                        }
-                    }
-
-                    /* But here, there isn't enough space to hold this many
-                     * digits in the fractional part plus the integral
-                     * portion.  Knock off the final fractional digit and try
-                     * again */
-                    frac += 10 / 2; //round
-                    frac /= 10;
-                } while (--frac_digit_count > 0);
+                    u *= Perl_pow(10.0, frac_digit_count);
 
                 /* Here, 'u' has been multiplied by just enough powers of 10
                  * to allow the fraction to be added to the space just made
@@ -13003,173 +12964,302 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 #endif
 
-        /* final misplaced underbar check */
-        SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
+    }
 
-        /* read a decimal portion if there is one.  avoid
-           3..5 being interpreted as the number 3. followed
-           by .5
-        */
-        if (*s == '.' && s[1] != '.') {
-            floatit = TRUE;
-            *d++ = *s++;
+    SUFFER_AN_UNDERSCORE_HERE(s);
 
-            SUFFER_AN_UNDERSCORE_HERE(s);
+    /* Now fold in any exponent.  An exponent needs some number to be applied
+     * to */
+    if (! has_digs) {
+        goto out;
+    }
 
-            /* copy, ignoring underbars, until we run out of digits.
-            */
-            while (   isDIGIT(*s)
-                   || *s == '_'
-                   || UNLIKELY(hexfp && isXDIGIT(*s)))
-            {
-                /* fixed length buffer check */
-                if (d >= e)
-                    croak("%s", number_too_long);
-                if (*s == '_') {
-                    HANDLE_UNDERSCORE(s);
-                }
-                else
-                    *d++ = *s++;
-            }
+    int exponent_type;
+    exponent_type = (isALPHA_FOLD_EQ(*s, 'e')) ? 1
+                  : (isALPHA_FOLD_EQ(*s, 'p')) ? -1
+                  : 0;
+    const char * before_exponent;   /* In case we have to back out */
+    before_exponent = s;
 
-            SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
+    NV exponent;
+    if (! exponent_type) {
 
-            if (*s == '.' && isDIGIT(s[1])) {
-                /* oops, it's really a v-string, but without the "v" */
-                s = start;
-                goto vstring;
-            }
-        }
-
-        /* read exponent part, if present */
-        if ((isALPHA_FOLD_EQ(*s, 'e')
-              || UNLIKELY(hexfp && isALPHA_FOLD_EQ(*s, 'p')))
-            && memCHRs("+-0123456789_", s[1]))
-        {
-            int exp_digits = 0;
-            const char *save_s = s;
-            char * save_d = d;
-
-            /* regardless of whether user said 3E5 or 3e5, use lower 'e',
-               ditto for p (hexfloats) */
-            if ((isALPHA_FOLD_EQ(*s, 'e'))) {
-                /* At least some Mach atof()s don't grok 'E' */
-                *d++ = 'e';
-            }
-            else if (UNLIKELY(hexfp && (isALPHA_FOLD_EQ(*s, 'p')))) {
-                *d++ = 'p';
-            }
-
-            s++;
-
-
-            /* stray preinitial _ */
-            SUFFER_AN_UNDERSCORE_HERE(s);
-
-            /* allow positive or negative exponent */
-            if (*s == '+' || *s == '-')
-                *d++ = *s++;
-
-            /* stray initial _ */
-            SUFFER_AN_UNDERSCORE_HERE(s);
-
-            /* read digits of exponent */
-            while (isDIGIT(*s) || *s == '_') {
-                if (isDIGIT(*s)) {
-                    ++exp_digits;
-                    if (d >= e)
-                        croak("%s", number_too_long);
-                    *d++ = *s++;
-                }
-                else {  /* Must be an underscore */
-                    HANDLE_UNDERSCORE(s);
-                }
-            }
-
-            SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
-
-            if (!exp_digits) {
-                /* no exponent digits, the [eEpP] could be for something else,
-                 * though in practice we don't get here for p since that's preparsed
-                 * earlier, and results in only the 0xX being consumed, so behave similarly
-                 * for decimal floats and consume only the D.DD, leaving the [eE] to the
-                 * next token.
-                 */
-                s = save_s;
-                d = save_d;
-            }
-            else {
-                floatit = TRUE;
-            }
-        }
-
-
-        /*
-           We try to do an integer conversion first if no characters
-           indicating "float" have been found.
-         */
-
-        if (!floatit) {
-            UV uv;
-            const int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
-
-            /* scan_num only parses tokens beginning with a digit or '.'
-               which can't be a negative number. */
-            assert(!(flags & IS_NUMBER_NEG));
-
-            if (flags == IS_NUMBER_IN_UV) {
-                /* Note that newSVuv will create IV if uv <= IV_MAX */
-                sv = newSVuv(uv);
-            } else
-              floatit = TRUE;
-        }
-        if (floatit) {
-            /* terminate the string */
-            *d = '\0';
-            if (UNLIKELY(hexfp)) {
-#  ifdef NV_MANT_DIG
-                if (significant_bits > NV_MANT_DIG)
-                    ck_warner(packWARN(WARN_OVERFLOW),
-                              "Hexadecimal float: mantissa overflow");
-#  endif
-#ifdef HEXFP_UQUAD
-                nv = (NV)hexfp_uquad;
-#else /* HEXFP_NV */
-                nv = hexfp_nv;
-#endif
-#ifdef Perl_ldexp
-                nv = Perl_ldexp(nv, hexfp_exp);
-#else
-                nv *= Perl_pow(2.0, hexfp_exp);
-#endif
-            } else {
-                nv = Atof(PL_tokenbuf);
-            }
-            sv = newSVnv(nv);
-        }
-
-        if ( floatit
-             ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) ) {
-            const char *const key = floatit ? "float" : "integer";
-            const STRLEN keylen = floatit ? 5 : 7;
-            sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
-                                key, keylen, sv, NULL, NULL, 0, NULL);
-        }
+        /* If no explicit exponent, use the value calculated earlier */
+        exponent = preliminary_exponent;
     }
     else {
-        croak("panic: scan_num, *s=%c", *s);
+        bool negexp = FALSE;
+        s++;
+
+        SUFFER_AN_UNDERSCORE_HERE(s);
+
+        if (*s == '+')
+            s++;
+        else if (*s == '-') {
+            negexp = TRUE;
+            s++;
+        }
+
+        SUFFER_AN_UNDERSCORE_HERE(s);
+
+        I32 exp_flags = call_flags;
+        SSize_t len = PL_bufend - s;
+        exponent = grok_uint_by_base(s, &len, &exp_flags,
+                                     /* Don't care about overflow, since an
+                                      * exponent that large is effectively
+                                      * infinity */
+                                      NULL,
+                                      NULL, /* Don't care how many digits here
+                                             */
+                                      UINTMAX_BITS, 3, 1, CC_DIGIT_, 0);
+        //*flags |= PERL_SCAN_SILENT_OVERFLOW;
+        if (exp_flags & PERL_SCAN_SUFFER_CONSECUTIVE_UNDERSCORES) {
+            WARN_ABOUT_UNDERSCORE();
+        }
+        //*flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
+        //*flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+
+        if (len == 0) {
+            s = before_exponent;
+        }
+        else {
+            s += len;
+        }
+
+        floatit = true;
+
+        SUFFER_AN_UNDERSCORE_HERE(s);
+
+        if (u == 0) {
+            exponent = 0;
+        }
+        else {
+
+            if (negexp) {
+                exponent = -exponent;
+            }
+
+            exponent += preliminary_exponent;
+        }
     }
 
-    /* make the op for the constant and return */
+    /* Here, have calculated the exponent; are completely done with parsing
+     * the number. */
 
-    if (sv)
-        lvalp->opval = newSVOP(OP_CONST, 0, sv);
-    else
-        lvalp->opval = NULL;
+#ifdef ALWAYS_USE_NV
+    /* We may have to deal with subnormals
+     */
+    // But we may underflow with this?? n = Perl_frexp(n, &exp
+#else
 
-    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: returning %s\n", __FILE__, (long) __LINE__, s));
-    DEBUG_U(sv_dump(sv));
-    return (char *)s;
+    /* We now may need to adjust the current value.  This is done if either of
+     * the following conditions exist:
+     *
+     * 1) The ultimate result here is an NV with a mantissa and exponent.
+     *    The mantissa may well have fewer bits available than the integral
+     *    value now occupies.  But if there are low-order zero bits, we could
+     *    change the would-be mantissa to occupy fewer bits by shifting some
+     *    or all of those off while adjusting the exponent accordingly up;
+     *    hence not changing the actual value.  Even if there are not enough
+     *    zero bits, we can lessen the loss of precision by getting rid of
+     *    them.  We let the compiler deal with the remaining loss of
+     *    precisions when it converts the integer to an NV.
+     *
+     * 2) We also need to adjust the exponent up if it is below the legal
+     *    minimum, again by shifting off any low-order zero bits from the
+     *    mantissa.  We let libc deal with creating subnormals when it
+     *    combines our integer with the exponent.
+     */
+
+    uint_fast8_t low_zero_bits_count;
+    significant_bits = (u == 0) ? 0 : msbit_pos(u) + 1;
+    low_zero_bits_count = (u == 0) ? 0 : lsbit_pos(u);
+    int  min_legal_exponent;
+    min_legal_exponent = (base == 10) ? NV_MIN_10_EXP : NV_MIN_EXP;
+    if (   exponent < min_legal_exponent
+        || significant_bits > NV_PRESERVES_UV_BITS)
+    {
+        if (base != 10) {   /* It's easiest with the binary bases */
+            uint_fast8_t used_bits =  significant_bits - low_zero_bits_count;
+            if (used_bits > NV_PRESERVES_UV_BITS) {
+                ck_warner(packWARN(WARN_OVERFLOW),
+                        "Hexadecimal float: mantissa overflow");
+            }
+
+            /* By shifting all the low-order zero bits off, we cause the
+             * would-be mantissa to occupy the fewest number of bits,
+             * minimizing any precision loss.  For the case where we are doing
+             * this because it doesn't fit, we only need to shift enough bits
+             * to get the total bits used down to what fits in the mantissa,
+             * but khw sees no reason not to shift as much as possible, except
+             * as noted just below. */
+            uint_fast8_t rshift;
+            if (exponent > 0) {
+                /* But, we can't go above the legal maximum */
+                rshift = MIN(NV_MAX_EXP - exponent, low_zero_bits_count);
+            }
+            else {
+                rshift = low_zero_bits_count;
+            }
+
+            u >>= rshift;
+            exponent += rshift;
+            significant_bits -= rshift;
+        }
+        else {    /* base 10 */
+
+            /* Keep goThen try to fit the mantissa */
+            while (   exponent < NV_MIN_10_EXP
+                   || (   exponent < NV_MAX_10_EXP
+                       && msbit_pos(u) + 1 - lsbit_pos(u) > NV_PRESERVES_UV_BITS))
+            {
+                uintmax_t tentative = u;
+
+                if (exponent < NV_MIN_10_EXP) {
+                    //tentative += 5; // Doesn't round towards even XXX
+                                    //
+                }
+                tentative /= 10;
+
+                /* Don't let it go to zero */
+                if (tentative == 0) {
+                    break;
+                }
+
+                /* If we are trying to get above the minimum exponent, we
+                 * don't care about the result being divisible by 10
+                 * XXX But otherwise stop when we get to a number not
+                 * evenly divisible by 10 */
+                if (tentative * 10 != u) {
+                //if (exponent >= NV_MIN_10_EXP && tentative * 10 != u) {
+                    break;
+                }
+
+                u = tentative;
+                exponent++;
+            }
+        }
+    }
+
+#endif
+
+    if (exponent != 0) {
+
+        /* Finally, combine everything together */
+
+#ifdef Perl_ldexp
+        if (base != 10 && exponent >= NV_MIN_EXP && (int) exponent == exponent) {
+            n = Perl_ldexp((n == 0) ? u : n, (int) exponent);
+        }
+        else
+#endif
+        {
+            /* Here's where we lose integer precision */
+            if (n == 0) {
+                n = u;
+            }
+
+            if (n != 0) {
+                NV raised = (base == 10) ? 10.0 : 2.0;
+
+                /* Multiply (or divide) exactly once to save as much precision
+                 * as possible.  khw found on his box that trying to collapse
+                 * these into just a multiplication by not taking the
+                 * abs(exponent) above resulted in a loss of precision */
+                if (exponent >= 0) {
+                    n *= Perl_pow(raised, exponent);
+                }
+                else {
+                    NV delta = min_legal_exponent - exponent;
+                    if (delta > 0) {
+                        n /= Perl_pow(raised, delta);
+                        exponent += delta;
+                    }
+
+                    n /= Perl_pow(raised, PERL_ABS(exponent));
+
+                    if (! n) {
+                        underflowed = true;
+                    }
+                }
+            }
+        }
+
+        /* For non-decimal, warn on over/underflow */
+        if (base != 10) {
+            if (exponent < NV_MIN_EXP - 1 || underflowed) {
+                /* NOTE: this means that the exponent underflow warning
+                 * happens for the IEEE 754 subnormals (denormals), because
+                 * DBL_MIN_EXP etc are the lowest possible binary (or, rather,
+                 * DBL_RADIX-base) exponent for normals, not subnormals.
+                 *
+                 * This may or may not be a good thing. */
+                ck_warner(packWARN(WARN_OVERFLOW),
+                            "Hexadecimal float: exponent underflow");
+            }
+            else if (exponent > NV_MAX_EXP - 1) {
+                ck_warner(packWARN(WARN_OVERFLOW),
+                            "Hexadecimal float: exponent overflow");
+            }
+        }
+    }
+
+  out:
+
+    /* */
+    if (! floatit && integral_flags_return & PERL_SCAN_SILENT_NON_PORTABLE) {
+        output_non_portable(base);
+    }
+
+    if (n || underflowed) { //integral_flags_return & PERL_SCAN_GREATER_THAN_UV_MAX) \{
+        sv = newSVnv(n);
+    }
+    else if (floatit) {
+        sv = newSVnv(u);
+    }
+    else {
+        sv = newSVuv(u);
+    }
+
+    if (!just_zero && !has_digs && significant_bits == 0) {
+        /* 0x, 0o or 0b with no digits, treat it as an error.
+         *
+         * Originally this backed up the parse before the b or x, but that has
+         * the potential for silent changes in behaviour, like for: "0x.3" and
+         * "0x+$foo". */
+        const char *d = s;
+        char *oldbp = PL_bufptr;
+        if (*d) ++d; /* so the user sees the bad non-digit */
+        PL_bufptr = (char *)d; /* so yyerror reports the context */
+        yyerror(form("No digits found for %s literal", bases[shift2]));
+        PL_bufptr = oldbp;
+    }
+
+    /* Create the value for overloaded constants */
+    if (PL_hints & (HINT_NEW_FLOAT | HINT_NEW_INTEGER | HINT_NEW_BINARY)) {
+        if (floatit && PL_hints & HINT_NEW_FLOAT) {
+            sv = new_constant(start, s - start, "float",
+                                sv, NULL, NULL, 0, NULL);
+        }
+        else if (   (just_zero || base == 10)
+                 && (PL_hints & HINT_NEW_INTEGER))
+        {
+            sv = new_constant(start, s - start, "integer",
+                                sv, NULL, NULL, 0, NULL);
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
+            DEBUG_U(sv_dump(sv));
+        }
+        else {
+            sv = new_constant(start, s - start, "binary",
+                                sv, NULL, NULL, 0, NULL);
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %ld: ", __FILE__, (long) __LINE__));
+            DEBUG_U(sv_dump(sv));
+        }
+    }
+
+    /* In order to minimize nested blocks, this goto is used.  If we did a
+     * goto earlier, the compiler says it skipped initialization. */
+    goto done;
 }
 
 STATIC char *

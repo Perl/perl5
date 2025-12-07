@@ -1434,7 +1434,7 @@ Adip	|UV	|grok_oct	|NN const char *start			\
 				|NULLOK NV *result
 Cdp	|UV	|grok_uint_by_base					\
 				|NN const char * const start		\
-				|NN STRLEN *len_p			\
+				|NN SSize_t *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
 				|NULLOK STRLEN *digit_count		\
