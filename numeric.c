@@ -556,12 +556,10 @@ mode requires the input string to be NUL-terminated.
 
     /* Loop through the characters */
     for (; s < e; s++) {
-        if (generic_isCC_(*s, lookup_bit)) {
+        if (LIKELY(generic_isCC_(*s, lookup_bit))) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
-               With gcc seems to be much straighter code than old scan_hex.
-               (khw suspects that adding a LIKELY() just above would do the
-               same thing) */
+               With gcc seems to be much straighter code than old scan_hex. */
           redo: ;
             U8 this_digit_value = XDIGIT_VALUE(*s);
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
