@@ -281,7 +281,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         NV *result,
 
                         /* Each of the shift parameters is 0 for binary; 2 for
-                         * octal; 3 for hex */
+                         * octal; 3 for hex.  For decimal shift1 is 3, shift2
+                         * is 1 */
                         const unsigned shift1,
                         const unsigned shift2,
 
@@ -292,7 +293,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 {
     PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
     ASSUME(inRANGE(shift1, 0, 3) && shift1 != 1);
-    ASSUME(shift2 == shift1);
+    ASSUME(shift2 == shift1 || (shift1 == 3 && shift2 == 1));
 
     /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
      * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
@@ -328,8 +329,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * integer multiplication is fast, it could be simply written as
      *      (value * base)
      *
-     * Shift by 1 less than expected, yielding a result of half the desired
-     * amount; do it again; then add them */
+     * For base 10, we shift 3 to multiply by 8; shift 1 to multiply by 2, and
+     * add the results to get 10.
+     *
+     * For the divisible-by-2 bases, shift by 1 less than expected, yielding a
+     * result of half the desired amount; do it again; then add them */
 #define MULTIPLY_BY_BASE(value)  (((value) << shift1) + ((value) << shift2))
 
 
@@ -387,9 +391,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
           /* If we get here, and the accumulated value is still 0, it is
            * because there are more leading zeros than the cases of this
-           * switch(),  These are common enough with these kinds of
-           * binary-style numbers that it is worth this extra conditional to
-           * continue absorbing them via the switch. */
+           * switch(),  These are common enough with the binary-style numbers
+           * that it is worth this extra conditional to continue absorbing
+           * them via the switch. */
           if (value == 0) {
               goto redo_switch;
           }
@@ -397,15 +401,24 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           break;
     }   /* End of switch on the first so-many characters */
 
-    const U8 shift = shift1 + 1;
-    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    /* 2, 8, 10, or 16 */
+    const PERL_UINT_FAST8_T base = (1 << shift1) + (1 << shift2);
 
 #ifdef Perl_ldexp
-#  define multiply_by_exponent(nv, digits)                                  \
-            STMT_START { nv = Perl_ldexp(nv, digits * shift); } STMT_END
+    const U8 shift = shift1 + 1;
+
+#  define multiply_by_exponent(nv, digits)                      \
+      STMT_START {                                              \
+                    if (base != 10) {                           \
+                        nv = Perl_ldexp(nv, digits * shift);    \
+                    }                                           \
+                    else {                                      \
+                        nv *= Perl_pow(base, digits);           \
+                    }                                           \
+      } STMT_END
 #else
-#  define multiply_by_exponent(nv, digits)                                  \
-                   STMT_START { nv *= Perl_pow(base, digits); } STMT_END
+#  define multiply_by_exponent(nv, digits)                      \
+      STMT_START { nv *= Perl_pow(base, digits); } STMT_END
 #endif
 
     /* The loop below accumulates the integral running total of the result,
@@ -419,16 +432,23 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     Size_t batch_digit_count = 0;
 
 #ifdef NV_PRESERVES_UV
-    /* As long as the running total is less than this, the next digit will
-     * fit. */
-    UV max_div = UV_MAX >> shift;
+    /* Value, above which, the next digit processed would overflow */
+    UV batch1_max_uint = UV_MAX;
 #else
-    UV max_div = nBIT_UMAX(NV_PRESERVES_UV_BITS) >> shift;
+    UV batch1_max_uint = nBIT_UMAX(NV_PRESERVES_UV_BITS);
 
     /* We set a checkpoint when we reach the first batch's limit */
     UV checkpoint_value = 0;
     const char * checkpoint_s = NULL;
 #endif
+
+    /* As long as the running total is less than this, the next digit will
+     * fit. */
+    UV max_div = batch1_max_uint / base;
+
+    /* When the running total equals 'max_div', the next digit will fit if it
+     * is <= this */
+    UV final_digit_max = batch1_max_uint - MULTIPLY_BY_BASE(max_div);
 
     bool overflowed = FALSE;
     NV value_nv = 0;
@@ -455,8 +475,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
+
             /* If there is room for this digit, accumulate it and repeat */
-            if (LIKELY(value <= max_div)) {
+            if (   LIKELY(value < max_div)
+                || (value == max_div && this_digit_value <= final_digit_max))
+            {
                 value = MULTIPLY_BY_BASE(value) + this_digit_value;
                 batch_digit_count++;
                 continue;
@@ -482,7 +505,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 /* But, for the remaining batches, use all available bits in
                  * the integer.  This may reduce the number of batches needed,
                  * hence fewer floating point operations. */
-                max_div = UV_MAX >> shift;
+                max_div = UV_MAX / base;
+                final_digit_max = UV_MAX - MULTIPLY_BY_BASE(max_div);
                 goto redo;
             }
 #endif
@@ -589,11 +613,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
         else if (ckWARN_d(WARN_OVERFLOW)) {
             warner(packWARN(WARN_OVERFLOW),
-                    "Integer overflow in %s number",
-                    (base == 16) ? "hexadecimal"
-                                : (base == 2)
-                                    ? "binary"
-                                    : "octal");
+                           "Integer overflow in %s number",
+                           (base == 16) ? "hexadecimal" :
+                           (base == 8)  ? "octal" :
+                           (base == 2)  ? "binary"
+                                        : "unexpected base");
         }
 
         value = UV_MAX;
@@ -617,10 +641,11 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             if (base != 8) {
                 warner(packWARN(WARN_DIGIT),
                         "Illegal %s digit '%c' ignored",
-                        ((base == 2)
-                        ? "binary"
-                        : "hexadecimal"),
-                        *s);
+                          (  (base == 2)  ? "binary"
+                           : (base == 16) ? "hexadecimal"
+                           :                "unexpected base"),
+                          *s);
+                        
             }
             else if (isDIGIT(*s)) { /* octal base */
 
