@@ -16,9 +16,9 @@ version 5 (hereafter just Perl) is compiled and/or runs.
 =head2 Deploying Perl on Linux
 
 Normally one can install F</usr/bin/perl> on Linux using your distribution's
-package manager (e.g: C<sudo apt-get install perl>, or
+package manager (e.g., C<sudo apt-get install perl>, or
 C<sudo dnf install perl>). Note that sometimes one needs to install some
-extra system packages in order to be able to use CPAN frontends, and that
+extra system packages in order to be able to use CPAN packages, and that
 messing with the system's perl is not always recommended. One can use
 L<perlbrew|https://perlbrew.pl/> to avoid such issues.
 
@@ -32,7 +32,7 @@ Linux.  As of May 2019, the last stable release took place on 2017, and one can
 buy support contracts for them.
 
 There are some special instructions for building Perl with Sun Studio on
-Linux.  Following the normal C<Configure>, you have to run make as follows:
+Linux.  Following the normal C<Configure>, you have to run F<make> as follows:
 
     LDLOADLIBS=-lc make
 
