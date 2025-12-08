@@ -12954,22 +12954,9 @@ n = 5.72957795130823 17e+18
                  *      4 7 10 14 17 20 24 27 30 ...
                  * We eat an extra bit on average of every 3 digits.  The
                  * bottom line is that we can overflow. */
-                bool overflowed = false;
-                uintmax_t tentative;
-
-                /* Check if overflowed */
-                while (frac_digit_count > 0) {
-                    NV factor = Perl_pow(10.0, frac_digit_count);
-                    tentative = u * factor;
-                    if (tentative / factor == u) {
-                        break;
-                    }
-
-                    overflowed = true;
-                    frac_digit_count--;
-                }
-
-                if (overflowed) {
+                NV factor = Perl_pow(10.0, frac_digit_count);
+                uintmax_t tentative = u * factor;
+                if (tentative / factor != u) {
                     s-= frac_len;
                     significant_bits++;
                     goto redo_fraction;

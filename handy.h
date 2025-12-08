@@ -319,10 +319,8 @@ don't, so that you can portably take advantage of this C99 feature.
  * TYPE_DIGITS gives the number of decimal digits required to represent any
  * possible unsigned number of type T. */
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log10(2) =~ 146/485 */
-//#define DIGIT_BITS(N)   (((N)*485/146) + 1)
 #define TYPE_DIGITS(T)  BIT_DIGITS(sizeof(T) * 8)
 #define TYPE_CHARS(T)   (TYPE_DIGITS(T) + 2) /* sign, NUL */
-//#define DIGIT_BITS(N)   (((N)*485)/146)  /* log10(2) =~ 146/485 */
 
 /* Unused by core; should be deprecated */
 #define Ctl(ch) ((ch) & 037)

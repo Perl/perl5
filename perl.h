@@ -8080,7 +8080,9 @@ C<strtoul>.
 #   define Atoul(s)	Strtoul(s, NULL, 10)
 #endif
 
-#define UINTMAX_BITS 64
+#ifndef UINTMAX_BITS
+#  define UINTMAX_BITS UV_BITS
+#endif
 
 #ifndef PERL_SCRIPT_MODE
 #define PERL_SCRIPT_MODE "r"
