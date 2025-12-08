@@ -137,6 +137,7 @@ while (<$diagfh>) {
                                     && !$entries{$cur_entry}{cattodo}) {
         my $data_line= $entries{$cur_entry}{todo_line};
         TODO: {
+            no warnings 'once';
             local $::TODO = "Remove the TODO entry \"$cur_entry\" from DATA "
                           . "at $0 line $data_line as it is already in $pod near line $.";
             ok($cur_entry);
