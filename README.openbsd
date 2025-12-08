@@ -17,9 +17,9 @@ version 5 (hereafter just Perl) is compiled and/or runs.
 
 When Perl is configured to use ithreads, it will use re-entrant library calls
 in preference to non-re-entrant versions.  There is an incompatibility in
-OpenBSD's C<getprotobyname_r> and C<getservbyname_r> function in versions 3.7
+OpenBSD's C<getprotobyname_r> and C<getservbyname_r> functions in versions 3.7
 and later that will cause a SEGV when called without doing a C<bzero> on
-their return structs prior to calling these functions.  Current Perl's
+their return structs prior to calling these functions.  Current Perls
 should handle this problem correctly.  Older threaded Perls (5.8.6 or earlier)
 will run into this problem.  If you want to run a threaded Perl on OpenBSD
 3.7 or higher, you will need to upgrade to at least Perl 5.8.7.
