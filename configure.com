@@ -6855,6 +6855,7 @@ $ WC "usevfork='true'"
 $ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
 $ WC "uvoformat='" + uvoformat + "'"
 $ WC "uvsize='" + uvsize + "'"
+$ WC "uintmaxsize='" + uvsize + "'"
 $ WC "uvtype='" + uvtype + "'"
 $ WC "uvuformat='" + uvuformat + "'"
 $ WC "uvxformat='" + uvxformat + "'"

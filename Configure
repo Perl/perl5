@@ -5798,7 +5798,12 @@ int main()
 	printf("intsize=%d;\n", (int)sizeof(int));
 	printf("longsize=%d;\n", (int)sizeof(long));
 	printf("shortsize=%d;\n", (int)sizeof(short));
+#ifdef I_STDINT
 	printf("uintmaxsize=%d;\n", (int)sizeof(uintmax_t));
+#else
+	printf("uintmaxsize=%d;\n", (int)sizeof(long));
+        /* long long XXX */
+#endif
 	exit(0);
 }
 EOCP
