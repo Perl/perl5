@@ -190,6 +190,7 @@ my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 # so no warning bit is needed anymore
 my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
   deprecated::goto_construct
+  deprecated::missing_import_called_with_args
   deprecated::smartmatch
   experimental::lexical_subs
   experimental::postderef

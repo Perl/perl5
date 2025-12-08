@@ -196,24 +196,25 @@ my $x = {}; bless $x, 'X';
 ok $x->isa('UNIVERSAL');
 ok $x->isa('UNIVERSAL');
 
+sub test_undefined_method {
+    my $method = shift;
+    my @message_components = (
+        q|Attempt to call undefined|,
+        q|method with arguments via package "Some::Package"|,
+        q|(Perhaps you forgot to load the package?)|,
+    );
+    my $message = join ' ' => (
+        $message_components[0],
+        $method,
+        @message_components[1,2],
+    );
+    my $pattern = qr/\Q$message\E/;
 
-{
-    my $err;
-    $SIG{__WARN__}= sub { die $_[0] };
-    eval { Some::Package->import("bar") };
-    my $err = $@;
-    $err=~s!t/op!op!;
-    is $err, "Attempt to call undefined import method with arguments (\"bar\")"
-           . " via package \"Some::Package\" (Perhaps you forgot to load"
-           . " the package?) at op/universal.t line 203.\n";
-    eval { Some::Package->unimport(1.234) };
-    $err = $@;
-    $err=~s!t/op!op!;
-    is $err, "Attempt to call undefined unimport method with arguments (\"1.234\")"
-           . " via package \"Some::Package\" (Perhaps you forgot to load"
-           . " the package?) at op/universal.t line 209.\n";
-
+    eval { Some::Package->$method("bar") };
+    like $@, $pattern, "Got expected pattern for undefined $method";
 }
+
+test_undefined_method($_) for (qw| import unimport |);
 
 # This segfaulted in a blead.
 fresh_perl_is('package Foo; Foo->VERSION;  print "ok"', 'ok');
