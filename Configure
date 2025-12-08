@@ -1,5 +1,4 @@
 #! /bin/sh
-set -x
 #
 # If these # comments don't work, trim them. Don't worry about any other
 # shell scripts, Configure will trim # comments from them for you.
