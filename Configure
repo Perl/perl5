@@ -1,4 +1,5 @@
 #! /bin/sh
+set -x
 #
 # If these # comments don't work, trim them. Don't worry about any other
 # shell scripts, Configure will trim # comments from them for you.
@@ -1245,6 +1246,7 @@ u64size=''
 u64type=''
 u8size=''
 u8type=''
+uintmaxsize=''
 uvsize=''
 uvtype=''
 ivdformat=''
@@ -5783,9 +5785,13 @@ case "$intsize" in
 	echo "Checking to see how big your integers are..." >&4
 	$cat >try.c <<EOCP
 #include <stdio.h>
+#include <stdint.h>
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
+#endif
+#ifdef I_STDINT
+#include <stdint.h>
 #endif
 #include <stdio.h>
 int main()
@@ -5793,6 +5799,7 @@ int main()
 	printf("intsize=%d;\n", (int)sizeof(int));
 	printf("longsize=%d;\n", (int)sizeof(long));
 	printf("shortsize=%d;\n", (int)sizeof(short));
+	printf("uintmaxsize=%d;\n", (int)sizeof(uintmax_t));
 	exit(0);
 }
 EOCP
@@ -5802,6 +5809,7 @@ EOCP
 		echo "Your integers are $intsize bytes long."
 		echo "Your long integers are $longsize bytes long."
 		echo "Your short integers are $shortsize bytes long."
+		echo "Your longest integers are $uintmaxsize bytes long."
 	else
 		$cat >&4 <<EOM
 !
@@ -26032,6 +26040,7 @@ uidformat='$uidformat'
 uidsign='$uidsign'
 uidsize='$uidsize'
 uidtype='$uidtype'
+uintmaxsize='$uintmaxsize'
 uname='$uname'
 uniq='$uniq'
 uquadtype='$uquadtype'
