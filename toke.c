@@ -12785,11 +12785,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         SUFFER_AN_UNDERSCORE_HERE(s);
 
         U8 available_bits;
+        SSize_t frac_len;
 
         /* Here, have a decimal point.  We might have any of things like:
          * 125.  125.0  125.0000  125.321  125.0000321  1250000.321  .321
          *
          * Absorb the fraction. */
+      redo_fraction:
 
 #if NV_PRESERVES_UV_BITS > UINTMAX_BITS
 #  define ALWAYS_USE_NV
@@ -12805,11 +12807,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
          * integer */
         {
             /* Parse the fraction */
-            SSize_t len = PL_bufend - s;
+            frac_len = PL_bufend - s;
             I32 frac_flags = call_flags;
             NV frac_NV = 0;
             frac_digit_count = 0;
-            frac = grok_uint_by_base(s, &len, &frac_flags,
+            frac = grok_uint_by_base(s, &frac_len, &frac_flags,
                                      &frac_NV,
                                      &frac_digit_count,
                                      UINTMAX_BITS, shift1, shift2, type_bit, 0);
@@ -12843,16 +12845,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
              * fraction without precision loss */
             available_bits = UINTMAX_BITS - significant_bits;
 
-            /* Now read the the fraction, for as many digits as can fit (but not
-             * beyond the buffer end */
-
-            SSize_t len = -1;
+            /* Now parse the the fraction, using a special mode that rounding
+             * the return to fit into a a maximum of that many bits.  This
+             * mode is triggered by all of:
+             *  1) Setting frac_len to -1
+             *  2) Setting the real length into 'frac_digit_count'
+             *  3) Setting the appropriate flag
+             *  4) Passing the bits restriction in the appropriate parameter
+             * Except for rounding, digits that would cause the result to
+             * exceed the allowed number of bits are discarded */
+            frac_len = -1;
             frac_digit_count = PL_bufend - s;
-            I32 frac_flags = call_flags | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
-            frac = grok_uint_by_base(s, &len, &frac_flags,
-                                     /* Don't care about overflow, since is <
-                                      * 1 */
-                                     NULL,
+            I32 frac_flags = call_flags
+                           | PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+            frac = grok_uint_by_base(s, &frac_len, &frac_flags,
+                                     NULL,  /* Can't overflow */
                                      &frac_digit_count,
                                      available_bits,
                                      shift1, shift2, type_bit, 0);
@@ -12868,11 +12875,10 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             //*flags |= PERL_SCAN_NOTIFY_ILLDIGIT;
             //*flags |= PERL_SCAN_GREATER_THAN_UV_MAX
             //|  PERL_SCAN_SILENT_NON_PORTABLE;
-            // portability we don't care, as it's bugous.  above nv_
             // max is just equiv to nv_max XXX maybe
-            if (len) {
+            if (frac_len) {
                 has_digs = true;
-                s += len;
+                s += frac_len;
             }
         }
 #endif
@@ -12938,20 +12944,38 @@ n = 5.72957795130823 17e+18
             }
             else {
 
-                /* Base 10 is not precise, and we can't just use shifts to
-                 * multiply and divide.  Instead we do an actual multiply of
-                 * the integral part by enough 10's to make room for the
-                 * fractional digits. */
+                /* Base 10 is not precise as to bits, and we can't just use
+                 * shifts to multiply and divide.  Instead we do an actual
+                 * multiply of the integral part by enough 10's to make room
+                 * for the fractional digits.  Each such multiply requires
+                 * about 3.3 bits, which shows up as a step function.  Here's
+                 * the first few values for how many bits 1 * 10, 1 * 100, 1 *
+                 * 1000 ...  requires:
+                 *      4 7 10 14 17 20 24 27 30 ...
+                 * We eat an extra bit on average of every 3 digits.  The
+                 * bottom line is that we can overflow. */
+                bool overflowed = false;
+                uintmax_t tentative;
 
-                    /* Earlier, we ignored the digits in the fraction past the
-                     * XXX no longer true?
-                     * precision of the word size.  But for base 10, this
-                     * isn't quite precise: we may still have a little too
-                     * many.  Back off until we don't overflow.  This is done
-                     * by truncating one-by-one the final remaining fractional
-                     * digit (with rounding), until we have a reasonable
-                     * result */
-                    u *= Perl_pow(10.0, frac_digit_count);
+                /* Check if overflowed */
+                while (frac_digit_count > 0) {
+                    NV factor = Perl_pow(10.0, frac_digit_count);
+                    tentative = u * factor;
+                    if (tentative / factor == u) {
+                        break;
+                    }
+
+                    overflowed = true;
+                    frac_digit_count--;
+                }
+
+                if (overflowed) {
+                    s-= frac_len;
+                    significant_bits++;
+                    goto redo_fraction;
+                }
+
+                u = tentative;
 
                 /* Here, 'u' has been multiplied by just enough powers of 10
                  * to allow the fraction to be added to the space just made
