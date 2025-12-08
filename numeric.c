@@ -294,7 +294,7 @@ Perl_grok_uint_by_base(pTHX_
                        I32 *flags,
                        NV *result,
                        Size_t *digit_count,
-                       U8 max_permissible_bits,
+                       uint_fast8_t max_permissible_bits,
 
                        /* Each of the shift parameters is 0 for binary; 2 for
                         * octal; 3 for hex.  For decimal shift1 is 3, shift2
@@ -303,9 +303,9 @@ Perl_grok_uint_by_base(pTHX_
                        uint_fast8_t shift2,
 
                        /* bit to pass to generic_isCC_() for lookup */
-                       U8 lookup_bit,
+                       uint_fast8_t lookup_bit,
 
-                       U8 offset
+                       uint_fast8_t offset
                       )
 {
     PERL_ARGS_ASSERT_GROK_UINT_BY_BASE;

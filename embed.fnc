@@ -1432,17 +1432,17 @@ Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
-Cdp	|UV	|grok_uint_by_base					\
+Cdp	|uintmax_t|grok_uint_by_base					\
 				|NN const char * const start		\
 				|NN SSize_t *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
 				|NULLOK STRLEN *digit_count		\
-				|U8 max_permissible_bits		\
+				|uint_fast8_t max_permissible_bits	\
 				|uint_fast8_t shift1			\
 				|uint_fast8_t shift2			\
-				|const U8 lookup_bit			\
-				|const U8 offset
+				|uint_fast8_t lookup_bit		\
+				|uint_fast8_t offset
 Adp	|GV *	|gv_add_by_type |NULLOK GV *gv				\
 				|svtype type
 Adp	|int	|Gv_AMupdate	|NN HV *stash				\

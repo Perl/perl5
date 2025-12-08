@@ -1283,8 +1283,8 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 #define PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX     \
         assert(sp); assert(send)
 
-PERL_CALLCONV UV
-Perl_grok_uint_by_base(pTHX_ const char * const start, SSize_t *len_p, I32 *flags, NV *result, STRLEN *digit_count, U8 max_permissible_bits, uint_fast8_t shift1, uint_fast8_t shift2, const U8 lookup_bit, const U8 offset);
+PERL_CALLCONV uintmax_t
+Perl_grok_uint_by_base(pTHX_ const char * const start, SSize_t *len_p, I32 *flags, NV *result, STRLEN *digit_count, uint_fast8_t max_permissible_bits, uint_fast8_t shift1, uint_fast8_t shift2, uint_fast8_t lookup_bit, uint_fast8_t offset);
 #define PERL_ARGS_ASSERT_GROK_UINT_BY_BASE      \
         assert(start); assert(len_p); assert(flags)
 
