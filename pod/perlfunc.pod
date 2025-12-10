@@ -7111,6 +7111,7 @@ would have semantics similar to the following:
                 croak $@ ? "$@Compilation failed in require"
                          : "Can't locate $filename: $!\n";
             }
+            return 1 if $feature_module_true_enabled_in_file;
             if (!$result) {
                 delete $INC{$filename};
                 croak "$filename did not return true value";
@@ -7135,6 +7136,11 @@ itself with this issue. See L<feature> for more details. Note that this
 affects the compilation unit within which the feature is used, and using
 it before requiring a module will not change the behavior of existing
 modules that do not themselves also use it.
+
+In this usage, the (truthy) result of the required file will be returned,
+but this should not be relied upon as it will not be returned in subsequent
+C<require> calls on the same file or with the 'module_true' feature enabled.
+To run a file and retrieve its return value, use L<C<do>|/do EXPR>.
 
 If EXPR is a bareword, C<require> assumes a F<.pm>
 extension and replaces C<::> with C</> in the filename for you,
