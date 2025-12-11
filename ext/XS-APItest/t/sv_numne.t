@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 24;
+use Test::More tests => 34;
 use XS::APItest;
 use Config;
 
@@ -44,13 +44,30 @@ ok !sv_numne_flags($1, 11, SV_GMAGIC), 'sv_numne_flags with SV_GMAGIC does';
     ok !sv_numne(12, $obj), 'AlwaysTwelve is 12 on right';
     ok  sv_numne(11, $obj), 'AlwayeTwelve is not 11 on the right';
 
-    ok !sv_numne_flags($obj, 11, SV_SKIP_OVERLOAD), 'AlwaysTwelve is 12 with SV_SKIP_OVERLOAD';
+    # neither '!=' nor '0+' overloading applies
+    ok sv_numne_flags($obj, 11, SV_SKIP_OVERLOAD), 'AlwaysTwelve is not 11 with SV_SKIP_OVERLOAD';
+    ok sv_numne_flags($obj, 12, SV_SKIP_OVERLOAD), 'AlwaysTwelve is not 12 with SV_SKIP_OVERLOAD';
 
     my $result;
     void_sv_numne($obj, 11, $result);
     ok($result, "overloaded sv_numne() (ne) in void context");
     void_sv_numne($obj, 12, $result);
     ok(!$result, "overloaded sv_numne() (eq) in void context");
+
+    no overloading;
+    ok sv_numne($obj, 11), 'AlwaysTwelve is not 11 with no overloading (api)';
+    ok $obj != 11, 'AlwaysTwelve is not 11 with no overloading (op)';
+
+    ok sv_numne($obj, 12), 'AlwaysTwelve is not 12 with no overloading (api)';
+    ok $obj != 12, 'AlwaysTwelve is not 12 with no overloading (op)';
+
+    ok !sv_numne_flags($obj, 12, SV_FORCE_OVERLOAD), 'AlwaysTwelve is 12 with no overloading and SV_FORCE_OVERLOAD';
+    use overloading;
+    no overloading '!=';
+    ok !sv_numne($obj, 11), 'AlwaysTwelve is 11 with no overloading "!=" (api)';
+    ok !($obj != 11), 'AlwaysTwelve is 11 with no overloading "!=" (op)';
+    ok sv_numne($obj, 12), 'AlwaysTwelve is not 12 with no overloading "!=" (api)';
+    ok $obj != 12, 'AlwaysTwelve is not 12 with no overloading "!=" (op)';
 }
 
 # +0 overloading with large numbers and using fallback

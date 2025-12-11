@@ -3754,6 +3754,10 @@ In many cases amagic_call() uses the L</GIMME_V> context of the
 current OP when calling the sub handling the overload.  This flag
 forces amagic_call() to use scalar context.
 
+=item C<AMGf_force_overload>
+
+Perform overloading even in the context of C<no overloading;>.
+
 =back
 
 =for apidoc Amnh||AMGf_noleft
@@ -3761,6 +3765,7 @@ forces amagic_call() to use scalar context.
 =for apidoc Amnh||AMGf_unary
 =for apidoc Amnh||AMGf_assign
 =for apidoc Amnh||AMGf_force_scalar
+=for apidoc Amnh||AMGf_force_overload
 
 =cut
 */
@@ -3785,7 +3790,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
   PERL_ARGS_ASSERT_AMAGIC_CALL;
 
-  if ( PL_curcop->cop_hints & HINT_NO_AMAGIC ) {
+  if ( (PL_curcop->cop_hints & HINT_NO_AMAGIC)
+       && !(flags & AMGf_force_overload)) {
       if (!amagic_is_enabled(method)) return NULL;
   }
 

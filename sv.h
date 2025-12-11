@@ -2147,6 +2147,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define SV_SKIP_OVERLOAD        (1 << 13) /* 0x2000 -  8192 */
 #define SV_CATBYTES             (1 << 14) /* 0x4000 - 16384 */
 #define SV_CATUTF8              (1 << 15) /* 0x8000 - 32768 */
+#define SV_FORCE_OVERLOAD	(1 << 16) /* 0x10000 - 65536 */
 
 /* sv_regex_global_pos_*() should count in bytes, not chars */
 #define SV_POSBYTES             SV_CATBYTES

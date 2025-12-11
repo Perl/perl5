@@ -2765,14 +2765,25 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 /*
 =for apidoc      sv_2num_flags
 =for apidoc_item sv_2num
-X<SV_SKIP_OVERLOAD>
 
 Return an SV with the numeric value of the source SV, doing any necessary
 reference or overload conversion.  The caller is expected to have handled
 get-magic already.
 
-For sv_2num_flags() you can set C<SV_SKIP_OVERLOAD> in flags to avoid
-any numeric context overloading.
+For sv_2num_flags() you can set the following flags:
+
+=over
+
+=item *
+
+C<SV_SKIP_OVERLOAD> - avoid any numeric context overloading.
+
+=item *
+
+C<SV_FORCE_OVERLOAD> - use numeric context overloading even if
+disabled in hints by C<no overloading;>.
+
+=back
 
 =cut
 */
@@ -2782,15 +2793,18 @@ Perl_sv_2num_flags(pTHX_ SV *const sv, int flags)
 {
     PERL_ARGS_ASSERT_SV_2NUM_FLAGS;
 
-    assert((flags & ~SV_SKIP_OVERLOAD) == 0);
+    assert((flags & ~(SV_SKIP_OVERLOAD|SV_FORCE_OVERLOAD)) == 0);
 
     if (!SvROK(sv))
         return sv;
     if (SvAMAGIC(sv) && !(flags & SV_SKIP_OVERLOAD)) {
-        SV * const tmpsv = AMG_CALLunary(sv, numer_amg);
+        STATIC_ASSERT_STMT(AMGf_force_overload == SV_FORCE_OVERLOAD);
+        SV * const tmpsv =
+            AMG_CALLunary_flags(sv, numer_amg,
+                                (flags & SV_FORCE_OVERLOAD));
         TAINT_IF(tmpsv && SvTAINTED(tmpsv));
         if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-            return sv_2num(tmpsv);
+            return sv_2num_flags(tmpsv, flags);
     }
     return sv_2mortal(newSVuv(PTR2UV(SvRV(sv))));
 }
@@ -8723,8 +8737,12 @@ S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
         *sv2 = &PL_sv_undef;
 
     if (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) {
-        if (!(flags & SV_SKIP_OVERLOAD)) {
-            if ((*result = amagic_call(*sv1, *sv2, method, AMGf_force_scalar)))
+        STATIC_ASSERT_STMT(AMGf_force_overload == SV_FORCE_OVERLOAD);
+        if (!(flags & SV_SKIP_OVERLOAD)
+            || (flags & SV_FORCE_OVERLOAD)) {
+            int amg_flags = AMGf_force_scalar
+                | (flags & AMGf_force_overload);
+            if ((*result = amagic_call(*sv1, *sv2, method, amg_flags)))
                 return true;
         }
 
@@ -8805,7 +8823,8 @@ different to C< !sv_numne(sv1, sv2) >.
 
 The non-C<_flags> suffix versions of these functions always perform
 get magic and handle the appropriate type of overloading.  See
-L<overload> for details.
+L<overload> for details.  Be aware that like the builtin operators,
+C<no overloading;> will disable overloading.
 
 These each return a boolean indicating if the numbers in the two SV
 arguments satisfy the given relationship, coercing them to numbers if
@@ -8824,11 +8843,22 @@ otherwise 'get' magic is ignored.
 
 =item C<SV_SKIP_OVERLOAD>
 
-Skip any operator overloading implemented for this type and operator.
+Skip any operator or numeric overloading implemented for this type and
+operator.  Be aware that for overloaded values this will compare the
+addresses of the references, as for the usual numeric comparison of
+non-overloaded references.
+
+=item C<SV_FORCE_OVERLOAD>
+
+Force overloading on even in the context of C<no overloading;>.
 
 =back
 
+If neither overload flag is set overloading is honored unless C<no
+overloading;> has disabled it.
+
 =for apidoc Amnh||SV_SKIP_OVERLOAD
+=for apidoc Amnh||SV_FORCE_OVERLOAD
 
 =cut
 */
@@ -8942,15 +8972,36 @@ because one of them is C<NaN>, though overloads can extend that.
 
 =back
 
-C<sv_numcmp> always performs 'get' magic.  C<sv_numcmp_flags> performs
-'get' magic on if C<flags> has the C<SV_GMAGIC> bit set.
+C<sv_numcmp> always performs 'get' magic.
 
-C<sv_numcmp> always checks for, and if present, handles C<< <=> >>
-overloading.  If not present, regular numerical comparison will be
-used instead.
-C<sv_numcmp_flags> normally does the same, but if the
-C<SV_SKIP_OVERLOAD> bit is set in C<flags> any C<< <=> >> overloading
-is ignored and a regular numerical comparison is done instead.
+<sv_numcmp_flags> accepts these flags:
+
+=over
+
+=item *
+
+C<SV_GMAGIC> - Perform 'get' magic on both C<sv1> amd C<sv2> if this
+flag is set, otherwise 'get' magic is ignored.
+
+=item *
+
+C<SV_SKIP_OVERLOAD> - If this is set any C<< <=> >> or numeric
+overloading implemented for this type is ignored.  Be aware that for
+overloaded values this will compare the addresses of the references,
+as for the usual numeric comparison of non-overloaded references.
+
+=item *
+
+C<SV_FORCE_OVERLOAD> - Force overloading on even in the context of
+C<no overloading;>.
+
+=back
+
+If neither overload flag is set overloading is honored unless C<no
+overloading;> has disabled it.
+
+=for apidoc Amnh||SV_SKIP_OVERLOAD
+=for apidoc Amnh||SV_FORCE_OVERLOAD
 
 =cut
 */
