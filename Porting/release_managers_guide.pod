@@ -1379,11 +1379,12 @@ You can include the customary link to the release announcement even before your
 message reaches the web-visible archives by looking for the X-List-Archive
 header in your message after receiving it back via perl5-porters.
 
+=for checklist skip RC BLEAD-POINT
+
 =head3 Update the link to the latest perl on perlweb
 
-Submit a pull request to L<https://github.com/perlorg/perlweb>.  For a dev
-release, update the link in F<docs/dev/perl5/index.html>.  For a stable
-release, update F<docs/shared/tpl/stats.html>.
+Submit a pull request to L<https://github.com/perlorg/perlweb>. 
+Update the link in F<docs/dev/perl5/index.html> and F<docs/shared/tpl/stats.html>.
 
 =for checklist skip RC
 
