@@ -5055,6 +5055,14 @@ sv_numeq_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
     OUTPUT:
         RETVAL
 
+# deliberately void context
+void
+void_sv_numeq(nullable_SV sv1, nullable_SV sv2, SV *out)
+    CODE:
+        sv_setbool(out, sv_numeq(sv1, sv2));
+    OUTPUT:
+        out
+
 bool
 sv_numne(nullable_SV sv1, nullable_SV sv2)
 
