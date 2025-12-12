@@ -651,7 +651,7 @@ understand what's happening behind the scenes.
 
 (This next paragraph is definitely only for background on debugging.)
 
-An C<OP> is is a data structure within the perl interpreter. It is used to
+An C<OP> is a data structure within the perl interpreter. It is used to
 hold the nodes within a tree structure created when the perl source is
 compiled. It usually represents a single operation within the perl source,
 such as an add, or a function call. The structure has various flags and
@@ -686,15 +686,15 @@ Consider this subroutine call:
 The various OPs executed by the Perl interpreter up until the function is
 called will: push a mark indicating the start of a new argument stack
 frame; push an SV containing the integer value 1; push the SV currently
-bound to the variable C<$x>; and push the C<*foo> typeglob. Then the
-PP function C<pp_entersub()> associated with the C<OP_ENTERSUB> will pop
-that typeglob, extract the C<&foo> CV from it, and see whether it is a
+associated with the variable C<$x>; and push the C<*foo> typeglob. Then
+the PP function C<pp_entersub()> associated with the C<OP_ENTERSUB> will
+pop that typeglob, extract the C<&foo> CV from it, and see whether it is a
 normal CV or an XSUB CV.
 
 For a normal Perl subroutine call, C<pp_entersub()> will then: pop the
 topmost mark off the mark stack; pop the SV pointers between that mark and
 the top of the stack and store them in C<@_>; then set C<PL_op> to the
-first  OP pointed to by the C<&foo> CV. Those OPs will then be run by the
+first OP pointed to by the C<&foo> CV. Those OPs will then be run by the
 main loop, until the OPs associated with the last statement of the
 function (or an explicit return) will leave any return values as SV
 pointers on the stack.
@@ -822,7 +822,7 @@ debugging.)
 
 As mentioned above, almost all runtime data within the perl interpreter is
 stored in an SV (scalar value) structure. The head of an SV structure
-consists of three or four words: a reference count; a type and flags; a
+consists of three or four fields: a reference count; a type and flags; a
 pointer to a body; and since perl 5.10.0, a general payload field. There
 are around 17 types, and the type indicates what body (if any) is pointed
 to from the SV's head. The body type only indicates what I<sorts> of data
@@ -943,14 +943,16 @@ as C<SvPVutf8>):
     STRLEN len;
     char *pv = SvPV(sv, len);
 
-which both retrieves a string pointer and sets C<len> to its length. Note
-that there is no guarantee that after this call C<SvPOK(sv)> is true, nor
-that C<pv == SvPVX(sv)>. For example, C<sv> may be a reference to a
-blessed object with an overloaded stringify (C<"">) method.  In which
-case, behind the scenes there may be a temporary SV containing the result
-of the call to the method, with C<pv> pointing to I<that> SV's string
-buffer; C<sv> remains a reference. Similarly, a non-overloaded reference
-to an array may return a temporary string like C<"ARRAY(0x12345678)">.
+which both retrieves a string pointer and sets C<len> to its length.
+(C<SvPV> is a macro, which is how it can update C<len> without needing an
+explicit C<&len>.) Note that there is no guarantee that after this call
+C<SvPOK(sv)> is true, nor that C<pv == SvPVX(sv)>. For example, C<sv> may
+be a reference to a blessed object with an overloaded stringify (C<"">)
+method.  In which case, behind the scenes there may be a temporary SV
+containing the result of the call to the method, with C<pv> pointing to
+I<that> SV's string buffer; C<sv> remains a reference. Similarly, a
+non-overloaded reference to an array may return a temporary string like
+C<"ARRAY(0x12345678)">.
 
 If you need to coerce an SV to a string (e.g. before directly modifying
 its string buffer) then use C<SvPV_force()> or one of its variants. For
@@ -1357,7 +1359,7 @@ example where the SV pre-exists in an array:
       OUTPUT:
         RETVAL
 
-Finally, note that some very old  (pre-1996) XS documentation suggested
+Finally, note that some very old (pre-1996) XS documentation suggested
 that you could return your own SV using code like:
 
     void
@@ -1813,7 +1815,7 @@ In general, XSUB prototypes (similarly to perl sub prototypes) are of very
 limited use and are typically only used to mimic the behaviour of Perl
 builtins. For example there is no way to implement a C<push @a, ...;>
 style function without a way of telling the Perl interpreter not to
-flatten C<@a>. Outside of these  narrow uses, it is generally a mistake to
+flatten C<@a>. Outside of these narrow uses, it is generally a mistake to
 use prototypes.
 
 In the early days of XS it was thought that using prototypes was probably
@@ -1922,7 +1924,7 @@ affect any subsequent XSUBs within the file, until further updates.
 
 Note however that, due to a quirk in parsing, it is possible for a
 C<TYPEMAP:> block which comes I<immediately after> an XSUB to affect any
-entries used by that XSUB, as if the  block had appeared just before the
+entries used by that XSUB, as if the block had appeared just before the
 XSUB. If all such typemap blocks are placed near the start of an XS file,
 then this won't be an issue. Indeed, it can only be a possible issue if
 you want typemap meanings to change during the course of an XS file (which
@@ -1986,7 +1988,7 @@ XSUB keyword or file-scoped directive.
 An XSUB definition consists of a declaration (typically two lines),
 followed by an optional body. The declaration specifies the XSUB's name,
 parameters and return type. The body consists of sections started by
-keywords, which may specify how its parameters and any any return value
+keywords, which may specify how its parameters and any return value
 should be processed, and what the main C code body of the XSUB consists
 of. Other keywords can change the behaviour of the XSUB, or affect how it
 is registered with Perl, e.g. with extra named aliases. In the absence of
@@ -2105,9 +2107,8 @@ comments.
 
 In fact all it does is extract the text between the C<(...)> and split on
 commas, while having enough intelligence to ignore commas and a closing
-parenthesis within a double-quoted string. Once each parameter declaration
-is extracted, it is processed, as described below in
-L</"An XSUB Parameter">.
+parenthesis within a quoted string. Once each parameter declaration is
+extracted, it is processed, as described below in L</"An XSUB Parameter">.
 
 Each parameter declaration usually generates a C auto variable declaration
 of the same name, along with initialisation code which assigns the value
@@ -2233,7 +2234,7 @@ See L</T_PTROBJ and opaque handles> for an example of this using
 the common C<T_PTROBJ> typemap type.
 
 Note that any check on whether the passed Perl object is of the correct
-class is down to to the implementation in the particular typemap: for
+class is down to the implementation in the particular typemap: for
 example, C<T_PTROBJ> will croak unless the passed SV argument is blessed
 into the C<Foo::Bar> or derived class.
 
@@ -2565,9 +2566,11 @@ ellipsis as the last parameter, similar to C function declarations. Its
 main effect is to disable the error check for too many parameters. Any
 declared parameters will still be processed as normal, but the programmer
 will have to access any extra arguments manually, making use of the
-C<ST(n)> macro to access the nth item on the stack (counting from 0), and
-the C<items> variable, which indicates the total number of passed
-arguments, including any fixed arguments.
+C<ST(n)> macro to access the nth item on the stack, and the C<items>
+variable, which indicates the total number of passed arguments, including
+any fixed arguments. Note that C<ST(0)> is the first passed argument,
+while the first ellipsis argument is C<ST(i)> where C<i> is the number of
+fixed arguments preceding the ellipsis.
 
 Note that currently XS doesn't provide any mechanism to autocall
 variable-length C functions, so the ellipsis should only be used on XSUBs
@@ -2619,7 +2622,7 @@ example, this XSUB does the equivalent of the Perl C<map { $_*3 } ...>
 
 Note that the L<PPCODE|/The PPCODE: Keyword> keyword, in comparison to
 C<CODE>, resets the local copy of the argument stack pointer, and relies
-on the coder  to place any return values on the stack. The example above
+on the coder to place any return values on the stack. The example above
 reclaims the passed arguments by setting C<SP> back to the top of the
 stack, then replaces the items on the stack one by one.
 
@@ -3200,7 +3203,10 @@ on the stack; then one by one, each passed argument is retrieved, and then
 each stack slot is replaced with a new mortal value. When the loop is
 finished, the current stack frame contains a list of mortals, which is
 then returned to the caller, with C<SP> indicating how many items are
-returned.
+returned. Note that in this example the C<SP += items> could have been
+done at the end instead. However, if the code was doing a mixture of
+updating the passed arguments I<and> pushing extra return values, then
+setting it early (before the first push) would be important.
 
 Before pushing return values onto the stack (or storing values at C<ST(i)>
 locations higher than the number of passed arguments), it is necessary to
@@ -3760,7 +3766,7 @@ similar. Conversely, C<INTERFACE> is intended for use with autocall;
 information stored in the CV indicates which C library function should be
 autocalled.
 
-Finally, there is the C<CASE> keyword,  which allows the whole body of an
+Finally, there is the C<CASE> keyword, which allows the whole body of an
 XSUB (not just the C<CODE> part) to have alternate cases. It can be
 thought of as a C<switch()> analogue which works at the top-most XS level
 rather than at the C level. The value the C<CASE> acts on could be
@@ -3799,7 +3805,8 @@ same C function, C<XS_Foo__Bar__add()>.
 
 The alias name can be either a simple function name or can include a
 package name. The alias value to the right of the C<=> may be either a
-literal positive integer or a word (which is expected to be a CPP define).
+literal positive integer or a word (which is expected to be a CPP define
+or enum constant).
 
 The rest of the line following the C<ALIAS> keyword, plus any further
 lines until the next keyword, are assumed to contain zero or more alias
@@ -4633,11 +4640,12 @@ This class might be used like this:
 
 =head2 Safely Storing Static Data in XS
 
-You should generally avoid declaring static variables and data within an
-XS file. The Perl interpreter binary is commonly configured to allow
-multiple interpreter structures, with a complete set of interpreter state
-per interpreter struct. In this case, you usually need your "static" data
-to be per-interpreter rather than a single shared per-process value.
+You should generally avoid declaring static variables and similar
+I<mutable> data within an XS file. The Perl interpreter binary is commonly
+configured to allow multiple interpreter structures, with a complete set
+of interpreter state per interpreter struct. In this case, you usually
+need your "static" data to be per-interpreter rather than a single shared
+per-process value.
 
 This becomes more important in the presence of multiple threads; either
 via C<use threads> or where the Perl interpreter is embedded within
