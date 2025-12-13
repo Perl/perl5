@@ -4408,13 +4408,9 @@ S_set_reg_curpm(pTHX_ REGEXP *rx, regmatch_info *reginfo)
 STATIC bool			/* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 {
-    CHECKPOINT lastcp;
     REGEXP *const rx = reginfo->prog;
     regexp *const prog = ReANY(rx);
     SSize_t result;
-#ifdef DEBUGGING
-    U32 depth = 0; /* used by REGCP_SET */
-#endif
     RXi_GET_DECL(prog,progi);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -4458,7 +4454,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
         }
     }
 #endif
-    REGCP_SET(lastcp);
     result = regmatch(reginfo, *startposp, progi->program + 1);
     if (result != -1) {
         RXp_OFFSp(prog)[0].end = result;
@@ -4466,7 +4461,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     }
     if (reginfo->cutpoint)
         *startposp= reginfo->cutpoint;
-    REGCP_UNWIND(lastcp);
     return 0;
 }
 
@@ -6712,7 +6706,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     char_class_number_ classnum;
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = false;
-    I32 orig_savestack_ix = PL_savestack_ix;
+    I32 orig_savestack_ix;
     U8 * script_run_begin = NULL;
     char *match_end= NULL; /* where a match MUST end to be considered successful */
     bool is_accepted = false; /* have we hit an ACCEPT opcode? */
@@ -6746,6 +6740,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             DUMP_EXEC_POS( locinput, scan, utf8_target, depth );
             Perl_re_printf( aTHX_ "regmatch start\n" );
     }));
+
+    REGCP_SET(orig_savestack_ix);
 
     while (scan != NULL) {
         next = scan + NEXT_OFF(scan);
@@ -10399,8 +10395,9 @@ NULL
         POP_MULTICALL;
         PERL_UNUSED_VAR(SP);
     }
-    else
-        LEAVE_SCOPE(orig_savestack_ix);
+    else {
+        REGCP_UNWIND(orig_savestack_ix);
+    }
 
     if (   reginfo->info_aux_eval
         && reginfo->info_aux_eval->final_replsv)
