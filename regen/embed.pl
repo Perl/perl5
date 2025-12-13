@@ -109,6 +109,27 @@ my @pod_list = qw(
                    pod/perlreapi.pod
                  );
 
+# A regular expression that matches names that are externally visible, but
+# Perl reserves for itself.  Generally, we want things to be delimitted on
+# both sides to show it isn't part of a larger word such as 'hyperlink',
+# 'perlustrate', or 'properly'.  Underscores delimit besides the typical ^ or
+# \b.  All caps PERL has looser rules to accommodate the many existing symbols
+# where everything is jammed together, and the less likelihood that something
+# with all caps is innocently referring to something unrelated to Perl.
+my $names_reserved_for_perl_use_re =
+                         qr/  ^ (  PL_ \w+ \b
+                                 | perl_        # The underscore delimits
+                                 | Perl [_A-Z]  # Uppercase delimits here too
+                                 | PERL [A-Z]+ [[:alpha:]] ( \b | _ )
+                                )
+
+                              # The \d is for PERL5, for example
+                            | ( _ | \b )  PERL ( _ | \b | \d+ )
+
+                              # This is for obsolete and deprecated uses
+                            | ( _ | \b ) CPERL (arg | scope) ( _ | \b )
+                          /x;
+
 # Below is a list of symbols that are not documented to be available for
 # modules to use, but are nevertheless currently not kept by embed.h from
 # being visible to the world.
@@ -116,7 +137,7 @@ my @pod_list = qw(
 # Strive to make this list empty.
 #
 # The list does not include symbols that we have documented as being reserved
-# for perl's use, namely those that begin with 'PL_' or contain qr/perl/i.
+# for perl's use, namely those that match the pattern just above.
 # There are two parts of the list; the second part contains the symbols which
 # have a trailing underscore; the first part those without.
 #
@@ -3936,14 +3957,12 @@ sub generate_proto_h {
         my $C_required_flags = '[pIimbs]';
         die_at_end
           "$plain_func: C flag requires one of $C_required_flags flags"
-                                             if $flags =~ /C/
-                                             && ($flags !~ /$C_required_flags/
+                            if $flags =~ /C/
+                            && $flags !~ /$C_required_flags/
 
-                                                # Notwithstanding the
-                                                # above, if the name won't
-                                                # clash with a user name,
-                                                # it's ok.
-                                             && $plain_func !~ /^[Pp]erl/);
+                            # Notwithstanding the above, if the name won't
+                            # clash with a user name, it's ok.
+                            && $plain_func !~ $names_reserved_for_perl_use_re;
 
 
         my @nonnull;
@@ -5032,8 +5051,7 @@ sub find_undefs {
             $name =~ s/ (?: \s | \( ) .* //x;
 
             # These are reserved for Perl's use, so not a problem.
-            next if $name =~ / ^ PL_ /x;
-            next if $name =~ /perl/i;
+            next if $name =~ $names_reserved_for_perl_use_re;
 
             next unless $line->reduce_conds($cpp_ifdef_constraints_re,
                                             \%cpp_ifdef_constraints);
