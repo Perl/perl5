@@ -25,7 +25,7 @@ BEGIN {
 our @global;
 
 
-plan tests => 528;  # Update this when adding/deleting tests.
+plan tests => 552;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1444,6 +1444,53 @@ sub run_tests {
 
         my $got = join '', map defined ? $_ : '-', @got;
         is($got, "[A-[X-,X-,XY,XY],A-,AB,AB]", "GH22869");
+    }
+
+    # GH #16197
+    # A subpattern, i.e. (??{...}) or (?&...), when combined with
+    # a cut, (?>...), caused the savestack to be prematurely unwound,
+    # resulting in localisations within (?{...}) being undone before
+    # the end of the match.
+
+    {
+        my ($match, @vals);
+
+        # The first six permutations do no backtracking, but are: with or
+        # without a cut; and match a digit via either a simple \d,
+        # or via a sub-pattern - (??{}) or (?&).
+        # The next six permutations add some backtracking.
+        #
+        # Previously the combination of a cut and a subpattern returned
+        # "101 101 101 101 101".
+
+        for my $bt ('', '[a-z]*') { # trigger a backtrack?
+            for my $cut ('', '?>') {
+                for my $subpat (q{\d}, q{(??{ '\d' })}, q{(?&DIGIT)} ) {
+
+                    my $desc = "bt=$bt cut=$cut subp=$subpat";
+                    @vals = ();
+                    local our $x99 = 100;
+
+                    use re 'eval';
+                    $match = 
+                        "a1b2c3d4e5" =~
+                        /^ (
+                            [a-z]
+                            ($cut
+                                    $subpat
+                                    (?{ local $x99 = $x99 + 1; push @vals, $x99 })
+                            )
+                            $bt
+                            ){5}
+
+                            (?(DEFINE) (?<DIGIT> \d ) )
+                        /x;
+                    ok($match, "GH 16197: match; $desc");
+                    is("@vals", "101 102 103 104 105",
+                                "GH 16197: local vals; $desc");
+                }
+            }
+        }
     }
 
 } # End of sub run_tests
