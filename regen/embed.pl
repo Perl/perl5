@@ -3567,6 +3567,21 @@ my %always_undefs;
 my %non_ext_re_undefs = %needed_by_ext_re;
 my %non_ext_undefs = %needed_by_ext;
 
+# Create lists of headers and C files to examine
+my @header_list;
+my @c_list;
+open my $mf, "<", "MANIFEST" or die "Can't open MANIFEST: $!";
+while (defined (my $file = <$mf>)) {
+    chomp $file;;
+    $file =~ s/ \s .* //x;
+    next if $file =~ m,/,;
+    next if defined $skip_files{$file};
+
+    push @header_list, $file if $file =~ / ( \.h | \.inc ) \b /x;
+    push @c_list, $file if $file =~ / \.c \b /x;
+}
+close $mf or die "Can't close MANIFEST: $!";
+
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
                      # succeed.
@@ -4679,23 +4694,6 @@ sub find_undefs {
         next unless $flags;     # No visibility
         $visibility{$entry->embed->{name}} = $flags;
     }
-
-    # Then examine every top-level header.  And we also examine the top
-    #  level dot c files looking for symbols that are supposed to be visible.
-    my @header_list;
-    my @c_list;
-    open my $mf, "<", "MANIFEST" or die "Can't open MANIFEST: $!";
-    while (defined (my $file = <$mf>)) {
-        chomp $file;;
-        $file =~ s/ \s .* //x;
-        next if $file =~ m,/,;
-        next if defined $skip_files{$file};
-
-        push @header_list, $file if $file =~ / ( \.h | \.inc ) \b /x;
-        push @c_list, $file if $file =~ / \.c \b /x;
-    }
-    close $mf or die "Can't close MANIFEST: $!";
-
 
     # A symbol can't be visible if it is guarded by #ifdef's that evaluate to
     # false.
