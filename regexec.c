@@ -320,7 +320,12 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
 /* REGCP_UNWIND(cp): unwind savestack back to marked index,
  * but without restoring regcppush()ed data (leave_scope() treats
- * SAVEt_REGCONTEXT as a NOOP)
+ * SAVEt_REGCONTEXT as a NOOP).
+ *
+ * Note that the stack is normally only unwound on failure and
+ * backtracking. Successful matches involve accumulating many savestack
+ * entries which are all freed in *one go* during the final exit from
+ * S_regmatch().
  */
 
 #define REGCP_UNWIND(cp)                                        \
@@ -6683,7 +6688,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                during a successful match */
     U32 lastopen = 0;       /* last open we saw */
     bool has_cutgroup = RXp_HAS_CUTGROUP(rex) ? 1 : 0;
-    SV* const oreplsv = GvSVn(PL_replgv);
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
      * iteration, and are not preserved or restored by state pushes/pops
@@ -6725,9 +6729,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #ifdef DEBUGGING
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #endif
-
-    /* protect against undef(*^R) */
-    SAVEFREESV(SvREFCNT_inc_simple_NN(oreplsv));
 
     /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
     multicall_oldcatch = 0;
@@ -8754,18 +8755,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             S_set_reg_curpm(aTHX_ rex_sv, reginfo);
             rex = ReANY(rex_sv);
             rexi = RXi_GET(rex);
-            {
-                /* preserve $^R across LEAVE's. See Bug 121070. */
-                SV *save_sv= GvSV(PL_replgv);
-                SV *replsv;
-                SvREFCNT_inc(save_sv);
-                REGCP_UNWIND(ST.cp); /* LEAVE in disguise */
-                /* don't move this initialization up */
-                replsv = GvSV(PL_replgv);
-                sv_setsv(replsv, save_sv);
-                SvSETMAGIC(replsv);
-                SvREFCNT_dec(save_sv);
-            }
             cur_eval = ST.prev_eval;
             cur_curlyx = ST.prev_curlyx;
 
@@ -10325,20 +10314,21 @@ NULL
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%sMatch successful!%s\n",
                           PL_colors[4], PL_colors[5]));
 
-    if (reginfo->info_aux_eval) {
-        /* each successfully executed (?{...}) block does the equivalent of
-         *   local $^R = do {...}
-         * When popping the save stack, all these locals would be undone;
-         * bypass this by setting the outermost saved $^R to the latest
-         * value */
-        /* I don't know if this is needed or works properly now.
-         * see code related to PL_replgv elsewhere in this file.
-         * Yves
+    if (reginfo->info_aux_eval && orig_savestack_ix < PL_savestack_ix) {
+        /* After exiting a match, $^R should still hold the value of the
+         * latest (?{...}). E.g.
+         *     /(?{42})/ and print $^R;
+         * will print 42. However, each successfully executed (?{...})
+         * block does the equivalent of 'local $^R = ...'. In addition,
+         * there may be an explicit 'local $^R' or similar code. When
+         * popping the savestack at the end, all these locals would be
+         * undone. Avoid this issue by making a copy of the final value
+         * just *before* the final savestack unwind. After the unwind,
+         * we set $^R to that value.
+         * This temporary copy is stored in the aux_eval struct so that
+         * it will get freed even if we die during savestack unwind.
          */
-        if (oreplsv != GvSV(PL_replgv)) {
-            sv_setsv(oreplsv, GvSV(PL_replgv));
-            SvSETMAGIC(oreplsv);
-        }
+        reginfo->info_aux_eval->final_replsv = newSVsv(GvSV(PL_replgv));
     }
     result = 1;
     goto final_exit;
@@ -10403,12 +10393,24 @@ NULL
 
     if (last_pushed_cv) {
         dSP;
-        /* see "Some notes about MULTICALL" above */
+        /* see "Some notes about MULTICALL" above, especially how
+         * the POP_MULTICALL does the equivalent of the LEAVE_SCOPE
+         * for us, so no need to do it explicitly. */
         POP_MULTICALL;
         PERL_UNUSED_VAR(SP);
     }
     else
         LEAVE_SCOPE(orig_savestack_ix);
+
+    if (   reginfo->info_aux_eval
+        && reginfo->info_aux_eval->final_replsv)
+    {
+        /* '/(?{42})/; print $^R' should print 42; now that the
+         * savestack has been popped, set the final value */
+        SV *replsv = GvSV(PL_replgv);
+        sv_setsv(replsv, reginfo->info_aux_eval->final_replsv);
+        SvSETMAGIC(replsv);
+    }
 
     assert(!result ||  locinput - reginfo->strbeg >= 0);
     return result ?  locinput - reginfo->strbeg : -1;
@@ -11503,6 +11505,8 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     RXp_SUBOFFSET(rex) = 0;
     RXp_SUBCOFFSET(rex) = 0;
     RXp_SUBLEN(rex) = reginfo->strend - reginfo->strbeg;
+
+    eval_state->final_replsv  = NULL; /* the final value of $^R. */
 }
 
 
@@ -11553,6 +11557,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
             PM_SETRE(eval_state->old_op, eval_state->old_op_val);
             SvREFCNT_dec(old_rx);
         }
+        SvREFCNT_dec(eval_state->final_replsv);
     }
 
     PL_regmatch_state = aux->old_regmatch_state;

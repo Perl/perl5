@@ -791,6 +791,7 @@ typedef struct {
     SV      *sv;        /* $_  during (?{}) */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
     SSize_t pos;        /* the original value of pos() in pos_magic */
+    SV   *final_replsv; /* the final value of $^R. */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
 } regmatch_info_aux_eval;
 

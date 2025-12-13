@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 157;
+plan tests => 158;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -708,5 +708,33 @@ package myconcat {
            1;
         },
         'overloaded pattern with code block'
+    );
+}
+
+# When making a final copy of $^R before unwinding the savestack,
+# make sure that the copy doesn't leak if we die during that unwinding.
+# Dying in STORE triggers that.
+
+package GH16197 {
+
+    sub TIESCALAR { bless [ 0 ]; }
+    sub FETCH { $_[0][0] }
+    sub STORE { my $v = $_[1];
+                # die when undoing the 'local'; the previous val was real,
+                # new value is undef.
+                if ($_[0][-1] and !$v) {
+                    @{$_[0]} = ();
+                    die;
+                }
+                push @{$_[0]}, $v;
+    }
+
+    our $x99;
+    local $x99;
+    tie $x99, 'GH16197';
+
+    ::leak(5, 0,
+         sub { eval { "" =~ /(?{ local $x99;  $x99 = 9 })/; }; },
+         "no leak in \$^R copy during stack unwind",
     );
 }
