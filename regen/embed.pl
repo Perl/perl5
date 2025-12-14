@@ -4717,22 +4717,23 @@ sub find_undefs {
     # evaluate, as a whole, to false or not.  We don't know the value of many
     # of the conditions, but generally, the ones that guard visibility will be
     # enough to rule out a symbol being globally visible.
-    my %constraints;
+    my %cpp_ifdef_constraints;
     for my $c (@c_list) {
         my $c_prime = $c =~ s/[.]/_/r;
-        $constraints{ "PERL_IN_\U$c_prime" } = 0;
+        $cpp_ifdef_constraints{ "PERL_IN_\U$c_prime" } = 0;
     }
 
     # There are also these three symbols that guard visibility.  A symbol that
     # is visible when all three are 0, is globally visible.
-    $constraints{PERL_CORE} = 0;
-    $constraints{PERL_EXT} = 0;
-    $constraints{PERL_EXT_RE_BUILD} = 0;
+    $cpp_ifdef_constraints{PERL_CORE} = 0;
+    $cpp_ifdef_constraints{PERL_EXT} = 0;
+    $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 
     # Match any of these.  HeaderParser creates this canonical form for all
     # conditionals.
-    my $constraints_re = join "|", keys %constraints;
-    $constraints_re = qr/ \b defined \( ( $constraints_re ) \) /x;
+    my $cpp_ifdef_constraints_re = join "|", keys %cpp_ifdef_constraints;
+    $cpp_ifdef_constraints_re =
+                        qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
 
     # There are a few cases where we redefine a system function to use the
     # 64-bit equivalent one that has a different name.  They currenty all look
@@ -4768,8 +4769,8 @@ sub find_undefs {
                 next if $name =~ / ^ PL_ /x;
                 next if $name =~ /perl/i;
 
-                next unless $line->reduce_conds($constraints_re,
-                                                \%constraints);
+                next unless $line->reduce_conds($cpp_ifdef_constraints_re,
+                                                \%cpp_ifdef_constraints);
 
                 # Often perl has code to make sure various symbols that are
                 # always expected by the system to be defined, in fact are.
