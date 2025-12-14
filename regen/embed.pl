@@ -3582,6 +3582,46 @@ while (defined (my $file = <$mf>)) {
 }
 close $mf or die "Can't close MANIFEST: $!";
 
+# A symbol can't be visible if it is guarded by #ifdef's that evaluate to
+# false.
+#
+# One type of such #ifdef follows the convention in perl's source code
+# that a C file, 'foo.c', will #define a symbol at the beginning named
+# PERL_IN_FOO_C.  And some otherwise global symbols in header files will
+# be protected from being visible from outside foo.c by
+#   #ifdef PERL_IN_FOO_C
+#   #  define x
+#   #  define y
+#   #    ...
+#   #endif
+#
+# 'x', 'y', ... need not be #undefined, as they aren't visible outside the
+# C files that are permitted to see them.  Below we look at every symbol
+# that has potential global scope to see if there are #ifdef's that
+# conditionally #define it and which evaluate to false.  We know that all
+# the PERL_IN_FOO_C symbols will be false.  reduce_conds() looks at the
+# totality of the #ifdefs guarding a symbol and determines if they
+# evaluate, as a whole, to false or not.  We don't know the value of many
+# of the conditions, but generally, the ones that guard visibility will be
+# enough to rule out a symbol being globally visible.
+my %cpp_ifdef_constraints;
+for my $c (@c_list) {
+    my $c_prime = $c =~ s/[.]/_/r;
+    $cpp_ifdef_constraints{ "PERL_IN_\U$c_prime" } = 0;
+}
+
+# There are also these three symbols that guard visibility.  A symbol that
+# is visible when all three are 0, is globally visible.
+$cpp_ifdef_constraints{PERL_CORE} = 0;
+$cpp_ifdef_constraints{PERL_EXT} = 0;
+$cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
+
+# Match any of these.  HeaderParser creates this canonical form for all
+# conditionals.
+my $cpp_ifdef_constraints_re = join "|", keys %cpp_ifdef_constraints;
+$cpp_ifdef_constraints_re =
+                      qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
+
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
                      # succeed.
@@ -4694,46 +4734,6 @@ sub find_undefs {
         next unless $flags;     # No visibility
         $visibility{$entry->embed->{name}} = $flags;
     }
-
-    # A symbol can't be visible if it is guarded by #ifdef's that evaluate to
-    # false.
-    #
-    # One type of such #ifdef follows the convention in perl's source code
-    # that a C file, 'foo.c', will #define a symbol at the beginning named
-    # PERL_IN_FOO_C.  And some otherwise global symbols in header files will
-    # be protected from being visible from outside foo.c by
-    #   #ifdef PERL_IN_FOO_C
-    #   #  define x
-    #   #  define y
-    #   #    ...
-    #   #endif
-    #
-    # 'x', 'y', ... need not be #undefined, as they aren't visible outside the
-    # C files that are permitted to see them.  Below we look at every symbol
-    # that has potential global scope to see if there are #ifdef's that
-    # conditionally #define it and which evaluate to false.  We know that all
-    # the PERL_IN_FOO_C symbols will be false.  reduce_conds() looks at the
-    # totality of the #ifdefs guarding a symbol and determines if they
-    # evaluate, as a whole, to false or not.  We don't know the value of many
-    # of the conditions, but generally, the ones that guard visibility will be
-    # enough to rule out a symbol being globally visible.
-    my %cpp_ifdef_constraints;
-    for my $c (@c_list) {
-        my $c_prime = $c =~ s/[.]/_/r;
-        $cpp_ifdef_constraints{ "PERL_IN_\U$c_prime" } = 0;
-    }
-
-    # There are also these three symbols that guard visibility.  A symbol that
-    # is visible when all three are 0, is globally visible.
-    $cpp_ifdef_constraints{PERL_CORE} = 0;
-    $cpp_ifdef_constraints{PERL_EXT} = 0;
-    $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
-
-    # Match any of these.  HeaderParser creates this canonical form for all
-    # conditionals.
-    my $cpp_ifdef_constraints_re = join "|", keys %cpp_ifdef_constraints;
-    $cpp_ifdef_constraints_re =
-                        qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
 
     # There are a few cases where we redefine a system function to use the
     # 64-bit equivalent one that has a different name.  They currenty all look
