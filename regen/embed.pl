@@ -3716,7 +3716,7 @@ sub generate_proto_h {
         }
 
         if ($has_mflag) {
-            if ($flags =~ /([bSX])/) {
+            if ($flags =~ /([bMSX])/) {
                 my $msg =
                          "$plain_func: m and $1 flags are mutually exclusive";
                 $msg .= " (try M flag)" if $1 eq 'b';
