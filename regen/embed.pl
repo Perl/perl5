@@ -3735,13 +3735,63 @@ close $mf or die "Can't close MANIFEST: $!";
 # considered undefined; 1, defined.
 my %cpp_ifdef_constraints;
 
+# The regular expression engine has complications beyond the above, mainly due
+# to the fact that it appears as both core and as an extension, via 'use re'.
+# So, for it alone, some #defines that would normally be excluded by the
+# PERL_IN_FOO_C convention are visible to the 'use re' extension.  There are
+# also several other #ifdef symbols it uses.  The list, current as of this
+# writing, is:
+my @regex_conditions = qw(
+                           PERL_IN_DQUOTE_C
+                           PERL_IN_REGCOMP_C
+                           PERL_IN_REGCOMP_DEBUG_C
+                           PERL_IN_REGCOMP_INVLIST_C
+                           PERL_IN_REGCOMP_STUDY_C
+                           PERL_IN_REGCOMP_TRIE_C
+                           PERL_IN_REGEXEC_C
+
+                           PERL_IN_REGCOMP_ANY
+                           PERL_EXT_RE_BUILD
+                           PERL_IN_REGEX_ENGINE
+                           PLUGGABLE_RE_EXTENSION
+                         );
+# None of those symbols will be defined when not in the 'use re extension' nor
+# core.
+my (%in_regex, %not_in_regex);
+$in_regex{$_}     = 1 for @regex_conditions;
+$not_in_regex{$_} = 0 for @regex_conditions;
+
+# Generate the symbols for the PERL_IN_FOO_C convention, excluding those from
+# the 'use re' we've already specially handled.  Otherwise, the convention
+# means each can be set to 0, as being outside of core contradicts all the
+# non-regex ones.
 for my $c (@c_list) {
     my $c_prime = $c =~ s/[.]/_/r;
-    $cpp_ifdef_constraints{ "PERL_IN_\U$c_prime" } = 0;
+    $c_prime = "PERL_IN_\U$c_prime";
+    next if defined $in_regex{$c_prime};
+    $cpp_ifdef_constraints{$c_prime} = 0;
 }
 
-# There are also these three symbols that guard visibility.
+# This doesn't follow the convention, as the file name is different from this
+$cpp_ifdef_constraints{PERL_IN_MRO_C} = 0;
+
+# Besides the obvious PERL_CORE, an inspection of our source revealed the
+# following symbols that won't be defined for general XS code.
 $cpp_ifdef_constraints{PERL_CORE} = 0;
+$cpp_ifdef_constraints{PERL_IN_XS_APITEST} = 0;
+$cpp_ifdef_constraints{PERL_DEBUG_READONLY_OPS} = 0;
+$cpp_ifdef_constraints{PERL_DEBUG_DUMPUNTIL} = 0;
+$cpp_ifdef_constraints{PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS} = 0;
+$cpp_ifdef_constraints{EXPERIMENTAL_INPLACESCAN} = 0;
+
+# Appears to be obsolete; App:s2p, etc were created to handle this
+# functionality
+$cpp_ifdef_constraints{PERL_FOR_X2P} = 0;
+
+# This is used only for perl core development, and no module should ever have
+# it defined.
+$cpp_ifdef_constraints{WIN32_USE_FAKE_OLD_MINGW_LOCALES} = 0;
+
 $cpp_ifdef_constraints{PERL_EXT} = 0;
 $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 
