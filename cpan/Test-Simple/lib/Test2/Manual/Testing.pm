@@ -2,7 +2,7 @@ package Test2::Manual::Testing;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 1;
 
@@ -39,7 +39,7 @@ lexically scoped, or they may be global.
 =item Test2::Bundle::*
 
 Bundles combine toolsets and plugins together to reduce your boilerplate. First
-time test writers are encouraged to start with the L<Test2::V0> bundle (which
+time test writers are encouraged to start with the L<Test2::V1> bundle (which
 is an exception to the namespace rule as it does not live under
 C<Test2::Bundle::>). If you find yourself loading several plugins and toolsets
 over and over again you could benefit from writing your own bundle.
@@ -69,18 +69,18 @@ and define new ones, typically with a new bundle. In short, if we feel the need
 to break something we will do so by creating a new bundle, and discouraging the
 old one, but we will not break the old one.
 
-So for example, if you use L<Test2::V0>, and L<Dist::Zilla> you
+So for example, if you use L<Test2::V1>, and L<Dist::Zilla> you
 should have this in your config:
 
     [Prereqs / TestRequires]
-    Test2::V0 = 0.000060
+    Test2::V1 = 0.000060
 
 You B<SHOULD NOT> do this:
 
     [Prereqs / TestRequires]
     Test2::Suite = 0.000060
 
-Because L<Test2::V0> might not always be part of L<Test2::Suite>.
+Because L<Test2::V1> might not always be part of L<Test2::Suite>.
 
 When writing new tests you should often check L<Test2::Suite> to see what the
 current recommended bundle is.
@@ -88,28 +88,28 @@ current recommended bundle is.
 =head3 Dist::Zilla
 
     [Prereqs / TestRequires]
-    Test2::V0 = 0.000060
+    Test2::V1 = 0.000060
 
 =head3 ExtUtils::MakeMaker
 
     my %WriteMakefileArgs = (
       ...,
       "TEST_REQUIRES" => {
-        "Test2::V0" => "0.000060"
+        "Test2::V1" => "0.000060"
       },
       ...
     );
 
 =head3 Module::Install
 
-    test_requires 'Test2::V0' => '0.000060';
+    test_requires 'Test2::V1' => '0.000060';
 
 =head3 Module::Build
 
     my $build = Module::Build->new(
         ...,
         test_requires => {
-            "Test2::V0" => "0.000060",
+            "Test2::V1" => "0.000060",
         },
         ...
     );

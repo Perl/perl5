@@ -2624,6 +2624,7 @@ cpan/Test-Simple/lib/Test2/EventFacet/Render.pm					Module related to Test::Simp
 cpan/Test-Simple/lib/Test2/EventFacet/Trace.pm					Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/Formatter.pm						Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/Formatter/TAP.pm					Module related to Test::Simple
+cpan/Test-Simple/lib/Test2/Handle.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Hub.pm						Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/Hub/Interceptor.pm					Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/Hub/Interceptor/Terminator.pm			Module related to Test::Simple
@@ -2721,6 +2722,9 @@ cpan/Test-Simple/lib/Test2/Util/Term.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Times.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Util/Trace.pm					Module related to Test::Simple
 cpan/Test-Simple/lib/Test2/V0.pm						Test-Simple
+cpan/Test-Simple/lib/Test2/V1.pm						Test-Simple
+cpan/Test-Simple/lib/Test2/V1/Base.pm						Test-Simple
+cpan/Test-Simple/lib/Test2/V1/Handle.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow.pm						Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow/BlockBase.pm				Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow/Build.pm					Test-Simple
@@ -2943,6 +2947,7 @@ cpan/Test-Simple/t/modules/Compare/Set.t					Test-Simple
 cpan/Test-Simple/t/modules/Compare/String.t					Test-Simple
 cpan/Test-Simple/t/modules/Compare/Undef.t					Test-Simple
 cpan/Test-Simple/t/modules/Compare/Wildcard.t					Test-Simple
+cpan/Test-Simple/t/modules/Handle.t						Test-Simple
 cpan/Test-Simple/t/modules/Mock.t						Test-Simple
 cpan/Test-Simple/t/modules/Plugin.t						Test-Simple
 cpan/Test-Simple/t/modules/Plugin/BailOnFail.t					Test-Simple
@@ -2999,6 +3004,9 @@ cpan/Test-Simple/t/modules/Util/Table/Cell.t					Test-Simple
 cpan/Test-Simple/t/modules/Util/Table/LineBreak.t				Test-Simple
 cpan/Test-Simple/t/modules/Util/Times.t						Test-Simple
 cpan/Test-Simple/t/modules/V0.t							Test-Simple
+cpan/Test-Simple/t/modules/V1.t							Test-Simple
+cpan/Test-Simple/t/modules/V1/Base.t						Test-Simple
+cpan/Test-Simple/t/modules/V1/Handle.t						Test-Simple
 cpan/Test-Simple/t/modules/Workflow.t						Test-Simple
 cpan/Test-Simple/t/modules/Workflow/BlockBase.t					Test-Simple
 cpan/Test-Simple/t/modules/Workflow/Build.t					Test-Simple

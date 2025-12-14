@@ -4,7 +4,7 @@ use warnings;
 
 use Test2::V0;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 BEGIN {
     push @Test2::Bundle::Extended::ISA => 'Test2::V0';
@@ -32,6 +32,8 @@ Test2::Bundle::Extended - Old name for Test2::V0
 
 This bundle has been renamed to L<Test2::V0>, in which the C<':v1'> tag has
 been removed as unnecessary.
+
+B<Note:> L<Test2::V1> is the latest bundle, you probably want to look at that.
 
 =head1 DESCRIPTION
 

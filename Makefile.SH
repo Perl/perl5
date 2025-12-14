@@ -1430,8 +1430,8 @@ _cleaner2:
 	-rmdir lib/Win32API lib/VMS lib/Unicode/Collate/Locale
 	-rmdir lib/Unicode/Collate/CJK lib/Unicode/Collate lib/Tie/Hash
 	-rmdir lib/Thread lib/Text lib/Test2/Workflow/Task lib/Test2/Workflow
-	-rmdir lib/Test2/Util/Table lib/Test2/Util lib/Test2/Tools
-	-rmdir lib/Test2/Require lib/Test2/Plugin
+	-rmdir lib/Test2/V1 lib/Test2/Util/Table lib/Test2/Util
+	-rmdir lib/Test2/Tools lib/Test2/Require lib/Test2/Plugin
 	-rmdir lib/Test2/Manual/Tooling/Plugin lib/Test2/Manual/Tooling
 	-rmdir lib/Test2/Manual/Testing lib/Test2/Manual/Anatomy
 	-rmdir lib/Test2/Manual lib/Test2/IPC/Driver lib/Test2/IPC

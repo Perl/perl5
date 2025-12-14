@@ -2,7 +2,7 @@ package Test2::Suite;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 1;
 
@@ -62,30 +62,24 @@ also produces undesirable side-effects.
 These do not live in the bundle namespace as they are the primary ways to use
 Test2::Suite.
 
-The current latest is L<Test2::V0>.
+The current latest is L<Test2::V1>.
 
-    use Test2::V0;
-    # strict and warnings are on for you now.
+    use Test2::V1;
 
-    ok(...);
+    T2->ok(...);
 
     # Note: is does deep checking, unlike the 'is' from Test::More.
-    is(...);
+    $T2->is(...);
 
     ...
 
-    done_testing;
+    T2->done_testing;
 
-This bundle includes every tool listed in the L</INCLUDED TOOLS> section below,
-except for L<Test2::Tools::ClassicCompare>. This bundle provides most of what
-anyone writing tests could need. This is also the preferred bundle/toolset of
-the L<Test2> author.
-
-See L<Test2::V0> for complete documentation.
+See L<Test2::V1> for complete documentation.
 
 =item Extended
 
-B<** Deprecated **> See L<Test2::V0>
+B<** Deprecated **> See L<Test2::V0> or L<Test2::V1>.
 
     use Test2::Bundle::Extended;
     # strict and warnings are on for you now.

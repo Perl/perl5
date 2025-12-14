@@ -2,7 +2,7 @@ package Test2::Plugin::BailOnFail;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 use Test2::API qw/test2_add_callback_context_release/;
 
@@ -40,12 +40,12 @@ diagnostics they may need.
 
 =head1 SYNOPSIS
 
-    use Test2::V0;
+    use Test2::V1;
     use Test2::Plugin::BailOnFail;
 
-    ok(1, "pass");
-    ok(0, "fail");
-    ok(1, "Will not run");
+    T2->ok(1, "pass");
+    T2->ok(0, "fail");
+    T2->ok(1, "Will not run");
 
 =head1 SOURCE
 

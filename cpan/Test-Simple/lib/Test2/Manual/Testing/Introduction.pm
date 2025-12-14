@@ -2,7 +2,7 @@ package Test2::Manual::Testing::Introduction;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 1;
 
@@ -26,7 +26,7 @@ C<.t> file extension.
 
 C<t/example.t>:
 
-    use Test2::V0;
+    use Test2::V1 -ipP;
 
     # Assertions will go here
 
@@ -36,10 +36,26 @@ This is all the boilerplate you need.
 
 =over 4
 
-=item use Test2::V0;
+=item use Test2::V1 -ipP;
 
 This loads a collection of testing tools that will be described later in the
-tutorial. This will also turn on C<strict> and C<warnings> for you.
+tutorial. See L<Test2::V1> for more details, but for starters '-ipP' is a good
+set of import flags.
+
+If you do not like importing a ton of symbols or enabling pragmas/plugins all
+in one swoop you can do C<< use Test2::V1; >>. If you do this you will need to
+use the T2() function to access tools, and load any pragmas/plugins manually:
+
+    use Test2::V1;
+    use strict;
+    use warnings;
+    use Test2::Plugin::UTF8;
+    use Test2::Plugin::SRand;
+
+    T2->ok(1, "pass");
+    T2->is(5, 5, "5 is 5");
+
+    T2->done_testing;
 
 =item done_testing;
 
@@ -59,28 +75,28 @@ L<Test2::Suite> to their own dists at any time.
 =head3 Dist::Zilla
 
     [Prereqs / TestRequires]
-    Test2::V0 = 0.000060
+    Test2::V1 = 0.000060
 
 =head3 ExtUtils::MakeMaker
 
     my %WriteMakefileArgs = (
       ...,
       "TEST_REQUIRES" => {
-        "Test2::V0" => "0.000060"
+        "Test2::V1" => "0.000060"
       },
       ...
     );
 
 =head3 Module::Install
 
-    test_requires 'Test2::V0' => '0.000060';
+    test_requires 'Test2::V1' => '0.000060';
 
 =head3 Module::Build
 
     my $build = Module::Build->new(
         ...,
         test_requires => {
-            "Test2::V0" => "0.000060",
+            "Test2::V1" => "0.000060",
         },
         ...
     );
@@ -94,11 +110,19 @@ that a condition is true.
 
 Here is a complete C<t/example.t>:
 
-    use Test2::V0;
+    use Test2::V1 -import;
 
     ok(1, "1 is true, so this will pass");
 
     done_testing;
+
+If you are doing it without imports:
+
+    use Test2::V1;
+
+    T2->ok(1, "1 is true, so this will pass");
+
+    T2->done_testing;
 
 =head1 RUNNING THE TEST
 
@@ -204,12 +228,16 @@ There are 2 primary ways to set the plan:
 
 =item done_testing()
 
+=item T2->done_testing()
+
 The most common, and recommended way to set a plan is to add C<done_testing> at
 the end of your test file. This will automatically calculate the plan for you
 at the end of the test. If the test were to exit early then C<done_testing>
 would not run and no plan would be found, forcing a failure.
 
 =item plan($COUNT)
+
+=item T2->plan($COUNT)
 
 The C<plan()> function allows you to specify an exact number of assertions you
 want to run. If you run too many or too few assertions then the plan will not
@@ -224,12 +252,14 @@ cannot be done in the middle of making assertions.
 
 =head1 ADDITIONAL ASSERTION TOOLS
 
-The L<Test2::V0> bundle provides a lot more than C<ok()>,
+The L<Test2::V1> bundle provides a lot more than C<ok()>,
 C<plan()>, and C<done_testing()>. The biggest tools to note are:
 
 =over 4
 
 =item is($a, $b, $description)
+
+=item T2->is($a, $b, $description)
 
 C<is()> allows you to compare 2 structures and insure they are identical. You
 can use it for simple string comparisons, or even deep data structure
@@ -240,6 +270,8 @@ comparisons.
     is(["foo", 1], ["foo", 1], "Both arrays contain the same elements");
 
 =item like($a, $b, $description)
+
+=item T2->like($a, $b, $description)
 
 C<like()> is similar to C<is()> except that it only checks items listed on the
 right, it ignores any extra values found on the left.

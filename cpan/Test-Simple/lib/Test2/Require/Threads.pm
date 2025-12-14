@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { require Test2::Require; our @ISA = qw(Test2::Require) }
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 use Test2::Util qw/CAN_THREAD/;
 

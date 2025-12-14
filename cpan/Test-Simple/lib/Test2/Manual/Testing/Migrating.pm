@@ -2,7 +2,7 @@ package Test2::Manual::Testing::Migrating;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 1;
 
@@ -99,7 +99,10 @@ BEFORE:
 
 AFTER:
 
-    use Test2::V0;
+    use strict;
+    use warnings;
+
+    use Test2::V1 '-import';
     plan(11);
 
     use Scalar::Util;
@@ -107,25 +110,42 @@ AFTER:
 
 =over 4
 
-=item Replace Test::More with Test2::V0
+=item Replace Test::More with Test2::V1
 
-L<Test2::V0> is the recommended bundle. In a full migration you
-will want to replace L<Test::More> with the L<Test2::V0> bundle.
+L<Test2::V1> is the recommended bundle. In a full migration you
+will want to replace L<Test::More> with the L<Test2::V1> bundle.
 
 B<Note:> You should always double check the latest L<Test2> to see if there is
 a new recommended bundle. When writing a new test you should always use the
 newest Test::V# module. Higher numbers are newer version.
 
+You probably want the C<-import> argument when using L<Test2::V0> as it will
+populate your namespace with all the tools you expect from a test helper
+module. However if you want your namespace left clean you can omit the
+argument, in which case C<T2()> is the only thing added to your namespace, and
+it can be used to access the tools:
+
+    use Test2::V1;
+
+    T2->ok(1, "pass");
+
+    T2->done_testing;
+
 =item NOTE: srand
 
-When srand is on (default) it can cause problems with things like L<File::Temp>
-which will end up attempting the same "random" filenames for every test process
-started on a given day (or sharing the same seed).
+When srand is on (not default in V1, but Default in older V0) it can cause
+problems with things like L<File::Temp> which will end up attempting the same
+"random" filenames for every test process started on a given day (or sharing
+the same seed).
 
 If this is a problem for you then please disable srand when loading
-L<Test2::V0>:
+
+For L<Test2::V0>:
 
     use Test2::V0 -no_srand => 1;
+
+For L<Test2::V1> simply do not use the C<-P>, or C<-Plugins> import option and it will not be loaded.
+
 
 =item Stop using use_ok()
 
@@ -144,9 +164,12 @@ The main difference here is that there is a space instead of an underscore.
 C<require_ok> has been removed just like C<use_ok>. There is no L<ok> module
 equivalent here. Just use C<require>.
 
-=item Remove strict/warnings (optional)
+=item (optional) remove strict/warnings
 
-The L<Test2::V0> bundle turns strict and warnings on for you.
+In the L<Test2::V0> bundle turns strict and warnings on for you.
+
+In the L<Test2::V1> bundle you must ask for strict and warnings with one of the
+following import args: C<-p>, C<-pragmas>, C<-strict>, C<-warnings>.
 
 =item Change where the plan is set
 
@@ -330,10 +353,14 @@ argument, then a test name as the third argument.
 
 =head1 FINAL VERSION
 
+=head2 IMPORTS
+
     #####################
     # Boilerplate
 
-    use Test2::V0;
+    use strict;
+    use warnings;
+    use Test2::V1 '-import';
     plan(11);
 
     use Scalar::Util;
@@ -390,6 +417,129 @@ argument, then a test name as the third argument.
     isa_ok($thing, ['THING'], 'got a THING');
 
     can_ok(__PACKAGE__, [qw/ok is/], "have expected subs");
+
+=head2 REDUCED BOILERPLATE
+
+    #####################
+    # Boilerplate
+
+    use Test2::V1 '-ipP';
+    plan(11);
+
+    use Scalar::Util;
+    require Exporter;
+
+    #####################
+    # Simple assertions (no changes)
+
+    ok(1, "pass");
+
+    is("apple", "apple", "Simple string compare");
+
+    like("foo bar baz", qr/bar/, "Regex match");
+
+    #####################
+    # Todo
+
+    todo "These are todo" => sub {
+        ok(0, "oops");
+    };
+
+    #####################
+    # Deep comparisons
+
+    is([1, 2, 3], [1, 2, 3], "Deep comparison");
+
+    #####################
+    # Comparing references
+
+    my $ref = [1];
+    ref_is($ref, $ref, "Check that we have the same ref both times");
+
+    #####################
+    # Things that are gone
+
+    is([1], [1], "array comparison");
+    is({a => 1}, {a => 1}, "hash comparison");
+
+    is([1, 3, 2], bag { item 1; item 2; item 3; end }, "set comparison");
+
+    use Data::Dumper;
+    note Dumper([1, 2, 3]);
+
+    {
+        package THING;
+        sub new { bless({}, shift) }
+    }
+
+    my $thing = THING->new;
+
+    #####################
+    # Tools that changed
+
+    isa_ok($thing, ['THING'], 'got a THING');
+
+    can_ok(__PACKAGE__, [qw/ok is/], "have expected subs");
+
+=head2 CLEAN NAMESPACE
+
+    use Test2::V1;
+    T2->plan(11);
+
+    use Scalar::Util;
+    require Exporter;
+
+    #####################
+    # Simple assertions (no changes)
+
+    T2->ok(1, "pass");
+
+    T2->is("apple", "apple", "Simple string compare");
+
+    T2->like("foo bar baz", qr/bar/, "Regex match");
+
+    #####################
+    # Todo
+
+    T2->todo("These are todo" => sub {
+        ok(0, "oops");
+    });
+
+    #####################
+    # Deep comparisons
+
+    T2->is([1, 2, 3], [1, 2, 3], "Deep comparison");
+
+    #####################
+    # Comparing references
+
+    my $ref = [1];
+    T2->ref_is($ref, $ref, "Check that we have the same ref both times");
+
+    #####################
+    # Things that are gone
+
+    T2->is([1], [1], "array comparison");
+    T2->is({a => 1}, {a => 1}, "hash comparison");
+
+    T2->is([1, 3, 2], bag { item 1; item 2; item 3; end }, "set comparison");
+
+    use Data::Dumper;
+    T2->note(Dumper([1, 2, 3]));
+
+    {
+        package THING;
+        sub new { bless({}, shift) }
+    }
+
+    my $thing = THING->new;
+
+    #####################
+    # Tools that changed
+
+    T2->isa_ok($thing, ['THING'], 'got a THING');
+
+    T2->can_ok(__PACKAGE__, [qw/ok is/], "have expected subs");
 
 =head1 SEE ALSO
 

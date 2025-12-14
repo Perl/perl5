@@ -2,7 +2,7 @@ package Test2::API::InterceptResult::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302216';
+our $VERSION = '1.302219';
 
 use List::Util   qw/first/;
 use Test2::Util  qw/pkg_to_file/;
@@ -507,7 +507,7 @@ you to use when testing your test tools.
 
 =head1 SYNOPSIS
 
-    use Test2::V0;
+    use Test2::V1 '-iPp';
     use Test2::API qw/intercept/;
 
     my $events = intercept {
