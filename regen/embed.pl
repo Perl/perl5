@@ -3679,6 +3679,18 @@ sub generate_proto_h {
                                             if $flags !~ /M/ && $flags !~ /D/;
         }
 
+        my $C_required_flags = '[pIimbs]';
+        die_at_end
+          "$plain_func: C flag requires one of $C_required_flags flags"
+                                             if $flags =~ /C/
+                                             && ($flags !~ /$C_required_flags/
+
+                                                # Notwithstanding the
+                                                # above, if the name won't
+                                                # clash with a user name,
+                                                # it's ok.
+                                             && $plain_func !~ /^[Pp]erl/);
+
 
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
@@ -3773,19 +3785,6 @@ sub generate_proto_h {
         }
 
         $func = full_name($plain_func, $flags);
-
-        my $C_required_flags = '[pIimbs]';
-        die_at_end
-          "$plain_func: C flag requires one of $C_required_flags] flags"
-                                             if $flags =~ /C/
-                                             && ($flags !~ /$C_required_flags/
-
-                                                # Notwithstanding the
-                                                # above, if the name won't
-                                                # clash with a user name,
-                                                # it's ok.
-                                             && $plain_func !~ /^[Pp]erl/);
-
 
         $ret = "";
         $ret .= "$retval\n";
