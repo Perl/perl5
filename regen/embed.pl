@@ -715,7 +715,6 @@ my @unresolved_visibility_overrides = qw(
     ENDGRENT_R_HAS_FPTR
     ENDPWENT_R_HAS_FPTR
     ENV_INIT
-    environ
     ENV_LOCK
     ENV_READ_LOCK
     ENV_READ_UNLOCK
@@ -1086,8 +1085,6 @@ my @unresolved_visibility_overrides = qw(
     HSm_XSVERLEN
     HS_XSVERLEN_MAX
     htoni
-    htonl
-    htons
     htovl
     htovs
     HvAMAGIC
@@ -1257,7 +1254,6 @@ my @unresolved_visibility_overrides = qw(
     isNON_BRACE_QUANTIFIER
     is_NONCHAR_utf8_safe
     IS_NON_FINAL_FOLD
-    isnormal
     IS_NUMERIC_RADIX
     IS_PADCONST
     IS_PADGV
@@ -1858,8 +1854,6 @@ my @unresolved_visibility_overrides = qw(
     NOTE3
     NOT_REACHED
     ntohi
-    ntohl
-    ntohs
     Null
     Nullfp
     Nullgv
@@ -2261,9 +2255,7 @@ my @unresolved_visibility_overrides = qw(
     PRIVSHIFT
     ProgLen
     pthread_addr_t
-    pthread_attr_init
     pthread_condattr_default
-    pthread_create
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     pthread_key_create
@@ -2740,8 +2732,6 @@ my @unresolved_visibility_overrides = qw(
     SetProgLen
     SETPWENT_R_HAS_FPTR
     SET_recode_x_to_native
-    setregid
-    setreuid
     SETs
     SET_SVANY_FOR_BODYLESS_IV
     SET_SVANY_FOR_BODYLESS_NV
@@ -2772,7 +2762,6 @@ my @unresolved_visibility_overrides = qw(
     Size_t_MAX
     SKIP_IF_CHAR
     SLOPPYDIVIDE
-    socketpair
     S_PAT_MODS
     specialWARN
     SS_ACCVIO
@@ -3523,12 +3512,23 @@ my @unresolved_visibility_overrides = qw(
 # define or redefine, and which aren't otherwise currently detectable by this
 # program's algorithms as being such.  They are not namespace pollutants
 my @system_symbols = qw(
+    environ
+    htonl
+    htons
+    isnormal
     INT32_MIN
     INT64_MIN
     LDBL_DIG
+    ntohl
+    ntohs
     O_CREAT
     O_RDWR
     O_WRONLY
+    pthread_attr_init
+    pthread_create
+    setregid
+    setreuid
+    socketpair
     S_IWGRP
     S_IWUSR
     S_IXGRP
