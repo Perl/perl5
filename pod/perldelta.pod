@@ -386,7 +386,11 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Regexes which include both a sub-pattern (e.g. C<(??{...})> or C<(?&FOO)>)
+and a cut (i.e. C<< (?>...) >>) could sometimes cause a premature scope
+exit in other code during a match. For example in something like
+C<(?{ local $x = ... })>, the C<local> might have been unwound before the
+pattern has finished matching. [GH #16197]
 
 =back
 
