@@ -3690,9 +3690,11 @@ sub generate_proto_h {
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {
-            if ($flags =~ /S/) {
-                die_at_end
-                          "$plain_func: m and S flags are mutually exclusive";
+            if ($flags =~ /([bSX])/) {
+                my $msg =
+                         "$plain_func: m and $1 flags are mutually exclusive";
+                $msg .= " (try M flag)" if $1 eq 'b';
+                die_at_end $msg;
             }
 
             # Don't generate a prototype for a macro that is not usable by the
@@ -3774,12 +3776,8 @@ sub generate_proto_h {
 
         die_at_end "$plain_func: X flag requires one of [Iip] flags"
                                         if $flags =~ /X/ && $flags !~ /[Iip]/;
-        die_at_end "$plain_func: X and m flags are mutually exclusive"
-                                            if $flags =~ /X/ && $has_mflag;
         die_at_end "$plain_func: [Ii] with [ACX] requires p flag"
                     if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
-        die_at_end "$plain_func: b and m flags are mutually exclusive"
-                 . " (try M flag)" if $flags =~ /b/ && $has_mflag;
         die_at_end "$plain_func: b flag without M flag requires D flag"
                         if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
         die_at_end "$plain_func: I and i flags are mutually exclusive"
