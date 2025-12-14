@@ -3708,7 +3708,8 @@ sub generate_proto_h {
         my $func;
 
         if (! $can_ignore && $retval eq 'void') {
-            warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
+            warn "It is nonsensical to require the return value of a void"
+               . " function ($plain_func) to be checked";
         }
 
         if ($flags =~ /[AC]/ && $flags =~ /([EX])/) {
@@ -3796,7 +3797,7 @@ sub generate_proto_h {
         if (@$args) {
             die_at_end
                     "$plain_func: n flag is contradicted by having arguments"
-                                                            if $flags =~ /n/;
+                                                             if $flags =~ /n/;
             my $n;
             my @bounded_strings;
 
