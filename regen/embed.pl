@@ -4803,20 +4803,23 @@ sub find_undefs {
                 next unless $line->reduce_conds($cpp_ifdef_constraints_re,
                                                 \%cpp_ifdef_constraints);
 
+                if (recurse_conds($has_64_pattern, $line->{cond}->@*)) {
+                    $system_symbols{$name} = 1;
+                    next;
+                }
+
                 # Often perl has code to make sure various symbols that are
                 # always expected by the system to be defined, in fact are.
                 # These don't constitute namespace pollution.  So, if perl
                 # defines a symbol only if it already isn't defined, we add it
                 # to the list of system symbols
                 my $pattern = qr/ ! \s* defined\($name\)/x;
-                if (   recurse_conds($pattern, $line->{cond}->@*)
-                    || recurse_conds($has_64_pattern, $line->{cond}->@*))
-                {
+                if (recurse_conds($pattern, $line->{cond}->@*)) {
                     $system_symbols{$name} = 1;
+                    next;
                 }
-                else {
-                    $always_undefs{$name} = 1;
-                }
+
+                $always_undefs{$name} = 1;
             }
             else {
 
