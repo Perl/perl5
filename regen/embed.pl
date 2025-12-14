@@ -3666,6 +3666,8 @@ sub generate_proto_h {
 
         die_at_end "$plain_func: I and i flags are mutually exclusive"
                                                      if $flags =~ tr/Ii// > 1;
+        die_at_end "$plain_func: S and p flags are mutually exclusive"
+                                                    if $flags =~ tr/Sp// > 1;
 
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
@@ -3690,8 +3692,6 @@ sub generate_proto_h {
                      . " mutually exclusive";
         }
 
-        die_at_end "$plain_func: S and p flags are mutually exclusive"
-                                                    if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {
             if ($flags =~ /([bSX])/) {
                 my $msg =
