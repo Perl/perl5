@@ -3664,6 +3664,9 @@ sub generate_proto_h {
             die_at_end "$plain_func: O flag forbids T flag" if $flags =~ /T/;
         }
 
+        die_at_end "$plain_func: I and i flags are mutually exclusive"
+                                                     if $flags =~ tr/Ii// > 1;
+
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
@@ -3780,8 +3783,6 @@ sub generate_proto_h {
                     if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
         die_at_end "$plain_func: b flag without M flag requires D flag"
                         if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
-        die_at_end "$plain_func: I and i flags are mutually exclusive"
-                                            if $flags =~ tr/Ii// > 1;
 
         $ret = "";
         $ret .= "$retval\n";
