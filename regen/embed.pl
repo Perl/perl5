@@ -4946,10 +4946,14 @@ sub find_undefs {
     # Here, have found all the externally visible macro definitions.  We will
     # undef all of them that aren't expected to be visible and aren't
     # otherwise needed to be visible.
+
+    foreach my $name (keys %visibility) {
+        delete $always_undefs{$name};
+    }
+
     foreach my $entry (keys %system_symbols,
                             %needed_by_ext,
                             %needed_by_ext_re,
-                            %visibility,
                             %unresolved_visibility_overrides
                       )
     {
