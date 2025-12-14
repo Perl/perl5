@@ -3582,39 +3582,70 @@ while (defined (my $file = <$mf>)) {
 }
 close $mf or die "Can't close MANIFEST: $!";
 
-# A symbol can't be visible if it is guarded by #ifdef's that evaluate to
-# false.
+# One part of this program is to keep macros from being externally visible
+# that shouldn't be.  This is done by adding #undef's to embed.h for the ones
+# that should be hidden.  Documented symbols have their desired visibility
+# specified in their documentation.  Undocumented ones are presumed here to
+# need to be hidden, unless overriden by one of the lists above.
 #
-# One type of such #ifdef follows the convention in perl's source code
-# that a C file, 'foo.c', will #define a symbol at the beginning named
-# PERL_IN_FOO_C.  And some otherwise global symbols in header files will
-# be protected from being visible from outside foo.c by
+# Only macros defined in a header can be visible externally. This is done by
+# the XS code #including perl.h which in turn #includes a bunch of headers,
+# which the code just above placed in @header_list.  The reason we look at C
+# files is to find documentation that will announce the symbol's intended
+# visibility.
+#
+# But just because there is a #define for a given symbol in a header doesn't
+# mean it actually gets defined.  That definition may be in the scope of some
+# #ifdef's that cause the definition to be skipped.  Some of those #ifdefs are
+# dependent on Configure options and/or the platform being used.  We have to
+# assume for those that they indicate that the definition does happen.  But
+# we know the values for some others, and we can use those to rule in or out
+# whether or not a definition happens.  The simplist example is
+#   #ifdef PERL_CORE ... #endif
+# Any #define within the '...' won't be visible to code outside the core, so
+# doesn't need an #undef generated for it.  No harm would be done to add a
+# #undef for such symbols, except for the unnecessary noise.  And there are so
+# many of them that the noise would be considerable,  so this program
+# examines those #ifdef's, and if they indicate a symbol isn't visible outside
+# its intended target, no #undef gets added to embed.h.
+#
+# One type of such #ifdef follows the convention in perl's source code that a
+# C file, 'foo.c', will #define a symbol at the beginning named PERL_IN_FOO_C.
+# And some otherwise global symbols in header files will be protected from
+# being visible from outside foo.c by
 #   #ifdef PERL_IN_FOO_C
 #   #  define x
 #   #  define y
 #   #    ...
 #   #endif
 #
-# 'x', 'y', ... need not be #undefined, as they aren't visible outside the
-# C files that are permitted to see them.  Below we look at every symbol
-# that has potential global scope to see if there are #ifdef's that
-# conditionally #define it and which evaluate to false.  We know that all
-# the PERL_IN_FOO_C symbols will be false.  reduce_conds() looks at the
-# totality of the #ifdefs guarding a symbol and determines if they
-# evaluate, as a whole, to false or not.  We don't know the value of many
-# of the conditions, but generally, the ones that guard visibility will be
-# enough to rule out a symbol being globally visible.
+# 'x', 'y', ... need not be #undef'ed, as they aren't visible outside the
+# C files that are permitted to see them.
+#
+# This hash contains the base constraints.  0 means the symbol is to be
+# considered undefined; 1, defined.
 my %cpp_ifdef_constraints;
+
 for my $c (@c_list) {
     my $c_prime = $c =~ s/[.]/_/r;
     $cpp_ifdef_constraints{ "PERL_IN_\U$c_prime" } = 0;
 }
 
-# There are also these three symbols that guard visibility.  A symbol that
-# is visible when all three are 0, is globally visible.
+# There are also these three symbols that guard visibility.
 $cpp_ifdef_constraints{PERL_CORE} = 0;
 $cpp_ifdef_constraints{PERL_EXT} = 0;
 $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
+
+# This program evaluates the conditionals surrounding every #define in every
+# examined header.  It turns out that in many cases, using the constraints in
+# %cpp_ifdef_constraints, a conditional can be reduced to a plain 0 or 1.  In
+# those cases, we know immediately if the #defined symbol is externally
+# visible.  In other cases, there are other terms in the conditionals whose
+# values we don't know; they typically depend on the platform and Configure
+# options being used.  Hence, there are circumstances where the symbol does
+# get #defined, and is externally visible, so we will add an #undef for it if
+# it shouldn't be visible.  There is no harm in undefining a symol that
+# doesn't happen to get defined in this particular build environment.
 
 # Match any of these.  HeaderParser creates this canonical form for all
 # conditionals.
