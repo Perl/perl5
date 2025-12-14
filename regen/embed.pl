@@ -3666,6 +3666,8 @@ sub generate_proto_h {
 
         die_at_end "$plain_func: I and i flags are mutually exclusive"
                                                      if $flags =~ tr/Ii// > 1;
+        die_at_end "$plain_func: A, C, and S flags are all mutually exclusive"
+                                                    if $flags =~ tr/ACS// > 1;
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
         die_at_end "$plain_func:, M flag requires p flag"
