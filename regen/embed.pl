@@ -3670,6 +3670,8 @@ sub generate_proto_h {
                                                     if $flags =~ tr/Sp// > 1;
         die_at_end "$plain_func:, M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
+        die_at_end "$plain_func: X flag requires one of [Iip] flags"
+                                        if $flags =~ /X/ && $flags !~ /[Iip]/;
 
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
@@ -3777,8 +3779,6 @@ sub generate_proto_h {
                                                 # it's ok.
                                              && $plain_func !~ /^[Pp]erl/);
 
-        die_at_end "$plain_func: X flag requires one of [Iip] flags"
-                                        if $flags =~ /X/ && $flags !~ /[Iip]/;
         die_at_end "$plain_func: [Ii] with [ACX] requires p flag"
                     if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
         die_at_end "$plain_func: b flag without M flag requires D flag"
