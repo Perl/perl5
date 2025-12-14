@@ -4847,18 +4847,19 @@ sub find_undefs {
     # restrict the visibility.
 
     foreach my $entry ($fnc->@*) {
+        my $embed = $entry->embed;
 
         # Only lines that have this are interesting to us.  Lines that don't
         # have it are typically '#if' lines in the file.  (These are
         # meaningful to HeaderParser which has already parsed them and used
         # their information to create auxiliary data for the lines we do care
         # about.)
-        next unless $entry->embed;
+        next unless $embed;
 
-        my $flags = $entry->embed->{flags};
+        my $flags = $embed->{flags};
         $flags =~ s/[^ACE]//g;
         next unless $flags;     # No visibility
-        $visibility{$entry->embed->{name}} = $flags;
+        $visibility{$embed->{name}} = $flags;
     }
 
     # Done with embed.fnc.  Now look through all the header files for their
