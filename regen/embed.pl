@@ -3668,6 +3668,8 @@ sub generate_proto_h {
                                                      if $flags =~ tr/Ii// > 1;
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
+        die_at_end "$plain_func:, M flag requires p flag"
+                                            if $flags =~ /M/ && $flags !~ /p/;
 
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
@@ -3763,8 +3765,6 @@ sub generate_proto_h {
 
         $func = full_name($plain_func, $flags);
 
-        die_at_end "$plain_func: M flag requires p flag"
-                                            if $flags =~ /M/ && $flags !~ /p/;
         my $C_required_flags = '[pIimbs]';
         die_at_end
           "$plain_func: C flag requires one of $C_required_flags] flags"
