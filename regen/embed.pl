@@ -4847,7 +4847,7 @@ sub process_apidoc_lines {
 }
 
 sub find_undefs {
-    my $all = shift;    # embed.fnc data
+    my $fnc = shift;    # embed.fnc data
 
     # This program attempts to enforce macro visibility restrictions outside
     # core.  This subroutine finds the symbols that need to be undefined when
@@ -4862,7 +4862,7 @@ sub find_undefs {
     # default, unless overridden by a visibility flag.  #ifdefs can further
     # restrict the visibility.
 
-    foreach my $entry ($all->@*) {
+    foreach my $entry ($fnc->@*) {
 
         # Only lines that have this are interesting to us.  Lines that don't
         # have it are typically '#if' lines in the file.  (These are
