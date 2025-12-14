@@ -3703,8 +3703,7 @@ sub generate_proto_h {
             next if $flags =~ /u/;
         }
         else {
-            die_at_end "$plain_func: u flag only usable with m"
-                                                            if $flags =~ /u/;
+            die_at_end "$plain_func: u flag requires m flag" if $flags =~ /u/;
         }
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
@@ -3744,7 +3743,7 @@ sub generate_proto_h {
 
             # A publicly accessible non-static element needs to have a Perl_
             # prefix available to call it with (in case of name conflicts).
-            die_at_end "'$plain_func' requires p flag because has A or C flag"
+            die_at_end "$plain_func: requires p flag because has A or C flag"
                                     if $flags !~ /p/
                                     && $flags =~ /[AC]/
                                     && $plain_func !~ /[Pp]erl/;
@@ -3759,11 +3758,11 @@ sub generate_proto_h {
 
         $func = full_name($plain_func, $flags);
 
-        die_at_end "For '$plain_func', M flag requires p flag"
+        die_at_end "$plain_func: M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
         my $C_required_flags = '[pIimbs]';
         die_at_end
-          "For '$plain_func', C flag requires one of $C_required_flags] flags"
+          "$plain_func: C flag requires one of $C_required_flags] flags"
                                              if $flags =~ /C/
                                              && ($flags !~ /$C_required_flags/
 
@@ -3773,17 +3772,17 @@ sub generate_proto_h {
                                                 # it's ok.
                                              && $plain_func !~ /^[Pp]erl/);
 
-        die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
+        die_at_end "$plain_func: X flag requires one of [Iip] flags"
                                         if $flags =~ /X/ && $flags !~ /[Iip]/;
-        die_at_end "For '$plain_func', X and m flags are mutually exclusive"
+        die_at_end "$plain_func: X and m flags are mutually exclusive"
                                             if $flags =~ /X/ && $has_mflag;
-        die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
+        die_at_end "$plain_func: [Ii] with [ACX] requires p flag"
                     if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
-        die_at_end "For '$plain_func', b and m flags are mutually exclusive"
+        die_at_end "$plain_func: b and m flags are mutually exclusive"
                  . " (try M flag)" if $flags =~ /b/ && $has_mflag;
-        die_at_end "For '$plain_func', b flag without M flag requires D flag"
+        die_at_end "$plain_func: b flag without M flag requires D flag"
                         if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
-        die_at_end "For '$plain_func', I and i flags are mutually exclusive"
+        die_at_end "$plain_func: I and i flags are mutually exclusive"
                                             if $flags =~ tr/Ii// > 1;
 
         $ret = "";
