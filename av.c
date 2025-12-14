@@ -361,7 +361,7 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
             return NULL;
     }
 
-    if (SvREADONLY(av) && key >= AvFILL(av))
+    if (SvREADONLY(av) && key > AvFILL(av))
         croak_no_modify();
 
     if (!AvREAL(av) && AvREIFY(av))
