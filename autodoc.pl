@@ -622,7 +622,7 @@ sub check_and_add_proto_defn {
 
 
     my @munged_args= $args_ref->@*;
-    s/\b(?:NN|NULLOK|[SM]PTR|EPTRQ?)\b\s+//g for @munged_args;
+    s/\b(?:NN|NULLOK|[SM]PTR|EPTR\w+)\b\s+//g for @munged_args;
 
     my $flags_sans_d = $flags;
     my $docs_expected = $flags_sans_d =~ s/d//g;
