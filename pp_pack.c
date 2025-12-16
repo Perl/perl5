@@ -804,7 +804,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
    themselves if they need to do a lot of unpacks like this on it
 */
 STATIC bool
-need_utf8(const char *pat, const char *patend)
+S_need_utf8(const char *pat, const char *patend)
 {
     bool first = TRUE;
 
@@ -824,7 +824,7 @@ need_utf8(const char *pat, const char *patend)
 }
 
 STATIC char
-first_symbol(const char *pat, const char *patend) {
+S_first_symbol(const char *pat, const char *patend) {
     PERL_ARGS_ASSERT_FIRST_SYMBOL;
 
     while (pat < patend) {
