@@ -406,7 +406,7 @@ This comes down to:
 =head3 Monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
-L<CoreSmokeDB Web|https://perl5.test-smoke.org/>, L<Perl Smoke Web|http://perl.develop-help.com> 
+L<CoreSmokeDB Web|https://perl5.test-smoke.org/>, L<Perl Smoke Web|http://perl.develop-help.com>
 and L<Smoke Status Report|https://tux.nl/perl5/smoke/index.html> for a summary. See also
 L<Raw Reports Mailing List|https://www.nntp.perl.org/group/perl.daily-build.reports/> which has emailed raw reports.
 
@@ -1383,7 +1383,7 @@ header in your message after receiving it back via perl5-porters.
 
 =head3 Update the link to the latest perl on perlweb
 
-Submit a pull request to L<https://github.com/perlorg/perlweb>. 
+Submit a pull request to L<https://github.com/perlorg/perlweb>.
 Update the link in F<docs/dev/perl5/index.html> and F<docs/shared/tpl/stats.html>.
 
 =for checklist skip RC
@@ -1684,7 +1684,7 @@ F<dist/Module-CoreList/Changes>.
 
 =item *
 
-Replace date '????-??-??' per actual planned YYYY-MM-DD in 
+Replace date '????-??-??' per actual planned YYYY-MM-DD in
 F<dist/Module-CoreList/lib/Module/CoreList.pm>.
 
 =item *
