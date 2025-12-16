@@ -5940,9 +5940,9 @@ ES	|void	|debug_start_match					\
 				|SPTR const char *start 		\
 				|EPTRge const char *end 		\
 				|NN const char *blurb
-ES	|void	|dump_exec_pos	|NN const char *locinput		\
+ES	|void	|dump_exec_pos	|SPTR const char *locinput		\
 				|NN const regnode *scan 		\
-				|NN const char *loc_regeol		\
+				|EPTRge const char *loc_regeol		\
 				|NN const char *loc_bostr		\
 				|NN const char *loc_reg_starttry	\
 				|const bool do_utf8			\
