@@ -6077,19 +6077,19 @@ S	|STRLEN |sv_pos_u2b_cached					\
 				|NN SV * const sv			\
 				|NN MAGIC ** const mgp			\
 				|SPTR const U8 * const start		\
-				|EPTRge const U8 * const send		\
+				|EPTRgt const U8 * const send		\
 				|STRLEN uoffset 			\
 				|STRLEN uoffset0			\
 				|STRLEN boffset0
 ST	|STRLEN |sv_pos_u2b_forwards					\
 				|SPTR const U8 * const start		\
-				|EPTRge const U8 * const send		\
+				|EPTRgt const U8 * const send		\
 				|NN STRLEN * const uoffset		\
 				|NN bool * const at_end 		\
 				|NN bool *canonical_position
 ST	|STRLEN |sv_pos_u2b_midway					\
 				|SPTR const U8 * const start		\
-				|EPTRge const U8 *send			\
+				|EPTRgt const U8 *send			\
 				|STRLEN uoffset 			\
 				|const STRLEN uend
 i	|void	|sv_unglob	|NN SV * const sv			\

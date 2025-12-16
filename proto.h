@@ -9231,18 +9231,18 @@ STATIC STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV * const sv, MAGIC ** const mgp, const U8 * const start, const U8 * const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_CACHED     \
         assert(sv); assert(mgp); assert(start); assert(send); \
-        assert(start <= send)
+        assert(start < send)
 
 STATIC STRLEN
 S_sv_pos_u2b_forwards(const U8 * const start, const U8 * const send, STRLEN * const uoffset, bool * const at_end, bool *canonical_position);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS   \
         assert(start); assert(send); assert(uoffset); assert(at_end); \
-        assert(canonical_position); assert(start <= send)
+        assert(canonical_position); assert(start < send)
 
 STATIC STRLEN
 S_sv_pos_u2b_midway(const U8 * const start, const U8 *send, STRLEN uoffset, const STRLEN uend);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_MIDWAY     \
-        assert(start); assert(send); assert(start <= send)
+        assert(start); assert(send); assert(start < send)
 
 STATIC void
 S_utf8_mg_len_cache_update(pTHX_ SV * const sv, MAGIC ** const mgp, const STRLEN ulen);
