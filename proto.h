@@ -8644,7 +8644,7 @@ Perl_populate_invlist_from_bitmap(pTHX_ const U8 *bitmap, const Size_t bitmap_le
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 # define PERL_ARGS_ASSERT_REGCURLY              \
-        assert(s); assert(e); assert(s <= e)
+        assert(s); assert(e); assert(s < e)
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_CALLCONV bool
