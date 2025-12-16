@@ -3886,10 +3886,10 @@ ARTdp	|char * |uiv_2buf	|NN char * const buf			\
 				|UV uv					\
 				|const int is_uv			\
 				|NN char ** const peob
-Adp	|SSize_t|unpackstring	|NN const char *pat			\
-				|NN const char *patend			\
-				|NN const char *s			\
-				|NN const char *strend			\
+Adp	|SSize_t|unpackstring	|SPTR const char *pat			\
+				|EPTRge const char *patend		\
+				|SPTR const char *s			\
+				|EPTRge const char *strend		\
 				|U32 flags
 : Used in gv.c, hv.c
 Cp	|void	|unshare_hek	|NULLOK HEK *hek
@@ -5416,7 +5416,7 @@ RS	|char * |sv_exp_grow	|NN SV *sv				\
 S	|SSize_t|unpack_rec	|NN struct tempsym *symptr		\
 				|MPTR const char *s			\
 				|SPTR const char *strbeg		\
-				|NN const char *strend			\
+				|EPTRge const char *strend		\
 				|NULLOK const char **new_s
 #endif /* defined(PERL_IN_PP_PACK_C) */
 #if defined(PERL_IN_PP_SORT_C)
