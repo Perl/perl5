@@ -9403,7 +9403,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv);
 STATIC int
 S_intuit_more(pTHX_ char *s, char *e, U8 caller_context, char *caller_s, Size_t caller_length);
 # define PERL_ARGS_ASSERT_INTUIT_MORE           \
-        assert(s); assert(e)
+        assert(s); assert(e); assert(s <= e); assert(*e == '\0')
 
 STATIC bool
 S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8);
