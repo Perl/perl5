@@ -10297,7 +10297,7 @@ PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_forward_overshoot(const U8 *s, SSize_t off, const U8 * const end, SSize_t *remaining)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_UTF8_HOP_FORWARD_OVERSHOOT \
-        assert(s); assert(end)
+        assert(s); assert(end); assert(s <= end)
 
 PERL_STATIC_INLINE U8 *
 Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end, SSize_t *remaining)
