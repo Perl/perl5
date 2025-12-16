@@ -5529,7 +5529,7 @@ ETi	|Size_t |find_first_differing_byte_pos				\
 ES	|U32	|get_quantifier_value					\
 				|NN RExC_state_t *pRExC_state		\
 				|SPTR const char *start 		\
-				|EPTRge const char *end
+				|EPTRgt const char *end
 ES	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		\
 				|NULLOK regnode_offset *nodep		\
 				|NULLOK UV *code_point_p		\

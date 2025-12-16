@@ -8388,7 +8388,7 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist);
         assert(screamer); assert(strbeg <= stringarg)
 
 # define PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE  \
-        assert(pRExC_state); assert(start); assert(end); assert(start <= end)
+        assert(pRExC_state); assert(start); assert(end); assert(start < end)
 
 # define PERL_ARGS_ASSERT_GROK_BSLASH_N         \
         assert(pRExC_state); assert(flagp)
