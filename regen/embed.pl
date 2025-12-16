@@ -4026,8 +4026,11 @@ sub generate_proto_h {
                     next if defined $string->{M} &&    $i->[0] eq 'S'
                                                     && $i->[1] eq 'E';
 
-                    my $lower = $string->{$i->[0]} or next;
-                    my $upper = $string->{$i->[1]} or next;
+                    my $lower_obj= $string->{$i->[0]} or next;
+                    my $upper_obj= $string->{$i->[1]} or next;
+                    my $lower = "$lower_obj->{deref}$lower_obj->{argname}";
+                    my $upper= "$upper_obj->{deref}$upper_obj->{argname}";
+                    my $equal = $upper_obj->{equal};
 
                     # This reduces to either;
                     #   assert(lower < upper);
@@ -4035,11 +4038,7 @@ sub generate_proto_h {
                     #   assert(lower <= upper);
                     #
                     # There might also be some derefences, like **lower
-                    push @asserts, "assert("
-                                        . "$lower->{deref}$lower->{argname}"
-                                        . " <$upper->{equal} "
-                                        . "$upper->{deref}$upper->{argname}"
-                                        . ")";
+                    push @asserts, "assert($lower <$equal $upper)";
                 }
             }
 
