@@ -3821,15 +3821,21 @@ sub generate_proto_h {
                     my $ptr_type;   # E, M, and S are the three types
                                     # corresponding respectively to EPTR,
                                     # MPTR, and SPTR
+                    my $ptr_name;   # The full name of $ptr_type
                     my $equal = ""; # set to "=" if can be equal to previous
                                     # pointer, empty if not
-                    if ($arg =~ s/ \b ( EPTRgt | EPTRge | MPTR | SPTR ) \b //x)
+                    if ($arg =~ s/ \b (  EPTRgt
+                                       | EPTRge
+                                       | EPTRtermNUL
+                                       | MPTR
+                                       | SPTR )
+                                   \b //x)
                     {
-                        my $name = $1;
-                        $ptr_type = substr($name, 0, 1);
+                        $ptr_name = $1;
+                        $ptr_type = substr($ptr_name, 0, 1);
                         $equal = "=" if $ptr_type eq 'M'
                                      or (   $ptr_type eq 'E'
-                                         && substr($name, -1, 1) eq 'e');
+                                         && $ptr_name !~ /gt/);
                     }
 
                     # A $ptr_type is a specialized 'nn'
@@ -3848,7 +3854,7 @@ sub generate_proto_h {
                     # times
                     die_at_end
                            ":$func: $arg Use only one of NN (including"
-                         . " EPTRge, EPTRgt, MPTR, SPTR), NULLOK, or NZ"
+                         . " an EPTR form, MPTR, SPTR), NULLOK, or NZ"
                                                if 0 + $nn + $nz + $nullok > 1;
 
                     push( @nonnull, $n ) if $nn;
@@ -3860,8 +3866,8 @@ sub generate_proto_h {
                     # pointer.
                     if ($args_assert_line && $arg =~ /\*/) {
                         if ($nn + $nullok == 0) {
-                            warn "$func: $arg needs one of: NN, EPTRge,"
-                               . " EPTRgt, MPTR, SPTR, or NULLOK\n";
+                            warn "$func: $arg needs one of: NN,"
+                               . " an EPTR form, MPTR, SPTR, or NULLOK";
                             ++$unflagged_pointers;
                         }
 
@@ -3920,9 +3926,10 @@ sub generate_proto_h {
 
                             # Save the data we need later
                             my %entry = (
-                                          argname => $argname,
-                                          equal   => $equal,
-                                          deref   => $derefs,
+                                          argname   => $argname,
+                                          equal     => $equal,
+                                          deref     => $derefs,
+                                          name      => $ptr_name,
                                         );
 
                             # The motivation for all this is that some string
@@ -3944,16 +3951,19 @@ sub generate_proto_h {
                             #               'equal' => '=',
                             #               'argname' => 'curpos',
                             #               'deref' => ''
+                            #               'name' => 'MPTR',
                             #               },
                             #       'E' => {
                             #               'equal' => '',
                             #               'argname' => 'strend',
                             #               'deref' => ''
+                            #               'name' => some-value,
                             #               },
                             #       'S' => {
                             #               'equal' => '',
                             #               'deref' => '',
                             #               'argname' => 'strbeg'
+                            #               'name' => 'SPTR',
                             #               }
                             #   }
                             #
@@ -4030,15 +4040,22 @@ sub generate_proto_h {
                     my $upper_obj= $string->{$i->[1]} or next;
                     my $lower = "$lower_obj->{deref}$lower_obj->{argname}";
                     my $upper= "$upper_obj->{deref}$upper_obj->{argname}";
-                    my $equal = $upper_obj->{equal};
 
-                    # This reduces to either;
-                    #   assert(lower < upper);
-                    # or
-                    #   assert(lower <= upper);
-                    #
-                    # There might also be some derefences, like **lower
-                    push @asserts, "assert($lower <$equal $upper)";
+                    if ($upper_obj->{name} eq 'EPTRtermNUL') {
+                            push @asserts, "assert($lower <= $upper)";
+                            push @asserts, "assert(*$upper == '\\0')";
+                    }
+                    else {
+                        my $equal = $upper_obj->{equal};
+
+                        # This reduces to either;
+                        #   assert(lower < upper);
+                        # or
+                        #   assert(lower <= upper);
+                        #
+                        # There might also be some derefences, like **lower
+                        push @asserts, "assert($lower <$equal $upper)";
+                    }
                 }
             }
 

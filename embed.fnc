@@ -219,22 +219,26 @@
 :   EPTRgt  is like EPTRge, but the called function need not be prepared to
 :	    handle the case of an empty string; the value of this pointer must
 :	    be strictly greater than the corresponding MPTR or SPTR.
+:   EPTRtermNUL  means that the string delimitted by it and its corresponding
+:	    SPTR must be NUL-terminated.  This parameter points to that
+:	    terminating NUL character.  That means that when the string looks
+:	    empty, it really contains a single NUL.
 :
-:   To summarize, either
+:   To summarize, one of:
 :	    SPTR <= MPTR <  EPTRgt
-:   or
 :	    SPTR <= MPTR <= EPTRge
+:	    SPTR <= MPTR <= EPTR && *EPTR == '\0'
 :   In each equation all three or any two of the constraints must be present.
 :
-:   When only two constraints are present and one of them is either EPTRge or
-:   EPTRgt, the difference between your choosing to use SPTR or MPTR for the
-:   other one becomes somewhat fuzzy; the generated assertion will be the same
-:   whichever constraint is used.  You should choose the one that makes the
-:   most sense for the semantics of the parameter.  For example, there are
-:   currently some functions with parameters named 'curpos', and no SPTR
-:   parameter exists.  The name of the parameter clearly indicates it isn't
-:   necessarily the starting position of the string, so using MPTR as the
-:   constraint makes the most sense.
+:   When only two constraints are present and one of them is an EPTR form, the
+:   difference between your choosing to use SPTR or MPTR for the other one
+:   becomes somewhat fuzzy; the generated assertion will be the same whichever
+:   constraint is used.  You should choose the one that makes the most sense
+:   for the semantics of the parameter.  For example, there are currently some
+:   functions with parameters named 'curpos', and no SPTR parameter exists.
+:   The name of the parameter clearly indicates it isn't necessarily the
+:   starting position of the string, so using MPTR as the constraint makes the
+:   most sense.
 :
 :   The parameters for the function can be in any order, except if a function
 :   has multiple different character strings, all the parameters for the first
