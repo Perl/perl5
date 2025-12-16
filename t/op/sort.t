@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 205);
+plan(tests => 206);
 use Tie::Array; # we need to test sorting tied arrays
 
 # these shouldn't hang
@@ -962,6 +962,22 @@ is("@b", "1 2 3 3 4 5 7", "comparison result as string");
     is($cc, 1, 'overload compare called once');
     is("@sorted","1 2", 'overload sort result');
     is($cs, 2, 'overload string called twice');
+}
+
+{
+    # GH 23956 - amagic_ncmp didn't handle numeric conversions
+    # properly
+    package GH23956 {
+        use overload
+          fallback => 1,
+          "0+" => sub { $_[0][0] };
+    }
+    my @data = map {
+        bless [ $_ ], "GH23956"
+    } ~0, ~0-1;
+    my @sorted = sort { $a <=> $b } @data;
+    local $::TODO = "sort amagic_ncmp is broken";
+    is $sorted[0]+0, $data[1], "sort of 0+ overloaded values";
 }
 
 fresh_perl_is('sub w ($$) {my ($l, $r) = @_; my $v = \@_; undef @_; $l <=> $r}; print join q{ }, sort w 3, 1, 2, 0',
