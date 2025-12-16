@@ -8917,7 +8917,7 @@ S_unwind_scan_frames(pTHX_ void *p);
 
 #   define PERL_ARGS_ASSERT_DUMP_EXEC_POS       \
         assert(locinput); assert(scan); assert(loc_regeol); assert(loc_bostr); \
-        assert(loc_reg_starttry)
+        assert(loc_reg_starttry); assert(locinput <= loc_regeol)
 
 #   define PERL_ARGS_ASSERT_RE_EXEC_INDENTF     \
         assert(fmt)
