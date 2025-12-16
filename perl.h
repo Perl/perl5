@@ -4107,6 +4107,9 @@ out there, Solaris being the most prominent.
 #endif
 #define UTF8fARG(u,l,p) (int)cBOOL(u), (UV)(l), (void*)(p)
 
+/* For printing a PADNAME. Ideally these would have been named
+ * PADNAMEf and PADNAMEfARG
+ */
 #define PNf UTF8f
 #define PNfARG(pn) (int)1, (UV)PadnameLEN(pn), (void *)PadnamePV(pn)
 
