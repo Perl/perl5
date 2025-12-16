@@ -8720,6 +8720,48 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
     return sv_eq_flags(sv1, sv2, 0);
 }
 
+/*
+=for apidoc sv_numcmp_common
+
+Handles the common parts of the L<perlapi/sv_numeq>, sv_numne,
+sv_numlt, sv_numle, sv_numge, sv_numgt, sv_numcmp APIs.
+
+C<method> should be the C<*_amg> constant for the operator being
+handled, such as C<eq_amg> for numeric equality.
+
+C<flags> takes the same flags as the numeric comparison APIs.
+
+This includes:
+
+=over
+
+=item *
+
+treating possible NULL C<*sv1> and C<*sv2> arguments as undef.
+
+=item *
+
+calling get magic
+
+=item *
+
+handling the pain of overloading, including numericizing the SVs if
+there is no numeric overload, but there is a numeric "0+" overload.
+
+=back
+
+If there is operator overloading this function will populate
+C<*result> with the SV returned by the overloading and return true.
+The caller will need to convert this to an integer for sv_numcmp() or
+to bool for the rest of the APIs.
+
+If there is no operator overloading, this function will return true.
+Before returning it will convert C<*sv1> and C<*sv2> to numbers if
+they are references so do_cmp() can be used safely.
+
+=cut
+*/
+
 PERL_STATIC_INLINE bool
 S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
                    int method, SV **result) {
