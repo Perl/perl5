@@ -5717,7 +5717,7 @@ ETXp	|UV	|to_fold_latin1_|const U8 c				\
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 ERTXp	|bool	|regcurly	|SPTR const char *s			\
-				|EPTRge const char *e			\
+				|EPTRgt const char *e			\
 				|NULLOK const char *result[5]
 #endif
 #if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
