@@ -8912,7 +8912,8 @@ S_unwind_scan_frames(pTHX_ void *p);
 
 # if defined(DEBUGGING)
 #   define PERL_ARGS_ASSERT_DEBUG_START_MATCH   \
-        assert(prog); assert(start); assert(end); assert(blurb)
+        assert(prog); assert(start); assert(end); assert(blurb); \
+        assert(start <= end)
 
 #   define PERL_ARGS_ASSERT_DUMP_EXEC_POS       \
         assert(locinput); assert(scan); assert(loc_regeol); assert(loc_bostr); \

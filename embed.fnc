@@ -5937,8 +5937,8 @@ EWi	|void	|unwind_paren	|NN regexp *rex 			\
 ES	|void	|debug_start_match					\
 				|NN const REGEXP *prog			\
 				|const bool do_utf8			\
-				|NN const char *start			\
-				|NN const char *end			\
+				|SPTR const char *start 		\
+				|EPTRge const char *end 		\
 				|NN const char *blurb
 ES	|void	|dump_exec_pos	|NN const char *locinput		\
 				|NN const regnode *scan 		\
