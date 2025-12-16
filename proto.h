@@ -1275,7 +1275,7 @@ PERL_CALLCONV bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX     \
-        assert(sp); assert(send)
+        assert(sp); assert(*sp); assert(send); assert(*sp <= send)
 
 /* PERL_CALLCONV GV *
 Perl_gv_AVadd(pTHX_ GV *gv); */

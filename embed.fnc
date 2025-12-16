@@ -1445,8 +1445,8 @@ Adp	|int	|grok_number_flags					\
 				|NULLOK UV *valuep			\
 				|U32 flags
 ARdp	|bool	|grok_numeric_radix					\
-				|NN const char **sp			\
-				|NN const char *send
+				|SPTR const char **sp			\
+				|EPTRge const char *send
 Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
