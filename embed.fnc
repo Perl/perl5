@@ -2588,8 +2588,8 @@ p	|void	|output_non_portable					\
 dp	|void	|package	|NN OP *name				\
 				|NULLOK OP *version
 Adp	|void	|packlist	|NN SV *cat				\
-				|NN const char *pat			\
-				|NN const char *patend			\
+				|SPTR const char *pat			\
+				|EPTRtermNUL const char *patend 	\
 				|NN SV **beglist			\
 				|NN SV **endlist
 Adp	|PADOFFSET|pad_add_anon |NN CV *func				\

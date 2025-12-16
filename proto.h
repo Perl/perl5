@@ -3337,7 +3337,7 @@ PERL_CALLCONV void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist);
 #define PERL_ARGS_ASSERT_PACKLIST               \
         assert(cat); assert(pat); assert(patend); assert(beglist); \
-        assert(endlist)
+        assert(endlist); assert(pat <= patend); assert(*patend == '\0')
 
 PERL_CALLCONV PADOFFSET
 Perl_pad_add_anon(pTHX_ CV *func, I32 optype);
