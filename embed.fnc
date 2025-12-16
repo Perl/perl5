@@ -3841,13 +3841,13 @@ ARTdip	|U8 *	|utf8_hop_back_overshoot				\
 				|SPTR const U8 * const start		\
 				|NULLOK SSize_t *remaining
 ARTdmp	|U8 *	|utf8_hop_forward					\
-				|NN const U8 *s 			\
+				|SPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const end
+				|EPTRge const U8 * const end
 ARTdip	|U8 *	|utf8_hop_forward_overshoot				\
-				|NN const U8 *s 			\
+				|SPTR const U8 *s			\
 				|SSize_t off				\
-				|NN const U8 * const end		\
+				|EPTRge const U8 * const end		\
 				|NULLOK SSize_t *remaining
 ARTdip	|U8 *	|utf8_hop_overshoot					\
 				|MPTR const U8 *s			\
