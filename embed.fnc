@@ -4552,7 +4552,7 @@ ERXp	|bool	|grok_bslash_c	|const char source			\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn
 ERXp	|bool	|grok_bslash_o	|SPTR char **s				\
-				|EPTRge const char * const send 	\
+				|EPTRgt const char * const send 	\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\
@@ -4560,7 +4560,7 @@ ERXp	|bool	|grok_bslash_o	|SPTR char **s				\
 				|const bool allow_UV_MAX		\
 				|const bool utf8
 ERXp	|bool	|grok_bslash_x	|SPTR char **s				\
-				|EPTRge const char * const send 	\
+				|EPTRgt const char * const send 	\
 				|NN UV *uv				\
 				|NN const char **message		\
 				|NULLOK U32 *packed_warn		\

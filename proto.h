@@ -6880,11 +6880,11 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 
 # define PERL_ARGS_ASSERT_GROK_BSLASH_O         \
         assert(s); assert(*s); assert(send); assert(uv); assert(message); \
-        assert(*s <= send)
+        assert(*s < send)
 
 # define PERL_ARGS_ASSERT_GROK_BSLASH_X         \
         assert(s); assert(*s); assert(send); assert(uv); assert(message); \
-        assert(*s <= send)
+        assert(*s < send)
 
 #endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) ||
           defined(PERL_IN_TOKE_C) */
