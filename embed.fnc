@@ -5520,7 +5520,7 @@ ERST	|int	|edit_distance	|NN const UV *src			\
 ES	|I32	|execute_wildcard					\
 				|NN REGEXP * const prog 		\
 				|MPTR char *stringarg			\
-				|NN char *strend			\
+				|EPTRtermNUL char *strend		\
 				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *screamer			\

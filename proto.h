@@ -8384,7 +8384,8 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist);
 
 # define PERL_ARGS_ASSERT_EXECUTE_WILDCARD      \
         assert(prog); assert(stringarg); assert(strend); assert(strbeg); \
-        assert(screamer); assert(strbeg <= stringarg)
+        assert(screamer); assert(strbeg <= stringarg); \
+        assert(stringarg <= strend); assert(*strend == '\0')
 
 # define PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE  \
         assert(pRExC_state); assert(start); assert(end); assert(start < end)
