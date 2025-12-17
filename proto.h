@@ -9393,7 +9393,7 @@ S_get_and_check_backslash_N_name_wrapper(pTHX_ const char *s, const char * const
 STATIC void
 S_incline(pTHX_ const char *s, const char *end);
 # define PERL_ARGS_ASSERT_INCLINE               \
-        assert(s); assert(end); assert(s <= end)
+        assert(s); assert(end); assert(s <= end); assert(*end == '\0')
 
 STATIC int
 S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv);

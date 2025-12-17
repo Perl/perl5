@@ -6172,7 +6172,7 @@ RS	|SV *	|get_and_check_backslash_N_name_wrapper 		\
 				|SPTR const char *s			\
 				|EPTRge const char * const e
 S	|void	|incline	|SPTR const char *s			\
-				|EPTRge const char *end
+				|EPTRtermNUL const char *end
 S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
