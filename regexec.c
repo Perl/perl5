@@ -3516,7 +3516,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         croak("panic: unknown regstclass %d", (int)OP(c));
     } /* End of switch on node type */
 
-    return 0;
+    return NULL;
 
   got_it:
     return s;
