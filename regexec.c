@@ -3694,7 +3694,7 @@ I32
 Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
               char *strbeg, SSize_t minend, SV *sv, void *data, U32 flags)
 /* stringarg: the point in the string at which to begin matching */
-/* strend:    pointer to null at end of string */
+/* strend:    pointer to NUL at end of string */
 /* strbeg:    real beginning of string */
 /* minend:    end of match must be >= minend bytes after stringarg. */
 /* sv:        SV being matched: only used for utf8 flag, pos() etc; string
