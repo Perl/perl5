@@ -397,6 +397,13 @@ exit in other code during a match. For example in something like
 C<(?{ local $x = ... })>, the C<local> might have been unwound before the
 pattern has finished matching. [GH #16197]
 
+=item *
+
+C<DB::sub> is not meant to be called for sub calls from the DB
+package, but called to overloaded subs for overloaded values used in
+the DB package would result in calls in DB::sub.  Fixed the check for
+the current package in amagic_call().  [GH 24001]
+
 =back
 
 =head1 Known Problems
