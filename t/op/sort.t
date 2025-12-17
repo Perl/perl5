@@ -976,7 +976,6 @@ is("@b", "1 2 3 3 4 5 7", "comparison result as string");
         bless [ $_ ], "GH23956"
     } ~0, ~0-1;
     my @sorted = sort { $a <=> $b } @data;
-    local $::TODO = "sort amagic_ncmp is broken";
     is $sorted[0]+0, $data[1], "sort of 0+ overloaded values";
 }
 

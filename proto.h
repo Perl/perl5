@@ -8226,7 +8226,7 @@ S_sv_i_ncmp_desc(pTHX_ SV * const a, SV * const b);
         assert(a); assert(b)
 
 PERL_STATIC_INLINE I32
-S_sv_ncmp(pTHX_ SV * const a, SV * const b);
+S_sv_ncmp(pTHX_ SV *a, SV *b);
 #   define PERL_ARGS_ASSERT_SV_NCMP             \
         assert(a); assert(b)
 

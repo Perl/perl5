@@ -5442,8 +5442,8 @@ i	|I32	|sv_i_ncmp	|NN SV * const a			\
 				|NN SV * const b
 i	|I32	|sv_i_ncmp_desc |NN SV * const a			\
 				|NN SV * const b
-i	|I32	|sv_ncmp	|NN SV * const a			\
-				|NN SV * const b
+i	|I32	|sv_ncmp	|NN SV *a				\
+				|NN SV *b
 i	|I32	|sv_ncmp_desc	|NN SV * const a			\
 				|NN SV * const b
 # if defined(USE_LOCALE_COLLATE)
