@@ -10601,8 +10601,9 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * identifier ends in the input.  If no identifier was found, the return
      * will be the the input 's' unchanged.
      *
-     * If the identifier is illegal, the function croaks unless this flag is
-     * passed in: */
+     * If the identifier is empty (s_end == s), *d is set to the NUL
+     * character; otherwise if the identifier is illegal, the function croaks
+     * unless this flag is passed in: */
     const bool check_only = flags & CHECK_ONLY;
 
     /* In this case NULL is returned instead of croaking, and the contents
