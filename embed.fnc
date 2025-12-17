@@ -2948,7 +2948,7 @@ Cp	|char * |re_intuit_start|NN REGEXP * const rx			\
 				|NULLOK SV *sv				\
 				|SPTR const char * const strbeg 	\
 				|MPTR char *strpos			\
-				|NN char *strend			\
+				|EPTRge char *strend			\
 				|const U32 flags			\
 				|NULLOK re_scream_pos_data *data
 Cp	|SV *	|re_intuit_string					\

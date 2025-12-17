@@ -3680,7 +3680,7 @@ PERL_CALLCONV char *
 Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, const char * const strbeg, char *strpos, char *strend, const U32 flags, re_scream_pos_data *data);
 #define PERL_ARGS_ASSERT_RE_INTUIT_START        \
         assert(rx); assert(strbeg); assert(strpos); assert(strend); \
-        assert(strbeg <= strpos)
+        assert(strbeg <= strpos); assert(strpos <= strend)
 
 PERL_CALLCONV SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r);
