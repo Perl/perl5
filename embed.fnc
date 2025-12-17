@@ -214,7 +214,8 @@
 :	    that this value may be equal to the corresponding SPTR or MPTR.
 :	    When this is true, it indicates the string is empty past the SPTR
 :	    or MPTR, and the called function must be prepared to handle this
-:	    case.
+:	    case by not dereferencing this parameter without first checking it
+:	    is valid.
 :   EPTRgt  is like EPTRge, but the called function need not be prepared to
 :	    handle the case of an empty string; the value of this pointer must
 :	    be strictly greater than the corresponding MPTR or SPTR.
