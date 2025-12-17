@@ -87,7 +87,10 @@ sub test_many {
         my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
 
         my $text = $preamble;
-        $text .= "$_\n" for @$xsub_lines;
+        for (@$xsub_lines) {
+            $text .= $_;
+            $text .= "\n" unless /\n\z/;
+        }
 
         tie *FH, 'Capture';
         my $pxs = ExtUtils::ParseXS->new;
@@ -318,8 +321,7 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
     $stderr = PrimitiveCapture::capture_stderr(sub {
       $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
     });
-    TODO: {
-      local $TODO = 'GH 19661';
+    {
       unlike $stderr,
         qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
@@ -330,8 +332,7 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
     $stderr = PrimitiveCapture::capture_stderr(sub {
       $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
     });
-    TODO: {
-      local $TODO = 'GH 19661';
+    {
       unlike $stderr,
         qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
@@ -5232,5 +5233,650 @@ EOF
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
+{
+    # Test C-preprocessor parsing
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "CPP basic",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |
+                |short foo()
+                |
+                |#elif USE_LONG
+                |
+                |long foo()
+                |
+                |#else
+                |
+                |int foo()
+                |
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+
+                         .*
+
+                        ^ \s* short \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#elif\ USE_LONG \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+
+                         .*
+
+                        ^ \s* long \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#else \n
+                        ^ \#define\ XSubPPtmpAAAC\ 1 \n
+
+                         .*
+
+                        ^ \s* int \s+ RETVAL; \s* \n
+
+                         .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc definitions"
+            ],
+
+            [ 0, 0, qr{
+                        ^ \#if\ XSubPPtmpAAAA \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAB \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAC \n
+                        .* newXS .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc boot usage"
+            ],
+        ],
+
+        [
+            "CPP two independent branches",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |#endif
+                |#if USE_LONG
+                |long foo()
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                        ^ \#if\ USE_LONG \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP one branch, one main",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |#endif
+                |long foo()
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP two in one branch",
+            [ Q(<<'EOF') ],
+                |#ifdef USE_SHORT
+                |short foo()
+                |
+                |long foo()
+                |#endif
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP two in main",
+            [ Q(<<'EOF') ],
+                |short foo()
+                |
+                |long foo()
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP nested conditions",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |
+                |short foo()
+                |
+                |#ifdef C2
+                |
+                |long foo()
+                |
+                |#endif
+                |
+                |int foo()
+                |
+                |#endif
+EOF
+            [ 1, 0, qr{Warning: duplicate function definition},
+                    "got expected warning"  ],
+        ],
+
+        [
+            "CPP nested conditions, different fns",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |
+                |short foo()
+                |
+                |#ifdef C2
+                |
+                |long bar()
+                |
+                |#endif
+                |
+                |int baz()
+                |
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#ifdef\ C2 \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                         .*
+                        ^ \s* int \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP with indentation",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#  ifdef C2
+                |long bar()
+                |#  endif
+                |#endif
+EOF
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+                        ^ \s* \n
+                        ^ \#\ \ ifdef\ C2 \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \s* long \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#\ \ endif \n
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP: trivial branch",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#define BLAH1
+                |#endif
+EOF
+            [ 0, 1, qr{XSubPPtmpAAA}, "no guard"  ],
+        ],
+
+        [
+            "CPP: guard and other CPP ordering",
+            [ Q(<<'EOF') ],
+                |#ifdef C1
+                |#define BLAH1
+                |
+                |short foo()
+                |
+                |#endif
+EOF
+
+            [ 0, 0, qr{
+                        ^ \#ifdef\ C1 \n
+                         .*
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+                         .*
+                        ^ \#define\ BLAH1\n
+                         .*
+                        ^ \s* short \s+ RETVAL; \s* \n
+                         .*
+                        ^ \#endif \n
+                      }smx,
+                    "ifdefs in order"  ],
+        ],
+
+        [
+            "CPP balanced else",
+            [ Q(<<'EOF') ],
+                |#else
+                |
+                |short foo()
+EOF
+            [ 1, 0, qr{Error: 'else' with no matching 'if'},
+                    "got expected err"  ],
+        ],
+
+        [
+            "CPP balanced if",
+            [ Q(<<'EOF') ],
+                |#ifdef
+                |
+                |short foo()
+EOF
+            [ 1, 0, qr{Error: Unterminated '#if/#ifdef/#ifndef'},
+                    "got expected err"  ],
+        ],
+
+        [
+            "stray CPP / indented XSUB",
+            [ Q(<<'EOF') ],
+                |#define FOO
+                |  int
+EOF
+            [ 1, 0, qr{\QCode is not inside a function\E
+                       \Q (maybe last function was ended by a blank line \E
+                       \Q followed by a statement on column one?)\E
+                      }x,
+                    "got expected err"  ],
+        ],
+
+
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+
+{
+    # Check for correct package name; i.e. use the current package name,
+    # not the last one seen in the file.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOTM
+        |foo_t T_FOO
+        |INPUT
+        |T_FOO
+        |    $var = in_foo($arg, "$Package")
+        |OUTPUT
+        |T_FOO
+        |    out_foo($arg, $var, "$Package")
+        |EOTM
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'typemap: $Package: one package',
+            [ Q(<<'EOF') ],
+                |foo_t foo(foo_t a1)
+EOF
+
+            [ 0, 0, qr{
+                        foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
+                        .*
+                        \Qout_foo(RETVALSV, RETVAL, "Foo")\E
+                      }smx,
+                "has corrrect Package"
+            ],
+        ],
+        [
+            'typemap: $Package: two packages',
+            [ Q(<<'EOF') ],
+                |foo_t foo(foo_t a1)
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{
+                        foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
+                        .*
+                        \Qout_foo(RETVALSV, RETVAL, "Foo")\E
+                      }smx,
+                "has corrrect Package"
+            ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
+    # Check for correct package name in boot code; i.e. use the current
+    # package name, not the last one seen in the file.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'attr: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |ATTRS: myattr(x)
+EOF
+
+            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'attr: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |ATTRS: myattr(x)
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+                "has corrrect package"
+            ],
+        ],
+
+        [
+            'interface: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |INTERFACE: abc
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'interface: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |INTERFACE: abc
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+
+        [
+            'overload: one package',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |OVERLOAD: cmp
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+        [
+            'overload: two packages',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |OVERLOAD: cmp
+                |
+                |MODULE = Foo PACKAGE = Foo::Bar
+                |
+                |int blah()
+EOF
+
+            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+                "has corrrect package"
+            ],
+        ],
+
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+{
+    # Test reporting of bad syntax on MODULE lines.
+
+    my $preamble = Q(<<'EOF');
+EOF
+
+    my @test_fns = (
+        [
+            '1st MODULE PKG',
+            [ Q(<<'EOF') ],
+                |MODULE = X PKG = Y
+                |
+                |PROTOTYPES:  DISABLE
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '1st MODULE colon',
+            [ Q(<<'EOF') ],
+                |MODULE: X PACKAGE = Y
+                |
+                |PROTOTYPES:  DISABLE
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '2nd MODULE PKG',
+            [ Q(<<'EOF') ],
+                |MODULE = Foo PACKAGE = Foo
+                |
+                |PROTOTYPES:  DISABLE
+                |
+                |MODULE = X PKG = Y
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            '2nd MODULE colon',
+            [ Q(<<'EOF') ],
+                |MODULE = Foo PACKAGE = Foo
+                |
+                |PROTOTYPES:  DISABLE
+                |
+                |MODULE: X PACKAGE = Y
+EOF
+
+            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+                "got expected err msg"
+            ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+
+{
+    # Test reporting of bad syntax on TYPEMAP lines.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            'TYPEMAP syntax err',
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <EOF
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
+                "got expected err msg"
+            ],
+        ],
+        [
+            "line continuation directly after TYPEMAP",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |
+                |foo_t T_FOO
+                |
+                |EOF
+                |void foo(int i, \
+                |         int j)
+EOF
+
+            [ 0, 0, qr{XS}, "no errs" ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+
+{
+    # Test POD
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "POD at EOF doesn't warn",
+            [ Q(<<'EOF') ],
+                |void foo()
+                |
+                |=pod
+                |=cut
+EOF
+
+            [ 0, 0, qr{XS}, "no undef warning" ],
+        ],
+        [
+            "line continuation directly after POD",
+            [ Q(<<'EOF') ],
+                |=pod
+                |=cut
+                |void foo(int i, \
+                |         int j)
+EOF
+
+            [ 0, 0, qr{XS}, "no errs" ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+{
+    # Test standard C file preamble
+    # check that a few standard lines are present
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "C preamble",
+            [ Q(<<'EOF') ],
+                |void foo()
+EOF
+
+            [ 0, 0, qr{#ifndef PERL_UNUSED_VAR}, "PERL_UNUSED_VAR" ],
+            [ 0, 0, qr{#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE},
+                        "PERL_ARGS_ASSERT_CROAK_XS_USAGE" ],
+            [ 0, 0, qr{#ifdef newXS_flags}, "newXS_flags" ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
 
 done_testing;

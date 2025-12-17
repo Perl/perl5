@@ -370,7 +370,10 @@ See GH#23967 for an example of where such a copy was noticeable.
 
 =item *
 
-XXX
+The XS parser, L<ExtUtils::ParseXS>, has been further extensively
+restructured internally. Most of these changes shouldn't be visible
+externally, but might affect XS code which was using invalid or
+unsupported syntax. Several minor bug-fixes were included.
 
 =back
 

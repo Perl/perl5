@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use File::Spec;
 use lib (-d 't' ? File::Spec->catdir(qw(t lib)) : 'lib');
-use Test::More tests => 13;
+use Test::More tests => 11;
 use ExtUtils::ParseXS;
 use ExtUtils::ParseXS::Utilities qw(
     check_conditional_preprocessor_statements
@@ -12,8 +12,6 @@ use PrimitiveCapture;
 
 my $self = bless({} => 'ExtUtils::ParseXS');
 $self->{line} = [];
-$self->{XS_parse_stack} = [];
-$self->{XS_parse_stack}->[0] = {};
 
 {
     $self->{line} = [
@@ -26,7 +24,6 @@ $self->{XS_parse_stack}->[0] = {};
         "#endif this_is_an_endif_statement",
     ];
     $self->{line_no} = [ 17 .. 23 ];
-    $self->{XS_parse_stack}->[-1]{type} = 'if';
     $self->{in_filename} = 'myfile1';
 
     my $rv;
@@ -49,7 +46,6 @@ $self->{XS_parse_stack}->[0] = {};
         "#endif this_is_an_endif_statement",
     ];
     $self->{line_no} = [ 17 .. 23 ];
-    $self->{XS_parse_stack}->[-1]{type} = 'if';
     $self->{in_filename} = 'myfile1';
 
     my $rv;
@@ -70,7 +66,6 @@ $self->{XS_parse_stack}->[0] = {};
         "#endif this_is_an_endif_statement",
     ];
     $self->{line_no} = [ 17 .. 22 ];
-    $self->{XS_parse_stack}->[-1]{type} = 'if';
     $self->{in_filename} = 'myfile1';
 
     my $rv;
@@ -82,10 +77,6 @@ $self->{XS_parse_stack}->[0] = {};
     like( $stderr,
         qr/Warning: #else\/elif\/endif without #if in this function/,
         "Got expected warning: lack of #if"
-    );
-    like( $stderr,
-        qr/precede it with a blank line/s,
-        "Got expected warning: advice re blank line"
     );
 }
 
@@ -99,7 +90,6 @@ $self->{XS_parse_stack}->[0] = {};
         "#endif this_is_an_endif_statement",
     ];
     $self->{line_no} = [ 17 .. 22 ];
-    $self->{XS_parse_stack}->[-1]{type} = 'file';
     $self->{in_filename} = 'myfile1';
 
     my $rv;
@@ -111,10 +101,6 @@ $self->{XS_parse_stack}->[0] = {};
     like( $stderr,
         qr/Warning: #else\/elif\/endif without #if in this function/,
         "Got expected warning: lack of #if"
-    );
-    unlike( $stderr,
-        qr/precede it with a blank line/s,
-        "Did not get unexpected stderr"
     );
 }
 
@@ -128,7 +114,6 @@ $self->{XS_parse_stack}->[0] = {};
         "Gamma this is not an if/elif/elsif/endif",
     ];
     $self->{line_no} = [ 17 .. 22 ];
-    $self->{XS_parse_stack}->[-1]{type} = 'if';
     $self->{in_filename} = 'myfile1';
 
     my $rv;

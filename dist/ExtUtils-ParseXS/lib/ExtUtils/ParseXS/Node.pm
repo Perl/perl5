@@ -1,8 +1,9 @@
 package ExtUtils::ParseXS::Node;
 use strict;
 use warnings;
+use Symbol;
 
-our $VERSION = '3.60';
+our $VERSION = '3.61';
 
 =head1 NAME
 
@@ -10,7 +11,7 @@ ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
 
 =head1 SYNOPSIS
 
-    # Create a node to represent the Foo part of an XSUB; then
+    # Create a node to represent the Foo part of an XS file; then
     # top-down parse it into a subtree; then top-down emit the
     # contents of the subtree as C code.
 
@@ -18,14 +19,11 @@ ExtUtils::ParseXS::Node - Classes for nodes of an Abstract Syntax Tree
     $foo->parse(...)
         or die;
     $foo->as_code(...);
+    print STDERR $foo->as_concise(1); # for debugging
 
 =head1 DESCRIPTION
 
 This API is currently private and subject to change.
-
-Node that as of May 2025, this is a Work In Progress. An AST is created
-for each parsed XSUB, but those nodes aren't yet linked into a
-higher-level tree representing the whole XS file.
 
 The C<ExtUtils::ParseXS::Node> class, and its various subclasses, hold the
 state for the nodes of an Abstract Syntax Tree (AST), which represents the
@@ -49,26 +47,42 @@ children; however, both C<INPUT_line> and C<OUTPUT_line> have an
 C<ioparam> field which points to the C<IO_Param> object associated with
 this line, which is located elsewhere in the tree.
 
-The various C<foo_part> nodes divide the parsing of the main body of the
+The various C<foo_part> nodes divide the parsing of the main body of an
 XSUB into sections where different sets of keywords are allowable, and
 where various bits of code can be conveniently emitted.
 
 =head2 Methods
 
-There are two main methods, in addition to new(), which are present in all
-subclasses. First, parse() consumes lines from the source to satisfy the
-construct being parsed. It may itself create objects of lower-level
-constructs and call parse on them. For example, C<Node::xbody::parse()>
-may create a C<Node::input_part> node and call parse() on it, which will
-create C<Node::INPUT> or C<Node::PREINIT> nodes as appropriate, and so on.
+There are two main methods in addition to C<new()>, which are present in
+all subclasses. First, C<parse()> consumes lines from the source to
+satisfy the construct being parsed. It may itself create objects of
+lower-level constructs and call parse on them. For example,
+C<Node::xbody::parse()> may create a C<Node::input_part> node and call
+C<parse()> on it, which will create C<Node::INPUT> or C<Node::PREINIT>
+nodes as appropriate, and so on.
 
-Secondly, as_code() descends its sub-tree, outputting the tree as C code.
+Secondly, C<as_code()> descends its sub-tree, outputting the tree as C
+code.
+
+The C<as_concise()> method returns a line-per-node string representation
+of the node and any children. Most node classes just inherit this method
+from the base C<Node> class. It is intended mainly for debugging.
+
+Some nodes also have an C<as_boot_code()> method for adding any code to
+the boot XSUB. This returns two array refs, one containing a list of code
+lines to be inserted early into the boot XSUB, and a second for later
+lines.
+
+Finally, in the IO_Param subclass, C<as_code()> is replaced with
+C<as_input_code> and C<as_output_code()>, since that node may need to
+generate I<two> sets of C code; one to assign a Perl argument to a C
+variable, and the other to return the value of a variable to Perl.
 
 Note that parsing and code-generation are done as two separate phases;
-parse() should only build a tree and never emit code.
+C<parse()> should only build a tree and never emit code.
 
-In addition to C<$self>, both these methods are always provided with
-these three parameters:
+In addition to C<$self>, methods may commonly have some of these
+parameters:
 
 =over
 
@@ -80,19 +94,21 @@ lines read in from the source file for the current paragraph.
 
 =item C<$xsub>
 
-The current C<ExtUtils::ParseXS::xsub> node being processed.
+For nodes related to parsing an XSUB, the current
+C<ExtUtils::ParseXS::xsub> node being processed.
 
 =item C<$xbody>
 
-The current C<ExtUtils::ParseXS::xbody> node being processed. Note that
-in the presence of a C<CASE> keyword, an XSUB can have multiple bodies.
+For nodes related to parsing an XSUB, the current
+C<ExtUtils::ParseXS::xbody> node being processed. Note that in the
+presence of a C<CASE> keyword, an XSUB can have multiple bodies.
 
 =back
 
-The parse() and as_code() methods for some subclasses may have additional
-parameters.
+The C<parse()> and C<as_code()> methods for some subclasses may have
+parameters in addition to those.
 
-Some subclasses may have additional helper methods.
+Some subclasses may also have additional helper methods.
 
 =head2 Class Hierachy
 
@@ -104,6 +120,18 @@ next keyword, and emit that code, possibly wrapped in C<#line> directives.
 This common behaviour is provided by the C<codeblock> class.
 
     Node
+        XS_file
+        preamble
+        C_part
+        C_part_POD
+        C_part_code
+        C_part_postamble
+        cpp_scope
+        global_cpp_line
+        BOOT
+        TYPEMAP
+        pre_boot
+        boot_xsub
         xsub
         xsub_decl
         ReturnType
@@ -118,6 +146,12 @@ This common behaviour is provided by the C<codeblock> class.
         cleanup_part
         autocall
         oneline
+            MODULE
+            REQUIRE
+            FALLBACK
+            include
+                INCLUDE
+                INCLUDE_COMMAND
             NOT_IMPLEMENTED_YET
             CASE
             enable
@@ -152,9 +186,44 @@ This common behaviour is provided by the C<codeblock> class.
 
 =head2 Abstract Syntax Tree structure
 
+A typical XS file might compile to a tree with a node structure similar to
+the following. Note that this is unrelated to the inheritance hierarchy
+shown above. In this example, the XS file includes another file, and has a
+couple of XSUBs within a C<#if/#else/#endif>. Note that a C<cpp_scope>
+node is the parent of all the nodes within the same branch of an C<#if>,
+or in the absence of C<#if>, within the same file.
+
+    XS_file
+        preamble
+        C_part
+            C_part_POD
+            C_part_code
+        C_part_postamble
+        cpp_scope: type="main"
+            MODULE
+            PROTOTYPES
+            BOOT
+            TYPEMAP
+            INCLUDE
+                cpp_scope: type="include"
+                    xsub
+                        ...
+            global_cpp_line: directive="ifdef"
+            cpp_scope: type="if"
+                xsub
+                    ...
+            global_cpp_line: directive="else"
+            cpp_scope: type="if"
+                xsub
+                    ...
+            global_cpp_line: directive="endif"
+            xsub
+                ...
+        pre_boot
+        boot_xsub
+
 A typical XSUB might compile to a tree with a structure similar to the
-following. Note that this is unrelated to the inheritance hierarchy
-shown above.
+following.
 
     xsub
         xsub_decl
@@ -200,6 +269,11 @@ shown above.
 my $open_brace  = '{';
 my $close_brace = '}';
 
+# values for parse_keywords() flags
+# (Can't assume 'constant.pm' is present yet)
+
+my $keywords_flag_MODULE              = 1;
+my $keywords_flag_NOT_IMPLEMENTED_YET = 2;
 
 # Utility sub to handle all the boilerplate of declaring a Node subclass,
 # including setting up @INC and @FIELDS. Intended to be called from within
@@ -319,6 +393,10 @@ sub parse {
 # If $max is defined, it specifies the maximum number of keywords to
 # process. This value is typically passed as undef (unlimited) or 1
 # (just grab the next keyword).
+# $flags can contain  $keywords_flag_MODULE or
+# keywords_flag_NOT_IMPLEMENTED_YET to indicate to match one of those
+# keywords too (whose syntax is slightly different from 'KEY:' and
+# so need special handling
 
 sub parse_keywords {
     my __PACKAGE__       $self  = shift;
@@ -327,24 +405,39 @@ sub parse_keywords {
     my                   $xbody = shift;
     my $max                     = shift; # max number of keywords to process
     my $pat                     = shift;
-    my $do_notimplemented       = shift;
+    my $flags                   = shift;
+
+    $flags = 0 unless defined $flags;
 
     my $n = 0;
     my @kids;
     while (@{$pxs->{line}}) {
         my $line = shift @{$pxs->{line}};
         next unless $line =~ /\S/;
-        # extract/delete recognised keyword and any following comment
-        unless (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
-                or (   $do_notimplemented
+
+        # extract/delete recognised keyword and any following text
+        my $keyword;
+
+        if (   ($flags & $keywords_flag_MODULE)
+            && ExtUtils::ParseXS::Utilities::looks_like_MODULE_line($line)
+           )
+        {
+            $keyword = 'MODULE';
+        }
+        elsif  (   $line =~ s/^(\s*)($pat)\s*:\s*(?:#.*)?/$1/s
+                or (   ($flags & $keywords_flag_NOT_IMPLEMENTED_YET)
                     && $line =~ s/^(\s*)(NOT_IMPLEMENTED_YET)/$1/
                    )
-        ) {
+               )
+        {
+            $keyword = $2
+        }
+        else {
             # stop at unrecognised line
             unshift @{$pxs->{line}}, $line;
             last;
         }
-        my $keyword = $2;
+
         unshift @{$pxs->{line}}, $line;
         # create a node for the keyword and parse any lines associated
         # with it.
@@ -362,8 +455,1355 @@ sub parse_keywords {
     return @kids;
 }
 
-
 sub as_code { }
+
+# Most node types inherit this: just continue walking the tree
+# looking for any nodes which provide some boot code.
+# It returns two array refs; one for lines of code to be injected early
+# into the boot XSUB, the second for later code.
+
+sub as_boot_code {
+    my __PACKAGE__       $self  = shift;
+    my ExtUtils::ParseXS $pxs   = shift;
+
+    my ($early, $later) = ([], []);
+    my $kids = $self->{kids};
+    if ($kids) {
+        for (@$kids) {
+            my ($e, $l) = $_->as_boot_code($pxs);
+            push @$early, @$e;
+            push @$later, @$l;
+        }
+    }
+    return $early, $later;
+}
+
+
+# as_concise(): for debugging:
+#
+# Return a string representing a concise line-per-node representation
+# of the node and any children, in the spirit of 'perl -MO=Concise'.
+# Intended to be human- rather than machine-readable.
+#
+# The single optional parameter, depth, is for indentation purposes
+
+sub as_concise {
+    my __PACKAGE__  $self  = shift;
+    my $depth =  shift;
+    $depth = 0 unless defined $depth;
+
+    my $f = $self->{file};
+    $f = '??' unless defined $f;
+    $f =~ s{^.*/}{};
+    substr($f,0,10) = '' if length($f) > 10;
+
+    my $l = $self->{line_no};
+    $l = defined $l ? sprintf("%-3d", $l) : '?? ';
+
+    my $s = sprintf "%-15s", "$f:$l";
+    $s .= ('  ' x $depth);
+
+    my $class = ref $self;
+    $class =~ s/^.*:://g;
+    $s .= "${class}: ";
+
+    my @kv;
+
+    for my $key (sort grep !/^(file|line_no|kids)$/, keys %$self) {
+        my $v = $self->{$key};
+
+        # some basic pretty-printing
+
+        if (!defined $v) {
+            $v = '-';
+        }
+        elsif (ref $v) {
+            $v = "[ref]";
+        }
+        elsif ($v =~ /^-?\d+(\.\d+)?$/) {
+            # leave as-is
+        }
+        else {
+            $v = "$v";
+            $v =~ s/"/\\"/g;
+            my $max = 20;
+            substr($v, $max) = '...' if length($v) > $max;
+            $v = qq("$v");
+        }
+
+        push @kv, "$key=$v";
+    }
+
+    $s .= join '; ', @kv;
+    $s .= "\n";
+
+    if ($self->{kids}) {
+        $s .= $_->as_concise($depth+1) for @{$self->{kids}};
+    }
+
+    $s;
+}
+
+
+# Simple method wrapper for ExtUtils::ParseXS::Q
+
+sub Q {
+    my __PACKAGE__ $self   = shift;
+    my $text = shift;
+    return ExtUtils::ParseXS::Q($text);
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::XS_file;
+
+# Top-level AST node representing an entire XS file
+
+BEGIN { $build_subclass->(
+    'preamble',   # Node::preamble object which emits preamble C code
+    'C_part',     # the C part of the XS file, before the first MODULE
+    'C_part_postamble',# Node::C_part_postamble object which emits
+                  # boilerplate code following the C code
+    'cpp_scope',  # node holding all the XS part of the main file
+    'pre_boot',   # node holding code after user XSUBs but before boot XSUB
+    'boot_xsub',  # node holding code which generates the boot XSUB
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = 1;
+    $self->{file}    = $pxs->{in_pathname};
+
+    # Hash of package name => package C name
+    $pxs->{map_overloaded_package_to_C_package} = {};
+
+    # Hashref of package name => fallback setting
+    $pxs->{map_package_to_fallback_string} = {};
+
+    $pxs->{error_count}  = 0;
+
+    # Initialise the sequence of guard defines used by cpp_scope
+    $pxs->{cpp_next_tmp_define} = 'XSubPPtmpAAAA';
+
+    # "Parse" the start of the file. Doesn't actually consume any lines:
+    # just a placeholder for emitting preamble later
+
+    my $preamble = ExtUtils::ParseXS::Node::preamble->new();
+    $self->{preamble} = $preamble;
+    $preamble->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $preamble;
+
+
+    # Process the first (C language) half of the XS file, up until the first
+    # MODULE: line
+
+    my $C_part = ExtUtils::ParseXS::Node::C_part->new();
+    $self->{C_part} = $C_part;
+    $C_part->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $C_part;
+
+    # "Parse" the bit following any C code. Doesn't actually consume any
+    # lines: just a placeholder for emitting postamble code.
+
+    my $C_part_postamble = ExtUtils::ParseXS::Node::C_part_postamble->new();
+    $self->{C_part_postamble} = $C_part_postamble;
+    $C_part_postamble->parse($pxs, $self)
+        or return;
+    push @{$self->{kids}}, $C_part_postamble;
+
+    # Parse the XS half of the file
+
+    my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({type => 'main'});
+    $self->{cpp_scope} = $cpp_scope;
+    $cpp_scope->parse($pxs)
+        or return;
+    push @{$self->{kids}}, $cpp_scope;
+
+    # Now at EOF: all paragraphs (and thus XSUBs) have now been read in
+    # and processed. Do any final post-processing.
+
+    # "Parse" the bit following any C code. Doesn't actually consume any
+    # lines: just a placeholder for emitting any code which should follow
+    # user XSUBs but which comes before the boot XSUB
+
+    my $pre_boot = ExtUtils::ParseXS::Node::pre_boot->new();
+    $self->{pre_boot} = $pre_boot;
+    push @{$self->{kids}}, $pre_boot;
+    $pre_boot->parse($pxs)
+        or return;
+
+    # Emit the boot XSUB initialization routine
+
+    my $boot_xsub = ExtUtils::ParseXS::Node::boot_xsub->new();
+    $self->{boot_xsub} = $boot_xsub;
+    push @{$self->{kids}}, $boot_xsub;
+    $boot_xsub->parse($pxs)
+        or return;
+
+    warn(   "Please specify prototyping behavior for "
+          . "$pxs->{in_filename} (see perlxs manual)\n")
+        unless $pxs->{proto_behaviour_specified};
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+
+}
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::preamble;
+
+# AST node representing the boilerplate C code preamble at the start of
+# the file. Parsing doesn't actually consume any lines; it exists just for
+# its as_code() method which emits the preamble into the C file.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = 1;
+    $self->{file}    = $pxs->{in_pathname};
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit preamble at start of C file, including the
+    # version it was generated by.
+
+    print $self->Q(<<"EOM");
+    |/*
+    | * This file was generated automatically by ExtUtils::ParseXS version $ExtUtils::ParseXS::VERSION from the
+    | * contents of $pxs->{in_filename}. Do not edit this file, edit $pxs->{in_filename} instead.
+    | *
+    | *    ANY CHANGES MADE HERE WILL BE LOST!
+    | *
+    | */
+    |
+EOM
+
+    print("#line 1 \"" .
+            ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                                            $self->{file}) . "\"\n")
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part;
+
+# A node representing the C part of the XS file - i.e. everything
+# before the first MODULE line
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = 1;
+    $self->{file}    = $pxs->{in_pathname};
+
+    # Read in lines until the first MODULE line, creating a list of
+    # Node::C_part_code and Node::C_part_POD nodes as children.
+    # Returns with $pxs->{lastline} holding the next line (i.e. the MODULE
+    # line) or errors out if not found
+
+    $pxs->{lastline}    =  readline($pxs->{in_fh});
+    $pxs->{lastline_no} = $.;
+
+    while (defined $pxs->{lastline}) {
+        if (ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
+                                                    $pxs->{lastline}))
+        {
+            # the fetch_para() regime in place in the XS part of the file
+            # expects this to have been chomped
+            chomp $pxs->{lastline};
+            return 1;
+        }
+
+        my $node = 
+            $pxs->{lastline} =~ /^=/
+                 ? ExtUtils::ParseXS::Node::C_part_POD->new()
+                 : ExtUtils::ParseXS::Node::C_part_code->new();
+
+        # Read in next block of code or POD lines
+        $node->parse($pxs)
+            or return;
+        push @{$self->{kids}}, $node;
+    }
+
+    warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
+    exit 0; # Not a fatal error for the caller process
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+
+    print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_POD;
+
+# A node representing a section of POD within the C part of the XS file
+
+BEGIN { $build_subclass->(
+    'pod_lines', # array of lines containing pod, including start and end
+                 # '=foo' lines
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = $pxs->{lastline_no};
+    $self->{file}    = $pxs->{in_pathname};
+
+    # This method is called with $pxs->{lastline} holding the first line
+    # of POD and returns with $pxs->{lastline} holding the (unprocessed)
+    # next line following the =cut line
+
+    my $cut;
+    while (1) {
+        push @{$self->{pod_lines}}, $pxs->{lastline};
+        $pxs->{lastline}    = readline($pxs->{in_fh});
+        $pxs->{lastline_no} = $.;
+        return 1 if $cut;
+        last unless defined $pxs->{lastline};
+        $cut = $pxs->{lastline} =~ /^=cut\s*$/;
+    }
+
+    # At this point $. is at end of file so die won't state the start
+    # of the problem, and as we haven't yet read any lines &death won't
+    # show the correct line in the message either.
+    die (  "Error: Unterminated pod in $pxs->{in_filename}, "
+         . "line $self->{line_no}\n");
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit something in the C file to indicate that a section of POD has
+    # been elided, while maintaining the correct lines numbers using
+    # #line.
+    #
+    # We can't just write out a /* */ comment, as our embedded POD might
+    # itself be in a comment. We can't put a /**/ comment inside #if 0, as
+    # the C standard says that the source file is decomposed into
+    # preprocessing characters in the stage before preprocessing commands
+    # are executed.
+    #
+    # I don't want to leave the text as barewords, because the spec isn't
+    # clear whether macros are expanded before or after preprocessing
+    # commands are executed, and someone pathological may just have
+    # defined one of the 3 words as a macro that does something strange.
+    # Multiline strings are illegal in C, so the "" we write must be a
+    # string literal. And they aren't concatenated until 2 steps later, so
+    # we are safe.
+    #     - Nicholas Clark
+
+    print $self->Q(<<"EOF");
+        |#if 0
+        |  "Skipped embedded POD."
+        |#endif
+EOF
+
+    printf("#line %d \"%s\"\n",
+                $self->{line_no} + @{$self->{pod_lines}},
+                ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                    $pxs->{in_pathname}))
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_code;
+
+# A node representing a section of C code within the C part of the XS file
+
+BEGIN { $build_subclass->(
+    'code_lines', # array of lines containing C code
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = $pxs->{lastline_no};
+    $self->{file}    = $pxs->{in_pathname};
+
+    # This method is called with $pxs->{lastline} holding the first line
+    # of (possibly) C code and returns with $pxs->{lastline} holding the
+    # first (unprocessed) line which isn't C code (i.e. its the start of
+    # POD or a MODULE line)
+
+    my $cut;
+    while (1) {
+        return 1 if ExtUtils::ParseXS::Utilities::looks_like_MODULE_line(
+                                                            $pxs->{lastline});
+        return 1 if $pxs->{lastline} =~ /^=/;
+        push @{$self->{code_lines}}, $pxs->{lastline};
+        $pxs->{lastline}    = readline($pxs->{in_fh});
+        $pxs->{lastline_no} = $.;
+        last unless defined $pxs->{lastline};
+    }
+
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    print @{$self->{code_lines}};
+}
+
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::C_part_postamble;
+
+# AST node representing the boilerplate C code postamble following any
+# initial C code contained within the C part of the XS file.
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method to emit the postamble into the C
+# file.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->{line_no} = $pxs->{lastline_no};
+    $self->{file}    = $pxs->{in_pathname};
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Emit boilerplate postamble following any code passed through from
+    # the 'C' part of the XS file
+
+    print $self->Q(<<'EOF');
+        |#ifndef PERL_UNUSED_VAR
+        |#  define PERL_UNUSED_VAR(var) if (0) var = var
+        |#endif
+        |
+        |#ifndef dVAR
+        |#  define dVAR		dNOOP
+        |#endif
+        |
+        |
+        |/* This stuff is not part of the API! You have been warned. */
+        |#ifndef PERL_VERSION_DECIMAL
+        |#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
+        |#endif
+        |#ifndef PERL_DECIMAL_VERSION
+        |#  define PERL_DECIMAL_VERSION \
+        |	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
+        |#endif
+        |#ifndef PERL_VERSION_GE
+        |#  define PERL_VERSION_GE(r,v,s) \
+        |	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
+        |#endif
+        |#ifndef PERL_VERSION_LE
+        |#  define PERL_VERSION_LE(r,v,s) \
+        |	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
+        |#endif
+        |
+        |/* XS_INTERNAL is the explicit static-linkage variant of the default
+        | * XS macro.
+        | *
+        | * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
+        | * "STATIC", ie. it exports XSUB symbols. You probably don't want that
+        | * for anything but the BOOT XSUB.
+        | *
+        | * See XSUB.h in core!
+        | */
+        |
+        |
+        |/* TODO: This might be compatible further back than 5.10.0. */
+        |#if PERL_VERSION_GE(5, 10, 0) && PERL_VERSION_LE(5, 15, 1)
+        |#  undef XS_EXTERNAL
+        |#  undef XS_INTERNAL
+        |#  if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
+        |#    define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
+        |#    define XS_INTERNAL(name) STATIC XSPROTO(name)
+        |#  endif
+        |#  if defined(__SYMBIAN32__)
+        |#    define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
+        |#    define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
+        |#  endif
+        |#  ifndef XS_EXTERNAL
+        |#    if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
+        |#      define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
+        |#      define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
+        |#    else
+        |#      ifdef __cplusplus
+        |#        define XS_EXTERNAL(name) extern "C" XSPROTO(name)
+        |#        define XS_INTERNAL(name) static XSPROTO(name)
+        |#      else
+        |#        define XS_EXTERNAL(name) XSPROTO(name)
+        |#        define XS_INTERNAL(name) STATIC XSPROTO(name)
+        |#      endif
+        |#    endif
+        |#  endif
+        |#endif
+        |
+        |/* perl >= 5.10.0 && perl <= 5.15.1 */
+        |
+        |
+        |/* The XS_EXTERNAL macro is used for functions that must not be static
+        | * like the boot XSUB of a module. If perl didn't have an XS_EXTERNAL
+        | * macro defined, the best we can do is assume XS is the same.
+        | * Dito for XS_INTERNAL.
+        | */
+        |#ifndef XS_EXTERNAL
+        |#  define XS_EXTERNAL(name) XS(name)
+        |#endif
+        |#ifndef XS_INTERNAL
+        |#  define XS_INTERNAL(name) XS(name)
+        |#endif
+        |
+        |/* Now, finally, after all this mess, we want an ExtUtils::ParseXS
+        | * internal macro that we're free to redefine for varying linkage due
+        | * to the EXPORT_XSUB_SYMBOLS XS keyword. This is internal, use
+        | * XS_EXTERNAL(name) or XS_INTERNAL(name) in your code if you need to!
+        | */
+        |
+        |#undef XS_EUPXS
+        |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
+        |#  define XS_EUPXS(name) XS_EXTERNAL(name)
+        |#else
+        |   /* default to internal */
+        |#  define XS_EUPXS(name) XS_INTERNAL(name)
+        |#endif
+        |
+        |#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
+        |#define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
+        |
+        |/* prototype to pass -Wmissing-prototypes */
+        |STATIC void
+        |S_croak_xs_usage(const CV *const cv, const char *const params);
+        |
+        |STATIC void
+        |S_croak_xs_usage(const CV *const cv, const char *const params)
+        |{
+        |    const GV *const gv = CvGV(cv);
+        |
+        |    PERL_ARGS_ASSERT_CROAK_XS_USAGE;
+        |
+        |    if (gv) {
+        |        const char *const gvname = GvNAME(gv);
+        |        const HV *const stash = GvSTASH(gv);
+        |        const char *const hvname = stash ? HvNAME(stash) : NULL;
+        |
+        |        if (hvname)
+        |	    Perl_croak_nocontext("Usage: %s::%s(%s)", hvname, gvname, params);
+        |        else
+        |	    Perl_croak_nocontext("Usage: %s(%s)", gvname, params);
+        |    } else {
+        |        /* Pants. I don't think that it should be possible to get here. */
+        |	Perl_croak_nocontext("Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
+        |    }
+        |}
+        |#undef  PERL_ARGS_ASSERT_CROAK_XS_USAGE
+        |
+        |#define croak_xs_usage        S_croak_xs_usage
+        |
+        |#endif
+        |
+        |/* NOTE: the prototype of newXSproto() is different in versions of perls,
+        | * so we define a portable version of newXSproto()
+        | */
+        |#ifdef newXS_flags
+        |#define newXSproto_portable(name, c_impl, file, proto) newXS_flags(name, c_impl, file, proto, 0)
+        |#else
+        |#define newXSproto_portable(name, c_impl, file, proto) (PL_Sv=(SV*)newXS(name, c_impl, file), sv_setpv(PL_Sv, proto), (CV*)PL_Sv)
+        |#endif /* !defined(newXS_flags) */
+        |
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |#  define newXS_deffile(a,b) Perl_newXS(aTHX_ a,b,file)
+        |#else
+        |#  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
+        |#endif
+        |
+        |/* simple backcompat versions of the TARGx() macros with no optimisation */
+        |#ifndef TARGi
+        |#  define TARGi(iv, do_taint) sv_setiv_mg(TARG, iv)
+        |#  define TARGu(uv, do_taint) sv_setuv_mg(TARG, uv)
+        |#  define TARGn(nv, do_taint) sv_setnv_mg(TARG, nv)
+        |#endif
+        |
+EOF
+
+    # Fix up line number reckoning
+
+    print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+        if $pxs->{config_WantLineNumbers};
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::cpp_scope;
+
+# Node representing a part of an XS file which is all in the same C
+# preprocessor scope as regards C preprocessor (CPP) conditionals, i.e.
+# #if/#elsif/#else/#endif etc.
+#
+# Note that this only considers file-scoped C preprocessor directives;
+# ones within a code block such as CODE or BOOT don't contribute to the
+# state maintained here.
+#
+# Initially the whole XS part of the main XS file is considered a single
+# scope, so the single main cpp_scope node would have, as children, all
+# the file-scoped nodes such as Node::PROTOTYPES and any Node::xsub's.
+#
+# After an INCLUDE, the new XS file is considered as being in a separate
+# scope, and gets its own child cpp_scope node.
+#
+# Once an XS file starts having file-scope CPP conditionals, then each
+# branch of the conditional is considered a separate scope and  gets its
+# own cpp_scope node. Nested conditionals cause nested cpp_scope objects
+# in the AST.
+#
+# The main reason for this node type is to separate out the AST into
+# separate sections which can each have the same named XSUB without a
+# 'duplicate XSUB' warning, and where newXS()-type calls can be added to
+# to the boot code for *both* XSUBs, guarded by suitable #ifdef's.
+#
+# This node is the main high-level node where file-scoped parsing takes
+# place: its parse() method contains a fetch_para() loop which does all
+# the looking for file-scoped keywords, CPP directives, and XSUB
+# declarations. It implements a recursive-decent parser by creating child
+# cpp_scope nodes and recursing into that child's parse() method (which
+# does its own fetch_para() calls).
+
+BEGIN { $build_subclass->(
+    'type',       # Str:  what sort of scope: 'main', 'include' or 'if'
+    'is_cmd',     # Bool: for include type, it's INCLUDE_COMMAND
+    'guard_name', # Str:  the name of the XSubPPtmpAAAA guard define
+    'seen_xsubs', # Hash: the names of any XSUBs seen in this scope
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Main loop: for each iteration, parse the next 'thing' in the current
+    # paragraph, such as a C preprocessor directive, a contiguous block of
+    # file-scoped keywords, or an XSUB. When the current paragraph runs
+    # out, read in another one. XSUBs, TYPEMAP and BOOT will consume
+    # all lines until the end of the current paragraph.
+    #
+    # C preprocessor conditionals such as #if may trigger recursive
+    # calls to process each branch until the matching #endif. These may
+    # cross paragraph boundaries.
+
+    while ( ($pxs->{line} && @{$pxs->{line}}) || $pxs->fetch_para())
+    {
+        next unless @{$pxs->{line}}; # fetch_para() can return zero lines
+
+        if (   !defined($self->{line_no})
+            && defined $pxs->{line_no}[0]
+        ) {
+            # set file/line_no after line number info is available:
+            # typically after the first call to fetch_para()
+            $self->SUPER::parse($pxs);
+        }
+
+        # skip blank line
+        shift @{$pxs->{line}}, next  if $pxs->{line}[0] !~ /\S/;
+
+        # Process a C-preprocessor line. Note that any non-CPP lines
+        # starting with '#' will already have been filtered out by
+        # fetch_para().
+        #
+        # If its a #if or similar, then recursively process each branch
+        # as a separate cpp_scope object until the matching #endif is
+        # reached.
+
+        if ($pxs->{line}[0] =~ /^#/) {
+            my $node = ExtUtils::ParseXS::Node::global_cpp_line->new();
+            $node->parse($pxs)
+                or next;
+            push @{$self->{kids}}, $node;
+
+            next unless $node->{is_cond};
+
+            # Parse branches of a CPP conditionals within a nested scope
+
+            if (not $node->{is_if}) {
+                $pxs->death("Error: '". $node->{directive}
+                                . "' with no matching 'if'")
+                    if $self->{type} ne 'if';
+
+                # we should already be within a nested scope; this
+                # CPP condition keyword just ends that scope. Our
+                # (recursive) caller will handle processing any further
+                # branches if it's an elif/else rather than endif
+
+                return 1
+            }
+
+            # So it's an 'if'/'ifdef' etc node. Start a new
+            # Node::cpp_scope sub-parse to handle that branch and then any
+            # other branches of the same conditional.
+
+            while (1) {
+                # For each iteration, parse the next branch in a new scope
+                my $scope = ExtUtils::ParseXS::Node::cpp_scope->new(
+                                                {type => 'if'});
+                $scope->parse($pxs)
+                    or next;
+
+                # Sub-parsing of that branch should have terminated
+                # at an elif/endif line rather than falling off the
+                # end of the file
+                my $last = $scope->{kids}[-1];
+                unless (
+                       defined $last
+                    && $last->isa(
+                            'ExtUtils::ParseXS::Node::global_cpp_line')
+                    &&  $last->{is_cond}
+                    && !$last->{is_if}
+                ) {
+                    $pxs->death("Error: Unterminated '#if/#ifdef/#ifndef'")
+                }
+
+                # Move the CPP line which terminated the branch from
+                # the end of the inner scope to the current scope
+                pop @{$scope->{kids}};
+                push @{$self->{kids}}, $scope, $last;
+
+                if (grep { ref($_) !~ /::global_cpp_line$/ }
+                        @{$scope->{kids}} )
+                {
+                    # the inner scope has some content, so needs
+                    # a '#define XSubPPtmpAAAA 1'-style guard
+                    $scope->{guard_name} = $pxs->{cpp_next_tmp_define}++;
+                }
+
+                # any more branches to process of current if?
+                last if $last->{is_endif};
+            } # while 1
+
+            next;
+        }
+
+        # die if the next line is indented: all file-scoped things (CPP,
+        # keywords, XSUB starts) are supposed to start on column 1
+        # (although see the comment below about multiple parse_keywords()
+        # iterations sneaking in indented keywords).
+        #
+        # The text of the error message is based around a common reason
+        # for an indented line to appear in file scope: this is due to an
+        # XSUB being prematurely truncated by fetch_para(). For example in
+        # the code below, the coder wants the foo and bar lines to both be
+        # part of the same CODE block. But the XS parser sees the blank
+        # line followed by the '#ifdef' on column 1 as terminating the
+        # current XSUB. So the bar() line is treated as being in file
+        # scope and dies because it is indented.
+        #
+        #   |int f()
+        #   |    CODE:
+        #   |        foo();
+        #   |
+        #   |#ifdef USE_BAR
+        #   |        bar();
+        #   |#endif
+
+        $pxs->death(
+            "Code is not inside a function"
+                ." (maybe last function was ended by a blank line "
+                ." followed by a statement on column one?)")
+            if $pxs->{line}->[0] =~ /^\s/;
+
+        # The SCOPE keyword can appear both in file scope (just before an
+        # XSUB) and as an XSUB keyword. This field maintains the state of the
+        # former: reset it at the start of processing any file-scoped
+        # keywords just before the XSUB (i.e. without any blank lines, e.g.
+        #     SCOPE: ENABLE
+        #     int
+        #     foo(...)
+        # These semantics may not be particularly sensible, but they maintain
+        # backwards compatibility for now.
+
+        $pxs->{file_SCOPE_enabled} = 0;
+
+        # Process file-scoped keywords
+        #
+        # This loop repeatedly: skips any blank lines and then calls
+        # the relevant Node::FOO::parse() method if it finds any of the
+        # file-scoped keywords in the passed pattern.
+        #
+        # Note: due to the looping within parse_keywords() rather than
+        # looping here, only the first keyword in a contiguous block
+        # gets the 'start at column 1' check above enforced.
+        # This is a bug, maintained for backwards compatibility: see the
+        # comments below referring to SCOPE for other bits of code needed
+        # to enforce this compatibility.
+
+        $self->parse_keywords(
+                $pxs,
+                undef, undef, # xsub and xbody: not needed for non XSUB keywords
+                undef,  # implies process as many keywords as possible
+                 "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
+              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP",
+                $keywords_flag_MODULE,
+            );
+        # XXX we could have an 'or next' here if not for SCOPE backcompat
+        # and also delete the following 'skip blank line' and 'next unless
+        # @line' lines
+
+        # skip blank lines
+        shift @{$pxs->{line}} while @{$pxs->{line}} && $pxs->{line}[0] !~ /\S/;
+
+        next unless @{$pxs->{line}};
+
+        # Parse an XSUB
+
+        my $xsub = ExtUtils::ParseXS::Node::xsub->new();
+        $xsub->parse($pxs)
+            or next;
+        push @{$self->{kids}}, $xsub;
+
+        # Check for a duplicate function definition in this scope
+        {
+            my $name = $xsub->{decl}{full_C_name};
+            if ($self->{seen_xsubs}{$name}) {
+                (my $short = $name) =~ s/^$pxs->{PACKAGE_C_name}_//;
+                $pxs->Warn(  "Warning: duplicate function definition "
+                       . "'$short' detected");
+            }
+            $self->{seen_xsubs}{$name} = 1;
+        }
+
+        # xsub->parse() should have consumed all the remaining
+        # lines in the current paragraph.
+        die "Internal error: unexpectedly not at EOF\n"
+                  if @{$pxs->{line}};
+
+        $pxs->{seen_an_XSUB} = 1; # encountered at least one XSUB
+
+    } # END main 'while' loop
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    my $g = $self->{guard_name};
+    print "#define $g 1\n\n" if defined $g;
+    $_->as_code($pxs, $self) for @{$self->{kids}};
+}
+
+
+sub as_boot_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # accumulate all the newXS()'s in $early and the BOOT blocks in $later,
+    my ($early, $later) = $self->SUPER::as_boot_code($pxs);
+
+    # then wrap them all within '#if XSubPPtmpAAAA' guards
+    my $g = $self->{guard_name};
+    if (defined $g) {
+        unshift @$early, "#if $g\n";
+        unshift @$later, "#if $g\n";
+        push    @$early, "#endif\n";
+        push    @$later, "#endif\n";
+    }
+
+    return $early, $later;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::global_cpp_line;
+
+# AST node representing a single C-preprocessor line in file (global)
+# scope. (A "single" line can actually include embedded "\\\n"'s from line
+# continuations).
+
+BEGIN { $build_subclass->(
+    'cpp_line',  # Str:  the full text of the "#  foo" CPP line
+    'directive', # Str:  one of 'define', 'endif' etc
+    'rest',      # Str:  the rest of the line following the directive
+    'is_cond',   # Bool: it's an ifdef/else/endif etc
+    'is_if',     # Bool: it's an if/ifdef/ifndef
+    'is_endif'   # Bool: it's an endif
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my $line = shift @{$pxs->{line}};
+
+    my ($directive, $rest) = $line =~ /^ \# \s* (\w+) (?:\s+ (.*) \s* $)?/sx
+        or $pxs->death("Internal error: can't parse CPP line: $line\n");
+    $rest = '' unless defined $rest;
+    my $is_cond  = $directive =~ /^(if|ifdef|ifndef|elif|else|endif)$/;
+    my $is_if    = $directive =~ /^(if|ifdef|ifndef)$/;
+    my $is_endif = $directive =~ /^endif$/;
+    @$self{qw(cpp_line directive rest is_cond is_if is_endif)}
+        = ($line, $directive, $rest, $is_cond, $is_if, $is_endif);
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    print $self->{cpp_line}, "\n";
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::BOOT;
+
+# Store the code lines associated with the BOOT keyword
+#
+# Note that unlike other codeblock-like Node classes, BOOT consumes
+# *all* lines remaining in the current paragraph, rather than stopping
+# at the next keyword, if any.
+# It's also file-scoped rather than XSUB-scoped.
+
+BEGIN { $build_subclass->(
+    'lines', # Array ref of all code lines making up the BOOT
+)};
+
+
+# Consume all the remaining lines and store in @$lines.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    # Check all the @{$pxs->{line}} lines for balance: all the
+    # #if, #else, #endif etc within the BOOT should balance out.
+    ExtUtils::ParseXS::Utilities::check_conditional_preprocessor_statements();
+
+    # Suck in all remaining lines
+
+    $self->{lines} = [ @{$pxs->{line}} ];
+    @{$pxs->{line}} = ();
+
+    # Ignore any text following the keyword on the same line.
+    # XXX this quietly ignores any such text - really it should
+    # warn, but not yet for backwards compatibility.
+    shift @{$self->{lines}};
+
+    1;
+}
+
+
+sub as_boot_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+
+    my @lines;
+
+    # Prepend a '#line' directive if not already present
+    if (   $pxs->{config_WantLineNumbers}
+        && @{$self->{lines}}
+        && $self->{lines}[0] !~ /^\s*#\s*line\b/
+    )
+    {
+        push @lines,
+            sprintf "#line %d \"%s\"\n",
+                $self->{line_no} + 1,
+                ExtUtils::ParseXS::Utilities::escape_file_for_line_directive(
+                        $self->{file});
+    }
+
+    # Save all the BOOT lines (plus trailing empty line) to be emitted
+    # later.
+    push @lines, "$_\n" for @{$self->{lines}}, "";
+
+    return [], \@lines;
+}
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::TYPEMAP;
+
+# Process the lines associated with the TYPEMAP keyword
+#
+# fetch_para() will have already processed the <<EOF logic
+# and read all the lines up to, but not including, the EOF line.
+
+BEGIN { $build_subclass->(
+    'lines', # Array ref of all lines making up the TYPEMAP section
+)};
+
+
+# Feed all the lines to ExtUtils::Typemaps.
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    shift @{$pxs->{line}}; # skip the 'TYPEMAP:' line
+
+    # Suck in all remaining lines
+    $self->{lines} = $pxs->{line};
+    $pxs->{line} = [];
+
+    my $tmap = ExtUtils::Typemaps->new(
+        string        => join("", map "$_\n", @{$self->{lines}}),
+        lineno_offset => 1 + ($pxs->current_line_number() || 0),
+        fake_filename => $pxs->{in_filename},
+    );
+
+    $pxs->{typemaps_object}->merge(typemap => $tmap, replace => 1);
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::pre_boot;
+
+# AST node representing C code that is emitted after all user-defined
+# XSUBs but before the boot XSUB. (This currently consists of
+#  'Foo::Bar::()' XSUBs for any packages which have overloading.)
+#
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # For each package FOO which has had at least one overloaded method
+    # specified:
+    #   - create a stub XSUB in that package called nil;
+    #   - generate code to be added to the boot XSUB which links that XSUB
+    #     to the symbol table entry *{"FOO::()"}.  This mimics the action in
+    #     overload::import() which creates the stub method as a quick way to
+    #     check whether an object is overloaded (including via inheritance),
+    #     by doing $self->can('()').
+    #   - Further down, we add a ${"FOO:()"} scalar containing the value of
+    #     'fallback' (or undef if not specified).
+    #
+    # XXX In 5.18.0, this arrangement was changed in overload.pm, but hasn't
+    # been updated here. The *() glob was being used for two different
+    # purposes: a sub to do a quick check of overloadability, and a scalar
+    # to indicate what 'fallback' value was specified (even if it wasn't
+    # specified). The commits:
+    #   v5.16.0-87-g50853fa94f
+    #   v5.16.0-190-g3866ea3be5
+    #   v5.17.1-219-g79c9643d87
+    # changed this so that overloadability is checked by &((, while fallback
+    # is checked by $() (and not present unless specified by 'fallback'
+    # as opposed to the always being present, but sometimes undef).
+    # Except that, in the presence of fallback, &() is added too for
+    # backcompat reasons (which I don't fully understand - DAPM).
+    # See overload.pm's import() and OVERLOAD() methods for more detail.
+    #
+    # So this code (and the code in as_boot_code) needs updating to match.
+
+    for my $package (sort keys %{$pxs->{map_overloaded_package_to_C_package}})
+    {
+        # make them findable with fetchmethod
+        my $packid = $pxs->{map_overloaded_package_to_C_package}{$package};
+        print $self->Q(<<"EOF");
+            |XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
+            |XS_EUPXS(XS_${packid}_nil)
+            |{
+            |   dXSARGS;
+            |   PERL_UNUSED_VAR(items);
+            |   XSRETURN_EMPTY;
+            |}
+            |
+EOF
+    }
+}
+
+sub as_boot_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    my @early;
+    for my $package (sort keys %{$pxs->{map_overloaded_package_to_C_package}})
+    {
+        my $packid = $pxs->{map_overloaded_package_to_C_package}{$package};
+        push @early, $self->Q(<<"EOF");
+            |   /* Making a sub named "${package}::()" allows the package */
+            |   /* to be findable via fetchmethod(), and causes */
+            |   /* overload::Overloaded("$package") to return true. */
+            |   (void)newXS_deffile("${package}::()", XS_${packid}_nil);
+EOF
+    }
+    return \@early, [];
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::boot_xsub;
+
+# AST node representing C code that is emitted to create the boo XSUB.
+#
+# This node's parse() method doesn't actually consume any lines; the node
+# exists just for its as_code() method.
+
+BEGIN { $build_subclass->(
+)};
+
+sub parse {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+    1;
+}
+
+sub as_code {
+    my __PACKAGE__        $self   = shift;
+    my ExtUtils::ParseXS  $pxs    = shift;
+
+    # Walk the AST accumulating any boot code generated by
+    # the various nodes' as_boot_code() methods.
+    my ($early, $later) = $pxs->{AST}->as_boot_code($pxs);
+
+    # Emit the boot_Foo__Bar() C function / XSUB
+
+    print $self->Q(<<"EOF");
+        |#ifdef __cplusplus
+        |extern "C" $open_brace
+        |#endif
+        |XS_EXTERNAL(boot_$pxs->{MODULE_cname}); /* prototype to pass -Wmissing-prototypes */
+        |XS_EXTERNAL(boot_$pxs->{MODULE_cname})
+        |$open_brace
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |    dVAR; dXSARGS;
+        |#else
+        |    dVAR; ${\($pxs->{VERSIONCHECK_value} ? 'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
+        |#endif
+EOF
+
+    # Declare a 'file' var for passing to newXS() and variants.
+    #
+    # If there is no $pxs->{seen_an_XSUB} then there are no xsubs
+    # in this .xs so 'file' is unused, so silence warnings.
+    #
+    # 'file' can also be unused in other circumstances: in particular,
+    # newXS_deffile() doesn't take a file parameter. So suppress any
+    # 'unused var' warning always.
+    #
+    # Give it the correct 'const'ness: Under 5.8.x and lower, newXS() is
+    # declared in proto.h as expecting a non-const file name argument. If
+    # the wrong qualifier is used, it causes breakage with C++ compilers and
+    # warnings with recent gcc.
+
+    print $self->Q(<<"EOF") if $pxs->{seen_an_XSUB};
+        |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+        |    char* file = __FILE__;
+        |#else
+        |    const char* file = __FILE__;
+        |#endif
+        |
+        |    PERL_UNUSED_VAR(file);
+EOF
+
+    # Emit assorted declarations
+
+    print $self->Q(<<"EOF");
+        |
+        |    PERL_UNUSED_VAR(cv); /* -W */
+        |    PERL_UNUSED_VAR(items); /* -W */
+EOF
+
+    if ($pxs->{VERSIONCHECK_value}) {
+        print $self->Q(<<"EOF");
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |    XS_VERSION_BOOTCHECK;
+        |#  ifdef XS_APIVERSION_BOOTCHECK
+        |    XS_APIVERSION_BOOTCHECK;
+        |#  endif
+        |#endif
+        |
+EOF
+    }
+    else {
+        print $self->Q(<<"EOF") ;
+            |#if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
+            |  XS_APIVERSION_BOOTCHECK;
+            |#endif
+            |
+EOF
+    }
+
+    # Declare a 'cv' variable within a scope small enough to be visible
+    # just to newXS() calls which need to do further processing of the cv:
+    # in particular, when emitting one of:
+    #      XSANY.any_i32 = $value;
+    #      XSINTERFACE_FUNC_SET(cv, $value);
+
+    if ($pxs->{need_boot_cv}) {
+        print $self->Q(<<"EOF");
+            |    $open_brace
+            |        CV * cv;
+            |
+EOF
+    }
+
+    # More overload stuff
+
+    if (keys %{ $pxs->{map_overloaded_package_to_C_package} }) {
+        # Emit just once if any overloads:
+        # Before 5.10, PL_amagic_generation used to need setting to at
+        # least a non-zero value to tell perl that any overloading was
+        # present.
+        print $self->Q(<<"EOF");
+            |    /* register the overloading (type 'A') magic */
+            |#if PERL_VERSION_LE(5, 8, 999) /* PERL_VERSION_LT is 5.33+ */
+            |    PL_amagic_generation++;
+            |#endif
+EOF
+
+        for my $package (
+            sort keys %{ $pxs->{map_overloaded_package_to_C_package} })
+        {
+            # Emit once for each package with overloads:
+            # Set ${'Foo::()'} to the fallback value for each overloaded
+            # package 'Foo' (or undef if not specified).
+            # But see the 'XXX' comments above about fallback and $().
+
+            my $fallback = $pxs->{map_package_to_fallback_string}{$package};
+            $fallback = 'UNDEF' unless defined $fallback;
+            $fallback = $fallback eq 'TRUE'  ? '&PL_sv_yes'
+                                      : $fallback eq 'FALSE' ? '&PL_sv_no'
+                                      :                        '&PL_sv_undef';
+
+            print $self->Q(<<"EOF");
+                |    /* The magic for overload gets a GV* via gv_fetchmeth as */
+                |    /* mentioned above, and looks in the SV* slot of it for */
+                |    /* the "fallback" status. */
+                |    sv_setsv(
+                |        get_sv( "${package}::()", TRUE ),
+                |        $fallback
+                |    );
+EOF
+        }
+    }
+
+    # Emit any boot code associated with newXS().
+
+    print @$early;
+
+    # Emit closing scope for the 'CV *cv' declaration
+
+    if ($pxs->{need_boot_cv}) {
+        print $self->Q(<<"EOF");
+            |    $close_brace
+EOF
+    }
+
+    # Emit any lines derived from BOOT: sections
+
+    if (@$later) {
+        print $self->Q(<<"EOF");
+            |
+            |    /* Initialisation Section */
+            |
+EOF
+
+        print @$later;
+
+        print 'ExtUtils::ParseXS::CountLines'->end_marker, "\n"
+            if $pxs->{config_WantLineNumbers};
+
+        print $self->Q(<<"EOF");
+            |
+            |    /* End of Initialisation Section */
+            |
+EOF
+    }
+
+    # Emit code to call any UNITCHECK blocks and return true.
+    # Since 5.22, this is been put into a separate function.
+
+    print $self->Q(<<"EOF");
+        |#if PERL_VERSION_LE(5, 21, 5)
+        |#  if PERL_VERSION_GE(5, 9, 0)
+        |    if (PL_unitcheckav)
+        |        call_list(PL_scopestack_ix, PL_unitcheckav);
+        |#  endif
+        |    XSRETURN_YES;
+        |#else
+        |    Perl_xs_boot_epilog(aTHX_ ax);
+        |#endif
+        |$close_brace
+        |
+        |#ifdef __cplusplus
+        |$close_brace
+        |#endif
+EOF
+}
 
 
 # ======================================================================
@@ -452,8 +1892,13 @@ BEGIN { $build_subclass->(
                                #    "2": empty prototype
                                #    other: a specific prototype.
 
+    # Misc
+
     'SCOPE_enabled',           # Bool: "SCOPE: ENABLE" seen, in either the
                                # file or XSUB part of the XS file
+
+    'PACKAGE_name',            # value of $pxs->{PACKAGE_name} at parse time
+    'PACKAGE_C_name',          # value of $pxs->{PACKAGE_C_name} at parse time
 
 )};
 
@@ -463,6 +1908,10 @@ sub parse {
     my ExtUtils::ParseXS  $pxs    = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
+
+    # record what package we're in
+    $self->{PACKAGE_name}   = $pxs->{PACKAGE_name};
+    $self->{PACKAGE_C_name} = $pxs->{PACKAGE_C_name};
 
     # Initially inherit the prototype behaviour for the XSUB from the
     # global PROTOTYPES default
@@ -480,18 +1929,9 @@ sub parse {
         or return;
     push @{$self->{kids}}, $decl;
 
-    # Append a fake EOF-keyword line. This makes it easy to do "all lines
-    # until the next keyword" style loops, since the fake END line (which
-    # includes a \n so it can't appear in the wild) is also matched as a
-    # keyword.
-    push(@{ $pxs->{line} }, "$ExtUtils::ParseXS::END:");
-    push(@{ $pxs->{line_no} }, $pxs->{line_no}->[-1]);
-
-    $_ = '';
-
     # Check all the @{ $pxs->{line}} lines for balance: all the
     # #if, #else, #endif etc within the XSUB should balance out.
-    ExtUtils::ParseXS::check_conditional_preprocessor_statements();
+    ExtUtils::ParseXS::Utilities::check_conditional_preprocessor_statements();
 
     # ----------------------------------------------------------------
     # Each iteration of this loop will process 1 optional CASE: line,
@@ -504,7 +1944,7 @@ sub parse {
     my $case_had_cond;       # the previous CASE had a condition
 
     # Repeatedly look for CASE or XSUB body.
-    while (@{ $pxs->{line} }) {
+    while (1) {
         # Parse a CASE statement if present.
         my ($case) =
             $self->parse_keywords(
@@ -524,10 +1964,10 @@ sub parse {
         else {
             $seen_bare_xbody = 1;
             if ($num++) {
-                my $l = $pxs->{line}[0];
                 # After the first CASE+body, we should only encounter
                 # further CASE+bodies or end-of-paragraph
-                last if $l eq "$ExtUtils::ParseXS::END:";
+                last unless @{$pxs->{line}};
+                my $l = $pxs->{line}[0];
                 $pxs->death(
                     $l =~ /^$ExtUtils::ParseXS::BLOCK_regexp/o
                             ? "Error: misplaced '$1:'"
@@ -539,7 +1979,8 @@ sub parse {
         # Parse the XSUB's body
 
         my $xbody = ExtUtils::ParseXS::Node::xbody->new();
-        $xbody->parse($pxs, $self);
+        $xbody->parse($pxs, $self)
+            or return;
 
         if (defined $case) {
             # make the xbody a child of the CASE
@@ -580,7 +2021,7 @@ sub as_code {
         my $cname = $self->{decl}{full_C_name};
 
         # Emit function header
-        print ExtUtils::ParseXS::Q(<<"EOF");
+        print $self->Q(<<"EOF");
             |$extern
             |XS_EUPXS(XS_$cname); /* prototype to pass -Wmissing-prototypes */
             |XS_EUPXS(XS_$cname)
@@ -589,7 +2030,7 @@ sub as_code {
 EOF
     }
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_ALIAS};
+    print $self->Q(<<"EOF") if $self->{seen_ALIAS};
         |    dXSI32;
 EOF
 
@@ -597,7 +2038,7 @@ EOF
         my $type = $self->{decl}{return_type}{type};
         $type =~ tr/:/_/
             unless $pxs->{config_RetainCplusplusHierarchicalTypes};
-        print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_INTERFACE};
+        print $self->Q(<<"EOF") if $self->{seen_INTERFACE};
             |    dXSFUNCTION($type);
 EOF
     }
@@ -613,7 +2054,7 @@ EOF
                                         $params->{nargs});
 
         # "-except" cmd line switch
-        print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+        print $self->Q(<<"EOF") if $pxs->{config_allow_exceptions};
             |    char errbuf[1024];
             |    *errbuf = '\\0';
 EOF
@@ -621,14 +2062,14 @@ EOF
         if ($condition_code) {
             my $p = $params->usage_string();
             $p =~ s/"/\\"/g;
-            print ExtUtils::ParseXS::Q(<<"EOF");
+            print $self->Q(<<"EOF");
                 |    if ($condition_code)
                 |       croak_xs_usage(cv,  "$p");
 EOF
         }
         else {
             # cv and items likely to be unused
-            print ExtUtils::ParseXS::Q(<<"EOF");
+            print $self->Q(<<"EOF");
                 |    PERL_UNUSED_VAR(cv); /* -W */
                 |    PERL_UNUSED_VAR(items); /* -W */
 EOF
@@ -640,11 +2081,11 @@ EOF
     # dXSARGS) is unused.
     # XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     # but such a move could break third-party extensions
-    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
+    print $self->Q(<<"EOF") if $self->{seen_PPCODE};
         |    PERL_UNUSED_VAR(ax); /* -Wall */
 EOF
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $self->{seen_PPCODE};
+    print $self->Q(<<"EOF") if $self->{seen_PPCODE};
         |    SP -= items;
 EOF
 
@@ -661,7 +2102,7 @@ EOF
     # bracket.
     # ----------------------------------------------------------------
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+    print $self->Q(<<"EOF") if $pxs->{config_allow_exceptions};
             |    if (errbuf[0])
             |    Perl_croak(aTHX_ errbuf);
 EOF
@@ -693,9 +2134,6 @@ EOF
 
     # Emit final closing bracket for the XSUB.
     print "$close_brace\n\n";
-
-    # generate all the 'newXS()' etc boot code needed for this XSUB
-    push @{$pxs->{bootcode_early}}, $self->boot_code($pxs);
 }
 
 
@@ -703,7 +2141,7 @@ EOF
 # call(s) plus any additional boot stuff like handling attributes or
 # storing an alias index in the XSUB's CV.
 
-sub boot_code {
+sub as_boot_code {
     my __PACKAGE__        $self   = shift;
     my ExtUtils::ParseXS  $pxs    = shift;
 
@@ -760,7 +2198,7 @@ sub boot_code {
                     %{ $self->{map_alias_name_to_value} })
         {
             my $value = $self->{map_alias_name_to_value}{$xname};
-            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+            push(@code, $self->Q(<<"EOF"));
                 |        cv = $newXS(\"$xname\", XS_$cname$file_arg$proto_arg);
                 |        XSANY.any_i32 = $value;
 EOF
@@ -771,9 +2209,9 @@ EOF
         # Generate a standard newXS() call, plus a single call to
         # apply_attrs_string() call with the string of attributes.
         my $attrs = "@{$self->{attributes}}";
-        push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+        push(@code, $self->Q(<<"EOF"));
           |        cv = $newXS(\"$pname\", XS_$cname$file_arg$proto_arg);
-          |        apply_attrs_string("$pxs->{PACKAGE_name}", cv, "$attrs", 0);
+          |        apply_attrs_string("$self->{PACKAGE_name}", cv, "$attrs", 0);
 EOF
         $pxs->{need_boot_cv} = 1;
     }
@@ -786,11 +2224,11 @@ EOF
                 %{ $self->{map_interface_name_short_to_original} })
         {
             my $value = $self->{map_interface_name_short_to_original}{$yname};
-            $yname = "$pxs->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
+            $yname = "$self->{PACKAGE_name}\::$yname" unless $yname =~ /::/;
 
             my $macro = $self->{interface_macro_set};
             $macro = 'XSINTERFACE_FUNC_SET' unless defined $macro;
-            push(@code, ExtUtils::ParseXS::Q(<<"EOF"));
+            push(@code, $self->Q(<<"EOF"));
                 |        cv = $newXS(\"$yname\", XS_$cname$file_arg$proto_arg);
                 |        $macro(cv,$value);
 EOF
@@ -823,14 +2261,12 @@ EOF
 
     for my $operator (sort keys %{ $self->{overload_name_seen} })
     {
-        $pxs->{map_overloaded_package_to_C_package}->{$pxs->{PACKAGE_name}}
-            = $pxs->{PACKAGE_C_name};
-        my $overload = "$pxs->{PACKAGE_name}\::($operator";
+        my $overload = "$self->{PACKAGE_name}\::($operator";
         push(@code,
         "        (void)$newXS(\"$overload\", XS_$cname$file_arg$proto_arg);\n");
     }
 
-    return @code;
+    return \@code, [];
 }
 
 
@@ -932,19 +2368,6 @@ sub parse {
     # $self->{full_C_name}    "BAR__BAZ_bar"
     # $params_text            "param1, param2, param3"
 
-    # Check for a duplicate function definition, but ignoring multiple
-    # definitions within the branches of an #if/#else/#endif
-    for my $tmp (@{ $pxs->{XS_parse_stack} }) {
-        next unless defined $tmp->{functions}{$full_cname};
-        $pxs->Warn(  "Warning: duplicate function definition "
-                   . "'$clean_func_name' detected");
-        last;
-    }
-
-    # mark C function name as used
-    $pxs->{XS_parse_stack}->
-        [$pxs->{XS_parse_stack_top_if_idx}]{functions}{$full_cname}++;
-
     # ----------------------------------------------------------------
     # Process the XSUB's signature.
     #
@@ -953,7 +2376,8 @@ sub parse {
 
     my $params = $self->{params} = ExtUtils::ParseXS::Node::Params->new();
 
-    $params->parse($pxs, $xsub, $params_text);
+    $params->parse($pxs, $xsub, $params_text)
+        or return;
     $self->{params} = $params;
     push @{$self->{kids}}, $params;
 
@@ -1353,6 +2777,7 @@ sub lookup_input_typemap {
         func_name      => $xsub->{decl}{name},
         full_perl_name => $xsub->{decl}{full_perl_name},
         full_C_name    => $xsub->{decl}{full_C_name},
+        Package        => $xsub->{PACKAGE_name},
     };
 
     # The type looked up in the eval is Foo__Bar rather than Foo::Bar
@@ -1652,6 +3077,7 @@ sub lookup_output_typemap {
             func_name       => $xsub->{decl}{name},
             full_perl_name  => $xsub->{decl}{full_perl_name},
             full_C_name     => $xsub->{decl}{full_C_name},
+            Package         => $xsub->{PACKAGE_name},
         };
 
 
@@ -2758,7 +4184,7 @@ sub as_code {
     # matches the $open_brace at the start of this function
     print "    $close_brace\n";
 
-    print ExtUtils::ParseXS::Q(<<"EOF") if $pxs->{config_allow_exceptions};
+    print $self->Q(<<"EOF") if $pxs->{config_allow_exceptions};
       |    BEGHANDLERS
       |    CATCHALL
       |    sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
@@ -2875,7 +4301,7 @@ sub as_code {
     }
 
     # The matching closes will be emitted in xbody->as_code()
-    print ExtUtils::ParseXS::Q(<<"EOF") if $xsub->{SCOPE_enabled};
+    print $self->Q(<<"EOF") if $xsub->{SCOPE_enabled};
         |      ENTER;
         |      $open_brace
 EOF
@@ -2988,7 +4414,7 @@ sub parse {
                         $pxs, $xsub, $xbody,
                         1, # match at most one keyword
                         "CODE|PPCODE",
-                        1, # also match NOT_IMPLEMENTED_YET
+                        $keywords_flag_NOT_IMPLEMENTED_YET,
                     );
 
     # Didn't find a CODE keyword or similar, so auto-generate a call
@@ -2996,7 +4422,8 @@ sub parse {
 
     my $autocall = ExtUtils::ParseXS::Node::autocall->new();
     # mainly a NOOP, but sets line number etc and flags that autocall seen
-    $autocall->parse($pxs, $xsub, $xbody);
+    $autocall->parse($pxs, $xsub, $xbody)
+        or return;
     push @{$self->{kids}}, $autocall;
 
     1;
@@ -3267,6 +4694,54 @@ sub parse {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::MODULE;
+
+# Process a MODULE keyword, e.g.
+#
+# MODULE = Foo PACKAGE = Foo::Bar PREFIX = foo_
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'module',   # Str
+    'package',  # Str: may be ''
+    'prefix',   # Str: may be ''
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no
+
+    my $line = $self->{text};
+    my ($module, $pkg, $prefix) = $line =~
+                            /^
+                                        MODULE  \s* = \s* ([\w:]+)
+                                (?: \s+ PACKAGE \s* = \s* ([\w:]+))?
+                                (?: \s+ PREFIX  \s* = \s* (\S+))?
+                                \s*
+                            $/x
+        or $pxs->death("Error: unparseable MODULE line: '$line'");
+
+    $self->{module} = $module;
+    ($pxs->{MODULE_cname} = $module) =~ s/\W/_/g;
+
+    $self->{package} = $pxs->{PACKAGE_name} = defined($pkg) ? $pkg : '';
+
+    $self->{prefix} = $prefix = defined($prefix) ? $prefix : '';
+    $pxs->{PREFIX_pattern} = quotemeta($prefix);
+
+    ($pxs->{PACKAGE_C_name} = $pxs->{PACKAGE_name}) =~ tr/:/_/;
+
+    $pxs->{PACKAGE_class} = $pxs->{PACKAGE_name};
+    $pxs->{PACKAGE_class} .= "::" if $pxs->{PACKAGE_class} ne "";
+
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::NOT_IMPLEMENTED_YET;
 
 # Handle NOT_IMPLEMENTED_YET pseudo-keyword
@@ -3452,6 +4927,293 @@ sub as_code {
 
 # ======================================================================
 
+package ExtUtils::ParseXS::Node::FALLBACK;
+
+# Process the 'FALLBACK' keyword.
+# Its main effect is to update $pxs->{map_package_to_fallback_string} with
+# the fallback value for the current package. That is later used to plant
+# boot code to set ${package}::() to a true/false/undef value.
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'value', # Str: TRUE, FALSE or UNDEF
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    # The rest of the current line should contain either TRUE,
+    # FALSE or UNDEF, but we also secretly allow 0 or 1 and lower/mixed
+    # case.
+
+    my $s = $self->{text};
+
+    $s = 'TRUE'  if $s eq '1';
+    $s = 'FALSE' if $s eq '0';
+    $s = uc($s);
+
+    $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF")
+        unless $s =~ /^(TRUE|FALSE|UNDEF)$/;
+
+    $self->{value} = $s;
+    $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}} = $s;
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::REQUIRE;
+
+# Process the 'REQUIRE' keyword.
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'version', # Str: the minimum version allowed, e.g.'1.23'
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    my $ver = $self->{text};
+
+    $pxs->death("Error: REQUIRE expects a version number")
+        unless length $ver;
+
+    # check that the version number is of the form n.n
+    $pxs->death("Error: REQUIRE: expected a number, got '$ver'")
+        unless $ver =~ /^\d+(\.\d*)?/;
+
+    my $got = $ExtUtils::ParseXS::VERSION;
+    $pxs->death("Error: xsubpp $ver (or better) required--this is only $got.")
+        unless $got >= $ver;
+
+    $self->{version} = $ver;
+
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::include;
+
+# Common base class for the 'INCLUDE' and 'INCLUDE_COMMAND' keywords
+
+BEGIN { $build_subclass->(-parent => 'oneline',
+    'is_cmd',       # Bool: is INCLUDE_COMMAND
+    'inc_filename', # Str:  the file/command to be included
+    'old_filename', # Str:  the previous file
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->SUPER::parse($pxs); # set file/line_no/text
+
+    my $f      = $self->{text};
+    my $is_cmd = $self->{is_cmd};
+
+    if ($is_cmd) {
+        $f = $self->QuoteArgs($f) if $^O eq 'VMS';
+
+        $pxs->death("INCLUDE_COMMAND: command missing")
+            unless length $f;
+
+        $pxs->death("INCLUDE_COMMAND: pipes are illegal")
+            if $f =~ /^\s*\|/ or $f =~ /\|\s*$/;
+    }
+    else {
+        $pxs->death("INCLUDE: filename missing")
+            unless length $f;
+
+        $pxs->death("INCLUDE: output pipe is illegal")
+            if $f =~ /^\s*\|/;
+
+        # simple minded recursion detector
+        $pxs->death("INCLUDE loop detected")
+            if $pxs->{IncludedFiles}{$f};
+
+        ++$pxs->{IncludedFiles}->{$f} unless $f =~ /\|\s*$/;
+
+        if ($f =~ /\|\s*$/ && $f =~ /^\s*perl\s/) {
+            $pxs->Warn(
+                  "The INCLUDE directive with a command is discouraged."
+                . " Use INCLUDE_COMMAND instead! In particular using 'perl'"
+                . " in an 'INCLUDE: ... |' directive is not guaranteed to pick"
+                . " up the correct perl. The INCLUDE_COMMAND directive allows"
+                . " the use of \$^X as the currently running perl, see"
+                . " 'perldoc perlxs' for details."
+            );
+        }
+    }
+
+    # Save the current file context.
+
+    my @save_keys = qw(in_fh in_filename in_pathname
+                       lastline lastline_no line line_no);
+    my @saved =  @$pxs{@save_keys};
+
+    my $isPipe = $is_cmd || $pxs->{in_filename} =~ /\|\s*$/;
+
+    $pxs->{line}    = [];
+    $pxs->{line_no} = [];
+
+    # Open the new file / pipe
+
+    $pxs->{in_fh} = Symbol::gensym();
+
+    if ($is_cmd) {
+        # Expand the special token '$^X' into the full path of the
+        # currently running perl interpreter
+        my $X = $pxs->_safe_quote($^X); # quotes if has spaces
+        $f =~ s/^\s*\$\^X/$X/;
+
+        open ($pxs->{in_fh}, "-|", $f)
+            or $pxs->death(
+                "Cannot run command '$f' to include its output: $!");
+    }
+    else {
+        open($pxs->{in_fh}, $f)
+            or $pxs->death("Cannot open '$f': $!");
+    }
+
+    $self->{old_filename} = $pxs->{in_filename};
+    $self->{inc_filename} = $f;
+    $pxs->{in_filename} = $f;
+
+    my $path = $f;
+    if ($is_cmd) {
+        #$path =~ s/\"/\\"/g; # Fails? See CPAN RT #53938: MinGW Broken after 2.21
+        $path =~ s/\\/\\\\/g; # Works according to reporter of #53938
+    }
+    else {
+        $path = ($^O =~ /^mswin/i)
+                      # See CPAN RT #61908: gcc doesn't like
+                      # backslashes on win32?
+                    ? "$pxs->{dir}/$path"
+                    : File::Spec->catfile($pxs->{dir}, $path);
+    }
+    $pxs->{in_pathname} = $self->{file} = $path;
+
+    # Prime the pump by reading the first non-blank line
+    while (readline($pxs->{in_fh})) {
+        last unless /^\s*$/;
+    }
+
+    $pxs->{lastline} = $_;
+    chomp $pxs->{lastline};
+    $pxs->{lastline_no} = $self->{line_no} = $.;
+
+    # Parse included file
+
+    my $cpp_scope = ExtUtils::ParseXS::Node::cpp_scope->new({
+                        type   => 'include',
+                        is_cmd =>  $self->{is_cmd},
+                    });
+    $cpp_scope->parse($pxs)
+        or return;
+    push @{$self->{kids}}, $cpp_scope;
+
+    --$pxs->{IncludedFiles}->{$pxs->{in_filename}}
+        unless $isPipe;
+
+    close $pxs->{in_fh};
+
+    # Restore the current file context.
+
+    @$pxs{@save_keys} = @saved;
+
+    if ($isPipe and $? ) {
+        --$pxs->{lastline_no};
+        print STDERR "Error reading from pipe '$self->{inc_filename}': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
+        exit 1;
+    }
+
+    1;
+}
+
+
+sub as_code {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+
+    my $comment = $self->{is_cmd}
+        ?   "INCLUDE_COMMAND:  Including output of"
+        :   "INCLUDE:  Including";
+
+    $comment .= " '$self->{inc_filename}' from '$self->{old_filename}'";
+
+    print $self->Q(<<"EOF");
+        |
+        |/* $comment */
+        |
+EOF
+
+    $_->as_code($pxs) for @{$self->{kids}};
+
+    print $self->Q(<<"EOF");
+    |
+    |/* INCLUDE: Returning to '$self->{old_filename}' from '$self->{inc_filename}' */
+    |
+EOF
+
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INCLUDE;
+
+# Process the 'INCLUDE' keyword. Most processing is actually done by the
+# parent 'include' class which handles INCLUDE_COMMAND too.
+
+BEGIN { $build_subclass->(-parent => 'include',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->{is_cmd} = 0;
+    $self->SUPER::parse($pxs); # main parsing done by Node::include
+    1;
+}
+
+
+# ======================================================================
+
+package ExtUtils::ParseXS::Node::INCLUDE_COMMAND;
+
+# Process the 'INCLUDE_COMMAND' keyword. Most processing is actually done
+# by the parent 'include' class which handles INCLUDE too.
+
+BEGIN { $build_subclass->(-parent => 'include',
+)};
+
+
+sub parse {
+    my __PACKAGE__       $self = shift;
+    my ExtUtils::ParseXS $pxs  = shift;
+
+    $self->{is_cmd} = 1;
+    $self->SUPER::parse($pxs); # main parsing done by Node::include
+    1;
+}
+
+
+# ======================================================================
+
 package ExtUtils::ParseXS::Node::enable;
 
 # Base class for keywords which accept ENABLE/DISABLE as an argument
@@ -3534,7 +5296,7 @@ sub as_code {
     # XS_EUPXS(fXS_Foo_foo) XSUB declarations will expand to
     # XS_EXTERNAL/XS_INTERNAL as appropriate
 
-    print ExtUtils::ParseXS::Q(<<"EOF");
+    print $self->Q(<<"EOF");
         |#undef XS_EUPXS
         |#if defined(PERL_EUPXS_ALWAYS_EXPORT)
         |#  define XS_EUPXS(name) XS_EXTERNAL(name)
@@ -3841,6 +5603,11 @@ sub parse {
         $self->{ops}{$1} = 1;
         $xsub->{overload_name_seen}{$1} = 1;
     }
+
+    # Mark the current package as being overloaded
+    $pxs->{map_overloaded_package_to_C_package}->{$xsub->{PACKAGE_name}}
+        = $xsub->{PACKAGE_C_name};
+
     1;
 }
 
@@ -4120,8 +5887,7 @@ sub parse {
 
     $self->SUPER::parse($pxs); # set file/line_no/lines
     $xsub->{seen_PPCODE} = 1;
-    # The only thing left should be the special "!End!\n\n" token.
-    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}} > 1;
+    $pxs->death("Error: PPCODE must be the last thing") if @{$pxs->{line}};
     1;
 }
 

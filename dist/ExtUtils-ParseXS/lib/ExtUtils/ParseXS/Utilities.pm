@@ -5,7 +5,7 @@ use Exporter;
 use File::Spec;
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.60';
+our $VERSION = '3.61';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -16,8 +16,6 @@ our (@ISA, @EXPORT_OK);
   valid_proto_string
   process_typemaps
   map_type
-  standard_XS_defs
-  analyze_preprocessor_statement
   set_cond
   Warn
   WarnHint
@@ -27,6 +25,7 @@ our (@ISA, @EXPORT_OK);
   check_conditional_preprocessor_statements
   escape_file_for_line_directive
   report_typemap_failure
+  looks_like_MODULE_line
 );
 
 =head1 NAME
@@ -42,8 +41,6 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     valid_proto_string
     process_typemaps
     map_type
-    standard_XS_defs
-    analyze_preprocessor_statement
     set_cond
     Warn
     blurt
@@ -303,272 +300,6 @@ sub map_type {
 }
 
 
-=head2 C<standard_XS_defs()>
-
-=over 4
-
-=item * Purpose
-
-Writes to the C<.c> output file certain preprocessor directives and function
-headers needed in all such files.
-
-=item * Arguments
-
-None.
-
-=item * Return Value
-
-Returns true.
-
-=back
-
-=cut
-
-sub standard_XS_defs {
-  print <<"EOF";
-#ifndef PERL_UNUSED_VAR
-#  define PERL_UNUSED_VAR(var) if (0) var = var
-#endif
-
-#ifndef dVAR
-#  define dVAR		dNOOP
-#endif
-
-
-/* This stuff is not part of the API! You have been warned. */
-#ifndef PERL_VERSION_DECIMAL
-#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
-#endif
-#ifndef PERL_DECIMAL_VERSION
-#  define PERL_DECIMAL_VERSION \\
-	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
-#endif
-#ifndef PERL_VERSION_GE
-#  define PERL_VERSION_GE(r,v,s) \\
-	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
-#endif
-#ifndef PERL_VERSION_LE
-#  define PERL_VERSION_LE(r,v,s) \\
-	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
-#endif
-
-/* XS_INTERNAL is the explicit static-linkage variant of the default
- * XS macro.
- *
- * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
- * "STATIC", ie. it exports XSUB symbols. You probably don't want that
- * for anything but the BOOT XSUB.
- *
- * See XSUB.h in core!
- */
-
-
-/* TODO: This might be compatible further back than 5.10.0. */
-#if PERL_VERSION_GE(5, 10, 0) && PERL_VERSION_LE(5, 15, 1)
-#  undef XS_EXTERNAL
-#  undef XS_INTERNAL
-#  if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
-#    define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
-#    define XS_INTERNAL(name) STATIC XSPROTO(name)
-#  endif
-#  if defined(__SYMBIAN32__)
-#    define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
-#    define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
-#  endif
-#  ifndef XS_EXTERNAL
-#    if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
-#      define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
-#      define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
-#    else
-#      ifdef __cplusplus
-#        define XS_EXTERNAL(name) extern "C" XSPROTO(name)
-#        define XS_INTERNAL(name) static XSPROTO(name)
-#      else
-#        define XS_EXTERNAL(name) XSPROTO(name)
-#        define XS_INTERNAL(name) STATIC XSPROTO(name)
-#      endif
-#    endif
-#  endif
-#endif
-
-/* perl >= 5.10.0 && perl <= 5.15.1 */
-
-
-/* The XS_EXTERNAL macro is used for functions that must not be static
- * like the boot XSUB of a module. If perl didn't have an XS_EXTERNAL
- * macro defined, the best we can do is assume XS is the same.
- * Dito for XS_INTERNAL.
- */
-#ifndef XS_EXTERNAL
-#  define XS_EXTERNAL(name) XS(name)
-#endif
-#ifndef XS_INTERNAL
-#  define XS_INTERNAL(name) XS(name)
-#endif
-
-/* Now, finally, after all this mess, we want an ExtUtils::ParseXS
- * internal macro that we're free to redefine for varying linkage due
- * to the EXPORT_XSUB_SYMBOLS XS keyword. This is internal, use
- * XS_EXTERNAL(name) or XS_INTERNAL(name) in your code if you need to!
- */
-
-#undef XS_EUPXS
-#if defined(PERL_EUPXS_ALWAYS_EXPORT)
-#  define XS_EUPXS(name) XS_EXTERNAL(name)
-#else
-   /* default to internal */
-#  define XS_EUPXS(name) XS_INTERNAL(name)
-#endif
-
-EOF
-
-  print <<"EOF";
-#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
-#define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
-
-/* prototype to pass -Wmissing-prototypes */
-STATIC void
-S_croak_xs_usage(const CV *const cv, const char *const params);
-
-STATIC void
-S_croak_xs_usage(const CV *const cv, const char *const params)
-{
-    const GV *const gv = CvGV(cv);
-
-    PERL_ARGS_ASSERT_CROAK_XS_USAGE;
-
-    if (gv) {
-        const char *const gvname = GvNAME(gv);
-        const HV *const stash = GvSTASH(gv);
-        const char *const hvname = stash ? HvNAME(stash) : NULL;
-
-        if (hvname)
-	    Perl_croak_nocontext("Usage: %s::%s(%s)", hvname, gvname, params);
-        else
-	    Perl_croak_nocontext("Usage: %s(%s)", gvname, params);
-    } else {
-        /* Pants. I don't think that it should be possible to get here. */
-	Perl_croak_nocontext("Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
-    }
-}
-#undef  PERL_ARGS_ASSERT_CROAK_XS_USAGE
-
-#define croak_xs_usage        S_croak_xs_usage
-
-#endif
-
-/* NOTE: the prototype of newXSproto() is different in versions of perls,
- * so we define a portable version of newXSproto()
- */
-#ifdef newXS_flags
-#define newXSproto_portable(name, c_impl, file, proto) newXS_flags(name, c_impl, file, proto, 0)
-#else
-#define newXSproto_portable(name, c_impl, file, proto) (PL_Sv=(SV*)newXS(name, c_impl, file), sv_setpv(PL_Sv, proto), (CV*)PL_Sv)
-#endif /* !defined(newXS_flags) */
-
-#if PERL_VERSION_LE(5, 21, 5)
-#  define newXS_deffile(a,b) Perl_newXS(aTHX_ a,b,file)
-#else
-#  define newXS_deffile(a,b) Perl_newXS_deffile(aTHX_ a,b)
-#endif
-
-/* simple backcompat versions of the TARGx() macros with no optimisation */
-#ifndef TARGi
-#  define TARGi(iv, do_taint) sv_setiv_mg(TARG, iv)
-#  define TARGu(uv, do_taint) sv_setuv_mg(TARG, uv)
-#  define TARGn(nv, do_taint) sv_setnv_mg(TARG, nv)
-#endif
-
-EOF
-  return 1;
-}
-
-=head2 C<analyze_preprocessor_statement()>
-
-=over 4
-
-=item * Purpose
-
-Process a CPP conditional line (C<#if> etc), to keep track of conditional
-nesting. In particular, it updates C<< @{$self->{XS_parse_stack}} >> which
-contains the current list of nested conditions, and
-C<< $self->{XS_parse_stack_top_if_idx} >> which indicates the most recent
-C<if> in that stack. So an C<#if> pushes, an C<#endif> pops, an C<#else>
-modifies etc. Each element is a hash of the form:
-
-  {
-    type      => 'if',
-    varname   => 'XSubPPtmpAAAA', # maintained by caller
-
-                  # XS functions defined within this branch of the
-                  # conditional (maintained by caller)
-    functions =>  {
-                    'Foo::Bar::baz' => 1,
-                    ...
-                  }
-                  # XS functions seen within any previous branch
-    other_functions => {... }
-
-It also updates C<< $self->{bootcode_early} >> and
-C<< $self->{bootcode_late} >> with extra CPP directives.
-
-=item * Arguments
-
-      $self->analyze_preprocessor_statement($statement);
-
-=back
-
-=cut
-
-sub analyze_preprocessor_statement {
-  my ExtUtils::ParseXS $self = shift;
-  my ($statement) = @_;
-
-  my $ix = $self->{XS_parse_stack_top_if_idx};
-
-  if ($statement eq 'if') {
-    # #if or #ifdef
-    $ix = @{ $self->{XS_parse_stack} };
-    push(@{ $self->{XS_parse_stack} }, {type => 'if'});
-  }
-  else {
-    # An #else/#elsif/#endif.
-
-    $self->death("Error: '$statement' with no matching 'if'")
-      if $self->{XS_parse_stack}->[-1]{type} ne 'if';
-
-    if ($self->{XS_parse_stack}->[-1]{varname}) {
-      # close any '#ifdef XSubPPtmpAAAA' inserted earlier into boot code.
-      push(@{ $self->{bootcode_early} }, "#endif\n");
-      push(@{ $self->{bootcode_later} }, "#endif\n");
-    }
-
-    my(@fns) = keys %{$self->{XS_parse_stack}->[-1]{functions}};
-
-    if ($statement ne 'endif') {
-      # Add current functions to the hash of functions seen in previous
-      # branch limbs, then reset for this next limb of the branch.
-      @{$self->{XS_parse_stack}->[-1]{other_functions}}{@fns} = (1) x @fns;
-      @{$self->{XS_parse_stack}->[-1]}{qw(varname functions)} = ('', {});
-    }
-    else {
-      # #endif - pop stack and update new top entry
-      my($tmp) = pop(@{ $self->{XS_parse_stack} });
-      0 while (--$ix
-           && $self->{XS_parse_stack}->[$ix]{type} ne 'if');
-
-      # For all functions declared within any limb of the just-popped
-      # if/endif, mark them as having appeared within this limb of the
-      # outer nested branch.
-      push(@fns, keys %{$tmp->{other_functions}});
-      @{$self->{XS_parse_stack}->[$ix]{functions}}{@fns}  =  (1) x @fns;
-    }
-  }
-
-  $self->{XS_parse_stack_top_if_idx} = $ix;
-}
-
-
 =head2 C<set_cond()>
 
 =over 4
@@ -632,7 +363,11 @@ The current line number.
 
 sub current_line_number {
   my ExtUtils::ParseXS $self = shift;
-  my $line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
+  # NB: until the first MODULE line is encountered, $self->{line_no} etc
+  # won't have been populated
+  my $line_number = @{$self->{line_no}}
+        ? $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1]
+        : $self->{lastline_no};
   return $line_number;
 }
 
@@ -776,8 +511,6 @@ sub check_conditional_preprocessor_statements {
       }
       elsif (!$cpplevel) {
         $self->Warn("Warning: #else/elif/endif without #if in this function");
-        print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
-          if $self->{XS_parse_stack}->[-1]{type} eq 'if';
         return;
       }
       elsif ($cpp =~ /^\#\s*endif/) {
@@ -859,6 +592,27 @@ sub report_typemap_failure {
   $self->$error_method($err);
   return();
 }
+
+=head2 C<looks like_MODULE_line($line)>
+
+Returns true if the passed line looks like an attempt to be a MODULE line.
+Note that it doesn't check for valid syntax. This allows the caller to do
+its own parsing of the line, providing some sort of 'invalid MODULE line'
+check. As compared with thinking that its not a MODULE line if its syntax
+is slightly off, leading instead to some weird error about a bad start to
+an XSUB or something.
+
+In particular, a line starting C<MODULE:> returns true, because it's
+likely to be an attempt by the programmer to write a MODULE line, even
+though it's invalid syntax.
+
+=cut
+
+sub looks_like_MODULE_line {
+  my $line  = shift;
+  $line =~ /^MODULE\s*[=:]/;
+}
+
 
 
 1;
