@@ -121,4 +121,54 @@ EXPECT
                   );
 }
 
+{
+    # GH 24001
+    local $::TODO = "&DB::sub shouldn't be called when called from DB";
+    local $ENV{PERL5DB} = 'sub DB::DB {}';
+    fresh_perl_is(<<'CODE', "OK\n",
+package DB;
+sub DB::sub {
+    # avoid deep recursion
+    die "Fail" if $DB::sub =~ /^version::/;
+    # trigger overloading call from package DB
+    my $v = "$^V";
+    print $v ne "" ? "OK\n" : ""
+}
+package main;
+sub f {
+}
+f();
+CODE
+                  {
+                      switches => [ '-d' ],
+                  },
+                  "overloading call from DB doesn't break into DB::sub");
+}
+{
+    local $ENV{PERL5DB} = 'sub DB::DB {}';
+    # make sure we don't break the expected break
+    fresh_perl_is(<<'CODE', "OK\n",
+package DB;
+sub DB::sub {
+    our @count;
+    if ($DB::sub eq 'version::(""') {
+        print "OK\n";
+        exit;
+    }
+    push @count, $DB::sub;
+    die "Fail @count\n" if @count > 10;
+    &$DB::sub;
+}
+package main;
+sub f {
+    my $v = "$^V";
+}
+f();
+CODE
+                  {
+                      switches => [ '-d' ],
+                  },
+                  "overloading call from non-DB does break into DB::sub");
+}
+
 done_testing();
