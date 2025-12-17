@@ -875,7 +875,8 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
  *           the SV itself.
  *   strbeg: real beginning of string
  *   strpos: the point in the string at which to begin matching
- *   strend: pointer to the byte following the last char of the string
+ *   strend: pointer to the byte following the last char of the string, or to
+ *           'strpos' if there is nothing left to match.
  *   flags   currently unused; set to 0
  *   data:   currently unused; set to NULL
  *
