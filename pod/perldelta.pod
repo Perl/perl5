@@ -420,7 +420,13 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+sort() optimizes common comparisons from calling the OP tree for a
+comparison block into a call to a C function.  The C function used for
+overloaded numeric comparisons did not handle the case where there was
+no comparison overload but there was a numeric ("0+") overload
+correctly, losing precision for large overloaded integer arguments that
+are not exactly representable as a Perl floating point value (NV).
+[GH #23956]
 
 =back
 
