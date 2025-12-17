@@ -123,7 +123,6 @@ EXPECT
 
 {
     # GH 24001
-    local $::TODO = "&DB::sub shouldn't be called when called from DB";
     local $ENV{PERL5DB} = 'sub DB::DB {}';
     fresh_perl_is(<<'CODE', "OK\n",
 package DB;
