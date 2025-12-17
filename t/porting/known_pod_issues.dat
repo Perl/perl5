@@ -123,6 +123,7 @@ exit(3)
 Expect
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
+ExtUtils::CppGuess
 fchdir(2)
 fchmod(2)
 fchown(2)

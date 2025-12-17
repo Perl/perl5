@@ -173,13 +173,15 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlxs>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The reference manual for writing Perl XS code has been completely
+rewritten and modernised. It is about twice the size of the old file,
+and promotes more modern XS syntax, such as ANSI signatures.
 
 =back
 
