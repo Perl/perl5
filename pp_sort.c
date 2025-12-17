@@ -1310,11 +1310,22 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 
 
 PERL_STATIC_FORCE_INLINE I32
-S_sv_ncmp(pTHX_ SV *const a, SV *const b)
+S_sv_ncmp(pTHX_ SV *a, SV *b)
 {
-    I32 cmp = do_ncmp(a, b);
-
     PERL_ARGS_ASSERT_SV_NCMP;
+
+    /* Numify since do_ncmp will just SvNV() non-IVs.
+
+       Even for the non-overloading case, if RVs are allocated with
+       large 64-bit addresses (only theoretically possible I think)
+       the bottom bits of the RV might be lost.
+     */
+    if (SvROK(a))
+        a = sv_2num(a);
+    if (SvROK(b))
+        b = sv_2num(b);
+
+    I32 cmp = do_ncmp(a, b);
 
     if (cmp == 2) {
         if (ckWARN(WARN_UNINITIALIZED)) report_uninit(NULL);
@@ -1359,7 +1370,7 @@ S_sv_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
 #define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
 
 PERL_STATIC_FORCE_INLINE I32
-S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
+S_amagic_ncmp(pTHX_ SV *a, SV *b)
 {
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
@@ -1375,6 +1386,7 @@ S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
             return SORT_NORMAL_RETURN_VALUE(d);
         }
      }
+
      return S_sv_ncmp(aTHX_ a, b);
 }
 
