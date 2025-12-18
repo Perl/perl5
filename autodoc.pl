@@ -2480,7 +2480,7 @@ sub output ($destpod) {  # Output a complete pod file
                         goto spliced;
                     }
 
-                    die "Unexpecedly \@items doesn't contain $leaders[$which]";
+                    die "Unexpectedly \@items doesn't contain $leaders[$which]";
 
                  spliced:
                     # The array now includes the out-of-order items.  Save,
