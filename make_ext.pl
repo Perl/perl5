@@ -31,14 +31,14 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 #    make_ext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
 #
 # E.g.
-# 
+#
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext
-# 
+#
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
-# 
+#
 # Will skip building extensions which are marked with an '!' char.
 # Mostly because they still not ported to specified platform.
-# 
+#
 # If any extensions are listed with a '+' char then only those
 # extensions will be built, but only if they aren't countermanded
 # by an '!ext' and are appropriate to the type of building being done.
@@ -276,8 +276,8 @@ sub build_extension {
     my ($ext_dir, $perl, $mname, $target, $pass_through) = @_;
 
     unless (chdir "$ext_dir") {
-	warn "Cannot cd to $ext_dir: $!";
-	return;
+        warn "Cannot cd to $ext_dir: $!";
+        return;
     }
 
     my $up = $ext_dir;
@@ -289,42 +289,42 @@ sub build_extension {
 
     my ($makefile, $makefile_no_minus_f);
     if (IS_VMS) {
-	$makefile = 'descrip.mms';
-	if ($target =~ /clean$/
-	    && !-f $makefile
-	    && -f "${makefile}_old") {
-	    $makefile = "${makefile}_old";
-	}
+        $makefile = 'descrip.mms';
+        if ($target =~ /clean$/
+            && !-f $makefile
+            && -f "${makefile}_old") {
+            $makefile = "${makefile}_old";
+        }
     } else {
-	$makefile = 'Makefile';
+        $makefile = 'Makefile';
     }
-    
+
     if (-f $makefile) {
-	$makefile_no_minus_f = 0;
-	open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
-	while (<$mfh>) {
-	    # Plagiarised from CPAN::Distribution
-	    last if /MakeMaker post_initialize section/;
-	    next unless /^#\s+VERSION_FROM\s+=>\s+(.+)/;
-	    my $vmod = eval $1;
-	    my $oldv;
-	    while (<$mfh>) {
-		next unless /^XS_VERSION = (\S+)/;
-		$oldv = $1;
-		last;
-	    }
-	    last unless defined $oldv;
-	    require ExtUtils::MM_Unix;
-	    defined (my $newv = parse_version MM $vmod) or last;
-	    if (version->parse($newv) ne $oldv) {
-		close $mfh or die "close $makefile: $!";
-		_unlink($makefile);
-		{
-		    no warnings 'deprecated';
-		    goto NO_MAKEFILE;
-		}
-	    }
-	}
+        $makefile_no_minus_f = 0;
+        open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
+        while (<$mfh>) {
+            # Plagiarised from CPAN::Distribution
+            last if /MakeMaker post_initialize section/;
+            next unless /^#\s+VERSION_FROM\s+=>\s+(.+)/;
+            my $vmod = eval $1;
+            my $oldv;
+            while (<$mfh>) {
+                next unless /^XS_VERSION = (\S+)/;
+                $oldv = $1;
+                last;
+            }
+            last unless defined $oldv;
+            require ExtUtils::MM_Unix;
+            defined (my $newv = parse_version MM $vmod) or last;
+            if (version->parse($newv) ne $oldv) {
+                close $mfh or die "close $makefile: $!";
+                _unlink($makefile);
+                {
+                    no warnings 'deprecated';
+                    goto NO_MAKEFILE;
+                }
+            }
+        }
 
         if (IS_CROSS) {
             # If we're cross-compiling, it's possible that the host's
@@ -352,40 +352,40 @@ sub build_extension {
             }
         }
     } else {
-	$makefile_no_minus_f = 1;
+        $makefile_no_minus_f = 1;
     }
 
     if ($makefile_no_minus_f || !-f $makefile) {
-	NO_MAKEFILE:
-	if (!-f 'Makefile.PL') {
+    NO_MAKEFILE:
+        if (!-f 'Makefile.PL') {
             unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
                 # No problems returned, so it has faked everything for us. :-)
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
                 return;
             }
 
-	    print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
-	    my ($fromname, $key, $value);
+            print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
+            my ($fromname, $key, $value);
 
-	    $key = 'ABSTRACT_FROM';
-	    # We need to cope well with various possible layouts
-	    my @dirs = split /::/, $mname;
-	    my $leaf = pop @dirs;
-	    my $leafname = "$leaf.pm";
-	    my $pathname = join '/', @dirs, $leafname;
-	    my @locations = ($leafname, $pathname, "lib/$pathname");
-	    foreach (@locations) {
-		if (-f $_) {
-		    $fromname = $_;
-		    last;
-		}
-	}
+            $key = 'ABSTRACT_FROM';
+            # We need to cope well with various possible layouts
+            my @dirs = split /::/, $mname;
+            my $leaf = pop @dirs;
+            my $leafname = "$leaf.pm";
+            my $pathname = join '/', @dirs, $leafname;
+            my @locations = ($leafname, $pathname, "lib/$pathname");
+            foreach (@locations) {
+                if (-f $_) {
+                    $fromname = $_;
+                    last;
+                }
+            }
 
-	unless ($fromname) {
-	    die "For $mname tried @locations in $ext_dir but can't find source";
-	}
-	($value = $fromname) =~ s/\.pm\z/.pod/;
-	$value = $fromname unless -e $value;
+            unless ($fromname) {
+                die "For $mname tried @locations in $ext_dir but can't find source";
+            }
+            ($value = $fromname) =~ s/\.pm\z/.pod/;
+            $value = $fromname unless -e $value;
 
             if ($mname eq 'Pod::Checker') {
                 # the abstract in the .pm file is unparseable by MM,
@@ -397,9 +397,9 @@ sub build_extension {
                 $value = 'Pod::Checker verifies POD documentation contents for compliance with the POD format specifications';
             }
 
-	    open my $fh, '>', 'Makefile.PL'
-		or die "Can't open Makefile.PL for writing: $!";
-	    printf $fh <<'EOM', $0, $mname, $fromname, $key, $value;
+            open my $fh, '>', 'Makefile.PL'
+                or die "Can't open Makefile.PL for writing: $!";
+            printf $fh <<'EOM', $0, $mname, $fromname, $key, $value;
 #-*- buffer-read-only: t -*-
 
 # This Makefile.PL was written by %s.
@@ -452,17 +452,17 @@ WriteMakefile(
 
 # ex: set ro:
 EOM
-	    close $fh or die "Can't close Makefile.PL: $!";
-	    # As described in commit 23525070d6c0e51f:
-	    # Push the atime and mtime of generated Makefile.PLs back 4
-	    # seconds. In certain circumstances ( on virtual machines ) the
-	    # generated Makefile.PL can produce a Makefile that is older than
-	    # the Makefile.PL. Altering the atime and mtime backwards by 4
-	    # seconds seems to resolve the issue.
-	    eval {
-        my $ftime = (stat('Makefile.PL'))[9] - 4;
-        utime $ftime, $ftime, 'Makefile.PL';
-	    };
+            close $fh or die "Can't close Makefile.PL: $!";
+            # As described in commit 23525070d6c0e51f:
+            # Push the atime and mtime of generated Makefile.PLs back 4
+            # seconds. In certain circumstances ( on virtual machines ) the
+            # generated Makefile.PL can produce a Makefile that is older than
+            # the Makefile.PL. Altering the atime and mtime backwards by 4
+            # seconds seems to resolve the issue.
+            eval {
+                my $ftime = (stat('Makefile.PL'))[9] - 4;
+                utime $ftime, $ftime, 'Makefile.PL';
+            };
         } elsif ($mname =~ /\A(?:Carp
                             |ExtUtils::CBuilder
                             |Safe
@@ -505,46 +505,46 @@ EOM
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
                 return;
             }
-	}
+        }
 
         # We are going to have to use Makefile.PL:
-	print "\nRunning Makefile.PL in $ext_dir\n" if $verbose;
+        print "\nRunning Makefile.PL in $ext_dir\n" if $verbose;
 
-	my @args = ("-I$lib_dir", 'Makefile.PL');
-	if (IS_VMS) {
-	    my $libd = VMS::Filespec::vmspath($lib_dir);
-	    push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
-	} else {
-	    push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
-		'INSTALLMAN3DIR=none';
-	}
-	push @args, @$pass_through;
-	push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
-	_quote_args(\@args) if IS_VMS;
-	print join(' ', $perl, @args), "\n" if $verbose;
-	my $code = do {
-	   local $ENV{PERL_MM_USE_DEFAULT} = 1;
-	    system $perl, @args;
-	};
-	if($code != 0){
-	    #make sure next build attempt/run of make_ext.pl doesn't succeed
-	    _unlink($makefile);
-	    die "Unsuccessful Makefile.PL($ext_dir): code=$code";
-	}
+        my @args = ("-I$lib_dir", 'Makefile.PL');
+        if (IS_VMS) {
+            my $libd = VMS::Filespec::vmspath($lib_dir);
+            push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
+        } else {
+            push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
+            'INSTALLMAN3DIR=none';
+        }
+        push @args, @$pass_through;
+        push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
+        _quote_args(\@args) if IS_VMS;
+        print join(' ', $perl, @args), "\n" if $verbose;
+        my $code = do {
+           local $ENV{PERL_MM_USE_DEFAULT} = 1;
+           system $perl, @args;
+        };
+        if($code != 0){
+            #make sure next build attempt/run of make_ext.pl doesn't succeed
+            _unlink($makefile);
+            die "Unsuccessful Makefile.PL($ext_dir): code=$code";
+        }
 
-	# Right. The reason for this little hack is that we're sitting inside
-	# a program run by ./miniperl, but there are tasks we need to perform
-	# when the 'realclean', 'distclean' or 'veryclean' targets are run.
-	# Unfortunately, they can be run *after* 'clean', which deletes
-	# ./miniperl
-	# So we do our best to leave a set of instructions identical to what
-	# we would do if we are run directly as 'realclean' etc
-	# Whilst we're perfect, unfortunately the targets we call are not, as
-	# some of them rely on a $(PERL) for their own distclean targets.
-	# But this always used to be a problem with the old /bin/sh version of
-	# this.
-	if (IS_UNIX) {
-	    foreach my $clean_target ('realclean', 'veryclean') {
+        # Right. The reason for this little hack is that we're sitting inside
+        # a program run by ./miniperl, but there are tasks we need to perform
+        # when the 'realclean', 'distclean' or 'veryclean' targets are run.
+        # Unfortunately, they can be run *after* 'clean', which deletes
+        # ./miniperl
+        # So we do our best to leave a set of instructions identical to what
+        # we would do if we are run directly as 'realclean' etc
+        # Whilst we're perfect, unfortunately the targets we call are not, as
+        # some of them rely on a $(PERL) for their own distclean targets.
+        # But this always used to be a problem with the old /bin/sh version of
+        # this.
+        if (IS_UNIX) {
+            foreach my $clean_target ('realclean', 'veryclean') {
                 fallback_cleanup($return_dir, $clean_target, <<"EOS");
 cd $ext_dir
 if test ! -f Makefile -a -f Makefile.old; then
@@ -552,26 +552,26 @@ if test ! -f Makefile -a -f Makefile.old; then
     make -f Makefile.old $clean_target MAKE='@make' @pass_through
 else
     if test ! -f Makefile ; then
-	echo "Warning: No Makefile!"
+    echo "Warning: No Makefile!"
     fi
     @make $clean_target MAKE='@make' @pass_through
 fi
 cd $return_dir
 EOS
-	    }
-	}
+            }
+        }
     }
 
     if (not -f $makefile) {
-	print "Warning: No Makefile!\n";
+        print "Warning: No Makefile!\n";
     }
 
     if (IS_VMS) {
-	_quote_args($pass_through);
-	@$pass_through = (
-			  "/DESCRIPTION=$makefile",
-			  '/MACRO=(' . join(',',@$pass_through) . ')'
-			 );
+        _quote_args($pass_through);
+        @$pass_through = (
+                  "/DESCRIPTION=$makefile",
+                  '/MACRO=(' . join(',',@$pass_through) . ')'
+        );
     }
 
     my @targ = ($target, @$pass_through);
