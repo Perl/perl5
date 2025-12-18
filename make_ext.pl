@@ -330,7 +330,7 @@ sub build_extension {
             # If we're cross-compiling, it's possible that the host's
             # Makefiles are around.
             seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
-            
+
             my $cross_makefile;
             while (<$mfh>) {
                 # XXX This might not be throughout enough.
@@ -344,7 +344,7 @@ sub build_extension {
                     last;
                 }
             }
-            
+
             if (!$cross_makefile) {
                 print "Deleting non-Cross makefile\n";
                 close $mfh or die "close $makefile: $!";
@@ -399,59 +399,59 @@ sub build_extension {
 
             open my $fh, '>', 'Makefile.PL'
                 or die "Can't open Makefile.PL for writing: $!";
-            printf $fh <<'EOM', $0, $mname, $fromname, $key, $value;
-#-*- buffer-read-only: t -*-
+            printf $fh <<~'EOM', $0, $mname, $fromname, $key, $value;
+            #-*- buffer-read-only: t -*-
 
-# This Makefile.PL was written by %s.
-# It will be deleted automatically by make realclean
+            # This Makefile.PL was written by %s.
+            # It will be deleted automatically by make realclean
 
-use strict;
-use ExtUtils::MakeMaker;
+            use strict;
+            use ExtUtils::MakeMaker;
 
-# This is what the .PL extracts to. Not the ultimate file that is installed.
-# (ie Win32 runs pl2bat after this)
+            # This is what the .PL extracts to. Not the ultimate file that is installed.
+            # (ie Win32 runs pl2bat after this)
 
-# Doing this here avoids all sort of quoting issues that would come from
-# attempting to write out perl source with literals to generate the arrays and
-# hash.
-my @temps = 'Makefile.PL';
-foreach (glob('scripts/pod*.PL')) {
-    # The various pod*.PL extractors change directory. Doing that with relative
-    # paths in @INC breaks. It seems the lesser of two evils to copy (to avoid)
-    # the chdir doing anything, than to attempt to convert lib paths to
-    # absolute, and potentially run into problems with quoting special
-    # characters in the path to our build dir (such as spaces)
-    require File::Copy;
+            # Doing this here avoids all sort of quoting issues that would come from
+            # attempting to write out perl source with literals to generate the arrays and
+            # hash.
+            my @temps = 'Makefile.PL';
+            foreach (glob('scripts/pod*.PL')) {
+                # The various pod*.PL extractors change directory. Doing that with relative
+                # paths in @INC breaks. It seems the lesser of two evils to copy (to avoid)
+                # the chdir doing anything, than to attempt to convert lib paths to
+                # absolute, and potentially run into problems with quoting special
+                # characters in the path to our build dir (such as spaces)
+                require File::Copy;
 
-    my $temp = $_;
-    $temp =~ s!scripts/!!;
-    File::Copy::copy($_, $temp) or die "Can't copy $temp to $_: $!";
-    push @temps, $temp;
-}
+                my $temp = $_;
+                $temp =~ s!scripts/!!;
+                File::Copy::copy($_, $temp) or die "Can't copy $temp to $_: $!";
+                push @temps, $temp;
+            }
 
-my $script_ext = $^O eq 'VMS' ? '.com' : '';
-my %%pod_scripts;
-foreach (glob('pod*.PL')) {
-    my $script = $_;
-    s/.PL$/$script_ext/i;
-    $pod_scripts{$script} = $_;
-}
-my @exe_files = values %%pod_scripts;
+            my $script_ext = $^O eq 'VMS' ? '.com' : '';
+            my %%pod_scripts;
+            foreach (glob('pod*.PL')) {
+                my $script = $_;
+                s/.PL$/$script_ext/i;
+                $pod_scripts{$script} = $_;
+            }
+            my @exe_files = values %%pod_scripts;
 
-WriteMakefile(
-    NAME          => '%s',
-    VERSION_FROM  => '%s',
-    %-13s => '%s',
-    realclean     => { FILES => "@temps" },
-    (%%pod_scripts ? (
-        PL_FILES  => \%%pod_scripts,
-        EXE_FILES => \@exe_files,
-        clean     => { FILES => "@exe_files" },
-    ) : ()),
-);
+            WriteMakefile(
+                NAME          => '%s',
+                VERSION_FROM  => '%s',
+                %-13s => '%s',
+                realclean     => { FILES => "@temps" },
+                (%%pod_scripts ? (
+                    PL_FILES  => \%%pod_scripts,
+                    EXE_FILES => \@exe_files,
+                    clean     => { FILES => "@exe_files" },
+                ) : ()),
+            );
 
-# ex: set ro:
-EOM
+            # ex: set ro:
+            EOM
             close $fh or die "Can't close Makefile.PL: $!";
             # As described in commit 23525070d6c0e51f:
             # Push the atime and mtime of generated Makefile.PLs back 4
@@ -545,19 +545,19 @@ EOM
         # this.
         if (IS_UNIX) {
             foreach my $clean_target ('realclean', 'veryclean') {
-                fallback_cleanup($return_dir, $clean_target, <<"EOS");
-cd $ext_dir
-if test ! -f Makefile -a -f Makefile.old; then
-    echo "Note: Using Makefile.old"
-    make -f Makefile.old $clean_target MAKE='@make' @pass_through
-else
-    if test ! -f Makefile ; then
-    echo "Warning: No Makefile!"
-    fi
-    @make $clean_target MAKE='@make' @pass_through
-fi
-cd $return_dir
-EOS
+                fallback_cleanup($return_dir, $clean_target, <<~"EOS");
+                cd $ext_dir
+                if test ! -f Makefile -a -f Makefile.old; then
+                    echo "Note: Using Makefile.old"
+                    make -f Makefile.old $clean_target MAKE='@make' @pass_through
+                else
+                    if test ! -f Makefile ; then
+                    echo "Warning: No Makefile!"
+                    fi
+                    @make $clean_target MAKE='@make' @pass_through
+                fi
+                cd $return_dir
+                EOS
             }
         }
     }
