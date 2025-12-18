@@ -273,7 +273,7 @@ foreach my $spec (@extspec)  {
 }
 
 sub build_extension {
-    my ($ext_dir, $perl, $mname, $target, $pass_through) = @_;
+    my ($ext_dir, $perl, $mname, $target, $pass_through_ref) = @_;
 
     unless (chdir "$ext_dir") {
         warn "Cannot cd to $ext_dir: $!";
@@ -518,7 +518,7 @@ sub build_extension {
             push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
             'INSTALLMAN3DIR=none';
         }
-        push @args, @$pass_through;
+        push @args, @$pass_through_ref;
         push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
         _quote_args(\@args) if IS_VMS;
         print join(' ', $perl, @args), "\n" if $verbose;
@@ -549,12 +549,12 @@ sub build_extension {
                 cd $ext_dir
                 if test ! -f Makefile -a -f Makefile.old; then
                     echo "Note: Using Makefile.old"
-                    make -f Makefile.old $clean_target MAKE='@make' @pass_through
+                    make -f Makefile.old $clean_target MAKE='@make' @$pass_through_ref
                 else
                     if test ! -f Makefile ; then
                     echo "Warning: No Makefile!"
                     fi
-                    @make $clean_target MAKE='@make' @pass_through
+                    @make $clean_target MAKE='@make' @$pass_through_ref
                 fi
                 cd $return_dir
                 EOS
@@ -567,14 +567,14 @@ sub build_extension {
     }
 
     if (IS_VMS) {
-        _quote_args($pass_through);
-        @$pass_through = (
+        _quote_args($pass_through_ref);
+        @$pass_through_ref = (
                   "/DESCRIPTION=$makefile",
-                  '/MACRO=(' . join(',',@$pass_through) . ')'
+                  '/MACRO=(' . join(',',@$pass_through_ref) . ')'
         );
     }
 
-    my @targ = ($target, @$pass_through);
+    my @targ = ($target, @$pass_through_ref);
     print "Making $target in $ext_dir\n@make @targ\n" if $verbose;
     local $ENV{PERL_INSTALL_QUIET} = 1;
     my $code = system(@make, @targ);
