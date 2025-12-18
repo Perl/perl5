@@ -49,7 +49,7 @@ you should reset the version numbers to the next blead series.
   2025-10-22  5.43.4  ✓       Eric Herman
   2025-11-20  5.43.5  ✓       Thibault Duponchelle
   2025-12-20  5.43.6          Steve Hay
-  2026-01-20  5.43.7          Max Maischein
+  2026-01-19  5.43.7          Max Maischein
   2026-02-20  5.43.8                            Contentious changes freeze
   2026-03-20  5.43.9                            User-visible changes to
                                                 correctly functioning
