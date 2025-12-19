@@ -86,6 +86,39 @@ modern XS syntax, such as ANSI signatures.
 
 =back
 
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Use of "goto" to jump into a construct is no longer permitted|perldiag/"Use of "goto" to jump into a construct is no longer permitted">
+
+(F) You have used C<goto LABEL;> or C<goto EXPR;> in an attempt to jump into
+the body of a loop or other block construct from the outside.  As of Perl 5.44,
+this throws an exception.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The error C<Unrecognised parameters for "%s" constructor: %s> has been changed
+to C<Unrecognized parameters for "%s" constructor: %s>.
+
+=back
+
 =head1 Testing
 
 Tests were added and changed to reflect the other additions and changes in this
