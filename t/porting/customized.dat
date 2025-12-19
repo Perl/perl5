@@ -17,3 +17,4 @@ Win32API::File cpan/Win32API-File/File.xs beb870fed4490d2faa547b4a8576b8d64d1d27
 autodie cpan/autodie/t/utime.t f94c3000b5b23db59df64895594050d7151f8333
 podlators pod/perlpodstyle.pod 3430e61d84673b62944ceed6d023bfd5aebe3847
 version cpan/version/lib/version.pm aa9f25fe6f6815139a9fb85d817b4e2802732c03
+version vutil.c d2967934cdd5dfbcc2f7c783712e199d57d69ba1

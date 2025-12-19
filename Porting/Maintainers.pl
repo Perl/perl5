@@ -1307,6 +1307,9 @@ our %Modules = (
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             'lib/version.pm',
+
+            # Customized by ba04a9040af061424b6d6f0b1e888cd3ce4b3d9f
+            'vutil.c',
          ],
 
         'MAP' => {
