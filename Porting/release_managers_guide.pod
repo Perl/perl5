@@ -1383,8 +1383,8 @@ header in your message after receiving it back via perl5-porters.
 
 =head3 Update the link to the latest perl on perlweb
 
-Submit a pull request to L<https://github.com/perlorg/perlweb>.
-Update the link in F<docs/dev/perl5/index.html> and F<docs/shared/tpl/stats.html>.
+Submit a pull request to L<https://github.com/perlorg/perlweb> to
+update the link in F<docs/shared/tpl/stats.html>.
 
 =for checklist skip RC
 
