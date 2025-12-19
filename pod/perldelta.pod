@@ -404,6 +404,12 @@ package, but called to overloaded subs for overloaded values used in
 the DB package would result in calls in DB::sub.  Fixed the check for
 the current package in amagic_call().  [GH 24001]
 
+=item *
+
+pregexec() handles zero-length strings again, fixing an assert failure in
+Package-Stash-XS (which Moose depends upon).  This had been broken in
+Perl 5.43.4.  [GH 23903]
+
 =back
 
 =head1 Known Problems
