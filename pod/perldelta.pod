@@ -81,7 +81,7 @@ Additionally, the following selected changes have been made:
 =item *
 
 The reference manual for writing Perl XS code has been completely rewritten and
-modernised.  It is about twice the size of the old file, and promotes more
+modernized.  It is about twice the size of the old file, and promotes more
 modern XS syntax, such as ANSI signatures.
 
 =back
