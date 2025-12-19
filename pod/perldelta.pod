@@ -339,9 +339,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+A compilation error in unthreaded builds using MSVC introduced in Perl 5.43.5
+has been fixed. [GH 23952]
 
 =back
 
