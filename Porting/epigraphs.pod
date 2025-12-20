@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.6 - Christopher Hitchens, "Mortality"
+
+L<Announced on 2025-12-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/12/msg270596.html>
+
+For me, to remember friendship is to recall those conversations that it
+seemed a sin to break off: the ones that made the sacrifice of the
+following day a trivial one.
+
 =head2 v5.43.5 - Jean Giono
 
 L<Announced on 2025-11-20 by Thibault Duponchelle|https://www.nntp.perl.org/group/perl.perl5.porters/2025/11/msg270513.html>
