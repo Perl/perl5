@@ -5879,4 +5879,28 @@ EOF
     test_many($preamble, undef, \@test_fns);
 }
 
+{
+    # An XS file without a MODULE line should warn, but
+    # still emit the C code in the C part of the file (the whole file
+    # contents in this case).
+
+    my $preamble = '';
+
+    my @test_fns = (
+        [
+            "No MODULE line",
+            [ Q(<<'EOF') ],
+                |foo
+                |bar
+EOF
+
+            [ 0, 0, qr{#line 1 ".*"\nfoo\nbar\n#line 13 ".*"}, "all C present" ],
+            [ 1, 0, qr{Didn't find a 'MODULE ... PACKAGE ... PREFIX' line},
+                    "got expected MODULE warning"  ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
 done_testing;
