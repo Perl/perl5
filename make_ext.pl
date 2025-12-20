@@ -527,24 +527,9 @@ sub build_extension {
         # some of them rely on a $(PERL) for their own distclean targets.
         # But this always used to be a problem with the old /bin/sh version of
         # this.
-        if (IS_UNIX) {
-            foreach my $clean_target ('realclean', 'veryclean') {
-                fallback_cleanup($return_dir, $clean_target, <<~"EOS");
-                cd $ext_dir
-                if test ! -f Makefile -a -f Makefile.old; then
-                    echo "Note: Using Makefile.old"
-                    make -f Makefile.old $clean_target MAKE='@make' @$pass_through_ref
-                else
-                    if test ! -f Makefile ; then
-                    echo "Warning: No Makefile!"
-                    fi
-                    @make $clean_target MAKE='@make' @$pass_through_ref
-                fi
-                cd $return_dir
-                EOS
 
-            } # END loop around targets
-        } # END if IS_UNIX
+        _is_unix($return_dir, $ext_dir, $pass_through_ref, \@make, $return_dir);
+
 ####################
     } # END NO_MAKEFILE scope
 
@@ -769,6 +754,29 @@ sub _use_Makefile_PL {
         _unlink($makefile);
         die "Unsuccessful Makefile.PL($ext_dir): code=$code";
     }
+    return 1;
+}
+
+sub _is_unix {
+    my ($return_dir, $ext_dir, $pass_through_ref, $makeref) = @_;
+    my @make = @{$makeref};
+    if (IS_UNIX) {
+        foreach my $clean_target ('realclean', 'veryclean') {
+            fallback_cleanup($return_dir, $clean_target, <<~"EOS");
+            cd $ext_dir
+            if test ! -f Makefile -a -f Makefile.old; then
+                echo "Note: Using Makefile.old"
+                make -f Makefile.old $clean_target MAKE='@make' @$pass_through_ref
+            else
+                if test ! -f Makefile ; then
+                echo "Warning: No Makefile!"
+                fi
+                @make $clean_target MAKE='@make' @$pass_through_ref
+            fi
+            cd $return_dir
+            EOS
+        } # END loop around targets
+    } # END if IS_UNIX
     return 1;
 }
 
