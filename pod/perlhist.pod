@@ -831,6 +831,7 @@ the strings?).
  Thibault   5.43.3       2025-Sep-23
  Eric       5.43.4       2025-Oct-22
  Thibault   5.43.5       2025-Nov-20
+ Steve      5.43.6       2025-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
