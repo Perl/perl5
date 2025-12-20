@@ -230,7 +230,8 @@ changing to the C99 approach.
 C<//> comments
 
 All compilers we tested support their use. Not all humans we tested
-support their use.
+support their use.  These should be avoided in header files, as there is
+CPAN code that breaks if it encounters these.
 
 =item *
 
