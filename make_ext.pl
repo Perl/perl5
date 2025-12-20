@@ -319,10 +319,11 @@ sub build_extension {
             if (version->parse($newv) ne $oldv) {
                 close $mfh or die "close $makefile: $!";
                 _unlink($makefile);
-                {
-                    no warnings 'deprecated';
-                    goto NO_MAKEFILE;
-                }
+                my $rv = _internal_build_extension(
+                    $target, $ext_dir, $mname, $return_dir, $verbose,
+                    $lib_dir, $pass_through_ref, $perl, $makefile, \@make
+                );
+                return unless defined $rv;
             }
         }
 
