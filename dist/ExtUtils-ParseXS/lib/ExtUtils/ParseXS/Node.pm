@@ -603,9 +603,13 @@ sub parse {
 
     my $C_part = ExtUtils::ParseXS::Node::C_part->new();
     $self->{C_part} = $C_part;
-    $C_part->parse($pxs, $self)
-        or return;
+    my $c_part_result = $C_part->parse($pxs, $self);
     push @{$self->{kids}}, $C_part;
+
+    # A failure when parsing the C part means that there wasn't a MODULE
+    # line. Don't try to parse the missing XS part, but still return
+    # success, passing through the lines from the C part.
+    return 1 unless $c_part_result;
 
     # "Parse" the bit following any C code. Doesn't actually consume any
     # lines: just a placeholder for emitting postamble code.
@@ -752,7 +756,7 @@ sub parse {
     }
 
     warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
-    exit 0; # Not a fatal error for the caller process
+    return;
 }
 
 
