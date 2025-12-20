@@ -117,6 +117,14 @@ this throws an exception.
 The error C<Unrecognised parameters for "%s" constructor: %s> has been changed
 to C<Unrecognized parameters for "%s" constructor: %s>.
 
+=item *
+
+The deprecation warning
+C<Attempt to call undefined %s method with arguments ("%s"%s) via package "%s" (Perhaps you forgot to load the package?)>
+has been changed to
+C<Attempt to call undefined %s method with arguments via package "%s" (Perhaps you forgot to load the package?)>
+and is now a fatal error.
+
 =back
 
 =head1 Testing
