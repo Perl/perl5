@@ -32,9 +32,9 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 #
 # E.g.
 #
-#     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext
+#    make_ext.pl "MAKE=nmake -nologo" --dir=..\ext
 #
-#     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
+#    make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
 #
 # Will skip building extensions which are marked with an '!' char.
 # Mostly because they still not ported to specified platform.
@@ -65,19 +65,19 @@ my (%excl, %incl, %opts, @extspec, @pass_through, $verbose);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
-	$excl{$1} = 1;
+        $excl{$1} = 1;
     } elsif (/^\+(.*)$/) {
-	$incl{$1} = 1;
+        $incl{$1} = 1;
     } elsif (/^--verbose$/ or /^-v$/) {
-	$verbose = 1;
+        $verbose = 1;
     } elsif (/^--([\w\-]+)$/) {
-	$opts{$1} = 1;
+        $opts{$1} = 1;
     } elsif (/^--([\w\-]+)=(.*)$/) {
-	push @{$opts{$1}}, $2;
+        push @{$opts{$1}}, $2;
     } elsif (/=/) {
-	push @pass_through, $_;
+        push @pass_through, $_;
     } elsif (length) {
-	push @extspec, $_;
+        push @extspec, $_;
     }
 }
 
@@ -87,35 +87,35 @@ my $nonxs = $opts{nonxs} || $opts{all};
 my $dynaloader = $opts{dynaloader} || $opts{all};
 
 # The Perl Makefile.SH will expand all extensions to
-#	lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
+#    lib/auto/X/X.a  (or lib/auto/X/Y/Y.a if nested)
 # A user wishing to run make_ext might use
-#	X (or X/Y or X::Y if nested)
+#    X (or X/Y or X::Y if nested)
 
 # canonise into X/Y form (pname)
 
 foreach (@extspec) {
     if (s{^lib/auto/}{}) {
-	# Remove lib/auto prefix and /*.* suffix
-	s{/[^/]+\.[^/]+$}{};
+        # Remove lib/auto prefix and /*.* suffix
+        s{/[^/]+\.[^/]+$}{};
     } elsif (s{^$ext_dirs_re/}{}) {
-	# Remove ext/ prefix and /pm_to_blib suffix
-	s{/pm_to_blib$}{};
-	# Targets are given as files on disk, but the extension spec is still
-	# written using /s for each ::
-	tr!-!/!;
+        # Remove ext/ prefix and /pm_to_blib suffix
+        s{/pm_to_blib$}{};
+        # Targets are given as files on disk, but the extension spec is still
+        # written using /s for each ::
+        tr!-!/!;
     } elsif (s{::}{\/}g) {
-	# Convert :: to /
+        # Convert :: to /
     } else {
-	s/\..*o//;
+        s/\..*o//;
     }
 }
 
 my $makecmd  = shift @pass_through; # Should be something like MAKE=make
 unshift @pass_through, 'PERL_CORE=1';
 
-my @dirs  = @{$opts{dir} || \@ext_dirs};
-my $target   = $opts{target}[0];
-$target = 'all' unless defined $target;
+my @dirs    = @{$opts{dir} || \@ext_dirs};
+my $target  = $opts{target}[0];
+$target     = 'all' unless defined $target;
 
 # Previously, $make was taken from config.sh.  However, the user might
 # instead be running a possibly incompatible make.  This might happen if
@@ -124,6 +124,7 @@ $target = 'all' unless defined $target;
 # makefile as MAKE=/whatever/make in $makecmd.  We'll be cautious in
 # case third party users of this script (are there any?) don't have the
 # MAKE=$(MAKE) argument, which was added after 5.004_03.
+
 unless(defined $makecmd and $makecmd =~ /^MAKE=(.*)$/) {
     die "$0:  WARNING:  Please include MAKE=\$(MAKE) in \@ARGV\n";
 }
@@ -131,8 +132,8 @@ unless(defined $makecmd and $makecmd =~ /^MAKE=(.*)$/) {
 # This isn't going to cope with anything fancy, such as spaces inside command
 # names, but neither did what it replaced. Once there is a use case that needs
 # it, please supply patches. Until then, I'm sticking to KISS
-my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
 
+my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
 
 if ($target eq '') {
     die "make_ext: no make target specified (eg all or clean)\n";
@@ -155,28 +156,28 @@ if (IS_WIN32) {
     my $build = Cwd::getcwd();
     $perl = $^X;
     if ($perl =~ m#^\.\.#) {
-	my $here = $build;
-	$here =~ s{/}{\\}g;
-	$perl = "$here\\$perl";
+        my $here = $build;
+        $here =~ s{/}{\\}g;
+        $perl = "$here\\$perl";
     }
     (my $topdir = $perl) =~ s/\\[^\\]+$//;
     # miniperl needs to find perlglob and pl2bat
     $ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}";
     my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
     unless (-f "$pl2bat.bat") {
-	my @args = ($perl, "-I$topdir\\lib", "-I$topdir\\cpan\\ExtUtils-PL2Bat\\lib", ("$pl2bat.pl") x 2);
-	print "@args\n" if $verbose;
-	system(@args) unless IS_CROSS;
+        my @args = ($perl, "-I$topdir\\lib", "-I$topdir\\cpan\\ExtUtils-PL2Bat\\lib", ("$pl2bat.pl") x 2);
+        print "@args\n" if $verbose;
+        system(@args) unless IS_CROSS;
     }
 
     print "In $build" if $verbose;
     foreach my $dir (@dirs) {
-	chdir($dir) or die "Cannot cd to $dir: $!\n";
-	(my $ext = Cwd::getcwd()) =~ s{/}{\\}g;
-	FindExt::scan_ext($ext);
-	FindExt::set_static_extensions(split ' ', $Config{static_ext});
-	chdir $build
-	    or die "Couldn't chdir to '$build': $!"; # restore our start directory
+        chdir($dir) or die "Cannot cd to $dir: $!\n";
+        (my $ext = Cwd::getcwd()) =~ s{/}{\\}g;
+        FindExt::scan_ext($ext);
+        FindExt::set_static_extensions(split ' ', $Config{static_ext});
+        chdir $build
+            or die "Couldn't chdir to '$build': $!"; # restore our start directory
     }
 
     my @ext;
@@ -186,22 +187,22 @@ if (IS_WIN32) {
     push @ext, 'DynaLoader' if $dynaloader;
 
     foreach (sort @ext) {
-	if (%incl and !exists $incl{$_}) {
-	    #warn "Skipping extension $_, not in inclusion list\n";
-	    next;
-	}
-	if (exists $excl{$_}) {
-	    warn "Skipping extension $_, not ported to current platform";
-	    next;
-	}
-	push @extspec, $_;
-	if($_ ne 'DynaLoader' && FindExt::is_static($_)) {
-	    push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
-	}
+        if (%incl and !exists $incl{$_}) {
+            #warn "Skipping extension $_, not in inclusion list\n";
+            next;
+        }
+        if (exists $excl{$_}) {
+            warn "Skipping extension $_, not ported to current platform";
+            next;
+        }
+        push @extspec, $_;
+        if($_ ne 'DynaLoader' && FindExt::is_static($_)) {
+            push @{$extra_passthrough{$_}}, 'LINKTYPE=static';
+        }
     }
 
     chdir '..'
-	or die "Couldn't chdir to build directory: $!"; # now in the Perl build
+        or die "Couldn't chdir to build directory: $!"; # now in the Perl build
 }
 elsif (IS_VMS) {
     $perl = $^X;
@@ -218,14 +219,14 @@ elsif (IS_VMS) {
     # This seems to be the simplest way to ensure this ordering:
     my (@first, @second, @other);
     foreach (@extspec) {
-	if ($_ eq 'Cwd' || $_ eq 'if' || $_ eq 'lib') {
-	    push @first, $_;
+        if ($_ eq 'Cwd' || $_ eq 'if' || $_ eq 'lib') {
+            push @first, $_;
         }
-	elsif ($_ eq 'Pod/Simple') {
-	    push @second, $_;
-	} else {
-	    push @other, $_;
-	}
+        elsif ($_ eq 'Pod/Simple') {
+            push @second, $_;
+        } else {
+            push @other, $_;
+        }
     }
     @extspec = (@first, @second, @other);
 }
@@ -250,26 +251,26 @@ foreach my $spec (@extspec)  {
     $copy = 'PathTools'         if $copy eq 'Cwd';
 
     foreach my $dir (@ext_dirs) {
-	if (-d "$dir/$copy") {
-	    $ext_pathname = "$dir/$copy";
-	    last;
-	}
+    if (-d "$dir/$copy") {
+        $ext_pathname = "$dir/$copy";
+        last;
+    }
     }
 
     if (!defined $ext_pathname) {
-	if (-d "ext/$spec") {
-	    # Old style ext/Data/Dumper/
-	    $ext_pathname = "ext/$spec";
-	} else {
-	    warn "Can't find extension $spec in any of @ext_dirs";
-	    next;
-	}
+    if (-d "ext/$spec") {
+        # Old style ext/Data/Dumper/
+        $ext_pathname = "ext/$spec";
+    } else {
+        warn "Can't find extension $spec in any of @ext_dirs";
+        next;
+    }
     }
 
     print "\tMaking $mname ($target)\n" if $verbose;
 
     build_extension($ext_pathname, $perl, $mname, $target,
-		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
+            [@pass_through, @{$extra_passthrough{$spec} || []}]);
 } # END foreach loop over elements in @extspec
 
 sub build_extension {
