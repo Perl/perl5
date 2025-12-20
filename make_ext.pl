@@ -270,14 +270,14 @@ foreach my $spec (@extspec)  {
 
     build_extension($ext_pathname, $perl, $mname, $target,
 		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
-}
+} # END foreach loop over elements in @extspec
 
 sub build_extension {
     my ($ext_dir, $perl, $mname, $target, $pass_through_ref) = @_;
 
     unless (chdir "$ext_dir") {
         warn "Cannot cd to $ext_dir: $!";
-        return;
+        return; # 1st possible return from build_extension
     }
 
     my $up = $ext_dir;
@@ -367,7 +367,7 @@ sub build_extension {
             unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
                 # No problems returned, so it has faked everything for us. :-)
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
-                return;
+                return; # 2nd possible return from build_extension
             }
 
             print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
@@ -485,7 +485,7 @@ sub build_extension {
             } else {
                 # It faked everything for us.
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
-                return;
+                return; # 3rd possible return from build_extension
             }
         }
 
