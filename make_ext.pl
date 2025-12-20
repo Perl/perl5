@@ -356,7 +356,13 @@ sub build_extension {
     }
 
     if ($makefile_no_minus_f || !-f $makefile) {
+
+    # What we actually need at this point for encapsulation:
+    # $target, $ext_dir, $mname, $return_dir,
+    # $lib_dir, $pass_through_ref, $makefile, $perl, \@make, $verbose);
+
     NO_MAKEFILE:
+####################
         if (!-f 'Makefile.PL') {
             unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
                 # No problems returned, so it has faked everything for us. :-)
@@ -508,29 +514,7 @@ sub build_extension {
         }
 
         # We are going to have to use Makefile.PL:
-        print "\nRunning Makefile.PL in $ext_dir\n" if $verbose;
-
-        my @args = ("-I$lib_dir", 'Makefile.PL');
-        if (IS_VMS) {
-            my $libd = VMS::Filespec::vmspath($lib_dir);
-            push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
-        } else {
-            push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
-            'INSTALLMAN3DIR=none';
-        }
-        push @args, @$pass_through_ref;
-        push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
-        _quote_args(\@args) if IS_VMS;
-        print join(' ', $perl, @args), "\n" if $verbose;
-        my $code = do {
-           local $ENV{PERL_MM_USE_DEFAULT} = 1;
-           system $perl, @args;
-        };
-        if($code != 0){
-            #make sure next build attempt/run of make_ext.pl doesn't succeed
-            _unlink($makefile);
-            die "Unsuccessful Makefile.PL($ext_dir): code=$code";
-        }
+        _use_Makefile_PL($ext_dir, $verbose, $lib_dir, $pass_through_ref, $perl, $makefile);
 
         # Right. The reason for this little hack is that we're sitting inside
         # a program run by ./miniperl, but there are tasks we need to perform
@@ -558,10 +542,11 @@ sub build_extension {
                 fi
                 cd $return_dir
                 EOS
-            }
-        }
-    }
 
+            } # END loop around targets
+        } # END if IS_UNIX
+####################
+    } # END NO_MAKEFILE scope
     if (not -f $makefile) {
         print "Warning: No Makefile!\n";
     }
@@ -776,3 +761,32 @@ sub fallback_cleanup {
     print $fh $contents or die "print $file: $!";
     close $fh or die "close $file: $!";
 }
+
+sub _use_Makefile_PL {
+    my ($ext_dir, $verbose, $lib_dir, $pass_through_ref, $perl, $makefile) = @_;
+
+    print "\nRunning Makefile.PL in $ext_dir\n" if $verbose;
+    my @args = ("-I$lib_dir", 'Makefile.PL');
+    if (IS_VMS) {
+        my $libd = VMS::Filespec::vmspath($lib_dir);
+        push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
+    } else {
+        push @args, 'INSTALLDIRS=perl', 'INSTALLMAN1DIR=none',
+        'INSTALLMAN3DIR=none';
+    }
+    push @args, @$pass_through_ref;
+    push @args, 'PERL=' . $perl if $perl; # use miniperl to run the Makefile later
+    _quote_args(\@args) if IS_VMS;
+    print join(' ', $perl, @args), "\n" if $verbose;
+    my $code = do {
+       local $ENV{PERL_MM_USE_DEFAULT} = 1;
+        system $perl, @args;
+    };
+    if($code != 0){
+        #make sure next build attempt/run of make_ext.pl doesn't succeed
+        _unlink($makefile);
+        die "Unsuccessful Makefile.PL($ext_dir): code=$code";
+    }
+    return 1;
+}
+
