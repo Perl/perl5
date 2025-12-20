@@ -472,7 +472,8 @@ sub build_extension {
         } elsif ($mname =~ /\A(?:Carp
                             |ExtUtils::CBuilder
                             |Safe
-                            |Search::Dict)\z/x) {
+                            |Search::Dict)\z/x
+        ) {
             # An explicit list of dual-life extensions that have a Makefile.PL
             # for CPAN, but we have verified can also be built using the fakery.
             my ($problem) = just_pm_to_blib($target, $ext_dir, $mname, $return_dir);
@@ -480,32 +481,7 @@ sub build_extension {
             # Otherwise "skips" will go undetected, and the build slow down for
             # everyone, defeating the purpose.
             if (defined $problem) {
-                if (-d "$return_dir/.git") {
-                    # Get the list of files that git isn't ignoring:
-                    my @files = `git ls-files --cached --others --exclude-standard 2>/dev/null`;
-                    # on error (eg no git) we get nothing, but that's not a
-                    # problem. The goal is to see if git thinks that the problem
-                    # file is interesting, by getting a positive match with
-                    # something git told us about, and if so bail out:
-                    foreach (@files) {
-                        chomp;
-                        # We really need to sanity test that we can fake it.
-                        # The intent is that this should only fail because
-                        # you've just added a file to the dual-life dist that
-                        # we can't handle. In which case you should either
-                        # 1) remove the dist from the regex a few lines above.
-                        # or
-                        # 2) add the file to regex of "safe" filenames earlier
-                        #    in this function, that starts with ChangeLog
-                        die "FATAL - $0 has $mname in the list of simple extensions, but it now contains file '$problem' which we can't handle"
-                            if $problem eq $_;
-                    }
-                    # There's an unexpected file, but it seems to be something
-                    # that git will ignore. So fall through to the regular
-                    # Makefile.PL handling code below, on the assumption that
-                    # we won't get here for a clean build.
-                }
-                warn "WARNING - $0 is building $mname using EU::MM, as it found file '$problem'";
+                _handle_problem( $problem, $return_dir, $mname );
             } else {
                 # It faked everything for us.
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
@@ -756,6 +732,37 @@ sub _use_Makefile_PL {
     }
     return 1;
 }
+
+
+sub _handle_problem {
+    my ( $problem, $return_dir, $mname ) = @_;
+    if (-d "$return_dir/.git") {
+        # Get the list of files that git isn't ignoring:
+        my @files = `git ls-files --cached --others --exclude-standard 2>/dev/null`;
+        # on error (eg no git) we get nothing, but that's not a
+        # problem. The goal is to see if git thinks that the problem
+        # file is interesting, by getting a positive match with
+        # something git told us about, and if so bail out:
+        foreach (@files) {
+            chomp;
+            # We really need to sanity test that we can fake it.
+            # The intent is that this should only fail because
+            # you've just added a file to the dual-life dist that
+            # we can't handle. In which case you should either
+            # 1) remove the dist from the regex a few lines above.
+            # or
+            # 2) add the file to regex of "safe" filenames earlier
+            #    in this function, that starts with ChangeLog
+            die "FATAL - $0 has $mname in the list of simple extensions, but it now contains file '$problem' which we can't handle"
+                if $problem eq $_;
+        }
+        # There's an unexpected file, but it seems to be something
+        # that git will ignore. So fall through to the regular
+        # Makefile.PL handling code below, on the assumption that
+        # we won't get here for a clean build.
+    }
+    warn "WARNING - $0 is building $mname using EU::MM, as it found file '$problem'";
+} # END _handle_problem
 
 sub _is_unix {
     my ($return_dir, $ext_dir, $pass_through_ref, $makeref) = @_;
