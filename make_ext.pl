@@ -363,148 +363,11 @@ sub build_extension {
 
     NO_MAKEFILE:
 ####################
-        if (!-f 'Makefile.PL') {
-            unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
-                # No problems returned, so it has faked everything for us. :-)
-                chdir $return_dir || die "Cannot cd to $return_dir: $!";
-                return; # 2nd possible return from build_extension
-            }
-
-            print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
-            my ($fromname, $key, $value);
-
-            $key = 'ABSTRACT_FROM';
-            # We need to cope well with various possible layouts
-            my @dirs = split /::/, $mname;
-            my $leaf = pop @dirs;
-            my $leafname = "$leaf.pm";
-            my $pathname = join '/', @dirs, $leafname;
-            my @locations = ($leafname, $pathname, "lib/$pathname");
-            foreach (@locations) {
-                if (-f $_) {
-                    $fromname = $_;
-                    last;
-                }
-            }
-
-            unless ($fromname) {
-                die "For $mname tried @locations in $ext_dir but can't find source";
-            }
-            ($value = $fromname) =~ s/\.pm\z/.pod/;
-            $value = $fromname unless -e $value;
-
-            if ($mname eq 'Pod::Checker') {
-                # the abstract in the .pm file is unparseable by MM,
-                # so special-case it. We can't use the package's own
-                # Makefile.PL, as it doesn't handle the executable scripts
-                # right.
-                $key = 'ABSTRACT';
-                # this is copied from the CPAN Makefile.PL v 1.171
-                $value = 'Pod::Checker verifies POD documentation contents for compliance with the POD format specifications';
-            }
-
-            open my $fh, '>', 'Makefile.PL'
-                or die "Can't open Makefile.PL for writing: $!";
-            printf $fh <<~'EOM', $0, $mname, $fromname, $key, $value;
-            #-*- buffer-read-only: t -*-
-
-            # This Makefile.PL was written by %s.
-            # It will be deleted automatically by make realclean
-
-            use strict;
-            use ExtUtils::MakeMaker;
-
-            # This is what the .PL extracts to. Not the ultimate file that is installed.
-            # (ie Win32 runs pl2bat after this)
-
-            # Doing this here avoids all sort of quoting issues that would come from
-            # attempting to write out perl source with literals to generate the arrays and
-            # hash.
-            my @temps = 'Makefile.PL';
-            foreach (glob('scripts/pod*.PL')) {
-                # The various pod*.PL extractors change directory. Doing that with relative
-                # paths in @INC breaks. It seems the lesser of two evils to copy (to avoid)
-                # the chdir doing anything, than to attempt to convert lib paths to
-                # absolute, and potentially run into problems with quoting special
-                # characters in the path to our build dir (such as spaces)
-                require File::Copy;
-
-                my $temp = $_;
-                $temp =~ s!scripts/!!;
-                File::Copy::copy($_, $temp) or die "Can't copy $temp to $_: $!";
-                push @temps, $temp;
-            }
-
-            my $script_ext = $^O eq 'VMS' ? '.com' : '';
-            my %%pod_scripts;
-            foreach (glob('pod*.PL')) {
-                my $script = $_;
-                s/.PL$/$script_ext/i;
-                $pod_scripts{$script} = $_;
-            }
-            my @exe_files = values %%pod_scripts;
-
-            WriteMakefile(
-                NAME          => '%s',
-                VERSION_FROM  => '%s',
-                %-13s => '%s',
-                realclean     => { FILES => "@temps" },
-                (%%pod_scripts ? (
-                    PL_FILES  => \%%pod_scripts,
-                    EXE_FILES => \@exe_files,
-                    clean     => { FILES => "@exe_files" },
-                ) : ()),
-            );
-
-            # ex: set ro:
-            EOM
-            close $fh or die "Can't close Makefile.PL: $!";
-            # As described in commit 23525070d6c0e51f:
-            # Push the atime and mtime of generated Makefile.PLs back 4
-            # seconds. In certain circumstances ( on virtual machines ) the
-            # generated Makefile.PL can produce a Makefile that is older than
-            # the Makefile.PL. Altering the atime and mtime backwards by 4
-            # seconds seems to resolve the issue.
-            eval {
-                my $ftime = (stat('Makefile.PL'))[9] - 4;
-                utime $ftime, $ftime, 'Makefile.PL';
-            };
-        } elsif ($mname =~ /\A(?:Carp
-                            |ExtUtils::CBuilder
-                            |Safe
-                            |Search::Dict)\z/x
-        ) {
-            # An explicit list of dual-life extensions that have a Makefile.PL
-            # for CPAN, but we have verified can also be built using the fakery.
-            my ($problem) = just_pm_to_blib($target, $ext_dir, $mname, $return_dir);
-            # We really need to sanity test that we can fake it.
-            # Otherwise "skips" will go undetected, and the build slow down for
-            # everyone, defeating the purpose.
-            if (defined $problem) {
-                _handle_problem( $problem, $return_dir, $mname );
-            } else {
-                # It faked everything for us.
-                chdir $return_dir || die "Cannot cd to $return_dir: $!";
-                return; # 3rd possible return from build_extension
-            }
-        }
-
-        # We are going to have to use Makefile.PL:
-        _use_Makefile_PL($ext_dir, $verbose, $lib_dir, $pass_through_ref, $perl, $makefile);
-
-        # Right. The reason for this little hack is that we're sitting inside
-        # a program run by ./miniperl, but there are tasks we need to perform
-        # when the 'realclean', 'distclean' or 'veryclean' targets are run.
-        # Unfortunately, they can be run *after* 'clean', which deletes
-        # ./miniperl
-        # So we do our best to leave a set of instructions identical to what
-        # we would do if we are run directly as 'realclean' etc
-        # Whilst we're perfect, unfortunately the targets we call are not, as
-        # some of them rely on a $(PERL) for their own distclean targets.
-        # But this always used to be a problem with the old /bin/sh version of
-        # this.
-
-        _is_unix($return_dir, $ext_dir, $pass_through_ref, \@make, $return_dir);
+    my $rv = _internal_build_extension(
+        $target, $ext_dir, $mname, $return_dir, $verbose,
+        $lib_dir, $pass_through_ref, $perl, $makefile, \@make
+    );
+    return unless defined $rv;
 
 ####################
     } # END NO_MAKEFILE scope
@@ -514,6 +377,157 @@ sub build_extension {
     chdir $return_dir || die "Cannot cd to $return_dir: $!";
 }
 
+sub _internal_build_extension {
+    my ($target, $ext_dir, $mname, $return_dir, $verbose,
+        $lib_dir, $pass_through_ref, $perl, $makefile, $makeref,
+    ) = @_;
+    my @make = $makeref;
+    if (!-f 'Makefile.PL') {
+        unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
+            # No problems returned, so it has faked everything for us. :-)
+            chdir $return_dir || die "Cannot cd to $return_dir: $!";
+            return; # 2nd possible return from build_extension
+        }
+
+        print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
+        my ($fromname, $key, $value);
+
+        $key = 'ABSTRACT_FROM';
+        # We need to cope well with various possible layouts
+        my @dirs = split /::/, $mname;
+        my $leaf = pop @dirs;
+        my $leafname = "$leaf.pm";
+        my $pathname = join '/', @dirs, $leafname;
+        my @locations = ($leafname, $pathname, "lib/$pathname");
+        foreach (@locations) {
+            if (-f $_) {
+                $fromname = $_;
+                last;
+            }
+        }
+
+        unless ($fromname) {
+            die "For $mname tried @locations in $ext_dir but can't find source";
+        }
+        ($value = $fromname) =~ s/\.pm\z/.pod/;
+        $value = $fromname unless -e $value;
+
+        if ($mname eq 'Pod::Checker') {
+            # the abstract in the .pm file is unparseable by MM,
+            # so special-case it. We can't use the package's own
+            # Makefile.PL, as it doesn't handle the executable scripts
+            # right.
+            $key = 'ABSTRACT';
+            # this is copied from the CPAN Makefile.PL v 1.171
+            $value = 'Pod::Checker verifies POD documentation contents for compliance with the POD format specifications';
+        }
+
+        open my $fh, '>', 'Makefile.PL'
+            or die "Can't open Makefile.PL for writing: $!";
+        printf $fh <<~'EOM', $0, $mname, $fromname, $key, $value;
+        #-*- buffer-read-only: t -*-
+
+        # This Makefile.PL was written by %s.
+        # It will be deleted automatically by make realclean
+
+        use strict;
+        use ExtUtils::MakeMaker;
+
+        # This is what the .PL extracts to. Not the ultimate file that is installed.
+        # (ie Win32 runs pl2bat after this)
+
+        # Doing this here avoids all sort of quoting issues that would come from
+        # attempting to write out perl source with literals to generate the arrays and
+        # hash.
+        my @temps = 'Makefile.PL';
+        foreach (glob('scripts/pod*.PL')) {
+            # The various pod*.PL extractors change directory. Doing that with relative
+            # paths in @INC breaks. It seems the lesser of two evils to copy (to avoid)
+            # the chdir doing anything, than to attempt to convert lib paths to
+            # absolute, and potentially run into problems with quoting special
+            # characters in the path to our build dir (such as spaces)
+            require File::Copy;
+
+            my $temp = $_;
+            $temp =~ s!scripts/!!;
+            File::Copy::copy($_, $temp) or die "Can't copy $temp to $_: $!";
+            push @temps, $temp;
+        }
+
+        my $script_ext = $^O eq 'VMS' ? '.com' : '';
+        my %%pod_scripts;
+        foreach (glob('pod*.PL')) {
+            my $script = $_;
+            s/.PL$/$script_ext/i;
+            $pod_scripts{$script} = $_;
+        }
+        my @exe_files = values %%pod_scripts;
+
+        WriteMakefile(
+            NAME          => '%s',
+            VERSION_FROM  => '%s',
+            %-13s => '%s',
+            realclean     => { FILES => "@temps" },
+            (%%pod_scripts ? (
+                PL_FILES  => \%%pod_scripts,
+                EXE_FILES => \@exe_files,
+                clean     => { FILES => "@exe_files" },
+            ) : ()),
+        );
+
+        # ex: set ro:
+        EOM
+        close $fh or die "Can't close Makefile.PL: $!";
+        # As described in commit 23525070d6c0e51f:
+        # Push the atime and mtime of generated Makefile.PLs back 4
+        # seconds. In certain circumstances ( on virtual machines ) the
+        # generated Makefile.PL can produce a Makefile that is older than
+        # the Makefile.PL. Altering the atime and mtime backwards by 4
+        # seconds seems to resolve the issue.
+        eval {
+            my $ftime = (stat('Makefile.PL'))[9] - 4;
+            utime $ftime, $ftime, 'Makefile.PL';
+        };
+    }
+    elsif ($mname =~ /\A(?:Carp
+                        |ExtUtils::CBuilder
+                        |Safe
+                        |Search::Dict)\z/x
+    ) {
+        # An explicit list of dual-life extensions that have a Makefile.PL
+        # for CPAN, but we have verified can also be built using the fakery.
+        my ($problem) = just_pm_to_blib($target, $ext_dir, $mname, $return_dir);
+        # We really need to sanity test that we can fake it.
+        # Otherwise "skips" will go undetected, and the build slow down for
+        # everyone, defeating the purpose.
+        if (defined $problem) {
+            _handle_problem( $problem, $return_dir, $mname );
+        }
+        else {
+            # It faked everything for us.
+            chdir $return_dir || die "Cannot cd to $return_dir: $!";
+            return; # 3rd possible return from build_extension
+        }
+    }
+
+    # We are going to have to use Makefile.PL:
+
+    _use_Makefile_PL($ext_dir, $verbose, $lib_dir, $pass_through_ref, $perl, $makefile);
+
+    # Right. The reason for this little hack is that we're sitting inside
+    # a program run by ./miniperl, but there are tasks we need to perform
+    # when the 'realclean', 'distclean' or 'veryclean' targets are run.
+    # Unfortunately, they can be run *after* 'clean', which deletes
+    # ./miniperl
+    # So we do our best to leave a set of instructions identical to what
+    # we would do if we are run directly as 'realclean' etc
+    # Whilst we're perfect, unfortunately the targets we call are not, as
+    # some of them rely on a $(PERL) for their own distclean targets.
+    # But this always used to be a problem with the old /bin/sh version of
+    # this.
+
+    _is_unix($return_dir, $ext_dir, $pass_through_ref, \@make, $return_dir);
+}
 sub _quote_args {
     my $args = shift; # must be array reference
 
