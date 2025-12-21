@@ -46,8 +46,6 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
-my @az = ('a'..'z');
-
 # This program has historically generated compatibility macros for a few
 # functions of the form Perl_FOO(pTHX_ ...).  Those macros would be named
 # FOO(...), and would expand outside the core to Perl_FOO_nocontext(...)
@@ -3763,6 +3761,8 @@ $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 my $cpp_ifdef_constraints_re = join "|", keys %cpp_ifdef_constraints;
 $cpp_ifdef_constraints_re =
                       qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
+
+my @az = ('a'..'z');
 
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
