@@ -3664,6 +3664,36 @@ sub generate_proto_h {
             die_at_end "$plain_func: O flag forbids T flag" if $flags =~ /T/;
         }
 
+        die_at_end "$plain_func: I and i flags are mutually exclusive"
+                                                     if $flags =~ tr/Ii// > 1;
+        die_at_end "$plain_func: A, C, and S flags are all mutually exclusive"
+                                                    if $flags =~ tr/ACS// > 1;
+        die_at_end "$plain_func: S and p flags are mutually exclusive"
+                                                    if $flags =~ tr/Sp// > 1;
+        die_at_end "$plain_func:, M flag requires p flag"
+                                            if $flags =~ /M/ && $flags !~ /p/;
+        die_at_end "$plain_func: X flag requires one of [Iip] flags"
+                                        if $flags =~ /X/ && $flags !~ /[Iip]/;
+        die_at_end "$plain_func: [Ii] with [ACX] requires p flag"
+                    if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
+        if ($flags =~ /b/) {
+            die_at_end "$plain_func: b flag without M flag requires D flag"
+                                            if $flags !~ /M/ && $flags !~ /D/;
+        }
+
+        my $C_required_flags = '[pIimbs]';
+        die_at_end
+          "$plain_func: C flag requires one of $C_required_flags flags"
+                                             if $flags =~ /C/
+                                             && ($flags !~ /$C_required_flags/
+
+                                                # Notwithstanding the
+                                                # above, if the name won't
+                                                # clash with a user name,
+                                                # it's ok.
+                                             && $plain_func !~ /^[Pp]erl/);
+
+
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
@@ -3678,21 +3708,21 @@ sub generate_proto_h {
         my $func;
 
         if (! $can_ignore && $retval eq 'void') {
-            warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
+            warn "It is nonsensical to require the return value of a void"
+               . " function ($plain_func) to be checked";
         }
 
-        my $has_E_or_X = $flags =~ /[EX]/;
-        if ($has_E_or_X + ($flags =~ tr/AC//) > 1) {
-            die_at_end "$plain_func: A, C, and either E or X flags are"
-                     . " mutually exclusive";
+        if ($flags =~ /[AC]/ && $flags =~ /([EX])/) {
+            die_at_end "$plain_func: $1 flag is incompatible with either A"
+                     . " or C flags";
         }
 
-        die_at_end "$plain_func: S and p flags are mutually exclusive"
-                                                    if $flags =~ tr/Sp// > 1;
         if ($has_mflag) {
-            if ($flags =~ /S/) {
-                die_at_end
-                          "$plain_func: m and S flags are mutually exclusive";
+            if ($flags =~ /([bMSX])/) {
+                my $msg =
+                         "$plain_func: m and $1 flags are mutually exclusive";
+                $msg .= " (try M flag)" if $1 eq 'b';
+                die_at_end $msg;
             }
 
             # Don't generate a prototype for a macro that is not usable by the
@@ -3703,8 +3733,7 @@ sub generate_proto_h {
             next if $flags =~ /u/;
         }
         else {
-            die_at_end "$plain_func: u flag only usable with m"
-                                                            if $flags =~ /u/;
+            die_at_end "$plain_func: u flag requires m flag" if $flags =~ /u/;
         }
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
@@ -3744,7 +3773,7 @@ sub generate_proto_h {
 
             # A publicly accessible non-static element needs to have a Perl_
             # prefix available to call it with (in case of name conflicts).
-            die_at_end "'$plain_func' requires p flag because has A or C flag"
+            die_at_end "$plain_func: requires p flag because has A or C flag"
                                     if $flags !~ /p/
                                     && $flags =~ /[AC]/
                                     && $plain_func !~ /[Pp]erl/;
@@ -3759,33 +3788,6 @@ sub generate_proto_h {
 
         $func = full_name($plain_func, $flags);
 
-        die_at_end "For '$plain_func', M flag requires p flag"
-                                            if $flags =~ /M/ && $flags !~ /p/;
-        my $C_required_flags = '[pIimbs]';
-        die_at_end
-          "For '$plain_func', C flag requires one of $C_required_flags] flags"
-                                             if $flags =~ /C/
-                                             && ($flags !~ /$C_required_flags/
-
-                                                # Notwithstanding the
-                                                # above, if the name won't
-                                                # clash with a user name,
-                                                # it's ok.
-                                             && $plain_func !~ /^[Pp]erl/);
-
-        die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
-                                        if $flags =~ /X/ && $flags !~ /[Iip]/;
-        die_at_end "For '$plain_func', X and m flags are mutually exclusive"
-                                            if $flags =~ /X/ && $has_mflag;
-        die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
-                    if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
-        die_at_end "For '$plain_func', b and m flags are mutually exclusive"
-                 . " (try M flag)" if $flags =~ /b/ && $has_mflag;
-        die_at_end "For '$plain_func', b flag without M flag requires D flag"
-                        if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
-        die_at_end "For '$plain_func', I and i flags are mutually exclusive"
-                                            if $flags =~ tr/Ii// > 1;
-
         $ret = "";
         $ret .= "$retval\n";
         $ret .= "$func(";
@@ -3795,7 +3797,7 @@ sub generate_proto_h {
         if (@$args) {
             die_at_end
                     "$plain_func: n flag is contradicted by having arguments"
-                                                            if $flags =~ /n/;
+                                                             if $flags =~ /n/;
             my $n;
             my @bounded_strings;
 
