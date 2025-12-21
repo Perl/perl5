@@ -76,7 +76,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.61';
+  $VERSION = '3.62';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Node; ExtUtils::ParseXS::Node->VERSION($VERSION);
