@@ -4712,7 +4712,7 @@ perl_lc_all_category_positions_init (disparate_lc_all.U):
 	element [0] is the first category in the string returned by
 	setlocale(LC_ALL, NULL) when not all categories are the same, on
 	systems that use a positional notation.  After element [0] is
-	$lc_all_separator_init, then the category given by element [1], and so on.
+	$lc_all_separator, then the category given by element [1], and so on.
 
 perl_lc_all_separator (disparate_lc_all.U):
 	This symbol, when defined, gives the substring used to separate
