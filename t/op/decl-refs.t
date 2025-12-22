@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 402;
+plan 408;
 
 for my $decl (qw< my CORE::state our local >) {
     for my $funny (qw< $ @ % >) {
@@ -120,3 +120,30 @@ ENE
     $code =~ s/is ?no?t/is/g if $decl eq 'our';
     eval $code or die $@;
 }}
+
+# GH#24028
+{
+    my $slexical = 42;
+    for \$slexical ( \1, \2, \3 ) { }
+    is $slexical, 42, 'scalar lexical restored after foreach-refalias';
+
+    my @alexical = (42);
+    for \@alexical ( [1], [2], [3] ) { }
+    is $alexical[0], 42, 'array lexical restored after foreach-refalias';
+
+    my %hlexical = (k => 42);
+    for \%hlexical ( {k => 1}, {k => 2}, {k => 3} ) { }
+    is $hlexical{k}, 42, 'hash lexical restored after foreach-refalias';
+
+    our $spkgvar = 84;
+    for \$spkgvar ( \1, \2, \3 ) { }
+    is $spkgvar, 84, 'scalar pkgvar restored after foreach-refalias';
+
+    our @apkgvar = (84);
+    for \@apkgvar ( [1], [2], [3] ) { }
+    is $apkgvar[0], 84, 'array pkgvar restored after foreach-refalias';
+
+    our %hpkgvar = (k => 84);
+    for \%hpkgvar ( {k => 1}, {k => 2}, {k => 3} ) { }
+    is $hpkgvar{k}, 84, 'hash pkgvar restored after foreach-refalias';
+}
