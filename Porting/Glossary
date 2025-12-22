@@ -1972,8 +1972,9 @@ d_perl_lc_all_separator (disparate_lc_all.U):
 d_perl_lc_all_uses_name_value_pairs (disparate_lc_all.U):
 	This symbol, if defined, indicates that the string returned by
 	setlocale(LC_ALL, NULL) uses 'name=value;' pairs to indicate what each
-	category's locale is when they aren't all set to the same locale.
-	When not defined, the platform uses positional notation.
+	category's locale is when they aren't all set to the same locale.  Note
+	the semicolon between each pair.  When not defined, the platform uses
+	positional notation (see 'perl_lc_all_category_positions_init').
 
 d_perl_otherlibdirs (otherlibdirs.U):
 	This variable conditionally defines PERL_OTHERLIBDIRS, which
