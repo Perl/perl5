@@ -171,6 +171,7 @@ iconv(3)
 Importer
 indirect
 inetd(8)
+Inline::C
 invoker
 IO::Pty
 IO::Socket::IP
