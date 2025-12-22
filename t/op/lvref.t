@@ -5,7 +5,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 203;
+plan 204;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -626,6 +626,9 @@ like $@,
 # Miscellaneous
 
 {
+  my $warnings = "";
+  local $SIG{__WARN__} = sub { $warnings .= $_[0]; };
+
   local $::TODO = ' ';
   my($x,$y);
   sub {
@@ -635,6 +638,10 @@ like $@,
     is \$x, \$y, 'lexical alias affects outer closure';
   }->();
   is \$x, \$y, 'lexical alias affects outer sub where vars are declared';
+
+  undef $::TODO;
+  like $warnings, qr/^Variable "\$x" will not stay shared after refalias /,
+    'warning emitted by refalias on closure shared variable';
 }
 
 { # PADSTALE has a double meaning

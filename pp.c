@@ -7624,6 +7624,12 @@ PP(pp_refassign)
     case 0:
     {
         SV * const old = PAD_SV(ARGTARG);
+        if(SvREFCNT(old) > 1) {
+            PADNAME *pn = PadlistNAMESARRAY(CvPADLIST(find_runcv(NULL)))[ARGTARG];
+            warner(packWARN(WARN_CLOSURE),
+                "Variable \"%" PNf "\" will not stay shared after refalias",
+                PNfARG(pn));
+        }
         PAD_SETSV(ARGTARG, SvREFCNT_inc_NN(SvRV(sv)));
         SvREFCNT_dec(old);
         if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))

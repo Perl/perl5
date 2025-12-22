@@ -8328,6 +8328,15 @@ anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are created, they
 are automatically rebound to the current values of such variables.
 
+=item Variable "%s" will not stay shared after refalias
+
+(W closure) A refalias operation has been performed on a variable that is
+captured by one or more closures, and thus is shared between them.  As a
+result of the way it is currently implemented, the variable in the scope
+that performed has now become disconnected from those in other scopes, and
+now operates independently.  Updates to this variable will not be reflected
+in the others, or vice versa.
+
 =item vector argument not supported with alpha versions
 
 (S printf) The %vd (s)printf format does not support version objects
