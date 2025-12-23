@@ -4836,12 +4836,6 @@ sub process_apidoc_lines {
         # one.
         $flags =~ s/[^ACE]//g;
         next unless $flags;
-
-        #next if defined $needed_by_ext{$name};
-        #next if defined $needed_by_ext_re{$name};
-
-        #die_at_end "${name}'s visibility is declared more than once"
-                                                #if defined $visibility{$name};
         $visibility{$name} = $flags;
     }
 }
