@@ -2101,8 +2101,9 @@ Perl_scalar(pTHX_ OP *o)
 
             kid = cLISTOPo->op_first;
             kid = OpSIBLING(kid); /* get past pushmark */
-            assert(OpSIBLING(kid));
-            name = op_varname(OpSIBLING(kid));
+            OP *sibling = OpSIBLING(kid);
+            assert(sibling);
+            name = op_varname(sibling);
             if (!name) /* XS module fiddling with the op tree */
                 break;
             warn_elem_scalar_context(kid, name, o->op_type == OP_KVHSLICE, false);

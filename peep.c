@@ -76,8 +76,9 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     if (kid->op_type == OP_NULL && kid->op_targ == OP_LIST)
         return;
 
-    assert(OpSIBLING(kid));
-    name = op_varname(OpSIBLING(kid));
+    OP *varop = OpSIBLING(kid);
+    assert(varop);
+    name = op_varname(varop);
     if (!name) /* XS module fiddling with the op tree */
         return;
     warn_elem_scalar_context(kid, name, is_hash, true);
@@ -754,7 +755,9 @@ S_maybe_multiconcat(pTHX_ OP *o)
         lastkidop = cLISTOPx(topop)->op_last;
         kid = cUNOPx(topop)->op_first; /* pushmark */
         op_null(kid);
-        op_null(OpSIBLING(kid));       /* const */
+        OP * const const_op = OpSIBLING(kid);
+        ASSUME(const_op);
+        op_null(const_op);       /* const */
         if (o != topop) {
             kid = op_sibling_splice(topop, NULL, -1, NULL); /* cut all args */
             op_sibling_splice(o, NULL, 0, kid); /* and attach to o */
