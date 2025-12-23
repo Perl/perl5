@@ -4749,6 +4749,23 @@ sub generate_embedvar_h {
         unless $error_count;
 }
 
+# Below is code to fill this hash with data about the visibility of each macro
+# that is potentially visible to XS code.  Currently it contains just the
+# visibility it is supposed to have given by flags in its apidoc descriptions.
+my %visibility;
+
+sub set_flags_visibility {
+    my ($name, $file, $flags) = @_;
+
+    # If no flag indicates any external visibility, we are done with this
+    # one.
+    $flags =~ s/[^ACE]//g;
+    return unless $flags;   # No visibility
+
+    $visibility{$name} = $flags;
+    return;
+}
+
 sub recurse_conds {
 
     #  Look through the list of conditionals that HeaderParser generates,
@@ -4772,8 +4789,6 @@ sub recurse_conds {
 
     return 0;
 }
-
-my %visibility;
 
 sub process_apidoc_lines {
     my $file = shift;
@@ -4817,11 +4832,7 @@ sub process_apidoc_lines {
             $flags = $group_flags;
         }
 
-        # If no flag indicates any external visibility, we are done with this
-        # one.
-        $flags =~ s/[^ACE]//g;
-        next unless $flags;
-        $visibility{$name} = $flags;
+        set_flags_visibility($name, $file, $flags);
     }
 }
 
@@ -4851,10 +4862,7 @@ sub find_undefs {
         # about.)
         next unless $embed;
 
-        my $flags = $embed->{flags};
-        $flags =~ s/[^ACE]//g;
-        next unless $flags;     # No visibility
-        $visibility{$embed->{name}} = $flags;
+        set_flags_visibility($embed->name, 'embed.fnc', $embed->{flags});
     }
 
     # Done with embed.fnc.  Now look through all the header files for their
@@ -4954,7 +4962,6 @@ sub find_undefs {
     {
         delete $always_undefs{$entry};
     }
-
 }
 
 sub update_headers {
