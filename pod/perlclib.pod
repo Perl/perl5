@@ -223,7 +223,7 @@ If you do need raw strings, use these instead:
   my_strlcpy(dt, src, sizeof(dt))
   my_strlcat(dt, src, sizeof(dt))
 
-Similiarly, you can use SVs for creating strings from formats
+Similarly, you can use SVs for creating strings from formats
 
   sprintf(s, fmt, ...)         sv_setpvf(sv, fmt, ...)
   vsprintf(str, fmt, va_list)  sv_vsetpvf(sv, fmt, va_list)
@@ -300,7 +300,7 @@ C<toUPPER_uvchr>, as described in L<perlapi/Character case changing>.)
 Note that the libc caseless comparisons are crippled; Unicode
 provides a richer set, using the concept of folding.  If you need
 more than equality/non-equality, it's probably best to store your
-strings in an SV and use SV functions to do the comparision.  Similarly
+strings in an SV and use SV functions to do the comparison.  Similarly
 for collation.
 
 =head2 F<stdlib.h> functions
