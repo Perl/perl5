@@ -2,7 +2,7 @@ package Pod::Html::Util;
 use strict;
 use Exporter 'import';
 
-our $VERSION = 1.35; # Please keep in synch with lib/Pod/Html.pm
+our $VERSION = 1.36; # Please keep in synch with lib/Pod/Html.pm
 $VERSION = eval $VERSION;
 our @EXPORT_OK = qw(
     anchorify
@@ -250,7 +250,9 @@ sub anchorify {
     $anchor =~ s/"/_/g;                 # Replace double quotes with underscores
     $anchor =~ s/_$//;                  # ... but strip any final underscore
     $anchor =~ s/[<>&']//g;             # Strip the remaining HTML special characters
-    $anchor =~ s/^\s+//; s/\s+$//;      # Strip white space.
+    $anchor =~ s/^\s+//;                # Strip white space.
+    $anchor =~ s/\s+$//;
+
     $anchor =~ s/^([^a-zA-Z]+)$/pod$1/; # Prepend "pod" if no valid chars.
     $anchor =~ s/^[^a-zA-Z]+//;         # First char must be a letter.
     $anchor =~ s/[^-a-zA-Z0-9_:.]+/-/g; # All other chars must be valid.
