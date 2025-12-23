@@ -4778,7 +4778,7 @@ sub set_flags_visibility {
     $flags =~ s/[^ACE]//g;
     return unless $flags;   # No visibility
 
-    $visibility{$name} = $flags;
+    $visibility{$name}{flags} = $flags;
     return;
 }
 
