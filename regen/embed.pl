@@ -4776,6 +4776,7 @@ sub recurse_conds {
 my %visibility;
 
 sub process_apidoc_lines {
+    my $file = shift;
 
     # Look through the input array of lines for ones that can declare the
     # visibility of a symbol, and add those that are visible externally to
@@ -4925,7 +4926,7 @@ sub find_undefs {
                 next unless $line->{flat} eq "";
 
                 next unless $line->{line} =~ / ^ =for \s+ apidoc /mx;
-                process_apidoc_lines(split /\n/, $line->{line});
+                process_apidoc_lines($hdr, split /\n/, $line->{line});
             }
         }
     }   # Done with headers
@@ -4933,7 +4934,7 @@ sub find_undefs {
     # Now look through the C and pod files
     foreach my $pod (@c_list, @pod_list) {
         open my $pfh, "<", $pod or die "Can't open $pod: $!";
-        process_apidoc_lines(<$pfh>);
+        process_apidoc_lines($pod, <$pfh>);
         close $pfh or die "Can't close $pod: $!";
     }
 
