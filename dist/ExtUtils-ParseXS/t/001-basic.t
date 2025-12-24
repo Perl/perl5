@@ -4908,6 +4908,17 @@ EOF
             qr{\QError: only one of ALIAS and INTERFACE can be used per XSUB},
                    "got expected err" ],
         ],
+        [
+            'INTERFACE dup',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |    INTERFACE: f1 f1
+EOF
+            [ 1, 0,
+            qr{\QError: duplicate INTERFACE name: 'f1'},
+                   "got expected err" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

@@ -5549,12 +5549,12 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
     $xsub->{seen_INTERFACE} = 1;
 
-    my %map;
-
     foreach (split /[\s,]+/, $self->{text}) {
         my $short = $_;
         $short =~ s/^$pxs->{PREFIX_pattern}//;
-        $map{$short} = $_;
+        $pxs->blurt("Error: duplicate INTERFACE name: '$short'")
+            if exists $xsub->{map_interface_name_short_to_original}{$short};
+
         $xsub->{map_interface_name_short_to_original}{$short} = $_;
     }
 
