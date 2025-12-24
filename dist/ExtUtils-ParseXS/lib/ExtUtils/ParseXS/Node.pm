@@ -2031,6 +2031,14 @@ sub parse {
             unless defined $self->{map_alias_name_to_value}{$pname};
     }
 
+    # per-XSUB sanity checks
+
+    if (   $self->{map_interface_name_short_to_original}
+        && $self->{map_alias_name_to_value})
+    {
+        $pxs->blurt("Error: only one of ALIAS and INTERFACE can be used per XSUB");
+    }
+
     1;
 }
 

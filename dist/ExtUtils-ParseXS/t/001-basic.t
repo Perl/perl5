@@ -4894,6 +4894,20 @@ EOF
             [ 0, 0, qr{\QRETVAL = ((char * (*)(X__Y, char *))(XSFUNCTION))(a,  c);},
                    "got XSFUNCTION call" ],
         ],
+
+        # errors
+        [
+            'INTERFACE and ALIAS dont mix',
+            [ Q(<<'EOF') ],
+                |int
+                |foo()
+                |    INTERFACE: f1
+                |    ALIAS: a1 = 1
+EOF
+            [ 1, 0,
+            qr{\QError: only one of ALIAS and INTERFACE can be used per XSUB},
+                   "got expected err" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
