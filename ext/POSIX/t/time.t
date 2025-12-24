@@ -9,7 +9,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 31;
+use Test::More tests => 49;
 
 # For the first go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -205,7 +205,7 @@ SKIP: {
     is(mktime(CORE::localtime($time)), $time, "mktime()");
     is(mktime(POSIX::localtime($time)), $time, "mktime()");
 }
- 
+
 SKIP: {
     skip "'%s' not implemented in strftime", 1 if $^O eq "VMS"
                                                || $^O eq "MSWin32"
@@ -225,4 +225,123 @@ SKIP: {
     local $SIG{__WARN__} = sub { $warnings .= $_[0] };
     is(strftime(undef, CORE::localtime), '', "strftime() works if format is undef");
     like($warnings, qr/^Use of uninitialized value in subroutine entry /, "strftime(undef, ...) produces expected warning");
+}
+
+# Now check the transitioning between standard and daylight savings times.  To
+# do this requires setting a timezone.  Unfortunately, timezone specification
+# syntax differs incompatibly between systems.  The older PST8PDT style
+# prevails on Windows, but is being supplanted by "Europe/Paris" style
+# elsewhere.  Debian in particular requires a special package to be installed
+# to correctly work with the old style.  Worse, without the package, it still
+# can recognize the syntax and correctly get right times that aren't at the
+# edge of the transitions.  khw tried the 2004 and 2025 spring forward times,
+# and Debian sans-package was exactly 6 hours off the correct values.
+# (The older style was U.S. centric, assuming everyone in the world with the
+# same longitude obeyed the same rules; the new style can tailor the rules to
+# the specific region affected.)
+
+# Tue 01 Jul 2025 05:01:01 PM GMT.  This is chosen as being in the middle of
+# Daylight Savings Time.  Below, we set locales, and verify that these
+# actually worked by checking that the hour returned is the expected value.
+my $reference_time = 1751389261;
+
+my $new_names_all_passed = 0;
+my $some_new_name_passed = 0;
+
+SKIP: {   # GH #23878; test that dst fall back works properly
+    my $skip_count = 9;
+    skip "No mktime()", $skip_count if $Config{d_mktime} ne 'define';
+
+    # Doing this ensures that Windows is expecting a different timezone than
+    # the one in the test.  Hence, if the new-style name isn't recognized, the
+    # tests will be skipped.  Otherwise, if the test happens to being run on a
+    # platform located in the Paris timezone, the check will happen to
+    # succeed even though the timezone change failed.
+    $ENV{TZ} = "PST8PDT";
+    tzset() if $has_tzset;
+
+    my $locale = "Europe/Paris";
+    $ENV{TZ} = $locale;
+    tzset() if $has_tzset;
+
+    skip "'$locale' not understood", $skip_count
+                   if POSIX::strftime("%H", localtime($reference_time)) != 19;
+
+    my $t = 1761436800;     # an hour before time should have changed
+    my @fall = (
+                 [   -1, "2025-10-26 01:59:59+0200", "Chg -1 hr, 1 sec" ],
+                 [    0, "2025-10-26 02:00:00+0200", "Chg -1 hr, 0 sec" ],
+                 [    1, "2025-10-26 02:00:01+0200", "Chg -59 min, 59 sec" ],
+                 [ 3599, "2025-10-26 02:59:59+0200", "Chg -1 sec" ],
+                 [ 3600, "2025-10-26 02:00:00+0100", "At Paris DST fallback" ],
+                 [ 3601, "2025-10-26 02:00:01+0100", "Chg +1 sec" ],
+                 [ 7199, "2025-10-26 02:59:59+0100", "Chg +1 hr, 59m, 59s" ],
+                 [ 7200, "2025-10-26 03:00:00+0100", "Chg +1 hr" ],
+                 [ 7201, "2025-10-26 03:00:01+0100", "Chg +1 hr, 1 sec" ],
+               );
+    my $had_failure = 0;
+    for (my $i = 0; $i < @fall; $i++) {
+        if (is(POSIX::strftime("%F %T%z", localtime $t + $fall[$i][0]),
+               $fall[$i][1], $fall[$i][2]))
+        {
+            $some_new_name_passed = 1;
+        }
+        else {
+            $had_failure = 1
+        }
+    }
+
+    $new_names_all_passed = ! $had_failure;
+}
+
+SKIP: {   # GH #23878: test that dst spring forward works properly.
+    my $skip_count = 9;
+    skip "No mktime()", $skip_count if $Config{d_mktime} ne 'define';
+
+    my $locale;
+
+    # For this group of tests, we use the old-style timezone names on systems
+    # that don't understand the new ones, and use the new ones on systems that
+    # do; this finesses the problem of some systems needing special packages
+    # to handle old names properly.
+
+    # The group of tests just before this one set this variable.  If 'false'
+    # it means no new name worked, likely because they aren't understood, but
+    # also could be because of bugs.
+    if ($some_new_name_passed) {
+        skip "DST fall back didn't work; spring forward not tested",
+                                     $skip_count unless $new_names_all_passed;
+        $locale = "America/Los_Angeles";
+    }
+    else {
+
+        # Use a locale that MS narcissism should be able to handle
+        $locale = "PST8PDT";
+    }
+
+    $ENV{TZ} = $locale;
+    tzset() if $has_tzset;
+
+    # $reference_time is in the middle of summer, dst should be in effect.
+    skip "'$locale' not understood", $skip_count if
+                POSIX::strftime("%H", localtime($reference_time)) != 10;
+
+    my $t = 1741510800;     # an hour before time should have changed
+
+    my @spring = (
+                  [   -1, "2025-03-09 00:59:59-0800", "Chg -1 hr,-1 sec" ],
+                  [    0, "2025-03-09 01:00:00-0800", "Chg -1 hr, 0 sec" ],
+                  [    1, "2025-03-09 01:00:01-0800", "Chg -59 min,-59 sec" ],
+                  [ 3599, "2025-03-09 01:59:59-0800", "Chg -1 sec" ],
+                  [ 3600, "2025-03-09 03:00:00-0700",
+                                            "At Redmond DST spring forward" ],
+                  [  3601, "2025-03-09 03:00:01-0700", "Chg +1 sec" ],
+                  [  7199, "2025-03-09 03:59:59-0700", "Chg +1 hr, 59m,59s" ],
+                  [  7200, "2025-03-09 04:00:00-0700", "Chg +1 hr" ],
+                  [  7201, "2025-03-09 04:00:01-0700", "Chg +1 hr, 1 sec" ],
+            );
+    for (my $i = 0; $i < @spring; $i++) {
+        is(POSIX::strftime("%F %T%z", localtime $t + $spring[$i][0]),
+           $spring[$i][1], $spring[$i][2]);
+    }
 }
