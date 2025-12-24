@@ -2882,8 +2882,10 @@ sub lookup_input_typemap {
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
         if ($xstype eq 'T_PV' and $self->{has_length}) {
-            die "default value not supported with length(NAME) supplied"
-                if defined $default;
+            if (defined $default) {
+                $pxs->blurt(  "Error: default value for $var not allowed"
+                            . " when length($var) also present");
+            }
             return "($type)SvPV($arg, STRLEN_length_of_$var);",
                    $eval_vars, 0;
         }

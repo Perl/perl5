@@ -1613,6 +1613,15 @@ EOF
                    "got expected error" ],
         ],
         [
+            "length() default value of strong var",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(length(s), char *s = "")
+EOF
+            [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
             "length() no matching var",
             [ Q(<<'EOF') ],
                 |void
