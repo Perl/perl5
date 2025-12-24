@@ -1,9 +1,10 @@
-#!./perl -Ilib -w
+#!./perl -Ilib
 
 # This file should really be extracted from a .PL file
 
 $| = 1;
 use strict;
+use warnings;
 use Config;		# for config options in the makefile
 use File::Path qw(remove_tree);
 use File::Spec::Functions qw(rel2abs no_upwards);
