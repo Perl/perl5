@@ -11773,9 +11773,27 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
      * parallel, table that gives the number of entries in each aux table.
      * These are all defined in charclass_invlists.inc */
 
-    /* XXX Here are the additional things UTS 39 says could be done:
+    /* XXX Here are the additional things UTS 39 (17.0
+     * https://unicode.org/reports/tr39/#Optional_Detection ) says could be
+     * done:
      *
-     * Forbid sequences of the same nonspacing mark
+     * Check for unlikely sequences of combining marks:
+     *    Forbid sequences of the same nonspacing mark.
+     *    Forbid sequences of more than 4 nonspacing marks (gc=Mn or gc=Me).
+     *    Forbid sequences of base character + nonspacing mark that look the
+     *      same as or confusingly similar to the base character alone
+     *      (because the nonspacing mark overlays a portion of the base
+     *      character). An example is U+0069 LOWERCASE LETTER I + U+0307
+     *      COMBINING DOT ABOVE.
+     *    Add support for detecting two distinct sequences that have identical
+     *      representations. The current data files only handle cases where a
+     *      single code point is confusable with another code point or
+     *      sequence.  It does not handle cases like shri:
+     *      The characters U+0BB6 TAMIL LETTER SHA and U+0BB8 TAMIL LETTER SA
+     *      are normally quite distinct. However, they can both be used in the
+     *      representation of the Tamil word shri. On some very common
+     *      platforms, some sequences result in exactly the same visual
+     *      appearance:
      *
      * Check to see that all the characters are in the sets of exemplar
      * characters for at least one language in the Unicode Common Locale Data
