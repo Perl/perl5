@@ -1530,6 +1530,15 @@ EOF
             [ 1, 1, qr/\QWarning: duplicate function definition/,
                     "no warning" ],
         ],
+
+        [
+            "unparseable params",
+            [ Q(<<'EOF') ],
+                |int foo(char *s = "abc\",)")
+EOF
+            [ 1, 0, qr/\QWarning: cannot parse parameter list/,
+                    "got warning" ],
+        ],
     );
 
     test_many($preamble, undef, \@test_fns);

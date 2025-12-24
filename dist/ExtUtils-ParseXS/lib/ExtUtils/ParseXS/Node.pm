@@ -3879,7 +3879,7 @@ sub parse {
             # $C_arg regex doesn't work. This code path should ideally
             # never be reached, and indicates a design weakness in $C_arg.
             @param_texts = split(/\s*,\s*/, $params_text);
-            Warn($pxs,   "Warning: cannot parse parameter list "
+            $pxs->Warn(  "Warning: cannot parse parameter list "
                        . "'$params_text', fallback to split");
         }
     }
