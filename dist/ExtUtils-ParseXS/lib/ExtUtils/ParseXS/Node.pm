@@ -1964,7 +1964,7 @@ sub parse {
 
     my $num             = 0; # the number of CASE+bodies seen
     my $seen_bare_xbody = 0; # seen a previous body without a CASE
-    my $case_had_cond;       # the previous CASE had a condition
+    my $case_had_cond   = 1; # the previous CASE had a condition
 
     # Repeatedly look for CASE or XSUB body.
     while (1) {
@@ -1978,11 +1978,16 @@ sub parse {
 
         if (defined $case) {
             $case->{num} = ++$num;
-            $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'")
-                if $num > 1 && ! $case_had_cond;
+
+            if ($seen_bare_xbody) {
+                $pxs->blurt("Error: no 'CASE:' at top of function");
+                $seen_bare_xbody = 0;
+            }
+
+            unless ($case_had_cond) {
+                $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'");
+            }
             $case_had_cond = length $case->{cond};
-            $pxs->blurt("Error: no 'CASE:' at top of function")
-                if $seen_bare_xbody;
         }
         else {
             $seen_bare_xbody = 1;

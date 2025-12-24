@@ -3788,6 +3788,23 @@ EOF
                     "expected err" ],
         ],
 
+        [
+            "CASE: not at top",
+            [ Q(<<'EOF') ],
+                |int abc(int x, int y)
+                |  INIT:
+                |    myinit
+                |  CASE: x > 0
+                |    CODE:
+                |      code1;
+                |  CASE:
+                |    CODE:
+                |      code2;
+EOF
+            [ 1, 0, qr/\A\QError: no 'CASE:' at top of function in (input), line 8\E\n\z/,
+                    "only the expected err" ],
+        ],
+
 
     );
 
