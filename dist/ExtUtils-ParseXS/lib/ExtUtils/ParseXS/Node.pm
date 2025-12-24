@@ -755,7 +755,7 @@ sub parse {
         push @{$self->{kids}}, $node;
     }
 
-    warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
+    warn "Warning: no MODULE line found in XS file $pxs->{in_filename}\n";
     return;
 }
 

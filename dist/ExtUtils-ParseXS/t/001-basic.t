@@ -5906,7 +5906,7 @@ EOF
 EOF
 
             [ 0, 0, qr{#line 1 ".*"\nfoo\nbar\n#line 13 ".*"}, "all C present" ],
-            [ 1, 0, qr{Didn't find a 'MODULE ... PACKAGE ... PREFIX' line},
+            [ 1, 0, qr{Warning: no MODULE line found in XS file \(input\)\n},
                     "got expected MODULE warning"  ],
         ],
     );
