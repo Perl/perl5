@@ -1207,7 +1207,8 @@ sub parse {
                     &&  $last->{is_cond}
                     && !$last->{is_if}
                 ) {
-                    $pxs->death("Error: Unterminated '#if/#ifdef/#ifndef'")
+                    $pxs->death(  "Error: Unterminated '#$node->{directive}'"
+                                . " from line $node->{line_no}")
                 }
 
                 # Move the CPP line which terminated the branch from

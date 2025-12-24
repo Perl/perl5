@@ -5517,7 +5517,7 @@ EOF
                 |
                 |short foo()
 EOF
-            [ 1, 0, qr{Error: Unterminated '#if/#ifdef/#ifndef'},
+            [ 1, 0, qr{Error: Unterminated '#ifdef' from line 5 in .* line 7},
                     "got expected err"  ],
         ],
 
