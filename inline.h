@@ -4152,6 +4152,25 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
         cx->blk_loop.itersave = NULL;
         SvREFCNT_dec(cursv);
     }
+    if (CxPADLOOP(cx)) {
+        /* for my ... might be multivariable. my_op->op_next will point at
+         * the OP_ITER whose op_targ contains the count of how many more
+         * variables
+         */
+        OP *iterop = cx->blk_loop.my_op->op_next;
+        assert(iterop->op_type == OP_ITER);
+        PADOFFSET how_many = iterop->op_targ;
+        /* op_targ actually stores count - 1, so it's the count of additional
+         * vars after itervar itself */
+        for (SV **svp = cx->blk_loop.itervar_u.svp + 1; how_many; svp++, how_many--) {
+            /* we didn't store an itersave for these, but we know they are all
+             * scoped to the loop we have just left. It's therefore safe to store
+             * &PL_sv_undef there since they weren't live before or afterwards.
+             */
+            SvREFCNT_dec(*svp);
+            *svp = &PL_sv_undef;
+        }
+    }
     if (cx->cx_type & CXp_FOR_LVREF) {
         SV *itervar = (SV *)(cx)->blk_loop.itervar_u.gv;
         SV *origval = (cx)->blk_loop.itersave;
