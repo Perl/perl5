@@ -2953,6 +2953,98 @@ EOF
 }
 
 {
+    # Test default parameter values
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+
+        # Basic int default
+        [
+            "default i = 0",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int i = 0)
+EOF
+            [ 0, 0, qr/^\s+int\s+i;$/m,        "i delcared" ],
+
+            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qi = 0;\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qi = (int)SvIV(ST(0))\E\n
+                       \s*;\n
+                       \s+}\n
+                       }x,
+                    "init" ],
+        ],
+
+        # Basic char default
+        [
+            "default c = 'x'",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(unsigned char c = 'x')
+EOF
+            [ 0, 0, qr/^\s+unsigned char\s+c;$/m,        "c delcared" ],
+
+            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qc = 'x';\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qc = (unsigned char)SvUV(ST(0))\E\n
+                       \s*;\n
+                       \s+}\n
+                       }x,
+                    "init" ],
+        ],
+
+        # Basic string default
+        [
+            'default s = "abc"',
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s = "abc")
+EOF
+            [ 0, 0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
+
+            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qs = "abc";\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qs = (char *)SvPV_nolen(ST(0))\E\n
+                       \s*;\n
+                       \s+}\n
+                       }x,
+                    "init" ],
+        ],
+
+        # mixed quote string default
+        [
+            'default s = "\'abc\'"',
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s = "'abc'")
+EOF
+            [ 0, 0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
+
+            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qs = "'abc'";\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qs = (char *)SvPV_nolen(ST(0))\E\n
+                       \s*;\n
+                       \s+}\n
+                       }x,
+                    "init" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+{
     # Test RETVAL as a parameter. This isn't well documented as to
     # how it should be interpreted, so these tests are more about checking
     # current behaviour so that inadvertent changes are detected, rather
