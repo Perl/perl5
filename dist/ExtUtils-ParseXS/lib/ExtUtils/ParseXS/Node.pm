@@ -1173,8 +1173,8 @@ sub parse {
             # Parse branches of a CPP conditionals within a nested scope
 
             if (not $node->{is_if}) {
-                $pxs->death("Error: '". $node->{directive}
-                                . "' with no matching 'if'")
+                $pxs->death("Error: '#". $node->{directive}
+                                . "' with no matching '#if'")
                     if $self->{type} ne 'if';
 
                 # we should already be within a nested scope; this

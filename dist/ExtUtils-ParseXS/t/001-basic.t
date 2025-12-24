@@ -5506,7 +5506,7 @@ EOF
                 |
                 |short foo()
 EOF
-            [ 1, 0, qr{Error: 'else' with no matching 'if'},
+            [ 1, 0, qr{Error: '#else' with no matching '#if'},
                     "got expected err"  ],
         ],
 
