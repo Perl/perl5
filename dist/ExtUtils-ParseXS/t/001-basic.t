@@ -380,7 +380,7 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
   is $stderr,
     "Warning: aliases 'pox' and 'dox', 'lox' have"
     . " identical values of 1 in XSAlias.xs, line 9\n"
-    . "    (If this is deliberate use a symbolic alias instead.)\n"
+    . "  (If this is deliberate use a symbolic alias instead.)\n"
     . "Warning: conflicting duplicate alias 'pox' changes"
     . " definition from '1' to '2' in XSAlias.xs, line 10\n"
     . "Warning: aliases 'docks' and 'dox', 'lox' have"
