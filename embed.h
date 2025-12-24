@@ -284,7 +284,6 @@
 #   undef CC_UNDERSCORE_
 #   undef isFOO_or_UNDERSCORE_
 #   undef sv_2num
-#   undef USE_STDIO
 #   if !defined(PERL_EXT)
 #     undef invlist_intersection_
 #     undef invlist_subtract_
