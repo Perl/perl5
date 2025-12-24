@@ -3763,6 +3763,8 @@ $cpp_ifdef_constraints_re =
                       qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
 
 my @az = ('a'..'z');
+my $never_visible_flags_re = qr/[eX]/;
+my $discard_non_visibility_flags_re = eval "qr/[^ACeEX]/";
 
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
@@ -4771,14 +4773,76 @@ sub generate_embedvar_h {
 my %visibility;
 
 sub set_flags_visibility {
-    my ($name, $file, $flags) = @_;
+    my ($name, $file, $raw_flags) = @_;
 
-    # If no flag indicates any external visibility, we are done with this
-    # one.
-    $flags =~ s/[^ACE]//g;
-    return unless $flags;   # No visibility
+    # Store $name's requested visibility into $visibility{$name}{flags} as
+    # determined by apidoc or embed.fnc lines.  The visibility is stored as
+    # a single character mnemonic, as follows:
+    #   0   The symbol is not supposed to be visible outside the perl core
+    #   E   The symbol is supposed to be visible to perl extensions and the
+    #       core but nowhere else
+    #   1   The symbol is supposed to be visible everywhere
+
+    # Use the stored flags if new ones empty
+    my $flags = $raw_flags // $visibility{$name}{flags_raw} // "";
+    $flags = 'e' unless $flags ne "";     # Default visibility is none
+
+    my $is_macro = $flags =~ /m/;
+
+    # Convert never to 0; always to 1; 'E' remains 'E'.
+    $flags =~ s/$discard_non_visibility_flags_re//g;
+    if ($flags =~ s/E//g) {
+        $flags .= 'E';          # Squeeze out multiple E's
+        $flags =~ s/[eX]//g;    # These flags are irrelevant for our purposes
+        if ($flags ne 'E') {
+            die_at_end "'E' flag for $name can't have other visibility flag"
+                     . " except [eX], not '$raw_flags'; in $file";
+            $flags = 'E';
+        }
+    }
+    elsif ($flags eq "" || $flags =~ $never_visible_flags_re) {
+        $flags = 0;
+    }
+    else {
+        $flags = 1;
+    }
+
+    # There are often cases where the same symbol has multiple entries, for
+    # example one for Win32, another for everything else; or one for threaded
+    # vs unthreaded, etc.  We want to find the most visible one.  To that end
+    # we compare the visibilities of the new and stored, and replace if the
+    # new one is more visible.
+    #
+    # If there isn't an already-stored one, set its visibility to -1, which is
+    # more restrictive than any new one, so this new one will automatically
+    # prevail.
+    my $stored_ordering = $visibility{$name}{flags_ordering} // -1;
+
+    # Compute an ordering for this flag, to more easily compare later.  This
+    # ended up being less code than writing specific comparisons.
+    my $ordering;
+
+    # Multiply to get the numeric numbers spread more widely than the
+    # non-numeric one.
+    if ($flags =~ / ^ -? \d+ $/x) {
+        $ordering = 2 * $flags;
+    }
+    elsif ($flags eq 'E') {
+        $ordering = 1;
+    }
+    else {
+        die_at_end "Flag '$flags' unrecognized";
+        $ordering = -1;
+    }
+
+    # Do nothing unless new one is more visible than old
+    return if $stored_ordering >= $ordering;
 
     $visibility{$name}{flags} = $flags;
+    $visibility{$name}{flags_ordering} = $ordering;
+    $visibility{$name}{flags_raw} = $raw_flags;
+    $visibility{$name}{flags_file} = $file;
+    $visibility{$name}{is_macro} = $is_macro;
     return;
 }
 
