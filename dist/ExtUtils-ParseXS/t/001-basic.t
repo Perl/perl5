@@ -1477,7 +1477,11 @@ EOF
             [ Q(<<'EOF') ],
                 |int
 EOF
-            [ 1, 0, qr/Error: function definition too short 'int'/, "got err" ],
+            [ 1, 0,qr{
+                \QError: unrecognised line: 'int' in (input), line 5\E\n
+                \Q  (possible start of a truncated XSUB definition?)\E\n
+                }x,
+            "got err" ],
         ],
         [
             "defn not parseable 1",
@@ -4604,6 +4608,15 @@ EOF
                 |SCOPE: ENABLE
 EOF
             [ 1, 0, qr{\QError: only one SCOPE declaration allowed per XSUB},
+                    "got expected error"],
+        ],
+        [
+            "unrecognised file-scoped keyword",
+            [ Q(<<'EOF') ],
+                |FOO_BAR:
+EOF
+            [ 1, 0,
+                qr{\QError: unrecognised keyword 'FOO_BAR' in (input), line 12\E\n},
                     "got expected error"],
         ],
     );

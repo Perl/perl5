@@ -2478,7 +2478,15 @@ sub parse {
 
     # a function definition needs at least 2 lines
     unless (@{$pxs->{line}}) {
-        $pxs->blurt("Error: function definition too short '$line'");
+        if ($line =~ /^([A-Z][A-Z_]+):/) {
+            # It's possibly a mistyped keyword: give a more specific
+            # error message:
+            $pxs->death("Error: unrecognised keyword '$1'");
+            return;
+        }
+        # Generic error message:
+        $pxs->deathHint("Error: unrecognised line: '$line'",
+                    "possible start of a truncated XSUB definition?");
         return;
     }
 
