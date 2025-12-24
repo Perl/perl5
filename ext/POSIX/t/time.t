@@ -17,11 +17,12 @@ use Test::More tests => 31;
 $ENV{TZ} = "EST5EDT";
 
 # It looks like POSIX.xs claims that only VMS and Mac OS traditional
-# don't have tzset().  Win32 works to call the function, but it doesn't
-# actually do anything.  Cygwin works in some places, but not others.  The
-# other Win32's below are guesses.
+# don't have tzset().  MingW doesn't work.  Cygwin works in some places, but
+# not others.  The other Win32's below are guesses.
 my $has_tzset = $^O ne "VMS" && $^O ne "cygwin"
-             && $^O ne "MSWin32" && $^O ne "interix";
+             && ($^O ne "MSWin32" || (   $^O eq "MSWin32"
+                                      && $Config{make} eq 'nmake'))
+             && $^O ne "interix";
 
 SKIP: {
     skip "No tzset()", 1 unless $has_tzset;
