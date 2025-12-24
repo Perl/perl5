@@ -3039,6 +3039,18 @@ EOF
                        }x,
                     "init" ],
         ],
+
+        # foo =
+        [
+            'default missing value',
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s = )
+EOF
+            [ 1, 0, qr/Error: missing default value expression for 's'/m,
+                    "got expected err" ],
+
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

@@ -2711,6 +2711,9 @@ sub parse {
 
     my $report_def = '';
     if (defined $default) {
+        $pxs->death("Error: missing default value expression for '$name'")
+            unless $default =~ /\S/;
+
         # The default expression for reporting usage. For backcompat,
         # sometimes preserve the spaces either side of the '='
         $report_def =    ((defined $type or $is_length) ? '' : $sp1)
