@@ -1231,33 +1231,52 @@ sub parse {
             next;
         }
 
-        # die if the next line is indented: all file-scoped things (CPP,
+        my $file_scoped_keywords =
+         "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
+              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP";
+
+        # Die if the next line is indented: all file-scoped things (CPP,
         # keywords, XSUB starts) are supposed to start on column 1
         # (although see the comment below about multiple parse_keywords()
         # iterations sneaking in indented keywords).
         #
-        # The text of the error message is based around a common reason
-        # for an indented line to appear in file scope: this is due to an
-        # XSUB being prematurely truncated by fetch_para(). For example in
-        # the code below, the coder wants the foo and bar lines to both be
-        # part of the same CODE block. But the XS parser sees the blank
-        # line followed by the '#ifdef' on column 1 as terminating the
-        # current XSUB. So the bar() line is treated as being in file
-        # scope and dies because it is indented.
-        #
-        #   |int f()
-        #   |    CODE:
-        #   |        foo();
-        #   |
-        #   |#ifdef USE_BAR
-        #   |        bar();
-        #   |#endif
 
-        $pxs->death(
-            "Code is not inside a function"
-                ." (maybe last function was ended by a blank line "
-                ." followed by a statement on column one?)")
-            if $pxs->{line}->[0] =~ /^\s/;
+        if ($pxs->{line}[0] =~ /^\s/) {
+            # Try to customise the error message based around why this
+            # line is indented, to better hint to the user what the
+            # problem is.
+
+            if ($pxs->{line}[0] =~ /^\s+($file_scoped_keywords)\s*:/) {
+                $pxs->death(
+                    "Error: file-scoped keywords should not be indented");
+            }
+
+            # The text of the error message is based around a common reason
+            # for an indented line to appear in file scope: this is due to an
+            # XSUB being prematurely truncated by fetch_para(). For example in
+            # the code below, the coder wants the foo and bar lines to both be
+            # part of the same CODE block. But the XS parser sees the blank
+            # line followed by the '#ifdef' on column 1 as terminating the
+            # current XSUB. So the bar() line is treated as being in file
+            # scope and dies because it is indented.
+            #
+            #   |int f()
+            #   |    CODE:
+            #   |        foo();
+            #   |
+            #   |#ifdef USE_BAR
+            #   |        bar();
+            #   |#endif
+
+            $pxs->deathHint(
+                    "Error: file-scoped directives must not be indented",
+                    $self->Q(<<EOF))
+    |If this line is supposed to be part of an XSUB rather than being
+    |file-scoped, then it is possible that your XSUB has a blank line
+    |followed by a line starting at column 1 which is being misinterpreted
+    |as the end of the current XSUB.
+EOF
+        }
 
         # The SCOPE keyword can appear both in file scope (just before an
         # XSUB) and as an XSUB keyword. This field maintains the state of the
@@ -1288,8 +1307,7 @@ sub parse {
                 $pxs,
                 undef, undef, # xsub and xbody: not needed for non XSUB keywords
                 undef,  # implies process as many keywords as possible
-                 "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
-              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP",
+                $file_scoped_keywords,
                 $keywords_flag_MODULE,
             );
         # XXX we could have an 'or next' here if not for SCOPE backcompat

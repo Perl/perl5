@@ -5522,16 +5522,27 @@ EOF
         ],
 
         [
+            "indented file-scoped keyword",
+            [ Q(<<'EOF') ],
+                |#define FOO 1
+                |  BOOT:
+EOF
+            [ 1, 0, qr{\QError: file-scoped keywords should not be indented\E
+                       \Q in (input), line 5\E}x,
+                    "got expected err"  ],
+        ],
+        [
             "stray CPP / indented XSUB",
             [ Q(<<'EOF') ],
                 |#define FOO
                 |  int
 EOF
-            [ 1, 0, qr{\QCode is not inside a function\E
-                       \Q (maybe last function was ended by a blank line \E
-                       \Q followed by a statement on column one?)\E
-                      }x,
-                    "got expected err"  ],
+            [ 1, 0, qr{
+                    \QError: file-scoped directives must not be indented\E
+                    \Q in (input), line 5\E\n
+                    \Q  (If this line is supposed to be part of an XSUB\E
+                  }x,
+                "got expected err"  ],
         ],
 
 
