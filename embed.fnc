@@ -5075,18 +5075,27 @@ S	|bool	|bool_setlocale_2008_i					\
 				|const locale_category_index index	\
 				|NN const char *new_locale		\
 				|const line_t caller_line
+S	|locale_t|use_curlocale_scratch
+#     if defined(HAS_GETLOCALENAME_L)
+ST	|const char *|querylocale_2024_l				\
+				|int category				\
+				|locale_t locale_obj			\
+				|line_t line
+#     else
 S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\
 				|const line_t line
-S	|locale_t|use_curlocale_scratch
+#     endif
 #     if !defined(USE_QUERYLOCALE)
 S	|void	|update_PL_curlocales_i 				\
 				|const locale_category_index index	\
 				|NN const char *new_locale		\
 				|const line_t caller_line
 #     endif
-#   elif  defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+#   elif  defined(USE_LOCALE_THREADS) &&                  \
+         !defined(USE_THREAD_SAFE_LOCALE) &&              \
+         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
+         !defined(USE_POSIX_2008_LOCALE) */
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale
