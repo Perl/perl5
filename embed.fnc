@@ -5042,10 +5042,12 @@ S	|bool	|bool_setlocale_2008_i					\
 				|const locale_category_index index	\
 				|NN const char *new_locale		\
 				|const line_t caller_line
+S	|locale_t|use_curlocale_scratch
+#     if !defined(HAS_GETLOCALENAME_L)
 S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\
 				|const line_t line
-S	|locale_t|use_curlocale_scratch
+#     endif
 #     if !defined(USE_QUERYLOCALE)
 S	|void	|update_PL_curlocales_i 				\
 				|const locale_category_index index	\

@@ -112,3 +112,10 @@ case "$osvers" in
         d_newlocale=undef
         ;;
 esac
+
+case "$osvers" in
+    # https://cygwin.com/pipermail/cygwin/2025-March/257720.html
+    [12].*|3.[12345].*|3.6.0)
+        d_getlocalename_l=undef
+        ;;
+esac
