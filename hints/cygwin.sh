@@ -112,3 +112,6 @@ case "$osvers" in
         d_newlocale=undef
         ;;
 esac
+
+# Doesn't work properly yet
+d_getlocalename_l=undef

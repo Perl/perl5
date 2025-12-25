@@ -1435,14 +1435,19 @@
 #       endif
 #       if defined(USE_POSIX_2008_LOCALE)
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
-#         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
+#         if defined(HAS_GETLOCALENAME_L)
+#           define querylocale_2024_l           S_querylocale_2024_l
+#         else
+#           define querylocale_2008_i(a,b)      S_querylocale_2008_i(aTHX_ a,b)
+#         endif
 #         if !defined(USE_QUERYLOCALE)
 #           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
 #         endif
-#       elif  defined(USE_LOCALE_THREADS) &&     \
-             !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+#       elif  defined(USE_LOCALE_THREADS) &&                  \
+             !defined(USE_THREAD_SAFE_LOCALE) &&              \
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
+             !defined(USE_POSIX_2008_LOCALE) */
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #       endif
