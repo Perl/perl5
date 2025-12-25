@@ -2038,14 +2038,48 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    define HAS_GLIBC_LC_MESSAGES_BUG
 #    include <libintl.h>
 #  endif
+#  ifdef HAS_GETLOCALE_NAME_L
 
-#  define querylocale_i(i)    querylocale_2008_i(i, __LINE__)
+   /* POSIX 2008 did not provide a method to find the category name of a
+    * locale, disregarding a basic linguistic tenet that for any object,
+    * people will create a name for it.  This was finally rectified in POSIX
+    * 2024, with the addition of getlocale_name_l().  On platforms that have
+    * this, getting the locale name is trivial.
+    *
+    * The semantics called for in the Standard are sane, requiring it to
+    * properly handle LC_ALL, unlike the querylocale() implementations that
+    * OS's came up to fill the void caused by its absence (and which we have
+    * had to compensate for).
+    *
+    * The return is a pointer to internal storage, but is completely
+    * independent of other threads; invalidated only when this thread
+    * terminates or calls the function again with the global locale, or when
+    * this thread changes the underlying object by either a freelocale() or by
+    * using it as a basis object in newlocale(). */
+
+#    define querylocale_r(cat)    getlocale_name_l(cat, uselocale(NULL))
+
+     /* These have to be defined here, because this function makes this layer
+      * a combination of using _i for setting the locale, and _c for
+      * retrieving it.  The compiler should complain if they get out of sync
+      * with the definitions below */
+#    define querylocale_c(cat)    querylocale_r(cat)
+#    define querylocale_i(i)      querylocale_r(categories[i])
+
+#  else /* Below, doesn't have getlocale_name_l */
+
+    /* Otherwise, getting the locale name is a lot of work.  Given the lack of
+     * this ability, some vendors created alternate methods to get the
+     * information.  querylocale() is the most prominent name used.  Below, we
+     * wrap or emulate the querylocale API. */
+
+#    define querylocale_i(i)    querylocale_2008_i(i, __LINE__)
 
     /* We need to define this derivative macro here, as it is needed in
      * the implementing function (for recursive calls).  It also gets defined
      * where all the other derivative macros are defined, and the compiler
      * will complain if the definition gets out of sync */
-#  define querylocale_c(cat)      querylocale_i(cat##_INDEX_)
+#    define querylocale_c(cat)      querylocale_i(cat##_INDEX_)
 
 static const char *
 S_querylocale_2008_i(pTHX_ const locale_category_index index,
@@ -2056,14 +2090,10 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
     /* This function returns the name of the locale category given by the input
      * 'index' into our parallel tables of them.
      *
-     * POSIX 2008, for some sick reason, chose not to provide a method to find
-     * the category name of a locale, disregarding a basic linguistic tenet
-     * that for any object, people will create a name for it.  (The next
-     * version of the POSIX standard is proposed to fix this.)  Some vendors
-     * have created a querylocale() function to do this in the meantime.  On
-     * systems without querylocale(), we have to keep track of what the locale
-     * has been set to, so that we can return its name so as to emulate
-     * setlocale().  There are potential problems with this:
+     * This function wraps or emulates libc querylocale().  On systems where
+     * we emulate it, we have to keep track of what the locale has been set
+     * to, so that we can return its name so as to emulate setlocale().  There
+     * are potential problems with this:
      *
      *  1)  We don't know what calling newlocale() with the locale argument ""
      *      actually does.  It gets its values from the program's environment.
@@ -2098,9 +2128,9 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
 
-#  ifdef MULTIPLICITY
+#    ifdef MULTIPLICITY
     assert(cur_obj== LC_GLOBAL_LOCALE || cur_obj == PL_cur_locale_obj);
-#  endif
+#    endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p;"
                                            " called from %" LINE_Tf "\n",
@@ -2122,7 +2152,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
      * one.  Below is the 'else' case of that.  There are two different
      * implementations, depending on USE_PL_CURLOCALES */
 
-#  ifdef USE_PL_CURLOCALES
+#    ifdef USE_PL_CURLOCALES
 
     else {
 
@@ -2155,7 +2185,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
         }
     }
 
-#  else
+#    else
 
     /* Below is the implementation of the 'else' clause which handles the case
      * of the current locale not being the global one on platforms where
@@ -2166,9 +2196,9 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
      * First, glibc has a function that implements querylocale(), but is called
      * something else, and takes the category number; the others take the mask.
      * */
-#    if defined(USE_QUERYLOCALE) && (   defined(_NL_LOCALE_NAME)            \
-                                     && defined(HAS_NL_LANGINFO_L))
-#      define my_querylocale(index, cur_obj)                                \
+#      if defined(USE_QUERYLOCALE) && (   defined(_NL_LOCALE_NAME)            \
+                                       && defined(HAS_NL_LANGINFO_L))
+#        define my_querylocale(index, cur_obj)                                \
                 nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), cur_obj)
 
        /* Experience so far shows it is thread-safe, as well as glibc's
@@ -2176,7 +2206,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
 #    else   /* below, ! glibc */
 
        /* Otherwise, use the system's querylocale(). */
-#      define my_querylocale(index, cur_obj)                                \
+#        define my_querylocale(index, cur_obj)                                \
                                querylocale(category_masks[index], cur_obj)
 #    endif
 
@@ -2234,6 +2264,8 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
     assert(strNE(retval, ""));
     return retval;
 }
+
+#  endif
 
 /*---------------------------------------------------------------------------*/
 

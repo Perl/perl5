@@ -10789,18 +10789,20 @@ S_bool_setlocale_2008_i(pTHX_ const locale_category_index index, const char *new
 #     define PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I \
         Perl_assert_aTHX; assert(new_locale)
 
-static const char *
-S_querylocale_2008_i(pTHX_ const locale_category_index index, const line_t line)
-        Perl_attribute_nonnull_aTHX;
-#     define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I \
-        Perl_assert_aTHX
-
 static locale_t
 S_use_curlocale_scratch(pTHX)
         Perl_attribute_nonnull_aTHX;
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH \
         Perl_assert_aTHX
 
+#     if !defined(HAS_GETLOCALE_NAME_L)
+static const char *
+S_querylocale_2008_i(pTHX_ const locale_category_index index, const line_t line)
+        Perl_attribute_nonnull_aTHX;
+#       define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I \
+        Perl_assert_aTHX
+
+#     endif
 #     if !defined(USE_QUERYLOCALE)
 static void
 S_update_PL_curlocales_i(pTHX_ const locale_category_index index, const char *new_locale, const line_t caller_line)

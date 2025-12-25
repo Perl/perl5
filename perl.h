@@ -1286,7 +1286,8 @@ typedef enum {
 #  endif
 
 #  ifdef USE_POSIX_2008_LOCALE
-#    if  defined(HAS_QUERYLOCALE)                                           \
+#    if  defined(HAS_GETLOCALE_NAME_L)                                      \
+     ||  defined(HAS_QUERYLOCALE)                                           \
               /* Use querylocale if has it, or has the glibc internal       \
                * undocumented equivalent (if not forbidden). */             \
      || (     defined(_NL_LOCALE_NAME)                                      \
