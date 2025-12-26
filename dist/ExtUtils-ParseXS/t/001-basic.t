@@ -121,7 +121,8 @@ sub test_many {
 
         my $err_tested;
         for my $test (@tests) {
-            my ($is_err, $exp_nomatch, $qr, $desc) = @$test;
+            my ($is_err, $exp_nomatch, $qr, $desc, $todo) = @$test;
+            local $TODO = $todo if defined $todo;
             $desc = "$desc_prefix: $desc" if length $desc_prefix;
             my $str;
             if ($is_err) {
