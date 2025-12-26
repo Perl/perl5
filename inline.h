@@ -4169,7 +4169,7 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
         else {
             // LV ref around a package lexical, mg_obj gives its GV
             GV *gv = (GV *)mg->mg_obj;
-            SV *oldsv;
+            SV *oldsv = NULL;
             switch(mg->mg_private & OPpLVREF_TYPE) {
                 case OPpLVREF_SV:
                     oldsv = GvSVn(gv);
@@ -4190,6 +4190,9 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
                     oldsv = (SV *)GvCV(gv);
                     GvCV_set(gv, (CV *)origval);
                     break;
+
+                default:
+                    NOT_REACHED;
             }
             SvREFCNT_dec(oldsv);
         }
