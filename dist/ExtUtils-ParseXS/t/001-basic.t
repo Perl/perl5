@@ -530,62 +530,6 @@ EOF
 
 
 {
-    # Test [=+;] on INPUT lines (including embedded double quotes
-    # within expression which get evalled)
-
-    my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Capture';
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void f(mymarker1, a, b, c, d)
-        |        int mymarker1
-        |        int a = ($var"$var\"$type);
-        |        int b ; blah($var"$var\"$type);
-        |        int c + blurg($var"$var\"$type);
-        |        int d
-        |    CODE:
-        |        mymarker2;
-EOF
-
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    # Those INPUT lines should have produced something like:
-    #
-    #    int    mymarker1 = (int)SvIV(ST(0));
-    #    int    a = (a"a\"int);
-    #    int    b;
-    #    int    c = (int)SvIV(ST(3))
-    #    int    d = (int)SvIV(ST(4))
-    #    blah(b"b\"int);
-    #    blurg(c"c\"int);
-    #    mymarker2;
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    like($out, qr/^ \s+ int \s+ a\ =\ \Q(a"a"int);\E $/xm,
-                        "INPUT '=' expands custom typemap");
-
-    like($out, qr/^ \s+ int \s+ b;$/xm,
-                        "INPUT ';' suppresses typemap");
-
-    like($out, qr/^ \s+ int \s+ c\ =\ \Q(int)SvIV(ST(3))\E $/xm,
-                        "INPUT '+' expands standard typemap");
-
-    like($out,
-        qr/^ \s+ int \s+ d\ = .*? blah\Q(b"b"int)\E .*? blurg\Q(c"c"int)\E .*? mymarker2/xms,
-                        "INPUT '+' and ';' append expanded code");
-}
-
-
-{
     # Check that function pointer types are supported
 
     my $pxs = ExtUtils::ParseXS->new;
@@ -660,42 +604,6 @@ EOF
     like($sout, qr/pkg.*=.*"Foo"/, "default expression expanded");
 }
 
-{
-    # Test 'alien' INPUT parameters: ones which are declared in an INPUT
-    # section but don't appear in the XSUB's signature. This ought to be
-    # a compile error, but people rely on it to declare and initialise
-    # variables which ought to be in a PREINIT or CODE section.
-
-    my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Capture';
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(mymarker1)
-        |        int mymarker1
-        |        long alien1
-        |        int  alien2 = 123;
-        |    CODE:
-        |        mymarker2;
-EOF
-
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    # remove all spaces for easier matching
-    my $sout = $out;
-    $sout =~ s/[ \t]+//g;
-
-    like($sout, qr/longalien1;\nintalien2=123;/, "alien INPUT parameters");
-}
 
 {
     # Test for 'No INPUT definition' error, particularly that the
@@ -722,77 +630,6 @@ EOF
 
     like($stderr, qr/Error: no INPUT definition for type 'Foo::Bar'/,
                     "No INPUT definition");
-}
-
-{
-    # Test for default arg mixed with initialisers
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(mymarker1, aaa = 111, bbb = 222, ccc = 333, ddd = NO_INIT, eee = NO_INIT, fff = NO_INIT)
-        |    int mymarker1
-        |    int aaa = 777;
-        |    int bbb + 888;
-        |    int ccc ; 999;
-        |    int ddd = AAA;
-        |    int eee + BBB;
-        |    int fff ; CCC;
-        |  CODE:
-        |    mymarker2
-EOF
-
-    tie *FH, 'Capture';
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    # remove all spaces for easier matching
-    my $sout = $out;
-    $sout =~ s/[ \t]+//g;
-
-    like($sout, qr/if\(items<3\)\nbbb=222;\nelse\{\nbbb=.*ST\(2\)\)\n;\n\}\n/,
-                    "default with +init");
-
-    like($sout, qr/\Qif(items>=6){\E\n\Qeee=(int)SvIV(ST(5))\E\n;\n\}/,
-                "NO_INIT default with +init");
-
-    {
-        local $TODO = "default is lost in presence of initialiser";
-
-        like($sout, qr/if\(items<2\)\naaa=111;\nelse\{\naaa=777;\n\}\n/,
-                    "default with =init");
-
-        like($sout, qr/if\(items<4\)\nccc=333;\n999;\n/,
-                    "default with ;init");
-
-        like($sout, qr/if\(items>=5\)\{\nddd=AAA;\n\}/,
-                    "NO_INIT default with =init");
-      unlike($sout, qr/^intddd=AAA;\n/m,
-                    "NO_INIT default with =init no stray");
-
-    }
-
-
-    like($sout, qr/^$/m,
-                    "default with +init deferred expression");
-    like($sout, qr/^888;$/m,
-                    "default with +init deferred expression");
-    like($sout, qr/^999;$/m,
-                    "default with ;init deferred expression");
-    like($sout, qr/^BBB;$/m,
-                    "NO_INIT default with +init deferred expression");
-    like($sout, qr/^CCC;$/m,
-                    "NO_INIT default with ;init deferred expression");
-
 }
 
 {
@@ -839,84 +676,6 @@ EOF
     like($out, qr/^\s*\QX__Y *\E\s+THIS = \Qmy_xy(ST(0))\E$/m,
                     "THIS auto-generated");
 
-}
-
-{
-    # Test for 'length(foo)' not legal in INPUT section
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(s)
-        |        char *s
-        |        int  length(s)
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        $pxs->process_file( filename => \$text, output => \*FH);
-    });
-
-    like($stderr, qr/./,
-                    "No length() in INPUT section");
-}
-
-{
-    # Test for initialisers with unknown variable type.
-    # This previously died.
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(a, b, c)
-        |    UnknownType a = NO_INIT
-        |    UnknownType b = bar();
-        |    UnknownType c = baz($arg);
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        $pxs->process_file( filename => \$text, output => \*FH);
-    });
-
-    is($stderr, undef, "Unknown type with initialiser: no errors");
-}
-
-{
-    # Test for "duplicate definition of argument" errors
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(a, b, int c)
-        |    int a;
-        |    int a;
-        |    int b;
-        |    int b;
-        |    int c;
-        |    int alien;
-        |    int alien;
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        $pxs->process_file( filename => \$text, output => \*FH);
-    });
-
-    for my $var (qw(a b c alien)) {
-        my $count = () =
-            $stderr =~ /duplicate definition of parameter '$var'/g;
-        is($count, 1, "One dup error for \"$var\"");
-    }
 }
 
 {
@@ -2584,6 +2343,229 @@ EOF
                                         "def: got expected error" ],
         ],
 
+
+
+        # Tests for [=+;] initialisers on INPUT lines (including embedded
+        # double quotes within the expression, which get evalled)
+
+        [
+            "INPUT '='",
+
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc)
+                |int abc = ($var"$var\"$type);
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc\ =\ \Q(abc"abc"int);\E $/mx,
+                                        "typemap was expanded" ],
+
+        ],
+        [
+            "INPUT ';'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc, long xyz)
+                |int abc ; blah($var"$var\"$type);
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+                                        "declaration doesn't have init" ],
+            [ 0, 0, qr/xyz .*\n.*\Qblah(abc"abc"int);\E$/msx,
+                                        "init code deferred and present" ],
+
+        ],
+        [
+            "INPUT '+'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc, long xyz)
+                |int abc + blurg($var"$var\"$type);
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc \s+ = \s+ \Q(int)SvIV(ST(0))\E\n; $/mx,
+                                        "std typemap was used and expanded" ],
+            [ 0, 0, qr/xyz .*\n.*\Qblurg(abc"abc"int);\E$/msx,
+                                        "deferred code present" ],
+
+        ],
+
+        # Tests for [=+;] initialisers on INPUT lines mixed with
+        # default values
+
+        [
+            "default value and INPUT '='",
+
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = 111)
+                |int abc = 777;
+EOF
+            [ 0, 0, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
+                "",
+                "default is lost in presence of initialiser", #TODO
+            ],
+
+        ],
+        [
+            "default value and INPUT ';'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = 111, long xyz)
+                |int abc ; 777;
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+                                        "declaration doesn't have init" ],
+            [ 0, 0, qr/xyz .*\n.*^777;$/msx,
+                                        "init code deferred and present" ],
+
+        ],
+        [
+            "default value and INPUT '+'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = 111, long xyz)
+                |int abc + 777;
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+                                        "declaration doesn't have init" ],
+            [ 0, 0, qr/
+                           \Qif (items < 1)\E\n
+                        \s+\Qabc = 111;\E\n
+                        \s+\Qelse {\E\n
+                        \s+\Qabc = (int)SvIV(ST(0))\E\n
+                      /msx,
+                "conditional init code present" ],
+
+            [ 0, 0, qr/
+                        \s+\Qabc = (int)SvIV(ST(0))\E\n
+                        \s*;\n\s*\}\n777;
+                      /msx,
+                "deferred code present" ],
+        ],
+
+        # Tests for [=+;] initialisers on INPUT lines mixed with
+        # NO_INIT default values
+
+        [
+            "NO_INIT default value and INPUT '='",
+
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = NO_INIT)
+                |int abc = 777;
+EOF
+            [ 0, 0, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
+                "",
+                "default is lost in presence of initialiser", #TODO
+            ],
+
+        ],
+        [
+            "NO_INIT default value and INPUT ';'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = NO_INIT, long xyz)
+                |int abc ; 777;
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+                                        "declaration doesn't have init" ],
+            [ 0, 0, qr/xyz .*\n.*^777;$/msx,
+                                        "init code deferred and present" ],
+
+        ],
+        [
+            "NO_INIT default value and INPUT '+'",
+            [ Q(<<'EOF') ],
+                |int
+                |foo(abc = NO_INIT, long xyz)
+                |int abc + 777;
+EOF
+            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+                                        "declaration doesn't have init" ],
+            [ 0, 0, qr/
+                           \Qif (items >= 1) {\E\n
+                        \s+\Qabc = (int)SvIV(ST(0))\E\n
+                      /msx,
+                "conditional init code present" ],
+
+            [ 0, 0, qr/\s*;\n\s*\}\n777; /msx,
+                "deferred code present" ],
+        ],
+
+        # Test for initialisers with unknown variable type.
+        # This previously died.
+
+        [
+            "INPUT initialiser with unknown type",
+            [ Q(<<'EOF') ],
+                |void foo(a, b, c)
+                |    UnknownType1 a = NO_INIT
+                |    UnknownType2 b = bar();
+                |    UnknownType3 c = baz($arg);
+EOF
+            [ 0, 0, qr/UnknownType1\s+a;/mx, "a decl" ],
+            [ 0, 0, qr/UnknownType2\s+\Qb = bar();\E/mx, "b decl" ],
+            [ 0, 0, qr/UnknownType3\s+\Qc = baz(ST(2));\E/mx, "c decl" ],
+        ],
+
+        # Test 'alien' INPUT parameters: ones which are declared in an INPUT
+        # section but don't appear in the XSUB's signature. This ought to be
+        # a compile error, but people rely on it to declare and initialise
+        # variables which ought to be in a PREINIT or CODE section.
+
+        [
+            "alien INPUT vars",
+            [ Q(<<'EOF') ],
+                |void foo()
+                |    long alien1
+                |    int  alien2 = 123;
+EOF
+            [ 0, 0, qr/long\s+alien1;\n/,      "alien1 decl" ],
+            [ 0, 0, qr/int\s+alien2 = 123;\n/, "alien2 decl" ],
+        ],
+
+        # Test for 'length(foo)' not legal in INPUT section
+
+        [
+            "alien INPUT vars",
+            [ Q(<<'EOF') ],
+                |void foo(s)
+                |    char *s
+                |    int  length(s)
+EOF
+            [ 1, 0, qr/\QError: length() not permitted in INPUT section/,
+                "got expected err" ],
+        ],
+
+        # Test for "duplicate definition of argument" errors
+
+        [
+            "duplicate INPUT vars",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc;
+                |    int abc;
+EOF
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+                "got expected err" ],
+        ],
+        [
+            "duplicate INPUT and signature vars",
+            [ Q(<<'EOF') ],
+                |void foo(int abc)
+                |    int abc;
+EOF
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+                "got expected err" ],
+        ],
+        [
+            "duplicate alien INPUT vars",
+            [ Q(<<'EOF') ],
+                |void foo()
+                |    int abc;
+                |    int abc;
+EOF
+            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+                "got expected err" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
