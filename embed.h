@@ -281,6 +281,7 @@
 #   undef case_98_SBOX32
 #   undef case_99_SBOX32
 #   undef case_9_SBOX32
+#   undef I_STDINT
 #   if !defined(PERL_EXT)
 #     undef invlist_intersection_
 #     undef invlist_subtract_

@@ -10,6 +10,7 @@
 
 #ifndef H_PERL
 #define H_PERL 1
+#define I_STDINT
 
 #if defined(__HP_cc) || defined(__HP_aCC)
 /* The HPUX compiler for Itanium is very picky and warns about
