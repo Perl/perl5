@@ -146,7 +146,7 @@ sub pod2man {
 
         next if ((-e $man) &&
                  (mtime($man) > mtime($pod)) &&
-                 (mtime($man) > mtime("Makefile")));
+                 (mtime($man) > (mtime("Makefile") // 0)) );
 
         my $parser = Pod::Man->new(%options);
         $parser->parse_from_file($pod, $man)
