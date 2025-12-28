@@ -1342,31 +1342,60 @@ sub _reduce_conds {
     # All the ones of these that match $constraints_pat are substituted by
     # their corresponding value in %constraints_ref, which will be either 0 or
     # 1.  The result is looked at to see if it has to evaluate to 0 or not.
+    # Any term whose definedness isn't known is left as-is, so the result of
+    # this function is a string of those, with the known ones removed.  In
+    # many cases, given the typical inputs we have, the result will be reduced
+    # to just '0' or '1'.
 
     # At leaf nodes, just change all defined(foo) whose values of foo are
-    # known to be those values, reducing them to "#if 0" or "#if 1".
+    # known to be those values, reducing them to "#if 0" or "#if 1".  The
+    # unknown values are left as-is, that is, as strings
     if (ref $cond_ref ne "ARRAY") {
         die "Expecting an array at top-level call" unless $recursed;
 
         $cond_ref =~ s/$constraints_pat/$constraints_ref->{$1}/g;
         reduce_ones_and_zeros(\$cond_ref);
 
-        # Assume 1 if doesn't evaluate completely to 0.
-        return $cond_ref ne '0';
+        return $cond_ref;
     }
 
     # Here, the conditions are in an array.  We recurse to handle each
     # element of the array.
-    for my $cond ($cond_ref->@*) {
-        return 0 unless _reduce_conds($cond,
-                                      $constraints_pat,
-                                      $constraints_ref,
-                                      ($recursed // 0) + 1  # is recursed
-                                     );
+    my $return = "";
+    for (my $i = 0; $i < $cond_ref->@*; $i++) {
+        my $cond = $cond_ref->[$i];
+        my $this_return =  _reduce_conds($cond,
+                                         $constraints_pat,
+                                         $constraints_ref,
+                                         ($recursed // 0) + 1  # is recursed
+                                        );
+        # Each element is ANDed with the others; so if this is 0, the result
+        # will also be 0.
+        return $this_return if $this_return eq '0';
+
+        if ($return =~ / ^ 1? $ /x) {
+            # Here, value so far contributes nothing to the final result;
+            # replace it with the new one.
+            $return = $this_return;
+        }
+        elsif ($this_return ne '1') {
+
+            # When $this_return is 1, it contributes nothing; so do nothing.
+            # Otherwise we will have to AND this new value with what exists.
+            # Parentheses are needed if this contains lower precedence '||'
+            $return .= " && ";
+            if ($this_return =~ /\Q||/) {
+                $return .= "( $this_return )";
+            }
+            else {
+                $return .= $this_return;
+            }
+        }
     }
 
     # Didn't do an early return.  Nothing conclusively evaluated to 0.
-    return 1;
+    reduce_ones_and_zeros(\$return);
+    return $return;
 }
 
 sub reduce_ones_and_zeros {
