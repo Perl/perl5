@@ -799,9 +799,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the value of sizeof(short) so that the C
  *	preprocessor can make decisions based on it.
  */
+/* INTMAXSIZE:
+ *	This symbol contains the value of sizeof(intmax_t) so that the C
+ *	preprocessor can make decisions based on it.
+ */
 #define INTSIZE $intsize		/**/
 #define LONGSIZE $longsize		/**/
 #define SHORTSIZE $shortsize		/**/
+#define INTMAXSIZE $intmaxsize		/**/
 
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build

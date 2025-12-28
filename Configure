@@ -1111,6 +1111,7 @@ installprefix=''
 installprefixexp=''
 installstyle=''
 installusrbinperl=''
+intmaxsize=''
 intsize=''
 longsize=''
 shortsize=''
@@ -5787,12 +5788,14 @@ case "$intsize" in
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#include <stdint.h>
 #include <stdio.h>
 int main()
 {
 	printf("intsize=%d;\n", (int)sizeof(int));
 	printf("longsize=%d;\n", (int)sizeof(long));
 	printf("shortsize=%d;\n", (int)sizeof(short));
+	printf("intmaxsize=%d;\n", (int)sizeof(intmax_t));
 	exit(0);
 }
 EOCP
@@ -5802,6 +5805,7 @@ EOCP
 		echo "Your integers are $intsize bytes long."
 		echo "Your long integers are $longsize bytes long."
 		echo "Your short integers are $shortsize bytes long."
+		echo "Your longest integers are $intmaxsize bytes long."
 	else
 		$cat >&4 <<EOM
 !
@@ -5822,6 +5826,9 @@ EOM
 		rp="What is the size of a short integer (in bytes)?"
 		. ./myread
 		shortsize="$ans"
+		rp="What is the size of a intmax_t integer (in bytes)?"
+		. ./myread
+		intmaxsize="$ans"
 	fi
 	;;
 esac
@@ -24264,7 +24271,7 @@ $rm_try
 set i_stdckdint
 eval $setvar
 
-: see if stdint is available
+: stdint.h should be available, but this makes sure it gets in config.h
 set stdint.h i_stdint
 eval $inhdr
 
@@ -25753,6 +25760,7 @@ installvendorlib='$installvendorlib'
 installvendorman1dir='$installvendorman1dir'
 installvendorman3dir='$installvendorman3dir'
 installvendorscript='$installvendorscript'
+intmaxsize='$intmaxsize'
 intsize='$intsize'
 issymlink='$issymlink'
 ivdformat='$ivdformat'
