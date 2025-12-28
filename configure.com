@@ -3263,6 +3263,7 @@ $ OS
 $ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
 $ WS "#endif"
+$ WS "#include <stdint.h>"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -5574,6 +5575,10 @@ $   gosub type_size_check
 $   intsize = tmp
 $ ENDIF
 $!
+$ tmp = "''intmax_t'"
+$ gosub type_size_check
+$ intmaxsize = tmp
+$!
 $ tmp = "''u32type'"
 $ gosub type_size_check
 $ u32size = tmp
@@ -6615,6 +6620,7 @@ $ WC "installsitearch='" + installsitearch + "'"
 $ WC "installsitebin='" + sitebin + "'"
 $ WC "installsitelib='" + installsitelib + "'"
 $ WC "installusrbinperl='undef'"
+$ WC "intmaxsize='" + intmaxsize + "'"
 $ WC "intsize='" + intsize + "'"
 $ WC "ivdformat='" + ivdformat + "'"
 $ WC "ivsize='" + ivsize + "'"
