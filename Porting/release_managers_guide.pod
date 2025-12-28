@@ -213,6 +213,13 @@ asked to compare the installed files with a previous install. Save yourself
 some time on release day, and have a (clean) install of the previous
 version ready.
 
+=head3 Install convenience modules in your main Perl
+
+Some of the tools in C<Porting/> require modules from CPAN. You can install
+these to your main Perl through the package manager of your choice:
+
+  cpan Algorithm::Diff
+
 =head3 Email account subscribed to perl5-porters
 
 In order for your release announcement email to be delivered to the
@@ -1145,12 +1152,17 @@ Compare the pathnames of all installed files with those of the previous
 release (i.e. against the last installed tarball on this branch which you
 have previously verified using this same procedure). In particular, look
 for files in the wrong place, or files no longer included which should be.
-For example, suppose the about-to-be-released version is 5.10.1 and the
-previous is 5.10.0:
+For example, suppose the about-to-be-released version is 5.43.6 and the
+previous is 5.43.7:
 
- $ cd installdir-5.10.0/
- $ find . -type f | perl -pe's/5\.10\.0/5.10.1/g' | sort > /tmp/f1
- $ cd installdir-5.10.1/
+ perl Porting/directory-diff.pl -l 's/5.43.6/5.43.7/g' /tmp/perl-5.43.6 /tmp/perl-5.43.7
+
+Alternatively, if you didn't install C<Algorithm::Diff> into your main Perl,
+you can do the manual steps in the shell:
+
+ $ cd installdir-5.43.6/
+ $ find . -type f | perl -pe's/5\.43\.6/5.43.7/g' | sort > /tmp/f1
+ $ cd installdir-5.43.7/
  $ find . -type f | sort > /tmp/f2
  $ diff -u /tmp/f[12]
 

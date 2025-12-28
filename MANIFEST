@@ -5912,6 +5912,7 @@ Porting/corelist.pl				Generates data for Module::CoreList
 Porting/corelist-diff				Tool to produce corelist diffs
 Porting/corelist-perldelta.pl			Generates data perldelta from Module::CoreList
 Porting/deparse-skips.txt			List of test files to ignore/skip for deparse tests.
+Porting/directory-diff.pl			Diff two directories
 Porting/docs-team-charter.pod			Perl Documentation Team charter
 Porting/epigraphs.pod				the release epigraphs used over the years
 Porting/exclude_contrib.txt			Data about contributors that do not want to be listed in AUTHORS
