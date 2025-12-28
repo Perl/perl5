@@ -1393,7 +1393,8 @@ hashes, lists and even references.  (See L<"Context"|perldata/Context>
 and L<perldata/List value constructors>, and L<perlref/Assigning to
 References>.)
 
-Unlike in C, the scalar assignment operator produces a valid lvalue.
+The scalar assignment operator returns its left operand, i.e. the scalar
+assigned to.  Unlike in C, it produces a valid lvalue.
 Modifying an assignment is equivalent to doing the assignment and
 then modifying the variable that was assigned to.  This is useful
 for modifying a copy of something, like this:
