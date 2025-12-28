@@ -4134,6 +4134,10 @@ installvendorscript (vendorscript.U):
 	those systems using AFS. For extra portability, only this variable
 	should be used in makefiles.
 
+intmaxsize (intsize.U):
+	This variable contains the value of the INTMAXSIZE symbol, which
+	indicates to the C program how many bytes there are in intmax_t.
+
 intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
 	indicates to the C program how many bytes there are in an int.
