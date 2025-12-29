@@ -530,48 +530,6 @@ EOF
 
 
 {
-    # Check that function pointer types are supported
-
-    my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Capture';
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |TYPEMAP: <<EOF
-        |int (*)(char *, long)   T_INT_FN_PTR
-        |
-        |INPUT
-        |
-        |T_INT_FN_PTR
-        |    $var = ($type)INT2PTR(SvIV($arg))
-        |EOF
-        |
-        |void foo(mymarker1, fn_ptr)
-        |    int                   mymarker1
-        |    int (*)(char *, long) fn_ptr
-EOF
-
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? XSRETURN ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    # remove all spaces for easier matching
-    my $sout = $out;
-    $sout =~ s/[ \t]+//g;
-
-    like($sout,
-        qr/\Qint(*fn_ptr)(char*,long)=(int(*)(char*,long))INT2PTR(SvIV(ST(1)))/,
-        "function pointer declared okay");
-}
-
-{
     # Check that default expressions are template-expanded.
     # Whether this is sensible or not, Dynaloader and other distributions
     # rely on it
@@ -3638,6 +3596,62 @@ EOF
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
+{
+    # Test function pointer args and return values
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |int (*)(char *, long) T_FP
+        |INPUT
+        |T_FP
+        |    $var = get_fn_ptr($arg)
+        |OUTPUT
+        |T_FP
+        |    set_fn_ptr($var, $arg)
+        |
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "function pointer arg type",
+            [ Q(<<'EOF') ],
+                |short
+                |foo(int (*)(char *, long) p)
+EOF
+            [ 0, 0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
+                        "var decl" ],
+        ],
+        [
+            "function pointer arg type, INPUT",
+            [ Q(<<'EOF') ],
+                |short
+                |foo(p)
+                |    int (*)(char *, long) p
+EOF
+            [ 0, 0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
+                        "var decl" ],
+        ],
+        [
+            "function pointer return type",
+            [ Q(<<'EOF') ],
+                |int (*)(char *, long)
+                |foo(short s)
+EOF
+            [ 0, 0, qr/\Qint ( * RETVAL  )(char * , long);/,
+                        "RETVAL decl" ],
+            [ 0, 0, qr/set_fn_ptr\(RETVAL,.*\)/, "RETVAL set value" ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
 
 {
     # Test CASE: blocks
