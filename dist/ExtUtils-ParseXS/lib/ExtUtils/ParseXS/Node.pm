@@ -5649,14 +5649,20 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
     my $s = $self->{text};
+
+    # Note that this doesn't check for the validity of an overload op
+    # name, to allow for forwards compatibility.
     while ($s =~  s{^
                     \s*
                     ( [\w:"\\)+\-*/%<>.&|^!~{}=]+ )
                     \s*
                    }{}x)
     {
-        $self->{ops}{$1} = 1;
-        $xsub->{overload_name_seen}{$1} = 1;
+        my $op = $1;
+        $self->{ops}{$op} = 1;
+        $pxs->Warn("Warning: duplicate OVERLOAD op name: '$op'")
+            if exists $xsub->{overload_name_seen}{$op};
+        $xsub->{overload_name_seen}{$op} = 1;
     }
 
     # Mark the current package as being overloaded

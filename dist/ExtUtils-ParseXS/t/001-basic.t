@@ -5177,6 +5177,16 @@ EOF
             [ 0, 0, qr{\Q"Foo::(>="},  "has Foo::(>= method"  ],
             [ 0, 0, qr{\Q"Foo::(cmp"}, "has Foo::(cmp method" ],
         ],
+        [
+            "OVERLOAD dup op",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    OVERLOAD:   cmp cmp
+EOF
+            [ 1, 0, qr{\QWarning: duplicate OVERLOAD op name: 'cmp'},
+                "got expected error"   ],
+        ],
 
     );
 
