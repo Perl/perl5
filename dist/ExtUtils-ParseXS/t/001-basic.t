@@ -2314,9 +2314,9 @@ EOF
             [ Q(<<'EOF') ],
                 |int
                 |foo(abc)
-                |    int +
+                |    int + foo;
 EOF
-            [ 1, 0, qr/^\QError: invalid parameter declaration '    int +'\E.* line 7\n/,   "got expected error" ],
+            [ 1, 0, qr/^\QError: invalid parameter declaration '    int + foo;'\E.* line 7\n/,   "got expected error" ],
         ],
         [
             "INPUT no length()",
@@ -2564,6 +2564,62 @@ EOF
                 |    int abc;
 EOF
             [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+                "got expected err" ],
+        ],
+
+        # Missing initialiser
+
+        [
+            "INPUT: missing '=' initialiser",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc =  
+EOF
+            [ 1, 0, qr/\QError: missing '=' initialiser value/,
+                "got expected err" ],
+        ],
+        [
+            "INPUT: missing '=' initialiser with semicolon",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc =  ;
+EOF
+            [ 1, 0, qr/\QError: missing '=' initialiser value/,
+                "got expected err" ],
+        ],
+        [
+            "INPUT: missing '+' initialiser",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc +  
+EOF
+            [ 1, 0, qr/\QError: missing '+' initialiser value/,
+                "got expected err" ],
+        ],
+        [
+            "INPUT: missing '+' initialiser with semicolon",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc +  ;
+EOF
+            [ 1, 0, qr/\QError: missing '+' initialiser value/,
+                "got expected err" ],
+        ],
+        [
+            "INPUT: NOT missing ';' initialiser",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc ;  
+EOF
+            # this is NOT an error
+        ],
+        [
+            "INPUT: missing ';' initialiser with semicolon",
+            [ Q(<<'EOF') ],
+                |void foo(abc)
+                |    int abc ;  ;
+EOF
+            [ 1, 0, qr/\QError: missing ';' initialiser value/,
                 "got expected err" ],
         ],
     );

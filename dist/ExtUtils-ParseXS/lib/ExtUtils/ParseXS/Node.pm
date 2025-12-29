@@ -6340,7 +6340,11 @@ sub parse {
     # normal typemap), such as 'int foo = ($type)SvIV($arg)'
     my $var_init = '';
     my $init_op;
-    ($init_op, $var_init) = ($1, $2) if $line =~ s/\s* ([=;+]) \s* (.*) $//xs;
+    if ($line =~ s/\s* ([=;+]) \s* (.*) $//xs) {
+        ($init_op, $var_init) = ($1, $2);
+        $pxs->death("Error: missing '$init_op' initialiser value")
+            unless $var_init =~ /\S/ && $var_init !~ /^\s*;\s*$/;
+    }
 
     $line =~ s/\s+/ /g;
 
