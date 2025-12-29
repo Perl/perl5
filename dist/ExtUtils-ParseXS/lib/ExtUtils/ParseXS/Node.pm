@@ -5290,7 +5290,7 @@ sub parse {
         # interpretation for backcomp, but warn.
 
         unless ($s =~ /^ ((ENABLE|DISABLE) D? ;?) \s* $ /xi) {
-            $pxs->death("Error: $keyword: ENABLE/DISABLE")
+            $pxs->death("Error: $keyword: invalid value '$s' (should be ENABLE/DISABLE)")
         }
         my ($value, $en_dis) = ($1, $2);
         $self->{enable} = $en_dis eq 'ENABLE' ? 1 : 0;
@@ -5302,7 +5302,9 @@ sub parse {
     else {
         # SCOPE / VERSIONCHECK / EXPORT_XSUB_SYMBOLS
         $s =~ /^(ENABLE|DISABLE)\s*$/
-            or $pxs->death("Error: $keyword: ENABLE/DISABLE");
+            or $pxs->death(
+              "Error: $keyword: invalid value '$s' (should be ENABLE/DISABLE)"
+            );
         $self->{enable} = $1 eq 'ENABLE' ? 1 : 0;
     }
 

@@ -4484,6 +4484,7 @@ EOF
 
 {
     # Test valid syntax of global-effect ENABLE/DISABLE keywords
+    # except PROTOTYPES.
     #
     # Check that disallowed variants give errors and allowed variants
     # get as far as generating a boot XSUB
@@ -4501,28 +4502,28 @@ EOF
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: ENABLEblah
 EOF
-            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: trailing text",
             [ Q(<<'EOF') ],
-                |VERSIONCHECK: DISABLE blah # bloo +$%
+                |VERSIONCHECK: DISABLE blah # bloo +%
 EOF
-            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: lower case",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: disable
 EOF
-            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: semicolon",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: DISABLE;
 EOF
-            [ 1, 0, qr{Error: VERSIONCHECK: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'DISABLE;' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
@@ -4530,21 +4531,21 @@ EOF
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: ENABLEblah
 EOF
-            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: trailing text",
             [ Q(<<'EOF') ],
-                |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +$%
+                |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +%
 EOF
-            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'diSAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: lower case",
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: disable
 EOF
-            [ 1, 0, qr{Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
@@ -4554,7 +4555,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "file SCOPE: lower case",
@@ -4563,7 +4564,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
     );
@@ -4660,7 +4661,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "PROTOTYPES: trailing text",
@@ -4670,17 +4671,17 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'ENABLE blah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "PROTOTYPES: trailing text and comment)",
             [ Q(<<'EOF') ],
-                |PROTOTYPES: DISABLE blah # bloo +$%
+                |PROTOTYPES: DISABLE blah # bloo +%
                 |
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{Error: PROTOTYPES: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
 
@@ -4849,7 +4850,7 @@ EOF
 }
 
 {
-    # Test per-XSUB ENABLE/DISABLE keywords except PROTOTYPES
+    # Test XSUB-scoped SCOPE keyword
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
@@ -4869,20 +4870,20 @@ EOF
         [
             "file SCOPE: trailing text",
             [ Q(<<'EOF') ],
-                |SCOPE: EnAble blah # bloo +$%
+                |SCOPE: EnAble blah # bloo +%
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: trailing text",
             [ Q(<<'EOF') ],
                 |void
                 |foo()
-                |SCOPE: EnAble blah # bloo +$%
+                |SCOPE: EnAble blah # bloo +%
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: lower case",
@@ -4891,7 +4892,7 @@ EOF
                 |foo()
                 |SCOPE: enable
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: semicolon",
@@ -4900,7 +4901,7 @@ EOF
                 |foo()
                 |SCOPE: ENABLE;
 EOF
-            [ 1, 0, qr{Error: SCOPE: ENABLE/DISABLE}, "should die" ],
+            [ 1, 0, qr{\QError: SCOPE: invalid value 'ENABLE;' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
