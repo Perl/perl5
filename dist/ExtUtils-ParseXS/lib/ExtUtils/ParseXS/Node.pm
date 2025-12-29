@@ -6599,8 +6599,13 @@ sub parse {
     $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
     $self->{is_setmagic} = 0;
 
-    if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-        $xbody->{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+    if ($line =~ /^\s*SETMAGIC\s*:\s*(.*?)\s*$/) {
+        my $arg = $1;
+        unless ($arg =~ /^(ENABLE|DISABLE)$/) {
+            $pxs->blurt("Error: SETMAGIC: invalid value '$arg' (should be ENABLE/DISABLE)");
+            return;
+        }
+        $xbody->{OUTPUT_SETMAGIC_state} = ($arg eq "ENABLE" ? 1 : 0);
         $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
         $self->{is_setmagic} = 1;
         return;

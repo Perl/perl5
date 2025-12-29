@@ -2945,6 +2945,17 @@ EOF
         ],
 
         [
+            "OUTPUT SETMAGIC bad arg",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int abc)
+                |    OUTPUT:
+                |      SETMAGIC: 1
+EOF
+            [ 1, 0, qr{\QError: SETMAGIC: invalid value '1' (should be ENABLE/DISABLE)}, "" ],
+        ],
+
+        [
             "OUTPUT with IN_OUTLIST",
             [ Q(<<'EOF') ],
                 |char*
