@@ -4961,6 +4961,25 @@ EOF
             [ 1, 0, qr{\QError: cannot parse ALIAS definitions from 'bar ='\E.*line 7},
                    "got expected error" ],
         ],
+        [
+            "ALIAS zero", # zero used to be silently ignored
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS: 0
+EOF
+            [ 1, 0, qr{\QError: cannot parse ALIAS definitions from '0'\E.*line 7},
+                   "got expected error" ],
+        ],
+        [
+            "ALIAS empty",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    ALIAS:
+EOF
+            # just concerend with not getting an error
+        ],
     );
 
     test_many($preamble, 'boot_Foo', \@test_fns);

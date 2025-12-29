@@ -6178,10 +6178,6 @@ sub parse {
     my $line = $self->{line};  # line of text to be processed
 
     ExtUtils::ParseXS::Utilities::trim_whitespace($line);
-    # XXX this skip doesn't make sense - we've already confirmed
-    # line has non-whitespace  with the /\S/; so we just skip if the
-    # line is "0" ?
-    return unless $line;
 
     my $orig = $line; # keep full line for error messages
 
@@ -6270,7 +6266,7 @@ sub parse {
     }
 
     $pxs->blurt("Error: cannot parse ALIAS definitions from '$orig'")
-        if $line;
+        if $line =~ /\S/;
 
     1;
 }
