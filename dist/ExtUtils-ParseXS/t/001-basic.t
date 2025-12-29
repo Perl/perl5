@@ -777,7 +777,7 @@ EOF
 }
 
 {
-    # Test for ellipis in the signature.
+    # Test for ellipsis in the signature.
 
     my $pxs = ExtUtils::ParseXS->new;
     my $text = Q(<<'EOF');
@@ -1211,7 +1211,7 @@ EOF
 
 
 {
-    # Test XSUB declarations declarations
+    # Test XSUB declarations.
     # Generates errors which don't result in an XSUB being emitted,
     # so use 'undef' in the test_many() call to not strip down output
 
