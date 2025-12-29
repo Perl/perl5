@@ -5487,6 +5487,62 @@ EOF
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
+
+{
+    # Test warnings for junk after a codeblock-ish keyword
+    # and confirm that such junk is indeed ignored.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns;
+
+    for my $kw (qw(
+                    CLEANUP
+                    CODE
+                    INIT
+                    POSTCALL
+                    PPCODE
+                    PREINIT
+                ))
+    {
+        push @test_fns,
+            [
+                "Warn if junk after $kw'",
+                [ Q(<<"EOF") ],
+                    |int foo()
+                    |$kw: blah
+                    |  codeline
+EOF
+                [ 0, 0, qr{\Q#line 7 "(input)"\E\n  codeline\n#line},
+                "junk ignored" ],
+                [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+                        "should die" ],
+            ];
+    }
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+
+    @test_fns = (
+        [
+            "Warn if junk after BOOT'",
+            [ Q(<<"EOF") ],
+                |BOOT: blah
+                |  codeline
+EOF
+            [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+                    "should die" ],
+        ],
+    );
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+
 {
     # Test C-preprocessor parsing
 

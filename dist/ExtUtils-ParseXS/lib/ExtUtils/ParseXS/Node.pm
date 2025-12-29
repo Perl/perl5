@@ -1459,10 +1459,11 @@ sub parse {
     $self->{lines} = [ @{$pxs->{line}} ];
     @{$pxs->{line}} = ();
 
-    # Ignore any text following the keyword on the same line.
-    # XXX this quietly ignores any such text - really it should
-    # warn, but not yet for backwards compatibility.
-    shift @{$self->{lines}};
+    # Text following the keyword is ignored rather than being treated
+    # as the first line of code.
+    my $line0 = shift @{$self->{lines}};
+    $pxs->Warn("Warning: text after keyword ignored: '$line0'")
+        if defined $line0 && $line0 =~ /\S/;
 
     1;
 }
@@ -5765,9 +5766,21 @@ package ExtUtils::ParseXS::Node::codeblock;
 BEGIN { $build_subclass->(-parent => 'multiline',
 )};
 
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
-# No parse() method: we just use the inherited Node::multiline's one
+    $self->SUPER::parse($pxs); # use multiline::parse()
 
+    # Text following the keyword is ignored rather than being treated
+    # as the first line of code.
+    my $line0 = shift @{$self->{lines}};
+    $pxs->Warn("Warning: text after keyword ignored: '$line0'")
+        if defined $line0 && $line0 =~ /\S/;
+    return 1;
+}
 
 # Emit the lines of code, skipping any initial blank lines,
 # and possibly wrapping in '#line' directives.
@@ -5780,12 +5793,7 @@ sub as_code {
 
     my @lines = map "$_\n", @{$self->{lines}};
 
-    my $n;
-
-    # Ignore any text following the keyword on the same line.
-    # XXX this quietly ignores any such text - really it should
-    # warn, but not yet for backwards compatibility.
-    $n++, shift @lines if @lines;
+    my $n = 1;
 
     # strip leading blank lines
     $n++, shift @lines while @lines && $lines[0] !~ /\S/;
