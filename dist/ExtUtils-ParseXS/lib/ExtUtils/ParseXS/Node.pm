@@ -5652,13 +5652,18 @@ sub parse {
 
     # Note that this doesn't check for the validity of an overload op
     # name, to allow for forwards compatibility.
-    while ($s =~  s{^
-                    \s*
-                    ( [\w:"\\)+\-*/%<>.&|^!~{}=]+ )
-                    \s*
-                   }{}x)
-    {
-        my $op = $1;
+    for my $op (split ' ', $s) {
+        if ($op !~  m{^
+                        ^
+                        ( [\w:"\\)+\-*/%<>.&|^!~{}=]+ )
+                        $
+                       }x)
+
+        {
+            # Names with invalid characters are currently silently ignored
+            next;
+        }
+
         $self->{ops}{$op} = 1;
         $pxs->Warn("Warning: duplicate OVERLOAD op name: '$op'")
             if exists $xsub->{overload_name_seen}{$op};
