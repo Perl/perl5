@@ -5649,7 +5649,12 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
     my $s = $self->{text};
-    while ($s =~  s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
+    while ($s =~  s{^
+                    \s*
+                    ( [\w:"\\)+\-*/%<>.&|^!~{}=]+ )
+                    \s*
+                   }{}x)
+    {
         $self->{ops}{$1} = 1;
         $xsub->{overload_name_seen}{$1} = 1;
     }
