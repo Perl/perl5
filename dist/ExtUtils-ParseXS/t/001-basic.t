@@ -4756,6 +4756,61 @@ EOF
 
 
 {
+    # Test REQUIRE keyword.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo::Bar PACKAGE = Foo::Bar
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "REQUIRE: 1",
+            [ Q(<<'EOF') ],
+                |REQUIRE: 1
+EOF
+            # not croaking is sufficient test here
+        ],
+        [
+            "REQUIRE: 1.0",
+            [ Q(<<'EOF') ],
+                |REQUIRE: 1.0
+EOF
+            # not croaking is sufficient test here
+        ],
+        [
+            "REQUIRE: 999999.9",
+            [ Q(<<'EOF') ],
+                |REQUIRE: 999999.9
+EOF
+            [ 1, 0, qr{\QError: xsubpp 999999.9 (or better) required--this is only},
+                    "got err" ],
+        ],
+        [
+            "REQUIRE: missing arg",
+            [ Q(<<'EOF') ],
+                |REQUIRE:   
+EOF
+            [ 1, 0, qr{\QError: REQUIRE expects a version number},
+                    "got err" ],
+        ],
+        [
+            "REQUIRE: bad arg",
+            [ Q(<<'EOF') ],
+                |REQUIRE: abc
+EOF
+            [ 1, 0, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got 'abc'},
+                    "got err" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
     # Test file-scoped keywords appearing in XSUB scope
 
     my $preamble = Q(<<'EOF');
