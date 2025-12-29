@@ -4691,6 +4691,71 @@ EOF
 
 
 {
+    # Test FALLBACK keyword.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo::Bar PACKAGE = Foo::Bar
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "FALLBACK: TRUE",
+            [ Q(<<'EOF') ],
+                |FALLBACK: TRUE
+                |
+                |void
+                |foo()
+                |    OVERLOAD: cmp
+EOF
+            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_yes}, "sets true" ],
+        ],
+        [
+            "FALLBACK: FALSE",
+            [ Q(<<'EOF') ],
+                |FALLBACK: FALSE
+                |
+                |void
+                |foo()
+                |    OVERLOAD: cmp
+EOF
+            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_no}, "sets false" ],
+        ],
+        [
+            "FALLBACK: UNDEF",
+            [ Q(<<'EOF') ],
+                |FALLBACK: UNDEF
+                |
+                |void
+                |foo()
+                |    OVERLOAD: cmp
+EOF
+            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_undef}, "sets undef" ],
+        ],
+        [
+            "FALLBACK: XYZ",
+            [ Q(<<'EOF') ],
+                |FALLBACK: XYZ
+                |
+                |void
+                |foo()
+                |    OVERLOAD: cmp
+EOF
+            [ 1, 0, qr{\QError: FALLBACK: invalid value 'XYZ' (should be TRUE/FALSE/UNDEF)},
+                    "got err" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
     # Test file-scoped keywords appearing in XSUB scope
 
     my $preamble = Q(<<'EOF');

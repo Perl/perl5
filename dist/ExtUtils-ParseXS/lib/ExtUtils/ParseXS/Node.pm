@@ -5005,7 +5005,7 @@ sub parse {
     $s = 'FALSE' if $s eq '0';
     $s = uc($s);
 
-    $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF")
+    $pxs->death("Error: FALLBACK: invalid value '$s' (should be TRUE/FALSE/UNDEF)")
         unless $s =~ /^(TRUE|FALSE|UNDEF)$/;
 
     $self->{value} = $s;
