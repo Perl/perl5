@@ -4666,6 +4666,44 @@ EOF
 
 
 {
+    # Test file-scoped keywords appearing in XSUB scope
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns;
+
+    for my $kw (qw(
+                    EXPORT_XSUB_SYMBOLS
+                    PROTOTYPES
+                    VERSIONCHECK
+                    FALLBACK
+                    INCLUDE
+                    INCLUDE_COMMAND
+                    REQUIRE
+                    BOOT
+                ))
+    {
+        push @test_fns,
+
+        [
+            "$kw not in file scope",
+            [ Q(<<"EOF") ],
+                |int foo()
+                |$kw: blah
+EOF
+            [ 1, 0, qr{Error: misplaced '$kw:'}, "should die" ],
+        ],
+    }
+
+    test_many($preamble, undef, \@test_fns);
+}
+
+{
     # Test per-XSUB ENABLE/DISABLE keywords except PROTOTYPES
 
     my $preamble = Q(<<'EOF');
