@@ -5433,6 +5433,24 @@ EOF
                    "got f2 entries" ],
             [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
+        [
+            "INTERFACE with MACRO",
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: f1 f2
+                |    INTERFACE_MACRO: GETMACRO SETMACRO
+EOF
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::f1", XS_Foo_foo);\E\n
+                       \s+\QSETMACRO(cv,f1);\E
+                      }x,
+                   "got f1 entries" ],
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::f2", XS_Foo_foo);\E\n
+                       \s+\QSETMACRO(cv,f2);\E
+                      }x,
+                   "got f2 entries" ],
+            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
+        ],
     );
 
     test_many($preamble, 'boot_Foo', \@test_fns);
@@ -5463,6 +5481,21 @@ EOF
             [ 0, 0, qr{\b\QdXSFUNCTION(void)},
                    "got XSFUNCTION declaration" ],
             [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(void,cv,XSANY.any_dptr);},
+                   "got XSFUNCTION assign" ],
+            [ 0, 0, qr{\Q((void (*)())(XSFUNCTION))();},
+                   "got XSFUNCTION call" ],
+        ],
+        [
+            'INTERFACE with MACRO',
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: f1 f2
+                |    INTERFACE_MACRO: GETMACRO SETMACRO
+EOF
+            [ 0, 0, qr{\b\QdXSFUNCTION(void)},
+                   "got XSFUNCTION declaration" ],
+            [ 0, 0, qr{\QXSFUNCTION = GETMACRO(void,cv,XSANY.any_dptr);},
                    "got XSFUNCTION assign" ],
             [ 0, 0, qr{\Q((void (*)())(XSFUNCTION))();},
                    "got XSFUNCTION call" ],
