@@ -927,7 +927,7 @@ EOF
                 'void',
                 'foo() const',
             ],
-            [ 1, 0, qr/\Qconst modifier only allowed on XSUBs which are C++ methods/,
+            [ 1, 0, qr/\QError: const modifier only allowed on XSUBs which are C++ methods/,
                 "got expected err" ],
         ],
 

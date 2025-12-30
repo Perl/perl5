@@ -2363,7 +2363,8 @@ sub parse {
     my ($class, $name, $params_text, $const) = ($1, $2, $3, $4);
 
     if (defined $const and !defined $class) {
-        $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
+        $pxs->blurt(
+          "Error: const modifier only allowed on XSUBs which are C++ methods");
         undef $const;
     }
 
@@ -5072,38 +5073,39 @@ sub parse {
 
     my $f      = $self->{text};
     my $is_cmd = $self->{is_cmd};
+    my $key    = $is_cmd ? 'INCLUDE_COMMAND' : 'INCLUDE';
 
     if ($is_cmd) {
         $f = $self->QuoteArgs($f) if $^O eq 'VMS';
 
-        $pxs->death("INCLUDE_COMMAND: command missing")
+        $pxs->death("Error: INCLUDE_COMMAND: command missing")
             unless length $f;
 
-        $pxs->death("INCLUDE_COMMAND: pipes are illegal")
+        $pxs->death("Error: INCLUDE_COMMAND: pipes are illegal")
             if $f =~ /^\s*\|/ or $f =~ /\|\s*$/;
     }
     else {
-        $pxs->death("INCLUDE: filename missing")
+        $pxs->death("Error: INCLUDE: filename missing")
             unless length $f;
 
-        $pxs->death("INCLUDE: output pipe is illegal")
+        $pxs->death("Error: INCLUDE: output pipe is illegal")
             if $f =~ /^\s*\|/;
 
         # simple minded recursion detector
-        $pxs->death("INCLUDE loop detected")
+        $pxs->death("Error: INCLUDE: loop detected")
             if $pxs->{IncludedFiles}{$f};
 
         ++$pxs->{IncludedFiles}->{$f} unless $f =~ /\|\s*$/;
 
         if ($f =~ /\|\s*$/ && $f =~ /^\s*perl\s/) {
-            $pxs->Warn(
-                  "The INCLUDE directive with a command is discouraged."
-                . " Use INCLUDE_COMMAND instead! In particular using 'perl'"
-                . " in an 'INCLUDE: ... |' directive is not guaranteed to pick"
-                . " up the correct perl. The INCLUDE_COMMAND directive allows"
-                . " the use of \$^X as the currently running perl, see"
-                . " 'perldoc perlxs' for details."
-            );
+            $pxs->WarnHint(
+              "Note: the INCLUDE directive with a command is discouraged",
+              <<'HINT');
+Use INCLUDE_COMMAND instead! In particular, using 'perl' in an
+'INCLUDE: ... |' directive is not guaranteed to pick up the correct perl.
+The INCLUDE_COMMAND directive allows the use of $^X as the currently
+running perl, see 'perldoc perlxs' for details.
+HINT
         }
     }
 
@@ -5130,11 +5132,11 @@ sub parse {
 
         open ($pxs->{in_fh}, "-|", $f)
             or $pxs->death(
-                "Cannot run command '$f' to include its output: $!");
+                "Error: INCLUDE_COMMAND: cannot run command '$f' to include its output: $!");
     }
     else {
         open($pxs->{in_fh}, $f)
-            or $pxs->death("Cannot open '$f': $!");
+            or $pxs->death("Error: INCLUDE: cannot open '$f': $!");
     }
 
     $self->{old_filename} = $pxs->{in_filename};
