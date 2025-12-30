@@ -1,5 +1,5 @@
-#ifndef PERL_SEEN_HV_MACRO_H_ /* compile once */
-#define PERL_SEEN_HV_MACRO_H_
+#ifndef PERL_HV_MACRO_H_ /* compile once */
+#define PERL_HV_MACRO_H_
 
 #if IVSIZE == 8
 #define CAN64BITHASH
