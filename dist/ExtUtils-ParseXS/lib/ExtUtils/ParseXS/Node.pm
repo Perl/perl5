@@ -2685,6 +2685,12 @@ sub parse {
                             . "length() parameter '$len_name'");
                 undef $default;
             }
+            unless (defined $type) {
+                $pxs->blurt(
+                    "Error: length($len_name) doesn't have a type specified");
+                $type = 'STRLEN'; # stop cascading problems while
+                                  # blurting the rest of the file
+            }
         }
         else {
             $pxs->blurt(  "Error: length() pseudo-parameter not allowed "

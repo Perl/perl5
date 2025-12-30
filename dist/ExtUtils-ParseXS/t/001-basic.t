@@ -1348,6 +1348,15 @@ EOF
             [ 1, 0, qr{\QError: length() on non-parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
+        [
+            "length() no type",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, length(s))
+EOF
+            [ 1, 0, qr{\QError: length(s) doesn't have a type specified\E.*line 6},
+                   "got expected error" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
