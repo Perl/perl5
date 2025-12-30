@@ -5409,7 +5409,7 @@ EOF
     # Test INTERFACE keyword - boot code
 
     my $preamble = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
+        |MODULE = Foo::Bar PACKAGE = Foo::Bar PREFIX = foobar_
         |
         |PROTOTYPES:  DISABLE
         |
@@ -5423,11 +5423,11 @@ EOF
                 |foo()
                 |    INTERFACE: f1 f2
 EOF
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::f1", XS_Foo_foo);\E\n
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
                        \s+\QXSINTERFACE_FUNC_SET(cv,f1);\E
                       }x,
                    "got f1 entries" ],
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::f2", XS_Foo_foo);\E\n
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
                        \s+\QXSINTERFACE_FUNC_SET(cv,f2);\E
                       }x,
                    "got f2 entries" ],
@@ -5441,15 +5441,57 @@ EOF
                 |    INTERFACE: f1 f2
                 |    INTERFACE_MACRO: GETMACRO SETMACRO
 EOF
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::f1", XS_Foo_foo);\E\n
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
                        \s+\QSETMACRO(cv,f1);\E
                       }x,
                    "got f1 entries" ],
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::f2", XS_Foo_foo);\E\n
+            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
                        \s+\QSETMACRO(cv,f2);\E
                       }x,
                    "got f2 entries" ],
             [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
+        ],
+
+        # Assorted name mangling - test the table in perlxs:
+        #
+        #   Interface name     Perl function name   C function name
+        #    --------------     ------------------   ----------------
+        #    abc                Foo::Bar::abc        abc
+        #    foobar_abc         Foo::Bar::abc        foobar_abc
+        #    X::Y::foobar_def   X::Y::foobar_def     X::Y::foobar_def
+
+        [
+            'INTERFACE simple name',
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: abc
+EOF
+            [ 0, 0, qr{newXS.*"Foo::Bar::abc"},         "perl name" ],
+            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},         "XS name"   ],
+            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,abc)}, "C name"    ],
+        ],
+        [
+            'INTERFACE name with prefix',
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: foobar_abc
+EOF
+            [ 0, 0, qr{newXS.*"Foo::Bar::abc"},                "perl name" ],
+            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},                "XS name"   ],
+            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,foobar_abc)}, "C name"    ],
+        ],
+        [
+            'INTERFACE name with class',
+            [ Q(<<'EOF') ],
+                |void
+                |foo()
+                |    INTERFACE: X::Y::foobar_abc
+EOF
+            [ 0, 0, qr{newXS.*"X::Y::foobar_abc"}, "perl name" ],
+            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},    "XS name"   ],
+            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,X::Y::foobar_abc)}, "C name"],
         ],
     );
 
