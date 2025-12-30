@@ -4812,6 +4812,109 @@ EOF
 
 
 {
+    # Test INCLUDE, INCLUDE_COMMAND keywords.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo::Bar PACKAGE = Foo::Bar
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+
+        # INCLUDE working
+
+        [
+            "INCLUDE: basic",
+            [ Q(<<'EOF') ],
+                |INCLUDE: XSInclude.xsh  
+EOF
+            [ 0, 0, qr{newXS.*\bXS_Foo__Bar_include_ok\b},
+                    "included XSUB was processed" ],
+        ],
+
+        # INCLUDE errors
+
+        [
+            "INCLUDE: no filename",
+            [ Q(<<'EOF') ],
+                |INCLUDE:   
+EOF
+            [ 1, 0, qr{\QError: INCLUDE: filename missing},
+                    "got err" ],
+        ],
+        [
+            "INCLUDE: no pipe",
+            [ Q(<<'EOF') ],
+                |INCLUDE: |foo
+EOF
+            [ 1, 0, qr{\QError: INCLUDE: output pipe is illegal},
+                    "got err" ],
+        ],
+        [
+            "INCLUDE: no loop",
+            [ Q(<<'EOF') ],
+                | # this file INCLUDEs itself
+                |INCLUDE: XSloop.xsh
+EOF
+            [ 1, 0, qr{\QError: INCLUDE: loop detected},
+                    "got err" ],
+        ],
+        [
+            "INCLUDE: no such file",
+            [ Q(<<'EOF') ],
+                |INCLUDE: NoSuchFile.xsh
+EOF
+            [ 1, 0, qr{\QError: INCLUDE: cannot open 'NoSuchFile.xsh': },
+                    "got err" ],
+        ],
+
+        # INCLUDE_COMMAND working
+
+        [
+            "INCLUDE_COMMAND: basic",
+            [ Q(<<'EOF') ],
+                |INCLUDE_COMMAND: $^X -Ilib -It/lib -MIncludeTester -e IncludeTester::print_xs
+EOF
+            [ 0, 0, qr{newXS.*\bXS_Foo__Bar_sum\b},
+                    "included XSUB was processed" ],
+        ],
+
+
+        # INCLUDE_COMMAND errors
+
+        [
+            "INCLUDE_COMMAND: no command",
+            [ Q(<<'EOF') ],
+                |INCLUDE_COMMAND:     
+EOF
+            [ 1, 0, qr{\QError: INCLUDE_COMMAND: command missing},
+                    "got err" ],
+        ],
+        [
+            "INCLUDE_COMMAND: no pipe - on left",
+            [ Q(<<'EOF') ],
+                |INCLUDE_COMMAND:   |  blah
+EOF
+            [ 1, 0, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
+                    "got err" ],
+        ],
+        [
+            "INCLUDE_COMMAND: no pipe - on right",
+            [ Q(<<'EOF') ],
+                |INCLUDE_COMMAND:   blah  |   
+EOF
+            [ 1, 0, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
+                    "got err" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
     # Test file-scoped keywords appearing in XSUB scope
 
     my $preamble = Q(<<'EOF');
