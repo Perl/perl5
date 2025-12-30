@@ -5607,6 +5607,44 @@ EOF
 
 
 {
+    # Test PREINIT: keyword
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "PREINIT basic",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(aaa, bbb)
+                |    int aaa
+                |  PREINIT:
+                |     XXX
+                |     YYY
+                |  INPUT:
+                |     short bbb
+                |  CODE:
+                |     ZZZ
+EOF
+            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [ 0, 0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
+            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [ 0, 0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
+            [ 0, 0, qr{int\s+aaa.*XXX.*YYY.*bbb.*ZZZ}s,"in sequence"    ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test INIT: keyword
 
     my $preamble = Q(<<'EOF');
