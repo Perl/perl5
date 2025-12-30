@@ -4801,6 +4801,29 @@ EOF
         ],
 
         [
+            # Prior to v5.43.5-157-gae3ec82909, xsubpp 3.61, a TYPEMAP
+            # appearing *directly* after an XSUB affected that preceding
+            # XSUB.
+            #
+            # [ This was due to TYPEMAPs being processed on the fly by
+            # fetch_para(): while looking for the end of the XSUB,
+            # it would process the following typemap, *then* return the
+            # XSUB lines to be processed by the main loop. Thankfully
+            # TYPEMAP is now handled as a normal keyword. ]
+
+            "TYPEMAP after XSUB",
+            [ Q(<<'EOF') ],
+                |int foo()
+                |
+                |TYPEMAP: <<EOF
+                |int T_UV
+                |EOF
+EOF
+
+            [ 0, 1, qr{UV}, "no UV found" ],
+        ],
+
+        [
             'TYPEMAP syntax err',
             [ Q(<<'EOF') ],
                 |TYPEMAP: <EOF
