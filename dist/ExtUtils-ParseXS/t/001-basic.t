@@ -4692,6 +4692,132 @@ EOF
 
 
 {
+    # Test BOOT keyword.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo::Bar PACKAGE = Foo::Bar
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "BOOT: basic'",
+            [ Q(<<"EOF") ],
+                |BOOT:
+                |
+                |
+                |  code1
+                |  code2
+                |
+                |
+                |
+EOF
+            [ 0, 0, qr{\Q#line 6 "(input)"\E\n\n\n  code1\n  code2\n\n#line},
+            "seen code" ],
+        ],
+        [
+            "Warn if junk after BOOT'",
+            [ Q(<<"EOF") ],
+                |BOOT: blah
+                |  codeline
+EOF
+            [ 0, 0, qr{\Q#line 6 "(input)"\E\n  codeline\n\n#line},
+            "junk ignored" ],
+            [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+                    "should die" ],
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns);
+}
+
+
+{
+    # Test TYPEMAP keyword.
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "TYPEMAP: basic'",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |mytype T_MYTYPE
+                |INPUT
+                |T_MYTYPE
+                |   $var = get_mytype($arg)
+                |OUTPUT
+                |T_MYTYPE
+                |   set_mytype($arg, $var)
+                |EOF
+                |
+                |mytype foo(mytype abc)
+EOF
+            [ 0, 0, qr{\Qmytype	abc = get_mytype(ST(0))}, "get" ],
+            [ 0, 0, qr{set_mytype\(.*?, RETVAL\)},        "set" ],
+        ],
+        [
+            "TYPEMAP: single quote'",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<' a.b+c'
+                |mytype T_IV
+                | a.b+c
+                |
+                |int foo(mytype abc)
+EOF
+            [ 0, 0, qr{\Qmytype	abc = (mytype)SvIV(ST(0))}, "get" ],
+        ],
+        [
+            "TYPEMAP: double quote'",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<" a.b+c' "
+                |mytype T_UV
+                | a.b+c' 
+                |
+                |int foo(mytype abc)
+EOF
+            [ 0, 0, qr{\Qmytype	abc = (mytype)SvUV(ST(0))}, "get" ],
+        ],
+        [
+            "line continuation directly after TYPEMAP",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |
+                |foo_t T_FOO
+                |
+                |EOF
+                |void foo(int i, \
+                |         int j)
+EOF
+
+            [ 0, 0, qr{XS_Foo_foo}, "no errs" ],
+        ],
+
+        [
+            'TYPEMAP syntax err',
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <EOF
+                |
+EOF
+
+            [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
+                "got expected err msg"
+            ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
     # Test FALLBACK keyword.
 
     my $preamble = Q(<<'EOF');
@@ -5787,6 +5913,7 @@ EOF
 {
     # Test warnings for junk after a codeblock-ish keyword
     # and confirm that such junk is indeed ignored.
+    # (BOOT is tested elsewhere as it's not an XSUB keyword)
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
@@ -6381,48 +6508,6 @@ EOF
             [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
                 "got expected err msg"
             ],
-        ],
-    );
-
-    test_many($preamble, undef, \@test_fns);
-}
-
-
-{
-    # Test reporting of bad syntax on TYPEMAP lines.
-
-    my $preamble = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES:  DISABLE
-        |
-EOF
-
-    my @test_fns = (
-        [
-            'TYPEMAP syntax err',
-            [ Q(<<'EOF') ],
-                |TYPEMAP: <EOF
-                |
-EOF
-
-            [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
-                "got expected err msg"
-            ],
-        ],
-        [
-            "line continuation directly after TYPEMAP",
-            [ Q(<<'EOF') ],
-                |TYPEMAP: <<EOF
-                |
-                |foo_t T_FOO
-                |
-                |EOF
-                |void foo(int i, \
-                |         int j)
-EOF
-
-            [ 0, 0, qr{XS}, "no errs" ],
         ],
     );
 
