@@ -1,5 +1,5 @@
-#ifndef REGCOMP_INTERNAL_H
-#define REGCOMP_INTERNAL_H
+#ifndef PERL_REGCOMP_INTERNAL_H
+#define PERL_REGCOMP_INTERNAL_H
 #ifndef STATIC
 #define STATIC  static
 #endif
@@ -1216,4 +1216,4 @@ static const scan_data_t zero_scan_data = {
 #define REGNODE_STEP_OVER(ret,t1,t2) \
     NEXT_OFF(REGNODE_p(ret)) = ((sizeof(t1)+sizeof(t2))/sizeof(regnode))
 
-#endif /* REGCOMP_INTERNAL_H */
+#endif /* PERL_REGCOMP_INTERNAL_H */

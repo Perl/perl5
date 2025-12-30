@@ -17,10 +17,10 @@
 * - INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY
 */
 
-#ifndef PERL_INC_MACROS_H
+#ifndef PERL_INC_MACRO_H
 
 /* protect against multiple inclusions */
-#define PERL_INC_MACROS_H 1
+#define PERL_INC_MACRO_H 1
 
 #ifdef APPLLIB_EXP
 #	define INCPUSH_APPLLIB_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), \
