@@ -4908,6 +4908,24 @@ EOF
             [ 1, 0, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
                     "got err" ],
         ],
+        [
+            "INCLUDE_COMMAND: non-zero exit",
+            # the filler 'PROTOTYPES' lines before and after are to
+            # check that the line number reported for the error is the
+            # right one (previously it was using the last line of the
+            # current paragraph + 1).
+            [ Q(<<'EOF') ],
+                |PROTOTYPES: DISABLE
+                |INCLUDE_COMMAND: $^X -e "exit(1)"
+                |PROTOTYPES: DISABLE
+                |PROTOTYPES: DISABLE
+EOF
+            [ 1, 0, qr{\QError: INCLUDE_COMMAND: got return code 0x0100\E
+                       \Q when reading from pipe '\E
+                       .*
+                       \Q' in (input), line 6\E}x,
+                    "got err" ],
+        ],
     );
 
     test_many($preamble, 'boot_Foo', \@test_fns);

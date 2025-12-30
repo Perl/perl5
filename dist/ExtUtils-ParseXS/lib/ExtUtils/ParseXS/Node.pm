@@ -5185,10 +5185,11 @@ HINT
 
     @$pxs{@save_keys} = @saved;
 
-    if ($isPipe and $? ) {
-        --$pxs->{lastline_no};
-        print STDERR "Error reading from pipe '$self->{inc_filename}': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
-        exit 1;
+    if ($isPipe and $?) {
+        $pxs->death(sprintf
+            "Error: %s: got return code 0x%04x when reading from pipe '%s'",
+            $key, $?, $self->{inc_filename}
+        );
     }
 
     1;
