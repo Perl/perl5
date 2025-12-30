@@ -5046,7 +5046,7 @@ sub parse {
 
     # check that the version number is of the form n.n
     $pxs->death("Error: REQUIRE: expected a MMM(.NNN) number, got '$ver'")
-        unless $ver =~ /^\d+(\.\d*)?/;
+        unless $ver =~ /^\d+(\.\d*)?$/;
 
     my $got = $ExtUtils::ParseXS::VERSION;
     $pxs->death("Error: xsubpp $ver (or better) required--this is only $got.")

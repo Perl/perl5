@@ -4952,7 +4952,7 @@ EOF
         [
             "REQUIRE: 1.0",
             [ Q(<<'EOF') ],
-                |REQUIRE: 1.0
+                |REQUIRE:    1.0   
 EOF
             # not croaking is sufficient test here
         ],
@@ -4978,6 +4978,14 @@ EOF
                 |REQUIRE: abc
 EOF
             [ 1, 0, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got 'abc'},
+                    "got err" ],
+        ],
+        [
+            "REQUIRE: bad arg trailing junk",
+            [ Q(<<'EOF') ],
+                |REQUIRE: 3.0.0
+EOF
+            [ 1, 0, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got '3.0.0'},
                     "got err" ],
         ],
     );
