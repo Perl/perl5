@@ -5163,7 +5163,7 @@ HINT
     }
 
     $pxs->{lastline} = $_;
-    chomp $pxs->{lastline};
+    chomp $pxs->{lastline} if defined $pxs->{lastline};
     $pxs->{lastline_no} = $self->{line_no} = $.;
 
     # Parse included file
