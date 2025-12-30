@@ -5010,6 +5010,12 @@ sub parse {
         unless $s =~ /^(TRUE|FALSE|UNDEF)$/;
 
     $self->{value} = $s;
+
+    # Only only FALLBACK allowed per package
+
+    $pxs->Warn("Warning: duplicate FALLBACK: entry")
+        if exists $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}};
+
     $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}} = $s;
 
     1;

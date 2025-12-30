@@ -4876,6 +4876,32 @@ EOF
             [ 1, 0, qr{\QError: FALLBACK: invalid value 'XYZ' (should be TRUE/FALSE/UNDEF)},
                     "got err" ],
         ],
+        [
+            "FALLBACK: dup warning",
+            [ Q(<<'EOF') ],
+                |FALLBACK: TRUE
+                |FALLBACK: TRUE
+                |
+                |void
+                |foo()
+EOF
+            [ 1, 0, qr{\QWarning: duplicate FALLBACK: entry},
+                    "got warning" ],
+        ],
+        [
+            "FALLBACK: no dup warning",
+            [ Q(<<'EOF') ],
+                |FALLBACK: TRUE
+                |
+                |MODULE = Foo::Bar PACKAGE = Baz
+                |
+                |FALLBACK: TRUE
+                |
+                |void
+                |foo()
+EOF
+            # no errors expected
+        ],
     );
 
     test_many($preamble, 'boot_Foo', \@test_fns);
