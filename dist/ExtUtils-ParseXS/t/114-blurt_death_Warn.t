@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the Warn, death() etc methods themselves.
+
 use strict;
 use warnings;
 $| = 1;
@@ -102,8 +105,7 @@ $self->{line_no} = [];
     is( $self->report_error_count, 1, "Error count incremented correctly" );
 }
 
-SKIP: {
-    skip "death() not testable as long as it contains hard-coded 'exit'", 1;
+{
 
     $self->{line} = [
         'Alpha',
@@ -114,16 +116,22 @@ SKIP: {
     $self->{line_no} = [ 17 .. 20 ];
     $self->{in_filename} = 'myfile1';
 
-    my $message = "Code is not inside a function";
-    eval {
-        my $stderr = PrimitiveCapture::capture_stderr(sub {
-            death( $self, $message);
-        });
-        like( $stderr,
-            qr/$message in $self->{in_filename}, line 20/,
-            "Got expected death output",
-        );
-    };
+    my $message = "reports of my death are premature";
+    my ($stderr, $err);
+    $stderr = PrimitiveCapture::capture_stderr(sub {
+        # NB: can't use 'local' here because under 5.8.x, $self is a
+        # pseudo hash and trying to localise gives this error:
+        #    Can't localize pseudo-hash element
+        my $old = $self->{config_die_on_error};
+        $self->{config_die_on_error} = 1; # don't exit
+        eval { death( $self, $message); };
+        $err = $@;
+        $self->{config_die_on_error} = $old;
+    });
+    like( $err,
+        qr/$message in $self->{in_filename}, line 20/,
+        "Got expected death output",
+    );
 }
 
 pass("Passed all tests in $0");
