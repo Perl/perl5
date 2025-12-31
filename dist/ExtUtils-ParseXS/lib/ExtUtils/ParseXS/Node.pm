@@ -2673,7 +2673,6 @@ sub parse {
 
     # Process 'length(foo)' pseudo-parameter
 
-    my $is_length;
     my $len_name;
 
     if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
@@ -2682,7 +2681,6 @@ sub parse {
         unless $pxs->{config_allow_argtypes};
 
         $len_name = $1;
-        $is_length = 1;
         if (defined $default) {
             $pxs->blurt(  "Error: default value not allowed on "
                         . "length() parameter '$len_name'");
@@ -2702,22 +2700,21 @@ sub parse {
             $out_type = ''; # avoid cascading errors
         }
 
+        $self->{no_init}   = 1;
+        $self->{is_length} = 1;
+        $self->{len_name}  = $len_name;
+
         # Note that cross-checking with the foo parameter associated with
         # length(foo) is done near the end of Node::Params::parse(), after
         # all params have been parsed.
     }
 
-    # Handle ANSI params: those which have a type or 'length(s)',
+    # Mark ANSI params: those which have a type (including 'length(s)')
     # and which thus don't need a matching INPUT line.
 
-    if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-        @$self{qw(type is_ansi)} = ($type, 1);
-
-        if ($is_length) {
-            $self->{no_init}   = 1;
-            $self->{is_length} = 1;
-            $self->{len_name}  = $len_name;
-        }
+    if (defined $type) { # 'int foo' or 'int length(foo)'
+        $self->{type}    = $type;
+        $self->{is_ansi} = 1;
     }
 
     $self->{in_out} = $out_type if length $out_type;
@@ -2733,7 +2730,7 @@ sub parse {
 
         # The default expression for reporting usage. For backcompat,
         # sometimes preserve the spaces either side of the '='
-        $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+        $report_def =    ($self->{is_ansi} ? '' : $sp1)
                        . "=$sp2$default";
         $self->{default_usage} = $report_def;
         $self->{default} = $default;
@@ -4395,7 +4392,8 @@ EOF
     }
 
     # Emit declaration/init code for any parameters which were
-    # declared with a type or length(foo). Do the length() ones first.
+    # declared with a type in the signature (rather than in INPUT).
+    # Do all the length() ones first.
 
     for my $ioparam (
             grep $_->{is_ansi},
