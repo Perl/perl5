@@ -2701,6 +2701,10 @@ sub parse {
                         . " with length($len_name)");
             $out_type = ''; # avoid cascading errors
         }
+
+        # Note that cross-checking with the foo parameter associated with
+        # length(foo) is done near the end of Node::Params::parse(), after
+        # all params have been parsed.
     }
 
     # Handle ANSI params: those which have a type or 'length(s)',
@@ -4021,6 +4025,8 @@ sub parse {
         my $name = $param->{len_name};
         if (exists $self->{names}{$name}) {
             $self->{names}{$name}{has_length} = 1;
+            $pxs->blurt("Error: length() on placeholder parameter '$name'")
+                unless defined $self->{names}{$name}{type};
         }
         else {
             $pxs->blurt("Error: length() on non-parameter '$name'");

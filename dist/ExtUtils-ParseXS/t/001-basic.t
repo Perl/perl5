@@ -1358,6 +1358,15 @@ EOF
                    "got expected error" ],
         ],
         [
+            "length() on placeholder var",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(s, int length(s))
+EOF
+            [ 1, 0, qr{\QError: length() on placeholder parameter 's'\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
             "length() no type",
             [ Q(<<'EOF') ],
                 |void
