@@ -4028,6 +4028,11 @@ sub parse {
             $pxs->blurt(  "Error: default value for $name not allowed"
                         . " when length($name) also present")
                 if defined $self->{names}{$name}{default};
+
+            my $in_out = $self->{names}{$name}{in_out};
+            $pxs->blurt(  "Error: '$in_out' modifier on '$name'"
+                        . " can't be used with length()")
+                if defined $in_out and $in_out !~ /^IN/;
         }
         else {
             $pxs->blurt("Error: length() on non-parameter '$name'");

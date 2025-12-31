@@ -1434,10 +1434,60 @@ EOF
             [ 1, 0, qr{\QError: 'IN_OUTLIST' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
+
+        # Ban OUT* on the corresponding parameter var. Currently we can't
+        # retrieve the length without also setting the char* var.
+
+        # IN* variants ok
+        [
+            "IN s, length(s)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(IN char *s, int length(s))
+EOF
+            # no error expected
+        ],
+        [
+            "IN_OUT s, length(s)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(IN_OUT char *s, int length(s))
+EOF
+            # no error expected
+        ],
+        [
+            "IN_OUTLIST s, length(s)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(IN_OUTLIST char *s, int length(s))
+EOF
+            # no error expected
+        ],
+
+        # non-IN* variants not ok
+        [
+            "OUT s, length(s)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(OUT char *s, int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'OUT' modifier on 's' can't be used with length()\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "OUTLIST s, length(s)",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(OUTLIST char *s, int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'OUTLIST' modifier on 's' can't be used with length()\E.*line 6},
+                   "got expected error" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
+
 
 {
     # check that args to an auto-called C function are correct
