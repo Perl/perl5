@@ -1357,6 +1357,56 @@ EOF
             [ 1, 0, qr{\QError: length(s) doesn't have a type specified\E.*line 6},
                    "got expected error" ],
         ],
+
+        # Ban IN_OUT etc. A couple of these sort-of could make sense,
+        # but aren't particularly useful, and the semantics aren't
+        # obvious. So ban the 'might work' ones as well as the 'makes no
+        # sense' ones.
+        [
+            "IN length()",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, IN int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'IN' modifier can't be used with length(s)\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "OUT length()",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, OUT int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'OUT' modifier can't be used with length(s)\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "IN_OUT length()",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, IN_OUT int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'IN_OUT' modifier can't be used with length(s)\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "OUTLIST length()",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, OUTLIST int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'OUTLIST' modifier can't be used with length(s)\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "IN_OUTLIST length()",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, IN_OUTLIST int length(s))
+EOF
+            [ 1, 0, qr{\QError: 'IN_OUTLIST' modifier can't be used with length(s)\E.*line 6},
+                   "got expected error" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

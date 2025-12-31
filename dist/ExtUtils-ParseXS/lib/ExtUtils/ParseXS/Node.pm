@@ -2652,6 +2652,7 @@ sub parse {
 
     # Process optional IN/OUT etc modifier
 
+    my $orig_out_type = $out_type;
     if (defined $out_type) {
         $pxs->blurt(
                 "Error: parameter IN/OUT modifier not allowed under -noinout")
@@ -2692,6 +2693,13 @@ sub parse {
                 "Error: length($len_name) doesn't have a type specified");
             $type = 'STRLEN'; # stop cascading problems while
                               # blurting the rest of the file
+        }
+
+        if (defined $orig_out_type) {
+            # Ban IN_OUT etc with length().
+            $pxs->blurt( "Error: '$orig_out_type' modifier can't be used"
+                        . " with length($len_name)");
+            $out_type = ''; # avoid cascading errors
         }
     }
 
