@@ -1325,16 +1325,16 @@ EOF
             "length() default value",
             [ Q(<<'EOF') ],
                 |void
-                |foo(char *s, length(s) = 0)
+                |foo(char *s, int length(s) = 0)
 EOF
             [ 1, 0, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
-            "length() default value of strong var",
+            "length() default value of string var",
             [ Q(<<'EOF') ],
                 |void
-                |foo(length(s), char *s = "")
+                |foo(int length(s), char *s = "")
 EOF
             [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
                    "got expected error" ],
@@ -1343,7 +1343,7 @@ EOF
             "length() no matching var",
             [ Q(<<'EOF') ],
                 |void
-                |foo(length(s))
+                |foo(int length(s))
 EOF
             [ 1, 0, qr{\QError: length() on non-parameter 's'\E.*line 6},
                    "got expected error" ],
