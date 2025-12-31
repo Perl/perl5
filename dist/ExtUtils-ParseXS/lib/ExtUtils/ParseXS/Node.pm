@@ -2581,12 +2581,12 @@ sub parse {
     my $param_text                             = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
-    $_ = $param_text;
 
     # Decompose parameter into its components.
     # Note that $name can be either 'foo' or 'length(foo)'
 
     my ($out_type, $type, $name, $sp1, $sp2, $default) =
+        $param_text =~
             /^
                  (?:
                      (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
@@ -2606,13 +2606,13 @@ sub parse {
             /x;
 
     unless (defined $name) {
-        if (/^ SV \s* \* $/x) {
+        if ($param_text =~ /^ SV \s* \* $/x) {
             # special-case SV* as a placeholder for backwards
             # compatibility.
             $self->{var} = 'SV *';
             return 1;
         }
-        $pxs->blurt("Error: unparseable XSUB parameter: '$_'");
+        $pxs->blurt("Error: unparseable XSUB parameter: '$param_text'");
         return;
     }
 
