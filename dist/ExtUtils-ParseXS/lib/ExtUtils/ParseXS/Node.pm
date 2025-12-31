@@ -2902,10 +2902,6 @@ sub lookup_input_typemap {
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
         if ($xstype eq 'T_PV' and $self->{has_length}) {
-            if (defined $default) {
-                $pxs->blurt(  "Error: default value for $var not allowed"
-                            . " when length($var) also present");
-            }
             return "($type)SvPV($arg, STRLEN_length_of_$var);",
                    $eval_vars, 0;
         }
@@ -4025,8 +4021,13 @@ sub parse {
         my $name = $param->{len_name};
         if (exists $self->{names}{$name}) {
             $self->{names}{$name}{has_length} = 1;
+
             $pxs->blurt("Error: length() on placeholder parameter '$name'")
                 unless defined $self->{names}{$name}{type};
+
+            $pxs->blurt(  "Error: default value for $name not allowed"
+                        . " when length($name) also present")
+                if defined $self->{names}{$name}{default};
         }
         else {
             $pxs->blurt("Error: length() on non-parameter '$name'");

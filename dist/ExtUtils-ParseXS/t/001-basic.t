@@ -686,7 +686,7 @@ EOF
         |
         |int
         |foo(  a   ,  char   * b  , OUT  int  c  ,  OUTLIST int  d   ,    \
-        |      IN_OUT char * * e    =   1  + 2 ,   long length(e)   ,    \
+        |      IN_OUT char * * e    =   1  + 2 ,   long length(b)   ,    \
         |      char* f="abc"  ,     g  =   0  ,   ...     )
 EOF
 
@@ -1344,6 +1344,15 @@ EOF
             [ Q(<<'EOF') ],
                 |void
                 |foo(int length(s), char *s = "")
+EOF
+            [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
+            "length() default value of string var, not T_PV",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(int length(s), char **s = "")
 EOF
             [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
                    "got expected error" ],
