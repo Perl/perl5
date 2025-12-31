@@ -1331,6 +1331,15 @@ EOF
                    "got expected error" ],
         ],
         [
+            "length() NO_INIT",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, int length(s) = NO_INIT)
+EOF
+            [ 1, 0, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
+                   "got expected error" ],
+        ],
+        [
             "length() default value of string var",
             [ Q(<<'EOF') ],
                 |void
