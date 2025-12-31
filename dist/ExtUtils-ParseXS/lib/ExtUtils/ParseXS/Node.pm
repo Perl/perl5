@@ -2653,12 +2653,11 @@ sub parse {
     # Process optional IN/OUT etc modifier
 
     if (defined $out_type) {
-        if ($pxs->{config_allow_inout}) {
-            $out_type =  $out_type eq 'IN' ? '' : $out_type;
-        }
-        else {
-            $pxs->blurt("Error: parameter IN/OUT modifier not allowed under -noinout");
-        }
+        $pxs->blurt(
+                "Error: parameter IN/OUT modifier not allowed under -noinout")
+            unless $pxs->{config_allow_inout};
+
+        $out_type =  $out_type eq 'IN' ? '' : $out_type;
     }
     else {
         $out_type = '';
@@ -2677,7 +2676,10 @@ sub parse {
     my $len_name;
 
     if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-        if ($pxs->{config_allow_argtypes}) {
+        $pxs->blurt(  "Error: length() pseudo-parameter not allowed "
+                    . "under -noargtypes")
+        unless $pxs->{config_allow_argtypes};
+
             $len_name = $1;
             $is_length = 1;
             if (defined $default) {
@@ -2691,11 +2693,6 @@ sub parse {
                 $type = 'STRLEN'; # stop cascading problems while
                                   # blurting the rest of the file
             }
-        }
-        else {
-            $pxs->blurt(  "Error: length() pseudo-parameter not allowed "
-                        . "under -noargtypes");
-        }
     }
 
     # Handle ANSI params: those which have a type or 'length(s)',
