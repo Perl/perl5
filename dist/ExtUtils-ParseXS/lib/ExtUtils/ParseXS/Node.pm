@@ -2680,19 +2680,19 @@ sub parse {
                     . "under -noargtypes")
         unless $pxs->{config_allow_argtypes};
 
-            $len_name = $1;
-            $is_length = 1;
-            if (defined $default) {
-                $pxs->blurt(  "Error: default value not allowed on "
-                            . "length() parameter '$len_name'");
-                undef $default;
-            }
-            unless (defined $type) {
-                $pxs->blurt(
-                    "Error: length($len_name) doesn't have a type specified");
-                $type = 'STRLEN'; # stop cascading problems while
-                                  # blurting the rest of the file
-            }
+        $len_name = $1;
+        $is_length = 1;
+        if (defined $default) {
+            $pxs->blurt(  "Error: default value not allowed on "
+                        . "length() parameter '$len_name'");
+            undef $default;
+        }
+        unless (defined $type) {
+            $pxs->blurt(
+                "Error: length($len_name) doesn't have a type specified");
+            $type = 'STRLEN'; # stop cascading problems while
+                              # blurting the rest of the file
+        }
     }
 
     # Handle ANSI params: those which have a type or 'length(s)',
