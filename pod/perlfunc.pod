@@ -2849,7 +2849,7 @@ Case Charts available at L<https://www.unicode.org/charts/case/>.
 If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
 
 This function behaves the same way under various pragmas, such as within
-L<S<C<"use feature 'unicode_strings">>|feature/The 'unicode_strings' feature>,
+L<S<C<"use feature 'unicode_strings'">>|feature/The 'unicode_strings' feature>,
 as L<C<lc>|/lc EXPR> does, with the single exception of
 C<fc> of I<LATIN CAPITAL LETTER SHARP S> (U+1E9E) within the
 scope of L<S<C<use locale>>|locale>.  The foldcase of this character

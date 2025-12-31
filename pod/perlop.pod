@@ -1296,7 +1296,7 @@ list.
 =back
 
 As of Perl 5.26, the list-context range operator on strings works as expected
-in the scope of L<< S<C<"use feature 'unicode_strings">>|feature/The
+in the scope of L<< S<C<"use feature 'unicode_strings'">>|feature/The
 'unicode_strings' feature >>. In previous versions, and outside the scope of
 that feature, it exhibits L<perlunicode/The "Unicode Bug">: its behavior
 depends on the internal encoding of the range endpoint.
