@@ -1,5 +1,6 @@
 : BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
+: ALL NON-STATIC FUNCTIONS DEFINED BY PERL NEED TO BE LISTED IN THIS FILE.
 :
 : This file is known to be processed by regen/embed.pl, autodoc.pl,
 : makedef.pl, Devel::PPPort, and porting/diag.t.
@@ -16,7 +17,6 @@
 : Many macros (as opposed to functions) listed here are the complete full name,
 : though we may want to start converting those to have full names.
 :
-: All non-static functions defined by perl need to be listed in this file.
 : embed.pl uses the entries here to construct:
 :   1) proto.h to declare to the compiler the function interfaces; and
 :   2) embed.h to create short name macros
