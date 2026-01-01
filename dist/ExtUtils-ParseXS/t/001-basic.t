@@ -1322,6 +1322,16 @@ EOF
             [ 0, 0, qr{^\s+\Qfoo(s, XSauto_length_of_s);}m, "autocall"   ],
         ],
         [
+            "length() len type not in typemap allowed",
+            [ Q(<<'EOF') ],
+                |void
+                |foo(char *s, blah ** length(s))
+EOF
+            [ 0, 0, qr{^\s+\Qblah **\E\s+XSauto_length_of_s;}m, "decl xsauto" ],
+
+        ],
+
+        [
             "length() default value",
             [ Q(<<'EOF') ],
                 |void
