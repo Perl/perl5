@@ -12,7 +12,7 @@
 : 'Perl_' (for publicly visible functions) or 'S_' (for internal-to-a-file
 : static ones).  In many instances a macro is defined that is the name in this
 : file, and which expands to call the real (full) name, with any appropriate
-: thread context paramaters, thus hiding that detail from the typical code.
+: thread context parameters, thus hiding that detail from the typical code.
 :
 : Many macros (as opposed to functions) listed here are the complete full name,
 : though we may want to start converting those to have full names.
