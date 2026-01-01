@@ -465,11 +465,12 @@
 :        * create PERL_ARGS_ASSERT_foo;
 :        * add embed.h entry (unless overridden by the 'M' or 'o' flags)
 :
-:   'C'  Intended for core use only. This indicates to XS writers that they
-:        shouldn't be using this function. Devel::PPPort informs them of this,
-:        for example. Some functions have to be accessible everywhere even if
-:        they are not intended for public use. An example is helper functions
-:        that are called from inline ones that are publicly available.
+:   'C'  Intended for core use only.  XS writers may not even know they exist,
+:	 since they don't get documented in perlapi.  But should they try
+:	 to use them anyway, Devel::PPPort informs them that this is a mistake.
+:	 Some functions have to be accessible everywhere even if they are not
+:	 intended for public use. An example is helper functions that are
+:	 called from inline ones that are publicly available.
 :        Requires one of /[iIpS]/ flags.
 :
 :        * add entry to the list of symbols available on all platforms unless e
@@ -482,10 +483,10 @@
 :
 :   'D'  Function is deprecated.
 :
-:	(Add a comment to the function source when adding this flag indicating
-:	what release it is first being deprecated in.  This will prevent having
-:	to dig up this information when deciding if enough releases have passed
-:	to actually remove the function.)
+:	(You should add a comment to the source when adding this flag
+:	indicating what release it is first being deprecated in.  This will
+:	prevent having to dig up this information when deciding if enough
+:	releases have passed to actually remove it.)
 :
 :        proto.h: add __attribute__deprecated__
 :        autodoc.pl adds a note to this effect in the doc entry
