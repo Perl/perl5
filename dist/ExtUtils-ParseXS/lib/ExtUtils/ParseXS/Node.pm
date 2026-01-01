@@ -2543,8 +2543,8 @@ BEGIN { $build_subclass->(
     'default_usage', # Str:  how to report default value in "usage:..." error
     'is_ansi',       # Bool: param's type was specified in signature
     'is_length',     # Bool: param is declared as 'length(foo)' in signature
-    'has_length',    # Bool: this param has a matching 'length(foo)'
-                     #       parameter in the signature
+    'length_param',  # Obj:  'foo' param's matching 'length(foo)' parameter
+                     #       node object, if any
     'len_name' ,     # Str:  the 'foo' in 'length(foo)' in signature
     'is_synthetic',  # Bool: var like 'THIS': we pretend it was in the sig
 
@@ -2898,7 +2898,7 @@ sub lookup_input_typemap {
         # as a pseudo-parameter, then override the normal typedef - which
         # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
         # STRLEN_length_of_foo)
-        if ($xstype eq 'T_PV' and $self->{has_length}) {
+        if ($xstype eq 'T_PV' and $self->{length_param}) {
             return "($type)SvPV($arg, STRLEN_length_of_$var);",
                    $eval_vars, 0;
         }
@@ -4011,13 +4011,14 @@ sub parse {
     $self->{nargs}    = $nargs;
     $self->{min_args} = $nargs - $opt_args;
 
-    # for each parameter of the form 'length(foo)', mark the corresponding
-    # 'foo' parameter as 'has_length', or error out if foo not found.
+    # for each parameter of the form 'length(foo)', set 'length_param' in
+    # the corresponding 'foo' parameter to point to that length parameter
+    # object, or error out if foo not found.
     for my $param (@{$self->{kids}}) {
         next unless $param->{is_length};
         my $name = $param->{len_name};
         if (exists $self->{names}{$name}) {
-            $self->{names}{$name}{has_length} = 1;
+            $self->{names}{$name}{length_param} = $param;
 
             $pxs->blurt("Error: length() on placeholder parameter '$name'")
                 unless defined $self->{names}{$name}{type};
