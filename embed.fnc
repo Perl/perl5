@@ -19,7 +19,8 @@
 :
 : embed.pl uses the entries here to construct:
 :   1) proto.h to declare to the compiler the function interfaces; and
-:   2) embed.h to create short name macros
+:   2) embed.h to create short name macros, and to control the visibility of
+:      other macros
 :
 : Static functions internal to a file need not appear here, but there is
 : benefit to declaring them here:
@@ -71,8 +72,14 @@
 : backport the fixed version to modules.  The only disadvantage khw can think
 : of is the namespace pollution one.
 :
-: WARNING: Any macro created in a header file is visible to XS code, unless
-: care is taken to wrap it within C preprocessor guards like the following
+: The default for any macro created after v5.43.6 is to hide it from all but
+: the Perl core.  Use the visibility-affecting flags described below to change
+: that.
+:
+: WARNING: The default hiding of symbols from XS code applies only to functions
+: and macros.  Other types of values that are created in a header file, such as
+: typedefs and enum names, will be visible to XS code, unless care is taken to
+: wrap them within C preprocessor guards like the following
 :
 :    #if defined(PERL_CORE)
 :    ...
@@ -577,11 +584,20 @@
 :        instead you define the macro as 'PERL_FOO' (all uppercase), the
 :        embed.h entry will use all uppercase.
 :
+:	 The default visibility of macros created before 5.43.7 is visible
+:	 everywhere, so the visibility flags are ignored.  Starting in that
+:	 release, the default visibility of newly created macros is core-only,
+:	 so the visibility flags do have effect.  To cause a pre-5.43.7 symbol
+:	 to be affected by a visibility flag, remove the symbol from its
+:	 override list in regen/embed.pl.
+:
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all
 :             platforms
 :         suppress embed.h entry (when no 'p' flag), as the implementation
 :             should furnish the macro
+:	  #undef this symbol in embed.h as needed to match the specified
+:	  visibility.
 :
 :   'M'  The implementation is furnishing its own macro instead of relying on
 :        the automatically generated short name macro (which simply expands to
@@ -734,9 +750,13 @@
 :
 :          Any doc entry is marked that this element may change.
 :
-:   'y'  Typedef.  The element names a type rather than being a macro
+:   'y'  Typedef.  The element names a type rather than being a function or
+:	 macro.  These are always visible to XS code unless guarded by
+:	 preprocessor directives,
 :
 :   '@'  The element names an array rather than being a macro or function.
+:	 These are always visible to XS code unless guarded by preprocessor
+:	 directives,
 :
 :          autodoc.pl automatically suppresses any usage information.
 :
