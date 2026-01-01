@@ -123,8 +123,8 @@ perlapio - perl's IO abstraction interface.
 
 Perl's source code, and extensions that want maximum portability,
 should use the above functions instead of those defined in ANSI C's
-F<stdio.h>.  The perl headers (in particular F<perlio.h>) will
-C<#define> them to the I/O mechanism selected at Configure time.
+F<stdio.h>.  The perl headers (in particular F<perlio.h>) C<#define>
+them properly.
 
 The functions are modeled on those in F<stdio.h>, but parameter order
 has been "tidied up a little".
@@ -133,36 +133,28 @@ S<C<PerlIO *>> takes the place of S<C<FILE *>>. Like S<C<FILE *>>, it
 should be treated as opaque (it is probably safe to assume it is a
 pointer to something).
 
-There are currently two implementations:
+There is one implementation extant, C<USE_PERLIO>.  This allows perl
+more control over how IO is done than plain stdio would, as it decouples
+IO from the way the operating system and C library choose to do things.
+C<PerlIO> has an extra layer of indirection than FILE -- it is a
+pointer-to-a-pointer.  This allows the S<C<PerlIO *>> to remain with a
+known value while swapping the implementation around underneath I<at run
+time>. This makes all the above calls true (but very simple) functions
+(not macros) which call the underlying implementation.
 
-=over 4
+This implementation was introduced just after perl5.7.0, and is
+described in L<perliol>.
 
-=item 1. USE_STDIO
+Prior to 5.16.0, a different implementation was also available, C<USE_STDIO>.
+In it, all the above functions were #define'd to stdio functions or were
+trivial wrapper functions which call stdio. In this case, S<C<PerlIO *>>
+was actually S<C<FILE *>>.
 
-All above are #define'd to stdio functions or are trivial wrapper
-functions which call stdio. In this case I<only> PerlIO * is a FILE *.
-This has been the default implementation since the abstraction was
-introduced in perl5.003_02.
+This implementation has not been available since 5.16.0.  It had been
+the default implementation before that, since it was introduced in
+perl5.003_02.
 
-=for apidoc Amnh#||USE_STDIO
-
-=item 2. USE_PERLIO
-
-Introduced just after perl5.7.0, this is a re-implementation of the
-above abstraction which allows perl more control over how IO is done
-as it decouples IO from the way the operating system and C library
-choose to do things. For USE_PERLIO PerlIO * has an extra layer of
-indirection - it is a pointer-to-a-pointer.  This allows the PerlIO *
-to remain with a known value while swapping the implementation around
-underneath I<at run time>. In this case all the above are true (but
-very simple) functions which call the underlying implementation.
-
-This is the only implementation for which C<PerlIO_apply_layers()>
-does anything "interesting".
-
-The USE_PERLIO implementation is described in L<perliol>.
-
-=back
+=for apidoc mnh#||USE_STDIO
 
 Because F<perlio.h> is a thin layer (for efficiency) the semantics of
 these functions are somewhat dependent on the underlying implementation.
