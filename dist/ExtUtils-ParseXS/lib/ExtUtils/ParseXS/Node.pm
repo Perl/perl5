@@ -2898,15 +2898,6 @@ sub lookup_input_typemap {
         $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
             if $xsub->{decl}{name} =~ /DESTROY$/;
 
-        # For a string-ish parameter foo, if length(foo) was also declared
-        # as a pseudo-parameter, then override the normal typedef - which
-        # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
-        # STRLEN_length_of_foo)
-        if ($xstype eq 'T_PV' and $self->{length_param}) {
-            return "($type)SvPV($arg, STRLEN_length_of_$var);",
-                   $eval_vars, 0;
-        }
-
         # Get the ExtUtils::Typemaps::InputMap object associated with the
         # xstype. This contains the template of the code to be embedded,
         # e.g. 'SvPV_nolen($arg)'
@@ -2966,6 +2957,53 @@ sub lookup_input_typemap {
         # Specify additional environment for when a template derived from a
         # *typemap* is evalled.
         @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
+        $init_template = $expr;
+
+        # For a parameter foo, if length(foo) was also declared as a
+        # pseudo-parameter, then try to modify the normal typemap, which
+        # we would expect to contain SvPV_nolen(...) or similar, into this
+        # form instead: SvPV(..., STRLEN_length_of_foo).
+        # Croak if this isn't possible.
+        # Just accept the typemap as-is if it already contains the correct
+        # STRLEN_length_of_ entry.
+
+        if ($self->{length_param}) {
+            if ($expr =~ /\bSTRLEN_length_of_\$var\b/) {
+                # leave as-is
+            }
+            else {
+                unless ($expr =~
+                            s{  \b
+                                (SvPV\w*)_nolen(\w*)
+                                \(
+                                \s*\$arg\s*
+                                \)
+                            }
+                            {$1$2(\$arg, STRLEN_length_of_\$var)}x
+                ) {
+                    $pxs->deathHint(
+                          "Error: can't modify input typemap for"
+                        . " length($self->{var})",
+                        <<EOF);
+The parameter '$self->{var}' has an associated length($self->{var})
+pseudo-parameter. In cases like this, the XS parser attempts to modify
+a typemap entry such as
+
+    \$var = (\$type)SvPV_nolen(\$arg)
+
+into a similar one which also sets a length, such as
+
+    \$var = (\$type)SvPV(\$arg, STRLEN_length_of_\$var)
+
+In this case, the following typemap did not contain a recognised
+SVPV_nolen() variant:
+
+    $expr
+EOF
+                }
+            }
+        }
+
         $init_template = $expr;
     }
 

@@ -1313,7 +1313,7 @@ EOF
             [ 0, 0, qr{^\s+int\s+XSauto_length_of_s;}m,     "decl int"    ],
 
             [ 0, 0, qr{^ \s+ \Qchar *\E \s+
-                        \Qs = (char *)SvPV(ST(0), STRLEN_length_of_s);}xm,
+                        \Qs = (char *)SvPV(ST(0), STRLEN_length_of_s)}xm,
                                                             "decl s"      ],
 
             [ 0, 0, qr{^\s+\QXSauto_length_of_s = STRLEN_length_of_s}m,
@@ -1329,6 +1329,62 @@ EOF
 EOF
             [ 0, 0, qr{^\s+\Qblah **\E\s+XSauto_length_of_s;}m, "decl xsauto" ],
 
+        ],
+        [
+            # Some CPAN modules do their own explicit length-setting.
+            # Check that such usage continues to work. See the discussion
+            # in PR #23479
+            "length() explict STRLEN_ use",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |byte_t  T_B
+                |INPUT
+                |T_B
+                |  $var = SvPVutf8($arg,STRLEN_length_of_$var)
+                |EOF
+                |
+                |void
+                |foo(byte_t s, size_t length(s))
+EOF
+            [ 0, 0,
+                qr{^\s+byte_t\s+s\s*=\s*\QSvPVutf8(ST(0),STRLEN_length_of_s)}m,
+                "decl/init s" ],
+        ],
+        [
+            # Work with typemaps for non-T_PV stuff which return
+            # templates which could be modified to work with length().
+            "length() modifiable typemap",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |byte_t  T_B
+                |INPUT
+                |T_B
+                |  $var = SvPVutf8_nolen_abc($arg)
+                |EOF
+                |
+                |void
+                |foo(byte_t s, size_t length(s))
+EOF
+            [ 0, 0,
+                qr{^\s+byte_t\s+s\s*=\s*\QSvPVutf8_abc(ST(0), STRLEN_length_of_s)}m,
+                "decl/init s" ],
+        ],
+        [
+            # .. but die if the typemap can't be modified
+            "length() unrecognised typemap",
+            [ Q(<<'EOF') ],
+                |TYPEMAP: <<EOF
+                |byte_t  T_B
+                |INPUT
+                |T_B
+                |  $var = SvPVutf8abc($arg)
+                |EOF
+                |
+                |void
+                |foo(byte_t s, size_t length(s))
+EOF
+            [ 1, 0, qr{\QError: can't modify input typemap for length(s)\E.*line 13},
+                   "got expected error" ],
         ],
 
         [
