@@ -123,15 +123,15 @@ perlapio - perl's IO abstraction interface.
 
 Perl's source code, and extensions that want maximum portability,
 should use the above functions instead of those defined in ANSI C's
-I<stdio.h>.  The perl headers (in particular "perlio.h") will
+F<stdio.h>.  The perl headers (in particular F<perlio.h>) will
 C<#define> them to the I/O mechanism selected at Configure time.
 
-The functions are modeled on those in I<stdio.h>, but parameter order
+The functions are modeled on those in F<stdio.h>, but parameter order
 has been "tidied up a little".
 
-C<PerlIO *> takes the place of FILE *. Like FILE * it should be
-treated as opaque (it is probably safe to assume it is a pointer to
-something).
+S<C<PerlIO *>> takes the place of S<C<FILE *>>. Like S<C<FILE *>>, it
+should be treated as opaque (it is probably safe to assume it is a
+pointer to something).
 
 There are currently two implementations:
 
@@ -164,7 +164,7 @@ The USE_PERLIO implementation is described in L<perliol>.
 
 =back
 
-Because "perlio.h" is a thin layer (for efficiency) the semantics of
+Because F<perlio.h> is a thin layer (for efficiency) the semantics of
 these functions are somewhat dependent on the underlying implementation.
 Where these variations are understood they are noted below.
 
@@ -241,8 +241,8 @@ Note that arguments have been revised to have "file" first.
 
 This corresponds to ungetc().  Note that arguments have been revised
 to have "file" first.  Arranges that next read operation will return
-the byte B<c>.  Despite the implied "character" in the name only
-values in the range 0..0xFF are defined. Returns the byte B<c> on
+the byte C<c>.  Despite the implied "character" in the name only
+values in the range 0..0xFF are defined. Returns the byte C<c> on
 success or -1 (C<EOF>) on error.  The number of bytes that can be
 "pushed back" may vary, only 1 character is certain, and then only if
 it is the last character that was read from the handle.
@@ -301,7 +301,7 @@ seeking the handle to the current logical position.
 
 This corresponds to fseek().  Sends buffered write data to the
 underlying file, or discards any buffered read data, then positions
-the file descriptor as specified by B<offset> and B<whence> (sic).
+the file descriptor as specified by C<offset> and C<whence> (sic).
 This is the correct thing to do when switching between read and write
 on the same handle (see issues with PerlIO_flush() above).  Offset is
 of type C<Off_t> which is a perl Configure value which may not be same
@@ -369,7 +369,7 @@ The first step is to add this line:
 =for apidoc Amnh ||PERLIO_NOT_STDIO
 
 I<before> including any perl header files. (This will probably become
-the default at some point).  That prevents "perlio.h" from attempting
+the default at some point).  That prevents F<perlio.h> from attempting
 to #define stdio functions onto PerlIO functions.
 
 XS code is probably better using "typemap" if it expects FILE *
@@ -385,8 +385,8 @@ Used to get a PerlIO * from a FILE *.
 The mode argument should be a string as would be passed to
 fopen/PerlIO_open.  If it is NULL then - for legacy support - the code
 will (depending upon the platform and the implementation) either
-attempt to empirically determine the mode in which I<f> is open, or
-use "r+" to indicate a read/write stream.
+attempt to empirically determine the mode in which C<f> is open, or
+use C<r+> to indicate a read/write stream.
 
 Once called the FILE * should I<ONLY> be closed by calling
 C<PerlIO_close()> on the returned PerlIO *.
@@ -399,7 +399,7 @@ This is B<not> the reverse of PerlIO_exportFILE().
 =item B<PerlIO_exportFILE(f,mode)>
 
 Given a PerlIO * create a 'native' FILE * suitable for passing to code
-expecting to be compiled and linked with ANSI C I<stdio.h>.  The mode
+expecting to be compiled and linked with ANSI C F<stdio.h>.  The mode
 argument should be a string as would be passed to fopen/PerlIO_open.
 If it is NULL then - for legacy support - the FILE * is opened in same
 mode as the PerlIO *.
@@ -500,7 +500,7 @@ pointer and a "limit".  Do not use this - use PerlIO_set_ptrcnt().
 =item B<PerlIO_has_base(f)>
 
 Returns true if implementation has a buffer, and can return pointer
-to whole buffer and its size. Used by perl for B<-T> / B<-B> tests.
+to whole buffer and its size. Used by perl for C<-T> / C<-B> tests.
 Other uses would be very obscure...
 
 =item B<PerlIO_get_base(f)>
@@ -523,15 +523,15 @@ happened to C<read()> (or whatever) last time IO was requested.
 
 =item PerlIO_apply_layers(aTHX_ f,mode,layers)
 
-The new interface to the USE_PERLIO implementation. The layers ":crlf"
-and ":raw" are the only ones allowed for other implementations and those
-are silently ignored. (As of perl5.8 ":raw" is deprecated.)  Use
+The new interface to the USE_PERLIO implementation. The layers C<:crlf>
+and C<:raw> are the only ones allowed for other implementations and those
+are silently ignored. (As of perl5.8 C<:raw> is deprecated.)  Use
 PerlIO_binmode() below for the portable case.
 
 =item PerlIO_binmode(aTHX_ f,ptype,imode,layers)
 
 The hook used by perl's C<binmode> operator.
-B<ptype> is perl's character for the kind of IO:
+C<ptype> is perl's character for the kind of IO:
 
 =over 8
 
@@ -543,10 +543,10 @@ B<ptype> is perl's character for the kind of IO:
 
 =back
 
-B<imode> is C<O_BINARY> or C<O_TEXT>.
+C<imode> is C<O_BINARY> or C<O_TEXT>.
 
-B<layers> is a string of layers to apply; only ":crlf" makes sense in
-the non-USE_PERLIO case. (As of perl5.8 ":raw" is deprecated in favour
+C<layers> is a string of layers to apply; only C<:crlf> makes sense in
+the non-USE_PERLIO case. (As of perl5.8 C<:raw> is deprecated in favour
 of passing NULL.)
 
 Portable cases are:
