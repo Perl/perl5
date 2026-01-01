@@ -1,6 +1,5 @@
 : BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
-: WARNING:  The meanings of some flags have been changed as of v5.31.0
 :
 : This file is known to be processed by regen/embed.pl, autodoc.pl,
 : makedef.pl, Devel::PPPort, and porting/diag.t.
