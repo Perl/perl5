@@ -2681,6 +2681,7 @@ sub parse {
         unless $pxs->{config_allow_argtypes};
 
         $len_name = $1;
+
         if (defined $default) {
             $pxs->blurt(  "Error: default value not allowed on "
                         . "length() parameter '$len_name'");
@@ -2703,6 +2704,10 @@ sub parse {
         $self->{no_init}   = 1;
         $self->{is_length} = 1;
         $self->{len_name}  = $len_name;
+                             # This is the C variable which will have it's
+                             # value set to the length of the string,
+                             # then used as an arg in an autocall:
+        $self->{var}       = "XSauto_length_of_$len_name";
 
         # Note that cross-checking with the foo parameter associated with
         # length(foo) is done near the end of Node::Params::parse(), after
@@ -2820,7 +2825,6 @@ sub lookup_input_typemap {
 
     my ($type, $arg_num, $var, $init, $no_init, $default)
         = @{$self}{qw(type arg_num var init no_init default)};
-    $var = "XSauto_length_of_$self->{len_name}" if $self->{is_length};
     my $arg = $pxs->ST($arg_num);
 
     # whitespace-tidy the type
@@ -3230,8 +3234,10 @@ sub as_input_code {
         #
         #    XSauto_length_of_s = STRLEN_length_of_s;
 
+        my $lenp       = $self->{length_param};
+        my $xsauto_var = $lenp->{var};
         print "\tSTRLEN\tSTRLEN_length_of_$var;\n";
-        print "\t$self->{length_param}{type}\tXSauto_length_of_$var;\n";
+        print "\t$lenp->{type}\t$xsauto_var;\n";
 
         # The "var = SvPV()" line will be emitted by the main body of this
         # function. Note that the T_PV typemap entry will have already
@@ -3241,7 +3247,7 @@ sub as_input_code {
         # The final assign should be deferred to come after all
         # declarations.
         $xbody->{input_part}{deferred_code_lines} .=
-            "\n\tXSauto_length_of_$var = STRLEN_length_of_$var;\n";
+            "\n\t$xsauto_var = STRLEN_length_of_$var;\n";
     }
 
     # Emit the variable's type and name.
@@ -4091,12 +4097,6 @@ sub C_func_signature {
                    # type) and has become semi-real.
                 && !($param->{var} eq 'RETVAL' && defined($param->{arg_num}));
 
-        if ($param->{is_length}) {
-            push @args, "XSauto_length_of_$param->{len_name}";
-            push @types, $param->{type};
-            next;
-        }
-
         if ($param->{var} eq 'SV *') {
             #backcompat placeholder
             $pxs->blurt("Error: parameter 'SV *' not valid as a C argument");
@@ -4109,7 +4109,9 @@ sub C_func_signature {
         # Ignore fake/alien stuff, except an OUTLIST arg, which
         # isn't passed from perl (so no arg_num), but *is* passed to
         # the C function and then back to perl.
-        next unless defined $param->{arg_num} or $io eq 'OUTLIST';
+        next unless defined $param->{arg_num}
+                 or $io eq 'OUTLIST'
+                 or $param->{is_length};
 
         my $a = $param->{var};
         $a = "&$a" if $param->{is_addr} or $io =~ /OUT/;
