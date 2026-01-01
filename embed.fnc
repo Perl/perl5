@@ -6,7 +6,7 @@
 : makedef.pl, Devel::PPPort, and porting/diag.t.
 :
 : This file contains entries for various functions, macros, typedefs, and
-: arrays defined by perl.  Each entry includes the name, parameters, and
+: other values defined by perl.  Each entry includes the name, parameters, and
 : various attributes about it.  In most functions listed here, the name is a
 : short name, and the function's real name is the short one, prefixed by either
 : 'Perl_' (for publicly visible functions) or 'S_' (for internal-to-a-file
@@ -91,48 +91,49 @@
 : file they are intended for, and the generated PERL_ARGS_ macros will only
 : be available to inline functions in the appropriate context.
 :
-: The 'A' flag is used to make a function and its short name visible everywhere
-:         on all platforms.  This should be used to make it part of Perl's API
-:         contract with XS developers.  The documentation for these is usually
-:         placed in perlapi.  If no documentation exists, that fact is also
-:         noted in perlapi.
+: The 'A' flag is used to make an element visible everywhere on all platforms.
+:	  This flag should be used to make it part of Perl's API contract with
+:	  XS developers.  The documentation for these is usually placed in
+:	  perlapi.  If no documentation exists, that fact is also noted in
+:	  perlapi.
 :
-:         These require one of the /[iIpS]/ flags to give callers a name to use
-:         that won't possibly collide with their own
+:         Functions require one of the /[iIpS]/ flags to give callers a name to
+:         use that won't possibly collide with their own
 :
-: The 'C' flag is used instead for functions and their short names that need to
-:         be accessible everywhere, typically because they are called from a
-:         publicly available macro or inline function, but they are not for
-:         public use by themselves.  The documentation for these is placed in
-:         perlintern.  If no documentation exists, that fact is also noted in
-:         perlintern.
+: The 'C' flag is used instead for elements that need to be accessible
+:	  everywhere, typically because they are called from a publicly
+:	  available macro or inline function, but they are not for public use
+:	  by themselves.  The documentation for these is placed in perlintern.
+:	  If no documentation exists, that fact is also noted in perlintern.
 :
-:	  Use the 'X' flag instead to suppress the short name outside the core
+:	  Use the 'X' flag instead to suppress the short name for functions
+:	  outside the core
 :
-:         These require one of the /[iIpS]/ flags to give callers a name to use
-:         that won't possibly collide with their own
+:         Functions require one of the /[iIpS]/ flags to give callers a name to
+:         use that won't possibly collide with their own
 :
 :         Some of these have been constructed so that the wrapper macro names
 :         begin with an underscore to lessen the chances of a name collision.
 :         However, this is contrary to the C standard, and those should be
 :         changed.
 :
-: The 'E' flag is used instead for a function and its short name that is
-:         supposed to be used only in the core plus extensions compiled with
-:         the PERL_EXT symbol defined.  Again, on some platforms, the function
-:         will be visible everywhere, so one of the /[iIpS]/ flags are
-:         generally needed.  Also note that an XS writer can always cheat and
-:         pretend to be an extension by #defining PERL_EXT.
+: The 'E' flag is used instead for elements that are supposed to be used only
+:	  in the core, plus extensions compiled with the PERL_EXT symbol
+:	  defined.  Again, on some platforms, functions marked with this will
+:	  be visible everywhere, so one of the /[iIpS]/ flags is generally
+:	  needed.  Also note that an XS writer can always cheat and pretend to
+:	  be an extension by #defining PERL_EXT.
 :
-: The 'X' flag is similar to the 'C' flag in that the function (whose entry
-:         better have the 'p' flag) is accessible everywhere on all platforms.
-:         However the short name macro that normally gets generated is
-:         suppressed outside the core.  (Except it is also visible in PERL_EXT
-:         extensions if the 'E' flag is also specified.)  This flag is used for
-:         functions that are called from a public macro, the name of which
-:         isn't derived from the function name.  You'll have to write the macro
-:         yourself, and from within it, refer to the function in its full
-:         'Perl_' form with any necessary thread context parameter.
+: The 'X' flag applies only to functions.  It is similar to the 'C' flag in
+:	  that the function (whose entry better have the 'p' flag) is
+:	  accessible everywhere on all platforms.  However the short name macro
+:	  that normally gets generated is suppressed outside the core.  (Except
+:	  it is also visible in PERL_EXT extensions if the 'E' flag is also
+:	  specified.)  This flag is used for functions that are called from a
+:	  public macro, the name of which isn't derived from the function name.
+:	  You'll have to write the macro yourself, and from within it, refer to
+:	  the function in its full 'Perl_' form with any necessary thread
+:	  context parameter.
 :
 : AUTOMATIC SORTING and FORMATTING of this file
 :
@@ -414,8 +415,9 @@
 : The remainder of these introductory comments detail all the possible flags:
 :
 :   'A'  Both long and short names are accessible fully everywhere (usually
-:        part of the public API). Requires one of /[iIpS]/ flags.  If the
-:	 function is not part of the public API, instead use 'C', 'E', or 'X'.
+:        part of the public API).  If this element is a function, this requires
+:        one of /[iIpS]/ flags.  If the element is not part of the public API,
+:        instead use 'C', 'E', or 'X'.
 :
 :        * adds entry to the list of symbols available on all platforms unless
 :          'e' or 'm' are also specified;
@@ -470,18 +472,18 @@
 :	 to use them anyway, Devel::PPPort informs them that this is a mistake.
 :	 Some functions have to be accessible everywhere even if they are not
 :	 intended for public use. An example is helper functions that are
-:	 called from inline ones that are publicly available.
-:        Requires one of /[iIpS]/ flags.
+:	 called from inline ones that are publicly available.  Requires one of
+:	 the /[iIpS]/ flags if the element is a function.
 :
 :        * add entry to the list of symbols available on all platforms unless e
 :          or m are also specified;
 :        * any doc entry goes in perlintern.pod rather than perlapi.pod. If
 :          there isn't a doc entry, autodoc.pl lists this in perlintern as
 :          existing and being undocumented
-:        * makes the short name defined for everywhere, not just for PERL_CORE
-:          or PERL_EXT
+:        * makes the function's short name defined for everywhere, not just for
+:	   PERL_CORE or PERL_EXT
 :
-:   'D'  Function is deprecated.
+:   'D'  The element is deprecated.
 :
 :	(You should add a comment to the source when adding this flag
 :	indicating what release it is first being deprecated in.  This will
@@ -491,7 +493,7 @@
 :        proto.h: add __attribute__deprecated__
 :        autodoc.pl adds a note to this effect in the doc entry
 :
-:   'd'  Function has documentation (somewhere) in the source:
+:   'd'  Element has documentation (somewhere) in the source:
 :
 :        Enables 'no docs for foo" warning in autodoc.pl if the documentation
 :        isn't found.
