@@ -3211,30 +3211,37 @@ sub as_input_code {
 
     my $arg = $pxs->ST($arg_num);
 
+
+    # For this construct: 'foo(char *s, int length(s))', ...
+
     if ($self->{is_length}) {
-        # Process length(foo) parameter.
-        # Basically for something like foo(char *s, int length(s)),
-        # create *two* local C vars: one with STRLEN type, and one with the
-        # type specified in the signature. Eventually, generate code looking
-        # something like:
-        #   STRLEN  STRLEN_length_of_s;
-        #   int     XSauto_length_of_s;
-        #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
-        #   XSauto_length_of_s = STRLEN_length_of_s;
-        #   RETVAL = foo(s, XSauto_length_of_s);
+        # ... the call for the 'length(s)' pseudo-parameter should
+        # emit nothing ...
+        return;
+    }
+    elsif ($self->{length_param}) {
+        # ... while the call for the 's' parameter should emit a (possibly
+        # modified) declaration and init as normal, but also some extra
+        # lines. In total this parameter should emit code something like:
         #
-        # Note that the SvPV() code line is generated via a separate call to
-        # this sub with s as the var (as opposed to *this* call, which is
-        # handling length(s)), by overriding the normal T_PV typemap (which
-        # uses PV_nolen()).
+        #    STRLEN STRLEN_length_of_s;
+        #    int    XSauto_length_of_s;
+        #    char * s = (char *)SvPV(ST(0), STRLEN_length_of_s);
+        #
+        #    XSauto_length_of_s = STRLEN_length_of_s;
 
-        my $name = $self->{len_name};
+        print "\tSTRLEN\tSTRLEN_length_of_$var;\n";
+        print "\t$self->{length_param}{type}\tXSauto_length_of_$var;\n";
 
-        print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
-        # defer this line until after all the other declarations
+        # The "var = SvPV()" line will be emitted by the main body of this
+        # function. Note that the T_PV typemap entry will have already
+        # been overridden in lookup_input_typemap() during parse time
+        # to change SvPV_nolen() to SvPV() or similar.
+        #
+        # The final assign should be deferred to come after all
+        # declarations.
         $xbody->{input_part}{deferred_code_lines} .=
-                "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
-        $var = "XSauto_length_of_$name";
+            "\n\tXSauto_length_of_$var = STRLEN_length_of_$var;\n";
     }
 
     # Emit the variable's type and name.
@@ -4394,17 +4401,8 @@ EOF
 
     # Emit declaration/init code for any parameters which were
     # declared with a type in the signature (rather than in INPUT).
-    # Do all the length() ones first.
 
-    for my $ioparam (
-            grep $_->{is_ansi},
-                (
-                    grep(  $_->{is_length}, @{$ioparams->{kids}} ),
-                    grep(! $_->{is_length}, @{$ioparams->{kids}} ),
-                )
-    )
-
-    {
+    for my $ioparam (grep $_->{is_ansi}, @{$ioparams->{kids}}) {
         $ioparam->as_input_code($pxs, $xsub, $xbody);
     }
 
