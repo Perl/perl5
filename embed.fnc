@@ -92,14 +92,6 @@
 : file they are intended for, and the generated PERL_ARGS_ macros will only
 : be available to inline functions in the appropriate context.
 :
-: From time to time it may be necessary to change or expand which files can
-: see a function, therefore we prefer the '#if defined()' form of condition
-: instead of the '#ifdef' form as the latter only works with one symbol and
-: the former can be combined with more than one.  It is also why you may see
-: functions with an 's' or 'i' export type grouped together into a single
-: conditional block separate from most of the other functions from the same
-: file with 'p' in them.
-:
 : The 'A' flag is used to make a function and its short name visible everywhere
 :         on all platforms.  This should be used to make it part of Perl's API
 :         contract with XS developers.  The documentation for these is usually
