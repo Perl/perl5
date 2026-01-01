@@ -158,8 +158,11 @@
 :   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
 :   should place a call to that macro in foo() before any other code.  It will
 :   automatically expand to whatever checking is currently generated for 'foo'
-:   (often none).  These are in the form of assert() calls, so they are only
-:   activated for DEBUGGING builds.
+:   (often none).  These are mostly in the form of assert() calls, so they are
+:   only activated for DEBUGGING builds.  But for non-DEBUGGING builds, pointer
+:   parameters that must not point to NULL have a compiler directive that means
+:   the same as GCC and Clang's '__attribute__nonnull__' generated for them for
+:   compilers that we know understand it.
 :
 :   Currently, it is optional to include an empty ARGS_ASSERT macro in your
 :   functions.  But a porting test enforces that a non-empty one does get
