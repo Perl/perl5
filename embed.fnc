@@ -430,8 +430,7 @@
 :          'e' or 'm' are also specified;
 :        * any doc entry goes in perlapi.pod rather than perlintern.pod. If
 :          there isn't a doc entry, autodoc.pl lists this in perlapi as
-:          existing and being undocumented; unless 'x' is also specified, in
-:          which case it simply isn't listed.
+:          existing and being undocumented.
 :        * makes the short name defined for everywhere, not just for PERL_CORE
 :          or PERL_EXT
 :
@@ -739,9 +738,7 @@
 :
 :   'x'  Experimental, may change:
 :
-:          Any doc entry is marked that it may change. An undocumented
-:          experimental function is listed in perlintern rather than perlapi,
-:          even if it is allegedly API.
+:          Any doc entry is marked that this element may change.
 :
 :   'y'  Typedef.  The element names a type rather than being a macro
 :
