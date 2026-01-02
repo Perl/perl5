@@ -72,18 +72,22 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 #       ... used as ...
 #       ... XSUB body...
 #     ],
-#     [ flags, qr/expected/, "test description"],
+#     [ flags, qr/expected/, "test description" (, "TODO text")],
 #     [ ... and more tests ..]
 #     ....
 # ]
 #
 #  where flags is zero or more of:
-#    NOT: invert: pass if the regex *doesn't* match
-#    ERR: test regex against STDERR rather than STDOUT
+#
+#    NOT:  invert: pass if the regex *doesn't* match
+#    ERR:  test regex against STDERR rather than STDOUT
+#    TODO: mark the test as TODO.  If set, an optional extra field
+#         may be included, with is the TODO description.
 
 # (avoid 'use constant' as an extra build-time dependency)
-sub NOT() { 1; }
-sub ERR() { 2; }
+sub NOT()  { 1; }
+sub ERR()  { 2; }
+sub TODO() { 4; }
 
 sub test_many {
     my ($preamble, $prefix, $test_fns) = @_;
@@ -126,9 +130,17 @@ sub test_many {
         my $err_tested;
         for my $test (@tests) {
             my ($flags, $qr, $desc, $todo) = @$test;
-            local $TODO = $todo if defined $todo;
             $desc = "$desc_prefix: $desc" if length $desc_prefix;
             my $str;
+
+            if ($flags & TODO) {
+                $todo = '' unless defined $todo;
+            }
+            elsif (defined $todo) {
+                die   "$desc_prefix: Internal error:"
+                    . " todo text present but not TODO flag\n";
+            }
+
             if ($flags & ERR) {
                 $err_tested = 1;
                 $str = $stderr;
@@ -136,12 +148,15 @@ sub test_many {
             else {
                 $str = $out;
             }
+            local $TODO = $todo if $flags & TODO;
+
             if ($flags & NOT) {
                 unlike $str, $qr, $desc;
             }
             else {
                 like $str, $qr, $desc;
             }
+
         }
         # if there were no tests that expect an error, test that there
         # were no errors
@@ -2562,9 +2577,9 @@ EOF
                 |foo(abc = 111)
                 |int abc = 777;
 EOF
-            [  0, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
+            [ TODO, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
                 "",
-                "default is lost in presence of initialiser", #TODO
+                "default is lost in presence of initialiser",
             ],
 
         ],
@@ -2616,9 +2631,9 @@ EOF
                 |foo(abc = NO_INIT)
                 |int abc = 777;
 EOF
-            [  0, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
+            [ TODO, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
                 "",
-                "default is lost in presence of initialiser", #TODO
+                "default is lost in presence of initialiser",
             ],
 
         ],
