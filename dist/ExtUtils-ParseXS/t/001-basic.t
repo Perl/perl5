@@ -72,14 +72,18 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 #       ... used as ...
 #       ... XSUB body...
 #     ],
-#     [ check_stderr, expect_nomatch, qr/expected/, "test description"],
+#     [ flags, qr/expected/, "test description"],
 #     [ ... and more tests ..]
 #     ....
 # ]
 #
-#  where:
-#  check_stderr:   boolean: test STDERR against regex rather than STDOUT
-#  expect_nomatch: boolean: pass if the regex *doesn't* match
+#  where flags is zero or more of:
+#    NOT: invert: pass if the regex *doesn't* match
+#    ERR: test regex against STDERR rather than STDOUT
+
+# (avoid 'use constant' as an extra build-time dependency)
+sub NOT() { 1; }
+sub ERR() { 2; }
 
 sub test_many {
     my ($preamble, $prefix, $test_fns) = @_;
@@ -121,18 +125,18 @@ sub test_many {
 
         my $err_tested;
         for my $test (@tests) {
-            my ($is_err, $exp_nomatch, $qr, $desc, $todo) = @$test;
+            my ($flags, $qr, $desc, $todo) = @$test;
             local $TODO = $todo if defined $todo;
             $desc = "$desc_prefix: $desc" if length $desc_prefix;
             my $str;
-            if ($is_err) {
+            if ($flags & ERR) {
                 $err_tested = 1;
                 $str = $stderr;
             }
             else {
                 $str = $out;
             }
-            if ($exp_nomatch) {
+            if ($flags & NOT) {
                 unlike $str, $qr, $desc;
             }
             else {
@@ -838,8 +842,8 @@ EOF
                 'X::Y*',
                 'new(int aaa)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
-            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
+            [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [  0, qr/\Qnew(aaa)/,                          "autocall" ],
         ],
 
         [
@@ -849,9 +853,9 @@ EOF
                 'static X::Y*',
                 'new(int aaa)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
-            [ 0, 0, qr/\Qnew(aaa)/,                          "autocall" ],
-            [ 1, 0, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
+            [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [  0, qr/\Qnew(aaa)/,                          "autocall" ],
+            [ERR, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
         ],
 
         [
@@ -861,9 +865,9 @@ EOF
                 'static X::Y*',
                 'foo(int aaa)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
-            [ 0, 0, qr/\Qfoo(aaa)/,                          "autocall" ],
-            [ 1, 0, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
+            [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
+            [  0, qr/\Qfoo(aaa)/,                          "autocall" ],
+            [ERR, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
         ],
 
         [
@@ -872,9 +876,9 @@ EOF
                 'X::Y*',
                 'X::Y::new(int aaa)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
-            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
-            [ 0, 0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
+            [  0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [  0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
         ],
 
         [
@@ -883,9 +887,9 @@ EOF
                 'static X::Y*',
                 'X::Y::new(int aaa)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
-            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
-            [ 0, 0, qr/\QX::Y(aaa)/,                         "autocall" ],
+            [  0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
+            [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [  0, qr/\QX::Y(aaa)/,                         "autocall" ],
         ],
 
         [
@@ -894,9 +898,9 @@ EOF
                 'void',
                 'X::Y::fff(int bbb)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
-            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
-            [ 0, 0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
+            [  0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
+            [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [  0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
         ],
 
         [
@@ -905,9 +909,9 @@ EOF
                 'static int',
                 'X::Y::ggg(int ccc)',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
-            [ 0, 0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
-            [ 0, 0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
+            [  0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
+            [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [  0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
         ],
 
         [
@@ -916,9 +920,9 @@ EOF
                 'int',
                 'X::Y::hhh(int ddd) const',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
-            [ 0, 0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
-            [ 0, 0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
+            [  0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
+            [  0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
+            [  0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
         ],
 
         [
@@ -927,7 +931,7 @@ EOF
                 'void',
                 'foo() const',
             ],
-            [ 1, 0, qr/\QError: const modifier only allowed on XSUBs which are C++ methods/,
+            [ERR, qr/\QError: const modifier only allowed on XSUBs which are C++ methods/,
                 "got expected err" ],
         ],
 
@@ -939,7 +943,7 @@ EOF
                 |static int
                 |X::Y::foo() const
 EOF
-            [ 0, 0, qr/\QRETVAL = X::Y::foo()/,
+            [  0, qr/\QRETVAL = X::Y::foo()/,
                 "autocall doesn't have const" ],
         ],
 
@@ -949,7 +953,7 @@ EOF
                 |static int
                 |X::Y::new() const
 EOF
-            [ 0, 0, qr/\QRETVAL = X::Y()/,
+            [  0, qr/\QRETVAL = X::Y()/,
                 "autocall doesn't have const" ],
         ],
 
@@ -959,7 +963,7 @@ EOF
                 |int
                 |X::Y::foo() const
 EOF
-            [ 0, 0, qr/\QRETVAL = THIS->foo()/,
+            [  0, qr/\QRETVAL = THIS->foo()/,
                 "autocall doesn't have const" ],
         ],
 
@@ -969,7 +973,7 @@ EOF
                 |int
                 |X::Y::new() const
 EOF
-            [ 0, 0, qr/\QRETVAL = new X::Y()/,
+            [  0, qr/\QRETVAL = new X::Y()/,
                 "autocall doesn't have const" ],
         ],
 
@@ -979,7 +983,7 @@ EOF
                 'int',
                 'X::Y::f1(THIS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
+            [ERR, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f1 dup THIS" ],
         ],
 
@@ -989,7 +993,7 @@ EOF
                 'int',
                 'X::Y::f2(int THIS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS' /,
+            [ERR, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f2 dup THIS" ],
         ],
 
@@ -999,7 +1003,7 @@ EOF
                 'int',
                 'X::Y::new(int CLASS, int i)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS' /,
+            [ERR, qr/\QError: duplicate definition of parameter 'CLASS' /,
                  "C++: new dup CLASS" ],
         ],
 
@@ -1011,10 +1015,10 @@ EOF
                 '    OUTPUT:',
                 '        THIS',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
-            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
-            [ 0, 0, qr/\QTHIS->f3(i)/,                       "autocall" ],
-            [ 0, 0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
+            [  0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
+            [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [  0, qr/\QTHIS->f3(i)/,                       "autocall" ],
+            [  0, qr/^\s*\Qmy_out(ST(0), THIS)/m,          "set st0"  ],
         ],
 
         [
@@ -1025,10 +1029,10 @@ EOF
                 'X::Y::f4(int i)',
                 '    int THIS',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
-            [ 0, 0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
-            [ 0, 1, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
-            [ 0, 0, qr/\QTHIS->f4(i)/,                  "autocall" ],
+            [  0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
+            [  0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
+            [NOT, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
+            [  0, qr/\QTHIS->f4(i)/,                  "autocall" ],
         ],
 
         [
@@ -1040,7 +1044,7 @@ EOF
                 '    int THIS',
                 '    long THIS',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1051,7 +1055,7 @@ EOF
                 'int',
                 'X::Y::f6(int THIS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1062,7 +1066,7 @@ EOF
                 'int',
                 'X::Y::f7(THIS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'THIS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
 
@@ -1074,10 +1078,10 @@ EOF
                 'X::Y::new(int i)',
                 '    int CLASS',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
-            [ 0, 0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
-            [ 0, 1, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
-            [ 0, 0, qr/\Qnew X::Y(i)/,                  "autocall" ],
+            [  0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
+            [  0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
+            [NOT, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
+            [  0, qr/\Qnew X::Y(i)/,                  "autocall" ],
         ],
 
         [
@@ -1089,7 +1093,7 @@ EOF
                 '    int CLASS',
                 '    long CLASS',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
@@ -1100,7 +1104,7 @@ EOF
                 'int',
                 'X::Y::new(int CLASS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
@@ -1111,7 +1115,7 @@ EOF
                 'int',
                 'X::Y::new(CLASS)',
             ],
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'CLASS'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
@@ -1121,9 +1125,9 @@ EOF
                 'void',
                 'X::Y::DESTROY()',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
-            [ 0, 0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
-            [ 0, 0, qr/delete\s+THIS;/,                      "autocall" ],
+            [  0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
+            [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
+            [  0, qr/delete\s+THIS;/,                      "autocall" ],
         ]
     );
 
@@ -1148,9 +1152,9 @@ EOF
                 |NO_OUTPUT int
                 |foo()
 EOF
-            [ 0, 0, qr/\QRETVAL = foo();/, "has autocall"     ],
-            [ 0, 1, qr/\bTARG/,            "no setting TARG"  ],
-            [ 0, 1, qr/\QST(0)/,           "no setting ST(0)" ],
+            [  0, qr/\QRETVAL = foo();/, "has autocall"     ],
+            [NOT, qr/\bTARG/,            "no setting TARG"  ],
+            [NOT, qr/\QST(0)/,           "no setting ST(0)" ],
         ],
         [
             "xsub decl on one line",
@@ -1158,9 +1162,9 @@ EOF
                 | int foo(A, int  B )
                 |    char *A
 EOF
-            [ 0, 0, qr/^\s+char \*\s+A\s+=/m,  "has A decl"    ],
-            [ 0, 0, qr/^\s+int\s+B\s+=/m,      "has B decl"    ],
-            [ 0, 0, qr/\QRETVAL = foo(A, B);/, "has autocall"  ],
+            [  0, qr/^\s+char \*\s+A\s+=/m,  "has A decl"    ],
+            [  0, qr/^\s+int\s+B\s+=/m,      "has B decl"    ],
+            [  0, qr/\QRETVAL = foo(A, B);/, "has autocall"  ],
         ],
     );
 
@@ -1187,7 +1191,7 @@ EOF
                 |extern "C"   int
                 |foo()
 EOF
-            [ 0, 0, qr/^extern "C"\nXS_EUPXS\(XS_Foo_foo\);/m,
+            [  0, qr/^extern "C"\nXS_EUPXS\(XS_Foo_foo\);/m,
                     "has extern decl" ],
         ],
         [
@@ -1195,7 +1199,7 @@ EOF
             [ Q(<<'EOF') ],
                 |int
 EOF
-            [ 1, 0,qr{
+            [ERR, qr{
                 \QError: unrecognised line: 'int' in (input), line 5\E\n
                 \Q  (possible start of a truncated XSUB definition?)\E\n
                 }x,
@@ -1209,7 +1213,7 @@ EOF
                 |    CODE:
                 |        AAA
 EOF
-            [ 1, 0, qr/\QError: cannot parse function definition from 'foo(aaa' in\E.*line 6/,
+            [ERR, qr/\QError: cannot parse function definition from 'foo(aaa' in\E.*line 6/,
                     "got err" ],
         ],
         [
@@ -1218,7 +1222,7 @@ EOF
                 |int
                 |fo o(aaa)
 EOF
-            [ 1, 0, qr/\QError: cannot parse function definition from 'fo o(aaa)' in\E.*line 6/,
+            [ERR, qr/\QError: cannot parse function definition from 'fo o(aaa)' in\E.*line 6/,
                     "got err" ],
         ],
 
@@ -1234,7 +1238,7 @@ EOF
                 |int
                 |foo(aaa)
 EOF
-            [ 1, 0, qr/\QWarning: duplicate function definition 'foo' detected in\E.*line 9/,
+            [ERR, qr/\QWarning: duplicate function definition 'foo' detected in\E.*line 9/,
                     "got warn" ],
         ],
         [
@@ -1249,7 +1253,7 @@ EOF
                 |foo(aaa)
                 |#endif
 EOF
-            [ 1, 1, qr/\QWarning: duplicate function definition/,
+            [ERR|NOT, qr/\QWarning: duplicate function definition/,
                     "no warning" ],
         ],
 
@@ -1258,7 +1262,7 @@ EOF
             [ Q(<<'EOF') ],
                 |int foo(char *s = "abc\",)")
 EOF
-            [ 1, 0, qr/\QWarning: cannot parse parameter list/,
+            [ERR, qr/\QWarning: cannot parse parameter list/,
                     "got warning" ],
         ],
     );
@@ -1285,7 +1289,7 @@ EOF
                 'foo(a, char *b,  int length(b), int d =  999, ...)',
                 '    long a',
             ],
-            [ 0, 0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
+            [  0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
         ]
     );
 
@@ -1309,17 +1313,17 @@ EOF
                 |void
                 |foo(char *s, int length(s))
 EOF
-            [ 0, 0, qr{^\s+STRLEN\s+STRLEN_length_of_s;}m,  "decl STRLEN" ],
-            [ 0, 0, qr{^\s+int\s+XSauto_length_of_s;}m,     "decl int"    ],
+            [  0, qr{^\s+STRLEN\s+STRLEN_length_of_s;}m,  "decl STRLEN" ],
+            [  0, qr{^\s+int\s+XSauto_length_of_s;}m,     "decl int"    ],
 
-            [ 0, 0, qr{^ \s+ \Qchar *\E \s+
+            [  0, qr{^ \s+ \Qchar *\E \s+
                         \Qs = (char *)SvPV(ST(0), STRLEN_length_of_s)}xm,
                                                             "decl s"      ],
 
-            [ 0, 0, qr{^\s+\QXSauto_length_of_s = STRLEN_length_of_s}m,
+            [  0, qr{^\s+\QXSauto_length_of_s = STRLEN_length_of_s}m,
                                                             "assign"     ],
 
-            [ 0, 0, qr{^\s+\Qfoo(s, XSauto_length_of_s);}m, "autocall"   ],
+            [  0, qr{^\s+\Qfoo(s, XSauto_length_of_s);}m, "autocall"   ],
         ],
         [
             "length() len type not in typemap allowed",
@@ -1327,7 +1331,7 @@ EOF
                 |void
                 |foo(char *s, blah ** length(s))
 EOF
-            [ 0, 0, qr{^\s+\Qblah **\E\s+XSauto_length_of_s;}m, "decl xsauto" ],
+            [  0, qr{^\s+\Qblah **\E\s+XSauto_length_of_s;}m, "decl xsauto" ],
 
         ],
         [
@@ -1346,7 +1350,7 @@ EOF
                 |void
                 |foo(byte_t s, size_t length(s))
 EOF
-            [ 0, 0,
+            [  0,
                 qr{^\s+byte_t\s+s\s*=\s*\QSvPVutf8(ST(0),STRLEN_length_of_s)}m,
                 "decl/init s" ],
         ],
@@ -1365,7 +1369,7 @@ EOF
                 |void
                 |foo(byte_t s, size_t length(s))
 EOF
-            [ 0, 0,
+            [  0,
                 qr{^\s+byte_t\s+s\s*=\s*\QSvPVutf8_abc(ST(0), STRLEN_length_of_s)}m,
                 "decl/init s" ],
         ],
@@ -1383,7 +1387,7 @@ EOF
                 |void
                 |foo(byte_t s, size_t length(s))
 EOF
-            [ 1, 0, qr{\QError: can't modify input typemap for length(s)\E.*line 13},
+            [ERR, qr{\QError: can't modify input typemap for length(s)\E.*line 13},
                    "got expected error" ],
         ],
 
@@ -1393,7 +1397,7 @@ EOF
                 |void
                 |foo(char *s, int length(s) = 0)
 EOF
-            [ 1, 0, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
+            [ERR, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1402,7 +1406,7 @@ EOF
                 |void
                 |foo(char *s, int length(s) = NO_INIT)
 EOF
-            [ 1, 0, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
+            [ERR, qr{\QError: default value not allowed on length() parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1411,7 +1415,7 @@ EOF
                 |void
                 |foo(int length(s), char *s = "")
 EOF
-            [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
+            [ERR, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1420,7 +1424,7 @@ EOF
                 |void
                 |foo(int length(s), char **s = "")
 EOF
-            [ 1, 0, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
+            [ERR, qr{\QError: default value for s not allowed when length(s) also present\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1429,7 +1433,7 @@ EOF
                 |void
                 |foo(int length(s))
 EOF
-            [ 1, 0, qr{\QError: length() on non-parameter 's'\E.*line 6},
+            [ERR, qr{\QError: length() on non-parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1438,7 +1442,7 @@ EOF
                 |void
                 |foo(s, int length(s))
 EOF
-            [ 1, 0, qr{\QError: length() on placeholder parameter 's'\E.*line 6},
+            [ERR, qr{\QError: length() on placeholder parameter 's'\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1447,7 +1451,7 @@ EOF
                 |void
                 |foo(char *s, length(s))
 EOF
-            [ 1, 0, qr{\QError: length(s) doesn't have a type specified\E.*line 6},
+            [ERR, qr{\QError: length(s) doesn't have a type specified\E.*line 6},
                    "got expected error" ],
         ],
 
@@ -1461,7 +1465,7 @@ EOF
                 |void
                 |foo(char *s, IN int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'IN' modifier can't be used with length(s)\E.*line 6},
+            [ERR, qr{\QError: 'IN' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1470,7 +1474,7 @@ EOF
                 |void
                 |foo(char *s, OUT int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'OUT' modifier can't be used with length(s)\E.*line 6},
+            [ERR, qr{\QError: 'OUT' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1479,7 +1483,7 @@ EOF
                 |void
                 |foo(char *s, IN_OUT int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'IN_OUT' modifier can't be used with length(s)\E.*line 6},
+            [ERR, qr{\QError: 'IN_OUT' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1488,7 +1492,7 @@ EOF
                 |void
                 |foo(char *s, OUTLIST int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'OUTLIST' modifier can't be used with length(s)\E.*line 6},
+            [ERR, qr{\QError: 'OUTLIST' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1497,7 +1501,7 @@ EOF
                 |void
                 |foo(char *s, IN_OUTLIST int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'IN_OUTLIST' modifier can't be used with length(s)\E.*line 6},
+            [ERR, qr{\QError: 'IN_OUTLIST' modifier can't be used with length(s)\E.*line 6},
                    "got expected error" ],
         ],
 
@@ -1537,7 +1541,7 @@ EOF
                 |void
                 |foo(OUT char *s, int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'OUT' modifier on 's' can't be used with length()\E.*line 6},
+            [ERR, qr{\QError: 'OUT' modifier on 's' can't be used with length()\E.*line 6},
                    "got expected error" ],
         ],
         [
@@ -1546,7 +1550,7 @@ EOF
                 |void
                 |foo(OUTLIST char *s, int length(s))
 EOF
-            [ 1, 0, qr{\QError: 'OUTLIST' modifier on 's' can't be used with length()\E.*line 6},
+            [ERR, qr{\QError: 'OUTLIST' modifier on 's' can't be used with length()\E.*line 6},
                    "got expected error" ],
         ],
     );
@@ -1574,7 +1578,7 @@ EOF
                 '    long &b',
                 '    int alien',
             ],
-            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c, &d, &e)/,  ""  ],
+            [  0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c, &d, &e)/,  ""  ],
         ],
         [
             "autocall args normal",
@@ -1584,7 +1588,7 @@ EOF
                 '    long &b',
                 '    int alien',
             ],
-            [ 0, 0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c)/,     ""    ],
+            [  0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c)/,     ""    ],
         ],
 
         [
@@ -1596,7 +1600,7 @@ EOF
                 '    INPUT:',
                 '        long &b',
             ],
-            [ 0, 0, qr/\Qfoo(a,   b   , bar,  c? c : "boo!")/,     ""    ],
+            [  0, qr/\Qfoo(a,   b   , bar,  c? c : "boo!")/,     ""    ],
         ],
 
         [
@@ -1606,7 +1610,7 @@ EOF
                 |foo(int  a)
                 |    C_ARGS:
 EOF
-            [ 0, 0, qr/\Qfoo()/,  "" ],
+            [  0, qr/\Qfoo()/,  "" ],
         ],
 
         [
@@ -1622,7 +1626,7 @@ EOF
                 '    INPUT:',
                 '        long &b',
             ],
-            [ 0, 0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
+            [  0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
               ""  ],
         ],
     );
@@ -1654,25 +1658,25 @@ EOF
                 'void',
                 'foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)',
             ],
-            [ 0, 0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
+            [  0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
 
-            [ 0, 0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
-            [ 0, 0, qr/int\s+B\s*=\s*\(int\)SvIV\s*/,  "B decl"   ],
-            [ 0, 0, qr/int\s+C\s*;/,                   "C decl"   ],
-            [ 0, 0, qr/int\s+D\s*;/,                   "D decl"   ],
-            [ 0, 0, qr/int\s+E\s*=\s*\(int\)SvIV\s*/,  "E decl"   ],
+            [  0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
+            [  0, qr/int\s+B\s*=\s*\(int\)SvIV\s*/,  "B decl"   ],
+            [  0, qr/int\s+C\s*;/,                   "C decl"   ],
+            [  0, qr/int\s+D\s*;/,                   "D decl"   ],
+            [  0, qr/int\s+E\s*=\s*\(int\)SvIV\s*/,  "E decl"   ],
 
-            [ 0, 0, qr/\Qfoo(A, &B, &C, &D, &E)/,      "autocall" ],
+            [  0, qr/\Qfoo(A, &B, &C, &D, &E)/,      "autocall" ],
 
-            [ 0, 0, qr/sv_setiv.*ST\(1\).*\bB\b/,      "set B"    ],
-            [ 0, 0, qr/\QSvSETMAGIC(ST(1))/,           "set magic B" ],
-            [ 0, 0, qr/sv_setiv.*ST\(2\).*\bC\b/,      "set C"    ],
-            [ 0, 0, qr/\QSvSETMAGIC(ST(2))/,           "set magic C" ],
+            [  0, qr/sv_setiv.*ST\(1\).*\bB\b/,      "set B"    ],
+            [  0, qr/\QSvSETMAGIC(ST(1))/,           "set magic B" ],
+            [  0, qr/sv_setiv.*ST\(2\).*\bC\b/,      "set C"    ],
+            [  0, qr/\QSvSETMAGIC(ST(2))/,           "set magic C" ],
 
-            [ 0, 1, qr/\bEXTEND\b/,                    "NO extend"       ],
+            [NOT, qr/\bEXTEND\b/,                    "NO extend"       ],
 
-            [ 0, 0, qr/\b\QTARGi((IV)D, 1);\E\s+\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "set D"    ],
-            [ 0, 0, qr/\b\Qsv_setiv(RETVALSV, (IV)E);\E\s+\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "set E"    ],
+            [  0, qr/\b\QTARGi((IV)D, 1);\E\s+\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "set D"    ],
+            [  0, qr/\b\Qsv_setiv(RETVALSV, (IV)E);\E\s+\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "set E"    ],
         ],
 
         # Various types of OUTLIST where the param is the only value to
@@ -1684,12 +1688,12 @@ EOF
                 'void',
                 'foo(OUTLIST bool A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 1, qr/\bEXTEND\b/,                      "NO extend"       ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(0) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
+            [  0, qr/\b\QST(0) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
         [
             "OUTLIST void/mybool",
@@ -1697,12 +1701,12 @@ EOF
                 'void',
                 'foo(OUTLIST mybool A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 1, qr/\bEXTEND\b/,                      "NO extend"       ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(0) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
+            [  0, qr/\b\QST(0) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
         [
             "OUTLIST void/int",
@@ -1710,13 +1714,13 @@ EOF
                 'void',
                 'foo(OUTLIST int A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 1, qr/\bEXTEND\b/,                      "NO extend"       ],
-            [ 0, 1, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
-            [ 0, 0, qr/\bdXSTARG;/,                      "dXSTARG"         ],
-            [ 0, 0, qr/\b\QTARGi((IV)A, 1);/,            "set TARG"        ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "store TARG"   ],
-            [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
+            [NOT, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
+            [  0, qr/\bdXSTARG;/,                      "dXSTARG"         ],
+            [  0, qr/\b\QTARGi((IV)A, 1);/,            "set TARG"        ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "store TARG"   ],
+            [  0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
         [
             "OUTLIST void/char*",
@@ -1724,13 +1728,13 @@ EOF
                 'void',
                 'foo(OUTLIST char* A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 1, qr/\bEXTEND\b/,                      "NO extend"       ],
-            [ 0, 1, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
-            [ 0, 0, qr/\bdXSTARG;/,                      "dXSTARG"         ],
-            [ 0, 0, qr/\b\Qsv_setpv((SV*)TARG, A);/,     "set TARG"        ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "store TARG"   ],
-            [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
+            [NOT, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
+            [  0, qr/\bdXSTARG;/,                      "dXSTARG"         ],
+            [  0, qr/\b\Qsv_setpv((SV*)TARG, A);/,     "set TARG"        ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "store TARG"   ],
+            [  0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
 
         # Various types of OUTLIST where the param is the second value to
@@ -1742,14 +1746,14 @@ EOF
                 'int',
                 'foo(OUTLIST bool A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
         ],
         [
             "OUTLIST int/mybool",
@@ -1757,14 +1761,14 @@ EOF
                 'int',
                 'foo(OUTLIST mybool A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/, "set RETVALSV"   ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
         ],
         [
             "OUTLIST int/int",
@@ -1772,14 +1776,14 @@ EOF
                 'int',
                 'foo(OUTLIST int A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setiv(RETVALSV, (IV)A);/,  "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setiv(RETVALSV, (IV)A);/,  "set RETVALSV"   ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
         ],
         [
             "OUTLIST int/char*",
@@ -1787,14 +1791,14 @@ EOF
                 'int',
                 'foo(OUTLIST char* A)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setpv((SV*)RETVALSV, A);/, "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setpv((SV*)RETVALSV, A);/, "set RETVALSV"   ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
         ],
         [
             "OUTLIST int/opt int",
@@ -1802,14 +1806,14 @@ EOF
                 'int',
                 'foo(IN_OUTLIST int A = 0)',
             ],
-            [ 0, 0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
-            [ 0, 0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
-            [ 0, 0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
-            [ 0, 0, qr/\b\Qsv_setiv(RETVALSV, (IV)A);/,  "set RETVALSV"   ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
+            [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
+            [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
+            [  0, qr/\b\QST(0) = TARG;\E\s+\Q++SP;/,   "store RETVAL,SP++" ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
+            [  0, qr/\b\Qsv_setiv(RETVALSV, (IV)A);/,  "set RETVALSV"   ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\b\QXSRETURN(2);/,                "XSRETURN(2)"     ],
         ],
         [
             "OUTLIST with OUTPUT override",
@@ -1819,10 +1823,10 @@ EOF
                 |    OUTPUT:
                 |        A    setA(ST[99], A);
 EOF
-            [ 0, 1, qr/\bEXTEND\b/,                      "NO extend"       ],
-            [ 0, 0, qr/\b\QsetA(ST[99], A);/,            "set ST[99]"      ],
-            [ 0, 0, qr/\b\QTARGi((IV)A, 1);/,            "set ST[0]"       ],
-            [ 0, 0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
+            [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
+            [  0, qr/\b\QsetA(ST[99], A);/,            "set ST[99]"      ],
+            [  0, qr/\b\QTARGi((IV)A, 1);/,            "set ST[0]"       ],
+            [  0, qr/\b\QXSRETURN(1);/,                "XSRETURN(1)"     ],
         ],
         [
             "OUTLIST with multiple CASES",
@@ -1836,13 +1840,13 @@ EOF
                  |        CODE:
                  |            BBB
 EOF
-            [ 0, 0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
-            [ 0, 0, qr{   \b\QEXTEND(SP,2);\E
+            [  0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
+            [  0, qr{   \b\QEXTEND(SP,2);\E
                        .* \b\QEXTEND(SP,2);\E }xs,        "two EXTEND(2)"  ],
-            [ 0, 0, qr{\b\QST(0) = \E .* \b\QST(0) = }xs, "two ST(0)"      ],
-            [ 0, 0, qr{\b\QST(1) = \E .* \b\QST(1) = }xs, "two ST(1)"      ],
-            [ 0, 0, qr/\b\QXSRETURN(2);/,                 "XSRETURN(2)"    ],
-            [ 0, 1, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
+            [  0, qr{\b\QST(0) = \E .* \b\QST(0) = }xs, "two ST(0)"      ],
+            [  0, qr{\b\QST(1) = \E .* \b\QST(1) = }xs, "two ST(1)"      ],
+            [  0, qr/\b\QXSRETURN(2);/,                 "XSRETURN(2)"    ],
+            [NOT, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
         ],
         [
             "OUTLIST with multiple CASES and void hack",
@@ -1856,16 +1860,16 @@ EOF
                  |        CODE:
                  |            ST(0) = 2;
 EOF
-            [ 0, 0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
-            [ 0, 0, qr{   \b\QEXTEND(SP,3);\E
+            [  0, qr{\bdXSTARG; .* \bdXSTARG;}xs,       "two dXSTARG"    ],
+            [  0, qr{   \b\QEXTEND(SP,3);\E
                        .* \b\QEXTEND(SP,3);\E }xs,        "two EXTEND(3)"  ],
-            [ 0, 0, qr{\b\QST(0) = 1\E .* \QST(0) = 2}xs, "two ST(0)"      ],
-            [ 0, 0, qr{   \b\QST(1) = TARG\E
+            [  0, qr{\b\QST(0) = 1\E .* \QST(0) = 2}xs, "two ST(0)"      ],
+            [  0, qr{   \b\QST(1) = TARG\E
                        .* \b\QST(1) = TARG}xs,            "two ST(1)"      ],
-            [ 0, 0, qr{   \b\QST(2) = RETVAL\E
+            [  0, qr{   \b\QST(2) = RETVAL\E
                        .* \b\QST(2) = RETVAL}xs,          "two ST(2)"      ],
-            [ 0, 0, qr/\b\QXSRETURN(3);/,                 "XSRETURN(3)"    ],
-            [ 0, 1, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
+            [  0, qr/\b\QXSRETURN(3);/,                 "XSRETURN(3)"    ],
+            [NOT, qr{XSRETURN.*XSRETURN}xs,             "<2 XSRETURNs"   ],
         ],
     );
 
@@ -1921,9 +1925,9 @@ EOF
                 'int',
                 'foo(OUTLIST SV * A)',
             ],
-            [ 0, 1, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
-            [ 0, 0, qr/\b\QA = sv_2mortal(A);/,              "mortalise A"    ],
-            [ 0, 0, qr/\b\QST(1) = A;/,                      "store A"        ],
+            [NOT, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
+            [  0, qr/\b\QA = sv_2mortal(A);/,              "mortalise A"    ],
+            [  0, qr/\b\QST(1) = A;/,                      "store A"        ],
         ],
 
         [
@@ -1932,10 +1936,10 @@ EOF
                 'int',
                 'foo(OUTLIST SVREF A)',
             ],
-            [ 0, 0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
-            [ 0, 0, qr/\b\QRETVALSV = newRV((SV*)A)/,        "newREF(A)"      ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
+            [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
+            [  0, qr/\b\QRETVALSV = newRV((SV*)A)/,        "newREF(A)"      ],
+            [  0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
+            [  0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
         ],
 
         [
@@ -1945,10 +1949,10 @@ EOF
                 'int',
                 'foo(OUTLIST svref_fix A)',
             ],
-            [ 0, 0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
-            [ 0, 0, qr/\b\Qsv_setrv_noinc(RETVALSV, (SV*)A);/,"setrv()"       ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
+            [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
+            [  0, qr/\b\Qsv_setrv_noinc(RETVALSV, (SV*)A);/,"setrv()"       ],
+            [  0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
         ],
         [
             # while this one uses assign
@@ -1957,10 +1961,10 @@ EOF
                 'int',
                 'foo(OUTLIST mysvref_fix A)',
             ],
-            [ 0, 0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
-            [ 0, 0, qr/\b\QRETVALSV = newRV_noinc((SV*)A)/,  "newRV(A)"       ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
+            [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
+            [  0, qr/\b\QRETVALSV = newRV_noinc((SV*)A)/,  "newRV(A)"       ],
+            [  0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
+            [  0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
         ],
 
         [
@@ -1970,10 +1974,10 @@ EOF
                 'int',
                 'foo(OUTLIST bool A)',
             ],
-            [ 0, 0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
-            [ 0, 0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
-            [ 0, 0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/,  "setsv(boolSV())"],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
+            [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
+            [  0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
+            [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/,  "setsv(boolSV())"],
+            [  0, qr/\b\QST(1) = RETVALSV;/,               "store RETVALSV" ],
         ],
         [
             # while this one uses assign
@@ -1982,8 +1986,8 @@ EOF
                 'int',
                 'foo(OUTLIST mybool A)',
             ],
-            [ 0, 1, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
-            [ 0, 0, qr/\b\QST(1) = boolSV(A)/,               "store boolSV(A)"],
+            [NOT, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
+            [  0, qr/\b\QST(1) = boolSV(A)/,               "store boolSV(A)"],
         ],
     );
 
@@ -2025,7 +2029,7 @@ EOF
                 'void',
                 'foo(int a, int b, int c)',
             ],
-            [ 0, 0, qr/"\$\$\$"/, "" ],
+            [  0, qr/"\$\$\$"/, "" ],
         ],
 
         [
@@ -2034,7 +2038,7 @@ EOF
                 'void',
                 'foo(int a, int b, int c = 0)',
             ],
-            [ 0, 0, qr/"\$\$;\$"/, "" ],
+            [  0, qr/"\$\$;\$"/, "" ],
         ],
 
         [
@@ -2043,7 +2047,7 @@ EOF
                 'void',
                 'foo(char *A, int length(A), int B, OUTLIST int C, int D)',
             ],
-            [ 0, 0, qr/"\$\$\$"/, "" ],
+            [  0, qr/"\$\$\$"/, "" ],
         ],
 
         [
@@ -2052,7 +2056,7 @@ EOF
                 'void',
                 'foo(char *A, int length(A), int B, IN_OUTLIST int C, int D = 0)',
             ],
-            [ 0, 0, qr/"\$\$\$;\$"/, "" ],
+            [  0, qr/"\$\$\$;\$"/, "" ],
         ],
 
         [
@@ -2061,7 +2065,7 @@ EOF
                 'void',
                 'foo(char *A, int length(A), int B, OUT int C, int D, ...)',
             ],
-            [ 0, 0, qr/"\$\$\$\$;\@"/, "" ],
+            [  0, qr/"\$\$\$\$;\@"/, "" ],
         ],
 
         [
@@ -2070,7 +2074,7 @@ EOF
                 'void',
                 'foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
             ],
-            [ 0, 0, qr/"\$\$\$;\$\@"/, "" ],
+            [  0, qr/"\$\$\$;\$\@"/, "" ],
         ],
 
         [
@@ -2079,7 +2083,7 @@ EOF
                 'void',
                 'X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
             ],
-            [ 0, 0, qr/"\$\$\$\$;\$\@"/, "" ],
+            [  0, qr/"\$\$\$\$;\$\@"/, "" ],
         ],
 
         [
@@ -2089,7 +2093,7 @@ EOF
                 'P::Q::foo()',
                 '    const P::Q * THIS'
             ],
-            [ 0, 0, qr/"%"/, "" ],
+            [  0, qr/"%"/, "" ],
         ],
 
         [
@@ -2099,7 +2103,7 @@ EOF
                 'foo(int a, int b, int c = 0)',
                 '    PROTOTYPE: $@%;$'
             ],
-            [ 0, 0, qr/"\$\@%;\$"/, "" ],
+            [  0, qr/"\$\@%;\$"/, "" ],
         ],
 
         [
@@ -2109,7 +2113,7 @@ EOF
                 |foo(int a, int b, int c)
                 |    PROTOTYPE:     $   $    @   
 EOF
-            [ 0, 0, qr/"\$\$\@"/, "" ],
+            [  0, qr/"\$\$\@"/, "" ],
         ],
 
         [
@@ -2124,7 +2128,7 @@ EOF
             #    newXS_some_variant(..., "\\$\\[@%]");
             # and so the regex below has to escape each backslash and
             # meta char its trying to match:
-            [ 0, 0, qr/" \\  \\  \$  \\  \\ \[  \@  \%  \] "/x, "" ],
+            [  0, qr/" \\  \\  \$  \\  \\ \[  \@  \%  \] "/x, "" ],
         ],
 
         [
@@ -2146,7 +2150,7 @@ EOF
                 |
                 |    C_ARGS: x,y,z
 EOF
-            [ 0, 0, qr/"\$\$\@"/, "" ],
+            [  0, qr/"\$\$\@"/, "" ],
         ],
 
 
@@ -2157,7 +2161,7 @@ EOF
                 'foo(int a, int b, int c = 0)',
                 '    PROTOTYPE:'
             ],
-            [ 0, 0, qr/newXS.*, ""/, "" ],
+            [  0, qr/newXS.*, ""/, "" ],
         ],
 
         [
@@ -2167,7 +2171,7 @@ EOF
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: ENABLE
 EOF
-            [ 0, 0, qr/"\$\$\$"/, "" ],
+            [  0, qr/"\$\$\$"/, "" ],
         ],
 
         [
@@ -2177,7 +2181,7 @@ EOF
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: DISABLE
 EOF
-            [ 0, 1, qr/"\$\$\$"/, "" ],
+            [NOT, qr/"\$\$\$"/, "" ],
         ],
 
         [
@@ -2188,7 +2192,7 @@ EOF
                 |    PROTOTYPE: $$$
                 |    PROTOTYPE: $$$
 EOF
-            [ 1, 0, qr/Error: only one PROTOTYPE definition allowed per xsub/, "" ],
+            [ERR, qr/Error: only one PROTOTYPE definition allowed per xsub/, "" ],
         ],
 
         [
@@ -2198,7 +2202,7 @@ EOF
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: ab
 EOF
-            [ 1, 0, qr/Error: invalid prototype 'ab'/, "" ],
+            [ERR, qr/Error: invalid prototype 'ab'/, "" ],
         ],
 
         [
@@ -2207,7 +2211,7 @@ EOF
                 'void',
                 'foo(X::Y * a, int b, int c = 0)',
             ],
-            [ 0, 0, qr/"\$\$;\$"/, "" ],
+            [  0, qr/"\$\$;\$"/, "" ],
         ],
 
         [
@@ -2216,7 +2220,7 @@ EOF
                 'void',
                 'foo(const X::Y * a, int b, int c = 0)',
             ],
-            [ 0, 0, qr/" \\ \\ \& \$ ; \$ "/x, "" ],
+            [  0, qr/" \\ \\ \& \$ ; \$ "/x, "" ],
         ],
 
         [
@@ -2226,7 +2230,7 @@ EOF
                 'void',
                 'foo(a, b, c = 0)',
             ],
-            [ 0, 0, qr/"\$\$;\$"/, ""  ],
+            [  0, qr/"\$\$;\$"/, ""  ],
         ],
 
         [
@@ -2236,7 +2240,7 @@ EOF
                 'foo(int a, SV*, char *c = "")',
                 'C_ARGS: a, c',
             ],
-            [ 0, 0, qr/"\$\$;\$"/, ""  ],
+            [  0, qr/"\$\$;\$"/, ""  ],
         ],
         [
             "CASE with variant prototype char",
@@ -2250,10 +2254,10 @@ EOF
                 |    CASE: Z
                 |       bar_t abc
 EOF
-            [ 0, 0, qr/newXS.*"%"/, "has %" ],
-            [ 1, 0, qr/Warning: prototype for 'abc' varies: '\@' versus '\$' .*line 28/,
+            [  0, qr/newXS.*"%"/, "has %" ],
+            [ERR, qr/Warning: prototype for 'abc' varies: '\@' versus '\$' .*line 28/,
                     "got 'varies' warning 1" ],
-            [ 1, 0, qr/Warning: prototype for 'abc' varies: '\$' versus '%' .*line 30/,
+            [ERR, qr/Warning: prototype for 'abc' varies: '\$' versus '%' .*line 30/,
                     "got 'varies' warning 2" ],
         ],
     );
@@ -2305,9 +2309,9 @@ EOF
                 'int',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bTARGi\b/,    "has TARGi" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bTARGi\b/,    "has TARGi" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2317,9 +2321,9 @@ EOF
                 'const int',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bTARGi\b/,    "has TARGi" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bTARGi\b/,    "has TARGi" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2329,9 +2333,9 @@ EOF
                 'const int',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bTARGi\b/,    "has TARGi" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bTARGi\b/,    "has TARGi" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2340,9 +2344,9 @@ EOF
                 'unsigned long',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bTARGu\b/,    "has TARGu" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bTARGu\b/,    "has TARGu" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2351,9 +2355,9 @@ EOF
                 'time_t',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bTARGn\b/,    "has TARGn" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bTARGn\b/,    "has TARGn" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2362,9 +2366,9 @@ EOF
                 'char',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bsv_setpvn\b/,"has sv_setpvn()" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bsv_setpvn\b/,"has sv_setpvn()" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2373,10 +2377,10 @@ EOF
                 'char *',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,   "has targ def" ],
-            [ 0, 0, qr/\bsv_setpv\b/, "has sv_setpv" ],
-            [ 0, 0, qr/\QST(0) = TARG;/, "has ST(0) = TARG" ],
-            [ 0, 1, qr/sv_newmortal/, "doesn't have newmortal" ],
+            [  0, qr/\bdXSTARG;/,   "has targ def" ],
+            [  0, qr/\bsv_setpv\b/, "has sv_setpv" ],
+            [  0, qr/\QST(0) = TARG;/, "has ST(0) = TARG" ],
+            [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
         ],
 
         [
@@ -2385,16 +2389,16 @@ EOF
                 'int',
                 'foo(OUTLIST int a, OUTLIST int b)',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,      "has targ def" ],
-            [ 0, 0, qr/\bXSprePUSH;/,    "has XSprePUSH" ],
-            [ 0, 1, qr/\bXSprePUSH\b.+\bXSprePUSH\b/s,
+            [  0, qr/\bdXSTARG;/,      "has targ def" ],
+            [  0, qr/\bXSprePUSH;/,    "has XSprePUSH" ],
+            [NOT, qr/\bXSprePUSH\b.+\bXSprePUSH\b/s,
                                          "has only one XSprePUSH" ],
 
-            [ 0, 0, qr/\bTARGi\b/,       "has TARGi" ],
-            [ 0, 0, qr/\bsv_setiv\(RETVALSV.*sv_setiv\(RETVALSV/s,
+            [  0, qr/\bTARGi\b/,       "has TARGi" ],
+            [  0, qr/\bsv_setiv\(RETVALSV.*sv_setiv\(RETVALSV/s,
                                          "has two setiv(RETVALSV,...)" ],
 
-            [ 0, 0, qr/\bXSRETURN\(3\)/, "has XSRETURN(3)" ],
+            [  0, qr/\bXSRETURN\(3\)/, "has XSRETURN(3)" ],
         ],
 
         # Test RETVAL with an overridden typemap template in OUTPUT
@@ -2406,7 +2410,7 @@ EOF
                 '    OUTPUT:',
                 '        RETVAL my_sv_setiv(ST(0), RETVAL);',
             ],
-            [ 0, 0, qr/\bmy_sv_setiv\b/,   "has my_sv_setiv" ],
+            [  0, qr/\bmy_sv_setiv\b/,   "has my_sv_setiv" ],
         ],
 
         [
@@ -2419,7 +2423,7 @@ EOF
             ],
             # XXX currently the TARG optimisation isn't done
             # XXX when this is fixed, update the test
-            [ 0, 0, qr/\bsv_setiv\b/,   "has sv_setiv" ],
+            [  0, qr/\bsv_setiv\b/,   "has sv_setiv" ],
         ],
 
         [
@@ -2428,10 +2432,10 @@ EOF
                 'void',
                 'foo(OUTLIST const short a)',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,      "has targ def" ],
-            [ 0, 0, qr/\bTARGi\b/,       "has TARGi" ],
-            [ 0, 1, qr/\bsv_setiv\(/,    "has NO sv_setiv" ],
-            [ 0, 0, qr/\bXSRETURN\(1\)/, "has XSRETURN(1)" ],
+            [  0, qr/\bdXSTARG;/,      "has targ def" ],
+            [  0, qr/\bTARGi\b/,       "has TARGi" ],
+            [NOT, qr/\bsv_setiv\(/,    "has NO sv_setiv" ],
+            [  0, qr/\bXSRETURN\(1\)/, "has XSRETURN(1)" ],
         ],
 
         [
@@ -2440,8 +2444,8 @@ EOF
                 'void',
                 'foo(OUTLIST undef_t a)',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,          "has targ def" ],
-            [ 0, 0, qr/\bsv_set_undef\(/,    "has sv_set_undef" ],
+            [  0, qr/\bdXSTARG;/,          "has targ def" ],
+            [  0, qr/\bsv_set_undef\(/,    "has sv_set_undef" ],
         ],
 
         [
@@ -2450,8 +2454,8 @@ EOF
                 'ivmg_t',
                 'foo()',
             ],
-            [ 0, 0, qr/\bdXSTARG;/,          "has targ def" ],
-            [ 0, 0, qr/\bTARGi\(/,           "has TARGi" ],
+            [  0, qr/\bdXSTARG;/,          "has targ def" ],
+            [  0, qr/\bTARGi\(/,           "has TARGi" ],
         ],
     );
 
@@ -2476,7 +2480,7 @@ EOF
                 |foo(abc)
                 |    int + foo;
 EOF
-            [ 1, 0, qr/^\QError: invalid parameter declaration '    int + foo;'\E.* line 7\n/,   "got expected error" ],
+            [ERR, qr/^\QError: invalid parameter declaration '    int + foo;'\E.* line 7\n/,   "got expected error" ],
         ],
         [
             "INPUT no length()",
@@ -2485,7 +2489,7 @@ EOF
                 |foo(abc)
                 |    int length(abc)
 EOF
-            [ 1, 0, qr/^\QError: length() not permitted in INPUT section\E.* line 7\n/,   "got expected error" ],
+            [ERR, qr/^\QError: length() not permitted in INPUT section\E.* line 7\n/,   "got expected error" ],
         ],
         [
             "INPUT dup",
@@ -2496,10 +2500,10 @@ EOF
                 |    int abc
                 |    int def
 EOF
-            [ 1, 0, qr/^\QError: duplicate definition of parameter 'abc' ignored in\E.* line 8\n/m,
+            [ERR, qr/^\QError: duplicate definition of parameter 'abc' ignored in\E.* line 8\n/m,
                                         "abc: got expected error" ],
 
-            [ 1, 0, qr/^\QError: duplicate definition of parameter 'def' ignored in\E.* line 9\n/m,
+            [ERR, qr/^\QError: duplicate definition of parameter 'def' ignored in\E.* line 9\n/m,
                                         "def: got expected error" ],
         ],
 
@@ -2516,7 +2520,7 @@ EOF
                 |foo(abc)
                 |int abc = ($var"$var\"$type);
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc\ =\ \Q(abc"abc"int);\E $/mx,
+            [  0, qr/^ \s+ int \s+ abc\ =\ \Q(abc"abc"int);\E $/mx,
                                         "typemap was expanded" ],
 
         ],
@@ -2527,9 +2531,9 @@ EOF
                 |foo(abc, long xyz)
                 |int abc ; blah($var"$var\"$type);
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+            [  0, qr/^ \s+ int \s+ abc;$/mx,
                                         "declaration doesn't have init" ],
-            [ 0, 0, qr/xyz .*\n.*\Qblah(abc"abc"int);\E$/msx,
+            [  0, qr/xyz .*\n.*\Qblah(abc"abc"int);\E$/msx,
                                         "init code deferred and present" ],
 
         ],
@@ -2540,9 +2544,9 @@ EOF
                 |foo(abc, long xyz)
                 |int abc + blurg($var"$var\"$type);
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc \s+ = \s+ \Q(int)SvIV(ST(0))\E\n; $/mx,
+            [  0, qr/^ \s+ int \s+ abc \s+ = \s+ \Q(int)SvIV(ST(0))\E\n; $/mx,
                                         "std typemap was used and expanded" ],
-            [ 0, 0, qr/xyz .*\n.*\Qblurg(abc"abc"int);\E$/msx,
+            [  0, qr/xyz .*\n.*\Qblurg(abc"abc"int);\E$/msx,
                                         "deferred code present" ],
 
         ],
@@ -2558,7 +2562,7 @@ EOF
                 |foo(abc = 111)
                 |int abc = 777;
 EOF
-            [ 0, 0, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
+            [  0, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
                 "",
                 "default is lost in presence of initialiser", #TODO
             ],
@@ -2571,9 +2575,9 @@ EOF
                 |foo(abc = 111, long xyz)
                 |int abc ; 777;
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+            [  0, qr/^ \s+ int \s+ abc;$/mx,
                                         "declaration doesn't have init" ],
-            [ 0, 0, qr/xyz .*\n.*^777;$/msx,
+            [  0, qr/xyz .*\n.*^777;$/msx,
                                         "init code deferred and present" ],
 
         ],
@@ -2584,9 +2588,9 @@ EOF
                 |foo(abc = 111, long xyz)
                 |int abc + 777;
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+            [  0, qr/^ \s+ int \s+ abc;$/mx,
                                         "declaration doesn't have init" ],
-            [ 0, 0, qr/
+            [  0, qr/
                            \Qif (items < 1)\E\n
                         \s+\Qabc = 111;\E\n
                         \s+\Qelse {\E\n
@@ -2594,7 +2598,7 @@ EOF
                       /msx,
                 "conditional init code present" ],
 
-            [ 0, 0, qr/
+            [  0, qr/
                         \s+\Qabc = (int)SvIV(ST(0))\E\n
                         \s*;\n\s*\}\n777;
                       /msx,
@@ -2612,7 +2616,7 @@ EOF
                 |foo(abc = NO_INIT)
                 |int abc = 777;
 EOF
-            [ 0, 0, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
+            [  0, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
                 "",
                 "default is lost in presence of initialiser", #TODO
             ],
@@ -2625,9 +2629,9 @@ EOF
                 |foo(abc = NO_INIT, long xyz)
                 |int abc ; 777;
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+            [  0, qr/^ \s+ int \s+ abc;$/mx,
                                         "declaration doesn't have init" ],
-            [ 0, 0, qr/xyz .*\n.*^777;$/msx,
+            [  0, qr/xyz .*\n.*^777;$/msx,
                                         "init code deferred and present" ],
 
         ],
@@ -2638,15 +2642,15 @@ EOF
                 |foo(abc = NO_INIT, long xyz)
                 |int abc + 777;
 EOF
-            [ 0, 0, qr/^ \s+ int \s+ abc;$/mx,
+            [  0, qr/^ \s+ int \s+ abc;$/mx,
                                         "declaration doesn't have init" ],
-            [ 0, 0, qr/
+            [  0, qr/
                            \Qif (items >= 1) {\E\n
                         \s+\Qabc = (int)SvIV(ST(0))\E\n
                       /msx,
                 "conditional init code present" ],
 
-            [ 0, 0, qr/\s*;\n\s*\}\n777; /msx,
+            [  0, qr/\s*;\n\s*\}\n777; /msx,
                 "deferred code present" ],
         ],
 
@@ -2661,9 +2665,9 @@ EOF
                 |    UnknownType2 b = bar();
                 |    UnknownType3 c = baz($arg);
 EOF
-            [ 0, 0, qr/UnknownType1\s+a;/mx, "a decl" ],
-            [ 0, 0, qr/UnknownType2\s+\Qb = bar();\E/mx, "b decl" ],
-            [ 0, 0, qr/UnknownType3\s+\Qc = baz(ST(2));\E/mx, "c decl" ],
+            [  0, qr/UnknownType1\s+a;/mx, "a decl" ],
+            [  0, qr/UnknownType2\s+\Qb = bar();\E/mx, "b decl" ],
+            [  0, qr/UnknownType3\s+\Qc = baz(ST(2));\E/mx, "c decl" ],
         ],
 
         # Test 'alien' INPUT parameters: ones which are declared in an INPUT
@@ -2678,8 +2682,8 @@ EOF
                 |    long alien1
                 |    int  alien2 = 123;
 EOF
-            [ 0, 0, qr/long\s+alien1;\n/,      "alien1 decl" ],
-            [ 0, 0, qr/int\s+alien2 = 123;\n/, "alien2 decl" ],
+            [  0, qr/long\s+alien1;\n/,      "alien1 decl" ],
+            [  0, qr/int\s+alien2 = 123;\n/, "alien2 decl" ],
         ],
 
         # Test for 'length(foo)' not legal in INPUT section
@@ -2691,7 +2695,7 @@ EOF
                 |    char *s
                 |    int  length(s)
 EOF
-            [ 1, 0, qr/\QError: length() not permitted in INPUT section/,
+            [ERR, qr/\QError: length() not permitted in INPUT section/,
                 "got expected err" ],
         ],
 
@@ -2704,7 +2708,7 @@ EOF
                 |    int abc;
                 |    int abc;
 EOF
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'abc'/,
                 "got expected err" ],
         ],
         [
@@ -2713,7 +2717,7 @@ EOF
                 |void foo(int abc)
                 |    int abc;
 EOF
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'abc'/,
                 "got expected err" ],
         ],
         [
@@ -2723,7 +2727,7 @@ EOF
                 |    int abc;
                 |    int abc;
 EOF
-            [ 1, 0, qr/\QError: duplicate definition of parameter 'abc'/,
+            [ERR, qr/\QError: duplicate definition of parameter 'abc'/,
                 "got expected err" ],
         ],
 
@@ -2735,7 +2739,7 @@ EOF
                 |void foo(abc)
                 |    int abc =  
 EOF
-            [ 1, 0, qr/\QError: missing '=' initialiser value/,
+            [ERR, qr/\QError: missing '=' initialiser value/,
                 "got expected err" ],
         ],
         [
@@ -2744,7 +2748,7 @@ EOF
                 |void foo(abc)
                 |    int abc =  ;
 EOF
-            [ 1, 0, qr/\QError: missing '=' initialiser value/,
+            [ERR, qr/\QError: missing '=' initialiser value/,
                 "got expected err" ],
         ],
         [
@@ -2753,7 +2757,7 @@ EOF
                 |void foo(abc)
                 |    int abc +  
 EOF
-            [ 1, 0, qr/\QError: missing '+' initialiser value/,
+            [ERR, qr/\QError: missing '+' initialiser value/,
                 "got expected err" ],
         ],
         [
@@ -2762,7 +2766,7 @@ EOF
                 |void foo(abc)
                 |    int abc +  ;
 EOF
-            [ 1, 0, qr/\QError: missing '+' initialiser value/,
+            [ERR, qr/\QError: missing '+' initialiser value/,
                 "got expected err" ],
         ],
         [
@@ -2779,7 +2783,7 @@ EOF
                 |void foo(abc)
                 |    int abc ;  ;
 EOF
-            [ 1, 0, qr/\QError: missing ';' initialiser value/,
+            [ERR, qr/\QError: missing ';' initialiser value/,
                 "got expected err" ],
         ],
     );
@@ -2813,9 +2817,9 @@ EOF
                 |    OUTPUT:
                 |      RETVAL
 EOF
-            [ 0, 1, qr/\bSvSETMAGIC\b/,   "no set magic" ],
-            [ 0, 0, qr/\bTARGi\b/,        "has TARGi" ],
-            [ 0, 0, qr/\QXSRETURN(1)/,    "has XSRETURN" ],
+            [NOT, qr/\bSvSETMAGIC\b/,   "no set magic" ],
+            [  0, qr/\bTARGi\b/,        "has TARGi" ],
+            [  0, qr/\QXSRETURN(1)/,    "has XSRETURN" ],
         ],
 
         [
@@ -2829,9 +2833,9 @@ EOF
                 |      SETMAGIC: ENABLE
                 |      RETVAL
 EOF
-            [ 0, 1, qr/\bSvSETMAGIC\b/,   "no set magic" ],
-            [ 0, 0, qr/\bTARGi\b/,        "has TARGi" ],
-            [ 0, 0, qr/\QXSRETURN(1)/,    "has XSRETURN" ],
+            [NOT, qr/\bSvSETMAGIC\b/,   "no set magic" ],
+            [  0, qr/\bTARGi\b/,        "has TARGi" ],
+            [  0, qr/\QXSRETURN(1)/,    "has XSRETURN" ],
         ],
 
         [
@@ -2844,8 +2848,8 @@ EOF
                 |    OUTPUT:
                 |      RETVAL PUSHs(my_newsviv(RETVAL));
 EOF
-            [ 0, 0, qr/\QPUSHs(my_newsviv(RETVAL));/,   "uses code" ],
-            [ 0, 0, qr/\QXSRETURN(1)/,                  "has XSRETURN" ],
+            [  0, qr/\QPUSHs(my_newsviv(RETVAL));/,   "uses code" ],
+            [  0, qr/\QXSRETURN(1)/,                  "has XSRETURN" ],
         ],
 
         [
@@ -2861,7 +2865,7 @@ EOF
             # Check that the override code is *not* template-expanded.
             # This was probably originally an implementation error, but
             # keep that behaviour for now for backwards compatibility.
-            [ 0, 0, qr'baz\(\$arg,\$val\);',            "vars not expanded" ],
+            [  0, qr'baz\(\$arg,\$val\);',            "vars not expanded" ],
         ],
 
         [
@@ -2875,13 +2879,13 @@ EOF
                 |      RETVAL
                 |      abc  my_set(ST[0], RETVAL);
 EOF
-            [ 0, 0, qr/\Qmy_set(ST[0], RETVAL)/,      "code used for st(0)" ],
-            [ 0, 0, qr/\bXSprePUSH;/,                 "XSprePUSH" ],
-            [ 0, 1, qr/\bEXTEND\b/,                   "NO extend"       ],
-            [ 0, 0, qr/\QTARGi((IV)RETVAL, 1);/,      "push RETVAL" ],
-            [ 0, 0, qr/\QRETVALSV = sv_newmortal();/, "create mortal" ],
-            [ 0, 0, qr/\Qsv_setiv(RETVALSV, (IV)abc);/, "code not used for st(1)" ],
-            [ 0, 0, qr/\QXSRETURN(2)/,                "has XSRETURN" ],
+            [  0, qr/\Qmy_set(ST[0], RETVAL)/,      "code used for st(0)" ],
+            [  0, qr/\bXSprePUSH;/,                 "XSprePUSH" ],
+            [NOT, qr/\bEXTEND\b/,                   "NO extend"       ],
+            [  0, qr/\QTARGi((IV)RETVAL, 1);/,      "push RETVAL" ],
+            [  0, qr/\QRETVALSV = sv_newmortal();/, "create mortal" ],
+            [  0, qr/\Qsv_setiv(RETVALSV, (IV)abc);/, "code not used for st(1)" ],
+            [  0, qr/\QXSRETURN(2)/,                "has XSRETURN" ],
         ],
 
         [
@@ -2894,9 +2898,9 @@ EOF
                 |    OUTPUT:
                 |      RETVAL PUSHs(my_newsviv(RETVAL));
 EOF
-            [ 0, 0, qr/blah\s+RETVAL;/,                 "decl" ],
-            [ 0, 0, qr/\QPUSHs(my_newsviv(RETVAL));/,   "uses code" ],
-            [ 0, 0, qr/\QXSRETURN(1)/,                  "has XSRETURN" ],
+            [  0, qr/blah\s+RETVAL;/,                 "decl" ],
+            [  0, qr/\QPUSHs(my_newsviv(RETVAL));/,   "uses code" ],
+            [  0, qr/\QXSRETURN(1)/,                  "has XSRETURN" ],
         ],
 
         [
@@ -2916,17 +2920,17 @@ EOF
                 |      SETMAGIC: ENABLE
                 |      ddd  my_set(xyz)
 EOF
-            [ 0, 0, qr/\b\QSvSETMAGIC(ST(0))/,       "set magic ST(0)" ],
-            [ 0, 0, qr/\b\QSvSETMAGIC(ST(1))/,       "set magic ST(1)" ],
-            [ 0, 1, qr/\b\QSvSETMAGIC(ST(2))/,       "no set magic ST(2)" ],
-            [ 0, 0, qr/\b\QSvSETMAGIC(ST(3))/,       "set magic ST(3)" ],
-            [ 0, 0, qr/\b\Qsv_setiv(ST(0),\E.*aaa/,  "setiv(aaa)" ],
-            [ 0, 0, qr/\b\Qsv_setiv(ST(1),\E.*bbb/,  "setiv(bbb)" ],
-            [ 0, 0, qr/\b\Qsv_setiv(ST(2),\E.*ccc/,  "setiv(ccc)" ],
-            [ 0, 1, qr/\b\Qsv_setiv(ST(3)/,          "no setiv(ddd)" ],
-            [ 0, 0, qr/\b\Qmy_set(xyz)/,             "myset" ],
-            [ 0, 0, qr/\bTARGi\b.*RETVAL/,           "has TARGi(RETVAL,1)" ],
-            [ 0, 0, qr/\QXSRETURN(1)/,               "has XSRETURN" ],
+            [  0, qr/\b\QSvSETMAGIC(ST(0))/,       "set magic ST(0)" ],
+            [  0, qr/\b\QSvSETMAGIC(ST(1))/,       "set magic ST(1)" ],
+            [NOT, qr/\b\QSvSETMAGIC(ST(2))/,       "no set magic ST(2)" ],
+            [  0, qr/\b\QSvSETMAGIC(ST(3))/,       "set magic ST(3)" ],
+            [  0, qr/\b\Qsv_setiv(ST(0),\E.*aaa/,  "setiv(aaa)" ],
+            [  0, qr/\b\Qsv_setiv(ST(1),\E.*bbb/,  "setiv(bbb)" ],
+            [  0, qr/\b\Qsv_setiv(ST(2),\E.*ccc/,  "setiv(ccc)" ],
+            [NOT, qr/\b\Qsv_setiv(ST(3)/,          "no setiv(ddd)" ],
+            [  0, qr/\b\Qmy_set(xyz)/,             "myset" ],
+            [  0, qr/\bTARGi\b.*RETVAL/,           "has TARGi(RETVAL,1)" ],
+            [  0, qr/\QXSRETURN(1)/,               "has XSRETURN" ],
         ],
 
         [
@@ -2945,23 +2949,23 @@ EOF
                 |        SETMAGIC: DISABLE
                 |        b
 EOF
-            [ 0, 0, qr{\Qif (X)\E
+            [  0, qr{\Qif (X)\E
                        .*
                        \QSvSETMAGIC(ST(0));\E
                        .*
                        \Qelse if (Y)\E
                        }sx,                          "X: set magic ST(0)" ],
-            [ 0, 1, qr{\Qif (X)\E
+            [NOT, qr{\Qif (X)\E
                        .*
                        \QSvSETMAGIC(ST(1));\E
                        .*
                        \Qelse if (Y)\E
                        }sx,                          "X: no magic ST(1)" ],
-            [ 0, 0, qr{\Qelse if (Y)\E
+            [  0, qr{\Qelse if (Y)\E
                        .*
                        \QSvSETMAGIC(ST(0));\E
                        }sx,                          "Y: set magic ST(0)" ],
-            [ 0, 1, qr{\Qelse if (Y)\E
+            [NOT, qr{\Qelse if (Y)\E
                        .*
                        \QSvSETMAGIC(ST(1));\E
                        }sx,                          "Y: no magic ST(1)" ],
@@ -2978,7 +2982,7 @@ EOF
                 |      RETVAL
                 |      RETVAL
 EOF
-            [ 1, 0, qr/Error: duplicate OUTPUT parameter 'RETVAL'/, "" ],
+            [ERR, qr/Error: duplicate OUTPUT parameter 'RETVAL'/, "" ],
         ],
 
         [
@@ -2993,7 +2997,7 @@ EOF
                 |      aaa
                 |      aaa
 EOF
-            [ 1, 0, qr/Error: duplicate OUTPUT parameter 'aaa'/, "" ],
+            [ERR, qr/Error: duplicate OUTPUT parameter 'aaa'/, "" ],
         ],
 
         [
@@ -3004,7 +3008,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ERR, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -3019,7 +3023,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 1, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "no warn" ],
+            [ERR|NOT, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "no warn" ],
         ],
 
         [
@@ -3032,7 +3036,7 @@ EOF
                 |    OUTPUT:
                 |      aaa
 EOF
-            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ERR, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -3049,7 +3053,7 @@ EOF
                 |    CODE:
                 |      RETVAL = 99
 EOF
-            [ 1, 0, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
+            [ERR, qr/Warning: found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section/, "" ],
         ],
 
         [
@@ -3062,7 +3066,7 @@ EOF
                 |    OUTPUT:
                 |      RETVAL
 EOF
-            [ 1, 0, qr/\QError: OUTPUT RETVAL not a parameter/, "" ],
+            [ERR, qr/\QError: OUTPUT RETVAL not a parameter/, "" ],
         ],
 
         [
@@ -3075,7 +3079,7 @@ EOF
                 |    OUTPUT:
                 |      RETVAL
 EOF
-            [ 1, 1, qr/\QError: OUTPUT RETVAL not a parameter/, "" ],
+            [ERR|NOT, qr/\QError: OUTPUT RETVAL not a parameter/, "" ],
         ],
 
         [
@@ -3088,7 +3092,7 @@ EOF
                 |    OUTPUT:
                 |      bbb
 EOF
-            [ 1, 0, qr/\QError: OUTPUT bbb not a parameter/, "" ],
+            [ERR, qr/\QError: OUTPUT bbb not a parameter/, "" ],
         ],
 
         [
@@ -3101,7 +3105,7 @@ EOF
                 |    OUTPUT:
                 |      length(aaa)
 EOF
-            [ 1, 0, qr/\QError: OUTPUT length(aaa) not a parameter/, "" ],
+            [ERR, qr/\QError: OUTPUT length(aaa) not a parameter/, "" ],
         ],
 
         [
@@ -3112,7 +3116,7 @@ EOF
                 |    OUTPUT:
                 |      SETMAGIC: 1
 EOF
-            [ 1, 0, qr{\QError: SETMAGIC: invalid value '1' (should be ENABLE/DISABLE)}, "" ],
+            [ERR, qr{\QError: SETMAGIC: invalid value '1' (should be ENABLE/DISABLE)}, "" ],
         ],
 
         [
@@ -3127,23 +3131,23 @@ EOF
                 |        abc
 EOF
             # OUT var - update arg 0 on stack
-            [ 0, 0, qr/\b\Qsv_setiv(ST(0),\E.*abc/,  "setiv(ST0, abc)" ],
-            [ 0, 0, qr/\b\QSvSETMAGIC(ST(0))/,       "set magic ST(0)" ],
+            [  0, qr/\b\Qsv_setiv(ST(0),\E.*abc/,  "setiv(ST0, abc)" ],
+            [  0, qr/\b\QSvSETMAGIC(ST(0))/,       "set magic ST(0)" ],
             # prepare stack for OUTLIST
-            [ 0, 0, qr/\bXSprePUSH\b/,               "XSprePUSH" ],
-            [ 0, 1, qr/\bEXTEND\b/,                  "NO extend"       ],
+            [  0, qr/\bXSprePUSH\b/,               "XSprePUSH" ],
+            [NOT, qr/\bEXTEND\b/,                  "NO extend"       ],
             # OUTPUT: RETVAL: push return value on stack
-            [ 0, 0, qr/\bsv_setpv\(\(SV\*\)TARG,\s*RETVAL\)/,"sv_setpv(TARG, RETVAL)" ],
-            [ 0, 0, qr/\QST(0) = TARG;/,             "has ST(0) = TARG" ],
+            [  0, qr/\bsv_setpv\(\(SV\*\)TARG,\s*RETVAL\)/,"sv_setpv(TARG, RETVAL)" ],
+            [  0, qr/\QST(0) = TARG;/,             "has ST(0) = TARG" ],
             # OUTLIST: push abc on stack
-            [ 0, 0, qr/\QRETVALSV = sv_newmortal();/, "create mortal" ],
-            [ 0, 0, qr/\b\Qsv_setiv(RETVALSV, (IV)abc);/,"sv_setiv(RETVALSV, abc)" ],
-            [ 0, 0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
+            [  0, qr/\QRETVALSV = sv_newmortal();/, "create mortal" ],
+            [  0, qr/\b\Qsv_setiv(RETVALSV, (IV)abc);/,"sv_setiv(RETVALSV, abc)" ],
+            [  0, qr/\b\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "store RETVALSV"],
             # and return RETVAL and abc
-            [ 0, 0, qr/\QXSRETURN(2)/,               "has XSRETURN" ],
+            [  0, qr/\QXSRETURN(2)/,               "has XSRETURN" ],
 
             # should only be one SvSETMAGIC
-            [ 0, 1, qr/\bSvSETMAGIC\b.*\bSvSETMAGIC\b/s,"only one SvSETMAGIC" ],
+            [NOT, qr/\bSvSETMAGIC\b.*\bSvSETMAGIC\b/s,"only one SvSETMAGIC" ],
         ],
 
         [
@@ -3154,7 +3158,7 @@ EOF
                 |    OUTPUT:
                 |      a
 EOF
-            [ 1, 1, qr/\QError: no OUTPUT definition for type 'blah', typekind 'T_BLAH'\E.*line 11/,
+            [ERR|NOT, qr/\QError: no OUTPUT definition for type 'blah', typekind 'T_BLAH'\E.*line 11/,
                     "got expected error" ],
         ],
     );
@@ -3181,9 +3185,9 @@ EOF
                 |void
                 |foo(int i = 0)
 EOF
-            [ 0, 0, qr/^\s+int\s+i;$/m,        "i delcared" ],
+            [  0, qr/^\s+int\s+i;$/m,        "i delcared" ],
 
-            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+            [  0, qr{\s+\Qif (items < 1)\E\n
                        \s+\Qi = 0;\E\n
                        \s+\Qelse {\E\n
                        \s+\Qi = (int)SvIV(ST(0))\E\n
@@ -3200,9 +3204,9 @@ EOF
                 |void
                 |foo(unsigned char c = 'x')
 EOF
-            [ 0, 0, qr/^\s+unsigned char\s+c;$/m,        "c delcared" ],
+            [  0, qr/^\s+unsigned char\s+c;$/m,        "c delcared" ],
 
-            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+            [  0, qr{\s+\Qif (items < 1)\E\n
                        \s+\Qc = 'x';\E\n
                        \s+\Qelse {\E\n
                        \s+\Qc = (unsigned char)SvUV(ST(0))\E\n
@@ -3219,9 +3223,9 @@ EOF
                 |void
                 |foo(char *s = "abc")
 EOF
-            [ 0, 0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
+            [  0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
 
-            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+            [  0, qr{\s+\Qif (items < 1)\E\n
                        \s+\Qs = "abc";\E\n
                        \s+\Qelse {\E\n
                        \s+\Qs = (char *)SvPV_nolen(ST(0))\E\n
@@ -3238,9 +3242,9 @@ EOF
                 |void
                 |foo(char *s = "'abc'")
 EOF
-            [ 0, 0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
+            [  0, qr/^\s+char \*\s+s;$/m,        "s delcared" ],
 
-            [ 0, 0, qr{\s+\Qif (items < 1)\E\n
+            [  0, qr{\s+\Qif (items < 1)\E\n
                        \s+\Qs = "'abc'";\E\n
                        \s+\Qelse {\E\n
                        \s+\Qs = (char *)SvPV_nolen(ST(0))\E\n
@@ -3257,7 +3261,7 @@ EOF
                 |void
                 |foo(char *s = )
 EOF
-            [ 1, 0, qr/Error: missing default value expression for 's'/m,
+            [ERR, qr/Error: missing default value expression for 's'/m,
                     "got expected err" ],
 
         ],
@@ -3294,10 +3298,10 @@ EOF
                 |void
                 |foo(RETVAL, short abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3308,9 +3312,9 @@ EOF
                 |    CODE:
                 |        xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3319,11 +3323,11 @@ EOF
                 |void
                 |foo(int RETVAL, short abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3333,11 +3337,11 @@ EOF
                 |foo(RETVAL, short abc)
                 |   int RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3348,10 +3352,10 @@ EOF
                 |    CODE:
                 |        xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3363,10 +3367,10 @@ EOF
                 |    CODE:
                 |        xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3376,11 +3380,11 @@ EOF
                 |foo(short abc)
                 |   int RETVAL = 99
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,           "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=\s*99/,         "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
-            [ 0, 0, qr/\Qfoo(abc)/,                      "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,           "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=\s*99/,         "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
+            [  0, qr/\Qfoo(abc)/,                      "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
         [
@@ -3390,10 +3394,10 @@ EOF
                 |foo(short abc)
                 |   int RETVAL = 99
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,           "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=\s*99/,         "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,           "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=\s*99/,         "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,              "ret empty" ],
         ],
 
 
@@ -3408,12 +3412,12 @@ EOF
                 |long
                 |foo(RETVAL, short abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
             # XXX RETVAL is passed uninitialised to the autocall fn
-            [ 0, 0, qr/long\s+RETVAL;/,                  "declare no init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
+            [  0, qr/long\s+RETVAL;/,                  "declare no init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\Qfoo(RETVAL, abc)/,              "autocall" ],
+            [  0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
         ],
 
         [
@@ -3424,10 +3428,10 @@ EOF
                 |    CODE:
                 |        xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 0, qr/long\s+RETVAL;/,                  "declare no init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/long\s+RETVAL;/,                  "declare no init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
         ],
 
         [
@@ -3436,16 +3440,16 @@ EOF
                 |long
                 |foo(int RETVAL, short abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
             # duplicate or malformed declarations used to be emitted
-            [ 0, 1, qr/int\s+RETVAL;/,                   "no none init init" ],
-            [ 0, 1, qr/long\s+RETVAL;/,                  "no none init long" ],
+            [NOT, qr/int\s+RETVAL;/,                   "no none init init" ],
+            [NOT, qr/long\s+RETVAL;/,                  "no none init long" ],
 
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "int  decl and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(RETVAL, abc\)/,"autocall" ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1)/,        "TARGi" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "int  decl and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(RETVAL, abc\)/,"autocall" ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1)/,        "TARGi" ],
+            [  0, qr/\b\QXSRETURN(1)/,                 "ret 1" ],
         ],
 
         [
@@ -3455,13 +3459,13 @@ EOF
                 |foo(RETVAL, short abc)
                 |   int RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 1, qr/long\s+RETVAL/,                   "no long decl" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "int  decl and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(RETVAL, abc\)/,"autocall" ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1)/,         "TARGi" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,                  "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [NOT, qr/long\s+RETVAL/,                   "no long decl" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,     "int  decl and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,        "abc is ST1" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(RETVAL, abc\)/,"autocall" ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1)/,         "TARGi" ],
+            [  0, qr/\b\QXSRETURN(1)/,                  "ret 1" ],
         ],
 
         [
@@ -3471,13 +3475,13 @@ EOF
                 |foo(short abc, RETVAL)
                 |   int RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc,\s*RETVAL"\)/, "usage" ],
-            [ 0, 1, qr/long\s+RETVAL/,                   "no long decl" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(1)/,     "int  decl and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(abc, RETVAL\)/,"autocall" ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1)/,         "TARGi" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,                  "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"abc,\s*RETVAL"\)/, "usage" ],
+            [NOT, qr/long\s+RETVAL/,                   "no long decl" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(1)/,     "int  decl and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(0)/,        "abc is ST0" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(abc, RETVAL\)/,"autocall" ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1)/,         "TARGi" ],
+            [  0, qr/\b\QXSRETURN(1)/,                  "ret 1" ],
         ],
 
         [
@@ -3490,15 +3494,15 @@ EOF
                 |    OUTPUT:
                 |        RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
             # duplicate or malformed declarations used to be emitted
-            [ 0, 1, qr/int\s+RETVAL;/,                "no none init init" ],
-            [ 0, 1, qr/long\s+RETVAL;/,               "no none init long" ],
+            [NOT, qr/int\s+RETVAL;/,                "no none init init" ],
+            [NOT, qr/long\s+RETVAL;/,               "no none init long" ],
 
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,  "int  decl and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,     "abc is ST1" ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1)/,     "TARGi" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,  "int  decl and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,     "abc is ST1" ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1)/,     "TARGi" ],
+            [  0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
         ],
 
         [
@@ -3512,12 +3516,12 @@ EOF
                 |    OUTPUT:
                 |        RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
-            [ 0, 1, qr/long\s+RETVAL/,                "no long declare" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,  "int  declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(1)/,     "abc is ST1" ],
-            [ 0, 0, qr/\b\QTARGi((IV)RETVAL, 1)/,     "TARGi" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL,\s*abc"\)/, "usage" ],
+            [NOT, qr/long\s+RETVAL/,                "no long declare" ],
+            [  0, qr/\bint\s+RETVAL\s*=.*\QST(0)/,  "int  declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(1)/,     "abc is ST1" ],
+            [  0, qr/\b\QTARGi((IV)RETVAL, 1)/,     "TARGi" ],
+            [  0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
         ],
 
         [
@@ -3527,11 +3531,11 @@ EOF
                 |foo(short abc)
                 |   int RETVAL = 99
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=\s*99/,      "declare and init" ],
-            [ 0, 0, qr/short\s+abc\s*=.*\QST(0)/,     "abc is ST0" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(abc\)/,    "autocall" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=\s*99/,      "declare and init" ],
+            [  0, qr/short\s+abc\s*=.*\QST(0)/,     "abc is ST0" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(abc\)/,    "autocall" ],
+            [  0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
         ],
 
         [
@@ -3545,12 +3549,12 @@ EOF
                 |  CODE:
                 |    xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc,\s*def"\)/, "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=\s*99/,      "declare and init" ],
-            [ 0, 0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
-            [ 0, 0, qr/int\s+def\s*=.*\QST(1)/,       "def is ST1" ],
-            [ 0, 0, qr/int\s+def.*int\s+RETVAL.*int\s+abc/s,  "ordering" ],
-            [ 0, 0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
+            [  0, qr/_usage\(cv,\s*"abc,\s*def"\)/, "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=\s*99/,      "declare and init" ],
+            [  0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
+            [  0, qr/int\s+def\s*=.*\QST(1)/,       "def is ST1" ],
+            [  0, qr/int\s+def.*int\s+RETVAL.*int\s+abc/s,  "ordering" ],
+            [  0, qr/\b\QXSRETURN(1)/,              "ret 1" ],
         ],
 
 
@@ -3562,11 +3566,11 @@ EOF
                 |NO_OUTPUT long
                 |foo(int abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
-            [ 0, 0, qr/long\s+RETVAL;/,               "long declare  no init" ],
-            [ 0, 0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(abc\)/,    "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
+            [  0, qr/long\s+RETVAL;/,               "long declare  no init" ],
+            [  0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(abc\)/,    "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
         [
@@ -3576,11 +3580,11 @@ EOF
                 |NO_OUTPUT void
                 |foo(int abc)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
-            [ 0, 1, qr/\s+RETVAL;/,                   "don't declare RETVAL" ],
-            [ 0, 0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
-            [ 0, 0, qr/^\s*foo\(abc\)/m,              "void autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
+            [NOT, qr/\s+RETVAL;/,                   "don't declare RETVAL" ],
+            [  0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
+            [  0, qr/^\s*foo\(abc\)/m,              "void autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
         [
@@ -3589,10 +3593,10 @@ EOF
                 |NO_OUTPUT long
                 |foo(int RETVAL)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL"\)/,     "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=/,           "declare and init" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*foo\(RETVAL\)/, "autocall" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL"\)/,     "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=/,           "declare and init" ],
+            [  0, qr/\bRETVAL\s*=\s*foo\(RETVAL\)/, "autocall" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
         [
@@ -3603,10 +3607,10 @@ EOF
                 |   CODE:
                 |      xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
-            [ 0, 0, qr/long\s+RETVAL;/,               "long declare  no init" ],
-            [ 0, 0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
+            [  0, qr/long\s+RETVAL;/,               "long declare  no init" ],
+            [  0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
         [
@@ -3618,10 +3622,10 @@ EOF
                 |   CODE:
                 |      xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
-            [ 0, 1, qr/\s+RETVAL;/,                   "don't declare RETVAL" ],
-            [ 0, 0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"abc"\)/,        "usage" ],
+            [NOT, qr/\s+RETVAL;/,                   "don't declare RETVAL" ],
+            [  0, qr/int\s+abc\s*=.*\QST(0)/,       "abc is ST0" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
         [
@@ -3632,9 +3636,9 @@ EOF
                 |   CODE:
                 |      xyz
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"RETVAL"\)/,     "usage" ],
-            [ 0, 0, qr/\bint\s+RETVAL\s*=/,           "declare and init" ],
-            [ 0, 0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
+            [  0, qr/_usage\(cv,\s*"RETVAL"\)/,     "usage" ],
+            [  0, qr/\bint\s+RETVAL\s*=/,           "declare and init" ],
+            [  0, qr/\bXSRETURN_EMPTY\b/,           "ret empty" ],
         ],
 
 
@@ -3648,7 +3652,7 @@ EOF
                 |   OUTPUT:
                 |      RETVAL
 EOF
-            [ 1, 0, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
+            [ERR, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
         ],
 
         [
@@ -3659,7 +3663,7 @@ EOF
                 |   OUTPUT:
                 |      RETVAL
 EOF
-            [ 1, 0, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
+            [ERR, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
         ],
 
         [
@@ -3672,7 +3676,7 @@ EOF
                 |   OUTPUT:
                 |      RETVAL
 EOF
-            [ 1, 0, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
+            [ERR, qr/Error: can't use RETVAL in OUTPUT when NO_OUTPUT declared/,  "OUTPUT err" ],
         ],
 
 
@@ -3684,7 +3688,7 @@ EOF
                 |void
                 |foo(RETVAL, RETVAL)
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
         [
@@ -3693,7 +3697,7 @@ EOF
                 |void
                 |foo(int RETVAL, short RETVAL)
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
         [
@@ -3703,7 +3707,7 @@ EOF
                 |foo(RETVAL, RETVAL)
                 |   int RETVAL
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
         [
@@ -3712,7 +3716,7 @@ EOF
                 |long
                 |foo(RETVAL, RETVAL)
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
         [
@@ -3721,7 +3725,7 @@ EOF
                 |long
                 |foo(int RETVAL, short RETVAL)
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
         [
@@ -3731,7 +3735,7 @@ EOF
                 |foo(RETVAL, RETVAL)
                 |   int RETVAL
 EOF
-            [ 1, 0, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
+            [ERR, qr/Error: duplicate definition of parameter 'RETVAL'/,  "" ],
         ],
 
 
@@ -3768,8 +3772,8 @@ EOF
                 |my_type
                 |foo(int RETVAL)
 EOF
-            [ 0, 0, qr/int\s+RETVAL\s*=.*SvIV\b/,  "RETVAL is int" ],
-            [ 0, 0, qr/sv_set_my_type\(/,          "return is my_type" ],
+            [  0, qr/int\s+RETVAL\s*=.*SvIV\b/,  "RETVAL is int" ],
+            [  0, qr/sv_set_my_type\(/,          "return is my_type" ],
         ],
 
         [
@@ -3779,8 +3783,8 @@ EOF
                 |foo(RETVAL)
                 |    int RETVAL
 EOF
-            [ 0, 0, qr/int\s+RETVAL\s*=.*SvIV\b/,  "RETVAL is int" ],
-            [ 0, 0, qr/sv_set_my_type\(/,          "return is my_type" ],
+            [  0, qr/int\s+RETVAL\s*=.*SvIV\b/,  "RETVAL is int" ],
+            [  0, qr/sv_set_my_type\(/,          "return is my_type" ],
         ],
 
         [
@@ -3790,8 +3794,8 @@ EOF
                 |foo()
                 |  int RETVAL = 99;
 EOF
-            [ 0, 0, qr/int\s+RETVAL\s*=\s*99/,     "RETVAL is int" ],
-            [ 0, 0, qr/sv_set_my_type\(/,          "return is my_type" ],
+            [  0, qr/int\s+RETVAL\s*=\s*99/,     "RETVAL is int" ],
+            [  0, qr/sv_set_my_type\(/,          "return is my_type" ],
         ],
 
     );
@@ -3825,7 +3829,7 @@ EOF
                 |short
                 |foo(int (*)(char *, long) p)
 EOF
-            [ 0, 0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
+            [  0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
                         "var decl" ],
         ],
         [
@@ -3835,7 +3839,7 @@ EOF
                 |foo(p)
                 |    int (*)(char *, long) p
 EOF
-            [ 0, 0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
+            [  0, qr/\Qint (* p )(char *, long) = get_fn_ptr(ST(0))/,
                         "var decl" ],
         ],
         [
@@ -3844,9 +3848,9 @@ EOF
                 |int (*)(char *, long)
                 |foo(short s)
 EOF
-            [ 0, 0, qr/\Qint ( * RETVAL  )(char * , long);/,
+            [  0, qr/\Qint ( * RETVAL  )(char * , long);/,
                         "RETVAL decl" ],
-            [ 0, 0, qr/set_fn_ptr\(RETVAL,.*\)/, "RETVAL set value" ],
+            [  0, qr/set_fn_ptr\(RETVAL,.*\)/, "RETVAL set value" ],
         ],
 
     );
@@ -3888,62 +3892,62 @@ EOF
                 |        OUTPUT:
                 |            RETVAL
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"abc, def"\)/,     "usage" ],
+            [  0, qr/_usage\(cv,\s*"abc, def"\)/,     "usage" ],
 
-            [ 0, 0, qr/
+            [  0, qr/
                        if \s* \(X\)
                        .*
                        int \s+ abc \s* = [^\n]* ST\(0\)
                        .*
                        else \s+ if \s* \(Y\)
                       /xs,                       "1st abc is int and ST(0)" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        else \s+ if \s* \(Y\)
                        .*
                        long \s+ abc \s* = [^\n]* ST\(0\)
                       /xs,                       "2nd abc is long and ST(0)" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        if \s* \(X\)
                        .*
                        short \s+ def \s* = [^\n]* ST\(1\)
                        .*
                        else \s+ if \s* \(Y\)
                       /xs,                       "1st def is short and ST(1)" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        else \s+ if \s* \(Y\)
                        .*
                        long \s+ def \s* = [^\n]* ST\(1\)
                       /xs,                       "2nd def is long and ST(1)" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        if \s* \(X\)
                        .*
                        int \s+ RETVAL;
                        .*
                        else \s+ if \s* \(Y\)
                       /xs,                       "1st RETVAL is int" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        else \s+ if \s* \(Y\)
                        .*
                        int \s+ RETVAL;
                        .*
                       /xs,                       "2nd RETVAL is int" ],
 
-            [ 0, 0, qr/
+            [  0, qr/
                        if \s* \(X\)
                        .*
                        \QRETVAL = abc + def;\E
                        .*
                        else \s+ if \s* \(Y\)
                       /xs,                       "1st RETVAL assign" ],
-            [ 0, 0, qr/
+            [  0, qr/
                        else \s+ if \s* \(Y\)
                        .*
                        \QRETVAL = abc - def;\E
                        .*
                       /xs,                       "2nd RETVAL assign" ],
 
-            [ 0, 0, qr/\b\QXSRETURN(1)/,           "ret 1" ],
-            [ 0, 1, qr/\bXSRETURN\b.*\bXSRETURN/s, "only a single XSRETURN" ],
+            [  0, qr/\b\QXSRETURN(1)/,           "ret 1" ],
+            [NOT, qr/\bXSRETURN\b.*\bXSRETURN/s, "only a single XSRETURN" ],
         ],
         [
             "CASE with unconditional else",
@@ -3960,7 +3964,7 @@ EOF
                 |        CODE:
                 |            YYY3
 EOF
-            [ 0, 0, qr/
+            [  0, qr/
                        ^ \s+ if \s+ \(CCC1\) \n
                        ^ \s+ \{   \n
                        .*
@@ -3995,7 +3999,7 @@ EOF
                 |            long abc
                 |            long def
 EOF
-            [ 0, 0, qr/
+            [  0, qr/
                        if \s* \(X\)
                        .*
                        int \s+ def \s*;
@@ -4015,7 +4019,7 @@ EOF
                 |    CASE: Y
                 |       C_ARGS: y,x
 EOF
-            [ 0, 0, qr/\(x,y\).*\(y,x\)/s, "C_ARGS" ],
+            [  0, qr/\(x,y\).*\(y,x\)/s, "C_ARGS" ],
         ],
         [
             "CASE with variant THIS type",
@@ -4029,7 +4033,7 @@ EOF
                 |    CASE:
                 |       short THIS
 EOF
-            [ 0, 0, qr/int   \s+ THIS .*
+            [  0, qr/int   \s+ THIS .*
                        long  \s+ THIS .*
                        short \s+ THIS/sx, "has three types" ],
         ],
@@ -4045,10 +4049,10 @@ EOF
                 |    CASE: Z
                 |       char * RETVAL
 EOF
-            [ 0, 0, qr/long        \s+ RETVAL .*
+            [  0, qr/long        \s+ RETVAL .*
                        double      \s+ RETVAL .*
                        char \s* \* \s+ RETVAL/sx, "has three decl types" ],
-            [ 0, 0, qr/X .* TARGi .*
+            [  0, qr/X .* TARGi .*
                        Y .* TARGi .*
                        Z .* TARGi .*/sx, "has one setting type" ],
         ],
@@ -4063,7 +4067,7 @@ EOF
                 |        CODE:
                 |            YYY
 EOF
-            [ 0, 0, qr{\Qif (X)\E
+            [  0, qr{\Qif (X)\E
                        .*
                        dXSTARG;
                        .*
@@ -4072,7 +4076,7 @@ EOF
                        \Qelse if (Y)\E
                        }sx,                 "branch X returns RETVAL" ],
 
-            [ 0, 1, qr{\Qelse if (Y)\E
+            [NOT, qr{\Qelse if (Y)\E
                        .*
                        \QPUSHi((IV)RETVAL);\E
                        }sx,                 "branch Y doesn't return RETVAL" ],
@@ -4088,7 +4092,7 @@ EOF
                 |    CASE: Y
                 |     HV *abc
 EOF
-            [ 0, 0, qr{\Qif (X)\E
+            [  0, qr{\Qif (X)\E
                        .*
                        croak.*\Qnot an ARRAY reference\E
                        .*
@@ -4114,7 +4118,7 @@ EOF
                 |        CODE:
                 |            CCC
 EOF
-            [ 1, 0, qr/\QError: 'CASE:' after unconditional 'CASE:'/,
+            [ERR, qr/\QError: 'CASE:' after unconditional 'CASE:'/,
                     "expected err" ],
         ],
         [
@@ -4127,7 +4131,7 @@ EOF
                 |    CASE: X
                 |        CODE:
 EOF
-            [ 1, 0, qr/\QError: no 'CASE:' at top of function/,
+            [ERR, qr/\QError: no 'CASE:' at top of function/,
                     "expected err" ],
         ],
         [
@@ -4139,7 +4143,7 @@ EOF
                 |    SCOPE: ENABLE
                 |    INPUTx:
 EOF
-            [ 1, 0, qr/\QError: junk at end of function: "    INPUTx:" in /,
+            [ERR, qr/\QError: junk at end of function: "    INPUTx:" in /,
                     "expected err" ],
         ],
         [
@@ -4151,7 +4155,7 @@ EOF
                 |     abc
                 |  C_ARGS:
 EOF
-            [ 1, 0, qr{\QError: misplaced 'C_ARGS:' in\E.*line 8},
+            [ERR, qr{\QError: misplaced 'C_ARGS:' in\E.*line 8},
                                                     "got expected error"  ],
         ],
 
@@ -4167,7 +4171,7 @@ EOF
                 |    CODE:
                 |      blah
 EOF
-            [ 1, 0, qr/\QWarning: ST(0) isn't consistently set in every CASE's CODE block/,
+            [ERR, qr/\QWarning: ST(0) isn't consistently set in every CASE's CODE block/,
                     "expected err" ],
         ],
 
@@ -4184,7 +4188,7 @@ EOF
                 |    CODE:
                 |      code2;
 EOF
-            [ 1, 0, qr/\A\QError: no 'CASE:' at top of function in (input), line 8\E\n\z/,
+            [ERR, qr/\A\QError: no 'CASE:' at top of function in (input), line 8\E\n\z/,
                     "only the expected err" ],
         ],
 
@@ -4215,10 +4219,10 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
-            [ 0, 1, qr/\bBBB;/,                               "no BBB decl" ],
+            [  0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
+            [NOT, qr/\bBBB;/,                               "no BBB decl" ],
         ],
 
         [
@@ -4227,14 +4231,14 @@ EOF
                 |int
                 |foo(int AAA, BBB, int CCC)
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
+            [  0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
             # Note that autocall uses the BBB var even though it isn't
             # declared. It would be up to the coder to use C_ARGS, or add
             # such a var via PREINIT.
-            [ 0, 0, qr/\bRETVAL\s*=\s*\Qfoo(AAA, BBB, CCC);/, "autocall" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
-            [ 0, 1, qr/\bBBB;/,                               "no BBB decl" ],
+            [  0, qr/\bRETVAL\s*=\s*\Qfoo(AAA, BBB, CCC);/, "autocall" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
+            [NOT, qr/\bBBB;/,                               "no BBB decl" ],
         ],
 
         [
@@ -4247,10 +4251,10 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
-            [ 0, 1, qr/\bBBB;/,                               "no BBB decl" ],
+            [  0, qr/_usage\(cv,\s*"AAA, BBB, CCC"\)/,      "usage" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
+            [NOT, qr/\bBBB;/,                               "no BBB decl" ],
         ],
 
 
@@ -4262,7 +4266,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
+            [ERR, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -4273,7 +4277,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
+            [ERR, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -4284,7 +4288,7 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 1, 0, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
+            [ERR, qr/Error: can't determine output type for 'BBB'/, "got type err" ],
         ],
 
         [
@@ -4298,11 +4302,11 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*"AAA, BBB = 888, CCC\s*= 999"\)/,"usage" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bCCC\s*=\s*.*\Q(ST(2))/,              "CCC is ST(2)" ],
-            [ 0, 1, qr/\bBBB;/,                               "no BBB decl" ],
-            [ 0, 1, qr/\b888\s*;/,                            "no 888 usage" ],
+            [  0, qr/_usage\(cv,\s*"AAA, BBB = 888, CCC\s*= 999"\)/,"usage" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bCCC\s*=\s*.*\Q(ST(2))/,              "CCC is ST(2)" ],
+            [NOT, qr/\bBBB;/,                               "no BBB decl" ],
+            [NOT, qr/\b888\s*;/,                            "no 888 usage" ],
         ],
 
         [
@@ -4313,9 +4317,9 @@ EOF
                 |   CODE:
                 |      XYZ;
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*\Q"AAA, SV *, CCC")/,    "usage" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
+            [  0, qr/_usage\(cv,\s*\Q"AAA, SV *, CCC")/,    "usage" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
         ],
 
         [
@@ -4325,7 +4329,7 @@ EOF
                 |int
                 |foo(int AAA, SV    *, int CCC)
 EOF
-            [ 1, 0, qr/Error: parameter 'SV \*' not valid as a C argument/,
+            [ERR, qr/Error: parameter 'SV \*' not valid as a C argument/,
                                                            "got arg err" ],
         ],
 
@@ -4338,10 +4342,10 @@ EOF
                 |foo(int AAA, SV    *, int CCC)
                 |    C_ARGS: AAA, CCC
 EOF
-            [ 0, 0, qr/_usage\(cv,\s*\Q"AAA, SV *, CCC")/,    "usage" ],
-            [ 0, 0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
-            [ 0, 0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
-            [ 0, 0, qr/\bRETVAL\s*=\s*\Qfoo(AAA, CCC);/,      "autocall" ],
+            [  0, qr/_usage\(cv,\s*\Q"AAA, SV *, CCC")/,    "usage" ],
+            [  0, qr/\bint\s+AAA\s*=\s*.*\Q(ST(0))/,        "AAA is ST(0)" ],
+            [  0, qr/\bint\s+CCC\s*=\s*.*\Q(ST(2))/,        "CCC is ST(2)" ],
+            [  0, qr/\bRETVAL\s*=\s*\Qfoo(AAA, CCC);/,      "autocall" ],
         ],
 
 
@@ -4368,11 +4372,11 @@ EOF
                 |array(int,5)
                 |foo()
 EOF
-            [ 0, 0, qr/int\s*\*\s+RETVAL;/,      "RETVAL is int*" ],
-            [ 0, 0, qr/sv_setpvn\(.*,\s*5\s*\*\s*\Qsizeof(int));/,
+            [  0, qr/int\s*\*\s+RETVAL;/,      "RETVAL is int*" ],
+            [  0, qr/sv_setpvn\(.*,\s*5\s*\*\s*\Qsizeof(int));/,
                                                  "return packs 5 ints" ],
-            [ 0, 0, qr/\bdXSTARG\b/,             "declares TARG" ],
-            [ 0, 0, qr/sv_setpvn\(TARG\b/,       "uses TARG" ],
+            [  0, qr/\bdXSTARG\b/,             "declares TARG" ],
+            [  0, qr/sv_setpvn\(TARG\b/,       "uses TARG" ],
 
         ],
 
@@ -4382,8 +4386,8 @@ EOF
                 |array(int*, FOO_SIZE)
                 |foo()
 EOF
-            [ 0, 0, qr/int\s*\*\s*\*\s+RETVAL;/, "RETVAL is int**" ],
-            [ 0, 0, qr/sv_setpvn\(.*,\s*FOO_SIZE\s*\*\s*sizeof\(int\s*\*\s*\)\);/,
+            [  0, qr/int\s*\*\s*\*\s+RETVAL;/, "RETVAL is int**" ],
+            [  0, qr/sv_setpvn\(.*,\s*FOO_SIZE\s*\*\s*sizeof\(int\s*\*\s*\)\);/,
                                                 "return packs FOO_SIZE int*s" ],
         ],
 
@@ -4394,7 +4398,7 @@ EOF
                 |foo(abc)
                 |    array(int,5) abc
 EOF
-            [ 1, 0, qr/Could not find a typemap for C type/, " no find type" ],
+            [ERR, qr/Could not find a typemap for C type/, " no find type" ],
         ],
 
         [
@@ -4405,8 +4409,8 @@ EOF
                 |    OUTPUT:
                 |        RETVAL my_setintptr(ST(0), RETVAL);
 EOF
-            [ 0, 0, qr/int\s*\*\s+RETVAL;/,             "RETVAL is int*" ],
-            [ 0, 0, qr/\Qmy_setintptr(ST(0), RETVAL);/, "override honoured" ],
+            [  0, qr/int\s*\*\s+RETVAL;/,             "RETVAL is int*" ],
+            [  0, qr/\Qmy_setintptr(ST(0), RETVAL);/, "override honoured" ],
         ],
 
         [
@@ -4417,8 +4421,8 @@ EOF
                 |    OUTPUT:
                 |        RETVAL array(int,5)
 EOF
-            [ 0, 0, qr/short\s+RETVAL;/,      "RETVAL is short" ],
-            [ 0, 0, qr/\Qarray(int,5)/,       "return expression is unchanged" ],
+            [  0, qr/short\s+RETVAL;/,      "RETVAL is short" ],
+            [  0, qr/\Qarray(int,5)/,       "return expression is unchanged" ],
         ],
 
         [
@@ -4427,7 +4431,7 @@ EOF
                 |int
                 |foo(OUT array(int,5) AAA)
 EOF
-            [ 1, 0, qr/\QError: can't use array(type,nitems) type for OUT parameter/,
+            [ERR, qr/\QError: can't use array(type,nitems) type for OUT parameter/,
                         "got err" ],
         ],
 
@@ -4437,7 +4441,7 @@ EOF
                 |int
                 |foo(OUTLIST array(int,5) AAA)
 EOF
-            [ 1, 0, qr/\QError: can't use array(type,nitems) type for OUTLIST parameter/,
+            [ERR, qr/\QError: can't use array(type,nitems) type for OUTLIST parameter/,
                     "got err" ],
         ],
     );
@@ -4497,11 +4501,11 @@ EOF
                 |char *
                 |foo(longArray * abc)
 EOF
-            [ 0, 0, qr/longArray\s*\*\s*abc;/,      "abc is longArray*" ],
-            [ 0, 0, qr/abc\s*=\s*longArrayPtr\(/,   "longArrayPtr called" ],
-            [ 0, 0, qr/abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))/,
+            [  0, qr/longArray\s*\*\s*abc;/,      "abc is longArray*" ],
+            [  0, qr/abc\s*=\s*longArrayPtr\(/,   "longArrayPtr called" ],
+            [  0, qr/abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))/,
                                                     "abc[i] set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
         [
             "T_ARRAY long output",
@@ -4509,11 +4513,11 @@ EOF
                 |longArray *
                 |foo()
 EOF
-            [ 0, 0, qr/longArray\s*\*\s*RETVAL;/,   "RETVAL is longArray*" ],
-            [ 0, 1, qr/longArrayPtr/,               "longArrayPtr NOT called" ],
-            [ 0, 0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
+            [  0, qr/longArray\s*\*\s*RETVAL;/,   "RETVAL is longArray*" ],
+            [NOT, qr/longArrayPtr/,               "longArrayPtr NOT called" ],
+            [  0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
                                                     "ST(i) set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
 
         [
@@ -4522,11 +4526,11 @@ EOF
                 |char *
                 |foo(myivArray * abc)
 EOF
-            [ 0, 0, qr/myivArray\s*\*\s*abc;/,      "abc is myivArray*" ],
-            [ 0, 0, qr/abc\s*=\s*myivArrayPtr\(/,   "myivArrayPtr called" ],
-            [ 0, 0, qr/abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))/,
+            [  0, qr/myivArray\s*\*\s*abc;/,      "abc is myivArray*" ],
+            [  0, qr/abc\s*=\s*myivArrayPtr\(/,   "myivArrayPtr called" ],
+            [  0, qr/abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))/,
                                                     "abc[i] set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
         [
             "T_ARRAY myiv output",
@@ -4534,11 +4538,11 @@ EOF
                 |myivArray *
                 |foo()
 EOF
-            [ 0, 0, qr/myivArray\s*\*\s*RETVAL;/,   "RETVAL is myivArray*" ],
-            [ 0, 1, qr/myivArrayPtr/,               "myivArrayPtr NOT called" ],
-            [ 0, 0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
+            [  0, qr/myivArray\s*\*\s*RETVAL;/,   "RETVAL is myivArray*" ],
+            [NOT, qr/myivArrayPtr/,               "myivArrayPtr NOT called" ],
+            [  0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
                                                     "ST(i) set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
 
         [
@@ -4547,11 +4551,11 @@ EOF
                 |char *
                 |foo(blahArray * abc)
 EOF
-            [ 0, 0, qr/blahArray\s*\*\s*abc;/,      "abc is blahArray*" ],
-            [ 0, 0, qr/abc\s*=\s*blahArrayPtr\(/,   "blahArrayPtr called" ],
-            [ 0, 0, qr/abc\[ix_abc.*\]\s*=\s*.*\Qmy_get_blah(ST(ix_abc))/,
+            [  0, qr/blahArray\s*\*\s*abc;/,      "abc is blahArray*" ],
+            [  0, qr/abc\s*=\s*blahArrayPtr\(/,   "blahArrayPtr called" ],
+            [  0, qr/abc\[ix_abc.*\]\s*=\s*.*\Qmy_get_blah(ST(ix_abc))/,
                                                     "abc[i] set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
         [
             "T_ARRAY blah output",
@@ -4559,11 +4563,11 @@ EOF
                 |blahArray *
                 |foo()
 EOF
-            [ 0, 0, qr/blahArray\s*\*\s+RETVAL;/,   "RETVAL is blahArray*" ],
-            [ 0, 1, qr/blahArrayPtr/,               "blahArrayPtr NOT called" ],
-            [ 0, 0, qr/\Qmy_set_blah(ST(ix_RETVAL), RETVAL[ix_RETVAL]);/,
+            [  0, qr/blahArray\s*\*\s+RETVAL;/,   "RETVAL is blahArray*" ],
+            [NOT, qr/blahArrayPtr/,               "blahArrayPtr NOT called" ],
+            [  0, qr/\Qmy_set_blah(ST(ix_RETVAL), RETVAL[ix_RETVAL]);/,
                                                     "ST(i) set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
 
         [
@@ -4572,7 +4576,7 @@ EOF
                 |char *
                 |foo(nosuchtypeArray * abc)
 EOF
-            [ 1, 0, qr/Could not find a typemap for C type 'nosuchtype'/,
+            [ERR, qr/Could not find a typemap for C type 'nosuchtype'/,
                                                     "no such type" ],
         ],
         [
@@ -4581,7 +4585,7 @@ EOF
                 |nosuchtypeArray *
                 |foo()
 EOF
-            [ 1, 0, qr/Could not find a typemap for C type 'nosuchtype'/,
+            [ERR, qr/Could not find a typemap for C type 'nosuchtype'/,
                                                     "no such type" ],
         ],
 
@@ -4601,15 +4605,15 @@ EOF
                 |char *
                 |foo(shortArray * abc)
 EOF
-            [ 0, 0, qr/shortArray\s*\*\s*abc;/,      "abc is shortArray*" ],
+            [  0, qr/shortArray\s*\*\s*abc;/,      "abc is shortArray*" ],
             # calling fooArrayPtr() is part of the T_ARRAY typemap,
             # not part of the general mechanism
-            [ 0, 1, qr/shortArrayPtr\(/,             "no shortArrayPtr call" ],
-            [ 0, 0, qr/\{\s*abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))\E\s*\n?\s*\}/,
+            [NOT, qr/shortArrayPtr\(/,             "no shortArrayPtr call" ],
+            [  0, qr/\{\s*abc\[ix_abc.*\]\s*=\s*.*\QSvIV(ST(ix_abc))\E\s*\n?\s*\}/,
                                                     "abc[i] set" ],
-            [ 0, 0, qr/\QIN(abc,shortArray *,shortArrayPtr,short,ST(0),0)/,
+            [  0, qr/\QIN(abc,shortArray *,shortArrayPtr,short,ST(0),0)/,
                                                     "template vars ok" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
         [
             "T_DAE output",
@@ -4617,13 +4621,13 @@ EOF
                 |shortArray *
                 |foo()
 EOF
-            [ 0, 0, qr/shortArray\s*\*\s*RETVAL;/,  "RETVAL is shortArray*" ],
-            [ 0, 1, qr/shortArrayPtr\(/,            "shortArrayPtr NOT called" ],
-            [ 0, 0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
+            [  0, qr/shortArray\s*\*\s*RETVAL;/,  "RETVAL is shortArray*" ],
+            [NOT, qr/shortArrayPtr\(/,            "shortArrayPtr NOT called" ],
+            [  0, qr/\Qsv_setiv(ST(ix_RETVAL), (IV)RETVAL[ix_RETVAL]);/,
                                                     "ST(i) set" ],
-            [ 0, 0, qr/\QOUT(RETVAL,shortArray *,shortArrayPtr,short,ST(0))/,
+            [  0, qr/\QOUT(RETVAL,shortArray *,shortArrayPtr,short,ST(0))/,
                                                     "template vars ok" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
         [
             "T_DAE bad input",
@@ -4631,7 +4635,7 @@ EOF
                 |int
                 |foo(NoInputArray * abc)
 EOF
-            [ 1, 0, qr/\QError: no INPUT definition for subtype 'NoInput', typekind 'T_Noinput' found in\E.*line 40/,
+            [ERR, qr/\QError: no INPUT definition for subtype 'NoInput', typekind 'T_Noinput' found in\E.*line 40/,
                                                     "got expected error" ],
         ],
 
@@ -4644,10 +4648,10 @@ EOF
                 |    OUTPUT:
                 |      RETVAL my_intptr_set(ST(0), RETVAL[0]);
 EOF
-            [ 0, 0, qr/intArray\s*\*\s*RETVAL;/,   "RETVAL is intArray*" ],
-            [ 0, 1, qr/intArrayPtr/,               "intArrayPtr NOT called" ],
-            [ 0, 0, qr/\Qmy_intptr_set(ST(0), RETVAL[0]);/, "ST(0) set" ],
-            [ 0, 1, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
+            [  0, qr/intArray\s*\*\s*RETVAL;/,   "RETVAL is intArray*" ],
+            [NOT, qr/intArrayPtr/,               "intArrayPtr NOT called" ],
+            [  0, qr/\Qmy_intptr_set(ST(0), RETVAL[0]);/, "ST(0) set" ],
+            [NOT, qr/DO_ARRAY_ELEM/,              "no DO_ARRAY_ELEM" ],
         ],
 
         # for OUT and OUTLIST arguments, don't process DO_ARRAY_ELEM
@@ -4657,7 +4661,7 @@ EOF
                 |int
                 |foo(OUT intArray * abc)
 EOF
-            [ 1, 0, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUT parameter/,
+            [ERR, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUT parameter/,
                     "gives err" ],
         ],
         [
@@ -4666,7 +4670,7 @@ EOF
                 |int
                 |foo(OUTLIST intArray * abc)
 EOF
-            [ 1, 0, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUTLIST parameter/,
+            [ERR, qr/Error: can't use typemap containing DO_ARRAY_ELEM for OUTLIST parameter/,
                     "gives err" ],
         ],
 
@@ -4676,7 +4680,7 @@ EOF
                 |NooutputArray *
                 |foo()
 EOF
-            [ 1, 0, qr/\QError: no OUTPUT definition for subtype 'Nooutput', typekind 'T_Nooutput'\E.*line 40/,
+            [ERR, qr/\QError: no OUTPUT definition for subtype 'Nooutput', typekind 'T_Nooutput'\E.*line 40/,
                     "gives expected error" ],
         ],
     );
@@ -4704,28 +4708,28 @@ EOF
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: ENABLEblah
 EOF
-            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: VERSIONCHECK: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: trailing text",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: DISABLE blah # bloo +%
 EOF
-            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: VERSIONCHECK: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: lower case",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: disable
 EOF
-            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: VERSIONCHECK: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: semicolon",
             [ Q(<<'EOF') ],
                 |VERSIONCHECK: DISABLE;
 EOF
-            [ 1, 0, qr{\QError: VERSIONCHECK: invalid value 'DISABLE;' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: VERSIONCHECK: invalid value 'DISABLE;' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
@@ -4733,21 +4737,21 @@ EOF
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: ENABLEblah
 EOF
-            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: trailing text",
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +%
 EOF
-            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'diSAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'diSAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: lower case",
             [ Q(<<'EOF') ],
                 |EXPORT_XSUB_SYMBOLS: disable
 EOF
-            [ 1, 0, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
@@ -4757,7 +4761,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "file SCOPE: lower case",
@@ -4766,7 +4770,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
     );
@@ -4793,7 +4797,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+            [  0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
         ],
         [
             "PROTOTYPES: ENABLED",
@@ -4803,8 +4807,8 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
-            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'ENABLED' interpreted as ENABLE},
+            [  0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+            [ERR, qr{Warning: invalid PROTOTYPES value 'ENABLED' interpreted as ENABLE},
                     "got warning" ],
         ],
         [
@@ -4815,8 +4819,8 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
-            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'ENABLE;' interpreted as ENABLE},
+            [  0, qr{newXSproto_portable.*"\$\$"}, "has proto" ],
+            [ERR, qr{Warning: invalid PROTOTYPES value 'ENABLE;' interpreted as ENABLE},
                     "got warning" ],
         ],
 
@@ -4828,7 +4832,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
+            [NOT, qr{"\$\$"}, "doesn't have proto" ],
         ],
         [
             "PROTOTYPES: DISABLED",
@@ -4838,8 +4842,8 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
-            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'DISABLED' interpreted as DISABLE},
+            [NOT, qr{"\$\$"}, "doesn't have proto" ],
+            [ERR, qr{Warning: invalid PROTOTYPES value 'DISABLED' interpreted as DISABLE},
                     "got warning" ],
         ],
         [
@@ -4850,8 +4854,8 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 0, 1, qr{"\$\$"}, "doesn't have proto" ],
-            [ 1, 0, qr{Warning: invalid PROTOTYPES value 'DISABLE;' interpreted as DISABLE},
+            [NOT, qr{"\$\$"}, "doesn't have proto" ],
+            [ERR, qr{Warning: invalid PROTOTYPES value 'DISABLE;' interpreted as DISABLE},
                     "got warning" ],
         ],
 
@@ -4863,7 +4867,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: PROTOTYPES: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "PROTOTYPES: trailing text",
@@ -4873,7 +4877,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'ENABLE blah' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: PROTOTYPES: invalid value 'ENABLE blah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "PROTOTYPES: trailing text and comment)",
@@ -4883,7 +4887,7 @@ EOF
                 |void
                 |foo(int a, int b)
 EOF
-            [ 1, 0, qr{\QError: PROTOTYPES: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: PROTOTYPES: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
 
@@ -4916,7 +4920,7 @@ EOF
                 |
                 |
 EOF
-            [ 0, 0, qr{\Q#line 6 "(input)"\E\n\n\n  code1\n  code2\n\n#line},
+            [  0, qr{\Q#line 6 "(input)"\E\n\n\n  code1\n  code2\n\n#line},
             "seen code" ],
         ],
         [
@@ -4925,9 +4929,9 @@ EOF
                 |BOOT: blah
                 |  codeline
 EOF
-            [ 0, 0, qr{\Q#line 6 "(input)"\E\n  codeline\n\n#line},
+            [  0, qr{\Q#line 6 "(input)"\E\n  codeline\n\n#line},
             "junk ignored" ],
-            [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+            [ERR, qr{Warning: text after keyword ignored: 'blah'},
                     "should die" ],
         ],
     );
@@ -4962,8 +4966,8 @@ EOF
                 |
                 |mytype foo(mytype abc)
 EOF
-            [ 0, 0, qr{\Qmytype	abc = get_mytype(ST(0))}, "get" ],
-            [ 0, 0, qr{set_mytype\(.*?, RETVAL\)},        "set" ],
+            [  0, qr{\Qmytype	abc = get_mytype(ST(0))}, "get" ],
+            [  0, qr{set_mytype\(.*?, RETVAL\)},        "set" ],
         ],
         [
             "TYPEMAP: single quote'",
@@ -4974,7 +4978,7 @@ EOF
                 |
                 |int foo(mytype abc)
 EOF
-            [ 0, 0, qr{\Qmytype	abc = (mytype)SvIV(ST(0))}, "get" ],
+            [  0, qr{\Qmytype	abc = (mytype)SvIV(ST(0))}, "get" ],
         ],
         [
             "TYPEMAP: double quote'",
@@ -4985,7 +4989,7 @@ EOF
                 |
                 |int foo(mytype abc)
 EOF
-            [ 0, 0, qr{\Qmytype	abc = (mytype)SvUV(ST(0))}, "get" ],
+            [  0, qr{\Qmytype	abc = (mytype)SvUV(ST(0))}, "get" ],
         ],
         [
             "line continuation directly after TYPEMAP",
@@ -4999,7 +5003,7 @@ EOF
                 |         int j)
 EOF
 
-            [ 0, 0, qr{XS_Foo_foo}, "no errs" ],
+            [  0, qr{XS_Foo_foo}, "no errs" ],
         ],
 
         [
@@ -5022,7 +5026,7 @@ EOF
                 |EOF
 EOF
 
-            [ 0, 1, qr{UV}, "no UV found" ],
+            [NOT, qr{UV}, "no UV found" ],
         ],
 
         [
@@ -5032,7 +5036,7 @@ EOF
                 |
 EOF
 
-            [ 1, 0, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
+            [ERR, qr{Error: unparseable TYPEMAP line: 'TYPEMAP: <EOF'},
                 "got expected err msg"
             ],
         ],
@@ -5062,8 +5066,8 @@ EOF
                 |foo()
                 |    OVERLOAD: cmp
 EOF
-            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
-            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_yes}, "sets true" ],
+            [  0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [  0, qr{sv_setsv\(\n.*\n\s+&PL_sv_yes}, "sets true" ],
         ],
         [
             "FALLBACK: FALSE",
@@ -5074,8 +5078,8 @@ EOF
                 |foo()
                 |    OVERLOAD: cmp
 EOF
-            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
-            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_no}, "sets false" ],
+            [  0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [  0, qr{sv_setsv\(\n.*\n\s+&PL_sv_no}, "sets false" ],
         ],
         [
             "FALLBACK: UNDEF",
@@ -5086,8 +5090,8 @@ EOF
                 |foo()
                 |    OVERLOAD: cmp
 EOF
-            [ 0, 0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
-            [ 0, 0, qr{sv_setsv\(\n.*\n\s+&PL_sv_undef}, "sets undef" ],
+            [  0, qr{newXS.*Foo::Bar::\(\).*XS_Foo__Bar_nil}, "has nil CV" ],
+            [  0, qr{sv_setsv\(\n.*\n\s+&PL_sv_undef}, "sets undef" ],
         ],
         [
             "FALLBACK: XYZ",
@@ -5098,7 +5102,7 @@ EOF
                 |foo()
                 |    OVERLOAD: cmp
 EOF
-            [ 1, 0, qr{\QError: FALLBACK: invalid value 'XYZ' (should be TRUE/FALSE/UNDEF)},
+            [ERR, qr{\QError: FALLBACK: invalid value 'XYZ' (should be TRUE/FALSE/UNDEF)},
                     "got err" ],
         ],
         [
@@ -5110,7 +5114,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{\QWarning: duplicate FALLBACK: entry},
+            [ERR, qr{\QWarning: duplicate FALLBACK: entry},
                     "got warning" ],
         ],
         [
@@ -5163,7 +5167,7 @@ EOF
             [ Q(<<'EOF') ],
                 |REQUIRE: 999999.9
 EOF
-            [ 1, 0, qr{\QError: xsubpp 999999.9 (or better) required--this is only},
+            [ERR, qr{\QError: xsubpp 999999.9 (or better) required--this is only},
                     "got err" ],
         ],
         [
@@ -5171,7 +5175,7 @@ EOF
             [ Q(<<'EOF') ],
                 |REQUIRE:   
 EOF
-            [ 1, 0, qr{\QError: REQUIRE expects a version number},
+            [ERR, qr{\QError: REQUIRE expects a version number},
                     "got err" ],
         ],
         [
@@ -5179,7 +5183,7 @@ EOF
             [ Q(<<'EOF') ],
                 |REQUIRE: abc
 EOF
-            [ 1, 0, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got 'abc'},
+            [ERR, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got 'abc'},
                     "got err" ],
         ],
         [
@@ -5187,7 +5191,7 @@ EOF
             [ Q(<<'EOF') ],
                 |REQUIRE: 3.0.0
 EOF
-            [ 1, 0, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got '3.0.0'},
+            [ERR, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got '3.0.0'},
                     "got err" ],
         ],
     );
@@ -5215,7 +5219,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE: XSInclude.xsh  
 EOF
-            [ 0, 0, qr{newXS.*\bXS_Foo__Bar_include_ok\b},
+            [  0, qr{newXS.*\bXS_Foo__Bar_include_ok\b},
                     "included XSUB was processed" ],
         ],
 
@@ -5226,7 +5230,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE:   
 EOF
-            [ 1, 0, qr{\QError: INCLUDE: filename missing},
+            [ERR, qr{\QError: INCLUDE: filename missing},
                     "got err" ],
         ],
         [
@@ -5234,7 +5238,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE: |foo
 EOF
-            [ 1, 0, qr{\QError: INCLUDE: output pipe is illegal},
+            [ERR, qr{\QError: INCLUDE: output pipe is illegal},
                     "got err" ],
         ],
         [
@@ -5243,7 +5247,7 @@ EOF
                 | # this file INCLUDEs itself
                 |INCLUDE: XSloop.xsh
 EOF
-            [ 1, 0, qr{\QError: INCLUDE: loop detected},
+            [ERR, qr{\QError: INCLUDE: loop detected},
                     "got err" ],
         ],
         [
@@ -5251,7 +5255,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE: NoSuchFile.xsh
 EOF
-            [ 1, 0, qr{\QError: INCLUDE: cannot open 'NoSuchFile.xsh': },
+            [ERR, qr{\QError: INCLUDE: cannot open 'NoSuchFile.xsh': },
                     "got err" ],
         ],
 
@@ -5262,7 +5266,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE_COMMAND: $^X -Ilib -It/lib -MIncludeTester -e IncludeTester::print_xs
 EOF
-            [ 0, 0, qr{newXS.*\bXS_Foo__Bar_sum\b},
+            [  0, qr{newXS.*\bXS_Foo__Bar_sum\b},
                     "included XSUB was processed" ],
         ],
 
@@ -5274,7 +5278,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE_COMMAND:     
 EOF
-            [ 1, 0, qr{\QError: INCLUDE_COMMAND: command missing},
+            [ERR, qr{\QError: INCLUDE_COMMAND: command missing},
                     "got err" ],
         ],
         [
@@ -5282,7 +5286,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE_COMMAND:   |  blah
 EOF
-            [ 1, 0, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
+            [ERR, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
                     "got err" ],
         ],
         [
@@ -5290,7 +5294,7 @@ EOF
             [ Q(<<'EOF') ],
                 |INCLUDE_COMMAND:   blah  |   
 EOF
-            [ 1, 0, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
+            [ERR, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
                     "got err" ],
         ],
         [
@@ -5305,7 +5309,7 @@ EOF
                 |PROTOTYPES: DISABLE
                 |PROTOTYPES: DISABLE
 EOF
-            [ 1, 0, qr{\QError: INCLUDE_COMMAND: got return code 0x0100\E
+            [ERR, qr{\QError: INCLUDE_COMMAND: got return code 0x0100\E
                        \Q when reading from pipe '\E
                        .*
                        \Q' in (input), line 6\E}x,
@@ -5348,7 +5352,7 @@ EOF
                 |int foo()
                 |$kw: blah
 EOF
-            [ 1, 0, qr{Error: misplaced '$kw:'}, "should die" ],
+            [ERR, qr{Error: misplaced '$kw:'}, "should die" ],
         ],
     }
 
@@ -5380,7 +5384,7 @@ EOF
                 |void
                 |foo()
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: trailing text",
@@ -5389,7 +5393,7 @@ EOF
                 |foo()
                 |SCOPE: EnAble blah # bloo +%
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'EnAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: lower case",
@@ -5398,7 +5402,7 @@ EOF
                 |foo()
                 |SCOPE: enable
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'enable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "xsub SCOPE: semicolon",
@@ -5407,7 +5411,7 @@ EOF
                 |foo()
                 |SCOPE: ENABLE;
 EOF
-            [ 1, 0, qr{\QError: SCOPE: invalid value 'ENABLE;' (should be ENABLE/DISABLE)}, "should die" ],
+            [ERR, qr{\QError: SCOPE: invalid value 'ENABLE;' (should be ENABLE/DISABLE)}, "should die" ],
         ],
 
         [
@@ -5418,7 +5422,7 @@ EOF
                 |foo()
                 |C_ARGS: a,b,c
 EOF
-            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
+            [  0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
                     "has ENTER/LEAVE" ],
         ],
         [
@@ -5429,7 +5433,7 @@ EOF
                 |C_ARGS: a,b,c
                 |SCOPE: ENABLE
 EOF
-            [ 0, 0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
+            [  0, qr{ENTER;\s+{\s+\Qfoo(a,b,c);\E\s+}\s+LEAVE;},
                     "has ENTER/LEAVE" ],
         ],
         [
@@ -5439,7 +5443,7 @@ EOF
                 |foo(i)
                 | MyScopeInt i
 EOF
-            [ 0, 0, qr{ENTER;\s+{.+\s+}\s+LEAVE;}s, "has ENTER/LEAVE" ],
+            [  0, qr{ENTER;\s+{.+\s+}\s+LEAVE;}s, "has ENTER/LEAVE" ],
         ],
         [
             "xsub duplicate SCOPE",
@@ -5449,7 +5453,7 @@ EOF
                 |SCOPE: ENABLE
                 |SCOPE: ENABLE
 EOF
-            [ 1, 0, qr{\QError: only one SCOPE declaration allowed per XSUB},
+            [ERR, qr{\QError: only one SCOPE declaration allowed per XSUB},
                     "got expected error"],
         ],
         [
@@ -5457,7 +5461,7 @@ EOF
             [ Q(<<'EOF') ],
                 |FOO_BAR:
 EOF
-            [ 1, 0,
+            [ERR,
                 qr{\QError: unrecognised keyword 'FOO_BAR' in (input), line 12\E\n},
                     "got expected error"],
         ],
@@ -5490,19 +5494,19 @@ EOF
                 |           buz => foo
                 |           biz => Baz::baz
 EOF
-            [ 0, 0, qr{"Foo::foo",.*\n.*= 1;},
+            [  0, qr{"Foo::foo",.*\n.*= 1;},
                    "has Foo::foo" ],
-            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+            [  0, qr{"Foo::bar",.*\n.*= 2;},
                    "has Foo::bar" ],
-            [ 0, 0, qr{"Baz::baz",.*\n.*= 3;},
+            [  0, qr{"Baz::baz",.*\n.*= 3;},
                    "has Baz::baz" ],
-            [ 0, 0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
+            [  0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
                    "has Foo::boz" ],
-            [ 0, 0, qr{"Foo::buz",.*\n.*= 1;},
+            [  0, qr{"Foo::buz",.*\n.*= 1;},
                    "has Foo::buz" ],
-            [ 0, 0, qr{"Foo::biz",.*\n.*= 3;},
+            [  0, qr{"Foo::biz",.*\n.*= 3;},
                    "has Foo::biz" ],
-            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
+            [  0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
 
         [
@@ -5513,9 +5517,9 @@ EOF
                 |    ALIAS:
                 |           bar = 2
 EOF
-            [ 0, 0, qr{"Foo::foo",.*\n.*= 0;},
+            [  0, qr{"Foo::foo",.*\n.*= 0;},
                    "has Foo::foo" ],
-            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+            [  0, qr{"Foo::bar",.*\n.*= 2;},
                    "has Foo::bar" ],
         ],
 
@@ -5532,17 +5536,17 @@ EOF
                 |   
                 |
 EOF
-            [ 0, 0, qr{"Foo::foo",.*\n.*= 1;},
+            [  0, qr{"Foo::foo",.*\n.*= 1;},
                    "has Foo::foo" ],
-            [ 0, 0, qr{"Foo::bar",.*\n.*= 2;},
+            [  0, qr{"Foo::bar",.*\n.*= 2;},
                    "has Foo::bar" ],
-            [ 0, 0, qr{"Baz::baz",.*\n.*= 3;},
+            [  0, qr{"Baz::baz",.*\n.*= 3;},
                    "has Baz::baz" ],
-            [ 0, 0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
+            [  0, qr{"Foo::boz",.*\n.*= BOZ_VAL;},
                    "has Foo::boz" ],
-            [ 0, 0, qr{"Foo::buz",.*\n.*= 1;},
+            [  0, qr{"Foo::buz",.*\n.*= 1;},
                    "has Foo::buz" ],
-            [ 0, 0, qr{"Foo::biz",.*\n.*= 3;},
+            [  0, qr{"Foo::biz",.*\n.*= 3;},
                    "has Foo::biz" ],
         ],
 
@@ -5553,7 +5557,7 @@ EOF
                 |foo()
                 |    ALIAS: bar = X::Y
 EOF
-            [ 1, 0, qr{\QError: in alias definition for 'bar' the value may not contain ':' unless it is symbolic.\E.*line 7},
+            [ERR, qr{\QError: in alias definition for 'bar' the value may not contain ':' unless it is symbolic.\E.*line 7},
                    "got expected error" ],
         ],
 
@@ -5564,7 +5568,7 @@ EOF
                 |foo()
                 |    ALIAS: Foo::bar => blurt
 EOF
-            [ 1, 0, qr{\QError: unknown alias 'Foo::blurt' in symbolic definition for 'Foo::bar'\E.*line 7},
+            [ERR, qr{\QError: unknown alias 'Foo::blurt' in symbolic definition for 'Foo::bar'\E.*line 7},
                    "got expected error" ],
         ],
 
@@ -5576,7 +5580,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           bar = 1
 EOF
-            [ 1, 0, qr{\QWarning: ignoring duplicate alias 'bar'\E.*line 8},
+            [ERR, qr{\QWarning: ignoring duplicate alias 'bar'\E.*line 8},
                    "got expected warning" ],
         ],
         [
@@ -5587,7 +5591,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           bar = 2
 EOF
-            [ 1, 0, qr{\QWarning: conflicting duplicate alias 'bar'\E.*line 8},
+            [ERR, qr{\QWarning: conflicting duplicate alias 'bar'\E.*line 8},
                    "got expected warning" ],
         ],
 
@@ -5599,7 +5603,7 @@ EOF
                 |    ALIAS: bar = 1
                 |           baz = 1
 EOF
-            [ 1, 0, qr{\QWarning: aliases 'baz' and 'bar' have identical values of 1\E.*line 8},
+            [ERR, qr{\QWarning: aliases 'baz' and 'bar' have identical values of 1\E.*line 8},
                    "got expected warning" ],
         ],
 
@@ -5610,7 +5614,7 @@ EOF
                 |foo()
                 |    ALIAS: bar = 
 EOF
-            [ 1, 0, qr{\QError: cannot parse ALIAS definitions from 'bar ='\E.*line 7},
+            [ERR, qr{\QError: cannot parse ALIAS definitions from 'bar ='\E.*line 7},
                    "got expected error" ],
         ],
         [
@@ -5620,7 +5624,7 @@ EOF
                 |foo()
                 |    ALIAS: 0
 EOF
-            [ 1, 0, qr{\QError: cannot parse ALIAS definitions from '0'\E.*line 7},
+            [ERR, qr{\QError: cannot parse ALIAS definitions from '0'\E.*line 7},
                    "got expected error" ],
         ],
         [
@@ -5655,7 +5659,7 @@ EOF
                 |foo(AV *av)
                 |    ALIAS: bar = 1
 EOF
-            [ 0, 0, qr{croak.*\n.*\QGvNAME(CvGV(cv))},
+            [  0, qr{croak.*\n.*\QGvNAME(CvGV(cv))},
                    "got alias variant of croak message" ],
         ],
     );
@@ -5682,15 +5686,15 @@ EOF
                 |foo()
                 |    INTERFACE: f1 f2
 EOF
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
+            [  0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
                        \s+\QXSINTERFACE_FUNC_SET(cv,f1);\E
                       }x,
                    "got f1 entries" ],
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
+            [  0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
                        \s+\QXSINTERFACE_FUNC_SET(cv,f2);\E
                       }x,
                    "got f2 entries" ],
-            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
+            [  0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
         [
             "INTERFACE with MACRO",
@@ -5700,15 +5704,15 @@ EOF
                 |    INTERFACE: f1 f2
                 |    INTERFACE_MACRO: GETMACRO SETMACRO
 EOF
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
+            [  0, qr{   \QnewXS_deffile("Foo::Bar::f1", XS_Foo__Bar_foo);\E\n
                        \s+\QSETMACRO(cv,f1);\E
                       }x,
                    "got f1 entries" ],
-            [ 0, 0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
+            [  0, qr{   \QnewXS_deffile("Foo::Bar::f2", XS_Foo__Bar_foo);\E\n
                        \s+\QSETMACRO(cv,f2);\E
                       }x,
                    "got f2 entries" ],
-            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
+            [  0, qr{\QCV * cv;}, "has cv declaration" ],
         ],
 
         # Assorted name mangling - test the table in perlxs:
@@ -5726,9 +5730,9 @@ EOF
                 |foo()
                 |    INTERFACE: abc
 EOF
-            [ 0, 0, qr{newXS.*"Foo::Bar::abc"},         "perl name" ],
-            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},         "XS name"   ],
-            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,abc)}, "C name"    ],
+            [  0, qr{newXS.*"Foo::Bar::abc"},         "perl name" ],
+            [  0, qr{newXS.*XS_Foo__Bar_foo},         "XS name"   ],
+            [  0, qr{\QXSINTERFACE_FUNC_SET(cv,abc)}, "C name"    ],
         ],
         [
             'INTERFACE name with prefix',
@@ -5737,9 +5741,9 @@ EOF
                 |foo()
                 |    INTERFACE: foobar_abc
 EOF
-            [ 0, 0, qr{newXS.*"Foo::Bar::abc"},                "perl name" ],
-            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},                "XS name"   ],
-            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,foobar_abc)}, "C name"    ],
+            [  0, qr{newXS.*"Foo::Bar::abc"},                "perl name" ],
+            [  0, qr{newXS.*XS_Foo__Bar_foo},                "XS name"   ],
+            [  0, qr{\QXSINTERFACE_FUNC_SET(cv,foobar_abc)}, "C name"    ],
         ],
         [
             'INTERFACE name with class',
@@ -5748,9 +5752,9 @@ EOF
                 |foo()
                 |    INTERFACE: X::Y::foobar_abc
 EOF
-            [ 0, 0, qr{newXS.*"X::Y::foobar_abc"}, "perl name" ],
-            [ 0, 0, qr{newXS.*XS_Foo__Bar_foo},    "XS name"   ],
-            [ 0, 0, qr{\QXSINTERFACE_FUNC_SET(cv,X::Y::foobar_abc)}, "C name"],
+            [  0, qr{newXS.*"X::Y::foobar_abc"}, "perl name" ],
+            [  0, qr{newXS.*XS_Foo__Bar_foo},    "XS name"   ],
+            [  0, qr{\QXSINTERFACE_FUNC_SET(cv,X::Y::foobar_abc)}, "C name"],
         ],
     );
 
@@ -5779,11 +5783,11 @@ EOF
                 |foo()
                 |    INTERFACE: f1 f2
 EOF
-            [ 0, 0, qr{\b\QdXSFUNCTION(void)},
+            [  0, qr{\b\QdXSFUNCTION(void)},
                    "got XSFUNCTION declaration" ],
-            [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(void,cv,XSANY.any_dptr);},
+            [  0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(void,cv,XSANY.any_dptr);},
                    "got XSFUNCTION assign" ],
-            [ 0, 0, qr{\Q((void (*)())(XSFUNCTION))();},
+            [  0, qr{\Q((void (*)())(XSFUNCTION))();},
                    "got XSFUNCTION call" ],
         ],
         [
@@ -5794,11 +5798,11 @@ EOF
                 |    INTERFACE: f1 f2
                 |    INTERFACE_MACRO: GETMACRO SETMACRO
 EOF
-            [ 0, 0, qr{\b\QdXSFUNCTION(void)},
+            [  0, qr{\b\QdXSFUNCTION(void)},
                    "got XSFUNCTION declaration" ],
-            [ 0, 0, qr{\QXSFUNCTION = GETMACRO(void,cv,XSANY.any_dptr);},
+            [  0, qr{\QXSFUNCTION = GETMACRO(void,cv,XSANY.any_dptr);},
                    "got XSFUNCTION assign" ],
-            [ 0, 0, qr{\Q((void (*)())(XSFUNCTION))();},
+            [  0, qr{\Q((void (*)())(XSFUNCTION))();},
                    "got XSFUNCTION call" ],
         ],
         [
@@ -5808,11 +5812,11 @@ EOF
                 |foo(X::Y a, char *b)
                 |    INTERFACE: f1
 EOF
-            [ 0, 0, qr{\b\QdXSFUNCTION(X__Y)},
+            [  0, qr{\b\QdXSFUNCTION(X__Y)},
                    "got XSFUNCTION declaration" ],
-            [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(X__Y,cv,XSANY.any_dptr);},
+            [  0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(X__Y,cv,XSANY.any_dptr);},
                    "got XSFUNCTION assign" ],
-            [ 0, 0, qr{\QRETVAL = ((X__Y (*)(X__Y, char *))(XSFUNCTION))(a, b);},
+            [  0, qr{\QRETVAL = ((X__Y (*)(X__Y, char *))(XSFUNCTION))(a, b);},
                    "got XSFUNCTION call" ],
         ],
         [
@@ -5823,11 +5827,11 @@ EOF
                 |    INTERFACE: f1
                 |    C_ARGS:  a,  c
 EOF
-            [ 0, 0, qr{\b\QdXSFUNCTION(char *)},
+            [  0, qr{\b\QdXSFUNCTION(char *)},
                    "got XSFUNCTION declaration" ],
-            [ 0, 0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(char *,cv,XSANY.any_dptr);},
+            [  0, qr{\QXSFUNCTION = XSINTERFACE_FUNC(char *,cv,XSANY.any_dptr);},
                    "got XSFUNCTION assign" ],
-            [ 0, 0, qr{\QRETVAL = ((char * (*)(X__Y, char *))(XSFUNCTION))(a,  c);},
+            [  0, qr{\QRETVAL = ((char * (*)(X__Y, char *))(XSFUNCTION))(a,  c);},
                    "got XSFUNCTION call" ],
         ],
 
@@ -5840,7 +5844,7 @@ EOF
                 |    INTERFACE: f1
                 |    ALIAS: a1 = 1
 EOF
-            [ 1, 0,
+            [ERR,
             qr{\QError: only one of ALIAS and INTERFACE can be used per XSUB},
                    "got expected err" ],
         ],
@@ -5851,7 +5855,7 @@ EOF
                 |foo()
                 |    INTERFACE: f1 f1
 EOF
-            [ 1, 0,
+            [ERR,
             qr{\QError: duplicate INTERFACE name: 'f1'},
                    "got expected err" ],
         ],
@@ -5882,8 +5886,8 @@ EOF
                 |    C_ARGS: foo
                 |    ATTRS: d(y(  z))  
 EOF
-            [ 0, 0, qr{\QCV * cv;}, "has cv declaration" ],
-            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "a\E\s+b\s+c\(x\)\s+\Qd(y(  z))", 0);},
+            [  0, qr{\QCV * cv;}, "has cv declaration" ],
+            [  0, qr{\Qapply_attrs_string("Foo", cv, "a\E\s+b\s+c\(x\)\s+\Qd(y(  z))", 0);},
                    "has correct attrs arg" ],
         ],
 
@@ -5913,15 +5917,15 @@ EOF
                 |                  + - *    /
                 |    OVERLOAD:   >   <  >=
 EOF
-            [ 0, 0, qr{\Q"Foo::(*"},   "has Foo::(* method"   ],
-            [ 0, 0, qr{\Q"Foo::(+"},   "has Foo::(+ method"   ],
-            [ 0, 0, qr{\Q"Foo::(-"},   "has Foo::(- method"   ],
-            [ 0, 0, qr{\Q"Foo::(/"},   "has Foo::(/ method"   ],
-            [ 0, 0, qr{\Q"Foo::(<"},   "has Foo::(< method"   ],
-            [ 0, 0, qr{\Q"Foo::(<=>"}, "has Foo::(<=> method" ],
-            [ 0, 0, qr{\Q"Foo::(>"},   "has Foo::(> method"   ],
-            [ 0, 0, qr{\Q"Foo::(>="},  "has Foo::(>= method"  ],
-            [ 0, 0, qr{\Q"Foo::(cmp"}, "has Foo::(cmp method" ],
+            [  0, qr{\Q"Foo::(*"},   "has Foo::(* method"   ],
+            [  0, qr{\Q"Foo::(+"},   "has Foo::(+ method"   ],
+            [  0, qr{\Q"Foo::(-"},   "has Foo::(- method"   ],
+            [  0, qr{\Q"Foo::(/"},   "has Foo::(/ method"   ],
+            [  0, qr{\Q"Foo::(<"},   "has Foo::(< method"   ],
+            [  0, qr{\Q"Foo::(<=>"}, "has Foo::(<=> method" ],
+            [  0, qr{\Q"Foo::(>"},   "has Foo::(> method"   ],
+            [  0, qr{\Q"Foo::(>="},  "has Foo::(>= method"  ],
+            [  0, qr{\Q"Foo::(cmp"}, "has Foo::(cmp method" ],
         ],
         [
             "OVERLOAD dup op",
@@ -5930,7 +5934,7 @@ EOF
                 |foo()
                 |    OVERLOAD:   cmp cmp
 EOF
-            [ 1, 0, qr{\QWarning: duplicate OVERLOAD op name: 'cmp'},
+            [ERR, qr{\QWarning: duplicate OVERLOAD op name: 'cmp'},
                 "got expected error"   ],
         ],
 
@@ -5965,11 +5969,11 @@ EOF
                 |  CODE:
                 |     ZZZ
 EOF
-            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
-            [ 0, 0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
-            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
-            [ 0, 0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
-            [ 0, 0, qr{int\s+aaa.*XXX.*YYY.*bbb.*ZZZ}s,"in sequence"    ],
+            [  0, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [  0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
+            [  0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [  0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
+            [  0, qr{int\s+aaa.*XXX.*YYY.*bbb.*ZZZ}s,"in sequence"    ],
         ],
 
     );
@@ -6001,11 +6005,11 @@ EOF
                 |  CODE:
                 |     ZZZ
 EOF
-            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
-            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
-            [ 0, 0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
-            [ 0, 0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
-            [ 0, 0, qr{aaa.*bbb.*XXX.*YYY.*ZZZ}s,"in sequence"    ],
+            [  0, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [  0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [  0, qr{^\s+XXX\n\s+YYY\n}m,      "has XXX, YYY"   ],
+            [  0, qr{^\s+ZZZ\n}m,              "has ZZZ"        ],
+            [  0, qr{aaa.*bbb.*XXX.*YYY.*ZZZ}s,"in sequence"    ],
         ],
 
     );
@@ -6039,12 +6043,12 @@ EOF
                 |    unsigned ccc
                 |  NOT_IMPLEMENTED_YET
 EOF
-            [ 0, 0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+            [  0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
                     "has croak"   ],
-            [ 0, 0, qr{\bint\s+aaa},             "has aaa decl"   ],
-            [ 0, 0, qr{\bshort\s+bbb},           "has bbb decl"   ],
-            [ 0, 0, qr{\bunsigned\s+ccc},        "has ccc decl"   ],
-            [ 0, 0, qr{\Qset_uint(ccc, ST(2))},  "has ccc init"   ],
+            [  0, qr{\bint\s+aaa},             "has aaa decl"   ],
+            [  0, qr{\bshort\s+bbb},           "has bbb decl"   ],
+            [  0, qr{\bunsigned\s+ccc},        "has ccc decl"   ],
+            [  0, qr{\Qset_uint(ccc, ST(2))},  "has ccc init"   ],
         ],
         [
             "NOT_IMPLEMENTED_YET no input part",
@@ -6053,9 +6057,9 @@ EOF
                 |foo()
                 |  NOT_IMPLEMENTED_YET
 EOF
-            [ 0, 0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+            [  0, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
                     "has croak"   ],
-            [ 0, 1, qr{NOT_IMPLEMENTED_YET},     "no NIY"         ],
+            [NOT, qr{NOT_IMPLEMENTED_YET},     "no NIY"         ],
         ],
         [
             "NOT_IMPLEMENTED_YET not special after C_ARGS",
@@ -6066,10 +6070,10 @@ EOF
                 |  C_ARGS: a,b,
                 |  NOT_IMPLEMENTED_YET
 EOF
-            [ 0, 1, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+            [NOT, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
                     "doesn't has croak"   ],
-            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"         ],
-            [ 0, 0, qr{a,b,\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of C_ARGS"],
+            [  0, qr{\bint\s+aaa},                  "has aaa decl"         ],
+            [  0, qr{a,b,\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of C_ARGS"],
         ],
         [
             "NOT_IMPLEMENTED_YET not special after INIT",
@@ -6081,10 +6085,10 @@ EOF
                 |    ZZZ
                 |  NOT_IMPLEMENTED_YET
 EOF
-            [ 0, 1, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
+            [NOT, qr{\QPerl_croak(aTHX_ "Foo::foo: not implemented yet");},
                     "doesn't has croak"   ],
-            [ 0, 0, qr{\bint\s+aaa},                 "has aaa decl"     ],
-            [ 0, 0, qr{ZZZ\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of init code"          ],
+            [  0, qr{\bint\s+aaa},                 "has aaa decl"     ],
+            [  0, qr{ZZZ\n\s+NOT_IMPLEMENTED_YET}, "NIY is part of init code"          ],
         ],
     );
 
@@ -6110,11 +6114,11 @@ EOF
                 |  CLEANUP:
                 |     YYY
 EOF
-            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
-            [ 0, 0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
-            [ 0, 0, qr{^\s+YYY\n}m,                   "has cleanup body" ],
-            [ 0, 0, qr{aaa.*foo\(aaa\).*TARGi.*YYY}s, "in sequence"       ],
-            [ 0, 0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
+            [  0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [  0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
+            [  0, qr{^\s+YYY\n}m,                   "has cleanup body" ],
+            [  0, qr{aaa.*foo\(aaa\).*TARGi.*YYY}s, "in sequence"       ],
+            [  0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
         ],
         [
              "CLEANUP empty",
@@ -6123,9 +6127,9 @@ EOF
                  |foo(int aaa)
                  |  CLEANUP:
 EOF
-            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
-            [ 0, 0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
-            [ 0, 0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
+            [  0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [  0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
+            [  0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
          ],
     );
 
@@ -6153,10 +6157,10 @@ EOF
                 |  CODE:
                 |     YYY
 EOF
-            [ 0, 0, qr{\bint\s+aaa},           "has aaa decl"   ],
-            [ 0, 0, qr{YYY},                   "has code body"  ],
-            [ 0, 0, qr{aaa.*YYY}s,             "in sequence"    ],
-            [ 0, 0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
+            [  0, qr{\bint\s+aaa},           "has aaa decl"   ],
+            [  0, qr{YYY},                   "has code body"  ],
+            [  0, qr{aaa.*YYY}s,             "in sequence"    ],
+            [  0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
         ],
         [
             "CODE empty",
@@ -6165,8 +6169,8 @@ EOF
                 |foo(int aaa)
                 |  CODE:
 EOF
-            [ 0, 0, qr{\bint\s+aaa},               "has aaa decl"   ],
-            [ 0, 0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
+            [  0, qr{\bint\s+aaa},               "has aaa decl"   ],
+            [  0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
         ],
     );
 
@@ -6193,10 +6197,10 @@ EOF
                 |  PPCODE:
                 |     YYY
 EOF
-            [ 0, 0, qr{\bint\s+aaa},           "has aaa decl"   ],
-            [ 0, 0, qr{YYY},                   "has code body"  ],
-            [ 0, 0, qr{aaa.*YYY}s,             "in sequence"    ],
-            [ 0, 0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
+            [  0, qr{\bint\s+aaa},           "has aaa decl"   ],
+            [  0, qr{YYY},                   "has code body"  ],
+            [  0, qr{aaa.*YYY}s,             "in sequence"    ],
+            [  0, qr{\#line 8 .*\n\s+YYY},   "correct #line"  ],
         ],
         [
             "PPCODE empty",
@@ -6205,8 +6209,8 @@ EOF
                 |foo(int aaa)
                 |  PPCODE:
 EOF
-            [ 0, 0, qr{\bint\s+aaa},               "has aaa decl"   ],
-            [ 0, 0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
+            [  0, qr{\bint\s+aaa},               "has aaa decl"   ],
+            [  0, qr{aaa.*\n\s*;\s*\n\#line 8 }, "correct #line"  ],
         ],
         [
             "PPCODE trailing keyword",
@@ -6218,7 +6222,7 @@ EOF
                 |  OUTPUT:
                 |     blah
 EOF
-            [ 1, 0, qr{Error: PPCODE must be the last thing}, "got expected err"  ],
+            [ERR, qr{Error: PPCODE must be the last thing}, "got expected err"  ],
         ],
         [
             "PPCODE code tweaks",
@@ -6228,10 +6232,10 @@ EOF
                 |  PPCODE:
                 |     YYY
 EOF
-            [ 0, 0, qr{\QPERL_UNUSED_VAR(ax);},   "got PERL_UNUSED_VAR"    ],
-            [ 0, 0, qr{\QSP -= items;},           "got SP -= items"        ],
-            [ 0, 1, qr{\QXSRETURN},               "no XSRETURN"            ],
-            [ 0, 0, qr{\bPUTBACK\b.*\breturn\b}s, "got PUTBACK and return" ],
+            [  0, qr{\QPERL_UNUSED_VAR(ax);},   "got PERL_UNUSED_VAR"    ],
+            [  0, qr{\QSP -= items;},           "got SP -= items"        ],
+            [NOT, qr{\QXSRETURN},               "no XSRETURN"            ],
+            [  0, qr{\bPUTBACK\b.*\breturn\b}s, "got PUTBACK and return" ],
         ],
 
     );
@@ -6259,11 +6263,11 @@ EOF
                 |  POSTCALL:
                 |     YYY
 EOF
-            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
-            [ 0, 0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
-            [ 0, 0, qr{^\s+YYY\n}m,                   "has postcall body" ],
-            [ 0, 0, qr{aaa.*foo\(aaa\).*YYY.*TARGi}s, "in sequence"       ],
-            [ 0, 0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
+            [  0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [  0, qr{^\s+\QRETVAL = foo(aaa);}m,    "has code body"     ],
+            [  0, qr{^\s+YYY\n}m,                   "has postcall body" ],
+            [  0, qr{aaa.*foo\(aaa\).*YYY.*TARGi}s, "in sequence"       ],
+            [  0, qr{\#line 8 .*\n\s+YYY},          "correct #line"     ],
         ],
         [
              "POSTCALL empty",
@@ -6272,9 +6276,9 @@ EOF
                  |foo(int aaa)
                  |  POSTCALL:
 EOF
-            [ 0, 0, qr{\bint\s+aaa},                  "has aaa decl"      ],
-            [ 0, 0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
-            [ 0, 0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
+            [  0, qr{\bint\s+aaa},                  "has aaa decl"      ],
+            [  0, qr{^\s+\Qfoo(aaa);}m,             "has code body"     ],
+            [  0, qr{\Qfoo(aaa);\E\n\#line 8 },     "correct #line"     ],
          ],
     );
 
@@ -6313,9 +6317,9 @@ EOF
                     |$kw: blah
                     |  codeline
 EOF
-                [ 0, 0, qr{\Q#line 7 "(input)"\E\n  codeline\n#line},
+                [  0, qr{\Q#line 7 "(input)"\E\n  codeline\n#line},
                 "junk ignored" ],
-                [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+                [ERR, qr{Warning: text after keyword ignored: 'blah'},
                         "should die" ],
             ];
     }
@@ -6329,7 +6333,7 @@ EOF
                 |BOOT: blah
                 |  codeline
 EOF
-            [ 1, 0, qr{Warning: text after keyword ignored: 'blah'},
+            [ERR, qr{Warning: text after keyword ignored: 'blah'},
                     "should die" ],
         ],
     );
@@ -6366,7 +6370,7 @@ EOF
                 |
                 |#endif
 EOF
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ USE_SHORT \n
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
 
@@ -6399,7 +6403,7 @@ EOF
                 "has corrrect XSubPPtmpAAAA etc definitions"
             ],
 
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#if\ XSubPPtmpAAAA \n
                         .* newXS .*
                         ^ \#endif \n
@@ -6425,7 +6429,7 @@ EOF
                 |long foo()
                 |#endif
 EOF
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ USE_SHORT \n
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
                          .*
@@ -6450,7 +6454,7 @@ EOF
                 |#endif
                 |long foo()
 EOF
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ USE_SHORT \n
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
                          .*
@@ -6472,7 +6476,7 @@ EOF
                 |long foo()
                 |#endif
 EOF
-            [ 1, 0, qr{Warning: duplicate function definition},
+            [ERR, qr{Warning: duplicate function definition},
                     "got expected warning"  ],
         ],
 
@@ -6483,7 +6487,7 @@ EOF
                 |
                 |long foo()
 EOF
-            [ 1, 0, qr{Warning: duplicate function definition},
+            [ERR, qr{Warning: duplicate function definition},
                     "got expected warning"  ],
         ],
 
@@ -6504,7 +6508,7 @@ EOF
                 |
                 |#endif
 EOF
-            [ 1, 0, qr{Warning: duplicate function definition},
+            [ERR, qr{Warning: duplicate function definition},
                     "got expected warning"  ],
         ],
 
@@ -6525,7 +6529,7 @@ EOF
                 |
                 |#endif
 EOF
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ C1 \n
                         ^ \#define\ XSubPPtmpAAAB\ 1 \n
                          .*
@@ -6554,7 +6558,7 @@ EOF
                 |#  endif
                 |#endif
 EOF
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ C1 \n
                         ^ \#define\ XSubPPtmpAAAB\ 1 \n
                         ^ \s* \n
@@ -6576,7 +6580,7 @@ EOF
                 |#define BLAH1
                 |#endif
 EOF
-            [ 0, 1, qr{XSubPPtmpAAA}, "no guard"  ],
+            [NOT, qr{XSubPPtmpAAA}, "no guard"  ],
         ],
 
         [
@@ -6590,7 +6594,7 @@ EOF
                 |#endif
 EOF
 
-            [ 0, 0, qr{
+            [  0, qr{
                         ^ \#ifdef\ C1 \n
                          .*
                         ^ \#define\ XSubPPtmpAAAA\ 1 \n
@@ -6611,7 +6615,7 @@ EOF
                 |
                 |short foo()
 EOF
-            [ 1, 0, qr{Error: '#else' with no matching '#if'},
+            [ERR, qr{Error: '#else' with no matching '#if'},
                     "got expected err"  ],
         ],
 
@@ -6622,7 +6626,7 @@ EOF
                 |
                 |short foo()
 EOF
-            [ 1, 0, qr{Error: Unterminated '#ifdef' from line 5 in .* line 7},
+            [ERR, qr{Error: Unterminated '#ifdef' from line 5 in .* line 7},
                     "got expected err"  ],
         ],
 
@@ -6632,7 +6636,7 @@ EOF
                 |#define FOO 1
                 |  BOOT:
 EOF
-            [ 1, 0, qr{\QError: file-scoped keywords should not be indented\E
+            [ERR, qr{\QError: file-scoped keywords should not be indented\E
                        \Q in (input), line 5\E}x,
                     "got expected err"  ],
         ],
@@ -6642,7 +6646,7 @@ EOF
                 |#define FOO
                 |  int
 EOF
-            [ 1, 0, qr{
+            [ERR, qr{
                     \QError: file-scoped directives must not be indented\E
                     \Q in (input), line 5\E\n
                     \Q  (If this line is supposed to be part of an XSUB\E
@@ -6685,7 +6689,7 @@ EOF
                 |foo_t foo(foo_t a1)
 EOF
 
-            [ 0, 0, qr{
+            [  0, qr{
                         foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
                         .*
                         \Qout_foo(RETVALSV, RETVAL, "Foo")\E
@@ -6703,7 +6707,7 @@ EOF
                 |int blah()
 EOF
 
-            [ 0, 0, qr{
+            [  0, qr{
                         foo_t \s+ \Qa1 = in_foo(ST(0), "Foo")\E
                         .*
                         \Qout_foo(RETVALSV, RETVAL, "Foo")\E
@@ -6736,7 +6740,7 @@ EOF
                 |ATTRS: myattr(x)
 EOF
 
-            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+            [  0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
                 "has corrrect package"
             ],
         ],
@@ -6752,7 +6756,7 @@ EOF
                 |int blah()
 EOF
 
-            [ 0, 0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
+            [  0, qr{\Qapply_attrs_string("Foo", cv, "myattr(x)", 0)},
                 "has corrrect package"
             ],
         ],
@@ -6765,7 +6769,7 @@ EOF
                 |INTERFACE: abc
 EOF
 
-            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+            [  0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
                 "has corrrect package"
             ],
         ],
@@ -6781,7 +6785,7 @@ EOF
                 |int blah()
 EOF
 
-            [ 0, 0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
+            [  0, qr{\QnewXS_deffile("Foo::abc", XS_Foo_foo)},
                 "has corrrect package"
             ],
         ],
@@ -6794,7 +6798,7 @@ EOF
                 |OVERLOAD: cmp
 EOF
 
-            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+            [  0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
                 "has corrrect package"
             ],
         ],
@@ -6810,7 +6814,7 @@ EOF
                 |int blah()
 EOF
 
-            [ 0, 0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
+            [  0, qr{\QnewXS_deffile("Foo::(cmp", XS_Foo_foo)},
                 "has corrrect package"
             ],
         ],
@@ -6836,7 +6840,7 @@ EOF
                 |
 EOF
 
-            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+            [ERR, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
                 "got expected err msg"
             ],
         ],
@@ -6849,7 +6853,7 @@ EOF
                 |
 EOF
 
-            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+            [ERR, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
                 "got expected err msg"
             ],
         ],
@@ -6863,7 +6867,7 @@ EOF
                 |MODULE = X PKG = Y
 EOF
 
-            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
+            [ERR, qr{Error: unparseable MODULE line: 'MODULE = X PKG = Y'},
                 "got expected err msg"
             ],
         ],
@@ -6877,7 +6881,7 @@ EOF
                 |MODULE: X PACKAGE = Y
 EOF
 
-            [ 1, 0, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
+            [ERR, qr{Error: unparseable MODULE line: 'MODULE: X PACKAGE = Y'},
                 "got expected err msg"
             ],
         ],
@@ -6907,7 +6911,7 @@ EOF
                 |=cut
 EOF
 
-            [ 0, 0, qr{XS}, "no undef warning" ],
+            [  0, qr{XS}, "no undef warning" ],
         ],
         [
             "line continuation directly after POD",
@@ -6918,7 +6922,7 @@ EOF
                 |         int j)
 EOF
 
-            [ 0, 0, qr{XS}, "no errs" ],
+            [  0, qr{XS}, "no errs" ],
         ],
     );
 
@@ -6943,10 +6947,10 @@ EOF
                 |void foo()
 EOF
 
-            [ 0, 0, qr{#ifndef PERL_UNUSED_VAR}, "PERL_UNUSED_VAR" ],
-            [ 0, 0, qr{#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE},
+            [  0, qr{#ifndef PERL_UNUSED_VAR}, "PERL_UNUSED_VAR" ],
+            [  0, qr{#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE},
                         "PERL_ARGS_ASSERT_CROAK_XS_USAGE" ],
-            [ 0, 0, qr{#ifdef newXS_flags}, "newXS_flags" ],
+            [  0, qr{#ifdef newXS_flags}, "newXS_flags" ],
         ],
     );
 
@@ -6968,8 +6972,8 @@ EOF
                 |bar
 EOF
 
-            [ 0, 0, qr{#line 1 ".*"\nfoo\nbar\n#line 13 ".*"}, "all C present" ],
-            [ 1, 0, qr{Warning: no MODULE line found in XS file \(input\)\n},
+            [  0, qr{#line 1 ".*"\nfoo\nbar\n#line 13 ".*"}, "all C present" ],
+            [ERR, qr{Warning: no MODULE line found in XS file \(input\)\n},
                     "got expected MODULE warning"  ],
         ],
     );
