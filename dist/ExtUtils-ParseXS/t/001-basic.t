@@ -69,10 +69,7 @@ use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 #  
 # [
 #     "common prefix for test descriptions",
-#     [ ... lines to be ...
-#       ... used as ...
-#       ... XSUB body...
-#     ],
+#     "lines to be used as XSUB or other body",
 #     [ flags, qr/expected/, "test description" (, "TODO text")],
 #     [ ... and more tests ..]
 #     ....
@@ -95,11 +92,7 @@ sub test_many {
     for my $test_fn (@$test_fns) {
         my ($desc_prefix, $xsub_lines, @tests) = @$test_fn;
 
-        my $text = $preamble;
-        for (@$xsub_lines) {
-            $text .= $_;
-            $text .= "\n" unless /\n\z/;
-        }
+        my $text = $preamble . $xsub_lines;
 
         tie *FH, 'Capture';
         my $pxs = ExtUtils::ParseXS->new;
@@ -854,10 +847,10 @@ EOF
         [
             # test something that isn't actually C++
             "C++: plain new",
-            [
-                'X::Y*',
-                'new(int aaa)',
-            ],
+            Q(<<'EOF'),
+                |X::Y*
+                |new(int aaa)
+EOF
             [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [  0, qr/\Qnew(aaa)/,                          "autocall" ],
         ],
@@ -865,10 +858,10 @@ EOF
         [
             # test something static that isn't actually C++
             "C++: plain static new",
-            [
-                'static X::Y*',
-                'new(int aaa)',
-            ],
+            Q(<<'EOF'),
+                |static X::Y*
+                |new(int aaa)
+EOF
             [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [  0, qr/\Qnew(aaa)/,                          "autocall" ],
             [ERR, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
@@ -877,10 +870,10 @@ EOF
         [
             # test something static that isn't actually C++ nor new
             "C++: plain static foo",
-            [
-                'static X::Y*',
-                'foo(int aaa)',
-            ],
+            Q(<<'EOF'),
+                |static X::Y*
+                |foo(int aaa)
+EOF
             [  0, qr/usage\(cv,\s+"aaa"\)/,                "usage"    ],
             [  0, qr/\Qfoo(aaa)/,                          "autocall" ],
             [ERR, qr/Warning: ignoring 'static' type modifier:/, "warning" ],
@@ -888,10 +881,10 @@ EOF
 
         [
             "C++: new",
-            [
-                'X::Y*',
-                'X::Y::new(int aaa)',
-            ],
+            Q(<<'EOF'),
+                |X::Y*
+                |X::Y::new(int aaa)
+EOF
             [  0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
             [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [  0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
@@ -899,10 +892,10 @@ EOF
 
         [
             "C++: static new",
-            [
-                'static X::Y*',
-                'X::Y::new(int aaa)',
-            ],
+            Q(<<'EOF'),
+                |static X::Y*
+                |X::Y::new(int aaa)
+EOF
             [  0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
             [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [  0, qr/\QX::Y(aaa)/,                         "autocall" ],
@@ -910,10 +903,10 @@ EOF
 
         [
             "C++: fff",
-            [
-                'void',
-                'X::Y::fff(int bbb)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |X::Y::fff(int bbb)
+EOF
             [  0, qr/usage\(cv,\s+"THIS, bbb"\)/,          "usage"    ],
             [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [  0, qr/\QTHIS->fff(bbb)/,                    "autocall" ],
@@ -921,10 +914,10 @@ EOF
 
         [
             "C++: ggg",
-            [
-                'static int',
-                'X::Y::ggg(int ccc)',
-            ],
+            Q(<<'EOF'),
+                |static int
+                |X::Y::ggg(int ccc)
+EOF
             [  0, qr/usage\(cv,\s+"CLASS, ccc"\)/,         "usage"    ],
             [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
             [  0, qr/\QX::Y::ggg(ccc)/,                    "autocall" ],
@@ -932,10 +925,10 @@ EOF
 
         [
             "C++: hhh",
-            [
-                'int',
-                'X::Y::hhh(int ddd) const',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::hhh(int ddd) const
+EOF
             [  0, qr/usage\(cv,\s+"THIS, ddd"\)/,          "usage"    ],
             [  0, qr/const X__Y\s*\*\s*THIS\s*=\s*my_in/,  "var decl" ],
             [  0, qr/\QTHIS->hhh(ddd)/,                    "autocall" ],
@@ -943,10 +936,10 @@ EOF
 
         [
             "C++: only const",
-            [
-                'void',
-                'foo() const',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo() const
+EOF
             [ERR, qr/\QError: const modifier only allowed on XSUBs which are C++ methods/,
                 "got expected err" ],
         ],
@@ -955,7 +948,7 @@ EOF
 
         [
             "C++: static const",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |static int
                 |X::Y::foo() const
 EOF
@@ -965,7 +958,7 @@ EOF
 
         [
             "C++: static new const",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |static int
                 |X::Y::new() const
 EOF
@@ -975,7 +968,7 @@ EOF
 
         [
             "C++: const",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |X::Y::foo() const
 EOF
@@ -985,7 +978,7 @@ EOF
 
         [
             "C++: new const",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |X::Y::new() const
 EOF
@@ -995,42 +988,42 @@ EOF
 
         [
             "",
-            [
-                'int',
-                'X::Y::f1(THIS, int i)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f1(THIS, int i)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f1 dup THIS" ],
         ],
 
         [
             "",
-            [
-                'int',
-                'X::Y::f2(int THIS, int i)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f2(int THIS, int i)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'THIS' /,
                  "C++: f2 dup THIS" ],
         ],
 
         [
             "",
-            [
-                'int',
-                'X::Y::new(int CLASS, int i)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::new(int CLASS, int i)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'CLASS' /,
                  "C++: new dup CLASS" ],
         ],
 
         [
             "C++: f3",
-            [
-                'int',
-                'X::Y::f3(int i)',
-                '    OUTPUT:',
-                '        THIS',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f3(int i)
+                |    OUTPUT:
+                |        THIS
+EOF
             [  0, qr/usage\(cv,\s+"THIS, i"\)/,            "usage"    ],
             [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [  0, qr/\QTHIS->f3(i)/,                       "autocall" ],
@@ -1040,11 +1033,11 @@ EOF
         [
             # allow THIS's type to be overridden ...
             "C++: f4: override THIS type",
-            [
-                'int',
-                'X::Y::f4(int i)',
-                '    int THIS',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f4(int i)
+                |    int THIS
+EOF
             [  0, qr/usage\(cv,\s+"THIS, i"\)/,       "usage"    ],
             [  0, qr/int\s*THIS\s*=\s*\(int\)/,       "var decl" ],
             [NOT, qr/X__Y\s*\*\s*THIS/,               "no class var decl" ],
@@ -1054,12 +1047,12 @@ EOF
         [
             #  ... but not multiple times
             "C++: f5: dup override THIS type",
-            [
-                'int',
-                'X::Y::f5(int i)',
-                '    int THIS',
-                '    long THIS',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f5(int i)
+                |    int THIS
+                |    long THIS
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
@@ -1067,10 +1060,10 @@ EOF
         [
             #  don't allow THIS in sig, with type
             "C++: f6: sig THIS type",
-            [
-                'int',
-                'X::Y::f6(int THIS)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f6(int THIS)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
@@ -1078,10 +1071,10 @@ EOF
         [
             #  don't allow THIS in sig, without type
             "C++: f7: sig THIS no type",
-            [
-                'int',
-                'X::Y::f7(THIS)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::f7(THIS)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'THIS'/,
                     "dup err" ],
         ],
@@ -1089,11 +1082,11 @@ EOF
         [
             # allow CLASS's type to be overridden ...
             "C++: new: override CLASS type",
-            [
-                'int',
-                'X::Y::new(int i)',
-                '    int CLASS',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::new(int i)
+                |    int CLASS
+EOF
             [  0, qr/usage\(cv,\s+"CLASS, i"\)/,      "usage"    ],
             [  0, qr/int\s*CLASS\s*=\s*\(int\)/,      "var decl" ],
             [NOT, qr/char\s*\*\s*CLASS/,              "no char* var decl" ],
@@ -1103,12 +1096,12 @@ EOF
         [
             #  ... but not multiple times
             "C++: new dup override CLASS type",
-            [
-                'int',
-                'X::Y::new(int i)',
-                '    int CLASS',
-                '    long CLASS',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::new(int i)
+                |    int CLASS
+                |    long CLASS
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
@@ -1116,10 +1109,10 @@ EOF
         [
             #  don't allow CLASS in sig, with type
             "C++: new sig CLASS type",
-            [
-                'int',
-                'X::Y::new(int CLASS)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::new(int CLASS)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
@@ -1127,20 +1120,20 @@ EOF
         [
             #  don't allow CLASS in sig, without type
             "C++: new sig CLASS no type",
-            [
-                'int',
-                'X::Y::new(CLASS)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |X::Y::new(CLASS)
+EOF
             [ERR, qr/\QError: duplicate definition of parameter 'CLASS'/,
                     "dup err" ],
         ],
 
         [
             "C++: DESTROY",
-            [
-                'void',
-                'X::Y::DESTROY()',
-            ],
+            Q(<<'EOF'),
+                |void
+                |X::Y::DESTROY()
+EOF
             [  0, qr/usage\(cv,\s+"THIS"\)/,               "usage"    ],
             [  0, qr/X__Y\s*\*\s*THIS\s*=\s*my_in/,        "var decl" ],
             [  0, qr/delete\s+THIS;/,                      "autocall" ],
@@ -1164,7 +1157,7 @@ EOF
     my @test_fns = (
         [
             "NO_OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT int
                 |foo()
 EOF
@@ -1174,7 +1167,7 @@ EOF
         ],
         [
             "xsub decl on one line",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 | int foo(A, int  B )
                 |    char *A
 EOF
@@ -1203,7 +1196,7 @@ EOF
     my @test_fns = (
         [
             "extern C",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |extern "C"   int
                 |foo()
 EOF
@@ -1212,7 +1205,7 @@ EOF
         ],
         [
             "defn too short",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
 EOF
             [ERR, qr{
@@ -1223,7 +1216,7 @@ EOF
         ],
         [
             "defn not parseable 1",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(aaa
                 |    CODE:
@@ -1234,7 +1227,7 @@ EOF
         ],
         [
             "defn not parseable 2",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |fo o(aaa)
 EOF
@@ -1247,7 +1240,7 @@ EOF
         # warning.
         [
             "dup fn warning",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(aaa)
                 |
@@ -1259,7 +1252,7 @@ EOF
         ],
         [
             "dup fn warning",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#if X
                 |int
                 |foo(aaa)
@@ -1275,7 +1268,7 @@ EOF
 
         [
             "unparseable params",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int foo(char *s = "abc\",)")
 EOF
             [ERR, qr/\QWarning: cannot parse parameter list/,
@@ -1300,11 +1293,11 @@ EOF
     my @test_fns = (
         [
             "general usage",
-            [
-                'void',
-                'foo(a, char *b,  int length(b), int d =  999, ...)',
-                '    long a',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(a, char *b,  int length(b), int d =  999, ...)
+                |    long a
+EOF
             [  0, qr/usage\(cv,\s+"a, b, d=  999, ..."\)/,     ""    ],
         ]
     );
@@ -1325,7 +1318,7 @@ EOF
     my @test_fns = (
         [
             "length() basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, int length(s))
 EOF
@@ -1343,7 +1336,7 @@ EOF
         ],
         [
             "length() len type not in typemap allowed",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, blah ** length(s))
 EOF
@@ -1355,7 +1348,7 @@ EOF
             # Check that such usage continues to work. See the discussion
             # in PR #23479
             "length() explict STRLEN_ use",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<EOF
                 |byte_t  T_B
                 |INPUT
@@ -1374,7 +1367,7 @@ EOF
             # Work with typemaps for non-T_PV stuff which return
             # templates which could be modified to work with length().
             "length() modifiable typemap",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<EOF
                 |byte_t  T_B
                 |INPUT
@@ -1392,7 +1385,7 @@ EOF
         [
             # .. but die if the typemap can't be modified
             "length() unrecognised typemap",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<EOF
                 |byte_t  T_B
                 |INPUT
@@ -1409,7 +1402,7 @@ EOF
 
         [
             "length() default value",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, int length(s) = 0)
 EOF
@@ -1418,7 +1411,7 @@ EOF
         ],
         [
             "length() NO_INIT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, int length(s) = NO_INIT)
 EOF
@@ -1427,7 +1420,7 @@ EOF
         ],
         [
             "length() default value of string var",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int length(s), char *s = "")
 EOF
@@ -1436,7 +1429,7 @@ EOF
         ],
         [
             "length() default value of string var, not T_PV",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int length(s), char **s = "")
 EOF
@@ -1445,7 +1438,7 @@ EOF
         ],
         [
             "length() no matching var",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int length(s))
 EOF
@@ -1454,7 +1447,7 @@ EOF
         ],
         [
             "length() on placeholder var",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(s, int length(s))
 EOF
@@ -1463,7 +1456,7 @@ EOF
         ],
         [
             "length() no type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, length(s))
 EOF
@@ -1477,7 +1470,7 @@ EOF
         # sense' ones.
         [
             "IN length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, IN int length(s))
 EOF
@@ -1486,7 +1479,7 @@ EOF
         ],
         [
             "OUT length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, OUT int length(s))
 EOF
@@ -1495,7 +1488,7 @@ EOF
         ],
         [
             "IN_OUT length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, IN_OUT int length(s))
 EOF
@@ -1504,7 +1497,7 @@ EOF
         ],
         [
             "OUTLIST length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, OUTLIST int length(s))
 EOF
@@ -1513,7 +1506,7 @@ EOF
         ],
         [
             "IN_OUTLIST length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s, IN_OUTLIST int length(s))
 EOF
@@ -1527,7 +1520,7 @@ EOF
         # IN* variants ok
         [
             "IN s, length(s)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(IN char *s, int length(s))
 EOF
@@ -1535,7 +1528,7 @@ EOF
         ],
         [
             "IN_OUT s, length(s)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(IN_OUT char *s, int length(s))
 EOF
@@ -1543,7 +1536,7 @@ EOF
         ],
         [
             "IN_OUTLIST s, length(s)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(IN_OUTLIST char *s, int length(s))
 EOF
@@ -1553,7 +1546,7 @@ EOF
         # non-IN* variants not ok
         [
             "OUT s, length(s)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(OUT char *s, int length(s))
 EOF
@@ -1562,7 +1555,7 @@ EOF
         ],
         [
             "OUTLIST s, length(s)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(OUTLIST char *s, int length(s))
 EOF
@@ -1588,40 +1581,40 @@ EOF
     my @test_fns = (
         [
             "autocall args normal",
-            [
-                'void',
-                'foo( OUT int  a,   b   , char   *  c , int length(c), OUTLIST int d, IN_OUTLIST int e)',
-                '    long &b',
-                '    int alien',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo( OUT int  a,   b   , char   *  c , int length(c), OUTLIST int d, IN_OUTLIST int e)
+                |    long &b
+                |    int alien
+EOF
             [  0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c, &d, &e)/,  ""  ],
         ],
         [
             "autocall args normal",
-            [
-                'void',
-                'foo( OUT int  a,   b   , char   *  c , size_t length(c) )',
-                '    long &b',
-                '    int alien',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo( OUT int  a,   b   , char   *  c , size_t length(c) )
+                |    long &b
+                |    int alien
+EOF
             [  0, qr/\Qfoo(&a, &b, c, XSauto_length_of_c)/,     ""    ],
         ],
 
         [
             "autocall args C_ARGS",
-            [
-                'void',
-                'foo( int  a,   b   , char   *  c  )',
-                '    C_ARGS:     a,   b   , bar,  c? c : "boo!"    ',
-                '    INPUT:',
-                '        long &b',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo( int  a,   b   , char   *  c  )
+                |    C_ARGS:     a,   b   , bar,  c? c : "boo!"    
+                |    INPUT:
+                |        long &b
+EOF
             [  0, qr/\Qfoo(a,   b   , bar,  c? c : "boo!")/,     ""    ],
         ],
 
         [
             "autocall args empty C_ARGS",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int  a)
                 |    C_ARGS:
@@ -1633,15 +1626,15 @@ EOF
             # Whether this is sensible or not is another matter.
             # For now, just check that it works as-is.
             "autocall args C_ARGS multi-line",
-            [
-                'void',
-                'foo( int  a,   b   , char   *  c  )',
-                '    C_ARGS: a,',
-                '        b   , bar,',
-                '        c? c : "boo!"',
-                '    INPUT:',
-                '        long &b',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo( int  a,   b   , char   *  c  )
+                |    C_ARGS: a,
+                |        b   , bar,
+                |        c? c : "boo!"
+                |    INPUT:
+                |        long &b
+EOF
             [  0, qr/\(a,\n        b   , bar,\n\Q        c? c : "boo!")/,
               ""  ],
         ],
@@ -1670,10 +1663,10 @@ EOF
     my @test_fns = (
         [
             "IN OUT",
-            [
-                'void',
-                'foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)
+EOF
             [  0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
 
             [  0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
@@ -1700,10 +1693,10 @@ EOF
 
         [
             "OUTLIST void/bool",
-            [
-                'void',
-                'foo(OUTLIST bool A)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST bool A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
             [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
@@ -1713,10 +1706,10 @@ EOF
         ],
         [
             "OUTLIST void/mybool",
-            [
-                'void',
-                'foo(OUTLIST mybool A)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST mybool A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
             [  0, qr/\b\QRETVALSV = sv_newmortal();/ , "create new mortal" ],
@@ -1726,10 +1719,10 @@ EOF
         ],
         [
             "OUTLIST void/int",
-            [
-                'void',
-                'foo(OUTLIST int A)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST int A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
             [NOT, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
@@ -1740,10 +1733,10 @@ EOF
         ],
         [
             "OUTLIST void/char*",
-            [
-                'void',
-                'foo(OUTLIST char* A)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST char* A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [NOT, qr/\bEXTEND\b/,                      "NO extend"       ],
             [NOT, qr/\bsv_newmortal\b;/,               "NO new mortal"   ],
@@ -1758,10 +1751,10 @@ EOF
 
         [
             "OUTLIST int/bool",
-            [
-                'int',
-                'foo(OUTLIST bool A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST bool A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
             [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
@@ -1773,10 +1766,10 @@ EOF
         ],
         [
             "OUTLIST int/mybool",
-            [
-                'int',
-                'foo(OUTLIST mybool A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST mybool A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
             [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
@@ -1788,10 +1781,10 @@ EOF
         ],
         [
             "OUTLIST int/int",
-            [
-                'int',
-                'foo(OUTLIST int A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST int A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
             [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
@@ -1803,10 +1796,10 @@ EOF
         ],
         [
             "OUTLIST int/char*",
-            [
-                'int',
-                'foo(OUTLIST char* A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST char* A)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
             [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
@@ -1818,10 +1811,10 @@ EOF
         ],
         [
             "OUTLIST int/opt int",
-            [
-                'int',
-                'foo(IN_OUTLIST int A = 0)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(IN_OUTLIST int A = 0)
+EOF
             [  0, qr/\bXSprePUSH;/,                    "XSprePUSH"       ],
             [  0, qr/\b\QEXTEND(SP,2);/,               "extend 2"        ],
             [  0, qr/\b\QTARGi((IV)RETVAL, 1);/,       "TARGi RETVAL"    ],
@@ -1833,7 +1826,7 @@ EOF
         ],
         [
             "OUTLIST with OUTPUT override",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(IN_OUTLIST int A)
                 |    OUTPUT:
@@ -1846,7 +1839,7 @@ EOF
         ],
         [
             "OUTLIST with multiple CASES",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                  |void
                  |foo(OUTLIST int a, OUTLIST int b)
                  |    CASE: A
@@ -1866,7 +1859,7 @@ EOF
         ],
         [
             "OUTLIST with multiple CASES and void hack",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                  |void
                  |foo(OUTLIST int a, OUTLIST int b)
                  |    CASE: A
@@ -1937,10 +1930,10 @@ EOF
             # output code overridden to use the direct $arg = $var assign,
             # which is normally only used for RETVAL return
             "OUTLIST T_SV",
-            [
-                'int',
-                'foo(OUTLIST SV * A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST SV * A)
+EOF
             [NOT, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
             [  0, qr/\b\QA = sv_2mortal(A);/,              "mortalise A"    ],
             [  0, qr/\b\QST(1) = A;/,                      "store A"        ],
@@ -1948,10 +1941,10 @@ EOF
 
         [
             "OUTLIST T_SVREF",
-            [
-                'int',
-                'foo(OUTLIST SVREF A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST SVREF A)
+EOF
             [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
             [  0, qr/\b\QRETVALSV = newRV((SV*)A)/,        "newREF(A)"      ],
             [  0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
@@ -1961,10 +1954,10 @@ EOF
         [
             # this one doesn't use assign for OUTLIST
             "OUTLIST T_SVREF_REFCOUNT_FIXED",
-            [
-                'int',
-                'foo(OUTLIST svref_fix A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST svref_fix A)
+EOF
             [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
             [  0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
             [  0, qr/\b\Qsv_setrv_noinc(RETVALSV, (SV*)A);/,"setrv()"       ],
@@ -1973,10 +1966,10 @@ EOF
         [
             # while this one uses assign
             "OUTLIST T_MYSVREF_REFCOUNT_FIXED",
-            [
-                'int',
-                'foo(OUTLIST mysvref_fix A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST mysvref_fix A)
+EOF
             [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
             [  0, qr/\b\QRETVALSV = newRV_noinc((SV*)A)/,  "newRV(A)"       ],
             [  0, qr/\b\QRETVALSV = sv_2mortal(RETVALSV);/,"mortalise RSV"  ],
@@ -1986,10 +1979,10 @@ EOF
         [
             # this one doesn't use assign for OUTLIST
             "OUTLIST T_BOOL",
-            [
-                'int',
-                'foo(OUTLIST bool A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST bool A)
+EOF
             [  0, qr/SV\s*\*\s*RETVALSV;/,                 "RETVALSV"       ],
             [  0, qr/\b\QRETVALSV = sv_newmortal();/ ,     "new mortal"     ],
             [  0, qr/\b\Qsv_setsv(RETVALSV, boolSV(A));/,  "setsv(boolSV())"],
@@ -1998,10 +1991,10 @@ EOF
         [
             # while this one uses assign
             "OUTLIST T_MYBOOL",
-            [
-                'int',
-                'foo(OUTLIST mybool A)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST mybool A)
+EOF
             [NOT, qr/\bRETVALSV\b/,                        "NO RETVALSV"    ],
             [  0, qr/\b\QST(1) = boolSV(A)/,               "store boolSV(A)"],
         ],
@@ -2041,90 +2034,90 @@ EOF
     my @test_fns = (
         [
             "auto-generated proto basic",
-            [
-                'void',
-                'foo(int a, int b, int c)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, int b, int c)
+EOF
             [  0, qr/"\$\$\$"/, "" ],
         ],
 
         [
             "auto-generated proto basic with default",
-            [
-                'void',
-                'foo(int a, int b, int c = 0)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, int b, int c = 0)
+EOF
             [  0, qr/"\$\$;\$"/, "" ],
         ],
 
         [
             "auto-generated proto complex",
-            [
-                'void',
-                'foo(char *A, int length(A), int B, OUTLIST int C, int D)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(char *A, int length(A), int B, OUTLIST int C, int D)
+EOF
             [  0, qr/"\$\$\$"/, "" ],
         ],
 
         [
             "auto-generated proto  complex with default",
-            [
-                'void',
-                'foo(char *A, int length(A), int B, IN_OUTLIST int C, int D = 0)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(char *A, int length(A), int B, IN_OUTLIST int C, int D = 0)
+EOF
             [  0, qr/"\$\$\$;\$"/, "" ],
         ],
 
         [
             "auto-generated proto with ellipsis",
-            [
-                'void',
-                'foo(char *A, int length(A), int B, OUT int C, int D, ...)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(char *A, int length(A), int B, OUT int C, int D, ...)
+EOF
             [  0, qr/"\$\$\$\$;\@"/, "" ],
         ],
 
         [
             "auto-generated proto with default and ellipsis",
-            [
-                'void',
-                'foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)
+EOF
             [  0, qr/"\$\$\$;\$\@"/, "" ],
         ],
 
         [
             "auto-generated proto with default and ellipsis and THIS",
-            [
-                'void',
-                'X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |X::Y::foo(char *A, int length(A), int B, IN_OUT int C, int D = 0, ...)
+EOF
             [  0, qr/"\$\$\$\$;\$\@"/, "" ],
         ],
 
         [
             "auto-generated proto with overridden THIS type",
-            [
-                'void',
-                'P::Q::foo()',
-                '    const P::Q * THIS'
-            ],
+            Q(<<'EOF'),
+                |void
+                |P::Q::foo()
+                |    const P::Q * THIS
+EOF
             [  0, qr/"%"/, "" ],
         ],
 
         [
             "explicit prototype",
-            [
-                'void',
-                'foo(int a, int b, int c = 0)',
-                '    PROTOTYPE: $@%;$'
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, int b, int c = 0)
+                |    PROTOTYPE: $@%;$
+EOF
             [  0, qr/"\$\@%;\$"/, "" ],
         ],
 
         [
             "explicit prototype with whitespace",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE:     $   $    @   
@@ -2134,11 +2127,11 @@ EOF
 
         [
             "explicit prototype with backslash etc",
-            [
-                'void',
-                'foo(int a, int b, int c = 0)',
-                '    PROTOTYPE: \$\[@%]'
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, int b, int c = 0)
+                |    PROTOTYPE: \$\[@%]
+EOF
             # Note that the emitted C code will have escaped backslashes,
             # so the actual C code looks something like:
             #    newXS_some_variant(..., "\\$\\[@%]");
@@ -2153,7 +2146,7 @@ EOF
             # Almost certainly a coding error, but preserve the behaviour
             # for now.
             "explicit multiline prototype",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE:
@@ -2172,17 +2165,17 @@ EOF
 
         [
             "explicit empty prototype",
-            [
-                'void',
-                'foo(int a, int b, int c = 0)',
-                '    PROTOTYPE:'
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, int b, int c = 0)
+                |    PROTOTYPE:
+EOF
             [  0, qr/newXS.*, ""/, "" ],
         ],
 
         [
             "explicit ENABLE prototype",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: ENABLE
@@ -2192,7 +2185,7 @@ EOF
 
         [
             "explicit DISABLE prototype",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: DISABLE
@@ -2202,7 +2195,7 @@ EOF
 
         [
             "multiple prototype",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: $$$
@@ -2213,7 +2206,7 @@ EOF
 
         [
             "explicit invalid prototype",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int a, int b, int c)
                 |    PROTOTYPE: ab
@@ -2223,44 +2216,44 @@ EOF
 
         [
             "not overridden by typemap",
-            [
-                'void',
-                'foo(X::Y * a, int b, int c = 0)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(X::Y * a, int b, int c = 0)
+EOF
             [  0, qr/"\$\$;\$"/, "" ],
         ],
 
         [
             "overridden by typemap",
-            [
-                'void',
-                'foo(const X::Y * a, int b, int c = 0)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(const X::Y * a, int b, int c = 0)
+EOF
             [  0, qr/" \\ \\ \& \$ ; \$ "/x, "" ],
         ],
 
         [
             # shady but legal - placeholder
             "auto-generated proto with no type",
-            [
-                'void',
-                'foo(a, b, c = 0)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(a, b, c = 0)
+EOF
             [  0, qr/"\$\$;\$"/, ""  ],
         ],
 
         [
             "auto-generated proto with backcompat SV* placeholder",
-            [
-                'void',
-                'foo(int a, SV*, char *c = "")',
-                'C_ARGS: a, c',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(int a, SV*, char *c = "")
+                |C_ARGS: a, c
+EOF
             [  0, qr/"\$\$;\$"/, ""  ],
         ],
         [
             "CASE with variant prototype char",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(abc)
                 |    CASE: X
@@ -2321,10 +2314,10 @@ EOF
     my @test_fns = (
         [
             "dXSTARG int (IV)",
-            [
-                'int',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bTARGi\b/,    "has TARGi" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2333,10 +2326,10 @@ EOF
         [
             # same as int, but via custom typemap entry
             "dXSTARG const int (IV)",
-            [
-                'const int',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |const int
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bTARGi\b/,    "has TARGi" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2345,10 +2338,10 @@ EOF
         [
             # same as int, but via custom typemap OUTPUT entry
             "dXSTARG const long (MYIV)",
-            [
-                'const int',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |const int
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bTARGi\b/,    "has TARGi" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2356,10 +2349,10 @@ EOF
 
         [
             "dXSTARG unsigned long (UV)",
-            [
-                'unsigned long',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |unsigned long
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bTARGu\b/,    "has TARGu" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2367,10 +2360,10 @@ EOF
 
         [
             "dXSTARG time_t (NV)",
-            [
-                'time_t',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |time_t
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bTARGn\b/,    "has TARGn" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2378,10 +2371,10 @@ EOF
 
         [
             "dXSTARG char (pvn)",
-            [
-                'char',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |char
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bsv_setpvn\b/,"has sv_setpvn()" ],
             [NOT, qr/sv_newmortal/, "doesn't have newmortal" ],
@@ -2389,10 +2382,10 @@ EOF
 
         [
             "dXSTARG char * (PV)",
-            [
-                'char *',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |char *
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,   "has targ def" ],
             [  0, qr/\bsv_setpv\b/, "has sv_setpv" ],
             [  0, qr/\QST(0) = TARG;/, "has ST(0) = TARG" ],
@@ -2401,10 +2394,10 @@ EOF
 
         [
             "dXSTARG int (IV) with outlist",
-            [
-                'int',
-                'foo(OUTLIST int a, OUTLIST int b)',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo(OUTLIST int a, OUTLIST int b)
+EOF
             [  0, qr/\bdXSTARG;/,      "has targ def" ],
             [  0, qr/\bXSprePUSH;/,    "has XSprePUSH" ],
             [NOT, qr/\bXSprePUSH\b.+\bXSprePUSH\b/s,
@@ -2420,23 +2413,23 @@ EOF
         # Test RETVAL with an overridden typemap template in OUTPUT
         [
             "RETVAL overridden typemap: non-TARGable",
-            [
-                'int',
-                'foo()',
-                '    OUTPUT:',
-                '        RETVAL my_sv_setiv(ST(0), RETVAL);',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo()
+                |    OUTPUT:
+                |        RETVAL my_sv_setiv(ST(0), RETVAL);
+EOF
             [  0, qr/\bmy_sv_setiv\b/,   "has my_sv_setiv" ],
         ],
 
         [
             "RETVAL overridden typemap: TARGable",
-            [
-                'int',
-                'foo()',
-                '    OUTPUT:',
-                '        RETVAL sv_setiv(ST(0), RETVAL);',
-            ],
+            Q(<<'EOF'),
+                |int
+                |foo()
+                |    OUTPUT:
+                |        RETVAL sv_setiv(ST(0), RETVAL);
+EOF
             # XXX currently the TARG optimisation isn't done
             # XXX when this is fixed, update the test
             [  0, qr/\bsv_setiv\b/,   "has sv_setiv" ],
@@ -2444,10 +2437,10 @@ EOF
 
         [
             "dXSTARG with variant typemap",
-            [
-                'void',
-                'foo(OUTLIST const short a)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST const short a)
+EOF
             [  0, qr/\bdXSTARG;/,      "has targ def" ],
             [  0, qr/\bTARGi\b/,       "has TARGi" ],
             [NOT, qr/\bsv_setiv\(/,    "has NO sv_setiv" ],
@@ -2456,20 +2449,20 @@ EOF
 
         [
             "dXSTARG with sv_set_undef",
-            [
-                'void',
-                'foo(OUTLIST undef_t a)',
-            ],
+            Q(<<'EOF'),
+                |void
+                |foo(OUTLIST undef_t a)
+EOF
             [  0, qr/\bdXSTARG;/,          "has targ def" ],
             [  0, qr/\bsv_set_undef\(/,    "has sv_set_undef" ],
         ],
 
         [
             "dXSTARG with sv_setiv_mg",
-            [
-                'ivmg_t',
-                'foo()',
-            ],
+            Q(<<'EOF'),
+                |ivmg_t
+                |foo()
+EOF
             [  0, qr/\bdXSTARG;/,          "has targ def" ],
             [  0, qr/\bTARGi\(/,           "has TARGi" ],
         ],
@@ -2491,7 +2484,7 @@ EOF
     my @test_fns = (
         [
             "INPUT bad line",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc)
                 |    int + foo;
@@ -2500,7 +2493,7 @@ EOF
         ],
         [
             "INPUT no length()",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc)
                 |    int length(abc)
@@ -2509,7 +2502,7 @@ EOF
         ],
         [
             "INPUT dup",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc, int def)
                 |    int abc
@@ -2531,7 +2524,7 @@ EOF
         [
             "INPUT '='",
 
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc)
                 |int abc = ($var"$var\"$type);
@@ -2542,7 +2535,7 @@ EOF
         ],
         [
             "INPUT ';'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc, long xyz)
                 |int abc ; blah($var"$var\"$type);
@@ -2555,7 +2548,7 @@ EOF
         ],
         [
             "INPUT '+'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc, long xyz)
                 |int abc + blurg($var"$var\"$type);
@@ -2573,7 +2566,7 @@ EOF
         [
             "default value and INPUT '='",
 
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = 111)
                 |int abc = 777;
@@ -2586,7 +2579,7 @@ EOF
         ],
         [
             "default value and INPUT ';'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = 111, long xyz)
                 |int abc ; 777;
@@ -2599,7 +2592,7 @@ EOF
         ],
         [
             "default value and INPUT '+'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = 111, long xyz)
                 |int abc + 777;
@@ -2627,7 +2620,7 @@ EOF
         [
             "NO_INIT default value and INPUT '='",
 
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = NO_INIT)
                 |int abc = 777;
@@ -2640,7 +2633,7 @@ EOF
         ],
         [
             "NO_INIT default value and INPUT ';'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = NO_INIT, long xyz)
                 |int abc ; 777;
@@ -2653,7 +2646,7 @@ EOF
         ],
         [
             "NO_INIT default value and INPUT '+'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc = NO_INIT, long xyz)
                 |int abc + 777;
@@ -2675,7 +2668,7 @@ EOF
 
         [
             "INPUT initialiser with unknown type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(a, b, c)
                 |    UnknownType1 a = NO_INIT
                 |    UnknownType2 b = bar();
@@ -2693,7 +2686,7 @@ EOF
 
         [
             "alien INPUT vars",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo()
                 |    long alien1
                 |    int  alien2 = 123;
@@ -2706,7 +2699,7 @@ EOF
 
         [
             "alien INPUT vars",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(s)
                 |    char *s
                 |    int  length(s)
@@ -2719,7 +2712,7 @@ EOF
 
         [
             "duplicate INPUT vars",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc;
                 |    int abc;
@@ -2729,7 +2722,7 @@ EOF
         ],
         [
             "duplicate INPUT and signature vars",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(int abc)
                 |    int abc;
 EOF
@@ -2738,7 +2731,7 @@ EOF
         ],
         [
             "duplicate alien INPUT vars",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo()
                 |    int abc;
                 |    int abc;
@@ -2751,7 +2744,7 @@ EOF
 
         [
             "INPUT: missing '=' initialiser",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc =  
 EOF
@@ -2760,7 +2753,7 @@ EOF
         ],
         [
             "INPUT: missing '=' initialiser with semicolon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc =  ;
 EOF
@@ -2769,7 +2762,7 @@ EOF
         ],
         [
             "INPUT: missing '+' initialiser",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc +  
 EOF
@@ -2778,7 +2771,7 @@ EOF
         ],
         [
             "INPUT: missing '+' initialiser with semicolon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc +  ;
 EOF
@@ -2787,7 +2780,7 @@ EOF
         ],
         [
             "INPUT: NOT missing ';' initialiser",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc ;  
 EOF
@@ -2795,7 +2788,7 @@ EOF
         ],
         [
             "INPUT: missing ';' initialiser with semicolon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo(abc)
                 |    int abc ;  ;
 EOF
@@ -2825,7 +2818,7 @@ EOF
     my @test_fns = (
         [
             "OUTPUT RETVAL",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a)
                 |    CODE:
@@ -2840,7 +2833,7 @@ EOF
 
         [
             "OUTPUT RETVAL with set magic ignored",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a)
                 |    CODE:
@@ -2856,7 +2849,7 @@ EOF
 
         [
             "OUTPUT RETVAL with code",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a)
                 |    CODE:
@@ -2870,7 +2863,7 @@ EOF
 
         [
             "OUTPUT RETVAL with code and template-like syntax",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a)
                 |    CODE:
@@ -2886,7 +2879,7 @@ EOF
 
         [
             "OUTPUT RETVAL with code on IN_OUTLIST param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(IN_OUTLIST int abc)
                 |    CODE:
@@ -2906,7 +2899,7 @@ EOF
 
         [
             "OUTPUT RETVAL with code and unknown type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |blah
                 |foo(int a)
                 |    CODE:
@@ -2921,7 +2914,7 @@ EOF
 
         [
             "OUTPUT vars with set magic mixture",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa, int bbb, int ccc, int ddd)
                 |    CODE:
@@ -2951,7 +2944,7 @@ EOF
 
         [
             "OUTPUT vars with set magic mixture per-CASE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a, int b)
                 |   CASE: X
@@ -2989,7 +2982,7 @@ EOF
 
         [
             "duplicate OUTPUT RETVAL",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |    CODE:
@@ -3003,7 +2996,7 @@ EOF
 
         [
             "duplicate OUTPUT parameter",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |    CODE:
@@ -3018,7 +3011,7 @@ EOF
 
         [
             "RETVAL in CODE without OUTPUT section",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    CODE:
@@ -3031,7 +3024,7 @@ EOF
             # This one *shouldn't* warn. For a void XSUB, RETVAL
             # is just another local variable.
             "void RETVAL in CODE without OUTPUT section",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    PREINIT:
@@ -3044,7 +3037,7 @@ EOF
 
         [
             "RETVAL in CODE without being in OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |    CODE:
@@ -3057,7 +3050,7 @@ EOF
 
         [
             "RETVAL in CODE without OUTPUT section, multiple CASEs",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |  CASE: X
@@ -3074,7 +3067,7 @@ EOF
 
         [
             "OUTPUT RETVAL not a parameter",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |    CODE:
@@ -3087,7 +3080,7 @@ EOF
 
         [
             "OUTPUT RETVAL IS a parameter",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |    CODE:
@@ -3100,7 +3093,7 @@ EOF
 
         [
             "OUTPUT foo not a parameter",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |    CODE:
@@ -3113,7 +3106,7 @@ EOF
 
         [
             "OUTPUT length(foo) not a parameter",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char* aaa, int length(aaa))
                 |    CODE:
@@ -3126,7 +3119,7 @@ EOF
 
         [
             "OUTPUT SETMAGIC bad arg",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int abc)
                 |    OUTPUT:
@@ -3137,7 +3130,7 @@ EOF
 
         [
             "OUTPUT with IN_OUTLIST",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char*
                 |foo(IN_OUTLIST int abc)
                 |    CODE:
@@ -3168,7 +3161,7 @@ EOF
 
         [
             "OUTPUT with no output typemap entry",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(blah a)
                 |    OUTPUT:
@@ -3197,7 +3190,7 @@ EOF
         # Basic int default
         [
             "default i = 0",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int i = 0)
 EOF
@@ -3216,7 +3209,7 @@ EOF
         # Basic char default
         [
             "default c = 'x'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(unsigned char c = 'x')
 EOF
@@ -3235,7 +3228,7 @@ EOF
         # Basic string default
         [
             'default s = "abc"',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s = "abc")
 EOF
@@ -3254,7 +3247,7 @@ EOF
         # mixed quote string default
         [
             'default s = "\'abc\'"',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s = "'abc'")
 EOF
@@ -3273,7 +3266,7 @@ EOF
         # foo =
         [
             'default missing value',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(char *s = )
 EOF
@@ -3310,7 +3303,7 @@ EOF
             # XXX this generates an autocall using undeclared RETVAL,
             # which should be an error
             "void RETVAL no-type param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, short abc)
 EOF
@@ -3322,7 +3315,7 @@ EOF
 
         [
             "void RETVAL no-type param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, short abc)
                 |    CODE:
@@ -3335,7 +3328,7 @@ EOF
 
         [
             "void RETVAL typed param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int RETVAL, short abc)
 EOF
@@ -3348,7 +3341,7 @@ EOF
 
         [
             "void RETVAL INPUT typed param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, short abc)
                 |   int RETVAL
@@ -3362,7 +3355,7 @@ EOF
 
         [
             "void RETVAL typed param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int RETVAL, short abc)
                 |    CODE:
@@ -3376,7 +3369,7 @@ EOF
 
         [
             "void RETVAL INPUT typed param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, short abc)
                 |   int RETVAL
@@ -3391,7 +3384,7 @@ EOF
 
         [
             "void RETVAL alien autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(short abc)
                 |   int RETVAL = 99
@@ -3405,7 +3398,7 @@ EOF
 
         [
             "void RETVAL alien",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(short abc)
                 |   int RETVAL = 99
@@ -3424,7 +3417,7 @@ EOF
 
         [
             "long RETVAL no-type param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, short abc)
 EOF
@@ -3438,7 +3431,7 @@ EOF
 
         [
             "long RETVAL no-type param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, short abc)
                 |    CODE:
@@ -3452,7 +3445,7 @@ EOF
 
         [
             "long RETVAL typed param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(int RETVAL, short abc)
 EOF
@@ -3470,7 +3463,7 @@ EOF
 
         [
             "long RETVAL INPUT typed param autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, short abc)
                 |   int RETVAL
@@ -3486,7 +3479,7 @@ EOF
 
         [
             "long RETVAL INPUT typed param autocall 2nd pos",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(short abc, RETVAL)
                 |   int RETVAL
@@ -3502,7 +3495,7 @@ EOF
 
         [
             "long RETVAL typed param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(int RETVAL, short abc)
                 |    CODE:
@@ -3523,7 +3516,7 @@ EOF
 
         [
             "long RETVAL INPUT typed param",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, short abc)
                 |    int RETVAL
@@ -3542,7 +3535,7 @@ EOF
 
         [
             "long RETVAL alien autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(short abc)
                 |   int RETVAL = 99
@@ -3556,7 +3549,7 @@ EOF
 
         [
             "long RETVAL alien",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(abc, def)
                 |   int def
@@ -3578,7 +3571,7 @@ EOF
 
         [
             "NO_OUTPUT autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int abc)
 EOF
@@ -3592,7 +3585,7 @@ EOF
         [
             # NO_OUTPUT with void should be a NOOP, but check
             "NO_OUTPUT void autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT void
                 |foo(int abc)
 EOF
@@ -3605,7 +3598,7 @@ EOF
 
         [
             "NO_OUTPUT with RETVAL autocall",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int RETVAL)
 EOF
@@ -3617,7 +3610,7 @@ EOF
 
         [
             "NO_OUTPUT with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int abc)
                 |   CODE:
@@ -3632,7 +3625,7 @@ EOF
         [
             # NO_OUTPUT with void should be a NOOP, but check
             "NO_OUTPUT void with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT void
                 |foo(int abc)
                 |   CODE:
@@ -3646,7 +3639,7 @@ EOF
 
         [
             "NO_OUTPUT with RETVAL and CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int RETVAL)
                 |   CODE:
@@ -3660,7 +3653,7 @@ EOF
 
         [
             "NO_OUTPUT with CODE and OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int abc)
                 |   CODE:
@@ -3673,7 +3666,7 @@ EOF
 
         [
             "NO_OUTPUT with RETVAL param and OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int RETVAL)
                 |   OUTPUT:
@@ -3684,7 +3677,7 @@ EOF
 
         [
             "NO_OUTPUT with RETVAL param, CODE and OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NO_OUTPUT long
                 |foo(int RETVAL)
                 |   CODE:
@@ -3700,7 +3693,7 @@ EOF
 
         [
             "void dup",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, RETVAL)
 EOF
@@ -3709,7 +3702,7 @@ EOF
 
         [
             "void dup typed",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int RETVAL, short RETVAL)
 EOF
@@ -3718,7 +3711,7 @@ EOF
 
         [
             "void dup INPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(RETVAL, RETVAL)
                 |   int RETVAL
@@ -3728,7 +3721,7 @@ EOF
 
         [
             "long dup",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, RETVAL)
 EOF
@@ -3737,7 +3730,7 @@ EOF
 
         [
             "long dup typed",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(int RETVAL, short RETVAL)
 EOF
@@ -3746,7 +3739,7 @@ EOF
 
         [
             "long dup INPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |long
                 |foo(RETVAL, RETVAL)
                 |   int RETVAL
@@ -3784,7 +3777,7 @@ EOF
 
         [
             "RETVAL mixed type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |my_type
                 |foo(int RETVAL)
 EOF
@@ -3794,7 +3787,7 @@ EOF
 
         [
             "RETVAL mixed type INPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |my_type
                 |foo(RETVAL)
                 |    int RETVAL
@@ -3805,7 +3798,7 @@ EOF
 
         [
             "RETVAL mixed type alien",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |my_type
                 |foo()
                 |  int RETVAL = 99;
@@ -3841,7 +3834,7 @@ EOF
     my @test_fns = (
         [
             "function pointer arg type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |short
                 |foo(int (*)(char *, long) p)
 EOF
@@ -3850,7 +3843,7 @@ EOF
         ],
         [
             "function pointer arg type, INPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |short
                 |foo(p)
                 |    int (*)(char *, long) p
@@ -3860,7 +3853,7 @@ EOF
         ],
         [
             "function pointer return type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int (*)(char *, long)
                 |foo(short s)
 EOF
@@ -3889,7 +3882,7 @@ EOF
 
         [
             "CASE with dup INPUT and OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc, def)
                 |    CASE: X
@@ -3967,7 +3960,7 @@ EOF
         ],
         [
             "CASE with unconditional else",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    CASE: CCC1
@@ -4005,7 +3998,7 @@ EOF
         ],
         [
             "CASE with dup alien var",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(abc)
                 |    CASE: X
@@ -4027,7 +4020,7 @@ EOF
         ],
         [
             "CASE with variant keywords",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    CASE: X
@@ -4039,7 +4032,7 @@ EOF
         ],
         [
             "CASE with variant THIS type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |A::B::foo()
                 |    CASE: X
@@ -4055,7 +4048,7 @@ EOF
         ],
         [
             "CASE with variant RETVAL type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    CASE: X
@@ -4074,7 +4067,7 @@ EOF
         ],
         [
             "CASE with variant autocall RETVAL",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int a)
                 |    CASE: X
@@ -4099,7 +4092,7 @@ EOF
         ],
         [
             "CASE with variant deferred var inits",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc)
                 |    CASE: X
@@ -4121,7 +4114,7 @@ EOF
 
         [
             "CASE: case follows unconditional CASE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    CASE: X
@@ -4139,7 +4132,7 @@ EOF
         ],
         [
             "CASE: not at top of function",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    CODE:
@@ -4152,7 +4145,7 @@ EOF
         ],
         [
             "CASE: junk",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(a)
                 |CASE: X
@@ -4164,7 +4157,7 @@ EOF
         ],
         [
             "keyword after end of xbody",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |  CODE:
@@ -4177,7 +4170,7 @@ EOF
 
         [
             "CASE: setting ST(0)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(a)
                 |CASE: X
@@ -4193,7 +4186,7 @@ EOF
 
         [
             "CASE: not at top",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int abc(int x, int y)
                 |  INIT:
                 |    myinit
@@ -4229,7 +4222,7 @@ EOF
 
         [
             "placeholder: typeless param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, BBB, int CCC)
                 |   CODE:
@@ -4243,7 +4236,7 @@ EOF
 
         [
             "placeholder: typeless param bodiless",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, BBB, int CCC)
 EOF
@@ -4261,7 +4254,7 @@ EOF
             # this is the only IN/OUT etc one which works, since IN is the
             # default.
             "placeholder: typeless IN param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, IN BBB, int CCC)
                 |   CODE:
@@ -4276,7 +4269,7 @@ EOF
 
         [
             "placeholder: typeless OUT param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, OUT BBB, int CCC)
                 |   CODE:
@@ -4287,7 +4280,7 @@ EOF
 
         [
             "placeholder: typeless IN_OUT param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, IN_OUT BBB, int CCC)
                 |   CODE:
@@ -4298,7 +4291,7 @@ EOF
 
         [
             "placeholder: typeless OUTLIST param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, OUTLIST BBB, int CCC)
                 |   CODE:
@@ -4312,7 +4305,7 @@ EOF
             # sense, but it allows an argument to still be passed (or
             # not), even if it;s no longer used.
             "placeholder: typeless default param with CODE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, BBB = 888, int CCC = 999)
                 |   CODE:
@@ -4327,7 +4320,7 @@ EOF
 
         [
             "placeholder: allow SV *",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, SV *, int CCC)
                 |   CODE:
@@ -4341,7 +4334,7 @@ EOF
         [
             # Bodiless XSUBs can't use SV* as a placeholder ...
             "placeholder: SV *, bodiless",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, SV    *, int CCC)
 EOF
@@ -4353,7 +4346,7 @@ EOF
             # ... unless they use C_ARGS to define how the C fn should
             # be called.
             "placeholder: SV *, bodiless C_ARGS",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int AAA, SV    *, int CCC)
                 |    C_ARGS: AAA, CCC
@@ -4384,7 +4377,7 @@ EOF
 
         [
             "array(int,5)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |array(int,5)
                 |foo()
 EOF
@@ -4398,7 +4391,7 @@ EOF
 
         [
             "array(int*, expr)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |array(int*, FOO_SIZE)
                 |foo()
 EOF
@@ -4409,7 +4402,7 @@ EOF
 
         [
             "array() as param type",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(abc)
                 |    array(int,5) abc
@@ -4419,7 +4412,7 @@ EOF
 
         [
             "array() can be overriden by OUTPUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |array(int,5)
                 |foo()
                 |    OUTPUT:
@@ -4431,7 +4424,7 @@ EOF
 
         [
             "array() in output override isn't special",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |short
                 |foo()
                 |    OUTPUT:
@@ -4443,7 +4436,7 @@ EOF
 
         [
             "array() OUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(OUT array(int,5) AAA)
 EOF
@@ -4453,7 +4446,7 @@ EOF
 
         [
             "array() OUTLIST",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(OUTLIST array(int,5) AAA)
 EOF
@@ -4513,7 +4506,7 @@ EOF
 
         [
             "T_ARRAY long input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(longArray * abc)
 EOF
@@ -4525,7 +4518,7 @@ EOF
         ],
         [
             "T_ARRAY long output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |longArray *
                 |foo()
 EOF
@@ -4538,7 +4531,7 @@ EOF
 
         [
             "T_ARRAY myiv input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(myivArray * abc)
 EOF
@@ -4550,7 +4543,7 @@ EOF
         ],
         [
             "T_ARRAY myiv output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |myivArray *
                 |foo()
 EOF
@@ -4563,7 +4556,7 @@ EOF
 
         [
             "T_ARRAY blah input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(blahArray * abc)
 EOF
@@ -4575,7 +4568,7 @@ EOF
         ],
         [
             "T_ARRAY blah output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |blahArray *
                 |foo()
 EOF
@@ -4588,7 +4581,7 @@ EOF
 
         [
             "T_ARRAY nosuchtype input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(nosuchtypeArray * abc)
 EOF
@@ -4597,7 +4590,7 @@ EOF
         ],
         [
             "T_ARRAY nosuchtype output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |nosuchtypeArray *
                 |foo()
 EOF
@@ -4617,7 +4610,7 @@ EOF
         # than accidental.
         [
             "T_DAE input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(shortArray * abc)
 EOF
@@ -4633,7 +4626,7 @@ EOF
         ],
         [
             "T_DAE output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |shortArray *
                 |foo()
 EOF
@@ -4647,7 +4640,7 @@ EOF
         ],
         [
             "T_DAE bad input",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(NoInputArray * abc)
 EOF
@@ -4658,7 +4651,7 @@ EOF
         # Use overridden return code with an OUTPUT line.
         [
             "T_ARRAY override output",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |intArray *
                 |foo()
                 |    OUTPUT:
@@ -4673,7 +4666,7 @@ EOF
         # for OUT and OUTLIST arguments, don't process DO_ARRAY_ELEM
         [
             "T_ARRAY OUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(OUT intArray * abc)
 EOF
@@ -4682,7 +4675,7 @@ EOF
         ],
         [
             "T_ARRAY OUT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(OUTLIST intArray * abc)
 EOF
@@ -4692,7 +4685,7 @@ EOF
 
         [
             "T_ARRAY no output typemap entry",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |NooutputArray *
                 |foo()
 EOF
@@ -4721,28 +4714,28 @@ EOF
     my @test_fns = (
         [
             "VERSIONCHECK: long word",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |VERSIONCHECK: ENABLEblah
 EOF
             [ERR, qr{\QError: VERSIONCHECK: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: trailing text",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |VERSIONCHECK: DISABLE blah # bloo +%
 EOF
             [ERR, qr{\QError: VERSIONCHECK: invalid value 'DISABLE blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: lower case",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |VERSIONCHECK: disable
 EOF
             [ERR, qr{\QError: VERSIONCHECK: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "VERSIONCHECK: semicolon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |VERSIONCHECK: DISABLE;
 EOF
             [ERR, qr{\QError: VERSIONCHECK: invalid value 'DISABLE;' (should be ENABLE/DISABLE)}, "should die" ],
@@ -4750,21 +4743,21 @@ EOF
 
         [
             "EXPORT_XSUB_SYMBOLS: long word",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |EXPORT_XSUB_SYMBOLS: ENABLEblah
 EOF
             [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'ENABLEblah' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: trailing text",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |EXPORT_XSUB_SYMBOLS: diSAble blah # bloo +%
 EOF
             [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'diSAble blah # bloo +%' (should be ENABLE/DISABLE)}, "should die" ],
         ],
         [
             "EXPORT_XSUB_SYMBOLS: lower case",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |EXPORT_XSUB_SYMBOLS: disable
 EOF
             [ERR, qr{\QError: EXPORT_XSUB_SYMBOLS: invalid value 'disable' (should be ENABLE/DISABLE)}, "should die" ],
@@ -4772,7 +4765,7 @@ EOF
 
         [
             "file SCOPE: long word",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |SCOPE: ENABLEblah
                 |void
                 |foo()
@@ -4781,7 +4774,7 @@ EOF
         ],
         [
             "file SCOPE: lower case",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |SCOPE: enable
                 |void
                 |foo()
@@ -4807,7 +4800,7 @@ EOF
     my @test_fns = (
         [
             "PROTOTYPES: ENABLE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: ENABLE
                 |
                 |void
@@ -4817,7 +4810,7 @@ EOF
         ],
         [
             "PROTOTYPES: ENABLED",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: ENABLED
                 |
                 |void
@@ -4829,7 +4822,7 @@ EOF
         ],
         [
             "PROTOTYPES: ENABLE;",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: ENABLE;
                 |
                 |void
@@ -4842,7 +4835,7 @@ EOF
 
         [
             "PROTOTYPES: DISABLE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: DISABLE
                 |
                 |void
@@ -4852,7 +4845,7 @@ EOF
         ],
         [
             "PROTOTYPES: DISABLED",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: DISABLED
                 |
                 |void
@@ -4864,7 +4857,7 @@ EOF
         ],
         [
             "PROTOTYPES: DISABLE;",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: DISABLE;
                 |
                 |void
@@ -4877,7 +4870,7 @@ EOF
 
         [
             "PROTOTYPES: long word",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: ENABLEblah
                 |
                 |void
@@ -4887,7 +4880,7 @@ EOF
         ],
         [
             "PROTOTYPES: trailing text",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: ENABLE blah
                 |
                 |void
@@ -4897,7 +4890,7 @@ EOF
         ],
         [
             "PROTOTYPES: trailing text and comment)",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: DISABLE blah # bloo +%
                 |
                 |void
@@ -4926,7 +4919,7 @@ EOF
     my @test_fns = (
         [
             "BOOT: basic'",
-            [ Q(<<"EOF") ],
+            Q(<<"EOF"),
                 |BOOT:
                 |
                 |
@@ -4941,7 +4934,7 @@ EOF
         ],
         [
             "Warn if junk after BOOT'",
-            [ Q(<<"EOF") ],
+            Q(<<"EOF"),
                 |BOOT: blah
                 |  codeline
 EOF
@@ -4969,7 +4962,7 @@ EOF
     my @test_fns = (
         [
             "TYPEMAP: basic'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<EOF
                 |mytype T_MYTYPE
                 |INPUT
@@ -4987,7 +4980,7 @@ EOF
         ],
         [
             "TYPEMAP: single quote'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<' a.b+c'
                 |mytype T_IV
                 | a.b+c
@@ -4998,7 +4991,7 @@ EOF
         ],
         [
             "TYPEMAP: double quote'",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<" a.b+c' "
                 |mytype T_UV
                 | a.b+c' 
@@ -5009,7 +5002,7 @@ EOF
         ],
         [
             "line continuation directly after TYPEMAP",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <<EOF
                 |
                 |foo_t T_FOO
@@ -5034,7 +5027,7 @@ EOF
             # TYPEMAP is now handled as a normal keyword. ]
 
             "TYPEMAP after XSUB",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int foo()
                 |
                 |TYPEMAP: <<EOF
@@ -5047,7 +5040,7 @@ EOF
 
         [
             'TYPEMAP syntax err',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |TYPEMAP: <EOF
                 |
 EOF
@@ -5075,7 +5068,7 @@ EOF
     my @test_fns = (
         [
             "FALLBACK: TRUE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: TRUE
                 |
                 |void
@@ -5087,7 +5080,7 @@ EOF
         ],
         [
             "FALLBACK: FALSE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: FALSE
                 |
                 |void
@@ -5099,7 +5092,7 @@ EOF
         ],
         [
             "FALLBACK: UNDEF",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: UNDEF
                 |
                 |void
@@ -5111,7 +5104,7 @@ EOF
         ],
         [
             "FALLBACK: XYZ",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: XYZ
                 |
                 |void
@@ -5123,7 +5116,7 @@ EOF
         ],
         [
             "FALLBACK: dup warning",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: TRUE
                 |FALLBACK: TRUE
                 |
@@ -5135,7 +5128,7 @@ EOF
         ],
         [
             "FALLBACK: no dup warning",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FALLBACK: TRUE
                 |
                 |MODULE = Foo::Bar PACKAGE = Baz
@@ -5166,21 +5159,21 @@ EOF
     my @test_fns = (
         [
             "REQUIRE: 1",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE: 1
 EOF
             # not croaking is sufficient test here
         ],
         [
             "REQUIRE: 1.0",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE:    1.0   
 EOF
             # not croaking is sufficient test here
         ],
         [
             "REQUIRE: 999999.9",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE: 999999.9
 EOF
             [ERR, qr{\QError: xsubpp 999999.9 (or better) required--this is only},
@@ -5188,7 +5181,7 @@ EOF
         ],
         [
             "REQUIRE: missing arg",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE:   
 EOF
             [ERR, qr{\QError: REQUIRE expects a version number},
@@ -5196,7 +5189,7 @@ EOF
         ],
         [
             "REQUIRE: bad arg",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE: abc
 EOF
             [ERR, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got 'abc'},
@@ -5204,7 +5197,7 @@ EOF
         ],
         [
             "REQUIRE: bad arg trailing junk",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |REQUIRE: 3.0.0
 EOF
             [ERR, qr{\QError: REQUIRE: expected a MMM(.NNN) number, got '3.0.0'},
@@ -5232,7 +5225,7 @@ EOF
 
         [
             "INCLUDE: basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE: XSInclude.xsh  
 EOF
             [  0, qr{newXS.*\bXS_Foo__Bar_include_ok\b},
@@ -5243,7 +5236,7 @@ EOF
 
         [
             "INCLUDE: no filename",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE:   
 EOF
             [ERR, qr{\QError: INCLUDE: filename missing},
@@ -5251,7 +5244,7 @@ EOF
         ],
         [
             "INCLUDE: no pipe",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE: |foo
 EOF
             [ERR, qr{\QError: INCLUDE: output pipe is illegal},
@@ -5259,7 +5252,7 @@ EOF
         ],
         [
             "INCLUDE: no loop",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 | # this file INCLUDEs itself
                 |INCLUDE: XSloop.xsh
 EOF
@@ -5268,7 +5261,7 @@ EOF
         ],
         [
             "INCLUDE: no such file",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE: NoSuchFile.xsh
 EOF
             [ERR, qr{\QError: INCLUDE: cannot open 'NoSuchFile.xsh': },
@@ -5279,7 +5272,7 @@ EOF
 
         [
             "INCLUDE_COMMAND: basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE_COMMAND: $^X -Ilib -It/lib -MIncludeTester -e IncludeTester::print_xs
 EOF
             [  0, qr{newXS.*\bXS_Foo__Bar_sum\b},
@@ -5291,7 +5284,7 @@ EOF
 
         [
             "INCLUDE_COMMAND: no command",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE_COMMAND:     
 EOF
             [ERR, qr{\QError: INCLUDE_COMMAND: command missing},
@@ -5299,7 +5292,7 @@ EOF
         ],
         [
             "INCLUDE_COMMAND: no pipe - on left",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE_COMMAND:   |  blah
 EOF
             [ERR, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
@@ -5307,7 +5300,7 @@ EOF
         ],
         [
             "INCLUDE_COMMAND: no pipe - on right",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |INCLUDE_COMMAND:   blah  |   
 EOF
             [ERR, qr{\QError: INCLUDE_COMMAND: pipes are illegal},
@@ -5319,7 +5312,7 @@ EOF
             # check that the line number reported for the error is the
             # right one (previously it was using the last line of the
             # current paragraph + 1).
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |PROTOTYPES: DISABLE
                 |INCLUDE_COMMAND: $^X -e "exit(1)"
                 |PROTOTYPES: DISABLE
@@ -5364,7 +5357,7 @@ EOF
 
         [
             "$kw not in file scope",
-            [ Q(<<"EOF") ],
+            Q(<<"EOF"),
                 |int foo()
                 |$kw: blah
 EOF
@@ -5395,7 +5388,7 @@ EOF
     my @test_fns = (
         [
             "file SCOPE: trailing text",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |SCOPE: EnAble blah # bloo +%
                 |void
                 |foo()
@@ -5404,7 +5397,7 @@ EOF
         ],
         [
             "xsub SCOPE: trailing text",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |SCOPE: EnAble blah # bloo +%
@@ -5413,7 +5406,7 @@ EOF
         ],
         [
             "xsub SCOPE: lower case",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |SCOPE: enable
@@ -5422,7 +5415,7 @@ EOF
         ],
         [
             "xsub SCOPE: semicolon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |SCOPE: ENABLE;
@@ -5432,7 +5425,7 @@ EOF
 
         [
             "SCOPE: as file-scoped keyword",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |SCOPE: ENABLE
                 |void
                 |foo()
@@ -5443,7 +5436,7 @@ EOF
         ],
         [
             "SCOPE: as xsub-scoped keyword",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |C_ARGS: a,b,c
@@ -5454,7 +5447,7 @@ EOF
         ],
         [
             "/* SCOPE */ in typemap",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(i)
                 | MyScopeInt i
@@ -5463,7 +5456,7 @@ EOF
         ],
         [
             "xsub duplicate SCOPE",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |SCOPE: ENABLE
@@ -5474,7 +5467,7 @@ EOF
         ],
         [
             "unrecognised file-scoped keyword",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |FOO_BAR:
 EOF
             [ERR,
@@ -5500,7 +5493,7 @@ EOF
     my @test_fns = (
         [
             "ALIAS basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: foo = 1
@@ -5527,7 +5520,7 @@ EOF
 
         [
             "ALIAS with main as default of 0",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS:
@@ -5541,7 +5534,7 @@ EOF
 
         [
             "ALIAS multi-perl-line, blank lines",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS:            foo   =    1       bar  =  2   
@@ -5568,7 +5561,7 @@ EOF
 
         [
             "ALIAS no colon",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: bar = X::Y
@@ -5579,7 +5572,7 @@ EOF
 
         [
             "ALIAS unknown alias",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: Foo::bar => blurt
@@ -5590,7 +5583,7 @@ EOF
 
         [
             "ALIAS warn duplicate",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: bar = 1
@@ -5601,7 +5594,7 @@ EOF
         ],
         [
             "ALIAS warn conflict duplicate",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: bar = 1
@@ -5613,7 +5606,7 @@ EOF
 
         [
             "ALIAS warn identical values",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: bar = 1
@@ -5625,7 +5618,7 @@ EOF
 
         [
             "ALIAS unparseable entry",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: bar = 
@@ -5635,7 +5628,7 @@ EOF
         ],
         [
             "ALIAS zero", # zero used to be silently ignored
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS: 0
@@ -5645,7 +5638,7 @@ EOF
         ],
         [
             "ALIAS empty",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ALIAS:
@@ -5670,7 +5663,7 @@ EOF
     my @test_fns = (
         [
             'ALIAS with $ALIAS used in typemap entry',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(AV *av)
                 |    ALIAS: bar = 1
@@ -5697,7 +5690,7 @@ EOF
     my @test_fns = (
         [
             "INTERFACE basic boot",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: f1 f2
@@ -5714,7 +5707,7 @@ EOF
         ],
         [
             "INTERFACE with MACRO",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: f1 f2
@@ -5741,7 +5734,7 @@ EOF
 
         [
             'INTERFACE simple name',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: abc
@@ -5752,7 +5745,7 @@ EOF
         ],
         [
             'INTERFACE name with prefix',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: foobar_abc
@@ -5763,7 +5756,7 @@ EOF
         ],
         [
             'INTERFACE name with class',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: X::Y::foobar_abc
@@ -5794,7 +5787,7 @@ EOF
     my @test_fns = (
         [
             'INTERFACE basic body',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: f1 f2
@@ -5808,7 +5801,7 @@ EOF
         ],
         [
             'INTERFACE with MACRO',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    INTERFACE: f1 f2
@@ -5823,7 +5816,7 @@ EOF
         ],
         [
             'INTERFACE with perl package name',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |X::Y
                 |foo(X::Y a, char *b)
                 |    INTERFACE: f1
@@ -5837,7 +5830,7 @@ EOF
         ],
         [
             'INTERFACE with C_ARGS',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |char *
                 |foo(X::Y a, int b, char *c)
                 |    INTERFACE: f1
@@ -5854,7 +5847,7 @@ EOF
         # errors
         [
             'INTERFACE and ALIAS dont mix',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    INTERFACE: f1
@@ -5866,7 +5859,7 @@ EOF
         ],
         [
             'INTERFACE dup',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |    INTERFACE: f1 f1
@@ -5894,7 +5887,7 @@ EOF
     my @test_fns = (
         [
             "ATTRS basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    ATTRS: a
@@ -5926,7 +5919,7 @@ EOF
     my @test_fns = (
         [
             "OVERLOAD basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    OVERLOAD:   cmp   <=>
@@ -5945,7 +5938,7 @@ EOF
         ],
         [
             "OVERLOAD dup op",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |    OVERLOAD:   cmp cmp
@@ -5973,7 +5966,7 @@ EOF
     my @test_fns = (
         [
             "PREINIT basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(aaa, bbb)
                 |    int aaa
@@ -6011,7 +6004,7 @@ EOF
     my @test_fns = (
         [
             "INIT basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(aaa, short bbb)
                 |    int aaa
@@ -6052,7 +6045,7 @@ EOF
     my @test_fns = (
         [
             "NOT_IMPLEMENTED_YET basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa, bbb, ccc)
                 |    short bbb
@@ -6068,7 +6061,7 @@ EOF
         ],
         [
             "NOT_IMPLEMENTED_YET no input part",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo()
                 |  NOT_IMPLEMENTED_YET
@@ -6079,7 +6072,7 @@ EOF
         ],
         [
             "NOT_IMPLEMENTED_YET not special after C_ARGS",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(aaa)
                 |    int aaa
@@ -6093,7 +6086,7 @@ EOF
         ],
         [
             "NOT_IMPLEMENTED_YET not special after INIT",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(aaa)
                 |    int aaa
@@ -6124,7 +6117,7 @@ EOF
     my @test_fns = (
         [
             "CLEANUP basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |  CLEANUP:
@@ -6138,7 +6131,7 @@ EOF
         ],
         [
              "CLEANUP empty",
-             [ Q(<<'EOF') ],
+             Q(<<'EOF'),
                  |void
                  |foo(int aaa)
                  |  CLEANUP:
@@ -6167,7 +6160,7 @@ EOF
     my @test_fns = (
         [
             "CODE basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  CODE:
@@ -6180,7 +6173,7 @@ EOF
         ],
         [
             "CODE empty",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  CODE:
@@ -6207,7 +6200,7 @@ EOF
     my @test_fns = (
         [
             "PPCODE basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  PPCODE:
@@ -6220,7 +6213,7 @@ EOF
         ],
         [
             "PPCODE empty",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  PPCODE:
@@ -6230,7 +6223,7 @@ EOF
         ],
         [
             "PPCODE trailing keyword",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  PPCODE:
@@ -6242,7 +6235,7 @@ EOF
         ],
         [
             "PPCODE code tweaks",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void
                 |foo(int aaa)
                 |  PPCODE:
@@ -6273,7 +6266,7 @@ EOF
     my @test_fns = (
         [
             "POSTCALL basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo(int aaa)
                 |  POSTCALL:
@@ -6287,7 +6280,7 @@ EOF
         ],
         [
              "POSTCALL empty",
-             [ Q(<<'EOF') ],
+             Q(<<'EOF'),
                  |void
                  |foo(int aaa)
                  |  POSTCALL:
@@ -6328,7 +6321,7 @@ EOF
         push @test_fns,
             [
                 "Warn if junk after $kw'",
-                [ Q(<<"EOF") ],
+                Q(<<"EOF"),
                     |int foo()
                     |$kw: blah
                     |  codeline
@@ -6345,7 +6338,7 @@ EOF
     @test_fns = (
         [
             "Warn if junk after BOOT'",
-            [ Q(<<"EOF") ],
+            Q(<<"EOF"),
                 |BOOT: blah
                 |  codeline
 EOF
@@ -6371,7 +6364,7 @@ EOF
     my @test_fns = (
         [
             "CPP basic",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef USE_SHORT
                 |
                 |short foo()
@@ -6437,7 +6430,7 @@ EOF
 
         [
             "CPP two independent branches",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef USE_SHORT
                 |short foo()
                 |#endif
@@ -6464,7 +6457,7 @@ EOF
 
         [
             "CPP one branch, one main",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef USE_SHORT
                 |short foo()
                 |#endif
@@ -6485,7 +6478,7 @@ EOF
 
         [
             "CPP two in one branch",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef USE_SHORT
                 |short foo()
                 |
@@ -6498,7 +6491,7 @@ EOF
 
         [
             "CPP two in main",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |short foo()
                 |
                 |long foo()
@@ -6509,7 +6502,7 @@ EOF
 
         [
             "CPP nested conditions",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef C1
                 |
                 |short foo()
@@ -6530,7 +6523,7 @@ EOF
 
         [
             "CPP nested conditions, different fns",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef C1
                 |
                 |short foo()
@@ -6567,7 +6560,7 @@ EOF
 
         [
             "CPP with indentation",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef C1
                 |#  ifdef C2
                 |long bar()
@@ -6591,7 +6584,7 @@ EOF
 
         [
             "CPP: trivial branch",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef C1
                 |#define BLAH1
                 |#endif
@@ -6601,7 +6594,7 @@ EOF
 
         [
             "CPP: guard and other CPP ordering",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef C1
                 |#define BLAH1
                 |
@@ -6626,7 +6619,7 @@ EOF
 
         [
             "CPP balanced else",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#else
                 |
                 |short foo()
@@ -6637,7 +6630,7 @@ EOF
 
         [
             "CPP balanced if",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#ifdef
                 |
                 |short foo()
@@ -6648,7 +6641,7 @@ EOF
 
         [
             "indented file-scoped keyword",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#define FOO 1
                 |  BOOT:
 EOF
@@ -6658,7 +6651,7 @@ EOF
         ],
         [
             "stray CPP / indented XSUB",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |#define FOO
                 |  int
 EOF
@@ -6701,7 +6694,7 @@ EOF
     my @test_fns = (
         [
             'typemap: $Package: one package',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |foo_t foo(foo_t a1)
 EOF
 
@@ -6715,7 +6708,7 @@ EOF
         ],
         [
             'typemap: $Package: two packages',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |foo_t foo(foo_t a1)
                 |
                 |MODULE = Foo PACKAGE = Foo::Bar
@@ -6750,7 +6743,7 @@ EOF
     my @test_fns = (
         [
             'attr: one package',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |ATTRS: myattr(x)
@@ -6762,7 +6755,7 @@ EOF
         ],
         [
             'attr: two packages',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |ATTRS: myattr(x)
@@ -6779,7 +6772,7 @@ EOF
 
         [
             'interface: one package',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |INTERFACE: abc
@@ -6791,7 +6784,7 @@ EOF
         ],
         [
             'interface: two packages',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |INTERFACE: abc
@@ -6808,7 +6801,7 @@ EOF
 
         [
             'overload: one package',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |OVERLOAD: cmp
@@ -6820,7 +6813,7 @@ EOF
         ],
         [
             'overload: two packages',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |int
                 |foo()
                 |OVERLOAD: cmp
@@ -6849,7 +6842,7 @@ EOF
     my @test_fns = (
         [
             '1st MODULE PKG',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |MODULE = X PKG = Y
                 |
                 |PROTOTYPES:  DISABLE
@@ -6862,7 +6855,7 @@ EOF
         ],
         [
             '1st MODULE colon',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |MODULE: X PACKAGE = Y
                 |
                 |PROTOTYPES:  DISABLE
@@ -6875,7 +6868,7 @@ EOF
         ],
         [
             '2nd MODULE PKG',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |MODULE = Foo PACKAGE = Foo
                 |
                 |PROTOTYPES:  DISABLE
@@ -6889,7 +6882,7 @@ EOF
         ],
         [
             '2nd MODULE colon',
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |MODULE = Foo PACKAGE = Foo
                 |
                 |PROTOTYPES:  DISABLE
@@ -6920,7 +6913,7 @@ EOF
     my @test_fns = (
         [
             "POD at EOF doesn't warn",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo()
                 |
                 |=pod
@@ -6931,7 +6924,7 @@ EOF
         ],
         [
             "line continuation directly after POD",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |=pod
                 |=cut
                 |void foo(int i, \
@@ -6959,7 +6952,7 @@ EOF
     my @test_fns = (
         [
             "C preamble",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |void foo()
 EOF
 
@@ -6983,7 +6976,7 @@ EOF
     my @test_fns = (
         [
             "No MODULE line",
-            [ Q(<<'EOF') ],
+            Q(<<'EOF'),
                 |foo
                 |bar
 EOF
