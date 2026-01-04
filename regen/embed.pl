@@ -3655,7 +3655,9 @@ sub generate_proto_h {
 
         my ($flags, $retval, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
-        if ($flags =~ / ( [^ AabCDdEefFhIiMmNnOoPpRrSsTUuWXx;] ) /xx) {
+        if ($flags =~
+             m/([^ aA b C dD eE fF h iI mM nN oO pP Rr sS T uU W xX ; ])/xx)
+        {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
 
