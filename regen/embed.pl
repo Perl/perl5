@@ -3604,7 +3604,7 @@ sub open_print_header {
                                'regen/HeaderParser.pm',
                            ],
                       final => "\nEdit those files and run 'make regen_headers' to effect changes.\n",
-                      copyright => [1993 .. 2022],
+                      copyright => [1993 .. 2026],
                       quote => $quote });
 }
 
