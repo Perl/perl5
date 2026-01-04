@@ -3997,12 +3997,12 @@ sub generate_proto_h {
                             && $plain_func !~ $names_reserved_for_perl_use_re;
 
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
         my $binarycompat = ( $flags =~ /b/ );
         my $has_mflag = ( $flags =~ /m/ );
+        my $args_assert_line = ! $has_mflag;
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /E/ );
