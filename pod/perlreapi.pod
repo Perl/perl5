@@ -165,7 +165,7 @@ is defined as per L<isSPACE|perlapi/isSPACE>, and by the internal
 macros C<is_utf8_space> under UTF-8, and C<isSPACE_LC> under C<use
 locale>.
 
-=for apidoc Amnh||REGEX_LOCALE_CHARSET
+=for apidoc Avnh||REGEX_LOCALE_CHARSET
 
 =back
 
