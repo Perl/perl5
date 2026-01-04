@@ -543,40 +543,6 @@ EOF
 
 
 {
-    # Check that default expressions are template-expanded.
-    # Whether this is sensible or not, Dynaloader and other distributions
-    # rely on it
-
-    my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Capture';
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void foo(int mymarker1, char *pkg = "$Package")
-        |    CODE:
-        |        mymarker2;
-EOF
-
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    # remove all spaces for easier matching
-    my $sout = $out;
-    $sout =~ s/[ \t]+//g;
-
-    like($sout, qr/pkg.*=.*"Foo"/, "default expression expanded");
-}
-
-
-{
     # Test for 'No INPUT definition' error, particularly that the
     # type is output correctly in the error message.
 
@@ -3261,6 +3227,18 @@ EOF
                        \s+}\n
                        }x,
                     "init" ],
+        ],
+
+        # Check that default expressions are template-expanded. Whether
+        # this is sensible or not, Dynaloader and other distributions rely
+        # on it
+        [
+            'default expression expanded',
+            Q(<<'EOF'),
+                |void
+                |foo(char *s = "$Package")
+EOF
+            [  0, qr/^\s+s\s+=\s+"Foo"/m,        "expanded" ],
         ],
 
         # foo =
