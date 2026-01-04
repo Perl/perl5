@@ -75,7 +75,7 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-            qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU vW xX y ;@#? ] /xx;
+          qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
 my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
@@ -617,7 +617,9 @@ sub check_and_add_proto_defn {
 
     $flags .= "m" if $flags =~ /M/;
     $flags .= "U" if $flags =~ /@/;     # No usage output for @arrays
-    $flags .= "n" if $flags =~ /#/;    # No threads, arguments for #ifdef
+    $flags .= "n" if $flags =~ /[#v]/;  # No threads, arguments for #ifdef's,
+                                        # plain values
+
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK|[SM]PTR|EPTRQ?)\b\s+//g for @munged_args;
@@ -1904,9 +1906,9 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             my $has_args = $flags !~ /n/;
             if (! $has_args) {
-                warn "$name: n flag without [m#] "
+                warn "$name: n flag without [mv#] "
                    . where_from_string($item->{file}, $item->{line_num})
-                                                        unless $flags =~ /[m#]/;
+                                                     unless $flags =~ /[mv#]/;
 
                 if ($item->{args} && $item->{args}->@*) {
                     warn "$name: n flag but apparently has args"

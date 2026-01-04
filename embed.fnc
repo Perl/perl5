@@ -364,7 +364,7 @@
 :
 : The 'name' in any such line must not be the same as any in this file (i.e.,
 : no redundant definitions), and one of the flags on the apidoc lines must be
-: 'm', 'y', or '@', indicating it is not a function.
+: 'm', 'v', 'y', or '@', indicating it is not a function.
 :
 : All but the name field of an apidoc_item line are optional, and if empty,
 : inherits from a corresponding apidoc_defn line, if one exists, or the
@@ -713,6 +713,13 @@
 :        tools, such as Devel::PPPort, that this requires special handling.
 :
 :   'U'  autodoc.pl will not output a usage example
+:
+:   'v'  The element is some sort of value that isn't any of the other types in
+:	 this file.  For example, it could be an enumeration constant; that is,
+:	 it is one of the members of the list of constants a variable declared
+:	 to be a particular enum can have.  These are always visible to XS code
+:	 unless guarded by preprocessor directives,  Also implies 'n'.
+
 :
 :   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
 :        argument to the function calls. This means that under DEBUGGING a
