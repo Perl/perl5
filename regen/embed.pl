@@ -3685,7 +3685,8 @@ my %always_undefs;
 my %non_ext_re_undefs = %needed_by_ext_re;
 my %non_ext_undefs = %needed_by_ext;
 
-# Create lists of headers and C files to examine
+# Create lists of headers and C files to examine.  Use all top level .c files,
+# and all top level .h files that aren't on the $skip_files list.
 my @header_list;
 my @c_list;
 open my $mf, "<", "MANIFEST" or die "Can't open MANIFEST: $!";
@@ -3995,7 +3996,6 @@ sub generate_proto_h {
                             # clash with a user name, it's ok.
                             && $plain_func !~ $names_reserved_for_perl_use_re;
 
-
         my @nonnull;
         my $args_assert_line = ( $flags !~ /m/ );
         my $has_depth = ( $flags =~ /W/ );
@@ -4089,7 +4089,6 @@ sub generate_proto_h {
         }
 
         $func = full_name($plain_func, $flags);
-
         $ret = "";
         $ret .= "$retval\n";
         $ret .= "$func(";
@@ -5192,7 +5191,7 @@ sub process_apidoc_lines {
     my $group_flags;
     for my $individual_line (@_) {
 
-        # Only apidoc lines do this; ignore the rest
+        # Only apidoc lines affect visibility; ignore the rest
         next unless $individual_line =~
                         m/ ^=for \s+ apidoc (\b | _defn | _item) \s* (.+) /x;
         my $type = $1;
@@ -5338,7 +5337,8 @@ sub find_undefs {
             # We handle two other symbol classes, both in the same way.  One
             # is where the names of things aren't standardized (or not all
             # platforms conform).  So we have created them on platforms where
-            # they don't exist.  The code in the header looks like:
+            # they wouldn't otherwise exist.  The code in the header looks
+            # like:
             #   #define this symbol it it isn't already defined
             #
             # An example is that platforms have different names for the S_foo
