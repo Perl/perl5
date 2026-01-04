@@ -254,7 +254,6 @@ my @unresolved_visibility_overrides = qw(
     BSDish
     BSD_SETPGRP
     BYTEORDER
-    BYTES_REMAINING_IN_WORD
     CALL_BLOCK_HOOKS
     CALL_FPTR
     CALLREGCOMP
@@ -1419,7 +1418,6 @@ my @unresolved_visibility_overrides = qw(
     KEEPCOPY_PAT_MOD
     KEEPCOPY_PAT_MODS
     KELVIN_SIGN
-    KERNEL
     KEY_abs
     KEY_accept
     KEY_ADJUST
@@ -3562,7 +3560,6 @@ my @unresolved_visibility_overrides = qw(
     NV_BODYLESS_UNION_
     o1_
     OFFUNISKIP_helper_
-    PADNAME_BASE_
     __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
@@ -3578,9 +3575,7 @@ my @unresolved_visibility_overrides = qw(
     shifted_octet_
     STATIC_ASSERT_STRUCT_BODY_
     STATIC_ASSERT_STRUCT_NAME_
-    SV_HEAD_
     SV_HEAD_DEBUG_
-    SV_HEAD_UNION_
     SVf_
     toFOLD_utf8_flags_
     toLOWER_utf8_flags_
@@ -5012,6 +5007,17 @@ sub get_and_set_cpp_visibility {
 
     my $file = $line->{source};
 
+    # We get called for both #define and #undef lines.  Determine which
+    my $is_define = $file =~ m! embed\.fnc | regen/opcodes !x
+                 || (   defined $line->{sub_type}
+                     && $line->{sub_type} eq '#define');
+    if (! $is_define && (   ! defined $line->{sub_type}
+                         || $line->{sub_type} ne '#undef'))
+    {
+        use Data::Dumper;
+        die "Unexpected line\n" . Dumper $line
+    }
+
     # The base cpp conditionals for every line in this file
     my %this_file_conds;
 
@@ -5081,6 +5087,13 @@ sub get_and_set_cpp_visibility {
 
   found_visibility:
 
+    # For the defining case, if there already has been an entry for $name,
+    # override it iff the new value is more widely visible.
+    #
+    # For the undefining case, we only undefine if we're pretty sure that it
+    # is appropriate to do so.  Any complications found mean we don't
+    # undefine.
+
     # Use the same algorithm as in set_flags_visibility() to see if this new
     # item has wider visibility than any stored (previously encountered) one.
     my $ordering;
@@ -5100,9 +5113,89 @@ sub get_and_set_cpp_visibility {
 
     my $stored_ordering = $visibility{$name}{cpp_ordering};
 
-    # Return without updating if the old visibility is wider than the new.
+    # Return without updating:
+    #   1) If the old visibility is wider than the new.
+    #   2) And if it is a #define, if the old is equal to the new.  This is
+    #      because the new won't replace it.  (But an #undef of the same
+    #      visibility could override the old.)
     return $cond_as_string if defined $stored_ordering
-                           && $stored_ordering > $ordering;
+                           && (   $stored_ordering > $ordering
+                               || (   $is_define
+                                   && $stored_ordering == $ordering));
+    if ($is_define == 0) {
+
+        # Here we are undefining a symbol.  If there are circumstances under
+        # which it doesn't get executed, we have to assume it doesn't, so that
+        # we consider the symbol to remain visible.  In case of uncertainty,
+        # we err on the side that the symbol remains visible.
+
+        # Do nothing if there is no symbol to undefine.
+        return $cond_as_string unless defined $visibility{$name};
+
+        # Do nothing if the symbol already isn't visible;
+        my $define_visibility_code = $visibility{$name}{cpp};
+        return $cond_as_string unless $define_visibility_code;
+
+        # Do nothing if we can't find information about the definition that
+        # would allow us to check the safety.
+        my $definer = $visibility{$name}{cpp_defining_object};
+        return $cond_as_string unless defined $definer;
+
+        # Don't undef if the symbol was created in a different file than this
+        # one.  Otherwise, it is unclear what is meant.
+        return $cond_as_string unless $definer->{source} eq $file;
+
+        # Do #undef if the #undef is unconditional or has the precise same
+        # constraints as the previous #define.  (This misses cases where
+        # things are the same but are in a different order.)
+        my $define_cond_as_string = $visibility{$name}{cpp_cond_as_string};
+        if (   $cond_as_string ne '1'
+            && $cond_as_string ne $define_cond_as_string)
+        {
+            # Here the stringified versions of the conditions for the #define
+            # and the #undef aren't the same.  That happens only if some of
+            # the values of the conditions are not known to us, and may not be
+            # knowable, as they may vary, dependent on the platform and
+            # Configuration.  What we're really after is "Does the #undef
+            # happen no matter what the #define conditions are set to?"  If
+            # the #undef's conditions include terms that aren't in the
+            # #define's, then the answer is that the #undef depends on
+            # something besides what the #define depends on, and so won't
+            # always be executed.  We could fairly easily rule that case out.
+            # But the rest is still hard.  One way, without anlayzing the
+            # expressions, would be to try every possible combination of the
+            # unresolved #define conditions and verify that whenever the
+            # #define happens, the #undef does too.  But that's a lot of work,
+            # and with very little payoff, since our existing headers don't
+            # tend to have conditions that actually would benefit from this.
+            #
+            # One case is easy, and does help with current data:  If the
+            # #undef conditions have ended up with a single value, we can
+            # simply see if that value is also in the #define conditions.
+            # Note that if the #define has extra conditions, it just means the
+            # #define happens under fewer circumstances than the #undef.
+            return $cond_as_string
+                    unless $cond_as_string =~
+                                    m/ ^ \s* (!)? (defined\(\w+\) ) \s* $ /xg;
+            my $complement = $1 // "";
+            my $term = $2;
+
+            # Not only must the term be in the #define conditions, but it must
+            # have the same type of being complemented.
+            if ($complement) {
+                return $cond_as_string
+                                  unless $define_cond_as_string =~ /\Q!$term/;
+            }
+            else {
+                return $cond_as_string
+                          unless $define_cond_as_string =~ / (?!!) \Q$term /x;
+            }
+        }
+
+        # Here, the #undef matches the #define, so the #undef happens, and the
+        # symbol is not visible.
+        $ordering = $visibility_code = 0;
+    }
 
     $visibility{$name}{cpp} = $visibility_code;
     $visibility{$name}{cpp_ordering} = $ordering;
@@ -5202,9 +5295,18 @@ sub find_undefs {
         my $lines = HeaderParser->new()->read_file($hdr)->lines();
         foreach my $line ($lines->@*) {
 
-            # We are here looking only for #defines and visibility
+            # We are here looking only for #defines, #undefs, and visibility
             # declarations
             next unless $line->{type} eq 'content';
+
+            # #undef's
+            if ($line->{sub_type} eq '#undef') {
+                my $flat = $line->{flat};
+                $flat =~ / ^ \s* \# \s* undef \s+ (\w+) \b /x;
+                my $name = $1;
+                get_and_set_cpp_visibility($name, $line);
+                next;
+            }
 
             # Everything but #defines.  All we care about are visibility
             # declarations.
