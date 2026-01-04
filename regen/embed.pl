@@ -70,11 +70,10 @@ $has_compat_macro{$_} = 1 for @have_compatibility_macros;
 my %perl_compats;   # Have 'perl_' prefix
 
 # This program inspects various top-level header files, except those on this
-# list.
+# list.  These are all machine-generated, or not relevant for our purposes.
 my %skip_files;
 $skip_files{$_} = 1 for qw(
                             charclass_invlists.inc
-                            config.h
                             embed.h
                             fakesdio.h
                             nostdio.h
