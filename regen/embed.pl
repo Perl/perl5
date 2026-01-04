@@ -4991,8 +4991,19 @@ sub find_undefs {
             # declarations
             next unless $line->{type} eq 'content';
 
-            # First, for #defines.
-            if ($line->{sub_type} eq '#define') {
+            # Everything but #defines.  All we care about are visibility
+            # declarations.
+            if ($line->{sub_type} ne '#define') {
+
+                next unless $line->{sub_type} eq 'text';
+
+                # Only comments have apidoc lines.
+                next unless $line->{flat} eq "";
+
+                next unless $line->{line} =~ / ^ =for \s+ apidoc /mx;
+                process_apidoc_lines($hdr, split /\n/, $line->{line});
+            }
+            else {
 
                 # HeaderParser stripped off most everything.
                 my $name = $line->{flat};
@@ -5038,17 +5049,6 @@ sub find_undefs {
                 }
 
                 $always_undefs{$name} = 1;
-            }
-            else {
-
-                # Otherwise check for a visibility declaration.
-                next unless $line->{sub_type} eq 'text';
-
-                # Only comments have apidoc lines.
-                next unless $line->{flat} eq "";
-
-                next unless $line->{line} =~ / ^ =for \s+ apidoc /mx;
-                process_apidoc_lines($hdr, split /\n/, $line->{line});
             }
         }
     }   # Done with headers
