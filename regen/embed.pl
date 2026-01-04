@@ -4861,12 +4861,6 @@ sub find_undefs {
         $visibility{$entry->embed->{name}} = $flags;
     }
 
-    # There are a few cases where we redefine a system function to use the
-    # 64-bit equivalent one that has a different name.  They currenty all look
-    # like this.  These symbols would show up as #defines that shouldn't have
-    # external visibility.
-    my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
-
     # Done with embed.fnc.  Now look through all the header files for their
     # symbols.
     foreach my $hdr (@header_list) {
@@ -4898,6 +4892,11 @@ sub find_undefs {
                 next unless $line->reduce_conds($cpp_ifdef_constraints_re,
                                                 \%cpp_ifdef_constraints);
 
+                # There are a few cases where we redefine a system function to
+                # use the 64-bit equivalent one that has a different name.
+                # They currenty all look like this.  These symbols would show
+                # up as #defines that shouldn't have external visibility.
+                my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
                 if (recurse_conds($has_64_pattern, $line->{cond}->@*)) {
                     $system_symbols{$name} = 1;
                     next;
