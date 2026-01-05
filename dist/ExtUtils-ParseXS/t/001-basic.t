@@ -589,40 +589,6 @@ EOF
 }
 
 {
-    # Basic check of an OUT parameter where the type is specified either
-    # in the signature or in an INPUT line
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |int
-        |f(marker1, OUT a, OUT int b)
-        |    int mymarker1
-        |    int a
-        |  CODE:
-        |    mymarker2
-        |
-EOF
-
-    tie *FH, 'Capture';
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    like($out, qr/^\s+int\s+a;\s*$/m, "OUT a");
-    like($out, qr/^\s+int\s+b;\s*$/m, "OUT b");
-
-}
-
-{
     # Basic check of a "usage: ..." string.
     # In particular, it should strip away type and IN/OUT class etc.
     # Also, some distros include a test of their usage strings which
@@ -1793,6 +1759,40 @@ EOF
             Q(<<'EOF'),
                 |void
                 |foo(IN int A, IN_OUT int B, OUT int C, OUTLIST int D, IN_OUTLIST int E)
+EOF
+            [  0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
+
+            [  0, qr/int\s+A\s*=\s*\(int\)SvIV\s*/,  "A decl"   ],
+            [  0, qr/int\s+B\s*=\s*\(int\)SvIV\s*/,  "B decl"   ],
+            [  0, qr/int\s+C\s*;/,                   "C decl"   ],
+            [  0, qr/int\s+D\s*;/,                   "D decl"   ],
+            [  0, qr/int\s+E\s*=\s*\(int\)SvIV\s*/,  "E decl"   ],
+
+            [  0, qr/\Qfoo(A, &B, &C, &D, &E)/,      "autocall" ],
+
+            [  0, qr/sv_setiv.*ST\(1\).*\bB\b/,      "set B"    ],
+            [  0, qr/\QSvSETMAGIC(ST(1))/,           "set magic B" ],
+            [  0, qr/sv_setiv.*ST\(2\).*\bC\b/,      "set C"    ],
+            [  0, qr/\QSvSETMAGIC(ST(2))/,           "set magic C" ],
+
+            [NOT, qr/\bEXTEND\b/,                    "NO extend"       ],
+
+            [  0, qr/\b\QTARGi((IV)D, 1);\E\s+\QST(0) = TARG;\E\s+\}\s+\Q++SP;/, "set D"    ],
+            [  0, qr/\b\Qsv_setiv(RETVALSV, (IV)E);\E\s+\QST(1) = RETVALSV;\E\s+\}\s+\Q++SP;/, "set E"    ],
+        ],
+
+        # The same set of tests, but this time the types of the variables
+        # are specified in INPUT lines rather than in the signature.
+        [
+            "IN OUT using INPUT",
+            Q(<<'EOF'),
+                |void
+                |foo(IN A, IN_OUT B, OUT C, OUTLIST D, IN_OUTLIST E)
+                |  int A
+                |  int B
+                |  int C
+                |  int D
+                |  int E
 EOF
             [  0, qr/\Qusage(cv,  "A, B, C, E")/,    "usage"    ],
 
