@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps::as_embedded_typemap()
+
 use strict;
 use warnings;
 

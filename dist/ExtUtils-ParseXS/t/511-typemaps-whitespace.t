@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+# Check that leading white space in typemap lines are handled correctly.
+
 use strict;
 use warnings;
 

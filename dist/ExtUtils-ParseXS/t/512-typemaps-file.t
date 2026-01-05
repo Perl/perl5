@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+# check creating and writing typemaps
+
 use strict;
 use warnings;
 

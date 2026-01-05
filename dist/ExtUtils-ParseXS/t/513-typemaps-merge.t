@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps::merge()
+
 use strict;
 use warnings;
 

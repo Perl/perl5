@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+# [ XXX I'm not clear what 'bare' refers to in the test file name ]
+
 use strict;
 use warnings;
 

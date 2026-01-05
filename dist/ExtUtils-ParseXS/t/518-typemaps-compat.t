@@ -1,12 +1,15 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+#
+# This test file is for making sure that the new EU::Typemaps
+# based typemap merging produces the same result as the old
+# EU::ParseXS code.
+
 use strict;
 use warnings;
 
 use Test::More;
-
-# This test is for making sure that the new EU::Typemaps
-# based typemap merging produces the same result as the old
-# EU::ParseXS code.
 
 use ExtUtils::Typemaps;
 use ExtUtils::ParseXS::Utilities qw(

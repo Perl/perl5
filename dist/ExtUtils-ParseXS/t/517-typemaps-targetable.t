@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+# test targetable() and targetable_legacy() methods
+
 use strict;
 use warnings;
 use Carp;

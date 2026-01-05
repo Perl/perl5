@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps:
+# check it built ok.
+
 use strict;
 BEGIN {
 	$|  = 1;

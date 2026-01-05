@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test ExtUtils::Typemaps::clone()
+
 use strict;
 use warnings;
 
