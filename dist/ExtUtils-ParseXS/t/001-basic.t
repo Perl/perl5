@@ -543,33 +543,6 @@ EOF
 
 
 {
-    # Test for 'No INPUT definition' error, particularly that the
-    # type is output correctly in the error message.
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |TYPEMAP: <<EOF
-        |Foo::Bar   T_FOOBAR
-        |EOF
-        |
-        |void foo(fb)
-        |        Foo::Bar fb
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        $pxs->process_file( filename => \$text, output => \*FH);
-    });
-
-    like($stderr, qr/Error: no INPUT definition for type 'Foo::Bar'/,
-                    "No INPUT definition");
-}
-
-{
     # C++ methods: check that a sub name including a class auto-generates
     # a THIS or CLASS parameter
 
@@ -768,6 +741,194 @@ EOF
     like $stderr, qr{\QError: further XSUB parameter seen after ellipsis},
                  "further XSUB parameter seen after ellipsis";
 }
+
+
+{
+    # Test very basic type lookups
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "known type",
+            Q(<<'EOF'),
+                |void
+                |foo(int abc)
+EOF
+            [  0, qr/^\s+int\s+abc\s+=\s+\Q(int)SvIV(ST(0))/m, "" ],
+        ],
+        [
+            "unknown type",
+            Q(<<'EOF'),
+                |void
+                |foo(blah abc)
+EOF
+            [ERR, qr/Could not find a typemap for C type 'blah'/, " " ],
+        ],
+        [
+            "custom type",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |myint   T_MYINT
+                |INPUT
+                |T_MYINT
+                |  $var = ($type)MySvIV($arg)
+                |EOF
+                |
+                |void
+                |foo(myint abc)
+EOF
+            [  0, qr/^\s+myint\s+abc\s+=\s+\Q(myint)MySvIV(ST(0))/m, "" ],
+        ],
+        [
+            "custom type with no template",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |myint   T_MYINT
+                |EOF
+                |
+                |void
+                |foo(myint abc)
+EOF
+            [ERR, qr/Error: no INPUT definition for type 'myint'/m, "" ],
+        ],
+
+        [
+            "known return type",
+            Q(<<'EOF'),
+                |int
+                |foo()
+EOF
+            [  0, qr/^\s+int\s+RETVAL\b/m, "decl" ],
+            [  0, qr/\bTARGi\b/m,          "set" ],
+        ],
+        [
+            "unknown return type",
+            Q(<<'EOF'),
+                |blah
+                |foo()
+EOF
+            [ERR, qr/Could not find a typemap for C type 'blah'/, " " ],
+        ],
+        [
+            "custom return type",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |myint   T_MYINT
+                |OUTPUT
+                |T_MYINT
+                |  my_sv_setiv($arg, ($type)$var);
+                |EOF
+                |
+                |myint
+                |foo()
+EOF
+            [  0, qr/^\s+myint\s+RETVAL\b/m, "decl" ],
+            [  0, qr/\b\Qmy_sv_setiv(RETVALSV, (myint)RETVAL)/m,  "set" ],
+        ],
+        [
+            "custom return type with no template",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |myint   T_MYINT
+                |EOF
+                |
+                |myint
+                |foo(abc)
+EOF
+            [ERR, qr/Error: no OUTPUT definition for type 'myint'/m, "" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
+    # Test very basic Perlish type lookups
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+        |TYPEMAP: <<EOF
+        |X::Y   T_XY
+        |P::Q   T_PQ
+        |
+        |INPUT
+        |T_XY
+        |  $var = ($type)MyXY($arg)
+        |
+        |OUTPUT
+        |T_XY
+        |  my_setxy($arg, ($type)$var);
+        |
+        |EOF
+EOF
+
+    my @test_fns = (
+        [
+            "known Perlish type",
+            Q(<<'EOF'),
+                |void
+                |foo(X::Y abc)
+EOF
+            [  0, qr/^\s+X__Y\s+abc\s+=\s+\Q(X__Y)MyXY(ST(0))/m, "" ],
+        ],
+        [
+            "unknown Perlish type",
+            Q(<<'EOF'),
+                |void
+                |foo(X::Blah abc)
+EOF
+            [ERR, qr/Could not find a typemap for C type 'X::Blah'/, "" ],
+        ],
+        [
+            "Perlish type with no template",
+            Q(<<'EOF'),
+                |void
+                |foo(P::Q abc)
+EOF
+            [ERR, qr/Error: no INPUT definition for type 'P::Q'/m, "" ],
+        ],
+
+        [
+            "known Perlish return type",
+            Q(<<'EOF'),
+                |X::Y
+                |foo()
+EOF
+            [  0, qr/^\s+X__Y\s+RETVAL\b/m, "decl" ],
+            [  0, qr/\b\Qmy_setxy(RETVALSV, (X__Y)RETVAL);/m, "set" ],
+        ],
+        [
+            "unknown Perlish return type",
+            Q(<<'EOF'),
+                |X::Blah
+                |foo()
+EOF
+            [ERR, qr/Could not find a typemap for C type 'X::Blah'/, " " ],
+        ],
+        [
+            "Perlish return type with no template",
+            Q(<<'EOF'),
+                |P::Q
+                |foo()
+EOF
+            [ERR, qr/Error: no OUTPUT definition for type 'P::Q'/m, "" ],
+        ],
+
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
 
 {
     # Test for C++ XSUB support: in particular,
