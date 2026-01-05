@@ -4246,7 +4246,6 @@ dist/ExtUtils-ParseXS/t/XSFalsePositive2.xs			Test file for ExtUtils::ParseXS te
 dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSloop.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSNoMap.xs
 dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.xs				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTightDirectives.xs			Test file for ExtUtils::ParseXS tests

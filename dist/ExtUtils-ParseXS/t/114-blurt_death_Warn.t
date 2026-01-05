@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 $| = 1;
-use Test::More tests =>  7;
+use Test::More tests =>  8;
 use File::Spec;
 use lib (-d 't' ? File::Spec->catdir(qw(t lib)) : 'lib');
 use ExtUtils::ParseXS;
@@ -131,6 +131,8 @@ $self->{line_no} = [];
     like( $err,
         qr/$message in $self->{in_filename}, line 20/,
         "Got expected death output",
+    );
+    is($stderr, undef, "no stderr noise in death",
     );
 }
 
