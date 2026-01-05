@@ -2515,9 +2515,12 @@ EOF
                 |void foo()
                 |    long alien1
                 |    int  alien2 = 123;
+                |    # see perl #112776
+                |    SV  *alien3 = sv_2mortal(newSV());
 EOF
             [  0, qr/long\s+alien1;\n/,      "alien1 decl" ],
             [  0, qr/int\s+alien2 = 123;\n/, "alien2 decl" ],
+            [  0, qr/SV \*\s+alien3 = \Qsv_2mortal(newSV());\E\n/, "alien3 decl" ],
         ],
 
         # Test for 'length(foo)' not legal in INPUT section
