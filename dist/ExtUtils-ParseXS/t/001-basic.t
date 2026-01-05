@@ -379,22 +379,6 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
 
 #####################################################################
 
-{ # tight cpp directives
-  my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Capture';
-  my $stderr = PrimitiveCapture::capture_stderr(sub { eval {
-    $pxs->process_file(
-      filename => 'XSTightDirectives.xs',
-      output => \*FH,
-      prototypes => 1);
-  } or warn $@ });
-  my $content = tied(*FH)->{buf};
-  my $count = 0;
-  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
-  is $stderr, undef, "No error expected from TightDirectives.xs";
-  is $count, 2, "Saw XS_MY_do definition the expected number of times";
-}
-
 {
     my $file = $INC{"ExtUtils/ParseXS.pm"};
     $file=~s!ExtUtils/ParseXS\.pm\z!perlxs.pod!;
@@ -6509,6 +6493,66 @@ EOF
                 |
                 |int foo()
                 |
+                |#endif
+EOF
+            [  0, qr{
+                        ^ \#ifdef\ USE_SHORT \n
+                        ^ \#define\ XSubPPtmpAAAA\ 1 \n
+
+                         .*
+
+                        ^ \s* short \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#elif\ USE_LONG \n
+                        ^ \#define\ XSubPPtmpAAAB\ 1 \n
+
+                         .*
+
+                        ^ \s* long \s+ RETVAL; \s* \n
+
+                         .*
+
+                        ^ \#else \n
+                        ^ \#define\ XSubPPtmpAAAC\ 1 \n
+
+                         .*
+
+                        ^ \s* int \s+ RETVAL; \s* \n
+
+                         .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc definitions"
+            ],
+
+            [  0, qr{
+                        ^ \#if\ XSubPPtmpAAAA \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAB \n
+                        .* newXS .*
+                        ^ \#endif \n
+                        ^ \#if\ XSubPPtmpAAAC \n
+                        .* newXS .*
+                        ^ \#endif \n
+
+                      }smx,
+                "has corrrect XSubPPtmpAAAA etc boot usage"
+            ],
+        ],
+
+        [
+            "CPP basic, tightly cuddled",
+            Q(<<'EOF'),
+                |#ifdef USE_SHORT
+                |short foo()
+                |#elif USE_LONG
+                |long foo()
+                |#else
+                |int foo()
                 |#endif
 EOF
             [  0, qr{

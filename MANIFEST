@@ -4247,7 +4247,6 @@ dist/ExtUtils-ParseXS/t/XSloop.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.xs				Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSTightDirectives.xs			Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.pm				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.xs				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSWarn.xs				ExtUtils::ParseXS tests
