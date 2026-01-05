@@ -11,7 +11,8 @@ use ExtUtils::Typemaps;
 use File::Spec;
 use File::Temp;
 
-my $datadir = -d 't' ? File::Spec->catdir(qw/t data/) : 'data';
+my $datadir = -d 't' ? File::Spec->catdir(qw/t test_typemaps/)
+                     : 'test_typemaps';
 
 sub slurp {
   my $file = shift;

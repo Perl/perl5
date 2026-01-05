@@ -20,7 +20,8 @@ use ExtUtils::ParseXS::Utilities qw(
 use ExtUtils::ParseXS::Constants;
 use File::Spec;
 
-my $path_prefix = File::Spec->catdir(-d 't' ? qw(t data) : qw(data));
+my $path_prefix = File::Spec->catdir(-d 't' ? qw(t test_typemaps)
+                                            : qw(test_typemaps));
 
 my @tests = (
   {

@@ -11,7 +11,8 @@ use Test::More tests => 6;
 use File::Spec;
 use ExtUtils::Typemaps::Cmd;
 
-my $datadir = -d 't' ? File::Spec->catdir(qw/t data/) : 'data';
+my $datadir = -d 't' ? File::Spec->catdir(qw/t test_typemaps/)
+                     : 'test_typemaps';
 my $libdir = -d 't' ? File::Spec->catdir(qw/t lib/) : 'lib';
 
 unshift @INC, $libdir;

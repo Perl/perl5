@@ -50,7 +50,7 @@ my $startdir  = cwd();
 
 {
     my $tm_obj = process_typemaps(
-        [ File::Spec->catfile("t", "data", "conflicting.typemap") ], '.');
+        [ File::Spec->catfile("t", "test_typemaps", "conflicting.typemap") ], '.');
     ok($tm_obj, "got typemap object");
 
     my $tm_entry = $tm_obj->get_typemap(ctype => 'double');
