@@ -22,7 +22,7 @@ push @INC, '.';
 
 use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 
-# See the comments about this in 001-basics.t
+# See the comments about this in 301-run-basics.t
 @INC = map { File::Spec->rel2abs($_) } @INC;
 
 #########################

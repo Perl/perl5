@@ -4214,6 +4214,7 @@ dist/ExtUtils-ParseXS/t/108-map_type.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/112-set_cond.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/113-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/114-blurt_death_Warn.t			ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/301-run-basic.t				See if ExtUtils::ParseXS can compile and run a file
 dist/ExtUtils-ParseXS/t/501-t-compile.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/510-t-bare.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/511-t-whitespace.t			ExtUtils::Typemaps tests
