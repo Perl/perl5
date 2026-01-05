@@ -12,6 +12,9 @@
 #    intrpvar.h
 #    perlvars.h
 #    regen/opcodes
+#    All top level .c files in MANIFEST
+#    Most top level .h files in MANIFEST, exception list %skip_files below
+#    Some pod files, listed in @pod_list below
 #
 # Accepts the standard regen_lib -q and -v args.
 #
@@ -108,7 +111,7 @@ my @pod_list = qw(
                    pod/perlreapi.pod
                  );
 
-# This is a list of symbols that are not documented to be available for
+# Below is a list of symbols that are not documented to be available for
 # modules to use, but are nevertheless currently not kept by embed.h from
 # being visible to the world.
 #
@@ -119,9 +122,8 @@ my @pod_list = qw(
 # There are two parts of the list; the second part contains the symbols which
 # have a trailing underscore; the first part those without.
 #
-# For all modules that aren't deliberating using particular names, all the
+# For all modules that aren't deliberately using particular names, all the
 # other symbols on it are namespace pollutants.
-
 my @unresolved_visibility_overrides = qw(
     _
     ABORT
@@ -3545,6 +3547,8 @@ my @needed_by_ext_re = qw(
 my @needed_by_ext = qw(
 );
 
+# Turn all the lists above into hashes
+
 my %unresolved_visibility_overrides;
 $unresolved_visibility_overrides{$_} = 1 for @unresolved_visibility_overrides;
 
@@ -4598,6 +4602,8 @@ sub process_apidoc_lines {
 
     my $group_flags;
     for my $individual_line (@_) {
+
+        # Only apidoc lines do this; ignore the rest
         next unless $individual_line =~
                         m/ ^=for \s+ apidoc (\b | _defn | _item) \s* (.+) /x;
         my $type = $1;
@@ -4612,17 +4618,20 @@ sub process_apidoc_lines {
             $flags = "";
         }
 
-        # These declarations may come in groups with the first line being
-        # 'apidoc', and the remaining ones 'apidoc_item'.  The flags parameter
-        # of the 'apidoc' line applies to the rest, though those may add flags
+        # apidoc lines may come in blocks with the first line being
+        # 'apidoc', and the remaining ones 'apidoc_item or apidoc_flag'.
+        # These are interpreted as groups with the flags parameter of the
+        # 'apidoc' line applying to the rest, though those may add flags
         # individually.
         if ($type ne  "_item" ) {
             $group_flags = $flags;
         }
         elsif ($flags) {
+
+            # Non-initial line with flags of its own; add them to the group's
             $flags .= $group_flags;
         }
-        else {
+        else {  # Non-initial line without flags of its own
             $flags = $group_flags;
         }
 
@@ -4641,15 +4650,30 @@ sub process_apidoc_lines {
 }
 
 sub find_undefs {
+    my $all = shift;    # embed.fnc data
 
-    # Find all the #defines that are visible to modules and which aren't
-    # marked as such nor whose names indicate they are reserved for Perl's
-    # use.  These are the symbols to #undef to prevent that visibility
+    # This program attempts to enforce macro visibility restrictions outside
+    # core.  This subroutine finds the symbols that need to be undefined when
+    # those restrictions aren't met.
     #
-    # First examine the passed in data from embed.fnc;
-    my $all = shift;
+    # A symbol can only be visible if its definition is in a #included header
+    # file.  So we only look for those definitions in header files, and
+    # embed.fnc, which is the data behind embed.h (and proto.h).  We care here
+    # only about the macros that aren't the short-names for functions.  (Those
+    # are handled by a different area of this file.)  Each function (since
+    # 0351a62, v5.37.1) is hidden from the outside on most platforms by
+    # default, unless overridden by a visibility flag.  #ifdefs can further
+    # restrict the visibility.
+
     foreach my $entry ($all->@*) {
+
+        # Only lines that have this are interesting to us.  Lines that don't
+        # have it are typically '#if' lines in the file.  (These are
+        # meaningful to HeaderParser which has already parsed them and used
+        # their information to create auxiliary data for the lines we do care
+        # about.)
         next unless $entry->embed;
+
         my $flags = $entry->embed->{flags};
         $flags =~ s/[^ACE]//g;
         next unless $flags;     # No visibility
@@ -4718,8 +4742,8 @@ sub find_undefs {
     # external visibility.
     my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
 
-    # Now look through all the header files for symbols that are visible to
-    # the outside world, and shouldn't be.
+    # Done with embed.fnc.  Now look through all the header files for their
+    # symbols.
     foreach my $hdr (@header_list) {
 
         # Parse the header
