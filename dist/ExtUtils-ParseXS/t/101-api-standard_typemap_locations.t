@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the standard_typemap_locations() function
+
 use strict;
 use warnings;
 use Test::More tests =>  5;

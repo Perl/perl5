@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the tidy_type() function
+
 use strict;
 use warnings;
 use Test::More;

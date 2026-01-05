@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the check_conditional_preprocessor_statements() function
+
 use strict;
 use warnings;
 use File::Spec;

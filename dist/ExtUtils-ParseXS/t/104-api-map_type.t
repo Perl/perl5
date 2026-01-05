@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the map_type() function
+
 use strict;
 use warnings;
 use Test::More tests =>  7;

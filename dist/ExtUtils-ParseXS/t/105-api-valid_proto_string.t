@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the valid_proto_string() function
+
 use strict;
 use warnings;
 use Test::More tests =>  6;

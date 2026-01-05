@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the trim_whitespace() function
+
 use strict;
 use warnings;
 use Test::More tests =>  5;

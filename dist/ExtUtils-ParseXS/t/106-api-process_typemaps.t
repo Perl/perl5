@@ -1,4 +1,7 @@
 #!/usr/bin/perl
+#
+# Test the process_typemaps() function
+
 use strict;
 use warnings;
 use Carp;
