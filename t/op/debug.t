@@ -177,7 +177,6 @@ CODE
     # Make sure we test calls from a non-DB package too
     # github #24001
     local $ENV{PERL5DB} = 1;
-    local $::TODO = "~~ uses call_sv which mishandles package DB calls";
     fresh_perl_is(<<'CODE', <<'EXPECT', { switches => [ "-d" ] }, "call_sv from DB");
 print "Before\n";
 DB::doit();
