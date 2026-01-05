@@ -1,4 +1,15 @@
 #!/usr/bin/perl
+#
+# 301-run-basic.t:
+#
+# Pass the file XSTest.xs through the XS parser and then through the C
+# compiler. Then execute the resulting object file.
+#
+# In general, tests which only need to examine whether the XS parser
+# has created the right C snippets should be added to the 0xx-parse-foo.t
+# test files. Only add tests here which need to be actually executed.
+#
+# Tests in the 3xx-run-foo.t namespace always run a C compiler
 
 use strict;
 use warnings;
