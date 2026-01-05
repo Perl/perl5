@@ -1,4 +1,16 @@
 #!/usr/bin/perl
+#
+# 001-parse-basic.t
+#
+# Test the parsing of an XSUB.
+#
+# This is the first 0xx file and doesn't really test much except that the
+# testing framework itself seems to work.
+#
+# The tests in this file, and indeed in all 0xx-parse-foo.t files, only
+# test parsing, and not compilation or execution of the C code. For the
+# latter, see 3xx-run-foo.t files.
+#
 
 use strict;
 use warnings;
