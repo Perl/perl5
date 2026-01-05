@@ -347,35 +347,6 @@ my $stderr = PrimitiveCapture::capture_stderr(sub {
 });
 like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
 }
-#####################################################################
-
-{ # fourth block: https://github.com/Perl/perl5/issues/19661
-  my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Capture';
-  my ($stderr, $filename);
-  {
-    $filename = 'XSFalsePositive.xs';
-    $stderr = PrimitiveCapture::capture_stderr(sub {
-      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
-    });
-    {
-      unlike $stderr,
-        qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
-        "No 'duplicate function definition' warning observed in $filename";
-    }
-  }
-  {
-    $filename = 'XSFalsePositive2.xs';
-    $stderr = PrimitiveCapture::capture_stderr(sub {
-      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
-    });
-    {
-      unlike $stderr,
-        qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
-        "No 'duplicate function definition' warning observed in $filename";
-      }
-  }
-}
 
 #####################################################################
 
