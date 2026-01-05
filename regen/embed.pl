@@ -16,6 +16,11 @@
 # Accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
+
+# See database of global and static function prototypes in embed.fnc
+# This is used to generate prototype headers under various configurations,
+# export symbols lists for different platforms, and macros to provide an
+# implicit interpreter context argument.
 #
 # We strive to not pollute the namespace of XS modules.  To that end, embed.h
 # (in cooperation with perl.h) keeps all macro names out of that namespace
@@ -3557,12 +3562,6 @@ $needed_by_ext{$_} = 1 for @needed_by_ext;
 my %always_undefs;
 my %non_ext_re_undefs = %needed_by_ext_re;
 my %non_ext_undefs = %needed_by_ext;
-
-# See database of global and static function prototypes in embed.fnc
-# This is used to generate prototype headers under various configurations,
-# export symbols lists for different platforms, and macros to provide an
-# implicit interpreter context argument.
-#
 
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
