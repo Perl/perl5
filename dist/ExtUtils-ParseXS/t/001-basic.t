@@ -543,38 +543,6 @@ EOF
 
 
 {
-    # Test for parameter parsing errors, including the effects of the
-    # -noargtype and -noinout switches
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void
-        |foo(char* a, length(a) = 0, IN c, +++)
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        eval {
-            $pxs->process_file( filename => \$text, output => \*FH,
-                                argtypes => 0, inout => 0);
-        }
-    });
-
-    like $stderr, qr{\QError: parameter type not allowed under -noargtypes},
-                 "no type under -noargtypes";
-    like $stderr, qr{\QError: length() pseudo-parameter not allowed under -noargtypes},
-                 "no length under -noargtypes";
-    like $stderr, qr{\QError: parameter IN/OUT modifier not allowed under -noinout},
-                 "no IN/OUT under -noinout";
-    like $stderr, qr{\QError: unparseable XSUB parameter: '+++'},
-                 "unparseable parameter";
-}
-
-{
     # Test very basic type lookups
 
     my $preamble = Q(<<'EOF');
@@ -3185,6 +3153,64 @@ EOF
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
 }
+
+
+{
+    # Basic tests of XSUB signature error processing
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "bad sig under -nofoo flags",
+            Q(<<'EOF'),
+                |void
+                |foo(+++)
+EOF
+            [ERR, qr{\QError: unparseable XSUB parameter: '+++},
+                    "unparseable" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns);
+}
+
+
+{
+    # Basic tests of XSUB signature error processing
+    # under -noargtypes, -noinout
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+        [
+            "bad sig under -nofoo flags",
+            Q(<<'EOF'),
+                |void
+                |foo(char* a, int length(a), IN c, +++)
+EOF
+            [ERR, qr{\QError: parameter type not allowed under -noargtypes},
+                    "-noargtypes" ],
+            [ERR, qr{\QError: length() pseudo-parameter not allowed under -noargtypes},
+                    "-noargtypes length" ],
+            [ERR, qr{\QError: parameter IN/OUT modifier not allowed under -noinout},
+                    "-noinout" ],
+        ],
+    );
+
+    test_many($preamble, 'XS_Foo_', \@test_fns, [ argtypes => 0, inout => 0 ]);
+}
+
 
 {
     # Test default parameter values and ellipses
