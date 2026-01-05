@@ -4201,6 +4201,7 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
 dist/ExtUtils-ParseXS/lib/perlxs.pod				Perl XS application programming interface
 dist/ExtUtils-ParseXS/lib/perlxstut.pod				Perl XS tutorial
 dist/ExtUtils-ParseXS/lib/perlxstypemap.pod			Perl XS C/Perl type conversion tools
+dist/ExtUtils-ParseXS/t/000-version.t				See if ExtUtils::ParseXS loads and has the right version num
 dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/102-trim_whitespace.t			ExtUtils::ParseXS tests
