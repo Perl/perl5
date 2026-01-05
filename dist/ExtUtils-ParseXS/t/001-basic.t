@@ -543,52 +543,6 @@ EOF
 
 
 {
-    # C++ methods: check that a sub name including a class auto-generates
-    # a THIS or CLASS parameter
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |TYPEMAP: <<EOF
-        |X::Y *    T_XY
-        |INPUT
-        |T_XY
-        |   $var = my_xy($arg)
-        |EOF
-        |
-        |int
-        |X::Y::new(marker1)
-        |    int mymarker1
-        |  CODE:
-        |
-        |int
-        |X::Y::f()
-        |  CODE:
-        |    mymarker2
-        |
-EOF
-
-    tie *FH, 'Capture';
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    like($out, qr/^\s*\Qchar *\E\s+CLASS = \Q(char *)SvPV_nolen(ST(0))\E$/m,
-                    "CLASS auto-generated");
-    like($out, qr/^\s*\QX__Y *\E\s+THIS = \Qmy_xy(ST(0))\E$/m,
-                    "THIS auto-generated");
-
-}
-
-{
     # Test for parameter parsing errors, including the effects of the
     # -noargtype and -noinout switches
 
@@ -890,7 +844,8 @@ EOF
                 |X::Y::new(int aaa)
 EOF
             [  0, qr/usage\(cv,\s+"CLASS, aaa"\)/,         "usage"    ],
-            [  0, qr/char\s*\*\s*CLASS\b/,                 "var decl" ],
+            [  0, qr/char\s*\*\s*CLASS = \Q(char *)SvPV_nolen(ST(0))\E/,
+                                                           "var decl" ],
             [  0, qr/\Qnew X::Y(aaa)/,                     "autocall" ],
         ],
 
