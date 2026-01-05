@@ -395,108 +395,6 @@ like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
   is $count, 2, "Saw XS_MY_do definition the expected number of times";
 }
 
-{ # Alias check
-  my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Capture';
-  my $erred;
-  my $stderr = PrimitiveCapture::capture_stderr(sub {
-      eval {
-        $pxs->process_file(
-          filename => 'XSAlias.xs',
-          output => \*FH,
-          prototypes => 1);
-      };
-      $erred = 1 if $@;
-      print STDERR "got eval err [$@]\n" if $@;
-    });
-  die $stderr if $erred; # don't hide stderr if code errors out
-
-  my $content = tied(*FH)->{buf};
-  my $count = 0;
-  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
-  is $stderr,
-    "Warning: aliases 'pox' and 'dox', 'lox' have"
-    . " identical values of 1 in XSAlias.xs, line 9\n"
-    . "  (If this is deliberate use a symbolic alias instead.)\n"
-    . "Warning: conflicting duplicate alias 'pox' changes"
-    . " definition from '1' to '2' in XSAlias.xs, line 10\n"
-    . "Warning: aliases 'docks' and 'dox', 'lox' have"
-    . " identical values of 1 in XSAlias.xs, line 11\n"
-    . "Warning: aliases 'xunx' and 'do' have identical values"
-    . " of 0 - the base function in XSAlias.xs, line 13\n"
-    . "Warning: aliases 'do' and 'xunx', 'do' have identical values"
-    . " of 0 - the base function in XSAlias.xs, line 14\n"
-    . "Warning: aliases 'xunx2' and 'do', 'xunx' have"
-    . " identical values of 0 - the base function in XSAlias.xs, line 15\n"
-    ,
-    "Saw expected warnings from XSAlias.xs in AUTHOR_WARNINGS mode";
-
-  my $expect = quotemeta(<<'EOF_CONTENT');
-         cv = newXSproto_portable("My::dachs", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::do", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-         cv = newXSproto_portable("My::docks", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::dox", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::lox", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::pox", XS_My_do, file, "$");
-         XSANY.any_i32 = 2;
-         cv = newXSproto_portable("My::xukes", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-         cv = newXSproto_portable("My::xunx", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-EOF_CONTENT
-  $expect=~s/(?:\\[ ])+/\\s+/g;
-  $expect=qr/$expect/;
-  like $content, $expect, "Saw expected alias initialization";
-
-  #diag $content;
-}
-{ # Alias check with no dev warnings.
-  my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Capture';
-  my $stderr = PrimitiveCapture::capture_stderr(sub {
-    $pxs->process_file(
-      filename => 'XSAlias.xs',
-      output => \*FH,
-      prototypes => 1,
-      author_warnings => 0);
-  });
-  my $content = tied(*FH)->{buf};
-  my $count = 0;
-  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
-  is $stderr,
-    "Warning: conflicting duplicate alias 'pox' changes"
-    . " definition from '1' to '2' in XSAlias.xs, line 10\n",
-    "Saw expected warnings from XSAlias.xs";
-
-  my $expect = quotemeta(<<'EOF_CONTENT');
-         cv = newXSproto_portable("My::dachs", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::do", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-         cv = newXSproto_portable("My::docks", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::dox", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::lox", XS_My_do, file, "$");
-         XSANY.any_i32 = 1;
-         cv = newXSproto_portable("My::pox", XS_My_do, file, "$");
-         XSANY.any_i32 = 2;
-         cv = newXSproto_portable("My::xukes", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-         cv = newXSproto_portable("My::xunx", XS_My_do, file, "$");
-         XSANY.any_i32 = 0;
-EOF_CONTENT
-  $expect=~s/(?:\\[ ])+/\\s+/g;
-  $expect=qr/$expect/;
-  like $content, $expect, "Saw expected alias initialization";
-
-  #diag $content;
-}
 {
     my $file = $INC{"ExtUtils/ParseXS.pm"};
     $file=~s!ExtUtils/ParseXS\.pm\z!perlxs.pod!;
@@ -5624,6 +5522,7 @@ EOF
                 |           Baz::baz = 3
                 |           boz = BOZ_VAL
                 |           buz => foo
+                |           baz => buz
                 |           biz => Baz::baz
 EOF
             [  0, qr{"Foo::foo",.*\n.*= 1;},
@@ -5636,6 +5535,8 @@ EOF
                    "has Foo::boz" ],
             [  0, qr{"Foo::buz",.*\n.*= 1;},
                    "has Foo::buz" ],
+            [  0, qr{"Foo::baz",.*\n.*= 1;},
+                   "has Foo::baz" ],
             [  0, qr{"Foo::biz",.*\n.*= 3;},
                    "has Foo::biz" ],
             [  0, qr{\QCV * cv;}, "has cv declaration" ],
@@ -5648,11 +5549,21 @@ EOF
                 |foo()
                 |    ALIAS:
                 |           bar = 2
+                |           baz = foo
+                |           boz = 0
 EOF
             [  0, qr{"Foo::foo",.*\n.*= 0;},
                    "has Foo::foo" ],
             [  0, qr{"Foo::bar",.*\n.*= 2;},
                    "has Foo::bar" ],
+            [  0, qr{"Foo::baz",.*\n.*= foo;},
+                   "has Foo::baz" ],
+            [  0, qr{"Foo::boz",.*\n.*= 0;},
+                   "has Foo::boz" ],
+            [ERR, qr{\QWarning: aliases 'boz' and 'foo' have identical\E
+                     \Q values of 0 - the base function in (input), line 10\E
+                    }x,
+                   "got dup warning" ],
         ],
 
         [
@@ -5740,6 +5651,69 @@ EOF
         ],
 
         [
+            "ALIAS warn twin identical values",
+            Q(<<'EOF'),
+                |void
+                |foo()
+                |    ALIAS: a1 =   1
+                |           a2 => a1
+                |           a3 =   1
+                |           a4 =   1
+EOF
+            [ERR, qr{\QWarning: aliases 'a3' and 'a1', 'a2'\E
+                     \Q have identical values of 1 in (input), line 9\E\n
+                     \Q  (If this is deliberate use a symbolic alias instead.)\E
+                     }x,
+                   "got a3 warning" ],
+            [ERR, qr{\QWarning: aliases 'a4' and 'a1', 'a2', 'a3'\E
+                     \Q have identical values of 1 in (input), line 10\E\n\z
+                     }x,
+                   "got a4 warning, no hint" ],
+        ],
+
+        [
+            "ALIAS warn identical 0 values",
+            Q(<<'EOF'),
+                |void
+                |foo()
+                |    ALIAS: b1  = 0
+                |           foo = 0
+                |           b2  = 0
+EOF
+            [ERR, qr{\QWarning: aliases 'b1' and 'foo'\E
+                     \Q have identical values of 0\E
+                     \Q - the base function in (input), line 7\E\n
+                     \Q  (If this is deliberate use a symbolic alias instead.)\E
+                     }x,
+                   "got b1 warning" ],
+            [ERR, qr{\QWarning: aliases 'foo' and 'b1', 'foo'\E
+                     \Q have identical values of 0\E
+                     \Q - the base function in (input), line 8\E\n
+                     }x,
+                   "got foo warning" ],
+            [ERR, qr{\QWarning: aliases 'b2' and 'b1', 'foo'\E
+                     \Q have identical values of 0\E
+                     \Q - the base function in (input), line 9\E\n\z
+                     }x,
+                   "got b2 warning, no hint" ],
+        ],
+
+        [
+            "ALIAS warn varying values",
+            Q(<<'EOF'),
+                |void
+                |foo()
+                |    ALIAS: c1 = 1
+                |           c1 = 2
+EOF
+            [ERR, qr{\QWarning: conflicting duplicate alias 'c1' changes\E
+                     \Q definition from '1' to '2' in\E
+                     \Q (input), line 8\E\n\z
+                     }x,
+                   "got c1 warning" ],
+        ],
+
+        [
             "ALIAS unparseable entry",
             Q(<<'EOF'),
                 |void
@@ -5772,6 +5746,41 @@ EOF
 
     test_many($preamble, 'boot_Foo', \@test_fns);
 }
+
+
+{
+    # Test ALIAS keyword - with AUTHOR_WARNINGS disabled
+
+    my $preamble = Q(<<'EOF');
+        |MODULE = Foo PACKAGE = Foo
+        |
+        |PROTOTYPES:  DISABLE
+        |
+EOF
+
+    my @test_fns = (
+
+        [
+            "ALIAS no warn identical values under no author tests",
+            Q(<<'EOF'),
+                |void
+                |foo()
+                |    ALIAS: bar = 1
+                |           baz = 1
+EOF
+            [  0, qr{"Foo::foo",.*\n.*= 0;},
+                   "has Foo::foo" ],
+            [  0, qr{"Foo::bar",.*\n.*= 1;},
+                   "has Foo::bar" ],
+            [  0, qr{"Foo::baz",.*\n.*= 1;},
+                   "has Foo::baz" ],
+            # and no warnings expected
+        ],
+    );
+
+    test_many($preamble, 'boot_Foo', \@test_fns, [ author_warnings => 0 ]);
+}
+
 
 {
     # Test ALIAS keyword  - XSUB body
