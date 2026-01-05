@@ -4247,7 +4247,6 @@ dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
 dist/ExtUtils-ParseXS/t/lib/PrimitiveCapture.pm			Primitive STDOUT/ERR capturing for tests
 dist/ExtUtils-ParseXS/t/lib/TestMany.pm				Tool for running XS parser tests
 dist/ExtUtils-ParseXS/t/lib/TypemapTest/Foo.pm			ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
 dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing
 dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSloop.xsh				Test file for ExtUtils::ParseXS tests
