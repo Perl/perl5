@@ -339,17 +339,6 @@ unless ($ENV{PERL_NO_CLEANUP}) {
 }
 #####################################################################
 
-{ # third block: broken typemap
-my $pxs = ExtUtils::ParseXS->new;
-tie *FH, 'Capture';
-my $stderr = PrimitiveCapture::capture_stderr(sub {
-  $pxs->process_file(filename => 'XSBroken.xs', output => \*FH);
-});
-like $stderr, '/Error: no INPUT definition/', "Exercise typemap error";
-}
-
-#####################################################################
-
 {
     my $file = $INC{"ExtUtils/ParseXS.pm"};
     $file=~s!ExtUtils/ParseXS\.pm\z!perlxs.pod!;
@@ -451,7 +440,7 @@ EOF
                 |void
                 |foo(myint abc)
 EOF
-            [ERR, qr/Error: no INPUT definition for type 'myint'/m, "" ],
+            [ERR, qr/Error: no INPUT definition for type 'myint', typekind 'T_MYINT'/m, "" ],
         ],
 
         [
