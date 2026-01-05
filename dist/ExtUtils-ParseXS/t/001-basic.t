@@ -515,30 +515,34 @@ EOF_CONTENT
         "The version in perlxs.pod should match the version of ExtUtils::ParseXS");
 }
 
+
 {
     # Basic test of using a string ref as the input file
 
-    my $pxs = ExtUtils::ParseXS->new;
-    tie *FH, 'Capture';
-    my $text = Q(<<'EOF');
+    my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
         |
-        |PROTOTYPES: DISABLE
+        |PROTOTYPES:  DISABLE
         |
-        |void f(int a)
-        |    CODE:
-        |        mycode;
 EOF
 
-    $pxs->process_file( filename => \$text, output => \*FH);
+    my @test_fns = (
+        [
+            "using string ref as input file",
+            Q(<<'EOF'),
+                |void f(int a)
+                |    CODE:
+                |        mycode;
+EOF
+            # We should have got some content, and the generated '#line' lines
+            # should be sensible rather than '#line 1 SCALAR(0x...)'.
+            [  0, qr/XS_Foo_f/,               "fn name"      ],
+            [  0, qr/#line \d+ "\(input\)"/,  "input #line"  ],
+            [  0, qr/#line \d+ "\(output\)"/, "output #line" ],
+        ],
+    );
 
-    my $out = tied(*FH)->content;
-
-    # We should have got some content, and the generated '#line' lines
-    # should be sensible rather than '#line 1 SCALAR(0x...)'.
-    like($out, qr/XS_Foo_f/,               "string ref: fn name");
-    like($out, qr/#line \d+ "\(input\)"/,  "string ref input #line");
-    like($out, qr/#line \d+ "\(output\)"/, "string ref output #line");
+    test_many($preamble, 'XS_Foo_', \@test_fns);
 }
 
 
