@@ -621,63 +621,6 @@ EOF
 }
 
 {
-    # Test for ellipsis in the signature.
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void
-        |foo(int mymarker1, char *b = "...", int c = 0, ...)
-        |    POSTCALL:
-        |      mymarker2;
-EOF
-
-    tie *FH, 'Capture';
-    $pxs->process_file( filename => \$text, output => \*FH);
-
-    my $out = tied(*FH)->content;
-
-    # trim the output to just the function in question to make
-    # test diagnostics smaller.
-    $out =~ s/\A .*? (int \s+ mymarker1 .*? mymarker2 ) .* \z/$1/xms
-        or die "couldn't trim output";
-
-    like $out, qr/\Qb = "..."/, "ellipsis: b has correct default value";
-    like $out, qr/b = .*SvPV/,  "ellipsis: b has correct non-default value";
-    like $out, qr/\Qc = 0/,     "ellipsis: c has correct default value";
-    like $out, qr/c = .*SvIV/,  "ellipsis: c has correct non-default value";
-    like $out, qr/\Qfoo(mymarker1, b, c)/, "ellipsis: wrapped function args";
-}
-
-{
-    # Test for bad ellipsis
-
-    my $pxs = ExtUtils::ParseXS->new;
-    my $text = Q(<<'EOF');
-        |MODULE = Foo PACKAGE = Foo
-        |
-        |PROTOTYPES: DISABLE
-        |
-        |void
-        |foo(a, ..., b)
-EOF
-
-    tie *FH, 'Capture';
-    my $stderr = PrimitiveCapture::capture_stderr(sub {
-        eval {
-            $pxs->process_file( filename => \$text, output => \*FH);
-        }
-    });
-
-    like $stderr, qr{\QError: further XSUB parameter seen after ellipsis},
-                 "further XSUB parameter seen after ellipsis";
-}
-
-
-{
     # Test very basic type lookups
 
     my $preamble = Q(<<'EOF');
@@ -3289,7 +3232,7 @@ EOF
 }
 
 {
-    # Test default parameter values
+    # Test default parameter values and ellipses
 
     my $preamble = Q(<<'EOF');
         |MODULE = Foo PACKAGE = Foo
@@ -3398,6 +3341,76 @@ EOF
             [ERR, qr/Error: missing default value expression for 's'/m,
                     "got expected err" ],
 
+        ],
+
+        # Ellipses
+
+        [
+            "empty ellipsis",
+            Q(<<'EOF'),
+                |void
+                |foo(...)
+EOF
+            [NOT, qr{if.*items}, "no checks" ],
+        ],
+
+        [
+            "ellipsis with 1 arg",
+            Q(<<'EOF'),
+                |void
+                |foo(int i, ...)
+EOF
+            [  0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qcroak_xs_usage(cv,  "i, ...");\E\n
+                       }x,
+                    "check" ],
+        ],
+        [
+            "ellipsis with 1 arg, 1 default arg",
+            Q(<<'EOF'),
+                |void
+                |foo(int i, int j = 0, ...)
+EOF
+            [  0, qr{\s+\Qif (items < 1)\E\n
+                       \s+\Qcroak_xs_usage(cv,  "i, j= 0, ...");\E\n
+                       }x,
+                    "check" ],
+            [  0, qr[\s+\Qif (items < 2)\E\n
+                       \s+\Qj = 0;\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qj = (int)SvIV(ST(1))\E\n
+                       ]x,
+                    "init" ],
+        ],
+        [
+            "ellipsis with an ellipsis in default arg value",
+            Q(<<'EOF'),
+                |void
+                |foo(char *s = "...", int j = 0, ...)
+EOF
+            [NOT, qr{croak_xs_usage}, "no check" ],
+            [  0, qr[\s+\Qif (items < 1)\E\n
+                       \s+\Qs = "...";\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qs = (char *)SvPV_nolen(ST(0))\E\n
+                       ]x,
+                    "init s" ],
+            [  0, qr[\s+\Qif (items < 2)\E\n
+                       \s+\Qj = 0;\E\n
+                       \s+\Qelse {\E\n
+                       \s+\Qj = (int)SvIV(ST(1))\E\n
+                       ]x,
+                    "init j" ],
+            [  0, qr{\Qfoo(s, j)}, "autocall args" ],
+        ],
+        [
+            "stuff after an ellipsis",
+            Q(<<'EOF'),
+                |void
+                |foo(..., int i)
+EOF
+            [ERR, qr{\QError: further XSUB parameter seen after ellipsis},
+                    "saw error" ],
         ],
     );
 
