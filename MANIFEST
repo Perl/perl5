@@ -4207,6 +4207,7 @@ dist/ExtUtils-ParseXS/t/002-parse-file-scope.t			test ExtUtils::ParseXS file-sco
 dist/ExtUtils-ParseXS/t/003-parse-file-scope-keywords.t		test ExtUtils::ParseXS file-scoped keywords syntax
 dist/ExtUtils-ParseXS/t/004-parse-xsub-declaration.t		test ExtUtils::ParseXS XSUB declaration syntax
 dist/ExtUtils-ParseXS/t/005-parse-parameters.t			test ExtUtils::ParseXS XSUB parameter syntax
+dist/ExtUtils-ParseXS/t/006-parse-return-type.t			test ExtUtils::ParseXS XSUB return type
 dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/102-trim_whitespace.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/103-tidy_type.t				ExtUtils::ParseXS tests
