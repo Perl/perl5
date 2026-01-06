@@ -175,7 +175,7 @@ EOF
             |      IN_OUT char * * e    =   1  + 2 ,   long length(b)   ,    \
             |      char* f="abc"  ,     g  =   0  ,   ...     )
 EOF
-            [  0, qr{usage\(cv,\s+\Q"a, b, c, e=   1  + 2, f=\"abc\", g  =   0, ...")},
+            [  0, qr{usage\(cv,\s+\Q"a, b, c, e=   1  + 2, f=\E\\"abc\\"\Q, g  =   0, ...")},
                 "" ],
         ]
     );
