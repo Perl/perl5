@@ -25,3 +25,26 @@ my $a = bless [] ;
 UNIVERSAL::isa $a, Jim ;
 EXPECT
 Can't locate package Joe for @Ｙ::ISA at - line 8.
+########
+use warnings 'missing_import';
+Some::Package->import;
+EXPECT
+########
+Some::Package->import("bar");
+EXPECT
+Attempt to call missing import method with arguments ("bar") via package "Some::Package" (Perhaps you forgot to load the package?) at - line 1.
+########
+use warnings 'missing_import';
+Some::Package->import("bar", "guff");
+EXPECT
+Attempt to call missing import method with arguments ("bar" ...) via package "Some::Package" (Perhaps you forgot to load the package?) at - line 2.
+########
+use warnings;
+no warnings 'missing_import';
+Some::Package->import("bar", "guff");
+EXPECT
+########
+use warnings 'missing_import';
+Some::Package->unimport(1.234);
+EXPECT
+Attempt to call missing unimport method with arguments ("1.234") via package "Some::Package" (Perhaps you forgot to load the package?) at - line 2.

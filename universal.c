@@ -451,10 +451,14 @@ XS(XS_UNIVERSAL_import_unimport)
          * depends on it has its own "no import" logic that produces better
          * warnings than this does. */
         if (strNE(class_pv,"_charnames"))
-            Perl_croak(aTHX_
-                "Attempt to call undefined %s method with arguments via package "
-                 "%" SVf_QUOTEDPREFIX " (Perhaps you forgot to load the package?)",
-                ix ? "unimport" : "import", SVfARG(ST(0)));
+            ck_warner_d(packWARN(WARN_MISSING_IMPORT),
+                        "Attempt to call missing %s method with arguments "
+                        "(%" SVf_QUOTEDPREFIX "%s) via package "
+                        "%" SVf_QUOTEDPREFIX " (Perhaps you forgot to load the package?)",
+                        ix ? "unimport" : "import",
+                        SVfARG(ST(1)),
+                        (items > 2 ? " ..." : ""),
+                        SVfARG(ST(0)));
     }
     XSRETURN_EMPTY;
 }
