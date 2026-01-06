@@ -11,7 +11,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 144;
+plan tests => 142;
 
 $a = {};
 bless $a, "Bob";
@@ -195,26 +195,6 @@ ok ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
 my $x = {}; bless $x, 'X';
 ok $x->isa('UNIVERSAL');
 ok $x->isa('UNIVERSAL');
-
-sub test_undefined_method {
-    my $method = shift;
-    my @message_components = (
-        q|Attempt to call undefined|,
-        q|method with arguments via package "Some::Package"|,
-        q|(Perhaps you forgot to load the package?)|,
-    );
-    my $message = join ' ' => (
-        $message_components[0],
-        $method,
-        @message_components[1,2],
-    );
-    my $pattern = qr/\Q$message\E/;
-
-    eval { Some::Package->$method("bar") };
-    like $@, $pattern, "Got expected pattern for undefined $method";
-}
-
-test_undefined_method($_) for (qw| import unimport |);
 
 # This segfaulted in a blead.
 fresh_perl_is('package Foo; Foo->VERSION;  print "ok"', 'ok');

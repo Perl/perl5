@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.76";
+our $VERSION = "1.77";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -132,6 +132,7 @@ our %Offsets = (
 
     # Warnings Categories added in Perl 5.043
     'experimental::signature_named_parameters'=> 156,
+    'missing_import'			=> 158,
 );
 
 our %Bits = (
@@ -178,6 +179,7 @@ our %Bits = (
     'malloc'				=> "\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [25]
     'misc'				=> "\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [12]
     'missing'				=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00", # [58]
+    'missing_import'			=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x40", # [79]
     'newline'				=> "\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [9]
     'non_unicode'			=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00", # [49]
     'nonchar'				=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00", # [50]
@@ -260,6 +262,7 @@ our %DeadBits = (
     'malloc'				=> "\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [25]
     'misc'				=> "\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [12]
     'missing'				=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00", # [58]
+    'missing_import'			=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80", # [79]
     'newline'				=> "\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", # [9]
     'non_unicode'			=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00", # [49]
     'nonchar'				=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x00\x00\x00\x00\x00\x00\x00", # [50]
@@ -316,8 +319,8 @@ our %NoOp = (
 
 # These are used by various things, including our own tests
 our $NONE				=  "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-our $DEFAULT				=  "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x01\x40\x05\x45\x55\x15\x55\x15"; # [2,4,22,23,25,48,55..57,60,61,63..70,72..78]
-our $LAST_BIT				=  158 ;
+our $DEFAULT				=  "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x01\x40\x05\x45\x55\x15\x55\x55"; # [2,4,22,23,25,48,55..57,60,61,63..70,72..79]
+our $LAST_BIT				=  160 ;
 our $BYTES				=  20 ;
 
 sub Croaker
@@ -918,79 +921,81 @@ The current hierarchy is:
          |
          +- closure
          |
-         +- deprecated ----+
-         |                 |
-         |                 +- deprecated::delimiter_will_be_paired
-         |                 |
-         |                 +- deprecated::dot_in_inc
-         |                 |
-         |                 +- deprecated::subsequent_use_version
-         |                 |
-         |                 +- deprecated::unicode_property_name
-         |                 |
-         |                 +- deprecated::version_downgrade
+         +- deprecated -----+
+         |                  |
+         |                  +- deprecated::delimiter_will_be_paired
+         |                  |
+         |                  +- deprecated::dot_in_inc
+         |                  |
+         |                  +- deprecated::subsequent_use_version
+         |                  |
+         |                  +- deprecated::unicode_property_name
+         |                  |
+         |                  +- deprecated::version_downgrade
          |
          +- exiting
          |
-         +- experimental --+
-         |                 |
-         |                 +- experimental::args_array_with_signatures
-         |                 |
-         |                 +- experimental::builtin
-         |                 |
-         |                 +- experimental::class
-         |                 |
-         |                 +- experimental::declared_refs
-         |                 |
-         |                 +- experimental::defer
-         |                 |
-         |                 +- experimental::extra_paired_delimiters
-         |                 |
-         |                 +- experimental::keyword_all
-         |                 |
-         |                 +- experimental::keyword_any
-         |                 |
-         |                 +- experimental::private_use
-         |                 |
-         |                 +- experimental::re_strict
-         |                 |
-         |                 +- experimental::refaliasing
-         |                 |
-         |                 +- experimental::regex_sets
-         |                 |
-         |                 +- experimental::signature_named_parameters
-         |                 |
-         |                 +- experimental::try
-         |                 |
-         |                 +- experimental::uniprop_wildcards
-         |                 |
-         |                 +- experimental::vlb
+         +- experimental ---+
+         |                  |
+         |                  +- experimental::args_array_with_signatures
+         |                  |
+         |                  +- experimental::builtin
+         |                  |
+         |                  +- experimental::class
+         |                  |
+         |                  +- experimental::declared_refs
+         |                  |
+         |                  +- experimental::defer
+         |                  |
+         |                  +- experimental::extra_paired_delimiters
+         |                  |
+         |                  +- experimental::keyword_all
+         |                  |
+         |                  +- experimental::keyword_any
+         |                  |
+         |                  +- experimental::private_use
+         |                  |
+         |                  +- experimental::re_strict
+         |                  |
+         |                  +- experimental::refaliasing
+         |                  |
+         |                  +- experimental::regex_sets
+         |                  |
+         |                  +- experimental::signature_named_parameters
+         |                  |
+         |                  +- experimental::try
+         |                  |
+         |                  +- experimental::uniprop_wildcards
+         |                  |
+         |                  +- experimental::vlb
          |
          +- glob
          |
          +- imprecision
          |
-         +- io ------------+
-         |                 |
-         |                 +- closed
-         |                 |
-         |                 +- exec
-         |                 |
-         |                 +- layer
-         |                 |
-         |                 +- newline
-         |                 |
-         |                 +- pipe
-         |                 |
-         |                 +- syscalls
-         |                 |
-         |                 +- unopened
+         +- io -------------+
+         |                  |
+         |                  +- closed
+         |                  |
+         |                  +- exec
+         |                  |
+         |                  +- layer
+         |                  |
+         |                  +- newline
+         |                  |
+         |                  +- pipe
+         |                  |
+         |                  +- syscalls
+         |                  |
+         |                  +- unopened
          |
          +- locale
          |
          +- misc
          |
          +- missing
+         |
+         +- missing_import
          |
          +- numeric
          |
@@ -1012,15 +1017,15 @@ The current hierarchy is:
          |
          +- scalar
          |
-         +- severe --------+
-         |                 |
-         |                 +- debugging
-         |                 |
-         |                 +- inplace
-         |                 |
-         |                 +- internal
-         |                 |
-         |                 +- malloc
+         +- severe ---------+
+         |                  |
+         |                  +- debugging
+         |                  |
+         |                  +- inplace
+         |                  |
+         |                  +- internal
+         |                  |
+         |                  +- malloc
          |
          +- shadow
          |
@@ -1028,29 +1033,29 @@ The current hierarchy is:
          |
          +- substr
          |
-         +- syntax --------+
-         |                 |
-         |                 +- ambiguous
-         |                 |
-         |                 +- bareword
-         |                 |
-         |                 +- digit
-         |                 |
-         |                 +- illegalproto
-         |                 |
-         |                 +- parenthesis
-         |                 |
-         |                 +- precedence
-         |                 |
-         |                 +- printf
-         |                 |
-         |                 +- prototype
-         |                 |
-         |                 +- qw
-         |                 |
-         |                 +- reserved
-         |                 |
-         |                 +- semicolon
+         +- syntax ---------+
+         |                  |
+         |                  +- ambiguous
+         |                  |
+         |                  +- bareword
+         |                  |
+         |                  +- digit
+         |                  |
+         |                  +- illegalproto
+         |                  |
+         |                  +- parenthesis
+         |                  |
+         |                  +- precedence
+         |                  |
+         |                  +- printf
+         |                  |
+         |                  +- prototype
+         |                  |
+         |                  +- qw
+         |                  |
+         |                  +- reserved
+         |                  |
+         |                  +- semicolon
          |
          +- taint
          |
@@ -1062,13 +1067,13 @@ The current hierarchy is:
          |
          +- untie
          |
-         +- utf8 ----------+
-         |                 |
-         |                 +- non_unicode
-         |                 |
-         |                 +- nonchar
-         |                 |
-         |                 +- surrogate
+         +- utf8 -----------+
+         |                  |
+         |                  +- non_unicode
+         |                  |
+         |                  +- nonchar
+         |                  |
+         |                  +- surrogate
          |
          +- void
 
