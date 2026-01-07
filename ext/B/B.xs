@@ -1046,10 +1046,7 @@ next(o)
                     STRLEN len;
                     U32 flags;
                     const char *pv = CopLABEL_len_flags(cCOPo, &len, &flags);
-                    ret = sv_2mortal(newSVpvn(pv, len));
-                    SvUTF8_off(ret);
-                    if (flags & SVf_UTF8)
-                        SvUTF8_on(ret);
+                    ret = newSVpvn_flags(pv, len, SVs_TEMP | (flags & SVf_UTF8));
                 }
 		break;
 	    case 43: /* B::COP::arybase */
