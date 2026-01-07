@@ -496,6 +496,12 @@ correctly, losing precision for large overloaded integer arguments that
 are not exactly representable as a Perl floating point value (NV).
 [GH #23956]
 
+=item *
+
+When a scalar variable used as the target of a filehandle is C<undef>'ed
+while being output, garbage bytes would be left in that scalar.
+[GH #24008]
+
 =back
 
 =head1 Known Problems

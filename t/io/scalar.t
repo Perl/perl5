@@ -12,7 +12,7 @@ use strict;
 use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 use Errno qw(EACCES);
 
-plan(128);
+plan(129);
 
 my $fh;
 my $var = "aaa\n";
@@ -527,4 +527,12 @@ SKIP:
     ok(seek($fh, 2**32, SEEK_SET), "seek to a large position");
     select((select($fh), ++$|)[0]);
     ok(!(print $fh "x"), "write to a large offset");
+}
+
+{ # GH #24008
+    open my $fh, '>', \my $str or die $!;
+    print $fh "xxxxx";
+    undef $str;
+    print $fh "y";
+    is($str, "\0\0\0\0\0y", "write to undef'ed variable");
 }
