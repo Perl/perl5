@@ -1,5 +1,18 @@
 package ExtUtils::ParseXS::CountLines;
+
+# Private helper module. It is used to tie a file handle, and
+# whenever lines are written to it, lines which match the
+#
+#   ExtUtils::ParseXS::CountLines->end_marker()
+#
+# token are replaced with:
+#
+#   #line NNN file.c
+#
+# where NNN is the count of lines written so far.
+
 use strict;
+use warnings;
 
 our $VERSION = '3.63';
 
@@ -40,7 +53,7 @@ sub PRINTF {
 sub DESTROY {
   # Not necessary if we're careful to end with a "\n"
   my $self = shift;
-  print {$self->{fh}} $self->{buffer};
+  print {$self->{fh}} $self->{buffer} if length $self->{buffer};
 }
 
 sub UNTIE {
