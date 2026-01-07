@@ -8,7 +8,7 @@ use warnings;
 
 use Exporter 'import';
 
-our $VERSION   = "1.009";
+our $VERSION   = "1.010";
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
 		     add_style walk_output compile reset_sequence );
@@ -146,7 +146,7 @@ sub concise_stashref {
 		    : ref\$h->{$k} eq 'GLOB' ? *{$h->{$k}}{CODE} || next
 		    : next;
 	reset_sequence();
-	print "FUNC: *", $name, "::", $k, "\n";
+	print $walkHandle "FUNC: *", $name, "::", $k, "\n";
 	my $codeobj = svref_2object($coderef);
 	next unless ref $codeobj eq 'B::CV';
 	eval { concise_cv_obj($order, $codeobj, $k) };
