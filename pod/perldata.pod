@@ -433,69 +433,117 @@ This rounds up the allocated buckets to the next power of two:
 =head2 Scalar value constructors
 X<scalar, literal> X<scalar, constant>
 
-Numeric literals are specified in any of the following floating point or
-integer formats:
-
- 12345
- 12345.67
- .23E-10             # a very small number
- 3.14_15_92          # a very important number
- 4_294_967_296       # underscore for legibility
- 0xff                # hex
- 0xdead_beef         # more hex
- 0377                # octal (only numbers, begins with 0)
- 0o12_345            # alternative octal (introduced in Perl 5.33.5)
- 0b011011            # binary
- 0x1.999ap-4         # hexadecimal floating point (the 'p' is required)
- 07.65p2             # octal floating point (the 'p' is required)
- 0o7.65p2            # alternative octal floating point
- 0b101.01p-1         # binary floating point (the 'p' is required)
-
-You are allowed to use underscores (underbars) in numeric literals
-between digits for legibility (but not multiple underscores in a row:
-C<23__500> is not legal; C<23_500> is).
-You could, for example, group binary
-digits by threes (as for a Unix-style mode argument such as 0b110_100_100)
-or by fours (to represent nibbles, as in 0b1010_0110) or in other groups.
+=head3 Numeric literals
 X<number, literal>
 
-String literals are usually delimited by either single or double
-quotes.  They work much like quotes in the standard Unix shells:
-double-quoted string literals are subject to backslash and variable
-substitution; single-quoted strings are not (except for C<\'> and
-C<\\>).  The usual C-style backslash rules apply for making
-characters such as newline, tab, etc., as well as some more exotic
-forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
+Integer literals are specified in any of the following formats:
+
+ 0
+ 12345
+ 4_294_967_296       # underscore for legibility
+ 0xff                # hex
+ 0Xdead_beef         # more hex
+ 0b01_1011           # binary
+ 0B110               # more binary
+ 0377                # octal (begins with 0 not followed by [bBxX])
+ 0o12_345            # alternative octal (introduced in Perl 5.33.5)
+
+As shown in the above examples, you are allowed to use underscores
+(underbars) between digits in numeric literals for legibility.  You
+could, for example, group binary digits by threes (as for a Unix-style
+mode argument such as 0b110_100_100) or by fours (to represent nibbles,
+as in 0b1010_0110) or in whatever groupings you want.  Multiple
+underscores in a row are tolerated, but warn: C<23__500> warns; C<23_500>
+is fine, so doesn't warn.
+
+If the value represented by the literal is too large to be precisely
+held by the platform, it is automatically converted to a floating point
+approximation.
+
+Otherwise, a floating point literal requires a dot and/or an exponent in it:
+
+ .10
+ 0.10
+ 12345.67
+ 3.14_15_92          # a very important number
+ 1e3                 # 1000
+ .23E-10             # a very small number
+ .23E+10             # a largish number
+
+Be careful with leading zeros.  A single zero is fine, but multiple ones
+cause Perl to think the dot is the concatenation operator, and the
+number before it is treated as an octal integer.
+
+  0.10               # Yields .1
+ 00.10               # Yields a string "010"
+ 00.10e3             # Yields a string "010000"
+
+With a single leading zero, Perl does accept float point literals expressed in
+binary, octal, or hexadecimal.  An exponent is required, but the
+exponent indicator characters are C<p> and C<P> instead of C<e> and
+C<E>.  The digits in the exponent are interpreted as being base 10
+(digits 0-9 are accepted), but the actual value is two raised to that
+power.  Thus
+
+   1e2  == 1 * 10-squared == 100
+ 0x1p2  == 1 *  2-squared ==   4
+  01p2  == 1 *  2-squared ==   4
+ 0b1p2  == 1 *  2-squared ==   4
+ 0x1p16 == 1 *  2-to-the-16th == 65536
+
+A fractional part is optional:
+
+ 0x1.999ap-4
+ 07.65p2
+ 0o7.65p2
+ 0b101.01p-1
+
+But, again, the C<p> or C<P> exponent is always required.  This type of
+exponent is forbidden except for binary, octal, and hex constants
+
+ 1.0p2    # Syntax error because is decimal
+
+These non-base 10 values are useful for accurately presenting floating
+point values, avoiding conversions to or from decimal floating point,
+and therefore avoiding possible loss in precision.  Notice that while
+most current platforms use the 64-bit IEEE 754 floating point, not all
+do.  Another potential source of (low-order) differences are the
+floating point rounding modes, which can differ between CPUs, operating
+systems, and compilers, and which Perl doesn't control.
+
+Here are some more examples:
+
+ 05p2       # 20
+ 05.0P2     # 20
+ 05.P2      # 20
+ 0b101p2    # 20
+ 0b1p10     # 1024
+ 0B1p11     # 2048
+ 5p2        # Illegal
+ 05e2       # Illegal
+ 0x5e2      # 1506; the 'e' is part of the number, not an exponent
+
+=head3 String literals
 X<string, literal>
 
-Hexadecimal, octal, or binary, representations in string literals
-(e.g. '0xff') are not automatically converted to their integer
-representation.  The hex() and oct() functions make these conversions
-for you.  See L<perlfunc/hex> and L<perlfunc/oct> for more details.
+String literals need to be delimited, usually by either single or double
+quotes.  These work much like quotes in the standard Unix shells:
+double-quoted string literals are subject to backslash and variable
+substitution; single-quoted strings are not (except for C<\'> and
+C<\\>).  The usual C-style backslash rules apply for making characters
+such as newline, tab, etc., as well as some more exotic forms.  See
+L<perlop/"Quote and Quote-like Operators"> for a list of these, as well
+as other delimiter forms.
 
-Hexadecimal floating point can start just like a hexadecimal literal,
-and it can be followed by an optional fractional hexadecimal part,
-but it must be followed by C<p>, an optional sign, and a power of two.
-The format is useful for accurately presenting floating point values,
-avoiding conversions to or from decimal floating point, and therefore
-avoiding possible loss in precision.  Notice that while most current
-platforms use the 64-bit IEEE 754 floating point, not all do.  Another
-potential source of (low-order) differences are the floating point
-rounding modes, which can differ between CPUs, operating systems,
-and compilers, and which Perl doesn't control.
-
-Octal and binary floating point numbers use the same format as hexadecimal
-floating point numbers, but limited to binary and octal digits, respectively.
-
-You can also embed newlines directly in your strings, i.e., they can end
-on a different line than they begin.  This is nice, but if you forget
-your trailing quote, the error will not be reported until Perl finds
-another line containing the quote character, which may be much further
-on in the script.  Variable substitution inside strings is limited to
-scalar variables, arrays, and array or hash slices.  (In other words,
-names beginning with $ or @, followed by an optional bracketed
-expression as a subscript.)  The following code segment prints out "The
-price is $Z<>100."
+You can also embed newlines directly in your strings, I<i.e.>, they can
+end on a different line than they begin.  This is nice, but if you
+forget your trailing quote, the error will not be reported until Perl
+finds another line containing the quote character, which may be much
+further on in the script.  Variable substitution inside strings is
+limited to scalar variables, arrays, and array or hash slices.  (In
+other words, names beginning with C<$> or C<@,> followed by an optional
+bracketed expression as a subscript.)  The following code segment prints
+out "The price is $Z<>100."
 X<interpolation>
 
     $Price = '$100';	# not interpolated
@@ -503,11 +551,28 @@ X<interpolation>
 
 There is no double interpolation in Perl, so the C<$100> is left as is.
 
-By default floating point numbers substituted inside strings use the
-dot (".")  as the decimal separator.  If C<use locale> is in effect,
-and POSIX::setlocale() has been called, the character used for the
-decimal separator is affected by the LC_NUMERIC locale.
-See L<perllocale> and L<POSIX>.
+String literals that look like decimal integer and floating point
+numbers are automatically converted to their numeric values when used in
+a context that expects a numeric value.
+
+By default floating point numbers use the dot (".")  as the decimal
+separator.  If C<use locale> is in effect, and POSIX::setlocale() has
+been called, the character used for the decimal separator is affected by
+the LC_NUMERIC locale.  See L<perllocale> and L<POSIX>.
+
+There is no automatic conversion of strings that look like hexadecimal,
+octal, or binary numbers (I<e.g.> C<0xff>).
+
+The L<C<oct>|perlfunc/oct EXPR> function can be used to convert
+integers.  Despite its name, it works on the other two bases as well if
+there is a prefix (like C<0x>) to indicate that this is not octal.  The
+L<C<hex>|perlfunc/hex> function converts from hex, assuming the string
+is a hexadecimal integer, ignoring any C<0x> prefix.
+
+To convert strings that look like non-decimal floating point numbers,
+use C<eval>.  (This method also works on integers.  This limitation is
+mainly due to ambiguity with the dot being interpreted as the
+concatenation operator.)
 
 =head3 Demarcated variable names using braces
 
