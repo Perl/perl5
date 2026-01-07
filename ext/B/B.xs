@@ -1037,7 +1037,15 @@ next(o)
 		    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv), SVs_TEMP);
 		break;
 	    case 42: /* B::COP::label */
-		ret = sv_2mortal(newSVpv(CopLABEL(cCOPo),0));
+                {
+                    STRLEN len;
+                    U32 flags;
+                    const char *pv = CopLABEL_len_flags(cCOPo, &len, &flags);
+                    ret = sv_2mortal(newSVpvn(pv, len));
+                    SvUTF8_off(ret);
+                    if (flags & SVf_UTF8)
+                        SvUTF8_on(ret);
+                }
 		break;
 	    case 43: /* B::COP::arybase */
 		ret = sv_2mortal(newSVuv(0));
