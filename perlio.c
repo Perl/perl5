@@ -1265,14 +1265,14 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	    SETERRNO(EINVAL, SS_IVCHAN);
 	    return 0;
 	}
+        /* Avoid calling SvCUR() on undef'ed SVs */
+        STRLEN const cur = SvOK(sv) ? SvCUR(sv) : 0;
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
-	    dst = SvGROW(sv, SvCUR(sv) + count + 1);
+	    dst = SvGROW(sv, cur + count + 1);
 	    offset = SvCUR(sv);
 	    s->posn = offset + count;
 	}
 	else {
-	    STRLEN const cur = SvCUR(sv);
-
             /* ensure we don't try to create ridiculously large
              * SVs on small platforms
              */
