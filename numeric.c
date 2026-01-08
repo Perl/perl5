@@ -296,7 +296,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }
 
     const char * const s0 = s;  /* Where the significant digits start */
-    UV value = 0;               /* Running total */
+    UV accumulated = 0;               /* Running total */
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -306,47 +306,47 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     switch (e - s) {
       default:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 6:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 5:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 4:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 3:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 2:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 1:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          value = (value << shift) | XDIGIT_VALUE(*s);
+          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 0:
           if (LIKELY(s >= e)) {
-              return value;
+              return accumulated;
           }
 
           /* If we get here, and the accumulated value is still 0, it is
@@ -354,7 +354,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
            * switch(),  These are common enough with these kinds of
            * binary-style numbers that it is worth this extra conditional to
            * continue absorbing them via the switch. */
-          if (value == 0) {
+          if (accumulated == 0) {
               goto redo_switch;
           }
 
@@ -371,7 +371,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     NV factor = 0.0;
 
     bool overflowed = FALSE;
-    NV value_nv = 0;
+    NV accumulated_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
     /* As long as the running total is less than this, the next digit will
@@ -388,31 +388,31 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                same thing) */
           redo: ;
             /* If there is room for this digit, accumulate it and repeat */
-            if (LIKELY(value <= max_div)) {
+            if (LIKELY(accumulated <= max_div)) {
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
                  * octal as well, so can be used here, without noticeably
                  * slowing those down (it does have unnecessary shifts, ANDSs,
                  * and additions for those) */
-                value = (value << shift) | XDIGIT_VALUE(*s);
+                accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
                 factor *= base;
                 continue;
             }
 
             /* Bah. We are about to overflow.  Instead, add the unoverflowed
-             * value to an NV that contains an approximation to the correct
+             * accumulated to an NV that contains an approximation to the correct
              * value.  Each time through the loop we have increased 'factor' so
              * that it gives how much the current approximation needs to
              * effectively be shifted to make room for this new value */
-            value_nv *= factor;
-            value_nv += (NV) value;
+            accumulated_nv *= factor;
+            accumulated_nv += (NV) accumulated;
 
             /* Then we keep accumulating digits, until all are parsed.  We
              * start over using the current input value as the initial digit.
-             * This will be added to 'value_nv' eventually, either when all
+             * This will be added to 'accumulated_nv' eventually, either when all
              * digits are gone, or we have overflowed this fresh start.  This
              * method uses the fewest floating point multiplications possible,
              * losing the least precision. */
-            value = XDIGIT_VALUE(*s);
+            accumulated = XDIGIT_VALUE(*s);
             factor = base;
             overflowed = TRUE;
             continue;
@@ -433,7 +433,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             /* To get here with the value so-far being 0 means we've only had
              * leading zeros, then an underscore.  We can continue with the
              * branchless switch() instead of this loop */
-            if (UNLIKELY(value == 0)) {
+            if (UNLIKELY(accumulated == 0)) {
                 goto redo_switch;
             }
             else {
@@ -453,14 +453,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     if (UNLIKELY(overflowed)) {
 
         /* Calculate the final overflow approximation */
-        value_nv *= factor;
-        value_nv += (NV) value;
+        accumulated_nv *= factor;
+        accumulated_nv += (NV) accumulated;
 
         *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
                |  PERL_SCAN_SILENT_NON_PORTABLE;
 
         if (result)
-            *result = value_nv;
+            *result = accumulated_nv;
 
         if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
             *flags |= PERL_SCAN_SILENT_OVERFLOW;
@@ -474,12 +474,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                                     : "octal");
         }
 
-        value = UV_MAX;
+        accumulated = UV_MAX;
         do_non_portable_output = true;
     }
     else {
 #if UVSIZE > 4
-        if (UNLIKELY(value > 0xffffffff)) {
+        if (UNLIKELY(accumulated > 0xffffffff)) {
             if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
                 do_non_portable_output = true;
             }
@@ -523,7 +523,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     /* s here points to e or to the first illegal character */
     *len_p = s - start;
-    return value;
+    return accumulated;
 }
 
 /*
