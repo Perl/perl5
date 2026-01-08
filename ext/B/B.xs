@@ -1189,6 +1189,49 @@ string(o, cv)
                 break;
             }
 
+        case OP_MULTIPARAM:
+        {
+            struct op_multiparam_aux *aux = (struct op_multiparam_aux *)cUNOP_AUXo->op_aux;
+            size_t min_args = aux->min_args;
+            size_t n_positional = aux->n_positional;
+            size_t n_named      = aux->n_named;
+            PADNAME **pns = PadnamelistARRAY(PadlistNAMES(CvPADLIST(cv)));
+
+            ret = newSVpvs_flags("", SVs_TEMP);
+            if(!n_positional && !n_named)
+                sv_catpvf(ret, "0"); /* omit trailing space */
+            else if(min_args < n_positional)
+                sv_catpvf(ret, "%zd..%zd ", min_args, n_positional);
+            else
+                sv_catpvf(ret, "%zd ", n_positional);
+
+            for(size_t i = 0; i < n_positional; i++) {
+                if(i)
+                    sv_catpvs(ret, ",");
+                PADOFFSET padix = aux->param_padix[i];
+                if(padix)
+                    sv_catpvf(ret, "%" PNf, PNfARG(pns[padix]));
+                else
+                    sv_catpvs(ret, "$");
+            }
+
+            for(size_t i = 0; i < n_named; i++) {
+                struct op_multiparam_named_aux *named = aux->named + i;
+                if(n_positional || i)
+                    sv_catpvs(ret, ",");
+
+                sv_catpvf(ret, ":%.*s", (int)named->namelen, named->namepv);
+            }
+
+            if(aux->slurpy) {
+                if(n_positional || n_named)
+                    sv_catpvf(ret, ",");
+                sv_catpvf(ret, "%" PNf, PNfARG(pns[aux->slurpy_padix]));
+            }
+
+            break;
+        }
+
         default:
             ret = sv_2mortal(newSVpvn("", 0));
         }
