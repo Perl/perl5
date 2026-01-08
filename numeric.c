@@ -306,6 +306,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     switch (e - s) {
       default:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        goto loop;
+
+      case 8:
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
@@ -345,21 +349,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         s++;
         /* FALLTHROUGH */
       case 0:
-        if (LIKELY(s >= e)) {
-            return accumulated;
-        }
-
-        /* If we get here, and the accumulated value is still 0, it is
-           * because there are more leading zeros than the cases of this
-         * switch(),  These are common enough with these kinds of
-         * binary-style numbers that it is worth this extra conditional to
-         * continue absorbing them via the switch. */
-        if (accumulated == 0) {
-            goto redo_switch;
-        }
-
-        break;
+        return accumulated;
     }   /* End of switch on the first so-many characters */
+
+  loop: ;
+    /* To get here, either the input is too long for the switch() statement
+     * above, or there was an unexpected character in the input (including
+     * an underscore, which is optionally acceptable). */
 
     /* The loop below accumulates the integral running total of the result,
      * digit by digit.  If this total overflows, it is added to an NV
