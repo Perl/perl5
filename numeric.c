@@ -306,7 +306,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     switch (e - s) {
       default:
           if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+          accumulated = XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
