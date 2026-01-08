@@ -1550,8 +1550,9 @@ or casts
 #  define CC_OCTDIGIT_                 24
 #  define CC_MNEMONIC_CNTRL_           25
 #  define CC_MAGICAL_                  26
+#  define CC_UNDERSCORE_               27
 
-/* Unused: 27-31
+/* Unused: 28-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -1659,6 +1660,10 @@ END_EXTERN_C
 #   define isUPPER_L1(c)  generic_isCC_(c, CC_UPPER_)
 #   define isWORDCHAR_L1(c) generic_isCC_(c, CC_WORDCHAR_)
 #   define isIDFIRST_L1(c) generic_isCC_(c, CC_IDFIRST_)
+
+#define isFOO_or_UNDERSCORE_(c, lookup_bit)                                   \
+    (FITS_IN_8_BITS(c) && ( PL_charclass[(U8) (c)]                            \
+                           & (CC_mask_(lookup_bit)|CC_mask_(CC_UNDERSCORE_))))
 
 #   ifdef EBCDIC
 #       define isASCII(c) generic_isCC_(c, CC_ASCII_)
