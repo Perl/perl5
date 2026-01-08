@@ -305,60 +305,60 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
   redo_switch:
     switch (e - s) {
       default:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 7:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 6:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 5:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 4:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 3:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 2:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 1:
-          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
-          accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-          s++;
-          /* FALLTHROUGH */
+        if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
+        /* FALLTHROUGH */
       case 0:
-          if (LIKELY(s >= e)) {
-              return accumulated;
-          }
+        if (LIKELY(s >= e)) {
+            return accumulated;
+        }
 
-          /* If we get here, and the accumulated value is still 0, it is
+        /* If we get here, and the accumulated value is still 0, it is
            * because there are more leading zeros than the cases of this
-           * switch(),  These are common enough with these kinds of
-           * binary-style numbers that it is worth this extra conditional to
-           * continue absorbing them via the switch. */
-          if (accumulated == 0) {
-              goto redo_switch;
-          }
+         * switch(),  These are common enough with these kinds of
+         * binary-style numbers that it is worth this extra conditional to
+         * continue absorbing them via the switch. */
+        if (accumulated == 0) {
+            goto redo_switch;
+        }
 
-          break;
+        break;
     }   /* End of switch on the first so-many characters */
 
     /* The loop below accumulates the integral running total of the result,
