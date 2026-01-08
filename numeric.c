@@ -425,13 +425,20 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     /* Loop through the characters */
     for (; s < e; s++) {
+
+        /* Handle non-trailing underscores when those are accepted */
+        if (UNLIKELY(*s == '_')) {
+            if (   ! allow_underscores
+                || ! underscore_valid(s, e, lookup_bit))
+            {
+                break;
+            }
+
+            ++s;
+        }
+
         if (Perl_isCC_by_bit(*s, lookup_bit)) {
-            /* Write it in this wonky order with a goto to attempt to get the
-               compiler to make the common case integer-only loop pretty tight.
-               With gcc seems to be much straighter code than old scan_hex.
-               (khw suspects that adding a LIKELY() just above would do the
-               same thing) */
-          redo: ;
+
             /* If there is room for this digit, accumulate it and repeat */
             if (LIKELY(accumulated <= max_div)) {
                 /* Note XDIGIT_VALUE() is branchless, works on binary and
@@ -462,15 +469,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             overflowed = TRUE;
             continue;
         } /* End of handling legal digit */
-
-        /* Handle non-trailing underscores when those are accepted */
-        if (   UNLIKELY(*s == '_')
-            && allow_underscores
-            && underscore_valid(s, e, lookup_bit))
-        {
-            ++s;
-            goto redo;
-        }
 
         /* We get here when done with the parse, or it got interrupted by a
          * non-digit or a digit that is outside the bounds of the base, like a
