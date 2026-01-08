@@ -378,6 +378,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     /* check_underscore() succeeds only if the next char is a legal digit */
     s++;
 
+    /* If we haven't seen any non-zero digits yet, we can jump back in to the
+     * switch() without fear of exceeding the portability limits */
+    if (UNLIKELY(accumulated == 0)) {
+        goto redo_switch;
+    }
+
     /* Here s points to a legal digit */
 
   loop: ;
