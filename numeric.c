@@ -355,10 +355,18 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         return accumulated;
     }   /* End of switch on the first so-many characters */
 
-  loop: ;
-    /* To get here, either the input is too long for the switch() statement
-     * above, or there was an unexpected character in the input (including
+    /* To get here, there was an unexpected character in the input (including
      * an underscore, which is optionally acceptable). */
+    if (*s != '_' || ! allow_underscores) {
+        goto done_parse;
+    }
+
+    /* An acceptable initial underscore has to have the right flag */
+    if (s == s0 && (input_flags & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY)) {
+        goto done_parse;
+    }
+
+  loop: ;
 
     /* The loop below accumulates the integral running total of the result,
      * digit by digit.  If this total overflows, it is added to an NV
@@ -419,11 +427,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         if (   UNLIKELY(*s == '_')
             && s < e - 1
             && allow_underscores
-            && Perl_isCC_by_bit(s[1], class_bit)
-            && (   LIKELY(s > s0)
-                   /* Including initial underscores if those are accepted */
-                || UNLIKELY(! (  input_flags
-                               & PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES_ONLY))))
+            && Perl_isCC_by_bit(s[1], class_bit))
         {
             ++s;
 
@@ -444,6 +448,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
          * loop */
         break;
     }   /* End of parsing loop */
+
+  done_parse:
 
     bool do_non_portable_output = false;
 
