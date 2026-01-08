@@ -302,9 +302,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     const char * const s0 = s;  /* Where the significant digits start */
     UV accumulated = 0;               /* Running total */
-    bool overflowed = FALSE;
-    NV accumulated_nv = 0;
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    bool do_non_portable_output = false;
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -409,16 +408,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * and 's' points to the next character.
      *
      * The loop below accumulates the integral running total of the result,
-     * digit by digit.  If this total overflows, it is added to an NV
-     * approximation, and the loop starts over, looking at the next batch of
-     * digits, until they overflow, and so on.
+     * digit by digit.
      *
-     * In overflows, this keeps track of how much to multiply the overflowed NV
-     * by as we continue to parse the remaining digits */
-    NV factor;
-    factor = 0.0;
-
-    /* As long as the running total is less than this, the next digit will
+     * As long as the running total is less than this, the next digit will
      * fit. */
     UV max_div;
     max_div = UV_MAX >> shift;
@@ -441,68 +433,22 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             ++s;
         }
 
-        /* If there is room for this digit, accumulate it and repeat */
-        if (LIKELY(accumulated <= max_div)) {
-        /* Note XDIGIT_VALUE() is branchless, works on binary and octal as
+        /* If would overflow, handle elsewhere */
+        if (UNLIKELY(accumulated > max_div)) {
+            goto overflowed;
+        }
+
+        /* Otherwise, there is room for this digit; accumulate it and repeat
+         *
+         * Note XDIGIT_VALUE() is branchless, works on binary and octal as
          * well, so can be used here, without noticeably slowing those down
          * (it does have unnecessary shifts, ANDSs, and additions for those)
          * */
         accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-        factor *= base;
-        continue;
-        }
-
-        /* Bah. We are about to overflow.  Instead, add the unoverflowed
-         * accumulated to an NV that contains an approximation to the correct
-         * value.  Each time through the loop we have increased 'factor' so
-         * that it gives how much the current approximation needs to
-         * effectively be shifted to make room for this new value */
-        accumulated_nv *= factor;
-        accumulated_nv += (NV) accumulated;
-
-        /* Then we keep accumulating digits, until all are parsed.  We
-         * start over using the current input value as the initial digit.
-         * This will be added to 'accumulated_nv' eventually, either when all
-         * digits are gone, or we have overflowed this fresh start.  This
-         * method uses the fewest floating point multiplications possible,
-         * losing the least precision. */
-        accumulated = XDIGIT_VALUE(*s);
-        factor = base;
-        overflowed = TRUE;
     }   /* End of parsing loop */
 
   done_parse:
 
-    bool do_non_portable_output = false;
-
-    if (UNLIKELY(overflowed)) {
-
-        /* Calculate the final overflow approximation */
-        accumulated_nv *= factor;
-        accumulated_nv += (NV) accumulated;
-
-        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
-               |  PERL_SCAN_SILENT_NON_PORTABLE;
-
-        if (result)
-            *result = accumulated_nv;
-
-        if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
-            *flags |= PERL_SCAN_SILENT_OVERFLOW;
-        }
-        else if (ckWARN_d(WARN_OVERFLOW)) {
-            warner(packWARN(WARN_OVERFLOW),
-                    "Integer overflow in %s number",
-                    (base == 16) ? "hexadecimal"
-                                : (base == 2)
-                                    ? "binary"
-                                    : "octal");
-        }
-
-        accumulated = UV_MAX;
-        do_non_portable_output = true;
-    }
-    else {
 #if UVSIZE > 4
         if (UNLIKELY(accumulated > 0xffffffff)) {
             if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
@@ -511,7 +457,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
         }
 #endif
-    }
 
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
         if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
@@ -549,6 +494,75 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     /* s here points to e or to the first illegal character */
     *len_p = s - start;
     return accumulated;
+
+  overflowed: ;
+
+    /* Bah. We are about to overflow.  Instead, place the unoverflowed
+     * accumulated value in an NV that will contain an approximation to the
+     * correct value. */
+    NV accumulated_nv = (NV) accumulated;
+
+    /* In overflows, this keeps track of how much to multiply the overflowed NV
+     * by as we continue to parse the remaining digits */
+    NV factor = 1.0;
+
+    /* Then we continue parsing, starting over with a new batch of digits to
+     * accumulate */
+    UV this_batch_accumulated = 0;
+    for (; s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits); s++)
+    {
+        /* Handle non-trailing underscores when those are accepted */
+        if (UNLIKELY(*s == '_')) {
+            if (   ! allow_underscores
+                || ! underscore_valid(s, e, lookup_bit))
+            {
+                break;
+            }
+
+            ++s;
+        }
+
+        if (LIKELY(this_batch_accumulated <= max_div)) {
+            this_batch_accumulated =
+                            (this_batch_accumulated << shift) | XDIGIT_VALUE(*s);
+            factor *= base;
+            continue;
+        }
+
+        /* Bah. We are about to overflow again.  Instead, add this batch to
+         * the NV, and start a new batch */
+        accumulated_nv *= factor;
+        accumulated_nv += (NV) this_batch_accumulated;
+
+        this_batch_accumulated = XDIGIT_VALUE(*s);
+        factor = base;
+    }
+
+    /* Calculate the final overflow approximation */
+    accumulated_nv *= factor;
+    accumulated_nv += (NV) accumulated;
+
+    *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+           |  PERL_SCAN_SILENT_NON_PORTABLE;
+
+    if (result)
+        *result = accumulated_nv;
+
+    if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
+        *flags |= PERL_SCAN_SILENT_OVERFLOW;
+    }
+    else if (ckWARN_d(WARN_OVERFLOW)) {
+        warner(packWARN(WARN_OVERFLOW),
+                "Integer overflow in %s number",
+                (base == 16) ? "hexadecimal"
+                            : (base == 2)
+                                ? "binary"
+                                : "octal");
+    }
+
+    accumulated = UV_MAX;
+    do_non_portable_output = true;
+    goto done_parse;
 }
 
 /*
