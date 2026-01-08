@@ -297,6 +297,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     const char * const s0 = s;  /* Where the significant digits start */
     UV accumulated = 0;               /* Running total */
+    bool overflowed = FALSE;
+    NV accumulated_nv = 0;
+    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -364,15 +367,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      *
      * In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
-    NV factor = 0.0;
-
-    bool overflowed = FALSE;
-    NV accumulated_nv = 0;
-    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
+    NV factor;
+    factor = 0.0;
 
     /* As long as the running total is less than this, the next digit will
      * fit. */
-    UV max_div = UV_MAX >> shift;
+    UV max_div;
+    max_div = UV_MAX >> shift;
 
     /* Loop through the characters */
     for (; s < e; s++) {
