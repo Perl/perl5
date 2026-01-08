@@ -236,6 +236,11 @@ Perl_output_non_portable(pTHX_ const U8 base)
     ck_warner(packWARN(WARN_PORTABLE), "%s non-portable", which);
 }
 
+/* An acceptable underscore must not be trailing, which also implies there
+ * must be a legal digit after it */
+#define underscore_valid(s, e, lookup_bit)                                  \
+                            (s < e - 1 && Perl_isCC_by_bit(s[1], lookup_bit))
+
 UV
 Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
@@ -425,9 +430,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
         /* Handle non-trailing underscores when those are accepted */
         if (   UNLIKELY(*s == '_')
-            && s < e - 1
             && allow_underscores
-            && Perl_isCC_by_bit(s[1], class_bit))
+            && underscore_valid(s, e, class_bit))
         {
             ++s;
 
