@@ -314,6 +314,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     switch (e - s) {
       default:
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        accumulated = XDIGIT_VALUE(*s);
+        s++;
         goto loop;
 
       case 8:
@@ -384,13 +386,16 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         goto redo_switch;
     }
 
-    /* Here s points to a legal digit */
+    /* Here s points to a legal digit.  We can save some operations by
+     * accumulating it now, and positioning the loop to start on the next
+     * character (whose value is unknown here). */
+    accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+    s++;
 
   loop: ;
 
     /* Here, 'accumulated' contains the running total so far in the input,
-     * and 's' points to the next character, which is known to be a legal
-     * digit
+     * and 's' points to the next character.
      *
      * The loop below accumulates the integral running total of the result,
      * digit by digit.  If this total overflows, it is added to an NV
