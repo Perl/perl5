@@ -62,7 +62,7 @@ static const char* const opclassnames[] = {
 };
 
 static const size_t opsizes[] = {
-    0,	
+    0,
     sizeof(OP),
     sizeof(UNOP),
     sizeof(BINOP),
@@ -647,7 +647,7 @@ formfeed()
     PPCODE:
 	PUSHs(make_sv_object(aTHX_ GvSV(gv_fetchpvs("\f", GV_ADD, SVt_PV))));
 
-long 
+long
 amagic_generation()
     CODE:
 	RETVAL = PL_amagic_generation;
@@ -728,7 +728,7 @@ opnumber(name)
 const char *	name
 CODE:
 {
- int i; 
+ int i;
  IV  result = -1;
  ST(0) = sv_newmortal();
  if (strBEGINs(name,"pp_"))
@@ -1447,7 +1447,7 @@ SvTRUE(sv)
 bool
 SvTRUE_nomg(sv)
     B::SV   sv
-	
+
 MODULE = B	PACKAGE = B::IV		PREFIX = Sv
 
 IV
@@ -1503,7 +1503,7 @@ MODULE = B	PACKAGE = B::IV
 
 #define PVAV_max_ix	sv_SSize_tp | STRUCT_OFFSET(struct xpvav, xav_max)
 
-#define PVCV_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_stash) 
+#define PVCV_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_stash)
 #define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv_u.xcv_gv)
 #define PVCV_file_ix	sv_char_pp | STRUCT_OFFSET(struct xpvcv, xcv_file)
 #define PVCV_outside_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_outside)
