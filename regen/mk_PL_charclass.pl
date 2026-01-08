@@ -69,6 +69,7 @@ my %bit_names = (
                          ord(']'), ord('^'), ord('`'), ord('|'), ord('~'),
                          ord('$'),
                        ],
+            UNDERSCORE => [ ord('_') ],
 );
 
 sub uniques {

@@ -281,6 +281,8 @@
 #   undef case_98_SBOX32
 #   undef case_99_SBOX32
 #   undef case_9_SBOX32
+#   undef CC_UNDERSCORE_
+#   undef isFOO_or_UNDERSCORE_
 #   undef IV_BITS
 #   undef USE_STDIO
 #   undef UV_BITS
