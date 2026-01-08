@@ -1033,8 +1033,13 @@ next(o)
                                             - (char*)tbl,
                                             SVs_TEMP);
 		}
-		else
-		    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv), SVs_TEMP);
+                else {
+                    U32 label_utf8 = (cPVOPo->op_private & OPpPV_IS_UTF8)
+                        ? SVf_UTF8 : 0;
+
+                    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv),
+                                         SVs_TEMP | label_utf8);
+                }
 		break;
 	    case 42: /* B::COP::label */
                 {
