@@ -371,9 +371,22 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         goto done_parse;
     }
 
+    if (! underscore_valid(s, e, class_bit)) {
+        goto done_parse;
+    }
+
+    /* check_underscore() succeeds only if the next char is a legal digit */
+    s++;
+
+    /* Here s points to a legal digit */
+
   loop: ;
 
-    /* The loop below accumulates the integral running total of the result,
+    /* Here, 'accumulated' contains the running total so far in the input,
+     * and 's' points to the next character, which is known to be a legal
+     * digit
+     *
+     * The loop below accumulates the integral running total of the result,
      * digit by digit.  If this total overflows, it is added to an NV
      * approximation, and the loop starts over, looking at the next batch of
      * digits, until they overflow, and so on.
