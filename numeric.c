@@ -313,6 +313,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
   redo_switch:
     switch (e - s) {
       default:
+
+        /* Leading zeros are common enough to deserve a special case when
+         * there are more digits than we handle in the switch.  Strip them
+         * off, and try again */
+        if (UNLIKELY(*s == '0')) {
+            do {
+                s++;
+            } while (s < e && *s == '0');
+            goto redo_switch;
+        }
+
         if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
@@ -458,16 +469,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             && underscore_valid(s, e, lookup_bit))
         {
             ++s;
-
-            /* To get here with the value so-far being 0 means we've only had
-             * leading zeros, then an underscore.  We can continue with the
-             * branchless switch() instead of this loop */
-            if (UNLIKELY(accumulated == 0)) {
-                goto redo_switch;
-            }
-            else {
-                goto redo;
-            }
+            goto redo;
         }
 
         /* We get here when done with the parse, or it got interrupted by a
