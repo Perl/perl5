@@ -36,4 +36,21 @@ sub f {
     is($label, "π", "UTF8 label correctly UTF8");
 }
 
+sub f2 {
+    goto π;
+    π:1;
+}
+
+{
+    # github 24040 - goto
+    my $f2 = B::svref_2object(\&f2);
+    my $op = $f2->START;
+    while ($op && $op->name ne 'goto') {
+        $op = $op->next;
+    }
+    $op or die "goto Not found";
+    my $label = $op->pv;
+    is($label, "π", "goto UTF8 label correctly UTF8");
+}
+
 done_testing();
