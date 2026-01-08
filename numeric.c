@@ -272,7 +272,14 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      *      ...
      */
 
-    const I32 input_flags = *flags;
+#if UVSIZE > 4
+    I32 input_flags = *flags;
+#else
+    /* Only overflow can be non-portable on this platform, and that turns off
+     * this flag unconditionally */
+    I32 input_flags = *flags | PERL_SCAN_SILENT_NON_PORTABLE;
+#endif
+
     /* Clear output flags; unlikely to find a problem that sets them */
     *flags = 0;
 
@@ -303,7 +310,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     const char * const s0 = s;  /* Where the significant digits start */
     UV accumulated = 0;               /* Running total */
     const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
-    bool do_non_portable_output = false;
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -450,14 +456,22 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
   done_parse:
 
 #if UVSIZE > 4
-    if (UNLIKELY(accumulated > 0xffffffff)) {
-        if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
-            do_non_portable_output = true;
-        }
+    if (UNLIKELY(accumulated <= 0xffffffff)) {
+        /* Fits in 32 bits; no warning necessary */
+        input_flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+    }
+    else {
+        /* Doesn't fit; return that to caller */
         *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+
+        /* If caller doesn't want warning raised, turn it off */
+        if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
+            input_flags &= ~PERL_SCAN_SILENT_NON_PORTABLE;
+        }
     }
 #endif
 
+  finish:
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
         if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
             &&    ckWARN(WARN_DIGIT))
@@ -487,7 +501,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
     }
 
-    if (UNLIKELY(do_non_portable_output)) {
+    if (UNLIKELY(! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))) {
         output_non_portable(base);
     }
 
@@ -561,8 +575,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     }
 
     accumulated = UV_MAX;
-    do_non_portable_output = true;
-    goto done_parse;
+    input_flags &= ~PERL_SCAN_SILENT_NON_PORTABLE;
+    goto finish;
 }
 
 /*
