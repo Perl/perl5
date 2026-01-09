@@ -206,7 +206,7 @@ my $tmpdir = tmpdir();
 my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
 my $package_file = "$tmpdir/$package"; # this is a cache
-my $type_dir     = "cpan";
+my $type_dir;
 
 my @problematic = (
     # no current entries as of perl-5.43.6
@@ -366,6 +366,10 @@ EOF
             "Bailing out. Use --force to go ahead anyway.\n";
     }
     pause_for_input("\n");
+}
+
+if (not defined $type_dir) {
+    ($type_dir) = split(/\//, $info->{FILES});
 }
 
 if (!$ENV{TEST_JOBS} and !WIN32) {
