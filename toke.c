@@ -2417,7 +2417,7 @@ S_force_version(pTHX_ char *s, int guessing)
     if (*d == 'v')
         d++;
     if (isDIGIT(*d)) {
-        while (isDIGIT(*d) || *d == '_' || *d == '.')
+        while (isDIGIT_or_UNDERSCORE(*d) || *d == '.')
             d++;
         if (*d == ';' || isSPACE(*d) || *d == '{' || *d == '}' || !*d) {
             SV *ver;
@@ -9833,7 +9833,7 @@ yyl_try(pTHX_ char *s)
     case 'v':
         if (isDIGIT(s[1]) && PL_expect != XOPERATOR) {
             char *start = s + 2;
-            while (isDIGIT(*start) || *start == '_')
+            while (isDIGIT_or_UNDERSCORE(*start))
                 start++;
             if (*start == '.' && isDIGIT(start[1])) {
                 s = scan_num(s, &pl_yylval);
@@ -12767,7 +12767,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         h++;
                     }
                     if (isDIGIT(*h)) {
-                        while (isDIGIT(*h) || *h == '_') {
+                        while (isDIGIT_or_UNDERSCORE(*h)) {
                             if (isDIGIT(*h)) {
                                 hexfp_exp *= 10;
                                 hexfp_exp += *h - '0';
@@ -12887,8 +12887,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 
         /* read next group of digits and _ and copy into d */
-        while (isDIGIT(*s)
-               || *s == '_'
+        while (   isDIGIT_or_UNDERSCORE(*s)
                || UNLIKELY(hexfp && isXDIGIT(*s)))
         {
             /* skip underscores, checking for misplaced ones
@@ -12927,8 +12926,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             /* copy, ignoring underbars, until we run out of digits.
             */
-            for (; isDIGIT(*s)
-                   || *s == '_'
+            for (;    isDIGIT_or_UNDERSCORE(*s)
                    || UNLIKELY(hexfp && isXDIGIT(*s));
                  s++)
             {
@@ -12992,7 +12990,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             }
 
             /* read digits of exponent */
-            while (isDIGIT(*s) || *s == '_') {
+            while (isDIGIT_or_UNDERSCORE(*s)) {
                 if (isDIGIT(*s)) {
                     ++exp_digits;
                     if (d >= e)
@@ -13000,8 +12998,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     *d++ = *s++;
                 }
                 else {
-                   if (((lastub && s == lastub + 1)
-                        || (!isDIGIT(s[1]) && s[1] != '_')))
+                   if (   (lastub && s == lastub + 1)
+                       || ! isDIGIT_or_UNDERSCORE(s[1]))
                         WARN_ABOUT_UNDERSCORE();
                    lastub = s++;
                 }
@@ -13800,7 +13798,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
     PERL_ARGS_ASSERT_SCAN_VSTRING;
 
     if (*pos == 'v') pos++;  /* get past 'v' */
-    while (pos < e && (isDIGIT(*pos) || *pos == '_'))
+    while (pos < e && isDIGIT_or_UNDERSCORE(*pos))
         pos++;
     if ( *pos != '.') {
         /* this may not be a v-string if followed by => */
@@ -13851,7 +13849,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
                  s = pos;
                  break;
             }
-            while (pos < e && (isDIGIT(*pos) || *pos == '_'))
+            while (pos < e && isDIGIT_or_UNDERSCORE(*pos))
                  pos++;
         }
         SvPOK_on(sv);
