@@ -1664,6 +1664,9 @@ END_EXTERN_C
 #define isFOO_or_UNDERSCORE_(c, lookup_bit)                                   \
     (FITS_IN_8_BITS(c) && ( PL_charclass[(U8) (c)]                            \
                            & (CC_mask_(lookup_bit)|CC_mask_(CC_UNDERSCORE_))))
+#ifdef PERL_CORE    /* Keep local for now */
+#  define isDIGIT_or_UNDERSCORE(c)  isFOO_or_UNDERSCORE_(c, CC_DIGIT_)
+#endif
 
 #   ifdef EBCDIC
 #       define isASCII(c) generic_isCC_(c, CC_ASCII_)
