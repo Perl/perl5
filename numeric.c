@@ -518,7 +518,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     /* In overflows, this keeps track of how much to multiply the overflowed NV
      * by as we continue to parse the remaining digits */
-    NV factor = 1.0;
+    NV accumulated_factor = 1.0;
 
     /* Then we continue parsing, starting over with a new batch of digits to
      * accumulate */
@@ -539,21 +539,21 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         if (LIKELY(this_batch_accumulated <= max_div)) {
             this_batch_accumulated =
                             (this_batch_accumulated << shift) | XDIGIT_VALUE(*s);
-            factor *= base;
+            accumulated_factor *= base;
             continue;
         }
 
         /* Bah. We are about to overflow again.  Instead, add this batch to
          * the NV, and start a new batch */
-        accumulated_nv *= factor;
+        accumulated_nv *= accumulated_factor;
         accumulated_nv += (NV) this_batch_accumulated;
 
         this_batch_accumulated = XDIGIT_VALUE(*s);
-        factor = base;
+        accumulated_factor = base;
     }
 
     /* Calculate the final overflow approximation */
-    accumulated_nv *= factor;
+    accumulated_nv *= accumulated_factor;
     accumulated_nv += (NV) accumulated;
 
     *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
