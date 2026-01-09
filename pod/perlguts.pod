@@ -3910,6 +3910,8 @@ the only core C<PVOP>, C<OP_TRANS>, can sometimes be a C<SVOP> instead.
 
 =item OA_COP
 
+=item OA_UNOP_AUX
+
 =for apidoc_section $optree_manipulation
 =for apidoc Amnh||OA_BASEOP
 =for apidoc_item OA_BINOP
