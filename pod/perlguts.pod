@@ -3904,7 +3904,7 @@ the C<OA_*> constants from F<op.h>, namely
 =item OA_PVOP_OR_SVOP
 
 This should be interpreted as 'C<PVOP>' only.  The C<_OR_SVOP> is because
-the only core C<PVOP>, C<OP_TRANS>, can sometimes be a C<SVOP> instead.
+one core C<PVOP>, C<OP_TRANS>, can sometimes be a C<SVOP> instead.
 
 =item OA_LOOP
 
