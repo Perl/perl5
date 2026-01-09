@@ -511,50 +511,83 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
   overflowed: ;
 
-    /* Bah. We are about to overflow.  Instead, place the unoverflowed
-     * accumulated value in an NV that will contain an approximation to the
-     * correct value. */
-    NV accumulated_nv = (NV) accumulated;
-
-    /* In overflows, this keeps track of how much to multiply the overflowed NV
-     * by as we continue to parse the remaining digits */
-    NV accumulated_factor = 1.0;
-
-    /* Then we continue parsing, starting over with a new batch of digits to
-     * accumulate */
-    UV this_batch_accumulated = 0;
-    for (; s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits); s++)
-    {
-        /* Handle non-trailing underscores when those are accepted */
-        if (UNLIKELY(*s == '_')) {
-            if (   ! allow_underscores
-                || ! underscore_valid(s, e, lookup_bit))
-            {
-                break;
-            }
-
-            ++s;
+    /* Bah. We are about to overflow.  Instead compute an approximation to the
+     * correct value.
+     *
+     * It turns out that there is less precision loss if we start at the low
+     * order digits of the string and build up the number from there.  This is
+     * because if we overflow multiple times, the low order digits will be so
+     * small in comparison to the larger ones that they are completely
+     * disregarded.  But going the other way allows them to contribute
+     * whatever bits they have to offer.
+     *
+     * So, find the end of the string */
+    const char * s1 = s;    /* Save our place */
+    s++;
+    while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+        if (   UNLIKELY(*s == '_')
+            && (   ! allow_underscores
+                || ! underscore_valid(s, e, lookup_bit)))
+        {
+            break;
         }
 
-        if (LIKELY(this_batch_accumulated <= max_div)) {
-            this_batch_accumulated =
-                            (this_batch_accumulated << shift) | XDIGIT_VALUE(*s);
-            accumulated_factor *= base;
+        s++;
+    }
+
+    /* Here we got to the end of the string; either we encountered an illegal
+     * character, which ends it, or got to the final position in it.  's'
+     * points to the position just after the final legal character.
+     *
+     * Accumulate the value starting at the lowest order digit and going
+     * backwards */
+    const char * t = s - 1;
+    NV accumulated_nv = 0;
+    NV accumulated_factor = 1;
+
+    UV this_batch_accumulated = 0;
+    UV this_batch_factor = 1;
+
+    /* To minimize precision loss, we do integer arithmetic on batches that
+     * don't overflow.  When one does, the final integer that didn't overflow
+     * is factored in to the running total, and a new batch is started */
+    while (t >= s1) {
+
+        /* Any underscores were already determined to be valid */
+        if (UNLIKELY(*t == '_')) {
+            t--;
             continue;
         }
 
-        /* Bah. We are about to overflow again.  Instead, add this batch to
-         * the NV, and start a new batch */
-        accumulated_nv *= accumulated_factor;
-        accumulated_nv += (NV) this_batch_accumulated;
+        /* If will fit, accumulate it and repeat.  Each digit has to be
+         * multiplied by the position it occupies, like 1, 8, 8-squared,
+         * 8-cubed, etc */
+        if (   LIKELY(this_batch_accumulated <= max_div)
+            && LIKELY(this_batch_factor <= max_div))
+        {
+            U8 this_digit_value = XDIGIT_VALUE(*t);
+            this_batch_accumulated += this_digit_value * this_batch_factor;
+            this_batch_factor <<= shift;
+            t--;
+            continue;
+        }
 
-        this_batch_accumulated = XDIGIT_VALUE(*s);
-        accumulated_factor = base;
+        /* Bah. We are about to overflow again.  Instead, accumulate this
+         * batch into the running total for all low order batches, and start a
+         * new batch. */
+        accumulated_nv += this_batch_accumulated * accumulated_factor;
+        accumulated_factor *= this_batch_factor;
+
+        this_batch_accumulated = 0;
+        this_batch_factor = 1;
     }
 
-    /* Calculate the final overflow approximation */
-    accumulated_nv *= accumulated_factor;
-    accumulated_nv += (NV) accumulated;
+    /* Here have accumulated everything.  Combine the low order bits with the
+     * high order that we have saved in 'accumulated'.  Those must be shifted
+     * left to account for the low order ones */
+    accumulated_nv += this_batch_accumulated * accumulated_factor;
+    accumulated_factor *= this_batch_factor;
+    accumulated_nv += accumulated * accumulated_factor;
 
     *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
            |  PERL_SCAN_SILENT_NON_PORTABLE;
