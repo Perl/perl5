@@ -450,12 +450,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
   done_parse:
 
 #if UVSIZE > 4
-        if (UNLIKELY(accumulated > 0xffffffff)) {
-            if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
-                do_non_portable_output = true;
-            }
-            *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+    if (UNLIKELY(accumulated > 0xffffffff)) {
+        if (! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
+            do_non_portable_output = true;
         }
+        *flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+    }
 #endif
 
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
