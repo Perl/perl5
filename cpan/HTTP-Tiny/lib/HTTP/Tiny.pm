@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.090';
+our $VERSION = '0.092';
 
 sub _croak { require Carp; Carp::croak(@_) }
 
@@ -24,6 +24,8 @@ sub _croak { require Carp; Carp::croak(@_) }
 #pod * C<local_address> — The local IP address to bind to
 #pod * C<keep_alive> — Whether to reuse the last connection (if for the same
 #pod   scheme, host and port) (defaults to 1)
+#pod * C<keep_alive_timeout> — How many seconds to keep a connection available
+#pod   for after a request (defaults to 0, unlimited)
 #pod * C<max_redirect> — Maximum number of redirects allowed (defaults to 5)
 #pod * C<max_size> — Maximum response size in bytes (only when not using a data
 #pod   callback).  If defined, requests with responses larger than this will return
@@ -64,6 +66,12 @@ sub _croak { require Carp; Carp::croak(@_) }
 #pod attributes are modified via accessor, or if the process ID or thread ID change,
 #pod the persistent connection will be dropped.  If you want persistent connections
 #pod across multiple destinations, use multiple HTTP::Tiny objects.
+#pod
+#pod The C<keep_alive_timeout> parameter allows you to control how long a
+#pod keep alive connection will be considered for reuse. By setting this lower
+#pod than the server keep alive time, this allows you to avoid race conditions where
+#pod the server closes the connection while preparing to write the request on
+#pod a reused persistent connection.
 #pod
 #pod See L</TLS/SSL SUPPORT> for more on the C<verify_SSL> and C<SSL_options>
 #pod attributes.
@@ -127,6 +135,7 @@ sub new {
         max_redirect => 5,
         timeout      => defined $args{timeout} ? $args{timeout} : 60,
         keep_alive   => 1,
+        keep_alive_timeout => 0,
         verify_SSL   => defined $args{verify_SSL} ? $args{verify_SSL} : _verify_SSL_default(),
         no_proxy     => $ENV{no_proxy},
     };
@@ -351,7 +360,7 @@ sub mirror {
 #pod international domain names encoded.
 #pod
 #pod B<NOTE>: Method names are B<case-sensitive> per the HTTP/1.1 specification.
-#pod Don't use C<get> when you really want C<GET>.  See L<LIMITATIONS> for
+#pod Don't use C<get> when you really want C<GET>.  See L</LIMITATIONS> for
 #pod how this applies to redirection.
 #pod
 #pod If the URL includes a "user:password" stanza, they will be used for Basic-style
@@ -694,6 +703,7 @@ sub _request {
         && $response->{protocol} eq 'HTTP/1.1'
         && ($response->{headers}{connection} || '') ne 'close'
     ) {
+        $handle->_update_last_used();
         $self->{handle} = $handle;
     }
     else {
@@ -723,8 +733,11 @@ sub _open_handle {
         SSL_options     => $self->{SSL_options},
         verify_SSL      => $self->{verify_SSL},
         local_address   => $self->{local_address},
-        keep_alive      => $self->{keep_alive}
+        keep_alive      => $self->{keep_alive},
+        keep_alive_timeout => $self->{keep_alive_timeout}
     );
+
+    require Time::HiRes if $self->{keep_alive_timeout} > 0;
 
     if ($self->{_has_proxy}{$scheme} && ! grep { $host =~ /\Q$_\E$/ } @{$self->{no_proxy}}) {
         return $self->_proxy_connect( $request, $handle );
@@ -865,7 +878,7 @@ sub _prepare_headers_and_cb {
         }
         elsif ( length $args->{content} ) {
             my $content = $args->{content};
-            if ( $] ge '5.008' ) {
+            if ( "$]" >= 5.008 ) {
                 utf8::downgrade($content, 1)
                     or die(qq/Wide character in request message body\n/);
             }
@@ -1032,7 +1045,7 @@ my $unsafe_char = qr/[^A-Za-z0-9\-\._~]/;
 sub _uri_escape {
     my ($self, $str) = @_;
     return "" if !defined $str;
-    if ( $] ge '5.008' ) {
+    if ( "$]" >= 5.008 ) {
         utf8::encode($str);
     }
     else {
@@ -1051,7 +1064,7 @@ use warnings;
 
 use Errno      qw[EINTR EPIPE];
 use IO::Socket qw[SOCK_STREAM];
-use Socket     qw[SOL_SOCKET SO_KEEPALIVE];
+use Socket     qw[SOL_SOCKET SO_KEEPALIVE TCP_NODELAY IPPROTO_TCP];
 
 # PERL_HTTP_TINY_IPV4_ONLY is a private environment variable to force old
 # behavior if someone is unable to boostrap CPAN from a new perl install; it is
@@ -1116,6 +1129,8 @@ sub connect {
         Type      => SOCK_STREAM,
         Timeout   => $self->{timeout},
     ) or die(qq/Could not connect to '$host:$port': $@\n/);
+
+    $self->{fh}->setsockopt(IPPROTO_TCP, TCP_NODELAY, 1);
 
     binmode($self->{fh})
       or die(qq/Could not binmode() socket: '$!'\n/);
@@ -1189,7 +1204,7 @@ sub write {
     @_ == 2 || die(q/Usage: $handle->write(buf)/ . "\n");
     my ($self, $buf) = @_;
 
-    if ( $] ge '5.008' ) {
+    if ( "$]" >= 5.008 ) {
         utf8::downgrade($buf, 1)
             or die(qq/Wide character in write()\n/);
     }
@@ -1474,7 +1489,7 @@ sub write_content_body {
         defined $data && length $data
           or last;
 
-        if ( $] ge '5.008' ) {
+        if ( "$]" >= 5.008 ) {
             utf8::downgrade($data, 1)
                 or die(qq/Wide character in write_content()\n/);
         }
@@ -1521,7 +1536,7 @@ sub write_chunked_body {
         defined $data && length $data
           or last;
 
-        if ( $] ge '5.008' ) {
+        if ( "$]" >= 5.008 ) {
             utf8::downgrade($data, 1)
                 or die(qq/Wide character in write_chunked_body()\n/);
         }
@@ -1621,6 +1636,19 @@ sub can_write {
     return $self->_do_timeout('write', @_)
 }
 
+sub _has_keep_alive_expired {
+    my $self = shift;
+    return unless $self->{keep_alive_timeout} > 0;
+    my $now = Time::HiRes::time();
+    return $now - ($self->{last_used} || $now) > $self->{keep_alive_timeout};
+}
+
+sub _update_last_used {
+    my $self = shift;
+    return unless $self->{keep_alive_timeout} > 0;
+    $self->{last_used} = Time::HiRes::time();
+}
+
 sub _assert_ssl {
     my($ok, $reason) = HTTP::Tiny->can_ssl();
     die $reason unless $ok;
@@ -1636,6 +1664,7 @@ sub can_reuse {
         || $host ne $self->{host}
         || $port ne $self->{port}
         || $peer ne $self->{peer}
+        || $self->_has_keep_alive_expired()
         || eval { $self->can_read(0) }
         || $@ ;
         return 1;
@@ -1739,7 +1768,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.090
+version 0.092
 
 =head1 SYNOPSIS
 
@@ -1804,6 +1833,10 @@ C<keep_alive> — Whether to reuse the last connection (if for the same scheme, 
 
 =item *
 
+C<keep_alive_timeout> — How many seconds to keep a connection available for after a request (defaults to 0, unlimited)
+
+=item *
+
 C<max_redirect> — Maximum number of redirects allowed (defaults to 5)
 
 =item *
@@ -1858,6 +1891,12 @@ single destination scheme, host and port.  If any connection-relevant
 attributes are modified via accessor, or if the process ID or thread ID change,
 the persistent connection will be dropped.  If you want persistent connections
 across multiple destinations, use multiple HTTP::Tiny objects.
+
+The C<keep_alive_timeout> parameter allows you to control how long a
+keep alive connection will be considered for reuse. By setting this lower
+than the server keep alive time, this allows you to avoid race conditions where
+the server closes the connection while preparing to write the request on
+a reused persistent connection.
 
 See L</TLS/SSL SUPPORT> for more on the C<verify_SSL> and C<SSL_options>
 attributes.
@@ -1923,7 +1962,7 @@ Executes an HTTP request of the given method type ('GET', 'HEAD', 'POST',
 international domain names encoded.
 
 B<NOTE>: Method names are B<case-sensitive> per the HTTP/1.1 specification.
-Don't use C<get> when you really want C<GET>.  See L<LIMITATIONS> for
+Don't use C<get> when you really want C<GET>.  See L</LIMITATIONS> for
 how this applies to redirection.
 
 If the URL includes a "user:password" stanza, they will be used for Basic-style
@@ -2389,7 +2428,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Golden Mitchell Dean Pearce Edward Zborowski Felipe Gasper Graham Knop Greg Kennedy James E Keenan Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Matthew Horsfall Michael R. Davis Mike Doherty Nicolas Rochelemagne Olaf Alders Olivier Mengué Petr Písař sanjay-cpu Serguei Trouchelle Shoichi Kaji SkyMarshal Sören Kornetzki Steve Grazzini Stig Palmquist Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook Xavier Guimard
+=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry Dan David Golden Mitchell Dean Pearce Edward Zborowski Felipe Gasper Graham Knop Greg Kennedy James E Keenan Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Matthew Horsfall Michael R. Davis Stevens Mike Doherty Nicolas Rochelemagne Olaf Alders Olivier Mengué Petr Písař Philippe Bruhat (BooK) Rob Mueller sanjay-cpu Serguei Trouchelle Shoichi Kaji SkyMarshal Sören Kornetzki Steve Grazzini Stig Palmquist Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook Xavier Guimard
 
 =over 4
 
@@ -2432,6 +2471,10 @@ Clinton Gormley <clint@traveljury.com>
 =item *
 
 Craig A. Berry <craigberry@mac.com>
+
+=item *
+
+Dan <grinnz@gmail.com>
 
 =item *
 
@@ -2503,6 +2546,10 @@ Michael R. Davis <mrdvt92@users.noreply.github.com>
 
 =item *
 
+Michael Stevens <michael.stevens@dianomi.com>
+
+=item *
+
 Mike Doherty <doherty@cpan.org>
 
 =item *
@@ -2520,6 +2567,14 @@ Olivier Mengué <dolmen@cpan.org>
 =item *
 
 Petr Písař <ppisar@redhat.com>
+
+=item *
+
+Philippe Bruhat (BooK) <book@cpan.org>
+
+=item *
+
+Rob Mueller <robm@fastmailteam.com>
 
 =item *
 
@@ -2573,7 +2628,7 @@ Xavier Guimard <yadd@debian.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2024 by Christian Hansen.
+This software is copyright (c) 2025 by Christian Hansen.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
