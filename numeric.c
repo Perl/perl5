@@ -422,10 +422,12 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * fit. */
     UV max_div;
     max_div = UV_MAX >> shift;
+    U32 valid_digit_or_underscore_bits;
+    valid_digit_or_underscore_bits = (lookup_bit|CC_mask_(CC_UNDERSCORE_));
 
     /* Loop through the characters */
-    for (; s < e; s++) {
-
+    for (; s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits); s++)
+    {
         /* Handle non-trailing underscores when those are accepted */
         if (UNLIKELY(*s == '_')) {
             if (   ! allow_underscores
@@ -434,10 +436,10 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                 break;
             }
 
+            /* check_underscore() succeeds only if the next char is a legal
+             * digit */
             ++s;
         }
-
-        if (Perl_isCC_by_bit(*s, lookup_bit)) {
 
             /* If there is room for this digit, accumulate it and repeat */
             if (LIKELY(accumulated <= max_div)) {
@@ -467,14 +469,6 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             accumulated = XDIGIT_VALUE(*s);
             factor = base;
             overflowed = TRUE;
-            continue;
-        } /* End of handling legal digit */
-
-        /* We get here when done with the parse, or it got interrupted by a
-         * non-digit or a digit that is outside the bounds of the base, like a
-         * digit 2 in a binary number.  In either case, we are done with the
-         * loop */
-        break;
     }   /* End of parsing loop */
 
   done_parse:
