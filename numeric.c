@@ -441,34 +441,34 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             ++s;
         }
 
-            /* If there is room for this digit, accumulate it and repeat */
-            if (LIKELY(accumulated <= max_div)) {
-                /* Note XDIGIT_VALUE() is branchless, works on binary and
-                 * octal as well, so can be used here, without noticeably
-                 * slowing those down (it does have unnecessary shifts, ANDSs,
-                 * and additions for those) */
-                accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
-                factor *= base;
-                continue;
-            }
+        /* If there is room for this digit, accumulate it and repeat */
+        if (LIKELY(accumulated <= max_div)) {
+        /* Note XDIGIT_VALUE() is branchless, works on binary and octal as
+         * well, so can be used here, without noticeably slowing those down
+         * (it does have unnecessary shifts, ANDSs, and additions for those)
+         * */
+        accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        factor *= base;
+        continue;
+        }
 
-            /* Bah. We are about to overflow.  Instead, add the unoverflowed
-             * accumulated to an NV that contains an approximation to the correct
-             * value.  Each time through the loop we have increased 'factor' so
-             * that it gives how much the current approximation needs to
-             * effectively be shifted to make room for this new value */
-            accumulated_nv *= factor;
-            accumulated_nv += (NV) accumulated;
+        /* Bah. We are about to overflow.  Instead, add the unoverflowed
+         * accumulated to an NV that contains an approximation to the correct
+         * value.  Each time through the loop we have increased 'factor' so
+         * that it gives how much the current approximation needs to
+         * effectively be shifted to make room for this new value */
+        accumulated_nv *= factor;
+        accumulated_nv += (NV) accumulated;
 
-            /* Then we keep accumulating digits, until all are parsed.  We
-             * start over using the current input value as the initial digit.
-             * This will be added to 'accumulated_nv' eventually, either when all
-             * digits are gone, or we have overflowed this fresh start.  This
-             * method uses the fewest floating point multiplications possible,
-             * losing the least precision. */
-            accumulated = XDIGIT_VALUE(*s);
-            factor = base;
-            overflowed = TRUE;
+        /* Then we keep accumulating digits, until all are parsed.  We
+         * start over using the current input value as the initial digit.
+         * This will be added to 'accumulated_nv' eventually, either when all
+         * digits are gone, or we have overflowed this fresh start.  This
+         * method uses the fewest floating point multiplications possible,
+         * losing the least precision. */
+        accumulated = XDIGIT_VALUE(*s);
+        factor = base;
+        overflowed = TRUE;
     }   /* End of parsing loop */
 
   done_parse:
