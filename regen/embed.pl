@@ -5018,54 +5018,53 @@ sub find_undefs {
 
                 next unless $line->{line} =~ / ^ =for \s+ apidoc /mx;
                 process_apidoc_lines($hdr, split /\n/, $line->{line});
+                next;
             }
-            else {
 
-                # HeaderParser stripped off most everything.
-                my $name = $line->{flat};
+            # What's left are #defines.  HeaderParser stripped off most
+            # everything.
+            my $name = $line->{flat};
 
-                # Just the symbol and its definition
-                $name =~ s/ ^ \s* \# \s* define \s+ //x;
+            # Just the symbol and its definition
+            $name =~ s/ ^ \s* \# \s* define \s+ //x;
 
-                # Just the symbol, no arglist nor definition
-                $name =~ s/ (?: \s | \( ) .* //x;
+            # Just the symbol, no arglist nor definition
+            $name =~ s/ (?: \s | \( ) .* //x;
 
-                # These are reserved for Perl's use, so not a problem.
-                next if $name =~ / ^ PL_ /x;
-                next if $name =~ /perl/i;
+            # These are reserved for Perl's use, so not a problem.
+            next if $name =~ / ^ PL_ /x;
+            next if $name =~ /perl/i;
 
-                next unless $line->reduce_conds($cpp_ifdef_constraints_re,
-                                                \%cpp_ifdef_constraints);
+            next unless $line->reduce_conds($cpp_ifdef_constraints_re,
+                                            \%cpp_ifdef_constraints);
 
-                # There are a few cases where we redefine a system function to
-                # use the 64-bit equivalent one that has a different name.
-                # They currenty all look like this.  These symbols would show
-                # up as #defines that shouldn't have external visibility.
-                my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
-                if (recurse_conds($has_64_pattern, $line->{cond}->@*)) {
-                    $system_symbols{$name} = 1;
-                    next;
-                }
-
-                # Often perl has code to make sure various symbols that are
-                # always expected by the system to be defined, in fact are.
-                # These don't constitute namespace pollution.  This applies
-                # mainly to libc calls, which are all lowercase, but also to a
-                # few other symbols.  (This pattern may have to be revised at
-                # times.)  So, if perl defines such a symbol only if it
-                # already isn't defined, we add it to the list of system
-                # symbols
-                my $pattern = qr/ ! \s* defined\($name\)/x;
-                if (   (   $name !~ /[[:upper:]]/
-                        || $name =~ / ^ ( [OS] _ | SIG) [[:upper:]]+ $ /x)
-                    && recurse_conds($pattern, $line->{cond}->@*))
-                {
-                    $system_symbols{$name} = 1;
-                    next;
-                }
-
-                $always_undefs{$name} = 1;
+            # There are a few cases where we redefine a system function to use
+            # the 64-bit equivalent one that has a different name.  They
+            # currenty all look like this.  These symbols would show up as
+            # #defines that shouldn't have external visibility.
+            my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
+            if (recurse_conds($has_64_pattern, $line->{cond}->@*)) {
+                $system_symbols{$name} = 1;
+                next;
             }
+
+            # Often perl has code to make sure various symbols that are always
+            # expected by the system to be defined, in fact are.  These don't
+            # constitute namespace pollution.  This applies mainly to libc
+            # calls, which are all lowercase, but also to a few other symbols.
+            # (This pattern may have to be revised at times.)  So, if perl
+            # defines such a symbol only if it already isn't defined, we add
+            # it to the list of system symbols
+            my $pattern = qr/ ! \s* defined\($name\)/x;
+            if (   (   $name !~ /[[:upper:]]/
+                    || $name =~ / ^ ( [OS] _ | SIG) [[:upper:]]+ $ /x)
+                && recurse_conds($pattern, $line->{cond}->@*))
+            {
+                $system_symbols{$name} = 1;
+                next;
+            }
+
+            $always_undefs{$name} = 1;
         }
     }   # Done with headers
 
