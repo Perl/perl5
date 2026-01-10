@@ -1,13 +1,25 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.60
+3.62
+  - allow 'length(foo)' to work with any 'foo' type that has
+        'SvPV_nolen()' or similar in its typemap, not just that it maps
+        to T_PV
+  - improve warning and error messages
+  - improve test coverage
+  - reorganise t/
+
+3.61 Fri Jan  9 2026
+  - rewrite perlxs.pod
+  - finish refactoring to use an Abstract Syntax Tree (AST) internally
+
+3.60 Fri Sep 26 2025
   - Fix INTERFACE for C23
   - support perl package names in INTERFACE
   - Cleanup typemap file-finding code and change priority
   - Revert throwing an exception when combining the length operator
     with a typemap other than T_PV
 
-3.59
+3.59 Fri Sep  5 2025
   - Throw an exception when combining the length operator with a
     typemap other than T_PV
 
