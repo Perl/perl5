@@ -5022,23 +5022,45 @@ sub find_undefs {
             next unless $line->reduce_conds($cpp_ifdef_constraints_re,
                                             \%cpp_ifdef_constraints);
 
-            # There are a few cases where we redefine a system function to use
-            # the 64-bit equivalent one that has a different name.  They
-            # currenty all look like this.  These symbols would show up as
-            # #defines that shouldn't have external visibility.
+            # Perl creates some symbols that mimic libc symbols.  These are
+            # visible everywhere and expected to be so.  Hence they should
+            # remain defined.  We put them on a list of system symbols to make
+            # sure this happens.
+            #
+            # For many symbols, this program can infer that it is in this
+            # class by examining the name and context.
+            #
+            # One class of symbols that are like this, are ones which have
+            # somewhat different names for a 64-bit version than a shorter
+            # one.
             my $has_64_pattern = qr / ( HAS | USE ) _ \w* 64 /x;
             if (recurse_conds($has_64_pattern, $line->{cond}->@*)) {
                 $system_symbols{$name} = 1;
                 next;
             }
 
-            # Often perl has code to make sure various symbols that are always
-            # expected by the system to be defined, in fact are.  These don't
-            # constitute namespace pollution.  This applies mainly to libc
-            # calls, which are all lowercase, but also to a few other symbols.
-            # (This pattern may have to be revised at times.)  So, if perl
-            # defines such a symbol only if it already isn't defined, we add
-            # it to the list of system symbols
+            # We handle two other symbol classes, both in the same way.  One
+            # is where the names of things aren't standardized (or not all
+            # platforms conform).  So we have created them on platforms where
+            # they don't exist.  The code in the header looks like:
+            #   #define this symbol it it isn't already defined
+            #
+            # An example is that platforms have different names for the S_foo
+            # constants used by chmod(2) and stat(2).  There is code in perl.h
+            # to define the missing names on platforms that don't have
+            # particular ones, yielding a consistent set of definitions for
+            # all platforms.
+            #
+            # The other class is when we $define a macro to override a libc
+            # call with something else.  Perhaps it is a bug fix, or more
+            # likely to provide reentrancy invisibly.  XS code can call a base
+            # libc function, like getgrent(), and instead magically get
+            # getgrent_r() when appropriate.
+            #
+            # To be considered system symbols, they must match the following
+            # conditions (which were created by inspection of current data,
+            # and which may have to be revised from time-to-time).  Note that
+            # it thinks any name that is all lowercase is a libc call.
             my $pattern = qr/ ! \s* defined\($name\)/x;
             if (   (   $name !~ /[[:upper:]]/
                     || $name =~ / ^ ( [OS] _ | SIG) [[:upper:]]+ $ /x)
