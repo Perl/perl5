@@ -130,6 +130,7 @@ my @unresolved_visibility_overrides = qw(
     ABS_IV_MIN
     ALIGNED_TYPE
     ALIGNED_TYPE_NAME
+    ALLOC_THREAD_KEY
     ALL_PARENS_COUNTED
     ALWAYS_WARN_SUPER
     AMG_CALLun
@@ -177,6 +178,7 @@ my @unresolved_visibility_overrides = qw(
     aTHXx
     AT_LEAST_ASCII_RESTRICTED
     AT_LEAST_UNI_SEMANTICS
+    Atoul
     AvARYLEN
     AvMAX
     AvREAL
@@ -221,7 +223,9 @@ my @unresolved_visibility_overrides = qw(
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
     BSD_GETPGRP
+    BSDish
     BSD_SETPGRP
+    BYTEORDER
     BYTES_REMAINING_IN_WORD
     CALL_BLOCK_HOOKS
     CALL_FPTR
@@ -262,6 +266,7 @@ my @unresolved_visibility_overrides = qw(
     cCOP
     cCOPo
     cCOPx
+    C_FAC_POSIX
     cGVOP_gv
     cGVOPo_gv
     cGVOPx_gv
@@ -319,6 +324,11 @@ my @unresolved_visibility_overrides = qw(
     COMBINING_DOT_ABOVE_UTF8
     COMBINING_GRAVE_ACCENT_UTF8
     COMBINING_GREEK_YPOGEGRAMMENI_UTF8
+    COND_BROADCAST
+    COND_DESTROY
+    COND_INIT
+    COND_SIGNAL
+    COND_WAIT
     CONTINUE_PAT_MOD
     COP_FEATURE_SIZE
     CopFEATURES_setfrom
@@ -366,6 +376,7 @@ my @unresolved_visibility_overrides = qw(
     CTIME_LOCK
     CTIME_UNLOCK
     Ctl
+    CTYPE256
     cUNOP
     cUNOP_AUX
     cUNOP_AUXo
@@ -585,6 +596,8 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_PEEP
     DEBUG_p_FLAG
     DEBUG_P_FLAG
+    DEBUG_POST_STMTS
+    DEBUG_PRE_STMTS
     DEBUG_p_TEST
     DEBUG_P_TEST
     DEBUG_Pv
@@ -601,6 +614,7 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_R_TEST
     DEBUG_s
     DEBUG_S
+    DEBUG_SBOX32_HASH
     DEBUG_SCOPE
     DEBUG_s_FLAG
     DEBUG_S_FLAG
@@ -639,6 +653,7 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_y_TEST
     DEBUG_yv
     DEBUG_yv_TEST
+    DEBUG_ZAPHOD32_HASH
     DEFAULT_PAT_MOD
     DEFERRED_COULD_BE_OFFICIAL_MARKERc
     DEFERRED_COULD_BE_OFFICIAL_MARKERs
@@ -648,6 +663,7 @@ my @unresolved_visibility_overrides = qw(
     DEPENDS_PAT_MOD
     DEPENDS_PAT_MODS
     DEPENDS_SEMANTICS
+    DETACH
     DIE
     DISABLE_LC_NUMERIC_CHANGES
     dJMPENV
@@ -691,6 +707,7 @@ my @unresolved_visibility_overrides = qw(
     dPOPXnnrl
     dPOPXssrl
     DPTR2FPTR
+    dSAVEDERRNO
     dSAVE_ERRNO
     dSS_ADD
     dTARG
@@ -729,6 +746,7 @@ my @unresolved_visibility_overrides = qw(
     EVAL_NULL
     EVAL_RE_REPARSING
     EVAL_WARNONLY
+    EXEC_ARGV_CAST
     EXEC_PAT_MOD
     EXEC_PAT_MODS
     EXPECT
@@ -794,9 +812,12 @@ my @unresolved_visibility_overrides = qw(
     free_and_set_cop_warnings
     free_c_backtrace
     FreeOp
+    FREE_THREAD_KEY
     FROM_INTERNAL_SIZE
+    FSEEKSIZE
     F_sin_amg
     F_sqrt_amg
+    Fstat
     FULL_TRIE_STUDY
     fwrite1
     G_ARRAY
@@ -1005,14 +1026,22 @@ my @unresolved_visibility_overrides = qw(
     HAS_CHOWN
     HAS_EXTENDED_OS_ERRNO
     HAS_EXTRA_LONG_UTF8
+    HAS_GETPGRP
     HAS_GROUP
+    HAS_HTONL
+    HAS_HTONS
     HAS_IOCTL
     HAS_KILL
     HAS_NONLATIN1_FOLD_CLOSURE
     HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE
+    HAS_NTOHL
+    HAS_NTOHS
     HAS_PASSWD
     HAS_POSIX_2008_LOCALE
     HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
+    HAS_SETPGRP
+    HAS_SETREGID
+    HAS_SETREUID
     HAS_UTIME
     HAS_WAIT
     hasWARNBIT
@@ -1021,9 +1050,13 @@ my @unresolved_visibility_overrides = qw(
     HEK_BASESIZE
     HeKEY_hek
     HeKEY_sv
+    HEKf
+    HEKf256
+    HEKf256_QUOTEDPREFIX
     HEKfARG
     HeKFLAGS
     HEK_FLAGS
+    HEKf_QUOTEDPREFIX
     HEK_HASH
     HEK_KEY
     HEK_LEN
@@ -1128,6 +1161,7 @@ my @unresolved_visibility_overrides = qw(
     HvLAZYDEL_off
     HvLAZYDEL_on
     HvMAX
+    HvNAME_HEK
     HvNAME_HEK_NN
     HvPLACEHOLDERS
     HvPLACEHOLDERS_get
@@ -1154,10 +1188,19 @@ my @unresolved_visibility_overrides = qw(
     I_LIMITS
     ILLEGAL_UTF8_BYTE
     IN_BYTES
+    INCLUDE_PROTOTYPES
     INCMARK
+    INCPUSH_APPLLIB_EXP
+    INCPUSH_APPLLIB_OLD_EXP
+    INCPUSH_ARCHLIB_EXP
+    INCPUSH_PRIVLIB_EXP
+    INCPUSH_SITEARCH_EXP
+    INCPUSH_SITELIB_EXP
+    INCPUSH_SITELIB_STEM
     INFNAN_NV_U8_DECL
     INFNAN_U8_NV_DECL
     init_os_extras
+    INIT_THREADS
     INIT_TRACK_MEMPOOL
     IN_LC
     IN_LC_ALL_COMPILETIME
@@ -1179,6 +1222,7 @@ my @unresolved_visibility_overrides = qw(
     IN_UTF8_TURKIC_LOCALE
     INVLIST_INDEX
     IoANY
+    IOCPARM_LEN
     IOf_ARGV
     IOf_DIDTOP
     IOf_FAKE_DIRP
@@ -1194,6 +1238,7 @@ my @unresolved_visibility_overrides = qw(
     IoTYPE_SOCKET
     IoTYPE_STD
     IoTYPE_WRONLY
+    IPERLSYS_H
     isALNUMC_LC_utf8_safe
     isALNUMC_uni
     isALNUMC_utf8
@@ -1242,6 +1287,7 @@ my @unresolved_visibility_overrides = qw(
     isIDFIRST_uni
     IS_IN_SOME_FOLD_L1
     is_LARGER_NON_CHARS_utf8
+    is_LAX_VERSION
     isLEXWARN_off
     isLEXWARN_on
     is_LNBREAK_latin1_safe
@@ -1294,6 +1340,7 @@ my @unresolved_visibility_overrides = qw(
     isSPACE_LC_utf8
     isSPACE_uni
     is_SPACE_utf8_safe_backwards
+    is_STRICT_VERSION
     is_SURROGATE_utf8
     is_SURROGATE_utf8_safe
     I_STDARG
@@ -1338,12 +1385,15 @@ my @unresolved_visibility_overrides = qw(
     is_XDIGIT_high
     isXDIGIT_LC_utf8
     isXDIGIT_uni
+    is_XPERLSPACE_cp_high
+    is_XPERLSPACE_high
     IV_MAX_P1
     JE_OLD_STACK_HWM_restore
     JE_OLD_STACK_HWM_save
     JE_OLD_STACK_HWM_zero
     JMPENV_BOOTSTRAP
     JMPENV_POP
+    JOIN
     kBINOP
     kCOP
     KEEPCOPY_PAT_MOD
@@ -1656,6 +1706,7 @@ my @unresolved_visibility_overrides = qw(
     LATIN_SMALL_LIGATURE_ST_UTF8
     LC_COLLATE_LOCK
     LC_COLLATE_UNLOCK
+    LC_NUMERIC_LOCK
     LC_NUMERIC_UNLOCK
     LDBL_DIG
     LEAVE_SCOPE
@@ -1672,8 +1723,10 @@ my @unresolved_visibility_overrides = qw(
     LOCALE_READ_UNLOCK
     LOCALE_TERM
     LOCALE_UNLOCK
+    LOCAL_PATCH_COUNT
     LOCALTIME_LOCK
     LOCALTIME_UNLOCK
+    LOCK_DOLLARZERO_MUTEX
     LOCK_LC_NUMERIC_STANDARD
     LONGDOUBLE_BIG_ENDIAN
     LONGDOUBLE_DOUBLEDOUBLE
@@ -1716,9 +1769,12 @@ my @unresolved_visibility_overrides = qw(
     MAX_LEGAL_CP
     MAX_MATCHES
     MAXO
+    MAXPATHLEN
     MAX_PORTABLE_UTF8_TWO_BYTE
     MAX_PRINT_A
+    MAX_RECURSE_EVAL_NOCHANGE_DEPTH
     MAX_SAVEt
+    MAXSYSFD
     MAX_UNICODE_UTF8
     MAX_UNICODE_UTF8_BYTES
     MAX_UTF8_TWO_BYTE
@@ -1752,8 +1808,11 @@ my @unresolved_visibility_overrides = qw(
     memGE
     memGT
     memLE
+    MEM_LOG_ALLOC
     MEM_LOG_DEL_SV
+    MEM_LOG_FREE
     MEM_LOG_NEW_SV
+    MEM_LOG_REALLOC
     memLT
     MEM_SIZE
     MEM_SIZE_MAX
@@ -1793,7 +1852,11 @@ my @unresolved_visibility_overrides = qw(
     MSVC_DIAG_RESTORE_STMT
     MULTILINE_PAT_MOD
     MUST_RESTART
+    MUTEX_DESTROY
+    MUTEX_INIT
     MUTEX_INIT_NEEDS_MUTEX_ZEROED
+    MUTEX_LOCK
+    MUTEX_UNLOCK
     my_binmode
     MY_CXT_INDEX
     MY_CXT_INIT_ARG
@@ -1813,6 +1876,7 @@ my @unresolved_visibility_overrides = qw(
     nBIT_UMAX
     NBSP_NATIVE
     NBSP_UTF8
+    NDEBUG
     NEED_UTF8
     NEGATE_2IV
     NEGATE_2UV
@@ -1851,8 +1915,10 @@ my @unresolved_visibility_overrides = qw(
     NO_POSIX_2008_LOCALE
     NORETURN_FUNCTION_END
     NORMAL
+    NO_TAINT_SUPPORT
     NOTE3
     NOT_REACHED
+    NSIG
     ntohi
     Null
     Nullfp
@@ -1865,6 +1931,7 @@ my @unresolved_visibility_overrides = qw(
     NV_DIG
     NV_EPSILON
     NV_IMPLICIT_BIT
+    NV_INF
     NV_LITTLE_ENDIAN
     NV_MANT_DIG
     NV_MAX
@@ -1874,6 +1941,7 @@ my @unresolved_visibility_overrides = qw(
     NV_MIN_10_EXP
     NV_MIN_EXP
     NV_MIX_ENDIAN
+    NV_NAN
     NV_NAN_BITS
     NV_NAN_IS_QUIET
     NV_NAN_IS_SIGNALING
@@ -1971,7 +2039,6 @@ my @unresolved_visibility_overrides = qw(
     OP_IS_SOCKET
     OP_IS_STAT
     OP_LVALUE_NO_CROAK
-    OP_SIBLING
     OPpALLOW_FAKE
     OPpARG1_MASK
     OPpARG2_MASK
@@ -2120,6 +2187,7 @@ my @unresolved_visibility_overrides = qw(
     OpREFCNT_set
     OP_REFCNT_TERM
     OP_REFCNT_UNLOCK
+    OP_SIBLING
     OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
@@ -2201,6 +2269,8 @@ my @unresolved_visibility_overrides = qw(
     Pause
     PBITVAL
     PBYTE
+    PIPE_OPEN_MODE
+    PIPESOCK_MODE
     PMf_BASE_SHIFT
     PMf_CHARSET
     PMf_CODELIST_PRIVATE
@@ -2252,12 +2322,20 @@ my @unresolved_visibility_overrides = qw(
     PRESCAN_VERSION
     PREV_RANGE_MATCHES_INVLIST
     PRINTF_FORMAT_NULL_OK
+    PRIVLIB_EXP
     PRIVSHIFT
     ProgLen
     pthread_addr_t
+    PTHREAD_ATFORK
+    pthread_attr_init
+    PTHREAD_ATTR_SETDETACHSTATE
     pthread_condattr_default
+    pthread_create
+    PTHREAD_CREATE
+    PTHREAD_CREATE_JOINABLE
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
+    PTHREAD_INIT_SELF
     pthread_key_create
     pthread_keycreate
     pthread_mutexattr_default
@@ -2275,13 +2353,16 @@ my @unresolved_visibility_overrides = qw(
     pTHX_9
     pTHX__FORMAT
     pTHX_FORMAT
+    pTHXo
     pTHX__VALUE
     pTHX_VALUE
+    pTHXx
     PUSH_MULTICALL_FLAGS
     PUSHSTACK
     PUSHSTACKi
     PUSHSTACK_INIT_HWM
     PUSHTARG
+    PVf_QUOTEDPREFIX
     pWARN_ALL
     pWARN_NONE
     pWARN_STD
@@ -2367,6 +2448,7 @@ my @unresolved_visibility_overrides = qw(
     REENTR_MEMZERO
     REFCOUNTED_HE_EXISTS
     REFCOUNTED_HE_KEY_UTF8
+    REGCOMP_INTERNAL_H
     RegexLengthToShowInErrorMessages
     REG_FETCH_ABSOLUTE
     REGNODE_GUTS
@@ -2377,6 +2459,8 @@ my @unresolved_visibility_overrides = qw(
     REGTAIL
     REGTAIL_STUDY
     reg_warn_non_literal_string
+    RE_OPTIMIZE_CURLYX_TO_CURLYM
+    RE_OPTIMIZE_CURLYX_TO_CURLYN
     REPORT_LOCATION
     REPORT_LOCATION_ARGS
     REQUIRE_BRANCHJ
@@ -2489,6 +2573,7 @@ my @unresolved_visibility_overrides = qw(
     RMS_IFI
     RMS_ISI
     RMS_PRV
+    ROTL32
     ROTL64
     ROTL_UV
     ROTR32
@@ -2519,6 +2604,7 @@ my @unresolved_visibility_overrides = qw(
     RXf_PMf_NOCAPTURE
     RXf_PMf_SPLIT
     RXf_PMf_STD_PMMOD
+    RXf_PMf_STD_PMMOD_SHIFT
     RXf_PMf_STRICT
     RXf_TAINTED
     RXf_TAINTED_SEEN
@@ -2697,10 +2783,13 @@ my @unresolved_visibility_overrides = qw(
     SAWAMPERSAND_LEFT
     SAWAMPERSAND_MIDDLE
     SAWAMPERSAND_RIGHT
+    SBOX32_CHURN_ROUNDS
     SBOX32_MIX3
     SBOX32_MIX4
     SBOX32_STATE_BITS
     SBOX32_STATE_BYTES
+    SBOX32_STATE_WORDS
+    SBOX32_STATIC_INLINE
     SBOX32_WARN2
     SBOX32_WARN3
     SBOX32_WARN4
@@ -2720,8 +2809,10 @@ my @unresolved_visibility_overrides = qw(
     SCF_TRIE_DOING_RESTUDY
     SCF_TRIE_RESTUDY
     SCF_WHILEM_VISITED_POS
+    SCOPE_SAVES_SIGNAL_MASK
     Semctl
     semun
+    SETERRNO
     SETGRENT_R_HAS_FPTR
     SETi
     SET_MARK_OFFSET
@@ -2736,6 +2827,7 @@ my @unresolved_visibility_overrides = qw(
     SET_SVANY_FOR_BODYLESS_IV
     SET_SVANY_FOR_BODYLESS_NV
     SETTARG
+    SET_THR
     SET_THREAD_SELF
     SETu
     SF_BEFORE_EOL
@@ -2748,6 +2840,7 @@ my @unresolved_visibility_overrides = qw(
     share_hek_hek
     sharepvn
     SHARP_S_SKIP
+    SH_PATH
     SHUTDOWN_TERM
     SHY_NATIVE
     sI
@@ -2762,6 +2855,7 @@ my @unresolved_visibility_overrides = qw(
     Size_t_MAX
     SKIP_IF_CHAR
     SLOPPYDIVIDE
+    SOCKET_OPEN_MODE
     S_PAT_MODS
     specialWARN
     SS_ACCVIO
@@ -2848,8 +2942,11 @@ my @unresolved_visibility_overrides = qw(
     SV_COW_REFCNT_MAX
     SV_COW_SHARED_HASH_KEYS
     SvDESTROYABLE
+    SV_DO_COW_SVSETSV
     SvEND_set
     SvENDx
+    SVf256
+    SVf32
     SvFAKE
     SvFAKE_off
     SvFAKE_on
@@ -3009,7 +3106,9 @@ my @unresolved_visibility_overrides = qw(
     TARGn
     TARGu
     tC
+    THR
     THREAD_CREATE_NEEDS_STACK
+    THREAD_RET_TYPE
     tI
     toCTRL
     toFOLD_LC
@@ -3064,6 +3163,7 @@ my @unresolved_visibility_overrides = qw(
     U32_MIN
     U8_MAX
     U8_MIN
+    U8TO16_LE
     U8TO32_LE
     U8TO64_LE
     U_I
@@ -3095,6 +3195,7 @@ my @unresolved_visibility_overrides = qw(
     UNISKIP
     UNKNOWN_ERRNO_MSG
     UNLINK
+    UNLOCK_DOLLARZERO_MUTEX
     UNLOCK_LC_NUMERIC_STANDARD
     UNOP_AUX_item_sv
     unpackWARN1
@@ -3105,10 +3206,12 @@ my @unresolved_visibility_overrides = qw(
     UPG_VERSION
     uproot_SV
     U_S
+    USE_BSDPGRP
     USE_ENVIRON_ARRAY
     USE_GRENT_BUFFER
     USE_GRENT_FPTR
     USE_GRENT_PTR
+    USE_HASH_SEED
     USE_HOSTENT_BUFFER
     USE_HOSTENT_ERRNO
     USE_HOSTENT_PTR
@@ -3142,6 +3245,7 @@ my @unresolved_visibility_overrides = qw(
     USE_PWENT_FPTR
     USE_PWENT_PTR
     USE_QUERYLOCALE
+    USE_REENTRANT_API
     USER_PROP_MUTEX_INIT
     USER_PROP_MUTEX_LOCK
     USER_PROP_MUTEX_TERM
@@ -3234,8 +3338,8 @@ my @unresolved_visibility_overrides = qw(
     vWARN_dep
     VXS
     VXS_CLASS
-    VXS_RETURN_M_SV
     VXSp
+    VXS_RETURN_M_SV
     VXSXSDP
     want_vtbl_bm
     want_vtbl_fm
@@ -3275,14 +3379,18 @@ my @unresolved_visibility_overrides = qw(
     XPUSHundef
     xpv_len
     XS_DYNAMIC_FILENAME
+    XS_INTERNAL
     XTENDED_PAT_MOD
     xuv_uv
     xV_FROM_REF
+    YIELD
     YYEMPTY
+    YYSTYPE_IS_DECLARED
     YYSTYPE_IS_TRIVIAL
     ZAPHOD32_FINALIZE
     ZAPHOD32_MIX
     ZAPHOD32_SCRAMBLE32
+    ZAPHOD32_STATIC_INLINE
     ZAPHOD32_WARN2
     ZAPHOD32_WARN3
     ZAPHOD32_WARN4
@@ -3336,6 +3444,7 @@ my @unresolved_visibility_overrides = qw(
     DEBUG_h_TEST_
     DEBUG_i_TEST_
     DEBUG_J_TEST_
+    DEBUG_LOCALE_INITIALIZATION_
     DEBUG_l_TEST_
     DEBUG_L_TEST_
     DEBUG_Lv_TEST_
@@ -3442,6 +3551,7 @@ my @unresolved_visibility_overrides = qw(
     o1_
     OFFUNISKIP_helper_
     PADNAME_BASE_
+    __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
     pTHXo_
@@ -3459,6 +3569,7 @@ my @unresolved_visibility_overrides = qw(
     SV_HEAD_
     SV_HEAD_DEBUG_
     SV_HEAD_UNION_
+    SVf_
     toFOLD_utf8_flags_
     toLOWER_utf8_flags_
     TOO_LATE_FOR_
@@ -4794,11 +4905,17 @@ sub find_undefs {
 
                 # Often perl has code to make sure various symbols that are
                 # always expected by the system to be defined, in fact are.
-                # These don't constitute namespace pollution.  So, if perl
-                # defines a symbol only if it already isn't defined, we add it
-                # to the list of system symbols
+                # These don't constitute namespace pollution.  This applies
+                # mainly to libc calls, which are all lowercase, but also to a
+                # few other symbols.  (This pattern may have to be revised at
+                # times.)  So, if perl defines such a symbol only if it
+                # already isn't defined, we add it to the list of system
+                # symbols
                 my $pattern = qr/ ! \s* defined\($name\)/x;
-                if (recurse_conds($pattern, $line->{cond}->@*)) {
+                if (   (   $name !~ /[[:upper:]]/
+                        || $name =~ / ^ ( [OS] _ | SIG) [[:upper:]]+ $ /x)
+                    && recurse_conds($pattern, $line->{cond}->@*))
+                {
                     $system_symbols{$name} = 1;
                     next;
                 }
