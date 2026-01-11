@@ -130,6 +130,20 @@ my $names_reserved_for_perl_use_re =
                             | ( _ | \b ) CPERL (arg | scope) ( _ | \b )
                           /x;
 
+# This program looks at C preprocessor conditional expressions.  It turns out
+# that many of those it cares about can be evaluated by knowing some
+# conventions used in our source.  This hash allows for information beyond
+# those conventions to be known.  Each key is a file, and its value is a
+# sub-hash.  Each key in that is a condition name which occurs in the source
+# as '#ifdef foo' or some variation on that. And the value of that key is 0 if
+# 'foo' is to be considered undefined while parsing the file; or 1 if the
+# symbol is to be considered to be defined.  Things to put in here might be to
+# set to 0 file-scope symbols that are only defined during development, such
+# as ones that turn on a special debugging mode.
+my %per_file_definitions = (
+        'perl.h'             => { 'H_PERL' => 0 },
+);
+
 # Below is a list of symbols that are not documented to be available for
 # modules to use, but are nevertheless currently not kept by embed.h from
 # being visible to the world.
@@ -5528,12 +5542,6 @@ $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 # it shouldn't be visible.  There is no harm in undefining a symol that
 # doesn't happen to get defined in this particular build environment.
 
-# Match any of these.  HeaderParser creates this canonical form for all
-# conditionals.
-my $cpp_ifdef_constraints_re = join "|", keys %cpp_ifdef_constraints;
-$cpp_ifdef_constraints_re =
-                      qr/ \b defined \( ( $cpp_ifdef_constraints_re ) \) /x;
-
 my @az = ('a'..'z');
 my $never_visible_flags_re = qr/[eX]/;
 my $discard_non_visibility_flags_re = eval "qr/[^ACeEX]/";
@@ -6675,9 +6683,59 @@ sub get_and_set_cpp_visibility {
 
     my $file = $line->{source};
 
-    my $cond_as_string = $line->reduce_conds($cpp_ifdef_constraints_re,
-                                             \%cpp_ifdef_constraints);
-    my $visibility_code = 0 + ($cond_as_string ne "");
+    # The base cpp conditionals for every line in this file
+    my %this_file_conds;
+
+    # The goal is to evaluate the cpp conditionals down to as close to just 0
+    # or 1 as possible.  To that end, we may have specified the values to
+    # assume some conditional terms are.  If so, use those.  If not, use
+    # some of our source code conventions for header files.
+    my $this_file_override = $per_file_definitions{$file};
+    if (defined $this_file_override) {
+        while (my ($name, $value) = each $this_file_override->%*) {
+            $this_file_conds{$name} = $value;
+        }
+    }
+    elsif ($file =~ / (.*) \. (?: h | inc ) $ /x) {
+
+        # Here is a header file.  Some header files have a guard against being
+        # #include'd recursively.  It looks like
+        #   #ifndef guard
+        #   #  define guard
+        #   ... rest of file ...
+        #   #endif  /* last line of file. */
+        # (The actual guard #define can come anywhere between the #ifndef and
+        # #endif)
+        # Assuming the value of that guard to be 0 accurately removes that
+        # conditional from the equation .
+        #
+        # For file foo, in most cases, the guard is either of the form
+        # 'PERL_FOO_H' or 'PERL_FOO_H_'  (except no PERL is added if foo
+        # already has that substring caselessly).
+        #
+        # Create rules for both potential guard forms
+        my $file_base = uc $1;
+        $file_base = "PERL_$file_base" unless $file_base =~ /PERL/;
+        $file_base .= "_H";
+        $this_file_conds{$file_base} = 0;
+        $this_file_conds{"${file_base}_"} = 0;
+    }
+
+    # my %visibility_types has stored in it values to assume various
+    # conditional terms are, given the type of visibility.  We add the
+    # per-file ones computed above.  Then we see if this symbol is visible for
+    # each type.  If the visibility evaluates to 0, it means there is no
+    # combination of conditions that lead to the symbol being visible with
+    # this type.  If it evaluates to anything else, there is.  Remember it
+    # could evaluate to plain 1, or to some string like
+    #   #if defined(a) || defined(b).
+    # If the result is like that, it means that there is some combination of
+    # conditions for which the symbol is visible.
+    my %hash = %this_file_conds;
+    my $pattern = join "|", keys %hash;
+    my $regex = qr/ \b defined \( ( $pattern ) \) /x;
+    my $cond_as_string = $line->reduce_conds($regex, \%hash);
+    my $visibility_code = $cond_as_string ne "";
 
     my $stored_ordering = $visibility{$name}{cpp_ordering};
 
