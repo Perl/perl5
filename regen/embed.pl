@@ -4960,30 +4960,6 @@ sub set_flags_visibility {
     return;
 }
 
-sub recurse_conds {
-
-    #  Look through the list of conditionals that HeaderParser generates,
-    #  looking for occurrences of the regex $pattern, returning true if found;
-    #  false otherwise.
-
-    my $status = 0;
-    my ($pattern, @conds) = @_;
-    for my $this_cond (@conds) {
-
-        # Recurse if necessary
-        if (ref $this_cond eq 'ARRAY') {
-            $status |= recurse_conds($pattern, $this_cond->@*);
-            return $status if $status;  # Early return if found
-        }
-        else {
-            $status |= $this_cond =~ $pattern;
-            return $status if $status;  # Early return if found
-        }
-    }
-
-    return 0;
-}
-
 sub get_and_set_cpp_visibility {
     my ($name, $line) = @_;
 
