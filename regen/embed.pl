@@ -4852,9 +4852,21 @@ sub set_flags_visibility {
     #       core but nowhere else
     #   1   The symbol is supposed to be visible everywhere
 
-    # Use the stored flags if new ones empty
-    my $flags = $raw_flags // $visibility{$name}{flags_raw} // "";
-    $flags = 'e' unless $flags ne "";     # Default visibility is none
+    # Use the stored flags if new ones empty.  If those don't exist, assume
+    # visible everywhere for symbols that Perl reserves for its use, and
+    # hidden visibility for everything else.
+    my $flags = $raw_flags // $visibility{$name}{flags_raw};
+    if (! defined $flags) {
+        if ($name =~ $names_reserved_for_perl_use_re) {
+            $flags = 'A';
+
+            # But note that this is an assumption; so can avoid warning later.
+            $visibility{$name}{flags_implicit} = 1;
+        }
+        else {
+            $flags = 'e';
+        }
+    }
 
     my $is_macro = $flags =~ /m/;
 
@@ -5050,8 +5062,9 @@ sub find_undefs {
             # Just the symbol, no arglist nor definition
             $name =~ s/ (?: \s | \( ) .* //x;
 
-            # These are reserved for Perl's use, so not a problem.
-            next if $name =~ $names_reserved_for_perl_use_re;
+            # 
+            set_flags_visibility($name, $hdr)
+                                  if $name =~ $names_reserved_for_perl_use_re;
 
             next unless $line->reduce_conds($cpp_ifdef_constraints_re,
                                             \%cpp_ifdef_constraints);
