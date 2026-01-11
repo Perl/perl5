@@ -424,8 +424,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     valid_digit_or_underscore_bits = (lookup_bit|CC_mask_(CC_UNDERSCORE_));
 
     /* Loop through the characters */
-    for (; s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits); s++)
-    {
+    while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+
         /* Handle non-trailing underscores when those are accepted */
         if (UNLIKELY(*s == '_')) {
             if (   ! allow_underscores
@@ -451,6 +451,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
          * (it does have unnecessary shifts, ANDSs, and additions for those)
          * */
         accumulated = (accumulated << shift) | XDIGIT_VALUE(*s);
+        s++;
     }   /* End of parsing loop */
 
   done_parse:
