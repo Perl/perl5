@@ -282,10 +282,11 @@
 #   undef case_99_SBOX32
 #   undef case_9_SBOX32
 #   undef CC_UNDERSCORE_
-#   undef isDIGIT_or_UNDERSCORE
 #   undef isFOO_or_UNDERSCORE_
 #   undef sv_2num
 #   if !defined(PERL_EXT)
+#     undef expected_size
+#     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
 #     undef invlist_subtract_
 #     undef invlist_union_

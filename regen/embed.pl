@@ -158,1706 +158,6 @@ my %per_file_definitions = (
 # For all modules that aren't deliberately using particular names, all the
 # other symbols on it are namespace pollutants.
 my @unresolved_visibility_overrides = qw(
-    _swab_16_
-    _swab_32_
-    _swab_64_
-    ACCEPT
-    ACCEPT_t8
-    ACCEPT_t8_p8
-    ACCEPT_t8_pb
-    ACCEPT_tb
-    ACCEPT_tb_p8
-    ACCEPT_tb_pb
-    AHOCORASICK
-    AHOCORASICK_t8
-    AHOCORASICK_t8_p8
-    AHOCORASICK_t8_pb
-    AHOCORASICK_tb
-    AHOCORASICK_tb_p8
-    AHOCORASICK_tb_pb
-    AHOCORASICKC
-    AHOCORASICKC_t8
-    AHOCORASICKC_t8_p8
-    AHOCORASICKC_t8_pb
-    AHOCORASICKC_tb
-    AHOCORASICKC_tb_p8
-    AHOCORASICKC_tb_pb
-    anchored_end_shift
-    anchored_offset
-    anchored_substr
-    anchored_utf8
-    ANY_FEATURE_BITS_SET
-    ANYOF
-    ANYOF_ALNUM
-    ANYOF_ALNUML
-    ANYOF_ALPHA
-    ANYOF_ALPHANUMERIC
-    ANYOF_ASCII
-    ANYOF_BIT
-    ANYOF_BITMAP
-    ANYOF_BITMAP_BYTE
-    ANYOF_BITMAP_CLEAR
-    ANYOF_BITMAP_CLEARALL
-    ANYOF_BITMAP_SET
-    ANYOF_BITMAP_SETALL
-    ANYOF_BITMAP_SIZE
-    ANYOF_BITMAP_TEST
-    ANYOF_BITMAP_ZERO
-    ANYOF_BLANK
-    ANYOF_CASED
-    ANYOF_CLASS_OR
-    ANYOF_CLASS_SETALL
-    ANYOF_CLASS_TEST_ANY_SET
-    ANYOF_CNTRL
-    ANYOF_COMMON_FLAGS
-    ANYOF_DIGIT
-    ANYOF_FLAGS
-    ANYOF_FLAGS_ALL
-    ANYOF_GRAPH
-    ANYOF_HAS_AUX
-    ANYOF_HAS_EXTRA_RUNTIME_MATCHES
-    ANYOF_HORIZWS
-    ANYOF_INVERT
-    ANYOF_LOCALE_FLAGS
-    ANYOF_LOWER
-    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP
-    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE
-    ANYOF_MATCHES_NONE_OUTSIDE_BITMAP
-    ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
-    ANYOF_MATCHES_POSIXL
-    ANYOF_MAX
-    ANYOF_NALNUM
-    ANYOF_NALNUML
-    ANYOF_NALPHA
-    ANYOF_NALPHANUMERIC
-    ANYOF_NASCII
-    ANYOF_NBLANK
-    ANYOF_NCASED
-    ANYOF_NCNTRL
-    ANYOF_NDIGIT
-    ANYOF_NGRAPH
-    ANYOF_NHORIZWS
-    ANYOF_NLOWER
-    ANYOF_NPRINT
-    ANYOF_NPUNCT
-    ANYOF_NSPACE
-    ANYOF_NSPACEL
-    ANYOF_NUPPER
-    ANYOF_NVERTWS
-    ANYOF_NWORDCHAR
-    ANYOF_NXDIGIT
-    ANYOF_ONLY_HAS_BITMAP
-    ANYOF_ONLY_HAS_BITMAP_MASK
-    ANYOF_POSIXL_AND
-    ANYOF_POSIXL_BITMAP
-    ANYOF_POSIXL_CLEAR
-    ANYOF_POSIXL_MAX
-    ANYOF_POSIXL_OR
-    ANYOF_POSIXL_SET
-    ANYOF_POSIXL_SET_TO_BITMAP
-    ANYOF_POSIXL_SETALL
-    ANYOF_POSIXL_SSC_TEST_ALL_SET
-    ANYOF_POSIXL_SSC_TEST_ANY_SET
-    ANYOF_POSIXL_TEST
-    ANYOF_POSIXL_TEST_ALL_SET
-    ANYOF_POSIXL_TEST_ANY_SET
-    ANYOF_POSIXL_ZERO
-    ANYOF_PRINT
-    ANYOF_PUNCT
-    ANYOF_SPACE
-    ANYOF_SPACEL
-    ANYOF_t8
-    ANYOF_t8_p8
-    ANYOF_t8_pb
-    ANYOF_tb
-    ANYOF_tb_p8
-    ANYOF_tb_pb
-    ANYOF_UNIPROP
-    ANYOF_UPPER
-    ANYOF_VERTWS
-    ANYOF_WARN_SUPER__shared
-    ANYOF_WORDCHAR
-    ANYOF_XDIGIT
-    ANYOFD
-    ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
-    ANYOFD_t8
-    ANYOFD_t8_p8
-    ANYOFD_t8_pb
-    ANYOFD_tb
-    ANYOFD_tb_p8
-    ANYOFD_tb_pb
-    ANYOFH
-    ANYOFH_t8
-    ANYOFH_t8_p8
-    ANYOFH_t8_pb
-    ANYOFH_tb
-    ANYOFH_tb_p8
-    ANYOFH_tb_pb
-    ANYOFHb
-    ANYOFHb_t8
-    ANYOFHb_t8_p8
-    ANYOFHb_t8_pb
-    ANYOFHb_tb
-    ANYOFHb_tb_p8
-    ANYOFHb_tb_pb
-    ANYOFHbbm
-    ANYOFHbbm_t8
-    ANYOFHbbm_t8_p8
-    ANYOFHbbm_t8_pb
-    ANYOFHbbm_tb
-    ANYOFHbbm_tb_p8
-    ANYOFHbbm_tb_pb
-    ANYOFHr
-    ANYOFHr_t8
-    ANYOFHr_t8_p8
-    ANYOFHr_t8_pb
-    ANYOFHr_tb
-    ANYOFHr_tb_p8
-    ANYOFHr_tb_pb
-    ANYOFHs
-    ANYOFHs_t8
-    ANYOFHs_t8_p8
-    ANYOFHs_t8_pb
-    ANYOFHs_tb
-    ANYOFHs_tb_p8
-    ANYOFHs_tb_pb
-    ANYOFL
-    ANYOFL_FOLD
-    ANYOFL_t8
-    ANYOFL_t8_p8
-    ANYOFL_t8_pb
-    ANYOFL_tb
-    ANYOFL_tb_p8
-    ANYOFL_tb_pb
-    ANYOFL_UTF8_LOCALE_REQD
-    ANYOFM
-    ANYOFM_t8
-    ANYOFM_t8_p8
-    ANYOFM_t8_pb
-    ANYOFM_tb
-    ANYOFM_tb_p8
-    ANYOFM_tb_pb
-    ANYOFPOSIXL
-    ANYOFPOSIXL_t8
-    ANYOFPOSIXL_t8_p8
-    ANYOFPOSIXL_t8_pb
-    ANYOFPOSIXL_tb
-    ANYOFPOSIXL_tb_p8
-    ANYOFPOSIXL_tb_pb
-    ANYOFR
-    ANYOFR_BASE_BITS
-    ANYOFR_t8
-    ANYOFR_t8_p8
-    ANYOFR_t8_pb
-    ANYOFR_tb
-    ANYOFR_tb_p8
-    ANYOFR_tb_pb
-    ANYOFRb
-    ANYOFRb_t8
-    ANYOFRb_t8_p8
-    ANYOFRb_t8_pb
-    ANYOFRb_tb
-    ANYOFRb_tb_p8
-    ANYOFRb_tb_pb
-    ANYOFRbase
-    ANYOFRdelta
-    ARG1a
-    ARG1a_LOC
-    ARG1a_SET
-    ARG1b
-    ARG1b_LOC
-    ARG1b_SET
-    ARG1i
-    ARG1i_LOC
-    ARG1i_SET
-    ARG1u
-    ARG1u_LOC
-    ARG1u_SET
-    ARG2a
-    ARG2a_LOC
-    ARG2a_SET
-    ARG2b
-    ARG2b_LOC
-    ARG2b_SET
-    ARG2i
-    ARG2i_LOC
-    ARG2i_SET
-    ARG2u
-    ARG2u_LOC
-    ARG2u_SET
-    ARG3a
-    ARG3a_LOC
-    ARG3a_SET
-    ARG3b
-    ARG3b_LOC
-    ARG3b_SET
-    ARG3i
-    ARG3i_LOC
-    ARG3i_SET
-    ARG3u
-    ARG3u_LOC
-    ARG3u_SET
-    ARG__SET
-    ARG_VALUE
-    ARGp
-    ARGp_BYTES_LOC
-    ARGp_SET
-    av_dup
-    av_dup_inc
-    BITMAP_BIT
-    BITMAP_BYTE
-    BITMAP_TEST
-    BOL
-    BOL_t8
-    BOL_t8_p8
-    BOL_t8_pb
-    BOL_tb
-    BOL_tb_p8
-    BOL_tb_pb
-    BOUND
-    BOUND_t8
-    BOUND_t8_p8
-    BOUND_t8_pb
-    BOUND_tb
-    BOUND_tb_p8
-    BOUND_tb_pb
-    BOUNDA
-    BOUNDA_t8
-    BOUNDA_t8_p8
-    BOUNDA_t8_pb
-    BOUNDA_tb
-    BOUNDA_tb_p8
-    BOUNDA_tb_pb
-    BOUNDL
-    BOUNDL_t8
-    BOUNDL_t8_p8
-    BOUNDL_t8_pb
-    BOUNDL_tb
-    BOUNDL_tb_p8
-    BOUNDL_tb_pb
-    BOUNDU
-    BOUNDU_t8
-    BOUNDU_t8_p8
-    BOUNDU_t8_pb
-    BOUNDU_tb
-    BOUNDU_tb_p8
-    BOUNDU_tb_pb
-    BRANCH
-    BRANCH_next
-    BRANCH_next_fail
-    BRANCH_next_fail_t8
-    BRANCH_next_fail_t8_p8
-    BRANCH_next_fail_t8_pb
-    BRANCH_next_fail_tb
-    BRANCH_next_fail_tb_p8
-    BRANCH_next_fail_tb_pb
-    BRANCH_next_t8
-    BRANCH_next_t8_p8
-    BRANCH_next_t8_pb
-    BRANCH_next_tb
-    BRANCH_next_tb_p8
-    BRANCH_next_tb_pb
-    BRANCH_t8
-    BRANCH_t8_p8
-    BRANCH_t8_pb
-    BRANCH_tb
-    BRANCH_tb_p8
-    BRANCH_tb_pb
-    BRANCHJ
-    BRANCHJ_t8
-    BRANCHJ_t8_p8
-    BRANCHJ_t8_pb
-    BRANCHJ_tb
-    BRANCHJ_tb_p8
-    BRANCHJ_tb_pb
-    check_end_shift
-    check_offset_max
-    check_offset_min
-    check_substr
-    check_utf8
-    CLEARFEATUREBITS
-    CLOSE
-    CLOSE_t8
-    CLOSE_t8_p8
-    CLOSE_t8_pb
-    CLOSE_tb
-    CLOSE_tb_p8
-    CLOSE_tb_pb
-    CLUMP
-    CLUMP_t8
-    CLUMP_t8_p8
-    CLUMP_t8_pb
-    CLUMP_tb
-    CLUMP_tb_p8
-    CLUMP_tb_pb
-    COMMIT
-    COMMIT_next
-    COMMIT_next_fail
-    COMMIT_next_fail_t8
-    COMMIT_next_fail_t8_p8
-    COMMIT_next_fail_t8_pb
-    COMMIT_next_fail_tb
-    COMMIT_next_fail_tb_p8
-    COMMIT_next_fail_tb_pb
-    COMMIT_next_t8
-    COMMIT_next_t8_p8
-    COMMIT_next_t8_pb
-    COMMIT_next_tb
-    COMMIT_next_tb_p8
-    COMMIT_next_tb_pb
-    COMMIT_t8
-    COMMIT_t8_p8
-    COMMIT_t8_pb
-    COMMIT_tb
-    COMMIT_tb_p8
-    COMMIT_tb_pb
-    CURLY
-    CURLY_B_max
-    CURLY_B_max_fail
-    CURLY_B_max_fail_t8
-    CURLY_B_max_fail_t8_p8
-    CURLY_B_max_fail_t8_pb
-    CURLY_B_max_fail_tb
-    CURLY_B_max_fail_tb_p8
-    CURLY_B_max_fail_tb_pb
-    CURLY_B_max_t8
-    CURLY_B_max_t8_p8
-    CURLY_B_max_t8_pb
-    CURLY_B_max_tb
-    CURLY_B_max_tb_p8
-    CURLY_B_max_tb_pb
-    CURLY_B_min
-    CURLY_B_min_fail
-    CURLY_B_min_fail_t8
-    CURLY_B_min_fail_t8_p8
-    CURLY_B_min_fail_t8_pb
-    CURLY_B_min_fail_tb
-    CURLY_B_min_fail_tb_p8
-    CURLY_B_min_fail_tb_pb
-    CURLY_B_min_t8
-    CURLY_B_min_t8_p8
-    CURLY_B_min_t8_pb
-    CURLY_B_min_tb
-    CURLY_B_min_tb_p8
-    CURLY_B_min_tb_pb
-    CURLY_t8
-    CURLY_t8_p8
-    CURLY_t8_pb
-    CURLY_tb
-    CURLY_tb_p8
-    CURLY_tb_pb
-    CURLYM
-    CURLYM_A
-    CURLYM_A_fail
-    CURLYM_A_fail_t8
-    CURLYM_A_fail_t8_p8
-    CURLYM_A_fail_t8_pb
-    CURLYM_A_fail_tb
-    CURLYM_A_fail_tb_p8
-    CURLYM_A_fail_tb_pb
-    CURLYM_A_t8
-    CURLYM_A_t8_p8
-    CURLYM_A_t8_pb
-    CURLYM_A_tb
-    CURLYM_A_tb_p8
-    CURLYM_A_tb_pb
-    CURLYM_B
-    CURLYM_B_fail
-    CURLYM_B_fail_t8
-    CURLYM_B_fail_t8_p8
-    CURLYM_B_fail_t8_pb
-    CURLYM_B_fail_tb
-    CURLYM_B_fail_tb_p8
-    CURLYM_B_fail_tb_pb
-    CURLYM_B_t8
-    CURLYM_B_t8_p8
-    CURLYM_B_t8_pb
-    CURLYM_B_tb
-    CURLYM_B_tb_p8
-    CURLYM_B_tb_pb
-    CURLYM_t8
-    CURLYM_t8_p8
-    CURLYM_t8_pb
-    CURLYM_tb
-    CURLYM_tb_p8
-    CURLYM_tb_pb
-    CURLYN
-    CURLYN_t8
-    CURLYN_t8_p8
-    CURLYN_t8_pb
-    CURLYN_tb
-    CURLYN_tb_p8
-    CURLYN_tb_pb
-    CURLYX
-    CURLYX_end
-    CURLYX_end_fail
-    CURLYX_end_fail_t8
-    CURLYX_end_fail_t8_p8
-    CURLYX_end_fail_t8_pb
-    CURLYX_end_fail_tb
-    CURLYX_end_fail_tb_p8
-    CURLYX_end_fail_tb_pb
-    CURLYX_end_t8
-    CURLYX_end_t8_p8
-    CURLYX_end_t8_pb
-    CURLYX_end_tb
-    CURLYX_end_tb_p8
-    CURLYX_end_tb_pb
-    CURLYX_t8
-    CURLYX_t8_p8
-    CURLYX_t8_pb
-    CURLYX_tb
-    CURLYX_tb_p8
-    CURLYX_tb_pb
-    CURRENT_FEATURE_BUNDLE
-    CURRENT_HINTS
-    CUTGROUP
-    CUTGROUP_next
-    CUTGROUP_next_fail
-    CUTGROUP_next_fail_t8
-    CUTGROUP_next_fail_t8_p8
-    CUTGROUP_next_fail_t8_pb
-    CUTGROUP_next_fail_tb
-    CUTGROUP_next_fail_tb_p8
-    CUTGROUP_next_fail_tb_pb
-    CUTGROUP_next_t8
-    CUTGROUP_next_t8_p8
-    CUTGROUP_next_t8_pb
-    CUTGROUP_next_tb
-    CUTGROUP_next_tb_p8
-    CUTGROUP_next_tb_pb
-    CUTGROUP_t8
-    CUTGROUP_t8_p8
-    CUTGROUP_t8_pb
-    CUTGROUP_tb
-    CUTGROUP_tb_p8
-    CUTGROUP_tb_pb
-    cv_dup
-    cv_dup_inc
-    CV_UNDEF_KEEP_NAME
-    CvSLABBED
-    CvSLABBED_off
-    CvSLABBED_on
-    CX_POPSUBST
-    CX_PUSHSUBST
-    DEBUG_BUFFERS_r
-    DEBUG_COMPILE_r
-    DEBUG_DUMP_PRE_OPTIMIZE_r
-    DEBUG_DUMP_r
-    DEBUG_EXECUTE_r
-    DEBUG_EXTRA_r
-    DEBUG_FLAGS_r
-    DEBUG_GPOS_r
-    DEBUG_INTUIT_r
-    DEBUG_MATCH_r
-    DEBUG_OPTIMISE_MORE_r
-    DEBUG_OPTIMISE_r
-    DEBUG_PARSE_r
-    DEBUG_STACK_r
-    DEBUG_STATE_r
-    DEBUG_TEST_r
-    DEBUG_TRIE_COMPILE_MORE_r
-    DEBUG_TRIE_COMPILE_r
-    DEBUG_TRIE_EXECUTE_MORE_r
-    DEBUG_TRIE_EXECUTE_r
-    DEBUG_TRIE_r
-    DECLARE_AND_GET_RE_DEBUG_FLAGS
-    DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX
-    DEFINEP
-    DEFINEP_t8
-    DEFINEP_t8_p8
-    DEFINEP_t8_pb
-    DEFINEP_tb
-    DEFINEP_tb_p8
-    DEFINEP_tb_pb
-    DEPRECATED_OPENING_NON_UTF8_BRACKETS
-    DEPRECATED_OPENING_UTF8_BRACKETS
-    DUMP_FEATURE_BITS
-    END
-    END_t8
-    END_t8_p8
-    END_t8_pb
-    END_tb
-    END_tb_p8
-    END_tb_pb
-    ENDLIKE
-    ENDLIKE_t8
-    ENDLIKE_t8_p8
-    ENDLIKE_t8_pb
-    ENDLIKE_tb
-    ENDLIKE_tb_p8
-    ENDLIKE_tb_pb
-    EOL
-    EOL_t8
-    EOL_t8_p8
-    EOL_t8_pb
-    EOL_tb
-    EOL_tb_p8
-    EOL_tb_pb
-    EOS
-    EOS_t8
-    EOS_t8_p8
-    EOS_t8_pb
-    EOS_tb
-    EOS_tb_p8
-    EOS_tb_pb
-    EVAL
-    EVAL_B
-    EVAL_B_fail
-    EVAL_B_fail_t8
-    EVAL_B_fail_t8_p8
-    EVAL_B_fail_t8_pb
-    EVAL_B_fail_tb
-    EVAL_B_fail_tb_p8
-    EVAL_B_fail_tb_pb
-    EVAL_B_t8
-    EVAL_B_t8_p8
-    EVAL_B_t8_pb
-    EVAL_B_tb
-    EVAL_B_tb_p8
-    EVAL_B_tb_pb
-    EVAL_FLAGS_MASK
-    EVAL_OPTIMISTIC_FLAG
-    EVAL_postponed_A
-    EVAL_postponed_A_fail
-    EVAL_postponed_A_fail_t8
-    EVAL_postponed_A_fail_t8_p8
-    EVAL_postponed_A_fail_t8_pb
-    EVAL_postponed_A_fail_tb
-    EVAL_postponed_A_fail_tb_p8
-    EVAL_postponed_A_fail_tb_pb
-    EVAL_postponed_A_t8
-    EVAL_postponed_A_t8_p8
-    EVAL_postponed_A_t8_pb
-    EVAL_postponed_A_tb
-    EVAL_postponed_A_tb_p8
-    EVAL_postponed_A_tb_pb
-    EVAL_postponed_B
-    EVAL_postponed_B_fail
-    EVAL_postponed_B_fail_t8
-    EVAL_postponed_B_fail_t8_p8
-    EVAL_postponed_B_fail_t8_pb
-    EVAL_postponed_B_fail_tb
-    EVAL_postponed_B_fail_tb_p8
-    EVAL_postponed_B_fail_tb_pb
-    EVAL_postponed_B_t8
-    EVAL_postponed_B_t8_p8
-    EVAL_postponed_B_t8_pb
-    EVAL_postponed_B_tb
-    EVAL_postponed_B_tb_p8
-    EVAL_postponed_B_tb_pb
-    EVAL_t8
-    EVAL_t8_p8
-    EVAL_t8_pb
-    EVAL_tb
-    EVAL_tb_p8
-    EVAL_tb_pb
-    EXACT
-    EXACT_REQ8
-    EXACT_REQ8_t8
-    EXACT_REQ8_t8_p8
-    EXACT_REQ8_t8_pb
-    EXACT_REQ8_tb
-    EXACT_REQ8_tb_p8
-    EXACT_REQ8_tb_pb
-    EXACT_t8
-    EXACT_t8_p8
-    EXACT_t8_pb
-    EXACT_tb
-    EXACT_tb_p8
-    EXACT_tb_pb
-    EXACTF
-    EXACTF_t8
-    EXACTF_t8_p8
-    EXACTF_t8_pb
-    EXACTF_tb
-    EXACTF_tb_p8
-    EXACTF_tb_pb
-    EXACTFAA
-    EXACTFAA_NO_TRIE
-    EXACTFAA_NO_TRIE_t8
-    EXACTFAA_NO_TRIE_t8_p8
-    EXACTFAA_NO_TRIE_t8_pb
-    EXACTFAA_NO_TRIE_tb
-    EXACTFAA_NO_TRIE_tb_p8
-    EXACTFAA_NO_TRIE_tb_pb
-    EXACTFAA_t8
-    EXACTFAA_t8_p8
-    EXACTFAA_t8_pb
-    EXACTFAA_tb
-    EXACTFAA_tb_p8
-    EXACTFAA_tb_pb
-    EXACTFL
-    EXACTFL_t8
-    EXACTFL_t8_p8
-    EXACTFL_t8_pb
-    EXACTFL_tb
-    EXACTFL_tb_p8
-    EXACTFL_tb_pb
-    EXACTFLU8
-    EXACTFLU8_t8
-    EXACTFLU8_t8_p8
-    EXACTFLU8_t8_pb
-    EXACTFLU8_tb
-    EXACTFLU8_tb_p8
-    EXACTFLU8_tb_pb
-    EXACTFU
-    EXACTFU_REQ8
-    EXACTFU_REQ8_t8
-    EXACTFU_REQ8_t8_p8
-    EXACTFU_REQ8_t8_pb
-    EXACTFU_REQ8_tb
-    EXACTFU_REQ8_tb_p8
-    EXACTFU_REQ8_tb_pb
-    EXACTFU_S_EDGE
-    EXACTFU_S_EDGE_t8
-    EXACTFU_S_EDGE_t8_p8
-    EXACTFU_S_EDGE_t8_pb
-    EXACTFU_S_EDGE_tb
-    EXACTFU_S_EDGE_tb_p8
-    EXACTFU_S_EDGE_tb_pb
-    EXACTFU_t8
-    EXACTFU_t8_p8
-    EXACTFU_t8_pb
-    EXACTFU_tb
-    EXACTFU_tb_p8
-    EXACTFU_tb_pb
-    EXACTFUP
-    EXACTFUP_t8
-    EXACTFUP_t8_p8
-    EXACTFUP_t8_pb
-    EXACTFUP_tb
-    EXACTFUP_tb_p8
-    EXACTFUP_tb_pb
-    EXACTL
-    EXACTL_t8
-    EXACTL_t8_p8
-    EXACTL_t8_pb
-    EXACTL_tb
-    EXACTL_tb_p8
-    EXACTL_tb_pb
-    EXTRA_CLOSING_NON_UTF8_BRACKETS
-    EXTRA_CLOSING_UTF8_BRACKETS
-    EXTRA_OPENING_NON_UTF8_BRACKETS
-    EXTRA_OPENING_UTF8_BRACKETS
-    EXTRA_SIZE
-    FATAL_ABOVE_FF_MSG
-    FEATURE___SUB___BIT
-    FEATURE___SUB___INDEX
-    FEATURE___SUB___IS_ENABLED
-    FEATURE_APOS_AS_NAME_SEP_BIT
-    FEATURE_APOS_AS_NAME_SEP_INDEX
-    FEATURE_APOS_AS_NAME_SEP_IS_ENABLED
-    FEATURE_BAREWORD_FILEHANDLES_BIT
-    FEATURE_BAREWORD_FILEHANDLES_INDEX
-    FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED
-    FEATURE_BITWISE_BIT
-    FEATURE_BITWISE_INDEX
-    FEATURE_BITWISE_IS_ENABLED
-    FEATURE_BUNDLE_510
-    FEATURE_BUNDLE_511
-    FEATURE_BUNDLE_515
-    FEATURE_BUNDLE_523
-    FEATURE_BUNDLE_527
-    FEATURE_BUNDLE_535
-    FEATURE_BUNDLE_537
-    FEATURE_BUNDLE_539
-    FEATURE_BUNDLE_541
-    FEATURE_BUNDLE_CUSTOM
-    FEATURE_BUNDLE_DEFAULT
-    FEATURE_CLASS_BIT
-    FEATURE_CLASS_INDEX
-    FEATURE_CLASS_IS_ENABLED
-    FEATURE_DEFER_BIT
-    FEATURE_DEFER_INDEX
-    FEATURE_DEFER_IS_ENABLED
-    FEATURE_EVALBYTES_BIT
-    FEATURE_EVALBYTES_INDEX
-    FEATURE_EVALBYTES_IS_ENABLED
-    FEATURE_FC_BIT
-    FEATURE_FC_INDEX
-    FEATURE_FC_IS_ENABLED
-    FEATURE_INDIRECT_BIT
-    FEATURE_INDIRECT_INDEX
-    FEATURE_INDIRECT_IS_ENABLED
-    FEATURE_IS_ENABLED_MASK
-    FEATURE_ISA_BIT
-    FEATURE_ISA_INDEX
-    FEATURE_ISA_IS_ENABLED
-    FEATURE_KEYWORD_ALL_BIT
-    FEATURE_KEYWORD_ALL_INDEX
-    FEATURE_KEYWORD_ALL_IS_ENABLED
-    FEATURE_KEYWORD_ANY_BIT
-    FEATURE_KEYWORD_ANY_INDEX
-    FEATURE_KEYWORD_ANY_IS_ENABLED
-    FEATURE_MODULE_TRUE_BIT
-    FEATURE_MODULE_TRUE_INDEX
-    FEATURE_MODULE_TRUE_IS_ENABLED
-    FEATURE_MORE_DELIMS_BIT
-    FEATURE_MORE_DELIMS_INDEX
-    FEATURE_MORE_DELIMS_IS_ENABLED
-    FEATURE_MULTIDIMENSIONAL_BIT
-    FEATURE_MULTIDIMENSIONAL_INDEX
-    FEATURE_MULTIDIMENSIONAL_IS_ENABLED
-    FEATURE_MYREF_BIT
-    FEATURE_MYREF_INDEX
-    FEATURE_MYREF_IS_ENABLED
-    FEATURE_POSTDEREF_QQ_BIT
-    FEATURE_POSTDEREF_QQ_INDEX
-    FEATURE_POSTDEREF_QQ_IS_ENABLED
-    FEATURE_REFALIASING_BIT
-    FEATURE_REFALIASING_INDEX
-    FEATURE_REFALIASING_IS_ENABLED
-    FEATURE_SAY_BIT
-    FEATURE_SAY_INDEX
-    FEATURE_SAY_IS_ENABLED
-    FEATURE_SIGNATURES_BIT
-    FEATURE_SIGNATURES_INDEX
-    FEATURE_SIGNATURES_IS_ENABLED
-    FEATURE_SMARTMATCH_BIT
-    FEATURE_SMARTMATCH_INDEX
-    FEATURE_SMARTMATCH_IS_ENABLED
-    FEATURE_STATE_BIT
-    FEATURE_STATE_INDEX
-    FEATURE_STATE_IS_ENABLED
-    FEATURE_SWITCH_BIT
-    FEATURE_SWITCH_INDEX
-    FEATURE_SWITCH_IS_ENABLED
-    FEATURE_TRY_BIT
-    FEATURE_TRY_INDEX
-    FEATURE_TRY_IS_ENABLED
-    FEATURE_UNICODE_BIT
-    FEATURE_UNICODE_INDEX
-    FEATURE_UNICODE_IS_ENABLED
-    FEATURE_UNIEVAL_BIT
-    FEATURE_UNIEVAL_INDEX
-    FEATURE_UNIEVAL_IS_ENABLED
-    FETCHFEATUREBITSHH
-    FILL_ADVANCE_NODE
-    FILL_ADVANCE_NODE_2ui_ARG
-    FILL_ADVANCE_NODE_ARG1u
-    FILL_ADVANCE_NODE_ARGp
-    FILL_NODE
-    FIND_RUNCV_level_eq
-    FIND_RUNCV_padid_eq
-    FIRST_BYTE
-    FIRST_NON_ASCII_DECIMAL_DIGIT
-    FLAGS
-    float_end_shift
-    float_max_offset
-    float_min_offset
-    float_substr
-    float_utf8
-    GET_REGCLASS_AUX_DATA
-    GOSUB
-    GOSUB_t8
-    GOSUB_t8_p8
-    GOSUB_t8_pb
-    GOSUB_tb
-    GOSUB_tb_p8
-    GOSUB_tb_pb
-    GPOS
-    GPOS_t8
-    GPOS_t8_p8
-    GPOS_t8_pb
-    GPOS_tb
-    GPOS_tb_p8
-    GPOS_tb_pb
-    GROUPP
-    GROUPP_t8
-    GROUPP_t8_p8
-    GROUPP_t8_pb
-    GROUPP_tb
-    GROUPP_tb_p8
-    GROUPP_tb_pb
-    GROUPPN
-    GROUPPN_t8
-    GROUPPN_t8_p8
-    GROUPPN_t8_pb
-    GROUPPN_tb
-    GROUPPN_tb_p8
-    GROUPPN_tb_pb
-    gv_dup
-    gv_dup_inc
-    HIGHEST_ANYOF_HRx_BYTE
-    HIGHEST_CASE_CHANGING_CP
-    HINT_FEATURE_SHIFT
-    HINTS_REFCNT_LOCK
-    HINTS_REFCNT_UNLOCK
-    hv_deletehek
-    hv_dup
-    hv_dup_inc
-    hv_existshek
-    hv_fetchhek
-    hv_storehek
-    HVAUX_ARENA_ROOT_IX
-    HVrhek_delete
-    HVrhek_IV
-    HVrhek_PV
-    HVrhek_PV_UTF8
-    HVrhek_typemask
-    HVrhek_undef
-    HVrhek_UV
-    IFMATCH
-    IFMATCH_A
-    IFMATCH_A_fail
-    IFMATCH_A_fail_t8
-    IFMATCH_A_fail_t8_p8
-    IFMATCH_A_fail_t8_pb
-    IFMATCH_A_fail_tb
-    IFMATCH_A_fail_tb_p8
-    IFMATCH_A_fail_tb_pb
-    IFMATCH_A_t8
-    IFMATCH_A_t8_p8
-    IFMATCH_A_t8_pb
-    IFMATCH_A_tb
-    IFMATCH_A_tb_p8
-    IFMATCH_A_tb_pb
-    IFMATCH_t8
-    IFMATCH_t8_p8
-    IFMATCH_t8_pb
-    IFMATCH_tb
-    IFMATCH_tb_p8
-    IFMATCH_tb_pb
-    IFTHEN
-    IFTHEN_t8
-    IFTHEN_t8_p8
-    IFTHEN_t8_pb
-    IFTHEN_tb
-    IFTHEN_tb_p8
-    IFTHEN_tb_pb
-    INSUBP
-    INSUBP_t8
-    INSUBP_t8_p8
-    INSUBP_t8_pb
-    INSUBP_tb
-    INSUBP_tb_p8
-    INSUBP_tb_pb
-    io_dup
-    io_dup_inc
-    is_ANYOF_SYNTHETIC
-    IS_ANYOF_TRIE
-    IS_TRIE_AC
-    isDEBUG_WILDCARD
-    isEXACT_REQ8
-    isEXACTFish
-    isGV_or_RVCV
-    isMNEMONIC_CNTRL
-    isPOWER_OF_2
-    IV_ADD_SUB_OVERFLOW_IS_EXPENSIVE
-    IV_MUL_OVERFLOW_IS_EXPENSIVE
-    KEEPS
-    KEEPS_next
-    KEEPS_next_fail
-    KEEPS_next_fail_t8
-    KEEPS_next_fail_t8_p8
-    KEEPS_next_fail_t8_pb
-    KEEPS_next_fail_tb
-    KEEPS_next_fail_tb_p8
-    KEEPS_next_fail_tb_pb
-    KEEPS_next_t8
-    KEEPS_next_t8_p8
-    KEEPS_next_t8_pb
-    KEEPS_next_tb
-    KEEPS_next_tb_p8
-    KEEPS_next_tb_pb
-    KEEPS_t8
-    KEEPS_t8_p8
-    KEEPS_t8_pb
-    KEEPS_tb
-    KEEPS_tb_p8
-    KEEPS_tb_pb
-    LEX_DONT_CLOSE_RSFP
-    LEX_EVALBYTES
-    LEX_IGNORE_UTF8_HINTS
-    LEX_START_COPIED
-    LEX_START_FLAGS
-    LEX_START_SAME_FILTER
-    LEXACT
-    LEXACT_REQ8
-    LEXACT_REQ8_t8
-    LEXACT_REQ8_t8_p8
-    LEXACT_REQ8_t8_pb
-    LEXACT_REQ8_tb
-    LEXACT_REQ8_tb_p8
-    LEXACT_REQ8_tb_pb
-    LEXACT_t8
-    LEXACT_t8_p8
-    LEXACT_t8_pb
-    LEXACT_tb
-    LEXACT_tb_p8
-    LEXACT_tb_pb
-    LNBREAK
-    LNBREAK_t8
-    LNBREAK_t8_p8
-    LNBREAK_t8_pb
-    LNBREAK_tb
-    LNBREAK_tb_p8
-    LNBREAK_tb_pb
-    LOGICAL
-    LOGICAL_t8
-    LOGICAL_t8_p8
-    LOGICAL_t8_pb
-    LOGICAL_tb
-    LOGICAL_tb_p8
-    LOGICAL_tb_pb
-    LONGJMP
-    LONGJMP_t8
-    LONGJMP_t8_p8
-    LONGJMP_t8_pb
-    LONGJMP_tb
-    LONGJMP_tb_p8
-    LONGJMP_tb_pb
-    LOOKBEHIND_END
-    LOOKBEHIND_END_t8
-    LOOKBEHIND_END_t8_p8
-    LOOKBEHIND_END_t8_pb
-    LOOKBEHIND_END_tb
-    LOOKBEHIND_END_tb_p8
-    LOOKBEHIND_END_tb_pb
-    LOWEST_ANYOF_HRx_BYTE
-    magic_sethint_feature
-    MARKPOINT
-    MARKPOINT_next
-    MARKPOINT_next_fail
-    MARKPOINT_next_fail_t8
-    MARKPOINT_next_fail_t8_p8
-    MARKPOINT_next_fail_t8_pb
-    MARKPOINT_next_fail_tb
-    MARKPOINT_next_fail_tb_p8
-    MARKPOINT_next_fail_tb_pb
-    MARKPOINT_next_t8
-    MARKPOINT_next_t8_p8
-    MARKPOINT_next_t8_pb
-    MARKPOINT_next_tb
-    MARKPOINT_next_tb_p8
-    MARKPOINT_next_tb_pb
-    MARKPOINT_t8
-    MARKPOINT_t8_p8
-    MARKPOINT_t8_pb
-    MARKPOINT_tb
-    MARKPOINT_tb_p8
-    MARKPOINT_tb_pb
-    MAX
-    MAX_ANYOF_HRx_BYTE
-    MAX_FEATURE_LEN
-    MAYBE_DEREF_GV
-    MAYBE_DEREF_GV_flags
-    MAYBE_DEREF_GV_nomg
-    MBOL
-    MBOL_t8
-    MBOL_t8_p8
-    MBOL_t8_pb
-    MBOL_tb
-    MBOL_tb_p8
-    MBOL_tb_pb
-    MEOL
-    MEOL_t8
-    MEOL_t8_p8
-    MEOL_t8_pb
-    MEOL_tb
-    MEOL_tb_p8
-    MEOL_tb_pb
-    MgBYTEPOS
-    MgBYTEPOS_set
-    MIN
-    MINMOD
-    MINMOD_t8
-    MINMOD_t8_p8
-    MINMOD_t8_pb
-    MINMOD_tb
-    MINMOD_tb_p8
-    MINMOD_tb_pb
-    MPH_BUCKETS
-    MPH_RSHIFT
-    MPH_VALt
-    my
-    N0
-    N1
-    N10
-    N11
-    N2
-    N3
-    N4
-    N5
-    N6
-    N7
-    N8
-    N9
-    NANYOFM
-    NANYOFM_t8
-    NANYOFM_t8_p8
-    NANYOFM_t8_pb
-    NANYOFM_tb
-    NANYOFM_tb_p8
-    NANYOFM_tb_pb
-    NBOUND
-    NBOUND_t8
-    NBOUND_t8_p8
-    NBOUND_t8_pb
-    NBOUND_tb
-    NBOUND_tb_p8
-    NBOUND_tb_pb
-    NBOUNDA
-    NBOUNDA_t8
-    NBOUNDA_t8_p8
-    NBOUNDA_t8_pb
-    NBOUNDA_tb
-    NBOUNDA_tb_p8
-    NBOUNDA_tb_pb
-    NBOUNDL
-    NBOUNDL_t8
-    NBOUNDL_t8_p8
-    NBOUNDL_t8_pb
-    NBOUNDL_tb
-    NBOUNDL_tb_p8
-    NBOUNDL_tb_pb
-    NBOUNDU
-    NBOUNDU_t8
-    NBOUNDU_t8_p8
-    NBOUNDU_t8_pb
-    NBOUNDU_tb
-    NBOUNDU_tb_p8
-    NBOUNDU_tb_pb
-    NEXT_OFF
-    NODE_ALIGN
-    NODE_ALIGN_FILL
-    NODE_STEP_REGNODE
-    NOTHING
-    NOTHING_t8
-    NOTHING_t8_p8
-    NOTHING_t8_pb
-    NOTHING_tb
-    NOTHING_tb_p8
-    NOTHING_tb_pb
-    NPOSIXA
-    NPOSIXA_t8
-    NPOSIXA_t8_p8
-    NPOSIXA_t8_pb
-    NPOSIXA_tb
-    NPOSIXA_tb_p8
-    NPOSIXA_tb_pb
-    NPOSIXD
-    NPOSIXD_t8
-    NPOSIXD_t8_p8
-    NPOSIXD_t8_pb
-    NPOSIXD_tb
-    NPOSIXD_tb_p8
-    NPOSIXD_tb_pb
-    NPOSIXL
-    NPOSIXL_t8
-    NPOSIXL_t8_p8
-    NPOSIXL_t8_pb
-    NPOSIXL_tb
-    NPOSIXL_tb_p8
-    NPOSIXL_tb_pb
-    NPOSIXU
-    NPOSIXU_t8
-    NPOSIXU_t8_p8
-    NPOSIXU_t8_pb
-    NPOSIXU_tb
-    NPOSIXU_tb_p8
-    NPOSIXU_tb_pb
-    NUM_CLASSES
-    O_VMS_DELETEONCLOSE
-    OLD_CURRENT_HINTS
-    OPEN
-    OPEN_t8
-    OPEN_t8_p8
-    OPEN_t8_pb
-    OPEN_tb
-    OPEN_tb_p8
-    OPEN_tb_pb
-    OPERAND
-    OPERANDl
-    OPERANDs
-    OPFAIL
-    OPFAIL_t8
-    OPFAIL_t8_p8
-    OPFAIL_t8_pb
-    OPFAIL_tb
-    OPFAIL_tb_p8
-    OPFAIL_tb_pb
-    OpMySLAB
-    OpSLAB
-    OpslabREFCNT_dec
-    OpslabREFCNT_dec_padok
-    OpSLOT
-    OPSLOT_HEADER
-    OpSLOToff
-    OPTIMIZED
-    OPTIMIZED_t8
-    OPTIMIZED_t8_p8
-    OPTIMIZED_t8_pb
-    OPTIMIZED_tb
-    OPTIMIZED_tb_p8
-    OPTIMIZED_tb_pb
-    PARNO
-    PLUS
-    PLUS_t8
-    PLUS_t8_p8
-    PLUS_t8_pb
-    PLUS_tb
-    PLUS_tb_p8
-    PLUS_tb_pb
-    POSIXA
-    POSIXA_t8
-    POSIXA_t8_p8
-    POSIXA_t8_pb
-    POSIXA_tb
-    POSIXA_tb_p8
-    POSIXA_tb_pb
-    POSIXD
-    POSIXD_t8
-    POSIXD_t8_p8
-    POSIXD_t8_pb
-    POSIXD_tb
-    POSIXD_tb_p8
-    POSIXD_tb_pb
-    POSIXL
-    POSIXL_CLEAR
-    POSIXL_SET
-    POSIXL_t8
-    POSIXL_t8_p8
-    POSIXL_t8_pb
-    POSIXL_tb
-    POSIXL_tb_p8
-    POSIXL_tb_pb
-    POSIXL_TEST
-    POSIXL_ZERO
-    POSIXU
-    POSIXU_t8
-    POSIXU_t8_p8
-    POSIXU_t8_pb
-    POSIXU_tb
-    POSIXU_tb_p8
-    POSIXU_tb_pb
-    PREGf_ANCH
-    PREGf_ANCH_GPOS
-    PREGf_ANCH_MBOL
-    PREGf_ANCH_SBOL
-    PREGf_CUTGROUP_SEEN
-    PREGf_GPOS_FLOAT
-    PREGf_GPOS_SEEN
-    PREGf_IMPLICIT
-    PREGf_NAUGHTY
-    PREGf_NOSCAN
-    PREGf_PESSIMIZE_SEEN
-    PREGf_RECURSE_SEEN
-    PREGf_SKIP
-    PREGf_USE_RE_EVAL
-    PREGf_VERBARG_SEEN
-    prepare_SV_for_RV
-    PRUNE
-    PRUNE_t8
-    PRUNE_t8_p8
-    PRUNE_t8_pb
-    PRUNE_tb
-    PRUNE_tb_p8
-    PRUNE_tb_pb
-    PSEUDO
-    PSEUDO_t8
-    PSEUDO_t8_p8
-    PSEUDO_t8_pb
-    PSEUDO_tb
-    PSEUDO_tb_p8
-    PSEUDO_tb_pb
-    RANGE_INDICATOR
-    RE_COMPILE_RECURSION_INIT
-    RE_COMPILE_RECURSION_LIMIT
-    RE_DEBUG_COMPILE_DUMP
-    RE_DEBUG_COMPILE_FLAGS
-    RE_DEBUG_COMPILE_MASK
-    RE_DEBUG_COMPILE_OPTIMISE
-    RE_DEBUG_COMPILE_PARSE
-    RE_DEBUG_COMPILE_TEST
-    RE_DEBUG_COMPILE_TRIE
-    RE_DEBUG_EXECUTE_INTUIT
-    RE_DEBUG_EXECUTE_MASK
-    RE_DEBUG_EXECUTE_MATCH
-    RE_DEBUG_EXECUTE_TRIE
-    RE_DEBUG_EXTRA_BUFFERS
-    RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE
-    RE_DEBUG_EXTRA_GPOS
-    RE_DEBUG_EXTRA_MASK
-    RE_DEBUG_EXTRA_OPTIMISE
-    RE_DEBUG_EXTRA_STACK
-    RE_DEBUG_EXTRA_STATE
-    RE_DEBUG_EXTRA_TRIE
-    RE_DEBUG_EXTRA_WILDCARD
-    RE_DEBUG_FLAG
-    RE_DEBUG_FLAGS
-    RE_PESSIMISTIC_PARENS
-    RE_PV_COLOR_DECL
-    RE_PV_QUOTED_DECL
-    RE_SV_DUMPLEN
-    RE_SV_ESCAPE
-    RE_SV_TAIL
-    RE_TRIE_MAXBUF_INIT
-    RE_TRIE_MAXBUF_NAME
-    REAL_COP_FEATURE_SIZE
-    REF
-    REF_HE_KEY
-    REF_next
-    REF_next_fail
-    REF_next_fail_t8
-    REF_next_fail_t8_p8
-    REF_next_fail_t8_pb
-    REF_next_fail_tb
-    REF_next_fail_tb_p8
-    REF_next_fail_tb_pb
-    REF_next_t8
-    REF_next_t8_p8
-    REF_next_t8_pb
-    REF_next_tb
-    REF_next_tb_p8
-    REF_next_tb_pb
-    REF_t8
-    REF_t8_p8
-    REF_t8_pb
-    REF_tb
-    REF_tb_p8
-    REF_tb_pb
-    REFF
-    REFF_t8
-    REFF_t8_p8
-    REFF_t8_pb
-    REFF_tb
-    REFF_tb_p8
-    REFF_tb_pb
-    REFFA
-    REFFA_t8
-    REFFA_t8_p8
-    REFFA_t8_pb
-    REFFA_tb
-    REFFA_tb_p8
-    REFFA_tb_pb
-    REFFAN
-    REFFAN_t8
-    REFFAN_t8_p8
-    REFFAN_t8_pb
-    REFFAN_tb
-    REFFAN_tb_p8
-    REFFAN_tb_pb
-    REFFL
-    REFFL_t8
-    REFFL_t8_p8
-    REFFL_t8_pb
-    REFFL_tb
-    REFFL_tb_p8
-    REFFL_tb_pb
-    REFFLN
-    REFFLN_t8
-    REFFLN_t8_p8
-    REFFLN_t8_pb
-    REFFLN_tb
-    REFFLN_tb_p8
-    REFFLN_tb_pb
-    REFFN
-    REFFN_t8
-    REFFN_t8_p8
-    REFFN_t8_pb
-    REFFN_tb
-    REFFN_tb_p8
-    REFFN_tb_pb
-    REFFU
-    REFFU_t8
-    REFFU_t8_p8
-    REFFU_t8_pb
-    REFFU_tb
-    REFFU_tb_p8
-    REFFU_tb_pb
-    REFFUN
-    REFFUN_t8
-    REFFUN_t8_p8
-    REFFUN_t8_pb
-    REFFUN_tb
-    REFFUN_tb_p8
-    REFFUN_tb_pb
-    REFN
-    REFN_t8
-    REFN_t8_p8
-    REFN_t8_pb
-    REFN_tb
-    REFN_tb_p8
-    REFN_tb_pb
-    REG_ANY
-    REG_ANY_t8
-    REG_ANY_t8_p8
-    REG_ANY_t8_pb
-    REG_ANY_tb
-    REG_ANY_tb_p8
-    REG_ANY_tb_pb
-    REG_CUTGROUP_SEEN
-    REG_EXTFLAGS_NAME_SIZE
-    REG_GPOS_SEEN
-    REG_INFTY
-    REG_INTFLAGS_NAME_SIZE
-    REG_LB_SEEN
-    REG_LOOKBEHIND_SEEN
-    REG_MAGIC
-    REG_PESSIMIZE_SEEN
-    REG_RECURSE_SEEN
-    REG_RUN_ON_COMMENT_SEEN
-    REG_TOP_LEVEL_BRANCHES_SEEN
-    REG_UNBOUNDED_QUANTIFIER_SEEN
-    REG_UNFOLDED_MULTI_SEEN
-    REG_VERBARG_SEEN
-    REG_ZERO_LEN_SEEN
-    REGEX_SET
-    REGEX_SET_t8
-    REGEX_SET_t8_p8
-    REGEX_SET_t8_pb
-    REGEX_SET_tb
-    REGEX_SET_tb_p8
-    REGEX_SET_tb_pb
-    REGMATCH_STATE_MAX
-    REGNODE_AFTER
-    REGNODE_AFTER_opcode
-    REGNODE_AFTER_PLUS
-    REGNODE_AFTER_PLUS_DEBUG
-    REGNODE_AFTER_type
-    REGNODE_AFTER_varies
-    REGNODE_ARG_LEN
-    REGNODE_ARG_LEN_VARIES
-    REGNODE_BBM_BITMAP_LEN
-    REGNODE_BEFORE
-    REGNODE_BEFORE_BASE
-    REGNODE_BEFORE_BASE_DEBUG
-    REGNODE_MAX
-    REGNODE_NAME
-    REGNODE_OFF_BY_ARG
-    REGNODE_SIMPLE
-    REGNODE_TYPE
-    REGNODE_VARIES
-    RENUM
-    RENUM_t8
-    RENUM_t8_p8
-    RENUM_t8_pb
-    RENUM_tb
-    RENUM_tb_p8
-    RENUM_tb_pb
-    RV2CVOPCV_MAYBE_NAME_GV
-    RX_ANCHORED_SUBSTR
-    RX_ANCHORED_UTF8
-    RX_FLOAT_SUBSTR
-    RX_FLOAT_UTF8
-    RX_INTFLAGS
-    RXi_GET
-    RXi_GET_DECL
-    RXi_GET_DECL_NULL
-    RXi_SET
-    RXp_INTFLAGS
-    S_iv_add_may_overflow
-    S_iv_mul_may_overflow
-    S_iv_sub_may_overflow
-    S_uv_add_overflow
-    S_uv_mul_overflow
-    S_uv_sub_overflow
-    SAFE_TRIE_NODENUM
-    SANY
-    SANY_t8
-    SANY_t8_p8
-    SANY_t8_pb
-    SANY_tb
-    SANY_tb_p8
-    SANY_tb_pb
-    SAVE_FREE_REXC_STATE
-    SAVEFEATUREBITS
-    sb_dstr
-    sb_iters
-    sb_m
-    sb_maxiters
-    sb_orig
-    sb_rflags
-    sb_rx
-    sb_rxres
-    sb_rxtainted
-    sb_s
-    sb_strend
-    sb_targ
-    SBOL
-    SBOL_t8
-    SBOL_t8_p8
-    SBOL_t8_pb
-    SBOL_tb
-    SBOL_tb_p8
-    SBOL_tb_pb
-    SEOL
-    SEOL_t8
-    SEOL_t8_p8
-    SEOL_t8_pb
-    SEOL_tb
-    SEOL_tb_p8
-    SEOL_tb_pb
-    set_ANYOF_SYNTHETIC
-    setSTR_LEN
-    SIZE_ALIGN
-    SKIP
-    SKIP_next
-    SKIP_next_fail
-    SKIP_next_fail_t8
-    SKIP_next_fail_t8_p8
-    SKIP_next_fail_t8_pb
-    SKIP_next_fail_tb
-    SKIP_next_fail_tb_p8
-    SKIP_next_fail_tb_pb
-    SKIP_next_t8
-    SKIP_next_t8_p8
-    SKIP_next_t8_pb
-    SKIP_next_tb
-    SKIP_next_tb_p8
-    SKIP_next_tb_pb
-    SKIP_t8
-    SKIP_t8_p8
-    SKIP_t8_pb
-    SKIP_tb
-    SKIP_tb_p8
-    SKIP_tb_pb
-    SRCLOSE
-    SRCLOSE_t8
-    SRCLOSE_t8_p8
-    SRCLOSE_t8_pb
-    SRCLOSE_tb
-    SRCLOSE_tb_p8
-    SRCLOSE_tb_pb
-    SROPEN
-    SROPEN_t8
-    SROPEN_t8_p8
-    SROPEN_t8_pb
-    SROPEN_tb
-    SROPEN_tb_p8
-    SROPEN_tb_pb
-    SSC_MATCHES_EMPTY_STRING
-    STAR
-    STAR_t8
-    STAR_t8_p8
-    STAR_t8_pb
-    STAR_tb
-    STAR_tb_p8
-    STAR_tb_pb
-    STR_LEN
-    STR_LEN_U8
-    STR_LENl
-    STR_LENs
-    STR_SZ
-    STRING
-    STRINGl
-    STRINGs
-    STRLENs
-    SUBST_TAINT_BOOLRET
-    SUBST_TAINT_PAT
-    SUBST_TAINT_REPL
-    SUBST_TAINT_RETAINT
-    SUBST_TAINT_STR
-    SUCCEED
-    SUCCEED_t8
-    SUCCEED_t8_p8
-    SUCCEED_t8_pb
-    SUCCEED_tb
-    SUCCEED_tb_p8
-    SUCCEED_tb_pb
-    SUSPEND
-    SUSPEND_t8
-    SUSPEND_t8_p8
-    SUSPEND_t8_pb
-    SUSPEND_tb
-    SUSPEND_tb_p8
-    SUSPEND_tb_pb
-    SV_CONST
-    SV_CONST_BINMODE
-    SV_CONST_CLEAR
-    SV_CONST_CLOSE
-    SV_CONST_DELETE
-    SV_CONST_DESTROY
-    SV_CONST_EOF
-    SV_CONST_EXISTS
-    SV_CONST_EXTEND
-    SV_CONST_FETCH
-    SV_CONST_FETCHSIZE
-    SV_CONST_FILENO
-    SV_CONST_FIRSTKEY
-    SV_CONST_GETC
-    SV_CONST_NEXTKEY
-    SV_CONST_OPEN
-    SV_CONST_POP
-    SV_CONST_PRINT
-    SV_CONST_PRINTF
-    SV_CONST_PUSH
-    SV_CONST_READ
-    SV_CONST_READLINE
-    SV_CONST_SCALAR
-    SV_CONST_SEEK
-    SV_CONST_SHIFT
-    SV_CONST_SPLICE
-    SV_CONST_STORE
-    SV_CONST_STORESIZE
-    SV_CONST_TELL
-    SV_CONST_TIEARRAY
-    SV_CONST_TIEHANDLE
-    SV_CONST_TIEHASH
-    SV_CONST_TIESCALAR
-    SV_CONST_UNSHIFT
-    SV_CONST_UNTIE
-    SV_CONST_WRITE
-    sv_dup_inc_NN
-    sv_or_pv_len_utf8
-    sv_setgid
-    sv_setuid
-    SvGID
-    SVt_FIRST
-    SvUID
-    TAIL
-    TAIL_t8
-    TAIL_t8_p8
-    TAIL_t8_pb
-    TAIL_tb
-    TAIL_tb_p8
-    TAIL_tb_pb
-    TIED_METHOD_ARGUMENTS_ON_STACK
-    TIED_METHOD_MORTALIZE_NOT_NEEDED
-    TIED_METHOD_SAY
-    TR_DELETE
-    TR_OOB
-    TR_R_EMPTY
-    TR_SPECIAL_HANDLING
-    TR_UNLISTED
-    TR_UNMAPPED
-    TRIE
-    TRIE_BITMAP
-    TRIE_BITMAP_BYTE
-    TRIE_BITMAP_CLEAR
-    TRIE_BITMAP_SET
-    TRIE_BITMAP_TEST
-    TRIE_CHARCOUNT
-    TRIE_next
-    TRIE_next_fail
-    TRIE_next_fail_t8
-    TRIE_next_fail_t8_p8
-    TRIE_next_fail_t8_pb
-    TRIE_next_fail_tb
-    TRIE_next_fail_tb_p8
-    TRIE_next_fail_tb_pb
-    TRIE_next_t8
-    TRIE_next_t8_p8
-    TRIE_next_t8_pb
-    TRIE_next_tb
-    TRIE_next_tb_p8
-    TRIE_next_tb_pb
-    TRIE_NODEIDX
-    TRIE_NODENUM
-    TRIE_t8
-    TRIE_t8_p8
-    TRIE_t8_pb
-    TRIE_tb
-    TRIE_tb_p8
-    TRIE_tb_pb
-    TRIE_WORDS_OFFSET
-    TRIEC
-    TRIEC_t8
-    TRIEC_t8_p8
-    TRIEC_t8_pb
-    TRIEC_tb
-    TRIEC_tb_p8
-    TRIEC_tb_pb
-    UCHARAT
-    UNICODE_ALLOW_ABOVE_IV_MAX
-    UNLESSM
-    UNLESSM_t8
-    UNLESSM_t8_p8
-    UNLESSM_t8_pb
-    UNLESSM_tb
-    UNLESSM_tb_p8
-    UNLESSM_tb_pb
-    VERB
-    VERB_t8
-    VERB_t8_p8
-    VERB_t8_pb
-    VERB_tb
-    VERB_tb_p8
-    VERB_tb_pb
-    VOLATILE_REF
-    WHILEM
-    WHILEM_A_max
-    WHILEM_A_max_fail
-    WHILEM_A_max_fail_t8
-    WHILEM_A_max_fail_t8_p8
-    WHILEM_A_max_fail_t8_pb
-    WHILEM_A_max_fail_tb
-    WHILEM_A_max_fail_tb_p8
-    WHILEM_A_max_fail_tb_pb
-    WHILEM_A_max_t8
-    WHILEM_A_max_t8_p8
-    WHILEM_A_max_t8_pb
-    WHILEM_A_max_tb
-    WHILEM_A_max_tb_p8
-    WHILEM_A_max_tb_pb
-    WHILEM_A_min
-    WHILEM_A_min_fail
-    WHILEM_A_min_fail_t8
-    WHILEM_A_min_fail_t8_p8
-    WHILEM_A_min_fail_t8_pb
-    WHILEM_A_min_fail_tb
-    WHILEM_A_min_fail_tb_p8
-    WHILEM_A_min_fail_tb_pb
-    WHILEM_A_min_t8
-    WHILEM_A_min_t8_p8
-    WHILEM_A_min_t8_pb
-    WHILEM_A_min_tb
-    WHILEM_A_min_tb_p8
-    WHILEM_A_min_tb_pb
-    WHILEM_A_pre
-    WHILEM_A_pre_fail
-    WHILEM_A_pre_fail_t8
-    WHILEM_A_pre_fail_t8_p8
-    WHILEM_A_pre_fail_t8_pb
-    WHILEM_A_pre_fail_tb
-    WHILEM_A_pre_fail_tb_p8
-    WHILEM_A_pre_fail_tb_pb
-    WHILEM_A_pre_t8
-    WHILEM_A_pre_t8_p8
-    WHILEM_A_pre_t8_pb
-    WHILEM_A_pre_tb
-    WHILEM_A_pre_tb_p8
-    WHILEM_A_pre_tb_pb
-    WHILEM_B_max
-    WHILEM_B_max_fail
-    WHILEM_B_max_fail_t8
-    WHILEM_B_max_fail_t8_p8
-    WHILEM_B_max_fail_t8_pb
-    WHILEM_B_max_fail_tb
-    WHILEM_B_max_fail_tb_p8
-    WHILEM_B_max_fail_tb_pb
-    WHILEM_B_max_t8
-    WHILEM_B_max_t8_p8
-    WHILEM_B_max_t8_pb
-    WHILEM_B_max_tb
-    WHILEM_B_max_tb_p8
-    WHILEM_B_max_tb_pb
-    WHILEM_B_min
-    WHILEM_B_min_fail
-    WHILEM_B_min_fail_t8
-    WHILEM_B_min_fail_t8_p8
-    WHILEM_B_min_fail_t8_pb
-    WHILEM_B_min_fail_tb
-    WHILEM_B_min_fail_tb_p8
-    WHILEM_B_min_fail_tb_pb
-    WHILEM_B_min_t8
-    WHILEM_B_min_t8_p8
-    WHILEM_B_min_t8_pb
-    WHILEM_B_min_tb
-    WHILEM_B_min_tb_p8
-    WHILEM_B_min_tb_pb
-    WHILEM_t8
-    WHILEM_t8_p8
-    WHILEM_t8_pb
-    WHILEM_tb
-    WHILEM_tb_p8
-    WHILEM_tb_pb
-    with_t_UTF8ness
-    with_tp_UTF8ness
-    YYDEBUG
-    YYTOKENTYPE
     _
     ABORT
     ABS_IV_MIN
@@ -2391,9 +691,6 @@ my @unresolved_visibility_overrides = qw(
     DEPENDS_PAT_MOD
     DEPENDS_PAT_MODS
     DEPENDS_SEMANTICS
-    deprecate
-    deprecate_disappears_in
-    deprecate_fatal_in
     DETACH
     DIE
     DISABLE_LC_NUMERIC_CHANGES
@@ -2457,9 +754,7 @@ my @unresolved_visibility_overrides = qw(
     eC
     eI
     EIGHT_BIT_UTF8_TO_NATIVE
-    ELEMENT_RANGE_MATCHES_INVLIST
     EMBEDMYMALLOC
-    EMULATE_THREAD_SAFE_LOCALES
     ENDGRENT_R_HAS_FPTR
     ENDPWENT_R_HAS_FPTR
     ENV_INIT
@@ -2544,7 +839,6 @@ my @unresolved_visibility_overrides = qw(
     free_c_backtrace
     FreeOp
     FREE_THREAD_KEY
-    FROM_INTERNAL_SIZE
     FSEEKSIZE
     F_sin_amg
     F_sqrt_amg
@@ -2764,7 +1058,6 @@ my @unresolved_visibility_overrides = qw(
     HAS_IOCTL
     HAS_KILL
     HAS_NONLATIN1_FOLD_CLOSURE
-    HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE
     HAS_NTOHL
     HAS_NTOHS
     HAS_PASSWD
@@ -2777,7 +1070,6 @@ my @unresolved_visibility_overrides = qw(
     HAS_WAIT
     hasWARNBIT
     HASWIDTH
-    HE_ARENA_ROOT_IX
     HEK_BASESIZE
     HeKEY_hek
     HeKEY_sv
@@ -3016,7 +1308,6 @@ my @unresolved_visibility_overrides = qw(
     isIDFIRST_lazy_if_safe
     isIDFIRST_LC_utf8
     isIDFIRST_uni
-    IS_IN_SOME_FOLD_L1
     is_LARGER_NON_CHARS_utf8
     is_LAX_VERSION
     isLEXWARN_off
@@ -3030,7 +1321,6 @@ my @unresolved_visibility_overrides = qw(
     is_MULTI_CHAR_FOLD_utf8_safe
     isNON_BRACE_QUANTIFIER
     is_NONCHAR_utf8_safe
-    IS_NON_FINAL_FOLD
     IS_NUMERIC_RADIX
     IS_PADCONST
     IS_PADGV
@@ -3062,7 +1352,6 @@ my @unresolved_visibility_overrides = qw(
     isPUNCT_LC_utf8
     isPUNCT_uni
     isQUANTIFIER
-    isQUOTEMETA
     is_QUOTEMETA_high
     isREGEXP
     IS_SAFE_PATHNAME
@@ -3495,14 +1784,12 @@ my @unresolved_visibility_overrides = qw(
     MARK_NAUGHTY_EXP
     MAXARG
     MAXARG3
-    MAX_CHARSET_NAME_LENGTH
     MAX_FOLD_FROMS
     MAX_LEGAL_CP
     MAX_MATCHES
     MAXO
     MAXPATHLEN
     MAX_PORTABLE_UTF8_TWO_BYTE
-    MAX_PRINT_A
     MAX_RECURSE_EVAL_NOCHANGE_DEPTH
     MAX_SAVEt
     MAXSYSFD
@@ -3641,9 +1928,7 @@ my @unresolved_visibility_overrides = qw(
     NOLINE
     NONDESTRUCT_PAT_MOD
     NONDESTRUCT_PAT_MODS
-    NON_OTHER_COUNT
     NONV
-    NO_POSIX_2008_LOCALE
     NORETURN_FUNCTION_END
     NORMAL
     NO_TAINT_SUPPORT
@@ -4050,7 +2335,6 @@ my @unresolved_visibility_overrides = qw(
     PP
     PP_wrapped
     PRESCAN_VERSION
-    PREV_RANGE_MATCHES_INVLIST
     PRINTF_FORMAT_NULL_OK
     PRIVLIB_EXP
     PRIVSHIFT
@@ -4176,9 +2460,6 @@ my @unresolved_visibility_overrides = qw(
     REENTRANT_PROTO_V_H
     REENTRANT_PROTO_V_ID
     REENTR_MEMZERO
-    ref
-    refcounted_he_fetch_pvs
-    refcounted_he_new_pvs
     REFCOUNTED_HE_EXISTS
     REFCOUNTED_HE_KEY_UTF8
     REGCOMP_INTERNAL_H
@@ -4846,7 +3127,6 @@ my @unresolved_visibility_overrides = qw(
     toCTRL
     toFOLD_LC
     toFOLD_uni
-    TO_INTERNAL_SIZE
     toLOWER_uni
     TOO_LATE_FOR
     TOO_NAUGHTY
@@ -4900,7 +3180,6 @@ my @unresolved_visibility_overrides = qw(
     U8TO32_LE
     U8TO64_LE
     U_I
-    UINT
     U_L
     UNICODE_ALLOW_ANY
     UNICODE_ALLOW_SUPER
@@ -4988,7 +3267,6 @@ my @unresolved_visibility_overrides = qw(
     USE_SPENT_BUFFER
     USE_SPENT_PTR
     USE_STAT_RDEV
-    USE_STDIO
     USE_SYSTEM_GMTIME
     USE_SYSTEM_LOCALTIME
     USE_THREAD_SAFE_LOCALE
@@ -5541,6 +3819,55 @@ $cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 # get #defined, and is externally visible, so we will add an #undef for it if
 # it shouldn't be visible.  There is no harm in undefining a symol that
 # doesn't happen to get defined in this particular build environment.
+#
+# Perl has modules that are considered extensions to the core, and are granted
+# access to functionality and symbols that are denied others.  The C
+# preprocessor symbol PERL_EXT is defined for these, and often there are
+# conditionals like
+#   #if defined(PERL_CORE) || defined(PERL_EXT)
+# in our headers.  So, in spite of PERL_CORE not being defined, the extension
+# does have access to the symbols defined within that conditional's scope.
+# The regular expression engine module is so important that it has additional
+# conditionals that are #defined just for it.  Many symbols that it needs are
+# of no use to other extensions, so shouldn't be visible to those others.
+# Below we extend the basic %cpp_ifdef_constraints to three cases:
+#   %cpp_always_externally_visible
+#           are symbols that don't depend on the module being considered an
+#           extension.  They may not actually be visible on a particular
+#           platform and build options, but theoretically there is a
+#           combination where they are visible, so we treat them as always
+#           visible.
+#   %cpp_visible_to_regex_extension
+#           are symbols that are visible to the regular expression extension
+#           (the one enabled by 'use re'), but no other extensions.  That is
+#           they are the symbols that match %cpp_always_externally_visible
+#           plus the ones visible to the re extension
+#   %%cpp_visible_to_extensions
+#           are symbols that are visible to all other extensions, but not to
+#           non-extension modules
+
+my %cpp_always_externally_visible =  (
+                                       %cpp_ifdef_constraints,
+                                       %not_in_regex,
+                                       PERL_EXT               => 0,
+                                     );
+my %cpp_visible_to_regex_extension = (
+                                       %cpp_ifdef_constraints,
+                                       %in_regex,
+                                       PERL_EXT               => 0,
+                                     );
+my %cpp_visible_to_extensions      = (
+                                       %cpp_ifdef_constraints,
+                                       %not_in_regex,
+                                       PERL_EXT               => 1,
+                                     );
+
+# Create mnemonic single-character codes for these
+my %visibility_types = (
+                          1 =>  \%cpp_always_externally_visible,
+                         '/' => \%cpp_visible_to_regex_extension,
+                         'E' => \%cpp_visible_to_extensions,
+                       );
 
 my @az = ('a'..'z');
 my $never_visible_flags_re = qr/[eX]/;
@@ -6663,7 +4990,9 @@ sub get_and_set_cpp_visibility {
     # $line points to the HeaderLine object that contains $name.
 
     # The stored visibility is the same as the codes used in
-    # set_flags_visibility()
+    # set_flags_visibility(), plus
+    #   /   The symbol is visible in the 'use re' extension, plus the perl
+    #       core, but nowhere else
 
     my $file = $line->{source};
 
@@ -6715,20 +5044,52 @@ sub get_and_set_cpp_visibility {
     #   #if defined(a) || defined(b).
     # If the result is like that, it means that there is some combination of
     # conditions for which the symbol is visible.
-    my %hash = %this_file_conds;
-    my $pattern = join "|", keys %hash;
-    my $regex = qr/ \b defined \( ( $pattern ) \) /x;
-    my $cond_as_string = $line->reduce_conds($regex, \%hash);
-    my $visibility_code = $cond_as_string ne "";
+    my $cond_as_string;
+    my $visibility_code;
+
+    # See if the symbol is visible everywhere; and if not, if it is visible to
+    # 'use 're'; and if not, if it is visible to other extensions.
+    for my $code (1, '/', 'E') {
+        my %hash = (%this_file_conds, $visibility_types{$code}->%*);
+        my $pattern = join "|", keys %hash;
+        my $regex = qr/ \b defined \( ( $pattern ) \) /x;
+        $cond_as_string = $line->reduce_conds($regex, \%hash);
+        next unless $cond_as_string;
+
+        $visibility_code = $code;
+        goto found_visibility;
+    }
+
+    # No visibilty outside core
+    $visibility_code = 0;
+
+  found_visibility:
+
+    # Use the same algorithm as in set_flags_visibility() to see if this new
+    # item has wider visibility than any stored (previously encountered) one.
+    my $ordering;
+    if ($visibility_code =~ / ^ -? \d+ $/x) {
+        $ordering = 3 * $visibility_code;
+    }
+    elsif ($visibility_code eq 'E') {
+        $ordering = 2;
+    }
+    elsif ($visibility_code eq '/') {
+        $ordering = 1;
+    }
+    else {
+        die_at_end "Internal code '$visibility_code' unrecognized";
+        $ordering = -1;
+    }
 
     my $stored_ordering = $visibility{$name}{cpp_ordering};
 
     # Return without updating if the old visibility is wider than the new.
     return $cond_as_string if defined $stored_ordering
-                           && $stored_ordering > $visibility_code;
+                           && $stored_ordering > $ordering;
 
     $visibility{$name}{cpp} = $visibility_code;
-    $visibility{$name}{cpp_ordering} = $visibility_code;
+    $visibility{$name}{cpp_ordering} = $ordering;
     $visibility{$name}{cpp_defining_object} = $line;
     $visibility{$name}{cpp_cond_as_string} = $cond_as_string;
     $visibility{$name}{is_macro} = $line->{type} eq 'content'
@@ -6964,7 +5325,9 @@ sub find_undefs {
         }
 
         if ($cpp_visibility eq '0') {
-            if ($flags_visibility) {
+            if (   $flags_visibility
+                && ! defined $visibility{$name}{flags_implicit})
+            {
                 push @warnings, "'$name' cannot actually be seen outside of"
                               . " the perl core, but it is flagged as having"
                               . " '$flags_visibility' visibility";
@@ -6978,10 +5341,24 @@ sub find_undefs {
                 # Supposed to be hidden, but isn't.  #undef it to hide it
                 $always_undefs{$name} = 1;
             }
-            else {
+            elsif ($flags_visibility =~ /E/) {
+                # Supposed to be hidden from non-extensions, but isn't.
+                $non_ext_undefs{$name} = 1;
+            }
+            elsif ($flags_visibility eq '1') {
                 goto ok_but_warn_if_overridden;
             }
+            else {
+                die_at_end "Unexpected flag '$flags_visibility' for '$name'";
+            }
 
+            next;
+        }
+
+        # The remaining legal codes are  '/' and 'E'
+        if ($cpp_visibility !~ m! ^ [/E] $ !x ) {
+            die_at_end "Unexpected visibility code '$cpp_visibility' for"
+                     . " '$name'";
             next;
         }
 
@@ -6990,6 +5367,19 @@ sub find_undefs {
         warn "'$name' is needlessly in %unresolved_visibility_overrides"
                                    if $unresolved_visibility_overrides{$name};
         delete $always_undefs{$name};   # No need to #undef it
+
+        if (   $flags_visibility
+            && $flags_visibility !~ /E/
+            && ! defined $visibility{$name}{flags_implicit})
+        {
+            push @warnings, "'$name' cannot actually be seen outside of"
+                          . " Perl extensions (because of #ifdef's), but"
+                          . " it is flagged as having '$flags_visibility'"
+                          . " visibility";
+            goto output_warnings;
+        }
+
+        next;
 
       ok_but_warn_if_overridden:
         push @warnings, "'$name' is needlessly listed as needing an override "
