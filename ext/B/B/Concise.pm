@@ -1,14 +1,12 @@
-package B::Concise;
+package B::Concise 1.010;
 # Copyright (C) 2000-2003 Stephen McCamant. All rights reserved.
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
 
-use strict;
-use warnings;
+use v5.40;
 
 use Exporter 'import';
 
-our $VERSION   = "1.010";
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
 		     add_style walk_output compile reset_sequence );
@@ -148,7 +146,7 @@ sub concise_stashref {
 	reset_sequence();
 	print $walkHandle "FUNC: *", $name, "::", $k, "\n";
 	my $codeobj = svref_2object($coderef);
-	next unless ref $codeobj eq 'B::CV';
+	next unless $codeobj isa B::CV;
 	eval { concise_cv_obj($order, $codeobj, $k) };
 	warn "err $@ on $codeobj" if $@;
     }
@@ -192,7 +190,7 @@ sub concise_cv_obj {
     elsif ($order eq "basic") {
 	# walk_topdown($cv->ROOT, sub { $_[0]->concise($_[1]) }, 0);
 	my $root = $cv->ROOT;
-	unless (ref $root eq 'B::NULL') {
+	unless ($root isa B::NULL) {
 	    walk_topdown($root, sub { $_[0]->concise($_[1]) }, 0);
 	} else {
 	    print $walkHandle "B::NULL encountered doing ROOT on $cv. avoiding disaster\n";
@@ -333,23 +331,23 @@ sub compile {
 
 	    if ($objname eq "BEGIN") {
 		concise_specials("BEGIN", $order,
-				 B::begin_av->isa("B::AV") ?
+				 B::begin_av isa B::AV ?
 				 B::begin_av->ARRAY : ());
 	    } elsif ($objname eq "INIT") {
 		concise_specials("INIT", $order,
-				 B::init_av->isa("B::AV") ?
+				 B::init_av isa B::AV ?
 				 B::init_av->ARRAY : ());
 	    } elsif ($objname eq "CHECK") {
 		concise_specials("CHECK", $order,
-				 B::check_av->isa("B::AV") ?
+				 B::check_av isa B::AV ?
 				 B::check_av->ARRAY : ());
 	    } elsif ($objname eq "UNITCHECK") {
 		concise_specials("UNITCHECK", $order,
-				 B::unitcheck_av->isa("B::AV") ?
+				 B::unitcheck_av isa B::AV ?
 				 B::unitcheck_av->ARRAY : ());
 	    } elsif ($objname eq "END") {
 		concise_specials("END", $order,
-				 B::end_av->isa("B::AV") ?
+				 B::end_av isa B::AV ?
 				 B::end_av->ARRAY : ());
 	    }
 	    else {
@@ -471,12 +469,11 @@ sub walk_topdown {
     }
     if (class($op) eq "PMOP") {
 	my $maybe_root = $op->code_list;
-	if ( ref($maybe_root) and $maybe_root->isa("B::OP")
-	 and not $op->flags & OPf_KIDS) {
+	if ($maybe_root isa B::OP and not $op->flags & OPf_KIDS) {
 	    walk_topdown($maybe_root, $sub, $level + 1);
 	}
 	$maybe_root = $op->pmreplroot;
-	if (ref($maybe_root) and $maybe_root->isa("B::OP")) {
+	if ($maybe_root isa B::OP) {
 	    # It really is the root of the replacement, not something
 	    # else stored here for lack of space elsewhere
 	    walk_topdown($maybe_root, $sub, $level + 1);
@@ -657,11 +654,7 @@ sub private_flags {
 
             if (defined $enum) {
                 # try to convert numeric $val into symbolic
-                my @enum = @$enum;
-                while (@enum) {
-                    my $ix    = shift @enum;
-                    my $name  = shift @enum;
-                    my $label = shift @enum;
+                for my ($ix, $name, $label) (@$enum) {
                     if ($val == $ix) {
                         $val = $label;
                         last;
@@ -692,7 +685,10 @@ sub concise_sv {
     $hr->{svclass} = class($sv);
     $hr->{svclass} = "UV"
       if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
-    Carp::cluck("bad concise_sv: $sv") unless $sv and $$sv;
+    unless ($sv and $$sv) {
+        require Carp;
+        Carp::cluck("bad concise_sv: $sv");
+    }
     $hr->{svaddr} = sprintf("%#x", $$sv);
     if ($hr->{svclass} eq "GV" && $sv->isGV_with_GP()) {
 	my $gv = $sv;
@@ -754,7 +750,7 @@ sub concise_sv {
 	    }
 	}
 
-	$hr->{svval} = 'undef' unless defined $hr->{svval};
+	$hr->{svval} //= 'undef';
 	my $out = $hr->{svclass};
 	return $out .= " $hr->{svval}" ; 
     }
@@ -1084,7 +1080,7 @@ sub tree {
 
 # Count how many BEGIN blocks have been used to avoid printing them when a
 # user asks for the BEGIN blocks in their program. Must be our last BEGIN.
-BEGIN { $begin_count =()= B::begin_av->isa('B::AV') ? B::begin_av->ARRAY : () }
+BEGIN { $begin_count =()= B::begin_av isa B::AV ? B::begin_av->ARRAY : () }
 
 # *** Warning: fragile kludge ahead ***
 # Because the B::* modules run in the same interpreter as the code
@@ -1120,8 +1116,6 @@ BEGIN { $begin_count =()= B::begin_av->isa('B::AV') ? B::begin_av->ARRAY : () }
 
 my $cop_seq_mnum = 12;
 $cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + $cop_seq_mnum;
-
-1;
 
 __END__
 
