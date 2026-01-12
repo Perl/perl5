@@ -59,12 +59,12 @@ foreach my $foo (undef, 0) {
     is ($handle, \*STDOUT, "walk_output set to STDOUT (default)");
 }
 
-{   # any object that can print should be ok for walk_output
-    package Hugo;
-    sub new { my $foo = bless {} };
+# any object that can print should be ok for walk_output
+package Hugo {
+    sub new { bless {} };
     sub print { CORE::print @_ }
 }
-my $foo = new Hugo;	# suggested this API fix
+my $foo = Hugo->new;	# suggested this API fix
 eval {  walk_output($foo) };
 is ($@, '', "walk_output() accepts obj that can print");
 
