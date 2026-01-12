@@ -2672,7 +2672,20 @@ PP(pp_enteriter)
                 DIE(aTHX_ "Assigned value is not a reference");
             SvGETMAGIC(sv);
             SvGETMAGIC(right);
-            if (RANGE_IS_NUMERIC(sv,right)) {
+            /* S_outside_integer will convert to NV and perform
+             * assorted comparisons. Skip this effort for simple IV
+             * cases. It should be possible to do this for all SvIOK,
+             * but that would need edge cases in t/op/range.t to be
+             * revisited, especially for (! $Config{d_nv_preserves_uv})
+             */
+            if (SvIOK_notUV(sv)    && SvIVX(sv) > -1 &&
+                SvIOK_notUV(right) && SvIVX(right) > -1) {
+                cx->cx_type |= CXt_LOOP_LAZYIV;
+                cx->blk_loop.state_u.lazyiv.cur = SvIVX(sv);
+                cx->blk_loop.state_u.lazyiv.end = SvIVX(right);
+                rpp_popfree_2_NN();
+            }
+            else if (RANGE_IS_NUMERIC(sv,right)) {
                 cx->cx_type |= CXt_LOOP_LAZYIV;
                 if (S_outside_integer(aTHX_ sv) ||
                     S_outside_integer(aTHX_ right))
