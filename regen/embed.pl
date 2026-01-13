@@ -3424,7 +3424,6 @@ my @unresolved_visibility_overrides = qw(
     CC_IS_IN_SOME_FOLD_
     CC_LOWER_
     CC_MAGICAL_
-    CC_mask_
     CC_mask_A_
     CC_MNEMONIC_CNTRL_
     CC_NON_FINAL_FOLD_

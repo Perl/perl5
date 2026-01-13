@@ -1602,10 +1602,28 @@ END_EXTERN_C
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define CC_mask_(classnum) (1U << (classnum))
 
+/*
+=for apidoc_section $classification
+=for apidoc Cm|U32|CC_mask_|U8 c|U8 classnum
+
+This translates C<classnum> into a bit pattern to use in conjunction with
+entries in C<PL_charclass[]>, and operations such is C<L</Perl_isCC_by_bit>>.
+C<classnum> is one of the classes defined in F<handy.h> for this purpose.
+
+=for apidoc Cm|bool|Perl_isCC_by_bit|U8 c|U32 bit_pattern
+
+Returns a boolean as to whether or not the character C<c> in the Latin1 range
+is a member of the class(es) given by C<bit_pattern>, as formed by
+C<L</CC_mask_>>.
+
+=cut
+*/
+#  define Perl_isCC_by_bit(c, bit_pattern)                              \
+       (FITS_IN_8_BITS(c) && (PL_charclass[(U8) (c)] & (bit_pattern)))
+
     /* For internal core Perl use only: the base macro for defining macros like
      * isALPHA */
-#   define generic_isCC_(c, classnum)                                       \
-       (FITS_IN_8_BITS(c) && (PL_charclass[(U8) (c)] & CC_mask_(classnum)))
+#   define generic_isCC_(c, classnum)  Perl_isCC_by_bit(c, CC_mask_(classnum))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
