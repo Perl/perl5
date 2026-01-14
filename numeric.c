@@ -243,7 +243,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         NV *result,
                         const unsigned shift, /* 1 for binary; 3 for octal;
                                                  4 for hex */
-                        const U8 class_bit,
+                        const U32 class_bit,
                         const char prefix
                      )
 
@@ -305,42 +305,42 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
   redo_switch:
     switch (e - s) {
       default:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 7:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 6:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 5:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 4:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 3:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 2:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
       case 1:
-          if (UNLIKELY(! generic_isCC_(*s, class_bit)))  break;
+          if (UNLIKELY(! Perl_isCC_by_bit(*s, class_bit)))  break;
           value = (value << shift) | XDIGIT_VALUE(*s);
           s++;
           /* FALLTHROUGH */
@@ -380,7 +380,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     /* Loop through the characters */
     for (; s < e; s++) {
-        if (generic_isCC_(*s, class_bit)) {
+        if (Perl_isCC_by_bit(*s, class_bit)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
                With gcc seems to be much straighter code than old scan_hex.
@@ -422,7 +422,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         if (   UNLIKELY(*s == '_')
             && s < e - 1
             && allow_underscores
-            && generic_isCC_(s[1], class_bit)
+            && Perl_isCC_by_bit(s[1], class_bit)
             && (   LIKELY(s > s0)
                    /* Including initial underscores if those are accepted */
                 || UNLIKELY(! (  input_flags

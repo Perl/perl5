@@ -1459,7 +1459,7 @@ Cp	|UV	|grok_bin_oct_hex					\
 				|NN I32 *flags				\
 				|NULLOK NV *result			\
 				|const unsigned shift			\
-				|const U8 lookup_bit			\
+				|const U32 lookup_bit			\
 				|const char prefix
 Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
