@@ -1434,8 +1434,8 @@ Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
 				|NULLOK NV *result
-Adp	|int	|grok_infnan	|NN const char **sp			\
-				|NN const char *send
+Adp	|int	|grok_infnan	|SPTR const char **sp			\
+				|EPTRge const char *send
 Adp	|int	|grok_number	|NN const char *pv			\
 				|STRLEN len				\
 				|NULLOK UV *valuep

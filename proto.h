@@ -1259,7 +1259,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags,
 PERL_CALLCONV int
 Perl_grok_infnan(pTHX_ const char **sp, const char *send);
 #define PERL_ARGS_ASSERT_GROK_INFNAN            \
-        assert(sp); assert(send)
+        assert(sp); assert(*sp); assert(send); assert(*sp <= send)
 
 PERL_CALLCONV int
 Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep);

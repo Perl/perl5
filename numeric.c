@@ -666,12 +666,17 @@ zero is returned, and C<*sp> will not move.
 int
 Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 {
+    PERL_ARGS_ASSERT_GROK_INFNAN;
+
     const char* s = *sp;
+
+    if (UNLIKELY(s >= send)) {
+        return 0;
+    }
+
     int flags = 0;
 #if defined(NV_INF) || defined(NV_NAN)
     bool odh = FALSE; /* one-dot-hash: 1.#INF */
-
-    PERL_ARGS_ASSERT_GROK_INFNAN;
 
     if (*s == '+') {
         s++; if (s == send) return 0;
