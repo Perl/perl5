@@ -1336,7 +1336,6 @@ my @unresolved_visibility_overrides = qw(
     is_XDIGIT_high
     isXDIGIT_LC_utf8
     isXDIGIT_uni
-    IV_DIG
     IV_MAX_P1
     JE_OLD_STACK_HWM_restore
     JE_OLD_STACK_HWM_save
@@ -3212,7 +3211,6 @@ my @unresolved_visibility_overrides = qw(
     UTF_START_MARK
     UTF_START_MASK
     UTF_TO_NATIVE
-    UV_DIG
     UV_MAX_P1
     UV_MAX_P1_HALF
     VCMP
