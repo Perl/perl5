@@ -283,9 +283,7 @@
 #   undef case_9_SBOX32
 #   undef CC_UNDERSCORE_
 #   undef isFOO_or_UNDERSCORE_
-#   undef IV_BITS
 #   undef USE_STDIO
-#   undef UV_BITS
 #   if !defined(PERL_EXT)
 #     undef invlist_intersection_
 #     undef invlist_subtract_

@@ -2410,6 +2410,23 @@ typedef UVTYPE UV;
 #define Size_t_MAX (~(Size_t)0)
 #define SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
 
+/*
+=for apidoc_section $integer
+=for apidoc   Amn|unsigned|IV_BITS
+=for apidoc_item |unsigned|UV_BITS
+
+These return the number of bits in an IV and UV, respectively.  These values
+vary depending on platform capabilities and Configure options.
+
+=for apidoc   Amn|unsigned|IV_DIG
+=for apidoc_item |unsigned|UV_DIG
+
+These return the number of decimal digits required to represent any possible
+number of their respective types.  These values vary depending on platform
+capabilities and Configure options.
+
+=cut
+*/
 #define IV_BITS (IVSIZE * CHARBITS)
 #define IV_DIG (BIT_DIGITS(IV_BITS))
 #define UV_BITS (UVSIZE * CHARBITS)
