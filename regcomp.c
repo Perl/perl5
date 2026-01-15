@@ -10213,7 +10213,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 }
             default:
                 /* Allow \_ to not give an error */
-                if (isWORDCHAR(value) && value != '_') {
+                if (isALPHANUMERIC_A(value)) {
                     if (strict) {
                         vFAIL2("Unrecognized escape \\%c in character class",
                                (int)value);
