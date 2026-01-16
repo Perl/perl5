@@ -133,7 +133,7 @@ EOF
                 |foo(abc = 111)
                 |int abc = 777;
 EOF
-            [ TODO, qr/if\(items < 2\)\n\s*abc = 111;\n\s*else \{\n\s*abc = `777;\n\}\n/,
+            [ TODO, qr/if\s*\(items < 1\)\n\s*abc = 111;\n\s*else \{\n\s*abc = 777;\n\}\n/,
                 "",
                 "default is lost in presence of initialiser",
             ],
@@ -187,7 +187,7 @@ EOF
                 |foo(abc = NO_INIT)
                 |int abc = 777;
 EOF
-            [ TODO, qr/if\(items >= 1\)\n\s*abc = 777;\n\s*}/,
+            [ TODO, qr/if\s*\(items >= 1\)\n\s*abc = 777;\n\s*}/,
                 "",
                 "default is lost in presence of initialiser",
             ],
