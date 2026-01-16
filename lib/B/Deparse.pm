@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.88;
+package B::Deparse 1.89;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -69,7 +69,7 @@ BEGIN {
     # Easiest way to keep this code portable between version looks to
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_INDEXED
-		OPpITER_REVERSED OPpCONST_NOVER
+		OPpITER_REVERSED OPpITER_REFALIAS OPpCONST_NOVER
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
 		PMf_CHARSET PMf_KEEPCOPY PMf_NOCAPTURE CVf_ANONCONST
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
@@ -4377,6 +4377,7 @@ sub loop_common {
             $var = 'my (' . join(', ', @vars) . ')';
         } elsif (null $var) {
             $var = $self->pp_padsv($enter, 1, 1);
+            $var = "\\" . $var if $iter->private & OPpITER_REFALIAS;
 	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
 	    if ($enter->private & OPpOUR_INTRO) {

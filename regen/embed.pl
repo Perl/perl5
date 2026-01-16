@@ -2041,6 +2041,7 @@ my @unresolved_visibility_overrides = qw(
     OPpINITFIELDS
     OPpITER_DEF
     OPpITER_INDEXED
+    OPpITER_REFALIAS
     OPpITER_REVERSED
     OPpKVSLICE
     OPpLIST_GUESSED

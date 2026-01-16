@@ -4298,6 +4298,8 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
         OP *iterop = cx->blk_loop.my_op->op_next;
         assert(iterop->op_type == OP_ITER);
         PADOFFSET how_many = iterop->op_targ;
+        if(iterop->op_private & OPpITER_REFALIAS)
+            how_many &= 0xFF;
         /* op_targ actually stores count - 1, so it's the count of additional
          * vars after itervar itself */
         for (SV **svp = cx->blk_loop.itervar_u.svp + 1; how_many; svp++, how_many--) {
