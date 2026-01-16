@@ -4878,6 +4878,11 @@ PP(pp_iter)
     SV **itersvp = CxITERVAR(cx);
     const U8 type = CxTYPE(cx);
     U8 pflags = PL_op->op_private;
+    bool pflag_refalias = (pflags & OPpITER_REFALIAS);
+
+    // TODO: This needs to be an opchecker or compiletime complaint
+    if(pflag_refalias)
+        assert(type == CXt_LOOP_LIST || type == CXt_LOOP_ARY);
 
     /* Classic "for" syntax iterates one-at-a-time.
        Many-at-a-time for loops are only for lexicals declared as part of the
@@ -4889,8 +4894,25 @@ PP(pp_iter)
        for many-at-a-time. We actually store C<how_many - 1>, so that for the
        case of one-at-a-time we have zero (as before), as this makes all the
        logic of the for loop below much simpler, with all the other
-       one-at-a-time cases just falling out of this "naturally". */
+       one-at-a-time cases just falling out of this "naturally".
+
+       If OPpITER_REFALIAS is set, this field actually stores two values.
+       The actual count sits in the lower 8 bits, and the upper 24 bits form a
+       bitmask indicating which of the iterator variables have refalias
+       behaviour */
     PADOFFSET how_many = PL_op->op_targ;
+    U32 refalias_mask = 0;
+    if (pflag_refalias) {
+        refalias_mask = how_many >> 8;
+        how_many &= 0xFF;
+
+        if (!how_many)
+            /* OPpITER_REFALIAS with how_many==0 means that one variable is
+             * refaliased
+             */
+            refalias_mask = 1;
+    }
+
     PADOFFSET i = 0;
 
     assert(itersvp);
@@ -4901,6 +4923,8 @@ PP(pp_iter)
         AV *av;
         IV ix;
         IV inc;
+
+        bool refalias_this = refalias_mask & (1<<i);
 
         switch (type) {
 
@@ -5084,6 +5108,38 @@ PP(pp_iter)
             }
 
         loop_ary_common:
+
+            if (refalias_this) {
+                /* TODO(leonerd): pull out this behaviour into a shared place.
+                 * This is mostly copypaste from mg.c's Perl_magic_setlvref */
+                if(!SvROK(sv)) croak("Assigned value is not a reference");
+                SV *rv = SvRV(sv);
+
+                const char *bad = NULL;
+                /* TODO(leonerd): is it sufficient to use the existing var type? */
+                switch (SvTYPE(*itersvp)) {
+                    case SVt_PVAV:
+                        if(SvTYPE(rv) != SVt_PVAV) bad = "an ARRAY";
+                        break;
+                    case SVt_PVHV:
+                        if(SvTYPE(rv) != SVt_PVHV) bad = "a HASH";
+                        break;
+                    case SVt_PVCV:
+                        if(SvTYPE(rv) != SVt_PVCV) bad = "a CODE";
+                        break;
+                    default:
+                        if(SvTYPE(rv) > SVt_PVLV) bad = "a SCALAR";
+                        break;
+                }
+                if (bad)
+                    croak("Assigned value is not %s reference", bad);
+
+                oldsv = *itersvp;
+                *itersvp = SvREFCNT_inc_NN(rv);
+                SvREFCNT_dec(oldsv);
+
+                break;
+            }
 
             if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
                 SvSetMagicSV(*itersvp, sv);

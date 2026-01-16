@@ -10037,8 +10037,27 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             sv = NULL;
             PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
         }
-        else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
-            NOOP;
+        else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN) {
+            /* for \VAR or for my \VAR */
+            /* sv should be OP_NULL[OP_NULL[OP_LVREF]]. We can distinguish
+             * the 'my' version by the LVINTRO flag */
+            assert(cUNOPx(sv)->op_first);
+            assert(cUNOPx(cUNOPx(sv)->op_first)->op_first);
+            OP *lvrefop = cUNOPx(cUNOPx(sv)->op_first)->op_first;
+            assert(lvrefop->op_type == OP_LVREF);
+
+            if(lvrefop->op_private & OPpLVAL_INTRO) {  /* for my \VAR */
+                /* Throw away the sv op subtree and turn this into a simple
+                 * padoffset + OPpITER_REFALIAS flag */
+                iterpflags = OPpITER_REFALIAS;
+                enteriterpflags = OPpLVAL_INTRO;
+                padoff = lvrefop->op_targ;
+                lvrefop->op_targ = 0;
+                op_free(sv);
+                sv = NULL;
+            }
+            /* else TODO(leonerd): still do something about the non-my version? */
+        }
         else if (sv->op_type == OP_LIST) {
             LISTOP *list = cLISTOPx(sv);
             OP *pushmark = list->op_first;
