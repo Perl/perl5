@@ -10042,12 +10042,12 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             parens = 1;
 
             if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
-                croak("panic: newFORLOOP, found %s, expecting pushmark",
+                croak("panic: newFOROP, found %s, expecting pushmark",
                            pushmark ? PL_op_desc[pushmark->op_type] : "NULL");
             }
             first_padsv = OpSIBLING(pushmark);
             if (!first_padsv || first_padsv->op_type != OP_PADSV) {
-                croak("panic: newFORLOOP, found %s, expecting padsv",
+                croak("panic: newFOROP, found %s, expecting padsv",
                            first_padsv ? PL_op_desc[first_padsv->op_type] : "NULL");
             }
             padoff = first_padsv->op_targ;
@@ -10057,13 +10057,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             padsv = cUNOPx(OpSIBLING(first_padsv));
             do {
                 if (!padsv || padsv->op_type != OP_PADSV) {
-                    croak("panic: newFORLOOP, found %s at %zd, expecting padsv",
+                    croak("panic: newFOROP, found %s at %zd, expecting padsv",
                                padsv ? PL_op_desc[padsv->op_type] : "NULL",
                                how_many_more);
                 }
                 ++how_many_more;
                 if (padsv->op_targ != padoff + how_many_more) {
-                    croak("panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
+                    croak("panic: newFOROP, padsv at %zd targ is %zd, not %zd",
                                how_many_more, padsv->op_targ, padoff + how_many_more);
                 }
 
