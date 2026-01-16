@@ -259,7 +259,7 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 28: /* bare_statement_for: KW_FOR KW_MY remember PERLY_PAREN_OPEN my_list_of_scalars PERLY_PAREN_CLOSE PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont  */
+  case 28: /* bare_statement_for: KW_FOR KW_MY remember PERLY_PAREN_OPEN my_list_of_itervars PERLY_PAREN_CLOSE PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont  */
 #line 403 "perly.y"
                 {
 			if ((ps[-6].val.opval)->op_type == OP_PADSV)
@@ -2184,13 +2184,13 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 344: /* list_of_scalars: list_of_scalars PERLY_COMMA  */
+  case 344: /* list_of_itervars: list_of_itervars PERLY_COMMA  */
 #line 1805 "perly.y"
                         { (yyval.opval) = (ps[-1].val.opval); }
 
     break;
 
-  case 345: /* list_of_scalars: list_of_scalars PERLY_COMMA scalar  */
+  case 345: /* list_of_itervars: list_of_itervars PERLY_COMMA scalar  */
 #line 1807 "perly.y"
                         {
 			  (yyval.opval) = op_append_elem(OP_LIST, (ps[-2].val.opval), (ps[0].val.opval));
@@ -2198,7 +2198,7 @@ case 2: /* @1: %empty  */
 
     break;
 
-  case 347: /* my_list_of_scalars: list_of_scalars  */
+  case 347: /* my_list_of_itervars: list_of_itervars  */
 #line 1814 "perly.y"
                         { parser->in_my = 0; (yyval.opval) = (ps[0].val.opval); }
 
@@ -2299,6 +2299,6 @@ case 2: /* @1: %empty  */
     
 
 /* Generated from:
- * 8444cada5b7e31b67a9eec8f91fdf7511e00378bd03fb2bc726dc0ff958643de perly.y
+ * ae0f9be132040b82b1e8357668376f7a0daae1482148dbfa551d61df28e545f0 perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */

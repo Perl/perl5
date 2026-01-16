@@ -134,7 +134,7 @@
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
-%type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
+%type <opval> list_of_itervars my_list_of_itervars refgen_topic formblock
 %type <opval> subattrlist attrlist optattrlist myattrterm myterm
 %type <pval>  fieldvar /* pval is PADNAME */
 %type <opval> fielddecl
@@ -393,7 +393,7 @@ bare_statement_for
 		KW_MY
 		remember
 		PERLY_PAREN_OPEN
-		my_list_of_scalars
+		my_list_of_itervars
 		PERLY_PAREN_CLOSE
 		PERLY_PAREN_OPEN
 		mexpr
@@ -401,11 +401,11 @@ bare_statement_for
 		mblock
 		cont
 		{
-			if ($my_list_of_scalars->op_type == OP_PADSV)
+			if ($my_list_of_itervars->op_type == OP_PADSV)
 				/* degenerate case of 1 var: for my ($x) ....
 				   Flag it so it can be special-cased in newFOROP */
-				$my_list_of_scalars->op_flags |= OPf_PARENS;
-			$$ = block_end($remember, newFOROP(0, $my_list_of_scalars, $mexpr, $mblock, $cont));
+				$my_list_of_itervars->op_flags |= OPf_PARENS;
+			$$ = block_end($remember, newFOROP(0, $my_list_of_itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
@@ -1801,17 +1801,17 @@ my_scalar:	scalar
 	;
 
 /* A list of scalars for "for my ($foo, $bar) (@baz)"  */
-list_of_scalars:	list_of_scalars[list] PERLY_COMMA
+list_of_itervars:	list_of_itervars[list] PERLY_COMMA
 			{ $$ = $list; }
-	|		list_of_scalars[list] PERLY_COMMA scalar
+	|		list_of_itervars[list] PERLY_COMMA scalar
 			{
 			  $$ = op_append_elem(OP_LIST, $list, $scalar);
 			}
 	|		scalar %prec PREC_LOW
 	;
 
-my_list_of_scalars:	list_of_scalars
-			{ parser->in_my = 0; $$ = $list_of_scalars; }
+my_list_of_itervars:	list_of_itervars
+			{ parser->in_my = 0; $$ = $list_of_itervars; }
 	;
 
 my_var	:	scalar
