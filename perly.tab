@@ -266,8 +266,8 @@ enum yysymbol_kind_t
   YYSYMBOL_optexpr = 255,                  /* optexpr  */
   YYSYMBOL_optrepl = 256,                  /* optrepl  */
   YYSYMBOL_my_scalar = 257,                /* my_scalar  */
-  YYSYMBOL_list_of_scalars = 258,          /* list_of_scalars  */
-  YYSYMBOL_my_list_of_scalars = 259,       /* my_list_of_scalars  */
+  YYSYMBOL_list_of_itervars = 258,         /* list_of_itervars  */
+  YYSYMBOL_my_list_of_itervars = 259,      /* my_list_of_itervars  */
   YYSYMBOL_my_var = 260,                   /* my_var  */
   YYSYMBOL_refgen_topic = 261,             /* refgen_topic  */
   YYSYMBOL_my_refgen = 262,                /* my_refgen  */
@@ -468,8 +468,8 @@ static const char *const yytname[] =
   "subscripted", "termbinop", "termrelop", "relopchain", "termeqop",
   "eqopchain", "termunop", "anonymous", "termdo", "term", "@23",
   "myattrterm", "myterm", "fieldvar", "fielddecl", "$@24", "optlistexpr",
-  "optexpr", "optrepl", "my_scalar", "list_of_scalars",
-  "my_list_of_scalars", "my_var", "refgen_topic", "my_refgen", "amper",
+  "optexpr", "optrepl", "my_scalar", "list_of_itervars",
+  "my_list_of_itervars", "my_var", "refgen_topic", "my_refgen", "amper",
   "scalar", "ary", "hsh", "arylen", "star", "sliceme", "kvslice", "gelem",
   "indirob", YY_NULLPTR
 };
@@ -1685,6 +1685,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * 8444cada5b7e31b67a9eec8f91fdf7511e00378bd03fb2bc726dc0ff958643de perly.y
+ * ae0f9be132040b82b1e8357668376f7a0daae1482148dbfa551d61df28e545f0 perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */
