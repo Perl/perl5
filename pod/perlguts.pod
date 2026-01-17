@@ -2113,8 +2113,6 @@ Note the I<end of the current statement> may occur much before the
 I<end of the current pseudo-block>.  You may wish to look at the
 C<SAVEDESTRUCTOR_X()> macro instead.
 
-=for apidoc Amh||MORTALSVFUNC_X|SVFUNC_t f|SV *sv
-
 =item C<MORTALDESTRUCTOR_SV(SV *coderef, SV *args)>
 
 At the end of I<the current statement> the Perl function contained in
@@ -2127,8 +2125,6 @@ I<end of the current pseudo-block>.  If you wish to call a perl
 function at the end of the current pseudo block you should use the
 C<SAVEDESTRUCTOR_X()> API instead, which will require you create a
 C wrapper to call the Perl function.
-
-=for apidoc Amh||MORTALDESTRUCTOR_SV|SV *coderef|SV *args
 
 =item C<SAVESTACK_POS()>
 
