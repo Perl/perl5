@@ -2285,3 +2285,15 @@ use v5.20;
 use test_22121;
 # expect no warning because different scope
 EXPECT
+########
+use feature qw( refaliasing declared_refs );
+foreach my \@arr ( [] ) { }
+EXPECT
+Declaring references is experimental at - line 2.
+Aliasing via reference is experimental at - line 2.
+########
+use feature qw( refaliasing declared_refs );
+foreach my ( \@ax, \@ay ) ( [], [] ) { }
+EXPECT
+Declaring references is experimental at - line 2.
+Aliasing via reference is experimental at - line 2.

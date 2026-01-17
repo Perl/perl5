@@ -1807,7 +1807,15 @@ list_of_itervars:	list_of_itervars[list] PERLY_COMMA
 			{
 			  $$ = op_append_elem(OP_LIST, $list, $scalar);
 			}
+	|		list_of_itervars[list] PERLY_COMMA REFGEN my_var
+			{
+			  $$ = op_append_elem(OP_LIST, $list, newUNOP(OP_REFGEN, 0, $my_var));
+			}
 	|		scalar %prec PREC_LOW
+	|		REFGEN my_var %prec PREC_LOW
+			{
+			  $$ = newUNOP(OP_REFGEN, 0, $my_var);
+			}
 	;
 
 my_list_of_itervars:	list_of_itervars

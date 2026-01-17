@@ -4930,6 +4930,8 @@ PP(pp_iter)
 
         case CXt_LOOP_LAZYSV: /* string increment */
             {
+                /* This should have been forbidden by pp_enteriter */
+                assert(!refalias_this);
                 SV* cur = cx->blk_loop.state_u.lazysv.cur;
                 SV *end = cx->blk_loop.state_u.lazysv.end;
                 /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
@@ -4992,6 +4994,8 @@ PP(pp_iter)
 
         case CXt_LOOP_LAZYIV: /* integer increment */
             {
+                /* This should have been forbidden by pp_enteriter */
+                assert(!refalias_this);
                 IV cur = cx->blk_loop.state_u.lazyiv.cur;
                 bool pad_it = FALSE;
                 if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end)) {
