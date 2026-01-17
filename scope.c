@@ -1888,9 +1888,12 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 
 /*
 =for apidoc_section $callback
-=for apidoc mortal_destructor_sv
+=for apidoc      mortal_destructor_sv
+=for apidoc_item MORTALDESTRUCTOR_SV
 
-This function arranges for either a Perl code reference, or a C function
+These are synonymous.
+
+They each arrange for either a Perl code reference, or a C function
 reference to be called at the B<end of the current statement>.
 
 The C<coderef> argument determines the type of function that will be
@@ -1921,9 +1924,12 @@ block>. If you are looking for a mechanism to trigger a function at the
 end of the B<current pseudo block> you should look at
 L<perlapi/C<SAVEDESTRUCTOR_X>> instead of this function.
 
-=for apidoc mortal_svfunc_x
+=for apidoc      mortal_svfunc_x
+=for apidoc_item MORTALSVFUNC_X
 
-This function arranges for a C function reference to be called at the
+These are synonymous.
+
+They each arrange for a C function reference to be called at the
 B<end of the current statement> with the arguments provided. It is a
 wrapper around C<mortal_destructor_sv()> which ensures that the latter
 function is called appropriately.
