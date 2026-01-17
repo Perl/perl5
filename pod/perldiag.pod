@@ -871,6 +871,21 @@ executing the current method, and therefore it can only be placed inside an
 actual method (or method-like expression, such as a field initializer
 expression).
 
+=item Cannot use declared reference iterator variables in foreach loop past the 24th variable
+
+(F) You attempted to create a multi-variable C<foreach> loop where at least
+one variable is a declared reference (C<\$VAR>, C<\@VAR> or C<\%VAR>) and
+one of the variables past the 24th variable is a declared reference. For
+internal implementation reasons, perl cannot keep track of declared references
+past the first 24 of them.
+
+=item Cannot use more than 256 iterator variables on a foreach loop if any are declared refs
+
+(F) You attempted to create a multi-variable C<foreach> loop where at least
+one variable is a declared reference (C<\$VAR>, C<\@VAR> or C<\%VAR>) and
+there are in total more than 256 iterator variables. For internal
+implementation reasons, this is too many for perl to keep track of.
+
 =item Cannot yet reorder sv_vcatpvfn() arguments from va_list
 
 (F) Some XS code tried to use C<sv_vcatpvfn()> or a related function with a

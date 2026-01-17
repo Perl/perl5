@@ -1092,6 +1092,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_ENTERTRY:
     case OP_ENTEREVAL:	/* Was holding hints. */
     case OP_ARGDEFELEM:	/* Was holding signature index. */
+    case OP_ITER:       /* Was holding multivariable itervar count */
         o->op_targ = 0;
         break;
     default:
@@ -10006,6 +10007,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     I32 enteriterpflags = 0;
     U8 iterpflags = 0;
     bool parens = 0;
+    U32 refalias_mask = 0;
 
     PERL_ARGS_ASSERT_NEWFOROP;
 
@@ -10037,22 +10039,27 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             sv = NULL;
             PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
         }
-        else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN) {
-            /* for \VAR or for my \VAR */
+        else if (OP_TYPE_IS_OR_WAS(sv, OP_SREFGEN)) {
+            /* for \VAR or for my \VAR, with or without parens */
             /* sv should be OP_NULL[OP_NULL[OP_LVREF]]. We can distinguish
              * the 'my' version by the LVINTRO flag */
             assert(cUNOPx(sv)->op_first);
             assert(cUNOPx(cUNOPx(sv)->op_first)->op_first);
-            OP *lvrefop = cUNOPx(cUNOPx(sv)->op_first)->op_first;
-            assert(lvrefop->op_type == OP_LVREF);
 
-            if(lvrefop->op_private & OPpLVAL_INTRO) {  /* for my \VAR */
+            OP *varop = cUNOPx(cUNOPx(sv)->op_first)->op_first;
+            /* This is either OP_LVREF or one of the OP_PADxV ops */
+            assert(varop->op_type == OP_LVREF ||
+                    (varop->op_type == OP_PADSV ||
+                     varop->op_type == OP_PADAV ||
+                     varop->op_type == OP_PADHV));
+
+            if(varop->op_type != OP_LVREF || varop->op_private & OPpLVAL_INTRO) {  /* for my \VAR */
                 /* Throw away the sv op subtree and turn this into a simple
                  * padoffset + OPpITER_REFALIAS flag */
                 iterpflags = OPpITER_REFALIAS;
                 enteriterpflags = OPpLVAL_INTRO;
-                padoff = lvrefop->op_targ;
-                lvrefop->op_targ = 0;
+                padoff = varop->op_targ;
+                varop->op_targ = 0;
                 op_free(sv);
                 sv = NULL;
             }
@@ -10061,9 +10068,6 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         else if (sv->op_type == OP_LIST) {
             LISTOP *list = cLISTOPx(sv);
             OP *pushmark = list->op_first;
-            OP *first_padsv;
-            UNOP *padsv;
-            PADOFFSET i;
 
             enteriterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
             parens = 1;
@@ -10072,46 +10076,68 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
                 croak("panic: newFOROP, found %s, expecting pushmark",
                            pushmark ? PL_op_desc[pushmark->op_type] : "NULL");
             }
-            first_padsv = OpSIBLING(pushmark);
-            if (!first_padsv || first_padsv->op_type != OP_PADSV) {
-                croak("panic: newFOROP, found %s, expecting padsv",
-                           first_padsv ? PL_op_desc[first_padsv->op_type] : "NULL");
-            }
-            padoff = first_padsv->op_targ;
 
-            /* There should be at least one more PADSV to find, and the ops
-               should have consecutive values in targ: */
-            padsv = cUNOPx(OpSIBLING(first_padsv));
-            do {
-                if (!padsv || padsv->op_type != OP_PADSV) {
+            for (OP *kid = OpSIBLING(pushmark); kid; kid = OpSIBLING(kid)) {
+                bool kid_refalias = false;
+                OP *padxv;
+                if (kid->op_type == OP_SREFGEN) {
+                    /* kid == SREFGEN[NULL[PADxV]] */
+                    assert(kUNOP->op_first);
+                    padxv = cUNOPx(kUNOP->op_first)->op_first;
+                    assert(padxv);
+
+                    if(padxv->op_type != OP_PADSV &&
+                       padxv->op_type != OP_PADAV &&
+                       padxv->op_type != OP_PADHV)
+                        croak("panic: newFOROP, found refgen(%s) at %zd, expecting refgen(padxv)",
+                                PL_op_desc[kUNOP->op_first->op_type],
+                                how_many_more + 1);
+                    if(!(iterpflags & OPpITER_REFALIAS)) {
+                        check_or_warn_declared_refs();
+                        check_or_warn_refaliasing();
+                    }
+                    iterpflags |= OPpITER_REFALIAS;
+                    kid_refalias = true;
+                }
+                else if (kid->op_type == OP_PADSV)
+                    padxv = kid;
+                else
                     croak("panic: newFOROP, found %s at %zd, expecting padsv",
-                               padsv ? PL_op_desc[padsv->op_type] : "NULL",
-                               how_many_more);
-                }
-                ++how_many_more;
-                if (padsv->op_targ != padoff + how_many_more) {
-                    croak("panic: newFOROP, padsv at %zd targ is %zd, not %zd",
-                               how_many_more, padsv->op_targ, padoff + how_many_more);
-                }
+                               PL_op_desc[kid->op_type],
+                               how_many_more + 1);
 
-                padsv = cUNOPx(OpSIBLING(padsv));
-            } while (padsv);
+                assert(padxv->op_targ);
+
+                if (!padoff) {
+                    /* first */
+                    padoff = padxv->op_targ;
+                }
+                else {
+                    /* subsequent */
+                    how_many_more++;
+                    if (padxv->op_targ != padoff + how_many_more) {
+                        croak("panic: newFOROP, padsv at %zd targ is %zd, not %zd",
+                                   how_many_more, padxv->op_targ, padoff + how_many_more);
+                    }
+                }
+                if (kid_refalias) {
+                    if((how_many_more + 1) > 24)
+                        croak("Cannot use declared reference iterator variables in foreach loop past the 24th variable");
+                    refalias_mask |= (1 << how_many_more);
+                }
+            }
 
             /* OK, this optree has the shape that we expected. So now *we*
                "claim" the Pad slots: */
-            first_padsv->op_targ = 0;
-            PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
+            for (OP *kid = OpSIBLING(pushmark); kid; kid = OpSIBLING(kid)) {
+                OP *padxv = (kid->op_type == OP_PADSV) ? kid :
+                            (kid->op_type == OP_SREFGEN) ? cUNOPx(kUNOP->op_first)->op_first :
+                            NULL;
+                assert(padxv);
 
-            i = padoff;
-
-            padsv = cUNOPx(OpSIBLING(first_padsv));
-            do {
-                ++i;
-                padsv->op_targ = 0;
-                PAD_COMPNAME_GEN_set(i, PERL_INT_MAX);
-
-                padsv = cUNOPx(OpSIBLING(padsv));
-            } while (padsv);
+                PAD_COMPNAME_GEN_set(padxv->op_targ, PERL_INT_MAX);
+                padxv->op_targ = 0;
+            }
 
             op_free(sv);
             sv = NULL;
@@ -10256,8 +10282,16 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     if (parens)
         /* hint to deparser that this is:  for my (...) ... */
         loop->op_flags |= OPf_PARENS;
+
     iter = newOP(OP_ITER, (U32)iterpflags << 8);
-    iter->op_targ = how_many_more;
+    if(iterpflags & OPpITER_REFALIAS) {
+        if(how_many_more > 0xFF)
+            croak("Cannot use more than 256 iterator variables on a foreach loop if any are declared refs");
+        iter->op_targ = (how_many_more) | (refalias_mask << 8);
+    }
+    else
+        iter->op_targ = how_many_more;
+
     return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
 }
 

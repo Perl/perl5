@@ -27,6 +27,30 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Multi-variable C<foreach> can now use aliased references
+
+Perl version 5.22 introduced reference aliases, allowing a C<foreach> loop
+iteration variable to create new aliases to references. Perl version 5.36
+introduced C<foreach> loops with multiple variables, consuming more than one
+input list item on each iteration. New in this version, the two features may
+now be used together, allowing multiple iteration variables where any of them
+are permitted to be reference aliases.
+
+    use v5.42;
+    use feature qw( refaliasing declared_refs );
+
+    my %hash = (
+        one => [1],
+        two => [2, 2],
+    );
+
+    foreach my ( $key, \@items ) ( %hash ) {
+        say "The $key array contains: @items";
+    }
+
+Currently both the C<refaliasing> and C<declared_refs> features remain
+B<experimental>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security

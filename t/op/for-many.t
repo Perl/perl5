@@ -463,6 +463,38 @@ is($continue, 'xx', 'continue reached twice');
     is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 42');
 }
 
+# multivar iterator variables can be refaliases
+{
+    use feature qw( refaliasing declared_refs );
+    no warnings qw( experimental::refaliasing experimental::declared_refs );
+
+    my @ret;
+
+    @ret = ();
+    foreach my ( \@array ) ( ["A"], ["B"], ["C"] ) {
+        push @ret, "<@array>";
+    }
+    is(join(",", @ret), "<A>,<B>,<C>", 'lone multivar iterator var can be refalias');
+
+    @ret = ();
+    foreach my ( $k, \$scalar ) ( one => \1, two => \2, three => \3 ) {
+        push @ret, "$k=$scalar";
+    }
+    is(join(",", @ret), "one=1,two=2,three=3", 'iterator vars can refalias scalars');
+
+    @ret = ();
+    foreach my ( $k, \@array ) ( one => [1], two => [2,2], three => [3,3,3] ) {
+        push @ret, "$k=<@array>";
+    }
+    is(join(",", @ret), "one=<1>,two=<2 2>,three=<3 3 3>", 'iterator vars can refalias arrays');
+
+    @ret = ();
+    foreach my ( $k, \%hash ) ( one => { 1 => 1 }, two => { 2 => 2 }, three => { 3 => 3 } ) {
+        push @ret, "$k=" . join("|", %hash );
+    }
+    is(join(",", @ret), "one=1|1,two=2|2,three=3|3", 'iterator vars can refalias arrays');
+}
+
 # Spaces shouldn't trigger parsing errors:
 {
     my @correct = ('Pointy', 'Up', 'Flamey', 'Down');

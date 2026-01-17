@@ -2596,12 +2596,13 @@ PP(pp_enteriter)
     void *itervarp; /* GV or pad slot of the iteration variable */
     SV   *itersave; /* the old var in the iterator var slot */
     U8 cxflags = 0;
+    U8 priv = PL_op->op_private;
 
     if (PL_op->op_targ) {			 /* "my" variable */
         itervarp = &PAD_SVl(PL_op->op_targ);
         itersave = *(SV**)itervarp;
         assert(itersave);
-        if (PL_op->op_private & OPpLVAL_INTRO) {        /* for my $x (...) */
+        if (priv & OPpLVAL_INTRO) {        /* for my $x (...) */
             /* the SV currently in the pad slot is never live during
              * iteration (the slot is always aliased to one of the items)
              * so it's always stale */
@@ -2617,7 +2618,7 @@ PP(pp_enteriter)
             itersave = GvSV(sv);
             SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
-            if (PL_op->op_private & OPpITER_DEF)
+            if (priv & OPpITER_DEF)
                 cxflags |= CXp_FOR_DEF;
         }
         else {                          /* LV ref: for \$foo (...) */
@@ -2649,7 +2650,7 @@ PP(pp_enteriter)
         (void)rpp_pop_1_norc();
     }
     /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
-    assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
+    assert((cxflags & CXp_FOR_GV) || !(priv & OPpITER_DEF));
 
     /* Note that this context is initially set as CXt_NULL. Further on
      * down it's changed to one of the CXt_LOOP_*. Before it's changed,
@@ -2668,7 +2669,9 @@ PP(pp_enteriter)
             /* range */
             SV* sv = PL_stack_sp[-1];
             SV * const right = maybe_ary;
-            if (UNLIKELY(cxflags & CXp_FOR_LVREF))
+            assert(PL_op->op_next->op_type == OP_ITER);
+            if (UNLIKELY((cxflags & CXp_FOR_LVREF) ||
+                         (PL_op->op_next->op_private & OPpITER_REFALIAS)))
                 DIE(aTHX_ "Assigned value is not a reference");
             SvGETMAGIC(sv);
             SvGETMAGIC(right);
@@ -2711,7 +2714,7 @@ PP(pp_enteriter)
              * stack to the CX .ary entry, so no SvREFCNT_dec() needed */
             (void)rpp_pop_1_norc();
             cx->blk_loop.state_u.ary.ix =
-                (PL_op->op_private & OPpITER_REVERSED) ?
+                (priv & OPpITER_REVERSED) ?
                 AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
                 -1;
         }
@@ -2723,7 +2726,7 @@ PP(pp_enteriter)
         cx->blk_oldsp = PL_stack_sp - PL_stack_base;
         cx->blk_loop.state_u.stack.basesp = MARK - PL_stack_base;
         cx->blk_loop.state_u.stack.ix =
-            (PL_op->op_private & OPpITER_REVERSED)
+            (priv & OPpITER_REVERSED)
                 ? cx->blk_oldsp + 1
                 : cx->blk_loop.state_u.stack.basesp;
         /* pre-extend stack so pp_iter doesn't have to check every time
