@@ -8527,19 +8527,24 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 =for apidoc      load_module
 =for apidoc_item load_module_nocontext
+=for apidoc_item vload_module
 =for apidoc_flag PERL_LOADMOD_DENY
 =for apidoc_flag PERL_LOADMOD_NOIMPORT
 =for apidoc_flag PERL_LOADMOD_IMPORT_OPS
 
 These load the module whose name is pointed to by the string part of C<name>.
 Note that the actual module name, not its filename, should be given.
-Eg, "Foo::Bar" instead of "Foo/Bar.pm". ver, if specified and not NULL,
-provides version semantics similar to C<use Foo::Bar VERSION>. The optional
-trailing arguments can be used to specify arguments to the module's C<import()>
-method, similar to C<use Foo::Bar VERSION LIST>; their precise handling depends
-on the flags. The flags argument is a bitwise-ORed collection of any of
-C<PERL_LOADMOD_DENY>, C<PERL_LOADMOD_NOIMPORT>, or C<PERL_LOADMOD_IMPORT_OPS>
-(or 0 for no flags).
+I<e.g.>, "Foo::Bar" instead of "Foo/Bar.pm".
+
+C<ver>, if specified and not NULL, provides version semantics similar to C<use
+Foo::Bar VERSION>.
+
+The optional trailing arguments can be used to specify arguments to the
+module's C<import()> method, similar to C<use Foo::Bar VERSION LIST>; their
+precise handling depends on the flags.
+
+The flags argument is a bitwise-ORed collection of any of C<PERL_LOADMOD_DENY>,
+C<PERL_LOADMOD_NOIMPORT>, or C<PERL_LOADMOD_IMPORT_OPS> (or 0 for no flags).
 
 If C<PERL_LOADMOD_NOIMPORT> is set, the module is loaded as if with an empty
 import list, as in C<use Foo::Bar ()>; this is the only circumstance in which
@@ -8558,8 +8563,8 @@ than C<use>.
 
 __PLAIN_vs_NOCONTEXT_wording__(load_module)
 
-=for apidoc vload_module
-Like C<L</load_module>> but the arguments are a C<va_list>.
+C<vload_module> differs from the other two only in that its trailing arguments
+are a C<va_list>.
 
 =cut */
 
