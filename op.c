@@ -3078,6 +3078,27 @@ S_potential_mod_type(I32 type)
 }
 
 
+#define check_or_warn_refaliasing() S_check_or_warn_refaliasing(aTHX)
+PERL_STATIC_INLINE void
+S_check_or_warn_refaliasing(pTHX)
+{
+    if (!FEATURE_REFALIASING_IS_ENABLED)
+        croak("Experimental aliasing via reference not enabled");
+    ck_warner_d(packWARN(WARN_EXPERIMENTAL__REFALIASING),
+            "Aliasing via reference is experimental");
+}
+
+#define check_or_warn_declared_refs() S_check_or_warn_declared_refs(aTHX)
+PERL_STATIC_INLINE void
+S_check_or_warn_declared_refs(pTHX)
+{
+    if (!FEATURE_MYREF_IS_ENABLED)
+        croak("The experimental declared_refs feature is not enabled");
+    ck_warner_d(packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+            "Declaring references is experimental");
+}
+
+
 /*
 =for apidoc op_lvalue
 
@@ -3506,11 +3527,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_SREFGEN:
         if (type == OP_NULL) { /* local */
           local_refgen:
-            if (!FEATURE_MYREF_IS_ENABLED)
-                croak("The experimental declared_refs "
-                                 "feature is not enabled");
-            ck_warner_d(packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-                        "Declaring references is experimental");
+            check_or_warn_declared_refs();
             next_kid = cUNOPo->op_first;
             goto do_next;
         }
@@ -3530,13 +3547,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         {
             const U8 ec = PL_parser ? PL_parser->error_count : 0;
             S_lvref(aTHX_ kid, type);
-            if (!PL_parser || PL_parser->error_count == ec) {
-                if (!FEATURE_REFALIASING_IS_ENABLED)
-                    croak(
-                       "Experimental aliasing via reference not enabled");
-                ck_warner_d(packWARN(WARN_EXPERIMENTAL__REFALIASING),
-                            "Aliasing via reference is experimental");
-            }
+            if (!PL_parser || PL_parser->error_count == ec)
+                check_or_warn_refaliasing();
         }
         if (o->op_type == OP_REFGEN)
             op_null(cUNOPx(cUNOPo->op_first)->op_first); /* pushmark */
@@ -4172,11 +4184,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         return o;
     }
     else if (type == OP_REFGEN || type == OP_SREFGEN) {
-        if (!FEATURE_MYREF_IS_ENABLED)
-            croak("The experimental declared_refs "
-                             "feature is not enabled");
-        ck_warner_d(packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-                    "Declaring references is experimental");
+        check_or_warn_declared_refs();
         /* Kid is a nulled OP_LIST, handled above.  */
         my_kid(cUNOPo->op_first, attrs, imopsp);
         return o;
@@ -14293,11 +14301,7 @@ Perl_ck_refassign(pTHX_ OP *o)
                                  OP_DESC(varop)));
         return o;
     }
-    if (!FEATURE_REFALIASING_IS_ENABLED)
-        croak(
-                  "Experimental aliasing via reference not enabled");
-    ck_warner_d(packWARN(WARN_EXPERIMENTAL__REFALIASING),
-                "Aliasing via reference is experimental");
+    check_or_warn_refaliasing();
     if (stacked) {
         o->op_flags |= OPf_STACKED;
         op_sibling_splice(o, right, 1, varop);
