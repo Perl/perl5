@@ -37,8 +37,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="khw steveh tonyc" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
-
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
