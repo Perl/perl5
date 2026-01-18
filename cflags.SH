@@ -184,11 +184,20 @@ Intel*) ;; # # Is that you, Intel C++?
 # NOTE 3: the relative order of these options matters:
 # -Wextra before -Wno-long-long -Wno-declaration-after-statement
 #
+# NOTE 4: If a function has __attribute__nonnull__(n), gcc generates many
+#         warnings for macros that have the generality to check for NULLness on
+#         parameter n.  We could write versions of those macros that eliminate
+#         that check, but why?.  It complicates our code and gains no
+#         perceptible performance except in very hot code that the compiler
+#         has chosen to not optimize away.  So turn these off with
+#         -Wno-nonnull-compare
+
 *) warns="$pedantic \
 	-Werror=pointer-arith \
 	-Werror=vla \
 	-Wextra \
 	-Wno-long-long -Wno-declaration-after-statement \
+        -Wno-nonnull-compare \
 	-Wc++-compat -Wwrite-strings"
    case " $ccflags " in
    *" -std="*) ;; # Already have -std=...
@@ -296,7 +305,7 @@ case "$gccversion" in
 *"Apple LLVM "[34]*|*"Apple LLVM version "[34]*)
   for f in -Wno-unused-value
   do
-    echo "cflags.SH: Adding $f because clang version '$gccversion'" 
+    echo "cflags.SH: Adding $f because clang version '$gccversion'"
     warn="$warn $f"
   done
   ;;
@@ -505,3 +514,4 @@ done
 !NO!SUBS!
 chmod 755 cflags
 $eunicefix cflags
+
