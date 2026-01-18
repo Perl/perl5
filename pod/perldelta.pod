@@ -12,8 +12,8 @@ perldelta - what is new for perl v5.42.1
 This document describes differences between the 5.42.0 release and the 5.42.1
 release.
 
-If you are upgrading from an earlier release such as 5.41.0, first read
-L<perl5420delta>, which describes differences between 5.41.0 and 5.42.0.
+If you are upgrading from an earlier release such as 5.40.0, first read
+L<perl5420delta>, which describes differences between 5.40.0 and 5.42.0.
 
 =head1 Notice
 
