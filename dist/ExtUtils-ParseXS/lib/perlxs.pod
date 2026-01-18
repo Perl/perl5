@@ -4938,7 +4938,52 @@ t/.
 =head2 Use of standard C library functions
 
 Often, the Perl API contains functions which you should use I<instead> of
-the standard C library ones. See L<perlclib>.
+the standard C library ones. See L<perlclib>.  Further, many libc
+functions are problematic or need special care to use in conjunction
+with perl.  L<perlclib> has specifics, and hints.
+
+=head2 Symbols defined by Perl that are visible to XS code
+
+By doing C<#include "perl.h">, you gain access to thousands of functions
+and macros defined by the perl interpreter.  Some of these you
+definitely want, such as elements designed to help your job be easier,
+described in L<perlapi>.  But some are inadvertently visible, and can be
+considered to be polluting your namespace.  Starting in Perl v5.44,
+more care is being taken to prevent adding new symbols like this, and we
+plan to gradually clean up many of the existing ones.
+
+In practice, this hasn't been much of a problem.  The universe of
+possible names is vast, and you can just choose a synonym or a different
+spelling if you find a clash with perl.
+
+Additionally, functionality has been created that just never got
+documented, and hence doesn't appear in L<perlapi>.  If you find yourself
+needing something that seems like somebody else could have needed it
+too, try perusing the array C<@unresolved_visibility_overrides> near the
+top of F<regen/embed.pl> for likely sounding candidates, and then
+investigate.  If something turns out to be what you want, let us know by
+reporting it via L<https://github.com/Perl/perl5/issues>, or better yet
+submit a patch.  By this time you are probably better equipped to know
+what to say in the documentation than anyone else!
+
+C<@unresolved_visibility_overrides> lists all the macros that are
+visible to your namespace that we haven't decided on what their
+disposition should be.  You can look through this list also to find
+names to avoid using yourself.
+
+Perl does reserve for itself names that begin with C<PL_> or have some
+form of C<perl> inside them (upper- and/or lowercase, but delimitted in
+some way on both ends, such as C</^Perl_/>.  A pattern giving the exact
+spellings is also near the top of the file F<regen/embed.pl>.
+
+Functions furnished by perl have long come in two forms, one which
+begins with C<Perl_>, and a short name that dispenses with that prefix.
+If the short name clashes with one of your symbols, you can just
+use the long name.  The downsides of doing that, though, are that the
+short name hid from you the need (or not) of a thread context parameter,
+and F<ppport.h> relies on the short name to furnish a fixed or
+back-compat version should that become necessary.  L<perlapi> gives the
+prototypes for the available forms of each API element.
 
 =head2 Event loops and control flow
 
