@@ -1782,7 +1782,6 @@ my @unresolved_visibility_overrides = qw(
     my_binmode
     MY_CXT_INDEX
     MY_CXT_INIT_ARG
-    MY_CXT_INIT_INTERP
     my_lstat
     my_stat
     namedclass_to_classnum

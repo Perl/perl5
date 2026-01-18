@@ -4783,6 +4783,8 @@ C<::_guts> and the module version number:
 
     #define MY_CXT_KEY "MyModule::_guts" XS_VERSION
 
+=for apidoc Amnh||MY_CXT_KEY
+
 =item my_cxt_t
 
 The "static" values should be stored within a struct typedef which I<must>
@@ -4793,6 +4795,8 @@ existence of the C<my_cxt_t> typedef name. For example:
         int some_value;
         int some_other_value;
     } my_cxt_t;
+
+=for apidoc yh||my_cxt_t
 
 =item START_MY_CXT
 
@@ -4885,6 +4889,9 @@ code can be added to C<CLONE()> to deep copy items within the structure.
 
 These are variants of the C<MY_CXT_INIT> and C<dMY_CXT> macros which take
 an explicit perl interpreter as an argument.
+
+=for apidoc  Amnh||MY_CXT_INIT_INTERP
+=for apidoc_item ||dMY_CXT_INIT_INTERP
 
 =back
 
