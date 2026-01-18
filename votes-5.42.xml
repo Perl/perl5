@@ -25,8 +25,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="mauke ether tonyc" id="96673a4bb36a" issue="23405" pull="23429" desc="newFOROP: fix crash when optimizing 2-var for over builtin::indexed"/>
-<commit votes="mauke khw" id="4e22a3d0e5f9" issue="23511" pull="23514" desc="class.c: gracefully handle reader definition after 'strict' error"/>
+<commit votes="mauke ether tonyc steveh" id="96673a4bb36a" issue="23405" pull="23429" desc="newFOROP: fix crash when optimizing 2-var for over builtin::indexed"/>
+<commit votes="mauke khw steveh" id="4e22a3d0e5f9" issue="23511" pull="23514" desc="class.c: gracefully handle reader definition after 'strict' error"/>
 
 </div>
 
@@ -34,13 +34,13 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <!-- The proposition is to merge all the commits in this PR except for the new test, commit d7218ffd1e1c1e4559436ecc3859e927e1a67f7e,
      which khw says will fail on some systems so is better off not put in a dot release -->
-<commit votes="khw" id="" issue="23878" pull="23921" desc="Fix 5.42 regression with strftime() and daylight savings"/>
+<commit votes="khw steveh" id="" issue="23878" pull="23921" desc="Fix 5.42 regression with strftime() and daylight savings"/>
 
 </div>
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="khw" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
+<commit votes="khw steveh" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
 
 </div>
 
@@ -50,7 +50,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="mauke khw" id="1f9d9f8d5ef1" issue="23825" pull="23829" desc="Turn off POSIX 2008 locales on AIX"/>
+<commit votes="mauke khw steveh" id="1f9d9f8d5ef1" issue="23825" pull="23829" desc="Turn off POSIX 2008 locales on AIX"/>
 
 </div>
 
