@@ -31,13 +31,13 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <!-- The proposition is to merge all the commits in this PR except for the new test, commit d7218ffd1e1c1e4559436ecc3859e927e1a67f7e,
      which khw says will fail on some systems so is better off not put in a dot release -->
-<commit votes="khw steveh" id="" issue="23878" pull="23921" desc="Fix 5.42 regression with strftime() and daylight savings"/>
+<commit votes="khw steveh tonyc" id="" issue="23878" pull="23921" desc="Fix 5.42 regression with strftime() and daylight savings"/>
 
 </div>
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="khw steveh" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
+<commit votes="khw steveh tonyc" id="5d62050d173f" issue="23881" pull="23887" desc="'use 5.41' affects current line source::encoding"/>
 
 </div>
 
