@@ -1839,7 +1839,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
         if (HvSHAREKEYS(ohv)) {
 #ifdef NODEFAULT_SHAREKEYS
-            HvSHAREKEYS_on(hv);
+            HvSHAREKEYS_off(hv);
 #else
             /* Shared is the default - it should have been set by newHV(). */
             assert(HvSHAREKEYS(hv));
