@@ -25,9 +25,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="mauke ether tonyc steveh" id="96673a4bb36a" issue="23405" pull="23429" desc="newFOROP: fix crash when optimizing 2-var for over builtin::indexed"/>
-<commit votes="mauke khw steveh" id="4e22a3d0e5f9" issue="23511" pull="23514" desc="class.c: gracefully handle reader definition after 'strict' error"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -49,8 +46,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 </div>
 
 <div><h3>Portability Fixes</h3>
-
-<commit votes="mauke khw steveh" id="1f9d9f8d5ef1" issue="23825" pull="23829" desc="Turn off POSIX 2008 locales on AIX"/>
 
 </div>
 
