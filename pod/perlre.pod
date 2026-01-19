@@ -509,9 +509,9 @@ making Perl's regular expressions more readable.  Here's an example:
 
     # Delete (most) C comments.
     $program =~ s {
-	/\*	# Match the opening delimiter.
-	.*?	# Match a minimal number of characters.
-	\*/	# Match the closing delimiter.
+        /\*	# Match the opening delimiter.
+        .*?	# Match a minimal number of characters.
+        \*/	# Match the closing delimiter.
     } []gsx;
 
 Note that anything inside

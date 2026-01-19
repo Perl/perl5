@@ -2774,8 +2774,8 @@ to the end of your file without finding such a line.
 (W redefine) You redefined a format.  To suppress this warning, say
 
     {
-	no warnings 'redefine';
-	eval "format NAME =...";
+        no warnings 'redefine';
+        eval "format NAME =...";
     }
 
 =item Found = in conditional, should be ==
@@ -4065,8 +4065,8 @@ See L</500 Server error>.
 (W redefine) You redefined a method.  To suppress this warning, say
 
     {
-	no warnings 'redefine';
-	*name = method { ... };
+        no warnings 'redefine';
+        *name = method { ... };
     }
 
 =item Might be a runaway multi-line %s string starting on line %d
@@ -5457,12 +5457,12 @@ hash seed you think you are.
 
 (S) The whole warning message will look something like:
 
-	perl: warning: Setting locale failed.
-	perl: warning: Please check that your locale settings:
-	        LC_ALL = "En_US",
-	        LANG = (unset)
-	    are supported and installed on your system.
-	perl: warning: Falling back to the standard locale ("C").
+        perl: warning: Setting locale failed.
+        perl: warning: Please check that your locale settings:
+                LC_ALL = "En_US",
+                LANG = (unset)
+            are supported and installed on your system.
+        perl: warning: Falling back to the standard locale ("C").
 
 Exactly what were the failed locale settings varies.  In the above the
 settings were that the LC_ALL was "En_US" and the LANG had no value.
@@ -5606,14 +5606,14 @@ parentheses shown here; braces are also frequently used.)
 You probably wrote something like this:
 
     @list = qw(
-	a # a comment
+        a # a comment
         b # another comment
     );
 
 when you should have written this:
 
     @list = qw(
-	a
+        a
         b
     );
 
@@ -6288,9 +6288,9 @@ variables (like PATH) from the user it isn't running under, and isn't
 in a location where the CGI server can't find it, basically, more or
 less.  Please see the following for more information:
 
-	https://www.perl.org/CGI_MetaFAQ.html
-	http://www.htmlhelp.org/faq/cgifaq.html
-	http://www.w3.org/Security/Faq/
+        https://www.perl.org/CGI_MetaFAQ.html
+        http://www.htmlhelp.org/faq/cgifaq.html
+        http://www.w3.org/Security/Faq/
 
 You should also look at L<perlfaq9>.
 
@@ -6512,8 +6512,8 @@ The second situation is caused by an eval accessing a lexical subroutine
 that has gone out of scope, for example,
 
     sub f {
-	my sub a {...}
-	sub { eval '\&a' }
+        my sub a {...}
+        sub { eval '\&a' }
     }
     f()->();
 
@@ -6533,8 +6533,8 @@ the scope or until all closure references to it are destroyed.
 (W redefine) You redefined a subroutine.  To suppress this warning, say
 
     {
-	no warnings 'redefine';
-	eval "sub name { ... }";
+        no warnings 'redefine';
+        eval "sub name { ... }";
     }
 
 =item Subroutine "%s" will not stay shared
@@ -7701,7 +7701,7 @@ See L<Win32> for more information.
 (W syntax) You used C<$[> in a comparison, such as:
 
     if ($[ > 5.006) {
-	...
+        ...
     }
 
 You probably meant to use C<$]> instead.  C<$[> is the base for indexing
@@ -8233,8 +8233,8 @@ The second situation is caused by an eval accessing a variable that has
 gone out of scope, for example,
 
     sub f {
-	my $x;
-	sub { eval '$x' }
+        my $x;
+        sub { eval '$x' }
     }
     f()->();
 
