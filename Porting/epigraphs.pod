@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.43.6 - Vajra Chandrasekera, "The Saint of Bright Doors"
 
-L<Announced on 2026-01-19 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2025/12/msg270596.html>
+L<Announced on 2026-01-19 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2026/01/msg270646.html>
 
 "When this door translates", Pipra says, pointing at it. "This side will be
 either the front or the back of the bright door. If it's the back, the door
