@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20260120';
+our $VERSION = '5.20260119';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -451,7 +451,7 @@ sub changes_between {
     5.043004 => '2025-10-22',
     5.043005 => '2025-11-20',
     5.043006 => '2025-12-20',
-    5.043007 => '2026-01-20',
+    5.043007 => '2026-01-19',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -24384,10 +24384,27 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.043007 => {
         delta_from => 5.043006,
         changed => {
+            'B'                     => '1.91',
+            'B::Concise'            => '1.010',
             'B::Op_private'         => '5.043007',
             'Config'                => '5.043007',
-            'Module::CoreList'      => '5.20260120',
-            'Module::CoreList::Utils'=> '5.20260120',
+            'ExtUtils::ParseXS'     => '3.62',
+            'ExtUtils::ParseXS::Constants'=> '3.62',
+            'ExtUtils::ParseXS::CountLines'=> '3.62',
+            'ExtUtils::ParseXS::Eval'=> '3.62',
+            'ExtUtils::ParseXS::Node'=> '3.62',
+            'ExtUtils::ParseXS::Utilities'=> '3.62',
+            'ExtUtils::Typemaps'    => '3.62',
+            'ExtUtils::Typemaps::Cmd'=> '3.62',
+            'ExtUtils::Typemaps::InputMap'=> '3.62',
+            'ExtUtils::Typemaps::OutputMap'=> '3.62',
+            'ExtUtils::Typemaps::Type'=> '3.62',
+            'HTTP::Tiny'            => '0.092',
+            'Module::CoreList'      => '5.20260119',
+            'Module::CoreList::Utils'=> '5.20260119',
+            'POSIX'                 => '2.25',
+            'Pod::Html'             => '1.36',
+            'Pod::Html::Util'       => '1.36',
         },
         removed => {
         }
