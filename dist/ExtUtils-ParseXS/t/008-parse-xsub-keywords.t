@@ -1116,6 +1116,25 @@ EOF
         |
 EOF
 
+    # all known legal overloadable ops
+    my @all_ops = qw(
+        + - * / % ** << >> x .
+        += -= *= /= %= **= <<= >>= x= .=
+        < <= >  >= == !=
+        <=> cmp
+        lt le gt ge eq ne
+        & &= | |= ^ ^= &. &.= |. |.= ^. ^.=
+        neg ! ~ ~.
+        ++ --
+        atan2 cos sin exp abs log sqrt int
+        bool "" 0+ qr
+        <>
+        -X
+        ${} @{} %{} &{} *{}
+        ~~
+        nomethod =
+    );
+
     my @test_fns = (
         [
             "OVERLOAD basic",
@@ -1136,6 +1155,19 @@ EOF
             [  0, qr{\Q"Foo::(>="},  "has Foo::(>= method"  ],
             [  0, qr{\Q"Foo::(cmp"}, "has Foo::(cmp method" ],
         ],
+
+        [
+            "OVERLOAD check all ops",
+            Q(<<EOF),
+                |void
+                |foo()
+                |    OVERLOAD: @all_ops
+EOF
+            map {
+                  [  0, qr{\Q"Foo::($_"}, "$_: has Foo::($_ method"   ]
+                } @all_ops
+        ],
+
         [
             "OVERLOAD dup op",
             Q(<<'EOF'),
