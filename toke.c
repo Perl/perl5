@@ -2942,7 +2942,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     /* Here, it isn't Perl's charname handler.  We can't rely on a
      * user-supplied handler to validate the input name.  For non-ut8 input,
      * look to see that the first character is legal.  Then loop through the
-     * rest checking that each is a continuation */
+     * rest checking that each is a charname continuation */
 
     /* This code makes the reasonable assumption that the only Latin1-range
      * characters that begin a character name alias are alphabetic, otherwise
