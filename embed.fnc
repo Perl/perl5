@@ -584,10 +584,10 @@
 :        instead you define the macro as 'PERL_FOO' (all uppercase), the
 :        embed.h entry will use all uppercase.
 :
-:	 The default visibility of macros created before 5.43.7 is visible
+:	 The default visibility of macros created before 5.43.8 is visible
 :	 everywhere, so the visibility flags are ignored.  Starting in that
 :	 release, the default visibility of newly created macros is core-only,
-:	 so the visibility flags do have effect.  To cause a pre-5.43.7 symbol
+:	 so the visibility flags do have effect.  To cause a pre-5.43.8 symbol
 :	 to be affected by a visibility flag, remove the symbol from its
 :	 override list in regen/embed.pl.
 :
