@@ -1444,8 +1444,7 @@ EOF
 EOF
                 [  0, qr{\Q#line 7 "(input)"\E\n  codeline\n#line},
                 "junk ignored" ],
-                [ERR, qr{Warning: text after keyword ignored: 'blah'},
-                        "should die" ],
+                [ERR, qr{Warning: text after keyword ignored: 'blah'}, "" ],
             ];
     }
 
@@ -1458,8 +1457,7 @@ EOF
                 |BOOT: blah
                 |  codeline
 EOF
-            [ERR, qr{Warning: text after keyword ignored: 'blah'},
-                    "should die" ],
+            [ERR, qr{Warning: text after keyword ignored: 'blah'}, "" ],
         ],
     );
 
