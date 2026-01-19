@@ -5721,8 +5721,9 @@ sub parse {
 
     my $s = $self->{text};
 
-    # Note that this doesn't check for the validity of an overload op
-    # name, to allow for forwards compatibility.
+    # Note that this doesn't forbid invalid overload op names, to allow
+    # for forwards compatibility. It does warn/skip ones which don't
+    # seem to be even vaguely syntactically correct.
     for my $op (split ' ', $s) {
         if ($op !~  m{^
                         ^
@@ -5731,7 +5732,7 @@ sub parse {
                        }x)
 
         {
-            # Names with invalid characters are currently silently ignored
+            $pxs->Warn("Warning: unrecognised OVERLOAD op name '$op' ignored");
             next;
         }
 

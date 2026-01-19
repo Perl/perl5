@@ -1178,6 +1178,16 @@ EOF
             [ERR, qr{\QWarning: duplicate OVERLOAD op name: 'cmp'},
                 "got expected error"   ],
         ],
+        [
+            "OVERLOAD unrecognised op",
+            Q(<<'EOF'),
+                |void
+                |foo()
+                |    OVERLOAD: []
+EOF
+            [ERR, qr{\QWarning: unrecognised OVERLOAD op name '[]' ignored},
+                "got expected error"   ],
+        ],
 
     );
 
