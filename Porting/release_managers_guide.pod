@@ -547,7 +547,7 @@ Test your changes:
  $ git clean -xdf   # careful if you don't have local files to keep!
  $ ./Configure -des -Dusedevel
  $ make
- $ make test
+ $ make test_harness
 
 Do note that at this stage, porting tests will fail. They will continue
 to fail until you've updated Module::CoreList, as described below.
@@ -661,6 +661,18 @@ permissions aren't a problem, delete the generated directory and tarballs.
 
 This section describes the actions required to make a release
 that are performed near to, or on the actual release day.
+
+=head3 Optimize your local setup
+
+You will be rebuilding perl quite often, so it makes sense to speed up
+the building and testing by running it in parallel. For that, you can
+optionally set the following environment variables to appropriate values
+for your machine:
+
+  export PERL_TEST_HARNESS_ASAP=1
+  export HARNESS_OPTIONS=j8
+  export TEST_JOBS=8
+  export MAKEFLAGS=-j12
 
 =head3 Re-check earlier actions
 
@@ -881,7 +893,7 @@ Then build a clean perl and do a full test
  $ git clean -dxf
  $ ./Configure -Dusedevel -des
  $ make
- $ make test
+ $ make test_harness
 
 Once all tests pass, commit your changes.
 
@@ -977,7 +989,7 @@ Build perl, then make sure it passes its own test suite, and installs:
  # or if it's an odd-numbered version:
  $ ./Configure -des -Dusedevel -Dprefix=/tmp/perl-5.X.Y-pretest
 
- $ make test install
+ $ make test ; make install
 
 For an odd-numbered version, perl will install itself as
 C</tmp/perl-5.X.Y-pretest/bin/perl5.X.Y> rather than
@@ -1527,7 +1539,7 @@ Test your changes:
  $ git clean -xdf   # careful if you don't have local files to keep!
  $ ./Configure -des -Dusedevel
  $ make
- $ make test
+ $ make test_harness
 
 Do note that at this stage, porting tests will fail. They will continue
 to fail until you've updated Module::CoreList, as described below.
@@ -1556,7 +1568,7 @@ executable built with the bumped version number.
  $ git clean -xdf
  $ ./Configure -des -Dusedevel
  $ make
- $ make test
+ $ make test_harness
 
 In particular, F<Porting/perldelta_template.pod> is intentionally exempted
 from podchecker tests, to avoid false positives about placeholder text.
