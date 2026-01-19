@@ -2404,7 +2404,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
             SETERRNO(EINVAL, LIB_INVARG);
             return -1;
         }
-#ifdef __MVS__  /* XXX Perhaps should be be OEMVS instead of __MVS__ */
+#ifdef __MVS__  /* XXX Perhaps should be OEMVS instead of __MVS__ */
         {
         /* The mode variable contains one positional parameter followed by
          * optional keyword parameters.  The positional parameters must be
