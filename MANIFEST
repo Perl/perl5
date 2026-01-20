@@ -131,6 +131,7 @@ pp_pack.c				Push/Pop code for pack/unpack
 pp_proto.h				C++ definitions for Push/Pop code
 pp_sort.c				Push/Pop code for sort
 pp_sys.c				Push/Pop code for system interaction
+prng.h					PRNG implementation
 proto.h					Prototypes
 README					The Instructions
 README.aix				Perl notes for AIX

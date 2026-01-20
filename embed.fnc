@@ -2728,6 +2728,8 @@ Adpx	|OP *	|parse_termexpr |U32 flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts					\
 				|NN const char **popt
+TXop	|double |pcg64_random_double
+TXop	|void	|pcg64_seed	|U64 seed1
 
 : peephole optimiser
 p	|void	|peep		|NULLOK OP *o
