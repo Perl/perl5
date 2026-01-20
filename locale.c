@@ -8278,18 +8278,18 @@ aligned, as best we can, with the POSIX Standard, as follows:
 
 =over
 
-=item C<is_dist> is 0
+=item C<isdst> is 0
 
 The function is to assume that daylight savings time is not in effect.  This
 should now always work properly, as perl uses its own implementation in this
 case, avoiding non-conforming libc ones.
 
-=item C<is_dist> is E<gt>0
+=item C<isdst> is E<gt>0
 
 The function is to assume that daylight savings time is in effect, though some
 underlying libc implementations treat this as a hint instead of a mandate.
 
-=item C<is_dist> is E<lt>0
+=item C<isdst> is E<lt>0
 
 The function is to itself try to calculate if daylight savings time is in
 effect.  More recent libc implementations are better at this than earlier
