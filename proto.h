@@ -5442,6 +5442,14 @@ Perl_parser_free(pTHX_ const yy_parser *parser)
 #define PERL_ARGS_ASSERT_PARSER_FREE            \
     STMT_START { Perl_assert_aTHX; assert(parser); } STMT_END
 
+PERL_CALLCONV double
+Perl_pcg64_random_double(void);
+#define PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE
+
+PERL_CALLCONV void
+Perl_pcg64_seed(U64 seed1);
+#define PERL_ARGS_ASSERT_PCG64_SEED
+
 PERL_CALLCONV void
 Perl_peep(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX
