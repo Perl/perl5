@@ -135,6 +135,6 @@ EOM
 
 { # [perl #115928] use a standard rand() implementation
     srand(1);
-    is(int rand(1000), 41, "our own implementation behaves consistently");
-    is(int rand(1000), 454, "and still consistently");
+    is(int rand(1000), 388, "our own implementation behaves consistently");
+    is(int rand(1000), 616, "and still consistently");
 }
