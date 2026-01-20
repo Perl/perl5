@@ -4237,7 +4237,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char * const e, SV *sv);
 #define PERL_ARGS_ASSERT_SCAN_WORD              \
         assert(s); assert(dest); assert(slp)
 
-PERL_CALLCONV U32
+PERL_CALLCONV U64
 Perl_seed(pTHX);
 #define PERL_ARGS_ASSERT_SEED
 
