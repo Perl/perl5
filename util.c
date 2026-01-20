@@ -43,6 +43,8 @@
 #include <sys/random.h>
 #endif
 
+#include "prng.h"
+
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 int putenv(char *);
