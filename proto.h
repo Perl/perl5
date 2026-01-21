@@ -3484,6 +3484,12 @@ PERL_CALLCONV OP *
 Perl_parse_fullstmt(pTHX_ U32 flags);
 #define PERL_ARGS_ASSERT_PARSE_FULLSTMT
 
+PERL_CALLCONV char *
+Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **failure_details, U32 flags)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_PARSE_IDENT_MSG        \
+        assert(s); assert(end); assert(s < end)
+
 PERL_CALLCONV SV *
 Perl_parse_label(pTHX_ U32 flags);
 #define PERL_ARGS_ASSERT_PARSE_LABEL
@@ -9491,13 +9497,13 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, 
         assert(key); assert(sv)
 
 STATIC char *
-S_parse_ident(pTHX_ const char *s, const char * const s_end, char **d, char * const e, bool is_utf8, U32 flags);
+S_parse_ident(pTHX_ const char *s, const char * const s_end, char **d, char * const e, bool is_utf8, HV **failure_details, U32 flags);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
         assert(s); assert(s_end); assert(d); assert(*d); assert(e); \
         assert(s <= s_end); assert(*d < e)
 
 STATIC char *
-S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end, bool is_utf8, U32 flags);
+S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end, bool is_utf8, HV **failure_details, U32 flags);
 # define PERL_ARGS_ASSERT_PARSE_IDENT_NO_COPY   \
         assert(s); assert(s_end); assert(s < s_end)
 

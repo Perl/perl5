@@ -5519,7 +5519,7 @@ yyl_sigvar(pTHX_ char *s)
             /* read var name, including sigil, into PL_tokenbuf */
             PL_tokenbuf[0] = sigil;
             s = parse_ident(s, PL_bufend, &dest, C_ARRAY_END(PL_tokenbuf),
-                            cBOOL(UTF), 0);
+                            cBOOL(UTF), NULL, 0);
             assert(PL_tokenbuf[1]); /* we have a variable name */
         }
         else {
@@ -10419,7 +10419,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 
     if ((isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))) {
         const char * const w = s;
-        s = parse_ident_no_copy(s, PL_bufend, cBOOL(UTF), IDFIRST_ONLY);
+        s = parse_ident_no_copy(s, PL_bufend, cBOOL(UTF), NULL, IDFIRST_ONLY);
         while (s < PL_bufend && isSPACE(*s))
             s++;
         if (*s == ',') {
@@ -10565,7 +10565,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 STATIC char *
 S_parse_ident(pTHX_ const char *s, const char * const s_end,
                     char **d, char * const e,
-                    bool is_utf8, U32 flags)
+                    bool is_utf8, HV** failure_details, U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
@@ -10628,8 +10628,26 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * parsed a portion of an identifier.  Therefore it should be able to
      * accept the first character being an IDCont, and not necessarily an
      * IDFIRST.  The 'IDCONT_first_OK' flag is used to indicate this */
-    const char * error = NULL;  /* Pointer to any error message */
+
+    /* When a normally fatal error occurs, and the 'failure_details' parameter
+     * is set, the function, instead of dieing, returns what would be the
+     * croak message and the position in the source string where it was
+     * encountered.  This variable holds the message text internally. */
+    const char * error;
+
+    /* This causes the CHECK_ONLY flag to also be set. */
+    if (failure_details) {
+        flags |= CHECK_ONLY;
+    }
+
+    /* However, the error position this function knows about is in the
+     * destination, normalized, string and a caller looking to mark where an
+     * error occurred, will want to use the source to report it. This variable
+     * is changed whenever a length change occurs, so that upon return, we can
+     * convert to the source position. */
+    SSize_t position_offset = 0;
     const char * const s0 = s;  /* First byte, for any error message */
+    const char * d0 = *d;
 
     while (s < s_end) {
 
@@ -10777,6 +10795,17 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
         /* FALLTHROUGH */
 
   found_error:
+    if (failure_details) {
+
+        SV * msg_sv = newSVpv(error, 0);
+        SV * position_sv = newSVuv(*d - d0 - position_offset);
+        HV * details = (HV *) newSV_type_mortal(SVt_PVHV);
+
+        (void) hv_stores(details, PARSE_IDENT_ERROR_TEXT, msg_sv);
+        (void) hv_stores(details, PARSE_IDENT_ERROR_POSITION,  position_sv);
+
+        *failure_details = details;
+    }
 
     if (check_only) {
         return NULL;
@@ -10787,7 +10816,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
 
 PERL_STATIC_INLINE char *
 S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end,
-                      bool is_utf8, U32 flags)
+                      bool is_utf8, HV ** failure_details, U32 flags)
 {
     PERL_ARGS_ASSERT_PARSE_IDENT_NO_COPY;
 
@@ -10798,7 +10827,38 @@ S_parse_ident_no_copy(pTHX_ const char *s, const char * const s_end,
     char scratch[ PERL_IDENTIFIER_LENGTH ];
     char * dest = scratch;
 
-    return parse_ident(s, s_end, &dest, C_ARRAY_END(scratch), is_utf8, flags);
+    return parse_ident(s, s_end, &dest, C_ARRAY_END(scratch), is_utf8,
+                       failure_details, flags);
+}
+
+/*
+=for apidoc parse_ident_msg
+
+Parse the string pointed to by '*s' (whose upper bound is 's_end') looking for
+a normal identifier whose first character matches \p{XID_Start} followed by any
+number of characters which match \p{XID_Continue}.
+
+It returns a pointer to the first character in 's' beyond the next such
+identifier, or NULL if a serious error was found in the parsed string.
+Currently the only such serious error is that the identifier is too long for
+the perl interpreter to handle (the maximum is guaranteed to be at least 255
+characters).
+
+If 'error_detail' is not NULL, when a serious error is found, it creates a
+mortal hash containing details of the error, as follows:
+
+=cut
+*/
+
+char *
+Perl_parse_ident_msg(pTHX_ const char *s, const char *end,
+                           bool is_utf8, HV ** error_detail, U32 flags)
+{
+    PERL_ARGS_ASSERT_PARSE_IDENT_MSG;
+    assert(flags == 0);     /* Reserved for future use */
+
+    return parse_ident_no_copy(s, end, is_utf8, error_detail,
+                               (IDFIRST_ONLY | flags));
 }
 
 char *
@@ -10810,7 +10870,7 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
 
-    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8, NULL,
                     (CHECK_DOLLAR | ((allow_package) ? ALLOW_PACKAGE : 0)));
     *slp = d - dest;
     return s;
@@ -10863,7 +10923,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         s = skipspace(s);
 
     /* See if it is a "normal" identifier */
-    s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+    s = parse_ident(s, PL_bufend, &d, e, is_utf8, NULL,
                     (ALLOW_PACKAGE | STOP_AT_FIRST_NON_DIGIT | check_only));
     if (s == NULL) {
         return NULL;
@@ -10949,7 +11009,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
      * ${10}, ${1547}, etc.  Handle those the same way we handle $1, etc */
     if (isDIGIT(*d)) {
         assert(bracket != NO_BRACE);
-        s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8,
+        s = parse_ident(s - 1, PL_bufend, &d, e, is_utf8, NULL,
                         STOP_AT_FIRST_NON_DIGIT | check_only);
         if (s == NULL) {
             return NULL;
@@ -11009,7 +11069,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                  * are jumping into the middle; so tell that to parse_ident.
                  * */
                 d += advance;
-                s = parse_ident(s, PL_bufend, &d, e, is_utf8,
+                s = parse_ident(s, PL_bufend, &d, e, is_utf8, NULL,
                                 (  ALLOW_PACKAGE
                                  | CHECK_DOLLAR
                                  | IDCONT_first_OK
@@ -11026,6 +11086,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
                 d++;
                 s = parse_ident(s, PL_bufend, &d, e,
                                 false,  /* Don't allow UTF-8 */
+                                NULL,
                                 IDCONT_first_OK);
             }
 
@@ -11985,7 +12046,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     if (*d == '$' && d[1]) d++;
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
-    d = parse_ident_no_copy(d, e, cBOOL(UTF), ALLOW_PACKAGE);
+    d = parse_ident_no_copy(d, e, cBOOL(UTF), NULL, ALLOW_PACKAGE);
 
     /* If we've tried to read what we allow filehandles to look like, and
        there's still text left, then it must be a glob() and not a getline.
@@ -14509,7 +14570,7 @@ Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags)
         return false;
 
     return end == parse_ident_no_copy(s, end, cBOOL(flags & SVf_UTF8),
-                                      IDFIRST_ONLY);
+                                      NULL, IDFIRST_ONLY);
 }
 
 bool
