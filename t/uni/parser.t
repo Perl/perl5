@@ -261,14 +261,16 @@ SKIP: {
     }
 }
 
-fresh_perl_is(<<'EOS', <<'EXPECT', {}, 'no panic in pad_findmy_pvn (#134061)');
-use utf8;
-eval "sort \x{100}%";
-die $@;
-EOS
-syntax error at (eval 1) line 1, at EOF
-Execution of (eval 1) aborted due to compilation errors.
-EXPECT
+{
+    fresh_perl_is(<<~'EOS', <<~'EXPECT', {}, 'no panic in pad_findmy_pvn (#134061)');
+    use utf8;
+    eval "sort \x{100}%";
+    die $@;
+    EOS
+    syntax error at (eval 1) line 1, at EOF
+    Execution of (eval 1) aborted due to compilation errors.
+    EXPECT
+}
 
 # New tests go here ^^^^^
 
