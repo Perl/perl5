@@ -38,4 +38,13 @@ is( !$x ? 0 : 1, 1, 'run time, false');
     $x = ( $x ) ? () : "JAPH";
 }
 
+# [GH #18576] OP_ENTER not having the correct context can cause
+# inappropriate optimisation behaviour.
+
+{
+    my $y = do { if (0) { 5 } elsif (0) { 6 } };
+    ok(defined($y), 'False elsif conditional returns condition, not undef');
+    ok($y == 0, 'False elsif conditional returns correct condition value');
+}
+
 done_testing();
