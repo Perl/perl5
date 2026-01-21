@@ -2521,23 +2521,28 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
     char *name_start = RExC_parse;
     SV* sv_name;
+    HV * error_message = NULL;
 
-    Size_t advance;
     if (RExC_parse == RExC_end) {
         NOOP;
     }
-    else if ((advance = isIDFIRST_lazy_if_safe(RExC_parse, RExC_end, UTF))) {
-         /* Note that the code here assumes well-formed UTF-8.  Skip IDFIRST by
-          * using do...while */
-        do {
-            RExC_parse_advance(advance);
-        } while (   RExC_parse < RExC_end
-                 && (advance = isWORDCHAR_utf8_safe( (U8 *) RExC_parse,
-                                                     (U8 *) RExC_end)));
-    } else {
-        /* so the <- from the vFAIL is after the offending character */
-        RExC_parse_inc_safe();
-        vFAIL("Group name must start with a non-digit word character");
+    else {
+        RExC_parse_set(parse_ident_msg(RExC_parse, RExC_end, cBOOL(UTF),
+                                       &error_message, 0));
+        if (RExC_parse == NULL) {
+
+            /* Here, parse_ident_msg found a serious error.  Use its returned
+             * message for the failure */
+            RExC_parse_inc_by(SvUV(*hv_fetchs(error_message,
+                                   PARSE_IDENT_ERROR_POSITION, 0)));
+            vFAIL(SvPVX(*hv_fetchs(error_message, PARSE_IDENT_ERROR_TEXT, 0)));
+        }
+        else if (RExC_parse == name_start) {
+            /* Here, the parse didn't advance, so is an error */
+            RExC_parse_inc(); /* so the <- from the vFAIL is after the
+                                 offending character */
+            vFAIL("Group name must start with a non-digit word character");
+        }
     }
     sv_name = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),
                              SVs_TEMP | (UTF ? SVf_UTF8 : 0));

@@ -2901,12 +2901,12 @@ Subsequent characters must match C<\p{XID_Continue}>.
 
 A common cause of this error is using (?&0) instead of (?0).
 
+See L<perlre> and L<perldata/Identifier parsing>.
+
 This message was formulated before Perl supported Unicode; so it is
 not accurate for Unicode characters outside the ASCII-range.  There are
 many word characters in Unicode that may not start a group name, and a
 few that may not be a continuation character.
-
-See L<perlre>.
 
 =item ()-group starts with a count
 

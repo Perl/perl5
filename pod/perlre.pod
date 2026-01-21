@@ -1198,7 +1198,9 @@ You can dispense with numbers altogether and create named capture groups.
 The notation is C<(?E<lt>I<name>E<gt>...)> to declare and C<\g{I<name>}> to
 reference.  (To be compatible with .Net regular expressions, C<\g{I<name>}> may
 also be written as C<\k{I<name>}>, C<\kE<lt>I<name>E<gt>> or C<\k'I<name>'>.)
-I<name> must not begin with a number, nor contain hyphens.
+I<name> must follow the rules for perl identifiers
+(L<perldata/Identifier parsing>) which means, for example, that they
+can't begin with a number, nor contain hyphens.
 When different groups within the same pattern have the same name, any reference
 to that name assumes the leftmost defined group.  Named groups count in
 absolute and relative numbering, and so can also be referred to by those

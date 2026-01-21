@@ -3484,9 +3484,6 @@ PERL_CALLCONV OP *
 Perl_parse_fullstmt(pTHX_ U32 flags);
 #define PERL_ARGS_ASSERT_PARSE_FULLSTMT
 
-PERL_CALLCONV char *
-Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **failure_details, U32 flags)
-        __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PARSE_IDENT_MSG        \
         assert(s); assert(end); assert(s < end)
 
@@ -6136,6 +6133,8 @@ Perl_new_warnings_bitfield(pTHX_ char *buffer, const char * const bits, STRLEN s
         __attribute__warn_unused_result__;
 PERL_CALLCONV void
 Perl_op_clear(pTHX_ OP *o);
+PERL_CALLCONV char *
+Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **failure_details, U32 flags);
 PERL_CALLCONV void
 Perl_qerror(pTHX_ SV *err);
 PERL_CALLCONV SV *
