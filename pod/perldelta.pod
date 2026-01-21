@@ -220,7 +220,12 @@ and L</New Warnings>
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<\x{%X} is a \w char that isn't valid in a name "%s"
+|perldiag/\x{%X} is a \w char that isn't valid in a name "%s">
+
+In most cases where this message now appears, an error would have
+occurred anyway, but the text would not have been helpful in finding the
+problem.
 
 =back
 

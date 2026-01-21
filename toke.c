@@ -10612,6 +10612,8 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      *     copied
      *  2) 'stop_at_first_non_digit' is in effect and the identifier name has
      *     leading zeros
+     *  3) The identifier contains a character that is illegal in names.
+     *     (These are rare, fewer than 200 in all of Unicode.)
      *
      * When 'allow_package' is non-zero, the function parses a full package
      * variable path.  Each iteration of the loop below picks up one segment
@@ -10629,6 +10631,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
      * accept the first character being an IDCont, and not necessarily an
      * IDFIRST.  The 'IDCONT_first_OK' flag is used to indicate this */
     const char * error = NULL;  /* Pointer to any error message */
+    const char * const s0 = s;  /* First byte, for any error message */
 
     while (s < s_end) {
 
@@ -10649,12 +10652,38 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
             while (s < s_end) {
+
+                /* Fail if the character is one of those few that look like
+                 * they could be in a name, but are forbidden because of
+                 * Section 5 of Unicode UAX #31 "Unicode Identifiers and
+                 * Syntax". */
+                advance = is_WORD_BUT_NONCONT_safe(s, s_end, is_utf8);
+                if (advance) {
+                    UV cp = valid_utf8_to_uv((U8 *) s, NULL);
+                    const char *error_pos = s + advance;
+
+                    /* Display the whole name */
+                    do {
+                        s += advance;
+                    }
+                    while ((advance = isWORDCHAR_lazy_if_safe(s, s_end,
+                                                              is_utf8)));
+                    error = form("\\x{%04" UVXf "} is a \\w char that isn't"
+                                 " valid in a name; marked by <-- HERE"
+                                 " after %" UTF8f "<-- HERE %" UTF8f,
+                                 cp,
+                                 UTF8fARG(is_utf8, error_pos - s0, s0),
+                                 UTF8fARG(is_utf8, s - error_pos, error_pos));
+                    goto found_error;
+                }
+                else {
                     advance = isIDCONT_lazy_if_safe((const U8*) s,
                                                     (const U8*) s_end,
                                                     is_utf8);
                     if (advance == 0) { /* Not an identifier character */
                         break;
                     }
+                }
 
                 s += advance;
             }
@@ -10755,8 +10784,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
         return NULL;
     }
 
-    croak("%s", error);
-
+    croak("%" UTF8f, UTF8fARG(is_utf8, strlen(error), error));
 }
 
 PERL_STATIC_INLINE char *
