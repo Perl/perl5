@@ -272,11 +272,11 @@ SKIP: {
     EXPECT
 }
 
-TODO: {
-    local $::TODO = "Fixed by next commit";
+{
     use utf8;
     my $expected = '\x{24E6} is a \w char that isn\'t valid in a name;'
-                 . ' marked by <-- HERE after has_illegal_ⓦ<-- HERE at';
+                 . ' marked by <-- HERE after has_illegal_ⓦ<-- HERE'
+                 . ' ordchar_in_identifier_name at';
     use feature 'unicode_eval';
     eval "my \$has_illegal_ⓦordchar_in_identifier_name = 0";
     like $@, qr/\Q$expected/;

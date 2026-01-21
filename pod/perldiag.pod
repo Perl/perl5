@@ -8511,6 +8511,28 @@ in are not legal in this encoding.  For example
 
 if you try to read in the a-diaereses Latin-1 as UTF-8.
 
+=item \x{%X} is a \w char that isn't valid in a name "%s"
+
+(F) There are fewer than 200 characters in Unicode that you might expect
+to be able to appear in an identifier or other name, but are actually
+illegal.  Perl encountered one of them when parsing the name given by
+the C<%s>.  Its Unicode code point is shown.  You'll need to choose a
+different name.
+
+Most of the illegal ones involve a character enclosed in some shape,
+such as CIRCLED LATIN CAPITAL LETTER M.  But others are because of
+problematic semantics.  MIDDLE DOT, for example, is punctuation in some
+languages, but is a word letter in others.  You can generate a complete
+list of the current ones by running this program
+
+ perl -le 'use re qw(Debug COMPILE); qr/(?[ \w ^ \p{XIDC} ])/'
+
+Look near the final line.  The one that begins C<stclass> contains a
+list of 4 and 5 digit hexdecimal numbers.  These are the Unicode code
+points that are illegal in names.  You can use
+L<charnames::viacode|charnames/charnames::viacode(code)> or many
+internet search engines to look up their names if desired.
+
 =item 'X' outside of string
 
 (F) You had a (un)pack template that specified a relative position before
