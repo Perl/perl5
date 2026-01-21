@@ -2681,7 +2681,7 @@ Adpx	|OP *	|parse_barestmt |U32 flags
 Adpx	|OP *	|parse_block	|U32 flags
 Adpx	|OP *	|parse_fullexpr |U32 flags
 Adpx	|OP *	|parse_fullstmt |U32 flags
-dp	|char * |parse_ident_msg|SPTR const char *s			\
+EXdp	|char * |parse_ident_msg|SPTR const char *s			\
 				|EPTRgt const char *end 		\
 				|bool is_utf8				\
 				|NULLOK HV **failure_details		\

@@ -69,6 +69,53 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Unicode rules are now fully enforced on identifier and regular
+expression group names.
+
+Before Unicode, Perl accepted any C<\w> character in an identifier or other
+name, except the first character couldn't be a digit.  Later, Unicode
+created two properties that described this.  Even later, they found
+those properties to be insufficient, and created two new similar
+properties.  These are the ones that perl has intended to use since:
+C<\p{XID_Start}> and C<\p{XID_Continue}>.  (The C<X> stands for
+"eXtended" and indicates these are the more modern versions.)
+
+(And even later, long after Perl identifier rules were formed using
+the above properties, Unicode added recommendations to further restrict
+legal identifier names.  These were added to counter cases where, for
+example, programmers snuck code past reviewers using characters that
+look like other ones.  The two properties are C<Identifier_Status> and
+C<Identifier_Type>.  L<https://www.unicode.org/reports/tr39/>.  Perl
+currently doesn't do anything with these, except to furnish you the
+ability to use them in regular expressions.)
+
+We soon discovered that there were 14 characters that match C<XID_Start>
+and C<XID_Continue> that don't also match C<\w>.  To avoid breaking code
+that had long relied on C<\w>, we chose to not add those to the list of
+acceptable identifier characters.
+
+It turns out that there are about 160 characters that match C<\w> but
+not the Unicode C<XID> properties.  Thus they are illegal according to
+Unicode.  Those are now explicitly forbidden in both Perl identifiers
+and regular expression group names.  Previously, it was likely that
+their use in identifiers wouldn't work anyway; they could be accepted as
+initially as legal, but other code would later reject them, but with a
+message that had nothing to do with the underlying problem.  However
+group names in regular expression patterns could contain illegal
+continuation characters and have a higher probablility of not being
+caught.  That is now changed.
+
+Only programs that do L<C<use utf8>|utf8> can be affected, and then only
+characters that appear in the 2nd or later positions of the name.  The
+characters that an identifier name can begin with are unchanged.
+
+130 of the now unacceptable characters are 5 sets of 26 Latin letters
+that are enclosed by some shape, such as CIRCLED LATIN CAPITAL LETTER N.
+Another 8 are generic modifiers that add shapes around other characters;
+5 are modifiers to Cyrillic numbers; and 16 are Arabic ligatures and
+isolated forms.  The other two are GREEK YPOGEGRAMMENI and VERTICAL
+TILDE.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

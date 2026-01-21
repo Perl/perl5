@@ -28,8 +28,6 @@
 #   undef CC_UNDERSCORE_
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
-#   undef PARSE_IDENT_ERROR_POSITION
-#   undef PARSE_IDENT_ERROR_TEXT
 #   undef sv_2num
 #   undef SvRVx
 #   if !defined(PERL_EXT)
@@ -39,6 +37,10 @@
 #     undef invlist_union_
 #     undef utf16_to_utf8
 #     undef utf16_to_utf8_reversed
+#   endif
+#   if !defined(PERL_EXT_RE_BUILD)
+#     undef PARSE_IDENT_ERROR_POSITION
+#     undef PARSE_IDENT_ERROR_TEXT
 #   endif
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */
@@ -1100,7 +1102,6 @@
 #   define pad_push(a,b)                        Perl_pad_push(aTHX_ a,b)
 #   define pad_swipe(a,b)                       Perl_pad_swipe(aTHX_ a,b)
 #   define padlist_store(a,b,c)                 Perl_padlist_store(aTHX_ a,b,c)
-#   define parse_ident_msg(a,b,c,d,e)           Perl_parse_ident_msg(aTHX_ a,b,c,d,e)
 #   define parse_unicode_opts(a)                Perl_parse_unicode_opts(aTHX_ a)
 #   define parser_free(a)                       Perl_parser_free(aTHX_ a)
 #   define peep(a)                              Perl_peep(aTHX_ a)
@@ -1883,6 +1884,7 @@
 #   define multiconcat_stringify(a)             Perl_multiconcat_stringify(aTHX_ a)
 #   define multideref_stringify(a,b)            Perl_multideref_stringify(aTHX_ a,b)
 #   define op_clear(a)                          Perl_op_clear(aTHX_ a)
+#   define parse_ident_msg(a,b,c,d,e)           Perl_parse_ident_msg(aTHX_ a,b,c,d,e)
 #   define qerror(a)                            Perl_qerror(aTHX_ a)
 #   define reg_named_buff(a,b,c,d)              Perl_reg_named_buff(aTHX_ a,b,c,d)
 #   define reg_named_buff_iter(a,b,c)           Perl_reg_named_buff_iter(aTHX_ a,b,c)
