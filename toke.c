@@ -14449,15 +14449,29 @@ Perl_parse_subsignature(pTHX_ U32 flags)
 }
 
 /*
-=for apidoc valid_identifier_pve
+=for apidoc      valid_identifier_pvn
+=for apidoc_item valid_identifier_pve
+=for apidoc_item valid_identifier_sv
 
-Returns true if the string given by C<s> until C<end> would be considered
-valid as a Perl identifier.  That is, it must begin with a character matching
-C<isIDFIRST>, followed by characters all matching C<isIDCONT>.  An empty
-string (i.e. when C<end> is C<s>) will return false.
+These each return true if the string given by their parameters would be
+considered valid as a Perl identifier.  That is, for non-UTF-8 strings, it must
+begin with a character matching C<L/<isIDFIRST>>, followed by characters all
+matching C<L</isIDCONT>>.  For UTF-8 strings, the characters must match
+C<L</isIDFIRST_utf8>> and C<L</isIDCONT_utf8>>, respectively.
 
-If C<flags> contains the C<SVf_UTF8> bit, then the string is presumed to be
-encoded in UTF-8, and suitable Unicode character test functions will be used.
+An empty string will return false.
+
+They differ only in how the string is specified.
+
+In C<valid_identifier_sv>, the string is extracted from C<sv> using
+C<L</SvPV_const>>, without performing "get" magic.  The string is considered to be encoded in UTF-8 if and only if C<sv> is marked as being UTF-8.
+
+In the other two functions, the first byte of the string is pointed to by
+C<s>.  In C<valid_identifier_pvn> its length is given by C<len>.
+In C<valid_identifier_pve> the final byte of the string is the one before
+C<e>.  If C<flags> contains the C<SVf_UTF8> bit, then the string is presumed
+to be encoded in UTF-8, and suitable Unicode character test functions will be
+used.
 
 =cut
 */
@@ -14474,20 +14488,6 @@ Perl_valid_identifier_pve(pTHX_ const char *s, const char *end, U32 flags)
                                       IDFIRST_ONLY);
 }
 
-/*
-=for apidoc valid_identifier_pvn
-
-Returns true if the string given by C<s> whose length is C<len> would be
-considered valid as a Perl identifier.  That is, it must begin with a
-character matching C<isIDFIRST>, followed by characters all matching
-C<isIDCONT>.  An empty string (i.e. when C<len> is zero) will return false.
-
-If C<flags> contains the C<SVf_UTF8> bit, then the string is presumed to be
-encoded in UTF-8, and suitable Unicode character test functions will be used.
-
-=cut
-*/
-
 bool
 Perl_valid_identifier_pvn(pTHX_ const char *s, STRLEN len, U32 flags)
 {
@@ -14495,18 +14495,6 @@ Perl_valid_identifier_pvn(pTHX_ const char *s, STRLEN len, U32 flags)
 
     return valid_identifier_pve(s, s + len, flags);
 }
-
-/*
-=for apidoc valid_identifier_sv
-
-Returns true if the given SV contains a non-empty string whose characters
-match accoding to C<valid_identifier_pvn>.  Returns false if given NULL, an
-undefined SV, or a SV that does not contain a non-empty string.
-
-Does not invoke C<get> magic on the SV beforehand.
-
-=cut
-*/
 
 bool
 Perl_valid_identifier_sv(pTHX_ SV *sv)
