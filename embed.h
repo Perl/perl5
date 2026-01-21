@@ -28,6 +28,8 @@
 #   undef CC_UNDERSCORE_
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
+#   undef PARSE_IDENT_ERROR_POSITION
+#   undef PARSE_IDENT_ERROR_TEXT
 #   undef sv_2num
 #   undef SvRVx
 #   if !defined(PERL_EXT)
@@ -1098,6 +1100,7 @@
 #   define pad_push(a,b)                        Perl_pad_push(aTHX_ a,b)
 #   define pad_swipe(a,b)                       Perl_pad_swipe(aTHX_ a,b)
 #   define padlist_store(a,b,c)                 Perl_padlist_store(aTHX_ a,b,c)
+#   define parse_ident_msg(a,b,c,d,e)           Perl_parse_ident_msg(aTHX_ a,b,c,d,e)
 #   define parse_unicode_opts(a)                Perl_parse_unicode_opts(aTHX_ a)
 #   define parser_free(a)                       Perl_parser_free(aTHX_ a)
 #   define peep(a)                              Perl_peep(aTHX_ a)
@@ -1710,8 +1713,8 @@
 #     define is_existing_identifier(a,b,c,d)    S_is_existing_identifier(aTHX_ a,b,c,d)
 #     define lop(a,b,c,d)                       S_lop(aTHX_ a,b,c,d)
 #     define missingterm(a,b)                   S_missingterm(aTHX_ a,b)
-#     define parse_ident(a,b,c,d,e,f)           S_parse_ident(aTHX_ a,b,c,d,e,f)
-#     define parse_ident_no_copy(a,b,c,d)       S_parse_ident_no_copy(aTHX_ a,b,c,d)
+#     define parse_ident(a,b,c,d,e,f,g)         S_parse_ident(aTHX_ a,b,c,d,e,f,g)
+#     define parse_ident_no_copy(a,b,c,d,e)     S_parse_ident_no_copy(aTHX_ a,b,c,d,e)
 #     define pending_ident()                    S_pending_ident(aTHX)
 #     define scan_const(a)                      S_scan_const(aTHX_ a)
 #     define scan_formline(a)                   S_scan_formline(aTHX_ a)

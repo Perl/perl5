@@ -162,6 +162,10 @@ enum {
     LEX_FAKEEOF_MAX
 };
 
+#define PARSE_IDENT_ERROR_POSITION  "position"
+#define PARSE_IDENT_ERROR_TEXT      "text"
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

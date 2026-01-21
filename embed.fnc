@@ -2681,6 +2681,11 @@ Adpx	|OP *	|parse_barestmt |U32 flags
 Adpx	|OP *	|parse_block	|U32 flags
 Adpx	|OP *	|parse_fullexpr |U32 flags
 Adpx	|OP *	|parse_fullstmt |U32 flags
+dp	|char * |parse_ident_msg|SPTR const char *s			\
+				|EPTRgt const char *end 		\
+				|bool is_utf8				\
+				|NULLOK HV **failure_details		\
+				|U32 flags
 Adpx	|SV *	|parse_label	|U32 flags
 Adpx	|OP *	|parse_listexpr |U32 flags
 : Only used in scope.c
@@ -6275,11 +6280,13 @@ S	|char * |parse_ident	|SPTR const char *s			\
 				|SPTR char **d				\
 				|EPTRgt char * const e			\
 				|bool is_utf8				\
+				|NULLOK HV **failure_details		\
 				|U32 flags
 S	|char * |parse_ident_no_copy					\
 				|SPTR const char *s			\
 				|EPTRgt const char * const s_end	\
 				|bool is_utf8				\
+				|NULLOK HV **failure_details		\
 				|U32 flags
 S	|int	|pending_ident
 RS	|char * |scan_const	|NN char *start
