@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 65);
+plan(tests => 66);
 
 sub empty_sub {}
 
@@ -449,3 +449,12 @@ fresh_perl_like(
 # github #21044
 ok( eval { $_->{x} = 1 for sub { undef }->(); 1 }, "check sub return values are modifiable")
   or diag $@;
+
+# GH #16868
+
+fresh_perl_like(
+    q#use strict;END{{{{}}}}{END}END{e}#,
+    qr/Execution of - aborted due to compilation errors./,
+    {},
+    "GH #16868 - continuing to use a freed CV*"
+);

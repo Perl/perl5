@@ -5079,7 +5079,7 @@ S	|void	|bad_type_pv	|I32 n					\
 				|NN const char *t			\
 				|NN const OP *o 			\
 				|NN const OP *kid
-S	|void	|clear_special_blocks					\
+S	|CV *	|clear_special_blocks					\
 				|NN const char * const fullname 	\
 				|NN GV * const gv			\
 				|NN CV * const cv

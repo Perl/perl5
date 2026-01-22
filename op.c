@@ -11798,6 +11798,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             SvREFCNT_inc_simple_void_NN(cv);
     }
 
+    assert(cv);
     if (block && has_name) {
         if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
             SV * const tmpstr = cv_name(cv,NULL,0);
@@ -11824,14 +11825,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         }
 
         if (name) {
-            if (PL_parser && PL_parser->error_count)
-                clear_special_blocks(name, gv, cv);
+            if (PL_parser && PL_parser->error_count) {
+                cv = clear_special_blocks(name, gv, cv);
+            }
             else
                 evanescent =
                     process_special_blocks(floor, name, gv, cv);
         }
     }
-    assert(cv);
 
   done:
     assert(!cv || evanescent || SvREFCNT((SV*)cv) != 0);
@@ -11851,7 +11852,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     return cv;
 }
 
-STATIC void
+STATIC CV*
 S_clear_special_blocks(pTHX_ const char *const fullname,
                        GV *const gv, CV *const cv) {
     const char *colon;
@@ -11872,8 +11873,10 @@ S_clear_special_blocks(pTHX_ const char *const fullname,
             assert(isGV(gv));
         }
         GvCV_set(gv, NULL);
+
         SvREFCNT_dec_NN(MUTABLE_SV(cv));
     }
+    return SvIS_FREED(cv) ? NULL : cv;
 }
 
 /* Returns true if the sub has been freed.  */
