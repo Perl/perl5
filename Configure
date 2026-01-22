@@ -519,6 +519,7 @@ d_gai_strerror=''
 d_Gconvert=''
 d_getaddrinfo=''
 d_getcwd=''
+d_getentropy=''
 d_getenv_preserves_other_thread=''
 d_getespwnam=''
 d_getfsstat=''
@@ -702,6 +703,7 @@ d_newlocale=''
 d_querylocale=''
 d_uselocale=''
 i_xlocale=''
+i_sysrandom=''
 xlocale_needed=''
 d_nextafter=''
 d_nexttoward=''
@@ -12759,6 +12761,10 @@ eval $inlibc
 set xlocale.h i_xlocale
 eval $inhdr
 
+: see if this is a sys/random.h system
+set sys/random.h i_sysrandom
+eval $inhdr
+
 : see if newlocale exists
 set newlocale d_newlocale
 eval $inlibc
@@ -14367,6 +14373,10 @@ eval $inlibc
 
 : see if getcwd exists
 set getcwd d_getcwd
+eval $inlibc
+
+: see if getentropy exists
+set getentropy d_getentropy
 eval $inlibc
 
 : check for getenv behavior
@@ -25125,6 +25135,7 @@ d_gdbm_ndbm_h_uses_prototypes='$d_gdbm_ndbm_h_uses_prototypes'
 d_gdbmndbm_h_uses_prototypes='$d_gdbmndbm_h_uses_prototypes'
 d_getaddrinfo='$d_getaddrinfo'
 d_getcwd='$d_getcwd'
+d_getentropy='$d_getentropy'
 d_getenv_preserves_other_thread='$d_getenv_preserves_other_thread'
 d_getespwnam='$d_getespwnam'
 d_getfsstat='$d_getfsstat'
@@ -25718,6 +25729,7 @@ i_vfork='$i_vfork'
 i_wchar='$i_wchar'
 i_wctype='$i_wctype'
 i_xlocale='$i_xlocale'
+i_sysrandom='$i_sysrandom'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'
 inc_version_list_init='$inc_version_list_init'

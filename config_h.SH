@@ -561,6 +561,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_system HAS_SYSTEM	/**/
 
+/* HAS_SYSRANDOM:
+ *	This symbol, if defined, indicates that the system has the
+ *	sys/random.h header file.
+ */
+#$i_sysrandom HAS_SYSRANDOM	/**/
+
 /* HAS_TCGETPGRP:
  *	This symbol, if defined, indicates that the tcgetpgrp routine is
  *	available to get foreground process group ID.
@@ -1603,6 +1609,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	longer than 14 characters.
  */
 #$d_flexfnam	FLEXFILENAMES		/**/
+
+/* HAS_GETENTROPY:
+ *	This symbol, if defined, indicates that the getentropy routine is
+ *	available.
+ */
+#$d_getentropy HAS_GETENTROPY		/**/
 
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
