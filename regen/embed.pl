@@ -1234,7 +1234,6 @@ my @unresolved_visibility_overrides = qw(
     IN_SOME_LOCALE_FORM
     IN_SOME_LOCALE_FORM_COMPILETIME
     IN_SOME_LOCALE_FORM_RUNTIME
-    INT32_MIN
     INT_64_T
     INT_PAT_MODS
     IN_UNI_8_BIT
@@ -1723,7 +1722,6 @@ my @unresolved_visibility_overrides = qw(
     LC_COLLATE_UNLOCK
     LC_NUMERIC_LOCK
     LC_NUMERIC_UNLOCK
-    LDBL_DIG
     LEAVE_SCOPE
     LEX_NOTPARSING
     LF_NATIVE
@@ -2340,10 +2338,8 @@ my @unresolved_visibility_overrides = qw(
     ProgLen
     pthread_addr_t
     PTHREAD_ATFORK
-    pthread_attr_init
     PTHREAD_ATTR_SETDETACHSTATE
     pthread_condattr_default
-    pthread_create
     PTHREAD_CREATE
     PTHREAD_CREATE_JOINABLE
     PTHREAD_GETSPECIFIC
@@ -5561,13 +5557,21 @@ sub find_undefs {
 
     # Done deciding what should be #undef'd.  But don't #undef anything found
     # in the override hashes
+    my %symbol_listed_count;
     foreach my $entry (keys %system_symbols,
                        keys %needed_by_ext,
                        keys %needed_by_ext_re,
                        keys %unresolved_visibility_overrides,
                       )
     {
+        $symbol_listed_count{$entry}++;
         delete $always_undefs{$entry};
+    }
+
+    foreach my $symbol (keys %symbol_listed_count) {
+        next if $symbol_listed_count{$symbol} <= 1;
+        die_at_end "'$symbol' is listed in more than one of the override"
+                 . " lists";
     }
 }
 
