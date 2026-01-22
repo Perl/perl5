@@ -2763,27 +2763,48 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 }
 
 /*
-=for apidoc sv_2num
+=for apidoc      sv_2num_flags
+=for apidoc_item sv_2num
 
 Return an SV with the numeric value of the source SV, doing any necessary
 reference or overload conversion.  The caller is expected to have handled
 get-magic already.
 
+For sv_2num_flags() you can set the following flags:
+
+=over
+
+=item *
+
+C<SV_SKIP_OVERLOAD> - avoid any numeric context overloading.
+
+=item *
+
+C<SV_FORCE_OVERLOAD> - use numeric context overloading even if
+disabled in hints by C<no overloading;>.
+
+=back
+
 =cut
 */
 
 SV *
-Perl_sv_2num(pTHX_ SV *const sv)
+Perl_sv_2num_flags(pTHX_ SV *const sv, int flags)
 {
-    PERL_ARGS_ASSERT_SV_2NUM;
+    PERL_ARGS_ASSERT_SV_2NUM_FLAGS;
+
+    assert((flags & ~(SV_SKIP_OVERLOAD|SV_FORCE_OVERLOAD)) == 0);
 
     if (!SvROK(sv))
         return sv;
-    if (SvAMAGIC(sv)) {
-        SV * const tmpsv = AMG_CALLunary(sv, numer_amg);
+    if (SvAMAGIC(sv) && !(flags & SV_SKIP_OVERLOAD)) {
+        STATIC_ASSERT_STMT(AMGf_force_overload == SV_FORCE_OVERLOAD);
+        SV * const tmpsv =
+            AMG_CALLunary_flags(sv, numer_amg,
+                                (flags & SV_FORCE_OVERLOAD));
         TAINT_IF(tmpsv && SvTAINTED(tmpsv));
         if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-            return sv_2num(tmpsv);
+            return sv_2num_flags(tmpsv, flags);
     }
     return sv_2mortal(newSVuv(PTR2UV(SvRV(sv))));
 }
@@ -8700,27 +8721,174 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 }
 
 /*
+=for apidoc sv_numcmp_common
+
+Handles the common parts of the L<perlapi/sv_numeq>, sv_numne,
+sv_numlt, sv_numle, sv_numge, sv_numgt, sv_numcmp APIs.
+
+C<method> should be the C<*_amg> constant for the operator being
+handled, such as C<eq_amg> for numeric equality.
+
+C<flags> takes the same flags as the numeric comparison APIs.
+
+This includes:
+
+=over
+
+=item *
+
+treating possible NULL C<*sv1> and C<*sv2> arguments as undef.
+
+=item *
+
+calling get magic
+
+=item *
+
+handling the pain of overloading, including numericizing the SVs if
+there is no numeric overload, but there is a numeric "0+" overload.
+
+=back
+
+If there is operator overloading this function will populate
+C<*result> with the SV returned by the overloading and return true.
+The caller will need to convert this to an integer for sv_numcmp() or
+to bool for the rest of the APIs.
+
+If there is no operator overloading, this function will return true.
+Before returning it will convert C<*sv1> and C<*sv2> to numbers if
+they are references so do_cmp() can be used safely.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_sv_numcmp_common(pTHX_ SV **sv1, SV **sv2, const U32 flags,
+                   int method, SV **result) {
+    if(flags & SV_GMAGIC) {
+        if(*sv1)
+            SvGETMAGIC(*sv1);
+        if(*sv2 && (!*sv1 || *sv1 != *sv2))
+            SvGETMAGIC(*sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!*sv1)
+        *sv1 = &PL_sv_undef;
+    if(!*sv2)
+        *sv2 = &PL_sv_undef;
+
+    if (SvAMAGIC(*sv1) || SvAMAGIC(*sv2)) {
+        STATIC_ASSERT_STMT(AMGf_force_overload == SV_FORCE_OVERLOAD);
+        if (!(flags & SV_SKIP_OVERLOAD)
+            || (flags & SV_FORCE_OVERLOAD)) {
+            int amg_flags = AMGf_force_scalar
+                | (flags & AMGf_force_overload);
+            if ((*result = amagic_call(*sv1, *sv2, method, amg_flags)))
+                return true;
+        }
+
+        /* Normally handled by try_amagic_bin
+           This will do the normal RV to UV conversion
+           with SV_SKIP_OVERLOAD.
+         */
+        if (SvROK(*sv1))
+            *sv1 = sv_2num_flags(*sv1, flags & SV_SKIP_OVERLOAD);
+        if (SvROK(*sv2))
+            *sv2 = sv_2num_flags(*sv2, flags & SV_SKIP_OVERLOAD);
+    }
+
+    return false;
+}
+
+/*
 
 =for apidoc      sv_numeq
 =for apidoc_item sv_numeq_flags
+=for apidoc_item sv_numne
+=for apidoc_item sv_numne_flags
+=for apidoc_item sv_numge
+=for apidoc_item sv_numge_flags
+=for apidoc_item sv_numgt
+=for apidoc_item sv_numgt_flags
+=for apidoc_item sv_numle
+=for apidoc_item sv_numle_flags
+=for apidoc_item sv_numlt
+=for apidoc_item sv_numlt_flags
 
-These each return a boolean indicating if the numbers in the two SV arguments
-are identical, coercing them to numbers if necessary, basically behaving like
-the Perl code S<C<$sv1 == $sv2>>.
+These return a boolean that is the result of the corresponding numeric
+comparison:
+
+=over
+
+=item C<sv_numeq>, C<sv_numeq_flags>
+
+Numeric equality, the same as S<C<$sv1 == $sv2>>.
+
+=item C<sv_numne>, C<sv_numne_flags>
+
+Numeric inequality, the same as S<C<$sv1 != $sv2>>.
+
+=item C<sv_numle>, C<sv_numle_flags>
+
+Numeric less than or equal, the same as S<C<$sv1 E<lt>= $sv2>>.
+
+=item C<sv_numlt>, C<sv_numlt_flags>
+
+Numeric less than, the same as S<C<$sv1 E<lt> $sv2>>.
+
+=item C<sv_numge>, C<sv_numge_flags>
+
+Numeric greater than or equal, the same as S<C<$sv1 E<gt>= $sv2>>.
+
+=item C<sv_numgt>, C<sv_numgt_flags>
+
+Numeric greater than, the same as S<C<$sv1 E<gt> $sv2>>.
+
+=back
+
+Beware that in the presence of overloading the comparisons might not
+have their normal properties, eg. C< sv_numeq(sv1, sv2) > might be
+different to C< !sv_numne(sv1, sv2) >.
+
+The non-C<_flags> suffix versions of these functions always perform
+get magic and handle the appropriate type of overloading.  See
+L<overload> for details.  Be aware that like the builtin operators,
+C<no overloading;> will disable overloading.
+
+These each return a boolean indicating if the numbers in the two SV
+arguments satisfy the given relationship, coercing them to numbers if
+necessary, basically behaving like the Perl code.
 
 A NULL SV is treated as C<undef>.
 
-C<sv_numeq> always performs 'get' magic.  C<sv_numeq_flags> performs 'get'
-magic only if C<flags> has the C<SV_GMAGIC> bit set.
+The C<_flags> variants of these functions accept these flags:
 
-C<sv_numeq> always checks for, and if present, handles C<==> overloading.  If
-not present, regular numerical comparison will be used instead.
-C<sv_numeq_flags> normally does the same, but setting the C<SV_SKIP_OVERLOAD>
-bit set in C<flags> causes it to use regular numerical comparison.
+=over
 
-Otherwise, the functions behave identically.
+=item C<SV_GMAGIC>
+
+Perform 'get' magic on both C<sv1> amd C<sv2> if this flag is set,
+otherwise 'get' magic is ignored.
+
+=item C<SV_SKIP_OVERLOAD>
+
+Skip any operator or numeric overloading implemented for this type and
+operator.  Be aware that for overloaded values this will compare the
+addresses of the references, as for the usual numeric comparison of
+non-overloaded references.
+
+=item C<SV_FORCE_OVERLOAD>
+
+Force overloading on even in the context of C<no overloading;>.
+
+=back
+
+If neither overload flag is set overloading is honored unless C<no
+overloading;> has disabled it.
 
 =for apidoc Amnh||SV_SKIP_OVERLOAD
+=for apidoc Amnh||SV_FORCE_OVERLOAD
 
 =cut
 */
@@ -8730,27 +8898,169 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS;
 
-    if(flags & SV_GMAGIC) {
-        if(sv1)
-            SvGETMAGIC(sv1);
-        if(sv2)
-            SvGETMAGIC(sv2);
-    }
-
-    /* Treat NULL as undef */
-    if(!sv1)
-        sv1 = &PL_sv_undef;
-    if(!sv2)
-        sv2 = &PL_sv_undef;
-
-    if(!(flags & SV_SKIP_OVERLOAD) &&
-            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
-        SV *ret = amagic_call(sv1, sv2, eq_amg, 0);
-        if(ret)
-            return SvTRUE(ret);
-    }
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, eq_amg, &result)))
+        return SvTRUE(result);
 
     return do_ncmp(sv1, sv2) == 0;
+}
+
+bool
+Perl_sv_numne_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMNE_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ne_amg, &result)))
+        return SvTRUE(result);
+
+    return do_ncmp(sv1, sv2) != 0;
+}
+
+bool
+Perl_sv_numle_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMLE_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, le_amg, &result)))
+        return SvTRUE(result);
+
+    return do_ncmp(sv1, sv2) <= 0;
+}
+
+bool
+Perl_sv_numlt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMLT_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, lt_amg, &result)))
+        return SvTRUE(result);
+
+    return do_ncmp(sv1, sv2) < 0;
+}
+
+bool
+Perl_sv_numge_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMGE_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ge_amg, &result)))
+        return SvTRUE(result);
+
+    I32 cmp = do_ncmp(sv1, sv2);
+
+    return cmp != 2 && cmp >= 0;
+}
+
+bool
+Perl_sv_numgt_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMGT_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, gt_amg, &result)))
+        return SvTRUE(result);
+
+    I32 cmp = do_ncmp(sv1, sv2);
+
+    return cmp != 2 && cmp > 0;
+}
+
+/*
+=for apidoc      sv_numcmp
+=for apidoc_item sv_numcmp_flags
+
+This returns an integer indicating the ordering of the two SV
+arguments, coercing them to numbers if necessary, basically behaving
+like the Perl code S<C<$sv1 <=> $sv2 >>.
+
+A NULL SV is treated as C<undef>.
+
+This will return one of the following values:
+
+=over
+
+=item *
+
+C<1> - C<sv2> is numerically greater than C<sv1>
+
+=item *
+
+C<0> - C<sv1> and C<sv2> are numerically equal.
+
+=item *
+
+C<-1> - C<sv2> is numerically less than C<sv1>
+
+=item *
+
+C<2> - C<sv1> and C<sv2> are not numerically comparable, probably
+because one of them is C<NaN>, though overloads can extend that.
+
+=back
+
+C<sv_numcmp> always performs 'get' magic.
+
+<sv_numcmp_flags> accepts these flags:
+
+=over
+
+=item *
+
+C<SV_GMAGIC> - Perform 'get' magic on both C<sv1> amd C<sv2> if this
+flag is set, otherwise 'get' magic is ignored.
+
+=item *
+
+C<SV_SKIP_OVERLOAD> - If this is set any C<< <=> >> or numeric
+overloading implemented for this type is ignored.  Be aware that for
+overloaded values this will compare the addresses of the references,
+as for the usual numeric comparison of non-overloaded references.
+
+=item *
+
+C<SV_FORCE_OVERLOAD> - Force overloading on even in the context of
+C<no overloading;>.
+
+=back
+
+If neither overload flag is set overloading is honored unless C<no
+overloading;> has disabled it.
+
+=for apidoc Amnh||SV_SKIP_OVERLOAD
+=for apidoc Amnh||SV_FORCE_OVERLOAD
+
+=cut
+*/
+
+#define SANE_ORDERING_RESULT(val) \
+    ((val) < 0 ? -1 : (val) > 0 ? 1 : 0)
+
+I32
+Perl_sv_numcmp_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMCMP_FLAGS;
+
+    SV *result;
+    if (UNLIKELY(sv_numcmp_common(&sv1, &sv2, flags, ncmp_amg, &result))) {
+        /* Similar to what sort() does in amagic_ncmp() */
+        if (SvIOK(result) && !SvIsUV(result)) {
+            IV i = SvIVX(result);
+            return SANE_ORDERING_RESULT(i);
+        }
+        else if (!SvOK(result)) {
+            return 2;
+        }
+        else {
+            NV nv = SvNV(result);
+            return SANE_ORDERING_RESULT(nv);
+        }
+    }
+
+    return do_ncmp(sv1, sv2);
 }
 
 /*

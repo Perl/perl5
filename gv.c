@@ -3748,7 +3748,24 @@ The operation is done only on just one operand.
 
 The operation changes one of the operands, e.g., $x += 1
 
+=item C<AMGf_force_scalar>
+
+In many cases amagic_call() uses the L</GIMME_V> context of the
+current OP when calling the sub handling the overload.  This flag
+forces amagic_call() to use scalar context.
+
+=item C<AMGf_force_overload>
+
+Perform overloading even in the context of C<no overloading;>.
+
 =back
+
+=for apidoc Amnh||AMGf_noleft
+=for apidoc Amnh||AMGf_noright
+=for apidoc Amnh||AMGf_unary
+=for apidoc Amnh||AMGf_assign
+=for apidoc Amnh||AMGf_force_scalar
+=for apidoc Amnh||AMGf_force_overload
 
 =cut
 */
@@ -3773,7 +3790,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
   PERL_ARGS_ASSERT_AMAGIC_CALL;
 
-  if ( PL_curcop->cop_hints & HINT_NO_AMAGIC ) {
+  if ( (PL_curcop->cop_hints & HINT_NO_AMAGIC)
+       && !(flags & AMGf_force_overload)) {
       if (!amagic_is_enabled(method)) return NULL;
   }
 
@@ -4142,7 +4160,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                  * with the context of individual concats being scalar,
                  * regardless of the overall context of the multiconcat op
                  */
-    U8 gimme = (force_scalar || !PL_op || PL_op->op_type == OP_MULTICONCAT)
+    U8 gimme = (force_scalar || (flags & AMGf_force_scalar) || !PL_op )
                     ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);

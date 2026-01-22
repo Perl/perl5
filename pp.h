@@ -653,14 +653,16 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             (void)Perl_tmps_grow_p(aTHX_ eMiX);			\
     } STMT_END
 
-#define AMGf_noright	1
-#define AMGf_noleft	2
-#define AMGf_assign	4       /* op supports mutator variant, e.g. $x += 1 */
-#define AMGf_unary	8
-#define AMGf_numeric	0x10	/* for Perl_try_amagic_bin */
+#define AMGf_noright	  1
+#define AMGf_noleft	  2
+#define AMGf_assign	  4    /* op supports mutator variant, e.g. $x += 1 */
+#define AMGf_unary	  8
+#define AMGf_numeric	  0x0010   /* for Perl_try_amagic_bin */
 
-#define AMGf_want_list	0x40
-#define AMGf_numarg	0x80
+#define AMGf_want_list	  0x0040
+#define AMGf_numarg	  0x0080
+#define AMGf_force_scalar 0x0100
+#define AMGf_force_overload SV_FORCE_OVERLOAD /* ignore HINTS_NO_AMAGIC */
 
 
 /* do SvGETMAGIC on the stack args before checking for overload */
@@ -676,8 +678,22 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             return NORMAL; \
     } STMT_END
 
+/*
+=for apidoc    Am|SV *|AMG_CALLunary|SV *sv|int meth
+=for apidoc_item |SV *|AMG_CALLunary_flags|SV *sv|int meth|int flags
+
+Macro wrappers around L</amagic_call> to call any unary magic.
+
+Sets the C<AMGf_noright> and C<AMGf_unary> flags.
+
+=cut
+*/
+
 #define AMG_CALLunary(sv,meth) \
     amagic_call(sv,&PL_sv_undef, meth, AMGf_noright | AMGf_unary)
+
+#define AMG_CALLunary_flags(sv,meth, flags) \
+    amagic_call(sv,&PL_sv_undef, meth, AMGf_noright | AMGf_unary | (flags))
 
 /* No longer used in core. Use AMG_CALLunary instead */
 #define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))

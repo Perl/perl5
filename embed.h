@@ -283,6 +283,7 @@
 #   undef case_9_SBOX32
 #   undef CC_UNDERSCORE_
 #   undef isFOO_or_UNDERSCORE_
+#   undef sv_2num
 #   undef USE_STDIO
 #   if !defined(PERL_EXT)
 #     undef invlist_intersection_
@@ -932,7 +933,13 @@
 # define sv_newmortal()                         Perl_sv_newmortal(aTHX)
 # define sv_newref(a)                           Perl_sv_newref(aTHX_ a)
 # define sv_nosharing(a)                        Perl_sv_nosharing(aTHX_ a)
+# define sv_numcmp_flags(a,b,c)                 Perl_sv_numcmp_flags(aTHX_ a,b,c)
 # define sv_numeq_flags(a,b,c)                  Perl_sv_numeq_flags(aTHX_ a,b,c)
+# define sv_numge_flags(a,b,c)                  Perl_sv_numge_flags(aTHX_ a,b,c)
+# define sv_numgt_flags(a,b,c)                  Perl_sv_numgt_flags(aTHX_ a,b,c)
+# define sv_numle_flags(a,b,c)                  Perl_sv_numle_flags(aTHX_ a,b,c)
+# define sv_numlt_flags(a,b,c)                  Perl_sv_numlt_flags(aTHX_ a,b,c)
+# define sv_numne_flags(a,b,c)                  Perl_sv_numne_flags(aTHX_ a,b,c)
 # define sv_peek(a)                             Perl_sv_peek(aTHX_ a)
 # define sv_pos_b2u(a,b)                        Perl_sv_pos_b2u(aTHX_ a,b)
 # define sv_pos_b2u_flags(a,b,c)                Perl_sv_pos_b2u_flags(aTHX_ a,b,c)
@@ -1386,7 +1393,7 @@
 #   define subsignature_append_slurpy(a,b)      Perl_subsignature_append_slurpy(aTHX_ a,b)
 #   define subsignature_finish()                Perl_subsignature_finish(aTHX)
 #   define subsignature_start()                 Perl_subsignature_start(aTHX)
-#   define sv_2num(a)                           Perl_sv_2num(aTHX_ a)
+#   define sv_2num_flags(a,b)                   Perl_sv_2num_flags(aTHX_ a,b)
 #   define sv_clean_all()                       Perl_sv_clean_all(aTHX)
 #   define sv_clean_objs()                      Perl_sv_clean_objs(aTHX)
 #   define sv_del_backref(a,b)                  Perl_sv_del_backref(aTHX_ a,b)
@@ -1905,6 +1912,7 @@
 #     define sv_2iuv_common(a)                  S_sv_2iuv_common(aTHX_ a)
 #     define sv_add_arena(a,b,c)                S_sv_add_arena(aTHX_ a,b,c)
 #     define sv_display(a,b,c)                  S_sv_display(aTHX_ a,b,c)
+#     define sv_numcmp_common(a,b,c,d,e)        S_sv_numcmp_common(aTHX_ a,b,c,d,e)
 #     define sv_pos_b2u_midway(a,b,c,d)         S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #     define sv_pos_u2b_cached(a,b,c,d,e,f,g)   S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
 #     define sv_pos_u2b_forwards                S_sv_pos_u2b_forwards
@@ -2048,6 +2056,11 @@
 #   if defined(USE_QUADMATH)
 #     define quadmath_format_needed             Perl_quadmath_format_needed
 #     define quadmath_format_valid              Perl_quadmath_format_valid
+#   endif
+#   if defined(USE_THREADS)
+#     define Perl_sv_2num(mTHX,a)               sv_2num(a)
+#   else
+#     define Perl_sv_2num                       sv_2num
 #   endif
 #   if defined(WIN32)
 #     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
@@ -2599,7 +2612,13 @@
 #   define Perl_sv_force_normal(mTHX,a)         sv_force_normal(a)
 #   define Perl_sv_insert(mTHX,a,b,c,d,e)       sv_insert(a,b,c,d,e)
 #   define Perl_sv_mortalcopy(mTHX,a)           sv_mortalcopy(a)
+#   define Perl_sv_numcmp(mTHX,a,b)             sv_numcmp(a,b)
 #   define Perl_sv_numeq(mTHX,a,b)              sv_numeq(a,b)
+#   define Perl_sv_numge(mTHX,a,b)              sv_numge(a,b)
+#   define Perl_sv_numgt(mTHX,a,b)              sv_numgt(a,b)
+#   define Perl_sv_numle(mTHX,a,b)              sv_numle(a,b)
+#   define Perl_sv_numlt(mTHX,a,b)              sv_numlt(a,b)
+#   define Perl_sv_numne(mTHX,a,b)              sv_numne(a,b)
 #   define Perl_sv_pv(mTHX,a)                   sv_pv(a)
 #   define Perl_sv_pvbyte(mTHX,a)               sv_pvbyte(a)
 #   define Perl_sv_pvn_force(mTHX,a,b)          sv_pvn_force(a,b)
@@ -2703,7 +2722,13 @@
 #   define Perl_sv_force_normal                 sv_force_normal
 #   define Perl_sv_insert                       sv_insert
 #   define Perl_sv_mortalcopy                   sv_mortalcopy
+#   define Perl_sv_numcmp                       sv_numcmp
 #   define Perl_sv_numeq                        sv_numeq
+#   define Perl_sv_numge                        sv_numge
+#   define Perl_sv_numgt                        sv_numgt
+#   define Perl_sv_numle                        sv_numle
+#   define Perl_sv_numlt                        sv_numlt
+#   define Perl_sv_numne                        sv_numne
 #   define Perl_sv_pv                           sv_pv
 #   define Perl_sv_pvbyte                       sv_pvbyte
 #   define Perl_sv_pvn_force                    sv_pvn_force

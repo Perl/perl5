@@ -372,7 +372,37 @@ well.
 
 =item *
 
-XXX
+Fixed a bug in the L<perlapi/sv_numeq> API where values with numeric
+("0+") overloading but not equality or numeric comparison overloading
+would always be compared as floating point values.  This could lead to
+large integers being reported as equal when they weren't.
+
+=item *
+
+Fixed a bug in L<perlapi/sv_numeq> where the C<SV_SKIP_OVERLOAD> flag
+would skip operator overloading, but would still honor numeric ("0+")
+overloading.
+
+=item *
+
+Added L<perlapi/sv_numne>, sv_numle, sv_numlt, sv_numge, sv_numgt and
+L<perlapi/sv_numcmp> APIs that perform numeric comparison in the same
+way perl does, including overloading.  Separate APIs for each
+comparison are needed to invoke their corresponding overload when
+needed.  Inspired by [GH #23918]
+
+This also extends the sv_numeq API to support C<SV_FORCE_OVERLOAD>.
+
+=item *
+
+Added the C<AMGf_force_scalar> flag to the L<perlapi/C<amagic_call>>
+API to force scalar context for overload calls.
+
+=item *
+
+Added the C<AMGf_force_overload> flag to the L<perlapi/C<amagic_call>>
+API to allow forcing overloading to be honored even in the context of
+C<no overloading;>.
 
 =back
 

@@ -3430,10 +3430,42 @@ ARdp	|SV *	|sv_newmortal
 Cdp	|SV *	|sv_newref	|NULLOK SV * const sv
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 : Used in pp.c, pp_hot.c, sv.c
-dpx	|SV *	|sv_2num	|NN SV * const sv
+dmp	|SV *	|sv_2num	|NN SV * const sv
+Admp	|I32	|sv_numcmp	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|I32	|sv_numcmp_flags|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
 Admp	|bool	|sv_numeq	|NULLOK SV *sv1 			\
 				|NULLOK SV *sv2
 Adp	|bool	|sv_numeq_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+dpx	|SV *	|sv_2num_flags	|NN SV * const sv			\
+				|int flags
+Admp	|bool	|sv_numge	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numge_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numgt	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numgt_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numle	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numle_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numlt	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numlt_flags |NULLOK SV *sv1 			\
+				|NULLOK SV *sv2 			\
+				|const U32 flags
+Admp	|bool	|sv_numne	|NULLOK SV *sv1 			\
+				|NULLOK SV *sv2
+Adp	|bool	|sv_numne_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
 Adip	|NV	|SvNV		|NN SV *sv
@@ -6072,6 +6104,12 @@ S	|const char *|sv_display|NN SV * const sv			\
 				|NN char *tmpbuf			\
 				|STRLEN tmpbuf_size
 S	|bool	|sv_2iuv_common |NN SV * const sv
+Sd	|bool	|sv_numcmp_common					\
+				|NULLOK SV **sv1			\
+				|NULLOK SV **sv2			\
+				|const U32 flags			\
+				|int method				\
+				|NN SV **result
 S	|STRLEN |sv_pos_b2u_midway					\
 				|SPTR const U8 * const s		\
 				|MPTR const U8 * const target		\

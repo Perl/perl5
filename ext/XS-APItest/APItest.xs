@@ -1640,6 +1640,8 @@ signal_thread_start(void *arg) {
 #  define hwm_checks_enabled() false
 #endif
 
+typedef SV *nullable_SV;
+
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
@@ -5028,20 +5030,82 @@ test_HvNAMEf_QUOTEDPREFIX(sv)
     OUTPUT:
         RETVAL
 
+TYPEMAP: <<HERE
+
+nullable_SV	T_NULLABLE_SV
+
+INPUT
+
+T_NULLABLE_SV
+    $var = $arg == &PL_sv_undef ? NULL : $arg;
+
+HERE
 
 bool
-sv_numeq(SV *sv1, SV *sv2)
+sv_numeq(nullable_SV sv1, nullable_SV sv2)
     CODE:
         RETVAL = sv_numeq(sv1, sv2);
     OUTPUT:
         RETVAL
 
 bool
-sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
+sv_numeq_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
     CODE:
         RETVAL = sv_numeq_flags(sv1, sv2, flags);
     OUTPUT:
         RETVAL
+
+# deliberately void context
+void
+void_sv_numeq(nullable_SV sv1, nullable_SV sv2, SV *out)
+    CODE:
+        sv_setbool(out, sv_numeq(sv1, sv2));
+    OUTPUT:
+        out
+
+bool
+sv_numne(nullable_SV sv1, nullable_SV sv2)
+
+# deliberately void context
+void
+void_sv_numne(nullable_SV sv1, nullable_SV sv2, SV *out)
+    CODE:
+        sv_setbool(out, sv_numne(sv1, sv2));
+    OUTPUT:
+        out
+
+bool
+sv_numne_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+I32
+sv_numcmp(nullable_SV sv1, nullable_SV sv2)
+
+I32
+sv_numcmp_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numle(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numle_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numlt(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numlt_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numge(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numge_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
+
+bool
+sv_numgt(nullable_SV sv1, nullable_SV sv2)
+
+bool
+sv_numgt_flags(nullable_SV sv1, nullable_SV sv2, U32 flags)
 
 bool
 sv_streq(SV *sv1, SV *sv2)

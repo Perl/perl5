@@ -2147,6 +2147,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define SV_SKIP_OVERLOAD        (1 << 13) /* 0x2000 -  8192 */
 #define SV_CATBYTES             (1 << 14) /* 0x4000 - 16384 */
 #define SV_CATUTF8              (1 << 15) /* 0x8000 - 32768 */
+#define SV_FORCE_OVERLOAD	(1 << 16) /* 0x10000 - 65536 */
 
 /* sv_regex_global_pos_*() should count in bytes, not chars */
 #define SV_POSBYTES             SV_CATBYTES
@@ -2311,6 +2312,7 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 
 =cut
 */
+#define sv_2num(sv) sv_2num_flags(sv, 0)
 #define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
@@ -2322,6 +2324,12 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 #define sv_cmp(sv1, sv2) sv_cmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
 #define sv_numeq(sv1, sv2) sv_numeq_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numne(sv1, sv2) sv_numne_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numle(sv1, sv2) sv_numle_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numlt(sv1, sv2) sv_numlt_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numge(sv1, sv2) sv_numge_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numgt(sv1, sv2) sv_numgt_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numcmp(sv1, sv2) sv_numcmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_streq(sv1, sv2) sv_streq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_collxfrm_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
@@ -2359,6 +2367,10 @@ Usually accessed via the C<SvPVutf8_nolen> macro.
 */
 #define sv_catpvn_nomg_maybeutf8(dsv, sstr, len, is_utf8) \
         sv_catpvn_flags(dsv, sstr, len, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
+
+#if defined(PERL_CORE)
+#define sv_2num(sv) sv_2num_flags(sv, 0)
+#endif
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 # define sv_or_pv_len_utf8(sv, pv, bytelen)	      \

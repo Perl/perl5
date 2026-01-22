@@ -1377,7 +1377,8 @@ PP(pp_multiconcat)
                     )
                 {
                     SV * const tmpsv = amagic_call(left, right, concat_amg,
-                                                (nextappend ? AMGf_assign: 0));
+                                                (nextappend ? AMGf_assign: 0)
+                                                   | AMGf_force_scalar);
                     if (tmpsv) {
                         /* NB: tryAMAGICbin_MG() includes an OPpTARGET_MY test
                          * here, which isn't needed as any implicit
