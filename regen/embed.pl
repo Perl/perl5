@@ -5562,9 +5562,9 @@ sub find_undefs {
     # Done deciding what should be #undef'd.  But don't #undef anything found
     # in the override hashes
     foreach my $entry (keys %system_symbols,
-                            %needed_by_ext,
-                            %needed_by_ext_re,
-                            %unresolved_visibility_overrides
+                       keys %needed_by_ext,
+                       keys %needed_by_ext_re,
+                       keys %unresolved_visibility_overrides,
                       )
     {
         delete $always_undefs{$entry};
