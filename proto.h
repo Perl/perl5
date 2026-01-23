@@ -3811,7 +3811,7 @@ PERL_CALLCONV I32
 Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend, char *strbeg, SSize_t minend, SV *sv, void *data, U32 flags);
 #define PERL_ARGS_ASSERT_REGEXEC_FLAGS          \
         assert(rx); assert(stringarg); assert(strend); assert(strbeg); \
-        assert(sv); assert(strbeg <= stringarg)
+        assert(sv); assert(strbeg <= stringarg); assert(stringarg <= strend)
 
 PERL_CALLCONV void
 Perl_regfree_internal(pTHX_ REGEXP * const rx);
