@@ -5408,6 +5408,12 @@ sub find_undefs {
         my @warnings;
         my $flags_visibility = $visibility{$name}{flags};
         my $cpp_visibility = $visibility{$name}{cpp};
+
+        # Some reserved names don't get parsed in the normal course of things,
+        # such as things declared in embedvar.h, which is skipped.  But all
+        # such are visible everywhere if not otherwise restricted.
+        $cpp_visibility = 1 if ! defined $cpp_visibility
+                            && $name =~ $names_reserved_for_perl_use_re;
         if (! defined $cpp_visibility) {
 
             # To get here we have a macro without having encountered its
