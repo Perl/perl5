@@ -81,6 +81,7 @@ my %skip_files;
 $skip_files{$_} = 1 for qw(
                             charclass_invlists.inc
                             embed.h
+                            embedvar.h
                             fakesdio.h
                             nostdio.h
                             perl_langinfo.h
