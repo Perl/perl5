@@ -618,3 +618,8 @@ $test
 EXPECT
 syntax error at - line 3, near "ok @<< - format '"
   (Might be a runaway multi-line '' string starting on line 2)
+########
+# NAME GH #16938 - don't continue parsing if a sub contains syntax errors
+eval"${sub{sub{//]]]"}}
+EXPECT
+syntax error at - line 1, near "//]"
