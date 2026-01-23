@@ -121,6 +121,7 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <opval> clause_itervars
 %type <opval> clause_mexpr
 %type <opval> subscript_index
 %type <opval> subscript_keys
@@ -394,77 +395,12 @@ bare_statement_for_itervars
 	/* for loop iterating over list using iterate variables */
 	:	KW_FOR
 		remember
-		KW_MY
-		my_scalar[itervars]
+		clause_itervars[itervars]
 		clause_mexpr[mexpr]
 		mblock
 		cont
 		{
 			$$ = block_end($remember, newFOROP(0, $itervars, $mexpr, $mblock, $cont));
-			parser->copline = (line_t)$KW_FOR;
-		}
-	|	KW_FOR
-		remember
-		KW_MY
-		PERLY_PAREN_OPEN
-		my_list_of_itervars[itervars]
-    	{
-			if ($itervars->op_type == OP_PADSV)
-				/* degenerate case of 1 var: for my ($x) ....
-				   Flag it so it can be special-cased in newFOROP */
-				$itervars->op_flags |= OPf_PARENS;
-        }
-		PERLY_PAREN_CLOSE
-		clause_mexpr[mexpr]
-		mblock
-		cont
-		{
-			$$ = block_end($remember, newFOROP(0, $itervars, $mexpr, $mblock, $cont));
-			parser->copline = (line_t)$KW_FOR;
-		}
-	|	KW_FOR
-		remember
-		scalar
-		{
-			$<opval>$ = op_lvalue ($scalar, OP_ENTERLOOP);
-		}[itervars]
-		clause_mexpr[mexpr]
-		mblock
-		cont
-		{
-			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
-			parser->copline = (line_t)$KW_FOR;
-		}
-	|	KW_FOR
-		remember
-		my_refgen
-		my_var
-		{
-			parser->in_my = 0;
-			$<opval>$ = op_lvalue(
-				newUNOP(OP_REFGEN, 0, my ($my_var)),
-				OP_ENTERLOOP
-			);
-		}[itervars]
-		clause_mexpr[mexpr]
-		mblock
-		cont
-		{
-			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
-			parser->copline = (line_t)$KW_FOR;
-		}
-	|	KW_FOR
-		remember
-		REFGEN
-		refgen_topic
-		{
-			$<opval>$ = op_lvalue (newUNOP(OP_REFGEN, 0, $refgen_topic), OP_ENTERLOOP);
-		}[itervars]
-		clause_mexpr[mexpr]
-		mblock
-		cont
-		{
-			$$ = block_end($remember, newFOROP(0, $<opval>itervars, $mexpr, $mblock, $cont));
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
@@ -746,6 +682,49 @@ bare_statement_yadayada
 		{
 			/* diag_listed_as: Unimplemented */
 			$$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0), newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+		}
+	;
+
+clause_itervars
+	/* read as: (clause)_(for_itervars)_(itervars)
+	 * part of `for_itervars` statement which declares `itervars`
+	 */
+	:	scalar
+		{
+			$$ = op_lvalue ($scalar, OP_ENTERLOOP);
+		}
+	|	KW_MY
+		my_scalar
+		{
+			$$ = $my_scalar;
+		}
+	|	KW_MY
+		PERLY_PAREN_OPEN
+		my_list_of_itervars
+		PERLY_PAREN_CLOSE
+		{
+			if ($my_list_of_itervars->op_type == OP_PADSV)
+				/* degenerate case of 1 var: for my ($x) ....
+				   Flag it so it can be special-cased in newFOROP */
+				$my_list_of_itervars->op_flags |= OPf_PARENS;
+			$$ = $my_list_of_itervars;
+		}
+	|	my_refgen
+		my_var
+		{
+			parser->in_my = 0;
+			$$ = op_lvalue (
+				newUNOP (OP_REFGEN, 0, my ($my_var)),
+				OP_ENTERLOOP
+			);
+		}
+	|	REFGEN
+		refgen_topic
+		{
+			$$ = op_lvalue (
+				newUNOP (OP_REFGEN, 0, $refgen_topic),
+				OP_ENTERLOOP
+			);
 		}
 	;
 
