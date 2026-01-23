@@ -2879,7 +2879,7 @@ Xdp	|struct refcounted_he *|refcounted_he_new_sv			\
 Cp	|void	|regdump	|NN const regexp *r
 Cp	|I32	|regexec_flags	|NN REGEXP * const rx			\
 				|MPTR char *stringarg			\
-				|NN char *strend			\
+				|EPTRge char *strend			\
 				|SPTR char *strbeg			\
 				|SSize_t minend 			\
 				|NN SV *sv				\
