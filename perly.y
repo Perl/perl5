@@ -349,8 +349,8 @@ bare_statement_field_declaration
 
 bare_statement_for
 	:	KW_FOR
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mnexpr[init_mnexpr]
 		PERLY_SEMICOLON
 		{
@@ -380,8 +380,8 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
-		KW_MY
 		remember
+		KW_MY
 		my_scalar
 		PERLY_PAREN_OPEN
 		mexpr
@@ -393,8 +393,8 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
-		KW_MY
 		remember
+		KW_MY
 		PERLY_PAREN_OPEN
 		my_list_of_itervars
 		PERLY_PAREN_CLOSE
@@ -412,9 +412,9 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
+		remember
 		scalar
 		PERLY_PAREN_OPEN
-		remember
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -424,8 +424,8 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
-		my_refgen
 		remember
+		my_refgen
 		my_var
 		{
 			parser->in_my = 0;
@@ -453,10 +453,10 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
+		remember
 		REFGEN
 		refgen_topic
 		PERLY_PAREN_OPEN
-		remember
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -475,8 +475,8 @@ bare_statement_for
 			parser->copline = (line_t)$KW_FOR;
 		}
 	|	KW_FOR
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -505,8 +505,8 @@ bare_statement_format
 
 bare_statement_given
 	:	KW_GIVEN
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -518,8 +518,8 @@ bare_statement_given
 
 bare_statement_if
 	:	KW_IF
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -685,8 +685,8 @@ bare_statement_try_catch
 
 bare_statement_unless
 	:	KW_UNLESS
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
@@ -733,8 +733,8 @@ bare_statement_utilize
 
 bare_statement_when
 	:	KW_WHEN
-		PERLY_PAREN_OPEN
 		remember
+		PERLY_PAREN_OPEN
 		mexpr
 		PERLY_PAREN_CLOSE
 		mblock
