@@ -13571,7 +13571,11 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
             (PL_parser->preambling == NOLINE
                    ? CopLINE(PL_curcop)
                    : PL_parser->preambling));
-        if (context)
+
+        /* Some syntax errors in an eval to result in a context being set
+         * but contlen being < 0. See GH#16945 for an example. In this
+         * situation, don't try to include context in the error message. */
+        if (context && contlen > 0)
             sv_catpvf(msg, "near \"%" UTF8f "\"\n",
                                  UTF8fARG(UTF, contlen, context));
         else
