@@ -635,3 +635,13 @@ Execution of (eval 1) aborted due to compilation errors.
 qr/(?{})\N{}/;while(my($0)=0){}
 EXPECT
 Unknown charname '' at - line 1, near "{})"
+########
+# NAME GH #16945 - don't pass a negative string length to Perl_sv_catpvf
+eval q!format=
+@​
+for(0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+!;
+die $@ if $@;
+EXPECT
+syntax error at (eval 1) line 4, 
+Execution of (eval 1) aborted due to compilation errors.
