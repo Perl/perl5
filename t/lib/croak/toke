@@ -623,3 +623,10 @@ syntax error at - line 3, near "ok @<< - format '"
 eval"${sub{sub{//]]]"}}
 EXPECT
 syntax error at - line 1, near "//]"
+########
+# NAME GH #16943 - don't continue parsing with a malformed CV
+eval q!s,,$0[sub{m[]]],;s,,$0[sub{m[]]],}}!;
+die $@ if $@;
+EXPECT
+syntax error at (eval 1) line 1, near "m[]]"
+Execution of (eval 1) aborted due to compilation errors.
