@@ -94,7 +94,7 @@ PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 
 /*
 =for apidoc_section $warning
-=for apidoc mn|U8|PL_dowarn
+=for apidoc Amn|U8|PL_dowarn
 
 The C variable that roughly corresponds to Perl's C<$^W> warning variable.
 However, C<$^W> is treated as a boolean, whereas C<PL_dowarn> is a
@@ -552,7 +552,7 @@ PERLVAR(I, DBline,	GV *)		/*  *DB::line   */
 
 /*
 =for apidoc_section $debugging
-=for apidoc mn|GV *|PL_DBsub
+=for apidoc Amn|GV *|PL_DBsub
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
 the SV which holds the name of the sub being debugged.  This is the C
 variable which corresponds to Perl's $DB::sub variable.  See
