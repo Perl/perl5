@@ -2284,6 +2284,11 @@ my @unresolved_visibility_overrides = qw(
     PerlEnv_putenv
     PIPE_OPEN_MODE
     PIPESOCK_MODE
+    PL_DBsingle
+    PL_DBtrace
+    PL_last_in_gv
+    PL_ofsgv
+    PL_rs
     PMf_BASE_SHIFT
     PMf_CHARSET
     PMf_CODELIST_PRIVATE
