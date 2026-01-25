@@ -282,6 +282,7 @@
 : Scattered around the perl source are lines of the form:
 :
 :   =for apidoc name ...
+:   =for apidoc_flag name ...
 :   =for apidoc_item name ...
 :   =for apidoc_defn name ...
 :
@@ -317,6 +318,25 @@
 : number of 'apidoc_item' lines.  These indicate that the macro or function
 : listed as 'name' on each is part of the group whose head entry is the one
 : specified by 'name' on the apidoc line.
+:
+: Many functions and macros take a flags parameter in which 1 bits in various
+: positions are OR'ed together.   Each position has a name.  You should give
+: the names of each bit that the function understands by using
+:
+:   =for apidoc_flag-name1
+:   =for apidoc_flag-name2
+:   ...
+:
+: These are to be placed, intermixed in any order, with any 'apidoc_item'
+: statements just after the plain head '=for apidoc' line.  If the function is
+: public, but some of the flags are not, you can say, for example,
+:
+:   =for apidoc_flag e|PERL_SCAN_SILENT_NON_PORTABLE
+:
+: where the 'e' could be any of the visibility flags listed at the top of this
+: file.  (Note that the term 'flag' is overloaded here.  The function has a
+: flags parameter, and the entry describing it here has a flags field to aid in
+: that description.)
 :
 : After the block of apidoc-like statements, is the text that is the
 : documentation, ending with the next =cut or '=for apidoc foo' lines.
@@ -364,6 +384,8 @@
 :
 :   =for apidoc flags|return_type|name|arg1|arg2|...|argN
 :   =for apidoc_item flags|return_type|name|arg1|arg2|...|argN
+:   =for apidoc_flag name
+:   =for apidoc_flag flags|name
 :   =for apidoc_defn flags|return_type|name|arg1|arg2|...|argN
 :
 : The 'name' in any such line must not be the same as any in this file (i.e.,

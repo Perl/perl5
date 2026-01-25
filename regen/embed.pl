@@ -5204,35 +5204,75 @@ sub process_apidoc_lines {
 
         # Only apidoc lines affect visibility; ignore the rest
         next unless $individual_line =~
-                        m/ ^=for \s+ apidoc (\b | _defn | _item) \s* (.+) /x;
+                        m/ ^=for \s+ apidoc
+                          ( \b | _defn | _item | _flag ) \b
+                          \s* (.+)
+                         /x;
         my $type = $1;
 
-        # A full-blown declaration has all these fields
-        my ($flags, $return_type, $name, @rest) = split /\s*\|\s*/, $2;
+        # Every such line will have at least one field, which for now we will
+        # assume is the name.
+        my ($name, @rest) = split /\s*\|\s*/, $2;
+        my $flags = "";
 
-        # But some lines look like '=for apidoc foo' where the rest of the
-        # data comes from elsewhere.  For these, shift.
-        if (! defined $return_type) {
-            $name = $flags;
-            $flags = "";
+        # If only one field, we are done; there are no flags.
+        if (@rest != 0) {
+
+            # But otherwise, the flags are in the 0th position.  And the name
+            # is later
+            $flags = $name;
+
+            # For the non-'apidoc_flag' types, the next parameter is the
+            # return (whose value doesn't matter to us here).  It is mandatory
+            # (even if empty)
+            shift @rest if $type ne '_flag';
+
+            $name = shift @rest;
         }
 
         # apidoc lines may come in blocks with the first line being
-        # 'apidoc', and the remaining ones 'apidoc_item or apidoc_flag'.
+        # 'apidoc', and the remaining ones 'apidoc_item' or 'apidoc_flag'.
         # These are interpreted as groups with the flags parameter of the
         # 'apidoc' line applying to the rest, though those may add flags
         # individually.
-        if ($type ne  "_item" ) {
+        if ($type =~ / ^ (?: _defn )? $ /x ) {
             $flags ||= $visibility{$name}{flags_raw};
             $group_flags = $flags;
         }
-        elsif ($flags) {
+        elsif ($type eq '_flag') {
+            if ($flags =~ /$discard_non_visibility_flags_re/) {
+                die_at_end "Only flags affecting visibility allowed in"
+                            . " 'apidoc_flag' lines '$individual_line'";
+                next;
+            }
 
-            # Non-initial line with flags of its own; add them to the group's
-            $flags .= $group_flags;
+            if ($flags) {
+                # Override the group's visibility flags with this entry's
+                my $non_visibility = $group_flags;
+                $non_visibility =~ s/$visibility_flags_re//g;
+                $flags .= $non_visibility;
+            }
+            else {
+                $flags = $group_flags;
+            }
+
+            # And this is actually a macro
+            $flags .= 'm';
         }
-        else {  # Non-initial line without flags of its own
-            $flags = $group_flags;
+        elsif ($type eq '_item') {
+            if ($flags) {
+
+                # Non-initial line with flags of its own; add them to the
+                # group's
+                $flags .= $group_flags;
+            }
+            else {  # Non-initial line without flags of its own
+                $flags = $group_flags;
+            }
+        }
+        else {
+            die_at_end "Unknown line '$individual_line'";
+            next;
         }
 
         set_flags_visibility($name, $file, $line_number, $flags);

@@ -84,6 +84,9 @@ my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
 # apidoc_item
 my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
 
+# Only certain flags are acceptable for apidoc_flag
+my $flag_flags_re = qr/[ A C dD eE h m n p u X ] /xx;
+
 # Certain functions have plain and no_context versions, and meet the criteria
 # stated here.  Each of their pods has been modified to have a marker line
 # which this program replaces by this wording.  This way we can tweak the
@@ -102,7 +105,8 @@ use constant {
               APIDOC_DEFN        =>  1,
               PLAIN_APIDOC       =>  2,
               APIDOC_ITEM        =>  3,
-              APIDOC_SECTION     =>  4,
+              APIDOC_FLAG        =>  4,
+              APIDOC_SECTION     =>  5,
 
               # This is the line type used for elements parsed in config.h.
               # Since that file is parsed after everything else, everything is
@@ -112,7 +116,7 @@ use constant {
               # doesn't have to get involved.  There are just a few of these,
               # with little likelihood of changes needed.  They were manually
               # added to handy.h via 51b56f5c7c7.
-              CONDITIONAL_APIDOC =>  5,
+              CONDITIONAL_APIDOC =>  6,
              };
 
 my $config_h = 'config.h';
@@ -791,7 +795,9 @@ sub classify_input_line ($file, $line_num, $input, $is_file_C) {
                        ? APIDOC_DEFN
                        : ($type_name eq 'section')
                          ? APIDOC_SECTION
-                         : ILLEGAL_APIDOC;
+                         : ($type_name eq 'flag')
+                           ? APIDOC_FLAG
+                           : ILLEGAL_APIDOC;
 
         my $mostly_proper_form =
                    (   $type != ILLEGAL_APIDOC
@@ -1009,8 +1015,8 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
 
             push @items, $leader_ref;
 
-            # Now look for any 'apidoc_item' lines.  These are in a block
-            # consisting solely of them, or all-blank lines
+            # Now look for any 'apidoc_(flag|item)' lines.  These are in a
+            # block consisting solely of them, or all-blank lines
             while (1) {
                 (my $item_line_type, $arg) = $get_next_line->();
                 last unless defined $item_line_type;
@@ -1021,7 +1027,37 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
                     next;
                 }
 
-                last unless $item_line_type == APIDOC_ITEM;
+                # Currently not much is done with these
+                if ($item_line_type == APIDOC_FLAG) {
+                    my @components = split /\|+/, $arg;
+                    my ($name, $flags);
+                    if (@components == 1) {
+                        $name = $components[0];
+                    }
+                    elsif (@components == 2) {
+                        $flags = $components[0];
+                        $name = $components[1];
+                        if (my $illegal = $flags =~ s/$flag_flags_re//gr) {
+                            die "[$illegal] illegal in apidoc_flag "
+                            . where_from_string($file, $line_num)
+                            . " :\n$arg";
+                        }
+
+                        # Only mention the flags that go to the parent's pod
+                        next if destination_pod($flags) ne $destpod;
+                    }
+                    else {
+                        die "Unexpected '| in ", $arg;
+                    }
+
+
+                    # We just make an X<> entry for it.
+                    $docs{$destpod}{$section}{X_tags}{$name} = $file;
+                    next;
+                }
+                else {
+                    last unless $item_line_type == APIDOC_ITEM;
+                }
 
                 # Reset $text; those blank lines it contains merely are
                 # separating 'apidoc_item' lines

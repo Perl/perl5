@@ -556,7 +556,7 @@ PERLVAR(I, DBline,	GV *)		/*  *DB::line   */
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
 the SV which holds the name of the sub being debugged.  This is the C
 variable which corresponds to Perl's $DB::sub variable.  See
-C<L</PL_DBsingle>>.
+L<perlintern/PL_DBsingle>>.
 
 On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
@@ -567,7 +567,7 @@ When Perl is run in debugging mode, with the B<-d> switch, this SV is a
 boolean which indicates whether subs are being single-stepped.
 Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
-C<L</PL_DBsub>>.
+L<perlapi/C<PL_DBsub>>.
 
 On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
