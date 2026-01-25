@@ -3872,8 +3872,13 @@ my %visibility_types = (
                        );
 
 my @az = ('a'..'z');
-my $never_visible_flags_re = qr/[eX]/;
-my $discard_non_visibility_flags_re = eval "qr/[^ACeEX]/";
+my $never_visible_flags= "eX";
+my $never_visible_flags_re = qr/[$never_visible_flags]/;
+
+my $visibility_flags = "ACE$never_visible_flags";
+my $visibility_flags_re = qr/[$visibility_flags]/;
+
+my $discard_non_visibility_flags_re = qr/[^$visibility_flags]/;
 
 my $error_count = 0;
 sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
