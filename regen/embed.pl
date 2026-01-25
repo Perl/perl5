@@ -5307,8 +5307,10 @@ sub find_undefs {
             # Just the symbol, no arglist nor definition
             $name =~ s/ (?: \s | \( ) .* //x;
 
-            # 
-            set_flags_visibility($name, $hdr)
+            # Call the subroutine with an 'undef' third parameter for symbols
+            # reserved for Perl-use.  That tells it to consider these to be
+            # always visible unless otherwise directed
+            set_flags_visibility($name, $hdr, undef)
                                   if $name =~ $names_reserved_for_perl_use_re;
 
             # Calculate $name's actual visibility for later use.
