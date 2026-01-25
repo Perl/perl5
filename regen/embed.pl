@@ -4885,7 +4885,7 @@ sub generate_embedvar_h {
 my %visibility;
 
 sub set_flags_visibility {
-    my ($name, $file, $raw_flags) = @_;
+    my ($name, $file, $line_number, $raw_flags) = @_;
 
     # Store $name's requested visibility into $visibility{$name}{flags} as
     # determined by apidoc or embed.fnc lines.  The visibility is stored as
@@ -4920,7 +4920,8 @@ sub set_flags_visibility {
         $flags =~ s/[eX]//g;    # These flags are irrelevant for our purposes
         if ($flags ne 'E') {
             die_at_end "'E' flag for $name can't have other visibility flag"
-                     . " except [eX], not '$raw_flags'; in $file";
+                     . " except [eX], not '$raw_flags'; in $file line"
+                     . " $line_number";
             $flags = 'E';
         }
     }
@@ -4955,7 +4956,8 @@ sub set_flags_visibility {
         $ordering = 1;
     }
     else {
-        die_at_end "Flag '$flags' unrecognized";
+        die_at_end "Flag for $name '$flags' unrecognized in $file line"
+                 . " $line_number";
         $ordering = -1;
     }
 
@@ -4966,6 +4968,7 @@ sub set_flags_visibility {
     $visibility{$name}{flags_ordering} = $ordering;
     $visibility{$name}{flags_raw} = $raw_flags;
     $visibility{$name}{flags_file} = $file;
+    $visibility{$name}{flags_file_line_number} = $line_number;
     $visibility{$name}{is_macro} = $is_macro;
     return;
 }
@@ -5195,12 +5198,15 @@ sub get_and_set_cpp_visibility {
 
 sub process_apidoc_lines {
     my $file = shift;
+    my $line_number = shift;
+    $line_number--;     # So increment below will have no effect first time
 
     # Look through the input array of lines for ones that can declare the
     # visibility of a symbol, and save those declarations for later use.
 
     my $group_flags;
     for my $individual_line (@_) {
+        $line_number++;
 
         # Only apidoc lines affect visibility; ignore the rest
         next unless $individual_line =~
@@ -5234,7 +5240,7 @@ sub process_apidoc_lines {
             $flags = $group_flags;
         }
 
-        set_flags_visibility($name, $file, $flags);
+        set_flags_visibility($name, $file, $line_number, $flags);
     }
 }
 
@@ -5270,7 +5276,8 @@ sub find_undefs {
 
         # embed.fnc lines also have visibility flags to specify the desired
         # visibility of the symbol.
-        set_flags_visibility($embed->name, 'embed.fnc', $embed->{flags});
+        set_flags_visibility($embed->name, 'embed.fnc',
+                             $embed->{start_line_num},  $embed->{flags});
     }
 
     # Done with embed.fnc.  Now look through all the header files for their
@@ -5304,7 +5311,8 @@ sub find_undefs {
                 next unless $line->{flat} eq "";
 
                 next unless $line->{line} =~ / ^ =for \s+ apidoc /mx;
-                process_apidoc_lines($hdr, split /\n/, $line->{line});
+                process_apidoc_lines($hdr, $line->{start_line_num},
+                                     split /\n/, $line->{line});
                 next;
             }
 
@@ -5321,7 +5329,7 @@ sub find_undefs {
             # Call the subroutine with an 'undef' third parameter for symbols
             # reserved for Perl-use.  That tells it to consider these to be
             # always visible unless otherwise directed
-            set_flags_visibility($name, $hdr, undef)
+            set_flags_visibility($name, $hdr, $line->{start_line_num}, undef)
                                   if $name =~ $names_reserved_for_perl_use_re;
 
             # Calculate $name's actual visibility for later use.
@@ -5386,7 +5394,7 @@ sub find_undefs {
     # stuff.
     foreach my $pod (@c_list, @pod_list) {
         open my $pfh, "<", $pod or die "Can't open $pod: $!";
-        process_apidoc_lines($pod, <$pfh>);
+        process_apidoc_lines($pod, 1, <$pfh>);
         close $pfh or die "Can't close $pod: $!";
     }
 
@@ -5429,7 +5437,8 @@ sub find_undefs {
             if ($flags_visibility ne '1') {
                 warn "'$name' unexpectedly has no C preprocessor conditions"
                    . " for #defining it; found in "
-                   . $visibility{$name}{flags_file};
+                   . $visibility{$name}{flags_file}
+                   . " line $visibility{$name}{flags_file_line_number}";
             }
             $cpp_visibility = 1;    # Assume worst case
 
@@ -5443,7 +5452,10 @@ sub find_undefs {
             {
                 push @warnings, "'$name' cannot actually be seen outside of"
                               . " the perl core, but it is flagged as having"
-                              . " '$flags_visibility' visibility";
+                              . " '$flags_visibility' visibility; in "
+                              . $visibility{$name}{flags_file}
+                              . " line "
+                              . $visibility{$name}{flags_file_line_number};
             }
 
             goto ok_but_warn_if_overridden;
@@ -5462,7 +5474,10 @@ sub find_undefs {
                 goto ok_but_warn_if_overridden;
             }
             else {
-                die_at_end "Unexpected flag '$flags_visibility' for '$name'";
+                die_at_end "Unexpected flag '$flags_visibility' for '$name'"
+                         . " in $visibility{$name}{flags_file}"
+                         . " line "
+                         . $visibility{$name}{flags_file_line_number};
             }
 
             next;
@@ -5488,7 +5503,9 @@ sub find_undefs {
             push @warnings, "'$name' cannot actually be seen outside of"
                           . " Perl extensions (because of #ifdef's), but"
                           . " it is flagged as having '$flags_visibility'"
-                          . " visibility";
+                          . " visibility; in $visibility{$name}{flags_file}"
+                         . " line "
+                         . $visibility{$name}{flags_file_line_number};
             goto output_warnings;
         }
 
