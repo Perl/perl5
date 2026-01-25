@@ -1355,7 +1355,6 @@ my @unresolved_visibility_overrides = qw(
     is_QUOTEMETA_high
     isREGEXP
     IS_SAFE_PATHNAME
-    IS_SAFE_SYSCALL
     is_SHORTER_NON_CHARS_utf8
     isSPACE_LC_utf8
     isSPACE_uni
@@ -1907,7 +1906,6 @@ my @unresolved_visibility_overrides = qw(
     new_NOARENAZ
     NewOp
     NewOpSz
-    newRV_inc
     new_SV
     NEWSV
     NEW_VERSION
@@ -3003,7 +3001,6 @@ my @unresolved_visibility_overrides = qw(
     SvIsUV_on
     SvIV_please
     SvIV_please_nomg
-    SvIVx
     SvIVXx
     SvLENx
     SvMAGIC
@@ -3016,7 +3013,6 @@ my @unresolved_visibility_overrides = qw(
     SvNOK_nog
     SvNOK_nogthink
     SvNOKp_on
-    SvNVx
     SvNVXx
     SvOBJECT
     SvOBJECT_off
@@ -3082,7 +3078,6 @@ my @unresolved_visibility_overrides = qw(
     SvRMAGICAL_off
     SvRMAGICAL_on
     SvRV_const
-    SvRVx
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on
@@ -3110,7 +3105,6 @@ my @unresolved_visibility_overrides = qw(
     SV_UNDEF_RETURNS_NULL
     SvUOK_nog
     SvUOK_nogthink
-    SvUVx
     SvVALID
     SvWEAKREF
     SvWEAKREF_off
@@ -5229,6 +5223,7 @@ sub process_apidoc_lines {
         # 'apidoc' line applying to the rest, though those may add flags
         # individually.
         if ($type ne  "_item" ) {
+            $flags ||= $visibility{$name}{flags_raw};
             $group_flags = $flags;
         }
         elsif ($flags) {

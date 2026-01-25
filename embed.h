@@ -28,6 +28,7 @@
 #   undef CC_UNDERSCORE_
 #   undef isFOO_or_UNDERSCORE_
 #   undef sv_2num
+#   undef SvRVx
 #   if !defined(PERL_EXT)
 #     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
