@@ -890,12 +890,14 @@ Dereferences an RV to return the SV.
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure C<SvIOK> is true.  See also C<L</SvIV>>.
 
-=for apidoc Am|UV|SvUVX|SV* sv
-Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure C<SvUOK> is true.  See also C<L</SvUV>>.
+=for apidoc      Am|UV|SvUVX|SV* sv
+=for apidoc_item Dm|UV|SvUVXx|SV* sv
 
-=for apidoc AmD|UV|SvUVXx|SV* sv
-This is an unnecessary synonym for L</SvUVX>
+These each return the raw value in the SV's UV slot, without checks or
+conversions.  Only use when you are sure C<SvUOK> is true.  See also
+C<L</SvUV>>.
+
+C<SvUVXx> is is an unnecessary synonym for C<SvUVX>.
 
 =for apidoc Am|NV|SvNVX|SV* sv
 Returns the raw value in the SV's NV slot, without checks or conversions.
