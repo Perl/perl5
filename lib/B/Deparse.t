@@ -934,6 +934,15 @@ print $_ foreach (reverse @a);
 our @a;
 print $_ foreach (reverse 1, 2..5);
 ####
+# foreach empty block
+our $foo;
+foreach $foo (1) {}
+>>>>
+our $foo;
+foreach $foo (1) {
+    ();
+}
+####
 # bug #38684
 our @ary;
 @ary = split(' ', 'foo', 0);

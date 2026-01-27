@@ -4410,9 +4410,16 @@ sub loop_common {
 	} else {
 	    $var = $self->deparse($var, 1);
 	}
+
 	$body = $iter->sibling;
-	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
-	    confess unless $var eq '$_';
+
+	if (!(   is_state $body->first
+              or _op_is_or_was($body->first, OP_STUB)
+              or ($body->first->name =~ /^(?:leave|scope)$/)))
+        {
+            # postfix for
+            die "Unexpected 'for' statement modifier with non-\$_ loop variable '$var'\n"
+                unless $var eq '$_';
 	    $body = $body->first;
 	    return $self->deparse($body, 2) . " "
 		 . $self->keyword("foreach") . " ($ary)";
