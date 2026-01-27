@@ -472,6 +472,18 @@ Added the C<AMGf_force_overload> flag to the L<perlapi/C<amagic_call>>
 API to allow forcing overloading to be honored even in the context of
 C<no overloading;>.
 
+=item *
+
+The C<SvFLAGS> bits used by C<SvPCS_IMPORTED()> and C<SvOOK()> have now been
+merged into the same position, thus freeing up a flags bit for possible future
+purposes. This merge is distinguished by the fact that the C<PCS_IMPORTED>
+behaviour is only used on references (when C<SvROK> is true), whereas the
+C<OOK> only applies to string buffers (when C<SvROK> is false).
+
+This change shouldn't affect any C<XS> module code that is using the test
+macros correctly, though might cause confusion to code that attempts to analyse
+C<SvFLAGS> bits directly outside of the helper macros.
+
 =back
 
 =head1 Selected Bug Fixes

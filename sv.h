@@ -438,10 +438,6 @@ These guys don't need the curly blocks
 #define SVp_SCREAM	0x00008000  /* currently unused on plain scalars */
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
-#define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
-                                       subroutine in another package. Set the
-                                       GvIMPORTED_CV_on() if it needs to be
-                                       expanded to a real GV */
 
 /* SVf_PROTECT is what SVf_READONLY should have been: i.e. modifying
  * this SV is completely illegal. However, SVf_READONLY (via
@@ -475,6 +471,10 @@ These guys don't need the curly blocks
                                        */
 #define SVf_OOK		0x02000000  /* has valid offset value */
 #define SVphv_HasAUX    SVf_OOK     /* PVHV has an additional hv_aux struct */
+#define SVprv_PCS_IMPORTED  SVf_OOK /* RV is a "proxy constant subroutine",
+                                       referring to a sub in another package.
+                                       Set the GvIMPORTED_CV_on() if it needs
+                                       to be expanded to a real GV */
 #define SVf_BREAK	0x04000000  /* refcnt is artificially low - used by
                                        SVs in final arena cleanup.
                                        Set in S_regtry on PL_reg_curpm, so that
