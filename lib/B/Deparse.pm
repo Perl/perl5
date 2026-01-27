@@ -4386,13 +4386,24 @@ sub loop_common {
             # for my ($x, $y, ...) ...
             # for my ($foo, $bar) () stores the count (less 1) in the targ of
             # the ITER op. For the degenerate case of 1 var ($x), the
-            # TARG is zero, so it works anyway
+            # TARG is zero, so it works anyway. In the presence of
+            # OPpITER_REFALIAS, the lower 8 bits is the var count, and the
+            # upper 24 bits is a mask indicating which of the variables
+            # have refalias behaviour.
             my $iter_targ = $kid->first->first->targ;
+            my $mask = 0;
+            if ($iter->private & OPpITER_REFALIAS) {
+                $mask = $iter_targ >> 8;
+                $iter_targ &= 0xff;
+            }
             my @vars;
             my $targ = $enter->targ;
             while ($iter_targ-- >= 0) {
-                push @vars, $self->padname_sv($targ)->PVX;
+                my $v = $self->padname_sv($targ)->PVX;
+                $v = "\\$v" if $mask & 1;
+                push @vars, $v;
                 ++$targ;
+                $mask >>= 1;
             }
             $var = 'my (' . join(', ', @vars) . ')';
         } elsif (null $var) {
