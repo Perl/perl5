@@ -4289,7 +4289,10 @@ sub pp_cond_expr {
 	}
 	$newcond = $self->deparse($newcond, 1);
 
-        if (null($false) && ! ($newop->flags & OPf_SPECIAL)) {
+        if (   $op->name eq 'cond'
+            && null($false)
+            && ! ($newop->flags & OPf_SPECIAL))
+        {
             # An empty elsif "true" block has been optimised away
             my $temp = $false; $false = $newtrue; $newtrue = $temp;
             $newtrue = "();";

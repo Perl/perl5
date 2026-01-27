@@ -3620,3 +3620,12 @@ elsif ($y) {
 } else {
     $y = 2;
 }
+####
+# Deparse of elsif  with no trailing block
+my($x, $y);
+if ($x) {
+    $x = 1;
+}
+elsif ($y) {
+    $y = 1;
+}
