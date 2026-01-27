@@ -9740,12 +9740,6 @@ S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const cha
         assert(type_name); assert(filename); assert(funcname)
 
 # endif
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE U32
-S_ptr_hash(PTRV u);
-#   define PERL_ARGS_ASSERT_PTR_HASH
-
-# endif
 # if defined(PERL_USES_PL_PIDSTATUS)
 STATIC void
 S_pidgone(pTHX_ Pid_t pid, int status);
