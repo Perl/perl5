@@ -68,7 +68,7 @@ EXPECT
 Can't find string terminator "/" anywhere before EOF at - line 1.
 ########
 # NAME Unterminated q//
-qw/
+q/
 EXPECT
 Can't find string terminator "/" anywhere before EOF at - line 1.
 ########
