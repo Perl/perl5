@@ -4242,32 +4242,45 @@ sub pp_cond_expr {
     my $cuddle = $self->{'cuddle'};
     my $no_true = 0;
 
-    if (class($false) eq "NULL") { # Empty true or false block was optimised away
+    if (class($false) eq "NULL") {
+        # Handle an empty true or false block that was optimised away.
+        # Note that it's always the false that's missing. But only
+        # when the false branch is empty and is optimised away, is
+        # OPf_SPECIAL set.
         if (!($op->flags & OPf_SPECIAL)) { # It was an empty true block
             my $temp = $false; $false = $true; $true = $temp;
             $no_true = 1;
+            # look for ?: rather than if/else
             unless ($cx < 1 and (is_scope($false) and $false->name ne "null")) {
+                # $cond ? () : $val2
                 $cond = $self->deparse($cond, 8);
                 $false = $self->deparse($false, 6);
                 return $self->maybe_parens("$cond ? () : $false", $cx, 8);
             }
         } else { # Must have been an empty false block
+            # look for ?: rather than if/else
             unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
+                # $cond ? $val1: ()
                 $cond = $self->deparse($cond, 8);
                 $true = $self->deparse($true, 6);
                 return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
             }
         }
     } else { # Both true and false branches are present
+        # look for ?: rather than if/else
         unless ($cx < 1 and (is_scope($true) and $true->name ne "null")
                and (is_scope($false) || is_ifelse_cont($false))
-               and $self->{'expand'} < 7) {
+               and $self->{'expand'} < 7)
+        {
+            # $cond ? $val1 : $val2
             $cond = $self->deparse($cond, 8);
             $true = $self->deparse($true, 6);
             $false = $self->deparse($false, 8);
             return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
         }
     }
+
+    # if/elseif/else etc
 
     $cond = $self->deparse($cond, 1);
     $true = ($no_true) ? "\b" : $self->deparse($true, 0);
@@ -4276,6 +4289,8 @@ sub pp_cond_expr {
                 : $self->keyword("if") . " ($cond) {\n\t$true\n\b}";
     my @elsifs;
     my $elsif;
+
+    # keep processing chained elsif's until final else (if present)
     while (!null($false) and is_ifelse_cont($false)) {
 	my $newop = $false->first;
 	my $newcond = $newop->first;
@@ -4303,6 +4318,7 @@ sub pp_cond_expr {
 	$elsif ||= $self->keyword("elsif");
 	push @elsifs, "$elsif ($newcond) {\n\t$newtrue\n\b}";
     }
+
     if (!null($false)) {
 	$false = $cuddle . $self->keyword("else") . " {\n\t" .
 	  $self->deparse($false, 0) . "\n\b}\cK";
@@ -4312,6 +4328,7 @@ sub pp_cond_expr {
     } else {
 	$false = "\cK";
     }
+
     return $head . join($cuddle, "", @elsifs) . $false;
 }
 
