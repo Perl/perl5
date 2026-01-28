@@ -4097,9 +4097,11 @@ S_scan_const(pTHX_ char *start)
                 }
                 else     /* Here is \N{NAME} but not \N{U+...}. */
                      if (! (res = get_and_check_backslash_N_name_wrapper(s, e)))
-                {   /* Failed.  We should die eventually, but for now use a NUL
-                       to keep parsing */
-                    *d++ = '\0';
+                {   /* Failed.  We used to keep parsing, but error conditions here
+                     * can sometimes result in scope problems, which later manifest
+                     * as the incorrect pad being operated upon. (See GH#16930.)
+                     * Safest to just abort now. */
+                    yyquit();
                 }
                 else {  /* Successfully evaluated the name */
                     STRLEN len;
