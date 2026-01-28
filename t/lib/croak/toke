@@ -630,3 +630,8 @@ die $@ if $@;
 EXPECT
 syntax error at (eval 1) line 1, near "m[]]"
 Execution of (eval 1) aborted due to compilation errors.
+########
+# NAME GH #16930 - parsing after \N{} errors can trigger segfaults
+qr/(?{})\N{}/;while(my($0)=0){}
+EXPECT
+Unknown charname '' at - line 1, near "{})"
