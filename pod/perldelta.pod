@@ -429,6 +429,19 @@ that field being released when the method exited.  The next access to
 that field could result in a crash or an assertion, or if the freed SV
 had been re-used, random data.  Discussed in [GH #24187]
 
+=item *
+
+call_sv() and related functions now check the runtime package instead
+of the package being compiled to when deciding whether the call is
+breakable into C<DB::sub>.
+
+The compile-time package is typically C<main::> when nothing is being
+compiled so C<DB::sub> could be called for sub calls from package DB.
+
+This means that core features that use call_sv(), such as smart match
+against a code reference, no longer incorrectly call C<DB::sub> when
+used from package DB.  Related to [github #24001]
+
 =back
 
 =head1 Known Problems
