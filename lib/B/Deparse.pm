@@ -4436,14 +4436,17 @@ sub loop_common {
 		 . $self->keyword("foreach") . " ($ary)";
 	}
 	$head = "foreach $var ($ary) ";
-    } elsif ($kid->name eq "null") { # while/until
+    }
+    elsif (_op_is_or_was($kid, OP_STUB)) { # bare and empty
+	return "{;}"; # {} could be a hashref
+    }
+    elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
 	$name = {"and" => "while", "or" => "until"}->{$kid->name};
 	$cond = $kid->first;
 	$body = $kid->first->sibling;
-    } elsif ($kid->name eq "stub") { # bare and empty
-	return "{;}"; # {} could be a hashref
     }
+
     # If there isn't a continue block, then the next pointer for the loop
     # will point to the unstack, which is kid's last child, except
     # in a bare loop, when it will point to the leaveloop. When neither of

@@ -3651,3 +3651,10 @@ if ($x) {
 elsif ($y) {
     $y = 1;
 }
+####
+# empty package block
+{
+    package Foo;
+}
+>>>>
+{;};
