@@ -137,3 +137,11 @@ foreach my (\$v1, $v2, $v3, $v4, $v5, $v6, $v7, $v8,
             $v249, $v250, $v251, $v252, $v253, $v254, $v255, $v256, $v257 ) ( @empty ) { }
 EXPECT
 Cannot use more than 256 iterator variables on a foreach loop if any are declared refs at - line 36.
+########
+# NAME foreach refalias does not crash on null elems of magical array
+# NOTE GH #24126
+package Foo;
+$ISA[1] = 'Bar';
+for \my $x (@ISA) {}
+EXPECT
+Assigned value is not a reference at - line 5.
