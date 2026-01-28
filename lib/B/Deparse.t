@@ -736,6 +736,19 @@ continue {
     123;
 }
 ####
+# block with empty continue
+{
+    f(234);
+}
+continue { }
+>>>>
+{
+    f(234);
+}
+continue {
+    ();
+}
+####
 # lexical and package scalars
 my $x;
 print $main::x;

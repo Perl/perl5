@@ -6983,7 +6983,7 @@ sub pp_subst {
 }
 
 sub is_lexical_subs {
-    my (@ops) = shift;
+    my (@ops) = @_;
     for my $op (@ops) {
         return 0 if $op->name !~ /\A(?:introcv|clonecv)\z/;
     }
