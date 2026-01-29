@@ -100,9 +100,9 @@ If you've never contributed, run one of the following:
 
 Then commit the change.
 
-=item * Send your changes to the Perl issue tracker
+=item * Submit your changes to GitHub
 
-The next step is to submit your patch to the Perl core ticket system.
+The next step is to submit your patch to GitHub.
 
 Create a GitHub fork of the perl5 repository and add it as a remote,
 if you haven't already, as described in the GitHub documentation at
