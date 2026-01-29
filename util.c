@@ -3155,7 +3155,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 #endif /* !DOSISH || OS2 || WIN32 */
 
 #ifdef PERL_USES_PL_PIDSTATUS
-void
+static void
 S_pidgone(pTHX_ Pid_t pid, int status)
 {
     SV *sv;
