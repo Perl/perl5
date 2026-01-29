@@ -4551,7 +4551,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
  * introduced in 2015: https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf
  * Examples: https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64
  */
-U64
+static U64
 splitmix64(U64 *state)
 {
     U64 z = (*state += 0x9e3779b97f4a7c15);
