@@ -4371,7 +4371,7 @@ PP(pp_sprintf)
     dMARK; dORIGMARK; dTARGET;
     SvTAINTED_off(TARG);
     do_sprintf(TARG, PL_stack_sp - MARK, MARK + 1);
-    TAINT_IF(SvTAINTED(TARG));
+    TAINT_IF_SV(TARG);
     rpp_popfree_to_NN(ORIGMARK);
     SvSETMAGIC(TARG);
     rpp_push_1(TARG);

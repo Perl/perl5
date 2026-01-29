@@ -5681,7 +5681,7 @@ PP(pp_entereval)
         lex_flags |= LEX_START_COPIED;
     }
 
-    TAINT_IF(SvTAINTED(sv));
+    TAINT_IF_SV(sv);
     TAINT_PROPER("eval");
 
     old_savestack_ix = PL_savestack_ix;
