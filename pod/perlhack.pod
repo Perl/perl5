@@ -62,11 +62,29 @@ Keep hacking until the tests pass.
 =item * Commit your change
 
 Committing your work will save the change I<on your local system>:
+You will first need to add your work to the list of things to be
+committed.  If you want everything in the files you've changed to be
+included, you can say
 
-  % git commit -a -m 'Commit message goes here'
+  % git add file1 file2 ...
 
-Make sure the commit message describes your change in a single
-sentence.  For example, "Fixed spelling errors in perlhack.pod".
+But a more flexible method is to use
+
+  % git add -i
+
+And follow the prompts to selectively add what you want.  This allows
+you to double check what you're adding as you go along.  Once everything
+is added, do
+
+  % git commit
+
+git will open an editor (a default one, or the one you have configured
+it to) for you to type in a commit message that describes the change.
+When done, save and exit.
+
+It is important for the smooth functioning of the project, both now and
+in the future, to write a good commit message.  This is covered below in
+L</Commit message>.
 
 =item * Add your name to the Perl contributors list
 
@@ -289,17 +307,100 @@ build artifacts, or you may get a confusing result.
 
 =head3 Commit message
 
-As you craft each patch you intend to submit to the Perl core, it's
-important to write a good commit message.  This is especially important
-if your submission will consist of a series of commits.
+A commit message needs to answer these questions about the commit:
+"Who", "When", "What", "Where", "Why", and "How".
 
-The first line of the commit message should be a short description
-without a period.  It should be no longer than the subject line of an
-email, 50 characters being a good rule of thumb.
+git automatically inserts the "Who" (you), and "When" (now), so you
+don't generally have to worry about these.  But you definitely need to
+answer the other four.
 
-A lot of Git tools (Gitweb, GitHub, git log --pretty=oneline, ...) will
-only display the first line (cut off at 50 characters) when presenting
-commit summaries.
+A commit message has two parts: a title and a body.  In rare instances,
+the body can be omitted if the title adequately describes the change.
+In such cases, you can use a git shortcut to create the commit:
+
+ % git commit -m'perlhack: Fix spelling error'
+
+This keeps git from opening an editor in which you are to compose your
+message, saving you key strokes.
+
+In this case, the title answers "What" (spelling error) and "Where"
+(pod/perlhacktips.pod).  It omits "Why", because it correctly assumes
+that the project's policy is that errors like this are always a bad
+thing that should be fixed.  And it omits "How", because that answer is
+obvious in this case.
+
+The title is extremely important.  It will be read over and over again
+far into the future; much more often than the body.  It is unfair to the
+future maintainers of Perl to skimp on its creation now.
+
+And the title has to be short, about 50 characters max, like the
+Subject: line of an email.  Some tools will refuse to accept a longer
+title, and some will just truncate its display at or about the 50th
+character.
+
+A title needs to convey enough information in the limited space allowed
+so that someone doing "git log" can immediately decide if the body of
+the commit message pertains to what they currently need, or if they can
+skip to the next commit without delving further into this one.
+
+That means it needs to answer "What" and "Where" at a minimum, and a
+hint of "Why" if there is room.  "How" can generally be deferred to the
+message body.
+
+"What" needs to have enough detail to be helpful, but not so much as to
+provide non-meaningful details.  In fixing a spelling error, for
+example, people aren't very likely to want to know which word was
+misspelled.  And giving that information to them can distract them from
+concentrating on their real purpose.  Do a "git log" yourself.  It
+should mostly have good examples of titles that answer this question,
+and the occasional one that leaves you wishing it had more.
+
+"Where" can vary greatly in its form.  In some cases it would refer to a
+subsystem, like "regex" or "mro" (method resolution order).  In some
+cases, to a particular function:
+
+ % git commit -m'Use getentropy() for seeding PRNG in Perl_seed()'
+
+In a few cases, a file:
+
+ % git commit -m'embed.fnc: Add ptr asserts for refcounted functions'
+
+Sometimes, a module:
+
+ % git commit -m'Devel::PPPort: Add support for utf8_to_uv'
+
+And rarely, entirely omitted:
+
+ % git commit -m'Add feature "class"'
+
+Terseness is helpful in commit titles.  This is not only because of the
+50 character limitation, but to bias you to not add unnecessary detail,
+thus making it faster for people skimming "git log" in the future.  The
+style "Where: rest-of-title" tends to use the fewest characters for the
+"Where" answer, leaving more for the "What".  Sometimes you will have to
+get creative to make things fit.  For example, 'Devel::' in the example
+above could have been omitted if the message exceeded the character
+limit.  You may have to spend a bit of time to rewrite the title more
+concisely.  Abbreviations are acceptable, when needed.  But keep in mind
+that this will be read by people whose first language is not English.
+
+The body of the commit message fills in the details, in plain English.
+In order to get the commit actually merged, it needs to persuade someone
+with the authority to do that that this change is desirable enough to
+outweigh considerations of potential harm.  It should not contain text
+tangential to the main point.
+
+No convincing is generally necessary (and hence nothing beyond the title
+need be included) for cases like this:
+
+ % git commit -m'"Where": Add/clarify comments"
+ % git commit -m'"Where": Use more mnemonic variable name"
+ % git commit -m'"Where": Move ARGS_ASSERT to top of function"
+
+(This last is because anyone who can merge commits would know that such
+macros are best placed at the top of functions, and that many weren't
+simply because of C89 compiler limitations that were lifted by our move
+to C99.)
 
 The commit message should include a description of the problem that the
 patch corrects or new functionality that the patch adds.
@@ -313,7 +414,7 @@ to Perl.
 
 =item * Why
 
-Your commit message should describe why the change you are making is
+The message body should describe why the change you are making is
 important.  When someone looks at your change in six months or six
 years, your intent should be clear.
 
@@ -324,19 +425,46 @@ that.
 
 =item * What
 
-Your commit message should describe what part of the Perl core you're
-changing and what you expect your patch to do.
+The message body should amplify what's in the title to describe what
+part of the Perl core you're changing and what you expect your patch to
+do.
 
 =item * How
 
 While it's not necessary for documentation changes, new tests or
-trivial patches, it's often worth explaining how your change works.
+trivial patches, it's usually worth explaining how your change works.
 Even if it's clear to you today, it may not be clear to a porter next
 month or next year.
 
 =back
 
-A commit message isn't intended to take the place of comments in your
+The body is the place for explaining why this particular implementation
+was chosen over alternatives that were considered.  If you claim
+performance gains, this would be the place to add supporting benchmarks.
+
+We are now using GitHub, and it will grep through your commit message
+for phrases of the form
+
+ m/Fixes\s+#(\d+)/
+
+If it finds that, it takes the matched number and automatically closes
+the GitHub issue with that number when the PR gets merged, saving you
+some effort.  (Beware that it has to be of that form.  If you instead
+say
+
+ Fixes GH #1234
+
+nothing will happen to #1234.)
+
+This also has the additional benefits of cross linking the issue and the
+pull request on GitHub, so that it is easy to start with one and find
+the other, and see what discussion has happened.
+
+But this is not a substitute for an adequate commit message.  We may not
+be on GitHub forever, and hence it might become hard to recover this
+information.
+
+A commit message also isn't intended to take the place of comments in your
 code.  Commit messages should describe the change you made, while code
 comments should describe the current state of the code.
 
