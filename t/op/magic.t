@@ -75,7 +75,7 @@ sub env_is {
 	Win32::SetConsoleOutputCP($cp);
         like $set, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
     } elsif ($Is_VMS) {
-        my $eqv = `write sys\$output f\$trnlnm("\Q$key\E")`;
+        my $eqv = `write sys\$output f\$trnlnm("$key")`;
         # A single null byte in the equivalence string means
         # an undef value for Perl, so mimic that here.
         $eqv = "\n" if length($eqv) == 2 and $eqv eq "\000\n";
