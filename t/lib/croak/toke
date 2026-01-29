@@ -645,3 +645,11 @@ die $@ if $@;
 EXPECT
 syntax error at (eval 1) line 4, 
 Execution of (eval 1) aborted due to compilation errors.
+########
+# NAME GH #16854 - _format_ syntax errors can mess up the scopestack
+format=
+@
+.//
+.
+EXPECT
+syntax error at - line 3, near "."
