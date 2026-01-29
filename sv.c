@@ -17553,7 +17553,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
     SV * const name = sv_newmortal();
     if (gv && isGV(gv)) {
-        char buffer[2];
+        char buffer[3];
         buffer[0] = gvtype;
         buffer[1] = 0;
 
@@ -17561,13 +17561,24 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
         gv_fullname4(name, gv, buffer, 0);
 
-        if ((unsigned int)SvPVX(name)[1] <= 26) {
-            buffer[0] = '^';
-            buffer[1] = SvPVX(name)[1] + 'A' - 1;
+        U8 first_char = SvPVX(name)[1];
+        if (first_char <= 31) {
 
             /* Swap the 1 unprintable control character for the 2 byte pretty
-               version - ie substr($name, 1, 1) = $buffer; */
-            sv_insert(name, 1, 1, buffer, 2);
+               version - i.e., substr($name, 1, 1) = $buffer;
+               wrap in { } if the name is longer than 2 character */
+            if (SvCUR(name) > 2) {
+                buffer[0] = '{';
+                buffer[1] = '^';
+                buffer[2] = toCTRL(first_char);
+                sv_insert(name, 1, 1, buffer, 3);
+                sv_catpvs(name, "}");
+            }
+            else {
+                buffer[0] = '^';
+                buffer[1] = toCTRL(first_char);
+                sv_insert(name, 1, 1, buffer, 2);
+            }
         }
     }
     else {
