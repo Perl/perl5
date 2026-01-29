@@ -5902,12 +5902,12 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 #define FREEBSD_DRAND48_MULT_2   (0x0005)
 #define FREEBSD_DRAND48_ADD      (0x000b)
 
-const unsigned short rand48_mult_[3] = {
-                FREEBSD_DRAND48_MULT_0,
-                FREEBSD_DRAND48_MULT_1,
-                FREEBSD_DRAND48_MULT_2
+static const unsigned short rand48_mult_[3] = {
+    FREEBSD_DRAND48_MULT_0,
+    FREEBSD_DRAND48_MULT_1,
+    FREEBSD_DRAND48_MULT_2
 };
-const unsigned short rand48_add_ = FREEBSD_DRAND48_ADD;
+static const unsigned short rand48_add_ = FREEBSD_DRAND48_ADD;
 
 #endif
 
