@@ -25,23 +25,42 @@
  * earlier when this file was #included with this symbol undefined */
 #if defined(PERL_DO_UNDEFS)
 # if !defined(PERL_CORE)
+#   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
+#   undef do_aexec
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
+#   undef isIDCONT_lazy_if_safe
+#   undef new_XPV
+#   undef new_XPVIV
+#   undef SHY_NATIVE
 #   undef sv_2num
 #   undef SvRVx
+#   undef UNI_DISPLAY_TR_
 #   if !defined(PERL_EXT)
 #     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
 #     undef invlist_subtract_
 #     undef invlist_union_
+#     undef OPpPARAM_IF_FALSE
+#     undef OPpPARAM_IF_UNDEF
+#     undef OPpSELF_IN_PAD
+#     undef RXf_PMf_CHARSET_SHIFT_
+#     undef RXf_PMf_SHIFT_NEXT_
 #     undef utf16_to_utf8
 #     undef utf16_to_utf8_reversed
-#   endif
+#   endif /* !defined(PERL_EXT) */
 #   if !defined(PERL_EXT_RE_BUILD)
+#     undef FAIL_
+#     undef first_upper_bit_set_byte_number
+#     undef invlist_intersection_complement_2nd_
+#     undef invlist_union_complement_2nd_
 #     undef PARSE_IDENT_ERROR_POSITION
 #     undef PARSE_IDENT_ERROR_TEXT
-#   endif
+#     undef RExC_parse_advance
+#     undef RXf_PMf_SHIFT_COMPILETIME_
+#     undef WARN_HELPER_
+#   endif /* !defined(PERL_EXT_RE_BUILD) */
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */
 

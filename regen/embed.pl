@@ -708,7 +708,6 @@ my @unresolved_visibility_overrides = qw(
     DM_RUID
     DM_UID
     dMY_CXT_INTERP
-    do_aexec
     do_exec
     DOSISH
     DOUBLE_BIG_ENDIAN
@@ -823,7 +822,6 @@ my @unresolved_visibility_overrides = qw(
     FILTER_DATA
     FILTER_ISREADER
     FILTER_READ
-    first_upper_bit_set_byte_number
     FIT_ARENA
     FIT_ARENA0
     FIT_ARENAn
@@ -1304,7 +1302,6 @@ my @unresolved_visibility_overrides = qw(
     is_HANGUL_ED_utf8_safe
     is_HORIZWS_cp_high
     is_HORIZWS_high
-    isIDCONT_lazy_if_safe
     isIDCONT_LC_utf8
     isIDCONT_uni
     isIDFIRST_lazy_if_safe
@@ -1793,7 +1790,6 @@ my @unresolved_visibility_overrides = qw(
     MAX_SAVEt
     MAXSYSFD
     MAX_UNICODE_UTF8
-    MAX_UNICODE_UTF8_BYTES
     MAX_UTF8_TWO_BYTE
     MDEREF_ACTION_MASK
     MDEREF_AV_gvav_aelem
@@ -1911,8 +1907,6 @@ my @unresolved_visibility_overrides = qw(
     NEWSV
     NEW_VERSION
     new_XNV
-    new_XPV
-    new_XPVIV
     new_XPVMG
     new_XPVNV
     Newz
@@ -2155,14 +2149,11 @@ my @unresolved_visibility_overrides = qw(
     OPpPADRANGE_COUNTMASK
     OPpPADRANGE_COUNTSHIFT
     OPpPAD_STATE
-    OPpPARAM_IF_FALSE
-    OPpPARAM_IF_UNDEF
     OPpPV_IS_UTF8
     OPpREFCOUNTED
     OPpREPEAT_DOLIST
     OPpREVERSE_INPLACE
     OPpRV2HV_ISKEYS
-    OPpSELF_IN_PAD
     OPpSLICE
     OPpSLICEWARNING
     OPpSORT_DESCEND
@@ -2536,7 +2527,6 @@ my @unresolved_visibility_overrides = qw(
     RExC_parno_to_logical
     RExC_parno_to_logical_next
     RExC_parse
-    RExC_parse_advance
     RExC_parse_inc
     RExC_parse_inc_by
     RExC_parse_incf
@@ -2857,7 +2847,6 @@ my @unresolved_visibility_overrides = qw(
     SHARP_S_SKIP
     SH_PATH
     SHUTDOWN_TERM
-    SHY_NATIVE
     sI
     SIMPLE
     Simple_vFAIL
@@ -3416,7 +3405,6 @@ my @unresolved_visibility_overrides = qw(
     CC_IDFIRST_
     CC_IS_IN_SOME_FOLD_
     CC_LOWER_
-    CC_MAGICAL_
     CC_mask_A_
     CC_MNEMONIC_CNTRL_
     CC_NON_FINAL_FOLD_
@@ -3475,9 +3463,6 @@ my @unresolved_visibility_overrides = qw(
     DFA_RETURN_FAILURE_
     DFA_RETURN_SUCCESS_
     DFA_TEASE_APART_FF_
-    EXTEND_NEEDS_GROW_
-    EXTEND_SAFE_N_
-    FAIL_
     FUNCTION__
     generic_func_utf8_safe_
     generic_invlist_utf8_safe_
@@ -3499,8 +3484,6 @@ my @unresolved_visibility_overrides = qw(
     HAS_IGNORED_LOCALE_CATEGORIES_
     HIGHEST_REGCOMP_DOT_H_SYNC_
     inRANGE_helper_
-    invlist_intersection_complement_2nd_
-    invlist_union_complement_2nd_
     is_MULTI_CHAR_FOLD_utf8_safe_part0_
     is_MULTI_CHAR_FOLD_utf8_safe_part1_
     is_MULTI_CHAR_FOLD_utf8_safe_part2_
@@ -3544,12 +3527,9 @@ my @unresolved_visibility_overrides = qw(
     MBTOWC_LOCK_
     MBTOWC_UNLOCK_
     MEM_WRAP_CHECK_
-    MEM_WRAP_NEEDS_RUNTIME_CHECK_
-    MEM_WRAP_WILL_WRAP_
     msbit_pos_uintmax_
     NOT_IN_NUMERIC_STANDARD_
     NOT_IN_NUMERIC_UNDERLYING_
-    NV_BODYLESS_UNION_
     o1_
     OFFUNISKIP_helper_
     __PATCHLEVEL_H_INCLUDED__
@@ -3559,47 +3539,17 @@ my @unresolved_visibility_overrides = qw(
     pTHX__VALUE_
     pTHX_VALUE_
     pTHXx_
-    RXf_PMf_CHARSET_SHIFT_
-    RXf_PMf_SHIFT_COMPILETIME_
-    RXf_PMf_SHIFT_NEXT_
     SAFE_FUNCTION__
     SBOX32_CASE_
-    shifted_octet_
-    STATIC_ASSERT_STRUCT_BODY_
-    STATIC_ASSERT_STRUCT_NAME_
-    SV_HEAD_DEBUG_
     SVf_
-    toFOLD_utf8_flags_
-    toLOWER_utf8_flags_
     TOO_LATE_FOR_
-    toTITLE_utf8_flags_
-    toUPPER_utf8_flags_
     type1_
-    UNI_DISPLAY_TR_
     UNISKIP_BY_MSB_
-    UTF8_CHECK_ONLY_BIT_POS_
-    UTF8_DIE_IF_MALFORMED_BIT_POS_
-    UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_
-    UTF8_GOT_CONTINUATION_BIT_POS_
-    UTF8_GOT_EMPTY_BIT_POS_
-    UTF8_GOT_LONG_BIT_POS_
-    UTF8_GOT_LONG_WITH_VALUE_BIT_POS_
-    UTF8_GOT_NONCHAR_BIT_POS_
-    UTF8_GOT_NON_CONTINUATION_BIT_POS_
-    UTF8_GOT_OVERFLOW_BIT_POS_
-    UTF8_GOT_SHORT_BIT_POS_
-    UTF8_GOT_SUPER_BIT_POS_
-    UTF8_GOT_SURROGATE_BIT_POS_
     UTF8_IS_SUPER_NO_CHECK_
     UTF8_NO_CONFIDENCE_IN_CURLEN_
-    UTF8_NO_CONFIDENCE_IN_CURLEN_BIT_POS_
     utf8_safe_assert_
-    UTF8_WARN_NONCHAR_BIT_POS_
-    UTF8_WARN_SUPER_BIT_POS_
-    UTF8_WARN_SURROGATE_BIT_POS_
     UTF_FIRST_CONT_BYTE_110000_
     UTF_START_BYTE_110000_
-    WARN_HELPER_
     WCRTOMB_LOCK_
     WCRTOMB_UNLOCK_
     WCTOMB_LOCK_
@@ -3650,13 +3600,25 @@ my @system_symbols = qw(
 # This is a list of symbols that are needed by the ext/re module, and are not
 # documented.  They become undefined for any other modules.
 my @needed_by_ext_re = qw(
+    FAIL_
+    first_upper_bit_set_byte_number
+    invlist_intersection_complement_2nd_
+    invlist_union_complement_2nd_
     PARSE_IDENT_ERROR_POSITION
     PARSE_IDENT_ERROR_TEXT
+    RExC_parse_advance
+    RXf_PMf_SHIFT_COMPILETIME_
+    WARN_HELPER_
 );
 
 # This is a list of symbols that are needed by various ext/ modules, and are
 # not documented.  They become undefined for any other modules.
 my @needed_by_ext = qw(
+    OPpPARAM_IF_FALSE
+    OPpPARAM_IF_UNDEF
+    OPpSELF_IN_PAD
+    RXf_PMf_CHARSET_SHIFT_
+    RXf_PMf_SHIFT_NEXT_
 );
 
 # This is a list of symbols that are needed to be visible everywhere and are
@@ -3671,6 +3633,37 @@ my @needed_by_ext = qw(
 # Typically these are symbols that are behind-the-scenes helpers whose use is
 # obvious from inspection of the things they help.
 my @undocumented_always_visible = qw(
+    EXTEND_NEEDS_GROW_
+    EXTEND_SAFE_N_
+    MAX_UNICODE_UTF8_BYTES
+    MEM_WRAP_NEEDS_RUNTIME_CHECK_
+    MEM_WRAP_WILL_WRAP_
+    NV_BODYLESS_UNION_
+    shifted_octet_
+    STATIC_ASSERT_STRUCT_BODY_
+    STATIC_ASSERT_STRUCT_NAME_
+    SV_HEAD_DEBUG_
+    toFOLD_utf8_flags_
+    toLOWER_utf8_flags_
+    toTITLE_utf8_flags_
+    toUPPER_utf8_flags_
+    UTF8_CHECK_ONLY_BIT_POS_
+    UTF8_DIE_IF_MALFORMED_BIT_POS_
+    UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_
+    UTF8_GOT_CONTINUATION_BIT_POS_
+    UTF8_GOT_EMPTY_BIT_POS_
+    UTF8_GOT_LONG_BIT_POS_
+    UTF8_GOT_LONG_WITH_VALUE_BIT_POS_
+    UTF8_GOT_NONCHAR_BIT_POS_
+    UTF8_GOT_NON_CONTINUATION_BIT_POS_
+    UTF8_GOT_OVERFLOW_BIT_POS_
+    UTF8_GOT_SHORT_BIT_POS_
+    UTF8_GOT_SUPER_BIT_POS_
+    UTF8_GOT_SURROGATE_BIT_POS_
+    UTF8_NO_CONFIDENCE_IN_CURLEN_BIT_POS_
+    UTF8_WARN_NONCHAR_BIT_POS_
+    UTF8_WARN_SUPER_BIT_POS_
+    UTF8_WARN_SURROGATE_BIT_POS_
 );
 
 # Turn all the lists above into hashes
