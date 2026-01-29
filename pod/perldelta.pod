@@ -294,6 +294,23 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+Variables whose name started with C<^_> were incorrectly shown in
+diagnostics with a literal C<Ctrl-_> (which is an invisible ASCII
+character) in their name.
+
+The names of variables whose names begin with a caret and are longer
+than two characters are now wrapped in braces, just as they have to be
+in the source code.
+
+Therefore, using an undefined C<${^_FOO}> will now correctly warn with
+C<Use of uninitialized value ${^_FOO}>, instead of the earlier C<Use of
+uninitialized value $FOO> (with a literal C<Ctrl-_> after the dollar
+sign).
+
+[GH #24135]
+
+=item *
+
 XXX Describe change here
 
 =back

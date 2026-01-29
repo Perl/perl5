@@ -1159,13 +1159,15 @@ Use of uninitialized value within %foo14 in join or string at - line 17.
 use warnings 'uninitialized';
 my ($v);
 
-undef $^A; $v = $^A + ${^FOO}; # should output '^A' not chr(1)
+undef $^A; $v = $^A + ${^FOO} + $^_ + ${^_FOO}; # should output '^A' not chr(1)
 *GLOB1 = *GLOB2;
 $v = $GLOB1 + 1;
 $v = $GLOB2 + 1;
 EXPECT
 Use of uninitialized value $^A in addition (+) at - line 4.
-Use of uninitialized value $^FOO in addition (+) at - line 4.
+Use of uninitialized value ${^FOO} in addition (+) at - line 4.
+Use of uninitialized value $^_ in addition (+) at - line 4.
+Use of uninitialized value ${^_FOO} in addition (+) at - line 4.
 Use of uninitialized value $GLOB1 in addition (+) at - line 6.
 Use of uninitialized value $GLOB2 in addition (+) at - line 7.
 ########
