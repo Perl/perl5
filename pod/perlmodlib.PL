@@ -18,15 +18,15 @@ require './regen/regen_lib.pl';
 # MANIFEST itself is Unix style filenames, so we have to assume that Unix style
 # filenames will work.
 
-open MANIFEST, '<', 'MANIFEST'
+open my $manifest_fh, '<', 'MANIFEST'
     or die "Can't open MANIFEST: $!";
 my @files =
     grep !m#/perl.*\.pod#,
     grep m#(?:\.pm|\.pod|_pm\.PL)#,
     map {s/\s.*//s; $_}
     grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo|corpus)/# }
-    <MANIFEST>;
-close MANIFEST
+    readline $manifest_fh;
+close $manifest_fh
     or die "$0: failed to close MANIFEST: $!";
 
 my $out = open_new('pod/perlmodlib.pod', undef,
@@ -44,7 +44,8 @@ my %exceptions = (
 my (@pragma, @mod);
 
 for my $filename (@files) {
-    unless (open MOD, '<', $filename) {
+    my $mod_fh;
+    unless (open $mod_fh, '<', $filename) {
         warn "Couldn't open $filename: $!";
 	next;
     }
@@ -53,7 +54,7 @@ for my $filename (@files) {
     my $foundit = 0;
     {
 	local $/ = "";
-	while (<MOD>) {
+	while (readline $mod_fh) {
 	    next unless /^=head1 NAME/;
 	    $foundit++;
 	    last;
@@ -69,9 +70,9 @@ for my $filename (@files) {
         warn "$filename missing =head1 NAME\n" unless $Quiet;
 	next;
     }
-    my $title = <MOD>;
+    my $title = readline $mod_fh;
     chomp $title;
-    close MOD
+    close $mod_fh
         or die "Error closing $filename: $!";
 
     ($name, $thing) = split /\s+--?\s+/, $title, 2;
