@@ -867,7 +867,7 @@ C<is_our> indicates that the name to check is an C<"our"> declaration.
 =cut
 */
 
-STATIC void
+static void
 S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 {
     PADNAME	**svp;
@@ -1102,7 +1102,7 @@ S_unavailable(pTHX_ PADNAME *name)
                PNfARG(name));
 }
 
-STATIC PADOFFSET
+static PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
         int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
 {
@@ -1876,7 +1876,7 @@ dump the contents of a CV
 =cut
 */
 
-STATIC void
+static void
 S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
     const CV * const outside = CvOUTSIDE(cv);

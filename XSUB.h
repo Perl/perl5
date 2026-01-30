@@ -128,7 +128,7 @@ is a lexical C<$_> in scope.
  * XS macro.
  *
  * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
- * "STATIC", ie. it exports XSUB symbols. You probably don't want that.
+ * "static", ie. it exports XSUB symbols. You probably don't want that.
  */
 
 #define XSPROTO(name) void name(pTHX_ CV* cv __attribute__unused__)
@@ -143,7 +143,7 @@ is a lexical C<$_> in scope.
 #else
 #  define XS_EXTERNAL(name) XSPROTO(name)
 #endif
-#define XS_INTERNAL(name) STATIC XSPROTO(name)
+#define XS_INTERNAL(name) static XSPROTO(name)
 
 /* We do export xsub symbols by default for the public XS macro.
  * Try explicitly using XS_INTERNAL/XS_EXTERNAL instead, please. */

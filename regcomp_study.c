@@ -24,7 +24,7 @@
     SAVEFREEPV(and_withp)
 
 
-STATIC void
+static void
 S_unwind_scan_frames(pTHX_ void *p)
 {
     PERL_ARGS_ASSERT_UNWIND_SCAN_FRAMES;
@@ -39,7 +39,7 @@ S_unwind_scan_frames(pTHX_ void *p)
 /* Follow the next-chain of the current node and optimize away
    all the NOTHINGs from it.
  */
-STATIC void
+static void
 S_rck_elide_nothing(pTHX_ regnode *node)
 {
     PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING;
@@ -81,7 +81,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
  * Returns the invlist as a new SV*; it is the caller's responsibility to
  * call SvREFCNT_dec() when done with it.
  */
-STATIC SV*
+static SV*
 S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 {
     const U8 * s = (U8*)STRING(node);
@@ -300,7 +300,7 @@ Perl_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 /* An SSC is just a regnode_charclass_posix with an extra field: the inversion
  * list that describes which code points it matches */
 
-STATIC void
+static void
 S_ssc_anything(pTHX_ regnode_ssc *ssc)
 {
     /* Set the SSC 'ssc' to match an empty string or any code point */
@@ -314,7 +314,7 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
     ANYOF_FLAGS(ssc) |= SSC_MATCHES_EMPTY_STRING;  /* Plus matches empty */
 }
 
-STATIC int
+static int
 S_ssc_is_anything(const regnode_ssc *ssc)
 {
     /* Returns true if the SSC 'ssc' can match the empty string and any code
@@ -386,7 +386,7 @@ Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
     }
 }
 
-STATIC int
+static int
 S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
                         const regnode_ssc *ssc)
 {
@@ -420,7 +420,7 @@ S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
 }
 
 
-STATIC SV*
+static SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                                const regnode_charclass* const node)
 {
@@ -572,7 +572,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 /* 'AND' a given class with another one.  Can create false positives.  'ssc'
  * should not be inverted. */
 
-STATIC void
+static void
 S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                 const regnode_charclass *and_with)
 {
@@ -755,7 +755,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     }
 }
 
-STATIC void
+static void
 S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                const regnode_charclass *or_with)
 {
@@ -838,7 +838,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
               );
 }
 
-STATIC void
+static void
 S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert2nd)
 {
     PERL_ARGS_ASSERT_SSC_UNION;
@@ -851,7 +851,7 @@ S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert2nd)
                                         &ssc->invlist);
 }
 
-STATIC void
+static void
 S_ssc_intersection(pTHX_ regnode_ssc *ssc,
                          SV* const invlist,
                          const bool invert2nd)
@@ -866,7 +866,7 @@ S_ssc_intersection(pTHX_ regnode_ssc *ssc,
                                                &ssc->invlist);
 }
 
-STATIC void
+static void
 S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
 {
     PERL_ARGS_ASSERT_SSC_ADD_RANGE;
@@ -876,7 +876,7 @@ S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
     ssc->invlist = add_range_to_invlist_(ssc->invlist, start, end);
 }
 
-STATIC void
+static void
 S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 {
     /* AND just the single code point 'cp' into the SSC 'ssc' */
@@ -894,7 +894,7 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
     SvREFCNT_dec_NN(cp_list);
 }
 
-STATIC void
+static void
 S_ssc_clear_locale(regnode_ssc *ssc)
 {
     /* Set the SSC 'ssc' to not match any locale things */

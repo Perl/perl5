@@ -47,7 +47,7 @@
   Used for debugging make_trie().
 */
 
-STATIC void
+static void
 S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
             AV *revcharmap, U32 depth)
 {
@@ -141,7 +141,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
   possible chars (trie->uniquecharcount) is very high.
   Used for debugging make_trie().
 */
-STATIC void
+static void
 S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
                          HV *widecharmap, AV *revcharmap, U32 next_alloc,
                          U32 depth)
@@ -201,7 +201,7 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
   twists to facilitate compression later.
   Used for debugging make_trie().
 */
-STATIC void
+static void
 S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
                           HV *widecharmap, AV *revcharmap, U32 next_alloc,
                           U32 depth)
@@ -523,7 +523,7 @@ is the recommended Unicode-aware way of saying
  * and its folded variant, and for the first byte of a variant codepoint,
  * if any */
 
-STATIC void
+static void
 S_trie_bitmap_set_folded(pTHX_ RExC_state_t *pRExC_state,
     reg_trie_data *trie, U8 ch, const U8 * folder)
 {

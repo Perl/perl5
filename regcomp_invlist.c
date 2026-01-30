@@ -158,7 +158,7 @@ S_invlist_array_init_(SV* const invlist, const bool will_have_0)
     return zero_addr + *offset;
 }
 
-STATIC void
+static void
 S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 {
     /* Replaces the inversion list in 'dest' with the one from 'src'.  It
@@ -284,7 +284,7 @@ S_invlist_max(const SV* const invlist)
            : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
 }
 
-STATIC void
+static void
 S_initialize_invlist_guts(pTHX_ SV* invlist, const Size_t initial_size)
 {
     PERL_ARGS_ASSERT_INITIALIZE_INVLIST_GUTS;
@@ -378,7 +378,7 @@ Perl_new_invlist_C_array_(pTHX_ const UV* const list)
     return invlist;
 }
 
-STATIC void
+static void
 S_append_range_to_invlist_(pTHX_ SV* const invlist,
                                  const UV start, const UV end)
 {

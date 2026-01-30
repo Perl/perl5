@@ -701,7 +701,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
 /* Deletes name from all the isarev entries listed in isa.
    Don't call this if isa is already empty. */
-STATIC void
+static void
 S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
                          const STRLEN len, HV * const exceptions, U32 hash,
                          U32 flags)
@@ -897,7 +897,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
 }
 
-STATIC void
+static void
 S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                               HV *stash, HV *oldstash, SV *namesv)
 {

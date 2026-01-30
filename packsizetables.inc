@@ -11,7 +11,7 @@
 typedef U8 packprops_t;
 #if 'J'-'I' == 1
 /* ASCII */
-STATIC const packprops_t packprops[512] = {
+static const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -116,7 +116,7 @@ STATIC const packprops_t packprops[512] = {
 };
 #else
 /* EBCDIC (or bust) */
-STATIC const packprops_t packprops[512] = {
+static const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

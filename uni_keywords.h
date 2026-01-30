@@ -21,7 +21,7 @@ ref length: 63248
 data size: 72380 (%64.87)
 */
 
-STATIC const unsigned char mph_blob[] =
+static const unsigned char mph_blob[] =
     "l&cwlmcmocradlmaghbahexahomarmiavstbatkbhksbuhdcakmcanschamchrscp"
     "mncprtcwucyrldsrtgonggrekgujrgukhhluwhmngzljtkawikitskndakrailaoo"
     "latnlisumedfmercmteimymrnarbnewaoryaosgeougrpcmphlpphnxqaacrjngru"
@@ -177,11 +177,11 @@ struct mph_struct {
 #define MPH_RSHIFT 8
 #define MPH_BUCKETS 7906
 
-STATIC const U32 MPH_SEED1 = 0x5065726f;
-STATIC const U32 MPH_FNV32_PRIME = 0x01000193;
+static const U32 MPH_SEED1 = 0x5065726f;
+static const U32 MPH_FNV32_PRIME = 0x01000193;
 
 /* The comments give the input key for the row it is in */
-STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
+static const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     1,  1733,  6484,   4,  20, UNI_GLAGOLITICSUP }   /* blk=glagoliticsupplement */,
   {     3,  1911,  1144,   6,   5, UNI_TALU }   /* script=talu */,
   {     3,  2429,  2385,   6,  12, UNI_INTULUTIGALARI }   /* block=tulutigalari */,
@@ -8177,5 +8177,5 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 8abaee16c84c1a61a69a77b6e8963675d99f515f3c2a34e449faeb9bfdec861a regen/mk_PL_charclass.pl
  * 20a6e3d507a66f4594586485568134873485b08e23383f3dc4e6b3047569267b regen/mk_invlists.pl
- * d6987e01ad538d1567394851cf199f99815f7701bebd6092be4bc7a6d8f147c6 regen/mph.pl
+ * a6ce8aefad005c081d4e04523e1f1f1a5a1bed5414ca4a421b5b16b73bfce6a4 regen/mph.pl
  * ex: set ro ft=c: */

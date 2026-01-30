@@ -43,13 +43,13 @@ rewritten to replace PUSHs() etc with rpp_push_1() etc.
 #ifdef PERL_RC_STACK
 #  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \
                                                                \
-STATIC OP* S_##xsppw_name##_norc(pTHX);                        \
+static OP* S_##xsppw_name##_norc(pTHX);                        \
 OP* xsppw_name(pTHX)                                           \
 {                                                              \
     return Perl_pp_wrap(aTHX_ S_##xsppw_name##_norc,           \
                         (xsppw_nargs), (xsppw_nlists));        \
 }                                                              \
-STATIC OP* S_##xsppw_name##_norc(pTHX)
+static OP* S_##xsppw_name##_norc(pTHX)
 
 #else
 #  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \

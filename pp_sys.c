@@ -222,7 +222,7 @@ void endservent(void);
     && (defined(HAS_SETREUID) || defined(HAS_SETRESUID)		\
         || defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
-STATIC int
+static int
 S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
     const Uid_t ruid = getuid();
@@ -1632,7 +1632,7 @@ PP_wrapped(pp_getc, MAXARG, 0)
     RETURN;
 }
 
-STATIC OP *
+static OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     PERL_CONTEXT *cx;
@@ -3345,7 +3345,7 @@ S_ft_return_true(pTHX_ SV *ret) {
         }						   \
     } STMT_END
 
-STATIC OP *
+static OP *
 S_try_amagic_ftest(pTHX_ char chr) {
     SV *const arg = *PL_stack_sp;
 
@@ -4091,7 +4091,7 @@ PP_wrapped(pp_readlink, 1, 0)
 }
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-STATIC int
+static int
 S_dooneliner(pTHX_ const char *cmd, const char *filename)
 {
     char * const save_filename = filename;

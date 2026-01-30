@@ -562,7 +562,7 @@ static struct debug_tokens {
 
 /* dump the returned token in rv, plus any optional arg in pl_yylval */
 
-STATIC int
+static int
 S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 {
     PERL_ARGS_ASSERT_TOKEREPORT;
@@ -627,7 +627,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 
 /* print the buffer with suitable escapes */
 
-STATIC void
+static void
 S_printbuf(pTHX_ const char *const fmt, const char *const s)
 {
     SV* const tmp = newSVpvs("");
@@ -649,7 +649,7 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
  * parsed and turns it into an ASSIGNOP if it finds one.
  */
 
-STATIC int
+static int
 S_ao(pTHX_ int toketype)
 {
     if (*PL_bufptr == '=') {
@@ -684,7 +684,7 @@ S_ao(pTHX_ int toketype)
 
 #define POP_OLDBUFPTR TRUE
 
-STATIC void
+static void
 S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
 {
     if (PL_expect != XOPERATOR)
@@ -768,7 +768,7 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
  * This is fatal.
  */
 
-STATIC void
+static void
 S_missingterm(pTHX_ char *s, STRLEN len)
 {
     char tmpbuf[UTF8_MAXBYTES + 1];
@@ -809,7 +809,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
                      " anywhere before EOF", q, UTF8fARG(uni, len, s), q);
 }
 
-STATIC char *
+static char *
 S_scan_terminated(pTHX_ char *s, I32 ival) {
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     if (!s)
@@ -822,7 +822,7 @@ S_scan_terminated(pTHX_ char *s, I32 ival) {
 
 #include "feature.h"
 
-STATIC void
+static void
 S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
 {
     PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE;
@@ -837,7 +837,7 @@ S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
 #  define is_ascii_string_loc(s, len, ep)                               \
                                 is_utf8_invariant_string_loc(s, len, ep)
 #else
-STATIC bool
+static bool
 S_is_ascii_string_loc(const U8 * const s0, STRLEN len, const U8 ** ep)
 {
     const U8 * s = s0;
@@ -1898,7 +1898,7 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
  * If so, it sets the current line number and file to the values in the comment.
  */
 
-STATIC void
+static void
 S_incline(pTHX_ const char *s, const char *end)
 {
     PERL_ARGS_ASSERT_INCLINE;
@@ -2020,7 +2020,7 @@ S_incline(pTHX_ const char *s, const char *end)
     CopLINE_set(PL_curcop, line_num);
 }
 
-STATIC void
+static void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
@@ -2091,7 +2091,7 @@ Perl_skipspace_flags(pTHX_ char *s, U32 flags)
  * the +5 is its argument.
  */
 
-STATIC void
+static void
 S_check_unary(pTHX)
 {
     const char *s;
@@ -2139,7 +2139,7 @@ S_check_unary(pTHX)
  *  - else it's a list operator
  */
 
-STATIC I32
+static I32
 S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s)
 {
     PERL_ARGS_ASSERT_LOP;
@@ -2174,7 +2174,7 @@ S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s)
  * the lexer handles the token correctly.
  */
 
-STATIC void
+static void
 S_force_next(pTHX_ I32 type)
 {
 #ifdef DEBUGGING
@@ -2249,7 +2249,7 @@ Perl_yyunlex(pTHX)
     }
 }
 
-STATIC SV *
+static SV *
 S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
 {
     SV * const sv = newSVpvn_utf8(start, len,
@@ -2277,7 +2277,7 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  *       use, etc. do this)
  */
 
-STATIC char *
+static char *
 S_force_word(pTHX_ char *start, int token, U32 flags)
 {
     char *s;
@@ -2330,7 +2330,7 @@ S_force_word(pTHX_ char *start, int token, U32 flags)
  * Creates the symbol if it didn't already exist (via gv_fetchpv()).
  */
 
-STATIC void
+static void
 S_force_ident(pTHX_ const char *s, int kind)
 {
     PERL_ARGS_ASSERT_FORCE_IDENT;
@@ -2401,7 +2401,7 @@ Perl_str_to_version(pTHX_ SV *sv)
  * must use an alternative parsing method).
  */
 
-STATIC char *
+static char *
 S_force_version(pTHX_ char *s, int guessing)
 {
     OP *version = NULL;
@@ -2445,7 +2445,7 @@ S_force_version(pTHX_ char *s, int guessing)
  * Forces the next token to be a version number using strict syntax rules.
  */
 
-STATIC char *
+static char *
 S_force_strict_version(pTHX_ char *s)
 {
     OP *version = NULL;
@@ -2484,7 +2484,7 @@ S_force_strict_version(pTHX_ char *s)
  * unchanged, and a new SV containing the modified input is returned.
  */
 
-STATIC SV *
+static SV *
 S_tokeq(pTHX_ SV *sv)
 {
     char *s;
@@ -2554,7 +2554,7 @@ S_tokeq(pTHX_ SV *sv)
  * call to S_sublex_push().
  */
 
-STATIC I32
+static I32
 S_sublex_start(pTHX)
 {
     const I32 op_type = pl_yylval.ival;
@@ -2606,7 +2606,7 @@ S_sublex_start(pTHX)
  * Sets PL_lex_state to LEX_INTERPCONCAT.
  */
 
-STATIC I32
+static I32
 S_sublex_push(pTHX)
 {
     LEXSHARED *shared;
@@ -2709,7 +2709,7 @@ S_sublex_push(pTHX)
  * Restores lexer state after a S_sublex_push.
  */
 
-STATIC I32
+static I32
 S_sublex_done(pTHX)
 {
     if (!PL_lex_starts++) {
@@ -2838,7 +2838,7 @@ Perl_load_charnames(pTHX_ SV * char_name, const char * context,
     return NULL;
 }
 
-STATIC SV*
+static SV*
 S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const e)
 {
     /* This justs wraps get_and_check_backslash_N_name() to output any error
@@ -3170,7 +3170,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 
 */
 
-STATIC char *
+static char *
 S_scan_const(pTHX_ char *start)
 {
     const char * const send = PL_bufend;/* end of the constant */
@@ -4480,7 +4480,7 @@ S_scan_const(pTHX_ char *start)
     return s;
 }
 
-STATIC bool
+static bool
 S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 {
     PERL_ARGS_ASSERT_IS_EXISTING_IDENTIFIER;
@@ -4529,7 +4529,7 @@ S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
-STATIC int
+static int
 S_intuit_more(pTHX_ char *s, char *e,
               U8 caller_context,    /* Who's calling us? basically an enum */
               char * caller_s,      /* If non-NULL, the name of the identifier
@@ -5020,7 +5020,7 @@ S_intuit_more(pTHX_ char *s, char *e,
  *   =>
  */
 
-STATIC int
+static int
 S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 {
     PERL_ARGS_ASSERT_INTUIT_METHOD;
@@ -5338,7 +5338,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     return ret;
 }
 
-STATIC char *
+static char *
 S_filter_gets(pTHX_ SV *sv, STRLEN append)
 {
     PERL_ARGS_ASSERT_FILTER_GETS;
@@ -5355,7 +5355,7 @@ S_filter_gets(pTHX_ SV *sv, STRLEN append)
         return (sv_gets(sv, PL_rsfp, append));
 }
 
-STATIC HV *
+static HV *
 S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 {
     GV *gv;
@@ -5386,7 +5386,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 }
 
 
-STATIC char *
+static char *
 S_tokenize_use(pTHX_ int is_use, char *s) {
     PERL_ARGS_ASSERT_TOKENIZE_USE;
 
@@ -5424,7 +5424,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #endif
 
 #define word_takes_any_delimiter(p,l) S_word_takes_any_delimiter(p,l)
-STATIC bool
+static bool
 S_word_takes_any_delimiter(char *p, STRLEN len)
 {
     return (len == 1 && memCHRs("msyq", p[0]))
@@ -10386,7 +10386,7 @@ S_pending_ident(pTHX)
     return BAREWORD;
 }
 
-STATIC void
+static void
 S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 {
     PERL_ARGS_ASSERT_CHECKCOMMA;
@@ -10456,7 +10456,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
    If error_msg is not NULL, *error_msg will be set to any error encountered.
    Otherwise yyerror() will be used to output it */
 
-STATIC SV *
+static SV *
 S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
                SV *sv, SV *pv, const char *type, STRLEN typelen,
                const char ** error_msg)
@@ -10564,7 +10564,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     return SvREFCNT_inc_simple_NN(sv);
 }
 
-STATIC char *
+static char *
 S_parse_ident(pTHX_ const char *s, const char * const s_end,
                     char **d, char * const e,
                     bool is_utf8, HV** failure_details, U32 flags)
@@ -10899,7 +10899,7 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
  * unary operators.  This is silently overriden if CHECK_ONLY is also
  * specified.
  */
-STATIC char *
+static char *
 S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 {
     PERL_ARGS_ASSERT_SCAN_IDENT;
@@ -11300,7 +11300,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
         return TRUE;
 }
 
-STATIC char *
+static char *
 S_scan_pat(pTHX_ char *start, I32 type)
 {
     PMOP *pm;
@@ -11376,7 +11376,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     return s;
 }
 
-STATIC char *
+static char *
 S_scan_subst(pTHX_ char *start)
 {
     char *s;
@@ -11464,7 +11464,7 @@ S_scan_subst(pTHX_ char *start)
     return s;
 }
 
-STATIC char *
+static char *
 S_scan_trans(pTHX_ char *start)
 {
     char* s;
@@ -11549,7 +11549,7 @@ S_scan_trans(pTHX_ char *start)
    Otherwise it is treated as an eval.
 */
 
-STATIC char *
+static char *
 S_scan_heredoc(pTHX_ char *s)
 {
     I32 op_type = OP_SCALAR;
@@ -12003,7 +12003,7 @@ S_scan_heredoc(pTHX_ char *s)
 
 */
 
-STATIC char *
+static char *
 S_scan_inputsymbol(pTHX_ char *start)
 {
     char *s = start;		/* current position in buffer */
@@ -13190,7 +13190,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     return (char *)s;
 }
 
-STATIC char *
+static char *
 S_scan_formline(pTHX_ char *s)
 {
     SV * const stuff = newSVpvs("");
@@ -13336,7 +13336,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
  * Otherwise does nothing and returns false
  */
 
-STATIC bool
+static bool
 S_apply_builtin_cv_attribute(pTHX_ CV *cv, OP *o)
 {
     assert(o->op_type == OP_CONST);
@@ -13607,7 +13607,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     return 0;
 }
 
-STATIC char*
+static char*
 S_swallow_bom(pTHX_ U8 *s)
 {
     const STRLEN slen = SvCUR(PL_linestr);

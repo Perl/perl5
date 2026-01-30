@@ -2904,6 +2904,7 @@ my @unresolved_visibility_overrides = qw(
     STANDARD_C
     StashHANDLER
     Stat
+    STATIC
     Stat_t
     STATUS_ALL_FAILURE
     STATUS_ALL_SUCCESS
@@ -4068,8 +4069,8 @@ sub generate_proto_h {
             }
             else {
                 $type = {
-                    'S' => 'STATIC',
-                    's' => 'STATIC',
+                    'S' => 'static',
+                    's' => 'static',
                     'i' => 'PERL_STATIC_INLINE',
                     'I' => 'PERL_STATIC_FORCE_INLINE'
                 }->{$static_flag};

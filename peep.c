@@ -108,7 +108,7 @@ struct sprintf_ismc_info {
  * populated.
  */
 
-STATIC bool
+static bool
 S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
 {
     OP    *pm, *constop, *kid;
@@ -229,7 +229,7 @@ S_sprintf_is_multiconcatable(pTHX_ OP *o,struct sprintf_ismc_info *info)
  * away with OPpTARGET_MY set on the OP_STRINGIFY or OP_CONCAT.
  */
 
-STATIC void
+static void
 S_maybe_multiconcat(pTHX_ OP *o)
 {
     OP *lastkidop;   /* the right-most of any kids unshifted onto o */
@@ -1064,7 +1064,7 @@ S_warn_implicit_snail_cvsig(pTHX_ OP *o)
  * to optimise any children.
  */
 
-STATIC void
+static void
 S_optimize_op(pTHX_ OP* o)
 {
     OP *top_op = o;
@@ -1210,7 +1210,7 @@ For now it's static, but it may be exposed to the API in the future.
 =cut
 */
 
-STATIC OP*
+static OP*
 S_traverse_op_tree(pTHX_ OP *top, OP *o) {
     OP *sib;
 
@@ -1236,7 +1236,7 @@ S_traverse_op_tree(pTHX_ OP *top, OP *o) {
     }
 }
 
-STATIC void
+static void
 S_finalize_op(pTHX_ OP* o)
 {
     OP * const top = o;
@@ -1909,7 +1909,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
  * OPpHINT_STRICT_REFS) as found in any rv2av/hv skipped by the caller.
  */
 
-STATIC void
+static void
 S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 {
     int pass;

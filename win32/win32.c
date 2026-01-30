@@ -3541,7 +3541,7 @@ win32_popenlist(const char *mode, IV narg, SV **args)
     return do_popen(mode, NULL, narg, args);
 }
 
-STATIC PerlIO*
+static PerlIO*
 do_popen(const char *mode, const char *command, IV narg, SV **args) {
     int p[2];
     int handles[3];

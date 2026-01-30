@@ -97,7 +97,7 @@ Perl_force_out_malformed_utf8_message_(pTHX_
     }
 }
 
-STATIC HV *
+static HV *
 S_new_msg_hv(pTHX_ const char * const message, /* The message text */
                    U32 categories,  /* Packed warning categories */
                    U32 flag)        /* Flag associated with this message */
@@ -3706,7 +3706,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
     return CALL_TITLE_CASE(c, NULL, p, lenp);
 }
 
-STATIC U8
+static U8
 S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp, const char dummy)
 {
     /* We have the latin1-range values compiled into the core, so just use
@@ -3854,7 +3854,7 @@ Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 #if 0	/* Not currently used, but may be needed in the future */
 PERLVAR(I, seen_deprecated_macro, HV *)
 
-STATIC void
+static void
 S_warn_on_first_deprecated_use(pTHX_ U32 category,
                                      const char * const name,
                                      const char * const alternative,
@@ -3901,7 +3901,7 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
 /* returns the number of bytes comprising the UTF8-encoded character that
  * starts at <p>, and extending no further than <e - 1> if it is in the
  * inversion list <invlist>; or 0 if it isn't */
-STATIC Size_t
+static Size_t
 S_is_utf8_in_invlist(pTHX_ const U8 * p, const U8 * e, SV * const invlist)
 {
     Size_t advance;
@@ -3936,7 +3936,7 @@ Perl_is_utf8_perl_idcont_(pTHX_ const U8 *p, const U8 * const e)
     return S_is_utf8_in_invlist(aTHX_ p, e, PL_utf8_perl_idcont);
 }
 
-STATIC UV
+static UV
 S_to_case_cp_list(pTHX_
                   const UV original,
                   const U32 ** const remaining_list,
@@ -4033,7 +4033,7 @@ S_to_case_cp_list(pTHX_
     return (UV) aux_tables[base][0];
 }
 
-STATIC UV
+static UV
 S_to_utf8_case_(pTHX_ const UV original, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const I32 * const invmap,
@@ -4160,7 +4160,7 @@ Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
     return 1;
 }
 
-STATIC UV
+static UV
 S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
                                        U8* const ustrp, STRLEN *lenp)
 {
@@ -4217,7 +4217,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
     return original;
 }
 
-STATIC UV
+static UV
 S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
@@ -4251,7 +4251,7 @@ S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e,
     return 0;
 }
 
-STATIC UV
+static UV
 S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
@@ -4296,7 +4296,7 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e,
     return turkic_fc(p0, e, ustrp, lenp);
 }
 
-STATIC UV
+static UV
 S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
                         U8 * ustrp, STRLEN *lenp)
 {
