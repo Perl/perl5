@@ -83,6 +83,10 @@ for my $filename (@files) {
 	next;
     }
 
+    # unwrap C<...> around module name
+    if ($name =~ /^C<([A-Za-z0-9_:]+)>/) {
+        $name = $1;
+    }
     $name =~ s/[^A-Za-z0-9_:\$<>].*//;
     $name = $exceptions{$name} || $name;
     $thing =~ s/^perl pragma to //i;
