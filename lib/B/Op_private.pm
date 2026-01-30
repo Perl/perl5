@@ -318,6 +318,7 @@ $bits{cmpchain_and}{0} = $bf[0];
 $bits{cmpchain_dup}{0} = $bf[0];
 @{$bits{concat}}{6,1,0} = ('OPpCONCAT_NESTED', $bf[1], $bf[1]);
 $bits{cond_expr}{0} = $bf[0];
+$bits{confold}{0} = $bf[0];
 @{$bits{connect}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 @{$bits{const}}{7,6,5,4,3,2,1} = ($bf[11], $bf[11], 'OPpCONST_BARE', 'OPpCONST_ENTERED', 'OPpCONST_STRICT', 'OPpCONST_SHORTCIRCUIT', 'OPpCONST_NOVER');
 @{$bits{coreargs}}{7,6,1,0} = ('OPpCOREARGS_PUSHMARK', 'OPpCOREARGS_SCALARMOD', 'OPpCOREARGS_DEREF2', 'OPpCOREARGS_DEREF1');

@@ -8444,6 +8444,24 @@ PP(pp_is_tainted)
     return NORMAL;
 }
 
+/* <: confold - runtime path for non-constant operands */
+PP(pp_confold)
+{
+    SV *sv = *PL_stack_sp;
+    SV *copy;
+
+    SvGETMAGIC(sv);
+
+    /* Create a copy of the value */
+    copy = newSVsv(sv);
+
+    /* Make the copy readonly */
+    SvREADONLY_on(copy);
+
+    rpp_replace_1_1_NN(copy);
+    return NORMAL;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

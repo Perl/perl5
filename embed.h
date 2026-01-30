@@ -1259,6 +1259,7 @@
 #     define ck_classname(a)                    Perl_ck_classname(aTHX_ a)
 #     define ck_cmp(a)                          Perl_ck_cmp(aTHX_ a)
 #     define ck_concat(a)                       Perl_ck_concat(aTHX_ a)
+#     define ck_confold(a)                      Perl_ck_confold(aTHX_ a)
 #     define ck_defined(a)                      Perl_ck_defined(aTHX_ a)
 #     define ck_delete(a)                       Perl_ck_delete(aTHX_ a)
 #     define ck_each(a)                         Perl_ck_each(aTHX_ a)

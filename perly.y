@@ -172,7 +172,7 @@
 %left ADDOP <pval> PLUGIN_ADD_OP
 %left MULOP <pval> PLUGIN_MUL_OP
 %left <ival> MATCHOP
-%right <ival> PERLY_EXCLAMATION_MARK PERLY_TILDE UMINUS REFGEN
+%right <ival> PERLY_EXCLAMATION_MARK PERLY_TILDE UMINUS REFGEN CONFOLD
 %right POWOP <pval> PLUGIN_POW_OP
 %nonassoc <ival> PREINC PREDEC POSTINC POSTDEC POSTJOIN
 %nonassoc <pval> PLUGIN_HIGH_OP
@@ -1565,6 +1565,8 @@ term[product]	:	termbinop
 			{ $$ = newCONDOP(0, $condition, $then, $else); }
 	|	REFGEN term[operand]                          /* \$x, \@y, \%z */
 			{ $$ = newUNOP(OP_REFGEN, 0, $operand); }
+	|	CONFOLD term[operand]                         /* <: expr - confold */
+			{ $$ = newUNOP(OP_CONFOLD, 0, $operand); }
 	|	myattrterm	%prec UNIOP
 			{ $$ = $myattrterm; }
 	|	KW_LOCAL term[operand]	%prec UNIOP

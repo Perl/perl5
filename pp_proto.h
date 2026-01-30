@@ -53,6 +53,7 @@ PERL_CALLCONV PP(pp_cmpchain_dup) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_complement) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_concat) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_cond_expr) __attribute__visibility__("hidden");
+PERL_CALLCONV PP(pp_confold) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_const) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_continue) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_coreargs) __attribute__visibility__("hidden");

@@ -7124,6 +7124,13 @@ yyl_leftpointy(pTHX_ char *s)
 {
     char tmp;
 
+    /* Check for <: confold operator first */
+    if (s[1] == ':') {
+        s += 2;
+        pl_yylval.ival = OP_CONFOLD;
+        OPERATOR(CONFOLD);
+    }
+
     if (PL_expect != XOPERATOR) {
         if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
             check_unary();

@@ -615,3 +615,6 @@ classname	class name		ck_classname		0t
 multiparam	signature processing	ck_null		+
 paramtest	signature argument value test	ck_null	|
 paramstore	signature parameter default expression	ck_null	1
+
+# <: constant fold operator
+confold		constant fold	ck_confold	fs1	S

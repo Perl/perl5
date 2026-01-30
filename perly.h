@@ -182,16 +182,17 @@ extern int yydebug;
     PERLY_TILDE = 376,             /* PERLY_TILDE  */
     UMINUS = 377,                  /* UMINUS  */
     REFGEN = 378,                  /* REFGEN  */
-    PLUGIN_POW_OP = 379,           /* PLUGIN_POW_OP  */
-    PREINC = 380,                  /* PREINC  */
-    PREDEC = 381,                  /* PREDEC  */
-    POSTINC = 382,                 /* POSTINC  */
-    POSTDEC = 383,                 /* POSTDEC  */
-    POSTJOIN = 384,                /* POSTJOIN  */
-    PLUGIN_HIGH_OP = 385,          /* PLUGIN_HIGH_OP  */
-    ARROW = 386,                   /* ARROW  */
-    PERLY_PAREN_CLOSE = 387,       /* PERLY_PAREN_CLOSE  */
-    PERLY_PAREN_OPEN = 388         /* PERLY_PAREN_OPEN  */
+    CONFOLD = 379,                 /* CONFOLD  */
+    PLUGIN_POW_OP = 380,           /* PLUGIN_POW_OP  */
+    PREINC = 381,                  /* PREINC  */
+    PREDEC = 382,                  /* PREDEC  */
+    POSTINC = 383,                 /* POSTINC  */
+    POSTDEC = 384,                 /* POSTDEC  */
+    POSTJOIN = 385,                /* POSTJOIN  */
+    PLUGIN_HIGH_OP = 386,          /* PLUGIN_HIGH_OP  */
+    ARROW = 387,                   /* ARROW  */
+    PERLY_PAREN_CLOSE = 388,       /* PERLY_PAREN_CLOSE  */
+    PERLY_PAREN_OPEN = 389         /* PERLY_PAREN_OPEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -248,6 +249,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 11a76178c6bb99bd6c08dfcc2b9fa80e33e491a061e3f2722d8ff2a9d9a5e7fd perly.y
+ * 0256668a07f408df59d6586a6ba7bb78d3755a53f697e04b2d6ce7ae038a926e perly.y
  * f13e9c08cea6302f0c1d1f467405bd0e0880d0ea92d0669901017a7f7e94ab28 regen_perly.pl
  * ex: set ro ft=c: */

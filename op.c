@@ -14192,6 +14192,30 @@ Perl_ck_null(pTHX_ OP *o)
     return o;
 }
 
+/* Check function for <: confold - constant folding */
+OP *
+Perl_ck_confold(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_CONFOLD;
+
+    if (o->op_flags & OPf_KIDS) {
+        OP *kid = cUNOPo->op_first;
+
+        /* If the operand is already a compile-time constant, fold it */
+        if (kid->op_type == OP_CONST) {
+            /* Detach the constant from confold */
+            op_sibling_splice(o, NULL, 1, NULL);
+            /* Free the confold wrapper, keep the constant */
+            op_free(o);
+            /* Return just the constant - it's already folded! */
+            return kid;
+        }
+    }
+
+    /* Not a constant - keep runtime confold */
+    return o;
+}
+
 static bool
 S_is_dup_mode(const OP *o)
 {

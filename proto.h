@@ -6442,6 +6442,13 @@ Perl_ck_concat(pTHX_ OP *o)
         assert(o)
 
 PERL_CALLCONV OP *
+Perl_ck_confold(pTHX_ OP *o)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_CONFOLD            \
+        assert(o)
+
+PERL_CALLCONV OP *
 Perl_ck_defined(pTHX_ OP *o)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
