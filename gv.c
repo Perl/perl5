@@ -285,7 +285,14 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 
 /* Convert CvSTASH + CvNAME_HEK into a GV.  Conceptually, all subs have a
    GV, but for efficiency that GV may not in fact exist.  This function,
-   called by CvGV, reifies it. */
+   called by CvGV, reifies it.
+
+   Note that the reified GV will have its gp_line/gp_file set to the value
+   in the current PL_curcop, i.e. to the place where the GV is first
+   accessed rather than to where the CV was defined. In practice this
+   implementation leakage doesn't seem to cause any problems part from
+   edge cases in Deparse.
+   */
 
 GV *
 Perl_cvgv_from_hek(pTHX_ CV *cv)
