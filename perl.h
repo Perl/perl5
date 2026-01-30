@@ -252,8 +252,6 @@ Now a synonym for C<L</dTHXa>>.
 #  define dTHX_DEBUGGING dNOOP
 #endif
 
-#define STATIC static
-
 #ifndef PERL_CORE
 /* Do not use these macros. They were part of PERL_OBJECT, which was an
  * implementation of multiplicity using C++ objects. They have been left
@@ -268,6 +266,7 @@ Now a no-op.
 
 =cut
  */
+#  define STATIC static
 #  define CPERLscope(x) x
 #  define CPERLarg void
 #  define CPERLarg_
