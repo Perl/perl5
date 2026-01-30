@@ -238,7 +238,7 @@ S_invlist_iterfinish(SV* invlist)
     *get_invlist_iter_addr(invlist) = (STRLEN) UV_MAX;
 }
 
-STATIC bool
+static bool
 S_invlist_iternext(SV* invlist, UV* start, UV* end)
 {
     /* An C<invlist_iterinit> call on <invlist> must be used to set this up.

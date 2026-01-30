@@ -39,7 +39,7 @@
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
  */
 
-STATIC bool
+static bool
 S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 flags)
 {
     PERL_ARGS_ASSERT_ISA_LOOKUP;
@@ -78,7 +78,7 @@ S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 fla
     return FALSE;
 }
 
-STATIC bool
+static bool
 S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags)
 {
     HV* stash;
@@ -1352,7 +1352,7 @@ static const struct xsub_details these_details[] = {
     {"Tie::Hash::NamedCapture::flags", XS_NamedCapture_flags, NULL, 0 },
 };
 
-STATIC OP*
+static OP*
 optimize_out_native_convert_function(pTHX_ OP* entersubop,
                                            GV* namegv,
                                            SV* protosv)

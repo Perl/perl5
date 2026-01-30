@@ -499,7 +499,7 @@ PP(pp_refgen)
 }
 
 
-STATIC SV*
+static SV*
 S_refto(pTHX_ SV *sv)
 {
     SV* rv;
@@ -5505,7 +5505,7 @@ PP_wrapped(pp_each, 1, 0)
     RETURN;
 }
 
-STATIC OP *
+static OP *
 S_do_delete_local(pTHX)
 {
     dSP;
@@ -7787,7 +7787,7 @@ PP(pp_anonconst)
  * at each position from startix onwards until endix.
  */
 #define av_refresh_elements_range(av, startix, endix)  S_av_refresh_elements_range(aTHX_ av, startix, endix)
-STATIC void
+static void
 S_av_refresh_elements_range(pTHX_ AV *av, IV startix, IV endix)
 {
     for(IV ix = startix; ix < endix; ix++) {
@@ -8036,7 +8036,7 @@ PP(pp_argcheck)
  * error message string
  */
 #define accumulate_error_names(n_errorsp, error_namesp, namepv, namelen)  S_accumulate_error_names(aTHX_ n_errorsp, error_namesp, namepv, namelen)
-STATIC void
+static void
 S_accumulate_error_names(pTHX_ size_t *n_errorsp, SV **error_namesp, const char *namepv, STRLEN namelen)
 {
     size_t n_errors = ++(*n_errorsp);

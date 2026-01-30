@@ -47,7 +47,7 @@
  * args
  */
 
-STATIC void
+static void
 S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
 {
     I32 nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
@@ -1439,7 +1439,7 @@ PP(pp_multiconcat)
 /* push the elements of av onto the stack.
  * Returns PL_op->op_next to allow tail-call optimisation of its callers */
 
-STATIC OP*
+static OP*
 S_pushav(pTHX_ AV* const av)
 {
     const SSize_t maxarg = AvFILL(av) + 1;
@@ -2494,7 +2494,7 @@ PP(pp_rv2av)
 }
 
 
-STATIC void
+static void
 S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 {
     PERL_ARGS_ASSERT_DO_ODDBALL;
@@ -2705,7 +2705,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
  * PL_delaymagic; now we tell the OS to update the uids/gids atomically.
  */
 
-STATIC void
+static void
 S_aassign_uid(pTHX)
 {
     /* Will be used to set PL_tainting below */
@@ -3649,7 +3649,7 @@ PP(pp_qr)
     return NORMAL;
 }
 
-STATIC bool
+static bool
 S_are_we_in_Debug_EXECUTE_r(pTHX)
 {
     /* Given a 'use re' is in effect, does it ask for outputting execution
@@ -4443,7 +4443,7 @@ PP(pp_helem)
 /* a stripped-down version of Perl_softref2xv() for use by
  * pp_multideref(), which doesn't use PL_op->op_flags */
 
-STATIC GV *
+static GV *
 S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
                 const svtype type)
 {

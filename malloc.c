@@ -1163,7 +1163,7 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 #  define FILLCHECK_DEADBEEF(s, n)	((void)0)
 #endif
 
-STATIC int
+static int
 S_adjust_size_and_find_bucket(size_t *nbytes_p)
 {
         MEM_SIZE shiftr;

@@ -1,8 +1,5 @@
 #ifndef PERL_REGCOMP_INTERNAL_H
 #define PERL_REGCOMP_INTERNAL_H
-#ifndef STATIC
-#define STATIC  static
-#endif
 #ifndef RE_OPTIMIZE_CURLYX_TO_CURLYM
 #define RE_OPTIMIZE_CURLYX_TO_CURLYM 1
 #endif

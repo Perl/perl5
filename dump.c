@@ -410,7 +410,7 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
     return SvPVX(dsv);
 }
 
-STATIC char *
+static char *
 S_pv_display_flags(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim, I32 pretty_flags)
 {
     PERL_ARGS_ASSERT_PV_DISPLAY_FLAGS;
@@ -1257,7 +1257,7 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
  * otherwise add it.
  *  *** Note that this isn't thread-safe */
 
-STATIC UV
+static UV
 S_sequence_num(pTHX_ const OP *o)
 {
     SV     *op,
@@ -1280,7 +1280,7 @@ S_sequence_num(pTHX_ const OP *o)
 
 
 /* forward declaration */
-STATIC void
+static void
 S_deb_padvar_cv(pTHX_ CV *cv, PADOFFSET off, int n, bool paren);
 
 
@@ -3301,7 +3301,7 @@ Perl_runops_debug(pTHX)
 /* Print the names of the n lexical vars starting at pad offset off
  * in the specified CV */
 
-STATIC void
+static void
 S_deb_padvar_cv(pTHX_ CV *cv, PADOFFSET off, int n, bool paren)
 {
     PADNAME *sv;
@@ -3331,7 +3331,7 @@ S_deb_padvar_cv(pTHX_ CV *cv, PADOFFSET off, int n, bool paren)
 /* Print the names of the n lexical vars starting at pad offset off n the
  * currently executing CV */
 
-STATIC void
+static void
 S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
 {
     S_deb_padvar_cv(aTHX_ deb_curcv(cxstack_ix), off, n, paren);
@@ -3821,7 +3821,7 @@ Perl_op_class(pTHX_ const OP *o)
 
 
 
-STATIC CV*
+static CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
     PERL_SI *si = PL_curstackinfo;
@@ -3865,7 +3865,7 @@ C<-DP> command line option.
 =cut
 */
 
-STATIC void
+static void
 S_debprof(pTHX_ const OP *o)
 {
     PERL_ARGS_ASSERT_DEBPROF;

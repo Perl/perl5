@@ -1371,7 +1371,7 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 
 /* the SV for Perl_form() and mess() is not kept in an arena */
 
-STATIC SV *
+static SV *
 S_mess_alloc(pTHX)
 {
     SV *sv;
@@ -1693,7 +1693,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 
 /* Common code used in dieing and warning */
 
-STATIC SV *
+static SV *
 S_with_queued_errors(pTHX_ SV *ex)
 {
     PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS;
@@ -5577,7 +5577,7 @@ cross platform way to prevent a SEGV.
 }
 
 
-STATIC void
+static void
 S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
                           STRLEN xs_len)
 {

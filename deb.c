@@ -133,7 +133,7 @@ Perl_debstackptrs(pTHX)     /* Currently unused in cpan and core */
  * Only displays top 30 max
  */
 
-STATIC void
+static void
 S_deb_stack_n(pTHX_ SV** stack_base, SSize_t stack_min, SSize_t stack_max,
         SSize_t mark_min, SSize_t mark_max, SSize_t nonrc_base)
 {

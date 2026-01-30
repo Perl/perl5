@@ -1057,7 +1057,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
 
 #ifdef DEBUGGING
-STATIC void
+static void
 S_put_code_point(pTHX_ SV *sv, UV c)
 {
     PERL_ARGS_ASSERT_PUT_CODE_POINT;
@@ -1082,7 +1082,7 @@ S_put_code_point(pTHX_ SV *sv, UV c)
     }
 }
 
-STATIC void
+static void
 S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 {
     /* Appends to 'sv' a displayable version of the range of code points from
@@ -1264,7 +1264,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
     }
 }
 
-STATIC void
+static void
 S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
 {
     /* Concatenate onto the PV in 'sv' a displayable form of the inversion list
@@ -1319,7 +1319,7 @@ S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
     return;
 }
 
-STATIC SV*
+static SV*
 S_put_charclass_bitmap_innards_common(pTHX_
         SV* invlist,            /* The bitmap */
         SV* posixes,            /* Under /l, things like [:word:], \S */
@@ -1398,7 +1398,7 @@ S_put_charclass_bitmap_innards_common(pTHX_
     return output;
 }
 
-STATIC U8
+static U8
 S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                      char *bitmap,
                                      SV *nonbitmap_invlist,

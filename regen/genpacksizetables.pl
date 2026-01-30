@@ -38,7 +38,7 @@ sub make_tables {
                       $unpredictable, $nocsum, $size, $condition);
     }
 
-    my $text = "STATIC const packprops_t packprops[512] = {\n";
+    my $text = "static const packprops_t packprops[512] = {\n";
     foreach my $arrayname (qw(normal shrieking)) {
         my $array = $arrays{$arrayname} ||
             die "No defined entries in $arrayname";

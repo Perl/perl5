@@ -297,7 +297,7 @@ S<C<'local $x = $y'>>), and that will handle the magic.
 =cut
 */
 
-STATIC SV *
+static SV *
 S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
     SV * osv;

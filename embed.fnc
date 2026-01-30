@@ -716,7 +716,7 @@
 :   'S'  Static function: function in source code has a S_ prefix:
 :
 :          proto.h: function is declared as S_foo rather than foo,
-:                STATIC is added to declaration;
+:                static is added to declaration;
 :          embed.h: "#define foo S_foo" entries added
 :
 :   's'  Static function, but function in source code has a Perl_ prefix:
@@ -725,7 +725,7 @@
 :        have been moved to a header file and declared static.
 :
 :          proto.h: function is declared as Perl_foo rather than foo
-:                STATIC is added to declaration;
+:                static is added to declaration;
 :          embed.h: "#define foo Perl_foo" entries added
 :
 :   'T'  Has no implicit interpreter/thread context argument:

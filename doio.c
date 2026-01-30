@@ -1613,7 +1613,7 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
 #define dir_unchanged(orig_psv, mg) \
     S_dir_unchanged(aTHX_ (orig_psv), (mg))
 
-STATIC bool
+static bool
 S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
     bool retval;
 

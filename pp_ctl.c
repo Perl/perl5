@@ -1571,7 +1571,7 @@ static const char * const context_name[] = {
     "defer block",
 };
 
-STATIC I32
+static I32
 S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 {
     I32 i;
@@ -1696,7 +1696,7 @@ Perl_was_lvalue_sub(pTHX)
         return 0;
 }
 
-STATIC I32
+static I32
 S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {
     I32 i;
@@ -1735,7 +1735,7 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
     return i;
 }
 
-STATIC I32
+static I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
     I32 i;
@@ -1752,7 +1752,7 @@ S_dopoptoeval(pTHX_ I32 startingblock)
     return i;
 }
 
-STATIC I32
+static I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
     I32 i;
@@ -1787,7 +1787,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 
 /* find the next GIVEN or FOR (with implicit $_) loop context block */
 
-STATIC I32
+static I32
 S_dopoptogivenfor(pTHX_ I32 startingblock)
 {
     I32 i;
@@ -1815,7 +1815,7 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
     return i;
 }
 
-STATIC I32
+static I32
 S_dopoptowhen(pTHX_ I32 startingblock)
 {
     I32 i;
@@ -3165,7 +3165,7 @@ PP(pp_redo)
 #define UNENTERABLE (OP *)1
 #define GOTO_DEPTH 64
 
-STATIC OP *
+static OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 {
     OP **ops = opstack;
@@ -3764,7 +3764,7 @@ PP_wrapped(pp_exit, 1, 0)
 
 /* Eval. */
 
-STATIC void
+static void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
     const char *s = SvPVX_const(sv);
@@ -3854,7 +3854,7 @@ See L<perlinterp/"Exception handing"> for further details.
 =cut
 */
 
-STATIC OP *
+static OP *
 S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 {
     int ret;
@@ -3987,7 +3987,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
  * See also try_run_unitcheck().
  *
  */
-STATIC int
+static int
 S_try_yyparse(pTHX_ int gramtype, OP *caller_op)
 {
     /* if we die during compilation PL_restartop and PL_restartjmpenv
@@ -4043,7 +4043,7 @@ S_try_yyparse(pTHX_ int gramtype, OP *caller_op)
  *
  * See also try_yyparse().
  */
-STATIC int
+static int
 S_try_run_unitcheck(pTHX_ OP* caller_op)
 {
     /* if we die during compilation PL_restartop and PL_restartjmpenv
@@ -4102,7 +4102,7 @@ S_try_run_unitcheck(pTHX_ OP* caller_op)
  * These can be distinguished by whether PL_op is entereval.
  */
 
-STATIC bool
+static bool
 S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 {
     OP * const saveop = PL_op;
@@ -4360,7 +4360,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
  * else return PerlIO_openn().
  */
 
-STATIC PerlIO *
+static PerlIO *
 S_check_type_and_open(pTHX_ SV *name)
 {
     Stat_t st;
@@ -4434,7 +4434,7 @@ S_check_type_and_open(pTHX_ SV *name)
  * try loading Foo.pmc first.
  */
 #ifndef PERL_DISABLE_PMC
-STATIC PerlIO *
+static PerlIO *
 S_doopen_pm(pTHX_ SV *name)
 {
     STRLEN namelen;
@@ -5868,7 +5868,7 @@ PP(pp_leavegiven)
 }
 
 /* Helper routines used by pp_smartmatch */
-STATIC PMOP *
+static PMOP *
 S_make_matcher(pTHX_ REGEXP *re)
 {
     PMOP *matcher = cPMOPx(newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED));
@@ -5883,7 +5883,7 @@ S_make_matcher(pTHX_ REGEXP *re)
     return matcher;
 }
 
-STATIC bool
+static bool
 S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
     bool result;
@@ -5898,7 +5898,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     return result;
 }
 
-STATIC void
+static void
 S_destroy_matcher(pTHX_ PMOP *matcher)
 {
     PERL_ARGS_ASSERT_DESTROY_MATCHER;
@@ -5920,7 +5920,7 @@ PP(pp_smartmatch)
 /* This version of do_smartmatch() implements the
  * table of smart matches that is found in perlsyn.
  */
-STATIC OP *
+static OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 {
     bool object_on_left = FALSE;
@@ -6853,7 +6853,7 @@ S_doparseform(pTHX_ SV *sv)
 }
 
 
-STATIC bool
+static bool
 S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 {
     /* Can value be printed in fldsize chars, using %*.*f ? */

@@ -931,7 +931,7 @@ sub blob_as_code {
     my $blob_name= $self->{blob_name};
 
     # output the blob as C code.
-    my @code= (sprintf "STATIC const unsigned char %s[] =\n", $blob_name);
+    my @code= (sprintf "static const unsigned char %s[] =\n", $blob_name);
     my $blob_len= length $blob;
     while (length($blob)) {
         push @code, sprintf qq(    "%s"), substr($blob, 0, 65, "");
@@ -1050,13 +1050,13 @@ EOF_CODE
 
     push @code, "#define ${prefix}_RSHIFT $RSHIFT\n";
     push @code, "#define ${prefix}_BUCKETS $n\n\n";
-    push @code, sprintf "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
-    push @code, sprintf "STATIC const U32 ${prefix}_FNV32_PRIME = 0x%08x;\n\n",
+    push @code, sprintf "static const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
+    push @code, sprintf "static const U32 ${prefix}_FNV32_PRIME = 0x%08x;\n\n",
         FNV32_PRIME;
 
     push @code, "/* The comments give the input key for the row it is in */\n";
     push @code,
-        "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n",
+        "static const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n",
         join(",\n", @$rows_array) . "\n};\n\n";
     push @code, <<"EOF_CODE";
 ${prefix}_VALt

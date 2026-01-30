@@ -35,7 +35,7 @@
  * be in the to-translate set
  */
 
-STATIC Size_t
+static Size_t
 S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     Size_t matches = 0;
@@ -124,7 +124,7 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
  * be in the to-translate set
  */
 
-STATIC Size_t
+static Size_t
 S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     STRLEN len;
@@ -173,7 +173,7 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
  * be in the to-translate set
  */
 
-STATIC Size_t
+static Size_t
 S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
     STRLEN len;
@@ -332,7 +332,7 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
  * sv may or may not be utf8.
  */
 
-STATIC Size_t
+static Size_t
 S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
 {
     U8 *s;
@@ -398,7 +398,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
  * sv may or may not be utf8.
  */
 
-STATIC Size_t
+static Size_t
 S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 {
     U8 *s;
