@@ -147,7 +147,7 @@ typedef struct {
 
 /* Block most signals for calling thread, setting the old signal mask to
  * oldmask, if it is not NULL */
-STATIC int
+static int
 S_block_most_signals(sigset_t *oldmask)
 {
     sigset_t newmask;
@@ -173,7 +173,7 @@ S_block_most_signals(sigset_t *oldmask)
 }
 
 /* Set the signal mask for this thread to newmask */
-STATIC int
+static int
 S_set_sigmask(sigset_t *newmask)
 {
 #if defined(VMS)
@@ -185,14 +185,14 @@ S_set_sigmask(sigset_t *newmask)
 #endif /* WIN32 */
 
 /* Used by Perl interpreter for thread context switching */
-STATIC void
+static void
 S_ithread_set(pTHX_ ithread *thread)
 {
     dMY_CXT;
     MY_CXT.context = thread;
 }
 
-STATIC ithread *
+static ithread *
 S_ithread_get(pTHX)
 {
     dMY_CXT;
@@ -207,7 +207,7 @@ S_ithread_get(pTHX)
  * of the interpreter can lead to recursive destruction calls that could
  * lead to a deadlock on that mutex.
  */
-STATIC void
+static void
 S_ithread_clear(pTHX_ ithread *thread)
 {
     PerlInterpreter *interp;
@@ -276,7 +276,7 @@ S_ithread_clear(pTHX_ ithread *thread)
  * Must be called with the mutex held.
  * On return, mutex is released (or destroyed).
  */
-STATIC void
+static void
 S_ithread_free(pTHX_ ithread *thread)
   PERL_TSA_RELEASE(thread->mutex)
 {
@@ -350,7 +350,7 @@ S_ithread_count_inc(pTHX_ ithread *thread)
 
 
 /* Warn if exiting with any unjoined threads */
-STATIC int
+static int
 S_exit_warning(pTHX)
 {
     int veto_cleanup, warn;
@@ -389,7 +389,7 @@ S_exit_warning(pTHX)
 /* Called from perl_destruct() in each thread.  If it's the main thread,
  * stop it from freeing everything if there are other threads still running.
  */
-STATIC int
+static int
 Perl_ithread_hook(pTHX)
 {
     dMY_POOL;
@@ -399,7 +399,7 @@ Perl_ithread_hook(pTHX)
 
 /* MAGIC (in mg.h sense) hooks */
 
-STATIC int
+static int
 ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
@@ -408,7 +408,7 @@ ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
-STATIC int
+static int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
@@ -418,7 +418,7 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
-STATIC int
+static int
 ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     PERL_UNUSED_ARG(param);
@@ -426,7 +426,7 @@ ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-STATIC const MGVTBL ithread_vtbl = {
+static const MGVTBL ithread_vtbl = {
     ithread_mg_get,     /* get */
     0,                  /* set */
     0,                  /* len */
@@ -441,7 +441,7 @@ STATIC const MGVTBL ithread_vtbl = {
 
 
 /* Provided default, minimum and rational stack sizes */
-STATIC IV
+static IV
 S_good_stack_size(pTHX_ IV stack_size)
 {
     dMY_POOL;
@@ -543,10 +543,10 @@ S_jmpenv_run(pTHX_ int action, ithread *thread,
  */
 #ifdef WIN32
 PERL_STACK_REALIGN
-STATIC THREAD_RET_TYPE
+static THREAD_RET_TYPE
 S_ithread_run(LPVOID arg)
 #else
-STATIC void *
+static void *
 S_ithread_run(void * arg)
 #endif
 {
@@ -726,7 +726,7 @@ S_ithread_run(void * arg)
 
 /* Type conversion helper functions */
 
-STATIC SV *
+static SV *
 S_ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
 {
     SV *sv;
@@ -748,7 +748,7 @@ S_ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
     return (obj);
 }
 
-STATIC ithread *
+static ithread *
 S_SV_to_ithread(pTHX_ SV *sv)
 {
     /* Argument is a thread */
@@ -765,7 +765,7 @@ S_SV_to_ithread(pTHX_ SV *sv)
  * Called with my_pool->create_destruct_mutex locked.
  * (Unlocked both on error and on success.)
  */
-STATIC ithread *
+static ithread *
 S_ithread_create(
         PerlInterpreter *parent_perl,
         my_pool_t *my_pool,
@@ -978,9 +978,9 @@ S_ithread_create(
                                   &thread->thr);
 #else
     {
-        STATIC pthread_attr_t attr;
-        STATIC int attr_inited = 0;
-        STATIC int attr_joinable = PTHREAD_CREATE_JOINABLE;
+        static pthread_attr_t attr;
+        static int attr_inited = 0;
+        static int attr_joinable = PTHREAD_CREATE_JOINABLE;
         if (! attr_inited) {
             pthread_attr_init(&attr);
             attr_inited = 1;
