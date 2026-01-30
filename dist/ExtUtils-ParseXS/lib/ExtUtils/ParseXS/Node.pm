@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Symbol;
 
-our $VERSION = '3.62';
+our $VERSION = '3.63';
 
 =head1 NAME
 
@@ -953,7 +953,7 @@ sub as_code {
         | * XS macro.
         | *
         | * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
-        | * "STATIC", ie. it exports XSUB symbols. You probably don't want that
+        | * "static", ie. it exports XSUB symbols. You probably don't want that
         | * for anything but the BOOT XSUB.
         | *
         | * See XSUB.h in core!
@@ -966,23 +966,23 @@ sub as_code {
         |#  undef XS_INTERNAL
         |#  if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
         |#    define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
-        |#    define XS_INTERNAL(name) STATIC XSPROTO(name)
+        |#    define XS_INTERNAL(name) static XSPROTO(name)
         |#  endif
         |#  if defined(__SYMBIAN32__)
         |#    define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
-        |#    define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
+        |#    define XS_INTERNAL(name) EXPORT_C static XSPROTO(name)
         |#  endif
         |#  ifndef XS_EXTERNAL
         |#    if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
         |#      define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
-        |#      define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
+        |#      define XS_INTERNAL(name) static void name(pTHX_ CV* cv __attribute__unused__)
         |#    else
         |#      ifdef __cplusplus
         |#        define XS_EXTERNAL(name) extern "C" XSPROTO(name)
         |#        define XS_INTERNAL(name) static XSPROTO(name)
         |#      else
         |#        define XS_EXTERNAL(name) XSPROTO(name)
-        |#        define XS_INTERNAL(name) STATIC XSPROTO(name)
+        |#        define XS_INTERNAL(name) static XSPROTO(name)
         |#      endif
         |#    endif
         |#  endif
@@ -1021,10 +1021,10 @@ sub as_code {
         |#define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
         |
         |/* prototype to pass -Wmissing-prototypes */
-        |STATIC void
+        |static void
         |S_croak_xs_usage(const CV *const cv, const char *const params);
         |
-        |STATIC void
+        |static void
         |S_croak_xs_usage(const CV *const cv, const char *const params)
         |{
         |    const GV *const gv = CvGV(cv);
