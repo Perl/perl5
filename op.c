@@ -9499,9 +9499,9 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     PERL_ARGS_ASSERT_NEWCONDOP;
 
     if (!falseop)
-        return newLOGOP(OP_AND, 0, first, trueop);
+        return newLOGOP(OP_AND, flags, first, trueop);
     if (!trueop)
-        return newLOGOP(OP_OR, 0, first, falseop);
+        return newLOGOP(OP_OR, flags, first, falseop);
 
     scalarboolean(first);
     if (S_is_control_transfer(aTHX_ first)) {

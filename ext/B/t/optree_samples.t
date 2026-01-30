@@ -26,7 +26,7 @@ checkOptree ( name	=> '-basic sub {if shift print then,else}',
 # -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 665 optree_samples.t:24) v:>,<,% ->2
 # -        <1> null K/1 ->-
-# 3           <|> cond_expr(other->4) K/1 ->8
+# 3           <|> cond_expr(other->4) K/STMT,1 ->8
 # 2              <0> shift s* ->3
 # -              <@> scope K ->-
 # -                 <;> ex-nextstate(main 1594 optree_samples.t:25) v:>,<,% ->4
@@ -44,7 +44,7 @@ EOT_EOT
 # -     <@> lineseq KP ->7
 # 1        <;> nextstate(main 665 optree_samples.t:24) v:>,<,% ->2
 # -        <1> null K/1 ->-
-# 3           <|> cond_expr(other->4) K/1 ->8
+# 3           <|> cond_expr(other->4) K/STMT,1 ->8
 # 2              <0> shift s* ->3
 # -              <@> scope K ->-
 # -                 <;> ex-nextstate(main 1594 optree_samples.t:25) v:>,<,% ->4
@@ -75,7 +75,7 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 # -           <0> ex-padsv sRM*/LVINTRO ->3
 # 4        <;> nextstate(main 670 optree_samples.t:71) v:>,<,% ->5
 # -        <1> null K/1 ->-
-# 6           <|> cond_expr(other->7) K/1 ->b
+# 6           <|> cond_expr(other->7) K/STMT,1 ->b
 # 5              <0> padsv[$a:666,670] s ->6
 # -              <@> scope K ->-
 # -                 <;> ex-nextstate(main 1510 optree_samples.t:66) v:>,<,% ->7
@@ -97,7 +97,7 @@ EOT_EOT
 # -           <0> ex-padsv sRM*/LVINTRO ->3
 # 4        <;> nextstate(main 670 optree_samples.t:71) v:>,<,% ->5
 # -        <1> null K/1 ->-
-# 6           <|> cond_expr(other->7) K/1 ->b
+# 6           <|> cond_expr(other->7) K/STMT,1 ->b
 # 5              <0> padsv[$a:666,670] s ->6
 # -              <@> scope K ->-
 # -                 <;> ex-nextstate(main 1510 optree_samples.t:70) v:>,<,% ->7
@@ -121,7 +121,7 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 674 optree_samples.t:125) v:>,<,%
 # 2  <0> shift s*
-# 3  <|> cond_expr(other->4) K/1
+# 3  <|> cond_expr(other->4) K/STMT,1
 # 4      <0> pushmark s
 # 5      <$> const[PV "then"] s
 # 6      <@> print sK
@@ -136,7 +136,7 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 EOT_EOT
 # 1  <;> nextstate(main 674 optree_samples.t:129) v:>,<,%
 # 2  <0> shift s*
-# 3  <|> cond_expr(other->4) K/1
+# 3  <|> cond_expr(other->4) K/STMT,1
 # 4      <0> pushmark s
 # 5      <$> const(PV "then") s
 # 6      <@> print sK
@@ -163,7 +163,7 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 # 3  <1> padsv_store[$a:1522,1529] vKS/LVINTRO
 # 4  <;> nextstate(main 679 optree_samples.t:166) v:>,<,%
 # 5  <0> padsv[$a:675,679] s
-# 6  <|> cond_expr(other->7) K/1
+# 6  <|> cond_expr(other->7) K/STMT,1
 # 7      <0> pushmark s
 # 8      <$> const[PV "foo"] s
 # 9      <@> print sK
@@ -181,7 +181,7 @@ EOT_EOT
 # 3  <1> padsv_store[$a:1522,1529] vKS/LVINTRO
 # 4  <;> nextstate(main 679 optree_samples.t:172) v:>,<,%
 # 5  <0> padsv[$a:675,679] s
-# 6  <|> cond_expr(other->7) K/1
+# 6  <|> cond_expr(other->7) K/STMT,1
 # 7      <0> pushmark s
 # 8      <$> const(PV "foo") s
 # 9      <@> print sK
@@ -636,7 +636,7 @@ checkOptree ( name	=> 'if ($a || $b) { } return 1',
 # 2  <#> gvsv[*a] s
 # 3  <|> or(other->4) sK/1
 # 4      <#> gvsv[*b] s
-# 5      <|> and(other->6) vK/1
+# 5      <|> and(other->6) vK/STMT,1
 # 6  <;> nextstate(main 997 (eval 15):1) v
 # 7  <$> const[IV 1] s
 # 8  <1> leavesub[1 ref] K/REFC,1
@@ -645,7 +645,7 @@ EOT_EOT
 # 2  <$> gvsv(*a) s
 # 3  <|> or(other->4) sK/1
 # 4      <$> gvsv(*b) s
-# 5      <|> and(other->6) vK/1
+# 5      <|> and(other->6) vK/STMT,1
 # 6  <;> nextstate(main 3 (eval 3):1) v
 # 7  <$> const(IV 1) s
 # 8  <1> leavesub[1 ref] K/REFC,1
@@ -661,7 +661,7 @@ checkOptree ( name	=> 'unless ($a && $b) { } return 1',
 # 2  <#> gvsv[*a] s
 # 3  <|> and(other->4) sK/1
 # 4      <#> gvsv[*b] s
-# 5      <|> or(other->6) vK/1
+# 5      <|> or(other->6) vK/STMT,1
 # 6  <;> nextstate(main 997 (eval 15):1) v
 # 7  <$> const[IV 1] s
 # 8  <1> leavesub[1 ref] K/REFC,1
@@ -670,7 +670,7 @@ EOT_EOT
 # 2  <$> gvsv(*a) s
 # 3  <|> and(other->4) sK/1
 # 4      <$> gvsv(*b) s
-# 5      <|> or(other->6) vK/1
+# 5      <|> or(other->6) vK/STMT,1
 # 6  <;> nextstate(main 3 (eval 3):1) v
 # 7  <$> const(IV 1) s
 # 8  <1> leavesub[1 ref] K/REFC,1

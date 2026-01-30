@@ -2166,6 +2166,7 @@ my @unresolved_visibility_overrides = qw(
     OPpSPLIT_ASSIGN
     OPpSPLIT_IMPLIM
     OPpSPLIT_LEX
+    OPpSTATEMENT
     OPpSUBSTR_REPL_FIRST
     OPpTARGET_MY
     OPpTRANS_ALL
