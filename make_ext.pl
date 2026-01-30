@@ -298,65 +298,64 @@ sub build_extension {
     } else {
 	$makefile = 'Makefile';
     }
-    
-    if (-f $makefile) {
-	$makefile_no_minus_f = 0;
-	open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
-	while (<$mfh>) {
-	    # Plagiarised from CPAN::Distribution
-	    last if /MakeMaker post_initialize section/;
-	    next unless /^#\s+VERSION_FROM\s+=>\s+(.+)/;
-	    my $vmod = eval $1;
-	    my $oldv;
-	    while (<$mfh>) {
-		next unless /^XS_VERSION = (\S+)/;
-		$oldv = $1;
-		last;
-	    }
-	    last unless defined $oldv;
-	    require ExtUtils::MM_Unix;
-	    defined (my $newv = parse_version MM $vmod) or last;
-	    if (version->parse($newv) ne $oldv) {
-		close $mfh or die "close $makefile: $!";
-		_unlink($makefile);
-		{
-		    no warnings 'deprecated';
-		    goto NO_MAKEFILE;
-		}
-	    }
-	}
 
-        if (IS_CROSS) {
-            # If we're cross-compiling, it's possible that the host's
-            # Makefiles are around.
-            seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
-            
-            my $cross_makefile;
+    MAKEFILE_CHECK: {
+        if (-f $makefile) {
+            $makefile_no_minus_f = 0;
+            open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
             while (<$mfh>) {
-                # XXX This might not be throughout enough.
-                # For example, it's possible to cause a false-positive
-                # if cross compiling on and for the Raspberry Pi,
-                # which is insane but plausible.
-                # False positives are really not troublesome, though;
-                # all they mean is that the module gets rebuilt.
-                if (/^CC = \Q$Config{cc}\E/) {
-                    $cross_makefile = 1;
+                # Plagiarised from CPAN::Distribution
+                last if /MakeMaker post_initialize section/;
+                next unless /^#\s+VERSION_FROM\s+=>\s+(.+)/;
+                my $vmod = eval $1;
+                my $oldv;
+                while (<$mfh>) {
+                    next unless /^XS_VERSION = (\S+)/;
+                    $oldv = $1;
                     last;
                 }
+                last unless defined $oldv;
+                require ExtUtils::MM_Unix;
+                defined (my $newv = parse_version MM $vmod) or last;
+                if (version->parse($newv) ne $oldv) {
+                    close $mfh or die "close $makefile: $!";
+                    _unlink($makefile);
+                    $makefile_no_minus_f = 1;
+                    last MAKEFILE_CHECK;
+                }
             }
-            
-            if (!$cross_makefile) {
-                print "Deleting non-Cross makefile\n";
-                close $mfh or die "close $makefile: $!";
-                _unlink($makefile);
+
+            if (IS_CROSS) {
+                # If we're cross-compiling, it's possible that the host's
+                # Makefiles are around.
+                seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
+
+                my $cross_makefile;
+                while (<$mfh>) {
+                    # XXX This might not be throughout enough.
+                    # For example, it's possible to cause a false-positive
+                    # if cross compiling on and for the Raspberry Pi,
+                    # which is insane but plausible.
+                    # False positives are really not troublesome, though;
+                    # all they mean is that the module gets rebuilt.
+                    if (/^CC = \Q$Config{cc}\E/) {
+                        $cross_makefile = 1;
+                        last;
+                    }
+                }
+
+                if (!$cross_makefile) {
+                    print "Deleting non-Cross makefile\n";
+                    close $mfh or die "close $makefile: $!";
+                    _unlink($makefile);
+                }
             }
+        } else {
+            $makefile_no_minus_f = 1;
         }
-    } else {
-	$makefile_no_minus_f = 1;
     }
 
     if ($makefile_no_minus_f || !-f $makefile) {
-	NO_MAKEFILE:
 	if (!-f 'Makefile.PL') {
             unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
                 # No problems returned, so it has faked everything for us. :-)
