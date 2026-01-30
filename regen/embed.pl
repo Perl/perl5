@@ -3531,6 +3531,11 @@ my @undocumented_always_visible = qw(
     DEBUG_i_TEST
     DEBUG_J_FLAG
     DEBUG_J_TEST
+    DEBUG_K
+    DEBUG_K_FLAG
+    DEBUG_K_TEST
+    DEBUG_Kv
+    DEBUG_Kv_TEST
     DEBUG_l
     DEBUG_L
     DEBUG_l_FLAG
@@ -3615,6 +3620,8 @@ my @undocumented_always_visible = qw(
     DEBUG_h_TEST_
     DEBUG_i_TEST_
     DEBUG_J_TEST_
+    DEBUG_K_TEST_
+    DEBUG_Kv_TEST_
     DEBUG_l_TEST_
     DEBUG_L_TEST_
     DEBUG_Lv_TEST_

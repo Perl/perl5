@@ -3634,6 +3634,8 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  y  trace y///, tr/// compilation and execution\n",
       "  h  Show (h)ash randomization debug output"
                 " (changes to PL_hash_rand_bits)\n",
+      "  K  trace mutex locking (requires Configure to be passed"
+                " -Accflags=DPERL_DEBUG_MUTEXES)\n",
       NULL
     };
     UV uv = 0;
@@ -3654,7 +3656,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
          * impacting the definitions of all the other flags in perl.h
          * However because the logic is guarded by isWORDCHAR we can
          * fill in holes with non-wordchar characters instead. */
-        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAqMBLiy";
+        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAqMBLiyK";
 
         for (; isWORDCHAR(**s); (*s)++) {
             const char * const d = strchr(debopts,**s);
