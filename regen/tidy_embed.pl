@@ -31,6 +31,10 @@ my $parser= HeaderParser->new(
             delete $_->{sort} for @$group_ary;
         },
     );
+if (@ARGV and $ARGV[0] eq "-v") {
+    # ignore
+    shift @ARGV;
+}
 my $tap;
 if (@ARGV and $ARGV[0] eq "--tap") {
     $tap = shift @ARGV;
