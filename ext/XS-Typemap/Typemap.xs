@@ -67,7 +67,7 @@ intArray * intArrayPtr( int nelem ) {
 }
 
 /* test T_PACKED */
-STATIC void
+static void
 XS_pack_anotherstructPtr(SV *out, anotherstruct *in)
 {
     dTHX;
@@ -81,7 +81,7 @@ XS_pack_anotherstructPtr(SV *out, anotherstruct *in)
     sv_setsv(out, sv_2mortal(newRV_noinc((SV*)hash)));
 }
 
-STATIC anotherstruct *
+static anotherstruct *
 XS_unpack_anotherstructPtr(SV *in)
 {
     dTHX; /* rats, this is expensive */
@@ -118,7 +118,7 @@ XS_unpack_anotherstructPtr(SV *in)
 }
 
 /* test T_PACKEDARRAY */
-STATIC void
+static void
 XS_pack_anotherstructPtrPtr(SV *out, anotherstruct **in, UV cnt)
 {
     dTHX;
@@ -137,7 +137,7 @@ XS_pack_anotherstructPtrPtr(SV *out, anotherstruct **in, UV cnt)
     sv_setsv(out, sv_2mortal(newRV_noinc((SV*)ary)));
 }
 
-STATIC anotherstruct **
+static anotherstruct **
 XS_unpack_anotherstructPtrPtr(SV *in)
 {
     dTHX; /* rats, this is expensive */
