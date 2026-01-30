@@ -196,7 +196,7 @@ S_mycopy_copy(pTHX_ SV *sv, MAGIC* mg, SV *nsv, const char *name, I32 namlen) {
     return 0;
 }
 
-STATIC MGVTBL vtbl_mycopy = { 0, 0, 0, 0, 0, S_mycopy_copy, 0, 0 };
+static MGVTBL vtbl_mycopy = { 0, 0, 0, 0, 0, S_mycopy_copy, 0, 0 };
 
 /* indirect functions to test the [pa]MY_CXT macros */
 
@@ -433,7 +433,7 @@ rot13_key(pTHX_ IV action, SV *field) {
     return 0;
 }
 
-STATIC I32
+static I32
 rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
     PERL_UNUSED_ARG(idx);
     PERL_UNUSED_ARG(sv);
@@ -445,9 +445,9 @@ rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
  * being a bit too paranoid.  But since this is file-static, we can
  * just have it without initializer, since it should get
  * zero-initialized. */
-STATIC MGVTBL rmagical_b;
+static MGVTBL rmagical_b;
 
-STATIC void
+static void
 blockhook_csc_start(pTHX_ int full)
 {
     dMY_CXT;
@@ -470,7 +470,7 @@ blockhook_csc_start(pTHX_ int full)
     }
 }
 
-STATIC void
+static void
 blockhook_csc_pre_end(pTHX_ OP **o)
 {
     dMY_CXT;
@@ -484,7 +484,7 @@ blockhook_csc_pre_end(pTHX_ OP **o)
 
 }
 
-STATIC void
+static void
 blockhook_test_start(pTHX_ int full)
 {
     dMY_CXT;
@@ -498,7 +498,7 @@ blockhook_test_start(pTHX_ int full)
     }
 }
 
-STATIC void
+static void
 blockhook_test_pre_end(pTHX_ OP **o)
 {
     dMY_CXT;
@@ -508,7 +508,7 @@ blockhook_test_pre_end(pTHX_ OP **o)
         av_push(MY_CXT.bhkav, newSVpvs("pre_end"));
 }
 
-STATIC void
+static void
 blockhook_test_post_end(pTHX_ OP **o)
 {
     dMY_CXT;
@@ -518,7 +518,7 @@ blockhook_test_post_end(pTHX_ OP **o)
         av_push(MY_CXT.bhkav, newSVpvs("post_end"));
 }
 
-STATIC void
+static void
 blockhook_test_eval(pTHX_ OP *const o)
 {
     dMY_CXT;
@@ -532,9 +532,9 @@ blockhook_test_eval(pTHX_ OP *const o)
     }
 }
 
-STATIC BHK bhk_csc, bhk_test;
+static BHK bhk_csc, bhk_test;
 
-STATIC void
+static void
 my_peep (pTHX_ OP *o)
 {
     dMY_CXT;
@@ -554,7 +554,7 @@ my_peep (pTHX_ OP *o)
     }
 }
 
-STATIC void
+static void
 my_rpeep (pTHX_ OP *first)
 {
     dMY_CXT;
@@ -580,7 +580,7 @@ my_rpeep (pTHX_ OP *first)
     }
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_args_lists(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     PERL_UNUSED_ARG(namegv);
@@ -588,7 +588,7 @@ THX_ck_entersub_args_lists(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return ck_entersub_args_list(entersubop);
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *aop = cUNOPx(entersubop)->op_first;
@@ -602,7 +602,7 @@ THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return entersubop;
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *sumop = NULL;
@@ -633,8 +633,8 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return sumop;
 }
 
-STATIC void test_op_list_describe_part(SV *res, OP *o);
-STATIC void
+static void test_op_list_describe_part(SV *res, OP *o);
+static void
 test_op_list_describe_part(SV *res, OP *o)
 {
     sv_catpv(res, PL_op_name[o->op_type]);
@@ -654,7 +654,7 @@ test_op_list_describe_part(SV *res, OP *o)
     }
 }
 
-STATIC char *
+static char *
 test_op_list_describe(OP *o)
 {
     SV *res = sv_2mortal(newSVpvs(""));
@@ -720,7 +720,7 @@ test_op_linklist_describe(OP *start)
 
 /** establish_cleanup operator, ripped off from Scope::Cleanup **/
 
-STATIC void
+static void
 THX_run_cleanup(pTHX_ void *cleanup_code_ref)
 {
     dSP;
@@ -736,7 +736,7 @@ THX_run_cleanup(pTHX_ void *cleanup_code_ref)
 
 /* Note that this is a pp function attached to an OP */
 
-STATIC OP *
+static OP *
 THX_pp_establish_cleanup(pTHX)
 {
     SV *cleanup_code_ref;
@@ -750,7 +750,7 @@ THX_pp_establish_cleanup(pTHX)
     ;
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *parent, *pushop, *argop, *estop;
@@ -772,7 +772,7 @@ THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return estop;
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *parent, *pushop, *argop;
@@ -790,7 +790,7 @@ THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
         op_lvalue(op_contextualize(argop, G_SCALAR), OP_POSTINC));
 }
 
-STATIC OP *
+static OP *
 THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *pushop, *argop;
