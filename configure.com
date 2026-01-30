@@ -1294,9 +1294,7 @@ $ vms_cc_dflt = ""
 $ vms_cc_available = ""
 $!
 $ OPEN/WRITE CONFIG ccvms.c
-$ WRITE CONFIG "#ifdef __DECC"
-$ WRITE CONFIG "#include <stdlib.h>"  !DECC is sooo picky
-$ WRITE CONFIG "#endif"
+$ WRITE CONFIG "#include <stdlib.h>"
 $ WRITE CONFIG "#include <stdio.h>"
 $ WRITE CONFIG "int main() {"
 $ WRITE CONFIG "#ifdef __DECC"
@@ -1478,7 +1476,7 @@ $ THEN
 $   echo ""
 $   echo4 "Checking for the Dec C version number..."
 $   OPEN/WRITE CONFIG deccvers.c
-$   WRITE CONFIG "#include <stdlib.h>"  !DECC is sooo picky
+$   WRITE CONFIG "#include <stdlib.h>"
 $   WRITE CONFIG "#include <stdio.h>"
 $   WRITE CONFIG "int main() {"
 $   WRITE CONFIG "#ifdef __DECC"
@@ -3260,9 +3258,7 @@ $!
 $type_size_check: 
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdint.h>"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
@@ -3278,9 +3274,7 @@ $!: locate header file
 $findhdr:
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <''tmp'>"
 $ WS "int main()"
@@ -3367,9 +3361,7 @@ $!
 $! Check for __STDC__
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -3402,10 +3394,7 @@ $!
 $! Check for long double size
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#pragma message disable ALL"  ! VAX compilers may have distracting informationals
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -3470,9 +3459,7 @@ $ sSCNfldbl = sPRIfldbl ! expect consistency
 $!
 $!: check for long long
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -3500,9 +3487,7 @@ $! Check the prototype for getgid
 $!
 $ echo "Looking for the type for group ids returned by getgid()."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ WS "int main()"
@@ -3526,9 +3511,7 @@ $! Check to see if we've got dev_t
 $!
 $ echo "Looking for the type for dev."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ WS "int main()"
@@ -3604,9 +3587,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   WS "#include <types.h>"
 $   IF i_unistd .EQS. "define" THEN WS "#include <unistd.h>"
@@ -3640,9 +3621,7 @@ $! Check to see if fd_set exists
 $!
 $ echo "Checking to see how well your C compiler handles fd_set and friends ..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ IF Has_Dec_C_Sockets
@@ -3690,9 +3669,7 @@ $! Check to see if off64_t exists
 $!
 $ echo4 "Checking to see if you have off64_t..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ WS "#''i_inttypes' IIH"
@@ -3718,9 +3695,7 @@ $!
 $! Check to see if fpclassify exists
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <math.h>"
 $ WS "int main()"
 $ WS "{"
@@ -3736,9 +3711,7 @@ $! Check to see if fpos64_t exists
 $!
 $ echo4 "Checking to see if you have fpos64_t..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ WS "#''i_inttypes' IIH"
@@ -3765,9 +3738,7 @@ $! Check to see if int64_t exists
 $!
 $ echo4 "Checking to see if you have int64_t..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
 $ WS "#''i_inttypes' IIH"
@@ -3832,9 +3803,7 @@ $! Check for h_errno
 $!
 $ echo4 "Checking to see if you have h_errno..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ IF i_unistd .EQS. "define" THEN WS "#include <unistd.h>"
 $ IF i_netdb  .EQS. "define" THEN WS "#include <netdb.h>"
@@ -3859,9 +3828,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   WS "#include <types.h>"
 $   WS "#include <time.h>"
@@ -3958,9 +3925,7 @@ $!
 $! Check for fcntl
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <fcntl.h>"
 $ WS "int main()"
@@ -3981,9 +3946,7 @@ $ IF d_fcntl .EQS. "define"
 $ THEN
 $   OS
 $   WS "#include <stdio.h>"
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <fcntl.h>"
 $   WS "#include <unistd.h>"
 $   WS "int main() {"
@@ -4188,9 +4151,7 @@ $!
 $! Check for memrchr
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4206,9 +4167,7 @@ $!
 $! Check for strnlen
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4224,9 +4183,7 @@ $!
 $! Check for strtoull
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4242,9 +4199,7 @@ $!
 $! Check for strtouq
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4260,9 +4215,7 @@ $!
 $! Check for strtoll
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4278,9 +4231,7 @@ $!
 $! Check for strtoq
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4296,9 +4247,7 @@ $!
 $! Check for strtold
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4314,9 +4263,7 @@ $!
 $! Check for atoll
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4332,9 +4279,7 @@ $!
 $! Check for atolf
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <string.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4350,9 +4295,7 @@ $!
 $! Check for access
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4367,9 +4310,7 @@ $!
 $! Check for mkostemp
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4384,9 +4325,7 @@ $!
 $! Check for mkstemp
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4401,9 +4340,7 @@ $!
 $! Check for mkstemps
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4418,9 +4355,7 @@ $!
 $! Check for mkdtemp
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4437,9 +4372,7 @@ $!
 $ if i_poll .eqs. "define"
 $ then
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <poll.h>"
 $   WS "int main()"
 $   WS "{"
@@ -4458,9 +4391,7 @@ $!
 $! Check for setvbuf
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4478,9 +4409,7 @@ $!
 $! Check for the shm* routines.
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "#include <sys/shm.h>"
 $ WS "#include <sys/stat.h>"
@@ -4516,9 +4445,7 @@ $!
 $! Check for setenv
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4533,9 +4460,7 @@ $!
 $! Check for setproctitle
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4597,9 +4522,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4620,9 +4543,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4643,9 +4564,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4666,9 +4585,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4689,9 +4606,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4712,9 +4627,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4735,9 +4648,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4758,9 +4669,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4781,9 +4690,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4804,9 +4711,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4827,9 +4732,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4850,9 +4753,7 @@ $!
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4875,9 +4776,7 @@ $ echo4 "Checking the availability of sa_len in the sockaddr struct ..."
 $ IF Has_Dec_C_Sockets
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#define _SOCKADDR_LEN"
 $   WS "#include <types.h>"
 $   WS "#include <socket.h>"
@@ -4935,9 +4834,7 @@ $!
 $! Check for nanosleep
 $!
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <time.h>"
 $ WS "int main()"
 $ WS "{"
@@ -4955,9 +4852,7 @@ $ IF Has_Dec_C_Sockets
 $ THEN
 $   echo4 "Checking to see if you have socklen_t..."
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <stdio.h>"
 $   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
 $   WS "int main()"
@@ -4984,9 +4879,7 @@ $!
 $ IF use_threads
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <pthread.h>"
 $   WS "#include <stdio.h>"
 $   WS "int main()"
@@ -5007,9 +4900,7 @@ $!
 $ IF use_threads
 $ THEN
 $   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
 $   WS "#include <stdlib.h>"
-$   WS "#endif"
 $   WS "#include <pthread.h>"
 $   WS "#include <stdio.h>"
 $   WS "int main()"
@@ -5039,9 +4930,7 @@ $! Check for generic pointer size
 $!
 $ echo4 "Checking to see how big your pointers are..." 
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
 $ WS "{"
@@ -5097,9 +4986,7 @@ $ st_ino_size = 4
 $ OS
 $ WS "#include <sys/stat.h>"
 $ WS "#include <stdio.h>"
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "int main() {"
 $ WS "#''uselargefiles' _LARGEFILE"
 $ WS "#ifdef _LARGEFILE"
@@ -5594,9 +5481,7 @@ $!
 $ d_nv_preserves_uv = "undef"
 $ echo4 "Checking how many bits of your UVs your NVs can preserve..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <stdio.h>"
 $ WS "int main() {"
 $ WS "    ''uvtype' u = 0;"
@@ -5693,9 +5578,7 @@ $! Check for signbit (must already know nvtype)
 $!
 $ echo4 "Checking to see if you have signbit() available to work on ''nvtype'..."
 $ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
-$ WS "#endif"
 $ WS "#include <fp.h>"
 $ WS "#include <stdio.h>"
 $ WS "int main()"
