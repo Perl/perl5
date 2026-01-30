@@ -475,7 +475,7 @@ sharedsv_elem_vtbl = {
 /* Return the user_lock structure (if any) associated with a shared SV.
  * If create is true, create one if it doesn't exist
  */
-STATIC user_lock *
+static user_lock *
 S_get_userlock(pTHX_ SV* ssv, bool create)
 {
     MAGIC *mg;
@@ -613,7 +613,7 @@ Perl_sharedsv_associate(pTHX_ SV *sv, SV *ssv)
 /* Given a private SV, create and return an associated shared SV.
  * Assumes lock is held.
  */
-STATIC SV *
+static SV *
 S_sharedsv_new_shared(pTHX_ SV *sv)
 {
     dTHXc;
@@ -635,7 +635,7 @@ S_sharedsv_new_shared(pTHX_ SV *sv)
 /* Given a shared SV, create and return an associated private SV.
  * Assumes lock is held.
  */
-STATIC SV *
+static SV *
 S_sharedsv_new_private(pTHX_ SV *ssv)
 {
     SV *sv;
@@ -652,7 +652,7 @@ S_sharedsv_new_private(pTHX_ SV *ssv)
 
 /* A threadsafe version of SvREFCNT_dec(ssv) */
 
-STATIC void
+static void
 S_sharedsv_dec(pTHX_ SV* ssv)
 {
     if (! ssv)
@@ -700,7 +700,7 @@ Perl_sharedsv_share(pTHX_ SV *sv)
 #define EPOCH_BIAS      11644473600000.
 
 /* Returns relative time in milliseconds.  (Adapted from Time::HiRes.) */
-STATIC DWORD
+static DWORD
 S_abs_2_rel_milli(double abs)
 {
     double rel;
@@ -809,7 +809,7 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
  * If the private side is already an appropriate RV->SV combination, keep
  * it if possible.
  */
-STATIC void
+static void
 S_get_RV(pTHX_ SV *sv, SV *sobj) {
     SV *obj;
     if (! (SvROK(sv) &&
@@ -1311,9 +1311,9 @@ Perl_shared_object_destroy(pTHX_ SV *sv)
 
 #ifdef PL_signalhook
 
-STATIC despatch_signals_proc_t prev_signal_hook = NULL;
+static despatch_signals_proc_t prev_signal_hook = NULL;
 
-STATIC void
+static void
 S_shared_signal_hook(pTHX) {
     int us;
     MUTEX_LOCK(&PL_sharedsv_lock.mutex);
