@@ -4874,7 +4874,8 @@ Gid_t getegid (void);
 #define DEBUG_L_FLAG		0x04000000 /*67108864*/
 #define DEBUG_i_FLAG		0x08000000 /*134217728*/
 #define DEBUG_y_FLAG		0x10000000 /*268435456*/
-#define DEBUG_MASK		0x1FFFEFFF /* mask of all the standard flags */
+#define DEBUG_K_FLAG		0x20000000 /*536870912*/
+#define DEBUG_MASK		0x2EFFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* -D was given --> PL_debug |= FLAG */
@@ -4909,6 +4910,7 @@ Gid_t getegid (void);
 #  define DEBUG_A_TEST_ UNLIKELY(PL_debug & DEBUG_A_FLAG)
 #  define DEBUG_q_TEST_ UNLIKELY(PL_debug & DEBUG_q_FLAG)
 #  define DEBUG_M_TEST_ UNLIKELY(PL_debug & DEBUG_M_FLAG)
+#  define DEBUG_K_TEST_ UNLIKELY(PL_debug & DEBUG_K_FLAG)
 #  define DEBUG_B_TEST_ UNLIKELY(PL_debug & DEBUG_B_FLAG)
 
 /* Locale initialization comes earlier than PL_debug gets set,
@@ -4926,6 +4928,7 @@ Gid_t getegid (void);
 #  define DEBUG_y_TEST_ UNLIKELY(PL_debug & DEBUG_y_FLAG)
 #  define DEBUG_Xv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_X_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Uv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_U_FLAG, DEBUG_v_FLAG)
+#  define DEBUG_Kv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_K_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Pv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_P_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_yv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_y_FLAG, DEBUG_v_FLAG)
 
@@ -4956,6 +4959,7 @@ Gid_t getegid (void);
 #  define DEBUG_A_TEST DEBUG_A_TEST_
 #  define DEBUG_q_TEST DEBUG_q_TEST_
 #  define DEBUG_M_TEST DEBUG_M_TEST_
+#  define DEBUG_K_TEST DEBUG_K_TEST_
 #  define DEBUG_B_TEST DEBUG_B_TEST_
 #  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_i_TEST DEBUG_i_TEST_
@@ -4964,6 +4968,7 @@ Gid_t getegid (void);
 #  define DEBUG_Uv_TEST DEBUG_Uv_TEST_
 #  define DEBUG_Pv_TEST DEBUG_Pv_TEST_
 #  define DEBUG_Lv_TEST DEBUG_Lv_TEST_
+#  define DEBUG_Kv_TEST DEBUG_Kv_TEST_
 #  define DEBUG_yv_TEST DEBUG_yv_TEST_
 
 #  define PERL_DEB(a)                  a
@@ -5045,6 +5050,7 @@ Gid_t getegid (void);
 #  define DEBUG_Uv(a) DEBUG__(DEBUG_Uv_TEST, a)
 #  define DEBUG_Pv(a) DEBUG__(DEBUG_Pv_TEST, a)
 #  define DEBUG_Lv(a) DEBUG__(DEBUG_Lv_TEST, a)
+#  define DEBUG_Kv(a) DEBUG__(DEBUG_Kv_TEST, a)
 #  define DEBUG_yv(a) DEBUG__(DEBUG_yv_TEST, a)
 
 #  define DEBUG_S(a) DEBUG__(DEBUG_S_TEST, a)
@@ -5055,6 +5061,11 @@ Gid_t getegid (void);
 #  define DEBUG_A(a) DEBUG__(DEBUG_A_TEST, a)
 #  define DEBUG_q(a) DEBUG__(DEBUG_q_TEST, a)
 #  define DEBUG_M(a) DEBUG__(DEBUG_M_TEST, a)
+#  ifdef PERL_DEBUG_MUTEXES
+#    define DEBUG_K(a) UNLESS_PERL_MEM_LOG(DEBUG__(DEBUG_K_TEST, a))
+#  else
+#    define DEBUG_K(a)
+#  endif
 #  define DEBUG_B(a) DEBUG__(DEBUG_B_TEST, a)
 #  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 #  define DEBUG_i(a) DEBUG__(DEBUG_i_TEST, a)
@@ -5087,6 +5098,7 @@ Gid_t getegid (void);
 #  define DEBUG_A_TEST (0)
 #  define DEBUG_q_TEST (0)
 #  define DEBUG_M_TEST (0)
+#  define DEBUG_K_TEST (0)
 #  define DEBUG_B_TEST (0)
 #  define DEBUG_L_TEST (0)
 #  define DEBUG_i_TEST (0)
@@ -5095,6 +5107,7 @@ Gid_t getegid (void);
 #  define DEBUG_Uv_TEST (0)
 #  define DEBUG_Pv_TEST (0)
 #  define DEBUG_Lv_TEST (0)
+#  define DEBUG_Kv_TEST (0)
 #  define DEBUG_yv_TEST (0)
 
 #  define PERL_DEB(a)
@@ -5123,6 +5136,7 @@ Gid_t getegid (void);
 #  define DEBUG_A(a)
 #  define DEBUG_q(a)
 #  define DEBUG_M(a)
+#  define DEBUG_K(a)
 #  define DEBUG_B(a)
 #  define DEBUG_L(a)
 #  define DEBUG_i(a)
@@ -5131,6 +5145,7 @@ Gid_t getegid (void);
 #  define DEBUG_Uv(a)
 #  define DEBUG_Pv(a)
 #  define DEBUG_Lv(a)
+#  define DEBUG_Kv(a)
 #  define DEBUG_yv(a)
 #endif /* DEBUGGING */
 
@@ -6466,27 +6481,24 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(counter <= 0)) {                                         \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
-                                "%s: %d: locking " name "; lock depth=1\n", \
-                                __FILE__, __LINE__));                       \
-            )                                                               \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                           "%s: %d: locking " name "; new lock depth=1\n",\
+                               __FILE__, __LINE__));                        \
             PERL_WRITE_LOCK(mutex);                                         \
             counter = 1;                                                    \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            DEBUG_Kv(PerlIO_printf(Perl_debug_log,                          \
                                 "%s: %d: " name " locked; lock depth=1\n",  \
                                 __FILE__, __LINE__));                       \
-            )                                                               \
         }                                                                   \
         else {                                                              \
             counter++;                                                      \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                             "%s: %d: avoided locking " name "; new lock"    \
                             " depth=%d, but will panic if '%s' is true\n",  \
                             __FILE__, __LINE__, counter,                    \
                             STRINGIFY(cond_to_panic_if_already_locked)));   \
-            )                                                               \
             if (cond_to_panic_if_already_locked) {                          \
-                Perl_croak_nocontext("panic: %s: %d: attempting to lock"    \
+                Perl_croak_nocontext("panic: %s: %d: attempting to lock "   \
                                 name " incompatibly: %s\n",                 \
                                 __FILE__, __LINE__,                         \
                                 STRINGIFY(cond_to_panic_if_already_locked));\
@@ -6513,10 +6525,9 @@ INIT({
 #  define PERL_REENTRANT_UNLOCK(name, mutex, counter)                       \
     STMT_START {                                                            \
         if (LIKELY(counter == 1)) {                                         \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                           "%s: %d: unlocking " name "; new lock depth=0\n", \
                           __FILE__, __LINE__));                             \
-            )                                                               \
             counter = 0;                                                    \
             PERL_WRITE_UNLOCK(mutex);                                       \
         }                                                                   \
@@ -6528,10 +6539,9 @@ INIT({
         }                                                                   \
         else {                                                              \
             counter--;                                                      \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                 "%s: %d: avoided unlocking " name "; new lock depth=%d\n",  \
                 __FILE__, __LINE__, counter));                              \
-            )                                                               \
         }                                                                   \
     } STMT_END
 
