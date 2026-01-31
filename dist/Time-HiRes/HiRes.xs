@@ -55,10 +55,198 @@
 #  define GCC_DIAG_IGNORE_CPP_COMPAT_RESTORE_STMT GCC_DIAG_RESTORE_STMT
 #endif
 
+#ifndef PERL_STATIC_FORCE_INLINE
+#  define PERL_STATIC_FORCE_INLINE STATIC
+#endif
+
 #if PERL_VERSION_GE(5,7,3) && !PERL_VERSION_GE(5,10,1)
 #  undef SAVEOP
 #  define SAVEOP() SAVEVPTR(PL_op)
 #endif
+
+#if defined(SV_COW_SHARED_HASH_KEYS) && defined(SV_COW_OTHER_PVS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_SHARED_HASH_KEYS|SV_COW_OTHER_PVS)
+#elif defined(SV_COW_SHARED_HASH_KEYS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_SHARED_HASH_KEYS)
+#elif defined(SV_COW_OTHER_PVS)
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL|SV_COW_OTHER_PVS)
+#else
+#  define THR_newSVsv_cow(sv) newSVsv_flags((sv), SV_GMAGIC|SV_NOSTEAL)
+#endif
+
+/* Added in 5.17.6 in commit 284167a54e2 10/9/2012 5:19:37 AM
+   Add C define to remove taint support from perl */
+#ifndef TAINT_get
+#  define TAINT_get		(PL_tainted)
+#endif
+
+#ifndef LIKELY
+#  define LIKELY(x)                      (x)
+#endif
+
+#ifndef UNLIKELY
+#  define UNLIKELY(x)                    (x)
+#endif
+
+/* PL_op->op_private & OPpENTERSUB_HASTARG feature was added in
+
+d30110745a - Ilya Zakharevich -8/26/1999 11:33:01 PM - 5.5.61
+Speeding up XSUB calls up to 66%
+Addendum: it's "only" 33% speedup.
+
+   These 3 are highly optimized version of 3 macros from pp.h that were
+   purpose made mostly for EU::PXS's private use, but we DO NOT want to execute
+   a slower sv_newmortal() + sv_set_i_u_n_v_mg(), instead of
+   sv_2mortal(newSV_i_u_n_v()).
+
+   These macros do not put the new SV* on the stack. Caller is responsible for
+   that.
+
+   Arg _nsv is an uninitialized SV* variable, a new SV* will be placed in
+   the _nsv var. SvREFCNT()/SV* lifecycle details are handled by the macro.
+   The caller IS NOT allowed to execute a "sv_2mortal(_nsv);" on the new SV*.
+
+   sv_set_i_u_n_v_mg() is required to a huge amount of safety checks like
+   de-COW PVs RVs, COWs, sv_upgrade(), copy old SV body contents to a higher
+   order SV body, etc.
+
+   Also if G_LIST context, we do not want Perl_leave_adjust_stacks() to create
+   a mortal copy of our PAD SV* TARG. Example of returning a dXSTARG, and
+   Perl_leave_adjust_stacks() instantly makes a mortal dup of it is this code
+       $self->logtime(time());
+*/
+
+
+
+/* set TARG to the IV value i. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGi(_nsv, i, do_taint) \
+STMT_START { \
+    IV TARGi_iv = i; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSViv_mortal(_nsv, TARGi_iv); \
+    } \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1))) \
+        { \
+            /* Cheap SvIOK_only(). \
+             * Assert that flags which SvIOK_only() would test or \
+             * clear can't be set, because we're SVt_IV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK))))); \
+            SvFLAGS(_nsv) |= (SVf_IOK|SVp_IOK); \
+            /* SvIV_set() where sv_any points to head */ \
+            _nsv->sv_u.svu_iv = TARGi_iv; \
+        } \
+        else \
+            sv_setiv_mg(_nsv, TARGi_iv); \
+    } \
+} STMT_END
+
+/* set TARG to the UV value u. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGu(_nsv, u, do_taint) \
+STMT_START { \
+    UV TARGu_uv = u; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSVuv_mortal(_nsv, TARGu_uv); \
+    } \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1) \
+            & (TARGu_uv <= (UV)IV_MAX))) \
+        { \
+            /* Cheap SvIOK_only(). \
+             * Assert that flags which SvIOK_only() would test or \
+             * clear can't be set, because we're SVt_IV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK))))); \
+            SvFLAGS(_nsv) |= (SVf_IOK|SVp_IOK); \
+            /* SvIV_set() where sv_any points to head */ \
+            _nsv->sv_u.svu_iv = TARGu_uv; \
+        } \
+        else \
+            sv_setuv_mg(_nsv, TARGu_uv); \
+    } \
+} STMT_END
+
+/* set TARG to the NV value n. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TMR_TARGn(_nsv, n, do_taint) \
+STMT_START { \
+    NV TARGn_nv = n; \
+    if (GIMME_V == G_LIST || !(PL_op->op_private & OPpENTERSUB_HASTARG)) { \
+        TMR_newSVnv_mortal(_nsv, TARGn_nv); \
+    } \
+    else { \
+        _nsv = PAD_SV(PL_op->op_targ); \
+        if (LIKELY( \
+              ((SvFLAGS(_nsv) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_NV) \
+            & (do_taint ? !TAINT_get : 1))) \
+        { \
+            /* Cheap SvNOK_only(). \
+             * Assert that flags which SvNOK_only() would test or \
+             * clear can't be set, because we're SVt_NV */ \
+            assert(!(SvFLAGS(_nsv) & \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_NOK|SVp_NOK))))); \
+            SvFLAGS(_nsv) |= (SVf_NOK|SVp_NOK); \
+            SvNV_set(_nsv, TARGn_nv); \
+        } \
+        else \
+            sv_setnv_mg(_nsv, TARGn_nv); \
+    } \
+} STMT_END
+
+
+/* newSV_type_mortal() is faster than sv_2mortal() */
+
+#ifdef newSV_type_mortal
+
+#  define TMR_newSViv_mortal(_nsv, _iv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_IV); \
+    SvIOK_on(_nsv); \
+    SvIV_set(_nsv, _iv); \
+} STMT_END
+
+#  define TMR_newSVuv_mortal(_nsv, _uv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_IV); \
+    SvIOK_on(_nsv); \
+    if (_uv <= (UV)IV_MAX) { \
+        SvIV_set(_nsv, (IV)_uv); \
+    } \
+    else { \
+        SvIsUV_on(_nsv);\
+        SvUV_set(_nsv, _uv); \
+    } \
+} STMT_END
+
+#  define TMR_newSVnv_mortal(_nsv, _nv) STMT_START { \
+    _nsv = newSV_type_mortal(SVt_NV); \
+    SvNOK_on(_nsv); \
+    SvNV_set(_nsv, _nv); \
+} STMT_END
+
+#else
+
+#  define TMR_newSViv_mortal(_nsv, _iv) STMT_START { \
+    _nsv = sv_2mortal(newSViv(_iv)); \
+} STMT_END
+
+#  define TMR_newSVuv_mortal(_nsv, _uv) STMT_START { \
+    _nsv = sv_2mortal(newSVuv(_uv)); \
+} STMT_END
+
+#  define TMR_newSVnv_mortal(_nsv, _nv) STMT_START { \
+    _nsv = sv_2mortal(newSVnv(_nv)); \
+} STMT_END
+
+#endif
+
 
 #define IV_1E6 1000000
 #define IV_1E7 10000000
@@ -89,6 +277,12 @@
 #  undef ITIMER_REALPROF
 #endif
 
+/* special type used by croak("unimplemented") XSUBs to neutralize */
+typedef NV NV_DIE; /* unused dXSTARG/sv_newmortal() calls */
+typedef I32 I32_DIE;
+
+#define die_t
+
 #ifndef TIME_HIRES_CLOCKID_T
 typedef int clockid_t;
 #endif
@@ -115,6 +309,10 @@ typedef int clockid_t;
 #    define HAS_GETTIMEOFDAY
 #  endif
 
+#  ifndef HAS_NV_GETTIMEOFDAY
+#    define HAS_NV_GETTIMEOFDAY
+#  endif
+
 /* shows up in winsock.h?
 struct timeval {
     long tv_sec;
@@ -130,12 +328,31 @@ typedef union {
 #  define MY_CXT_KEY "Time::HiRes_" XS_VERSION
 
 typedef struct {
-    unsigned long run_count;
     unsigned __int64 base_ticks;
-    unsigned __int64 tick_frequency;
     FT_t base_systime_as_filetime;
     unsigned __int64 reset_time;
+    unsigned long run_count;
 } my_cxt_t;
+
+typedef BOOL (WINAPI *pfnQueryPerformanceCounter_T)(LARGE_INTEGER*);
+typedef VOID (WINAPI *pfnGetSystemTimeAsFileTime_T) (PFILETIME);
+
+static unsigned __int64 tick_frequency = 0;
+static NV tick_frequency_nv = 0;
+static unsigned __int64 qpc_res_ns = 0;
+static unsigned __int64 qpc_res_ns_realtime = 0;
+static pfnQueryPerformanceCounter_T pfnQueryPerformanceCounter = NULL;
+static pfnGetSystemTimeAsFileTime_T pfnGetSystemTimeAsFileTime = NULL;
+
+#define S_InterlockedExchange64(_d,_s) \
+    InterlockedExchange64((LONG64 volatile *)(_d),(LONG64)(_s))
+#define S_InterlockedExchangePointer(_d,_s) \
+    InterlockedExchangePointer((PVOID volatile *)(_d),(PVOID)(_s))
+
+#undef QueryPerformanceCounter
+#define QueryPerformanceCounter pfnQueryPerformanceCounter
+#undef GetSystemTimeAsFileTime
+#define GetSystemTimeAsFileTime pfnGetSystemTimeAsFileTime
 
 /* Visual C++ 2013 and older don't have the timespec structure.
  * Neither do mingw.org compilers with MinGW runtimes older than 3.22. */
@@ -178,13 +395,17 @@ START_MY_CXT
    for performance reasons */
 
 #  undef gettimeofday
-#  define gettimeofday(tp, not_used) _gettimeofday(aTHX_ tp, not_used)
+#  define gettimeofday(tp, not_used)  ((*(tp) = _gettimeofday_x(aTHX)), 0)
 
 #  undef GetSystemTimePreciseAsFileTime
-#  define GetSystemTimePreciseAsFileTime(out) _GetSystemTimePreciseAsFileTime(aTHX_ out)
+#  define GetSystemTimePreciseAsFileTime(out)  (void)(*(out) = _GetSystemTimePreciseAsFileTime(aTHX))
 
 #  undef clock_gettime
 #  define clock_gettime(clock_id, tp) _clock_gettime(aTHX_ clock_id, tp)
+
+#  define TIME_HIRES_NV_CLOCK_GETTIME
+#  undef nv_clock_gettime
+#  define nv_clock_gettime(clock_id, _bp) _nv_clock_gettime(aTHX_ clock_id, _bp)
 
 #  undef clock_getres
 #  define clock_getres(clock_id, tp) _clock_getres(clock_id, tp)
@@ -207,83 +428,135 @@ START_MY_CXT
  * Windows 8 introduced GetSystemTimePreciseAsFileTime(), but currently we have
  * to support older systems, so for now we provide our own implementation.
  * In the future we will switch to the real deal.
+ *
+ * FILETIME, switch to "return by copy", vs MS's "return by reference" prototype.
+ * We never take the fn ptr of static fn _GetSystemTimePreciseAsFileTime(pTHX).
+ * The MS API GetSystemTimePreciseAsFileTime() has a void return type but we
+ * have no reason to match ABI compatibility with MS's function symbol.
+ * Return by copy, encourages CC optimizations, since the C stack FILETIME var
+ * never escaped the function that declared it. This allows the CC, in the
+ * caller of _GetSystemTimePreciseAsFileTime(), to keep C stack FILETIME var
+ * in CPU registers at all times in its function body, if the CC wants to
+ * do that.
+ *
+ * Note even on Win64 x64, where "return by copy" return types > 8 bytes, become
+ * secret C++ "this"-style first arguments, a > 8 bytes "return by copy" retval
+ * is still more efficient!!! than explicitly passing a ptr to a C stack alloced
+ * temporary C struct in C code. The latter requires the CC to re-read the
+ * temporary C struct each time after any child function call, since the CC
+ * can't know if SvPV() or GetSystemTimePreciseAsFileTime(), permanently saved
+ * the pointer for long term Interlocked or Atomic message passing from an
+ * unknown 2nd OS thread running on another CPU Core.
  */
-static void
-_GetSystemTimePreciseAsFileTime(pTHX_ FILETIME *out)
+
+static FILETIME
+_GetSystemTimePreciseAsFileTime(pTHX)
 {
-    dMY_CXT;
-    FT_t ft;
+#define MY_CXTX (*MY_CXT_x)
+    unsigned __int64 ticks;
 
-    if (MY_CXT.run_count++ == 0 ||
-        MY_CXT.base_systime_as_filetime.ft_i64 > MY_CXT.reset_time) {
+    unsigned __int64 timesys;
+/*  If no threads, CC will probably optimize away all MY_CXT_x references
+    so they directly access the C static global struct. */
+    my_cxt_t * MY_CXT_x;
 
-        QueryPerformanceFrequency((LARGE_INTEGER*)&MY_CXT.tick_frequency);
-        QueryPerformanceCounter((LARGE_INTEGER*)&MY_CXT.base_ticks);
-        GetSystemTimeAsFileTime(&MY_CXT.base_systime_as_filetime.ft_val);
-        ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64;
-        MY_CXT.reset_time = ft.ft_i64 + MAX_PERF_COUNTER_TICKS;
+    {
+        unsigned __int64 ticks_mem;
+        QueryPerformanceCounter((LARGE_INTEGER*)&ticks_mem);
+    /* Inform the CC nothing external or in this fn (ptr aliasing) can ever
+       rewrite the value in ticks. Increases chance of CC using registers. */
+        ticks = ticks_mem;
+    }
+    {
+        dMY_CXT;
+        MY_CXT_x = &(MY_CXT);
+    }
+    if (MY_CXTX.run_count++ == 0 ||
+        MY_CXTX.base_systime_as_filetime.ft_i64 > MY_CXTX.reset_time) {
+        MY_CXTX.base_ticks = ticks;
+        GetSystemTimeAsFileTime(&MY_CXTX.base_systime_as_filetime.ft_val);
+        timesys = MY_CXTX.base_systime_as_filetime.ft_i64;
+        MY_CXTX.reset_time = timesys + MAX_PERF_COUNTER_TICKS;
     }
     else {
         __int64 diff;
-        unsigned __int64 ticks;
-        QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
-        ticks -= MY_CXT.base_ticks;
-        ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
-                    + Const64(IV_1E7) * (ticks / MY_CXT.tick_frequency)
-                    +(Const64(IV_1E7) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
-        diff = ft.ft_i64 - MY_CXT.base_systime_as_filetime.ft_i64;
+        ticks -= MY_CXTX.base_ticks;
+        timesys = MY_CXTX.base_systime_as_filetime.ft_i64
+                    + Const64(IV_1E7) * (ticks / tick_frequency)
+                    +(Const64(IV_1E7) * (ticks % tick_frequency)) / tick_frequency;
+        diff = timesys - MY_CXTX.base_systime_as_filetime.ft_i64;
         if (diff < -MAX_PERF_COUNTER_SKEW || diff > MAX_PERF_COUNTER_SKEW) {
-            MY_CXT.base_ticks += ticks;
-            GetSystemTimeAsFileTime(&MY_CXT.base_systime_as_filetime.ft_val);
-            ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64;
+            MY_CXTX.base_ticks += ticks;
+            GetSystemTimeAsFileTime(&MY_CXTX.base_systime_as_filetime.ft_val);
+            timesys = MY_CXTX.base_systime_as_filetime.ft_i64;
         }
+        /* Note this invisible else {} branch, SKIPS calling GetSystemTimeAsFileTime() */
     }
-
-    *out = ft.ft_val;
-
-    return;
+#undef MY_CXTX
+    {
+        FT_t ft;
+        ft.ft_i64 = timesys;
+        return ft.ft_val;
+    }
 }
 
-static int
-_gettimeofday(pTHX_ struct timeval *tp, void *not_used)
+/* former prototype: static int _gettimeofday(pTHX_ struct timeval *tp, void *not_used);
+
+   B/c _gettimeofday_x() is not capable of failing, and retval was always
+   constant 0, and its a static fn that never leaves this TU, repurpose the
+   retval for something better. */
+
+PERL_STATIC_FORCE_INLINE struct timeval
+_gettimeofday_x(pTHX)
 {
     FT_t ft;
-
-    PERL_UNUSED_ARG(not_used);
+    struct timeval tp;
 
     GetSystemTimePreciseAsFileTime(&ft.ft_val);
 
     /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
+    tp.tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
 
     /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(IV_1E6));
+    tp.tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(IV_1E6));
 
-    return 0;
+    return tp;
 }
 
-static int
+PERL_STATIC_FORCE_INLINE NV
+nv_gettimeofday_x(pTHX)
+{
+    FT_t ft;
+
+    GetSystemTimePreciseAsFileTime(&ft.ft_val);
+
+    /* FP seconds since epoch */
+    return ((NV)((U64)((U64)ft.ft_i64) - ((U64)EPOCH_BIAS))) / ((NV)NV_1E7);
+}
+#define nv_gettimeofday() nv_gettimeofday_x(aTHX)
+
+/* force inline it, because XS_Time__HiRes_clock_gettime() is the only caller */
+
+PERL_STATIC_FORCE_INLINE int
 _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
 {
+    FT_t ft;
+    unsigned __int64 ticks;
+    unsigned __int64 time_sys;
+
     switch (clock_id) {
-    case CLOCK_REALTIME: {
-        FT_t ft;
-
+    case CLOCK_REALTIME:
         GetSystemTimePreciseAsFileTime(&ft.ft_val);
-        tp->tv_sec = (time_t)((ft.ft_i64 - EPOCH_BIAS) / IV_1E7);
-        tp->tv_nsec = (long)((ft.ft_i64 % IV_1E7) * 100);
+        time_sys = ft.ft_i64;
+        tp->tv_sec = (time_t)((time_sys - EPOCH_BIAS) / IV_1E7);
+        tp->tv_nsec = (long)((time_sys % IV_1E7) * 100);
         break;
-    }
-    case CLOCK_MONOTONIC: {
-        unsigned __int64 freq, ticks;
-
-        QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-        QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
-
-        tp->tv_sec = (time_t)(ticks / freq);
-        tp->tv_nsec = (long)((IV_1E9 * (ticks % freq)) / freq);
+    case CLOCK_MONOTONIC:
+        QueryPerformanceCounter((LARGE_INTEGER*)&ft.ft_i64);
+        ticks = ft.ft_i64;
+        tp->tv_sec = (time_t)(ticks / tick_frequency);
+        tp->tv_nsec = (long)((IV_1E9 * (ticks % tick_frequency)) / tick_frequency);
         break;
-    }
     default:
         errno = EINVAL;
         return 1;
@@ -292,20 +565,37 @@ _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
     return 0;
 }
 
+PERL_STATIC_FORCE_INLINE NV
+_nv_clock_gettime(pTHX_ clockid_t clock_id, bool * statusp)
+{
+    FT_t ft;
+    unsigned __int64 ticks;
+    unsigned __int64 time_sys;
+
+    *statusp = 0;
+    switch (clock_id) {
+    case CLOCK_REALTIME:
+        GetSystemTimePreciseAsFileTime(&ft.ft_val);
+        time_sys = ft.ft_i64;
+        return ((NV)((U64)((U64)time_sys) - ((U64)EPOCH_BIAS))) / ((NV)NV_1E7);
+    case CLOCK_MONOTONIC:
+        QueryPerformanceCounter((LARGE_INTEGER*)&ft.ft_i64);
+        ticks = ft.ft_i64;
+        return ((NV)ticks) / tick_frequency_nv;
+    default:
+        *statusp = 1;
+        errno = EINVAL;
+        return -1.0;
+    }
+}
+
 static int
 _clock_getres(clockid_t clock_id, struct timespec *tp)
 {
-    unsigned __int64 freq, qpc_res_ns;
-
-    QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-    qpc_res_ns = IV_1E9 > freq ? IV_1E9 / freq : 1;
-
     switch (clock_id) {
     case CLOCK_REALTIME:
         tp->tv_sec = 0;
-        /* the resolution can't be smaller than 100ns because our implementation
-         * of CLOCK_REALTIME is using FILETIME internally */
-        tp->tv_nsec = (long)(qpc_res_ns > 100 ? qpc_res_ns : 100);
+        tp->tv_nsec = (long)qpc_res_ns_realtime;
         break;
 
     case CLOCK_MONOTONIC:
@@ -616,24 +906,55 @@ myU2time(pTHX_ UV *ret)
     return status;
 }
 
+#ifdef PERL_IMPLICIT_CONTEXT
+static NV myNVtime_cxt(pTHX);
+#endif
+
 static NV
 myNVtime()
 {
 #  ifdef WIN32
     dTHX;
+#    ifdef PERL_IMPLICIT_CONTEXT
+   return myNVtime_cxt(aTHX);
+#    endif
 #  endif
+#ifdef HAS_NV_GETTIMEOFDAY
+    return nv_gettimeofday();
+#else
     struct timeval Tp;
     int status;
     status = gettimeofday (&Tp, NULL);
     return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
+#endif
 }
+
+#ifdef PERL_IMPLICIT_CONTEXT
+
+static NV
+myNVtime_cxt(pTHX)
+{
+#ifdef HAS_NV_GETTIMEOFDAY
+    return nv_gettimeofday();
+#else
+    struct timeval Tp;
+    int status;
+    status = gettimeofday (&Tp, NULL);
+    return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
+#endif
+}
+
+#endif
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
-static void
-hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
+/*  Force inline this because it has only 1 caller:
+        XSUB void stat(...) PROTOTYPE: ;$
+    Change back to plain "static", if in the future a 2nd call site is added */
+
+PERL_STATIC_FORCE_INLINE void
+S_hrstatns(pTHX_ UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 {
-    dTHX;
 #if TIME_HIRES_STAT == 1
     *atime_nsec = PL_statcache.st_atimespec.tv_nsec;
     *mtime_nsec = PL_statcache.st_mtimespec.tv_nsec;
@@ -660,6 +981,8 @@ hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
     *ctime_nsec = 0;
 #endif /* !TIME_HIRES_STAT */
 }
+
+#define hrstatns(_at,_mt,_ct) S_hrstatns(aTHX_ (_at),(_mt),(_ct))
 
 /* Until Apple implements clock_gettime()
  * (ditto clock_getres() and clock_nanosleep())
@@ -912,6 +1235,46 @@ nsec_without_unslept(struct timespec *sleepfor,
 #  define IS_SAFE_PATHNAME(pv, len, opname) (((len)>1)&&memchr((pv), 0, (len)-1)?(SETERRNO(ENOENT, LIB_INVARG),WARNEMU(opname),FALSE):(TRUE))
 #endif
 
+static void
+S_croak_xs_unimplemented(CV *const cv);
+
+static void
+S_croak_xs_unimplemented(CV *const cv)
+{
+    dTHX;
+    /* added in 5.21.4 commit c5569a55d2 - 8/28/2014 6:56:30 PM - cv_name */
+#ifdef cv_name
+    SV* sv = cv_name(cv, NULL, 0);
+    Perl_croak_nocontext(
+        "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1), SvPVX(sv));
+#else
+    char buf[sizeof("CODE(0x%" UVxf ")") + (sizeof(UV)*8)];
+    const char * pv1;
+    const GV *const gv = CvGV(cv);
+    if (gv) {
+        const char *const gvname = GvNAME(gv);
+        const HV *const stash = GvSTASH(gv);
+        const char *const hvname = stash ? HvNAME(stash) : NULL;
+        if (hvname)
+            Perl_croak_nocontext("%s::%s(): unimplemented in this platform",
+                hvname, gvname);
+        else {
+            pv1 = gvname;
+            goto one_str;
+        }
+    } else {
+        my_sprintf(buf, sizeof(buf), "CODE(0x%" UVxf ")", PTR2UV(cv));
+        pv1 = buf;
+
+        one_str:
+        Perl_croak_nocontext(
+            "%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1),
+            pv1);
+    }
+#endif
+}
+#define croak_xs_unimplemented        S_croak_xs_unimplemented
+
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 
 PROTOTYPES: ENABLE
@@ -921,12 +1284,95 @@ BOOT:
 #ifdef MY_CXT_KEY
         MY_CXT_INIT;
 #endif
+#if defined(WIN32) || defined(CYGWIN_WITH_W32API)
+{
+    unsigned __int64 l_qpc_res_ns;
+    unsigned __int64 l_qpc_res_ns_realtime;
+    unsigned __int64 l_tick_frequency = tick_frequency;
+    if (l_tick_frequency == 0) { /* no DllMain() in very rare static Perls */
+/* from MSDN: >= WinXP, function will always succeed and never return zero */
+        unsigned __int64 l_tick_frequency_mem;
+        if (!QueryPerformanceFrequency((LARGE_INTEGER*)&l_tick_frequency_mem))
+            croak("%s::%s(): unimplemented in this platform" + (sizeof("%s::")-1),
+                "QueryPerformanceFrequency");
+        l_tick_frequency = l_tick_frequency_mem;
+             /* 32-bit CPU anti-sharding paranoia */
+        tick_frequency_nv = (NV)l_tick_frequency;
+        S_InterlockedExchange64(&tick_frequency, l_tick_frequency);
+    }
+    l_qpc_res_ns = qpc_res_ns;
+    if (l_qpc_res_ns == 0) {
+        l_qpc_res_ns = IV_1E9 > l_tick_frequency ? IV_1E9 / l_tick_frequency : 1;
+        S_InterlockedExchange64(&qpc_res_ns, l_qpc_res_ns);
+    }
+    l_qpc_res_ns_realtime = qpc_res_ns_realtime;
+    if (l_qpc_res_ns_realtime == 0) {
+    /* the resolution can't be smaller than 100ns because our implementation
+     * of CLOCK_REALTIME is using FILETIME internally */
+        l_qpc_res_ns_realtime = l_qpc_res_ns > 100 ? l_qpc_res_ns : 100;
+        S_InterlockedExchange64(&qpc_res_ns_realtime, l_qpc_res_ns_realtime);
+    }
+    {/* Remove a couple jump stub funcs between kernel32->kernelbase->ntdll
+        for perf reasons. RtlQueryPerformanceCounter() was added in NT 6.1,
+        so a fallback path is still required to QPC()@K32.dll. */
+        pfnQueryPerformanceCounter_T QPCfn = pfnQueryPerformanceCounter;
+        if (!QPCfn) {
+            HMODULE hmod = GetModuleHandleW(L"NTDLL.DLL");
+            if (hmod) {
+                QPCfn = (pfnQueryPerformanceCounter_T)GetProcAddress(hmod,"RtlQueryPerformanceCounter");
+                if (QPCfn)
+                    goto QPC_done;
+            }
+#undef QueryPerformanceCounter
+            QPCfn = QueryPerformanceCounter; /* Get the public API fallback sym. */
+#undef QueryPerformanceCounter
+#QueryPerformanceCounter pfnQueryPerformanceCounter
+            QPC_done:
+            S_InterlockedExchangePointer(&pfnQueryPerformanceCounter, QPCfn);
+        }
+    }
+    {/* Remove 2 jump stub funcs between kernel32->kernelbase for perf reasons.
+        kernelbase.dll is somewhat new to the Win32/NT OS, so keep the fallback. */
+        pfnGetSystemTimeAsFileTime_T GSTAFTfn = pfnGetSystemTimeAsFileTime;
+        if (!GSTAFTfn) {
+            HMODULE hmod = GetModuleHandleW(L"KERNELBASE.DLL");
+            if (hmod) {
+                GSTAFTfn = (pfnGetSystemTimeAsFileTime_T)GetProcAddress(hmod,"GetSystemTimeAsFileTime");
+                if (GSTAFTfn)
+                    goto GSTAFT_done;
+            }
+#undef GetSystemTimeAsFileTime
+            GSTAFTfn = GetSystemTimeAsFileTime; /* Get the public API fallback sym. */
+#undef GetSystemTimeAsFileTime
+#GetSystemTimeAsFileTime pfnGetSystemTimeAsFileTime
+            GSTAFT_done:
+            S_InterlockedExchangePointer(&pfnGetSystemTimeAsFileTime, GSTAFTfn);
+        }
+    }
+}
+#endif
 #ifdef HAS_GETTIMEOFDAY
         {
-            (void) hv_store(PL_modglobal, "Time::NVtime", 12,
-                            newSViv(PTR2IV(myNVtime)), 0);
-            (void) hv_store(PL_modglobal, "Time::U2time", 12,
-                            newSViv(PTR2IV(myU2time)), 0);
+            SV* sv = newSV_type(SVt_PVIV);
+#ifdef PERL_IMPLICIT_CONTEXT
+            static NV (* const pMyNVtime_cxt)(pTHX) = myNVtime_cxt;
+#else
+            static NV (* const pMyNVtime_cxt)(pTHX) = myNVtime;
+#endif
+/*          Don't bother making a 5/9 byte struct{void*; char;} just for '\0'.
+            It is 8/16 bytes after padding. This SVPV will never be "printed". */
+            SvCUR_set(sv, sizeof(pMyNVtime_cxt));
+            SvLEN_set(sv, 0);
+            SvIV_set(sv, PTR2IV(myNVtime));
+            SvPV_set(sv, (char *)(&pMyNVtime_cxt));
+            SvPOK_on(sv);
+            SvIOK_on(sv);
+            SvREADONLY_on(sv);
+            {
+                HV* const modglobal = PL_modglobal;
+                (void)hv_stores(modglobal, "Time::NVtime", sv);
+                (void)hv_stores(modglobal, "Time::U2time", newSViv(PTR2IV(myU2time)));
+            }
         }
 #endif
 #if defined(PERL_DARWIN)
@@ -934,6 +1380,113 @@ BOOT:
         MUTEX_INIT(&darwin_time_mutex);
 #  endif
 #endif
+#if defined(HAS_GETITIMER) && defined(HAS_SETITIMER)
+#  define GETITIMER_SUBSTR NUM2PTR(const char *, "Time::HiRes::getitimer")+13
+#  define SETITIMER_SUBSTR NUM2PTR(const char *, "Time::HiRes::setitimer")+13
+#else
+#  define GETITIMER_SUBSTR NUM2PTR(const char *, "d_getitimer")+2
+#  define SETITIMER_SUBSTR NUM2PTR(const char *, "d_setitimer")+2
+#endif
+#define INIT1 INIT2(sym_usleep, NUM2PTR(const char *, "Time::HiRes::usleep")+13, sizeof("usleep")-1, NULL, 0) \
+INIT2(sym_sleep, NUM2PTR(const char *, "Time::HiRes::sleep")+13, sizeof("sleep")-1, NULL, 0) \
+INIT2(sym_ualarm, NUM2PTR(const char *, "Time::HiRes::ualarm")+13, sizeof("ualarm")-1, NULL, 0) \
+INIT2(sym_alarm, NUM2PTR(const char *, "Time::HiRes::alarm")+13, sizeof("alarm")-1, NULL, 0) \
+INIT2(sym_gettimeofday, NUM2PTR(const char *, "Time::HiRes::gettimeofday")+13, sizeof("gettimeofday")-1, NULL, 0) \
+INIT2(sym_time, NUM2PTR(const char *, "Time::HiRes::time")+13, sizeof("time")-1, NULL, 0) \
+INIT2(sym_tv_interval, "tv_interval", sizeof("tv_interval")-1, NULL, 0) \
+INIT2(sym_getitimer, GETITIMER_SUBSTR, sizeof("getitimer")-1, NULL, 0) \
+INIT2(sym_setitimer, SETITIMER_SUBSTR, sizeof("setitimer")-1, NULL, 0) \
+INIT2(sym_nanosleep, NUM2PTR(const char *, "Time::HiRes::nanosleep")+13, sizeof("nanosleep")-1, NULL, 0) \
+INIT2(sym_clock_gettime, NUM2PTR(const char *, "Time::HiRes::clock_gettime")+13, sizeof("clock_gettime")-1, NULL, 0) \
+INIT2(sym_clock_getres, NUM2PTR(const char *, "Time::HiRes::clock_getres")+13, sizeof("clock_getres")-1, NULL, 0) \
+INIT2(sym_clock, NUM2PTR(const char *, "Time::HiRes::clock")+13, sizeof("clock")-1, NULL, 0) \
+INIT2(sym_clock_nanosleep, NUM2PTR(const char *, "Time::HiRes::clock_nanosleep")+13, sizeof("clock_nanosleep")-1, NULL, 0) \
+INIT2(sym_CLOCKS_PER_SEC, "CLOCKS_PER_SEC", sizeof("CLOCKS_PER_SEC")-1, NULL, 0) \
+INIT2(sym_CLOCK_BOOTTIME, "CLOCK_BOOTTIME", sizeof("CLOCK_BOOTTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_HIGHRES, "CLOCK_HIGHRES", sizeof("CLOCK_HIGHRES")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC, "CLOCK_MONOTONIC", sizeof("CLOCK_MONOTONIC")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_COARSE, "CLOCK_MONOTONIC_COARSE", sizeof("CLOCK_MONOTONIC_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_FAST, "CLOCK_MONOTONIC_FAST", sizeof("CLOCK_MONOTONIC_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_PRECISE, "CLOCK_MONOTONIC_PRECISE", sizeof("CLOCK_MONOTONIC_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_MONOTONIC_RAW, "CLOCK_MONOTONIC_RAW", sizeof("CLOCK_MONOTONIC_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_PROCESS_CPUTIME_ID, "CLOCK_PROCESS_CPUTIME_ID", sizeof("CLOCK_PROCESS_CPUTIME_ID")-1, NULL, 0) \
+INIT2(sym_CLOCK_PROF, "CLOCK_PROF", sizeof("CLOCK_PROF")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME, "CLOCK_REALTIME", sizeof("CLOCK_REALTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_COARSE, "CLOCK_REALTIME_COARSE", sizeof("CLOCK_REALTIME_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_FAST, "CLOCK_REALTIME_FAST", sizeof("CLOCK_REALTIME_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_PRECISE, "CLOCK_REALTIME_PRECISE", sizeof("CLOCK_REALTIME_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_REALTIME_RAW, "CLOCK_REALTIME_RAW", sizeof("CLOCK_REALTIME_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_SECOND, "CLOCK_SECOND", sizeof("CLOCK_SECOND")-1, NULL, 0) \
+INIT2(sym_CLOCK_SOFTTIME, "CLOCK_SOFTTIME", sizeof("CLOCK_SOFTTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_THREAD_CPUTIME_ID, "CLOCK_THREAD_CPUTIME_ID", sizeof("CLOCK_THREAD_CPUTIME_ID")-1, NULL, 0) \
+INIT2(sym_CLOCK_TIMEOFDAY, "CLOCK_TIMEOFDAY", sizeof("CLOCK_TIMEOFDAY")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME, "CLOCK_UPTIME", sizeof("CLOCK_UPTIME")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_COARSE, "CLOCK_UPTIME_COARSE", sizeof("CLOCK_UPTIME_COARSE")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_FAST, "CLOCK_UPTIME_FAST", sizeof("CLOCK_UPTIME_FAST")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_PRECISE, "CLOCK_UPTIME_PRECISE", sizeof("CLOCK_UPTIME_PRECISE")-1, NULL, 0) \
+INIT2(sym_CLOCK_UPTIME_RAW, "CLOCK_UPTIME_RAW", sizeof("CLOCK_UPTIME_RAW")-1, NULL, 0) \
+INIT2(sym_CLOCK_VIRTUAL, "CLOCK_VIRTUAL", sizeof("CLOCK_VIRTUAL")-1, NULL, 0) \
+INIT2(sym_ITIMER_PROF, "ITIMER_PROF", sizeof("ITIMER_PROF")-1, NULL, 0) \
+INIT2(sym_ITIMER_REAL, "ITIMER_REAL", sizeof("ITIMER_REAL")-1, NULL, 0) \
+INIT2(sym_ITIMER_REALPROF, "ITIMER_REALPROF", sizeof("ITIMER_REALPROF")-1, NULL, 0) \
+INIT2(sym_ITIMER_VIRTUAL, "ITIMER_VIRTUAL", sizeof("ITIMER_VIRTUAL")-1, NULL, 0) \
+INIT2(sym_TIMER_ABSTIME, "TIMER_ABSTIME", sizeof("TIMER_ABSTIME")-1, NULL, 0) \
+INIT2(sym_d_usleep, "d_usleep", sizeof("d_usleep")-1, NUM2PTR(const char *, "Time::HiRes::usleep")+13, 1) \
+INIT2(sym_d_ualarm, "d_ualarm", sizeof("d_ualarm")-1, NUM2PTR(const char *, "Time::HiRes::ualarm")+13, 1) \
+INIT2(sym_d_gettimeofday, "d_gettimeofday", sizeof("d_gettimeofday")-1, NUM2PTR(const char *, "Time::HiRes::gettimeofday")+13, 1) \
+INIT2(sym_d_getitimer, "d_getitimer", sizeof("d_getitimer")-1, GETITIMER_SUBSTR, 1) \
+INIT2(sym_d_setitimer, "d_setitimer", sizeof("d_setitimer")-1, SETITIMER_SUBSTR, 1) \
+INIT2(sym_d_nanosleep, "d_nanosleep", sizeof("d_nanosleep")-1, NUM2PTR(const char *, "Time::HiRes::nanosleep")+13, 1) \
+INIT2(sym_d_clock_gettime, "d_clock_gettime", sizeof("d_clock_gettime")-1, NUM2PTR(const char *, "Time::HiRes::clock_gettime")+13, 1) \
+INIT2(sym_d_clock_getres, "d_clock_getres", sizeof("d_clock_getres")-1, NUM2PTR(const char *, "Time::HiRes::clock_getres")+13, 1) \
+INIT2(sym_d_clock, "d_clock", sizeof("d_clock")-1, NUM2PTR(const char *, "Time::HiRes::clock")+13, 1) \
+INIT2(sym_d_clock_nanosleep, "d_clock_nanosleep", sizeof("d_clock_nanosleep")-1, NUM2PTR(const char *, "Time::HiRes::clock_nanosleep")+13, 1) \
+INIT2(sym_d_hires_stat, "d_hires_stat", sizeof("d_hires_stat")-1, NULL, 0) \
+INIT2(sym_d_futimens, "d_futimens", sizeof("d_futimens")-1, NULL, 0) \
+INIT2(sym_d_utimensat, "d_utimensat", sizeof("d_utimensat")-1, NULL, 0) \
+INIT2(sym_d_hires_utime, "d_hires_utime", sizeof("d_hires_utime")-1, NULL, 0) \
+INIT2(sym_stat, NUM2PTR(const char *, "Time::HiRes::stat")+13, sizeof("stat")-1, NULL, 0) \
+INIT2(sym_lstat, NUM2PTR(const char *, "Time::HiRes::lstat")+13, sizeof("lstat")-1, NULL, 0) \
+INIT2(sym_utime, NUM2PTR(const char *, "Time::HiRes::utime")+13, sizeof("utime")-1, NULL, 0)
+/* A test inside ../dist/XSLoader/t/XSLoader.t, doesn't allow us to
+   pass any args from our .pm to .xs. So this idea is rejected:
+        XSLoader::load( 'Time::HiRes', $XS_VERSION, \@EXPORT_OK );
+        if (items != 3 || !SvROK((rv=ST(2))) || (SvTYPE(SvRV(rv))!=SVt_PVAV)
+            croak_xs_usage(cv, "class, version, export_ok"); */
+#undef INIT2
+#define INIT2(_s, _str, _l, _d, _db) ((_db) ? (_d) : (_str)),
+        { /* All C strings are shared with EU::PXS's or constant()'s codegen. */
+            static const char * const expokpv[] = {
+                INIT1
+            };
+#undef INIT2
+#define INIT2(_s, _str, _l, _d, _db) ((_db) ? NUM2PTR(I8,-NUM2PTR(I8,_l)) : NUM2PTR(I8,_l)),
+            static const I8 expoklen[] = {
+                INIT1
+            };
+#undef INIT2
+            char buf [64];
+            GV* gv = gv_fetchpvs("Time::HiRes::EXPORT_OK", GV_ADDMULTI, SVt_PVAV);
+            AV* av = GvAV(gv);
+            int i = 0;
+            buf[0] = 'd';
+            buf[1] = '_';
+            av_extend(av, C_ARRAY_LENGTH(expoklen));
+            for(;i < C_ARRAY_LENGTH(expoklen); i++) {
+                I8 l = expoklen[i];
+                const char * pv = expokpv[i];
+                if (l < 0) { /* neg val is a "d_" prefixed identifier */
+                    l = -l; /* +1 for "\0" -2 for "d_" */
+                    Copy(pv, &buf[2], (l+1)-2, char);
+                    pv = buf;
+                }
+#ifdef av_store_simple
+                av_store_simple(av, i, newSVpvn_share(pv, l, 0));
+#else
+                av_store(av, i, newSVpvn_share(pv, l, 0));
+#endif
+            }
+        }
     }
 
 #if defined(USE_ITHREADS) && defined(MY_CXT_KEY)
@@ -949,13 +1502,23 @@ INCLUDE: const-xs.inc
 
 #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 
-NV
+void
 usleep(useconds)
     NV useconds
     PREINIT:
+#ifndef HAS_NV_GETTIMEOFDAY
         struct timeval Ta, Tb;
+#else
+        NV Ta_nv, Tb_nv;
+#endif
+        SV* rsv;
+        NV RETVAL;
     CODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Ta, NULL);
+#else
+        Ta_nv = nv_gettimeofday();
+#endif
         if (items > 0) {
             if (useconds >= NV_1E6) {
                 IV seconds = (IV) (useconds / NV_1E6);
@@ -967,63 +1530,80 @@ usleep(useconds)
                     useconds -= NV_1E6 * seconds;
                 }
             } else if (useconds < 0.0)
-                croak("Time::HiRes::usleep(%" NVgf
-                      "): negative time not invented yet", useconds);
-
+                croak("%s(%" NVgf "%s",
+                      "Time::HiRes::usleep", useconds,
+                      "): negative time not invented yet");
             usleep((U32)useconds);
         } else
             PerlProc_pause();
-
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Tb, NULL);
 #  if 0
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = NV_1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
-
-    OUTPUT:
-        RETVAL
+#else
+        Tb_nv = nv_gettimeofday();
+        RETVAL = NV_1E6*(Tb_nv - Ta_nv);
+#endif
+    TMR_TARGn(rsv, RETVAL, 1);
+    SETs(rsv);
+    return; /* no PUTBACK no PUSH, 1 in, 1 out */
 
 #  if defined(TIME_HIRES_NANOSLEEP)
 
-NV
+void
 nanosleep(nsec)
     NV nsec
     PREINIT:
         struct timespec sleepfor, unslept;
+        SV* rsv;
+        NV RETVAL;
     CODE:
         if (nsec < 0.0)
-            croak("Time::HiRes::nanosleep(%" NVgf
-                  "): negative time not invented yet", nsec);
+            croak("%s(%" NVgf "%s", "Time::HiRes::nanosleep", nsec,
+                  "): negative time not invented yet");
         nanosleep_init(nsec, &sleepfor, &unslept);
         if (nanosleep(&sleepfor, &unslept) == 0) {
             RETVAL = nsec;
         } else {
             RETVAL = nsec_without_unslept(&sleepfor, &unslept);
         }
-    OUTPUT:
-        RETVAL
+        TMR_TARGn(rsv, RETVAL, 1);
+        SETs(rsv);
+        return; /* no PUTBACK no PUSH, 1 in, 1 out */
 
 #  else  /* #if defined(TIME_HIRES_NANOSLEEP) */
 
-NV
+NV_DIE
 nanosleep(nsec)
-    NV nsec
+    NV_DIE nsec
     CODE:
         PERL_UNUSED_ARG(nsec);
-        croak("Time::HiRes::nanosleep(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
 
 #  endif /* #if defined(TIME_HIRES_NANOSLEEP) */
 
-NV
+void
 sleep(...)
 PROTOTYPE: ;$
     PREINIT:
+#ifndef HAS_NV_GETTIMEOFDAY
         struct timeval Ta, Tb;
-    CODE:
+#else
+        NV Ta_nv, Tb_nv;
+#endif
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Ta, NULL);
+#else
+        Ta_nv = nv_gettimeofday();
+#endif
         if (items > 0) {
             NV seconds  = SvNV(ST(0));
             if (seconds >= 0.0) {
@@ -1039,35 +1619,41 @@ PROTOTYPE: ;$
                     useconds = -(IV)useconds;
 #  endif /* #if defined(__sparc64__) && defined(__GNUC__) */
                     if ((IV)useconds < 0)
-                        croak("Time::HiRes::sleep(%" NVgf
+                        croak("%s(%" NVgf
                               "): internal error: useconds < 0 (unsigned %" UVuf
-                              " signed %" IVdf ")",
+                              " signed %" IVdf ")", "Time::HiRes::sleep",
                               seconds, useconds, (IV)useconds);
                 }
                 usleep(useconds);
             } else
-                croak("Time::HiRes::sleep(%" NVgf
-                      "): negative time not invented yet", seconds);
+                croak("%s(%" NVgf "%s",
+                      "Time::HiRes::sleep", seconds,
+                      "): negative time not invented yet");
         } else
             PerlProc_pause();
-
+#ifndef HAS_NV_GETTIMEOFDAY
         gettimeofday(&Tb, NULL);
 #  if 0
         printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #  endif
         RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
-
-    OUTPUT:
-        RETVAL
+#else
+        Tb_nv = nv_gettimeofday();
+        RETVAL = Tb_nv - Ta_nv;
+#endif
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv);
+        PUTBACK;
+        return;
 
 #else  /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
-NV
+NV_DIE
 usleep(useconds)
-    NV useconds
+    NV_DIE useconds
     CODE:
         PERL_UNUSED_ARG(useconds);
-        croak("Time::HiRes::usleep(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1076,13 +1662,18 @@ usleep(useconds)
 
 #ifdef HAS_UALARM
 
-IV
+void
 ualarm(useconds,uinterval=0)
     int useconds
     int uinterval
-    CODE:
+    PREINIT:
+        SV* rsv;
+        IV RETVAL;
+    PPCODE:
         if (useconds < 0 || uinterval < 0)
-            croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, uinterval);
+            croak("%s(%d, %d%s",
+                "Time::HiRes::ualarm", useconds, uinterval,
+                "): negative time not invented yet");
 #  if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
         {
             struct itimerval itv;
@@ -1102,19 +1693,23 @@ ualarm(useconds,uinterval=0)
 
         RETVAL = ualarm(useconds, uinterval);
 #  endif
+    TMR_TARGi(rsv, RETVAL, 1);
+    PUSHs(rsv);
+    PUTBACK;
+    return;
 
-    OUTPUT:
-        RETVAL
-
-NV
+void
 alarm(seconds,interval=0)
     NV seconds
     NV interval
-    CODE:
+    PREINIT:
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
         if (seconds < 0.0 || interval < 0.0)
-            croak("Time::HiRes::alarm(%" NVgf ", %" NVgf
-                  "): negative time not invented yet", seconds, interval);
-
+            croak("%s(%" NVgf ", %" NVgf "%s",
+                  "Time::HiRes::alarm", seconds, interval,
+                  "): negative time not invented yet");
         {
             IV iseconds = (IV)seconds;
             IV iinterval = (IV)interval;
@@ -1152,32 +1747,33 @@ alarm(seconds,interval=0)
             RETVAL = (NV)ualarm( useconds, uinterval ) / NV_1E6;
 #  endif
         }
-
-    OUTPUT:
-        RETVAL
+    TMR_TARGn(rsv, RETVAL, 1);
+    PUSHs(rsv);
+    PUTBACK;
+    return;
 
 #else /* #ifdef HAS_UALARM */
 
-int
+int die_t
 ualarm(useconds,interval=0)
-    int useconds
-    int interval
+    int die_t useconds
+    int die_t interval
     CODE:
         PERL_UNUSED_ARG(useconds);
         PERL_UNUSED_ARG(interval);
-        croak("Time::HiRes::ualarm(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = -1;
     OUTPUT:
         RETVAL
 
-NV
+NV_DIE
 alarm(seconds,interval=0)
-    NV seconds
-    NV interval
+    NV_DIE seconds
+    NV_DIE interval
     CODE:
         PERL_UNUSED_ARG(seconds);
         PERL_UNUSED_ARG(interval);
-        croak("Time::HiRes::alarm(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1186,38 +1782,98 @@ alarm(seconds,interval=0)
 
 #ifdef HAS_GETTIMEOFDAY
 
+#ifdef HAS_NV_GETTIMEOFDAY
+#  define HAS_NV_GETTIMEOFDAY_BOOL 1
+#else
+#  define HAS_NV_GETTIMEOFDAY_BOOL 0
+#endif
+
 void
 gettimeofday()
     PREINIT:
         struct timeval Tp;
-    PPCODE:
         int status;
+        OP* const op = PL_op;
+        U8 is_G_LIST = GIMME_V == G_LIST;
+        NV nv;
+        const U8 do_taint = 1;
+    PPCODE:
+        if (is_G_LIST)
+            EXTEND(sp, 2);
+        else if(HAS_NV_GETTIMEOFDAY_BOOL) {
+#ifdef HAS_NV_GETTIMEOFDAY
+            nv = nv_gettimeofday();
+#endif
+            goto ret_1_nv;
+        }
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
-            if (GIMME_V == G_LIST) {
-                EXTEND(sp, 2);
-                PUSHs(sv_2mortal(newSViv(Tp.tv_sec)));
-                PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
+            if (HAS_NV_GETTIMEOFDAY_BOOL || is_G_LIST) {
+                /* copy to registers to prove sv_2mortal/newSViv */
+                IV sec = Tp.tv_sec; /* can't modify the values */
+                IV usec = Tp.tv_usec;
+                SV* rsv;
+                TMR_newSViv_mortal(rsv, sec);
+                PUSHs(rsv);
+                TMR_newSViv_mortal(rsv, usec);
+                PUSHs(rsv);
             } else {
-                EXTEND(sp, 1);
-                PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / NV_1E6))));
+                /* no Perl_leave_adjust_stacks() hazard here,
+                   only a PP vs call_sv() hazard */
+                NV TARGn_nv;
+                SV* rsv;
+                nv = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
+
+                ret_1_nv:
+                TARGn_nv = nv;
+                if (op->op_private & OPpENTERSUB_HASTARG) {
+                    rsv = PAD_SV(op->op_targ);
+                    if (LIKELY(
+                          ((SvFLAGS(rsv) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_NV)
+                        & (do_taint ? !TAINT_get : 1)))
+                    {
+                        /* Cheap SvNOK_only().
+                         * Assert that flags which SvNOK_only() would test or
+                         * clear can't be set, because we're SVt_NV */
+                        assert(!(SvFLAGS(rsv) &
+                            (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_NOK|SVp_NOK)))));
+                        SvFLAGS(rsv) |= (SVf_NOK|SVp_NOK);
+                        SvNV_set(rsv, TARGn_nv);
+                    }
+                    else
+                        sv_setnv_mg(rsv, TARGn_nv);
+                }
+                else {
+                    TMR_newSVnv_mortal(rsv, TARGn_nv);
+                }
+                PUSHs(rsv);
             }
         }
 
-NV
+void
 time()
     PREINIT:
+        SV* rsv;
+        NV RETVAL;
+#ifndef HAS_NV_GETTIMEOFDAY
         struct timeval Tp;
-    CODE:
         int status;
+#endif
+    CODE:
+#ifndef HAS_NV_GETTIMEOFDAY
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
             RETVAL = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
         } else {
             RETVAL = -1.0;
         }
-    OUTPUT:
-        RETVAL
+#else
+        RETVAL = nv_gettimeofday();
+#endif
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv); /* 0 in, 1 out, entersub guarenteed 1 slot */
+        PUTBACK;
+        return;
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
@@ -1235,9 +1891,10 @@ setitimer(which, seconds, interval = 0)
         struct itimerval oldit;
     PPCODE:
         if (seconds < 0.0 || interval < 0.0)
-            croak("Time::HiRes::setitimer(%" IVdf ", %" NVgf ", %" NVgf
-                  "): negative time not invented yet",
-                  (IV)which, seconds, interval);
+            croak("%s(%" IVdf ", %" NVgf ", %" NVgf "%s",
+                  "Time::HiRes::setitimer",
+                  (IV)which, seconds, interval,
+                  "): negative time not invented yet");
         newit.it_value.tv_sec  = (IV)seconds;
         newit.it_value.tv_usec =
           (IV)((seconds  - (NV)newit.it_value.tv_sec)    * NV_1E6);
@@ -1249,10 +1906,8 @@ setitimer(which, seconds, interval = 0)
          */
         GCC_DIAG_IGNORE_CPP_COMPAT_STMT;
         if (setitimer(which, &newit, &oldit) == 0) {
-            EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
             if (GIMME_V == G_LIST) {
-                EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
             }
         }
@@ -1269,7 +1924,6 @@ getitimer(which)
          */
         GCC_DIAG_IGNORE_CPP_COMPAT_STMT;
         if (getitimer(which, &nowit) == 0) {
-            EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
             if (GIMME_V == G_LIST) {
                 EXTEND(sp, 1);
@@ -1303,28 +1957,31 @@ PROTOTYPE: $$@
         if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
             utbufp = NULL;
         else {
-            if (SvNV(accessed) < 0.0 || SvNV(modified) < 0.0)
-                croak("Time::HiRes::utime(%" NVgf ", %" NVgf
-                      "): negative time not invented yet",
-                          SvNV(accessed), SvNV(modified));
+            NV modified_nv = SvNV(modified);
+            NV accessed_nv = SvNV(accessed);
+            if (accessed_nv < 0.0 || modified_nv < 0.0)
+                croak("%s(%" NVgf ", %" NVgf "%s", "Time::HiRes::utime",
+                          accessed_nv, modified_nv,
+                          "): negative time not invented yet");
             Zero(&utbuf, sizeof utbuf, char);
 
-            utbuf[0].tv_sec = (Time_t)SvNV(accessed);  /* time accessed */
+            utbuf[0].tv_sec = (Time_t)accessed_nv;  /* time accessed */
             utbuf[0].tv_nsec = (long)(
-                (SvNV(accessed) - (NV)utbuf[0].tv_sec)
+                (accessed_nv - (NV)utbuf[0].tv_sec)
                 * NV_1E9 + (NV)0.5);
 
-            utbuf[1].tv_sec = (Time_t)SvNV(modified);  /* time modified */
+            utbuf[1].tv_sec = (Time_t)modified_nv;  /* time modified */
             utbuf[1].tv_nsec = (long)(
-                (SvNV(modified) - (NV)utbuf[1].tv_sec)
+                (modified_nv - (NV)utbuf[1].tv_sec)
                 * NV_1E9 + (NV)0.5);
         }
 
         while (items > 0) {
+            PerlIO * pio;
             file = POPs; items--;
 
-            if (SvROK(file) && GvIO(SvRV(file)) && IoIFP(sv_2io(SvRV(file)))) {
-	        int fd =  PerlIO_fileno(IoIFP(sv_2io(file)));
+            if (SvROK(file) && GvIO(SvRV(file)) && (pio = IoIFP(sv_2io(SvRV(file))))) {
+	        int fd =  PerlIO_fileno(pio);
                 if (fd < 0) {
                     SETERRNO(EBADF,RMS_IFI);
                 } else {
@@ -1334,10 +1991,10 @@ PROTOTYPE: $$@
                             tot++;
                         }
                     } else {
-                        croak("futimens unimplemented in this platform");
+                        croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_futimens")+2);
                     }
 #  else  /* HAS_FUTIMENS */
-                    croak("futimens unimplemented in this platform");
+                    croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_futimens")+2);
 #  endif /* HAS_FUTIMENS */
                 }
             }
@@ -1345,17 +2002,17 @@ PROTOTYPE: $$@
 #  ifdef HAS_UTIMENSAT
                 if (UTIMENSAT_AVAILABLE) {
                     STRLEN len;
-                    char * name = SvPV(file, len);
+                    const char * name = SvPV_const(file, len);
                     if (IS_SAFE_PATHNAME(name, len, "utime") &&
                         utimensat(AT_FDCWD, name, utbufp, 0) == 0) {
 
                         tot++;
                     }
                 } else {
-                    croak("utimensat unimplemented in this platform");
+                    croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_utimensat")+2);
                 }
 #  else  /* HAS_UTIMENSAT */
-                croak("utimensat unimplemented in this platform");
+                croak("%s unimplemented in this platform", NUM2PTR(const char *, "d_utimensat")+2);
 #  endif /* HAS_UTIMENSAT */
             }
         } /* while items */
@@ -1366,10 +2023,10 @@ PROTOTYPE: $$@
 
 #else  /* #if defined(TIME_HIRES_UTIME) */
 
-I32
+I32_DIE
 utime(accessed, modified, ...)
     CODE:
-        croak("Time::HiRes::utime(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0;
     OUTPUT:
         RETVAL
@@ -1378,31 +2035,44 @@ utime(accessed, modified, ...)
 
 #if defined(TIME_HIRES_CLOCK_GETTIME)
 
-NV
+void
 clock_gettime(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
+#ifndef TIME_HIRES_NV_CLOCK_GETTIME
         struct timespec ts;
-        int status = -1;
-    CODE:
+        int status;
+#endif
+        SV* rsv;
+        NV RETVAL;
+    PPCODE:
 #  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
         status = syscall(SYS_clock_gettime, clock_id, &ts);
 #  else
+#    ifndef TIME_HIRES_NV_CLOCK_GETTIME
         status = clock_gettime(clock_id, &ts);
-#  endif
         RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
-
-    OUTPUT:
-        RETVAL
+#    else
+        {
+            bool status;
+            NV nv = nv_clock_gettime(clock_id, &status);
+            RETVAL = status == 0 ? nv : -1;
+        }
+#    endif
+#  endif
+        TMR_TARGn(rsv, RETVAL, 1);
+        PUSHs(rsv); /* 0 or 1 in, 1 out, PPCODE: did rewind */
+        PUTBACK;
+        return;
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
 
-NV
+NV_DIE
 clock_gettime(clock_id = 0)
-    clockid_t clock_id
+    clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1415,7 +2085,7 @@ NV
 clock_getres(clock_id = CLOCK_REALTIME)
     clockid_t clock_id
     PREINIT:
-        int status = -1;
+        int status;
         struct timespec ts;
     CODE:
 #  ifdef TIME_HIRES_CLOCK_GETRES_SYSCALL
@@ -1430,12 +2100,12 @@ clock_getres(clock_id = CLOCK_REALTIME)
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETRES) */
 
-NV
+NV_DIE
 clock_getres(clock_id = 0)
-    clockid_t clock_id
+    clockid_t die_t clock_id
     CODE:
         PERL_UNUSED_ARG(clock_id);
-        croak("Time::HiRes::clock_getres(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1453,8 +2123,9 @@ clock_nanosleep(clock_id, nsec, flags = 0)
         struct timespec sleepfor, unslept;
     CODE:
         if (nsec < 0.0)
-            croak("Time::HiRes::clock_nanosleep(..., %" NVgf
-                  "): negative time not invented yet", nsec);
+            croak("%s(..., %" NVgf "%s",
+                  "Time::HiRes::clock_nanosleep", nsec,
+                  "): negative time not invented yet");
         nanosleep_init(nsec, &sleepfor, &unslept);
         if (clock_nanosleep(clock_id, flags, &sleepfor, &unslept) == 0) {
             RETVAL = nsec;
@@ -1466,16 +2137,16 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 
 #else  /* if defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME) */
 
-NV
+NV_DIE
 clock_nanosleep(clock_id, nsec, flags = 0)
-    clockid_t clock_id
-    NV  nsec
-    int flags
+    clockid_t die_t clock_id
+    NV_DIE  nsec
+    int die_t flags
     CODE:
         PERL_UNUSED_ARG(clock_id);
         PERL_UNUSED_ARG(nsec);
         PERL_UNUSED_ARG(flags);
-        croak("Time::HiRes::clock_nanosleep(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1497,10 +2168,10 @@ clock()
 
 #else  /* if defined(TIME_HIRES_CLOCK) && defined(CLOCKS_PER_SEC) */
 
-NV
+NV_DIE
 clock()
     CODE:
-        croak("Time::HiRes::clock(): unimplemented in this platform");
+        croak_xs_unimplemented(cv);
         RETVAL = 0.0;
     OUTPUT:
         RETVAL
@@ -1511,39 +2182,57 @@ void
 stat(...)
 PROTOTYPE: ;$
     PREINIT:
-        OP fakeop;
-        int nret;
+        SSize_t nret;
+        SV* sv_arg;
+        SV** SPBASE;
+        U32 op_type = (U32)ix;
     ALIAS:
-        Time::HiRes::lstat = 1
+        Time::HiRes::stat = OP_STAT
+        Time::HiRes::lstat = OP_LSTAT
     PPCODE:
-        XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
+        EXTEND(SP, 13);
+        sv_arg = items == 1 ? ST(0) : DEFSV;
+        /* XXX will pp_stat()/pp_lstat() really modify $_[0] ? */
+        PUSHs(sv_2mortal(THR_newSVsv_cow(sv_arg)));
         PUTBACK;
         ENTER;
         PL_laststatval = -1;
         SAVEOP();
-        Zero(&fakeop, 1, OP);
-        fakeop.op_type = ix ? OP_LSTAT : OP_STAT;
-        fakeop.op_ppaddr = PL_ppaddr[fakeop.op_type];
-        fakeop.op_flags = GIMME_V == G_LIST ? OPf_WANT_LIST :
-            GIMME_V == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID;
-        PL_op = &fakeop;
-        (void)fakeop.op_ppaddr(aTHX);
-        SPAGAIN;
+        {
+            OP* (*ppaddr)(pTHX);
+            U8 gimme = GIMME_V; /* ILP */
+/* extern "C" memset() doesn't know struct OP's alignment. ISO C doesn't
+   promise Zero(); and memset(); will inline.  But this does. Now the CC can
+   detangle for us, what OP fields will get a 0/NULL, or our values. */
+            OP fakeop = {0};
+            fakeop.op_flags = gimme == G_LIST ? OPf_WANT_LIST :
+                gimme == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID; /* ILP */
+            ppaddr = PL_ppaddr[op_type];
+            fakeop.op_type = (U16)op_type;
+            fakeop.op_ppaddr = ppaddr; /* ILP */
+            PL_op = &fakeop;
+            (void)ppaddr(aTHX);
+        }
         LEAVE;
-        nret = SP+1 - &ST(0);
+        SPAGAIN;
+        SPBASE = &ST(0);
+        nret = SP+1 - SPBASE;
         if (nret == 13) {
-            UV atime = SvUV(ST( 8));
-            UV mtime = SvUV(ST( 9));
-            UV ctime = SvUV(ST(10));
             UV atime_nsec;
             UV mtime_nsec;
             UV ctime_nsec;
             hrstatns(&atime_nsec, &mtime_nsec, &ctime_nsec);
-            if (atime_nsec)
-                ST( 8) = sv_2mortal(newSVnv(atime + (NV) atime_nsec / NV_1E9));
-            if (mtime_nsec)
-                ST( 9) = sv_2mortal(newSVnv(mtime + (NV) mtime_nsec / NV_1E9));
-            if (ctime_nsec)
-                ST(10) = sv_2mortal(newSVnv(ctime + (NV) ctime_nsec / NV_1E9));
+            if (atime_nsec) { /* on certain configs hrstatns() is a NOOP */
+                UV atime = SvUV(SPBASE[ 8]);
+                SPBASE[ 8] = sv_2mortal(newSVnv(atime + (NV) atime_nsec / NV_1E9));
+            }
+            if (mtime_nsec) {
+                UV mtime = SvUV(SPBASE[ 9]);
+                SPBASE[ 9] = sv_2mortal(newSVnv(mtime + (NV) mtime_nsec / NV_1E9));
+            }
+            if (ctime_nsec) {
+                UV ctime = SvUV(SPBASE[10]);
+                SPBASE[10] = sv_2mortal(newSVnv(ctime + (NV) ctime_nsec / NV_1E9));
+            }
         }
         XSRETURN(nret);

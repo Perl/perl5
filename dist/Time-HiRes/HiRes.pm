@@ -10,45 +10,8 @@ our @ISA = qw(Exporter);
 
 our @EXPORT = qw( );
 # More or less this same list is in Makefile.PL.  Should unify.
-our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
-                 getitimer setitimer nanosleep clock_gettime clock_getres
-                 clock clock_nanosleep
-                 CLOCKS_PER_SEC
-                 CLOCK_BOOTTIME
-                 CLOCK_HIGHRES
-                 CLOCK_MONOTONIC
-                 CLOCK_MONOTONIC_COARSE
-                 CLOCK_MONOTONIC_FAST
-                 CLOCK_MONOTONIC_PRECISE
-                 CLOCK_MONOTONIC_RAW
-                 CLOCK_PROCESS_CPUTIME_ID
-                 CLOCK_PROF
-                 CLOCK_REALTIME
-                 CLOCK_REALTIME_COARSE
-                 CLOCK_REALTIME_FAST
-                 CLOCK_REALTIME_PRECISE
-                 CLOCK_REALTIME_RAW
-                 CLOCK_SECOND
-                 CLOCK_SOFTTIME
-                 CLOCK_THREAD_CPUTIME_ID
-                 CLOCK_TIMEOFDAY
-                 CLOCK_UPTIME
-                 CLOCK_UPTIME_COARSE
-                 CLOCK_UPTIME_FAST
-                 CLOCK_UPTIME_PRECISE
-                 CLOCK_UPTIME_RAW
-                 CLOCK_VIRTUAL
-                 ITIMER_PROF
-                 ITIMER_REAL
-                 ITIMER_REALPROF
-                 ITIMER_VIRTUAL
-                 TIMER_ABSTIME
-                 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-                 d_nanosleep d_clock_gettime d_clock_getres
-                 d_clock d_clock_nanosleep d_hires_stat
-                 d_futimens d_utimensat d_hires_utime
-                 stat lstat utime
-                );
+# Set by XSLoader::load()/::bootstrap(). See t/clock.t or HiRes.xs for contents.
+our @EXPORT_OK;
 
 our $VERSION = '1.9779';
 our $XS_VERSION = $VERSION;
@@ -90,7 +53,7 @@ sub import {
     goto &Exporter::import;
 }
 
-XSLoader::load( 'Time::HiRes', $XS_VERSION );
+XSLoader::load( 'Time::HiRes', $XS_VERSION);
 
 # Preloaded methods go here.
 

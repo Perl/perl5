@@ -1015,6 +1015,14 @@ sub doConstants {
             push @names, {name => $_, macro => $macro, value => 1,
                           default => ["IV", "0"]};
         }
+        {
+            #disarm chopping off first or last letter of each C string for memEQs()
+            my $sub = \&ExtUtils::Constant::Base::memEQ_clause;
+            *ExtUtils::Constant::Base::memEQ_clause = sub {
+                $_[1]->{checked_at} = 32;
+                return $sub->(@_);
+            };
+        }
         ExtUtils::Constant::WriteConstants(
                                            NAME => 'Time::HiRes',
                                            NAMES => \@names,
