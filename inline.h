@@ -404,11 +404,13 @@ Perl_TOPMARK(pTHX)
 PERL_STATIC_INLINE Stack_off_t
 Perl_POPMARK(pTHX)
 {
+    if (UNLIKELY(PL_markstack_ptr <= PL_markstack))
+        Perl_croak(aTHX_ "panic: MARK underflow");
+
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
                                  "MARK pop  %p %" IVdf "\n",
-                                  (PL_markstack_ptr-1),
-                                  (IV)*(PL_markstack_ptr-1))));
-    assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");
+                                  PL_markstack_ptr,
+                                  (IV)*PL_markstack_ptr)));
     return *PL_markstack_ptr--;
 }
 
