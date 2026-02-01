@@ -1902,7 +1902,7 @@ The C<coderef> argument determines the type of function that will be
 called. If it is C<SvROK()> it is assumed to be a reference to a CV and
 will arrange for the coderef to be called. If it is not SvROK() then it
 is assumed to be a C<SvIV()> which is C<SvIOK()> whose value is a pointer
-to a C function of type C<DESTRUCTORFUNC_t> created using C<PTR2INT()>.
+to a C function of type C<DESTRUCTORFUNC_t> created using C<L</PTR2IV>>.
 Either way the C<args> parameter will be provided to the callback as a
 parameter, although the rules for doing so differ between the Perl and
 C mode. Normally this function is only used directly for the Perl case
