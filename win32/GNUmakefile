@@ -963,6 +963,7 @@ MICROCORE_SRC	=		\
 		..\globals.c	\
 		..\mro_core.c	\
 		..\locale.c	\
+		..\long_names.c	\
 		..\keywords.c	\
 		..\mathoms.c    \
 		..\mg.c		\
