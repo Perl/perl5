@@ -1,7 +1,7 @@
 #
 # Makefile to build perl on Windows using GMAKE.
 # Supported compilers:
-#	Microsoft Visual C++ 12.0 or later
+#	Microsoft Visual C++ 2015 / 14.0 or later
 #	MinGW with gcc-3.4.5-5.3.0
 #	MinGW64 with gcc-4.4.3 or later
 #
@@ -168,6 +168,8 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #CCTYPE		:= MSVC142
 # Visual C++ 2022 (aka Visual C++ 14.3) (full version or Community Edition)
 #CCTYPE		:= MSVC143
+# Visual C++ 2026 (aka Visual C++ 14.5) (full version or Community Edition)
+#CCTYPE		:= MSVC145
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		:= GCC
 

@@ -1,7 +1,7 @@
 #
 # Makefile to build perl on Windows using Microsoft NMAKE.
 # Supported compilers:
-#	Microsoft Visual C++ 12.0 or later
+#	Microsoft Visual C++ 2015 / 14.0 or later
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl543.dll).  Also makes individual DLLs for the XS extensions.
@@ -110,6 +110,8 @@ DEFAULT_INC_EXCLUDES_DOT = define
 #CCTYPE		= MSVC142
 # Visual C++ 2022 (aka Visual C++ 14.3) (full version or Community Edition)
 #CCTYPE		= MSVC143
+# Visual C++ 2026 (aka Visual C++ 14.5) (full version or Community Edition)
+#CCTYPE		= MSVC145
 
 #
 # If you are using Intel C++ Compiler uncomment this
