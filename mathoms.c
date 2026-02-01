@@ -22,7 +22,7 @@
 /*
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl which we cannot completely remove from the core
- * code. There is only one reason these days for functions should be here:
+ * code. The remaining reasons functions should be here are:
  *
  * 1) A function has been replaced by a macro within a minor release,
  *    so XS modules compiled against an older release will expect to
