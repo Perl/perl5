@@ -604,15 +604,19 @@
 :          proto.h: function is declared as PERL_STATIC_FORCE_INLINE and
 :                  __attribute__always_inline__ is added
 :
-:   'm'  Implemented as a macro; there is no function associated with this
-:        name.  There is no long S_ name.
+:   'm'  The implementation is a macro.  There is no long "S_" name form
+:	 created for it.  However, if you also specify the 'p' flag, a long
+:	 name Perl_" form is automatically created.  That form will be an
+:	 actual function on a threaded build unless the 'T' flag is present.
 :
-:        However, you may #define the macro with a long name like 'Perl_foo',
-:        and specify the 'p' flag.  This will cause an embed.h entry to be
-:        created that #defines 'foo' as 'Perl_foo'.  This can be used to make
-:        any macro have a long name, perhaps to avoid name collisions.  If
-:        instead you define the macro as 'PERL_FOO' (all uppercase), the
-:        embed.h entry will use all uppercase.
+:	 The implication of this is that we can swap implementations at will,
+:	 macro-to-function or function-to-macro, without any source code
+:	 changes needed.  That doesn't work for fancy macros that use the C
+:	 preprocessor language for things, like the '#' and '##' commands to
+:	 it, or expanding a single argument to a list, such as 'STR_WITH_LEN'
+:	 does.  And the behavior isn't precisely synonymous if the macro
+:	 evaluates an argument more than once, and is called with that argument
+:	 being an expression with side effects.
 :
 :	 The default visibility of macros created before 5.43 is visible
 :	 everywhere, so the visibility flags are ignored.  Starting in that
@@ -626,6 +630,8 @@
 :             platforms
 :         suppress embed.h entry (when no 'p' flag), as the implementation
 :             should furnish the macro
+:         add long name Perl_ entry (when 'p' flag).  This may be a function in
+:	      long_names.c, and/or an entry in embed.h
 :	  #undef this symbol in embed.h as needed to match the specified
 :	  visibility.
 :
