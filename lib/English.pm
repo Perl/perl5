@@ -1,6 +1,6 @@
 package English;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -191,8 +191,6 @@ sub import {
 # Error status.
 
 	*CHILD_ERROR				= *?	;
-	*OS_ERROR				= *!	;
-	    *ERRNO				= *!	;
 	*OS_ERROR				= *!	;
 	    *ERRNO				= *!	;
 	*EXTENDED_OS_ERROR			= *^E	;
