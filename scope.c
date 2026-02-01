@@ -1891,7 +1891,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 /*
 =for apidoc_section $callback
 =for apidoc      mortal_destructor_sv
-=for apidoc_item MORTALDESTRUCTOR_SV
+=for apidoc_item m||MORTALDESTRUCTOR_SV
 
 These are synonymous.
 
@@ -1927,7 +1927,7 @@ end of the B<current pseudo block> you should look at
 L<perlapi/C<SAVEDESTRUCTOR_X>> instead of this function.
 
 =for apidoc      mortal_svfunc_x
-=for apidoc_item MORTALSVFUNC_X
+=for apidoc_item m||MORTALSVFUNC_X
 
 These are synonymous.
 
