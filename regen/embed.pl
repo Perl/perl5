@@ -4207,8 +4207,10 @@ sub generate_proto_h {
                     }
                     my $argname = $1;
 
-                    if (defined $argname && (! $has_mflag || $binarycompat)) {
-                        if ($nn || $nz) {
+                    if (   defined $argname
+                        && ($args_assert_line || $binarycompat))
+                    {
+                        if ($nn||$nz) {
                             push @asserts, "assert($argname)";
                             if ($nn) {
                                 my $string_n = $n;
@@ -4461,8 +4463,8 @@ sub generate_proto_h {
             $ret .= "\n"
                  .  join( "\n", map { (" " x 8) . $_ } @attrs);
         }
-        $ret .= ';';
-        $ret = "/* $ret */" if $has_mflag;
+        $ret .= ";";
+        $ret = "/* $ret */" unless $args_assert_line;
 
         # Hide the prototype from non-authorized code.  This acts kind of like
         # __attribute__visibility__("hidden") for cases where that can't be
