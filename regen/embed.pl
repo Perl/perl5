@@ -3610,7 +3610,6 @@ my @needed_by_ext_re = qw(
     PARSE_IDENT_ERROR_POSITION
     PARSE_IDENT_ERROR_TEXT
     RExC_parse_advance
-    RXf_PMf_SHIFT_COMPILETIME_
     WARN_HELPER_
 );
 
@@ -3620,8 +3619,6 @@ my @needed_by_ext = qw(
     OPpPARAM_IF_FALSE
     OPpPARAM_IF_UNDEF
     OPpSELF_IN_PAD
-    RXf_PMf_CHARSET_SHIFT_
-    RXf_PMf_SHIFT_NEXT_
 );
 
 # This is a list of symbols that are needed to be visible everywhere and are
@@ -3647,6 +3644,9 @@ my @undocumented_always_visible = qw(
     MEM_WRAP_NEEDS_RUNTIME_CHECK_
     MEM_WRAP_WILL_WRAP_
     NV_BODYLESS_UNION_
+    RXf_PMf_CHARSET_SHIFT_
+    RXf_PMf_SHIFT_COMPILETIME_
+    RXf_PMf_SHIFT_NEXT_
     shifted_octet_
     STATIC_ASSERT_STRUCT_BODY_
     STATIC_ASSERT_STRUCT_NAME_

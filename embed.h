@@ -45,8 +45,6 @@
 #     undef OPpPARAM_IF_FALSE
 #     undef OPpPARAM_IF_UNDEF
 #     undef OPpSELF_IN_PAD
-#     undef RXf_PMf_CHARSET_SHIFT_
-#     undef RXf_PMf_SHIFT_NEXT_
 #     undef utf16_to_utf8
 #     undef utf16_to_utf8_reversed
 #   endif /* !defined(PERL_EXT) */
@@ -58,9 +56,8 @@
 #     undef PARSE_IDENT_ERROR_POSITION
 #     undef PARSE_IDENT_ERROR_TEXT
 #     undef RExC_parse_advance
-#     undef RXf_PMf_SHIFT_COMPILETIME_
 #     undef WARN_HELPER_
-#   endif /* !defined(PERL_EXT_RE_BUILD) */
+#   endif
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */
 
