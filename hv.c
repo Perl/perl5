@@ -995,7 +995,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
        bad API design.  */
     if (LIKELY(HvSHAREKEYS(hv))) {
         entry = new_HE();
-        HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
+        if (keysv_hek) {
+            HeKEY_hek(entry) = share_hek_hek(keysv_hek);
+        } else {
+            HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
+        }
     }
     else if (UNLIKELY(hv == PL_strtab)) {
         /* PL_strtab is usually the only hash without HvSHAREKEYS, so putting
