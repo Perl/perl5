@@ -4680,6 +4680,12 @@ sub embed_h {
                 push @stripped_args, $argname++ for $args->@*;
                 my $arglist = join ",", @stripped_args;
 
+                # The non-threaded case just uses what we generated above for
+                # the /T/ flag case.
+                $ret = "#${ind}ifndef USE_THREADS\n"
+                     . "$ind  $no_thread_full_define" # No \n because no chomp
+                     . "#${ind}endif\n";
+
                 # In the threaded case, the Perl_ form is expecting an aTHX
                 # first argument.  Use mTHX to match that, which isn't passed
                 # on to the short form name, as that is expecting an implicit
@@ -4687,11 +4693,9 @@ sub embed_h {
                 # above for the /T/ flag case.
                 my $mTHX_ = "mTHX";
                 $mTHX_ .= ',' if $arglist ne "";
-                $ret = "#${ind}ifdef USE_THREADS\n"
+                $ret.= "#${ind}ifdef USE_THREADS\n"
                      . "#${ind}  define $full_name($mTHX_$arglist)"
                      .           "  $func($arglist)\n"
-                     . "#${ind}else\n"
-                     . "$ind  $no_thread_full_define" # No \n because no chomp
                      . "#${ind}endif\n";
             }
         }
