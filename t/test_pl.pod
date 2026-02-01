@@ -224,14 +224,15 @@ Otherwise succeeds if C<< abs($got - $expected)/$expected < $range >>.
     within(sin($pi/6), 0.5, 0.0001, "sin(PI/6) is sane");
     within(cos($pi), 0, 0.0001, "cos(PI) is sane");
 
-=item refcount_is($got, $expected, $name)
+=item refcount_is($rv, $expected, $name)
 
-Succeed if the reference count of C<$got> is C<$expected>.
+Succeed if the reference count of the thing referenced by C<$rv> is
+C<$expected>.
 
-    my $x = 1;
-    refcount_is(\$x, 1, "only one reference");
-    my $ref = \$x;
-    refcount_is(\$x, 2, "two references");
+    my $x = [];
+    refcount_is($x, 1, "only one reference");
+    my $ref = $x;
+    refcount_is($x, 2, "two references");
 
 =item object_ok($obj, $isa, $obj_name)
 
