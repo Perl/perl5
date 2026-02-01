@@ -698,9 +698,6 @@ tr/\x{345}/\x{370}/;
 # Lexical and simple arithmetic
 my $test;
 ++$test and $test /= 2;
->>>>
-my $test;
-$test /= 2 if ++$test;
 ####
 # list x
 -((1, 2) x 2);

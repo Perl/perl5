@@ -56,6 +56,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_FLAG_last
         MDEREF_MASK
         MDEREF_SHIFT
+        OPpSTATEMENT
     );
 
 our $AUTOLOAD;
@@ -3498,25 +3499,33 @@ sub logop {
     my $left = $op->first;
     my $right = $op->first->sibling;
     $blockname &&= $self->keyword($blockname);
-    if ($cx < 1 and is_scope($right) and $blockname
-	and $self->{'expand'} < 7)
-    { # if ($a) {$b}
-	$left = $self->deparse($left, 1);
-	$right = $self->deparse($right, 0);
-	return "$blockname ($left) {\n\t$right\n\b}\cK";
-    } elsif ($cx < 1 and $blockname and not $self->{'parens'}
-	     and $self->{'expand'} < 7) { # $b if $a
-	$right = $self->deparse($right, 1);
-	$left = $self->deparse($left, 1);
-	return "$right $blockname $left";
-    } elsif ($cx > $lowprec and $highop) { # $a && $b
-	$left = $self->deparse_binop_left($op, $left, $highprec);
-	$right = $self->deparse_binop_right($op, $right, $highprec);
-	return $self->maybe_parens("$left $highop $right", $cx, $highprec);
-    } else { # $a and $b
-	$left = $self->deparse_binop_left($op, $left, $lowprec);
-	$right = $self->deparse_binop_right($op, $right, $lowprec);
-	return $self->maybe_parens("$left $lowop $right", $cx, $lowprec);
+
+    if ($op->private & OPpSTATEMENT) {
+        if (is_scope($right)) {
+            # if ($a) {$b}
+            $left = $self->deparse($left, 1);
+            $right = $self->deparse($right, 0);
+            return "$blockname ($left) {\n\t$right\n\b}\cK";
+        }
+        else {
+             # $b if $a
+            $right = $self->deparse($right, 1);
+            $left = $self->deparse($left, 1);
+            return "$right $blockname $left";
+        }
+    }
+    else {
+        if ($cx > $lowprec and $highop) {
+            # $a && $b
+            $left = $self->deparse_binop_left($op, $left, $highprec);
+            $right = $self->deparse_binop_right($op, $right, $highprec);
+            return $self->maybe_parens("$left $highop $right", $cx, $highprec);
+        } else {
+            # $a and $b
+            $left = $self->deparse_binop_left($op, $left, $lowprec);
+            $right = $self->deparse_binop_right($op, $right, $lowprec);
+            return $self->maybe_parens("$left $lowop $right", $cx, $lowprec);
+        }
     }
 }
 
@@ -4242,45 +4251,30 @@ sub pp_cond_expr {
     my $cuddle = $self->{'cuddle'};
     my $no_true = 0;
 
-    if (class($false) eq "NULL") {
-        # Handle an empty true or false block that was optimised away.
-        # Note that it's always the false that's missing. But only
-        # when the false branch is empty and is optimised away, is
-        # OPf_SPECIAL set.
-        if (!($op->flags & OPf_SPECIAL)) { # It was an empty true block
-            my $temp = $false; $false = $true; $true = $temp;
-            $no_true = 1;
-            # look for ?: rather than if/else
-            unless ($cx < 1 and (is_scope($false) and $false->name ne "null")) {
-                # $cond ? () : $val2
-                $cond = $self->deparse($cond, 8);
-                $false = $self->deparse($false, 6);
-                return $self->maybe_parens("$cond ? () : $false", $cx, 8);
-            }
-        } else { # Must have been an empty false block
-            # look for ?: rather than if/else
-            unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
-                # $cond ? $val1: ()
-                $cond = $self->deparse($cond, 8);
-                $true = $self->deparse($true, 6);
-                return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
-            }
-        }
-    } else { # Both true and false branches are present
-        # look for ?: rather than if/else
-        unless ($cx < 1 and (is_scope($true) and $true->name ne "null")
-               and (is_scope($false) || is_ifelse_cont($false))
-               and $self->{'expand'} < 7)
-        {
-            # $cond ? $val1 : $val2
-            $cond = $self->deparse($cond, 8);
-            $true = $self->deparse($true, 6);
-            $false = $self->deparse($false, 8);
-            return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
-        }
+    # Note that when an empty true or false block is optimised away,
+    # cond_expr only has two children: a conditional and a single block,
+    # rather than the usual two. When the false branch is empty and is
+    # optimised away, OPf_SPECIAL is set.
+
+    if (class($false) eq "NULL" && !($op->flags & OPf_SPECIAL)) {
+        # It was an empty true block
+        $no_true = 1;
+    }
+
+    unless ($op->private & OPpSTATEMENT) {
+        # it's a ?: rather than an if/else
+
+        $cond = $self->deparse($cond, 8);
+        $true = $self->deparse($true, 6);
+        # has one of the two branches has been optimised away?
+        $false = class($false) eq "NULL" ? '()' : $self->deparse($false, 8);
+        ($true, $false) = ($false, $true) if $no_true;
+        return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
     }
 
     # if/elseif/else etc
+
+    ($true, $false) = ($false, $true) if $no_true;
 
     $cond = $self->deparse($cond, 1);
     $true = ($no_true) ? "\b" : $self->deparse($true, 0);
