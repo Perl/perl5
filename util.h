@@ -95,7 +95,7 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results
  * of rand() */
-#define Perl_internal_drand48() (Perl_drand48_r(&PL_internal_random_state))
+#define Perl_internal_randd() (Perl_drand48_r(&PL_internal_random_state))
 #endif
 
 #ifdef USE_C_BACKTRACE
