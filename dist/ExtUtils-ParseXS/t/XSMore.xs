@@ -36,13 +36,13 @@ This parts are ignored.
 #endif
 
 
-static void
+STATIC void
 outlist(int* a, int* b){
 	*a = 'a';
 	*b = 'b';
 }
 
-static bool
+STATIC bool
 outlist_bool(const char *a, const char *b, char **c)
 {
    dTHX;
@@ -57,7 +57,7 @@ outlist_bool(const char *a, const char *b, char **c)
    return TRUE;
 }
 
-static int
+STATIC int
 outlist_int(const char *a, const char *b, char **c)
 {
    dTHX;
@@ -72,17 +72,17 @@ outlist_int(const char *a, const char *b, char **c)
    return 11;
 }
 
-static int
+STATIC int
 len(const char* const s, int const l){
 	PERL_UNUSED_ARG(s);
 	return l;
 }
 
-static int
+STATIC int
 myadd1(int a, int b)
 { return a + b; }
 
-static int
+STATIC int
 myadd2(int a, int b)
 { return a + b; }
 
