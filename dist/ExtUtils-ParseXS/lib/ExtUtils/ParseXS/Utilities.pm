@@ -22,6 +22,7 @@ our (@ISA, @EXPORT_OK);
   current_line_number
   blurt
   death
+  deathHint
   check_conditional_preprocessor_statements
   escape_file_for_line_directive
   report_typemap_failure
@@ -417,9 +418,19 @@ is called, then instead it will die() with that message.
 
 This is a more obscure twin to C<Warn>, which does the same as C<Warn>,
 but afterwards, outputs any lines contained in the C<$hints> string, with
-each line wrapped in parentheses. For example:
+the paragraph wrapped in parentheses. For example:
 
   $self->WarnHint(@messages,
+    "Have you set the foo switch?\nSee the manual for further info");
+
+
+=item C<< $self->deathHint(@messages, $hints) >>
+
+This is a more obscure twin to C<death>, which does the same as C<death>,
+but afterwards, outputs any lines contained in the C<$hints> string, with
+the paragraph wrapped in parentheses. For example:
+
+  $self->deathHint(@messages,
     "Have you set the foo switch?\nSee the manual for further info");
 
 =back
@@ -450,7 +461,10 @@ sub _MsgHint {
   my $warn_line_number = $self->current_line_number();
   my $ret = join("",@_) . " in $self->{in_filename}, line $warn_line_number\n";
   if ($hint) {
-    $ret .= "    ($_)\n" for split /\n/, $hint;
+    my @lines = map " $_", split /\n/, $hint;
+    $lines[0] =~ s/^ /(/;
+    $lines[-1] .= ')';
+    $ret .= "  $_\n" for @lines;
   }
   return $ret;
 }
@@ -464,12 +478,11 @@ sub blurt {
   $self->{error_count}++
 }
 
-
 # see L</Error handling methods> above
 
-sub death {
+sub deathHint {
   my ExtUtils::ParseXS $self = $_[0];
-  my $message = _MsgHint(@_,"");
+  my $message = _MsgHint(@_);
   if ($self->{config_die_on_error}) {
     die $message;
   } else {
@@ -477,6 +490,14 @@ sub death {
   }
   exit 1;
 }
+
+
+# see L</Error handling methods> above
+
+sub death {
+  deathHint(@_, undef);
+}
+
 
 
 =head2 C<check_conditional_preprocessor_statements()>

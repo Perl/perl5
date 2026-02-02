@@ -4201,57 +4201,58 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
 dist/ExtUtils-ParseXS/lib/perlxs.pod				Perl XS application programming interface
 dist/ExtUtils-ParseXS/lib/perlxstut.pod				Perl XS tutorial
 dist/ExtUtils-ParseXS/lib/perlxstypemap.pod			Perl XS C/Perl type conversion tools
-dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
-dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
-dist/ExtUtils-ParseXS/t/003-usage.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/102-trim_whitespace.t			ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/103-tidy_type.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/104-map_type.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/105-valid_proto_string.t		ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/106-process_typemaps.t			ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/108-map_type.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/112-set_cond.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/113-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/114-blurt_death_Warn.t			ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/115-avoid-noise.t			ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/501-t-compile.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/510-t-bare.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/511-t-whitespace.t			ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/512-t-file.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/513-t-merge.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/514-t-embed.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/515-t-cmd.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/516-t-clone.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/517-t-targetable.t			ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/600-t-compat.t				ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/data/b.typemap				ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/combined.typemap			ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/confl_repl.typemap			ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/confl_skip.typemap			ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/conflicting.typemap		ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/other.typemap			ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/perl.typemap			ExtUtils::Typemaps test data
-dist/ExtUtils-ParseXS/t/data/simple.typemap			ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/000-version.t				See if ExtUtils::ParseXS loads and has the right version num
+dist/ExtUtils-ParseXS/t/001-parse-basic.t			See if ExtUtils::ParseXS basic parsing works
+dist/ExtUtils-ParseXS/t/002-parse-file-scope.t			test ExtUtils::ParseXS file-scoped syntax
+dist/ExtUtils-ParseXS/t/003-parse-file-scope-keywords.t		test ExtUtils::ParseXS file-scoped keywords syntax
+dist/ExtUtils-ParseXS/t/004-parse-xsub-declaration.t		test ExtUtils::ParseXS XSUB declaration syntax
+dist/ExtUtils-ParseXS/t/005-parse-parameters.t			test ExtUtils::ParseXS XSUB parameter syntax
+dist/ExtUtils-ParseXS/t/006-parse-return-type.t			test ExtUtils::ParseXS XSUB return type
+dist/ExtUtils-ParseXS/t/007-parse-input-output.t		test ExtUtils::ParseXS XSUB INPUT and OUTPUT keywords
+dist/ExtUtils-ParseXS/t/008-parse-xsub-keywords.t		test ExtUtils::ParseXS XSUB keywords
+dist/ExtUtils-ParseXS/t/009-parse-c-plusplus.t			test ExtUtils::ParseXS C++ support
+dist/ExtUtils-ParseXS/t/101-api-standard_typemap_locations.t	ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/102-api-trim_whitespace.t		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/103-api-tidy_type.t			ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/104-api-map_type.t			ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/105-api-valid_proto_string.t		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/106-api-process_typemaps.t		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/113-api-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/114-api-blurt_death_Warn.t		ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/301-run-basic.t				See if ExtUtils::ParseXS can compile and run a file
+dist/ExtUtils-ParseXS/t/302-run-more.t				Extended ExtUtils::ParseXS compile and run
+dist/ExtUtils-ParseXS/t/303-run-usage.t				ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/501-typemaps-compile.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/510-typemaps-bare.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/511-typemaps-whitespace.t		ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/512-typemaps-file.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/513-typemaps-merge.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/514-typemaps-embed.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/515-typemaps-cmd.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/516-typemaps-clone.t			ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/517-typemaps-targetable.t		ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/518-typemaps-compat.t			ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/lib/ExtUtils/Typemaps/Test.pm		ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
 dist/ExtUtils-ParseXS/t/lib/PrimitiveCapture.pm			Primitive STDOUT/ERR capturing for tests
+dist/ExtUtils-ParseXS/t/lib/TestMany.pm				Tool for running XS parser tests
 dist/ExtUtils-ParseXS/t/lib/TypemapTest/Foo.pm			ExtUtils::Typemaps tests
-dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
+dist/ExtUtils-ParseXS/t/test_typemaps/b.typemap			ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/combined.typemap		ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/confl_repl.typemap	ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/confl_skip.typemap	ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/conflicting.typemap	ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/other.typemap		ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/perl.typemap		ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/test_typemaps/simple.typemap		ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing
-dist/ExtUtils-ParseXS/t/XSAlias.xs				Test file for ExtUtils::ParseXS ALIAS tests
-dist/ExtUtils-ParseXS/t/XSBroken.xs				Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSFalsePositive.xs			Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSFalsePositive2.xs			Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSloop.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSNoMap.xs
 dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.xs				Test file for ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSTightDirectives.xs			Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.pm				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.xs				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/XSWarn.xs				ExtUtils::ParseXS tests
 dist/Filter-Simple/Changes					History of change for Filter::Simple
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
 dist/Filter-Simple/Makefile.PL					Build Filter::Simple

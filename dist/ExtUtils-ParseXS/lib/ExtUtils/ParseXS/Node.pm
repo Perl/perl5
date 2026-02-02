@@ -755,7 +755,7 @@ sub parse {
         push @{$self->{kids}}, $node;
     }
 
-    warn "Didn't find a 'MODULE ... PACKAGE ... PREFIX' line\n";
+    warn "Warning: no MODULE line found in XS file $pxs->{in_filename}\n";
     return;
 }
 
@@ -1173,8 +1173,8 @@ sub parse {
             # Parse branches of a CPP conditionals within a nested scope
 
             if (not $node->{is_if}) {
-                $pxs->death("Error: '". $node->{directive}
-                                . "' with no matching 'if'")
+                $pxs->death("Error: '#". $node->{directive}
+                                . "' with no matching '#if'")
                     if $self->{type} ne 'if';
 
                 # we should already be within a nested scope; this
@@ -1207,7 +1207,8 @@ sub parse {
                     &&  $last->{is_cond}
                     && !$last->{is_if}
                 ) {
-                    $pxs->death("Error: Unterminated '#if/#ifdef/#ifndef'")
+                    $pxs->death(  "Error: Unterminated '#$node->{directive}'"
+                                . " from line $node->{line_no}")
                 }
 
                 # Move the CPP line which terminated the branch from
@@ -1230,33 +1231,52 @@ sub parse {
             next;
         }
 
-        # die if the next line is indented: all file-scoped things (CPP,
+        my $file_scoped_keywords =
+         "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
+              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP";
+
+        # Die if the next line is indented: all file-scoped things (CPP,
         # keywords, XSUB starts) are supposed to start on column 1
         # (although see the comment below about multiple parse_keywords()
         # iterations sneaking in indented keywords).
         #
-        # The text of the error message is based around a common reason
-        # for an indented line to appear in file scope: this is due to an
-        # XSUB being prematurely truncated by fetch_para(). For example in
-        # the code below, the coder wants the foo and bar lines to both be
-        # part of the same CODE block. But the XS parser sees the blank
-        # line followed by the '#ifdef' on column 1 as terminating the
-        # current XSUB. So the bar() line is treated as being in file
-        # scope and dies because it is indented.
-        #
-        #   |int f()
-        #   |    CODE:
-        #   |        foo();
-        #   |
-        #   |#ifdef USE_BAR
-        #   |        bar();
-        #   |#endif
 
-        $pxs->death(
-            "Code is not inside a function"
-                ." (maybe last function was ended by a blank line "
-                ." followed by a statement on column one?)")
-            if $pxs->{line}->[0] =~ /^\s/;
+        if ($pxs->{line}[0] =~ /^\s/) {
+            # Try to customise the error message based around why this
+            # line is indented, to better hint to the user what the
+            # problem is.
+
+            if ($pxs->{line}[0] =~ /^\s+($file_scoped_keywords)\s*:/) {
+                $pxs->death(
+                    "Error: file-scoped keywords should not be indented");
+            }
+
+            # The text of the error message is based around a common reason
+            # for an indented line to appear in file scope: this is due to an
+            # XSUB being prematurely truncated by fetch_para(). For example in
+            # the code below, the coder wants the foo and bar lines to both be
+            # part of the same CODE block. But the XS parser sees the blank
+            # line followed by the '#ifdef' on column 1 as terminating the
+            # current XSUB. So the bar() line is treated as being in file
+            # scope and dies because it is indented.
+            #
+            #   |int f()
+            #   |    CODE:
+            #   |        foo();
+            #   |
+            #   |#ifdef USE_BAR
+            #   |        bar();
+            #   |#endif
+
+            $pxs->deathHint(
+                    "Error: file-scoped directives must not be indented",
+                    $self->Q(<<EOF))
+    |If this line is supposed to be part of an XSUB rather than being
+    |file-scoped, then it is possible that your XSUB has a blank line
+    |followed by a line starting at column 1 which is being misinterpreted
+    |as the end of the current XSUB.
+EOF
+        }
 
         # The SCOPE keyword can appear both in file scope (just before an
         # XSUB) and as an XSUB keyword. This field maintains the state of the
@@ -1287,8 +1307,7 @@ sub parse {
                 $pxs,
                 undef, undef, # xsub and xbody: not needed for non XSUB keywords
                 undef,  # implies process as many keywords as possible
-                 "BOOT|REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK"
-              . "|VERSIONCHECK|INCLUDE|INCLUDE_COMMAND|SCOPE|TYPEMAP",
+                $file_scoped_keywords,
                 $keywords_flag_MODULE,
             );
         # XXX we could have an 'or next' here if not for SCOPE backcompat
@@ -1440,10 +1459,11 @@ sub parse {
     $self->{lines} = [ @{$pxs->{line}} ];
     @{$pxs->{line}} = ();
 
-    # Ignore any text following the keyword on the same line.
-    # XXX this quietly ignores any such text - really it should
-    # warn, but not yet for backwards compatibility.
-    shift @{$self->{lines}};
+    # Text following the keyword is ignored rather than being treated
+    # as the first line of code.
+    my $line0 = shift @{$self->{lines}};
+    $pxs->Warn("Warning: text after keyword ignored: '$line0'")
+        if defined $line0 && $line0 =~ /\S/;
 
     1;
 }
@@ -1945,7 +1965,7 @@ sub parse {
 
     my $num             = 0; # the number of CASE+bodies seen
     my $seen_bare_xbody = 0; # seen a previous body without a CASE
-    my $case_had_cond;       # the previous CASE had a condition
+    my $case_had_cond   = 1; # the previous CASE had a condition
 
     # Repeatedly look for CASE or XSUB body.
     while (1) {
@@ -1959,11 +1979,16 @@ sub parse {
 
         if (defined $case) {
             $case->{num} = ++$num;
-            $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'")
-                if $num > 1 && ! $case_had_cond;
+
+            if ($seen_bare_xbody) {
+                $pxs->blurt("Error: no 'CASE:' at top of function");
+                $seen_bare_xbody = 0;
+            }
+
+            unless ($case_had_cond) {
+                $pxs->blurt("Error: 'CASE:' after unconditional 'CASE:'");
+            }
             $case_had_cond = length $case->{cond};
-            $pxs->blurt("Error: no 'CASE:' at top of function")
-                if $seen_bare_xbody;
         }
         else {
             $seen_bare_xbody = 1;
@@ -2005,6 +2030,14 @@ sub parse {
         my $pname = $self->{decl}{full_perl_name};
         $self->{map_alias_name_to_value}{$pname} = 0
             unless defined $self->{map_alias_name_to_value}{$pname};
+    }
+
+    # per-XSUB sanity checks
+
+    if (   $self->{map_interface_name_short_to_original}
+        && $self->{map_alias_name_to_value})
+    {
+        $pxs->blurt("Error: only one of ALIAS and INTERFACE can be used per XSUB");
     }
 
     1;
@@ -2330,7 +2363,8 @@ sub parse {
     my ($class, $name, $params_text, $const) = ($1, $2, $3, $4);
 
     if (defined $const and !defined $class) {
-        $pxs->blurt("const modifier only allowed on XSUBs which are C++ methods");
+        $pxs->blurt(
+          "Error: const modifier only allowed on XSUBs which are C++ methods");
         undef $const;
     }
 
@@ -2454,7 +2488,15 @@ sub parse {
 
     # a function definition needs at least 2 lines
     unless (@{$pxs->{line}}) {
-        $pxs->blurt("Error: function definition too short '$line'");
+        if ($line =~ /^([A-Z][A-Z_]+):/) {
+            # It's possibly a mistyped keyword: give a more specific
+            # error message:
+            $pxs->death("Error: unrecognised keyword '$1'");
+            return;
+        }
+        # Generic error message:
+        $pxs->deathHint("Error: unrecognised line: '$line'",
+                    "possible start of a truncated XSUB definition?");
         return;
     }
 
@@ -2501,8 +2543,8 @@ BEGIN { $build_subclass->(
     'default_usage', # Str:  how to report default value in "usage:..." error
     'is_ansi',       # Bool: param's type was specified in signature
     'is_length',     # Bool: param is declared as 'length(foo)' in signature
-    'has_length',    # Bool: this param has a matching 'length(foo)'
-                     #       parameter in the signature
+    'length_param',  # Obj:  'foo' param's matching 'length(foo)' parameter
+                     #       node object, if any
     'len_name' ,     # Str:  the 'foo' in 'length(foo)' in signature
     'is_synthetic',  # Bool: var like 'THIS': we pretend it was in the sig
 
@@ -2539,12 +2581,12 @@ sub parse {
     my $param_text                             = shift;
 
     $self->SUPER::parse($pxs); # set file/line_no
-    $_ = $param_text;
 
     # Decompose parameter into its components.
     # Note that $name can be either 'foo' or 'length(foo)'
 
     my ($out_type, $type, $name, $sp1, $sp2, $default) =
+        $param_text =~
             /^
                  (?:
                      (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
@@ -2564,13 +2606,13 @@ sub parse {
             /x;
 
     unless (defined $name) {
-        if (/^ SV \s* \* $/x) {
+        if ($param_text =~ /^ SV \s* \* $/x) {
             # special-case SV* as a placeholder for backwards
             # compatibility.
             $self->{var} = 'SV *';
             return 1;
         }
-        $pxs->blurt("Error: unparseable XSUB parameter: '$_'");
+        $pxs->blurt("Error: unparseable XSUB parameter: '$param_text'");
         return;
     }
 
@@ -2610,13 +2652,13 @@ sub parse {
 
     # Process optional IN/OUT etc modifier
 
+    my $orig_out_type = $out_type;
     if (defined $out_type) {
-        if ($pxs->{config_allow_inout}) {
-            $out_type =  $out_type eq 'IN' ? '' : $out_type;
-        }
-        else {
-            $pxs->blurt("Error: parameter IN/OUT modifier not allowed under -noinout");
-        }
+        $pxs->blurt(
+                "Error: parameter IN/OUT modifier not allowed under -noinout")
+            unless $pxs->{config_allow_inout};
+
+        $out_type =  $out_type eq 'IN' ? '' : $out_type;
     }
     else {
         $out_type = '';
@@ -2631,36 +2673,53 @@ sub parse {
 
     # Process 'length(foo)' pseudo-parameter
 
-    my $is_length;
     my $len_name;
 
     if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
-        if ($pxs->{config_allow_argtypes}) {
-            $len_name = $1;
-            $is_length = 1;
-            if (defined $default) {
-                $pxs->blurt(  "Error: default value not allowed on "
-                            . "length() parameter '$len_name'");
-                undef $default;
-            }
+        $pxs->blurt(  "Error: length() pseudo-parameter not allowed "
+                    . "under -noargtypes")
+        unless $pxs->{config_allow_argtypes};
+
+        $len_name = $1;
+
+        if (defined $default) {
+            $pxs->blurt(  "Error: default value not allowed on "
+                        . "length() parameter '$len_name'");
+            undef $default;
         }
-        else {
-            $pxs->blurt(  "Error: length() pseudo-parameter not allowed "
-                        . "under -noargtypes");
+        unless (defined $type) {
+            $pxs->blurt(
+                "Error: length($len_name) doesn't have a type specified");
+            $type = 'STRLEN'; # stop cascading problems while
+                              # blurting the rest of the file
         }
+
+        if (defined $orig_out_type) {
+            # Ban IN_OUT etc with length().
+            $pxs->blurt( "Error: '$orig_out_type' modifier can't be used"
+                        . " with length($len_name)");
+            $out_type = ''; # avoid cascading errors
+        }
+
+        $self->{no_init}   = 1;
+        $self->{is_length} = 1;
+        $self->{len_name}  = $len_name;
+                             # This is the C variable which will have it's
+                             # value set to the length of the string,
+                             # then used as an arg in an autocall:
+        $self->{var}       = "XSauto_length_of_$len_name";
+
+        # Note that cross-checking with the foo parameter associated with
+        # length(foo) is done near the end of Node::Params::parse(), after
+        # all params have been parsed.
     }
 
-    # Handle ANSI params: those which have a type or 'length(s)',
+    # Mark ANSI params: those which have a type (including 'length(s)')
     # and which thus don't need a matching INPUT line.
 
-    if (defined $type or $is_length) { # 'int foo' or 'length(foo)'
-        @$self{qw(type is_ansi)} = ($type, 1);
-
-        if ($is_length) {
-            $self->{no_init}   = 1;
-            $self->{is_length} = 1;
-            $self->{len_name}  = $len_name;
-        }
+    if (defined $type) { # 'int foo' or 'int length(foo)'
+        $self->{type}    = $type;
+        $self->{is_ansi} = 1;
     }
 
     $self->{in_out} = $out_type if length $out_type;
@@ -2671,9 +2730,12 @@ sub parse {
 
     my $report_def = '';
     if (defined $default) {
+        $pxs->death("Error: missing default value expression for '$name'")
+            unless $default =~ /\S/;
+
         # The default expression for reporting usage. For backcompat,
         # sometimes preserve the spaces either side of the '='
-        $report_def =    ((defined $type or $is_length) ? '' : $sp1)
+        $report_def =    ($self->{is_ansi} ? '' : $sp1)
                        . "=$sp2$default";
         $self->{default_usage} = $report_def;
         $self->{default} = $default;
@@ -2763,7 +2825,6 @@ sub lookup_input_typemap {
 
     my ($type, $arg_num, $var, $init, $no_init, $default)
         = @{$self}{qw(type arg_num var init no_init default)};
-    $var = "XSauto_length_of_$self->{len_name}" if $self->{is_length};
     my $arg = $pxs->ST($arg_num);
 
     # whitespace-tidy the type
@@ -2837,17 +2898,6 @@ sub lookup_input_typemap {
         $xstype =~ s/OBJ$/REF/ || $xstype =~ s/^T_REF_IV_PTR$/T_PTRREF/
             if $xsub->{decl}{name} =~ /DESTROY$/;
 
-        # For a string-ish parameter foo, if length(foo) was also declared
-        # as a pseudo-parameter, then override the normal typedef - which
-        # would emit SvPV_nolen(...) - and instead, emit SvPV(...,
-        # STRLEN_length_of_foo)
-        if ($xstype eq 'T_PV' and $self->{has_length}) {
-            die "default value not supported with length(NAME) supplied"
-                if defined $default;
-            return "($type)SvPV($arg, STRLEN_length_of_$var);",
-                   $eval_vars, 0;
-        }
-
         # Get the ExtUtils::Typemaps::InputMap object associated with the
         # xstype. This contains the template of the code to be embedded,
         # e.g. 'SvPV_nolen($arg)'
@@ -2907,6 +2957,53 @@ sub lookup_input_typemap {
         # Specify additional environment for when a template derived from a
         # *typemap* is evalled.
         @$eval_vars{qw(ntype subtype argoff)} = ($ntype, $subtype, $argoff);
+        $init_template = $expr;
+
+        # For a parameter foo, if length(foo) was also declared as a
+        # pseudo-parameter, then try to modify the normal typemap, which
+        # we would expect to contain SvPV_nolen(...) or similar, into this
+        # form instead: SvPV(..., STRLEN_length_of_foo).
+        # Croak if this isn't possible.
+        # Just accept the typemap as-is if it already contains the correct
+        # STRLEN_length_of_ entry.
+
+        if ($self->{length_param}) {
+            if ($expr =~ /\bSTRLEN_length_of_\$var\b/) {
+                # leave as-is
+            }
+            else {
+                unless ($expr =~
+                            s{  \b
+                                (SvPV\w*)_nolen(\w*)
+                                \(
+                                \s*\$arg\s*
+                                \)
+                            }
+                            {$1$2(\$arg, STRLEN_length_of_\$var)}x
+                ) {
+                    $pxs->deathHint(
+                          "Error: can't modify input typemap for"
+                        . " length($self->{var})",
+                        <<EOF);
+The parameter '$self->{var}' has an associated length($self->{var})
+pseudo-parameter. In cases like this, the XS parser attempts to modify
+a typemap entry such as
+
+    \$var = (\$type)SvPV_nolen(\$arg)
+
+into a similar one which also sets a length, such as
+
+    \$var = (\$type)SvPV(\$arg, STRLEN_length_of_\$var)
+
+In this case, the following typemap did not contain a recognised
+SVPV_nolen() variant:
+
+    $expr
+EOF
+                }
+            }
+        }
+
         $init_template = $expr;
     }
 
@@ -3156,30 +3253,39 @@ sub as_input_code {
 
     my $arg = $pxs->ST($arg_num);
 
+
+    # For this construct: 'foo(char *s, int length(s))', ...
+
     if ($self->{is_length}) {
-        # Process length(foo) parameter.
-        # Basically for something like foo(char *s, int length(s)),
-        # create *two* local C vars: one with STRLEN type, and one with the
-        # type specified in the signature. Eventually, generate code looking
-        # something like:
-        #   STRLEN  STRLEN_length_of_s;
-        #   int     XSauto_length_of_s;
-        #   char *s = (char *)SvPV(ST(0), STRLEN_length_of_s);
-        #   XSauto_length_of_s = STRLEN_length_of_s;
-        #   RETVAL = foo(s, XSauto_length_of_s);
+        # ... the call for the 'length(s)' pseudo-parameter should
+        # emit nothing ...
+        return;
+    }
+    elsif ($self->{length_param}) {
+        # ... while the call for the 's' parameter should emit a (possibly
+        # modified) declaration and init as normal, but also some extra
+        # lines. In total this parameter should emit code something like:
         #
-        # Note that the SvPV() code line is generated via a separate call to
-        # this sub with s as the var (as opposed to *this* call, which is
-        # handling length(s)), by overriding the normal T_PV typemap (which
-        # uses PV_nolen()).
+        #    STRLEN STRLEN_length_of_s;
+        #    int    XSauto_length_of_s;
+        #    char * s = (char *)SvPV(ST(0), STRLEN_length_of_s);
+        #
+        #    XSauto_length_of_s = STRLEN_length_of_s;
 
-        my $name = $self->{len_name};
+        my $lenp       = $self->{length_param};
+        my $xsauto_var = $lenp->{var};
+        print "\tSTRLEN\tSTRLEN_length_of_$var;\n";
+        print "\t$lenp->{type}\t$xsauto_var;\n";
 
-        print "\tSTRLEN\tSTRLEN_length_of_$name;\n";
-        # defer this line until after all the other declarations
+        # The "var = SvPV()" line will be emitted by the main body of this
+        # function. Note that the T_PV typemap entry will have already
+        # been overridden in lookup_input_typemap() during parse time
+        # to change SvPV_nolen() to SvPV() or similar.
+        #
+        # The final assign should be deferred to come after all
+        # declarations.
         $xbody->{input_part}{deferred_code_lines} .=
-                "\n\tXSauto_length_of_$name = STRLEN_length_of_$name;\n";
-        $var = "XSauto_length_of_$name";
+            "\n\t$xsauto_var = STRLEN_length_of_$var;\n";
     }
 
     # Emit the variable's type and name.
@@ -3860,7 +3966,7 @@ sub parse {
             # $C_arg regex doesn't work. This code path should ideally
             # never be reached, and indicates a design weakness in $C_arg.
             @param_texts = split(/\s*,\s*/, $params_text);
-            Warn($pxs,   "Warning: cannot parse parameter list "
+            $pxs->Warn(  "Warning: cannot parse parameter list "
                        . "'$params_text', fallback to split");
         }
     }
@@ -3956,13 +4062,26 @@ sub parse {
     $self->{nargs}    = $nargs;
     $self->{min_args} = $nargs - $opt_args;
 
-    # for each parameter of the form 'length(foo)', mark the corresponding
-    # 'foo' parameter as 'has_length', or error out if foo not found.
+    # for each parameter of the form 'length(foo)', set 'length_param' in
+    # the corresponding 'foo' parameter to point to that length parameter
+    # object, or error out if foo not found.
     for my $param (@{$self->{kids}}) {
         next unless $param->{is_length};
         my $name = $param->{len_name};
         if (exists $self->{names}{$name}) {
-            $self->{names}{$name}{has_length} = 1;
+            $self->{names}{$name}{length_param} = $param;
+
+            $pxs->blurt("Error: length() on placeholder parameter '$name'")
+                unless defined $self->{names}{$name}{type};
+
+            $pxs->blurt(  "Error: default value for $name not allowed"
+                        . " when length($name) also present")
+                if defined $self->{names}{$name}{default};
+
+            my $in_out = $self->{names}{$name}{in_out};
+            $pxs->blurt(  "Error: '$in_out' modifier on '$name'"
+                        . " can't be used with length()")
+                if defined $in_out and $in_out !~ /^IN/;
         }
         else {
             $pxs->blurt("Error: length() on non-parameter '$name'");
@@ -4016,12 +4135,6 @@ sub C_func_signature {
                    # type) and has become semi-real.
                 && !($param->{var} eq 'RETVAL' && defined($param->{arg_num}));
 
-        if ($param->{is_length}) {
-            push @args, "XSauto_length_of_$param->{len_name}";
-            push @types, $param->{type};
-            next;
-        }
-
         if ($param->{var} eq 'SV *') {
             #backcompat placeholder
             $pxs->blurt("Error: parameter 'SV *' not valid as a C argument");
@@ -4034,7 +4147,9 @@ sub C_func_signature {
         # Ignore fake/alien stuff, except an OUTLIST arg, which
         # isn't passed from perl (so no arg_num), but *is* passed to
         # the C function and then back to perl.
-        next unless defined $param->{arg_num} or $io eq 'OUTLIST';
+        next unless defined $param->{arg_num}
+                 or $io eq 'OUTLIST'
+                 or $param->{is_length};
 
         my $a = $param->{var};
         $a = "&$a" if $param->{is_addr} or $io =~ /OUT/;
@@ -4325,17 +4440,9 @@ EOF
     }
 
     # Emit declaration/init code for any parameters which were
-    # declared with a type or length(foo). Do the length() ones first.
+    # declared with a type in the signature (rather than in INPUT).
 
-    for my $ioparam (
-            grep $_->{is_ansi},
-                (
-                    grep(  $_->{is_length}, @{$ioparams->{kids}} ),
-                    grep(! $_->{is_length}, @{$ioparams->{kids}} ),
-                )
-    )
-
-    {
+    for my $ioparam (grep $_->{is_ansi}, @{$ioparams->{kids}}) {
         $ioparam->as_input_code($pxs, $xsub, $xbody);
     }
 
@@ -4959,10 +5066,16 @@ sub parse {
     $s = 'FALSE' if $s eq '0';
     $s = uc($s);
 
-    $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF")
+    $pxs->death("Error: FALLBACK: invalid value '$s' (should be TRUE/FALSE/UNDEF)")
         unless $s =~ /^(TRUE|FALSE|UNDEF)$/;
 
     $self->{value} = $s;
+
+    # Only one FALLBACK allowed per package
+
+    $pxs->Warn("Warning: duplicate FALLBACK: entry")
+        if exists $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}};
+
     $pxs->{map_package_to_fallback_string}{$pxs->{PACKAGE_name}} = $s;
 
     1;
@@ -4992,8 +5105,8 @@ sub parse {
         unless length $ver;
 
     # check that the version number is of the form n.n
-    $pxs->death("Error: REQUIRE: expected a number, got '$ver'")
-        unless $ver =~ /^\d+(\.\d*)?/;
+    $pxs->death("Error: REQUIRE: expected a MMM(.NNN) number, got '$ver'")
+        unless $ver =~ /^\d+(\.\d*)?$/;
 
     my $got = $ExtUtils::ParseXS::VERSION;
     $pxs->death("Error: xsubpp $ver (or better) required--this is only $got.")
@@ -5026,38 +5139,39 @@ sub parse {
 
     my $f      = $self->{text};
     my $is_cmd = $self->{is_cmd};
+    my $key    = $is_cmd ? 'INCLUDE_COMMAND' : 'INCLUDE';
 
     if ($is_cmd) {
         $f = $self->QuoteArgs($f) if $^O eq 'VMS';
 
-        $pxs->death("INCLUDE_COMMAND: command missing")
+        $pxs->death("Error: INCLUDE_COMMAND: command missing")
             unless length $f;
 
-        $pxs->death("INCLUDE_COMMAND: pipes are illegal")
+        $pxs->death("Error: INCLUDE_COMMAND: pipes are illegal")
             if $f =~ /^\s*\|/ or $f =~ /\|\s*$/;
     }
     else {
-        $pxs->death("INCLUDE: filename missing")
+        $pxs->death("Error: INCLUDE: filename missing")
             unless length $f;
 
-        $pxs->death("INCLUDE: output pipe is illegal")
+        $pxs->death("Error: INCLUDE: output pipe is illegal")
             if $f =~ /^\s*\|/;
 
         # simple minded recursion detector
-        $pxs->death("INCLUDE loop detected")
+        $pxs->death("Error: INCLUDE: loop detected")
             if $pxs->{IncludedFiles}{$f};
 
         ++$pxs->{IncludedFiles}->{$f} unless $f =~ /\|\s*$/;
 
         if ($f =~ /\|\s*$/ && $f =~ /^\s*perl\s/) {
-            $pxs->Warn(
-                  "The INCLUDE directive with a command is discouraged."
-                . " Use INCLUDE_COMMAND instead! In particular using 'perl'"
-                . " in an 'INCLUDE: ... |' directive is not guaranteed to pick"
-                . " up the correct perl. The INCLUDE_COMMAND directive allows"
-                . " the use of \$^X as the currently running perl, see"
-                . " 'perldoc perlxs' for details."
-            );
+            $pxs->WarnHint(
+              "Note: the INCLUDE directive with a command is discouraged",
+              <<'HINT');
+Use INCLUDE_COMMAND instead! In particular, using 'perl' in an
+'INCLUDE: ... |' directive is not guaranteed to pick up the correct perl.
+The INCLUDE_COMMAND directive allows the use of $^X as the currently
+running perl, see 'perldoc perlxs' for details.
+HINT
         }
     }
 
@@ -5084,11 +5198,11 @@ sub parse {
 
         open ($pxs->{in_fh}, "-|", $f)
             or $pxs->death(
-                "Cannot run command '$f' to include its output: $!");
+                "Error: INCLUDE_COMMAND: cannot run command '$f' to include its output: $!");
     }
     else {
         open($pxs->{in_fh}, $f)
-            or $pxs->death("Cannot open '$f': $!");
+            or $pxs->death("Error: INCLUDE: cannot open '$f': $!");
     }
 
     $self->{old_filename} = $pxs->{in_filename};
@@ -5115,7 +5229,7 @@ sub parse {
     }
 
     $pxs->{lastline} = $_;
-    chomp $pxs->{lastline};
+    chomp $pxs->{lastline} if defined $pxs->{lastline};
     $pxs->{lastline_no} = $self->{line_no} = $.;
 
     # Parse included file
@@ -5137,10 +5251,11 @@ sub parse {
 
     @$pxs{@save_keys} = @saved;
 
-    if ($isPipe and $? ) {
-        --$pxs->{lastline_no};
-        print STDERR "Error reading from pipe '$self->{inc_filename}': $! in $pxs->{in_filename}, line $pxs->{lastline_no}\n" ;
-        exit 1;
+    if ($isPipe and $?) {
+        $pxs->death(sprintf
+            "Error: %s: got return code 0x%04x when reading from pipe '%s'",
+            $key, $?, $self->{inc_filename}
+        );
     }
 
     1;
@@ -5244,7 +5359,7 @@ sub parse {
         # interpretation for backcomp, but warn.
 
         unless ($s =~ /^ ((ENABLE|DISABLE) D? ;?) \s* $ /xi) {
-            $pxs->death("Error: $keyword: ENABLE/DISABLE")
+            $pxs->death("Error: $keyword: invalid value '$s' (should be ENABLE/DISABLE)")
         }
         my ($value, $en_dis) = ($1, $2);
         $self->{enable} = $en_dis eq 'ENABLE' ? 1 : 0;
@@ -5256,7 +5371,9 @@ sub parse {
     else {
         # SCOPE / VERSIONCHECK / EXPORT_XSUB_SYMBOLS
         $s =~ /^(ENABLE|DISABLE)\s*$/
-            or $pxs->death("Error: $keyword: ENABLE/DISABLE");
+            or $pxs->death(
+              "Error: $keyword: invalid value '$s' (should be ENABLE/DISABLE)"
+            );
         $self->{enable} = $1 eq 'ENABLE' ? 1 : 0;
     }
 
@@ -5509,12 +5626,12 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
     $xsub->{seen_INTERFACE} = 1;
 
-    my %map;
-
     foreach (split /[\s,]+/, $self->{text}) {
         my $short = $_;
         $short =~ s/^$pxs->{PREFIX_pattern}//;
-        $map{$short} = $_;
+        $pxs->blurt("Error: duplicate INTERFACE name: '$short'")
+            if exists $xsub->{map_interface_name_short_to_original}{$short};
+
         $xsub->{map_interface_name_short_to_original}{$short} = $_;
     }
 
@@ -5603,9 +5720,26 @@ sub parse {
     $self->SUPER::parse($pxs); # set file/line_no, get lines, set text
 
     my $s = $self->{text};
-    while ($s =~  s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
-        $self->{ops}{$1} = 1;
-        $xsub->{overload_name_seen}{$1} = 1;
+
+    # Note that this doesn't forbid invalid overload op names, to allow
+    # for forwards compatibility. It does warn/skip ones which don't
+    # seem to be even vaguely syntactically correct.
+    for my $op (split ' ', $s) {
+        if ($op !~  m{^
+                        ^
+                        ( [\w:"\\)+\-*/%<>.&|^!~{}=\@\$]+ )
+                        $
+                       }x)
+
+        {
+            $pxs->Warn("Warning: unrecognised OVERLOAD op name '$op' ignored");
+            next;
+        }
+
+        $self->{ops}{$op} = 1;
+        $pxs->Warn("Warning: duplicate OVERLOAD op name: '$op'")
+            if exists $xsub->{overload_name_seen}{$op};
+        $xsub->{overload_name_seen}{$op} = 1;
     }
 
     # Mark the current package as being overloaded
@@ -5720,9 +5854,21 @@ package ExtUtils::ParseXS::Node::codeblock;
 BEGIN { $build_subclass->(-parent => 'multiline',
 )};
 
+sub parse {
+    my __PACKAGE__                    $self  = shift;
+    my ExtUtils::ParseXS              $pxs   = shift;
+    my ExtUtils::ParseXS::Node::xsub  $xsub  = shift;
+    my ExtUtils::ParseXS::Node::xbody $xbody = shift;
 
-# No parse() method: we just use the inherited Node::multiline's one
+    $self->SUPER::parse($pxs); # use multiline::parse()
 
+    # Text following the keyword is ignored rather than being treated
+    # as the first line of code.
+    my $line0 = shift @{$self->{lines}};
+    $pxs->Warn("Warning: text after keyword ignored: '$line0'")
+        if defined $line0 && $line0 =~ /\S/;
+    return 1;
+}
 
 # Emit the lines of code, skipping any initial blank lines,
 # and possibly wrapping in '#line' directives.
@@ -5735,12 +5881,7 @@ sub as_code {
 
     my @lines = map "$_\n", @{$self->{lines}};
 
-    my $n;
-
-    # Ignore any text following the keyword on the same line.
-    # XXX this quietly ignores any such text - really it should
-    # warn, but not yet for backwards compatibility.
-    $n++, shift @lines if @lines;
+    my $n = 1;
 
     # strip leading blank lines
     $n++, shift @lines while @lines && $lines[0] !~ /\S/;
@@ -6109,10 +6250,6 @@ sub parse {
     my $line = $self->{line};  # line of text to be processed
 
     ExtUtils::ParseXS::Utilities::trim_whitespace($line);
-    # XXX this skip doesn't make sense - we've already confirmed
-    # line has non-whitespace  with the /\S/; so we just skip if the
-    # line is "0" ?
-    return unless $line;
 
     my $orig = $line; # keep full line for error messages
 
@@ -6201,7 +6338,7 @@ sub parse {
     }
 
     $pxs->blurt("Error: cannot parse ALIAS definitions from '$orig'")
-        if $line;
+        if $line =~ /\S/;
 
     1;
 }
@@ -6295,7 +6432,11 @@ sub parse {
     # normal typemap), such as 'int foo = ($type)SvIV($arg)'
     my $var_init = '';
     my $init_op;
-    ($init_op, $var_init) = ($1, $2) if $line =~ s/\s* ([=;+]) \s* (.*) $//xs;
+    if ($line =~ s/\s* ([=;+]) \s* (.*) $//xs) {
+        ($init_op, $var_init) = ($1, $2);
+        $pxs->death("Error: missing '$init_op' initialiser value")
+            unless $var_init =~ /\S/ && $var_init !~ /^\s*;\s*$/;
+    }
 
     $line =~ s/\s+/ /g;
 
@@ -6530,8 +6671,13 @@ sub parse {
     $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
     $self->{is_setmagic} = 0;
 
-    if ($line =~ /^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
-        $xbody->{OUTPUT_SETMAGIC_state} = ($1 eq "ENABLE" ? 1 : 0);
+    if ($line =~ /^\s*SETMAGIC\s*:\s*(.*?)\s*$/) {
+        my $arg = $1;
+        unless ($arg =~ /^(ENABLE|DISABLE)$/) {
+            $pxs->blurt("Error: SETMAGIC: invalid value '$arg' (should be ENABLE/DISABLE)");
+            return;
+        }
+        $xbody->{OUTPUT_SETMAGIC_state} = ($arg eq "ENABLE" ? 1 : 0);
         $self->{do_setmagic} = $xbody->{OUTPUT_SETMAGIC_state};
         $self->{is_setmagic} = 1;
         return;

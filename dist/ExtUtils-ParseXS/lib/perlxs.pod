@@ -1922,13 +1922,13 @@ use C<TYPEMAP:> to individually override specific C<TYPEMAP>, C<INPUT>, or
 C<OUTPUT> entries in the system typemap. In general, typemap changes
 affect any subsequent XSUBs within the file, until further updates.
 
-Note however that, due to a quirk in parsing, it is possible for a
-C<TYPEMAP:> block which comes I<immediately after> an XSUB to affect any
-entries used by that XSUB, as if the block had appeared just before the
-XSUB. If all such typemap blocks are placed near the start of an XS file,
-then this won't be an issue. Indeed, it can only be a possible issue if
-you want typemap meanings to change during the course of an XS file (which
-is rare).
+Note however that, due to a quirk in parsing, it is possible in F<xsubpp>
+prior to 3.61 for a C<TYPEMAP:> block which comes I<immediately after> an
+XSUB to affect any entries used by that XSUB, as if the block had appeared
+just before the XSUB. If all such typemap blocks are placed near the start
+of an XS file, then this won't be an issue. Indeed, it can only be a
+possible issue if you want typemap meanings to change during the course of
+an XS file (which is rare).
 
 The C<TYPEMAP> keyword syntax is intended to mimic Perl's "heredoc"
 syntax, and the keyword must be followed by one of these three forms:

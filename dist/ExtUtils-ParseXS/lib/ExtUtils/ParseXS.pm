@@ -97,6 +97,7 @@ use ExtUtils::ParseXS::Utilities qw(
   current_line_number
   blurt
   death
+  deathHint
   escape_file_for_line_directive
   report_typemap_failure
 );
