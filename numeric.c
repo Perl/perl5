@@ -229,9 +229,9 @@ Perl_output_non_portable(pTHX_ const U8 base)
 
     PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
 
-    /* Also there are listings for the other two.  That's because, since they
-     * are the first word, it would be hard for a user to find them there
-     * starting with a %s */
+    /* Also there are diag listings for the others.  That's because, since
+     * %s is the first thing in the message, it would be hard for a user to
+     * find them there */
     /* diag_listed_as: Hexadecimal number > 0xffffffff non-portable */
     ck_warner(packWARN(WARN_PORTABLE), "%s non-portable", which);
 }
