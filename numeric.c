@@ -516,27 +516,32 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
   finish:
     if (s < e && *s) {  /* *s is to keep a terminating NUL from warning */
-        if (   ! (input_flags & PERL_SCAN_SILENT_ILLDIGIT)
-            &&    ckWARN(WARN_DIGIT))
+        if (! (input_flags & PERL_SCAN_SILENT_ILLDIGIT) && ckWARN(WARN_DIGIT))
         {
-            if (base != 8) {
-                warner(packWARN(WARN_DIGIT),
-                        "Illegal %s digit '%c' ignored",
-                        ((base == 2)
-                        ? "binary"
-                        : "hexadecimal"),
-                        *s);
-            }
-            else if (isDIGIT(*s)) { /* octal base */
+            const char * base_name;
+
+            switch (base) {
+              default: goto bad_base;
+              case 2:  base_name = "binary";      break;
+              case 16: base_name = "hexadecimal"; break;
+              case 8:
 
                 /* Allow \octal to work the DWIM way (that is, stop scanning
                  * as soon as non-octal characters are seen, complain only if
                  * someone seems to want to use the digits eight and nine.
                  * Since we know it is not octal, then if isDIGIT, must be an
                  * 8 or 9). khw: XXX why not DWIM for other bases as well? */
-                warner(packWARN(WARN_DIGIT),
-                        "Illegal octal digit '%c' ignored", *s);
+                if (! isDIGIT(*s)) {
+                    goto illegal_warning_done;
+                }
+
+                base_name = "octal";
+                break;
             }
+
+            warner(packWARN(WARN_DIGIT), "Illegal %s digit '%c' ignored",
+                                         base_name, *s);
+          illegal_warning_done: ;
         }
 
         if (input_flags & PERL_SCAN_NOTIFY_ILLDIGIT) {
@@ -551,6 +556,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
     /* s here points to e or to the first illegal character */
     *len_p = s - start;
     return accumulated;
+
+  bad_base:
+    croak("panic: Unexpected numeric base %d", base);
 
   overflowed: ;
 
@@ -697,7 +705,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         const char * base_name;
 
         switch (base) {
-          default: croak("panic: Unexpected numeric base %d", base);
+          default: goto bad_base;
           case 2:  base_name = "binary";      break;
           case 8:  base_name = "octal";       break;
           case 16: base_name = "hexadecimal"; break;
