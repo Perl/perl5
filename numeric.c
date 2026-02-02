@@ -371,48 +371,48 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             goto redo_switch;
         }
 
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
         goto loop;
 
       case 8:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 7:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 6:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 5:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 4:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 3:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 2:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 1:
-        if (UNLIKELY(! Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
@@ -544,7 +544,7 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         }
     }
 
-    if (UNLIKELY(! (input_flags & PERL_SCAN_SILENT_NON_PORTABLE))) {
+    if (! LIKELY(input_flags & PERL_SCAN_SILENT_NON_PORTABLE)) {
         output_non_portable(base);
     }
 
