@@ -30,6 +30,13 @@ no warnings 'experimental::class';
     ok(eq_array([$o->a], [qw( the array )]), '$o->a accessor');
     ok(eq_hash({$o->h}, {qw( the hash )}), '$o->h accessor');
 
+    my @x = ($o->s, $o->a, $o->h);
+    is($x[0], 'the scalar', '$o->s accessor + assignment');
+    is($x[1], 'the', '$o->a accessor + assignment pt1');
+    is($x[2], 'array', '$o->a accessor + assignment pt2');
+    is($x[3], 'the', '$o->h accessor + assignment pt1');
+    is($x[4], 'hash', '$o->h accessor + assignment pt2');
+
     is(scalar $o->a, 2, '$o->a accessor in scalar context');
     is(scalar $o->h, 1, '$o->h accessor in scalar context');
 
