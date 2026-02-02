@@ -694,12 +694,17 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
         *flags |= PERL_SCAN_SILENT_OVERFLOW;
     }
     else if (ckWARN_d(WARN_OVERFLOW)) {
-        warner(packWARN(WARN_OVERFLOW),
-                "Integer overflow in %s number",
-                (base == 16) ? "hexadecimal"
-                            : (base == 2)
-                                ? "binary"
-                                : "octal");
+        const char * base_name;
+
+        switch (base) {
+          default: croak("panic: Unexpected numeric base %d", base);
+          case 2:  base_name = "binary";      break;
+          case 8:  base_name = "octal";       break;
+          case 16: base_name = "hexadecimal"; break;
+        }
+
+        warner(packWARN(WARN_OVERFLOW), "Integer overflow in %s number",
+                                        base_name);
     }
 
     accumulated = UV_MAX;
