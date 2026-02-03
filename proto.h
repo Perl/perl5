@@ -222,6 +222,32 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
     } STMT_END
 
 PERL_CALLCONV void
+Perl_apply_attributes_lexical(pTHX_ PADOFFSET padix, OP *attrlist)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_LEXICAL \
+    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attributes_pkgscoped(pTHX_ SV *sv, GV *namegv, OP *attrlist)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_PKGSCOPED \
+    STMT_START { Perl_assert_aTHX; assert(sv); assert(namegv);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;           \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attributes_sv(pTHX_ SV *sv, OP *attrlist)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_SV    \
+    STMT_START { Perl_assert_aTHX; assert(sv);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
 Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, const char *attrstr, STRLEN len)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
