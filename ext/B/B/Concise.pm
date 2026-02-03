@@ -1,4 +1,4 @@
-package B::Concise 1.010;
+package B::Concise 1.011;
 # Copyright (C) 2000-2003 Stephen McCamant. All rights reserved.
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
