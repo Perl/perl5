@@ -12,7 +12,7 @@ use strict;
 use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 use Errno qw(EACCES);
 
-plan(129);
+plan(131);
 
 my $fh;
 my $var = "aaa\n";
@@ -535,4 +535,17 @@ SKIP:
     undef $str;
     print $fh "y";
     is($str, "\0\0\0\0\0y", "write to undef'ed variable");
+
+    undef $str;
+    seek $fh, 0, SEEK_SET;
+    print $fh "zz";
+    is($str, "zz", "rewind and write to undef'ed variable");
+}
+
+{
+    open my $fh, '>>', \my $str or die $!;
+    print $fh "xxxxx";
+    undef $str;
+    print $fh "y";
+    is($str, "y", "append to undef'ed variable");
 }

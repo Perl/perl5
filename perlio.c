@@ -1269,7 +1269,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
         STRLEN const cur = SvOK(sv) ? SvCUR(sv) : 0;
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
 	    dst = SvGROW(sv, cur + count + 1);
-	    offset = SvCUR(sv);
+	    offset = cur;
 	    s->posn = offset + count;
 	}
 	else {
@@ -1299,7 +1299,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	    s->posn += count;
 	}
 	Move(vbuf, dst + offset, count, char);
-	if ((STRLEN) s->posn > SvCUR(sv)) {
+	if ((STRLEN) s->posn > cur) {
 	    SvCUR_set(sv, (STRLEN)s->posn);
 	    dst[(STRLEN) s->posn] = 0;
 	}
