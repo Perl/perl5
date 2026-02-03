@@ -7917,20 +7917,7 @@ typedef struct am_table_short AMTS;
  * better one */
 #define gwLOCALEr_LOCK              gwENVr_LOCALEr_LOCK
 #define gwLOCALEr_UNLOCK            gwENVr_LOCALEr_UNLOCK
-#ifdef PERL_REENTR_USING_GETPROTOENT_R
-#  define GETPROTOENT_LOCK          LOCALE_READ_LOCK
-#  define GETPROTOENT_UNLOCK        LOCALE_READ_UNLOCK
-#else
-#  define GETPROTOENT_LOCK          gwLOCALEr_LOCK
-#  define GETPROTOENT_UNLOCK        gwLOCALEr_UNLOCK
-#endif
-#ifdef PERL_REENTR_USING_GETSERVENT_R
-#  define GETSERVENT_LOCK           LOCALE_READ_LOCK
-#  define GETSERVENT_UNLOCK         LOCALE_READ_UNLOCK
-#else
-#  define GETSERVENT_LOCK           gwLOCALEr_LOCK
-#  define GETSERVENT_UNLOCK         gwLOCALEr_UNLOCK
-#endif
+
 /* End of locale/env synchronization */
 
 #if ! defined(USE_THREADS)
