@@ -190,6 +190,26 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
         Perl_assert_aTHX; assert(mark); assert(sp)
 
 PERL_CALLCONV void
+Perl_apply_attributes_lexical(pTHX_ PADOFFSET padix, OP *attrlist)
+        Perl_attribute_nonnull_aTHX_;
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_LEXICAL
+
+PERL_CALLCONV void
+Perl_apply_attributes_pkgscoped(pTHX_ SV *sv, GV *namegv, OP *attrlist)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2);
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_PKGSCOPED \
+        assert(sv); assert(namegv)
+
+PERL_CALLCONV void
+Perl_apply_attributes_sv(pTHX_ SV *sv, OP *attrlist)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1);
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_SV    \
+        assert(sv)
+
+PERL_CALLCONV void
 Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, const char *attrstr, STRLEN len)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)

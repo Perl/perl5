@@ -895,6 +895,16 @@ ETXip	|void	|append_utf8_from_native_byte				\
 p	|SSize_t|apply		|I32 type				\
 				|NN SV **mark				\
 				|NN SV **sp
+Apx	|void	|apply_attributes_lexical				\
+				|PADOFFSET padix			\
+				|NULLOK OP *attrlist
+Apx	|void	|apply_attributes_pkgscoped				\
+				|NN SV *sv				\
+				|NN GV *namegv				\
+				|NULLOK OP *attrlist
+Apx	|void	|apply_attributes_sv					\
+				|NN SV *sv				\
+				|NULLOK OP *attrlist
 Apx	|void	|apply_attrs_string					\
 				|NN const char *stashpv 		\
 				|NN CV *cv				\

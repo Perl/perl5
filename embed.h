@@ -351,6 +351,9 @@
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define api_version_assert                     Perl_api_version_assert
+# define apply_attributes_lexical(a,b)          Perl_apply_attributes_lexical(aTHX_ a,b)
+# define apply_attributes_pkgscoped(a,b,c)      Perl_apply_attributes_pkgscoped(aTHX_ a,b,c)
+# define apply_attributes_sv(a,b)               Perl_apply_attributes_sv(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
 # define apply_builtin_cv_attributes(a,b)       Perl_apply_builtin_cv_attributes(aTHX_ a,b)
 # define atfork_child                           Perl_atfork_child
