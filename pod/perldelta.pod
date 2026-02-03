@@ -45,6 +45,16 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Mutex locks for C<getprotoent> and C<getservent> are removed
+
+The macros C<GETPROTOENT_LOCK> and C<GETSERVENT_LOCK> macros are
+removed, along with their unlocking counterparts.  These macros, though
+never documented, were intended to create thread safety when using their
+corresponding functions in a threaded-perl.  But they didn't actually
+furnish that, so using them would give a false sense of security.
+Another thread simultaneously accessing the database could move the
+pointers, so these would act unpredictably.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
