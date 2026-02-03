@@ -7376,8 +7376,6 @@ typedef struct am_table_short AMTS;
 #if ! defined(USE_THREADS)   /* No threads */
 #  define LOCALE_LOCK_(cond)  NOOP
 #  define LOCALE_UNLOCK_      NOOP
-#  define LOCALE_LOCK         NOOP
-#  define LOCALE_UNLOCK       NOOP
 #else   /* Below: Threaded */
 
     /* The locale mutex is required on all threaded builds, even if there is no
@@ -7410,13 +7408,9 @@ typedef struct am_table_short AMTS;
      *
      * In locale thread-safe Configurations, typical operations don't need
      * locking */
-#    define LOCALE_LOCK         NOOP
-#    define LOCALE_UNLOCK       NOOP
 #  else
      /* Whereas, thread-unsafe Configurations always requires locking */
 #    define LOCALE_LOCK_DOES_SOMETHING_
-#    define LOCALE_LOCK         LOCALE_LOCK_(0)
-#    define LOCALE_UNLOCK       LOCALE_UNLOCK_
 #    ifdef USE_LOCALE_NUMERIC
 #      define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                  LOCALE_LOCK_(cond_to_panic_if_already_locked)
@@ -7880,43 +7874,27 @@ typedef struct am_table_short AMTS;
 #  define LC_NUMERIC_UNLOCK       NOOP
 #endif
 
-   /* These non-reentrant versions use global space */
-#  define MBLEN_LOCK_                gwLOCALE_LOCK
-#  define MBLEN_UNLOCK_              gwLOCALE_UNLOCK
-
-#  define MBTOWC_LOCK_               gwLOCALE_LOCK
-#  define MBTOWC_UNLOCK_             gwLOCALE_UNLOCK
-
-#  define WCTOMB_LOCK_               gwLOCALE_LOCK
-#  define WCTOMB_UNLOCK_             gwLOCALE_UNLOCK
-
-   /* Whereas the reentrant versions don't (assuming they are called with a
-    * per-thread buffer; some have the capability of being called with a NULL
-    * parameter, which defeats the reentrancy) */
-#  define MBRLEN_LOCK_                  NOOP
-#  define MBRLEN_UNLOCK_                NOOP
-#  define MBRTOWC_LOCK_                 NOOP
-#  define MBRTOWC_UNLOCK_               NOOP
-#  define WCRTOMB_LOCK_                 NOOP
-#  define WCRTOMB_UNLOCK_               NOOP
-
-#  define LC_COLLATE_LOCK               LOCALE_LOCK
-#  define LC_COLLATE_UNLOCK             LOCALE_UNLOCK
-
+/* These spellings are retained for backwards compatibility */
+#define LOCALE_LOCK          PERL_LCx_LOCK()
+#define LOCALE_UNLOCK        PERL_LCx_UNLOCK()
+#define MBLEN_LOCK_          PERL_MBLEN_LOCK
+#define MBLEN_UNLOCK_        PERL_MBLEN_UNLOCK
+#define MBTOWC_LOCK_         PERL_MBTOWC_LOCK
+#define MBTOWC_UNLOCK_       PERL_MBTOWC_UNLOCK
+#define WCTOMB_LOCK_         PERL_WCTOMB_LOCK
+#define WCTOMB_UNLOCK_       PERL_WCTOMB_UNLOCK
+#define MBRLEN_LOCK_         PERL_MBRLEN_LOCK
+#define MBRLEN_UNLOCK_       PERL_MBRLEN_UNLOCK
+#define MBRTOWC_LOCK_        PERL_MBRTOWC_LOCK
+#define MBRTOWC_UNLOCK_      PERL_MBRTOWC_UNLOCK
+#define WCRTOMB_LOCK_        PERL_WCRTOMB_LOCK
+#define WCRTOMB_UNLOCK_      PERL_WCRTOMB_UNLOCK
+#define LC_COLLATE_LOCK      LOCALE_LOCK
+#define LC_COLLATE_UNLOCK    LOCALE_UNLOCK
 #define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK()
 #define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK()
-/* Similarly, these functions need a constant environment and/or locale.  And
- * some have a buffer that is shared with another thread executing the same or
- * a related call.  A mutex could be created for each class, but for now, share
- * the ENV mutex with everything, as none probably gets called so much that
- * performance would suffer by a thread being locked out by another thread that
- * could have used a different mutex.
- *
- * But, create a different macro name just to indicate the ones that don't
- * actually depend on the environment, but are using its mutex for want of a
- * better one */
-#define gwLOCALEr_LOCK              gwENVr_LOCALEr_LOCK
-#define gwLOCALEr_UNLOCK            gwENVr_LOCALEr_UNLOCK
+#define gwLOCALEr_LOCK       PERL_GENx_LCr_LOCK
+#define gwLOCALEr_UNLOCK     PERL_GENx_LCr_UNLOCK
 
 /* End of locale/env synchronization */
 
