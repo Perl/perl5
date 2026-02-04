@@ -43,8 +43,6 @@
 #include <sys/random.h>
 #endif
 
-#include "prng.h"
-
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 int putenv(char *);
@@ -4659,7 +4657,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
  * Examples: https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64
  */
 static U64
-splitmix64(U64 *state)
+S_splitmix64(U64 *state)
 {
     U64 z = (*state += 0x9e3779b97f4a7c15);
     z     = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
@@ -5983,102 +5981,58 @@ Perl_get_re_arg(pTHX_ SV *sv)
     return NULL;
 }
 
-/*
- * This code is derived from drand48() implementation from FreeBSD,
- * found in lib/libc/gen/_rand48.c.
- *
- * The U64 implementation is original, based on the POSIX
- * specification for drand48().
- */
-
-/*
-* Copyright (c) 1993 Martin Birgmeier
-* All rights reserved.
-*
-* You may redistribute unmodified or modified versions of this source
-* code provided that the above copyright notice and this and the
-* following conditions are retained.
-*
-* This software is provided ``as is'', and comes with no warranties
-* of any kind. I shall in no event be liable for anything that happens
-* to anyone/anything when using this software.
-*/
-
-#define FREEBSD_DRAND48_SEED_0   (0x330e)
-
-#ifdef PERL_DRAND48_QUAD
-
-#define DRAND48_MULT UINT64_C(0x5deece66d)
-#define DRAND48_ADD  0xb
-#define DRAND48_MASK UINT64_C(0xffffffffffff)
-
-#else
-
-#define FREEBSD_DRAND48_SEED_1   (0xabcd)
-#define FREEBSD_DRAND48_SEED_2   (0x1234)
-#define FREEBSD_DRAND48_MULT_0   (0xe66d)
-#define FREEBSD_DRAND48_MULT_1   (0xdeec)
-#define FREEBSD_DRAND48_MULT_2   (0x0005)
-#define FREEBSD_DRAND48_ADD      (0x000b)
-
-static const unsigned short rand48_mult_[3] = {
-    FREEBSD_DRAND48_MULT_0,
-    FREEBSD_DRAND48_MULT_1,
-    FREEBSD_DRAND48_MULT_2
-};
-static const unsigned short rand48_add_ = FREEBSD_DRAND48_ADD;
-
-#endif
-
-void
-Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
+// https://prng.di.unimi.it/#remarks
+static double
+uint64_to_double(U64 num)
 {
-    PERL_ARGS_ASSERT_DRAND48_INIT_R;
+	// A standard 64bit double floating-point number in IEEE floating point
+	// format has 52 bits of significand. Thus, the representation can actually
+	// store numbers with 53 significant binary digits.
+	double ret   = ldexp(num >> 11, -53);
 
-#ifdef PERL_DRAND48_QUAD
-    *random_state = FREEBSD_DRAND48_SEED_0 + ((U64)seed << 16);
-#else
-    random_state->seed[0] = FREEBSD_DRAND48_SEED_0;
-    random_state->seed[1] = (U16) seed;
-    random_state->seed[2] = (U16) (seed >> 16);
-#endif
+	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
+
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////
+// PCG64 functions
+//////////////////////////////////////////////////////////////
+
+// Perl can only send one seed, so we have to deterministically
+// create the other seeds needed for our PRNG
+void
+Perl_pcg64_seed_r(pcg64_random_t *state, U64 seed)
+{
+    PERL_ARGS_ASSERT_PCG64_SEED_R;
+	U64 seed1 = splitmix64(&seed);
+	U64 seed2 = splitmix64(&seed1);
+
+	state->state = seed1;
+	state->inc   = seed2;
+
+	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 INIT: %lu => %lu / %lu\n", seed, state->state, state->inc));*/
+}
+
+static U64
+pcg64_rand64_r(pcg64_random_t *state)
+{
+    const uint64_t word = ((state->state >> ((state->state >> 59) + 5)) ^ state->state) * 12605985483714917081ull;
+    state->state = state->state * 6364136223846793005ull + state->inc;
+    return (word >> 43) ^ word;
 }
 
 double
-Perl_drand48_r(perl_drand48_t *random_state)
+Perl_pcg64_random_double_r(pcg64_random_t *state)
 {
-    PERL_ARGS_ASSERT_DRAND48_R;
+    PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE_R;
 
-#ifdef PERL_DRAND48_QUAD
-    *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
-        & DRAND48_MASK;
+	U64 num    = pcg64_rand64_r(state);
+	double ret = uint64_to_double(num);
 
-    return ldexp((double)*random_state, -48);
-#else
-    {
-    U32 accu;
-    U16 temp[2];
+	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15f\n", ret));*/
 
-    accu = (U32) rand48_mult_[0] * (U32) random_state->seed[0]
-         + (U32) rand48_add_;
-    temp[0] = (U16) accu;        /* lower 16 bits */
-    accu >>= sizeof(U16) * 8;
-    accu += (U32) rand48_mult_[0] * (U32) random_state->seed[1]
-          + (U32) rand48_mult_[1] * (U32) random_state->seed[0];
-    temp[1] = (U16) accu;        /* middle 16 bits */
-    accu >>= sizeof(U16) * 8;
-    accu += rand48_mult_[0] * random_state->seed[2]
-          + rand48_mult_[1] * random_state->seed[1]
-          + rand48_mult_[2] * random_state->seed[0];
-    random_state->seed[0] = temp[0];
-    random_state->seed[1] = temp[1];
-    random_state->seed[2] = (U16) accu;
-
-    return ldexp((double) random_state->seed[0], -48) +
-           ldexp((double) random_state->seed[1], -32) +
-           ldexp((double) random_state->seed[2], -16);
-    }
-#endif
+	return ret;
 }
 
 #ifdef USE_C_BACKTRACE
