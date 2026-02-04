@@ -67,14 +67,14 @@ typedef struct { uint64_t state;  uint64_t inc; } pcg64_random_t;
 #define PL_RANDOM_STATE_TYPE pcg64_random_t
 
 #define Perl_pcg64_seed(seed) (Perl_pcg64_seed_r(&PL_random_state, (seed)))
-#define Perl_pcg64_random_double() \
-    (Perl_pcg64_random_double_r(&PL_random_state))
+#define Perl_pcg64_random_NV() \
+    (Perl_pcg64_random_NV_r(&PL_random_state))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results
  * of rand() */
 #define Perl_internal_randd() \
-    (Perl_pcg64_random_double_r(&PL_internal_random_state))
+    (Perl_pcg64_random_NV_r(&PL_internal_random_state))
 #define Perl_internal_rand_seed(seed) \
     (Perl_pcg64_seed_r(&PL_internal_random_state, (seed)))
 #endif
