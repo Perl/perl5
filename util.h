@@ -74,40 +74,21 @@ Hence, for example, C<ibcmp()> is S<C<(! foldEQ())>>
 #define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
                     cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
-/* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
-   We can't swap this to HAS_QUAD, because the logic here affects the type of
-   perl_drand48_t below, and that is visible outside of the core.  */
-#if defined(U64TYPE)
-/* use a faster implementation when quads are available */
-#    define PERL_DRAND48_QUAD
-#endif
+typedef struct { uint64_t state;  uint64_t inc; } pcg64_random_t;
 
-#ifdef PERL_DRAND48_QUAD
+#define PL_RANDOM_STATE_TYPE pcg64_random_t
 
-/* U64 is only defined under PERL_CORE, but this needs to be visible
- * elsewhere so the definition of PerlInterpreter is complete.
- */
-typedef U64TYPE perl_drand48_t;
-
-#else
-
-struct PERL_DRAND48_T {
-    U16 seed[3];
-};
-
-typedef struct PERL_DRAND48_T perl_drand48_t;
-
-#endif
-
-#define PL_RANDOM_STATE_TYPE perl_drand48_t
-
-#define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
-#define Perl_drand48() (Perl_drand48_r(&PL_random_state))
+#define Perl_pcg64_seed(seed) (Perl_pcg64_seed_r(&PL_random_state, (seed)))
+#define Perl_pcg64_random_double() \
+    (Perl_pcg64_random_double_r(&PL_random_state))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results
  * of rand() */
-#define Perl_internal_randd() (Perl_drand48_r(&PL_internal_random_state))
+#define Perl_internal_randd() \
+    (Perl_pcg64_random_double_r(&PL_internal_random_state))
+#define Perl_internal_rand_seed(seed) \
+    (Perl_pcg64_seed_r(&PL_internal_random_state, (seed)))
 #endif
 
 #ifdef USE_C_BACKTRACE

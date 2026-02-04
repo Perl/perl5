@@ -2048,6 +2048,7 @@
 #   if defined(PERL_IN_UTIL_C)
 #     define ckwarn_common(a)                   S_ckwarn_common(aTHX_ a)
 #     define mess_alloc()                       S_mess_alloc(aTHX)
+#     define splitmix64(a)                      S_splitmix64(aTHX_ a)
 #     define with_queued_errors(a)              S_with_queued_errors(aTHX_ a)
 #     if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 #       define mem_log_common                   S_mem_log_common

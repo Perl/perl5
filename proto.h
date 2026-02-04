@@ -1395,18 +1395,6 @@ Perl_dowantarray(pTHX)
         Perl_assert_aTHX
 
 PERL_CALLCONV void
-Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
-        Perl_attribute_nonnull(1);
-#define PERL_ARGS_ASSERT_DRAND48_INIT_R         \
-        assert(random_state)
-
-PERL_CALLCONV double
-Perl_drand48_r(perl_drand48_t *random_state)
-        Perl_attribute_nonnull(1);
-#define PERL_ARGS_ASSERT_DRAND48_R              \
-        assert(random_state)
-
-PERL_CALLCONV void
 Perl_dump_all(pTHX)
         Perl_attribute_nonnull_aTHX;
 #define PERL_ARGS_ASSERT_DUMP_ALL               \
@@ -5242,12 +5230,16 @@ Perl_parser_free(pTHX_ const yy_parser *parser)
         Perl_assert_aTHX; assert(parser)
 
 PERL_CALLCONV double
-Perl_pcg64_random_double(void);
-#define PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE
+Perl_pcg64_random_double_r(PL_RANDOM_STATE_TYPE *state)
+        Perl_attribute_nonnull(1);
+#define PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE_R  \
+        assert(state)
 
 PERL_CALLCONV void
-Perl_pcg64_seed(U64 seed1);
-#define PERL_ARGS_ASSERT_PCG64_SEED
+Perl_pcg64_seed_r(PL_RANDOM_STATE_TYPE *state, U64 seed1)
+        Perl_attribute_nonnull(1);
+#define PERL_ARGS_ASSERT_PCG64_SEED_R           \
+        assert(state)
 
 PERL_CALLCONV void
 Perl_peep(pTHX_ OP *o)
@@ -14306,6 +14298,13 @@ S_mess_alloc(pTHX)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_MESS_ALLOC            \
         Perl_assert_aTHX
+
+static U64
+S_splitmix64(pTHX_ U64 *state)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_SPLITMIX64            \
+        assert(state)
 
 static SV *
 S_with_queued_errors(pTHX_ SV *ex)
