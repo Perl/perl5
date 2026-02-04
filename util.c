@@ -5868,14 +5868,14 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 static double
 uint64_to_double(U64 num)
 {
-	// A standard 64bit double floating-point number in IEEE floating point
-	// format has 52 bits of significand. Thus, the representation can actually
-	// store numbers with 53 significant binary digits.
-	double ret   = ldexp(num >> 11, -53);
+    // A standard 64bit double floating-point number in IEEE floating point
+    // format has 52 bits of significand. Thus, the representation can actually
+    // store numbers with 53 significant binary digits.
+    double ret   = ldexp(num >> 11, -53);
 
-	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
+    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
 
-	return ret;
+    return ret;
 }
 
 //////////////////////////////////////////////////////////////
@@ -5888,13 +5888,13 @@ void
 Perl_pcg64_seed_r(pcg64_random_t *state, U64 seed)
 {
     PERL_ARGS_ASSERT_PCG64_SEED_R;
-	U64 seed1 = splitmix64(&seed);
-	U64 seed2 = splitmix64(&seed1);
+    U64 seed1 = splitmix64(&seed);
+    U64 seed2 = splitmix64(&seed1);
 
-	state->state = seed1;
-	state->inc   = seed2;
+    state->state = seed1;
+    state->inc   = seed2;
 
-	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 INIT: %lu => %lu / %lu\n", seed, state->state, state->inc));*/
+    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 INIT: %lu => %lu / %lu\n", seed, state->state, state->inc));*/
 }
 
 static U64
@@ -5910,12 +5910,12 @@ Perl_pcg64_random_double_r(pcg64_random_t *state)
 {
     PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE_R;
 
-	U64 num    = pcg64_rand64_r(state);
-	double ret = uint64_to_double(num);
+    U64 num    = pcg64_rand64_r(state);
+    double ret = uint64_to_double(num);
 
-	/*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15f\n", ret));*/
+    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15f\n", ret));*/
 
-	return ret;
+    return ret;
 }
 
 #ifdef USE_C_BACKTRACE
