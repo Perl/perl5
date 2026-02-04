@@ -1332,4 +1332,11 @@ test_opcount(0, "basic any/all",
                 }
             );
 
+# GH #13793, GH #20586
+test_opcount(0, "Don't fold string repetition above a multiplier threshold",
+                sub { my $x = "A" x (2**22) },
+                {
+                    repeat      => 1,
+                });
+
 done_testing();

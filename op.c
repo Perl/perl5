@@ -169,6 +169,9 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
+#ifndef PERL_FOLD_REPEAT_LIMIT
+#define PERL_FOLD_REPEAT_LIMIT (1024 * 1024)
+#endif
 static const char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
 
 /* remove any leading "empty" ops from the op_next chain whose first
@@ -5057,6 +5060,30 @@ S_fold_constants(pTHX_ OP *const o)
         break;
     case OP_REPEAT:
         if (o->op_private & OPpREPEAT_DOLIST) goto nope;
+
+        /* Don't constant fold above a certain threshold.
+         * (GH#13793 & GH#20586)
+         *
+         * Implementation note: pp_pow returns powers of 2 as an NV
+         *     e.g. my $x = "A" x (2**3);
+         */
+        if (OP_TYPE_IS(cBINOPo->op_last, OP_CONST)) {
+            SV *constsv = cSVOPx_sv(cBINOPo->op_last);
+
+            if (SvIOK(constsv)) {
+                if (SvIOK_UV(constsv)) {
+                    if (SvUVX(constsv) > (UV)PERL_FOLD_REPEAT_LIMIT)
+                        goto nope;
+                } else {
+                    if (SvIVX(constsv) > (IV)PERL_FOLD_REPEAT_LIMIT)
+                        goto nope;
+                }
+            } else {
+                NV rhs = 0.0; rhs = SvNV_nomg(constsv);
+                if (rhs > (NV)PERL_FOLD_REPEAT_LIMIT)
+                    goto nope;
+            }
+        }
         break;
     case OP_SREFGEN:
         if (cUNOPx(cUNOPo->op_first)->op_first->op_type != OP_CONST
