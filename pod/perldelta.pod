@@ -501,6 +501,13 @@ This change shouldn't affect any C<XS> module code that is using the test
 macros correctly, though might cause confusion to code that attempts to analyse
 C<SvFLAGS> bits directly outside of the helper macros.
 
+=item *
+
+An upper limit has been applied to the multiplier operand of the
+repetition operator. Constant folding will not be attempted if the
+operand is a numerical constant above C<PERL_FOLD_REPEAT_LIMIT>.
+See [GH #20586] and [GH #23561] for background.
+
 =back
 
 =head1 Selected Bug Fixes
