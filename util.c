@@ -5865,13 +5865,13 @@ Perl_get_re_arg(pTHX_ SV *sv) {
 }
 
 // https://prng.di.unimi.it/#remarks
-static double
-uint64_to_double(U64 num)
+static NV
+uint64_to_NV(U64 num)
 {
-    // A standard 64bit double floating-point number in IEEE floating point
-    // format has 52 bits of significand. Thus, the representation can actually
-    // store numbers with 53 significant binary digits.
-    double ret   = ldexp(num >> 11, -53);
+    /* NV can be have different significant bits depending on how perl
+       is configured, so just let the appropriate ldexp do the work
+    */
+    NV ret   = Perl_ldexp((NV)num, -64);
 
     /*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
 
@@ -5905,15 +5905,15 @@ pcg64_rand64_r(pcg64_random_t *state)
     return (word >> 43) ^ word;
 }
 
-double
+NV
 Perl_pcg64_random_double_r(pcg64_random_t *state)
 {
     PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE_R;
 
     U64 num    = pcg64_rand64_r(state);
-    double ret = uint64_to_double(num);
+    NV ret = uint64_to_NV(num);
 
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15f\n", ret));*/
+    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15" NVff "\n", ret));*/
 
     return ret;
 }

@@ -3509,7 +3509,7 @@ Perl_parser_free(pTHX_ const yy_parser *parser)
 #define PERL_ARGS_ASSERT_PARSER_FREE            \
         assert(parser)
 
-PERL_CALLCONV double
+PERL_CALLCONV NV
 Perl_pcg64_random_double_r(PL_RANDOM_STATE_TYPE *state);
 #define PERL_ARGS_ASSERT_PCG64_RANDOM_DOUBLE_R  \
         assert(state)
