@@ -113,6 +113,7 @@ perlio.c				C code for PerlIO abstraction
 perlio.h				PerlIO abstraction
 perlio.sym				Symbols for PerlIO abstraction
 perliol.h				PerlIO Layer definition
+perlrand.h				Types and macros for random numbers
 perlsdio.h				Fake stdio using perlio
 perlstatic.h				Like inline.h, but functions not declared inline
 perlvars.h				Global variables
@@ -131,6 +132,7 @@ pp_proto.h				C++ definitions for Push/Pop code
 pp_sort.c				Push/Pop code for sort
 pp_sys.c				Push/Pop code for system interaction
 proto.h					Prototypes
+random.c				Random number generation and seeds
 README					The Instructions
 README.aix				Perl notes for AIX
 README.amiga				Perl notes for AmigaOS

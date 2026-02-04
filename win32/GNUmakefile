@@ -971,6 +971,7 @@ MICROCORE_SRC	=		\
 		..\peep.c	\
 		..\perly.c	\
 		..\pp_sort.c	\
+		..\random.c	\
 		..\reentr.c	\
 		..\run.c	\
 		..\scope.c	\
@@ -1011,6 +1012,7 @@ CORE_NOCFG_H	=		\
 		..\opcode.h	\
 		..\perl.h	\
 		..\perlapi.h	\
+		..\perlrand.h	\
 		..\perlsdio.h	\
 		..\perly.h	\
 		..\pp.h		\

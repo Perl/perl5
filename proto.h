@@ -9734,11 +9734,6 @@ static SV *
 S_mess_alloc(pTHX);
 # define PERL_ARGS_ASSERT_MESS_ALLOC
 
-static U64
-S_splitmix64(pTHX_ U64 *state);
-# define PERL_ARGS_ASSERT_SPLITMIX64            \
-        assert(state)
-
 static SV *
 S_with_queued_errors(pTHX_ SV *ex);
 # define PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS    \
