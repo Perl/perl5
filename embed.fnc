@@ -1300,9 +1300,6 @@ p	|void	|do_vop 	|I32 optype				\
 				|NN SV *left				\
 				|NN SV *right
 CDRdp	|U8	|dowantarray
-TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
-				|U32 seed
-TXop	|double |drand48_r	|NN perl_drand48_t *random_state
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
@@ -2697,8 +2694,10 @@ Adpx	|OP *	|parse_termexpr |U32 flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts					\
 				|NN const char **popt
-TXop	|double |pcg64_random_double
-TXop	|void	|pcg64_seed	|U64 seed1
+TXop	|double |pcg64_random_double_r					\
+				|NN PL_RANDOM_STATE_TYPE *state
+TXop	|void	|pcg64_seed_r	|NN PL_RANDOM_STATE_TYPE *state 	\
+				|U64 seed1
 
 : peephole optimiser
 p	|void	|peep		|NULLOK OP *o
@@ -6422,6 +6421,7 @@ S	|void	|warn_on_first_deprecated_use				\
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
 S	|SV *	|mess_alloc
+S	|U64	|splitmix64	|NN U64 *state
 S	|SV *	|with_queued_errors					\
 				|NN SV *ex
 So	|void	|xs_version_bootcheck					\
