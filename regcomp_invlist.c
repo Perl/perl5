@@ -269,7 +269,15 @@ S_invlist_trim(SV* invlist)
     const STRLEN realistic_size = expected_size(
                                       MAX( min_size, SvCUR(invlist) + 1)  );
 
-    if ( SvLEN(invlist) > realistic_size ) {
+    /* It's not clear what proportion of invlists are short lived, with
+     * the malloc() overhead of resizing is more relevant than the
+     * memory briefly saved, versus long lived invlists where memory
+     * savings are definitely desirable and malloc() overhead matters less.
+     *
+     * The 4*PTRSIZE below is an arbitrary fudge-factor added to
+     * attempt to strike a balance.
+     */
+    if ( SvLEN(invlist) > realistic_size + 4*PTRSIZE ) {
         SvPV_renew(invlist, realistic_size);
     }
 }
