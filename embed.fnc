@@ -2767,7 +2767,7 @@ Adpx	|OP *	|parse_termexpr |U32 flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts					\
 				|NN const char **popt
-TXop	|double |pcg64_random_double_r					\
+TXop	|NV	|pcg64_random_NV_r					\
 				|NN PL_RANDOM_STATE_TYPE *state
 TXop	|void	|pcg64_seed_r	|NN PL_RANDOM_STATE_TYPE *state 	\
 				|U64 seed1

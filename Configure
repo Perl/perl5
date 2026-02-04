@@ -21404,8 +21404,8 @@ esac
 #randbits=48
 #randseedtype=U32
 
-randfunc=Perl_pcg64_random_double
-drand01="Perl_pcg64_random_double()"
+randfunc=Perl_pcg64_random_NV
+drand01="Perl_pcg64_random_NV()"
 seedfunc="Perl_pcg64_seed"
 randseedtype=U64
 
