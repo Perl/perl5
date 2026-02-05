@@ -5168,11 +5168,11 @@ $! Check rand48 and its ilk
 $!
 $ echo4 "Using our internal random number implementation..."
 $!
-$ randfunc = "Perl_drand48"
-$ drand01 = "Perl_drand48()"
-$ seedfunc = "Perl_drand48_init"
+$ randfunc = "Perl_pcg64_random_double"
+$ drand01 = "Perl_pcg64_random_double()"
+$ seedfunc = "Perl_pcg64_seed"
 $ randbits = "48"
-$ randseedtype = "U32"
+$ randseedtype = "U64"
 $ d_drand48proto = "define"
 $!
 $! Done with compiler checks. Clean up.
