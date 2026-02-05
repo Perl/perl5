@@ -7322,16 +7322,7 @@ typedef struct am_table_short AMTS;
  * Perl doesn't try to solve this kind of issue.  But it does have mutexes for
  * the other cases. */
 
-#ifdef USE_THREADS
-#  define KEYWORD_PLUGIN_MUTEX_INIT    MUTEX_INIT(&PL_keyword_plugin_mutex)
-#  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
-#  define KEYWORD_PLUGIN_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_keyword_plugin_mutex)
-#  define KEYWORD_PLUGIN_MUTEX_TERM    MUTEX_DESTROY(&PL_keyword_plugin_mutex)
-#  define USER_PROP_MUTEX_INIT    MUTEX_INIT(&PL_user_prop_mutex)
-#  define USER_PROP_MUTEX_LOCK    MUTEX_LOCK(&PL_user_prop_mutex)
-#  define USER_PROP_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_user_prop_mutex)
-#  define USER_PROP_MUTEX_TERM    MUTEX_DESTROY(&PL_user_prop_mutex)
-#else
+#ifndef USE_THREADS
 #  define KEYWORD_PLUGIN_MUTEX_INIT    NOOP
 #  define KEYWORD_PLUGIN_MUTEX_LOCK    NOOP
 #  define KEYWORD_PLUGIN_MUTEX_UNLOCK  NOOP
@@ -7340,9 +7331,33 @@ typedef struct am_table_short AMTS;
 #  define USER_PROP_MUTEX_LOCK    NOOP
 #  define USER_PROP_MUTEX_UNLOCK  NOOP
 #  define USER_PROP_MUTEX_TERM    NOOP
-#endif
+#  define ENV_LOCK        NOOP
+#  define ENV_UNLOCK      NOOP
+#  define ENV_READ_LOCK   NOOP
+#  define ENV_READ_UNLOCK NOOP
+#  define ENV_INIT        NOOP
+#  define ENV_TERM        NOOP
+#  define LOCALE_INIT     NOOP
+#  define LOCALE_TERM     NOOP
+#  define LOCALE_LOCK_(cond)        NOOP
+#  define LOCALE_UNLOCK_            NOOP
+#  define LOCALE_READ_LOCK          NOOP
+#  define LOCALE_READ_UNLOCK        NOOP
+#else
+#  define KEYWORD_PLUGIN_MUTEX_INIT    MUTEX_INIT(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_keyword_plugin_mutex)
+#  define KEYWORD_PLUGIN_MUTEX_TERM    MUTEX_DESTROY(&PL_keyword_plugin_mutex)
+#  define USER_PROP_MUTEX_INIT    MUTEX_INIT(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_LOCK    MUTEX_LOCK(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_user_prop_mutex)
+#  define USER_PROP_MUTEX_TERM    MUTEX_DESTROY(&PL_user_prop_mutex)
 
-#ifdef USE_THREADS
+/* The above mutexes are for perl's internal state only.  Accessing the
+ * environment and locale is more complicated, as they are exposed to XS code,
+ * and there are cases where both need to be constant at the same time, along
+ * with possibly other resources.  We make them simulate general mutexes to be
+ * able to handle this complexity better */
 #  define ENV_LOCK            PERL_REENTRANT_LOCK("env",                    \
                                                   &PL_env_mutex,            \
                                                   PL_env_mutex_depth,       \
@@ -7363,20 +7378,12 @@ typedef struct am_table_short AMTS;
 
 #  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
 #  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
-#else
-#  define ENV_LOCK        NOOP
-#  define ENV_UNLOCK      NOOP
-#  define ENV_READ_LOCK   NOOP
-#  define ENV_READ_UNLOCK NOOP
-#  define ENV_INIT        NOOP
-#  define ENV_TERM        NOOP
-#endif
 
-/* Locale/thread synchronization macros. */
-#if ! defined(USE_THREADS)   /* No threads */
-#  define LOCALE_LOCK_(cond)  NOOP
-#  define LOCALE_UNLOCK_      NOOP
-#else   /* Below: Threaded */
+#  define LOCALE_INIT           PERL_RW_MUTEX_INIT(&PL_locale_mutex)
+#  define LOCALE_TERM           STMT_START {                                  \
+                                    LOCALE_TERM_POSIX_2008_;                  \
+                                    PERL_RW_MUTEX_DESTROY(&PL_locale_mutex);  \
+                                } STMT_END
 
     /* The locale mutex is required on all threaded builds, even if there is no
      * locale handling enabled, because it gets repurposed for other uses
@@ -7402,21 +7409,37 @@ typedef struct am_table_short AMTS;
                                                     &PL_locale_mutex,       \
                                                     PL_locale_mutex_depth,  \
                                                     PL_locale_mutex_readers)
-#  ifdef USE_THREAD_SAFE_LOCALE
-    /* But for most situations, we use the macro name without a trailing
-     * underscore.
-     *
-     * In locale thread-safe Configurations, typical operations don't need
-     * locking */
+#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+    /* This function is coerced by this Configure option into cleaning up
+     * memory that is static to locale.c.  So we call it at termination.  Doing
+     * it this way is kludgy but confines having to deal with this
+     * Configuration to a bare minimum number of places. */
+#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
+#  elif ! defined(USE_POSIX_2008_LOCALE)
+#      define LOCALE_TERM_POSIX_2008_  NOOP
 #  else
-     /* Whereas, thread-unsafe Configurations always requires locking */
-#    define LOCALE_LOCK_DOES_SOMETHING_
-#    ifdef USE_LOCALE_NUMERIC
-#      define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
-                 LOCALE_LOCK_(cond_to_panic_if_already_locked)
-#      define LC_NUMERIC_UNLOCK  LOCALE_UNLOCK_
-#    endif
+     /* We have a locale object holding the 'C' locale for Posix 2008 */
+#    define LOCALE_TERM_POSIX_2008_                                         \
+                    STMT_START {                                            \
+                        if (PL_C_locale_obj) {                              \
+                            /* Make sure we aren't using the locale         \
+                             * space we are about to free */                \
+                            uselocale(LC_GLOBAL_LOCALE);                    \
+                            freelocale(PL_C_locale_obj);                    \
+                            PL_C_locale_obj = (locale_t) NULL;              \
+                        }                                                   \
+                    } STMT_END
 #  endif
+#  ifdef USE_LOCALE_NUMERIC
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+                 LOCALE_LOCK_(cond_to_panic_if_already_locked)
+#    define LC_NUMERIC_UNLOCK  LOCALE_UNLOCK_
+#  endif
+#endif  /* USE_THREADS */
+
+#ifndef LC_NUMERIC_LOCK
+#  define LC_NUMERIC_LOCK(cond)     NOOP
+#  define LC_NUMERIC_UNLOCK         NOOP
 #endif
 
 /* The POSIX Standard says:
@@ -7869,11 +7892,6 @@ typedef struct am_table_short AMTS;
 #  define POSIX_SETLOCALE_UNLOCK  PERL_SETLOCALE_UNLOCK
 #endif
 
-#ifndef LC_NUMERIC_LOCK
-#  define LC_NUMERIC_LOCK(cond)   NOOP
-#  define LC_NUMERIC_UNLOCK       NOOP
-#endif
-
 /* These spellings are retained for backwards compatibility */
 #define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK(0)
 #define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
@@ -7897,38 +7915,6 @@ typedef struct am_table_short AMTS;
 #define WCTOMB_UNLOCK_       PERL_WCTOMB_UNLOCK
 
 /* End of locale/env synchronization */
-
-#if ! defined(USE_THREADS)
-#  define LOCALE_INIT
-#  define LOCALE_TERM
-#else
-#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-    /* This function is coerced by this Configure option into cleaning up
-     * memory that is static to locale.c.  So we call it at termination.  Doing
-     * it this way is kludgy but confines having to deal with this
-     * Configuration to a bare minimum number of places. */
-#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
-#  elif ! defined(USE_POSIX_2008_LOCALE)
-#      define LOCALE_TERM_POSIX_2008_  NOOP
-#  else
-     /* We have a locale object holding the 'C' locale for Posix 2008 */
-#    define LOCALE_TERM_POSIX_2008_                                         \
-                    STMT_START {                                            \
-                        if (PL_C_locale_obj) {                              \
-                            /* Make sure we aren't using the locale         \
-                             * space we are about to free */                \
-                            uselocale(LC_GLOBAL_LOCALE);                    \
-                            freelocale(PL_C_locale_obj);                    \
-                            PL_C_locale_obj = (locale_t) NULL;              \
-                        }                                                   \
-                    } STMT_END
-#  endif
-#  define LOCALE_INIT           PERL_RW_MUTEX_INIT(&PL_locale_mutex)
-#  define LOCALE_TERM           STMT_START {                                  \
-                                    LOCALE_TERM_POSIX_2008_;                  \
-                                    PERL_RW_MUTEX_DESTROY(&PL_locale_mutex);  \
-                                } STMT_END
-#endif
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */
 
