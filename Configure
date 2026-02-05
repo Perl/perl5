@@ -21394,15 +21394,10 @@ case "$ccflags" in
 	;;
 esac
 
-#randfunc=Perl_drand48
-#drand01="Perl_drand48()"
-#seedfunc="Perl_drand48_init"
-#randbits=48
-#randseedtype=U32
-
 randfunc=Perl_pcg64_random_NV
 drand01="Perl_pcg64_random_NV()"
 seedfunc="Perl_pcg64_seed"
+randbits=53
 randseedtype=U64
 
 : Probe whether dtrace builds an object, as newer Illumos requires an input
