@@ -251,6 +251,7 @@ use strict;
                             ops_with_check('ck_stringify'),
                             ops_with_check('ck_tell'),
                             ops_with_check('ck_trunc'),
+                            ops_with_check('ck_anonhash'),
                             ;
 
 

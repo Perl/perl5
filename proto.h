@@ -8211,12 +8211,30 @@ S_class_cleanup_definition(pTHX_ HV *stash)
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
     defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
 PERL_CALLCONV OP *
+Perl_ck_aassign(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_AASSIGN            \
+        assert(o)
+
+PERL_CALLCONV OP *
 Perl_ck_anoncode(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_CK_ANONCODE           \
+        assert(o)
+
+PERL_CALLCONV OP *
+Perl_ck_anonhash(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_ANONHASH           \
         assert(o)
 
 PERL_CALLCONV OP *
@@ -9701,6 +9719,13 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const OP *o, const OP *kid)
         Perl_attribute_nonnull_(pTHX_4);
 # define PERL_ARGS_ASSERT_BAD_TYPE_PV           \
         assert(t); assert(o); assert(kid)
+
+static void
+S_check_alt_hash_fields_hekify(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1);
+# define PERL_ARGS_ASSERT_CHECK_ALT_HASH_FIELDS_HEKIFY \
+        assert(o)
 
 static CV *
 S_clear_special_blocks(pTHX_ const char * const fullname, GV * const gv, CV * const cv)

@@ -14151,6 +14151,98 @@ Perl_ck_sassign(pTHX_ OP *o)
 }
 
 
+/* This function is very similar to Perl_check_hash_fields_and_hekify.
+ * It provides compile time checks on CONST hash key fields and
+ * converts them to HEK-in-SVs.
+ *
+ * The primary difference is that the other function operates on
+ * one (HELEM) or all (HSLICE, KVSLICE) OPs, this function is called
+ * by functions (anonhash, aassign) taking key/value pairs, and only
+ * the keys require examination so values are skipped. If we lose the
+ * ability to tell which OPs are keys and which are values, the function
+ * exits prematurely so as not to inadvertently operate on any values.
+ * (Doing so could erroneously downgrade some UTF8 CONSTs, which could
+ * introduce subtle logic changes to user code.)
+ *
+ * This function also does not check for fields or for barewords.
+ * (finalize_op() should still report any barewords present here.)
+ */
+static void
+S_check_alt_hash_fields_hekify(pTHX_ OP *o)
+{
+    OP *sib = o;
+
+    if (OP_TYPE_IS_OR_WAS(o, OP_LIST)) {
+        sib = cLISTOPo->op_first;
+        assert(OpSIBLING(sib) &&
+               OP_TYPE_IS(sib, OP_PUSHMARK));
+        sib = OpSIBLING(sib);
+    } else if(OP_TYPE_IS_OR_WAS(o, OP_PUSHMARK)) {
+        sib = OpSIBLING(sib);
+    }
+
+    /* Examine the keys, skip the vals */
+    while (sib) {
+        /* Looking at a key */
+        if (OP_TYPE_IS(sib, OP_CONST)) {
+            SV **svp = cSVOPx_svp(sib);
+            SV *sv = *svp;
+
+            /* Make the CONST have a shared SV */
+            if (!SvIsCOW_shared_hash(sv) && SvTYPE(sv) < SVt_PVMG
+                && SvOK(sv) && !SvROK(sv)
+                && !(SvNOK(sv) && IN_LC_RUNTIME(LC_NUMERIC))
+            ) {
+                STRLEN keylen;
+                const char * const key = SvPV_const(sv, keylen);
+                if (UNLIKELY(keylen > I32_MAX)) {
+                    croak("Sorry, hash keys must be smaller than 2**31 bytes");
+                }
+
+                SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
+                SvREFCNT_dec_NN(sv);
+                *svp = nsv;
+            }
+        } else if (!(PL_opargs[sib->op_type] & OA_RETSCALAR))
+            break;
+
+        /* Looking for a corresponding value OP */
+        sib = OpSIBLING(sib);
+        if (!sib) break;
+
+        /* Is this OP guaranteed to only push a single SV? */
+        if (!(PL_opargs[sib->op_type] & OA_RETSCALAR))
+            break;
+
+        sib = OpSIBLING(sib);
+    }
+    return;
+}
+
+OP *
+Perl_ck_aassign(pTHX_ OP *o)
+{
+    OP * const last = cBINOPo->op_last;
+    if (last && OP_TYPE_IS_OR_WAS(last, OP_LIST)) {
+        OP * const sib = cLISTOPx(last)->op_first;
+        if (sib && OP_TYPE_IS(sib, OP_PUSHMARK)) {
+            OP * const lval = OpSIBLING(sib);
+            if (lval && !OpSIBLING(lval) &&
+                (OP_TYPE_IS(lval, OP_PADHV) || OP_TYPE_IS(lval, OP_RV2HV))) {
+                check_alt_hash_fields_hekify(cBINOPo->op_first);
+            }
+        }
+    }
+    return o;
+}
+
+OP *
+Perl_ck_anonhash(pTHX_ OP *o)
+{
+    check_alt_hash_fields_hekify(cLISTOPo->op_first);
+    return ck_fun(o);
+}
+
 OP *
 Perl_ck_match(pTHX_ OP *o)
 {

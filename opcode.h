@@ -1490,7 +1490,7 @@ INIT({
 	Perl_ck_match,		/* trans */
 	Perl_ck_match,		/* transr */
 	Perl_ck_sassign,	/* sassign */
-	Perl_ck_null,		/* aassign */
+	Perl_ck_aassign,	/* aassign */
 	Perl_ck_spair,		/* chop */
 	Perl_ck_null,		/* schop */
 	Perl_ck_spair,		/* chomp */
@@ -1616,7 +1616,7 @@ INIT({
 	Perl_ck_null,		/* list */
 	Perl_ck_null,		/* lslice */
 	Perl_ck_fun,		/* anonlist */
-	Perl_ck_fun,		/* anonhash */
+	Perl_ck_anonhash,	/* anonhash */
 	Perl_ck_fun,		/* emptyavhv */
 	Perl_ck_fun,		/* splice */
 	Perl_ck_fun,		/* push */

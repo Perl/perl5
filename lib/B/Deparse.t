@@ -2606,9 +2606,9 @@ my %h;
 (\my %d) = foo();
 \local %_ = \%h;
 (\local %_) = \%h;
-\state %y = {1,2};
-\our %z = {1,2};
-(\our %zz) = {1,2};
+\state %y = {'1',2};
+\our %z = {'1',2};
+(\our %zz) = {'1',2};
 \&a = foo();
 (\&a) = foo();
 \(&a) = foo();
@@ -2684,9 +2684,9 @@ my %h;
 (\my %d) = foo();
 \local %_ = \%h;
 (\local %_) = \%h;
-\state %y = {1, 2};
-\our %z = {1, 2};
-(\our %zz) = {1, 2};
+\state %y = {'1', 2};
+\our %z = {'1', 2};
+(\our %zz) = {'1', 2};
 \&a = foo();
 (\&a) = foo();
 (\&a) = foo();
@@ -2773,16 +2773,16 @@ foreach \our @a ([1, 2], [3, 4]) {
 foreach \@_ ([1, 2], [3, 4]) {
     die;
 }
-foreach \my %a ({5, 6}, {7, 8}) {
+foreach \my %a ({'5', 6}, {'7', 8}) {
     die;
 }
-foreach \our %a ({5, 6}, {7, 8}) {
+foreach \our %a ({'5', 6}, {'7', 8}) {
     die;
 }
-foreach \state %a ({5, 6}, {7, 8}) {
+foreach \state %a ({'5', 6}, {'7', 8}) {
     die;
 }
-foreach \%_ ({5, 6}, {7, 8}) {
+foreach \%_ ({'5', 6}, {'7', 8}) {
     die;
 }
 {
