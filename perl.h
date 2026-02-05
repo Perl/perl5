@@ -7853,28 +7853,44 @@ typedef struct am_table_short AMTS;
 #define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(0)
 #define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(0)
 
-/* setlocale() generally returns in a global static buffer, but not on Windows
- * when operating in thread-safe mode */
-#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
-#  define POSIX_SETLOCALE_LOCK                                              \
+/* posix_setlocale() is used internally to mean the setlocale() libc function
+ * defined in C89 and the POSIX Standard.  Windows implementations have
+ * extended behavior in which if you are operating with thread-safe locales is
+ * changeable at runtime.
+ *
+ * WSETLOCALE_LOCK is defined on those machines to take advantage of that
+ * extended behavior, and it can be used around calls to _wsetlocale() as well.
+ * It remains undefined on machines without that behavior, to catch mistakes in
+ * using it wrongly. */
+#if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
+#  ifndef USE_THREADS
+#    define WSETLOCALE_LOCK    NOOP
+#    define WSETLOCALE_UNLOCK  NOOP
+#  else
+     /* No locking is necessary when operating in thread-safe mode */
+#    define WSETLOCALE_LOCK                                                 \
             STMT_START {                                                    \
                 if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_LOCK;                                          \
+                    PERL_SETLOCALE_LOCK;                                    \
             } STMT_END
-#  define POSIX_SETLOCALE_UNLOCK                                            \
+#    define WSETLOCALE_UNLOCK                                               \
             STMT_START {                                                    \
                 if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_UNLOCK;                                        \
+                    PERL_SETLOCALE_UNLOCK;                                  \
             } STMT_END
-#else
-#  define POSIX_SETLOCALE_LOCK      gwLOCALE_LOCK
-#  define POSIX_SETLOCALE_UNLOCK    gwLOCALE_UNLOCK
+#  endif
 #endif
 
-/* It handles _wsetlocale() as well */
-#define WSETLOCALE_LOCK      POSIX_SETLOCALE_LOCK
-#define WSETLOCALE_UNLOCK    POSIX_SETLOCALE_UNLOCK
-
+/* XS code should be using Perl_setlocale() which provides many services.
+ * Internal code close to the metal should use POSIX_SETLOCALE_LOCK to
+ * interface with libc setlocale-like functions. */
+#if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
+#  define POSIX_SETLOCALE_LOCK    WSETLOCALE_LOCK
+#  define POSIX_SETLOCALE_UNLOCK  WSETLOCALE_UNLOCK
+#else
+#  define POSIX_SETLOCALE_LOCK    PERL_SETLOCALE_LOCK
+#  define POSIX_SETLOCALE_UNLOCK  PERL_SETLOCALE_UNLOCK
+#endif
 
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
