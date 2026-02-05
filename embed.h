@@ -1254,7 +1254,9 @@
 #   endif
 #   if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
        defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
+#     define ck_aassign(a)                      Perl_ck_aassign(aTHX_ a)
 #     define ck_anoncode(a)                     Perl_ck_anoncode(aTHX_ a)
+#     define ck_anonhash(a)                     Perl_ck_anonhash(aTHX_ a)
 #     define ck_backtick(a)                     Perl_ck_backtick(aTHX_ a)
 #     define ck_bitop(a)                        Perl_ck_bitop(aTHX_ a)
 #     define ck_classname(a)                    Perl_ck_classname(aTHX_ a)
@@ -1474,6 +1476,7 @@
 #     define assignment_type(a)                 S_assignment_type(aTHX_ a)
 #     define bad_type_gv(a,b,c,d)               S_bad_type_gv(aTHX_ a,b,c,d)
 #     define bad_type_pv(a,b,c,d)               S_bad_type_pv(aTHX_ a,b,c,d)
+#     define check_alt_hash_fields_hekify(a)    S_check_alt_hash_fields_hekify(aTHX_ a)
 #     define clear_special_blocks(a,b,c)        S_clear_special_blocks(aTHX_ a,b,c)
 #     define cop_free(a)                        S_cop_free(aTHX_ a)
 #     define dup_attrlist(a)                    S_dup_attrlist(aTHX_ a)

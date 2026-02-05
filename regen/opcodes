@@ -95,7 +95,7 @@ transr		transliteration (tr///)	ck_match	is"	S
 # Lvalue operators.
 
 sassign		scalar assignment	ck_sassign	s2	S S
-aassign		list assignment		ck_null		t2	L L
+aassign		list assignment		ck_aassign	t2	L L
 
 chop		chop			ck_spair	mts%	L
 schop		scalar chop		ck_null		stu%	S?
@@ -261,7 +261,7 @@ join		join or string		ck_join		fmst@	S L
 list		list			ck_null		m@	L
 lslice		list slice		ck_null		2	H L L
 anonlist	anonymous array ([])	ck_fun		ms@	L
-anonhash	anonymous hash ({})	ck_fun		ms@	L
+anonhash	anonymous hash ({})	ck_anonhash	ms@	L
 emptyavhv	empty anon hash/array	ck_fun		sT0
 
 splice		splice			ck_fun		m@	A S? S? L
