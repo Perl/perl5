@@ -76,8 +76,8 @@
  * char *realpath(const char *path, char resolved[MAXPATHLEN]);
  *
  * Find the real name of path, by removing all ".", ".." and symlink
- * components.  Returns (resolved) on success, or (NULL) on failure,
- * in which case the path which caused trouble is left in (resolved).
+ * components.  Returns resolved on success, or NULL on failure,
+ * in which case the path which caused trouble is left in resolved.
  */
 static
 char *
@@ -98,20 +98,20 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             resolved[0] = '/';
             resolved[1] = '\0';
             if (path[1] == '\0')
-                    return (resolved);
+                    return resolved;
             resolved_len = 1;
             remaining_len = my_strlcpy(remaining, path + 1, sizeof(remaining));
 	} else {
             if (getcwd(resolved, MAXPATHLEN) == NULL) {
                 my_strlcpy(resolved, ".", MAXPATHLEN);
-                return (NULL);
+                return NULL;
             }
             resolved_len = strlen(resolved);
             remaining_len = my_strlcpy(remaining, path, sizeof(remaining));
 	}
 	if (remaining_len >= sizeof(remaining) || resolved_len >= MAXPATHLEN) {
             errno = ENAMETOOLONG;
-            return (NULL);
+            return NULL;
 	}
 
 	/*
@@ -129,7 +129,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 
             if ((STRLEN)(s - remaining) >= (STRLEN)sizeof(next_token)) {
                 errno = ENAMETOOLONG;
-                return (NULL);
+                return NULL;
             }
             memcpy(next_token, remaining, s - remaining);
             next_token[s - remaining] = '\0';
@@ -147,7 +147,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             if (resolved[resolved_len - 1] != '/') {
                 if (resolved_len + 1 >= MAXPATHLEN) {
                     errno = ENAMETOOLONG;
-                    return (NULL);
+                    return NULL;
                 }
                 resolved[resolved_len++] = '/';
                 resolved[resolved_len] = '\0';
@@ -178,7 +178,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             resolved_len = my_strlcat(resolved, next_token, MAXPATHLEN);
             if (resolved_len >= MAXPATHLEN) {
                 errno = ENAMETOOLONG;
-                return (NULL);
+                return NULL;
             }
 #if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
             {
@@ -186,9 +186,9 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                 if (PerlLIO_lstat(resolved, &sb) != 0) {
                     if (errno == ENOENT && p == NULL) {
                         errno = serrno;
-                        return (resolved);
+                        return resolved;
                     }
-                    return (NULL);
+                    return NULL;
                 }
                 if (S_ISLNK(sb.st_mode)) {
                     int slen;
@@ -196,11 +196,11 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 
                     if (symlinks++ > MAXSYMLINKS) {
                         errno = ELOOP;
-                        return (NULL);
+                        return NULL;
                     }
                     slen = PerlLIO_readlink(resolved, symlink, sizeof(symlink) - 1);
                     if (slen < 0)
-                        return (NULL);
+                        return NULL;
                     symlink[slen] = '\0';
 #  ifdef OS390
                     /* Replace all instances of $SYSNAME/foo simply by /foo */
@@ -232,7 +232,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                         if (symlink[slen - 1] != '/') {
                             if ((STRLEN)(slen + 1) >= (STRLEN)sizeof(symlink)) {
                                 errno = ENAMETOOLONG;
-                                return (NULL);
+                                return NULL;
                             }
                             symlink[slen] = '/';
                             symlink[slen + 1] = 0;
@@ -240,7 +240,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                         remaining_len = my_strlcat(symlink, remaining, sizeof(symlink));
                         if (remaining_len >= sizeof(remaining)) {
                             errno = ENAMETOOLONG;
-                            return (NULL);
+                            return NULL;
                         }
                     }
                     remaining_len = my_strlcpy(remaining, symlink, sizeof(remaining));
@@ -258,7 +258,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	 */
 	if (resolved_len > 1 && resolved[resolved_len - 1] == '/')
             resolved[resolved_len - 1] = '\0';
-	return (resolved);
+	return resolved;
 }
 #endif
 
