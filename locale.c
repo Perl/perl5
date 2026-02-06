@@ -2179,7 +2179,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
        /* There is no standard for this function, and khw has never seen
         * anything beyond minimal vendor documentation, lacking important
         * details.  Experience has shown that some implementations have race
-        * conditons, and their returns may not be thread safe.  It would be
+        * conditions, and their returns may not be thread safe.  It would be
         * unreliable to test for complete thread safety in Configure.  What we
         * do instead is to assume that it is thread-safe, unless overriden by,
         * say, a hints file specifying
