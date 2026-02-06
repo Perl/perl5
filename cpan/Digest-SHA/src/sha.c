@@ -485,14 +485,14 @@ static HMAC *hmacinit(HMAC *h, int alg, UCHR *key, UINT keylen)
 
 	Zero(h, 1, HMAC);
 	if (!shainit(&h->isha, alg))
-		return(NULL);
+		return NULL;
 	if (!shainit(&h->osha, alg))
-		return(NULL);
+		return NULL;
 	if (keylen <= h->osha.blocksize / 8)
 		Copy(key, h->key, keylen, char);
 	else {
 		if (!shainit(&ksha, alg))
-			return(NULL);
+			return NULL;
 		shawrite(key, keylen * 8, &ksha);
 		shafinish(&ksha);
 		Copy(digcpy(&ksha), h->key, ksha.digestlen, char);

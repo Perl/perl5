@@ -9,7 +9,7 @@ use Fcntl qw(O_RDONLY O_RDWR);
 use Cwd qw(getcwd);
 use integer;
 
-$VERSION = '6.04';
+$VERSION = '6.04_001';
 
 require Exporter;
 @ISA = qw(Exporter);

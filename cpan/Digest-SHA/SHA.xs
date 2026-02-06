@@ -48,7 +48,7 @@ static const int ix2alg[] =
 static SHA *getSHA(pTHX_ SV *self)
 {
 	if (!sv_isobject(self) || !sv_derived_from(self, "Digest::SHA"))
-		return(NULL);
+		return NULL;
 	return INT2PTR(SHA *, SvIV(SvRV(self)));
 }
 
