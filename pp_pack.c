@@ -1943,7 +1943,7 @@ S_is_an_int(pTHX_ const char *s, STRLEN l)
     case '+':
       if (!skip) {
         SvREFCNT_dec(result);
-        return (NULL);
+        return NULL;
       }
       break;
     case '0':
@@ -1966,7 +1966,7 @@ S_is_an_int(pTHX_ const char *s, STRLEN l)
       break;
     default:
       SvREFCNT_dec(result);
-      return (NULL);
+      return NULL;
     }
     s++;
   }
