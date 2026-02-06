@@ -1019,7 +1019,7 @@ g_opendir(Char *str, glob_t *pglob)
                 my_strlcpy(buf, ".", sizeof(buf));
         } else {
                 if (g_Ctoc(str, buf, sizeof(buf)))
-                        return(NULL);
+                        return NULL;
         }
 
         if (pglob->gl_flags & GLOB_ALTDIRFUNC)
@@ -1063,7 +1063,7 @@ g_strchr(Char *str, int ch)
                 if (*str == ch)
                         return (str);
         } while (*str++);
-        return (NULL);
+        return NULL;
 }
 
 static int
