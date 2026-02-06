@@ -546,7 +546,7 @@ Perl_sharedsv_find(pTHX_ SV *sv)
     if (SvROK(sv) && sv_derived_from(sv, "threads::shared::tie")) {
         return (SHAREDSV_FROM_OBJ(sv));
     }
-    return (NULL);
+    return NULL;
 }
 
 
