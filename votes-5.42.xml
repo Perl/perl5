@@ -29,8 +29,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh tonyc khw" id="39d060cbfc89badb10092e880731f7c99d8076bb" issue="18669" pull="23913" desc="propagate correct ref context to both ?: branches"/>
-
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -38,10 +36,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-<commit votes="steveh tonyc khw" id="7b87a86b61a2855bab6d6c5324ebe230d24c548c" issue="" pull="23178" desc="win32: build without threads but still with implicit sys"/>
-
-<commit votes="khw mauke steveh" id="18b7917" issue="22992" pull="23961" desc="Configure: Allow LC_ALL syntax override"/>
 
 </div>
 
