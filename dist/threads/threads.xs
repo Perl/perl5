@@ -1061,7 +1061,7 @@ S_ithread_create(
             }
         }
 #endif
-        return (NULL);
+        return NULL;
     }
 
     my_pool->running_threads++;
