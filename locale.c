@@ -2179,7 +2179,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
        /* There is no standard for this function, and khw has never seen
         * anything beyond minimal vendor documentation, lacking important
         * details.  Experience has shown that some implementations have race
-        * condiions, and their returns may not be thread safe.  It would be
+        * conditons, and their returns may not be thread safe.  It would be
         * unreliable to test for complete thread safety in Configure.  What we
         * do instead is to assume that it is thread-safe, unless overriden by,
         * say, a hints file specifying
@@ -6602,7 +6602,7 @@ S_langinfo_sv_i(pTHX_
 
         /* nl_langinfo() is not supposed to return empty for the items below
          * when the locale is legal.  But we have experienced it happening.
-         * THe panic below includes enough information to do further debugging.
+         * The panic below includes enough information to do further debugging.
          * */
         if (UNLIKELY(total_len == 0)) switch (item) {
             case RADIXCHAR:
