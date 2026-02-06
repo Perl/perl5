@@ -254,7 +254,13 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+It is now possible to pass to F<Configure> the values dealing with POSIX
+locale categories, overriding its automatic calculation of these.  This
+enables cross-compilation to work.  The easiest way to do this is to
+extract the C program that does the calculation from F<Configure> and
+then run it on the target machine, and then pass the values it outputs
+to F<Configure> on the other machine.  F<Porting/Glossary> has examples.
+[GH #22992]
 
 =back
 
