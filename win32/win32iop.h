@@ -297,7 +297,7 @@ END_EXTERN_C
 #define malloc			win32_malloc
 #define calloc			win32_calloc
 #define realloc			win32_realloc
-#define free			win32_free
+static inline void free(void *ptr) { win32_free(ptr); }
 #endif
 
 /* XXX Why are APIs like sleep(), times() etc. inside a block
