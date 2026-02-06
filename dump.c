@@ -2265,7 +2265,7 @@ const struct flag_to_name hv_flags_names[] = {
     {SVphv_SHAREKEYS, "SHAREKEYS,"},
     {SVphv_LAZYDEL, "LAZYDEL,"},
     {SVphv_HASKFLAGS, "HASKFLAGS,"},
-    {SVf_AMAGIC, "OVERLOAD,"},
+    {SVphv_OVERLOAD, "OVERLOAD,"},
     {SVphv_CLONEABLE, "CLONEABLE,"}
 };
 
