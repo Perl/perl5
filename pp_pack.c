@@ -276,7 +276,7 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
         *(U8 *)(s)++)
 
 static bool
-S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t buf_len, I32 datumtype)
+S_utf8_to_bytes(pTHX_ const char **s, const char *end, char *buf, SSize_t buf_len, I32 datumtype)
 {
     UV val;
     STRLEN retlen;
