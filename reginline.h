@@ -11,7 +11,7 @@ Perl_regnext(pTHX_ const regnode *p)
     I32 offset;
 
     if (!p)
-        return(NULL);
+        return NULL;
 
     if (OP(p) > REGNODE_MAX) {                /* regnode.type is unsigned */
         croak("Corrupted regexp opcode %d > %d",
@@ -20,7 +20,7 @@ Perl_regnext(pTHX_ const regnode *p)
 
     offset = (REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p));
     if (offset == 0)
-        return(NULL);
+        return NULL;
 
     return(regnode *)(p+offset);
 }
