@@ -3639,6 +3639,7 @@ my @needed_by_ext = qw(
 my @undocumented_always_visible = qw(
     MAX_UNICODE_UTF8_BYTES
 
+    assert_scalar_or_IO_
     EXTEND_NEEDS_GROW_
     EXTEND_SAFE_N_
     MEM_WRAP_NEEDS_RUNTIME_CHECK_

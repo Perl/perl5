@@ -995,6 +995,8 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
                                                   SVp_IOK|SVp_NOK|SVf_IVisUV))
 
+#define assert_scalar_or_IO_(sv) \
+                                assert_((SvTYPE(sv) <= SVt_PVMG) || (SvTYPE(sv) == SVt_PVIO))
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
@@ -1114,8 +1116,17 @@ Returns the vstring magic, or NULL if none
 #define SvVSTRING_mg(sv)	(SvMAGICAL(sv) \
                                  ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
-#define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
-#define SvOOK_on(sv)		(SvFLAGS(sv) |= SVf_OOK)
+/* The SVf_OOK flag is only meaningful on regular scalars when ROK is off, and
+ * in two other legacy conditions. Older modules might still use the SvOOK
+ * macro to test for SVphv_HasAUX, and in some circumstances IoTOP_GV() ends
+ * up using it despite being an SVt_PVIO. So we accept those cases as well.
+ */
+#define SvOOK(sv)		((SvTYPE(sv) <= SVt_PVMG ||         /* regular scalars */ \
+                                        SvTYPE(sv) == SVt_PVHV ||   /* hashes */          \
+                                        SvTYPE(sv) == SVt_PVIO) &&  /* IOs */             \
+                                    ((SvFLAGS(sv) & (SVf_ROK|SVf_OOK)) == SVf_OOK))
+#define SvOOK_on(sv)		(assert_scalar_or_IO_(sv) assert_not_ROK(sv) \
+                                    SvFLAGS(sv) |= SVf_OOK)
 
 
 /*
