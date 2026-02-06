@@ -2949,6 +2949,7 @@ my @unresolved_visibility_overrides = qw(
     SVphv_HasAUX
     SVphv_HASKFLAGS
     SVphv_LAZYDEL
+    SVphv_OVERLOAD
     SVphv_SHAREKEYS
     SVp_IOK
     SVp_NOK

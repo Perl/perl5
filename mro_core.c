@@ -563,7 +563,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     if(meta->mro_nextmethod) hv_clear(meta->mro_nextmethod);
 
     /* Changes to @ISA might turn overloading on */
-    HvAMAGIC_on(stash);
+    HvOVERLOAD_on(stash);
     /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 
@@ -1383,7 +1383,7 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
     /* The method change may be due to *{$package . "::()"} = \&nil; in
        overload.pm. */
-    HvAMAGIC_on(stash);
+    HvOVERLOAD_on(stash);
     /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 }

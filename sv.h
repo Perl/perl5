@@ -495,13 +495,7 @@ These guys don't need the curly blocks
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
-/* SVf_AMAGIC means that the stash *may* have overload methods. It's
- * set each time a function is compiled into a stash, and is reset by the
- * overload code when called for the first time and finds that there are
- * no overload methods. Note that this used to be set on the object; but
- * is now only set on stashes.
- */
-#define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
+#define SVphv_OVERLOAD  0x10000000  /* stash has magical overloaded methods */
 #define SVf_IsCOW	0x10000000  /* copy on write (shared hash key if
                                        SvLEN == 0) */
 
@@ -1208,12 +1202,36 @@ Note: A GET magic check should be performed prior to an active magic check.
 */
 
 #define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
-                                 HvAMAGIC(SvSTASH(SvRV(sv))))
+                                 HvOVERLOAD(SvSTASH(SvRV(sv))))
 
 /* To be used on the stashes themselves: */
-#define HvAMAGIC(hv)		(SvFLAGS(hv) & SVf_AMAGIC)
-#define HvAMAGIC_on(hv)		(SvFLAGS(hv) |= SVf_AMAGIC)
-#define HvAMAGIC_off(hv)	(SvFLAGS(hv) &=~ SVf_AMAGIC)
+#define perl_assert_HV_(sv)          assert_(SvTYPE(sv) == SVt_PVHV)
+
+/*
+=for apidoc Am|bool|HvOVERLOAD|HV *hv
+
+Returns a boolean as to whether the stash C<hv> has overloaded methods defined
+on it.
+
+=for apidoc      Am|void|HvOVERLOAD_on|HV *hv
+=for apidoc_item       ||HvOVERLOAD_off|HV *hv
+
+Turns on or off the L</HvOVERLOAD> flag.
+
+=cut
+*/
+
+#define HvOVERLOAD(hv)          (SvFLAGS(hv) & SVphv_OVERLOAD)
+#define HvOVERLOAD_on(hv)       (perl_assert_HV_(hv) SvFLAGS(hv) |= SVphv_OVERLOAD)
+#define HvOVERLOAD_off(hv)      (perl_assert_HV_(hv) SvFLAGS(hv) &=~ SVphv_OVERLOAD)
+/* These used to be called "AMAGIC", for "active magic", a rather vague
+ * description of what we now call operator overloading. */
+#ifndef PERL_CORE
+#  define SVf_AMAGIC            SVphv_OVERLOAD
+#  define HvAMAGIC              HvOVERLOAD
+#  define HvAMAGIC_on           HvOVERLOAD_on
+#  define HvAMAGIC_off          HvOVERLOAD_off
+#endif
 
 
 /* "nog" means "doesn't have get magic" */
@@ -1272,7 +1290,7 @@ the scalar's value cannot change unless written to.
 #define Gv_AMG(stash) \
         (HvNAME(stash) && Gv_AMupdate(stash,FALSE) \
             ? 1					    \
-            : (HvAMAGIC_off(stash), 0))
+            : (HvOVERLOAD_off(stash), 0))
 
 #define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
                                   == (SVf_ROK|SVprv_WEAKREF))

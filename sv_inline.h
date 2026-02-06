@@ -656,7 +656,7 @@ Perl_SvTRUE_common(pTHX_ SV * sv, const bool sv_2bool_is_fallback)
     if (SvIOK(sv))
         return SvIVX(sv) != 0; /* casts to bool */
 
-    if (SvROK(sv) && !(SvOBJECT(SvRV(sv)) && HvAMAGIC(SvSTASH(SvRV(sv)))))
+    if (SvROK(sv) && !(SvOBJECT(SvRV(sv)) && HvOVERLOAD(SvSTASH(SvRV(sv)))))
         return TRUE;
 
     if (sv_2bool_is_fallback)
@@ -743,7 +743,8 @@ Perl_SvAMAGIC_on(SV *sv)
     PERL_ARGS_ASSERT_SVAMAGIC_ON;
     assert(SvROK(sv));
 
-    if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
+    if (SvOBJECT(SvRV(sv)))
+        HvOVERLOAD_on(SvSTASH(SvRV(sv)));
 }
 
 /*
@@ -760,7 +761,7 @@ Perl_SvAMAGIC_off(SV *sv)
     PERL_ARGS_ASSERT_SVAMAGIC_OFF;
 
     if (SvROK(sv) && SvOBJECT(SvRV(sv)))
-        HvAMAGIC_off(SvSTASH(SvRV(sv)));
+        HvOVERLOAD_off(SvSTASH(SvRV(sv)));
 }
 
 PERL_STATIC_INLINE U32
