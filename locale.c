@@ -2514,9 +2514,11 @@ S_bool_setlocale_2008_i(pTHX_
 #  endif
 
         {
+            PERL_NEWLOCALE_LOCK;
             new_obj = newlocale(mask,
                                 override_ignored_category(index, new_locale),
                                 basis_obj);
+            PERL_NEWLOCALE_UNLOCK;
             if (! new_obj) {
                 DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
                                         basis_obj);
@@ -2558,9 +2560,11 @@ S_bool_setlocale_2008_i(pTHX_
              * next one.  (The first time we effectively use the locale in
              * force upon entry to this function.) */
             for_all_individual_category_indexes(i) {
+                PERL_NEWLOCALE_LOCK;
                 new_obj = newlocale(category_masks[i],
                                     new_locales[i],
                                     basis_obj);
+                PERL_NEWLOCALE_UNLOCK;
                 if (new_obj) {
                     DEBUG_NEW_OBJECT_CREATED(category_names[i],
                                              new_locales[i],
@@ -3750,6 +3754,8 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
          * Turkic.  Make sure these two are the only anomalies.  (We don't
          * require towupper and towlower because they aren't in C89.) */
 
+        PERL_TOWUPPER_LOCK;
+
 #    if defined(HAS_TOWUPPER) && defined (HAS_TOWLOWER)
 
         if (towupper('i') == 0x130 && towlower('I') == 0x131)
@@ -3765,6 +3771,8 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
             check_for_problems = TRUE;
             maybe_utf8_turkic = TRUE;
         }
+
+        PERL_TOWUPPER_UNLOCK;
     }
     else {  /* Not a canned locale we know the values for.  Compute them */
 
@@ -3869,7 +3877,9 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
      * locale requires more than one byte, there are going to be BIG problems.
      * */
 
+    PERL_MB_CUR_MAX_LOCK;
     const int mb_cur_max = MB_CUR_MAX;
+    PERL_MB_CUR_MAX_UNLOCK;
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "MB_CUR_MAX=%d, utf8?=%d\n",
                                         mb_cur_max, PL_in_utf8_CTYPE_locale));
@@ -9106,7 +9116,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps));
 #  endif
 #  ifdef HAS_WCTOMBR
+    PERL_WCRTOMB_LOCK;
     wcrtomb(NULL, L'\0', &PL_wcrtomb_ps);
+    PERL_WCRTOMB_UNLOCK;
 #  endif
 #  ifdef USE_PL_CURLOCALES
 
@@ -9161,20 +9173,27 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     LOCALE_UNLOCK;
 
 #  endif
+
+/* Here's a case where the standard locking macros aren't sufficient.  This
+ * code knows that we need to have a read lock on the environment, and an
+ * exclusive lock on the locale, the latter being so we can create the global
+ * PL_C_locale_obj. */
 #  ifdef USE_POSIX_2008_LOCALE
+#    define POSIX_INIT_LOCK    PERL_ENVr_LCx_LOCK()
+#    define POSIX_INIT_UNLOCK  PERL_ENVr_LCx_UNLOCK()
 
     /* This is a global, so be sure to keep another instance from zapping it */
-    LOCALE_LOCK;
+    POSIX_INIT_LOCK;
     if (PL_C_locale_obj) {
-        LOCALE_UNLOCK;
+        POSIX_INIT_UNLOCK;
     }
     else {
         PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
         if (! PL_C_locale_obj) {
-            LOCALE_UNLOCK;
+            POSIX_INIT_UNLOCK;
             locale_panic_("Cannot create POSIX 2008 C locale object");
         }
-        LOCALE_UNLOCK;
+        POSIX_INIT_UNLOCK;
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
                                                PL_C_locale_obj));
@@ -10276,8 +10295,11 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
 #    ifdef USE_LOCALE_CTYPE
 
+    PERL_NEWLOCALE_LOCK;
     constructed_locale = newlocale(LC_CTYPE_MASK, PL_collation_name,
                                    duplocale(use_curlocale_scratch()));
+    PERL_NEWLOCALE_UNLOCK;
+
 #    else
 
     constructed_locale = duplocale(use_curlocale_scratch());
@@ -10304,12 +10326,13 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
+        PERL_STRXFRM_LOCK;
 
         errno = 0;
         *xlen = my_strxfrm(xbuf + COLLXFRM_HDR_LEN,
                            s,
                            xAlloc - COLLXFRM_HDR_LEN);
-
+        PERL_STRXFRM_UNLOCK;
 
         /* If the transformed string occupies less space than we told strxfrm()
          * was available, it means it transformed the whole string. */
@@ -10663,7 +10686,9 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
         locale_t cur = duplocale(use_curlocale_scratch());
 
         const char * locale = querylocale_c(LC_MESSAGES);
+        PERL_NEWLOCALE_LOCK;
         cur = newlocale(LC_CTYPE_MASK, locale, cur);
+        PERL_NEWLOCALE_UNLOCK;
         errstr = savepv(strerror_l(errnum, cur));
         *utf8ness = get_locale_string_utf8ness_i(errstr,
                                                  LOCALE_UTF8NESS_UNKNOWN,
@@ -10692,7 +10717,12 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
     DEBUG_STRERROR_ENTER(errnum, 0);
 
+    PERL_STRERROR_LOCK;
+
     const char *errstr = savepv(Strerror(errnum));
+
+    PERL_STRERROR_UNLOCK;
+
     *utf8ness = UTF8NESS_IMMATERIAL;
 
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
@@ -10717,7 +10747,10 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
     const char *errstr;
     if (IN_LC(categories[WHICH_LC_INDEX])) {
+        PERL_STRERROR_LOCK;
         errstr = savepv(Strerror(errnum));
+        PERL_STRERROR_UNLOCK;
+
         *utf8ness = get_locale_string_utf8ness_i(errstr,
                                                  LOCALE_UTF8NESS_UNKNOWN,
                                                  NULL, WHICH_LC_INDEX);
@@ -10728,7 +10761,9 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
         const char * orig_locale = toggle_locale_i(WHICH_LC_INDEX, "C");
 
+        PERL_STRERROR_LOCK;
         errstr = savepv(Strerror(errnum));
+        PERL_STRERROR_UNLOCK;
 
         restore_toggled_locale_i(WHICH_LC_INDEX, orig_locale);
 
@@ -10767,7 +10802,11 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                                                        desired_locale);
     const char* orig_MESSAGES_locale = toggle_locale_c(LC_MESSAGES,
                                                        desired_locale);
+    /* Assumes the LOCALE_LOCK above is sufficient for this as well
+       PERL_STRERROR_LOCK;
+     */
     const char *errstr = savepv(Strerror(errnum));
+    /* PERL_STRERROR_UNLOCK; */
 
     restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
