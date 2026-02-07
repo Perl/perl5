@@ -23,7 +23,7 @@
  * the Perl interpreter.  This is done automatically for the perl core and
  * extensions, but not generally for XS modules unless they
  *    #define PERL_REENTRANT
- * See L<perlxs/Thread-aware system interfaces>.
+ * See L<perlxs/XS code in Embedded and Threaded Systems>
  *
  * For a function 'foo', use the compile-time directive
  *    #ifdef PERL_REENTR_USING_FOO_R
