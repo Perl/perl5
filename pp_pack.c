@@ -113,14 +113,14 @@ typedef union {
    --jhi Feb 1999 */
 
 #if U16SIZE <= SIZE16 && U32SIZE <= SIZE32
-#  define OFF16(p)     ((char *) (p))
-#  define OFF32(p)     ((char *) (p))
+#  define OFF16(p)      ((U8 *)(p))
+#  define OFF32(p)      ((U8 *)(p))
 #elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
-#  define OFF16(p)	((char*)(p))
-#  define OFF32(p)	((char*)(p))
+#  define OFF16(p)      ((U8 *)(p))
+#  define OFF32(p)      ((U8 *)(p))
 #elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
-#  define OFF16(p)	((char*)(p) + (sizeof(U16) - SIZE16))
-#  define OFF32(p)	((char*)(p) + (sizeof(U32) - SIZE32))
+#  define OFF16(p)      ((U8 *)(p) + (sizeof(U16) - SIZE16))
+#  define OFF32(p)      ((U8 *)(p) + (sizeof(U32) - SIZE32))
 #else
 #  error "bad cray byte order"
 #endif
@@ -148,7 +148,7 @@ typedef union {
 STMT_START {						\
     if (UNLIKELY(utf8)) {                               \
         if (!S_utf8_to_bytes(aTHX_ &s, strend,		\
-          (char *) (buf), len, datumtype)) break;	\
+            (U8 *)(buf), len, datumtype)) break;        \
     } else {						\
         if (UNLIKELY(needs_swap))                       \
             S_reverse_copy(s, (char *) (buf), len);     \
@@ -276,7 +276,7 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
         *(U8 *)(s)++)
 
 static bool
-S_utf8_to_bytes(pTHX_ const char **s, const char *end, char *buf, SSize_t buf_len, I32 datumtype)
+S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len, I32 datumtype)
 {
     UV val;
     STRLEN retlen;
@@ -315,9 +315,9 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, char *buf, SSize_t buf_le
         }
 
         if (UNLIKELY(needs_swap))
-            *(U8 *)--buf = (U8)val;
+            *--buf = (U8)val;
         else
-            *(U8 *)buf++ = (U8)val;
+            *buf++ = (U8)val;
     }
 
     /* We have enough characters for the buffer. Did we have problems ? */
@@ -1345,12 +1345,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     STRLEN len;
                     /* Bug: warns about bad utf8 even if we are short on bytes
                        and will break out of the loop */
-                    if (!S_utf8_to_bytes(aTHX_ &ptr, strend, (char *) result, 1,
+                    if (!S_utf8_to_bytes(aTHX_ &ptr, strend, result, 1,
                                       'U'))
                         break;
                     len = UTF8SKIP(result);
                     if (!S_utf8_to_bytes(aTHX_ &ptr, strend,
-                                         (char *) &result[1], len - 1, 'U'))
+                                         &result[1], len - 1, 'U'))
                     {
                         break;
                     }
@@ -2410,7 +2410,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                     if (datumtype == 'Z') len++;
                 }
                 GROWING(0, cat, start, cur, len);
-                if (!S_utf8_to_bytes(aTHX_ &aptr, end, cur, fromlen,
+                if (!S_utf8_to_bytes(aTHX_ &aptr, end, (U8 *)cur, fromlen,
                                   datumtype | TYPE_IS_PACK))
                     croak("panic: predicted utf8 length not available, "
                                "for '%c', aptr=%p end=%p cur=%p, fromlen=%zu",
@@ -3142,7 +3142,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 else
                     todo = fromlen;
                 if (from_utf8) {
-                    char buffer[64];
+                    U8 buffer[64];
                     if (!S_utf8_to_bytes(aTHX_ &aptr, aend, buffer, todo,
                                       'u' | TYPE_IS_PACK)) {
                         *cur = '\0';
@@ -3151,7 +3151,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                                    "aptr=%p, aend=%p, buffer=%p, todo=%zd",
                                    aptr, aend, buffer, todo);
                     }
-                    end = doencodes(hunk, (const U8 *)buffer, todo);
+                    end = doencodes(hunk, buffer, todo);
                 } else {
                     end = doencodes(hunk, (const U8 *)aptr, todo);
                     aptr += todo;
