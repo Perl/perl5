@@ -1194,10 +1194,10 @@ struct op_argcheck_aux {
 /* for OP_MULTIPARAM */
 
 struct op_multiparam_named_aux {
+    PADOFFSET   padix;
     const char *namepv;
     STRLEN      namelen;
     U32         namehash;
-    PADOFFSET   padix;
 
     bool is_required : 1;
 };
