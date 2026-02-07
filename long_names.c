@@ -95,7 +95,6 @@ Perl_gv_IOadd(pTHX_ GV *gv)
     return gv_IOadd(gv);
 }
 
-#if defined(PERL_DONT_CREATE_GVSV)
 GV *
 Perl_gv_SVadd(pTHX_ GV *gv)
 {
@@ -103,7 +102,6 @@ Perl_gv_SVadd(pTHX_ GV *gv)
 
     return gv_SVadd(gv);
 }
-#endif
 
 void
 Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)

@@ -2321,6 +2321,7 @@
 #   define Perl_gv_AVadd                        gv_AVadd
 #   define Perl_gv_HVadd                        gv_HVadd
 #   define Perl_gv_IOadd                        gv_IOadd
+#   define Perl_gv_SVadd                        gv_SVadd
 #   define Perl_gv_efullname3                   gv_efullname3
 #   define Perl_gv_fetchmeth                    gv_fetchmeth
 #   define Perl_gv_fetchmeth_autoload           gv_fetchmeth_autoload
@@ -2415,9 +2416,6 @@
 #   if defined(PERL_CORE) || defined(PERL_EXT)
 #     define Perl_utf16_to_utf8                 utf16_to_utf8
 #     define Perl_utf16_to_utf8_reversed        utf16_to_utf8_reversed
-#   endif
-#   if defined(PERL_DONT_CREATE_GVSV)
-#     define Perl_gv_SVadd                      gv_SVadd
 #   endif
 #   if !defined(USE_ITHREADS)
 #     define Perl_CopFILEGV_set                 CopFILEGV_set

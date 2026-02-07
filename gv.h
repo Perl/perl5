@@ -94,9 +94,8 @@ the need to cast the result to the appropriate type.
 
 Return the SV from the GV.
 
-Prior to Perl v5.9.3, this would add a scalar if none existed.  Nowadays, use
-C<L</GvSVn>> for that, or compile perl with S<C<-DPERL_CREATE_GVSV>>.  See
-L<perl5100delta>.
+Use C<L</GvSVn>> if you wish to create an empty scalar when the SV slot is
+empty.
 
 =for apidoc Am|SV*|GvSVn|GV* gv
 Like C<L</GvSV>>, but creates an empty scalar if none already exists.
@@ -117,13 +116,9 @@ Return the CV from the GV.
 */
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
-#ifdef PERL_DONT_CREATE_GVSV
 #define GvSVn(gv)	(*(GvGP(gv)->gp_sv ? \
                          &(GvGP(gv)->gp_sv) : \
                          &(GvGP(gv_SVadd(gv))->gp_sv)))
-#else
-#define GvSVn(gv)	GvSV(gv)
-#endif
 
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)
 #define GvIO(gv)                         \

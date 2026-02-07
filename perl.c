@@ -2022,9 +2022,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_DISABLE_PMC
                              " PERL_DISABLE_PMC"
 #  endif
-#  ifdef PERL_DONT_CREATE_GVSV
-                             " PERL_DONT_CREATE_GVSV"
-#  endif
 #  ifdef PERL_EXTERNAL_GLOB
                              " PERL_EXTERNAL_GLOB"
 #  endif
@@ -4162,9 +4159,7 @@ S_init_main_stash(pTHX)
     SvREFCNT_inc_simple_void(PL_replgv);
     GvMULTI_on(PL_replgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
-#ifdef PERL_DONT_CREATE_GVSV
     (void)gv_SVadd(PL_errgv);
-#endif
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     CLEAR_ERRSV();
     CopSTASH_set(&PL_compiling, PL_defstash);
