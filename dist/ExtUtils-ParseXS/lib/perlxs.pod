@@ -4638,19 +4638,38 @@ This class might be used like this:
     $color->set_blue(0x80);
     printf "blue=%d\n", $color->blue();   # prints 128
 
+=head2 XS code in Embedded and Threaded Systems
+
+The Perl interpreter binary is commonly configured to allow multiple
+interpreter structures, with a complete set of interpreter state per
+interpreter struct.
+
+This can happen when the interpreter is embedded in another application
+(such as a web server) which may manage its own threads and allocate
+interpreters to threads as it sees fit.  See L<perlembed>.
+
+It also happens when the interpreter is built to allow multiple threads
+to execute simultaneously via C<use threads>. See L<perlthrtut>.
+
+These present extra gotchas that have to be taken into account.
+
+In both cases, you usually need your "static" data to be per-interpreter
+rather than a single shared per-process value.  This will be discussed
+at length in the next section L</Safely Storing Static Data in XS>.
+
+Doing this is usually sufficient for embedded applications with no
+threads.  But threads additionally present significant concurrency
+issues.  As long as your code is just executing C statements using local
+data, there isn't a problem, but a significant number of functions in
+the C library have races and undefined behavior when another thread is
+executing certain other functions.  This can happen unpredictably and
+must be prevented.  L<perlclib> has extensive discussion about this.
+
 =head2 Safely Storing Static Data in XS
 
-You should generally avoid declaring static variables and similar
-I<mutable> data within an XS file. The Perl interpreter binary is commonly
-configured to allow multiple interpreter structures, with a complete set
-of interpreter state per interpreter struct. In this case, you usually
-need your "static" data to be per-interpreter rather than a single shared
-per-process value.
-
-This becomes more important in the presence of multiple threads; either
-via C<use threads> or where the Perl interpreter is embedded within
-another application (such as a web server) which may manage its own
-threads and allocate interpreters to threads as it sees fit.
+Because of the possibility of threads or embedding, you should generally
+avoid declaring static variables and similar I<mutable> data within an
+XS file.
 
 A macro framework is available to XS code to allow a single C struct to be
 declared and safely accessed. Behind the scenes, the struct will be
