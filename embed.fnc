@@ -1636,6 +1636,7 @@ Adp	|HV *	|gv_stashpvn	|NN const char *name			\
 				|I32 flags
 Adp	|HV *	|gv_stashsv	|NN SV *sv				\
 				|I32 flags
+Admp	|GV *	|gv_SVadd	|NULLOK GV *gv
 Xdpx	|void	|gv_try_downgrade					\
 				|NN GV *gv
 op	|struct xpvhv_aux *|hv_auxalloc 				\
@@ -4416,9 +4417,6 @@ eopx	|OP *	|op_refcnt_inc	|NULLOK OP *o
 Mp	|bool	|do_exec	|NN const char *cmd
 #else
 p	|bool	|do_exec	|NN const char *cmd
-#endif
-#if defined(PERL_DONT_CREATE_GVSV)
-Admp	|GV *	|gv_SVadd	|NULLOK GV *gv
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 CTo	|PerlInterpreter *|perl_alloc_using				\

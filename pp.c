@@ -1009,9 +1009,6 @@ PP(pp_undef)
             gp_free(MUTABLE_GV(sv));
             Newxz(gp, 1, GP);
             GvGP_set(sv, gp_ref(gp));
-#ifndef PERL_DONT_CREATE_GVSV
-            GvSV(sv) = newSV_type(SVt_NULL);
-#endif
             GvLINE(sv) = CopLINE(PL_curcop);
             GvEGV(sv) = MUTABLE_GV(sv);
             GvMULTI_on(sv);

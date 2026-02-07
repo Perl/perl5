@@ -1733,6 +1733,11 @@ Perl_gv_IOadd(pTHX_ GV *gv)
 #define PERL_ARGS_ASSERT_GV_IOADD
 
 PERL_CALLCONV GV *
+Perl_gv_SVadd(pTHX_ GV *gv)
+        Perl_attribute_nonnull_aTHX_;
+#define PERL_ARGS_ASSERT_GV_SVADD
+
+PERL_CALLCONV GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
         Perl_attribute_nonnull_aTHX_;
 #define PERL_ARGS_ASSERT_GV_ADD_BY_TYPE
@@ -8852,13 +8857,6 @@ Perl_do_exec(pTHX_ const char *cmd)
         assert(cmd)
 
 #endif /* !defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION) */
-#if defined(PERL_DONT_CREATE_GVSV)
-PERL_CALLCONV GV *
-Perl_gv_SVadd(pTHX_ GV *gv)
-        Perl_attribute_nonnull_aTHX_;
-# define PERL_ARGS_ASSERT_GV_SVADD
-
-#endif
 #if defined(PERL_IMPLICIT_SYS)
 PERL_CALLCONV PerlInterpreter *
 perl_alloc_using(const struct IPerlMem **ipM, const struct IPerlMem **ipMS, const struct IPerlMem **ipMP, const struct IPerlEnv **ipE, const struct IPerlStdIO **ipStd, const struct IPerlLIO **ipLIO, const struct IPerlDir **ipD, const struct IPerlSock **ipS, const struct IPerlProc **ipP)

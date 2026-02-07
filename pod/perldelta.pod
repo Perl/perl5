@@ -355,6 +355,12 @@ then run it on the target machine, and then pass the values it outputs
 to F<Configure> on the other machine.  F<Porting/Glossary> has examples.
 [GH #22992]
 
+=item *
+
+The C<PERL_CREATE_GVSV> configuration macro has been removed. It was almost
+undocumented and it has been disabled by default since Perl 5.10.0. Its purpose
+was to force all GVs to initialize their SV slot on creation. [GH #24177]
+
 =back
 
 =head1 Testing
