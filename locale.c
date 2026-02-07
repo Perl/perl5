@@ -5939,20 +5939,9 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #  endif  /* End of LC_MONETARY setup */
 
-    /* Here, have toggled to the correct locale.
-     *
-     * We don't need to worry about locking at all if localeconv() is
-     * thread-safe, regardless of if using threads or not. */
-#  ifdef LOCALECONV_IS_THREAD_SAFE
-#    define LOCALECONV_UNLOCK
-#  else
+    /* Here, have toggled to the correct locale. */
+     PERL_LOCALECONV_LOCK;
 
-     /* Otherwise, the gwLOCALE_LOCK macro expands to whatever locking is
-      * needed (none if there is only a single perl instance) */
-    gwLOCALE_LOCK;
-
-#    define LOCALECONV_UNLOCK  gwLOCALE_UNLOCK
-#  endif
 #  if ! defined(TS_W32_BROKEN_LOCALECONV) || ! defined(USE_THREAD_SAFE_LOCALE)
 #    define WIN32_TEARDOWN
 #  else
@@ -6108,7 +6097,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     /* Back out of what we set up */
     WIN32_TEARDOWN;
-    LOCALECONV_UNLOCK;
+    PERL_LOCALECONV_UNLOCK;
     MONETARY_TEARDOWN;
     NUMERIC_TEARDOWN;
     CTYPE_TEARDOWN;
