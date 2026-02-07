@@ -703,9 +703,9 @@ S_opdump_indent(pTHX_ const OP *o, I32 level, UV bar, PerlIO *file,
 }
 
 struct Perl_OpDumpContext {
-    I32 level;
-    UV bar;
     PerlIO *file;
+    UV bar;
+    I32 level;
     bool indent_needed;
 };
 
@@ -1869,9 +1869,9 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
 
         if(custom_dumper) {
             struct Perl_OpDumpContext ctx = {
-                .level         = level,
-                .bar           = bar,
                 .file          = file,
+                .bar           = bar,
+                .level         = level,
                 .indent_needed = true,
             };
             (*custom_dumper)(aTHX_ o, &ctx);
