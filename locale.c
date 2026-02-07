@@ -1942,11 +1942,11 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
         return stdized_setlocale(category, locale);
     }
 
-    gwLOCALE_LOCK;
+    STDIZED_SETLOCALE_LOCK;
     const char * retval = save_to_buffer(stdized_setlocale(category, locale),
                                          &PL_setlocale_buf,
                                          &PL_setlocale_bufsize);
-    gwLOCALE_UNLOCK;
+    STDIZED_SETLOCALE_UNLOCK;
 
     return retval;
 }
@@ -5182,9 +5182,9 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 #  else
 
         SETERRNO(0, 0);
-        MBTOWC_LOCK_;
+        PERL_MBTOWC_LOCK;
         retval = mbtowc(NULL, NULL, 0);
-        MBTOWC_UNLOCK_;
+        PERL_MBTOWC_UNLOCK;
         return retval;
 
 #  endif
@@ -5194,18 +5194,18 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 #  if defined(USE_MBRTOWC)
 
     SETERRNO(0, 0);
-    MBRTOWC_LOCK_;
+    PERL_MBRTOWC_LOCK;
     retval = (SSize_t) mbrtowc((wchar_t *) pwc, s, len, &PL_mbrtowc_ps);
-    MBRTOWC_UNLOCK_;
+    PERL_MBRTOWC_UNLOCK;
 
 #  else
 
     /* Locking prevents races, but locales can be switched out without locking,
      * so this isn't a cure all */
     SETERRNO(0, 0);
-    MBTOWC_LOCK_;
+    PERL_MBTOWC_LOCK;
     retval = mbtowc((wchar_t *) pwc, s, len);
-    MBTOWC_UNLOCK_;
+    PERL_MBTOWC_UNLOCK;
 
 #  endif
 
@@ -6568,9 +6568,9 @@ S_langinfo_sv_i(pTHX_
        {
         /* An ugly API; only the first byte of the returned char* address means
          * anything */
-        gwLOCALE_LOCK;
+        PERL_NL_LANGINFO_LOCK;
         char char_value = nl_langinfo(item)[0];
-        gwLOCALE_UNLOCK;
+        PERL_NL_LANGINFO_UNLOCK;
 
         sv_setuv(sv, char_value);
        }
@@ -6601,9 +6601,9 @@ S_langinfo_sv_i(pTHX_
 
        {    /* A slightly less ugly API; the int portion of the returned char*
              * address is an integer. */
-        gwLOCALE_LOCK;
+        PERL_NL_LANGINFO_LOCK;
         int int_value = (int) PTR2UV(nl_langinfo(item));
-        gwLOCALE_UNLOCK;
+        PERL_NL_LANGINFO_UNLOCK;
 
         sv_setuv(sv, int_value);
        }
@@ -6632,7 +6632,7 @@ S_langinfo_sv_i(pTHX_
 
         /* The rest of the possibilities deliver a true char* pointer to a
          * string (or sequence of strings in the case of ALT_DIGITS) */
-        gwLOCALE_LOCK;
+        PERL_NL_LANGINFO_LOCK;
 
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
@@ -6771,7 +6771,7 @@ S_langinfo_sv_i(pTHX_
 
         sv_setpvn(sv, retval, total_len);
 
-        gwLOCALE_UNLOCK;
+        PERL_NL_LANGINFO_UNLOCK;
 
         /* Convert the ALT_DIGITS separator to a semi-colon if not already */
         if (UNLIKELY(item == ALT_DIGITS) && total_len > 0 && separator != ';') {
@@ -8535,7 +8535,7 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
         /* Unlike mini_mktime(), it does consider the locale, so have to switch
          * to the correct one. */
         const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
-        MKTIME_LOCK;
+        PERL_MKTIME_LOCK;
 
         /* 'which_tm' points to an auxiliary copy if we ran mini_mktime().
          * Otherwise it points to the passed-in one which now gets populated
@@ -8635,7 +8635,7 @@ S_strftime_tm(pTHX_ const char *fmt,
         /* Needed because the LOCK might (or might not) save/restore errno */
         bool strftime_failed = false;
 
-        STRFTIME_LOCK;
+        PERL_STRFTIME_LOCK;
         dSAVE_ERRNO;
         errno = 0;
 
@@ -8645,16 +8645,16 @@ S_strftime_tm(pTHX_ const char *fmt,
         }
 
         RESTORE_ERRNO;
-        STRFTIME_UNLOCK;
+        PERL_STRFTIME_UNLOCK;
 
         if (strftime_failed) {
             goto strftime_failed;
         }
 
 #else
-        STRFTIME_LOCK;
+        PERL_STRFTIME_LOCK;
         Size_t len = strftime(buf, bufsize, fmt, mytm);
-        STRFTIME_UNLOCK;
+        PERL_STRFTIME_UNLOCK;
 #endif
 
         GCC_DIAG_RESTORE_STMT;
