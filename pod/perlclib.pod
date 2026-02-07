@@ -45,6 +45,11 @@ a way of being adapted beyond our initial expectations.  If it is just
 as easy to use something that can be used under threads, it's better to
 use that now, just in case.
 
+Perl furnishes macros that can "cure" many cases of multi-thread
+problems.  The functions they are generated for are listed in
+L<perlapi/Mutex locking macros>.  The macros themselves are listed
+alphabetically in F<perl_lock_definitions.h>.
+
 =item *
 
 In functions that deal with strings, complications may arise because the
@@ -874,42 +879,98 @@ All the uses listed above are function calls, except for these:
 
  daylight  MB_CUR_MAX  timezone  tzname
 
-There are three main approaches to coping with issues involving these
+There are various approaches to coping with issues involving these
 constructs, each suitable for different circumstances:
 
 =over
 
 =item *
 
-Don't use them.  Some of them have preferred alternatives.  Use the list
-above in L</libc functions to avoid> to replace your uses with ones
-that are thread-friendly.  For example I/O, should be done via
-L<perlapio>.
+Don't use them.
 
-If you must use them, many, but not all, of them will be ok as long as
-their use is confined to a single thread that has no interaction with
-conflicting uses in other threads.  You will need to closely examine
-their man pages for this, and be aware that vendor documentation is
-often imprecise.
+Some of them are obsolete.  For example, most functions listed above that
+deal with randomness or cryptography have been superceded by other
+functions that are more secure, and tend to be thread-safe.  C<setkey>,
+for example has even been removed from some distributions.
+
+Others have preferred alternatives.  Use the list above in L</libc
+functions to avoid> to replace your uses with ones that are
+thread-friendly.  For example I/O, should be done via L<perlapio>.
+
+Still others are implemented in the L<POSIX> module, and can be called
+from XS code using the mechanisms described in L<perlcall>.  See the
+next item.
 
 =item *
 
-Do all your business before any other code can change things.  If you
-make changes, change back before returning.
+Use them with mutexes.
+
+Since v5.44, perl furnishes wrapper macros to make many of the above calls
+thread-safe.  If you surround a function call with the macros designed
+for it that are found in F<perl_lock_definitions.h>, you automatically
+make it thread-safe, as long as all other executing threads have done
+the same.
+
+Note that if the function returns results in global storage, you will
+need to save it to a per-instance area before unlocking.  Then you can
+work on it at your leisure.  This might be an automatic C variable for
+non-pointers, or something as described in C<L<perlxs/Safely Storing
+Static Data in XS>>.
+
+(If you're writing a module, you can't guarantee the behavior of other
+modules in other threads, but you can advertise that your module is
+thread-safe when used with any other thread-safe module(s).)
+
+For example F<perl_lock_definitions.h> defines the C<PERL_TZSET_LOCK> and
+C<PERL_TZSET_UNLOCK> macros to wrap C<tzset> with, making it
+thread-safe.
+
+There are a few functions that are callable from Perl code that use
+mutexes somewhat prior to v5.44.  You can call them to get thread-safety
+a little further back if you use L<perlcall> to access them.  An example
+is C<tzset>.
+
+Otherwise, you can say that your module is thread-safe when used with
+perls 5.44 or later.
 
 =item *
 
-Save the result of a query of global information to a per-instance area
-before allowing another instance to execute.  Then you can work on it at
-your leisure.  This might be an automatic C variable for non-pointers,
-or something as described above in
-C<L<perlxs/Safely Storing Static Data in XS>>.
+C<#define PERL_REENTRANT>
+
+Some functions have reentrant versions on some or all systems and which don't
+have races, or have fewer races than their base counterpart.  You gain
+automatic conversion to use these when you define this symbol prior to
+including F<perl.h>.
+See L</Reentrant equivalent functions> below for details.
+
+=item *
+
+If the above items don't work for you, many, but certainly not all, of
+the functions will be ok as long as their use is confined to a single
+thread that has no interaction with conflicting uses in other threads.
+You will need to closely examine their man pages for this, and be aware
+that vendor documentation is often imprecise.
+
+An example of this case is the C<dbm> set of functions.  Perl does not
+generate locking macros for functions that are used atomically in
+conjunction with other functions.  In the case of databases with
+iterators, the open, traversal, and close must be done without
+interference from other threads.  As long as just a single thread
+accesses a given database, there is no need for locking.  If that cannot
+be guaranteed, you'll have to carefully craft your own mutexes, and be
+very worried about deadlock.
+
+=item *
+
+Do all your business at initialization, before any other code can change
+things.
 
 =back
 
 Without threading, you don't have to worry about being interrupted by
 the system giving control to another thread.  With threading, you will
-have to uses mutexes, and be concerned with the possibility of deadlock.
+have to use mutexes, and, if not using the automatically furnished ones,
+be concerned with the possibility of deadlock.
 
 =head2 Functions always unsuitable for use under multi-threads
 
@@ -931,7 +992,7 @@ multi-thread use.
 
 Some functions perform initialization on their first call that must be done
 while still in a single-thread environment, but subsequent calls are
-thread-safe when executed in a critical section.
+thread-safe when executed in a critical section controlled by mutexes.
 Therefore, they must be called at least once before switching to
 multi-threads:
 
@@ -971,9 +1032,9 @@ does, even if the database is not changed.  For example, typically there is
 a global iterator for such a data base and that iterator is maintained by
 libc, so that each new read from any instance advances it, meaning that no
 instance will see all the entries.  The only way to make these thread-safe
-is to have an exclusive lock on a mutex from the open call through the
-close.  You are advised to not use such databases from more than one
-instance at a time.
+is to have an exclusive lock on a mutex from the open call all the way
+through the close.  You are advised to not use such databases from more
+than one instance at a time.
 
 Other examples of functions that use a global state include pseudo-random
 number generators.  Some libc implementations of 'rand()', for example, may
@@ -1022,6 +1083,21 @@ substitution is done if the alternative is not available or desirable on
 the platform, nor if threads aren't enabled.  You just write as if there
 weren't threads, and you get the better behavior without having to think
 about it.
+
+An example is C<localtime>.  It has various potential races with other
+threads executing related functions.  POSIX 2008 added a C<localtime_r>
+reentrant version which doesn't have such races (but it does require
+that the environment not change during its execution, nor the locale if
+it isn't executing in a per-thread locale).  If your code has defined
+C<PERL_REENTRANT>, all calls to C<localtime> will automatically be
+converted to C<localtime_r> on systems that implement POSIX 2008.
+Further, if you have wrapped calls to C<localtime> with
+C<PERL_LOCALTIME_LOCK>/C<PERL_LOCALTIME_UNLOCK> macros, it will be
+thread-safe, as long as the returned struct is copied to a safe place
+before the unlock.  Further, on systems with C<localtime_r>, the calls
+will have been converted to use that, and the calls to the locking
+macros will be converted to use the locking macros for that function,
+which have fewer things that need to be locked.
 
 On some platforms the safer library functions may fail if the result
 buffer is too small (for example the user group databases may be rather
@@ -1091,6 +1167,12 @@ alternative.)
  *tmpnam()              ~tmpnam_r()
   ttyname()              ttyname_r()
 
+(There are other functions that could be added to have this behavior,
+but nobody has.  Patches Welcome!  For example, some systems (but not
+the POSIX Standard) have an C<lgamma_r> that doesn't change the global
+C<signgam> that plain C<lgamma> does.  It would be fairly easy to add
+that function.)
+
 The Perl-furnished items are documented in perlapi.
 
 The bottom line is:
@@ -1112,7 +1194,10 @@ If you really need to use these functions, you have two choices:
 
 Use the function in the first column as-is, and let perl do the work of
 substituting the function in the right column if available on the
-platform, and it is deemed suitable for use.
+platform, and it is deemed suitable for use.  If there are locking
+macros defined for it in F<perl_lock_definitions.h>, wrap your calls with
+them.  Perl will automatically substitute whatever locking mechanism is
+needed for the replacement function.
 
 You should look at the man pages for both versions to find any other
 gotchas.
@@ -1123,7 +1208,8 @@ You should examine the application's code to determine if the column 1
 function presents a real problem under threads given the circumstances
 it is used in.  You can go directly to the column 2 replacement, but
 beware of the ones that are marked.  Some of those may be nonexistent or
-flaky on some platforms.
+flaky on some platforms.  If there are macros defined for the
+replacement in F<perl_lock_definitions.h>, wrap your calls with them.
 
 =back
 
@@ -1136,8 +1222,11 @@ it.  One instance changing the environment affects all the other
 instances.  Under threads, any libc call that expects the environment to
 not change for the duration of its execution will have undefined results
 if another thread interrupts it at just the wrong time and changes it.
-These are the functions that the man pages list as being sensitive to
-that.
+
+Any locking macros for the functions in the list below, in
+F<perl_lock_definitions.h>, automatically cause the environment to be held
+constant while locked, so you don't otherwise need to be concerned about
+them.
 
  catopen()               gethostbyname2()    newlocale()
  ctime()                 gethostbyname2_r()  regerror()
@@ -1162,11 +1251,6 @@ that.
 Many of these functions are problematic under threads for other reasons
 as well.  See the man pages for any you use.
 
-Perl defines mutexes C<ENV_READ_LOCK> and C<ENV_READ_UNLOCK> with which
-to wrap calls to these functions.  You need to consider the possibility
-of deadlock.  It is expected that a different mechanism will be in place
-and preferred for Perl v5.42.
-
 =head2 Locale-specific issues
 
 C language programs originally had a single locale global to the entire
@@ -1185,6 +1269,10 @@ the global locale are affected.  Almost all the locale-related functions
 in the list directly under L</Dealing with embedded perls and threads>
 have undefined behavior if another thread interrupts their execution and
 changes the locale.  Under threads, another thread could do exactly that.
+Starting in v5.44, if all threads wrap those function calls with the
+locking macros designed for each and found in F<perl_lock_definitions.h>,
+that interruption doesn't happen.  But, the thread may still find itself
+executing in an unexpected locale, with bad results.
 
 But, on systems that have per-thread locales, starting with Perl v5.28,
 perl uses them after initialization; the global locale is not used
@@ -1201,7 +1289,8 @@ possibility of using them.
 
 The converse is that on systems with only a global locale, having
 different threads using different locales is not likely to work well;
-and changing the locale is dangerous, often leading to crashes.
+and changing the locale is dangerous, and without use of the locking
+macros, often leads to crashes.
 
 Perl has extensive code to work as well as possible on both types of
 systems.  You should always use C<Perl_setlocale()> to change and query
