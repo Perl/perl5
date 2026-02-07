@@ -2172,40 +2172,11 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
 
        /* Experience so far shows it is thread-safe, as well as glibc's
         * nl_langinfo_l(), so unless overridden, mark it so */
-#      ifdef NO_THREAD_SAFE_QUERYLOCALE
-#        undef HAS_THREAD_SAFE_QUERYLOCALE
-#      else
-#        define HAS_THREAD_SAFE_QUERYLOCALE
-#      endif
 #    else   /* below, ! glibc */
 
        /* Otherwise, use the system's querylocale(). */
 #      define my_querylocale(index, cur_obj)                                \
                                querylocale(category_masks[index], cur_obj)
-
-       /* There is no standard for this function, and khw has never seen
-        * anything beyond minimal vendor documentation, lacking important
-        * details.  Experience has shown that some implementations have race
-        * conditions, and their returns may not be thread safe.  It would be
-        * unreliable to test for complete thread safety in Configure.  What we
-        * do instead is to assume that it is thread-safe, unless overriden by,
-        * say, a hints file specifying
-        * -Accflags='-DNO_THREAD_SAFE_QUERYLOCALE */
-#      ifdef NO_THREAD_SAFE_QUERYLOCALE
-#        undef HAS_THREAD_SAFE_QUERYLOCALE
-#      else
-#        define HAS_THREAD_SAFE_QUERYLOCALE
-#      endif
-#    endif
-
-     /* Here, we have set up enough information to know if this querylocale()
-      * is thread-safe, or needs to use a mutex */
-#    ifdef HAS_THREAD_SAFE_QUERYLOCALE
-#      define QUERYLOCALE_LOCK
-#      define QUERYLOCALE_UNLOCK
-#    else
-#      define QUERYLOCALE_LOCK    gwLOCALE_LOCK
-#      define QUERYLOCALE_UNLOCK  gwLOCALE_UNLOCK
 #    endif
 
     /* Finally, everything is ready, so here is the 'else' clause to implement
@@ -2229,7 +2200,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
         }
         else {
 
-            QUERYLOCALE_LOCK;
+            PERL_QUERYLOCALE_LOCK;
             retval = my_querylocale(index, cur_obj);
 
             /* querylocale() may conflate the C locale with something that
@@ -2243,19 +2214,17 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
              * rest of our code.  (The code is ordered this way so that if the
              * system distinugishes "C" from "POSIX", we do too.) */
             if (cur_obj == PL_C_locale_obj && ! isNAME_C_OR_POSIX(retval)) {
-                QUERYLOCALE_UNLOCK;
+                PERL_QUERYLOCALE_UNLOCK;
                 retval = "C";
             }
             else {
                 retval = savepv(retval);
-                QUERYLOCALE_UNLOCK;
+                PERL_QUERYLOCALE_UNLOCK;
                 SAVEFREEPV(retval);
             }
         }
     }
 
-#    undef QUERYLOCALE_LOCK
-#    undef QUERYLOCALE_UNLOCK
 #  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
