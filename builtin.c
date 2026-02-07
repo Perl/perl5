@@ -23,10 +23,10 @@
 struct BuiltinFuncDescriptor {
     const char *name;
     U16 since_ver;
+    bool is_experimental;
     XSUBADDR_t xsub;
     OP *(*checker)(pTHX_ OP *, GV *, SV *);
     IV ckval;
-    bool is_experimental;
 };
 
 #define warn_experimental_builtin(name) S_warn_experimental_builtin(aTHX_ name)
@@ -615,35 +615,35 @@ static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a 
 
 static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
-    { "true",  SHORTVER(5,39), &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
-    { "false", SHORTVER(5,39), &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
-    { "inf",        NO_BUNDLE, &XS_builtin_inf,    &ck_builtin_const, BUILTIN_CONST_INF,   true },
-    { "nan",        NO_BUNDLE, &XS_builtin_nan,    &ck_builtin_const, BUILTIN_CONST_NAN,   true },
+    { "true",  SHORTVER(5,39), false, &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
+    { "false", SHORTVER(5,39), false, &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
+    { "inf",        NO_BUNDLE, true,  &XS_builtin_inf,    &ck_builtin_const, BUILTIN_CONST_INF   },
+    { "nan",        NO_BUNDLE, true,  &XS_builtin_nan,    &ck_builtin_const, BUILTIN_CONST_NAN   },
 
     /* unary functions */
-    { "is_bool",         NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
-    { "weaken",     SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
-    { "unweaken",   SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
-    { "is_weak",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
-    { "blessed",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED,    false },
-    { "refaddr",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR,    false },
-    { "reftype",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE,    false },
-    { "ceil",       SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL,       false },
-    { "floor",      SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
-    { "is_tainted", SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
-    { "trim",       SHORTVER(5,39), &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
-    { "stringify",       NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
+    { "is_bool",         NO_BUNDLE, true,  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL    },
+    { "weaken",     SHORTVER(5,39), false, &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN     },
+    { "unweaken",   SHORTVER(5,39), false, &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN   },
+    { "is_weak",    SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK    },
+    { "blessed",    SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED    },
+    { "refaddr",    SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR    },
+    { "reftype",    SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE    },
+    { "ceil",       SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL       },
+    { "floor",      SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR      },
+    { "is_tainted", SHORTVER(5,39), false, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED },
+    { "trim",       SHORTVER(5,39), false, &XS_builtin_trim,         &ck_builtin_func1, 0             },
+    { "stringify",       NO_BUNDLE, true,  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY  },
 
-    { "created_as_string", NO_BUNDLE, &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
-    { "created_as_number", NO_BUNDLE, &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
+    { "created_as_string", NO_BUNDLE, true, &XS_builtin_created_as_string, &ck_builtin_func1, 0 },
+    { "created_as_number", NO_BUNDLE, true, &XS_builtin_created_as_number, &ck_builtin_func1, 0 },
 
-    { "load_module", NO_BUNDLE, &XS_builtin_load_module, &ck_builtin_func1, 0, true },
+    { "load_module", NO_BUNDLE, true, &XS_builtin_load_module, &ck_builtin_func1, 0 },
 
     /* list functions */
-    { "indexed",          SHORTVER(5,39), &Perl_XS_builtin_indexed,     &ck_builtin_funcN, 0, false },
-    { "export_lexically",      NO_BUNDLE, &XS_builtin_export_lexically, NULL,              0, true },
+    { "indexed",          SHORTVER(5,39), false, &Perl_XS_builtin_indexed,     &ck_builtin_funcN, 0 },
+    { "export_lexically",      NO_BUNDLE, true,  &XS_builtin_export_lexically, NULL,              0 },
 
-    { NULL, 0, NULL, NULL, 0, false }
+    { NULL, 0, false, NULL, NULL, 0 }
 };
 
 static bool S_parse_version(const char *vstr, const char *vend, UV *vmajor, UV *vminor)
