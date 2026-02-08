@@ -216,6 +216,7 @@ my $magic_scn = 'Magic';
 my $memory_scn = 'Memory Management';
 my $MRO_scn = 'MRO';
 my $multicall_scn = 'Multicall Functions';
+my $mutex_scn = 'Mutex locking macros';
 my $numeric_scn = 'Numeric Functions';
 my $rpp_scn = 'Reference-counted stack manipulation';
 
@@ -253,6 +254,7 @@ my $undocumented_scn = 'Undocumented elements';
 my @has_defs;
 my @has_r_defs;     # Reentrant symbols
 my @include_defs;
+my @mutex_locks;
 my %list_only = (
       has_defs     => {
                         section => $genconfig_scn,
@@ -272,6 +274,11 @@ my %list_only = (
                         header => "List of C<#include> needed symbols",
                         placement => '__INCLUDE_LIST__',
                        },
+      mutex_locks => {
+                        section => $mutex_scn,
+                        list => \@mutex_locks,
+                        placement => '__MUTEX_LIST__',
+                      },
 );
 
 my %valid_sections = (
@@ -304,7 +311,14 @@ my %valid_sections = (
     $custom_scn => {},
     $debugging_scn => {},
     $display_scn => {},
-    $embedding_scn => {},
+    $embedding_scn => {
+        header => <<~EOT,
+            See also L</$mutex_scn> for macros to make many libc functions
+            thread-safe
+
+            EOT
+        },
+
     $errno_scn => {},
     $exceptions_scn => {},
     $filesystem_scn => {
@@ -459,6 +473,46 @@ my %valid_sections = (
     $memory_scn => {},
     $MRO_scn => {},
     $multicall_scn => {},
+    $mutex_scn => {
+        header => <<~"EOT",
+            Below is a list of libc functions for which Perl furnishes mutex
+            locking/unlocking macros.  Functions on this list can be made
+            thread-safe by wrapping their calls with these macros.  All these
+            macros expand to no-ops unless threading is in effect.
+
+            In some cases, the functions return pointers to static data that
+            must be copied to a safe place before the unlock occurs.
+
+            If a function is not on the list, it is because of one of several
+            reasons:
+
+                1) We believe it is thread-safe
+                2) It cannot be made thread safe
+                3) It is used in conjunction with other functions which have
+                   to be executed in one atomic unit, and that is beyond our
+                   capabilities for automatically generating locks.
+                4) We don't know about it.
+
+            See L<perlclib/Dealing with embedded perls and threads> for more
+            details.  F<regen/lock_definitions.pl> can be patched to add new
+            functions or revise existing data.
+
+            For a function 'foo', the locking/unlocking macros are named
+
+             PERL_FOO_LOCK
+             PERL_FOO_UNLOCK
+
+            Note that just because a function is on this list, doesn't mean it
+            is a good idea for you to use it.  Some are obsolete; some are
+            implemented on only one or a few platforms; some have better
+            alternatives.  Before using a given lock, look it up in
+            F<perl_lock_definitions.h> to see what notes and cautions are
+            given for it.
+            EOT
+        footer => <<~EOT,
+            $list_only{mutex_locks}{placement}
+            EOT
+        },
     $numeric_scn => {},
     $optrees_scn => {},
     $optree_construction_scn => {},
@@ -1733,6 +1787,24 @@ sub parse_config_h {
     }
 }
 
+sub parse_lock_definitions_h {
+    use re '/aa';   # Everything is ASCII in this file
+
+    my %mutexes;
+
+    # Process lock_definitions.h
+    my $lock_definitions_h = 'perl_lock_definitions.h';
+    die "Can't find $lock_definitions_h" unless -e $lock_definitions_h;
+    open my $fh, '<', $lock_definitions_h
+                                or die "Can't open $lock_definitions_h: $!";
+    while (<$fh>) {
+        next unless $_ =~ s/ ^\# \s* define \s+ PERL_ (\w+) _LOCK \b .* //x;
+        $mutexes{lc $1} = 1;
+    }
+
+    @mutex_locks = keys %mutexes;
+}
+
 sub format_pod_indexes ($entries_ref) {
 
     # Output the X<> references to the names, packed since they don't get
@@ -2746,6 +2818,8 @@ for my $file (@headers, @non_headers) {
     autodoc($fh, $file);
     close $fh or die "Error closing $file: $!\n";
 }
+
+parse_lock_definitions_h();
 
 # Code in this file depends on doing config.h last.
 parse_config_h();
