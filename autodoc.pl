@@ -2868,13 +2868,7 @@ my $places_other_than_api = join ", ",
 
 
 foreach my $name (keys %list_only) {
-    my @this_list = $list_only{$name}{list}->@*;
-    my $text = "";
-    foreach my $entry (sort dictionary_order @this_list) {
-        $text .= ",S< > " if $text; # The S< > makes things less densely
-                                    # packed, hence more readable
-        $text .= "C<$entry>";
-    }
+    my $text = make_verbatim_list($list_only{$name}{list}->@*);
     $valid_sections{$genconfig_scn}{footer}
                                     =~ s/$list_only{$name}{placement}/$text/;
 }
