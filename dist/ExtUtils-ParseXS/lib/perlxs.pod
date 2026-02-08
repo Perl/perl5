@@ -1095,7 +1095,7 @@ current Perl interpreter context. You won't need to directly use these
 most of the time.
 
 The first few lines of code in the C function are standard boilerplate
-added to to all XSUBs.  Note that the naming convention for Perl
+added to all XSUBs.  Note that the naming convention for Perl
 interpreter macros is that ones starting with a C<d> are declarations; they
 go in places where a variable can be declared, and typically declare one
 or more variables and possibly their initialisations.
