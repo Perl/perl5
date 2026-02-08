@@ -562,6 +562,20 @@ sub where_from_string ($file, $line_num = 0) {
     return "at $file, line $line_num";
 }
 
+sub make_verbatim_list(@entries) {
+
+    # This takes a list and creates an alphabetized verbatim table of its
+    # entries for convenient display
+
+    my @list = sort dictionary_order @entries;
+
+    # Give the table a width one less than you might expect, as we indent each
+    # line by one, to mark it as verbatim.
+    my $table = columnarize_list(\@list, $max_width - 1);
+
+    return $table =~ s/^/ /gmr;
+}
+
 sub check_and_add_proto_defn {
     my ($element, $file, $line_num, $raw_flags, $ret_type, $args_ref,
         $definition_type
@@ -2297,13 +2311,8 @@ sub construct_missings_section ($missings_hdr, $missings_ref) {
     # Sort the elements.
     my @missings = sort dictionary_order $missings_ref->@*;
 
-    # Make a table of the missings in columns.  Give the subroutine a width
-    # one less than you might expect, as we indent each line by one, to mark
-    # it as verbatim.
-    my $table .= columnarize_list(\@missings, $max_width - 1);
-    $table =~ s/^/ /gm;
-
-    return $text . "\n\n" . $table;
+    # Make a table of the missings in columns.
+    return $text . "\n\n" . make_verbatim_list(@missings);
 }
 
 sub dictionary_order {
