@@ -22,6 +22,7 @@ foreach my $pl (map {chomp; "regen/$_"} <DATA>) {
 }
 
 # embed.pl must be kept last, as other scripts may affect it.
+# lock_definitions.pl must come after reentr.pl
 __END__
 feature.pl
 mg_vtable.pl
@@ -34,4 +35,5 @@ scope_types.pl
 tidy_embed.pl
 warnings.pl
 locale.pl
+lock_definitions.pl
 embed.pl

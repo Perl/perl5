@@ -83,6 +83,7 @@ $skip_files{$_} = 1 for qw(
                             embed.h
                             embedvar.h
                             fakesdio.h
+                            perl_lock_definitions.h
                             nostdio.h
                             perl_langinfo.h
                             perlio.h

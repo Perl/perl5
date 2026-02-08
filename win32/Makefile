@@ -735,6 +735,7 @@ CORE_NOCFG_H	=		\
 		..\hv.h		\
 		..\hv_func.h	\
 		..\iperlsys.h	\
+		..\perl_lock_definitions.h	\
 		..\mg.h		\
 		..\nostdio.h	\
 		..\op.h		\
