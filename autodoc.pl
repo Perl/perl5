@@ -255,16 +255,19 @@ my @has_r_defs;     # Reentrant symbols
 my @include_defs;
 my %list_only = (
       has_defs     => {
+                        section => $genconfig_scn,
                         list => \@has_defs,
                         header => "List of capability C<HAS_I<foo>> symbols",
                         placement => '__HAS_LIST__',
                       },
       has_r_defs   => {
+                        section => $genconfig_scn,
                         list => \@has_r_defs,
                         header => "List of capability C<HAS_I<foo>> symbols",
                         placement => '__HAS_R_LIST__',
                        },
       include_defs => {
+                        section => $genconfig_scn,
                         list => \@include_defs,
                         header => "List of C<#include> needed symbols",
                         placement => '__INCLUDE_LIST__',
@@ -2411,8 +2414,9 @@ sub output ($destpod) {  # Output a complete pod file
 
     for my $section_name (sort dictionary_order keys %valid_sections) {
         my $section_info = $dochash->{$section_name};
+        my $has_list = $valid_sections{$section_name}{has_list};
 
-        if (! $section_info) {
+        if (! $section_info && ! $has_list) {
             # We always allow empty sections in perlintern.
             if (   $podname eq $api
                 && ! $valid_sections{$section_name}{may_be_empty_in_perlapi})
@@ -2431,7 +2435,7 @@ sub output ($destpod) {  # Output a complete pod file
         }
 
         my $has_entries = $section_info && keys $section_info->%*;
-        if ($has_entries) {
+        if ($has_entries || $has_list) {
             print $fh "\n", $valid_sections{$section_name}{header}, "\n"
                  if defined $valid_sections{$section_name}{header};
 
@@ -2443,7 +2447,7 @@ sub output ($destpod) {  # Output a complete pod file
             }
         }
 
-        if (! $has_entries) {
+        if (! $has_entries && ! $has_list) {
             my $pod_type = ($podname eq $api) ? "public" : "internal";
             print $fh "\nThere are currently no $pod_type API items in ",
                       $section_name, "\n";
@@ -2891,9 +2895,11 @@ my $places_other_than_api = join ", ",
 
 
 foreach my $name (keys %list_only) {
+    my $section = $list_only{$name}{section};
     my $text = make_verbatim_list($list_only{$name}{list}->@*);
-    $valid_sections{$genconfig_scn}{footer}
+    $valid_sections{$section}{footer}
                                     =~ s/$list_only{$name}{placement}/$text/;
+    $valid_sections{$section}{has_list} = 1;
 }
 
 my $section_list = join "\n\n", map { "=item L</$_>" }
