@@ -129,6 +129,8 @@ my $names_reserved_for_perl_use_re =
 
                               # This is for obsolete and deprecated uses
                             | ( _ | \b ) CPERL (arg | scope) ( _ | \b )
+
+                            | _ (?: pl | PL) _ \b
                           /x;
 
 # This program looks at C preprocessor conditional expressions.  It turns out
