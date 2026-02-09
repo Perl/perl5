@@ -374,7 +374,7 @@ Mnemonic: it's the uid you went I<to>, if you're running setuid.
 =item $SUBSEP
 
 =item $;
-X<$;> X<$SUBSEP> X<SUBSCRIPT_SEPARATOR>
+X<$;> X<$SUBSEP> X<$SUBSCRIPT_SEPARATOR>
 
 The subscript separator for multidimensional array emulation.  If you
 refer to a hash element as
@@ -1914,7 +1914,7 @@ Mnemonic: lines_on_page - lines_printed.
 =item $FORMAT_LINE_BREAK_CHARACTERS
 
 =item $:
-X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>
+X<$:> X<$FORMAT_LINE_BREAK_CHARACTERS>
 
 The current set of characters after which a string may be broken to
 fill continuation fields (starting with C<^>) in a format.  The default is
