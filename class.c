@@ -1059,12 +1059,15 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
     PADOFFSET fieldix = aux->xhv_class_next_fieldix;
     aux->xhv_class_next_fieldix++;
 
-    Newxz(PadnameFIELDINFO(pn), 1, struct padname_fieldinfo);
-    PadnameFLAGS(pn) |= PADNAMEf_FIELD;
+    struct padname_fieldinfo *fieldinfo;
+    Newxz(fieldinfo, 1, struct padname_fieldinfo);
 
-    PadnameFIELDINFO(pn)->refcount = 1;
-    PadnameFIELDINFO(pn)->fieldix = fieldix;
-    PadnameFIELDINFO(pn)->fieldstash = (HV *)SvREFCNT_inc(stash);
+    fieldinfo->refcount = 1;
+    fieldinfo->fieldix = fieldix;
+    fieldinfo->fieldstash = HvREFCNT_inc(stash);
+
+    PadnameFIELDINFO(pn) = fieldinfo;
+    PadnameFLAGS(pn) |= PADNAMEf_FIELD;
 
     if(!aux->xhv_class_fields)
         aux->xhv_class_fields = newPADNAMELIST(0);
