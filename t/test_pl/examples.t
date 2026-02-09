@@ -20,7 +20,7 @@ watchdog(10);
 }
 
 {
-    my $x = \(1+1);
+    my $x = [];
     refcount_is($x, 1, "only one reference");
     my $ref = $x;
     refcount_is($x, 2, "two references");

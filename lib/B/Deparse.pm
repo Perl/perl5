@@ -56,6 +56,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_FLAG_last
         MDEREF_MASK
         MDEREF_SHIFT
+        OPpSTATEMENT
     );
 
 our $AUTOLOAD;
@@ -3498,25 +3499,33 @@ sub logop {
     my $left = $op->first;
     my $right = $op->first->sibling;
     $blockname &&= $self->keyword($blockname);
-    if ($cx < 1 and is_scope($right) and $blockname
-	and $self->{'expand'} < 7)
-    { # if ($a) {$b}
-	$left = $self->deparse($left, 1);
-	$right = $self->deparse($right, 0);
-	return "$blockname ($left) {\n\t$right\n\b}\cK";
-    } elsif ($cx < 1 and $blockname and not $self->{'parens'}
-	     and $self->{'expand'} < 7) { # $b if $a
-	$right = $self->deparse($right, 1);
-	$left = $self->deparse($left, 1);
-	return "$right $blockname $left";
-    } elsif ($cx > $lowprec and $highop) { # $a && $b
-	$left = $self->deparse_binop_left($op, $left, $highprec);
-	$right = $self->deparse_binop_right($op, $right, $highprec);
-	return $self->maybe_parens("$left $highop $right", $cx, $highprec);
-    } else { # $a and $b
-	$left = $self->deparse_binop_left($op, $left, $lowprec);
-	$right = $self->deparse_binop_right($op, $right, $lowprec);
-	return $self->maybe_parens("$left $lowop $right", $cx, $lowprec);
+
+    if ($op->private & OPpSTATEMENT) {
+        if (is_scope($right)) {
+            # if ($a) {$b}
+            $left = $self->deparse($left, 1);
+            $right = $self->deparse($right, 0);
+            return "$blockname ($left) {\n\t$right\n\b}\cK";
+        }
+        else {
+             # $b if $a
+            $right = $self->deparse($right, 1);
+            $left = $self->deparse($left, 1);
+            return "$right $blockname $left";
+        }
+    }
+    else {
+        if ($cx > $lowprec and $highop) {
+            # $a && $b
+            $left = $self->deparse_binop_left($op, $left, $highprec);
+            $right = $self->deparse_binop_right($op, $right, $highprec);
+            return $self->maybe_parens("$left $highop $right", $cx, $highprec);
+        } else {
+            # $a and $b
+            $left = $self->deparse_binop_left($op, $left, $lowprec);
+            $right = $self->deparse_binop_right($op, $right, $lowprec);
+            return $self->maybe_parens("$left $lowop $right", $cx, $lowprec);
+        }
     }
 }
 
@@ -4242,32 +4251,30 @@ sub pp_cond_expr {
     my $cuddle = $self->{'cuddle'};
     my $no_true = 0;
 
-    if (class($false) eq "NULL") { # Empty true or false block was optimised away
-        if (!($op->flags & OPf_SPECIAL)) { # It was an empty true block
-            my $temp = $false; $false = $true; $true = $temp;
-            $no_true = 1;
-            unless ($cx < 1 and (is_scope($false) and $false->name ne "null")) {
-                $cond = $self->deparse($cond, 8);
-                $false = $self->deparse($false, 6);
-                return $self->maybe_parens("$cond ? () : $false", $cx, 8);
-            }
-        } else { # Must have been an empty false block
-            unless ($cx < 1 and (is_scope($true) and $true->name ne "null")) {
-                $cond = $self->deparse($cond, 8);
-                $true = $self->deparse($true, 6);
-                return $self->maybe_parens("$cond ? $true : ()", $cx, 8);
-            }
-        }
-    } else { # Both true and false branches are present
-        unless ($cx < 1 and (is_scope($true) and $true->name ne "null")
-               and (is_scope($false) || is_ifelse_cont($false))
-               and $self->{'expand'} < 7) {
-            $cond = $self->deparse($cond, 8);
-            $true = $self->deparse($true, 6);
-            $false = $self->deparse($false, 8);
-            return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
-        }
+    # Note that when an empty true or false block is optimised away,
+    # cond_expr only has two children: a conditional and a single block,
+    # rather than the usual two. When the false branch is empty and is
+    # optimised away, OPf_SPECIAL is set.
+
+    if (class($false) eq "NULL" && !($op->flags & OPf_SPECIAL)) {
+        # It was an empty true block
+        $no_true = 1;
     }
+
+    unless ($op->private & OPpSTATEMENT) {
+        # it's a ?: rather than an if/else
+
+        $cond = $self->deparse($cond, 8);
+        $true = $self->deparse($true, 6);
+        # has one of the two branches has been optimised away?
+        $false = class($false) eq "NULL" ? '()' : $self->deparse($false, 8);
+        ($true, $false) = ($false, $true) if $no_true;
+        return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
+    }
+
+    # if/elseif/else etc
+
+    ($true, $false) = ($false, $true) if $no_true;
 
     $cond = $self->deparse($cond, 1);
     $true = ($no_true) ? "\b" : $self->deparse($true, 0);
@@ -4276,6 +4283,8 @@ sub pp_cond_expr {
                 : $self->keyword("if") . " ($cond) {\n\t$true\n\b}";
     my @elsifs;
     my $elsif;
+
+    # keep processing chained elsif's until final else (if present)
     while (!null($false) and is_ifelse_cont($false)) {
 	my $newop = $false->first;
 	my $newcond = $newop->first;
@@ -4289,7 +4298,10 @@ sub pp_cond_expr {
 	}
 	$newcond = $self->deparse($newcond, 1);
 
-        if (null($false) && ! ($newop->flags & OPf_SPECIAL)) {
+        if (   $op->name eq 'cond'
+            && null($false)
+            && ! ($newop->flags & OPf_SPECIAL))
+        {
             # An empty elsif "true" block has been optimised away
             my $temp = $false; $false = $newtrue; $newtrue = $temp;
             $newtrue = "();";
@@ -4300,6 +4312,7 @@ sub pp_cond_expr {
 	$elsif ||= $self->keyword("elsif");
 	push @elsifs, "$elsif ($newcond) {\n\t$newtrue\n\b}";
     }
+
     if (!null($false)) {
 	$false = $cuddle . $self->keyword("else") . " {\n\t" .
 	  $self->deparse($false, 0) . "\n\b}\cK";
@@ -4309,6 +4322,7 @@ sub pp_cond_expr {
     } else {
 	$false = "\cK";
     }
+
     return $head . join($cuddle, "", @elsifs) . $false;
 }
 
@@ -4366,13 +4380,24 @@ sub loop_common {
             # for my ($x, $y, ...) ...
             # for my ($foo, $bar) () stores the count (less 1) in the targ of
             # the ITER op. For the degenerate case of 1 var ($x), the
-            # TARG is zero, so it works anyway
+            # TARG is zero, so it works anyway. In the presence of
+            # OPpITER_REFALIAS, the lower 8 bits is the var count, and the
+            # upper 24 bits is a mask indicating which of the variables
+            # have refalias behaviour.
             my $iter_targ = $kid->first->first->targ;
+            my $mask = 0;
+            if ($iter->private & OPpITER_REFALIAS) {
+                $mask = $iter_targ >> 8;
+                $iter_targ &= 0xff;
+            }
             my @vars;
             my $targ = $enter->targ;
             while ($iter_targ-- >= 0) {
-                push @vars, $self->padname_sv($targ)->PVX;
+                my $v = $self->padname_sv($targ)->PVX;
+                $v = "\\$v" if $mask & 1;
+                push @vars, $v;
                 ++$targ;
+                $mask >>= 1;
             }
             $var = 'my (' . join(', ', @vars) . ')';
         } elsif (null $var) {
@@ -4390,22 +4415,32 @@ sub loop_common {
 	} else {
 	    $var = $self->deparse($var, 1);
 	}
+
 	$body = $iter->sibling;
-	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
-	    confess unless $var eq '$_';
+
+	if (!(   is_state $body->first
+              or _op_is_or_was($body->first, OP_STUB)
+              or ($body->first->name =~ /^(?:leave|scope)$/)))
+        {
+            # postfix for
+            die "Unexpected 'for' statement modifier with non-\$_ loop variable '$var'\n"
+                unless $var eq '$_';
 	    $body = $body->first;
 	    return $self->deparse($body, 2) . " "
 		 . $self->keyword("foreach") . " ($ary)";
 	}
 	$head = "foreach $var ($ary) ";
-    } elsif ($kid->name eq "null") { # while/until
+    }
+    elsif (_op_is_or_was($kid, OP_STUB)) { # bare and empty
+	return "{;}"; # {} could be a hashref
+    }
+    elsif ($kid->name eq "null") { # while/until
 	$kid = $kid->first;
 	$name = {"and" => "while", "or" => "until"}->{$kid->name};
 	$cond = $kid->first;
 	$body = $kid->first->sibling;
-    } elsif ($kid->name eq "stub") { # bare and empty
-	return "{;}"; # {} could be a hashref
     }
+
     # If there isn't a continue block, then the next pointer for the loop
     # will point to the unstack, which is kid's last child, except
     # in a bare loop, when it will point to the leaveloop. When neither of
@@ -6945,7 +6980,7 @@ sub pp_subst {
 }
 
 sub is_lexical_subs {
-    my (@ops) = shift;
+    my (@ops) = @_;
     for my $op (@ops) {
         return 0 if $op->name !~ /\A(?:introcv|clonecv)\z/;
     }

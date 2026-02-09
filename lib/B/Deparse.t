@@ -698,9 +698,6 @@ tr/\x{345}/\x{370}/;
 # Lexical and simple arithmetic
 my $test;
 ++$test and $test /= 2;
->>>>
-my $test;
-$test /= 2 if ++$test;
 ####
 # list x
 -((1, 2) x 2);
@@ -734,6 +731,19 @@ my $z = do { foo: +sub : method { my $a; } };
 }
 continue {
     123;
+}
+####
+# block with empty continue
+{
+    f(234);
+}
+continue { }
+>>>>
+{
+    f(234);
+}
+continue {
+    ();
 }
 ####
 # lexical and package scalars
@@ -933,6 +943,15 @@ print $_ foreach (reverse @a);
 # foreach reverse (not inplace)
 our @a;
 print $_ foreach (reverse 1, 2..5);
+####
+# foreach empty block
+our $foo;
+foreach $foo (1) {}
+>>>>
+our $foo;
+foreach $foo (1) {
+    ();
+}
 ####
 # bug #38684
 our @ary;
@@ -3620,3 +3639,19 @@ elsif ($y) {
 } else {
     $y = 2;
 }
+####
+# Deparse of elsif  with no trailing block
+my($x, $y);
+if ($x) {
+    $x = 1;
+}
+elsif ($y) {
+    $y = 1;
+}
+####
+# empty package block
+{
+    package Foo;
+}
+>>>>
+{;};

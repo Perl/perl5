@@ -522,7 +522,8 @@ bare_statement_if
 		mblock
 		else
 		{
-			$$ = block_end($remember, newCONDOP(0, $mexpr, op_scope($mblock), $else));
+			$$ = block_end($remember, newCONDOP(OPpSTATEMENT<<8,
+                                        $mexpr, op_scope($mblock), $else));
 			parser->copline = (line_t)$KW_IF;
 		}
 	;
@@ -688,7 +689,8 @@ bare_statement_unless
 		mblock
 		else
 		{
-			$$ = block_end($remember, newCONDOP(0, $mexpr, $else, op_scope($mblock)));
+			$$ = block_end($remember, newCONDOP(OPpSTATEMENT<<8,
+                                        $mexpr, $else, op_scope($mblock)));
 			parser->copline = (line_t)$KW_UNLESS;
 		}
 	;
@@ -933,9 +935,11 @@ sideff	:	error
 	|	expr[body]
 			{ $$ = $body; }
 	|	expr[body] KW_IF condition
-			{ $$ = newLOGOP(OP_AND, 0, $condition, $body); }
+			{ $$ = newLOGOP(OP_AND, OPpSTATEMENT<<8,
+                                            $condition, $body); }
 	|	expr[body] KW_UNLESS condition
-			{ $$ = newLOGOP(OP_OR, 0, $condition, $body); }
+			{ $$ = newLOGOP(OP_OR, OPpSTATEMENT<<8,
+                                    $condition, $body); }
 	|	expr[body] KW_WHILE condition
 			{ $$ = newLOOPOP(OPf_PARENS, 1, scalar($condition), $body); }
 	|	expr[body] KW_UNTIL iexpr
@@ -957,7 +961,7 @@ else
 			}
 	|	KW_ELSIF PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock else[else.recurse]
 			{ parser->copline = (line_t)$KW_ELSIF;
-			    $$ = newCONDOP(0,
+			    $$ = newCONDOP(OPpSTATEMENT<<8,
 				newSTATEOP(OPf_SPECIAL,NULL,$mexpr),
 				op_scope($mblock), $[else.recurse]);
 			  PL_hints |= HINT_BLOCK_SCOPE;
