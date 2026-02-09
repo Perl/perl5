@@ -2905,7 +2905,7 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
     if(PadnameIsFIELD(src)) {
         assert(PadnameFIELDINFO(src));
         struct padname_fieldinfo *sinfo = PadnameFIELDINFO(src);
-        struct padname_fieldinfo *dinfo = (struct padname_fieldinfo *)ptr_table_fetch(PL_ptr_table, src);
+        struct padname_fieldinfo *dinfo = (struct padname_fieldinfo *)ptr_table_fetch(PL_ptr_table, sinfo);
         if (dinfo)
             PadnameFIELDINFO(dst) = dinfo;
         else {
