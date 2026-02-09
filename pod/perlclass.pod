@@ -454,6 +454,12 @@ Fields cannot be used by anonymous C<method> expressions during C<BEGIN>
 phasers or as part of a C<use> statement.
 [L<GH #24418|https://github.com/Perl/perl5/issues/24418>]
 
+=item *
+
+Tying fields is not officially supported and the behaviour that doing so
+exhibits should be considered unstable. (In particular, the number and
+timing of FETCH operations may very well change in the future.)
+
 =back
 
 =head1 AUTHORS
