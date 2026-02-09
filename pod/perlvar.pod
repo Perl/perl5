@@ -1651,31 +1651,31 @@ when doing edit-in-place processing with B<-i>.  Useful when you have
 to do a lot of inserting and don't want to keep modifying C<$_>.  See
 L<perlrun|perlrun/-i[extension]> for the B<-i> switch.
 
-=item IO::Handle->output_field_separator( EXPR )
+=item IO::Handle->output_field_separator(EXPR)
 
 =item $OUTPUT_FIELD_SEPARATOR
 
 =item $OFS
 
 =item $,
-X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>
+X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR> X<output_field_separator>
 
 The output field separator for the print operator.  If defined, this
 value is printed between each of print's arguments.  Default is C<undef>.
 
 You cannot call C<output_field_separator()> on a handle, only as a
-static method.  See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle>.
 
 Mnemonic: what is printed when there is a "," in your print statement.
 
-=item HANDLE->input_line_number( EXPR )
+=item HANDLE->input_line_number(EXPR)
 
 =item $INPUT_LINE_NUMBER
 
 =item $NR
 
 =item $.
-X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line number>
+X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line number> X<input_line_number>
 
 Current line number for the last filehandle accessed.
 
@@ -1703,14 +1703,14 @@ which handle you last accessed.
 
 Mnemonic: many programs use "." to mean the current line number.
 
-=item IO::Handle->input_record_separator( EXPR )
+=item IO::Handle->input_record_separator(EXPR)
 
 =item $INPUT_RECORD_SEPARATOR
 
 =item $RS
 
 =item $/
-X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>
+X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR> X<input_record_separator>
 
 The input record separator, newline by default.  This influences Perl's
 idea of what a "line" is.  Works like B<awk>'s RS variable, including
@@ -1796,31 +1796,31 @@ same filehandle.  Record mode mixes with line mode only when the
 same buffering layer is in use for both modes.
 
 You cannot call C<input_record_separator()> on a handle, only as a
-static method.  See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle>.
 
 See also L<perlport/"Newlines">.  Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
-=item IO::Handle->output_record_separator( EXPR )
+=item IO::Handle->output_record_separator(EXPR)
 
 =item $OUTPUT_RECORD_SEPARATOR
 
 =item $ORS
 
 =item $\
-X<$\> X<$ORS> X<$OUTPUT_RECORD_SEPARATOR>
+X<$\> X<$ORS> X<$OUTPUT_RECORD_SEPARATOR> X<output_record_separator>
 
 The output record separator for the print operator.  If defined, this
 value is printed after the last of print's arguments.  Default is C<undef>.
 
 You cannot call C<output_record_separator()> on a handle, only as a
-static method.  See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle>.
 
 Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
 Also, it's just like C<$/>, but it's what you get "back" from Perl.
 
-=item HANDLE->autoflush( EXPR )
+=item HANDLE->autoflush(EXPR)
 
 =item $OUTPUT_AUTOFLUSH
 
@@ -1879,19 +1879,19 @@ L<perlform> and L<perlfunc/"formline PICTURE,LIST">.
 =item $FORMAT_FORMFEED
 
 =item $^L
-X<$^L> X<$FORMAT_FORMFEED>
+X<$^L> X<$FORMAT_FORMFEED> X<format_formfeed>
 
 What formats output as a form feed.  The default is C<\f>.
 
 You cannot call C<format_formfeed()> on a handle, only as a static
-method.  See L<IO::Handle|IO::Handle>.
+method.  See L<IO::Handle>.
 
 =item HANDLE->format_page_number(EXPR)
 
 =item $FORMAT_PAGE_NUMBER
 
 =item $%
-X<$%> X<$FORMAT_PAGE_NUMBER>
+X<$%> X<$FORMAT_PAGE_NUMBER> X<format_page_number>
 
 The current page number of the currently selected output channel.
 
@@ -1902,26 +1902,26 @@ Mnemonic: C<%> is page number in B<nroff>.
 =item $FORMAT_LINES_LEFT
 
 =item $-
-X<$-> X<$FORMAT_LINES_LEFT>
+X<$-> X<$FORMAT_LINES_LEFT> X<format_lines_left>
 
 The number of lines left on the page of the currently selected output
 channel.
 
 Mnemonic: lines_on_page - lines_printed.
 
-=item IO::Handle->format_line_break_characters EXPR
+=item IO::Handle->format_line_break_characters(EXPR)
 
 =item $FORMAT_LINE_BREAK_CHARACTERS
 
 =item $:
-X<$:> X<$FORMAT_LINE_BREAK_CHARACTERS>
+X<$:> X<$FORMAT_LINE_BREAK_CHARACTERS> X<format_line_break_characters>
 
 The current set of characters after which a string may be broken to
 fill continuation fields (starting with C<^>) in a format.  The default is
 S<" \n-">, to break on a space, newline, or a hyphen.
 
 You cannot call C<format_line_break_characters()> on a handle, only as
-a static method.  See L<IO::Handle|IO::Handle>.
+a static method.  See L<IO::Handle>.
 
 Mnemonic: a "colon" in poetry is a part of a line.
 
@@ -1930,7 +1930,7 @@ Mnemonic: a "colon" in poetry is a part of a line.
 =item $FORMAT_LINES_PER_PAGE
 
 =item $=
-X<$=> X<$FORMAT_LINES_PER_PAGE>
+X<$=> X<$FORMAT_LINES_PER_PAGE> X<format_lines_per_page>
 
 The current page length (printable lines) of the currently selected
 output channel.  The default is 60.
@@ -1942,7 +1942,7 @@ Mnemonic: = has horizontal lines.
 =item $FORMAT_TOP_NAME
 
 =item $^
-X<$^> X<$FORMAT_TOP_NAME>
+X<$^> X<$FORMAT_TOP_NAME> X<format_top_name>
 
 The name of the current top-of-page format for the currently selected
 output channel.  The default is the name of the filehandle with C<_TOP>
@@ -1956,7 +1956,7 @@ Mnemonic: points to top of page.
 =item $FORMAT_NAME
 
 =item $~
-X<$~> X<$FORMAT_NAME>
+X<$~> X<$FORMAT_NAME> X<format_name>
 
 The name of the current report format for the currently selected
 output channel.  The default format name is the same as the filehandle
