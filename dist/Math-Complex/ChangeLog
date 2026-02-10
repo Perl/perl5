@@ -406,7 +406,7 @@ after which Math::Complex and Math::Trig were CPANized as 1.36 and 1.04.
 	[5974] on 2000/04/27 by gsar@auger
 
 	change#4197 somehow missed initializing PL_errors, meaning
-	sytax error queueing wasn't working outside eval"" at all;
+	syntax error queueing wasn't working outside eval"" at all;
 	also fixed eval"" to localize PL_error_count, so that compile-time
 	eval's don't clobber the error state of the outer context
 	
