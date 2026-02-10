@@ -8835,7 +8835,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case SRCLOSE:  /*  (*SCRIPT_RUN: ... )   */
 
-            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput, utf8_target))
+            if (! isSCRIPT_RUN(script_run_begin, (U8 *) locinput,
+                               utf8_target, NULL))
             {
                 sayNO;
             }
@@ -11744,6 +11745,10 @@ are in common usage freely intermixed.  Perl uses Unicode's rules.  For
 example, this applies to the Kiragana and Hatakana scripts used in Japan.  See
 L<https://www.unicode.org/reports/tr24>.
 
+If C<first_bad_pos> is not NULL, and this routine returns C<false>, it will
+also store a pointer to the first byte of the first character that breaks the
+script run into C<*first_bad_pos>.
+
 This is currently unused, but a potential future parameter is C<*ret_script>,
 if C<ret_script> is not NULL, will on return of true contain the script found,
 using the C<SCX_enum> typedef.  Its value will be C<SCX_INVALID> if the
@@ -11769,7 +11774,9 @@ it are from the Inherited or Common scripts.
 */
 
 bool
-Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
+Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send,
+                        const bool utf8_target,
+                        U8 const ** first_bad_pos)
 {
     PERL_ARGS_ASSERT_ISSCRIPT_RUN;
 
@@ -11830,6 +11837,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
     bool retval = true;
     SCX_enum * ret_script = NULL;
+    const U8 * prior_s = s;   /* So don't have to hop back */
 
     /* All code points in 0..255 are either Common or Latin, so must be a
      * script run.  We can return immediately unless we need to know which
@@ -11878,6 +11886,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
             else {
                 zero_of_run = '0';
             }
+            prior_s = s;
             s++;
             continue;
         }
@@ -11886,9 +11895,11 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         if (! UTF8_IS_INVARIANT(*s)) {
             Size_t len;
             cp = valid_utf8_to_uv((U8 *) s, &len);
+            prior_s = s;
             s += len;
         }
         else {
+            prior_s = s;
             cp = *(s++);
         }
 
@@ -12178,12 +12189,17 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
     Safefree(intersection);
 
-    if (ret_script != NULL) {
-        if (retval) {
+    if (retval) {
+        if (ret_script != NULL) {
             *ret_script = script_of_run;
         }
-        else {
+    }
+    else {
+        if (ret_script != NULL) {
             *ret_script = SCX_INVALID;
+        }
+        if (first_bad_pos) {
+            *first_bad_pos = prior_s;
         }
     }
 

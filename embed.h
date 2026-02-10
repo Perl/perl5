@@ -1929,7 +1929,7 @@
 #   define validate_proto(a,b,c,d)              Perl_validate_proto(aTHX_ a,b,c,d)
 #   define vivify_defelem(a)                    Perl_vivify_defelem(aTHX_ a)
 #   define yylex()                              Perl_yylex(aTHX)
-#   define isSCRIPT_RUN(a,b,c)                  Perl_isSCRIPT_RUN(aTHX_ a,b,c)
+#   define isSCRIPT_RUN(a,b,c,d)                Perl_isSCRIPT_RUN(aTHX_ a,b,c,d)
 #   define is_utf8_non_invariant_string         Perl_is_utf8_non_invariant_string
 #   define sv_or_pv_pos_u2b(a,b,c,d)            S_sv_or_pv_pos_u2b(aTHX_ a,b,c,d)
 #   define variant_under_utf8_count             S_variant_under_utf8_count

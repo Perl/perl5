@@ -7876,7 +7876,7 @@ PERL_CALLCONV int
 Perl_yylex(pTHX)
         Perl_attribute_nonnull_aTHX;
 PERL_CALLCONV bool
-Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
+Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target, U8 const **first_bad_pos)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
