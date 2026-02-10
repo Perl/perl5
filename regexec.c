@@ -11744,9 +11744,10 @@ are in common usage freely intermixed.  Perl uses Unicode's rules.  For
 example, this applies to the Kiragana and Hatakana scripts used in Japan.  See
 L<https://www.unicode.org/reports/tr24>.
 
-C<*ret_script>, if C<ret_script> is not NULL, will on return of true
-contain the script found, using the C<SCX_enum> typedef.  Its value will be
-C<SCX_INVALID> if the function returns false.
+This is currently unused, but a potential future parameter is C<*ret_script>,
+if C<ret_script> is not NULL, will on return of true contain the script found,
+using the C<SCX_enum> typedef.  Its value will be C<SCX_INVALID> if the
+function returns false.
 
 If the sequence is empty, true is returned, but C<*ret_script> (if asked for)
 will be C<SCX_INVALID>.
