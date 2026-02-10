@@ -10894,6 +10894,8 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
     const char * const s0 = s;  /* First byte, for any error message */
     const char * d0 = *d;
 
+    const bool feature_enabled = true;
+
     while (s < s_end) {
 
         /* For non-UTF8, variables that match ASCII \w are a superset of
@@ -10901,14 +10903,27 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
          * Unicode definition only when UTF-8 is in effect.  We have to check
          * for the subset before checking for the superset. */
         Size_t advance;
+        Size_t count = (flags & IDCONT_first_OK);
         if (   (is_utf8 || idfirst_only)
-            && (advance = (flags & IDCONT_first_OK)
+            && (advance = (count)
                           ? isIDCONT_lazy_if_safe((U8 *) s, (U8 *) s_end,
                                                   is_utf8)
                           : isIDFIRST_lazy_if_safe(s, s_end, is_utf8)))
         {
             const char *this_start = s;
+            UV bad_cp;
+            const char * bad_char_pos = NULL;
+            const char * word_noncont_pos = NULL;
+
+            if (feature_enabled) {
+                bad_cp = valid_utf8_to_uv((U8 *) this_start, NULL);
+                if (! invlist_contains_cp_(PL_id_allowed, bad_cp)) {
+                    bad_char_pos = s + advance;
+                }
+            }
+
             s += advance;
+            count++;
 
             /* Find the end of the identifier by accumulating characters until
              * find a non-identifier character */
@@ -10918,42 +10933,72 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end,
                  * they could be in a name, but are forbidden because of
                  * Section 5 of Unicode UAX #31 "Unicode Identifiers and
                  * Syntax". */
-                advance = is_WORD_BUT_NONCONT_safe(s, s_end, is_utf8);
-                if (advance) {
-                    UV cp = valid_utf8_to_uv((U8 *) s, NULL);
-                    const char *error_pos = s + advance;
-
-                    /* Display the whole name */
-                    do {
-                        s += advance;
-                    }
-                    while ((advance = isWORDCHAR_lazy_if_safe(s, s_end,
-                                                              is_utf8)));
-                    error = form("\\x{%04" UVXf "} is a \\w char that isn't"
-                                 " valid in a name; marked by <-- HERE"
-                                 " after %" UTF8f "<-- HERE %" UTF8f,
-                                 cp,
-                                 UTF8fARG(is_utf8, error_pos - s0, s0),
-                                 UTF8fARG(is_utf8, s - error_pos, error_pos));
-                    goto found_error;
+                if (   ! bad_char_pos && ! word_noncont_pos
+                    && (advance = is_WORD_BUT_NONCONT_safe(s, s_end,is_utf8)))
+                {
+                    bad_cp = valid_utf8_to_uv((U8 *) s, NULL);
+                    word_noncont_pos = s + advance;
                 }
-                else {
-                    advance = isIDCONT_lazy_if_safe((const U8*) s,
-                                                    (const U8*) s_end,
-                                                    is_utf8);
-                    if (advance == 0) { /* Not an identifier character */
-                        break;
+                else if (! (advance = isIDCONT_lazy_if_safe((const U8*) s,
+                                                            (const U8*) s_end,
+                                                            is_utf8)))
+                {
+                    /* Not an identifier character */
+                    break;
+                }
+
+                /* Here we have a \w character whose byte length is in
+                 * 'advance' */
+                if (feature_enabled && ! bad_char_pos && ! word_noncont_pos) {
+                    bad_cp = valid_utf8_to_uv((U8 *) s, NULL);
+                    if (! invlist_contains_cp_(PL_id_allowed, bad_cp)) {
+                        bad_char_pos = s + advance;
                     }
                 }
 
                 s += advance;
+                count++;
             }
 
             /* Here we have found the end of the identifier */
+
+            if (word_noncont_pos || (count > 1 && bad_char_pos)) {
+                const char * error_pos = (word_noncont_pos != NULL)
+                                          ? word_noncont_pos
+                                          : bad_char_pos;
+
+                error = form("\\x{%04" UVXf "} is a \\w char that isn't"
+                             " valid in a name; marked by <-- HERE after %"
+                             UTF8f "<-- HERE %" UTF8f,
+                             bad_cp,
+                             UTF8fARG(is_utf8, error_pos - s0, s0),
+                             UTF8fARG(is_utf8, s - error_pos, error_pos));
+                goto found_error;
+            }
+
             Size_t this_length = s - this_start;
 
             if (*d + this_length >= e) {
                 goto too_long;
+            }
+
+            /* Make sure is in a single script */
+            const U8 * error_pos = NULL;
+            if (   feature_enabled
+                && ! isSCRIPT_RUN((U8 *) this_start, (U8 *) s, is_utf8,
+                                  &error_pos))
+            {
+                // XXX backup if initial count not 0
+                bad_cp = valid_utf8_to_uv((U8 *) error_pos, NULL);
+                error_pos += UTF8SKIP(error_pos);
+                error = form("\\x{%04" UVXf "} is not in the same script as"
+                             " the characters that preceded it; marked by"
+                             " <-- HERE after %" UTF8f "<-- HERE %" UTF8f,
+                            bad_cp,
+                            UTF8fARG(is_utf8, (char *) error_pos - s0, s0),
+                            UTF8fARG(is_utf8, s - (char *) error_pos,
+                                     error_pos));
+                goto found_error;
             }
 
             /* And copy the whole thing in one operation */
