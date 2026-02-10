@@ -11721,13 +11721,13 @@ Perl_is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const
 =for apidoc isSCRIPT_RUN
 
 Returns a bool as to whether or not the sequence of bytes from C<s> up to but
-not including C<send> form a "script run".  C<utf8_target> is true iff the
-sequence starting at C<s> is to be treated as UTF-8.  To be precise, except for
-two degenerate cases given below, this function returns true iff all code
-points in it come from any combination of three "scripts" given by the Unicode
-"Script Extensions" property: Common, Inherited, and possibly one other.
-Additionally all decimal digits must come from the same consecutive sequence of
-10.
+not including C<send> are all from the same Unicode script; that is if they
+form a "script run".  C<utf8_target> is true iff the sequence starting at C<s>
+is to be treated as UTF-8.  To be precise, except for two degenerate cases
+given below, this function returns true iff all code points in it come from
+any combination of three "scripts" given by the Unicode "Script Extensions"
+property: Common, Inherited, and possibly one other.  Additionally all decimal
+digits must come from the same consecutive sequence of 10.
 
 For example, if all the characters in the sequence are Greek, or Common, or
 Inherited, this function will return true, provided any decimal digits in it
@@ -11738,6 +11738,11 @@ their own digits defined this will accept either digits from that set or from
 one of the Common digit sets, but not a combination of the two.  Some scripts,
 such as Arabic, have more than one set of digits.  All digits must come from
 the same set for this function to return true.
+
+Note that Unicode considers a few distinct scripts as a single one when those
+are in common usage freely intermixed.  Perl uses Unicode's rules.  For
+example, this applies to the Kiragana and Hatakana scripts used in Japan.  See
+L<https://www.unicode.org/reports/tr24>.
 
 C<*ret_script>, if C<ret_script> is not NULL, will on return of true
 contain the script found, using the C<SCX_enum> typedef.  Its value will be
