@@ -51,6 +51,17 @@ are permitted to be reference aliases.
 Currently both the C<refaliasing> and C<declared_refs> features remain
 B<experimental>.
 
+=head2 The C</p> regexp modifier is not needed any more
+
+Since their creation, the availability of C<${^PREMATCH}>, C<${^MATCH}>,
+and C<${^POSTMATCH}> was controlled by the use of the C</p> match operator
+flag on the corresponding regular expression. Since Perl 5.20, using
+the match variables has not had the performance impact it used to have,
+but C</p> was still required for them to be populated.
+
+The match variables are now always populated, regardless of the presence
+of the C<p> modifier on regular expressions.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
