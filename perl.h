@@ -6446,18 +6446,6 @@ INIT({
 #  define PERL_SET_THX(t)		NOOP
 #endif
 
-/* Create a reentrant lock mechanism.  Currently these are also
- * many-readers/1-writer locks, simply because that's all that is so far needed
- * */
-#ifdef WIN32
-    /* Windows mutexes are all general semaphores; we don't currently bother
-     * with reproducing the same panic behavior as on other systems */
-#  define PERL_REENTRANT_LOCK(name, mutex, xcounter,                        \
-                              cond_to_panic_if_already_locked)              \
-        PERL_WRITE_LOCK(mutex)
-
-#  define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)  PERL_WRITE_UNLOCK(mutex)
-#else
 
     /* Simulate a general (or recursive) semaphore on 'mutex' whose name will
      * be displayed as 'name' in any messages.  There must be a per-thread
@@ -6476,7 +6464,7 @@ INIT({
      * Clang improperly gives warnings for this, if not silenced:
      * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
      */
-#  define PERL_REENTRANT_LOCK(name, mutex, xcounter,                        \
+#define PERL_REENTRANT_LOCK(name, mutex, xcounter,                          \
                               cond_to_panic_if_already_locked)              \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
@@ -6508,7 +6496,7 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#  define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)                      \
+#define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)                        \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {                                        \
             DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
@@ -6531,7 +6519,7 @@ INIT({
         }                                                                   \
     } STMT_END
 
-#  define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter)                   \
+#define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter)                     \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (xcounter <= 0) {                                                \
@@ -6546,7 +6534,7 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#  define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter)                 \
+#define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter)                   \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (xcounter <= 0) {                                                \
@@ -6568,7 +6556,6 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#endif
 
 #ifndef EBCDIC
 
@@ -7174,8 +7161,8 @@ typedef struct am_table_short AMTS;
 #  define ENV_UNLOCK          PERL_REENTRANT_UNLOCK("env",                  \
                                                     &PL_env_mutex,          \
                                                     PL_env_mutex_depth)
-#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
-#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
+#  define ENV_READ_LOCK       ENV_LOCK
+#  define ENV_READ_UNLOCK     ENV_UNLOCK
 #  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
 #  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
 
