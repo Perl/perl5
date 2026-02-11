@@ -1416,6 +1416,8 @@ cpan/IO-Compress/t/files/jar.zip			IO-Compress
 cpan/IO-Compress/t/files/meta.xml			IO-Compress
 cpan/IO-Compress/t/files/test.ods			IO-Compress
 cpan/IO-Compress/t/files/testfile1.odt			IO-Compress
+cpan/IO-Compress/t/files/time-invalid.zip		IO-Compress
+cpan/IO-Compress/t/files/time-zero.zip			IO-Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
 cpan/IO-Socket-IP/.editorconfig				IO-Socket-IP
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP

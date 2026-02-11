@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.214 ;
-use IO::Compress::Base::Common  2.214 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.214 ;
-use IO::Uncompress::Adapter::Identity 2.214 ;
-use IO::Compress::Zlib::Extra 2.214 ;
-use IO::Compress::Zip::Constants 2.214 ;
+use IO::Uncompress::RawInflate  2.217 ;
+use IO::Compress::Base::Common  2.217 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.217 ;
+use IO::Uncompress::Adapter::Identity 2.217 ;
+use IO::Compress::Zlib::Extra 2.217 ;
+use IO::Compress::Zip::Constants 2.217 ;
 
-use Compress::Raw::Zlib  2.214 () ;
+use Compress::Raw::Zlib  2.217 () ;
 
 BEGIN
 {
@@ -24,13 +24,13 @@ BEGIN
    local $SIG{__DIE__};
 
     eval{ require IO::Uncompress::Adapter::Bunzip2 ;
-          IO::Uncompress::Adapter::Bunzip2->VERSION(2.214) } ;
+          IO::Uncompress::Adapter::Bunzip2->VERSION(2.217) } ;
     eval{ require IO::Uncompress::Adapter::UnLzma ;
-          IO::Uncompress::Adapter::UnLzma->VERSION(2.214) } ;
+          IO::Uncompress::Adapter::UnLzma->VERSION(2.217) } ;
     eval{ require IO::Uncompress::Adapter::UnXz ;
-          IO::Uncompress::Adapter::UnXz->VERSION(2.214) } ;
+          IO::Uncompress::Adapter::UnXz->VERSION(2.217) } ;
     eval{ require IO::Uncompress::Adapter::UnZstd ;
-          IO::Uncompress::Adapter::UnZstd->VERSION(2.214) } ;
+          IO::Uncompress::Adapter::UnZstd->VERSION(2.217) } ;
 }
 
 
@@ -38,7 +38,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.214';
+$VERSION = '2.217';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);
@@ -802,7 +802,14 @@ sub filterUncompressed
 # from Archive::Zip & info-zip
 sub _dosToUnixTime
 {
+    # Returns zero when $dt is already zero or it doesn't expand to a value that Time::Local::timelocal()
+    # can handle.
+
 	my $dt = shift;
+    # warn "_dosToUnixTime dt=[$dt]\n";
+
+    # some zip files don't populate the datetime field at all
+    return 0 if ! $dt;
 
 	my $year = ( ( $dt >> 25 ) & 0x7f ) + 80;
 	my $mon  = ( ( $dt >> 21 ) & 0x0f ) - 1;
@@ -813,10 +820,15 @@ sub _dosToUnixTime
 	my $sec  = ( ( $dt << 1 ) & 0x3e );
 
     use Time::Local ;
-    my $time_t = Time::Local::timelocal( $sec, $min, $hour, $mday, $mon, $year);
+
+    my $time_t ;
+    # wrap in an eval to catch out of range errors
+    eval {
+        $time_t = Time::Local::timelocal( $sec, $min, $hour, $mday, $mon, $year);
+    } ;
+
     return 0 if ! defined $time_t;
     return $time_t;
-
 }
 
 #sub scanCentralDirectory
@@ -2012,7 +2024,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2025 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2026 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

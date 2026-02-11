@@ -304,6 +304,7 @@ my %Extras = (
       0x4690,  ['POSZIP 4690',                                              undef],
       0x4704,  ['VM/CMS',                                                   undef],
       0x470f,  ['MVS',                                                      undef],
+      0x4850,  ['Info-ZIP PHold [PH]',                                      undef],
       0x4854,  ['Theos [TH]',                                               undef],
       0x4b46,  ['FWKCS MD5 [FK]',                                           undef],
       0x4c41,  ['OS/2 access control list [AL]',                            undef],
@@ -320,6 +321,7 @@ my %Extras = (
       0x6375,  ['Unicode Comment [uc]',                                     \&decode_uc,                    5, undef,  5, undef],
       0x6542,  ['BeOS/Haiku [Be]',                                          undef], # TODO
       0x6854,  ['Theos [Th]',                                               undef],
+      0x6C78,  ['Inzo-ZIP Stream [xl]',                                     undef], # TODO
       0x7075,  ['Unicode Path [up]',                                        \&decode_up,                    5, undef,   5, undef],
       0x756e,  ['ASi Unix [un]',                                            \&decode_ASi_Unix], # TODO
       0x7441,  ['AtheOS [At]',                                              undef],
@@ -2036,8 +2038,17 @@ sub LocalHeader
     my $lastMod = out_V "Modification Time", sub { LastModTime($_[0]) };
 
     my $crc              = out_V "CRC";
+
+    # Weak encryption if
+    # * encrypt flag (bit 0) set in General Purpose Flags
+    # * strong encrypt (bit ) not set in General Purpose Flags
+    # * not using AES encryption (compression method 99)
+    my $weakEncryption = ($gpFlag & ZIP_GP_FLAG_ALL_ENCRYPT) == ZIP_GP_FLAG_ENCRYPTED_MASK &&
+                         $compressedMethod != 99;
+    # Weak encryption uses the CRC value even when streaming is in play.
+    # This conflicts with appnote 6.3.10 section 4.4.4
     warning $FH->tell() - 4, "CRC field should be zero when streaming is enabled"
-        if $streaming && $crc != 0 ;
+        if $streaming && $crc != 0 && ! $weakEncryption;
 
     my $compressedSize   = out_V "Compressed Size";
     # warning $FH->tell(), "Compressed Size should be zero when streaming is enabled";

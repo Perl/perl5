@@ -670,8 +670,8 @@ our %Modules = (
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.214.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Sat Oct 25 11:58:55 2025',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.217.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Feb 11 11:42:12 2026',
         'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
