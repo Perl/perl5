@@ -2,7 +2,7 @@
 #
 # Written by Paul Marquess (pmqs@cpan.org)
 #
-#     Copyright (c) 1995-2023 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2026 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -165,7 +165,7 @@ use Carp;
 # Module not thread safe, so don't clone
 sub CLONE_SKIP { 1 }
 
-$VERSION = "1.859" ;
+$VERSION = "1.860" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
@@ -593,7 +593,7 @@ __END__
 
 =head1 NAME
 
-DB_File - Perl5 access to Berkeley DB version 1.x
+DB_File - Perl access to Berkeley DB 1.x
 
 =head1 SYNOPSIS
 
@@ -1646,7 +1646,7 @@ destroyed.
 
 See L<The untie() Gotcha> for more details.
 
-All the functions defined in L<dbopen> are available except for
+All the functions defined in L<dbopen(3)> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the
 supported functions have been implemented to mirror the way Berkeley DB
 works whenever possible. In particular note that:
@@ -1708,7 +1708,7 @@ The code above can be rearranged to get around the problem, like this:
 
 =back
 
-All the constants defined in L<dbopen> for use in the flags parameters
+All the constants defined in L<dbopen(3)> for use in the flags parameters
 in the methods defined below are also available. Refer to the Berkeley
 DB documentation for the precise meaning of the flags values.
 
@@ -1755,7 +1755,7 @@ not use C<fd> to lock your database.
 =item B<$status = $X-E<gt>seq($key, $value, $flags) ;>
 
 This interface allows sequential retrieval from the database. See
-L<dbopen> for full details.
+L<dbopen(3)> for full details.
 
 Both the C<$key> and C<$value> parameters will be set to the key/value
 pair read from the database.
@@ -2325,7 +2325,7 @@ archive in F<src/misc/db.1.85.tar.gz>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2023 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-2026 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 

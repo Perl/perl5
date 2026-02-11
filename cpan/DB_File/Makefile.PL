@@ -71,7 +71,9 @@ WriteMakefile(
 
         #OPTIMIZE       => '-g',
         'depend'        => { 'Makefile'          => 'config.in',
-                             'version$(OBJ_EXT)' => 'version.c'},
+                             'version$(OBJ_EXT)' => 'version.c',
+                              'manifypods' => 'READMEmd'
+                             },
         'clean'         => { FILES => 'constants.h constants.xs *.bak t/*.t.bak' },
         'macro'         => { my_files => "@files" },
         'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz',
@@ -193,7 +195,11 @@ sub MY::libscan
 }
 
 
-sub MY::postamble { <<'EOM' } ;
+sub MY::postamble
+{
+    my %params = %{ $_[0] };
+
+    my $postamble = <<'EOM';
 
 MyDoubleCheck:
 	@echo Checking config.in is setup for a release
@@ -227,6 +233,29 @@ MyDoubleCheck:
 EOM
 
 
+    if (-e '.github')
+    {
+        $postamble .= <<EOM;
+
+READMEmd: .github/DB_File.pod
+
+.github/DB_File.pod: DB_File.pm
+	\@echo Creating .github/DB_File.pod from DB_File.pm
+	\$(NOECHO) perl -e 'while(<>){ next if 1 .. /^__END__/; print}' DB_File.pm >.github/DB_File.pod
+
+EOM
+    }
+    else
+    {
+        $postamble .= <<EOM;
+
+READMEmd:
+
+EOM
+    }
+
+    return $postamble;
+}
 
 sub ParseCONFIG
 {
