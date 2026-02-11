@@ -2922,7 +2922,7 @@ Perl_utf8_hop_forward_overshoot(const U8 * s, SSize_t off,
 
     if (off != 0) {
         if (UNLIKELY(s >= end && ! remaining)) {
-            Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd"
+            Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %td"
                                  " bytes beyond legal end position (0x%p)",
                                  s, 1 + s - end, end);
         }
