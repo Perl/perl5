@@ -5152,9 +5152,9 @@ Gid_t getegid (void);
 
 #define DEBUG_SCOPE(where) \
     DEBUG_l( \
-    deb("%s scope %ld (savestack=%ld) at %s:%d\n",	                \
-        where, (long)PL_scopestack_ix, (long)PL_savestack_ix,           \
-        __FILE__, __LINE__));
+    deb("%s scope %ld (savestack=%ld) at %s:%" LINE_Tf "\n",    \
+        where, (long)PL_scopestack_ix, (long)PL_savestack_ix,   \
+        __FILE__, (line_t) __LINE__));
 /*
 =for apidoc_section $directives
 =for apidoc     ATmp|void|assert_|bool expr
@@ -6476,9 +6476,9 @@ INIT({
         else {                                                              \
             xcounter++;                                                     \
             if (cond_to_panic_if_already_locked) {                          \
-                Perl_croak_nocontext("panic: %s: %d: attempting to lock "   \
-                                name " incompatibly: %s\n",                 \
-                                __FILE__, __LINE__,                         \
+                Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting"  \
+                                     " to lock " name " incompatibly: %s\n",\
+                                     __FILE__, (line_t) __LINE__,           \
                                 STRINGIFY(cond_to_panic_if_already_locked));\
             }                                                               \
         }                                                                   \
@@ -6492,10 +6492,10 @@ INIT({
             xcounter = 0;                                                   \
         }                                                                   \
         else if (xcounter <= 0) {                                           \
-            Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
-                                 " already unlocked " name "; depth was"    \
-                                 " %d\n", __FILE__, __LINE__,               \
-                                 xcounter);                                 \
+            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to"   \
+                                 " unlock already unlocked " name           \
+                                 "; depth was %d\n",                        \
+                                 __FILE__, (line_t) __LINE__, xcounter);    \
         }                                                                   \
         else {                                                              \
             xcounter--;                                                     \
@@ -6530,10 +6530,10 @@ INIT({
             (mutex)->readers_count--;                                       \
         }                                                                   \
         else {                                                              \
-            Perl_croak_nocontext("panic: %s: %d: attempting to read unlock" \
+            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to read unlock" \
                                  " already unlocked " name "; readers"      \
                                  " count was"                               \
-                                 " %zd\n", __FILE__, __LINE__,              \
+                                 " %zd\n", __FILE__, (line_t) __LINE__,              \
                                  (mutex)->readers_count);                   \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
@@ -7850,18 +7850,18 @@ cannot have changed since the precalculation.
 #  define SET_NUMERIC_STANDARD()                                            \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                               "%s: %d: lc_numeric standard=%d\n",          \
+                               "%s: %" LINE_Tf ": lc_numeric standard=%d\n",\
                                 __FILE__, __LINE__, PL_numeric_standard));  \
             if (UNLIKELY(NOT_IN_NUMERIC_STANDARD_)) {                       \
                 Perl_set_numeric_standard(aTHX_ __FILE__, __LINE__);        \
             }                                                               \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                                 "%s: %d: lc_numeric standard=%d\n",        \
-                                 __FILE__, __LINE__, PL_numeric_standard)); \
+                     "%s: %" LINE_Tf ": lc_numeric standard=%d\n",          \
+                     __FILE__, __LINE__, PL_numeric_standard));             \
         } STMT_END
 
 #  define SET_NUMERIC_UNDERLYING()                                          \
-	STMT_START {                                                        \
+        STMT_START {                                                        \
           /*assert(PL_locale_mutex_depth > 0);*/                            \
             if (NOT_IN_NUMERIC_UNDERLYING_) {                               \
                 Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);      \
@@ -7882,7 +7882,7 @@ cannot have changed since the precalculation.
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
 #  define STORE_LC_NUMERIC_FORCE_TO_UNDERLYING()                            \
-	STMT_START {                                                        \
+        STMT_START {                                                        \
             LC_NUMERIC_LOCK(NOT_IN_NUMERIC_UNDERLYING_);                    \
             if (NOT_IN_NUMERIC_UNDERLYING_) {                               \
                 Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);      \
@@ -7900,8 +7900,9 @@ cannot have changed since the precalculation.
 #  define DISABLE_LC_NUMERIC_CHANGES()                                      \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                    "%s: %d: lc_numeric_standard now locked to depth %d\n", \
-                    __FILE__, __LINE__, PL_numeric_standard));              \
+                    "%s: %" LINE_Tf ": lc_numeric_standard now locked to"   \
+                    " depth %d\n", __FILE__, (line_t) __LINE__,             \
+                    PL_numeric_standard));                                  \
             PL_numeric_standard++;                                          \
         } STMT_END
 
@@ -7914,7 +7915,7 @@ cannot have changed since the precalculation.
                 assert(0);                                                  \
             }                                                               \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                                   "%s: %d: ",  __FILE__, __LINE__);        \
+                     "%s: %" LINE_Tf ": ",  __FILE__, (line_t) __LINE__);   \
                     if (PL_numeric_standard <= 1)                           \
                         PerlIO_printf(Perl_debug_log,                       \
                                       "lc_numeric_standard now unlocked\n");\
