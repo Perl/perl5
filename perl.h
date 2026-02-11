@@ -6469,23 +6469,12 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(xcounter <= 0)) {                                        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                           "%s: %d: locking " name "; new lock depth=1\n",\
-                               __FILE__, __LINE__));                        \
             assert(xcounter == 0);                                          \
             PERL_WRITE_LOCK(mutex);                                         \
             xcounter = 1;                                                   \
-            DEBUG_Kv(PerlIO_printf(Perl_debug_log,                          \
-                                "%s: %d: " name " locked; lock depth=1\n",  \
-                                __FILE__, __LINE__));                       \
         }                                                                   \
         else {                                                              \
             xcounter++;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                            "%s: %d: avoided locking " name "; new lock"    \
-                            " depth=%d, but will panic if '%s' is true\n",  \
-                            __FILE__, __LINE__, xcounter,                   \
-                            STRINGIFY(cond_to_panic_if_already_locked)));   \
             if (cond_to_panic_if_already_locked) {                          \
                 Perl_croak_nocontext("panic: %s: %d: attempting to lock "   \
                                 name " incompatibly: %s\n",                 \
@@ -6499,9 +6488,6 @@ INIT({
 #define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)                        \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {                                        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                          "%s: %d: unlocking " name "; new lock depth=0\n", \
-                          __FILE__, __LINE__));                             \
             PERL_WRITE_UNLOCK(mutex);                                       \
             xcounter = 0;                                                   \
         }                                                                   \
@@ -6513,9 +6499,6 @@ INIT({
         }                                                                   \
         else {                                                              \
             xcounter--;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                "%s: %d: avoided unlocking " name "; new lock depth=%d\n",  \
-                __FILE__, __LINE__, xcounter));                             \
         }                                                                   \
     } STMT_END
 
