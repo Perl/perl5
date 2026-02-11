@@ -1068,6 +1068,10 @@ In Perl 5.20.0 a new copy-on-write system was enabled by default, which
 finally fixes most of the performance issues with these three variables, and
 makes them safe to use anywhere.
 
+In Perl 5.44.0 the C</p> match operator flag does nothing, and the
+C<${^PREMATCH}>, C<${^MATCH}>, and C<${^POSTMATCH}> are always populated,
+behaving exactly like C<$`>, C<$&>, and C<$'>.
+
 The C<Devel::NYTProf> and C<Devel::FindAmpersand> modules can help you
 find uses of these problematic match variables in your code.
 
@@ -1150,16 +1154,16 @@ Mnemonic: like C<&> in some editors.
 =item ${^MATCH}
 X<${^MATCH}>
 
-It is only guaranteed to return a defined value when the pattern was
-compiled or executed with the C</p> modifier.
+This is similar to C<$&>.
 
-This is similar to C<$&> (C<$MATCH>) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
-the performance penalty associated with that variable.
-
-See L</Performance issues> above.
+In Perl v5.42 and earlier, it is only guaranteed to return a defined
+value when the pattern was compiled or executed with the C</p> modifier.
+In Perl v5.44, the C</p> modifier does nothing, so C<${^MATCH}> is always
+available, and does the same thing as C<$MATCH>.
 
 This variable was added in Perl v5.10.0.
+
+See L</Performance issues> above for historical context.
 
 This variable is read-only, and its value is dynamically scoped.
 
@@ -1181,17 +1185,16 @@ Mnemonic: C<`> often precedes a quoted string.
 =item ${^PREMATCH}
 X<${^PREMATCH}>
 
-It is only guaranteed to return a defined value when the pattern was
-executed with the C</p> modifier.
+This is similar to C<$`>.
 
-This is similar to C<$`> ($PREMATCH) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
-the performance penalty associated with that variable.
-
-See L</Performance issues> above.
-
+In Perl v5.42 and earlier, it is only guaranteed to return a defined
+value when the pattern was compiled or executed with the C</p> modifier.
+In Perl v5.44, the C</p> modifier does nothing, so C<${^PREMATCH}> is always
+available, and does the same thing as C<$PREMATCH>.
 
 This variable was added in Perl v5.10.0.
+
+See L</Performance issues> above for historical context.
 
 This variable is read-only, and its value is dynamically scoped.
 
@@ -1217,16 +1220,16 @@ Mnemonic: C<'> often follows a quoted string.
 =item ${^POSTMATCH}
 X<${^POSTMATCH}>
 
-It is only guaranteed to return a defined value when the pattern was
-compiled or executed with the C</p> modifier.
+This is similar to C<$'>.
 
-This is similar to C<$'> (C<$POSTMATCH>) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
-the performance penalty associated with that variable.
-
-See L</Performance issues> above.
+In Perl v5.42 and earlier, it is only guaranteed to return a defined
+value when the pattern was compiled or executed with the C</p> modifier.
+In Perl v5.44, the C</p> modifier does nothing, so C<${^POSTMATCH}> is always
+available, and does the same thing as C<$POSTMATCH>.
 
 This variable was added in Perl v5.10.0.
+
+See L</Performance issues> above for historical context.
 
 This variable is read-only, and its value is dynamically scoped.
 
