@@ -163,6 +163,10 @@
 #    define PERL_ASCTIME_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_ASCTIME_UNLOCK  PERL_LCx_UNLOCK(0)
 #  endif
+#  ifndef ASCTIME_LOCK
+#    define ASCTIME_LOCK    PERL_ASCTIME_LOCK
+#    define ASCTIME_UNLOCK  PERL_ASCTIME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_ASCTIME_R_LOCK
@@ -371,6 +375,10 @@
 #  else
 #    define PERL_CTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_CTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  endif
+#  ifndef CTIME_LOCK
+#    define CTIME_LOCK    PERL_CTIME_LOCK
+#    define CTIME_UNLOCK  PERL_CTIME_UNLOCK
 #  endif
 #endif
 
@@ -1614,9 +1622,17 @@
 #  ifdef GETENV_PRESERVES_OTHER_THREAD
 #    define PERL_GETENV_LOCK    PERL_ENVr_LOCK
 #    define PERL_GETENV_UNLOCK  PERL_ENVr_UNLOCK
+#    ifndef GETENV_LOCK
+#      define GETENV_LOCK    PERL_GETENV_LOCK
+#      define GETENV_UNLOCK  PERL_GETENV_UNLOCK
+#    endif
 #  else
 #    define PERL_GETENV_LOCK    PERL_ENVx_LOCK
 #    define PERL_GETENV_UNLOCK  PERL_ENVx_UNLOCK
+#    ifndef GETENV_LOCK
+#      define GETENV_LOCK    PERL_GETENV_LOCK
+#      define GETENV_UNLOCK  PERL_GETENV_UNLOCK
+#    endif
 #  endif
 #endif
 
@@ -1752,6 +1768,10 @@
 #    define PERL_GETHOSTBYADDR_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_GETHOSTBYADDR_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
 #  endif
+#  ifndef GETHOSTBYADDR_LOCK
+#    define GETHOSTBYADDR_LOCK    PERL_GETHOSTBYADDR_LOCK
+#    define GETHOSTBYADDR_UNLOCK  PERL_GETHOSTBYADDR_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_GETHOSTBYADDR_R_LOCK
@@ -1773,6 +1793,10 @@
 #  else
 #    define PERL_GETHOSTBYNAME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_GETHOSTBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETHOSTBYNAME_LOCK
+#    define GETHOSTBYNAME_LOCK    PERL_GETHOSTBYNAME_LOCK
+#    define GETHOSTBYNAME_UNLOCK  PERL_GETHOSTBYNAME_UNLOCK
 #  endif
 #endif
 
@@ -1911,6 +1935,10 @@
 #    define PERL_GETNETBYADDR_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETNETBYADDR_UNLOCK  PERL_LCx_UNLOCK(0)
 #  endif
+#  ifndef GETNETBYADDR_LOCK
+#    define GETNETBYADDR_LOCK    PERL_GETNETBYADDR_LOCK
+#    define GETNETBYADDR_UNLOCK  PERL_GETNETBYADDR_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_GETNETBYADDR_R_LOCK
@@ -1928,6 +1956,10 @@
 #  else
 #    define PERL_GETNETBYNAME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_GETNETBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETNETBYNAME_LOCK
+#    define GETNETBYNAME_LOCK    PERL_GETNETBYNAME_LOCK
+#    define GETNETBYNAME_UNLOCK  PERL_GETNETBYNAME_UNLOCK
 #  endif
 #endif
 
@@ -2047,6 +2079,10 @@
 #    define PERL_GETPROTOBYNAME_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETPROTOBYNAME_UNLOCK  PERL_LCx_UNLOCK(0)
 #  endif
+#  ifndef GETPROTOBYNAME_LOCK
+#    define GETPROTOBYNAME_LOCK    PERL_GETPROTOBYNAME_LOCK
+#    define GETPROTOBYNAME_UNLOCK  PERL_GETPROTOBYNAME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_GETPROTOBYNAME_R_LOCK
@@ -2064,6 +2100,10 @@
 #  else
 #    define PERL_GETPROTOBYNUMBER_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETPROTOBYNUMBER_UNLOCK  PERL_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETPROTOBYNUMBER_LOCK
+#    define GETPROTOBYNUMBER_LOCK    PERL_GETPROTOBYNUMBER_LOCK
+#    define GETPROTOBYNUMBER_UNLOCK  PERL_GETPROTOBYNUMBER_UNLOCK
 #  endif
 #endif
 
@@ -2153,6 +2193,10 @@
 #    define PERL_GETPWNAM_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETPWNAM_UNLOCK  PERL_LCx_UNLOCK(0)
 #  endif
+#  ifndef GETPWNAM_LOCK
+#    define GETPWNAM_LOCK    PERL_GETPWNAM_LOCK
+#    define GETPWNAM_UNLOCK  PERL_GETPWNAM_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_GETPWNAM_R_LOCK
@@ -2167,6 +2211,10 @@
 #  else
 #    define PERL_GETPWUID_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETPWUID_UNLOCK  PERL_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETPWUID_LOCK
+#    define GETPWUID_LOCK    PERL_GETPWUID_LOCK
+#    define GETPWUID_UNLOCK  PERL_GETPWUID_UNLOCK
 #  endif
 #endif
 
@@ -2256,6 +2304,10 @@
 #    define PERL_GETSERVBYNAME_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETSERVBYNAME_UNLOCK  PERL_LCx_UNLOCK(0)
 #  endif
+#  ifndef GETSERVBYNAME_LOCK
+#    define GETSERVBYNAME_LOCK    PERL_GETSERVBYNAME_LOCK
+#    define GETSERVBYNAME_UNLOCK  PERL_GETSERVBYNAME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_GETSERVBYNAME_R_LOCK
@@ -2276,6 +2328,10 @@
 #  else
 #    define PERL_GETSERVBYPORT_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETSERVBYPORT_UNLOCK  PERL_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETSERVBYPORT_LOCK
+#    define GETSERVBYPORT_LOCK    PERL_GETSERVBYPORT_LOCK
+#    define GETSERVBYPORT_UNLOCK  PERL_GETSERVBYPORT_UNLOCK
 #  endif
 #endif
 
@@ -2359,6 +2415,10 @@
 #  else
 #    define PERL_GETSPNAM_LOCK    PERL_LCx_LOCK(0)
 #    define PERL_GETSPNAM_UNLOCK  PERL_LCx_UNLOCK(0)
+#  endif
+#  ifndef GETSPNAM_LOCK
+#    define GETSPNAM_LOCK    PERL_GETSPNAM_LOCK
+#    define GETSPNAM_UNLOCK  PERL_GETSPNAM_UNLOCK
 #  endif
 #endif
 
@@ -2620,6 +2680,10 @@
 #  else
 #    define PERL_GMTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_GMTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  endif
+#  ifndef GMTIME_LOCK
+#    define GMTIME_LOCK    PERL_GMTIME_LOCK
+#    define GMTIME_UNLOCK  PERL_GMTIME_UNLOCK
 #  endif
 #endif
 
@@ -3204,6 +3268,10 @@
 #    define PERL_LOCALTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #    define PERL_LOCALTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
 #  endif
+#  ifndef LOCALTIME_LOCK
+#    define LOCALTIME_LOCK    PERL_LOCALTIME_LOCK
+#    define LOCALTIME_UNLOCK  PERL_LOCALTIME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_LOCALTIME_R_LOCK
@@ -3417,6 +3485,10 @@
     *          localtime_r(), strftime(), timezone, tzname, or tzset(). */
 #  define PERL_MKTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #  define PERL_MKTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  ifndef MKTIME_LOCK
+#    define MKTIME_LOCK    PERL_MKTIME_LOCK
+#    define MKTIME_UNLOCK  PERL_MKTIME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_MPROBE_LOCK
@@ -4599,6 +4671,10 @@
 #ifndef PERL_STRFMON_LOCK
 #  define PERL_STRFMON_LOCK    PERL_LCr_LOCK(0)
 #  define PERL_STRFMON_UNLOCK  PERL_LCr_UNLOCK(0)
+#  ifndef STRFMON_LOCK
+#    define STRFMON_LOCK    PERL_STRFMON_LOCK
+#    define STRFMON_UNLOCK  PERL_STRFMON_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_STRFMON_L_LOCK
@@ -4635,6 +4711,10 @@
     *            localtime_r(), mktime(), timezone, tzname, or tzset(). */
 #  define PERL_STRFTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
 #  define PERL_STRFTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  ifndef STRFTIME_LOCK
+#    define STRFTIME_LOCK    PERL_STRFTIME_LOCK
+#    define STRFTIME_UNLOCK  PERL_STRFTIME_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_STRFTIME_L_LOCK
@@ -4980,6 +5060,10 @@
     *         localtime_r(), mktime(), strftime(), timezone, or tzname. */
 #  define PERL_TZSET_LOCK    PERL_ENVr_LCx_LOCK(0)
 #  define PERL_TZSET_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  ifndef TZSET_LOCK
+#    define TZSET_LOCK    PERL_TZSET_LOCK
+#    define TZSET_UNLOCK  PERL_TZSET_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_UNGETWC_LOCK
