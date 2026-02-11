@@ -4,7 +4,7 @@ use warnings;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
 
-our $VERSION = '2.150010';
+our $VERSION = '2.150012';
 
 use Exporter;
 use Carp 'croak';
@@ -169,7 +169,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 2.150010
+version 2.150012
 
 =head1 SYNOPSIS
 
@@ -352,7 +352,7 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <rjbs@cpan.org>
+Ricardo Signes <cpan@semiotic.systems>
 
 =item *
 

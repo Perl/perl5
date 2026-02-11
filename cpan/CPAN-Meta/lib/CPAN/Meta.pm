@@ -1,9 +1,9 @@
-use 5.006;
+use 5.008001;
 use strict;
 use warnings;
 package CPAN::Meta;
 
-our $VERSION = '2.150010';
+our $VERSION = '2.150012';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -398,7 +398,6 @@ sub save {
   my ($self, $file, $options) = @_;
 
   my $version = $options->{version} || '2';
-  my $layer = $] ge '5.008001' ? ':utf8' : '';
 
   if ( $version ge '2' ) {
     carp "'$file' should end in '.json'"
@@ -410,7 +409,7 @@ sub save {
   }
 
   my $data = $self->as_string( $options );
-  open my $fh, ">$layer", $file
+  open my $fh, '>:encoding(UTF-8)', $file
     or die "Error opening '$file' for writing: $!\n";
 
   print {$fh} $data;
@@ -650,7 +649,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.150010
+version 2.150012
 
 =head1 SYNOPSIS
 
@@ -1000,7 +999,7 @@ L<CPAN::Meta::Validator>
 
 =back
 
-=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
+=for :stopwords cpan testmatrix url bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 
 =head1 SUPPORT
 
@@ -1029,7 +1028,7 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <rjbs@cpan.org>
+Ricardo Signes <cpan@semiotic.systems>
 
 =item *
 
@@ -1039,7 +1038,7 @@ Adam Kennedy <adamk@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Benjamin Noggle Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov David Golden Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Kent Fredric Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern Mohammad Anwar mohawk2 moznion Niko Tyni Olaf Alders Olivier Mengué Randy Sims Tomohiro Hosaka
+=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Benjamin Noggle Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Dan Book Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Kent Fredric Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern Mohammad Anwar mohawk2 moznion Niko Tyni Olaf Alders Olivier Mengué Philippe Bruhat (BooK) Randy Sims Ricardo Signes Tomohiro Hosaka
 
 =over 4
 
@@ -1073,7 +1072,7 @@ Damyan Ivanov <dam@cpan.org>
 
 =item *
 
-David Golden <xdg@xdg.me>
+Dan Book <grinnz@gmail.com>
 
 =item *
 
@@ -1153,7 +1152,15 @@ Olivier Mengué <dolmen@cpan.org>
 
 =item *
 
+Philippe Bruhat (BooK) <book@cpan.org>
+
+=item *
+
 Randy Sims <randys@thepierianspring.org>
+
+=item *
+
+Ricardo Signes <rjbs@semiotic.systems>
 
 =item *
 
