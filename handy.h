@@ -2537,15 +2537,47 @@ C<L</CC_mask_>>.
 #define isALNUMC_utf8_safe(p,e)  isALPHANUMERIC_utf8_safe(p,e)
 #define isALNUMC_LC_utf8_safe(p,e) isALPHANUMERIC_LC_utf8_safe(p,e)
 
-/* On EBCDIC platforms, CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII,
- * except that they don't necessarily mean the same characters, e.g. CTRL-D is
- * 4 on both systems, but that is EOT on ASCII;  ST on EBCDIC.
- * '?' is special-cased on EBCDIC to APC, which is the control there that is
- * the outlier from the block that contains the other controls, just like
- * toCTRL('?') on ASCII yields DEL, the control that is the outlier from the C0
- * block.  If it weren't special cased, it would yield a non-control.
- * The conversion works both ways, so toCTRL('D') is 4, and toCTRL(4) is D,
- * etc. */
+/*
+=for apidoc_section $casing_scn
+=for apidoc Am|U8|toCTRL|U8 cp
+
+Converts the character C<cp> into its equivalent control character, I<i.e.>,
+what the Perl construct C<\cI<cp>> would do given the same input.
+
+For example, C<toCTRL('A')> yields 1.
+
+This is described in L<perlop/Quote and Quote-like Operators> and
+L<perlebcdic/OPERATOR DIFFERENCES>.
+
+The conversion is numerical, not semantic; that is, C<toCTRL('D')> yields 4,
+which happens to mean C<EOT> on ASCII platforms.  But Perl does not ascribe
+that meaning, as 4 means a completely different control character on EBCDIC
+ones.
+
+A lowercase argument yields the same result as its upper case equivalent, hence
+C<toCTRL('b')> returns 2.
+
+The result is defined for A-Z, a-z, and the following special characters:
+
+ @     0
+ [    27
+ \    28
+ ]    29
+ ^    30
+ _    31
+ ?   127 on ASCII, and whatever the APC control is on EBCDIC
+
+It turns out that the conversion works both ways (except for lowercase inputs),
+so C<toCTRL('E')> is 5, and C<toCTRL(5)> is E.  But perhaps there should be a
+C<fromCTRL()> so you don't have to remember that?
+
+(The choice of APC for C<toCTRL('?')> is not semantic.  127 is being the only
+ASCII outlier control, the one that isn't in the contiguous block the rest of
+them are.  APC is the only outlier control in EBCDIC; its value depends on the
+EBCDIC flavor in use.)
+
+=cut
+*/
 #ifndef EBCDIC
 #  define toCTRL(c)    (assert(FITS_IN_8_BITS(c)), toUPPER(((U8)(c))) ^ 64)
 #else

@@ -3114,7 +3114,6 @@ my @unresolved_visibility_overrides = qw(
     THREAD_CREATE_NEEDS_STACK
     THREAD_RET_TYPE
     tI
-    toCTRL
     toFOLD_LC
     toFOLD_uni
     toLOWER_uni
