@@ -5,7 +5,7 @@ use warnings;
 
 use Config;
 use Exporter;
-our $VERSION     = "0.38";
+our $VERSION     = "0.39";
 our @ISA         = qw( Exporter );
 our @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 our %EXPORT_TAGS = (
@@ -575,7 +575,7 @@ H.Merijn Brand <h.m.brand@xs4all.nl>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2025 H.Merijn Brand
+Copyright (C) 2009-2026 H.Merijn Brand
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
