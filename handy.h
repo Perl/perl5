@@ -2560,8 +2560,11 @@ C<L</CC_mask_>>.
 #endif
 
 /*
+=for apidoc_section $warning_scn
 =for apidoc Ay||line_t
 The typedef to use to declare variables that are to hold line numbers.
+
+Use the C<LINE_Tf> format to display these.
 
 =cut
 
