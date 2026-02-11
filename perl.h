@@ -6446,34 +6446,162 @@ INIT({
 #  define PERL_SET_THX(t)		NOOP
 #endif
 
+/* Perl has recursive locking for both exclusive access to a resource, and
+ * read-only access where other readers may simultaneously be using it.  These
+ * macros define that.  They should not be used directly.  Instead
+ * lock_definitions.h contains lock/unlock definitions specific to every libc
+ * function that we know about that can benefit from locking, and are amenable
+ * to such locks.  Those have been crafted to avoid deadlock as long as you
+ * don't have more than one of those locks in effect at the same time.
+ *
+ * These macros simulate a general (or recursive) semaphore on 'mutex' whose
+ * name will be displayed as 'name' in any messages.  Thus they can be used on
+ * platforms lacking recursive mutexes.  They also gracefully handle cases that
+ * platforms with recursive mutexes likely won't, such as recursively asking
+ * for a read lock when an exclusive one is already owned by the thread.
+ *
+ * 'cond_to_panic_if_already_locked' should be set to '0' for a fully reentrant
+ * semaphore.  Otherwise set it to a bit of code which will be evaluated if the
+ * macro is called recursively.  If it evaluates to 'true', it means something
+ * is seriously wrong, and the process panics.
+ *
+ * The way it works is that there are three counters for every thread,
 
-    /* Simulate a general (or recursive) semaphore on 'mutex' whose name will
-     * be displayed as 'name' in any messages.  There must be a per-thread
-     * variable 'xcounter', initialized to 0 upon thread creation that this
-     * macro otherwise controls and keeps set to the recursion depth of the
-     * mutex.  'cond_to_panic_if_already_locked' should be set to '0' for a
-     * fully reentrant semaphore.  Otherwise set it to a bit of code which will
-     * be evaluated if the macro is called recursively.  If it evaluates to
-     * 'true', it means something is seriously wrong, and the process panics.
-     *
-     * It locks the mutex if the 'xcounter' is zero, and then increments
-     * 'xcounter'.  Each corresponding UNLOCK decrements 'xcounter' until it is
-     * 0, at which point it actually unlocks the mutex.  Since the variable is
-     * per-thread, initialized to 0, there is no race with other threads.
-     *
-     * Clang improperly gives warnings for this, if not silenced:
-     * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
-     */
-#define PERL_REENTRANT_LOCK(name, mutex, xcounter,                          \
-                              cond_to_panic_if_already_locked)              \
+ * One is global to the whole process, stored in a field in the mutex
+ * structure, and is a count of the number of threads that currently have
+ * non-exclusive access to this mutex.  This counter is not to be accessed by
+ * the caller of these macros.  This is called the R counter in the comments
+ * below, but in the code below it is named '(mutex)->readers_count'.
+ *
+ * The other two counters, xcounter and rcounter, are local to the thread and
+ * are passed to the macros, so are visible to the caller, but attempts to
+ * change their contents would be disastrous.  The API-level macros hide these
+ * from outside callers.  Each is initialized to 0 upon thread creation.
+ *
+ * These two counters are used to simulate recursive semaphores, so the
+ * way things works is standardized even on systems that have some form of
+ * them.
+ *
+ * 'xcounter' counts the depth of exclusive locks on the mutex from this
+ * thread.  PERL_REENTRANT_LOCK locks the mutex if xcounter is zero, and
+ * then increments xcounter.  If called when xcounter is not zero, the macro
+ * knows it already has an exclusive lock on the mutex, and merely increments
+ * xcounter.  Each corresponding PERL_REENTRANT_UNLOCK decrements xcounter
+ * until it is 0, at which point it actually unlocks the mutex.  Since the
+ * variable is per-thread, there is no race with other threads.
+ *
+ * 'rcounter' similarly counts the depth of read locks from this thread.
+ *
+ * Here are the cases in detail:
+ *
+ * PERL_REENTRANT_READ_LOCK: Requesting a read lock:
+ *
+ *      xcounter == 0; rcounter is anything
+ *
+ *          The thread locks the mutex.  If another thread has a lock on the
+ *          mutex, the system will block this thread until that is released.
+ *          If that lock is for a read lock, the wait will be brief, as all
+ *          that is done is to increment the R counter field of the mutex
+ *          structure, then release the lock.  If the other thread has an
+ *          exclusive lock, this thread will hang for however long that takes.
+ *
+ *          Once this thread has the mutex, it increments the R counter field,
+ *          then releases the mutex.
+ *
+ *          rcounter is incremented.
+ *
+ *          Note that in this and all cases below, the R counter in the mutex
+ *          structure field is only accessed while the mutex is locked.
+ *
+ *      xcounter > 0; rcounter is anything
+ *
+ *          The R counter field in the already-owned mutex struct is simply
+ *          incremented, without trying to lock the mutex. rcounter is neither
+ *          inspected nor changed in this scenario.
+ *
+ *          The system continues to prevent any other thread from locking this
+ *
+ * PERL_REENTRANT_LOCK: Requesting an exclusive lock:
+ *
+ *      xcounter == 0; rcounter == 0
+ *
+ *          The thread locks the mutex.  The system will block this thread
+ *          until any existing lock from another thread is released.
+ *
+ *          (The locking macro, PERL_WRITE_LOCK, once it owns the lock,
+ *          examines the R counter field in the mutex struct.  If it is
+ *          non-zero, another thread has a read lock on this mutex.  If so,
+ *          the macro causes the system to suspend this thread until an
+ *          unlocking event happens.  Eventually we proceed to the next steps.)
+ *
+ *          xcounter is set to 1.
+ *
+ *          The system prevents any other thread from locking this mutex.
+ *
+ *      xcounter >  0; rcounter is anything
+ *
+ *          This means this thread already owns an exclusive lock on this
+ *          mutex.  xcounter is simply incremented, keeping it to be the number
+ *          of nested exclusive locks this thread owns.
+ *
+ *          No attempt is made to re-lock the mutex.  Doing so would hang
+ *          forever if the system mutex is a binary one.
+ *
+ *          The system continues to prevent any other thread from locking this
+ *          mutex.
+ *
+ *      xcounter == 0; rcounter > 0
+ *
+ *          This panics; otherwise this scenario could lead to deadlock.  If
+ *          another thread has a read lock, this thread hangs until that one is
+ *          released.  If that one instead requests an exclusive lock, it will
+ *          hang until this thread releases its read lock, which it will never
+ *          do because it is suspended.
+ *
+ *          Your code needs to be structured so as to not attempt this.  The
+ *          panic is to greatly increase the odds of this happening during
+ *          development, so that it can be fixed before the code is released.
+ *
+ * PERL_REENTRANT_UNLOCK, PERL_REENTRANT_READ_UNLOCK
+ *
+ *      Unlocking is essentially the reverse.  The respective counter is
+ *      decremented and when zero is reached, the respective lock type is
+ *      released.
+ *
+ * Note that if xcounter is non-zero, rcounter is not looked at; if a new read
+ * lock/unlock request comes in, the mutex struct R counter is changed, and
+ * not rcounter.
+ *
+ * Clang improperly gives warnings for this, if not silenced:
+ * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
+ */
+#define PERL_REENTRANT_LOCK(name, mutex, xcounter, rcounter,                \
+                            cond_to_panic_if_already_locked)                \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(xcounter <= 0)) {                                        \
-            assert(xcounter == 0);                                          \
-            PERL_WRITE_LOCK(mutex);                                         \
+            if (xcounter < 0) (Perl_croak_nocontext("panic: "               \
+                              "%s: %" LINE_Tf ": locking " name "; new lock"\
+                              " depth=%d; this thread reader count=%d\n",   \
+                              __FILE__, (line_t) __LINE__, xcounter,        \
+                              rcounter));                                   \
+                                                                            \
+            /* If this thread has no read locks on this mutex, it is a      \
+             * simple exclusive lock */                                     \
+            if (rcounter <= 0) {                                            \
+                assert(rcounter == 0);                                      \
+                PERL_WRITE_LOCK(mutex);                                     \
+            }                                                               \
+            else {                                                          \
+                Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting"  \
+                                     " to convert non-exclusive lock on "   \
+                                     name " to exclusive\n",                \
+                                     __FILE__, (line_t) __LINE__);          \
+            }                                                               \
+                                                                            \
             xcounter = 1;                                                   \
         }                                                                   \
-        else {                                                              \
+        else {  /* This thread already owns this mutex exclusively */       \
             xcounter++;                                                     \
             if (cond_to_panic_if_already_locked) {                          \
                 Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting"  \
@@ -6485,9 +6613,9 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#define PERL_REENTRANT_UNLOCK(name, mutex, xcounter)                        \
+#define PERL_REENTRANT_UNLOCK(name, mutex, xcounter, rcounter)              \
     STMT_START {                                                            \
-        if (LIKELY(xcounter == 1)) {                                        \
+        if (LIKELY(xcounter == 1)) {  /* Only a single level lock */        \
             PERL_WRITE_UNLOCK(mutex);                                       \
             xcounter = 0;                                                   \
         }                                                                   \
@@ -6502,12 +6630,15 @@ INIT({
         }                                                                   \
     } STMT_END
 
-#define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter)                     \
+#define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter, rcounter)           \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {                                                \
-            assert(xcounter == 0);                                          \
+        if (xcounter <= 0) {    /* No exclusive lock */                     \
+            if (xcounter != 0) Perl_croak_nocontext("panic: %s: %" LINE_Tf  \
+                                    ": read locking " name "; writers=%d\n",\
+                                    __FILE__, (line_t) __LINE__, xcounter); \
             PERL_READ_LOCK(mutex);                                          \
+            (rcounter)++;                                                   \
         }                                                                   \
         else {                                                              \
             /* This thread already has an exclusive lock on this mutex.     \
@@ -6517,12 +6648,17 @@ INIT({
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter)                   \
+#define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter, rcounter)         \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {                                                \
+        if (xcounter <= 0) {    /* No exclusive lock */                     \
+            if (xcounter != 0) Perl_croak_nocontext("panic: %s: %" LINE_Tf  \
+                            ": read unlocking " name "; writers=%d; this"   \
+                            " thread reader count=%d\n",                    \
+                           __FILE__, (line_t) __LINE__, xcounter, rcounter);\
             assert(xcounter == 0);                                          \
             PERL_READ_UNLOCK(mutex);                                        \
+            (rcounter)--;                                                   \
         }                                                                   \
         else if (LIKELY((mutex)->readers_count > 0)) {                      \
             /* This thread already has an exclusive lock on this mutex.     \
@@ -6530,10 +6666,10 @@ INIT({
             (mutex)->readers_count--;                                       \
         }                                                                   \
         else {                                                              \
-            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to read unlock" \
-                                 " already unlocked " name "; readers"      \
-                                 " count was"                               \
-                                 " %zd\n", __FILE__, (line_t) __LINE__,              \
+            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to"   \
+                                 " read unlock already unlocked " name      \
+                                 "; readers count was %zd\n",               \
+                                 __FILE__, (line_t) __LINE__,               \
                                  (mutex)->readers_count);                   \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
@@ -7140,10 +7276,12 @@ typedef struct am_table_short AMTS;
 #  define ENV_LOCK            PERL_REENTRANT_LOCK("env",                    \
                                                   &PL_env_mutex,            \
                                                   PL_env_mutex_depth,       \
+                                                  PL_env_mutex_readers,     \
                                                   1)
 #  define ENV_UNLOCK          PERL_REENTRANT_UNLOCK("env",                  \
                                                     &PL_env_mutex,          \
-                                                    PL_env_mutex_depth)
+                                                    PL_env_mutex_depth,     \
+                                                    PL_env_mutex_readers)
 #  define ENV_READ_LOCK       ENV_LOCK
 #  define ENV_READ_UNLOCK     ENV_UNLOCK
 #  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
@@ -7187,11 +7325,16 @@ typedef struct am_table_short AMTS;
      * handles these has a trailing underscore in the name */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
        PERL_REENTRANT_LOCK("locale",                                        \
-                           &PL_locale_mutex, PL_locale_mutex_depth,         \
+                           &PL_locale_mutex,                                \
+                           PL_locale_mutex_depth,                           \
+                           PL_locale_mutex_readers,                         \
                            cond_to_panic_if_already_locked)
 #  define LOCALE_UNLOCK_                                                    \
        PERL_REENTRANT_UNLOCK("locale",                                      \
-                             &PL_locale_mutex, PL_locale_mutex_depth)
+                             &PL_locale_mutex,                              \
+                             PL_locale_mutex_depth,                         \
+                             PL_locale_mutex_readers)
+
 #  ifdef USE_THREAD_SAFE_LOCALE
     /* But for most situations, we use the macro name without a trailing
      * underscore.
