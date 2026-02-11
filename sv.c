@@ -17056,7 +17056,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif /* USE_LOCALE_COLLATE */
 
 #ifdef USE_LOCALE_THREADS
-    assert(PL_locale_mutex_depth <= 0);
+    assert(proto_perl->Ilocale_mutex_depth <= 0);
     PL_locale_mutex_depth = 0;
 #endif
 
@@ -17095,7 +17095,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_less_dicey_locale_bufsize = 0;
 #endif
 #ifdef USE_THREADS
-    assert(PL_env_mutex_depth <= 0);
+    assert(proto_perl->Ienv_mutex_depth <= 0);
     PL_env_mutex_depth = 0;
 #endif
 
