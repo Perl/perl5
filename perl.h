@@ -7390,7 +7390,7 @@ typedef struct am_table_short AMTS;
 #endif
 
 /* Locale/thread synchronization macros. */
-#if ! defined(USE_LOCALE_THREADS)   /* No threads, or no locales */
+#if ! defined(USE_THREADS)   /* No threads */
 #  define LOCALE_LOCK_(cond)  NOOP
 #  define LOCALE_UNLOCK_      NOOP
 #  define LOCALE_LOCK         NOOP
@@ -7695,7 +7695,7 @@ typedef struct am_table_short AMTS;
 
 /* End of locale/env synchronization */
 
-#if ! defined(USE_LOCALE_THREADS)
+#if ! defined(USE_THREADS)
 #  define LOCALE_INIT
 #  define LOCALE_TERM
 #else
