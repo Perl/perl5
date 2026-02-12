@@ -1043,7 +1043,7 @@ Perl_force_locale_unlock(pTHX)
     /* Remove any locale mutex, in preperation for an inglorious termination,
      * typically a  panic */
 
-#if defined(USE_LOCALE_THREADS)
+#if defined(USE_THREADS)
 
     /* If recursively locked, clear all at once */
     if (PL_locale_mutex_depth > 1) {
