@@ -703,7 +703,6 @@ d_newlocale=''
 d_querylocale=''
 d_uselocale=''
 i_xlocale=''
-i_sysrandom=''
 xlocale_needed=''
 d_nextafter=''
 d_nexttoward=''
@@ -1073,6 +1072,7 @@ i_sysmount=''
 i_sysndir=''
 i_sysparam=''
 i_syspoll=''
+i_sysrandom=''
 i_sysresrc=''
 i_syssecrt=''
 i_sysselct=''
@@ -5779,112 +5779,6 @@ $cc -o ${mc_file} $optimize $ccflags $ldflags $* ${mc_file}.c $libs > /dev/null 
 : stub, used only to satisfy other units
 i_stdlib='define'
 
-: check for lengths of integral types
-echo " "
-case "$intsize" in
-'')
-	echo "Checking to see how big your integers are..." >&4
-	$cat >try.c <<EOCP
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#include <stdint.h>
-#include <stdio.h>
-int main()
-{
-	printf("intsize=%d;\n", (int)sizeof(int));
-	printf("longsize=%d;\n", (int)sizeof(long));
-	printf("shortsize=%d;\n", (int)sizeof(short));
-	printf("intmaxsize=%d;\n", (int)sizeof(intmax_t));
-	exit(0);
-}
-EOCP
-	set try
-	if eval $compile_ok && $run ./try > /dev/null; then
-		eval `$run ./try`
-		echo "Your integers are $intsize bytes long."
-		echo "Your long integers are $longsize bytes long."
-		echo "Your short integers are $shortsize bytes long."
-		echo "Your longest integers are $intmaxsize bytes long."
-	else
-		$cat >&4 <<EOM
-!
-Help! I can't compile and run the intsize test program: please enlighten me!
-(This is probably a misconfiguration in your system or libraries, and
-you really ought to fix it.  Still, I'll try anyway.)
-!
-EOM
-		dflt=4
-		rp="What is the size of an integer (in bytes)?"
-		. ./myread
-		intsize="$ans"
-		dflt=$intsize
-		rp="What is the size of a long integer (in bytes)?"
-		. ./myread
-		longsize="$ans"
-		dflt=2
-		rp="What is the size of a short integer (in bytes)?"
-		. ./myread
-		shortsize="$ans"
-		dflt=$longsize
-		rp="What is the size of a intmax_t integer (in bytes)?"
-		. ./myread
-		intmaxsize="$ans"
-	fi
-	;;
-esac
-$rm_try
-
-: check for long long
-echo " "
-echo "Checking to see if you have long long..." >&4
-echo 'int main() { long long x = 7; return 0; }' > try.c
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have long long."
-else
-	val="$undef"
-	echo "You do not have long long."
-fi
-$rm_try
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	echo "Checking to see how big your long longs are..." >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-    printf("%d\n", (int)sizeof(long long));
-    return(0);
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`$run ./try`
-		echo "Your long longs are $longlongsize bytes long."
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi
-	;;
-esac
-$rm_try
-
 : determine filename position in cpp output
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
@@ -5996,6 +5890,116 @@ do set $yyy; var=$2; eval "was=\$$2";
 	eval "case \"\$$var\" in $define) . ./whoa; esac"; eval "$var=\$tu";
 	set $yyy; shift; shift; yyy=$@;
 done'
+
+: stdint.h should be available, but this makes sure it gets in config.h
+set stdint.h i_stdint
+eval $inhdr
+
+: check for lengths of integral types
+echo " "
+case "$intsize" in
+'')
+	echo "Checking to see how big your integers are..." >&4
+	$cat >try.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <stdint.h>
+#include <stdio.h>
+int main()
+{
+	printf("intsize=%d;\n", (int)sizeof(int));
+	printf("longsize=%d;\n", (int)sizeof(long));
+	printf("shortsize=%d;\n", (int)sizeof(short));
+	printf("intmaxsize=%d;\n", (int)sizeof(intmax_t));
+	exit(0);
+}
+EOCP
+	set try
+	if eval $compile_ok && $run ./try > /dev/null; then
+		eval `$run ./try`
+		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
+		echo "Your longest integers are $intmaxsize bytes long."
+	else
+		$cat >&4 <<EOM
+!
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+!
+EOM
+		dflt=4
+		rp="What is the size of an integer (in bytes)?"
+		. ./myread
+		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
+		dflt=$longsize
+		rp="What is the size of a intmax_t integer (in bytes)?"
+		. ./myread
+		intmaxsize="$ans"
+	fi
+	;;
+esac
+$rm_try
+
+: check for long long
+echo " "
+echo "Checking to see if you have long long..." >&4
+echo 'int main() { long long x = 7; return 0; }' > try.c
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have long long."
+else
+	val="$undef"
+	echo "You do not have long long."
+fi
+$rm_try
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	echo "Checking to see how big your long longs are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+    printf("%d\n", (int)sizeof(long long));
+    return(0);
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`$run ./try`
+		echo "Your long longs are $longlongsize bytes long."
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi
+	;;
+esac
+$rm_try
 
 : see if inttypes.h is available
 : we want a real compile instead of Inhdr because some systems
@@ -12767,10 +12771,6 @@ eval $inlibc
 
 : see if this is an xlocale.h system
 set xlocale.h i_xlocale
-eval $inhdr
-
-: see if this is a sys/random.h system
-set sys/random.h i_sysrandom
 eval $inhdr
 
 : see if newlocale exists
@@ -24301,10 +24301,6 @@ $rm_try
 set i_stdckdint
 eval $setvar
 
-: stdint.h should be available, but this makes sure it gets in config.h
-set stdint.h i_stdint
-eval $inhdr
-
 : see if sys/access.h is available
 set sys/access.h i_sysaccess
 eval $inhdr
@@ -24360,6 +24356,10 @@ eval $inhdr
 
 : see if there is a sys/poll.h file
 set sys/poll.h i_syspoll
+eval $inhdr
+
+: see if this is a sys/random.h system
+set sys/random.h i_sysrandom
 eval $inhdr
 
 : see if sys/resource.h has to be included
@@ -25729,6 +25729,7 @@ i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
 i_syspoll='$i_syspoll'
+i_sysrandom='$i_sysrandom'
 i_sysresrc='$i_sysresrc'
 i_syssecrt='$i_syssecrt'
 i_sysselct='$i_sysselct'
@@ -25756,7 +25757,6 @@ i_vfork='$i_vfork'
 i_wchar='$i_wchar'
 i_wctype='$i_wctype'
 i_xlocale='$i_xlocale'
-i_sysrandom='$i_sysrandom'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'
 inc_version_list_init='$inc_version_list_init'
