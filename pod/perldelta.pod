@@ -157,6 +157,12 @@ Specifically, any of the following single subscripts
 
 =item *
 
+The I<class> feature's C<:reader> and C<:writer> accessors are now
+implemented in XS for better performance.
+[GH #24187]
+
+=item *
+
 XXX
 
 =back
