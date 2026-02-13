@@ -4763,6 +4763,13 @@ S_intuit_more(pTHX_ char *s, char *e,
             /* Here, is a syntactically valid identifier */
             Size_t len = strlen(tmpbuf + 1);
 
+            /* If it doesn't look like an identifier at all, scan_ident will
+             * set tmpbuf[1] to NUL.  This is either an error or a character
+             * class. */
+            if (len == 0) {
+                return false;
+            }
+
             /* khw: Using \w here misses the possibility of lots of other
              * syntaxes of variables, like $::foo or ${foo}, that scan_ident
              * looks for.
