@@ -3613,7 +3613,7 @@ Perl_rpeep(pTHX_ OP *o)
                         cLOGOP->op_other = stub->op_next;
                         op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
                         op_free(stub);
-                        break;
+                        goto generic_logop;
                     } else if (OP_TYPE_IS(trueop, OP_SCOPE) &&
                                (stub == cUNOPx(trueop)->op_first) ) {
                         assert(!(stub->op_flags & OPf_KIDS));
@@ -3630,7 +3630,7 @@ Perl_rpeep(pTHX_ OP *o)
                             op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
                             op_free(stub);
                             op_free(trueop);
-                            break;
+                            goto generic_logop;
                         } else {
                             /* Could be something like this:
                              *         -condition-
