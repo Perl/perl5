@@ -1711,9 +1711,16 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o,
     case OP_ENTERTRY:
     case OP_ONCE:
     case OP_PARAMTEST:
+    case OP_CMPCHAIN_AND:
+    case OP_PUSHDEFER:
+    case OP_ENTERTRYCATCH:
+    case OP_HELEMEXISTSOR:
+    case OP_ANYWHILE:
+    case OP_CATCH:
         S_opdump_indent(aTHX_ o, level, bar, file, "OTHER");
         S_opdump_link(aTHX_ o, cLOGOPo->op_other, file);
         break;
+
     case OP_SPLIT:
     case OP_MATCH:
     case OP_QR:
