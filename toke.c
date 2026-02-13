@@ -4748,9 +4748,10 @@ S_intuit_more(pTHX_ char *s, char *e,
              * 4 times as large as tokenbuf in 1997, and had not changed since
              * the code was first added.
              *
-             * (Reserve tmpbuf[0] for future commits, hence +1 in most of the
-             * tmpbuf references below) */
+             * Place the sigil in tmpbuf[0], hence the identifier starts in
+             * tmpbuf[1] */
             char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 + 1 ];
+            tmpbuf[0] = s[0];
 
             if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
                              CHECK_ONLY))
@@ -4774,7 +4775,7 @@ S_intuit_more(pTHX_ char *s, char *e,
              * syntaxes of variables, like $::foo or ${foo}, that scan_ident
              * looks for.
              */
-            if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
+            if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
 
                 /* khw: This only looks at global variables; lexicals came
                  * later, and this hasn't been updated.  Ouch!! */
@@ -4812,15 +4813,15 @@ S_intuit_more(pTHX_ char *s, char *e,
                     weight -= 10;
                 }
             }
-            else if (   s[0] == '$'
-                     && s[1]
-                     && memCHRs("[#!%*<>()-=", s[1]))
+            else if (   tmpbuf[0] == '$'
+                     && tmpbuf[1]
+                     && memCHRs("[#!%*<>()-=", tmpbuf[1+0]))
             {
                 /* Here we have what could be a punctuation variable.  If the
                  * next character after it is a closing bracket, it makes it
                  * quite likely to be that, and hence a subscript.  If it is
                  * something else, more mildly a subscript */
-                if (/*{*/ memCHRs("])} =", s[2]))
+                if (/*{*/ memCHRs("])} =", tmpbuf[1+1]))
                     weight -= 10;
                 else
                     weight -= 1;
