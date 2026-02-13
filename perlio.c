@@ -1257,6 +1257,21 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	SV *sv = s->var;
 	char *dst;
+
+        /* XXX Could share the code with sv_insert() ?
+           Below is roughly sv_insert(sv, s->posn, count, vbuf, count)
+           but with small differences */
+
+        /* If vbuf points within sv, we need to make a private copy since
+           it might be modified or reallocated in sv manipulations below.
+           This is probably rare in reality, but possible.  */
+        if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv) &&
+            UNLIKELY(SvPVX_const(sv) <= (const char *)vbuf &&
+                     (const char *)vbuf < SvPVX_const(sv) + SvLEN(sv))) {
+            vbuf = savepvn(vbuf, count);
+            SAVEFREEPV(vbuf);
+        }
+
 	SvGETMAGIC(sv);
 	if (!SvROK(sv)) sv_force_normal(sv);
 	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
@@ -1291,7 +1306,9 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
         if ((STRLEN)offset > cur)
             Zero(dst + cur, (STRLEN)offset - cur, char);
         s->posn = offset + count;
-	Move(vbuf, dst + offset, count, char);
+        /* vbuf is now a private copy if overlapped with sv,
+           so Copy should be safe here */
+        Copy(vbuf, dst + offset, count, char);
 	if ((STRLEN) s->posn > cur) {
 	    SvCUR_set(sv, (STRLEN)s->posn);
 	    dst[(STRLEN) s->posn] = 0;
