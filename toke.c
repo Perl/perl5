@@ -4741,13 +4741,8 @@ S_intuit_more(pTHX_ char *s, char *e,
              * the chance of there being a pattern with that many capture
              * groups goes rapidly down.
              *
-             * khw: Using \w here misses the possibility of lots of other
-             * syntaxes of variables, like $::foo or ${foo}, that scan_ident
-             * looks for.
-             *
              * khw: $z-a is definitely a subscript
              */
-            if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
 
                 /* khw: where did the magic number 4 come from?.  This buffer
                  * was 4 times as large as tokenbuf in 1997, and had not
@@ -4765,7 +4760,14 @@ S_intuit_more(pTHX_ char *s, char *e,
                     return false;
                 }
 
+                /* Here, is a syntactically valid identifier */
                 Size_t len = strlen(tmpbuf + 1);
+
+            /* khw: Using \w here misses the possibility of lots of other
+             * syntaxes of variables, like $::foo or ${foo}, that scan_ident
+             * looks for.
+             */
+            if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
 
                 /* khw: This only looks at global variables; lexicals came
                  * later, and this hasn't been updated.  Ouch!! */
