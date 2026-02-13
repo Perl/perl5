@@ -3708,6 +3708,8 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_ONCE:
         case OP_ARGDEFELEM:
         case OP_PARAMTEST:
+        case OP_HELEMEXISTSOR:
+        case OP_ANYWHILE:
 
         generic_logop:
 
