@@ -4831,6 +4831,19 @@ S_intuit_more(pTHX_ char *s, char *e,
                     weight -= 100;
                 }
             }   /* Below is not a digit */
+            else if (   tmpbuf[0] == '$'
+                     && len == 1    /* 'len' doesn't include the sigil */
+                     && memCHRs("[#!%*<>()-=", tmpbuf[1+0]))
+            {
+                /* Here we have what could be a punctuation variable.  If the
+                 * next character after it is a closing bracket, it makes it
+                 * quite likely to be that, and hence a subscript.  If it is
+                 * something else, more mildly a subscript */
+                if (/*{*/ memCHRs("])} =", tmpbuf[1+1]))
+                    weight -= 10;
+                else
+                    weight -= 1;
+            }
             else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
 
                 /* khw: Using \w here misses the possibility of lots of other
@@ -4872,19 +4885,6 @@ S_intuit_more(pTHX_ char *s, char *e,
                      * bareword with meaning; something like [$A-ord] */
                     weight -= 10;
                 }
-            }
-            else if (   tmpbuf[0] == '$'
-                     && len == 1    /* 'len' doesn't include the sigil */
-                     && memCHRs("[#!%*<>()-=", tmpbuf[1+0]))
-            {
-                /* Here we have what could be a punctuation variable.  If the
-                 * next character after it is a closing bracket, it makes it
-                 * quite likely to be that, and hence a subscript.  If it is
-                 * something else, more mildly a subscript */
-                if (/*{*/ memCHRs("])} =", tmpbuf[1+1]))
-                    weight -= 10;
-                else
-                    weight -= 1;
             }
          /* else {  We don't weight any other case }*/
 
