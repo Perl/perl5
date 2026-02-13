@@ -3698,8 +3698,18 @@ Perl_rpeep(pTHX_ OP *o)
                     }
                 }
 
+                goto generic_logop;
             }
-            /* FALLTHROUGH */
+
+        case OP_ENTERTRY:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
+            goto generic_logop;
+
+        case OP_ENTERTRYCATCH:
+            /* catch body is the ->op_other of the OP_CATCH */
+            assert(cLOGOPo->op_other->op_type == OP_CATCH);
+            goto generic_logop;
+
         case OP_MAPWHILE:
         case OP_ANDASSIGN:
         case OP_ORASSIGN:
@@ -3739,16 +3749,6 @@ Perl_rpeep(pTHX_ OP *o)
              * process the rest of the code */
             DEFER(cLOOP->op_lastop);
             break;
-
-        case OP_ENTERTRY:
-            assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
-            DEFER(cLOGOPo->op_other);
-            break;
-
-        case OP_ENTERTRYCATCH:
-            /* catch body is the ->op_other of the OP_CATCH */
-            assert(cLOGOPo->op_other->op_type == OP_CATCH);
-            goto generic_logop;
 
         case OP_SUBST:
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
