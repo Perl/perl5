@@ -3710,6 +3710,32 @@ Perl_rpeep(pTHX_ OP *o)
             assert(cLOGOPo->op_other->op_type == OP_CATCH);
             goto generic_logop;
 
+        /* these LOGOPs' op_other always go to a known op which has alrady
+         * been processed and so don't need to run the peephole optimiser
+         * on it. They are included here for completeness.
+         * If any of the asserts fail then this assumption should be
+         * reconsidered.
+         * */
+
+        case OP_SUBSTCONT:
+            assert(cLOGOPo->op_other->op_type == OP_SUBST);
+            break;
+
+        case OP_REGCOMP:
+            assert((PL_opargs[cLOGOPo->op_other->op_type] & OA_CLASS_MASK)
+                    == OA_PMOP);
+            break;
+
+        case OP_ENTERGIVEN:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVEGIVEN);
+            break;
+
+        case OP_ENTERWHEN:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVEWHEN);
+            break;
+
+        /* general LOGOPs */
+
         case OP_MAPWHILE:
         case OP_ANDASSIGN:
         case OP_ORASSIGN:
