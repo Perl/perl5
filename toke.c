@@ -4818,59 +4818,58 @@ S_intuit_more(pTHX_ char *s, char *e,
                 weight += 100;
             }
             else if (memCHRs("wds]", s[1])) {
-                    weight += 100;  /* \w \d \s => strongly charclass */
-                    /* khw: \] can't happen, as any ']' is beyond our search.
+                weight += 100;  /* \w \d \s => strongly charclass */
+                /* khw: \] can't happen, as any ']' is beyond our search.
                      * Why not \W \D \S \h \v, etc as well?  Should they have
                      * the same weights as \w \d \s or should all or some be
                      * in the 'abcfnrtvx' below? */
-                } else if (seen[(U8)'\''] || seen[(U8)'"']) {
-                    weight += 1;
-                    /* khw: This is problematic.  Enough so, that I misread
-                     * it, and added a wrong comment about what it does in
-                     * 57ae1f3a8e669082e3d5ec6a8cdffbdc39d87bee.  Note that it
-                     * doesn't look at the current character.  What it
-                     * actually does is: if any quote has been seen in the
-                     * parse, don't do the rest of the else's below, but for
-                     * every subsequent backslashed character encountered
-                     * (except \0 \w \s \d), increment the weight to lean a
-                     * bit more towards being a charclass.  That means that
-                     * every backslash sequence following the first occurrence
-                     * of a quote increments the weight regardless of what the
-                     * sequence is.  Again, \0 \w \d and \s are not controlled
-                     * by this else, so they change the weight by a lot more.
-                     * But what makes them so special that they aren't subject
-                     * to this.  Any why does having a quote change the
-                     * behavior from then on.  And why only backslashed
-                     * sequences get this treatment?  This code has been
-                     * unchanged since this function was added in 1993.  I
-                     * don't get it.  Instead, it does seem to me that it is
-                     * especially unlikely to repeat a quote in a charclass,
-                     * but that having just a single quote is indicative of a
-                     * charclass, and having pairs of quotes is indicative of
-                     * a subscript.  Similarly for things that could indicate
-                     * nesting of braces or parens. */
-                }
-                else if (memCHRs("abcfnrtvx", s[1]))
-                    weight += 40;   /* \n, etc => charclass */
+            }
+            else if (seen[(U8)'\''] || seen[(U8)'"']) {
+                weight += 1;
+                /* khw: This is problematic.  Enough so, that I misread it,
+                 * and added a wrong comment about what it does in
+                 * 57ae1f3a8e669082e3d5ec6a8cdffbdc39d87bee.  Note that it
+                 * doesn't look at the current character.  What it actually
+                 * does is: if any quote has been seen in the parse, don't do
+                 * the rest of the else's below, but for every subsequent
+                 * backslashed character encountered (except \0 \w \s \d),
+                 * increment the weight to lean a bit more towards being a
+                 * charclass.  That means that every backslash sequence
+                 * following the first occurrence of a quote increments the
+                 * weight regardless of what the sequence is.  Again, \0 \w \d
+                 * and \s are not controlled by this else, so they change the
+                 * weight by a lot more.  But what makes them so special that
+                 * they aren't subject to this.  Any why does having a quote
+                 * change the behavior from then on.  And why only backslashed
+                 * sequences get this treatment?  This code has been unchanged
+                 * since this function was added in 1993.  I don't get it.
+                 * Instead, it does seem to me that it is especially unlikely
+                 * to repeat a quote in a charclass, but that having just a
+                 * single quote is indicative of a charclass, and having pairs
+                 * of quotes is indicative of a subscript.  Similarly for
+                 * things that could indicate nesting of braces or parens. */
+            }
+            else if (memCHRs("abcfnrtvx", s[1]))
+                weight += 40;   /* \n, etc => charclass */
                     /* khw: Why not \e etc as well? */
-                else if (isDIGIT(s[1])) {
-                    weight += 40;   /* \123 => charclass */
-                    while (s[1] && isDIGIT(s[1]))
-                        s++;
-                }
+            else if (isDIGIT(s[1])) {
+                weight += 40;   /* \123 => charclass */
+                while (s[1] && isDIGIT(s[1]))
+                    s++;
+            }
 
-                /* khw: There are lots more possible escape sequences.  Some,
-                 * like \A,\z have no special meaning to charclasses, so might
-                 * indicate a subscript, but I don't know what they would be
-                 * doing there either.  Some have been added to the language
-                 * after this code was written, but no one thought to, or
-                 * could wade through this function, to add them.  Things like
-                 * \p{} for properties, \N and \N{}, for example.
-                 *
-                 * It's problematic that \a is treated as plain 'a' for
-                 * purposes of the 'seen' array.  Whatever is matched by these
-                 * backslashed sequences should not be added to 'seen'.  That
-                 * includes the backslash. */
+            /* khw: There are lots more possible escape sequences.  Some, like
+             * \A,\z have no special meaning to charclasses, so might indicate
+             * a subscript, but I don't know what they would be doing there
+             * either.  Some have been added to the language after this code
+             * was written, but no one thought to, or could wade through this
+             * function, to add them.  Things like \p{} for properties, \N and
+             * \N{}, for example.
+             *
+             * It's problematic that \a is treated as plain 'a' for purposes
+             * of the 'seen' array.  Whatever is matched by these backslashed
+             * sequences should not be added to 'seen'.  That includes the
+             * backslash. */
             break;
 
           case '-':
@@ -4882,23 +4881,23 @@ S_intuit_more(pTHX_ char *s, char *e,
             if (s[1] == '\\')
                 weight += 50;
 
-            /* If it is something like 'a-' or '0-', it is more likely to
-             * be a character class. '!' is the first ASCII graphic, so '!-'
-             * would be the start of a range of graphics. */
+            /* If it is something like 'a-' or '0-', it is more likely to be a
+             * character class. '!' is the first ASCII graphic, so '!-' would
+             * be the start of a range of graphics. */
             if (! first_time && memCHRs("aA01! ", prev_un_char))
                 weight += 30;
 
-            /* If it is something like '-Z' or '-7' (for octal) or '-9' it
-             * is more likely to be a character class. '~' is the final ASCII
+            /* If it is something like '-Z' or '-7' (for octal) or '-9' it is
+             * more likely to be a character class. '~' is the final ASCII
              * graphic, so '-~' would be the end of a range of graphics.
              *
              * khw: Having [-z] really doesn't imply what the comments above
-             * indicate, so this should only be tested when '! first_time' */
+             * indicate, so this should only be tested when '!  first_time' */
             if (memCHRs("zZ79~", s[1]))
                 weight += 30;
 
-            /* If it is something like -1 or -$foo, it is more likely to be a
-             * subscript.  */
+            /* If it is something like -1 or -$foo, it is more likely to be
+             * a subscript.  */
             if (first_time && (isDIGIT(s[1]) || s[1] == '$')) {
                 weight -= 5;	/* cope with negative subscript */
             }
