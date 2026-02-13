@@ -565,6 +565,16 @@ When a scalar variable used as the target of a filehandle is C<undef>'ed
 while being output, garbage bytes would be left in that scalar.
 [GH #24008]
 
+=over 4
+
+=item *
+
+Additionally, there was a case that would expose garbage bytes in the
+target scalar when that scalar is output on it (as in
+C<< open $fh, '>', \$str; print $fh $str; >>).  This is also fixed.
+
+=back
+
 =item *
 
 C<close(STDOUT)> when C<STDOUT> has been opened as a pipe will now
