@@ -4744,24 +4744,24 @@ S_intuit_more(pTHX_ char *s, char *e,
              * khw: $z-a is definitely a subscript
              */
 
-                /* khw: where did the magic number 4 come from?.  This buffer
-                 * was 4 times as large as tokenbuf in 1997, and had not
-                 * changed since the code was first added.
-                 *
-                 * (Reserve tmpbuf[0] for future commits, hence +1 in most of
-                 * the tmpbuf references below) */
-                char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 + 1 ];
+            /* khw: where did the magic number 4 come from?.  This buffer was
+             * 4 times as large as tokenbuf in 1997, and had not changed since
+             * the code was first added.
+             *
+             * (Reserve tmpbuf[0] for future commits, hence +1 in most of the
+             * tmpbuf references below) */
+            char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 + 1 ];
 
-                if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
-                                 CHECK_ONLY))
-                {
-                    /* An illegal identifier means this can't be a subscript;
-                     * it's an error or it could be a charclass */
-                    return false;
-                }
+            if (! scan_ident(s, tmpbuf + 1, C_ARRAY_END(tmpbuf),
+                             CHECK_ONLY))
+            {
+                /* An illegal identifier means this can't be a subscript;
+                 * it's an error or it could be a charclass */
+                return false;
+            }
 
-                /* Here, is a syntactically valid identifier */
-                Size_t len = strlen(tmpbuf + 1);
+            /* Here, is a syntactically valid identifier */
+            Size_t len = strlen(tmpbuf + 1);
 
             /* khw: Using \w here misses the possibility of lots of other
              * syntaxes of variables, like $::foo or ${foo}, that scan_ident
@@ -4831,7 +4831,6 @@ S_intuit_more(pTHX_ char *s, char *e,
            *      \R must be subscript
            *      \? must be subscript for things like \d, but not \a.
            */
-
 
           case '\\':
             if (s[1] == '\0') {
