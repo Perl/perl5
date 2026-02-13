@@ -3589,9 +3589,10 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_GREPWHILE:
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            /* FALLTHROUGH */
+            goto generic_logop;
+
         case OP_COND_EXPR:
-            if (o->op_type == OP_COND_EXPR) {
+            {
                 OP *stub = cLOGOP->op_other;
                 OP *trueop  = OpSIBLING( cLOGOP->op_first );
                 OP *falseop = OpSIBLING(trueop);
@@ -3707,6 +3708,16 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_ONCE:
         case OP_ARGDEFELEM:
         case OP_PARAMTEST:
+
+        generic_logop:
+
+            /* Handle the stuff generically needed for all LOGOPs:
+             * in particular, process op_other: strip nulls and
+             * run the peephole optimiser on it.
+             *
+             * Note that some LOGOPs, such as OP_AND, do their own
+             * specialised handling and never reach here.
+             */
             while (cLOGOP->op_other->op_type == OP_NULL)
                 cLOGOP->op_other = cLOGOP->op_other->op_next;
             DEFER(cLOGOP->op_other);
