@@ -3583,7 +3583,6 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_next = cLOGOPx(o->op_next)->op_other;
             }
             DEFER(cLOGOP->op_other);
-            o->op_opt = 1;
             break;
 
         case OP_GREPWHILE:
