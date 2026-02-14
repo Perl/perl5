@@ -4863,9 +4863,78 @@ S_intuit_more(pTHX_ char *s, char *e,
                     return false;
                 }
 
-                if (len > 1 && is_known) {
-                    weight -= 100;
+                /* Look at all possible combinations of the conditions.
+                 *
+                 * This code takes the stance that it could easily be
+                 * coincidence that a single character name coincides with a
+                 * known identifier.  But much less so for two or more
+                 * characters. */
 
+#               define embraced    1 << 0
+#               define unembraced  0
+#               define unknown     0
+#               define known       1 << 1
+#               define len1        0
+#               define multi       1 << 2
+
+                const unsigned switch_on = (is_embraced << 0)
+                                         | (is_known << 1)
+                                         | (is_multichar << 2);
+                switch (switch_on) {
+                  case len1 | unknown | unembraced:
+                    /* We don't infer anything for something like [...$n...]
+                     * where n is not a known identifier.
+                     *
+                     * khw: Our test suite contains several constructs like
+                     * [$A-Z].  I would argue that if the next character is a
+                     * '-' followed by an alpha, that would make it much more
+                     * likely to be a charclass.  It would only make sense to
+                     * be an expression if that alpha string is a bareword
+                     * with meaning; something like [$A-ord] */
+                    break;
+
+                  case len1 | unknown | embraced:
+
+                    /* Bias something like [...${n}...] slightly towards n
+                     * meaning an identifier, even though n isn't known to be
+                     * one. */
+                    weight -= 5;
+                    break;
+
+                  case len1 | known | unembraced:
+
+                    /* Bias something like [...$n...] where n is a known
+                     * identifier, slightly towards n meaning an identifier */
+                    weight -= 10;
+                    break;
+
+                  case len1 | known | embraced:
+
+                    /* Bias something like [...${n}...] where n is a known
+                     * identifier, fairly strongly towards n meaning an
+                     * identifier */
+                    weight -= 50;
+                    break;
+
+                  case multi | unknown | unembraced:
+
+                    /* We don't infer anything for something like [...$ab...]
+                     * where ab is not a known identifier. */
+                    break;
+
+                  case multi | unknown | embraced:
+
+                    /* Bias something like [...${ab}...] where there is no
+                     * known identifier named ab, slightly towards ab meaning
+                     * an identifier */
+                    weight -= 10;
+                    break;
+
+                  case multi | known | unembraced:
+
+                    /* Bias something like [...$ab...] where ab is a known
+                     * identifier, strongly towards ab meaning an identifier.
+                     * */
                     /* khw: Below we keep track of repeated characters;  People
                      * rarely say qr/[aba]/, as the second a is pointless.
                      * (Some do it though as a mnemonic that is meaningful to
@@ -4876,20 +4945,21 @@ S_intuit_more(pTHX_ char *s, char *e,
                      * should advance past it.  Suppose it is a hash element,
                      * like $subscripts{$which}.  We should advance past the
                      * braces and key */
-                }
-                else {
-                    /* Not a multi-char identifier already known in the
-                     * program; is somewhat likely to be a subscript.
-                     *
-                     * khw: Our test suite contains several constructs like
-                     * [$A-Z].  Excluding length 1 identifiers in the
-                     * conditional above means such are much less likely to be
-                     * mistaken for subscripts.  I would argue that if the next
-                     * character is a '-' followed by an alpha, that would make
-                     * it much more likely to be a charclass.  It would only
-                     * make sense to be an expression if that alpha string is a
-                     * bareword with meaning; something like [$A-ord] */
-                    weight -= 10;
+                    weight -= 100;
+                    break;
+
+                  case multi | known | embraced:
+
+                    /* Bias something like [...${ab}...] where ab is a known
+                     * identifier, strongly towards ab meaning an identifier.
+                     * */
+                    weight -= 100;
+                    break;
+
+                  default:
+                    croak("panic: Unexpected case %x in switch in"
+                          " %s, line %" LINE_Tf,
+                          switch_on, __FILE__, (line_t) __LINE__);
                 }
             }
          /* else {  We don't weight any other case }*/
