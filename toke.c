@@ -4718,7 +4718,7 @@ S_intuit_more(pTHX_ char *s, char *e,
              * indicates it is a subscript */
             weight -= seen[un_char] * 10;
 
-            /* Following one of these characters, we look to see if there is an
+            /* Following one of these sigils, we look to see if there is an
              * identifier already found in the program by that name.  If so,
              * strongly suspect this isn't a character class
              *
