@@ -4848,18 +4848,22 @@ S_intuit_more(pTHX_ char *s, char *e,
             }
             else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
 
-                /* khw: Using \w here misses the possibility of lots of other
-                 * syntaxes of variables, like $::foo or ${foo}, that
-                 * scan_ident looks for. */
+                /* See if there is a known identifier of the given kind.  For
+                 * arrays, this might also be a reference to one of its
+                 * elements.   XXX Maybe the latter should require a following
+                 * '[' or '->[' */
+                const bool is_known =
+                           is_existing_identifier(tmpbuf, len, tmpbuf[0], UTF)
+                       || (   tmpbuf[0] == '$'
+                           && is_existing_identifier(tmpbuf, len, '@', UTF));
 
-                /* khw: This only looks at global variables; lexicals came
-                 * later, and this hasn't been updated.  Ouch!! */
-                if (   len > 1
-                    && gv_fetchpvn_flags(tmpbuf + 1,
-                                         len,
-                                         UTF ? SVf_UTF8 : 0,
-                                         SVt_PV))
-                {
+                /* Under strict, an unknown variable means an error or a
+                 * character class */
+                if (under_strict_vars && ! is_known) {
+                    return false;
+                }
+
+                if (len > 1 && is_known) {
                     weight -= 100;
 
                     /* khw: Below we keep track of repeated characters;  People
