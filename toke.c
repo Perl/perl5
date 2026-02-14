@@ -4538,11 +4538,11 @@ S_intuit_more(pTHX_ char *s, char *e,
 {
     PERL_ARGS_ASSERT_INTUIT_MORE;
 
-    /* This function has been mostly untouched for a long time, due to its,
+    /* This function has been mostly untouched for a long time, due to its
      * 'scariness', and lack of comments.  khw has gone through and done some
      * cleanup, while finding various instances of problematic behavior.
      * Rather than change this base-level function immediately, khw has added
-     * commentary to those areas. 
+     * commentary to those areas.
      *
      * khw: $0 in square brackets is never going to mean the expansion of $0.
      * How could that help in calculating a subscript?  And one would never
@@ -4643,10 +4643,18 @@ S_intuit_more(pTHX_ char *s, char *e,
             /* Here have both an array and a scalar with the same name.  Drop
              * down to use the heuristics to try to intuit which is meant */
         }
+        else {
+            /* Here, there could be undeclared variables.  But khw believes if
+             * one is known to exist but not the other, it is more likely that
+             * the other doesn't exist, so we can factor this in to the
+             * heuristics below */
+        }
     }
 
-    /* Find matching ']'.  khw: This means any s[1] below is guaranteed to
-     * exist */
+    /* Find matching ']'.  khw: Actually it finds the next ']' and assumes it
+     * matches the '['.  In order to account for the possibility of the ']'
+     * being inside the scope of \Q or preceded by an even number of
+     * backslashes, this should be rewritten */
     const char * const send = (char *) memchr(s, ']', e - s);
     if (! send)		/* has to be an expression */
         return TRUE;
@@ -4659,8 +4667,11 @@ S_intuit_more(pTHX_ char *s, char *e,
     /* If the construct consists entirely of one or two digits, call it a
      * subscript.
      *
-     * khw: No one writes 03 to mean 3.  Any string of digits beginning with
-     * '0' is likely to be a charclass, including length 2 ones. */
+     * khw: A string of digits beginning with 0 would be considered octal.  If
+     * that string contains 8 or 9, it has to be a character class.  And if
+     * it's exactly two digits long, it would would be very unlikely for
+     * someone to use octal to spell a number from 1-7, so would be a
+     * character class */
     if (isDIGIT(s[0]) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
         return TRUE;
     }
@@ -4733,6 +4744,7 @@ S_intuit_more(pTHX_ char *s, char *e,
              * syntaxes of variables, like $::foo or ${foo}, that scan_ident
              * looks for.
              *
+             * khw: $z-a is definitely a subscript
              */
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
                 Size_t len;
@@ -4800,6 +4812,8 @@ S_intuit_more(pTHX_ char *s, char *e,
                 else
                     weight -= 1;
             }
+         /* else {  We don't weight any other case }*/
+
             break;
 
           /* khw:  [:blank:] strongly indicates a charclass */
@@ -4822,9 +4836,10 @@ S_intuit_more(pTHX_ char *s, char *e,
             if (memCHRs("wds]", s[1])) {
                 weight += 100;  /* \w \d \s => strongly charclass */
                 /* khw: \] can't happen, as any ']' is beyond our search.
-                     * Why not \W \D \S \h \v, etc as well?  Should they have
-                     * the same weights as \w \d \s or should all or some be
-                     * in the 'abcfnrtvx' below? */
+                 * Should \W \D \S have the same weights as \w \d \s or should
+                 * all or some be in the abcfnrtvx below?  Why not \h etc as
+                 * well? \v is below, adding 40; \h should add at least that
+                 * much */
                 break;
             }
 
@@ -4857,7 +4872,8 @@ S_intuit_more(pTHX_ char *s, char *e,
 
             if (memCHRs("abcfnrtvx", s[1])) {
                 weight += 40;   /* \n, etc => charclass */
-                    /* khw: Why not \e etc as well? */
+                    /* This is missing \e; could use isMNEMONIC_CNTRL; others
+                     * are missing from perlrebackslash */
                 break;
             }
 
