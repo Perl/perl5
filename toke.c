@@ -4833,12 +4833,14 @@ S_intuit_more(pTHX_ char *s, char *e,
             }   /* Below is not a digit */
             else if (   tmpbuf[0] == '$'
                      && len == 1    /* 'len' doesn't include the sigil */
-                     && memCHRs("[#!%*<>()-=", tmpbuf[1+0]))
+                     && memCHRs("!\"%&'()*+,-./:;<=>?@[\\]^_`|~$",
+                                tmpbuf[1+0]))
             {
-                /* Here we have what could be a punctuation variable.  If the
-                 * next character after it is a closing bracket, it makes it
-                 * quite likely to be that, and hence a subscript.  If it is
-                 * something else, more mildly a subscript */
+                /* Here we have what could be a punctuation variable.  (Note
+                 * '[' is deprecated, but unlikely to ever be removed.)  If
+                 * the next character after it is a closing bracket, it makes
+                 * it quite likely to be that, and hence a subscript.  If it
+                 * is something else, more mildly a subscript */
                 if (/*{*/ memCHRs("])} =", tmpbuf[1+1]))
                     weight -= 10;
                 else
