@@ -1,9 +1,9 @@
-use 5.008001;
+use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
 
-our $VERSION = '2.150012';
+our $VERSION = '2.150010';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -1513,7 +1513,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.150012
+version 2.150010
 
 =head1 SYNOPSIS
 
@@ -1634,7 +1634,7 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <cpan@semiotic.systems>
+Ricardo Signes <rjbs@cpan.org>
 
 =item *
 

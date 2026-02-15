@@ -1,4 +1,3 @@
-use 5.008001;
 package Parse::CPAN::Meta::Test;
 
 use strict;

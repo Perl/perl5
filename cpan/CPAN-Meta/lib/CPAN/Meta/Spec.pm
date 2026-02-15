@@ -3,12 +3,12 @@
 # that change semantics are not acceptable without prior approval
 # by David Golden or Ricardo Signes.
 
-use 5.008001;
+use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
 
-our $VERSION = '2.150012';
+our $VERSION = '2.150010';
 
 1;
 
@@ -29,7 +29,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.150012
+version 2.150010
 
 =head1 SYNOPSIS
 
@@ -144,8 +144,7 @@ serializes into a bytestream and/or writes it to disk.
 
 =item must, should, may, etc.
 
-These terms are interpreted as described in
-L<IETF RFC 2119|https://www.ietf.org/rfc/rfc2119.txt>.
+These terms are interpreted as described in IETF RFC 2119.
 
 =back
 
@@ -1087,7 +1086,7 @@ other methods for locating a module in C<@INC>.
 
 If only a filename is available, the following approach may be used:
 
-  # via Module::Metadata
+  # via Module::Build
   my $info = Module::Metadata->new_from_file($file);
   my $version = $info->version;
 
@@ -1105,25 +1104,16 @@ ordinary comparison operators.  For example:
   }
 
 If the only comparison needed is whether an installed module is of a
-sufficiently high version, a direct test may be done using the C<VERSION>
-method.  For example, for module C<$mod> and version prerequisite
-C<$prereq>:
+sufficiently high version, a direct test may be done using the string
+form of C<eval> and the C<use> function.  For example, for module C<$mod>
+and version prerequisite C<$prereq>:
 
-  use Module::Load 'load';
-  if ( $mod =~ m/\A[\w:']+\z/a and eval { load $mod; $mod->VERSION($prereq); 1 } ) {
+  if ( eval "use $mod $prereq (); 1" ) {
     print "Module $mod version is OK.\n";
   }
 
-The regexp checks that C<$mod> only includes characters legal for module
-names before passing it to L<Module::Load/load>, which also accepts file
-paths that may escape C<@INC>.  Alternatively, if L<Module::Runtime> is
-installed, the C<use_module> function can load the module and perform the
-version check at the same time, and does not accept file paths:
-
-  use Module::Runtime 'use_module';
-  if ( eval { use_module $mod, $prereq; 1 } ) {
-    print "Module $mod version is OK.\n";
-  }
+If the values of C<$mod> and C<$prereq> have not been scrubbed, however,
+this presents security implications.
 
 =head2 Prerequisites for dynamically configured distributions
 
@@ -1236,7 +1226,7 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <cpan@semiotic.systems>
+Ricardo Signes <rjbs@cpan.org>
 
 =item *
 

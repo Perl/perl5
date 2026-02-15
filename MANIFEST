@@ -545,101 +545,101 @@ cpan/CPAN/t/03pkgs.t					See if CPAN::Version works
 cpan/CPAN/t/10version.t					See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t				See if CPAN::Mirrored::By works
 cpan/CPAN/t/32pushyhttps.t				Test file related to CPAN
-cpan/CPAN-Meta/corpus/BadMETA.yml					CPAN::Meta
-cpan/CPAN-Meta/corpus/bareyaml.meta					CPAN::Meta
-cpan/CPAN-Meta/corpus/CL018_yaml.meta					CPAN::Meta
-cpan/CPAN-Meta/corpus/json.meta						CPAN::Meta
-cpan/CPAN-Meta/corpus/META-VR.json					CPAN::Meta
-cpan/CPAN-Meta/corpus/META-VR.yml					CPAN::Meta
-cpan/CPAN-Meta/corpus/yaml.meta						CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta.pm						Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm				Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_0.pod			CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_1.pod			CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_2.pod			CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_3.pod			CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_4.pod			CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Merge.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm				Module related to CPAN::Meta
-cpan/CPAN-Meta/lib/Parse/CPAN/Meta.pm					Module related to CPAN::Meta
-cpan/CPAN-Meta/t/converter.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/converter-bad.t					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/converter-fail.t					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/converter-fragments.t					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-1_0.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-1_1.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-1_2.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-1_3.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-1_4.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-fail/META-2.json					CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/107650337-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/1598804075-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/1927486199-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/1985980974-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/2031017050-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/284247103-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/344981821-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/35478989-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/98042513-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.json		CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.yml		CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/META-1_2.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/META-1_3.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/META-1_4.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/META-2.json				CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.json	CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.yml	CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/restrictive-2.json			CPAN::Meta
-cpan/CPAN-Meta/t/data-fixable/version-ranges-2.json			CPAN::Meta
-cpan/CPAN-Meta/t/data-test/gpl-1_4.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-1_0.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-1_1.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-1_2.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-1_3.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-1_4.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-2.json					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/META-2.meta					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/preserve-release-status.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-test/provides-version-missing.json		CPAN::Meta
-cpan/CPAN-Meta/t/data-test/resources.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-test/restricted-2.json				CPAN::Meta
-cpan/CPAN-Meta/t/data-test/restrictive-1_4.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-test/unicode.yml					CPAN::Meta
-cpan/CPAN-Meta/t/data-test/version-not-normal.json			CPAN::Meta
-cpan/CPAN-Meta/t/data-test/version-ranges-1_4.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-test/version-ranges-2.json			CPAN::Meta
-cpan/CPAN-Meta/t/data-test/x_deprecated-META.json			CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/1122575719-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/1206545041-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/1985684504-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/476602558-META.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/META-1_0.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/META-1_1.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/META-1_4.yml				CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/META-2.json					CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/scalar-meta-spec.yml			CPAN::Meta
-cpan/CPAN-Meta/t/data-valid/x_deprecated-META.yml			CPAN::Meta
-cpan/CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm				Module related to CPAN::Meta
-cpan/CPAN-Meta/t/load-bad.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/merge.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/meta-obj.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/no-index.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/optional_feature-merge.t				Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/parse-cpan-meta/02_api.t				Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/parse-cpan-meta/03_functions.t				Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/parse-cpan-meta/04_export.t				Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/parse-cpan-meta/05_errors.t				Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/prereqs.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/prereqs-finalize.t					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/prereqs-merge.t					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/README-data.txt					Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/repository.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/save-load.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta/t/validator.t						Test file related to CPAN::Meta
+cpan/CPAN-Meta/corpus/BadMETA.yml
+cpan/CPAN-Meta/corpus/bareyaml.meta
+cpan/CPAN-Meta/corpus/CL018_yaml.meta
+cpan/CPAN-Meta/corpus/json.meta
+cpan/CPAN-Meta/corpus/META-VR.json
+cpan/CPAN-Meta/corpus/META-VR.yml
+cpan/CPAN-Meta/corpus/yaml.meta
+cpan/CPAN-Meta/lib/CPAN/Meta.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/History.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_0.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_1.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_2.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_3.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/History/Meta_1_4.pod
+cpan/CPAN-Meta/lib/CPAN/Meta/Merge.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
+cpan/CPAN-Meta/lib/Parse/CPAN/Meta.pm
+cpan/CPAN-Meta/t/converter.t
+cpan/CPAN-Meta/t/converter-bad.t
+cpan/CPAN-Meta/t/converter-fail.t
+cpan/CPAN-Meta/t/converter-fragments.t
+cpan/CPAN-Meta/t/data-fail/META-1_0.yml
+cpan/CPAN-Meta/t/data-fail/META-1_1.yml
+cpan/CPAN-Meta/t/data-fail/META-1_2.yml
+cpan/CPAN-Meta/t/data-fail/META-1_3.yml
+cpan/CPAN-Meta/t/data-fail/META-1_4.yml
+cpan/CPAN-Meta/t/data-fail/META-2.json
+cpan/CPAN-Meta/t/data-fixable/107650337-META.yml
+cpan/CPAN-Meta/t/data-fixable/1598804075-META.yml
+cpan/CPAN-Meta/t/data-fixable/1927486199-META.yml
+cpan/CPAN-Meta/t/data-fixable/1985980974-META.yml
+cpan/CPAN-Meta/t/data-fixable/2031017050-META.yml
+cpan/CPAN-Meta/t/data-fixable/284247103-META.yml
+cpan/CPAN-Meta/t/data-fixable/344981821-META.yml
+cpan/CPAN-Meta/t/data-fixable/35478989-META.yml
+cpan/CPAN-Meta/t/data-fixable/98042513-META.yml
+cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.json
+cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.yml
+cpan/CPAN-Meta/t/data-fixable/META-1_2.yml
+cpan/CPAN-Meta/t/data-fixable/META-1_3.yml
+cpan/CPAN-Meta/t/data-fixable/META-1_4.yml
+cpan/CPAN-Meta/t/data-fixable/META-2.json
+cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.json
+cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.yml
+cpan/CPAN-Meta/t/data-fixable/restrictive-2.json
+cpan/CPAN-Meta/t/data-fixable/version-ranges-2.json
+cpan/CPAN-Meta/t/data-test/gpl-1_4.yml
+cpan/CPAN-Meta/t/data-test/META-1_0.yml
+cpan/CPAN-Meta/t/data-test/META-1_1.yml
+cpan/CPAN-Meta/t/data-test/META-1_2.yml
+cpan/CPAN-Meta/t/data-test/META-1_3.yml
+cpan/CPAN-Meta/t/data-test/META-1_4.yml
+cpan/CPAN-Meta/t/data-test/META-2.json
+cpan/CPAN-Meta/t/data-test/META-2.meta
+cpan/CPAN-Meta/t/data-test/preserve-release-status.yml
+cpan/CPAN-Meta/t/data-test/provides-version-missing.json
+cpan/CPAN-Meta/t/data-test/resources.yml
+cpan/CPAN-Meta/t/data-test/restricted-2.json
+cpan/CPAN-Meta/t/data-test/restrictive-1_4.yml
+cpan/CPAN-Meta/t/data-test/unicode.yml
+cpan/CPAN-Meta/t/data-test/version-not-normal.json
+cpan/CPAN-Meta/t/data-test/version-ranges-1_4.yml
+cpan/CPAN-Meta/t/data-test/version-ranges-2.json
+cpan/CPAN-Meta/t/data-test/x_deprecated-META.json
+cpan/CPAN-Meta/t/data-valid/1122575719-META.yml
+cpan/CPAN-Meta/t/data-valid/1206545041-META.yml
+cpan/CPAN-Meta/t/data-valid/1985684504-META.yml
+cpan/CPAN-Meta/t/data-valid/476602558-META.yml
+cpan/CPAN-Meta/t/data-valid/META-1_0.yml
+cpan/CPAN-Meta/t/data-valid/META-1_1.yml
+cpan/CPAN-Meta/t/data-valid/META-1_4.yml
+cpan/CPAN-Meta/t/data-valid/META-2.json
+cpan/CPAN-Meta/t/data-valid/scalar-meta-spec.yml
+cpan/CPAN-Meta/t/data-valid/x_deprecated-META.yml
+cpan/CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm
+cpan/CPAN-Meta/t/load-bad.t
+cpan/CPAN-Meta/t/merge.t
+cpan/CPAN-Meta/t/meta-obj.t
+cpan/CPAN-Meta/t/no-index.t
+cpan/CPAN-Meta/t/optional_feature-merge.t
+cpan/CPAN-Meta/t/parse-cpan-meta/02_api.t
+cpan/CPAN-Meta/t/parse-cpan-meta/03_functions.t
+cpan/CPAN-Meta/t/parse-cpan-meta/04_export.t
+cpan/CPAN-Meta/t/parse-cpan-meta/05_errors.t
+cpan/CPAN-Meta/t/prereqs.t
+cpan/CPAN-Meta/t/prereqs-finalize.t
+cpan/CPAN-Meta/t/prereqs-merge.t
+cpan/CPAN-Meta/t/README-data.txt
+cpan/CPAN-Meta/t/repository.t
+cpan/CPAN-Meta/t/save-load.t
+cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements.pm
 cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements/Range.pm
 cpan/CPAN-Meta-Requirements/t/accepts.t
