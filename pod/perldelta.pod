@@ -341,6 +341,11 @@ L</Modules and Pragmata> section.
 Thread-safe locale handling has been turned off on all releases due to
 apparent bugs in the underlying operating system support.
 
+=item Win32
+
+Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
+defined.
+
 =back
 
 =head1 Internal Changes
