@@ -4816,15 +4816,19 @@ S_intuit_more(pTHX_ char *s, char *e,
             if (s[1] == '\0') {
                 /* \ followed by NUL strongly indicates character class */
                 weight += 100;
+                break;
             }
-            else if (memCHRs("wds]", s[1])) {
+
+            if (memCHRs("wds]", s[1])) {
                 weight += 100;  /* \w \d \s => strongly charclass */
                 /* khw: \] can't happen, as any ']' is beyond our search.
                      * Why not \W \D \S \h \v, etc as well?  Should they have
                      * the same weights as \w \d \s or should all or some be
                      * in the 'abcfnrtvx' below? */
+                break;
             }
-            else if (seen[(U8)'\''] || seen[(U8)'"']) {
+
+            if (seen[(U8)'\''] || seen[(U8)'"']) {
                 weight += 1;
                 /* khw: This is problematic.  Enough so, that I misread it,
                  * and added a wrong comment about what it does in
@@ -4848,11 +4852,16 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * single quote is indicative of a charclass, and having pairs
                  * of quotes is indicative of a subscript.  Similarly for
                  * things that could indicate nesting of braces or parens. */
+                break;
             }
-            else if (memCHRs("abcfnrtvx", s[1]))
+
+            if (memCHRs("abcfnrtvx", s[1])) {
                 weight += 40;   /* \n, etc => charclass */
                     /* khw: Why not \e etc as well? */
-            else if (isDIGIT(s[1])) {
+                break;
+            }
+
+            if (isDIGIT(s[1])) {
                 weight += 40;   /* \123 => charclass */
                 while (s[1] && isDIGIT(s[1]))
                     s++;
