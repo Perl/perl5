@@ -4814,7 +4814,7 @@ S_intuit_more(pTHX_ char *s, char *e,
                 }
             }
             else if (   tmpbuf[0] == '$'
-                     && tmpbuf[1]
+                     && len == 1    /* 'len' doesn't include the sigil */
                      && memCHRs("[#!%*<>()-=", tmpbuf[1+0]))
             {
                 /* Here we have what could be a punctuation variable.  If the
