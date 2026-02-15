@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.6 - Vajra Chandrasekera, "The Saint of Bright Doors"
+
+L<Announced on 2026-01-19 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2025/12/msg270596.html>
+
+"When this door translates", Pipra says, pointing at it. "This side will be
+either the front or the back of the bright door. If it's the back, the door
+will vanish - we want to know what that looks like. Does it pop out of
+existence? Does it make a noise? Is there a puff of air? A farting sound?
+
 =head2 v5.43.6 - Christopher Hitchens, "Mortality"
 
 L<Announced on 2025-12-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2025/12/msg270596.html>
