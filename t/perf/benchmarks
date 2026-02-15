@@ -1539,6 +1539,49 @@
         code    => 's/(.)/$1-$1-$1/g',
     },
 
+    # Conditional operator, (... ? .... : ... )
+
+    'expr::cond::scalar_lll_true' => {
+        setup   => 'my ($c, $t, $f, $res)  = (1, 111, 222, 0);',
+        code    => '$res = $c ? $t : $f',
+    },
+
+    'expr::cond::scalar_lll_false' => {
+        setup   => 'my ($c, $t, $f, $res)  = (0, 111, 222, 0);',
+        code    => '$res = $c ? $t : $f',
+    },
+
+    'expr::cond::list_lll_true' => {
+        setup   => 'my $c = 1; my @t = 111; my @f = 222; my @res;',
+        code    => '@res = $c ? @t : @f',
+    },
+
+    'expr::cond::list_lll_false' => {
+        setup   => 'my $c = 0; my @t = 111; my @f = 222; my @res;',
+        code    => '@res = $c ? @t : @f',
+    },
+
+    'expr::cond::list_l0l_true' => {
+        setup   => 'my $c = 1; my @f = 222; my @res;',
+        code    => '@res = $c ? () : @f',
+    },
+
+    'expr::cond::list_l0l_false' => {
+        setup   => 'my $c = 0; my @f = 222; my @res;',
+        code    => '@res = $c ? () : @f',
+    },
+
+    'expr::cond::list_ll0_true' => {
+        setup   => 'my $c = 1; my @t = 111; my @res;',
+        code    => '@res = $c ? @t : ()',
+    },
+
+    'expr::cond::list_ll0_false' => {
+        setup   => 'my $c = 0; my @t = 111; my @res;',
+        code    => '@res = $c ? @t : ()',
+    },
+
+
 
 
     # scalar assign, OP_SASSIGN

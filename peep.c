@@ -3583,66 +3583,58 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_next = cLOGOPx(o->op_next)->op_other;
             }
             DEFER(cLOGOP->op_other);
-            o->op_opt = 1;
             break;
 
         case OP_GREPWHILE:
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
-            /* FALLTHROUGH */
+            goto generic_logop;
+
         case OP_COND_EXPR:
-            if (o->op_type == OP_COND_EXPR) {
+            {
+                /* A cond_expr op will usually have three children (all of
+                 * which are sub-trees):
+                 *     cond_expr
+                 *         -condition-
+                 *         -true-
+                 *         -false-
+                 *  with op_other pointing to the start op within the
+                 *  true subtree and op_next to the start op within the
+                 *  false subtree.
+                 *
+                 *  The code in this block looks for stub subtrees
+                 *  (either a single stub op, or far more likely,
+                 *  a stub op as part of an empty scope or entry/leave
+                 *  subtree). If found, the subtree is deleted (so the
+                 *  cond_expr only has two children) and the
+                 *  op_next/op_other as appropriate is made to point to
+                 *  the op following the cond_expr op.
+                 */
+
                 OP *stub = cLOGOP->op_other;
                 OP *trueop  = OpSIBLING( cLOGOP->op_first );
                 OP *falseop = OpSIBLING(trueop);
 
                 /* Is there an empty "if" block or ternary true branch?
                    If so, optimise away the OP_STUB if safe to do so. */
-                if (stub->op_type == OP_STUB &&
-                    ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+                if (   stub->op_type == OP_STUB
+                    && ((stub->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+                    && (
+                            /* bare stub */
+                            (stub == trueop)
+                            /* stub in scope/enter */
+                        || (   OP_TYPE_IS(trueop, OP_SCOPE)
+                            && stub == cUNOPx(trueop)->op_first
+                               /* doesn't yet handle trailing nulls */
+                            && !OpSIBLING(stub)
+                            )
+                        )
                 ) {
-                    if (stub == trueop) {
-                        /* This is very unlikely:
-                         *     cond_expr
-                         *         -condition-
-                         *         stub
-                         *         -else-
-                         */
                         assert(!(stub->op_flags & OPf_KIDS));
-                        cLOGOP->op_other = stub->op_next;
+                        cLOGOP->op_other = trueop->op_next;
                         op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
-                        op_free(stub);
-                        break;
-                    } else if (OP_TYPE_IS(trueop, OP_SCOPE) &&
-                               (stub == cUNOPx(trueop)->op_first) ) {
-                        assert(!(stub->op_flags & OPf_KIDS));
-
-                        OP *stubsib = OpSIBLING(stub);
-                        if (!stubsib) {
-                        /*     cond_expr
-                         *         -condition-
-                         *         scope
-                         *             stub
-                         *         -else-
-                         */
-                            cLOGOP->op_other = trueop->op_next;
-                            op_sibling_splice(o, cLOGOP->op_first, 1, NULL);
-                            op_free(stub);
-                            op_free(trueop);
-                            break;
-                        } else {
-                            /* Could be something like this:
-                             *         -condition-
-                             *         scope
-                             *             stub
-                             *             null
-                             *         -else-
-                             * But it may be more desirable (but is less
-                             * straightforward) to transform this earlier
-                             * in the compiler. Ignoring it for now,
-                             * pending further exploration. */
-                        }
-                    }
+                        op_free(trueop);
+                        goto generic_logop;
                 }
 
                 /* Is there an empty "else" block or ternary false branch?
@@ -3697,8 +3689,44 @@ Perl_rpeep(pTHX_ OP *o)
                     }
                 }
 
+                goto generic_logop;
             }
-            /* FALLTHROUGH */
+
+        case OP_ENTERTRY:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
+            goto generic_logop;
+
+        case OP_ENTERTRYCATCH:
+            /* catch body is the ->op_other of the OP_CATCH */
+            assert(cLOGOPo->op_other->op_type == OP_CATCH);
+            goto generic_logop;
+
+        /* these LOGOPs' op_other always go to a known op which has alrady
+         * been processed and so don't need to run the peephole optimiser
+         * on it. They are included here for completeness.
+         * If any of the asserts fail then this assumption should be
+         * reconsidered.
+         * */
+
+        case OP_SUBSTCONT:
+            assert(cLOGOPo->op_other->op_type == OP_SUBST);
+            break;
+
+        case OP_REGCOMP:
+            assert((PL_opargs[cLOGOPo->op_other->op_type] & OA_CLASS_MASK)
+                    == OA_PMOP);
+            break;
+
+        case OP_ENTERGIVEN:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVEGIVEN);
+            break;
+
+        case OP_ENTERWHEN:
+            assert(cLOGOPo->op_other->op_type == OP_LEAVEWHEN);
+            break;
+
+        /* general LOGOPs */
+
         case OP_MAPWHILE:
         case OP_ANDASSIGN:
         case OP_ORASSIGN:
@@ -3707,6 +3735,19 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_ONCE:
         case OP_ARGDEFELEM:
         case OP_PARAMTEST:
+        case OP_HELEMEXISTSOR:
+        case OP_ANYWHILE:
+        case OP_CATCH:
+
+        generic_logop:
+
+            /* Handle the stuff generically needed for all LOGOPs:
+             * in particular, process op_other: strip nulls and
+             * run the peephole optimiser on it.
+             *
+             * Note that some LOGOPs, such as OP_AND, do their own
+             * specialised handling and never reach here.
+             */
             while (cLOGOP->op_other->op_type == OP_NULL)
                 cLOGOP->op_other = cLOGOP->op_other->op_next;
             DEFER(cLOGOP->op_other);
@@ -3724,17 +3765,6 @@ Perl_rpeep(pTHX_ OP *o)
              * loop, so we have to explicitly follow the op_lastop to
              * process the rest of the code */
             DEFER(cLOOP->op_lastop);
-            break;
-
-        case OP_ENTERTRY:
-            assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
-            DEFER(cLOGOPo->op_other);
-            break;
-
-        case OP_ENTERTRYCATCH:
-            assert(cLOGOPo->op_other->op_type == OP_CATCH);
-            /* catch body is the ->op_other of the OP_CATCH */
-            DEFER(cLOGOPx(cLOGOPo->op_other)->op_other);
             break;
 
         case OP_SUBST:

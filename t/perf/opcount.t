@@ -1315,4 +1315,21 @@ test_opcount(0, "Empty ternary false blocks are optimised away",
                     stub => 0
                 });
 
+# make sure the code block for an any/all gets optimised
+
+test_opcount(0, "basic any/all",
+                sub {
+                    use feature      'keyword_any', 'keyword_all';
+                    use experimental 'keyword_any', 'keyword_all';
+                    my (@a, @x, @b);
+                    @a = any { $x[0] } @b;
+                    @a = all { $x[0] } @b;
+                },
+                {
+                    aelem          => 0,
+                    aelemfast_lex  => 2,
+                    'ex-aelem'     => 2,
+                }
+            );
+
 done_testing();
