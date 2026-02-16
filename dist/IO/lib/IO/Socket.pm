@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 our @ISA = qw(IO::Handle);
 
-our $VERSION = "1.55";
+our $VERSION = "1.56";
 
 our @EXPORT_OK = qw(sockatmark);
 
@@ -291,7 +291,7 @@ sub send {
         # this is non-portable for "connected" UDP sockets
         $peer = $_[3];
     }
-    elsif (!defined getpeername($sock)) {
+    elsif (!defined getpeername($sock) && !$!{EOPNOTSUPP}) {
         # we're not connected, so we require a peer from somewhere
         $peer = $sock->peername;
 
