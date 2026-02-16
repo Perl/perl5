@@ -1,14 +1,14 @@
 #!./perl
 
 BEGIN{
-	# Don't do anything if POSIX is missing, or sigaction missing.
-	use Config;
-	eval 'use POSIX';
-	if($@ || $^O eq 'MSWin32' ||
-	   ($^O eq 'VMS' && !$Config{'d_sigaction'})) {
-		print "1..0\n";
-		exit 0;
-	}
+        # Don't do anything if POSIX is missing, or sigaction missing.
+        use Config;
+        eval 'use POSIX';
+        if($@ || $^O eq 'MSWin32' ||
+           ($^O eq 'VMS' && !$Config{'d_sigaction'})) {
+                print "1..0\n";
+                exit 0;
+        }
 }
 
 use Test::More tests => 36;
@@ -34,10 +34,10 @@ my $newaction=POSIX::SigAction->new('::foo', new POSIX::SigSet(SIGUSR1), 0);
 my $oldaction=POSIX::SigAction->new('::bar', new POSIX::SigSet(), 0);
 
 {
-	my $bad;
-	local($SIG{__WARN__})=sub { $bad=1; };
-	sigaction(SIGHUP, $newaction, $oldaction);
-	is($bad, undef, "no warnings");
+        my $bad;
+        local($SIG{__WARN__})=sub { $bad=1; };
+        sigaction(SIGHUP, $newaction, $oldaction);
+        is($bad, undef, "no warnings");
 }
 
 like($oldaction->{HANDLER}, qr/\A(?:DEFAULT|IGNORE)\z/, '$oldaction->{HANDLER}');
@@ -51,7 +51,7 @@ ok($oldaction->{MASK}->ismember(SIGUSR1), "SIGUSR1 ismember MASK");
 
 SKIP: {
     skip("sigaction() thinks different in $^O", 1)
-	if $^O eq 'linux' || $^O eq 'unicos';
+        if $^O eq 'linux' || $^O eq 'unicos';
     is($oldaction->{FLAGS}, 0);
 }
 
@@ -67,8 +67,8 @@ is($SIG{HUP}, 'DEFAULT');
 $newaction=POSIX::SigAction->new(sub { ++$ok10; });
 sigaction(SIGHUP, $newaction);
 {
-	local($^W)=0;
-	kill 'HUP', $$;
+        local($^W)=0;
+        kill 'HUP', $$;
 }
 is($ok10, 1, "SIGHUP handler called");
 
@@ -77,9 +77,9 @@ is(ref($SIG{HUP}), 'CODE');
 sigaction(SIGHUP, POSIX::SigAction->new('::foo'));
 # Make sure the signal mask gets restored after sigaction croak()s.
 eval {
-	my $act=POSIX::SigAction->new('::foo');
-	delete $act->{HANDLER};
-	sigaction(SIGINT, $act);
+        my $act=POSIX::SigAction->new('::foo');
+        delete $act->{HANDLER};
+        sigaction(SIGINT, $act);
 };
 kill 'HUP', $$;
 is($ok, 1, "signal mask gets restored after croak");
@@ -96,31 +96,31 @@ sigaction(SIGHUP, $newaction, $oldaction);
 is(ref($oldaction->{HANDLER}), 'CODE');
 
 eval {
-	sigaction(SIGHUP, undef, $oldaction);
+        sigaction(SIGHUP, undef, $oldaction);
 };
 is($@, '', "undef for new action");
 
 eval {
-	sigaction(SIGHUP, 0, $oldaction);
+        sigaction(SIGHUP, 0, $oldaction);
 };
 is($@, '', "zero for new action");
 
 eval {
-	sigaction(SIGHUP, bless({},'Class'), $oldaction);
+        sigaction(SIGHUP, bless({},'Class'), $oldaction);
 };
 like($@, qr/\Aaction is not of type POSIX::SigAction/,
      'any object not good as new action');
 
 SKIP: {
     skip("SIGCONT not trappable in $^O", 1)
-	if ($^O eq 'VMS');
+        if ($^O eq 'VMS');
     $newaction=POSIX::SigAction->new(sub { ++$ok10; });
     if (eval { SIGCONT; 1 }) {
-	sigaction(SIGCONT, POSIX::SigAction->new('DEFAULT'));
-	{
-	    local($^W)=0;
-	    kill 'CONT', $$;
-	}
+        sigaction(SIGCONT, POSIX::SigAction->new('DEFAULT'));
+        {
+            local($^W)=0;
+            kill 'CONT', $$;
+        }
     }
     is($bad18, undef, "SIGCONT trappable");
 }
@@ -176,10 +176,10 @@ is($ok, 1, "safe signal delivery must work");
 
 SKIP: {
     eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); scalar %SIGRT + SIGRTMIN() + SIGRTMAX()';
-    $@					# POSIX did not exort
-    || SIGRTMIN() < 0 || SIGRTMAX() < 0	# HP-UX 10.20 exports both as -1
-    || SIGRTMIN() > $Config{sig_count}	# AIX 4.3.3 exports bogus 888 and 999
-	and skip("no SIGRT signals", 4);
+    $@                                  # POSIX did not exort
+    || SIGRTMIN() < 0 || SIGRTMAX() < 0 # HP-UX 10.20 exports both as -1
+    || SIGRTMIN() > $Config{sig_count}  # AIX 4.3.3 exports bogus 888 and 999
+        and skip("no SIGRT signals", 4);
     cmp_ok(SIGRTMAX(), '>', SIGRTMIN(), "SIGRTMAX > SIGRTMIN");
     is(scalar %SIGRT, SIGRTMAX() - SIGRTMIN() + 1, "scalar SIGRT");
     my $sigrtmin;

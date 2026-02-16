@@ -134,43 +134,43 @@ static int not_here(const char *s);
 #  endif
 
 #  ifndef M_E
-#    define M_E		FLOAT_C(2.71828182845904523536028747135266250)
+#    define M_E         FLOAT_C(2.71828182845904523536028747135266250)
 #  endif
 #  ifndef M_LOG2E
-#    define M_LOG2E	FLOAT_C(1.44269504088896340735992468100189214)
+#    define M_LOG2E     FLOAT_C(1.44269504088896340735992468100189214)
 #  endif
 #  ifndef M_LOG10E
-#    define M_LOG10E	FLOAT_C(0.434294481903251827651128918916605082)
+#    define M_LOG10E    FLOAT_C(0.434294481903251827651128918916605082)
 #  endif
 #  ifndef M_LN2
-#    define M_LN2	FLOAT_C(0.693147180559945309417232121458176568)
+#    define M_LN2       FLOAT_C(0.693147180559945309417232121458176568)
 #  endif
 #  ifndef M_LN10
-#    define M_LN10	FLOAT_C(2.30258509299404568401799145468436421)
+#    define M_LN10      FLOAT_C(2.30258509299404568401799145468436421)
 #  endif
 #  ifndef M_PI
-#    define M_PI	FLOAT_C(3.14159265358979323846264338327950288)
+#    define M_PI        FLOAT_C(3.14159265358979323846264338327950288)
 #  endif
 #  ifndef M_PI_2
-#    define M_PI_2	FLOAT_C(1.57079632679489661923132169163975144)
+#    define M_PI_2      FLOAT_C(1.57079632679489661923132169163975144)
 #  endif
 #  ifndef M_PI_4
-#    define M_PI_4	FLOAT_C(0.785398163397448309615660845819875721)
+#    define M_PI_4      FLOAT_C(0.785398163397448309615660845819875721)
 #  endif
 #  ifndef M_1_PI
-#    define M_1_PI	FLOAT_C(0.318309886183790671537767526745028724)
+#    define M_1_PI      FLOAT_C(0.318309886183790671537767526745028724)
 #  endif
 #  ifndef M_2_PI
-#    define M_2_PI	FLOAT_C(0.636619772367581343075535053490057448)
+#    define M_2_PI      FLOAT_C(0.636619772367581343075535053490057448)
 #  endif
 #  ifndef M_2_SQRTPI
-#    define M_2_SQRTPI	FLOAT_C(1.12837916709551257389615890312154517)
+#    define M_2_SQRTPI  FLOAT_C(1.12837916709551257389615890312154517)
 #  endif
 #  ifndef M_SQRT2
-#    define M_SQRT2	FLOAT_C(1.41421356237309504880168872420969808)
+#    define M_SQRT2     FLOAT_C(1.41421356237309504880168872420969808)
 #  endif
 #  ifndef M_SQRT1_2
-#    define M_SQRT1_2	FLOAT_C(0.707106781186547524400844362104849039)
+#    define M_SQRT1_2   FLOAT_C(0.707106781186547524400844362104849039)
 #  endif
 
 #endif
@@ -193,19 +193,19 @@ static int not_here(const char *s);
 
 /* We will have an emulation. */
 #ifndef FP_INFINITE
-#  define FP_INFINITE	0
-#  define FP_NAN	1
-#  define FP_NORMAL	2
-#  define FP_SUBNORMAL	3
-#  define FP_ZERO	4
+#  define FP_INFINITE   0
+#  define FP_NAN        1
+#  define FP_NORMAL     2
+#  define FP_SUBNORMAL  3
+#  define FP_ZERO       4
 #endif
 
 /* We will have an emulation. */
 #ifndef FE_TONEAREST
-#  define FE_TOWARDZERO	0
-#  define FE_TONEAREST	1
-#  define FE_UPWARD	2
-#  define FE_DOWNWARD	3
+#  define FE_TOWARDZERO 0
+#  define FE_TONEAREST  1
+#  define FE_UPWARD     2
+#  define FE_DOWNWARD   3
 #endif
 
 /* C89 math.h:
@@ -256,44 +256,44 @@ static int not_here(const char *s);
  * Also see the comments in hints/aix.sh about long doubles. */
 
 #if defined(USE_QUADMATH) && defined(I_QUADMATH)
-#  define c99_acosh	acoshq
-#  define c99_asinh	asinhq
-#  define c99_atanh	atanhq
-#  define c99_cbrt	cbrtq
-#  define c99_copysign	copysignq
-#  define c99_erf	erfq
-#  define c99_erfc	erfcq
+#  define c99_acosh     acoshq
+#  define c99_asinh     asinhq
+#  define c99_atanh     atanhq
+#  define c99_cbrt      cbrtq
+#  define c99_copysign  copysignq
+#  define c99_erf       erfq
+#  define c99_erfc      erfcq
 /* no exp2q */
-#  define c99_expm1	expm1q
-#  define c99_fdim	fdimq
-#  define c99_fma	fmaq
-#  define c99_fmax	fmaxq
-#  define c99_fmin	fminq
-#  define c99_hypot	hypotq
-#  define c99_ilogb	ilogbq
-#  define c99_lgamma	lgammaq
-#  define c99_log1p	log1pq
-#  define c99_log2	log2q
+#  define c99_expm1     expm1q
+#  define c99_fdim      fdimq
+#  define c99_fma       fmaq
+#  define c99_fmax      fmaxq
+#  define c99_fmin      fminq
+#  define c99_hypot     hypotq
+#  define c99_ilogb     ilogbq
+#  define c99_lgamma    lgammaq
+#  define c99_log1p     log1pq
+#  define c99_log2      log2q
 /* no logbq */
 #  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG
-#    define c99_lrint	llrintq
-#    define c99_lround	llroundq
+#    define c99_lrint   llrintq
+#    define c99_lround  llroundq
 #  else
-#    define c99_lrint	lrintq
-#    define c99_lround	lroundq
+#    define c99_lrint   lrintq
+#    define c99_lround  lroundq
 #  endif
-#  define c99_nan	nanq
-#  define c99_nearbyint	nearbyintq
-#  define c99_nextafter	nextafterq
+#  define c99_nan       nanq
+#  define c99_nearbyint nearbyintq
+#  define c99_nextafter nextafterq
 /* no nexttowardq */
-#  define c99_remainder	remainderq
-#  define c99_remquo	remquoq
-#  define c99_rint	rintq
-#  define c99_round	roundq
-#  define c99_scalbn	scalbnq
+#  define c99_remainder remainderq
+#  define c99_remquo    remquoq
+#  define c99_rint      rintq
+#  define c99_round     roundq
+#  define c99_scalbn    scalbnq
 /* We already define Perl_signbit to signbitq in perl.h. */
-#  define c99_tgamma	tgammaq
-#  define c99_trunc	truncq
+#  define c99_tgamma    tgammaq
+#  define c99_trunc     truncq
 #  define bessel_j0 j0q
 #  define bessel_j1 j1q
 #  define bessel_jn jnq
@@ -304,89 +304,89 @@ static int not_here(const char *s);
   (defined(HAS_FREXPL) || defined(HAS_ILOGBL)) && defined(HAS_SQRTL)
 /* Use some of the Configure scans for long double math functions
  * as the canary for all the C99 *l variants being defined. */
-#  define c99_acosh	acoshl
-#  define c99_asinh	asinhl
-#  define c99_atanh	atanhl
-#  define c99_cbrt	cbrtl
-#  define c99_copysign	copysignl
-#  define c99_erf	erfl
-#  define c99_erfc	erfcl
-#  define c99_exp2	exp2l
-#  define c99_expm1	expm1l
-#  define c99_fdim	fdiml
-#  define c99_fma	fmal
-#  define c99_fmax	fmaxl
-#  define c99_fmin	fminl
-#  define c99_hypot	hypotl
-#  define c99_ilogb	ilogbl
-#  define c99_lgamma	lgammal
-#  define c99_log1p	log1pl
-#  define c99_log2	log2l
-#  define c99_logb	logbl
+#  define c99_acosh     acoshl
+#  define c99_asinh     asinhl
+#  define c99_atanh     atanhl
+#  define c99_cbrt      cbrtl
+#  define c99_copysign  copysignl
+#  define c99_erf       erfl
+#  define c99_erfc      erfcl
+#  define c99_exp2      exp2l
+#  define c99_expm1     expm1l
+#  define c99_fdim      fdiml
+#  define c99_fma       fmal
+#  define c99_fmax      fmaxl
+#  define c99_fmin      fminl
+#  define c99_hypot     hypotl
+#  define c99_ilogb     ilogbl
+#  define c99_lgamma    lgammal
+#  define c99_log1p     log1pl
+#  define c99_log2      log2l
+#  define c99_logb      logbl
 #  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINTL)
-#    define c99_lrint	llrintl
+#    define c99_lrint   llrintl
 #  elif defined(HAS_LRINTL)
-#    define c99_lrint	lrintl
+#    define c99_lrint   lrintl
 #  endif
 #  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUNDL)
-#    define c99_lround	llroundl
+#    define c99_lround  llroundl
 #  elif defined(HAS_LROUNDL)
-#    define c99_lround	lroundl
+#    define c99_lround  lroundl
 #  endif
-#  define c99_nan	nanl
-#  define c99_nearbyint	nearbyintl
-#  define c99_nextafter	nextafterl
-#  define c99_nexttoward	nexttowardl
-#  define c99_remainder	remainderl
-#  define c99_remquo	remquol
-#  define c99_rint	rintl
-#  define c99_round	roundl
-#  define c99_scalbn	scalbnl
+#  define c99_nan       nanl
+#  define c99_nearbyint nearbyintl
+#  define c99_nextafter nextafterl
+#  define c99_nexttoward        nexttowardl
+#  define c99_remainder remainderl
+#  define c99_remquo    remquol
+#  define c99_rint      rintl
+#  define c99_round     roundl
+#  define c99_scalbn    scalbnl
 /* We already define Perl_signbit in perl.h. */
-#  define c99_tgamma	tgammal
-#  define c99_trunc	truncl
+#  define c99_tgamma    tgammal
+#  define c99_trunc     truncl
 #else
-#  define c99_acosh	acosh
-#  define c99_asinh	asinh
-#  define c99_atanh	atanh
-#  define c99_cbrt	cbrt
-#  define c99_copysign	copysign
-#  define c99_erf	erf
-#  define c99_erfc	erfc
-#  define c99_exp2	exp2
-#  define c99_expm1	expm1
-#  define c99_fdim	fdim
-#  define c99_fma	fma
-#  define c99_fmax	fmax
-#  define c99_fmin	fmin
-#  define c99_hypot	hypot
-#  define c99_ilogb	ilogb
-#  define c99_lgamma	lgamma
-#  define c99_log1p	log1p
-#  define c99_log2	log2
-#  define c99_logb	logb
+#  define c99_acosh     acosh
+#  define c99_asinh     asinh
+#  define c99_atanh     atanh
+#  define c99_cbrt      cbrt
+#  define c99_copysign  copysign
+#  define c99_erf       erf
+#  define c99_erfc      erfc
+#  define c99_exp2      exp2
+#  define c99_expm1     expm1
+#  define c99_fdim      fdim
+#  define c99_fma       fma
+#  define c99_fmax      fmax
+#  define c99_fmin      fmin
+#  define c99_hypot     hypot
+#  define c99_ilogb     ilogb
+#  define c99_lgamma    lgamma
+#  define c99_log1p     log1p
+#  define c99_log2      log2
+#  define c99_logb      logb
 #  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLRINT)
-#    define c99_lrint	llrint
+#    define c99_lrint   llrint
 #  else
-#    define c99_lrint	lrint
+#    define c99_lrint   lrint
 #  endif
 #  if defined(USE_64_BIT_INT) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LLROUND)
-#    define c99_lround	llround
+#    define c99_lround  llround
 #  else
-#    define c99_lround	lround
+#    define c99_lround  lround
 #  endif
-#  define c99_nan	nan
-#  define c99_nearbyint	nearbyint
-#  define c99_nextafter	nextafter
-#  define c99_nexttoward	nexttoward
-#  define c99_remainder	remainder
-#  define c99_remquo	remquo
-#  define c99_rint	rint
-#  define c99_round	round
-#  define c99_scalbn	scalbn
+#  define c99_nan       nan
+#  define c99_nearbyint nearbyint
+#  define c99_nextafter nextafter
+#  define c99_nexttoward        nexttoward
+#  define c99_remainder remainder
+#  define c99_remquo    remquo
+#  define c99_rint      rint
+#  define c99_round     round
+#  define c99_scalbn    scalbn
 /* We already define Perl_signbit in perl.h. */
-#  define c99_tgamma	tgamma
-#  define c99_trunc	trunc
+#  define c99_tgamma    tgamma
+#  define c99_trunc     trunc
 #endif
 
 /* AIX xlc (__IBMC__) really doesn't have the following long double
@@ -466,24 +466,24 @@ static int not_here(const char *s);
                                      ((x) > (y) || (y) > (x)))
 #endif
 
-/* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
+/* Check both the Configure symbol and the macro-ness (like C99 promises). */
 #if defined(HAS_FPCLASSIFY) && defined(fpclassify)
-#  define c99_fpclassify	fpclassify
+#  define c99_fpclassify        fpclassify
 #endif
 /* Like isnormal(), the isfinite(), isinf(), and isnan() are also C99
    and also (sizeof-arg-aware) macros, but they are already well taken
    care of by Configure et al, and defined in perl.h as
    Perl_isfinite(), Perl_isinf(), and Perl_isnan(). */
 #ifdef isnormal
-#  define c99_isnormal	isnormal
+#  define c99_isnormal  isnormal
 #endif
 #ifdef isgreater /* canary for all the C99 is*<cmp>* macros. */
-#  define c99_isgreater	isgreater
-#  define c99_isgreaterequal	isgreaterequal
-#  define c99_isless		isless
-#  define c99_islessequal	islessequal
-#  define c99_islessgreater	islessgreater
-#  define c99_isunordered	isunordered
+#  define c99_isgreater isgreater
+#  define c99_isgreaterequal    isgreaterequal
+#  define c99_isless            isless
+#  define c99_islessequal       islessequal
+#  define c99_islessgreater     islessgreater
+#  define c99_isunordered       isunordered
 #endif
 
 /* The Great Wall of Undef where according to the definedness of HAS_FOO symbols
@@ -1408,34 +1408,34 @@ char *tzname[] = { "" , "" };
 #  ifdef __MINGW32__
 #    define mode_t short
 #    ifndef tzset
-#      define tzset()		not_here("tzset")
+#      define tzset()           not_here("tzset")
 #    endif
 #    ifndef _POSIX_OPEN_MAX
-#      define _POSIX_OPEN_MAX	FOPEN_MAX	/* XXX bogus ? */
+#      define _POSIX_OPEN_MAX   FOPEN_MAX       /* XXX bogus ? */
 #    endif
 #  endif
-#  define sigaction(a,b,c)	not_here("sigaction")
-#  define sigpending(a)		not_here("sigpending")
-#  define sigprocmask(a,b,c)	not_here("sigprocmask")
-#  define sigsuspend(a)		not_here("sigsuspend")
-#  define sigemptyset(a)	not_here("sigemptyset")
-#  define sigaddset(a,b)	not_here("sigaddset")
-#  define sigdelset(a,b)	not_here("sigdelset")
-#  define sigfillset(a)		not_here("sigfillset")
-#  define sigismember(a,b)	not_here("sigismember")
+#  define sigaction(a,b,c)      not_here("sigaction")
+#  define sigpending(a)         not_here("sigpending")
+#  define sigprocmask(a,b,c)    not_here("sigprocmask")
+#  define sigsuspend(a)         not_here("sigsuspend")
+#  define sigemptyset(a)        not_here("sigemptyset")
+#  define sigaddset(a,b)        not_here("sigaddset")
+#  define sigdelset(a,b)        not_here("sigdelset")
+#  define sigfillset(a)         not_here("sigfillset")
+#  define sigismember(a,b)      not_here("sigismember")
 #  undef setuid
 #  undef setgid
-#  define setuid(a)		not_here("setuid")
-#  define setgid(a)		not_here("setgid")
+#  define setuid(a)             not_here("setuid")
+#  define setgid(a)             not_here("setgid")
 #if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
-#  define strtold(s1,s2)	not_here("strtold")
+#  define strtold(s1,s2)        not_here("strtold")
 #endif  /* !(USE_LONG_DOUBLE) && !(USE_QUADMATH) */
 #else
 
 #  ifndef HAS_MKFIFO
 #    if defined(OS2) || defined(__amigaos4__)
 #      define mkfifo(a,b) not_here("mkfifo")
-#    else	/* !( defined OS2 ) */
+#    else       /* !( defined OS2 ) */
 #      ifndef mkfifo
 #        define mkfifo(path, mode) (mknod((path), (mode) | S_IFIFO, 0))
 #      endif
@@ -1500,7 +1500,7 @@ END_EXTERN_C
 #endif
 #endif
 #ifndef HAS_FPATHCONF
-#define fpathconf(f,n)	(SysRetLong) not_here("fpathconf")
+#define fpathconf(f,n)  (SysRetLong) not_here("fpathconf")
 #endif
 #ifndef HAS_MKTIME
 #define mktime(a) not_here("mktime")
@@ -1509,10 +1509,10 @@ END_EXTERN_C
 #define nice(a) not_here("nice")
 #endif
 #ifndef HAS_PATHCONF
-#define pathconf(f,n)	(SysRetLong) not_here("pathconf")
+#define pathconf(f,n)   (SysRetLong) not_here("pathconf")
 #endif
 #ifndef HAS_SYSCONF
-#define sysconf(n)	(SysRetLong) not_here("sysconf")
+#define sysconf(n)      (SysRetLong) not_here("sysconf")
 #endif
 #ifndef HAS_READLINK
 #define readlink(a,b,c) not_here("readlink")
@@ -1774,82 +1774,82 @@ my_tzset(pTHX)
      * self-consistent */
 }
 
-MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
+MODULE = SigSet         PACKAGE = POSIX::SigSet         PREFIX = sig
 
 void
 new(packname = "POSIX::SigSet", ...)
-    const char *	packname
+    const char *        packname
     CODE:
-	{
-	    int i;
-	    sigset_t *const s
-		= (sigset_t *) allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
-					       sizeof(sigset_t),
-					       packname);
-	    sigemptyset(s);
-	    for (i = 1; i < items; i++) {
+        {
+            int i;
+            sigset_t *const s
+                = (sigset_t *) allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
+                                               sizeof(sigset_t),
+                                               packname);
+            sigemptyset(s);
+            for (i = 1; i < items; i++) {
                 IV sig = SvIV(ST(i));
-		if (sigaddset(s, sig) < 0)
+                if (sigaddset(s, sig) < 0)
                     croak("POSIX::Sigset->new: failed to add signal %" IVdf, sig);
             }
-	    XSRETURN(1);
-	}
+            XSRETURN(1);
+        }
 
 SysRet
 addset(sigset, sig)
-	POSIX::SigSet	sigset
-	POSIX::SigNo	sig
+        POSIX::SigSet   sigset
+        POSIX::SigNo    sig
    ALIAS:
-	delset = 1
+        delset = 1
    CODE:
-	RETVAL = ix ? sigdelset(sigset, sig) : sigaddset(sigset, sig);
+        RETVAL = ix ? sigdelset(sigset, sig) : sigaddset(sigset, sig);
    OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 emptyset(sigset)
-	POSIX::SigSet	sigset
+        POSIX::SigSet   sigset
    ALIAS:
-	fillset = 1
+        fillset = 1
    CODE:
-	RETVAL = ix ? sigfillset(sigset) : sigemptyset(sigset);
+        RETVAL = ix ? sigfillset(sigset) : sigemptyset(sigset);
    OUTPUT:
-	RETVAL
+        RETVAL
 
 int
 sigismember(sigset, sig)
-	POSIX::SigSet	sigset
-	POSIX::SigNo	sig
+        POSIX::SigSet   sigset
+        POSIX::SigNo    sig
 
-MODULE = Termios	PACKAGE = POSIX::Termios	PREFIX = cf
+MODULE = Termios        PACKAGE = POSIX::Termios        PREFIX = cf
 
 void
 new(packname = "POSIX::Termios", ...)
-    const char *	packname
+    const char *        packname
     CODE:
-	{
+        {
 #ifdef I_TERMIOS
-	    void *const p = allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
-					    sizeof(struct termios), packname);
-	    /* The previous implementation stored a pointer to an uninitialised
-	       struct termios. Seems safer to initialise it, particularly as
-	       this implementation exposes the struct to prying from perl-space.
-	    */
-	    memset(p, 0, 1 + sizeof(struct termios));
-	    XSRETURN(1);
+            void *const p = allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
+                                            sizeof(struct termios), packname);
+            /* The previous implementation stored a pointer to an uninitialised
+               struct termios. Seems safer to initialise it, particularly as
+               this implementation exposes the struct to prying from perl-space.
+            */
+            memset(p, 0, 1 + sizeof(struct termios));
+            XSRETURN(1);
 #else
-	    not_here("termios");
+            not_here("termios");
 #endif
-	}
+        }
 
 SysRet
 getattr(termios_ref, fd = 0)
-	POSIX::Termios	termios_ref
-	POSIX::Fd		fd
+        POSIX::Termios  termios_ref
+        POSIX::Fd               fd
     CODE:
-	RETVAL = tcgetattr(fd, termios_ref);
+        RETVAL = tcgetattr(fd, termios_ref);
     OUTPUT:
-	RETVAL
+        RETVAL
 
     # If we define TCSANOW here then both a found and not found constant sub
     # are created causing a Constant subroutine TCSANOW redefined warning
@@ -1861,215 +1861,215 @@ getattr(termios_ref, fd = 0)
 #endif
 SysRet
 setattr(termios_ref, fd = 0, optional_actions = DEF_SETATTR_ACTION)
-	POSIX::Termios	termios_ref
-	POSIX::Fd	fd
-	int		optional_actions
+        POSIX::Termios  termios_ref
+        POSIX::Fd       fd
+        int             optional_actions
     CODE:
-	/* The second argument to the call is mandatory, but we'd like to give
-	   it a useful default. 0 isn't valid on all operating systems - on
+        /* The second argument to the call is mandatory, but we'd like to give
+           it a useful default. 0 isn't valid on all operating systems - on
            Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
            values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
-	if (optional_actions < 0) {
+        if (optional_actions < 0) {
             SETERRNO(EINVAL, LIB_INVARG);
             RETVAL = -1;
         } else {
             RETVAL = tcsetattr(fd, optional_actions, termios_ref);
         }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 speed_t
 getispeed(termios_ref)
-	POSIX::Termios	termios_ref
+        POSIX::Termios  termios_ref
     ALIAS:
-	getospeed = 1
+        getospeed = 1
     CODE:
-	RETVAL = ix ? cfgetospeed(termios_ref) : cfgetispeed(termios_ref);
+        RETVAL = ix ? cfgetospeed(termios_ref) : cfgetispeed(termios_ref);
     OUTPUT:
-	RETVAL
+        RETVAL
 
 tcflag_t
 getiflag(termios_ref)
-	POSIX::Termios	termios_ref
+        POSIX::Termios  termios_ref
     ALIAS:
-	getoflag = 1
-	getcflag = 2
-	getlflag = 3
+        getoflag = 1
+        getcflag = 2
+        getlflag = 3
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	switch(ix) {
-	case 0:
-	    RETVAL = termios_ref->c_iflag;
-	    break;
-	case 1:
-	    RETVAL = termios_ref->c_oflag;
-	    break;
-	case 2:
-	    RETVAL = termios_ref->c_cflag;
-	    break;
-	case 3:
-	    RETVAL = termios_ref->c_lflag;
-	    break;
+        switch(ix) {
+        case 0:
+            RETVAL = termios_ref->c_iflag;
+            break;
+        case 1:
+            RETVAL = termios_ref->c_oflag;
+            break;
+        case 2:
+            RETVAL = termios_ref->c_cflag;
+            break;
+        case 3:
+            RETVAL = termios_ref->c_lflag;
+            break;
         default:
-	    RETVAL = 0; /* silence compiler warning */
-	}
+            RETVAL = 0; /* silence compiler warning */
+        }
 #else
-	not_here(GvNAME(CvGV(cv)));
-	RETVAL = 0;
+        not_here(GvNAME(CvGV(cv)));
+        RETVAL = 0;
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 cc_t
 getcc(termios_ref, ccix)
-	POSIX::Termios	termios_ref
-	unsigned int	ccix
+        POSIX::Termios  termios_ref
+        unsigned int    ccix
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	if (ccix >= NCCS)
-	    croak("Bad getcc subscript");
-	RETVAL = termios_ref->c_cc[ccix];
+        if (ccix >= NCCS)
+            croak("Bad getcc subscript");
+        RETVAL = termios_ref->c_cc[ccix];
 #else
      not_here("getcc");
      RETVAL = 0;
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 setispeed(termios_ref, speed)
-	POSIX::Termios	termios_ref
-	speed_t		speed
+        POSIX::Termios  termios_ref
+        speed_t         speed
     ALIAS:
-	setospeed = 1
+        setospeed = 1
     CODE:
-	RETVAL = ix
-	    ? cfsetospeed(termios_ref, speed) : cfsetispeed(termios_ref, speed);
+        RETVAL = ix
+            ? cfsetospeed(termios_ref, speed) : cfsetispeed(termios_ref, speed);
     OUTPUT:
-	RETVAL
+        RETVAL
 
 void
 setiflag(termios_ref, flag)
-	POSIX::Termios	termios_ref
-	tcflag_t	flag
+        POSIX::Termios  termios_ref
+        tcflag_t        flag
     ALIAS:
-	setoflag = 1
-	setcflag = 2
-	setlflag = 3
+        setoflag = 1
+        setcflag = 2
+        setlflag = 3
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	switch(ix) {
-	case 0:
-	    termios_ref->c_iflag = flag;
-	    break;
-	case 1:
-	    termios_ref->c_oflag = flag;
-	    break;
-	case 2:
-	    termios_ref->c_cflag = flag;
-	    break;
-	case 3:
-	    termios_ref->c_lflag = flag;
-	    break;
-	}
+        switch(ix) {
+        case 0:
+            termios_ref->c_iflag = flag;
+            break;
+        case 1:
+            termios_ref->c_oflag = flag;
+            break;
+        case 2:
+            termios_ref->c_cflag = flag;
+            break;
+        case 3:
+            termios_ref->c_lflag = flag;
+            break;
+        }
 #else
-	not_here(GvNAME(CvGV(cv)));
+        not_here(GvNAME(CvGV(cv)));
 #endif
 
 void
 setcc(termios_ref, ccix, cc)
-	POSIX::Termios	termios_ref
-	unsigned int	ccix
-	cc_t		cc
+        POSIX::Termios  termios_ref
+        unsigned int    ccix
+        cc_t            cc
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	if (ccix >= NCCS)
-	    croak("Bad setcc subscript");
-	termios_ref->c_cc[ccix] = cc;
+        if (ccix >= NCCS)
+            croak("Bad setcc subscript");
+        termios_ref->c_cc[ccix] = cc;
 #else
-	    not_here("setcc");
+            not_here("setcc");
 #endif
 
 
-MODULE = POSIX		PACKAGE = POSIX
+MODULE = POSIX          PACKAGE = POSIX
 
 INCLUDE: const-xs.inc
 
 int
 WEXITSTATUS(status)
-	int status
+        int status
     ALIAS:
-	POSIX::WIFEXITED = 1
-	POSIX::WIFSIGNALED = 2
-	POSIX::WIFSTOPPED = 3
-	POSIX::WSTOPSIG = 4
-	POSIX::WTERMSIG = 5
+        POSIX::WIFEXITED = 1
+        POSIX::WIFSIGNALED = 2
+        POSIX::WIFSTOPPED = 3
+        POSIX::WSTOPSIG = 4
+        POSIX::WTERMSIG = 5
     CODE:
 #if !defined(WEXITSTATUS) || !defined(WIFEXITED) || !defined(WIFSIGNALED) \
       || !defined(WIFSTOPPED) || !defined(WSTOPSIG) || !defined(WTERMSIG)
         RETVAL = 0; /* Silence compilers that notice this, but don't realise
-		       that not_here() can't return.  */
+                       that not_here() can't return.  */
 #endif
-	switch(ix) {
-	case 0:
+        switch(ix) {
+        case 0:
 #ifdef WEXITSTATUS
-	    RETVAL = WEXITSTATUS(WMUNGE(status));
+            RETVAL = WEXITSTATUS(WMUNGE(status));
 #else
-	    not_here("WEXITSTATUS");
+            not_here("WEXITSTATUS");
 #endif
-	    break;
-	case 1:
+            break;
+        case 1:
 #ifdef WIFEXITED
-	    RETVAL = WIFEXITED(WMUNGE(status));
+            RETVAL = WIFEXITED(WMUNGE(status));
 #else
-	    not_here("WIFEXITED");
+            not_here("WIFEXITED");
 #endif
-	    break;
-	case 2:
+            break;
+        case 2:
 #ifdef WIFSIGNALED
-	    RETVAL = WIFSIGNALED(WMUNGE(status));
+            RETVAL = WIFSIGNALED(WMUNGE(status));
 #else
-	    not_here("WIFSIGNALED");
+            not_here("WIFSIGNALED");
 #endif
-	    break;
-	case 3:
+            break;
+        case 3:
 #ifdef WIFSTOPPED
-	    RETVAL = WIFSTOPPED(WMUNGE(status));
+            RETVAL = WIFSTOPPED(WMUNGE(status));
 #else
-	    not_here("WIFSTOPPED");
+            not_here("WIFSTOPPED");
 #endif
-	    break;
-	case 4:
+            break;
+        case 4:
 #ifdef WSTOPSIG
-	    RETVAL = WSTOPSIG(WMUNGE(status));
+            RETVAL = WSTOPSIG(WMUNGE(status));
 #else
-	    not_here("WSTOPSIG");
+            not_here("WSTOPSIG");
 #endif
-	    break;
-	case 5:
+            break;
+        case 5:
 #ifdef WTERMSIG
-	    RETVAL = WTERMSIG(WMUNGE(status));
+            RETVAL = WTERMSIG(WMUNGE(status));
 #else
-	    not_here("WTERMSIG");
+            not_here("WTERMSIG");
 #endif
-	    break;
-	default:
-	    croak("Illegal alias %d for POSIX::W*", (int)ix);
-	}
+            break;
+        default:
+            croak("Illegal alias %d for POSIX::W*", (int)ix);
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 open(filename, flags = O_RDONLY, mode = 0666)
-	char *		filename
-	int		flags
-	Mode_t		mode
+        char *          filename
+        int             flags
+        Mode_t          mode
     CODE:
-	if (flags & (O_APPEND|O_CREAT|O_TRUNC|O_RDWR|O_WRONLY|O_EXCL))
-	    TAINT_PROPER("open");
-	RETVAL = open(filename, flags, mode);
+        if (flags & (O_APPEND|O_CREAT|O_TRUNC|O_RDWR|O_WRONLY|O_EXCL))
+            TAINT_PROPER("open");
+        RETVAL = open(filename, flags, mode);
     OUTPUT:
-	RETVAL
+        RETVAL
 
 
 HV *
@@ -2077,251 +2077,251 @@ localeconv()
     CODE:
         RETVAL = Perl_localeconv(aTHX);
     OUTPUT:
-	RETVAL
+        RETVAL
 
 char *
 setlocale(category, locale = 0)
-	int		category
-	const char *    locale
+        int             category
+        const char *    locale
     PREINIT:
-	char *		retval;
+        char *          retval;
     CODE:
-	retval = (char *) Perl_setlocale(category, locale);
+        retval = (char *) Perl_setlocale(category, locale);
         if (! retval) {
             XSRETURN_UNDEF;
         }
 
         RETVAL = retval;
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 acos(x)
-	NV		x
+        NV              x
     ALIAS:
-	acosh = 1
-	asin = 2
-	asinh = 3
-	atan = 4
-	atanh = 5
-	cbrt = 6
-	ceil = 7
-	cosh = 8
-	erf = 9
-	erfc = 10
-	exp2 = 11
-	expm1 = 12
-	floor = 13
-	j0 = 14
-	j1 = 15
-	lgamma = 16
-	log10 = 17
-	log1p = 18
-	log2 = 19
-	logb = 20
-	nearbyint = 21
-	rint = 22
-	round = 23
-	sinh = 24
-	tan = 25
-	tanh = 26
-	tgamma = 27
-	trunc = 28
-	y0 = 29
-	y1 = 30
+        acosh = 1
+        asin = 2
+        asinh = 3
+        atan = 4
+        atanh = 5
+        cbrt = 6
+        ceil = 7
+        cosh = 8
+        erf = 9
+        erfc = 10
+        exp2 = 11
+        expm1 = 12
+        floor = 13
+        j0 = 14
+        j1 = 15
+        lgamma = 16
+        log10 = 17
+        log1p = 18
+        log2 = 19
+        logb = 20
+        nearbyint = 21
+        rint = 22
+        round = 23
+        sinh = 24
+        tan = 25
+        tanh = 26
+        tgamma = 27
+        trunc = 28
+        y0 = 29
+        y1 = 30
     CODE:
-	PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(x);
 #ifdef NV_NAN
-	RETVAL = NV_NAN;
+        RETVAL = NV_NAN;
 #else
-	RETVAL = 0;
+        RETVAL = 0;
 #endif
-	switch (ix) {
-	case 0:
-	    RETVAL = Perl_acos(x); /* C89 math */
-	    break;
-	case 1:
+        switch (ix) {
+        case 0:
+            RETVAL = Perl_acos(x); /* C89 math */
+            break;
+        case 1:
 #ifdef c99_acosh
-	    RETVAL = c99_acosh(x);
+            RETVAL = c99_acosh(x);
 #else
-	    not_here("acosh");
+            not_here("acosh");
 #endif
-	    break;
-	case 2:
-	    RETVAL = Perl_asin(x); /* C89 math */
-	    break;
-	case 3:
+            break;
+        case 2:
+            RETVAL = Perl_asin(x); /* C89 math */
+            break;
+        case 3:
 #ifdef c99_asinh
-	    RETVAL = c99_asinh(x);
+            RETVAL = c99_asinh(x);
 #else
-	    not_here("asinh");
+            not_here("asinh");
 #endif
-	    break;
-	case 4:
-	    RETVAL = Perl_atan(x); /* C89 math */
-	    break;
-	case 5:
+            break;
+        case 4:
+            RETVAL = Perl_atan(x); /* C89 math */
+            break;
+        case 5:
 #ifdef c99_atanh
-	    RETVAL = c99_atanh(x);
+            RETVAL = c99_atanh(x);
 #else
-	    not_here("atanh");
+            not_here("atanh");
 #endif
-	    break;
-	case 6:
+            break;
+        case 6:
 #ifdef c99_cbrt
-	    RETVAL = c99_cbrt(x);
+            RETVAL = c99_cbrt(x);
 #else
-	    not_here("cbrt");
+            not_here("cbrt");
 #endif
-	    break;
-	case 7:
-	    RETVAL = Perl_ceil(x); /* C89 math */
-	    break;
-	case 8:
-	    RETVAL = Perl_cosh(x); /* C89 math */
-	    break;
-	case 9:
+            break;
+        case 7:
+            RETVAL = Perl_ceil(x); /* C89 math */
+            break;
+        case 8:
+            RETVAL = Perl_cosh(x); /* C89 math */
+            break;
+        case 9:
 #ifdef c99_erf
-	    RETVAL = c99_erf(x);
+            RETVAL = c99_erf(x);
 #else
-	    not_here("erf");
+            not_here("erf");
 #endif
-	    break;
-	case 10:
+            break;
+        case 10:
 #ifdef c99_erfc
-	    RETVAL = c99_erfc(x);
+            RETVAL = c99_erfc(x);
 #else
-	    not_here("erfc");
+            not_here("erfc");
 #endif
-	    break;
-	case 11:
+            break;
+        case 11:
 #ifdef c99_exp2
-	    RETVAL = c99_exp2(x);
+            RETVAL = c99_exp2(x);
 #else
-	    not_here("exp2");
+            not_here("exp2");
 #endif
-	    break;
-	case 12:
+            break;
+        case 12:
 #ifdef c99_expm1
-	    RETVAL = c99_expm1(x);
+            RETVAL = c99_expm1(x);
 #else
-	    not_here("expm1");
+            not_here("expm1");
 #endif
-	    break;
-	case 13:
-	    RETVAL = Perl_floor(x); /* C89 math */
-	    break;
-	case 14:
+            break;
+        case 13:
+            RETVAL = Perl_floor(x); /* C89 math */
+            break;
+        case 14:
 #ifdef bessel_j0
-	    RETVAL = bessel_j0(x);
+            RETVAL = bessel_j0(x);
 #else
-	    not_here("j0");
+            not_here("j0");
 #endif
-	    break;
-	case 15:
+            break;
+        case 15:
 #ifdef bessel_j1
-	    RETVAL = bessel_j1(x);
+            RETVAL = bessel_j1(x);
 #else
-	    not_here("j1");
+            not_here("j1");
 #endif
-	    break;
-	case 16:
+            break;
+        case 16:
         /* XXX Note: the lgamma modifies a global variable (signgam),
          * which is evil.  Some platforms have lgamma_r, which has
          * extra output parameter instead of the global variable. */
 #ifdef c99_lgamma
-	    RETVAL = c99_lgamma(x);
+            RETVAL = c99_lgamma(x);
 #else
-	    not_here("lgamma");
+            not_here("lgamma");
 #endif
-	    break;
-	case 17:
-	    RETVAL = Perl_log10(x); /* C89 math */
-	    break;
-	case 18:
+            break;
+        case 17:
+            RETVAL = Perl_log10(x); /* C89 math */
+            break;
+        case 18:
 #ifdef c99_log1p
-	    RETVAL = c99_log1p(x);
+            RETVAL = c99_log1p(x);
 #else
-	    not_here("log1p");
+            not_here("log1p");
 #endif
-	    break;
-	case 19:
+            break;
+        case 19:
 #ifdef c99_log2
-	    RETVAL = c99_log2(x);
+            RETVAL = c99_log2(x);
 #else
-	    not_here("log2");
+            not_here("log2");
 #endif
-	    break;
-	case 20:
+            break;
+        case 20:
 #ifdef c99_logb
-	    RETVAL = c99_logb(x);
+            RETVAL = c99_logb(x);
 #elif defined(c99_log2) && FLT_RADIX == 2
-	    RETVAL = Perl_floor(c99_log2(PERL_ABS(x)));
+            RETVAL = Perl_floor(c99_log2(PERL_ABS(x)));
 #else
-	    not_here("logb");
+            not_here("logb");
 #endif
-	    break;
-	case 21:
+            break;
+        case 21:
 #ifdef c99_nearbyint
-	    RETVAL = c99_nearbyint(x);
+            RETVAL = c99_nearbyint(x);
 #else
-	    not_here("nearbyint");
+            not_here("nearbyint");
 #endif
-	    break;
-	case 22:
+            break;
+        case 22:
 #ifdef c99_rint
-	    RETVAL = c99_rint(x);
+            RETVAL = c99_rint(x);
 #else
-	    not_here("rint");
+            not_here("rint");
 #endif
-	    break;
-	case 23:
+            break;
+        case 23:
 #ifdef c99_round
-	    RETVAL = c99_round(x);
+            RETVAL = c99_round(x);
 #else
-	    not_here("round");
+            not_here("round");
 #endif
-	    break;
-	case 24:
-	    RETVAL = Perl_sinh(x); /* C89 math */
-	    break;
-	case 25:
-	    RETVAL = Perl_tan(x); /* C89 math */
-	    break;
-	case 26:
-	    RETVAL = Perl_tanh(x); /* C89 math */
-	    break;
-	case 27:
+            break;
+        case 24:
+            RETVAL = Perl_sinh(x); /* C89 math */
+            break;
+        case 25:
+            RETVAL = Perl_tan(x); /* C89 math */
+            break;
+        case 26:
+            RETVAL = Perl_tanh(x); /* C89 math */
+            break;
+        case 27:
 #ifdef c99_tgamma
-	    RETVAL = c99_tgamma(x);
+            RETVAL = c99_tgamma(x);
 #else
-	    not_here("tgamma");
+            not_here("tgamma");
 #endif
-	    break;
-	case 28:
+            break;
+        case 28:
 #ifdef c99_trunc
-	    RETVAL = c99_trunc(x);
+            RETVAL = c99_trunc(x);
 #else
-	    not_here("trunc");
+            not_here("trunc");
 #endif
-	    break;
-	case 29:
+            break;
+        case 29:
 #ifdef bessel_y0
-	    RETVAL = bessel_y0(x);
+            RETVAL = bessel_y0(x);
 #else
-	    not_here("y0");
+            not_here("y0");
 #endif
-	    break;
+            break;
         case 30:
-	default:
+        default:
 #ifdef bessel_y1
-	    RETVAL = bessel_y1(x);
+            RETVAL = bessel_y1(x);
 #else
-	    not_here("y1");
+            not_here("y1");
 #endif
-	}
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 IV
 fegetround()
@@ -2367,312 +2367,312 @@ fegetround()
             break;
         }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 IV
 fesetround(x)
-	IV	x
+        IV      x
     CODE:
 #ifdef HAS_FEGETROUND /* canary for fesetround */
-	RETVAL = fesetround(x);
+        RETVAL = fesetround(x);
 #elif defined(HAS_FPGETROUND) /* canary for fpsetround */
-	switch (x) {
-	case FE_TONEAREST:  RETVAL = fpsetround(FP_RN); break;
-	case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
-	case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
-	case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
+        switch (x) {
+        case FE_TONEAREST:  RETVAL = fpsetround(FP_RN); break;
+        case FE_TOWARDZERO: RETVAL = fpsetround(FP_RZ); break;
+        case FE_DOWNWARD:   RETVAL = fpsetround(FP_RM); break;
+        case FE_UPWARD:     RETVAL = fpsetround(FP_RP); break;
         default: RETVAL = -1; break;
-	}
+        }
 #elif defined(__osf__) /* Tru64 */
-	switch (x) {
-	case FE_TONEAREST:  RETVAL = write_rnd(FP_RND_RN); break;
-	case FE_TOWARDZERO: RETVAL = write_rnd(FP_RND_RZ); break;
-	case FE_DOWNWARD:   RETVAL = write_rnd(FP_RND_RM); break;
-	case FE_UPWARD:     RETVAL = write_rnd(FP_RND_RP); break;
+        switch (x) {
+        case FE_TONEAREST:  RETVAL = write_rnd(FP_RND_RN); break;
+        case FE_TOWARDZERO: RETVAL = write_rnd(FP_RND_RZ); break;
+        case FE_DOWNWARD:   RETVAL = write_rnd(FP_RND_RM); break;
+        case FE_UPWARD:     RETVAL = write_rnd(FP_RND_RP); break;
         default: RETVAL = -1; break;
-	}
+        }
 #else
-	PERL_UNUSED_VAR(x);
-	RETVAL = -1;
-	not_here("fesetround");
+        PERL_UNUSED_VAR(x);
+        RETVAL = -1;
+        not_here("fesetround");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 IV
 fpclassify(x)
-	NV		x
+        NV              x
     ALIAS:
-	ilogb = 1
-	isfinite = 2
-	isinf = 3
-	isnan = 4
-	isnormal = 5
-	lrint = 6
-	lround = 7
+        ilogb = 1
+        isfinite = 2
+        isinf = 3
+        isnan = 4
+        isnormal = 5
+        lrint = 6
+        lround = 7
         signbit = 8
     CODE:
         PERL_UNUSED_VAR(x);
-	RETVAL = -1;
-	switch (ix) {
-	case 0:
+        RETVAL = -1;
+        switch (ix) {
+        case 0:
 #ifdef c99_fpclassify
-	    RETVAL = c99_fpclassify(x);
+            RETVAL = c99_fpclassify(x);
 #else
-	    not_here("fpclassify");
+            not_here("fpclassify");
 #endif
-	    break;
-	case 1:
+            break;
+        case 1:
 #ifdef c99_ilogb
-	    RETVAL = c99_ilogb(x);
+            RETVAL = c99_ilogb(x);
 #else
-	    not_here("ilogb");
+            not_here("ilogb");
 #endif
-	    break;
-	case 2:
-	    RETVAL = Perl_isfinite(x);
-	    break;
-	case 3:
-	    RETVAL = Perl_isinf(x);
-	    break;
-	case 4:
-	    RETVAL = Perl_isnan(x);
-	    break;
-	case 5:
+            break;
+        case 2:
+            RETVAL = Perl_isfinite(x);
+            break;
+        case 3:
+            RETVAL = Perl_isinf(x);
+            break;
+        case 4:
+            RETVAL = Perl_isnan(x);
+            break;
+        case 5:
 #ifdef c99_isnormal
-	    RETVAL = c99_isnormal(x);
+            RETVAL = c99_isnormal(x);
 #else
-	    not_here("isnormal");
+            not_here("isnormal");
 #endif
-	    break;
-	case 6:
+            break;
+        case 6:
 #ifdef c99_lrint
-	    RETVAL = c99_lrint(x);
+            RETVAL = c99_lrint(x);
 #else
-	    not_here("lrint");
+            not_here("lrint");
 #endif
-	    break;
-	case 7:
+            break;
+        case 7:
 #ifdef c99_lround
-	    RETVAL = c99_lround(x);
+            RETVAL = c99_lround(x);
 #else
-	    not_here("lround");
+            not_here("lround");
 #endif
-	    break;
-	case 8:
-	default:
-	    RETVAL = Perl_signbit(x);
-	    break;
-	}
+            break;
+        case 8:
+        default:
+            RETVAL = Perl_signbit(x);
+            break;
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 getpayload(nv)
-	NV nv
+        NV nv
     CODE:
 #ifdef DOUBLE_HAS_NAN
-	RETVAL = S_getpayload(nv);
+        RETVAL = S_getpayload(nv);
 #else
         PERL_UNUSED_VAR(nv);
         RETVAL = 0.0;
-	not_here("getpayload");
+        not_here("getpayload");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 void
 setpayload(nv, payload)
-	NV nv
-	NV payload
+        NV nv
+        NV payload
     CODE:
 #ifdef DOUBLE_HAS_NAN
-	S_setpayload(&nv, payload, FALSE);
+        S_setpayload(&nv, payload, FALSE);
 #else
         PERL_UNUSED_VAR(nv);
         PERL_UNUSED_VAR(payload);
-	not_here("setpayload");
+        not_here("setpayload");
 #endif
     OUTPUT:
-	nv
+        nv
 
 void
 setpayloadsig(nv, payload)
-	NV nv
-	NV payload
+        NV nv
+        NV payload
     CODE:
 #ifdef DOUBLE_HAS_NAN
-	nv = NV_NAN;
-	S_setpayload(&nv, payload, TRUE);
+        nv = NV_NAN;
+        S_setpayload(&nv, payload, TRUE);
 #else
         PERL_UNUSED_VAR(nv);
         PERL_UNUSED_VAR(payload);
-	not_here("setpayloadsig");
+        not_here("setpayloadsig");
 #endif
     OUTPUT:
-	nv
+        nv
 
 int
 issignaling(nv)
-	NV nv
+        NV nv
     CODE:
 #ifdef DOUBLE_HAS_NAN
-	RETVAL = Perl_isnan(nv) && NV_NAN_IS_SIGNALING(&nv);
+        RETVAL = Perl_isnan(nv) && NV_NAN_IS_SIGNALING(&nv);
 #else
         PERL_UNUSED_VAR(nv);
         RETVAL = 0.0;
-	not_here("issignaling");
+        not_here("issignaling");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 copysign(x,y)
-	NV		x
-	NV		y
+        NV              x
+        NV              y
     ALIAS:
-	fdim = 1
-	fmax = 2
-	fmin = 3
-	fmod = 4
-	hypot = 5
-	isgreater = 6
-	isgreaterequal = 7
-	isless = 8
-	islessequal = 9
-	islessgreater = 10
-	isunordered = 11
-	nextafter = 12
-	nexttoward = 13
-	remainder = 14
+        fdim = 1
+        fmax = 2
+        fmin = 3
+        fmod = 4
+        hypot = 5
+        isgreater = 6
+        isgreaterequal = 7
+        isless = 8
+        islessequal = 9
+        islessgreater = 10
+        isunordered = 11
+        nextafter = 12
+        nexttoward = 13
+        remainder = 14
     CODE:
         PERL_UNUSED_VAR(x);
         PERL_UNUSED_VAR(y);
 #ifdef NV_NAN
-	RETVAL = NV_NAN;
+        RETVAL = NV_NAN;
 #else
-	RETVAL = 0;
+        RETVAL = 0;
 #endif
-	switch (ix) {
-	case 0:
+        switch (ix) {
+        case 0:
 #ifdef c99_copysign
-	    RETVAL = c99_copysign(x, y);
+            RETVAL = c99_copysign(x, y);
 #else
-	    not_here("copysign");
+            not_here("copysign");
 #endif
-	    break;
-	case 1:
+            break;
+        case 1:
 #ifdef c99_fdim
-	    RETVAL = c99_fdim(x, y);
+            RETVAL = c99_fdim(x, y);
 #else
-	    not_here("fdim");
+            not_here("fdim");
 #endif
-	    break;
-	case 2:
+            break;
+        case 2:
 #ifdef c99_fmax
-	    RETVAL = c99_fmax(x, y);
+            RETVAL = c99_fmax(x, y);
 #else
-	    not_here("fmax");
+            not_here("fmax");
 #endif
-	    break;
-	case 3:
+            break;
+        case 3:
 #ifdef c99_fmin
-	    RETVAL = c99_fmin(x, y);
+            RETVAL = c99_fmin(x, y);
 #else
-	    not_here("fmin");
+            not_here("fmin");
 #endif
-	    break;
-	case 4:
-	    RETVAL = Perl_fmod(x, y); /* C89 math */
-	    break;
-	case 5:
+            break;
+        case 4:
+            RETVAL = Perl_fmod(x, y); /* C89 math */
+            break;
+        case 5:
 #ifdef c99_hypot
-	    RETVAL = c99_hypot(x, y);
+            RETVAL = c99_hypot(x, y);
 #else
-	    not_here("hypot");
+            not_here("hypot");
 #endif
-	    break;
-	case 6:
+            break;
+        case 6:
 #ifdef c99_isgreater
-	    RETVAL = c99_isgreater(x, y);
+            RETVAL = c99_isgreater(x, y);
 #else
-	    not_here("isgreater");
+            not_here("isgreater");
 #endif
-	    break;
-	case 7:
+            break;
+        case 7:
 #ifdef c99_isgreaterequal
-	    RETVAL = c99_isgreaterequal(x, y);
+            RETVAL = c99_isgreaterequal(x, y);
 #else
-	    not_here("isgreaterequal");
+            not_here("isgreaterequal");
 #endif
-	    break;
-	case 8:
+            break;
+        case 8:
 #ifdef c99_isless
-	    RETVAL = c99_isless(x, y);
+            RETVAL = c99_isless(x, y);
 #else
-	    not_here("isless");
+            not_here("isless");
 #endif
-	    break;
-	case 9:
+            break;
+        case 9:
 #ifdef c99_islessequal
-	    RETVAL = c99_islessequal(x, y);
+            RETVAL = c99_islessequal(x, y);
 #else
-	    not_here("islessequal");
+            not_here("islessequal");
 #endif
-	    break;
-	case 10:
+            break;
+        case 10:
 #ifdef c99_islessgreater
-	    RETVAL = c99_islessgreater(x, y);
+            RETVAL = c99_islessgreater(x, y);
 #else
-	    not_here("islessgreater");
+            not_here("islessgreater");
 #endif
-	    break;
-	case 11:
+            break;
+        case 11:
 #ifdef c99_isunordered
-	    RETVAL = c99_isunordered(x, y);
+            RETVAL = c99_isunordered(x, y);
 #else
-	    not_here("isunordered");
+            not_here("isunordered");
 #endif
-	    break;
-	case 12:
+            break;
+        case 12:
 #ifdef c99_nextafter
-	    RETVAL = c99_nextafter(x, y);
+            RETVAL = c99_nextafter(x, y);
 #else
-	    not_here("nextafter");
+            not_here("nextafter");
 #endif
-	    break;
-	case 13:
+            break;
+        case 13:
 #ifdef c99_nexttoward
-	    RETVAL = c99_nexttoward(x, y);
+            RETVAL = c99_nexttoward(x, y);
 #else
-	    not_here("nexttoward");
+            not_here("nexttoward");
 #endif
-	    break;
-	case 14:
-	default:
+            break;
+        case 14:
+        default:
 #ifdef c99_remainder
           RETVAL = c99_remainder(x, y);
 #else
           not_here("remainder");
 #endif
-	    break;
-	}
-	OUTPUT:
-	    RETVAL
+            break;
+        }
+        OUTPUT:
+            RETVAL
 
 void
 frexp(x)
-	NV		x
+        NV              x
     PPCODE:
-	int expvar;
-	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(Perl_frexp(x,&expvar)))); /* C89 math */
-	PUSHs(sv_2mortal(newSViv(expvar)));
+        int expvar;
+        /* (We already know stack is long enough.) */
+        PUSHs(sv_2mortal(newSVnv(Perl_frexp(x,&expvar)))); /* C89 math */
+        PUSHs(sv_2mortal(newSViv(expvar)));
 
 NV
 ldexp(x,exp)
-	NV		x
-	int		exp
+        NV              x
+        int             exp
     CODE:
         RETVAL = Perl_ldexp(x, exp);
     OUTPUT:
@@ -2680,81 +2680,81 @@ ldexp(x,exp)
 
 void
 modf(x)
-	NV		x
+        NV              x
     PPCODE:
-	NV intvar;
-	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar)))); /* C89 math */
-	PUSHs(sv_2mortal(newSVnv(intvar)));
+        NV intvar;
+        /* (We already know stack is long enough.) */
+        PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar)))); /* C89 math */
+        PUSHs(sv_2mortal(newSVnv(intvar)));
 
 void
 remquo(x,y)
-	NV		x
-	NV		y
+        NV              x
+        NV              y
     PPCODE:
 #ifdef c99_remquo
         int intvar;
         PUSHs(sv_2mortal(newSVnv(c99_remquo(x,y,&intvar))));
         PUSHs(sv_2mortal(newSVnv(intvar)));
 #else
-	PERL_UNUSED_VAR(x);
-	PERL_UNUSED_VAR(y);
-	not_here("remquo");
+        PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(y);
+        not_here("remquo");
 #endif
 
 NV
 scalbn(x,y)
-	NV		x
-	IV		y
+        NV              x
+        IV              y
     CODE:
 #ifdef c99_scalbn
-	RETVAL = c99_scalbn(x, y);
+        RETVAL = c99_scalbn(x, y);
 #else
-	PERL_UNUSED_VAR(x);
-	PERL_UNUSED_VAR(y);
-	RETVAL = NV_NAN;
-	not_here("scalbn");
+        PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(y);
+        RETVAL = NV_NAN;
+        not_here("scalbn");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 fma(x,y,z)
-	NV		x
-	NV		y
-	NV		z
+        NV              x
+        NV              y
+        NV              z
     CODE:
 #ifdef c99_fma
-	RETVAL = c99_fma(x, y, z);
+        RETVAL = c99_fma(x, y, z);
 #else
-	PERL_UNUSED_VAR(x);
-	PERL_UNUSED_VAR(y);
-	PERL_UNUSED_VAR(z);
-	not_here("fma");
+        PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(y);
+        PERL_UNUSED_VAR(z);
+        not_here("fma");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 nan(payload = 0)
-	NV payload
+        NV payload
     CODE:
 #ifdef NV_NAN
         /* If no payload given, just return the default NaN.
          * This makes a difference in platforms where the default
          * NaN is not all zeros. */
-	if (items == 0) {
+        if (items == 0) {
           RETVAL = NV_NAN;
-	} else {
+        } else {
           S_setpayload(&RETVAL, payload, FALSE);
         }
 #elif defined(c99_nan)
-	{
-	  STRLEN elen = my_snprintf(PL_efloatbuf, PL_efloatsize, "%g", payload);
+        {
+          STRLEN elen = my_snprintf(PL_efloatbuf, PL_efloatsize, "%g", payload);
           if ((IV)elen == -1) {
 #ifdef NV_NAN
-	    RETVAL = NV_NAN;
-#else            
+            RETVAL = NV_NAN;
+#else
             RETVAL = 0.0;
             not_here("nan");
 #endif
@@ -2763,165 +2763,165 @@ nan(payload = 0)
           }
         }
 #else
-	not_here("nan");
+        not_here("nan");
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 NV
 jn(x,y)
-	IV		x
-	NV		y
+        IV              x
+        NV              y
     ALIAS:
-	yn = 1
+        yn = 1
     CODE:
 #ifdef NV_NAN
-	RETVAL = NV_NAN;
+        RETVAL = NV_NAN;
 #else
-	RETVAL = 0;
+        RETVAL = 0;
 #endif
         switch (ix) {
-	case 0:
+        case 0:
 #ifdef bessel_jn
           RETVAL = bessel_jn(x, y);
 #else
-	  PERL_UNUSED_VAR(x);
-	  PERL_UNUSED_VAR(y);
+          PERL_UNUSED_VAR(x);
+          PERL_UNUSED_VAR(y);
           not_here("jn");
 #endif
             break;
-	case 1:
-	default:
+        case 1:
+        default:
 #ifdef bessel_yn
           RETVAL = bessel_yn(x, y);
 #else
-	  PERL_UNUSED_VAR(x);
-	  PERL_UNUSED_VAR(y);
+          PERL_UNUSED_VAR(x);
+          PERL_UNUSED_VAR(y);
           not_here("yn");
 #endif
             break;
-	}
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 sigaction(sig, optaction, oldaction = 0)
-	int			sig
-	SV *			optaction
-	POSIX::SigAction	oldaction
+        int                     sig
+        SV *                    optaction
+        POSIX::SigAction        oldaction
     CODE:
 #if defined(WIN32) || (defined(__amigaos4__) && defined(__NEWLIB__))
-	RETVAL = not_here("sigaction");
+        RETVAL = not_here("sigaction");
 #else
 # This code is really grody because we are trying to make the signal
 # interface look beautiful, which is hard.
 
-	{
-	    POSIX__SigAction action;
-	    GV *siggv = gv_fetchpvs("SIG", GV_ADD, SVt_PVHV);
-	    struct sigaction act;
-	    struct sigaction oact;
-	    sigset_t sset;
-	    SV *osset_sv;
-	    sigset_t osset;
-	    POSIX__SigSet sigset;
-	    SV** svp;
-	    SV** sigsvp;
+        {
+            POSIX__SigAction action;
+            GV *siggv = gv_fetchpvs("SIG", GV_ADD, SVt_PVHV);
+            struct sigaction act;
+            struct sigaction oact;
+            sigset_t sset;
+            SV *osset_sv;
+            sigset_t osset;
+            POSIX__SigSet sigset;
+            SV** svp;
+            SV** sigsvp;
 
             if (sig < 0) {
                 croak("Negative signals are not allowed");
             }
 
-	    if (sig == 0 && SvPOK(ST(0))) {
-	        const char *s = SvPVX_const(ST(0));
-		int i = whichsig(s);
+            if (sig == 0 && SvPOK(ST(0))) {
+                const char *s = SvPVX_const(ST(0));
+                int i = whichsig(s);
 
-	        if (i < 0 && memBEGINs(s, SvCUR(ST(0)), "SIG"))
-		    i = whichsig(s + 3);
-	        if (i < 0) {
-	            if (ckWARN(WARN_SIGNAL))
-		        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+                if (i < 0 && memBEGINs(s, SvCUR(ST(0)), "SIG"))
+                    i = whichsig(s + 3);
+                if (i < 0) {
+                    if (ckWARN(WARN_SIGNAL))
+                        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
                                     "No such signal: SIG%s", s);
-	            XSRETURN_UNDEF;
-		}
-	        else
-		    sig = i;
+                    XSRETURN_UNDEF;
+                }
+                else
+                    sig = i;
             }
 #ifdef NSIG
-	    if (sig > NSIG) { /* NSIG - 1 is still okay. */
-	        Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+            if (sig > NSIG) { /* NSIG - 1 is still okay. */
+                Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
                             "No such signal: %d", sig);
-	        XSRETURN_UNDEF;
-	    }
+                XSRETURN_UNDEF;
+            }
 #endif
-	    sigsvp = hv_fetch(GvHVn(siggv),
-			      PL_sig_name[sig],
-			      strlen(PL_sig_name[sig]),
-			      TRUE);
+            sigsvp = hv_fetch(GvHVn(siggv),
+                              PL_sig_name[sig],
+                              strlen(PL_sig_name[sig]),
+                              TRUE);
 
-	    /* Check optaction and set action */
-	    if(SvTRUE(optaction)) {
-		if(sv_isa(optaction, "POSIX::SigAction"))
-			action = (HV*)SvRV(optaction);
-		else
-			croak("action is not of type POSIX::SigAction");
-	    }
-	    else {
-		action=0;
-	    }
+            /* Check optaction and set action */
+            if(SvTRUE(optaction)) {
+                if(sv_isa(optaction, "POSIX::SigAction"))
+                        action = (HV*)SvRV(optaction);
+                else
+                        croak("action is not of type POSIX::SigAction");
+            }
+            else {
+                action=0;
+            }
 
-	    /* sigaction() is supposed to look atomic. In particular, any
-	     * signal handler invoked during a sigaction() call should
-	     * see either the old or the new disposition, and not something
-	     * in between. We use sigprocmask() to make it so.
-	     */
-	    sigfillset(&sset);
-	    RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
-	    if(RETVAL == -1)
+            /* sigaction() is supposed to look atomic. In particular, any
+             * signal handler invoked during a sigaction() call should
+             * see either the old or the new disposition, and not something
+             * in between. We use sigprocmask() to make it so.
+             */
+            sigfillset(&sset);
+            RETVAL=sigprocmask(SIG_BLOCK, &sset, &osset);
+            if(RETVAL == -1)
                XSRETURN_UNDEF;
-	    ENTER;
-	    /* Restore signal mask no matter how we exit this block. */
-	    osset_sv = newSVpvn((char *)(&osset), sizeof(sigset_t));
-	    SAVEFREESV( osset_sv );
-	    SAVEDESTRUCTOR_X(restore_sigmask, osset_sv);
+            ENTER;
+            /* Restore signal mask no matter how we exit this block. */
+            osset_sv = newSVpvn((char *)(&osset), sizeof(sigset_t));
+            SAVEFREESV( osset_sv );
+            SAVEDESTRUCTOR_X(restore_sigmask, osset_sv);
 
-	    RETVAL=-1; /* In case both oldaction and action are 0. */
+            RETVAL=-1; /* In case both oldaction and action are 0. */
 
-	    /* Remember old disposition if desired. */
-	    if (oldaction) {
+            /* Remember old disposition if desired. */
+            if (oldaction) {
                 int safe;
 
-		svp = hv_fetchs(oldaction, "HANDLER", TRUE);
-		if(!svp)
-		    croak("Can't supply an oldaction without a HANDLER");
-		if(SvTRUE(*sigsvp)) { /* TBD: what if "0"? */
-			sv_setsv(*svp, *sigsvp);
-		}
-		else {
-			sv_setpvs(*svp, "DEFAULT");
-		}
-		RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
-		if(RETVAL == -1) {
+                svp = hv_fetchs(oldaction, "HANDLER", TRUE);
+                if(!svp)
+                    croak("Can't supply an oldaction without a HANDLER");
+                if(SvTRUE(*sigsvp)) { /* TBD: what if "0"? */
+                        sv_setsv(*svp, *sigsvp);
+                }
+                else {
+                        sv_setpvs(*svp, "DEFAULT");
+                }
+                RETVAL = sigaction(sig, (struct sigaction *)0, & oact);
+                if(RETVAL == -1) {
                    LEAVE;
                    XSRETURN_UNDEF;
                 }
-		/* Get back the mask. */
-		svp = hv_fetchs(oldaction, "MASK", TRUE);
-		if (sv_isa(*svp, "POSIX::SigSet")) {
-		    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
-		}
-		else {
-		    sigset = (sigset_t *) allocate_struct(aTHX_ *svp,
-							  sizeof(sigset_t),
-							  "POSIX::SigSet");
-		}
-		*sigset = oact.sa_mask;
+                /* Get back the mask. */
+                svp = hv_fetchs(oldaction, "MASK", TRUE);
+                if (sv_isa(*svp, "POSIX::SigSet")) {
+                    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
+                }
+                else {
+                    sigset = (sigset_t *) allocate_struct(aTHX_ *svp,
+                                                          sizeof(sigset_t),
+                                                          "POSIX::SigSet");
+                }
+                *sigset = oact.sa_mask;
 
-		/* Get back the flags. */
-		svp = hv_fetchs(oldaction, "FLAGS", TRUE);
-		sv_setiv(*svp, oact.sa_flags);
+                /* Get back the flags. */
+                svp = hv_fetchs(oldaction, "FLAGS", TRUE);
+                sv_setiv(*svp, oact.sa_flags);
 
-		/* Get back whether the old handler used safe signals;
+                /* Get back whether the old handler used safe signals;
                  * i.e. it used Perl_csighandler[13] rather than
                  * Perl_sighandler[13]
                  */
@@ -2941,135 +2941,135 @@ sigaction(sig, optaction, oldaction = 0)
 #endif
                            );
 
-		svp = hv_fetchs(oldaction, "SAFE", TRUE);
-		sv_setiv(*svp, safe);
-	    }
+                svp = hv_fetchs(oldaction, "SAFE", TRUE);
+                sv_setiv(*svp, safe);
+            }
 
-	    if (action) {
+            if (action) {
                 int safe;
 
-		/* Set up any desired flags. */
-		svp = hv_fetchs(action, "FLAGS", FALSE);
-		act.sa_flags = svp ? SvIV(*svp) : 0;
+                /* Set up any desired flags. */
+                svp = hv_fetchs(action, "FLAGS", FALSE);
+                act.sa_flags = svp ? SvIV(*svp) : 0;
 
-		/* Safe signals use "csighandler", which vectors through the
-		   PL_sighandlerp pointer when it's safe to do so.
-		   (BTW, "csighandler" is very different from "sighandler".) */
-		svp = hv_fetchs(action, "SAFE", FALSE);
+                /* Safe signals use "csighandler", which vectors through the
+                   PL_sighandlerp pointer when it's safe to do so.
+                   (BTW, "csighandler" is very different from "sighandler".) */
+                svp = hv_fetchs(action, "SAFE", FALSE);
                 safe = *svp && SvTRUE(*svp);
 #ifdef SA_SIGINFO
                 if (act.sa_flags & SA_SIGINFO) {
                     /* 3-arg handler */
                     act.sa_sigaction =
-			    safe ? PL_csighandler3p : PL_sighandler3p;
+                            safe ? PL_csighandler3p : PL_sighandler3p;
                 }
                 else
 #endif
                 {
                     /* 1-arg handler */
                     act.sa_handler =
-			    safe ? PL_csighandler1p : PL_sighandler1p;
+                            safe ? PL_csighandler1p : PL_sighandler1p;
                 }
 
-		/* Vector new Perl handler through %SIG.
-		   (The core signal handlers read %SIG to dispatch.) */
-		svp = hv_fetchs(action, "HANDLER", FALSE);
-		if (!svp)
-		    croak("Can't supply an action without a HANDLER");
-		sv_setsv(*sigsvp, *svp);
+                /* Vector new Perl handler through %SIG.
+                   (The core signal handlers read %SIG to dispatch.) */
+                svp = hv_fetchs(action, "HANDLER", FALSE);
+                if (!svp)
+                    croak("Can't supply an action without a HANDLER");
+                sv_setsv(*sigsvp, *svp);
 
-		/* This call actually calls sigaction() with almost the
-		   right settings, including appropriate interpretation
-		   of DEFAULT and IGNORE.  However, why are we doing
-		   this when we're about to do it again just below?  XXX */
-		SvSETMAGIC(*sigsvp);
+                /* This call actually calls sigaction() with almost the
+                   right settings, including appropriate interpretation
+                   of DEFAULT and IGNORE.  However, why are we doing
+                   this when we're about to do it again just below?  XXX */
+                SvSETMAGIC(*sigsvp);
 
-		/* And here again we duplicate -- DEFAULT/IGNORE checking. */
-		if(SvPOK(*svp)) {
-			const char *s=SvPVX_const(*svp);
-			if(strEQ(s,"IGNORE")) {
-				act.sa_handler = SIG_IGN;
-			}
-			else if(strEQ(s,"DEFAULT")) {
-				act.sa_handler = SIG_DFL;
-			}
-		}
+                /* And here again we duplicate -- DEFAULT/IGNORE checking. */
+                if(SvPOK(*svp)) {
+                        const char *s=SvPVX_const(*svp);
+                        if(strEQ(s,"IGNORE")) {
+                                act.sa_handler = SIG_IGN;
+                        }
+                        else if(strEQ(s,"DEFAULT")) {
+                                act.sa_handler = SIG_DFL;
+                        }
+                }
 
-		/* Set up any desired mask. */
-		svp = hv_fetchs(action, "MASK", FALSE);
-		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
-		    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
-		    act.sa_mask = *sigset;
-		}
-		else
-		    sigemptyset(& act.sa_mask);
+                /* Set up any desired mask. */
+                svp = hv_fetchs(action, "MASK", FALSE);
+                if (svp && sv_isa(*svp, "POSIX::SigSet")) {
+                    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
+                    act.sa_mask = *sigset;
+                }
+                else
+                    sigemptyset(& act.sa_mask);
 
-		/* Don't worry about cleaning up *sigsvp if this fails,
-		 * because that means we tried to disposition a
-		 * nonblockable signal, in which case *sigsvp is
-		 * essentially meaningless anyway.
-		 */
-		RETVAL = sigaction(sig, & act, (struct sigaction *)0);
-		if(RETVAL == -1) {
+                /* Don't worry about cleaning up *sigsvp if this fails,
+                 * because that means we tried to disposition a
+                 * nonblockable signal, in which case *sigsvp is
+                 * essentially meaningless anyway.
+                 */
+                RETVAL = sigaction(sig, & act, (struct sigaction *)0);
+                if(RETVAL == -1) {
                     LEAVE;
-		    XSRETURN_UNDEF;
+                    XSRETURN_UNDEF;
                 }
-	    }
+            }
 
-	    LEAVE;
-	}
+            LEAVE;
+        }
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 sigpending(sigset)
-	POSIX::SigSet		sigset
+        POSIX::SigSet           sigset
     ALIAS:
-	sigsuspend = 1
+        sigsuspend = 1
     CODE:
 #ifdef __amigaos4__
-	RETVAL = not_here("sigpending");
+        RETVAL = not_here("sigpending");
 #else
-	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
+        RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
 #endif
     OUTPUT:
-	RETVAL
+        RETVAL
     CLEANUP:
     PERL_ASYNC_CHECK();
 
 SysRet
 sigprocmask(how, sigset, oldsigset = 0)
-	int			how
-	POSIX::SigSet		sigset = NO_INIT
-	POSIX::SigSet		oldsigset = NO_INIT
+        int                     how
+        POSIX::SigSet           sigset = NO_INIT
+        POSIX::SigSet           oldsigset = NO_INIT
 INIT:
-	if (! SvOK(ST(1))) {
-	    sigset = NULL;
-	} else if (sv_isa(ST(1), "POSIX::SigSet")) {
-	    sigset = (sigset_t *) SvPV_nolen(SvRV(ST(1)));
-	} else {
-	    croak("sigset is not of type POSIX::SigSet");
-	}
+        if (! SvOK(ST(1))) {
+            sigset = NULL;
+        } else if (sv_isa(ST(1), "POSIX::SigSet")) {
+            sigset = (sigset_t *) SvPV_nolen(SvRV(ST(1)));
+        } else {
+            croak("sigset is not of type POSIX::SigSet");
+        }
 
-	if (items < 3 || ! SvOK(ST(2))) {
-	    oldsigset = NULL;
-	} else if (sv_isa(ST(2), "POSIX::SigSet")) {
-	    oldsigset = (sigset_t *) SvPV_nolen(SvRV(ST(2)));
-	} else {
-	    croak("oldsigset is not of type POSIX::SigSet");
-	}
+        if (items < 3 || ! SvOK(ST(2))) {
+            oldsigset = NULL;
+        } else if (sv_isa(ST(2), "POSIX::SigSet")) {
+            oldsigset = (sigset_t *) SvPV_nolen(SvRV(ST(2)));
+        } else {
+            croak("oldsigset is not of type POSIX::SigSet");
+        }
 
 void
 _exit(status)
-	int		status
+        int             status
 
 SysRet
 dup2(fd1, fd2)
-	int		fd1
-	int		fd2
+        int             fd1
+        int             fd2
     CODE:
-	if (fd1 >= 0 && fd2 >= 0) {
+        if (fd1 >= 0 && fd2 >= 0) {
 #ifdef WIN32
             /* RT #98912 - More Microsoft muppetry - failing to
                actually implemented the well known documented POSIX
@@ -3084,50 +3084,50 @@ dup2(fd1, fd2)
             RETVAL = -1;
         }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SV *
 lseek(fd, offset, whence)
-	POSIX::Fd	fd
-	Off_t		offset
-	int		whence
+        POSIX::Fd       fd
+        Off_t           offset
+        int             whence
     CODE:
-	{
+        {
               Off_t pos = PerlLIO_lseek(fd, offset, whence);
               RETVAL = sizeof(Off_t) > sizeof(IV)
                 ? newSVnv((NV)pos) : newSViv((IV)pos);
         }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 void
 nice(incr)
-	int		incr
+        int             incr
     PPCODE:
-	errno = 0;
-	if ((incr = nice(incr)) != -1 || errno == 0) {
-	    if (incr == 0)
-		XPUSHs(newSVpvs_flags("0 but true", SVs_TEMP));
-	    else
-		XPUSHs(sv_2mortal(newSViv(incr)));
-	}
+        errno = 0;
+        if ((incr = nice(incr)) != -1 || errno == 0) {
+            if (incr == 0)
+                XPUSHs(newSVpvs_flags("0 but true", SVs_TEMP));
+            else
+                XPUSHs(sv_2mortal(newSViv(incr)));
+        }
 
 void
 pipe()
     PPCODE:
-	int fds[2];
-	if (pipe(fds) != -1) {
-	    EXTEND(SP,2);
-	    PUSHs(sv_2mortal(newSViv(fds[0])));
-	    PUSHs(sv_2mortal(newSViv(fds[1])));
-	}
+        int fds[2];
+        if (pipe(fds) != -1) {
+            EXTEND(SP,2);
+            PUSHs(sv_2mortal(newSViv(fds[0])));
+            PUSHs(sv_2mortal(newSViv(fds[1])));
+        }
 
 SysRet
 read(fd, buffer, nbytes)
     PREINIT:
         SV *sv_buffer = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
     INPUT:
-	POSIX::Fd	fd
+        POSIX::Fd       fd
         size_t          nbytes
         char *          buffer = sv_grow( sv_buffer, nbytes+1 );
     CLEANUP:
@@ -3140,43 +3140,43 @@ read(fd, buffer, nbytes)
 
 SysRet
 setpgid(pid, pgid)
-	pid_t		pid
-	pid_t		pgid
+        pid_t           pid
+        pid_t           pgid
 
 pid_t
 setsid()
 
 pid_t
 tcgetpgrp(fd)
-	POSIX::Fd	fd
+        POSIX::Fd       fd
 
 SysRet
 tcsetpgrp(fd, pgrp_id)
-	POSIX::Fd	fd
-	pid_t		pgrp_id
+        POSIX::Fd       fd
+        pid_t           pgrp_id
 
 void
 uname()
     PPCODE:
 #ifdef HAS_UNAME
-	struct utsname buf;
-	if (uname(&buf) >= 0) {
-	    EXTEND(SP, 5);
-	    PUSHs(newSVpvn_flags(buf.sysname, strlen(buf.sysname), SVs_TEMP));
-	    PUSHs(newSVpvn_flags(buf.nodename, strlen(buf.nodename), SVs_TEMP));
-	    PUSHs(newSVpvn_flags(buf.release, strlen(buf.release), SVs_TEMP));
-	    PUSHs(newSVpvn_flags(buf.version, strlen(buf.version), SVs_TEMP));
-	    PUSHs(newSVpvn_flags(buf.machine, strlen(buf.machine), SVs_TEMP));
-	}
+        struct utsname buf;
+        if (uname(&buf) >= 0) {
+            EXTEND(SP, 5);
+            PUSHs(newSVpvn_flags(buf.sysname, strlen(buf.sysname), SVs_TEMP));
+            PUSHs(newSVpvn_flags(buf.nodename, strlen(buf.nodename), SVs_TEMP));
+            PUSHs(newSVpvn_flags(buf.release, strlen(buf.release), SVs_TEMP));
+            PUSHs(newSVpvn_flags(buf.version, strlen(buf.version), SVs_TEMP));
+            PUSHs(newSVpvn_flags(buf.machine, strlen(buf.machine), SVs_TEMP));
+        }
 #else
-	uname((char *) 0); /* A stub to call not_here(). */
+        uname((char *) 0); /* A stub to call not_here(). */
 #endif
 
 SysRet
 write(fd, buffer, nbytes)
-	POSIX::Fd	fd
-	char *		buffer
-	size_t		nbytes
+        POSIX::Fd       fd
+        char *          buffer
+        size_t          nbytes
 
 void
 abort()
@@ -3189,8 +3189,8 @@ abort()
 
 int
 mblen(s, n = ~0)
-	SV *		s
-	size_t		n
+        SV *            s
+        size_t          n
     CODE:
         errno = 0;
 
@@ -3238,9 +3238,9 @@ mblen(s, n = ~0)
 
 int
 mbtowc(pwc, s, n = ~0)
-	SV *	        pwc
-	SV *		s
-	size_t		n
+        SV *            pwc
+        SV *            s
+        size_t          n
     CODE:
         RETVAL = -1;
 #if ! defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
@@ -3285,8 +3285,8 @@ mbtowc(pwc, s, n = ~0)
 
 int
 wctomb(s, wchar)
-	SV *		s
-	wchar_t		wchar
+        SV *            s
+        wchar_t         wchar
     CODE:
         errno = 0;
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
@@ -3326,11 +3326,11 @@ wctomb(s, wchar)
 
 int
 strcoll(s1, s2)
-	char *		s1
-	char *		s2
+        char *          s1
+        char *          s2
     CODE:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-	LC_COLLATE_LOCK;
+        LC_COLLATE_LOCK;
         RETVAL = strcoll(s1, s2);
         LC_COLLATE_UNLOCK;
     OUTPUT:
@@ -3338,58 +3338,58 @@ strcoll(s1, s2)
 
 void
 strtod(str)
-	char *		str
+        char *          str
     PREINIT:
-	double num;
-	char *unparsed;
+        double num;
+        char *unparsed;
     PPCODE:
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-	num = strtod(str, &unparsed);
+        num = strtod(str, &unparsed);
         RESTORE_LC_NUMERIC();
-	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME_V == G_LIST) {
-	    EXTEND(SP, 1);
-	    if (unparsed)
-		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
-	    else
-		PUSHs(&PL_sv_undef);
-	}
+        PUSHs(sv_2mortal(newSVnv(num)));
+        if (GIMME_V == G_LIST) {
+            EXTEND(SP, 1);
+            if (unparsed)
+                PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+            else
+                PUSHs(&PL_sv_undef);
+        }
 
 #ifdef HAS_STRTOLD
 
 void
 strtold(str)
-	char *		str
+        char *          str
     PREINIT:
-	long double num;
-	char *unparsed;
+        long double num;
+        char *unparsed;
     PPCODE:
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-	num = strtold(str, &unparsed);
+        num = strtold(str, &unparsed);
         RESTORE_LC_NUMERIC();
-	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME_V == G_LIST) {
-	    EXTEND(SP, 1);
-	    if (unparsed)
-		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
-	    else
-		PUSHs(&PL_sv_undef);
-	}
+        PUSHs(sv_2mortal(newSVnv(num)));
+        if (GIMME_V == G_LIST) {
+            EXTEND(SP, 1);
+            if (unparsed)
+                PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+            else
+                PUSHs(&PL_sv_undef);
+        }
 
 #endif
 
 void
 strtol(str, base = 0)
-	char *		str
-	int		base
+        char *          str
+        int             base
     PREINIT:
-	long num;
-	char *unparsed;
+        long num;
+        char *unparsed;
     PPCODE:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-	if (base == 0 || inRANGE(base, 2, 36)) {
+        if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtol(str, &unparsed, base);
 #if IVSIZE < LONGSIZE
             if (num < IV_MIN || num > IV_MAX)
@@ -3405,7 +3405,7 @@ strtol(str, base = 0)
                     PUSHs(&PL_sv_undef);
             }
         } else {
-	    SETERRNO(EINVAL, LIB_INVARG);
+            SETERRNO(EINVAL, LIB_INVARG);
             PUSHs(&PL_sv_undef);
             if (GIMME_V == G_LIST) {
                EXTEND(SP, 1);
@@ -3415,16 +3415,16 @@ strtol(str, base = 0)
 
 void
 strtoul(str, base = 0)
-	const char *	str
-	int		base
+        const char *    str
+        int             base
     PREINIT:
-	unsigned long num;
-	char *unparsed = NULL;
+        unsigned long num;
+        char *unparsed = NULL;
     PPCODE:
-	PERL_UNUSED_VAR(str);
-	PERL_UNUSED_VAR(base);
+        PERL_UNUSED_VAR(str);
+        PERL_UNUSED_VAR(base);
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-	if (base == 0 || inRANGE(base, 2, 36)) {
+        if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtoul(str, &unparsed, base);
 #if UVSIZE < LONGSIZE
             if (num > UV_MAX)
@@ -3439,8 +3439,8 @@ strtoul(str, base = 0)
                 else
                   PUSHs(&PL_sv_undef);
             }
-	} else {
-	    SETERRNO(EINVAL, LIB_INVARG);
+        } else {
+            SETERRNO(EINVAL, LIB_INVARG);
             PUSHs(&PL_sv_undef);
             if (GIMME_V == G_LIST) {
                EXTEND(SP, 1);
@@ -3450,7 +3450,7 @@ strtoul(str, base = 0)
 
 void
 strxfrm(src)
-	SV *		src
+        SV *            src
     CODE:
 #ifdef USE_LOCALE_COLLATE
       CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
@@ -3461,45 +3461,45 @@ strxfrm(src)
 
 SysRet
 mkfifo(filename, mode)
-	char *		filename
-	Mode_t		mode
+        char *          filename
+        Mode_t          mode
     ALIAS:
-	access = 1
+        access = 1
     CODE:
-	if(ix) {
-	    RETVAL = access(filename, mode);
-	} else {
-	    TAINT_PROPER("mkfifo");
-	    RETVAL = mkfifo(filename, mode);
-	}
+        if(ix) {
+            RETVAL = access(filename, mode);
+        } else {
+            TAINT_PROPER("mkfifo");
+            RETVAL = mkfifo(filename, mode);
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 tcdrain(fd)
-	POSIX::Fd	fd
+        POSIX::Fd       fd
     ALIAS:
-	close = 1
-	dup = 2
+        close = 1
+        dup = 2
     CODE:
-	if (fd >= 0) {
-	    RETVAL = ix == 1 ? close(fd)
-	      : (ix < 1 ? tcdrain(fd) : dup(fd));
-	} else {
-	    SETERRNO(EBADF,RMS_IFI);
-	    RETVAL = -1;
-	}
+        if (fd >= 0) {
+            RETVAL = ix == 1 ? close(fd)
+              : (ix < 1 ? tcdrain(fd) : dup(fd));
+        } else {
+            SETERRNO(EBADF,RMS_IFI);
+            RETVAL = -1;
+        }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 
 SysRet
 tcflow(fd, action)
-	POSIX::Fd	fd
-	int		action
+        POSIX::Fd       fd
+        int             action
     ALIAS:
-	tcflush = 1
-	tcsendbreak = 2
+        tcflush = 1
+        tcsendbreak = 2
     CODE:
         if (action >= 0) {
             RETVAL = ix == 1 ? tcflush(fd, action)
@@ -3509,105 +3509,105 @@ tcflow(fd, action)
             RETVAL = -1;
         }
     OUTPUT:
-	RETVAL
+        RETVAL
 
 void
 asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
-	int		sec
-	int		min
-	int		hour
-	int		mday
-	int		mon
-	int		year
-	int		wday
-	int		yday
-	int		isdst
+        int             sec
+        int             min
+        int             hour
+        int             mday
+        int             mon
+        int             year
+        int             wday
+        int             yday
+        int             isdst
     ALIAS:
-	mktime = 1
+        mktime = 1
     PPCODE:
-	{
-	    dXSTARG;
-	    struct tm mytm;
-	    init_tm(&mytm);	/* XXX workaround - see init_tm() in core util.c */
-	    mytm.tm_sec = sec;
-	    mytm.tm_min = min;
-	    mytm.tm_hour = hour;
-	    mytm.tm_mday = mday;
-	    mytm.tm_mon = mon;
-	    mytm.tm_year = year;
-	    mytm.tm_wday = wday;
-	    mytm.tm_yday = yday;
-	    mytm.tm_isdst = isdst;
-	    if (ix) {
-	        time_t result;
+        {
+            dXSTARG;
+            struct tm mytm;
+            init_tm(&mytm);     /* XXX workaround - see init_tm() in core util.c */
+            mytm.tm_sec = sec;
+            mytm.tm_min = min;
+            mytm.tm_hour = hour;
+            mytm.tm_mday = mday;
+            mytm.tm_mon = mon;
+            mytm.tm_year = year;
+            mytm.tm_wday = wday;
+            mytm.tm_yday = yday;
+            mytm.tm_isdst = isdst;
+            if (ix) {
+                time_t result;
                 MKTIME_LOCK;
-	        result = mktime(&mytm);
+                result = mktime(&mytm);
                 MKTIME_UNLOCK;
-		if (result == (time_t)-1)
-		    SvOK_off(TARG);
-		else if (result == 0)
-		    sv_setpvs(TARG, "0 but true");
-		else if (sizeof (IV) < sizeof (time_t) && (result < IV_MIN || IV_MAX < result))
+                if (result == (time_t)-1)
+                    SvOK_off(TARG);
+                else if (result == 0)
+                    sv_setpvs(TARG, "0 but true");
+                else if (sizeof (IV) < sizeof (time_t) && (result < IV_MIN || IV_MAX < result))
                     sv_setnv(TARG, result);
-		else
-		    sv_setiv(TARG, (IV)result);
-	    } else {
+                else
+                    sv_setiv(TARG, (IV)result);
+            } else {
                 ASCTIME_LOCK;
-		sv_setpv(TARG, asctime(&mytm));
+                sv_setpv(TARG, asctime(&mytm));
                 ASCTIME_UNLOCK;
-	    }
-	    ST(0) = TARG;
-	    XSRETURN(1);
-	}
+            }
+            ST(0) = TARG;
+            XSRETURN(1);
+        }
 
 long
 clock()
 
 char *
 ctime(time)
-	Time_t		&time
+        Time_t          &time
 
 void
 times()
-	PPCODE:
-	struct tms tms;
-	clock_t realtime;
-	realtime = times( &tms );
-	EXTEND(SP,5);
-	PUSHs( sv_2mortal( newSViv( (IV) realtime ) ) );
-	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_utime ) ) );
-	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_stime ) ) );
-	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cutime ) ) );
-	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cstime ) ) );
+        PPCODE:
+        struct tms tms;
+        clock_t realtime;
+        realtime = times( &tms );
+        EXTEND(SP,5);
+        PUSHs( sv_2mortal( newSViv( (IV) realtime ) ) );
+        PUSHs( sv_2mortal( newSViv( (IV) tms.tms_utime ) ) );
+        PUSHs( sv_2mortal( newSViv( (IV) tms.tms_stime ) ) );
+        PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cutime ) ) );
+        PUSHs( sv_2mortal( newSViv( (IV) tms.tms_cstime ) ) );
 
 double
 difftime(time1, time2)
-	Time_t		time1
-	Time_t		time2
+        Time_t          time1
+        Time_t          time2
 
 #XXX: if $xsubpp::WantOptimize is always the default
 #     sv_setpv(TARG, ...) could be used rather than
 #     ST(0) = sv_2mortal(newSVpv(...))
 void
 strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
-	SV *		fmt
-	int		sec
-	int		min
-	int		hour
-	int		mday
-	int		mon
-	int		year
-	int		wday
-	int		yday
-	int		isdst
+        SV *            fmt
+        int             sec
+        int             min
+        int             hour
+        int             mday
+        int             mon
+        int             year
+        int             wday
+        int             yday
+        int             isdst
     CODE:
-	{
+        {
             PERL_UNUSED_ARG(wday);
             PERL_UNUSED_ARG(yday);
 
             SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year,
                                       isdst);
-	    if (sv) {
+            if (sv) {
                 sv = sv_2mortal(sv);
             }
             else {
@@ -3623,7 +3623,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             }
 
             ST(0) = sv;
-	}
+        }
 
 void
 tzset()
@@ -3633,34 +3633,34 @@ tzset()
 void
 tzname()
     PPCODE:
-	EXTEND(SP,2);
+        EXTEND(SP,2);
         /* It is undefined behavior if another thread is changing this while
          * its being read */
         ENVr_LOCALEr_LOCK;
-	PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
-	PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
+        PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
+        PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
         ENVr_LOCALEr_UNLOCK;
 
 char *
 ctermid(s = 0)
-	char *          s = 0;
+        char *          s = 0;
     CODE:
 #ifdef I_TERMIOS
         /* On some systems L_ctermid is a #define; but not all; this code works
          * for all cases (so far...) */
-	s = (char *) safemalloc((size_t) L_ctermid);
+        s = (char *) safemalloc((size_t) L_ctermid);
 #endif
-	RETVAL = ctermid(s);
+        RETVAL = ctermid(s);
     OUTPUT:
-	RETVAL
+        RETVAL
     CLEANUP:
 #ifdef I_TERMIOS
-	Safefree(s);
+        Safefree(s);
 #endif
 
 char *
 cuserid(s = 0)
-	char *		s = 0;
+        char *          s = 0;
     CODE:
 #ifdef HAS_CUSERID
   RETVAL = cuserid(s);
@@ -3674,13 +3674,13 @@ cuserid(s = 0)
 
 SysRetLong
 fpathconf(fd, name)
-	POSIX::Fd	fd
-	int		name
+        POSIX::Fd       fd
+        int             name
 
 SysRetLong
 pathconf(filename, name)
-	char *		filename
-	int		name
+        char *          filename
+        int             name
 
 SysRet
 pause()
@@ -3689,35 +3689,35 @@ pause()
 
 unsigned int
 sleep(seconds)
-	unsigned int	seconds
+        unsigned int    seconds
     CODE:
-	RETVAL = PerlProc_sleep(seconds);
+        RETVAL = PerlProc_sleep(seconds);
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SysRet
 setgid(gid)
-	Gid_t		gid
+        Gid_t           gid
 
 SysRet
 setuid(uid)
-	Uid_t		uid
+        Uid_t           uid
 
 SysRetLong
 sysconf(name)
-	int		name
+        int             name
 
 char *
 ttyname(fd)
-	POSIX::Fd	fd
+        POSIX::Fd       fd
 
 void
 getcwd()
     PPCODE:
       {
-	dXSTARG;
-	getcwd_sv(TARG);
-	XSprePUSH; PUSHTARG;
+        dXSTARG;
+        getcwd_sv(TARG);
+        XSprePUSH; PUSHTARG;
       }
 
 SysRet

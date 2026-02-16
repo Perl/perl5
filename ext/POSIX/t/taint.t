@@ -3,8 +3,8 @@
 use Config;
 BEGIN {
     if ($^O ne 'VMS' and $Config{'extensions'} !~ /\bPOSIX\b/) {
-	print "1..0\n";
-	exit 0;
+        print "1..0\n";
+        exit 0;
     }
 }
 
@@ -45,7 +45,7 @@ eval { $testfd = open($file, O_RDONLY, 0) };
 is($@, "",                                  'open with untainted data');
 
 read($testfd, $buffer, 2) if $testfd > 2;
-is( $buffer, "#d",	                          '    read' );
+is( $buffer, "#d",                                '    read' );
 ok(tainted($buffer),                          '    scalar tainted');
 
 TODO: {
@@ -53,6 +53,6 @@ TODO: {
 
     read($testfd, $buffer[1], 2) if $testfd > 2;
 
-    is( $buffer[1], "./",	                      '    read' );
+    is( $buffer[1], "./",                             '    read' );
     ok(tainted($buffer[1]),                       '    array element tainted');
 }

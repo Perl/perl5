@@ -24,13 +24,13 @@ sub expected_signals {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     for my $sig ($min..$max) {
-	if ($expected{$sig}) {
-	    cmp_ok($sigset->ismember($sig), '==', 1,
-		   "$desc - sig $sig is a member");
-	} else {
-	    cmp_ok($sigset->ismember($sig), '==', 0,
-		   "$desc - sig $sig is not a member");
-	}
+        if ($expected{$sig}) {
+            cmp_ok($sigset->ismember($sig), '==', 1,
+                   "$desc - sig $sig is a member");
+        } else {
+            cmp_ok($sigset->ismember($sig), '==', 0,
+                   "$desc - sig $sig is not a member");
+        }
     }
 }
 
@@ -83,10 +83,10 @@ is($sigset->delset($signo[2]), '0 but true', 'delset');
 expected_signals($sigset, 'empty again');
 
 foreach ([$signo[0]],
-	 [$signo[2]],
-	 [$signo[3]],
-	 [@signo[2,3,6]],
-	) {
+         [$signo[2]],
+         [$signo[3]],
+         [@signo[2,3,6]],
+        ) {
     $sigset = POSIX::SigSet->new(@$_);
     isa_ok($sigset, 'POSIX::SigSet', 'checking the type of the object');
     local $" = ', ';

@@ -192,7 +192,7 @@ plan (tests => 2 * keys(%expect) + keys(%POSIX::));
 while (my ($var, $expect) = each %expect) {
     my $have = *{$POSIX::{$var}}{ARRAY};
     cmp_ok(@$have, '==', @$expect,
-	   "Correct number of entries for \@POSIX::$var");
+           "Correct number of entries for \@POSIX::$var");
     is_deeply([sort @$have], $expect, "Correct entries for \@POSIX::$var");
 }
 

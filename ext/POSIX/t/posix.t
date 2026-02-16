@@ -3,8 +3,8 @@
 use Config;
 BEGIN {
     if ($^O ne 'VMS' and $Config{'extensions'} !~ /\bPOSIX\b/) {
-	print "1..0\n";
-	exit 0;
+        print "1..0\n";
+        exit 0;
     }
     unshift @INC, "../../t";
     require 'loc_tools.pl';
@@ -13,7 +13,7 @@ BEGIN {
 use Test::More tests => 98;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
-	     errno localeconv dup dup2 lseek access);
+             errno localeconv dup dup2 lseek access);
 use strict 'subs';
 use warnings;
 
@@ -60,7 +60,7 @@ TODO:
     local $TODO = "read to array element not working";
 
     read($testfd, $buffer[1], 5) if $testfd > 2;
-    is( $buffer[1], "perl\n",	               '    read to array element' );
+    is( $buffer[1], "perl\n",                  '    read to array element' );
 }
 
 my $test = next_test();
@@ -139,7 +139,7 @@ SKIP: {
     skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
 
     cmp_ok(&_POSIX_OPEN_MAX, '>=', 16,
-	   "The minimum allowed values according to susv2" );
+           "The minimum allowed values according to susv2" );
 
 }
 
@@ -155,7 +155,7 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 # Check string conversion functions.
 my $weasel_words = "(though differences may be beyond the displayed digits)";
 
-SKIP: { 
+SKIP: {
     skip("strtod() not present", 3) unless $Config{d_strtod};
 
     if (locales_enabled('LC_NUMERIC')) {
@@ -265,7 +265,7 @@ cmp_ok(&POSIX::acos(1.0), '==', 0.0, 'dynamic loading');
 # This can coredump if struct tm has a timezone field and we
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
-# See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
+# See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl
 $test = next_test();
 print POSIX::strftime("ok $test # %H:%M, on %m/%d/%y\n", localtime());
 
@@ -290,12 +290,12 @@ if (locales_enabled('LC_TIME')) {
 try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
 SKIP: {
     skip("VC++ 8 and Vista's CRTs regard 60 seconds as an invalid parameter", 1)
-	if ($Is_W32
-	    and (($Config{cc} eq 'cl' and
-		    $Config{ccversion} =~ /^(\d+)/ and $1 >= 14)
-		or ($Config{cc} eq 'icl' and
-		    `cl --version 2>&1` =~ /^.*Version\s+([\d.]+)/ and $1 >= 14)
-		or (Win32::GetOSVersion())[1] >= 6));
+        if ($Is_W32
+            and (($Config{cc} eq 'cl' and
+                    $Config{ccversion} =~ /^(\d+)/ and $1 >= 14)
+                or ($Config{cc} eq 'icl' and
+                    `cl --version 2>&1` =~ /^.*Version\s+([\d.]+)/ and $1 >= 14)
+                or (Win32::GetOSVersion())[1] >= 6));
 
     try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
 }
@@ -325,16 +325,16 @@ try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 
 {
     for my $test (0, 1) {
-	$! = 0;
-	# POSIX::errno is autoloaded. 
-	# Autoloading requires many system calls.
-	# errno() looks at $! to generate its result.
-	# Autoloading should not munge the value.
-	my $foo  = $!;
-	my $errno = POSIX::errno();
+        $! = 0;
+        # POSIX::errno is autoloaded.
+        # Autoloading requires many system calls.
+        # errno() looks at $! to generate its result.
+        # Autoloading should not munge the value.
+        my $foo  = $!;
+        my $errno = POSIX::errno();
 
         # Force numeric context.
-	is( $errno + 0, $foo + 0,     'autoloading and errno() mix' );
+        is( $errno + 0, $foo + 0,     'autoloading and errno() mix' );
     }
 }
 
@@ -374,13 +374,13 @@ SKIP: {
     is(ref $conv, 'HASH', 'localeconv returns a hash reference');
 
     foreach (qw(decimal_point thousands_sep grouping int_curr_symbol
-		currency_symbol mon_decimal_point mon_thousands_sep
-		mon_grouping positive_sign negative_sign)) {
+                currency_symbol mon_decimal_point mon_thousands_sep
+                mon_grouping positive_sign negative_sign)) {
     SKIP: {
-	    my $value = delete $conv->{$_};
-	    skip("localeconv '$_' may be empty", 1) if $_ ne 'decimal_point';
-	    isnt($value, "", "localeconv returned a non-empty string for $_");
-	}
+            my $value = delete $conv->{$_};
+            skip("localeconv '$_' may be empty", 1) if $_ ne 'decimal_point';
+            isnt($value, "", "localeconv returned a non-empty string for $_");
+        }
     }
 
     my @lconv = qw(
@@ -402,9 +402,9 @@ SKIP: {
 
     foreach (@lconv) {
     SKIP: {
-	    like(delete $conv->{$_}, qr/\A-?\d+\z/,
-		 "localeconv returned an integer for $_");
-	}
+            like(delete $conv->{$_}, qr/\A-?\d+\z/,
+                 "localeconv returned an integer for $_");
+        }
     }
     is_deeply([%$conv], [], 'no unexpected keys returned by localeconv');
 }
@@ -451,7 +451,7 @@ is(access('Makefile.PL/nonsense', POSIX::F_OK), undef,
    'access on not-a-directory');
 SKIP: {
     skip("$^O is insufficiently POSIX", 1)
-	if $Is_W32 || $Is_VMS;
+        if $Is_W32 || $Is_VMS;
     cmp_ok($!, '==', POSIX::ENOTDIR);
 }
 
@@ -470,8 +470,8 @@ if ($^O eq 'vos') {
  # The following line assumes buffered output, which may be not true:
  print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_OS390 ||
                             $Is_VMS ||
-			    (defined $ENV{PERLIO} &&
-			     $ENV{PERLIO} eq 'unix' &&
-			     $Config::Config{useperlio}));
+                            (defined $ENV{PERLIO} &&
+                             $ENV{PERLIO} eq 'unix' &&
+                             $Config::Config{useperlio}));
  _exit(0);
 }

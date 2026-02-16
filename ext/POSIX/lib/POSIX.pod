@@ -13,7 +13,7 @@ POSIX - Perl interface to IEEE Std 1003.1
     my $sess_id = POSIX::setsid();
 
     my $fd = POSIX::open($path, O_CREAT|O_EXCL|O_WRONLY, 0644);
-	# note: that's a filedescriptor, *NOT* a filehandle
+    # note: that's a filedescriptor, *NOT* a filehandle
 
 =head1 DESCRIPTION
 
@@ -98,9 +98,9 @@ an explicit value (rather than relying on an implicit C<$_>):
 
 Determines the accessibility of a file.
 
-	if( POSIX::access( "/", &POSIX::R_OK ) ){
-		print "have read permission\n";
-	}
+    if( POSIX::access( "/", &POSIX::R_OK ) ){
+        print "have read permission\n";
+    }
 
 Returns C<undef> on failure.  Note: do not use C<access()> for
 security purposes.  Between the C<access()> call and the operation
@@ -133,12 +133,12 @@ an explicit value (rather than relying on an implicit C<$_>):
 This is identical to the C function C<asctime()>.  It returns
 a string of the form
 
-	"Fri Jun  2 18:22:13 2000\n\0"
+    "Fri Jun  2 18:22:13 2000\n\0"
 
 and it is called thusly
 
-	$asctime = asctime($sec, $min, $hour, $mday, $mon,
-			   $year, $wday, $yday, $isdst);
+    $asctime = asctime($sec, $min, $hour, $mday, $mon,
+                       $year, $wday, $yday, $isdst);
 
 The C<$mon> is zero-based: January equals C<0>.  The C<$year> is
 1900-based: 2001 equals C<101>.  C<$wday> and C<$yday> default to zero
@@ -267,8 +267,8 @@ amount of spent processor time in microseconds.
 Close the file.  This uses file descriptors such as those obtained by calling
 C<POSIX::open>.
 
-	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
-	POSIX::close( $fd );
+    $fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+    POSIX::close( $fd );
 
 Returns C<undef> on failure.
 
@@ -300,7 +300,7 @@ the hyperbolic cosine of its numeric argument.  See also L<Math::Trig>.
 
 Returns C<x> but with the sign of C<y> [C99].  Added in Perl v5.22.
 
- $x_with_sign_of_y = POSIX::copysign($x, $y);
+    $x_with_sign_of_y = POSIX::copysign($x, $y);
 
 See also L</signbit>.
 
@@ -309,8 +309,8 @@ See also L</signbit>.
 Create a new file.  This returns a file descriptor like the ones returned by
 C<POSIX::open>.  Use C<POSIX::close> to close the file.
 
-	$fd = POSIX::creat( "foo", 0611 );
-	POSIX::close( $fd );
+    $fd = POSIX::creat( "foo", 0611 );
+    POSIX::close( $fd );
 
 See also L<perlfunc/sysopen> and its C<O_CREAT> flag.
 
@@ -318,7 +318,7 @@ See also L<perlfunc/sysopen> and its C<O_CREAT> flag.
 
 Generates the path name for the controlling terminal.
 
-	$path = POSIX::ctermid();
+    $path = POSIX::ctermid();
 
 =item C<ctime>
 
@@ -329,7 +329,7 @@ to C<asctime(localtime(...))>, see L</asctime> and L</localtime>.
 
 Get the login name of the owner of the current process.
 
-	$name = POSIX::cuserid();
+    $name = POSIX::cuserid();
 
 Note: this function has not been specified by POSIX since 1990 and is included
 only for backwards compatibility. New code should use L<C<getlogin()>|perlfunc/getlogin> instead.
@@ -377,7 +377,7 @@ The complementary error function [C99].  Added in Perl v5.22.
 
 Returns the value of errno.
 
-	$errno = POSIX::errno();
+    $errno = POSIX::errno();
 
 This identical to the numerical values of the C<$!>, see L<perlvar/$ERRNO>.
 
@@ -500,7 +500,7 @@ Added in Perl v5.22.
 
 Returns the current floating point rounding mode, one of
 
-  FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_DOWNWARD
+    FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_DOWNWARD
 
 C<FE_TONEAREST> is like L</round>, C<FE_TOWARDZERO> is like L</trunc> [C99].
 Added in Perl v5.22.
@@ -515,27 +515,27 @@ Perl v5.22.
 "Fused multiply-add", S<C<x * y + z>>, possibly faster (and less lossy)
 than the explicit two operations [C99].  Added in Perl v5.22.
 
- my $fused = POSIX::fma($x, $y, $z);
+    my $fused = POSIX::fma($x, $y, $z);
 
 =item C<fmax>
 
 Maximum of C<x> and C<y>, except when either is C<NaN>, returns the other [C99].
 Added in Perl v5.22.
 
- my $max = POSIX::fmax($x, $y);
+    my $max = POSIX::fmax($x, $y);
 
 =item C<fmin>
 
 Minimum of C<x> and C<y>, except when either is C<NaN>, returns the other [C99].
 Added in Perl v5.22.
 
- my $min = POSIX::fmin($x, $y);
+    my $min = POSIX::fmin($x, $y);
 
 =item C<fmod>
 
 This is identical to the C function C<fmod()>.
 
-	$r = fmod($x, $y);
+    $r = fmod($x, $y);
 
 It returns the remainder S<C<$r = $x - $n*$y>>, where S<C<$n = trunc($x/$y)>>.
 The C<$r> has the same sign as C<$x> and magnitude (absolute value)
@@ -559,8 +559,8 @@ uses file descriptors such as those obtained by calling C<POSIX::open>.
 The following will determine the maximum length of the longest allowable
 pathname on the filesystem which holds F</var/foo>.
 
-	$fd = POSIX::open( "/var/foo", &POSIX::O_RDONLY );
-	$path_max = POSIX::fpathconf($fd, &POSIX::_PC_PATH_MAX);
+    $fd = POSIX::open( "/var/foo", &POSIX::O_RDONLY );
+    $path_max = POSIX::fpathconf($fd, &POSIX::_PC_PATH_MAX);
 
 Returns C<undef> on failure.
 
@@ -568,7 +568,7 @@ Returns C<undef> on failure.
 
 Returns one of
 
-  FP_NORMAL FP_ZERO FP_SUBNORMAL FP_INFINITE FP_NAN
+    FP_NORMAL FP_ZERO FP_SUBNORMAL FP_INFINITE FP_NAN
 
 telling the class of the argument [C99].  C<FP_INFINITE> is positive
 or negative infinity, C<FP_NAN> is not-a-number.  C<FP_SUBNORMAL>
@@ -604,7 +604,7 @@ Not implemented.  C<freopen()> is C-specific, see L<perlfunc/open> instead.
 
 Return the mantissa and exponent of a floating-point number.
 
-	($mantissa, $exponent) = POSIX::frexp( 1.234e56 );
+    ($mantissa, $exponent) = POSIX::frexp( 1.234e56 );
 
 =item C<fscanf>
 
@@ -624,8 +624,8 @@ Get file status.  This uses file descriptors such as those obtained by
 calling C<POSIX::open>.  The data returned is identical to the data from
 Perl's builtin C<stat> function.
 
-	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
-	@stats = POSIX::fstat( $fd );
+    $fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+    @stats = POSIX::fstat( $fd );
 
 =item C<fsync>
 
@@ -698,8 +698,8 @@ L<perlfunc/getlogin>.
 
 =item C<getpayload>
 
-	use POSIX ':nan_payload';
-	getpayload($var)
+    use POSIX ':nan_payload';
+    getpayload($var)
 
 Returns the C<NaN> payload.  Added in Perl v5.24.
 
@@ -772,9 +772,9 @@ See also L</logb>.
 
 The infinity as a constant:
 
-   use POSIX qw(Inf);
-   my $pos_inf = +Inf;  # Or just Inf.
-   my $neg_inf = -Inf;
+    use POSIX qw(Inf);
+    my $pos_inf = +Inf;  # Or just Inf.
+    my $neg_inf = -Inf;
 
 See also L</isinf>, and L</fpclassify>.
 
@@ -876,8 +876,8 @@ to use instead.  See L<perlrecharclass/POSIX Character Classes>.
 
 =item C<issignaling>
 
-	use POSIX ':nan_payload';
-	issignaling($var, $payload)
+    use POSIX ':nan_payload';
+    issignaling($var, $payload)
 
 Return true if the argument is a I<signaling> NaN.  Added in Perl v5.24.
 
@@ -935,14 +935,14 @@ of only one path, not a list of paths.  Does the same thing as the
 C<chown()> function but changes the owner of a symbolic link instead
 of the file the symbolic link points to.
 
- POSIX::lchown($uid, $gid, $file_path);
+    POSIX::lchown($uid, $gid, $file_path);
 
 =item C<ldexp>
 
 This is identical to the C function C<ldexp()>
 for multiplying floating point numbers with powers of two.
 
-	$x_quadrupled = POSIX::ldexp($x, 2);
+    $x_quadrupled = POSIX::ldexp($x, 2);
 
 =item C<ldiv>
 
@@ -999,39 +999,39 @@ L<perlapi/switch_to_global_locale>.
 
 Here is how to query the database for the B<de> (Deutsch or German) locale.
 
-	my $loc = POSIX::setlocale( &POSIX::LC_ALL, "de" );
-	print "Locale: \"$loc\"\n";
-	my $lconv = POSIX::localeconv();
-	foreach my $property (qw(
-		decimal_point
-		thousands_sep
-		grouping
-		int_curr_symbol
-		currency_symbol
-		mon_decimal_point
-		mon_thousands_sep
-		mon_grouping
-		positive_sign
-		negative_sign
-		int_frac_digits
-		frac_digits
-		p_cs_precedes
-		p_sep_by_space
-		n_cs_precedes
-		n_sep_by_space
-		p_sign_posn
-		n_sign_posn
-		int_p_cs_precedes
-		int_p_sep_by_space
-		int_n_cs_precedes
-		int_n_sep_by_space
-		int_p_sign_posn
-		int_n_sign_posn
-	))
-	{
-		printf qq(%s: "%s",\n),
-			$property, $lconv->{$property};
-	}
+    my $loc = POSIX::setlocale( &POSIX::LC_ALL, "de" );
+    print "Locale: \"$loc\"\n";
+    my $lconv = POSIX::localeconv();
+    foreach my $property (qw(
+        decimal_point
+        thousands_sep
+        grouping
+        int_curr_symbol
+        currency_symbol
+        mon_decimal_point
+        mon_thousands_sep
+        mon_grouping
+        positive_sign
+        negative_sign
+        int_frac_digits
+        frac_digits
+        p_cs_precedes
+        p_sep_by_space
+        n_cs_precedes
+        n_sep_by_space
+        p_sign_posn
+        n_sign_posn
+        int_p_cs_precedes
+        int_p_sep_by_space
+        int_n_cs_precedes
+        int_n_sep_by_space
+        int_p_sign_posn
+        int_n_sign_posn
+    ))
+    {
+        printf qq(%s: "%s",\n),
+            $property, $lconv->{$property};
+    }
 
 The members whose names begin with C<int_p_> and C<int_n_> were added by
 POSIX.1-2008 and are only available on systems that support them.
@@ -1099,8 +1099,8 @@ Not implemented.  C<longjmp()> is C-specific: use L<perlfunc/die> instead.
 Move the file's read/write position.  This uses file descriptors such as
 those obtained by calling C<POSIX::open>.
 
-	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
-	$off_t = POSIX::lseek( $fd, 0, &POSIX::SEEK_SET );
+    $fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+    $off_t = POSIX::lseek( $fd, 0, &POSIX::SEEK_SET );
 
 Returns C<undef> on failure.
 
@@ -1220,7 +1220,7 @@ for creating directories, see L<perlfunc/mkdir>.
 This is similar to the C function C<mkfifo()> for creating
 FIFO special files.
 
-	if (mkfifo($path, $mode)) { ....
+    if (mkfifo($path, $mode)) { ....
 
 Returns C<undef> on failure.  The C<$mode> is similar to the
 mode of C<mkdir()>, see L<perlfunc/mkdir>, though for C<mkfifo>
@@ -1232,8 +1232,8 @@ Convert date/time info to a calendar time.
 
 Synopsis:
 
-	mktime(sec, min, hour, mday, mon, year, wday = 0,
-	       yday = 0, isdst = -1)
+    mktime(sec, min, hour, mday, mon, year, wday = 0,
+           yday = 0, isdst = -1)
 
 The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero,
 I<i.e.>, January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
@@ -1243,8 +1243,8 @@ about these and the other arguments.
 
 Calendar time for December 12, 1995, at 10:30 am.
 
-	$time_t = POSIX::mktime( 0, 30, 10, 12, 11, 95 );
-	print "Date = ", POSIX::ctime($time_t);
+    $time_t = POSIX::mktime( 0, 30, 10, 12, 11, 95 );
+    print "Date = ", POSIX::ctime($time_t);
 
 Returns C<undef> on failure.
 
@@ -1252,7 +1252,7 @@ Returns C<undef> on failure.
 
 Return the integral and fractional parts of a floating-point number.
 
-	($fractional, $integral) = POSIX::modf( 3.14 );
+    ($fractional, $integral) = POSIX::modf( 3.14 );
 
 See also L</round>.
 
@@ -1260,14 +1260,14 @@ See also L</round>.
 
 The not-a-number as a constant:
 
-   use POSIX qw(NaN);
-   my $nan = NaN;
+    use POSIX qw(NaN);
+    my $nan = NaN;
 
 See also L</nan>, C</isnan>, and L</fpclassify>.
 
 =item C<nan>
 
-   my $nan = nan();
+    my $nan = nan();
 
 Returns C<NaN>, not-a-number [C99].  Added in Perl v5.22.
 
@@ -1312,7 +1312,7 @@ rounding mode (see L</fegetround>) [C99].  Added in Perl v5.22.
 Returns the next representable floating point number after C<x> in the
 direction of C<y> [C99].  Added in Perl v5.22.
 
- my $nextafter = POSIX::nextafter($x, $y);
+    my $nextafter = POSIX::nextafter($x, $y);
 
 Like L</nexttoward>, but potentially less accurate.
 
@@ -1321,7 +1321,7 @@ Like L</nexttoward>, but potentially less accurate.
 Returns the next representable floating point number after C<x> in the
 direction of C<y> [C99].  Added in Perl v5.22.
 
- my $nexttoward = POSIX::nexttoward($x, $y);
+    my $nexttoward = POSIX::nexttoward($x, $y);
 
 Like L</nextafter>, but potentially more accurate.
 
@@ -1346,23 +1346,23 @@ Perl filehandles.  Use C<POSIX::close> to close the file.
 
 Open a file read-only with mode 0666.
 
-	$fd = POSIX::open( "foo" );
+    $fd = POSIX::open( "foo" );
 
 Open a file for read and write.
 
-	$fd = POSIX::open( "foo", &POSIX::O_RDWR );
+    $fd = POSIX::open( "foo", &POSIX::O_RDWR );
 
 Open a file for write, with truncation.
 
-	$fd = POSIX::open(
-		"foo", &POSIX::O_WRONLY | &POSIX::O_TRUNC
-	);
+    $fd = POSIX::open(
+        "foo", &POSIX::O_WRONLY | &POSIX::O_TRUNC
+    );
 
 Create a new file with mode 0640.  Set up the file for writing.
 
-	$fd = POSIX::open(
-		"foo", &POSIX::O_CREAT | &POSIX::O_WRONLY, 0640
-	);
+    $fd = POSIX::open(
+        "foo", &POSIX::O_CREAT | &POSIX::O_WRONLY, 0640
+    );
 
 Returns C<undef> on failure.
 
@@ -1372,9 +1372,9 @@ See also L<perlfunc/sysopen>.
 
 Open a directory for reading.
 
-	$dir = POSIX::opendir( "/var" );
-	@files = POSIX::readdir( $dir );
-	POSIX::closedir( $dir );
+    $dir = POSIX::opendir( "/var" );
+    @files = POSIX::readdir( $dir );
+    POSIX::closedir( $dir );
 
 Returns C<undef> on failure.
 
@@ -1385,8 +1385,8 @@ Retrieves the value of a configurable limit on a file or directory.
 The following will determine the maximum length of the longest allowable
 pathname on the filesystem which holds C</var>.
 
-	$path_max = POSIX::pathconf( "/var",
-				      &POSIX::_PC_PATH_MAX );
+    $path_max = POSIX::pathconf( "/var",
+                                  &POSIX::_PC_PATH_MAX );
 
 Returns C<undef> on failure.
 
@@ -1409,9 +1409,9 @@ variable instead, see L<perlfunc/warn> and L<perlvar/$ERRNO>.
 Create an interprocess channel.  This returns file descriptors like those
 returned by C<POSIX::open>.
 
-	my ($read, $write) = POSIX::pipe();
-	POSIX::write( $write, "hello", 5 );
-	POSIX::read( $read, $buf, 5 );
+    my ($read, $write) = POSIX::pipe();
+    POSIX::write( $write, "hello", 5 );
+    POSIX::read( $read, $buf, 5 );
 
 See also L<perlfunc/pipe>.
 
@@ -1419,7 +1419,7 @@ See also L<perlfunc/pipe>.
 
 Computes C<$x> raised to the power C<$exponent>.
 
-	$ret = POSIX::pow( $x, $exponent );
+    $ret = POSIX::pow( $x, $exponent );
 
 You can also use the C<**> operator, see L<perlop>.
 
@@ -1459,8 +1459,8 @@ Read from a file.  This uses file descriptors such as those obtained by
 calling C<POSIX::open>.  If the buffer C<$buf> is not large enough for the
 read then Perl will extend it to make room for the request.
 
-	$fd = POSIX::open( "foo", &POSIX::O_RDONLY );
-	$bytes = POSIX::read( $fd, $buf, 3 );
+    $fd = POSIX::open( "foo", &POSIX::O_RDONLY );
+    $bytes = POSIX::read( $fd, $buf, 3 );
 
 Returns C<undef> on failure.
 
@@ -1480,7 +1480,7 @@ Not implemented.  C<realloc()> is C-specific.  Perl does memory management trans
 Given C<x> and C<y>, returns the value S<C<x - n*y>>, where C<n> is the integer
 closest to C<x>/C<y> [C99].  Added in Perl v5.22.
 
- my $remainder = POSIX::remainder($x, $y)
+    my $remainder = POSIX::remainder($x, $y)
 
 See also L</remquo>.
 
@@ -1580,38 +1580,38 @@ by the current locale.)
 
 The following examples assume
 
-	use POSIX qw(setlocale LC_ALL LC_CTYPE);
+    use POSIX qw(setlocale LC_ALL LC_CTYPE);
 
 has been issued.
 
 The following will set the traditional UNIX system locale behavior
 (the second argument C<"C">).
 
-	$loc = setlocale( LC_ALL, "C" );
+    $loc = setlocale( LC_ALL, "C" );
 
 The following will query the current C<LC_CTYPE> category.  (No second
 argument means 'query'.)
 
-	$loc = setlocale( LC_CTYPE );
+    $loc = setlocale( LC_CTYPE );
 
 The following will set the C<LC_CTYPE> behaviour according to the locale
 environment variables (the second argument C<"">).
 Please see your system's C<setlocale(3)> documentation for the locale
 environment variables' meaning or consult L<perllocale>.
 
-	$loc = setlocale( LC_CTYPE, "" );
+    $loc = setlocale( LC_CTYPE, "" );
 
 The following will set the C<LC_COLLATE> behaviour to Argentinian
 Spanish. B<NOTE>: The naming and availability of locales depends on
 your operating system. Please consult L<perllocale> for how to find
 out which locales are available in your system.
 
-	$loc = setlocale( LC_COLLATE, "es_AR.ISO8859-1" );
+    $loc = setlocale( LC_COLLATE, "es_AR.ISO8859-1" );
 
 =item C<setpayload>
 
-	use POSIX ':nan_payload';
-	setpayload($var, $payload);
+    use POSIX ':nan_payload';
+    setpayload($var, $payload);
 
 Sets the C<NaN> payload of var.  Added in Perl v5.24.
 
@@ -1625,8 +1625,8 @@ See also L</setpayloadsig>, L</isnan>, L</getpayload>, and L</issignaling>.
 
 =item C<setpayloadsig>
 
-	use POSIX ':nan_payload';
-	setpayloadsig($var, $payload);
+    use POSIX ':nan_payload';
+    setpayloadsig($var, $payload);
 
 Like L</setpayload> but also makes the NaN I<signaling>.  Added in Perl
 v5.24.
@@ -1669,7 +1669,7 @@ for details, see also L</POSIX::SigRt>.
 
 Synopsis:
 
-	sigaction(signal, action, oldaction = 0)
+    sigaction(signal, action, oldaction = 0)
 
 Returns C<undef> on failure.  The C<signal> must be a number (like
 C<SIGHUP>), not a string (like C<"SIGHUP">), though Perl does try hard
@@ -1726,7 +1726,7 @@ manpage for details.
 
 Synopsis:
 
-	sigpending(sigset)
+    sigpending(sigset)
 
 Returns C<undef> on failure.
 
@@ -1738,7 +1738,7 @@ Consult your system's C<sigprocmask> manpage for details.
 
 Synopsis:
 
-	sigprocmask(how, sigset, oldsigset = 0)
+    sigprocmask(how, sigset, oldsigset = 0)
 
 Returns C<undef> on failure.
 
@@ -1759,7 +1759,7 @@ system's C<sigsuspend> manpage for details.
 
 Synopsis:
 
-	sigsuspend(signal_mask)
+    sigsuspend(signal_mask)
 
 Returns C<undef> on failure.
 
@@ -1869,8 +1869,8 @@ Convert date and time information to string based on the current
 underlying locale of the program.
 Returns the string in a mortalized SV; set to an empty string on error.
 
- my $sv = strftime(fmt, sec, min, hour, mday, mon, year,
-                   wday = -1, yday = -1, isdst = -1)
+    my $sv = strftime(fmt, sec, min, hour, mday, mon, year,
+                      wday = -1, yday = -1, isdst = -1)
 
 The C<wday> and C<yday> parameters are both ignored.  Their values are
 always determinable from the other parameters.
@@ -1995,7 +1995,7 @@ Other vendors that do supply C<strtoul()> parse "-1" as a valid value.
 
 String transformation.  Returns the transformed string.
 
-	$dst = POSIX::strxfrm( $src );
+    $dst = POSIX::strxfrm( $src );
 
 Used with C<eq> or C<cmp> as an alternative to C<L</strcoll>>.
 
@@ -2017,7 +2017,7 @@ Retrieves values of system configurable variables.
 
 The following will get the machine's clock speed.
 
-	$clock_ticks = POSIX::sysconf( &POSIX::_SC_CLK_TCK );
+    $clock_ticks = POSIX::sysconf( &POSIX::_SC_CLK_TCK );
 
 Returns C<undef> on failure.
 
@@ -2098,7 +2098,7 @@ and system times used by child processes.  All times are returned in clock
 ticks.
 
     ($realtime, $user, $system, $cuser, $csystem)
-	= POSIX::times();
+        = POSIX::times();
 
 Note: Perl's builtin C<times()> function returns four values, measured in
 seconds.
@@ -2146,8 +2146,8 @@ name of the current terminal.
 
 Retrieves the time conversion information from the C<tzname> variable.
 
-	POSIX::tzset();
-	($std, $dst) = POSIX::tzname();
+    POSIX::tzset();
+    ($std, $dst) = POSIX::tzname();
 
 =item C<tzset>
 
@@ -2175,8 +2175,8 @@ See L<perlfunc/umask>.
 
 Get name of current operating system.
 
-	($sysname, $nodename, $release, $version, $machine)
-		= POSIX::uname();
+    ($sysname, $nodename, $release, $version, $machine)
+        = POSIX::uname();
 
 Note that the actual meanings of the various fields are not
 that well standardized, do not expect any great portability.
@@ -2224,8 +2224,8 @@ see L<perlfunc/wait>.
 Wait for a child process to change state.  This is identical to Perl's
 builtin C<waitpid()> function, see L<perlfunc/waitpid>.
 
-	$pid = POSIX::waitpid( -1, POSIX::WNOHANG );
-	print "status = ", ($? / 256), "\n";
+    $pid = POSIX::waitpid( -1, POSIX::WNOHANG );
+    print "status = ", ($? / 256), "\n";
 
 See L</mblen>.
 
@@ -2262,9 +2262,9 @@ before calling them.
 Write to a file.  This uses file descriptors such as those obtained by
 calling C<POSIX::open>.
 
-	$fd = POSIX::open( "foo", &POSIX::O_WRONLY );
-	$buf = "hello";
-	$bytes = POSIX::write( $fd, $buf, 5 );
+    $fd = POSIX::open( "foo", &POSIX::O_WRONLY );
+    $buf = "hello";
+    $bytes = POSIX::write( $fd, $buf, 5 );
 
 Returns C<undef> on failure.
 
@@ -2287,10 +2287,10 @@ reference.  The second parameter is a C<POSIX::SigSet> object, it
 defaults to the empty set.  The third parameter contains the
 C<sa_flags>, it defaults to 0.
 
-	$sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
-	$sigaction = POSIX::SigAction->new(
-			\&handler, $sigset, &POSIX::SA_NOCLDSTOP
-		     );
+    $sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
+    $sigaction = POSIX::SigAction->new(
+                     \&handler, $sigset, &POSIX::SA_NOCLDSTOP
+                 );
 
 This C<POSIX::SigAction> object is intended for use with the C<POSIX::sigaction()>
 function.
@@ -2307,8 +2307,8 @@ function.
 
 accessor functions to get/set the values of a SigAction object.
 
-	$sigset = $sigaction->mask;
-	$sigaction->flags(&POSIX::SA_RESTART);
+    $sigset = $sigaction->mask;
+    $sigaction->flags(&POSIX::SA_RESTART);
 
 =item C<safe>
 
@@ -2317,15 +2317,15 @@ L<perlipc> for general information on safe (a.k.a. "deferred") signals.  If
 you wish to handle a signal safely, use this accessor to set the "safe" flag
 in the C<POSIX::SigAction> object:
 
-	$sigaction->safe(1);
+    $sigaction->safe(1);
 
 You may also examine the "safe" flag on the output action object which is
 filled in when given as the third parameter to C<POSIX::sigaction()>:
 
-	sigaction(SIGINT, $new_action, $old_action);
-	if ($old_action->safe) {
-	    # previous SIGINT handler used safe signals
-	}
+    sigaction(SIGINT, $new_action, $old_action);
+    if ($old_action->safe) {
+        # previous SIGINT handler used safe signals
+    }
 
 =back
 
@@ -2348,12 +2348,12 @@ a valid POSIX realtime signal).
 
 Setting the C<%SIGRT> elements is equivalent to calling this:
 
-  sub new {
-    my ($rtsig, $handler, $flags) = @_;
-    my $sigset = POSIX::SigSet($rtsig);
-    my $sigact = POSIX::SigAction->new($handler,$sigset,$flags);
-    sigaction($rtsig, $sigact);
-  }
+    sub new {
+        my ($rtsig, $handler, $flags) = @_;
+        my $sigset = POSIX::SigSet($rtsig);
+        my $sigact = POSIX::SigAction->new($handler,$sigset,$flags);
+        sigaction($rtsig, $sigact);
+    }
 
 The flags default to zero, if you want something different you can
 either use C<local> on C<$POSIX::SigRt::SIGACTION_FLAGS>, or you can
@@ -2392,11 +2392,11 @@ set.
 
 Create an empty set.
 
-	$sigset = POSIX::SigSet->new;
+    $sigset = POSIX::SigSet->new;
 
 Create a set with C<SIGUSR1>.
 
-	$sigset = POSIX::SigSet->new( &POSIX::SIGUSR1 );
+    $sigset = POSIX::SigSet->new( &POSIX::SIGUSR1 );
 
 Throws an error if any of the signals supplied cannot be added to the
 set.
@@ -2405,7 +2405,7 @@ set.
 
 Add a signal to a SigSet object.
 
-	$sigset->addset( &POSIX::SIGUSR2 );
+    $sigset->addset( &POSIX::SIGUSR2 );
 
 Returns C<undef> on failure.
 
@@ -2413,7 +2413,7 @@ Returns C<undef> on failure.
 
 Remove a signal from the SigSet object.
 
-	$sigset->delset( &POSIX::SIGUSR2 );
+    $sigset->delset( &POSIX::SIGUSR2 );
 
 Returns C<undef> on failure.
 
@@ -2421,7 +2421,7 @@ Returns C<undef> on failure.
 
 Initialize the SigSet object to be empty.
 
-	$sigset->emptyset();
+    $sigset->emptyset();
 
 Returns C<undef> on failure.
 
@@ -2429,7 +2429,7 @@ Returns C<undef> on failure.
 
 Initialize the SigSet object to include all signals.
 
-	$sigset->fillset();
+    $sigset->fillset();
 
 Returns C<undef> on failure.
 
@@ -2437,9 +2437,9 @@ Returns C<undef> on failure.
 
 Tests the SigSet object to see if it contains a specific signal.
 
-	if( $sigset->ismember( &POSIX::SIGUSR1 ) ){
-		print "contains SIGUSR1\n";
-	}
+    if( $sigset->ismember( &POSIX::SIGUSR1 ) ){
+        print "contains SIGUSR1\n";
+    }
 
 =back
 
@@ -2454,7 +2454,7 @@ when it is no longer needed.  A Termios object corresponds to the C<termios>
 C struct.  C<new()> mallocs a new one, C<getattr()> fills it from a file descriptor,
 and C<setattr()> sets a file descriptor's parameters to match Termios' contents.
 
-	$termios = POSIX::Termios->new;
+    $termios = POSIX::Termios->new;
 
 =item C<getattr>
 
@@ -2462,12 +2462,12 @@ Get terminal control attributes.
 
 Obtain the attributes for C<stdin>.
 
-	$termios->getattr( 0 ) # Recommended for clarity.
-	$termios->getattr()
+    $termios->getattr( 0 ) # Recommended for clarity.
+    $termios->getattr()
 
 Obtain the attributes for stdout.
 
-	$termios->getattr( 1 )
+    $termios->getattr( 1 )
 
 Returns C<undef> on failure.
 
@@ -2476,43 +2476,43 @@ Returns C<undef> on failure.
 Retrieve a value from the C<c_cc> field of a C<termios> object.  The C<c_cc> field is
 an array so an index must be specified.
 
-	$c_cc[1] = $termios->getcc(1);
+    $c_cc[1] = $termios->getcc(1);
 
 =item C<getcflag>
 
 Retrieve the C<c_cflag> field of a C<termios> object.
 
-	$c_cflag = $termios->getcflag;
+    $c_cflag = $termios->getcflag;
 
 =item C<getiflag>
 
 Retrieve the C<c_iflag> field of a C<termios> object.
 
-	$c_iflag = $termios->getiflag;
+    $c_iflag = $termios->getiflag;
 
 =item C<getispeed>
 
 Retrieve the input baud rate.
 
-	$ispeed = $termios->getispeed;
+    $ispeed = $termios->getispeed;
 
 =item C<getlflag>
 
 Retrieve the C<c_lflag> field of a C<termios> object.
 
-	$c_lflag = $termios->getlflag;
+    $c_lflag = $termios->getlflag;
 
 =item C<getoflag>
 
 Retrieve the C<c_oflag> field of a C<termios> object.
 
-	$c_oflag = $termios->getoflag;
+    $c_oflag = $termios->getoflag;
 
 =item C<getospeed>
 
 Retrieve the output baud rate.
 
-	$ospeed = $termios->getospeed;
+    $ospeed = $termios->getospeed;
 
 =item C<setattr>
 
@@ -2520,7 +2520,7 @@ Set terminal control attributes.
 
 Set attributes immediately for stdout.
 
-	$termios->setattr( 1, &POSIX::TCSANOW );
+    $termios->setattr( 1, &POSIX::TCSANOW );
 
 Returns C<undef> on failure.
 
@@ -2529,25 +2529,25 @@ Returns C<undef> on failure.
 Set a value in the C<c_cc> field of a C<termios> object.  The C<c_cc> field is an
 array so an index must be specified.
 
-	$termios->setcc( &POSIX::VEOF, 1 );
+    $termios->setcc( &POSIX::VEOF, 1 );
 
 =item C<setcflag>
 
 Set the C<c_cflag> field of a C<termios> object.
 
-	$termios->setcflag( $c_cflag | &POSIX::CLOCAL );
+    $termios->setcflag( $c_cflag | &POSIX::CLOCAL );
 
 =item C<setiflag>
 
 Set the C<c_iflag> field of a C<termios> object.
 
-	$termios->setiflag( $c_iflag | &POSIX::BRKINT );
+    $termios->setiflag( $c_iflag | &POSIX::BRKINT );
 
 =item C<setispeed>
 
 Set the input baud rate.
 
-	$termios->setispeed( &POSIX::B9600 );
+    $termios->setispeed( &POSIX::B9600 );
 
 Returns C<undef> on failure.
 
@@ -2555,19 +2555,19 @@ Returns C<undef> on failure.
 
 Set the C<c_lflag> field of a C<termios> object.
 
-	$termios->setlflag( $c_lflag | &POSIX::ECHO );
+    $termios->setlflag( $c_lflag | &POSIX::ECHO );
 
 =item C<setoflag>
 
 Set the C<c_oflag> field of a C<termios> object.
 
-	$termios->setoflag( $c_oflag | &POSIX::OPOST );
+    $termios->setoflag( $c_oflag | &POSIX::OPOST );
 
 =item C<setospeed>
 
 Set the output baud rate.
 
-	$termios->setospeed( &POSIX::B9600 );
+    $termios->setospeed( &POSIX::B9600 );
 
 Returns C<undef> on failure.
 

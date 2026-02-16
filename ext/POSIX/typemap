@@ -1,43 +1,43 @@
-Mode_t			T_IV
-pid_t			T_IV
-Uid_t			T_UV
-Time_t			T_IV
-Gid_t			T_UV
-Off_t			T_NV
-speed_t			T_IV
-tcflag_t		T_IV
-cc_t			T_IV
-POSIX::SigSet		T_OPAQUEPTROBJ
-POSIX::Termios		T_OPAQUEPTROBJ
-POSIX::SigAction	T_HVREF
-POSIX::SigNo		T_SIGNO
-POSIX::Fd		T_FD
+Mode_t                   T_IV
+pid_t                   T_IV
+Uid_t                   T_UV
+Time_t                  T_IV
+Gid_t                   T_UV
+Off_t                   T_NV
+speed_t                 T_IV
+tcflag_t                T_IV
+cc_t                    T_IV
+POSIX::SigSet           T_OPAQUEPTROBJ
+POSIX::Termios          T_OPAQUEPTROBJ
+POSIX::SigAction        T_HVREF
+POSIX::SigNo            T_SIGNO
+POSIX::Fd               T_FD
 
 INPUT
 T_OPAQUEPTROBJ
-	{
-	    SV * sv = $arg;
-	    if (SvROK(sv) && sv_derived_from(sv, \"${ntype}\"))
-		$var = ($type)SvPV_nolen(SvRV(sv));
-	    else
-		croak(\"%s: %s is not of type %s\",
-			    ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\", \"$ntype\");
-	}
+        {
+            SV * sv = $arg;
+            if (SvROK(sv) && sv_derived_from(sv, \"${ntype}\"))
+                $var = ($type)SvPV_nolen(SvRV(sv));
+            else
+                croak(\"%s: %s is not of type %s\",
+                            ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+                        \"$var\", \"$ntype\");
+        }
 
 T_SIGNO
-	if (($var = SvIV($arg)) < 0) {
-	   croak(\"%s: Negative signals are not allowed %d\",
-		${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+        if (($var = SvIV($arg)) < 0) {
+           croak(\"%s: Negative signals are not allowed %d\",
+                ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
                                    $var);
-	}
+        }
 
 T_FD
-	if (($var = (int)SvIV($arg)) < 0) {
-	     SETERRNO(EBADF, RMS_IFI);
-	     XSRETURN_IV(-1);
-	}
+        if (($var = (int)SvIV($arg)) < 0) {
+             SETERRNO(EBADF, RMS_IFI);
+             XSRETURN_IV(-1);
+        }
 
 OUTPUT
 T_OPAQUEPTROBJ
-	sv_setref_pvn($arg, \"${ntype}\", (const char*)$var, sizeof(*$var));
+        sv_setref_pvn($arg, \"${ntype}\", (const char*)$var, sizeof(*$var));

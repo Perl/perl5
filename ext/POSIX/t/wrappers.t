@@ -74,7 +74,7 @@ SKIP: {
     skip("getgrgid not available", 2) unless defined $name;
     is_deeply([POSIX::getgrgid($()], [CORE::getgrgid($()], "getgrgid($()");
     is_deeply([POSIX::getgrnam($name)], [CORE::getgrnam($name)],
-	      "getgrnam('$name')");
+              "getgrnam('$name')");
 }
 
 cmp_ok((length join ' ', POSIX::getgroups()), '<=', length $), 'getgroups');
@@ -92,7 +92,7 @@ SKIP: {
     skip('getpwuid not available', 2) unless defined $name;
     is_deeply([POSIX::getpwuid($<)], [CORE::getpwuid($<)], "getgrgid($<)");
     is_deeply([POSIX::getpwnam($name)], [CORE::getpwnam($name)],
-	      "getpwnam('$name')");
+              "getpwnam('$name')");
 }
 
 SKIP: {
@@ -111,8 +111,8 @@ is(POSIX::pow(2, 31), 0x80000000, 'pow');
     use parent 'Tie::StdHandle';
 
     sub WRITE {
-	$buffer .= $_[1];
-	42;
+        $buffer .= $_[1];
+        42;
     }
 
     package main;
@@ -144,10 +144,10 @@ is(POSIX::strstr('BBFRPRAFPGHPP', 'FP'), 7, 'strstr');
 SKIP: {
     my $true;
     foreach (qw(/bin/true /usr/bin/true)) {
-	if (-x $_) {
-	    $true = $_;
-	    last;
-	}
+        if (-x $_) {
+            $true = $_;
+            last;
+        }
     }
     skip("Can't find true", 1) unless $true;
     is(POSIX::system($true), 0, 'system');
@@ -165,24 +165,24 @@ SKIP: {
 is(-e NOT_HERE, undef, NOT_HERE . ' does not exist');
 
 foreach ([undef, !!0, 'chdir', NOT_HERE],
-	 [undef, 0, 'chmod', 0, NOT_HERE],
-	 ['d_chown', 0, 'chown', 0, 0, NOT_HERE],
-	 [undef, undef, 'creat', NOT_HERE . '/crash', 0],
-	 ['d_link', 0, 'link', NOT_HERE, 'ouch'],
-	 [undef, 0, 'remove', NOT_HERE],
-	 [undef, 0, 'rename', NOT_HERE, 'z_zwapp'],
-	 [undef, 0, 'remove', NOT_HERE],
-	 [undef, 0, 'unlink', NOT_HERE],
-	 [undef, 0, 'utime', NOT_HERE, 0, 0],
-	) {
+         [undef, 0, 'chmod', 0, NOT_HERE],
+         ['d_chown', 0, 'chown', 0, 0, NOT_HERE],
+         [undef, undef, 'creat', NOT_HERE . '/crash', 0],
+         ['d_link', 0, 'link', NOT_HERE, 'ouch'],
+         [undef, 0, 'remove', NOT_HERE],
+         [undef, 0, 'rename', NOT_HERE, 'z_zwapp'],
+         [undef, 0, 'remove', NOT_HERE],
+         [undef, 0, 'unlink', NOT_HERE],
+         [undef, 0, 'utime', NOT_HERE, 0, 0],
+        ) {
     my ($skip, $expect, $name, @args) = @$_;
     my $func = do {no strict 'refs'; \&{"POSIX::$name"}};
 
  SKIP: {
         skip("$name() is not available", 2) if $skip && !$Config{$skip};
-	$! = 0;
-	is(&$func(@args), $expect, $name);
-	isnt($!, '', "$name reported an error");
+        $! = 0;
+        is(&$func(@args), $expect, $name);
+        isnt($!, '', "$name reported an error");
     }
 }
 
@@ -220,7 +220,7 @@ SKIP: {
 
 SKIP: {
     foreach (qw(fork pipe)) {
-	skip("no $_", 8) unless $Config{"d_$_"};
+        skip("no $_", 8) unless $Config{"d_$_"};
     }
     # die with an uncaught SIGARLM if something goes wrong
     is(CORE::alarm(60), 0, 'no alarm set previously');
@@ -230,22 +230,22 @@ SKIP: {
     fail("fork failed: $!") unless defined $pid;
 
     if ($pid) {
-	close $w;
-	is(POSIX::getc(*STDIN), '1', 'getc');
-	is(POSIX::getchar(), '2', 'getchar');
-	is(POSIX::gets(), "345\n", 'gets');
-	my $ppid = <STDIN>;
-	chomp $ppid;
-	is($ppid, $$, 'getppid');
-	is(POSIX::wait(), $pid, 'wait');
-	is(POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), 1, 'child exited cleanly');
-	is(POSIX::WEXITSTATUS(${^CHILD_ERROR_NATIVE}), 1,
-	   'child exited with 1 (the return value of its close call)');
+        close $w;
+        is(POSIX::getc(*STDIN), '1', 'getc');
+        is(POSIX::getchar(), '2', 'getchar');
+        is(POSIX::gets(), "345\n", 'gets');
+        my $ppid = <STDIN>;
+        chomp $ppid;
+        is($ppid, $$, 'getppid');
+        is(POSIX::wait(), $pid, 'wait');
+        is(POSIX::WIFEXITED(${^CHILD_ERROR_NATIVE}), 1, 'child exited cleanly');
+        is(POSIX::WEXITSTATUS(${^CHILD_ERROR_NATIVE}), 1,
+           'child exited with 1 (the return value of its close call)');
     } else {
-	# Child
-	close *STDIN;
-	print $w "12345\n", POSIX::getppid(), "\n";
-	POSIX::_exit(close $w);
+        # Child
+        close *STDIN;
+        print $w "12345\n", POSIX::getppid(), "\n";
+        POSIX::_exit(close $w);
     }
 }
 
