@@ -15238,6 +15238,7 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
                 if (thisname && PadnameLEN(thisname) == PadnameLEN(name)
                     && PadnamePV(thisname) == PadnamePV(name)) {
                     name = thisname;
+                    off = offset;
                     break;
                 }
             }
