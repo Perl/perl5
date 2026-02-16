@@ -5,55 +5,103 @@
 # appropriate permissions.
 # First modified 6/30/96 by:
 # Luther Huffman, Strategic Computer Solutions, Inc., lutherh@stratcom.com
-# Last modified May 2020 by:
+# Modified May 2020 by:
 # David Romano, unobe@cpan.org
+# Last Modified December 2024 by:
+# e. alvarez, ~eax/public-inbox@lists.sr.ht
 
-# Get the Perl version information
+# these default paths can be overridden by environment variables
+if (! ~ $privroot '') privroot=/sys/lib/perl 
+if (! ~ $builddir '') builddir=`{cd .. ; pwd}
+
+required_files = (plan9.c plan9ish.h mkfile ../patchlevel.h 9front.patch)
+for(file in $required_files){
+    if (! test -e $file) {
+        echo 'Error: Required file not found: $file' >[1=2]
+        exit
+    }
+}
+
 awk -f versnum ../patchlevel.h
+if (! test -e buildinfo) {
+    echo 'Error: buildinfo file is missing.' >[1=2]
+    exit
+}
 . buildinfo
 
-builddir = `{ cd .. ; pwd }
- 
 # 'typestr' is used by /sys/src/cmd/cc/lex.c, but not sure when/if it is ever used.
 # Patch sv.c from afar, which uses 'typestr' as a variable name, and uses bit-fields.
 # Also patch some other things:
+echo 'Applying patch...'
 status=`{cd $builddir; ape/patch -p1 <plan9/9front.patch}
+if (! ~ $status 0) {
+    echo 'Error: Patching failed.' >[1=2]
+    exit
+}
 
 if (~ $#* 0) platforms = $objtype
 if not switch($1) {
-	case -a ; platforms = (386 68000 68020 arm arm amd64 mips power power64 sparc sparc64 spim)
-	case * ; echo 'Usage: setup.rc [-a]' >[1=2] ; exit
+    case -a ; platforms = (386 68000 68020 arm arm amd64 mips power power64 sparc sparc64 spim)
+    case * ; echo 'Usage: setup.rc [-a]' >[1=2] ; exit
 }
 
-# Update some files
+echo 'Updating build files...'
 cp plan9.c plan9ish.h mkfile $builddir
+if (! ~ $? 0) {
+    echo 'Error: Failed to copy files to build directory.' >[1=2]
+    exit
+}
 
-exit;
-# Why is this done during setup and not during 'mk install'?
-# Build library directories
-echo Building library directories ...
-privroot=/sys/lib/perl
+echo 'Creating library directories...'
 privlib=$privroot/$p9pvers
 sitelib=$privlib/site_perl
 
-if (test ! -d $privroot) mkdir $privroot
-if (test ! -d $privlib) mkdir $privlib
-if (test ! -d $privlib/auto) mkdir $privlib/auto
-if (test ! -d $sitelib) mkdir $sitelib
-for(i in $platforms){
-	archroot=/$i/lib/perl
-	archlib=$archroot/$p9pvers
-	sitearch=$archlib/site_perl
-	corelib=$archlib/CORE
-	arpalib=$corelib/arpa
-	if (test ! -d $archroot) mkdir $archroot
-	if (test ! -d $archlib) mkdir $archlib
-	if (test ! -d $sitearch) mkdir $sitearch
-	if (test ! -d $corelib) mkdir $corelib
-	if (test ! -d $arpalib) mkdir $arpalib
-	cp $builddir/*.h *.h  $corelib
-	cp arpa/*.h  $arpalib
+for(dir in $privroot $privlib $privlib/auto $sitelib){
+    if (! test -d $dir) {
+        mkdir $dir
+        if (! ~ $? 0) {
+            echo 'Error: Failed to create directory: $dir' >[1=2]
+            exit
+        }
+    }
 }
 
-# Populate library directories
+for(i in $platforms){
+    echo "Creating directories for platform: $i..."
+    archroot=/$i/lib/perl
+    archlib=$archroot/$p9pvers
+    sitearch=$archlib/site_perl
+    corelib=$archlib/CORE
+    arpalib=$corelib/arpa
+
+    for(dir in $archroot $archlib $sitearch $corelib $arpalib){
+        if (! test -d $dir) {
+            mkdir $dir
+            if (! ~ $? 0) {
+                echo 'Error: Failed to create directory: $dir' >[1=2]
+                exit
+            }
+        }
+    }
+
+    cp $builddir/*.h *.h $corelib
+    if (! ~ $? 0) {
+        echo 'Error: Failed to copy header files to $corelib' >[1=2]
+        exit
+    }
+    cp arpa/*.h $arpalib
+    if (! ~ $? 0) {
+        echo 'Error: Failed to copy arpa headers to $arpalib' >[1=2]
+        exit
+    }
+}
+
+echo 'Populating private libraries...'
 {cd $builddir/lib ; tar c . } | {cd $privlib ; tar x }
+if (! ~ $? 0) {
+    echo 'Error: Failed to populate private libraries.' >[1=2]
+    exit
+}
+
+echo 'Setup completed successfully.'
+
