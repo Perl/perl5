@@ -4678,54 +4678,81 @@ sub embed_h {
 
         if ($flags =~ tr/mp// > 1) {    # Has both m and p
 
-            # Yields
-            #   #define Perl_func  func
-            # which works when there is no thread context.
-            $ret = indent_define($full_name, $func, $ind);
+            # Here is the case where the code implements the functionality
+            # with a macro, and we're supposed to create a long name synonym
+            # for it.  If there's no thread context, we can just #define the
+            # long name to be equivalent to the short.
+            if ($flags =~ /[T]/) {
+                # Yields
+                #   #define Perl_func  func
+                # which works when there is no thread context.
+                $ret = indent_define($full_name, $func, $ind);
+            }
+            else {
 
-            if ($flags !~ /[T]/) {
-
-                # But when there is the possibility of a thread context
-                # parameter, $ret works only on non-threaded builds
-                my $no_thread_full_define = $ret;
-
-                # And we have to do more when there are threads.  First,
-                # convert the input argument list to 'a', 'b' ....  This keeps
-                # us from having to worry about all the extra stuff in the
-                # input list; stuff like the type declarations, things like
-                # NULLOK, and pointers '*'.
+                # Here, there is thread context.  The macro doesn't have an
+                # explicit thread context argument, but the long name will.
+                # And that argument is empty on unthreaded builds.  The code
+                # below creates two scenarios:
+                #   Threaded:
+                #       A function is created named with the long name, which
+                #       merely calls the short name macro.  That gets expanded
+                #       out properly inside the function.  A prototype for it
+                #       is created elsewhere in this program.  (Things are
+                #       simpler if the macro isn't visible outside core, as
+                #       explained below.)
+                #   Unthreaded:
+                #       A macro is created named with the long name, which
+                #       merely calls the short name macro, while omitting the
+                #       thread-context parameter in the call.  This parameter
+                #       is just a placeholder anyway since there are no
+                #       threads.
+                #
+                # First, convert the input argument list to 'a', 'b' ....
+                # This keeps us from having to worry about all the extra stuff
+                # in the input list; stuff like the type declarations, things
+                # like NULLOK, and pointers '*'.
                 my $argname = 'a';
                 my @stripped_args;
                 push @stripped_args, $argname++ for $args->@*;
                 my $arglist = join ",", @stripped_args;
 
-                # The non-threaded case just uses what we generated above for
-                # the /T/ flag case.
-                $ret = "#${ind}ifndef USE_THREADS\n"
-                     . "$ind  $no_thread_full_define" # No \n because no chomp
-                     . "#${ind}endif\n";
+                # Now create a placeholder for the (paradoxically empty)
+                # thread context parameter.
+                my $mTHX_ = "mTHX";
+                $mTHX_ .= ',' if $arglist ne "";
 
-                # In the threaded case, the Perl_ form is expecting an aTHX
-                # first argument.  When called from core, that will always
-                # match aTHX, so we can just use mTHX to match that, and
-                # otherwise ignore it.  Then call the short name which is
-                # expecting an implicit aTHX to exist.
-                if ($flags !~ /[ACE]/) {
-                    my $mTHX_ = "mTHX";
-                    $mTHX_ .= ',' if $arglist ne "";
-                    $ret .= "#${ind}ifdef USE_THREADS\n"
-                          . "#${ind}  define $full_name($mTHX_$arglist)"
-                          .           "  $func($arglist)\n"
-                          . "#${ind}endif\n";
-                }
-                else {
+                # Then create the definition, which just calls the short name,
+                # omitting the thread context arg.
+                $ret = indent_define("$full_name($mTHX_$arglist)",
+                                     "$func($arglist)", $ind);
 
-                    # Here, the form can be called from outside core.  In the
-                    # case of a program containing two embedded perl instances
-                    # running, the thread context could be different from
-                    # aTHX, so we have to do something else.  For now, just
-                    # add all the needed information to a list to be handled
-                    # all at once later.
+                # The macro generally is valid only when unthreaded, and we
+                # add the macro to the list of functions which need to be
+                # generated.
+                #
+                # But we can skip all this if the macro isn't visible outside
+                # core.  The reason we need to do this in the first place is
+                # because of the possibility of embedding.  Suppose a program
+                # contains two embedded perl instances.  It calls the various
+                # long form functions with whatever thread context it wants.
+                # We can't just ignore that context, so an actual function
+                # needs to be created to pass the context to.  However, if the
+                # function isn't visible outside core, it can't be called
+                # directly by the embedding code, so the thread context is
+                # always going to be aTHX, and so can be omitted, and the
+                # called-macro will add aTHX back in.
+                if ($flags =~ /[ACE]/) {
+
+                    # Visible outside core means macro is only valid when
+                    # unthreaded
+                    $ret = "#${ind}ifndef USE_THREADS\n"
+                         . $ret
+                         . "#${ind}endif\n";
+
+                    # And we later need to generate a function for the long
+                    # name.  Add all the information needed for this to a
+                    # list.
                     $object->{guard} = $guard;
                     $need_longs{$full_name} = $object;
                 }
