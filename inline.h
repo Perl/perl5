@@ -4317,43 +4317,35 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
         MAGIC *mg = SvMAGIC(itervar);
         assert(mg);
         assert(mg->mg_type == PERL_MAGIC_lvref);
-        if (!mg->mg_obj) {
-            // LV ref around a lexical, mg_len gives its pad index
-            SV **padslot = &PAD_SVl(mg->mg_len);
-            SV *oldsv = *padslot;
-            *padslot = origval;
-            SvREFCNT_dec(oldsv);
+        assert(mg->mg_obj);
+        // LV ref around a package lexical, mg_obj gives its GV
+        GV *gv = (GV *)mg->mg_obj;
+        SV *oldsv = NULL;
+        switch(mg->mg_private & OPpLVREF_TYPE) {
+            case OPpLVREF_SV:
+                oldsv = GvSVn(gv);
+                GvSVn(gv) = origval;
+                break;
+
+            case OPpLVREF_AV:
+                oldsv = (SV *)GvAV(gv);
+                GvAV(gv) = (AV *)origval;
+                break;
+
+            case OPpLVREF_HV:
+                oldsv = (SV *)GvHV(gv);
+                GvHV(gv) = (HV *)origval;
+                break;
+
+            case OPpLVREF_CV:
+                oldsv = (SV *)GvCV(gv);
+                GvCV_set(gv, (CV *)origval);
+                break;
+
+            default:
+                NOT_REACHED;
         }
-        else {
-            // LV ref around a package lexical, mg_obj gives its GV
-            GV *gv = (GV *)mg->mg_obj;
-            SV *oldsv = NULL;
-            switch(mg->mg_private & OPpLVREF_TYPE) {
-                case OPpLVREF_SV:
-                    oldsv = GvSVn(gv);
-                    GvSVn(gv) = origval;
-                    break;
-
-                case OPpLVREF_AV:
-                    oldsv = (SV *)GvAV(gv);
-                    GvAV(gv) = (AV *)origval;
-                    break;
-
-                case OPpLVREF_HV:
-                    oldsv = (SV *)GvHV(gv);
-                    GvHV(gv) = (HV *)origval;
-                    break;
-
-                case OPpLVREF_CV:
-                    oldsv = (SV *)GvCV(gv);
-                    GvCV_set(gv, (CV *)origval);
-                    break;
-
-                default:
-                    NOT_REACHED;
-            }
-            SvREFCNT_dec(oldsv);
-        }
+        SvREFCNT_dec(oldsv);
     }
     if (cx->cx_type & (CXp_FOR_GV|CXp_FOR_LVREF))
         SvREFCNT_dec(cx->blk_loop.itervar_u.svp);

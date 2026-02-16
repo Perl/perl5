@@ -10086,11 +10086,14 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
                      varop->op_type == OP_PADAV ||
                      varop->op_type == OP_PADHV));
 
-            if(varop->op_type != OP_LVREF || varop->op_private & OPpLVAL_INTRO) {  /* for my \VAR */
+            /* Any of these ops with a non-zero ->op_targ operates on lexicals
+             * providing it is not OPf_STACKED */
+            if((varop->op_targ && !(varop->op_flags & OPf_STACKED)) || varop->op_private & OPpLVAL_INTRO) {  /* for my \VAR */
                 /* Throw away the sv op subtree and turn this into a simple
                  * padoffset + OPpITER_REFALIAS flag */
                 iterpflags = OPpITER_REFALIAS;
-                enteriterpflags = OPpLVAL_INTRO;
+                if(varop->op_private & OPpLVAL_INTRO)
+                    enteriterpflags = OPpLVAL_INTRO;
                 padoff = varop->op_targ;
                 varop->op_targ = 0;
                 op_free(sv);
