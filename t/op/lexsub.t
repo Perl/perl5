@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 
-plan 158;
+plan 160;
 
 # -------------------- our -------------------- #
 
@@ -1053,4 +1053,39 @@ my $result =
 say "result=", ($result//"undef");
 EOS
 
+}
+
+{
+    # test case from GH #24131
+    fresh_perl_is(<<'CODE', "ARRAY", {}, "lexical sub call from eval");
+use v5.40;
+sub foo2 {
+sub { eval "say reftype([]);" or die $@ }
+    };
+foo2->();
+CODE
+
+    # adapted test case from GH #24056
+    # may pass on non-threaded perls
+    fresh_perl_is(<<'CODE', "", {}, "another lexical sub call from eval");
+BEGIN {
+    eval <<~'EOS';
+        package eval_bug;
+        $eval_bug::VERSION='0.001';
+        
+        use v5.40;
+        
+        sub do_eval
+        {
+            eval 'use v5.40; true';
+            die $@ if $@;
+        }
+        EOS
+}
+
+{
+    eval_bug::do_eval;
+    die $@ if $@;
+}
+CODE
 }
