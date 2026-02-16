@@ -2627,22 +2627,17 @@ PP(pp_enteriter)
             MAGIC *mg = SvMAGIC(sv);
             assert(mg);
             assert(mg->mg_type == PERL_MAGIC_lvref);
-            if (!mg->mg_obj) {
-                // LV ref around a lexical, mg_len gives its pad index
-                itersave = SvREFCNT_inc_NN(PAD_SV(mg->mg_len));
+            assert(mg->mg_obj);
+            // LV ref around a package lexical, mg_obj gives its GV
+            GV *gv = (GV *)mg->mg_obj;
+            assert(SvTYPE(gv) == SVt_PVGV);
+            switch(mg->mg_private & OPpLVREF_TYPE) {
+                case OPpLVREF_SV: itersave =       GvSVn(gv); break;
+                case OPpLVREF_AV: itersave = (SV *)GvAV(gv);  break;
+                case OPpLVREF_HV: itersave = (SV *)GvHV(gv);  break;
+                case OPpLVREF_CV: itersave = (SV *)GvCV(gv);  break;
             }
-            else {
-                // LV ref around a package lexical, mg_obj gives its GV
-                GV *gv = (GV *)mg->mg_obj;
-                assert(SvTYPE(gv) == SVt_PVGV);
-                switch(mg->mg_private & OPpLVREF_TYPE) {
-                    case OPpLVREF_SV: itersave =       GvSVn(gv); break;
-                    case OPpLVREF_AV: itersave = (SV *)GvAV(gv);  break;
-                    case OPpLVREF_HV: itersave = (SV *)GvHV(gv);  break;
-                    case OPpLVREF_CV: itersave = (SV *)GvCV(gv);  break;
-                }
-                SvREFCNT_inc_void(itersave);
-            }
+            SvREFCNT_inc_void(itersave);
             cxflags = CXp_FOR_LVREF;
         }
         /* we transfer ownership of 1 ref count of itervarp from the stack
