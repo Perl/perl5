@@ -368,6 +368,12 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Resolving a lexical sub for prototype checking during parsing in eval
+could result in finding the wrong sub, resulting in confusing
+errors. [GH #24056][GH #24131]
+
 =back
 
 =head1 Known Problems
