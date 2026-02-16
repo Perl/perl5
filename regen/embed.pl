@@ -4525,6 +4525,8 @@ sub generate_proto_h {
             if $static_inline;
         $ret = "#${ind}ifndef NO_MATHOMS\n$ret\n#${ind}endif"
             if $binarycompat;
+        $ret = "#${ind}ifdef USE_THREADS\n$ret\n#${ind}endif"
+            if $has_mflag;
 
         $ret .= @attrs ? "\n\n" : "\n";
 
