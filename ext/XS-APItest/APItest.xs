@@ -3473,7 +3473,7 @@ void
 test_magic_chain()
     PREINIT:
         SV *sv;
-        MAGIC *callmg, *uvarmg;
+        MAGIC *callmg = NULL, *uvarmg = NULL;
     CODE:
         sv = newSV_type_mortal(SVt_NULL);
         if (SvTYPE(sv) >= SVt_PVMG) croak_fail();
