@@ -2622,51 +2622,6 @@ my %h;
 $_ == 3 ? \$_ : $_ = \3;
 $_ == 3 ? \$_ : \$x = \3;
 \($_ == 3 ? $_ : $x) = \3;
-for \my $topic (\$1, \$2) {
-    die;
-}
-for \state $topic (\$1, \$2) {
-    die;
-}
-for \our $topic (\$1, \$2) {
-    die;
-}
-for \$_ (\$1, \$2) {
-    die;
-}
-for \my @a ([1,2], [3,4]) {
-    die;
-}
-for \state @a ([1,2], [3,4]) {
-    die;
-}
-for \our @a ([1,2], [3,4]) {
-    die;
-}
-for \@_ ([1,2], [3,4]) {
-    die;
-}
-for \my %a ({5,6}, {7,8}) {
-    die;
-}
-for \our %a ({5,6}, {7,8}) {
-    die;
-}
-for \state %a ({5,6}, {7,8}) {
-    die;
-}
-for \%_ ({5,6}, {7,8}) {
-    die;
-}
-{
-    my sub a;
-    for \&a (sub { 9; }, sub { 10; }) {
-        die;
-    }
-}
-for \&a (sub { 9; }, sub { 10; }) {
-    die;
-}
 >>>>
 our $x;
 \$x = \$x;
@@ -2745,6 +2700,55 @@ my %h;
 $_ == 3 ? \$_ : $_ = \3;
 $_ == 3 ? \$_ : \$x = \3;
 ($_ == 3 ? \$_ : \$x) = \3;
+####
+# lvalue reference iteration
+# CONTEXT use feature "state", 'refaliasing', 'lexical_subs'; no warnings 'experimental';
+for \my $topic (\$1, \$2) {
+    die;
+}
+for \state $topic (\$1, \$2) {
+    die;
+}
+for \our $topic (\$1, \$2) {
+    die;
+}
+for \$_ (\$1, \$2) {
+    die;
+}
+for \my @a ([1,2], [3,4]) {
+    die;
+}
+for \state @a ([1,2], [3,4]) {
+    die;
+}
+for \our @a ([1,2], [3,4]) {
+    die;
+}
+for \@_ ([1,2], [3,4]) {
+    die;
+}
+for \my %a ({5,6}, {7,8}) {
+    die;
+}
+for \our %a ({5,6}, {7,8}) {
+    die;
+}
+for \state %a ({5,6}, {7,8}) {
+    die;
+}
+for \%_ ({5,6}, {7,8}) {
+    die;
+}
+{
+    my sub a;
+    for \&a (sub { 9; }, sub { 10; }) {
+        die;
+    }
+}
+for \&a (sub { 9; }, sub { 10; }) {
+    die;
+}
+>>>>
 foreach \my $topic (\$1, \$2) {
     die;
 }
