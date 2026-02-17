@@ -2048,7 +2048,7 @@
 #     define reg_la_OPFAIL(a,b,c)               S_reg_la_OPFAIL(aTHX_ a,b,c)
 #     define reg_node(a,b)                      S_reg_node(aTHX_ a,b)
 #     define reg_scan_name(a,b)                 S_reg_scan_name(aTHX_ a,b)
-#     define reg_skipcomment                    S_reg_skipcomment
+#     define reg_skipcomment(a,b)               S_reg_skipcomment(aTHX_ a,b)
 #     define regatom(a,b,c)                     S_regatom(aTHX_ a,b,c)
 #     define regbranch(a,b,c,d)                 S_regbranch(aTHX_ a,b,c,d)
 #     define regclass(a,b,c,d,e,f,g,h,i)        S_regclass(aTHX_ a,b,c,d,e,f,g,h,i)

@@ -11349,11 +11349,12 @@ PERL_STATIC_INLINE Size_t
 S_find_first_differing_byte_pos(const U8 *s1, const U8 *s2, const Size_t max)
         Perl_attribute_nonnull_(1)
         Perl_attribute_nonnull_(2);
-PERL_STATIC_INLINE char *
-S_reg_skipcomment(RExC_state_t *pRExC_state, char *p)
-        Perl_attribute_nonnull_(1)
-        Perl_attribute_nonnull_(2);
-#   endif
+PERL_STATIC_INLINE void
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char **p)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2);
+#   endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_REGCOMP_C) */
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGCOMP_INVLIST_C)

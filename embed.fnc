@@ -5742,8 +5742,8 @@ ES	|regnode_offset|regpnode|NN RExC_state_t *pRExC_state		\
 				|NN SV *arg
 ES	|SV *	|reg_scan_name	|NN RExC_state_t *pRExC_state		\
 				|U32 flags
-ETi	|char * |reg_skipcomment|NN RExC_state_t *pRExC_state		\
-				|NN char *p
+Ei	|void	|reg_skipcomment|NN RExC_state_t *pRExC_state		\
+				|NN char **p
 ERS	|bool	|regtail	|NN RExC_state_t *pRExC_state		\
 				|const regnode_offset p 		\
 				|const regnode_offset val		\
