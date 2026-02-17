@@ -5751,7 +5751,9 @@ ERS	|bool	|regtail	|NN RExC_state_t *pRExC_state		\
 ES	|void	|set_regex_pv	|NN RExC_state_t *pRExC_state		\
 				|NN REGEXP *Rx
 ES	|void	|skip_bracketed_white_space				\
+				|NN RExC_state_t *pRExC_state		\
 				|U8 do_skip				\
+				|SPTR const char *p_start		\
 				|MPTR char **p				\
 				|EPTRge char *stop_p
 ES	|void	|skip_to_be_ignored_text				\
