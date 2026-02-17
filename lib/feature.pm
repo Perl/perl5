@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '2.01';
+our $VERSION = '2.02';
 
 our %feature = (
     fc                              => 'feature_fc',
@@ -21,6 +21,7 @@ our %feature = (
     signatures                      => 'feature_signatures',
     smartmatch                      => 'feature_smartmatch',
     current_sub                     => 'feature___SUB__',
+    enhanced_xx                     => 'feature_enhanced_xx',
     keyword_all                     => 'feature_keyword_all',
     keyword_any                     => 'feature_keyword_any',
     module_true                     => 'feature_module_true',
@@ -45,7 +46,7 @@ our %feature_bundle = (
     "5.37"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures smartmatch state unicode_eval unicode_strings)],
     "5.39"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures smartmatch state try unicode_eval unicode_strings)],
     "5.41"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
-    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa keyword_all keyword_any module_true multidimensional postderef_qq refaliasing say signatures smartmatch state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer enhanced_xx evalbytes extra_paired_delimiters fc indirect isa keyword_all keyword_any module_true multidimensional postderef_qq refaliasing say signatures smartmatch state switch try unicode_eval unicode_strings)],
     "default" => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional smartmatch)],
 );
 
@@ -414,6 +415,21 @@ to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
 
 This feature is available starting in Perl 5.36.
+
+=head2 The 'enhanced_xx' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::eenhanced_xx";
+
+This feature changes the meaning of the C</xx> regular expression pattern
+modifier to allow bracketed character classes to be split across lines, and to
+catch cases where a literal C<#> was meant to be matched, but instead that and
+the rest of the line was taken to be a comment.
+
+This feature is available starting in Perl 5.44.
 
 =head2 The 'evalbytes' feature
 
