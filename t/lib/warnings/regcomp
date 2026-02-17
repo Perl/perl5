@@ -120,3 +120,68 @@ Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not p
 Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable in regex; marked by <-- HERE in m/[\x{8000_0000} <-- HERE ]/ at - line 3.
 Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable in regex; marked by <-- HERE in m/\o{20_000_000_000} <-- HERE / at - line 4.
 Code point 0x80000000 is not Unicode, requires a Perl extension, and so is not portable in regex; marked by <-- HERE in m/[\o{20_000_000_000} <-- HERE ]/ at - line 5.
+########
+# NAME [GH #24209] Enhanced /xx: Two '#' on same line
+use warnings;
+use feature 'enhanced_xx';
+
+my @a = (0, 1, 2);
+my $i = 0;
+$a[$i] =~ qr/ [ a-z         # We need to match the lowercase alphabetics
+                ! @ # . *   # And certain punctuation
+                0-9         # And the digits (which can only occur in $a[0])
+              ]
+            /xx;
+$a[$i] =~ qr/ a-z         # Unquoted '#' in a comment warns
+            /xx;
+no warnings 'experimental::enhanced_xx';
+$a[$i] =~ qr/ a-z         # Unquoted "#" in a comment warns
+            /xx;
+$a[$i] =~ qr/ a-z         # Unescaped "#" in a comment warns
+            /xx;
+EXPECT
+enhanced_xx is experimental at - line 6.
+enhanced_xx is experimental at - line 11.
+Did you mean to have a second '#' in your comment?
+If so, escape with '\' or quote with " or ' to silence this message
+ in regex; marked by <-- HERE in m/ [ a-z         # We need to match the lowercase alphabetics
+                ! @ # . *   # <-- HERE  And certain punctuation
+                0-9         # And the digits (which can only occur in 0)
+              ]
+            / at - line 6.
+########
+# NAME [GH #24209] Enhanced /xx: Class terminator in comment
+use warnings;
+use feature 'enhanced_xx';
+
+my @a = (0, 1, 2);
+my $i = 0;
+
+no warnings 'experimental::enhanced_xx';
+$a[$i] =~ s/ [ a-z  # . * ]
+             [ A-Z ]
+           //xx;
+$a[$i] =~ s/ [ a-z  # . * \]
+             [ A-Z ]
+           //xx;
+EXPECT
+Did you mean to have a ']' in your comment?
+If so, escape with '\' or quote with " or ' to silence this message
+ in regex; marked by <-- HERE in m/ [ a-z  # . * ] <-- HERE 
+             [ A-Z ]
+           / at - line 10.
+########
+# NAME [GH #24209] Enhanced /xx: '#' without surrounding spaces
+use warnings;
+use feature 'enhanced_xx';
+
+my @a = (0, 1, 2);
+my $i = 0;
+$a[$i] =~ m/ ab#c /xx;
+$a[$i] =~ m/ ab\#c /xx;
+EXPECT
+enhanced_xx is experimental at - line 6.
+Did you mean this to be a comment?
+If so, to silence this message add blanks like so: " # "
+ in regex; marked by <-- HERE in m/ ab# <-- HERE c / at - line 6.
+enhanced_xx is experimental at - line 7.

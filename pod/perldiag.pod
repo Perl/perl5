@@ -2284,6 +2284,42 @@ seems superfluous.
 @hash{@keys}.  On the other hand, maybe you just meant %hash and got
 carried away.
 
+=item Did you mean to have a second '#' in your comment?  If so, escape with '\' or quote with " or ' to silence this message
+
+(W regexp) (only under C<S<use feature 'enhanced_xx'>>)
+Your pattern contains an unescaped, unquoted C<#> character inside a
+comment.  This warning is intended to catch cases where the first C<#>
+was intended to be taken as a literal, but instead it and the rest of
+the line are slurped up as a comment, leading to very unintended
+behavior.  If the earlier C<#> wasn't intended to begin a comment,
+change it to C<\#>; otherwise quote or escape the second C<#> to
+suppress the message.
+
+=item Did you mean this to be a comment?
+
+(W regexp) (only under C<S<use feature 'enhanced_xx'>>)
+Your pattern contains an unescaped C<#> character which causes it and
+all text up through the end of the current line to be considered a
+comment.  The normal style for such comments is for the C<#> to be
+surrounded by at least one white space character on each side.  And this
+wasn't.  That makes it look like it might have been intended to be taken
+as a literal C<#> character.  This warning is intended to alert you to
+the possibility that your pattern won't behave as you intended.
+If the C<#> is intended to taken literally, change it to C<\#>.
+If it was intended to start a comment, change it to S<C< # >>.
+
+=item Did you mean to have a ']' in your comment?
+
+(W regexp) (only under C<S<use feature 'enhanced_xx'>>)
+Your pattern contains a bracketed character class with a comment, and
+inside that comment is an unescaped, unquoted C<]> character, which
+normally is used to terminate the character class.  Thus the class isn't
+terminated here, but goes on to include other lines.  This warning is
+intended to catch cases where that isn't what was intended.  If the C<]>
+is intended to be part of the comment, quote or escape it suppress the
+message.  If it was intended to terminate the class, simply make it to
+be on a new line in the source code.
+
 =item Died
 
 (F) You passed die() an empty string (the equivalent of C<die "">) or
@@ -2424,6 +2460,13 @@ details.
 (F) You attempted to assign something other than undef or a CODE ref to
 C<%{^HOOK}>. Hooks may only be CODE refs. See L<perlvar/%{^HOOK}> for
 details.
+
+=item enhanced_xx is experimental
+
+(S experimental::enhanced_xx) This warning is emitted if you compile a
+regular expression pattern while C<use feature 'enhanced_xx'> is in effect.
+This feature is currently experimental and its behaviour may change in
+future releases of Perl.
 
 =item entering effective %s failed
 

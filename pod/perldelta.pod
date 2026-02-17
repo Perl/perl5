@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Enhanced operation of regular expression patterns under /xx
+
+Experimentally, the C</xx> pattern modifier can allow bracketed
+character classes (I<e.g.>, C<[a-zA-Z]> to extend across multiple lines
+and to contain comments, and to warn you of potential cases where a
+portion of a pattern inadvertently has been treated as a comment instead
+of what you intended.  This behavior is enabled by S<C<use feature
+"enhanced_xx">>.  See L<perlre/E<sol>x and  E<sol>xx>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security

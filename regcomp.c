@@ -144,6 +144,7 @@ EXTERN_C const struct regexp_engine wild_reg_engine;
 #include "invlist_inline.h"
 #include "unicode_constants.h"
 #include "regcomp_internal.h"
+#include "feature.h"
 
 /* =========================================================
  * BEGIN edit_distance stuff.
@@ -9478,16 +9479,37 @@ S_skip_bracketed_white_space(pTHX_ RExC_state_t *pRExC_state,
                                    char * stop_p)
 {
     PERL_ARGS_ASSERT_SKIP_BRACKETED_WHITE_SPACE;
-    PERL_UNUSED_ARG(pRExC_state);
-    PERL_UNUSED_ARG(p_start);
 
     if (! do_skip) {
         return;
     }
 
+    if (! FEATURE_ENHANCED_XX_IS_ENABLED) {
         while (*p < stop_p && isBLANK_A(UCHARAT(*p))) {
             (*p)++;
         }
+    }
+    else {
+
+        /* With this feature, vertical space is allowed (isSPACE_A() vs the
+         * isBLANK_A() above, and we have to take into account the possibility
+         * of comments, and vertical space */
+        while (*p < stop_p) {
+            if (**p == '#') {
+                reg_skipcomment(pRExC_state,
+                                p_start,
+                                p,
+                                stop_p,
+                                "]");
+            }
+
+            if (! isSPACE_A((**p))) {
+                break;
+            }
+
+            (*p)++;
+        }
+    }
 }
 
 static regnode_offset
@@ -10249,13 +10271,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 vFAIL("Literal vertical space in [] is illegal except"
                       " under /x");
             }
-            else if (RExC_flags & RXf_PMf_EXTENDED_MORE) {
+            else if (   RExC_flags & RXf_PMf_EXTENDED_MORE
+                     && ! FEATURE_ENHANCED_XX_IS_ENABLED)
+            {
                 ckWARNdep(RExC_parse, WARN_DEPRECATED,
                           "Use of literal vertical space in [] is"
                           " deprecated under /xx");
             }
         }
-        else if (value == '#' && RExC_flags & RXf_PMf_EXTENDED_MORE) {
+        else if (   value == '#'
+                 && RExC_flags & RXf_PMf_EXTENDED_MORE
+                 && ! FEATURE_ENHANCED_XX_IS_ENABLED)
+        {
             ckWARNdep(RExC_parse, WARN_DEPRECATED,
                       "Use of unescaped '#' in [] is deprecated under /xx");
         }
@@ -12726,10 +12753,16 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 /* reg_skipcomment()
 
    Absorbs an /x style '#" comment from the input stream, advancing the stream
-   to the first character beyond the comment, or to one byte past the final
-   character of the pattern if the comment terminates the pattern without
-   anything following it (in other words, RExC_end).  In the latter case, it
-   sets the REG_RUN_ON_COMMENT_SEEN flag.
+   to the first character beyond the comment.
+
+   If 'check_for_R_bracket' is true, it is being called while parsing a
+   bracketed character class, and checks that no unescaped, unquoted ']' is in
+   the comment, warning if one is found there.
+
+   Otherwise, it handles the case of the comment terminating the pattern
+   without anything following it.  If so, it sets the parse to RExC_end (which
+   should be one byte following the final byte of the pattern) and also sets
+   the REG_RUN_ON_COMMENT_SEEN flag.
 
    Note it's the callers responsibility to ensure that we are
    actually in /x mode
@@ -12745,19 +12778,110 @@ S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state,
 {
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
     assert(**p == '#');
-    PERL_UNUSED_ARG(p_start);
-    PERL_UNUSED_ARG(p_end);
-    PERL_UNUSED_ARG(check_for_R_bracket);
 
-    while (*p < RExC_end) {
-        if (*(++(*p)) == '\n') {
+    /* Some people like to string multiple '#'s together to mark a comment */
+    char * p0 = *p;
+    do {
+        (*p)++;
+    } while (**p == '#');
+
+    bool warned = false;
+
+    /* With this feature, it's suspicious if a comment:
+     *  1) isn't surrounded by horizontal white space; or
+     *  2) isn't the final character on the line; or
+     *  3) isn't multiple '#'s in a row
+     **/
+    if (FEATURE_ENHANCED_XX_IS_ENABLED && *p == p0 + 1) {
+        if (   (*p < p_end && **p != '\n' && ! isBLANK(**p))
+            || (*p > p_start + 1 && ! isBLANK(*(*p - 2))))
+        {
+            vWARN(*p, "Did you mean this to be a comment?\nIf so, to"
+                      " silence this message add blanks like so: \""
+                      " # \"\n");
+            warned = true;
+        }
+    }
+
+    bool quoted = false;
+    size_t backslash_count = 0;
+
+    /* Absorb the text up to and including the next \n */
+    while (*p < p_end) {
+        if (**p == '\n') {
+            (*p)++;
             return;
         }
+
+        /* Without this feature, all characters get absorbed.  With it, some
+         * characters need special attention, unless we've already raised a
+         * warning */
+        if ( ! FEATURE_ENHANCED_XX_IS_ENABLED
+            || warned
+            || ! strchr("\\'\"#]", **p))
+        {
+            (*p)++;
+
+            backslash_count = 0;
+            quoted = false;
+            continue;
+        }
+
+        /* Keep track of how many sequential backslashes we've found */
+        if (**p == '\\') {
+            backslash_count++;
+            quoted = false;
+            (*p)++;
+            continue;
+        }
+
+        /* Note that the current character is a quote */
+        if (**p == '"' || **p == '\'') {
+            quoted = isEVEN(backslash_count);
+            backslash_count = 0;
+            (*p)++;
+            continue;
+        }
+
+        /* If the previous character was a quote, or there were an odd number
+         * of backslashes just before this character, this character is
+         * considered to be escaped */
+        bool isnt_a_problem = isODD(backslash_count) || quoted;
+
+        /* Here it isn't a backslash nor a quote, so reset for next iteration.
+         * */
+        backslash_count = 0;
+        quoted = false;
+
+        /* Done with this character if not a problem */
+        if (isnt_a_problem) {
+            (*p)++;
+            continue;
+        }
+
+        /* When a problematic second '#' is encountered, warn.  But a final
+         * '#' on the line isn't considered problematic */
+        if (**p == '#' && (*p < p_end - 1 || *p_end == '\0')) {
+            vWARN(*p + 1, "Did you mean to have a second '#' in your comment?"
+                          "\nIf so, escape with '\\' or quote with \" or \'"
+                          " to silence this message\n");
+            warned = true;
+        }
+        else if (check_for_R_bracket && **p == ']') {
+            vWARN(*p + 1, "Did you mean to have a ']' in your comment?"
+                          "\nIf so, escape with '\\' or quote with \" or \'"
+                          " to silence this message\n");
+            warned = true;
+        }
+
+        (*p)++;
     }
 
     /* we ran off the end of the pattern without ending the comment, so we have
      * to add an \n when wrapping */
-    RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
+    if (! check_for_R_bracket) {
+        RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
+    }
 }
 
 static void

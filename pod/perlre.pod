@@ -463,6 +463,15 @@ this is very much like an ordinary Perl code comment.  (You can include
 the closing delimiter within the comment only if you precede it with a
 backslash, so be careful!)
 
+For example,
+
+    # Delete (most) C comments.
+    $program =~ s {
+        /\*	# Match the opening delimiter.
+        .*?	# Match a minimal number of characters.
+        \*/	# Match the closing delimiter.
+    } []gsx;
+
 Use of C</x> means that if you want real
 whitespace or C<"#"> characters in the pattern (outside a bracketed character
 class, which is unaffected by C</x>), then you'll either have to
@@ -474,13 +483,6 @@ escaping the C<\n> with a backslash or C<\Q>.
 You can use L</(?#text)> to create a comment that ends earlier than the
 end of the current line, but C<text> also can't contain the closing
 delimiter unless escaped with a backslash.
-
-A common pitfall is to forget that C<"#"> characters (outside a
-bracketed character class) begin a comment under C</x> and are not
-matched literally.  Just keep that in mind when trying to puzzle out why
-a particular C</x> pattern isn't working as expected.
-Inside a bracketed character class, C<"#"> retains its non-special,
-literal meaning.
 
 Starting in Perl v5.26, if the modifier has a second C<"x"> within it,
 the effect of a single C</x> is increased.  The only difference is that
@@ -496,23 +498,47 @@ may be easier to grasp than the squashed equivalents
     /[d-eg-i3-7]/
     /[!@"#$%^&*()=?<>']/
 
-Note that this unfortunately doesn't mean that your bracketed classes
-can contain comments or extend over multiple lines.  A C<#> inside a
-character class is still just a literal C<#>, and doesn't introduce a
-comment.  And, unless the closing bracket is on the same line as the
-opening one, the newline character (and everything on the next line(s)
-until terminated by a C<]> will be part of the class, just as if you'd
-written C<\n>.
+Starting in Perl v5.44, the experimental feature 
 
-Taken together, these features go a long way towards
-making Perl's regular expressions more readable.  Here's an example:
+ use feature 'enhanced_xx';
 
-    # Delete (most) C comments.
-    $program =~ s {
-        /\*	# Match the opening delimiter.
-        .*?	# Match a minimal number of characters.
-        \*/	# Match the closing delimiter.
-    } []gsx;
+changes the behavior of C</xx> to allow your bracketed classes to extend
+over multiple lines and to contain comments.  
+
+Without this feature being enabled, a C<#> inside a character class is
+still just a literal C<#>; but with it, the C<#> introduces a comment,
+and to get a literal "octothorpe" (the "official" name of this character),
+you must write C<"\#">.  To minimize the chances of an unescaped C<#>
+which was intended to be taken as a literal from being treated as a
+comment, a warning is raised if a C<]> would be absorbed by the comment
+instead of closing the class.  Escape or quote any C<]> intended to be
+part of the comment.
+
+It's best for both clarity and lack of surprises to always spell
+non-printing characters using some printable equivalent, such as C<\0> for
+C<NUL>, C<\n> for newline, I<etc>.  Literal vertical space characters
+have a diffrent meaning when this feature is enabled than when not.
+When enabled, any newline (and any other vertical spacing) characters
+are ignored inside the bracketed class, thus allowing the class to
+extend over as many lines as you like (until terminated by a C<]>).
+When the feature isn't enabled, literal vertical space characters are
+part of the class.  Using C<\n> and its compatriots avoids these
+different behaviors.
+
+This feature also causes an unescaped C<#> that isn't surrounded by
+white space to warn.  This is to catch the common pitfall where you
+forgot to escape it, and silently got a comment instead.  To avoid the
+warning, make sure all comments are of the form S<" # ...">, and escape all
+octothorpes you mean literally with a preceding backslash C<\#>.
+
+To catch further unintentional behaviors, this feature warns if an
+unescaped, unquoted C<#> is inside a comment.  (A check could be added
+that the closing delimiter of the pattern isn't getting absorbed by the
+comment.  But the program likely won't compile anyway in this case.)
+
+It's still easy to forget to escape SPACE characters to get them to
+match literally when C</xx> is in effect.  Keep that in the back of your
+mind for when your pattern isn't behaving as you expect.
 
 Note that anything inside
 a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect

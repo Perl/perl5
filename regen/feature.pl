@@ -54,6 +54,7 @@ my %feature = (
         keyword_any
         keyword_all
         smartmatch
+        enhanced_xx
     )
 );
 
@@ -621,7 +622,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '2.01';
+our $VERSION = '2.02';
 
 FEATURES
 
@@ -946,6 +947,21 @@ to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
 
 This feature is available starting in Perl 5.36.
+
+=head2 The 'enhanced_xx' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::eenhanced_xx";
+
+This feature changes the meaning of the C</xx> regular expression pattern
+modifier to allow bracketed character classes to be split across lines, and to
+catch cases where a literal C<#> was meant to be matched, but instead that and
+the rest of the line was taken to be a comment.
+
+This feature is available starting in Perl 5.44.
 
 =head2 The 'evalbytes' feature
 

@@ -211,6 +211,21 @@ name rather than by position, and is documented in L<perlsub/Signatures>.
 The ticket for this experiment is
 L<[perl #23945]|https://github.com/Perl/perl5/issues/23945>.
 
+=item Enhanced C</xx> modifier in regular expression pattern matching
+
+Introduced in Perl 5.43.8.
+
+Using this feature triggers warnings in the category
+C<experimental::enhanced_xx>.
+
+This feature enables bracketed character classes to be split across
+multiple lines, and to contain comments, and adds warnings if it appears
+a C<#> is interpreted as beginning a comment when it was meant to be
+taken as a literal character.
+
+The ticket for this experiment is
+L<[perl #23945]|https://github.com/Perl/perl5/issues/24209>.
+
 =back
 
 =head2 Accepted features
