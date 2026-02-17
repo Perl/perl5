@@ -2058,7 +2058,7 @@
 #     define regpnode(a,b,c)                    S_regpnode(aTHX_ a,b,c)
 #     define regtail(a,b,c,d)                   S_regtail(aTHX_ a,b,c,d)
 #     define set_regex_pv(a,b)                  S_set_regex_pv(aTHX_ a,b)
-#     define skip_bracketed_white_space(a,b,c)  S_skip_bracketed_white_space(aTHX_ a,b,c)
+#     define skip_bracketed_white_space(a,b,c,d,e) S_skip_bracketed_white_space(aTHX_ a,b,c,d,e)
 #     define skip_to_be_ignored_text(a,b,c)     S_skip_to_be_ignored_text(aTHX_ a,b,c)
 #     define ssc_finalize(a,b)                  S_ssc_finalize(aTHX_ a,b)
 #     if defined(DEBUGGING)
