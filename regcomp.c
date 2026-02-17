@@ -6250,7 +6250,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         assert((RExC_flags & RXf_PMf_EXTENDED) == 0);
         /*
         if (RExC_flags & RXf_PMf_EXTENDED) {
-            RExC_parse_set( reg_skipcomment( pRExC_state, RExC_parse ) );
+            RExC_parse_set( reg_skipcomment( pRExC_state, &RExC_parse ) );
             if (RExC_parse < RExC_end)
                 goto tryagain;
         }
@@ -12725,10 +12725,10 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 
 /* reg_skipcomment()
 
-   Absorbs an /x style # comment from the input stream,
-   returning a pointer to the first character beyond the comment, or if the
-   comment terminates the pattern without anything following it, this returns
-   one past the final character of the pattern (in other words, RExC_end) and
+   Absorbs an /x style '#" comment from the input stream, advancing the stream
+   to the first character beyond the comment, or to one byte past the final
+   character of the pattern if the comment terminates the pattern without
+   anything following it (in other words, RExC_end).  In the latter case, it
    sets the REG_RUN_ON_COMMENT_SEEN flag.
 
    Note it's the callers responsibility to ensure that we are
@@ -12736,23 +12736,22 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 
 */
 
-PERL_STATIC_INLINE char*
-S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
+PERL_STATIC_INLINE void
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char ** p)
 {
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
 
-    assert(*p == '#');
+    assert(**p == '#');
 
-    while (p < RExC_end) {
-        if (*(++p) == '\n') {
-            return p+1;
+    while (*p < RExC_end) {
+        if (*(++(*p)) == '\n') {
+            return;
         }
     }
 
     /* we ran off the end of the pattern without ending the comment, so we have
      * to add an \n when wrapping */
     RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
-    return p;
 }
 
 static void
@@ -12795,7 +12794,7 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
                     (*p) += len;
                 }
                 else if (*(*p) == '#') {
-                    (*p) = reg_skipcomment(pRExC_state, (*p));
+                    reg_skipcomment(pRExC_state, p);
                 }
                 else {
                     break;
