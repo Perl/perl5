@@ -164,7 +164,7 @@ no warnings 'experimental::class';
 }
 
 { # came up during GH #24187 review
-    local $::TODO = "refaliasing a field in a method crashed";
+    # https://github.com/Perl/perl5/pull/24187#discussion_r2814795858
     fresh_perl_is(<<'CODE', "OK", {}, "clear the right SV");
 use feature 'class', 'refaliasing';
 no warnings 'experimental::class';
