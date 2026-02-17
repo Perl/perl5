@@ -12373,6 +12373,7 @@ S_scan_inputsymbol(pTHX_ char *start)
    On success, the SV with the resulting string is put into lex_stuff or,
    if that is already non-NULL, into lex_repl. The second case occurs only
    when parsing the RHS of the special constructs s/// and tr/// (y///).
+
    For convenience, the terminating delimiter character is stuffed into
    SvIVX of the SV.
 */
