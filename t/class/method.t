@@ -163,4 +163,29 @@ no warnings 'experimental::class';
         'lexical method with signature counts $self correctly');
 }
 
+{ # came up during GH #24187 review
+    local $::TODO = "refaliasing a field in a method crashed";
+    fresh_perl_is(<<'CODE', "OK", {}, "clear the right SV");
+use feature 'class', 'refaliasing';
+no warnings 'experimental::class';
+no warnings 'experimental::refaliasing';
+
+class TestCase10 {
+    field %x : reader;
+    method magic {
+        # this doesn't modify the field itself, just the
+        # lexical slot in the method's pad
+        \%x = \%ENV;
+        $self;
+    }
+}
+
+my $c = TestCase10->new;
+$c->magic;
+# the reference to $x would crash/assert
+$c->x;
+print "OK\n";
+CODE
+}
+
 done_testing;
