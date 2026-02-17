@@ -318,11 +318,13 @@ PP(pp_methstart)
              *   See also https://github.com/Perl/perl5/issues/22278
              */
             if(fieldp[fieldix]) {
-              /* TODO: There isn't a convenient SAVE macro for doing both these
-               * steps in one go. Add one. */
-              SAVESPTR(PAD_SVl(padix));
-              SV *sv = PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
-              save_freesv(sv);
+                /* TODO: There isn't a convenient SAVE macro for doing
+                 * both these steps in one go. Add one.
+                 */
+                SV ** const padentry = &(PAD_SVl(padix));
+                SAVESPTR(*padentry);
+                *padentry = SvREFCNT_inc(fieldp[fieldix]);
+                save_clearsv(padentry);
             }
         }
     }
