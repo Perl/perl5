@@ -1268,7 +1268,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
         if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv) &&
             UNLIKELY(SvPVX_const(sv) <= (const char *)vbuf &&
                      (const char *)vbuf < SvPVX_const(sv) + SvLEN(sv))) {
-            vbuf = savepvn(vbuf, count);
+            vbuf = savepvn((const char *)vbuf, count);
             SAVEFREEPV(vbuf);
         }
 
