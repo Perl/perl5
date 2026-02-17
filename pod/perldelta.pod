@@ -147,6 +147,27 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =back
 
+=head2 C<m/...[...].../xx> has new restrictions
+
+Using an unescaped C<#> or literal vertical space is now deprecated in a
+regular expression bracketed character class that is compiled with the
+C</xx> modifier.  These still work, but deprecation warnings will be
+generated unless turned off or the constructs are cured as follows.
+
+=over
+
+=item *
+
+Escape a C<#> by preceding it with a backslash, like in
+
+ m/ [ % \# ( ) ] /xx
+
+=item *
+
+Use constructs like C<\n> instead of literal vertical space.
+
+=back
+
 [ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
