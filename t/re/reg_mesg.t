@@ -786,6 +786,12 @@ my @deprecated = (
  '/foo(:?{bar)/' => "",
  '/\s*{/'        => "",
  '/a{3,4}{/'     => "",
+ '/a[b#c]/xx'    => "Use of unescaped '#' in [] is deprecated under /xx"
+                  . " {#} m/a[b#{#}c]/",
+ '/a[b\#c]/xx'    => "",
+ '/a[b
+ c]/xx'    => "Use of literal vertical space in [] is deprecated under /xx {#} m/a[b
+{#} c]/",
 );
 
 for my $strict ("", "use re 'strict';") {

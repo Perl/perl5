@@ -10228,11 +10228,22 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 break;
             }   /* End of switch on char following backslash */
         } /* end of handling backslash escape sequences */
-        else if (  strict && ! skip_white
-                 && (   generic_isCC_(value, CC_VERTSPACE_)
-                     || is_VERTWS_cp_high(value)))
+        else if (   generic_isCC_(value, CC_VERTSPACE_)
+                 || is_VERTWS_cp_high(value))
         {
-            vFAIL("Literal vertical space in [] is illegal except under /x");
+            if (strict && ! skip_white) {
+                vFAIL("Literal vertical space in [] is illegal except"
+                      " under /x");
+            }
+            else if (RExC_flags & RXf_PMf_EXTENDED_MORE) {
+                ckWARNdep(RExC_parse, WARN_DEPRECATED,
+                          "Use of literal vertical space in [] is"
+                          " deprecated under /xx");
+            }
+        }
+        else if (value == '#' && RExC_flags & RXf_PMf_EXTENDED_MORE) {
+            ckWARNdep(RExC_parse, WARN_DEPRECATED,
+                      "Use of unescaped '#' in [] is deprecated under /xx");
         }
 
         /* Here, we have the current token in 'value' */
