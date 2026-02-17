@@ -2871,6 +2871,101 @@ there is no op tree)
 and C<Perl_dump_all>, which dumps all the subroutines in the stash and
 the op tree of the main root.
 
+=head1 Tracing the interpreter execution
+
+Throughout the source code you'll see statements like
+
+ DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n", msg));
+ DEBUG_l(deb("Entering new RUNOPS level: depth=%d\n", depth));
+ DEBUG_r(if (!PL_colorset) reginitcolors());
+ DEBUG_y(sv_dump(sv));
+
+Each statement executes the code within the outermost pair of
+parentheses, but only under certain circumstances:
+
+=over
+
+=item perl must have been compiled with -DDEBUGGING
+
+If not, each such statement compiles to nothing.
+
+=item The C<$^D> variable must have the appropriate bit set.
+
+To execute, C<DEBUG_y> needs the C<y> bit set.  Similarly, there are
+C<L>, C<l>, and C<r> bits.
+
+Each bit is for a different aspect of the interpreter execution.  C<L>
+is for locale handling, C<l> is for context (loop) stack processing,
+C<r> for regular expressions, and C<y> for C<tr///>.
+
+All possibe bits and their meanings are listed in L<perlrun/-Dletters>,
+or in the F<perl.h> source under, like, C<DEBUG_L_FLAG>.
+
+Setting these is most often done from the command line that started this
+execution of the interpreter, using C<-D...> options, but a Perl
+program can change the value of this variable at will.
+
+=back
+
+So, for example, when perl has been compiled with C<-DEBUGGING>, and
+turned on by passing the C<-Dy> option to perl at startup, any time the
+execution encounters a C language source C<DEBUG_y(sv_dump(sv));>
+statement, C<sv_dump> is called.  (See L<perlapi/C<sv_dump>> for what
+that does.)
+
+Lines like these are strategically placed in the C code to help find
+problems when turned on, but occupy no space at all without
+C<-DDEBUGGING>.
+
+There is also a C<v> modifier bit which requests extra verbosity for the
+other set bits.  In statements like
+
+ DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Entering function(%s);", ...))
+
+C<PerlIO_printf> is executed only when perl has been compiled with
+C<-DDEBUGGING> and BOTH the C<L> and C<v> bits are enabled, such as
+with C<-DLv> or C<-DvL...>.  Only a few main bits are affected by C<v>,
+and currently there is only one level of extra verbosity.  C<-DLvvv> and
+C<-LDv> do exeactly the same thing.
+
+The most commonly used form of these is like
+
+ DEBUG_L(PerlIO_printf(Perl_debug_log, "%s", msg));
+
+When enabled as described above, this statement causes the contents of
+the C language character string C<msg> to be displayed to C<stderr>
+whenever the statement is encountered during the execution of a Perl
+program.  After C<Perl_debug_log> must be a format string, and then any
+number of arguments to that format, just as-if this were a C<printf()>.
+
+C<deb()> as the interior does the same thing, but automatically notes the
+Perl source code line that was the ultimate cause of this C statement
+getting executed.  This is an easy way to associate the Perl code with
+its corresponding C translation.  See L<perlapi/C<deb>>.  Its use in our
+source should actually be more widespread than it is.  Patches Welcome!
+
+Most of these statements are essentially permanently placed in the
+source code, to be turned on, perhaps in the far distant future,
+as-needed.  But there is one bit that is reserved for temporary
+placement during development or handling special situations.  You can
+add C<DEBUG_U> (for "Unofficial") statements for whatever you need.  But
+these should be removed after the code is debugged, or be converted to
+use other bits.
+
+You can write more complex conditions to more finely tune if output will
+be generated, using the C<DEBUG_U_TEST> and C<DEBUG_Uv_TEST> macros.
+They return true if and only if a debug statement of the corresponding
+type would display.  There are corresponding macros for each of the
+bits.
+
+=for apidoc_section $debugging
+=for apidoc      Amh|    |DEBUG_U |const char * format|...
+=for apidoc_item    |    |DEBUG_Uv|const char * format|...
+=for apidoc_item mn|bool|DEBUG_U_TEST
+=for apidoc_item mn|bool|DEBUG_Uv_TEST
+
+=for apidoc     Cmnh|U32 |DEBUG_L_FLAG
+
 =head1 How multiple interpreters and concurrency are supported
 
 =head2 Background and MULTIPLICITY

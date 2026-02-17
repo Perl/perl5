@@ -1100,12 +1100,15 @@ For example
     (-e:1)	add
         =>  NV(1)
 
+All the options are listed in L<perlrun/-Dletters>.
 
 Some of the functionality of the debugging code can be achieved with a
 non-debugging perl by using XS modules:
 
     -Dr => use re 'debug'
     -Dx => use O 'Debug'
+
+More details can be found in L<perlguts/Tracing the interpreter execution>.
 
 =head2 Using a source-level debugger
 

@@ -580,112 +580,17 @@ my @unresolved_visibility_overrides = qw(
     DBVARMG_SIGNAL
     DBVARMG_SINGLE
     DBVARMG_TRACE
-    DEBUG_A
-    DEBUG_A_FLAG
-    DEBUG_A_TEST
-    DEBUG_B
-    DEBUG_B_FLAG
-    DEBUG_B_TEST
-    DEBUG_c
-    DEBUG_C
-    DEBUG_c_FLAG
-    DEBUG_C_FLAG
-    DEBUG_c_TEST
-    DEBUG_C_TEST
-    DEBUG_D
     DEBUG_DB_RECURSE_FLAG
-    DEBUG_D_FLAG
-    DEBUG_D_TEST
-    DEBUG_f
-    DEBUG_f_FLAG
-    DEBUG_f_TEST
-    DEBUG_h_FLAG
-    DEBUG_h_TEST
-    DEBUG_i
-    DEBUG_i_FLAG
-    DEBUG_i_TEST
-    DEBUG_J_FLAG
-    DEBUG_J_TEST
-    DEBUG_l
-    DEBUG_L
-    DEBUG_l_FLAG
-    DEBUG_L_FLAG
-    DEBUG_l_TEST
-    DEBUG_L_TEST
-    DEBUG_Lv
-    DEBUG_Lv_TEST
-    DEBUG_m
-    DEBUG_M
     DEBUG_MASK
-    DEBUG_m_FLAG
-    DEBUG_M_FLAG
-    DEBUG_m_TEST
-    DEBUG_M_TEST
-    DEBUG_o
-    DEBUG_o_FLAG
-    DEBUG_o_TEST
-    DEBUG_p
-    DEBUG_P
     DEBUG_PEEP
-    DEBUG_p_FLAG
-    DEBUG_P_FLAG
     DEBUG_POST_STMTS
     DEBUG_PRE_STMTS
-    DEBUG_p_TEST
-    DEBUG_P_TEST
-    DEBUG_Pv
-    DEBUG_Pv_TEST
-    DEBUG_q
-    DEBUG_q_FLAG
-    DEBUG_q_TEST
-    DEBUG_r
-    DEBUG_R
     DEBUG_RExC_seen
-    DEBUG_r_FLAG
-    DEBUG_R_FLAG
-    DEBUG_r_TEST
-    DEBUG_R_TEST
-    DEBUG_s
-    DEBUG_S
     DEBUG_SBOX32_HASH
     DEBUG_SCOPE
-    DEBUG_s_FLAG
-    DEBUG_S_FLAG
     DEBUG_SHOW_STUDY_FLAG
-    DEBUG_s_TEST
-    DEBUG_S_TEST
     DEBUG_STUDYDATA
-    DEBUG_t
-    DEBUG_T
-    DEBUG_t_FLAG
-    DEBUG_T_FLAG
     DEBUG_TOP_FLAG
-    DEBUG_t_TEST
-    DEBUG_T_TEST
-    DEBUG_u
-    DEBUG_U
-    DEBUG_u_FLAG
-    DEBUG_U_FLAG
-    DEBUG_u_TEST
-    DEBUG_U_TEST
-    DEBUG_Uv
-    DEBUG_Uv_TEST
-    DEBUG_v
-    DEBUG_v_FLAG
-    DEBUG_v_TEST
-    DEBUG_x
-    DEBUG_X
-    DEBUG_x_FLAG
-    DEBUG_X_FLAG
-    DEBUG_x_TEST
-    DEBUG_X_TEST
-    DEBUG_Xv
-    DEBUG_Xv_TEST
-    DEBUG_y
-    DEBUG_y_FLAG
-    DEBUG_y_TEST
-    DEBUG_yv
-    DEBUG_yv_TEST
     DEBUG_ZAPHOD32_HASH
     DEFAULT_PAT_MOD
     DEFERRED_COULD_BE_OFFICIAL_MARKERc
@@ -3426,43 +3331,7 @@ my @unresolved_visibility_overrides = qw(
     CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_
     CHECK_AND_WARN_PROBLEMATIC_LOCALE_
     CHECK_MALLOC_TOO_LATE_FOR_
-    DEBUG__
-    DEBUG_A_TEST_
-    DEBUG_BOTH_FLAGS_TEST_
-    DEBUG_B_TEST_
-    DEBUG_c_TEST_
-    DEBUG_C_TEST_
-    DEBUG_D_TEST_
-    DEBUG_f_TEST_
-    DEBUG_h_TEST_
-    DEBUG_i_TEST_
-    DEBUG_J_TEST_
     DEBUG_LOCALE_INITIALIZATION_
-    DEBUG_l_TEST_
-    DEBUG_L_TEST_
-    DEBUG_Lv_TEST_
-    DEBUG_m_TEST_
-    DEBUG_M_TEST_
-    DEBUG_o_TEST_
-    DEBUG_p_TEST_
-    DEBUG_P_TEST_
-    DEBUG_Pv_TEST_
-    DEBUG_q_TEST_
-    DEBUG_r_TEST_
-    DEBUG_R_TEST_
-    DEBUG_s_TEST_
-    DEBUG_S_TEST_
-    DEBUG_t_TEST_
-    DEBUG_T_TEST_
-    DEBUG_u_TEST_
-    DEBUG_U_TEST_
-    DEBUG_Uv_TEST_
-    DEBUG_v_TEST_
-    DEBUG_x_TEST_
-    DEBUG_X_TEST_
-    DEBUG_Xv_TEST_
-    DEBUG_y_TEST_
-    DEBUG_yv_TEST_
     DFA_RETURN_FAILURE_
     DFA_RETURN_SUCCESS_
     DFA_TEASE_APART_FF_
@@ -3637,9 +3506,140 @@ my @needed_by_ext = qw(
 # part have a trailing underscore, indicating the intent for this symbol to
 # not be directly usable by XS code
 my @undocumented_always_visible = qw(
+    DEBUG_A
+    DEBUG_A_FLAG
+    DEBUG_A_TEST
+    DEBUG_B
+    DEBUG_B_FLAG
+    DEBUG_B_TEST
+    DEBUG_c
+    DEBUG_C
+    DEBUG_c_FLAG
+    DEBUG_C_FLAG
+    DEBUG_c_TEST
+    DEBUG_C_TEST
+    DEBUG_D
+    DEBUG_D_FLAG
+    DEBUG_D_TEST
+    DEBUG_f
+    DEBUG_f_FLAG
+    DEBUG_f_TEST
+    DEBUG_h_FLAG
+    DEBUG_h_TEST
+    DEBUG_i
+    DEBUG_i_FLAG
+    DEBUG_i_TEST
+    DEBUG_J_FLAG
+    DEBUG_J_TEST
+    DEBUG_l
+    DEBUG_L
+    DEBUG_l_FLAG
+    DEBUG_L_FLAG
+    DEBUG_l_TEST
+    DEBUG_L_TEST
+    DEBUG_Lv
+    DEBUG_Lv_TEST
+    DEBUG_m
+    DEBUG_M
+    DEBUG_m_FLAG
+    DEBUG_M_FLAG
+    DEBUG_m_TEST
+    DEBUG_M_TEST
+    DEBUG_o
+    DEBUG_o_FLAG
+    DEBUG_o_TEST
+    DEBUG_p
+    DEBUG_P
+    DEBUG_p_FLAG
+    DEBUG_P_FLAG
+    DEBUG_p_TEST
+    DEBUG_P_TEST
+    DEBUG_Pv
+    DEBUG_Pv_TEST
+    DEBUG_q
+    DEBUG_q_FLAG
+    DEBUG_q_TEST
+    DEBUG_r
+    DEBUG_R
+    DEBUG_r_FLAG
+    DEBUG_R_FLAG
+    DEBUG_r_TEST
+    DEBUG_R_TEST
+    DEBUG_s
+    DEBUG_S
+    DEBUG_s_FLAG
+    DEBUG_S_FLAG
+    DEBUG_s_TEST
+    DEBUG_S_TEST
+    DEBUG_t
+    DEBUG_T
+    DEBUG_t_FLAG
+    DEBUG_T_FLAG
+    DEBUG_t_TEST
+    DEBUG_T_TEST
+    DEBUG_u
+    DEBUG_U
+    DEBUG_u_FLAG
+    DEBUG_U_FLAG
+    DEBUG_u_TEST
+    DEBUG_U_TEST
+    DEBUG_Uv
+    DEBUG_Uv_TEST
+    DEBUG_v
+    DEBUG_v_FLAG
+    DEBUG_v_TEST
+    DEBUG_x
+    DEBUG_X
+    DEBUG_x_FLAG
+    DEBUG_X_FLAG
+    DEBUG_x_TEST
+    DEBUG_X_TEST
+    DEBUG_Xv
+    DEBUG_Xv_TEST
+    DEBUG_y
+    DEBUG_y_FLAG
+    DEBUG_y_TEST
+    DEBUG_yv
+    DEBUG_yv_TEST
     MAX_UNICODE_UTF8_BYTES
 
     assert_scalar_or_IO_
+    DEBUG__
+    DEBUG_A_TEST_
+    DEBUG_BOTH_FLAGS_TEST_
+    DEBUG_B_TEST_
+    DEBUG_c_TEST_
+    DEBUG_C_TEST_
+    DEBUG_D_TEST_
+    DEBUG_f_TEST_
+    DEBUG_h_TEST_
+    DEBUG_i_TEST_
+    DEBUG_J_TEST_
+    DEBUG_l_TEST_
+    DEBUG_L_TEST_
+    DEBUG_Lv_TEST_
+    DEBUG_m_TEST_
+    DEBUG_M_TEST_
+    DEBUG_o_TEST_
+    DEBUG_p_TEST_
+    DEBUG_P_TEST_
+    DEBUG_Pv_TEST_
+    DEBUG_q_TEST_
+    DEBUG_r_TEST_
+    DEBUG_R_TEST_
+    DEBUG_s_TEST_
+    DEBUG_S_TEST_
+    DEBUG_t_TEST_
+    DEBUG_T_TEST_
+    DEBUG_u_TEST_
+    DEBUG_U_TEST_
+    DEBUG_Uv_TEST_
+    DEBUG_v_TEST_
+    DEBUG_x_TEST_
+    DEBUG_X_TEST_
+    DEBUG_Xv_TEST_
+    DEBUG_y_TEST_
+    DEBUG_yv_TEST_
     EXTEND_NEEDS_GROW_
     EXTEND_SAFE_N_
     MEM_WRAP_NEEDS_RUNTIME_CHECK_
