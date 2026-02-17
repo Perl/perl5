@@ -11096,6 +11096,9 @@ S_re_croak(pTHX_ bool utf8, const char *pat, ...)
 # define PERL_ARGS_ASSERT_SET_REGEX_PV          \
         assert(pRExC_state); assert(Rx)
 
+# define PERL_ARGS_ASSERT_SKIP_BRACKETED_WHITE_SPACE \
+        assert(p); assert(*p); assert(stop_p); assert(*p <= stop_p)
+
 # define PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT \
         assert(pRExC_state); assert(p)
 
@@ -11294,6 +11297,11 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2);
+static void
+S_skip_bracketed_white_space(pTHX_ U8 do_skip, char **p, char *stop_p)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_2)
+        Perl_attribute_nonnull_(pTHX_3);
 static void
 S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state, char **p, const bool force_to_xmod)
         Perl_attribute_nonnull_aTHX_
