@@ -38,6 +38,26 @@ are permitted to be reference aliases.
 Currently both the C<refaliasing> and C<declared_refs> features remain
 B<experimental>.
 
+=head2 New source of entropy for PRNG seeding
+
+Perl now utilizes the C<getentropy()> system call to fetch random bytes suitable for seeding the internal PRNG. Previously Perl would read raw bytes from the F</dev/urandom> filehandle. Perl now seeds itself in this order (and falls through upon failure):
+
+=over
+
+=item 1.
+
+C<getentropy()> on systems that support this call (Linux, BSD, MacOS)
+
+=item 2.
+
+F</dev/urandom> on systems that have it
+
+=item 3.
+
+Hash of internal state variables: unixtime, process PID, and pointer value
+
+=back
+
 =head1 Incompatible Changes
 
 =head2 Unicode rules are now fully enforced on identifier and regular
