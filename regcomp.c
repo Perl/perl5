@@ -12737,11 +12737,17 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 */
 
 PERL_STATIC_INLINE void
-S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char ** p)
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state,
+                        const char *p_start,
+                        char ** p,
+                        char *p_end,
+                        bool check_for_R_bracket)
 {
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
-
     assert(**p == '#');
+    PERL_UNUSED_ARG(p_start);
+    PERL_UNUSED_ARG(p_end);
+    PERL_UNUSED_ARG(check_for_R_bracket);
 
     while (*p < RExC_end) {
         if (*(++(*p)) == '\n') {
@@ -12794,7 +12800,11 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
                     (*p) += len;
                 }
                 else if (*(*p) == '#') {
-                    reg_skipcomment(pRExC_state, p);
+                    reg_skipcomment(pRExC_state,
+                                    (const char *) RExC_start,
+                                    p,
+                                    RExC_end,
+                                    false);
                 }
                 else {
                     break;
