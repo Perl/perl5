@@ -3486,9 +3486,10 @@ PP(pp_goto)
                  * provide that information.
                  */
                 Copy(PL_op, &fake_goto_op, 1, UNOP);
+                U8 gimme = (cx->blk_gimme & G_WANT);
                 fake_goto_op.op_flags =
                                   (fake_goto_op.op_flags & ~OPf_WANT)
-                                | (cx->blk_gimme & G_WANT);
+                                | gimme;
                 PL_op = (OP*)&fake_goto_op;
 
                 /* XS subs don't have a CXt_SUB, so pop it;
@@ -3502,7 +3503,31 @@ PP(pp_goto)
 
                 /* Push a mark for the start of arglist */
                 PUSHMARK(mark);
+                SSize_t markix = TOPMARK;
                 rpp_invoke_xs(cv);
+
+                /* Enforce some sanity in scalar context. */
+                if (gimme == G_SCALAR) {
+                    SV **svp = PL_stack_base + markix + 1;
+                    if (svp != PL_stack_sp) {
+#ifdef PERL_RC_STACK
+                        if (svp < PL_stack_sp) {
+                            /* move return value to bottom of stack frame
+                             * and free everything else */
+                            SV* retsv = *PL_stack_sp;
+                            *PL_stack_sp = *svp;
+                            *svp = retsv;
+                            rpp_popfree_to_NN(svp);
+                        }
+                        else
+                            rpp_push_IMM(&PL_sv_undef);
+#else
+                        *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
+                        PL_stack_sp = svp;
+#endif
+                    }
+                }
+
                 LEAVE;
             }
             else {
