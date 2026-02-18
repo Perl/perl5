@@ -766,7 +766,7 @@ Perl_delimcpy(char *to, const char *to_end,
             /* If the number of backslashes is even, they just escape one
              * another, leaving the delimiter unescaped, and stopping the copy.
              * */
-            if (! ((delim_pos - (backslash_pos + 1)) & 1)) {
+            if (isEVEN(delim_pos - (backslash_pos + 1))) {
                 copy_len = delim_pos - from;  /* even, copy up to delimiter */
                 break;
             }

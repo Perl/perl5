@@ -1217,7 +1217,7 @@ PP(pp_pow)
                            on same algorithm as above */
                         UV result = 1;
                         UV base = baseuv;
-                        const bool odd_power = cBOOL(power & 1);
+                        const bool odd_power = isODD(power);
                         if (odd_power) {
                             result *= base;
                         }

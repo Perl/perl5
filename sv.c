@@ -12313,7 +12313,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
         if (uv != nv) {
             nv += 0.5;
             uv = (UV)nv;
-            if (uv & 1 && uv == nv)
+            if (isODD(uv) && uv == nv)
                 uv--;			/* Round to even */
         }
         do {
