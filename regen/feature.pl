@@ -1065,6 +1065,8 @@ failures, but reaching the end of the module when this feature is in effect
 will prevent C<perl> from throwing an exception that the module "did not return
 a true value".
 
+This feature is available from Perl 5.38 onwards.
+
 =head2 The 'multidimensional' feature
 
 This feature enables multidimensional array emulation, a perl 4 (or
