@@ -13,14 +13,15 @@ BEGIN {
 # turn warnings into fatal errors
     $SIG{__WARN__} = sub { die "WARNING: @_" } ;
     set_up_inc('../lib');
-    skip_all_if_miniperl("no dynamic loading on miniperl, no Fcntl");
+    skip_all_if_miniperl("no dynamic loading on miniperl, no Fcntl, APItest");
+    skip_all_without_dynamic_extension('XS::APItest') unless $Config{usedl};
     require Fcntl;
 }
 use strict;
 use warnings;
 my $VALID;
 
-plan(tests => 11);
+plan(tests => 22);
 
 # We don't know what symbols are defined in platform X's system headers.
 # We don't even want to guess, because some platform out there will
@@ -109,5 +110,37 @@ sub goto_croak { goto &mycroak }
     }
     is($e, "boo1\nboo2\nboo3\nboo4\n",
        '[perl #35878] croak in XS after goto segfaulted')
+}
+
+# GH #24212
+# goto'ing a void XSUB in scalar context wasn't pushing an undef
+# onto the stack (unlike a direct scalar call to that xsub)
+#
+{
+    require_ok('XS::APItest');
+
+    # xsreturn_empty() is just a convenient XSUB which happens
+    # to return no values.
+    sub wrap_24212 { goto \&XS::APItest::XSUB::xsreturn_empty }
+
+    my @a = (10, (my $ret1 = wrap_24212()), 20);
+    is(scalar(@a), 3, "void XSUB in scalar cxt: num of results");
+    is($a[0], 10,     "void XSUB in scalar cxt: a[0]");
+    is($a[1], undef,  "void XSUB in scalar cxt: a[1]");
+    is($a[2], 20,     "void XSUB in scalar cxt: a[2]");
+    is($ret1, undef,  "void XSUB in scalar cxt: ret1");
+
+    # Similarly test for for an XSUB in scalar context which returns
+    # several values
+
+    # xsreturn(n) returns a list 0..n-1
+    sub wrap_many_24212 { @_ = (7); goto \&XS::APItest::XSUB::xsreturn }
+
+    @a = (10,(my $ret2 = wrap_many_24212()), 20);
+    is(scalar(@a), 3, "list XSUB in scalar cxt: num of results");
+    is($a[0], 10,     "list XSUB in scalar cxt: a[0]");
+    is($a[1], 6,      "list XSUB in scalar cxt: a[1]");
+    is($a[2], 20,     "list XSUB in scalar cxt: a[2]");
+    is($ret2, 6,      "list XSUB in scalar cxt: ret2");
 }
 
