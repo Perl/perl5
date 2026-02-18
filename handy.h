@@ -334,6 +334,22 @@ don't, so that you can portably take advantage of this C99 feature.
 #  endif
 #endif
 
+/*
+=for apidoc_section $numeric_scn
+=for apidoc      Em|bool|isEVEN|UV a
+=for apidoc_item   |bool|isODD|UV a
+
+These return a boolean as to whether or not the integer value given by the
+argument is even or odd, respectively.
+
+=cut
+*/
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+#  define isODD(a) ((a) & 1)
+#  define isEVEN(a) (! isODD(a))
+#endif
+
 /* Returns a boolean as to whether the input unsigned number is a power of 2
  * (2**0, 2**1, etc).  In other words if it has just a single bit set.
  * If not, subtracting 1 would leave the uppermost bit set, so the & would
