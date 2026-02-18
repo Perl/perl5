@@ -368,6 +368,13 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Refassigning to a class field in a method could result in the SV for
+that field being released when the method exited.  The next access to
+that field could result in a crash or an assertion, or if the freed SV
+had been re-used, random data.  Discussed in [GH #24187]
+
 =back
 
 =head1 Known Problems
