@@ -549,6 +549,17 @@ while being output, garbage bytes would be left in that scalar.
 C<close(STDOUT)> when C<STDOUT> has been opened as a pipe will now
 properly wait for the child to exit on Windows.  [GH #4106]
 
+=item *
+
+Calling an XSUB via goto in scalar context, where the XSUB didn't return
+exactly one value, could result in the return of the wrong number of
+items, leading to potential stack corruption. For example:
+
+    sub wrap { goto \&an_xsub_which_returns_no_values }
+    $ret = wrap();
+
+[GH #24212]
+
 =back
 
 =head1 Known Problems
