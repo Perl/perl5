@@ -11333,7 +11333,8 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state, AV *stack, const I
         assert(s1); assert(s2)
 
 #   define PERL_ARGS_ASSERT_REG_SKIPCOMMENT     \
-        assert(pRExC_state); assert(p)
+        assert(pRExC_state); assert(p_start); assert(p); assert(*p); \
+        assert(p_end); assert(p_start <= *p); assert(*p <= p_end)
 
 #   if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_STATIC_INLINE Size_t
@@ -11341,10 +11342,12 @@ S_find_first_differing_byte_pos(const U8 *s1, const U8 *s2, const Size_t max)
         Perl_attribute_nonnull_(1)
         Perl_attribute_nonnull_(2);
 PERL_STATIC_INLINE void
-S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char **p)
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, const char *p_start, char **p, char *p_end, bool check_for_R_bracket)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
-        Perl_attribute_nonnull_(pTHX_2);
+        Perl_attribute_nonnull_(pTHX_2)
+        Perl_attribute_nonnull_(pTHX_3)
+        Perl_attribute_nonnull_(pTHX_4);
 #   endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_REGCOMP_C) */

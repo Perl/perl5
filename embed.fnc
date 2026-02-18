@@ -5736,7 +5736,10 @@ ES	|regnode_offset|regpnode|NN RExC_state_t *pRExC_state		\
 ES	|SV *	|reg_scan_name	|NN RExC_state_t *pRExC_state		\
 				|U32 flags
 Ei	|void	|reg_skipcomment|NN RExC_state_t *pRExC_state		\
-				|NN char **p
+				|SPTR const char *p_start		\
+				|MPTR char **p				\
+				|EPTRge char *p_end			\
+				|bool check_for_R_bracket
 ERS	|bool	|regtail	|NN RExC_state_t *pRExC_state		\
 				|const regnode_offset p 		\
 				|const regnode_offset val		\
