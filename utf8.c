@@ -3417,7 +3417,7 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
 
     PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE;
 
-    if (bytelen & 1)
+    if (isODD(bytelen))
         croak("panic: utf16_to_utf8%s: odd bytelen %" UVuf,
                 ((high_byte == 0) ? "" : "_reversed"), (UV)bytelen);
     pend = p + bytelen;

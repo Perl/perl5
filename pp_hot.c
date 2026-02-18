@@ -3153,7 +3153,7 @@ PP(pp_aassign)
             SSize_t nelems = lastrelem - relem + 1;
             HV *hash = MUTABLE_HV(lsv);
 
-            if (UNLIKELY(nelems & 1)) {
+            if (UNLIKELY(isODD(nelems))) {
                 do_oddball(lastrelem, relem);
                 /* we have firstlelem to reuse, it's not needed any more */
 #ifdef PERL_RC_STACK
