@@ -116,18 +116,6 @@ get_regex_charset(const U32 flags)
     ( RXf_PMf_COMPILETIME       \
     | RXf_PMf_SPLIT )
 
-/* Temporary to get Jenkins happy again
- * See thread starting at http://nntp.perl.org/group/perl.perl5.porters/220710
- */
-#if 0
-    /* Exclude win32 because it can't cope with I32_MAX definition */
-#ifndef WIN32
-#   if RXf_PMf_COMPILETIME > I32_MAX
-#     error RXf_PMf_COMPILETIME wont fit in arg2 field of eval node
-#   endif
-#endif
-#endif
-
 /* These copies need to be numerical or ext/B/Makefile.PL won't think they are
  * constants */
 #define PMf_MULTILINE     (1U<<0)
