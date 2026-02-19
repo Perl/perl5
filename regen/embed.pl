@@ -4693,71 +4693,66 @@ sub embed_h {
             else {
 
                 # Here, there is thread context.  The macro doesn't have an
-                # explicit thread context argument, but the long name will.
-                # And that argument is empty on unthreaded builds.  The code
-                # below creates two scenarios:
-                #   Threaded:
-                #       A function is created named with the long name, which
-                #       merely calls the short name macro.  That gets expanded
-                #       out properly inside the function.  A prototype for it
-                #       is created elsewhere in this program.  (Things are
-                #       simpler if the macro isn't visible outside core, as
-                #       explained below.)
-                #   Unthreaded:
-                #       A macro is created named with the long name, which
-                #       merely calls the short name macro, while omitting the
-                #       thread-context parameter in the call.  This parameter
-                #       is just a placeholder anyway since there are no
-                #       threads.
+                # explicit thread context argument, but the long name will
+                # which is empty on unthreaded builds.  We need to have two
+                # scenarios, one for threaded, and one for not.
                 #
-                # First, convert the input argument list to 'a', 'b' ....
-                # This keeps us from having to worry about all the extra stuff
-                # in the input list; stuff like the type declarations, things
-                # like NULLOK, and pointers '*'.
+                # First, create the base argument list by converting the input
+                # argument list to 'a', 'b' ....  This keeps us from having to
+                # worry about all the extra stuff in the input list; stuff
+                # like the type declarations, things like NULLOK, and pointers
+                # '*'.
                 my $argname = 'a';
                 my @stripped_args;
                 push @stripped_args, $argname++ for $args->@*;
                 my $arglist = join ",", @stripped_args;
 
-                # Now create a placeholder for the (paradoxically empty)
-                # thread context parameter.
-                my $mTHX_ = "mTHX";
-                $mTHX_ .= ',' if $arglist ne "";
-
-                # Then create the definition, which just calls the short name,
-                # omitting the thread context arg.
-                $ret = indent_define("$full_name($mTHX_$arglist)",
+                # For the unthreaded case, there is no actual thread context
+                # parameter, so the short and long versions are identical.
+                $ret = "#${ind}ifndef USE_THREADS\n"
+                     . indent_define("$full_name($arglist)",
                                      "$func($arglist)", $ind);
+                # Code below may add an #else, so defer adding the #endif
 
-                # The macro generally is valid only when unthreaded, and we
-                # add the macro to the list of functions which need to be
-                # generated.
-                #
-                # But we can skip all this if the macro isn't visible outside
-                # core.  The reason we need to do this in the first place is
-                # because of the possibility of embedding.  Suppose a program
-                # contains two embedded perl instances.  It calls the various
-                # long form functions with whatever thread context it wants.
-                # We can't just ignore that context, so an actual function
-                # needs to be created to pass the context to.  However, if the
-                # function isn't visible outside core, it can't be called
-                # directly by the embedding code, so the thread context is
-                # always going to be aTHX, and so can be omitted, and the
-                # called-macro will add aTHX back in.
+                # Now handle the threaded case.  We can shortcut for elements
+                # not visible outside core, so split the possibilities.
                 if ($flags =~ /[ACE]/) {
 
-                    # Visible outside core means macro is only valid when
-                    # unthreaded
-                    $ret = "#${ind}ifndef USE_THREADS\n"
-                         . $ret
-                         . "#${ind}endif\n";
-
-                    # And we later need to generate a function for the long
-                    # name.  Add all the information needed for this to a
-                    # list.
+                    # For elements visible outside core, we need to generate a
+                    # function to implement the macro.  This is done elsehwere
+                    # in the program after everything is gathered, using the
+                    # information that we save now.
                     $object->{guard} = $guard;
                     $need_longs{$full_name} = $object;
                 }
+                else {
+                    
+                    # But a macro suffices for core-only elements.  We just
+                    # discard the thread context passed to the long form and
+                    # call the short form macro whose expansion adds it back
+                    # in.
+                    my $mTHX_ = "mTHX";
+                    $mTHX_ .= ',' if $arglist ne "";
+
+                    # And append this opposite branch
+                    $ret .= "#${ind}else\n"
+                         . indent_define("$full_name($mTHX_$arglist)",
+                                         "$func($arglist)", $ind)
+
+                    # The reason we can't discard the thread context for
+                    # elements visible outside core is because of the
+                    # possibility of embedding.  Suppose a program contains
+                    # two embedded perl instances.  It calls the various long
+                    # form functions with whatever thread context it wants.
+                    # We can't just ignore that context, so an actual function
+                    # needs to be created to pass the context to.  However, if
+                    # the function isn't visible outside core, it can't be
+                    # called directly by the embedding code, so the thread
+                    # context is always going to be aTHX, and so can be
+                    # omitted, and the called-macro will add aTHX back in.
+                } 
+
+                $ret .= "#${ind}endif\n";
             }
         }
         elsif ($flags !~ /[omM]/) {
