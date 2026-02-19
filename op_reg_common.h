@@ -95,8 +95,6 @@ get_regex_charset(const U32 flags)
 */
 #define RXf_PMf_SPLIT (1U<<(RXf_PMf_STD_PMMOD_SHIFT+11))
 
-/* Next available bit after the above.  Name begins with '_' so won't be
- * exported by B */
 #define RXf_PMf_SHIFT_NEXT_ (RXf_PMf_STD_PMMOD_SHIFT+12)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
