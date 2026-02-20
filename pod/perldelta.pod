@@ -332,7 +332,17 @@ sign).
 
 =item *
 
-XXX Describe change here
+Calling the C<import> method on a package with no C<import> method now
+produces a regular warning rather than a deprecation warning or error.
+
+Since Perl 5.39.1, calling C<import> with arguments on a package without
+such a method has triggered a deprecation warning. In Perl 5.43.6, this
+deprecation was promoted into an error. This broke a significant amount
+of code while providing very little advantage over the warning. This
+fatal error has been converted back to a warning, with its deprecation
+status removed. There are no longer any plans to make this fatal in the
+future. The category for this warning is C<missing_import> and it is
+enabled by default.
 
 =back
 
