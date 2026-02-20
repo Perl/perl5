@@ -4655,14 +4655,6 @@ S_intuit_more(pTHX_ char *s, char *e,
         }
     }
 
-    /* Find matching ']'.  khw: Actually it finds the next ']' and assumes it
-     * matches the '['.  In order to account for the possibility of the ']'
-     * being inside the scope of \Q or preceded by an even number of
-     * backslashes, this should be rewritten */
-    const char * const send = (char *) memchr(s, ']', e - s);
-    if (! send)		/* has to be an expression */
-        return TRUE;
-
     /* Below here, the heuristics start.  One idea from alh is, given 'use
      * 5.43.x', that for all digits, that if we have to resort to heuristics,
      * we instead raise an error with an explanation of how to make it
@@ -4720,11 +4712,25 @@ S_intuit_more(pTHX_ char *s, char *e,
      * and thus lean more towards this being a character class than when not
      * in UTF-8. */
     const char * start = s;
-    while (s < send) {
+    while (s < e) {
 
         U8 prev_un_char = un_char;
         un_char = (U8) s[0];
         switch (s[0]) {
+
+          case ']':     /* Terminates the construct */
+
+            /* khw: This has the bug that it could be inside a \Q, so
+             * shouldn't actually terminate the construct.
+             *
+             * People on #irc have suggested things that I think boil
+             * down to: under 'use 5.43.x', output a warning like existing
+             * warnings for similar situations "Ambiguous use of [], resolved
+             * as ..."  Perhaps suppress the message if all (or maybe almost
+             * all) the evidence points to the same outcome.  This would
+             * involve two weight variables */
+            return (weight < 0);
+
           case '@':
           case '&':
           case '$':
@@ -4989,9 +4995,22 @@ S_intuit_more(pTHX_ char *s, char *e,
                 break;
             }
 
-            if (memCHRs("wds]", s[1])) {
+            if (s[1] == ']') {
+                /* The intent of the code was to do this:
+                 *      weight += 100;  // ] strongly charclass
+                 * But, due to a bug in setting up the loop terminating
+                 * condition, a ']' would never occur.  That bug was fixed so
+                 * late in the development cycle that we didn't want to
+                 * possibly break anything, so this is commented out to retain
+                 * previous (unintended) behavior */
+                seen[(U8) '\\']++;
+                s++;
+                break;
+            }
+
+            if (memCHRs("wds", s[1])) {
                 weight += 100;  /* \w \d \s => strongly charclass */
-                /* khw: \] can't happen, as any ']' is beyond our search.
+                /* khw:
                  * Should \W \D \S have the same weights as \w \d \s or should
                  * all or some be in the abcfnrtvx below?  Why not \h etc as
                  * well? \v is below, adding 40; \h should add at least that
@@ -5167,14 +5186,7 @@ S_intuit_more(pTHX_ char *s, char *e,
         s++;
     }   /* End of loop through each character of the construct */
 
-    /* khw: People on #irc have suggested things that I think boil down to:
-     * under 'use 5.43.x', output a warning like existing warnings for
-     * similar situations "Ambiguous use of [], resolved as ..."  Perhaps
-     * suppress the message if all (or maybe almost all) the evidence points
-     * to the same outcome.  This would involve two weight variables */
-    if (weight >= 0)	/* probably a character class */
-        return FALSE;
-
+    /* No terminating ']', has to be an expression */
     return TRUE;
 }
 
