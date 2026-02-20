@@ -4555,6 +4555,10 @@ S_intuit_more(pTHX_ char *s, char *e,
     if (PL_lex_brackets)
         return TRUE;
 
+    if (e <= s) {
+        return false;
+    }
+
     /* If begins with '->' ... */
     if (s[0] == '-' && s[1] == '>') {
 
