@@ -4713,8 +4713,8 @@ S_intuit_more(pTHX_ char *s, char *e,
      * \xC2 or \xC3.  The heuristics below will count those as repeated bytes,
      * and thus lean more towards this being a character class than when not
      * in UTF-8. */
-    bool first_time = true;
-    for (; s < send; s++, first_time = false) {
+    const char * start = s;
+    for (; s < send; s++) {
 
         U8 prev_un_char = un_char;
         un_char = (U8) s[0];
@@ -5059,7 +5059,7 @@ S_intuit_more(pTHX_ char *s, char *e,
             /* If it is something like 'a-' or '0-', it is more likely to be a
              * character class. '!' is the first ASCII graphic, so '!-' would
              * be the start of a range of graphics. */
-            if (! first_time && memCHRs("aA01! ", prev_un_char))
+            if (s > start && memCHRs("aA01! ", prev_un_char))
                 weight += 30;
 
             /* If it is something like '-Z' or '-7' (for octal) or '-9' it is
@@ -5067,19 +5067,19 @@ S_intuit_more(pTHX_ char *s, char *e,
              * graphic, so '-~' would be the end of a range of graphics.
              *
              * khw: Having [-z] really doesn't imply what the comments above
-             * indicate, so this should only be tested when '!  first_time' */
+             * indicate, so this should only be tested when s > start */
             if (memCHRs("zZ79~", s[1]))
                 weight += 30;
 
             /* If it is something like -1 or -$foo, it is more likely to be
              * a subscript.  */
-            if (first_time && (isDIGIT(s[1]) || s[1] == '$')) {
+            if (s == start && (isDIGIT(s[1]) || s[1] == '$')) {
                 weight -= 5;	/* cope with negative subscript */
             }
             break;
 
           default:
-            if (  (first_time || (  ! isWORDCHAR(prev_un_char)
+            if (  (s == start || (  ! isWORDCHAR(prev_un_char)
                                   &&  prev_un_char != '$'
                                   &&  prev_un_char != '@'
                                   &&  prev_un_char != '&'))
@@ -5125,7 +5125,7 @@ S_intuit_more(pTHX_ char *s, char *e,
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
              * more likely to be character classes */
-            if (    ! first_time
+            if (    s > start
                 && (   NATIVE_TO_LATIN1(un_char)
                     == NATIVE_TO_LATIN1(prev_un_char) + 1))
             {
