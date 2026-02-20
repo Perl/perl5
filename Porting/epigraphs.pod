@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.8 - Raymond Chandler, "The Big Sleep"
+
+L<Announced on 2026-02-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2026/02/msg270752.html>
+
+  "Would you have a Ben Hur, 1860, Third Edition, the one with the
+  duplicated line on page 116?"
+
 =head2 v5.43.7 - Vajra Chandrasekera, "The Saint of Bright Doors"
 
 L<Announced on 2026-01-19 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2026/01/msg270646.html>
