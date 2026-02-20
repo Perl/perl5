@@ -4714,7 +4714,7 @@ S_intuit_more(pTHX_ char *s, char *e,
      * and thus lean more towards this being a character class than when not
      * in UTF-8. */
     const char * start = s;
-    for (; s < send; s++) {
+    while (s < send) {
 
         U8 prev_un_char = un_char;
         un_char = (U8) s[0];
@@ -5158,6 +5158,7 @@ S_intuit_more(pTHX_ char *s, char *e,
          * repeated characters.  There may be others, like I have mentioned
          * quotes and paired delimiters  */
         seen[un_char]++;
+        s++;
     }   /* End of loop through each character of the construct */
 
     /* khw: People on #irc have suggested things that I think boil down to:
