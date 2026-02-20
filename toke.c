@@ -5029,7 +5029,7 @@ S_intuit_more(pTHX_ char *s, char *e,
 
             if (isDIGIT(s[1])) {
                 weight += 40;   /* \123 => charclass */
-                while (s[1] && isDIGIT(s[1]))
+                while (s < e - 1 && isDIGIT(s[1]))
                     s++;
             }
 
