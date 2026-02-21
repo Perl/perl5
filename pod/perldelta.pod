@@ -125,6 +125,14 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20250702 to 5.20260308.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.23 to 2.23_01.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
