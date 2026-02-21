@@ -75,7 +75,7 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-          qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@#? ] /xx;
+         qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@\#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
 my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
