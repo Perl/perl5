@@ -363,6 +363,9 @@ S_class_reader_common(pTHX_ CV* cv) {
     SV *objr = *PL_stack_sp;
 #ifdef PERL_RC_STACK
     assert(SvREFCNT(objr) > 1); /* Will get decremented by AV/HV reader in list context */
+    if (UNLIKELY(SvREFCNT(objr) == 1)) { /* Just in case it happens on a non-DEBUGGING build */
+        (void)sv_2mortal(SvREFCNT_inc_NN(objr));
+    }
 #endif
     SV *obj = SvROK(objr) ? SvRV(objr) : NULL;
 
