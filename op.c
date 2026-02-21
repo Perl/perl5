@@ -5281,6 +5281,34 @@ S_gen_constant_list(pTHX_ OP *o)
         break;
     case 3:
         CLEAR_ERRSV();
+        /* CALL_PEEP() above set op_opt=1 on ops in the chain, but since we
+         * failed to generate the constant list they remain live in the op
+         * tree.  Reset op_opt so the main rpeep() pass can process them.
+         *
+         * Without this, a sort whose arg list contains a range with constant
+         * string endpoint (e.g. sort { ... } 0, 0.."r") triggers
+         * gen_constant_list which pre-marks the flip-flop ops as optimised.
+         * The numeric warning for "r" makes CALLRUNOPS die here (case 3),
+         * leaving the ops with op_opt=1.  The main rpeep then stops at the
+         * first such op (OP_RANGE), never reaches case OP_SORT, and
+         * null_wrap->op_next (= PL_sortcop) is left pointing into the sort's
+         * argument list instead of the comparator block.  S_sortcv then
+         * re-executes the argument list on each comparison, exhausting the
+         * MARK stack and causing a heap-buffer-overflow in Perl_POPMARK.
+         *
+         * The loop is bounded: o->op_next was zeroed at line 5215 (before
+         * CALL_PEEP), so the chain curop→…→o terminates at o (op_next=0).
+         * The (p != o) guard provides an explicit upper bound in case a
+         * future CALL_PEEP side-effect alters op_next along the way.
+         *
+         * GH #19790, GH #16865.
+         */
+        {
+            OP *p;
+            for (p = curop; p && p != o; p = p->op_next)
+                p->op_opt = 0;
+            o->op_opt = 0;
+        }
         o->op_next = old_next;
         break;
     default:
