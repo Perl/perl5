@@ -14,7 +14,7 @@ L<perl5420delta>, which describes differences between 5.40.0 and 5.42.0.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with Perl 5.40.0.  If any
+There are no changes intentionally incompatible with Perl 5.42.0.  If any
 exist, they are bugs, and we request that you submit a report.  See
 L</Reporting Bugs> below.
 
