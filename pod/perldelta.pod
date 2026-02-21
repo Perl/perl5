@@ -112,9 +112,9 @@ compiler in Perl 5.42.0:
 
 and
 
-    # Two-variable for loop over a list returned from a call to a lexical(ly
-    # imported) subroutine, all inside a lexically scoped or anonymous
-    # subroutine:
+    # Two-variable for loop over a list returned from a call to a
+    # lexical(ly imported) subroutine, all inside a lexically scoped
+    # or anonymous subroutine:
     my sub foo { ... }
     my $fn = sub {
         for my ($x, $y) (foo()) { ... }
