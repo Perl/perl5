@@ -14,9 +14,9 @@ L<perl5420delta>, which describes differences between 5.40.0 and 5.42.0.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.40.0.
-If any exist, they are bugs, and we request that you submit a
-report. See L</Reporting Bugs> below.
+There are no changes intentionally incompatible with Perl 5.40.0.  If any
+exist, they are bugs, and we request that you submit a report.  See
+L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
 
@@ -38,9 +38,9 @@ L<POSIX> has been upgraded from version 2.23 to 2.23_01.
 
 =head2 Changes to Existing Documentation
 
-We have attempted to update the documentation to reflect the changes
-listed in this document. If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues>.
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, open an issue at
+L<https://github.com/Perl/perl5/issues>.
 
 =head1 Configuration and Compilation
 
@@ -48,20 +48,20 @@ at L<https://github.com/Perl/perl5/issues>.
 
 =item *
 
-It is now possible to pass to F<Configure> the values dealing with POSIX
-locale categories, overriding its automatic calculation of these.  This
-enables cross-compilation to work.  The easiest way to do this is to
-extract the C program that does the calculation from F<Configure> and
-then run it on the target machine, and then pass the values it outputs
-to F<Configure> on the other machine.  F<Porting/Glossary> has examples.
+It is now possible to pass to F<Configure> the values dealing with POSIX locale
+categories, overriding its automatic calculation of these.  This enables
+cross-compilation to work.  The easiest way to do this is to extract the C
+program that does the calculation from F<Configure> and then run it on the
+target machine, and then pass the values it outputs to F<Configure> on the
+other machine.  F<Porting/Glossary> has examples.
 [GH #22992]
 
 =back
 
 =head1 Testing
 
-Tests were added and changed to reflect the other additions and changes
-in this release.
+Tests were added and changed to reflect the other additions and changes in this
+release.
 
 =head1 Platform Support
 
@@ -76,8 +76,7 @@ apparent bugs in the underlying operating system support.
 
 =item Win32
 
-Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
-defined.
+Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not defined.
 
 =back
 
@@ -88,22 +87,22 @@ defined.
 =item *
 
 S<C<use 5.42>> now turns on S<C<use source::encoding "ascii">> for the
-remainder of the line (besides subsequent lines). [GH #23881]
+remainder of the line (besides subsequent lines).
+[GH #23881]
 
 =item *
 
 Perl 5.42.0 does not handle the transition to/from daylight savings time
-properly.  The time and/or timezone can be off by an hour in the
-intervals surrounding such transitions.  This is a regression from
-earlier releases, and is now fixed.  This bug was evident from perl
-space in the L<POSIX/strftime> function, and in XS code with any of
-L<perlapi/my_strftime>, L<perlapi/sv_strftime_ints>, or
-L<perlapi/sv_strftime_tm>.
+properly.  The time and/or timezone can be off by an hour in the intervals
+surrounding such transitions.  This is a regression from earlier releases, and
+is now fixed.  This bug was evident from perl space in the L<POSIX/strftime>
+function, and in XS code with any of L<perlapi/my_strftime>,
+L<perlapi/sv_strftime_ints>, or L<perlapi/sv_strftime_tm>.
 
 =item *
 
 Certain constructs involving a two-variable C<for> loop would crash the perl
-compiler in v5.42.0:
+compiler in Perl 5.42.0:
 
     # Two-variable for loop over a list returned from a method call:
     for my ($x, $y) (Some::Class->foo()) { ... }
@@ -111,9 +110,9 @@ compiler in v5.42.0:
 
 and
 
-    # Two-variable for loop over a list returned from a call to a
-    # lexical(ly imported) subroutine, all inside a lexically scoped
-    # or anonymous subroutine:
+    # Two-variable for loop over a list returned from a call to a lexical(ly
+    # imported) subroutine, all inside a lexically scoped or anonymous
+    # subroutine:
     my sub foo { ... }
     my $fn = sub {
         for my ($x, $y) (foo()) { ... }
@@ -124,19 +123,20 @@ and
         for my ($x, $y) (indexed(...)) { ... }
     }
 
-These have been fixed.  [GH #23405]
+These have been fixed.
+[GH #23405]
 
 =item *
 
-Since 5.32.0, the second branch of a ternary condition operator wasn't
-getting the correct autovivification context applied. For example in
-something like
+Since Perl 5.32.0, the second branch of a ternary condition operator wasn't
+getting the correct autovivification context applied.  For example in something
+like
 
     @{ $cond ? $h{foo} : $h{bar} } = ...;
 
-the first branch would correctly autovivify C<$h{foo}> to an array ref,
-but the second branch might incorrectly autovivify C<$h{bar}> to a hash
-ref. [GH #18669].
+the first branch would correctly autovivify C<$h{foo}> to an array ref, but the
+second branch might incorrectly autovivify C<$h{bar}> to a hash ref.
+[GH #18669].
 
 =back
 
@@ -148,23 +148,23 @@ XXX Generate this with:
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the perl bug database
-at L<https://github.com/Perl/perl5/issues>. There may also be information at
+If you find what you think is a bug, you might check the perl bug database at
+L<https://github.com/Perl/perl5/issues>.  There may also be information at
 L<https://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please open an issue at
-L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
 tiny but sufficient test case.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a public issue tracker, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 Give Thanks
 
-If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
-you can do so by running the C<perlthanks> program:
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
 
     perlthanks
 
