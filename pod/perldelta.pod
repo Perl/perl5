@@ -54,7 +54,7 @@ cross-compilation to work.  The easiest way to do this is to extract the C
 program that does the calculation from F<Configure> and then run it on the
 target machine, and then pass the values it outputs to F<Configure> on the
 other machine.  F<Porting/Glossary> has examples.
-[GH #22992]
+[L<GH #22992|https://github.com/Perl/perl5/issues/22992>]
 
 =back
 
@@ -73,6 +73,7 @@ release.
 
 Thread-safe locale handling has been turned off on all releases due to
 apparent bugs in the underlying operating system support.
+[L<GH #23825|https://github.com/Perl/perl5/issues/23825>]
 
 =item Win32
 
@@ -88,7 +89,7 @@ Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not defined.
 
 S<C<use 5.42>> now turns on S<C<use source::encoding "ascii">> for the
 remainder of the line (besides subsequent lines).
-[GH #23881]
+[L<GH #23881|https://github.com/Perl/perl5/issues/23881>]
 
 =item *
 
@@ -98,6 +99,7 @@ surrounding such transitions.  This is a regression from earlier releases, and
 is now fixed.  This bug was evident from perl space in the L<POSIX/strftime>
 function, and in XS code with any of L<perlapi/my_strftime>,
 L<perlapi/sv_strftime_ints>, or L<perlapi/sv_strftime_tm>.
+[L<GH #23878|https://github.com/Perl/perl5/issues/23878>]
 
 =item *
 
@@ -124,7 +126,7 @@ and
     }
 
 These have been fixed.
-[GH #23405]
+[L<GH #23405|https://github.com/Perl/perl5/issues/23405>]
 
 =item *
 
@@ -136,7 +138,7 @@ like
 
 the first branch would correctly autovivify C<$h{foo}> to an array ref, but the
 second branch might incorrectly autovivify C<$h{bar}> to a hash ref.
-[GH #18669].
+[L<GH #18669|https://github.com/Perl/perl5/issues/18669>].
 
 =back
 
