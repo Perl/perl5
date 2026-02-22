@@ -65,7 +65,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
         SV ** const tmp = av_fetch_simple( revcharmap, state, 0);
         if ( tmp ) {
-            Perl_re_printf( aTHX_  "%*s",
+            re_printf("%*s",
                 colwidth,
                 pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth,
                             PL_colors[0], PL_colors[1],
@@ -75,12 +75,12 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
             );
         }
     }
-    Perl_re_printf( aTHX_  "\n");
+    re_printf("\n");
     re_indentf("State|-----------------------", depth+1);
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ )
-        Perl_re_printf( aTHX_  "%.*s", colwidth, "--------");
-    Perl_re_printf( aTHX_  "\n");
+        re_printf("%.*s", colwidth, "--------");
+    re_printf("\n");
 
     for( state = 1 ; state < trie->statecount ; state++ ) {
         const U32 base = trie->states[ state ].trans.base;
@@ -88,12 +88,12 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
         re_indentf("#%4" UVXf "|", depth+1, (UV)state);
 
         if ( trie->states[ state ].wordnum ) {
-            Perl_re_printf( aTHX_  " W%4X", trie->states[ state ].wordnum );
+            re_printf(" W%4X", trie->states[ state ].wordnum );
         } else {
-            Perl_re_printf( aTHX_  "%6s", "" );
+            re_printf("%6s", "" );
         }
 
-        Perl_re_printf( aTHX_  " @%4" UVXf " ", (UV)base );
+        re_printf(" @%4" UVXf " ", (UV)base );
 
         if ( base ) {
             U32 ofs = 0;
@@ -104,7 +104,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
                                                                     != state))
                     ofs++;
 
-            Perl_re_printf( aTHX_  "+%2" UVXf "[ ", (UV)ofs);
+            re_printf("+%2" UVXf "[ ", (UV)ofs);
 
             for ( ofs = 0 ; ofs < trie->uniquecharcount ; ofs++ ) {
                 if ( ( base + ofs >= trie->uniquecharcount )
@@ -113,27 +113,27 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
                         && trie->trans[ base + ofs
                                     - trie->uniquecharcount ].check == state )
                 {
-                   Perl_re_printf( aTHX_  "%*" UVXf, colwidth,
+                   re_printf("%*" UVXf, colwidth,
                     (UV)trie->trans[ base + ofs - trie->uniquecharcount ].next
                    );
                 } else {
-                    Perl_re_printf( aTHX_  "%*s", colwidth,"   ." );
+                    re_printf("%*s", colwidth,"   ." );
                 }
             }
 
-            Perl_re_printf( aTHX_  "]");
+            re_printf("]");
 
         }
-        Perl_re_printf( aTHX_  "\n" );
+        re_printf("\n" );
     }
     re_indentf("word_info N:(prev,len)=",
                                 depth);
     for (word = 1; word <= trie->wordcount; word++) {
-        Perl_re_printf( aTHX_  " %d:(%d,%d)",
+        re_printf(" %d:(%d,%d)",
             (int)word, (int)(trie->wordinfo[word].prev),
             (int)(trie->wordinfo[word].len));
     }
-    Perl_re_printf( aTHX_  "\n" );
+    re_printf("\n" );
 }
 /*
   Dumps a fully constructed but uncompressed trie in list form.
@@ -165,9 +165,9 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
         re_indentf(" %4" UVXf " :",
             depth+1, (UV)state  );
         if ( ! trie->states[ state ].wordnum ) {
-            Perl_re_printf( aTHX_  "%5s| ","");
+            re_printf("%5s| ","");
         } else {
-            Perl_re_printf( aTHX_  "W%4x| ",
+            re_printf("W%4x| ",
                 trie->states[ state ].wordnum
             );
         }
@@ -175,7 +175,7 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
             SV ** const tmp = av_fetch_simple( revcharmap,
                                         TRIE_LIST_ITEM(state, charid).forid, 0);
             if ( tmp ) {
-                Perl_re_printf( aTHX_  "%*s:%3X=%4" UVXf " | ",
+                re_printf("%*s:%3X=%4" UVXf " | ",
                     colwidth,
                     pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp),
                               colwidth,
@@ -187,11 +187,11 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
                     (UV)TRIE_LIST_ITEM(state, charid).newstate
                 );
                 if (!(charid % 10))
-                    Perl_re_printf( aTHX_  "\n%*s| ",
+                    re_printf("\n%*s| ",
                         (int)((depth * 2) + 14), "");
             }
         }
-        Perl_re_printf( aTHX_  "\n");
+        re_printf("\n");
     }
 }
 
@@ -226,7 +226,7 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
         if ( tmp ) {
             STRLEN n;
             const char *s = SvPV_const(*tmp, n);
-            Perl_re_printf( aTHX_  "%*s",
+            re_printf("%*s",
                 colwidth,
                 pv_pretty(sv, s, n, colwidth,
                             PL_colors[0], PL_colors[1],
@@ -237,14 +237,14 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
         }
     }
 
-    Perl_re_printf( aTHX_ "\n");
+    re_printf("\n");
     re_indentf("State+-", depth+1 );
 
     for( charid = 0; charid < trie->uniquecharcount; charid++ ) {
-        Perl_re_printf( aTHX_  "%.*s", colwidth,"--------");
+        re_printf("%.*s", colwidth,"--------");
     }
 
-    Perl_re_printf( aTHX_  "\n" );
+    re_printf("\n" );
 
     for( state = 1; state < next_alloc; state += trie->uniquecharcount ) {
 
@@ -255,15 +255,15 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
         for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
             UV v = (UV)SAFE_TRIE_NODENUM( trie->trans[ state + charid ].next );
             if (v)
-                Perl_re_printf( aTHX_  "%*" UVXf, colwidth, v );
+                re_printf("%*" UVXf, colwidth, v );
             else
-                Perl_re_printf( aTHX_  "%*s", colwidth, "." );
+                re_printf("%*s", colwidth, "." );
         }
         if ( ! trie->states[ TRIE_NODENUM( state ) ].wordnum ) {
-            Perl_re_printf( aTHX_  " (%4" UVXf ")\n",
+            re_printf(" (%4" UVXf ")\n",
                                             (UV)trie->trans[ state ].check );
         } else {
-            Perl_re_printf( aTHX_  " (%4" UVXf ") W%4X\n",
+            re_printf(" (%4" UVXf ") W%4X\n",
                                             (UV)trie->trans[ state ].check,
             trie->states[ TRIE_NODENUM( state ) ].wordnum );
         }
@@ -1017,7 +1017,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                 /*
                 DEBUG_TRIE_COMPILE_MORE_r(
-                    Perl_re_printf( aTHX_  "tp: %d zp: %d ",tp,zp)
+                    re_printf("tp: %d zp: %d ",tp,zp)
                 );
                 */
 
@@ -1079,7 +1079,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 }
                 /*
                 DEBUG_TRIE_COMPILE_MORE_r(
-                    Perl_re_printf( aTHX_  " base: %d\n",base);
+                    re_printf(" base: %d\n",base);
                 );
                 */
                 trie->states[ state ].trans.base = base;
@@ -1424,13 +1424,13 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                                     S_trie_bitmap_set_folded(aTHX_ pRExC_state, trie, *ch, folder);
                                     DEBUG_OPTIMISE_r(
-                                        Perl_re_printf( aTHX_  "%s", (char*)ch)
+                                        re_printf("%s", (char*)ch)
                                     );
                                 }
                             }
                             /* store the current firstchar in the bitmap */
                             S_trie_bitmap_set_folded(aTHX_ pRExC_state, trie, *ch, folder);
-                            DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
+                            DEBUG_OPTIMISE_r(re_printf("%s", ch));
                         }
                         first_ofs = ofs;
                     }
@@ -1466,7 +1466,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 } else {
 #ifdef DEBUGGING
                     if (state > 1)
-                        DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "]\n"));
+                        DEBUG_OPTIMISE_r(re_printf("]\n"));
 #endif
                     break;
                 }
@@ -1729,9 +1729,9 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
                       depth, (UV)numstates
         );
         for( q_read = 1; q_read < numstates; q_read++ ) {
-            Perl_re_printf( aTHX_  ", %" UVuf, (UV)fail[q_read]);
+            re_printf(", %" UVuf, (UV)fail[q_read]);
         }
-        Perl_re_printf( aTHX_  "\n");
+        re_printf("\n");
     });
     Safefree(q);
     /*RExC_seen |= REG_TRIEDFA_SEEN;*/

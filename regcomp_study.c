@@ -1558,16 +1558,16 @@ Perl_study_chunk(pTHX_
             for ( j = 0 ; j < recursed_depth ; j++ ) {
                 for ( i = 0 ; i < (U32)RExC_total_parens ; i++ ) {
                     if (PAREN_TEST(j, i) && (!j || !PAREN_TEST(j - 1, i))) {
-                        Perl_re_printf( aTHX_ " %d",(int)i);
+                        re_printf(" %d",(int)i);
                         break;
                     }
                 }
                 if ( j + 1 < recursed_depth ) {
-                    Perl_re_printf( aTHX_  ",");
+                    re_printf(",");
                 }
             }
         }
-        Perl_re_printf( aTHX_ "\n");
+        re_printf("\n");
     }
     );
     while ( scan && OP(scan) != END && scan < last ){
@@ -1948,15 +1948,15 @@ Perl_study_chunk(pTHX_
                                    REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
                                 regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
-                                Perl_re_printf( aTHX_  " -> %d:%s",
+                                re_printf(" -> %d:%s",
                                     REG_NODE_NUM(noper), SvPV_nolen_const(RExC_mysv));
 
                                 if ( noper_next ) {
                                   regprop(RExC_rx, RExC_mysv, noper_next, NULL, pRExC_state);
-                                  Perl_re_printf( aTHX_ "\t=> %d:%s\t",
+                                  re_printf("\t=> %d:%s\t",
                                     REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
                                 }
-                                Perl_re_printf( aTHX_  "(First == %d,Last == %d,Cur == %d,tt == %s,ntt == %s,nntt == %s)\n",
+                                re_printf("(First == %d,Last == %d,Cur == %d,tt == %s,ntt == %s,nntt == %s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
                                    REGNODE_NAME(trietype), REGNODE_NAME(noper_trietype), REGNODE_NAME(noper_next_trietype)
                                 );
@@ -2054,7 +2054,7 @@ Perl_study_chunk(pTHX_
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                             re_indentf("- %s (%d) <SCAN FINISHED> ",
                               depth+1, SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
-                            Perl_re_printf( aTHX_  "(First == %d, Last == %d, Cur == %d, tt == %s)\n",
+                            re_printf("(First == %d, Last == %d, Cur == %d, tt == %s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
                                REGNODE_NAME(trietype)
                             );
@@ -2814,14 +2814,14 @@ Perl_study_chunk(pTHX_
                     /* It is counted once already... */
                     data->pos_min += minnext * (mincount - counted);
 #if 0
-    Perl_re_printf( aTHX_  "counted = %" UVuf " deltanext = %" UVuf
+    re_printf("counted = %" UVuf " deltanext = %" UVuf
                               " OPTIMIZE_INFTY = %" UVuf " minnext = %" UVuf
                               " maxcount = %" UVuf " mincount = %" UVuf
                               " data->pos_delta = %" UVuf "\n",
         (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext,
         (UV)maxcount, (UV)mincount, (UV)data->pos_delta);
     if (deltanext != OPTIMIZE_INFTY)
-        Perl_re_printf( aTHX_  "LHS = %" UVuf " RHS = %" UVuf "\n",
+        re_printf("LHS = %" UVuf " RHS = %" UVuf "\n",
             (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
             - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
