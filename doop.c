@@ -809,7 +809,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
         croak("Illegal number of bits in vec");
 
     if (SvUTF8(sv)) {
-        if (Perl_sv_utf8_downgrade_flags(aTHX_ sv, TRUE, 0)) {
+        if (sv_utf8_downgrade_flags(sv, TRUE, 0)) {
             /* PVX may have changed */
             s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
         }
@@ -918,10 +918,10 @@ Perl_do_vecset(pTHX_ SV *sv)
                                          SV_GMAGIC | SV_UNDEF_RETURNS_NULL);
     if (SvUTF8(targ)) {
         /* This is handled by the SvPOK_only below...
-        if (!Perl_sv_utf8_downgrade_flags(aTHX_ targ, TRUE, 0))
+        if (!sv_utf8_downgrade_flags(targ, TRUE, 0))
             SvUTF8_off(targ);
          */
-        (void) Perl_sv_utf8_downgrade_flags(aTHX_ targ, TRUE, 0);
+        (void) sv_utf8_downgrade_flags(targ, TRUE, 0);
     }
 
     (void)SvPOK_only(targ);
