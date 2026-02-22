@@ -1545,7 +1545,7 @@ Perl_study_chunk(pTHX_
     );
     DEBUG_OPTIMISE_MORE_r(
     {
-        Perl_re_indentf( aTHX_  "study_chunk stopparen = %ld recursed_count = %lu "
+        re_indentf("study_chunk stopparen = %ld recursed_count = %lu "
                                 "depth = %lu recursed_depth = %lu scan = %p last = %p",
             depth, (long)stopparen,
             (unsigned long)RExC_study_chunk_recursed_count,
@@ -1847,7 +1847,7 @@ Perl_study_chunk(pTHX_
 
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
-                            Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
+                            re_indentf("%s %" UVuf ":%s\n",
                               depth+1,
                               "Looking for TRIE'able sequences. Tail node is ",
                               (UV) REGNODE_OFFSET(tail),
@@ -1943,7 +1943,7 @@ Perl_study_chunk(pTHX_
 
                             DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                Perl_re_indentf( aTHX_  "- %d:%s (%d)",
+                                re_indentf("- %d:%s (%d)",
                                    depth+1,
                                    REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
@@ -2052,7 +2052,7 @@ Perl_study_chunk(pTHX_
                         } /* loop over branches */
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                            Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
+                            re_indentf("- %s (%d) <SCAN FINISHED> ",
                               depth+1, SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
                             Perl_re_printf( aTHX_  "(First == %d, Last == %d, Cur == %d, tt == %s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
@@ -2094,7 +2094,7 @@ Perl_study_chunk(pTHX_
                                      * turn it into a plain NOTHING op. */
                                     DEBUG_TRIE_COMPILE_r({
                                         regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                        Perl_re_indentf( aTHX_  "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
+                                        re_indentf("- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
                                           depth+1,
                                           SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
 
