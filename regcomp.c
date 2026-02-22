@@ -2584,29 +2584,29 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
     if (RExC_lastparse!=RExC_parse) {                           \
         Perl_re_printf( aTHX_  "%s",                            \
-            Perl_pv_pretty(aTHX_ RExC_mysv1, RExC_parse,        \
-                RExC_end - RExC_parse, 16,                      \
-                "", "",                                         \
-                PERL_PV_ESCAPE_UNI_DETECT |                     \
-                PERL_PV_PRETTY_ELLIPSES   |                     \
-                PERL_PV_PRETTY_LTGT       |                     \
-                PERL_PV_ESCAPE_RE         |                     \
-                PERL_PV_PRETTY_EXACTSIZE                        \
+            pv_pretty(RExC_mysv1, RExC_parse,                   \
+                      RExC_end - RExC_parse, 16,                \
+                      "", "",                                   \
+                      PERL_PV_ESCAPE_UNI_DETECT |               \
+                      PERL_PV_PRETTY_ELLIPSES   |               \
+                      PERL_PV_PRETTY_LTGT       |               \
+                      PERL_PV_ESCAPE_RE         |               \
+                      PERL_PV_PRETTY_EXACTSIZE                  \
             )                                                   \
         );                                                      \
     } else                                                      \
         Perl_re_printf( aTHX_ "%16s","");                       \
                                                                 \
     if (RExC_lastnum!=RExC_emit)                                \
-       Perl_re_printf( aTHX_ "|%4zu", RExC_emit);                \
+       Perl_re_printf( aTHX_ "|%4zu", RExC_emit);               \
     else                                                        \
        Perl_re_printf( aTHX_ "|%4s","");                        \
     Perl_re_printf( aTHX_ "|%*s%-4s",                           \
         (int)((depth*2)), "",                                   \
         (funcname)                                              \
     );                                                          \
-    RExC_lastnum = RExC_emit;                                     \
-    RExC_lastparse = RExC_parse;                                  \
+    RExC_lastnum = RExC_emit;                                   \
+    RExC_lastparse = RExC_parse;                                \
 })
 
 

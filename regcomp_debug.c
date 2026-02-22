@@ -709,8 +709,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             else {
                 const char *s = reginfo->strbeg + ln;
                 sv_catpvf(sv, ": ");
-                Perl_pv_pretty( aTHX_ sv, s, RXp_OFFS_END(prog,n) - RXp_OFFS_START(prog,n), 32, 0, 0,
-                    PERL_PV_ESCAPE_UNI_DETECT|PERL_PV_PRETTY_NOCLEAR|PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE );
+                pv_pretty(sv, s,
+                          RXp_OFFS_END(prog,n) - RXp_OFFS_START(prog,n),
+                          32, 0, 0,
+                          PERL_PV_ESCAPE_UNI_DETECT
+                         |PERL_PV_PRETTY_NOCLEAR
+                         |PERL_PV_PRETTY_ELLIPSES
+                         |PERL_PV_PRETTY_QUOTE );
             }
         }
     } else if (k == GOSUB) {
