@@ -502,7 +502,7 @@ Perl_newSV_type(pTHX_ const svtype type)
             SvOBJECT_on(io);
             /* Clear the stashcache because a new IO could overrule a package
                name */
-            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            DEBUG_o(deb("sv_upgrade clearing PL_stashcache\n"));
             hv_clear(PL_stashcache);
 
             SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));

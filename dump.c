@@ -3276,7 +3276,7 @@ Perl_runops_debug(pTHX)
         ck_warner_d(packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
         return 0;
     }
-    DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
+    DEBUG_l(deb("Entering new RUNOPS level\n"));
     do {
 #ifdef PERL_TRACE_OPS
         ++PL_op_exec_cnt[PL_op->op_type];
@@ -3316,7 +3316,7 @@ Perl_runops_debug(pTHX)
 
         PERL_DTRACE_PROBE_OP(PL_op);
     } while ((PL_op = PL_op->op_ppaddr(aTHX)));
-    DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
+    DEBUG_l(deb("leaving RUNOPS level\n"));
     PERL_ASYNC_CHECK();
 
 #ifdef PERL_USE_HWM
@@ -3627,7 +3627,7 @@ Perl_debop(pTHX_ const OP *o)
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
         return 0;
 
-    Perl_deb(aTHX_ "%s", OP_NAME(o));
+    deb("%s", OP_NAME(o));
     switch (o->op_type) {
     case OP_CONST:
     case OP_HINTSEVAL:

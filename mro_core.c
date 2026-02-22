@@ -978,8 +978,8 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                 STRLEN len;
                 const char *name = SvPVx_const(*svp, len);
                 if(PL_stashcache) {
-                    DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%" SVf "'\n",
-                                     SVfARG(*svp)));
+                    DEBUG_o(deb("mro_gather_and_rename clearing PL_stashcache"
+                                " for '%" SVf "'\n", SVfARG(*svp)));
                     (void)hv_delete_ent(PL_stashcache, *svp, G_DISCARD, 0);
                 }
                 hv_ename_delete(oldstash, name, len, name_utf8);

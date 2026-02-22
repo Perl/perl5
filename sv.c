@@ -1275,7 +1275,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             SvOBJECT_on(io);
             /* Clear the stashcache because a new IO could overrule a package
                name */
-            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            DEBUG_o(deb("sv_upgrade clearing PL_stashcache\n"));
             hv_clear(PL_stashcache);
 
             SvSTASH_set(io, HvREFCNT_inc(GvHV(iogv)));
@@ -3982,8 +3982,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dsv));
     if (GvIO(dsv) && dtype == SVt_PVGV) {
-        DEBUG_o(Perl_deb(aTHX_
-                        "glob_assign_glob clearing PL_stashcache\n"));
+        DEBUG_o(deb("glob_assign_glob clearing PL_stashcache\n"));
         /* It's a cache. It will rebuild itself quite happily.
            It's a lot of effort to work out exactly which key (or keys)
            might be invalidated by the creation of the this file handle.
@@ -4192,7 +4191,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
             Perl_magic_clearisa(aTHX_ NULL, mg);
         }
         else if (stype == SVt_PVIO) {
-            DEBUG_o(Perl_deb(aTHX_ "gv_setref clearing PL_stashcache\n"));
+            DEBUG_o(deb("gv_setref clearing PL_stashcache\n"));
             /* It's a cache. It will rebuild itself quite happily.
                It's a lot of effort to work out exactly which key (or keys)
                might be invalidated by the creation of the this file handle.
@@ -7376,10 +7375,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                     && (hek = HvNAME_HEK((HV*)sv)))
                 {
                     if (PL_stashcache) {
-                        DEBUG_o(Perl_deb(aTHX_
-                            "sv_clear clearing PL_stashcache for '%" HEKf
-                            "'\n",
-                             HEKfARG(hek)));
+                        DEBUG_o(deb("sv_clear clearing PL_stashcache for '%"
+                                    HEKf "'\n", HEKfARG(hek)));
                         (void)hv_deletehek(PL_stashcache,
                                            hek, G_DISCARD);
                     }
@@ -7714,7 +7711,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
 
             assert (HvHasAUX(stash));
 
-            DEBUG_o( Perl_deb(aTHX_ "Looking for DESTROY method for %s\n",
+            DEBUG_o( deb("Looking for DESTROY method for %s\n",
                          HvNAME(stash)) );
 
             /* don't make this an initialization above the assert, since it needs
@@ -7722,7 +7719,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
             meta = HvMROMETA(stash);
             if (meta->destroy_gen && meta->destroy_gen == PL_sub_generation) {
                 destructor = meta->destroy;
-                DEBUG_o( Perl_deb(aTHX_ "Using cached DESTROY method %p for %s\n",
+                DEBUG_o( deb("Using cached DESTROY method %p for %s\n",
                              (void *)destructor, HvNAME(stash)) );
             }
             else {
@@ -7746,11 +7743,11 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
                     meta->destroy_gen = PL_sub_generation;
                     meta->destroy = destructor;
 
-                    DEBUG_o( Perl_deb(aTHX_ "Set cached DESTROY method %p for %s\n",
-                                      (void *)destructor, HvNAME(stash)) );
+                    DEBUG_o( deb("Set cached DESTROY method %p for %s\n",
+                                 (void *)destructor, HvNAME(stash)) );
                 }
                 else {
-                    DEBUG_o( Perl_deb(aTHX_ "Not caching AUTOLOAD for DESTROY method for %s\n",
+                    DEBUG_o( deb("Not caching AUTOLOAD for DESTROY method for %s\n",
                                       HvNAME(stash)) );
                 }
             }

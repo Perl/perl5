@@ -1616,11 +1616,12 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
                                         (const U8*)cx_label, cx_label_len) == 0)
                     : (len == cx_label_len && ((cx_label == label)
                                     || memEQ(cx_label, label, len))) )) {
-                DEBUG_l(Perl_deb(aTHX_ "(poptolabel(): skipping label at cx=%ld %s)\n",
-                        (long)i, cx_label));
+                DEBUG_l(deb("(poptolabel(): skipping label at cx=%ld %s)\n",
+                            (long)i, cx_label));
                 continue;
             }
-            DEBUG_l( Perl_deb(aTHX_ "(poptolabel(): found label at cx=%ld %s)\n", (long)i, label));
+            DEBUG_l( deb("(poptolabel(): found label at cx=%ld %s)\n",
+                         (long)i, label));
             return i;
           }
         }
@@ -1728,17 +1729,17 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
              * code block. Hide this faked entry from the world. */
             if (cx->cx_type & CXp_SUB_RE_FAKE)
                 continue;
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
             return i;
 
         case CXt_EVAL:
             if (CxTRY(cx))
                 continue;
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
             return i;
 
         case CXt_FORMAT:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
             return i;
         }
     }
@@ -1757,7 +1758,7 @@ S_dopoptoeval(pTHX_ I32 startingblock)
         default:
             continue;
         case CXt_EVAL:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptoeval(): found eval at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptoeval(): found eval at cx=%ld)\n", (long)i));
             return i;
         }
     }
@@ -1792,7 +1793,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
         case CXt_LOOP_LAZYSV:
         case CXt_LOOP_LIST:
         case CXt_LOOP_ARY:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptoloop(): found loop at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptoloop(): found loop at cx=%ld)\n", (long)i));
             return i;
         }
     }
@@ -1813,7 +1814,8 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
         default:
             continue;
         case CXt_GIVEN:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found given at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptogivenfor(): found given at cx=%ld)\n",
+                         (long)i));
             return i;
         case CXt_LOOP_PLAIN:
             assert(!(cx->cx_type & CXp_FOR_DEF));
@@ -1823,7 +1825,8 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
         case CXt_LOOP_LIST:
         case CXt_LOOP_ARY:
             if (cx->cx_type & CXp_FOR_DEF) {
-                DEBUG_l( Perl_deb(aTHX_ "(dopoptogivenfor(): found foreach at cx=%ld)\n", (long)i));
+                DEBUG_l( deb("(dopoptogivenfor(): found foreach at cx=%ld)\n",
+                         (long)i));
                 return i;
             }
         }
@@ -1843,7 +1846,7 @@ S_dopoptowhen(pTHX_ I32 startingblock)
         default:
             continue;
         case CXt_WHEN:
-            DEBUG_l( Perl_deb(aTHX_ "(dopoptowhen(): found when at cx=%ld)\n", (long)i));
+            DEBUG_l( deb("(dopoptowhen(): found when at cx=%ld)\n", (long)i));
             return i;
         }
     }
@@ -3752,7 +3755,7 @@ PP(pp_goto)
             for (; enterops[ix]; ix++) {
                 PL_op = enterops[ix];
                 S_check_op_type(aTHX_ PL_op);
-                DEBUG_l( Perl_deb(aTHX_ "pp_goto: Entering %s\n",
+                DEBUG_l( deb("pp_goto: Entering %s\n",
                                          OP_NAME(PL_op)));
                 PL_op->op_ppaddr(aTHX);
             }
@@ -5967,7 +5970,7 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
 /* Do a smart match */
 PP(pp_smartmatch)
 {
-    DEBUG_M(Perl_deb(aTHX_ "Starting smart match resolution\n"));
+    DEBUG_M(deb("Starting smart match resolution\n"));
     return do_smartmatch(NULL, NULL, 0);
 }
 
@@ -6000,20 +6003,20 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     /* First of all, handle overload magic of the rightmost argument */
     if (SvAMAGIC(e)) {
         SV * tmpsv;
-        DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
-        DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+        DEBUG_M(deb("    applying rule Any-Object\n"));
+        DEBUG_M(deb("        attempting overload\n"));
 
         tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
         if (tmpsv) {
             rpp_replace_2_1_NN(tmpsv);
             return NORMAL;
         }
-        DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
+        DEBUG_M(deb("        failed to run overload method; continuing...\n"));
     }
 
     /* ~~ undef */
     if (!SvOK(e)) {
-        DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-undef\n"));
+        DEBUG_M(deb("    applying rule Any-undef\n"));
         if (SvOK(d))
             goto ret_no;
         else
@@ -6021,7 +6024,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     }
 
     if (SvROK(e) && SvOBJECT(SvRV(e)) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
-        DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
+        DEBUG_M(deb("    applying rule Any-Object\n"));
         croak("Smart matching a non-overloaded object breaks encapsulation");
     }
     if (SvROK(d) && SvOBJECT(SvRV(d)) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
@@ -6038,12 +6041,12 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             bool andedresults = TRUE;
             HV *hv = (HV*) SvRV(d);
             I32 numkeys = hv_iterinit(hv);
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-CodeRef\n"));
+            DEBUG_M(deb("    applying rule Hash-CodeRef\n"));
             if (numkeys == 0)
                 goto ret_yes;
             push_stackinfo(PERLSI_SMARTMATCH, 1);
             while ( (he = hv_iternext(hv)) ) {
-                DEBUG_M(Perl_deb(aTHX_ "        testing hash key...\n"));
+                DEBUG_M(deb("        testing hash key...\n"));
                 ENTER_with_name("smartmatch_hash_key_test");
                 SAVETMPS;
                 PUSHMARK(PL_stack_sp);
@@ -6066,13 +6069,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             bool andedresults = TRUE;
             AV *av = (AV*) SvRV(d);
             const Size_t len = av_count(av);
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-CodeRef\n"));
+            DEBUG_M(deb("    applying rule Array-CodeRef\n"));
             if (len == 0)
                 goto ret_yes;
             push_stackinfo(PERLSI_SMARTMATCH, 1);
             for (i = 0; i < len; ++i) {
                 SV * const * const svp = av_fetch(av, i, FALSE);
-                DEBUG_M(Perl_deb(aTHX_ "        testing array element...\n"));
+                DEBUG_M(deb("        testing array element...\n"));
                 ENTER_with_name("smartmatch_array_elem_test");
                 SAVETMPS;
                 PUSHMARK(PL_stack_sp);
@@ -6092,7 +6095,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         }
         else {
           sm_any_sub:
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
+            DEBUG_M(deb("    applying rule Any-CodeRef\n"));
             push_stackinfo(PERLSI_SMARTMATCH, 1);
             ENTER_with_name("smartmatch_coderef");
             PUSHMARK(PL_stack_sp);
@@ -6114,7 +6117,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             goto sm_any_hash; /* Treat objects like scalars */
         }
         else if (!SvOK(d)) {
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash ($a undef)\n"));
+            DEBUG_M(deb("    applying rule Any-Hash ($a undef)\n"));
             goto ret_no;
         }
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
@@ -6127,7 +6130,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 other_key_count = 0;
             HV *hv = HV_FROM_REF(e);
 
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Hash\n"));
+            DEBUG_M(deb("    applying rule Hash-Hash\n"));
             /* Tied hashes don't know how many keys they have. */
             tied = cBOOL(SvTIED_mg((SV*)hv, PERL_MAGIC_tied));
             other_tied = cBOOL(SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied));
@@ -6150,7 +6153,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             while ( (he = hv_iternext(hv)) ) {
                 SV *key = hv_iterkeysv(he);
 
-                DEBUG_M(Perl_deb(aTHX_ "        comparing hash key...\n"));
+                DEBUG_M(deb("        comparing hash key...\n"));
                 ++ this_key_count;
                 
                 if(!hv_exists_ent(other_hv, key, 0)) {
@@ -6178,10 +6181,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             Size_t i;
             HV *hv = HV_FROM_REF(e);
 
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Hash\n"));
+            DEBUG_M(deb("    applying rule Array-Hash\n"));
             for (i = 0; i < other_len; ++i) {
                 SV ** const svp = av_fetch(other_av, i, FALSE);
-                DEBUG_M(Perl_deb(aTHX_ "        checking for key existence...\n"));
+                DEBUG_M(deb("        checking for key existence...\n"));
                 if (svp) {	/* ??? When can this not happen? */
                     if (hv_exists_ent(hv, *svp, 0))
                         goto ret_yes;
@@ -6190,7 +6193,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             goto ret_no;
         }
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Hash\n"));
+            DEBUG_M(deb("    applying rule Regex-Hash\n"));
           sm_regex_hash:
             {
                 PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
@@ -6199,7 +6202,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
                 (void) hv_iterinit(hv);
                 while ( (he = hv_iternext(hv)) ) {
-                    DEBUG_M(Perl_deb(aTHX_ "        testing key against pattern...\n"));
+                    DEBUG_M(deb("        testing key against pattern...\n"));
                     if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
                         (void) hv_iterinit(hv);
                         destroy_matcher(matcher);
@@ -6212,7 +6215,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         }
         else {
           sm_any_hash:
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Hash\n"));
+            DEBUG_M(deb("    applying rule Any-Hash\n"));
             if (hv_exists_ent(HV_FROM_REF(e), d, 0))
                 goto ret_yes;
             else
@@ -6229,11 +6232,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             const Size_t other_len = av_count(other_av);
             Size_t i;
 
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Array\n"));
+            DEBUG_M(deb("    applying rule Hash-Array\n"));
             for (i = 0; i < other_len; ++i) {
                 SV ** const svp = av_fetch(other_av, i, FALSE);
 
-                DEBUG_M(Perl_deb(aTHX_ "        testing for key existence...\n"));
+                DEBUG_M(deb("        testing for key existence...\n"));
                 if (svp) {	/* ??? When can this not happen? */
                     if (hv_exists_ent(HV_FROM_REF(d), *svp, 0))
                         goto ret_yes;
@@ -6243,7 +6246,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         }
         if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
             AV *other_av = AV_FROM_REF(d);
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Array\n"));
+            DEBUG_M(deb("    applying rule Array-Array\n"));
             if (av_count(AV_FROM_REF(e)) != av_count(other_av))
                 goto ret_no;
             else {
@@ -6281,9 +6284,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                                 sv_2mortal(newSViv(PTR2IV(*other_elem))),
                                 &PL_sv_undef, 0);
                         rpp_xpush_2(*other_elem, *this_elem);
-                        DEBUG_M(Perl_deb(aTHX_ "        recursively comparing array element...\n"));
+                        DEBUG_M(deb("        recursively comparing array element...\n"));
                         (void) do_smartmatch(seen_this, seen_other, 0);
-                        DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
+                        DEBUG_M(deb("        recursion finished\n"));
                         
                          bool ok = SvTRUEx(PL_stack_sp[0]);
                          rpp_popfree_1_NN();
@@ -6295,7 +6298,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             }
         }
         else if (SvROK(d) && SvTYPE(SvRV(d)) == SVt_REGEXP) {
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Regex-Array\n"));
+            DEBUG_M(deb("    applying rule Regex-Array\n"));
           sm_regex_array:
             {
                 PMOP * const matcher = make_matcher((REGEXP*) SvRV(d));
@@ -6304,7 +6307,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
                 for(i = 0; i < this_len; ++i) {
                     SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
-                    DEBUG_M(Perl_deb(aTHX_ "        testing element against pattern...\n"));
+                    DEBUG_M(deb("        testing element against pattern...\n"));
                     if (svp && matcher_matches_sv(matcher, *svp)) {
                         destroy_matcher(matcher);
                         goto ret_yes;
@@ -6319,10 +6322,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             const Size_t this_len = av_count(AV_FROM_REF(e));
             Size_t i;
 
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Undef-Array\n"));
+            DEBUG_M(deb("    applying rule Undef-Array\n"));
             for (i = 0; i < this_len; ++i) {
                 SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
-                DEBUG_M(Perl_deb(aTHX_ "        testing for undef element...\n"));
+                DEBUG_M(deb("        testing for undef element...\n"));
                 if (!svp || !SvOK(*svp))
                     goto ret_yes;
             }
@@ -6334,7 +6337,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 Size_t i;
                 const Size_t this_len = av_count(AV_FROM_REF(e));
 
-                DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Array\n"));
+                DEBUG_M(deb("    applying rule Any-Array\n"));
                 for (i = 0; i < this_len; ++i) {
                     SV * const * const svp = av_fetch(AV_FROM_REF(e), i, FALSE);
                     if (!svp)
@@ -6342,9 +6345,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
                     rpp_xpush_2(d, *svp);
                     /* infinite recursion isn't supposed to happen here */
-                    DEBUG_M(Perl_deb(aTHX_ "        recursively testing array element...\n"));
+                    DEBUG_M(deb("        recursively testing array element...\n"));
                     (void) do_smartmatch(NULL, NULL, 1);
-                    DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
+                    DEBUG_M(deb("        recursion finished\n"));
                     bool ok = SvTRUEx(PL_stack_sp[0]);
                     rpp_popfree_1_NN();
                     if (ok)
@@ -6358,19 +6361,19 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     else if (SvROK(e) && SvTYPE(SvRV(e)) == SVt_REGEXP) {
         if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVHV) {
             SV *t = d; d = e; e = t;
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Regex\n"));
+            DEBUG_M(deb("    applying rule Hash-Regex\n"));
             goto sm_regex_hash;
         }
         else if (!object_on_left && SvROK(d) && SvTYPE(SvRV(d)) == SVt_PVAV) {
             SV *t = d; d = e; e = t;
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Array-Regex\n"));
+            DEBUG_M(deb("    applying rule Array-Regex\n"));
             goto sm_regex_array;
         }
         else {
             PMOP * const matcher = make_matcher((REGEXP*) SvRV(e));
             bool result;
 
-            DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Regex\n"));
+            DEBUG_M(deb("    applying rule Any-Regex\n"));
             result = matcher_matches_sv(matcher, d);
             destroy_matcher(matcher);
             if (result)
@@ -6383,29 +6386,29 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     /* See if there is overload magic on left */
     else if (object_on_left && SvAMAGIC(d)) {
         SV *tmpsv;
-        DEBUG_M(Perl_deb(aTHX_ "    applying rule Object-Any\n"));
-        DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
+        DEBUG_M(deb("    applying rule Object-Any\n"));
+        DEBUG_M(deb("        attempting overload\n"));
         tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
         if (tmpsv) {
             rpp_replace_2_1_NN(tmpsv);
             return NORMAL;
         }
 
-        DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; falling back...\n"));
+        DEBUG_M(deb("        failed to run overload method; falling back...\n"));
         goto sm_any_scalar;
     }
     else if (!SvOK(d)) {
         /* undef ~~ scalar ; we already know that the scalar is SvOK */
-        DEBUG_M(Perl_deb(aTHX_ "    applying rule undef-Any\n"));
+        DEBUG_M(deb("    applying rule undef-Any\n"));
         goto ret_no;
     }
     else
   sm_any_scalar:
     if (SvNIOK(e) || (SvPOK(e) && looks_like_number(e) && SvNIOK(d))) {
         DEBUG_M(if (SvNIOK(e))
-                    Perl_deb(aTHX_ "    applying rule Any-Num\n");
+                    deb("    applying rule Any-Num\n");
                 else
-                    Perl_deb(aTHX_ "    applying rule Num-numish\n");
+                    deb("    applying rule Num-numish\n");
         );
         /* numeric comparison */
         rpp_xpush_2(d, e);
@@ -6422,7 +6425,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     }
     
     /* As a last resort, use string comparison */
-    DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
+    DEBUG_M(deb("    applying rule Any-Any\n"));
     rpp_xpush_2(d, e);
     Perl_pp_seq(aTHX);
     {
