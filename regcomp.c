@@ -442,7 +442,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 
     /* Dispatch a request to compile a regexp to correct regexp engine. */
     DEBUG_COMPILE_r({
-        Perl_re_printf( aTHX_  "Using engine %" UVxf "\n",
+        re_printf("Using engine %" UVxf "\n",
                         PTR2UV(eng));
     });
     return CALLREGCOMP_ENG(eng, pattern, flags);
@@ -568,7 +568,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     bool do_end = 0;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    DEBUG_PARSE_r(Perl_re_printf( aTHX_
+    DEBUG_PARSE_r(re_printf(
         "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
     int nblocks = 0;
@@ -1007,7 +1007,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
         }
         *p++ = '\0';
         DEBUG_COMPILE_r({
-            Perl_re_printf( aTHX_
+            re_printf(
                 "%sre-parsing pattern for runtime code:%s %s\n",
                 PL_colors[4], PL_colors[5], newpat);
         });
@@ -1554,7 +1554,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     }
 
-    DEBUG_PARSE_r(Perl_re_printf( aTHX_
+    DEBUG_PARSE_r(re_printf(
         "Assembling pattern from %d elements%s\n", pat_count,
             orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
@@ -1583,7 +1583,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (is_bare_re)
                 *is_bare_re = true;
             SvREFCNT_inc(re);
-            DEBUG_PARSE_r(Perl_re_printf( aTHX_
+            DEBUG_PARSE_r(re_printf(
                 "Precompiled pattern%s\n",
                     orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
@@ -1616,7 +1616,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     DEBUG_COMPILE_r({
             RE_PV_QUOTED_DECL(s, RExC_utf8, RExC_mysv, exp, plen, PL_dump_re_max_len);
-            Perl_re_printf( aTHX_  "%sCompiling REx%s %s\n",
+            re_printf("%sCompiling REx%s %s\n",
                           PL_colors[4], PL_colors[5], s);
         });
 
@@ -1653,7 +1653,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     {
         DEBUG_COMPILE_r({
             RE_PV_QUOTED_DECL(s, RExC_utf8, RExC_mysv, exp, plen, PL_dump_re_max_len);
-            Perl_re_printf( aTHX_  "%sSkipping recompilation of unchanged REx%s %s\n",
+            re_printf("%sSkipping recompilation of unchanged REx%s %s\n",
                           PL_colors[4], PL_colors[5], s);
         });
         LEAVE_with_name("re_op_compile");
@@ -1722,7 +1722,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     set_regex_pv(pRExC_state, Rx);
 
     DEBUG_PARSE_r({
-        Perl_re_printf( aTHX_
+        re_printf(
             "Starting parse and generation\n");
         RExC_lastnum = 0;
         RExC_lastparse = NULL;
@@ -1838,10 +1838,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                                 + RExC_latest_warn_offset);
             }
             S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
-            DEBUG_PARSE_r(Perl_re_printf( aTHX_ "Need to redo parse after upgrade\n"));
+            DEBUG_PARSE_r(re_printf("Need to redo parse after upgrade\n"));
         }
         else {
-            DEBUG_PARSE_r(Perl_re_printf( aTHX_ "Need to redo parse\n"));
+            DEBUG_PARSE_r(re_printf("Need to redo parse\n"));
         }
 
         if (ALL_PARENS_COUNTED) {
@@ -1899,7 +1899,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_whilem_seen = 15;
 
     DEBUG_PARSE_r({
-        Perl_re_printf( aTHX_
+        re_printf(
             "Required size %zd nodes\n", RExC_size);
         RExC_lastnum = 0;
         RExC_lastparse = NULL;
@@ -1911,14 +1911,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         SV * const sv = sv_newmortal(); /* can this use RExC_mysv? */
         RXi_GET_DECL(RExC_rx, ri);
         DEBUG_RExC_seen();
-        Perl_re_printf( aTHX_ "Program before optimization:\n");
+        re_printf("Program before optimization:\n");
 
         (void)dumpuntil(RExC_rx, ri->program, ri->program + 1, NULL, NULL,
                         sv, 0, 0);
     });
 
     DEBUG_OPTIMISE_r(
-        Perl_re_printf( aTHX_  "Starting post parse optimization\n");
+        re_printf("Starting post parse optimization\n");
     );
 
     /* XXXX To minimize changes to RE engine we always allocate
@@ -1958,7 +1958,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         copyRExC_state = *pRExC_state;
     } else {
         U32 seen = RExC_seen;
-        DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "Restudying\n"));
+        DEBUG_OPTIMISE_r(re_printf("Restudying\n"));
 
         *pRExC_state = copyRExC_state;
         if (seen & REG_TOP_LEVEL_BRANCHES_SEEN)
@@ -2100,11 +2100,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* search for "restudy" in this file for a detailed explanation */
         DEBUG_PARSE_r(
             if (!restudied)
-                Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
+                re_printf("first at %td\n", first - scan + 1)
         );
 #else
         DEBUG_PARSE_r(
-            Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
+            re_printf("first at %td\n", first - scan + 1)
         );
 #endif
 
@@ -2226,7 +2226,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             RExC_rx->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
             DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
                       regprop(RExC_rx, sv, (regnode*)data.start_class, NULL, pRExC_state);
-                      Perl_re_printf( aTHX_
+                      re_printf(
                                     "synthetic stclass \"%s\".\n",
                                     SvPVX_const(sv));});
             data.start_class = NULL;
@@ -2264,7 +2264,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         SSize_t last_close = 0;
         regnode *last_close_op = NULL;
 
-        DEBUG_PARSE_r(Perl_re_printf( aTHX_  "\nMulti Top Level\n"));
+        DEBUG_PARSE_r(re_printf("\nMulti Top Level\n"));
 
         scan = RExC_rxi->program + 1;
         ssc_init(pRExC_state, &ch_class);
@@ -2310,7 +2310,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             RExC_rx->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
             DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
                       regprop(RExC_rx, sv, (regnode*)data.start_class, NULL, pRExC_state);
-                      Perl_re_printf( aTHX_
+                      re_printf(
                                     "synthetic stclass \"%s\".\n",
                                     SvPVX_const(sv));});
             data.start_class = NULL;
@@ -2328,7 +2328,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
-        Perl_re_printf( aTHX_ "minlen: %zd RExC_rx->minlen:%zd maxlen:%zd\n",
+        re_printf("minlen: %zd RExC_rx->minlen:%zd maxlen:%zd\n",
                       minlen, RExC_rx->minlen, RExC_maxlen);
     });
     RExC_rx->minlenret = minlen;
@@ -2468,12 +2468,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     Newxz(RXp_OFFSp(RExC_rx), RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
-        Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
+        re_printf("study_chunk_recursed_count: %lu\n",
             (unsigned long)RExC_study_chunk_recursed_count);
     });
     DEBUG_DUMP_r({
         DEBUG_RExC_seen();
-        Perl_re_printf( aTHX_ "Final program:\n");
+        re_printf("Final program:\n");
         regdump(RExC_rx);
     });
 
@@ -2583,7 +2583,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
     if (RExC_lastparse!=RExC_parse) {                           \
-        Perl_re_printf( aTHX_  "%s",                            \
+        re_printf("%s",                                         \
             pv_pretty(RExC_mysv1, RExC_parse,                   \
                       RExC_end - RExC_parse, 16,                \
                       "", "",                                   \
@@ -2595,13 +2595,13 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             )                                                   \
         );                                                      \
     } else                                                      \
-        Perl_re_printf( aTHX_ "%16s","");                       \
+        re_printf("%16s","");                                   \
                                                                 \
     if (RExC_lastnum!=RExC_emit)                                \
-       Perl_re_printf( aTHX_ "|%4zu", RExC_emit);               \
+       re_printf("|%4zu", RExC_emit);                           \
     else                                                        \
-       Perl_re_printf( aTHX_ "|%4s","");                        \
-    Perl_re_printf( aTHX_ "|%*s%-4s",                           \
+       re_printf("|%4s","");                                    \
+    re_printf("|%*s%-4s",                                       \
         (int)((depth*2)), "",                                   \
         (funcname)                                              \
     );                                                          \
@@ -2613,11 +2613,11 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 #define DEBUG_PARSE(funcname)     DEBUG_PARSE_r({           \
     DEBUG_PARSE_MSG((funcname));                            \
-    Perl_re_printf( aTHX_ "%4s","\n");                                  \
+    re_printf("%4s","\n");                                  \
 })
 #define DEBUG_PARSE_FMT(funcname,fmt,args)     DEBUG_PARSE_r({\
     DEBUG_PARSE_MSG((funcname));                            \
-    Perl_re_printf( aTHX_ fmt "\n",args);                               \
+    re_printf(fmt "\n",args);                               \
 })
 
 
@@ -3824,7 +3824,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                  */
                 ret = reg2node(pRExC_state, GOSUB, num, RExC_recurse_count);
                 RExC_recurse_count++;
-                DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
+                DEBUG_OPTIMISE_MORE_r(re_printf(
                     "%*s%*s Recurse #%" UVuf " to %" IVdf "\n",
                             22, "|    |", (int)(depth * 2 + 1), "",
                             (UV)ARG1u(REGNODE_p(ret)),
@@ -4229,7 +4229,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 RExC_nestroot = parno;
             if (RExC_open_parens && !RExC_open_parens[parno])
             {
-                DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
+                DEBUG_OPTIMISE_MORE_r(re_printf(
                     "%*s%*s Setting open paren #%" IVdf " to %zu\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
                     (IV)parno, ret));
@@ -4345,7 +4345,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         case 1: case 2:
             ender = reg1node(pRExC_state, CLOSE, parno);
             if ( RExC_close_parens ) {
-                DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
+                DEBUG_OPTIMISE_MORE_r(re_printf(
                         "%*s%*s Setting close paren #%" IVdf " to %zu\n",
                         22, "|    |", (int)(depth * 2 + 1), "",
                         (IV)parno, ender));
@@ -4382,7 +4382,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             assert(!RExC_end_op); /* there can only be one! */
             RExC_end_op = REGNODE_p(ender);
             if (RExC_close_parens) {
-                DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
+                DEBUG_OPTIMISE_MORE_r(re_printf(
                     "%*s%*s Setting close paren #0 (END) to %zu\n",
                     22, "|    |", (int)(depth * 2 + 1), "",
                     ender));
@@ -4395,7 +4395,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             DEBUG_PARSE_MSG("lsbr");
             regprop(RExC_rx, RExC_mysv1, REGNODE_p(lastbr), NULL, pRExC_state);
             regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ tying lastbr %s (%zd) to ender %s (%zd) offset %zd\n",
+            re_printf("~ tying lastbr %s (%zd) to ender %s (%zd) offset %zd\n",
                           SvPV_nolen_const(RExC_mysv1),
                           lastbr,
                           SvPV_nolen_const(RExC_mysv2),
@@ -4459,7 +4459,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                      NULL, pRExC_state);
                     regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender),
                                      NULL, pRExC_state);
-                    Perl_re_printf( aTHX_  "~ converting ret %s (%" IVdf ") to ender %s (%zd) offset %zd\n",
+                    re_printf("~ converting ret %s (%" IVdf ") to ender %s (%zd) offset %zd\n",
                                   SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret_as_regnode),
                                   SvPV_nolen_const(RExC_mysv2),
@@ -13219,7 +13219,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan == p ? "tail" : ""));
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ %s (%zu) %s %s\n",
+            re_printf("~ %s (%zu) %s %s\n",
                 SvPV_nolen_const(RExC_mysv), scan,
                     (temp == NULL ? "->" : ""),
                     (temp == NULL ? REGNODE_NAME(OP(REGNODE_p(val))) : "")
@@ -13312,7 +13312,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan == p ? "tsdy" : ""));
             regprop(RExC_rx, RExC_mysv, REGNODE_p(scan), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ %s (%zu) -> %s\n",
+            re_printf("~ %s (%zu) -> %s\n",
                 SvPV_nolen_const(RExC_mysv),
                 scan,
                 REGNODE_NAME(exact));
@@ -13324,7 +13324,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
     DEBUG_PARSE_r({
         DEBUG_PARSE_MSG("");
         regprop(RExC_rx, RExC_mysv, REGNODE_p(val), NULL, pRExC_state);
-        Perl_re_printf( aTHX_
+        re_printf(
                       "~ attach to %s (%zd) offset to %zd\n",
                       SvPV_nolen_const(RExC_mysv),
                       val,
@@ -13425,7 +13425,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
                       ? prog->check_utf8 : prog->check_substr);
 
                 if (!PL_colorset) reginitcolors();
-                Perl_re_printf( aTHX_
+                re_printf(
                       "%sUsing REx %ssubstr:%s \"%s%.60s%s%s\"\n",
                       PL_colors[4],
                       RX_UTF8(r) ? "utf8 " : "",
@@ -13677,7 +13677,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
             SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RX_UTF8(rx),
                 dsv, RX_PRECOMP(rx), RX_PRELEN(rx), PL_dump_re_max_len);
-            Perl_re_printf( aTHX_ "%sFreeing REx:%s %s\n",
+            re_printf("%sFreeing REx:%s %s\n",
                 PL_colors[4], PL_colors[5], s);
         }
     });

@@ -56,7 +56,7 @@ Perl_debug_show_study_flags(pTHX_ U32 flags, const char *open_str,
     if (!flags)
         return;
 
-    Perl_re_printf( aTHX_  "%s", open_str);
+    re_printf("%s", open_str);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_BEFORE_SEOL);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_BEFORE_MEOL);
     DEBUG_SHOW_STUDY_FLAG(flags, SF_IS_INF);
@@ -72,7 +72,7 @@ Perl_debug_show_study_flags(pTHX_ U32 flags, const char *open_str,
     DEBUG_SHOW_STUDY_FLAG(flags, SCF_SEEN_ACCEPT);
     DEBUG_SHOW_STUDY_FLAG(flags, SCF_TRIE_DOING_RESTUDY);
     DEBUG_SHOW_STUDY_FLAG(flags, SCF_IN_DEFINE);
-    Perl_re_printf( aTHX_  "%s", close_str);
+    re_printf("%s", close_str);
 }
 
 void
@@ -99,7 +99,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
 
         debug_show_study_flags(data->flags," [","]");
 
-        Perl_re_printf( aTHX_
+        re_printf(
             " Whilem_c: %" IVdf " Lcp: %" IVdf " %s",
             (IV)data->whilem_c,
             (IV)(data->last_closep ? *((data)->last_closep) : -1),
@@ -108,7 +108,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
 
         if (data->last_found) {
             int i;
-            Perl_re_printf(aTHX_
+            re_printf(
                 "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf,
                     SvPVX_const(data->last_found),
                     (IV)data->last_end,
@@ -117,7 +117,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
             );
 
             for (i = 0; i < 2; i++) {
-                Perl_re_printf(aTHX_
+                re_printf(
                     " %s%s: '%s' @ %" IVdf "/%" IVdf,
                     data->cur_is_floating == i ? "*" : "",
                     i ? "Float" : "Fixed",
@@ -129,7 +129,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
             }
         }
 
-        Perl_re_printf( aTHX_ "\n");
+        re_printf("\n");
     });
 }
 
@@ -154,7 +154,7 @@ Perl_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
                    REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),
                    Next ? (REG_NODE_NUM(Next)) : 0 );
         debug_show_study_flags(flags," [ ","]");
-        Perl_re_printf( aTHX_  "\n");
+        re_printf("\n");
    });
 }
 
@@ -172,7 +172,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
 #ifdef DEBUG_DUMPUNTIL
-    Perl_re_printf( aTHX_  "--- %d : %d - %d - %d\n", indent, node-start,
+    re_printf("--- %d : %d - %d - %d\n", indent, node-start,
         last ? last-start : 0, plast ? plast-start : 0);
 #endif
 
@@ -197,18 +197,18 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             CLEAR_OPTSTART;
 
         regprop(r, sv, node, NULL, NULL);
-        Perl_re_printf( aTHX_  "%4" IVdf ":%*s%s", (IV)(node - start),
+        re_printf("%4" IVdf ":%*s%s", (IV)(node - start),
                       (int)(2*indent + 1), "", SvPVX_const(sv));
 
         if (op != OPTIMIZED) {
             if (next == NULL)           /* Next ptr. */
-                Perl_re_printf( aTHX_  " (0)");
+                re_printf(" (0)");
             else if (REGNODE_TYPE(op) == BRANCH
                      && REGNODE_TYPE(OP(next)) != BRANCH )
-                Perl_re_printf( aTHX_  " (FAIL)");
+                re_printf(" (FAIL)");
             else
-                Perl_re_printf( aTHX_  " (%" IVdf ")", (IV)(next - start));
-            Perl_re_printf( aTHX_ "\n");
+                re_printf(" (%" IVdf ")", (IV)(next - start));
+            re_printf("\n");
         }
 
       after_print:
@@ -259,7 +259,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 );
                 if (trie->jump) {
                     U16 dist = trie->jump[word_idx+1];
-                    Perl_re_printf( aTHX_  "(%" UVuf ")\n",
+                    re_printf("(%" UVuf ")\n",
                                (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
                         if (!nextbranch)
@@ -269,7 +269,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                     if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
                         nextbranch = regnext((regnode *)nextbranch);
                 } else {
-                    Perl_re_printf( aTHX_  "\n");
+                    re_printf("\n");
                 }
             }
             if (last && next > last)
@@ -301,7 +301,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     }
     CLEAR_OPTSTART;
 #ifdef DEBUG_DUMPUNTIL
-    Perl_re_printf( aTHX_  "--- %d\n", (int)indent);
+    re_printf("--- %d\n", (int)indent);
 #endif
     return node;
 }
@@ -325,15 +325,15 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
     for (bit = 0; bit < REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1 << bit)) {
             if (!set++ && lead)
-                Perl_re_printf( aTHX_  "%s", lead);
-            Perl_re_printf( aTHX_  "%s ", PL_reg_intflags_name[bit]);
+                re_printf("%s", lead);
+            re_printf("%s ", PL_reg_intflags_name[bit]);
         }
     }
     if (lead)  {
         if (set)
-            Perl_re_printf( aTHX_  "\n");
+            re_printf("\n");
         else
-            Perl_re_printf( aTHX_  "%s[none-set]\n", lead);
+            re_printf("%s[none-set]\n", lead);
     }
 }
 
@@ -354,37 +354,37 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
                 continue;
             }
             if (!set++ && lead)
-                Perl_re_printf( aTHX_  "%s", lead);
-            Perl_re_printf( aTHX_  "%s ", PL_reg_extflags_name[bit]);
+                re_printf("%s", lead);
+            re_printf("%s ", PL_reg_extflags_name[bit]);
         }
     }
     if ((cs = get_regex_charset(flags)) != REGEX_DEPENDS_CHARSET) {
             if (!set++ && lead) {
-                Perl_re_printf( aTHX_  "%s", lead);
+                re_printf("%s", lead);
             }
             switch (cs) {
                 case REGEX_UNICODE_CHARSET:
-                    Perl_re_printf( aTHX_  "UNICODE");
+                    re_printf("UNICODE");
                     break;
                 case REGEX_LOCALE_CHARSET:
-                    Perl_re_printf( aTHX_  "LOCALE");
+                    re_printf("LOCALE");
                     break;
                 case REGEX_ASCII_RESTRICTED_CHARSET:
-                    Perl_re_printf( aTHX_  "ASCII-RESTRICTED");
+                    re_printf("ASCII-RESTRICTED");
                     break;
                 case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-                    Perl_re_printf( aTHX_  "ASCII-MORE_RESTRICTED");
+                    re_printf("ASCII-MORE_RESTRICTED");
                     break;
                 default:
-                    Perl_re_printf( aTHX_  "UNKNOWN CHARACTER SET");
+                    re_printf("UNKNOWN CHARACTER SET");
                     break;
             }
     }
     if (lead)  {
         if (set)
-            Perl_re_printf( aTHX_  "\n");
+            re_printf("\n");
         else
-            Perl_re_printf( aTHX_  "%s[none-set]\n", lead);
+            re_printf("%s[none-set]\n", lead);
     }
 }
 #endif
@@ -412,7 +412,7 @@ Perl_regdump(pTHX_ const regexp *r)
                             SvPVX_const(r->substrs->data[i].substr),
                             RE_SV_DUMPLEN(r->substrs->data[i].substr),
                             PL_dump_re_max_len);
-            Perl_re_printf( aTHX_
+            re_printf(
                           "%s %s%s at %" IVdf "..%" UVuf " ",
                           i ? "floating" : "anchored",
                           s,
@@ -425,7 +425,7 @@ Perl_regdump(pTHX_ const regexp *r)
                             SvPVX_const(r->substrs->data[i].utf8_substr),
                             RE_SV_DUMPLEN(r->substrs->data[i].utf8_substr),
                             30);
-            Perl_re_printf( aTHX_
+            re_printf(
                           "%s utf8 %s%s at %" IVdf "..%" UVuf " ",
                           i ? "floating" : "anchored",
                           s,
@@ -436,42 +436,42 @@ Perl_regdump(pTHX_ const regexp *r)
     }
 
     if (r->check_substr || r->check_utf8)
-        Perl_re_printf( aTHX_
+        re_printf(
                       (const char *)
                       (   r->check_substr == r->substrs->data[1].substr
                        && r->check_utf8   == r->substrs->data[1].utf8_substr
                        ? "(checking floating" : "(checking anchored"));
     if (r->intflags & PREGf_NOSCAN)
-        Perl_re_printf( aTHX_  " noscan");
+        re_printf(" noscan");
     if (r->extflags & RXf_CHECK_ALL)
-        Perl_re_printf( aTHX_  " isall");
+        re_printf(" isall");
     if (r->check_substr || r->check_utf8)
-        Perl_re_printf( aTHX_  ") ");
+        re_printf(") ");
 
     if (ri->regstclass) {
         regprop(r, sv, ri->regstclass, NULL, NULL);
-        Perl_re_printf( aTHX_  "stclass %s ", SvPVX_const(sv));
+        re_printf("stclass %s ", SvPVX_const(sv));
     }
     if (r->intflags & PREGf_ANCH) {
-        Perl_re_printf( aTHX_  "anchored");
+        re_printf("anchored");
         if (r->intflags & PREGf_ANCH_MBOL)
-            Perl_re_printf( aTHX_  "(MBOL)");
+            re_printf("(MBOL)");
         if (r->intflags & PREGf_ANCH_SBOL)
-            Perl_re_printf( aTHX_  "(SBOL)");
+            re_printf("(SBOL)");
         if (r->intflags & PREGf_ANCH_GPOS)
-            Perl_re_printf( aTHX_  "(GPOS)");
-        Perl_re_printf( aTHX_ " ");
+            re_printf("(GPOS)");
+        re_printf(" ");
     }
     if (r->intflags & PREGf_GPOS_SEEN)
-        Perl_re_printf( aTHX_  "GPOS:%" UVuf " ", (UV)r->gofs);
+        re_printf("GPOS:%" UVuf " ", (UV)r->gofs);
     if (r->intflags & PREGf_SKIP)
-        Perl_re_printf( aTHX_  "plus ");
+        re_printf("plus ");
     if (r->intflags & PREGf_IMPLICIT)
-        Perl_re_printf( aTHX_  "implicit ");
-    Perl_re_printf( aTHX_  "minlen %" IVdf " ", (IV)r->minlen);
+        re_printf("implicit ");
+    re_printf("minlen %" IVdf " ", (IV)r->minlen);
     if (r->extflags & RXf_EVAL_SEEN)
-        Perl_re_printf( aTHX_  "with eval ");
-    Perl_re_printf( aTHX_  "\n");
+        re_printf("with eval ");
+    re_printf("\n");
     DEBUG_FLAGS_r({
         regdump_extflags("r->extflags: ", r->extflags);
         regdump_intflags("r->intflags: ", r->intflags);
