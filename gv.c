@@ -2013,15 +2013,15 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                          (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
                 {
                     /* diag_listed_as: Variable "%s" is not imported%s */
-                    Perl_ck_warner_d(
-                        aTHX_ packWARN(WARN_MISC),
+                    ck_warner_d(
+                        packWARN(WARN_MISC),
                         "Variable \"%c%" UTF8f "\" is not imported",
                         sv_type == SVt_PVAV ? '@' :
                         sv_type == SVt_PVHV ? '%' : '$',
                         UTF8fARG(is_utf8, len, name));
                     if (GvCVu(*gvp))
-                        Perl_ck_warner_d(
-                            aTHX_ packWARN(WARN_MISC),
+                        ck_warner_d(
+                            packWARN(WARN_MISC),
                             "\t(Did you mean &%" UTF8f " instead?)\n",
                             UTF8fARG(is_utf8, len, name)
                         );
