@@ -5717,8 +5717,9 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
         xssv = upg_version(xssv, 0);
         if ( vcmp(pmsv,xssv) ) {
             SV *string = vstringify(xssv);
-            SV *xpt = Perl_newSVpvf(aTHX_ "%" SVf " object version %" SVf
-                                    " does not match ", SVfARG(module), SVfARG(string));
+            SV *xpt = newSVpvf("%" SVf " object version %" SVf
+                               " does not match ",
+                               SVfARG(module), SVfARG(string));
 
             SvREFCNT_dec(string);
             string = vstringify(pmsv);

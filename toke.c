@@ -8474,7 +8474,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY___LINE__:
         FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_LINE<<8,
-                Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop))));
+                newSVpvf("%" LINE_Tf, CopLINE(PL_curcop))));
 
     case KEY___PACKAGE__:
         FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_PACKAGE<<8,

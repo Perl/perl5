@@ -386,7 +386,7 @@ Perl_class_setup_stash(pTHX_ HV *stash)
 
     /* Inject the constructor */
     {
-        SV *newname = Perl_newSVpvf(aTHX_ "%s::new", classname);
+        SV *newname = newSVpvf("%s::new", classname);
         SAVEFREESV(newname);
 
         CV *newcv = newXS_flags(SvPV_nolen(newname), injected_constructor, __FILE__, NULL, nameflags);

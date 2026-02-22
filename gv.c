@@ -4020,7 +4020,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       } else {
         SV *msg;
         if (off==-1) off=method;
-        msg = sv_2mortal(Perl_newSVpvf(aTHX_
+        msg = sv_2mortal(newSVpvf(
                       "Operation \"%s\": no method found,%sargument %s%" SVf "%s%" SVf,
                       AMG_id2name(method + assignshift),
                       (flags & AMGf_unary ? " " : "\n\tleft "),

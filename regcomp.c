@@ -7706,7 +7706,7 @@ Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         if (posix_warnings) {                                               \
             if (! RExC_warn_text ) RExC_warn_text =                         \
                                    MUTABLE_AV(newSV_type_mortal(SVt_PVAV)); \
-            av_push_simple(RExC_warn_text, Perl_newSVpvf(aTHX_              \
+            av_push_simple(RExC_warn_text, newSVpvf(\
                                              WARNING_PREFIX                 \
                                              text                           \
                                              REPORT_LOCATION,               \
@@ -9682,7 +9682,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* We include the /i status at the beginning of this so that we can
      * know it at runtime */
-    listsv = sv_2mortal(Perl_newSVpvf(aTHX_ "#%d\n", cBOOL(FOLD)));
+    listsv = sv_2mortal(newSVpvf("#%d\n", cBOOL(FOLD)));
     initial_listsv_len = SvCUR(listsv);
     SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
 
@@ -16072,7 +16072,7 @@ S_parse_uniprop_string(pTHX_
         if (UNLIKELY(pu_overrides && SvPOK(pu_overrides))) {
 
             /* See if there is an element in the hints hash for this table */
-            SV * pu_lookup = Perl_newSVpvf(aTHX_ "%d=", table_index);
+            SV * pu_lookup = newSVpvf("%d=", table_index);
             const char * pos = strstr(SvPVX(pu_overrides), SvPVX(pu_lookup));
 
             if (pos) {
@@ -16526,7 +16526,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
         char * legal = SvPVX(* hv_fetchs(this_series, "legal", 0));
 
         /* Pre-allocate an SV with enough space */
-        SV * algo_name = sv_2mortal(Perl_newSVpvf(aTHX_ "%s-0000",
+        SV * algo_name = sv_2mortal(newSVpvf("%s-0000",
                                                         SvPVX(prefix)));
         if (high >= 0x10000) {
             sv_catpvs(algo_name, "0");

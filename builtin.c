@@ -334,7 +334,7 @@ XS(XS_builtin_export_lexically)
             default:
                 /* overwrites the pointer on the stack; but this is fine, the
                  * caller's value isn't modified */
-                ST(i) = name = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(name)));
+                ST(i) = name = sv_2mortal(newSVpvf("&%" SVf, SVfARG(name)));
 
                 /* FALLTHROUGH */
             case '&':
@@ -695,8 +695,8 @@ static bool S_parse_version(const char *vstr, const char *vend, UV *vmajor, UV *
 #define import_sym(sym)  S_import_sym(aTHX_ sym)
 static void S_import_sym(pTHX_ SV *sym)
 {
-    SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
-    SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
+    SV *ampname = sv_2mortal(newSVpvf("&%" SVf, SVfARG(sym)));
+    SV *fqname = sv_2mortal(newSVpvf("builtin::%" SVf, SVfARG(sym)));
 
     CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
     if(!cv)

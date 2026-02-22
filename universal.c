@@ -879,9 +879,9 @@ XS(XS_PerlIO_get_layers)
                   }
                   else {
                        if (namok && argok)
-                            PUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%" SVf "(%" SVf ")",
-                                                 SVfARG(*namsvp),
-                                                 SVfARG(*argsvp))));
+                            PUSHs(sv_2mortal(newSVpvf("%" SVf "(%" SVf ")",
+                                                      SVfARG(*namsvp),
+                                                      SVfARG(*argsvp))));
                        else if (namok)
                             PUSHs(sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp)));
                        else

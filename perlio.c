@@ -383,8 +383,8 @@ PerlIO_debug(const char *fmt, ...)
 #else
         const char *s = CopFILE(PL_curcop);
         STRLEN len;
-        SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf " ",
-                                      s ? s : "(none)", CopLINE(PL_curcop));
+        SV * const sv = newSVpvf("%s:%" LINE_Tf " ",
+                                 s ? s : "(none)", CopLINE(PL_curcop));
         Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
         s = SvPV_const(sv, len);

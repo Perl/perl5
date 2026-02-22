@@ -2374,17 +2374,17 @@ Perl_scalarvoid(pTHX_ OP *arg)
                     else if (SvPOK(sv)) {
                         SV * const dsv = newSVpvs("");
                         useless_sv
-                            = Perl_newSVpvf(aTHX_
-                                            "a constant (%s)",
-                                            pv_pretty(dsv, SvPVX_const(sv),
-                                                      SvCUR(sv), 32, NULL, NULL,
-                                                      PERL_PV_PRETTY_DUMP
-                                                      | PERL_PV_ESCAPE_NOCLEAR
-                                                      | PERL_PV_ESCAPE_UNI_DETECT));
+                            = newSVpvf("a constant (%s)",
+                                       pv_pretty(dsv, SvPVX_const(sv),
+                                                 SvCUR(sv), 32, NULL, NULL,
+                                                 PERL_PV_PRETTY_DUMP
+                                               | PERL_PV_ESCAPE_NOCLEAR
+                                               | PERL_PV_ESCAPE_UNI_DETECT));
                         SvREFCNT_dec_NN(dsv);
                     }
                     else if (SvOK(sv)) {
-                        useless_sv = Perl_newSVpvf(aTHX_ "a constant (%" SVf ")", SVfARG(sv));
+                        useless_sv = newSVpvf("a constant (%" SVf ")",
+                                              SVfARG(sv));
                     }
                     else
                         useless = "a constant (undef)";
@@ -11346,10 +11346,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
-                                          CopFILE(PL_curcop),
-                                          (line_t)PL_subline,
-                                          CopLINE(PL_curcop));
+            SV * const sv = newSVpvf("%s:%" LINE_Tf "-%" LINE_Tf,
+                                     CopFILE(PL_curcop),
+                                     (line_t)PL_subline,
+                                     CopLINE(PL_curcop));
             if (HvNAME_HEK(PL_curstash)) {
                 sv_sethek(tmpstr, HvNAME_HEK(PL_curstash));
                 sv_catpvs(tmpstr, "::");
@@ -11967,10 +11967,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
-                                          CopFILE(PL_curcop),
-                                          (line_t)PL_subline,
-                                          CopLINE(PL_curcop));
+            SV * const sv = newSVpvf("%s:%" LINE_Tf "-%" LINE_Tf,
+                                     CopFILE(PL_curcop),
+                                     (line_t)PL_subline,
+                                     CopLINE(PL_curcop));
             (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
             if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
@@ -13867,10 +13867,9 @@ Perl_ck_fun(pTHX_ OP *o)
                                            GV * const gv = cGVOPx_gv(firstop);
                                            if (gv)
                                                 tmpstr =
-                                                     Perl_newSVpvf(aTHX_
-                                                                   "%s%c...%c",
-                                                                   GvNAME(gv),
-                                                                   a[0], a[1]);
+                                                     newSVpvf("%s%c...%c",
+                                                              GvNAME(gv),
+                                                              a[0], a[1]);
                                       }
                                       else if (op->op_type == OP_PADAV
                                                || op->op_type == OP_PADHV) {
@@ -13879,10 +13878,9 @@ Perl_ck_fun(pTHX_ OP *o)
                                                 PAD_COMPNAME_PV(op->op_targ);
                                            if (padname)
                                                 tmpstr =
-                                                     Perl_newSVpvf(aTHX_
-                                                                   "%s%c...%c",
-                                                                   padname + 1,
-                                                                   a[0], a[1]);
+                                                     newSVpvf("%s%c...%c",
+                                                              padname + 1,
+                                                              a[0], a[1]);
                                       }
                                       if (tmpstr) {
                                            name = SvPV_const(tmpstr, len);
@@ -15656,7 +15654,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                     newSVpv(CopFILE(PL_curcop),0));
         case 'L': /* __LINE__ */
             return newSVOP(OP_CONST, 0,
-                    Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop)));
+                    newSVpvf("%" LINE_Tf, CopLINE(PL_curcop)));
         case 'P': /* __PACKAGE__ */
             return newSVOP(OP_CONST, 0,
                     (PL_curstash

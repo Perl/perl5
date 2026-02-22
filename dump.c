@@ -2360,11 +2360,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
     /* process general SV flags */
 
-    d = Perl_newSVpvf(aTHX_
-                   "(0x%" UVxf ") at 0x%" UVxf "\n%*s  REFCNT = %" IVdf "\n%*s  FLAGS = (",
-                   PTR2UV(SvANY(sv)), PTR2UV(sv),
-                   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
-                   (int)(PL_dumpindent*level), "");
+    d = newSVpvf("(0x%" UVxf ") at 0x%" UVxf "\n%*s  REFCNT = %" IVdf "\n%*s"
+                 "  FLAGS = (",
+                 PTR2UV(SvANY(sv)), PTR2UV(sv),
+                 (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
+                 (int)(PL_dumpindent*level), "");
 
     if ((flags & SVs_PADSTALE))
             sv_catpvs(d, "PADSTALE,");
