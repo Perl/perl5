@@ -4520,8 +4520,8 @@ Perl_push_stackinfo(pTHX_ I32 type, UV flags)
     DEBUG_l({
         int i = 0; PERL_SI *p = PL_curstackinfo;
         while (p) { i++; p = p->si_prev; }
-        Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",
-                     i, SAFE_FUNCTION__, __FILE__, __LINE__);
+        deb("push STACKINFO %d in %s at %s:%d\n",
+            i, SAFE_FUNCTION__, __FILE__, __LINE__);
     })
 
     if (!next) {
@@ -4560,8 +4560,8 @@ Perl_pop_stackinfo(pTHX)
     DEBUG_l({
         int i = -1; PERL_SI *p = PL_curstackinfo;
         while (p) { i++; p = p->si_prev; }
-        Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",
-                     i, SAFE_FUNCTION__, __FILE__, __LINE__);})
+        deb("pop  STACKINFO %d in %s at %s:%d\n",
+            i, SAFE_FUNCTION__, __FILE__, __LINE__);})
     if (!prev) {
         Perl_croak_popstack();
     }

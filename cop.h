@@ -120,8 +120,8 @@ typedef struct jmpenv JMPENV;
             int i = 0;                                                  \
             JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d in %s at %s:%d\n", \
-                         i,  SAFE_FUNCTION__, __FILE__, __LINE__);      \
+            deb("JMPENV_PUSH pre level=%d in %s at %s:%d\n",            \
+                i,  SAFE_FUNCTION__, __FILE__, __LINE__);               \
         });                                                             \
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
@@ -142,8 +142,8 @@ typedef struct jmpenv JMPENV;
             int i = 0;                                                  \
             JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d in %s at %s:%d\n",    \
-                         i, cur_env.je_ret, SAFE_FUNCTION__,  __FILE__, __LINE__); \
+            deb("JMPENV_PUSH level=%d ret=%d in %s at %s:%d\n",         \
+                i, cur_env.je_ret, SAFE_FUNCTION__,  __FILE__, __LINE__); \
         });                                                             \
         (v) = cur_env.je_ret;						\
     } STMT_END
@@ -153,8 +153,8 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({                                                       \
             int i = -1; JMPENV *p = PL_top_env;				\
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_POP level=%d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
+            deb("JMPENV_POP level=%d in %s at %s:%d\n",                 \
+                i, SAFE_FUNCTION__, __FILE__, __LINE__);})              \
         assert(PL_top_env == &cur_env);					\
         PL_delaymagic = cur_env.je_old_delaymagic;			\
         PL_top_env = cur_env.je_prev;					\
@@ -165,8 +165,8 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({                                               \
             int i = -1; JMPENV *p = PL_top_env;			\
             while (p) { i++; p = p->je_prev; }			\
-            Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d in %s at %s:%d\n",         \
-                         (int)(v), i, SAFE_FUNCTION__, __FILE__, __LINE__);})   \
+            deb("JMPENV_JUMP(%d) level=%d in %s at %s:%d\n",    \
+                (int)(v), i, SAFE_FUNCTION__, __FILE__, __LINE__);}) \
         if (PL_top_env->je_prev) {				\
             assert((v) >= 0 && (v) <= 3);			\
             PerlProc_longjmp(PL_top_env->je_buf, (v));		\
@@ -181,8 +181,7 @@ typedef struct jmpenv JMPENV;
 #define CATCH_SET(v) \
     STMT_START {							\
         DEBUG_l(                                                        \
-            Perl_deb(aTHX_						\
-                "JUMPLEVEL set catch %d => %d (for %p) in %s at %s:%d\n",   \
+            deb("JUMPLEVEL set catch %d => %d (for %p) in %s at %s:%d\n", \
                  PL_top_env->je_mustcatch, (v), (void*)PL_top_env,      \
                  SAFE_FUNCTION__, __FILE__, __LINE__);)			\
         PL_top_env->je_mustcatch = (v);					\
@@ -1035,15 +1034,15 @@ struct block {
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\
-        Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) in %s at %s:%d\n",\
-                    (long)cxstack_ix,					\
-                    action,						\
-                    PL_block_type[CxTYPE(cx)],	                        \
-                    (long)PL_scopestack_ix,				\
-                    (long)(cx->blk_oldscopesp),		                \
-                    (long)PL_savestack_ix,				\
-                    (long)(cx->blk_oldsaveix),                          \
-                    SAFE_FUNCTION__, __FILE__, __LINE__));
+        deb("CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) in %s at %s:%d\n",\
+            (long)cxstack_ix,					        \
+            action,						        \
+            PL_block_type[CxTYPE(cx)],	                                \
+            (long)PL_scopestack_ix,				        \
+            (long)(cx->blk_oldscopesp),		                        \
+            (long)PL_savestack_ix,				        \
+            (long)(cx->blk_oldsaveix),                                  \
+            SAFE_FUNCTION__, __FILE__, __LINE__));
 
 
 
