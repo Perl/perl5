@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Validator;
 
-our $VERSION = '2.150012';
+our $VERSION = '2.150013';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -996,7 +996,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.150012
+version 2.150013
 
 =head1 SYNOPSIS
 

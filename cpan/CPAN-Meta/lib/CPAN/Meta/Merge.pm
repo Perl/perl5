@@ -4,7 +4,7 @@ use warnings;
 
 package CPAN::Meta::Merge;
 
-our $VERSION = '2.150012';
+our $VERSION = '2.150013';
 
 use Carp qw/croak/;
 use Scalar::Util qw/blessed/;
@@ -252,7 +252,7 @@ CPAN::Meta::Merge - Merging CPAN Meta fragments
 
 =head1 VERSION
 
-version 2.150012
+version 2.150013
 
 =head1 SYNOPSIS
 

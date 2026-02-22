@@ -22,7 +22,7 @@ my %base = (
 	prereqs => {
 		runtime => {
 			requires => {
-				Foo => '0',
+				Foo => '1',
 			},
 		},
 	},
@@ -48,7 +48,7 @@ my %first = (
 	prereqs => {
 		runtime => {
 			requires => {
-				Foo => '< 1',
+				Foo => '< 2',
 			},
 			recommends => {
 				Bar => '3.14',
@@ -79,7 +79,7 @@ my %first_expected = (
 	prereqs => {
 		runtime => {
 			requires => {
-				Foo => '>= 0, < 1',
+				Foo => '>= 1, < 2',
 			},
 			recommends => {
 				Bar => '3.14',
@@ -117,7 +117,7 @@ my %provides_merge_expected = (
 	prereqs => {
 		runtime => {
 			requires => {
-				Foo => '0',
+				Foo => '1',
 			},
 		},
 	},
