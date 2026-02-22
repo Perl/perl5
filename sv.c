@@ -15539,7 +15539,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
     case SVt_IV:
         SET_SVANY_FOR_BODYLESS_IV(dsv);
         if(SvROK(ssv)) {
-            Perl_rvpv_dup(aTHX_ dsv, ssv, param);
+            rvpv_dup(dsv, ssv, param);
         } else {
             SvIV_set(dsv, SvIVX(ssv));
         }
@@ -15620,7 +15620,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 && !isGV_with_GP(dsv)
                 && !isREGEXP(dsv)
                 && !(sv_type == SVt_PVIO && !(IoFLAGS(dsv) & IOf_FAKE_DIRP)))
-                Perl_rvpv_dup(aTHX_ dsv, ssv, param);
+                rvpv_dup(dsv, ssv, param);
 
             /* The Copy above means that all the source (unduplicated) pointers
                are now in the destination.  We can check the flags and the
