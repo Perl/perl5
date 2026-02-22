@@ -3969,7 +3969,7 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
     PERL_ARGS_ASSERT_FIND_RUNCV;
 
-    return Perl_find_runcv_where(aTHX_ 0, 0, db_seqp);
+    return find_runcv_where(0, 0, db_seqp);
 }
 
 /* If this becomes part of the API, it might need a better name. */
