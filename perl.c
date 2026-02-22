@@ -361,7 +361,7 @@ perl_construct(pTHXx)
          */
 #if defined(USE_HASH_SEED)
         /* get the hash seed from the environment or from an RNG */
-        Perl_get_hash_seed(aTHX_ PL_hash_seed);
+        get_hash_seed(PL_hash_seed);
 #else
         /* they want a hard coded seed, check that it is long enough */
         assert( strlen(PERL_HASH_SEED) >= PERL_HASH_SEED_BYTES );
