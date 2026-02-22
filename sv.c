@@ -6691,7 +6691,7 @@ Perl_sv_rvunweaken(pTHX_ SV *const sv)
     SvWEAKREF_off(sv);
     SvROK_on(sv);
     SvREFCNT_inc_NN(tsv);
-    Perl_sv_del_backref(aTHX_ tsv, sv);
+    sv_del_backref(tsv, sv);
     return sv;
 }
 
