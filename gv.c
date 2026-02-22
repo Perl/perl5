@@ -1558,7 +1558,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
         const char type = varname == '[' ? '$' : '%';
         if ( flags & 1 )
             save_scalar(gv);
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, module, NULL);
         assert(sp == PL_stack_sp);
         stash = gv_stashpvn(name, len, 0);
         if (!stash)

@@ -3975,16 +3975,15 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
 
-        Perl_load_module(
-          aTHX_ PERL_LOADMOD_IMPORT_OPS,
-          newSVpvs(ATTRSMODULE),
-          NULL,
-          op_prepend_elem(OP_LIST,
-                          newSVOP(OP_CONST, 0, stashsv),
-                          op_prepend_elem(OP_LIST,
-                                          newSVOP(OP_CONST, 0,
-                                                  newRV(target)),
-                                          dup_attrlist(attrs))));
+        load_module(PERL_LOADMOD_IMPORT_OPS,
+                    newSVpvs(ATTRSMODULE),
+                    NULL,
+                    op_prepend_elem(OP_LIST,
+                                    newSVOP(OP_CONST, 0, stashsv),
+                                    op_prepend_elem(OP_LIST,
+                                                    newSVOP(OP_CONST, 0,
+                                                            newRV(target)),
+                                                    dup_attrlist(attrs))));
     }
 }
 
@@ -4009,8 +4008,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     if (svp && *svp != &PL_sv_undef)
         NOOP;	/* already in %INC */
     else
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                               newSVpvs(ATTRSMODULE), NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs(ATTRSMODULE), NULL);
 
     /* Need package name for method call. */
     pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
@@ -4077,12 +4075,13 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
         }
     }
 
-    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-                     newSVpvs(ATTRSMODULE),
-                     NULL, op_prepend_elem(OP_LIST,
-                                  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
-                                  op_prepend_elem(OP_LIST,
-                                               newSVOP(OP_CONST, 0,
+    load_module(PERL_LOADMOD_IMPORT_OPS,
+                newSVpvs(ATTRSMODULE),
+                NULL,
+                op_prepend_elem(OP_LIST,
+                                newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
+                                op_prepend_elem(OP_LIST,
+                                                newSVOP(OP_CONST, 0,
                                                        newRV(MUTABLE_SV(cv))),
                                                attrs)));
 }
@@ -13998,8 +13997,8 @@ Perl_ck_glob(pTHX_ OP *o)
 #if !defined(PERL_EXTERNAL_GLOB)
     if (!PL_globhook) {
         ENTER;
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                               newSVpvs("File::Glob"), NULL, NULL, NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("File::Glob"),
+                    NULL, NULL, NULL);
         LEAVE;
     }
 #endif /* !PERL_EXTERNAL_GLOB */
