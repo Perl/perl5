@@ -91,8 +91,7 @@ static const char b_utf8_locale_required[] =
 #define CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_BOUND                       \
     STMT_START {                                                            \
         if (! IN_UTF8_CTYPE_LOCALE) {                                       \
-          Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                       \
-                                                b_utf8_locale_required);    \
+          ck_warner(packWARN(WARN_LOCALE), b_utf8_locale_required);         \
         }                                                                   \
     } STMT_END
 
@@ -102,8 +101,7 @@ static const char sets_utf8_locale_required[] =
 #define CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(n)                     \
     STMT_START {                                                            \
         if (! IN_UTF8_CTYPE_LOCALE && (FLAGS(n) & ANYOFL_UTF8_LOCALE_REQD)){\
-          Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                       \
-                                             sets_utf8_locale_required);    \
+          ck_warner(packWARN(WARN_LOCALE), sets_utf8_locale_required);      \
         }                                                                   \
     } STMT_END
 
