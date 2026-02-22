@@ -1436,7 +1436,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
   if ((s + 2 < send) && UNLIKELY(memCHRs("inqs#", toFOLD(*s)))) {
       /* Really detect inf/nan. Start at d, not s, since the above
        * code might have already consumed the "1." or "1". */
-      const int infnan = Perl_grok_infnan(aTHX_ &d, send);
+      const int infnan = grok_infnan(&d, send);
 
       if ((infnan & IS_NUMBER_TRAILING) && !(flags & PERL_SCAN_TRAILING)) {
           return 0;
