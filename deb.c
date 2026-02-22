@@ -49,7 +49,7 @@ Perl_deb_nocontext(const char *pat, ...)
 
 When perl is compiled with C<-DDEBUGGING>, these each print to STDERR the
 information given by the arguments, prefaced by the name of the file containing
-the script causing the call, and the line number within that file.
+the Perl script causing the call, and the line number within that file.
 
 If the C<v> (verbose) debugging option is in effect, the process id is also
 printed.
