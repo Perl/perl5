@@ -5732,7 +5732,7 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
             SvREFCNT_dec(string);
 
             Perl_sv_2mortal(aTHX_ xpt);
-            Perl_croak_sv(aTHX_ xpt);
+            croak_sv(xpt);
         }
     }
 }
@@ -5759,9 +5759,8 @@ Perl_api_version_assert(size_t interp_size, void *v_my_perl,
     if (interp_size != sizeof(PerlInterpreter)) {
         /* detects various types of configuration mismatches */
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl interpreter structure size %zd vs %zd",
-                   interp_size, sizeof(PerlInterpreter));
+        croak("Mismatch between expected and libperl interpreter structure"
+              " size %zd vs %zd", interp_size, sizeof(PerlInterpreter));
     }
     if (
 #ifdef MULTIPLICITY
@@ -5772,14 +5771,12 @@ Perl_api_version_assert(size_t interp_size, void *v_my_perl,
         ) {
         /* detect threads vs non-threads mismatch */
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl interpreter pointer");
+        croak("Mismatch between expected and libperl interpreter pointer");
     }
     if (strNE(api_version, PERL_API_VERSION_STRING)) {
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl API versions %s vs %s",
-                   api_version, PERL_API_VERSION_STRING);
+        croak("Mismatch between expected and libperl API versions %s vs %s",
+              api_version, PERL_API_VERSION_STRING);
     }
 }
 
