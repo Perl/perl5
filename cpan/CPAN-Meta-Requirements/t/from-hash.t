@@ -41,9 +41,7 @@ for my $string (10, '>= 2, <= 9, != 7') {
   );
 }
 
-SKIP: {
-  skip "Can't tell v-strings from strings until 5.8.1", 1
-    unless $] gt '5.008';
+{
   my $string_hash = {
     Left   => 10,
     Shared => '= 2',
@@ -53,17 +51,17 @@ SKIP: {
   dies_ok { CPAN::Meta::Requirements->from_string_hash($string_hash) }
     qr/Can't convert/,
     "we die when we can't understand a version spec";
-}
 
-{
-  my $warning;
-  local $SIG{__WARN__} = sub { $warning = join("\n",@_) };
+  {
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning = join("\n",@_) };
 
-  my $range = CPAN::Meta::Requirements::Range->with_string_requirement(undef);
-  like ($warning, qr/Undefined requirement.*treated as '0'/, "undef requirement warns");
-  $range->with_string_requirement('');
-  like ($warning, qr/Undefined requirement.*treated as '0'/, "'' requirement warns");
+    my $range = CPAN::Meta::Requirements::Range->with_string_requirement(undef);
+    like ($warning, qr/Undefined requirement.*treated as '0'/, "undef requirement warns");
+    $range->with_string_requirement('');
+    like ($warning, qr/Undefined requirement.*treated as '0'/, "'' requirement warns");
 
+  }
 }
 
 {
@@ -85,9 +83,7 @@ SKIP: {
   );
 }
 
-SKIP: {
-  skip "Can't tell v-strings from strings until 5.8.1", 2
-    unless $] gt '5.008';
+{
   my $string_hash = {
     Left   => 10,
     Shared => v50.44.60,
@@ -105,7 +101,6 @@ SKIP: {
     "vstring treated as if string",
   );
 }
-
 
 {
   my $req = CPAN::Meta::Requirements->from_string_hash(

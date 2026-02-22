@@ -324,7 +324,8 @@ our %Modules = (
     },
 
     'CPAN::Meta::Requirements' => {
-        'DISTRIBUTION' => 'RJBS/CPAN-Meta-Requirements-2.143.tar.gz',
+        'DISTRIBUTION' => 'RJBS/CPAN-Meta-Requirements-2.145.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Feb 22 18:56:47 2026',
         'FILES'        => q[cpan/CPAN-Meta-Requirements],
         'EXCLUDED'     => [
             qw(t/00-report-prereqs.t),

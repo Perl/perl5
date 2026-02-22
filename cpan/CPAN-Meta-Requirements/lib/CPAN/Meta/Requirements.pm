@@ -4,7 +4,7 @@ use warnings;
 package CPAN::Meta::Requirements;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.143';
+our $VERSION = '2.145';
 
 use CPAN::Meta::Requirements::Range;
 
@@ -486,7 +486,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.143
+version 2.145
 
 =head1 SYNOPSIS
 
@@ -776,13 +776,13 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <rjbs@cpan.org>
+Ricardo Signes <cpan@semiotic.systems>
 
 =back
 
 =head1 CONTRIBUTORS
 
-=for stopwords Ed J Graham Knop Karen Etheridge Leon Timmermans Paul Howarth Ricardo Signes robario Tatsuhiko Miyagawa
+=for stopwords Ed J Graham Knop Karen Etheridge Leon Timmermans Paul Howarth Philippe Bruhat (BooK) Ricardo Signes robario Tatsuhiko Miyagawa
 
 =over 4
 
@@ -808,6 +808,10 @@ Paul Howarth <paul@city-fan.org>
 
 =item *
 
+Philippe Bruhat (BooK) <book@cpan.org>
+
+=item *
+
 Ricardo Signes <rjbs@semiotic.systems>
 
 =item *
@@ -817,10 +821,6 @@ robario <webmaster@robario.com>
 =item *
 
 Tatsuhiko Miyagawa <miyagawa@bulknews.net>
-
-=item *
-
-Tatsuhiko Miyagawa <miyagawa@gmail.com>
 
 =back
 

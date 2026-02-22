@@ -4,7 +4,7 @@ use warnings;
 package CPAN::Meta::Requirements::Range;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.143';
+our $VERSION = '2.145';
 
 use Carp ();
 
@@ -96,10 +96,6 @@ sub _version_object {
     if ( $INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'} ) {
       my $magic = _find_magic_vstring( $version );
       $version = $magic if length $magic;
-    }
-    # pad to 3 characters if before 5.8.1 and appears to be a v-string
-    if ( $] < 5.008001 && $version !~ /\A[0-9]/ && substr($version,0,1) ne 'v' && length($version) < 3 ) {
-      $version .= "\0" x (3 - length($version));
     }
     eval {
       local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
@@ -460,6 +456,7 @@ sub as_string {
   my @parts = @{ $self->as_struct };
 
   return $parts[0][1] if @parts == 1 and $parts[0][0] eq '>=';
+  @parts = grep { $_->[0] ne '>=' || $_->[1] ne '0' } @parts;
 
   return join q{, }, map {; join q{ }, @$_ } @parts;
 }
@@ -607,7 +604,7 @@ CPAN::Meta::Requirements::Range - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.143
+version 2.145
 
 =head1 SYNOPSIS
 
@@ -762,7 +759,7 @@ David Golden <dagolden@cpan.org>
 
 =item *
 
-Ricardo Signes <rjbs@cpan.org>
+Ricardo Signes <cpan@semiotic.systems>
 
 =back
 

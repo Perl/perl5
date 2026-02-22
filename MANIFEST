@@ -640,15 +640,15 @@ cpan/CPAN-Meta/t/README-data.txt					Test file related to CPAN::Meta
 cpan/CPAN-Meta/t/repository.t						Test file related to CPAN::Meta
 cpan/CPAN-Meta/t/save-load.t						Test file related to CPAN::Meta
 cpan/CPAN-Meta/t/validator.t						Test file related to CPAN::Meta
-cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements.pm
-cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements/Range.pm
-cpan/CPAN-Meta-Requirements/t/accepts.t
-cpan/CPAN-Meta-Requirements/t/bad_version_hook.t
-cpan/CPAN-Meta-Requirements/t/basic.t
-cpan/CPAN-Meta-Requirements/t/finalize.t
-cpan/CPAN-Meta-Requirements/t/from-hash.t
-cpan/CPAN-Meta-Requirements/t/merge.t
-cpan/CPAN-Meta-Requirements/t/strings.t
+cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements.pm	Module related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements/Range.pm	Module related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/accepts.t				Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/bad_version_hook.t		Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/basic.t				Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/finalize.t			Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/from-hash.t			Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/merge.t				Test file related to CPAN::Meta::Requirements
+cpan/CPAN-Meta-Requirements/t/strings.t				Test file related to CPAN::Meta::Requirements
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm				CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/01_api.t						Test file related to CPAN::Meta::YAML
 cpan/CPAN-Meta-YAML/t/01_compile.t					CPAN-Meta-YAML files
