@@ -3223,7 +3223,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
            then we could have created stubs for "(+0" in A and C too.
            But if B overloads "bool", we may want to use it for
            numifying instead of C's "+0". */
-        gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
+        gv = gv_fetchmeth_pvn(stash, cooky, l, -1, 0);
         cv = 0;
         if (gv && (cv = GvCV(gv)) && CvHASGV(cv)) {
             const HEK * const gvhek = CvGvNAME_HEK(cv);
