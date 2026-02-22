@@ -1867,7 +1867,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     pad = PadlistARRAY(padlist)[1];
     pname = PadnamelistARRAY(pad_name);
     ppad = AvARRAY(pad);
-    Perl_dump_indent(aTHX_ level, file,
+    dump_indent(level, file,
             "PADNAME = 0x%" UVxf "(0x%" UVxf ") PAD = 0x%" UVxf "(0x%" UVxf ")\n",
             PTR2UV(pad_name), PTR2UV(pname), PTR2UV(pad), PTR2UV(ppad)
     );
@@ -1879,7 +1879,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
         }
         if (namesv) {
             if (PadnameOUTER(namesv))
-                Perl_dump_indent(aTHX_ level+1, file,
+                dump_indent(level+1, file,
                     "%2d. 0x%" UVxf "<%lu> FAKE \"%s\" flags=0x%lx index=%lu\n",
                     (int) ix,
                     PTR2UV(ppad[ix]),
@@ -1890,7 +1890,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 
                 );
             else
-                Perl_dump_indent(aTHX_ level+1, file,
+                dump_indent(level+1, file,
                     "%2d. 0x%" UVxf "<%lu> (%lu,%lu) \"%s\"\n",
                     (int) ix,
                     PTR2UV(ppad[ix]),
@@ -1901,7 +1901,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
                 );
         }
         else if (full) {
-            Perl_dump_indent(aTHX_ level+1, file,
+            dump_indent(level+1, file,
                 "%2d. 0x%" UVxf "<%lu>\n",
                 (int) ix,
                 PTR2UV(ppad[ix]),
