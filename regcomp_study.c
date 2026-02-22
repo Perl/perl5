@@ -2577,7 +2577,7 @@ Perl_study_chunk(pTHX_
                                                    count */
                 {
                     WARN_HELPER_(RExC_precomp_end, packWARN(WARN_REGEXP),
-                        Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
+                        ck_warner(packWARN(WARN_REGEXP),
                             "Quantifier unexpected on zero-length expression "
                             "in regex m/%" UTF8f "/",
                              UTF8fARG(UTF, RExC_precomp_end - RExC_precomp,
