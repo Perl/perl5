@@ -974,7 +974,7 @@ PP(pp_sort)
             }
 
             start = p1 - max;
-            Perl_sortsv_flags(aTHX_ start, max,
+            sortsv_flags(start, max,
                     (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
                     sort_flags);
 
