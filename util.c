@@ -5028,7 +5028,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
                         CopFILE(PL_curcop), CopLINE(PL_curcop));
                 PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 
-                Perl_c_backtrace *bt = Perl_get_c_backtrace(aTHX_ 3, 3);
+                Perl_c_backtrace *bt = get_c_backtrace(3, 3);
                 Perl_c_backtrace_frame *frame;
                 UV i;
                 for (i = 0, frame = bt->frame_info;
