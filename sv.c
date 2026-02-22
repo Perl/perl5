@@ -18459,7 +18459,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         if (sv) {
             const char *name = OP_NAME(obase);
             Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("("), 0);
-            Perl_sv_insert_flags(aTHX_ sv, 0, 0, name, strlen(name), 0);
+            sv_insert_flags(sv, 0, 0, name, strlen(name), 0);
             sv_catpvs_nomg(sv, ")");
         }
         return sv;
