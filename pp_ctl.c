@@ -4276,14 +4276,14 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         PL_compiling.cop_warnings =
             DUP_WARNINGS(oldcurcop->cop_warnings);
         cophh_free(CopHINTHASH_get(&PL_compiling));
-        if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
+        if (cop_fetch_label(oldcurcop, NULL, NULL)) {
             /* The label, if present, is the first entry on the chain. So rather
                than writing a blank label in front of it (which involves an
                allocation), just use the next entry in the chain.  */
             PL_compiling.cop_hints_hash
                 = cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
             /* Check the assumption that this removed the label.  */
-            assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
+            assert(cop_fetch_label(&PL_compiling, NULL, NULL) == NULL);
         }
         else
             PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
