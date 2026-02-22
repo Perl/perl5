@@ -2038,7 +2038,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     if (!*stash) {
         if (add && !PL_in_clean_all) {
             GV *gv;
-            qerror(Perl_mess(aTHX_
+            qerror(mess(
                  "Global symbol \"%s%" UTF8f
                  "\" requires explicit package name (did you forget to "
                  "declare \"my %s%" UTF8f "\"?)",
