@@ -2362,9 +2362,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 }
                 else {
                     ++s;
-                    opts_prog = Perl_newSVpvf(aTHX_
-                                              "use Config; Config::config_vars(qw%c%s%c)",
-                                              0, s, 0);
+                    opts_prog = newSVpvf("use Config; Config::config_vars"
+                                         "(qw%c%s%c)", 0, s, 0);
                     s += strlen(s);
                 }
                 Perl_av_create_and_push(aTHX_ &PL_preambleav, opts_prog);
@@ -2509,11 +2508,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             /* if lib/buildcustomize.pl exists, it should not fail. If it does,
                it should be reported immediately as a build failure.  */
             (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 Perl_newSVpvf(aTHX_
+                                                 newSVpvf(
                 "BEGIN { my $f = q%c%s%" SVf "/buildcustomize.pl%c; "
                         "do {local $!; -f $f }"
                         " and do $f || die $@ || qq '$f: $!' }",
-                                0, (TAINTING_get ? "./" : ""), SVfARG(*inc0), 0));
+                                0, (TAINTING_get ? "./" : ""),
+                                SVfARG(*inc0), 0));
         }
 #  else
         /* SITELIB_EXP is a function call on Win32.  */
@@ -2524,10 +2524,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                                            INCPUSH_CAN_RELOCATE);
             const char *const sitelib = SvPVX(sitelib_sv);
             (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 Perl_newSVpvf(aTHX_
-                                                               "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
-                                                               0, sitelib, 0,
-                                                               0, sitelib, 0));
+                                                 newSVpvf(
+                "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} &&"
+                         " do q%c%s/sitecustomize.pl%c }",
+                         0, sitelib, 0,
+                         0, sitelib, 0));
             assert (SvREFCNT(sitelib_sv) == 1);
             SvREFCNT_dec(sitelib_sv);
         }
@@ -3530,7 +3531,7 @@ Perl_require_pv(pTHX_ const char *pv)
     SV* sv;
 
     PUSHSTACKi(PERLSI_REQUIRE);
-    sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
+    sv = newSVpvf("require q%c%s%c", 0, pv, 0);
     eval_sv(sv_2mortal(sv), G_DISCARD);
     POPSTACK;
 }
@@ -5155,7 +5156,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
                        length. libpath points somewhere into the libdir SV.
                        We need to join the 2 with '/' and drop the result into
                        libdir.  */
-                    tempsv = Perl_newSVpvf(aTHX_ "%s/%s", prefix, libpath);
+                    tempsv = newSVpvf("%s/%s", prefix, libpath);
                     SvREFCNT_dec(libdir);
                     /* And this is the new libdir.  */
                     libdir = tempsv;

@@ -4079,13 +4079,11 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                         report_redefined_cv(
                            sv_2mortal(
                              stash
-                               ? Perl_newSVpvf(aTHX_
-                                    "%" HEKf "::%" HEKf,
-                                    HEKfARG(HvNAME_HEK(stash)),
-                                    HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
-                               : Perl_newSVpvf(aTHX_
-                                    "%" HEKf,
-                                    HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
+                               ? newSVpvf("%" HEKf "::%" HEKf,
+                                        HEKfARG(HvNAME_HEK(stash)),
+                                        HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
+                               : newSVpvf("%" HEKf,
+                                        HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
                            ),
                            cv,
                            CvCONST((const CV *)sref) ? &new_const_sv : NULL

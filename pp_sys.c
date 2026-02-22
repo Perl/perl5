@@ -1729,8 +1729,8 @@ PP(pp_leavewrite)
                 SV *topname;
                 if (!IoFMT_NAME(io))
                     IoFMT_NAME(io) = savepv(GvNAME(gv));
-                topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%" HEKf "_TOP",
-                                        HEKfARG(GvNAME_HEK(gv))));
+                topname = sv_2mortal(newSVpvf("%" HEKf "_TOP",
+                                              HEKfARG(GvNAME_HEK(gv))));
                 topgv = gv_fetchsv(topname, 0, SVt_PVFM);
                 if ((topgv && GvFORM(topgv)) ||
                   !gv_fetchpvs("top", GV_NOTQUAL, SVt_PVFM))

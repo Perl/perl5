@@ -4594,8 +4594,7 @@ S_require_version(pTHX_ SV *sv)
                     second = SvIV(*av_fetch(lav,1,0));
 
                 second /= second >= 600  ? 100 : 10;
-                hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
-                                       (int)first, (int)second);
+                hintsv = newSVpvf("v%d.%d.0", (int)first, (int)second);
                 upg_version(hintsv, TRUE);
 
                 DIE(aTHX_ "Perl %" SVf " required (did you mean %" SVf "?)"
