@@ -98,6 +98,11 @@ There may well be none in a stable release.
 
 =item *
 
+Populating a hash from a list of key/value pairs, when the keys are constant
+string operands known at compile time, is commonly now faster. [GH #24228]
+
+=item *
+
 XXX
 
 =back
@@ -354,6 +359,12 @@ well.
 [ List each change as an =item entry ]
 
 =over 4
+
+=item *
+
+Dedicated check functions C<Perl_ck_anonhash> and C<Perl_ck_aassign> have been
+added and are used to hekify some C<OP_CONST> hash keys at compile time.
+[GH #24228]
 
 =item *
 
