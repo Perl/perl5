@@ -11309,7 +11309,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
             && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
         {
-            Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
+            warner(packWARN(WARN_NON_UNICODE),
                 "Matched non-Unicode code point 0x%04" UVXf " against Unicode property; may not be portable", c);
         }
     }

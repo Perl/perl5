@@ -9394,7 +9394,7 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
                                             fail-safe */
             (void) sv_2mortal(msg);
         }
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s", SvPVX(msg));
+        warner(packWARN(WARN_REGEXP), "%s", SvPVX(msg));
         SvREFCNT_dec_NN(msg);
     }
 
