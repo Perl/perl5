@@ -2858,7 +2858,7 @@ Perl_load_charnames(pTHX_ SV * char_name, const char * context,
         }
 
         if (i == 0) {
-            Perl_load_module(aTHX_
+            load_module(
                 0,
                 newSVpvs("_charnames"),
 
