@@ -250,11 +250,11 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
     DEBUG_BUFFERS_r(
         if ((int)maxopenparen > (int)parenfloor)
-            Perl_re_exec_indentf( aTHX_
-                "rex = 0x%" UVxf " offs = 0x%" UVxf ": saving capture indices:\n",
-                depth,
-                PTR2UV(rex),
-                PTR2UV(RXp_OFFSp(rex))
+            re_exec_indentf("rex = 0x%" UVxf " offs = 0x%" UVxf ": saving"
+                            " capture indices:\n",
+                            depth,
+                            PTR2UV(rex),
+                            PTR2UV(RXp_OFFSp(rex))
             );
     );
 
@@ -268,14 +268,14 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
     DEBUG_BUFFERS_r({
 	I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
-            Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf " (regcppush)\n",
-                depth,
-                (UV)p,
-                (IV)RXp_OFFSp(rex)[p].start,
-                (IV)RXp_OFFSp(rex)[p].start_tmp,
-                (IV)RXp_OFFSp(rex)[p].end
-            );
+            re_exec_indentf("    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf
+                            " (regcppush)\n",
+                            depth,
+                            (UV)p,
+                            (IV)RXp_OFFSp(rex)[p].start,
+                            (IV)RXp_OFFSp(rex)[p].start_tmp,
+                            (IV)RXp_OFFSp(rex)[p].end
+                         );
         }
     });
 
@@ -287,13 +287,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
 
     DEBUG_BUFFERS_r({
-        Perl_re_exec_indentf(aTHX_
+        re_exec_indentf(
                 "finished regcppush returning %" IVdf " cur: %" IVdf "\n",
                 depth, retval, PL_savestack_ix);
     });
 
     DEBUG_STATE_r(
-        Perl_re_exec_indentf(aTHX_
+        re_exec_indentf(
             "savestack: regcppush filled in range [%" IVdf "..%" IVdf ")\n",
                 depth, (IV)retval, (IV)PL_savestack_ix
         )
@@ -305,7 +305,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 /* These are needed since we do not localize EVAL nodes: */
 #define REGCP_SET(cp)                                           \
     DEBUG_STATE_r(                                              \
-        Perl_re_exec_indentf( aTHX_                             \
+        re_exec_indentf(                                        \
             "savestack: snapping ix=%" IVdf "\n",               \
             depth, (IV)PL_savestack_ix                          \
         )                                                       \
@@ -324,7 +324,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
 #define REGCP_UNWIND(cp)                                        \
     DEBUG_STATE_r(                                              \
-        Perl_re_exec_indentf( aTHX_                             \
+        re_exec_indentf(                                        \
             "savestack: freeing in range [%"                    \
             IVdf "..%" IVdf ")\n",                              \
             depth, (IV)(cp), (IV)PL_savestack_ix                \
@@ -342,7 +342,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
     if (ix > RXp_LASTPAREN(rex))                                            \
         RXp_LASTPAREN(rex) = (ix);                                          \
     RXp_LASTCLOSEPAREN(rex) = (ix);                                         \
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                             \
+    DEBUG_BUFFERS_r(re_exec_indentf(                                        \
         "CLOSE: rex = 0x%" UVxf " offs = 0x%" UVxf ": \\%" UVuf ": set %" IVdf " .. %" IVdf " max: %" UVuf "\n", \
         depth,                                                              \
         PTR2UV(rex),                                                        \
@@ -364,7 +364,7 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH)
     PERL_ARGS_ASSERT_UNWIND_PAREN;
     U32 n;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+    DEBUG_BUFFERS_r(re_exec_indentf(
         "UNWIND_PAREN: rex = 0x%" UVxf " offs = 0x%" UVxf
         ": invalidate (%" UVuf " .. %" UVuf ") set lcp: %" UVuf "\n",
         depth,
@@ -390,7 +390,7 @@ S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma
     U16 my_ix;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
     for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {
-        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+        DEBUG_BUFFERS_r(re_exec_indentf(
                 "CAPTURE_CLEAR %s \\%" IVdf ": "
                 "%" IVdf "(%" IVdf ") .. %" IVdf
                 " => "
@@ -425,9 +425,8 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
 
 
     DEBUG_BUFFERS_r({
-        Perl_re_exec_indentf(aTHX_
-                "starting regcppop at %" IVdf "\n",
-                depth, PL_savestack_ix);
+        re_exec_indentf("starting regcppop at %" IVdf "\n",
+                        depth, PL_savestack_ix);
     });
 
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
@@ -442,7 +441,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     /* Now restore the parentheses context. */
     DEBUG_BUFFERS_r(
         if (i || RXp_LASTPAREN(rex) + 1 <= rex->nparens)
-            Perl_re_exec_indentf( aTHX_
+            re_exec_indentf(
                 "rex = 0x%" UVxf " offs = 0x%" UVxf ": restoring capture indices to:\n",
                 depth,
                 PTR2UV(rex),
@@ -469,7 +468,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
 
     DEBUG_BUFFERS_r(
         for (; paren <= *maxopenparen_p; ++paren) {
-            Perl_re_exec_indentf(aTHX_
+            re_exec_indentf(
                 "    \\%" UVuf " %" IVdf "(%" IVdf ") .. %" IVdf " %s (regcppop)\n",
                 depth,
                 (UV)paren,
@@ -494,7 +493,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
             RXp_OFFSp(rex)[i].start = -1;
         }
         RXp_OFFSp(rex)[i].end = -1;
-        DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
+        DEBUG_BUFFERS_r( re_exec_indentf(
             "    \\%" UVuf ": %s   ..-1 undeffing (regcppop)\n",
             depth,
             (UV)i,
@@ -503,13 +502,12 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     }
 #endif
     DEBUG_BUFFERS_r({
-        Perl_re_exec_indentf(aTHX_
-                "finished regcppop at %" IVdf "\n",
-                depth, PL_savestack_ix);
+        re_exec_indentf("finished regcppop at %" IVdf "\n",
+                        depth, PL_savestack_ix);
     });
 
     DEBUG_STATE_r(
-        Perl_re_exec_indentf(aTHX_
+        re_exec_indentf(
             "savestack: regcppop freed in range [%" IVdf "..%" IVdf ")\n",
                 depth, (IV)(PL_savestack_ix), (IV)orig_ix
         )
@@ -529,7 +527,7 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p comma_pDEPTH)
     I32 tmpix = PL_savestack_ix;
 
     DEBUG_STATE_r(
-        Perl_re_exec_indentf( aTHX_
+        re_exec_indentf(
             "savestack: regcp_restore: ix was %" IVdf "\n",
             depth, (IV)PL_savestack_ix);
     );
@@ -537,7 +535,7 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p comma_pDEPTH)
     regcppop(rex, maxopenparen_p);
     PL_savestack_ix = tmpix;
     DEBUG_STATE_r(
-        Perl_re_exec_indentf( aTHX_
+        re_exec_indentf(
             "savestack: regcp_restore: reset ix=%" IVdf "\n",
             depth, (IV)PL_savestack_ix);
     );
@@ -3947,7 +3945,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         /* avoid leak if we die, or clean up anyway if match completes */
         SAVEFREEPV(swap);
         Newxz(RXp_OFFSp(prog), (prog->nparens + 1), regexp_paren_pair);
-        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+        DEBUG_BUFFERS_r(re_exec_indentf(
             "rex = 0x%" UVxf " saving  offs: orig = 0x%" UVxf " new = 0x%" UVxf "\n",
             0,
             PTR2UV(prog),
@@ -4358,7 +4356,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          * shortly, restore the old captures by copying 'swap's original
          * data to the new offs buffer
          */
-        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+        DEBUG_BUFFERS_r(re_exec_indentf(
             "rex = 0x%" UVxf " rolling back offs: 0x%" UVxf " will be freed; restoring data to =0x%" UVxf "\n",
             0,
             PTR2UV(prog),
@@ -6852,7 +6850,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 && ! ANYOF_BITMAP_TEST(scan, nextbyte))
             {
                 DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
+                    re_exec_indentf("%sTRIE: failed to match trie start class...%s\n",
                               depth, PL_colors[4], PL_colors[5])
                 );
                 sayNO_SILENT;
@@ -6940,14 +6938,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 {
                     if (trie->states[ state ].wordnum) {
                          DEBUG_EXECUTE_r(
-                            Perl_re_exec_indentf( aTHX_  "%sTRIE: matched empty string...%s\n",
+                            re_exec_indentf("%sTRIE: matched empty string...%s\n",
                                           depth, PL_colors[4], PL_colors[5])
                         );
                         if (!trie->jump)
                             break;
                     } else {
                         DEBUG_EXECUTE_r(
-                            Perl_re_exec_indentf( aTHX_  "%sTRIE: failed to match trie start class...%s\n",
+                            re_exec_indentf("%sTRIE: failed to match trie start class...%s\n",
                                           depth, PL_colors[4], PL_colors[5])
                         );
                         sayNO_SILENT;
@@ -7062,7 +7060,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
 
                 DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "%sTRIE: got %" IVdf " possible matches%s\n",
+                    re_exec_indentf("%sTRIE: got %" IVdf " possible matches%s\n",
                         depth,
                         PL_colors[4], (IV)ST.accepted, PL_colors[5] );
                 );
@@ -7092,7 +7090,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             if (!--ST.accepted) {
                 DEBUG_EXECUTE_r({
-                    Perl_re_exec_indentf( aTHX_  "%sTRIE failed...%s\n",
+                    re_exec_indentf("%sTRIE failed...%s\n",
                         depth,
                         PL_colors[4],
                         PL_colors[5] );
@@ -7191,7 +7189,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 
             DEBUG_EXECUTE_r({
-                Perl_re_exec_indentf( aTHX_  "%sTRIE: matched word #%d, continuing%s\n",
+                re_exec_indentf("%sTRIE: matched word #%d, continuing%s\n",
                     depth,
                     PL_colors[4],
                     ST.nextword,
@@ -7216,7 +7214,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         ? av_fetch(trie_words, ST.nextword - 1, 0) : NULL;
                 SV *sv= tmp ? sv_newmortal() : NULL;
 
-                Perl_re_exec_indentf( aTHX_  "%sTRIE: only one match left, short-circuiting: #%d <%s>%s\n",
+                re_exec_indentf("%sTRIE: only one match left, short-circuiting: #%d <%s>%s\n",
                     depth, PL_colors[4],
                     ST.nextword,
                     tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0,
@@ -8371,7 +8369,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DEBUG_r({
                     DECLARE_AND_GET_RE_DEBUG_FLAGS;
                     DEBUG_STACK_r({
-                        Perl_re_exec_indentf( aTHX_
+                        re_exec_indentf(
                             "entering GOSUB, prev_recurse_locinput = %p recurse_locinput[%d]=%p\n",
                             depth, ST.prev_recurse_locinput, arg, rex->recurse_locinput[arg]
                         );
@@ -8729,14 +8727,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                   successful (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
-                Perl_re_exec_indentf( aTHX_  "EVAL_postponed_A/B cur_eval = %p prev_eval = %p\n",
+                re_exec_indentf("EVAL_postponed_A/B cur_eval = %p prev_eval = %p\n",
                     depth, cur_eval, ST.prev_eval);
             });
 
 #define SET_RECURSE_LOCINPUT(STR,VAL)                                   \
             if ( cur_eval && CUR_EVAL.close_paren ) {                   \
                 DEBUG_STACK_r({                                         \
-                    Perl_re_exec_indentf( aTHX_  STR "                  \
+                    re_exec_indentf(STR "                               \
                         GOSUB%d ce = %p recurse_locinput = %p\n",       \
                         depth,                                          \
                         CUR_EVAL.close_paren - 1,                       \
@@ -8774,7 +8772,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EVAL_postponed_B_fail: /* unsuccessfully ran B in (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
-                Perl_re_exec_indentf( aTHX_  "EVAL_AB_fail cur_eval = %p prev_eval = %p\n",
+                re_exec_indentf("EVAL_AB_fail cur_eval = %p prev_eval = %p\n",
                     depth, cur_eval, ST.prev_eval);
             });
 
@@ -8805,7 +8803,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             RXp_OFFSp(rex)[n].start_tmp = locinput - reginfo->strbeg;
             if (n > maxopenparen)
                 maxopenparen = n;
-            DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+            DEBUG_BUFFERS_r(re_exec_indentf(
                 "OPEN: rex = 0x%" UVxf " offs = 0x%" UVxf ": \\%" UVuf ": set %" IVdf " tmp; maxopenparen = %" UVuf "\n",
                 depth,
                 PTR2UV(rex),
@@ -9066,7 +9064,7 @@ NULL
             ST.cache_offset = 0;
             ST.cache_mask = 0;
 
-            DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: matched %ld out of %d..%d\n",
+            DEBUG_EXECUTE_r( re_exec_indentf("WHILEM: matched %ld out of %d..%d\n",
                   depth, (long)n, min, max)
             );
 
@@ -9084,7 +9082,7 @@ NULL
             /* If degenerate A matches "", assume A done. */
 
             if (locinput == cur_curlyx->u.curlyx.lastloc) {
-                DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: empty match detected, trying continuation...\n",
+                DEBUG_EXECUTE_r( re_exec_indentf("WHILEM: empty match detected, trying continuation...\n",
                    depth)
                 );
                 goto do_whilem_B_max;
@@ -9168,7 +9166,7 @@ NULL
                     mask    = 1 << (offset % 8);
                     offset /= 8;
                     if (reginfo->info_aux->poscache[offset] & mask) {
-                        DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: (cache) already tried at this position...\n",
+                        DEBUG_EXECUTE_r( re_exec_indentf("WHILEM: (cache) already tried at this position...\n",
                             depth)
                         );
                         cur_curlyx->u.curlyx.count--;
@@ -9230,7 +9228,7 @@ NULL
         case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
             REGCP_UNWIND(ST.lastcp);
             regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
-            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: failed, trying continuation...\n",
+            DEBUG_EXECUTE_r(re_exec_indentf("WHILEM: failed, trying continuation...\n",
                 depth)
             );
 
@@ -9251,7 +9249,7 @@ NULL
                 CACHEsayNO;
             }
 
-            DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: B min fail: trying longer...\n", depth)
+            DEBUG_EXECUTE_r(re_exec_indentf("WHILEM: B min fail: trying longer...\n", depth)
             );
             /* Try grabbing another A and see if it helps. */
             cur_curlyx->u.curlyx.lastloc = locinput;
@@ -9335,7 +9333,7 @@ NULL
             /* no more branches? */
             if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
                 DEBUG_EXECUTE_r({
-                    Perl_re_exec_indentf( aTHX_  "%sBRANCH failed...%s\n",
+                    re_exec_indentf("%sBRANCH failed...%s\n",
                         depth,
                         PL_colors[4],
                         PL_colors[5] );
@@ -9409,7 +9407,7 @@ NULL
                     ST.count = ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me);
             }
             DEBUG_EXECUTE_r(
-                Perl_re_exec_indentf( aTHX_  "CURLYM now matched %" IVdf " times, len = %" IVdf "...\n",
+                re_exec_indentf("CURLYM now matched %" IVdf " times, len = %" IVdf "...\n",
                           depth, (IV) ST.count, (IV)ST.alen)
             );
 
@@ -9462,7 +9460,7 @@ NULL
             }
 
             DEBUG_EXECUTE_r(
-                Perl_re_exec_indentf( aTHX_  "CURLYM trying tail with matches = %" IVdf "...\n",
+                re_exec_indentf("CURLYM trying tail with matches = %" IVdf "...\n",
                     depth, (IV)ST.count)
             );
             if (! NEXTCHR_IS_EOS && ST.Binfo.count >= 0) {
@@ -9473,7 +9471,7 @@ NULL
                     || ! S_test_EXACTISH_ST(locinput, ST.Binfo))
                 {
                     DEBUG_OPTIMISE_r(
-                        Perl_re_exec_indentf( aTHX_
+                        re_exec_indentf(
                             "CURLYM Fast bail next target = 0x%X anded == 0x%X"
                                                                 " mask = 0x%X\n",
                             depth,
@@ -9886,7 +9884,7 @@ NULL
                 st->u.eval.prev_eval = cur_eval;
                 cur_eval = CUR_EVAL.prev_eval;
                 DEBUG_EXECUTE_r(
-                    Perl_re_exec_indentf( aTHX_  "END: EVAL trying tail ... (cur_eval = %p)\n",
+                    re_exec_indentf("END: EVAL trying tail ... (cur_eval = %p)\n",
                                       depth, cur_eval););
                 if ( nochange_depth )
                     nochange_depth--;
@@ -9916,7 +9914,7 @@ NULL
             if (match_end && locinput != match_end)
             {
                 DEBUG_EXECUTE_r(
-                Perl_re_exec_indentf( aTHX_
+                re_exec_indentf(
                     "%sLOOKBEHIND_END: subpattern failed...%s\n",
                     depth, PL_colors[4], PL_colors[5]));
                 sayNO;            /* Variable length match didn't line up */
@@ -9926,7 +9924,7 @@ NULL
         case SUCCEED: /* successful SUSPEND/CURLYM and
                                             *lookahead* IFMATCH/UNLESSM*/
             DEBUG_EXECUTE_r(
-            Perl_re_exec_indentf( aTHX_
+            re_exec_indentf(
                 "%sSUCCEED: subpattern success...%s\n",
                 depth, PL_colors[4], PL_colors[5]));
             sayYES;			/* Success! */
@@ -10109,7 +10107,7 @@ NULL
                 sv_commit = ST.mark_name;
 
                 DEBUG_EXECUTE_r({
-                        Perl_re_exec_indentf( aTHX_  "%sMARKPOINT: next fail: setting cutpoint to mark:%" SVf "...%s\n",
+                        re_exec_indentf("%sMARKPOINT: next fail: setting cutpoint to mark:%" SVf "...%s\n",
                             depth,
                             PL_colors[4], SVfARG(sv_commit), PL_colors[5]);
                 });
@@ -10224,7 +10222,7 @@ NULL
                         slab = slab->prev;
                         cur = SLAB_LAST(slab);
                     }
-                    Perl_re_exec_indentf( aTHX_ "%4s #%-3d %-10s %s\n",
+                    re_exec_indentf("%4s #%-3d %-10s %s\n",
                         depth,
                         i ? "    " : "push",
                         depth - i, REGNODE_NAME(cur->resume_state),
@@ -10333,7 +10331,7 @@ NULL
 
   no:
     DEBUG_EXECUTE_r(
-        Perl_re_exec_indentf( aTHX_  "%sfailed...%s\n",
+        re_exec_indentf("%sfailed...%s\n",
             depth,
             PL_colors[4], PL_colors[5])
         );
@@ -11085,7 +11083,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         DEBUG_EXECUTE_r({
             SV * const prop = sv_newmortal();
             regprop(prog, prop, p, reginfo, NULL);
-            Perl_re_exec_indentf( aTHX_
+            re_exec_indentf(
                         "%s can match %" IVdf " times out of %" IVdf "...\n",
                         depth, SvPVX_const(prop),(IV)c,(IV)max);
         });
