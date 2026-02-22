@@ -6122,7 +6122,7 @@ PP_wrapped(pp_splice, 0, 1)
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        return Perl_tied_method(aTHX_ SV_CONST(SPLICE), mark - 1, MUTABLE_SV(ary), mg,
+        return tied_method(SV_CONST(SPLICE), mark - 1, MUTABLE_SV(ary), mg,
                                     GIMME_V | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
     }
