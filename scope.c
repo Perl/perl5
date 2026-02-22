@@ -196,7 +196,7 @@ Perl_savestack_grow(pTHX)
     PERL_ARGS_ASSERT_SAVESTACK_GROW;
 
     const I32 by = PL_savestack_max - PL_savestack_ix;
-    Perl_savestack_grow_cnt(aTHX_ by);
+    savestack_grow_cnt(by);
 }
 
 void
