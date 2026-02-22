@@ -5058,7 +5058,7 @@ PP_wrapped(pp_gmtime, MAXARG, 0)
        else {
            dTARGET;
            PUSHs(TARG);
-           Perl_sv_setpvf_mg(aTHX_ TARG, "%s %s %2d %02d:%02d:%02d %" IVdf,
+           sv_setpvf_mg(TARG, "%s %s %2d %02d:%02d:%02d %" IVdf,
                                 dayname[tmbuf.tm_wday],
                                 monname[tmbuf.tm_mon],
                                 tmbuf.tm_mday,
