@@ -11616,7 +11616,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     }
 
     if (x_mod_count > 1 && FEATURE_ENHANCED_XX_IS_ENABLED) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ENHANCED_XX), 
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
                          "enhanced_xx is experimental");
     }
 
@@ -11679,7 +11679,7 @@ S_scan_subst(pTHX_ char *start)
     }
 
     if (x_mod_count > 1 && FEATURE_ENHANCED_XX_IS_ENABLED) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
                          "enhanced_xx is experimental");
     }
 

@@ -15024,7 +15024,7 @@ S_parse_uniprop_string(pTHX_
                     goto append_name_to_msg;
                 }
 
-                Perl_ck_warner_d(aTHX_
+                ck_warner_d(
                     packWARN(WARN_EXPERIMENTAL__UNIPROP_WILDCARDS),
                     "The Unicode property wildcards feature is experimental");
 
@@ -16029,7 +16029,7 @@ S_parse_uniprop_string(pTHX_
     if (table_index > MAX_UNI_KEYWORD_INDEX) {
         Size_t warning_offset = table_index / MAX_UNI_KEYWORD_INDEX;
         table_index %= MAX_UNI_KEYWORD_INDEX;
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED__UNICODE_PROPERTY_NAME),
+        ck_warner_d(packWARN(WARN_DEPRECATED__UNICODE_PROPERTY_NAME),
                 "Use of '%.*s' in \\p{} or \\P{} is deprecated because: %s",
                 (int) name_len, name,
                 get_deprecated_property_msg(warning_offset));
@@ -16113,7 +16113,8 @@ S_parse_uniprop_string(pTHX_
                                &expanded_prop_definition);
                 prop_definition = expanded_prop_definition;
                 cloned = true;
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__PRIVATE_USE), "The private_use feature is experimental");
+                ck_warner_d(packWARN(WARN_EXPERIMENTAL__PRIVATE_USE),
+                            "The private_use feature is experimental");
             }
         }
     }
