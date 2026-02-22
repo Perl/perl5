@@ -6746,9 +6746,7 @@ Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int depth, int skip)
 {
     PERL_ARGS_ASSERT_DUMP_C_BACKTRACE;
 
-    SV* sv;
-
-    sv = Perl_get_c_backtrace_dump(aTHX_ depth, skip);
+    SV* sv = get_c_backtrace_dump(depth, skip);
     if (sv) {
         sv_2mortal(sv);
         PerlIO_printf(fp, "%s", SvPV_nolen(sv));
