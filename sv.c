@@ -4188,7 +4188,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                magic_clearisa do it for us, as it already has the logic for
                dealing with globs vs arrays of globs. */
             assert(mg);
-            Perl_magic_clearisa(aTHX_ NULL, mg);
+            magic_clearisa(NULL, mg);
         }
         else if (stype == SVt_PVIO) {
             DEBUG_o(deb("gv_setref clearing PL_stashcache\n"));
