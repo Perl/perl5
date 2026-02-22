@@ -5732,7 +5732,7 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
             }
             SvREFCNT_dec(string);
 
-            Perl_sv_2mortal(aTHX_ xpt);
+            sv_2mortal(xpt);
             croak_sv(xpt);
         }
     }
