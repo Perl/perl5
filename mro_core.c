@@ -42,9 +42,9 @@ Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
 
     SV **data;
 
-    data = (SV **)Perl_hv_common(aTHX_ smeta->mro_linear_all, NULL,
-                                 which->name, which->length, which->kflags,
-                                 HV_FETCH_JUST_SV, NULL, which->hash);
+    data = (SV **)hv_common(smeta->mro_linear_all, NULL,
+                            which->name, which->length, which->kflags,
+                            HV_FETCH_JUST_SV, NULL, which->hash);
     if (!data)
         return NULL;
 
@@ -93,9 +93,10 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
         smeta->mro_linear_current = data;
     }
 
-    if (!Perl_hv_common(aTHX_ smeta->mro_linear_all, NULL,
-                        which->name, which->length, which->kflags,
-                        HV_FETCH_ISSTORE, data, which->hash)) {
+    if (!hv_common(smeta->mro_linear_all, NULL,
+                   which->name, which->length, which->kflags,
+                   HV_FETCH_ISSTORE, data, which->hash))
+    {
         croak("panic: hv_store() failed in set_mro_private_data() "
                    "for '%.*s' %d", (int) which->length, which->name,
                    which->kflags);
@@ -120,8 +121,8 @@ Perl_mro_get_from_name(pTHX_ SV *name)
 
     SV **data;
 
-    data = (SV **)Perl_hv_common(aTHX_ PL_registered_mros, name, NULL, 0, 0,
-                                 HV_FETCH_JUST_SV, NULL, 0);
+    data = (SV **)hv_common(PL_registered_mros, name, NULL, 0, 0,
+                            HV_FETCH_JUST_SV, NULL, 0);
     if (!data)
         return NULL;
     assert(SvTYPE(*data) == SVt_IV);
@@ -144,9 +145,10 @@ Perl_mro_register(pTHX_ const struct mro_alg *mro) {
     PERL_ARGS_ASSERT_MRO_REGISTER;
 
 
-    if (!Perl_hv_common(aTHX_ PL_registered_mros, NULL,
-                        mro->name, mro->length, mro->kflags,
-                        HV_FETCH_ISSTORE, wrapper, mro->hash)) {
+    if (!hv_common(PL_registered_mros, NULL,
+                   mro->name, mro->length, mro->kflags,
+                   HV_FETCH_ISSTORE, wrapper, mro->hash))
+    {
         SvREFCNT_dec_NN(wrapper);
         croak("panic: hv_store() failed in mro_register() "
                    "for '%.*s' %d", (int) mro->length, mro->name, mro->kflags);
@@ -939,12 +941,11 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     if(oldstash) {
         /* Add to the big list. */
         struct mro_meta * meta;
-        HE * const entry
-         = (HE *)
-             hv_common(
-              seen_stashes, NULL, (const char *)&oldstash, sizeof(HV *), 0,
-              HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
-             );
+        HE * const entry =
+            (HE *) hv_common(
+                  seen_stashes, NULL, (const char *)&oldstash, sizeof(HV *),
+                  0, HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
+            );
         if(HeVAL(entry) == &PL_sv_undef || HeVAL(entry) == &PL_sv_yes) {
             oldstash = NULL;
             goto check_stash;
@@ -1040,8 +1041,8 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
         entry
          = (HE *)
              hv_common(
-              seen_stashes, NULL, (const char *)&stash, sizeof(HV *), 0,
-              HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
+                  seen_stashes, NULL, (const char *)&stash, sizeof(HV *), 0,
+                  HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
              );
         if(HeVAL(entry) == &PL_sv_yes || HeVAL(entry) == &PL_sv_no)
             stash = NULL;
