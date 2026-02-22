@@ -7905,7 +7905,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
     }
     if (ckWARN_d(WARN_INTERNAL)) {
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-        Perl_dump_sv_child(aTHX_ sv);
+        dump_sv_child(sv);
 #else
     #ifdef DEBUG_LEAKING_SCALARS
         sv_dump(sv);
