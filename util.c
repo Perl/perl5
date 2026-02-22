@@ -5711,7 +5711,7 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
         }
     }
     if (sv) {
-        SV *xssv = Perl_newSVpvn_flags(aTHX_ xs_p, xs_len, SVs_TEMP);
+        SV *xssv = newSVpvn_flags(xs_p, xs_len, SVs_TEMP);
         SV *pmsv = sv_isobject(sv) && sv_derived_from(sv, "version")
             ? sv : sv_2mortal(new_version(sv));
         xssv = upg_version(xssv, 0);

@@ -2113,9 +2113,9 @@ S_Internals_V(pTHX_ CV *cv)
     EXTEND(SP, entries);
 
     PUSHs(newSVpvn_flags(PL_bincompat_options, strlen(PL_bincompat_options),
-                              SVs_TEMP));
-    PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
-                              sizeof(non_bincompat_options) - 1, SVs_TEMP));
+                         SVs_TEMP));
+    PUSHs(newSVpvn_flags(non_bincompat_options,
+                         sizeof(non_bincompat_options) - 1, SVs_TEMP));
 
 #ifndef PERL_BUILD_DATE
 #  ifdef __DATE__
@@ -2138,8 +2138,10 @@ S_Internals_V(pTHX_ CV *cv)
     for (i = 1; i <= local_patch_count; i++) {
         /* This will be an undef, if PL_localpatches[i] is NULL.  */
         PUSHs(newSVpvn_flags(PL_localpatches[i],
-            PL_localpatches[i] == NULL ? 0 : strlen(PL_localpatches[i]),
-            SVs_TEMP));
+                             (PL_localpatches[i] == NULL)
+                              ? 0
+                              : strlen(PL_localpatches[i]),
+                             SVs_TEMP));
     }
 
     XSRETURN(entries);
@@ -2442,7 +2444,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
-                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d), SVs_TEMP));
+                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d),
+                                                             SVs_TEMP));
                             s = popt_copy + (s - d);
                             d = popt_copy;
                         }
