@@ -800,11 +800,11 @@ Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
 
 
 #define tied_method0(a,b,c,d)		\
-    Perl_tied_method(aTHX_ a,b,c,d,G_SCALAR,0)
+    tied_method(a,b,c,d,G_SCALAR,0)
 #define tied_method1(a,b,c,d,e)		\
-    Perl_tied_method(aTHX_ a,b,c,d,G_SCALAR,1,e)
+    tied_method(a,b,c,d,G_SCALAR,1,e)
 #define tied_method2(a,b,c,d,e,f)	\
-    Perl_tied_method(aTHX_ a,b,c,d,G_SCALAR,2,e,f)
+    tied_method(a,b,c,d,G_SCALAR,2,e,f)
 
 PP_wrapped(pp_open, 0, 1)
 {
@@ -834,7 +834,7 @@ PP_wrapped(pp_open, 0, 1)
         if (mg) {
             /* Method's args are same as ours ... */
             /* ... except handle is replaced by the object */
-            return Perl_tied_method(aTHX_ SV_CONST(OPEN), mark - 1, MUTABLE_SV(io), mg,
+            return tied_method(SV_CONST(OPEN), mark - 1, MUTABLE_SV(io), mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
         }
@@ -1034,7 +1034,7 @@ PP_wrapped(pp_binmode, MAXARG, 0)
                function, which I don't think that the optimiser will be able to
                figure out. Although, as it's a static function, in theory it
                could.  */
-            return Perl_tied_method(aTHX_ SV_CONST(BINMODE), SP, MUTABLE_SV(io), mg,
+            return tied_method(SV_CONST(BINMODE), SP, MUTABLE_SV(io), mg,
                                     G_SCALAR|TIED_METHOD_MORTALIZE_NOT_NEEDED,
                                     discp ? 1 : 0, discp);
         }
@@ -1600,7 +1600,7 @@ PP_wrapped(pp_getc, MAXARG, 0)
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
             const U8 gimme = GIMME_V;
-            Perl_tied_method(aTHX_ SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
+            tied_method(SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
             if (gimme == G_SCALAR) {
                 SPAGAIN;
                 SvSetMagicSV_nosteal(TARG, TOPs);
@@ -1854,7 +1854,7 @@ PP(pp_prtf)
                 *MARK = NULL;
                 ++PL_stack_sp;
             }
-            return Perl_tied_method(aTHX_ SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
+            return tied_method(SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
                                     mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     PL_stack_sp - mark);
@@ -1944,7 +1944,7 @@ PP_wrapped(pp_sysread, 0, 1)
     {
         const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
-            return Perl_tied_method(aTHX_ SV_CONST(READ), mark - 1, MUTABLE_SV(io), mg,
+            return tied_method(SV_CONST(READ), mark - 1, MUTABLE_SV(io), mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
         }
@@ -2202,7 +2202,7 @@ PP_wrapped(pp_syswrite, 0, 1)
                 PUTBACK;
             }
 
-            return Perl_tied_method(aTHX_ SV_CONST(WRITE), mark - 1, MUTABLE_SV(io), mg,
+            return tied_method(SV_CONST(WRITE), mark - 1, MUTABLE_SV(io), mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
                                     sp - mark);
         }
