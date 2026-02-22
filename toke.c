@@ -7574,7 +7574,7 @@ yyl_croak_unrecognised(pTHX_ char *s)
         while (d > SvPVX(PL_linestr) && d[-1] && d[-1] != '\n')
             --d;
     }
-    len = UTF ? Perl_utf8_length(aTHX_ (U8 *) d, (U8 *) s) : (STRLEN) (s - d);
+    len = UTF ? utf8_length((U8 *) d, (U8 *) s) : (STRLEN) (s - d);
     if (len > UNRECOGNIZED_PRECEDE_COUNT) {
         d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)d) : s - UNRECOGNIZED_PRECEDE_COUNT;
     }
