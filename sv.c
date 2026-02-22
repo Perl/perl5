@@ -16821,7 +16821,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      *  PERL_SET_CONTEXT(proto_perl);
      * breaks too many other things
      */
-    Perl_reentrant_init(aTHX);
+    reentrant_init();
 #endif
 
     /* create SV map for pointer relocation */

@@ -348,7 +348,7 @@ perl_construct(pTHXx)
     Newxz(PL_stashpad, PL_stashpadmax, HV *);
 #endif
 #ifdef USE_REENTRANT_API
-    Perl_reentrant_init(aTHX);
+    reentrant_init();
 #endif
     if (PL_hash_seed_set == FALSE) {
         /* Initialize the hash seed and state at startup. This must be
