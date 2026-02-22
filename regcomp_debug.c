@@ -99,7 +99,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
             (UV)data->flags
         );
 
-        Perl_debug_show_study_flags(aTHX_ data->flags," [","]");
+        debug_show_study_flags(data->flags," [","]");
 
         Perl_re_printf( aTHX_
             " Whilem_c: %" IVdf " Lcp: %" IVdf " %s",
@@ -127,7 +127,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
                     (IV)data->substrs[i].min_offset,
                     (IV)data->substrs[i].max_offset
                 );
-                Perl_debug_show_study_flags(aTHX_ data->substrs[i].flags," [","]");
+                debug_show_study_flags(data->substrs[i].flags," [","]");
             }
         }
 
@@ -155,7 +155,7 @@ Perl_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
             str,
             REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),
             Next ? (REG_NODE_NUM(Next)) : 0 );
-        Perl_debug_show_study_flags(aTHX_ flags," [ ","]");
+        debug_show_study_flags(flags," [ ","]");
         Perl_re_printf( aTHX_  "\n");
    });
 }
