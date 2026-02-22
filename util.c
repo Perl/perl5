@@ -3837,8 +3837,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
                     have_name ? " " : "",
                     SVfARG(have_name ? name : &PL_sv_no));
         if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-                Perl_warner(
-                            aTHX_ packWARN(warn_type),
+                warner(packWARN(warn_type),
                         "\t(Are you trying to call %s%s on dirhandle%s%" SVf "?)\n",
                         func, pars, have_name ? " " : "",
                         SVfARG(have_name ? name : &PL_sv_no)
