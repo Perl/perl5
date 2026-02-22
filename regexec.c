@@ -12248,7 +12248,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                     && RXp_OFFS_VALID(rx,nums[i]))
                 {
                     ret = newSVpvs("");
-                    Perl_reg_numbered_buff_fetch_flags(aTHX_ r, nums[i], ret, REG_FETCH_ABSOLUTE);
+                    reg_numbered_buff_fetch_flags(r, nums[i], ret, REG_FETCH_ABSOLUTE);
                     if (!retarray)
                         return ret;
                 } else {
@@ -12405,7 +12405,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren,
                              SV * const sv)
 {
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
-    Perl_reg_numbered_buff_fetch_flags(aTHX_ re, paren, sv, 0);
+    reg_numbered_buff_fetch_flags(re, paren, sv, 0);
 }
 
 #ifndef PERL_IN_XSUB_RE
