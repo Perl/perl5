@@ -1458,7 +1458,7 @@ perl_destruct(pTHXx)
                         sv->sv_debug_serial
                     );
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-                    Perl_dump_sv_child(aTHX_ sv);
+                    dump_sv_child(sv);
 #endif
                 }
             }
