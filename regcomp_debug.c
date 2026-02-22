@@ -85,12 +85,10 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
 
     DEBUG_OPTIMISE_MORE_r({
         if (!data) {
-            Perl_re_indentf(aTHX_  "%s: NO DATA",
-                depth,
-                where);
+            re_indentf("%s: NO DATA", depth, where);
             return;
         }
-        Perl_re_indentf(aTHX_  "%s: M/S/D: %" IVdf "/%" IVdf "/%" IVdf " Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
+        re_indentf("%s: M/S/D: %" IVdf "/%" IVdf "/%" IVdf " Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
             depth,
             where,
             min, stopmin, delta,
@@ -150,11 +148,11 @@ Perl_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
             return;
         Next = regnext(scan);
         regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);
-        Perl_re_indentf( aTHX_   "%s>%3d: %s (%d)",
-            depth,
-            str,
-            REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),
-            Next ? (REG_NODE_NUM(Next)) : 0 );
+        re_indentf("%s>%3d: %s (%d)",
+                   depth,
+                   str,
+                   REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),
+                   Next ? (REG_NODE_NUM(Next)) : 0 );
         debug_show_study_flags(flags," [ ","]");
         Perl_re_printf( aTHX_  "\n");
    });
@@ -245,19 +243,19 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
                 SV ** const elem_ptr = av_fetch_simple(trie_words, word_idx, 0);
 
-                Perl_re_indentf( aTHX_  "%s ",
-                    indent+3,
-                    elem_ptr
-                    ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr),
-                                SvCUR(*elem_ptr), PL_dump_re_max_len,
-                                PL_colors[0], PL_colors[1],
-                                (SvUTF8(*elem_ptr)
-                                 ? PERL_PV_ESCAPE_UNI
-                                 : 0)
-                                | PERL_PV_PRETTY_ELLIPSES
-                                | PERL_PV_PRETTY_LTGT
-                            )
-                    : "???"
+                re_indentf("%s ",
+                           indent+3,
+                           elem_ptr
+                           ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr),
+                                       SvCUR(*elem_ptr), PL_dump_re_max_len,
+                                       PL_colors[0], PL_colors[1],
+                                       (SvUTF8(*elem_ptr)
+                                        ? PERL_PV_ESCAPE_UNI
+                                        : 0)
+                                       | PERL_PV_PRETTY_ELLIPSES
+                                       | PERL_PV_PRETTY_LTGT
+                                      )
+                           : "???"
                 );
                 if (trie->jump) {
                     U16 dist = trie->jump[word_idx+1];

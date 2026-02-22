@@ -59,7 +59,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
     U16 word;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    Perl_re_indentf( aTHX_  "Char : %-6s%-6s%-4s ",
+    re_indentf("Char : %-6s%-6s%-4s ",
         depth+1, "Match","Base","Ofs" );
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
@@ -76,7 +76,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
         }
     }
     Perl_re_printf( aTHX_  "\n");
-    Perl_re_indentf( aTHX_ "State|-----------------------", depth+1);
+    re_indentf("State|-----------------------", depth+1);
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ )
         Perl_re_printf( aTHX_  "%.*s", colwidth, "--------");
@@ -85,7 +85,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
     for( state = 1 ; state < trie->statecount ; state++ ) {
         const U32 base = trie->states[ state ].trans.base;
 
-        Perl_re_indentf( aTHX_  "#%4" UVXf "|", depth+1, (UV)state);
+        re_indentf("#%4" UVXf "|", depth+1, (UV)state);
 
         if ( trie->states[ state ].wordnum ) {
             Perl_re_printf( aTHX_  " W%4X", trie->states[ state ].wordnum );
@@ -126,7 +126,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
         }
         Perl_re_printf( aTHX_  "\n" );
     }
-    Perl_re_indentf( aTHX_  "word_info N:(prev,len)=",
+    re_indentf("word_info N:(prev,len)=",
                                 depth);
     for (word = 1; word <= trie->wordcount; word++) {
         Perl_re_printf( aTHX_  " %d:(%d,%d)",
@@ -154,15 +154,15 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     /* print out the table precompression.  */
-    Perl_re_indentf( aTHX_  "State :Word | Transition Data\n",
+    re_indentf("State :Word | Transition Data\n",
             depth+1 );
-    Perl_re_indentf( aTHX_  "%s",
+    re_indentf("%s",
             depth+1, "------:-----+-----------------\n" );
 
     for( state = 1; state < next_alloc; state++ ) {
         U16 charid;
 
-        Perl_re_indentf( aTHX_  " %4" UVXf " :",
+        re_indentf(" %4" UVXf " :",
             depth+1, (UV)state  );
         if ( ! trie->states[ state ].wordnum ) {
             Perl_re_printf( aTHX_  "%5s| ","");
@@ -219,7 +219,7 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
        that they are identical.
      */
 
-    Perl_re_indentf( aTHX_  "Char : ", depth+1 );
+    re_indentf("Char : ", depth+1 );
 
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
         SV ** const tmp = av_fetch_simple( revcharmap, charid, 0);
@@ -238,7 +238,7 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
     }
 
     Perl_re_printf( aTHX_ "\n");
-    Perl_re_indentf( aTHX_  "State+-", depth+1 );
+    re_indentf("State+-", depth+1 );
 
     for( charid = 0; charid < trie->uniquecharcount; charid++ ) {
         Perl_re_printf( aTHX_  "%.*s", colwidth,"--------");
@@ -248,7 +248,7 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
 
     for( state = 1; state < next_alloc; state += trie->uniquecharcount ) {
 
-        Perl_re_indentf( aTHX_  "%4" UVXf " : ",
+        re_indentf("%4" UVXf " : ",
             depth+1,
             (UV)TRIE_NODENUM( state ) );
 
@@ -623,7 +623,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
     }
     DEBUG_TRIE_COMPILE_r({
-        Perl_re_indentf( aTHX_
+        re_indentf(
           "make_trie start == %d, first == %d, last == %d, tail == %d depth = %d\n",
           depth+1,
           REG_NODE_NUM(startbranch), REG_NODE_NUM(first),
@@ -847,7 +847,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                  ? ARG1b(lastbranch)
                  : ARG2b(lastbranch); /* BRANCHJ */
     DEBUG_TRIE_COMPILE_r(
-        Perl_re_indentf( aTHX_
+        re_indentf(
                 "TRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
                 depth+1,
                 ( widecharmap ? "UTF8" : "NATIVE" ), (int)word_count,
@@ -897,7 +897,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
         STRLEN transcount = 1;
 
-        DEBUG_TRIE_COMPILE_MORE_r( Perl_re_indentf( aTHX_  "Compiling trie using list compiler\n",
+        DEBUG_TRIE_COMPILE_MORE_r( re_indentf("Compiling trie using list compiler\n",
             depth+1));
 
         trie->states = (reg_trie_state *)
@@ -1123,7 +1123,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
            we have to use TRIE_NODENUM() to convert.
 
         */
-        DEBUG_TRIE_COMPILE_MORE_r( Perl_re_indentf( aTHX_  "Compiling trie using table compiler\n",
+        DEBUG_TRIE_COMPILE_MORE_r( re_indentf("Compiling trie using table compiler\n",
             depth+1));
 
         trie->trans = (reg_trie_trans *)
@@ -1328,7 +1328,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             PerlMemShared_realloc( trie->states, laststate
                                    * sizeof(reg_trie_state) );
         DEBUG_TRIE_COMPILE_MORE_r(
-            Perl_re_indentf( aTHX_  "Alloc: %d Orig: %" IVdf " elements, Final:%" IVdf ". Savings of %%%5.2f\n",
+            re_indentf("Alloc: %d Orig: %" IVdf " elements, Final:%" IVdf ". Savings of %%%5.2f\n",
                 depth+1,
                 (int)( ( TRIE_CHARCOUNT(trie) + 1 ) * trie->uniquecharcount
                        + 1 ),
@@ -1340,7 +1340,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         } /* end table compress */
     }
     DEBUG_TRIE_COMPILE_MORE_r(
-            Perl_re_indentf( aTHX_  "Statecount:%" UVxf " Lasttrans:%" UVxf "\n",
+            re_indentf("Statecount:%" UVxf " Lasttrans:%" UVxf "\n",
                 depth+1,
                 (UV)trie->statecount,
                 (UV)trie->lasttrans)
@@ -1416,7 +1416,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                 /* clear the bitmap */
                                 Zero(trie->bitmap, ANYOF_BITMAP_SIZE, char);
                                 DEBUG_OPTIMISE_r(
-                                    Perl_re_indentf( aTHX_  "New Start State = %" UVuf " Class: [",
+                                    re_indentf("New Start State = %" UVuf " Class: [",
                                         depth+1,
                                         (UV)state));
                                 if (first_ofs >= 0) {
@@ -1445,7 +1445,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
                         SV *sv = sv_newmortal();
-                        Perl_re_indentf( aTHX_  "Prefix State: %" UVuf " Ofs: %" UVuf " Char: '%s'\n",
+                        re_indentf("Prefix State: %" UVuf " Ofs: %" UVuf " Char: '%s'\n",
                             depth+1,
                             (UV)state, (UV)first_ofs,
                             pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 6,
@@ -1727,7 +1727,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
      */
     fail[ 0 ] = fail[ 1 ] = 0;
     DEBUG_TRIE_COMPILE_r({
-        Perl_re_indentf( aTHX_  "Stclass Failtable (%" UVuf " states): 0",
+        re_indentf("Stclass Failtable (%" UVuf " states): 0",
                       depth, (UV)numstates
         );
         for( q_read = 1; q_read < numstates; q_read++ ) {
