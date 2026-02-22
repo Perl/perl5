@@ -581,7 +581,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
             }
         }
         if (name)
-            Perl_sv_catpv(aTHX_ report, name);
+            sv_catpv(report, name);
         else if (isGRAPH(rv))
         {
             sv_catpvf(report, "'%c'", (char)rv);
