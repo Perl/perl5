@@ -741,9 +741,8 @@ Perl_no_bareword_allowed(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED;
 
-    qerror(Perl_mess(aTHX_
-                     "Bareword \"%" SVf "\" not allowed while \"strict subs\" in use",
-                     SVfARG(cSVOPo_sv)));
+    qerror(mess("Bareword \"%" SVf "\" not allowed while \"strict subs\" in"
+                " use", SVfARG(cSVOPo_sv)));
     o->op_private &= ~OPpCONST_STRICT; /* prevent warning twice about the same OP */
 }
 
@@ -772,7 +771,8 @@ Perl_no_bareword_filehandle(pTHX_ const char *fhname)
     PERL_ARGS_ASSERT_NO_BAREWORD_FILEHANDLE;
 
     if (!is_standard_filehandle_name(fhname)) {
-        qerror(Perl_mess(aTHX_ "Bareword filehandle \"%s\" not allowed under 'no feature \"bareword_filehandles\"'", fhname));
+        qerror(mess("Bareword filehandle \"%s\" not allowed under 'no"
+                    " feature \"bareword_filehandles\"'", fhname));
     }
 }
 
@@ -16193,9 +16193,8 @@ Perl_ck_each(pTHX_ OP *o)
                     goto bad;
                 /* FALLTHROUGH */
             default:
-                qerror(Perl_mess(aTHX_
-                    "Experimental %s on scalar is now forbidden",
-                     PL_op_desc[orig_type]));
+                qerror(mess("Experimental %s on scalar is now forbidden",
+                            PL_op_desc[orig_type]));
                bad:
                 bad_type_pv(1, "hash or array", o, kid);
                 return o;
