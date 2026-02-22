@@ -4878,8 +4878,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
     const char * const ptr =
         isREGEXP(ssv) ? RX_WRAPPED((REGEXP*)ssv) : SvPVX_const(ssv);
 
-    return Perl_pv_uni_display(aTHX_ dsv, (const U8*)ptr,
-                                SvCUR(ssv), pvlim, flags);
+    return pv_uni_display(dsv, (const U8*)ptr, SvCUR(ssv), pvlim, flags);
 }
 
 /*
