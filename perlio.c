@@ -385,7 +385,7 @@ PerlIO_debug(const char *fmt, ...)
         STRLEN len;
         SV * const sv = newSVpvf("%s:%" LINE_Tf " ",
                                  s ? s : "(none)", CopLINE(PL_curcop));
-        Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
+        sv_vcatpvf(sv, fmt, &ap);
 
         s = SvPV_const(sv, len);
         PERL_UNUSED_RESULT(PerlLIO_write(PL_perlio_debug_fd, s, len));
