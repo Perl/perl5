@@ -25,6 +25,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="tonyc" id="d0d82f50bd6d895b86607b19787ff59f9de7d18c" issue="24212" pull="24213" desc="goto: impose scalar context on XSUB return values"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
