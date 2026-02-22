@@ -8005,22 +8005,21 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
                        The longer value is stored in the first pair.  */
                     STRLEN *cache = (STRLEN *) mg->mg_ptr;
 
-                    ulen = cache[0] + Perl_utf8_length(aTHX_ s + cache[1],
-                                                       s + len);
+                    ulen = cache[0] + utf8_length(s + cache[1], s + len);
                 }
 
                 if (PL_utf8cache < 0) {
-                    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
+                    const STRLEN real = utf8_length(s, s + len);
                     assert_uft8_cache_coherent("sv_len_utf8", ulen, real, sv);
                 }
             }
             else {
-                ulen = Perl_utf8_length(aTHX_ s, s + len);
+                ulen = utf8_length(s, s + len);
                 utf8_mg_len_cache_update(sv, &mg, ulen);
             }
             return ulen;
     }
-    return SvUTF8(sv) ? Perl_utf8_length(aTHX_ s, s + len) : len;
+    return SvUTF8(sv) ? utf8_length(s, s + len) : len;
 }
 
 /* Walk forwards to find the byte corresponding to the passed in UTF-8
