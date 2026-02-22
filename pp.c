@@ -5466,7 +5466,7 @@ PP_wrapped(pp_akeys, 1, 0)
         }
         else {
             for (i = 0;  i <= n;  i++) {
-                SV *const *const elem = Perl_av_fetch(aTHX_ array, i, 0);
+                SV *const *const elem = av_fetch(array, i, 0);
                 PUSHs(elem ? *elem : &PL_sv_undef);
             }
         }
