@@ -1526,7 +1526,7 @@ perl_destruct(pTHXx)
     PL_debug = 0;
 
 #ifdef USE_REENTRANT_API
-    Perl_reentrant_free(aTHX);
+    reentrant_free();
 #endif
 
     /* These all point to HVs that are about to be blown away.
