@@ -256,13 +256,13 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
-                        const unsigned shift,
+                        uint_fast8_t base,  /* 2 or 16 */
                         const U32 lookup_bit,
                         const char prefix       /* 'b' or 'x' */
                  )
 {
     PERL_ARGS_ASSERT_GROK_BIN_HEX;
-    assert(shift == 1 || shift == 4);
+    assert(base == 2 || base == 16);
 
     /* Parse an optional 0b or 0x prefix to the number if the flags don't
      * forbid these, then call grok_bin_oct_hex() with the parse set to beyond
@@ -290,7 +290,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
     }
 
     return grok_bin_oct_hex(start, len_p, flags, result,
-                            shift, lookup_bit, offset);
+                            base, lookup_bit, offset);
 }
 
 /* An acceptable underscore must not be trailing, which also implies there
@@ -304,15 +304,15 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
                         NV *result,
-                        const unsigned shift, /* 1 for binary; 3 for octal;
-                                                 4 for hex */
+                        uint_fast8_t base,
                         const U32 lookup_bit,
                         uint_fast8_t offset /* parse starting at start+offset */
                      )
 
 {
     PERL_ARGS_ASSERT_GROK_BIN_OCT_HEX;
-    ASSUME(inRANGE(shift, 1, 4) && shift != 2);
+    ASSUME(   base == 10
+           || (isPOWER_OF_2(base) && inRANGE(base, 2, 16) && base != 4));
 
     /* This function unifies the core of grok_bin, grok_oct, and grok_hex.  It
      * is optimized for hex conversion.  For example, it uses XDIGIT_VALUE to
@@ -349,9 +349,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
 
     const char * const s0 = s;  /* Where the significant digits start */
     UV accumulated = 0;         /* Running total */
-    const PERL_UINT_FAST8_T base = 1 << shift;  /* 2, 8, or 16 */
 
-#define MULTIPLY_BY_BASE(value)  ((value) << shift)
+    /* Highest value where one more hex digit will still fit and not overflow.
+     * */
+    const UV base16_max_div = UV_MAX / 16;
+
+    /* MULTIPLY_BY_BASE(value) multiplies 'value' by the input base */
+#define MULTIPLY_BY_BASE(value)  (((value) * base))
 
     /* Unroll the loop so that numbers with 8 or fewer digits can be handled
      * with the minimum amount of work.  Anything higher would require extra
@@ -461,8 +465,9 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
      * As long as the running total is less than this, the next digit will
      * fit. */
     UV max_div;
-    max_div = UV_MAX >> shift;
+    max_div = base16_max_div;
     U32 valid_digit_or_underscore_bits;
+
     valid_digit_or_underscore_bits = (lookup_bit|CC_mask_(CC_UNDERSCORE_));
 
     /* Loop through the characters */
@@ -481,9 +486,36 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
             ++s;
         }
 
-        /* If would overflow, handle elsewhere */
-        if (UNLIKELY(accumulated > max_div)) {
-            goto overflowed;
+      check_overflow:
+        if (UNLIKELY(accumulated >= max_div)) {
+
+            /* Here we have reached overflowing or nearly overflowing for at
+             * least base 16, which has the lowest such threshold of the bases
+             * we handle.  For the other bases, we now set the proper upper
+             * limit and try again.  (It's comparatively rare for a number to
+             * be this large, so doing it here means this code won't get
+             * commonly executed.) */
+            if (max_div == base16_max_div) {
+                switch (base) {
+                  case 16: break;
+                  case 10: max_div = UV_MAX / 10; goto check_overflow;
+                  case 8:  max_div = UV_MAX >> 3; goto check_overflow;
+                  case 2:  max_div = UV_MAX >> 1; goto check_overflow;
+                  default: goto bad_base;
+                }
+            }
+
+            /* If we've exceeded 'max_div' this digit is going to overflow,
+             * but if equal, for all the power-of-two bases, this digit is
+             * guaranteed to not overflow.  For base 10, some larger digits
+             * will overflow, so have to check explicitly */
+            if (   accumulated > max_div
+                || (   base == 10
+                    && (unsigned) XDIGIT_VALUE(*s) >
+                                          UV_MAX - MULTIPLY_BY_BASE(max_div)))
+            {
+                goto overflowed;
+            }
         }
 
         /* Otherwise, there is room for this digit; accumulate it and repeat
@@ -524,6 +556,8 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
               default: goto bad_base;
               case 2:  base_name = "binary";      break;
               case 16: base_name = "hexadecimal"; break;
+              case 10: /* Base 10 historically has not raised warnings here */
+                goto illegal_warning_done;
               case 8:
 
                 /* Allow \octal to work the DWIM way (that is, stop scanning
@@ -709,10 +743,13 @@ Perl_grok_bin_oct_hex(pTHX_ const char * const start,
           case 2:  base_name = "binary";      break;
           case 8:  base_name = "octal";       break;
           case 16: base_name = "hexadecimal"; break;
+          case 10: /* Base 10 historically has not raised a warning here */
+            goto overflow_warning_done;
         }
 
         warner(packWARN(WARN_OVERFLOW), "Integer overflow in %s number",
                                         base_name);
+      overflow_warning_done: ;
     }
 
     accumulated = UV_MAX;
