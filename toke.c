@@ -4846,7 +4846,7 @@ S_intuit_more(pTHX_ char *s, char *e,
                 else
                     weight -= 1;
             }
-            else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, PL_bufend, UTF)) {
+            else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, tmpbuf + 1 + len, UTF)) {
 
                 /* See if there is a known identifier of the given kind.  For
                  * arrays, this might also be a reference to one of its
