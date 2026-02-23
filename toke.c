@@ -4853,9 +4853,9 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * elements.   XXX Maybe the latter should require a following
                  * '[' or '->[' */
                 const bool is_known =
-                           is_existing_identifier(tmpbuf, len, tmpbuf[0], UTF)
+                           is_existing_identifier(tmpbuf, len + 1, tmpbuf[0], UTF)
                        || (   tmpbuf[0] == '$'
-                           && is_existing_identifier(tmpbuf, len, '@', UTF));
+                           && is_existing_identifier(tmpbuf, len + 1, '@', UTF));
 
                 /* Under strict, an unknown variable means an error or a
                  * character class */
