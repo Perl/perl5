@@ -1430,7 +1430,7 @@ UNSHIFT(SV *obj, ...)
         LEAVE_LOCK;
 
 
-void
+SV*
 POP(SV *obj)
     CODE:
         dTHXc;
@@ -1440,14 +1440,14 @@ POP(SV *obj)
         SHARED_CONTEXT;
         ssv = av_pop((AV*)sobj);
         CALLER_CONTEXT;
-        ST(0) = sv_newmortal();
-        Perl_sharedsv_associate(aTHX_ ST(0), ssv);
+        RETVAL = newSV(0);
+        Perl_sharedsv_associate(aTHX_ RETVAL, ssv);
         SvREFCNT_dec(ssv);
         LEAVE_LOCK;
-        /* XSRETURN(1); - implied */
+    OUTPUT: RETVAL
 
 
-void
+SV*
 SHIFT(SV *obj)
     CODE:
         dTHXc;
@@ -1457,11 +1457,11 @@ SHIFT(SV *obj)
         SHARED_CONTEXT;
         ssv = av_shift((AV*)sobj);
         CALLER_CONTEXT;
-        ST(0) = sv_newmortal();
-        Perl_sharedsv_associate(aTHX_ ST(0), ssv);
+        RETVAL = newSV(0);
+        Perl_sharedsv_associate(aTHX_ RETVAL, ssv);
         SvREFCNT_dec(ssv);
         LEAVE_LOCK;
-        /* XSRETURN(1); - implied */
+    OUTPUT: RETVAL
 
 
 void
@@ -1505,7 +1505,7 @@ STORESIZE(SV *obj,IV count)
         SHARED_RELEASE;
 
 
-void
+SV*
 EXISTS(SV *obj, SV *index)
     CODE:
         dTHXc;
@@ -1526,11 +1526,11 @@ EXISTS(SV *obj, SV *index)
             exists = hv_exists((HV*) sobj, key, len);
         }
         SHARED_RELEASE;
-        ST(0) = (exists) ? &PL_sv_yes : &PL_sv_no;
-        /* XSRETURN(1); - implied */
+        RETVAL = (exists) ? &PL_sv_yes : &PL_sv_no;
 
+    OUTPUT: RETVAL
 
-void
+SV*
 FIRSTKEY(SV *obj)
     CODE:
         dTHXc;
@@ -1546,16 +1546,16 @@ FIRSTKEY(SV *obj)
             I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = newSVpvn_flags(key, len, SVs_TEMP | (utf8 ? SVf_UTF8 : 0));
+            RETVAL = newSVpvn_flags(key, len, (utf8 ? SVf_UTF8 : 0));
         } else {
             CALLER_CONTEXT;
-            ST(0) = &PL_sv_undef;
+            RETVAL = &PL_sv_undef;
         }
         LEAVE_LOCK;
-        /* XSRETURN(1); - implied */
+    OUTPUT: RETVAL
 
 
-void
+SV*
 NEXTKEY(SV *obj, SV *oldkey)
     CODE:
         dTHXc;
@@ -1573,20 +1573,20 @@ NEXTKEY(SV *obj, SV *oldkey)
             I32 utf8 = HeKUTF8(entry);
             key = hv_iterkey(entry,&len);
             CALLER_CONTEXT;
-            ST(0) = newSVpvn_flags(key, len, SVs_TEMP | (utf8 ? SVf_UTF8 : 0));
+            RETVAL = newSVpvn_flags(key, len, (utf8 ? SVf_UTF8 : 0));
         } else {
             CALLER_CONTEXT;
-            ST(0) = &PL_sv_undef;
+            RETVAL = &PL_sv_undef;
         }
         LEAVE_LOCK;
-        /* XSRETURN(1); - implied */
+    OUTPUT: RETVAL
 
 
 MODULE = threads::shared        PACKAGE = threads::shared
 
 PROTOTYPES: ENABLE
 
-void
+UV
 _id(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
@@ -1600,11 +1600,11 @@ _id(SV *myref)
         ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv)
             XSRETURN_UNDEF;
-        ST(0) = sv_2mortal(newSVuv(PTR2UV(ssv)));
-        /* XSRETURN(1); - implied */
+        RETVAL = PTR2UV(ssv);
+    OUTPUT: RETVAL
 
 
-void
+IV
 _refcnt(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
@@ -1621,11 +1621,11 @@ _refcnt(SV *myref)
             }
             XSRETURN_UNDEF;
         }
-        ST(0) = sv_2mortal(newSViv(SvREFCNT(ssv)));
-        /* XSRETURN(1); - implied */
+        RETVAL = SvREFCNT(ssv);
+    OUTPUT: RETVAL
 
 
-void
+SV*
 share(SV *myref)
     PROTOTYPE: \[$@%]
     CODE:
@@ -1635,8 +1635,8 @@ share(SV *myref)
         if (SvROK(myref))
             myref = SvRV(myref);
         Perl_sharedsv_share(aTHX_ myref);
-        ST(0) = sv_2mortal(newRV_inc(myref));
-        /* XSRETURN(1); - implied */
+        RETVAL = newRV_inc(myref);
+    OUTPUT: RETVAL
 
 
 void
@@ -1792,7 +1792,7 @@ cond_broadcast(SV *myref)
         COND_BROADCAST(&ul->user_cond);
 
 
-void
+SV*
 bless(SV* myref, ...)
     PROTOTYPE: $;$
     PREINIT:
@@ -1822,7 +1822,7 @@ bless(SV* myref, ...)
         }
         SvREFCNT_inc_void(myref);
         (void)sv_bless(myref, stash);
-        ST(0) = sv_2mortal(myref);
+        RETVAL = myref;
         ssv = Perl_sharedsv_find(aTHX_ myref);
         if (ssv) {
             dTHXc;
@@ -1835,7 +1835,8 @@ bless(SV* myref, ...)
             CALLER_CONTEXT;
             LEAVE_LOCK;
         }
-        /* XSRETURN(1); - implied */
+    OUTPUT: RETVAL
+
 
 #endif /* USE_ITHREADS */
 
