@@ -4538,12 +4538,23 @@ where it has parity with the other two forms.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
+/*
+=for apidoc_section $io_formats
+=for apidoc AmnD||STACK_OFFdf
+
+This symbol defines the format string used for printing a stack offset
+as a signed decimal integer.
+
+=cut
+*/
 #ifdef PERL_STACK_OFFSET_SSIZET
   typedef SSize_t Stack_off_t;
 #  define Stack_off_t_MAX SSize_t_MAX
+#  define STACK_OFFdf "zd"
 #else
   typedef I32 Stack_off_t;
 #  define Stack_off_t_MAX I32_MAX
+#  define STACK_OFFdf I32df
 #endif
 #define PERL_STACK_OFFSET_DEFINED
 
