@@ -120,7 +120,7 @@ The file Makefile.PL should look something like this:
     # the contents of the Makefile that is written.
     WriteMakefile(
         NAME         => 'Mytest',
-        VERSION_FROM => 'Mytest.pm', # finds $VERSION
+        VERSION_FROM => 'lib/Mytest.pm', # finds $VERSION
         LIBS         => [''],        # e.g., '-lm'
         DEFINE       => '',          # e.g., '-DHAVE_SOMETHING'
         INC          => '-I',        # e.g., '-I. -I/usr/include/other'
@@ -221,18 +221,15 @@ Perl has its own special way of easily writing test scripts, but for this
 example only, we'll create our own test script.  Create a file called hello
 that looks like this:
 
-    #! /opt/perl5/bin/perl
-
     use ExtUtils::testlib;
 
     use Mytest;
 
     Mytest::hello();
 
-Now we make the script executable (C<chmod +x hello>), run the script
-and we should see the following output:
+Now we run the script and we should see the following output:
 
-    % ./hello
+    % perl hello
     Hello, world!
     %
 
@@ -258,9 +255,6 @@ the end of that line is also optional.  Any amount and kind of whitespace
 may be placed between the "C<int>" and "C<input>".
 
 Now re-run make to rebuild our new shared library.
-
-Now perform the same steps as before, generating a Makefile from the
-Makefile.PL file, and running make.
 
 In order to test that our extension works, we now need to look at the
 file Mytest.t.  This file is set up to imitate the same kind of testing
@@ -605,7 +599,7 @@ the WriteMakefile call so that it looks like this:
 
 	WriteMakefile(
 	    NAME         => 'Mytest2',
-	    VERSION_FROM => 'Mytest2.pm', # finds $VERSION
+	    VERSION_FROM => 'lib/Mytest2.pm', # finds $VERSION
 	    LIBS         => [''],   # e.g., '-lm'
 	    DEFINE       => '',     # e.g., '-DHAVE_SOMETHING'
 	    INC          => '',     # e.g., '-I/usr/include/other'
@@ -689,17 +683,8 @@ could move the extension directory if we wanted to.
 There's now some new C code that's been added to the .xs file.  The purpose
 of the C<constant> routine is to make the values that are #define'd in the
 header file accessible by the Perl script (by calling either C<TESTVAL> or
-C<&Mytest2::TESTVAL>).  There's also some XS code to allow calls to the
+C<Mytest2::TESTVAL>).  There's also some XS code to allow calls to the
 C<constant> routine.
-
-=item *
-
-The .pm file originally exported the name C<TESTVAL> in the C<@EXPORT> array.
-This could lead to name clashes.  A good rule of thumb is that if the #define
-is only going to be used by the C routines themselves, and not by the user,
-they should be removed from the C<@EXPORT> array.  Alternately, if you don't
-mind using the "fully qualified name" of a variable, you could move most
-or all of the items from the C<@EXPORT> array into the C<@EXPORT_OK> array.
 
 =item *
 
@@ -1369,30 +1354,6 @@ As mentioned at the top of this document, if you are having problems with
 these example extensions, you might see if any of these help you.
 
 =over 4
-
-=item *
-
-In versions of 5.002 prior to the gamma version, the test script in Example
-1 will not function properly.  You need to change the "use lib" line to
-read:
-
-	use lib './blib';
-
-=item *
-
-In versions of 5.002 prior to version 5.002b1h, the test.pl file was not
-automatically created by h2xs.  This means that you cannot say "make test"
-to run the test script.  You will need to add the following line before the
-"use extension" statement:
-
-	use lib './blib';
-
-=item *
-
-In versions 5.000 and 5.001, instead of using the above line, you will need
-to use the following line:
-
-	BEGIN { unshift(@INC, "./blib") }
 
 =item *
 
