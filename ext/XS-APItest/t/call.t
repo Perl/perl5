@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(547);
+    plan(548);
     use_ok('XS::APItest')
 };
 use Config;
@@ -396,3 +396,47 @@ fresh_perl_like('use XS::APItest;'
               .'XS::APItest::XSUB::test_mismatch_xs_handshake_bad_struct_and_ver("Dog");'
               , qr/\QPerl API version v1.1337.0 of APItest.xs does not match\E/);
 
+{
+    local $ENV{PERL5DB} = 1;
+    fresh_perl_is(<<'CODE', <<'EXPECT', { switches => [ "-d" ] }, "call from package DB");
+use XS::APItest;
+$DB::enable = 1;  # avoid noise from XS loading
+print "Before\n";
+DB::doit();
+NonDB::doit();
+print "After\n";
+$DB::enable = 0;
+
+sub f {
+    print "In f\n";
+}
+
+package DB;
+
+sub DB {}
+
+sub doit {
+    XS::APItest::call_sv(\&main::f, 0);
+}
+
+sub sub {
+    print "sub $DB::sub\n" if $DB::enable;
+    &$DB::sub;
+}
+
+package NonDB;
+
+sub doit {
+    XS::APItest::call_sv(\&main::f, 0);
+}
+CODE
+Before
+sub DB::doit
+In f
+sub NonDB::doit
+sub XS::APItest::call_sv
+sub main::f
+In f
+After
+EXPECT
+}
