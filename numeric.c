@@ -499,7 +499,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
         goto done_parse;
     }
 
-    /* check_underscore() succeeds only if the next char is a legal digit */
+    /* underscore_valid() succeeds only if the next char is a legal digit */
     s++;
 
     /* If we haven't seen any non-zero digits yet, we can jump back in to the
@@ -541,7 +541,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
                 break;
             }
 
-            /* check_underscore() succeeds only if the next char is a legal
+            /* underscore_valid() succeeds only if the next char is a legal
              * digit */
             ++s;
         }
@@ -581,8 +581,8 @@ Other compromises kick in only when the result is within a digit of overflowing.
         /* Otherwise, there is room for this digit; accumulate it and repeat
          *
          * Note XDIGIT_VALUE() is branchless, works on binary and octal as
-         * well, so can be used here, without noticeably slowing those down
-         * (it does have unnecessary shifts, ANDSs, and additions for those)
+         * well, so can be used here, without noticeably slowing those down.
+         * (It does have unnecessary shifts, ANDSs, and additions for those.)
          * */
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
