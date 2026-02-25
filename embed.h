@@ -36,6 +36,7 @@
 #   undef pTHX_10
 #   undef pTHX_11
 #   undef SHY_NATIVE
+#   undef STACK_OFFdf
 #   undef sv_2num
 #   undef SvRVx
 #   undef UNI_DISPLAY_TR_
