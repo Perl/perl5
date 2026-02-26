@@ -14,13 +14,12 @@
 : file, and which expands to call the real (full) name, with any appropriate
 : thread context parameters, thus hiding that detail from the typical code.
 :
-: Many macros (as opposed to functions) listed here are the complete full name,
-: though we may want to start converting those to have full names.
-:
 : embed.pl uses the entries here to construct:
 :   1) proto.h to declare to the compiler the function interfaces; and
 :   2) embed.h to create short name macros, and to control the visibility of
 :      other macros
+:   3) long_names.c holds long-named function definitions that implement
+:      short-named macros listed here, when a function is necessary.
 :
 : Static functions internal to a file need not appear here, but there is
 : benefit to declaring them here:
@@ -37,44 +36,61 @@
 : Lines in this file are of the form:
 :    flags|return_type|name|arg1|arg2|...|argN ( assert(...) )*
 :
+: A line may be continued onto the next by ending it with a backslash.
+: Leading and trailing whitespace will be ignored in each component.
+:
+: 'name' is the name of the function, macro, typedef, etc.  It returns values
+: of type 'return_type'.  Use 'void' if there is no return value.
+:
 : 'flags' is a string of single letters.  Most of the flags are meaningful only
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
 : comments here mostly don't include how Devel::PPPort or diag.t use them:
-: All the possible flags and their meanings are given below.
+: All the possible flags and their meanings are given in comments below.
 :
 : A function taking no parameters will have no 'arg' elements.  Currently
 : arguments that are function pointers are unlikely to be parsed properly here
 : (patches welcome!); you can work around this by creating a typedef for the
-: function pointer, in an appropriate header file and using that here.
-:
-: A line may be continued onto the next by ending it with a backslash.
-: Leading and trailing whitespace will be ignored in each component.
+: function pointer in an appropriate header file and use that here.
 :
 : The optional list of asserts is used to customize the generated
 : PERL_ARGS_ASSERT macro.  See AUTOMATIC PARAMETER SANITY CHECKING below
 :
-: Most entries here have a macro created with the entry name.  This presents
-: name space collision potentials which haven't been well thought out, but are
-: now documented here.  In practice this has rarely been an issue.  At least,
-: with a macro, the XS author can #undef it, unlike a function.
+: In practice, every element here will have at least one flag.  But without any
+: flags, the default would be to create an entry in proto.h declaring 'name' as
+: a function returning 'return_type' with arguments aTHX, 'arg1', ..., 'argN'.
+: The function would be visible to only other files in the perl core, unless
+: the system doesn't allow visibility restrictions.
 :
-: The default without flags is to declare a function for internal perl-core use
-: only.  The short name is visible only when the PERL_CORE symbol is defined.
-: On some platforms all non-static functions are currently externally visible.
-: Because of this, and also for programs that embed perl, most non-static
-: functions should have the 'p' flag to avoid namespace clashes.
+: But, in practice, every function listed here will have a flag to indicate
+: that the function's name isn't precisely 'name', but is a perturbation of
+: that so that the actual name declared in proto.h is either 'S_name' (for
+: static (file-scoped) functions) or 'Perl_name' (for functions visible outside
+: a single file).  (A very few cases have a different backwards-compatibility
+: name instead.)  A macro is then added to embed.h which maps 'name' to the
+: actual name.  If the Perl interpreter is embedded in a larger application, or
+: on platforms where all non-static functions are externally visible, there
+: could be two functions with the same name; making ours 'Perl_foo' instead of
+: 'foo' prevents that.  This is done by using the 'p' flag.  Hence, just about
+: every function element here that is non-static should have that flag
+: specified.
 :
-: There are several advantages to using a macro instead of the full Perl_foo or
-: S_foo form: it hides the need to know if the called function requires a
-: thread context parameter or not, and the code using it is more readable
-: because of fewer parameters being visible.  And if there is some bug in it
-: that gets fixed in a later release, ppport.h can be changed to automatically
-: backport the fixed version to modules.  The only disadvantage khw can think
-: of is the namespace pollution one.
+: Most calls wanting to invoke 'name' will use that precise spelling, which
+: embed.h maps to the actual function.  This allows the macro to do some
+: hanky-panky behind the scenes to hide various details from the caller.
+: Notably, this includes whether or not to call the function with a
+: thread-context parameter.  This parameter is only needed for threaded or
+: embedded uses of perl, and it would be wasteful to have to call functions
+: with an extra meaningless parameter, so it is omitted unless needed.  The
+: macro in embed.h knows whether there is one or not, expanding appropriately
+: without exposing it to the code calling it.  Hence the same source code works
+: in both cases.  The macro can hide other things as well.  Devel::PPPort, for
+: example, can redefine the macro to backport fixes to bugs.
 :
-: The default for any macro created after v5.43.6 is to hide it from all but
-: the Perl core.  Use the visibility-affecting flags described below to change
-: that.
+: For elements in place here in 5.42 and earlier, the visibility of the macros
+: in embed.h (and other header files) is everywhere.  This presents the
+: possibility of name space collisions in XS code, generally resolved by the XS
+: writer changing their name to not conflict.  For elements created later than
+: that, the default visibility is core-only.
 :
 : WARNING: The default hiding of symbols from XS code applies only to functions
 : and macros.  Other types of values that are created in a header file, such as
@@ -121,8 +137,8 @@
 :
 :         Some of these have been constructed so that the wrapper macro names
 :         begin with an underscore to lessen the chances of a name collision.
-:         However, this is contrary to the C standard, and those should be
-:         changed.
+:         However, this is contrary to the C standard, many of those have been
+:         changed, and the remainder should be.
 :
 : The 'E' flag is used instead for elements that are supposed to be used only
 :         in the core, plus extensions compiled with the PERL_EXT symbol
