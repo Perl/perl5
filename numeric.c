@@ -219,15 +219,30 @@ Perl_cast_uv(NV f)
 void
 Perl_output_non_portable(pTHX_ const U8 base)
 {
+    PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
+
     /* Display the proper message for a number in the given input base not
      * fitting in 32 bits */
-    const char * which = (base == 2)
-                      ? "Binary number > 0b11111111111111111111111111111111"
-                      : (base == 8)
-                        ? "Octal number > 037777777777"
-                        : "Hexadecimal number > 0xffffffff";
-
-    PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE;
+    const char * which;
+    switch (base) {
+      case 2:
+        which = "Binary number > 0b11111111111111111111111111111111";
+        break;
+      case 8:
+        which = "Octal number > 037777777777";
+        break;
+      case 10:
+        return;
+        /* Historically no warnings of this type have been output for decimals
+         * which = "Decimal number > 4294967295 (0xffff_ffff)";
+         */
+        break;
+      case 16:
+        which = "Hexadecimal number > 0xffffffff";
+        break;
+      default:
+        croak("panic: Unexpected numeric base %d", base);
+    }
 
     /* Also there are diag listings for the others.  That's because, since
      * %s is the first thing in the message, it would be hard for a user to
