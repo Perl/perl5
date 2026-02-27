@@ -342,7 +342,8 @@ CODE:
 OUTPUT:
     RETVAL
 
-void
+
+SV*
 invert_opset(opset)
     SV *opset
 CODE:
@@ -350,7 +351,7 @@ CODE:
     char *bitmap;
     STRLEN len = opset_len;
 
-    opset = sv_2mortal(new_opset(aTHX_ opset));	/* verify and clone opset */
+    opset = new_opset(aTHX_ opset);	/* verify and clone opset */
     bitmap = SvPVX(opset);
     while(len-- > 0)
 	bitmap[len] = ~bitmap[len];
@@ -358,7 +359,8 @@ CODE:
     if (PL_maxo & 07)
 	bitmap[opset_len-1] &= ~(char)(0xFF << (PL_maxo & 0x07));
     }
-    ST(0) = opset;
+    RETVAL = opset;
+OUTPUT: RETVAL
 
 
 void
@@ -385,14 +387,14 @@ PPCODE:
     }
 
 
-void
+SV*
 opset(...)
 CODE:
     int i;
     SV *bitspec;
     STRLEN len, on;
 
-    SV * const opset = sv_2mortal(new_opset(aTHX_ Nullsv));
+    SV * const opset = new_opset(aTHX_ Nullsv);
     char * const bitmap = SvPVX(opset);
     for (i = 0; i < items; i++) {
 	const char *opname;
@@ -408,13 +410,14 @@ CODE:
 	}
 	set_opset_bits(aTHX_ bitmap, bitspec, on, opname);
     }
-    ST(0) = opset;
+    RETVAL = opset;
+OUTPUT: RETVAL
 
 
 #define PERMITING  (ix == 0 || ix == 1)
 #define ONLY_THESE (ix == 0 || ix == 2)
 
-void
+SV*
 permit_only(safe, ...)
     SV *safe
 ALIAS:
@@ -451,7 +454,8 @@ CODE:
 	}
 	set_opset_bits(aTHX_ bitmap, bitspec, on, opname);
     }
-    ST(0) = &PL_sv_yes;
+    RETVAL = &PL_sv_yes;
+OUTPUT: RETVAL
 
 
 
@@ -496,7 +500,7 @@ PPCODE:
     }
 
 
-void
+SV*
 define_optag(optagsv, mask)
     SV *optagsv
     SV *mask
@@ -505,19 +509,24 @@ CODE:
     const char *optag = SvPV(optagsv, len);
 
     put_op_bitspec(aTHX_ optag, len, mask); /* croaks */
-    ST(0) = &PL_sv_yes;
+    RETVAL = &PL_sv_yes;
+OUTPUT: RETVAL
 
 
-void
+SV*
 empty_opset()
 CODE:
-    ST(0) = sv_2mortal(new_opset(aTHX_ Nullsv));
+    RETVAL = new_opset(aTHX_ Nullsv);
+OUTPUT: RETVAL
 
-void
+
+SV*
 full_opset()
 CODE:
     dMY_CXT;
-    ST(0) = sv_2mortal(new_opset(aTHX_ opset_all));
+    RETVAL = new_opset(aTHX_ opset_all);
+OUTPUT: RETVAL
+
 
 void
 opmask_add(opset)
@@ -538,16 +547,18 @@ PPCODE:
 	XPUSHs(sv_2mortal(newSViv(PL_maxo)));
     }
 
-void
+
+SV*
 opmask()
 CODE:
-    ST(0) = sv_2mortal(new_opset(aTHX_ Nullsv));
+    RETVAL = new_opset(aTHX_ Nullsv);
     if (PL_op_mask) {
-	char * const bitmap = SvPVX(ST(0));
+	char * const bitmap = SvPVX(RETVAL);
 	int myopcode;
 	for(myopcode=0; myopcode < PL_maxo; ++myopcode) {
 	    if (PL_op_mask[myopcode])
 		bitmap[myopcode >> 3] |= 1 << (myopcode & 0x07);
 	}
     }
+OUTPUT: RETVAL
 

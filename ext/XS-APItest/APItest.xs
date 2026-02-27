@@ -3364,7 +3364,7 @@ END()
     CODE:
         sv_inc(get_sv("XS::APItest::END_called", GV_ADD|GV_ADDMULTI));
 
-void
+SV*
 utf16_to_utf8 (sv, ...)
     SV* sv
         ALIAS:
@@ -3390,10 +3390,14 @@ utf16_to_utf8 (sv, ...)
         SvCUR_set(dest, got);
         SvPVX(dest)[got] = '\0';
         SvPOK_on(dest);
-        ST(0) = dest;
-        XSRETURN(1);
+        /* counteract the second mortalisation the SV* OUTPUT typmap
+         * is about to perform */
+        SvREFCNT_inc(dest);
+        RETVAL = dest;
+    OUTPUT: RETVAL
 
-void
+
+SV*
 utf8_to_utf16 (sv, ...)
     SV* sv
         ALIAS:
@@ -3419,8 +3423,11 @@ utf8_to_utf16 (sv, ...)
         SvCUR_set(dest, got);
         SvPVX(dest)[got] = '\0';
         SvPOK_on(dest);
-        ST(0) = dest;
-        XSRETURN(1);
+        /* counteract the second mortalisation the SV* OUTPUT typmap
+         * is about to perform */
+        SvREFCNT_inc(dest);
+        RETVAL = dest;
+    OUTPUT: RETVAL
 
 void
 my_exit(int exitcode)
@@ -4278,9 +4285,8 @@ multicall_return(block, context)
     SV *block
     I32 context
 PROTOTYPE: &$
-CODE:
+PPCODE:
 {
-    dSP;
     dMULTICALL;
     GV *gv;
     HV *stash;
@@ -4330,9 +4336,8 @@ CODE:
     size = AvFILLp(av) + 1;
     EXTEND(SP, size);
     for (i = 0; i < size; i++)
-        ST(i) = *av_fetch_simple(av, i, FALSE);
+        PUSHs(*av_fetch_simple(av, i, FALSE));
     sv_2mortal((SV*)av);
-    XSRETURN(size);
 }
 
 

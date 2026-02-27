@@ -7849,7 +7849,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-void
+SV*
 last_op_in_netorder()
 ALIAS:
     is_storing = ST_STORE
@@ -7864,7 +7864,8 @@ CODE:
     } else {
         result = cBOOL(last_op_in_netorder(aTHX));
     }
-    ST(0) = boolSV(result);
+    RETVAL = boolSV(result);
+OUTPUT: RETVAL
 
 
 IV

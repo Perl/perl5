@@ -144,9 +144,9 @@ get_overlay_object(pTHX_ const OP *o, const char * const name, U32 namelen)
 
 
 static SV *
-make_sv_object(pTHX_ SV *sv)
+make_sv_object_nonmortal(pTHX_ SV *sv)
 {
-    SV *const arg = sv_newmortal();
+    SV *const arg = newSV(0);
     const char *type = 0;
     IV iv;
     dMY_CXT;
@@ -164,6 +164,14 @@ make_sv_object(pTHX_ SV *sv)
     sv_setiv(newSVrv(arg, type), iv);
     return arg;
 }
+
+
+static SV *
+make_sv_object(pTHX_ SV *sv)
+{
+    return sv_2mortal(make_sv_object_nonmortal(aTHX_ sv));
+}
+
 
 static SV *
 make_temp_object(pTHX_ SV *temp)
@@ -723,36 +731,40 @@ svref_2object(sv)
 	    croak("argument is not a reference");
 	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
 
-void
+
+IV
 opnumber(name)
 const char *	name
 CODE:
 {
  int i;
- IV  result = -1;
- ST(0) = sv_newmortal();
+ RETVAL = -1;
  if (strBEGINs(name,"pp_"))
    name += 3;
  for (i = 0; i < PL_maxo; i++)
   {
    if (strEQ(name, PL_op_name[i]))
     {
-     result = i;
+     RETVAL = i;
      break;
     }
   }
- sv_setiv(ST(0),result);
 }
 
-void
+    OUTPUT: RETVAL
+
+
+SV*
 ppname(opnum)
 	int	opnum
     CODE:
-	ST(0) = sv_newmortal();
-	if (opnum >= 0 && opnum < PL_maxo)
-	    Perl_sv_setpvf(aTHX_ ST(0), "pp_%s", PL_op_name[opnum]);
+        RETVAL = (opnum >= 0 && opnum < PL_maxo)
+                ? Perl_newSVpvf(aTHX_ "pp_%s", PL_op_name[opnum])
+                : &PL_sv_undef;
+    OUTPUT: RETVAL
 
-void
+
+SV*
 hash(sv)
 	SV *	sv
     CODE:
@@ -760,7 +772,9 @@ hash(sv)
 	U32 hash = 0;
 	const char *s = SvPVbyte(sv, len);
 	PERL_HASH(hash, s, len);
-	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "0x%" UVxf, (UV)hash));
+	RETVAL = Perl_newSVpvf(aTHX_ "0x%" UVxf, (UV)hash);
+    OUTPUT: RETVAL
+
 
 #define cast_I32(foo) (I32)foo
 IV
@@ -1654,14 +1668,15 @@ IVX(sv)
 	ST(0) = ret;
 	XSRETURN(1);
 
-void
+
+SV*
 packiv(sv)
 	B::IV	sv
     ALIAS:
 	needs64bits = 1
     CODE:
 	if (ix) {
-	    ST(0) = boolSV((I32)SvIVX(sv) != SvIVX(sv));
+	    RETVAL = boolSV((I32)SvIVX(sv) != SvIVX(sv));
 	} else if (sizeof(IV) == 8) {
 	    U32 wp[2];
 	    const IV iv = SvIVX(sv);
@@ -1678,11 +1693,13 @@ packiv(sv)
 	    wp[0] = htonl(((U32)iv) >> (sizeof(UV)*4));
 #endif
 	    wp[1] = htonl(iv & 0xffffffff);
-	    ST(0) = newSVpvn_flags((char *)wp, 8, SVs_TEMP);
+	    RETVAL = newSVpvn((char *)wp, 8);
 	} else {
 	    U32 w = htonl((U32)SvIVX(sv));
-	    ST(0) = newSVpvn_flags((char *)&w, 4, SVs_TEMP);
+	    RETVAL = newSVpvn((char *)&w, 4);
 	}
+    OUTPUT: RETVAL
+
 
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
@@ -1788,7 +1805,8 @@ RV(sv)
             croak( "argument is not SvROK" );
 	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
 
-void
+
+SV*
 PV(sv)
 	B::PV	sv
     ALIAS:
@@ -1844,7 +1862,10 @@ PV(sv)
             /* croak( "argument is not SvPOK" ); */
 	    p = NULL;
         }
-	ST(0) = newSVpvn_flags(p, len, SVs_TEMP | utf8);
+	RETVAL = newSVpvn_flags(p, len, utf8);
+
+    OUTPUT: RETVAL
+
 
 MODULE = B	PACKAGE = B::PVMG
 
@@ -1944,16 +1965,19 @@ BmRARE(sv)
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
-void
+
+SV*
 GvNAME(gv)
 	B::GV	gv
     ALIAS:
 	FILE = 1
 	B::HV::NAME = 2
     CODE:
-	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
-					: (ix == 1 ? GvFILE_HEK(gv)
-						   : HvNAME_HEK((HV *)gv))));
+        RETVAL = newSVhek(!ix   ? GvNAME_HEK(gv)
+                                : (ix == 1 ? GvFILE_HEK(gv)
+                                           : HvNAME_HEK((HV *)gv)));
+    OUTPUT: RETVAL
+
 
 bool
 is_empty(gv)
@@ -2135,18 +2159,21 @@ CvHSCXT(cv)
     OUTPUT:
 	RETVAL
 
-void
+
+SV*
 CvXSUB(cv)
 	B::CV	cv
     ALIAS:
 	XSUBANY = 1
     CODE:
-	ST(0) = ix && CvCONST(cv)
-	    ? make_sv_object(aTHX_ (SV *)CvXSUBANY(cv).any_ptr)
-	    : sv_2mortal(newSViv(CvISXSUB(cv)
+	RETVAL = ix && CvCONST(cv)
+	    ? make_sv_object_nonmortal(aTHX_ (SV *)CvXSUBANY(cv).any_ptr)
+	    : newSViv(CvISXSUB(cv)
 				 ? (ix ? CvXSUBANY(cv).any_iv
 				       : PTR2IV(CvXSUB(cv)))
-				 : 0));
+				 : 0);
+    OUTPUT: RETVAL
+
 
 void
 const_sv(cv)
@@ -2154,11 +2181,12 @@ const_sv(cv)
     PPCODE:
 	PUSHs(make_sv_object(aTHX_ (SV *)cv_const_sv(cv)));
 
-void
+SV*
 GV(cv)
 	B::CV cv
     CODE:
-	ST(0) = make_sv_object(aTHX_ (SV*)CvGV(cv));
+	RETVAL = make_sv_object_nonmortal(aTHX_ (SV*)CvGV(cv));
+    OUTPUT: RETVAL
 
 SV *
 NAME_HEK(cv)
