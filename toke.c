@@ -12620,7 +12620,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
     bool warned_about_underscore = 0;
-    I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
+    uint_fast8_t base = 10; /* Number base 2, 8, 10, 16 */
 
 #define WARN_ABOUT_UNDERSCORE()                         \
         STMT_START {                                    \
@@ -12731,9 +12731,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         bool overflowed = FALSE;
         bool just_zero  = TRUE;	/* just plain 0 or binary number? */
         bool has_digs = FALSE;
-        static const NV nvshift[5] = { 1.0, 2.0, 4.0, 8.0, 16.0 };
         static const char* const bases[5] =
           { "", "binary", "", "octal", "hexadecimal" };
+        I32 shift = 0; /* shift per digit for hex/oct/bin */
 
         switch (toFOLD_A(s[1])) {
           case 'e': /* check for a decimal in disguise */
@@ -12742,12 +12742,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
           case 'x':
             shift = 4;
+            base = 16;
             s += 2;
             just_zero = FALSE;
             break;
 
           case 'b':
             shift = 1;
+            base = 2;
             s += 2;
             just_zero = FALSE;
             break;
@@ -12782,6 +12784,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             }
 
             shift = 3;
+            base = 8;
             s++;
             break;
         }
@@ -12852,7 +12855,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         u = x | b;		/* add the digit to the end */
                 }
                 if (overflowed) {
-                    n *= nvshift[shift];
+                    n *= (NV) base;
                     /* If an NV has not enough bits in its
                      * mantissa to represent an UV this summing of
                      * small low-order numbers is a waste of time
@@ -12972,7 +12975,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                 }
 #else /* HEXFP_NV */
                                 if (accumulate) {
-                                    nv_mult /= nvshift[shift];
+                                    nv_mult /= (NV) base;
                                     if (nv_mult > 0.0)
                                         hexfp_nv += b * nv_mult;
                                     else
@@ -13058,13 +13061,13 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             if (overflowed) {
                 if (n > 4294967295.0)
-                    output_non_portable(1 << shift);
+                    output_non_portable(base);
                 sv = newSVnv(n);
             }
             else {
 #if UVSIZE > 4
                 if (u > 0xffffffff)
-                    output_non_portable(1 << shift);
+                    output_non_portable(base);
 #endif
                 sv = newSVuv(u);
             }
@@ -13093,12 +13096,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         if (hexfp) {
             floatit = TRUE;
             *d++ = '0';
-            switch (shift) {
-            case 4:
+            switch (base) {
+            case 16:
                 *d++ = 'x';
                 s = start + 2;
                 break;
-            case 3:
+            case 8:
                 if (octal_with_0o) {
                     *d++ = 'o';
                     s = start + 2;
@@ -13106,7 +13109,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 }
                 s = start + 1;
                 break;
-            case 1:
+            case 2:
                 *d++ = 'b';
                 s = start + 2;
                 break;
