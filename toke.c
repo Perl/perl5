@@ -12800,7 +12800,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
             /* if we don't mention it, we're done */
             default:
-                goto out;
+                goto finish_integer;
 
             /* _ are ignored -- but warned about if consecutive */
             case '_':
@@ -12829,7 +12829,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
                 /* make sure they said 0x */
                 if (shift != 4)
-                    goto out;
+                    goto finish_integer;
                 b = (*s++ & 7) + 9;
 
                 /* Prepare to put the digit we have onto the end
@@ -12870,7 +12870,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 /* this could be hexfp, but peek ahead
                  * to avoid matching ".." */
                 if (UNLIKELY(HEXFP_PEEK(s))) {
-                    goto out;
+                    goto finish_integer;
                 }
 
                 break;
@@ -12880,7 +12880,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
       /* if we get here, we had success: make a scalar value from
          the number.
       */
-      out:
+      finish_integer:
 
                 /* final misplaced underbar check */
                 SUFFER_AN_UNDERSCORE_JUST_BEFORE_HERE(s);
