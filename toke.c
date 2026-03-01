@@ -12736,6 +12736,10 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
           { "", "binary", "", "octal", "hexadecimal" };
 
         switch (toFOLD_A(s[1])) {
+          case 'e': /* check for a decimal in disguise */
+          case '.':
+            goto decimal;
+
           case 'x':
             shift = 4;
             s += 2;
@@ -12747,10 +12751,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             s += 2;
             just_zero = FALSE;
             break;
-
-          case 'e': /* check for a decimal in disguise */
-          case '.':
-            goto decimal;
 
           default: /* so it must be octal */
             shift = 3;
