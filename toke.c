@@ -12735,21 +12735,24 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         static const char* const bases[5] =
           { "", "binary", "", "octal", "hexadecimal" };
 
-        /* check for hex */
-        if (isALPHA_FOLD_EQ(s[1], 'x')) {
+        switch (toFOLD_A(s[1])) {
+          case 'x':
             shift = 4;
             s += 2;
             just_zero = FALSE;
-        } else if (isALPHA_FOLD_EQ(s[1], 'b')) {
+            break;
+
+          case 'b':
             shift = 1;
             s += 2;
             just_zero = FALSE;
-        }
-        /* check for a decimal in disguise */
-        else if (s[1] == '.' || isALPHA_FOLD_EQ(s[1], 'e'))
+            break;
+
+          case 'e': /* check for a decimal in disguise */
+          case '.':
             goto decimal;
-        /* so it must be octal */
-        else {
+
+          default: /* so it must be octal */
             shift = 3;
             s++;
             if (isALPHA_FOLD_EQ(*s, 'o')) {
@@ -12757,6 +12760,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 just_zero = FALSE;
                 new_octal = TRUE;
             }
+
+            break;
         }
 
         SUFFER_AN_UNDERSCORE_HERE(s);
