@@ -12752,15 +12752,37 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             just_zero = FALSE;
             break;
 
-          default: /* so it must be octal */
-            shift = 3;
-            s++;
-            if (isALPHA_FOLD_EQ(*s, 'o')) {
+          default: /* Any other leading zero means it could be octal */
+
+            /* Looking at the next character may resolve this */
+            if (isDIGIT_A(s[1])) {
+
+                /* 01..07 are octal.  We treat even 08 or 09 as an attempt at
+                 * octal, and will raise an error */
+                has_digs = true;
+                just_zero = false;
+            }
+            else switch (toFOLD_A(s[1])) {
+              case 'o':     /* Definitely octal */
                 s++;
                 just_zero = FALSE;
                 new_octal = TRUE;
+                break;
+
+              case '_':
+                /* An underscore needs more look ahead, in part to see if a
+                 * warning should be raised, so treat it as octal for now */
+                break;
+
+              default:
+                /* Anything else including a '.' or 'e' means this was just a
+                 * single zero, not indicating an octal, so is a decimal.  0p4
+                 * also isn't considered an octal. */
+                goto decimal;
             }
 
+            shift = 3;
+            s++;
             break;
         }
 
