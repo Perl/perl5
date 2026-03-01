@@ -12617,12 +12617,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     const char *s = start;	/* current position in buffer */
     const char *s_end = s + strlen(s);
-    char *d;			/* destination in temp buffer */
-    char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
-    bool floatit;			/* boolean: int or float? */
-    static const char* const number_too_long = "Number too long";
     bool warned_about_underscore = 0;
     I32 shift = 0; /* shift per digit for hex/oct/bin, hoisted here for fp */
 
@@ -13058,13 +13054,15 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
       case '7': case '8': case '9':
       case '.':
       decimal:
+       {
+        static const char* const number_too_long = "Number too long";
 
         /* handle decimal numbers.
            we're also sent here when we read a 0 as the first digit
          */
-        d = PL_tokenbuf;
-        e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punctuation */
-        floatit = FALSE;
+        char *d = PL_tokenbuf;
+        char *e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punct */
+        bool floatit = FALSE;       /* boolean: int or float? */
         if (hexfp) {
             floatit = TRUE;
             *d++ = '0';
@@ -13264,6 +13262,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 
         break;
+     } /* End of floating/decimal case */
     }  /* End of switch on first character */
 
     /* make the op for the constant and return */
