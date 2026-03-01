@@ -12704,6 +12704,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     /* We use the first character to decide what type of number this is */
 
     switch (*s) {
+      default:
+        croak("panic: scan_num, *s=%c", *s);
+
       case 'v':
       vstring:
         sv = newSV(5); /* preallocate storage space */
@@ -13261,9 +13264,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         }
 
         break;
-
-      default:
-        croak("panic: scan_num, *s=%c", *s);
     }  /* End of switch on first character */
 
     /* make the op for the constant and return */
