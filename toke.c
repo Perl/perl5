@@ -12616,6 +12616,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     PERL_ARGS_ASSERT_SCAN_NUM;
 
     const char *s = start;	/* current position in buffer */
+    const char *s_end = s + strlen(s);
     char *d;			/* destination in temp buffer */
     char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
@@ -12636,7 +12637,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 /* Call this when we're not expecting an underscore, but are willing to
  * tolerate one if found, but raising a warning about it.  It absorbs any
- * adjacent underscores up to PL_bufend, advancing 's' to point to the byte
+ * adjacent underscores up to s_end, advancing 's' to point to the byte
  * after the final underscore */
 #define SUFFER_AN_UNDERSCORE_HERE(s)                        \
         STMT_START {                                        \
@@ -12646,7 +12647,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 /* Absorb any adjacent underscores */       \
                 do {                                        \
                     (s)++;                                  \
-                } while ((s) < PL_bufend && *(s) == '_');   \
+                } while ((s) < s_end && *(s) == '_');   \
             }                                               \
         } STMT_END
 
@@ -12707,7 +12708,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         sv = newSV(5); /* preallocate storage space */
         ENTER_with_name("scan_vstring");
         SAVEFREESV(sv);
-        s = scan_vstring(s, PL_bufend, sv);
+        s = scan_vstring(s, s_end, sv);
         SvREFCNT_inc_simple_void_NN(sv);
         LEAVE_with_name("scan_vstring");
     }
