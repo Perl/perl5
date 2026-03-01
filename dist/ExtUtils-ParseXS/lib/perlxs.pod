@@ -4972,7 +4972,7 @@ disposition should be.  You can look through this list also to find
 names to avoid using yourself.
 
 Perl does reserve for itself names that begin with C<PL_> or have some
-form of C<perl> inside them (upper- and/or lowercase, but delimitted in
+form of C<perl> inside them (upper- and/or lowercase, but delimited in
 some way on both ends, such as C</^Perl_/>.  A pattern giving the exact
 spellings is also near the top of the file F<regen/embed.pl>.
 
