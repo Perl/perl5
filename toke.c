@@ -12703,7 +12703,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     /* We use the first character to decide what type of number this is */
 
-    if (*s == 'v') {
+    switch (*s) {
+      case 'v':
       vstring:
         sv = newSV(5); /* preallocate storage space */
         ENTER_with_name("scan_vstring");
@@ -12711,9 +12712,10 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         s = scan_vstring(s, s_end, sv);
         SvREFCNT_inc_simple_void_NN(sv);
         LEAVE_with_name("scan_vstring");
-    }
-    else if (*s == '0') {
+        break;
 
+      case '0':
+       {
         /* if it starts with a 0, it could be an octal number, a decimal in
            0.13 disguise, or a hexadecimal number, or a binary number.
          *
@@ -13046,8 +13048,12 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         else if (PL_hints & HINT_NEW_BINARY)
             sv = new_constant(start, s - start, "binary",
                               sv, NULL, NULL, 0, NULL);
-    }
-    else if (isDIGIT_A(*s) || *s == '.') {
+        break;
+       }
+
+      case '1': case '2': case '3': case '4': case '5': case '6':
+      case '7': case '8': case '9':
+      case '.':
       decimal:
 
         /* handle decimal numbers.
@@ -13253,13 +13259,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
                                 key, keylen, sv, NULL, NULL, 0, NULL);
         }
-    }
-    else {
+
+        break;
+
+      default:
         croak("panic: scan_num, *s=%c", *s);
-    }
+    }  /* End of switch on first character */
 
     /* make the op for the constant and return */
-
     if (sv)
         lvalp->opval = newSVOP(OP_CONST, 0, sv);
     else
