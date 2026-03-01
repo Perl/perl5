@@ -2665,7 +2665,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SBOX32_CASE_
     SVf_
     TOO_LATE_FOR_
-    type1_
     UNISKIP_BY_MSB_
     UTF8_IS_SUPER_NO_CHECK_
     UTF8_NO_CONFIDENCE_IN_CURLEN_
