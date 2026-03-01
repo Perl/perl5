@@ -12679,7 +12679,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
      * using long doubles), in which case we have to resort to NV,
      * which will probably mean horrible loss of precision due to
      * multiple fp operations. */
-    bool hexfp = FALSE;
     int significant_bits = 0;
 #if NVSIZE == 8 && defined(HAS_QUAD) && defined(Uquad_t)
 #  define HEXFP_UQUAD
@@ -12888,7 +12887,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
                 if (UNLIKELY(HEXFP_PEEK(s))) {
                     /* Do sloppy (on the underbars) but quick detection
-                     * (and value construction) for hexfp, the decimal
+                     * (and value construction); the decimal
                      * detection will shortly be more thorough with the
                      * underbar checks. */
                     const char* h = s;
@@ -13038,7 +13037,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #ifdef HEXFP_UQUAD
                             hexfp_exp -= hexfp_frac_bits;
 #endif
-                            hexfp = TRUE;
                             goto decimal;
                         }
                     }
@@ -13093,7 +13091,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         char *d = PL_tokenbuf;
         char *e = C_ARRAY_END(PL_tokenbuf) - 6; /* room for various punct */
         bool floatit = FALSE;       /* boolean: int or float? */
-        if (hexfp) {
+
+        if (base != 10) {
             floatit = TRUE;
             *d++ = '0';
             switch (base) {
@@ -13120,7 +13119,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
         /* read next group of digits and _ and copy into d */
         while (   isDIGIT_or_UNDERSCORE(*s)
-               || UNLIKELY(hexfp && isXDIGIT(*s)))
+               || UNLIKELY(base != 10 && isXDIGIT(*s)))
         {
             /* skip underscores, checking for misplaced ones
                if -w is on
@@ -13155,7 +13154,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             /* copy, ignoring underbars, until we run out of digits.
             */
             while (   isDIGIT_or_UNDERSCORE(*s)
-                   || UNLIKELY(hexfp && isXDIGIT(*s)))
+                   || UNLIKELY(base != 10 && isXDIGIT(*s)))
             {
                 /* fixed length buffer check */
                 if (d >= e)
@@ -13178,7 +13177,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
         /* read exponent part, if present */
         if ((isALPHA_FOLD_EQ(*s, 'e')
-              || UNLIKELY(hexfp && isALPHA_FOLD_EQ(*s, 'p')))
+              || UNLIKELY(base != 10 && isALPHA_FOLD_EQ(*s, 'p')))
             && memCHRs("+-0123456789_", s[1]))
         {
             int exp_digits = 0;
@@ -13191,7 +13190,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 /* At least some Mach atof()s don't grok 'E' */
                 *d++ = 'e';
             }
-            else if (UNLIKELY(hexfp && (isALPHA_FOLD_EQ(*s, 'p')))) {
+            else if (UNLIKELY(base != 10 && (isALPHA_FOLD_EQ(*s, 'p')))) {
                 *d++ = 'p';
             }
 
@@ -13261,7 +13260,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
         if (floatit) {
             /* terminate the string */
             *d = '\0';
-            if (UNLIKELY(hexfp)) {
+            if (UNLIKELY(base != 10)) {
 #  ifdef NV_MANT_DIG
                 if (significant_bits > NV_MANT_DIG)
                     ck_warner(packWARN(WARN_OVERFLOW),
