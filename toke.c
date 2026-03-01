@@ -10313,7 +10313,20 @@ Perl_yylex(pTHX)
 
         /* m'foo' still needs to be parsed for possible (?{...}) */
         if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
+            /* Despite effectively having a live value in its IV slot,
+             * PL_linestr does not have the SVf_IOK or SVp_IOK flags set.
+             * The following assertion is here just to flag any changes
+             * during future development cycles. */
+            assert(!SvIOK(PL_linestr));
+
             SV *sv = newSVsv(PL_linestr);
+
+             /* The parser has assumed that the IV value will be copied to
+              * the new SV, but since PL_linestr does not have any IV flags
+              * set, that's not a safe assumption to make.
+              * Manually set it. */
+            SvIV_set(sv, '\'');
+
             sv = tokeq(sv);
             pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
             s = PL_bufend;
