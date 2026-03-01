@@ -12690,7 +12690,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     NV hexfp_nv = 0.0;
 #endif
     int hexfp_exp = 0;
-    bool new_octal = FALSE;     /* octal with "0o" prefix */
+    bool octal_with_0o = false;     /* octal with "0o" prefix */
 
     /* Make sure "int" is wide enough to hold exponent of NV.
        We use "int" (rather than I32 etc.) to be compatible with ldexp() */
@@ -12766,7 +12766,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
               case 'o':     /* Definitely octal */
                 s++;
                 just_zero = FALSE;
-                new_octal = TRUE;
+                octal_with_0o = TRUE;
                 break;
 
               case '_':
@@ -13099,7 +13099,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                 s = start + 2;
                 break;
             case 3:
-                if (new_octal) {
+                if (octal_with_0o) {
                     *d++ = 'o';
                     s = start + 2;
                     break;
