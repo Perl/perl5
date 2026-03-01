@@ -304,7 +304,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
 /* An acceptable underscore must not be trailing, which also implies there
  * must be a legal digit after it */
 #define underscore_valid(s, e, lookup_bit)                                  \
-                            (s < e - 1 && Perl_isCC_by_bit(s[1], lookup_bit))
+                            (s < e - 1 && isCC_by_bit_pl_(s[1], lookup_bit))
 
 
 UV
@@ -444,48 +444,48 @@ Other compromises kick in only when the result is within a digit of overflowing.
             goto redo_switch;
         }
 
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
         goto loop;
 
       case 8:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 7:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 6:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 5:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 4:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 3:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 2:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
       case 1:
-        if (! LIKELY(Perl_isCC_by_bit(*s, lookup_bit)))  break;
+        if (! LIKELY(isCC_by_bit_pl_(*s, lookup_bit)))  break;
         accumulated = MULTIPLY_BY_BASE(accumulated) + XDIGIT_VALUE(*s);
         s++;
         /* FALLTHROUGH */
@@ -540,7 +540,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
     valid_digit_or_underscore_bits = (lookup_bit|CC_mask_(CC_UNDERSCORE_));
 
     /* Loop through the characters */
-    while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+    while (s < e && isCC_by_bit_pl_(*s, valid_digit_or_underscore_bits)) {
 
         /* Handle non-trailing underscores when those are accepted */
         if (UNLIKELY(*s == '_')) {
@@ -735,7 +735,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
 
         /* Find end of input, seeing if need to round */
         s++;
-        while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+        while (s < e && isCC_by_bit_pl_(*s, valid_digit_or_underscore_bits)) {
             if (   UNLIKELY(*s == '_')
                 && (   ! allow_underscores
                     || ! underscore_valid(s, e, lookup_bit)))
@@ -774,7 +774,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
      * So, find the end of the string */
     const char * s1 = s;    /* Save our place */
     s++;
-    while (s < e && Perl_isCC_by_bit(*s, valid_digit_or_underscore_bits)) {
+    while (s < e && isCC_by_bit_pl_(*s, valid_digit_or_underscore_bits)) {
         if (   UNLIKELY(*s == '_')
             && (   ! allow_underscores
                 || ! underscore_valid(s, e, lookup_bit)))
