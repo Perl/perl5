@@ -1461,18 +1461,18 @@ ATdp	|bool	|grok_atoUV	|NN const char *pv			\
 Adip	|UV	|grok_bin	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
-				|NULLOK NV *result
+				|NULLOK NV *approximation
 Cp	|UV	|grok_bin_hex	|NN const char * const start		\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
-				|NULLOK NV *result			\
+				|NULLOK NV *approximation		\
 				|uint_fast8_t base			\
 				|const U32 lookup_bit			\
 				|const char prefix
 Adip	|UV	|grok_hex	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
-				|NULLOK NV *result
+				|NULLOK NV *approximation
 Adp	|int	|grok_infnan	|SPTR const char **sp			\
 				|EPTRge const char *send
 Adp	|int	|grok_number	|NN const char *pv			\
@@ -1489,12 +1489,12 @@ ARdp	|bool	|grok_numeric_radix					\
 Adip	|UV	|grok_oct	|NN const char *start			\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
-				|NULLOK NV *result
+				|NULLOK NV *approximation
 Cdp	|UV	|grok_uint_by_base					\
 				|NN const char * const start		\
 				|NN STRLEN *len_p			\
 				|NN I32 *flags				\
-				|NULLOK NV *result			\
+				|NULLOK NV *approximation		\
 				|uint_fast8_t base			\
 				|const U32 lookup_bit			\
 				|uint_fast8_t offset

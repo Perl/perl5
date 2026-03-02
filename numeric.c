@@ -255,7 +255,7 @@ UV
 Perl_grok_bin_hex(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
-                        NV *result,
+                        NV *approximation,
                         uint_fast8_t base,  /* 2 or 16 */
                         const U32 lookup_bit,
                         const char prefix       /* 'b' or 'x' */
@@ -289,7 +289,7 @@ Perl_grok_bin_hex(pTHX_ const char * const start,
         }
     }
 
-    return grok_uint_by_base(start, len_p, flags, result,
+    return grok_uint_by_base(start, len_p, flags, approximation,
                             base, lookup_bit, offset);
 }
 
@@ -303,7 +303,7 @@ UV
 Perl_grok_uint_by_base(pTHX_ const char * const start,
                         STRLEN *len_p,
                         I32 *flags,
-                        NV *result,
+                        NV *approximation,
                         uint_fast8_t base,
                         const U32 lookup_bit,
                         uint_fast8_t offset /* parse starting at start+offset */
@@ -333,12 +333,12 @@ bit in *flags.  The flag is cleared if no illegal character is found,
 otherwise it will remain set on output.
 
 If the resultant integer won't fit in a UV, UV_MAX is returned, and *flags
-will contain the PERL_SCAN_NUMBER_OVERFLOWED bit. If 'result' is not NULL, an
-NV approximation to the full integer will be placed into *result.  And for
-bases 2, 8, 16, it raises a warning unless the caller has set the
-PERL_SCAN_SILENT_OVERFLOW bit in *flags.
+will contain the PERL_SCAN_NUMBER_OVERFLOWED bit. If 'approximation' is not
+NULL, an NV approximation to the full integer will be placed into
+*approximation.  And for bases 2, 8, 16, it raises a warning unless the
+caller has set the PERL_SCAN_SILENT_OVERFLOW bit in *flags.
 
-Note that *result is not changed unless overflow occurs.
+Note that *approximation is not changed unless overflow occurs.
 
 For non-base10 operations, by default, a warning is raised for numbers
 that don't overflow but exceed 32 bits in width.  This is suppressed if
@@ -689,7 +689,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
                 break;
             }
 
-            /* If result is no longer exactly half, set to round up */
+            /* If the result is no longer exactly half, set to round up */
             if (to_round == round_to_even_if_half && *s != '0') {
                 to_round = yes_round_up;
             }
@@ -789,8 +789,8 @@ Other compromises kick in only when the result is within a digit of overflowing.
     *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
            |  PERL_SCAN_SILENT_NON_PORTABLE;
 
-    if (result)
-        *result = accumulated_nv;
+    if (approximation)
+        *approximation = accumulated_nv;
 
     if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
         *flags |= PERL_SCAN_SILENT_OVERFLOW;
