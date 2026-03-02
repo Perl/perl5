@@ -3799,16 +3799,16 @@ number is binary in C<grok_bin>, octal in C<grok_oct>, and hexadecimal in
 C<grok_hex>.
 
 On entry C<start> and C<*len_p> give the string to scan, C<*flags> gives
-conversion flags, and C<result> should be C<NULL> or a pointer to an NV.  The
-scan stops at the end of the string, or at just before the first invalid
+conversion flags, and C<approximation> should be C<NULL> or a pointer to an NV.
+The scan stops at the end of the string, or at just before the first invalid
 character.  Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in C<*flags>,
 encountering an invalid character (except NUL) will also trigger a warning.  On
 return C<*len_p> is set to the length of the scanned string, and C<*flags>
 gives output flags.
 
-If the value is S<E<lt>= C<UV_MAX>>, it is returned as a UV, the output flags are
-clear, and nothing is written to C<*result>.  If the value is S<E<gt>
-C<UV_MAX>>:
+If the value is S<E<lt>= C<UV_MAX>>, it is returned as a UV, the output flags
+are clear, and nothing is written to C<*approximation>.  If the value is
+S<E<gt> C<UV_MAX>>:
 
 =over
 
@@ -3822,8 +3822,8 @@ C<PERL_SCAN_GREATER_THAN_UV_MAX> is set in C<*flags>.
 
 =item *
 
-If C<result> is not null, an approximation of the correct value is written
-into C<*result> (which is an NV).
+If C<approximation> is not null, an approximation of the correct value is
+written into C<*approximation> (which is an NV).
 
 =back
 
@@ -3858,30 +3858,33 @@ numbers that are still valid on this platform.
  */
 
 PERL_STATIC_INLINE UV
-Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags,
+              NV *approximation)
 {
     PERL_ARGS_ASSERT_GROK_BIN;
 
-    return grok_bin_hex(start, len_p, flags, result, 2,
+    return grok_bin_hex(start, len_p, flags, approximation, 2,
                         CC_mask_(CC_BINDIGIT_), 'b');
 }
 
 PERL_STATIC_INLINE UV
-Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags,
+              NV *approximation)
 {
     PERL_ARGS_ASSERT_GROK_HEX;
 
-    return grok_bin_hex(start, len_p, flags, result, 16,
+    return grok_bin_hex(start, len_p, flags, approximation, 16,
                         CC_mask_(CC_XDIGIT_), 'x');
 }
 
 PERL_STATIC_INLINE UV
-Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags,
+              NV *approximation)
 {
     PERL_ARGS_ASSERT_GROK_OCT;
 
     *flags |= PERL_SCAN_DISALLOW_PREFIX;
-    return grok_uint_by_base(start, len_p, flags, result, 8,
+    return grok_uint_by_base(start, len_p, flags, approximation, 8,
                              CC_mask_(CC_OCTDIGIT_), 0);
 }
 

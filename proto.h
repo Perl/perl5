@@ -1651,7 +1651,7 @@ Perl_grok_atoUV(const char *pv, UV *valptr, const char **endptr)
         assert(pv); assert(valptr)
 
 PERL_CALLCONV UV
-Perl_grok_bin_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, uint_fast8_t base, const U32 lookup_bit, const char prefix)
+Perl_grok_bin_hex(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *approximation, uint_fast8_t base, const U32 lookup_bit, const char prefix)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2)
@@ -1691,7 +1691,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         assert(sp); assert(*sp); assert(send); assert(*sp <= send)
 
 PERL_CALLCONV UV
-Perl_grok_uint_by_base(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *result, uint_fast8_t base, const U32 lookup_bit, uint_fast8_t offset)
+Perl_grok_uint_by_base(pTHX_ const char * const start, STRLEN *len_p, I32 *flags, NV *approximation, uint_fast8_t base, const U32 lookup_bit, uint_fast8_t offset)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2)
@@ -13183,7 +13183,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 # define PERL_ARGS_ASSERT_GET_VTBL
 
 PERL_STATIC_INLINE UV
-Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *approximation)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2)
@@ -13192,7 +13192,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         assert(start); assert(len_p); assert(flags)
 
 PERL_STATIC_INLINE UV
-Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *approximation)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2)
@@ -13201,7 +13201,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         assert(start); assert(len_p); assert(flags)
 
 PERL_STATIC_INLINE UV
-Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *approximation)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2)
