@@ -82,13 +82,17 @@ PP(pp_initfield)
                 SV **svp = PL_stack_base + POPMARK + 1;
                 STRLEN count = PL_stack_sp - svp + 1;
 
-                av = newAV_alloc_x(count);
+                if (count != 0) {
+                    av = newAV_alloc_x(count);
 
-                while(svp <= PL_stack_sp) {
-                    av_push_simple(av, newSVsv(*svp));
-                    svp++;
+                    while(svp <= PL_stack_sp) {
+                        av_push_simple(av, newSVsv(*svp));
+                        svp++;
+                    }
+                    rpp_popfree_to(PL_stack_sp - count);
                 }
-                rpp_popfree_to(PL_stack_sp - count);
+                else
+                    av = newAV();
             }
             else
                 av = newAV();
