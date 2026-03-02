@@ -375,7 +375,18 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+On debugging perls, instantiating a class with an array field with an empty
+initializer list would abort with an error:
+
+    class Foo {
+        field @bar = ();
+    }
+    Foo->new();
+
+Error message: C<< perl: inline.h:194: Perl_av_new_alloc: Assertion `size > 0'
+failed. >>
+
+This has been fixed. [GH #24246]
 
 =item *
 
