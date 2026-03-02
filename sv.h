@@ -1357,10 +1357,6 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 # define SvREADONLY_off(sv)	(SvFLAGS(sv) &= ~SVf_READONLY)
 #endif
 
-#define SvSCREAM(sv) ((SvFLAGS(sv) & (SVp_SCREAM|SVp_POK)) == (SVp_SCREAM|SVp_POK))
-#define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVp_SCREAM)
-#define SvSCREAM_off(sv)	(SvFLAGS(sv) &= ~SVp_SCREAM)
-
 #ifndef PERL_CORE
 #  define SvCOMPILED(sv)	0
 #  define SvCOMPILED_on(sv)
