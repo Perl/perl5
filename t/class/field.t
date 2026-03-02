@@ -308,4 +308,25 @@ no warnings 'experimental::class';
     is(Testcase14->new->classname, "Testcase14", '__CLASS__ in field initialisers');
 }
 
+{
+    class Testcase15 {
+        field $scalar = undef;
+        method scalar { return $scalar; }
+
+        field @array = ();
+        method array { return @array; }
+
+        field %hash = ();
+        method hash { return %hash; }
+    }
+
+    my $obj = Testcase15->new;
+
+    is($obj->scalar, undef, 'Scalar field can have redundant initialiser');
+
+    ok(eq_array([$obj->array], []), 'Array field can have redundant initialiser');
+
+    ok(eq_hash({$obj->hash}, {}), 'Hash field can have redundant initialiser');
+}
+
 done_testing;
