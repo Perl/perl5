@@ -10,7 +10,7 @@ BEGIN {
 # Tests the new documented mechanism for determining the original type
 # of an SV.
 
-plan tests => 22;
+plan tests => 23;
 use strict;
 use B qw(svref_2object SVf_IOK SVf_NOK SVf_POK);
 
@@ -113,3 +113,12 @@ ok(builtin::is_weak($wref), 'a weakened SVt_PVIV ref has WEAKREF set');
 $cref = [ $wref ];
 ok(!builtin::is_weak( $cref->[0] ), 'SVt_PVIV copies do NOT have WEAKREF set');
 
+# GH #24242 - S_newSVsv_flags_PVxx must initialize IV & NV in PVIV/PVNV/PVMG
+#             even when the source SV is not IOK or NOK. Some code may
+#             nonetheless read the IV or NV value. This is only likely
+#             to be detectable when using valgrind or a similar tool.
+my $got = fresh_perl(<<'CODE', { switches => [ '-c' ] });
+s'foo'bar'
+CODE
+unlike($got, qr/Conditional jump or move depends on uninitialised value/,
+        'All fields initialized in SVt_PV[IV|NV|MG] copies');

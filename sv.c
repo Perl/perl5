@@ -4927,9 +4927,15 @@ S_newSVsv_flags_NN_POK(pTHX_ SV* dsv, SV* ssv, const I32 flags)
  * for Perl_newSVsv_flags_NN. This function may get inlined, even
  * though it might be preferable if it didn't.
  *
- * Notes: it is the caller's responsibility to check GET magic.
+ * Notes: It is the caller's responsibility to check GET magic.
  *        Perl_sv_setsv_flags essentially ignores magic, except for
  *        taint and vstring magic, which are also handled here.
+ *
+ *        All SV body structs must be initialized by the end of this
+ *        function. Even if SvFLAGS(ssv) indicates that a struct member
+ *        is not valid in `ssv`, it turns out that some code does
+ *        actually store values without setting the associated `OK` flags
+ *        and reads values for which the associated `OK` flags are unset.
  *
  * [%] numbers are a rough percentage of calls to this function, as
  * measured by a gcov build running the test harness. They are presented
@@ -4974,6 +4980,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
         case SVt_PVNV:  /* [ 15 %] */
             SvANY(dsv) = new_XPVNV();
             SvFLAGS(dsv) = SVt_PVNV;
+            SvNV_set(dsv, 0.0); /* IV and PV are initialized below */
             break;
         case SVt_PVMG:  /* [ 71% ] */
             if (flags & SV_GMAGIC && SvGMAGICAL(ssv))
@@ -4983,6 +4990,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             SvFLAGS(dsv) = SVt_PVMG;
             SvMAGIC(dsv) = NULL;
             SvSTASH(dsv) = NULL;
+            SvNV_set(dsv, 0.0); /* IV and PV are initialized below */
             break;
         default:  /* [ 4% ] */
             if (flags & SV_GMAGIC && SvGMAGICAL(ssv)) {  /* [ 3.5% ] */
@@ -5024,10 +5032,12 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             assert(!SvOK(ssv));
 #if NVSIZE <= IVSIZE
             SET_SVANY_FOR_BODYLESS_NV(dsv);
+            SvFLAGS(dsv) = SVt_NV;
 #else
             SvANY(dsv) = new_XNV();
-#endif
             SvFLAGS(dsv) = SVt_NV;
+            SvNV_set(dsv, 0.0);
+#endif
             return dsv;
     }
     assert(SvTYPE(dsv) == SVt_PVIV || SvTYPE(dsv) == SVt_PVNV || SvTYPE(dsv) == SVt_PVMG);
@@ -5057,6 +5067,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             SvIV_set(dsv, SvIVX(ssv));
             break;
         case SVp_POK:  /* [ 28% ] */
+            SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             break;
         case SVp_POK|SVp_IOK|SVp_NOK|SVppv_STATIC:  /* [ 6.5% ]*/
             /* e.g. PL_sv_yes, PL_sv_no */
@@ -5071,16 +5082,18 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             SvNV_set(dsv, SvNVX(ssv));
             return dsv;
         case SVp_POK|SVp_NOK:  /* [ 3% ]*/
+            SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             SvNV_set(dsv, SvNVX(ssv));
             break;
         case SVf_ROK:  /* [ 3% ]*/
             /* Another corner case here. SVf_IVisUV and SVprv_WEAKREF
              * have the same underlying value. We do not want to
              * propagate the latter. */
-             SvFLAGS(dsv) &= ~SVprv_WEAKREF;
+            SvFLAGS(dsv) &= ~SVprv_WEAKREF;
             SvRV_set(dsv, SvREFCNT_inc(SvRV(ssv)));
             return dsv;
         default:  /* [ 2% ]*/
+            SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             if(!SvOK(ssv))  /* [ ~2% ]*/
                 return dsv;
             /* Some cases seem so rare that we may as well let
@@ -5098,6 +5111,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             return dsv;
         case SVp_NOK:  /* [ << 1% ]*/
             ASSUME(SvTYPE(dsv) != SVt_PVIV);
+            SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             SvNV_set(dsv, SvNVX(ssv));
             return dsv;
     }
