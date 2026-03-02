@@ -382,7 +382,8 @@ The main switch() statement could have more case statements for non-hex bases.
 There is a special mode that functions as an alternative to overflowing.  It
 is triggered by the caller setting PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW into
 *flags.  Should overflow otherwise occur, subsequent digits are instead simply
-discarded, while rounding the result towards even.
+discarded, while rounding the result towards even.  *approximation is not
+changed if this flag is set.
 
 =cut
 
@@ -656,12 +657,57 @@ Other compromises kick in only when the result is within a digit of overflowing.
 
   overflowed: ;
 
-    /* We are about to overflow. 's' points to the first overflowing digit.
-     * Honor a caller's request to discard the overflowing digits instead. */
+    /* Bah. We are about to overflow.  The caller may want an approximation to
+     * the correct value (by passing a pointer to an NV, 'approximation'); or
+     * may not want to actually overflow, but instead return the highest,
+     * non-overflowing value (rounded, a flag indicates to do this, which
+     * overrides also passing 'approximation').
+     *
+     * 's' points to the first overflowing digit. */
+    UV high_order_batch;
     if (UNLIKELY(input_flags & PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW)) {
 
         /* Return that it actually happened */
         *flags |= PERL_SCAN_DISCARD_INSTEAD_OF_OVERFLOW;
+
+        /* Override this */
+        approximation = NULL;
+    }
+    else {
+        /* Here, does want overflow to happen.  Set up return, and do
+         * warnings. */
+        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
+               |  PERL_SCAN_SILENT_NON_PORTABLE;
+
+        if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
+            *flags |= PERL_SCAN_SILENT_OVERFLOW;
+        }
+        else if (ckWARN_d(WARN_OVERFLOW)) {
+            const char * base_name;
+
+            switch (base) {
+              default: goto bad_base;
+              case 2:  base_name = "binary";      break;
+              case 8:  base_name = "octal";       break;
+              case 16: base_name = "hexadecimal"; break;
+              case 10: /* Base 10 historically has not raised a warning here */
+                goto overflow_warning_done;
+            }
+
+            warner(packWARN(WARN_OVERFLOW), "Integer overflow in %s number",
+                                            base_name);
+          overflow_warning_done: ;
+        }
+
+        high_order_batch = accumulated;
+        accumulated = UV_MAX;
+        input_flags &= ~PERL_SCAN_SILENT_NON_PORTABLE;
+    }
+
+    /* We always have to keep parsing to find the end of the intended number.
+     * If we don't need to compute an approximation, we don't have to pay much
+     * attention to the values */
+    if (approximation == NULL) {
 
         /* When discarding, we round the undiscarded result to even.  In some
          * cases, whether to round isn't known until the final discarded digit
@@ -708,8 +754,7 @@ Other compromises kick in only when the result is within a digit of overflowing.
         goto finish;
     }
 
-    /* Bah. We are about to overflow.  Instead compute an approximation to the
-     * correct value.
+    /* Here, the caller wants an approximation to the overflowed value.
      *
      * It turns out that there is less precision loss if we start at the low
      * order digits of the string and build up the number from there.  This is
@@ -780,40 +825,13 @@ Other compromises kick in only when the result is within a digit of overflowing.
     }
 
     /* Here have accumulated everything.  Combine the low order bits with the
-     * high order that we have saved in 'accumulated'.  Those must be shifted
-     * left to account for the low order ones */
+     * high order that we have saved in 'high_order_batch'.  Those must be
+     * shifted left to account for the low order ones */
     accumulated_nv += this_batch_accumulated * accumulated_factor;
     accumulated_factor *= this_batch_factor;
-    accumulated_nv += accumulated * accumulated_factor;
+    accumulated_nv += high_order_batch * accumulated_factor;
 
-    *flags |= PERL_SCAN_GREATER_THAN_UV_MAX
-           |  PERL_SCAN_SILENT_NON_PORTABLE;
-
-    if (approximation)
-        *approximation = accumulated_nv;
-
-    if (input_flags & PERL_SCAN_SILENT_OVERFLOW) {
-        *flags |= PERL_SCAN_SILENT_OVERFLOW;
-    }
-    else if (ckWARN_d(WARN_OVERFLOW)) {
-        const char * base_name;
-
-        switch (base) {
-          default: goto bad_base;
-          case 2:  base_name = "binary";      break;
-          case 8:  base_name = "octal";       break;
-          case 16: base_name = "hexadecimal"; break;
-          case 10: /* Base 10 historically has not raised a warning here */
-            goto overflow_warning_done;
-        }
-
-        warner(packWARN(WARN_OVERFLOW), "Integer overflow in %s number",
-                                        base_name);
-      overflow_warning_done: ;
-    }
-
-    accumulated = UV_MAX;
-    input_flags &= ~PERL_SCAN_SILENT_NON_PORTABLE;
+    *approximation = accumulated_nv;
     goto finish;
 }
 
