@@ -24,15 +24,15 @@
 :
 : Static functions internal to a file need not appear here, but there is
 : benefit to declaring them here:
-:   1)	It generally handles the thread context parameter invisibly making it
-:	trivial to add or remove needing thread context passed;
+:   1)  It generally handles the thread context parameter invisibly making it
+:       trivial to add or remove needing thread context passed;
 :   2)  It defines a PERL_ARGS_ASSERT_foo macro, which can save you debugging
-:	time;
+:       time;
 :   3)  It is is automatically known to Devel::PPPort, making it quicker to
-:	later find out when it came into existence.  For example
-:	    perl ppport.h --api-info=/edit_distance/
-:	yields
-:		Supported at least since perl-5.23.8, with or without ppport.h.
+:       later find out when it came into existence.  For example
+:           perl ppport.h --api-info=/edit_distance/
+:       yields
+:               Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
 :    flags|return_type|name|arg1|arg2|...|argN ( assert(...) )*
@@ -99,22 +99,22 @@
 : be available to inline functions in the appropriate context.
 :
 : The 'A' flag is used to make an element visible everywhere on all platforms.
-:	  This flag should be used to make it part of Perl's API contract with
-:	  XS developers.  The documentation for these is usually placed in
-:	  perlapi.  If no documentation exists, that fact is also noted in
-:	  perlapi.
+:         This flag should be used to make it part of Perl's API contract with
+:         XS developers.  The documentation for these is usually placed in
+:         perlapi.  If no documentation exists, that fact is also noted in
+:         perlapi.
 :
 :         Functions require one of the /[iIpS]/ flags to give callers a name to
 :         use that won't possibly collide with their own
 :
 : The 'C' flag is used instead for elements that need to be accessible
-:	  everywhere, typically because they are called from a publicly
-:	  available macro or inline function, but they are not for public use
-:	  by themselves.  The documentation for these is placed in perlintern.
-:	  If no documentation exists, that fact is also noted in perlintern.
+:         everywhere, typically because they are called from a publicly
+:         available macro or inline function, but they are not for public use
+:         by themselves.  The documentation for these is placed in perlintern.
+:         If no documentation exists, that fact is also noted in perlintern.
 :
-:	  Use the 'X' flag instead to suppress the short name for functions
-:	  outside the core
+:         Use the 'X' flag instead to suppress the short name for functions
+:         outside the core
 :
 :         Functions require one of the /[iIpS]/ flags to give callers a name to
 :         use that won't possibly collide with their own
@@ -125,22 +125,22 @@
 :         changed.
 :
 : The 'E' flag is used instead for elements that are supposed to be used only
-:	  in the core, plus extensions compiled with the PERL_EXT symbol
-:	  defined.  Again, on some platforms, functions marked with this will
-:	  be visible everywhere, so one of the /[iIpS]/ flags is generally
-:	  needed.  Also note that an XS writer can always cheat and pretend to
-:	  be an extension by #defining PERL_EXT.
+:         in the core, plus extensions compiled with the PERL_EXT symbol
+:         defined.  Again, on some platforms, functions marked with this will
+:         be visible everywhere, so one of the /[iIpS]/ flags is generally
+:         needed.  Also note that an XS writer can always cheat and pretend to
+:         be an extension by #defining PERL_EXT.
 :
 : The 'X' flag applies only to functions.  It is similar to the 'C' flag in
-:	  that the function (whose entry better have the 'p' flag) is
-:	  accessible everywhere on all platforms.  However the short name macro
-:	  that normally gets generated is suppressed outside the core.  (Except
-:	  it is also visible in PERL_EXT extensions if the 'E' flag is also
-:	  specified.)  This flag is used for functions that are called from a
-:	  public macro, the name of which isn't derived from the function name.
-:	  You'll have to write the macro yourself, and from within it, refer to
-:	  the function in its full 'Perl_' form with any necessary thread
-:	  context parameter.
+:         that the function (whose entry better have the 'p' flag) is
+:         accessible everywhere on all platforms.  However the short name macro
+:         that normally gets generated is suppressed outside the core.  (Except
+:         it is also visible in PERL_EXT extensions if the 'E' flag is also
+:         specified.)  This flag is used for functions that are called from a
+:         public macro, the name of which isn't derived from the function name.
+:         You'll have to write the macro yourself, and from within it, refer to
+:         the function in its full 'Perl_' form with any necessary thread
+:         context parameter.
 :
 : AUTOMATIC SORTING and FORMATTING of this file
 :
@@ -177,12 +177,12 @@
 :   this call to the very beginning of the function.)
 :
 :   The contents of ARGS_ASSERT are determined by
-:	1)  constraints you give in this file.  Each such constraint is
-:	    positioned in the input between the '|' that marks the beginning of
-:	    a parameter definition, and the the definition itself, like
-:		|NN const char * const name
-:	2)  the internal logic used by code that reads this file.
-:	3)  explicit asserts that you add in this file.
+:       1)  constraints you give in this file.  Each such constraint is
+:           positioned in the input between the '|' that marks the beginning of
+:           a parameter definition, and the the definition itself, like
+:               |NN const char * const name
+:       2)  the internal logic used by code that reads this file.
+:       3)  explicit asserts that you add in this file.
 :
 :   Sections below give more details of each item.  For readability,
 :   constraints are split into two sections, one for pointer parameters, and
@@ -192,45 +192,45 @@
 :
 :   Every pointer parameter must have a constraint; one of the following:
 :
-:   NN	    means the called function is expecting this pointer parameter to be
-:	    non-NULL, and likely is not equipped to handle it being NULL.
+:   NN      means the called function is expecting this pointer parameter to be
+:           non-NULL, and likely is not equipped to handle it being NULL.
 :   NULLOK  means the called function definitely can handle this parameter
-:	    being NULL.  The reason you need to specify this at all is to tell
-:	    future maintainers that you have considered the question about the
-:	    parameter, and you have determined that this is the answer.
+:           being NULL.  The reason you need to specify this at all is to tell
+:           future maintainers that you have considered the question about the
+:           parameter, and you have determined that this is the answer.
 :   SPTR    means that not only must this pointer parameter be non-NULL, it
-:	    points to a position in a character string, which the called
-:	    function is not to look behind.  If a parameter is marked with this
-:	    constraint, another parameter to the function must be marked with
-:	    one of the constraints below in this list.
+:           points to a position in a character string, which the called
+:           function is not to look behind.  If a parameter is marked with this
+:           constraint, another parameter to the function must be marked with
+:           one of the constraints below in this list.
 :   MPTR    means that not only must this pointer parameter be non-NULL, it
-:	    points to a position somewhere in the middle of a character string.
-:	    If a parameter is marked with this constraint, another parameter to
-:	    the function must be marked with SPTR and/or either of the EPTR
-:	    constraints (described just below).
+:           points to a position somewhere in the middle of a character string.
+:           If a parameter is marked with this constraint, another parameter to
+:           the function must be marked with SPTR and/or either of the EPTR
+:           constraints (described just below).
 :   EPTRge  means that not only must this pointer parameter be non-NULL, it
-:	    points to the position exactly one byte beyond the final byte of
-:	    the string that a corresponding SPTR began and/or MPTR points to
-:	    the middle of.  There must be a SPTR and/or MPTR constraint on
-:	    another parameter to the called function.  That function is not to
-:	    look at the byte in this position or any higher ones.  'ge' means
-:	    that this value may be equal to the corresponding SPTR or MPTR.
-:	    When this is true, it indicates the string is empty past the SPTR
-:	    or MPTR, and the called function must be prepared to handle this
-:	    case by not dereferencing this parameter without first checking it
-:	    is valid.
+:           points to the position exactly one byte beyond the final byte of
+:           the string that a corresponding SPTR began and/or MPTR points to
+:           the middle of.  There must be a SPTR and/or MPTR constraint on
+:           another parameter to the called function.  That function is not to
+:           look at the byte in this position or any higher ones.  'ge' means
+:           that this value may be equal to the corresponding SPTR or MPTR.
+:           When this is true, it indicates the string is empty past the SPTR
+:           or MPTR, and the called function must be prepared to handle this
+:           case by not dereferencing this parameter without first checking it
+:           is valid.
 :   EPTRgt  is like EPTRge, but the called function need not be prepared to
-:	    handle the case of an empty string; the value of this pointer must
-:	    be strictly greater than the corresponding MPTR or SPTR.
+:           handle the case of an empty string; the value of this pointer must
+:           be strictly greater than the corresponding MPTR or SPTR.
 :   EPTRtermNUL  means that the string delimitted by it and its corresponding
-:	    SPTR must be NUL-terminated.  This parameter points to that
-:	    terminating NUL character.  That means that when the string looks
-:	    empty, it really contains a single NUL.
+:           SPTR must be NUL-terminated.  This parameter points to that
+:           terminating NUL character.  That means that when the string looks
+:           empty, it really contains a single NUL.
 :
 :   To summarize, one of:
-:	    SPTR <= MPTR <  EPTRgt
-:	    SPTR <= MPTR <= EPTRge
-:	    SPTR <= MPTR <= EPTR && *EPTR == '\0'
+:           SPTR <= MPTR <  EPTRgt
+:           SPTR <= MPTR <= EPTRge
+:           SPTR <= MPTR <= EPTR && *EPTR == '\0'
 :   In each equation all three or any two of the constraints must be present.
 :
 :   When only two constraints are present and one of them is an EPTR form, the
@@ -255,8 +255,8 @@
 :   Only a single constraint is currently available to you to use; it is for
 :   parameters that are some sort of integer
 :
-:   NZ	    means the called function is expecting this parameter to be
-:	    non-zero, and is not equipped to handle it being 0.
+:   NZ      means the called function is expecting this parameter to be
+:           non-zero, and is not equipped to handle it being 0.
 :
 : *** Automatically generated checks
 :
@@ -420,12 +420,12 @@
 :  block      the argument is a C brace-enclosed block
 :  cast       the argument names a type which the macro casts to
 :  const_expr the argument is an expression whose result is known at compile
-:	      time
+:             time
 :  number     the argument is a C numeric constant, like 3
 :  SP         the argument is the stack pointer, SP
 :  "string"   the argument is a literal C double-quoted string; what's important
-:	      here are the quotes; for clarity, you can say whatever you want
-:	      inside them
+:             here are the quotes; for clarity, you can say whatever you want
+:             inside them
 :  token      the argument is a generic C preprocessor token, like abc
 :  type       the argument names a type
 :
@@ -505,12 +505,12 @@
 :        * add embed.h entry (unless overridden by the 'M' or 'o' flags)
 :
 :   'C'  Intended for core use only.  XS writers may not even know they exist,
-:	 since they don't get documented in perlapi.  But should they try
-:	 to use them anyway, Devel::PPPort informs them that this is a mistake.
-:	 Some functions have to be accessible everywhere even if they are not
-:	 intended for public use. An example is helper functions that are
-:	 called from inline ones that are publicly available.  Requires one of
-:	 the /[iIpS]/ flags if the element is a function.
+:        since they don't get documented in perlapi.  But should they try
+:        to use them anyway, Devel::PPPort informs them that this is a mistake.
+:        Some functions have to be accessible everywhere even if they are not
+:        intended for public use. An example is helper functions that are
+:        called from inline ones that are publicly available.  Requires one of
+:        the /[iIpS]/ flags if the element is a function.
 :
 :        * add entry to the list of symbols available on all platforms unless e
 :          or m are also specified;
@@ -518,14 +518,14 @@
 :          there isn't a doc entry, autodoc.pl lists this in perlintern as
 :          existing and being undocumented
 :        * makes the function's short name defined for everywhere, not just for
-:	   PERL_CORE or PERL_EXT
+:          PERL_CORE or PERL_EXT
 :
 :   'D'  The element is deprecated.
 :
-:	(You should add a comment to the source when adding this flag
-:	indicating what release it is first being deprecated in.  This will
-:	prevent having to dig up this information when deciding if enough
-:	releases have passed to actually remove it.)
+:       (You should add a comment to the source when adding this flag
+:       indicating what release it is first being deprecated in.  This will
+:       prevent having to dig up this information when deciding if enough
+:       releases have passed to actually remove it.)
 :
 :        proto.h: add __attribute__deprecated__
 :        autodoc.pl adds a note to this effect in the doc entry
@@ -605,25 +605,25 @@
 :                  __attribute__always_inline__ is added
 :
 :   'm'  The implementation is a macro.  There is no long "S_" name form
-:	 created for it.  However, if you also specify the 'p' flag, a long
-:	 name Perl_" form is automatically created.  That form will be an
-:	 actual function on a threaded build unless the 'T' flag is present.
+:        created for it.  However, if you also specify the 'p' flag, a long
+:        name Perl_" form is automatically created.  That form will be an
+:        actual function on a threaded build unless the 'T' flag is present.
 :
-:	 The implication of this is that we can swap implementations at will,
-:	 macro-to-function or function-to-macro, without any source code
-:	 changes needed.  That doesn't work for fancy macros that use the C
-:	 preprocessor language for things, like the '#' and '##' commands to
-:	 it, or expanding a single argument to a list, such as 'STR_WITH_LEN'
-:	 does.  And the behavior isn't precisely synonymous if the macro
-:	 evaluates an argument more than once, and is called with that argument
-:	 being an expression with side effects.
+:        The implication of this is that we can swap implementations at will,
+:        macro-to-function or function-to-macro, without any source code
+:        changes needed.  That doesn't work for fancy macros that use the C
+:        preprocessor language for things, like the '#' and '##' commands to
+:        it, or expanding a single argument to a list, such as 'STR_WITH_LEN'
+:        does.  And the behavior isn't precisely synonymous if the macro
+:        evaluates an argument more than once, and is called with that argument
+:        being an expression with side effects.
 :
-:	 The default visibility of macros created before 5.43 is visible
-:	 everywhere, so the visibility flags are ignored.  Starting in that
-:	 release, the default visibility of newly created macros is core-only,
-:	 so the visibility flags do have effect.  To cause a pre-5.43 symbol
-:	 to be affected by a visibility flag, remove the symbol from its
-:	 override list in regen/embed.pl.
+:        The default visibility of macros created before 5.43 is visible
+:        everywhere, so the visibility flags are ignored.  Starting in that
+:        release, the default visibility of newly created macros is core-only,
+:        so the visibility flags do have effect.  To cause a pre-5.43 symbol
+:        to be affected by a visibility flag, remove the symbol from its
+:        override list in regen/embed.pl.
 :
 :         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols available on all
@@ -631,9 +631,9 @@
 :         suppress embed.h entry (when no 'p' flag), as the implementation
 :             should furnish the macro
 :         add long name Perl_ entry (when 'p' flag).  This may be a function in
-:	      long_names.c, and/or an entry in embed.h
-:	  #undef this symbol in embed.h as needed to match the specified
-:	  visibility.
+:             long_names.c, and/or an entry in embed.h
+:         #undef this symbol in embed.h as needed to match the specified
+:         visibility.
 :
 :   'M'  The implementation is furnishing its own macro instead of relying on
 :        the automatically generated short name macro (which simply expands to
@@ -667,8 +667,8 @@
 :   'O'  Has a perl_ compatibility macro.
 :
 :        The really OLD name for API funcs.  These now also require the 'p'
-:	 flag so as to generate a modern name.  Obviously no new entries
-:	 should get this flag.
+:        flag so as to generate a modern name.  Obviously no new entries
+:        should get this flag.
 :
 :        autodoc.pl adds a note that the 'perl_' form of this function is
 :        deprecated.
@@ -760,10 +760,10 @@
 :   'U'  autodoc.pl will not output a usage example
 :
 :   'v'  The element is some sort of value that isn't any of the other types in
-:	 this file.  For example, it could be an enumeration constant; that is,
-:	 it is one of the members of the list of constants a variable declared
-:	 to be a particular enum can have.  These are always visible to XS code
-:	 unless guarded by preprocessor directives,  Also implies 'n'.
+:        this file.  For example, it could be an enumeration constant; that is,
+:        it is one of the members of the list of constants a variable declared
+:        to be a particular enum can have.  These are always visible to XS code
+:        unless guarded by preprocessor directives,  Also implies 'n'.
 
 :
 :   'W'  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
@@ -787,12 +787,12 @@
 :          Any doc entry is marked that this element may change.
 :
 :   'y'  Typedef.  The element names a type rather than being a function or
-:	 macro.  These are always visible to XS code unless guarded by
-:	 preprocessor directives,
+:        macro.  These are always visible to XS code unless guarded by
+:        preprocessor directives,
 :
 :   '@'  The element names an array rather than being a macro or function.
-:	 These are always visible to XS code unless guarded by preprocessor
-:	 directives,
+:        These are always visible to XS code unless guarded by preprocessor
+:        directives,
 :
 :          autodoc.pl automatically suppresses any usage information.
 :
