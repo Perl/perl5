@@ -4237,7 +4237,7 @@ sub generate_proto_h {
                                 my $string_n = $n;
                                 $string_n = "pTHX_$string_n" if $has_context;
                                 push @attrs,
-                                     "Perl_attribute_nonnull_($string_n)";
+                                     "Perl_attribute_nonnull($string_n)";
                             }
                         }
 
@@ -4478,7 +4478,7 @@ sub generate_proto_h {
                      . " f or F flag";
         }
 
-        unshift @attrs, "Perl_attribute_nonnull_aTHX_" if $has_context;
+        unshift @attrs, "Perl_attribute_nonnull_aTHX" if $has_context;
 
         if ( @attrs ) {
             $ret .= "\n"
@@ -4544,15 +4544,15 @@ sub generate_proto_h {
 
     print $fh <<~"EOF";
         #ifdef DEBUGGING    /* See GH #23641 */
-        #  define Perl_attribute_nonnull_(which)
+        #  define Perl_attribute_nonnull(which)
         #else
-        #  define Perl_attribute_nonnull_(which)  __attribute__nonnull__(which)
+        #  define Perl_attribute_nonnull(which)  __attribute__nonnull__(which)
         #endif
 
         #if defined(MULTIPLICITY)
-        #  define Perl_attribute_nonnull_aTHX_ __attribute__nonnull__(1)
+        #  define Perl_attribute_nonnull_aTHX  __attribute__nonnull__(1)
         #else
-        #  define Perl_attribute_nonnull_aTHX_
+        #  define Perl_attribute_nonnull_aTHX
         #endif
 
         START_EXTERN_C
