@@ -633,7 +633,7 @@ a simple C<*PL_stack_sp-->.
 PERL_STATIC_INLINE SV*
 Perl_rpp_pop_1_norc(pTHX)
 {
-    PERL_ARGS_ASSERT_RPP_POP_1_NORC
+    PERL_ARGS_ASSERT_RPP_POP_1_NORC;
 
     SV *sv = *PL_stack_sp--;
 
