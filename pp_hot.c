@@ -4775,6 +4775,7 @@ PP(pp_multideref)
                        || SvTYPE(keysv) >= SVt_PVMG
                        || !SvOK(keysv)
                        || SvROK(keysv)
+                       || SvNOK(keysv)
                        || SvIsCOW_shared_hash(keysv));
 
                 /* this is basically a copy of pp_helem with OPpDEREF skipped */
