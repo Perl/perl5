@@ -175,7 +175,7 @@ EOF
     }
 
     SKIP: {
-        skip("no locale available where LC_NUMERIC radix isn't '.'", 30) unless $different;
+        skip("no locale available where LC_NUMERIC radix isn't '.'", 32) unless $different;
         note("using the '$different' locale for LC_NUMERIC tests");
         {
             local $ENV{LC_NUMERIC} = $different;
@@ -292,6 +292,7 @@ EOF
 EOF
                 "too late to ignore the locale at write() time");
             }
+
         }
 
         {
@@ -424,6 +425,27 @@ EOF
 EOF
             "C", { stderr => 'devnull' },
             "No compile error on v-strings when setting the locale to non-dot radix at compile time when default environment has non-dot radix");
+        }
+
+        {
+            fresh_perl_is(<<"EOF", 'OK', { eval $switches },
+                use locale;
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_NUMERIC(),"$different");
+                my \%h = ( "$difference" => 1 );
+                print "OK" if exists(\$h{4.2});
+EOF
+                "Solo NV hash keys are not prematurely hekified");
+        }
+        {
+            fresh_perl_is(<<"EOF", 'OK', { eval $switches },
+                use locale;
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_NUMERIC(),"$different");
+                my \%h = ( 4.2 => 1 );
+                print "OK" if exists(\$h{"$difference"});
+EOF
+                "NV hash keys with values are not prematurely hekified");
         }
 
         unless ($comma) {

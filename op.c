@@ -2806,6 +2806,7 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
             && SvTYPE(sv) < SVt_PVMG
             && SvOK(sv)
             && !SvROK(sv)
+            && !(SvNOK(sv) && IN_LC_RUNTIME(LC_NUMERIC)) /* Decimal separator depends on runtime locale */
             && real)
         {
             SSize_t keylen;
