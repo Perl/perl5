@@ -5230,6 +5230,11 @@ Perl_save_iv(pTHX_ IV *ivp)
         assert(ivp)
 
 PERL_CALLCONV void
+Perl_save_padsv(pTHX_ PADOFFSET padix)
+        Perl_attribute_nonnull_aTHX_;
+#define PERL_ARGS_ASSERT_SAVE_PADSV
+
+PERL_CALLCONV void
 Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
         Perl_attribute_nonnull_aTHX_;
 #define PERL_ARGS_ASSERT_SAVE_PADSV_AND_MORTALIZE

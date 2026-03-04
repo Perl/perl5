@@ -2676,6 +2676,7 @@ my @unresolved_visibility_overrides = qw(
     SAVEt_MORTALIZESV
     SAVEt_NSTAB
     SAVEt_OP
+    SAVEt_PADSV
     SAVEt_PADSV_AND_MORTALIZE
     SAVEt_PARSER
     SAVEt_PPTR

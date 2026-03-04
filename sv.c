@@ -16061,6 +16061,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
                 break;
             /* FALLTHROUGH */
         case SAVEt_FREESV:
+        case SAVEt_PADSV:
         case SAVEt_MORTALIZESV:
         case SAVEt_READONLY_OFF:
             sv = (const SV *)POPPTR(ss,ix);
