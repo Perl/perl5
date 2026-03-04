@@ -1550,8 +1550,8 @@ ithread_kill(...)
         }
 
         /* Return the thread to allow for method chaining: */
-        /* ST(0) still holds the object SV */
-        XSRETURN(1);
+        /* cheap PUSHs(ST(0)) -  ST(0) still holds the object SV */
+        SP++;
 
 
 void
