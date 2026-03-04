@@ -36,8 +36,9 @@
 # reference - R
 # "?" denotes an optional operand.
 
-# Nothing.
+# name		description		check fnc	flags	operand descr
 
+# Nothing.
 null		null operation		ck_null		0	
 stub		stub			ck_null		0
 scalar		scalar			ck_fun		s%	S
