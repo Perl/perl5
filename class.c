@@ -322,13 +322,8 @@ PP(pp_methstart)
              *   See also https://github.com/Perl/perl5/issues/22278
              */
             if(fieldp[fieldix]) {
-                /* TODO: There isn't a convenient SAVE macro for doing
-                 * both these steps in one go. Add one.
-                 */
-                SV ** const padentry = &(PAD_SVl(padix));
-                SAVESPTR(*padentry);
-                *padentry = SvREFCNT_inc(fieldp[fieldix]);
-                save_clearsv(padentry);
+                save_padsv(padix);
+                PAD_SVl(padix) = SvREFCNT_inc(fieldp[fieldix]);
             }
         }
     }
@@ -343,9 +338,8 @@ PP(pp_methstart)
     if(PL_op->op_private & OPpINITFIELDS) {
         SV *params = *av_fetch(GvAV(PL_defgv), 0, 0);
         if(params && SvTYPE(params) == SVt_PVHV) {
-            SAVESPTR(PAD_SVl(PADIX_PARAMS));
+            save_padsv(PADIX_PARAMS);
             PAD_SVl(PADIX_PARAMS) = SvREFCNT_inc(params);
-            save_freesv(params);
         }
     }
 

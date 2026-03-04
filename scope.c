@@ -823,6 +823,35 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 }
 
 /*
+=for apidoc save_padsv
+
+Saves the value in the pad at the given index to be restored on scope exit.
+Before this value is restored back in, whatever is currently there has its
+reference count decremented by one.
+
+=cut
+*/
+
+void
+Perl_save_padsv(pTHX_ PADOFFSET padix)
+{
+    PERL_ARGS_ASSERT_SAVE_PADSV;
+
+    const UV padix_shifted = padix << SAVE_TIGHT_SHIFT;
+    if (UNLIKELY((padix_shifted >> SAVE_TIGHT_SHIFT) != (UV)padix)) {
+        croak("panic: pad offset %" UVuf " out of range",
+                   (UV)padix);
+    }
+
+    {
+        dSS_ADD;
+        SS_ADD_PTR(SvREFCNT_inc(PL_curpad[padix]));
+        SS_ADD_UV(padix_shifted | SAVEt_PADSV);
+        SS_ADD_END(2);
+    }
+}
+
+/*
 =for apidoc_section $callback
 =for apidoc save_hdelete
 
@@ -1527,6 +1556,16 @@ Perl_leave_scope(pTHX_ I32 base)
             }
             break;
         }
+
+        case SAVEt_PADSV:
+            {
+                SV **padentry = &PAD_SVl(uv >> SAVE_TIGHT_SHIFT);
+
+                SvREFCNT_dec(*padentry);
+                *padentry = ap[0].any_sv;
+                SvREFCNT_dec(ap[0].any_sv);
+            }
+            break;
 
         case SAVEt_DELETE:
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];

@@ -603,6 +603,7 @@
 # define save_int(a)                            Perl_save_int(aTHX_ a)
 # define save_item(a)                           Perl_save_item(aTHX_ a)
 # define save_iv(a)                             Perl_save_iv(aTHX_ a)
+# define save_padsv(a)                          Perl_save_padsv(aTHX_ a)
 # define save_padsv_and_mortalize(a)            Perl_save_padsv_and_mortalize(aTHX_ a)
 # define save_pptr(a)                           Perl_save_pptr(aTHX_ a)
 # define save_pushi32ptr(a,b,c)                 Perl_save_pushi32ptr(aTHX_ a,b,c)
