@@ -114,6 +114,25 @@ and maintain releases of Perl.
 This document codifies the support and maintenance commitments that
 the Perl community should expect from Perl's developers:
 
+=head2 Version Support Status
+
+The following table summarizes the current support status.  It is updated
+with each stable release.
+
+    Version    Released     Support status
+    -------    --------     --------------
+    5.42.x     2025-Jul     Full support (current stable)
+    5.40.x     2024-Jun     Full support (previous stable)
+    5.38.x     2023-Jul     Security fixes only
+    5.36.x     2022-May     End of life
+    5.34.x     2021-May     End of life
+
+Only the latest point release in each series (e.g., 5.42.1, not 5.42.0)
+receives patches.  Development releases (odd-numbered series like 5.43.x)
+are not supported.
+
+=head2 Support Details
+
 =over
 
 =item *
