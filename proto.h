@@ -1387,8 +1387,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 #define PERL_ARGS_ASSERT_EVAL_SV                \
         assert(sv)
 
-#define PERL_ARGS_ASSERT_EXPECTED_SIZE
-
 PERL_CALLCONV void
 Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
         Perl_attribute_nonnull_aTHX_
@@ -7735,9 +7733,6 @@ Perl_emulate_cop_io(pTHX_ const COP * const c, SV * const sv)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2);
-PERL_CALLCONV Size_t
-Perl_expected_size(UV size)
-        __attribute__visibility__("hidden");
 PERL_CALLCONV SV *
 Perl_get_and_check_backslash_N_name(pTHX_ const char *s, const char *e, const bool is_utf8, const char **error_msg)
         Perl_attribute_nonnull_aTHX_
@@ -15497,6 +15492,8 @@ Perl_thread_locale_term(pTHX)
 # define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
+/* PERL_CALLCONV Size_t
+Perl_expected_size(UV size); */
 PERL_CALLCONV U8 *
 Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
         Perl_attribute_nonnull_aTHX_

@@ -40,6 +40,7 @@
 #   undef SvRVx
 #   undef UNI_DISPLAY_TR_
 #   if !defined(PERL_EXT)
+#     undef expected_size
 #     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
 #     undef invlist_subtract_
@@ -1896,6 +1897,7 @@
 #   define cv_ckproto_len_flags(a,b,c,d,e)      Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #   define delimcpy_no_escape                   Perl_delimcpy_no_escape
 #   define do_uniprop_match                     Perl_do_uniprop_match
+#   define Perl_expected_size                   expected_size
 #   define get_and_check_backslash_N_name(a,b,c,d) Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
 #   define get_deprecated_property_msg          Perl_get_deprecated_property_msg
 #   define get_prop_definition(a)               Perl_get_prop_definition(aTHX_ a)
