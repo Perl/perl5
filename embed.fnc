@@ -180,12 +180,10 @@
 :   the same as GCC and Clang's '__attribute__nonnull__' generated for them for
 :   compilers that we know understand it.
 :
-:   Currently, it is optional to include an empty ARGS_ASSERT macro in your
-:   functions.  But a porting test enforces that a non-empty one does get
-:   included.  The call should be at the top of your function so that the
-:   sanity checks have passed before anything tries to use an argument.  When
-:   writing a new function, add the macro even if not required, and you'll
-:   never have to go back and add one later when more checks do get added.
+:   A porting test enforces that an ARGS_ASSERT macro has been included in all
+:   new functions added to this file.  Each call should be at the top of your
+:   function so that the sanity checks have passed before anything tries to use
+:   an argument.
 :
 :   (Much of the perl core was written assuming the ARGS_ASSERT macro needed to
 :   be placed after any declarations because of the C89 Standard.  That is no
