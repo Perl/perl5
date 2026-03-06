@@ -15583,22 +15583,17 @@ Perl_thread_locale_term(pTHX)
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
 /* PERL_CALLCONV U8 *
-Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-        Perl_attribute_nonnull_aTHX; */
+Perl_utf16_to_utf8(U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 /* PERL_CALLCONV U8 *
-Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-        Perl_attribute_nonnull_aTHX; */
+Perl_utf16_to_utf8_reversed(U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 #   if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
        defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 /* PERL_CALLCONV void
-invlist_intersection_(pTHX_ SV * const a, SV * const b, SV **i)
-        Perl_attribute_nonnull_aTHX; */
+invlist_intersection_(SV * const a, SV * const b, SV **i); */
 /* PERL_CALLCONV void
-invlist_subtract_(pTHX_ SV * const a, SV * const b, SV **result)
-        Perl_attribute_nonnull_aTHX; */
+invlist_subtract_(SV * const a, SV * const b, SV **result); */
 /* PERL_CALLCONV void
-invlist_union_(pTHX_ SV * const a, SV * const b, SV **output)
-        Perl_attribute_nonnull_aTHX; */
+invlist_union_(SV * const a, SV * const b, SV **output); */
 #   endif
 # endif
 # if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
