@@ -1214,7 +1214,8 @@ For now it's static, but it may be exposed to the API in the future.
 */
 
 static OP*
-S_traverse_op_tree(pTHX_ OP *top, OP *o) {
+S_traverse_op_tree(pTHX_ OP *top, OP *o)
+{
     OP *sib;
 
     PERL_ARGS_ASSERT_TRAVERSE_OP_TREE;

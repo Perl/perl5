@@ -1190,7 +1190,8 @@ Perl_av_exists(pTHX_ AV *av, SSize_t key)
 }
 
 static MAGIC *
-S_get_aux_mg(pTHX_ AV *av) {
+S_get_aux_mg(pTHX_ AV *av)
+{
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_GET_AUX_MG;
@@ -1208,7 +1209,8 @@ S_get_aux_mg(pTHX_ AV *av) {
 }
 
 SV **
-Perl_av_arylen_p(pTHX_ AV *av) {
+Perl_av_arylen_p(pTHX_ AV *av)
+{
     MAGIC *const mg = get_aux_mg(av);
 
     PERL_ARGS_ASSERT_AV_ARYLEN_P;
@@ -1217,7 +1219,8 @@ Perl_av_arylen_p(pTHX_ AV *av) {
 }
 
 IV *
-Perl_av_iter_p(pTHX_ AV *av) {
+Perl_av_iter_p(pTHX_ AV *av)
+{
     MAGIC *const mg = get_aux_mg(av);
 
     PERL_ARGS_ASSERT_AV_ITER_P;
@@ -1236,7 +1239,8 @@ Perl_av_iter_p(pTHX_ AV *av) {
 }
 
 SV *
-Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
+Perl_av_nonelem(pTHX_ AV *av, SSize_t ix)
+{
     SV * const sv = newSV_type(SVt_NULL);
     PERL_ARGS_ASSERT_AV_NONELEM;
     if (!av_store(av,ix,sv))

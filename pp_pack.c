@@ -356,7 +356,8 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len,
 }
 
 static char *
-S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
+S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap)
+{
     PERL_ARGS_ASSERT_MY_BYTES_TO_UTF8;
 
     if (UNLIKELY(needs_swap)) {
@@ -824,7 +825,8 @@ S_need_utf8(const char *pat, const char *patend)
 }
 
 static char
-S_first_symbol(const char *pat, const char *patend) {
+S_first_symbol(const char *pat, const char *patend)
+{
     PERL_ARGS_ASSERT_FIRST_SYMBOL;
 
     while (pat < patend) {
@@ -2029,7 +2031,8 @@ Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, 
 
 /* like sv_utf8_upgrade, but also repoint the group start markers */
 static void
-marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
+marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr)
+{
     STRLEN len;
     tempsym_t *group;
     const char *from_ptr, *from_start, *from_end, **marks, **m;
@@ -2097,7 +2100,8 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
    Only grows the string if there is an actual lack of space
 */
 static char *
-S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed) {
+S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
+{
     const STRLEN cur = SvCUR(sv);
     const STRLEN len = SvLEN(sv);
     STRLEN extend;

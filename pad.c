@@ -160,7 +160,8 @@ Points directly to the body of the L</PL_comppad> array.
 
 #ifdef DEBUGGING
 void
-Perl_set_padlist(CV * cv, PADLIST *padlist){
+Perl_set_padlist(CV * cv, PADLIST *padlist)
+{
     PERL_ARGS_ASSERT_SET_PADLIST;
 #  if PTRSIZE == 8
     assert((Size_t)padlist != UINT64_C(0xEFEFEFEFEFEFEFEF));
@@ -2980,7 +2981,8 @@ Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer)
 
 /* interface compatible with SAVEDESTRUCTOR_X */
 static void
-S_suspend_compcv_destruct(pTHX_ void *p) {
+S_suspend_compcv_destruct(pTHX_ void *p)
+{
     suspend_compcv((struct suspended_compcv *)p);
 }
 

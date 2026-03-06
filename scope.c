@@ -377,7 +377,8 @@ or be prematurely freed.
 =cut
  */
 void
-Perl_save_rcpv(pTHX_ char **prcpv) {
+Perl_save_rcpv(pTHX_ char **prcpv)
+{
     PERL_ARGS_ASSERT_SAVE_RCPV;
     save_pushptrptr(prcpv, rcpv_copy(*prcpv), SAVEt_RCPV);
 }
@@ -393,7 +394,8 @@ on the argument when the current pseudo block is finished.
 =cut
  */
 void
-Perl_save_freercpv(pTHX_ char *rcpv) {
+Perl_save_freercpv(pTHX_ char *rcpv)
+{
     PERL_ARGS_ASSERT_SAVE_FREERCPV;
     save_pushptr(rcpv, SAVEt_FREERCPV);
 }
@@ -1991,7 +1993,8 @@ should not be called directly and has no user serviceable parts.
 */
 
 void
-Perl_mortal_destructor_sv(pTHX_ SV *coderef, SV *args) {
+Perl_mortal_destructor_sv(pTHX_ SV *coderef, SV *args)
+{
     PERL_ARGS_ASSERT_MORTAL_DESTRUCTOR_SV;
     assert(
         (SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV) /* perl coderef */
@@ -2005,7 +2008,8 @@ Perl_mortal_destructor_sv(pTHX_ SV *coderef, SV *args) {
 
 
 void
-Perl_mortal_svfunc_x(pTHX_ SVFUNC_t f, SV *sv) {
+Perl_mortal_svfunc_x(pTHX_ SVFUNC_t f, SV *sv)
+{
     PERL_ARGS_ASSERT_MORTAL_SVFUNC_X;
     SV *sviv = newSViv(PTR2IV(f));
     mortal_destructor_sv(sviv,sv);
@@ -2013,7 +2017,8 @@ Perl_mortal_svfunc_x(pTHX_ SVFUNC_t f, SV *sv) {
 
 
 int
-Perl_magic_freedestruct(pTHX_ SV* sv, MAGIC* mg) {
+Perl_magic_freedestruct(pTHX_ SV* sv, MAGIC* mg)
+{
     PERL_ARGS_ASSERT_MAGIC_FREEDESTRUCT;
     dSP;
     union {

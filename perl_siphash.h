@@ -219,7 +219,8 @@ do {                                    \
 } while (0)
 
 PERL_STATIC_INLINE
-void S_perl_siphash_seed_state(const unsigned char * const seed_buf, unsigned char * state_buf) {
+void S_perl_siphash_seed_state(const unsigned char * const seed_buf, unsigned char * state_buf)
+{
     U64 *v= (U64*) state_buf;
     SIPHASH_SEED_STATE(seed_buf, v[0],v[1],v[2],v[3]);
 }

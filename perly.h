@@ -199,7 +199,8 @@ extern int yydebug;
 /* Value type.  */
 #ifdef PERL_IN_TOKE_C
 static bool
-S_is_opval_token(int type) {
+S_is_opval_token(int type)
+{
     switch (type) {
     case ATTRLIST:
     case BAREWORD:

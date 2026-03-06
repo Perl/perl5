@@ -1094,7 +1094,8 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 */
 
 static bool
-S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
+S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name)
+{
     int fd;
     PerlIO *fp;
     const char *p = SvPV_nolen(orig_name);
@@ -1187,7 +1188,8 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #endif
 
 static int
-S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
+S_argvout_free(pTHX_ SV *io, MAGIC *mg)
+{
     PERL_UNUSED_ARG(io);
 
     /* note this can be entered once the file has been
@@ -1251,7 +1253,8 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
 }
 
 static int
-S_argvout_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param) {
+S_argvout_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
+{
     PERL_UNUSED_ARG(param);
 
     /* ideally we could just remove the magic from the SV but we don't get the SV here */
@@ -1550,7 +1553,8 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
  * equivalent rename() succeeds
  */
 static int
-S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) {
+S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath)
+{
     /* this is intended only for use in Perl_do_close() */
     assert(olddfd == newdfd);
     assert(PERL_FILE_IS_ABSOLUTE(oldpath) == PERL_FILE_IS_ABSOLUTE(newpath));
@@ -1568,7 +1572,8 @@ S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath) 
 #endif
 
 static bool
-S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
+S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg)
+{
     Stat_t statbuf;
 
 #ifdef ARGV_USE_STAT_INO
@@ -1610,7 +1615,8 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg) {
     S_dir_unchanged(aTHX_ (orig_psv), (mg))
 
 static bool
-S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
+S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict)
+{
     bool retval;
 
     /* ensure args are checked before we start using them */

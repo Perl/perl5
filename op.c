@@ -211,7 +211,8 @@ Perl_op_prune_chain_head(OP** op_p)
 
 /* rounds up to nearest pointer */
 PERL_STATIC_INLINE U16
-S_size_to_psize(size_t sz) {
+S_size_to_psize(size_t sz)
+{
     size_t psize = (sz + sizeof(I32 *) - 1) / sizeof(I32 *);
     assert(psize <= U16_MAX);
 
@@ -225,7 +226,8 @@ S_size_to_psize(size_t sz) {
 */
 
 PERL_STATIC_INLINE U16
-S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot) {
+S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot)
+{
     PERL_ARGS_ASSERT_OPSLAB_SLOT_OFFSET;
 
     const char *base = (const char *)&slab->opslab_slots;
@@ -294,7 +296,8 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 
 #define link_freed_op(slab, o) S_link_freed_op(aTHX_ slab, o)
 static void
-S_link_freed_op(pTHX_ OPSLAB *slab, OP *o) {
+S_link_freed_op(pTHX_ OPSLAB *slab, OP *o)
+{
     U16 sz = OpSLOT(o)->opslot_size;
     U16 index = OPSLOT_SIZE_TO_INDEX(sz);
 
@@ -751,7 +754,8 @@ S_is_standard_filehandle_name(const char *fhname) {
 }
 
 void
-Perl_no_bareword_filehandle(pTHX_ const char *fhname) {
+Perl_no_bareword_filehandle(pTHX_ const char *fhname)
+{
     PERL_ARGS_ASSERT_NO_BAREWORD_FILEHANDLE;
 
     if (!is_standard_filehandle_name(fhname)) {
@@ -4979,7 +4983,8 @@ S_op_integerize(pTHX_ OP *o)
    it uses setjmp
  */
 static int
-S_fold_constants_eval(pTHX) {
+S_fold_constants_eval(pTHX)
+{
     int ret = 0;
     dJMPENV;
 
@@ -6019,7 +6024,8 @@ Supported optypes: C<OP_METHOD>.
 */
 
 static OP*
-S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth) {
+S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth)
+{
     METHOP *methop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_METHOP
@@ -6054,7 +6060,8 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
 }
 
 OP *
-Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth) {
+Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth)
+{
     PERL_ARGS_ASSERT_NEWMETHOP;
     return newMETHOP_internal(type, flags, dynamic_meth, NULL);
 }
@@ -6073,7 +6080,8 @@ Supported optypes: C<OP_METHOD_NAMED>.
 */
 
 OP *
-Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth) {
+Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth)
+{
     PERL_ARGS_ASSERT_NEWMETHOP_NAMED;
     return newMETHOP_internal(type, flags, NULL, const_meth);
 }
@@ -9935,7 +9943,8 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 
 #define find_argop_from_entersub(op) S_find_argop_from_entersub(op)
 static OP *
-S_find_argop_from_entersub(OP *entersubop) {
+S_find_argop_from_entersub(OP *entersubop)
+{
     assert(entersubop != NULL);
 
     OP *aop = cUNOPx(entersubop)->op_first;
@@ -9950,7 +9959,8 @@ S_find_argop_from_entersub(OP *entersubop) {
 
 #define find_cvop_from_argop(op) S_find_cvop_from_argop(op)
 static OP *
-S_find_cvop_from_argop(OP *cvop)  {
+S_find_cvop_from_argop(OP *cvop)
+{
     assert(cvop != NULL);
 
     /* CV is the last argument to entersub */
@@ -15947,7 +15957,8 @@ Perl_ck_tell(pTHX_ OP *o)
 }
 
 PERL_STATIC_INLINE OP *
-S_last_non_null_kid(OP *o) {
+S_last_non_null_kid(OP *o)
+{
     OP *last = NULL;
     if (cUNOPo->op_flags & OPf_KIDS) {
         OP *k = cLISTOPo->op_first;
@@ -16125,7 +16136,8 @@ Perl_ck_isa(pTHX_ OP *o)
    and modify the optree to make them work inplace */
 
 static void
-S_inplace_aassign(pTHX_ OP *o) {
+S_inplace_aassign(pTHX_ OP *o)
+{
 
     OP *modop, *modop_pushmark;
     OP *oright;
@@ -16804,7 +16816,8 @@ the input content.
 */
 
 char *
-Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
+Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags)
+{
     RCPV *rcpv;
 
     PERL_ARGS_ASSERT_RCPV_NEW;
@@ -16859,7 +16872,8 @@ Always returns NULL so it can be used like this:
 */
 
 char *
-Perl_rcpv_free(pTHX_ char *pv) {
+Perl_rcpv_free(pTHX_ char *pv)
+{
 
     PERL_ARGS_ASSERT_RCPV_FREE;
 
@@ -16899,7 +16913,8 @@ Returns the same pointer that was passed in.
 
 
 char *
-Perl_rcpv_copy(pTHX_ char *pv) {
+Perl_rcpv_copy(pTHX_ char *pv)
+{
 
     PERL_ARGS_ASSERT_RCPV_COPY;
 

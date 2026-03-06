@@ -813,7 +813,8 @@ guaranteed to evaluate C<sv> only once.
 */
 
 PERL_STATIC_INLINE IV
-Perl_SvIV(pTHX_ SV *sv) {
+Perl_SvIV(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVIV;
 
     if (SvIOK_nog(sv))
@@ -822,7 +823,8 @@ Perl_SvIV(pTHX_ SV *sv) {
 }
 
 PERL_STATIC_INLINE UV
-Perl_SvUV(pTHX_ SV *sv) {
+Perl_SvUV(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVUV;
 
     if (SvUOK_nog(sv))
@@ -831,7 +833,8 @@ Perl_SvUV(pTHX_ SV *sv) {
 }
 
 PERL_STATIC_INLINE NV
-Perl_SvNV(pTHX_ SV *sv) {
+Perl_SvNV(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVNV;
 
     if (SvNOK_nog(sv))
@@ -840,7 +843,8 @@ Perl_SvNV(pTHX_ SV *sv) {
 }
 
 PERL_STATIC_INLINE IV
-Perl_SvIV_nomg(pTHX_ SV *sv) {
+Perl_SvIV_nomg(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVIV_NOMG;
 
     if (SvIOK(sv))
@@ -849,7 +853,8 @@ Perl_SvIV_nomg(pTHX_ SV *sv) {
 }
 
 PERL_STATIC_INLINE UV
-Perl_SvUV_nomg(pTHX_ SV *sv) {
+Perl_SvUV_nomg(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVUV_NOMG;
 
     if (SvUOK(sv))
@@ -858,7 +863,8 @@ Perl_SvUV_nomg(pTHX_ SV *sv) {
 }
 
 PERL_STATIC_INLINE NV
-Perl_SvNV_nomg(pTHX_ SV *sv) {
+Perl_SvNV_nomg(pTHX_ SV *sv)
+{
     PERL_ARGS_ASSERT_SVNV_NOMG;
 
     if (SvNOK(sv))

@@ -3997,7 +3997,8 @@ PP(pp_match)
    is non-blocking but would have blocked if blocking
 */
 PERL_STATIC_INLINE bool
-error_is_would_block(int err) {
+error_is_would_block(int err)
+{
 #ifdef EAGAIN
     if (err == EAGAIN)
         return true;

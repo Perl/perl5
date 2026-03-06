@@ -810,7 +810,8 @@ S_missingterm(pTHX_ char *s, STRLEN len)
 }
 
 static char *
-S_scan_terminated(pTHX_ char *s, I32 ival) {
+S_scan_terminated(pTHX_ char *s, I32 ival)
+{
     s = scan_str(s,FALSE,FALSE,FALSE,NULL);
     if (!s)
         missingterm(NULL, 0);
@@ -5578,7 +5579,8 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
 
 static char *
-S_tokenize_use(pTHX_ int is_use, char *s) {
+S_tokenize_use(pTHX_ int is_use, char *s)
+{
     PERL_ARGS_ASSERT_TOKENIZE_USE;
 
     if (PL_expect != XSTATE)
@@ -7682,7 +7684,8 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
 }
 
 static const char *
-declarator_name(I32 k) {
+declarator_name(I32 k)
+{
     switch (k) {
         case KEY_my:    return "my";
         case KEY_state: return "state";
@@ -11395,7 +11398,8 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
 }
 
 static bool
-S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charset, unsigned int * x_mod_count) {
+S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charset, unsigned int * x_mod_count)
+{
 
     /* Adds, subtracts to/from 'pmfl' based on the next regex modifier flag
      * found in the parse starting at 's', based on the subset that are valid

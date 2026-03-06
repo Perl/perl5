@@ -361,7 +361,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
  * line 4003 or so of regcomp.c where we parse OPEN parens
  * of various types. */
 PERL_STATIC_INLINE void
-S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH) {
+S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH)
+{
     PERL_ARGS_ASSERT_UNWIND_PAREN;
     U32 n;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -384,7 +385,8 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH) {
 #define UNWIND_PAREN(lp,lcp) unwind_paren(rex,lp,lcp)
 
 PERL_STATIC_INLINE void
-S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH) {
+S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH)
+{
     PERL_ARGS_ASSERT_CAPTURE_CLEAR;
     PERL_UNUSED_ARG(str); /* only used for debugging */
     U16 my_ix;
@@ -2181,7 +2183,8 @@ STMT_START {                                                                \
 
 #ifdef DEBUGGING
 static IV
-S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
+S_get_break_val_cp_checked(SV* const invlist, const UV cp_in)
+{
   IV cp_out = invlist_search_(invlist, cp_in);
   assert(cp_out >= 0);
   return cp_out;

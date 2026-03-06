@@ -4912,7 +4912,8 @@ Perl_sv_isbool(pTHX_ const SV *sv)
 #ifdef USE_ITHREADS
 
 PERL_STATIC_INLINE AV *
-Perl_cop_file_avn(pTHX_ const COP *cop) {
+Perl_cop_file_avn(pTHX_ const COP *cop)
+{
 
     PERL_ARGS_ASSERT_COP_FILE_AVN;
 

@@ -66,7 +66,8 @@ struct mg_data_t {
 static struct mg_data_t mg_data[256];
 
 static void
-format_mg_data(FILE *out, const void *thing, size_t count) {
+format_mg_data(FILE *out, const void *thing, size_t count)
+{
   const struct mg_data_t *p = (const struct mg_data_t *)thing;
 
   while (1) {
@@ -84,7 +85,8 @@ format_mg_data(FILE *out, const void *thing, size_t count) {
 }
 
 static void
-format_char_block(FILE *out, const void *thing, size_t count) {
+format_char_block(FILE *out, const void *thing, size_t count)
+{
   const char *block = (const char *)thing;
 
   fputs("    ", out);
@@ -139,7 +141,8 @@ typedef unsigned char U8;
 static char PL_uudmap[256];
 static char PL_bitcount[256];
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   size_t i;
   int bits;
   struct mg_data_raw_t *p = mg_data_raw;

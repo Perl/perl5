@@ -3303,7 +3303,8 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
 */
 
 static OP *
-S_ft_return_false(pTHX_ SV *ret) {
+S_ft_return_false(pTHX_ SV *ret)
+{
     OP *next = NORMAL;
 
     if (PL_op->op_flags & OPf_REF) {
@@ -3321,7 +3322,8 @@ S_ft_return_false(pTHX_ SV *ret) {
 }
 
 PERL_STATIC_INLINE OP *
-S_ft_return_true(pTHX_ SV *ret) {
+S_ft_return_true(pTHX_ SV *ret)
+{
     if (PL_op->op_flags & OPf_REF) {
         rpp_xpush_1((PL_op->op_private & OPpFT_STACKING)
                     ? (SV*)cGVOP_gv : ret);
@@ -3346,7 +3348,8 @@ S_ft_return_true(pTHX_ SV *ret) {
     } STMT_END
 
 static OP *
-S_try_amagic_ftest(pTHX_ char chr) {
+S_try_amagic_ftest(pTHX_ char chr)
+{
     SV *const arg = *PL_stack_sp;
 
     assert(chr != '?');
@@ -4271,7 +4274,8 @@ PP_wrapped(pp_open_dir, 2, 0)
 }
 
 static void
-S_warn_not_dirhandle(pTHX_ GV *gv) {
+S_warn_not_dirhandle(pTHX_ GV *gv)
+{
     IO *io = GvIOn(gv);
 
     if (IoIFP(io)) {
