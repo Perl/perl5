@@ -1428,6 +1428,8 @@ XS(XS_mro_method_changed_in);
 void
 Perl_boot_core_mro(pTHX)
 {
+    PERL_ARGS_ASSERT_BOOT_CORE_MRO;
+
     static const char file[] = __FILE__;
 
     Perl_mro_register(aTHX_ &dfs_alg);

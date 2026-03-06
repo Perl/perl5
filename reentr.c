@@ -45,6 +45,7 @@
 
 void
 Perl_reentrant_size(pTHX) {
+        PERL_ARGS_ASSERT_REENTRANT_SIZE;
         PERL_UNUSED_CONTEXT;
 
         /* Set the sizes of the reentrant buffers */
@@ -171,6 +172,7 @@ Perl_reentrant_size(pTHX) {
 
 void
 Perl_reentrant_init(pTHX) {
+        PERL_ARGS_ASSERT_REENTRANT_INIT;
         PERL_UNUSED_CONTEXT;
 
         /* Initialize the whole thing */
@@ -276,6 +278,7 @@ Perl_reentrant_init(pTHX) {
 
 void
 Perl_reentrant_free(pTHX) {
+        PERL_ARGS_ASSERT_REENTRANT_FREE;
         PERL_UNUSED_CONTEXT;
 
         /* Tear down */

@@ -652,6 +652,8 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 static int
 S_ao(pTHX_ int toketype)
 {
+    PERL_ARGS_ASSERT_AO;
+
     if (*PL_bufptr == '=') {
         PL_bufptr++;
 
@@ -771,6 +773,8 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
 static void
 S_missingterm(pTHX_ char *s, STRLEN len)
 {
+    PERL_ARGS_ASSERT_MISSINGTERM;
+
     char tmpbuf[UTF8_MAXBYTES + 1];
     char q;
     bool uni = FALSE;
@@ -897,6 +901,8 @@ used by perl internally, so extensions should always pass zero.
 void
 Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_START;
+
     const char *s = NULL;
     yy_parser *parser, *oparser;
 
@@ -1125,6 +1131,8 @@ instead of implementing the logic yourself.
 bool
 Perl_lex_bufutf8(pTHX)
 {
+    PERL_ARGS_ASSERT_LEX_BUFUTF8;
+
     return UTF;
 }
 
@@ -1148,6 +1156,8 @@ into the buffer.
 char *
 Perl_lex_grow_linestr(pTHX_ STRLEN len)
 {
+    PERL_ARGS_ASSERT_LEX_GROW_LINESTR;
+
     SV *linestr;
     char *buf;
     STRLEN bufend_pos, bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
@@ -1441,6 +1451,8 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 void
 Perl_notify_parser_that_encoding_changed(pTHX)
 {
+    PERL_ARGS_ASSERT_NOTIFY_PARSER_THAT_ENCODING_CHANGED;
+
     /* Called when $^H is changed to indicate that HINT_UTF8 or
      * HINT_ASCII_ENCODING has changed from off to on.  At compile time, this
      * has the effect of entering a 'use utf8' or 'use source::encoding'
@@ -1486,6 +1498,8 @@ buffer has reached the end of the input text.
 bool
 Perl_lex_next_chunk(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_NEXT_CHUNK;
+
     SV *linestr;
     char *buf;
     STRLEN old_bufend_pos, new_bufend_pos;
@@ -1627,6 +1641,8 @@ is encountered, an exception is generated.
 I32
 Perl_lex_peek_unichar(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_PEEK_UNICHAR;
+
     char *s, *bufend;
     if (flags & ~(LEX_KEEP_PREVIOUS))
         croak("Lexing code internal error (%s)", "lex_peek_unichar");
@@ -1690,6 +1706,8 @@ is encountered, an exception is generated.
 I32
 Perl_lex_read_unichar(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_READ_UNICHAR;
+
     I32 c;
     if (flags & ~(LEX_KEEP_PREVIOUS))
         croak("Lexing code internal error (%s)", "lex_read_unichar");
@@ -1728,6 +1746,8 @@ chunk will not be discarded.
 void
 Perl_lex_read_space(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_READ_SPACE;
+
     char *s, *bufend;
     const bool can_incline = !(flags & LEX_NO_INCLINE);
     bool need_incline = 0;
@@ -2024,6 +2044,8 @@ S_incline(pTHX_ const char *s, const char *end)
 static void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 {
+    PERL_ARGS_ASSERT_UPDATE_DEBUGGER_INFO;
+
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
         SV * sv;
@@ -2095,6 +2117,8 @@ Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 static void
 S_check_unary(pTHX)
 {
+    PERL_ARGS_ASSERT_CHECK_UNARY;
+
     const char *s;
 
     if (PL_oldoldbufptr != PL_last_uni)
@@ -2178,6 +2202,8 @@ S_lop(pTHX_ enum yytokentype t, I32 f, U8 x, char *s)
 static void
 S_force_next(pTHX_ I32 type)
 {
+    PERL_ARGS_ASSERT_FORCE_NEXT;
+
 #ifdef DEBUGGING
     if (DEBUG_T_TEST) {
         PerlIO_printf(Perl_debug_log, "### forced token:\n");
@@ -2232,6 +2258,8 @@ S_postderef(pTHX_ int const funny, char const next)
 void
 Perl_yyunlex(pTHX)
 {
+    PERL_ARGS_ASSERT_YYUNLEX;
+
     int yyc = PL_parser->yychar;
     if (yyc != YYEMPTY) {
         if (yyc) {
@@ -2362,6 +2390,8 @@ S_force_ident(pTHX_ const char *s, int kind)
 static void
 S_force_ident_maybe_lex(pTHX_ char pit)
 {
+    PERL_ARGS_ASSERT_FORCE_IDENT_MAYBE_LEX;
+
     NEXTVAL_NEXTTOKE.ival = pit;
     force_next('p');
 }
@@ -2558,6 +2588,8 @@ S_tokeq(pTHX_ SV *sv)
 static I32
 S_sublex_start(pTHX)
 {
+    PERL_ARGS_ASSERT_SUBLEX_START;
+
     const I32 op_type = pl_yylval.ival;
 
     if (op_type == OP_NULL) {
@@ -2610,6 +2642,8 @@ S_sublex_start(pTHX)
 static I32
 S_sublex_push(pTHX)
 {
+    PERL_ARGS_ASSERT_SUBLEX_PUSH;
+
     LEXSHARED *shared;
     const bool is_heredoc = PL_multi_close == '<';
     ENTER;
@@ -2713,6 +2747,8 @@ S_sublex_push(pTHX)
 static I32
 S_sublex_done(pTHX)
 {
+    PERL_ARGS_ASSERT_SUBLEX_DONE;
+
     if (!PL_lex_starts++) {
         SV * const sv = newSVpvs("");
         if (SvUTF8(PL_linestr))
@@ -5312,6 +5348,8 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 SV *
 Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
+    PERL_ARGS_ASSERT_FILTER_ADD;
+
     if (!funcp)
         return NULL;
 
@@ -10154,6 +10192,8 @@ yyl_try(pTHX_ char *s)
 int
 Perl_yylex(pTHX)
 {
+    PERL_ARGS_ASSERT_YYLEX;
+
     char *s = PL_bufptr;
 
     if (UNLIKELY(PL_parser->recheck_charset_validity)) {
@@ -10454,6 +10494,8 @@ Perl_yylex(pTHX)
 static int
 S_pending_ident(pTHX)
 {
+    PERL_ARGS_ASSERT_PENDING_IDENT;
+
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
     const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
@@ -13512,6 +13554,8 @@ the function;
 I32
 Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
+    PERL_ARGS_ASSERT_START_SUBPARSE;
+
     const I32 oldsavestack_ix = PL_savestack_ix;
     CV* const outsidecv = PL_compcv;
     bool is_method = flags & CVf_IsMETHOD;
@@ -13690,6 +13734,8 @@ Perl_abort_execution(pTHX_ SV* msg_sv, const char * const name)
 void
 Perl_yyquit(pTHX)
 {
+    PERL_ARGS_ASSERT_YYQUIT;
+
     /* Called, after at least one error has been found, to abort the parse now,
      * instead of trying to forge ahead */
 
@@ -13715,6 +13761,8 @@ Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
 int
 Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_YYERROR_PVN;
+
     const char *context = NULL;
     int contlen = -1;
     SV *msg;
@@ -14377,6 +14425,8 @@ errors, however, will throw an exception immediately.
 OP *
 Perl_parse_arithexpr(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_ARITHEXPR;
+
     return parse_expr(LEX_FAKEEOF_COMPARE, flags);
 }
 
@@ -14409,6 +14459,8 @@ errors, however, will throw an exception immediately.
 OP *
 Perl_parse_termexpr(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_TERMEXPR;
+
     return parse_expr(LEX_FAKEEOF_COMMA, flags);
 }
 
@@ -14441,6 +14493,8 @@ errors, however, will throw an exception immediately.
 OP *
 Perl_parse_listexpr(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_LISTEXPR;
+
     return parse_expr(LEX_FAKEEOF_LOWLOGIC, flags);
 }
 
@@ -14474,6 +14528,8 @@ errors, however, will throw an exception immediately.
 OP *
 Perl_parse_fullexpr(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_FULLEXPR;
+
     return parse_expr(LEX_FAKEEOF_NONEXPR, flags);
 }
 
@@ -14508,6 +14564,8 @@ be zero.
 OP *
 Perl_parse_block(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_BLOCK;
+
     if (flags)
         croak("Parsing code internal error (%s)", "parse_block");
     return parse_recdescent_for_op(GRAMBLOCK, LEX_FAKEEOF_NEVER);
@@ -14546,6 +14604,8 @@ be zero.
 OP *
 Perl_parse_barestmt(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_BARESTMT;
+
     if (flags)
         croak("Parsing code internal error (%s)", "parse_barestmt");
     return parse_recdescent_for_op(GRAMBARESTMT, LEX_FAKEEOF_NEVER);
@@ -14574,6 +14634,8 @@ level of parsing which covers all the compilation errors that occurred.
 SV *
 Perl_parse_label(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_LABEL;
+
     if (flags & ~PARSE_OPTIONAL)
         croak("Parsing code internal error (%s)", "parse_label");
     if (PL_nexttoke) {
@@ -14652,6 +14714,8 @@ be zero.
 OP *
 Perl_parse_fullstmt(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_FULLSTMT;
+
     if (flags)
         croak("Parsing code internal error (%s)", "parse_fullstmt");
     return parse_recdescent_for_op(GRAMFULLSTMT, LEX_FAKEEOF_NEVER);
@@ -14690,6 +14754,8 @@ be zero.
 OP *
 Perl_parse_stmtseq(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_STMTSEQ;
+
     OP *stmtseqop;
     I32 c;
     if (flags)
@@ -14728,6 +14794,8 @@ be zero.
 OP *
 Perl_parse_subsignature(pTHX_ U32 flags)
 {
+    PERL_ARGS_ASSERT_PARSE_SUBSIGNATURE;
+
     if (flags)
         croak("Parsing code internal error (%s)", "parse_subsignature");
     /* sub signatures might be empty, but perly.y can't cope with the

@@ -36,6 +36,8 @@
 int
 Perl_runops_standard(pTHX)
 {
+    PERL_ARGS_ASSERT_RUNOPS_STANDARD;
+
     OP *op = PL_op;
     PERL_DTRACE_PROBE_OP(op);
     while ((PL_op = op = op->op_ppaddr(aTHX))) {
@@ -56,6 +58,8 @@ Perl_runops_standard(pTHX)
 int
 Perl_runops_wrap(pTHX)
 {
+    PERL_ARGS_ASSERT_RUNOPS_WRAP;
+
     /* runops loops assume a ref-counted stack. If we have been called via a
      * wrapper (pp_wrap or xs_wrap) with the top half of the stack not
      * reference-counted, or with a non-real stack, temporarily convert it

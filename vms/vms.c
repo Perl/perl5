@@ -13341,11 +13341,14 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src,
 void  
 Perl_sys_intern_clear(pTHX)
 {
+    PERL_ARGS_ASSERT_SYS_INTERN_CLEAR;
 }
 
 void  
 Perl_sys_intern_init(pTHX)
 {
+    PERL_ARGS_ASSERT_SYS_INTERN_INIT;
+
     unsigned int ix = RAND_MAX;
     double x;
 

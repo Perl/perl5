@@ -1642,6 +1642,8 @@ Deprecated since 5.38
 U8
 Perl_dowantarray(pTHX)
 {
+    PERL_ARGS_ASSERT_DOWANTARRAY;
+
     const U8 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
@@ -1651,6 +1653,8 @@ Perl_dowantarray(pTHX)
 U8
 Perl_block_gimme(pTHX)
 {
+    PERL_ARGS_ASSERT_BLOCK_GIMME;
+
     const I32 cxix = dopopto_cursub();
     U8 gimme;
     if (cxix < 0)
@@ -1674,6 +1678,8 @@ context.  Returns 0 otherwise.
 I32
 Perl_is_lvalue_sub(pTHX)
 {
+    PERL_ARGS_ASSERT_IS_LVALUE_SUB;
+
     const I32 cxix = dopopto_cursub();
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
@@ -1687,6 +1693,8 @@ Perl_is_lvalue_sub(pTHX)
 I32
 Perl_was_lvalue_sub(pTHX)
 {
+    PERL_ARGS_ASSERT_WAS_LVALUE_SUB;
+
     const I32 cxix = dopoptosub(cxstack_ix-1);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
@@ -1738,6 +1746,8 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 static I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
+    PERL_ARGS_ASSERT_DOPOPTOEVAL;
+
     I32 i;
     for (i = startingblock; i >= 0; i--) {
         const PERL_CONTEXT *cx = &cxstack[i];
@@ -1755,6 +1765,8 @@ S_dopoptoeval(pTHX_ I32 startingblock)
 static I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
+    PERL_ARGS_ASSERT_DOPOPTOLOOP;
+
     I32 i;
     for (i = startingblock; i >= 0; i--) {
         const PERL_CONTEXT * const cx = &cxstack[i];
@@ -1790,6 +1802,8 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 static I32
 S_dopoptogivenfor(pTHX_ I32 startingblock)
 {
+    PERL_ARGS_ASSERT_DOPOPTOGIVENFOR;
+
     I32 i;
     for (i = startingblock; i >= 0; i--) {
         const PERL_CONTEXT *cx = &cxstack[i];
@@ -1818,6 +1832,8 @@ S_dopoptogivenfor(pTHX_ I32 startingblock)
 static I32
 S_dopoptowhen(pTHX_ I32 startingblock)
 {
+    PERL_ARGS_ASSERT_DOPOPTOWHEN;
+
     I32 i;
     for (i = startingblock; i >= 0; i--) {
         const PERL_CONTEXT *cx = &cxstack[i];
@@ -1842,6 +1858,8 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
+    PERL_ARGS_ASSERT_DOUNWIND;
+
     if (!PL_curstackinfo) /* can happen if die during thread cloning */
         return;
 
@@ -1908,6 +1926,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 void
 Perl_rpp_obliterate_stack_to(pTHX_ I32 ix)
 {
+    PERL_ARGS_ASSERT_RPP_OBLITERATE_STACK_TO;
+
 #ifdef PERL_RC_STACK
     I32 nonrc_base = PL_curstackinfo->si_stack_nonrc_base;
     assert(ix >= 0);
@@ -2214,6 +2234,8 @@ frame for the sub call itself.
 const PERL_CONTEXT *
 Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 {
+    PERL_ARGS_ASSERT_CALLER_CX;
+
     I32 cxix = dopopto_cursub();
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *ccstack = cxstack;
@@ -3877,6 +3899,8 @@ See L<perlinterp/"Exception handing"> for further details.
 static OP *
 S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 {
+    PERL_ARGS_ASSERT_DOCATCH;
+
     int ret;
     OP * const oldop = PL_op;
     dJMPENV;
@@ -3937,6 +3961,8 @@ rather than in the scope of the debugger itself.)
 CV*
 Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
+    PERL_ARGS_ASSERT_FIND_RUNCV;
+
     return Perl_find_runcv_where(aTHX_ 0, 0, db_seqp);
 }
 
@@ -3944,6 +3970,8 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 CV *
 Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 {
+    PERL_ARGS_ASSERT_FIND_RUNCV_WHERE;
+
     PERL_SI	 *si;
     int		 level = 0;
 
@@ -4125,6 +4153,8 @@ S_try_run_unitcheck(pTHX_ OP* caller_op)
 static bool
 S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 {
+    PERL_ARGS_ASSERT_DOEVAL_COMPILE;
+
     OP * const saveop = PL_op;
     bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
@@ -5759,6 +5789,8 @@ PP(pp_catch)
 void
 Perl_delete_eval_scope(pTHX)
 {
+    PERL_ARGS_ASSERT_DELETE_EVAL_SCOPE;
+
     PERL_CONTEXT *cx;
         
     cx = CX_CUR();
@@ -5943,6 +5975,8 @@ PP(pp_smartmatch)
 static OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 {
+    PERL_ARGS_ASSERT_DO_SMARTMATCH;
+
     bool object_on_left = FALSE;
     SV *e = PL_stack_sp[0];  /* e is for 'expression' */
     SV *d = PL_stack_sp[-1]; /* d is for 'default', as in PL_defgv */
@@ -6876,6 +6910,8 @@ S_doparseform(pTHX_ SV *sv)
 static bool
 S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 {
+    PERL_ARGS_ASSERT_NUM_OVERFLOW;
+
     /* Can value be printed in fldsize chars, using %*.*f ? */
     NV pwr = 1;
     NV eps = 0.5;

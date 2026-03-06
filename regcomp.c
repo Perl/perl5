@@ -350,6 +350,8 @@ Perl_reg_add_data(RExC_state_t* const pRExC_state, const char* const s, const U3
 void
 Perl_reginitcolors(pTHX)
 {
+    PERL_ARGS_ASSERT_REGINITCOLORS;
+
     const char * const s = PerlEnv_getenv("PERL_RE_COLORS");
     if (s) {
         char *t = savepv(s);
@@ -396,6 +398,8 @@ Perl_reginitcolors(pTHX)
 regexp_engine const *
 Perl_current_re_engine(pTHX)
 {
+    PERL_ARGS_ASSERT_CURRENT_RE_ENGINE;
+
     SV *ptr;
     if (IN_PERL_COMPILETIME) {
         HV * const table = GvHV(PL_hintgv);
@@ -8508,6 +8512,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
 static unsigned  int
 S_regex_set_precedence(const U8 my_operator)
 {
+    PERL_ARGS_ASSERT_REGEX_SET_PRECEDENCE;
 
     /* Returns the precedence in the (?[...]) construct of the input operator,
      * specified by its character representation.  The precedence follows
@@ -13450,6 +13455,8 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 void
 Perl_pregfree(pTHX_ REGEXP *r)
 {
+    PERL_ARGS_ASSERT_PREGFREE;
+
     SvREFCNT_dec(r);
 }
 
@@ -14064,6 +14071,8 @@ S_re_croak(pTHX_ bool utf8, const char* pat,...)
 void
 Perl_save_re_context(pTHX)
 {
+    PERL_ARGS_ASSERT_SAVE_RE_CONTEXT;
+
     I32 nparens = -1;
     I32 i;
 
@@ -14105,6 +14114,7 @@ Perl_save_re_context(pTHX)
 void
 Perl_init_uniprops(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_UNIPROPS;
 
 #  ifdef DEBUGGING
     char * dump_len_string;

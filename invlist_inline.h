@@ -29,6 +29,8 @@
 PERL_STATIC_INLINE bool
 S_is_invlist(const SV* const invlist)
 {
+    PERL_ARGS_ASSERT_IS_INVLIST;
+
     return invlist != NULL && SvTYPE(invlist) == SVt_INVLIST;
 }
 
@@ -127,13 +129,17 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 }
 
 PERL_STATIC_INLINE SV*
-S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
+S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
+{
+    PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST;
+
     return add_range_to_invlist_(invlist, cp, cp);
 }
 
 PERL_STATIC_INLINE UV
 S_invlist_highest(SV* const invlist)
 {
+
     /* Returns the highest code point that matches an inversion list.  This API
      * has an ambiguity, as it returns 0 under either the highest is actually
      * 0, or if the list is empty.  If this distinction matters to you, check

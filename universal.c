@@ -1404,6 +1404,8 @@ optimize_out_native_convert_function(pTHX_ OP* entersubop,
 void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
+    PERL_ARGS_ASSERT_BOOT_CORE_UNIVERSAL;
+
     static const char file[] = __FILE__;
     const struct xsub_details *xsub = these_details;
     const struct xsub_details *end = C_ARRAY_END(these_details);

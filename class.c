@@ -668,6 +668,8 @@ been defined so a new attempt can be made.
 static void
 S_class_cleanup_definition(pTHX_ HV *stash)
 {
+    PERL_ARGS_ASSERT_CLASS_CLEANUP_DEFINITION;
+
     struct xpvhv_aux *aux = HvAUX(stash);
 
     SvREFCNT_dec(aux->xhv_class_superclass);
@@ -1383,6 +1385,8 @@ Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv)
 OP *
 Perl_ck_classname(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_CK_CLASSNAME;
+
     if(!CvIsMETHOD(PL_compcv))
         croak("Cannot use __CLASS__ outside of a method or field initializer expression");
 

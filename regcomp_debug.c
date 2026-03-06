@@ -315,6 +315,8 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 static void
 S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 {
+    PERL_ARGS_ASSERT_REGDUMP_INTFLAGS;
+
     int bit;
     int set = 0;
 
@@ -338,6 +340,8 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 static void
 S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 {
+    PERL_ARGS_ASSERT_REGDUMP_EXTFLAGS;
+
     int bit;
     int set = 0;
     regex_charset cs;

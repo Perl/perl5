@@ -455,6 +455,8 @@ Implements C<SvPEEK>
 char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_PEEK;
+
     SV * const t = sv_newmortal();
     int unref = 0;
     U32 type;
@@ -804,12 +806,16 @@ C<PL_defstash>.
 void
 Perl_dump_all(pTHX)
 {
+    PERL_ARGS_ASSERT_DUMP_ALL;
+
     dump_all_perl(FALSE);
 }
 
 void
 Perl_dump_all_perl(pTHX_ bool justperl)
 {
+    PERL_ARGS_ASSERT_DUMP_ALL_PERL;
+
     PerlIO_setlinebuf(Perl_debug_log);
     if (PL_main_root)
         op_dump(PL_main_root);
@@ -936,6 +942,8 @@ Perl_dump_form(pTHX_ const GV *gv)
 void
 Perl_dump_eval(pTHX)
 {
+    PERL_ARGS_ASSERT_DUMP_EVAL;
+
     op_dump(PL_eval_root);
 }
 
@@ -1250,6 +1258,8 @@ special handling.
 void
 Perl_pmop_dump(pTHX_ PMOP *pm)
 {
+    PERL_ARGS_ASSERT_PMOP_DUMP;
+
     do_pmop_dump(0, Perl_debug_log, pm);
 }
 
@@ -1261,6 +1271,8 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
 static UV
 S_sequence_num(pTHX_ const OP *o)
 {
+    PERL_ARGS_ASSERT_SEQUENCE_NUM;
+
     SV     *op,
           **seq;
     const char *key;
@@ -1935,6 +1947,8 @@ C<STDERR>.
 void
 Perl_gv_dump(pTHX_ GV *gv)
 {
+    PERL_ARGS_ASSERT_GV_DUMP;
+
     STRLEN len;
     const char* name;
     SV *sv, *tmp = newSVpvs_flags("", SVs_TEMP);
@@ -2105,6 +2119,8 @@ Dumps the contents of the MAGIC C<mg> to C<STDERR>.
 void
 Perl_magic_dump(pTHX_ const MAGIC *mg)
 {
+    PERL_ARGS_ASSERT_MAGIC_DUMP;
+
     do_magic_dump(0, Perl_debug_log, mg, 0, 0, FALSE, 0);
 }
 
@@ -3209,6 +3225,8 @@ deep.
 void
 Perl_sv_dump(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_DUMP;
+
     if (sv && SvROK(sv))
         sv_dump_depth(sv, 4);
     else
@@ -3218,6 +3236,8 @@ Perl_sv_dump(pTHX_ SV *sv)
 void
 Perl_sv_dump_depth(pTHX_ SV *sv, I32 depth)
 {
+    PERL_ARGS_ASSERT_SV_DUMP_DEPTH;
+
     do_sv_dump(0, Perl_debug_log, sv, 0, depth, 0, 0);
 }
 
@@ -3238,6 +3258,8 @@ Perl_hv_dump(pTHX_ HV *hv)
 int
 Perl_runops_debug(pTHX)
 {
+    PERL_ARGS_ASSERT_RUNOPS_DEBUG;
+
 #ifdef PERL_USE_HWM
     SSize_t orig_stack_hwm = PL_curstackinfo->si_stack_hwm;
 
@@ -3696,6 +3718,8 @@ Returns one of the OPclass enums, such as OPclass_LISTOP.
 OPclass
 Perl_op_class(pTHX_ const OP *o)
 {
+    PERL_ARGS_ASSERT_OP_CLASS;
+
     bool custom = 0;
 
     if (!o)
@@ -3832,6 +3856,8 @@ Perl_op_class(pTHX_ const OP *o)
 static CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
+    PERL_ARGS_ASSERT_DEB_CURCV;
+
     PERL_SI *si = PL_curstackinfo;
     for (; ix >=0; ix--) {
         const PERL_CONTEXT * const cx = &(si->si_cxstack)[ix];
@@ -3897,6 +3923,8 @@ option.
 void
 Perl_debprofdump(pTHX)
 {
+    PERL_ARGS_ASSERT_DEBPROFDUMP;
+
     unsigned i;
     if (!PL_profiledata)
         return;

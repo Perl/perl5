@@ -192,6 +192,8 @@ flags can be OR'ed together:
 PADLIST *
 Perl_pad_new(pTHX_ int flags)
 {
+    PERL_ARGS_ASSERT_PAD_NEW;
+
     PADLIST *padlist;
     PADNAMELIST *padname;
     PAD *pad;
@@ -723,6 +725,8 @@ but is used for debugging.
 PADOFFSET
 Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 {
+    PERL_ARGS_ASSERT_PAD_ALLOC;
+
     SV *sv;
     PADOFFSET retval;
 
@@ -1059,6 +1063,8 @@ Returns the global variable C<$_>.
 SV *
 Perl_find_rundefsv(pTHX)
 {
+    PERL_ARGS_ASSERT_FIND_RUNDEFSV;
+
     return DEFSV;
 }
 
@@ -1378,6 +1384,8 @@ Use macro C<PAD_SV> instead of calling this function directly.
 SV *
 Perl_pad_sv(pTHX_ PADOFFSET po)
 {
+    PERL_ARGS_ASSERT_PAD_SV;
+
     ASSERT_CURPAD_ACTIVE("pad_sv");
 
     if (!po)
@@ -1425,7 +1433,9 @@ Update the pad compilation state variables on entry to a new block.
 void
 Perl_pad_block_start(pTHX_ int full)
 {
+    PERL_ARGS_ASSERT_PAD_BLOCK_START;
     ASSERT_CURPAD_ACTIVE("pad_block_start");
+
     SAVESTRLEN(PL_comppad_name_floor);
     PL_comppad_name_floor = PadnamelistMAX(PL_comppad_name);
     if (full)
@@ -1460,6 +1470,8 @@ statements.
 U32
 Perl_intro_my(pTHX)
 {
+    PERL_ARGS_ASSERT_INTRO_MY;
+
     PADNAME **svp;
     PADOFFSET i;
     U32 seq;
@@ -1512,6 +1524,8 @@ lexicals in this scope and warn of any lexicals that never got introduced.
 OP *
 Perl_pad_leavemy(pTHX)
 {
+    PERL_ARGS_ASSERT_PAD_LEAVEMY;
+
     PADOFFSET off;
     OP *o = NULL;
     PADNAME * const * const svp = PadnamelistARRAY(PL_comppad_name);
@@ -1568,7 +1582,9 @@ new one.
 void
 Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 {
+    PERL_ARGS_ASSERT_PAD_SWIPE;
     ASSERT_CURPAD_LEGAL("pad_swipe");
+
     if (!PL_curpad)
         return;
     if (AvARRAY(PL_comppad) != PL_curpad)
@@ -1624,6 +1640,8 @@ Mark all the current temporaries for reuse
 static void
 S_pad_reset(pTHX)
 {
+    PERL_ARGS_ASSERT_PAD_RESET;
+
 #ifdef USE_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
         croak("panic: pad_reset curpad, %p!=%p",
@@ -1661,7 +1679,7 @@ the kind of subroutine:
 void
 Perl_pad_tidy(pTHX_ padtidy_type type)
 {
-
+    PERL_ARGS_ASSERT_PAD_TIDY;
     ASSERT_CURPAD_ACTIVE("pad_tidy");
 
     /* If this CV has had any 'eval-capable' ops planted in it:
@@ -1773,6 +1791,8 @@ Free the SV at offset po in the current pad.
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
+    PERL_ARGS_ASSERT_PAD_FREE;
+
 #ifndef USE_PAD_RESET
     SV *sv;
 #endif
@@ -2656,6 +2676,8 @@ is allocated.
 PADNAMELIST *
 Perl_newPADNAMELIST(size_t max)
 {
+    PERL_ARGS_ASSERT_NEWPADNAMELIST;
+
     PADNAMELIST *pnl;
     Newx(pnl, 1, PADNAMELIST);
     Newxz(PadnamelistARRAY(pnl), max+1, PADNAME *);

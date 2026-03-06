@@ -548,6 +548,8 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p comma_pDEPTH)
 static bool
 S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 {
+    PERL_ARGS_ASSERT_ISFOO_LC;
+
     /* Returns a boolean as to whether or not 'character' is a member of the
      * Posix character class given by 'classnum' that should be equivalent to a
      * value in the typedef 'char_class_number_'.

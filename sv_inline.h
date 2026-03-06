@@ -67,6 +67,8 @@
 PERL_STATIC_INLINE SV*
 Perl_new_sv(pTHX_ const char *file, int line, const char *func)
 {
+    PERL_ARGS_ASSERT_NEW_SV;
+
     SV* sv;
 #if !defined(DEBUG_LEAKING_SCALARS) || \
      (!defined(DEBUGGING) && !defined(PERL_MEM_LOG))
@@ -369,6 +371,8 @@ is set to 1.
 PERL_STATIC_INLINE SV *
 Perl_newSV_type(pTHX_ const svtype type)
 {
+    PERL_ARGS_ASSERT_NEWSV_TYPE;
+
     SV *sv;
     void*      new_body;
     const struct body_details *type_details;
@@ -535,6 +539,8 @@ at some point in the future.)
 PERL_STATIC_INLINE SV *
 Perl_newSV_type_mortal(pTHX_ const svtype type)
 {
+    PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL;
+
     SV *sv = newSV_type(type);
     SSize_t ix = ++PL_tmps_ix;
     if (UNLIKELY(ix >= PL_tmps_max))
@@ -662,6 +668,8 @@ Perl_SvTRUE_common(pTHX_ SV * sv, const bool sv_2bool_is_fallback)
 PERL_STATIC_INLINE SV *
 Perl_SvREFCNT_inc(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVREFCNT_INC;
+
     if (LIKELY(sv != NULL))
         SvREFCNT(sv)++;
     return sv;
@@ -679,6 +687,8 @@ Perl_SvREFCNT_inc_NN(SV *sv)
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_inc_void(SV *sv)
 {
+    PERL_ARGS_ASSERT_SVREFCNT_INC_VOID;
+
     if (LIKELY(sv != NULL))
         SvREFCNT(sv)++;
 }
@@ -686,6 +696,8 @@ Perl_SvREFCNT_inc_void(SV *sv)
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SVREFCNT_DEC;
+
     if (LIKELY(sv != NULL)) {
         U32 rc = SvREFCNT(sv);
         if (LIKELY(rc > 1))
@@ -921,6 +933,8 @@ Perl_SvPV_helper(pTHX_
                  const U32 return_flags
                 )
 {
+    PERL_ARGS_ASSERT_SVPV_HELPER;
+
     /* 'type' should be known at compile time, so this is reduced to a single
      * conditional at runtime */
     if (   (type == SvPVbyte_type_      && SvPOK_byte_nog(sv))
@@ -1025,6 +1039,8 @@ parameter.
 PERL_STATIC_INLINE SV *
 Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
 {
+    PERL_ARGS_ASSERT_NEWSVSV_FLAGS;
+
     if (!old)
         return NULL;
 

@@ -2707,6 +2707,8 @@ S_check_for_bool_cxt(OP*o, bool safe_and, U8 bool_flag, U8 maybe_flag)
 void
 Perl_rpeep(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_RPEEP;
+
     OP* oldop = NULL;
     OP* oldoldop = NULL;
     OP** defer_queue[MAX_DEFERRED] = { NULL }; /* small queue of deferred branches */
@@ -4426,6 +4428,8 @@ Perl_rpeep(pTHX_ OP *o)
 void
 Perl_peep(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_PEEP;
+
     CALL_RPEEP(o);
 }
 

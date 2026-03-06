@@ -315,6 +315,8 @@ XS(XS_PerlIO__Layer__find)
 void
 Perl_boot_core_PerlIO(pTHX)
 {
+    PERL_ARGS_ASSERT_BOOT_CORE_PERLIO;
+
     newXS("PerlIO::Layer::find", XS_PerlIO__Layer__find, __FILE__);
 }
 
@@ -1523,6 +1525,8 @@ PerlIO_default_layers(pTHX)
 void
 Perl_boot_core_PerlIO(pTHX)
 {
+    PERL_ARGS_ASSERT_BOOT_CORE_PERLIO;
+
 #ifdef USE_ATTRIBUTES_FOR_PERLIO
     newXS("io::MODIFY_SCALAR_ATTRIBUTES", XS_io_MODIFY_SCALAR_ATTRIBUTES,
           __FILE__);
@@ -1810,6 +1814,8 @@ PerlIO__close(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_close(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_CLOSE;
+
     const int code = PerlIO__close(aTHX_ f);
     while (PerlIOValid(f)) {
         PerlIO_pop(aTHX_ f);
@@ -1823,6 +1829,8 @@ Perl_PerlIO_close(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_fileno(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_FILENO;
+
     Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
@@ -2023,18 +2031,24 @@ Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 int
 Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
+    PERL_ARGS_ASSERT_PERLIO_SEEK;
+
      Perl_PerlIO_or_fail(f, Seek, -1, (aTHX_ f, offset, whence));
 }
 
 Off_t
 Perl_PerlIO_tell(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_TELL;
+
      Perl_PerlIO_or_fail(f, Tell, -1, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_flush(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_FLUSH;
+
     if (f) {
         if (*f) {
             const PerlIO_funcs *tab = PerlIOBase(f)->tab;
@@ -2098,6 +2112,8 @@ PerlIOBase_flush_linebuf(pTHX)
 int
 Perl_PerlIO_fill(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_FILL;
+
      Perl_PerlIO_or_fail(f, Fill, -1, (aTHX_ f));
 }
 
@@ -2115,24 +2131,32 @@ PerlIO_isutf8(PerlIO *f)
 int
 Perl_PerlIO_eof(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_EOF;
+
      Perl_PerlIO_or_Base(f, Eof, eof, -1, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_error(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_ERROR;
+
      Perl_PerlIO_or_Base(f, Error, error, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_clearerr(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_CLEARERR;
+
      Perl_PerlIO_or_Base_void(f, Clearerr, clearerr, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_SETLINEBUF;
+
      Perl_PerlIO_or_Base_void(f, Setlinebuf, setlinebuf, (aTHX_ f));
 }
 
@@ -2193,12 +2217,16 @@ PerlIO_canset_cnt(PerlIO *f)
 STDCHAR *
 Perl_PerlIO_get_base(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_GET_BASE;
+
      Perl_PerlIO_or_fail(f, Get_base, NULL, (aTHX_ f));
 }
 
 SSize_t
 Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_GET_BUFSIZ;
+
     /* Note that Get_bufsiz returns a Size_t */
      Perl_PerlIO_or_fail(f, Get_bufsiz, -1, (aTHX_ f));
 }
@@ -2206,24 +2234,32 @@ Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 STDCHAR *
 Perl_PerlIO_get_ptr(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_GET_PTR;
+
      Perl_PerlIO_or_fail(f, Get_ptr, NULL, (aTHX_ f));
 }
 
 SSize_t
 Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_GET_CNT;
+
      Perl_PerlIO_or_fail(f, Get_cnt, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, SSize_t cnt)
 {
+    PERL_ARGS_ASSERT_PERLIO_SET_CNT;
+
      Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, NULL, cnt));
 }
 
 void
 Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 {
+    PERL_ARGS_ASSERT_PERLIO_SET_PTRCNT;
+
      Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, ptr, cnt));
 }
 
@@ -5265,6 +5301,8 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
 PerlIO *
 Perl_PerlIO_stdin(pTHX)
 {
+    PERL_ARGS_ASSERT_PERLIO_STDIN;
+
     if (!PL_perlio) {
         PerlIO_stdstreams(aTHX);
     }
@@ -5274,6 +5312,8 @@ Perl_PerlIO_stdin(pTHX)
 PerlIO *
 Perl_PerlIO_stdout(pTHX)
 {
+    PERL_ARGS_ASSERT_PERLIO_STDOUT;
+
     if (!PL_perlio) {
         PerlIO_stdstreams(aTHX);
     }
@@ -5283,6 +5323,8 @@ Perl_PerlIO_stdout(pTHX)
 PerlIO *
 Perl_PerlIO_stderr(pTHX)
 {
+    PERL_ARGS_ASSERT_PERLIO_STDERR;
+
     if (!PL_perlio) {
         PerlIO_stdstreams(aTHX);
     }
@@ -5521,6 +5563,8 @@ PerlIO_tmpfile_flags(int imode)
 void
 Perl_PerlIO_save_errno(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_SAVE_ERRNO;
+
     PERL_UNUSED_CONTEXT;
     if (!PerlIOValid(f))
         return;
@@ -5537,6 +5581,8 @@ Perl_PerlIO_save_errno(pTHX_ PerlIO *f)
 void
 Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 {
+    PERL_ARGS_ASSERT_PERLIO_RESTORE_ERRNO;
+
     PERL_UNUSED_CONTEXT;
     if (!PerlIOValid(f))
         return;
@@ -5560,6 +5606,8 @@ Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 const char *
 Perl_PerlIO_context_layers(pTHX_ const char *mode)
 {
+    PERL_ARGS_ASSERT_PERLIO_CONTEXT_LAYERS;
+
     /* Returns the layers set by "use open" */
 
     const char *direction = NULL;

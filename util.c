@@ -154,6 +154,8 @@ Paranoid version of system's malloc()
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
 {
+    PERL_ARGS_ASSERT_SAFESYSMALLOC;
+
 #ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
@@ -243,6 +245,8 @@ Paranoid version of system's realloc()
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
+    PERL_ARGS_ASSERT_SAFESYSREALLOC;
+
 #ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
@@ -379,6 +383,8 @@ Safe version of system's free()
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
+    PERL_ARGS_ASSERT_SAFESYSFREE;
+
 #ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
@@ -450,6 +456,8 @@ Safe version of system's calloc()
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
+    PERL_ARGS_ASSERT_SAFESYSCALLOC;
+
 #ifdef ALWAYS_NEED_THX
     dTHX;
 #endif
@@ -1318,6 +1326,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 const char *
 Perl_cntrl_to_mnemonic(const U8 c)
 {
+    PERL_ARGS_ASSERT_CNTRL_TO_MNEMONIC;
+
     /* Returns the mnemonic string that represents character 'c', if one
      * exists; NULL otherwise.  The only ones that exist for the purposes of
      * this routine are a few control characters */
@@ -1338,6 +1348,8 @@ Perl_cntrl_to_mnemonic(const U8 c)
 char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
+    PERL_ARGS_ASSERT_SAVESHAREDPV;
+
     char *newaddr;
     STRLEN pvlen;
 
@@ -1374,6 +1386,8 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 static SV *
 S_mess_alloc(pTHX)
 {
+    PERL_ARGS_ASSERT_MESS_ALLOC;
+
     SV *sv;
     XPVMG *any;
 
@@ -1708,6 +1722,8 @@ S_with_queued_errors(pTHX_ SV *ex)
 bool
 Perl_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 {
+    PERL_ARGS_ASSERT_INVOKE_EXCEPTION_HOOK;
+
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1769,6 +1785,8 @@ MSVC_DIAG_IGNORE(4646 4645)
 OP *
 Perl_die_nocontext(const char* pat, ...)
 {
+    PERL_ARGS_ASSERT_DIE_NOCONTEXT;
+
     dTHX;
     va_list args;
     va_start(args, pat);
@@ -1786,6 +1804,8 @@ MSVC_DIAG_IGNORE(4646 4645)
 OP *
 Perl_die(pTHX_ const char* pat, ...)
 {
+    PERL_ARGS_ASSERT_DIE;
+
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
@@ -1807,6 +1827,8 @@ Perl_croak_sv(pTHX_ SV *baseex)
 void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
+    PERL_ARGS_ASSERT_VCROAK;
+
     SV *ex = with_queued_errors(pat ? vmess(pat, args) : mess_sv(ERRSV, 0));
     invoke_exception_hook(ex, FALSE);
     die_unwind(ex);
@@ -1865,6 +1887,8 @@ is now true even when called from within core.
 void
 Perl_croak_nocontext(const char *pat, ...)
 {
+    PERL_ARGS_ASSERT_CROAK_NOCONTEXT;
+
     dTHX;
     va_list args;
     va_start(args, pat);
@@ -1877,6 +1901,8 @@ Perl_croak_nocontext(const char *pat, ...)
 void
 Perl_croak(pTHX_ const char *pat, ...)
 {
+    PERL_ARGS_ASSERT_CROAK;
+
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
@@ -1900,6 +1926,8 @@ Less code used on exception code paths reduces CPU cache pressure.
 void
 Perl_croak_no_modify(void)
 {
+    PERL_ARGS_ASSERT_CROAK_NO_MODIFY;
+
     Perl_croak_nocontext( "%s", PL_no_modify);
 }
 
@@ -1933,6 +1961,8 @@ Perl_croak_no_mem_ext(const char *context, STRLEN len)
 void
 Perl_croak_no_mem(void)
 {
+    PERL_ARGS_ASSERT_CROAK_NO_MEM;
+
     croak_no_mem_ext(STR_WITH_LEN("???"));
 }
 
@@ -1940,6 +1970,8 @@ Perl_croak_no_mem(void)
 void
 Perl_croak_popstack(void)
 {
+    PERL_ARGS_ASSERT_CROAK_POPSTACK;
+
     dTHX;
     PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");
     my_exit(1);
@@ -2175,6 +2207,8 @@ Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
 bool
 Perl_ckwarn(pTHX_ U32 w)
 {
+    PERL_ARGS_ASSERT_CKWARN;
+
     /* If lexical warnings have not been set, use $^W.  */
     if (isLEXWARN_off)
         return PL_dowarn & G_WARN_ON;
@@ -2187,6 +2221,8 @@ Perl_ckwarn(pTHX_ U32 w)
 bool
 Perl_ckwarn_d(pTHX_ U32 w)
 {
+    PERL_ARGS_ASSERT_CKWARN_D;
+
     /* If lexical warnings have not been set then default classes warn.  */
     if (isLEXWARN_off)
         return TRUE;
@@ -2197,6 +2233,8 @@ Perl_ckwarn_d(pTHX_ U32 w)
 static bool
 S_ckwarn_common(pTHX_ U32 w)
 {
+    PERL_ARGS_ASSERT_CKWARN_COMMON;
+
     if (PL_curcop->cop_warnings == pWARN_ALL)
         return TRUE;
 
@@ -2300,6 +2338,8 @@ version has desirable safeguards
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
+    PERL_ARGS_ASSERT_MY_SETENV;
+
 #  if defined(USE_ITHREADS) && !defined(WIN32)
     /* only parent thread can modify process environment */
     if (PL_curinterp != aTHX)
@@ -2705,6 +2745,8 @@ Perl_atfork_lock(void)
   PERL_TSA_ACQUIRE(PL_op_mutex)
 #endif
 {
+    PERL_ARGS_ASSERT_ATFORK_LOCK;
+
 #if defined(USE_ITHREADS)
     /* locks must be held in locking order (if any) */
 #  ifdef USE_PERLIO
@@ -2730,6 +2772,8 @@ Perl_atfork_unlock(void)
   PERL_TSA_RELEASE(PL_op_mutex)
 #endif
 {
+    PERL_ARGS_ASSERT_ATFORK_UNLOCK;
+
 #if defined(USE_ITHREADS)
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef USE_PERLIO
@@ -2745,6 +2789,8 @@ Perl_atfork_unlock(void)
 void
 Perl_atfork_child(void)
 {
+    PERL_ARGS_ASSERT_ATFORK_CHILD;
+
 #ifdef USE_ITHREADS
     /* so we can resend signals received in a non-perl thread to the
        new main thread
@@ -2770,6 +2816,8 @@ used except through C<PerlProc_fork>.
 Pid_t
 Perl_my_fork(void)
 {
+    PERL_ARGS_ASSERT_MY_FORK;
+
 #if defined(HAS_FORK)
     Pid_t pid;
 #if defined(USE_ITHREADS) && !defined(HAS_PTHREAD_ATFORK)
@@ -2842,6 +2890,8 @@ rest of the perl interpreter.
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
+    PERL_ARGS_ASSERT_RSIGNAL;
+
     struct sigaction act, oact;
 
 #ifdef USE_ITHREADS
@@ -2880,6 +2930,8 @@ See L</C<rsignal>>.
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
+    PERL_ARGS_ASSERT_RSIGNAL_STATE;
+
     struct sigaction oact;
     PERL_UNUSED_CONTEXT;
 
@@ -2919,7 +2971,9 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+    PERL_ARGS_ASSERT_RSIGNAL_RESTORE;
     PERL_UNUSED_CONTEXT;
+
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
@@ -2934,6 +2988,8 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
+    PERL_ARGS_ASSERT_RSIGNAL;
+
 #if defined(USE_ITHREADS) && !defined(WIN32)
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
@@ -2953,6 +3009,8 @@ sig_trap(int signo)
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
+    PERL_ARGS_ASSERT_RSIGNAL_STATE;
+
     Sighandler_t oldsig;
 
 #if defined(USE_ITHREADS) && !defined(WIN32)
@@ -2984,6 +3042,8 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+    PERL_ARGS_ASSERT_RSIGNAL_RESTORE;
+
 #if defined(USE_ITHREADS) && !defined(WIN32)
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
@@ -3010,6 +3070,8 @@ version knows things that interact with the rest of the perl interpreter.
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
+    PERL_ARGS_ASSERT_MY_PCLOSE;
+
     int status;
     SV **svp;
     Pid_t pid;
@@ -3060,6 +3122,8 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
+    PERL_ARGS_ASSERT_MY_PCLOSE;
+
     return -1;
 }
 #endif /* !DOSISH */
@@ -3159,6 +3223,8 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 static void
 S_pidgone(pTHX_ Pid_t pid, int status)
 {
+    PERL_ARGS_ASSERT_PIDGONE;
+
     SV *sv;
 
     sv = *hv_fetch(PL_pidstatus,(const char*)&pid,sizeof(Pid_t),TRUE);
@@ -3179,6 +3245,8 @@ I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 {
+    PERL_ARGS_ASSERT_MY_PCLOSE;
+
     /* Needs work for PerlIO ! */
     FILE * const f = PerlIO_findFILE(ptr);
     const I32 result = pclose(f);
@@ -3571,6 +3639,8 @@ Deprecated since 5.38
 char **
 Perl_get_op_names(pTHX)
 {
+    PERL_ARGS_ASSERT_GET_OP_NAMES;
+
     PERL_UNUSED_CONTEXT;
     return (char **)PL_op_name;
 }
@@ -3590,6 +3660,8 @@ Deprecated since 5.38
 char **
 Perl_get_op_descs(pTHX)
 {
+    PERL_ARGS_ASSERT_GET_OP_DESCS;
+
     PERL_UNUSED_CONTEXT;
     return (char **)PL_op_desc;
 }
@@ -3597,6 +3669,8 @@ Perl_get_op_descs(pTHX)
 const char *
 Perl_get_no_modify(pTHX)
 {
+    PERL_ARGS_ASSERT_GET_NO_MODIFY;
+
     PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return PL_no_modify;
 }
@@ -3604,6 +3678,8 @@ Perl_get_no_modify(pTHX)
 U32 *
 Perl_get_opargs(pTHX)
 {
+    PERL_ARGS_ASSERT_GET_OPARGS;
+
     PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (U32 *)PL_opargs;
 }
@@ -3611,6 +3687,8 @@ Perl_get_opargs(pTHX)
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
+    PERL_ARGS_ASSERT_GET_PPADDR;
+
     PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (PPADDR_t*)PL_ppaddr;
 }
@@ -3640,6 +3718,8 @@ Implements C<PERL_FLUSHALL_FOR_CHILD> on some platforms.
 I32
 Perl_my_fflush_all(pTHX)
 {
+    PERL_ARGS_ASSERT_MY_FFLUSH_ALL;
+
 #if defined(USE_PERLIO) || defined(FFLUSH_NULL)
     return PerlIO_flush(NULL);
 #else
@@ -3682,6 +3762,8 @@ Perl_my_fflush_all(pTHX)
 void
 Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
+    PERL_ARGS_ASSERT_REPORT_WRONGWAY_FH;
+
     if (ckWARN(WARN_IO)) {
         HEK * const name
            = gv && (isGV_with_GP(gv))
@@ -3702,6 +3784,8 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 void
 Perl_report_evil_fh(pTHX_ const GV *gv)
 {
+    PERL_ARGS_ASSERT_REPORT_EVIL_FH;
+
     const IO *io = gv ? GvIO(gv) : NULL;
     const PERL_BITFIELD16 op = PL_op->op_type;
     const char *vile;
@@ -4422,6 +4506,8 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
  * to the my_socketpair in embed.fnc. */
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
+    PERL_ARGS_ASSERT_MY_SOCKETPAIR;
+
 #ifdef HAS_SOCKETPAIR
     return socketpair(family, type, protocol, fd);
 #else
@@ -4446,6 +4532,7 @@ potentially warn under some level of strict-ness.
 void
 Perl_sv_nosharing(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_NOSHARING;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 }
@@ -4465,8 +4552,10 @@ could potentially warn under some level of strict-ness.
 bool
 Perl_sv_destroyable(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_DESTROYABLE;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
+
     return TRUE;
 }
 
@@ -4565,6 +4654,8 @@ splitmix64(U64 *state)
 U64
 Perl_seed(pTHX)
 {
+    PERL_ARGS_ASSERT_SEED;
+
    /*
     * Attempt to read from /dev/urandom to generate a pseudo-random number.
     * If that does not work, or it is unavailable, we fall back to gathering
@@ -5285,6 +5376,8 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
 void
 Perl_my_clearenv(pTHX)
 {
+    PERL_ARGS_ASSERT_MY_CLEARENV;
+
 #  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
 #  else /* ! (PERL_IMPLICIT_SYS || WIN32) */
@@ -5755,6 +5848,7 @@ if not easily emulatable.
 int
 Perl_my_dirfd(DIR * dir)
 {
+    PERL_ARGS_ASSERT_MY_DIRFD;
 
     /* Most dirfd implementations have problems when passed NULL. */
     if(!dir)
@@ -5855,6 +5949,7 @@ Perl_my_mkstemp(char *templte)
 REGEXP *
 Perl_get_re_arg(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_GET_RE_ARG;
 
     if (sv) {
         if (SvMAGICAL(sv))
@@ -6298,6 +6393,8 @@ returning at most C<depth> frames.
 Perl_c_backtrace*
 Perl_get_c_backtrace(pTHX_ int depth, int skip)
 {
+    PERL_ARGS_ASSERT_GET_C_BACKTRACE;
+
     /* Note that here we must stay as low-level as possible: Newx(),
      * Copy(), Safefree(); since we may be called from anywhere,
      * so we should avoid higher level constructs like SVs or AVs.
@@ -6567,6 +6664,8 @@ if the optimizer has transformed the code by for example inlining.
 SV*
 Perl_get_c_backtrace_dump(pTHX_ int depth, int skip)
 {
+    PERL_ARGS_ASSERT_GET_C_BACKTRACE_DUMP;
+
     Perl_c_backtrace* bt;
 
     bt = get_c_backtrace(depth, skip + 1 /* Hide ourselves. */);
@@ -6736,6 +6835,8 @@ Perl_dtrace_probe_op(pTHX_ const OP *op)
 void
 Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase)
 {
+    PERL_ARGS_ASSERT_DTRACE_PROBE_PHASE;
+
     const char *ph_old = PL_phase_names[PL_phase];
     const char *ph_new = PL_phase_names[phase];
 

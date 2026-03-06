@@ -3538,18 +3538,24 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 bool
 Perl_is_uni_FOO_(pTHX_ const U8 classnum, const UV c)
 {
+    PERL_ARGS_ASSERT_IS_UNI_FOO_;
+
     return invlist_contains_cp_(PL_XPosix_ptrs[classnum], c);
 }
 
 bool
 Perl_is_uni_perl_idcont_(pTHX_ UV c)
 {
+    PERL_ARGS_ASSERT_IS_UNI_PERL_IDCONT_;
+
     return invlist_contains_cp_(PL_utf8_perl_idcont, c);
 }
 
 bool
 Perl_is_uni_perl_idstart_(pTHX_ UV c)
 {
+    PERL_ARGS_ASSERT_IS_UNI_PERL_IDSTART_;
+
     return invlist_contains_cp_(PL_utf8_perl_idstart, c);
 }
 
@@ -3709,6 +3715,8 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 static U8
 S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp, const char dummy)
 {
+    PERL_ARGS_ASSERT_TO_LOWER_LATIN1;
+
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  Since the result is always just
      * one character, we allow <p> to be NULL */
