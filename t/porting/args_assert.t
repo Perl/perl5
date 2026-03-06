@@ -43,10 +43,17 @@ if (!@ARGV) {
     my $manifest = $prefix . 'MANIFEST';
     open my $fh, '<', $manifest or die "Can't open $manifest: $!";
     while (<$fh>) {
-	# *.c or */*.c
-	push @ARGV, $prefix . $1 if m! ^ ( (?: [^/]+ / )? [^/]+ \.c ) \t !x;
-        # Special case the *inline.h since they behave like *.c
-	push @ARGV, $prefix . $1 if m!^(([^/]+)?inline\.h)\t!;
+        # *.c or */*.c; and special case several .h that have functions
+        # defined in them
+	push @ARGV, $prefix . $1 if m! ^
+                                       ( (?: [^/]+ / )? [^/]*
+                                         (?:             \.c
+                                             |     inline\.h
+                                             | perlstatic\.h
+                                         )
+                                       )
+                                       \t
+                                     !x;
     }
 }
 
