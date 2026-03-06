@@ -2895,7 +2895,8 @@ S_lockcnt_dec(pTHX_ void* f)
  * this handle, free what we can and return true */
 
 static bool
-S_perlio_async_run(pTHX_ PerlIO* f) {
+S_perlio_async_run(pTHX_ PerlIO* f)
+{
     ENTER;
     SAVEDESTRUCTOR_X(S_lockcnt_dec, (void*)f);
     PerlIO_lockcnt(f)++;

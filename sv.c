@@ -523,7 +523,8 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
 
 /* Void wrapper to pass to visit() */
 static void
-do_curse(pTHX_ SV * const sv) {
+do_curse(pTHX_ SV * const sv)
+{
     if ((PL_stderrgv && GvGP(PL_stderrgv) && (SV*)GvIO(PL_stderrgv) == sv)
      || (PL_defoutgv && GvGP(PL_defoutgv) && (SV*)GvIO(PL_defoutgv) == sv))
         return;
@@ -1292,7 +1293,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 }
 
 struct xpvhv_aux*
-Perl_hv_auxalloc(pTHX_ HV *hv) {
+Perl_hv_auxalloc(pTHX_ HV *hv)
+{
     const struct body_details *old_type_details = bodies_by_type + SVt_PVHV;
     void *old_body;
     void *new_body;
@@ -1771,7 +1773,8 @@ Perl_sv_setrv_inc_mg(pTHX_ SV *const sv, SV *const ref)
  */
 
 static const char *
-S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
+S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size)
+{
     const char *pv;
 
      PERL_ARGS_ASSERT_SV_DISPLAY;
@@ -1861,7 +1864,8 @@ S_not_a_number(pTHX_ SV *const sv)
 }
 
 static void
-S_not_incrementable(pTHX_ SV *const sv) {
+S_not_incrementable(pTHX_ SV *const sv)
+{
      char tmpbuf[64];
      const char *pv;
 
@@ -2915,7 +2919,8 @@ Perl_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const
  * shared string constants we point to, instead of generating a new
  * string for each instance. */
 static size_t
-S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
+S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus)
+{
     char* s = buffer;
     assert(maxlen >= 4);
     if (Perl_isinf(nv)) {
@@ -7664,7 +7669,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
    sv does not have to be ROK. */
 
 static bool
-S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
+S_curse(pTHX_ SV * const sv, const bool check_refcnt)
+{
     PERL_ARGS_ASSERT_CURSE;
     assert(SvOBJECT(sv));
 
@@ -12218,7 +12224,8 @@ S_sv_catpvn_simple(pTHX_ SV *const sv, const char* const buf, const STRLEN len)
  * inappropriate "use of uninit" warnings [perl #71000].
  */
 static void
-S_warn_vcatpvfn_missing_argument(pTHX) {
+S_warn_vcatpvfn_missing_argument(pTHX)
+{
     ck_warner(packWARN(WARN_MISSING), "Missing argument in %s",
               PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
 }
@@ -18491,7 +18498,8 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
  * The main aim is to keep Perl_sv_setsv_flags as slim as possible and this
  * includes keeping the call sites for this function small.
  */
-void S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
+void
+S_croak_sv_setsv_flags(pTHX_ SV * const dsv, SV * const ssv)
 {
     OP *op = PL_op;
     if (SvIS_FREED(dsv)) {

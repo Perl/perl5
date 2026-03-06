@@ -4641,13 +4641,15 @@ struct ptr_tbl {
    htonl etc they will clash with the declarations in the Win32 headers.  */
 
 PERL_STATIC_INLINE U32
-my_swap32(const U32 x) {
+my_swap32(const U32 x)
+{
     return ((x & 0xFF) << 24) | ((x >> 24) & 0xFF)
         | ((x & 0x0000FF00) << 8) | ((x & 0x00FF0000) >> 8);
 }
 
 PERL_STATIC_INLINE U16
-my_swap16(const U16 x) {
+my_swap16(const U16 x)
+{
     return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
 }
 

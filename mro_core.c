@@ -113,7 +113,8 @@ registered.  See L</C<mro_register>>.
 */
 
 const struct mro_alg *
-Perl_mro_get_from_name(pTHX_ SV *name) {
+Perl_mro_get_from_name(pTHX_ SV *name)
+{
     SV **data;
 
     PERL_ARGS_ASSERT_MRO_GET_FROM_NAME;

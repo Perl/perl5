@@ -1363,7 +1363,8 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
 #ifdef PERL_RE_BUILD_AUX
 
 void
-Perl_release_RExC_state(pTHX_ void *vstate) {
+Perl_release_RExC_state(pTHX_ void *vstate)
+{
     PERL_ARGS_ASSERT_RELEASE_REXC_STATE;
 
     RExC_state_t *pRExC_state = (RExC_state_t *)vstate;
@@ -8505,7 +8506,8 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
 #undef ADD_POSIX_WARNING
 
 static unsigned  int
-S_regex_set_precedence(const U8 my_operator) {
+S_regex_set_precedence(const U8 my_operator)
+{
 
     /* Returns the precedence in the (?[...]) construct of the input operator,
      * specified by its character representation.  The precedence follows
@@ -13020,7 +13022,8 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
 #ifdef DEBUGGING
 
 static regnode_offset
-S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size) {
+S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size)
+{
     PERL_ARGS_ASSERT_REGNODE_GUTS_DEBUG;
     assert(extra_size >= REGNODE_ARG_LEN(op) || REGNODE_TYPE(op) == ANYOF);
     return S_regnode_guts(aTHX_ pRExC_state, extra_size);
@@ -13343,7 +13346,8 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 
 #ifdef PERL_RE_BUILD_AUX
 SV*
-Perl_get_ANYOFM_contents(pTHX_ const regnode * n) {
+Perl_get_ANYOFM_contents(pTHX_ const regnode * n)
+{
 
     /* Returns an inversion list of all the code points matched by the
      * ANYOFM/NANYOFM node 'n' */
@@ -13376,7 +13380,8 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n) {
 }
 
 SV *
-Perl_get_ANYOFHbbm_contents(pTHX_ const regnode * n) {
+Perl_get_ANYOFHbbm_contents(pTHX_ const regnode * n)
+{
     PERL_ARGS_ASSERT_GET_ANYOFHBBM_CONTENTS;
 
     SV * cp_list = NULL;

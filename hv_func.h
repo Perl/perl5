@@ -176,7 +176,8 @@
 #endif
 
 PERL_STATIC_INLINE U32
-S_perl_hash_with_seed(const U8 * seed, const U8 *str, STRLEN len) {
+S_perl_hash_with_seed(const U8 * seed, const U8 *str, STRLEN len)
+{
     PVT__PERL_HASH_WORD_TYPE state[PERL_HASH_STATE_WORDS];
     PVT_PERL_HASH_SEED_STATE(seed,(U8*)state);
     return PVT_PERL_HASH_WITH_STATE((U8*)state,str,len);

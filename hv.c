@@ -1629,7 +1629,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 #ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
 static bool
-S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
+S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size)
+{
     if (size > 42
         && !SvOBJECT(hv)
         && !(HvHasAUX(hv) && HvENAME_get(hv))) {
@@ -2457,7 +2458,8 @@ Perl_hv_fill(pTHX_ HV *const hv)
 }
 
 static struct xpvhv_aux*
-S_hv_auxinit(pTHX_ HV *hv) {
+S_hv_auxinit(pTHX_ HV *hv)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_AUXINIT;
@@ -2539,7 +2541,8 @@ Implements C<HvRITER> which you should use instead.
 */
 
 I32 *
-Perl_hv_riter_p(pTHX_ HV *hv) {
+Perl_hv_riter_p(pTHX_ HV *hv)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_RITER_P;
@@ -2557,7 +2560,8 @@ Implements C<HvEITER> which you should use instead.
 */
 
 HE **
-Perl_hv_eiter_p(pTHX_ HV *hv) {
+Perl_hv_eiter_p(pTHX_ HV *hv)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_EITER_P;
@@ -2575,7 +2579,8 @@ Implements C<HvRITER_set> which you should use instead.
 */
 
 void
-Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
+Perl_hv_riter_set(pTHX_ HV *hv, I32 riter)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_RITER_SET;
@@ -2592,7 +2597,8 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
 }
 
 void
-Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand) {
+Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_RAND_SET;
@@ -2618,7 +2624,8 @@ Implements C<HvEITER_set> which you should use instead.
 */
 
 void
-Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
+Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter)
+{
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_EITER_SET;
@@ -2737,7 +2744,8 @@ and bytes checking.
 */
 
 static I32
-hek_eq_pvn_flags(pTHX_ const HEK *hek, const char* pv, const I32 pvlen, const U32 flags) {
+hek_eq_pvn_flags(pTHX_ const HEK *hek, const char* pv, const I32 pvlen, const U32 flags)
+{
     if ( (HEK_UTF8(hek) ? 1 : 0) != (flags & SVf_UTF8 ? 1 : 0) ) {
         if (flags & SVf_UTF8)
             return (bytes_cmp_utf8(
@@ -2894,7 +2902,8 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 }
 
 AV **
-Perl_hv_backreferences_p(pTHX_ HV *hv) {
+Perl_hv_backreferences_p(pTHX_ HV *hv)
+{
     PERL_ARGS_ASSERT_HV_BACKREFERENCES_P;
     /* See also Perl_sv_get_backrefs in sv.c where this logic is unrolled */
     {
@@ -2904,7 +2913,8 @@ Perl_hv_backreferences_p(pTHX_ HV *hv) {
 }
 
 void
-Perl_hv_kill_backrefs(pTHX_ HV *hv) {
+Perl_hv_kill_backrefs(pTHX_ HV *hv)
+{
     AV *av;
 
     PERL_ARGS_ASSERT_HV_KILL_BACKREFS;
@@ -4031,7 +4041,8 @@ or if you additionally don't need to know the length, C<L</CopLABEL>>.
 /* pp_entereval is aware that labels are stored with a key ':' at the top of
    the linked list.  */
 const char *
-Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags) {
+Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
+{
     struct refcounted_he *const chain = cop->cop_hints_hash;
 
     PERL_ARGS_ASSERT_COP_FETCH_LABEL;

@@ -666,7 +666,8 @@ been defined so a new attempt can be made.
 */
 
 static void
-S_class_cleanup_definition(pTHX_ HV *stash) {
+S_class_cleanup_definition(pTHX_ HV *stash)
+{
     struct xpvhv_aux *aux = HvAUX(stash);
 
     SvREFCNT_dec(aux->xhv_class_superclass);

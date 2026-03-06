@@ -6189,7 +6189,8 @@ L<I18N::Langinfo>.
 #endif
 
 SV *
-Perl_sv_langinfo(pTHX_ const nl_item  item) {
+Perl_sv_langinfo(pTHX_ const nl_item  item)
+{
     utf8ness_t dummy;   /* Having this tells the layers below that we want the
                            UTF-8 flag in 'sv' to be set properly. */
 

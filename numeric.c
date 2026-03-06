@@ -2130,7 +2130,8 @@ Perl_my_modfl(long double x, long double *ip)
 /* Similarly, with ilogbl and scalbnl we can emulate frexpl. */
 #if ! defined(HAS_FREXPL) && defined(HAS_ILOGBL) && defined(HAS_SCALBNL)
 long double
-Perl_my_frexpl(long double x, int *e) {
+Perl_my_frexpl(long double x, int *e)
+{
     *e = x == 0.0L ? 0 : ilogbl(x) + 1;
     return (scalbnl(x, -*e));
 }
@@ -2160,7 +2161,8 @@ Users should just always call C<Perl_signbit()>.
 */
 #if !defined(HAS_SIGNBIT)
 int
-Perl_signbit(NV x) {
+Perl_signbit(NV x)
+{
 #  ifdef Perl_fp_class_nzero
     return Perl_fp_class_nzero(x);
     /* Try finding the high byte, and assume it's highest bit

@@ -4003,7 +4003,8 @@ Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
 }
 
 int
-Perl_magic_setdebugvar(pTHX_ SV *sv, MAGIC *mg) {
+Perl_magic_setdebugvar(pTHX_ SV *sv, MAGIC *mg)
+{
     PERL_ARGS_ASSERT_MAGIC_SETDEBUGVAR;
 
 #if DBVARMG_SINGLE != 0
@@ -4017,7 +4018,8 @@ Perl_magic_setdebugvar(pTHX_ SV *sv, MAGIC *mg) {
 }
 
 int
-Perl_magic_getdebugvar(pTHX_ SV *sv, MAGIC *mg) {
+Perl_magic_getdebugvar(pTHX_ SV *sv, MAGIC *mg)
+{
     PERL_ARGS_ASSERT_MAGIC_GETDEBUGVAR;
 
 #if DBVARMG_SINGLE != 0

@@ -1747,13 +1747,15 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
     return gv_stashsvpvn_cached(sv, NULL, 0, flags);
 }
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type) {
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type)
+{
     PERL_ARGS_ASSERT_GV_FETCHPV;
     return gv_fetchpvn_flags(nambeg, strlen(nambeg), flags, sv_type);
 }
 
 GV *
-Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type) {
+Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type)
+{
     STRLEN len;
     const char * const nambeg =
        SvPV_flags_const(name, len, flags & GV_NO_SVGMAGIC ? 0 : SV_GMAGIC);
@@ -3661,7 +3663,8 @@ If overloading is inactive on C<ref>, returns C<ref> itself.
 */
 
 SV *
-Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
+Perl_amagic_deref_call(pTHX_ SV *ref, int method)
+{
     SV *tmpsv = NULL;
     HV *stash;
 

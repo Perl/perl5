@@ -2743,7 +2743,8 @@ Perl_atfork_unlock(void)
 }
 
 void
-Perl_atfork_child(void) {
+Perl_atfork_child(void)
+{
 #ifdef USE_ITHREADS
     /* so we can resend signals received in a non-perl thread to the
        new main thread
@@ -5752,7 +5753,8 @@ if not easily emulatable.
 */
 
 int
-Perl_my_dirfd(DIR * dir) {
+Perl_my_dirfd(DIR * dir)
+{
 
     /* Most dirfd implementations have problems when passed NULL. */
     if(!dir)
@@ -5774,7 +5776,8 @@ Perl_my_dirfd(DIR * dir) {
 #define TEMP_FILE_CH_COUNT (sizeof(TEMP_FILE_CH)-1)
 
 static int
-S_my_mkostemp(char *templte, int flags) {
+S_my_mkostemp(char *templte, int flags)
+{
     dTHX;
     STRLEN len = strlen(templte);
     int fd;
@@ -5850,7 +5853,8 @@ Perl_my_mkstemp(char *templte)
 #endif
 
 REGEXP *
-Perl_get_re_arg(pTHX_ SV *sv) {
+Perl_get_re_arg(pTHX_ SV *sv)
+{
 
     if (sv) {
         if (SvMAGICAL(sv))
