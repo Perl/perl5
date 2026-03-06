@@ -103,6 +103,8 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 I32
 Perl_debstackptrs(pTHX)     /* Currently unused in cpan and core */
 {
+    PERL_ARGS_ASSERT_DEBSTACKPTRS;
+
 #ifdef DEBUGGING
     PerlIO_printf(Perl_debug_log,
                   "%8" UVxf " %8" UVxf " %8" IVdf " %8" IVdf " %8" IVdf "\n",
@@ -198,6 +200,8 @@ Dump the current stack
 I32
 Perl_debstack(pTHX)
 {
+    PERL_ARGS_ASSERT_DEBSTACK;
+
 #ifndef SKIP_DEBUGGING
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
         return 0;
@@ -247,6 +251,8 @@ static const char * const si_names[] = {
 void
 Perl_deb_stack_all(pTHX)
 {
+    PERL_ARGS_ASSERT_DEB_STACK_ALL;
+
 #ifdef DEBUGGING
     I32 si_ix;
     const PERL_SI *si;

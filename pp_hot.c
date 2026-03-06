@@ -4052,6 +4052,7 @@ error_is_would_block(int err)
 OP *
 Perl_do_readline(pTHX)
 {
+    PERL_ARGS_ASSERT_DO_READLINE;
 
     const I32 type = PL_op->op_type;
 
@@ -6687,6 +6688,8 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 void
 Perl_croak_caller(const char *pat, ...)
 {
+    PERL_ARGS_ASSERT_CROAK_CALLER;
+
     dTHX;
     va_list args;
     const PERL_CONTEXT *cx = caller_cx(0, NULL);

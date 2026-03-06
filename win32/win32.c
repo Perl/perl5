@@ -5686,6 +5686,8 @@ win32_csighandler(int sig)
 void
 Perl_sys_intern_init(pTHX)
 {
+    PERL_ARGS_ASSERT_SYS_INTERN_INIT;
+
     int i;
 
     w32_perlshell_tokens	= NULL;
@@ -5730,6 +5732,7 @@ Perl_sys_intern_init(pTHX)
 void
 Perl_sys_intern_clear(pTHX)
 {
+    PERL_ARGS_ASSERT_SYS_INTERN_CLEAR;
 
     Safefree(w32_perlshell_tokens);
     Safefree(w32_perlshell_vec);

@@ -330,6 +330,8 @@ S_initialize_invlist_guts(pTHX_ SV* invlist, const Size_t initial_size)
 SV*
 Perl_new_invlist_(pTHX_ IV initial_size)
 {
+    PERL_ARGS_ASSERT_NEW_INVLIST_;
+
 
     /* Return a pointer to a newly constructed inversion list, with enough
      * space to store 'initial_size' elements.  If that number is negative, a
@@ -1104,6 +1106,8 @@ Perl_invlist_intersection_maybe_complement_2nd_(pTHX_ SV* const a, SV* const b,
 SV*
 Perl_add_range_to_invlist_(pTHX_ SV* invlist, UV start, UV end)
 {
+    PERL_ARGS_ASSERT_ADD_RANGE_TO_INVLIST_;
+
     /* Add the range from 'start' to 'end' inclusive to the inversion list's
      * set.  A pointer to the inversion list is returned.  This may actually be
      * a new list, in which case the passed in one has been destroyed.  The

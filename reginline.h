@@ -8,6 +8,8 @@ PERL_STATIC_INLINE
 regnode *
 Perl_regnext(pTHX_ const regnode *p)
 {
+    PERL_ARGS_ASSERT_REGNEXT;
+
     I32 offset;
 
     if (!p)
@@ -34,6 +36,8 @@ PERL_STATIC_INLINE
 regnode *
 Perl_regnode_after(pTHX_ const regnode *p, const bool varies)
 {
+    PERL_ARGS_ASSERT_REGNODE_AFTER;
+
     assert(p);
     const U8 op = OP(p);
     assert(op < REGNODE_MAX);
@@ -49,6 +53,8 @@ PERL_STATIC_INLINE
 bool
 Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
 {
+    PERL_ARGS_ASSERT_CHECK_REGNODE_AFTER;
+
     const regnode *nextoper = regnode_after((regnode *)p,FALSE);
     const regnode *other = REGNODE_AFTER_PLUS(p, extra);
     if (nextoper != other) {

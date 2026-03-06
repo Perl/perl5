@@ -79,6 +79,8 @@ GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 void
 Perl_load_mathoms()
 {
+    PERL_ARGS_ASSERT_LOAD_MATHOMS;
+
     /* This exists only to make sure the functions in this file get loaded, as
      * it is referred to by a structure element in intrpvar.h */
 }
@@ -89,6 +91,8 @@ Perl_load_mathoms()
 OP *
 Perl_ref(pTHX_ OP *o, I32 type)
 {
+    PERL_ARGS_ASSERT_REF;
+
     return doref(o, type, TRUE);
 }
 

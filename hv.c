@@ -155,6 +155,8 @@ STMT_START {                                                            \
 static HE*
 S_new_he(pTHX)
 {
+    PERL_ARGS_ASSERT_NEW_HE;
+
     HE* he;
     void ** const root = &PL_body_roots[HE_ARENA_ROOT_IX];
 
@@ -204,6 +206,8 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 void
 Perl_free_tied_hv_pool(pTHX)
 {
+    PERL_ARGS_ASSERT_FREE_TIED_HV_POOL;
+
     HE *he = PL_hv_fetch_ent_mh;
     while (he) {
         HE * const ohe = he;
@@ -469,6 +473,8 @@ void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                int flags, int action, SV *val, U32 hash)
 {
+    PERL_ARGS_ASSERT_HV_COMMON;
+
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
@@ -1296,6 +1302,8 @@ static SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                    int k_flags, I32 d_flags, U32 hash)
 {
+    PERL_ARGS_ASSERT_HV_DELETE_COMMON;
+
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
@@ -3259,6 +3267,8 @@ C<len> and C<hash> must both be valid for C<str>.
 void
 Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 {
+    PERL_ARGS_ASSERT_UNSHAREPVN;
+
     unshare_hek_or_pvn (NULL, str, len, hash);
 }
 
@@ -3266,7 +3276,9 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 void
 Perl_unshare_hek(pTHX_ HEK *hek)
 {
+    PERL_ARGS_ASSERT_UNSHARE_HEK;
     assert(hek);
+
     unshare_hek_or_pvn(hek, NULL, 0, 0);
 }
 
@@ -3277,6 +3289,8 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 static void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
+    PERL_ARGS_ASSERT_UNSHARE_HEK_OR_PVN;
+
     HE *entry;
     HE **oentry;
     int k_flags = 0;
@@ -3602,6 +3616,8 @@ C<flags> is currently unused and must be zero.
 HV *
 Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 {
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_CHAIN_2HV;
+
     HV *hv;
     U32 placeholders, max;
 
@@ -3977,6 +3993,7 @@ no action occurs in this case.
 
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_FREE;
     PERL_UNUSED_CONTEXT;
 
     while (he) {
@@ -4013,6 +4030,8 @@ to this function: no action occurs and a null pointer is returned.
 struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_INC;
+
     PERL_UNUSED_CONTEXT;
     if (he) {
         HINTS_REFCNT_LOCK;

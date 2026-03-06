@@ -146,6 +146,8 @@ Perl_my_strtod(const char * const s, char **e)
 U32
 Perl_cast_ulong(NV f)
 {
+    PERL_ARGS_ASSERT_CAST_ULONG;
+
   if (f < 0.0)
     return f < I32_MIN ? (U32) I32_MIN : (U32)(I32) f;
   if (f < U32_MAX_P1) {
@@ -164,6 +166,8 @@ Perl_cast_ulong(NV f)
 I32
 Perl_cast_i32(NV f)
 {
+    PERL_ARGS_ASSERT_CAST_I32;
+
   if (f < I32_MAX_P1)
     return f < I32_MIN ? I32_MIN : (I32) f;
   if (f < U32_MAX_P1) {
@@ -182,6 +186,8 @@ Perl_cast_i32(NV f)
 IV
 Perl_cast_iv(NV f)
 {
+    PERL_ARGS_ASSERT_CAST_IV;
+
   if (f < IV_MAX_P1)
     return f < IV_MIN ? IV_MIN : (IV) f;
   if (f < UV_MAX_P1) {
@@ -201,6 +207,8 @@ Perl_cast_iv(NV f)
 UV
 Perl_cast_uv(NV f)
 {
+    PERL_ARGS_ASSERT_CAST_UV;
+
   if (f < 0.0)
     return f < IV_MIN ? (UV) IV_MIN : (UV)(IV) f;
   if (f < UV_MAX_P1) {
@@ -2063,6 +2071,8 @@ This is also the logical inverse of Perl_isfinite().
 bool
 Perl_isinfnan(NV nv)
 {
+    PERL_ARGS_ASSERT_ISINFNAN;
+
   PERL_UNUSED_ARG(nv);
 #ifdef Perl_isinf
     if (Perl_isinf(nv))
@@ -2163,6 +2173,8 @@ Users should just always call C<Perl_signbit()>.
 int
 Perl_signbit(NV x)
 {
+    PERL_ARGS_ASSERT_PERL_SIGNBIT;
+
 #  ifdef Perl_fp_class_nzero
     return Perl_fp_class_nzero(x);
     /* Try finding the high byte, and assume it's highest bit

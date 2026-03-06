@@ -394,6 +394,8 @@ S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 PERL_STATIC_INLINE Stack_off_t
 Perl_TOPMARK(pTHX)
 {
+    PERL_ARGS_ASSERT_TOPMARK;
+
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
                                  "MARK top  %p %" IVdf "\n",
                                   PL_markstack_ptr,
@@ -404,6 +406,8 @@ Perl_TOPMARK(pTHX)
 PERL_STATIC_INLINE Stack_off_t
 Perl_POPMARK(pTHX)
 {
+    PERL_ARGS_ASSERT_POPMARK;
+
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
                                  "MARK pop  %p %" IVdf "\n",
                                   (PL_markstack_ptr-1),
@@ -745,7 +749,7 @@ reference count of 1, but has not yet been anchored anywhere.
 PERL_STATIC_INLINE void
 Perl_rpp_push_1_norc(pTHX_ SV *sv)
 {
-    PERL_ARGS_ASSERT_RPP_PUSH_1;
+    PERL_ARGS_ASSERT_RPP_PUSH_1_NORC;
 
     *++PL_stack_sp = sv;
 #ifdef PERL_RC_STACK
@@ -881,6 +885,8 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1_COMMON(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_1_COMMON;
+
 
     assert(sv);
 #ifdef PERL_RC_STACK
@@ -1112,6 +1118,8 @@ the beginning of the PP function for unary or binary ops.
 PERL_STATIC_INLINE bool
 Perl_rpp_try_AMAGIC_1(pTHX_ int method, int flags)
 {
+    PERL_ARGS_ASSERT_RPP_TRY_AMAGIC_1;
+
     return    UNLIKELY((SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)))
            && Perl_try_amagic_un(aTHX_ method, flags);
 }
@@ -1119,6 +1127,8 @@ Perl_rpp_try_AMAGIC_1(pTHX_ int method, int flags)
 PERL_STATIC_INLINE bool
 Perl_rpp_try_AMAGIC_2(pTHX_ int method, int flags)
 {
+    PERL_ARGS_ASSERT_RPP_TRY_AMAGIC_2;
+
     return    UNLIKELY(((SvFLAGS(PL_stack_sp[-1])|SvFLAGS(PL_stack_sp[0]))
                      & (SVf_ROK|SVs_GMG)))
            && Perl_try_amagic_bin(aTHX_ method, flags);
@@ -1139,6 +1149,8 @@ contains zero items.
 PERL_STATIC_INLINE bool
 Perl_rpp_stack_is_rc(pTHX)
 {
+    PERL_ARGS_ASSERT_RPP_STACK_IS_RC;
+
 #ifdef PERL_RC_STACK
     return AvREAL(PL_curstack) && !PL_curstackinfo->si_stack_nonrc_base;
 #else
@@ -1165,6 +1177,8 @@ in lvalue context.
 PERL_STATIC_INLINE bool
 Perl_rpp_is_lone(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_RPP_IS_LONE;
+
 #ifdef PERL_RC_STACK
     /* note that rpp_is_lone() can be used in wrapped pp functions,
      * where technically the stack is no longer ref-counted; but because
@@ -1277,12 +1291,16 @@ Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
 PERL_STATIC_INLINE U8 *
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_BYTES_TO_UTF8;
+
     return bytes_to_utf8_free_me(s, lenp, NULL);
 }
 
 PERL_STATIC_INLINE U8 *
 Perl_bytes_to_utf8_temp_pv(pTHX_ const U8 *s, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_BYTES_TO_UTF8_TEMP_PV;
+
     void * free_me = NULL;
     U8 * converted = bytes_to_utf8_free_me(s, lenp, &free_me);
 
@@ -1296,6 +1314,8 @@ Perl_bytes_to_utf8_temp_pv(pTHX_ const U8 *s, STRLEN *lenp)
 PERL_STATIC_INLINE bool
 Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, void ** free_me)
 {
+    PERL_ARGS_ASSERT_UTF8_TO_BYTES_NEW_PV;
+
     /* utf8_to_bytes_() is declared to take a non-const s_ptr because it may
      * change it, but NOT when called with PL_utf8_to_bytes_new_memory, so it
      * is ok to cast away const */
@@ -1306,6 +1326,8 @@ Perl_utf8_to_bytes_new_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp, void ** free_me)
 PERL_STATIC_INLINE bool
 Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_UTF8_TO_BYTES_TEMP_PV;
+
     /* utf8_to_bytes_() requires a non-NULL pointer, but doesn't use it when
      * called with PL_utf8_to_bytes_use_temporary */
     void* dummy = NULL;
@@ -1320,6 +1342,8 @@ Perl_utf8_to_bytes_temp_pv(pTHX_ U8 const **s_ptr, STRLEN *lenp)
 PERL_STATIC_INLINE bool
 Perl_utf8_to_bytes_overwrite(pTHX_ U8 **s_ptr, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_UTF8_TO_BYTES_OVERWRITE;
+
     /* utf8_to_bytes_() requires a non-NULL pointer, but doesn't use it when
      * called with PL_utf8_to_bytes_overwrite */
     void* dummy = NULL;
@@ -1720,10 +1744,11 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 PERL_STATIC_INLINE unsigned
 Perl_lsbit_pos64(U64 word)
 {
+    PERL_ARGS_ASSERT_LSBIT_POS64;
+    ASSUME(word != 0);
+
     /* Find the position (0..63) of the least significant set bit in the input
      * word */
-
-    ASSUME(word != 0);
 
     /* If we can determine that the platform has a usable fast method to get
      * this info, use that */
@@ -1777,10 +1802,11 @@ Perl_lsbit_pos64(U64 word)
 PERL_STATIC_INLINE unsigned     /* Like above for 32 bit word */
 Perl_lsbit_pos32(U32 word)
 {
+    PERL_ARGS_ASSERT_LSBIT_POS32;
+    ASSUME(word != 0);
+
     /* Find the position (0..31) of the least significant set bit in the input
      * word */
-
-    ASSUME(word != 0);
 
 #if defined(PERL_CTZ_32)
 #  define PERL_HAS_FAST_GET_LSB_POS32
@@ -1828,10 +1854,11 @@ Perl_lsbit_pos32(U32 word)
 PERL_STATIC_INLINE unsigned
 Perl_msbit_pos64(U64 word)
 {
+    PERL_ARGS_ASSERT_MSBIT_POS64;
+    ASSUME(word != 0);
+
     /* Find the position (0..63) of the most significant set bit in the input
      * word */
-
-    ASSUME(word != 0);
 
     /* If we can determine that the platform has a usable fast method to get
      * this, use that */
@@ -1888,10 +1915,11 @@ Perl_msbit_pos64(U64 word)
 PERL_STATIC_INLINE unsigned
 Perl_msbit_pos32(U32 word)
 {
+    PERL_ARGS_ASSERT_MSBIT_POS32;
+    ASSUME(word != 0);
+
     /* Find the position (0..31) of the most significant set bit in the input
      * word */
-
-    ASSUME(word != 0);
 
 #if defined(PERL_CLZ_32)
 #  define PERL_HAS_FAST_GET_MSB_POS32
@@ -1945,6 +1973,8 @@ Perl_msbit_pos32(U32 word)
 PERL_STATIC_INLINE unsigned
 Perl_single_1bit_pos64(U64 word)
 {
+    PERL_ARGS_ASSERT_SINGLE_1BIT_POS64;
+
     /* Given a 64-bit word known to contain all zero bits except one 1 bit,
      * find and return the 1's position: 0..63 */
 
@@ -1984,6 +2014,8 @@ Perl_single_1bit_pos64(U64 word)
 PERL_STATIC_INLINE unsigned
 Perl_single_1bit_pos32(U32 word)
 {
+    PERL_ARGS_ASSERT_SINGLE_1BIT_POS32;
+
     /* Given a 32-bit word known to contain all zero bits except one 1 bit,
      * find and return the 1's position: 0..31 */
 
@@ -2015,6 +2047,8 @@ Perl_single_1bit_pos32(U32 word)
 PERL_STATIC_INLINE unsigned int
 Perl_variant_byte_number(PERL_UINTMAX_T word)
 {
+    PERL_ARGS_ASSERT_VARIANT_BYTE_NUMBER;
+
     /* This returns the position in a word (0..7) of the first byte whose
      * uppermost bit is set.  On ASCII boxes, this is equivalent to the first
      * byte whose representation is different in UTF-8 vs not, hence the name
@@ -3428,12 +3462,16 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 {
+    PERL_ARGS_ASSERT_UV_TO_UTF8;
+
     return uv_to_utf8_msgs(d, uv, 0, 0);
 }
 
 PERL_STATIC_INLINE U8 *
 Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
+    PERL_ARGS_ASSERT_UV_TO_UTF8_FLAGS;
+
     return uv_to_utf8_msgs(d, uv, flags, 0);
 }
 
@@ -3953,6 +3991,8 @@ Perl_sv_only_taint_gmagic(SV *sv)
 PERL_STATIC_INLINE U8
 Perl_gimme_V(pTHX)
 {
+    PERL_ARGS_ASSERT_GIMME_V;
+
     I32 cxix;
     U8  gimme = (PL_op->op_flags & OPf_WANT);
 
@@ -4370,10 +4410,10 @@ PERL_STATIC_INLINE void
 Perl_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPWHEN;
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(cx);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    PERL_UNUSED_ARG(cx);
-    PERL_UNUSED_CONTEXT;
     /* currently NOOP */
 }
 
@@ -5025,7 +5065,9 @@ Use the C<PerlMemShared_free> function.
 PERL_STATIC_INLINE char *
 Perl_savepv(pTHX_ const char *pv)
 {
+    PERL_ARGS_ASSERT_SAVEPV;
     PERL_UNUSED_CONTEXT;
+
     if (!pv)
         return NULL;
     else {
@@ -5041,6 +5083,8 @@ Perl_savepv(pTHX_ const char *pv)
 PERL_STATIC_INLINE char *
 Perl_savepvn(pTHX_ const char *pv, Size_t len)
 {
+    PERL_ARGS_ASSERT_SAVEPVN;
+
     char *newaddr;
     PERL_UNUSED_CONTEXT;
 
@@ -5095,6 +5139,8 @@ Implements L<perlapi/C<PERL_GET_CONTEXT>>, which you should use instead.
 PERL_STATIC_INLINE void *
 Perl_get_context(void)
 {
+    PERL_ARGS_ASSERT_GET_CONTEXT;
+
 #  if defined(USE_ITHREADS)
 #    ifdef OLD_PTHREADS_API
     pthread_addr_t t;
@@ -5117,6 +5163,7 @@ Perl_get_context(void)
 PERL_STATIC_INLINE MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
+    PERL_ARGS_ASSERT_GET_VTBL;
     PERL_UNUSED_CONTEXT;
 
     return (vtbl_id < 0 || vtbl_id >= magic_vtable_max)
@@ -5152,6 +5199,8 @@ Description stolen from http://man.openbsd.org/strlcat.3
 PERL_STATIC_INLINE Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size)
 {
+    PERL_ARGS_ASSERT_MY_STRLCAT;
+
     Size_t used, length, copy;
 
     used = strlen(dst);
@@ -5186,6 +5235,8 @@ Description stolen from http://man.openbsd.org/strlcpy.3
 PERL_STATIC_INLINE Size_t
 Perl_my_strlcpy(char *dst, const char *src, Size_t size)
 {
+    PERL_ARGS_ASSERT_MY_STRLCPY;
+
     Size_t length, copy;
 
     length = strlen(src);

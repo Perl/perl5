@@ -391,6 +391,8 @@ Finds the magic pointer for C<type> matching the SV.  See C<L</sv_magic>>.
 MAGIC*
 Perl_mg_find(const SV *sv, int type)
 {
+    PERL_ARGS_ASSERT_MG_FIND;
+
     return S_mg_findext_flags(sv, type, NULL, 0);
 }
 
@@ -406,6 +408,8 @@ C<L</sv_magicext>>.
 MAGIC*
 Perl_mg_findext(const SV *sv, int type, const MGVTBL *vtbl)
 {
+    PERL_ARGS_ASSERT_MG_FINDEXT;
+
     return S_mg_findext_flags(sv, type, vtbl, 1);
 }
 
@@ -785,6 +789,8 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 int
 Perl_get_extended_os_errno(void)
 {
+    PERL_ARGS_ASSERT_GET_EXTENDED_OS_ERRNO;
+
 
 #if defined(VMS)
 
@@ -864,6 +870,8 @@ string (currently empty) is returned.
 SV *
 Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
 {
+    PERL_ARGS_ASSERT_SV_STRING_FROM_ERRNUM;
+
     char const *errstr;
     utf8ness_t utf8ness;
 
@@ -1542,12 +1550,16 @@ PERL_STACK_REALIGN
 Signal_t
 Perl_csighandler(int sig, Siginfo_t *sip, void *uap)
 {
+    PERL_ARGS_ASSERT_CSIGHANDLER;
+
     Perl_csighandler3(sig, sip, uap);
 }
 #else
 Signal_t
 Perl_csighandler(int sig)
 {
+    PERL_ARGS_ASSERT_CSIGHANDLER;
+
     Perl_csighandler3(sig, NULL, NULL);
 }
 #endif
@@ -1555,6 +1567,8 @@ Perl_csighandler(int sig)
 Signal_t
 Perl_csighandler1(int sig)
 {
+    PERL_ARGS_ASSERT_CSIGHANDLER1;
+
     Perl_csighandler3(sig, NULL, NULL);
 }
 
@@ -1569,6 +1583,8 @@ Perl_csighandler1(int sig)
 Signal_t
 Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 {
+    PERL_ARGS_ASSERT_CSIGHANDLER3;
+
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
 #else
@@ -1686,6 +1702,8 @@ unblock_sigmask(pTHX_ void* newset)
 void
 Perl_despatch_signals(pTHX)
 {
+    PERL_ARGS_ASSERT_DESPATCH_SIGNALS;
+
     int sig;
     PL_sig_pending = 0;
     for (sig = 1; sig < SIG_SIZE; sig++) {
@@ -3625,6 +3643,8 @@ Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 Signal_t
 Perl_sighandler(int sig, Siginfo_t *sip, void *uap)
 {
+    PERL_ARGS_ASSERT_SIGHANDLER;
+
     Perl_perly_sighandler(sig, sip, uap, 0);
 }
 
@@ -3633,6 +3653,8 @@ Perl_sighandler(int sig, Siginfo_t *sip, void *uap)
 Signal_t
 Perl_sighandler(int sig)
 {
+    PERL_ARGS_ASSERT_SIGHANDLER;
+
     Perl_perly_sighandler(sig, NULL, NULL, 0);
 }
 
@@ -3641,12 +3663,16 @@ Perl_sighandler(int sig)
 Signal_t
 Perl_sighandler1(int sig)
 {
+    PERL_ARGS_ASSERT_SIGHANDLER1;
+
     Perl_perly_sighandler(sig, NULL, NULL, 0);
 }
 
 Signal_t
 Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
 {
+    PERL_ARGS_ASSERT_SIGHANDLER3;
+
     Perl_perly_sighandler(sig, sip, uap, 0);
 }
 
@@ -3663,6 +3689,8 @@ Signal_t
 Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
                     void *uap PERL_UNUSED_DECL, bool safe)
 {
+    PERL_ARGS_ASSERT_PERLY_SIGHANDLER;
+
 #ifdef PERL_GET_SIG_CONTEXT
     dTHXa(PERL_GET_SIG_CONTEXT);
 #else
@@ -3838,6 +3866,8 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
 static void
 S_restore_magic(pTHX_ void *p)
 {
+    PERL_ARGS_ASSERT_RESTORE_MAGIC;
+
     MGS* const mgs = SSPTR(PTR2IV(p), MGS*);
     SV* const sv = mgs->mgs_sv;
     bool bumped;
@@ -3895,6 +3925,7 @@ S_restore_magic(pTHX_ void *p)
 static void
 S_unwind_handler_stack(pTHX_ void *p)
 {
+    PERL_ARGS_ASSERT_UNWIND_HANDLER_STACK;
     PERL_UNUSED_ARG(p);
 
     PL_savestack_ix -= 5; /* Unprotect save in progress. */

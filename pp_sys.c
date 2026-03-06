@@ -4276,6 +4276,8 @@ PP_wrapped(pp_open_dir, 2, 0)
 static void
 S_warn_not_dirhandle(pTHX_ GV *gv)
 {
+    PERL_ARGS_ASSERT_WARN_NOT_DIRHANDLE;
+
     IO *io = GvIOn(gv);
 
     if (IoIFP(io)) {
@@ -4293,6 +4295,7 @@ S_warn_not_dirhandle(pTHX_ GV *gv)
 
 PP_wrapped(pp_readdir, 1, 0)
 {
+
 #if !defined(Direntry_t) || !defined(HAS_READDIR)
     DIE(aTHX_ PL_no_dir_func, "readdir");
 #else
@@ -5225,6 +5228,8 @@ PP_wrapped(pp_semctl, 0, 1)
 static SV *
 S_space_join_names_mortal(pTHX_ char *const *array)
 {
+    PERL_ARGS_ASSERT_SPACE_JOIN_NAMES_MORTAL;
+
     SV *target;
 
     if (array && *array) {

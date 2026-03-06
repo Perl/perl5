@@ -1222,6 +1222,8 @@ Implements L<perlapi/C<Newx>> which you should use instead.
 Malloc_t
 Perl_malloc(size_t nbytes)
 {
+    PERL_ARGS_ASSERT_MALLOC;
+
         union overhead *p;
         int bucket;
 #if defined(DEBUGGING) || defined(RCHECK)
@@ -1795,6 +1797,8 @@ Implements L<perlapi/C<Safefree>> which you should use instead.
 Free_t
 Perl_mfree(Malloc_t where)
 {
+    PERL_ARGS_ASSERT_MFREE;
+
         MEM_SIZE size;
         union overhead *ovp;
         char *cp = (char*)where;
@@ -1895,6 +1899,8 @@ Implements L<perlapi/C<Renew>> which you should use instead.
 Malloc_t
 Perl_realloc(void *mp, size_t nbytes)
 {
+    PERL_ARGS_ASSERT_REALLOC;
+
         MEM_SIZE onb;
         union overhead *ovp;
         char *res;
@@ -2090,6 +2096,8 @@ Implements L<perlapi/C<Newxz>> which you should use instead.
 Malloc_t
 Perl_calloc(size_t elements, size_t size)
 {
+    PERL_ARGS_ASSERT_CALLOC;
+
     long sz = elements * size;
     Malloc_t p = Perl_malloc(sz);
 
@@ -2161,6 +2169,8 @@ Perl_malloced_size(void *p)
 MEM_SIZE
 Perl_malloc_good_size(size_t wanted)
 {
+    PERL_ARGS_ASSERT_MALLOC_GOOD_SIZE;
+
     return BUCKET_SIZE_REAL(adjust_size_and_find_bucket(&wanted));
 }
 

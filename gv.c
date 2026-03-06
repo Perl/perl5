@@ -57,6 +57,8 @@ Make sure there is a slot of type C<type> in the GV C<gv>.
 GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
+    PERL_ARGS_ASSERT_GV_ADD_BY_TYPE;
+
     SV **where;
 
     if (
@@ -851,6 +853,8 @@ Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
 PERL_STATIC_INLINE GV*
 S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags)
 {
+    PERL_ARGS_ASSERT_GV_FETCHMETH_INTERNAL;
+
     GV** gvp;
     HE* he;
     AV* linear_av;
@@ -2857,6 +2861,8 @@ Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
+    PERL_ARGS_ASSERT_GP_REF;
+
     if (!gp)
         return NULL;
     gp->gp_refcnt++;
@@ -2876,6 +2882,8 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
+    PERL_ARGS_ASSERT_GP_FREE;
+
     GP* gp;
     int attempts = 100;
     bool in_global_destruction = PL_phase == PERL_PHASE_DESTRUCT;
@@ -3353,6 +3361,8 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 bool
 Perl_try_amagic_un(pTHX_ int method, int flags)
 {
+    PERL_ARGS_ASSERT_TRY_AMAGIC_UN;
+
     SV* tmpsv;
     SV* const arg = PL_stack_sp[0];
     bool is_rc = rpp_stack_is_rc();
@@ -3557,6 +3567,8 @@ Perl_amagic_applies(pTHX_ SV *sv, int method, int flags)
 bool
 Perl_try_amagic_bin(pTHX_ int method, int flags)
 {
+    PERL_ARGS_ASSERT_TRY_AMAGIC_BIN;
+
     SV* left  = PL_stack_sp[-1];
     SV* right = PL_stack_sp[0];
     bool is_rc = rpp_stack_is_rc();
@@ -3696,6 +3708,8 @@ Perl_amagic_deref_call(pTHX_ SV *ref, int method)
 bool
 Perl_amagic_is_enabled(pTHX_ int method)
 {
+    PERL_ARGS_ASSERT_AMAGIC_IS_ENABLED;
+
       SV *lex_mask = cop_hints_fetch_pvs(PL_curcop, "overloading", 0);
 
       assert(PL_curcop->cop_hints & HINT_NO_AMAGIC);

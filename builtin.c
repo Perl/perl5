@@ -43,6 +43,8 @@ static void S_warn_experimental_builtin(pTHX_ const char *name)
 void
 Perl_prepare_export_lexical(pTHX)
 {
+    PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL;
+
     assert(PL_compcv);
 
     /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
@@ -64,6 +66,8 @@ static void S_export_lexical(pTHX_ SV *name, SV *sv)
 void
 Perl_finish_export_lexical(pTHX)
 {
+    PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL;
+
     intro_my();
 
     LEAVE;
@@ -710,6 +714,8 @@ static bool S_cv_is_builtin(pTHX_ CV *cv)
 void
 Perl_import_builtin_bundle(pTHX_ U16 ver)
 {
+    PERL_ARGS_ASSERT_IMPORT_BUILTIN_BUNDLE;
+
     SV *ampname = sv_newmortal();
 
     for(int i = 0; builtins[i].name; i++) {
@@ -776,6 +782,8 @@ XS(XS_builtin_import)
 void
 Perl_boot_core_builtin(pTHX)
 {
+    PERL_ARGS_ASSERT_BOOT_CORE_BUILTIN;
+
     I32 i;
     for(i = 0; builtins[i].name; i++) {
         const struct BuiltinFuncDescriptor *builtin = &builtins[i];

@@ -160,6 +160,8 @@ Perl_sys_init3(int* argc, char*** argv, char*** env)
 void
 Perl_sys_term(void)
 {
+    PERL_ARGS_ASSERT_SYS_TERM;
+
     if (!PL_veto_cleanup) {
         PERL_SYS_TERM_BODY();
     }
@@ -209,6 +211,8 @@ Allocates a new Perl interpreter.  See L<perlembed>.
 PerlInterpreter *
 perl_alloc(void)
 {
+    PERL_ARGS_ASSERT_PERL_ALLOC;
+
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_calloc(1, sizeof(PerlInterpreter));
 
     S_init_tls_and_interp(my_perl);
@@ -477,7 +481,9 @@ no threads.
 int
 Perl_nothreadhook(pTHX)
 {
+    PERL_ARGS_ASSERT_NOTHREADHOOK;
     PERL_UNUSED_CONTEXT;
+
     return 0;
 }
 
@@ -492,6 +498,7 @@ Stub that provides shutdown hook.
 void
 Perl_noshutdownhook()
 {
+    PERL_ARGS_ASSERT_NOSHUTDOWNHOOK;
 }
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -1661,6 +1668,8 @@ list is executed each time the current or any descendent thread terminates.
 void
 Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 {
+    PERL_ARGS_ASSERT_CALL_ATEXIT;
+
     Renew(PL_exitlist, PL_exitlistlen+1, PerlExitListEntry);
     PL_exitlist[PL_exitlistlen].fn = fn;
     PL_exitlist[PL_exitlistlen].ptr = ptr;
@@ -2200,6 +2209,8 @@ S_moreswitch_m(pTHX_ char option, const char *s)
 static void *
 S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 {
+    PERL_ARGS_ASSERT_PARSE_BODY;
+
     PerlIO *rsfp;
     int argc = PL_origargc;
     char **argv = PL_origargv;
@@ -2829,6 +2840,8 @@ perl_run(pTHXx)
 static void
 S_run_body(pTHX_ I32 oldscope)
 {
+    PERL_ARGS_ASSERT_RUN_BODY;
+
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support (0x%x).\n",
                     PL_sawampersand ? "Enabling" : "Omitting",
                     (unsigned int)(PL_sawampersand)));
@@ -3525,6 +3538,8 @@ Perl_require_pv(pTHX_ const char *pv)
 static void
 S_usage(pTHX)		/* XXX move this out into a module ? */
 {
+    PERL_ARGS_ASSERT_USAGE;
+
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
 
@@ -3974,6 +3989,8 @@ Perl_moreswitches(pTHX_ const char *s)
 static void
 S_minus_v(pTHX)
 {
+    PERL_ARGS_ASSERT_MINUS_V;
+
         PerlIO * PIO_stdout;
         {
             const char * const level_str = "v" PERL_VERSION_STRING;
@@ -4066,6 +4083,8 @@ Internet, point your browser at https://www.perl.org/, the Perl Home Page.\n\n")
 void
 Perl_my_unexec(pTHX)
 {
+    PERL_ARGS_ASSERT_MY_UNEXEC;
+
 #ifdef UNEXEC
     SV *    prog = newSVpv(BIN_EXP, 0);
     SV *    file = newSVpv(PL_origfilename, 0);
@@ -4094,6 +4113,8 @@ Perl_my_unexec(pTHX)
 static void
 S_init_interp(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_INTERP;
+
 #ifdef MULTIPLICITY
 #  define PERLVAR(prefix,var,type)
 #  define PERLVARA(prefix,var,n,type)
@@ -4126,6 +4147,8 @@ S_init_interp(pTHX)
 static void
 S_init_main_stash(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_MAIN_STASH;
+
     GV *gv;
     HV *hv = newHV();
 
@@ -4368,6 +4391,8 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 static void
 S_init_ids(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_IDS;
+
     /* no need to do anything here any more if we don't
      * do tainting. */
 #ifndef NO_TAINT_SUPPORT
@@ -4399,6 +4424,8 @@ S_init_ids(pTHX)
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
+    PERL_ARGS_ASSERT_DOING_TAINT;
+
 #ifdef PERL_IMPLICIT_SYS
     PERL_UNUSED_ARG(envp);
 #else
@@ -4439,6 +4466,8 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 static void
 S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
 {
+    PERL_ARGS_ASSERT_FORBID_SETID;
+
     char string[3] = "-x";
     const char *message = "program input from stdin";
 
@@ -4461,6 +4490,8 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
 void
 Perl_init_dbargs(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_DBARGS;
+
     AV *const args = PL_dbargs = GvAV(gv_AVadd((gv_fetchpvs("DB::args",
                                                             GV_ADDMULTI,
                                                             SVt_PVAV))));
@@ -4479,6 +4510,8 @@ Perl_init_dbargs(pTHX)
 void
 Perl_init_debugger(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_DEBUGGER;
+
     HV * const ostash = PL_curstash;
     MAGIC *mg;
 
@@ -4524,6 +4557,8 @@ Perl_init_debugger(pTHX)
 void
 Perl_init_stacks(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_STACKS;
+
     SSize_t size;
 
 #ifdef PERL_RC_STACK
@@ -4576,6 +4611,8 @@ Perl_init_stacks(pTHX)
 static void
 S_nuke_stacks(pTHX)
 {
+    PERL_ARGS_ASSERT_NUKE_STACKS;
+
     while (PL_curstackinfo->si_next)
         PL_curstackinfo = PL_curstackinfo->si_next;
     while (PL_curstackinfo) {
@@ -4631,6 +4668,8 @@ Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
 static void
 S_init_predump_symbols(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_PREDUMP_SYMBOLS;
+
     GV *tmpgv;
     IO *io;
 
@@ -4893,6 +4932,8 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 static void
 S_init_perllib(pTHX)
 {
+    PERL_ARGS_ASSERT_INIT_PERLLIB;
+
 #ifndef VMS
     const char *perl5lib = NULL;
 #endif
@@ -5383,6 +5424,8 @@ say to do.
 void
 Perl_my_exit(pTHX_ U32 status)
 {
+    PERL_ARGS_ASSERT_MY_EXIT;
+
     if (PL_exit_flags & PERL_EXIT_ABORT) {
         abort();
     }
@@ -5421,6 +5464,8 @@ On VMS, it takes care to set the appropriate severity bits in the exit status.
 void
 Perl_my_failure_exit(pTHX)
 {
+    PERL_ARGS_ASSERT_MY_FAILURE_EXIT;
+
 #ifdef VMS
      /* We have been called to fall on our sword.  The desired exit code
       * should be already set in STATUS_UNIX, but could be shifted over
@@ -5515,6 +5560,8 @@ Perl_my_failure_exit(pTHX)
 static void
 S_my_exit_jump(pTHX)
 {
+    PERL_ARGS_ASSERT_MY_EXIT_JUMP;
+
     if (PL_e_script) {
         SvREFCNT_dec(PL_e_script);
         PL_e_script = NULL;
@@ -5554,6 +5601,8 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 void
 Perl_xs_boot_epilog(pTHX_ const SSize_t ax)
 {
+    PERL_ARGS_ASSERT_XS_BOOT_EPILOG;
+
   if (PL_unitcheckav)
         call_list(PL_scopestack_ix, PL_unitcheckav);
     XSRETURN_YES;

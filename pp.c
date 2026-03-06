@@ -5505,6 +5505,8 @@ PP_wrapped(pp_each, 1, 0)
 static OP *
 S_do_delete_local(pTHX)
 {
+    PERL_ARGS_ASSERT_DO_DELETE_LOCAL;
+
     dSP;
     const U8 gimme = GIMME_V;
     const bool sliced = cBOOL(PL_op->op_private & OPpSLICE);

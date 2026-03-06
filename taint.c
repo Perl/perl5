@@ -97,6 +97,8 @@ Implements the L</TAINT_ENV> macro, which you should generally use instead.
 void
 Perl_taint_env(pTHX)
 {
+    PERL_ARGS_ASSERT_TAINT_ENV;
+
     /* Don't use directly; instead use TAINT_ENV */
 
     SV** svp;

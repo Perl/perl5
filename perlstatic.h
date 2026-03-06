@@ -21,6 +21,8 @@ GCC_DIAG_IGNORE_DECL(-Wunused-function);
 static void
 Perl_croak_memory_wrap(void)
 {
+    PERL_ARGS_ASSERT_CROAK_MEMORY_WRAP;
+
     Perl_croak_nocontext("%s",PL_memory_wrap);
 }
 
