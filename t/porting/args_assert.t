@@ -34,7 +34,7 @@ unless (-d 't' && -f 'MANIFEST') {
         # The trailing '.' distinguishes real from dummy macros that have no
         # real asserts
 	$declared{$1}++ if / ^ \s* \# \s* define \s+
-                               ( PERL_ARGS_ASSERT \w+ ) \s+ .
+                               ( PERL_ARGS_ASSERT \w+ ) \b
                            /ax;
     }
 }
