@@ -18,7 +18,10 @@ my $perl = which_perl();
 my $killsig = 'HUP';
 $killsig = 1 unless $Config{sig_name} =~ /\bHUP\b/;
 
+SKIP:
 {
+    skip("No list form of piped open on $^O", 2)
+        if $^O eq "VMS";
     # github #4106
     open my $saveout, ">&", \*STDOUT or die;
     my $start = time();
