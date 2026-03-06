@@ -525,9 +525,9 @@ C<5.10.0>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
 See below in L</"Update INSTALL"> for more details.
 
-For the first RC release leading up to a BLEAD-FINAL release, update the
-description of which releases are now "officially" supported in
-F<pod/perlpolicy.pod>.
+For the first RC release leading up to a BLEAD-FINAL release, update
+F<pod/perlpolicy.pod>: both the version support status table and the
+description of which releases are now "officially" supported.
 
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
