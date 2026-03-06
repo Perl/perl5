@@ -4030,7 +4030,6 @@ sub generate_proto_h {
 
         my @nonnull;
         my $has_depth = ( $flags =~ /W/ );
-        my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
         my $binarycompat = ( $flags =~ /b/ );
         my $has_mflag = ( $flags =~ /m/ );
@@ -4056,6 +4055,11 @@ sub generate_proto_h {
             # gets generated.
             $need_longs{$plain_func} = $args_assert_line = 1;
         }
+
+        # Macros don't have a context parameter unless there is a Perl_ form
+        # generated for them.
+        my $has_context = ($flags !~ /T/ && (   $need_longs{$plain_func}
+                                             || ! $has_mflag));
 
         if (! $can_ignore && $ret_type eq 'void') {
             warn "It is nonsensical to require the return value of a void"
