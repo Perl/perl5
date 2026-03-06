@@ -33,7 +33,9 @@ unless (-d 't' && -f 'MANIFEST') {
     while (<$fh>) {
         # The trailing '.' distinguishes real from dummy macros that have no
         # real asserts
-	$declared{$1}++ if / ^ \#define \s+ ( PERL_ARGS_ASSERT \w+ ) \s+ . /ax;
+	$declared{$1}++ if / ^ \s* \# \s* define \s+
+                               ( PERL_ARGS_ASSERT \w+ ) \s+ .
+                           /ax;
     }
 }
 
@@ -58,7 +60,7 @@ if (!@ARGV) {
 }
 
 while (<>) {
-    $used{$1}++ if / ^ \s+ (PERL_ARGS_ASSERT_ \w+ ) ; $ /ax;
+    $used{$1}++ if / ^ \s+ (PERL_ARGS_ASSERT_ \w+ ) ; /ax;
 }
 
 my %unused;
