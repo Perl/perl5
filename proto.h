@@ -9204,12 +9204,12 @@ S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t
 # define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
 
 static void
-S_ints_to_tm(pTHX_ struct tm *my_tm, const char *locale, int sec, int min, int hour, int mday, int mon, int year, int isdst)
+S_ints_to_tm(pTHX_ struct tm *mytm, const char *locale, int sec, int min, int hour, int mday, int mon, int year, int isdst)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
         Perl_attribute_nonnull_(pTHX_2);
 # define PERL_ARGS_ASSERT_INTS_TO_TM            \
-        assert(my_tm); assert(locale)
+        assert(mytm); assert(locale)
 
 static bool
 S_is_locale_utf8(pTHX_ const char *locale)

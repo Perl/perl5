@@ -4827,7 +4827,7 @@ S	|utf8ness_t|get_locale_string_utf8ness_i			\
 				|const locale_utf8ness_t known_utf8	\
 				|NULLOK const char *locale		\
 				|const locale_category_index cat_index
-S	|void	|ints_to_tm	|NN struct tm *my_tm			\
+S	|void	|ints_to_tm	|NN struct tm *mytm			\
 				|NN const char *locale			\
 				|int sec				\
 				|int min				\
