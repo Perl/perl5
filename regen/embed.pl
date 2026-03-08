@@ -4150,9 +4150,14 @@ sub generate_proto_h {
         $ret = "";
         $ret .= "$retval\n";
         $ret .= "$func(";
-        if ( $has_context ) {
-            $ret .= @$args ? "pTHX_ " : "pTHX";
+
+        if ($has_context) {
+            push @attrs, "Perl_attribute_nonnull_aTHX";
+
+            $ret .= "pTHX";
+            $ret .= "_ " if $args->@*;
         }
+
         if (@$args) {
             die_at_end
                     "$plain_func: n flag is contradicted by having arguments"
@@ -4498,8 +4503,6 @@ sub generate_proto_h {
             die_at_end "$plain_func: Function with '...' arguments must have"
                      . " f or F flag";
         }
-
-        unshift @attrs, "Perl_attribute_nonnull_aTHX" if $has_context;
 
         if ( @attrs ) {
             $ret .= "\n"
