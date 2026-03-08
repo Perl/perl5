@@ -81,6 +81,18 @@ L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.
   they emerge, surprised for a moment by how hot they are to touch.
     'This is ultra fine,' says Joe. 'It goes into Wotsits.'
 
+=head2 v5.42.1 - Andrew Benedict, "The Wall-to-Wall Grave" (in "Alfred Hitchcock presents: Stories my mother never told me, Part One")
+
+L<Announced on 2026-03-08 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270767.html>
+
+  'There are worse crimes than murder,' said the small man in the grey
+suit.  'And there are worse punishments than the electric chair.'
+[...]
+  'Civilization?' the little man questioned, as the bartender drew my
+beer.  'What is it, anyway? It's a carefully cultivated myth.  We are
+just savages living in upholstered caves.  Give any man sufficient
+provocation and the barbarian will emerge.'
+
 =head2 v5.42.1-RC1 - "Saki" (H. H. Munro), "Sredni Vashtar" (in "Alfred Hitchcock presents: 'Stories they wouldn't let me do on TV'")
 
 L<Announced on 2026-02-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/02/msg270754.html>
