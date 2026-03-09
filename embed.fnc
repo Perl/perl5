@@ -6528,7 +6528,6 @@ S	|void	|warn_on_first_deprecated_use				\
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
 S	|SV *	|mess_alloc
-S	|U64	|splitmix64	|NN U64 *state
 S	|SV *	|with_queued_errors					\
 				|NN SV *ex
 So	|void	|xs_version_bootcheck					\

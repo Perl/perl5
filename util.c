@@ -6034,60 +6034,6 @@ Perl_get_re_arg(pTHX_ SV *sv)
     return NULL;
 }
 
-// https://prng.di.unimi.it/#remarks
-static NV
-uint64_to_NV(U64 num)
-{
-    /* NV can be have different significant bits depending on how perl
-       is configured, so just let the appropriate ldexp do the work
-    */
-    NV ret   = Perl_ldexp((NV)num, -64);
-
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
-
-    return ret;
-}
-
-//////////////////////////////////////////////////////////////
-// PCG64 functions
-//////////////////////////////////////////////////////////////
-
-// Perl can only send one seed, so we have to deterministically
-// create the other seeds needed for our PRNG
-void
-Perl_pcg64_seed_r(pcg64_random_t *state, U64 seed)
-{
-    PERL_ARGS_ASSERT_PCG64_SEED_R;
-    U64 seed1 = splitmix64(&seed);
-    U64 seed2 = splitmix64(&seed1);
-
-    state->state = seed1;
-    state->inc   = seed2;
-
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 INIT: %lu => %lu / %lu\n", seed, state->state, state->inc));*/
-}
-
-static U64
-pcg64_rand64_r(pcg64_random_t *state)
-{
-    const uint64_t word = ((state->state >> ((state->state >> 59) + 5)) ^ state->state) * 12605985483714917081ull;
-    state->state = state->state * 6364136223846793005ull + state->inc;
-    return (word >> 43) ^ word;
-}
-
-NV
-Perl_pcg64_random_NV_r(pcg64_random_t *state)
-{
-    PERL_ARGS_ASSERT_PCG64_RANDOM_NV_R;
-
-    U64 num    = pcg64_rand64_r(state);
-    NV ret = uint64_to_NV(num);
-
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15" NVff "\n", ret));*/
-
-    return ret;
-}
-
 #ifdef USE_C_BACKTRACE
 
 /* Possibly move all this USE_C_BACKTRACE code into a new file. */

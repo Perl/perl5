@@ -575,8 +575,8 @@ common_objs = \
     mathoms$(OBJ_EXT) mg$(OBJ_EXT) mro_core$(OBJ_EXT) numeric$(OBJ_EXT) \
     pad$(OBJ_EXT) peep$(OBJ_EXT) perlio$(OBJ_EXT) perly$(OBJ_EXT) \
     pp$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_hot$(OBJ_EXT) pp_pack$(OBJ_EXT) \
-    pp_sort$(OBJ_EXT) pp_sys$(OBJ_EXT) reentr$(OBJ_EXT) regcomp$(OBJ_EXT) \
-    regcomp_debug$(OBJ_EXT) regcomp_invlist$(OBJ_EXT) \
+    pp_sort$(OBJ_EXT) pp_sys$(OBJ_EXT) random$(OBJ_EXT) reentr$(OBJ_EXT) \
+    regcomp$(OBJ_EXT) regcomp_debug$(OBJ_EXT) regcomp_invlist$(OBJ_EXT) \
     regcomp_study$(OBJ_EXT) regcomp_trie$(OBJ_EXT) regexec$(OBJ_EXT) \
     run$(OBJ_EXT) scope$(OBJ_EXT) sv$(OBJ_EXT) taint$(OBJ_EXT) \
     time64$(OBJ_EXT) toke$(OBJ_EXT) utf8$(OBJ_EXT) util$(OBJ_EXT) \
