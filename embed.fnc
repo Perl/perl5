@@ -112,9 +112,9 @@
 : In practice, every element here will have at least one flag.  But without any
 : flags, the default would be to create an entry in proto.h declaring 'name' as
 : a function returning 'return_type' with arguments aTHX, 'arg1', ..., 'argN',
-: with 'aTHX' omitted on builds that don't need it.  The function would be
-: visible to only other files in the perl core, unless the system doesn't allow
-: visibility restrictions.
+: with 'aTHX' omitted on builds that don't need it.  When present, it is
+: asserted to be non-NULL.  The function would be visible to only other files
+: in the perl core, unless the system doesn't allow visibility restrictions.
 :
 : A common pattern is to use defines like 'PERL_IN_FILE_C' (with FILE_C being
 : appropriately replaced with the real filename).  Most, if not all, of the

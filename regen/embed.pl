@@ -4261,6 +4261,7 @@ sub generate_proto_h {
 
                     if ($is_aTHX) {
                         if ($nn) {
+                            push @asserts,  "Perl_assert_aTHX";
                             push @attrs, "Perl_attribute_nonnull_aTHX";
                         }
                     }
@@ -4585,9 +4586,11 @@ sub generate_proto_h {
         #endif
 
         #if defined(MULTIPLICITY)
-        #  define Perl_attribute_nonnull_aTHX  __attribute__nonnull__(1)
+          #  define Perl_assert_aTHX             assert(aTHX)
+          #  define Perl_attribute_nonnull_aTHX  __attribute__nonnull__(1)
         #else
-        #  define Perl_attribute_nonnull_aTHX
+          #  define Perl_assert_aTHX
+          #  define Perl_attribute_nonnull_aTHX
         #endif
 
         START_EXTERN_C
