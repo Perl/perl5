@@ -4155,7 +4155,6 @@ sub generate_proto_h {
 
             # Pretend there was an aTHX argument in the first position.
             unshift $args->@*, "PerlInterpreter* aTHX NN";
-            push @attrs, "Perl_attribute_nonnull_aTHX";
 
             $ret .= "pTHX";
             $ret .= "_ " if $args->@* > 1;
@@ -4260,7 +4259,12 @@ sub generate_proto_h {
                                    && defined $argname
                                    && $argname eq 'aTHX' && $n == 1);
 
-                    if (! $is_aTHX && defined $argname
+                    if ($is_aTHX) {
+                        if ($nn) {
+                            push @attrs, "Perl_attribute_nonnull_aTHX";
+                        }
+                    }
+                    elsif (   defined $argname
                         && ($args_assert_line || $binarycompat))
                     {
                         if ($nn||$nz) {
