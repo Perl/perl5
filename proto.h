@@ -17426,13 +17426,6 @@ S_mess_alloc(pTHX)
      STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-static U64
-S_splitmix64(pTHX_ U64 *state)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-# define PERL_ARGS_ASSERT_SPLITMIX64            \
-     STMT_START { Perl_assert_aTHX; assert(state); } STMT_END
-
 static SV *
 S_with_queued_errors(pTHX_ SV *ex)
         Perl_attribute_nonnull_aTHX
