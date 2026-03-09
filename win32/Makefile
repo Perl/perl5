@@ -692,6 +692,7 @@ MICROCORE_SRC	=		\
 		..\pp_pack.c	\
 		..\pp_sort.c	\
 		..\pp_sys.c	\
+		..\random.c	\
 		..\reentr.c	\
 		..\regcomp.c	\
 		..\regcomp_trie.c	\
@@ -741,6 +742,7 @@ CORE_NOCFG_H	=		\
 		..\opcode.h	\
 		..\perl.h	\
 		..\perlapi.h	\
+		..\perlrand.h	\
 		..\perlsdio.h	\
 		..\perly.h	\
 		..\pp.h		\
