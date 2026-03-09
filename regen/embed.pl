@@ -4152,10 +4152,13 @@ sub generate_proto_h {
         $ret .= "$func(";
 
         if ($has_context) {
+
+            # Pretend there was an aTHX argument in the first position.
+            unshift $args->@*, "PerlInterpreter* aTHX NN";
             push @attrs, "Perl_attribute_nonnull_aTHX";
 
             $ret .= "pTHX";
-            $ret .= "_ " if $args->@*;
+            $ret .= "_ " if $args->@* > 1;
         }
 
         if (@$args) {
@@ -4221,7 +4224,7 @@ sub generate_proto_h {
                          . " an EPTR form, MPTR, SPTR), NULLOK, or NZ"
                                                if 0 + $nn + $nz + $nullok > 1;
 
-                    push( @nonnull, $n ) if $nn;
+                    push( @nonnull, $n - $has_context) if $nn;
 
                     # A non-pointer shouldn't have a pointer-related modifier.
                     # But typedefs may be pointers without our knowing it, so
@@ -4253,14 +4256,17 @@ sub generate_proto_h {
                         die_at_end "$func: $arg ($n) doesn't have a name\n";
                     }
                     my $argname = $1;
+                    my $is_aTHX = (   $has_context
+                                   && defined $argname
+                                   && $argname eq 'aTHX' && $n == 1);
 
-                    if (   defined $argname
+                    if (! $is_aTHX && defined $argname
                         && ($args_assert_line || $binarycompat))
                     {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
                             if ($nn) {
-                                my $string_n = $n;
+                                my $string_n = $n - $has_context;
                                 $string_n = "pTHX_$string_n" if $has_context;
                                 push @attrs,
                                      "Perl_attribute_nonnull($string_n)";
@@ -4432,6 +4438,7 @@ sub generate_proto_h {
                 }
             }
 
+            shift $args->@* if $has_context;    # Remove implicit aTHX arg
             $ret .= join ", ", @$args;
         }
         else {
