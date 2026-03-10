@@ -368,6 +368,13 @@ added and are used to hekify some C<OP_CONST> hash keys at compile time.
 
 =item *
 
+C<Perl_check_hash_fields_and_hekify>, partly called as a compile-time
+optimization, no longer preemptively converts an NV to a HEK if the
+compile time and run time locales could differ.
+[GH #24252]
+
+=item *
+
 XXX
 
 =back
