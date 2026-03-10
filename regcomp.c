@@ -232,12 +232,12 @@ S_edit_distance(const UV* src,
                 const SSize_t maxDistance
 )
 {
+    PERL_ARGS_ASSERT_EDIT_DISTANCE;
+
     item *head = NULL;
     UV swapCount, swapScore, targetCharCount, i, j;
     UV *scores;
     UV score_ceil = x + y;
-
-    PERL_ARGS_ASSERT_EDIT_DISTANCE;
 
     /* initialize matrix start values */
     Newx(scores, ( (x + 2) * (y + 2)), UV);
@@ -299,9 +299,9 @@ S_edit_distance(const UV* src,
 U32
 Perl_reg_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
 {
-    U32 count = RExC_rxi->data ? RExC_rxi->data->count : 1;
-
     PERL_ARGS_ASSERT_REG_ADD_DATA;
+
+    U32 count = RExC_rxi->data ? RExC_rxi->data->count : 1;
 
     /* in the below expression we have (count + n - 1), the minus one is there
      * because the struct that we allocate already contains a slot for 1 data
@@ -435,10 +435,10 @@ Perl_current_re_engine(pTHX)
 REGEXP *
 Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 {
+    PERL_ARGS_ASSERT_PREGCOMP;
+
     regexp_engine const *eng = current_re_engine();
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_PREGCOMP;
 
     /* Dispatch a request to compile a regexp to correct regexp engine. */
     DEBUG_COMPILE_r({
@@ -478,9 +478,9 @@ all begin with C<RXf_>.
 REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 {
-    SV *pat = pattern; /* defeat constness! */
-
     PERL_ARGS_ASSERT_RE_COMPILE;
+
+    SV *pat = pattern; /* defeat constness! */
 
     return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
 #ifdef PERL_IN_XSUB_RE
@@ -884,7 +884,6 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 {
     int n = 0;
     STRLEN s;
-
     PERL_UNUSED_CONTEXT;
 
     for (s = 0; s < plen; s++) {
@@ -1182,6 +1181,8 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state,
 static void
 S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
 {
+    PERL_ARGS_ASSERT_SET_REGEX_PV;
+
     /* Calculates and sets in the compiled pattern 'Rx' the string to compile,
      * properly wrapped with the right modifiers */
 
@@ -1212,8 +1213,6 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
             /* If needs a character set specifier */
         + ((has_charset) ? MAX_CHARSET_NAME_LENGTH : 0)
         + (sizeof("(?:)") - 1);
-
-    PERL_ARGS_ASSERT_SET_REGEX_PV;
 
     /* make sure PL_bitcount bounds not exceeded */
     STATIC_ASSERT_STMT(sizeof(STD_PAT_MODS) <= 8);
@@ -1271,14 +1270,14 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
 static void
 S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 {
+    PERL_ARGS_ASSERT_SSC_FINALIZE;
+
     /* The inversion list in the SSC is marked mortal; now we need a more
      * permanent copy, which is stored the same way that is done in a regular
      * ANYOF node, with the first NUM_ANYOF_CODE_POINTS code points in a bit
      * map */
 
     SV* invlist = invlist_clone(ssc->invlist, NULL);
-
-    PERL_ARGS_ASSERT_SSC_FINALIZE;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -1312,6 +1311,8 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 static bool
 S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
 {
+    PERL_ARGS_ASSERT_IS_SSC_WORTH_IT;
+
     /* The synthetic start class is used to hopefully quickly winnow down
      * places where a pattern could start a match in the target string.  If it
      * doesn't really narrow things down that much, there isn't much point to
@@ -1345,8 +1346,6 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
                                   ? 128
                                   : NON_OTHER_COUNT);
     const U32 max_match = max_code_points / 2;
-
-    PERL_ARGS_ASSERT_IS_SSC_WORTH_IT;
 
     invlist_iterinit(ssc->invlist);
     while (invlist_iternext(ssc->invlist, &start, &end)) {
@@ -1449,6 +1448,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                     OP *expr, const regexp_engine* eng, REGEXP *old_re,
                      bool *is_bare_re, const U32 orig_rx_flags, const U32 pm_flags)
 {
+    PERL_ARGS_ASSERT_RE_OP_COMPILE;
+
     REGEXP *Rx;         /* Capital 'R' means points to a REGEXP */
     STRLEN plen;
     char *exp;
@@ -1477,8 +1478,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_state_t copyRExC_state;
 #endif
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_RE_OP_COMPILE;
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
@@ -2625,6 +2624,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 static void
 S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 {
+    PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS;
+
     /* This parses the flags that are in either the '(?foo)' or '(?foo:bar)'
      * constructs, and updates RExC_flags with them.  On input, RExC_parse
      * should point to the first flag; it is updated on output to point to the
@@ -2646,8 +2647,6 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
     bool has_use_defaults = false;
     const char* const seqstart = RExC_parse - 1; /* Point to the '?' */
     int x_mod_count = 0;
-
-    PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS;
 
     /* '^' as an initial flag sets certain defaults */
     if (UCHARAT(RExC_parse) == '^') {
@@ -2898,13 +2897,13 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                              char ch
                       )
 {
+    PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF;
+
     regnode_offset ret;
     char* name_start = RExC_parse;
     U32 num = 0;
     SV *sv_dat = reg_scan_name(pRExC_state, REG_RSN_RETURN_DATA);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF;
 
     if (RExC_parse != name_start && ch == '}') {
         while (isBLANK(*RExC_parse)) {
@@ -2968,7 +2967,6 @@ static regnode_offset
 S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
     const char *type)
 {
-
     PERL_ARGS_ASSERT_REG_LA_NOTHING;
 
     /* false below so we do not force /x */
@@ -3017,7 +3015,6 @@ static regnode_offset
 S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags,
     const char *type)
 {
-
     PERL_ARGS_ASSERT_REG_LA_OPFAIL;
 
     /* false so we don't force to /x below */;
@@ -3102,6 +3099,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
      * RExC_parse beyond the '('.  Things like '(?' are indivisible tokens, and
      * this flag alerts us to the need to check for that */
 {
+    PERL_ARGS_ASSERT_REG;
+
     regnode_offset ret = 0;    /* Will be the head of the group. */
     regnode_offset br;
     regnode_offset lastbr;
@@ -3132,7 +3131,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_REG;
     DEBUG_PARSE("reg ");
 
     max_open = get_sv(RE_COMPILE_RECURSION_LIMIT, GV_ADD);
@@ -4553,14 +4551,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 static regnode_offset
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 {
+    PERL_ARGS_ASSERT_REGBRANCH;
+
     regnode_offset ret;
     regnode_offset chain = 0;
     regnode_offset latest;
     regnode *branch_node = NULL;
     I32 flags = 0, c = 0;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_REGBRANCH;
 
     DEBUG_PARSE("brnc");
 
@@ -4629,6 +4627,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 bool
 Perl_regcurly(const char *s, const char *e, const char * result[5])
 {
+    PERL_ARGS_ASSERT_REGCURLY;
+
     /* This function matches a {m,n} quantifier.  When called with a NULL final
      * argument, it simply parses the input from 's' up through 'e-1', and
      * returns a boolean as to whether or not this input is syntactically a
@@ -4667,8 +4667,6 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
     const char * max_end = NULL;
 
     bool has_comma = false;
-
-    PERL_ARGS_ASSERT_REGCURLY;
 
     if (s >= e || *s++ != '{')
         return false;
@@ -4747,6 +4745,8 @@ U32
 S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
                        const char * start, const char * end)
 {
+    PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE;
+
     /* This is a helper function for regpiece() to compute, given the
      * quantifier {m,n}, the value of either m or n, based on the starting
      * position 'start' in the string, through the byte 'end-1', returning it
@@ -4755,8 +4755,6 @@ S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
 
     UV uv;
     STATIC_ASSERT_DECL(REG_INFTY <= U32_MAX);
-
-    PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE;
 
     if (grok_atoUV(start, &uv, &end)) {
         if (uv < REG_INFTY) {   /* A valid, small-enough number */
@@ -4802,6 +4800,8 @@ S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
 static regnode_offset
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
+    PERL_ARGS_ASSERT_REGPIECE;
+
     regnode_offset ret;
     char op;
     I32 flags;
@@ -4814,8 +4814,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     const regnode_offset orig_emit = RExC_emit;
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_REGPIECE;
 
     DEBUG_PARSE("piec");
 
@@ -5063,6 +5061,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                 const U32 depth
     )
 {
+    PERL_ARGS_ASSERT_GROK_BSLASH_N;
+
  /* This routine teases apart the various meanings of \N and returns
   * accordingly.  The input parameters constrain which meaning(s) is/are valid
   * in the current context.
@@ -5152,8 +5152,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     I32 flags;
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_GROK_BSLASH_N;
 
     assert(cBOOL(node_p) ^ cBOOL(code_point_p));  /* Exactly one should be set */
     assert(! (node_p && cp_count));               /* At most 1 should be set */
@@ -5510,9 +5508,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 static U8
 S_compute_EXACTish(RExC_state_t *pRExC_state)
 {
-    U8 op;
-
     PERL_ARGS_ASSERT_COMPUTE_EXACTISH;
+
+    U8 op;
 
     if (! FOLD) {
         return (LOC)
@@ -5622,6 +5620,8 @@ S_backref_value(const char *p, const char *e, char **pe)
 static regnode_offset
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
+    PERL_ARGS_ASSERT_REGATOM;
+
     regnode_offset ret = 0;
     I32 flags = 0;
     char *atom_parse_start;
@@ -5633,8 +5633,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     *flagp = 0;		/* Initialize. */
 
     DEBUG_PARSE("atom");
-
-    PERL_ARGS_ASSERT_REGATOM;
 
   tryagain:
     atom_parse_start = RExC_parse;
@@ -7627,12 +7625,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 void
 Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 {
+    PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST;
+
     /* Uses the inversion list '*invlist_ptr' to populate the ANYOF 'node'.  It
      * sets up the bitmap and any flags, removing those code points from the
      * inversion list, setting it to NULL should it become completely empty */
 
-
-    PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST;
 
     /* There is no bitmap for this node type */
     if (REGNODE_TYPE(OP(node))  != ANYOF) {
@@ -7741,6 +7739,8 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
     const bool check_only      /* Don't die if error */
 )
 {
+    PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
+
     /* This parses what the caller thinks may be one of the three POSIX
      * constructs:
      *  1) a character class, like [:blank:]
@@ -7853,8 +7853,6 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
      * sizeof("alphanumeric") */
     UV input_text[15];
     STATIC_ASSERT_DECL(C_ARRAY_LENGTH(input_text) >= sizeof "alphanumeric");
-
-    PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
 
     CLEAR_POSIX_WARNINGS();
 
@@ -8543,6 +8541,8 @@ static regnode_offset
 S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     I32 *flagp, U32 depth)
 {
+    PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
+
     /* Handle the (?[...]) construct to do set operations */
 
     U8 curchar;                     /* Current character being parsed */
@@ -8568,8 +8568,6 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     const bool in_locale = LOC;     /* we turn off /l during processing */
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
 
     DEBUG_PARSE("xcls");
 
@@ -9286,6 +9284,8 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
 void
 Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist)
 {
+    PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS;
+
     /* This adds the Latin1/above-Latin1 folding rules.
      *
      * This should be called only for a Latin1-range code points, cp, which is
@@ -9293,8 +9293,6 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
      * Latin1.  It would give false results if /aa has been specified.
      * Multi-char folds are outside the scope of this, and must be handled
      * specially. */
-
-    PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS;
 
     assert(HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(cp));
 
@@ -9376,13 +9374,13 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
 static void
 S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
 {
+    PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS;
+
     /* Output the elements of the array given by '*posix_warnings' as REGEXP
      * warnings. */
 
     SV * msg;
     const bool first_is_fatal = ckDEAD(packWARN(WARN_REGEXP));
-
-    PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS;
 
     if (! TO_OUTPUT_WARNINGS(RExC_parse)) {
         CLEAR_POSIX_WARNINGS();
@@ -9406,10 +9404,10 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
 PERL_STATIC_INLINE Size_t
 S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max)
 {
+    PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS;
+
     const U8 * const start = s1;
     const U8 * const send = start + max;
-
-    PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS;
 
     while (s1 < send && *s1  == *s2) {
         s1++; s2++;
@@ -9421,6 +9419,8 @@ S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max)
 static AV *
 S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count)
 {
+    PERL_ARGS_ASSERT_ADD_MULTI_MATCH;
+
     /* This adds the string scalar <multi_string> to the array
      * <multi_char_matches>.  <multi_string> is known to have exactly
      * <cp_count> code points in it.  This is used when constructing a
@@ -9444,8 +9444,6 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
 
     AV* this_array;
     AV** this_array_ptr;
-
-    PERL_ARGS_ASSERT_ADD_MULTI_MATCH;
 
     if (! multi_char_matches) {
         multi_char_matches = newAV();
@@ -9533,6 +9531,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  SV** ret_invlist  /* Return an inversion list, not a node */
           )
 {
+    PERL_ARGS_ASSERT_REGCLASS;
+    assert(! (ret_invlist && allow_mutiple_chars));
+
     /* parse a bracketed class specification.  Most of these will produce an
      * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
      * EXACTFish node; [[:ascii:]], a POSIXA node; etc.  It is more complex
@@ -9660,11 +9661,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_REGCLASS;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-
     assert(! (ret_invlist && allow_mutiple_chars));
 
     /* If wants an inversion list returned, we can't optimize to something
@@ -11420,6 +11419,8 @@ S_optimize_regclass(pTHX_
                     I32 *flagp
                   )
 {
+    PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
+
     /* This function exists just to make S_regclass() smaller.  It extracts out
      * the code that looks for potential optimizations away from a full generic
      * ANYOF node.  The parameter names are the same as the corresponding
@@ -11441,8 +11442,6 @@ S_optimize_regclass(pTHX_
     UV   end[MAX_FOLD_FROMS+1] = { 0 };
     bool single_range = false;
     UV lowest_cp = 0, highest_cp = 0;
-
-    PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
 
     if (cp_list) { /* Count the code points in enough ranges that we would see
                       all the ones possible in any fold in this version of
@@ -12354,6 +12353,8 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 SV* const runtime_defns,
                 SV* const only_utf8_locale_list)
 {
+    PERL_ARGS_ASSERT_SET_ANYOF_ARG;
+
     /* Sets the arg field of an ANYOF-type node 'node', using information about
      * the node passed-in.  If only the bitmap is needed to determine what
      * matches, the arg is set appropriately to either
@@ -12371,8 +12372,6 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
      *        definitions aren't known at this time, or no entry if none. */
 
     UV n;
-
-    PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
     /* If this is set, the final disposition won't be known until runtime, so
      * we can't do any of the compile time optimizations */
@@ -12514,6 +12513,14 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 #endif
 
 {
+
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+    PERL_ARGS_ASSERT_GET_REGCLASS_AUX_DATA;
+#else
+    PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA;
+#endif
+    assert(! output_invlist || listsvp);
+
     /* For internal core use only.
      * Returns the inversion list for the input 'node' in the regex 'prog'.
      * If <doinit> is 'true', will attempt to create the inversion list if not
@@ -12549,13 +12556,6 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
 
     RXi_GET_DECL_NULL(prog, progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
-
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-    PERL_ARGS_ASSERT_GET_REGCLASS_AUX_DATA;
-#else
-    PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA;
-#endif
-    assert(! output_invlist || listsvp);
 
     if (data && data->count) {
         const U32 n = ARG1u(node);
@@ -12897,14 +12897,14 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
                                 const bool force_to_xmod
                          )
 {
+    PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT;
+
     /* If the text at the current parse position '*p' is a '(?#...)' comment,
      * or if we are under /x or 'force_to_xmod' is true, and the text at '*p'
      * is /x whitespace, advance '*p' so that on exit it points to the first
      * byte past all such white space and comments */
 
     const bool use_xmod = force_to_xmod || (RExC_flags & RXf_PMf_EXTENDED);
-
-    PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT;
 
     assert( ! UTF || UTF8_IS_INVARIANT(**p) || UTF8_IS_START(**p));
 
@@ -12982,11 +12982,11 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 static void
 S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const ptrdiff_t size)
 {
+    PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE;
+
     /* 'size' is the delta number of smallest regnode equivalents to add or
      * subtract from the current memory allocated to the regex engine being
      * constructed. */
-
-    PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE;
 
     RExC_size += size;
 
@@ -13008,6 +13008,8 @@ S_change_engine_size(pTHX_ RExC_state_t *pRExC_state, const ptrdiff_t size)
 static regnode_offset
 S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
 {
+    PERL_ARGS_ASSERT_REGNODE_GUTS;
+
     /* Allocate a regnode that is (1 + extra_size) times as big as the
      * smallest regnode worth of space, and also aligns and increments
      * RExC_size appropriately.
@@ -13015,8 +13017,6 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
      * It returns the regnode's offset into the regex engine program */
 
     const regnode_offset ret = RExC_emit;
-
-    PERL_ARGS_ASSERT_REGNODE_GUTS;
 
     SIZE_ALIGN(RExC_size);
     change_engine_size(pRExC_state, (ptrdiff_t) 1 + extra_size);
@@ -13044,10 +13044,10 @@ S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN 
 static regnode_offset /* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
+    PERL_ARGS_ASSERT_REG_NODE;
+
     const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
     regnode_offset ptr = ret;
-
-    PERL_ARGS_ASSERT_REG_NODE;
 
     assert(REGNODE_ARG_LEN(op) == 0);
 
@@ -13062,10 +13062,10 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 static regnode_offset /* Location. */
 S_reg1node(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
+    PERL_ARGS_ASSERT_REG1NODE;
+
     const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
     regnode_offset ptr = ret;
-
-    PERL_ARGS_ASSERT_REG1NODE;
 
     /* ANYOF are special cased to allow non-length 1 args */
     assert(REGNODE_ARG_LEN(op) == 1);
@@ -13081,10 +13081,10 @@ S_reg1node(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 static regnode_offset /* Location. */
 S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, SV * arg)
 {
+    PERL_ARGS_ASSERT_REGPNODE;
+
     const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
     regnode_offset ptr = ret;
-
-    PERL_ARGS_ASSERT_REGPNODE;
 
     FILL_ADVANCE_NODE_ARGp(ptr, op, arg);
     RExC_emit = ptr;
@@ -13094,12 +13094,12 @@ S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, SV * arg)
 static regnode_offset
 S_reg2node(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2)
 {
+    PERL_ARGS_ASSERT_REG2NODE;
+
     /* emit a node with U32 and I32 arguments */
 
     const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
     regnode_offset ptr = ret;
-
-    PERL_ARGS_ASSERT_REG2NODE;
 
     assert(REGNODE_ARG_LEN(op) == 2);
 
@@ -13126,6 +13126,8 @@ static void
 S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
                   const regnode_offset operand, const U32 depth)
 {
+    PERL_ARGS_ASSERT_REGINSERT;
+
     regnode *src;
     regnode *dst;
     regnode *place;
@@ -13133,7 +13135,6 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     const int size = NODE_STEP_REGNODE + offset;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_REGINSERT;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
     DEBUG_PARSE_FMT("inst"," - %s", REGNODE_NAME(op));
@@ -13201,14 +13202,14 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
                 const regnode_offset val,
                 const U32 depth)
 {
+    PERL_ARGS_ASSERT_REGTAIL;
+
     regnode_offset scan;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_REGTAIL;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-
     /* The final node in the chain is the first one with a nonzero next pointer
      * */
     scan = (regnode_offset) p;
@@ -13273,14 +13274,14 @@ static bool
 S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
                       const regnode_offset val, U32 depth)
 {
+    PERL_ARGS_ASSERT_REGTAIL_STUDY;
+
     regnode_offset scan;
     U8 exact = PSEUDO;
 #ifdef EXPERIMENTAL_INPLACESCAN
     I32 min = 0;
 #endif
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_REGTAIL_STUDY;
 
 
     /* Find last node. */
@@ -13353,6 +13354,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 SV*
 Perl_get_ANYOFM_contents(pTHX_ const regnode * n)
 {
+    PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS;
 
     /* Returns an inversion list of all the code points matched by the
      * ANYOFM/NANYOFM node 'n' */
@@ -13362,8 +13364,6 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n)
     unsigned int i;
     U8 count = 0;
     U8 needed = 1U << PL_bitcount[ (U8) ~ FLAGS(n)];
-
-    PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS;
 
     /* Starting with the lowest code point, any code point that ANDed with the
      * mask yields the lowest code point is in the set */
@@ -13463,10 +13463,10 @@ Perl_pregfree(pTHX_ REGEXP *r)
 void
 Perl_pregfree2(pTHX_ REGEXP *rx)
 {
+    PERL_ARGS_ASSERT_PREGFREE2;
+
     struct regexp *const r = ReANY(rx);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_PREGFREE2;
 
     if (! r)
         return;
@@ -13529,11 +13529,11 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 REGEXP *
 Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 {
+    PERL_ARGS_ASSERT_REG_TEMP_COPY;
+
     struct regexp *drx;
     struct regexp *const srx = ReANY(ssv);
     const bool islv = dsv && SvTYPE(dsv) == SVt_PVLV;
-
-    PERL_ARGS_ASSERT_REG_TEMP_COPY;
 
     if (!dsv)
         dsv = (REGEXP*) newSV_type(SVt_REGEXP);
@@ -13659,11 +13659,11 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 void
 Perl_regfree_internal(pTHX_ REGEXP * const rx)
 {
+    PERL_ARGS_ASSERT_REGFREE_INTERNAL;
+
     struct regexp *const r = ReANY(rx);
     RXi_GET_DECL(r, ri);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_REGFREE_INTERNAL;
 
     if (! ri) {
         return;
@@ -13796,11 +13796,11 @@ any duplication they need to do.
 void
 Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 {
+    PERL_ARGS_ASSERT_RE_DUP_GUTS;
+
     I32 npar;
     const struct regexp *r = ReANY(sstr);
     struct regexp *ret = ReANY(dstr);
-
-    PERL_ARGS_ASSERT_RE_DUP_GUTS;
 
     npar = r->nparens+1;
     NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
@@ -13910,12 +13910,12 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 void *
 Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 {
+    PERL_ARGS_ASSERT_REGDUPE_INTERNAL;
+
     struct regexp *const r = ReANY(rx);
     regexp_internal *reti;
     int len;
     RXi_GET_DECL(r, ri);
-
-    PERL_ARGS_ASSERT_REGDUPE_INTERNAL;
 
     len = ProgLen(ri);
 
@@ -14041,13 +14041,13 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 static void
 S_re_croak(pTHX_ bool utf8, const char* pat,...)
 {
+    PERL_ARGS_ASSERT_RE_CROAK;
+
     va_list args;
     STRLEN len = strlen(pat);
     char buf[512];
     SV *msv;
     const char *message;
-
-    PERL_ARGS_ASSERT_RE_CROAK;
 
     if (len > 510)
         len = 510;
@@ -14287,6 +14287,8 @@ static REGEXP *
 S_compile_wildcard(pTHX_ const char * subpattern, const STRLEN len,
                          const bool ignore_case)
 {
+    PERL_ARGS_ASSERT_COMPILE_WILDCARD;
+
     /* Pretends that the input subpattern is qr/subpattern/aam, compiling it
      * possibly with /i if the 'ignore_case' parameter is true.  Use /aa
      * because nothing outside of ASCII will match.  Use /m because the input
@@ -14299,8 +14301,6 @@ S_compile_wildcard(pTHX_ const char * subpattern, const STRLEN len,
     SV * subpattern_sv = newSVpvn_flags(subpattern, len, SVs_TEMP);
     REGEXP * subpattern_re;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_COMPILE_WILDCARD;
 
     if (ignore_case) {
         flags |= PMf_FOLD;
@@ -14359,10 +14359,10 @@ static I32
 S_execute_wildcard(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
          char *strbeg, SSize_t minend, SV *screamer, U32 nosave)
 {
+    PERL_ARGS_ASSERT_EXECUTE_WILDCARD;
+
     I32 result;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_EXECUTE_WILDCARD;
 
     ENTER;
 
@@ -14419,6 +14419,8 @@ S_handle_user_defined_property(pTHX_
                                    this */
     const STRLEN level)         /* Recursion level of this call */
 {
+    PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY;
+
     STRLEN len;
     const char * string         = SvPV_const(contents, len);
     const char * const e        = string + len;
@@ -14429,8 +14431,6 @@ S_handle_user_defined_property(pTHX_
                                    being parsed in 'string' */
     const char * const overflow_msg = "Code point too large in \"";
     SV* running_definition = NULL;
-
-    PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY;
 
     *user_defined_ptr = true;
 
@@ -14794,6 +14794,8 @@ S_parse_uniprop_string(pTHX_
                                    this */
     const STRLEN level)         /* Recursion level of this call */
 {
+    PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
+
     char* lookup_name;          /* normalized name for lookup in our tables */
     unsigned lookup_len;        /* Its length */
     enum { Not_Strict = 0,      /* Some properties have stricter name */
@@ -14838,8 +14840,6 @@ S_parse_uniprop_string(pTHX_
      * we've seen that marker.  If not, what we're parsing can't be such an
      * official Unicode property whose expansion was deferred */
     bool could_be_deferred_official = false;
-
-    PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING;
 
     /* The input will be normalized into 'lookup_name' */
     Newx(lookup_name, name_len, char);
@@ -16191,6 +16191,8 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                               SV ** prop_definition,
                               AV ** strings)
 {
+    PERL_ARGS_ASSERT_HANDLE_NAMES_WILDCARD;
+
     /* Deal with Name property wildcard subpatterns; returns true if there were
      * any matches, adding them to prop_definition */
 
@@ -16222,8 +16224,6 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
     const STRLEN syl_max_len = hangul_prefix_len + 7;
 
     IV i;
-
-    PERL_ARGS_ASSERT_HANDLE_NAMES_WILDCARD;
 
     /* Make sure _charnames is loaded.  (The parameters give context
      * for any errors generated */

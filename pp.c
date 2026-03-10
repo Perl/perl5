@@ -217,9 +217,9 @@ GV *
 Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
                 const svtype type)
 {
-    GV *gv;
-
     PERL_ARGS_ASSERT_SOFTREF2XV;
+
+    GV *gv;
 
     if (PL_op->op_private & HINT_STRICT_REFS) {
         if (SvOK(sv))
@@ -502,9 +502,9 @@ PP(pp_refgen)
 static SV*
 S_refto(pTHX_ SV *sv)
 {
-    SV* rv;
-
     PERL_ARGS_ASSERT_REFTO;
+
+    SV* rv;
 
     if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
         if (LvTARGLEN(sv))
@@ -758,11 +758,11 @@ PP_wrapped(pp_trans, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
 static size_t
 S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 {
+    PERL_ARGS_ASSERT_DO_CHOMP;
+
     STRLEN len;
     char *s;
     size_t count = 0;
-
-    PERL_ARGS_ASSERT_DO_CHOMP;
 
     if (chomping && (RsSNARF(PL_rs) || RsRECORD(PL_rs)))
         return 0;
@@ -3443,10 +3443,10 @@ Perl_translate_substr_offsets( STRLEN curlen, IV pos1_iv,
                                 bool len_is_uv, STRLEN *posp,
                                 STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS;
+
     IV pos2_iv;
     int    pos2_is_uv;
-
-    PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS;
 
     if (!pos1_is_uv && pos1_iv < 0 && curlen) {
         pos1_is_uv = curlen-1 > ~(UV)pos1_iv;

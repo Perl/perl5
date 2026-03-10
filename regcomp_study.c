@@ -84,13 +84,13 @@ S_rck_elide_nothing(pTHX_ regnode *node)
 static SV*
 S_make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 {
+    PERL_ARGS_ASSERT_MAKE_EXACTF_INVLIST;
+
     const U8 * s = (U8*)STRING(node);
     SSize_t bytelen = STR_LEN(node);
     UV uc;
     /* Start out big enough for 2 separate code points */
     SV* invlist = new_invlist_(4);
-
-    PERL_ARGS_ASSERT_MAKE_EXACTF_INVLIST;
 
     if (! UTF) {
         uc = *s;
@@ -252,12 +252,12 @@ void
 Perl_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
                     SSize_t *minlenp, int is_inf)
 {
+    PERL_ARGS_ASSERT_SCAN_COMMIT;
+
     const STRLEN l = CHR_SVLEN(data->last_found);
     SV * const longest_sv = data->substrs[data->cur_is_floating].str;
     const STRLEN old_l = CHR_SVLEN(longest_sv);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_SCAN_COMMIT;
 
     if ((l >= old_l) && ((l > old_l) || (data->flags & SF_BEFORE_EOL))) {
         const U8 i = data->cur_is_floating;
@@ -303,9 +303,9 @@ Perl_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 static void
 S_ssc_anything(pTHX_ regnode_ssc *ssc)
 {
-    /* Set the SSC 'ssc' to match an empty string or any code point */
-
     PERL_ARGS_ASSERT_SSC_ANYTHING;
+
+    /* Set the SSC 'ssc' to match an empty string or any code point */
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -317,6 +317,8 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 static int
 S_ssc_is_anything(const regnode_ssc *ssc)
 {
+    PERL_ARGS_ASSERT_SSC_IS_ANYTHING;
+
     /* Returns true if the SSC 'ssc' can match the empty string and any code
      * point; false otherwise.  Thus, this is used to see if using 'ssc' buys
      * us anything: if the function returns true, 'ssc' hasn't been restricted
@@ -324,8 +326,6 @@ S_ssc_is_anything(const regnode_ssc *ssc)
 
     UV start = 0, end = 0;  /* Initialize due to messages from dumb compiler */
     bool ret;
-
-    PERL_ARGS_ASSERT_SSC_IS_ANYTHING;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -361,10 +361,10 @@ S_ssc_is_anything(const regnode_ssc *ssc)
 void
 Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 {
+    PERL_ARGS_ASSERT_SSC_INIT;
+
     /* Initializes the SSC 'ssc'.  This includes setting it to match an empty
      * string, any code point, or any posix class under locale */
-
-    PERL_ARGS_ASSERT_SSC_INIT;
 
     Zero(ssc, 1, regnode_ssc);
     set_ANYOF_SYNTHETIC(ssc);
@@ -390,14 +390,14 @@ static int
 S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
                         const regnode_ssc *ssc)
 {
+    PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT;
+
     /* Returns true if the SSC 'ssc' is in its initial state with regard only
      * to the list of code points matched, and locale posix classes; hence does
      * not check its flags) */
 
     UV start = 0, end = 0;  /* Initialize due to messages from dumb compiler */
     bool ret;
-
-    PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -424,6 +424,8 @@ static SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                                const regnode_charclass* const node)
 {
+    PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
+
     /* Returns a mortal inversion list defining which code points are matched
      * by 'node', which is of ANYOF-ish type .  Handles complementing the
      * result if appropriate.  If some code points aren't knowable at this
@@ -436,8 +438,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     const U8 flags = (REGNODE_TYPE(OP(node)) == ANYOF)
                       ? ANYOF_FLAGS(node)
                       : 0;
-
-    PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
     /* Look at the data structure created by S_set_ANYOF_arg() */
     if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)) {
@@ -576,6 +576,8 @@ static void
 S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                 const regnode_charclass *and_with)
 {
+    PERL_ARGS_ASSERT_SSC_AND;
+
     /* Accumulate into SSC 'ssc' its 'AND' with 'and_with', which is either
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
@@ -584,8 +586,6 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                           ? ANYOF_FLAGS(and_with)
                           : 0;
     U8  anded_flags;
-
-    PERL_ARGS_ASSERT_SSC_AND;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -759,6 +759,8 @@ static void
 S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                const regnode_charclass *or_with)
 {
+    PERL_ARGS_ASSERT_SSC_OR;
+
     /* Accumulate into SSC 'ssc' its 'OR' with 'or_with', which is either
      * another SSC or a regular ANYOF class.  Can create false positives if
      * 'or_with' is to be inverted. */
@@ -768,8 +770,6 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     U8  or_with_flags = (REGNODE_TYPE(OP(or_with)) == ANYOF)
                          ? ANYOF_FLAGS(or_with)
                          : 0;
-
-    PERL_ARGS_ASSERT_SSC_OR;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -879,11 +879,11 @@ S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
 static void
 S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 {
+    PERL_ARGS_ASSERT_SSC_CP_AND;
+
     /* AND just the single code point 'cp' into the SSC 'ssc' */
 
     SV* cp_list = new_invlist_(2);
-
-    PERL_ARGS_ASSERT_SSC_CP_AND;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -897,8 +897,9 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 static void
 S_ssc_clear_locale(regnode_ssc *ssc)
 {
-    /* Set the SSC 'ssc' to not match any locale things */
     PERL_ARGS_ASSERT_SSC_CLEAR_LOCALE;
+
+    /* Set the SSC 'ssc' to not match any locale things */
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
@@ -1059,6 +1060,8 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                    UV *min_subtract, bool *unfolded_multi_char,
                    U32 flags, regnode *val, U32 depth)
 {
+    PERL_ARGS_ASSERT_JOIN_EXACT;
+
     /* Merge several consecutive EXACTish nodes into one. */
 
     regnode *n = regnext(scan);
@@ -1073,7 +1076,6 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     PERL_UNUSED_ARG(depth);
 #endif
 
-    PERL_ARGS_ASSERT_JOIN_EXACT;
 #ifndef EXPERIMENTAL_INPLACESCAN
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(val);
@@ -1489,6 +1491,8 @@ Perl_study_chunk(pTHX_
                                a higher caller is holding a ptr to them. */
 )
 {
+    PERL_ARGS_ASSERT_STUDY_CHUNK;
+
     /* vars about the regnodes we are working with */
     regnode *scan = *scanp; /* the current opcode we are inspecting */
     regnode *next = NULL;   /* the next opcode beyond scan, tmp var */
@@ -1526,7 +1530,6 @@ Perl_study_chunk(pTHX_
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_STUDY_CHUNK;
     RExC_study_started = 1;
 
     Zero(&data_fake, 1, scan_data_t);

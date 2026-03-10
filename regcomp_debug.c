@@ -22,10 +22,11 @@
 int
 Perl_re_printf(pTHX_ const char *fmt, ...)
 {
+    PERL_ARGS_ASSERT_RE_PRINTF;
+
     va_list ap;
     int result;
     PerlIO *f= Perl_debug_log;
-    PERL_ARGS_ASSERT_RE_PRINTF;
     va_start(ap, fmt);
     result = PerlIO_vprintf(f, fmt, ap);
     va_end(ap);
@@ -35,10 +36,11 @@ Perl_re_printf(pTHX_ const char *fmt, ...)
 int
 Perl_re_indentf(pTHX_ const char *fmt, U32 depth, ...)
 {
+    PERL_ARGS_ASSERT_RE_INDENTF;
+
     va_list ap;
     int result;
     PerlIO *f= Perl_debug_log;
-    PERL_ARGS_ASSERT_RE_INDENTF;
     va_start(ap, depth);
     PerlIO_printf(f, "%*s", ( (int)depth % 20 ) * 2, "");
     result = PerlIO_vprintf(f, fmt, ap);
@@ -163,13 +165,13 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             const regnode *last, const regnode *plast,
             SV* sv, I32 indent, U32 depth)
 {
+    PERL_ARGS_ASSERT_DUMPUNTIL;
+
     const regnode *next;
     const regnode *optstart= NULL;
 
     RXi_GET_DECL(r, ri);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_DUMPUNTIL;
 
 #ifdef DEBUG_DUMPUNTIL
     Perl_re_printf( aTHX_  "--- %d : %d - %d - %d\n", indent, node-start,
@@ -392,6 +394,8 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 void
 Perl_regdump(pTHX_ const regexp *r)
 {
+    PERL_ARGS_ASSERT_REGDUMP;
+
 #ifdef DEBUGGING
     int i;
     SV * const sv = sv_newmortal();
@@ -475,10 +479,10 @@ Perl_regdump(pTHX_ const regexp *r)
         regdump_intflags("r->intflags: ", r->intflags);
     });
 #else
-    PERL_ARGS_ASSERT_REGDUMP;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);
 #endif  /* DEBUGGING */
+
 }
 
 /* Should be synchronized with ANYOF_ #defines in regcomp.h */
@@ -535,13 +539,13 @@ static const char * const anyofs[] = {
 void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
 {
+    PERL_ARGS_ASSERT_REGPROP;
+
 #ifdef DEBUGGING
     U8 k;
     const U8 op = OP(o);
     RXi_GET_DECL(prog, progi);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_REGPROP;
 
     SvPVCLEAR(sv);
 
@@ -1089,6 +1093,8 @@ S_put_code_point(pTHX_ SV *sv, UV c)
 static void
 S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 {
+    PERL_ARGS_ASSERT_PUT_RANGE;
+
     /* Appends to 'sv' a displayable version of the range of code points from
      * 'start' to 'end'.  Mnemonics (like '\r') are used for the few controls
      * that have them, when they occur at the beginning or end of the range.
@@ -1103,8 +1109,6 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
     const unsigned int min_range_count = 3;
 
     assert(start <= end);
-
-    PERL_ARGS_ASSERT_PUT_RANGE;
 
     while (start <= end) {
         UV this_end;
@@ -1271,13 +1275,13 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 static void
 S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
 {
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_INVLIST;
+
     /* Concatenate onto the PV in 'sv' a displayable form of the inversion list
      * 'invlist' */
 
     UV start, end;
     bool allow_literals = true;
-
-    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_INVLIST;
 
     /* Generally, it is more readable if printable characters are output as
      * literals, but if a range (nearly) spans all of them, it's best to output
@@ -1333,14 +1337,14 @@ S_put_charclass_bitmap_innards_common(pTHX_
         const bool invert       /* Is the result to be inverted? */
 )
 {
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON;
+
     /* Create and return an SV containing a displayable version of the bitmap
      * and associated information determined by the input parameters.  If the
      * output would have been only the inversion indicator '^', NULL is instead
      * returned. */
 
     SV * output;
-
-    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON;
 
     if (invert) {
         output = newSVpvs("^");
@@ -1411,6 +1415,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                      const U8 flags,
                                      const bool force_as_is_display)
 {
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
+
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class defined by the other arguments:
      *  'bitmap' points to the bitmap, or NULL if to ignore that.
@@ -1470,8 +1476,6 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     /* We are biased in favor of displaying things without them being inverted,
      * as that is generally easier to understand */
     const int bias = 5;
-
-    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
     /* Start off with whatever code points are passed in.  (We clone, so we
      * don't change the caller's list) */

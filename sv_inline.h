@@ -719,9 +719,9 @@ Perl_SvREFCNT_dec_ret_NULL(pTHX_ SV *sv)
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
-    U32 rc = SvREFCNT(sv);
-
     PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
+
+    U32 rc = SvREFCNT(sv);
 
     if (LIKELY(rc > 1))
         SvREFCNT(sv) = rc - 1;
@@ -901,10 +901,11 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 PERL_STATIC_INLINE char *
 Perl_sv_pvutf8n_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
 {
+    PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER;
+
     /* This is just so can be passed to Perl_SvPV_helper() as a function
      * pointer with the same signature as all the other such pointers, and
      * having hence an unused parameter */
-    PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER;
     PERL_UNUSED_ARG(dummy);
 
     return sv_pvutf8n_force(sv, lp);
@@ -913,10 +914,11 @@ Perl_sv_pvutf8n_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 
 PERL_STATIC_INLINE char *
 Perl_sv_pvbyten_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
 {
+    PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER;
+
     /* This is just so can be passed to Perl_SvPV_helper() as a function
      * pointer with the same signature as all the other such pointers, and
      * having hence an unused parameter */
-    PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER;
     PERL_UNUSED_ARG(dummy);
 
     return sv_pvbyten_force(sv, lp);
@@ -991,9 +993,9 @@ SV is B<not> incremented.
 PERL_STATIC_INLINE SV *
 Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 {
-    SV *sv = newSV_type(SVt_IV);
-
     PERL_ARGS_ASSERT_NEWRV_NOINC;
+
+    SV *sv = newSV_type(SVt_IV);
 
     SvTEMP_off(tmpRef);
 

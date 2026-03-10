@@ -5712,8 +5712,9 @@ PerlIO_getpos(PerlIO *f, SV *pos)
 void
 Perl_noperl_die(const char* pat, ...)
 {
-    va_list arglist;
     PERL_ARGS_ASSERT_NOPERL_DIE;
+
+    va_list arglist;
     va_start(arglist, pat);
     vfprintf(stderr, pat, arglist);
     va_end(arglist);

@@ -670,13 +670,13 @@ OP *
 Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
                  const MAGIC *const mg, const U32 flags, U32 argc, ...)
 {
+    PERL_ARGS_ASSERT_TIED_METHOD;
+
     I32 ret_args;
     SSize_t extend_size;
 #ifdef PERL_RC_STACK
     bool was_rc = rpp_stack_is_rc();
 #endif
-
-    PERL_ARGS_ASSERT_TIED_METHOD;
 
     /* Ensure that our flag bits do not overlap.  */
     STATIC_ASSERT_STMT((TIED_METHOD_MORTALIZE_NOT_NEEDED & G_WANT) == 0);
@@ -1544,9 +1544,9 @@ See C<L</setdefout>>.
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
-    GV *oldgv = PL_defoutgv;
-
     PERL_ARGS_ASSERT_SETDEFOUT;
+
+    GV *oldgv = PL_defoutgv;
 
     SvREFCNT_inc_simple_void_NN(gv);
     PL_defoutgv = gv;
@@ -1635,10 +1635,10 @@ PP_wrapped(pp_getc, MAXARG, 0)
 static OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
+    PERL_ARGS_ASSERT_DOFORM;
+
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
-
-    PERL_ARGS_ASSERT_DOFORM;
 
     if (CvCLONE(cv))
         cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
@@ -4097,14 +4097,14 @@ PP_wrapped(pp_readlink, 1, 0)
 static int
 S_dooneliner(pTHX_ const char *cmd, const char *filename)
 {
+    PERL_ARGS_ASSERT_DOONELINER;
+
     char * const save_filename = filename;
     char *cmdline;
     char *s;
     PerlIO *myfp;
     int anum = 1;
     Size_t size = strlen(cmd) + (strlen(filename) * 2) + 10;
-
-    PERL_ARGS_ASSERT_DOONELINER;
 
     Newx(cmdline, size, char);
     my_strlcpy(cmdline, cmd, size);

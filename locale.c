@@ -1969,9 +1969,9 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
 static const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 {
-    const char * retval;
-
     PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R;
+
+    const char * retval;
 
     STDIZED_SETLOCALE_LOCK;
 
@@ -1992,9 +1992,9 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 static bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 {
-    bool retval;
-
     PERL_ARGS_ASSERT_LESS_DICEY_BOOL_SETLOCALE_R;
+
+    bool retval;
 
     /* Unlikely, but potentially possible that another thread could zap the
      * buffer from true to false or vice-versa, so need to lock here */
@@ -2808,10 +2808,10 @@ S_update_PL_curlocales_i(pTHX_
                          const char * new_locale,
                          const line_t caller_line)
 {
+    PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I;
+
     /* Update PL_curlocales[], which is parallel to the other ones indexed by
      * our mapping of libc category number to our internal equivalents. */
-
-    PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I;
 
     if (index == LC_ALL_INDEX_) {
 
@@ -4748,11 +4748,11 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
                                  const char * restore_locale,
                                  const line_t caller_line)
 {
+    PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
+
     /* Restores the locale for LC_category corresponding to cat_index to
      * 'restore_locale' (which is a copy that will be freed by this function),
      * or do nothing if the latter parameter is NULL */
-
-    PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
 
     if (restore_locale == NULL) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -5000,11 +5000,11 @@ S_is_locale_utf8(pTHX_ const char * locale)
 static bool
 S_is_codeset_name_UTF8(const char * name)
 {
+    PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
+
     /* Return a boolean as to if the passed-in name indicates it is a UTF-8
      * code set.  Several variants are possible */
     const Size_t len = strlen(name);
-
-    PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
 
 #    ifdef WIN32
 
@@ -7892,6 +7892,8 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
                                const char * locale,
                                const char ** new_codeset)
 {
+    PERL_ARGS_ASSERT_MY_STRFTIME;
+
 #  define NAME_INDICATES_UTF8       0x1
 #  define MB_CUR_MAX_SUGGESTS_UTF8  0x2
 
@@ -8360,7 +8362,6 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
                        int mday, int mon, int year, int wday, int yday,
                        int isdst)
 {   /* Documented above */
-    PERL_ARGS_ASSERT_MY_STRFTIME;
     PERL_UNUSED_ARG(wday);
     PERL_UNUSED_ARG(yday);
 
@@ -10468,7 +10469,6 @@ S_print_collxfrm_input_and_return(pTHX_
                                   const STRLEN xlen,
                                   const bool is_utf8)
 {
-
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
     PerlIO_printf(Perl_debug_log,

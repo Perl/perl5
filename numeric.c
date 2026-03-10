@@ -112,9 +112,9 @@ These are are available even on platforms that lack plain strtod().
 NV
 Perl_my_strtod(const char * const s, char **e)
 {
-    dTHX;
-
     PERL_ARGS_ASSERT_MY_STRTOD;
+
+    dTHX;
 
 #ifdef Perl_strtod
 
@@ -862,11 +862,11 @@ For backwards compatibility.  Use C<grok_oct> instead.
 NV
 Perl_scan_bin(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
+    PERL_ARGS_ASSERT_SCAN_BIN;
+
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
     const UV ruv = grok_bin (start, &len, &flags, &rnv);
-
-    PERL_ARGS_ASSERT_SCAN_BIN;
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
@@ -875,11 +875,11 @@ Perl_scan_bin(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 NV
 Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
+    PERL_ARGS_ASSERT_SCAN_OCT;
+
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
     const UV ruv = grok_oct (start, &len, &flags, &rnv);
-
-    PERL_ARGS_ASSERT_SCAN_OCT;
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
@@ -888,11 +888,11 @@ Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 NV
 Perl_scan_hex(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 {
+    PERL_ARGS_ASSERT_SCAN_HEX;
+
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
     const UV ruv = grok_hex (start, &len, &flags, &rnv);
-
-    PERL_ARGS_ASSERT_SCAN_HEX;
 
     *retlen = len;
     return (flags & PERL_SCAN_GREATER_THAN_UV_MAX) ? rnv : (NV)ruv;
@@ -1297,12 +1297,12 @@ static const U8 uv_max_mod_10 = UV_MAX % 10;
 int
 Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 {
+  PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS;
+
   const char *s = pv;
   const char * const send = pv + len;
   const char *d;
   int numtype = 0;
-
-  PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS;
 
   if (UNLIKELY(isSPACE(*s))) {
       s++;
@@ -1660,6 +1660,7 @@ S_mulexp10(NV value, I32 exponent)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
+    PERL_ARGS_ASSERT_MY_ATOF;
 
 /*
 =for apidoc      my_atof
@@ -1676,8 +1677,6 @@ N.B. C<s> must be NUL terminated.
 */
 
     NV x = 0.0;
-
-    PERL_ARGS_ASSERT_MY_ATOF;
 
 #if ! defined(USE_LOCALE_NUMERIC)
 
@@ -1821,6 +1820,8 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 char*
 Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 {
+    PERL_ARGS_ASSERT_MY_ATOF3;
+
     const char* s = orig;
     NV result[3] = {0.0, 0.0, 0.0};
 #if defined(USE_PERL_ATOF) || defined(Perl_strtod)
@@ -1843,7 +1844,6 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 #endif
 
 #if defined(USE_PERL_ATOF) || defined(Perl_strtod)
-    PERL_ARGS_ASSERT_MY_ATOF3;
 
     /* leading whitespace */
     while (s < send && isSPACE(*s))

@@ -96,9 +96,10 @@ Approximate Perl equivalent: C<splice(@myarray, $key, 1, $val)>.
 PERL_STATIC_INLINE SV**
 Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
 {
+    PERL_ARGS_ASSERT_AV_STORE_SIMPLE;
+
     SV** ary;
 
-    PERL_ARGS_ASSERT_AV_STORE_SIMPLE;
     assert(!SvMAGICAL(av));
     assert(!SvREADONLY(av));
     assert(AvREAL(av));
@@ -1257,9 +1258,10 @@ Perl_sv_can_existdelete(pTHX_ SV *sv)
 PERL_STATIC_INLINE struct regexp *
 Perl_ReANY(const REGEXP * const re)
 {
+    PERL_ARGS_ASSERT_REANY;
+
     XPV* const p = (XPV*)SvANY(re);
 
-    PERL_ARGS_ASSERT_REANY;
     assert(isREGEXP(re));
 
     return SvTYPE(re) == SVt_PVLV ? p->xpv_len_u.xpvlenu_rx
@@ -1275,10 +1277,10 @@ Perl_ReANY(const REGEXP * const re)
 PERL_STATIC_INLINE void
 Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
 {
+    PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE;
+
     /* Takes an input 'byte' (Latin1 or EBCDIC) and appends it to the UTF-8
      * encoded string at '*dest', updating '*dest' to include it */
-
-    PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE;
 
     if (NATIVE_BYTE_IS_INVARIANT(byte))
         *((*dest)++) = byte;
@@ -2226,9 +2228,9 @@ at this low a level.  A valid use case could change that.
 PERL_STATIC_INLINE bool
 Perl_is_utf8_non_invariant_string(const U8* const s, STRLEN len)
 {
-    const U8 * first_variant;
-
     PERL_ARGS_ASSERT_IS_UTF8_NON_INVARIANT_STRING;
+
+    const U8 * first_variant;
 
     if (is_utf8_invariant_string_loc(s, len, &first_variant)) {
         return FALSE;
@@ -2324,9 +2326,10 @@ C<L</is_utf8_fixed_width_buf_flags>>,
 PERL_STATIC_INLINE bool
 Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS;
+
     const U8 * first_variant;
 
-    PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS;
     assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     if (len == 0) {
@@ -2371,9 +2374,9 @@ Perl_is_utf8_string_flags(const U8 *s, STRLEN len, const U32 flags)
 PERL_STATIC_INLINE bool
 Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
-    const U8 * first_variant;
-
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
+
+    const U8 * first_variant;
 
     if (len == 0) {
         len = strlen((const char *) s);
@@ -2660,9 +2663,9 @@ Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 PERL_STATIC_INLINE bool
 Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
-    const U8 * first_variant;
-
     PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOCLEN;
+
+    const U8 * first_variant;
 
     if (len == 0) {
         len = strlen((const char *) s);
@@ -2710,9 +2713,9 @@ Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN
 PERL_STATIC_INLINE bool
 Perl_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
-    const U8 * first_variant;
-
     PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOCLEN;
+
+    const U8 * first_variant;
 
     if (len == 0) {
         len = strlen((const char *) s);
@@ -2765,9 +2768,10 @@ Perl_is_c9strict_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRL
 PERL_STATIC_INLINE bool
 Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS;
+
     const U8 * first_variant;
 
-    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS;
     assert(0 == (flags & ~UTF8_DISALLOW_ILLEGAL_INTERCHANGE));
 
     if (flags == 0) {
@@ -3283,9 +3287,9 @@ Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
                                        STRLEN *el,
                                        const U32 flags)
 {
-    const U8 * maybe_partial;
-
     PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOCLEN_FLAGS;
+
+    const U8 * maybe_partial;
 
     if (! ep) {
         ep  = &maybe_partial;
@@ -3502,11 +3506,11 @@ Allows one ending \0
 PERL_STATIC_INLINE bool
 Perl_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
 {
+    PERL_ARGS_ASSERT_IS_SAFE_SYSCALL;
+
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
-
-    PERL_ARGS_ASSERT_IS_SAFE_SYSCALL;
 
     if (len > 1) {
         char *null_at;
@@ -3544,9 +3548,9 @@ then calling:
 PERL_STATIC_INLINE bool
 S_should_warn_nl(const char *pv)
 {
-    STRLEN len;
-
     PERL_ARGS_ASSERT_SHOULD_WARN_NL;
+
+    STRLEN len;
 
     len = strlen(pv);
 
@@ -3560,12 +3564,12 @@ S_should_warn_nl(const char *pv)
 PERL_STATIC_INLINE bool
 S_lossless_NV_to_IV(const NV nv, IV *ivp)
 {
+    PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
+
     /* This function determines if the input NV 'nv' may be converted without
      * loss of data to an IV.  If not, it returns FALSE taking no other action.
      * But if it is possible, it does the conversion, returning TRUE, and
      * storing the converted result in '*ivp' */
-
-    PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
 
 #  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
     /* Normally any comparison with a NaN returns false; if we can't rely
@@ -3968,9 +3972,9 @@ Return false if any get magic is on the SV other than taint magic.
 PERL_STATIC_INLINE bool
 Perl_sv_only_taint_gmagic(SV *sv)
 {
-    MAGIC *mg = SvMAGIC(sv);
-
     PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC;
+
+    MAGIC *mg = SvMAGIC(sv);
 
     while (mg) {
         if (mg->mg_type != PERL_MAGIC_taint
@@ -4011,9 +4015,9 @@ Perl_gimme_V(pTHX)
 PERL_STATIC_INLINE PERL_CONTEXT *
 Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
 {
-    PERL_CONTEXT * cx;
-
     PERL_ARGS_ASSERT_CX_PUSHBLOCK;
+
+    PERL_CONTEXT * cx;
 
     CXINC;
     cx = CX_CUR();
@@ -4080,9 +4084,9 @@ Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 PERL_STATIC_INLINE void
 Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 {
-    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
-
     PERL_ARGS_ASSERT_CX_PUSHSUB;
+
+    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
 
     PERL_DTRACE_PROBE_ENTRY(cv);
     cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
@@ -4102,9 +4106,10 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 PERL_STATIC_INLINE void
 Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
 {
+    PERL_ARGS_ASSERT_CX_POPSUB_COMMON;
+
     CV *cv;
 
-    PERL_ARGS_ASSERT_CX_POPSUB_COMMON;
     assert(CxTYPE(cx) == CXt_SUB);
 
     PL_comppad = cx->blk_sub.prevcomppad;
@@ -4122,9 +4127,10 @@ Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
 PERL_STATIC_INLINE void
 Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 {
+    PERL_ARGS_ASSERT_CX_POPSUB_ARGS;
+
     AV *av;
 
-    PERL_ARGS_ASSERT_CX_POPSUB_ARGS;
     assert(CxTYPE(cx) == CXt_SUB);
     assert(AvARRAY(MUTABLE_AV(
         PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
@@ -4181,10 +4187,11 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
 PERL_STATIC_INLINE void
 Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 {
+    PERL_ARGS_ASSERT_CX_POPFORMAT;
+
     CV *cv;
     GV *dfout;
 
-    PERL_ARGS_ASSERT_CX_POPFORMAT;
     assert(CxTYPE(cx) == CXt_FORMAT);
 
     dfout = cx->blk_format.dfoutgv;
@@ -4244,9 +4251,10 @@ Perl_cx_pushtry(pTHX_ PERL_CONTEXT *cx, OP *retop)
 PERL_STATIC_INLINE void
 Perl_cx_popeval(pTHX_ PERL_CONTEXT *cx)
 {
+    PERL_ARGS_ASSERT_CX_POPEVAL;
+
     SV *sv;
 
-    PERL_ARGS_ASSERT_CX_POPEVAL;
     assert(CxTYPE(cx) == CXt_EVAL);
 
     PL_in_eval = CxOLD_IN_EVAL(cx);
@@ -4431,9 +4439,10 @@ Perl_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
 PERL_STATIC_INLINE void
 Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
 {
+    PERL_ARGS_ASSERT_CX_POPGIVEN;
+
     SV *sv;
 
-    PERL_ARGS_ASSERT_CX_POPGIVEN;
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     sv = GvSV(PL_defgv);
@@ -4620,12 +4629,11 @@ instead.
 PERL_STATIC_INLINE I32
 Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 {
+    PERL_ARGS_ASSERT_FOLDEQ;
     PERL_UNUSED_CONTEXT;
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
-
-    PERL_ARGS_ASSERT_FOLDEQ;
 
     assert(len >= 0);
 
@@ -4640,6 +4648,8 @@ Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 PERL_STATIC_INLINE I32
 Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
 {
+    PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
+
     /* Compare non-UTF-8 using Unicode (Latin1) semantics.  Works on all folds
      * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
      * does not check for this.  Nor does it check that the strings each have
@@ -4649,8 +4659,6 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
-
-    PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
 
     assert(len >= 0);
 
@@ -4666,10 +4674,10 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
 PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(pTHX_ const char *s1, const char *s2, I32 len)
 {
+    PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
+
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
-
-    PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
 
     assert(len >= 0);
 
@@ -4723,11 +4731,11 @@ Perl_my_strnlen(const char *str, Size_t maxlen)
 PERL_STATIC_INLINE void *
 S_my_memrchr(const char * s, const char c, const STRLEN len)
 {
+    PERL_ARGS_ASSERT_MY_MEMRCHR;
+
     /* memrchr(), since many platforms lack it */
 
     const char * t = s + len - 1;
-
-    PERL_ARGS_ASSERT_MY_MEMRCHR;
 
     while (t >= s) {
         if (*t == c) {
@@ -4744,6 +4752,8 @@ S_my_memrchr(const char * s, const char c, const STRLEN len)
 PERL_STATIC_INLINE char *
 Perl_mortal_getenv(const char * str)
 {
+    PERL_ARGS_ASSERT_MORTAL_GETENV;
+
     /* This implements a (mostly) thread-safe, sequential-call-safe getenv().
      *
      * It's (mostly) thread-safe because it uses a mutex to prevent other
@@ -4780,8 +4790,6 @@ Perl_mortal_getenv(const char * str)
 
     char * ret;
     dTHX;
-
-    PERL_ARGS_ASSERT_MORTAL_GETENV;
 
     /* Can't mortalize without stacks.  khw believes that no other threads
      * should be running, so no need to lock things, and this may be during a
@@ -4954,7 +4962,6 @@ Perl_sv_isbool(pTHX_ const SV *sv)
 PERL_STATIC_INLINE AV *
 Perl_cop_file_avn(pTHX_ const COP *cop)
 {
-
     PERL_ARGS_ASSERT_COP_FILE_AVN;
 
     const char *file = CopFILE(cop);
@@ -5103,11 +5110,11 @@ Perl_savepvn(pTHX_ const char *pv, Size_t len)
 PERL_STATIC_INLINE char *
 Perl_savesvpv(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SAVESVPV;
+
     STRLEN len;
     const char * const pv = SvPV_const(sv, len);
     char *newaddr;
-
-    PERL_ARGS_ASSERT_SAVESVPV;
 
     ++len;
     Newx(newaddr,len,char);
@@ -5117,10 +5124,10 @@ Perl_savesvpv(pTHX_ SV *sv)
 PERL_STATIC_INLINE char *
 Perl_savesharedsvpv(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SAVESHAREDSVPV;
+
     STRLEN len;
     const char * const pv = SvPV_const(sv, len);
-
-    PERL_ARGS_ASSERT_SAVESHAREDSVPV;
 
     return savesharedpvn(pv, len);
 }

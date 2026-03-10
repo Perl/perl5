@@ -630,9 +630,9 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 static void
 S_printbuf(pTHX_ const char *const fmt, const char *const s)
 {
-    SV* const tmp = newSVpvs("");
-
     PERL_ARGS_ASSERT_PRINTBUF;
+
+    SV* const tmp = newSVpvs("");
 
     GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
     PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
@@ -689,6 +689,8 @@ S_ao(pTHX_ int toketype)
 static void
 S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
 {
+    PERL_ARGS_ASSERT_WARN_EXPECT_OPERATOR;
+
     if (PL_expect != XOPERATOR)
         return;
 
@@ -703,8 +705,6 @@ S_warn_expect_operator(pTHX_ const char *const what, char *s, I32 pop_oldbufptr)
                    PERL_DIAG_WARN_SYNTAX("%s found where operator expected"),
                    what
                   ) );
-
-    PERL_ARGS_ASSERT_WARN_EXPECT_OPERATOR;
 
     if (!s)
         s = oldbp;
@@ -1025,8 +1025,9 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 void
 Perl_parser_free_nexttoke_ops(pTHX_  yy_parser *parser, OPSLAB *slab)
 {
-    I32 nexttoke = parser->nexttoke;
     PERL_ARGS_ASSERT_PARSER_FREE_NEXTTOKE_OPS;
+
+    I32 nexttoke = parser->nexttoke;
     while (nexttoke--) {
         if (S_is_opval_token(parser->nexttype[nexttoke] & 0xffff)
          && parser->nextval[nexttoke].opval
@@ -1241,8 +1242,9 @@ to how the buffer is currently being interpreted (L</lex_bufutf8>).
 void
 Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 {
-    char *bufptr;
     PERL_ARGS_ASSERT_LEX_STUFF_PVN;
+
+    char *bufptr;
     if (flags & ~(LEX_STUFF_UTF8))
         croak("Lexing code internal error (%s)", "lex_stuff_pvn");
     if (UTF) {
@@ -1320,9 +1322,10 @@ Perl_lex_stuff_pv(pTHX_ const char *pv, U32 flags)
 void
 Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)
 {
+    PERL_ARGS_ASSERT_LEX_STUFF_SV;
+
     char *pv;
     STRLEN len;
-    PERL_ARGS_ASSERT_LEX_STUFF_SV;
     if (flags)
         croak("Lexing code internal error (%s)", "lex_stuff_sv");
     pv = SvPV(sv, len);
@@ -1346,9 +1349,10 @@ L</lex_read_to>.
 void
 Perl_lex_unstuff(pTHX_ char *ptr)
 {
+    PERL_ARGS_ASSERT_LEX_UNSTUFF;
+
     char *buf, *bufend;
     STRLEN unstuff_len;
-    PERL_ARGS_ASSERT_LEX_UNSTUFF;
     buf = PL_parser->bufptr;
     if (ptr < buf)
         croak("Lexing code internal error (%s)", "lex_unstuff");
@@ -1381,8 +1385,9 @@ L</lex_read_unichar>.
 void
 Perl_lex_read_to(pTHX_ char *ptr)
 {
-    char *s;
     PERL_ARGS_ASSERT_LEX_READ_TO;
+
+    char *s;
     s = PL_parser->bufptr;
     if (ptr < s || ptr > PL_parser->bufend)
         croak("Lexing code internal error (%s)", "lex_read_to");
@@ -1417,9 +1422,10 @@ multi-line tokens growing the buffer without bound.
 void
 Perl_lex_discard_to(pTHX_ char *ptr)
 {
+    PERL_ARGS_ASSERT_LEX_DISCARD_TO;
+
     char *buf;
     STRLEN discard_len;
-    PERL_ARGS_ASSERT_LEX_DISCARD_TO;
     buf = SvPVX(PL_parser->linestr);
     if (ptr < buf)
         croak("Lexing code internal error (%s)", "lex_discard_to");
@@ -1821,6 +1827,8 @@ Note that C<NULL> is a valid C<proto> and will always return C<true>.
 bool
 Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 {
+    PERL_ARGS_ASSERT_VALIDATE_PROTO;
+
     STRLEN len, origlen;
     char *p;
     bool bad_proto = FALSE;
@@ -1831,8 +1839,6 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
     bool must_be_last = FALSE;
     bool underscore = FALSE;
     bool bad_proto_after_underscore = FALSE;
-
-    PERL_ARGS_ASSERT_VALIDATE_PROTO;
 
     if (!proto)
         return TRUE;
@@ -2309,12 +2315,12 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
 static char *
 S_force_word(pTHX_ char *start, int token, U32 flags)
 {
+    PERL_ARGS_ASSERT_FORCE_WORD;
+
     char *s;
     STRLEN len;
     const bool check_keyword = flags & CHECK_KEYWORD;
     const bool allow_pack    = flags & ALLOW_PACKAGE;
-
-    PERL_ARGS_ASSERT_FORCE_WORD;
 
     start = skipspace(start);
     s = start;
@@ -2399,14 +2405,14 @@ S_force_ident_maybe_lex(pTHX_ char pit)
 NV
 Perl_str_to_version(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_STR_TO_VERSION;
+
     NV retval = 0.0;
     NV nshift = 1.0;
     STRLEN len;
     const U8 *start = (const U8 *) SvPV_const(sv,len);
     const U8 * const end = start + len;
     const bool utf = cBOOL(SvUTF8(sv));
-
-    PERL_ARGS_ASSERT_STR_TO_VERSION;
 
     while (start < end) {
         STRLEN skip;
@@ -2435,10 +2441,10 @@ Perl_str_to_version(pTHX_ SV *sv)
 static char *
 S_force_version(pTHX_ char *s, int guessing)
 {
+    PERL_ARGS_ASSERT_FORCE_VERSION;
+
     OP *version = NULL;
     char *d;
-
-    PERL_ARGS_ASSERT_FORCE_VERSION;
 
     s = skipspace(s);
 
@@ -2479,10 +2485,10 @@ S_force_version(pTHX_ char *s, int guessing)
 static char *
 S_force_strict_version(pTHX_ char *s)
 {
+    PERL_ARGS_ASSERT_FORCE_STRICT_VERSION;
+
     OP *version = NULL;
     const char *errstr = NULL;
-
-    PERL_ARGS_ASSERT_FORCE_STRICT_VERSION;
 
     while (isSPACE(*s)) /* leading whitespace */
         s++;
@@ -2518,12 +2524,12 @@ S_force_strict_version(pTHX_ char *s)
 static SV *
 S_tokeq(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_TOKEQ;
+
     char *s;
     char *send;
     char *d;
     SV *pv = sv;
-
-    PERL_ARGS_ASSERT_TOKEQ;
 
     assert (SvPOK(sv));
     assert (SvLEN(sv));
@@ -2821,6 +2827,8 @@ HV *
 Perl_load_charnames(pTHX_ SV * char_name, const char * context,
                           const STRLEN context_len, const char ** error_msg)
 {
+    PERL_ARGS_ASSERT_LOAD_CHARNAMES;
+
     /* Load the official _charnames module if not already there.  The
      * parameters are just to give info for any error messages generated:
      *  char_name   a name to look up which is the reason for loading this
@@ -2834,8 +2842,6 @@ Perl_load_charnames(pTHX_ SV * char_name, const char * context,
     HV * table;
     SV **cvp;
     SV * res;
-
-    PERL_ARGS_ASSERT_LOAD_CHARNAMES;
 
     /* This loop is executed 1 1/2 times.  On the first time through, if it
      * isn't already loaded, try loading it, and iterate just once to see if it
@@ -2878,13 +2884,13 @@ Perl_load_charnames(pTHX_ SV * char_name, const char * context,
 static SV*
 S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const e)
 {
+    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME_WRAPPER;
+
     /* This justs wraps get_and_check_backslash_N_name() to output any error
      * message it returns. */
 
     const char * error_msg = NULL;
     SV * result;
-
-    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME_WRAPPER;
 
     /* charnames doesn't work well if there have been errors found */
     if (PL_error_count > 0) {
@@ -3210,6 +3216,8 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 static char *
 S_scan_const(pTHX_ char *start)
 {
+    PERL_ARGS_ASSERT_SCAN_CONST;
+
     const char * const send = PL_bufend;/* end of the constant */
     SV *sv = newSV(send - start);       /* sv for the constant.  See note below
                                            on sizing. */
@@ -3260,8 +3268,6 @@ S_scan_const(pTHX_ char *start)
     int non_portable_endpoint = 0;  /* ? In a range is an endpoint
                                        platform-specific like \x65 */
 #endif
-
-    PERL_ARGS_ASSERT_SCAN_CONST;
 
     assert(PL_lex_inwhat != OP_TRANSR);
 
@@ -5425,9 +5431,9 @@ Delete most recently added instance of the filter function argument
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
-    SV *datasv;
-
     PERL_ARGS_ASSERT_FILTER_DEL;
+
+    SV *datasv;
 
 #ifdef DEBUGGING
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p",
@@ -5452,6 +5458,8 @@ Perl_filter_del(pTHX_ filter_t funcp)
 I32
 Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
+    PERL_ARGS_ASSERT_FILTER_READ;
+
     filter_t funcp;
     I32 ret;
     SV *datasv = NULL;
@@ -5459,8 +5467,6 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
        Not sure if we want to change the API, but if not we should sanity
        check the value here.  */
     unsigned int correct_length = maxlen < 0 ?  PERL_INT_MAX : maxlen;
-
-    PERL_ARGS_ASSERT_FILTER_READ;
 
     if (!PL_parser || !PL_rsfp_filters)
         return -1;
@@ -5588,9 +5594,9 @@ S_filter_gets(pTHX_ SV *sv, STRLEN append)
 static HV *
 S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 {
-    GV *gv;
-
     PERL_ARGS_ASSERT_FIND_IN_MY_STASH;
+
+    GV *gv;
 
     if (memEQs(pkgname, len, "__PACKAGE__"))
         return PL_curstash;
@@ -10697,6 +10703,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
                SV *sv, SV *pv, const char *type, STRLEN typelen,
                const char ** error_msg)
 {
+    PERL_ARGS_ASSERT_NEW_CONSTANT;
+
     dSP;
     HV * table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
@@ -10707,7 +10715,6 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     const char * optional_colon = ":";  /* Only some messages have a colon */
     char *msg;
 
-    PERL_ARGS_ASSERT_NEW_CONSTANT;
     /* We assume that this is true: */
     assert(type || s);
 
@@ -11540,14 +11547,14 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 static char *
 S_scan_pat(pTHX_ char *start, I32 type)
 {
+    PERL_ARGS_ASSERT_SCAN_PAT;
+
     PMOP *pm;
     char *s;
     const char * const valid_flags =
         (const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
     unsigned int x_mod_count = 0;
-
-    PERL_ARGS_ASSERT_SCAN_PAT;
 
     s = scan_str(start,TRUE,FALSE, (PL_in_eval & EVAL_RE_REPARSING), NULL);
     if (!s)
@@ -11621,6 +11628,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
 static char *
 S_scan_subst(pTHX_ char *start)
 {
+    PERL_ARGS_ASSERT_SCAN_SUBST;
+
     char *s;
     PMOP *pm;
     I32 first_start;
@@ -11630,8 +11639,6 @@ S_scan_subst(pTHX_ char *start)
     char charset = '\0';    /* character set modifier */
     unsigned int x_mod_count = 0;
     char *t;
-
-    PERL_ARGS_ASSERT_SCAN_SUBST;
 
     pl_yylval.ival = OP_NULL;
 
@@ -11714,6 +11721,8 @@ S_scan_subst(pTHX_ char *start)
 static char *
 S_scan_trans(pTHX_ char *start)
 {
+    PERL_ARGS_ASSERT_SCAN_TRANS;
+
     char* s;
     OP *o;
     U8 squash;
@@ -11721,8 +11730,6 @@ S_scan_trans(pTHX_ char *start)
     U8 complement;
     bool nondestruct = 0;
     char *t;
-
-    PERL_ARGS_ASSERT_SCAN_TRANS;
 
     pl_yylval.ival = OP_NULL;
 
@@ -11799,6 +11806,8 @@ S_scan_trans(pTHX_ char *start)
 static char *
 S_scan_heredoc(pTHX_ char *s)
 {
+    PERL_ARGS_ASSERT_SCAN_HEREDOC;
+
     I32 op_type = OP_SCALAR;
     I32 len;
     SV *tmpstr;
@@ -11812,8 +11821,6 @@ S_scan_heredoc(pTHX_ char *s)
     const bool infile = PL_rsfp || PL_parser->filtered;
     const line_t origline = CopLINE(PL_curcop);
     LEXSHARED *shared = PL_parser->lex_shared;
-
-    PERL_ARGS_ASSERT_SCAN_HEREDOC;
 
     s += 2;
     d = PL_tokenbuf + 1;
@@ -12253,14 +12260,14 @@ S_scan_heredoc(pTHX_ char *s)
 static char *
 S_scan_inputsymbol(pTHX_ char *start)
 {
+    PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL;
+
     char *s = start;		/* current position in buffer */
     char *end;
     I32 len;
     bool nomagicopen = FALSE;
     char *d = PL_tokenbuf;					/* start of temp holding space */
     const char * const e = C_ARRAY_END(PL_tokenbuf);	/* end of temp holding space */
-
-    PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL;
 
     end = (char *) memchr(s, '\n', PL_bufend - s);
     if (!end)
@@ -12457,6 +12464,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                  char **delimp
     )
 {
+    PERL_ARGS_ASSERT_SCAN_STR;
+
     SV *sv;			/* scalar value: string */
     char *s = start;		/* current position in the buffer */
     char *to;			/* current position in the sv's data */
@@ -12473,7 +12482,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     const char * non_grapheme_msg = "Use of unassigned code point or"
                                     " non-standalone grapheme for a delimiter"
                                     " is not allowed";
-    PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
     if (isSPACE(*s)) {  /* skipspace can change the buffer 's' is in, so
@@ -12784,6 +12792,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 char *
 Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 {
+    PERL_ARGS_ASSERT_SCAN_NUM;
+
     const char *s = start;	/* current position in buffer */
     char *d;			/* destination in temp buffer */
     char *e;			/* end of temp buffer */
@@ -12863,8 +12873,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #endif
     int hexfp_exp = 0;
     bool new_octal = FALSE;     /* octal with "0o" prefix */
-
-    PERL_ARGS_ASSERT_SCAN_NUM;
 
     /* Make sure "int" is wide enough to hold exponent of NV.
        We use "int" (rather than I32 etc.) to be compatible with ldexp() */
@@ -13441,11 +13449,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 static char *
 S_scan_formline(pTHX_ char *s)
 {
+    PERL_ARGS_ASSERT_SCAN_FORMLINE;
+
     SV * const stuff = newSVpvs("");
     bool needargs = FALSE;
     bool eofmt = FALSE;
-
-    PERL_ARGS_ASSERT_SCAN_FORMLINE;
 
     while (!needargs) {
         char *eol;
@@ -13864,9 +13872,9 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 static char*
 S_swallow_bom(pTHX_ U8 *s)
 {
-    const STRLEN slen = SvCUR(PL_linestr);
-
     PERL_ARGS_ASSERT_SWALLOW_BOM;
+
+    const STRLEN slen = SvCUR(PL_linestr);
 
     switch (s[0]) {
     case 0xFF:
@@ -13969,6 +13977,8 @@ S_swallow_bom(pTHX_ U8 *s)
 static I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
+    PERL_ARGS_ASSERT_UTF16_TEXTFILTER;
+
     SV *const filter = FILTER_DATA(idx);
     /* We re-use this each time round, throwing the contents away before we
        return.  */
@@ -13977,8 +13987,6 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     IV status = IoPAGE(filter);
     const bool reverse = cBOOL(IoLINES(filter));
     I32 retval;
-
-    PERL_ARGS_ASSERT_UTF16_TEXTFILTER;
 
     /* As we're automatically added, at the lowest level, and hence only called
        from this file, we can be sure that we're not called in block mode. Hence
@@ -14096,9 +14104,9 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 static U8 *
 S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
 {
-    SV *filter = filter_add(S_utf16_textfilter, NULL);
-
     PERL_ARGS_ASSERT_ADD_UTF16_TEXTFILTER;
+
+    SV *filter = filter_add(S_utf16_textfilter, NULL);
 
     IoTOP_GV(filter) = MUTABLE_GV(newSVpvn((char *)s, PL_bufend - (char*)s));
     SvPVCLEAR(filter);
@@ -14144,10 +14152,10 @@ sv_2mortal.
 char *
 Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 {
+    PERL_ARGS_ASSERT_SCAN_VSTRING;
+
     const char *pos = s;
     const char *start = s;
-
-    PERL_ARGS_ASSERT_SCAN_VSTRING;
 
     if (*pos == 'v') pos++;  /* get past 'v' */
     while (pos < e && isDIGIT_or_UNDERSCORE(*pos))

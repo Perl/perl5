@@ -38,12 +38,13 @@
 static Size_t
 S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
+    PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
+
     Size_t matches = 0;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
 
-    PERL_ARGS_ASSERT_DO_TRANS_SIMPLE;
     DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_simple:"
                                           " input sv:\n",
                                           __FILE__, __LINE__));
@@ -127,12 +128,12 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 static Size_t
 S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
+    PERL_ARGS_ASSERT_DO_TRANS_COUNT;
+
     STRLEN len;
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
     Size_t matches = 0;
-
-    PERL_ARGS_ASSERT_DO_TRANS_COUNT;
 
     DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_count:"
                                           " input sv:\n",
@@ -176,13 +177,13 @@ S_do_trans_count(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 static Size_t
 S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 {
+    PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
+
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
     Size_t matches = 0;
     const bool complement = cBOOL(PL_op->op_private & OPpTRANS_COMPLEMENT);
-
-    PERL_ARGS_ASSERT_DO_TRANS_COMPLEX;
 
     DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d: entering do_trans_complex:"
                                           " input sv:\n",
@@ -335,6 +336,8 @@ S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 static Size_t
 S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
 {
+    PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP;
+
     U8 *s;
     U8 *send;
     Size_t matches = 0;
@@ -344,8 +347,6 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
     SV* from_invlist = *from_invlist_ptr;
     SV* to_invmap_sv = *to_invmap_ptr;
     UV* map = (UV *) SvPVX(to_invmap_sv);
-
-    PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP;
 
     DEBUG_y(PerlIO_printf(Perl_debug_log, "%s: %d:"
                                           "entering do_trans_count_invmap:"
@@ -401,6 +402,8 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
 static Size_t
 S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 {
+    PERL_ARGS_ASSERT_DO_TRANS_INVMAP;
+
     U8 *s;
     U8 *send;
     U8 *d;
@@ -423,8 +426,6 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
     UV final_map = TR_OOB;
     bool out_is_utf8 = cBOOL(SvUTF8(sv));
     STRLEN s_len;
-
-    PERL_ARGS_ASSERT_DO_TRANS_INVMAP;
 
     /* A third element in the array indicates that the replacement list was
      * shorter than the search list, and this element contains the value to use
@@ -584,12 +585,12 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
 Size_t
 Perl_do_trans(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_DO_TRANS;
+
     STRLEN len;
     const U8 flags = PL_op->op_private;
     bool use_utf8_fcns = cBOOL(flags & OPpTRANS_USE_SVOP);
     bool identical     = cBOOL(flags & OPpTRANS_IDENTICAL);
-
-    PERL_ARGS_ASSERT_DO_TRANS;
 
     if (SvREADONLY(sv) && ! identical) {
         croak_no_modify();
@@ -763,11 +764,12 @@ Magic and tainting are handled.
 void
 Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 {
+    PERL_ARGS_ASSERT_DO_SPRINTF;
+
     STRLEN patlen;
     const char * const pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
 
-    PERL_ARGS_ASSERT_DO_SPRINTF;
     assert(len >= 1);
 
     if (SvTAINTED(*sarg))
@@ -790,6 +792,8 @@ Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 UV
 Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 {
+    PERL_ARGS_ASSERT_DO_VECGET;
+
     STRLEN srclen;
     const I32 svpv_flags = ((PL_op->op_flags & OPf_MOD || LVRET)
                                           ? SV_UNDEF_RETURNS_NULL : 0);
@@ -800,8 +804,6 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
     if (!s) {
       s = (unsigned char *)"";
     }
-
-    PERL_ARGS_ASSERT_DO_VECGET;
 
     if (size < 1 || ! isPOWER_OF_2(size))
         croak("Illegal number of bits in vec");
@@ -889,6 +891,8 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_DO_VECSET;
+
     STRLEN offset, bitoffs = 0;
     int size;
     unsigned char *s;
@@ -898,8 +902,6 @@ Perl_do_vecset(pTHX_ SV *sv)
     STRLEN len;
     SV * const targ = LvTARG(sv);
     char errflags = LvFLAGS(sv);
-
-    PERL_ARGS_ASSERT_DO_VECSET;
 
     /* some out-of-range errors have been deferred if/until the LV is
      * actually written to: f(vec($s,-1,8)) is not always fatal */
@@ -985,6 +987,8 @@ Perl_do_vecset(pTHX_ SV *sv)
 void
 Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
+    PERL_ARGS_ASSERT_DO_VOP;
+
     long *dl;
     long *ll;
     long *rl;
@@ -1001,8 +1005,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     bool result_needs_to_be_utf8 = FALSE;
     bool left_utf8 = FALSE;
     bool right_utf8 = FALSE;
-
-    PERL_ARGS_ASSERT_DO_VOP;
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv)))
         SvPVCLEAR(sv);        /* avoid undef warning on |= and ^= */

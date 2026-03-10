@@ -51,13 +51,13 @@ static void
 S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
             AV *revcharmap, U32 depth)
 {
+    PERL_ARGS_ASSERT_DUMP_TRIE;
+
     U32 state;
     SV *sv = sv_newmortal();
     int colwidth = widecharmap ? 6 : 4;
     U16 word;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_DUMP_TRIE;
 
     Perl_re_indentf( aTHX_  "Char : %-6s%-6s%-4s ",
         depth+1, "Match","Base","Ofs" );
@@ -146,12 +146,12 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
                          HV *widecharmap, AV *revcharmap, U32 next_alloc,
                          U32 depth)
 {
+    PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST;
+
     U32 state;
     SV *sv = sv_newmortal();
     int colwidth = widecharmap ? 6 : 4;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST;
 
     /* print out the table precompression.  */
     Perl_re_indentf( aTHX_  "State :Word | Transition Data\n",
@@ -206,13 +206,13 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
                           HV *widecharmap, AV *revcharmap, U32 next_alloc,
                           U32 depth)
 {
+    PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE;
+
     U32 state;
     U16 charid;
     SV *sv = sv_newmortal();
     int colwidth = widecharmap ? 6 : 4;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
-
-    PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE;
 
     /*
        print out the table precompression so that we can do a visual check
@@ -552,6 +552,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                   regnode *first, regnode *last, regnode *tail,
                   U32 word_count, U32 flags, U32 depth)
 {
+    PERL_ARGS_ASSERT_MAKE_TRIE;
+
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
     HV *widecharmap = NULL;
@@ -585,11 +587,9 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     SV *re_trie_maxbuff;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_MAKE_TRIE;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-
     switch (flags) {
         case EXACT: case EXACT_REQ8: case EXACTL: break;
         case EXACTFAA:
@@ -1613,6 +1613,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 regnode *
 Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *source, U32 depth)
 {
+    PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE;
+
 /* The Trie is constructed and compressed now so we can build a fail array if
  * it's needed
 
@@ -1652,12 +1654,10 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     regnode *stclass;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE;
     PERL_UNUSED_CONTEXT;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-
     if ( OP(source) == TRIE ) {
         tregnode_TRIE *op = (tregnode_TRIE *)
             PerlMemShared_calloc(1, sizeof(tregnode_TRIE));

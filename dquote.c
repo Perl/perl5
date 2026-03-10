@@ -87,6 +87,8 @@ Perl_form_alien_digit_msg(pTHX_
         const bool UTF,               /* Is it in UTF-8? */
         const bool braced)            /* Is it enclosed in {} */
 {
+    PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG;
+
     /* Generate a mortal SV containing an appropriate warning message about
      * alien characters found in an octal or hex constant given by the inputs,
      * and return a pointer to that SV's string.  The message looks like:
@@ -103,7 +105,6 @@ Perl_form_alien_digit_msg(pTHX_
     SV * message_sv = sv_newmortal();
     char symbol;
 
-    PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG;
     assert(which == 8 || which == 16);
 
     /* Calculate the display form of the character */
@@ -184,6 +185,8 @@ Perl_form_cp_too_large_msg(pTHX_
         const UV cp)           /* 0 if 'string' not NULL; else the too-large
                                   code point */
 {
+    PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG;
+
     /* Generate a mortal SV containing an appropriate warning message about
      * code points that are too large for this system, given by the inputs,
      * and return a pointer to that SV's string.  Either the text of the string
@@ -200,7 +203,6 @@ Perl_form_cp_too_large_msg(pTHX_
     const char * format;
     const char * prefix;
 
-    PERL_ARGS_ASSERT_FORM_CP_TOO_LARGE_MSG;
     assert(which == 8 || which == 16);
 
     /* One but not both must be non-zero */
@@ -237,6 +239,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
                       const bool allow_UV_MAX,
                       const bool UTF)
 {
+    PERL_ARGS_ASSERT_GROK_BSLASH_O;
 
 /*  Documentation to be supplied when interface nailed down finally
  *  This returns FALSE if there is an error the caller should probably die
@@ -276,8 +279,6 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
               | PERL_SCAN_SILENT_NON_PORTABLE
               | PERL_SCAN_SILENT_ILLDIGIT
               | PERL_SCAN_SILENT_OVERFLOW;
-
-    PERL_ARGS_ASSERT_GROK_BSLASH_O;
 
     assert(*(*s - 1) == '\\');
     assert(* *s       == 'o');
@@ -379,6 +380,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
                       const bool allow_UV_MAX,
                       const bool UTF)
 {
+    PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
 /*  Documentation to be supplied when interface nailed down finally
  *  This returns FALSE if there is an error the caller should probably die
@@ -423,8 +425,6 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
               | PERL_SCAN_NOTIFY_ILLDIGIT
               | PERL_SCAN_SILENT_NON_PORTABLE
               | PERL_SCAN_SILENT_OVERFLOW;
-
-    PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
     assert(*(*s - 1) == '\\');
     assert(* *s      == 'x');

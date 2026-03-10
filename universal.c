@@ -81,9 +81,10 @@ S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 fla
 static bool
 S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN;
+
     HV* stash;
 
-    PERL_ARGS_ASSERT_SV_DERIVED_FROM_SVPVN;
     SvGETMAGIC(sv);
 
     if (SvROK(sv)) {
@@ -212,9 +213,9 @@ overloaded C<isa()> method, nor will check subclassing.
 bool
 Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 {
-    GV *isagv;
-
     PERL_ARGS_ASSERT_SV_ISA_SV;
+
+    GV *isagv;
 
     if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
         return FALSE;
@@ -296,12 +297,13 @@ XXX extracted in sv_does_sv is more complicated than the hand waving above
 bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
+    PERL_ARGS_ASSERT_SV_DOES_SV;
+
     SV *classname;
     bool does_it;
     SV *methodname;
     dSP;
 
-    PERL_ARGS_ASSERT_SV_DOES_SV;
     PERL_UNUSED_ARG(flags);
 
     ENTER;
@@ -389,10 +391,10 @@ C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 void
 Perl_croak_xs_usage(const CV *const cv, const char *const params)
 {
+    PERL_ARGS_ASSERT_CROAK_XS_USAGE;
+
     /* Avoid CvGV as it requires aTHX.  */
     const GV *gv = CvNAMED(cv) ? NULL : cv->sv_any->xcv_gv_u.xcv_gv;
-
-    PERL_ARGS_ASSERT_CROAK_XS_USAGE;
 
     if (gv) got_gv: {
         const HV *const stash = GvSTASH(gv);
