@@ -185,11 +185,11 @@ STMT_START {						\
 static SV *
 S_mul128(pTHX_ SV *sv, U8 m)
 {
+  PERL_ARGS_ASSERT_MUL128;
+
   STRLEN          len;
   char           *s = SvPV(sv, len);
   char           *t;
-
-  PERL_ARGS_ASSERT_MUL128;
 
   if (! memBEGINs(s, len, "0000")) {  /* need to grow sv */
     SV * const tmpNew = newSVpvs("0000000000");
@@ -459,9 +459,9 @@ static const char *action_( const tempsym_t* symptr )
 static SSize_t
 S_measure_struct(pTHX_ tempsym_t* symptr)
 {
-    SSize_t total = 0;
-
     PERL_ARGS_ASSERT_MEASURE_STRUCT;
+
+    SSize_t total = 0;
 
     while (next_symbol(symptr)) {
         SSize_t len, size;
@@ -603,9 +603,9 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
 static const char *
 S_get_num(pTHX_ const char *patptr, SSize_t *lenptr )
 {
-  SSize_t len = *patptr++ - '0';
-
   PERL_ARGS_ASSERT_GET_NUM;
+
+  SSize_t len = *patptr++ - '0';
 
   while (isDIGIT(*patptr)) {
     SSize_t nlen = (len * 10) + (*patptr++ - '0');
@@ -623,10 +623,10 @@ S_get_num(pTHX_ const char *patptr, SSize_t *lenptr )
 static bool
 S_next_symbol(pTHX_ tempsym_t* symptr )
 {
+  PERL_ARGS_ASSERT_NEXT_SYMBOL;
+
   const char* patptr = symptr->patptr;
   const char* const patend = symptr->patend;
-
-  PERL_ARGS_ASSERT_NEXT_SYMBOL;
 
   symptr->flags &= ~FLAG_SLASH;
 
@@ -807,9 +807,9 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
 static bool
 S_need_utf8(const char *pat, const char *patend)
 {
-    bool first = TRUE;
-
     PERL_ARGS_ASSERT_NEED_UTF8;
+
+    bool first = TRUE;
 
     while (pat < patend) {
         if (pat[0] == '#') {
@@ -864,9 +864,9 @@ example).
 SSize_t
 Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags)
 {
-    tempsym_t sym;
-
     PERL_ARGS_ASSERT_UNPACKSTRING;
+
+    tempsym_t sym;
 
     if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
     else if (need_utf8(pat, patend)) {
@@ -889,6 +889,8 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
 static SSize_t
 S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s )
 {
+    PERL_ARGS_ASSERT_UNPACK_REC;
+
     dSP;
     SV *sv = NULL;
     const SSize_t start_sp_offset = SP - PL_stack_base;
@@ -901,8 +903,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
     bool explicit_length;
     const bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
-
-    PERL_ARGS_ASSERT_UNPACK_REC;
 
     symptr->strbeg = s - strbeg;
 
@@ -1930,13 +1930,13 @@ doencodes(U8 *h, const U8 *s, SSize_t len)
 static SV *
 S_is_an_int(pTHX_ const char *s, STRLEN l)
 {
+  PERL_ARGS_ASSERT_IS_AN_INT;
+
   SV *result = newSVpvn(s, l);
   char *const result_c = SvPV_nolen(result);	/* convenience */
   char *out = result_c;
   bool skip = 1;
   bool ignore = 0;
-
-  PERL_ARGS_ASSERT_IS_AN_INT;
 
   while (*s) {
     switch (*s) {
@@ -1981,12 +1981,12 @@ S_is_an_int(pTHX_ const char *s, STRLEN l)
 static int
 S_div128(pTHX_ SV *pnum, bool *done)
 {
+    PERL_ARGS_ASSERT_DIV128;
+
     STRLEN len;
     char * const s = SvPV(pnum, len);
     char *t = s;
     int m = 0;
-
-    PERL_ARGS_ASSERT_DIV128;
 
     *done = 1;
     while (*t) {
@@ -2014,9 +2014,9 @@ The engine implementing C<pack()> Perl function.
 void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist )
 {
-    tempsym_t sym;
-
     PERL_ARGS_ASSERT_PACKLIST;
+
+    tempsym_t sym;
 
     TEMPSYM_INIT(&sym, pat, patend, FLAG_PACK);
 
@@ -2102,11 +2102,11 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr)
 static char *
 S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
 {
+    PERL_ARGS_ASSERT_SV_EXP_GROW;
+
     const STRLEN cur = SvCUR(sv);
     const STRLEN len = SvLEN(sv);
     STRLEN extend;
-
-    PERL_ARGS_ASSERT_SV_EXP_GROW;
 
     if (len - cur > needed) return SvPVX(sv);
     extend = needed > len ? needed : len;
@@ -2139,14 +2139,14 @@ static
 SV **
 S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 {
+    PERL_ARGS_ASSERT_PACK_REC;
+
     tempsym_t lookahead;
     SSize_t items  = endlist - beglist;
     bool found = next_symbol(symptr);
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
     bool warn_utf8 = ckWARN(WARN_UTF8);
     char* from;
-
-    PERL_ARGS_ASSERT_PACK_REC;
 
     if (symptr->level == 0 && found && symptr->code == 'U') {
         marked_upgrade(aTHX_ cat, symptr);

@@ -137,7 +137,6 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 void
 Perl_sys_init(int* argc, char*** argv)
 {
-
     PERL_ARGS_ASSERT_SYS_INIT;
 
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
@@ -148,7 +147,6 @@ Perl_sys_init(int* argc, char*** argv)
 void
 Perl_sys_init3(int* argc, char*** argv, char*** env)
 {
-
     PERL_ARGS_ASSERT_SYS_INIT3;
 
     PERL_UNUSED_ARG(argc); /* may not be used depending on _BODY macro */
@@ -176,9 +174,9 @@ perl_alloc_using(const struct IPerlMem** ipM, const struct IPerlMem** ipMS,
                  const struct IPerlDir** ipD, const struct IPerlSock** ipS,
                  const struct IPerlProc** ipP)
 {
-    PerlInterpreter *my_perl;
-
     PERL_ARGS_ASSERT_PERL_ALLOC_USING;
+
+    PerlInterpreter *my_perl;
 
     /* Newx() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)((*ipM)->pCalloc)(ipM, 1, sizeof(PerlInterpreter));
@@ -232,7 +230,6 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 void
 perl_construct(pTHXx)
 {
-
     PERL_ARGS_ASSERT_PERL_CONSTRUCT;
 
 #ifdef MULTIPLICITY
@@ -505,6 +502,8 @@ Perl_noshutdownhook()
 void
 Perl_dump_sv_child(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_DUMP_SV_CHILD;
+
     ssize_t got;
     const int sock = PL_dumper_fd;
     const int debug_fd = PerlIO_fileno(Perl_debug_log);
@@ -514,8 +513,6 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     struct cmsghdr *cmptr;
     int returned_errno;
     unsigned char buffer[256];
-
-    PERL_ARGS_ASSERT_DUMP_SV_CHILD;
 
     if(sock == -1 || debug_fd == -1)
         return;
@@ -636,6 +633,8 @@ interpret specific numeric values as having specific meanings.
 int
 perl_destruct(pTHXx)
 {
+    PERL_ARGS_ASSERT_PERL_DESTRUCT;
+
     volatile signed char destruct_level;  /* see possible values in intrpvar.h */
     HV *hv;
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -643,7 +642,6 @@ perl_destruct(pTHXx)
 #endif
     int i;
 
-    PERL_ARGS_ASSERT_PERL_DESTRUCT;
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
@@ -1582,7 +1580,6 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
-
     PERL_ARGS_ASSERT_PERL_FREE;
 
     if (PL_veto_cleanup)
@@ -1790,11 +1787,12 @@ code: one should get that from L</perl_destruct>.
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
+    PERL_ARGS_ASSERT_PERL_PARSE;
+
     I32 oldscope;
     int ret;
     dJMPENV;
 
-    PERL_ARGS_ASSERT_PERL_PARSE;
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
@@ -2783,11 +2781,12 @@ one should get that from L</perl_destruct>.
 int
 perl_run(pTHXx)
 {
+    PERL_ARGS_ASSERT_PERL_RUN;
+
     I32 oldscope;
     int ret = 0;
     dJMPENV;
 
-    PERL_ARGS_ASSERT_PERL_RUN;
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
@@ -2913,9 +2912,9 @@ and the variable does not exist then NULL is returned.
 SV*
 Perl_get_sv(pTHX_ const char *name, I32 flags)
 {
-    GV *gv;
-
     PERL_ARGS_ASSERT_GET_SV;
+
+    GV *gv;
 
     gv = gv_fetchpv(name, flags, SVt_PV);
     if (gv)
@@ -2943,9 +2942,9 @@ Perl equivalent: C<@{"$name"}>.
 AV*
 Perl_get_av(pTHX_ const char *name, I32 flags)
 {
-    GV* const gv = gv_fetchpv(name, flags, SVt_PVAV);
-
     PERL_ARGS_ASSERT_GET_AV;
+
+    GV* const gv = gv_fetchpv(name, flags, SVt_PVAV);
 
     if (flags & ~SVf_UTF8)
         return GvAVn(gv);
@@ -2971,9 +2970,9 @@ returned.
 HV*
 Perl_get_hv(pTHX_ const char *name, I32 flags)
 {
-    GV* const gv = gv_fetchpv(name, flags, SVt_PVHV);
-
     PERL_ARGS_ASSERT_GET_HV;
+
+    GV* const gv = gv_fetchpv(name, flags, SVt_PVHV);
 
     if (flags & ~SVf_UTF8)
         return GvHVn(gv);
@@ -3009,9 +3008,9 @@ and its length in bytes is contained in the C<len> parameter.
 CV*
 Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
 {
-    GV* const gv = gv_fetchpvn_flags(name, len, flags, SVt_PVCV);
-
     PERL_ARGS_ASSERT_GET_CVN_FLAGS;
+
+    GV* const gv = gv_fetchpvn_flags(name, len, flags, SVt_PVCV);
 
     if (gv && UNLIKELY(SvROK(gv)) && SvTYPE(SvRV((SV *)gv)) == SVt_PVCV)
         return (CV*)SvRV((SV *)gv);
@@ -3130,9 +3129,10 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
                         /* name of the subroutine */
                         /* See G_* flags in cop.h */
 {
+    PERL_ARGS_ASSERT_CALL_METHOD;
+
     STRLEN len;
     SV* sv;
-    PERL_ARGS_ASSERT_CALL_METHOD;
 
     len = strlen(methname);
     sv = flags & G_METHOD_NAMED
@@ -3172,6 +3172,8 @@ SSize_t
 Perl_call_sv(pTHX_ SV *sv, I32 arg_flags)
                         /* See G_* flags in cop.h */
 {
+    PERL_ARGS_ASSERT_CALL_SV;
+
     LOGOP myop;		/* fake syntax tree node */
     METHOP method_op;
     SSize_t oldmark;
@@ -3184,8 +3186,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 arg_flags)
      */
     volatile I32 flags = arg_flags;
     dJMPENV;
-
-    PERL_ARGS_ASSERT_CALL_SV;
 
     if (flags & G_DISCARD) {
         ENTER;
@@ -3346,14 +3346,14 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
                         /* See G_* flags in cop.h */
 {
+    PERL_ARGS_ASSERT_EVAL_SV;
+
     UNOP myop;		/* fake syntax tree node */
     volatile SSize_t oldmark;
     volatile SSize_t retval = 0;
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
-
-    PERL_ARGS_ASSERT_EVAL_SV;
 
     if (flags & G_DISCARD) {
         ENTER;
@@ -3481,9 +3481,9 @@ Tells Perl to C<eval> the given string in scalar context and return an SV* resul
 SV*
 Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 {
-    SV* sv = newSVpv(p, 0);
-
     PERL_ARGS_ASSERT_EVAL_PV;
+
+    SV* sv = newSVpv(p, 0);
 
     if (croak_on_error) {
         sv_2mortal(sv);
@@ -3524,10 +3524,10 @@ implemented that way; consider using C<L</load_module>> instead.
 void
 Perl_require_pv(pTHX_ const char *pv)
 {
+    PERL_ARGS_ASSERT_REQUIRE_PV;
+
     dSP;
     SV* sv;
-
-    PERL_ARGS_ASSERT_REQUIRE_PV;
 
     PUSHSTACKi(PERLSI_REQUIRE);
     sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
@@ -3597,6 +3597,8 @@ NULL
 int
 Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 {
+    PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
+
     static const char * const usage_msgd[] = {
       " Debugging flag values: (see also -d)\n"
       "  p  Tokenizing and parsing (with v, displays parse stack)\n"
@@ -3631,8 +3633,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       NULL
     };
     UV uv = 0;
-
-    PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
 
     if (isALPHA(**s)) {
         /* NOTE:
@@ -3680,10 +3680,10 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 const char *
 Perl_moreswitches(pTHX_ const char *s)
 {
+    PERL_ARGS_ASSERT_MORESWITCHES;
+
     UV rschar;
     const char option = *s; /* used to remember option in -m/-M code */
-
-    PERL_ARGS_ASSERT_MORESWITCHES;
 
     switch (*s) {
     case '0':
@@ -4196,12 +4196,12 @@ S_init_main_stash(pTHX)
 static PerlIO *
 S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 {
+    PERL_ARGS_ASSERT_OPEN_SCRIPT;
+
     int fdscript = -1;
     PerlIO *rsfp = NULL;
     Stat_t tmpstatbuf;
     int fd;
-
-    PERL_ARGS_ASSERT_OPEN_SCRIPT;
 
     if (PL_e_script) {
         PL_origfilename = savepvs("-e");
@@ -4334,12 +4334,12 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 static void
 S_validate_suid(pTHX_ PerlIO *rsfp)
 {
+    PERL_ARGS_ASSERT_VALIDATE_SUID;
+
     const Uid_t  my_uid = PerlProc_getuid();
     const Uid_t my_euid = PerlProc_geteuid();
     const Gid_t  my_gid = PerlProc_getgid();
     const Gid_t my_egid = PerlProc_getegid();
-
-    PERL_ARGS_ASSERT_VALIDATE_SUID;
 
     if (my_euid != my_uid || my_egid != my_gid) {	/* (suidperl doesn't exist, in fact) */
         int fd = PerlIO_fileno(rsfp);
@@ -4362,10 +4362,10 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 static void
 S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 {
+    PERL_ARGS_ASSERT_FIND_BEGINNING;
+
     const char *s;
     const char *s2;
-
-    PERL_ARGS_ASSERT_FIND_BEGINNING;
 
     /* skip forward in input to the real script? */
 
@@ -4634,11 +4634,11 @@ S_nuke_stacks(pTHX)
 void
 Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
 {
+    PERL_ARGS_ASSERT_POPULATE_ISA;
+
     GV *const gv = gv_fetchpvn(name, len, GV_ADD | GV_ADDMULTI, SVt_PVAV);
     AV *const isa = GvAVn(gv);
     va_list args;
-
-    PERL_ARGS_ASSERT_POPULATE_ISA;
 
     if(AvFILLp(isa) != -1)
         return;
@@ -4784,9 +4784,9 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 static void
 S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 {
-    GV* tmpgv;
-
     PERL_ARGS_ASSERT_INIT_POSTDUMP_SYMBOLS;
+
+    GV* tmpgv;
 
     PL_toptarget = newSV_type(SVt_PVIV);
     SvPVCLEAR(PL_toptarget);
@@ -5021,9 +5021,9 @@ S_init_perllib(pTHX)
 static SV *
 S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
 {
-    Stat_t tmpstatbuf;
-
     PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS;
+
+    Stat_t tmpstatbuf;
 
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
         S_ISDIR(tmpstatbuf.st_mode)) {
@@ -5040,10 +5040,11 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
 static SV *
 S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_MAYBERELOCATE;
+
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     SV *libdir;
 
-    PERL_ARGS_ASSERT_MAYBERELOCATE;
     assert(len > 0);
 
     /* I am not convinced that this is valid when PERLLIB_MANGLE is
@@ -5175,6 +5176,8 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 static void
 S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_INCPUSH;
+
 #ifndef PERL_IS_MINIPERL
     const U8 using_sub_dirs
         = (U8)flags & (INCPUSH_ADD_VERSIONED_SUB_DIRS
@@ -5191,7 +5194,6 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
     const U8 push_basedir = (flags & INCPUSH_NOT_BASEDIR) ? 0 : 1;
     AV *const inc = GvAVn(PL_incgv);
 
-    PERL_ARGS_ASSERT_INCPUSH;
     assert(len > 0);
 
     /* Could remove this vestigial extra block, if we don't mind a lot of
@@ -5292,12 +5294,12 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 static void
 S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 {
+    PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
+
     const char *s;
     const char *end;
     /* This logic has been broken out from S_incpush(). It may be possible to
        simplify it.  */
-
-    PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
 
     /* perl compiled with -DPERL_RELOCATABLE_INCPUSH will ignore the len
      * argument to incpush_use_sep.  This allows creation of relocatable
@@ -5333,14 +5335,14 @@ S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
+    PERL_ARGS_ASSERT_CALL_LIST;
+
     SV *atsv;
     volatile const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
     CV *cv;
     STRLEN len;
     int ret;
     dJMPENV;
-
-    PERL_ARGS_ASSERT_CALL_LIST;
 
     while (av_count(paramList) > 0) {
         cv = MUTABLE_CV(av_shift(paramList));

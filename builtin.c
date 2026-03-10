@@ -496,8 +496,9 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 void
 Perl_XS_builtin_indexed(pTHX_ CV *cv)
 {
-    dXSARGS;
     PERL_ARGS_ASSERT_XS_BUILTIN_INDEXED;
+
+    dXSARGS;
     PERL_UNUSED_VAR(cv);
 
     switch(GIMME_V) {

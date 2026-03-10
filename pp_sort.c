@@ -333,6 +333,8 @@ typedef struct {
 PERL_STATIC_FORCE_INLINE void
 S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
+    PERL_ARGS_ASSERT_SORTSV_FLAGS_IMPL;
+
     IV i, run, offset;
     I32 sense, level;
     gptr *f1, *f2, *t, *b, *p;
@@ -344,7 +346,6 @@ S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     off_runs stack[60], *stackp;
 
     PERL_UNUSED_ARG(flags);
-    PERL_ARGS_ASSERT_SORTSV_FLAGS_IMPL;
     if (nmemb <= 1) return;                     /* sorted trivially */
 
     if (nmemb <= SMALLSORT) aux = small;        /* use stack for aux array */
@@ -1173,13 +1174,13 @@ PP(pp_sort)
 static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
+    PERL_ARGS_ASSERT_SORTCV;
+
     const I32 oldsaveix = PL_savestack_ix;
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
     SV *olda, *oldb;
  
-    PERL_ARGS_ASSERT_SORTCV;
-
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
 #endif
@@ -1215,12 +1216,12 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
 static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 {
+    PERL_ARGS_ASSERT_SORTCV_STACKED;
+
     const I32 oldsaveix = PL_savestack_ix;
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
-
-    PERL_ARGS_ASSERT_SORTCV_STACKED;
 
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
@@ -1284,11 +1285,11 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 static I32
 S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
+    PERL_ARGS_ASSERT_SORTCV_XSUB;
+
     const I32 oldsaveix = PL_savestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
     PMOP * const pm = PL_curpm;
-
-    PERL_ARGS_ASSERT_SORTCV_XSUB;
 
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
@@ -1353,10 +1354,10 @@ S_sv_ncmp_desc(pTHX_ SV *const a, SV *const b)
 PERL_STATIC_FORCE_INLINE I32
 S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
+    PERL_ARGS_ASSERT_SV_I_NCMP;
+
     const IV iv1 = SvIV(a);
     const IV iv2 = SvIV(b);
-
-    PERL_ARGS_ASSERT_SV_I_NCMP;
 
     return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
 }
@@ -1379,9 +1380,9 @@ S_sv_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
 PERL_STATIC_FORCE_INLINE I32
 S_amagic_ncmp(pTHX_ SV *a, SV *b)
 {
-    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
-
     PERL_ARGS_ASSERT_AMAGIC_NCMP;
+
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1408,9 +1409,9 @@ S_amagic_ncmp_desc(pTHX_ SV *const a, SV *const b)
 PERL_STATIC_FORCE_INLINE I32
 S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
-    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
-
     PERL_ARGS_ASSERT_AMAGIC_I_NCMP;
+
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1436,9 +1437,9 @@ S_amagic_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
 PERL_STATIC_FORCE_INLINE I32
 S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 {
-    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
-
     PERL_ARGS_ASSERT_AMAGIC_CMP;
+
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1474,9 +1475,9 @@ S_cmp_desc(pTHX_ SV *const str1, SV *const str2)
 PERL_STATIC_FORCE_INLINE I32
 S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
 {
-    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
-
     PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE;
+
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     if (tmpsv) {
         if (SvIOK(tmpsv)) {

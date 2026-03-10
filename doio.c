@@ -398,9 +398,9 @@ static IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
               int *savefd,  char *savetype)
 {
-    IO * const io = GvIOn(gv);
-
     PERL_ARGS_ASSERT_OPENN_SETUP;
+
+    IO * const io = GvIOn(gv);
 
     *saveifp = NULL;
     *saveofp = NULL;
@@ -479,6 +479,8 @@ bool
 Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
                  int rawmode, int rawperm, Stat_t *statbufp)
 {
+    PERL_ARGS_ASSERT_DO_OPEN_RAW;
+
     PerlIO *saveifp;
     PerlIO *saveofp;
     int savefd;
@@ -487,8 +489,6 @@ Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
     IO * const io = openn_setup(gv, mode, &saveifp, &saveofp, &savefd, &savetype);
     int writing = 0;
     PerlIO *fp;
-
-    PERL_ARGS_ASSERT_DO_OPEN_RAW;
 
     /* For ease of blame back to 5.000, keep the existing indenting. */
     {
@@ -548,6 +548,8 @@ bool
 Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
               PerlIO *supplied_fp, SV **svp, U32 num_svs)
 {
+    PERL_ARGS_ASSERT_DO_OPEN6;
+
     PerlIO *saveifp;
     PerlIO *saveofp;
     int savefd;
@@ -558,8 +560,6 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
     PerlIO *fp;
     bool was_fdopen = FALSE;
     char *type  = NULL;
-
-    PERL_ARGS_ASSERT_DO_OPEN6;
 
     /* For ease of blame back to 5.000, keep the existing indenting. */
     {
@@ -940,10 +940,10 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                 PerlIO *saveifp, PerlIO *saveofp, int savefd, char savetype,
                 int writing, bool was_fdopen, const char *type, Stat_t *statbufp)
 {
+    PERL_ARGS_ASSERT_OPENN_CLEANUP;
+
     int fd;
     Stat_t statbuf;
-
-    PERL_ARGS_ASSERT_OPENN_CLEANUP;
 
     Zero(&statbuf, 1, Stat_t);
 
@@ -1345,10 +1345,10 @@ S_is_fork_open(const char *name)
 PerlIO *
 Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 {
+    PERL_ARGS_ASSERT_NEXTARGV;
+
     IO * const io = GvIOp(gv);
     SV *const old_out_name = PL_inplace ? newSVsv(GvSV(gv)) : NULL;
-
-    PERL_ARGS_ASSERT_NEXTARGV;
 
     if (old_out_name)
         SAVEFREESV(old_out_name);
@@ -1638,10 +1638,11 @@ S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg)
 static bool
 S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict)
 {
+    PERL_ARGS_ASSERT_ARGVOUT_FINAL;
+
     bool retval;
 
     /* ensure args are checked before we start using them */
-    PERL_ARGS_ASSERT_ARGVOUT_FINAL;
 
     {
         /* handle to an in-place edit work file */
@@ -1877,9 +1878,9 @@ Perl_do_close(pTHX_ GV *gv, bool is_explict)
 bool
 Perl_io_close(pTHX_ IO *io, GV *gv, bool is_explict, bool warn_on_fail)
 {
-    bool retval = FALSE;
-
     PERL_ARGS_ASSERT_IO_CLOSE;
+
+    bool retval = FALSE;
 
     if (IoIFP(io)) {
         if (IoTYPE(io) == IoTYPE_PIPE) {
@@ -1949,9 +1950,9 @@ Perl_io_close(pTHX_ IO *io, GV *gv, bool is_explict, bool warn_on_fail)
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
-    IO * const io = GvIO(gv);
-
     PERL_ARGS_ASSERT_DO_EOF;
+
+    IO * const io = GvIO(gv);
 
     if (!io)
         return TRUE;
@@ -1993,10 +1994,10 @@ Perl_do_eof(pTHX_ GV *gv)
 Off_t
 Perl_do_tell(pTHX_ GV *gv)
 {
+    PERL_ARGS_ASSERT_DO_TELL;
+
     IO *const io = GvIO(gv);
     PerlIO *fp;
-
-    PERL_ARGS_ASSERT_DO_TELL;
 
     if (io && (fp = IoIFP(io))) {
         return PerlIO_tell(fp);
@@ -2025,10 +2026,10 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 Off_t
 Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
+    PERL_ARGS_ASSERT_DO_SYSSEEK;
+
     IO *const io = GvIO(gv);
     PerlIO *fp;
-
-    PERL_ARGS_ASSERT_DO_SYSSEEK;
 
     if (io && (fp = IoIFP(io))) {
         int fd = PerlIO_fileno(fp);
@@ -2386,8 +2387,9 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 static void
 S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 {
-    const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
+
+    const int e = errno;
 
     ck_warner(packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
               cmd, Strerror(e));
@@ -2452,14 +2454,14 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
+    PERL_ARGS_ASSERT_DO_EXEC3;
+
     const char **argv, **a;
     char *s;
     char *buf;
     char *cmd;
     /* Make a copy so we can change it */
     const Size_t cmdlen = strlen(incmd) + 1;
-
-    PERL_ARGS_ASSERT_DO_EXEC3;
 
     ENTER;
     Newx(buf, cmdlen, char);
@@ -2589,6 +2591,8 @@ leave:
 SSize_t
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_APPLY;
+
     I32 val;
     SSize_t tot = 0;
     const char *const what = PL_op_name[type];
@@ -2596,8 +2600,6 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
     STRLEN len;
     SV ** const oldmark = mark;
     bool killgp = FALSE;
-
-    PERL_ARGS_ASSERT_APPLY;
 
     PERL_UNUSED_VAR(what); /* may not be used depending on compile options */
 
@@ -3025,11 +3027,12 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_IPCGET;
+
     const key_t key = (key_t)SvNVx(*++mark);
     SV *nsv = optype == OP_MSGGET ? NULL : *++mark;
     const I32 flags = SvIVx(*++mark);
 
-    PERL_ARGS_ASSERT_DO_IPCGET;
     PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
@@ -3059,6 +3062,8 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_IPCCTL;
+
     char *a;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
@@ -3070,7 +3075,6 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     STRLEN infosize = 0;
     I32 getinfo = (cmd == IPC_STAT);
 
-    PERL_ARGS_ASSERT_DO_IPCCTL;
     PERL_UNUSED_ARG(sp);
 
     switch (optype)
@@ -3207,8 +3211,8 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
-#ifdef HAS_MSG
     PERL_ARGS_ASSERT_DO_MSGSND;
+#ifdef HAS_MSG
     PERL_UNUSED_ARG(sp);
 
     STRLEN len;
@@ -3241,6 +3245,8 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 SSize_t
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_MSGRCV;
+
 #ifdef HAS_MSG
     char *mbuf;
     long mtype;
@@ -3248,7 +3254,6 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
 
-    PERL_ARGS_ASSERT_DO_MSGRCV;
     PERL_UNUSED_ARG(sp);
 
     /* suppress warning when reading into undef var --jhi */
@@ -3290,13 +3295,14 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_SEMOP;
+
 #ifdef HAS_SEM
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
     const char * const opbuf = SvPVbyte(opstr, opsize);
 
-    PERL_ARGS_ASSERT_DO_SEMOP;
     PERL_UNUSED_ARG(sp);
 
     if (opsize < 3 * SHORTSIZE
@@ -3442,12 +3448,12 @@ Moving it away shrinks F<pp_hot.c>; shrinking F<pp_hot.c> helps speed perl up.
 PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
+    PERL_ARGS_ASSERT_START_GLOB;
+
     SV * const tmpcmd = newSV(0);
     PerlIO *fp;
     STRLEN len;
     const char *s = SvPV(tmpglob, len);
-
-    PERL_ARGS_ASSERT_START_GLOB;
 
     if (!IS_SAFE_SYSCALL(s, len, "pattern", "glob"))
         return NULL;

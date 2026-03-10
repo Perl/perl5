@@ -306,6 +306,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 void
 Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 {
+    PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
+
     CV cvbody;/*CV body will never be realloced inside this func,
                so don't read it more than once, use fake CV so existing macros
                will work, the indirection and CV head struct optimized away*/
@@ -313,8 +315,6 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     SvFLAGS(&cvbody) = SVt_PVCV;
 #endif
     SvANY(&cvbody) = SvANY(cv);
-
-    PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
           "CV undef: cv=0x%" UVxf " comppad=0x%" UVxf "\n",
@@ -558,9 +558,9 @@ static PADOFFSET
 S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
                        HV *ourstash)
 {
-    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
-
     PERL_ARGS_ASSERT_PAD_ALLOC_NAME;
+
+    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
 
     ASSERT_CURPAD_ACTIVE("pad_alloc_name");
 
@@ -631,10 +631,10 @@ PADOFFSET
 Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
                 U32 flags, HV *typestash, HV *ourstash)
 {
+    PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
+
     PADOFFSET offset;
     PADNAME *name;
-
-    PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
     if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_FIELD))
         croak("panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
@@ -689,9 +689,10 @@ Perl_pad_add_name_pv(pTHX_ const char *name,
 PADOFFSET
 Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
 {
+    PERL_ARGS_ASSERT_PAD_ADD_NAME_SV;
+
     char *namepv;
     STRLEN namelen;
-    PERL_ARGS_ASSERT_PAD_ADD_NAME_SV;
     namepv = SvPVutf8(name, namelen);
     return pad_add_name_pvn(namepv, namelen, flags, typestash, ourstash);
 }
@@ -819,10 +820,11 @@ but is used for debugging.
 PADOFFSET
 Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 {
+    PERL_ARGS_ASSERT_PAD_ADD_ANON;
+
     PADOFFSET ix;
     PADNAME * const name = newPADNAMEpvn("&", 1);
 
-    PERL_ARGS_ASSERT_PAD_ADD_ANON;
     assert (SvTYPE(func) == SVt_PVCV);
 
     /* These two aren't used; just make sure they're not equal to
@@ -846,11 +848,11 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 void
 Perl_pad_add_weakref(pTHX_ CV* func)
 {
+    PERL_ARGS_ASSERT_PAD_ADD_WEAKREF;
+
     const PADOFFSET ix = pad_alloc(OP_NULL, SVs_PADMY);
     PADNAME * const name = newPADNAMEpvn("&", 1);
     SV * const rv = newRV_inc((SV *)func);
-
-    PERL_ARGS_ASSERT_PAD_ADD_WEAKREF;
 
     /* These two aren't used; just make sure they're not equal to
      * PERL_PADSEQ_INTRO.  They should be 0 by default.  */
@@ -878,12 +880,12 @@ C<is_our> indicates that the name to check is an C<"our"> declaration.
 static void
 S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 {
+    PERL_ARGS_ASSERT_PAD_CHECK_DUP;
+
     PADNAME	**svp;
     PADOFFSET	top, off;
     const U32	is_our = flags & padadd_OUR;
     bool        is_field = flags & padadd_FIELD;
-
-    PERL_ARGS_ASSERT_PAD_CHECK_DUP;
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
 
@@ -990,13 +992,13 @@ C<flags> is reserved and must be zero.
 PADOFFSET
 Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 {
+    PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
+
     PADNAME *out_pn;
     int out_flags;
     PADOFFSET offset;
     const PADNAMELIST *namelist;
     PADNAME **name_p;
-
-    PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
 
     if (flags)
         croak("panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
@@ -1045,9 +1047,10 @@ Perl_pad_findmy_pv(pTHX_ const char *name, U32 flags)
 PADOFFSET
 Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 {
+    PERL_ARGS_ASSERT_PAD_FINDMY_SV;
+
     char *namepv;
     STRLEN namelen;
-    PERL_ARGS_ASSERT_PAD_FINDMY_SV;
     namepv = SvPVutf8(name, namelen);
     return pad_findmy_pvn(namepv, namelen, flags);
 }
@@ -1116,14 +1119,14 @@ static PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
         int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
 {
+    PERL_ARGS_ASSERT_PAD_FINDLEX;
+
     PADOFFSET offset, new_offset;
     SV *new_capture;
     SV **new_capturep;
     const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = cBOOL(flags & padadd_STALEOK);
     const bool fieldok = cBOOL(flags & padfind_FIELD_OK);
-
-    PERL_ARGS_ASSERT_PAD_FINDLEX;
 
     flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
     if (flags)
@@ -1831,13 +1834,13 @@ Dump the contents of a padlist
 void
 Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 {
+    PERL_ARGS_ASSERT_DO_DUMP_PAD;
+
     const PADNAMELIST *pad_name;
     const AV *pad;
     PADNAME **pname;
     SV **ppad;
     PADOFFSET ix;
-
-    PERL_ARGS_ASSERT_DO_DUMP_PAD;
 
     if (!padlist) {
         return;
@@ -1903,9 +1906,9 @@ dump the contents of a CV
 static void
 S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
-    const CV * const outside = CvOUTSIDE(cv);
-
     PERL_ARGS_ASSERT_CV_DUMP;
+
+    const CV * const outside = CvOUTSIDE(cv);
 
     PerlIO_printf(Perl_debug_log,
                   "  %s: CV=0x%" UVxf " (%s), OUTSIDE=0x%" UVxf " (%s)\n",
@@ -2383,13 +2386,14 @@ moved to a pre-existing CV struct.
 void
 Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
+    PERL_ARGS_ASSERT_PAD_FIXUP_INNER_ANONS;
+
     PADOFFSET ix;
     PADNAMELIST * const comppad_name = PadlistNAMES(padlist);
     AV * const comppad = PadlistARRAY(padlist)[1];
     PADNAME ** const namepad = PadnamelistARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
 
-    PERL_ARGS_ASSERT_PAD_FIXUP_INNER_ANONS;
     PERL_UNUSED_ARG(old_cv);
 
     for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
@@ -2534,11 +2538,11 @@ Duplicates a pad.
 PADLIST *
 Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 {
+    PERL_ARGS_ASSERT_PADLIST_DUP;
+
     PADLIST *dstpad;
     bool cloneall;
     PADOFFSET max;
-
-    PERL_ARGS_ASSERT_PADLIST_DUP;
 
     cloneall = cBOOL(param->flags & CLONEf_COPY_STACKS);
     assert (SvREFCNT(PadlistARRAY(srcpad)[1]) == 1);
@@ -2644,10 +2648,10 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 PAD **
 Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
 {
+    PERL_ARGS_ASSERT_PADLIST_STORE;
+
     PAD **ary;
     SSize_t const oldmax = PadlistMAX(padlist);
-
-    PERL_ARGS_ASSERT_PADLIST_STORE;
 
     assert(key >= 0);
 
@@ -2700,9 +2704,9 @@ existing pad name in that slot.
 PADNAME **
 Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, SSize_t key, PADNAME *val)
 {
-    PADNAME **ary;
-
     PERL_ARGS_ASSERT_PADNAMELIST_STORE;
+
+    PADNAME **ary;
 
     assert(key >= 0);
 
@@ -2811,10 +2815,11 @@ C<L</newPADNAMEouter>>.
 PADNAME *
 Perl_newPADNAMEpvn(const char *s, STRLEN len)
 {
+    PERL_ARGS_ASSERT_NEWPADNAMEPVN;
+
     struct padname_with_str *alloc;
     char *alloc2; /* for Newxz */
     PADNAME *pn;
-    PERL_ARGS_ASSERT_NEWPADNAMEPVN;
     Newxz(alloc2,
           STRUCT_OFFSET(struct padname_with_str, xpadn_str[0]) + len + 1,
           char);
@@ -2843,8 +2848,9 @@ C<PADNAMEf_OUTER> flag already set.
 PADNAME *
 Perl_newPADNAMEouter(PADNAME *outer)
 {
-    PADNAME *pn;
     PERL_ARGS_ASSERT_NEWPADNAMEOUTER;
+
+    PADNAME *pn;
     Newxz(pn, 1, PADNAME);
     PadnameREFCNT(pn) = 1;
     PadnamePV(pn) = PadnamePV(outer);
@@ -2903,9 +2909,9 @@ Duplicates a pad name.
 PADNAME *
 Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
 {
-    PADNAME *dst;
-
     PERL_ARGS_ASSERT_PADNAME_DUP;
+
+    PADNAME *dst;
 
     /* look for it in the table first */
     dst = (PADNAME *)ptr_table_fetch(PL_ptr_table, src);

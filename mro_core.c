@@ -38,8 +38,9 @@ SV *
 Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta,
                           const struct mro_alg *const which)
 {
-    SV **data;
     PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA;
+
+    SV **data;
 
     data = (SV **)Perl_hv_common(aTHX_ smeta->mro_linear_all, NULL,
                                  which->name, which->length, which->kflags,
@@ -115,9 +116,9 @@ registered.  See L</C<mro_register>>.
 const struct mro_alg *
 Perl_mro_get_from_name(pTHX_ SV *name)
 {
-    SV **data;
-
     PERL_ARGS_ASSERT_MRO_GET_FROM_NAME;
+
+    SV **data;
 
     data = (SV **)Perl_hv_common(aTHX_ PL_registered_mros, name, NULL, 0, 0,
                                  HV_FETCH_JUST_SV, NULL, 0);
@@ -155,9 +156,10 @@ Perl_mro_register(pTHX_ const struct mro_alg *mro) {
 struct mro_meta*
 Perl_mro_meta_init(pTHX_ HV* stash)
 {
+    PERL_ARGS_ASSERT_MRO_META_INIT;
+
     struct mro_meta* newmeta;
 
-    PERL_ARGS_ASSERT_MRO_META_INIT;
     PERL_UNUSED_CONTEXT;
     assert(HvAUX(stash));
     assert(!(HvAUX(stash)->xhv_mro_meta));
@@ -176,9 +178,9 @@ Perl_mro_meta_init(pTHX_ HV* stash)
 struct mro_meta*
 Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 {
-    struct mro_meta* newmeta;
-
     PERL_ARGS_ASSERT_MRO_META_DUP;
+
+    struct mro_meta* newmeta;
 
     Newx(newmeta, 1, struct mro_meta);
     Copy(smeta, newmeta, 1, struct mro_meta);
@@ -233,6 +235,8 @@ invalidated).
 static AV*
 S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 {
+    PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS;
+
     AV* retval;
     GV** gvp;
     GV* gv;
@@ -242,7 +246,6 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     SV *our_name;
     HV *stored = NULL;
 
-    PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS;
     assert(HvAUX(stash));
 
     stashhek
@@ -414,10 +417,11 @@ invalidated).
 AV*
 Perl_mro_get_linear_isa(pTHX_ HV *stash)
 {
+    PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA;
+
     struct mro_meta* meta;
     AV *isa;
 
-    PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA;
     if(!HvHasAUX(stash))
         croak("Can't linearize anonymous symbol table");
 
@@ -506,6 +510,8 @@ by the C<setisa> magic, should not need to invoke directly.
 void
 Perl_mro_isa_changed_in(pTHX_ HV* stash)
 {
+    PERL_ARGS_ASSERT_MRO_ISA_CHANGED_IN;
+
     HV* isarev;
     AV* linear_mro;
     HE* iter;
@@ -518,8 +524,6 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     const HEK * const stashhek = HvENAME_HEK(stash);
     const char * const stashname = HvENAME_get(stash);
     const STRLEN stashname_len = HvENAMELEN_get(stash);
-
-    PERL_ARGS_ASSERT_MRO_ISA_CHANGED_IN;
 
     if(!stashname)
         croak("Can't call mro_isa_changed_in() on anonymous symbol table");
@@ -707,9 +711,9 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
                          const STRLEN len, HV * const exceptions, U32 hash,
                          U32 flags)
 {
-    HE* iter;
-
     PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV;
+
+    HE* iter;
 
     assert(HvTOTALKEYS(isa));
     /* Delete our name from our former parents' isarevs. */
@@ -758,13 +762,14 @@ void
 Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
                        const GV * const gv, U32 flags)
 {
+    PERL_ARGS_ASSERT_MRO_PACKAGE_MOVED;
+
     SV *namesv;
     HEK **namep;
     I32 name_count;
     HV *stashes;
     HE* iter;
 
-    PERL_ARGS_ASSERT_MRO_PACKAGE_MOVED;
     assert(stash || oldstash);
 
     /* Determine the name(s) of the location that stash was assigned to
@@ -902,6 +907,8 @@ static void
 S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                               HV *stash, HV *oldstash, SV *namesv)
 {
+    PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME;
+
     XPVHV* xhv;
     HE *entry;
     I32 riter = -1;
@@ -911,8 +918,6 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     HV *seen = NULL;
     HV *isarev = NULL;
     SV **svp = NULL;
-
-    PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME;
 
     /* We use the seen_stashes hash to keep track of which packages have
        been encountered so far. This must be separate from the main list of
@@ -1396,9 +1401,9 @@ Croaks if C<name> hasn't been registered
 void
 Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
 {
-    const struct mro_alg *const which = Perl_mro_get_from_name(aTHX_ name);
-
     PERL_ARGS_ASSERT_MRO_SET_MRO;
+
+    const struct mro_alg *const which = Perl_mro_get_from_name(aTHX_ name);
 
     if (!which)
         croak("Invalid mro name: '%" SVf "'", name);

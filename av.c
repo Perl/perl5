@@ -22,9 +22,9 @@
 void
 Perl_av_reify(pTHX_ AV *av)
 {
-    SSize_t key;
-
     PERL_ARGS_ASSERT_AV_REIFY;
+
+    SSize_t key;
 
     if (AvREAL(av))
         return;
@@ -64,9 +64,9 @@ array method with an argument of C<(key+1)>.
 void
 Perl_av_extend(pTHX_ AV *av, SSize_t key)
 {
-    MAGIC *mg;
-
     PERL_ARGS_ASSERT_AV_EXTEND;
+
+    MAGIC *mg;
 
     mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied);
     if (mg) {
@@ -332,9 +332,9 @@ more information on how to use this function on tied arrays.
 SV**
 Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 {
-    SV** ary;
-
     PERL_ARGS_ASSERT_AV_STORE;
+
+    SV** ary;
 
     /* S_regclass relies on being able to pass in a NULL sv
        (unicode_alternate may be NULL).
@@ -457,9 +457,10 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 AV *
 Perl_av_make(pTHX_ SSize_t size, SV **strp)
 {
+    PERL_ARGS_ASSERT_AV_MAKE;
+
     AV * const av = newAV();
     /* sv_upgrade does AvREAL_only()  */
-    PERL_ARGS_ASSERT_AV_MAKE;
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
@@ -623,10 +624,10 @@ to it.
 void
 Perl_av_clear(pTHX_ AV *av)
 {
+    PERL_ARGS_ASSERT_AV_CLEAR;
+
     bool real;
     SSize_t orig_ix = 0;
-
-    PERL_ARGS_ASSERT_AV_CLEAR;
 
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0) {
@@ -696,10 +697,10 @@ return.
 void
 Perl_av_undef(pTHX_ AV *av)
 {
+    PERL_ARGS_ASSERT_AV_UNDEF;
+
     bool real;
     SSize_t orig_ix = PL_tmps_ix; /* silence bogus warning about possible uninitialized use */
-
-    PERL_ARGS_ASSERT_AV_UNDEF;
 
     /* Give any tie a chance to cleanup first */
     if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied)) 
@@ -778,9 +779,9 @@ assumptions may not hold.
 void
 Perl_av_push(pTHX_ AV *av, SV *val)
 {             
-    MAGIC *mg;
-
     PERL_ARGS_ASSERT_AV_PUSH;
+
+    MAGIC *mg;
 
     if (SvREADONLY(av))
         croak_no_modify();
@@ -808,10 +809,10 @@ Perl equivalent: C<pop(@myarray);>
 SV *
 Perl_av_pop(pTHX_ AV *av)
 {
+    PERL_ARGS_ASSERT_AV_POP;
+
     SV *retval;
     MAGIC* mg;
-
-    PERL_ARGS_ASSERT_AV_POP;
 
     if (SvREADONLY(av))
         croak_no_modify();
@@ -866,10 +867,10 @@ Perl equivalent: S<C<unshift @myarray, ((undef) x $num);>>
 void
 Perl_av_unshift(pTHX_ AV *av, SSize_t num)
 {
+    PERL_ARGS_ASSERT_AV_UNSHIFT;
+
     SSize_t i;
     MAGIC* mg;
-
-    PERL_ARGS_ASSERT_AV_UNSHIFT;
 
     if (SvREADONLY(av))
         croak_no_modify();
@@ -932,10 +933,10 @@ Perl equivalent: C<shift(@myarray);>
 SV *
 Perl_av_shift(pTHX_ AV *av)
 {
+    PERL_ARGS_ASSERT_AV_SHIFT;
+
     SV *retval;
     MAGIC* mg;
-
-    PERL_ARGS_ASSERT_AV_SHIFT;
 
     if (SvREADONLY(av))
         croak_no_modify();
@@ -1008,9 +1009,9 @@ the same as C<av_clear(av)>.
 void
 Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 {
-    MAGIC *mg;
-
     PERL_ARGS_ASSERT_AV_FILL;
+
+    MAGIC *mg;
 
     if (fill < 0)
         fill = -1;
@@ -1060,9 +1061,9 @@ C<splice> in void context if C<G_DISCARD> is present).
 SV *
 Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
 {
-    SV *sv;
-
     PERL_ARGS_ASSERT_AV_DELETE;
+
+    SV *sv;
 
     if (SvREADONLY(av))
         croak_no_modify();
@@ -1192,9 +1193,9 @@ Perl_av_exists(pTHX_ AV *av, SSize_t key)
 static MAGIC *
 S_get_aux_mg(pTHX_ AV *av)
 {
-    MAGIC *mg;
-
     PERL_ARGS_ASSERT_GET_AUX_MG;
+
+    MAGIC *mg;
 
     mg = mg_find((const SV *)av, PERL_MAGIC_arylen_p);
 
@@ -1211,9 +1212,9 @@ S_get_aux_mg(pTHX_ AV *av)
 SV **
 Perl_av_arylen_p(pTHX_ AV *av)
 {
-    MAGIC *const mg = get_aux_mg(av);
-
     PERL_ARGS_ASSERT_AV_ARYLEN_P;
+
+    MAGIC *const mg = get_aux_mg(av);
 
     return &(mg->mg_obj);
 }
@@ -1221,9 +1222,9 @@ Perl_av_arylen_p(pTHX_ AV *av)
 IV *
 Perl_av_iter_p(pTHX_ AV *av)
 {
-    MAGIC *const mg = get_aux_mg(av);
-
     PERL_ARGS_ASSERT_AV_ITER_P;
+
+    MAGIC *const mg = get_aux_mg(av);
 
     if (sizeof(IV) == sizeof(SSize_t)) {
         return (IV *)&(mg->mg_len);
@@ -1241,8 +1242,9 @@ Perl_av_iter_p(pTHX_ AV *av)
 SV *
 Perl_av_nonelem(pTHX_ AV *av, SSize_t ix)
 {
-    SV * const sv = newSV_type(SVt_NULL);
     PERL_ARGS_ASSERT_AV_NONELEM;
+
+    SV * const sv = newSV_type(SVt_NULL);
     if (!av_store(av,ix,sv))
         return sv_2mortal(sv); /* has tie magic */
     sv_magic(sv, NULL, PERL_MAGIC_nonelem, NULL, 0);

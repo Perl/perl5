@@ -34,13 +34,14 @@ Implements the L</TAINT_PROPER> macro, which you should generally use instead.
 void
 Perl_taint_proper(pTHX_ const char *f, const char *const s)
 {
+    PERL_ARGS_ASSERT_TAINT_PROPER;
+
     /* Don't use directly; instead use TAINT_PROPER
      *
      * Output a tainting violation, croaking unless we're just to warn.
      * '_proper' is just to throw you off the scent */
 
 #if defined(HAS_SETEUID) && defined(DEBUGGING)
-    PERL_ARGS_ASSERT_TAINT_PROPER;
 
     {
         const Uid_t  uid = PerlProc_getuid();

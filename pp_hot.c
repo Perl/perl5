@@ -192,7 +192,6 @@ void
 Perl_rpp_free_2_(pTHX_ SV *const sv1,  SV *const sv2,
                        const U32 rc1,  const U32 rc2)
 {
-
     PERL_ARGS_ASSERT_RPP_FREE_2_;
 
 #ifdef PERL_RC_STACK
@@ -5911,10 +5910,10 @@ PP(pp_grepwhile)
 void
 Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
+    PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS;
+
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
-
-    PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS;
 
     TAINT_NOT;
 
@@ -6825,6 +6824,8 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 PERL_STATIC_INLINE HV *
 S_opmethod_stash(pTHX_ SV* meth)
 {
+    PERL_ARGS_ASSERT_OPMETHOD_STASH;
+
     SV* ob;
     HV* stash;
 
@@ -6833,8 +6834,6 @@ S_opmethod_stash(pTHX_ SV* meth)
                             "package or object reference", SVfARG(meth)),
            (SV *)NULL)
         : *(PL_stack_base + TOPMARK + 1);
-
-    PERL_ARGS_ASSERT_OPMETHOD_STASH;
 
     if (UNLIKELY(!sv))
        undefined:

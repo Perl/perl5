@@ -102,6 +102,8 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
                    U32 categories,  /* Packed warning categories */
                    U32 flag)        /* Flag associated with this message */
 {
+    PERL_ARGS_ASSERT_NEW_MSG_HV;
+
     /* Creates, populates, and returns an HV* that describes an error message
      * for the translators between UTF8 and code point */
 
@@ -110,8 +112,6 @@ S_new_msg_hv(pTHX_ const char * const message, /* The message text */
     SV* flag_bit_sv = newSVuv(flag);
 
     HV* msg_hv = newHV();
-
-    PERL_ARGS_ASSERT_NEW_MSG_HV;
 
     (void) hv_stores(msg_hv, "text", msg_sv);
     (void) hv_stores(msg_hv, "warn_categories",  category_sv);
@@ -209,11 +209,11 @@ The caller, of course, is responsible for freeing any returned HV.
 U8 *
 Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 {
+    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS;
+
     U8 *p;
     UV shifted_uv = input_uv;
     STRLEN utf8_skip = OFFUNISKIP(input_uv);
-
-    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS;
 
     if (msgs) {
         *msgs = NULL;
@@ -468,6 +468,8 @@ The new names accurately describe the situation in all cases.
 PERL_STATIC_INLINE SSize_t
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
+    PERL_ARGS_ASSERT_IS_UTF8_OVERLONG;
+
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 's' + 'len' - 1 is an overlong.  It returns a positive number if it is
      * an overlong; 0 if it isn't, and -1 if there isn't enough information to
@@ -485,8 +487,6 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
      * number of leading 1 bits in a start byte increases from the next lower
      * start byte.  That happens for start bytes C0, E0, F0, F8, FC, FE, and
      * FF. */
-
-    PERL_ARGS_ASSERT_IS_UTF8_OVERLONG;
 
     /* Each platform has overlongs after the start bytes given above (expressed
      * in I8 for EBCDIC).  The values below were found by manually inspecting
@@ -532,6 +532,8 @@ S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 PERL_STATIC_INLINE int
 S_isFF_overlong(const U8 * const s, const STRLEN len)
 {
+    PERL_ARGS_ASSERT_ISFF_OVERLONG;
+
     /* Returns an int indicating whether or not the UTF-8 sequence of 'len'
      * bytes starting at 's' is an overlong beginning with \xFF.  It returns a
      * positive number if it is; 0 if it isn't, and -1 if there isn't enough
@@ -542,8 +544,6 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
      *
      * A positive return gives the number of bytes needed to be examined to
      * make the determination */
-
-    PERL_ARGS_ASSERT_ISFF_OVERLONG;
 
 #ifdef EBCDIC
     /* This works on all three EBCDIC code pages traditionally supported by
@@ -902,6 +902,8 @@ Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
 const char *
 Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format)
 {
+    PERL_ARGS_ASSERT_BYTE_DUMP_STRING_;
+
     /* Returns a mortalized C string that is a displayable copy of the 'len'
      * bytes starting at 'start'.  'format' gives how to display each byte.
      * Currently, there are only two formats, so it is currently a bool:
@@ -919,8 +921,6 @@ Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const boo
     const U8 * const e = start + len;
     char * output;
     char * d;
-
-    PERL_ARGS_ASSERT_BYTE_DUMP_STRING_;
 
     Newx(output, output_len, char);
     SAVEFREEPV(output);
@@ -2643,11 +2643,11 @@ and returns the number of valid characters.
 STRLEN
 Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 {
+    PERL_ARGS_ASSERT_UTF8_LENGTH;
+
     STRLEN continuations = 0;
     STRLEN len = 0;
     const U8 * s = s0;
-
-    PERL_ARGS_ASSERT_UTF8_LENGTH;
 
     /* For EBCDIC and short strings, we count the characters.  The boundary
      * was determined by eyeballing the output of Porting/bench.pl and
@@ -2781,10 +2781,10 @@ within the strings.
 int
 Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 {
+    PERL_ARGS_ASSERT_BYTES_CMP_UTF8;
+
     const U8 *const bend = b + blen;
     const U8 *const uend = u + ulen;
-
-    PERL_ARGS_ASSERT_BYTES_CMP_UTF8;
 
     while (b < bend && u < uend) {
         U8 c = *u++;
@@ -3412,10 +3412,10 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
                                                   high order */
                               const bool low_byte)
 {
+    PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE;
+
     U8* pend;
     U8* dstart = d;
-
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE;
 
     if (isODD(bytelen))
         croak("panic: utf16_to_utf8%s: odd bytelen %" UVuf,
@@ -3491,10 +3491,10 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
                                                        is high order */
                               const bool low_byte)
 {
+    PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE;
+
     U8* send;
     U8* dstart = d;
-
-    PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE;
 
     send = s + bytelen;
 
@@ -3683,6 +3683,8 @@ Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_TO_UNI_UPPER;
+
     /* Convert the Unicode character whose ordinal is <c> to its uppercase
      * version and store that in UTF-8 in <p> and its length in bytes in <lenp>.
      * Note that the <p> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
@@ -3690,8 +3692,6 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
      *
      * The ordinal of the first character of the changed version is returned
      * (but note, as explained above, that there may be more.) */
-
-    PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     if (c < 256) {
         return to_upper_title_latin1_((U8) c, p, lenp, 'S');
@@ -3756,6 +3756,8 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_fold_latin1_(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
+    PERL_ARGS_ASSERT_TO_FOLD_LATIN1_;
+
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      *	    FOLD_FLAGS_FULL  iff full folding is to be used;
@@ -3764,8 +3766,6 @@ Perl_to_fold_latin1_(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
      */
 
     UV converted;
-
-    PERL_ARGS_ASSERT_TO_FOLD_LATIN1_;
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 
@@ -3816,6 +3816,7 @@ Perl_to_fold_latin1_(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 UV
 Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 {
+    PERL_ARGS_ASSERT_TO_UNI_FOLD_FLAGS_;
 
     /* Not currently externally documented, and subject to change
      *  <flags> bits meanings:
@@ -3824,8 +3825,6 @@ Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
      *	                      locale are to be used.
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      */
-
-    PERL_ARGS_ASSERT_TO_UNI_FOLD_FLAGS_;
 
     if (flags & FOLD_FLAGS_LOCALE) {
         /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
@@ -3870,9 +3869,9 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
                                      const char * const file,
                                      const unsigned line)
 {
-    const char * key;
-
     PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
+
+    const char * key;
 
     if (ckWARN_d(category)) {
 
@@ -3954,6 +3953,8 @@ S_to_case_cp_list(pTHX_
                   const U8 * const aux_table_lengths,
                   const char * const normal)
 {
+    PERL_ARGS_ASSERT_TO_CASE_CP_LIST;
+
     SSize_t index;
     I32 base;
 
@@ -3975,8 +3976,6 @@ S_to_case_cp_list(pTHX_
      * The casing to use is given by the data structures in the remaining
      * arguments.
      */
-
-    PERL_ARGS_ASSERT_TO_CASE_CP_LIST;
 
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [perl #133365] */
@@ -4049,6 +4048,8 @@ S_to_utf8_case_(pTHX_ const UV original, const U8 *p,
                       const U8 * const aux_table_lengths,
                       const char * const normal)
 {
+    PERL_ARGS_ASSERT_TO_UTF8_CASE_;
+
     /* Change the case of code point 'original'.  If 'p' is non-NULL, it points to
      * the beginning of the (assumed to be valid) UTF-8 representation of
      * 'original'.  'normal' is a string to use to name the new case in any
@@ -4070,8 +4071,6 @@ S_to_utf8_case_(pTHX_ const UV original, const U8 *p,
                                invlist, invmap,
                                aux_tables, aux_table_lengths,
                                normal);
-
-    PERL_ARGS_ASSERT_TO_UTF8_CASE_;
 
     /* If the code point maps to itself and we already have its representation,
      * copy it instead of recalculating */
@@ -4103,6 +4102,8 @@ Size_t
 Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
                           const U32 ** remaining_folds_to)
 {
+    PERL_ARGS_ASSERT_INVERSE_FOLDS_;
+
     /* Returns the count of the number of code points that fold to the input
      * 'cp' (besides itself).
      *
@@ -4125,8 +4126,6 @@ Perl_inverse_folds_(pTHX_ const UV cp, U32 * first_folds_to,
      * occupy at most 21 bits, and so a U32 is sufficient, and the lists are
      * constructed with this size (to save space and memory), and we return
      * pointers, so they must be this size */
-
-    PERL_ARGS_ASSERT_INVERSE_FOLDS_;
 
     /* 'index' is guaranteed to be non-negative, as this is an inversion map
      * that covers all possible inputs.  See [GH #16624] */
@@ -4172,6 +4171,8 @@ static UV
 S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
                                        U8* const ustrp, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING;
+
     /* This is called when changing the case of a UTF-8-encoded character above
      * the Latin1 range, and the operation is in a non-UTF-8 locale.  If the
      * result contains a character that crosses the 255/256 boundary, disallow
@@ -4186,8 +4187,6 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result,
      * lenp	points to the length of <ustrp> */
 
     UV original;    /* To store the first code point of <p> */
-
-    PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING;
 
     assert(UTF8_IS_ABOVE_LATIN1(*p));
 
@@ -4671,6 +4670,8 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
 bool
 Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 {
+    PERL_ARGS_ASSERT_CHECK_UTF8_PRINT;
+
     /* May change: warns if surrogates, non-character code points, or
      * non-Unicode code points are in 's' which has length 'len' bytes.
      * Returns TRUE if none found; FALSE otherwise.  The only other validity
@@ -4679,8 +4680,6 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 
     const U8* const e = s + len;
     bool ok = TRUE;
-
-    PERL_ARGS_ASSERT_CHECK_UTF8_PRINT;
 
     while (s < e) {
         if (UTF8SKIP(s) > len) {
@@ -4874,10 +4873,10 @@ The pointer to the PV of the C<dsv> is returned.
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
+    PERL_ARGS_ASSERT_SV_UNI_DISPLAY;
+
     const char * const ptr =
         isREGEXP(ssv) ? RX_WRAPPED((REGEXP*)ssv) : SvPVX_const(ssv);
-
-    PERL_ARGS_ASSERT_SV_UNI_DISPLAY;
 
     return Perl_pv_uni_display(aTHX_ dsv, (const U8*)ptr,
                                 SvCUR(ssv), pvlim, flags);
@@ -4966,6 +4965,8 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                              const char *s2, char **pe2, UV l2, bool u2,
                              U32 flags)
 {
+    PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
+
     const U8 *p1  = (const U8*)s1; /* Point to current char */
     const U8 *p2  = (const U8*)s2;
     const U8 *g1 = NULL;       /* goal for s1 */
@@ -4978,8 +4979,6 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
     U8 flags_for_folder = FOLD_FLAGS_FULL;
-
-    PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
     assert( ! (             (flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_LOCALE))
                && ((        (flags &  FOLDEQ_S1_ALREADY_FOLDED)
