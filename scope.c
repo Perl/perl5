@@ -875,9 +875,17 @@ Perl_save_padsv(pTHX_ PADOFFSET padix)
 
     {
         dSS_ADD;
-        SS_ADD_PTR(SvREFCNT_inc(PL_curpad[padix]));
-        SS_ADD_UV(padix_shifted | SAVEt_PADSV);
-        SS_ADD_END(2);
+        SV *cursv = PL_curpad[padix];
+
+        if (cursv) {
+            SS_ADD_PTR(SvREFCNT_inc(cursv));
+            SS_ADD_UV(padix_shifted | SAVEt_PADSV);
+            SS_ADD_END(2);
+        }
+        else {
+            SS_ADD_UV(padix_shifted | SAVEt_PADSV_NULL);
+            SS_ADD_END(1);
+        }
     }
 }
 
@@ -1600,13 +1608,19 @@ Perl_leave_scope(pTHX_ I32 base)
             break;
         }
 
+        case SAVEt_PADSV_NULL:
         case SAVEt_PADSV:
             {
                 SV **padentry = &PAD_SVl(uv >> SAVE_TIGHT_SHIFT);
 
                 SvREFCNT_dec(*padentry);
-                *padentry = ap[0].any_sv;
-                SvREFCNT_dec(ap[0].any_sv);
+
+                if (type == SAVEt_PADSV_NULL)
+                    *padentry = NULL;
+                else {
+                    *padentry = ap[0].any_sv;
+                    SvREFCNT_dec(ap[0].any_sv);
+                }
             }
             break;
 

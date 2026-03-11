@@ -16161,6 +16161,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
         switch (type) {
         case SAVEt_CLEARSV:
         case SAVEt_CLEARPADRANGE:
+        case SAVEt_PADSV_NULL:
             break;
         case SAVEt_HELEM:		/* hash element */
         case SAVEt_SV:			/* scalar reference */
