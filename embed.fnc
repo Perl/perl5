@@ -6,32 +6,62 @@
 : makedef.pl, Devel::PPPort, and porting/diag.t.
 :
 : This file contains entries for various functions, macros, typedefs, and
-: other values defined by perl.  Each entry includes the name, parameters, and
-: various attributes about it.  In most functions listed here, the name is a
-: short name, and the function's real name is the short one, prefixed by either
-: 'Perl_' (for publicly visible functions) or 'S_' (for internal-to-a-file
-: static ones).  In many instances a macro is defined that is the name in this
-: file, and which expands to call the real (full) name, with any appropriate
-: thread context parameters, thus hiding that detail from the typical code.
+: other values defined by perl.  Each entry includes the name, any parameters,
+: and various attributes about it.
+:
+: In almost all functions listed here, the specified name is a shortened
+: version of the function's real name.  The actual name for publicly visible
+: functions needs to be different from any other name that the loader could
+: need to combine with it.  We accomplish this by reserving for our use any
+: name begininng with /^[pP]erl_/, and add those prefixes to the actual names
+: of the publicly visible functions.
+:
+: Using the long names is unwieldly and harder to read; so most code will call
+: the function using the short name, never needing to even know that a long
+: name exists.  embed.h contains macros that map the short name to the actual
+: name.  But the long name may be needed in special circumstances.  See
+: perlembed for one such; another is when the short name collides with a name
+: that XS code uses.  Our short name can be #undef'ed, and the function will
+: still be accessible via its long name.  Using intermediary macros to access
+: functions also allows flexibility.  For example, parameters may be added,
+: subtracted, or rearranged.
+:
+: In contrast, macros do not usually have long versus short names, and, until
+: v5.44, there was not much effort to avoid polluting the XS namespace.  But,
+: symbols newly created in that release and going forward, are by default not
+: visible to XS code, so that new pollutants will not be inadvertently added.
+:
+: WARNING: The default hiding of symbols from XS code applies only to functions
+: and macros.  Other types of values that are created in a header file, such as
+: typedefs and enum names, will be visible to XS code, unless care is taken to
+: wrap them within C preprocessor guards like the following
+:
+:    #if defined(PERL_CORE)
+:    ...
+:    #endif
 :
 : embed.pl uses the entries here to construct:
 :   1) proto.h to declare to the compiler the function interfaces; and
-:   2) embed.h to create short name macros, and to control the visibility of
-:      other macros
+:   2) embed.h to create the short name macros, and to control the visibility
+:      of other macros
 :   3) long_names.c holds long-named function definitions that implement
 :      short-named macros listed here, when a function is necessary.
 :
 : Static functions internal to a file need not appear here, but there is
-: benefit to declaring them here:
+: significant benefit to declaring them here:
 :   1)  It generally handles the thread context parameter invisibly making it
 :       trivial to add or remove needing thread context passed;
-:   2)  It defines a PERL_ARGS_ASSERT_foo macro, which can save you debugging
-:       time;
-:   3)  It is is automatically known to Devel::PPPort, making it quicker to
+:   2)  The function may appear anywhere in the file; otherwise it has to be
+:       placed before the first call to it;
+:   3)  It defines a PERL_ARGS_ASSERT_foo macro, which can save you debugging
+:       time.  These ASSERT macros have been enhanced over time; your code will
+:       get the benefits of future enhancements without any changes to the
+:       source needed.
+:   4)  It is is automatically known to Devel::PPPort, making it quicker to
 :       later find out when it came into existence.  For example
 :           perl ppport.h --api-info=/edit_distance/
 :       yields
-:               Supported at least since perl-5.23.8, with or without ppport.h.
+:           Supported at least since perl-5.23.8, with or without ppport.h.
 :
 : Lines in this file are of the form:
 :    flags|return_type|name|arg1|arg2|...|argN ( assert(...) )*
@@ -47,59 +77,44 @@
 : comments here mostly don't include how Devel::PPPort or diag.t use them:
 : All the possible flags and their meanings are given in comments below.
 :
-: A function taking no parameters will have no 'arg' elements.  Currently
-: arguments that are function pointers are unlikely to be parsed properly here
-: (patches welcome!); you can work around this by creating a typedef for the
-: function pointer in an appropriate header file and use that here.
+: The 'argN' components denote the arguments, in order, that the macro or
+: function requires to be passed to it when calling it.  These do not appear on
+: entries for other types of elements, such as typedefs, nor when the function
+: or macro doesn't have any argumentes.  Each is usually of the form
 :
-: The optional list of asserts is used to customize the generated
-: PERL_ARGS_ASSERT macro.  See AUTOMATIC PARAMETER SANITY CHECKING below
+:   arg-type arg-name
+:
+: but with lots of possible added attributes and special cases, as described
+: below.  The attributes may come anywhere in the component.  But they function
+: as reserved keywords.  For example 'NZ' is an attribute, and hence no
+: argument may be named 'NZ.
+:
+: In threaded and embedded uses of perl, operations need to know which thread
+: or which embedded instance to operate on.  This is often invisible to the
+: operation, made possible by passing the context information to it in a
+: parameter named 'aTHX', which transparently is passed on through potentially
+: multiple layers to lower level code that does know about it.  When the perl
+: interpreter is built to not need context, it would be wasteful to have to
+: call functions with an extra meaningless parameter, so it is omitted for
+: those builds.  The entries in this file do not show it; it is automagically
+: added when needed.
+:
+: An element taking no parameters or just an implicit 'aTHX' parameter will
+: contain no 'arg' components.  Currently arguments that are function pointers
+: are unlikely to be parsed properly here (patches welcome!); you can work
+: around this by creating a typedef for the function pointer in an appropriate
+: header file and use that here.
+:
+: The final component in an entry is an optional list of asserts.  It is used
+: to customize the generated PERL_ARGS_ASSERT macro.  See AUTOMATIC PARAMETER
+: SANITY CHECKING below
 :
 : In practice, every element here will have at least one flag.  But without any
 : flags, the default would be to create an entry in proto.h declaring 'name' as
-: a function returning 'return_type' with arguments aTHX, 'arg1', ..., 'argN'.
-: The function would be visible to only other files in the perl core, unless
-: the system doesn't allow visibility restrictions.
-:
-: But, in practice, every function listed here will have a flag to indicate
-: that the function's name isn't precisely 'name', but is a perturbation of
-: that so that the actual name declared in proto.h is either 'S_name' (for
-: static (file-scoped) functions) or 'Perl_name' (for functions visible outside
-: a single file).  (A very few cases have a different backwards-compatibility
-: name instead.)  A macro is then added to embed.h which maps 'name' to the
-: actual name.  If the Perl interpreter is embedded in a larger application, or
-: on platforms where all non-static functions are externally visible, there
-: could be two functions with the same name; making ours 'Perl_foo' instead of
-: 'foo' prevents that.  This is done by using the 'p' flag.  Hence, just about
-: every function element here that is non-static should have that flag
-: specified.
-:
-: Most calls wanting to invoke 'name' will use that precise spelling, which
-: embed.h maps to the actual function.  This allows the macro to do some
-: hanky-panky behind the scenes to hide various details from the caller.
-: Notably, this includes whether or not to call the function with a
-: thread-context parameter.  This parameter is only needed for threaded or
-: embedded uses of perl, and it would be wasteful to have to call functions
-: with an extra meaningless parameter, so it is omitted unless needed.  The
-: macro in embed.h knows whether there is one or not, expanding appropriately
-: without exposing it to the code calling it.  Hence the same source code works
-: in both cases.  The macro can hide other things as well.  Devel::PPPort, for
-: example, can redefine the macro to backport fixes to bugs.
-:
-: For elements in place here in 5.42 and earlier, the visibility of the macros
-: in embed.h (and other header files) is everywhere.  This presents the
-: possibility of name space collisions in XS code, generally resolved by the XS
-: writer changing their name to not conflict.  For elements created later than
-: that, the default visibility is core-only.
-:
-: WARNING: The default hiding of symbols from XS code applies only to functions
-: and macros.  Other types of values that are created in a header file, such as
-: typedefs and enum names, will be visible to XS code, unless care is taken to
-: wrap them within C preprocessor guards like the following
-:
-:    #if defined(PERL_CORE)
-:    ...
-:    #endif
+: a function returning 'return_type' with arguments aTHX, 'arg1', ..., 'argN',
+: with 'aTHX' omitted on builds that don't need it.  The function would be
+: visible to only other files in the perl core, unless the system doesn't allow
+: visibility restrictions.
 :
 : A common pattern is to use defines like 'PERL_IN_FILE_C' (with FILE_C being
 : appropriately replaced with the real filename).  Most, if not all, of the
@@ -174,11 +189,11 @@
 :   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
 :   should place a call to that macro in foo() before any other code.  It will
 :   automatically expand to whatever checking is currently generated for 'foo'
-:   (often none).  These are mostly in the form of assert() calls, so they are
-:   only activated for DEBUGGING builds.  But for non-DEBUGGING builds, pointer
-:   parameters that must not point to NULL have a compiler directive that means
-:   the same as GCC and Clang's '__attribute__nonnull__' generated for them for
-:   compilers that we know understand it.
+:   (often none).  These are mostly in the form of assert() calls, so they
+:   are only activated for DEBUGGING builds.  But for non-DEBUGGING builds,
+:   pointer parameters that must not point to NULL have a compiler directive
+:   that means the same as GCC and Clang's '__attribute__nonnull__' generated
+:   for them for compilers that we know understand it.
 :
 :   A porting test enforces that an ARGS_ASSERT macro has been included in all
 :   new functions added to this file.  Each call should be at the top of your
@@ -627,12 +642,15 @@
 :
 :        The implication of this is that we can swap implementations at will,
 :        macro-to-function or function-to-macro, without any source code
-:        changes needed.  That doesn't work for fancy macros that use the C
-:        preprocessor language for things, like the '#' and '##' commands to
-:        it, or expanding a single argument to a list, such as 'STR_WITH_LEN'
-:        does.  And the behavior isn't precisely synonymous if the macro
-:        evaluates an argument more than once, and is called with that argument
-:        being an expression with side effects.
+:        changes needed.  That isn't advisable for changing an externally
+:        visible function into a macro because someone might be taking a
+:        function pointer of it, that will suddenly break.  It also doesn't
+:        work for fancy macros that use the C preprocessor language for things,
+:        like the '#' and '##' commands to it, or expanding a single argument
+:        to a list, such as 'STR_WITH_LEN' does.  And the behavior isn't
+:        precisely synonymous if the macro evaluates an argument more than
+:        once, and is called with that argument being an expression with side
+:        effects.
 :
 :        The default visibility of macros created before 5.43 is visible
 :        everywhere, so the visibility flags are ignored.  Starting in that
