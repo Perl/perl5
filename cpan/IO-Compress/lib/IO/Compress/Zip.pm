@@ -4,24 +4,24 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.217 qw(:Status );
-use IO::Compress::RawDeflate 2.217 ();
-use IO::Compress::Adapter::Deflate 2.217 ;
-use IO::Compress::Adapter::Identity 2.217 ;
-use IO::Compress::Zlib::Extra 2.217 ;
-use IO::Compress::Zip::Constants 2.217 ;
+use IO::Compress::Base::Common  2.219 qw(:Status );
+use IO::Compress::RawDeflate 2.219 ();
+use IO::Compress::Adapter::Deflate 2.219 ;
+use IO::Compress::Adapter::Identity 2.219 ;
+use IO::Compress::Zlib::Extra 2.219 ;
+use IO::Compress::Zip::Constants 2.219 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.217 ();
+use Compress::Raw::Zlib  2.218 ();
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ;
-           IO::Compress::Adapter::Bzip2->VERSION( 2.217 );
+           IO::Compress::Adapter::Bzip2->VERSION( 2.218 );
            require IO::Compress::Bzip2 ;
-           IO::Compress::Bzip2->VERSION( 2.217 );
+           IO::Compress::Bzip2->VERSION( 2.218 );
          } ;
 
     eval { require IO::Compress::Adapter::Lzma ;
@@ -47,7 +47,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.217';
+$VERSION = '2.219';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -570,7 +570,7 @@ sub mkFinalTrailer
         $z64e .= U64::pack_V64 $entries   ; # entries in central dir
         $z64e .= U64::pack_V64 $cd_len    ; # size of central dir
         $z64e .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to start central dir
-        $z64e .= *$self->{ZipData}{extrafieldzip64}  # otional extra field
+        $z64e .= *$self->{ZipData}{extrafieldzip64}  # optional extra field
             if defined *$self->{ZipData}{extrafieldzip64} ;
 
         $z64e  = pack("V", ZIP64_END_CENTRAL_REC_HDR_SIG) # signature
@@ -810,7 +810,7 @@ sub getFileInfo
         $params->setValue('mtime' => $mtime) ;
         $params->setValue('atime' => $atime) ;
         $params->setValue('ctime' => undef) ; # No Creation time
-        # TODO - see if can fillout creation time on non-Unix
+        # TODO - see if can fill out creation time on non-Unix
     }
 
     # NOTE - Unix specific code alert

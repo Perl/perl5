@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.217 ;
-use IO::Compress::Base::Common  2.217 qw(:Status );
+use Compress::Raw::Zlib  2.218 ;
+use IO::Compress::Base::Common  2.219 qw(:Status );
 
-use IO::Uncompress::Base  2.217 ;
-use IO::Uncompress::Adapter::Inflate  2.217 ;
+use IO::Uncompress::Base  2.219 ;
+use IO::Uncompress::Adapter::Inflate  2.219 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.217';
+$VERSION = '2.219';
 $RawInflateError = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
@@ -306,7 +306,7 @@ sub zap
     my $headerLength = *$self->{Info}{HeaderLength};
     my $block_offset =  $headerLength + *$self->{Uncomp}->getLastBlockOffset();
     $_[0] = $headerLength + *$self->{Uncomp}->getEndOffset();
-    #printf "# End $_[0], headerlen $headerLength \n";;
+    #printf "# End $_[0], headerlen $headerLength \n";
     #printf "# block_offset $block_offset %x\n", $block_offset;
     my $byte ;
     ( $self->smartSeek($block_offset) &&

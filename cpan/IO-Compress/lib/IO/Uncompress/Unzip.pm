@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.217 ;
-use IO::Compress::Base::Common  2.217 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.217 ;
-use IO::Uncompress::Adapter::Identity 2.217 ;
-use IO::Compress::Zlib::Extra 2.217 ;
-use IO::Compress::Zip::Constants 2.217 ;
+use IO::Uncompress::RawInflate  2.219 ;
+use IO::Compress::Base::Common  2.219 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.219 ;
+use IO::Uncompress::Adapter::Identity 2.219 ;
+use IO::Compress::Zlib::Extra 2.219 ;
+use IO::Compress::Zip::Constants 2.219 ;
 
-use Compress::Raw::Zlib  2.217 () ;
+use Compress::Raw::Zlib  2.218 () ;
 
 BEGIN
 {
@@ -24,7 +24,7 @@ BEGIN
    local $SIG{__DIE__};
 
     eval{ require IO::Uncompress::Adapter::Bunzip2 ;
-          IO::Uncompress::Adapter::Bunzip2->VERSION(2.217) } ;
+          IO::Uncompress::Adapter::Bunzip2->VERSION(2.219) } ;
     eval{ require IO::Uncompress::Adapter::UnLzma ;
           IO::Uncompress::Adapter::UnLzma->VERSION(2.217) } ;
     eval{ require IO::Uncompress::Adapter::UnXz ;
@@ -38,7 +38,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.217';
+$VERSION = '2.219';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);

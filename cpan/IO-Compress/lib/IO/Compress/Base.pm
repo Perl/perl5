@@ -6,9 +6,9 @@ require 5.006 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.217 ;
+use IO::Compress::Base::Common 2.219 ;
 
-use IO::File (); ;
+use IO::File ();
 use Scalar::Util ();
 
 #use File::Glob;
@@ -20,7 +20,7 @@ use Symbol();
 our (@ISA, $VERSION);
 @ISA    = qw(IO::File Exporter);
 
-$VERSION = '2.217';
+$VERSION = '2.219';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
