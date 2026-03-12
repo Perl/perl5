@@ -59,7 +59,11 @@ try_oneliner(q{print q[ "&<>^|@() !"&<>^|@() !" ]}, [],  q{ "&<>^|@() !"&<>^|@()
 try_oneliner(q{print q[ "C:\TEST A\" ]}, [],  q{ "C:\TEST A\" },  'example 8.4' );
 try_oneliner(q{print q[ "C:\TEST %&^ A\" ]}, [],  q{ "C:\TEST %&^ A\" },  'example 8.5' );
 
-try_oneliner(<<CODE, [],    "foobar",                   'newlines' );
+SKIP: {
+    skip "Can't send newlines through backticks on VMS", 1 if $^O eq 'VMS';
+    try_oneliner(<<CODE, [],    "foobar",                   'newlines' );
 print "foo";
 print "bar";
 CODE
+
+}

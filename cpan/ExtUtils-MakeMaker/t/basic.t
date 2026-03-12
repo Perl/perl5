@@ -183,10 +183,11 @@ $mtext =~ s/^(\s*PERL\s*=.*)$/$1 -Iinc/m;
 write_file($makefile, $mtext);
 
 sub check_dummy_inst {
-    my ($loc, $install_args, $label, $skipsubdir) = @_;
+    my ($loc, $label, $skipsubdir) = (shift, shift, shift);
     my %files;
     SKIP: {
-        my $install_out = run("$make install NOECHO= $install_args");
+        my $run_cmd = make_macro($make, 'install', 'NOECHO' => '', @_);
+        my $install_out = run($run_cmd);
         is( $?, 0, "install $label" ) || diag $install_out;
         like( $install_out, qr/^Installing /m, "/Installing/ $label" );
         ok( -r $loc,     "$label install dir created" )
@@ -209,17 +210,17 @@ sub check_dummy_inst {
     \%files;
 }
 
-check_dummy_inst($DUMMYINST, '', 'Module::Install style');
+check_dummy_inst($DUMMYINST, 'Module::Install style');
 
 SKIP: {
     skip 'VMS install targets do not preserve $(PREFIX)', 8 if $Is_VMS;
-    check_dummy_inst('elsewhere', "PREFIX=elsewhere", 'with PREFIX');
+    check_dummy_inst('elsewhere', 'with PREFIX', 0, 'PREFIX' => 'elsewhere');
     rmtree('elsewhere');
 }
 
 SKIP: {
     skip 'VMS install targets do not preserve $(DESTDIR)', 10 if $Is_VMS;
-    my $files = check_dummy_inst('other', 'PREFIX= DESTDIR=other', 'with DESTDIR');
+    my $files = check_dummy_inst('other', 'with DESTDIR', 0, 'PREFIX' => '', 'DESTDIR' => 'other');
     eval {
         unlike slurp($files->{'perllocal.pod'}), qr/other/, 'DESTDIR should not appear in perllocal'; 1
     } or fail "error in slurp: $@";
@@ -239,7 +240,7 @@ SKIP: {
 
 SKIP: {
     skip 'VMS install targets do not preserve $(PREFIX)', 9 if $Is_VMS;
-    check_dummy_inst('other/elsewhere', 'PREFIX=elsewhere DESTDIR=other/', 'PREFIX override and DESTDIR');
+    check_dummy_inst('other/elsewhere', 'PREFIX override and DESTDIR', 0, 'PREFIX' => 'elsewhere', 'DESTDIR' => 'other/');
     ok( !-d 'elsewhere',       '  install dir not created' );
     rmtree('other');
 }
@@ -460,13 +461,13 @@ write_file($file, $text);
 # now do with "Liar" subdir still there
 rmtree $DUMMYINST; # so no false positive from before
 @mpl_out = run(qq{$perl Makefile.PL "PREFIX=$DUMMYINST"});
-check_dummy_inst($DUMMYINST, '', "with PREFIX=$DUMMYINST");
+check_dummy_inst($DUMMYINST, "with PREFIX=$DUMMYINST");
 # now clean, delete "Liar" subdir, do again
 $realclean_out = run("$make realclean");
 rmtree 'Liar';
 rmtree $DUMMYINST; # so no false positive from before
 @mpl_out = run(qq{$perl Makefile.PL "PREFIX=$DUMMYINST"});
-check_dummy_inst($DUMMYINST, '', "with PREFIX=$DUMMYINST minus subdir", 1);
+check_dummy_inst($DUMMYINST, "with PREFIX=$DUMMYINST minus subdir", 1);
 write_file($file, $preserve_MPL); # restore Makefile.PL
 $realclean_out = run("$make realclean");
 rmtree 'Liar';
@@ -477,7 +478,8 @@ $text = $preserve_MPL;
 ok(($text =~ s:\);:    PM_FILTER => '\$(ABSPERLRUN) -ne "print unless /^#/"',\n$&:), 'successful M.PL edit');
 write_file($file, $text);
 @mpl_out = run(qq{$perl Makefile.PL});
-$test_out = run("$make test NOECHO=");
+my $run_cmd = make_macro($make, 'test', 'NOECHO' => '');
+$test_out = run($run_cmd);
 like( $test_out, qr/All tests successful/, 'make test' );
 is( $?, 0,                                 '  exited normally' ) ||
     diag $test_out;

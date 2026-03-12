@@ -107,6 +107,40 @@ our $VERSION = 2.34;
 END
 }
 
+if ( "$]" >= 5.038 ) {
+    $versions{'class Foo 1.23;'              } = '1.23';
+    $versions{'class Foo::Bar 1.23;'         } = '1.23';
+    $versions{'class Foo v1.2.3;'            } = 'v1.2.3';
+    $versions{'class Foo::Bar v1.2.3;'       } = 'v1.2.3';
+    $versions{' class Foo::Bar v1.2.3;'      } = 'v1.2.3';
+    $versions{"class Foo'Bar 1.23;"          } = '1.23';
+    $versions{'class Foo 1.230;'             } = '1.230';
+
+    $versions{'class Foo 1.23 { }'           } = '1.23';
+    $versions{'class Foo::Bar 1.23 { }'      } = '1.23';
+    $versions{'class Foo v1.2.3 { }'         } = 'v1.2.3';
+    $versions{'class Foo::Bar v1.2.3 { }'    } = 'v1.2.3';
+    $versions{' class Foo::Bar v1.2.3 { }'   } = 'v1.2.3';
+    $versions{"class Foo'Bar 1.23 { }"       } = '1.23';
+    $versions{'class Foo 1.230 { }'          } = '1.230';
+
+    $versions{'class Foo 1.23 :isa(Bar);'              } = '1.23';
+    $versions{'class Foo::Bar 1.23 :isa(Bar);'         } = '1.23';
+    $versions{'class Foo v1.2.3 :isa(Bar);'            } = 'v1.2.3';
+    $versions{'class Foo::Bar v1.2.3 :isa(Bar);'       } = 'v1.2.3';
+    $versions{' class Foo::Bar v1.2.3 :isa(Bar);'      } = 'v1.2.3';
+    $versions{"class Foo'Bar 1.23 :isa(Bar);"          } = '1.23';
+    $versions{'class Foo 1.230 :isa(Bar);'             } = '1.230';
+
+    $versions{'class Foo 1.23 :isa(Bar) { }'           } = '1.23';
+    $versions{'class Foo::Bar 1.23 :isa(Bar) { }'      } = '1.23';
+    $versions{'class Foo v1.2.3 :isa(Bar) { }'         } = 'v1.2.3';
+    $versions{'class Foo::Bar v1.2.3 :isa(Bar) { }'    } = 'v1.2.3';
+    $versions{' class Foo::Bar v1.2.3 :isa(Bar) { }'   } = 'v1.2.3';
+    $versions{"class Foo'Bar 1.23 :isa(Bar) { }"       } = '1.23';
+    $versions{'class Foo 1.230 :isa(Bar) { }'          } = '1.230';
+}
+
 if ( "$]" < 5.012 ) {
   delete $versions{'$VERSION = -1.0'};
 }

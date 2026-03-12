@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If $VERSION is in scope, parse_version() breaks
 {
-our $VERSION = '7.76';
+our $VERSION = '7.78';
 $VERSION =~ tr/_//d;
 }
 
@@ -1322,6 +1322,7 @@ sub _fixin_replace_shebang {
     my $interpreter;
     if ( defined $ENV{PERL_MM_SHEBANG} && $ENV{PERL_MM_SHEBANG} eq "relocatable" ) {
         $interpreter = "/usr/bin/env perl";
+        $arg = '';
     }
     elsif ( $cmd =~ m{^perl(?:\z|[^a-z])} ) {
         if ( $Config{startperl} =~ m,^\#!.*/perl, ) {
@@ -3029,7 +3030,7 @@ sub parse_version {
         next if $inpod || /^\s*#/;
         chop;
         next if /^\s*(if|unless|elsif)/;
-        if ( m{^ \s* package \s+ \w[\w\:\']* \s+ (v?[0-9._]+) \s* (;|\{)  }x ) {
+        if ( m{^ \s* (?:package|class) \s+ \w[\w\:\']* \s+ (v?[0-9._]+) \s* (:|;|\{)  }x ) {
             no warnings;
             $result = $1;
         }
@@ -3967,7 +3968,7 @@ sub tool_xsubpp {
     }
 
 
-    $self->{XSPROTOARG} = "" unless defined $self->{XSPROTOARG};
+    $self->{XSPROTOARG} = "-noprototypes" unless defined $self->{XSPROTOARG};
     $self->tool_xsubpp_emit($xsdir, \@tmdeps, \@tmargs);
 }
 

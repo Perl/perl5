@@ -203,43 +203,17 @@ $label2files{eud_consume} = +{
   %{ $label2files{basic} }, # make copy
   'Makefile.PL' => <<'EOF' .
 use File::Spec::Functions;
-my $root; BEGIN {$root = catdir(updir, qw(XS-Testeud_produce blib arch));}
+my @parts = split /::/, 'XS::Other';
+my $libdir = catdir(updir, qw(XS-Testeud_produce blib arch auto), @parts);
+my $stem = defined &DynaLoader::mod2fname ? DynaLoader::mod2fname(\@parts) : $parts[-1];
 EOF
     sprintf(
       $MAKEFILEPL, 'Test', 'Test.pm', qq{},
       q{
         DEFINE => '-DINVAR=input',
-        LDFROM => join(' ', '$(OBJECT)', map _quote_if_space($_), find_extra_libs({'XS::Other'=>undef}, [$root])),
+        LIBS   => ["-L$libdir -l$stem"],
       },
-    ) . <<'EOF',
-use Config;
-use File::Spec::Functions;
-sub _quote_if_space { $_[0] =~ / / ? qq{"$_[0]"} : $_[0] }
-my %exts; BEGIN { %exts = (
-  MSWin32 => [ ".lib", ".$Config{dlext}", $Config{_a} ],
-  cygwin => [ '.dll' ],
-  android => [ ".$Config{dlext}" ],
-); }
-sub find_extra_libs {
-  my ($deps, $search) = @_;
-  return () if !keys %$deps;
-  return () unless my $exts = $exts{$^O};
-  my @found_libs = ();
-  DEP: foreach my $name (keys %$deps) {
-    my @parts = split /::/, $name;
-    my $stem = defined &DynaLoader::mod2fname
-      ? DynaLoader::mod2fname(\@parts) : $parts[-1];
-    my @bases = map $stem.$_, @$exts;
-    for my $dir (grep -d, @$search) { # only extant dirs
-      my ($found) = grep -f, map catfile($dir, 'auto', @parts, $_), @bases;
-      next if !defined $found;
-      push @found_libs, $found;
-      next DEP;
-    }
-  }
-  @found_libs;
-}
-EOF
+    ),
   'Test.pm' => do {
     my $t = $PM_TEST; $t =~ s:is_even:is_odd:g;
     $t =~ s/bootstrap/

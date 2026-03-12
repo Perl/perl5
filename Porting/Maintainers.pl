@@ -501,8 +501,8 @@ our %Modules = (
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.76.tar.gz',
-        'SYNCINFO'     => 'yorton on Sun Mar 26 16:20:23 2023',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.78.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu Mar 12 07:27:54 2026',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},

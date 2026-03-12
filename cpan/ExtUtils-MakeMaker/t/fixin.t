@@ -12,7 +12,7 @@ BEGIN {
 
 use File::Spec;
 
-use Test::More tests => 25;
+use Test::More tests => 28;
 
 use Config;
 use TieOut;
@@ -122,6 +122,21 @@ END
 blah blah blah
 END
         }
+    );
+}
+
+SKIP: {
+    skip "Not relevant on VMS or MSWin32", 3 if $^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin';
+    local $ENV{PERL_MM_SHEBANG}='relocatable';
+    test_fixin(<<END,
+#!/usr/bin/env perl
+
+foo doo who doo
+END
+    sub {
+        my @lines = @_;
+        like $lines[0], qr[^#!/usr/bin/env perl\s$], "Relocatable perl";
+    }
     );
 }
 
