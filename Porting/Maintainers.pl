@@ -224,9 +224,12 @@ our %Modules = (
         'EXCLUDED'     => [
             qr{^t/Test/},
             qr{^t/meta},
-            'bzip2-src/bzip2-const.patch',
-            'bzip2-src/bzip2-cpp.patch',
-            'bzip2-src/bzip2-unsigned.patch',
+            qw(
+               bzip2-src/bzip2-const.patch
+               bzip2-src/bzip2-cpp.patch
+               bzip2-src/bzip2-unsigned.patch
+               SECURITY.md
+            ),
         ],
     },
 
@@ -238,7 +241,8 @@ our %Modules = (
             qr{^examples/},
             qr{^t/Test/},
             qr{^t/meta},
-            qw( t/000prereq.t
+            qw(
+                t/000prereq.t
                 t/99pod.t
                 SECURITY.md
             ),
