@@ -33,7 +33,7 @@ SKIP:
 {
     # If running a github workflow that tests upstream zlib/zlib-ng, check we have the version requested
 
-    # Not github or not asking for explicit verson, so skip
+    # Not github or not asking for explicit version, so skip
     skip "Not github", 7
         if ! (defined $ENV{GITHUB_ACTION} && defined $ENV{ZLIB_VERSION}) ;
 
