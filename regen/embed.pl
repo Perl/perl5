@@ -4239,7 +4239,8 @@ sub generate_proto_h {
                     $temp_arg =~
                               s/ \s* \b ( struct | enum | union ) \b \s*/ /xg;
                     if ( ($temp_arg ne "...")
-                        && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
+                        && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) )
+                    {
                         die_at_end "$func: $arg ($n) doesn't have a name\n";
                     }
                     my $argname = $1;
