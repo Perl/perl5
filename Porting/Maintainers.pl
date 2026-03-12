@@ -240,7 +240,8 @@ our %Modules = (
             qr{^t/meta},
             qw( t/000prereq.t
                 t/99pod.t
-                ),
+                SECURITY.md
+            ),
         ],
     },
 
@@ -249,9 +250,9 @@ our %Modules = (
         'SYNCINFO'     => 'jkeenan on Wed Feb 11 08:21:24 2026',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => [qw(
-		examples/show-v.pl
-		SECURITY.md
-		)],
+            examples/show-v.pl
+            SECURITY.md
+        )],
     },
 
     'constant' => {
