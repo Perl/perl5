@@ -11975,6 +11975,9 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH)
 #endif /* defined(PERL_IN_REGEXEC_C) */
 #if defined(PERL_IN_REGEX_ENGINE)
 
+# define PERL_ARGS_ASSERT_REGPROP               \
+        assert(sv); assert(o)
+
 # if defined(DEBUGGING)
 #   define PERL_ARGS_ASSERT_DEBUG_PEEP          \
         assert(str); assert(pRExC_state)
@@ -11994,10 +11997,15 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH)
 #   define PERL_ARGS_ASSERT_RE_PRINTF           \
         assert(fmt)
 
-#   define PERL_ARGS_ASSERT_REGPROP             \
-        assert(sv); assert(o)
-
-#   if defined(PERL_CORE) || defined(PERL_EXT)
+# endif /* defined(DEBUGGING) */
+# if defined(PERL_CORE) || defined(PERL_EXT)
+PERL_CALLCONV void
+Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_2)
+        Perl_attribute_nonnull_(pTHX_3)
+        __attribute__visibility__("hidden");
+#   if defined(DEBUGGING)
 PERL_CALLCONV void
 Perl_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state, regnode *scan, U32 depth, U32 flags)
         Perl_attribute_nonnull_aTHX_
@@ -12034,14 +12042,8 @@ Perl_re_printf(pTHX_ const char *fmt, ...)
         Perl_attribute_nonnull_(pTHX_1)
         __attribute__visibility__("hidden")
         __attribute__format__(__printf__,pTHX_1,pTHX_2);
-PERL_CALLCONV void
-Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_2)
-        Perl_attribute_nonnull_(pTHX_3)
-        __attribute__visibility__("hidden");
-#   endif /* defined(PERL_CORE) || defined(PERL_EXT) */
-# endif /* defined(DEBUGGING) */
+#   endif /* defined(DEBUGGING) */
+# endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_EXT_RE_BUILD)
 #   define PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA \
         assert(node)
