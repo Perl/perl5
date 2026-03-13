@@ -2875,6 +2875,12 @@ Some examples:
                        # return 0 if any were found and changed.
                        # Otherwise return 1
 
+Transliterated characters are not rescanned for further transliteration, even
+if a character in the I<REPLACEMENTLIST> appears elsewhere in the
+I<SEARCHLIST>:
+
+    tr/ox/xo/;  # oxxo -> xoox
+
 If multiple transliterations are given for a character, only the
 first one is used:
 
