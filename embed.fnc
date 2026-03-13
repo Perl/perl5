@@ -6071,6 +6071,11 @@ CRip	|bool	|check_regnode_after					\
 CRip	|regnode *|regnext	|NULLOK const regnode *p
 CRip	|regnode *|regnode_after|NULLOK const regnode *p		\
 				|bool varies
+Ep	|void	|regprop	|NULLOK const regexp *prog		\
+				|NN SV *sv				\
+				|NN const regnode *o			\
+				|NULLOK const regmatch_info *reginfo	\
+				|NULLOK const RExC_state_t *pRExC_state
 # if defined(DEBUGGING)
 Ep	|void	|debug_peep	|NN const char *str			\
 				|NN const RExC_state_t *pRExC_state	\
@@ -6097,11 +6102,6 @@ Ep	|const regnode *|dumpuntil					\
 				|NN SV *sv				\
 				|I32 indent				\
 				|U32 depth
-Ep	|void	|regprop	|NULLOK const regexp *prog		\
-				|NN SV *sv				\
-				|NN const regnode *o			\
-				|NULLOK const regmatch_info *reginfo	\
-				|NULLOK const RExC_state_t *pRExC_state
 EFp	|int	|re_indentf	|NN const char *fmt			\
 				|U32 depth				\
 				|...
