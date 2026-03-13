@@ -43,8 +43,6 @@ in deprecation warnings.
 
 Category: "deprecated::unicode_property_name"
 
-=head2 Perl 5.44
-
 =head3 Changing C<use VERSION> while another C<use VERSION> is in scope
 
 A C<use VERSION> declaration has many implicit effects on the surrounding
@@ -55,6 +53,8 @@ Perl 5.39.8, due to the increasing complexity of swapping from one
 prevailing version to another.
 
 Category: "deprecated::subsequent_use_version"
+
+=head2 Perl 5.44
 
 =head3 Goto Block Construct
 
@@ -74,8 +74,8 @@ Category: "deprecated::goto_construct"
 =head2 Perl 5.42
 
 There were no deprecations or fatalizations in Perl 5.42.  (There were
-deprecations we I<planned> to do in Perl 5.42 but failed to carry out; they
-have been re-scheduled.)
+deprecations we I<planned> to do in Perl 5.42 but failed to carry out.  One
+was accomplished in Perl 5.44; one was cancelled; one is now unscheduled.)
 
 =head2 Perl 5.40
 
