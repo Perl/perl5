@@ -31,7 +31,7 @@ Perl_deb_nocontext(const char *pat, ...)
     PERL_ARGS_ASSERT_DEB_NOCONTEXT;
 
 #ifdef DEBUGGING
-    dTHX;
+    dTHXa(NULL);
     va_list args;
     va_start(args, pat);
     vdeb(pat, &args);
@@ -80,6 +80,7 @@ void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VDEB;
+    GET_aTHX_if_NULL;
 
 #ifdef DEBUGGING
     const char* const file = PL_curcop ? OutCopFILE(PL_curcop) : "<null>";

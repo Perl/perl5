@@ -1413,8 +1413,8 @@ char *
 Perl_form_nocontext(const char* pat, ...)
 {
     PERL_ARGS_ASSERT_FORM_NOCONTEXT;
+    dTHXa(NULL);
 
-    dTHX;
     char *retval;
     va_list args;
     va_start(args, pat);
@@ -1473,6 +1473,7 @@ char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VFORM;
+    GET_aTHX_if_NULL;
 
     SV * const sv = mess_alloc();
     sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
@@ -1507,9 +1508,10 @@ SV *
 Perl_mess_nocontext(const char *pat, ...)
 {
     PERL_ARGS_ASSERT_MESS_NOCONTEXT;
+    dTHXa(NULL);
 
-    dTHX;
     SV *retval;
+
     va_list args;
     va_start(args, pat);
     retval = vmess(pat, &args);
@@ -1734,6 +1736,7 @@ SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VMESS;
+    GET_aTHX_if_NULL;
 
     SV * const sv = mess_alloc();
 
@@ -1890,6 +1893,7 @@ void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VCROAK;
+    GET_aTHX_if_NULL;
 
     SV *ex = with_queued_errors(pat ? vmess(pat, args) : mess_sv(ERRSV, 0));
     invoke_exception_hook(ex, FALSE);
@@ -2053,6 +2057,7 @@ void
 Perl_vwarn(pTHX_ const char* pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VWARN;
+    GET_aTHX_if_NULL;
 
     SV *ex = vmess(pat, args);
     if (!invoke_exception_hook(ex, TRUE))
@@ -2094,8 +2099,8 @@ void
 Perl_warn_nocontext(const char *pat, ...)
 {
     PERL_ARGS_ASSERT_WARN_NOCONTEXT;
+    dTHXa(NULL);
 
-    dTHX;
     va_list args;
     va_start(args, pat);
     vwarn(pat, &args);
@@ -2180,8 +2185,8 @@ void
 Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
     PERL_ARGS_ASSERT_WARNER_NOCONTEXT;
+    dTHXa(NULL);
 
-    dTHX;
     va_list args;
     va_start(args, pat);
     vwarner(err, pat, &args);
@@ -2193,6 +2198,7 @@ void
 Perl_ck_warner_d(pTHX_ U32 err, const char* pat, ...)
 {
     PERL_ARGS_ASSERT_CK_WARNER_D;
+    GET_aTHX_if_NULL;
 
     if (Perl_ckwarn_d(aTHX_ err)) {
         va_list args;
@@ -2206,6 +2212,7 @@ void
 Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
 {
     PERL_ARGS_ASSERT_CK_WARNER;
+    GET_aTHX_if_NULL;
 
     if (Perl_ckwarn(aTHX_ err)) {
         va_list args;
@@ -2230,6 +2237,8 @@ void
 Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 {
     PERL_ARGS_ASSERT_VWARNER;
+    GET_aTHX_if_NULL;
+
     if (
         (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) &&
         !(PL_in_eval & EVAL_KEEPERR)
@@ -2256,7 +2265,7 @@ void
 Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VFATAL_WARNER;
-
+    GET_aTHX_if_NULL;
     PERL_UNUSED_ARG(err);
 
     SV * const msv = vmess(pat, args);
@@ -2276,6 +2285,7 @@ bool
 Perl_ckwarn(pTHX_ U32 w)
 {
     PERL_ARGS_ASSERT_CKWARN;
+    GET_aTHX_if_NULL;
 
     /* If lexical warnings have not been set, use $^W.  */
     if (isLEXWARN_off)
@@ -2290,6 +2300,7 @@ bool
 Perl_ckwarn_d(pTHX_ U32 w)
 {
     PERL_ARGS_ASSERT_CKWARN_D;
+    GET_aTHX_if_NULL;
 
     /* If lexical warnings have not been set then default classes warn.  */
     if (isLEXWARN_off)
