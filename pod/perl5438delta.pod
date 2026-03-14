@@ -40,7 +40,10 @@ B<experimental>.
 
 =head2 New source of entropy for PRNG seeding
 
-Perl now utilizes the C<getentropy()> system call to fetch random bytes suitable for seeding the internal PRNG. Previously Perl would read raw bytes from the F</dev/urandom> filehandle. Perl now seeds itself in this order (and falls through upon failure):
+Perl now uses the C<getentropy()> system call to fetch random bytes suitable
+for seeding the internal PRNG. Previously Perl would read raw bytes from the
+F</dev/urandom> device. Perl now seeds itself in this order (and falls through
+upon failure):
 
 =over
 
@@ -54,7 +57,7 @@ F</dev/urandom> on systems that have it
 
 =item 3.
 
-Hash of internal state variables: unixtime, process PID, and pointer value
+Hash of internal state variables: Unix time, process ID, and pointer value
 
 =back
 
