@@ -11,7 +11,7 @@ use IO::Socket;
 use Carp;
 
 our @ISA = qw(IO::Socket);
-our $VERSION = "1.56";
+our $VERSION = "1.57";
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
 
@@ -45,6 +45,7 @@ sub configure {
     }
     elsif(exists $arg->{Peer}) {
 	my $addr = sockaddr_un($arg->{Peer});
+	${*$sock}{'io_socket_peername'} = $arg->{Peer};
 	$sock->connect($addr) or
 	    return undef;
     }
