@@ -901,7 +901,7 @@ sub handle_apidoc_line ($file, $line_num, $type, $arg) {
         $ret_type = '#ifdef';
     }
 
-    warn ("'$name' not \\w+ in '$proto_as_written' "
+    die ("'$name' not \\w+ in '$proto_as_written' "
        .  where_from_string($file, $line_num))
                         if $flags !~ /N/
                         && $name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
@@ -1132,9 +1132,9 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
             if ($file_is_C && $inner_arg =~ m: ^ \s* \* / $ :x) {
 
                 # End of comment line in C files is a fall-back
-                # terminator, but warn only if there actually is some
+                # terminator, but die only if there actually is some
                 # accumulated text
-                warn "=cut missing? "
+                die "=cut missing? "
                    . where_from_string($file, $line_num)
                    . "\n$inner_arg"                             if $text =~ /\S/;
                 last;
@@ -1171,7 +1171,7 @@ sub autodoc ($fh, $file) {  # parse a file and extract documentation info
             if (   ! $is_link_only
                 && exists $docs{$destpod}{$section}{$element_name})
             {
-                warn "$0: duplicate API entry for '$element_name'"
+                die "$0: duplicate API entry for '$element_name'"
                    . " $destpod/$section "
                    . where_from_string($file, $line_num);
                 next;
@@ -1475,7 +1475,7 @@ sub parse_config_h {
                 }
             }
 
-            warn "$name has no documentation "
+            die "$name has no documentation "
                . where_from_string($config_h, $configs{$name}{defn_line_num});
 
             next;
@@ -1761,7 +1761,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my $flags = $item0->{flags};
 
     if ($pod !~ /\S/) {
-        warn "Empty pod for $element_name ("
+        die "Empty pod for $element_name ("
            . where_from_string($item0->{file}, $item0->{line_num})
            . ')';
     }
@@ -1943,7 +1943,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
             if (! $additional_long_form && $flags =~ /O/) {
                 my $real_proto = delete $protos{"perl_$name"};
                 if (! $real_proto) {
-                    warn "Unexpectedly there isn't a 'perl_$name' even though"
+                    die "Unexpectedly there isn't a 'perl_$name' even though"
                        . " there is an 'O' flag "
                        . where_from_string($item->{file}, $item->{line_num})
                        . "; omitting the deprecation warning";
@@ -1960,7 +1960,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                                         if $flags =~ /u/ && $flags !~ /[my]/;
 
             my $has_semicolon = $flags =~ /;/;
-            warn "'U' and ';' flags are incompatible"
+            die "'U' and ';' flags are incompatible"
                . where_from_string($item->{file}, $item->{line_num})
                                             if $flags =~ /U/ && $has_semicolon;
 
@@ -1971,12 +1971,12 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             my $has_args = $flags !~ /n/;
             if (! $has_args) {
-                warn "$name: n flag without [mv#] "
+                die "$name: n flag without [mv#] "
                    . where_from_string($item->{file}, $item->{line_num})
                                                      unless $flags =~ /[mv#]/;
 
                 if ($item->{args} && $item->{args}->@*) {
-                    warn "$name: n flag but apparently has args"
+                    die "$name: n flag but apparently has args"
                        . where_from_string($item->{file}, $item->{line_num});
                     $flags =~ s/n//g;
                     $has_args = 1;
@@ -2052,7 +2052,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                         $any_has_additional_long_form = 1;
                     }
                     else {
-                        warn "$name unexpectedly doesn't have a long name;"
+                        die "$name unexpectedly doesn't have a long name;"
                            . " only short name used\n("
                            . where_from_string($item->{file}, $item->{line_num})
                            . ')';
@@ -2409,7 +2409,7 @@ sub output ($destpod) {  # Output a complete pod file
             if (   $podname eq $api
                 && ! $valid_sections{$section_name}{may_be_empty_in_perlapi})
             {
-                warn "Empty section '$section_name' for $podname; skipped";
+                die "Empty section '$section_name' for $podname; skipped";
                 next;
             }
         }
@@ -2759,7 +2759,7 @@ foreach my $section_name (keys $unknown->%*) {
         }
 
         my $destpod = destination_pod($corrected->{flags});
-        warn "The destination pod for $item_name remains unknown."
+        die "The destination pod for $item_name remains unknown."
           . "  It should have been determined by now" if $destpod eq "unknown";
 
         # $destpod now gives the correct pod for this group.  Prepare to move it
@@ -2841,12 +2841,12 @@ for my $which (\%api, \%intern) {
         next if $which == \%intern && $element->{flags} =~ /A/;
 
         if ($element->{docs_found}) {
-            warn "'$name' missing 'd' flag "
+            die "'$name' missing 'd' flag "
                . where_from_string($element->{file}, $element->{line_num})
                                                if ! $element->{docs_expected};
         }
         elsif ($element->{docs_expected}) { # But no docs found
-            warn "No documentation was found for $name, even though "
+            die "No documentation was found for $name, even though "
                . where_from_string($element->{file}, $element->{line_num})
                . " says there should be some available"
         }
