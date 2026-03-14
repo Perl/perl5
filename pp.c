@@ -573,13 +573,13 @@ PP(pp_ref)
 
   do_sv_ref:
     {
+        HEK* hek = sv_refhek(SvRV(sv), TRUE);
         dTARGET;
-        sv_ref(TARG, SvRV(sv), TRUE);
+        sv_sethek(TARG, hek);
         rpp_replace_1_1_NN(TARG);
         SvSETMAGIC(TARG);
         return NORMAL;
     }
-
 }
 
 
@@ -681,8 +681,12 @@ PP(pp_gelem)
         case 'P':
             if (memEQs(elem, len, "PACKAGE")) {
                 const HV * const stash = GvSTASH(gv);
-                const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
-                sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
+                const HEK * hek = stash ? HvNAME_HEK(stash) : NULL;
+                if (!hek) {
+                    SV * sv_hek = SV_CONST(__ANON__);
+                    hek = SvSHARED_HEK_FROM_PV(SvPVX_const(sv_hek));
+                }
+                sv = newSVhek(hek);
             }
             break;
         case 'S':

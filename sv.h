@@ -2754,8 +2754,12 @@ Create a new IO, setting the reference count to 1.
 #  define SV_CONST_FETCHSIZE 5
 #  define SV_CONST_STORE 6
 #  define SV_CONST_STORESIZE 7
-#  define SV_CONST_EXISTS 8
+#endif
 
+/* required by Perl_sv_can_existdelete() */
+#define SV_CONST_EXISTS 8
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #  define SV_CONST_PUSH 9
 #  define SV_CONST_POP 10
 #  define SV_CONST_SHIFT 11
@@ -2780,14 +2784,34 @@ Create a new IO, setting the reference count to 1.
 #  define SV_CONST_BINMODE 28
 #  define SV_CONST_FILENO 29
 #  define SV_CONST_CLOSE 30
+#endif
 
+/* required by Perl_sv_can_existdelete() */
 #  define SV_CONST_DELETE 31
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #  define SV_CONST_CLEAR 32
 #  define SV_CONST_UNTIE 33
 #  define SV_CONST_DESTROY 34
+
+#  define SV_CONST_ARRAY 35
+#  define SV_CONST_CODE 36
+#  define SV_CONST_FORMAT 37
+#  define SV_CONST_GLOB 38
+#  define SV_CONST_HASH 39
+#  define SV_CONST_INVLIST 40
+#  define SV_CONST_IO 41
+#  define SV_CONST_LVALUE 42
+#  define SV_CONST_OBJECT 43
+#  define SV_CONST_REF 44
+#  define SV_CONST_REGEXP 45
+/* "SCALAR" is above */
+#  define SV_CONST_UNKNOWN 46
+#  define SV_CONST_VSTRING 47
+#  define SV_CONST___ANON__ 48
 #endif
 
-#define SV_CONSTS_COUNT 35
+#define SV_CONSTS_COUNT 49
 
 /*
  * Bodyless IVs and NVs!
