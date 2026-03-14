@@ -62,13 +62,17 @@ int win32_ioctlsocket (SOCKET s, long cmd, u_long *argp);
 int win32_getpeername (SOCKET s, struct sockaddr *name, int * namelen);
 int win32_getsockname (SOCKET s, struct sockaddr *name, int * namelen);
 int win32_getsockopt (SOCKET s, int level, int optname, char * optval, int *optlen);
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
 u_long win32_htonl (u_long hostlong);
 u_short win32_htons (u_short hostshort);
+#endif
 unsigned long win32_inet_addr (const char * cp);
 char * win32_inet_ntoa (struct in_addr in);
 int win32_listen (SOCKET s, int backlog);
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
 u_long win32_ntohl (u_long netlong);
 u_short win32_ntohs (u_short netshort);
+#endif
 int win32_recv (SOCKET s, char * buf, int len, int flags);
 int win32_recvfrom (SOCKET s, char * buf, int len, int flags,
                          struct sockaddr *from, int * fromlen);
@@ -109,10 +113,33 @@ void win32_endservent(void);
 
 /* direct to our version */
 
-#define htonl		win32_htonl
-#define htons		win32_htons
-#define ntohl		win32_ntohl
-#define ntohs		win32_ntohs
+#ifndef PERL_MY_HOST_NET_BYTE_SWAP
+
+/* Because of hysterical raisins involving Trumpet Winsock, force the POSIX
+   name, to redirect into perl5XX.dll, which goes through [unimplimented/NOOP]
+   iperlsys.h/CPerlHost emulation on threaded WinPerls, which then redirects to
+   ws2_32.dll's implementation.
+
+   No-thread WinPerl immediatly redirects to ws2_32.dll's implementation. */
+#  define htonl		win32_htonl
+#  define htons		win32_htons
+#  define ntohl		win32_ntohl
+#  define ntohs		win32_ntohs
+#else
+/* These 4 win32_*() prefixed byte swap functions are macros
+   if #include "perl.h" is done in a TU. A manual function declaration in
+   a Perl XS unaware TU/.c file, that is linked with another perl aware .xs TU.
+   Then both TUs are linked into a XSUB/DynaLoader/EU::PXS .dll, is the
+   theoretical BBC risk. Hence if a TU does #include "perl.h" they get the
+   macro, if the TU is Perl XS unaware but manually declared these byte swappers
+   that TU will wind up at the ws2_32.dll exported implementation. */
+
+#  define win32_htonl		htonl /* redirect to perl.h's very fast impl */
+#  define win32_htons		htons
+#  define win32_ntohl		ntohl
+#  define win32_ntohs		ntohs
+#endif
+
 #define inet_addr	win32_inet_addr
 #define inet_ntoa	win32_inet_ntoa
 

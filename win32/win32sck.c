@@ -316,32 +316,6 @@ convert_errno_to_wsa_error(int err)
 }
 #endif /* ERRNO_HAS_POSIX_SUPPLEMENT */
 
-u_long
-win32_htonl(u_long hostlong)
-{
-    return htonl(hostlong);
-}
-
-u_short
-win32_htons(u_short hostshort)
-{
-    return htons(hostshort);
-}
-
-u_long
-win32_ntohl(u_long netlong)
-{
-    return ntohl(netlong);
-}
-
-u_short
-win32_ntohs(u_short netshort)
-{
-    return ntohs(netshort);
-}
-
-
-
 SOCKET
 win32_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
