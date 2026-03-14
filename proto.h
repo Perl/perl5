@@ -631,35 +631,29 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop, GV *namegv, SV *protos
 
 PERL_CALLCONV void
 Perl_ck_warner(pTHX_ U32 err, const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         __attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_CK_WARNER              \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_ck_warner_d(pTHX_ U32 err, const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         __attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_CK_WARNER_D            \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV bool
 Perl_ckwarn(pTHX_ U32 w)
-        Perl_attribute_nonnull_aTHX
         __attribute__warn_unused_result__
         __attribute__pure__;
-#define PERL_ARGS_ASSERT_CKWARN                 \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_CKWARN
 
 PERL_CALLCONV bool
 Perl_ckwarn_d(pTHX_ U32 w)
-        Perl_attribute_nonnull_aTHX
         __attribute__warn_unused_result__
         __attribute__pure__;
-#define PERL_ARGS_ASSERT_CKWARN_D               \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_CKWARN_D
 
 PERL_CALLCONV void
 Perl_clear_defarray(pTHX_ AV *av, bool abandon)
@@ -769,11 +763,9 @@ Perl_create_eval_scope(pTHX_ OP *retop, SV **sp, U32 flags)
 
 PERL_CALLCONV_NO_RET void
 Perl_croak(pTHX_ const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         __attribute__noreturn__
         __attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
-#define PERL_ARGS_ASSERT_CROAK                  \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_CROAK
 
 PERL_CALLCONV_NO_RET void
 Perl_croak_caller(const char *pat, ...)
@@ -1110,11 +1102,9 @@ Perl_despatch_signals(pTHX)
 
 PERL_CALLCONV_NON_VOID_NO_RET(OP *) OP *
 Perl_die(pTHX_ const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         __attribute__noreturn__
         __attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
-#define PERL_ARGS_ASSERT_DIE                    \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_DIE
 
 PERL_CALLCONV_NON_VOID_NO_RET(OP *) OP *
 Perl_die_sv(pTHX_ SV *baseex)
@@ -1529,11 +1519,10 @@ Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_
 
 PERL_CALLCONV void
 Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         __attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_FATAL_WARNER           \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
@@ -1657,11 +1646,10 @@ Perl_force_out_malformed_utf8_message_(pTHX_ const U8 * const p, const U8 * cons
 
 PERL_CALLCONV char *
 Perl_form(pTHX_ const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         __attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_FORM                   \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_free_tied_hv_pool(pTHX)
@@ -3649,11 +3637,10 @@ Perl_mbtowc_(pTHX_ const wchar_t *pwc, const char *s, const Size_t len)
 
 PERL_CALLCONV SV *
 Perl_mess(pTHX_ const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         __attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_MESS                   \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV SV *
 Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
@@ -4955,10 +4942,8 @@ Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
 
 PERL_CALLCONV void
 Perl_output_non_portable(pTHX_ const U8 shift)
-        Perl_attribute_nonnull_aTHX
         __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE    \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_OUTPUT_NON_PORTABLE
 
 PERL_CALLCONV void
 Perl_package(pTHX_ OP *name, OP *version)
@@ -8426,10 +8411,8 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 
 PERL_CALLCONV_NO_RET void
 Perl_vcroak(pTHX_ const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         __attribute__noreturn__;
-#define PERL_ARGS_ASSERT_VCROAK                 \
-        Perl_assert_aTHX
+#define PERL_ARGS_ASSERT_VCROAK
 
 PERL_CALLCONV void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
@@ -8440,17 +8423,15 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 
 PERL_CALLCONV void
 Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_VFATAL_WARNER          \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_VFORM                  \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_vivify_defelem(pTHX_ SV *sv)
@@ -8477,10 +8458,9 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 
 PERL_CALLCONV SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_VMESS                  \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV SV *
 Perl_vnewSVpvf(pTHX_ const char * const pat, va_list * const args)
@@ -8520,17 +8500,15 @@ Perl_vverify(pTHX_ SV *vs)
 
 PERL_CALLCONV void
 Perl_vwarn(pTHX_ const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_VWARN                  \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_vwarner(pTHX_ U32 err, const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_VWARNER                \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
@@ -8542,11 +8520,10 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 PERL_CALLCONV void
 Perl_warn(pTHX_ const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         __attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_WARN                   \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_warn_sv(pTHX_ SV *baseex)
@@ -8557,11 +8534,10 @@ Perl_warn_sv(pTHX_ SV *baseex)
 
 PERL_CALLCONV void
 Perl_warner(pTHX_ U32 err, const char *pat, ...)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         __attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_WARNER                 \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV I32
 Perl_was_lvalue_sub(pTHX)

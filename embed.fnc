@@ -1055,12 +1055,12 @@ Adp	|OP *	|ck_entersub_args_proto_or_list 			\
 				|NN GV *namegv				\
 				|NN SV *protosv
 
-CPop	|bool	|ckwarn 	|U32 w
-CPop	|bool	|ckwarn_d	|U32 w
-Adfp	|void	|ck_warner	|U32 err				\
+CPopt	|bool	|ckwarn 	|U32 w
+CPopt	|bool	|ckwarn_d	|U32 w
+Adfpt	|void	|ck_warner	|U32 err				\
 				|NN const char *pat			\
 				|...
-Adfp	|void	|ck_warner_d	|U32 err				\
+Adfpt	|void	|ck_warner_d	|U32 err				\
 				|NN const char *pat			\
 				|...
 
@@ -1116,7 +1116,7 @@ px	|void	|create_eval_scope					\
 				|NN SV **sp				\
 				|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
-AMdfpr	|void	|croak		|NULLOK const char *pat 		\
+AMdfprt |void	|croak		|NULLOK const char *pat 		\
 				|...
 Tfpr	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...
@@ -1224,7 +1224,7 @@ ETXdp	|char * |delimcpy_no_escape					\
 				|const int delim			\
 				|NN I32 *retlen
 Cp	|void	|despatch_signals
-AMdfpr	|OP *	|die		|NULLOK const char *pat 		\
+AMdfprt |OP *	|die		|NULLOK const char *pat 		\
 				|...
 Adpr	|OP *	|die_sv 	|NN SV *baseex
 : Used in util.c
@@ -1403,7 +1403,7 @@ ATdmp	|bool	|extended_utf8_to_uv					\
 				|EPTRge const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
-Adfp	|void	|fatal_warner	|U32 err				\
+Adfpt	|void	|fatal_warner	|U32 err				\
 				|NN const char *pat			\
 				|...
 Adp	|void	|fbm_compile	|NN SV *sv				\
@@ -1469,7 +1469,7 @@ Cp	|void	|force_out_malformed_utf8_message_			\
 				|EPTRgt const U8 * const e		\
 				|U32 flags				\
 				|const bool die_here
-Adfp	|char * |form		|NN const char *pat			\
+Adfpt	|char * |form		|NN const char *pat			\
 				|...
 : Only used in perl.c
 p	|void	|free_tied_hv_pool
@@ -2240,7 +2240,7 @@ Cp	|Stack_off_t *|markstack_grow
 EXp	|int	|mbtowc_	|NULLOK const wchar_t *pwc		\
 				|NULLOK const char *s			\
 				|const Size_t len
-Adfp	|SV *	|mess		|NN const char *pat			\
+Adfpt	|SV *	|mess		|NN const char *pat			\
 				|...
 Adp	|SV *	|mess_sv	|NN SV *basemsg 			\
 				|bool consume
@@ -2692,7 +2692,7 @@ Adp	|OP *	|op_sibling_splice					\
 px	|OP *	|op_unscope	|NULLOK OP *o
 ARdpx	|OP *	|op_wrap_finally|NN OP *block				\
 				|NN OP *finally
-p	|void	|output_non_portable					\
+pt	|void	|output_non_portable					\
 				|const U8 shift
 : Used in perly.y
 dp	|void	|package	|NN OP *name				\
@@ -2790,7 +2790,7 @@ p	|void	|peep		|NULLOK OP *o
 ATdo	|PerlInterpreter *|perl_alloc
 ATdo	|void	|perl_construct |NN PerlInterpreter *my_perl
 
-: The reason for the 'u' flag is that this passes "aTHX_ x" to its callee: not
+t: The reason for the 'u' flag is that this passes "aTHX_ x" to its callee: not
 : a legal C parameter
 Admu	|const XOP *|Perl_custom_op_xop 				\
 				|NN const OP *o
@@ -4214,14 +4214,14 @@ CRTip	|unsigned int|variant_byte_number				\
 				|PERL_UINTMAX_T word
 Adp	|int	|vcmp		|NN SV *lhv				\
 				|NN SV *rhv
-Adpr	|void	|vcroak 	|NULLOK const char *pat 		\
+Adprt	|void	|vcroak 	|NULLOK const char *pat 		\
 				|NULLOK va_list *args
 Adp	|void	|vdeb		|NN const char *pat			\
 				|NULLOK va_list *args
-Adp	|void	|vfatal_warner	|U32 err				\
+Adpt	|void	|vfatal_warner	|U32 err				\
 				|NN const char *pat			\
 				|NULLOK va_list *args
-Adp	|char * |vform		|NN const char *pat			\
+Adpt	|char * |vform		|NN const char *pat			\
 				|NULLOK va_list *args
 : Used by Data::Alias
 EXp	|void	|vivify_defelem |NN SV *sv
@@ -4232,7 +4232,7 @@ Adp	|void	|vload_module	|U32 flags				\
 				|NN SV *name				\
 				|NULLOK SV *ver 			\
 				|NULLOK va_list *args
-Adp	|SV *	|vmess		|NN const char *pat			\
+Adpt	|SV *	|vmess		|NN const char *pat			\
 				|NULLOK va_list *args
 ARdp	|SV *	|vnewSVpvf	|NN const char * const pat		\
 				|NULLOK va_list * const args
@@ -4240,18 +4240,18 @@ Adp	|SV *	|vnormal	|NN SV *vs
 Adp	|SV *	|vnumify	|NN SV *vs
 Adp	|SV *	|vstringify	|NN SV *vs
 Adp	|SV *	|vverify	|NN SV *vs
-Adp	|void	|vwarn		|NN const char *pat			\
+Adpt	|void	|vwarn		|NN const char *pat			\
 				|NULLOK va_list *args
-Adp	|void	|vwarner	|U32 err				\
+Adpt	|void	|vwarner	|U32 err				\
 				|NN const char *pat			\
 				|NULLOK va_list *args
 : Used in pp_sys.c
 p	|I32	|wait4pid	|Pid_t pid				\
 				|NN int *statusp			\
 				|int flags
-Adfp	|void	|warn		|NN const char *pat			\
+Adfpt	|void	|warn		|NN const char *pat			\
 				|...
-Adfp	|void	|warner 	|U32 err				\
+Adfpt	|void	|warner 	|U32 err				\
 				|NN const char *pat			\
 				|...
 Adp	|void	|warn_sv	|NN SV *baseex
