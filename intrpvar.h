@@ -906,6 +906,7 @@ PERLVARI(I, stashpadmax, PADOFFSET, 64)
 PERLVARI(I, stashpadix, PADOFFSET, 0)
 PERLVARI(I, env_mutex_depth, int, 0)     /* Emulate general semaphore */
 PERLVARI(I, env_mutex_readers, int, 0)
+PERLVARI(I, veto_switch_non_tTHX_context, int, FALSE)
 #endif
 
 #ifdef USE_REENTRANT_API

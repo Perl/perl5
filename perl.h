@@ -6419,7 +6419,7 @@ INIT({
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 #  define PERL_SET_LOCALE_CONTEXT(i)                                        \
       STMT_START {                                                          \
-          if (LIKELY(! PL_veto_switch_non_tTHX_context))                    \
+          if (LIKELY(! (i)->Iveto_switch_non_tTHX_context))                 \
                 Perl_switch_locale_context(i);                              \
       } STMT_END
 

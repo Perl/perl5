@@ -359,6 +359,7 @@
 # define PL_utf8_xidstart                       (vTHX->Iutf8_xidstart)
 # define PL_utf8cache                           (vTHX->Iutf8cache)
 # define PL_utf8locale                          (vTHX->Iutf8locale)
+# define PL_veto_switch_non_tTHX_context        (vTHX->Iveto_switch_non_tTHX_context)
 # define PL_warn_locale                         (vTHX->Iwarn_locale)
 # define PL_warnhook                            (vTHX->Iwarnhook)
 # define PL_watchaddr                           (vTHX->Iwatchaddr)

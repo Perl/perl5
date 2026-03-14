@@ -228,7 +228,7 @@ S_ithread_clear(pTHX_ ithread *thread)
     S_block_most_signals(&origmask);
 #endif
 
-#if PERL_VERSION_GE(5, 37, 5)
+#if PERL_VERSION_GE(5, 37, 5) && PERL_VERSION_LT(5, 45, 0)
     int save_veto = PL_veto_switch_non_tTHX_context;
 #endif
 
@@ -262,7 +262,7 @@ S_ithread_clear(pTHX_ ithread *thread)
     }
 
     PERL_SET_CONTEXT(aTHX);
-#if PERL_VERSION_GE(5, 37, 5)
+#if PERL_VERSION_GE(5, 37, 5) && PERL_VERSION_LT(5, 45, 0)
     PL_veto_switch_non_tTHX_context = save_veto;
 #endif
 

@@ -16556,6 +16556,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_ARGS_ASSERT_PERL_CLONE;
 #endif		/* PERL_IMPLICIT_SYS */
 
+    /* Set this very early - it will shortly be overwritten by the
+     * PoisonNew below and need setting again, but it must be set before
+     * PERL_SET_THX() is called */
+    PL_veto_switch_non_tTHX_context = false;
+
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     my_perl->Iphase = PERL_PHASE_CONSTRUCT;
@@ -16596,6 +16601,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_locale_mutex_depth = 0;
     PL_locale_mutex_readers = 0;
 #endif
+
+    PL_veto_switch_non_tTHX_context = false;
 
 #ifdef PERL_IMPLICIT_SYS
     /* host pointers */
