@@ -4472,6 +4472,13 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #    define PERL_CALLCONV_NO_RET PERL_CALLCONV
 #endif
 
+/* Some platforms require special handling of functions that don't return, but
+ * are declared as having a return value that isn't 'void'.  Use whatever
+ * they've set, or if nothing, just use the normal handling. */
+#ifndef PERL_CALLCONV_NON_VOID_NO_RET
+#    define PERL_CALLCONV_NON_VOID_NO_RET(ret_type)  PERL_CALLCONV_NO_RET
+#endif
+
 /* PERL_STATIC_NO_RET is supposed to be equivalent to static on builds that
    dont have a noreturn as a declaration specifier
 */

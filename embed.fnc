@@ -2116,6 +2116,9 @@ p	|U32	|magic_regdata_cnt					\
 p	|int	|magic_regdatum_get					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
+pr	|int	|magic_regdatum_set					\
+				|NN SV *sv				\
+				|NN MAGIC *mg
 
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|SV *	|magic_scalarpack					\
@@ -4318,15 +4321,6 @@ Cp	|void	|sys_intern_init
 Cp	|void	|sys_intern_dup |NN struct interp_intern *src		\
 				|NN struct interp_intern *dst
 # endif
-#endif
-#if defined(_MSC_VER)
-p	|int	|magic_regdatum_set					\
-				|NN SV *sv				\
-				|NN MAGIC *mg
-#else
-pr	|int	|magic_regdatum_set					\
-				|NN SV *sv				\
-				|NN MAGIC *mg
 #endif
 #if defined(MULTIPLICITY)
 ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\
