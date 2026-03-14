@@ -1019,14 +1019,14 @@ Perl_despatch_signals(pTHX)
         Perl_attribute_nonnull_aTHX;
 #define PERL_ARGS_ASSERT_DESPATCH_SIGNALS
 
-PERL_CALLCONV_NO_RET OP *
+PERL_CALLCONV_NON_VOID_NO_RET(OP *) OP *
 Perl_die(pTHX_ const char *pat, ...)
         Perl_attribute_nonnull_aTHX
         __attribute__noreturn__
         __attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_DIE
 
-PERL_CALLCONV_NO_RET OP *
+PERL_CALLCONV_NON_VOID_NO_RET(OP *) OP *
 Perl_die_sv(pTHX_ SV *baseex)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
@@ -2851,6 +2851,16 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_REGDATUM_GET     \
+        assert(sv); assert(mg)
+
+PERL_CALLCONV_NON_VOID_NO_RET(int) int
+Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__noreturn__
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET     \
         assert(sv); assert(mg)
 
 PERL_CALLCONV SV *
@@ -7426,28 +7436,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 
 # endif /* defined(USE_ITHREADS) */
 #endif /* defined(HAVE_INTERP_INTERN) */
-#if defined(_MSC_VER)
-PERL_CALLCONV int
-Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET    \
-        assert(sv); assert(mg)
-
-#else /* if !defined(_MSC_VER) */
-PERL_CALLCONV_NO_RET int
-Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
-        __attribute__noreturn__
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET    \
-        assert(sv); assert(mg)
-
-#endif /* !defined(_MSC_VER) */
 #if defined(MULTIPLICITY)
 PERL_CALLCONV_NO_RET void
 Perl_croak_nocontext(const char *pat, ...)
@@ -7462,7 +7450,7 @@ Perl_deb_nocontext(const char *pat, ...)
 # define PERL_ARGS_ASSERT_DEB_NOCONTEXT         \
         assert(pat)
 
-PERL_CALLCONV_NO_RET OP *
+PERL_CALLCONV_NON_VOID_NO_RET(OP *) OP *
 Perl_die_nocontext(const char *pat, ...)
         __attribute__noreturn__
         __attribute__format__null_ok__(__printf__,1,2);
