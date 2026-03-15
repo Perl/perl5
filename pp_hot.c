@@ -4777,6 +4777,7 @@ PP(pp_multideref)
                        || !SvOK(keysv)
                        || SvROK(keysv)
                        || SvNOK(keysv)
+                       || SvUTF8(keysv) /* See GH#24266 */
                        || SvIsCOW_shared_hash(keysv));
 
                 /* this is basically a copy of pp_helem with OPpDEREF skipped */

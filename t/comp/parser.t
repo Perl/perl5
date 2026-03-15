@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..193\n";
+print "1..195\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -682,6 +682,42 @@ is $@, "", 'substr keys assignment';
     }
     else {
         is ($result, $expected, "Parser can handle a continuation as 2nd char");
+    }
+}
+
+{
+    # GH#24266 - when a UTF-8 string is used as a hash key, it will
+    # be downgraded to a single-byte encoding if possible. However,
+    # when `keys %hash` returns a list of keys, any keys that started
+    # out as UTF-8 strings must come back out as UTF-8 strings, not
+    # the downgraded representation. The HVhek_WASUTF8 flag on the
+    # relevant HEK is what makes that possible.
+    #
+    # However, this flag was not always included when converting
+    # strings to HEKs ahead of time as an optimization, and when
+    # that did happen, other functions failed to check for the
+    # flag or propagate it correctly.
+
+    # Note: "de" should _not_ get uppercased in real life. It's only
+    #       shown like that below to keep the test case simple.
+    my %lower_to_upper = eval q[use utf8;
+        my %lower_to_upper = ( 'über maus' => 'Über Maus' );
+        $lower_to_upper{'Explicación dél significado de los términos utilizados en "Don Quijote", por capítulo.'}
+                =   'Explicación Dél Significado De Los Términos Utilizados En "Don Quijote", Por Capítulo.';
+        return %lower_to_upper;
+    ];
+
+    my %messages = (
+       'über maus'
+           => 'HVhek_WASUTF8 set on downgraded UTF8 key in hash initialization',
+       'Explicación dél significado de los términos utilizados en "Don Quijote", por capítulo.'
+           => 'HVhek_WASUTF8 set on downgraded UTF8 key in helelm store',
+    );
+
+    foreach (sort keys %lower_to_upper) {
+        my $key = $_;
+        s/\b(.*?)\b/$1 eq uc $1 ? $1 : "\u\L$1"/ge;
+        is($_, $lower_to_upper{$key}, $messages{$key});
     }
 }
 
