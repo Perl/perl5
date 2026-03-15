@@ -620,8 +620,10 @@
 :
 :   'm'  The implementation is a macro.  There is no long "S_" name form
 :        created for it.  However, if you also specify the 'p' flag, a long
-:        name Perl_" form is automatically created.  That form will be an
-:        actual function on a threaded build unless the 'T' flag is present.
+:        name Perl_" form is automatically created.  Except when the macro
+:        is visible only to core and extensions, the 'Perl_' form will be an
+:        actual function.  This allows the XS writer to simply #undef the short
+:        name and use the long form if there is a namespace clash.
 :
 :        The implication of this is that we can swap implementations at will,
 :        macro-to-function or function-to-macro, without any source code

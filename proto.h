@@ -14727,8 +14727,13 @@ Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_SVREFCNT_DEC_SET_NULL
 
-/* PERL_CALLCONV bool
-Perl_c9strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+PERL_CALLCONV bool
+Perl_c9strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_C9STRICT_UTF8_TO_UV   \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
 PERL_CALLCONV bool
 Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
@@ -14738,11 +14743,17 @@ Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, i
 # define PERL_ARGS_ASSERT_DO_OPEN               \
         assert(gv); assert(name)
 
-/* PERL_CALLCONV Size_t
-Perl_expected_size(UV size); */
+PERL_CALLCONV Size_t
+Perl_expected_size(UV size);
+# define PERL_ARGS_ASSERT_EXPECTED_SIZE
 
-/* PERL_CALLCONV bool
-Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+PERL_CALLCONV bool
+Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_EXTENDED_UTF8_TO_UV   \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
 PERL_CALLCONV I32
 Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
@@ -14929,48 +14940,91 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2
 # define PERL_ARGS_ASSERT_IBCMP_UTF8            \
         assert(s1); assert(s2)
 
-/* PERL_CALLCONV char *
+PERL_CALLCONV char *
 Perl_instr(const char *big, const char *little)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
         __attribute__warn_unused_result__
-        __attribute__pure__; */
+        __attribute__pure__;
+# define PERL_ARGS_ASSERT_INSTR                 \
+        assert(big); assert(little)
 
-/* PERL_CALLCONV bool
+PERL_CALLCONV bool
 Perl_is_c9strict_utf8_string(const U8 *s, STRLEN len)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING \
+        assert(s)
 
-/* PERL_CALLCONV bool
-Perl_is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
+PERL_CALLCONV bool
+Perl_is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOC \
+        assert(s); assert(ep)
 
-/* PERL_CALLCONV bool
+PERL_CALLCONV bool
 Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING \
+        assert(s)
 
-/* PERL_CALLCONV bool
-Perl_is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
+PERL_CALLCONV bool
+Perl_is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOC \
+        assert(s); assert(ep)
 
-/* PERL_CALLCONV STRLEN
-Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end); */
+PERL_CALLCONV STRLEN
+Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2);
+# define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF      \
+        assert(buf); assert(buf_end); assert(buf <= buf_end)
 
-/* PERL_CALLCONV bool
-Perl_is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags); */
+PERL_CALLCONV bool
+Perl_is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags)
+        Perl_attribute_nonnull(1);
+# define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_FLAGS \
+        assert(s)
 
-/* PERL_CALLCONV bool
-Perl_is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags); */
+PERL_CALLCONV bool
+Perl_is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags)
+        Perl_attribute_nonnull(1);
+# define PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOC_FLAGS \
+        assert(s)
 
-/* PERL_CALLCONV bool
+PERL_CALLCONV bool
 Perl_is_utf8_string(const U8 *s, STRLEN len)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_IS_UTF8_STRING        \
+        assert(s)
 
-/* PERL_CALLCONV bool
-Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep); */
+PERL_CALLCONV bool
+Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC    \
+        assert(s); assert(ep)
 
-/* PERL_CALLCONV bool
-Perl_is_utf8_string_loc_flags(const U8 *s, STRLEN len, const U8 **ep, const U32 flags); */
+PERL_CALLCONV bool
+Perl_is_utf8_string_loc_flags(const U8 *s, STRLEN len, const U8 **ep, const U32 flags)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC_FLAGS \
+        assert(s); assert(ep)
 
-/* PERL_CALLCONV bool
+PERL_CALLCONV bool
 Perl_is_utf8_valid_partial_char(const U8 * const s0, const U8 * const e)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
         __attribute__warn_unused_result__
-        __attribute__pure__; */
+        __attribute__pure__;
+# define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR \
+        assert(s0); assert(e); assert(s0 < e)
 
 PERL_CALLCONV CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
@@ -15105,8 +15159,13 @@ Perl_save_op(pTHX)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_SAVE_OP
 
-/* PERL_CALLCONV bool
-Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+PERL_CALLCONV bool
+Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_STRICT_UTF8_TO_UV     \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
 PERL_CALLCONV bool
 Perl_sv_2bool(pTHX_ SV * const sv)
@@ -15401,32 +15460,67 @@ Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
 # define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED \
         assert(p); assert(d); assert(newlen)
 
-/* PERL_CALLCONV U8 *
+PERL_CALLCONV U8 *
 Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_UTF8_HOP_BACK         \
+        assert(s); assert(start); assert(start <= s)
 
-/* PERL_CALLCONV U8 *
+PERL_CALLCONV U8 *
 Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 * const end)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_UTF8_HOP_FORWARD      \
+        assert(s); assert(end); assert(s <= end)
 
-/* PERL_CALLCONV U8 *
+PERL_CALLCONV U8 *
 Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(3)
+        Perl_attribute_nonnull(4)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_UTF8_HOP_SAFE         \
+        assert(s); assert(start); assert(end); assert(start <= s); \
+        assert(s <= end)
 
-/* PERL_CALLCONV bool
-Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
+PERL_CALLCONV bool
+Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV            \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
-/* PERL_CALLCONV bool
-Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors); */
+PERL_CALLCONV bool
+Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV_ERRORS     \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
-/* PERL_CALLCONV bool
-Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags); */
+PERL_CALLCONV bool
+Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags)
+        Perl_attribute_nonnull(1)
+        Perl_attribute_nonnull(2)
+        Perl_attribute_nonnull(3);
+# define PERL_ARGS_ASSERT_UTF8_TO_UV_FLAGS      \
+        assert(s); assert(e); assert(cp_p); assert(s <= e)
 
-/* PERL_CALLCONV UV
-Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags); */
+PERL_CALLCONV UV
+Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags)
+        Perl_attribute_nonnull(1);
+# define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR        \
+        assert(s)
 
-/* PERL_CALLCONV UV
-Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors); */
+PERL_CALLCONV UV
+Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors)
+        Perl_attribute_nonnull(1);
+# define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR  \
+        assert(s)
 
 PERL_CALLCONV U8 *
 Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs)
@@ -15463,9 +15557,12 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 # define PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS \
         assert(d)
 
-/* PERL_CALLCONV UV
+PERL_CALLCONV UV
 Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
-        __attribute__warn_unused_result__; */
+        Perl_attribute_nonnull(1)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR   \
+        assert(s)
 
 PERL_CALLCONV I32
 Perl_whichsig(pTHX_ const char *sig)
