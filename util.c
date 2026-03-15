@@ -1696,7 +1696,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     if (PL_stderrgv && SvREFCNT(PL_stderrgv)
         && (io = GvIO(PL_stderrgv))
         && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, SV_CONST(PRINT),
+        magic_methcall(MUTABLE_SV(io), mg, SV_CONST(PRINT),
                             G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
         PerlIO * const serr = Perl_error_log;

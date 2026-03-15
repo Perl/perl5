@@ -81,7 +81,7 @@ Perl_av_extend(pTHX_ AV *av, SSize_t key)
          * we call the tied method.
          */
         sv_setiv(arg1, (IV)(key + 1));
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(EXTEND), G_DISCARD, 1,
+        magic_methcall(MUTABLE_SV(av), mg, SV_CONST(EXTEND), G_DISCARD, 1,
                             arg1);
         return;
     }
@@ -787,7 +787,7 @@ Perl_av_push(pTHX_ AV *av, SV *val)
         croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(PUSH), G_DISCARD, 1,
+        magic_methcall(MUTABLE_SV(av), mg, SV_CONST(PUSH), G_DISCARD, 1,
                             val);
         return;
     }
@@ -817,7 +817,7 @@ Perl_av_pop(pTHX_ AV *av)
     if (SvREADONLY(av))
         croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-        retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(POP), 0, 0);
+        retval = magic_methcall(MUTABLE_SV(av), mg, SV_CONST(POP), 0, 0);
         if (retval)
             retval = newSVsv(retval);
         return retval;
@@ -876,7 +876,7 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
         croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(UNSHIFT),
+        magic_methcall(MUTABLE_SV(av), mg, SV_CONST(UNSHIFT),
                             G_DISCARD | G_UNDEF_FILL, num);
         return;
     }
@@ -941,7 +941,7 @@ Perl_av_shift(pTHX_ AV *av)
     if (SvREADONLY(av))
         croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-        retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(SHIFT), 0, 0);
+        retval = magic_methcall(MUTABLE_SV(av), mg, SV_CONST(SHIFT), 0, 0);
         if (retval)
             retval = newSVsv(retval);
         return retval;
@@ -1018,7 +1018,7 @@ Perl_av_fill(pTHX_ AV *av, SSize_t fill)
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
         SV *arg1 = sv_newmortal();
         sv_setiv(arg1, (IV)(fill + 1));
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(STORESIZE), G_DISCARD,
+        magic_methcall(MUTABLE_SV(av), mg, SV_CONST(STORESIZE), G_DISCARD,
                             1, arg1);
         return;
     }
