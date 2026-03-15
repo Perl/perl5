@@ -1610,7 +1610,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
             && grok_atoUV(ws, &wi, NULL)
             && wi <= PERL_INT_MAX
         ) {
-            Perl_dump_c_backtrace(aTHX_ Perl_debug_log, (int)wi, 1);
+            dump_c_backtrace(Perl_debug_log, (int)wi, 1);
         }
     }
 #endif
