@@ -375,6 +375,22 @@ compile time and run time locales could differ.
 
 =item *
 
+C<Perl_check_hash_fields_and_hekify>, partly called as a compile-time
+optimization, no longer preemptively converts a UTF-8 string to a HEK
+when this will downgrade the string to a single byte representation.
+
+At present, multiple functions inadequately handle the flag used to
+denote when a key originally had UTF-8 encoding, making it impossible to
+restore the encoding when keys are extracted from a hash (using C<keys>
+for example).
+
+Tracking of UTF-8 origins can hopefully be improved in the next development
+cycle, allowing for preemptive conversion of all UTF-8 strings once again.
+[GH #24266]
+[GH #24287]
+
+=item *
+
 XXX
 
 =back
