@@ -251,8 +251,11 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
 =cut
 */
 
-
-#define instr(haystack, needle) strstr(haystack, needle)
+/* The casting away const is because some implementations of strstr() have
+ * haystack not declared const, even though POSIX requires it to be const.
+ * This allows them to compile; we've never had a problem with the function
+ * zapping the 'haystack' */
+#define instr(haystack, needle) strstr( (char *) haystack, needle)
 
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
