@@ -4047,12 +4047,12 @@ sub generate_proto_h {
         if (! $has_mflag) {
             $args_assert_line = 1;
         }
-        elsif ($has_mpflags && $flags =~ $visible_outside_core_flags_re) {
+        elsif ($has_mpflags && $flags =~ $visible_everywhere_flags_re) {
 
             # And assertions are created for the automatically generated
             # functions from macros.  No function is needed unless one has
             # been requested (p flag), and is needed.  None is needed if the
-            # macro doesn't have visibility outside core, as no function
+            # macro is only visible to core and extensions, as no function
             # gets generated.
             $need_longs{$plain_func} = $args_assert_line = 1;
         }
@@ -4719,8 +4719,8 @@ sub embed_h {
             # to pass the context to.
             #
             # But we don't have to worry about collisions for functions that
-            # are visible only to core
-            if ($flags =~ /[T]/ && $flags !~ $visible_outside_core_flags_re) {
+            # are visible only to core or its extensions
+            if ($flags =~ /[T]/ && $flags !~ $visible_everywhere_flags_re) {
                 # Yields
                 #   #define Perl_func  func
                 # which works when there is no thread context.
@@ -4740,7 +4740,7 @@ sub embed_h {
                 push @stripped_args, $argname++ for $args->@*;
                 my $arglist = join ",", @stripped_args;
 
-                if ($flags =~ $visible_outside_core_flags_re) {
+                if ($flags =~ $visible_everywhere_flags_re) {
 
                     # For elements visible outside core, we need to generate a
                     # function to implement the macro.  This is done elsehwere

@@ -2138,6 +2138,10 @@
 #       define re_exec_indentf(a,...)           Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
 #     endif
 #   endif /* defined(PERL_IN_REGEXEC_C) */
+#   if !defined(USE_THREADS)
+#     define Perl_utf16_to_utf8(a,b,c,d)        utf16_to_utf8(a,b,c,d)
+#     define Perl_utf16_to_utf8_reversed(a,b,c,d) utf16_to_utf8_reversed(a,b,c,d)
+#   endif
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 #   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
@@ -2290,6 +2294,10 @@
 # if defined(USE_THREADS)
 #   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
 #   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
+#   if defined(PERL_CORE) || defined(PERL_EXT)
+#     define Perl_utf16_to_utf8(mTHX,a,b,c,d)   utf16_to_utf8(a,b,c,d)
+#     define Perl_utf16_to_utf8_reversed(mTHX,a,b,c,d) utf16_to_utf8_reversed(a,b,c,d)
+#   endif
 # endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)

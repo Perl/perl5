@@ -921,26 +921,6 @@ Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
     return to_uni_fold(c, p, lenp);
 }
 
-#if defined(PERL_CORE) || defined(PERL_EXT)
-U8 *
-Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-{
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8;
-
-    return utf16_to_utf8(p, d, bytelen, newlen);
-}
-#endif
-
-#if defined(PERL_CORE) || defined(PERL_EXT)
-U8 *
-Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-{
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED;
-
-    return utf16_to_utf8_reversed(p, d, bytelen, newlen);
-}
-#endif
-
 U8 *
 Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
 {
