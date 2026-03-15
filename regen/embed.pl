@@ -3399,7 +3399,6 @@ $cpp_ifdef_constraints{PERL_FOR_X2P} = 0;
 $cpp_ifdef_constraints{WIN32_USE_FAKE_OLD_MINGW_LOCALES} = 0;
 
 $cpp_ifdef_constraints{PERL_EXT} = 0;
-$cpp_ifdef_constraints{PERL_EXT_RE_BUILD} = 0;
 
 # This program evaluates the conditionals surrounding every #define in every
 # examined header.  It turns out that in many cases, using the constraints in
