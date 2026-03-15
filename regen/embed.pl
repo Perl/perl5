@@ -3080,6 +3080,8 @@ my @regex_conditions = qw(
 
                            PERL_IN_REGCOMP_ANY
                            PERL_EXT_RE_BUILD
+                           PERL_EXT_RE_DEBUG
+                           PERL_EXT_RE_STATIC
                            PERL_IN_REGEX_ENGINE
                            PLUGGABLE_RE_EXTENSION
                          );
@@ -3110,6 +3112,9 @@ $cpp_ifdef_constraints{PERL_IN_XS_APITEST} = 0;
 $cpp_ifdef_constraints{PERL_DEBUG_READONLY_OPS} = 0;
 $cpp_ifdef_constraints{PERL_DEBUG_DUMPUNTIL} = 0;
 $cpp_ifdef_constraints{PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS} = 0;
+$cpp_ifdef_constraints{PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION} = 0;
+$cpp_ifdef_constraints{PERL_ENABLE_POSITIVE_ASSERTION_STUDY} = 0;
+$cpp_ifdef_constraints{PERL_ENABLE_TRIE_OPTIMISATION} = 0;
 $cpp_ifdef_constraints{EXPERIMENTAL_INPLACESCAN} = 0;
 
 # Appears to be obsolete; App:s2p, etc were created to handle this
@@ -3121,6 +3126,9 @@ $cpp_ifdef_constraints{PERL_FOR_X2P} = 0;
 $cpp_ifdef_constraints{WIN32_USE_FAKE_OLD_MINGW_LOCALES} = 0;
 
 $cpp_ifdef_constraints{PERL_EXT} = 0;
+$cpp_ifdef_constraints{PERL_EXT_IO} = 0;
+$cpp_ifdef_constraints{PERL_EXT_LANGINFO} = 0;
+$cpp_ifdef_constraints{PERL_EXT_POSIX} = 0;
 
 # This program evaluates the conditionals surrounding every #define in every
 # examined header.  It turns out that in many cases, using the constraints in
