@@ -2619,7 +2619,7 @@ Adp	|void	|op_free	|NULLOK OP *arg
 Adp	|OP *	|op_linklist	|NN OP *o
 Admpx	|OP *	|op_lvalue	|NULLOK OP *o				\
 				|I32 type
-Xop	|OP *	|op_lvalue_flags|NULLOK OP *o				\
+Xdop	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
 				|U32 flags
 : Used in various files
