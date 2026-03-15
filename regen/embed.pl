@@ -3888,7 +3888,13 @@ my @az = ('a'..'z');
 my $never_visible_flags= "eX";
 my $never_visible_flags_re = qr/[$never_visible_flags]/;
 
-my $visibility_flags = "ACE$never_visible_flags";
+my $visible_everywhere_flags = "AC";
+my $visible_everywhere_flags_re = qr/[$visible_everywhere_flags]/;
+
+my $visible_outside_core_flags = "E$visible_everywhere_flags";
+my $visible_outside_core_flags_re = qr/[$visible_outside_core_flags]/;
+
+my $visibility_flags = "$visible_outside_core_flags$never_visible_flags";
 my $visibility_flags_re = qr/[$visibility_flags]/;
 
 my $discard_non_visibility_flags_re = qr/[^$visibility_flags]/;
@@ -4054,7 +4060,7 @@ sub generate_proto_h {
                . " function ($plain_func) to be checked";
         }
 
-        if ($flags =~ /[AC]/ && $flags =~ /([EX])/) {
+        if ($flags =~ $visible_everywhere_flags_re && $flags =~ /([EX])/) {
             die_at_end "$plain_func: $1 flag is incompatible with either A"
                      . " or C flags";
         }
@@ -4069,7 +4075,7 @@ sub generate_proto_h {
 
             # Don't generate a prototype for a macro that is not usable by the
             # outside world.
-            next unless $flags =~ /[ACE]/;
+            next unless $flags =~ $visible_outside_core_flags_re;
 
             # Nor one that is weird, which would likely be a syntax error.
             next if $flags =~ /u/;
@@ -4117,7 +4123,7 @@ sub generate_proto_h {
             # prefix available to call it with (in case of name conflicts).
             die_at_end "$plain_func: requires p flag because has A or C flag"
                                     if $flags !~ /p/
-                                    && $flags =~ /[AC]/
+                                    && $flags =~ $visible_everywhere_flags_re
                                     && $plain_func !~ /[Pp]erl/;
 
             if ($never_returns) {
@@ -4663,7 +4669,7 @@ sub embed_h {
         # Macros with [oO] don't appear without a [Pp]erl_ prefix, so nothing
         # to undef
         if ($flags =~ /m/ && $flags !~ /[oO]/) {
-            if ($flags !~ /[ACE]/) {    # No external visibility
+            if ($flags !~ $visible_outside_core_flags_re) {
                 $always_undefs{$func} = 1
                   unless defined $unresolved_visibility_overrides{$func};
             }
