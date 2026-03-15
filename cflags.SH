@@ -198,7 +198,7 @@ Intel*) ;; # # Is that you, Intel C++?
 	-Wextra \
 	-Wno-long-long -Wno-declaration-after-statement \
         -Wno-nonnull-compare \
-	-Wc++-compat -Wwrite-strings"
+	-Wc++-compat -Wno-c++-keyword -Wwrite-strings"
    case " $ccflags " in
    *" -std="*) ;; # Already have -std=...
    *) warns="-std=c99 $warns" ;;
