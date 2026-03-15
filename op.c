@@ -3159,12 +3159,21 @@ called with an op of type C<OP_ADD> and a C<type> argument of C<OP_SASSIGN>.
 It also flags things that need to behave specially in an lvalue context,
 such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 
+=for apidoc      op_lvalue_flags
+=for apidoc_flag OP_LVALUE_NO_CROAK
+
+This is a non-API lower-level interface to L<perlapi/C<op_lvalue>>, whose
+flags param has these bits:
+
+=over
+
+=item OP_LVALUE_NO_CROAK
+
+return rather than croaking on error
+
+=back
+
 =cut
-
-Perl_op_lvalue_flags() is a non-API lower-level interface to
-op_lvalue().  The flags param has these bits:
-    OP_LVALUE_NO_CROAK:  return rather than croaking on error
-
 */
 
 OP *
