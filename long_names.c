@@ -56,11 +56,35 @@ Perl_SvREFCNT_dec_set_NULL(pTHX_ SV *sv)
 }
 
 bool
+Perl_c9strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+{
+    PERL_ARGS_ASSERT_C9STRICT_UTF8_TO_UV;
+
+    return c9strict_utf8_to_uv(s, e, cp_p, advance_p);
+}
+
+bool
 Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     PERL_ARGS_ASSERT_DO_OPEN;
 
     return do_open(gv, name, len, as_raw, rawmode, rawperm, supplied_fp);
+}
+
+Size_t
+Perl_expected_size(UV size)
+{
+    PERL_ARGS_ASSERT_EXPECTED_SIZE;
+
+    return expected_size(size);
+}
+
+bool
+Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+{
+    PERL_ARGS_ASSERT_EXTENDED_UTF8_TO_UV;
+
+    return extended_utf8_to_uv(s, e, cp_p, advance_p);
 }
 
 I32
@@ -271,6 +295,102 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2
     return ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2);
 }
 
+char *
+Perl_instr(const char *big, const char *little)
+{
+    PERL_ARGS_ASSERT_INSTR;
+
+    return instr(big, little);
+}
+
+bool
+Perl_is_c9strict_utf8_string(const U8 *s, STRLEN len)
+{
+    PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING;
+
+    return is_c9strict_utf8_string(s, len);
+}
+
+bool
+Perl_is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
+{
+    PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOC;
+
+    return is_c9strict_utf8_string_loc(s, len, ep);
+}
+
+bool
+Perl_is_strict_utf8_string(const U8 *s, STRLEN len)
+{
+    PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING;
+
+    return is_strict_utf8_string(s, len);
+}
+
+bool
+Perl_is_strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
+{
+    PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOC;
+
+    return is_strict_utf8_string_loc(s, len, ep);
+}
+
+STRLEN
+Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
+
+    return is_utf8_char_buf(buf, buf_end);
+}
+
+bool
+Perl_is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_FLAGS;
+
+    return is_utf8_fixed_width_buf_flags(s, len, flags);
+}
+
+bool
+Perl_is_utf8_fixed_width_buf_loc_flags(const U8 * const s, STRLEN len, const U8 **ep, const U32 flags)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOC_FLAGS;
+
+    return is_utf8_fixed_width_buf_loc_flags(s, len, ep, flags);
+}
+
+bool
+Perl_is_utf8_string(const U8 *s, STRLEN len)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_STRING;
+
+    return is_utf8_string(s, len);
+}
+
+bool
+Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
+
+    return is_utf8_string_loc(s, len, ep);
+}
+
+bool
+Perl_is_utf8_string_loc_flags(const U8 *s, STRLEN len, const U8 **ep, const U32 flags)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC_FLAGS;
+
+    return is_utf8_string_loc_flags(s, len, ep, flags);
+}
+
+bool
+Perl_is_utf8_valid_partial_char(const U8 * const s0, const U8 * const e)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR;
+
+    return is_utf8_valid_partial_char(s0, e);
+}
+
 CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
@@ -445,6 +565,14 @@ Perl_save_op(pTHX)
     PERL_ARGS_ASSERT_SAVE_OP;
 
     save_op();
+}
+
+bool
+Perl_strict_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+{
+    PERL_ARGS_ASSERT_STRICT_UTF8_TO_UV;
+
+    return strict_utf8_to_uv(s, e, cp_p, advance_p);
 }
 
 bool
@@ -814,6 +942,70 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
 #endif
 
 U8 *
+Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_BACK;
+
+    return utf8_hop_back(s, off, start);
+}
+
+U8 *
+Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 * const end)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_FORWARD;
+
+    return utf8_hop_forward(s, off, end);
+}
+
+U8 *
+Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * const end)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_SAFE;
+
+    return utf8_hop_safe(s, off, start, end);
+}
+
+bool
+Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UV;
+
+    return utf8_to_uv(s, e, cp_p, advance_p);
+}
+
+bool
+Perl_utf8_to_uv_errors(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags, U32 *errors)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UV_ERRORS;
+
+    return utf8_to_uv_errors(s, e, cp_p, advance_p, flags, errors);
+}
+
+bool
+Perl_utf8_to_uv_flags(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p, U32 flags)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UV_FLAGS;
+
+    return utf8_to_uv_flags(s, e, cp_p, advance_p, flags);
+}
+
+UV
+Perl_utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags)
+{
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
+
+    return utf8n_to_uvchr(s, curlen, retlen, flags);
+}
+
+UV
+Perl_utf8n_to_uvchr_error(const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags, U32 *errors)
+{
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR;
+
+    return utf8n_to_uvchr_error(s, curlen, retlen, flags, errors);
+}
+
+U8 *
 Perl_uv_to_utf8_msgs(pTHX_ U8 *d, UV uv, UV flags, HV **msgs)
 {
     PERL_ARGS_ASSERT_UV_TO_UTF8_MSGS;
@@ -851,6 +1043,14 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
 
     return uvoffuni_to_utf8_flags(d, uv, flags);
+}
+
+UV
+Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+
+    return valid_utf8_to_uvchr(s, retlen);
 }
 
 I32
