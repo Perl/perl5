@@ -15466,12 +15466,6 @@ Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
 # define PERL_ARGS_ASSERT_TO_UNI_FOLD           \
         assert(p); assert(lenp)
 
-# define PERL_ARGS_ASSERT_UTF16_TO_UTF8         \
-        assert(p); assert(d); assert(newlen)
-
-# define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED \
-        assert(p); assert(d); assert(newlen)
-
 PERL_CALLCONV U8 *
 Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 * const start)
         Perl_attribute_nonnull(1)
@@ -15594,18 +15588,12 @@ Perl_thread_locale_term(pTHX)
 # define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
-PERL_CALLCONV U8 *
+/* PERL_CALLCONV U8 *
 Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_4);
-PERL_CALLCONV U8 *
+        Perl_attribute_nonnull_aTHX; */
+/* PERL_CALLCONV U8 *
 Perl_utf16_to_utf8_reversed(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_4);
+        Perl_attribute_nonnull_aTHX; */
 #   if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
        defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 /* PERL_CALLCONV void
@@ -15618,7 +15606,7 @@ invlist_subtract_(pTHX_ SV * const a, SV * const b, SV **result)
 invlist_union_(pTHX_ SV * const a, SV * const b, SV **output)
         Perl_attribute_nonnull_aTHX; */
 #   endif
-# endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# endif
 # if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 
