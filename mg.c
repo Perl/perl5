@@ -2214,9 +2214,9 @@ S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
         sv_2mortal(arg1);
     }
     if (!arg1) {
-        return Perl_magic_methcall(aTHX_ sv, mg, meth, flags, n - 1, val);
+        return magic_methcall(sv, mg, meth, flags, n - 1, val);
     }
-    return Perl_magic_methcall(aTHX_ sv, mg, meth, flags, n, arg1, val);
+    return magic_methcall(sv, mg, meth, flags, n, arg1, val);
 }
 
 static int
@@ -2306,7 +2306,7 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_WIPEPACK;
 
-    Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(CLEAR), G_DISCARD, 0);
+    magic_methcall(sv, mg, SV_CONST(CLEAR), G_DISCARD, 0);
     return 0;
 }
 
@@ -2317,8 +2317,8 @@ Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 
     SV* ret;
 
-    ret = SvOK(key) ? Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(NEXTKEY), 0, 1, key)
-        : Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(FIRSTKEY), 0, 0);
+    ret = SvOK(key) ? magic_methcall(sv, mg, SV_CONST(NEXTKEY), 0, 1, key)
+        : magic_methcall(sv, mg, SV_CONST(FIRSTKEY), 0, 0);
     if (ret)
         sv_setsv(key,ret);
     return 0;
@@ -2354,7 +2354,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
     }
    
     /* there is a SCALAR method that we can call */
-    retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(hv), mg, SV_CONST(SCALAR), 0, 0);
+    retval = magic_methcall(MUTABLE_SV(hv), mg, SV_CONST(SCALAR), 0, 0);
     if (!retval)
         retval = &PL_sv_undef;
     return retval;
