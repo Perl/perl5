@@ -2851,18 +2851,11 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
             if (keylen > I32_MAX) {
                 croak("Sorry, hash keys must be smaller than 2**31 bytes");
             }
-            if (SvUTF8(sv) && utf8_to_bytes_temp_pv((const U8**)&key, &keylen)) {
-                /* See GH#24266. This is (hopefully) a temporary constraint
-                 * that can be removed when HVhek_WASUTF8 propagation/
-                 * checking has been fully examined. */
-                goto HVhek_WASUTF8_bugs;
-            }
 
             SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
             SvREFCNT_dec_NN(sv);
             *svp = nsv;
         }
-  HVhek_WASUTF8_bugs:
 
         if (   check_fields
             && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0))
@@ -14351,12 +14344,6 @@ S_check_alt_hash_fields_hekify(pTHX_ OP *o)
                 if (UNLIKELY(keylen > I32_MAX)) {
                     croak("Sorry, hash keys must be smaller than 2**31 bytes");
                 }
-                if (SvUTF8(sv) && utf8_to_bytes_temp_pv((const U8**)&key, &keylen)) {
-                    /* See GH#24266. This is (hopefully) a temporary constraint
-                     * that can be removed when HVhek_WASUTF8 propagation/
-                     * checking has been fully examined. */
-                    goto HVhek_WASUTF8_bugs;
-                }
 
                 SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
                 SvREFCNT_dec_NN(sv);
@@ -14364,8 +14351,6 @@ S_check_alt_hash_fields_hekify(pTHX_ OP *o)
             }
         } else if (!(PL_opargs[sib->op_type] & OA_RETSCALAR))
             break;
-
-  HVhek_WASUTF8_bugs:
 
         /* Looking for a corresponding value OP */
         sib = OpSIBLING(sib);
