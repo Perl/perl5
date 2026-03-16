@@ -2115,6 +2115,7 @@ my @unresolved_visibility_overrides = qw(
     padadd_OUR
     padadd_STALEOK
     padadd_STATE
+    padalloc_NO_SV
     PAD_BASE_SV
     PAD_CLONE_VARS
     PAD_COMPNAME

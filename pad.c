@@ -716,6 +716,10 @@ does not cause the SV in the pad slot to be marked read-only, but simply
 tells C<pad_alloc> that it I<will> be made read-only (by the caller), or at
 least should be treated as such.
 
+C<SVs_PADMY> can be combined with C<padalloc_NO_SV> to request that no actual
+SV be allocated and stored in the pad; the pad slot will be left as NULL in
+this case.
+
 C<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
 but is used for debugging.
@@ -728,11 +732,14 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 {
     PERL_ARGS_ASSERT_PAD_ALLOC;
 
-    SV *sv;
+    SV *sv = NULL;
     PADOFFSET retval;
 
     PERL_UNUSED_ARG(optype);
     ASSERT_CURPAD_ACTIVE("pad_alloc");
+
+    const bool alloc_sv = !(tmptype & padalloc_NO_SV);
+    tmptype &= ~padalloc_NO_SV;
 
     if (AvARRAY(PL_comppad) != PL_curpad)
         croak("panic: pad_alloc, %p!=%p",
@@ -741,7 +748,9 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         pad_reset();
     if (tmptype == SVs_PADMY) { /* Not & because this ‘flag’ is 0.  */
         /* For a my, simply push a null SV onto the end of PL_comppad. */
-        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV_type(SVt_NULL));
+        if (alloc_sv)
+            sv = newSV_type(SVt_NULL);
+        av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, sv);
         retval = (PADOFFSET)AvFILLp(PL_comppad);
     }
     else {
@@ -785,7 +794,8 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         }
         *(konst ? &PL_constpadix : &PL_padix) = retval;
     }
-    SvFLAGS(sv) |= tmptype;
+    if (sv)
+        SvFLAGS(sv) |= tmptype;
     PL_curpad = AvARRAY(PL_comppad);
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
@@ -793,8 +803,10 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
           PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long) retval,
           PL_op_name[optype]));
 #ifdef DEBUG_LEAKING_SCALARS
-    sv->sv_debug_optype = optype;
-    sv->sv_debug_inpad = 1;
+    if (sv) {
+        sv->sv_debug_optype = optype;
+        sv->sv_debug_inpad = 1;
+    }
 #endif
     return retval;
 }
