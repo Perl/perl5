@@ -1093,7 +1093,7 @@ S_pad_import_field(pTHX_ PADNAME *fieldpn)
     /* We can't just pad_findmy_pvn() because the actual field may not have been
      * intro_my()'ed yet */
     PADNAME *name = newPADNAMEouter(fieldpn);
-    PADOFFSET padix = pad_alloc(OP_PADSV, SVs_PADMY);
+    PADOFFSET padix = pad_alloc(OP_PADSV, SVs_PADMY|padalloc_NO_SV);
     padnamelist_store(PL_comppad_name, padix, name);
 
     return padix;
