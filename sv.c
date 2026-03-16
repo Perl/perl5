@@ -10756,31 +10756,20 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
     PERL_ARGS_ASSERT_NEWSVPVN_SHARE;
 
-    SV *sv;
-    bool is_utf8 = FALSE;
-
-    if (len < 0) {
-        len = -len;
-        Size_t size_t_len = len;
-        /* See the note in hv.c:hv_fetch() --jhi */
-        if (! utf8_to_bytes_temp_pv((const U8**)&src, &size_t_len)) {
-            is_utf8 = true;
-        }
-        else {
-            hash = 0;
-            len = size_t_len;
-        }
+    if (!hash) {
+        PERL_HASH(hash, src, abs(len));
     }
-    if (!hash)
-        PERL_HASH(hash, src, len);
-    sv = newSV_type(SVt_PV);
+
+    HEK *hek = share_hek(src, len, hash);
+    SV *sv = newSV_type(SVt_PV);
+
     /* The logic for this is inlined in S_mro_get_linear_isa_dfs(), so if it
        changes here, update it there too.  */
     SvFLAGS(sv) |= SVf_POK | SVp_POK | SVf_IsCOW |
-                   (is_utf8 ? SVf_UTF8 : 0);
-    SvCUR_set(sv, len);
+                   (HEK_UTF8(hek) ? SVf_UTF8 : 0);
+    SvCUR_set(sv, HEK_LEN(hek));
     assert(SvLEN(sv) ==0);
-    SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
+    SvPV_set(sv, HEK_KEY(hek));
     return sv;
 }
 
