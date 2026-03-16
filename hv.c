@@ -535,7 +535,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         key = SvPV_const(keysv, klen);
         is_utf8 = (SvUTF8(keysv) != 0);
         if (SvIsCOW_shared_hash(keysv)) {
-            flags = HVhek_KEYCANONICAL | (is_utf8 ? HVhek_UTF8 : 0);
+            HEK *keysv_hek = SvSHARED_HEK_FROM_PV(SvPVX_const(keysv));
+            unsigned char keysv_flags = HEK_FLAGS(keysv_hek);
+            flags = HVhek_KEYCANONICAL | (keysv_flags & (HVhek_UTF8|HVhek_WASUTF8));
         } else {
             flags = 0;
         }
