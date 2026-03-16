@@ -43,6 +43,8 @@ in deprecation warnings.
 
 Category: "deprecated::unicode_property_name"
 
+=head2 Perl 5.46
+
 =head3 Changing C<use VERSION> while another C<use VERSION> is in scope
 
 A C<use VERSION> declaration has many implicit effects on the surrounding
