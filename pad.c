@@ -560,7 +560,8 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 {
     PERL_ARGS_ASSERT_PAD_ALLOC_NAME;
 
-    const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
+    const PADOFFSET offset = pad_alloc(OP_PADSV,
+            SVs_PADMY | ((flags & padadd_FIELD) ? padalloc_NO_SV : 0));
 
     ASSERT_CURPAD_ACTIVE("pad_alloc_name");
 
@@ -660,6 +661,11 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     if (!PL_min_intro_pending)
         PL_min_intro_pending = offset;
     PL_max_intro_pending = offset;
+
+    /* fields should not have entries in the pad; we're done here */
+    if (flags & padadd_FIELD)
+        return offset;
+
     /* if it's not a simple scalar, replace with an AV or HV */
     assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
     assert(SvREFCNT(PL_curpad[offset]) == 1);
@@ -1271,7 +1277,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                         "Pad findlex cv=0x%" UVxf " found lex=0x%" UVxf "\n",
                         PTR2UV(cv), PTR2UV(*out_capture)));
 
-                    if (SvPADSTALE(*out_capture)
+                    if (*out_capture && SvPADSTALE(*out_capture)
                         && (!CvDEPTH(cv) || !staleok)
                         && !PadnameIsSTATE(name_p[offset]))
                     {
@@ -1280,7 +1286,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                         *out_capture = NULL;
                     }
                 }
-                if (!*out_capture) {
+                if (!*out_capture && !PadnameIsFIELD(*out_name)) {
                     if (namelen != 0 && *namepv == '@')
                         *out_capture = newSV_type_mortal(SVt_PVAV);
                     else if (namelen != 0 && *namepv == '%')
@@ -1981,6 +1987,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
     long depth;
     U32 subclones = 0;
     bool trouble = FALSE;
+    const bool cv_is_method = CvIsMETHOD(cv);
 
     assert(!CvUNIQUE(proto));
 
@@ -2041,6 +2048,12 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
         if (namesv && PadnameLEN(namesv)) { /* lexical */
           if (PadnameIsOUR(namesv)) { /* or maybe not so lexical */
                 NOOP;
+          }
+          else if (cv_is_method && PadnameIsFIELD(namesv)) {
+              /* fields within methods shouldn't be captured because the inner
+               * method's pp_methstart will set it up again.
+               */
+              NOOP;
           }
           else {
             if (PadnameOUTER(namesv)) {   /* lexical from outside? */
