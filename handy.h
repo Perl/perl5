@@ -2555,42 +2555,72 @@ C<L</CC_mask_>>.
 
 /*
 =for apidoc_section $casing_scn
-=for apidoc Am|U8|toCTRL|U8 cp
+=for apidoc      Am|U8|toCTRL|U8 cp
+=for apidoc_item   ||fromCTRL|U8 cp
 
-Converts the character C<cp> into its equivalent control character, I<i.e.>,
-what the Perl construct C<\cI<cp>> would do given the same input.
+C<toCTRL> converts the character C<cp> into its equivalent control character,
+I<i.e.>, what the Perl construct C<\cI<cp>> would do given the same input.
 
 For example, C<toCTRL('A')> yields 1.
 
-This is described in L<perlop/Quote and Quote-like Operators> and
-L<perlebcdic/OPERATOR DIFFERENCES>.
+C<fromCTRL> goes the other way.
 
-The conversion is numerical, not semantic; that is, C<toCTRL('D')> yields 4,
-which happens to mean C<EOT> on ASCII platforms.  But Perl does not ascribe
-that meaning, as 4 means a completely different control character on EBCDIC
-ones.
+The original motivation behind this is that most keyboards for languages based
+on the Latin script will have keys labelled with the ASCII alphabetic
+characters.  "G" is one such key.  (That key should really be labelled "g",
+because that's what generally gets transmitted to the computer when that key is
+pressed.  Getting "G" transmitted instead usually requires the "Shift" key to
+simultaneously be held down.)  There is typically a "Ctrl" key on such
+keyboards, and C<toCTRL('G')> returns what gets transmitted when the "Ctrl" key
+and the "G" key are simultaneously pressed, hence its name.  That value in this
+case is 7, which is an ASCII ALERT (or BEL).  Hence, typing CTRL-G at the
+command line will typically trigger the computer's bell sound.
+
+The values are (fairly) standardized only for the following keys:
+
+ @       0
+ A-Z  1-26
+ [      27
+ \      28
+ ]      29
+ ^      30
+ _      31
+
+The Perl language includes the C<\c> construct to be able to express this
+mapping, (See L<perlop/Quote and Quote-like Operators> and
+L<perlebcdic/OPERATOR DIFFERENCES>), and the C<toCTRL> macro is the XS and C
+language equivalent of that.
+
+It has been ported to work on EBCDIC as well, so that the conversion is
+numerical, not semantic; that is, on EBCDIC platforms, CTRL-@ is 0, CTRL-A is
+1, etc, just like on ASCII, except that they don't necessarily mean the same
+character.  For example, C<toCTRL('D')> yields 4 on both platforms, which
+happens to mean C<EOT> (C<END OF TRANSMISSION>) on ASCII platforms (which is
+why CTRL-D is often used to exit out of a shell), and C<SEL> (Select) on
+EBCDIC. (See perlebcdic/Unicode code points versus EBCDIC code points.)  But
+Perl itself does not ascribe any meaning beyond it being 4.  (If your need is
+to get to C<EOT> from "D", no matter which platform, wrap it thusly:
+C<LATIN1_TO_NATIVE(toCTRL('D'))>.)
 
 A lowercase argument yields the same result as its upper case equivalent, hence
 C<toCTRL('b')> returns 2.
 
-The result is defined for A-Z, a-z, and the following special characters:
+To go the other direction, starting with a value in the range 0..31, and
+yielding a character like 'A", you can use C<fromCTRL()>.  For alphabetic
+results, this will always be the uppercase form.
 
- @     0
- [    27
- \    28
- ]    29
- ^    30
- _    31
- ?   127 on ASCII, and whatever the APC control is on EBCDIC
+The macros also map between the "?" character and a defined value.  But it is
+not possible to do this portably between ASCII and EBCDIC.  On ASCII platforms,
+it is mapped to 127, which happens to be C<DELETE>.  On EBCDIC, it is mapped to
+the C<APC> control, whatever value this happens to be for the flavor of EBCDIC
+used on the platform.  What these all have in common is that the value chosen
+is the only control that isn't in the same contiguous block of controls that
+the others are in.
 
-It turns out that the conversion works both ways (except for lowercase inputs),
-so C<toCTRL('E')> is 5, and C<toCTRL(5)> is E.  But perhaps there should be a
-C<fromCTRL()> so you don't have to remember that?
+Using any other values than those mentioned yields an undefined result.
 
-(The choice of APC for C<toCTRL('?')> is not semantic.  127 is being the only
-ASCII outlier control, the one that isn't in the contiguous block the rest of
-them are.  APC is the only outlier control in EBCDIC; its value depends on the
-EBCDIC flavor in use.)
+(It turns out that the conversion works both ways (except for lowercase inputs),
+so C<toCTRL('E')> is 5, and C<toCTRL(5)> is E.  But you shouldn't have to know that, so just use C<fromCTRL> to get from 5 to "E".)
 
 =cut
 */
@@ -2606,6 +2636,7 @@ EBCDIC flavor in use.)
                          ? '?'                                          \
                          : (LATIN1_TO_NATIVE(((U8) (c)) ^ 64)))))
 #endif
+#define fromCTRL(c) toCTRL(c)
 
 /*
 =for apidoc_section $warning_scn

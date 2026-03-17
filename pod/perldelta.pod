@@ -391,6 +391,13 @@ cycle, allowing for preemptive conversion of all UTF-8 strings once again.
 
 =item *
 
+The macro L<perlapi/C<fromCTRL>> has been added to be the inverse of the
+existing L<perlapi/C<toCTRL>>.  C<toCTRL('A')> yields 1 (the control
+character C<SOH> on all platforms Perl works on); C<fromCTRL(1)>
+yields 'A'.
+
+=item *
+
 XXX
 
 =back
