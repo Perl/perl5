@@ -242,6 +242,77 @@ does that too; you can see it in the code chart L<below|/recipe 3>.
 This makes things generally "just work" without you even having to be
 aware that there is a swap.
 
+For reference, here are the mappings of the IBM 1047 control name
+abbreviations to the ones used by Unicode (and hence Perl):
+
+ IBM       ASCII        IBM name
+ abbr.    mapping
+
+ BYP/INP    IND         Bypass, Inhibit Presentation 
+ CSP        PLD         Control Sequence Prefix 
+ CU1        SS3         Customer Use One 
+ CU3        CSI         Customer Use Three 
+ DS         PAD         Digit Select 
+ EO         APC         Eight Ones
+ FS/FDS     BPH         Field Separator
+ GE         EPA         Graphic Escape 
+ IR         STS         Index Return 
+ IT         SGC         Indent Tab 
+ MFA        PLU         Modify Field Attribute 
+ NBS        SPA         Numeric Backspace 
+ NL         NEL         New Line 
+ POC        ESA         Program Operator Communication 
+ PP         CCH         Presentation Position 
+ RES/ENP    OSC         Restore, Enable Presentation 
+ RFF        SCI         Required Form Feed 
+ RNL        SSA         Required New Line 
+ RPT        SS2         Repeat 
+ SA         HTS         Set Attribute 
+ SBS        SOS         Subscript 
+ SEL        ST          Select 
+ SFE        HTJ         Start Field Extended 
+ SM/SW      VTS         Set Mode, Switch 
+ SOS        HOP         Start of Significance 
+ SPS        RI          Superscript 
+ TRN        MW          Transparent 
+ UBS        PU2         Unit Backspace 
+ WUS        NBH         Word Underscore 
+
+And the inverse ones:
+
+ IBM       ASCII        IBM name
+ abbr.    mapping
+
+ EO         APC         Eight Ones
+ FS/FDS     BPH         Field Separator
+ PP         CCH         Presentation Position 
+ CU3        CSI         Customer Use Three 
+ GE         EPA         Graphic Escape 
+ POC        ESA         Program Operator Communication 
+ SOS        HOP         Start of Significance 
+ SFE        HTJ         Start Field Extended 
+ SA         HTS         Set Attribute 
+ BYP/INP    IND         Bypass, Inhibit Presentation 
+ TRN        MW          Transparent 
+ WUS        NBH         Word Underscore 
+ NL         NEL         New Line 
+ RES/ENP    OSC         Restore, Enable Presentation 
+ DS         PAD         Digit Select 
+ CSP        PLD         Control Sequence Prefix 
+ MFA        PLU         Modify Field Attribute 
+ UBS        PU2         Unit Backspace 
+ SPS        RI          Superscript 
+ RFF        SCI         Required Form Feed 
+ IT         SGC         Indent Tab 
+ SBS        SOS         Subscript 
+ NBS        SPA         Numeric Backspace 
+ RPT        SS2         Repeat 
+ CU1        SS3         Customer Use One 
+ RNL        SSA         Required New Line 
+ SEL        ST          Select 
+ IR         STS         Index Return 
+ SM/SW      VTS         Set Mode, Switch 
+
 =head2 Unicode and UTF
 
 UTF stands for "Unicode Transformation Format".
