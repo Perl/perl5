@@ -40,7 +40,6 @@
 #   undef SvRVx
 #   undef UNI_DISPLAY_TR_
 #   if !defined(PERL_EXT)
-#     undef expected_size
 #     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
 #     undef invlist_subtract_
@@ -191,6 +190,7 @@
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
+# define Perl_expected_size                     expected_size
 # define Perl_extended_utf8_to_uv               extended_utf8_to_uv
 # define fatal_warner(a,...)                    Perl_fatal_warner(aTHX_ a,__VA_ARGS__)
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
@@ -1897,7 +1897,6 @@
 #   define cv_ckproto_len_flags(a,b,c,d,e)      Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #   define delimcpy_no_escape                   Perl_delimcpy_no_escape
 #   define do_uniprop_match                     Perl_do_uniprop_match
-#   define Perl_expected_size                   expected_size
 #   define get_and_check_backslash_N_name(a,b,c,d) Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
 #   define get_deprecated_property_msg          Perl_get_deprecated_property_msg
 #   define get_prop_definition(a)               Perl_get_prop_definition(aTHX_ a)

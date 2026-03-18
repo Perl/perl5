@@ -14750,6 +14750,9 @@ Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, i
 # define PERL_ARGS_ASSERT_DO_OPEN               \
         assert(gv); assert(name)
 
+/* PERL_CALLCONV Size_t
+Perl_expected_size(UV size); */
+
 /* PERL_CALLCONV bool
 Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p); */
 
@@ -15494,8 +15497,6 @@ Perl_thread_locale_term(pTHX)
 # define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
-/* PERL_CALLCONV Size_t
-Perl_expected_size(UV size); */
 PERL_CALLCONV U8 *
 Perl_utf16_to_utf8(pTHX_ U8 *p, U8 *d, Size_t bytelen, Size_t *newlen)
         Perl_attribute_nonnull_aTHX_
