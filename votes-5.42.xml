@@ -51,6 +51,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.42
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="jkeenan" id="a22007f6faa" issue="" pull="24297" desc="POSIX documentation formatting error"/>
+
 </div>
 
 <div><h3>Others</h3>
