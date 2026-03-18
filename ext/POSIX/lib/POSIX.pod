@@ -442,7 +442,6 @@ be provided with an explicit value (rather than relying on an implicit C<$_>):
 
 See L<perlfunc/abs>.
 
-This is identical to Perl's builtin C<cos()> function for returning the cosine
 =item C<fclose>
 
 Not implemented.  Use method C<IO::Handle::close()> instead, or see L<perlfunc/close>.
