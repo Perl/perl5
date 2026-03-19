@@ -9248,6 +9248,7 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
     PERL_ARGS_ASSERT_DUMP_REGEX_SETS_STRUCTURES;
 
     PerlIO_printf(Perl_debug_log, "\nParse position is:%s\n", RExC_parse);
+    PerlIO_printf(Perl_debug_log, "\nDepth is: %zu\n", RExC_sets_depth);
 
     if (stack_top < 0) {
         PerlIO_printf(Perl_debug_log, "Nothing on stack\n");
