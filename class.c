@@ -449,16 +449,36 @@ XS(class_reader_av_xsub)
         {
             rpp_popfree_1_NN();
             rpp_extend(count);
+#ifndef PERL_RC_STACK
+                /* Note: rpp_push_1_norc() calls sv_2mortal(), which will
+                 * extend the mortals stack should this turn out to be
+                 * insuffient when handling a tied array. */
+            EXTEND_MORTAL(count);
+#endif
 
             AV* const av = (AV*)fsv;
-            /* This is the no-magic part of S_pushav, found in pp_hot.c */
-            PADOFFSET i;
-            for (i=0; i < (PADOFFSET)count; i++) {
-                SV* sv = AvARRAY(av)[i];
-                if (LIKELY(sv))
-                    rpp_push_1_norc(newSVsv_flags_NN(sv, SV_GMAGIC|SV_DO_COW_SVSETSV));
-                else
-                    rpp_push_IMM(&PL_sv_undef);
+            /* This is very like S_pushav in pp_hot.c, but instead of
+             * the retrieved SV onto the stack it pushes a copy. */
+            if (UNLIKELY(SvMAGICAL(av))) {
+                PADOFFSET i;
+                for (i=0; i < (PADOFFSET)count; i++) {
+                    SV ** const svp = av_fetch(av, i, FALSE);
+                    if (LIKELY(svp))
+                        rpp_push_1_norc(newSVsv_flags_NN(*svp, SV_GMAGIC|SV_DO_COW_SVSETSV));
+                    else if (UNLIKELY(PL_op->op_flags & OPf_MOD))
+                        rpp_push_1_norc(av_nonelem(av,i));
+                    else
+                        rpp_push_IMM(&PL_sv_undef);
+                }
+            } else {
+                PADOFFSET i;
+                for (i=0; i < (PADOFFSET)count; i++) {
+                    SV* sv = AvARRAY(av)[i];
+                    if (LIKELY(sv))
+                        rpp_push_1_norc(newSVsv_flags_NN(sv, SV_GMAGIC|SV_DO_COW_SVSETSV));
+                    else
+                        rpp_push_IMM(&PL_sv_undef);
+                }
             }
             return;
         }
@@ -498,20 +518,54 @@ XS(class_reader_hv_xsub)
         {
             rpp_popfree_1_NN();
 
+            HV *hv = MUTABLE_HV(fsv);
+            bool tied = SvRMAGICAL(hv) && (mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied)
+#ifdef DYNAMIC_ENV_FETCH  /* might not know number of keys yet */
+                                        || mg_find(MUTABLE_SV(hv), PERL_MAGIC_env)
+#endif
+            );
+
             if (nkeys) {
-                HV* hv = MUTABLE_HV(fsv);
-                (void)hv_iterinit(hv);
                 assert(nkeys <= (Size_t_MAX >> 1));
-
-                EXTEND_MORTAL(nkeys);
                 SSize_t ext = nkeys * 2;
-                rpp_extend(ext);
+                (void)hv_iterinit(hv);
 
-                HE *entry;
-                while ((entry = hv_iternext(hv))) {
-                    SV *keysv = newSVhek(HeKEY_hek(entry));
-                    rpp_push_1_norc(keysv);
-                    rpp_push_1_norc(newSVsv(HeVAL(entry)));
+#ifndef PERL_RC_STACK
+                /* Note: rpp_push_1_norc() calls sv_2mortal(), which will
+                 * extend the mortals stack should this turn out to be
+                 * insuffient when handling a tied hash. */
+                EXTEND_MORTAL(ext);
+#endif
+                if (tied) {
+                    HE *entry;
+                    while ((entry = hv_iternext(hv))) {
+                        rpp_extend(2);
+#ifndef PERL_RC_STACK
+                        /* hv_iterkeysv and hv_iterval (for tied hashes)
+                         * return a sv_newmortal() SV. */
+                        rpp_push_1(hv_iterkeysv(entry));
+                        rpp_push_1(hv_iterval(hv, entry));
+#else
+                        /* We don't want to return mortal SVs */
+                        rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+
+                        SV* const valsv = newSV_type(SVt_NULL);
+                        if (HeKLEN(entry) == HEf_SVKEY)
+                            mg_copy(MUTABLE_SV(hv), valsv, (char*)HeKEY_sv(entry), HEf_SVKEY);
+                        else
+                            mg_copy(MUTABLE_SV(hv), valsv, HeKEY(entry), HeKLEN(entry));
+                        rpp_push_1_norc(valsv);
+
+#endif
+                    }
+                } else {
+                    rpp_extend(ext);
+
+                    HE *entry;
+                    while ((entry = hv_iternext(hv))) {
+                        rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+                        rpp_push_1_norc(newSVsv(HeVAL(entry)));
+                    }
                 }
             }
             return;
