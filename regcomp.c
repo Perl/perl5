@@ -9224,9 +9224,11 @@ redo_curchar:
             OP(REGNODE_p(node)) = ANYOFL;
             ANYOF_FLAGS(REGNODE_p(node)) |= ANYOFL_UTF8_LOCALE_REQD;
         }
+
+        /* Now able to advance to prepare for the next construct. */
+        nextchar(pRExC_state);
     }
 
-    nextchar(pRExC_state);
     return node;
 
   regclass_failed:
