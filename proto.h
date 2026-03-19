@@ -12731,7 +12731,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p, const regnode
         __attribute__warn_unused_result__;
 #     if defined(ENABLE_REGEX_SETS_DEBUGGING)
 static void
-S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state, AV *stack, const IV fence, AV *fence_stack)
+S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state, AV *stack, const IV fence, AV *fence_stack, line_t line_number)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
