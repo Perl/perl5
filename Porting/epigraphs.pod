@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.9 - Mary Ann Evans (under pen name George Eliot), "Middlemarch", 1872
+
+L<Announced on 2026-03-20 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270813.html>
+
+  "the growing good of the world is partly dependent on unhistoric acts;
+  and that things are not so ill with you and me as they might have been,
+  is half owing to the number who lived faithfully a hidden life"
+
 =head2 v5.43.8 - Raymond Chandler, "The Big Sleep"
 
 L<Announced on 2026-02-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2026/02/msg270752.html>
