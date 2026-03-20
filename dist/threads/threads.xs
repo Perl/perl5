@@ -206,6 +206,10 @@ S_ithread_get(pTHX)
  * must be called with MY_POOL.create_destruct_mutex unlocked as destruction
  * of the interpreter can lead to recursive destruction calls that could
  * lead to a deadlock on that mutex.
+ *
+ * The thread of this function's caller (and thus the passed pTHX) is
+ * different than that of the thread being cleared: the caller is
+ * typically the thread calling join() or similar.
  */
 static void
 S_ithread_clear(pTHX_ ithread *thread)
@@ -275,6 +279,10 @@ S_ithread_clear(pTHX_ ithread *thread)
 /* Decrement the refcount of an ithread, and if it reaches zero, free it.
  * Must be called with the mutex held.
  * On return, mutex is released (or destroyed).
+ *
+ * The thread of this function's caller (and thus the passed pTHX) is
+ * different than that of the thread being freed: the caller is typically
+ * the thread calling join() or similar.
  */
 static void
 S_ithread_free(pTHX_ ithread *thread)

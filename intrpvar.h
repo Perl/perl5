@@ -906,6 +906,12 @@ PERLVARI(I, stashpadmax, PADOFFSET, 64)
 PERLVARI(I, stashpadix, PADOFFSET, 0)
 PERLVARI(I, env_mutex_depth, int, 0)     /* Emulate general semaphore */
 PERLVARI(I, env_mutex_readers, int, 0)
+
+/* This is set when switching to a thread's context while starting to
+ * free that thread: don't switch any other stuff too (currently just the
+ * thread-specific locale) because that stuff is in the middle of being
+ * freed also, and so may not be viable.
+ */
 PERLVARI(I, veto_switch_non_tTHX_context, int, FALSE)
 #endif
 
