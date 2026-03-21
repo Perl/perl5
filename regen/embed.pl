@@ -3624,7 +3624,7 @@ sub generate_proto_h {
         my ($flags, $ret_type, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
         if ($flags =~
-            m/([^ aA bB C dD eE fF h iI mM nN oO pP Rr sS T uU v W xX ; ])/xx)
+           m/([^ aA bB C dD eE fF h iI mM nN oO pP Rr sS tT uU v W xX ; ])/xx)
         {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
@@ -3640,6 +3640,8 @@ sub generate_proto_h {
                                                     if $flags =~ tr/ACS// > 1;
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
+        die_at_end "$plain_func: t and T flags are mutually exclusive"
+                                                    if $flags =~ tr/tT// > 1;
         die_at_end "$plain_func:, M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
         die_at_end "$plain_func: X flag requires one of [Iip] flags"
@@ -3790,7 +3792,8 @@ sub generate_proto_h {
         if ($has_context) {
 
             # Pretend there was an aTHX argument in the first position.
-            unshift $args->@*, "PerlInterpreter* aTHX NN";
+            my $NULL_accept = $flags =~ /t/ ? "NULLOK" : "NN";
+            unshift $args->@*, "PerlInterpreter* aTHX $NULL_accept";
 
             $ret .= "pTHX";
             $ret .= "_ " if $args->@* > 1;
