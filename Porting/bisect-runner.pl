@@ -1272,6 +1272,51 @@ L<GH issue 21564|https://github.com/Perl/perl5/issues/21564>
 
 =back
 
+=head2 When did program using locally installed module stop crashing?
+
+=over 4
+
+=item * Problem
+
+Use of a feature (C<module_true>) was reported as crashing under certain
+circumstances (the experimental C<class> feature).  The program demonstrating
+the crash needed to use a module installed in the same directory as the demo
+program.  The feature was subsequently reported to be working properly.  At what
+commit did the program stop crashing?
+
+=item * Solution
+
+The module:
+
+    $ cat /tmp/Noofoo.pm
+    # https://github.com/Perl/perl5/issues/23435
+    use experimental 'class';
+    use feature 'module_true';
+    class Noofoo;
+    ADJUST {}
+
+The demonstration program:
+
+    $ cat /tmp/foo.pl
+    use strict;
+    use warnings;
+    use Noofoo;
+    print "Hello world!\n";
+
+The bisection invocation:
+
+    $ perl Porting/bisect.pl \
+    --expect-fail \
+    --start=v5.43.3 \
+    --end=v5.43.4 \
+    -- ./perl -Ilib -I/tmp "/tmp/foo.pl"
+
+=item * Reference
+
+L<GH issue 23435|https://github.com/Perl/perl5/issues/23435#issuecomment-3067034712>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
