@@ -14325,20 +14325,34 @@ S_check_alt_hash_fields_hekify(pTHX_ OP *o)
             SV **svp = cSVOPx_svp(sib);
             SV *sv = *svp;
 
-            /* Make the CONST have a shared SV */
-            if (!SvIsCOW_shared_hash(sv) && SvTYPE(sv) < SVt_PVMG
-                && SvOK(sv) && !SvROK(sv)
-                && !(SvNOK(sv) && IN_LC_RUNTIME(LC_NUMERIC))
+            if (SvTYPE(sv) < SVt_PVMG && (
+                (SvPOK(sv) && !SvIsCOW_shared_hash(sv)) || SvIOK(sv)
+                 || (SvNOK(sv) && !IN_LC_RUNTIME(LC_NUMERIC)) )
             ) {
+                bool was_POK = (SvFLAGS(sv) & SVf_POK);
                 STRLEN keylen;
+                /* SvPV_const will upgrade any SVt_IV or SVt_NV */
                 const char * const key = SvPV_const(sv, keylen);
+
                 if (UNLIKELY(keylen > I32_MAX)) {
                     croak("Sorry, hash keys must be smaller than 2**31 bytes");
                 }
 
                 SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
-                SvREFCNT_dec_NN(sv);
                 *svp = nsv;
+
+                if (SvTYPE(sv) != SVt_PV) {
+                    sv_upgrade(nsv, SvTYPE(sv));
+                    if (!was_POK)
+                        SvFLAGS(nsv) &= ~SVf_POK;
+                    SvFLAGS(nsv) |= SvFLAGS(sv) & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK);
+
+                    if (SvIOK(sv))
+                        SvIV_set(nsv, SvIVX(sv));
+                    if (SvNOK(sv))
+                        SvNV_set(nsv, SvNVX(sv));
+                }
+                SvREFCNT_dec_NN(sv);
             }
         } else if (!(PL_opargs[sib->op_type] & OA_RETSCALAR))
             break;
