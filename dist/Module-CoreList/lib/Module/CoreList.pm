@@ -24628,6 +24628,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         delta_from => 5.040003,
         changed => {
             'B::Op_private'         => '5.040004',
+            'Compress::Raw::Zlib'   => '2.222',
             'Config'                => '5.040004',
             'Module::CoreList'      => '5.20260329_40',
             'Module::CoreList::Utils'=> '5.20260329_40',
