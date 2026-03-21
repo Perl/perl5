@@ -1182,10 +1182,12 @@ string:
 =head3 Capture groups
 
 The grouping construct C<( ... )> creates capture groups (also referred to as
-capture buffers). To refer to the current contents of a group later on, within
-the same pattern, use C<\g1> (or C<\g{1}>) for the first, C<\g2> (or C<\g{2}>)
-for the second, and so on.
-This is called a I<backreference>.
+capture buffers).
+
+To refer to the current contents of a group later on, within the same
+pattern, use C<\g1> (or C<\g{1}>) for the first, C<\g2> (or C<\g{2}>)
+for the second, and so on.  This is called a I<backreference>.
+
 X<regex, capture buffer> X<regexp, capture buffer>
 X<regex, capture group> X<regexp, capture group>
 X<regular expression, capture buffer> X<backreference>
@@ -1194,20 +1196,58 @@ X<\g{1}> X<\g{-1}> X<\g{name}> X<relative backreference> X<named backreference>
 X<named capture buffer> X<regular expression, named capture buffer>
 X<named capture group> X<regular expression, named capture group>
 X<%+> X<$+{name}> X<< \k<name> >>
+
 There is no limit to the number of captured substrings that you may use.
-Groups are numbered with the leftmost open parenthesis being number 1, I<etc>.  If
-a group did not match, the associated backreference won't match either. (This
-can happen if the group is optional, or in a different branch of an
-alternation.)
-You can omit the C<"g">, and write C<"\1">, I<etc>, but there are some issues with
-this form, described below.
+Groups are numbered with the leftmost open parenthesis being number 1,
+I<etc>.
 
-You can also refer to capture groups relatively, by using a negative number, so
-that C<\g-1> and C<\g{-1}> both refer to the immediately preceding capture
-group, and C<\g-2> and C<\g{-2}> both refer to the group before it.  For
-example:
+If a group did not match, the associated backreference won't match
+either. (This can happen if the group is optional, or in a different
+branch of an alternation.)
 
-        /
+Note that a quantified group which matches zero things counts as not
+matching, so neither of the following will match:
+
+ "aba" =~ / a (x)* b \g1 a /x;  # Doesn't match
+ "aba" =~ / a (x)? b \g1 a /x;  # Doesn't match
+
+However when the quantifier is on the inside of the group it does match:
+
+ "aba" =~ / a (x*) b \g1 a /x;   # Matches
+ "aba" =~ / a (x?) b \g1 a /x;   # Matches
+
+Put another way, perl's regex engine distinguishes between "captured the
+empty string" and "an optional capture did not match".
+
+You can see this in the following code snippet:
+
+ if ("aba" =~ qr/$ARGV[0]/) {
+     print "matched: ", defined($1) ? "<$1>" : "undef";
+ }
+ else {
+     print "rejected";
+ }
+ print "\n";
+
+This prints as follows:
+
+ Argument       Output
+ 'a(x)*b'    matched: <>
+ 'a(x*)b'    matched: undef
+
+Both patterns match, but leave the contents of the C<$1> capture group
+in different states.  Back references only match when the capture group
+they reference contains a defined value.
+
+You can omit the C<"g">, and write C<"\1">, I<etc>, but there are some
+issues with this form, described below.
+
+You can also refer to capture groups relatively, by using a negative
+number, so that C<\g-1> and C<\g{-1}> both refer to the immediately
+preceding capture group, and C<\g-2> and C<\g{-2}> both refer to the
+group before it.  For example:
+
+       m/
          (Y)            # group 1
          (              # group 2
             (X)         # group 3
@@ -1227,6 +1267,7 @@ also be written as C<\k{I<name>}>, C<\kE<lt>I<name>E<gt>> or C<\k'I<name>'>.)
 I<name> must follow the rules for perl identifiers
 (L<perldata/Identifier parsing>) which means, for example, that they
 can't begin with a number, nor contain hyphens.
+
 When different groups within the same pattern have the same name, any reference
 to that name assumes the leftmost defined group.  Named groups count in
 absolute and relative numbering, and so can also be referred to by those
