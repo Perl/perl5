@@ -699,6 +699,24 @@ EOS
     is(f(123), 123, "check TARG.IOK is reset properly");
 }
 
+# github #24302
+{
+    use builtin qw( created_as_number );
+    package HekifiedConstantKeys {
+        sub TIEHASH {  bless {}, shift; }
+        sub STORE {
+            my ($hash, $key, $value) = @_;
+            $hash->{$key} = ($key == 123 && created_as_number($key))
+                             ? $value : undef;
+        }
+        sub CLEAR {}
+        sub FETCH { return $_[0]{$_[1]} }
+    }
+    tie my %h, 'HekifiedConstantKeys';
+    %h = (123 => 456);
+    is($h{123}, 456, "Numerical OP_CONST SVs in hash init are created_as_number() when hekified");
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
