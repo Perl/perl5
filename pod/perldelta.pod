@@ -125,9 +125,11 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Compress::Raw::Zlib> has been upgraded from version 2.212 to 2.222.
 
-XXX If there was something important to note about this change, include that here.
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20250803_40 to 5.20260329_40.
 
 =back
 
