@@ -75,7 +75,7 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-       qr/[ aA bB C dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@\#? ] /xx;
+      qr/[ aA bB C dD eE fF h iI mM nN oO pP rR sS tT uU v W xX y ;@\#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
 my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
@@ -706,6 +706,7 @@ sub check_and_add_proto_defn {
     $flags .= "U" if $flags =~ /@/;     # No usage output for @arrays
     $flags .= "n" if $flags =~ /[#v]/;  # No threads, arguments for #ifdef's,
                                         # plain values
+    my $aTHX_NULLOK = $flags =~ /t/;
 
     if ($flags =~ /N/) {
         state %escapes = (
@@ -775,6 +776,7 @@ sub check_and_add_proto_defn {
         $elements{$element}{args} = \@munged_args;
         $elements{$element}{file} = $file;
         $elements{$element}{line_num} = $line_num // 0;
+        $elements{$element}{aTHX_NULLOK} = $aTHX_NULLOK;
 
         # Don't reset expecting documentation.
         $elements{$element}{docs_expected} = $docs_expected
@@ -1998,6 +2000,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     # Accumulate the usage section of the entry into this array.  Output below
     # only when non-empty
     my @usage;
+    my @allowed_pTHX_NULL;
     if (defined $docref->{usage}) {
 
         # A complete override of the usage section.  Note that the O flag
@@ -2131,6 +2134,8 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                         $this_has_pTHX = 1;
                         unshift @args, "pTHX";
                         $any_has_pTHX_ = 1 if @args > 1;
+                        push @allowed_pTHX_NULL, $name
+                                                     if $item->{aTHX_NULLOK};
                     }
 
                     $additional_long_form = 0;
@@ -2396,6 +2401,13 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
                 push @usage, "\n";
             }
+        }
+    }
+
+    if (@allowed_pTHX_NULL) {
+        print $fh "\n";
+        foreach my $name (@allowed_pTHX_NULL) {
+            print $fh " $name accepts a NULL value for the pTHX parameter\n";
         }
     }
 

@@ -784,6 +784,19 @@
 :             "#define foo Perl_foo",      rather than
 :             "#define foo(a,b,c) Perl_foo(aTHX_ a,b,c)
 :
+:   't'	 Almost, but not quite, entirely unlike 'T'.  This means there IS an
+:	 implicit interpreter/thread context argument, but this function is
+:	 equipped to handle the case where it is NULL.  That distinguishes this
+:	 kind of function from those that have no flag at all, which are those
+:	 that do have a thread-context parameter, but it needs to be non-NULL.
+:
+:	 The major use case for this type of function would be those that are
+:	 callable both from places where there is no thread context available,
+:	 and from places where there is, and this keeps the caller from having
+:	 to fetch one just to call this function.
+:
+:          suppress assert that aTHX isn't NULL
+:
 :   'u'  The macro's (it has to be a macro) return value or parameters are
 :        unorthodox, and aren't in the list above of recognized weird ones. For
 :        example, they aren't C parameters, or the macro expands to something

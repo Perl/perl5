@@ -241,10 +241,22 @@ Now a synonym for C<L</dTHXa>>.
 #  define pTHX_10	11
 #  define pTHX_11	12
 #  define pTHX_12	13
+
+/*
+=for apidoc_section $concurrency
+=for apidoc m||GET_aTHX_if_NULL
+
+Sets C<aTHX> to the current context value if C<aTHX> points to NULL on entry.
+Otherwise it has no effect.
+=cut
+*/
+#  define GET_aTHX_if_NULL                                                  \
+      STMT_START { if (UNLIKELY(aTHX == NULL)) aTHX = PERL_GET_THX; } STMT_END
 #  if defined(DEBUGGING) && !defined(PERL_TRACK_MEMPOOL)
 #    define PERL_TRACK_MEMPOOL
 #  endif
 #else
+#  define GET_aTHX_if_NULL
 #  undef PERL_TRACK_MEMPOOL
 #endif
 
