@@ -348,6 +348,34 @@ well.
 
 =item *
 
+When a UTF-8 constant string was used as the hash key in an insert
+operation, such as C<$hash{'über maus'} = 1;>, and the string could
+be converted into a single byte representation, the flag noting the
+original encoding (C<HVhek_WASUTF8>) was not always retained.
+
+When this occurred, the relevant scalars returned by C<keys %hash>
+would not be in the original, expected UTF-8 encoding.
+
+The original encoding is now captured and propagated.
+[GH #24266]
+
+=item *
+
+When a constant IV or NV was used as a hash key, such as in
+C<my %hash = ( 42 => 0 );>, and was preemptively stringified
+into a hash key, the fact that the numerical value came first
+was lost. This unintentionally modified deparse output for
+such keys.
+
+The numerical values are now carried across, and flags on the
+key variable reflect the original data type.
+
+Note: This now preserves the form of constant keys supplied
+to tied hashes in list assignments.
+[GH #24302]
+
+=item *
+
 XXX
 
 =back
