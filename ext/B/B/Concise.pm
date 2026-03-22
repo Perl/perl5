@@ -1,4 +1,4 @@
-package B::Concise 1.011;
+package B::Concise 1.012;
 # Copyright (C) 2000-2003 Stephen McCamant. All rights reserved.
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
@@ -1766,13 +1766,13 @@ Identifies _POSIX_ARG_MAX as a constant sub, optimized to an IV.
 Although POSIX isn't entirely consistent across platforms, this is
 likely to be present in virtually all of them.
 
-=item perl -MPOSIX -MO=Concise,a -e 'print _POSIX_SAVED_IDS'
+=item perl -MPOSIX -MO=Concise -e 'print _POSIX_SAVED_IDS'
 
 This renders a print statement, which includes a call to the function.
 It's identical to rendering a file with a use call and that single
 statement, except for the filename which appears in the nextstate ops.
 
-=item perl -MPOSIX -MO=Concise,a -e 'sub a{_POSIX_SAVED_IDS}'
+=item perl -MPOSIX -MO=Concise,a -e 'sub a{print _POSIX_SAVED_IDS}'
 
 This is B<very> similar to previous, only the first two ops differ.  This
 subroutine rendering is more representative, insofar as a single main
