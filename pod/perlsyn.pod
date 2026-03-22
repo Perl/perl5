@@ -162,9 +162,8 @@ condition is true (or while the condition is false):
 
 The C<while> and C<until> modifiers have the usual "C<while> loop"
 semantics (conditional evaluated first), except when applied to a
-C<do>-BLOCK (or to the Perl4 C<do>-SUBROUTINE statement), in
-which case the block executes once before the conditional is
-evaluated.
+C<do>-BLOCK, in which case the block executes once before the
+conditional is evaluated.
 
 This is so that you can write loops like:
 
