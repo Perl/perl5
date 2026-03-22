@@ -233,7 +233,8 @@ our %Modules = (
             qr{^t/meta},
             qw( t/000prereq.t
                 t/99pod.t
-                ),
+                SECURITY.md
+            ),
         ],
     },
 
