@@ -89,6 +89,19 @@ L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.
   they emerge, surprised for a moment by how hot they are to touch.
     'This is ultra fine,' says Joe. 'It goes into Wotsits.'
 
+=head2 v5.42.2-RC1 - Edgar Allan Poe, "The Murders in the Rue Morgue" (in "Tales of Mystery and Imagination")
+
+L<Announced on 2026-03-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270828.html>
+
+Whist has long been noted for its influence upon what is termed the
+calculating power; and men of the highest order of intellect have been
+known to take an apparently unaccountable delight in it, while eschewing
+chess as frivolous.  Beyond doubt there is nothing of a similar nature
+so greatly tasking the faculty of analysis.  The best chess player in
+Christendom may be little more than the best player of chess; but
+proficiency in whist implies capacity for success in all those more
+important undertakings where mind struggles with mind.
+
 =head2 v5.42.1 - Andrew Benedict, "The Wall-to-Wall Grave" (in "Alfred Hitchcock presents: Stories my mother never told me, Part One")
 
 L<Announced on 2026-03-08 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270767.html>
@@ -253,6 +266,21 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   We find that in research a certain amount of intelligent ignorance
   is essential to progress; for, if you know too much, you won't try
   the thing.
+
+=head2 v5.40.4-RC1 - Edgar Allan Poe, "The Fall of the House of Usher" (in "Tales of Mystery and Imagination")
+
+L<Announced on 2026-03-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270827.html>
+
+To an anomalous species of terror I found him a bounden slave.  "I shall
+perish", said he, "I must perish in this deplorable folly.  Thus, thus,
+and not otherwise, shall I be lost.  I dread the events of the future,
+not in themselves, but in their results.  I shudder at the thought of
+any, even the most trivial, incident, which may operate upon this
+intolerable agitation of soul.  I have, indeed, no abhorrence of danger,
+except in its absolute effect--in terror.  In this unnerved, in this
+pitiable, condition I feel that the period will sooner or later arrive
+when I must abandon life and reason together, in some struggle with the
+grim phantasm, FEAR."
 
 =head2 v5.40.3 - J. M. Roberts, "The Penguin History of Europe"
 
