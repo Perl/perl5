@@ -243,8 +243,8 @@ our %Modules = (
         'SYNCINFO'     => 'yorton on Sat Mar  4 10:43:06 2023',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => [qw(
-		examples/show-v.pl
-		)],
+            examples/show-v.pl
+            )],
     },
 
     'constant' => {
@@ -380,6 +380,11 @@ our %Modules = (
         'SYNCINFO'     => 'root on Sat Dec 30 21:42:47 2023',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
+        'CUSTOMIZED'   => [
+            'MD5.pm',
+            'MD5.xs',
+            't/files.t'
+        ],
     },
 
     'Digest::SHA' => {
@@ -431,6 +436,9 @@ our %Modules = (
         'SYNCINFO'     => 'LeoNerd on Sat Apr 27 09:43:20 2024',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
+        'CUSTOMIZED'   => [
+            'lib/stable.pm'
+        ],
     },
 
     'Exporter' => {
@@ -955,9 +963,9 @@ our %Modules = (
         ],
 
         'CUSTOMIZED'   => [
-	    # [rt.cpan.org #88204], [rt.cpan.org #120229]
-	    'lib/Pod/Perldoc.pm',
-	],
+            # [rt.cpan.org #88204], [rt.cpan.org #120229]
+            'lib/Pod/Perldoc.pm',
+        ],
     },
 
     'Pod::Simple' => {
@@ -967,7 +975,10 @@ our %Modules = (
         'EXCLUDED' => [
             qw{.ChangeLog.swp},
             qr{^\.github/}
-	],
+        ],
+        'CUSTOMIZED'   => [
+            'lib/Pod/Simple/HTMLLegacy.pm'
+        ],
     },
 
     'Pod::Usage' => {
@@ -976,7 +987,7 @@ our %Modules = (
         'EXCLUDED' => [
             qr{^t/00-},
             qr{^xt/}
-	],
+        ],
     },
 
     'podlators' => {
@@ -1327,6 +1338,8 @@ our %Modules = (
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             'lib/version.pm',
+
+            't/07locale.t'
          ],
 
         'MAP' => {
