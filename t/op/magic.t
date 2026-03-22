@@ -868,10 +868,18 @@ SKIP: {
 	utf8::upgrade($chars = $bytes);
 	$forced = $ENV{foo} = $chars;
 	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
-	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
+	SKIP: {
+		skip("Non-UTF-8 env is broken on Ubuntu 25.10", 1)
+			if `env --version` eq "uu_env (uutils coreutils) 0.2.2\n";
+		env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
+	}
 	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
 	$ENV{$chars} = 'widekey';
-	env_is("eh zero \x{A0}" => 'widekey', 'ENV store downgrades utf8 key in setenv');
+	SKIP: {
+		skip("Non-UTF-8 env is broken on Ubuntu 25.10", 1)
+			if `env --version` eq "uu_env (uutils coreutils) 0.2.2\n";
+		env_is("eh zero \x{A0}" => 'widekey', 'ENV store downgrades utf8 key in setenv');
+	}
 	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
 	is( delete($ENV{$chars}), 'widekey', 'delete(%ENV) downgrades utf8 key' );
 
