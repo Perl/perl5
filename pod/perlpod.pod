@@ -713,11 +713,11 @@ Without that empty line before the "=head1", many translators wouldn't
 have recognized the "=head1" as starting a Pod block.
 
 =head2 Hints for Writing Pod
+X<podchecker> X<POD, validating>
 
 =over
 
 =item *
-X<podchecker> X<POD, validating>
 
 The B<podchecker> command is provided for checking Pod syntax for errors
 and warnings.  For example, it checks for completely blank lines in
