@@ -9379,6 +9379,24 @@ S_PerlEnv_putenv(pTHX_ char *str)
 #   endif
 # endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+PERL_CALLCONV HV *
+Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2);
+# define PERL_ARGS_ASSERT_ATTRTARGET_CLASS      \
+        assert(target); assert(attrname)
+
+PERL_CALLCONV PADNAME *
+Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2);
+# define PERL_ARGS_ASSERT_ATTRTARGET_PADNAME    \
+        assert(target); assert(attrname)
+
+#endif /* defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C) */
 #if defined(PERL_IN_AV_C)
 static MAGIC *
 S_get_aux_mg(pTHX_ AV *av)

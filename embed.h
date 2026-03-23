@@ -2435,6 +2435,10 @@
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
 # endif
+# if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+#   define attrtarget_class(a,b)                Perl_attrtarget_class(aTHX_ a,b)
+#   define attrtarget_padname(a,b)              Perl_attrtarget_padname(aTHX_ a,b)
+# endif
 # if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
      defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
      defined(PERL_IN_TOKE_C)

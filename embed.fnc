@@ -4557,6 +4557,15 @@ Adp	|PerlIO *|my_popen	|NN const char *cmd			\
 i	|bool	|PerlEnv_putenv |NN char *str
 # endif
 #endif
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+: this should probably be public API?
+Cp	|HV *	|attrtarget_class					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+Cp	|PADNAME *|attrtarget_padname					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+#endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif

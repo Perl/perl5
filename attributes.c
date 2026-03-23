@@ -11,6 +11,13 @@
 #define PERL_IN_ATTRIBUTES_C
 #include "perl.h"
 
+#define croak_apply_attribute(attrname, targettype)  S_croak_apply_attribute(aTHX_ attrname, targettype)
+static void
+S_croak_apply_attribute(pTHX_ const char *attrname, const char *targettype)
+{
+    croak("Can only apply the :%s attribute to %s", attrname, targettype);
+}
+
 #define targetsv(target, type, attrname)  S_targetsv(aTHX_ target, type, attrname)
 static SV *
 S_targetsv(pTHX_ struct PerlAttributeTarget *target, U8 type, const char *attrname)
@@ -25,10 +32,35 @@ S_targetsv(pTHX_ struct PerlAttributeTarget *target, U8 type, const char *attrna
     switch(type) {
         case SVt_PVCV:
             if(SvTYPE(sv) != SVt_PVCV)
-                croak("Can only apply the :%s attribute to CODE", attrname);
+                croak_apply_attribute(attrname, "CODE");
             break;
     }
     return sv;
+}
+
+HV *
+Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+{
+    PERL_ARGS_ASSERT_ATTRTARGET_CLASS;
+
+    SV *sv = targetsv(target, 0, attrname);
+    if(SvTYPE(sv) != SVt_PVHV ||
+            !HvHasAUX((HV *)sv) ||
+            !HvSTASH_IS_CLASS((HV *)sv)) {
+        croak_apply_attribute(attrname, "a class");
+    }
+    return (HV *)sv;
+}
+
+PADNAME *
+Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+{
+    PERL_ARGS_ASSERT_ATTRTARGET_PADNAME;
+
+    if(target->kind != PERL_ATTRTARGET_LEXICAL)
+        croak_apply_attribute(attrname, "a lexical");
+
+    return target->lexical.padname;
 }
 
 /* :const */
