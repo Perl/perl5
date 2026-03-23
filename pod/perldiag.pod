@@ -1803,12 +1803,11 @@ The required syntax is
     try { ... }
     catch ($var) { ... }
 
-=item Changing use VERSION while another use VERSION is in scope is now deprecated
+=item Changing use VERSION while another use VERSION is in scope is not permitted
 
-(W deprecated) Once you have a C<use VERSION> statement in scope, any
-C<use VERSION> statement that requests a different version is now deprecated,
-due to the increasing complexity of swapping from one prevailing version to
-another.
+(F) Once you have a C<use VERSION> statement in scope, any C<use VERSION>
+statement that requests a different version is not permitted, due to the
+increasing complexity of swapping from one prevailing version to another.
 
 It is suggested that you do not try to mix multiple different version
 declarations within the same file as it leads to complex behaviours about the
