@@ -314,3 +314,15 @@ no warnings 'experimental::keyword_all';
 all length, qw( a b c )
 EXPECT
 syntax error at - line 4, near "all length"
+########
+use warnings;
+use v5.12;
+use v5.20;
+EXPECT
+Changing use VERSION while another use VERSION is in scope is not permitted at - line 3.
+########
+use warnings;
+use v5.10;
+use v5.8;
+EXPECT
+Changing use VERSION while another use VERSION is in scope is not permitted at - line 3.

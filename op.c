@@ -8586,9 +8586,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 croak("Downgrading a use VERSION declaration to below v5.11 is not permitted");
             }
             else {
-                /* OK let's at least warn */
-                deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.46",
-                    "Changing use VERSION while another use VERSION is in scope");
+                croak("Changing use VERSION while another use VERSION is in scope is not permitted");
             }
         }
 
