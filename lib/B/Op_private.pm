@@ -330,6 +330,7 @@ $bits{defined}{0} = $bf[0];
 @{$bits{delete}}{6,5,0} = ('OPpSLICE', 'OPpKVSLICE', $bf[0]);
 @{$bits{die}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 @{$bits{divide}}{1,0} = ($bf[1], $bf[1]);
+@{$bits{does}}{1,0} = ($bf[1], $bf[1]);
 $bits{dofile}{0} = $bf[0];
 $bits{dor}{0} = $bf[0];
 $bits{dorassign}{0} = $bf[0];

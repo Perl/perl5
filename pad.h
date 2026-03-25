@@ -95,7 +95,8 @@ struct padname_with_str {
  */
 struct padname_fieldinfo {
     U32        refcount;
-    PADOFFSET  fieldix;    /* index of this field within ObjectFIELDS() array */
+    PADOFFSET  fieldix;    /* absolute index into ObjectFIELDS() array; resolved at seal time */
+    PADOFFSET  relative_fieldix; /* class-relative index (0-based within defining class/role) */
     HV        *fieldstash; /* original class package which added this field */
     OP        *defop;      /* optree fragment for defaulting expression */
     SV        *paramname;  /* name of the :param to look for in constructor */

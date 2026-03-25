@@ -2561,6 +2561,7 @@ my %feature_keywords = (
    signatures => 'signatures',
    any      => 'any',
    all      => 'all',
+   does     => 'class',
 );
 
 # keywords that are strong and also have a prototype
@@ -3392,6 +3393,7 @@ sub pp_sle { binop(@_, "le", 15) }
 sub pp_scmp { maybe_targmy(@_, \&binop, "cmp", 14) }
 
 sub pp_isa { binop(@_, "isa", 15) }
+sub pp_does { binop(@_, "does", 15) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }

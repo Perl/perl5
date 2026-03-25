@@ -5924,6 +5924,15 @@ Perl_sv_does_pvn(pTHX_ SV *sv, const char * const name, const STRLEN len, U32 fl
         assert(sv); assert(name)
 
 PERL_CALLCONV bool
+Perl_sv_does_role_sv(pTHX_ SV *sv, SV *namesv)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        Perl_attribute_nonnull_(pTHX_2)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_DOES_ROLE_SV        \
+        assert(sv); assert(namesv)
+
+PERL_CALLCONV bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
@@ -8296,6 +8305,15 @@ Perl_ck_delete(pTHX_ OP *o)
         assert(o)
 
 PERL_CALLCONV OP *
+Perl_ck_does(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_DOES               \
+        assert(o)
+
+PERL_CALLCONV OP *
 Perl_ck_each(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX_
         Perl_attribute_nonnull_(pTHX_1)
@@ -8763,6 +8781,20 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw)
         Perl_attribute_nonnull_(pTHX_1);
 # define PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS \
         assert(kw)
+
+PERL_CALLCONV void
+Perl_role_seal_stash(pTHX_ HV *stash)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1);
+# define PERL_ARGS_ASSERT_ROLE_SEAL_STASH       \
+        assert(stash); assert(SvTYPE(stash) == SVt_PVHV)
+
+PERL_CALLCONV void
+Perl_role_setup_stash(pTHX_ HV *stash)
+        Perl_attribute_nonnull_aTHX_
+        Perl_attribute_nonnull_(pTHX_1);
+# define PERL_ARGS_ASSERT_ROLE_SETUP_STASH      \
+        assert(stash); assert(SvTYPE(stash) == SVt_PVHV)
 
 #endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    ||
           defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) ||

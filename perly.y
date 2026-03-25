@@ -64,7 +64,7 @@
 %token <ival> PERLY_STAR
 
 /* Tokens emitted by toke.c on simple keywords */
-%token <ival> KW_FORMAT KW_PACKAGE KW_CLASS
+%token <ival> KW_FORMAT KW_PACKAGE KW_CLASS KW_ROLE
 %token <ival> KW_LOCAL KW_MY KW_FIELD
 %token <ival> KW_IF KW_ELSE KW_ELSIF KW_UNLESS
 %token <ival> KW_FOR KW_UNTIL KW_WHILE KW_CONTINUE
@@ -98,6 +98,8 @@
 %type <opval> bare_statement_block
 %type <opval> bare_statement_class_declaration
 %type <opval> bare_statement_class_definition
+%type <opval> bare_statement_role_declaration
+%type <opval> bare_statement_role_definition
 %type <opval> bare_statement_default
 %type <opval> bare_statement_defer
 %type <opval> bare_statement_expression
@@ -300,6 +302,45 @@ bare_statement_class_definition
 		{
 			package ($package, $version);
 			class_setup_stash(PL_curstash);
+			if ($optattrlist) {
+				class_apply_attributes(PL_curstash, $optattrlist);
+			}
+		}
+		stmtseq
+		PERLY_BRACE_CLOSE
+		{
+			$$ = new_block_statement (block_end ($remember, $stmtseq), NULL);
+			if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+				parser->copline = (line_t)$PERLY_BRACE_OPEN;
+		}
+	;
+
+bare_statement_role_declaration
+	:	KW_ROLE
+		BAREWORD[version]
+		BAREWORD[package]
+		optattrlist
+		PERLY_SEMICOLON
+		{
+			package ($package, $version);
+			$$ = NULL;
+			role_setup_stash(PL_curstash);
+			if ($optattrlist) {
+				class_apply_attributes(PL_curstash, $optattrlist);
+			}
+		}
+	;
+
+bare_statement_role_definition
+	:	KW_ROLE
+		BAREWORD[version]
+		BAREWORD[package]
+		optattrlist
+		PERLY_BRACE_OPEN
+		remember
+		{
+			package ($package, $version);
+			role_setup_stash(PL_curstash);
 			if ($optattrlist) {
 				class_apply_attributes(PL_curstash, $optattrlist);
 			}
@@ -879,6 +920,8 @@ barestmt
 	|	bare_statement_block
 	|	bare_statement_class_declaration
 	|	bare_statement_class_definition
+	|	bare_statement_role_declaration
+	|	bare_statement_role_definition
 	|	bare_statement_default
 	|	bare_statement_defer
 	|	bare_statement_expression

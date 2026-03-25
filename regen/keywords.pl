@@ -53,10 +53,12 @@ my %feature_kw = (
     finally   => 'try',
     defer     => 'defer',
     class     => 'class',
+    role      => 'class',
     field     => 'class',
     method    => 'class',
     ADJUST    => 'class',
     __CLASS__ => 'class',
+    does      => 'class',
     any       => 'keyword_any',
     all       => 'keyword_all',
 );
@@ -169,6 +171,7 @@ __END__
 +delete
 -die
 +do
+-does
 -dump
 -each
 +else
@@ -304,6 +307,7 @@ __END__
 -rewinddir
 -rindex
 -rmdir
+-role
 +s
 +say
 +scalar

@@ -29,6 +29,7 @@
 #include "EXTERN.h"
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"
+#include "class.h"
 
 #if defined(USE_PERLIO)
 #include "perliol.h" /* For the PERLIO_F_XXX */
@@ -294,6 +295,67 @@ XXX extracted in sv_does_sv is more complicated than the hand waving above
 
 #include "XSUB.h"
 
+/*
+ * Structural role contract check.  Returns TRUE if objstash fulfills the
+ * role's complete interface contract as defined in ROLE_ALGEBRA.md §11.3:
+ *
+ *   - For each Defined method in the role's proto-role: the method that
+ *     objstash would dispatch to must have CvSTASH == rolestash (the role's
+ *     original implementation is still in place).
+ *   - For each Required method: some implementation must exist.
+ *   - Generated accessors (from_field != NULL) are skipped — they are
+ *     implementation machinery, not part of the behavioral contract.
+ */
+#define class_does_role_structurally(o, r) \
+    S_class_does_role_structurally(aTHX_ o, r)
+static bool
+S_class_does_role_structurally(pTHX_ HV *objstash, HV *rolestash)
+{
+    struct xpvhv_aux *raux = HvAUX(rolestash);
+    proto_role_t *proto = raux->xhv_class_proto_role;
+
+    /* If no proto-role is retained, fall back to nominal check */
+    if (!proto)
+        return FALSE;
+
+    for (UV i = 0; i < proto->method_count; i++) {
+        method_slot_t *slot = &proto->method_slots[i];
+
+        /* Skip generated accessors — not part of the behavioral contract */
+        if (slot->from_field)
+            continue;
+
+        STRLEN namelen;
+        const char *name = SvPV(slot->name, namelen);
+
+        if (origin_is_defined(slot->origins)) {
+            /* Defined: the method that objstash dispatches to must have
+             * CvSTASH == rolestash (role's original implementation) */
+            GV *gv = gv_fetchmeth_pvn(objstash, name, namelen, 0, 0);
+            if (!gv)
+                return FALSE;
+
+            CV *cv = isGV(gv) ? GvCV(gv) : (CV *)gv;
+            if (!cv || CvSTASH(cv) != rolestash)
+                return FALSE;
+        }
+        else if (origin_is_required(slot->origins)) {
+            /* Required: some implementation must exist */
+            GV *gv = gv_fetchmeth_pvn(objstash, name, namelen, 0, 0);
+            if (!gv)
+                return FALSE;
+
+            CV *cv = isGV(gv) ? GvCV(gv) : (CV *)gv;
+            if (!cv)
+                return FALSE;
+        }
+        /* Conflicted slots are not checked — they represent composition
+         * artifacts, not part of the original role's contract */
+    }
+
+    return TRUE;
+}
+
 bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
@@ -325,6 +387,26 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     if (sv_eq(classname, namesv)) {
         LEAVE;
         return TRUE;
+    }
+
+    /* For class-system objects, perform the structural DOES check
+     * per ROLE_ALGEBRA.md §11.3: verify the role's interface contract
+     * is actually fulfilled by the object's dispatch table. */
+    {
+        HV *objstash = NULL;
+        if (SvROK(sv) && SvOBJECT(SvRV(sv)))
+            objstash = SvSTASH(SvRV(sv));
+        else
+            objstash = gv_stashsv(sv, 0);
+
+        if (objstash && HvSTASH_IS_CLASS_OR_ROLE(objstash)) {
+            HV *target_stash = gv_stashsv(namesv, 0);
+            if (target_stash && HvSTASH_IS_ROLE(target_stash)) {
+                bool result = class_does_role_structurally(objstash, target_stash);
+                LEAVE;
+                return result;
+            }
+        }
     }
 
     PUSHMARK(SP);
@@ -370,6 +452,57 @@ Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 fla
     PERL_ARGS_ASSERT_SV_DOES_PVN;
 
     return sv_does_sv(sv, newSVpvn_flags(name, len, flags | SVs_TEMP), flags);
+}
+
+/*
+=for apidoc sv_does_role_sv
+
+Nominal role composition check.  Returns TRUE if C<sv> (an object instance
+or class name) declared C<:does(namesv)>, directly or transitively through
+another composed role.  This is the "did the programmer declare this
+relationship?" check.
+
+=cut
+*/
+
+bool
+Perl_sv_does_role_sv(pTHX_ SV *sv, SV *namesv)
+{
+    PERL_ARGS_ASSERT_SV_DOES_ROLE_SV;
+
+    HV *objstash = NULL;
+
+    SvGETMAGIC(sv);
+
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
+        return FALSE;
+
+    if (SvROK(sv) && SvOBJECT(SvRV(sv)))
+        objstash = SvSTASH(SvRV(sv));
+    else
+        objstash = gv_stashsv(sv, 0);
+
+    if (!objstash || !HvSTASH_IS_CLASS_OR_ROLE(objstash))
+        return FALSE;
+
+    HV *target_stash = gv_stashsv(namesv, 0);
+    if (!target_stash || !HvSTASH_IS_ROLE(target_stash))
+        return FALSE;
+
+    /* Walk the class hierarchy checking xhv_class_roles */
+    HV *walk = objstash;
+    while (walk && HvSTASH_IS_CLASS_OR_ROLE(walk)) {
+        struct xpvhv_aux *waux = HvAUX(walk);
+        if (waux->xhv_class_roles) {
+            for (SSize_t i = 0; i <= AvFILL(waux->xhv_class_roles); i++) {
+                if ((HV *)AvARRAY(waux->xhv_class_roles)[i] == target_stash)
+                    return TRUE;
+            }
+        }
+        walk = waux->xhv_class_superclass;
+    }
+
+    return FALSE;
 }
 
 /*
@@ -528,6 +661,23 @@ XS(XS_UNIVERSAL_DOES)
     else {
         SV * const sv = ST(0);
         if (sv_does_sv( sv, ST(1), 0 ))
+            XSRETURN_YES;
+
+        XSRETURN_NO;
+    }
+}
+
+XS(XS_UNIVERSAL_does); /* prototype to pass -Wmissing-prototypes */
+XS(XS_UNIVERSAL_does)
+{
+    dXSARGS;
+    PERL_UNUSED_ARG(cv);
+
+    if (items != 2)
+        croak("Usage: invocant->does(role)");
+    else {
+        SV * const sv = ST(0);
+        if (sv_does_role_sv(sv, ST(1)))
             XSRETURN_YES;
 
         XSRETURN_NO;
@@ -1314,6 +1464,7 @@ static const struct xsub_details these_details[] = {
     {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL, 0 },
     {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL, 0 },
     {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL, 0 },
+    {"UNIVERSAL::does", XS_UNIVERSAL_does, NULL, 0 },
     {"UNIVERSAL::import", XS_UNIVERSAL_import_unimport, NULL, 0},
     {"UNIVERSAL::unimport", XS_UNIVERSAL_import_unimport, NULL, 1},
 #define VXS_XSUB_DETAILS

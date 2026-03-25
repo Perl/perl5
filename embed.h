@@ -28,9 +28,16 @@
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
 #   undef do_aexec
+#   undef HvAUXf_IS_CLASS_SEALED
+#   undef HvAUXf_IS_ROLE
+#   undef HvSTASH_IS_CLASS_OR_ROLE
+#   undef HvSTASH_IS_CLASS_SEALED
+#   undef HvSTASH_IS_ROLE
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
+#   undef KEY_does
+#   undef KEY_role
 #   undef new_XPV
 #   undef new_XPVIV
 #   undef pTHX_10
@@ -679,6 +686,7 @@
 # define sv_does(a,b)                           Perl_sv_does(aTHX_ a,b)
 # define sv_does_pv(a,b,c)                      Perl_sv_does_pv(aTHX_ a,b,c)
 # define sv_does_pvn(a,b,c,d)                   Perl_sv_does_pvn(aTHX_ a,b,c,d)
+# define sv_does_role_sv(a,b)                   Perl_sv_does_role_sv(aTHX_ a,b)
 # define sv_does_sv(a,b,c)                      Perl_sv_does_sv(aTHX_ a,b,c)
 # define sv_dump(a)                             Perl_sv_dump(aTHX_ a)
 # define sv_dump_depth(a,b)                     Perl_sv_dump_depth(aTHX_ a,b)
@@ -1265,6 +1273,7 @@
 #     define ck_concat(a)                       Perl_ck_concat(aTHX_ a)
 #     define ck_defined(a)                      Perl_ck_defined(aTHX_ a)
 #     define ck_delete(a)                       Perl_ck_delete(aTHX_ a)
+#     define ck_does(a)                         Perl_ck_does(aTHX_ a)
 #     define ck_each(a)                         Perl_ck_each(aTHX_ a)
 #     define ck_eof(a)                          Perl_ck_eof(aTHX_ a)
 #     define ck_eval(a)                         Perl_ck_eval(aTHX_ a)
@@ -2189,6 +2198,8 @@
 #   define class_setup_stash(a)                 Perl_class_setup_stash(aTHX_ a)
 #   define class_wrap_method_body(a)            Perl_class_wrap_method_body(aTHX_ a)
 #   define croak_kw_unless_class(a)             Perl_croak_kw_unless_class(aTHX_ a)
+#   define role_seal_stash(a)                   Perl_role_seal_stash(aTHX_ a)
+#   define role_setup_stash(a)                  Perl_role_setup_stash(aTHX_ a)
 # endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    ||
            defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) ||
            defined(PERL_IN_TOKE_C) */

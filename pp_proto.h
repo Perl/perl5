@@ -63,6 +63,7 @@ PERL_CALLCONV PP(pp_defined) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_delete) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_die) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_divide) __attribute__visibility__("hidden");
+PERL_CALLCONV PP(pp_does) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_each) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_ehostent) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_emptyavhv) __attribute__visibility__("hidden");

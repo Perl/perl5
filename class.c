@@ -16,19 +16,42 @@
 #include "perl.h"
 
 #include "XSUB.h"
+#include "class.h"
 
 enum {
-    PADIX_SELF   = 1,
-    PADIX_PARAMS = 2,
+    PADIX_SELF        = 1,
+    PADIX_PARAMS      = 2,
+    PADIX_ROLE_OFFSET = 3,
 };
+
+/* Forward declarations */
+static OP *S_find_op_methstart(pTHX_ OP *o);
+#define find_op_methstart(o)  S_find_op_methstart(aTHX_ o)
+static AV *S_class_compose_roles(pTHX_ HV *stash);
+#define class_compose_roles(stash)  S_class_compose_roles(aTHX_ stash)
+
+/* Clone a role CV and store a fieldix offset in its pad for composition.
+ * The clone gets its own padlist (via cv_clone) and shares the optree
+ * (via OpREFCNT). The offset is stored in pad slot PADIX_ROLE_OFFSET,
+ * read by pp_methstart and pp_initfield at runtime. */
+static CV *
+S_cv_clone_with_field_offset(pTHX_ CV *proto, PADOFFSET offset)
+{
+    CV *cv = cv_clone(proto);
+    PAD *pad1 = PadlistARRAY(CvPADLIST(cv))[1];
+    sv_setuv(PadARRAY(pad1)[PADIX_ROLE_OFFSET], offset);
+    return cv;
+}
+#define cv_clone_with_field_offset(proto, offset) \
+    S_cv_clone_with_field_offset(aTHX_ proto, offset)
 
 void
 Perl_croak_kw_unless_class(pTHX_ const char *kw)
 {
     PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS;
 
-    if(!HvSTASH_IS_CLASS(PL_curstash))
-        croak("Cannot '%s' outside of a 'class'", kw);
+    if(!HvSTASH_IS_CLASS_OR_ROLE(PL_curstash))
+        croak("Cannot '%s' outside of a 'class' or 'role'", kw);
 }
 
 #define newSVobject(fieldcount)  Perl_newSVobject(aTHX_ fieldcount)
@@ -62,6 +85,16 @@ PP(pp_initfield)
     SV **fields = ObjectFIELDS(instance);
 
     PADOFFSET fieldix = aux[0].uv;
+
+    /* Apply per-CV fieldix offset from role composition.
+     * Cloned role CVs have the offset stored in pad slot PADIX_ROLE_OFFSET.
+     * For non-role CVs this slot is undef (SvIOK false), so the check is
+     * a single flag test — no magic walk needed. */
+    {
+        SV *offset_sv = PAD_SVl(PADIX_ROLE_OFFSET);
+        if(UNLIKELY(SvIOK(offset_sv)))
+            fieldix += SvUVX(offset_sv);
+    }
 
     SV *val = NULL;
 
@@ -251,6 +284,33 @@ XS(injected_constructor)
     XSRETURN(1);
 }
 
+/* Check if a class/role stash composes a given role (directly or transitively).
+ * Also walks the superclass chain. */
+static bool
+S_class_does_role(pTHX_ HV *stash, HV *rolestash)
+{
+    if(!stash || !rolestash)
+        return FALSE;
+
+    /* Walk the class hierarchy */
+    while(stash) {
+        if(HvSTASH_IS_CLASS_OR_ROLE(stash)) {
+            struct xpvhv_aux *aux = HvAUX(stash);
+            if(aux->xhv_class_roles) {
+                for(SSize_t i = 0; i <= AvFILL(aux->xhv_class_roles); i++) {
+                    if((HV *)AvARRAY(aux->xhv_class_roles)[i] == rolestash)
+                        return TRUE;
+                }
+            }
+            stash = aux->xhv_class_superclass;
+        }
+        else
+            break;
+    }
+    return FALSE;
+}
+#define class_does_role(stash, rolestash) S_class_does_role(aTHX_ stash, rolestash)
+
 /* OP_METHSTART is an UNOP_AUX whose AUX list contains
  *   [0].uv = count of fieldbinding pairs
  *   [1].uv = maximum fieldidx found in the binding list
@@ -292,7 +352,9 @@ PP(pp_methstart)
     }
 
     if(CvSTASH(curcv) != SvSTASH(rv) &&
-        !sv_derived_from_hv(self, CvSTASH(curcv)))
+        !sv_derived_from_hv(self, CvSTASH(curcv)) &&
+        /* For role methods, check if the instance's class composes the role */
+        !(HvSTASH_IS_ROLE(CvSTASH(curcv)) && class_does_role(SvSTASH(rv), CvSTASH(curcv))))
         croak("Cannot invoke a method of %" HvNAMEf_QUOTEDPREFIX " on an instance of %" HvNAMEf_QUOTEDPREFIX,
             HvNAMEfARG(CvSTASH(curcv)), HvNAMEfARG(SvSTASH(rv)));
 
@@ -307,15 +369,27 @@ PP(pp_methstart)
         SV *instance = SvRV(self);
         SV **fieldp = ObjectFIELDS(instance);
 
+        /* Check for a per-CV fieldix offset (set during role composition).
+         * Role methods carry role-local field indices in their OP_METHSTART
+         * aux; when composed into a class with existing fields, the indices
+         * need to be offset. The offset is stored in pad slot
+         * PADIX_ROLE_OFFSET. For non-role CVs, the slot is undef (SvIOK
+         * false), so this is a single flag test. */
+        PADOFFSET fieldix_offset = 0;
+        {
+            SV *offset_sv = PAD_SVl(PADIX_ROLE_OFFSET);
+            if(UNLIKELY(SvIOK(offset_sv)))
+                fieldix_offset = SvUVX(offset_sv);
+        }
         U32 fieldcount = (aux++)->uv;
-        U32 max_fieldix = (aux++)->uv;
+        U32 max_fieldix = (aux++)->uv + fieldix_offset;
 
         assert((U32)(ObjectMAXFIELD(instance)+1) > max_fieldix);
         PERL_UNUSED_VAR(max_fieldix);
 
         for(Size_t i = 0; i < fieldcount; i++) {
             PADOFFSET padix   = (aux++)->uv;
-            U32       fieldix = (aux++)->uv;
+            U32       fieldix = (aux++)->uv + fieldix_offset;
 
             /* Defend against fields that don't yet exist; e.g. because of
              * method invoked during DESTROY of an aborted constructor
@@ -350,6 +424,12 @@ static void
 invoke_class_seal(pTHX_ void *arg_)
 {
     class_seal_stash((HV *)arg_);
+}
+
+static void
+invoke_role_seal(pTHX_ void *arg_)
+{
+    role_seal_stash((HV *)arg_);
 }
 
 void
@@ -398,12 +478,16 @@ Perl_class_setup_stash(pTHX_ HV *stash)
      */
 
     struct xpvhv_aux *aux = HvAUX(stash);
-    aux->xhv_class_superclass    = NULL;
-    aux->xhv_class_initfields_cv = NULL;
-    aux->xhv_class_adjust_blocks = NULL;
-    aux->xhv_class_fields        = NULL;
-    aux->xhv_class_next_fieldix  = 0;
-    aux->xhv_class_param_map     = NULL;
+    aux->xhv_class_superclass         = NULL;
+    aux->xhv_class_initfields_cv      = NULL;
+    aux->xhv_class_adjust_blocks      = NULL;
+    aux->xhv_class_fields             = NULL;
+    aux->xhv_class_next_fieldix       = 0;
+    aux->xhv_class_param_map          = NULL;
+    aux->xhv_class_pending_method_cvs = NULL;
+    aux->xhv_class_pending_roles      = NULL;
+    aux->xhv_class_roles              = NULL;
+    aux->xhv_class_proto_role         = proto_role_new(stash);
 
     aux->xhv_aux_flags |= HvAUXf_IS_CLASS;
 
@@ -423,6 +507,9 @@ Perl_class_setup_stash(pTHX_ HV *stash)
 
         padix = pad_add_name_pvs("%(params)", 0, NULL, NULL);
         assert(padix == PADIX_PARAMS);
+
+        padix = pad_add_name_pvs("$(role_offset)", 0, NULL, NULL);
+        assert(padix == PADIX_ROLE_OFFSET);
 
         PERL_UNUSED_VAR(padix);
 
@@ -529,6 +616,9 @@ static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
 static void
 apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
 {
+    if(HvSTASH_IS_ROLE(stash))
+        croak("Roles cannot use :isa");
+
     assert(HvSTASH_IS_CLASS(stash));
     struct xpvhv_aux *aux = HvAUX(stash);
 
@@ -549,8 +639,8 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
     }
     if(!superstash || !HvSTASH_IS_CLASS(superstash))
         /* TODO: This would be a useful feature addition */
-        croak("Class :isa attribute requires a class but %" HvNAMEf_QUOTEDPREFIX " is not one",
-            HvNAMEfARG(superstash));
+        croak("Class :isa attribute requires a class but %" SVf_QUOTEDPREFIX " is not one",
+            SVfARG(superclassname));
 
     if(superclassver && SvOK(superclassver))
         ensure_module_version(superclassname, superclassver);
@@ -580,7 +670,11 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
 
     struct xpvhv_aux *superaux = HvAUX(superstash);
 
-    aux->xhv_class_next_fieldix = superaux->xhv_class_next_fieldix;
+    /* Don't copy next_fieldix from the parent here. Field indices are now
+     * assigned as class-relative values during parsing and resolved to
+     * absolute indices at seal time. The base offset from the superclass
+     * will be applied during class_seal_stash().
+     */
 
     if(superaux->xhv_class_adjust_blocks) {
         if(!aux->xhv_class_adjust_blocks)
@@ -595,6 +689,68 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
     }
 }
 
+static void
+S_apply_one_role(pTHX_ HV *stash, struct xpvhv_aux *aux, SV *namesv)
+{
+    SV *rolename = sv_newmortal(), *rolever = sv_newmortal();
+    const char *end = split_package_ver(namesv, rolename, rolever);
+    if(*end)
+        croak("Unexpected characters while parsing :does attribute: %s", end);
+
+    HV *rolestash = gv_stashsv(rolename, 0);
+    if (!rolestash) {
+        load_module(PERL_LOADMOD_NOIMPORT, newSVsv(rolename), NULL, NULL);
+        rolestash = gv_stashsv(rolename, 0);
+    }
+    if(!rolestash || !HvSTASH_IS_ROLE(rolestash))
+        croak(":does attribute requires a role but %" HvNAMEf_QUOTEDPREFIX " is not one",
+            rolestash ? HvNAMEfARG(rolestash) : "\"(unknown)\"");
+
+    if(rolever && SvOK(rolever))
+        ensure_module_version(rolename, rolever);
+
+    if(!aux->xhv_class_pending_roles)
+        aux->xhv_class_pending_roles = newAV();
+
+    av_push(aux->xhv_class_pending_roles, SvREFCNT_inc((SV *)rolestash));
+}
+
+static void
+apply_class_attribute_does(pTHX_ HV *stash, SV *value)
+{
+    assert(HvSTASH_IS_CLASS_OR_ROLE(stash));
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    /* Support comma-separated list: :does(R1, R2, R3) */
+    const char *p   = SvPVX(value);
+    const char *end = p + SvCUR(value);
+
+    while(p < end) {
+        /* skip leading whitespace and commas */
+        while(p < end && (*p == ',' || isSPACE(*p)))
+            p++;
+        if(p >= end)
+            break;
+
+        /* find end of this entry (up to comma or end) */
+        const char *start = p;
+        while(p < end && *p != ',')
+            p++;
+
+        /* trim trailing whitespace */
+        const char *entry_end = p;
+        while(entry_end > start && isSPACE(*(entry_end - 1)))
+            entry_end--;
+
+        if(entry_end > start) {
+            SV *entry = newSVpvn_flags(start, entry_end - start,
+                                       SvUTF8(value) ? SVf_UTF8 : 0);
+            sv_2mortal(entry);
+            S_apply_one_role(aTHX_ stash, aux, entry);
+        }
+    }
+}
+
 static struct {
     const char *name;
     bool requires_value;
@@ -603,6 +759,10 @@ static struct {
     { .name           = "isa",
       .requires_value = true,
       .apply          = &apply_class_attribute_isa,
+    },
+    { .name           = "does",
+      .requires_value = true,
+      .apply          = &apply_class_attribute_does,
     },
     { NULL, false, NULL }
 };
@@ -683,6 +843,21 @@ S_class_cleanup_definition(pTHX_ HV *stash)
     SvREFCNT_dec(aux->xhv_class_param_map);
     aux->xhv_class_param_map = NULL;
 
+    SvREFCNT_dec(aux->xhv_class_pending_method_cvs);
+    aux->xhv_class_pending_method_cvs = NULL;
+
+    /* pending roles */
+    SvREFCNT_dec(aux->xhv_class_pending_roles);
+    aux->xhv_class_pending_roles = NULL;
+
+    /* composed roles */
+    SvREFCNT_dec(aux->xhv_class_roles);
+    aux->xhv_class_roles = NULL;
+
+    /* proto-role */
+    proto_role_free(aux->xhv_class_proto_role);
+    aux->xhv_class_proto_role = NULL;
+
     /* clean up the ops for defaults for fields, if any, since
        padname_free() doesn't.
     */
@@ -743,8 +918,1198 @@ S_class_cleanup_definition(pTHX_ HV *stash)
         av_clear(isa);
     }
 
-    /* no longer a class */
-    aux->xhv_aux_flags &= ~HvAUXf_IS_CLASS;
+    /* no longer a class or role */
+    aux->xhv_aux_flags &= ~(HvAUXf_IS_CLASS | HvAUXf_IS_ROLE);
+}
+
+/* Build the OP_METHSTART field-binding aux for a single method CV.
+ * Scans the CV's pad for field PADNAMEs and builds an aux array of
+ * (padix, fieldix) pairs. Skips CVs whose OP_METHSTART already has aux.
+ */
+#define class_seal_method_fieldmap(cv)  S_class_seal_method_fieldmap(aTHX_ cv)
+static void
+S_class_seal_method_fieldmap(pTHX_ CV *cv)
+{
+    assert(CvROOT(cv));
+
+    OP *methstartop = find_op_methstart(CvROOT(cv));
+    if(!methstartop)
+        return;
+
+    /* Already processed (e.g. found via both pending list and stash walk) */
+    if(cUNOP_AUXx(methstartop)->op_aux)
+        return;
+
+    PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(cv));
+
+    AV *fieldmap = newAV();
+    UV max_fieldix = 0;
+
+    /* padix 0 == @_; padix 1 == $self. Start at 2 */
+    for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
+        PADNAME *pn = PadnamelistARRAY(pnl)[padix];
+        if(!pn || !PadnameIsFIELD(pn))
+            continue;
+
+        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+        assert(fieldix != (PADOFFSET)-1); /* must be resolved */
+
+        if(fieldix > max_fieldix)
+            max_fieldix = fieldix;
+
+        av_push_simple(fieldmap, newSVuv(padix));
+        av_push_simple(fieldmap, newSVuv(fieldix));
+    }
+
+    if(av_count(fieldmap)) {
+        UNOP_AUX_item *aux = (UNOP_AUX_item *)PerlMemShared_malloc(
+            sizeof(UNOP_AUX_item) * (2 + av_count(fieldmap)));
+
+        UNOP_AUX_item *ap = aux;
+
+        (ap++)->uv = av_count(fieldmap) / 2;
+        (ap++)->uv = max_fieldix;
+
+        for(Size_t j = 0; j < av_count(fieldmap); j++)
+            (ap++)->uv = SvUV(AvARRAY(fieldmap)[j]);
+
+        cUNOP_AUXx(methstartop)->op_aux = aux;
+    }
+
+    SvREFCNT_dec_NN((SV *)fieldmap);
+}
+
+/* Collect unique role stashes for composition, deduplicating by stash pointer
+ * identity (diamond case). We do NOT recurse into transitive roles because
+ * each role's seal already composed its own :does roles into its stash.
+ * The transitive methods are already present in the intermediate role. */
+static void
+S_collect_unique_roles(pTHX_ AV *pending, AV *seen, AV *unique)
+{
+    for(SSize_t i = 0; i <= AvFILL(pending); i++) {
+        HV *rolestash = (HV *)AvARRAY(pending)[i];
+
+        /* Check if already seen (diamond dedup) */
+        bool found = FALSE;
+        for(SSize_t j = 0; j <= AvFILL(seen); j++) {
+            if((HV *)AvARRAY(seen)[j] == rolestash) {
+                found = TRUE;
+                break;
+            }
+        }
+        if(found)
+            continue;
+
+        av_push(seen, (SV *)rolestash); /* no refcnt — just tracking pointers */
+        av_push(unique, SvREFCNT_inc((SV *)rolestash));
+    }
+}
+#define collect_unique_roles(pending, seen, unique) S_collect_unique_roles(aTHX_ pending, seen, unique)
+
+/* Compose all pending roles into a class/role stash.
+ * Called from class_seal_stash / role_seal_stash before Phase 1 (field resolution).
+ * For now, this handles methods, required methods, ADJUST blocks, and @ISA.
+ * Field composition is handled in Step 5. */
+/* Finalize the proto-role's method slots by walking the stash and
+ * pending_method_cvs to capture explicit methods and required method stubs.
+ * Accessor methods and field slots are already populated during parsing.
+ * This must be called before composition begins.
+ *
+ * Also sorts all slot arrays by name for the merge-join composition. */
+static void
+S_proto_role_finalize(pTHX_ HV *stash)
+{
+    struct xpvhv_aux *aux = HvAUX(stash);
+    proto_role_t *pr = aux->xhv_class_proto_role;
+
+    if (!pr)
+        return;
+
+    /* Walk the stash for named method CVs */
+    if (hv_iterinit(stash)) {
+        HE *he;
+        while ((he = hv_iternext(stash)) != NULL) {
+            SV *entry = HeVAL(he);
+            CV *cv = NULL;
+
+            if (SvTYPE(entry) == SVt_PVGV && isGV_with_GP(entry))
+                cv = GvCV((GV *)entry);
+            else if (SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                cv = (CV *)SvRV(entry);
+
+            if (!cv || !CvIsMETHOD(cv))
+                continue;
+
+            SV *methname = HeSVKEY_force(he);
+
+            /* Skip if already recorded (e.g. accessor from :reader/:writer) */
+            bool found = FALSE;
+            for (UV i = 0; i < pr->method_count; i++) {
+                if (sv_eq(pr->method_slots[i].name, methname)) {
+                    found = TRUE;
+                    break;
+                }
+            }
+            if (found)
+                continue;
+
+            /* Required method stub (no body) or explicit method */
+            if (!CvROOT(cv)) {
+                /* Required: origins = 0, cv = NULL */
+                proto_role_add_method(pr, methname, ORIGIN_SET_EMPTY,
+                                     NULL, NULL);
+            } else {
+                /* Explicit method: from_field = NULL */
+                proto_role_add_method(pr, methname, ORIGIN_SET_EMPTY,
+                                     cv, NULL);
+            }
+        }
+    }
+
+    /* Sort method slots by name for merge-join composition */
+    if (pr->method_count > 1) {
+        /* Simple insertion sort — method counts are small (typically <20) */
+        for (UV i = 1; i < pr->method_count; i++) {
+            method_slot_t tmp = pr->method_slots[i];
+            UV j = i;
+            while (j > 0 && sv_cmp(pr->method_slots[j-1].name, tmp.name) > 0) {
+                pr->method_slots[j] = pr->method_slots[j-1];
+                j--;
+            }
+            pr->method_slots[j] = tmp;
+        }
+    }
+
+    /* Sort field slots by name for merge-join composition */
+    if (pr->field_count > 1) {
+        for (UV i = 1; i < pr->field_count; i++) {
+            field_slot_t tmp = pr->field_slots[i];
+            UV j = i;
+            while (j > 0 && sv_cmp(PadnameSV(pr->field_slots[j-1].padname),
+                                    PadnameSV(tmp.padname)) > 0) {
+                pr->field_slots[j] = pr->field_slots[j-1];
+                j--;
+            }
+            pr->field_slots[j] = tmp;
+        }
+    }
+}
+#define proto_role_finalize(stash) S_proto_role_finalize(aTHX_ stash)
+
+/* ========================================================================
+ * Proto-Role Composition Pipeline
+ *
+ * These functions implement the composition algebra from ROLE_ALGEBRA.md.
+ * They are the new pipeline that will replace S_class_compose_roles.
+ * ======================================================================== */
+
+/* Assign origin IDs (bit positions) to all participating proto-roles.
+ * Consumer gets bit 0, then roles get bits 1..N.
+ * Also sets the origin bits on each proto-role's own slots. */
+static void
+S_proto_role_assign_ids(pTHX_ proto_role_t *consumer,
+                        proto_role_t **roles, UV role_count,
+                        origin_map_t *map)
+{
+    origin_map_init(map);
+
+    /* Consumer gets bit 0 */
+    consumer->origin_id = map->next_id;
+    map->stashes[map->next_id] = consumer->stash;
+    map->next_id++;
+
+    origin_set_t consumer_bit = (origin_set_t)1 << consumer->origin_id;
+
+    /* Set consumer's own origin bits on its slots.
+     * A method with cv != NULL is Defined (gets origin bit).
+     * A method with cv == NULL is Required (stays at 0). */
+    for (UV i = 0; i < consumer->method_count; i++) {
+        if (consumer->method_slots[i].cv != NULL)
+            consumer->method_slots[i].origins = consumer_bit;
+        /* else: Required — leave origins at 0 */
+    }
+    for (UV i = 0; i < consumer->field_count; i++)
+        consumer->field_slots[i].origins = consumer_bit;
+
+    /* Assign IDs to roles */
+    for (UV r = 0; r < role_count; r++) {
+        if (map->next_id >= ORIGIN_SET_MAX_BITS)
+            croak("Too many roles in a single composition (max %d)",
+                  ORIGIN_SET_MAX_BITS);
+
+        roles[r]->origin_id = map->next_id;
+        map->stashes[map->next_id] = roles[r]->stash;
+        map->next_id++;
+
+        origin_set_t role_bit = (origin_set_t)1 << roles[r]->origin_id;
+
+        /* Set role's origin bits on its slots */
+        for (UV i = 0; i < roles[r]->method_count; i++) {
+            if (roles[r]->method_slots[i].cv != NULL)
+                roles[r]->method_slots[i].origins = role_bit;
+        }
+        for (UV i = 0; i < roles[r]->field_count; i++)
+            roles[r]->field_slots[i].origins = role_bit;
+    }
+}
+#define proto_role_assign_ids(consumer, roles, count, map) \
+    S_proto_role_assign_ids(aTHX_ consumer, roles, count, map)
+
+/* Merge two sorted method-slot arrays into a new allocated array.
+ * For same-name entries, origins are OR'd together (the algebra).
+ * CV from left is kept as representative. */
+static method_slot_t *
+S_merge_method_slots(pTHX_ method_slot_t *a, UV a_count,
+                           method_slot_t *b, UV b_count,
+                           UV *out_count)
+{
+    UV max = a_count + b_count;
+    method_slot_t *out;
+    Newx(out, max ? max : 1, method_slot_t);
+    UV ai = 0, bi = 0, oi = 0;
+
+    while (ai < a_count && bi < b_count) {
+        int cmp = sv_cmp(a[ai].name, b[bi].name);
+        if (cmp < 0) {
+            out[oi] = a[ai];
+            out[oi].name = SvREFCNT_inc(a[ai].name);
+            out[oi].cv   = a[ai].cv ? (CV *)SvREFCNT_inc((SV *)a[ai].cv) : NULL;
+            oi++; ai++;
+        }
+        else if (cmp > 0) {
+            out[oi] = b[bi];
+            out[oi].name = SvREFCNT_inc(b[bi].name);
+            out[oi].cv   = b[bi].cv ? (CV *)SvREFCNT_inc((SV *)b[bi].cv) : NULL;
+            oi++; bi++;
+        }
+        else {
+            /* Same name — compose via OR */
+            out[oi].name    = SvREFCNT_inc(a[ai].name);
+            out[oi].origins = compose_origins(a[ai].origins, b[bi].origins);
+            out[oi].from_field = a[ai].from_field ? a[ai].from_field : b[bi].from_field;
+
+            /* Keep CV from left for Defined, either for Conflicted (arbitrary) */
+            if (a[ai].cv) {
+                out[oi].cv = (CV *)SvREFCNT_inc((SV *)a[ai].cv);
+            } else {
+                out[oi].cv = b[bi].cv ? (CV *)SvREFCNT_inc((SV *)b[bi].cv) : NULL;
+            }
+
+            oi++; ai++; bi++;
+        }
+    }
+
+    /* Copy remaining from a */
+    while (ai < a_count) {
+        out[oi] = a[ai];
+        out[oi].name = SvREFCNT_inc(a[ai].name);
+        out[oi].cv   = a[ai].cv ? (CV *)SvREFCNT_inc((SV *)a[ai].cv) : NULL;
+        oi++; ai++;
+    }
+
+    /* Copy remaining from b */
+    while (bi < b_count) {
+        out[oi] = b[bi];
+        out[oi].name = SvREFCNT_inc(b[bi].name);
+        out[oi].cv   = b[bi].cv ? (CV *)SvREFCNT_inc((SV *)b[bi].cv) : NULL;
+        oi++; bi++;
+    }
+
+    *out_count = oi;
+    return out;
+}
+#define merge_method_slots(a, ac, b, bc, oc) \
+    S_merge_method_slots(aTHX_ a, ac, b, bc, oc)
+
+/* Merge two sorted field-slot arrays into a new allocated array.
+ * Same semantics as method slots but no Required variant. */
+static field_slot_t *
+S_merge_field_slots(pTHX_ field_slot_t *a, UV a_count,
+                          field_slot_t *b, UV b_count,
+                          UV *out_count)
+{
+    UV max = a_count + b_count;
+    field_slot_t *out;
+    Newx(out, max ? max : 1, field_slot_t);
+    UV ai = 0, bi = 0, oi = 0;
+
+    while (ai < a_count && bi < b_count) {
+        int cmp = sv_cmp(PadnameSV(a[ai].padname), PadnameSV(b[bi].padname));
+        if (cmp < 0) {
+            out[oi].padname = PadnameREFCNT_inc(a[ai].padname);
+            out[oi].origins = a[ai].origins;
+            oi++; ai++;
+        }
+        else if (cmp > 0) {
+            out[oi].padname = PadnameREFCNT_inc(b[bi].padname);
+            out[oi].origins = b[bi].origins;
+            oi++; bi++;
+        }
+        else {
+            /* Same name — compose via OR */
+            out[oi].padname = PadnameREFCNT_inc(a[ai].padname);
+            out[oi].origins = compose_origins(a[ai].origins, b[bi].origins);
+            oi++; ai++; bi++;
+        }
+    }
+
+    while (ai < a_count) {
+        out[oi].padname = PadnameREFCNT_inc(a[ai].padname);
+        out[oi].origins = a[ai].origins;
+        oi++; ai++;
+    }
+
+    while (bi < b_count) {
+        out[oi].padname = PadnameREFCNT_inc(b[bi].padname);
+        out[oi].origins = b[bi].origins;
+        oi++; bi++;
+    }
+
+    *out_count = oi;
+    return out;
+}
+#define merge_field_slots(a, ac, b, bc, oc) \
+    S_merge_field_slots(aTHX_ a, ac, b, bc, oc)
+
+/* Compose two proto-roles into a new proto-role.
+ * The result has merged method and field slot arrays. */
+static proto_role_t *
+S_proto_role_compose_pair(pTHX_ proto_role_t *left, proto_role_t *right)
+{
+    proto_role_t *result;
+    Newxz(result, 1, proto_role_t);
+
+    result->method_slots = merge_method_slots(
+        left->method_slots, left->method_count,
+        right->method_slots, right->method_count,
+        &result->method_count);
+    result->method_alloc = result->method_count;
+
+    result->field_slots = merge_field_slots(
+        left->field_slots, left->field_count,
+        right->field_slots, right->field_count,
+        &result->field_count);
+    result->field_alloc = result->field_count;
+
+    return result;
+}
+#define proto_role_compose_pair(l, r) S_proto_role_compose_pair(aTHX_ l, r)
+
+/* Fold N proto-roles via repeated pairwise merge.
+ * roles[0] is the consumer's proto-role. */
+static proto_role_t *
+S_proto_role_compose_all(pTHX_ proto_role_t **roles, UV count)
+{
+    assert(count > 0);
+
+    proto_role_t *result = roles[0];
+
+    for (UV i = 1; i < count; i++) {
+        proto_role_t *merged = proto_role_compose_pair(result, roles[i]);
+        /* Free intermediate results (but not the originals) */
+        if (i > 1)
+            proto_role_free(result);
+        result = merged;
+    }
+
+    return result;
+}
+#define proto_role_compose_all(roles, count) \
+    S_proto_role_compose_all(aTHX_ roles, count)
+
+/* Check if the consumer has an explicit method (not generated accessor)
+ * with the given name. Uses binary search on sorted array. */
+static bool
+S_consumer_has_explicit(pTHX_ proto_role_t *consumer, SV *name)
+{
+    /* Binary search on sorted method_slots */
+    UV lo = 0, hi = consumer->method_count;
+    while (lo < hi) {
+        UV mid = (lo + hi) / 2;
+        int cmp = sv_cmp(consumer->method_slots[mid].name, name);
+        if (cmp == 0) {
+            /* Found — but only counts if explicit (not generated accessor) */
+            return consumer->method_slots[mid].from_field == NULL
+                && consumer->method_slots[mid].cv != NULL;
+        }
+        if (cmp < 0) lo = mid + 1;
+        else          hi = mid;
+    }
+    return FALSE;
+}
+#define consumer_has_explicit(consumer, name) \
+    S_consumer_has_explicit(aTHX_ consumer, name)
+
+/* Check if the class inherits a method from its superclass chain */
+static bool
+S_class_inherits_method(pTHX_ HV *stash, SV *name)
+{
+    struct xpvhv_aux *aux = HvAUX(stash);
+    HV *super = aux->xhv_class_superclass;
+    if (!super)
+        return FALSE;
+
+    /* Walk superclass chain */
+    while (super) {
+        HE *he = hv_fetch_ent(super, name, 0, 0);
+        if (he) {
+            SV *entry = HeVAL(he);
+            CV *cv = NULL;
+            if (SvTYPE(entry) == SVt_PVGV && isGV_with_GP(entry))
+                cv = GvCV((GV *)entry);
+            else if (SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                cv = (CV *)SvRV(entry);
+            if (cv && CvROOT(cv))
+                return TRUE;
+        }
+        if (!HvSTASH_IS_CLASS(super))
+            break;
+        super = HvAUX(super)->xhv_class_superclass;
+    }
+    return FALSE;
+}
+#define class_inherits_method(stash, name) \
+    S_class_inherits_method(aTHX_ stash, name)
+
+/* Resolution: check composed result against consumer's explicit methods.
+ * Returns NULL if no errors, or an AV of error SVs. */
+static AV *
+S_proto_role_resolve(pTHX_ proto_role_t *composed,
+                     proto_role_t *consumer, HV *stash,
+                     origin_map_t *map, bool is_role)
+{
+    AV *errors = NULL;
+
+    for (UV i = 0; i < composed->method_count; i++) {
+        method_slot_t *slot = &composed->method_slots[i];
+        origin_set_t origins = slot->origins;
+
+        if (origin_is_required(origins)) {
+            /* Required — check consumer explicit methods and inheritance */
+            if (consumer_has_explicit(consumer, slot->name))
+                continue;
+            if (!is_role && class_inherits_method(stash, slot->name))
+                continue;
+
+            /* For roles, unresolved Required slots propagate (not errors) */
+            if (is_role)
+                continue;
+
+            if (!errors) errors = newAV();
+            av_push(errors, newSVpvf(
+                "Method '%" SVf "' is required but not provided by %"
+                HvNAMEf_QUOTEDPREFIX,
+                SVfARG(slot->name), HvNAMEfARG(stash)));
+        }
+        else if (origin_is_conflicted(origins)) {
+            /* Conflicted — only consumer explicit method resolves */
+            if (consumer_has_explicit(consumer, slot->name))
+                continue;
+
+            /* For roles, unresolved Conflicted slots propagate */
+            if (is_role)
+                continue;
+
+            /* Inherited method does NOT resolve conflicts */
+            if (!errors) errors = newAV();
+
+            /* Build list of conflicting role names */
+            SV *role_names = newSVpvs("");
+            bool first = TRUE;
+            for (U8 bit = 0; bit < map->next_id; bit++) {
+                if ((origins & ((origin_set_t)1 << bit)) && map->stashes[bit]) {
+                    /* Skip consumer's own origin in the message */
+                    if (map->stashes[bit] == stash)
+                        continue;
+                    if (!first)
+                        sv_catpvs(role_names, " and ");
+                    sv_catpvf(role_names, "%" HvNAMEf_QUOTEDPREFIX,
+                              HvNAMEfARG(map->stashes[bit]));
+                    first = FALSE;
+                }
+            }
+
+            av_push(errors, newSVpvf(
+                "Method '%" SVf "' conflicts between %" SVf,
+                SVfARG(slot->name), SVfARG(role_names)));
+            SvREFCNT_dec(role_names);
+        }
+        /* Defined (popcount == 1): no action needed */
+    }
+
+    /* Field conflicts are always errors */
+    for (UV i = 0; i < composed->field_count; i++) {
+        field_slot_t *slot = &composed->field_slots[i];
+        if (origin_is_conflicted(slot->origins)) {
+            if (!errors) errors = newAV();
+
+            SV *role_names = newSVpvs("");
+            bool first = TRUE;
+            for (U8 bit = 0; bit < map->next_id; bit++) {
+                if ((slot->origins & ((origin_set_t)1 << bit)) && map->stashes[bit]) {
+                    if (!first)
+                        sv_catpvs(role_names, " and ");
+                    sv_catpvf(role_names, "%" HvNAMEf_QUOTEDPREFIX,
+                              HvNAMEfARG(map->stashes[bit]));
+                    first = FALSE;
+                }
+            }
+
+            av_push(errors, newSVpvf(
+                "Field '%" SVf "' conflicts between %" SVf,
+                SVfARG(PadnameSV(slot->padname)), SVfARG(role_names)));
+            SvREFCNT_dec(role_names);
+        }
+    }
+
+    return errors; /* NULL = no errors */
+}
+#define proto_role_resolve(composed, consumer, stash, map, is_role) \
+    S_proto_role_resolve(aTHX_ composed, consumer, stash, map, is_role)
+
+/* Format and croak with all collected errors */
+static void
+S_proto_role_croak_errors(pTHX_ AV *errors, HV *stash)
+{
+    assert(errors && av_count(errors) > 0);
+
+    SV *msg = newSVpvf("Role composition errors in %" HvNAMEf_QUOTEDPREFIX
+                        ":\n", HvNAMEfARG(stash));
+
+    for (SSize_t i = 0; i <= AvFILL(errors); i++) {
+        sv_catpvf(msg, "  - %" SVf "\n", SVfARG(AvARRAY(errors)[i]));
+    }
+
+    SvREFCNT_dec(errors);
+    croak_sv(msg);
+}
+#define proto_role_croak_errors(errors, stash) \
+    S_proto_role_croak_errors(aTHX_ errors, stash)
+
+/* ======================================================================== */
+
+/* New proto-role-based composition pipeline.
+ * Replaces S_class_compose_roles with algebraic composition + resolution.
+ * Returns an AV of role initfields CVs (same interface as the old function). */
+static AV *
+S_proto_role_compose_and_install(pTHX_ HV *stash)
+{
+    struct xpvhv_aux *aux = HvAUX(stash);
+    bool is_role = HvSTASH_IS_ROLE(stash);
+    proto_role_t *consumer_pr = aux->xhv_class_proto_role;
+
+    if (!aux->xhv_class_pending_roles || av_count(aux->xhv_class_pending_roles) == 0)
+        return NULL;
+
+    /* Step 1: Collect unique roles with diamond deduplication */
+    AV *seen = newAV();
+    SAVEFREESV((SV *)seen);
+    AV *flat_roles = newAV();
+    SAVEFREESV((SV *)flat_roles);
+
+    collect_unique_roles(aux->xhv_class_pending_roles, seen, flat_roles);
+
+    UV role_count = (UV)av_count(flat_roles);
+    if (role_count == 0)
+        return NULL;
+
+    /* Step 2: Gather role proto-roles and assign origin IDs */
+    proto_role_t **all_roles;
+    /* all_roles[0] = consumer, all_roles[1..N] = roles */
+    Newx(all_roles, 1 + role_count, proto_role_t *);
+    all_roles[0] = consumer_pr;
+
+    for (UV i = 0; i < role_count; i++) {
+        HV *rolestash = (HV *)AvARRAY(flat_roles)[i];
+        struct xpvhv_aux *roleaux = HvAUX(rolestash);
+
+        if (!roleaux->xhv_class_proto_role) {
+            /* Role doesn't have a proto-role (shouldn't happen for roles
+             * sealed by this build; falling back to legacy composition) */
+#ifdef DEBUGGING
+            Perl_warn(aTHX_ "proto_role_compose_and_install: role %" HvNAMEf_QUOTEDPREFIX
+                      " has no proto-role; falling back to legacy composition path",
+                      HvNAMEfARG(rolestash));
+#endif
+            Safefree(all_roles);
+            goto fallback;
+        }
+        all_roles[1 + i] = roleaux->xhv_class_proto_role;
+    }
+
+    origin_map_t map;
+    proto_role_assign_ids(consumer_pr, all_roles + 1, role_count, &map);
+
+    /* Step 3: Compose all proto-roles */
+    proto_role_t *composed = proto_role_compose_all(all_roles, 1 + role_count);
+
+    /* Step 4: Resolve */
+    AV *errors = proto_role_resolve(composed, consumer_pr, stash, &map, is_role);
+
+    if (errors) {
+        proto_role_free(composed);
+        Safefree(all_roles);
+        proto_role_croak_errors(errors, stash);
+        /* NOTREACHED */
+    }
+
+    /* Step 5: Install — perform the same work as the old compose function:
+     * field index advancement, param_map propagation, initfields chaining,
+     * method installation, ADJUST blocks, role tracking for DOES.
+     *
+     * We iterate over the flat_roles in order (same as old code) for
+     * installation, but use the composed proto-role for conflict-free
+     * assurance. */
+    AV *role_initfields_cvs = newAV();
+
+    for (SSize_t ri = 0; ri <= AvFILL(flat_roles); ri++) {
+        HV *rolestash = (HV *)AvARRAY(flat_roles)[ri];
+        struct xpvhv_aux *roleaux = HvAUX(rolestash);
+
+        PADOFFSET fieldix_offset = aux->xhv_class_next_fieldix;
+
+        /* --- Compose fields (metadata only) --- */
+        {
+            PADNAMELIST *rolefields = roleaux->xhv_class_fields;
+            if (rolefields) {
+                PADNAME **pnp = PadnamelistARRAY(rolefields);
+                SSize_t max = PadnamelistMAX(rolefields);
+
+                for (SSize_t i = 0; i <= max; i++) {
+                    PADNAME *rolepn = pnp[i];
+                    if (!rolepn || !PadnameIsFIELD(rolepn))
+                        continue;
+
+                    /* Param map propagation */
+                    if (PadnameFIELDINFO(rolepn)->paramname) {
+                        PADOFFSET fieldix = PadnameFIELDINFO(rolepn)->fieldix + fieldix_offset;
+                        if (!aux->xhv_class_param_map)
+                            aux->xhv_class_param_map = newHV();
+                        if (!hv_exists_ent(aux->xhv_class_param_map,
+                                           PadnameFIELDINFO(rolepn)->paramname, 0))
+                            (void)hv_store_ent(aux->xhv_class_param_map,
+                                PadnameFIELDINFO(rolepn)->paramname,
+                                newSVuv(fieldix), 0);
+                    }
+                }
+            }
+        }
+
+        /* Advance next_fieldix past this role's fields */
+        {
+            PADOFFSET role_end = fieldix_offset + roleaux->xhv_class_next_fieldix;
+            if (role_end > aux->xhv_class_next_fieldix)
+                aux->xhv_class_next_fieldix = role_end;
+        }
+
+        /* Propagate transitive param_map entries */
+        if (roleaux->xhv_class_param_map) {
+            if (!aux->xhv_class_param_map)
+                aux->xhv_class_param_map = newHV();
+            hv_iterinit(roleaux->xhv_class_param_map);
+            HE *he;
+            while ((he = hv_iternext(roleaux->xhv_class_param_map))) {
+                SV *key = HeSVKEY_force(he);
+                if (!hv_exists_ent(aux->xhv_class_param_map, key, 0)) {
+                    PADOFFSET fieldix = SvUV(HeVAL(he)) + fieldix_offset;
+                    (void)hv_store_ent(aux->xhv_class_param_map,
+                        key, newSVuv(fieldix), 0);
+                }
+            }
+        }
+
+        /* --- Chain the role's initfields CV --- */
+        if (roleaux->xhv_class_initfields_cv) {
+            CV *initcv = roleaux->xhv_class_initfields_cv;
+
+            if (fieldix_offset > 0) {
+                initcv = cv_clone_with_field_offset(initcv, fieldix_offset);
+                av_push(role_initfields_cvs, (SV *)initcv);
+            }
+            else {
+                av_push(role_initfields_cvs, SvREFCNT_inc((SV *)initcv));
+            }
+        }
+
+        /* --- Install methods --- */
+        {
+            HE *he;
+            (void)hv_iterinit(rolestash);
+            while ((he = hv_iternext(rolestash))) {
+                STRLEN klen;
+                const char *key = HePV(he, klen);
+                SV *entry = HeVAL(he);
+                CV *rolecv = NULL;
+
+                if (memEQs(key, klen, "new"))
+                    continue;
+
+                if (SvTYPE(entry) == SVt_PVGV && isGV_with_GP(entry))
+                    rolecv = GvCV((GV *)entry);
+                else if (SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                    rolecv = (CV *)SvRV(entry);
+
+                if (!rolecv || !CvIsMETHOD(rolecv))
+                    continue;
+
+                /* Required method stub — propagate to role consumers */
+                if (!CvROOT(rolecv)) {
+                    SV *methname = HeSVKEY_force(he);
+                    HE *existing = hv_fetch_ent(stash, methname, 0, 0);
+
+                    if (existing) {
+                        SV *existentry = HeVAL(existing);
+                        CV *existcv = NULL;
+                        if (SvTYPE(existentry) == SVt_PVGV && isGV_with_GP(existentry))
+                            existcv = GvCV((GV *)existentry);
+                        else if (SvROK(existentry) && SvTYPE(SvRV(existentry)) == SVt_PVCV)
+                            existcv = (CV *)SvRV(existentry);
+                        if (existcv && CvROOT(existcv))
+                            continue; /* satisfied */
+                    }
+
+                    /* For role consumers, install stub for transitive propagation */
+                    if (is_role && !existing) {
+                        (void)hv_store(stash, key,
+                                       HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                       newRV_inc((SV *)rolecv), 0);
+                    }
+                    continue;
+                }
+
+                /* Check for existing method — skip if same origin (diamond) */
+                HE *existing = hv_fetch_ent(stash, HeSVKEY_force(he), 0, 0);
+                if (existing) {
+                    SV *existentry = HeVAL(existing);
+                    CV *existcv = NULL;
+                    if (SvTYPE(existentry) == SVt_PVGV && isGV_with_GP(existentry))
+                        existcv = GvCV((GV *)existentry);
+                    else if (SvROK(existentry) && SvTYPE(SvRV(existentry)) == SVt_PVCV)
+                        existcv = (CV *)SvRV(existentry);
+
+                    /* Same CV or same origin (diamond) */
+                    if (existcv == rolecv ||
+                        (existcv && CvSTASH(existcv) == CvSTASH(rolecv)))
+                        continue;
+
+                    /* Consumer stub satisfied by role method */
+                    if (existcv && !CvROOT(existcv))
+                        goto new_install_method;
+
+                    /* Consumer's explicit method takes precedence (conflict
+                     * was already checked by proto_role_resolve) */
+                    if (existcv && CvIsMETHOD(existcv) &&
+                        consumer_has_explicit(consumer_pr, HeSVKEY_force(he)))
+                        continue;
+
+                    /* Remaining conflict case — should have been caught by resolve.
+                     * But if another role already installed its method, skip
+                     * (this role's method was conflicting but resolved by consumer). */
+                    if (existcv && CvIsMETHOD(existcv))
+                        continue;
+                }
+
+                new_install_method: {
+                    CV *composed_cv = rolecv;
+                    if (fieldix_offset > 0) {
+                        OP *methstart = find_op_methstart(CvROOT(rolecv));
+                        if (methstart && cUNOP_AUXx(methstart)->op_aux) {
+                            U32 fieldcount = cUNOP_AUXx(methstart)->op_aux[0].uv;
+                            if (fieldcount > 0)
+                                composed_cv = cv_clone_with_field_offset(
+                                                  rolecv, fieldix_offset);
+                        }
+                    }
+
+                    SV *rv = (composed_cv == rolecv)
+                        ? newRV_inc((SV *)rolecv)
+                        : newRV_noinc((SV *)composed_cv);
+                    (void)hv_store(stash, key,
+                                   HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                   rv, 0);
+                }
+            }
+        }
+
+        /* --- Compose ADJUST blocks --- */
+        if (roleaux->xhv_class_adjust_blocks) {
+            if (!aux->xhv_class_adjust_blocks)
+                aux->xhv_class_adjust_blocks = newAV();
+
+            for (SSize_t i = 0; i <= AvFILL(roleaux->xhv_class_adjust_blocks); i++) {
+                CV *adjust_cv = (CV *)AvARRAY(roleaux->xhv_class_adjust_blocks)[i];
+
+                CV *composed_adjust = adjust_cv;
+                if (fieldix_offset > 0) {
+                    OP *methstart = find_op_methstart(CvROOT(adjust_cv));
+                    if (methstart && cUNOP_AUXx(methstart)->op_aux) {
+                        U32 fieldcount = cUNOP_AUXx(methstart)->op_aux[0].uv;
+                        if (fieldcount > 0)
+                            composed_adjust = cv_clone_with_field_offset(
+                                                  adjust_cv, fieldix_offset);
+                    }
+                }
+
+                av_push(aux->xhv_class_adjust_blocks,
+                        SvREFCNT_inc((SV *)composed_adjust));
+            }
+        }
+
+        /* --- Record role in xhv_class_roles for DOES() --- */
+        {
+            if (!aux->xhv_class_roles)
+                aux->xhv_class_roles = newAV();
+
+            av_push(aux->xhv_class_roles, SvREFCNT_inc((SV *)rolestash));
+
+            /* Transitive roles */
+            if (HvSTASH_IS_ROLE(rolestash)) {
+                struct xpvhv_aux *raux = HvAUX(rolestash);
+                if (raux->xhv_class_roles) {
+                    for (SSize_t ti = 0; ti <= AvFILL(raux->xhv_class_roles); ti++) {
+                        HV *transitive = (HV *)AvARRAY(raux->xhv_class_roles)[ti];
+                        bool found = FALSE;
+                        for (SSize_t tj = 0; tj <= AvFILL(aux->xhv_class_roles); tj++) {
+                            if ((HV *)AvARRAY(aux->xhv_class_roles)[tj] == transitive) {
+                                found = TRUE;
+                                break;
+                            }
+                        }
+                        if (!found)
+                            av_push(aux->xhv_class_roles,
+                                    SvREFCNT_inc((SV *)transitive));
+                    }
+                }
+            }
+        }
+    }
+
+    proto_role_free(composed);
+    Safefree(all_roles);
+
+    return role_initfields_cvs;
+
+fallback:
+    /* Fall back to old compose path if a role lacks proto-role */
+    return class_compose_roles(stash);
+}
+#define proto_role_compose_and_install(stash) \
+    S_proto_role_compose_and_install(aTHX_ stash)
+
+/* Old composition function (retained for fallback). Will be removed once
+ * all roles have proto-roles. */
+/* Compose all pending roles into a class/role stash.
+ * Called from class_seal_stash / role_seal_stash before Phase 1 (field resolution).
+ * Returns an AV of (cloned) role initfields CVs with offset fieldix,
+ * to be chained in the class's initfields. Caller must free. Returns NULL
+ * if no roles are pending. */
+static AV *
+S_class_compose_roles(pTHX_ HV *stash)
+{
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    if(!aux->xhv_class_pending_roles || av_count(aux->xhv_class_pending_roles) == 0)
+        return NULL;
+
+    /* Collect unique direct roles with diamond deduplication */
+    AV *seen = newAV();
+    SAVEFREESV((SV *)seen);
+    AV *flat_roles = newAV();
+    SAVEFREESV((SV *)flat_roles);
+
+    collect_unique_roles(aux->xhv_class_pending_roles, seen, flat_roles);
+
+    AV *role_initfields_cvs = newAV();
+
+    /* Track composed field names -> origin stash for conflict detection */
+    HV *composed_fields = newHV(); /* field name => fieldstash ptr (as UV) */
+    SAVEFREESV((SV *)composed_fields);
+
+    /* Track required methods (from role stubs: method foo;) */
+    HV *required_methods = newHV(); /* method name => role stash name */
+    SAVEFREESV((SV *)required_methods);
+
+    for(SSize_t ri = 0; ri <= AvFILL(flat_roles); ri++) {
+        HV *rolestash = (HV *)AvARRAY(flat_roles)[ri];
+        struct xpvhv_aux *roleaux = HvAUX(rolestash);
+
+        PADOFFSET fieldix_offset = aux->xhv_class_next_fieldix;
+
+        /* --- Compose fields (metadata only, no pad entries) --- */
+        {
+            PADNAMELIST *rolefields = roleaux->xhv_class_fields;
+            if(rolefields) {
+                PADNAME **pnp = PadnamelistARRAY(rolefields);
+                SSize_t max = PadnamelistMAX(rolefields);
+
+                for(SSize_t i = 0; i <= max; i++) {
+                    PADNAME *rolepn = pnp[i];
+                    if(!rolepn || !PadnameIsFIELD(rolepn))
+                        continue;
+
+                    /* Check for field name conflicts with previously composed fields */
+                    {
+                        HE *fhe = hv_fetch_ent(composed_fields,
+                            PadnameSV(rolepn), 0, 0);
+                        if(fhe) {
+                            HV *existing_stash = INT2PTR(HV *, SvUV(HeVAL(fhe)));
+                            if(existing_stash == PadnameFIELDINFO(rolepn)->fieldstash)
+                                goto next_field; /* idempotent (diamond) */
+
+                            croak("Field %" SVf " conflicts between %" HvNAMEf_QUOTEDPREFIX
+                                  " and %" HvNAMEf_QUOTEDPREFIX,
+                                  SVfARG(PadnameSV(rolepn)),
+                                  HvNAMEfARG(existing_stash),
+                                  HvNAMEfARG(PadnameFIELDINFO(rolepn)->fieldstash));
+                        }
+                    }
+
+                    /* Track this field for future conflict detection */
+                    (void)hv_store_ent(composed_fields,
+                        PadnameSV(rolepn),
+                        newSVuv(PTR2UV(PadnameFIELDINFO(rolepn)->fieldstash)), 0);
+
+                    /* Add to param_map so the constructor knows about
+                     * these params (for extraction and unknown-param
+                     * validation). The role's initfields CV handles the
+                     * actual initialization. */
+                    if(PadnameFIELDINFO(rolepn)->paramname) {
+                        PADOFFSET fieldix = PadnameFIELDINFO(rolepn)->fieldix + fieldix_offset;
+                        if(!aux->xhv_class_param_map)
+                            aux->xhv_class_param_map = newHV();
+                        (void)hv_store_ent(aux->xhv_class_param_map,
+                            PadnameFIELDINFO(rolepn)->paramname,
+                            newSVuv(fieldix), 0);
+                    }
+
+                    next_field: ;
+                }
+            }
+        }
+
+        /* Advance next_fieldix past all of this role's fields, including
+         * any transitively composed fields that aren't in its own
+         * xhv_class_fields list. The role's xhv_class_next_fieldix is
+         * the total slot count (own + composed) determined at role seal time. */
+        {
+            PADOFFSET role_end = fieldix_offset + roleaux->xhv_class_next_fieldix;
+            if(role_end > aux->xhv_class_next_fieldix)
+                aux->xhv_class_next_fieldix = role_end;
+        }
+
+        /* Propagate the role's param_map to the consumer. This handles
+         * transitively composed :param fields that are in the role's
+         * param_map but not in its xhv_class_fields (because the role
+         * composed them from a sub-role). */
+        if(roleaux->xhv_class_param_map) {
+            if(!aux->xhv_class_param_map)
+                aux->xhv_class_param_map = newHV();
+            hv_iterinit(roleaux->xhv_class_param_map);
+            HE *he;
+            while((he = hv_iternext(roleaux->xhv_class_param_map))) {
+                SV *key = HeSVKEY_force(he);
+                if(!hv_exists_ent(aux->xhv_class_param_map, key, 0)) {
+                    PADOFFSET fieldix = SvUV(HeVAL(he)) + fieldix_offset;
+                    (void)hv_store_ent(aux->xhv_class_param_map,
+                        key, newSVuv(fieldix), 0);
+                }
+            }
+        }
+
+        /* --- Chain the role's initfields CV --- */
+        if(roleaux->xhv_class_initfields_cv) {
+            CV *initcv = roleaux->xhv_class_initfields_cv;
+
+            if(fieldix_offset > 0) {
+                initcv = cv_clone_with_field_offset(initcv, fieldix_offset);
+                av_push(role_initfields_cvs, (SV *)initcv); /* cv_clone refcnt=1 */
+            }
+            else {
+                av_push(role_initfields_cvs, SvREFCNT_inc((SV *)initcv));
+            }
+        }
+
+        /* --- Compose methods --- */
+        {
+            HE *he;
+            (void)hv_iterinit(rolestash);
+            while((he = hv_iternext(rolestash))) {
+                STRLEN klen;
+                const char *key = HePV(he, klen);
+                SV *entry = HeVAL(he);
+                CV *rolecv = NULL;
+
+                if(memEQs(key, klen, "new"))
+                    continue;
+
+                if(SvTYPE(entry) == SVt_PVGV && isGV_with_GP(entry))
+                    rolecv = GvCV((GV *)entry);
+                else if(SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                    rolecv = (CV *)SvRV(entry);
+
+                if(!rolecv || !CvIsMETHOD(rolecv))
+                    continue;
+
+                /* A role method with no body (method foo;) is a requirement.
+                 * Track it; install the stub into role consumers so it
+                 * propagates transitively. */
+                if(!CvROOT(rolecv)) {
+                    SV *methname = HeSVKEY_force(he);
+                    /* Check if the consumer already provides this method */
+                    HE *existing = hv_fetch_ent(stash, methname, 0, 0);
+                    if(existing) {
+                        SV *existentry = HeVAL(existing);
+                        CV *existcv = NULL;
+
+                        if(SvTYPE(existentry) == SVt_PVGV && isGV_with_GP(existentry))
+                            existcv = GvCV((GV *)existentry);
+                        else if(SvROK(existentry) && SvTYPE(SvRV(existentry)) == SVt_PVCV)
+                            existcv = (CV *)SvRV(existentry);
+
+                        if(existcv && CvROOT(existcv))
+                            continue; /* satisfied by consumer */
+                    }
+                    /* Not yet satisfied — track it */
+                    (void)hv_store_ent(required_methods, methname,
+                                       newSVpvf("%" HEKf, HvNAME_HEK(rolestash)), 0);
+                    /* Install stub into role consumers for transitive propagation */
+                    if(HvSTASH_IS_ROLE(stash) && !existing) {
+                        (void)hv_store(stash, key,
+                                       HeUTF8(he) ? -(I32)klen : (I32)klen,
+                                       newRV_inc((SV *)rolecv), 0);
+                    }
+                    continue;
+                }
+
+                /* A real role method also satisfies any pending requirement
+                 * of the same name (from a previously composed role) */
+                (void)hv_delete_ent(required_methods, HeSVKEY_force(he), G_DISCARD, 0);
+
+                /* Check for method conflicts */
+                HE *existing = hv_fetch_ent(stash, HeSVKEY_force(he), 0, 0);
+                if(existing) {
+                    SV *existentry = HeVAL(existing);
+                    CV *existcv = NULL;
+
+                    if(SvTYPE(existentry) == SVt_PVGV && isGV_with_GP(existentry))
+                        existcv = GvCV((GV *)existentry);
+                    else if(SvROK(existentry) && SvTYPE(SvRV(existentry)) == SVt_PVCV)
+                        existcv = (CV *)SvRV(existentry);
+
+                    /* Same CV or same origin (diamond case — cloned CVs
+                     * from the same source share CvSTASH) */
+                    if(existcv == rolecv ||
+                       (existcv && CvSTASH(existcv) == CvSTASH(rolecv)))
+                        continue;
+
+                    /* Consumer stub satisfied by role method — not a conflict */
+                    if(existcv && !CvROOT(existcv))
+                        goto install_method;
+
+                    if(existcv && CvIsMETHOD(existcv)) {
+                        croak("Method %" SVf " conflicts between %" HvNAMEf_QUOTEDPREFIX
+                              " and %" HvNAMEf_QUOTEDPREFIX,
+                              SVfARG(HeSVKEY_force(he)),
+                              HvNAMEfARG(CvSTASH(existcv)),
+                              HvNAMEfARG(CvSTASH(rolecv)));
+                    }
+                }
+
+                install_method: {
+                /* If there's a fieldix offset and this method references fields,
+                 * clone the CV and attach the offset as magic. pp_methstart
+                 * applies the offset at runtime, so the shared optree's aux
+                 * is never mutated. */
+                CV *composed_cv = rolecv;
+                if(fieldix_offset > 0) {
+                    OP *methstart = find_op_methstart(CvROOT(rolecv));
+                    if(methstart && cUNOP_AUXx(methstart)->op_aux) {
+                        U32 fieldcount = cUNOP_AUXx(methstart)->op_aux[0].uv;
+                        if(fieldcount > 0)
+                            composed_cv = cv_clone_with_field_offset(
+                                              rolecv, fieldix_offset);
+                    }
+                }
+
+                /* Install the method CV into the class stash. */
+                SV *rv = (composed_cv == rolecv)
+                    ? newRV_inc((SV *)rolecv)
+                    : newRV_noinc((SV *)composed_cv);
+                (void)hv_store(stash, key,
+                               HeUTF8(he) ? -(I32)klen : (I32)klen,
+                               rv, 0);
+                }
+            }
+        }
+
+        /* --- Compose ADJUST blocks --- */
+        if(roleaux->xhv_class_adjust_blocks) {
+            if(!aux->xhv_class_adjust_blocks)
+                aux->xhv_class_adjust_blocks = newAV();
+
+            for(SSize_t i = 0; i <= AvFILL(roleaux->xhv_class_adjust_blocks); i++) {
+                CV *adjust_cv = (CV *)AvARRAY(roleaux->xhv_class_adjust_blocks)[i];
+
+                /* ADJUST blocks reference fields via OP_METHSTART aux.
+                 * Like methods, clone and attach offset magic. */
+                CV *composed_adjust = adjust_cv;
+                if(fieldix_offset > 0) {
+                    OP *methstart = find_op_methstart(CvROOT(adjust_cv));
+                    if(methstart && cUNOP_AUXx(methstart)->op_aux) {
+                        U32 fieldcount = cUNOP_AUXx(methstart)->op_aux[0].uv;
+                        if(fieldcount > 0)
+                            composed_adjust = cv_clone_with_field_offset(
+                                                  adjust_cv, fieldix_offset);
+                    }
+                }
+
+                av_push(aux->xhv_class_adjust_blocks, SvREFCNT_inc((SV *)composed_adjust));
+            }
+        }
+
+        /* --- Record role in xhv_class_roles for DOES() --- */
+        {
+            if(!aux->xhv_class_roles)
+                aux->xhv_class_roles = newAV();
+
+            av_push(aux->xhv_class_roles, SvREFCNT_inc((SV *)rolestash));
+
+            /* Also record transitive roles from the composed role */
+            if(HvSTASH_IS_ROLE(rolestash)) {
+                struct xpvhv_aux *roleaux = HvAUX(rolestash);
+                if(roleaux->xhv_class_roles) {
+                    for(SSize_t ri = 0; ri <= AvFILL(roleaux->xhv_class_roles); ri++) {
+                        HV *transitive = (HV *)AvARRAY(roleaux->xhv_class_roles)[ri];
+                        /* Dedup: check if already recorded */
+                        bool found = FALSE;
+                        for(SSize_t rj = 0; rj <= AvFILL(aux->xhv_class_roles); rj++) {
+                            if((HV *)AvARRAY(aux->xhv_class_roles)[rj] == transitive) {
+                                found = TRUE;
+                                break;
+                            }
+                        }
+                        if(!found)
+                            av_push(aux->xhv_class_roles, SvREFCNT_inc((SV *)transitive));
+                    }
+                }
+            }
+        }
+    }
+
+    /* Check for unsatisfied required methods.
+     * Only enforce for classes — roles propagate requirements to consumers. */
+    if(!HvSTASH_IS_ROLE(stash) && HvUSEDKEYS(required_methods) > 0) {
+        HE *he;
+        (void)hv_iterinit(required_methods);
+        he = hv_iternext(required_methods);
+        croak("Method %" SVf " is required by role %" SVf
+              " but not provided by %" HvNAMEf_QUOTEDPREFIX,
+              SVfARG(HeSVKEY_force(he)),
+              SVfARG(HeVAL(he)),
+              HvNAMEfARG(stash));
+    }
+
+    return role_initfields_cvs;
 }
 
 void
@@ -754,6 +2119,12 @@ Perl_class_seal_stash(pTHX_ HV *stash)
 
     assert(HvSTASH_IS_CLASS(stash));
 
+    /* If this class has already been sealed (e.g. sealed on-demand by a
+     * subclass before our SAVEDESTRUCTOR fires), nothing to do.
+     */
+    if(HvSTASH_IS_CLASS_SEALED(stash))
+        return;
+
     if (PL_parser->error_count) {
         /* we had errors, clean up */
         class_cleanup_definition(stash);
@@ -762,7 +2133,108 @@ Perl_class_seal_stash(pTHX_ HV *stash)
 
     struct xpvhv_aux *aux = HvAUX(stash);
 
-    /* generate initfields CV */
+    /* If our superclass hasn't been sealed yet (e.g. it was declared with
+     * unit syntax `class A;` and its SAVEDESTRUCTOR hasn't fired), seal it
+     * now. We need its field count and initfields CV to be available.
+     */
+    if(aux->xhv_class_superclass && !HvSTASH_IS_CLASS_SEALED(aux->xhv_class_superclass))
+        Perl_class_seal_stash(aTHX_ aux->xhv_class_superclass);
+
+    /* Initialize next_fieldix from superclass before role composition.
+     * During parsing, next_fieldix counted our own fields. Now we repurpose
+     * it: set it to the superclass's total so compose_roles can allocate
+     * role field blocks starting from the right offset. */
+    if(aux->xhv_class_superclass) {
+        assert(HvSTASH_IS_CLASS(aux->xhv_class_superclass));
+        struct xpvhv_aux *superaux = HvAUX(aux->xhv_class_superclass);
+        aux->xhv_class_next_fieldix = superaux->xhv_class_next_fieldix;
+    }
+    else {
+        aux->xhv_class_next_fieldix = 0;
+    }
+
+    /* Finalize proto-role: collect explicit methods from stash, sort arrays */
+    proto_role_finalize(stash);
+
+    /* Compose all pending roles using the proto-role algebra pipeline.
+     * This advances next_fieldix past role fields, installs role methods/
+     * ADJUST blocks into our stash, and returns role initfields CVs for
+     * chaining. Conflict resolution checks consumer's explicit methods. */
+    AV *role_initfields_cvs = proto_role_compose_and_install(stash);
+
+    /* Phase 1: Resolve class-relative field indices to absolute indices.
+     * base_offset = next_fieldix, which now accounts for superclass + role
+     * fields (set by compose_roles, or just the superclass if no roles).
+     */
+    {
+        PADOFFSET base_offset = aux->xhv_class_next_fieldix;
+
+        PADNAMELIST *fieldnames = aux->xhv_class_fields;
+        PADOFFSET own_field_count = 0;
+
+        if(fieldnames) {
+            for(SSize_t i = 0; i <= PadnamelistMAX(fieldnames); i++) {
+                PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+                struct padname_fieldinfo *fi = PadnameFIELDINFO(pn);
+                assert(fi->fieldix == (PADOFFSET)-1); /* should be unresolved */
+                fi->fieldix = base_offset + fi->relative_fieldix;
+                own_field_count++;
+            }
+        }
+
+        /* Set next_fieldix to the total count (inherited + role + own).
+         * This is what the constructor uses to size the object.
+         */
+        aux->xhv_class_next_fieldix = base_offset + own_field_count;
+    }
+
+    /* Phase 2: Build the OP_METHSTART field-binding aux for all method CVs.
+     * Field indices are now resolved, so we can build the (padix, fieldix)
+     * pairs that OP_METHSTART needs at runtime.
+     *
+     * We process CVs from two sources:
+     *   (a) The pending_method_cvs list — covers anonymous methods, lexical
+     *       methods, and ADJUST blocks that aren't in the stash.
+     *   (b) A walk of the stash — covers named methods, including those
+     *       whose optree was transferred from PL_compcv to a pre-existing
+     *       CV by newATTRSUB (e.g. forward-declared methods).
+     * The NULL-aux check on OP_METHSTART prevents double-processing.
+     */
+    {
+        /* Process pending (non-stash) method CVs */
+        if(aux->xhv_class_pending_method_cvs) {
+            AV *pending = aux->xhv_class_pending_method_cvs;
+
+            for(SSize_t i = 0; i <= AvFILL(pending); i++) {
+                CV *methcv = (CV *)AvARRAY(pending)[i];
+                if(CvROOT(methcv))
+                    class_seal_method_fieldmap(methcv);
+            }
+
+            SvREFCNT_dec_NN((SV *)pending);
+            aux->xhv_class_pending_method_cvs = NULL;
+        }
+
+        /* Also walk the stash for named method CVs (catches forward-declared
+         * methods where newATTRSUB transferred the optree to the existing CV)
+         */
+        if(hv_iterinit(stash)) {
+            HE *he;
+            while((he = hv_iternext(stash)) != NULL) {
+                SV *entry = HeVAL(he);
+                CV *cv = NULL;
+                if(SvTYPE(entry) == SVt_PVGV)
+                    cv = GvCV((GV *)entry);
+                else if(SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                    cv = (CV *)SvRV(entry);
+
+                if(cv && CvIsMETHOD(cv) && CvROOT(cv))
+                    class_seal_method_fieldmap(cv);
+            }
+        }
+    }
+
+    /* Phase 3: Generate initfields CV */
     I32 floor_ix = PL_savestack_ix;
     SAVEI32(PL_subline);
     save_item(PL_subname);
@@ -810,6 +2282,23 @@ Perl_class_seal_stash(pTHX_ HV *stash)
             NULL);
 
         ops = op_append_list(OP_LINESEQ, ops, o);
+    }
+
+    /* Chain composed role initfields CVs. These run after the superclass
+     * initfields but before the class's own OP_INITFIELD ops. */
+    if(role_initfields_cvs) {
+        for(SSize_t i = 0; i <= AvFILL(role_initfields_cvs); i++) {
+            CV *role_initcv = (CV *)AvARRAY(role_initfields_cvs)[i];
+
+            OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
+                newPADxVOP(OP_PADSV, 0, PADIX_SELF),
+                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                newSVOP(OP_CONST, 0, SvREFCNT_inc((SV *)role_initcv)),
+                NULL);
+
+            ops = op_append_list(OP_LINESEQ, ops, o);
+        }
+        SvREFCNT_dec((SV *)role_initfields_cvs);
     }
 
     PADNAMELIST *fieldnames = aux->xhv_class_fields;
@@ -920,6 +2409,299 @@ Perl_class_seal_stash(pTHX_ HV *stash)
     CvIsMETHOD_on(initfields);
 
     aux->xhv_class_initfields_cv = initfields;
+
+    aux->xhv_aux_flags |= HvAUXf_IS_CLASS_SEALED;
+}
+
+void
+Perl_role_setup_stash(pTHX_ HV *stash)
+{
+    PERL_ARGS_ASSERT_ROLE_SETUP_STASH;
+
+    assert(HvHasAUX(stash));
+
+    if(HvSTASH_IS_ROLE(stash)) {
+        croak("Cannot reopen existing role %" HvNAMEf_QUOTEDPREFIX,
+            HvNAMEfARG(stash));
+    }
+
+    if(HvSTASH_IS_CLASS(stash)) {
+        croak("Cannot define role %" HvNAMEf_QUOTEDPREFIX " as it is already a class",
+            HvNAMEfARG(stash));
+    }
+
+    {
+        SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+        sv_2mortal(isaname);
+
+        AV *isa = get_av(SvPV_nolen(isaname), (SvFLAGS(isaname) & SVf_UTF8));
+
+        if(isa && av_count(isa) > 0)
+            croak("Cannot create role %" HEKf " as it already has a non-empty @ISA",
+                HvNAME_HEK(stash));
+    }
+
+    /* Roles do NOT get a constructor injected */
+
+    struct xpvhv_aux *aux = HvAUX(stash);
+    aux->xhv_class_superclass         = NULL;
+    aux->xhv_class_initfields_cv      = NULL;
+    aux->xhv_class_adjust_blocks      = NULL;
+    aux->xhv_class_fields             = NULL;
+    aux->xhv_class_next_fieldix       = 0;
+    aux->xhv_class_param_map          = NULL;
+    aux->xhv_class_pending_method_cvs = NULL;
+    aux->xhv_class_pending_roles      = NULL;
+    aux->xhv_class_roles              = NULL;
+    aux->xhv_class_proto_role         = proto_role_new(stash);
+
+    aux->xhv_aux_flags |= HvAUXf_IS_ROLE;
+
+    SAVEDESTRUCTOR_X(invoke_role_seal, stash);
+
+    /* Prepare a suspended compcv for parsing field init expressions */
+    {
+        I32 floor_ix = start_subparse(FALSE, 0);
+
+        CvIsMETHOD_on(PL_compcv);
+
+        PADOFFSET padix = pad_add_name_pvs("$(self)", 0, NULL, NULL);
+        assert(padix == PADIX_SELF);
+
+        padix = pad_add_name_pvs("%(params)", 0, NULL, NULL);
+        assert(padix == PADIX_PARAMS);
+
+        padix = pad_add_name_pvs("$(role_offset)", 0, NULL, NULL);
+        assert(padix == PADIX_ROLE_OFFSET);
+
+        PERL_UNUSED_VAR(padix);
+
+        Newx(aux->xhv_class_suspended_initfields_compcv, 1, struct suspended_compcv);
+        suspend_compcv(aux->xhv_class_suspended_initfields_compcv);
+
+        LEAVE_SCOPE(floor_ix);
+    }
+}
+
+void
+Perl_role_seal_stash(pTHX_ HV *stash)
+{
+    PERL_ARGS_ASSERT_ROLE_SEAL_STASH;
+
+    assert(HvSTASH_IS_ROLE(stash));
+
+    if (PL_parser->error_count) {
+        class_cleanup_definition(stash);
+        return;
+    }
+
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    /* Roles have no superclass, so base starts at 0 */
+    aux->xhv_class_next_fieldix = 0;
+
+    /* Finalize proto-role: collect explicit methods from stash, sort arrays */
+    proto_role_finalize(stash);
+
+    /* Compose any roles this role composes (role-composes-role).
+     * Uses proto-role algebra pipeline for composition and resolution. */
+    AV *role_initfields_cvs = proto_role_compose_and_install(stash);
+
+    /* Phase 1: Resolve field indices.
+     * base_offset = next_fieldix (includes any composed role fields). */
+    {
+        PADOFFSET base_offset = aux->xhv_class_next_fieldix;
+        PADNAMELIST *fieldnames = aux->xhv_class_fields;
+        PADOFFSET own_field_count = 0;
+
+        for(SSize_t i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+            PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+            if(!pn || !PadnameIsFIELD(pn))
+                continue;
+
+            struct padname_fieldinfo *fi = PadnameFIELDINFO(pn);
+            assert(fi->fieldix == (PADOFFSET)-1);  /* should be unresolved */
+            fi->fieldix = base_offset + fi->relative_fieldix;
+            own_field_count++;
+        }
+        aux->xhv_class_next_fieldix = base_offset + own_field_count;
+    }
+
+    /* Phase 2: Build OP_METHSTART field binding aux for all method CVs */
+    {
+        /* First process pending method CVs collected during parsing */
+        if(aux->xhv_class_pending_method_cvs) {
+            AV *pending = aux->xhv_class_pending_method_cvs;
+            for(SSize_t i = 0; i <= AvFILL(pending); i++) {
+                CV *cv = (CV *)AvARRAY(pending)[i];
+                if(CvROOT(cv))
+                    class_seal_method_fieldmap(cv);
+            }
+        }
+
+        /* Also walk the stash for any named method CVs not in the pending list */
+        {
+            HE *he;
+            (void)hv_iterinit(stash);
+            while((he = hv_iternext(stash))) {
+                SV *entry = HeVAL(he);
+                CV *cv = NULL;
+
+                if(SvTYPE(entry) == SVt_PVGV && isGV_with_GP(entry))
+                    cv = GvCV((GV *)entry);
+                else if(SvROK(entry) && SvTYPE(SvRV(entry)) == SVt_PVCV)
+                    cv = (CV *)SvRV(entry);
+
+                if(!cv || !CvIsMETHOD(cv) || !CvROOT(cv))
+                    continue;
+
+                class_seal_method_fieldmap(cv);
+            }
+        }
+
+        SvREFCNT_dec(aux->xhv_class_pending_method_cvs);
+        aux->xhv_class_pending_method_cvs = NULL;
+    }
+
+    /* Phase 3: Generate initfields CV */
+    I32 floor_ix = PL_savestack_ix;
+    SAVEI32(PL_subline);
+    save_item(PL_subname);
+
+    resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+
+    PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
+    HV *fieldix_to_padix = newHV();
+    SAVEFREESV((SV *)fieldix_to_padix);
+
+    for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
+        PADNAME *pn = PadnamelistARRAY(pnl)[padix];
+        if(!pn || !PadnameIsFIELD(pn))
+            continue;
+
+        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+        (void)hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
+    }
+
+    OP *ops = NULL;
+
+    ops = op_append_list(OP_LINESEQ, ops,
+         newUNOP_AUX(OP_METHSTART, OPpINITFIELDS << 8, NULL, NULL));
+
+    /* Chain composed role initfields CVs */
+    if(role_initfields_cvs) {
+        for(SSize_t i = 0; i <= AvFILL(role_initfields_cvs); i++) {
+            CV *role_initcv = (CV *)AvARRAY(role_initfields_cvs)[i];
+
+            OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
+                newPADxVOP(OP_PADSV, 0, PADIX_SELF),
+                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                newSVOP(OP_CONST, 0, SvREFCNT_inc((SV *)role_initcv)),
+                NULL);
+
+            ops = op_append_list(OP_LINESEQ, ops, o);
+        }
+        SvREFCNT_dec((SV *)role_initfields_cvs);
+    }
+
+    PADNAMELIST *fieldnames = aux->xhv_class_fields;
+
+    for(SSize_t i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+        PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+        char sigil = PadnamePV(pn)[0];
+        PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+        OP *valop = PadnameFIELDINFO(pn)->defop;
+        if(valop && valop->op_type == OP_LINESEQ) {
+            OP *o = cLISTOPx(valop)->op_first;
+            cLISTOPx(valop)->op_first = NULL;
+            cLISTOPx(valop)->op_last = NULL;
+            valop->op_flags &= ~OPf_KIDS;
+            op_free(valop);
+
+            OP *fieldcop = o;
+            assert(fieldcop->op_type == OP_NEXTSTATE || fieldcop->op_type == OP_DBSTATE);
+            o = OpSIBLING(o);
+            OpLASTSIB_set(fieldcop, NULL);
+
+            valop = o;
+            OpLASTSIB_set(valop, NULL);
+
+            ops = op_append_list(OP_LINESEQ, ops, fieldcop);
+        }
+
+        SV *paramname = PadnameFIELDINFO(pn)->paramname;
+
+        U8 op_priv = 0;
+        switch(sigil) {
+        case '$':
+            if(paramname) {
+                if(!valop) {
+                    SV *message =
+                        newSVpvf("Required parameter '%" SVf "' is missing for "
+                                 "%" HvNAMEf_QUOTEDPREFIX " constructor",
+                                 SVfARG(paramname), HvNAMEfARG(stash));
+                    valop = newLISTOPn(OP_DIE, 0,
+                                       newSVOP(OP_CONST, 0, message),
+                                       NULL);
+                }
+
+                OP *helemop =
+                    newBINOP(OP_HELEM, 0,
+                             newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                             newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)));
+
+                if(PadnameFIELDINFO(pn)->def_if_undef) {
+                    valop = newLOGOP(OP_DOR, 0,
+                                     newUNOP(OP_DELETE, 0, helemop), valop);
+                }
+                else if(PadnameFIELDINFO(pn)->def_if_false) {
+                    valop = newLOGOP(OP_OR, 0,
+                                     newUNOP(OP_DELETE, 0, helemop), valop);
+                }
+                else {
+                    valop = newLOGOP(OP_HELEMEXISTSOR, OPpHELEMEXISTSOR_DELETE << 8,
+                                     helemop, valop);
+                }
+
+                valop = op_contextualize(valop, G_SCALAR);
+            }
+            break;
+
+        case '@':
+            op_priv = OPpINITFIELD_AV;
+            break;
+
+        case '%':
+            op_priv = OPpINITFIELD_HV;
+            break;
+
+        default:
+            NOT_REACHED;
+        }
+
+        UNOP_AUX_item *faux;
+        faux = (UNOP_AUX_item *)PerlMemShared_malloc(sizeof(UNOP_AUX_item) * 2);
+
+        faux[0].uv = fieldix;
+
+        OP *fieldop = newUNOP_AUX(OP_INITFIELD, valop ? OPf_STACKED : 0, valop, faux);
+        fieldop->op_private = op_priv;
+
+        HE *he;
+        if((he = hv_fetch_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), 0, 0)) &&
+           SvOK(HeVAL(he))) {
+            fieldop->op_targ = SvUV(HeVAL(he));
+        }
+
+        ops = op_append_list(OP_LINESEQ, ops, fieldop);
+    }
+
+    CvIsMETHOD_off(PL_compcv);
+    CV *initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
+    CvIsMETHOD_on(initfields);
+
+    aux->xhv_class_initfields_cv = initfields;
 }
 
 void
@@ -927,7 +2709,7 @@ Perl_class_prepare_initfield_parse(pTHX)
 {
     PERL_ARGS_ASSERT_CLASS_PREPARE_INITFIELD_PARSE;
 
-    assert(HvSTASH_IS_CLASS(PL_curstash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(PL_curstash));
     struct xpvhv_aux *aux = HvAUX(PL_curstash);
 
     resume_compcv_and_save(aux->xhv_class_suspended_initfields_compcv);
@@ -940,7 +2722,7 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE;
 
     assert(cv == PL_compcv);
-    assert(HvSTASH_IS_CLASS(PL_curstash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(PL_curstash));
 
     /* We expect this to be at the start of sub parsing, so there won't be
      * anything in the pad yet
@@ -951,6 +2733,12 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    padix = pad_add_name_pvs("$(params)", 0, NULL, NULL);
+    assert(padix == PADIX_PARAMS);
+
+    padix = pad_add_name_pvs("$(role_offset)", 0, NULL, NULL);
+    assert(padix == PADIX_ROLE_OFFSET);
     PERL_UNUSED_VAR(padix);
 
     intro_my();
@@ -959,7 +2747,6 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     CvIsMETHOD_on(cv);
 }
 
-#define find_op_methstart(o)  S_find_op_methstart(aTHX_ o)
 static OP *
 S_find_op_methstart(pTHX_ OP *o)
 {
@@ -986,49 +2773,10 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
     if(!o)
         return o;
 
-    /* Walk the pad of this CV looking for lexicals with field info. These
-     * will be the fields used by this particular method, which we build into
-     * a list for the OP_METHSTART op. This ensures we only set up the fields
-     * needed by this particular method body, rather than every available
-     * field in the whole class
+    /* Field indices are not yet resolved (they are class-relative at this
+     * point). We insert the OP_METHSTART with NULL aux and record this CV
+     * for fixup at seal time, when absolute field indices are known.
      */
-
-    PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
-
-    AV *fieldmap = newAV();
-    UV max_fieldix = 0;
-    SAVEFREESV((SV *)fieldmap);
-
-    /* padix 0 == @_; padix 1 == $self. Start at 2 */
-    for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
-        PADNAME *pn = PadnamelistARRAY(pnl)[padix];
-        if(!pn || !PadnameIsFIELD(pn))
-            continue;
-
-        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
-        if(fieldix > max_fieldix)
-            max_fieldix = fieldix;
-
-        av_push_simple(fieldmap, newSVuv(padix));
-        av_push_simple(fieldmap, newSVuv(fieldix));
-    }
-
-    UNOP_AUX_item *aux = NULL;
-
-    if(av_count(fieldmap)) {
-        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
-                                    sizeof(UNOP_AUX_item)
-                                    *  (2 + av_count(fieldmap))
-                                );
-
-        UNOP_AUX_item *ap = aux;
-
-        (ap++)->uv = av_count(fieldmap) / 2;
-        (ap++)->uv = max_fieldix;
-
-        for(Size_t i = 0; i < av_count(fieldmap); i++)
-            (ap++)->uv = SvUV(AvARRAY(fieldmap)[i]);
-    }
 
     /* If this is an empty method body then o will be an OP_STUB and not a
      * list. This will confuse op_sibling_splice() */
@@ -1036,17 +2784,29 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
         o = newLISTOP(OP_LINESEQ, 0, o, NULL);
 
     if(CvSIGNATURE(PL_compcv)) {
-        /* A signatured method has already injected the OP_METHSTART; we just
-         * have to find it and attach the aux structure to it
+        /* A signatured method has already injected the OP_METHSTART;
+         * leave its aux as NULL for now. Just assert it exists.
          */
+#ifdef DEBUGGING
         OP *methstartop = find_op_methstart(o);
         assert(methstartop);
         assert(!cUNOP_AUXx(methstartop)->op_aux);
-
-        cUNOP_AUXx(methstartop)->op_aux = aux;
+#endif
     }
     else
-        op_sibling_splice(o, NULL, 0, newUNOP_AUX(OP_METHSTART, 0, NULL, aux));
+        op_sibling_splice(o, NULL, 0, newUNOP_AUX(OP_METHSTART, 0, NULL, NULL));
+
+    /* Record this method CV for field binding fixup at class seal time */
+    {
+        assert(HvSTASH_IS_CLASS_OR_ROLE(PL_curstash));
+        struct xpvhv_aux *aux = HvAUX(PL_curstash);
+
+        if(!aux->xhv_class_pending_method_cvs)
+            aux->xhv_class_pending_method_cvs = newAV();
+
+        av_push(aux->xhv_class_pending_method_cvs,
+                SvREFCNT_inc_simple_NN((SV *)PL_compcv));
+    }
 
     return o;
 }
@@ -1056,17 +2816,18 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
 {
     PERL_ARGS_ASSERT_CLASS_ADD_FIELD;
 
-    assert(HvSTASH_IS_CLASS(stash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(stash));
     struct xpvhv_aux *aux = HvAUX(stash);
 
-    PADOFFSET fieldix = aux->xhv_class_next_fieldix;
+    PADOFFSET relative_fieldix = aux->xhv_class_next_fieldix;
     aux->xhv_class_next_fieldix++;
 
     struct padname_fieldinfo *fieldinfo;
     Newxz(fieldinfo, 1, struct padname_fieldinfo);
 
     fieldinfo->refcount = 1;
-    fieldinfo->fieldix = fieldix;
+    fieldinfo->relative_fieldix = relative_fieldix;
+    fieldinfo->fieldix = (PADOFFSET)-1; /* sentinel; resolved at seal time */
     fieldinfo->fieldstash = HvREFCNT_inc(stash);
 
     PadnameFIELDINFO(pn) = fieldinfo;
@@ -1077,6 +2838,10 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
 
     padnamelist_store(aux->xhv_class_fields, PadnamelistMAX(aux->xhv_class_fields)+1, pn);
     PadnameREFCNT_inc(pn);
+
+    /* Record in proto-role for composition algebra */
+    if (aux->xhv_class_proto_role)
+        proto_role_add_field(aux->xhv_class_proto_role, pn, ORIGIN_SET_EMPTY);
 }
 
 /* Adds a pad entry to PL_compcv to make the given field visible. This works
@@ -1113,7 +2878,7 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
         croak("Field already has a parameter name, cannot add another");
 
     HV *stash = PadnameFIELDINFO(pn)->fieldstash;
-    assert(HvSTASH_IS_CLASS(stash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(stash));
     struct xpvhv_aux *aux = HvAUX(stash);
 
     if(aux->xhv_class_param_map &&
@@ -1126,7 +2891,11 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
     if(!aux->xhv_class_param_map)
         aux->xhv_class_param_map = newHV();
 
-    (void)hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
+    /* Store into param_map for duplicate checking. The value is not
+     * meaningful at this point (fieldix is unresolved); only the key's
+     * existence matters for the duplicate check above.
+     */
+    (void)hv_store_ent(aux->xhv_class_param_map, value, newSVuv(0), 0);
 }
 
 static void
@@ -1151,6 +2920,12 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    padix = pad_add_name_pvs("$(params)", 0, NULL, NULL);
+    assert(padix == PADIX_PARAMS);
+
+    padix = pad_add_name_pvs("$(role_offset)", 0, NULL, NULL);
+    assert(padix == PADIX_ROLE_OFFSET);
 
     subsignature_start();
     CvSIGNATURE_on(PL_compcv);
@@ -1186,8 +2961,23 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
+    if (cv) {
         CvIsMETHOD_on(cv);
+
+        /* Record accessor in proto-role for composition algebra.
+         * value was consumed by nameop, so use the CV's name. */
+        if (HvSTASH_IS_CLASS_OR_ROLE(PL_curstash)) {
+            struct xpvhv_aux *aux = HvAUX(PL_curstash);
+            if (aux->xhv_class_proto_role) {
+                SV *methname = newSVpvn_flags(
+                    GvNAME(CvGV(cv)), GvNAMELEN(CvGV(cv)),
+                    GvNAMEUTF8(CvGV(cv)) ? SVf_UTF8 : 0);
+                proto_role_add_method(aux->xhv_class_proto_role,
+                    methname, ORIGIN_SET_EMPTY, cv, pn);
+                SvREFCNT_dec(methname); /* add_method incremented it */
+            }
+        }
+    }
 }
 
 static void
@@ -1219,6 +3009,12 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
 
     padix = pad_add_name_pvs("$self", 0, NULL, NULL);
     assert(padix == PADIX_SELF);
+
+    padix = pad_add_name_pvs("$(params)", 0, NULL, NULL);
+    assert(padix == PADIX_PARAMS);
+
+    padix = pad_add_name_pvs("$(role_offset)", 0, NULL, NULL);
+    assert(padix == PADIX_ROLE_OFFSET);
 
     subsignature_start();
     CvSIGNATURE_on(PL_compcv);
@@ -1255,8 +3051,22 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
+    if (cv) {
         CvIsMETHOD_on(cv);
+
+        /* Record accessor in proto-role for composition algebra */
+        if (HvSTASH_IS_CLASS_OR_ROLE(PL_curstash)) {
+            struct xpvhv_aux *aux = HvAUX(PL_curstash);
+            if (aux->xhv_class_proto_role) {
+                SV *methname = newSVpvn_flags(
+                    GvNAME(CvGV(cv)), GvNAMELEN(CvGV(cv)),
+                    GvNAMEUTF8(CvGV(cv)) ? SVf_UTF8 : 0);
+                proto_role_add_method(aux->xhv_class_proto_role,
+                    methname, ORIGIN_SET_EMPTY, cv, pn);
+                SvREFCNT_dec(methname); /* add_method incremented it */
+            }
+        }
+    }
 }
 
 static struct {
@@ -1335,7 +3145,7 @@ Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop)
 
     assert(defmode == 0 || defmode == OP_ORASSIGN || defmode == OP_DORASSIGN);
 
-    assert(HvSTASH_IS_CLASS(PL_curstash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(PL_curstash));
 
     op_free(PadnameFIELDINFO(pn)->defop);
 
@@ -1373,13 +3183,21 @@ Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv)
 {
     PERL_ARGS_ASSERT_CLASS_ADD_ADJUST;
 
-    assert(HvSTASH_IS_CLASS(stash));
+    assert(HvSTASH_IS_CLASS_OR_ROLE(stash));
     struct xpvhv_aux *aux = HvAUX(stash);
 
     if(!aux->xhv_class_adjust_blocks)
         aux->xhv_class_adjust_blocks = newAV();
 
     av_push(aux->xhv_class_adjust_blocks, (SV *)cv);
+
+    /* Record in proto-role for composition algebra */
+    if (aux->xhv_class_proto_role) {
+        if (!aux->xhv_class_proto_role->adjust_blocks)
+            aux->xhv_class_proto_role->adjust_blocks = newAV();
+        av_push(aux->xhv_class_proto_role->adjust_blocks,
+                SvREFCNT_inc_simple_NN((SV *)cv));
+    }
 }
 
 OP *

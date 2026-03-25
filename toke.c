@@ -8659,6 +8659,9 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_dbmclose:
         UNI(OP_DBMCLOSE);
 
+    case KEY_does:
+        NCRop(OP_DOES);
+
     case KEY_dump:
         LOOPX(OP_DUMP);
 
@@ -9130,6 +9133,15 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_ref:
         UNI(OP_REF);
+
+    case KEY_role:
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__CLASS), "role is experimental");
+
+        s = force_word(s, BAREWORD, ALLOW_PACKAGE);
+        s = skipspace(s);
+        s = force_strict_version(s);
+        PL_expect = XATTRBLOCK;
+        TOKEN(KW_ROLE);
 
     case KEY_s:
         s = scan_subst(s);

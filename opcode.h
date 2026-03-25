@@ -553,6 +553,7 @@ EXTCONST char* const PL_op_name[] INIT({
 	"lvavref",
 	"anonconst",
 	"isa",
+	"does",
 	"cmpchain_and",
 	"cmpchain_dup",
 	"entertrycatch",
@@ -986,6 +987,7 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"lvalue array reference",
 	"anonymous constant",
 	"derived class test",
+	"role composition test",
 	"comparison chaining",
 	"comparand shuffling",
 	"try {block}",
@@ -1424,6 +1426,7 @@ INIT({
 	Perl_pp_lvavref,
 	Perl_pp_anonconst,
 	Perl_pp_isa,
+	Perl_pp_does,
 	Perl_pp_cmpchain_and,
 	Perl_pp_cmpchain_dup,
 	Perl_pp_entertrycatch,
@@ -1857,6 +1860,7 @@ INIT({
 	Perl_ck_null,		/* lvavref */
 	Perl_ck_null,		/* anonconst */
 	Perl_ck_isa,		/* isa */
+	Perl_ck_does,		/* does */
 	Perl_ck_null,		/* cmpchain_and */
 	Perl_ck_null,		/* cmpchain_dup */
 	Perl_ck_trycatch,	/* entertrycatch */
@@ -1897,9 +1901,9 @@ INIT({
 
 /* Indexes into PL_check for the comparison function pointers */
 #ifdef PERL_IN_PEEP_C
-  #define PERL_CK_NULL  429
-  #define PERL_CK_EXISTS  430
-  #define PERL_CK_DELETE  431
+  #define PERL_CK_NULL  430
+  #define PERL_CK_EXISTS  431
+  #define PERL_CK_DELETE  432
 #endif
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -2308,6 +2312,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00000b40,	/* lvavref */
 	0x00000144,	/* anonconst */
 	0x00000204,	/* isa */
+	0x00000204,	/* does */
 	0x00000300,	/* cmpchain_and */
 	0x00000100,	/* cmpchain_dup */
 	0x00000300,	/* entertrycatch */
@@ -3037,6 +3042,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[]  INIT( {
       17, /* lvavref */
        0, /* anonconst */
       13, /* isa */
+      13, /* does */
        0, /* cmpchain_and */
        0, /* cmpchain_dup */
        0, /* entertrycatch */
@@ -3085,7 +3091,7 @@ EXTCONST U16  PL_op_private_bitdefs[] INIT( {
     0x077e, 0x0554, 0x1b70, 0x576c, 0x5268, 0x4225, /* const */
     0x3cfc, 0x47f9, /* gvsv */
     0x19d5, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, smartmatch, lslice, xor, isa */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, smartmatch, lslice, xor, isa, does */
     0x3cfc, 0x5618, 0x04f7, /* padsv */
     0x3cfc, 0x5618, 0x0003, /* padsv_store, lvavref */
     0x3cfc, 0x5618, 0x06d4, 0x3dec, 0x53e9, /* padav */
@@ -3576,6 +3582,7 @@ EXTCONST U8 PL_op_private_valid[] INIT( {
     /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
     /* ANONCONST  */ (OPpARG1_MASK),
     /* ISA        */ (OPpARG2_MASK),
+    /* DOES       */ (OPpARG2_MASK),
     /* CMPCHAIN_AND */ (OPpARG1_MASK),
     /* CMPCHAIN_DUP */ (OPpARG1_MASK),
     /* ENTERTRYCATCH */ (OPpARG1_MASK),

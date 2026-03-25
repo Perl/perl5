@@ -8587,7 +8587,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             }
             else {
                 /* OK let's at least warn */
-                deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.44",
+                deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.46",
                     "Changing use VERSION while another use VERSION is in scope");
             }
         }
@@ -15238,6 +15238,7 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
                 if (thisname && PadnameLEN(thisname) == PadnameLEN(name)
                     && PadnamePV(thisname) == PadnamePV(name)) {
                     name = thisname;
+                    off = offset;
                     break;
                 }
             }
@@ -16289,6 +16290,28 @@ Perl_ck_isa(pTHX_ OP *o)
     return o;
 }
 
+OP *
+Perl_ck_does(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_DOES;
+
+    OP *const roleop = cBINOPo->op_last;
+
+    /* Convert barename into PV */
+    if(roleop->op_type == OP_CONST && roleop->op_private & OPpCONST_BARE) {
+        roleop->op_private &= ~(OPpCONST_BARE|OPpCONST_STRICT);
+    }
+
+    OP *const objop = cBINOPo->op_first;
+    /* !$x does Some::Role  # probably meant !($x does Some::Role) */
+    if (objop->op_type == OP_NOT && !(objop->op_flags & OPf_PARENS)) {
+        ck_warner(packWARN(WARN_PRECEDENCE),
+            "Possible precedence problem between ! and %s", OP_DESC(o)
+        );
+    }
+
+    return o;
+}
 
 /* Check for in place reverse and sort assignments like "@a = reverse @a"
    and modify the optree to make them work inplace */

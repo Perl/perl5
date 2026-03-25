@@ -115,6 +115,8 @@ union xhvnameu_ {
 /* A struct defined by pad.h and used within class.c */
 struct suspended_compcv;
 
+struct proto_role;  /* forward declaration; full definition in class.h */
+
 struct xpvhv_aux {
     union xhvnameu_ xhv_name_u;	/* name, if a symbol table */
     AV		*xhv_backreferences; /* back references for weak references */
@@ -143,17 +145,33 @@ struct xpvhv_aux {
     PADNAMELIST *xhv_class_fields;             /* PADNAMEs with PadnameIsFIELD() */
     PADOFFSET    xhv_class_next_fieldix;
     HV          *xhv_class_param_map;          /* Maps param names to field index stored in UV */
+    AV          *xhv_class_pending_method_cvs; /* method CVs needing field binding at seal time */
 
     struct suspended_compcv
                 *xhv_class_suspended_initfields_compcv;
+
+    AV          *xhv_class_pending_roles;      /* role stashes pending composition */
+    AV          *xhv_class_roles;              /* composed role stashes (for DOES) */
+
+    struct proto_role *xhv_class_proto_role;   /* proto-role for composition algebra */
 };
 
 #define HvAUXf_SCAN_STASH   0x1   /* stash is being scanned by gv_check */
 #define HvAUXf_NO_DEREF     0x2   /* @{}, %{} etc (and nomethod) not present */
 #define HvAUXf_IS_CLASS     0x4   /* the package is a 'class' */
+#define HvAUXf_IS_ROLE      0x8   /* the package is a 'role' */
+#define HvAUXf_IS_CLASS_SEALED 0x10 /* the class has been sealed */
 
 #define HvSTASH_IS_CLASS(hv) \
     (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & HvAUXf_IS_CLASS)
+#define HvSTASH_IS_CLASS_SEALED(hv) \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & HvAUXf_IS_CLASS_SEALED)
+
+#define HvSTASH_IS_ROLE(hv) \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & HvAUXf_IS_ROLE)
+
+#define HvSTASH_IS_CLASS_OR_ROLE(hv) \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & (HvAUXf_IS_CLASS | HvAUXf_IS_ROLE))
 
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */

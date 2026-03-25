@@ -33,6 +33,7 @@ holds the key and hash value.
 #define PERL_IN_HV_C
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
+#include "class.h"
 
 /* we split when we collide and we have a load factor over 0.667.
  * NOTE if you change this formula so we split earlier than previously
@@ -2383,17 +2384,22 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         aux->xhv_mro_meta = NULL;
       }
 
-      if(HvSTASH_IS_CLASS(hv)) {
+      if(HvSTASH_IS_CLASS(hv) || HvSTASH_IS_ROLE(hv)) {
           SvREFCNT_dec(aux->xhv_class_superclass);
           SvREFCNT_dec(aux->xhv_class_initfields_cv);
           SvREFCNT_dec(aux->xhv_class_adjust_blocks);
           if(aux->xhv_class_fields)
             PadnamelistREFCNT_dec(aux->xhv_class_fields);
           SvREFCNT_dec(aux->xhv_class_param_map);
+          SvREFCNT_dec(aux->xhv_class_pending_method_cvs);
+          SvREFCNT_dec(aux->xhv_class_pending_roles);
+          SvREFCNT_dec(aux->xhv_class_roles);
+          proto_role_free(aux->xhv_class_proto_role);
+          aux->xhv_class_proto_role = NULL;
           Safefree(aux->xhv_class_suspended_initfields_compcv);
           aux->xhv_class_suspended_initfields_compcv = NULL;
 
-          aux->xhv_aux_flags &= ~HvAUXf_IS_CLASS;
+          aux->xhv_aux_flags &= ~(HvAUXf_IS_CLASS | HvAUXf_IS_ROLE);
       }
     }
 

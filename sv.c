@@ -15444,13 +15444,17 @@ S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
     if (HvNAME(ssv))
         av_push(param->stashes, dsv);
 
-    if (HvSTASH_IS_CLASS(ssv)) {
+    if (HvSTASH_IS_CLASS(ssv) || HvSTASH_IS_ROLE(ssv)) {
         daux->xhv_class_superclass    = hv_dup_inc(saux->xhv_class_superclass,    param);
         daux->xhv_class_initfields_cv = cv_dup_inc(saux->xhv_class_initfields_cv, param);
         daux->xhv_class_adjust_blocks = av_dup_inc(saux->xhv_class_adjust_blocks, param);
         daux->xhv_class_fields        = padnamelist_dup_inc(saux->xhv_class_fields, param);
         daux->xhv_class_next_fieldix  = saux->xhv_class_next_fieldix;
         daux->xhv_class_param_map     = hv_dup_inc(saux->xhv_class_param_map,     param);
+        /* pending_method_cvs and pending_roles are compile-time only; should be NULL after sealing */
+        daux->xhv_class_pending_method_cvs = NULL;
+        daux->xhv_class_pending_roles      = NULL;
+        daux->xhv_class_roles              = av_dup_inc(saux->xhv_class_roles, param);
 
         /* TODO: This does mean that we can't compile more `field` expressions
          * in the cloned thread, but surely we're done with compiletime now..?
