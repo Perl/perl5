@@ -6682,10 +6682,10 @@ t/re/uniprops09.t			Test unicode \p{} regex constructs
 t/re/uniprops10.t			Test unicode \p{} regex constructs
 t/re/user_prop_race_thr.t		Test races in user-defined \p{} under threads
 t/README				Instructions for regression tests
-t/role/examples/001-currency.t		Example: currency value-object role
-t/role/examples/002-shard-migrator.t	Example: shard-migrator role composition
-t/role/examples/003-lambda-terms.t	Example: lambda-terms via roles
-t/role/examples/004-native-types.t	Example: native-type roles
+t/role/001-currency.t		Example: currency value-object role
+t/role/002-shard-migrator.t	Example: shard-migrator role composition
+t/role/003-lambda-terms.t	Example: lambda-terms via roles
+t/role/004-native-types.t	Example: native-type roles
 t/role/role.t				Basic role machinery tests
 t/role/role_compose.t			Role method and field composition tests
 t/role/role_conflict_resolution.t	Role method conflict detection and resolution
