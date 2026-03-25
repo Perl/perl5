@@ -1061,6 +1061,8 @@ my @unresolved_visibility_overrides = qw(
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
     HvAUXf_SCAN_STASH
+    HvCLASS_IS_SEALED
+    HvCLASSf_SEALED
     HV_DELETE
     HV_DISABLE_UVAR_XKEY
     HvEITER

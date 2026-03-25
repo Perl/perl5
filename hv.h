@@ -137,12 +137,15 @@ struct xpvhv_aux {
     U32         xhv_aux_flags;      /* assorted extra flags */
 
     /* The following fields are only valid if we have the flag HvAUXf_IS_CLASS */
+    U32         xhv_class_flags;
     HV          *xhv_class_superclass;         /* STASH of the :isa() base class */
     CV          *xhv_class_initfields_cv;      /* CV for running initfields */
     AV          *xhv_class_adjust_blocks;      /* CVs containing the ADJUST blocks */
     PADNAMELIST *xhv_class_fields;             /* PADNAMEs with PadnameIsFIELD() */
     PADOFFSET    xhv_class_next_fieldix;
     HV          *xhv_class_param_map;          /* Maps param names to field index stored in UV */
+    AV          *xhv_class_subclasses_pending_seal;
+                                               /* STASHes of subclasses that are awaiting seal after this */
 
     struct suspended_compcv
                 *xhv_class_suspended_initfields_compcv;
@@ -154,6 +157,11 @@ struct xpvhv_aux {
 
 #define HvSTASH_IS_CLASS(hv) \
     (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & HvAUXf_IS_CLASS)
+
+#define HvCLASSf_SEALED     0x1   /* class seal operation has been invoked */
+
+#define HvCLASS_IS_SEALED(hv) \
+    (HvSTASH_IS_CLASS(hv) && HvAUX(hv)->xhv_class_flags & HvCLASSf_SEALED)
 
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
