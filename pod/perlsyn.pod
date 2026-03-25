@@ -542,10 +542,22 @@ the C<foreach> loop index variable is an implicit alias for each item
 in the list that you're looping over.
 X<alias>
 
-If any part of LIST is an array, C<foreach> will get very confused if
+If the LIST is just a single array, C<foreach> will get very confused if
 you add or remove elements within the loop body, for example with
-C<splice>.  So don't do that.
-X<splice>
+C<splice> or C<push>.  So don't do that.
+X<splice>X<push>
+
+  my @arr1 = 1 .. 2;
+  for my $x (@arr1, ()) {
+      push @arr1, 'a' if $x =~ /[0-9]/;
+      print $x;
+  } # Outputs 12
+
+  my @arr2 = 1 .. 2;
+  for my $x (@arr2) {
+      push @arr2, 'b' if $x =~ /[0-9]/;
+      print $x;
+  } # Outputs 12bb
 
 C<foreach> probably won't do what you expect if VAR is a tied or other
 special variable.  Don't do that either.
