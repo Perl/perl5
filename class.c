@@ -1785,6 +1785,57 @@ S_proto_role_compose_and_install(pTHX_ HV *stash)
         }
     }
 
+    /* For roles: propagate transitively-required methods into the stored
+     * proto-role so that future consumers detect unsatisfied requirements.
+     * Only Required slots are propagated; Defined slots are not, because
+     * the stored proto must only carry the role's own implementations
+     * (the structural DOES check verifies CvSTASH == rolestash). */
+    if (is_role) {
+        proto_role_t *stored = aux->xhv_class_proto_role;
+
+        /* Count new Required slots not already present */
+        UV add_count = 0;
+        for (UV i = 0; i < composed->method_count; i++) {
+            method_slot_t *cslot = &composed->method_slots[i];
+            if (!origin_is_required(cslot->origins))
+                continue;
+            bool found = FALSE;
+            for (UV j = 0; j < stored->method_count; j++) {
+                if (sv_eq(stored->method_slots[j].name, cslot->name)) {
+                    found = TRUE;
+                    break;
+                }
+            }
+            if (!found) add_count++;
+        }
+
+        if (add_count > 0) {
+            UV old_count = stored->method_count;
+            Renew(stored->method_slots, old_count + add_count, method_slot_t);
+            UV k = old_count;
+            for (UV i = 0; i < composed->method_count; i++) {
+                method_slot_t *cslot = &composed->method_slots[i];
+                if (!origin_is_required(cslot->origins))
+                    continue;
+                bool found = FALSE;
+                for (UV j = 0; j < old_count; j++) {
+                    if (sv_eq(stored->method_slots[j].name, cslot->name)) {
+                        found = TRUE;
+                        break;
+                    }
+                }
+                if (!found) {
+                    stored->method_slots[k].name       = SvREFCNT_inc(cslot->name);
+                    stored->method_slots[k].origins    = 0; /* Required */
+                    stored->method_slots[k].cv         = NULL;
+                    stored->method_slots[k].from_field = FALSE;
+                    k++;
+                }
+            }
+            stored->method_count = k;
+        }
+    }
+
     proto_role_free(composed);
     Safefree(all_roles);
 

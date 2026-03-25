@@ -67,7 +67,7 @@ use Test::More;
 # Method conflict detection
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
 
@@ -79,7 +79,7 @@ use Test::More;
         }
         1;
     }, 'method conflict croaks');
-    like($@, qr/Method clash conflicts between/, 'conflict error message');
+    like($@, qr/Method 'clash' conflicts between/, 'conflict error message');
 }
 
 # Diamond deduplication - same role via two paths

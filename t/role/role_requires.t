@@ -26,7 +26,7 @@ use Test::More;
 # Required method - unsatisfied (class)
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
 
@@ -39,7 +39,7 @@ use Test::More;
         }
         1;
     }, 'unsatisfied required method croaks');
-    like($@, qr/Method to_string is required by role NeedsToString but not provided by/,
+    like($@, qr/Method 'to_string' is required but not provided by/,
         'correct error for unsatisfied required method');
 }
 
@@ -60,7 +60,7 @@ use Test::More;
 # Transitive required method - propagated through role, unsatisfied at class
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
 
@@ -77,7 +77,7 @@ use Test::More;
         }
         1;
     }, 'transitive unsatisfied required method croaks');
-    like($@, qr/Method required_method is required by role/,
+    like($@, qr/Method 'required_method' is required but not provided by/,
         'correct error for transitive unsatisfied requirement');
 }
 
@@ -147,7 +147,7 @@ use Test::More;
 # Multiple required methods - partial satisfaction fails
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
 
@@ -162,7 +162,7 @@ use Test::More;
         }
         1;
     }, 'partially satisfied requirements croak');
-    like($@, qr/Method beta is required by role NeedsBoth/,
+    like($@, qr/Method 'beta' is required but not provided by/,
         'error names the unsatisfied method');
 }
 

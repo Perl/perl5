@@ -54,7 +54,7 @@ use Test::More;
 # :does rejects non-role targets
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
 
@@ -73,7 +73,7 @@ use Test::More;
 # :does rejects non-existent packages
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
         class Bad :does(No::Such::Role::Anywhere) { }
@@ -86,7 +86,7 @@ use Test::More;
 package PlainPkg { sub dummy { 1 } }
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
         class Consumer2 :does(PlainPkg) { }

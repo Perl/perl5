@@ -40,7 +40,7 @@ use Test::More;
 # Roles cannot use :isa
 {
     ok(!eval q{
-        use v5.36;
+        use strict;
         use feature 'class';
         no warnings 'experimental::class';
         role BadRole :isa(UNIVERSAL) { }
