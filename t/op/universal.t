@@ -139,9 +139,9 @@ like $@, qr/^Invalid version format/;
 
 my $subs = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 if ('a' lt 'A') {
-    is $subs, "can import isa unimport DOES VERSION";
+    is $subs, "can does import isa unimport DOES VERSION";
 } else {
-    is $subs, "DOES VERSION can import isa unimport";
+    is $subs, "DOES VERSION can does import isa unimport";
 }
 
 ok $a->isa("UNIVERSAL");
@@ -161,9 +161,9 @@ ok $a->isa("UNIVERSAL");
 
 my $sub2 = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 if ('a' lt 'A') {
-    is $sub2, "can import isa unimport DOES VERSION";
+    is $sub2, "can does import isa unimport DOES VERSION";
 } else {
-    is $sub2, "DOES VERSION can import isa unimport";
+    is $sub2, "DOES VERSION can does import isa unimport";
 }
 
 eval 'sub UNIVERSAL::sleep {}';

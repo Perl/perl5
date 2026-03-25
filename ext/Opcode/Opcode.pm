@@ -321,7 +321,7 @@ invert_opset function.
 
     lt i_lt gt i_gt le i_le ge i_ge eq i_eq ne i_ne ncmp i_ncmp
     slt sgt sle sge seq sne scmp
-    isa
+    isa does
 
     substr substr_left vec stringify study pos length index
     rindex ord chr

@@ -690,7 +690,7 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
 }
 
 static void
-S_apply_one_role(pTHX_ HV *stash, struct xpvhv_aux *aux, SV *namesv)
+S_apply_one_role(pTHX_ struct xpvhv_aux *aux, SV *namesv)
 {
     SV *rolename = sv_newmortal(), *rolever = sv_newmortal();
     const char *end = split_package_ver(namesv, rolename, rolever);
@@ -746,7 +746,7 @@ apply_class_attribute_does(pTHX_ HV *stash, SV *value)
             SV *entry = newSVpvn_flags(start, entry_end - start,
                                        SvUTF8(value) ? SVf_UTF8 : 0);
             sv_2mortal(entry);
-            S_apply_one_role(aTHX_ stash, aux, entry);
+            S_apply_one_role(aTHX_ aux, entry);
         }
     }
 }
@@ -1527,7 +1527,8 @@ S_proto_role_compose_and_install(pTHX_ HV *stash)
             /* Role doesn't have a proto-role (shouldn't happen for roles
              * sealed by this build; falling back to legacy composition) */
 #ifdef DEBUGGING
-            Perl_warn(aTHX_ "proto_role_compose_and_install: role %" HvNAMEf_QUOTEDPREFIX
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
+                      "proto_role_compose_and_install: role %" HvNAMEf_QUOTEDPREFIX
                       " has no proto-role; falling back to legacy composition path",
                       HvNAMEfARG(rolestash));
 #endif

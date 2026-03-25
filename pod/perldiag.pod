@@ -789,6 +789,12 @@ be directly assigned to.
 an C<@ISA> array, and the array is not empty.  This is not permitted, as it
 would lead to a class with inconsistent inheritance.
 
+=item Cannot create role %s as it already has a non-empty @ISA
+
+(F) An attempt was made to create a role out of a package that already has
+an C<@ISA> array, and the array is not empty.  Roles do not use C<@ISA>
+for composition; this package cannot be used as a role.
+
 =item Cannot create an object of incomplete class "%s"
 
 (F) An attempt was made to create an object of a class where the start
@@ -832,6 +838,11 @@ or scalar) that already holds a dirhandle.  Since this idiom might render
 your code confusing, it was deprecated in Perl 5.10.  As of Perl 5.28, it
 is a fatal error.
 
+=item Cannot '%s' outside of a 'class' or 'role'
+
+(F) You attempted to use one of the keywords that only makes sense inside
+a C<class> or C<role> definition, at a location that is not inside either.
+
 =item Cannot '%s' outside of a 'class'
 
 (F) You attempted to use one of the keywords that only makes sense inside
@@ -847,10 +858,20 @@ which makes no sense.
 (F) You tried printing an infinity or not-a-number as a character (%c),
 which makes no sense.  Maybe you meant '%s', or just stringifying it?
 
+=item Cannot define role "%s" as it is already a class
+
+(F) You tried to define a role using a name that is already in use as a
+C<class>.  A name cannot be both a class and a role.
+
 =item Cannot reopen existing class "%s"
 
 (F) You tried to begin a C<class> definition for a class that already exists.
 A class may only have one definition block.
+
+=item Cannot reopen existing role "%s"
+
+(F) You tried to begin a C<role> definition for a role that already exists.
+A role may only have one definition block.
 
 =item Cannot set tied @DB::args
 
@@ -2740,6 +2761,13 @@ method of another class nested inside the one that actually defined it.
 This is not permitted, as only methods defined by a given class are
 permitted to access fields of that class.
 
+=item Field %s conflicts between "%s" and "%s"
+
+(F) Two roles being composed into the same class or role both provide a
+field with the same name C<%s>, originating from C<"%s"> and C<"%s">
+respectively.  Field conflicts are always errors; unlike method conflicts
+they cannot be resolved by the consumer.
+
 =item Field too wide in 'u' format in pack
 
 (W pack) Each line in an uuencoded string starts with a length indicator
@@ -4087,6 +4115,21 @@ interpreter, especially if the word that is being warned about is
 (F) You can't pack a string by supplying a checksum, because the
 checksumming process loses information, and you can't go the other way.
 See L<perlfunc/unpack>.
+
+=item Method %s conflicts between "%s" and "%s"
+
+(F) Two roles being composed into the same class or role both provide a
+method named C<%s>, originating from C<"%s"> and C<"%s"> respectively,
+and the consumer did not provide an explicit method to resolve the
+conflict.  Provide a C<method %s { ... }> in the consuming class or role
+to resolve the conflict.
+
+=item Method %s is required by role %s but not provided by "%s"
+
+(F) The role C<%s> declares a required method stub for C<%s>, but the
+consuming class C<"%s"> does not provide an implementation and no
+matching method was found in its inheritance chain.  Add a C<method %s
+{ ... }> to the class to satisfy the requirement.
 
 =item Method for operation %s not found in package %s during blessing
 
@@ -5801,6 +5844,14 @@ of "||".
 
 See L</500 Server error>.
 
+=item proto_role_compose_and_install: role "%s" has no proto-role; falling back to legacy composition path
+
+(S debugging) A role being composed into a class or role did not have a
+proto-role structure, which should not happen for roles sealed by the
+current build.  This warning is only emitted under C<-DDEBUGGING>
+builds.  The composition fell back to the legacy path, which has
+different (croak-on-first-conflict) semantics.
+
 =item printf() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
@@ -6121,6 +6172,20 @@ for the character.
 
 (W syntax) You wrote your assignment operator backwards.  The = must
 always come last, to avoid ambiguity with subsequent unary operators.
+
+=item role is experimental
+
+(S experimental::class) This warning is emitted if you use the C<role>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item Roles cannot use :isa
+
+(F) You attempted to apply the C<:isa> attribute to a C<role>
+definition.  Roles define contracts that can be composed into classes;
+they do not participate in class inheritance and therefore cannot use
+C<:isa>.  If you want to require that a consuming class also inherits
+from a given base class, use a C<method> requirement instead.
 
 =item Scalars leaked: %d
 
@@ -6950,6 +7015,12 @@ of arguments given and the number expected.
 Similar to the previous message but for subroutines that accept a variable
 number of arguments.
 
+=item Too many roles in a single composition (max %d)
+
+(F) You attempted to compose more roles into a single class or role than
+the implementation limit allows (currently 32).  Restructure your role
+hierarchy so that fewer roles are directly composed at one level.
+
 =item Too many nested open parens in regex; marked by <-- HERE in m/%s/
 
 (F) You have exceeded the number of open C<"("> parentheses that haven't
@@ -7287,6 +7358,18 @@ enough to figure out what you really meant.
 (F) You tried to specify something other than a single class name with an
 optional trailing version number as the value for a C<class> C<:isa>
 attribute.  This confused the parser.
+
+=item Unexpected characters while parsing :does attribute: %s
+
+(F) You tried to specify something other than a comma-separated list of
+role names as the value for a C<:does> attribute.  This confused the
+parser.
+
+=item :does attribute requires a role but "%s" is not one
+
+(F) You specified a name in a C<:does> attribute that has not been
+declared as a C<role>.  Only names that refer to roles created with the
+C<role> keyword may appear in C<:does>.
 
 =item Unexpected exit %u
 

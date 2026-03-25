@@ -13,6 +13,7 @@ cflags.SH				A script that emits C compilation flags per file
 Changes					Describe how to peruse changes between releases
 charclass_invlists.inc			Generated compiled-in inversion lists
 class.c					Internals of the `use feature 'class'` object system
+class.h					Type definitions for the proto-role algebra (roles v3)
 CODE_OF_CONDUCT.md			Information on where to find the Standards of Conduct
 config_h.SH				Produces config.h
 configpm				Produces lib/Config.pm
@@ -6681,6 +6682,20 @@ t/re/uniprops09.t			Test unicode \p{} regex constructs
 t/re/uniprops10.t			Test unicode \p{} regex constructs
 t/re/user_prop_race_thr.t		Test races in user-defined \p{} under threads
 t/README				Instructions for regression tests
+t/role/examples/001-currency.t		Example: currency value-object role
+t/role/examples/002-shard-migrator.t	Example: shard-migrator role composition
+t/role/examples/003-lambda-terms.t	Example: lambda-terms via roles
+t/role/examples/004-native-types.t	Example: native-type roles
+t/role/role.t				Basic role machinery tests
+t/role/role_compose.t			Role method and field composition tests
+t/role/role_conflict_resolution.t	Role method conflict detection and resolution
+t/role/role_does.t			:does attribute validation tests
+t/role/role_does_method.t		->does, infix does, ->DOES tests
+t/role/role_does_semantics.t		Nominal and structural role-check semantics
+t/role/role_field_composition.t		Role field inheritance tests
+t/role/role_field_conflicts.t		Role field conflict detection tests
+t/role/role_fields.t			Role field behaviour tests
+t/role/role_requires.t			Required method stub tests
 t/run/cloexec.t				Test close-on-exec.
 t/run/dtrace.pl				For dtrace.t
 t/run/dtrace.t				Test for DTrace probes
