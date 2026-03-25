@@ -2016,7 +2016,7 @@ first.)
 C<do BLOCK> does I<not> count as a loop, so the loop control statements
 L<C<next>|/next LABEL>, L<C<last>|/last LABEL>, or
 L<C<redo>|/redo LABEL> cannot be used to leave or restart the block.
-See L<perlsyn> for alternative strategies.
+See L<perlsyn/Statement Modifiers> for alternative strategies.
 
 =item do EXPR
 X<do>
@@ -4121,7 +4121,8 @@ L<C<continue>|/continue BLOCK> block, if any, is not executed:
     }
 
 C<last> cannot return a value from a block that typically
-returns a value, such as C<eval {}>, C<sub {}>, or C<do {}>. It will perform
+returns a value, such as C<eval {}>, C<sub {}>, or C<do {}>.  (For C<do>,
+see L<perlsyn/Statement Modifiers> for workarounds.)  It will perform
 its flow control behavior, which precludes any return value. It should not be
 used to exit a L<C<grep>|/grep BLOCK LIST> or L<C<map>|/map BLOCK LIST>
 operation.
