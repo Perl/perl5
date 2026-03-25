@@ -16,10 +16,9 @@ use Test::More tests => 49;
 # Those with a working tzset() should be able to use the TZ below.
 $ENV{TZ} = "EST5EDT";
 
-# It looks like POSIX.xs claims that only VMS and Mac OS traditional
-# don't have tzset().  MingW doesn't work.  Cygwin works in some places, but
+# MingW tzset doesn't work.  Cygwin works in some places, but
 # not others.  The other Win32's below are guesses.
-my $has_tzset = $^O ne "VMS" && $^O ne "cygwin"
+my $has_tzset = $^O ne "cygwin"
              && ($^O ne "MSWin32" || (   $^O eq "MSWin32"
                                       && $Config{make} eq 'nmake'))
              && $^O ne "interix";
@@ -267,6 +266,10 @@ SKIP: {   # GH #23878; test that dst fall back works properly
     skip "'$locale' not understood", $skip_count
                    if POSIX::strftime("%H", localtime($reference_time)) != 19;
 
+    skip "No tzset()", $skip_count unless $has_tzset;
+
+    local $TODO = 'mktime() does not populate tm_gmtoff' if $^O eq 'VMS';
+
     my $t = 1761436800;     # an hour before time should have changed
     my @fall = (
                  [   -1, "2025-10-26 01:59:59+0200", "Chg -1 hr, 1 sec" ],
@@ -325,6 +328,10 @@ SKIP: {   # GH #23878: test that dst spring forward works properly.
     # $reference_time is in the middle of summer, dst should be in effect.
     skip "'$locale' not understood", $skip_count if
                 POSIX::strftime("%H", localtime($reference_time)) != 10;
+
+    skip "No tzset()", $skip_count unless $has_tzset;
+
+    local $TODO = 'mktime() does not populate tm_gmtoff' if $^O eq 'VMS';
 
     my $t = 1741510800;     # an hour before time should have changed
 
