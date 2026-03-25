@@ -398,12 +398,14 @@ Perl_class_setup_stash(pTHX_ HV *stash)
      */
 
     struct xpvhv_aux *aux = HvAUX(stash);
+    aux->xhv_class_flags         = 0;
     aux->xhv_class_superclass    = NULL;
     aux->xhv_class_initfields_cv = NULL;
     aux->xhv_class_adjust_blocks = NULL;
     aux->xhv_class_fields        = NULL;
     aux->xhv_class_next_fieldix  = 0;
     aux->xhv_class_param_map     = NULL;
+    aux->xhv_class_subclasses_pending_seal = NULL;
 
     aux->xhv_aux_flags |= HvAUXf_IS_CLASS;
 
@@ -683,6 +685,9 @@ S_class_cleanup_definition(pTHX_ HV *stash)
     SvREFCNT_dec(aux->xhv_class_param_map);
     aux->xhv_class_param_map = NULL;
 
+    SvREFCNT_dec(aux->xhv_class_subclasses_pending_seal);
+    aux->xhv_class_subclasses_pending_seal = NULL;
+
     /* clean up the ops for defaults for fields, if any, since
        padname_free() doesn't.
     */
@@ -760,7 +765,29 @@ Perl_class_seal_stash(pTHX_ HV *stash)
         return;
     }
 
+    if(HvCLASS_IS_SEALED(stash))
+        /* idempotent */
+        return;
+
     struct xpvhv_aux *aux = HvAUX(stash);
+    struct xpvhv_aux *superaux = NULL;
+
+    if(aux->xhv_class_superclass) {
+        HV *superstash = aux->xhv_class_superclass;
+        assert(HvSTASH_IS_CLASS(superstash));
+        superaux = HvAUX(superstash);
+
+        if(!HvCLASS_IS_SEALED(superstash)) {
+            if(!superaux->xhv_class_subclasses_pending_seal)
+                superaux->xhv_class_subclasses_pending_seal = newAV();
+            /* tut tut this will be an AV whose elements are HV *s directly.
+             * That's fine. perl code won't ever see this array so there's no
+             * point us wrapping them in newRV_inc()s
+             */
+            av_push(superaux->xhv_class_subclasses_pending_seal, SvREFCNT_inc((SV *)stash));
+            return;
+        }
+    }
 
     /* generate initfields CV */
     I32 floor_ix = PL_savestack_ix;
@@ -793,11 +820,8 @@ Perl_class_seal_stash(pTHX_ HV *stash)
     ops = op_append_list(OP_LINESEQ, ops,
          newUNOP_AUX(OP_METHSTART, OPpINITFIELDS << 8, NULL, NULL));
 
-    if(aux->xhv_class_superclass) {
-        HV *superstash = aux->xhv_class_superclass;
-        assert(HvSTASH_IS_CLASS(superstash));
-        struct xpvhv_aux *superaux = HvAUX(superstash);
-
+    if(superaux) {
+        assert(superaux->xhv_class_initfields_cv);
         /* Build an OP_ENTERSUB */
         OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
             newPADxVOP(OP_PADSV, 0, PADIX_SELF),
@@ -920,6 +944,17 @@ Perl_class_seal_stash(pTHX_ HV *stash)
     CvIsMETHOD_on(initfields);
 
     aux->xhv_class_initfields_cv = initfields;
+
+    aux->xhv_class_flags |= HvCLASSf_SEALED;
+
+    if(aux->xhv_class_subclasses_pending_seal) {
+        AV *subclasses = aux->xhv_class_subclasses_pending_seal;
+        for (UV idx = 0; idx < av_count(subclasses); idx++)
+            class_seal_stash((HV *)AvARRAY(subclasses)[idx]);
+
+        SvREFCNT_dec(subclasses);
+        aux->xhv_class_subclasses_pending_seal = NULL;
+    }
 }
 
 void

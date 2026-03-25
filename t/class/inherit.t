@@ -114,4 +114,27 @@ EOS
     is(Testcase6B->VERSION, 1.23, 'Testcase6B sets VERSION');
 }
 
+# GH#20890
+{
+    {
+        class Testcase7A; # unit syntax, not block
+        method m { return "the method"; }
+
+        class Testcase7B :isa(Testcase7A);
+    }
+
+    my $obj1 = Testcase7B->new;
+    is($obj1->m, "the method", 'Testcase7B can inherit from unit-syntax base class');
+
+    # Not in the original bug report but inspired by Object::Pad's equivalent test
+    class Testcase7C {
+        method m { return "also the method"; }
+
+        class Testcase7D :isa(Testcase7C) { }
+    }
+
+    my $obj2 = Testcase7D->new;
+    is($obj2->m, "also the method", 'Testcase7D can inherit from inside block-syntax base class');
+}
+
 done_testing;
