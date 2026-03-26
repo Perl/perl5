@@ -27,6 +27,7 @@
 # if !defined(PERL_CORE)
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
+#   undef compose_origins
 #   undef do_aexec
 #   undef HvAUXf_IS_CLASS_SEALED
 #   undef HvAUXf_IS_ROLE
@@ -40,6 +41,17 @@
 #   undef KEY_role
 #   undef new_XPV
 #   undef new_XPVIV
+#   undef origin_is_conflicted
+#   undef origin_is_defined
+#   undef origin_is_required
+#   undef origin_map_init
+#   undef origin_popcount
+#   undef ORIGIN_SET_EMPTY
+#   undef ORIGIN_SET_MAX_BITS
+#   undef proto_role_add_field
+#   undef proto_role_add_method
+#   undef proto_role_free
+#   undef proto_role_new
 #   undef pTHX_10
 #   undef pTHX_11
 #   undef SHY_NATIVE

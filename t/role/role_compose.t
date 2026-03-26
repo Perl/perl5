@@ -179,7 +179,7 @@ no warnings 'experimental::class';
 
     @order = ();
     my $obj = AdjustConsumer->new();
-    is_deeply(\@order, [qw(class_adjust adjust1 adjust2)],
+    is(join(" ", @order), "class_adjust adjust1 adjust2",
         'ADJUST blocks: class first, then roles in composition order');
 }
 
