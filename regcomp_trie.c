@@ -1370,7 +1370,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         /* Find the node we are going to overwrite */
         if ( first != startbranch || OP( last ) == BRANCH ) {
             /* branch sub-chain */
-            NEXT_OFF( first ) = (U16)(last - first);
+            NEXT_OFF_set(first, last - first);
             /* whole branch chain */
         }
         /* But first we check to see if there is a common prefix we can
@@ -1474,8 +1474,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             trie->prefixlen = (state-1);
             if (str) {
                 regnode *n = REGNODE_AFTER(convert);
-                assert( n - convert <= U16_MAX );
-                NEXT_OFF(convert) = n - convert;
+                NEXT_OFF_set(convert, n - convert);
                 trie->startstate = state;
                 trie->minlen -= (state - 1);
                 trie->maxlen -= (state - 1);
@@ -1505,7 +1504,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 if (trie->maxlen) {
                     convert = n;
                 } else {
-                    NEXT_OFF(convert) = (U16)(tail - convert);
+                    NEXT_OFF_set(convert, tail - convert);
                     DEBUG_r(optimize= n);
                 }
             }
@@ -1513,7 +1512,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if (!jumper)
             jumper = last;
         if ( trie->maxlen ) {
-            NEXT_OFF( convert ) = (U16)(tail - convert);
+            NEXT_OFF_set( convert, tail - convert);
             ARG1u_SET( convert, data_slot );
             /* Store the offset to the first unabsorbed branch in
                jump[0], which is otherwise unused by the jump logic.

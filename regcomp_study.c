@@ -67,7 +67,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
         if (REGNODE_OFF_BY_ARG(OP(node)))
             ARG1u(node) = off;
         else
-            NEXT_OFF(node) = off;
+            NEXT_OFF_set(node, off);
     }
     return;
 }
@@ -1097,7 +1097,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             stringok = 0;
         if (REGNODE_TYPE(OP(n)) == NOTHING) {
             DEBUG_PEEP("skip:", n, depth, 0);
-            NEXT_OFF(scan) += NEXT_OFF(n);
+            NEXT_OFF_set(scan, NEXT_OFF(scan) + NEXT_OFF(n));
             next = n + NODE_STEP_REGNODE;
 #ifdef DEBUGGING
             if (stringok)
@@ -1221,7 +1221,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 #endif
 
             next = REGNODE_AFTER_varies(n);
-            NEXT_OFF(scan) += NEXT_OFF(n);
+            NEXT_OFF_set(scan, NEXT_OFF(scan) + NEXT_OFF(n));
             assert( ( STR_LEN(scan) + STR_LEN(n) ) < 256 );
             setSTR_LEN(scan, (U8)(STR_LEN(scan) + STR_LEN(n)));
             /* Now we can overwrite *n : */
@@ -1240,7 +1240,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 ARG1u_SET(n, val - n);
             }
             else {
-                NEXT_OFF(n) = val - n;
+                NEXT_OFF_set(n, val - n);
             }
             stopnow = 1;
         }
@@ -1456,7 +1456,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     while (n <= stop) {
         OP(n) = OPTIMIZED;
         FLAGS(n) = 0;
-        NEXT_OFF(n) = 0;
+        NEXT_OFF_set(n, 0);
         n++;
     }
 #endif
@@ -2100,7 +2100,8 @@ Perl_study_chunk(pTHX_
 
                                     });
                                     OP(startbranch)= NOTHING;
-                                    NEXT_OFF(startbranch)= tail - startbranch;
+                                    NEXT_OFF_set(startbranch,
+                                                 tail - startbranch);
                                     for ( opt = startbranch + 1; opt < tail ; opt++ )
                                         OP(opt)= OPTIMIZED;
                                 }
@@ -2646,11 +2647,11 @@ Perl_study_chunk(pTHX_
 
 #ifdef DEBUGGING
                     OP(nxt1 + 1) = OPTIMIZED; /* was count. */
-                    NEXT_OFF(nxt1+ 1) = 0; /* just for consistency. */
-                    NEXT_OFF(nxt2) = 0; /* just for consistency with CURLY. */
+                    NEXT_OFF_set(nxt1 + 1, 0); /* just for consistency. */
+                    NEXT_OFF_set(nxt2, 0); /* just for consistency with CURLY. */
                     OP(nxt) = OPTIMIZED;        /* was CLOSE. */
                     OP(nxt + 1) = OPTIMIZED; /* was count. */
-                    NEXT_OFF(nxt+ 1) = 0; /* just for consistency. */
+                    NEXT_OFF_set(nxt + 1, 0); /* just for consistency. */
 #endif
                 }
               nogo:
@@ -2704,8 +2705,8 @@ Perl_study_chunk(pTHX_
 #ifdef DEBUGGING
                         OP(nxt1 + 1) = OPTIMIZED; /* was count. */
                         OP(nxt + 1) = OPTIMIZED; /* was count. */
-                        NEXT_OFF(nxt1 + 1) = 0; /* just for consistency. */
-                        NEXT_OFF(nxt + 1) = 0; /* just for consistency. */
+                        NEXT_OFF_set(nxt1 + 1, 0); /* just for consistency. */
+                        NEXT_OFF_set(nxt + 1, 0);  /* just for consistency. */
 #endif
 #if 0
                         while ( nxt1 && (OP(nxt1) != WHILEM)) {
@@ -2714,7 +2715,7 @@ Perl_study_chunk(pTHX_
                                 if (REGNODE_OFF_BY_ARG(OP(nxt1)))
                                     ARG1u_SET(nxt1, nxt2 - nxt1);
                                 else if (nxt2 - nxt1 < U16_MAX)
-                                    NEXT_OFF(nxt1) = nxt2 - nxt1;
+                                    NEXT_OFF_set(nxt1, nxt2 - nxt1);
                                 else
                                     OP(nxt) = NOTHING;  /* Cannot beautify */
                             }
@@ -3204,7 +3205,7 @@ Perl_study_chunk(pTHX_
                      * matches to avoid breakage for those not using this
                      * extension) */
                     if (deltanext)  {
-                        NEXT_OFF(scan) = deltanext;
+                        NEXT_OFF_set(scan, deltanext);
                         if (
                             /* See a CLOSE op inside this lookbehind? */
                             cur_last_close_op != *(data_fake.last_close_opp)
@@ -3320,7 +3321,7 @@ Perl_study_chunk(pTHX_
                     }
 
                     if (deltanext) {
-                        NEXT_OFF(scan) = deltanext;
+                        NEXT_OFF_set(scan, deltanext);
                     }
                     FLAGS(scan) = (U8)*minnextp + deltanext;
                 }
