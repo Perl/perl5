@@ -1,10 +1,15 @@
-#!/usr/bin/perl
+#!./perl
+
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+    require Config;
+}
 
 use v5.42;
 use feature 'class';
 no warnings 'experimental::class';
-
-use Test::More;
 
 # Basic field composition
 {
