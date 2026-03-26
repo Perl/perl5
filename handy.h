@@ -1439,6 +1439,23 @@ or casts
  */
 #define ASSERT_IS_PTR(x) (assert(sizeof(*(x))), (x))
 
+/*
+=for apidoc_section $directives_scn
+=for apidoc Em|bool|PREVENT_LVALUE|x
+
+This returns its input C<x>, but forces a compilation error if called from an
+lvalue context.  Its main use is to be placed in a macro that otherwise could 
+be used to change the value of C<x>, but doing so is undesirable.
+
+A common example is when there are getter and setter macros for C<x>, and the
+setter has error checking that shouldn't be short circuited.  Wrapping C<x>
+with this macro in the getter call forces the setter one to be used to change
+C<x>.
+
+=cut
+*/
+#define PREVENT_LVALUE(x)  ((x) | 0)
+
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
  * bits of information are lost even on a 64-bit machine, but to get the

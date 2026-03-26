@@ -48,6 +48,7 @@
 #     undef OPpPARAM_IF_FALSE
 #     undef OPpPARAM_IF_UNDEF
 #     undef OPpSELF_IN_PAD
+#     undef PREVENT_LVALUE
 #     undef utf16_to_utf8
 #     undef utf16_to_utf8_reversed
 #   endif /* !defined(PERL_EXT) */
