@@ -24611,7 +24611,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'IO::Uncompress::Unzip' => '2.219',
             'Module::CoreList'      => '5.20260320',
             'Module::CoreList::Utils'=> '5.20260320',
-            'Opcode'                => '1.71',
             'POSIX'                 => '2.26',
             'Parse::CPAN::Meta'     => '2.150013',
             'Storable'              => '3.40',
@@ -24630,6 +24629,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'B::Concise'            => '1.012',
             'B::Op_private'         => '5.043010',
             'Config'                => '5.04301',
+            'Opcode'                => '1.71',
         },
         removed => {
         }
