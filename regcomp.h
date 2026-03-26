@@ -485,9 +485,11 @@ struct regnode_ssc {
 #define OP(p)           ((p)->head.data.type)
 #define STR_LEN_U8(p)   ((p)->head.data.u_8.str_len_u8)
 #define FIRST_BYTE(p)   ((p)->head.data.u_8.first_byte)
-#define FLAGS(p)        ((p)->head.data.u_8.flags) /* Caution: Doesn't apply to all      \
-                                           regnode types.  For some, it's the \
-                                           character set of the regnode */
+
+/* Caution: Doesn't apply to all regnode types.  For some, it's the character
+ * set of the regnode */
+#define FLAGS(p)        ((p)->head.data.u_8.flags)
+
 #define STR_LENs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
                                     STR_LEN_U8((struct regnode_string *)p))
 #define STRINGs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
