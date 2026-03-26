@@ -1070,6 +1070,7 @@
 #   define magic_nextpack(a,b,c)                Perl_magic_nextpack(aTHX_ a,b,c)
 #   define magic_regdata_cnt(a,b)               Perl_magic_regdata_cnt(aTHX_ a,b)
 #   define magic_regdatum_get(a,b)              Perl_magic_regdatum_get(aTHX_ a,b)
+#   define magic_regdatum_set(a,b)              Perl_magic_regdatum_set(aTHX_ a,b)
 #   define magic_scalarpack(a,b)                Perl_magic_scalarpack(aTHX_ a,b)
 #   define magic_set(a,b)                       Perl_magic_set(aTHX_ a,b)
 #   define magic_set_all_env(a,b)               Perl_magic_set_all_env(aTHX_ a,b)
@@ -1233,11 +1234,6 @@
        ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
          defined(SOCK_DGRAM) )
 #     define PerlSock_socketpair_cloexec(a,b,c,d) Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
-#   endif
-#   if defined(_MSC_VER)
-#     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
-#   else
-#     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
 #   endif
 #   if defined(PERL_DEBUG_READONLY_COW)
 #     define sv_buf_to_ro(a)                    Perl_sv_buf_to_ro(aTHX_ a)

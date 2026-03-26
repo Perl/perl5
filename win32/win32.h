@@ -99,6 +99,10 @@
 #  else /* MSVC noreturn support inside the interp */
 #    ifdef _MSC_VER
 #      define PERL_CALLCONV_NO_RET __declspec(noreturn)
+
+        /* Windows can't cope with a function that isn't supposed to return
+         * declared as having a non-void return value */
+#      define PERL_CALLCONV_NON_VOID_NO_RET(ret_type)
 #    endif
 #  endif
 #endif

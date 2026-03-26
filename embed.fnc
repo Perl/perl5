@@ -2116,6 +2116,9 @@ p	|U32	|magic_regdata_cnt					\
 p	|int	|magic_regdatum_get					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
+pr	|int	|magic_regdatum_set					\
+				|NN SV *sv				\
+				|NN MAGIC *mg
 
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|SV *	|magic_scalarpack					\
@@ -2619,7 +2622,7 @@ Adp	|void	|op_free	|NULLOK OP *arg
 Adp	|OP *	|op_linklist	|NN OP *o
 Admpx	|OP *	|op_lvalue	|NULLOK OP *o				\
 				|I32 type
-Xop	|OP *	|op_lvalue_flags|NULLOK OP *o				\
+Xdop	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
 				|U32 flags
 : Used in various files
@@ -3160,7 +3163,7 @@ Cmp	|void	|save_mortalizesv					\
 				|NN SV *sv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
 Cdmp	|void	|save_op
-Cp	|void	|save_padsv	|PADOFFSET padix
+Cdp	|void	|save_padsv	|PADOFFSET padix
 Cdp	|void	|save_padsv_and_mortalize				\
 				|PADOFFSET off
 Cp	|void	|save_pptr	|NN char **pptr
@@ -4320,15 +4323,6 @@ Cp	|void	|sys_intern_init
 Cp	|void	|sys_intern_dup |NN struct interp_intern *src		\
 				|NN struct interp_intern *dst
 # endif
-#endif
-#if defined(_MSC_VER)
-p	|int	|magic_regdatum_set					\
-				|NN SV *sv				\
-				|NN MAGIC *mg
-#else
-pr	|int	|magic_regdatum_set					\
-				|NN SV *sv				\
-				|NN MAGIC *mg
 #endif
 #if defined(MULTIPLICITY)
 ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\

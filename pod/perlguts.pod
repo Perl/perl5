@@ -12,7 +12,7 @@ perlguts - Introduction to the Perl API
 This document attempts to describe how to use the Perl API, as well as
 to provide some info on the basic workings of the Perl core.  It is far
 from complete and probably contains many errors.  Please refer any
-questions or comments to the author below.
+questions or comments to the Perl 5 Porters E<lt>perl5-porters@perl.orgE<gt>.
 
 =head1 Variables
 

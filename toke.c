@@ -1041,7 +1041,7 @@ Perl_parser_free_nexttoke_ops(pTHX_  yy_parser *parser, OPSLAB *slab)
 
 
 /*
-=for apidoc AmnxUN|SV *|PL_parser-E<gt>linestr
+=for apidoc AmnxUN|SV *|PL_parser->linestr
 
 Buffer scalar containing the chunk currently under consideration of the
 text currently being lexed.  This is always a plain string scalar (for
@@ -1068,7 +1068,7 @@ lexing position is pointed to by L</PL_parser-E<gt>bufptr>.  Direct use
 of these pointers is usually preferable to examination of the scalar
 through normal scalar means.
 
-=for apidoc AmnxUN|char *|PL_parser-E<gt>bufend
+=for apidoc AmnxUN|char *|PL_parser->bufend
 
 Direct pointer to the end of the chunk of text currently being lexed, the
 end of the lexer buffer.  This is equal to C<SvPVX(PL_parser-E<gt>linestr)
@@ -1076,7 +1076,7 @@ end of the lexer buffer.  This is equal to C<SvPVX(PL_parser-E<gt>linestr)
 always located at the end of the buffer, and does not count as part of
 the buffer's contents.
 
-=for apidoc AmnxUN|char *|PL_parser-E<gt>bufptr
+=for apidoc AmnxUN|char *|PL_parser->bufptr
 
 Points to the current position of lexing inside the lexer buffer.
 Characters around this point may be freely examined, within
@@ -1094,7 +1094,7 @@ Interpretation of the buffer's octets can be abstracted out by
 using the slightly higher-level functions L</lex_peek_unichar> and
 L</lex_read_unichar>.
 
-=for apidoc AmnxUN|char *|PL_parser-E<gt>linestart
+=for apidoc AmnxUN|char *|PL_parser->linestart
 
 Points to the start of the current line inside the lexer buffer.
 This is useful for indicating at which column an error occurred, and

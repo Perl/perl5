@@ -804,6 +804,7 @@ the strings?).
             5.40.2       2025-Apr-13
             5.40.3-RC1   2025-Jul-21
             5.40.3       2025-Aug-03
+            5.40.4-RC1   2026-Mar-22
 
  Graham K   5.41.0       2024-Jun-10     The 5.41 development track
  Philippe   5.41.1       2024-Jul-02
@@ -827,6 +828,7 @@ the strings?).
 
  Steve      5.42.1-RC1   2026-Feb-22     The 5.42 maintenance track
             5.42.1       2026-Mar-08
+            5.42.2-RC1   2026-Mar-22
 
  Philippe   5.43.0       2025-Jul-03     The 5.43 development track
  Richard L  5.43.1       2025-Jul-20

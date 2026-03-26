@@ -527,7 +527,7 @@ sub _normalize_if_elif {
         my $not= $2 ? "!" : "";
         $line= "#$if ${not}defined($3)";
     }
-    $line =~ s/#((?:el)?if)\s+//
+    $line =~ s/#((?:el)?if)\b\s*//
         or confess "Bad cond: $line";
     my $if= $1;
     $line =~ s/!\s+/!/g;

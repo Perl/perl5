@@ -3980,7 +3980,7 @@ sub generate_proto_h {
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
-        my ($flags, $retval, $plain_func, $args, $assertions ) =
+        my ($flags, $ret_type, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
         if ($flags =~
              m/([^ aA b C dD eE fF h iI mM nN oO pP Rr sS T uU v W xX ; ])/xx)
@@ -4049,7 +4049,7 @@ sub generate_proto_h {
             $need_longs{$plain_func} = $args_assert_line = 1;
         }
 
-        if (! $can_ignore && $retval eq 'void') {
+        if (! $can_ignore && $ret_type eq 'void') {
             warn "It is nonsensical to require the return value of a void"
                . " function ($plain_func) to be checked";
         }
@@ -4087,6 +4087,7 @@ sub generate_proto_h {
                      "$plain_func: flags $flags_str are mutually exclusive\n";
         }
 
+        my $retval = $ret_type;
         my $static_inline = 0;
         if ($static_flag) {
             my $type;
@@ -4121,7 +4122,12 @@ sub generate_proto_h {
                                     && $plain_func !~ /[Pp]erl/;
 
             if ($never_returns) {
-                $retval = "PERL_CALLCONV_NO_RET $retval";
+                if ($ret_type eq 'void') {
+                    $retval = "PERL_CALLCONV_NO_RET $retval";
+                }
+                else {
+                    $retval = "PERL_CALLCONV_NON_VOID_NO_RET($ret_type) $retval";
+                }
             }
             else {
                 $retval = "PERL_CALLCONV $retval";
@@ -4239,7 +4245,7 @@ sub generate_proto_h {
                                 my $string_n = $n;
                                 $string_n = "pTHX_$string_n" if $has_context;
                                 push @attrs,
-                                     "Perl_attribute_nonnull_($string_n)";
+                                     "Perl_attribute_nonnull($string_n)";
                             }
                         }
 
@@ -4480,7 +4486,7 @@ sub generate_proto_h {
                      . " f or F flag";
         }
 
-        unshift @attrs, "Perl_attribute_nonnull_aTHX_" if $has_context;
+        unshift @attrs, "Perl_attribute_nonnull_aTHX" if $has_context;
 
         if ( @attrs ) {
             $ret .= "\n"
@@ -4546,15 +4552,15 @@ sub generate_proto_h {
 
     print $fh <<~"EOF";
         #ifdef DEBUGGING    /* See GH #23641 */
-        #  define Perl_attribute_nonnull_(which)
+        #  define Perl_attribute_nonnull(which)
         #else
-        #  define Perl_attribute_nonnull_(which)  __attribute__nonnull__(which)
+        #  define Perl_attribute_nonnull(which)  __attribute__nonnull__(which)
         #endif
 
         #if defined(MULTIPLICITY)
-        #  define Perl_attribute_nonnull_aTHX_ __attribute__nonnull__(1)
+        #  define Perl_attribute_nonnull_aTHX  __attribute__nonnull__(1)
         #else
-        #  define Perl_attribute_nonnull_aTHX_
+        #  define Perl_attribute_nonnull_aTHX
         #endif
 
         START_EXTERN_C

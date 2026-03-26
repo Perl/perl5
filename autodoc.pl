@@ -638,6 +638,20 @@ sub check_and_add_proto_defn {
     $flags .= "n" if $flags =~ /[#v]/;  # No threads, arguments for #ifdef's,
                                         # plain values
 
+    if ($flags =~ /N/) {
+        state %escapes = (
+                          '<' => 'lt',
+                          '>' => 'gt',
+                          '|' => 'verbar',
+                          '/' => 'sol',
+                          '"' => 'quot'
+                         );
+        my $has_lt = $element =~ /</;
+        $element =~ s/ ([ < > | ]) /E<$escapes{$1}>/gxx;
+
+        # Don't need to escape '/' if there are no '<'s
+        $element =~ s/(\/)/E<$escapes{$1}>/g if $has_lt;
+    }
 
     my @munged_args= $args_ref->@*;
     s/\b(?:NN|NULLOK|[SM]PTR|EPTR\w+)\b\s+//g for @munged_args;
