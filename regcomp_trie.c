@@ -479,7 +479,8 @@ is the recommended Unicode-aware way of saying
             trie->j_after_paren = (U16 *) PerlMemShared_calloc( word_count + 1, \
                                                  sizeof(U16) ); \
         }                                                       \
-        trie->jump[curword] = (U16)(noper_next - convert);      \
+        assert(inRANGE(noper_next - convert, 0, U16_MAX));      \
+        trie->jump[curword] = noper_next - convert;             \
         U16 set_before_paren;                                   \
         U16 set_after_paren;                                    \
         if (OP(cur) == BRANCH) {                                \
@@ -1517,8 +1518,10 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             /* Store the offset to the first unabsorbed branch in
                jump[0], which is otherwise unused by the jump logic.
                We use this when dumping a trie and during optimisation. */
-            if (trie->jump)
+            if (trie->jump) {
+                assert(inRANGE(nextbranch - convert, 0, U16_MAX));
                 trie->jump[0] = (U16)(nextbranch - convert);
+            }
 
             /* If the start state is not accepting (meaning there is no empty string/NOTHING)
              *   and there is a bitmap
