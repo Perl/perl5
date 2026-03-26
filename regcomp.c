@@ -4469,13 +4469,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 });
                 OP(br)= NOTHING;
                 if (OP(REGNODE_p(ender)) == TAIL) {
-                    NEXT_OFF(br)= 0;
+                    NEXT_OFF_set(br, 0);
                     RExC_emit = REGNODE_OFFSET(br) + NODE_STEP_REGNODE;
                 } else {
                     regnode *opt;
                     for ( opt = br + 1; opt < REGNODE_p(ender) ; opt++ )
                         OP(opt)= OPTIMIZED;
-                    NEXT_OFF(br)= REGNODE_p(ender) - br;
+                    NEXT_OFF_set(br, REGNODE_p(ender) - br);
                 }
             }
         }
@@ -4877,8 +4877,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                    unconditionally */
                 reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
                 ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
-                NEXT_OFF(REGNODE_p(orig_emit)) =
-                                    REGNODE_ARG_LEN(OPFAIL) + NODE_STEP_REGNODE;
+                NEXT_OFF_set(REGNODE_p(orig_emit),
+                             REGNODE_ARG_LEN(OPFAIL) + NODE_STEP_REGNODE);
                 return ret;
             }
             else if (min == max && *RExC_parse == '?') {
@@ -13118,7 +13118,8 @@ S_reg2node(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I
 * set up NEXT_OFF() of the inserted node if needed. Something like this:
 *
 *   reginsert(pRExC, OPFAIL, orig_emit, depth+1);
-*   NEXT_OFF(REGNODE_p(orig_emit)) = REGNODE_ARG_LEN(OPFAIL) + NODE_STEP_REGNODE;
+*   NEXT_OFF_set(REGNODE_p(orig_emit),
+*                REGNODE_ARG_LEN(OPFAIL) + NODE_STEP_REGNODE);
 *
 * ALSO NOTE - FLAGS(newly-inserted-operator) will be set to 0 as well.
 */
@@ -13240,10 +13241,10 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
             /* Populate this with something that won't loop and will likely
              * lead to a crash if the caller ignores the failure return, and
              * execution continues */
-            NEXT_OFF(REGNODE_p(scan)) = U16_MAX;
+            NEXT_OFF_set(REGNODE_p(scan), U16_MAX);
             return false;
         }
-        NEXT_OFF(REGNODE_p(scan)) = val - scan;
+        NEXT_OFF_set(REGNODE_p(scan), val - scan);
     }
 
     return true;
@@ -13339,10 +13340,10 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
             /* Populate this with something that won't loop and will likely
              * lead to a crash if the caller ignores the failure return, and
              * execution continues */
-            NEXT_OFF(REGNODE_p(scan)) = U16_MAX;
+            NEXT_OFF_set(REGNODE_p(scan), U16_MAX);
             return false;
         }
-        NEXT_OFF(REGNODE_p(scan)) = val - scan;
+        NEXT_OFF_set(REGNODE_p(scan), val - scan);
     }
 
     return true; /* Was 'return exact' */

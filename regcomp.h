@@ -490,6 +490,8 @@ struct regnode_ssc {
  * set of the regnode */
 #define FLAGS(p)        ((p)->head.data.u_8.flags)
 
+#define NEXT_OFF_set(p, v)                                                  \
+                    (assert(inRANGE((v), 0, U16_MAX)), NEXT_OFF(p) = (v))
 #define STR_LENs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
                                     STR_LEN_U8((struct regnode_string *)p))
 #define STRINGs(p)	(assert(OP(p) != LEXACT && OP(p) != LEXACT_REQ8),   \
@@ -668,7 +670,7 @@ struct regnode_ssc {
 #define FILL_NODE(offset, op)                                           \
     STMT_START {                                                        \
                     OP(REGNODE_p(offset)) = op;                         \
-                    NEXT_OFF(REGNODE_p(offset)) = 0;                    \
+                    NEXT_OFF_set(REGNODE_p(offset), 0);                 \
     } STMT_END
 #define FILL_ADVANCE_NODE(offset, op)                                   \
     STMT_START {                                                        \

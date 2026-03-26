@@ -1211,6 +1211,6 @@ static const scan_data_t zero_scan_data = {
     node = dumpuntil(r,start,(b),(e),last,sv,indent+1,depth+1);
 
 #define REGNODE_STEP_OVER(ret,t1,t2) \
-    NEXT_OFF(REGNODE_p(ret)) = ((sizeof(t1)+sizeof(t2))/sizeof(regnode))
+    NEXT_OFF_set(REGNODE_p(ret), ((sizeof(t1)+sizeof(t2))/sizeof(regnode)));
 
 #endif /* PERL_REGCOMP_INTERNAL_H */
