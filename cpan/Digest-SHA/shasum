@@ -6,11 +6,22 @@
 	##
 	## Version: 6.04
 	## Sat Feb 25 12:00:50 PM MST 2023
-
+	##
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum. Add
 	## "-a" option for algorithm selection,
-	## "-U" option for Universal Newlines support, and
-	## "-0" option for reading bit strings.
+	## "-U" option for Universal Newlines support,
+	## "-0" option for reading bit strings, and
+	## "--progress" for optional progress reporting during checksum
+	## calculation.
+	##
+	## The --progress option reports hashing progress to STDERR while
+	## preserving the normal checksum output on STDOUT. This keeps the
+	## feature safe for scripts and pipelines that parse checksum output.
+	##
+	## For regular files, progress includes bytes processed, total bytes,
+	## percentage complete, throughput, and ETA. For STDIN or other inputs
+	## with unknown total size, progress includes bytes processed and
+	## throughput only.
 
 BEGIN { pop @INC if $INC[-1] eq '.' }
 
@@ -19,6 +30,7 @@ use warnings;
 use Fcntl;
 use Getopt::Long;
 use Digest::SHA qw($errmsg);
+use Time::HiRes qw(time);
 
 my $POD = <<'END_OF_POD';
 
@@ -43,6 +55,8 @@ shasum - Print or Check SHA Checksums
                          ASCII '0' interpreted as 0-bit,
                          ASCII '1' interpreted as 1-bit,
                          all other characters ignored
+       --progress    report hashing progress to STDERR during
+                         checksum calculation
 
  The following five options are useful only when verifying checksums:
        --ignore-missing  don't fail or report status for missing files
@@ -67,7 +81,21 @@ shasum - Print or Check SHA Checksums
  FILE name contains either newlines or backslashes, which are then
  replaced by the two-character sequences `\n' and `\\' respectively.
 
- Report shasum bugs to mshelor@cpan.org
+ When the optional --progress flag is used during checksum calculation,
+ progress information is written to STDERR and the final checksum output
+ remains on STDOUT.  This preserves compatibility with scripts and
+ pipelines that consume checksum output.
+
+ For regular files, progress output includes bytes processed, total size,
+ percentage complete, throughput, and estimated time remaining.  For
+ standard input or other inputs whose total size is not known in advance,
+ progress output includes bytes processed and throughput only.
+
+ The --progress option currently supports normal checksum calculation on
+ regular files or standard input, and does not support Universal
+ Newlines mode or BITS mode.
+
+Report shasum bugs to mshelor@cpan.org
 
 =head1 DESCRIPTION
 
@@ -79,6 +107,22 @@ The following command shows how to compute digests for typical inputs
 such as the NIST test vector "abc":
 
 	perl -e "print qq(abc)" | shasum
+
+To display optional progress information while hashing a regular file,
+use the I<--progress> option:
+
+	shasum --progress -a 256 large-media-file.mp4
+
+Since progress is written to standard error, the checksum result remains
+safe to redirect or capture from standard output:
+
+	shasum --progress -a 256 large-media-file.mp4 > checksum.txt
+
+Progress also works when reading from standard input. In that case, the
+total size is not known in advance, so only bytes processed and
+throughput are displayed:
+
+	cat large-media-file.mp4 | shasum --progress -a 256
 
 Or, if you want to use SHA-256 instead of the default SHA-1, simply say:
 
@@ -109,6 +153,8 @@ END_OF_POD
 
 my $VERSION = "6.04";
 
+	## usage: print help or an error message, then exit
+
 sub usage {
 	my($err, $msg) = @_;
 
@@ -135,7 +181,7 @@ select((select(STDERR), $| = 1)[0]);
 	## Collect options from command line
 
 my ($alg, $binary, $check, $text, $status, $quiet, $warn, $help);
-my ($version, $BITS, $UNIVERSAL, $tag, $strict, $ignore_missing);
+my ($version, $BITS, $UNIVERSAL, $tag, $strict, $ignore_missing, $progress);
 
 eval { Getopt::Long::Configure ("bundling") };
 GetOptions(
@@ -148,6 +194,7 @@ GetOptions(
 	'U|UNIVERSAL' => \$UNIVERSAL,
 	'tag' => \$tag,
 	'strict' => \$strict,
+	'progress' => \$progress,
 	'ignore-missing' => \$ignore_missing,
 ) or usage(1, "");
 
@@ -175,7 +222,12 @@ usage(1, "shasum: --tag does not support Universal Newlines mode\n")
 	if $tag && $UNIVERSAL;
 usage(1, "shasum: --tag does not support BITS mode\n")
 	if $tag && $BITS;
-
+usage(1, "shasum: --progress option used only when calculating checksums\n")
+	if $progress && $check;
+usage(1, "shasum: --progress does not support Universal Newlines mode\n")
+	if $progress && $UNIVERSAL;
+usage(1, "shasum: --progress does not support BITS mode\n")
+	if $progress && $BITS;
 
 	## Default to SHA-1 unless overridden by command line option
 
@@ -206,6 +258,8 @@ if ($isDOSish) { $binary = 1 unless $text || $UNIVERSAL }
 
 my $modesym = $binary ? '*' : ($UNIVERSAL ? 'U' : ($BITS ? '^' : ' '));
 
+my $PROGRESS_CHUNK_BYTES = 1024 * 1024;
+my $PROGRESS_MIN_SECS    = 0.25;
 
 	## Read from STDIN (-) if no files listed on command line
 
@@ -218,11 +272,68 @@ sub sumfile {
 	my $file = shift;
 
 	my $mode = $binary ? 'b' : ($UNIVERSAL ? 'U' : ($BITS ? '0' : ''));
-	my $digest = eval { Digest::SHA->new($alg)->addfile($file, $mode) };
-	if ($@) { warn "shasum: $file: $errmsg\n"; return }
-	$digest->hexdigest;
-}
 
+	# Normal fast path: preserve existing behavior exactly
+	if (!$progress) {
+		my $digest = eval { Digest::SHA->new($alg)->addfile($file, $mode) };
+		if ($@) { warn "shasum: $file: $errmsg\n"; return }
+		return $digest->hexdigest;
+	}
+
+	# Progress-enabled path
+	local *FH;
+	my $label = ($file eq '-') ? 'stdin' : $file;
+
+	if ($file eq '-') {
+		open(FH, '< -') or do { warn "shasum: $file: $!\n"; return };
+	}
+	else {
+		sysopen(FH, $file, O_RDONLY) or do { warn "shasum: $file: $!\n"; return };
+	}
+
+	# Preserve binary-mode behavior when requested.
+	binmode(FH) if $binary;
+
+	my $sha   = Digest::SHA->new($alg);
+	my $total = (-f FH) ? -s FH : undef;
+	my $done  = 0;
+	my $t0    = time();
+	my $last  = 0;
+	my $buf   = '';
+
+	while (1) {
+		my $n = read(FH, $buf, $PROGRESS_CHUNK_BYTES);
+		if (!defined $n) {
+			warn "shasum: $file: $!\n";
+			return;
+		}
+		last if $n == 0;
+
+		$sha->add($buf);
+		$done += $n;
+
+		my $now = time();
+		if (($now - $last) >= $PROGRESS_MIN_SECS) {
+			_progress_emit(
+				label => $label,
+				done  => $done,
+				total => $total,
+				t0    => $t0,
+			);
+			$last = $now;
+		}
+	}
+
+	_progress_emit(
+		label => $label,
+		done  => $done,
+		total => $total,
+		t0    => $t0,
+	);
+	print STDERR "\n";
+
+	return $sha->hexdigest;
+}
 
 	## %len2alg: maps hex digest length to SHA algorithm
 
@@ -317,6 +428,62 @@ sub verify {
 	return($err == 0);
 }
 
+	## _human_size: format a byte count using human-readable units
+
+sub _human_size {
+	my ($n) = @_;
+	$n = 0 unless defined $n && $n =~ /^\d+(?:\.\d+)?$/;
+	return sprintf("%.1fG", $n / (1024**3)) if $n >= 1024**3;
+	return sprintf("%.1fM", $n / (1024**2)) if $n >= 1024**2;
+	return sprintf("%.1fK", $n / 1024)			if $n >= 1024;
+	return "${n}B";
+}
+
+	## _fmt_eta: format a remaining time in seconds as HH:MM:SS or MM:SS
+
+sub _fmt_eta {
+	my ($secs) = @_;
+	$secs = 0 if !defined($secs) || $secs < 0;
+	my $h = int($secs / 3600);
+	my $m = int(($secs % 3600) / 60);
+	my $s = int($secs % 60);
+	return $h ? sprintf("%d:%02d:%02d", $h, $m, $s)
+						: sprintf("%02d:%02d", $m, $s);
+}
+
+	## _progress_emit: write one progress update line to STDERR
+
+sub _progress_emit {
+	my (%args) = @_;
+	my $label	 = $args{label};
+	my $done	 = $args{done};
+	my $total	 = $args{total};
+	my $t0		 = $args{t0};
+
+	my $elapsed = time() - $t0;
+	$elapsed = 0.001 if $elapsed <= 0;
+	my $rate = $done / $elapsed;
+
+	if (defined $total && $total > 0) {
+			my $pct = int(($done * 100) / $total);
+			$pct = 100 if $pct > 100;
+			my $remain = $total - $done;
+			$remain = 0 if $remain < 0;
+			my $eta = $rate > 0 ? _fmt_eta($remain / $rate) : "--:--";
+			printf STDERR "\r%-24s %7s/%-7s %3d%% %7s/s ETA %s",
+				$label,
+				_human_size($done),
+				_human_size($total),
+				$pct,
+				_human_size($rate),
+				$eta;
+	} else {
+			printf STDERR "\r%-24s %7s %7s/s",
+				$label,
+				_human_size($done),
+				_human_size($rate);
+	}
+}
 
 	## Verify or compute SHA checksums of requested files
 
