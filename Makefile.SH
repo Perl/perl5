@@ -1703,6 +1703,12 @@ test_reonly test-reonly: test_prep_reonly
 test_porting test-porting: test_prep
 	TEST_ARGS='porting/*.t lib/diagnostics.t' TESTFILE=harness $(RUN_TESTS) choose
 
+NON_PORTING_TESTS = 'base/*.t comp/*.t run/*.t cmd/*.t io/*.t re/*.t opbasic/*.t op/*.t op/hook/*.t uni/*.t mro/*.t lib/*.t class/*.t perf/*.t test_pl/*.t'
+
+test_non_porting test-non-porting: test_prep
+	TEST_ARGS=$(NON_PORTING_TESTS) TESTFILE=harness $(RUN_TESTS) choose
+
+
 !NO!SUBS!
 
 $spitshell>>$Makefile <<!GROK!THIS!
