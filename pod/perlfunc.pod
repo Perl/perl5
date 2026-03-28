@@ -10414,6 +10414,9 @@ If the specified Perl version is 5.39.0 or higher, builtin functions are
 imported lexically as with L<C<use builtin>|builtin> with a corresponding
 version bundle.
 
+If the specified Perl version is v5.41.0 or higher,
+L<S<C<use source::encoding 'ascii'>>|source::encoding> is enabled lexically.
+
 Use of C<use VERSION> while another is in effect is not allowed with a
 C<use v5.39;> or greater version.  For lower versions, C<use VERSION> will
 override most behavior of a previous C<use VERSION>, possibly removing
