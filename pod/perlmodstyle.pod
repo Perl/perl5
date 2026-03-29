@@ -542,11 +542,35 @@ DESCRIPTION
 =item *
 
 One or more sections or subsections giving greater detail of available
-methods and routines and any other relevant information.
+methods and routines and any other relevant information.  For example,
+
+=over 4
 
 =item *
 
-BUGS/CAVEATS/etc
+EXPORTS
+
+=item *
+
+METHODS
+
+=back
+
+=item *
+
+SECURITY CONSIDERATIONS
+
+=item *
+
+KNOWN ISSUES/CAVEATS/LIMITATIONS
+
+=item *
+
+SOURCE
+
+=item *
+
+SUPPORT/REPORTING ISSUES/BUGS
 
 =item *
 
@@ -805,4 +829,3 @@ authors.
 =head1 AUTHOR
 
 Kirrily "Skud" Robert <skud@cpan.org>
-
