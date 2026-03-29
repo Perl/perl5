@@ -2605,8 +2605,7 @@ Adp	|OP *	|op_append_list |I32 optype				\
 				|NULLOK OP *first			\
 				|NULLOK OP *last
 Adp	|OPclass|op_class	|NULLOK const OP *o
-: FIXME. Used by Data::Alias
-EXp	|void	|op_clear	|NN OP *o
+Ap	|void	|op_clear	|NN OP *o
 Adp	|OP *	|op_contextualize					\
 				|NN OP *o				\
 				|I32 context

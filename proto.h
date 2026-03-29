@@ -4145,6 +4145,10 @@ Perl_op_class(pTHX_ const OP *o)
         Perl_attribute_nonnull_aTHX;
 #define PERL_ARGS_ASSERT_OP_CLASS
 
+PERL_CALLCONV void
+Perl_op_clear(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_CLEAR               \
         assert(o)
 
@@ -7772,10 +7776,6 @@ Perl_new_warnings_bitfield(pTHX_ char *buffer, const char * const bits, STRLEN s
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
-PERL_CALLCONV void
-Perl_op_clear(pTHX_ OP *o)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
 PERL_CALLCONV char *
 Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **failure_details, U32 flags)
         Perl_attribute_nonnull_aTHX
