@@ -89,6 +89,16 @@ L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.
   they emerge, surprised for a moment by how hot they are to touch.
     'This is ultra fine,' says Joe. 'It goes into Wotsits.'
 
+=head2 v5.42.2 - Edgar Allan Poe, "The Pit and the Pendulum" (in "Tales of Mystery and Imagination")
+
+L<Announced on 2026-03-29 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270839.html>
+
+I had swooned; but still will not say that all of consciousness was
+lost.  What of it there remained I will not attempt to define, or even
+to describe; yet all was not lost.  In the deepest slumber--no!  In
+delirium--no!  In a swoon--no!  In death--no! even in the grave all is
+not lost.  Else there is no immortality for man.
+
 =head2 v5.42.2-RC1 - Edgar Allan Poe, "The Murders in the Rue Morgue" (in "Tales of Mystery and Imagination")
 
 L<Announced on 2026-03-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270828.html>
@@ -266,6 +276,17 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   We find that in research a certain amount of intelligent ignorance
   is essential to progress; for, if you know too much, you won't try
   the thing.
+
+=head2 v5.40.4 - Edgar Allan Poe, "The Masque of the Red Death" (in "Tales of Mystery and Imagination")
+
+L<Announced on 2026-03-29 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270838.html>
+
+In an assembly of phantasms such as I have painted, it may well be
+supposed that no ordinary appearance could have excited such sensation.
+In truth the masquerade licence of the night was nearly unlimited; but
+the figure in question had out-Heroded Herod, and gone beyond the bounds
+of even the prince's infinite decorum.  There are chords in the hearts
+of the most reckless which cannot be touched without emotion.
 
 =head2 v5.40.4-RC1 - Edgar Allan Poe, "The Fall of the House of Usher" (in "Tales of Mystery and Imagination")
 
