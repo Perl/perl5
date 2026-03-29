@@ -592,6 +592,8 @@ method's subroutine.  This makes it easier to keep the documentation up
 to date, and avoids having to document each piece of code twice (once in
 POD and once in comments).
 
+The sections are described in more detail in L<perlpodstyle>.
+
 =head2 README, INSTALL, release notes, changelogs
 
 Your module should also include a F<README> file describing the module
