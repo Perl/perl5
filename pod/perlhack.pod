@@ -68,7 +68,38 @@ Committing your work will save the change I<on your local system>:
 Make sure the commit message describes your change in a single
 sentence.  For example, "Fixed spelling errors in perlhack.pod".
 
-=item * Send your change to the Perl issue tracker
+=item * Add your name to the Perl contributors list
+
+We keep a list of all people who have contributed to Perl, as well as
+the Git commit history.  The default is to show our gratitude by
+publicly listing their names and email addresses in the file named
+AUTHORS, which is part of the perl distribution.  But some people choose
+to instead remain anonymous.
+
+If you have already contributed, you can skip this step, unless you want
+to update your records with, say, a new email address.  Run
+
+ perldoc Porting/updateAUTHORS.pl
+
+to see the possibilities.
+
+If you've never contributed, run one of the following:
+
+=over
+
+=item * If you want to be publicly credited
+
+ perl Porting/updateAUTHORS.pl
+
+=item * If you want to remain anonymous
+
+ perl Porting/updateAUTHORS.pl --exclude-me
+
+=back
+
+Then commit the change.
+
+=item * Send your changes to the Perl issue tracker
 
 The next step is to submit your patch to the Perl core ticket system.
 
@@ -85,7 +116,8 @@ HTTPS URLs"|https://docs.github.com/en/free-pro-team@latest/github/using-git/whi
 
   % git remote add fork https://github.com/MyUser/perl5.git
 
-Then, push your new branch to your fork.
+Now, you are ready to submit your work.  To do this, push your new
+branch to your fork.
 
   % git push -u fork mychange
 
@@ -97,16 +129,6 @@ L<https://help.github.com/en/articles/creating-a-pull-request-from-a-fork>.
 
 The porters appreciate the time you spent helping to make Perl better.
 Thank you!
-
-=item * Acknowledgement
-
-All contributors are credited (by name and email address) in the
-AUTHORS file, which is part of the perl distribution, as well as the
-Git commit history.
-
-If you don’t want to be included in the AUTHORS file, just let us
-know. Otherwise we will take your submission of a patch as permission
-to credit you in the AUTHORS file.
 
 =item * Next time
 
