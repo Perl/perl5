@@ -594,37 +594,27 @@ POD and once in comments).
 
 =head2 README, INSTALL, release notes, changelogs
 
-Your module should also include a README file describing the module and
+Your module should also include a F<README> file describing the module
+and any requirements (including external libraries or files), and
 giving pointers to further information (website, author email).
 
-An INSTALL file should be included, and should contain simple installation
-instructions.  When using ExtUtils::MakeMaker this will usually be:
+The F<README> should be a plain text file or markdown (F<README.md>) file.
 
-=over 4
+Installation instructions should be included, either as a section in F<README>
+or as a separate F<INSTALL> file. It should contain simple installation
+instructions.  When using L<ExtUtils::MakeMaker> this will usually be:
 
-=item perl Makefile.PL
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-=item make
+When using L<Module::Build>, this will usually be:
 
-=item make test
-
-=item make install
-
-=back
-
-When using Module::Build, this will usually be:
-
-=over 4
-
-=item perl Build.PL
-
-=item perl Build
-
-=item perl Build test
-
-=item perl Build install
-
-=back
+    perl Build.PL
+    perl Build
+    perl Build test
+    perl Build install
 
 Release notes or changelogs should be produced for each release of your
 software describing user-visible changes to your module, in terms
