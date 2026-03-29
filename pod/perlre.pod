@@ -974,7 +974,7 @@ will never match, as the C<a++> will gobble up all the C<"a">'s in the
 string and won't leave any for the remaining part of the pattern. This
 feature can be extremely useful to give perl hints about where it
 shouldn't backtrack. For instance, the typical "match a double-quoted
-string" problem can be most efficiently performed when written as:
+string" problem can be written as:
 
    /"(?:[^"\\]++|\\.)*+"/
 
@@ -984,7 +984,14 @@ C<L</(?E<gt>I<pattern>)>> for more details;
 possessive quantifiers are just syntactic sugar for that construct. For
 instance the above example could also be written as follows:
 
-   /"(?>(?:(?>[^"\\]+)|\\.)*)"/
+   / " (?> (?: (?> [^"\\]+ ) | \\. )* ) " /x
+
+This example is not the most efficient possible, as it effectively
+loops with alternation inside the loop.  It can be rewritten as:
+
+   / " [^"\\]*+ (?: \\(?s: .) [^"\\]*+ )*+ " /x
+
+which is "unrolled", and has better performance.
 
 Note that the possessive quantifier modifier can not be combined
 with the non-greedy modifier. This is because it would make no sense.
