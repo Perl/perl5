@@ -221,6 +221,9 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         my $cur_result = setlocale($category, $locale);
         return unless defined $cur_result;
 
+        # Use filename not return value to survive trip through LC_* environment variables
+        $cur_result = $locale if $^O eq 'VMS';
+
         no locale;
 
         if (   $gathering_platform_locales
