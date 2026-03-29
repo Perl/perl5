@@ -682,7 +682,7 @@ SKIP: {   # GH #20085
     skip "didn't find a suitable UTF-8 locale", 1
                                             unless $utf8_ref && $utf8_ref->@*;
     local $ENV{LC_CTYPE} = $utf8_ref->[0];
-    local $ENV{LC_ALL} = undef;
+    delete local $ENV{LC_ALL};
     fresh_perl_is(<<~'EOF', "ok\n", {}, "check that setlocale overrides startup");
         use POSIX;
 
