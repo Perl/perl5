@@ -11,7 +11,7 @@ overload::import('overload',
     fallback => 1,
 );
 
-our $VERSION = '4.16';
+our $VERSION = '4.18';
 
 1;
 

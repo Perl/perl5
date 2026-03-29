@@ -725,7 +725,8 @@ our %Modules = (
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.16.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.18.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Mar 29 09:04:16 2026',
         'FILES'        => q[cpan/JSON-PP],
     },
 
