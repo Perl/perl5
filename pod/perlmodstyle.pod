@@ -627,6 +627,57 @@ Unless you have good reasons for using some other format
 the convention is to name your changelog file C<Changes>,
 and to follow the simple format described in L<CPAN::Changes::Spec>.
 
+=head2 Community Health Documents
+
+You may want to add additional documents to your distribution.
+
+=over 4
+
+=item F<LICENSE>
+
+This contains the full text of the license.
+
+=item F<SECURITY.md>
+
+This is a security policy that tells users how to report a security
+vulnerability, and how you will handle such reports.  See the CPAN
+L<Guidelines for Adding a Security Policy to Perl Distributions|https://security.metacpan.org/docs/guides/security-policy-for-authors.html> for more information.
+
+=item F<AI_POLICY.md>
+
+This outlines your policy on using AI/LLM tools for your distribution.
+Is AI used to identify bugs? Is AI used to fix bugs and add new features?
+Can AI tools make changes to code automatically without human interaction?
+
+=item F<CONTRIBUTING.md>
+
+This describes how users can participate in development and contribute
+issues or code changes.
+
+=item F<CODE_OF_CONDUCT.md>
+
+This document describes standards of behaviour of maintainers, conteributors and other community members of the project.
+This is often used for larger projects or projects with a large community of users.
+
+=item F<FUNDING.md>
+
+This is used to identify sponsors of projects, and to indicate how the
+project can be supported financially.
+
+=item F<GOVERNANCE.md>
+
+This will describe how the project is run, the different roles of
+people in the project, and how decisions are made.
+
+=item F<SUPPORT.md>
+
+This will describe how users can get support for a project. It
+indicates what aspects of the project you support (e.g. what Perl
+versions and releases), and where people can find help (forums, IRC
+channels, etc.)
+
+=back
+
 =head1 RELEASE CONSIDERATIONS
 
 =head2 Version numbering
