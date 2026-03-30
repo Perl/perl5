@@ -958,7 +958,8 @@ Perl_re_intuit_start(pTHX_
     char *check_at = NULL;		/* check substr found at this pos */
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
-    regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
+    /* create some info to pass to find_byclass */
+    regmatch_info reginfo_buf __attribute__uninitialized__;
     regmatch_info *const reginfo = &reginfo_buf;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -1009,6 +1010,9 @@ Perl_re_intuit_start(pTHX_
     reginfo->intuit = 1;
     /* not actually used within intuit, but zero for safety anyway */
     reginfo->poscache_maxiter = 0;
+    reginfo->prog = NULL;
+    reginfo->sv = NULL;
+    reginfo->warned = false;
 
     if (utf8_target) {
         if ((!prog->anchored_utf8 && prog->anchored_substr)
@@ -3719,7 +3723,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
-    regmatch_info reginfo_buf;  /* create some info to pass to regtry etc */
+    /* create some info to pass to regtry etc */
+    regmatch_info reginfo_buf __attribute__uninitialized__;
     regmatch_info *const reginfo = &reginfo_buf;
     regexp_paren_pair *swap = NULL;
     I32 oldsave;
@@ -3876,6 +3881,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     /* see how far we have to get to not match where we matched before */
     reginfo->till = stringarg + minend;
+
+    /* zero for safety */
+    reginfo->info_aux = NULL;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
