@@ -4689,6 +4689,9 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 #define PERL_ARGS_ASSERT_PV_UNI_DISPLAY         \
         assert(dsv); assert(spv)
 
+PERL_CALLCONV void
+Perl_qerror(pTHX_ SV *err)
+        Perl_attribute_nonnull_aTHX;
 #define PERL_ARGS_ASSERT_QERROR
 
 PERL_CALLCONV char *
@@ -7781,9 +7784,6 @@ Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **fa
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
-PERL_CALLCONV void
-Perl_qerror(pTHX_ SV *err)
-        Perl_attribute_nonnull_aTHX;
 PERL_CALLCONV SV *
 Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
         Perl_attribute_nonnull_aTHX
