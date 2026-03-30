@@ -1100,6 +1100,16 @@ void S_op_clear_gv(pTHX_ OP *o, SV**svp)
     }
 }
 
+/*
+=for apidoc op_clear
+
+Clean up anything allocated for an OP, except the OP itself.
+
+You may want to use L<C<op_null()>|/op_null> or
+L<C<op_free()>|/op_free> instead.
+
+=cut
+*/
 
 void
 Perl_op_clear(pTHX_ OP *o)
