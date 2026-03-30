@@ -2850,9 +2850,7 @@ Adp	|char * |pv_uni_display |NN SV *dsv				\
 				|STRLEN len				\
 				|STRLEN pvlim				\
 				|UV flags
-: FIXME - either make it public, or stop exporting it. (Data::Alias uses this)
-: Used in gv.c, op.c, toke.c
-EXp	|void	|qerror 	|NULLOK SV *err
+Ap	|void	|qerror 	|NULLOK SV *err
 Adp	|char * |rcpv_copy	|NULLOK char * const pv
 Adp	|char * |rcpv_free	|NULLOK char * const pv
 Aadp	|char * |rcpv_new	|NULLOK const char * const pv		\
