@@ -5042,6 +5042,13 @@ S_intuit_more(pTHX_ char *s, char *e,
            */
 
           case '\\':
+
+            if (s[1] == '\\') {
+                /* Escaped backslash is treated as a single literal */
+                s++;
+                break;
+            }
+
             if (s[1] == '\0') {
                 /* \ followed by NUL strongly indicates character class */
                 weight += 100;
@@ -5056,8 +5063,6 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * late in the development cycle that we didn't want to
                  * possibly break anything, so this is commented out to retain
                  * previous (unintended) behavior */
-                seen[(U8) '\\']++;
-                s++;
                 break;
             }
 
