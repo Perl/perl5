@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1300;  # Update this when adding/deleting tests.
+plan tests => 1301;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2683,6 +2683,14 @@ PROG
     {   # GH 16894 Fixed by acababb42be12ff2986b73c1bfa963b70bb5d54e
         "abab" =~ /(?:[^b]*(?=(b)|(a))ab)*/;
         is($1, undef, "GH #16894");
+    }
+
+    {   # GH #24336
+        fresh_perl_is(<<~'PROG', "", {}, "Parses ambiguous array vs subscript correctly");
+            my $foo = "whatever";
+            $foo =~ s{^$foo[/\\]?}{};
+            print $foo, "\n";
+            PROG
     }
 
 } # End of sub run_tests
