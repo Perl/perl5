@@ -707,7 +707,8 @@ PP(pp_multiconcat)
         *svpv_p,             /* ptr for looping through svpv_buf */
         *svpv_base,          /* first slot (may be greater than svpv_buf), */
         *svpv_end,           /* and slot after highest result so far, of: */
-        svpv_buf[PERL_MULTICONCAT_MAXARG]; /* buf for storing SvPV() results */
+        /* buf for storing SvPV() results */
+        svpv_buf[PERL_MULTICONCAT_MAXARG] __attribute__uninitialized__;
 
     aux   = cUNOP_AUXx(PL_op)->op_aux;
     stack_adj = nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
