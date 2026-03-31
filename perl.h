@@ -425,6 +425,9 @@ Now a no-op.
 #  if PERL_GCC_VERSION_GE(3,3,0)
 #    define HASATTRIBUTE_VISIBILITY
 #  endif
+#  if PERL_GCC_VERSION_GE(12,0,0)
+#    define HASATTRIBUTE_UNINITIALIZED
+#  endif
 #endif
 
 #ifdef HASATTRIBUTE_DEPRECATED
@@ -465,6 +468,9 @@ Now a no-op.
  */
 #  define __attribute__visibility__(x) __attribute__((visibility(x)))
 #endif
+#ifdef HASATTRIBUTE_UNINITIALIZED
+#  define __attribute__uninitialized__ __attribute__((uninitialized))
+#endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
 #ifndef __attribute__deprecated__
@@ -496,6 +502,9 @@ Now a no-op.
 #endif
 #ifndef __attribute__visibility__
 #  define __attribute__visibility__(x)
+#endif
+#ifndef __attribute__uninitialized__
+#  define __attribute__uninitialized__
 #endif
 
 /* Some OS warn on NULL format to printf */

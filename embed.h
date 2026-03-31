@@ -28,6 +28,7 @@
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
 #   undef do_aexec
+#   undef HASATTRIBUTE_UNINITIALIZED
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
