@@ -25,9 +25,9 @@ uint64_to_NV(U64 num)
     /* NV can be have different significant bits depending on how perl
        is configured, so just let the appropriate ldexp do the work
     */
-    NV ret   = Perl_ldexp((NV)num, -64);
+    NV ret = Perl_ldexp((NV)num, -64);
 
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U2D: %lu => %0.15f\n", num, ret));*/
+    //DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U642NV: %20lu => %0.15f\n", num, ret));
 
     return ret;
 }
@@ -56,13 +56,14 @@ void
 Perl_pcg64_seed_r(pcg64_random_t *state, U64 seed)
 {
     PERL_ARGS_ASSERT_PCG64_SEED_R;
+
     U64 seed1 = splitmix64(&seed);
     U64 seed2 = splitmix64(&seed1);
 
     state->state = seed1;
     state->inc   = seed2;
 
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 INIT: %lu => %lu / %lu\n", seed, prng.state, prng.inc));*/
+    //DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 Seed : %20lu => %20lu / %20lu\n", seed, state->state, state->inc));
 }
 
 static U64
@@ -78,19 +79,22 @@ Perl_pcg64_random_NV_r(pcg64_random_t *state)
 {
     PERL_ARGS_ASSERT_PCG64_RANDOM_NV_R;
 
-    U64 num    = pcg64_rand64_r(state);
-    NV ret = uint64_to_NV(num);
+    U64 num = pcg64_rand64_r(state);
+    NV ret  = uint64_to_NV(num);
 
-    /*DEBUG_U(PerlIO_printf(Perl_error_log, "PCG Double: %0.15" NVff "\n", ret));*/
+    //DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 Doubl: %20lu => %0.15" NVff "\n", num, ret));
 
     return ret;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 U64
 Perl_seed(pTHX)
 {
     PERL_ARGS_ASSERT_SEED;
-    
+
    /*
     * Attempt to read from /dev/urandom to generate a pseudo-random number.
     * If that does not work, or it is unavailable, we fall back to gathering
@@ -165,4 +169,3 @@ Perl_seed(pTHX)
 
     return ret;
 }
-
