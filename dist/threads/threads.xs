@@ -773,8 +773,6 @@ S_SV_to_ithread(pTHX_ SV *sv)
 
 /* threads->create()
  * Called in context of parent thread.
- * Called with my_pool->create_destruct_mutex locked.
- * (Unlocked both on error and on success.)
  */
 static ithread *
 S_ithread_create(
@@ -786,7 +784,6 @@ S_ithread_create(
         int       exit_opt,
         int       params_start,
         int       num_params)
-  PERL_TSA_RELEASE(my_pool->create_destruct_mutex)
 {
     dTHXa(parent_perl);
     ithread     *thread;
@@ -803,6 +800,8 @@ S_ithread_create(
     int          create_err   = 0;
 #endif
 
+    MUTEX_LOCK(&my_pool->create_destruct_mutex);
+
     /* Allocate thread structure in context of the main thread's interpreter */
     {
         PERL_SET_CONTEXT(my_pool->main_thread.interp);
@@ -810,8 +809,6 @@ S_ithread_create(
     }
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
-        /* This lock was acquired in ithread_create()
-         * prior to calling S_ithread_create(). */
         MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         {
           int fd = PerlIO_fileno(Perl_error_log);
@@ -1051,8 +1048,6 @@ S_ithread_create(
     if (setstack_err || create_err) {
 #endif
         /* Must unlock mutex for destruct call */
-        /* This lock was acquired in ithread_create()
-         * prior to calling S_ithread_create(). */
         MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
@@ -1205,7 +1200,6 @@ ithread_create(...)
         }
 
         /* Create thread */
-        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         thread = S_ithread_create(aTHX_ &MY_POOL,
                                         function_to_call,
                                         stack_size,
