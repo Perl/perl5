@@ -574,10 +574,12 @@ S_ithread_run(void * arg)
     /* The following mutex lock + mutex unlock pair explained.
      *
      * parent:
-     * - calls ithread_create (and S_ithread_create), which:
-     *   - creates the new thread
+     * - calls ithread_create(),
+     *   which calls pthread_create(..., S_ithread_run,...), which
+     *   - creates the new thread structure
      *   - does MUTEX_LOCK(&thread->mutex)
-     *   - calls pthread_create(..., S_ithread_run,...)
+     *   - clones the interpreter;
+     *   - creates an OS thread to run S_ithread_run()
      * child:
      * - starts the S_ithread_run (where we are now), which:
      *   - tries to MUTEX_LOCK(&thread->mutex)
@@ -1071,6 +1073,10 @@ S_ithread_create(
     my_pool->total_threads++;
     my_pool->running_threads++;
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
+
+    /* Let thread run. */
+    /* See S_ithread_run() for more detail. */
+    MUTEX_UNLOCK(&thread->mutex);
     return (thread);
 
     CLANG_DIAG_IGNORE(-Wthread-safety)
@@ -1213,12 +1219,6 @@ ithread_create(...)
         PERL_SRAND_OVERRIDE_NEXT_PARENT();
         RETVAL = S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE);
 
-        /* Let thread run. */
-        /* See S_ithread_run() for more detail. */
-        CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
-        /* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
-        MUTEX_UNLOCK(&thread->mutex);
-        CLANG_DIAG_RESTORE_STMT;
     OUTPUT: RETVAL
 
 
