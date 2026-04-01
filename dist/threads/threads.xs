@@ -1120,12 +1120,13 @@ ithread_create(...)
 
         if (sv_isobject(ST(0))) {
             /* $thr->create() */
+            ithread *parent_thread;
             classname = HvNAME(SvSTASH(SvRV(ST(0))));
-            thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
-            MUTEX_LOCK(&thread->mutex);
-            stack_size = thread->stack_size;
-            exit_opt = thread->state & PERL_ITHR_THREAD_EXIT_ONLY;
-            MUTEX_UNLOCK(&thread->mutex);
+            parent_thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+            MUTEX_LOCK(&parent_thread->mutex);
+            stack_size = parent_thread->stack_size;
+            exit_opt = parent_thread->state & PERL_ITHR_THREAD_EXIT_ONLY;
+            MUTEX_UNLOCK(&parent_thread->mutex);
         } else {
             /* threads->create() */
             classname = (char *)SvPV_nolen(ST(0));
