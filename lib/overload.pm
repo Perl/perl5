@@ -1,9 +1,7 @@
-package overload;
+package overload 1.41;
 
-use strict;
+use v5.42;
 no strict 'refs';
-
-our $VERSION = '1.40';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -99,7 +97,6 @@ sub OverloadedStringify {
 sub Method {
     my $package = shift;
     if (ref $package) {
-        no warnings 'experimental::builtin';
         $package = builtin::blessed($package);
         return undef if !defined $package;
     }
