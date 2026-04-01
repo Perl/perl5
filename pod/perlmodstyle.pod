@@ -601,6 +601,9 @@ and any requirements (including external libraries or files), and
 giving pointers to further information (website, author email).
 
 The F<README> should be a plain text file or markdown (F<README.md>) file.
+Note that files like F<README.pod> should not be included in the
+distribution, as they may confuse tools that interpret it as module
+documentation, including the installer.
 
 Installation instructions should be included, either as a section in F<README>
 or as a separate F<INSTALL> file. It should contain simple installation
