@@ -25,7 +25,8 @@ uint64_to_NV(U64 num)
     /* NV can be have different significant bits depending on how perl
        is configured, so just let the appropriate ldexp do the work
     */
-    NV ret = Perl_ldexp((NV)num, -64);
+	num    = num >> 11;
+    NV ret = Perl_ldexp((NV)num, -53);
 
     //DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U642NV: %20lu => %0.15f\n", num, ret));
 
