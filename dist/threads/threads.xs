@@ -308,13 +308,16 @@ S_ithread_free(pTHX_ ithread *thread)
     assert(thread->tid != 0);
 
     /* Remove from circular list of threads */
-    MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-    assert(thread->prev && thread->next);
-    thread->next->prev = thread->prev;
-    thread->prev->next = thread->next;
-    thread->next = NULL;
-    thread->prev = NULL;
-    MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+    if (thread->next) {
+        /* the thread won't yet be in the list if we failed while
+         * creating the thread and are now just cleaning up */
+        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+        thread->next->prev = thread->prev;
+        thread->prev->next = thread->next;
+        thread->next = NULL;
+        thread->prev = NULL;
+        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+    }
 
     /* Thread is now disowned */
     MUTEX_LOCK(&thread->mutex);
@@ -822,13 +825,6 @@ S_ithread_create(
     }
     Zero(thread, 1, ithread);
 
-    /* Add to threads list */
-    thread->next = &my_pool->main_thread;
-    thread->prev = my_pool->main_thread.prev;
-    my_pool->main_thread.prev = thread;
-    thread->prev->next = thread;
-    my_pool->total_threads++;
-
     /* 1 ref to be held by the local var 'thread' in S_ithread_run().
      * 1 ref to be held by the threads object that we assume we will
      *      be embedded in upon our return.
@@ -1072,6 +1068,12 @@ S_ithread_create(
         return NULL;
     }
 
+    /* Add to threads list */
+    thread->next = &my_pool->main_thread;
+    thread->prev = my_pool->main_thread.prev;
+    my_pool->main_thread.prev = thread;
+    thread->prev->next = thread;
+    my_pool->total_threads++;
     my_pool->running_threads++;
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
