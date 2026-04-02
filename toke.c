@@ -4537,7 +4537,7 @@ S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 
     char save_sigil = s[0];
     s[0] = sigil;
-    PADOFFSET slot = pad_findmy_pv(s, 0);
+    PADOFFSET slot = pad_findmy_pvn(s, len, 0);
     s[0] = save_sigil;
 
     return   slot != NOT_IN_PAD
