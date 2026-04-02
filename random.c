@@ -22,11 +22,9 @@
 static NV
 uint64_to_NV(U64 num)
 {
-    /* NV can be have different significant bits depending on how perl
-       is configured, so just let the appropriate ldexp do the work
-    */
-	num    = num >> 11;
-    NV ret = Perl_ldexp((NV)num, -53);
+    const uint64_t mantissa = num >> 11;              // Most significant 53 bits
+    const double scale      = 1.0 / 9007199254740992; // 1 / 2^53
+    const NV ret            = mantissa * scale;
 
     //DEBUG_U(PerlIO_printf(Perl_error_log, "PRNG U642NV: %20lu => %0.15f\n", num, ret));
 
