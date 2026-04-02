@@ -802,16 +802,17 @@ S_ithread_create(
     int          create_err   = 0;
 #endif
 
-    MUTEX_LOCK(&my_pool->create_destruct_mutex);
 
     /* Allocate thread structure in context of the main thread's interpreter */
     {
+        MUTEX_LOCK(&my_pool->create_destruct_mutex);
         PERL_SET_CONTEXT(my_pool->main_thread.interp);
         thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
+        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     }
+
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
-        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         {
           int fd = PerlIO_fileno(Perl_error_log);
           if (fd >= 0) {
@@ -838,7 +839,9 @@ S_ithread_create(
     MUTEX_INIT(&thread->mutex);
     MUTEX_LOCK(&thread->mutex); /* See S_ithread_run() for more detail. */
 
+    MUTEX_LOCK(&my_pool->create_destruct_mutex);
     thread->tid = my_pool->tid_counter++;
+    MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     thread->stack_size = S_good_stack_size(aTHX_ stack_size);
     thread->gimme = gimme;
     thread->state = exit_opt;
@@ -1049,8 +1052,6 @@ S_ithread_create(
 #else
     if (setstack_err || create_err) {
 #endif
-        /* Must unlock mutex for destruct call */
-        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
@@ -1066,6 +1067,8 @@ S_ithread_create(
     }
 
     /* Add to threads list */
+
+    MUTEX_LOCK(&my_pool->create_destruct_mutex);
     thread->next = &my_pool->main_thread;
     thread->prev = my_pool->main_thread.prev;
     my_pool->main_thread.prev = thread;
