@@ -4657,7 +4657,9 @@ S_intuit_more(pTHX_ char *s, char *e,
      * variables, so in that case it MUST be a character class.)  If the
      * situation is reversed, it is more likely to be (or must be) a
      * subscript.  */
-    if (caller_context == FROM_DOLLAR) {
+    if (   caller_context == FROM_DOLLAR
+        || (caller_context == FROM_INTERDEPENDMAYBE && caller_s[0] == '$'))
+    {
         assert (caller_s);
 
         /* See if there is a known scalar for the input identifier */
@@ -10317,7 +10319,8 @@ Perl_yylex(pTHX)
         return yylex();
 
     case LEX_INTERPENDMAYBE:
-        if (intuit_more(PL_bufptr, PL_bufend, FROM_INTERDEPENDMAYBE, NULL, 0))
+        if (intuit_more(PL_bufptr, PL_bufend, FROM_INTERDEPENDMAYBE,
+                        PL_oldbufptr, PL_bufptr - PL_oldbufptr))
         {
             PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
             break;
