@@ -796,8 +796,8 @@ S_ithread_create(
     IV           tmps_ix  = PL_tmps_ix;
 #endif
 #ifndef WIN32
-    int          rc_stack_size = 0;
-    int          rc_thread_create = 0;
+    int          setstack_err = 0;
+    int          create_err   = 0;
 #endif
 
     /* Allocate thread structure in context of the main thread's interpreter */
@@ -1002,14 +1002,14 @@ S_ithread_create(
 #  ifdef _POSIX_THREAD_ATTR_STACKSIZE
         /* Set thread's stack size */
         if (thread->stack_size > 0) {
-            rc_stack_size = pthread_attr_setstacksize(&attr, (size_t)thread->stack_size);
+            setstack_err = pthread_attr_setstacksize(&attr, (size_t)thread->stack_size);
         }
 #  endif
 
         /* Create the thread */
-        if (! rc_stack_size) {
+        if (!setstack_err) {
 #  ifdef OLD_PTHREADS_API
-            rc_thread_create = pthread_create(&thread->thr,
+            create_err   = pthread_create(&thread->thr,
                                               attr,
                                               S_ithread_run,
                                               (void *)thread);
@@ -1017,7 +1017,7 @@ S_ithread_create(
 #    if defined(HAS_PTHREAD_ATTR_SETSCOPE) && defined(PTHREAD_SCOPE_SYSTEM)
             pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
 #    endif
-            rc_thread_create = pthread_create(&thread->thr,
+            create_err   = pthread_create(&thread->thr,
                                               &attr,
                                               S_ithread_run,
                                               (void *)thread);
@@ -1052,7 +1052,7 @@ S_ithread_create(
 #ifdef WIN32
     if (thread->handle == NULL) {
 #else
-    if (rc_stack_size || rc_thread_create) {
+    if (setstack_err || create_err) {
 #endif
         /* Must unlock mutex for destruct call */
         /* This lock was acquired in ithread_create()
@@ -1062,10 +1062,10 @@ S_ithread_create(
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
-            if (rc_stack_size) {
-                Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", thread->stack_size, rc_stack_size);
+            if (setstack_err) {
+                Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", thread->stack_size, setstack_err);
             } else {
-                Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", rc_thread_create);
+                Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", create_err);
             }
         }
 #endif
