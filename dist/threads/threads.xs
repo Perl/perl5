@@ -1427,10 +1427,17 @@ ithread_join(...)
 #endif
         }
 
-        /* If thread didn't die, then we can free its interpreter */
+        /* Free the interpreter now, unless there was an error and
+         * $@ needs to be kept for a later $thr->error() call.
+         */
         if (! (thread->state & PERL_ITHR_DIED)) {
             S_ithread_clear(aTHX_ thread);
         }
+        /* Decrement the thread's ref count. The thread will likely live
+         * on for now and be freed later, when it will do a second call
+         * to S_ithread_clear() which will notice that the interpreter
+         * has already been freed, and so not do much further cleanup.
+         */
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
         /* If no return values, then just return */
@@ -1493,14 +1500,21 @@ ithread_detach(...)
                                 : "Cannot detach a joined thread");
         }
 
-        /* If thread is finished and didn't die,
-         * then we can free its interpreter */
+        /* If the interpreter is finished with, free it now, unless there
+         * was an error and $@ needs to be kept for a later $thr->error()
+         * call.
+         */
         MUTEX_LOCK(&thread->mutex);
         if ((thread->state & PERL_ITHR_FINISHED) &&
             ! (thread->state & PERL_ITHR_DIED))
         {
             S_ithread_clear(aTHX_ thread);
         }
+        /* Decrement the thread's ref count. The thread will likely live
+         * on for now and be freed later, when it will do a second call
+         * to S_ithread_clear() which will notice that the interpreter
+         * has already been freed, and so not do much further cleanup.
+         */
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
 
