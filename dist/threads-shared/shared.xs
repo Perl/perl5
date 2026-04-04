@@ -241,8 +241,12 @@ recursive_lock_release(pTHX_ void *ptr)
     MUTEX_UNLOCK(&lock->mutex);
 }
 
+/* if defer_unlock is true, push a recursive_lock_release on the save
+ * stack */
+
 static void
-recursive_lock_acquire(pTHX_ recursive_lock_t *lock, const char *file, int line)
+recursive_lock_acquire(pTHX_ recursive_lock_t *lock, int defer_unlock,
+                       const char *file, int line)
 {
     PERL_UNUSED_ARG(file);
     PERL_UNUSED_ARG(line);
@@ -278,13 +282,14 @@ recursive_lock_acquire(pTHX_ recursive_lock_t *lock, const char *file, int line)
 #endif
     }
     MUTEX_UNLOCK(&lock->mutex);
-    SAVEDESTRUCTOR_X(recursive_lock_release,lock);
+    if (defer_unlock)
+        SAVEDESTRUCTOR_X(recursive_lock_release,lock);
 }
 
 #define ENTER_LOCK                                                          \
     STMT_START {                                                            \
         ENTER;                                                              \
-        recursive_lock_acquire(aTHX_ &PL_sharedsv_lock, __FILE__, __LINE__);\
+        recursive_lock_acquire(aTHX_ &PL_sharedsv_lock, 1, __FILE__, __LINE__);\
     } STMT_END
 
 /* The unlocking is done automatically at scope exit */
@@ -984,7 +989,9 @@ static int
 sharedsv_scalar_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     PERL_UNUSED_ARG(param);
+    recursive_lock_acquire(aTHX_ &PL_sharedsv_lock, 0, __FILE__, __LINE__);
     SvREFCNT_inc_void(mg->mg_ptr);
+    recursive_lock_release(aTHX_ (void *)&PL_sharedsv_lock);
     return (0);
 }
 
@@ -1154,7 +1161,9 @@ static int
 sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     PERL_UNUSED_ARG(param);
+    recursive_lock_acquire(aTHX_ &PL_sharedsv_lock, 0, __FILE__, __LINE__);
     SvREFCNT_inc_void(SHAREDSV_FROM_OBJ(mg->mg_obj));
+    recursive_lock_release(aTHX_ (void *)&PL_sharedsv_lock);
     assert(mg->mg_flags & MGf_DUP);
     return (0);
 }
@@ -1255,7 +1264,9 @@ static int
 sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     PERL_UNUSED_ARG(param);
+    recursive_lock_acquire(aTHX_ &PL_sharedsv_lock, 0, __FILE__, __LINE__);
     SvREFCNT_inc_void((SV*)mg->mg_ptr);
+    recursive_lock_release(aTHX_ (void *)&PL_sharedsv_lock);
     assert(mg->mg_flags & MGf_DUP);
     return (0);
 }
@@ -1271,7 +1282,7 @@ Perl_sharedsv_lock(pTHX_ SV *ssv)
     if (! ssv)
         return;
     ul = S_get_userlock(aTHX_ ssv, 1);
-    recursive_lock_acquire(aTHX_ &ul->lock, __FILE__, __LINE__);
+    recursive_lock_acquire(aTHX_ &ul->lock, 1, __FILE__, __LINE__);
 }
 
 /* Handles calls from lock() builtin via PL_lockhook */
