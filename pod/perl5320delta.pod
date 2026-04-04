@@ -665,7 +665,7 @@ L<XS::APItest> has been upgraded from version 1.00 to 1.09.
 =item *
 
 Pod::Parser has been removed from the core distribution.
-It still is available for download from CPAN. This resolves 
+It still is available for download from CPAN. This resolves
 [L<#13194|https://github.com/Perl/perl5/issues/13194>].
 
 =back
@@ -1724,7 +1724,7 @@ C<[GH #17045]|https://github.com/Perl/perl5/issues/17045>]
 Extraordinarily large (over 2GB) floating point format widths could
 cause an integer overflow in the underlying call to snprintf(),
 resulting in an assertion. Formatted floating point widths are now
-limited to the range of int, the return value of snprintf(). 
+limited to the range of int, the return value of snprintf().
 [L<#16881|https://github.com/Perl/perl5/issues/16881>]
 
 =item *
@@ -1759,7 +1759,7 @@ L<[GH #16847]|https://github.com/Perl/perl5/issues/16847>
 =item *
 
 Incomplete hex and binary literals like C<0x> and C<0b> are now
-treated as if the C<x> or C<b> is part of the next token. 
+treated as if the C<x> or C<b> is part of the next token.
 [L<#17010|https://github.com/Perl/perl5/issues/17010>]
 
 =item *

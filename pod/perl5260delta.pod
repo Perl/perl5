@@ -3220,7 +3220,7 @@ that if you specify very small values using the hexadecimal floating
 point format, like C<0x1.fffffffffffffp-1022>, they become zeros.
 L<[GH #15990]|https://github.com/Perl/perl5/issues/15990>
 
-=back 
+=back
 
 =head1 Errata From Previous Releases
 

@@ -156,7 +156,7 @@ and consider upgrading their glibc.
 
 =head1 Known Problems
 
-Detached threads aren't supported on Windows yet, as they may lead to 
+Detached threads aren't supported on Windows yet, as they may lead to
 memory access violation problems.
 
 There is a known race condition opening scripts in C<suidperl>. C<suidperl>

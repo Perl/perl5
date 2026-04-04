@@ -287,7 +287,7 @@ C<pack> C<Z0> used to destroy the preceding character.
 
 =item *
 
-C<P>/C<p> C<pack> formats used to only recognise literal C<undef> 
+C<P>/C<p> C<pack> formats used to only recognise literal C<undef>
 
 =back
 

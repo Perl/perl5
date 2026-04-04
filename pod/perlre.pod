@@ -498,12 +498,12 @@ may be easier to grasp than the squashed equivalents
     /[d-eg-i3-7]/
     /[!@"#$%^&*()=?<>']/
 
-Starting in Perl v5.44, the experimental feature 
+Starting in Perl v5.44, the experimental feature
 
  use feature 'enhanced_xx';
 
 changes the behavior of C</xx> to allow your bracketed classes to extend
-over multiple lines and to contain comments.  
+over multiple lines and to contain comments.
 
 Without this feature being enabled, a C<#> inside a character class is
 still just a literal C<#>; but with it, the C<#> introduces a comment,

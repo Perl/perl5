@@ -15,7 +15,7 @@ L<perl5361delta>, which describes differences between 5.36.0 and 5.36.1.
 
 =head1 Security
 
-This release fixes the following security issues. 
+This release fixes the following security issues.
 
 =head2 CVE-2023-47038 - Write past buffer end via illegal user-defined Unicode property
 

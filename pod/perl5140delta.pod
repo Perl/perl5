@@ -45,7 +45,7 @@ deprecation warning message unless such warnings are turned off.  The
 new name for U+0007 in Perl is C<ALERT>, which corresponds nicely
 with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}>
 means U+0007, with no warning given.  The character at U+1F514 has no
-name in 5.14, but can be referred to by C<\N{U+1F514}>. 
+name in 5.14, but can be referred to by C<\N{U+1F514}>.
 In Perl 5.16, C<\N{BELL}> will refer to U+1F514; all code
 that uses C<\N{BELL}> should be converted to use C<\N{ALERT}>,
 C<\N{BEL}>, or C<"\a"> before upgrading.
@@ -138,7 +138,7 @@ inconsistent and in places, incorrect.
 
 Unicode non-characters, some of which previously were erroneously
 considered illegal in places by Perl, contrary to the Unicode Standard,
-are now always legal internally.  Inputting or outputting them 
+are now always legal internally.  Inputting or outputting them
 works the same as with the non-legal Unicode code points, because the Unicode
 Standard says they are (only) illegal for "open interchange".
 
@@ -158,7 +158,7 @@ expression now means that the subexpression does not inherit surrounding
 modifiers such as C</i>, but reverts to the Perl defaults.  Any modifiers
 following the caret override the defaults.
 
-Stringification of regular expressions now uses this notation.  
+Stringification of regular expressions now uses this notation.
 For example, C<qr/hlagh/i> would previously be stringified as
 C<(?i-xsm:hlagh)>, but now it's stringified as C<(?^i:hlagh)>.
 
@@ -174,7 +174,7 @@ expressions with fixed strings containing C<?-xism>.
 Four new regular expression modifiers have been added.  These are mutually
 exclusive: one only can be turned on at a time.
 
-=over 
+=over
 
 =item *
 
@@ -207,7 +207,7 @@ For example,
     "k"     =~ /\N{KELVIN SIGN}/ai
     "\xDF" =~ /ss/ai
 
-match but 
+match but
 
     "k"    =~ /\N{KELVIN SIGN}/aai
     "\xDF" =~ /ss/aai
@@ -307,8 +307,8 @@ C<@{}> or C<%{}>:
   push @{$obj->tags}, $new_tag;  # old way
   push $obj->tags,    $new_tag;  # new way
 
-  for ( keys %{$hoh->{genres}{artists}} ) {...} # old way 
-  for ( keys $hoh->{genres}{artists}    ) {...} # new way 
+  for ( keys %{$hoh->{genres}{artists}} ) {...} # old way
+  for ( keys $hoh->{genres}{artists}    ) {...} # new way
 
 =head3 Single term prototype
 
@@ -321,7 +321,7 @@ force scalar context on the argument.  See L<perlsub/Prototypes>.
 A package declaration can now contain a code block, in which case the
 declaration is in scope inside that block only.  So C<package Foo { ... }>
 is precisely equivalent to C<{ package Foo; ... }>.  It also works with
-a version number in the declaration, as in C<package Foo 1.2 { ... }>, 
+a version number in the declaration, as in C<package Foo 1.2 { ... }>,
 which is its most attractive feature.  See L<perlfunc>.
 
 =head3 Statement labels can appear in more places
@@ -354,7 +354,7 @@ to how C<die>, C<warn>, and C<$@> behave.
 
 =over
 
-=item * 
+=item *
 
 When an exception is thrown inside an C<eval>, the exception is no
 longer at risk of being clobbered by destructor code running during unwinding.
@@ -384,7 +384,7 @@ always emitted as a warning, leaving the surrounding C<$@> untouched.
 In addition to object destructors, this also affects any function call
 run by XS code using the C<G_KEEPERR> flag.
 
-=item * 
+=item *
 
 Warnings for C<warn> can now be objects in the same way as exceptions
 for C<die>.  If an object-based warning gets the default handling
@@ -420,7 +420,7 @@ log the seed used for that run so this can later be used to produce the same res
 Perl's printf and sprintf operators, and Perl's internal printf replacement
 function, now understand the C90 size modifiers "hh" (C<char>), "z"
 (C<size_t>), and "t" (C<ptrdiff_t>).  Also, when compiled with a C99
-compiler, Perl now understands the size modifier "j" (C<intmax_t>) 
+compiler, Perl now understands the size modifier "j" (C<intmax_t>)
 (but this is not portable).
 
 So, for example, on any modern machine, C<sprintf("%hhd", 257)> returns "1".
@@ -612,9 +612,9 @@ has come to rely on the incorrect behaviour.
 =head3 Stringification of regexes has changed
 
 Default regular expression modifiers are now notated using
-C<(?^...)>.  Code relying on the old stringification will fail.  
+C<(?^...)>.  Code relying on the old stringification will fail.
 This is so that when new modifiers are added, such code won't
-have to keep changing each time this happens, because the stringification 
+have to keep changing each time this happens, because the stringification
 will automatically incorporate the new modifiers.
 
 Code that needs to work properly with both old- and new-style regexes
@@ -680,7 +680,7 @@ of an empty C<%hash> always returning false in scalar context.
 
 =head3 Clearing stashes
 
-Stash list assignment C<%foo:: = ()> used to make the stash temporarily 
+Stash list assignment C<%foo:: = ()> used to make the stash temporarily
 anonymous while it was being emptied.  Consequently, any of its
 subroutines referenced elsewhere would become anonymous,  showing up as
 "(unknown)" in C<caller>.  They now retain their package names such that
@@ -753,8 +753,8 @@ it as well.
 
 =head3 Parsing of package and variable names
 
-Parsing the names of packages and package variables has changed: 
-multiple adjacent pairs of colons, as in C<foo::::bar>, are now all 
+Parsing the names of packages and package variables has changed:
+multiple adjacent pairs of colons, as in C<foo::::bar>, are now all
 treated as package separators.
 
 Regardless of this change, the exact parsing of package separators has
@@ -956,7 +956,7 @@ course, do not generate the warning.
 =head2 List assignment to C<$[>
 
 Assignment to C<$[> was deprecated and started to give warnings in
-Perl version 5.12.0.  This version of Perl (5.14) now also emits a warning 
+Perl version 5.12.0.  This version of Perl (5.14) now also emits a warning
 when assigning to C<$[> in list context.  This fixes an oversight in 5.12.0.
 
 =head2 Use of qw(...) as parentheses
@@ -1168,7 +1168,7 @@ programs that do not use C<%+> or C<%->.
 
 The internal structures of threading now make fewer API calls and fewer
 allocations, resulting in noticeably smaller object code.  Additionally,
-many thread context checks have been deferred so they're done only 
+many thread context checks have been deferred so they're done only
 as needed (although this is only possible for non-debugging builds).
 
 =head2 Adjacent pairs of nextstate opcodes are now optimized away
@@ -1247,7 +1247,7 @@ a single location for easier maintenance.
 
 =item *
 
-The following modules were added by the L<Unicode::Collate> 
+The following modules were added by the L<Unicode::Collate>
 upgrade.  See below for details.
 
 L<Unicode::Collate::CJK::Big5>
@@ -1318,7 +1318,7 @@ archives to be uploaded to CPAN.
 
 =item *
 
-A new L<ptargrep(1)> utility for using regular expressions against 
+A new L<ptargrep(1)> utility for using regular expressions against
 the contents of files in a tar archive.
 
 =item *
@@ -1421,8 +1421,8 @@ errors" error that ensue if there has been a syntax error
 
 L<CGI> has been upgraded from version 3.48 to 3.52.
 
-This provides the following security fixes: the MIME boundary in 
-multipart_init() is now random and the handling of 
+This provides the following security fixes: the MIME boundary in
+multipart_init() is now random and the handling of
 newlines embedded in header values has been improved.
 
 =item *
@@ -1456,7 +1456,7 @@ Major highlights:
 
 =item * support for L<local::lib>
 
-=item * support for L<HTTP::Tiny> to reduce the dependency on FTP sites 
+=item * support for L<HTTP::Tiny> to reduce the dependency on FTP sites
 
 =item * automatic mirror selection
 
@@ -2088,21 +2088,21 @@ L<Unicode::Collate> has been upgraded from version 0.52_01 to 0.73.
 L<Unicode::Collate> has been updated to use Unicode 6.0.0.
 
 L<Unicode::Collate::Locale> now supports a plethora of new locales: I<ar, be,
-bg, de__phonebook, hu, hy, kk, mk, nso, om, tn, vi, hr, ig, ja, ko, ru, sq, 
+bg, de__phonebook, hu, hy, kk, mk, nso, om, tn, vi, hr, ig, ja, ko, ru, sq,
 se, sr, to, uk, zh, zh__big5han, zh__gb2312han, zh__pinyin>, and I<zh__stroke>.
 
 The following modules have been added:
 
-L<Unicode::Collate::CJK::Big5> for C<zh__big5han> which makes 
+L<Unicode::Collate::CJK::Big5> for C<zh__big5han> which makes
 tailoring of CJK Unified Ideographs in the order of CLDR's big5han ordering.
 
 L<Unicode::Collate::CJK::GB2312> for C<zh__gb2312han> which makes
 tailoring of CJK Unified Ideographs in the order of CLDR's gb2312han ordering.
 
-L<Unicode::Collate::CJK::JISX0208> which makes tailoring of 6355 kanji 
+L<Unicode::Collate::CJK::JISX0208> which makes tailoring of 6355 kanji
 (CJK Unified Ideographs) in the JIS X 0208 order.
 
-L<Unicode::Collate::CJK::Korean> which makes tailoring of CJK Unified Ideographs 
+L<Unicode::Collate::CJK::Korean> which makes tailoring of CJK Unified Ideographs
 in the order of CLDR's Korean ordering.
 
 L<Unicode::Collate::CJK::Pinyin> for C<zh__pinyin> which makes
@@ -2137,7 +2137,7 @@ This upgrade also includes several bug fixes:
 
 =item *
 
-It is now updated to Unicode Version 6.0.0 with I<Corrigendum #8>, 
+It is now updated to Unicode Version 6.0.0 with I<Corrigendum #8>,
 excepting that, just as with Perl 5.14, the code point at U+1F514 has no name.
 
 =item *
@@ -2387,7 +2387,7 @@ Several API functions that process optrees have been newly documented.
 =head3 L<perlvar> revamp
 
 L<perlvar> reorders the variables and groups them by topic.  Each variable
-introduced after Perl 5.000 notes the first version in which it is 
+introduced after Perl 5.000 notes the first version in which it is
 available.  L<perlvar> also has a new section for deprecated variables to
 note when they were removed.
 
@@ -2410,7 +2410,7 @@ is now much more straightforward and clear.
 The L<perlhack> document is now much shorter, and focuses on the Perl 5
 development process and submitting patches to Perl.  The technical content
 has been moved to several new documents, L<perlsource>, L<perlinterp>,
-L<perlhacktut>, and L<perlhacktips>.  This technical content has 
+L<perlhacktut>, and L<perlhacktips>.  This technical content has
 been only lightly edited.
 
 The perlrepository document has been renamed to L<perlgit>.  This new
@@ -2745,7 +2745,7 @@ Improved rebase behaviour
 
 If a DLL is updated on cygwin the old imagebase address is reused.
 This solves most rebase errors, especially when updating on core DLL's.
-See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README> 
+See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README>
 for more information.
 
 =item *
@@ -2762,7 +2762,7 @@ Updated build hints file
 
 =over
 
-=item * 
+=item *
 
 FreeBSD 7 no longer contains F</usr/bin/objformat>.  At build time,
 Perl now skips the F<objformat> check for versions 7 and higher and
@@ -2772,7 +2772,7 @@ assumes ELF (5.12.1).
 
 =head3 HP-UX
 
-=over 
+=over
 
 =item *
 
@@ -3117,7 +3117,7 @@ get-magic is processed.
   sv_collxfrm_flags
 
 In some of these cases, the non-C<_flags> functions have
-been replaced with wrappers around the new functions. 
+been replaced with wrappers around the new functions.
 
 =head3 pv/pvs/sv versions of existing functions
 
@@ -3719,7 +3719,7 @@ causing a memory leak [perl #75176].
 In addition, various other bugs related to typeglobs and stashes have been
 fixed:
 
-=over 
+=over
 
 =item *
 
@@ -4072,7 +4072,7 @@ C<@DB::args> has been fixed (5.12.2).
 
 =item *
 
-Perl no longer stomps on C<$DB::single>, C<$DB::trace>, and C<$DB::signal> 
+Perl no longer stomps on C<$DB::single>, C<$DB::trace>, and C<$DB::signal>
 if these variables already have values when C<$^P> is assigned to [perl #72422].
 
 =item *
@@ -4350,7 +4350,7 @@ sprintf() was ignoring locales when called with constant arguments
 =item *
 
 Combining the vector (C<%v>) flag and dynamic precision would
-cause C<sprintf> to confuse the order of its arguments, making it 
+cause C<sprintf> to confuse the order of its arguments, making it
 treat the string as the precision and vice-versa [perl #83194].
 
 =back

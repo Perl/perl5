@@ -1960,7 +1960,7 @@ available API elements for working with it.  UTF-8 is how Unicode
 strings are currently stored internally by the interpreter.  You B<need>
 to be using functions in the C<utf8_to_uv> family when parsing a string
 encoded in UTF-8.  This avoids the pitfalls of earlier API functions,
-whose names contained C<to_uvchr> instead of plain C<to_uv>.  
+whose names contained C<to_uvchr> instead of plain C<to_uv>.
 
 =item Illegal code points
 

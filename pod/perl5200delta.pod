@@ -2975,7 +2975,7 @@ stringification of the decimal point. [perl #108378] [perl #115800]
 
 There have been several fixes related to Perl's handling of locales.  perl
 #38193 was described above in L</Internal Changes>.
-Also fixed is 
+Also fixed is
 #118197, where the radix (decimal point) character had to be an ASCII
 character (which doesn't work for some non-Western languages);
 and #115808, in which C<POSIX::setlocale()> on failure returned an

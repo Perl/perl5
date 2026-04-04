@@ -1987,7 +1987,7 @@ L<perlxs>, L<perlguts>, L<perlembed>
 
 =head1 AUTHOR
 
-Paul Marquess 
+Paul Marquess
 
 Special thanks to the following people who assisted in the creation of
 the document.
