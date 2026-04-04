@@ -260,7 +260,9 @@ S_ithread_clear(pTHX_ ithread *thread)
             thread->err = Nullsv;
         }
 
+        MUTEX_UNLOCK(&thread->mutex);
         perl_destruct(interp);
+        MUTEX_LOCK(&thread->mutex);
         perl_free(interp);
         thread->interp = NULL;
     }
@@ -831,13 +833,12 @@ S_ithread_create(
      */
     thread->count = 3;
 
-    /* Block new thread until ->create() call finishes */
     MUTEX_INIT(&thread->mutex);
-    MUTEX_LOCK(&thread->mutex); /* See S_ithread_run() for more detail. */
 
     MUTEX_LOCK(&my_pool->create_destruct_mutex);
     thread->tid = my_pool->tid_counter++;
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
+
     thread->stack_size = S_good_stack_size(aTHX_ stack_size);
     thread->gimme = gimme;
     thread->state = exit_opt;
@@ -970,6 +971,22 @@ S_ithread_create(
     S_ithread_set(aTHX_ current_thread);
     PERL_SET_CONTEXT(aTHX);
 
+    /* Add to threads list */
+
+    MUTEX_LOCK(&my_pool->create_destruct_mutex);
+    thread->next = &my_pool->main_thread;
+    thread->prev = my_pool->main_thread.prev;
+    my_pool->main_thread.prev = thread;
+    thread->prev->next = thread;
+    my_pool->total_threads++;
+    my_pool->running_threads++;
+    MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
+
+
+    /* Block new thread until ->create() call finishes */
+    MUTEX_LOCK(&thread->mutex); /* See S_ithread_run() for more detail. */
+
+
     /* Create/start the thread */
 #ifdef WIN32
     thread->handle = CreateThread(NULL,
@@ -1061,17 +1078,6 @@ S_ithread_create(
 #endif
         return NULL;
     }
-
-    /* Add to threads list */
-
-    MUTEX_LOCK(&my_pool->create_destruct_mutex);
-    thread->next = &my_pool->main_thread;
-    thread->prev = my_pool->main_thread.prev;
-    my_pool->main_thread.prev = thread;
-    thread->prev->next = thread;
-    my_pool->total_threads++;
-    my_pool->running_threads++;
-    MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
 
     /* Let thread run. */
     /* See S_ithread_run() for more detail. */
