@@ -562,7 +562,7 @@ from using thread-safe locales.
 C<${^SAFE_LOCALES}> will be 0 on systems that turn off the thread-safe
 operations.
 
-Normally on unthreaded builds, Perl uses the traditional C<setlocale()> 
+Normally on unthreaded builds, Perl uses the traditional C<setlocale()>
 to change the locale, and not the alternate POSIX 2008 thread-safe
 locale-changing functions.  You can force the use of these on systems
 that have them by adding the C<-Accflags='-DUSE_THREAD_SAFE_LOCALE'> to

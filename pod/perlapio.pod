@@ -242,7 +242,7 @@ it is the last character that was read from the handle.
 =item B<PerlIO_unread(f,buf,count)>
 
 This allows one to unget more than a single byte.
-It effectively unshifts C<count> bytes onto the beginning of the buffer 
+It effectively unshifts C<count> bytes onto the beginning of the buffer
 C<buf>, so that the next read operation(s) will return them before
 anything else that was in the buffer.
 

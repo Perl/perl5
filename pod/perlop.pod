@@ -3077,7 +3077,7 @@ delimiter) will be preserved:
      This text is indented with two spaces
 		This line is indented with two tabs, though those may
                 have been converted to spaces by various filters by
-                the time you read this. 
+                the time you read this.
    EOF
 
 =back

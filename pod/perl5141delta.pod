@@ -134,7 +134,7 @@ on environment variables has been corrected and expanded.
 
 =head3 L<POSIX>
 
-=over 
+=over
 
 =item *
 
@@ -182,7 +182,7 @@ option, as used by some projects that include perl's header files.
 Some test failures in F<dist/Locale-Maketext/t/09_compile.t> that could
 occur depending on the environment have been fixed. [perl #89896]
 
-=item * 
+=item *
 
 A watchdog timer for F<t/re/re.t> was lengthened to accommodate SH-4 systems
 which were unable to complete the tests before the previous timer ran out.
@@ -204,7 +204,7 @@ None
 
 =head3 Solaris
 
-=over 
+=over
 
 =item *
 
@@ -217,12 +217,12 @@ Solaris 9 and Solaris 10 has been corrected.
 
 =over
 
-=item * 
+=item *
 
 The F<lib/locale.t> test script has been updated to work on the upcoming
 Lion release.
 
-=item * 
+=item *
 
 Mac OS X specific compilation instructions have been clarified.
 
@@ -230,7 +230,7 @@ Mac OS X specific compilation instructions have been clarified.
 
 =head3 Ubuntu Linux
 
-=over 
+=over
 
 =item *
 
@@ -241,7 +241,7 @@ paths on Ubuntu natty.
 
 =head1 Internal Changes
 
-=over 
+=over
 
 =item *
 
@@ -286,7 +286,7 @@ portion of the fold, plus some more.
 
 is one such case.  C<\xDF> folds to C<"ss">.
 
-=item * 
+=item *
 
 Several Unicode case-folding bugs have been fixed.
 

@@ -1043,7 +1043,7 @@ F<win32/buildext.pl>.
 Removed F<libbsd> for AIX 5L and 6.1. Only flock() was used from F<libbsd>.
 
 Removed F<libgdbm> for AIX 5L and 6.1. The F<libgdbm> is delivered as an
-optional package with the AIX Toolbox. Unfortunately the 64 bit version 
+optional package with the AIX Toolbox. Unfortunately the 64 bit version
 is broken.
 
 Hints changes mean that AIX 4.2 should work again.
@@ -1288,7 +1288,7 @@ These have all been fixed.
 
 A 5.10.0 optimisation to clear the temporary stack within the implicit
 loop of C<s///ge> has been reverted, as it turned out to be the cause of
-obscure bugs in seemingly unrelated parts of the interpreter [commit 
+obscure bugs in seemingly unrelated parts of the interpreter [commit
 ef0d4e17921ee3de].
 
 =item *
@@ -1619,7 +1619,7 @@ Tests for the interaction of Unicode properties and threads.
 
 Test the tied methods of C<Tie::Hash::NamedCapture>.
 
-=item t/op/reg_posixcc.t 
+=item t/op/reg_posixcc.t
 
 Check that POSIX character classes behave consistently.
 

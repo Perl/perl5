@@ -409,7 +409,7 @@ allows nested text formats, and you should use this feature as needed.
 Here is an example sentence that mentions Perl's C<say> function, with a
 link to its documentation section within the C<perlfunc> man page:
 
-    In version 5.10, Perl added support for the 
+    In version 5.10, Perl added support for the
     L<C<say>|perlfunc/say FILEHANDLE LIST> function.
 
 Note the use of the vertical pipe ("C<|>") to separate how the link will
@@ -461,7 +461,7 @@ explanation's clarity without adding to its complexity.
 Like any other kind of source code, Pod lets you insert comments visible
 only to other people reading the source directly, and ignored by the
 formatting programs that transform Pod into various human-friendly
-output formats (such as HTML or PDF). 
+output formats (such as HTML or PDF).
 
 To comment Pod text, use the C<=for> and C<=begin> / C<=end> Pod
 directives, aiming them at a (notional) formatter called "C<comment>". A
@@ -549,7 +549,7 @@ argument, might have an entry in perlfunc shaped like this:
 
     =item myfunc
 
-    =for Pod::Functions demonstrate a function's perlfunc section 
+    =for Pod::Functions demonstrate a function's perlfunc section
 
     [ Main part of function definition goes here, with examples ]
 
@@ -878,7 +878,7 @@ after thoroughly documenting and demonstrating how it works in the
 common case. Furthermore, while engaging in this demonstration, the
 C<open> documentation does not burden the reader right away with detailed
 explanations about calling C<open> via any route other than the
-best-practice, three-argument style. 
+best-practice, three-argument style.
 
 =head3 Show the lesser ways when needed
 
@@ -997,7 +997,7 @@ reader. Should a sentence exist mainly to make a wry joke that doesn't
 further the reader's knowledge of Perl, set it aside, and consider
 recasting it into a personal blog post or other article instead.
 
-Write with a light heart, and a miserly hand. 
+Write with a light heart, and a miserly hand.
 
 =head1 INDEX OF PREFERRED TERMS
 

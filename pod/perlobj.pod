@@ -751,7 +751,7 @@ appending C<::> to it, like we saw earlier:
 
   my $file = new File:: $path, $data;
 
-Indirect object syntax is only available when the 
+Indirect object syntax is only available when the
 L<C<"indirect">|feature/The 'indirect' feature> named feature is enabled.
 This is enabled by default, but can be disabled if requested.  This
 feature is present in older feature version bundles, but was removed

@@ -232,12 +232,12 @@ Note that only the major bug fixes are listed here.  See F<Changes> for others.
 	Backtracking might not restore start of $3.
 	No feedback if max count for * or + on "complex" subexpression
 	    was reached, similarly (but at compile time) for {3,34567}
-	Primitive restrictions on max count introduced to decrease a 
+	Primitive restrictions on max count introduced to decrease a
 	    possibility of a segfault;
 	(ZERO-LENGTH)* could segfault;
 	(ZERO-LENGTH)* was prohibited;
 	Long REs were not allowed;
-	/RE/g could skip matches at the same position after a 
+	/RE/g could skip matches at the same position after a
 	  zero-length match;
 
 =item New regular expression constructs
@@ -504,14 +504,14 @@ the command-line arguments used in F<config.sh>.
 
 BeOS is now supported.  See F<README.beos>.
 
-DOS is now supported under the DJGPP tools.  See F<README.dos> (installed 
+DOS is now supported under the DJGPP tools.  See F<README.dos> (installed
 as L<perldos> on some systems).
 
 MiNT is now supported.  See F<README.mint>.
 
 MPE/iX is now supported.  See README.mpeix.
 
-MVS (aka OS390, aka Open Edition) is now supported.  See F<README.os390> 
+MVS (aka OS390, aka Open Edition) is now supported.  See F<README.os390>
 (installed as L<perlos390> on some systems).
 
 Stratus VOS is now supported.  See F<README.vos>.
@@ -522,7 +522,7 @@ Win32 support has been vastly enhanced.  Support for Perl Object, a C++
 encapsulation of Perl.  GCC and EGCS are now supported on Win32.
 See F<README.win32>, aka L<perlwin32>.
 
-VMS configuration system has been rewritten.  See F<README.vms> (installed 
+VMS configuration system has been rewritten.  See F<README.vms> (installed
 as F<README_vms> on some systems).
 
 The hints files for most Unix platforms have seen incremental improvements.
@@ -691,7 +691,7 @@ Config.pm now has a glossary of variables.
 F<Porting/patching.pod> has detailed instructions on how to create and
 submit patches for perl.
 
-L<perlport> specifies guidelines on how to write portably. 
+L<perlport> specifies guidelines on how to write portably.
 
 L<perlmodinstall> describes how to fetch and install modules from C<CPAN>
 sites.
@@ -872,7 +872,7 @@ method.  Probably indicates an unintended loop in your inheritance hierarchy.
 
 (W) You gave a single reference where Perl was expecting a list with
 an even number of elements (for assignment to a hash). This
-usually means that you used the anon hash constructor when you meant 
+usually means that you used the anon hash constructor when you meant
 to use parens. In any case, a hash requires key/value B<pairs>.
 
     %hash = { one => 1, two => 2, };   # WRONG

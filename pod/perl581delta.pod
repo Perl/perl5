@@ -663,7 +663,7 @@ now uses the vendor-supplied function if detected.
 A rare access violation at Perl start-up could occur if the Perl image was
 installed with privileges or if there was an identifier with the
 subsystem attribute set in the process's rightslist.  Either of these
-circumstances triggered tainting code that contained a pointer bug. 
+circumstances triggered tainting code that contained a pointer bug.
 The faulty pointer arithmetic has been fixed.
 
 =item *

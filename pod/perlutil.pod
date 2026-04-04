@@ -23,7 +23,7 @@ The main interface to Perl's documentation is F<perldoc>, although
 if you're reading this, it's more than likely that you've already found
 it. F<perldoc> will extract and format the documentation from any file
 in the current directory, any Perl module installed on the system, or
-any of the standard documentation pages, such as this one. Use 
+any of the standard documentation pages, such as this one. Use
 C<perldoc E<lt>nameE<gt>> to get information on any of the utilities
 described in this document.
 
@@ -99,7 +99,7 @@ and its libraries have been installed correctly.
 
 =head2 Development
 
-There are a set of utilities which help you in developing Perl programs, 
+There are a set of utilities which help you in developing Perl programs,
 and in particular, extending Perl with C.
 
 =over 3
@@ -196,7 +196,7 @@ with perl, but is available from the CPAN.)
 
 =item L<ptargrep>
 
-F<ptargrep> is a utility to apply pattern matching to the contents of files 
+F<ptargrep> is a utility to apply pattern matching to the contents of files
 in a tar archive.
 
 =item L<shasum>

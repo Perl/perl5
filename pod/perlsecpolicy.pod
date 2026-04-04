@@ -409,8 +409,8 @@ on private systems during the pre-release L</Embargo Period>.
 =head3 Release of fixes and announcements
 
 The L</Embargo Period> ends when the security fixes are committed to Perl's
-public git repository. Announcements will be sent to the 
-L<perl5-porters|https://lists.perl.org/list/perl5-porters.html> and 
+public git repository. Announcements will be sent to the
+L<perl5-porters|https://lists.perl.org/list/perl5-porters.html> and
 L<oss-security|https://oss-security.openwall.org/wiki/mailing-lists/oss-security>
 mailing lists.
 
@@ -507,10 +507,10 @@ issue is being addressed.
 Embargo lengths can vary depending on the complexity of the issue and the
 time required to develop a fix. The security team will communicate
 the expected duration of the embargo to the reporter and any other
-parties involved in the process. 
+parties involved in the process.
 
 As a goal, the security team aims to keep the total embargo period to less
-than 60 days. This may be extended due to the following factors: 
+than 60 days. This may be extended due to the following factors:
 
 =over 4
 

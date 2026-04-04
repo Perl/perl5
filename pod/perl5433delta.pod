@@ -133,7 +133,7 @@ L<XS::APItest> has been upgraded from version 1.44 to 1.46.
 =item *
 
 L<perlapi> now contains information about how to find what release of
-Perl first contained an API element 
+Perl first contained an API element
 
 =back
 

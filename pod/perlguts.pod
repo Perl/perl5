@@ -816,7 +816,7 @@ C<SV*>.  To access the scalar value, you must first dereference the return
 value.  However, you should check to make sure that the return value is
 not NULL before dereferencing it.
 
-The first of these two functions checks if a hash table entry exists, and the 
+The first of these two functions checks if a hash table entry exists, and the
 second deletes it.
 
     bool  hv_exists(HV*, const char* key, U32 klen);
@@ -3613,7 +3613,7 @@ you if a string contains only valid UTF-8 characters, and the chances
 of a non-UTF-8 string looking like valid UTF-8 become very small very
 quickly with increasing string length.  On a character-by-character
 basis, C<isUTF8_CHAR>
-will tell you whether the current character in a string is valid UTF-8. 
+will tell you whether the current character in a string is valid UTF-8.
 
 =head2 How does UTF-8 represent Unicode characters?
 

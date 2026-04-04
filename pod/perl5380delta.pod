@@ -366,7 +366,7 @@ supplement the features have come and gone.
 
 In v5.38.0, we are declaring the experiment a failure.  Some future system may
 take the conceptual place of smartmatch, but it has not yet been designed or
-built.  
+built.
 
 These features will be entirely removed from perl in v5.42.0.
 

@@ -1933,7 +1933,7 @@ A F<gdb> session on a threaded perl might look something like this:
     Unmarked SV: 0xaf24c8: IV(3)
     Unmarked SV: 0xace6c8: PV("AV()"\0)
     Unmarked SV: 0xace848: PV("IV(1)"\0)
-    (gdb) 
+    (gdb)
 
 Here, at the start of the first call to pp_entereval(), all existing SVs
 are marked. Then at the start of the second call, we list all the SVs
