@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Pod::Simple::PullParser ();
 our @ISA = ('Pod::Simple::PullParser');
-our $VERSION = '3.47';
+our $VERSION = '3.48';
 BEGIN {
   if(defined &DEBUG) { } # no-op
   elsif( defined &Pod::Simple::DEBUG ) { *DEBUG = \&Pod::Simple::DEBUG }
@@ -798,7 +798,8 @@ sub resolve_man_page_link {
 
   return $self->man_url_prefix . "$section/"
       . $self->manpage_url_escape($page) . ".$section"
-      . $self->man_url_postfix;
+      . $self->man_url_postfix
+      . (defined $frag ? '#' . $frag : '');
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
