@@ -142,6 +142,14 @@ our $foo = 1;
 class Simple::Edward;
 ---
 },
+{
+  name => 'package and class declarations',
+  package => [ 'Ticket::Widget::Entry' ],
+  code => <<'---',
+package Ticket::Widget::Entry 0.36;
+class Ticket::Widget::Entry :strict(params) :isa(Tickit::Widget);
+---
+},
 );
 
 my $test_num = 0;

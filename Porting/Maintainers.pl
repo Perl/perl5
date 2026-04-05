@@ -865,7 +865,8 @@ our %Modules = (
     },
 
     'Module::Metadata' => {
-        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000038.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000039.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Apr  5 19:01:14 2026',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
             qw(t/00-report-prereqs.t),
