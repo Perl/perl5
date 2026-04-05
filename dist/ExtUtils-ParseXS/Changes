@@ -1,12 +1,16 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.62
+3.63 Sun Apr  5 2026
   - allow 'length(foo)' to work with any 'foo' type that has
         'SvPV_nolen()' or similar in its typemap, not just that it maps
         to T_PV
   - improve warning and error messages
   - improve test coverage
   - reorganise t/
+
+3.62 Sun Apr  5 2026
+  - allow XS files with no XS again
+  - use static, not STATIC
 
 3.61 Fri Jan  9 2026
   - rewrite perlxs.pod

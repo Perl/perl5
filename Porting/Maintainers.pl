@@ -535,7 +535,7 @@ our %Modules = (
     },
 
     'ExtUtils::ParseXS' => {
-        'DISTRIBUTION' => 'LEONT/ExtUtils-ParseXS-3.61.tar.gz',
+        'DISTRIBUTION' => 'LEONT/ExtUtils-ParseXS-3.63.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
     },
 
