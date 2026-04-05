@@ -80,7 +80,12 @@ typedef struct _ithread {
     struct _ithread *prev;      /* Prev thread in the list */
     PerlInterpreter *interp;    /* The thread's interpreter */
     UV tid;                     /* Thread's module's thread id */
-    perl_mutex mutex;           /* Mutex for updating things in this struct */
+
+    perl_mutex mutex;           /* Mutex for updating things in this struct.
+                                 * When both need to be held, it should
+                                 * always be acquired *after*
+                                 * create_destruct_mutex. */
+
     int count;                  /* Reference count. See S_ithread_create. */
     int state;                  /* Detached, joined, finished, etc. */
     int gimme;                  /* Context of create */
@@ -113,12 +118,20 @@ START_MY_CXT
 
 #define MY_POOL_KEY "threads::_pool" XS_VERSION
 
+/* The pool of threads. Typically there is a single copy of this struct
+ * per process, which maintains information about all the threads created
+ * via threads.xs. However, when a process (e.g. a web server) maintains
+ * multiple interpreters, then there will be a pool for each interpreter
+ * which has done 'use threads' at least once.
+ */
 typedef struct {
     /* Structure for 'main' thread
      * Also forms the 'base' for the doubly-linked list of threads */
     ithread main_thread;
 
-    /* Protects the creation and destruction of threads*/
+    /* Protects the creation and destruction of threads.
+     * When both need to be held, it should always be acquired *before* a
+     * thread mutex. */
     perl_mutex create_destruct_mutex;
 
     UV tid_counter;
@@ -579,8 +592,8 @@ S_ithread_run(void * arg)
      * - calls ithread_create(),
      *   which calls pthread_create(..., S_ithread_run,...), which
      *   - creates the new thread structure
-     *   - does MUTEX_LOCK(&thread->mutex)
      *   - clones the interpreter;
+     *   - does MUTEX_LOCK(&thread->mutex)
      *   - creates an OS thread to run S_ithread_run()
      * child:
      * - starts the S_ithread_run (where we are now), which:
