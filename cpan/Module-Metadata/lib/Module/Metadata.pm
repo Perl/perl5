@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2:tw=78
-package Module::Metadata; # git description: v1.000037-8-g92dec6c
+package Module::Metadata; # git description: v1.000038-5-g7f7baae
 # ABSTRACT: Gather package and POD information from perl module files
 
 # Adapted from Perl-licensed code originally distributed with
@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000038';
+our $VERSION = '1.000039';
 
 use Carp qw/croak/;
 use File::Spec;
@@ -87,7 +87,7 @@ my $CLASS_REGEXP = qr{  # match a class declaration (core since 5.38)
   \s*                   # optional whitespace
   ($V_NUM_REGEXP)?      # optional version number
   \s*                   # optional whitespace
-  [;\{]                 # semicolon line terminator or block start
+  [:;\{]                # attribute start, semicolon line terminator or block start
 }x;
 
 my $VARNAME_REGEXP = qr{ # match fully-qualified VERSION name
@@ -861,7 +861,7 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 VERSION
 
-version 1.000038
+version 1.000039
 
 =head1 SYNOPSIS
 
@@ -1072,6 +1072,14 @@ Returns a boolean indicating whether the package (if provided) or any package
 Note This only checks for valid C<package> declarations, and does not take any
 ownership information into account.
 
+=head1 GIVING THANKS
+
+=for stopwords MetaCPAN GitHub
+
+If you found this module to be useful, please show your appreciation by
+adding a +1 in L<MetaCPAN|https://metacpan.org/dist/Module-Metadata>
+and a star in L<GitHub|https://github.com/Perl-Toolchain-Gang/Module-Metadata>.
+
 =head1 SUPPORT
 
 Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Module-Metadata>
@@ -1093,7 +1101,7 @@ assistance from David Golden (xdg) <dagolden@cpan.org>.
 
 =head1 CONTRIBUTORS
 
-=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Christian Walde Craig A. Berry Tatsuhiko Miyagawa tokuhirom 'BinGOs' Williams Mitchell Steinbrunner Edward Zborowski Gareth Harper James Raspass Jerry D. Hedden Josh Jore Kent Fredric Leon Timmermans Peter Rabbitson Steve Hay
+=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Christian Walde Craig A. Berry Tatsuhiko Miyagawa tokuhirom 'BinGOs' Williams Mitchell Steinbrunner Edward Zborowski Erik Huelsmann Gareth Harper James Raspass Jerry D. Hedden Josh Jore Kent Fredric Leon Timmermans Peter Rabbitson Steve Hay
 
 =over 4
 
@@ -1160,6 +1168,10 @@ David Steinbrunner <dsteinbrunner@pobox.com>
 =item *
 
 Edward Zborowski <ed@rubensteintech.com>
+
+=item *
+
+Erik Huelsmann <ehuels@gmail.com>
 
 =item *
 

@@ -1723,22 +1723,22 @@ cpan/Module-Load-Conditional/t/to_load/NotX.pm			Module::Conditional tests
 cpan/Module-Load-Conditional/t/to_load/ToBeLoaded		Module::Conditional tests
 cpan/Module-Loaded/lib/Module/Loaded.pm	Module::Loaded
 cpan/Module-Loaded/t/01_Module-Loaded.t	Module::Loaded tests
-cpan/Module-Metadata/corpus/BOMTest/UTF16BE.pm
-cpan/Module-Metadata/corpus/BOMTest/UTF16LE.pm
-cpan/Module-Metadata/corpus/BOMTest/UTF8.pm
-cpan/Module-Metadata/lib/Module/Metadata.pm
-cpan/Module-Metadata/t/contains_pod.t
-cpan/Module-Metadata/t/encoding.t
-cpan/Module-Metadata/t/endpod.t
-cpan/Module-Metadata/t/extract-package.t
-cpan/Module-Metadata/t/extract-version.t
-cpan/Module-Metadata/t/lib/0_1/Foo.pm
-cpan/Module-Metadata/t/lib/0_2/Foo.pm
-cpan/Module-Metadata/t/lib/ENDPOD.pm
-cpan/Module-Metadata/t/lib/GeneratePackage.pm
-cpan/Module-Metadata/t/metadata.t
-cpan/Module-Metadata/t/taint.t
-cpan/Module-Metadata/t/version.t
+cpan/Module-Metadata/corpus/BOMTest/UTF16BE.pm	Module related to Module::Metadata
+cpan/Module-Metadata/corpus/BOMTest/UTF16LE.pm	Module related to Module::Metadata
+cpan/Module-Metadata/corpus/BOMTest/UTF8.pm	Module related to Module::Metadata
+cpan/Module-Metadata/lib/Module/Metadata.pm	Module related to Module::Metadata
+cpan/Module-Metadata/t/contains_pod.t		Test file related to Module::Metadata
+cpan/Module-Metadata/t/encoding.t		Test file related to Module::Metadata
+cpan/Module-Metadata/t/endpod.t			Test file related to Module::Metadata
+cpan/Module-Metadata/t/extract-package.t	Test file related to Module::Metadata
+cpan/Module-Metadata/t/extract-version.t	Test file related to Module::Metadata
+cpan/Module-Metadata/t/lib/0_1/Foo.pm		Module related to Module::Metadata
+cpan/Module-Metadata/t/lib/0_2/Foo.pm		Module related to Module::Metadata
+cpan/Module-Metadata/t/lib/ENDPOD.pm		Module related to Module::Metadata
+cpan/Module-Metadata/t/lib/GeneratePackage.pm	Module related to Module::Metadata
+cpan/Module-Metadata/t/metadata.t		Test file related to Module::Metadata
+cpan/Module-Metadata/t/taint.t			Test file related to Module::Metadata
+cpan/Module-Metadata/t/version.t		Test file related to Module::Metadata
 cpan/NEXT/lib/NEXT.pm				Pseudo-class NEXT for method redispatch
 cpan/NEXT/t/actual.t				NEXT
 cpan/NEXT/t/actuns.t				NEXT

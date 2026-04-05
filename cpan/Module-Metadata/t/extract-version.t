@@ -387,6 +387,38 @@ our $VERSION = '1.23_00_00';
   all_versions => { Simple => 'v1.2_3' },
 },
 {
+  name => 'class NAME VERSION ATTRIBUTE',
+  code => <<'---',
+  class Simple 1.23 :isa(Complex);
+---
+  vers => '1.23',
+  all_versions => { Simple => '1.23' },
+},
+{
+  name => 'class NAME VERSION ATTRIBUTE',
+  code => <<'---',
+  class Simple 1.23_01 :isa(Complex);
+---
+  vers => '1.23_01',
+  all_versions => { Simple => '1.23_01' },
+},
+{
+  name => 'class NAME VERSION ATTRIBUTE',
+  code => <<'---',
+  class Simple v1.2.3 :isa(Complex);
+---
+  vers => 'v1.2.3',
+  all_versions => { Simple => 'v1.2.3' },
+},
+{
+  name => 'class NAME VERSION ATTRIBUTE',
+  code => <<'---',
+  class Simple v1.2_3 :isa(Complex);
+---
+  vers => 'v1.2_3',
+  all_versions => { Simple => 'v1.2_3' },
+},
+{
   name => 'trailing crud',
   code => <<'---',
   package Simple;
@@ -500,6 +532,46 @@ class Simple 1.23 {
   name => 'class NAME VERSION BLOCK (2)',
   code => <<'---',
 class Simple v1.2.3_4 {
+  1;
+}
+---
+  vers => 'v1.2.3_4',
+  all_versions => { Simple => 'v1.2.3_4' },
+},
+{
+  name => 'class NAME ATTRIBUTE BLOCK, undef $VERSION',
+  code => <<'---',
+class Simple :isa(Complex) {
+  our $VERSION;
+}
+---
+  vers => $undef,
+  all_versions => {},
+},
+{
+  name => 'class NAME ATTRIBUTE BLOCK, with $VERSION',
+  code => <<'---',
+class Simple :isa(Complex) {
+  our $VERSION = '1.23';
+}
+---
+  vers => '1.23',
+  all_versions => { Simple => '1.23' },
+},
+{
+  name => 'class NAME VERSION ATTRIBUTE BLOCK (1)',
+  code => <<'---',
+class Simple 1.23 :isa(Complex) {
+  1;
+}
+---
+  vers => '1.23',
+  all_versions => { Simple => '1.23' },
+},
+{
+  name => 'class NAME VERSION ATTRIBUTE BLOCK (2)',
+  code => <<'---',
+class Simple v1.2.3_4 :isa(Complex) {
   1;
 }
 ---
