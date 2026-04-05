@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Pod::Simple::PullParserToken ();
 our @ISA = ('Pod::Simple::PullParserToken');
-our $VERSION = '3.47';
+our $VERSION = '3.48';
 
 sub new {  # Class->new(tagname);
   my $class = shift;

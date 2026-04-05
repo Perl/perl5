@@ -45,7 +45,7 @@ use warnings;
 
 package Pod::Simple::XHTML;
 use strict;
-our $VERSION = '3.47';
+our $VERSION = '3.48';
 use Pod::Simple::Methody ();
 our @ISA = ('Pod::Simple::Methody');
 
@@ -70,10 +70,11 @@ sub encode_entities {
       $ents =~ s,(?<!\\)([]/]),\\$1,g;
       $ents =~ s,(?<!\\)\\\z,\\\\,;
   } else {
-      $ents = join '', keys %entities;
+      # the same set of characters as in HTML::Entities
+      $ents = '^\n\r\t !\#\$%\(-;=?-~';
   }
   my $str = $_[0];
-  $str =~ s/([$ents])/'&' . ($entities{$1} || sprintf '#x%X', ord $1) . ';'/ge;
+  $str =~ s/([$ents])/'&' . ($entities{$1} || sprintf '#x%X', unpack('U', $1)) . ';'/ge;
   return $str;
 }
 
@@ -94,12 +95,17 @@ sub decode_entities {
   return $string;
 }
 
+sub HAVE_UTF8_ENCODE ();
+BEGIN {
+  *HAVE_UTF8_ENCODE = defined &utf8::encode ? sub () { 1 } : sub () { 0 };
+}
+my %percent_enc = map +( chr($_) => sprintf('%%%02X', $_) ), 0 .. 255;
+
 sub encode_url {
   my ($self, $string) = @_;
 
-  $string =~ s{([^-_.!~*()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZZ0123456789])}{
-    sprintf('%%%02X', ord($1))
-  }eg;
+  utf8::encode($string) if HAVE_UTF8_ENCODE;
+  $string =~ s{([^-_.!~*()a-zA-Z0-9])}{$percent_enc{$1}}g;
 
   return $string;
 }
@@ -792,10 +798,18 @@ sub resolve_man_page_link {
     my ($page, $part) = $to =~ /^([^(]+)(?:[(](\d+)[)])?$/;
     return undef unless $page;
 
+    if (defined $section) {
+        $section =~ s/\s+/_/g;
+        my $id = $self->idify($section, 1);
+        $section = '#' . $self->encode_url($id);
+    } else {
+        $section = ''
+    }
+
     return ($self->man_url_prefix || '')
         . ($part || 1) . "/" . $self->encode_entities($page)
-        . "." . ($part || 1) . ($self->man_url_postfix || '');
-
+        . "." . ($part || 1) . ($self->man_url_postfix || '')
+        . $section;
 }
 
 =head2 idify

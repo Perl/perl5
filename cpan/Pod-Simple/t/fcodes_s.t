@@ -182,7 +182,7 @@ is(
 );
 
 is(
-    $x->_out(qq{=pod\n\nL<things|crontab(5)/ENVIRONMENT>\n}),
+    $x->_out(qq{=pod\n\nL<things|crontab(5)/EXAMPLE CRON FILE>\n}),
     "    things\n\n"
 );
 
@@ -305,8 +305,8 @@ is(
 );
 
 is(
-    x(qq{L<things|crontab(5)/ENVIRONMENT>\n}),
-    qq{\n<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}" class="podlinkman"\n>things</a></p>\n}
+    x(qq{L<things|crontab(5)/EXAMPLE CRON FILE>\n}),
+    qq{\n<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}#EXAMPLE_CRON_FILE" class="podlinkman"\n>things</a></p>\n}
 );
 
 is(
@@ -427,8 +427,8 @@ is(
 );
 
 is(
-    o(qq{L<things|crontab(5)/ENVIRONMENT>}),
-    qq{<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}">things</a></p>\n\n}
+    o(qq{L<things|crontab(5)/EXAMPLE CRON FILE>}),
+    qq{<p><a href="${MANURL}5/crontab.5${MANURL_POSTFIX}#EXAMPLE_CRON_FILE">things</a></p>\n\n}
 );
 
 is(

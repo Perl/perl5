@@ -2,7 +2,7 @@ package Pod::Simple::Methody;
 use strict;
 use warnings;
 use Pod::Simple ();
-our $VERSION = '3.47';
+our $VERSION = '3.48';
 our @ISA = ('Pod::Simple');
 
 # Yes, we could use named variables, but I want this to be impose
