@@ -1061,10 +1061,11 @@ S_ithread_create(
 
     /* Check for errors */
 #ifdef WIN32
-    if (thread->handle == NULL) {
+    if (thread->handle == NULL)
 #else
-    if (setstack_err || create_err) {
+    if (setstack_err || create_err)
 #endif
+    {
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
