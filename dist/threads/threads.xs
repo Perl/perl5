@@ -296,11 +296,11 @@ S_ithread_clear(pTHX_ ithread *thread)
  * On return, mutex is released (or destroyed).
  *
  * The thread of this function's caller (and thus the passed pTHX) is
- * different than that of the thread being freed: the caller is typically
- * the thread calling join() or similar.
+ * often different than that of the thread being freed: the caller is
+ * typically the thread calling join() or similar.
  */
 static void
-S_ithread_free(pTHX_ ithread *thread)
+S_ithread_dec_free(pTHX_ ithread *thread)
   PERL_TSA_RELEASE(thread->mutex)
 {
 #ifdef WIN32
@@ -440,7 +440,7 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
     ithread *thread = (ithread *)mg->mg_ptr;
     PERL_UNUSED_ARG(sv);
     MUTEX_LOCK(&thread->mutex);
-    S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
+    S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
     return (0);
 }
 
@@ -741,8 +741,15 @@ S_ithread_run(void * arg)
      */
     aTHX = MY_POOL.main_thread.interp;
 
+    /* Typically the thread isn't freed at this point:
+     * the creator of the thread likely still holds a ref to it,
+     * and the thread has an extra ref count if it hasn't been joined
+     * or detached yet.
+     * But a thread which has been detached and whose creator frees the
+     * threads->new() object early on, could be freed here.
+     */
     MUTEX_LOCK(&thread->mutex);
-    S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
+    S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -1080,7 +1087,7 @@ S_ithread_create(
 #endif
     {
         thread->state |= PERL_ITHR_NONVIABLE;
-        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
+        S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
             if (setstack_err) {
@@ -1454,7 +1461,7 @@ ithread_join(...)
          * to S_ithread_clear() which will notice that the interpreter
          * has already been freed, and so not do much further cleanup.
          */
-        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
+        S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 
         /* If no return values, then just return */
         if (! params) {
@@ -1531,7 +1538,7 @@ ithread_detach(...)
          * to S_ithread_clear() which will notice that the interpreter
          * has already been freed, and so not do much further cleanup.
          */
-        S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
+        S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 
 
 void
