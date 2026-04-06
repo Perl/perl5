@@ -164,6 +164,7 @@
 # define debprofdump()                          Perl_debprofdump(aTHX)
 # define debstack()                             Perl_debstack(aTHX)
 # define debstackptrs()                         Perl_debstackptrs(aTHX)
+# define defer_error(a)                         Perl_defer_error(aTHX_ a)
 # define delimcpy                               Perl_delimcpy
 # define despatch_signals()                     Perl_despatch_signals(aTHX)
 # define die_sv(a)                              Perl_die_sv(aTHX_ a)
@@ -502,7 +503,6 @@
 # define pv_escape(a,b,c,d,e,f)                 Perl_pv_escape(aTHX_ a,b,c,d,e,f)
 # define pv_pretty(a,b,c,d,e,f,g)               Perl_pv_pretty(aTHX_ a,b,c,d,e,f,g)
 # define pv_uni_display(a,b,c,d,e)              Perl_pv_uni_display(aTHX_ a,b,c,d,e)
-# define qerror(a)                              Perl_qerror(aTHX_ a)
 # define rcpv_copy(a)                           Perl_rcpv_copy(aTHX_ a)
 # define rcpv_free(a)                           Perl_rcpv_free(aTHX_ a)
 # define rcpv_new(a,b,c)                        Perl_rcpv_new(aTHX_ a,b,c)

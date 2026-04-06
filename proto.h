@@ -994,6 +994,11 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
         assert(sv)
 
 PERL_CALLCONV void
+Perl_defer_error(pTHX_ SV *err)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_DEFER_ERROR
+
+PERL_CALLCONV void
 Perl_delete_eval_scope(pTHX)
         Perl_attribute_nonnull_aTHX
         __attribute__visibility__("hidden");
@@ -4688,11 +4693,6 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_PV_UNI_DISPLAY         \
         assert(dsv); assert(spv)
-
-PERL_CALLCONV void
-Perl_qerror(pTHX_ SV *err)
-        Perl_attribute_nonnull_aTHX;
-#define PERL_ARGS_ASSERT_QERROR
 
 PERL_CALLCONV char *
 Perl_rcpv_copy(pTHX_ char * const pv)

@@ -1957,7 +1957,7 @@ Perl_rpp_obliterate_stack_to(pTHX_ I32 ix)
 }
 
 /*
-=for apidoc qerror
+=for apidoc defer_error
 
 Called to report compilation errors, doing one of:
 
@@ -1990,9 +1990,9 @@ This is intended for use during compilation.
 */
 
 void
-Perl_qerror(pTHX_ SV *err)
+Perl_defer_error(pTHX_ SV *err)
 {
-    PERL_ARGS_ASSERT_QERROR;
+    PERL_ARGS_ASSERT_DEFER_ERROR;
     if (err!=NULL) {
         if (PL_in_eval) {
             if (PL_in_eval & EVAL_KEEPERR) {
