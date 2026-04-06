@@ -13868,13 +13868,13 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
             ck_warner_d(packWARN(WARN_SYNTAX), "%" SVf, SVfARG(msg));
         }
         else {
-            qerror(msg);
+            defer_error(msg);
         }
     }
     /* if there was no message then this is a yyquit(), which is actualy handled
-     * by qerror() with a NULL argument */
+     * by defer_error() with a NULL argument */
     if (s == NULL)
-        qerror(NULL);
+        defer_error(NULL);
 
     PL_in_my = 0;
     PL_in_my_stash = NULL;
@@ -14380,7 +14380,7 @@ S_parse_recdescent(pTHX_ int gramtype, I32 fakeeof)
     SAVEI8(PL_lex_fakeeof);
     PL_lex_fakeeof = (U8)fakeeof;
     if(yyparse(gramtype) && !PL_parser->error_count)
-        qerror(mess("Parse error"));
+        defer_error(mess("Parse error"));
 }
 
 #define parse_recdescent_for_op(g,p) S_parse_recdescent_for_op(aTHX_ g,p)
@@ -14407,7 +14407,7 @@ S_parse_expr(pTHX_ I32 fakeeof, U32 flags)
     exprop = parse_recdescent_for_op(GRAMEXPR, fakeeof);
     if (!exprop && !(flags & PARSE_OPTIONAL)) {
         if (!PL_parser->error_count)
-            qerror(mess("Parse error"));
+            defer_error(mess("Parse error"));
         exprop = newOP(OP_NULL, 0);
     }
     return exprop;
@@ -14697,7 +14697,7 @@ Perl_parse_label(pTHX_ U32 flags)
             if (flags & PARSE_OPTIONAL) {
                 return NULL;
             } else {
-                qerror(mess("Parse error"));
+                defer_error(mess("Parse error"));
                 return newSVpvs("x");
             }
         }
@@ -14783,7 +14783,7 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     stmtseqop = parse_recdescent_for_op(GRAMSTMTSEQ, LEX_FAKEEOF_CLOSING);
     c = lex_peek_unichar(0);
     if (c != -1 && c != /*{*/'}')
-        qerror(mess("Parse error"));
+        defer_error(mess("Parse error"));
     return stmtseqop;
 }
 

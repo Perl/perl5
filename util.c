@@ -2206,7 +2206,7 @@ Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
     SV * const msv = vmess(pat, args);
 
     if (PL_parser && PL_parser->error_count) {
-        qerror(msv);
+        defer_error(msv);
     }
     else {
         invoke_exception_hook(msv, FALSE);
