@@ -1419,10 +1419,17 @@ sub render {
     my ( $self, $op, $combine, $opts_ref, $def_fmt )= @_;
 
     my @submacros;
-    my $macro= sprintf "#define $def_fmt\n( %s )", "",
-                       $self->_render( $op, $combine, 0, $opts_ref, $def_fmt,
+    my $rendered = $self->_render( $op, $combine, 0, $opts_ref, $def_fmt,
                                                                  \@submacros);
 
+    # Wrap length-returning macros in a cast so that ternaries returning
+    # integer constants don't trigger -Wtautological-constant-compare 
+    # when used in boolean context.
+    if (($opts_ref->{ret_type} // 'len') eq 'len') {
+        $rendered = "(STRLEN)( $rendered )";
+    }
+
+    my $macro= sprintf "#define $def_fmt\n( %s )", "", $rendered;
     return join "\n\n",
             map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) }
                                                             @submacros, $macro;
