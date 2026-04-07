@@ -636,7 +636,7 @@ You may want to add additional documents to your distribution.
 
 =over 4
 
-=item F<LICENSE>
+=item F<LICENSE> or F<COPYING>
 
 This contains the full text of the license.
 
