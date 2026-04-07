@@ -3667,29 +3667,30 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             RXp_SUBOFFSET(prog) = min;
             RXp_SUBLEN(prog) = sublen;
             RXp_MATCH_COPIED_on(prog);
-        }
-        RXp_SUBCOFFSET(prog) = RXp_SUBOFFSET(prog);
-        if (RXp_SUBOFFSET(prog) && utf8_target) {
-            /* Convert byte offset to chars.
-             * XXX ideally should only compute this if @-/@+
-             * has been seen, a la PL_sawampersand ??? */
 
-            /* If there's a direct correspondence between the
-             * string which we're matching and the original SV,
-             * then we can use the utf8 len cache associated with
-             * the SV. In particular, it means that under //g,
-             * sv_pos_b2u() will use the previously cached
-             * position to speed up working out the new length of
-             * subcoffset, rather than counting from the start of
-             * the string each time. This stops
-             *   $x = "\x{100}" x 1E6; 1 while $x =~ /(.)/g;
-             * from going quadratic */
-            if (SvPOKp(sv) && SvPVX(sv) == strbeg)
-                RXp_SUBCOFFSET(prog) = sv_pos_b2u_flags(sv, RXp_SUBCOFFSET(prog),
-                                                SV_GMAGIC|SV_CONST_RETURN);
-            else
-                RXp_SUBCOFFSET(prog) = utf8_length((U8*)strbeg,
-                                    (U8*)(strbeg+RXp_SUBOFFSET(prog)));
+            RXp_SUBCOFFSET(prog) = RXp_SUBOFFSET(prog);
+            if (RXp_SUBOFFSET(prog) && utf8_target) {
+                /* Convert byte offset to chars.
+                 * XXX ideally should only compute this if @-/@+
+                 * has been seen, a la PL_sawampersand ??? */
+
+                /* If there's a direct correspondence between the
+                 * string which we're matching and the original SV,
+                 * then we can use the utf8 len cache associated with
+                 * the SV. In particular, it means that under //g,
+                 * sv_pos_b2u() will use the previously cached
+                 * position to speed up working out the new length of
+                 * subcoffset, rather than counting from the start of
+                 * the string each time. This stops
+                 *   $x = "\x{100}" x 1E6; 1 while $x =~ /(.)/g;
+                 * from going quadratic */
+                if (SvPOKp(sv) && SvPVX(sv) == strbeg)
+                    RXp_SUBCOFFSET(prog) = sv_pos_b2u_flags(sv, RXp_SUBCOFFSET(prog),
+                                                    SV_GMAGIC|SV_CONST_RETURN);
+                else
+                    RXp_SUBCOFFSET(prog) = utf8_length((U8*)strbeg,
+                                        (U8*)(strbeg+RXp_SUBOFFSET(prog)));
+            }
         }
     }
     else {
