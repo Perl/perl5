@@ -2851,6 +2851,7 @@ Adp	|char * |pv_uni_display |NN SV *dsv				\
 				|STRLEN len				\
 				|STRLEN pvlim				\
 				|UV flags
+ADdmp	|void	|qerror 	|NULLOK SV *err
 Adp	|char * |rcpv_copy	|NULLOK char * const pv
 Adp	|char * |rcpv_free	|NULLOK char * const pv
 Aadp	|char * |rcpv_new	|NULLOK const char * const pv		\

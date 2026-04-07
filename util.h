@@ -23,6 +23,18 @@
 #  define Perl_die_nocontext  Perl_die
 #endif
 
+/*
+=for apidoc_section $warning
+
+=for apidoc qerror
+
+A deprecated alias for L</defer_error>.
+
+=cut
+*/
+
+#define qerror(err) defer_error(err)
+
 #ifdef VMS
 #  define PERL_FILE_IS_ABSOLUTE(f) \
         (*(f) == '/'							\
