@@ -11528,7 +11528,8 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
     regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
     regmatch_slab *s;
 
-    Safefree(aux->poscache);
+    if (aux->poscache)
+        Safefree(aux->poscache);
 
     if (eval_state) {
 
