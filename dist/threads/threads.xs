@@ -231,6 +231,7 @@ S_ithread_clear(pTHX_ ithread *thread)
 #ifndef WIN32
     sigset_t origmask;
 #endif
+    bool self_thx; /* the caller's interpreter is the same as the thread's */
 
     assert(((thread->state & PERL_ITHR_FINISHED) &&
             (thread->state & PERL_ITHR_UNCALLABLE))
@@ -250,6 +251,7 @@ S_ithread_clear(pTHX_ ithread *thread)
 #endif
 
     interp = thread->interp;
+    self_thx = (aTHX == interp);
     if (interp) {
         dTHXa(interp);
 
@@ -279,9 +281,14 @@ S_ithread_clear(pTHX_ ithread *thread)
         perl_free(interp);
         thread->interp = NULL;
     }
+    if (self_thx)
+        aTHX = NULL;
 
     PERL_SET_CONTEXT(aTHX);
+
 #if PERL_VERSION_GE(5, 37, 5) && PERL_VERSION_LT(5, 45, 0)
+    /* between those releases, this was a global var rather than per
+     * interpreter */
     PL_veto_switch_non_tTHX_context = save_veto;
 #endif
 
@@ -307,6 +314,7 @@ S_ithread_dec_free(pTHX_ ithread *thread)
     HANDLE handle;
 #endif
     dMY_POOL;
+    bool self_thx; /* the caller's interpreter is the same as the thread's */
 
     if (! (thread->state & PERL_ITHR_NONVIABLE)) {
         assert(thread->count > 0);
@@ -336,7 +344,15 @@ S_ithread_dec_free(pTHX_ ithread *thread)
 
     /* Thread is now disowned */
     MUTEX_LOCK(&thread->mutex);
+    self_thx = (aTHX == thread->interp);
     S_ithread_clear(aTHX_ thread);
+    if (self_thx)
+        aTHX = NULL; /* we just freed the interpreter */
+        /* NB: if anything subsequentially SEGVs due to dereferencing a
+         * NULL my_perl, its likely that the dereferencing code needs a
+         * non-NULL guard adding, rather than that setting it to NULL here
+         * was wrong.
+         */
 
 #ifdef WIN32
     handle = thread->handle;
@@ -351,7 +367,23 @@ S_ithread_dec_free(pTHX_ ithread *thread)
     }
 #endif
 
+
+#ifdef PERL_IMPLICIT_SYS
+    if (!aTHX) {
+        /* under PERL_IMPLICIT_SYS, PerlMemShared_free() uses
+         * my_perl->IMemShared to access a function pointer. Since there
+         * is no interpreter, use the main one instead (which is
+         * guaranteed to be freed last). This isn't ideal, but is better
+         * than nothing.
+         */
+        aTHX = MY_POOL.main_thread.interp;
+        PerlMemShared_free(thread);
+        aTHX = NULL;
+    }
+    else
+#else
     PerlMemShared_free(thread);
+#endif
 
     /* total_threads >= 1 is used to veto cleanup by the main thread,
      * should it happen to exit while other threads still exist.
@@ -734,12 +766,6 @@ S_ithread_run(void * arg)
         (void)S_jmpenv_run(aTHX_ 2, thread, NULL, &exit_app, &exit_code);
         my_exit(exit_code);
     }
-
-    /* At this point, the interpreter may have been freed, so call
-     * free in the context of the 'main' interpreter which
-     * can't have been freed due to the veto_cleanup mechanism.
-     */
-    aTHX = MY_POOL.main_thread.interp;
 
     /* Typically the thread isn't freed at this point:
      * the creator of the thread likely still holds a ref to it,
