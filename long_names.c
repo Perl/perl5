@@ -496,6 +496,14 @@ Perl_phase_name(pTHX_ enum perl_phase phase)
 }
 
 void
+Perl_qerror(pTHX_ SV *err)
+{
+    PERL_ARGS_ASSERT_QERROR;
+
+    qerror(err);
+}
+
+void
 Perl_resume_compcv_and_save(pTHX_ struct suspended_compcv *buffer)
 {
     PERL_ARGS_ASSERT_RESUME_COMPCV_AND_SAVE;

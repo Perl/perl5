@@ -15102,6 +15102,12 @@ Perl_phase_name(pTHX_ enum perl_phase phase)
 # define PERL_ARGS_ASSERT_PHASE_NAME
 
 PERL_CALLCONV void
+Perl_qerror(pTHX_ SV *err)
+        Perl_attribute_nonnull_aTHX
+        __attribute__deprecated__;
+# define PERL_ARGS_ASSERT_QERROR
+
+PERL_CALLCONV void
 Perl_resume_compcv_and_save(pTHX_ struct suspended_compcv *buffer)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
