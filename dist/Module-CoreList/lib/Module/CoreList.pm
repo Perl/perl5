@@ -22533,7 +22533,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'DynaLoader'            => '1.54_01',
             'Module::CoreList'      => '5.20250118_38',
             'Module::CoreList::Utils'=> '5.20250118_38',
-            'Pod::Functions::Functions'=> '1.14',
         },
         removed => {
         }
@@ -22547,7 +22546,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'File::Spec'            => '3.91',
             'Module::CoreList'      => '5.20250118_40',
             'Module::CoreList::Utils'=> '5.20250118_40',
-            'Pod::Functions::Functions'=> '1.14',
             'warnings'              => '1.70',
         },
         removed => {
