@@ -529,6 +529,21 @@ For the first RC release leading up to a BLEAD-FINAL release, update
 F<pod/perlpolicy.pod>: both the version support status table and the
 description of which releases are now "officially" supported.
 
+In the release announcement for RC releases, the C<END OF SUPPORT NOTE>
+placeholder in F<Porting/release_announcement_template.txt> should be
+replaced with:
+
+    Support for the 5.[VERSION].x release series will end shortly.
+    Please refer to L<perlpolicy> for version support information.
+
+For a BLEAD-FINAL release, the release announcement placeholder should
+be replaced with:
+
+    Support for the 5.[VERSION].x release series has now ended.
+    Please refer to L<perlpolicy> for version support information.
+
+MAINT releases should omit the C<END OF SUPPORT NOTE> placeholder.
+
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
 you're releasing, unless you're absolutely sure the release you're about to
@@ -567,6 +582,24 @@ previous version bump.
 When the version number is bumped, you should also update Module::CoreList
 (as described below in L</"Update Module::CoreList">) to reflect the new
 version number.
+
+=for checklist skip RC BLEAD-FINAL MAINT
+
+=head3 Prepare an end of support note (if necessary)
+
+For the I<final> BLEAD-POINT release in a development cycle, the
+C<END OF SUPPORT NOTE> placeholder in
+F<Porting/release_announcement_template.txt> should note the upcoming
+end of support for the oldest of the currently supported release series.
+Check L<perlpolicy> to confirm the affected VERSION.
+
+The format for this note (and subsequent RC releases) should be:
+
+    Support for the 5.[VERSION].x release series will end shortly.
+    Please refer to L<perlpolicy> for version support information.
+
+For all other BLEAD-POINT releases, there is no need for an
+C<END OF SUPPORT NOTE>.
 
 =head3 Update INSTALL
 
@@ -1347,27 +1380,6 @@ Disarm the F<patchlevel.h> change; for example,
 Be sure to commit your change:
 
  $ git commit -m 'Disarm RCnnn bump' patchlevel.h
-
-=for checklist skip MAINT
-
-=head3 Prepare an end of support note (if necessary)
-
-As a stable release approaches, the C<END OF SUPPORT NOTE> placeholder in
-F<Porting/release_announcement_template.txt> must mention the upcoming end
-of support for the oldest of the currently supported release series.
-Check L<perlpolicy> to confirm the affected VERSION.
-
-The I<final> BLEAD-POINT and RC releases should state:
-
- Support for the 5.[VERSION].x release series will end shortly.
- Please refer to L<perlpolicy> for version support information.
-
-The BLEAD-FINAL release should state:
-
- Support for the 5.[VERSION].x release series has now ended.
- Please refer to L<perlpolicy> for version support information.
-
-Non-final BLEAD-POINT and MAINT releases should omit this placeholder.
 
 =head3 Announce to p5p
 
