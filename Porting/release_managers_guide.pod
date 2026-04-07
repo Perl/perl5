@@ -48,6 +48,18 @@ last component is 0, it subtracts 2 from the middle component:
     5.40.0  ->  5.38.0
     5.41.0  ->  5.39.0
 
+=item C<5.OLDSUPPORT>
+
+The oldest release series that is officially eligible for support, as per
+F<pod/perlpolicy.pod>. A lookup isn't actually performed, instead the
+assumption is baked in that only the most recent two series are supported.
+
+The current middle component is taken and a fixed value subtracted:
+
+* 2 if this is a MAINT release
+* 3 if this is a BLEAD-POINT release
+* 4 for all other release types
+
 =back
 
 =head1 SYNOPSIS
@@ -529,20 +541,21 @@ For the first RC release leading up to a BLEAD-FINAL release, update
 F<pod/perlpolicy.pod>: both the version support status table and the
 description of which releases are now "officially" supported.
 
-In the release announcement for RC releases, the C<END OF SUPPORT NOTE>
-placeholder in F<Porting/release_announcement_template.txt> should be
-replaced with:
+That description should match up with these following notes, used to
+fill the C<END OF SUPPORT NOTE> placeholder when preparing the
+release announcement email.
 
-    Support for the 5.[VERSION].x release series will end shortly.
+For a BLEAD-FINAL RC release:
+
+    Support for the 5.OLDSUPPORT.x release series will end shortly.
     Please refer to L<perlpolicy> for version support information.
 
-For a BLEAD-FINAL release, the release announcement placeholder should
-be replaced with:
+For a BLEAD-FINAL release:
 
-    Support for the 5.[VERSION].x release series has now ended.
+    Support for the 5.OLDSUPPORT.x release series has now ended.
     Please refer to L<perlpolicy> for version support information.
 
-MAINT releases should omit the C<END OF SUPPORT NOTE> placeholder.
+MAINT release announcements must not contain C<END OF SUPPORT NOTE> text.
 
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
@@ -584,19 +597,18 @@ When the version number is bumped, you should also update Module::CoreList
 version number.
 
 =for checklist skip RC BLEAD-FINAL MAINT
-
 =head3 Prepare an end of support note (if necessary)
 
 For the I<final> BLEAD-POINT release in a development cycle, the
-C<END OF SUPPORT NOTE> placeholder in
-F<Porting/release_announcement_template.txt> should note the upcoming
-end of support for the oldest of the currently supported release series.
-Check L<perlpolicy> to confirm the affected VERSION.
+release announcement email should note the upcoming end of support
+for the oldest of the currently supported release series.
 
-The format for this note (and subsequent RC releases) should be:
+Replace the C<END OF SUPPORT NOTE> placeholder with this text:
 
-    Support for the 5.[VERSION].x release series will end shortly.
+    Support for the 5.OLDSUPPORT.x release series will end shortly.
     Please refer to L<perlpolicy> for version support information.
+
+Check L<perlpolicy> to confirm the affected VERSION before sending!
 
 For all other BLEAD-POINT releases, there is no need for an
 C<END OF SUPPORT NOTE>.
