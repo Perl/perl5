@@ -134,7 +134,7 @@ pass("loaded");
                                     "err cond_wait not locked");
 
     eval q{&cond_timedwait(\$lock, 0.0);};
-    like($@, qr/You need a lock before you can cond_wait/, # XXX fixme
+    like($@, qr/You need a lock before you can cond_timedwait/,
                                     "err cond_timedwait not locked");
 
     eval q{&cond_signal(1);};

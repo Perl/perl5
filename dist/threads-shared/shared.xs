@@ -1386,6 +1386,76 @@ Perl_sharedsv_init(pTHX)
 #endif
 }
 
+
+/* common function to implement the cond_wait() and cond_timedwait()
+ * XS functions. For the latter, timed is true.
+ */
+
+static int
+S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
+{
+    SV *ssv;
+    perl_cond* user_condition;
+    int locks;
+    user_lock *ul;
+    int ret;
+    const char *caller = timed ? "cond_timedwait" : "cond_wait";
+
+    if (!SvROK(ref_cond))
+        Perl_croak(aTHX_ "Argument to %s needs to be passed as ref", caller);
+    ref_cond = SvRV(ref_cond);
+    if (SvROK(ref_cond))
+        ref_cond = SvRV(ref_cond);
+
+    ssv = Perl_sharedsv_find(aTHX_ ref_cond);
+    if (!ssv)
+        Perl_croak(aTHX_ "%s can only be used on shared values", caller);
+    ul = S_get_userlock(aTHX_ ssv, 1);
+
+    user_condition = &ul->user_cond;
+    if (ref_lock && (ref_cond != ref_lock)) {
+        if (! SvROK(ref_lock))
+            Perl_croak(aTHX_ "%s lock needs to be passed as ref", caller);
+        ref_lock = SvRV(ref_lock);
+        if (SvROK(ref_lock)) ref_lock = SvRV(ref_lock);
+        ssv = Perl_sharedsv_find(aTHX_ ref_lock);
+        if (! ssv)
+            Perl_croak(aTHX_ "%s lock must be a shared value", caller);
+        ul = S_get_userlock(aTHX_ ssv, 1);
+    }
+
+    if (ul->lock.owner != aTHX)
+        Perl_croak(aTHX_ "You need a lock before you can %s", caller);
+
+    /* Stealing the members of the lock object worries me - NI-S */
+    MUTEX_LOCK(&ul->lock.mutex);
+    ul->lock.owner = NULL;
+    locks = ul->lock.locks;
+    ul->lock.locks = 0;
+
+    /* Since we are releasing the lock here, we need to tell other
+     * people that it is ok to go ahead and use it */
+    COND_SIGNAL(&ul->lock.cond);
+
+    if (timed)
+        ret = Perl_sharedsv_cond_timedwait(user_condition,
+                                                &ul->lock.mutex, abs);
+    else {
+        ret = 0;
+        COND_WAIT(user_condition, &ul->lock.mutex);
+    }
+
+    while (ul->lock.owner != NULL) {
+        /* OK -- must reacquire the lock... */
+        COND_WAIT(&ul->lock.cond, &ul->lock.mutex);
+    }
+    ul->lock.owner = aTHX;
+    ul->lock.locks = locks;
+    MUTEX_UNLOCK(&ul->lock.mutex);
+    return ret;
+}
+
+
 #endif /* USE_ITHREADS */
 
 MODULE = threads::shared        PACKAGE = threads::shared::tie
@@ -1653,104 +1723,15 @@ share(SV *myref)
 void
 cond_wait(SV *ref_cond, SV *ref_lock = 0)
     PROTOTYPE: \[$@%];\[$@%]
-    PREINIT:
-        SV *ssv;
-        perl_cond* user_condition;
-        int locks;
-        user_lock *ul;
     CODE:
-        if (!SvROK(ref_cond))
-            Perl_croak(aTHX_ "Argument to cond_wait needs to be passed as ref");
-        ref_cond = SvRV(ref_cond);
-        if (SvROK(ref_cond))
-            ref_cond = SvRV(ref_cond);
-        ssv = Perl_sharedsv_find(aTHX_ ref_cond);
-        if (! ssv)
-            Perl_croak(aTHX_ "cond_wait can only be used on shared values");
-        ul = S_get_userlock(aTHX_ ssv, 1);
-
-        user_condition = &ul->user_cond;
-        if (ref_lock && (ref_cond != ref_lock)) {
-            if (!SvROK(ref_lock))
-                Perl_croak(aTHX_ "cond_wait lock needs to be passed as ref");
-            ref_lock = SvRV(ref_lock);
-            if (SvROK(ref_lock)) ref_lock = SvRV(ref_lock);
-            ssv = Perl_sharedsv_find(aTHX_ ref_lock);
-            if (! ssv)
-                Perl_croak(aTHX_ "cond_wait lock must be a shared value");
-            ul = S_get_userlock(aTHX_ ssv, 1);
-        }
-        if (ul->lock.owner != aTHX)
-            croak("You need a lock before you can cond_wait");
-
-        /* Stealing the members of the lock object worries me - NI-S */
-        MUTEX_LOCK(&ul->lock.mutex);
-        ul->lock.owner = NULL;
-        locks = ul->lock.locks;
-        ul->lock.locks = 0;
-
-        /* Since we are releasing the lock here, we need to tell other
-         * people that it is ok to go ahead and use it */
-        COND_SIGNAL(&ul->lock.cond);
-        COND_WAIT(user_condition, &ul->lock.mutex);
-        while (ul->lock.owner != NULL) {
-            /* OK -- must reacquire the lock */
-            COND_WAIT(&ul->lock.cond, &ul->lock.mutex);
-        }
-        ul->lock.owner = aTHX;
-        ul->lock.locks = locks;
-        MUTEX_UNLOCK(&ul->lock.mutex);
+        (void)S_do_cond_timedwait(aTHX_ ref_cond, 0.0, ref_lock, 0);
 
 
 int
 cond_timedwait(SV *ref_cond, double abs, SV *ref_lock = 0)
     PROTOTYPE: \[$@%]$;\[$@%]
-    PREINIT:
-        SV *ssv;
-        perl_cond* user_condition;
-        int locks;
-        user_lock *ul;
     CODE:
-        if (! SvROK(ref_cond))
-            Perl_croak(aTHX_ "Argument to cond_timedwait needs to be passed as ref");
-        ref_cond = SvRV(ref_cond);
-        if (SvROK(ref_cond))
-            ref_cond = SvRV(ref_cond);
-        ssv = Perl_sharedsv_find(aTHX_ ref_cond);
-        if (! ssv)
-            Perl_croak(aTHX_ "cond_timedwait can only be used on shared values");
-        ul = S_get_userlock(aTHX_ ssv, 1);
-
-        user_condition = &ul->user_cond;
-        if (ref_lock && (ref_cond != ref_lock)) {
-            if (! SvROK(ref_lock))
-                Perl_croak(aTHX_ "cond_timedwait lock needs to be passed as ref");
-            ref_lock = SvRV(ref_lock);
-            if (SvROK(ref_lock)) ref_lock = SvRV(ref_lock);
-            ssv = Perl_sharedsv_find(aTHX_ ref_lock);
-            if (! ssv)
-                Perl_croak(aTHX_ "cond_timedwait lock must be a shared value");
-            ul = S_get_userlock(aTHX_ ssv, 1);
-        }
-        if (ul->lock.owner != aTHX)
-            Perl_croak(aTHX_ "You need a lock before you can cond_wait");
-
-        MUTEX_LOCK(&ul->lock.mutex);
-        ul->lock.owner = NULL;
-        locks = ul->lock.locks;
-        ul->lock.locks = 0;
-        /* Since we are releasing the lock here, we need to tell other
-         * people that it is ok to go ahead and use it */
-        COND_SIGNAL(&ul->lock.cond);
-        RETVAL = Perl_sharedsv_cond_timedwait(user_condition, &ul->lock.mutex, abs);
-        while (ul->lock.owner != NULL) {
-            /* OK -- must reacquire the lock... */
-            COND_WAIT(&ul->lock.cond, &ul->lock.mutex);
-        }
-        ul->lock.owner = aTHX;
-        ul->lock.locks = locks;
-        MUTEX_UNLOCK(&ul->lock.mutex);
-
+        RETVAL = S_do_cond_timedwait(aTHX_ ref_cond, abs, ref_lock, 1);
         if (RETVAL == 0)
             XSRETURN_UNDEF;
     OUTPUT:
