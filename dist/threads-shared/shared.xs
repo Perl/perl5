@@ -1764,48 +1764,34 @@ cond_timedwait(SV *ref_cond, double abs, SV *ref_lock = 0)
 
 void
 cond_signal(SV *myref)
+    ALIAS:
+        cond_broadcast = 1
+
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
         user_lock *ul;
+        const char *name = ix ? "cond_broadcast" : "cond_signal";
     CODE:
         if (! SvROK(myref))
-            Perl_croak(aTHX_ "Argument to cond_signal needs to be passed as ref");
+            Perl_croak(aTHX_ "Argument to %s needs to be passed as ref",
+                        name);
         myref = SvRV(myref);
         if (SvROK(myref))
             myref = SvRV(myref);
         ssv = Perl_sharedsv_find(aTHX_ myref);
         if (! ssv)
-            Perl_croak(aTHX_ "cond_signal can only be used on shared values");
+            Perl_croak(aTHX_ "%s can only be used on shared values", name);
+
         ul = S_get_userlock(aTHX_ ssv, 1);
         if (ckWARN(WARN_THREADS) && ul->lock.owner != aTHX) {
             Perl_warner(aTHX_ packWARN(WARN_THREADS),
-                            "cond_signal() called on unlocked variable");
+                            "%s() called on unlocked variable", name);
         }
-        COND_SIGNAL(&ul->user_cond);
-
-
-void
-cond_broadcast(SV *myref)
-    PROTOTYPE: \[$@%]
-    PREINIT:
-        SV *ssv;
-        user_lock *ul;
-    CODE:
-        if (! SvROK(myref))
-            Perl_croak(aTHX_ "Argument to cond_broadcast needs to be passed as ref");
-        myref = SvRV(myref);
-        if (SvROK(myref))
-            myref = SvRV(myref);
-        ssv = Perl_sharedsv_find(aTHX_ myref);
-        if (! ssv)
-            Perl_croak(aTHX_ "cond_broadcast can only be used on shared values");
-        ul = S_get_userlock(aTHX_ ssv, 1);
-        if (ckWARN(WARN_THREADS) && ul->lock.owner != aTHX) {
-            Perl_warner(aTHX_ packWARN(WARN_THREADS),
-                            "cond_broadcast() called on unlocked variable");
-        }
-        COND_BROADCAST(&ul->user_cond);
+        if (ix)
+            COND_BROADCAST(&ul->user_cond);
+        else
+            COND_SIGNAL(&ul->user_cond);
 
 
 SV*
