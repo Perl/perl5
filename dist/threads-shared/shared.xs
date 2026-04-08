@@ -1395,9 +1395,8 @@ static int
 S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
 {
     SV *ssv;
-    perl_cond* user_condition;
     int locks;
-    user_lock *ul;
+    user_lock *cl, *ul; /* the cond/lock pair, and the lock, if different */
     int ret;
     const char *caller = timed ? "cond_timedwait" : "cond_wait";
 
@@ -1410,9 +1409,9 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
     ssv = Perl_sharedsv_find(aTHX_ ref_cond);
     if (!ssv)
         Perl_croak(aTHX_ "%s can only be used on shared values", caller);
-    ul = S_get_userlock(aTHX_ ssv, 1);
+    cl = S_get_userlock(aTHX_ ssv, 1);
+    ul = cl; /* use same lock by default */
 
-    user_condition = &ul->user_cond;
     if (ref_lock && (ref_cond != ref_lock)) {
         if (! SvROK(ref_lock))
             Perl_croak(aTHX_ "%s lock needs to be passed as ref", caller);
@@ -1457,11 +1456,11 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
      */
 
     if (timed)
-        ret = Perl_sharedsv_cond_timedwait(user_condition,
-                                                &ul->lock.mutex, abs);
+        ret = Perl_sharedsv_cond_timedwait(&cl->user_cond,
+                                           &ul->lock.mutex, abs);
     else {
         ret = 0;
-        COND_WAIT(user_condition, &ul->lock.mutex);
+        COND_WAIT(&cl->user_cond, &ul->lock.mutex);
     }
 
     /* ------------------------------------------------------------------
@@ -1476,6 +1475,7 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
     ul->lock.owner = aTHX;
     ul->lock.locks = locks;
     MUTEX_UNLOCK(&ul->lock.mutex);
+
     return ret;
 }
 
