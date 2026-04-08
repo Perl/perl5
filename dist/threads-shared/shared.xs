@@ -1770,7 +1770,7 @@ cond_signal(SV *myref)
     PROTOTYPE: \[$@%]
     PREINIT:
         SV *ssv;
-        user_lock *ul;
+        user_lock *cl;
         const char *name = ix ? "cond_broadcast" : "cond_signal";
     CODE:
         if (! SvROK(myref))
@@ -1783,15 +1783,15 @@ cond_signal(SV *myref)
         if (! ssv)
             Perl_croak(aTHX_ "%s can only be used on shared values", name);
 
-        ul = S_get_userlock(aTHX_ ssv, 1);
-        if (ckWARN(WARN_THREADS) && ul->lock.owner != aTHX) {
+        cl = S_get_userlock(aTHX_ ssv, 1);
+        if (ckWARN(WARN_THREADS) && cl->lock.owner != aTHX) {
             Perl_warner(aTHX_ packWARN(WARN_THREADS),
                             "%s() called on unlocked variable", name);
         }
         if (ix)
-            COND_BROADCAST(&ul->user_cond);
+            COND_BROADCAST(&cl->user_cond);
         else
-            COND_SIGNAL(&ul->user_cond);
+            COND_SIGNAL(&cl->user_cond);
 
 
 SV*
