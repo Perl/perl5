@@ -5423,8 +5423,8 @@ echo "int main(void) { return 0; }" > gcctest.c;
 if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest.out && $run ./gcctest; then
     echo "Yes, it does." >&4;
     if $test -s gcctest.out ; then
-        echo "But your platform does not like it:";
-        cat gcctest.out;
+        echo "But your platform does not like it:" >&4;
+        cat gcctest.out >&4;
     else
 	case "$ccflags" in
 	*$check*)
