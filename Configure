@@ -5420,8 +5420,9 @@ echo " ";
 echo "Checking if your compiler accepts $flag" >&4;
 [ "X$sysroot" != "X" ] && echo "For sysroot = $sysroot";
 echo "int main(void) { return 0; }" > gcctest.c;
-if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest.out && $run ./gcctest; then
+if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest_raw.out && $run ./gcctest; then
     echo "Yes, it does." >&4;
+    grep -v "when in C++ mode, this behavior is deprecated" gcctest_raw.out > gcctest.out;
     if $test -s gcctest.out ; then
         echo "But your platform does not like it:" >&4;
         cat gcctest.out >&4;
@@ -5758,7 +5759,7 @@ y)
 	;;
 n) echo "OK, that should do.";;
 esac
-$rm_try gcctest gcctest.out
+$rm_try gcctest gcctest.out gcctest_raw.out
 
 : define a shorthand compile call
 compile='
