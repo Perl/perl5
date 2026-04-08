@@ -1427,6 +1427,18 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
     if (ul->lock.owner != aTHX)
         Perl_croak(aTHX_ "You need a lock before you can %s", caller);
 
+    /* ------------------------------------------------------------------
+     * The following sections emulate the behaviour of the OS-level
+     * cond_wait():
+     *  - unlock the lock,
+     *  - block waiting for a signal,
+     *  - re-acquire the lock;
+     * with the first two being done atomically.
+     *
+     * First, *completely* unlock the perl-level lock (as opposed to
+     * the usual of just decrementing the lock count by one)
+     */
+
     /* Stealing the members of the lock object worries me - NI-S */
     MUTEX_LOCK(&ul->lock.mutex);
     ul->lock.owner = NULL;
@@ -1437,6 +1449,13 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
      * people that it is ok to go ahead and use it */
     COND_SIGNAL(&ul->lock.cond);
 
+    /* ------------------------------------------------------------------
+     * The perl lock is now unlocked, although we still hold the OS mutex.
+     * Now do the actual wait. While waiting, that mutex will be unlocked.
+     * (Note that the two COND_WAIT's below wait on different condition
+     * variables.)
+     */
+
     if (timed)
         ret = Perl_sharedsv_cond_timedwait(user_condition,
                                                 &ul->lock.mutex, abs);
@@ -1444,6 +1463,11 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
         ret = 0;
         COND_WAIT(user_condition, &ul->lock.mutex);
     }
+
+    /* ------------------------------------------------------------------
+     * Now acquire and relock the perl lock, restoring it to its original
+     * recursion level.
+     */
 
     while (ul->lock.owner != NULL) {
         /* OK -- must reacquire the lock... */
