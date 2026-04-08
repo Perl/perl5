@@ -56,6 +56,78 @@ pass("loaded");
     cond_broadcast($lock);
     like($w, qr/\Qcond_broadcast() called on unlocked variable/,
                                     "warn cond_broadcast not locked");
+
+    # Test for the "cond_wait() called on multiple locks" warning.
+    # To trigger this, we need to start two threads, which wait on the
+    # same condition variable but using different locks.
+    # We must make sure they aren't signalled (and thus run to
+    # completion) until after *both* are in wait() with their lock
+    # unlocked
+    #
+    # We skip this test if running under helgrind, because otherwise it
+    # triggers these false positives:
+    #     "cond is associated with a different mutex"
+    #     "dubious: associated lock is not held by any thread"
+
+    SKIP: {
+        skip "running under helgrind", 2
+            if (($ENV{LD_PRELOAD} || "") =~ /valgrind/);
+        my $cond :shared = 0;
+
+        my $t1 = threads->new(sub {
+                    lock $cond;
+                    $cond = 1;
+                    undef $w;
+                    cond_wait($cond);
+                    return $w;
+                }
+             );
+
+        # Pause until t1 is in wait and has unlocked
+        SYNC1:
+        while (1) {
+            {
+                lock $cond;
+                last SYNC1 if $cond == 1;
+            }
+            note "sleeping for 1 second to acquire \$cond";
+            sleep 1;
+        }
+
+        my $t2 = threads->new(sub {
+                    lock $lock;
+                    $lock = 2;
+                    undef $w;
+                    cond_wait($cond, $lock);
+                    return $w;
+                }
+             );
+
+        # Pause until t2 is in wait and has unlocked
+        SYNC2:
+        while (1) {
+            {
+                lock $lock;
+                last SYNC2 if $lock == 2;
+                last if $lock == 2;
+            }
+            note "sleeping for 1 second to acquire \$lock";
+            sleep 1;
+        }
+
+        # wake up both threads
+
+        cond_signal($cond);
+        cond_signal($cond);
+
+        my $w1 = $t1->join();
+        my $w2 = $t2->join();
+
+        is   $w1, undef,        "multiple locks: no warn on first";
+        like $w2, qr/\Qcond_wait() called on multiple locks/,
+                                "multiple locks: warn on second";
+    }
+
 }
 
 

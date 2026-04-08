@@ -316,10 +316,15 @@ recursive_lock_acquire(pTHX_ recursive_lock_t *lock, int defer_unlock,
    is used by user-level locking or condition code
 */
 
-typedef struct {
-    recursive_lock_t    lock;           /* For user-levl locks */
+typedef struct user_lock_struct user_lock;
+
+struct user_lock_struct {
+    recursive_lock_t    lock;           /* For user-level locks */
     perl_cond           user_cond;      /* For user-level conditions */
-} user_lock;
+    int                 waiters;        /* how many wait()ers on this cond */
+    user_lock          *cur_lock;       /* lock for current cond_wait() */
+};
+
 
 /* Magic used for attaching user_lock structs to shared SVs
 
@@ -513,6 +518,8 @@ S_get_userlock(pTHX_ SV* ssv, bool create)
         mg->mg_private = UL_MAGIC_SIG;  /* Set private signature */
         recursive_lock_init(aTHX_ &ul->lock);
         COND_INIT(&ul->user_cond);
+        ul->waiters  = 0;
+        ul->cur_lock = NULL;
         CALLER_CONTEXT;
     }
     LEAVE_LOCK;
@@ -1399,6 +1406,7 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
     user_lock *cl, *ul; /* the cond/lock pair, and the lock, if different */
     int ret;
     const char *caller = timed ? "cond_timedwait" : "cond_wait";
+    bool multi_lock = 0; /* multiple locks seen with same cond */
 
     if (!SvROK(ref_cond))
         Perl_croak(aTHX_ "Argument to %s needs to be passed as ref", caller);
@@ -1455,6 +1463,22 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
      * variables.)
      */
 
+    /* record what lock is currently being used with the condition var */
+    if (cl->waiters && cl->cur_lock != ul) {
+        if (ckWARN(WARN_THREADS))
+            Perl_warner(aTHX_ packWARN(WARN_THREADS),
+                            "%s() called on multiple locks", caller);
+        multi_lock = 1;
+        /* can't rely on just locking ul to protect cl fields, as
+         * different threads are using different ul's */
+        MUTEX_LOCK(&cl->lock.mutex);
+    }
+
+    cl->waiters++;
+    cl->cur_lock = ul;
+    if (multi_lock)
+        MUTEX_UNLOCK(&cl->lock.mutex);
+
     if (timed)
         ret = Perl_sharedsv_cond_timedwait(&cl->user_cond,
                                            &ul->lock.mutex, abs);
@@ -1472,6 +1496,16 @@ S_do_cond_timedwait(pTHX_ SV *ref_cond, double abs, SV *ref_lock, bool timed)
         /* OK -- must reacquire the lock... */
         COND_WAIT(&ul->lock.cond, &ul->lock.mutex);
     }
+
+    if (multi_lock)
+        MUTEX_LOCK(&cl->lock.mutex);
+
+     if (! --cl->waiters)
+         cl->cur_lock = NULL;
+
+    if (multi_lock)
+        MUTEX_UNLOCK(&cl->lock.mutex);
+
     ul->lock.owner = aTHX;
     ul->lock.locks = locks;
     MUTEX_UNLOCK(&ul->lock.mutex);
