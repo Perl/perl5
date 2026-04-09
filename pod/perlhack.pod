@@ -28,6 +28,7 @@ The perl source is in a git repository.  You can clone the repository
 with the following command:
 
   % git clone https://github.com/Perl/perl5.git perl
+  % cd perl
 
 =item * Ensure you're following the latest advice
 
