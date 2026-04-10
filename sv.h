@@ -227,6 +227,7 @@ typedef struct hek HEK;
         HE**	svu_hash;		\
         GP*	svu_gp;			\
         PerlIO *svu_fp;			\
+        SV**    svu_fields;             \
     }	sv_u				\
     SV_HEAD_DEBUG_
 
@@ -723,12 +724,11 @@ struct xobject {
     union xmgu_ xmg_u;
     SSize_t     xobject_maxfield;
     SSize_t     xobject_iter_sv_at; /* this is only used by Perl_sv_clear() */
-    SV**        xobject_fields;
 };
 
+#define ObjectFIELDS(inst)    ((inst)->sv_u.svu_fields)
 #define ObjectMAXFIELD(inst)  ((XPVOBJ *)SvANY(inst))->xobject_maxfield
 #define ObjectITERSVAT(inst)  ((XPVOBJ *)SvANY(inst))->xobject_iter_sv_at
-#define ObjectFIELDS(inst)    ((XPVOBJ *)SvANY(inst))->xobject_fields
 
 /* The following macros define implementation-independent predicates on SVs. */
 
