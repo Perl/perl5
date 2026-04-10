@@ -10912,7 +10912,8 @@ characters) into it.  The reference count for the
 SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
 string.  You are responsible for ensuring that the source string is at least
 C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
-Currently the only flag bits accepted are C<SVf_UTF8> and C<SVs_TEMP>.
+Currently the only flag bits accepted are C<SVf_UTF8>, C<SVs_TEMP>,
+C<SVf_READONLY> and C<SVf_PROTECT>.
 If C<SVs_TEMP> is set, then C<sv_2mortal()> is called on the result before
 returning.  If C<SVf_UTF8> is set, C<s>
 is considered to be in UTF-8 and the
@@ -10934,7 +10935,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
 
     /* All the flags we don't support must be zero.
        And we're new code so I'm going to assert this from the start.  */
-    assert(!(flags & ~(SVf_UTF8|SVs_TEMP)));
+    assert(!(flags & ~(SVf_UTF8|SVs_TEMP|SVf_READONLY|SVf_PROTECT)));
     sv = newSV_type(SVt_PV);
     sv_setpvn_fresh(sv,s,len);
 
