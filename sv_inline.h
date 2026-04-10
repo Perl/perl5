@@ -291,7 +291,7 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
 
     { sizeof(ALIGNED_TYPE_NAME(XPVOBJ)),
-      copy_length(XPVOBJ, xobject_fields),
+      copy_length(XPVOBJ, xobject_iter_sv_at),
       0,
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
