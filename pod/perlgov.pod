@@ -508,6 +508,8 @@ The current members of the Perl Core Team are:
 
 =over 4
 
+=item Andreas König <andk@cpan.org>
+
 =item Aristotle Pagaltzis <pagaltzis@gmx.de>
 
 =item Chad Granum <exodist7@gmail.com>
@@ -534,6 +536,8 @@ The current members of the Perl Core Team are:
 
 =item Leon Timmermans <fawaka@gmail.com>
 
+=item Lukas Mai <lukasmai.403+p5p@gmail.com>
+
 =item Matthew Horsfall <wolfsage@gmail.com>
 
 =item Max Maischein <cpan@corion.net>
@@ -542,7 +546,7 @@ The current members of the Perl Core Team are:
 
 =item Nicholas Clark <nick@ccl4.org>
 
-=item Nicolas R <atoomic@cpan.org>
+=item Nicolas R <nicolas@atoomic.org>
 
 =item Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
 
@@ -553,6 +557,8 @@ The current members of the Perl Core Team are:
 =item Steve Hay <steve.m.hay@googlemail.com>
 
 =item Stuart Mackintosh <stuart@perlfoundation.org>
+
+=item Thibault Duponchelle <thibault.duponchelle@gmail.com>
 
 =item Todd Rinaldo <toddr@cpanel.net>
 
