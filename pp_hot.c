@@ -6205,7 +6205,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
     while (PL_tmps_ix >= tmps_base) {
         SV* const sv = PL_tmps_stack[PL_tmps_ix--];
 #ifdef PERL_POISON
-        PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
+        PoisonNew(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *);
 #endif
         if (LIKELY(sv)) {
             SvTEMP_off(sv);
