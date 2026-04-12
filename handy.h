@@ -2814,6 +2814,7 @@ optimise.
 This is an architecture-independent macro that does a shallow copy of one
 structure to another.
 
+=for apidoc_section $debugging
 =for apidoc Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
 
 Fill up memory with a byte pattern (a byte repeated over and over
