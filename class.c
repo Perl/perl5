@@ -525,47 +525,41 @@ XS(class_reader_hv_xsub)
 #endif
             );
 
-            if (nkeys) {
+            if (tied) { /* HvUSEDKEYS(fsv) cannot be relied upon here */
+                HE *entry;
+                while ((entry = hv_iternext(hv))) {
+                    rpp_extend(2);
+#ifndef PERL_RC_STACK
+                    /* hv_iterkeysv and hv_iterval (for tied hashes)
+                     * return a sv_newmortal() SV. */
+                    rpp_push_1(hv_iterkeysv(entry));
+                    rpp_push_1(hv_iterval(hv, entry));
+#else
+                    /* We don't want to return mortal SVs */
+                    rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+
+                    SV* const valsv = newSV_type(SVt_NULL);
+                    if (HeKLEN(entry) == HEf_SVKEY)
+                        mg_copy(MUTABLE_SV(hv), valsv, (char*)HeKEY_sv(entry), HEf_SVKEY);
+                    else
+                        mg_copy(MUTABLE_SV(hv), valsv, HeKEY(entry), HeKLEN(entry));
+                    rpp_push_1_norc(valsv);
+
+#endif
+                }
+            } else if (nkeys) {
                 assert(nkeys <= (Size_t_MAX >> 1));
                 SSize_t ext = nkeys * 2;
                 (void)hv_iterinit(hv);
-
 #ifndef PERL_RC_STACK
-                /* Note: rpp_push_1_norc() calls sv_2mortal(), which will
-                 * extend the mortals stack should this turn out to be
-                 * insuffient when handling a tied hash. */
                 EXTEND_MORTAL(ext);
 #endif
-                if (tied) {
-                    HE *entry;
-                    while ((entry = hv_iternext(hv))) {
-                        rpp_extend(2);
-#ifndef PERL_RC_STACK
-                        /* hv_iterkeysv and hv_iterval (for tied hashes)
-                         * return a sv_newmortal() SV. */
-                        rpp_push_1(hv_iterkeysv(entry));
-                        rpp_push_1(hv_iterval(hv, entry));
-#else
-                        /* We don't want to return mortal SVs */
-                        rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+                rpp_extend(ext);
 
-                        SV* const valsv = newSV_type(SVt_NULL);
-                        if (HeKLEN(entry) == HEf_SVKEY)
-                            mg_copy(MUTABLE_SV(hv), valsv, (char*)HeKEY_sv(entry), HEf_SVKEY);
-                        else
-                            mg_copy(MUTABLE_SV(hv), valsv, HeKEY(entry), HeKLEN(entry));
-                        rpp_push_1_norc(valsv);
-
-#endif
-                    }
-                } else {
-                    rpp_extend(ext);
-
-                    HE *entry;
-                    while ((entry = hv_iternext(hv))) {
-                        rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
-                        rpp_push_1_norc(newSVsv(HeVAL(entry)));
-                    }
+                HE *entry;
+                while ((entry = hv_iternext(hv))) {
+                    rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+                    rpp_push_1_norc(newSVsv(HeVAL(entry)));
                 }
             }
             return;
