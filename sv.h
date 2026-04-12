@@ -1134,6 +1134,39 @@ Returns the vstring magic, or NULL if none
 
 Remove any string offset.
 
+=for apidoc Am|U32|SvMAGICAL|SV* sv
+Returns a U32 value indicating whether the SV has "magical" behavior
+attached.
+
+This includes any GET, SET, or RANDOM magic but it does not encompass
+overload functionality (also referred to as I<active magic>). For that,
+the separate C<SvAMAGIC()> macro should be used I<after> checking for
+GET magic.
+
+=for apidoc Am|U32|SvGMAGICAL|SV* sv
+Returns a U32 value indicating whether the SV has GET magic assigned.
+
+This is typically used prior to retrieving a value from an SV, normally
+via C<SvGETMAGIC()>.
+
+GET magic could modify the value being retrieved, substitute it for a
+different value, derive it on the fly, or invoke some other behaviour.
+
+=for apidoc Am|U32|SvSMAGICAL|SV* sv
+Returns a U32 value indicating whether the SV has SET magic assigned.
+
+This is typically used immediately after assigning a value to the SV,
+normally via C<SvSETMAGIC()>.
+
+SET magic could influence how or where a value is stored, transform the
+stored value, or trigger post-assignment functionality.
+
+=for apidoc Am|U32|SvRMAGICAL|SV* sv
+Returns a U32 value indicating whether the SV has RANDOM magic assigned.
+
+This is a catch-all category for magic that is not GET, SET, or ACTIVE
+magic. Refer to L<perltie> for some examples of other magical methods.
+
 =cut
 */
 
@@ -1168,6 +1201,8 @@ Remove any string offset.
 
 Returns a boolean as to whether C<sv> has overloading (active magic) enabled or
 not.
+
+Note: A GET magic check should be performed prior to an active magic check.
 
 =cut
 */
