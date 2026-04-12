@@ -66,13 +66,16 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlootut           Perl OO tutorial for beginners
 
-    perlperf            Perl Performance and Optimization Techniques
+    perlopentut         Perl open() tutorial
 
-    perlstyle           Perl style guide
+    perlpacktut         Perl pack() and unpack() tutorial
+
+    perldebtut          Perl debugging tutorial
 
     perlcheat           Perl cheat sheet
+    perlperf            Perl Performance and Optimization Techniques
+    perlstyle           Perl style guide
     perltrap            Perl traps for the unwary
-    perldebtut          Perl debugging tutorial
 
     perlfaq             Perl frequently asked questions
       perlfaq1          General Questions About Perl
@@ -92,8 +95,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlop              Perl expressions: operators, precedence, string literals
     perlsub             Perl subroutines
     perlfunc            Perl built-in functions
-      perlopentut       Perl open() tutorial
-      perlpacktut       Perl pack() and unpack() tutorial
     perlpod             Perl plain old documentation
     perlpodspec         Perl plain old documentation format specification
     perldocstyle        Perl style guide for core docs
@@ -111,7 +112,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlform            Perl formats
     perlobj             Perl objects
     perltie             Perl objects hidden behind simple variables
-      perldbmfilter     Perl DBM filters
+    perldbmfilter       Perl DBM filters
     perlclass           Perl class syntax
 
     perlipc             Perl interprocess communication
