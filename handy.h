@@ -2984,10 +2984,10 @@ enum mem_log_type {
           (v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_REALLOC(n,t,v,saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 
 #ifdef PERL_POISON
-#define Safefree(d) \
+#  define Safefree(d) \
   ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d))), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
-#define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
+#  define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
 /* assert that a valid ptr has been supplied - use this instead of assert(ptr)  *
