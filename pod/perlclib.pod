@@ -162,7 +162,7 @@ should use C<sv_gets> instead:
   Instead Of:                    Use:
 
   t* p = malloc(n)               Newx(p, n, t)
-  t* p = calloc(n, s)            Newxz(p, n, t)
+  t* p = calloc(n, s)            Newxz(p, n, t)   (But see [1] below)
   p = realloc(p, n)              Renew(p, n, t)
 
 It is not portable to try to allocate 0 bytes; allocating 1 or more is
@@ -178,26 +178,13 @@ occur, or subtle memory leaks or subtle heap corruption.
 Notice the different order of arguments to C<Copy> and C<Move> than used
 in C<memcpy> and C<memmove>.
 
-  memset(dst, 0, n * sizeof(t))  Zero(dst, n, t)
-  memzero(dst, 0)                Zero(dst, n, char)
+  memset(dst, 0, n * sizeof(t))  Zero(dst, n, t)      (But see [1] below)
+  memzero(dst, 0)                Zero(dst, n, char)   (But see [1] below)
   free(p)                        Safefree(p)
 
   strdup(p)                      savepv(p)
   strndup(p, n)                  savepvn(p, n) (Hey, strndup doesn't
                                                 exist!)
-
-Sometimes instead of zeroing the allocated heap by using Newxz() you
-should consider "poisoning" the data.  This means writing a bit
-pattern into it that should be illegal as pointers (and floating point
-numbers), and also hopefully surprising enough as integers, so that
-any code attempting to use the data without forethought will break
-sooner rather than later.  Poisoning can be done using the Poison()
-macros, which have similar arguments to Zero():
-
-  PoisonWith(dst, n, t, b)    scribble memory with byte b
-  PoisonNew(dst, n, t)        equal to PoisonWith(dst, n, t, 0xAB)
-  PoisonFree(dst, n, t)       equal to PoisonWith(dst, n, t, 0xEF)
-  Poison(dst, n, t)           equal to PoisonFree(dst, n, t)
 
   strstr(big, little)            instr(big, little)
   memmem(big, blen, little, len) ninstr(big, bigend, little, little_end)
@@ -244,6 +231,10 @@ create a string that isn't valid UTF-8 if the current underlying locale
 of the program is UTF-8.  What happens is that the C<%s> and its
 operand are simply skipped without any notice.
 L<https://sourceware.org/bugzilla/show_bug.cgi?id=6530>.
+
+[1] Sometimes instead of zeroing the allocated memory, you
+should consider "poisoning" the data to catch uninitialized uses of it.
+See L<perlhacktips/Catching hidden flaws>.
 
 =head2 Character Class Tests
 
