@@ -1100,7 +1100,9 @@ For example
     (-e:1)	add
         =>  NV(1)
 
-All the options are listed in L<perlrun/-Dletters>.
+All the options are listed in L<perlrun/-Dletters>.  Note that C<-DU> is
+reserved for your (temporary) use; you can add your own debugging
+statements controlled just by that switch.
 
 Some of the functionality of the debugging code can be achieved with a
 non-debugging perl by using XS modules:
