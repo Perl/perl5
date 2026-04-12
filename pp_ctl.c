@@ -500,11 +500,11 @@ S_rxres_free(pTHX_ void **rsp)
     if (p) {
         void *tmp = INT2PTR(char*,*p);
 #ifdef PERL_POISON
-#ifdef PERL_ANY_COW
+#  ifdef PERL_ANY_COW
         U32 i = 9 + p[1] * 2;
-#else
+#  else
         U32 i = 8 + p[1] * 2;
-#endif
+#  endif
 #endif
 
 #ifdef PERL_ANY_COW
