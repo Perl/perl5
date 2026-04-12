@@ -1,5 +1,5 @@
-
-=encoding utf8
+C<
+=>encoding utf8
 
 =for comment
 Consistent formatting of this file is achieved with:
@@ -1057,17 +1057,22 @@ calculate the length for you.  See L<perlapi/String Handling>.
 
 =head1 DEBUGGING
 
-You can compile a special debugging version of Perl, which allows you
-to use the C<-D> option of Perl to tell more about what Perl is doing.
-But sometimes there is no alternative than to dive in with a debugger,
-either to see the stack trace of a core dump (very useful in a bug
-report), or trying to figure out what went wrong before the core dump
-happened, or how did we end up having wrong or unexpected results.
+Most code won't work as intended the first time it is run, and so needs
+to be debugged and revised.  Scarier is code that seems to work but has
+hidden flaws that a hacker could use to perform malicious actions.
+There are ways to detect both types.
 
 =head2 Poking at Perl
 
-To really poke around with Perl, you'll probably want to build Perl for
-debugging, like this:
+We will start with the first kind.  You can compile a special debugging
+version of Perl, which enables many built-in checks that things are
+going as expected.  When one fails, the interpreter abruptly stops with
+a message as to what went wrong.  Many people always use this option
+during code development.  It also allows you to enable tracing of one or
+more specific areas of the execution, and to use a debugger much more
+conveniently.
+
+To create this kind of Perl, you will need to:
 
     ./Configure -d -DDEBUGGING
     make
@@ -1076,12 +1081,15 @@ C<-DDEBUGGING> turns on the C compiler's C<-g> flag to have it produce
 debugging information which will allow us to step through a running
 program, and to see in which C function we are at (without the
 debugging information we might see only the numerical addresses of the
-functions, which is not very helpful). It will also turn on the
-C<DEBUGGING> compilation symbol which enables all the internal
-debugging code in Perl. There are a whole bunch of things you can debug
-with this: L<perlrun|perlrun/-Dletters> lists them all, and the best
-way to find out about them is to play about with them.  The most useful
-options are probably
+functions, which is not very helpful).  See L</Using a source-level
+debugger> for more on this.
+
+C<-DDEBUGGING> also causes each compiled file to have the symbol
+C<DEBUGGING> #defined.  This enables all the internal debugging code in
+Perl, including the ability to trace a whole bunch of things.
+L<perlrun|perlrun/-Dletters> lists them all, and the best way to find
+out about them is to play about with them.  The most useful options for
+a general overview of what is going on are probably:
 
     l  Context (loop) stack processing
     s  Stack snapshots (with v, displays all stacks)
@@ -1112,10 +1120,45 @@ non-debugging perl by using XS modules:
 
 More details can be found in L<perlguts/Tracing the interpreter execution>.
 
+=head2 Catching hidden flaws
+
+Various tools exist to find hidden flaws in your code, but these
+typically cause an unacceptable slowdown, and so tend not to get used
+until a problem is found, which may be after a hacker has caused damage.
+See L</MEMORY DEBUGGERS> for more on these.
+
+But perl does have a compilation option that catches many instances of
+the important flaw of using uninitialized values, and slows things down by
+much less than these tools -- by around 5%.  To enable it, add this option
+to your F<Configure> call
+
+    ./Configure ... -Accflags=-DPERL_POISON
+    make
+
+=for apidoc_section $debugging
+=for apidoc Amnh||PERL_POISON
+
+This causes perl to set any created or freed memory to specific bit
+patterns that should be illegal as pointers (and floating point
+numbers), and also hopefully surprising enough as integers, so that any
+code attempting to use the data without forethought will break sooner
+rather than later.
+
+You may wish to always cause this to happen for particular memory
+allocations.  The following macros (which have similar arguments to
+Zero()) accomplish this:
+
+  PoisonWith(dst, n, t, b)    scribble memory with byte b
+  PoisonNew(dst, n, t)        equal to PoisonWith(dst, n, t, 0xAB)
+  PoisonFree(dst, n, t)       equal to PoisonWith(dst, n, t, 0xEF)
+  Poison(dst, n, t)           equal to PoisonFree(dst, n, t)
+
 =head2 Using a source-level debugger
 
-If the debugging output of C<-D> doesn't help you, it's time to step
-through perl's execution with a source-level debugger.
+If the debugging output of C<-D> doesn't help you, it's time to dive in
+with a source-level debugger, either to see the stack trace of a core
+dump (very useful in a bug report), or to try to figure out what went
+wrong before the core dump by stepping through perl's execution.
 
 =over 3
 
@@ -1521,6 +1564,8 @@ must be doing something that is quite unfriendly for memory debuggers.
 If you don't feel like waiting, you can simply kill the perl process.
 Roughly valgrind slows down execution by factor 10, AddressSanitizer by
 factor 2.
+
+(Also see L</Catching hidden flaws>.)
 
 B<NOTE 2>: To minimize the number of memory leak false alarms (see
 L</PERL_DESTRUCT_LEVEL> for more information), you have to set the
