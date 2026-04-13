@@ -677,7 +677,7 @@ The hash C<%SIG> contains signal handlers for signals.  For example:
     sub handler {   # 1st argument is signal name
         my($sig) = @_;
         print "Caught a SIG$sig--shutting down\n";
-        close(LOG);
+        close($LOG);
         exit(0);
     }
 
@@ -1725,7 +1725,7 @@ C<"\n\n"> will blindly assume that the next input character belongs to
 the next paragraph, even if it's a newline.
 
     local $/;           # enable "slurp" mode
-    local $_ = <FH>;    # whole file now here
+    local $_ = <$FH>;   # whole file now here
     s/\n[ \t]+/ /g;
 
 Remember: the value of C<$/> is a string, not a regex.  B<awk> has to
