@@ -7944,16 +7944,14 @@ Perl_ref(pTHX_ OP *o, I32 type)
 # endif
 #endif /* !defined(NO_MATHOMS) */
 #if defined(PERL_ANY_COW)
-# define PERL_ARGS_ASSERT_SV_SETSV_COW          \
-        Perl_assert_aTHX; assert(ssv)
-
-# if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_CALLCONV SV *
 Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
-# endif
-#endif /* defined(PERL_ANY_COW) */
+# define PERL_ARGS_ASSERT_SV_SETSV_COW          \
+        Perl_assert_aTHX; assert(ssv)
+
+#endif
 #if defined(PERL_CORE)
 PERL_CALLCONV void
 Perl_opslab_force_free(pTHX_ OPSLAB *slab)
