@@ -357,8 +357,8 @@ X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
 
 The effective uid of this process.  For example:
 
-    $< = $>;            # set real to effective uid
-    ($<,$>) = ($>,$<);  # swap real and effective uids
+    $< = $>;              # set real to effective uid
+    ($<, $>) = ($>, $<);  # swap real and effective uids
 
 You can change both the effective uid and the real uid at the same
 time by using C<POSIX::setuid()>.  Changes to C<< $> >> require a check
@@ -379,7 +379,7 @@ X<$;> X<$SUBSEP> X<$SUBSCRIPT_SEPARATOR>
 The subscript separator for multidimensional array emulation.  If you
 refer to a hash element as
 
-    $foo{$x,$y,$z}
+    $foo{$x, $y, $z}
 
 it really means
 
@@ -387,11 +387,11 @@ it really means
 
 But don't put
 
-    @foo{$x,$y,$z}     # a slice--note the @
+    @foo{$x, $y, $z}     # a slice--note the @
 
 which means
 
-    ($foo{$x},$foo{$y},$foo{$z})
+    ($foo{$x}, $foo{$y}, $foo{$z})
 
 Default is "\034", the same as SUBSEP in B<awk>.  If your keys contain
 binary data there might not be any safe value for C<$;>.
@@ -423,7 +423,7 @@ As of v5.18.0, both keys and values stored in C<%ENV> are stringified.
 
     my $foo = 1;
     $ENV{'bar'} = \$foo;
-    if( ref $ENV{'bar'} ) {
+    if ( ref $ENV{'bar'} ) {
         say "Pre 5.18.0 Behaviour";
     } else {
         say "Post 5.18.0 Behaviour";
@@ -621,7 +621,7 @@ C<$@> as usual.
 
 Consider the code
 
- perl -le'sub f { eval "BEGIN { f() }"; } f()'
+ perl -le 'sub f { eval "BEGIN { f() }"; } f()'
 
 each invocation of C<f()> will consume considerable C stack, and this
 variable is used to cause code like this to die instead of exhausting
@@ -639,9 +639,9 @@ completed, thus the innermost will execute before the ones which contain
 it have even finished compiling, and the depth will not go above 1. In
 fact the above code is equivalent to
 
-    BEGIN { $n+=4 }
-    BEGIN { $n+=2 }
-    BEGIN { $n+=1 }
+    BEGIN { $n += 4; }
+    BEGIN { $n += 2; }
+    BEGIN { $n += 1; }
 
 which makes it obvious why a ${^MAX_NESTED_EVAL_BEGIN_BLOCKS} of 1
 would not block this code.
@@ -675,7 +675,7 @@ X<%SIG>
 The hash C<%SIG> contains signal handlers for signals.  For example:
 
     sub handler {   # 1st argument is signal name
-        my($sig) = @_;
+        my ($sig) = @_;
         print "Caught a SIG$sig--shutting down\n";
         close($LOG);
         exit(0);
@@ -929,7 +929,7 @@ following statements:
     my $this_perl = $^X;
     if ($^O ne 'VMS') {
         $this_perl .= $Config{_exe}
-        unless $this_perl =~ m/$Config{_exe}$/i;
+            unless $this_perl =~ m/$Config{_exe}$/i;
     }
 
 Because many operating systems permit anyone with read access to
@@ -944,7 +944,7 @@ command or referenced as a file.
     my $secure_perl_path = $Config{perlpath};
     if ($^O ne 'VMS') {
         $secure_perl_path .= $Config{_exe}
-        unless $secure_perl_path =~ m/$Config{_exe}$/i;
+            unless $secure_perl_path =~ m/$Config{_exe}$/i;
     }
 
 =back
@@ -956,7 +956,7 @@ effects. Perl sets these variables when it has completed a match
 successfully, so you should check the match result before using them.
 For instance:
 
-    if( /P(A)TT(ER)N/ ) {
+    if ( /P(A)TT(ER)N/ ) {
         print "I found $1 and $2\n";
     }
 
@@ -1038,14 +1038,14 @@ In Perl 5.6.0 the C<@-> and C<@+> dynamic arrays were introduced that
 supply the indices of successful matches. So you could for example do
 this:
 
-    $str =~ /pattern/;
+    $str =~ /pattern/ or die "No match";
 
     print $`, $&, $'; # bad: performance hit
 
     print             # good: no performance hit
-    substr($str, 0,     $-[0]),
-    substr($str, $-[0], $+[0]-$-[0]),
-    substr($str, $+[0]);
+        substr($str, 0,     $-[0]),
+        substr($str, $-[0], $+[0] - $-[0]),
+        substr($str, $+[0]);
 
 In Perl 5.10.0 the C</p> match operator flag and the C<${^PREMATCH}>,
 C<${^MATCH}>, and C<${^POSTMATCH}> variables were introduced, that allowed
@@ -1098,7 +1098,7 @@ in nested blocks that have been exited already.
 Note that the 0 index of C<@{^CAPTURE}> is equivalent to C<$1>, the 1 index
 is equivalent to C<$2>, etc.
 
-    if ("foal"=~/(.)(.)(.)(.)/) {
+    if ("foal" =~ /(.)(.)(.)(.)/) {
         print join "-", @{^CAPTURE};
     }
 
@@ -1112,7 +1112,7 @@ letter equivalent to C<@{^CAPTURE}>. Also be aware that when
 interpolating subscripts of this array you B<must> use the demarcated
 variable form, for instance
 
-    print "${^CAPTURE[0]}"
+    print "${^CAPTURE[0]}";
 
 see L<perldata/"Demarcated variable names using braces"> for more
 information on this form and its uses.
@@ -1261,7 +1261,6 @@ X<$^N> X<$LAST_SUBMATCH_RESULT>
 The text matched by the used group most-recently closed (i.e. the group
 with the rightmost closing parenthesis) of the last successful match.
 (See L</Scoping Rules of Regex Variables>).
-
 
 This is subtly different from C<$+>. For example in
 
@@ -1420,7 +1419,7 @@ Here's an example:
     if ('1234' =~ /(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
         foreach my $bufname (sort keys %-) {
             my $ary = $-{$bufname};
-            foreach my $idx (0..$#$ary) {
+            foreach my $idx (0 .. $#$ary) {
                 print "\$-{$bufname}[$idx] : ",
                       (defined($ary->[$idx])
                           ? "'$ary->[$idx]'"
@@ -1590,7 +1589,7 @@ example:
 
 Here is an example of how your own code can go broken:
 
-    for ( 1..3 ){
+    for ( 1 .. 3 ) {
         $\ = "\r\n";
         nasty_break();
         print "$_";
