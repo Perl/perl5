@@ -1754,16 +1754,16 @@ Suppose we wrote the following string to a file:
     $string .= "theta\n";
 
     my $file = 'simple_file.txt';
-    open my $OUT, '>', $file or die;
+    open my $OUT, '>', $file or die $!;
     print $OUT $string;
-    close $OUT or die;
+    close $OUT or die $!;
 
 Now we read that file in paragraph mode:
 
     local $/ = ""; # paragraph mode
-    open my $IN, '<', $file or die;
+    open my $IN, '<', $file or die $!;
     my @records = <$IN>;
-    close $IN or die;
+    close $IN or die $!;
 
 C<@records> will consist of these 3 strings:
 
