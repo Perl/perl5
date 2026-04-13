@@ -33,7 +33,7 @@ then the sequence may be special; if so, it's listed below. A few letters have
 not been used yet, so escaping them with a backslash doesn't change them to be
 special.  A future version of Perl may assign a special meaning to them, so if
 you have warnings turned on, Perl issues a warning if you use such a
-sequence.  [1].
+sequence.
 
 It is however guaranteed that backslash or escape sequences never have a
 punctuation character following the backslash, not now, and not in a future
@@ -44,18 +44,51 @@ Note that the backslash itself is special; if you want to match a backslash,
 you have to escape the backslash with a backslash: C</\\/> matches a single
 backslash.
 
-=over 4
+Also note that if a character inside the pattern proper is the same as
+the pattern's closing delimiter, it must be escaped so that it retains
+its normal meaning and isn't mistaken for terminating the pattern.  That
+means that if that character is also a metacharacter, escaping it causes
+it to be treated as that metacharacter.  To match it literally, enclose
+the escaped sequence in square brackets:
 
-=item [1]
+ m...       # Syntax error!
+ m.\..      # Normal meaning: matches any character but \n
+ m.[.].     # Syntax error!
+ m.[\.].    # Matches a literal dot "."
 
-There is one exception. If you use an alphanumeric character as the
-delimiter of your pattern (which you probably shouldn't do for readability
-reasons), you have to escape the delimiter if you want to match
-it. Perl won't warn then. See also L<perlop/Gory details of parsing
-quoted constructs>.
+None of this works, however, if the delimiter is a backslash:
 
-=back
+ m\\\       # Syntax error!
+ m\\\\      # Syntax error!
+ m\[\]\     # Syntax error!
+ m\[\\]\    # Syntax error!
 
+Adding more backslashes doesn't help.  Don't use backslash as a
+delimiter and expect to be able to have any inside the pattern.
+
+Escaping an ASCII letter or an ASCII digit inside a pattern that is
+delimited by that character doesn't turn the sequence into one with
+special meaning.  For example:
+
+ qr w\ww
+
+matches a literal "w" character.  It doesn't match what C<\w> normally
+matches.  That is, it doesn't match a word character, and there is no
+combination of backslashes and/or brackets that you can add that will
+change it to do so.  Using "w" as a pattern delimiter takes away the
+ability of using a C<\w> inside to have its special meaning.  The same
+applies to all other similar cases.
+
+Finally, as mentioned above, using a backslash alphabetic letter
+sequence that isn't currently recognized as special by Perl normally
+raises a warning.  That warning is suppressed if the escaped character
+is also the delimiter:
+
+ qr C\CC
+
+C<\C> matches a literal "C" character, and doesn't warn.
+
+See also L<perlop/Gory details of parsing quoted constructs>.
 
 =head2 All the sequences and escapes
 
