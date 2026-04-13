@@ -1244,7 +1244,10 @@ numbered capture variable (C<$1>, C<$2>, ...) which has a defined value.
 This is useful if you don't know which one of a set of alternative patterns
 matched.  For example:
 
-    /Version: (.*)|Revision: (.*)/ && ($rev = $+);
+    if (/Version: (.*)|Revision: (.*)|Release: (.*)/) {
+        $rev = $+;
+        # like $rev = $3 // $2 // $1;
+    }
 
 This variable is read-only, and its value is dynamically scoped.
 
