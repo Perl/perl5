@@ -915,6 +915,9 @@
 #   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
 #   define uvuni_to_utf8(a,b)                   Perl_uvuni_to_utf8(aTHX_ a,b)
 # endif
+# if defined(PERL_ANY_COW)
+#   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
+# endif
 # if defined(PERL_CORE)
 #   define PerlLIO_dup2_cloexec(a,b)            Perl_PerlLIO_dup2_cloexec(aTHX_ a,b)
 #   define PerlLIO_dup_cloexec(a)               Perl_PerlLIO_dup_cloexec(aTHX_ a)
@@ -1909,9 +1912,6 @@
 #   define variant_under_utf8_count             S_variant_under_utf8_count
 #   if !defined(HAS_MEMRCHR)
 #     define my_memrchr                         S_my_memrchr
-#   endif
-#   if defined(PERL_ANY_COW)
-#     define sv_setsv_cow(a,b)                  Perl_sv_setsv_cow(aTHX_ a,b)
 #   endif
 #   if defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
        defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
