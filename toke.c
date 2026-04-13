@@ -5150,12 +5150,12 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * bugs have surfaced since indicates this whole thing doesn't
                  * get applied very much */
                 char *d = s;
-                while (s < e - 1 && isALPHA(s[1]))
+                while (isALPHA(s[0]))
                     s++;
 
                 /* If those alphas spell a keyword, it's almost certainly not a
                  * character class */
-                if (keyword(d, s + 1 - d, 0))
+                if (keyword(d, s - d, 0))
                     weight -= 150;
 
                 /* khw: Barewords could also be subroutine calls, and these
