@@ -1654,7 +1654,7 @@ X<\o{}>
     \r                  return            (CR)
     \f                  form feed         (FF)
     \b                  backspace         (BS)
-    \a                  alarm (bell)      (BEL)
+    \a                  alert (bell)      (BEL)
     \e                  escape            (ESC)
     \x{263A}     [1,8]  hex char          (example shown: SMILEY)
     \x{ 263A }          Same, but shows optional blanks inside and

@@ -64,7 +64,7 @@ as C<Not in [].>
 
  \000              Octal escape sequence.  See also \o{}.
  \1                Absolute backreference.  Not in [].
- \a                Alarm or bell.
+ \a                Alert or bell.
  \A                Beginning of string.  Not in [].
  \b{}, \b          Boundary. (\b is a backspace in []).
  \B{}, \B          Not a boundary.  Not in [].
@@ -121,7 +121,7 @@ description.  (For EBCDIC platforms, see L<perlebcdic/OPERATOR DIFFERENCES>.)
 
  Seq.  Code Point  ASCII   Cntrl   Description.
        Dec    Hex
-  \a     7     07    BEL    \cG    alarm or bell
+  \a     7     07    BEL    \cG    alert or bell
   \b     8     08     BS    \cH    backspace [1]
   \e    27     1B    ESC    \c[    escape character
   \f    12     0C     FF    \cL    form feed
