@@ -33,7 +33,7 @@ $EXPORT_TAGS{bsd_glob} = [@{$EXPORT_TAGS{glob}}];
 
 our @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 sub import {
     require Exporter;
@@ -127,6 +127,7 @@ under L</EXPORTS>, below.
 
   \       Quote the next metacharacter
   []      Character class
+  [!...]  Negated character class (not [^...])
   {}      Multiple pattern
   *       Match any string of characters
   ?       Match any single character
