@@ -90,7 +90,7 @@ delimiters can be used.  Must be reset with reset().
 
 These work as in normal strings.
 
-   \a       Alarm (beep)
+   \a       Alert (beep)
    \e       Escape
    \f       Formfeed
    \n       Newline

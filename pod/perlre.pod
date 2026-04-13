@@ -1005,7 +1005,7 @@ also work:
  \n          newline               (LF, NL)
  \r          return                (CR)
  \f          form feed             (FF)
- \a          alarm (bell)          (BEL)
+ \a          alert (bell)          (BEL)
  \e          escape (think troff)  (ESC)
  \cK         control char          (example: VT)
  \x{}, \x00  character whose ordinal is the given hexadecimal number
