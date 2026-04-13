@@ -4719,10 +4719,8 @@ S_intuit_more(pTHX_ char *s, char *e,
      * it's exactly two digits long, it would would be very unlikely for
      * someone to use octal to spell a number from 1-7, so would be a
      * character class */
-    if (isDIGIT(s[0]) && (   (e - s >= 2 &&                  s[1] == ']')
-                          || (e - s >= 3 && isDIGIT(s[1]) && s[2] == ']')))
-    {
-        return true;
+    if (isDIGIT(s[0]) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
+        return TRUE;
     }
 
     /* this is terrifying, and it mostly works.  See GH #16478.
