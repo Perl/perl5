@@ -5522,11 +5522,11 @@ ERp	|SV *	|get_ANYOFM_contents					\
 ERi	|SV *	|invlist_contents					\
 				|NN SV * const invlist			\
 				|const bool traditional_style
-ERTix	|UV	|invlist_highest_range_start				\
+ERTdi	|UV	|invlist_highest_range_start				\
 				|NN SV * const invlist
 ERTi	|bool	|invlist_is_iterating					\
 				|NN const SV * const invlist
-ERTix	|UV	|invlist_lowest |NN SV * const invlist
+ERTdi	|UV	|invlist_lowest |NN SV * const invlist
 Ep	|U32	|join_exact	|NN RExC_state_t *pRExC_state		\
 				|NN regnode *scan			\
 				|NN UV *min_subtract			\

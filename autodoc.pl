@@ -524,6 +524,7 @@ my %initial_file_section = (
                             'gv.h' => $GV_scn,
                             'hv.h' => $HV_scn,
                             'INTERN.h' => $global_definitions_scn,
+                            'invlist_inline.h' => $unicode_scn,
                             'locale.c' => $locale_scn,
                             'malloc.c' => $memory_scn,
                             'numeric.c' => $numeric_scn,
