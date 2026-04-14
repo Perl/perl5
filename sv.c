@@ -1275,7 +1275,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             SvOBJECT_on(io);
             /* Clear the stashcache because a new IO could overrule a package
                name */
-            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            DEBUG_o(deb("sv_upgrade clearing PL_stashcache\n"));
             hv_clear(PL_stashcache);
 
             SvSTASH_set(io, HvREFCNT_inc(GvHV(iogv)));
@@ -3982,8 +3982,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dsv));
     if (GvIO(dsv) && dtype == SVt_PVGV) {
-        DEBUG_o(Perl_deb(aTHX_
-                        "glob_assign_glob clearing PL_stashcache\n"));
+        DEBUG_o(deb("glob_assign_glob clearing PL_stashcache\n"));
         /* It's a cache. It will rebuild itself quite happily.
            It's a lot of effort to work out exactly which key (or keys)
            might be invalidated by the creation of the this file handle.
@@ -4080,13 +4079,11 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                         report_redefined_cv(
                            sv_2mortal(
                              stash
-                               ? Perl_newSVpvf(aTHX_
-                                    "%" HEKf "::%" HEKf,
-                                    HEKfARG(HvNAME_HEK(stash)),
-                                    HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
-                               : Perl_newSVpvf(aTHX_
-                                    "%" HEKf,
-                                    HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
+                               ? newSVpvf("%" HEKf "::%" HEKf,
+                                        HEKfARG(HvNAME_HEK(stash)),
+                                        HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
+                               : newSVpvf("%" HEKf,
+                                        HEKfARG(GvENAME_HEK(MUTABLE_GV(dsv))))
                            ),
                            cv,
                            CvCONST((const CV *)sref) ? &new_const_sv : NULL
@@ -4189,10 +4186,10 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                magic_clearisa do it for us, as it already has the logic for
                dealing with globs vs arrays of globs. */
             assert(mg);
-            Perl_magic_clearisa(aTHX_ NULL, mg);
+            magic_clearisa(NULL, mg);
         }
         else if (stype == SVt_PVIO) {
-            DEBUG_o(Perl_deb(aTHX_ "gv_setref clearing PL_stashcache\n"));
+            DEBUG_o(deb("gv_setref clearing PL_stashcache\n"));
             /* It's a cache. It will rebuild itself quite happily.
                It's a lot of effort to work out exactly which key (or keys)
                might be invalidated by the creation of the this file handle.
@@ -6694,7 +6691,7 @@ Perl_sv_rvunweaken(pTHX_ SV *const sv)
     SvWEAKREF_off(sv);
     SvROK_on(sv);
     SvREFCNT_inc_NN(tsv);
-    Perl_sv_del_backref(aTHX_ tsv, sv);
+    sv_del_backref(tsv, sv);
     return sv;
 }
 
@@ -7376,10 +7373,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                     && (hek = HvNAME_HEK((HV*)sv)))
                 {
                     if (PL_stashcache) {
-                        DEBUG_o(Perl_deb(aTHX_
-                            "sv_clear clearing PL_stashcache for '%" HEKf
-                            "'\n",
-                             HEKfARG(hek)));
+                        DEBUG_o(deb("sv_clear clearing PL_stashcache for '%"
+                                    HEKf "'\n", HEKfARG(hek)));
                         (void)hv_deletehek(PL_stashcache,
                                            hek, G_DISCARD);
                     }
@@ -7714,7 +7709,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
 
             assert (HvHasAUX(stash));
 
-            DEBUG_o( Perl_deb(aTHX_ "Looking for DESTROY method for %s\n",
+            DEBUG_o( deb("Looking for DESTROY method for %s\n",
                          HvNAME(stash)) );
 
             /* don't make this an initialization above the assert, since it needs
@@ -7722,7 +7717,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
             meta = HvMROMETA(stash);
             if (meta->destroy_gen && meta->destroy_gen == PL_sub_generation) {
                 destructor = meta->destroy;
-                DEBUG_o( Perl_deb(aTHX_ "Using cached DESTROY method %p for %s\n",
+                DEBUG_o( deb("Using cached DESTROY method %p for %s\n",
                              (void *)destructor, HvNAME(stash)) );
             }
             else {
@@ -7746,11 +7741,11 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt)
                     meta->destroy_gen = PL_sub_generation;
                     meta->destroy = destructor;
 
-                    DEBUG_o( Perl_deb(aTHX_ "Set cached DESTROY method %p for %s\n",
-                                      (void *)destructor, HvNAME(stash)) );
+                    DEBUG_o( deb("Set cached DESTROY method %p for %s\n",
+                                 (void *)destructor, HvNAME(stash)) );
                 }
                 else {
-                    DEBUG_o( Perl_deb(aTHX_ "Not caching AUTOLOAD for DESTROY method for %s\n",
+                    DEBUG_o( deb("Not caching AUTOLOAD for DESTROY method for %s\n",
                                       HvNAME(stash)) );
                 }
             }
@@ -7908,7 +7903,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
     }
     if (ckWARN_d(WARN_INTERNAL)) {
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-        Perl_dump_sv_child(aTHX_ sv);
+        dump_sv_child(sv);
 #else
     #ifdef DEBUG_LEAKING_SCALARS
         sv_dump(sv);
@@ -8010,22 +8005,21 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
                        The longer value is stored in the first pair.  */
                     STRLEN *cache = (STRLEN *) mg->mg_ptr;
 
-                    ulen = cache[0] + Perl_utf8_length(aTHX_ s + cache[1],
-                                                       s + len);
+                    ulen = cache[0] + utf8_length(s + cache[1], s + len);
                 }
 
                 if (PL_utf8cache < 0) {
-                    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
+                    const STRLEN real = utf8_length(s, s + len);
                     assert_uft8_cache_coherent("sv_len_utf8", ulen, real, sv);
                 }
             }
             else {
-                ulen = Perl_utf8_length(aTHX_ s, s + len);
+                ulen = utf8_length(s, s + len);
                 utf8_mg_len_cache_update(sv, &mg, ulen);
             }
             return ulen;
     }
-    return SvUTF8(sv) ? Perl_utf8_length(aTHX_ s, s + len) : len;
+    return SvUTF8(sv) ? utf8_length(s, s + len) : len;
 }
 
 /* Walk forwards to find the byte corresponding to the passed in UTF-8
@@ -15544,7 +15538,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
     case SVt_IV:
         SET_SVANY_FOR_BODYLESS_IV(dsv);
         if(SvROK(ssv)) {
-            Perl_rvpv_dup(aTHX_ dsv, ssv, param);
+            rvpv_dup(dsv, ssv, param);
         } else {
             SvIV_set(dsv, SvIVX(ssv));
         }
@@ -15625,7 +15619,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 && !isGV_with_GP(dsv)
                 && !isREGEXP(dsv)
                 && !(sv_type == SVt_PVIO && !(IoFLAGS(dsv) & IOf_FAKE_DIRP)))
-                Perl_rvpv_dup(aTHX_ dsv, ssv, param);
+                rvpv_dup(dsv, ssv, param);
 
             /* The Copy above means that all the source (unduplicated) pointers
                are now in the destination.  We can check the flags and the
@@ -16816,7 +16810,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      *  PERL_SET_CONTEXT(proto_perl);
      * breaks too many other things
      */
-    Perl_reentrant_init(aTHX);
+    reentrant_init();
 #endif
 
     /* create SV map for pointer relocation */
@@ -18464,7 +18458,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         if (sv) {
             const char *name = OP_NAME(obase);
             Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("("), 0);
-            Perl_sv_insert_flags(aTHX_ sv, 0, 0, name, strlen(name), 0);
+            sv_insert_flags(sv, 0, 0, name, strlen(name), 0);
             sv_catpvs_nomg(sv, ")");
         }
         return sv;

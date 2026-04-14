@@ -348,7 +348,7 @@ perl_construct(pTHXx)
     Newxz(PL_stashpad, PL_stashpadmax, HV *);
 #endif
 #ifdef USE_REENTRANT_API
-    Perl_reentrant_init(aTHX);
+    reentrant_init();
 #endif
     if (PL_hash_seed_set == FALSE) {
         /* Initialize the hash seed and state at startup. This must be
@@ -361,7 +361,7 @@ perl_construct(pTHXx)
          */
 #if defined(USE_HASH_SEED)
         /* get the hash seed from the environment or from an RNG */
-        Perl_get_hash_seed(aTHX_ PL_hash_seed);
+        get_hash_seed(PL_hash_seed);
 #else
         /* they want a hard coded seed, check that it is long enough */
         assert( strlen(PERL_HASH_SEED) >= PERL_HASH_SEED_BYTES );
@@ -1458,7 +1458,7 @@ perl_destruct(pTHXx)
                         sv->sv_debug_serial
                     );
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-                    Perl_dump_sv_child(aTHX_ sv);
+                    dump_sv_child(sv);
 #endif
                 }
             }
@@ -1526,7 +1526,7 @@ perl_destruct(pTHXx)
     PL_debug = 0;
 
 #ifdef USE_REENTRANT_API
-    Perl_reentrant_free(aTHX);
+    reentrant_free();
 #endif
 
     /* These all point to HVs that are about to be blown away.
@@ -2113,9 +2113,9 @@ S_Internals_V(pTHX_ CV *cv)
     EXTEND(SP, entries);
 
     PUSHs(newSVpvn_flags(PL_bincompat_options, strlen(PL_bincompat_options),
-                              SVs_TEMP));
-    PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
-                              sizeof(non_bincompat_options) - 1, SVs_TEMP));
+                         SVs_TEMP));
+    PUSHs(newSVpvn_flags(non_bincompat_options,
+                         sizeof(non_bincompat_options) - 1, SVs_TEMP));
 
 #ifndef PERL_BUILD_DATE
 #  ifdef __DATE__
@@ -2138,8 +2138,10 @@ S_Internals_V(pTHX_ CV *cv)
     for (i = 1; i <= local_patch_count; i++) {
         /* This will be an undef, if PL_localpatches[i] is NULL.  */
         PUSHs(newSVpvn_flags(PL_localpatches[i],
-            PL_localpatches[i] == NULL ? 0 : strlen(PL_localpatches[i]),
-            SVs_TEMP));
+                             (PL_localpatches[i] == NULL)
+                              ? 0
+                              : strlen(PL_localpatches[i]),
+                             SVs_TEMP));
     }
 
     XSRETURN(entries);
@@ -2362,9 +2364,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 }
                 else {
                     ++s;
-                    opts_prog = Perl_newSVpvf(aTHX_
-                                              "use Config; Config::config_vars(qw%c%s%c)",
-                                              0, s, 0);
+                    opts_prog = newSVpvf("use Config; Config::config_vars"
+                                         "(qw%c%s%c)", 0, s, 0);
                     s += strlen(s);
                 }
                 Perl_av_create_and_push(aTHX_ &PL_preambleav, opts_prog);
@@ -2443,7 +2444,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
-                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d), SVs_TEMP));
+                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d),
+                                                             SVs_TEMP));
                             s = popt_copy + (s - d);
                             d = popt_copy;
                         }
@@ -2509,11 +2511,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             /* if lib/buildcustomize.pl exists, it should not fail. If it does,
                it should be reported immediately as a build failure.  */
             (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 Perl_newSVpvf(aTHX_
+                                                 newSVpvf(
                 "BEGIN { my $f = q%c%s%" SVf "/buildcustomize.pl%c; "
                         "do {local $!; -f $f }"
                         " and do $f || die $@ || qq '$f: $!' }",
-                                0, (TAINTING_get ? "./" : ""), SVfARG(*inc0), 0));
+                                0, (TAINTING_get ? "./" : ""),
+                                SVfARG(*inc0), 0));
         }
 #  else
         /* SITELIB_EXP is a function call on Win32.  */
@@ -2524,10 +2527,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                                            INCPUSH_CAN_RELOCATE);
             const char *const sitelib = SvPVX(sitelib_sv);
             (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 Perl_newSVpvf(aTHX_
-                                                               "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
-                                                               0, sitelib, 0,
-                                                               0, sitelib, 0));
+                                                 newSVpvf(
+                "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} &&"
+                         " do q%c%s/sitecustomize.pl%c }",
+                         0, sitelib, 0,
+                         0, sitelib, 0));
             assert (SvREFCNT(sitelib_sv) == 1);
             SvREFCNT_dec(sitelib_sv);
         }
@@ -3530,7 +3534,7 @@ Perl_require_pv(pTHX_ const char *pv)
     SV* sv;
 
     PUSHSTACKi(PERLSI_REQUIRE);
-    sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
+    sv = newSVpvf("require q%c%s%c", 0, pv, 0);
     eval_sv(sv_2mortal(sv), G_DISCARD);
     POPSTACK;
 }
@@ -5155,7 +5159,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
                        length. libpath points somewhere into the libdir SV.
                        We need to join the 2 with '/' and drop the result into
                        libdir.  */
-                    tempsv = Perl_newSVpvf(aTHX_ "%s/%s", prefix, libpath);
+                    tempsv = newSVpvf("%s/%s", prefix, libpath);
                     SvREFCNT_dec(libdir);
                     /* And this is the new libdir.  */
                     libdir = tempsv;

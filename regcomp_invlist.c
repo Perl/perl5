@@ -1475,7 +1475,7 @@ Perl_invlist_dump_(pTHX_ PerlIO *file, I32 level,
     STRLEN count = 0;
 
     if (invlist_is_iterating(invlist)) {
-        Perl_dump_indent(aTHX_ level, file,
+        dump_indent(level, file,
              "%sCan't dump inversion list because is in middle of iterating\n",
              indent);
         return;
@@ -1484,17 +1484,17 @@ Perl_invlist_dump_(pTHX_ PerlIO *file, I32 level,
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
         if (end == UV_MAX) {
-            Perl_dump_indent(aTHX_ level, file,
+            dump_indent(level, file,
                                        "%s[%" UVuf "] 0x%04" UVXf " .. INFTY\n",
                                    indent, (UV)count, start);
         }
         else if (end != start) {
-            Perl_dump_indent(aTHX_ level, file,
+            dump_indent(level, file,
                                     "%s[%" UVuf "] 0x%04" UVXf " .. 0x%04" UVXf "\n",
                                 indent, (UV)count, start,         end);
         }
         else {
-            Perl_dump_indent(aTHX_ level, file, "%s[%" UVuf "] 0x%04" UVXf "\n",
+            dump_indent(level, file, "%s[%" UVuf "] 0x%04" UVXf "\n",
                                             indent, (UV)count, start);
         }
         count += 2;

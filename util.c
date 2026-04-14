@@ -1610,7 +1610,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
             && grok_atoUV(ws, &wi, NULL)
             && wi <= PERL_INT_MAX
         ) {
-            Perl_dump_c_backtrace(aTHX_ Perl_debug_log, (int)wi, 1);
+            dump_c_backtrace(Perl_debug_log, (int)wi, 1);
         }
     }
 #endif
@@ -1696,7 +1696,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     if (PL_stderrgv && SvREFCNT(PL_stderrgv)
         && (io = GvIO(PL_stderrgv))
         && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
-        Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, SV_CONST(PRINT),
+        magic_methcall(MUTABLE_SV(io), mg, SV_CONST(PRINT),
                             G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
         PerlIO * const serr = Perl_error_log;
@@ -3837,8 +3837,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
                     have_name ? " " : "",
                     SVfARG(have_name ? name : &PL_sv_no));
         if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-                Perl_warner(
-                            aTHX_ packWARN(warn_type),
+                warner(packWARN(warn_type),
                         "\t(Are you trying to call %s%s on dirhandle%s%" SVf "?)\n",
                         func, pars, have_name ? " " : "",
                         SVfARG(have_name ? name : &PL_sv_no)
@@ -5028,7 +5027,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
                         CopFILE(PL_curcop), CopLINE(PL_curcop));
                 PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 
-                Perl_c_backtrace *bt = Perl_get_c_backtrace(aTHX_ 3, 3);
+                Perl_c_backtrace *bt = get_c_backtrace(3, 3);
                 Perl_c_backtrace_frame *frame;
                 UV i;
                 for (i = 0, frame = bt->frame_info;
@@ -5711,14 +5710,15 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
         }
     }
     if (sv) {
-        SV *xssv = Perl_newSVpvn_flags(aTHX_ xs_p, xs_len, SVs_TEMP);
+        SV *xssv = newSVpvn_flags(xs_p, xs_len, SVs_TEMP);
         SV *pmsv = sv_isobject(sv) && sv_derived_from(sv, "version")
             ? sv : sv_2mortal(new_version(sv));
         xssv = upg_version(xssv, 0);
         if ( vcmp(pmsv,xssv) ) {
             SV *string = vstringify(xssv);
-            SV *xpt = Perl_newSVpvf(aTHX_ "%" SVf " object version %" SVf
-                                    " does not match ", SVfARG(module), SVfARG(string));
+            SV *xpt = newSVpvf("%" SVf " object version %" SVf
+                               " does not match ",
+                               SVfARG(module), SVfARG(string));
 
             SvREFCNT_dec(string);
             string = vstringify(pmsv);
@@ -5731,8 +5731,8 @@ S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p,
             }
             SvREFCNT_dec(string);
 
-            Perl_sv_2mortal(aTHX_ xpt);
-            Perl_croak_sv(aTHX_ xpt);
+            sv_2mortal(xpt);
+            croak_sv(xpt);
         }
     }
 }
@@ -5759,9 +5759,8 @@ Perl_api_version_assert(size_t interp_size, void *v_my_perl,
     if (interp_size != sizeof(PerlInterpreter)) {
         /* detects various types of configuration mismatches */
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl interpreter structure size %zd vs %zd",
-                   interp_size, sizeof(PerlInterpreter));
+        croak("Mismatch between expected and libperl interpreter structure"
+              " size %zd vs %zd", interp_size, sizeof(PerlInterpreter));
     }
     if (
 #ifdef MULTIPLICITY
@@ -5772,14 +5771,12 @@ Perl_api_version_assert(size_t interp_size, void *v_my_perl,
         ) {
         /* detect threads vs non-threads mismatch */
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl interpreter pointer");
+        croak("Mismatch between expected and libperl interpreter pointer");
     }
     if (strNE(api_version, PERL_API_VERSION_STRING)) {
         /* diag_listed_as: Mismatch between expected and libperl %s */
-        Perl_croak(aTHX_
-                   "Mismatch between expected and libperl API versions %s vs %s",
-                   api_version, PERL_API_VERSION_STRING);
+        croak("Mismatch between expected and libperl API versions %s vs %s",
+              api_version, PERL_API_VERSION_STRING);
     }
 }
 
@@ -6749,9 +6746,7 @@ Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int depth, int skip)
 {
     PERL_ARGS_ASSERT_DUMP_C_BACKTRACE;
 
-    SV* sv;
-
-    sv = Perl_get_c_backtrace_dump(aTHX_ depth, skip);
+    SV* sv = get_c_backtrace_dump(depth, skip);
     if (sv) {
         sv_2mortal(sv);
         PerlIO_printf(fp, "%s", SvPV_nolen(sv));

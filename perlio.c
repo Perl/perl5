@@ -383,9 +383,9 @@ PerlIO_debug(const char *fmt, ...)
 #else
         const char *s = CopFILE(PL_curcop);
         STRLEN len;
-        SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf " ",
-                                      s ? s : "(none)", CopLINE(PL_curcop));
-        Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
+        SV * const sv = newSVpvf("%s:%" LINE_Tf " ",
+                                 s ? s : "(none)", CopLINE(PL_curcop));
+        sv_vcatpvf(sv, fmt, &ap);
 
         s = SvPV_const(sv, len);
         PERL_UNUSED_RESULT(PerlLIO_write(PL_perlio_debug_fd, s, len));
@@ -744,7 +744,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
             /*
              * The two SVs are magically freed by load_module
              */
-            Perl_load_module(aTHX_ 0, pkgsv, NULL, layer, NULL);
+            load_module(0, pkgsv, NULL, layer, NULL);
             LEAVE;
             return PerlIO_find_layer(aTHX_ name, len, 0);
         }

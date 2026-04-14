@@ -2278,7 +2278,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * function */
 
                 assert(0);
-                message = Perl_form(aTHX_ "%s: (empty string)", malformed_text);
+                message = form("%s: (empty string)", malformed_text);
                 break;
 
               case UTF8_GOT_CONTINUATION_BIT_POS_:
@@ -2329,7 +2329,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * The other error types either can't generate an overlong, or
                  * else the 'input_uv' is valid */
                 if (orig_problems & (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW)) {
-                    message = Perl_form(aTHX_
+                    message = form(
                             "%s: %s (any UTF-8 sequence that starts with"
                             " \"%s\" is overlong which can and should be"
                             " represented with a different, shorter sequence)",
@@ -2354,7 +2354,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                                             )
                                             ? "0x"
                                             : "U+";
-                    message = Perl_form(aTHX_
+                    message = form(
                                 "%s: %s (overlong; instead use %s to represent"
                                 " %s%0*" UVXf ")",
                                 malformed_text,
@@ -2404,13 +2404,13 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                 /* This is the only error that can occur with a surrogate when
                  * the 'input_uv' isn't valid */
                 if (orig_problems & UTF8_GOT_TOO_SHORT) {
-                    message = Perl_form(aTHX_
+                    message = form(
                                    "UTF-16 surrogate (any UTF-8 sequence that"
                                    " starts with \"%s\" is for a surrogate)",
                                    byte_dump_string_(s0, curlen, 0));
                 }
                 else {
-                    message = Perl_form(aTHX_ surrogate_cp_format, input_uv);
+                    message = form(surrogate_cp_format, input_uv);
                 }
 
                 break;
@@ -2495,7 +2495,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                  * have this situation. */
 
                 if (overflows) {
-                    message = Perl_form(aTHX_ "%s: %s (overflows)",
+                    message = form("%s: %s (overflows)",
                                               malformed_text,
                                               byte_dump_string_(s0, curlen, 0));
                 }
@@ -2504,14 +2504,14 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                              && ! UNICODE_IS_SUPER(input_uv)))
                 {
                     if (is_extended) {
-                        message = Perl_form(aTHX_
+                        message = form(
                                         "Any UTF-8 sequence that starts with"
                                         " \"%s\" is a Perl extension, and so"
                                         " is not portable",
                                         byte_dump_string_(s0, curlen, 0));
                     }
                     else {
-                        message = Perl_form(aTHX_
+                        message = form(
                                         "Any UTF-8 sequence that starts with"
                                         " \"%s\" is for a non-Unicode code"
                                         " point, may not be portable",
@@ -2519,10 +2519,10 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
                     }
                 }
                 else if (is_extended) {
-                    message = Perl_form(aTHX_ PL_extended_cp_format, input_uv);
+                    message = form(PL_extended_cp_format, input_uv);
                 }
                 else {
-                    message = Perl_form(aTHX_ super_cp_format, input_uv);
+                    message = form(super_cp_format, input_uv);
                 }
 
                 /* This message only needs to output once.  Ww can potentially
@@ -4878,8 +4878,7 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
     const char * const ptr =
         isREGEXP(ssv) ? RX_WRAPPED((REGEXP*)ssv) : SvPVX_const(ssv);
 
-    return Perl_pv_uni_display(aTHX_ dsv, (const U8*)ptr,
-                                SvCUR(ssv), pvlim, flags);
+    return pv_uni_display(dsv, (const U8*)ptr, SvCUR(ssv), pvlim, flags);
 }
 
 /*

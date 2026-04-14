@@ -741,9 +741,8 @@ Perl_no_bareword_allowed(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED;
 
-    qerror(Perl_mess(aTHX_
-                     "Bareword \"%" SVf "\" not allowed while \"strict subs\" in use",
-                     SVfARG(cSVOPo_sv)));
+    qerror(mess("Bareword \"%" SVf "\" not allowed while \"strict subs\" in"
+                " use", SVfARG(cSVOPo_sv)));
     o->op_private &= ~OPpCONST_STRICT; /* prevent warning twice about the same OP */
 }
 
@@ -772,7 +771,8 @@ Perl_no_bareword_filehandle(pTHX_ const char *fhname)
     PERL_ARGS_ASSERT_NO_BAREWORD_FILEHANDLE;
 
     if (!is_standard_filehandle_name(fhname)) {
-        qerror(Perl_mess(aTHX_ "Bareword filehandle \"%s\" not allowed under 'no feature \"bareword_filehandles\"'", fhname));
+        qerror(mess("Bareword filehandle \"%s\" not allowed under 'no"
+                    " feature \"bareword_filehandles\"'", fhname));
     }
 }
 
@@ -2374,17 +2374,17 @@ Perl_scalarvoid(pTHX_ OP *arg)
                     else if (SvPOK(sv)) {
                         SV * const dsv = newSVpvs("");
                         useless_sv
-                            = Perl_newSVpvf(aTHX_
-                                            "a constant (%s)",
-                                            pv_pretty(dsv, SvPVX_const(sv),
-                                                      SvCUR(sv), 32, NULL, NULL,
-                                                      PERL_PV_PRETTY_DUMP
-                                                      | PERL_PV_ESCAPE_NOCLEAR
-                                                      | PERL_PV_ESCAPE_UNI_DETECT));
+                            = newSVpvf("a constant (%s)",
+                                       pv_pretty(dsv, SvPVX_const(sv),
+                                                 SvCUR(sv), 32, NULL, NULL,
+                                                 PERL_PV_PRETTY_DUMP
+                                               | PERL_PV_ESCAPE_NOCLEAR
+                                               | PERL_PV_ESCAPE_UNI_DETECT));
                         SvREFCNT_dec_NN(dsv);
                     }
                     else if (SvOK(sv)) {
-                        useless_sv = Perl_newSVpvf(aTHX_ "a constant (%" SVf ")", SVfARG(sv));
+                        useless_sv = newSVpvf("a constant (%" SVf ")",
+                                              SVfARG(sv));
                     }
                     else
                         useless = "a constant (undef)";
@@ -3975,16 +3975,15 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
 
-        Perl_load_module(
-          aTHX_ PERL_LOADMOD_IMPORT_OPS,
-          newSVpvs(ATTRSMODULE),
-          NULL,
-          op_prepend_elem(OP_LIST,
-                          newSVOP(OP_CONST, 0, stashsv),
-                          op_prepend_elem(OP_LIST,
-                                          newSVOP(OP_CONST, 0,
-                                                  newRV(target)),
-                                          dup_attrlist(attrs))));
+        load_module(PERL_LOADMOD_IMPORT_OPS,
+                    newSVpvs(ATTRSMODULE),
+                    NULL,
+                    op_prepend_elem(OP_LIST,
+                                    newSVOP(OP_CONST, 0, stashsv),
+                                    op_prepend_elem(OP_LIST,
+                                                    newSVOP(OP_CONST, 0,
+                                                            newRV(target)),
+                                                    dup_attrlist(attrs))));
     }
 }
 
@@ -4009,8 +4008,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     if (svp && *svp != &PL_sv_undef)
         NOOP;	/* already in %INC */
     else
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                               newSVpvs(ATTRSMODULE), NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs(ATTRSMODULE), NULL);
 
     /* Need package name for method call. */
     pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
@@ -4077,12 +4075,13 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
         }
     }
 
-    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-                     newSVpvs(ATTRSMODULE),
-                     NULL, op_prepend_elem(OP_LIST,
-                                  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
-                                  op_prepend_elem(OP_LIST,
-                                               newSVOP(OP_CONST, 0,
+    load_module(PERL_LOADMOD_IMPORT_OPS,
+                newSVpvs(ATTRSMODULE),
+                NULL,
+                op_prepend_elem(OP_LIST,
+                                newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
+                                op_prepend_elem(OP_LIST,
+                                                newSVOP(OP_CONST, 0,
                                                        newRV(MUTABLE_SV(cv))),
                                                attrs)));
 }
@@ -9236,7 +9235,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     CopHINTHASH_set(cop, cophh_copy(CopHINTHASH_get(PL_curcop)));
     CopFEATURES_setfrom(cop, PL_curcop);
     if (label) {
-        Perl_cop_store_label(aTHX_ cop, label, strlen(label), utf8);
+        cop_store_label(cop, label, strlen(label), utf8);
 
         PL_hints |= HINT_BLOCK_SCOPE;
         /* It seems that we need to defer freeing this pointer, as other parts
@@ -11356,10 +11355,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
-                                          CopFILE(PL_curcop),
-                                          (line_t)PL_subline,
-                                          CopLINE(PL_curcop));
+            SV * const sv = newSVpvf("%s:%" LINE_Tf "-%" LINE_Tf,
+                                     CopFILE(PL_curcop),
+                                     (line_t)PL_subline,
+                                     CopLINE(PL_curcop));
             if (HvNAME_HEK(PL_curstash)) {
                 sv_sethek(tmpstr, HvNAME_HEK(PL_curstash));
                 sv_catpvs(tmpstr, "::");
@@ -11977,10 +11976,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
-                                          CopFILE(PL_curcop),
-                                          (line_t)PL_subline,
-                                          CopLINE(PL_curcop));
+            SV * const sv = newSVpvf("%s:%" LINE_Tf "-%" LINE_Tf,
+                                     CopFILE(PL_curcop),
+                                     (line_t)PL_subline,
+                                     CopLINE(PL_curcop));
             (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
             if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
@@ -13877,10 +13876,9 @@ Perl_ck_fun(pTHX_ OP *o)
                                            GV * const gv = cGVOPx_gv(firstop);
                                            if (gv)
                                                 tmpstr =
-                                                     Perl_newSVpvf(aTHX_
-                                                                   "%s%c...%c",
-                                                                   GvNAME(gv),
-                                                                   a[0], a[1]);
+                                                     newSVpvf("%s%c...%c",
+                                                              GvNAME(gv),
+                                                              a[0], a[1]);
                                       }
                                       else if (op->op_type == OP_PADAV
                                                || op->op_type == OP_PADHV) {
@@ -13889,10 +13887,9 @@ Perl_ck_fun(pTHX_ OP *o)
                                                 PAD_COMPNAME_PV(op->op_targ);
                                            if (padname)
                                                 tmpstr =
-                                                     Perl_newSVpvf(aTHX_
-                                                                   "%s%c...%c",
-                                                                   padname + 1,
-                                                                   a[0], a[1]);
+                                                     newSVpvf("%s%c...%c",
+                                                              padname + 1,
+                                                              a[0], a[1]);
                                       }
                                       if (tmpstr) {
                                            name = SvPV_const(tmpstr, len);
@@ -13998,8 +13995,8 @@ Perl_ck_glob(pTHX_ OP *o)
 #if !defined(PERL_EXTERNAL_GLOB)
     if (!PL_globhook) {
         ENTER;
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                               newSVpvs("File::Glob"), NULL, NULL, NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("File::Glob"),
+                    NULL, NULL, NULL);
         LEAVE;
     }
 #endif /* !PERL_EXTERNAL_GLOB */
@@ -15681,7 +15678,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                     newSVpv(CopFILE(PL_curcop),0));
         case 'L': /* __LINE__ */
             return newSVOP(OP_CONST, 0,
-                    Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop)));
+                    newSVpvf("%" LINE_Tf, CopLINE(PL_curcop)));
         case 'P': /* __PACKAGE__ */
             return newSVOP(OP_CONST, 0,
                     (PL_curstash
@@ -16218,9 +16215,8 @@ Perl_ck_each(pTHX_ OP *o)
                     goto bad;
                 /* FALLTHROUGH */
             default:
-                qerror(Perl_mess(aTHX_
-                    "Experimental %s on scalar is now forbidden",
-                     PL_op_desc[orig_type]));
+                qerror(mess("Experimental %s on scalar is now forbidden",
+                            PL_op_desc[orig_type]));
                bad:
                 bad_type_pv(1, "hash or array", o, kid);
                 return o;

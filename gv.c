@@ -896,9 +896,9 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     assert(hvname);
     assert(name || meth);
 
-    DEBUG_o( Perl_deb(aTHX_ "Looking for %smethod %s in package %s\n",
-                      flags & GV_SUPER ? "SUPER " : "",
-                      name ? name : SvPV_nolen(meth), hvname) );
+    DEBUG_o( deb("Looking for %smethod %s in package %s\n",
+                 flags & GV_SUPER ? "SUPER " : "",
+                 name ? name : SvPV_nolen(meth), hvname) );
 
     topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
@@ -1222,7 +1222,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
             /* ->SUPER::method should really be looked up in original stash */
             stash = CopSTASH(PL_curcop);
             flags |= GV_SUPER;
-            DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
+            DEBUG_o( deb("Treating %s as %s::%s\n",
                          origname, HvENAME_get(stash), name) );
         }
         else if ( sep_len >= 7 &&
@@ -1558,7 +1558,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
         const char type = varname == '[' ? '$' : '%';
         if ( flags & 1 )
             save_scalar(gv);
-        Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
+        load_module(PERL_LOADMOD_NOIMPORT, module, NULL);
         assert(sp == PL_stack_sp);
         stash = gv_stashpvn(name, len, 0);
         if (!stash)
@@ -2013,15 +2013,15 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                          (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
                 {
                     /* diag_listed_as: Variable "%s" is not imported%s */
-                    Perl_ck_warner_d(
-                        aTHX_ packWARN(WARN_MISC),
+                    ck_warner_d(
+                        packWARN(WARN_MISC),
                         "Variable \"%c%" UTF8f "\" is not imported",
                         sv_type == SVt_PVAV ? '@' :
                         sv_type == SVt_PVHV ? '%' : '$',
                         UTF8fARG(is_utf8, len, name));
                     if (GvCVu(*gvp))
-                        Perl_ck_warner_d(
-                            aTHX_ packWARN(WARN_MISC),
+                        ck_warner_d(
+                            packWARN(WARN_MISC),
                             "\t(Did you mean &%" UTF8f " instead?)\n",
                             UTF8fARG(is_utf8, len, name)
                         );
@@ -2038,7 +2038,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     if (!*stash) {
         if (add && !PL_in_clean_all) {
             GV *gv;
-            qerror(Perl_mess(aTHX_
+            qerror(mess(
                  "Global symbol \"%s%" UTF8f
                  "\" requires explicit package name (did you forget to "
                  "declare \"my %s%" UTF8f "\"?)",
@@ -2994,9 +2994,8 @@ Perl_gp_free(pTHX_ GV *gv)
       if (hv && SvTYPE(hv) == SVt_PVHV) {
         const HEK *hvname_hek = HvNAME_HEK(hv);
         if (PL_stashcache && hvname_hek) {
-           DEBUG_o(Perl_deb(aTHX_
-                          "gp_free clearing PL_stashcache for '%" HEKf "'\n",
-                           HEKfARG(hvname_hek)));
+           DEBUG_o(deb("gp_free clearing PL_stashcache for '%" HEKf "'\n",
+                       HEKfARG(hvname_hek)));
            (void)hv_deletehek(PL_stashcache, hvname_hek, G_DISCARD);
         }
         if (SvREFCNT(hv) > 1 || SvOBJECT(hv) || UNLIKELY(in_global_destruction)) {
@@ -3164,7 +3163,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
       sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
   }
 
-  DEBUG_o( Perl_deb(aTHX_ "Recalculating overload magic in package %s\n",HvNAME_get(stash)) );
+  DEBUG_o( deb("Recalculating overload magic in package %s\n",
+               HvNAME_get(stash)) );
 
   Zero(&amt,1,AMT);
   amt.was_ok_sub = newgen;
@@ -3214,7 +3214,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
         const char * const cp = AMG_id2name(i);
         const STRLEN l = PL_AMG_namelens[i];
 
-        DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
+        DEBUG_o( deb("Checking overloading of \"%s\" in package \"%.256s\"\n",
                      cp, HvNAME_get(stash)) );
         /* don't fill the cache while looking up!
            Creation of inheritance stubs in intermediate packages may
@@ -3223,7 +3223,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
            then we could have created stubs for "(+0" in A and C too.
            But if B overloads "bool", we may want to use it for
            numifying instead of C's "+0". */
-        gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
+        gv = gv_fetchmeth_pvn(stash, cooky, l, -1, 0);
         cv = 0;
         if (gv && (cv = GvCV(gv)) && CvHASGV(cv)) {
             const HEK * const gvhek = CvGvNAME_HEK(cv);
@@ -3238,8 +3238,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
                 GV *ngv = NULL;
                 SV *gvsv = GvSV(gv);
 
-                DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%" SVf256\
-                        "\" for overloaded \"%s\" in package \"%.256s\"\n",
+                DEBUG_o( deb("Resolving method \"%" SVf256 "\" for overloaded"
+                             " \"%s\" in package \"%.256s\"\n",
                              (void*)GvSV(gv), cp, HvNAME(stash)) );
                 if (!gvsv || !SvPOK(gvsv)
                     || !(ngv = gv_fetchmethod_sv_flags(stash, gvsv, 0)))
@@ -3266,7 +3266,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
                 }
                 cv = GvCV(gv = ngv);
             }
-            DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" via \"%.256s::%.256s\"\n",
+            DEBUG_o( deb("Overloading \"%s\" in package \"%.256s\" via"
+                         " \"%.256s::%.256s\"\n",
                          cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
                          GvNAME(CvGV(cv))) );
             filled = 1;
@@ -4019,7 +4020,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       } else {
         SV *msg;
         if (off==-1) off=method;
-        msg = sv_2mortal(Perl_newSVpvf(aTHX_
+        msg = sv_2mortal(newSVpvf(
                       "Operation \"%s\": no method found,%sargument %s%" SVf "%s%" SVf,
                       AMG_id2name(method + assignshift),
                       (flags & AMGf_unary ? " " : "\n\tleft "),
@@ -4038,7 +4039,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                         SVfARG(newSVhek_mortal(HvNAME_HEK(SvSTASH(SvRV(right))))):
                         SVfARG(&PL_sv_no)));
         if (use_default_op) {
-          DEBUG_o( Perl_deb(aTHX_ "%" SVf, SVfARG(msg)) );
+          DEBUG_o( deb("%" SVf, SVfARG(msg)) );
         } else {
           croak("%" SVf, SVfARG(msg));
         }
@@ -4119,19 +4120,21 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
 #ifdef DEBUGGING
   if (!notfound) {
-    DEBUG_o(Perl_deb(aTHX_
-                     "Overloaded operator \"%s\"%s%s%s:\n\tmethod%s found%s in package %" SVf "%s\n",
-                     AMG_id2name(off),
-                     method+assignshift==off? "" :
-                     " (initially \"",
-                     method+assignshift==off? "" :
-                     AMG_id2name(method+assignshift),
-                     method+assignshift==off? "" : "\")",
-                     flags & AMGf_unary? "" :
-                     lr==1 ? " for right argument": " for left argument",
-                     flags & AMGf_unary? " for argument" : "",
-                     stash ? SVfARG(newSVhek_mortal(HvNAME_HEK(stash))) : SVfARG(newSVpvs_flags("null", SVs_TEMP)),
-                     fl? ",\n\tassignment variant used": "") );
+    DEBUG_o(deb("Overloaded operator \"%s\"%s%s%s:\n\tmethod%s found%s in"
+                " package %" SVf "%s\n",
+                AMG_id2name(off),
+                method+assignshift==off? "" :
+                " (initially \"",
+                method+assignshift==off? "" :
+                AMG_id2name(method+assignshift),
+                method+assignshift==off? "" : "\")",
+                flags & AMGf_unary? "" :
+                lr==1 ? " for right argument": " for left argument",
+                flags & AMGf_unary? " for argument" : "",
+                (stash) ? SVfARG(newSVhek_mortal(HvNAME_HEK(stash)))
+                        : SVfARG(newSVpvs_flags("null", SVs_TEMP)),
+                (fl) ? ",\n\tassignment variant used"
+                     : "") );
   }
 #endif
     /* Since we use shallow copy during assignment, we need

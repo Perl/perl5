@@ -196,7 +196,7 @@ Perl_savestack_grow(pTHX)
     PERL_ARGS_ASSERT_SAVESTACK_GROW;
 
     const I32 by = PL_savestack_max - PL_savestack_ix;
-    Perl_savestack_grow_cnt(aTHX_ by);
+    savestack_grow_cnt(by);
 }
 
 void
@@ -1190,8 +1190,8 @@ Perl_leave_scope(pTHX_ I32 base)
 
     if (UNLIKELY(base < -1))
         croak("panic: corrupt saved stack index %ld", (long) base);
-    DEBUG_l(Perl_deb(aTHX_ "savestack: releasing items %ld -> %ld\n",
-                        (long)PL_savestack_ix, (long)base));
+    DEBUG_l(deb("savestack: releasing items %ld -> %ld\n",
+                (long)PL_savestack_ix, (long)base));
     while (PL_savestack_ix > base) {
         UV uv;
         U8 type;

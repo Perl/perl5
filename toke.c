@@ -581,7 +581,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
             }
         }
         if (name)
-            Perl_sv_catpv(aTHX_ report, name);
+            sv_catpv(report, name);
         else if (isGRAPH(rv))
         {
             sv_catpvf(report, "'%c'", (char)rv);
@@ -2858,7 +2858,7 @@ Perl_load_charnames(pTHX_ SV * char_name, const char * context,
         }
 
         if (i == 0) {
-            Perl_load_module(aTHX_
+            load_module(
                 0,
                 newSVpvs("_charnames"),
 
@@ -7574,7 +7574,7 @@ yyl_croak_unrecognised(pTHX_ char *s)
         while (d > SvPVX(PL_linestr) && d[-1] && d[-1] != '\n')
             --d;
     }
-    len = UTF ? Perl_utf8_length(aTHX_ (U8 *) d, (U8 *) s) : (STRLEN) (s - d);
+    len = UTF ? utf8_length((U8 *) d, (U8 *) s) : (STRLEN) (s - d);
     if (len > UNRECOGNIZED_PRECEDE_COUNT) {
         d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)d) : s - UNRECOGNIZED_PRECEDE_COUNT;
     }
@@ -8474,7 +8474,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY___LINE__:
         FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_LINE<<8,
-                Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop))));
+                newSVpvf("%" LINE_Tf, CopLINE(PL_curcop))));
 
     case KEY___PACKAGE__:
         FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_PACKAGE<<8,
@@ -11616,7 +11616,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     }
 
     if (x_mod_count > 1 && FEATURE_ENHANCED_XX_IS_ENABLED) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ENHANCED_XX), 
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
                          "enhanced_xx is experimental");
     }
 
@@ -11679,7 +11679,7 @@ S_scan_subst(pTHX_ char *start)
     }
 
     if (x_mod_count > 1 && FEATURE_ENHANCED_XX_IS_ENABLED) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__ENHANCED_XX),
                          "enhanced_xx is experimental");
     }
 
@@ -14380,7 +14380,7 @@ S_parse_recdescent(pTHX_ int gramtype, I32 fakeeof)
     SAVEI8(PL_lex_fakeeof);
     PL_lex_fakeeof = (U8)fakeeof;
     if(yyparse(gramtype) && !PL_parser->error_count)
-        qerror(Perl_mess(aTHX_ "Parse error"));
+        qerror(mess("Parse error"));
 }
 
 #define parse_recdescent_for_op(g,p) S_parse_recdescent_for_op(aTHX_ g,p)
@@ -14407,7 +14407,7 @@ S_parse_expr(pTHX_ I32 fakeeof, U32 flags)
     exprop = parse_recdescent_for_op(GRAMEXPR, fakeeof);
     if (!exprop && !(flags & PARSE_OPTIONAL)) {
         if (!PL_parser->error_count)
-            qerror(Perl_mess(aTHX_ "Parse error"));
+            qerror(mess("Parse error"));
         exprop = newOP(OP_NULL, 0);
     }
     return exprop;
@@ -14697,7 +14697,7 @@ Perl_parse_label(pTHX_ U32 flags)
             if (flags & PARSE_OPTIONAL) {
                 return NULL;
             } else {
-                qerror(Perl_mess(aTHX_ "Parse error"));
+                qerror(mess("Parse error"));
                 return newSVpvs("x");
             }
         }
@@ -14783,7 +14783,7 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     stmtseqop = parse_recdescent_for_op(GRAMSTMTSEQ, LEX_FAKEEOF_CLOSING);
     c = lex_peek_unichar(0);
     if (c != -1 && c != /*{*/'}')
-        qerror(Perl_mess(aTHX_ "Parse error"));
+        qerror(mess("Parse error"));
     return stmtseqop;
 }
 
