@@ -90,9 +90,7 @@ pass("loaded");
             lock $lock;
             cond_signal($cond);
         }
-        # XXX fixme
-        like($w, qr/\Qcond_signal() called on unlocked variable/,
-                                        "warn cond_signal not locked");
+        is($w, undef, "no warn cond_signal not locked");
         $t->join;
     }
 
