@@ -57,6 +57,45 @@ pass("loaded");
     like($w, qr/\Qcond_broadcast() called on unlocked variable/,
                                     "warn cond_broadcast not locked");
 
+    {
+        # Test whether using separate cond and lock vars triggers
+        # an 'unlocked var' warning.
+        my $cond :shared; # used for actual test
+        my $sig  :shared; # used to sync threads ready for test
+        undef $w;
+        my $t = threads->new(
+            sub {
+                lock $lock;
+                {
+                    # tell parent we have $lock
+                    lock $sig;
+                    $sig = 1;
+                    cond_signal($sig);
+                }
+                cond_wait($cond, $lock);
+            }
+        );
+
+        # wait until child has $lock
+        {
+            lock $sig;
+            while (!$sig) {
+                cond_wait($sig);
+            }
+        }
+        pass("\$lock acquired");
+
+        {
+            # the actual test
+            lock $lock;
+            cond_signal($cond);
+        }
+        # XXX fixme
+        like($w, qr/\Qcond_signal() called on unlocked variable/,
+                                        "warn cond_signal not locked");
+        $t->join;
+    }
+
     # Test for the "cond_wait() called on multiple locks" warning.
     # To trigger this, we need to start two threads, which wait on the
     # same condition variable but using different locks.
