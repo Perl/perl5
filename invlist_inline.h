@@ -175,11 +175,18 @@ S_invlist_highest_range_start(SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_HIGHEST_RANGE_START;
 
-    /* Returns the lowest code point of the highest range in the inversion
-     * list parameter.  This API has an ambiguity: it returns 0 either when
-     * the lowest such point is actually 0 or when the list is empty.  If this
-     * distinction matters to you, check for emptiness before calling this
-     * function. */
+/*
+=for apidoc invlist_highest_range_start
+
+Returns the lowest code point of the highest range in the inversion list
+given by its parameter.
+
+This API has an ambiguity: it returns 0 either when the lowest such
+point is actually 0 or when the list is empty.  If this distinction matters to
+you, check for emptiness before calling this function.
+
+=cut
+*/
 
     UV len = invlist_len_(invlist);
     UV *array;
@@ -360,10 +367,17 @@ S_invlist_lowest(SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_LOWEST;
 
-    /* Returns the lowest code point that matches an inversion list.  This API
-     * has an ambiguity, as it returns 0 under either the lowest is actually
-     * 0, or if the list is empty.  If this distinction matters to you, check
-     * for emptiness before calling this function */
+/*
+=for apidoc invlist_lowest
+
+Returns the lowest code point that matches an inversion list.
+
+This API has an ambiguity, as it returns 0 under either the lowest is actually
+0, or if the list is empty.  If this distinction matters to you, check for
+emptiness before calling this function
+
+=cut
+*/
 
     UV len = invlist_len_(invlist);
     UV *array;
