@@ -194,7 +194,7 @@ S_invlist_highest_range_start(SV* const invlist)
      * range that goes to infinity.  That range may be for code points that are
      * matched in the inversion list, or it may be for ones that aren't
      * matched.  In the first case, the lowest code point in the matching range
-     * is that the one that started the range.  If the other case, the final
+     * is the one that started the range.  In the other case, the final
      * matching range begins at the next element down (which may be 0 in the
      * edge case). */
     return (ELEMENT_RANGE_MATCHES_INVLIST(len - 1))
