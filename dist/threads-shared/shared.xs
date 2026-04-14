@@ -1827,10 +1827,34 @@ cond_signal(SV *myref)
             Perl_warner(aTHX_ packWARN(WARN_THREADS),
                             "%s() called on unlocked variable", name);
         }
+
+        /* The purpose of holding the mutex while signalling:
+         * strictly speaking it isn't necessary, but it stops
+         * tools like helgrind and drd reporting false positives.
+         *
+         * Normally signalling is done in this order:
+         *     lock(mutuex);
+         *     predicate = 1;
+         *     signal(cond)
+         *     unlock(mutuex);
+         * although it often doesn't matter if the unlock is done before
+         * the signal(), as long as it's done *after* the predicate
+         * change.
+         * In our case however, the predicate is set in perl-land, and
+         * the lock that protects it is a perl-level lock, which is still
+         * held (see the "cond_signal() called on unlocked variable"
+         * check above); but the C-level mutex *isn't* held at this point.
+         * So setting the mutex below is harmless (apart from being
+         * infinitesimally slower), but not necessary.
+         */
+        MUTEX_LOCK(&ul->lock.mutex);
+
         if (ix)
             COND_BROADCAST(&cl->user_cond);
         else
             COND_SIGNAL(&cl->user_cond);
+
+        MUTEX_UNLOCK(&ul->lock.mutex);
 
 
 SV*
