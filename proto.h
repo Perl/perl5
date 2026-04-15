@@ -4373,23 +4373,27 @@ Perl_newOP(pTHX_ I32 optype, I32 flags)
         Perl_assert_aTHX
 
 PERL_CALLCONV PADNAMELIST *
-Perl_newPADNAMELIST(size_t max)
+Perl_newPADNAMELIST(pTHX_ size_t max)
+        Perl_attribute_nonnull_aTHX
         __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEWPADNAMELIST
+#define PERL_ARGS_ASSERT_NEWPADNAMELIST         \
+        Perl_assert_aTHX
 
 PERL_CALLCONV PADNAME *
-Perl_newPADNAMEouter(PADNAME *outer)
-        Perl_attribute_nonnull(1)
+Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWPADNAMEOUTER        \
-        assert(outer)
+        Perl_assert_aTHX; assert(outer)
 
 PERL_CALLCONV PADNAME *
-Perl_newPADNAMEpvn(const char *s, STRLEN len)
-        Perl_attribute_nonnull(1)
+Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWPADNAMEPVN          \
-        assert(s)
+        Perl_assert_aTHX; assert(s)
 
 PERL_CALLCONV OP *
 Perl_newPMOP(pTHX_ I32 type, I32 flags)

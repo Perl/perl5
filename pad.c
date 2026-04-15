@@ -2709,7 +2709,7 @@ is allocated.
 */
 
 PADNAMELIST *
-Perl_newPADNAMELIST(size_t max)
+Perl_newPADNAMELIST(pTHX_ size_t max)
 {
     PERL_ARGS_ASSERT_NEWPADNAMELIST;
 
@@ -2844,7 +2844,7 @@ C<L</newPADNAMEouter>>.
 */
 
 PADNAME *
-Perl_newPADNAMEpvn(const char *s, STRLEN len)
+Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
 {
     PERL_ARGS_ASSERT_NEWPADNAMEPVN;
 
@@ -2877,7 +2877,7 @@ C<PADNAMEf_OUTER> flag already set.
 */
 
 PADNAME *
-Perl_newPADNAMEouter(PADNAME *outer)
+Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
 {
     PERL_ARGS_ASSERT_NEWPADNAMEOUTER;
 
