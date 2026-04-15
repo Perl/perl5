@@ -17904,7 +17904,7 @@ Perl_init_constants(pTHX)
     SvIV_set(&PL_sv_zero, 0);
     SvNV_set(&PL_sv_zero, 0);
 
-    PadnamePV(&PL_padname_const) = (char *)PL_No;
+    PadnamePV_set(&PL_padname_const, (char *)PL_No);
 
     assert(SvIMMORTAL_INTERP(&PL_sv_yes));
     assert(SvIMMORTAL_INTERP(&PL_sv_undef));

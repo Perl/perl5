@@ -2857,10 +2857,11 @@ Perl_newPADNAMEpvn(pTHX_ const char *s, STRLEN len)
     alloc = (struct padname_with_str *)alloc2;
     pn = (PADNAME *)alloc;
     PadnameREFCNT(pn) = 1;
-    PadnamePV(pn) = alloc->xpadn_str;
-    Copy(s, PadnamePV(pn), len, char);
-    *(PadnamePV(pn) + len) = '\0';
-    PadnameLEN(pn) = len;
+    char *pv = alloc->xpadn_str;
+    Copy(s, pv, len, char);
+    *(pv + len) = '\0';
+    PadnamePV_set(pn, pv);
+    PadnameLEN_set(pn, len);
     return pn;
 }
 
@@ -2884,7 +2885,7 @@ Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
     PADNAME *pn;
     Newxz(pn, 1, PADNAME);
     PadnameREFCNT(pn) = 1;
-    PadnamePV(pn) = PadnamePV(outer);
+    PadnamePV_set(pn, PadnamePV(outer));
     /* Not PadnameREFCNT(outer), because ‘outer’ may itself close over
        another entry.  The original pad name owns the buffer.  */
     PadnameREFCNT_inc(PADNAME_FROM_PV(PadnamePV(outer)));
@@ -2895,7 +2896,7 @@ Perl_newPADNAMEouter(pTHX_ PADNAME *outer)
         PadnameFIELDINFO(pn)->refcount++;
         PadnameFLAGS(pn) |= PADNAMEf_FIELD;
     }
-    PadnameLEN(pn) = PadnameLEN(outer);
+    PadnameLEN_set(pn, PadnameLEN(outer));
     return pn;
 }
 
@@ -2959,7 +2960,6 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
      ? newPADNAMEouter(padname_dup(PADNAME_FROM_PV(PadnamePV(src)), param))
      : newPADNAMEpvn(PadnamePV(src), PadnameLEN(src));
     ptr_table_store(PL_ptr_table, src, dst);
-    PadnameLEN(dst) = PadnameLEN(src);
     PadnameFLAGS(dst) = PadnameFLAGS(src);
     PadnameREFCNT(dst) = 0; /* The caller will increment it.  */
     PadnameTYPE   (dst) = (HV *)sv_dup_inc((SV *)PadnameTYPE(src), param);
