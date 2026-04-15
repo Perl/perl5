@@ -338,8 +338,8 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadARRAY(pad)		AvARRAY(pad)
 #define PadMAX(pad)		AvFILLp(pad)
 
-#define PadnamePV(pn)		(pn)->xpadn_pv
-#define PadnameLEN(pn)		(pn)->xpadn_len
+#define PadnamePV(pn)		((pn)->xpadn_pv + 0)
+#define PadnameLEN(pn)		((pn)->xpadn_len + 0)
 #define PadnameUTF8(pn)		1
 #define PadnameSV(pn) \
         newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8|SVf_READONLY|SVf_PROTECT)
@@ -369,6 +369,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PADNAMEf_TYPED      0x08    /* for B; unused by core */
 #define PADNAMEf_OUR        0x10    /* for B; unused by core */
 #define PADNAMEf_FIELD      0x20    /* field var */
+
+#ifdef PERL_CORE
+#  define PadnamePV_set(pn, pv)     ((pn)->xpadn_pv = (pv))
+#  define PadnameLEN_set(pn, len)   ((pn)->xpadn_len = (len))
+#endif
 
 /* backward compatibility */
 #ifndef PERL_CORE
