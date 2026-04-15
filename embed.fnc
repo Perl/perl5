@@ -2488,11 +2488,11 @@ Cdp	|CV *	|newMYSUB	|I32 floor				\
 ARdp	|OP *	|newNULLLIST
 ARdp	|OP *	|newOP		|I32 optype				\
 				|I32 flags
-ARTdpx	|PADNAMELIST *|newPADNAMELIST					\
+ARdpx	|PADNAMELIST *|newPADNAMELIST					\
 				|size_t max
-ARTdpx	|PADNAME *|newPADNAMEouter					\
+ARdpx	|PADNAME *|newPADNAMEouter					\
 				|NN PADNAME *outer
-ARTdpx	|PADNAME *|newPADNAMEpvn|NN const char *s			\
+ARdpx	|PADNAME *|newPADNAMEpvn|NN const char *s			\
 				|STRLEN len
 ARdip	|OP *	|newPADxVOP	|I32 type				\
 				|I32 flags				\

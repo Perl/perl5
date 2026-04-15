@@ -660,9 +660,9 @@
 # define newMYSUB(a,b,c,d,e)                    Perl_newMYSUB(aTHX_ a,b,c,d,e)
 # define newNULLLIST()                          Perl_newNULLLIST(aTHX)
 # define newOP(a,b)                             Perl_newOP(aTHX_ a,b)
-# define newPADNAMELIST                         Perl_newPADNAMELIST
-# define newPADNAMEouter                        Perl_newPADNAMEouter
-# define newPADNAMEpvn                          Perl_newPADNAMEpvn
+# define newPADNAMELIST(a)                      Perl_newPADNAMELIST(aTHX_ a)
+# define newPADNAMEouter(a)                     Perl_newPADNAMEouter(aTHX_ a)
+# define newPADNAMEpvn(a,b)                     Perl_newPADNAMEpvn(aTHX_ a,b)
 # define newPADxVOP(a,b,c)                      Perl_newPADxVOP(aTHX_ a,b,c)
 # define newPMOP(a,b)                           Perl_newPMOP(aTHX_ a,b)
 # define newPROG(a)                             Perl_newPROG(aTHX_ a)
