@@ -2924,8 +2924,37 @@ Perl_padname_free(pTHX_ PADNAME *pn)
                 Safefree(info);
             }
         }
+        if (PadnameIsFULLSV(pn))
+            SvREFCNT_dec(PadnameSV(pn));
         Safefree(pn);
     }
+}
+
+/*
+In-place upgrades a PADNAME so that PadnameIsFULLSV() is true. This stores an
+SV inside the padname, which is now always the one returned by PadnameSV().
+Code may use this SV as a place to attach magic.
+*/
+PADNAME *
+Perl_padname_upgrade_sv(pTHX_ PADNAME *pn)
+{
+    PERL_ARGS_ASSERT_PADNAME_UPGRADE_SV;
+
+    if(PadnameIsFULLSV(pn))
+        return pn;
+
+    SV *sv = newSV_type(SVt_PV);
+    SvLEN_set(sv, 0); /* sv does not own the buffer, it belongs to the underlying Padname */
+    SvCUR_set(sv, PadnameLEN(pn));
+    SvPVX(sv) = PadnamePV(pn);
+    SvPOK_on(sv);
+    SvUTF8_on(sv);
+    SvREADONLY_on(sv);
+
+    pn->xpadn_sv = sv;
+
+    PadnameFLAGS(pn) |= PADNAMEf_FULLSV;
+    return pn;
 }
 
 #if defined(USE_ITHREADS)
@@ -2956,9 +2985,20 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
         return dst;
     }
 
-    dst = PadnameOUTER(src)
-     ? newPADNAMEouter(padname_dup(PADNAME_FROM_PV(PadnamePV(src)), param))
-     : newPADNAMEpvn(PadnamePV(src), PadnameLEN(src));
+    if(PadnameOUTER(src))
+        /* Cloning an outer padname just makes a capture of the outer part
+         * regardless of whether it is SV-backed
+         */
+        dst = newPADNAMEouter(padname_dup(PADNAME_FROM_PV(PadnamePV(src)), param));
+    else {
+        dst = newPADNAMEpvn(PadnamePV(src), PadnameLEN(src));
+
+        if(PadnameIsFULLSV(src)) {
+            char *pnpv = PadnamePV(dst);
+            dst->xpadn_sv = sv_dup_inc(src->xpadn_sv, param);
+            SvPVX(dst->xpadn_sv) = pnpv;
+        }
+    }
     ptr_table_store(PL_ptr_table, src, dst);
     PadnameFLAGS(dst) = PadnameFLAGS(src);
     PadnameREFCNT(dst) = 0; /* The caller will increment it.  */

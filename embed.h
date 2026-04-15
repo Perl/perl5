@@ -1383,6 +1383,7 @@
 #   define pad_push(a,b)                        Perl_pad_push(aTHX_ a,b)
 #   define pad_swipe(a,b)                       Perl_pad_swipe(aTHX_ a,b)
 #   define padlist_store(a,b,c)                 Perl_padlist_store(aTHX_ a,b,c)
+#   define padname_upgrade_sv(a)                Perl_padname_upgrade_sv(aTHX_ a)
 #   define parse_unicode_opts(a)                Perl_parse_unicode_opts(aTHX_ a)
 #   define parser_free(a)                       Perl_parser_free(aTHX_ a)
 #   define peep(a)                              Perl_peep(aTHX_ a)

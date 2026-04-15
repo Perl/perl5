@@ -2738,6 +2738,8 @@ Adpx	|PADNAME **|padnamelist_store					\
 				|NN PADNAMELIST *pnl			\
 				|SSize_t key				\
 				|NULLOK PADNAME *val
+p	|PADNAME *|padname_upgrade_sv					\
+				|NN PADNAME *pn
 
 : pad API
 ARdp	|PADLIST *|pad_new	|int flags

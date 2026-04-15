@@ -5129,6 +5129,14 @@ Perl_padname_free(pTHX_ PADNAME *pn)
         Perl_assert_aTHX; assert(pn)
 
 PERL_CALLCONV PADNAME *
+Perl_padname_upgrade_sv(pTHX_ PADNAME *pn)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_PADNAME_UPGRADE_SV     \
+        Perl_assert_aTHX; assert(pn)
+
+PERL_CALLCONV PADNAME *
 Perl_padnamelist_fetch(PADNAMELIST *pnl, SSize_t key)
         Perl_attribute_nonnull(1)
         __attribute__warn_unused_result__;
