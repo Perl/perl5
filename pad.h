@@ -58,7 +58,10 @@ struct padnamelist {
 struct padname_fieldinfo;
 
 #define PADNAME_BASE_ \
-    char *	xpadn_pv;		\
+    union {                             \
+        char *	xpadn_pv;		\
+        SV *    xpadn_sv;               \
+    };                                  \
     HV *	xpadn_ourstash;		\
     union {				\
         HV *	xpadn_typestash;	\
@@ -247,8 +250,12 @@ The length of the name.
 Whether PadnamePV is in UTF-8.  Currently, this is always true.
 
 =for apidoc Amx|SV *|PadnameSV|PADNAME * pn
-Returns the pad name as a mortal SV. The returned SV is marked C<SvREADONLY>;
-the caller must not attempt to modify it.
+Returns the pad name as a maybe-mortal SV. The returned SV is marked
+C<SvREADONLY>; the caller must not attempt to modify it.
+
+The returned SV might be mortal, or it might be owned by the pad name itself.
+Either way, the caller should not attempt to take ownership of it or call
+C<SvREFCNT_dec> on it.
 
 =for apidoc m|bool|PadnameIsOUR|PADNAME * pn
 Whether this is an "our" variable.
@@ -338,11 +345,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadARRAY(pad)		AvARRAY(pad)
 #define PadMAX(pad)		AvFILLp(pad)
 
-#define PadnamePV(pn)		((pn)->xpadn_pv + 0)
-#define PadnameLEN(pn)		((pn)->xpadn_len + 0)
+#define PadnamePV(pn)		(PadnameIsFULLSV(pn) ? SvPVX((pn)->xpadn_sv) : (pn)->xpadn_pv)
+#define PadnameLEN(pn)		(PadnameIsFULLSV(pn) ? SvCUR((pn)->xpadn_sv) : (pn)->xpadn_len)
 #define PadnameUTF8(pn)		1
 #define PadnameSV(pn) \
-        newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8|SVf_READONLY|SVf_PROTECT)
+        (PadnameIsFULLSV(pn) ? (pn)->xpadn_sv : newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8|SVf_READONLY|SVf_PROTECT))
 #define PadnameFLAGS(pn)	(pn)->xpadn_flags
 #define PadnameIsOUR(pn)	cBOOL((pn)->xpadn_ourstash)
 #define PadnameOURSTASH(pn)	(pn)->xpadn_ourstash
@@ -359,6 +366,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameIsSTATE(pn)	(PadnameFLAGS(pn) & PADNAMEf_STATE)
 #define PadnameLVALUE(pn)	(PadnameFLAGS(pn) & PADNAMEf_LVALUE)
 #define PadnameIsFIELD(pn)	(PadnameFLAGS(pn) & PADNAMEf_FIELD)
+#define PadnameIsFULLSV(pn)     (PadnameFLAGS(pn) & PADNAMEf_FULLSV)
 
 #define PadnameLVALUE_on(pn)    (PadnameFLAGS(pn) |= PADNAMEf_LVALUE)
 #define PadnameIsSTATE_on(pn)   (PadnameFLAGS(pn) |= PADNAMEf_STATE)
@@ -369,10 +377,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PADNAMEf_TYPED      0x08    /* for B; unused by core */
 #define PADNAMEf_OUR        0x10    /* for B; unused by core */
 #define PADNAMEf_FIELD      0x20    /* field var */
+#define PADNAMEf_FULLSV     0x80    /* padname stored in SVt_PV in xpadn_sv */
 
 #ifdef PERL_CORE
-#  define PadnamePV_set(pn, pv)     ((pn)->xpadn_pv = (pv))
-#  define PadnameLEN_set(pn, len)   ((pn)->xpadn_len = (len))
+#  define PadnamePV_set(pn, pv)     (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_pv = (pv))
+#  define PadnameLEN_set(pn, len)   (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_len = (len))
 #endif
 
 /* backward compatibility */

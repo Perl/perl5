@@ -422,6 +422,12 @@ L<perlclib/Dealing with embedded perls and threads>.
 During compiletime of a named subroutine, the name of the new sub
 currently being compiled is now accessible via C<CvNAME_HEK(PL_compcv)>.
 
+=item *
+
+A new internal function, C<padname_upgrade_sv()> attaches an SV onto a
+PADNAME instance, which is used to store the name string of that padname.
+This SV can be used by code that wishes to attach magic onto the padname.
+
 =back
 
 =head1 Selected Bug Fixes

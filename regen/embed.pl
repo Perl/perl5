@@ -3322,6 +3322,8 @@ my @undocumented_always_visible = qw(
     KEY_UNITCHECK
     MAX_UNICODE_UTF8_BYTES
     MGf_MGv2
+    PADNAMEf_FULLSV
+    PadnameIsFULLSV
 
     assert_scalar_or_IO_
     DEBUG__
