@@ -3755,6 +3755,9 @@ Perl_sv_utf8_encode(pTHX_ SV *const sv)
     if (SvREADONLY(sv)) {
         sv_force_normal_flags(sv, 0);
     }
+    if (SvIsCOW(sv)) {
+        S_sv_uncow(aTHX_ sv, 0);
+    }
     (void) sv_utf8_upgrade(sv);
     SvUTF8_off(sv);
 }
