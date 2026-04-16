@@ -3369,7 +3369,8 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 /* Implement tryAMAGICun_MG macro.
    Do get magic, then see if the stack arg is overloaded and if so call it.
    Flags:
-        AMGf_numeric apply sv_2num to the stack arg.
+        AMGf_numeric      apply sv_2num to the stack arg.
+        AMGf_no_GETMAGIC  do not call SvGETMAGIC on arguments
 */
 
 bool
@@ -3381,7 +3382,8 @@ Perl_try_amagic_un(pTHX_ int method, int flags)
     SV* const arg = PL_stack_sp[0];
     bool is_rc = rpp_stack_is_rc();
 
-    SvGETMAGIC(arg);
+    if (LIKELY(!(flags & AMGf_no_GETMAGIC)))
+        SvGETMAGIC(arg);
 
     if (SvAMAGIC(arg) && (tmpsv = amagic_call(arg, &PL_sv_undef, method,
                                               AMGf_noright | AMGf_unary
@@ -3574,8 +3576,9 @@ Perl_amagic_applies(pTHX_ SV *sv, int method, int flags)
    Do get magic, then see if the two stack args are overloaded and if so
    call it.
    Flags:
-        AMGf_assign  op may be called as mutator (eg +=)
-        AMGf_numeric apply sv_2num to the stack arg.
+        AMGf_assign       op may be called as mutator (eg +=)
+        AMGf_numeric      apply sv_2num to the stack arg.
+        AMGf_no_GETMAGIC  do not call SvGETMAGIC on arguments
 */
 
 bool
@@ -3587,9 +3590,11 @@ Perl_try_amagic_bin(pTHX_ int method, int flags)
     SV* right = PL_stack_sp[0];
     bool is_rc = rpp_stack_is_rc();
 
-    SvGETMAGIC(left);
-    if (left != right)
-        SvGETMAGIC(right);
+    if (LIKELY(!(flags & AMGf_no_GETMAGIC))) {
+        SvGETMAGIC(left);
+        if (left != right)
+            SvGETMAGIC(right);
+    }
 
     if (SvAMAGIC(left) || SvAMAGIC(right)) {
         SV * tmpsv;

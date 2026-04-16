@@ -26,6 +26,7 @@
 #if defined(PERL_DO_UNDEFS)
 # if !defined(PERL_CORE)
 #   undef ALIGNED_TYPE_NAME
+#   undef AMGf_no_GETMAGIC
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
 #   undef do_aexec

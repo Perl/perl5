@@ -663,6 +663,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define AMGf_numarg	  0x0080
 #define AMGf_force_scalar 0x0100
 #define AMGf_force_overload SV_FORCE_OVERLOAD /* ignore HINTS_NO_AMAGIC */
+#define AMGf_no_GETMAGIC  0x0200
 
 
 /* do SvGETMAGIC on the stack args before checking for overload */
