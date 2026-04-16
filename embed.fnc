@@ -80,7 +80,7 @@
 : The 'argN' components denote the arguments, in order, that the macro or
 : function requires to be passed to it when calling it.  These do not appear on
 : entries for other types of elements, such as typedefs, nor when the function
-: or macro doesn't have any argumentes.  Each is usually of the form
+: or macro doesn't have any arguments.  Each is usually of the form
 :
 :   arg-type arg-name
 :
@@ -200,16 +200,15 @@
 :   function so that the sanity checks have passed before anything tries to use
 :   an argument.
 :
-:   (Much of the perl core was written assuming the ARGS_ASSERT macro needed to
-:   be placed after any declarations because of the C89 Standard.  That is no
-:   longer true with C99; feel free when modifying code in the vicinity to move
-:   this call to the very beginning of the function.)
-:
 :   The contents of ARGS_ASSERT are determined by
-:       1)  constraints you give in this file.  Each such constraint is
-:           positioned in the input between the '|' that marks the beginning of
-:           a parameter definition, and the the definition itself, like
+:       1)  constraints you give in this file for an argument.  Historically,
+:	    each such constraint has been positioned between the '|' that marks
+:	    the beginning of a parameter definition, and the the definition
+:	    itself, like
 :               |NN const char * const name
+:	    But it can come anywhere in the definition, and some prefer it to
+:	    come at the end, as it modifies the argument.
+:               |const char * const name NN
 :       2)  the internal logic used by code that reads this file.
 :       3)  explicit asserts that you add in this file.
 :
@@ -235,7 +234,7 @@
 :   MPTR    means that not only must this pointer parameter be non-NULL, it
 :           points to a position somewhere in the middle of a character string.
 :           If a parameter is marked with this constraint, another parameter to
-:           the function must be marked with SPTR and/or either of the EPTR
+:           the function must be marked with SPTR and/or one of the EPTR
 :           constraints (described just below).
 :   EPTRge  means that not only must this pointer parameter be non-NULL, it
 :           points to the position exactly one byte beyond the final byte of
