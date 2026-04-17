@@ -170,12 +170,12 @@ SKIP: {
 
     is(ctime($jan_16), strftime($ctime_format, CORE::localtime($jan_16)),
        "Repeat of ctime() equal to strftime()");
-    is(setlocale(LC_CTYPE), $non_C_locale, "strftime restores LC_CTYPE");
+    is(setlocale(LC_CTYPE), setlocale(LC_CTYPE, $non_C_locale), "strftime restores LC_CTYPE");
 
     is(munge_illegal_format_result(strftime($illegal_format,
                                             CORE::localtime($jan_16))),
        "", "strftime returns appropriate result for an illegal format");
-    is(setlocale(LC_CTYPE), $non_C_locale,
+    is(setlocale(LC_CTYPE), setlocale(LC_CTYPE, $non_C_locale),
        "strftime restores LC_CTYPE even on failure");
 
     setlocale(LC_CTYPE, $orig_ctype_locale)
