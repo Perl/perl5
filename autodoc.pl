@@ -281,7 +281,15 @@ my %valid_sections = (
     $compiler_scn => {},
     $directives_scn => {},
     $concurrency_scn => {},
-    $COP_scn => {},
+    $COP_scn => {
+        header => <<~'EOT',
+            COP stands for "Current Operation".  It is the type used for
+            nextstate and dbstate ops, storing the filename and line number,
+            warning bits, hints bits, feature flags, I<etc>, and a sort of
+            incremental representation of the hints hash for the code that
+            follows.
+            EOT
+    },
     $CV_scn => {
         header => <<~'EOT',
             This section documents functions to manipulate CVs which are
