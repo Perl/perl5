@@ -6692,6 +6692,8 @@ including:
 
 =over
 
+=item * L<Crypt::SysRandom>
+
 =item * L<Crypt::URandom>
 
 =item * L<Crypt::PRNG>

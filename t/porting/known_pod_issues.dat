@@ -78,6 +78,7 @@ CPANPLUS
 crypt(3)
 Crypt::PRNG
 Crypt::URandom
+Crypt::SysRandom
 ctime(3)
 curl(1)
 Dancer
