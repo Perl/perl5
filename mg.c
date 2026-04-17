@@ -1491,15 +1491,19 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+
 #ifdef HAS_SIGPROCMASK
 static void
 restore_sigmask(pTHX_ void *ptr)
 {
     SV *save_sv = (SV *)ptr;
-    const sigset_t * const ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
+    const sigset_t * const ossetp =
+                        (const sigset_t *) SvPV_nolen_const( save_sv );
     (void)sigprocmask(SIG_SETMASK, ossetp, NULL);
 }
 #endif
+
+
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1519,25 +1523,31 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
             sv_setsv(sv,PL_psig_ptr[i]);
         else {
             Sighandler_t sigstate = rsignal_state(i);
+
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
             if (PL_sig_handlers_initted && PL_sig_ignoring[i])
                 sigstate = SIG_IGN;
 #endif
+
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
             if (PL_sig_handlers_initted && PL_sig_defaulting[i])
                 sigstate = SIG_DFL;
 #endif
+
             /* cache state so we don't fetch it again */
             if(sigstate == (Sighandler_t) SIG_IGN)
                 sv_setpvs(sv,"IGNORE");
             else
                 sv_set_undef(sv);
+
             PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
             SvTEMP_off(sv);
         }
     }
     return 0;
 }
+
+
 int
 Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1567,6 +1577,7 @@ Perl_csighandler(int sig)
 }
 #endif
 
+
 Signal_t
 Perl_csighandler1(int sig)
 {
@@ -1574,6 +1585,7 @@ Perl_csighandler1(int sig)
 
     Perl_csighandler3(sig, NULL, NULL);
 }
+
 
 /* Handler intended to directly handle signal calls from the kernel.
  * (Depending on configuration, the kernel may actually call one of the
@@ -1606,26 +1618,29 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 #endif
 
 #ifdef PERL_USE_3ARG_SIGHANDLER
-#if defined(__cplusplus) && defined(__GNUC__)
+#  if defined(__cplusplus) && defined(__GNUC__)
     /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
      * parameters would be warned about. */
     PERL_UNUSED_ARG(sip);
     PERL_UNUSED_ARG(uap);
-#endif
+#  endif
 #endif
 
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
-    if (PL_sig_ignoring[sig]) return;
+    if (PL_sig_ignoring[sig])
+        return;
 #endif
+
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
     if (PL_sig_defaulting[sig])
-#ifdef KILL_BY_SIGPRC
+#  ifdef KILL_BY_SIGPRC
             exit((Perl_sig_to_vmscondition(sig)&STS$M_COND_ID)|STS$K_SEVERE|STS$M_INHIB_MSG);
-#else
+#  else
             exit(1);
+#  endif
 #endif
-#endif
+
     if (
 #ifdef SIGILL
            sig == SIGILL ||
@@ -1639,27 +1654,31 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 #ifdef SIGFPE
            sig == SIGFPE ||
 #endif
-           (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
+           (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+    ) {
         /* Call the perl level handler now--
          * with risk we may be in malloc() or being destructed etc. */
-    {
+
         if (PL_sighandlerp == Perl_sighandler)
             /* default handler, so can call perly_sighandler() directly
              * rather than via Perl_sighandler, passing the extra
              * 'safe = false' arg
              */
             Perl_perly_sighandler(sig, NULL, NULL, 0 /* unsafe */);
-        else
+        else {
 #ifdef PERL_USE_3ARG_SIGHANDLER
             (*PL_sighandlerp)(sig, NULL, NULL);
 #else
             (*PL_sighandlerp)(sig);
 #endif
+        }
     }
     else {
-        if (!PL_psig_pend) return;
-        /* Set a flag to say this signal is pending, that is awaiting delivery after
-         * the current Perl opcode completes */
+        if (!PL_psig_pend)
+            return;
+
+        /* Set a flag to say this signal is pending, that is awaiting
+         * delivery after the current Perl opcode completes */
         PL_psig_pend[sig]++;
 
 #ifndef SIG_PENDING_DIE_COUNT
@@ -1672,26 +1691,32 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
     }
 }
 
+
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 void
 Perl_csighandler_init(void)
 {
     int sig;
-    if (PL_sig_handlers_initted) return;
+    if (PL_sig_handlers_initted)
+        return;
 
     for (sig = 1; sig < SIG_SIZE; sig++) {
-#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+
+#  ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
         dTHX;
         PL_sig_defaulting[sig] = 1;
         (void) rsignal(sig, PL_csighandlerp);
-#endif
-#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
+#  endif
+
+#  ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
         PL_sig_ignoring[sig] = 0;
-#endif
+#  endif
+
     }
     PL_sig_handlers_initted = 1;
 }
 #endif
+
 
 #if defined HAS_SIGPROCMASK
 static void
@@ -1702,6 +1727,7 @@ unblock_sigmask(pTHX_ void* newset)
 }
 #endif
 
+
 void
 Perl_despatch_signals(pTHX)
 {
@@ -1709,9 +1735,11 @@ Perl_despatch_signals(pTHX)
 
     int sig;
     PL_sig_pending = 0;
+
     for (sig = 1; sig < SIG_SIZE; sig++) {
         if (PL_psig_pend[sig]) {
             dSAVE_ERRNO;
+
 #ifdef HAS_SIGPROCMASK
             /* From sigaction(2) (FreeBSD man page):
              * | Signal routines normally execute with the signal that
@@ -1734,6 +1762,7 @@ Perl_despatch_signals(pTHX)
                 SAVEDESTRUCTOR_X(unblock_sigmask, SvPV_nolen(save_sv));
             }
 #endif
+
             PL_psig_pend[sig] = 0;
             if (PL_sighandlerp == Perl_sighandler)
                 /* default handler, so can call perly_sighandler() directly
@@ -1756,6 +1785,7 @@ Perl_despatch_signals(pTHX)
         }
     }
 }
+
 
 /* sv of NULL signifies that we're acting as magic_clearsig.  */
 int
@@ -1815,6 +1845,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
             }
             return 0;
         }
+
 #ifdef HAS_SIGPROCMASK
         /* Avoid having the signal arrive at a bad time, if possible. */
         sigemptyset(&set);
@@ -1825,16 +1856,21 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
         SAVEFREESV(save_sv);
         SAVEDESTRUCTOR_X(restore_sigmask, save_sv);
 #endif
+
         PERL_ASYNC_CHECK();
+
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
         if (!PL_sig_handlers_initted) Perl_csighandler_init();
 #endif
+
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
         PL_sig_ignoring[i] = 0;
 #endif
+
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
         PL_sig_defaulting[i] = 0;
 #endif
+
         to_dec = PL_psig_ptr[i];
         if (sv) {
             PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
@@ -1857,6 +1893,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
             PL_psig_ptr[i] = NULL;
         }
     }
+
     if (sv && (isGV_with_GP(sv) || SvROK(sv))) {
         if (i) {
             (void)rsignal(i, PL_csighandlerp);
@@ -1864,12 +1901,15 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
         else {
             *svp = SvREFCNT_inc_simple_NN(sv);
         }
-    } else {
+    }
+    else {
         if (sv && SvOK(sv)) {
             s = SvPV_force(sv, len);
-        } else {
+        }
+        else {
             sv = NULL;
         }
+
         if (sv && memEQs(s, len,"IGNORE")) {
             if (i) {
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -1910,9 +1950,11 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     if(i)
         LEAVE;
 #endif
+
     SvREFCNT_dec(to_dec);
     return 0;
 }
+
 
 int
 Perl_magic_setsigall(pTHX_ SV* sv, MAGIC* mg)
@@ -1931,6 +1973,7 @@ Perl_magic_setsigall(pTHX_ SV* sv, MAGIC* mg)
     }
     return 0;
 }
+
 
 int
 Perl_magic_clearhook(pTHX_ SV *sv, MAGIC *mg)
