@@ -18,9 +18,10 @@ BEGIN {
 use strict;
 use warnings;
 use 5.010;
+use utf8;
 use Config;
 
-plan tests => 2514;  # Update this when adding/deleting tests.
+plan tests => 2515;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -260,7 +261,6 @@ sub run_tests {
 
     {
         my $message = "Optimizer doesn't prematurely reject match; Bug 19767";
-        use utf8;
 
         my $attr = 'Name-1';
         my $NormalChar      = qr /[\p{IsDigit}\p{IsLower}\p{IsUpper}]/;
@@ -1168,6 +1168,13 @@ EOP
 		ok($result == 0);
 	}
 
+    {
+        # GH #24229
+        # utf8.c:72: Perl_force_out_malformed_utf8_message_: Assertion `p < e' failed.
+        my $éx = 0;
+        $_ = qr/$_[$éx]/ if 0;
+        ok(1, "GH #24229 - non-ascii variable in brackets doesn't crash S_intuit_more()");
+    }
 } # End of sub run_tests
 
 1;
