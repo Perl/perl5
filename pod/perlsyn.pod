@@ -743,9 +743,11 @@ rest of the construct has finished.
     }
 
 The C<finally> block is equivalent to using a C<defer> block and will be
-invoked in the same situations; whether the C<try> block completes
-successfully, throws an exception, or transfers control elsewhere by using
-C<return>, a loop control, or C<goto>.
+invoked in the same situations: not only when the C<try> block completes
+successfully or throws an exception, but also (out of the ordinary order
+of execution) immediately before code in the C<try> or C<catch> blocks
+transfers control elsewhere by using C<return>, a loop control, or
+C<goto>.
 
 Unlike the C<try> and C<catch> blocks, a C<finally> block is not permitted to
 C<return>, C<goto> or use any loop controls. The final expression value is
