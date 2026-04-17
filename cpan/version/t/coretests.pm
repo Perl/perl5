@@ -348,7 +348,7 @@ SKIP: 	{
 
 SKIP: 	{
 	skip 'Cannot test bare alpha v-strings with Perl < 5.8.1', 2
-		if $] lt 5.008_001;
+		if "$]" < 5.008_001;
 	$version = $CLASS->$method(v1.2.3_4);
 	$DB::single = 1;
 	is($version, "v1.2.34", '"$version" eq "v1.2.34"');

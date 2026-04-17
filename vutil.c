@@ -56,9 +56,6 @@ Perl_prescan_version(pTHX_ const char *s, bool strict,
     PERL_ARGS_ASSERT_PRESCAN_VERSION;
     PERL_UNUSED_CONTEXT;
 
-    if (qv && isDIGIT(*d))
-        goto dotted_decimal_version;
-
     if (*d == 'v') { /* explicit v-string */
         d++;
         if (isDIGIT(*d)) {
@@ -68,7 +65,9 @@ Perl_prescan_version(pTHX_ const char *s, bool strict,
             /* requires v1.2.3 */
             BADVERSION(s,errstr,"Invalid version format (dotted-decimal versions require at least three parts)");
         }
+    }
 
+    if (qv && isDIGIT(*d)) {
 dotted_decimal_version:
         if (strict && d[0] == '0' && isDIGIT(d[1])) {
             /* no leading zeros allowed */
