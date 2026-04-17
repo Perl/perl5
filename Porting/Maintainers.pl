@@ -448,7 +448,8 @@ our %Modules = (
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.78.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.79.tar.gz',
+        'SYNCINFO'     => 'book on Fri Apr 17 09:48:56 2026',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
