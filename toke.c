@@ -4581,11 +4581,11 @@ S_intuit_more(pTHX_ char *s, char *e,
 {
     PERL_ARGS_ASSERT_INTUIT_MORE;
 
-    /* This function has been mostly untouched for a long time, due to its,
+    /* This function has been mostly untouched for a long time, due to its
      * 'scariness', and lack of comments.  khw has gone through and done some
      * cleanup, while finding various instances of problematic behavior.
      * Rather than change this base-level function immediately, khw has added
-     * commentary to those areas. 
+     * commentary to those areas.
      *
      * khw: $0 in square brackets is never going to mean the expansion of $0.
      * How could that help in calculating a subscript?  And one would never
@@ -4597,6 +4597,10 @@ S_intuit_more(pTHX_ char *s, char *e,
     /* If recursed within brackets, there is more to the expression */
     if (PL_lex_brackets)
         return TRUE;
+
+    if (e <= s) {
+        return false;
+    }
 
     /* If begins with '->' ... */
     if (s[0] == '-' && s[1] == '>') {
@@ -4634,10 +4638,7 @@ S_intuit_more(pTHX_ char *s, char *e,
      * written, and regcurly never required a comma, as in {0}.  Probably it is
      * ok as-is */
     if (s[0] == '{') {
-        if (regcurly(s, e, NULL)) {
-            return FALSE;
-        }
-        return TRUE;
+        return ! regcurly(s, e, NULL);
     }
 
     /* Here is '[': maybe we have a character class.  Examine the guts */
@@ -4689,26 +4690,32 @@ S_intuit_more(pTHX_ char *s, char *e,
             /* Here have both an array and a scalar with the same name.  Drop
              * down to use the heuristics to try to intuit which is meant */
         }
+     /* else {
+            // Here, there could be undeclared variables.  But khw believes if
+            // one is known to exist but not the other, it is more likely that
+            // the other doesn't exist, so we can factor this in to the
+            // heuristics below
+        }
+      */
     }
 
-    /* Find matching ']'.  khw: This means any s[1] below is guaranteed to
-     * exist */
-    const char * const send = (char *) memchr(s, ']', e - s);
-    if (! send)		/* has to be an expression */
-        return TRUE;
-
     /* Below here, the heuristics start.  One idea from alh is, given 'use
-     * 5.43.x', that for all digits, that if we have to resort to heuristics,
+     * 5.45.x', that for all digits, that if we have to resort to heuristics,
      * we instead raise an error with an explanation of how to make it
      * unambiguous: ${foo}[123] */
 
     /* If the construct consists entirely of one or two digits, call it a
      * subscript.
      *
-     * khw: No one writes 03 to mean 3.  Any string of digits beginning with
-     * '0' is likely to be a charclass, including length 2 ones. */
-    if (isDIGIT(s[0]) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
-        return TRUE;
+     * khw: A string of digits beginning with 0 would be considered octal.  If
+     * that string contains 8 or 9, it has to be a character class.  And if
+     * it's exactly two digits long, it would would be very unlikely for
+     * someone to use octal to spell a number from 1-7, so would be a
+     * character class */
+    if (isDIGIT(s[0]) && (   (e - s >= 2 &&                  s[1] == ']')
+                          || (e - s >= 3 && isDIGIT(s[1]) && s[2] == ']')))
+    {
+        return true;
     }
 
     /* this is terrifying, and it mostly works.  See GH #16478.
@@ -4733,7 +4740,7 @@ S_intuit_more(pTHX_ char *s, char *e,
     }
 
     /* Unsigned version of current character */
-    unsigned char un_char = 0;
+    U8 un_char = 0;
 
     /* Keep track of how many multiple occurrences of the same character there
      * are */
@@ -4748,14 +4755,29 @@ S_intuit_more(pTHX_ char *s, char *e,
      * \xC2 or \xC3.  The heuristics below will count those as repeated bytes,
      * and thus lean more towards this being a character class than when not
      * in UTF-8. */
-    bool first_time = true;
-    for (; s < send; s++, first_time = false) {
-        unsigned char prev_un_char = un_char;
-        un_char = (unsigned char) s[0];
+    const char * start = s;
+    while (s < e) {
+        U8 prev_un_char = un_char;
+        un_char = (U8) s[0];
         switch (s[0]) {
+
+          case ']':     /* Terminates the construct */
+
+            /* khw: This has the bug that it could be inside a \Q, so
+             * shouldn't actually terminate the construct.
+             *
+             * People on #irc have suggested things that I think boil
+             * down to: under 'use 5.45.x', output a warning like existing
+             * warnings for similar situations "Ambiguous use of [], resolved
+             * as ..."  Perhaps suppress the message if all (or maybe almost
+             * all) the evidence points to the same outcome.  This would
+             * involve two weight variables */
+            return (weight < 0);
+
           case '@':
           case '&':
           case '$':
+           {
 
             /* Each additional occurrence of one of these three strongly
              * indicates it is a subscript */
@@ -4774,38 +4796,200 @@ S_intuit_more(pTHX_ char *s, char *e,
              * the chance of there being a pattern with that many capture
              * groups goes rapidly down.
              *
-             * khw: Using \w here misses the possibility of lots of other
-             * syntaxes of variables, like $::foo or ${foo}, that scan_ident
-             * looks for.
-             *
+             * khw: $z-a is definitely a subscript
              */
-            if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
-                Size_t len;
 
-                /* khw: where did the magic number 4 come from?.  This buffer
-                 * was 4 times as large as tokenbuf in 1997, and had not
-                 * changed since the code was first added */
-                char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) * 4 ];
+            /* Place the sigil in tmpbuf[0], hence the identifier starts in
+             * tmpbuf[1] */
+            char tmpbuf[ C_ARRAY_LENGTH(PL_tokenbuf) + 1 ];
+            tmpbuf[0] = s[0];
 
-                if (! scan_ident(s, tmpbuf, C_ARRAY_END(tmpbuf), CHECK_ONLY))
-                {
-                    /* An illegal identifier means this can't be a subscript;
-                     * it's an error or it could be a charclass */
+            /* scan_ident returns NULL if the input looks like an identifier
+             * that is illegal, e.g., it is too long or is like $001. */
+            char * s_after_ident = scan_ident(s, tmpbuf + 1,
+                                              C_ARRAY_END(tmpbuf),
+                                              CHECK_ONLY);
+            if (s_after_ident == NULL) {
+
+                /* An illegal identifier means this can't be a subscript;
+                 * it's an error or it could be a charclass */
+                return false;
+            }
+
+            /* Here, is a syntactically valid identifier */
+            Size_t len = strlen(tmpbuf + 1);
+
+            /* If it doesn't look like an identifier at all, scan_ident will
+             * set tmpbuf[1] to NUL.  This is either an error or a character
+             * class. */
+            if (len == 0) {
+                return false;
+            }
+
+            /* If there is extra stuff in the source, like braces, it means
+             * this is almost definitely intended to be an identifier */
+            const bool is_embraced = memchr(s, '{', s_after_ident - s);
+
+            const bool is_multichar = len > 1;
+
+            /* Numeric identifier names are special */
+            if (isDIGIT_A(tmpbuf[1+0])) {
+
+                /* &41 and &6b are illegal subroutine names so is an error or
+                 * a charclass */
+                if (tmpbuf[0] == '&') {
                     return false;
                 }
 
-                len = strlen(tmpbuf);
-
-                /* khw: This only looks at global variables; lexicals came
-                 * later, and this hasn't been updated.  Ouch!! */
-                if (   len > 1
-                    && gv_fetchpvn_flags(tmpbuf,
-                                         len,
-                                         UTF ? SVf_UTF8 : 0,
-                                         SVt_PV))
+                /* scan_ident will stop at the first non-digit, which is
+                 * pointed to by 's_after_indent'.  If that is a \w, we would
+                 * have something like $456x, which is an illegal identifer,
+                 * so is an error or a charclass */
+                if ( ! is_embraced
+                    && isWORDCHAR_lazy_if_safe(s_after_ident,
+                                               PL_bufend, UTF))
                 {
-                    weight -= 100;
+                    return false;
+                }
 
+                /* We don't get here if this potential identifier starts with
+                 * leading zeros, due to the logic in scan_ident. */
+                assert(len == 1 || tmpbuf[1+0] != '0');
+
+                /* The chances are vanishingly small that someone is going to
+                 * want [$0] to expand to the program's name in a character
+                 * class -- this would mean to match on any character in the
+                 * its file path.  But, what would the program's name be doing
+                 * as part of a subscript either?  The only likely scenario is
+                 * that this is meant to be a charclass matching either '$' or
+                 * '0'.  */
+                if (tmpbuf[1+0] == '0') {
+                    return false;
+                }
+
+                /* Here it is either something like $1 which is supposed to
+                 * match either dollar or 1, or it is supposed to expand to
+                 * what is in $1 left over from a capturing group from the
+                 * previous pattern match.  In the latter case, it could be
+                 * either a part of wanting to calculate a subscript, or to
+                 * use as the contents of as part of the character class.
+                 * Larger (unembraced) numbers are much less likely to have
+                 * had capturing groups, so they lean more towards a
+                 * charclass.  weight 100 is what this function has
+                 * traditionally used for len>1; khw thinks there is no bias
+                 * one way or the other for length 1 ones; but has chosen 100
+                 * for embraced identifiers
+                 *
+                 * XXX long enough identifiers could probably return false
+                 * immediately here, rather than using weights. */
+                if (is_embraced || is_multichar) {
+                    weight -= 100;
+                }
+            }   /* Below is not a digit */
+            else if (   tmpbuf[0] == '$'
+                     && len == 1    /* 'len' doesn't include the sigil */
+                     && memCHRs("!\"%&'()*+,-./:;<=>?@[\\]^_`|~$",
+                                tmpbuf[1+0]))
+            {
+                /* Here we have what could be a punctuation variable.  (Note
+                 * '[' is deprecated, but unlikely to ever be removed.)  If
+                 * the next character after it is a closing bracket, it makes
+                 * it quite likely to be that, and hence a subscript.  If it
+                 * is something else, more mildly a subscript */
+                if (/*{*/ memCHRs("])} =", tmpbuf[1+1]))
+                    weight -= 10;
+                else
+                    weight -= 1;
+            }
+            else if (isWORDCHAR_lazy_if_safe(tmpbuf + 1, tmpbuf + 1 + len, UTF)) {
+
+                /* See if there is a known identifier of the given kind.  For
+                 * arrays, this might also be a reference to one of its
+                 * elements.   XXX Maybe the latter should require a following
+                 * '[' or '->[' */
+                const bool is_known =
+                           is_existing_identifier(tmpbuf, len + 1, tmpbuf[0], UTF)
+                       || (   tmpbuf[0] == '$'
+                           && is_existing_identifier(tmpbuf, len + 1, '@', UTF));
+
+                /* Under strict, an unknown variable means an error or a
+                 * character class */
+                if (under_strict_vars && ! is_known) {
+                    return false;
+                }
+
+                /* Look at all possible combinations of the conditions.
+                 *
+                 * This code takes the stance that it could easily be
+                 * coincidence that a single character name coincides with a
+                 * known identifier.  But much less so for two or more
+                 * characters. */
+
+#               define embraced    1 << 0
+#               define unembraced  0
+#               define unknown     0
+#               define known       1 << 1
+#               define len1        0
+#               define multi       1 << 2
+
+                const unsigned switch_on = (is_embraced << 0)
+                                         | (is_known << 1)
+                                         | (is_multichar << 2);
+                switch (switch_on) {
+                  case len1 | unknown | unembraced:
+                    /* We don't infer anything for something like [...$n...]
+                     * where n is not a known identifier.
+                     *
+                     * khw: Our test suite contains several constructs like
+                     * [$A-Z].  I would argue that if the next character is a
+                     * '-' followed by an alpha, that would make it much more
+                     * likely to be a charclass.  It would only make sense to
+                     * be an expression if that alpha string is a bareword
+                     * with meaning; something like [$A-ord] */
+                    break;
+
+                  case len1 | unknown | embraced:
+
+                    /* Bias something like [...${n}...] slightly towards n
+                     * meaning an identifier, even though n isn't known to be
+                     * one. */
+                    weight -= 5;
+                    break;
+
+                  case len1 | known | unembraced:
+
+                    /* Bias something like [...$n...] where n is a known
+                     * identifier, slightly towards n meaning an identifier */
+                    weight -= 10;
+                    break;
+
+                  case len1 | known | embraced:
+
+                    /* Bias something like [...${n}...] where n is a known
+                     * identifier, fairly strongly towards n meaning an
+                     * identifier */
+                    weight -= 50;
+                    break;
+
+                  case multi | unknown | unembraced:
+
+                    /* We don't infer anything for something like [...$ab...]
+                     * where ab is not a known identifier. */
+                    break;
+
+                  case multi | unknown | embraced:
+
+                    /* Bias something like [...${ab}...] where there is no
+                     * known identifier named ab, slightly towards ab meaning
+                     * an identifier */
+                    weight -= 10;
+                    break;
+
+                  case multi | known | unembraced:
+
+                    /* Bias something like [...$ab...] where ab is a known
+                     * identifier, strongly towards ab meaning an identifier.
+                     * */
                     /* khw: Below we keep track of repeated characters;  People
                      * rarely say qr/[aba]/, as the second a is pointless.
                      * (Some do it though as a mnemonic that is meaningful to
@@ -4816,36 +5000,35 @@ S_intuit_more(pTHX_ char *s, char *e,
                      * should advance past it.  Suppose it is a hash element,
                      * like $subscripts{$which}.  We should advance past the
                      * braces and key */
+                    weight -= 100;
+                    break;
+
+                  case multi | known | embraced:
+
+                    /* Bias something like [...${ab}...] where ab is a known
+                     * identifier, strongly towards ab meaning an identifier.
+                     * */
+                    weight -= 100;
+                    break;
+
+                  default:
+                    croak("panic: Unexpected case %x in switch in"
+                          " %s, line %" LINE_Tf,
+                          switch_on, __FILE__, (line_t) __LINE__);
                 }
-                else {
-                    /* Not a multi-char identifier already known in the
-                     * program; is somewhat likely to be a subscript.
-                     *
-                     * khw: Our test suite contains several constructs like
-                     * [$A-Z].  Excluding length 1 identifiers in the
-                     * conditional above means such are much less likely to be
-                     * mistaken for subscripts.  I would argue that if the next
-                     * character is a '-' followed by an alpha, that would make
-                     * it much more likely to be a charclass.  It would only
-                     * make sense to be an expression if that alpha string is a
-                     * bareword with meaning; something like [$A-ord] */
-                    weight -= 10;
-                }
+
+#               undef embraced
+#               undef unembraced
+#               undef unknown
+#               undef known
+#               undef len1
+#               undef multi
+
             }
-            else if (   s[0] == '$'
-                     && s[1]
-                     && memCHRs("[#!%*<>()-=", s[1]))
-            {
-                /* Here we have what could be a punctuation variable.  If the
-                 * next character after it is a closing bracket, it makes it
-                 * quite likely to be that, and hence a subscript.  If it is
-                 * something else, more mildly a subscript */
-                if (/*{*/ memCHRs("])} =", s[2]))
-                    weight -= 10;
-                else
-                    weight -= 1;
-            }
+         /* else {  We don't weight any other case }*/
+
             break;
+           }
 
           /* khw:  [:blank:] strongly indicates a charclass */
           /* khw: Z-A definitely subscript
@@ -4856,66 +5039,88 @@ S_intuit_more(pTHX_ char *s, char *e,
            *      \? must be subscript for things like \d, but not \a.
            */
 
-
           case '\\':
-            if (s[1]) {
-                if (memCHRs("wds]", s[1])) {
-                    weight += 100;  /* \w \d \s => strongly charclass */
-                    /* khw: \] can't happen, as any ']' is beyond our search.
-                     * Why not \W \D \S \h \v, etc as well?  Should they have
-                     * the same weights as \w \d \s or should all or some be
-                     * in the 'abcfnrtvx' below? */
-                } else if (seen[(U8)'\''] || seen[(U8)'"']) {
-                    weight += 1;
-                    /* khw: This is problematic.  Enough so, that I misread
-                     * it, and added a wrong comment about what it does in
-                     * 57ae1f3a8e669082e3d5ec6a8cdffbdc39d87bee.  Note that it
-                     * doesn't look at the current character.  What it
-                     * actually does is: if any quote has been seen in the
-                     * parse, don't do the rest of the else's below, but for
-                     * every subsequent backslashed character encountered
-                     * (except \0 \w \s \d), increment the weight to lean a
-                     * bit more towards being a charclass.  That means that
-                     * every backslash sequence following the first occurrence
-                     * of a quote increments the weight regardless of what the
-                     * sequence is.  Again, \0 \w \d and \s are not controlled
-                     * by this else, so they change the weight by a lot more.
-                     * But what makes them so special that they aren't subject
-                     * to this.  Any why does having a quote change the
-                     * behavior from then on.  And why only backslashed
-                     * sequences get this treatment?  This code has been
-                     * unchanged since this function was added in 1993.  I
-                     * don't get it.  Instead, it does seem to me that it is
-                     * especially unlikely to repeat a quote in a charclass,
-                     * but that having just a single quote is indicative of a
-                     * charclass, and having pairs of quotes is indicative of
-                     * a subscript.  Similarly for things that could indicate
-                     * nesting of braces or parens. */
-                }
-                else if (memCHRs("abcfnrtvx", s[1]))
-                    weight += 40;   /* \n, etc => charclass */
-                    /* khw: Why not \e etc as well? */
-                else if (isDIGIT(s[1])) {
-                    weight += 40;   /* \123 => charclass */
-                    while (s[1] && isDIGIT(s[1]))
-                        s++;
-                }
-
-                /* khw: There are lots more possible escape sequences.  Some,
-                 * like \A,\z have no special meaning to charclasses, so might
-                 * indicate a subscript, but I don't know what they would be
-                 * doing there either.  Some have been added to the language
-                 * after this code was written, but no one thought to, or
-                 * could wade through this function, to add them.  Things like
-                 * \p{} for properties, \N and \N{}, for example.
-                 *
-                 * It's problematic that \a is treated as plain 'a' for
-                 * purposes of the 'seen' array.  Whatever is matched by these
-                 * backslashed sequences should not be added to 'seen'.  That
-                 * includes the backslash. */
-            }
-            else /* \ followed by NUL strongly indicates character class */
+            if (s[1] == '\0') {
+                /* \ followed by NUL strongly indicates character class */
                 weight += 100;
+                break;
+            }
+
+            if (s[1] == ']') {
+                /* The intent of the code was to do this:
+                 *      weight += 100;  // ] strongly charclass
+                 * But, due to a bug in setting up the loop terminating
+                 * condition, a ']' would never occur.  That bug was fixed so
+                 * late in the development cycle that we didn't want to
+                 * possibly break anything, so this is commented out to retain
+                 * previous (unintended) behavior */
+                seen[(U8) '\\']++;
+                s++;
+                break;
+            }
+
+            if (memCHRs("wds", s[1])) {
+                weight += 100;  /* \w \d \s => strongly charclass */
+                /* khw:
+                 * Should \W \D \S have the same weights as \w \d \s or should
+                 * all or some be in the abcfnrtvx below?  Why not \h etc as
+                 * well? \v is below, adding 40; \h should add at least that
+                 * much */
+                break;
+            }
+
+            if (seen[(U8)'\''] || seen[(U8)'"']) {
+                weight += 1;
+                /* khw: This is problematic.  Enough so, that I misread it,
+                 * and added a wrong comment about what it does in
+                 * 57ae1f3a8e669082e3d5ec6a8cdffbdc39d87bee.  Note that it
+                 * doesn't look at the current character.  What it actually
+                 * does is: if any quote has been seen in the parse, don't do
+                 * the rest of the else's below, but for every subsequent
+                 * backslashed character encountered (except \0 \w \s \d),
+                 * increment the weight to lean a bit more towards being a
+                 * charclass.  That means that every backslash sequence
+                 * following the first occurrence of a quote increments the
+                 * weight regardless of what the sequence is.  Again, \0 \w \d
+                 * and \s are not controlled by this else, so they change the
+                 * weight by a lot more.  But what makes them so special that
+                 * they aren't subject to this.  Any why does having a quote
+                 * change the behavior from then on.  And why only backslashed
+                 * sequences get this treatment?  This code has been unchanged
+                 * since this function was added in 1993.  I don't get it.
+                 * Instead, it does seem to me that it is especially unlikely
+                 * to repeat a quote in a charclass, but that having just a
+                 * single quote is indicative of a charclass, and having pairs
+                 * of quotes is indicative of a subscript.  Similarly for
+                 * things that could indicate nesting of braces or parens. */
+                break;
+            }
+
+            if (memCHRs("abcfnrtvx", s[1])) {
+                weight += 40;   /* \n, etc => charclass */
+                    /* This is missing \e; could use isMNEMONIC_CNTRL; others
+                     * are missing from perlrebackslash */
+                break;
+            }
+
+            if (isDIGIT(s[1])) {
+                weight += 40;   /* \123 => charclass */
+                while (s < e - 1 && isDIGIT(s[1]))
+                    s++;
+            }
+
+            /* khw: There are lots more possible escape sequences.  Some, like
+             * \A,\z have no special meaning to charclasses, so might indicate
+             * a subscript, but I don't know what they would be doing there
+             * either.  Some have been added to the language after this code
+             * was written, but no one thought to, or could wade through this
+             * function, to add them.  Things like \p{} for properties, \N and
+             * \N{}, for example.
+             *
+             * It's problematic that \a is treated as plain 'a' for purposes
+             * of the 'seen' array.  Whatever is matched by these backslashed
+             * sequences should not be added to 'seen'.  That includes the
+             * backslash. */
             break;
 
           case '-':
@@ -4927,30 +5132,30 @@ S_intuit_more(pTHX_ char *s, char *e,
             if (s[1] == '\\')
                 weight += 50;
 
-            /* If it is something like 'a-' or '0-', it is more likely to
-             * be a character class. '!' is the first ASCII graphic, so '!-'
-             * would be the start of a range of graphics. */
-            if (! first_time && memCHRs("aA01! ", prev_un_char))
+            /* If it is something like 'a-' or '0-', it is more likely to be a
+             * character class. '!' is the first ASCII graphic, so '!-' would
+             * be the start of a range of graphics. */
+            if (s > start && memCHRs("aA01! ", prev_un_char))
                 weight += 30;
 
-            /* If it is something like '-Z' or '-7' (for octal) or '-9' it
-             * is more likely to be a character class. '~' is the final ASCII
+            /* If it is something like '-Z' or '-7' (for octal) or '-9' it is
+             * more likely to be a character class. '~' is the final ASCII
              * graphic, so '-~' would be the end of a range of graphics.
              *
              * khw: Having [-z] really doesn't imply what the comments above
-             * indicate, so this should only be tested when '! first_time' */
+             * indicate, so this should only be tested when s > start */
             if (memCHRs("zZ79~", s[1]))
                 weight += 30;
 
-            /* If it is something like -1 or -$foo, it is more likely to be a
-             * subscript.  */
-            if (first_time && (isDIGIT(s[1]) || s[1] == '$')) {
+            /* If it is something like -1 or -$foo, it is more likely to be
+             * a subscript.  */
+            if (s == start && (isDIGIT(s[1]) || s[1] == '$')) {
                 weight -= 5;	/* cope with negative subscript */
             }
             break;
 
           default:
-            if (  (first_time || (  ! isWORDCHAR(prev_un_char)
+            if (  (s == start || (  ! isWORDCHAR(prev_un_char)
                                   &&  prev_un_char != '$'
                                   &&  prev_un_char != '@'
                                   &&  prev_un_char != '&'))
@@ -4978,12 +5183,12 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * bugs have surfaced since indicates this whole thing doesn't
                  * get applied very much */
                 char *d = s;
-                while (isALPHA(s[0]))
+                while (s < e - 1 && isALPHA(s[1]))
                     s++;
 
                 /* If those alphas spell a keyword, it's almost certainly not a
                  * character class */
-                if (keyword(d, s - d, 0))
+                if (keyword(d, s + 1 - d, 0))
                     weight -= 150;
 
                 /* khw: Barewords could also be subroutine calls, and these
@@ -4996,7 +5201,7 @@ S_intuit_more(pTHX_ char *s, char *e,
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
              * more likely to be character classes */
-            if (    ! first_time
+            if (    s > start
                 && (   NATIVE_TO_LATIN1(un_char)
                     == NATIVE_TO_LATIN1(prev_un_char) + 1))
             {
@@ -5029,16 +5234,10 @@ S_intuit_more(pTHX_ char *s, char *e,
          * repeated characters.  There may be others, like I have mentioned
          * quotes and paired delimiters  */
         seen[un_char]++;
+        s++;
     }   /* End of loop through each character of the construct */
 
-    /* khw: People on #irc have suggested things that I think boil down to:
-     * under 'use 5.43.x', output a warning like existing warnings for
-     * similar situations "Ambiguous use of [], resolved as ..."  Perhaps
-     * suppress the message if all (or maybe almost all) the evidence points
-     * to the same outcome.  This would involve two weight variables */
-    if (weight >= 0)	/* probably a character class */
-        return FALSE;
-
+    /* No terminating ']', has to be an expression */
     return TRUE;
 }
 
@@ -7369,7 +7568,7 @@ yyl_croak_unrecognised(pTHX_ char *s)
                            10, UNI_DISPLAY_ISPRINT);
     }
     else {
-        c = form("\\x%02X", (unsigned char)*s);
+        c = form("\\x%02X", (U8)*s);
     }
 
     if (s >= PL_linestart) {
