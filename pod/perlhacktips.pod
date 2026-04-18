@@ -605,10 +605,38 @@ to figure out.
 
 Therefore, if a macro does use variables, their names should be such
 that it is very unlikely that they would collide with any caller, now
-or forever.  One way to do that, now being used in the perl source, is
-to include the name of the macro itself as part of the name of each
-variable in the macro.  Suppose the macro is named C<SvPV>.  Then we
-could have
+or forever.  Some ways to do that are:
+
+=over
+
+=item Use C<PERL_UNIQUE_NAME(I<x>)>
+
+This macro returns a generated symbol containing I<x>, but decorated
+with extra characters so the symbol is guaranteed to be unique to the C
+compilation unit.
+
+You use it like this:
+
+    #define x_pl_ PERL_UNIQUE_NAME(x)
+
+Note the C<_pl_> suffix  If we used a plain C<x>, the symbol would
+collide with the caller also using the symbol C<x>.  But the C<_pl_>
+suffix makes the symbol reserved for perl's use, so that only other
+symbols created for perl can clash.  Besides the C<_pl_> suffix,
+commonly used reserved names include symbols that begin with
+C<[Pp]erl_>, C<PERL_> or C<PL_>.
+
+There are other possibilities as well; the canonical list is anything
+that matches the pattern C<$names_reserved_for_perl_use_re> found in
+F<regen/embed.pl>.
+
+You also need to always use C<PERL_UNIQUE_NAME> to create symbols used
+inside a macro.  Then any other calls to it with the same parameter will
+result in a compiler warning that it is being redefined.
+
+=item Include the macro name as part of the symbol
+
+Suppose the macro is named C<SvPV>  Then we could have
 
  int foo_svpv_ = 0;
 
@@ -617,9 +645,10 @@ guaranteed that a caller will never naively use C<foo_svpv_> (and run
 into problems).  (The lowercasing makes it clearer that this is a
 variable, but assumes that there won't be two elements whose names
 differ only in the case of their letters.)  The trailing underscore
-makes it even more unlikely to clash, as those, by convention, signify
-a private variable name.  (See L</Choosing legal symbol names> for
-restrictions on what names you can use.)
+makes it even more unlikely to clash.  (See L</Choosing legal symbol
+names> for restrictions on what names you can use.)
+
+=back
 
 This kind of name collision doesn't happen with the macro's formal
 parameters, so they don't need to have complicated names.  But there
