@@ -898,6 +898,38 @@ Parentheses missing around "local" list at - line 3.
 Parentheses missing around "local" list at - line 4.
 Parentheses missing around "local" list at - line 5.
 ########
+# NAME don't warn on 'open/opendir my $x, $y'
+# NOTE GH #4186
+# NOTE 'if (0)' because we only test parsing, not runtime behavior
+use warnings 'parenthesis';
+my $mode = '<';
+my ($file, $fh2, $dir);
+if (0) {
+    pipe my $fh1, $fh2;
+    open my $fh, $mode, $file;
+    opendir my $dh, $dir;
+    CORE::open CORE::my $fh, $mode, $file;
+    CORE::opendir CORE::my $dh, $dir;
+}
+if (0) {
+    pipe our $fh1, $fh2;
+    open our $fh, $mode, $file;
+    opendir our $dh, $dir;
+    CORE::open CORE::our $fh, $mode, $file;
+    CORE::opendir CORE::our $dh, $dir;
+}
+if (0) {
+    pipe local $fh1, $fh2;
+    open local $fh, $mode, $file;
+    opendir local $dh, $dir;
+    CORE::open CORE::local $fh, $mode, $file;
+    CORE::opendir CORE::local $dh, $dir;
+}
+EXPECT
+Parentheses missing around "my" list at - line 5.
+Parentheses missing around "our" list at - line 12.
+Parentheses missing around "local" list at - line 19.
+########
 # op.c
 use warnings 'bareword' ;
 print (ABC || 1) ;

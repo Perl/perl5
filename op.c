@@ -4952,7 +4952,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
             && PL_parser->bufptr[-1] == ','
             && ckWARN(WARN_PARENTHESIS))
         {
-            char *s = PL_parser->bufptr;
+            const char *s = PL_parser->bufptr;
             bool sigil = FALSE;
 
             /* some heuristics to detect a potential error */
@@ -4974,15 +4974,42 @@ Perl_localize(pTHX_ OP *o, I32 lex)
                     break;
             }
             if (sigil && (*s == ';' || *s == '=')) {
-                warner(packWARN(WARN_PARENTHESIS),
-                       "Parentheses missing around \"%s\" list",
-                       lex
-                           ? (PL_parser->in_my == KEY_our
-                               ? "our"
-                               : PL_parser->in_my == KEY_state
-                                   ? "state"
-                                   : "my")
-                           : "local");
+                bool should_warn = TRUE;
+                if (PL_parser->last_lop_op == OP_OPEN || PL_parser->last_lop_op == OP_OPEN_DIR) {
+                    /* horrible hack on top of a horrible hack: avoid warning
+                     * on 'open my $foo, $bar;' and 'opendir my $foo, $bar;' */
+                    const char *t = PL_parser->last_lop, *stop = PL_parser->bufend;
+
+                    /* optional whitespace */
+                    for (; t < stop && memCHRs(" \t\n", *t); t++) {}
+                    /* keyword 1: one of open, CORE::open, opendir, CORE::opendir */
+                    for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
+                    /* whitespace */
+                    for (; t < stop && memCHRs(" \t\n", *t); t++) {}
+                    /* keyword 2: one of my, our, state, local */
+                    for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
+                    /* optional whitespace */
+                    for (; t < stop && memCHRs(" \t\n", *t); t++) {
+                        if (t == PL_parser->oldoldbufptr) {
+                            break;
+                        }
+                    }
+
+                    if (t == PL_parser->oldoldbufptr) {
+                        should_warn = FALSE;
+                    }
+                }
+                if (should_warn) {
+                    warner(packWARN(WARN_PARENTHESIS),
+                           "Parentheses missing around \"%s\" list",
+                           lex
+                               ? (PL_parser->in_my == KEY_our
+                                   ? "our"
+                                   : PL_parser->in_my == KEY_state
+                                       ? "state"
+                                       : "my")
+                               : "local");
+                }
             }
         }
     }
