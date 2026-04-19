@@ -4,7 +4,7 @@ use strict;
 
 use Exporter 'import';
 require XSLoader;
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 XSLoader::load();
 
@@ -13,7 +13,7 @@ our %EXPORT_TAGS = (
     'flock'   => [qw(LOCK_SH LOCK_EX LOCK_NB LOCK_UN)],
     'Fcompat' => [qw(FAPPEND FASYNC FCREAT FDEFER FDSYNC FEXCL FLARGEFILE
 		     FNDELAY FNONBLOCK FRSYNC FSYNC FTRUNC)],
-    'seek'    => [qw(SEEK_SET SEEK_CUR SEEK_END)],
+    'seek'    => [qw(SEEK_SET SEEK_CUR SEEK_END SEEK_DATA SEEK_HOLE)],
     'mode'    => [qw(S_ISUID S_ISGID S_ISVTX S_ISTXT
 		     _S_IFMT S_IFREG S_IFDIR S_IFLNK
 		     S_IFSOCK S_IFBLK S_IFCHR S_IFIFO S_IFWHT S_ENFMT
@@ -727,6 +727,25 @@ File offsets are relative to the end of the file (i.e. mostly negative).
 =item C<SEEK_SET>
 
 File offsets are absolute (i.e. relative to the beginning of the file).
+
+=item C<SEEK_DATA>
+
+For use with C<sysseek> only. File offsets are absolute (like with
+C<SEEK_SET>), but automatically adjusted upward to the next file location
+containing data.
+
+This symbol is meant for use with sparse files, where sequences of zero bytes
+may not be allocated on disk (forming "holes" in the storage). Filesystems that
+don't support sparse files may treat C<SEEK_DATA> like C<SEEK_SET> (except for
+offsets beyond the current file size, which C<SEEK_DATA> does not support).
+
+=item C<SEEK_HOLE>
+
+For use with C<sysseek> only. File offsets are absolute (like with
+C<SEEK_SET>), but automatically adjusted upward to the next file location not
+containing data (a "hole"). If there is no hole at or following the specified
+offset, the end of the file is used instead. (In other words, there is an
+implicit hole at the end of any file.)
 
 =back
 
