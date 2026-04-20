@@ -64,7 +64,7 @@ The original encoding is now captured and propagated.
 =item *
 
 When a constant IV or NV was used as a hash key, such as in
-C<my %hash = ( 42 => 0 );>, and was preemptively stringified
+C<< my %hash = ( 42 => 0 ); >>, and was preemptively stringified
 into a hash key, the fact that the numerical value came first
 was lost. This unintentionally modified deparse output for
 such keys.
