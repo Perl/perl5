@@ -192,6 +192,7 @@
 # define dump_vindent(a,b,c,d)                  Perl_dump_vindent(aTHX_ a,b,c,d)
 # define eval_pv(a,b)                           Perl_eval_pv(aTHX_ a,b)
 # define eval_sv(a,b)                           Perl_eval_sv(aTHX_ a,b)
+# define export_lexical(a,b)                    Perl_export_lexical(aTHX_ a,b)
 # define fatal_warner(a,...)                    Perl_fatal_warner(aTHX_ a,__VA_ARGS__)
 # define fbm_compile(a,b)                       Perl_fbm_compile(aTHX_ a,b)
 # define fbm_instr(a,b,c,d)                     Perl_fbm_instr(aTHX_ a,b,c,d)
@@ -200,6 +201,7 @@
 # define filter_read(a,b,c)                     Perl_filter_read(aTHX_ a,b,c)
 # define find_runcv(a)                          Perl_find_runcv(aTHX_ a)
 # define find_rundefsv()                        Perl_find_rundefsv(aTHX)
+# define finish_export_lexical()                Perl_finish_export_lexical(aTHX)
 # define foldEQ(a,b,c)                          Perl_foldEQ(aTHX_ a,b,c)
 # define foldEQ_latin1(a,b,c)                   Perl_foldEQ_latin1(aTHX_ a,b,c)
 # define foldEQ_locale(a,b,c)                   Perl_foldEQ_locale(aTHX_ a,b,c)
@@ -491,6 +493,7 @@
 # define pregexec(a,b,c,d,e,f,g)                Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 # define pregfree(a)                            Perl_pregfree(aTHX_ a)
 # define pregfree2(a)                           Perl_pregfree2(aTHX_ a)
+# define prepare_export_lexical()               Perl_prepare_export_lexical(aTHX)
 # define prescan_version(a,b,c,d,e,f,g)         Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
 # define ptr_table_fetch(a,b)                   Perl_ptr_table_fetch(aTHX_ a,b)
 # define ptr_table_free(a)                      Perl_ptr_table_free(aTHX_ a)
@@ -1226,9 +1229,7 @@
 #   endif
 #   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 #     define XS_builtin_indexed(a)              Perl_XS_builtin_indexed(aTHX_ a)
-#     define finish_export_lexical()            Perl_finish_export_lexical(aTHX)
 #     define import_builtin_bundle(a)           Perl_import_builtin_bundle(aTHX_ a)
-#     define prepare_export_lexical()           Perl_prepare_export_lexical(aTHX)
 #   endif
 #   if defined(PERL_IN_CLASS_C)
 #     define class_cleanup_definition(a)        S_class_cleanup_definition(aTHX_ a)

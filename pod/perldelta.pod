@@ -368,7 +368,8 @@ well.
 
 =item *
 
-XXX
+Added new API function C<export_lexical()> which does the same lexical export
+that the L<builtin/export_lexically> function does.
 
 =back
 

@@ -37,42 +37,6 @@ static void S_warn_experimental_builtin(pTHX_ const char *name)
                 "Built-in function 'builtin::%s' is experimental", name);
 }
 
-/* These three utilities might want to live elsewhere to be reused from other
- * code sometime
- */
-void
-Perl_prepare_export_lexical(pTHX)
-{
-    PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL;
-
-    assert(PL_compcv);
-
-    /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
-    ENTER;
-    SAVESPTR(PL_comppad_name); PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
-    SAVECOMPPAD();
-    PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
-    PL_curpad       = PadARRAY(PL_comppad);
-}
-
-#define export_lexical(name, sv)  S_export_lexical(aTHX_ name, sv)
-static void S_export_lexical(pTHX_ SV *name, SV *sv)
-{
-    PADOFFSET off = pad_add_name_sv(name, padadd_STATE, 0, 0);
-    SvREFCNT_dec(PL_curpad[off]);
-    PL_curpad[off] = SvREFCNT_inc(sv);
-}
-
-void
-Perl_finish_export_lexical(pTHX)
-{
-    PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL;
-
-    intro_my();
-
-    LEAVE;
-}
-
 
 XS(XS_builtin_true);
 XS(XS_builtin_true)
