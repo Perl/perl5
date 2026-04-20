@@ -57,7 +57,7 @@ you should reset the version numbers to the next blead series.
   2026-03-20  5.43.9  ✓       Eric Herman       User-visible changes to
                                                 correctly functioning
                                                 programs freeze
-  2026-04-20  5.43.10         Philippe Bruhat   Full program freeze
+  2026-04-20  5.43.10 ✓       Philippe Bruhat   Full program freeze
   2026-05-20  5.44.0                            New perl!
 
 =head1 VICTIMS
