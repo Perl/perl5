@@ -1453,7 +1453,6 @@
 #     define mro_get_linear_isa_dfs(a,b)        S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #   endif
 #   if defined(PERL_IN_OP_C)
-#     define apply_attrs(a,b,c)                 S_apply_attrs(aTHX_ a,b,c)
 #     define apply_attrs_my(a,b,c,d)            S_apply_attrs_my(aTHX_ a,b,c,d)
 #     define assignment_type(a)                 S_assignment_type(aTHX_ a)
 #     define bad_type_gv(a,b,c,d)               S_bad_type_gv(aTHX_ a,b,c,d)
@@ -1461,12 +1460,14 @@
 #     define check_alt_hash_fields_hekify(a)    S_check_alt_hash_fields_hekify(aTHX_ a)
 #     define clear_special_blocks(a,b,c)        S_clear_special_blocks(aTHX_ a,b,c)
 #     define cop_free(a)                        S_cop_free(aTHX_ a)
+#     define declare_var_attributes(a,b,c)      S_declare_var_attributes(aTHX_ a,b,c)
 #     define dup_attrlist(a)                    S_dup_attrlist(aTHX_ a)
 #     define find_and_forget_pmops(a)           S_find_and_forget_pmops(aTHX_ a)
 #     define fold_constants(a)                  S_fold_constants(aTHX_ a)
 #     define force_list(a,b)                    S_force_list(aTHX_ a,b)
 #     define forget_pmop(a)                     S_forget_pmop(aTHX_ a)
 #     define gen_constant_list(a)               S_gen_constant_list(aTHX_ a)
+#     define import_attributes_module(a,b,c)    S_import_attributes_module(aTHX_ a,b,c)
 #     define inplace_aassign(a)                 S_inplace_aassign(aTHX_ a)
 #     define is_dup_mode                        S_is_dup_mode
 #     define is_handle_constructor              S_is_handle_constructor
@@ -1475,7 +1476,6 @@
 #     define looks_like_bool(a)                 S_looks_like_bool(aTHX_ a)
 #     define modkids(a,b)                       S_modkids(aTHX_ a,b)
 #     define move_proto_attr(a,b,c,d)           S_move_proto_attr(aTHX_ a,b,c,d)
-#     define my_kid(a,b,c)                      S_my_kid(aTHX_ a,b,c)
 #     define newGIVWHENOP(a,b,c,d,e)            S_newGIVWHENOP(aTHX_ a,b,c,d,e)
 #     define newMETHOP_internal(a,b,c,d)        S_newMETHOP_internal(aTHX_ a,b,c,d)
 #     define new_logop(a,b,c,d)                 S_new_logop(aTHX_ a,b,c,d)

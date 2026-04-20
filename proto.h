@@ -10893,23 +10893,14 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 #endif /* defined(PERL_IN_MRO_C) */
 #if defined(PERL_IN_OP_C)
 static void
-S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2);
-# define PERL_ARGS_ASSERT_APPLY_ATTRS           \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
-        assert(target)
-
-static void
-S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
+S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_APPLY_ATTRS_MY        \
         Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
-        assert(target); assert(imopsp)
+        assert(target); assert(import_opsp)
 
 static I32
 S_assignment_type(pTHX_ const OP *o)
@@ -10961,6 +10952,13 @@ S_cop_free(pTHX_ COP *cop)
         Perl_assert_aTHX; assert(cop)
 
 static OP *
+S_declare_var_attributes(pTHX_ OP *o, OP *attrs, OP **import_opsp)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_3);
+# define PERL_ARGS_ASSERT_DECLARE_VAR_ATTRIBUTES \
+        Perl_assert_aTHX; assert(import_opsp)
+
+static OP *
 S_dup_attrlist(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
@@ -10999,6 +10997,15 @@ S_gen_constant_list(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_GEN_CONSTANT_LIST     \
         Perl_assert_aTHX
+
+static void
+S_import_attributes_module(pTHX_ HV *stash, SV *target, OP *attrs)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+# define PERL_ARGS_ASSERT_IMPORT_ATTRIBUTES_MODULE \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        assert(target)
 
 static void
 S_inplace_aassign(pTHX_ OP *o)
@@ -11047,13 +11054,6 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV *name, bool curstash)
         Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_MOVE_PROTO_ATTR       \
         Perl_assert_aTHX; assert(proto); assert(attrs); assert(name)
-
-static OP *
-S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_3);
-# define PERL_ARGS_ASSERT_MY_KID                \
-        Perl_assert_aTHX; assert(imopsp)
 
 static OP *
 S_newGIVWHENOP(pTHX_ OP *cond, OP *block, I32 enter_opcode, I32 leave_opcode, PADOFFSET entertarg)
