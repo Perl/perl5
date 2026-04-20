@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.43.10 - Jasper Fforde, "One of Our Thursdays Is Missing"
+
+L<Announced on 2026-04-20 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2026/04/msg270871.html>
+
+The people to listen to are the ones who don't say very much.
+
 =head2 v5.43.9 - Mary Ann Evans (under pen name George Eliot), "Middlemarch", 1872
 
 L<Announced on 2026-03-20 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270813.html>
