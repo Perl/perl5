@@ -137,15 +137,13 @@ comparative code in a file and running a C<Benchmark> test.
          },
  };
 
- timethese(1000000, {
+ timethese(10_000_000, {
          'direct'       => sub {
-           my $x = $ref->{ref}->{_myscore} . $ref->{ref}->{_yourscore} ;
+             my $x = $ref->{ref}->{_myscore} . $ref->{ref}->{_yourscore} ;
          },
          'dereference'  => sub {
              my $ref  = $ref->{ref};
-             my $myscore = $ref->{_myscore};
-             my $yourscore = $ref->{_yourscore};
-             my $x = $myscore . $yourscore;
+             my $x = $ref->{_myscore} . $ref->{_yourscore};
          },
  });
 
@@ -153,22 +151,25 @@ It's essential to run any timing measurements a sufficient number of times so
 the numbers settle on a numerical average, otherwise each run will naturally
 fluctuate due to variations in the environment, to reduce the effect of
 contention for C<CPU> resources and network bandwidth for instance.  Running
-the above code for one million iterations, we can take a look at the report
+the above code for ten million iterations, we can take a look at the report
 output by the C<Benchmark> module, to see which approach is the most effective.
 
  $> perl dereference
 
- Benchmark: timing 1000000 iterations of dereference, direct...
- dereference:  2 wallclock secs ( 1.59 usr +  0.00 sys =  1.59 CPU) @ 628930.82/s (n=1000000)
-     direct:  1 wallclock secs ( 1.20 usr +  0.00 sys =  1.20 CPU) @ 833333.33/s (n=1000000)
+ Benchmark: timing 10000000 iterations of dereference, direct...
+ dereference:  2 wallclock secs ( 1.11 usr +  0.00 sys =  1.11 CPU) @ 9009009.01/s (n=10000000)
+     direct:  0 wallclock secs ( 0.89 usr +  0.00 sys =  0.89 CPU) @ 11235955.06/s (n=10000000)
 
-The difference is clear to see and the dereferencing approach is slower.  While
-it managed to execute an average of 628,930 times a second during our test, the
-direct approach managed to run an additional 204,403 times, unfortunately.
-Unfortunately, because there are many examples of code written using the
-multiple layer direct variable access, and it's usually horrible.  It is,
-however, minusculely faster.  The question remains whether the minute gain is
-actually worth the eyestrain, or the loss of maintainability.
+The difference is clear to see: the C<direct> approach is faster.  C<direct>
+ran 2,226,946 times/second more or 24% faster than the C<dereference>
+approach.  The question remains, however, whether C<direct>'s relatively
+modest performance gain outweighs its poorer readability and
+maintainability.
+
+Be aware that the exact results depend on the version of perl, the
+compiler and options used to build perl and the hardware you're
+running on.  The above results are from a threaded build of perl
+5.42.1 built with gcc 14.2.0 on a Core i7-10700F.
 
 =head2  Search and replace or tr
 
