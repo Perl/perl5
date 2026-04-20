@@ -1378,6 +1378,8 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
 CTmpx	|Size_t |expected_size	|UV size
+Adp	|void	|export_lexical |NN SV *name				\
+				|NN SV *sv
 ATdmp	|bool	|extended_utf8_to_uv					\
 				|SPTR const U8 * const s		\
 				|EPTRge const U8 * const e		\
@@ -1411,6 +1413,8 @@ p	|char * |find_script	|NN const char *scriptname			\
 				|bool dosearch					\
 				|NULLOK const char * const * const search_ext	\
 				|I32 flags
+
+Adp	|void	|finish_export_lexical
 Adip	|I32	|foldEQ 	|NN const char *s1			\
 				|NN const char *s2			\
 				|I32 len
@@ -2828,6 +2832,7 @@ Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
 				|U32 nosave
 Cp	|void	|pregfree	|NULLOK REGEXP *r
 Cp	|void	|pregfree2	|NN REGEXP *rx
+Adp	|void	|prepare_export_lexical
 Adp	|const char *|prescan_version					\
 				|NN const char *s			\
 				|bool strict				\
@@ -4491,10 +4496,8 @@ i	|bool	|PerlEnv_putenv |NN char *str
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
-p	|void	|finish_export_lexical
 p	|void	|import_builtin_bundle					\
 				|U16 ver
-p	|void	|prepare_export_lexical
 p	|void	|XS_builtin_indexed					\
 				|NN CV *cv
 #endif

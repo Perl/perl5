@@ -3087,5 +3087,78 @@ Perl_resume_compcv(pTHX_ struct suspended_compcv *buffer, bool save)
 }
 
 /*
+=for apidoc prepare_export_lexical
+
+Sets up the parser state ready to call L</export_lexical> one or more times.
+Calling this function implies a call to C<ENTER>, and must be paired with a
+corresponding call to L</finish_export_lexical> to end it.
+
+=cut
+ */
+void
+Perl_prepare_export_lexical(pTHX)
+{
+    PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL;
+
+    assert(PL_compcv);
+
+    /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
+    ENTER;
+    SAVESPTR(PL_comppad_name); PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
+    SAVECOMPPAD();
+    PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
+    PL_curpad       = PadARRAY(PL_comppad);
+}
+
+/*
+=for apidoc export_lexical
+
+Adds an entry into the lexical scope of the code which called this. In order
+to have any effect this must be while the surrounding code is still being
+compiled; usually by being invoked as part of a C<BEGIN> block (or the one
+implied by a C<use> statement.)
+
+Calls to this function must be wrapped between a pair of calls to
+L</prepare_export_lexical> and L</finish_export_lexical>, between which may be
+placed one or more calls to C<export_lexical> itself.
+
+    prepare_export_lexical();
+    export_lexical(name1, sv1);
+    export_lexical(name2, sv2);
+    ...
+    finish_export_lexical();
+
+=cut
+*/
+void
+Perl_export_lexical(pTHX_ SV *name, SV *sv)
+{
+    PERL_ARGS_ASSERT_EXPORT_LEXICAL;
+
+    PADOFFSET off = pad_add_name_sv(name, padadd_STATE, 0, 0);
+    SvREFCNT_dec(PL_curpad[off]);
+    PL_curpad[off] = SvREFCNT_inc(sv);
+}
+
+/*
+=for apidoc finish_export_lexical
+
+Commits any recently exported lexical names to the caller's pad and undoes
+the effect of L</prepare_export_lexical>. See L</export_lexical> for more
+detail.
+
+=cut
+*/
+void
+Perl_finish_export_lexical(pTHX)
+{
+    PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL;
+
+    intro_my();
+
+    LEAVE;
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

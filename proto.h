@@ -1511,6 +1511,14 @@ PERL_CALLCONV Size_t
 Perl_expected_size(UV size);
 #define PERL_ARGS_ASSERT_EXPECTED_SIZE
 
+PERL_CALLCONV void
+Perl_export_lexical(pTHX_ SV *name, SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_EXPORT_LEXICAL         \
+        Perl_assert_aTHX; assert(name); assert(sv)
+
 PERL_CALLCONV bool
 Perl_extended_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
         Perl_attribute_nonnull(1)
@@ -1601,6 +1609,12 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch, const char * const
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_FIND_SCRIPT            \
         Perl_assert_aTHX; assert(scriptname)
+
+PERL_CALLCONV void
+Perl_finish_export_lexical(pTHX)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL  \
+        Perl_assert_aTHX
 
 PERL_CALLCONV I32
 Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
@@ -5311,6 +5325,12 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_PREGFREE2              \
         Perl_assert_aTHX; assert(rx)
+
+PERL_CALLCONV void
+Perl_prepare_export_lexical(pTHX)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL \
+        Perl_assert_aTHX
 
 PERL_CALLCONV const char *
 Perl_prescan_version(pTHX_ const char *s, bool strict, const char **errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha)
@@ -9280,24 +9300,10 @@ Perl_XS_builtin_indexed(pTHX_ CV *cv)
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
-Perl_finish_export_lexical(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL \
-        Perl_assert_aTHX
-
-PERL_CALLCONV void
 Perl_import_builtin_bundle(pTHX_ U16 ver)
         Perl_attribute_nonnull_aTHX
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_IMPORT_BUILTIN_BUNDLE \
-        Perl_assert_aTHX
-
-PERL_CALLCONV void
-Perl_prepare_export_lexical(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL \
         Perl_assert_aTHX
 
 #endif /* defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C) */
