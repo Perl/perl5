@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 112 ); # some tests are run in a BEGIN block
+    plan( tests => 113 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -393,3 +393,14 @@ do './op/caller.pl' or die $@;
     }
     ->($a[0], 'B');
 }
+
+# Derived from GH #23175
+fresh_perl_is(<<'END', '4 at - line 1.', {},
+    sub bogocarp() { my ($fi, $pa, $line) = caller; die $line; }
+    my $x = 1;
+    if ($x) {
+       bogocarp();
+    }
+    print $x;
+END
+    'GH #23175 - caller line number in if-condition block');

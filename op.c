@@ -4641,12 +4641,31 @@ Perl_op_scope(pTHX_ OP *o)
             OpTYPE_set(o, OP_SCOPE);
             kid = cLISTOPo->op_first;
             if (OP_TYPE_IS_COP_NN(kid)) {
-                op_null(kid);
+                /* As a small micro-optimization, it might be possible
+                 * to null this COP without detrimental consequence.
+                 *
+                 * However, if a subroutine call immediately follows, any
+                 * use of caller() before the return will be operating on
+                 * whatever the previous COP was. This is most often
+                 * noticeable when caller() outputs an obviously inaccurate
+                 * caller line number. Hence the COP is preserved when
+                 * followed by an entersub.
+                 */
+                 OP *sib = OpSIBLING(kid);
+                 if (LIKELY(sib)) {
+                     if (sib->op_type != OP_ENTERSUB) {
+                         op_null(kid);
 
-                /* The following deals with things like 'do {1 for 1}' */
-                kid = OpSIBLING(kid);
-                if (kid && OP_TYPE_IS_COP_NN(kid))
-                    op_null(kid);
+                         /* The following deals with things like 'do {1 for 1}' */
+                         if (OP_TYPE_IS_COP_NN(sib)) {
+                             OP *sib2 = OpSIBLING(sib);
+                             if (!sib2 || sib2->op_type != OP_ENTERSUB)
+                                 op_null(sib);
+                         }
+                     }
+                 } else {
+                     op_null(kid);
+                 }
             }
         }
         else
