@@ -16488,9 +16488,7 @@ static const MGVTBL custom_op_register_vtbl = {
     custom_op_register_free,     /* free */
     0,                          /* copy */
     0,                          /* dup */
-#ifdef MGf_LOCAL
     0,                          /* local */
-#endif
 };
 
 
