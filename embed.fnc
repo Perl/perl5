@@ -5110,13 +5110,10 @@ Sd	|AV *	|mro_get_linear_isa_dfs 				\
 				|U32 level
 #endif
 #if defined(PERL_IN_OP_C)
-S	|void	|apply_attrs	|NN HV *stash				\
-				|NN SV *target				\
-				|NULLOK OP *attrs
 S	|void	|apply_attrs_my |NN HV *stash				\
 				|NN OP *target				\
 				|NULLOK OP *attrs			\
-				|NN OP **imopsp
+				|NN OP **import_opsp
 RS	|I32	|assignment_type|NULLOK const OP *o
 S	|void	|bad_type_gv	|I32 n					\
 				|NN GV *gv				\
@@ -5133,6 +5130,10 @@ S	|CV *	|clear_special_blocks					\
 				|NN GV * const gv			\
 				|NN CV * const cv
 S	|void	|cop_free	|NN COP *cop
+S	|OP *	|declare_var_attributes 				\
+				|NULLOK OP *o				\
+				|NULLOK OP *attrs			\
+				|NN OP **import_opsp
 S	|OP *	|dup_attrlist	|NN OP *o
 S	|void	|find_and_forget_pmops					\
 				|NN OP *o
@@ -5143,6 +5144,10 @@ S	|OP *	|force_list	|NULLOK OP *arg 			\
 S	|void	|forget_pmop	|NN PMOP * const o
 S	|void	|gen_constant_list					\
 				|NULLOK OP *o
+S	|void	|import_attributes_module				\
+				|NN HV *stash				\
+				|NN SV *target				\
+				|NULLOK OP *attrs
 S	|void	|inplace_aassign|NN OP *o
 ST	|bool	|is_dup_mode	|NN const OP *o
 RST	|bool	|is_handle_constructor					\
@@ -5158,9 +5163,6 @@ S	|void	|move_proto_attr|NN OP **proto				\
 				|NN OP **attrs				\
 				|NN const GV *name			\
 				|bool curstash
-S	|OP *	|my_kid 	|NULLOK OP *o				\
-				|NULLOK OP *attrs			\
-				|NN OP **imopsp
 S	|OP *	|newGIVWHENOP	|NULLOK OP *cond			\
 				|NN OP *block				\
 				|I32 enter_opcode			\

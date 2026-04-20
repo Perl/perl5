@@ -3974,31 +3974,30 @@ S_dup_attrlist(pTHX_ OP *o)
 }
 
 static void
-S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
+S_import_attributes_module(pTHX_ HV *stash, SV *target, OP *attrs)
 {
-    PERL_ARGS_ASSERT_APPLY_ATTRS;
-    {
-        SV * const stashsv = newSVhek(HvNAME_HEK(stash));
+    PERL_ARGS_ASSERT_IMPORT_ATTRIBUTES_MODULE;
 
-        /* fake up C<use attributes $pkg,$rv,@attrs> */
+    SV * const stashsv = newSVhek(HvNAME_HEK(stash));
+
+    /* fake up C<use attributes $pkg,$rv,@attrs> */
 
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
 
-        load_module(PERL_LOADMOD_IMPORT_OPS,
-                    newSVpvs(ATTRSMODULE),
-                    NULL,
-                    op_prepend_elem(OP_LIST,
-                                    newSVOP(OP_CONST, 0, stashsv),
-                                    op_prepend_elem(OP_LIST,
-                                                    newSVOP(OP_CONST, 0,
-                                                            newRV(target)),
-                                                    dup_attrlist(attrs))));
-    }
+    load_module(
+            PERL_LOADMOD_IMPORT_OPS,
+            newSVpvs(ATTRSMODULE),
+            NULL,
+            op_prepend_elem(OP_LIST,
+                newSVOP(OP_CONST, 0, stashsv),
+                op_prepend_elem(OP_LIST,
+                    newSVOP(OP_CONST, 0, newRV(target)),
+                    dup_attrlist(attrs))));
 }
 
 static void
-S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
+S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
 {
     PERL_ARGS_ASSERT_APPLY_ATTRS_MY;
 
@@ -4042,7 +4041,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
                                newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
 
     /* Combine the ops. */
-    *imopsp = op_append_elem(OP_LIST, *imopsp, imop);
+    *import_opsp = op_append_elem(OP_LIST, *import_opsp, imop);
 }
 
 /*
@@ -4213,9 +4212,9 @@ S_cant_declare(pTHX_ OP *o)
 }
 
 static OP *
-S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
+S_declare_var_attributes(pTHX_ OP *o, OP *attrs, OP **import_opsp)
 {
-    PERL_ARGS_ASSERT_MY_KID;
+    PERL_ARGS_ASSERT_DECLARE_VAR_ATTRIBUTES;
 
     I32 type;
     const bool stately = PL_parser && PL_parser->in_my == KEY_state;
@@ -4228,7 +4227,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     if (OP_TYPE_IS_OR_WAS(o, OP_LIST)) {
         OP *kid;
         for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
-            my_kid(kid, attrs, imopsp);
+            declare_var_attributes(kid, attrs, import_opsp);
         return o;
     } else if (type == OP_UNDEF || type == OP_STUB) {
         return o;
@@ -4242,11 +4241,11 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
             assert(PL_parser);
             PL_parser->in_my = KEY_NULL;
             PL_parser->in_my_stash = NULL;
-            apply_attrs(GvSTASH(gv),
-                        (type == OP_RV2SV ? GvSVn(gv) :
-                         type == OP_RV2AV ? MUTABLE_SV(GvAVn(gv)) :
-                         type == OP_RV2HV ? MUTABLE_SV(GvHVn(gv)) : MUTABLE_SV(gv)),
-                        attrs);
+            import_attributes_module(GvSTASH(gv),
+                    (type == OP_RV2SV ? GvSVn(gv) :
+                     type == OP_RV2AV ? MUTABLE_SV(GvAVn(gv)) :
+                     type == OP_RV2HV ? MUTABLE_SV(GvHVn(gv)) : MUTABLE_SV(gv)),
+                    attrs);
         }
         o->op_private |= OPpOUR_INTRO;
         return o;
@@ -4254,7 +4253,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     else if (type == OP_REFGEN || type == OP_SREFGEN) {
         check_or_warn_declared_refs();
         /* Kid is a nulled OP_LIST, handled above.  */
-        my_kid(cUNOPo->op_first, attrs, imopsp);
+        declare_var_attributes(cUNOPo->op_first, attrs, import_opsp);
         return o;
     }
     else if (type != OP_PADSV &&
@@ -4276,7 +4275,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         stash = PAD_COMPNAME_TYPE(o->op_targ);
         if (!stash)
             stash = PL_curstash;
-        apply_attrs_my(stash, o, attrs, imopsp);
+        apply_attrs_my(stash, o, attrs, import_opsp);
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
@@ -4306,7 +4305,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     if (attrs)
         SAVEFREEOP(attrs);
     rops = NULL;
-    o = my_kid(o, attrs, &rops);
+    o = declare_var_attributes(o, attrs, &rops);
     if (rops) {
         if (maybe_scalar && o->op_type == OP_PADSV) {
             o = scalar(op_append_list(OP_LIST, rops, o));
@@ -11517,7 +11516,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
   attrs:
     if (attrs) {
         /* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
-        apply_attrs(PL_curstash, MUTABLE_SV(cv), attrs);
+        import_attributes_module(PL_curstash, MUTABLE_SV(cv), attrs);
     }
 
     if (block) {
@@ -12138,7 +12137,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                         : PL_curstash;
         if (!name)
             SAVEFREESV(cv);
-        apply_attrs(stash, MUTABLE_SV(cv), attrs);
+        import_attributes_module(stash, MUTABLE_SV(cv), attrs);
         if (!name)
             SvREFCNT_inc_simple_void_NN(cv);
     }
