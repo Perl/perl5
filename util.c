@@ -1531,6 +1531,35 @@ Perl_mess(pTHX_ const char *pat, ...)
     return retval;
 }
 
+/*
+=for apidoc closest_cop
+
+Returns the closest COP to the current OP (C<curop>), given the last COP
+seen (C<cop>), a starting OP (C<o>), and a traversal option (C<opnext>).
+
+The function walks the optree from the starting OP, calling itself
+recursively if required, until the walk is exhausted. The best candidate
+COP should then be returned.
+
+This function is typically used by C<Perl_sv_mess> to find the correct
+source code file name and line number to emit in a warning or fatal
+message, or by C<pp_caller> to populate its return values.
+
+The most recently seen COP (C<cop>) is unsuitable in situations such as:
+
+=over
+
+=item *
+C<caller()> needs the most recent COP in a sub I<caller's> context.
+
+=item *
+A closer COP existed, but was nulled out during compilation.
+
+=back
+
+=cut
+*/
+
 const COP*
 Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
                        bool opnext)
@@ -1541,10 +1570,36 @@ Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
     /* opnext means that curop is actually the ->op_next of the op we are
        seeking. */
 
-    if (!o || !curop || (
-        opnext ? o->op_next == curop && o->op_type != OP_SCOPE : o == curop
-    ))
+    if (!o || !curop || (!opnext && o == curop) )
         return cop;
+
+    if (opnext && o->op_next == curop) {
+        /* COPs in branches of LOGOPs are frequently nulled out during
+         * compilation/optimization, so these branches should definitely
+         * be checked to pick up any relevent such COP, as otherwise it's
+         * easy for the returned cop to refer to a line in source code
+         * far away from the line where PL_op came from.
+         *
+         * For example, consider the elsif branch here:
+         *     if ($condition) {
+         *         # Many lines
+         *     } elsif ($other) {
+         *         warn "Boop";
+         *     }
+         *
+         * cop is likely to be the OP_NEXTSTATE prior to the this optree.
+         * o is likely to be an OP_NULL with a LOGOP kid. The elsif
+         * branch will start with an OP_SCOPE, and the first OP_NEXTSTATE
+         * inside it will have been nulled out and is an ex-nextstate.
+         * */
+        if (! ( (o->op_flags & OPf_KIDS) && (
+                     o->op_type  == OP_NULL
+                  || o->op_type  == OP_SCOPE
+                  || OP_CLASS(o) == OA_LOGOP
+            )))
+            return cop;
+    }
+
 
     if (o->op_flags & OPf_KIDS) {
         const OP *kid;
