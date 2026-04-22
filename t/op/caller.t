@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 112 ); # some tests are run in a BEGIN block
+    plan( tests => 114 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -393,3 +393,37 @@ do './op/caller.pl' or die $@;
     }
     ->($a[0], 'B');
 }
+
+# Derived from GH #16872
+
+fresh_perl_is(<<'END', 'HERE WE ARE at - line 16.', {},
+    use strict; use warnings;
+    sub u(_) { defined($_[0]) ? $_[0] : "undef" }
+    sub f { warn((join ", ", map{u} (caller(0))), "\n"); }
+
+    use Carp;
+    my $bad = 1;
+    if (0) {
+    #
+    #
+    # millions of lines of spagetti code
+    #
+    #
+    }
+    elsif ($bad) {
+      # my $x; #un-comment and the problem goes away
+      confess("HERE WE ARE");
+    }
+END
+    'GH #16872 - caller line number: elsif($bad) {confess()}');
+
+# Derived from GH #23175
+fresh_perl_is(<<'END', '4 at - line 1.', {},
+    sub bogocarp() { my ($fi, $pa, $line) = caller; die $line; }
+    my $x = 1;
+    if ($x) {
+       bogocarp();
+    }
+    print $x;
+END
+    'GH #23175 - caller line number: if($x) { bogocarp() }');
