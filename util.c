@@ -1595,6 +1595,7 @@ Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
         if (! ( (o->op_flags & OPf_KIDS) && (
                      o->op_type  == OP_NULL
                   || o->op_type  == OP_SCOPE
+                  || o->op_type  == OP_LINESEQ
                   || OP_CLASS(o) == OA_LOGOP
             )))
             return cop;

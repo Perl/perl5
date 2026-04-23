@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 114 ); # some tests are run in a BEGIN block
+    plan( tests => 115 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -427,3 +427,23 @@ fresh_perl_is(<<'END', '4 at - line 1.', {},
     print $x;
 END
     'GH #23175 - caller line number: if($x) { bogocarp() }');
+
+# Derived from muddle.pl in GH #16872
+fresh_perl_is <<'END', "t3 at - line 7.\n\tmain::t3() called at - line 13", {},
+use strict;
+use warnings;
+use Carp;
+
+sub t1 {}
+sub t2 {}
+sub t3 { Carp::confess("t3"); }
+
+if (t1) {
+
+} elsif (t2) {
+
+} elsif (t3) {
+
+}
+END
+    'GH #16872 (part) - caller line number if (t1) {} elsif (t2) {}';
