@@ -1464,7 +1464,7 @@ EXPECT
 Use of uninitialized value $undef in numeric eq (==) at - line 4.
 Use of uninitialized value $undef in numeric eq (==) at - line 5.
 ########
-# TODO long standing bug - conditions of while loops
+# NAME conditions of while loops
 use warnings;
 
 my $c;
@@ -1480,7 +1480,7 @@ EXPECT
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 ########
-# TODO long standing bug - conditions of until loops
+# NAME conditions of until loops
 use warnings;
 
 my $c;
@@ -1496,7 +1496,7 @@ EXPECT
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 Use of uninitialized value $c in numeric eq (==) at - line 5.
 ########
-# TODO long standing bug - conditions of for loops
+# NAME conditions of for loops
 use warnings;
 
 my $c;
