@@ -366,3 +366,22 @@ print undef;
 
 EXPECT
 [TIE] Use of uninitialized value in print at - line 11.
+########
+# NAME GH #4693 LOGOP branch COP survives LOGOP constant folding
+if (0) {die "aa";}
+elsif (1) {die "bb";}
+EXPECT
+bb at - line 2.
+########
+# NAME LOGOP branch COP survives LOGOP constant folding (2)
+if (1) {die "aa";}
+elsif (0) {die "bb";}
+EXPECT
+aa at - line 1.
+########
+# NAME LOGOP branch COP survives LOGOP constant folding (3)
+if (0) {die "aa";}
+elsif (0) {die "bb";}
+else {die "cc";}
+EXPECT
+cc at - line 3.
