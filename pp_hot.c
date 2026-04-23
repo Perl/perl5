@@ -529,6 +529,11 @@ PP(pp_unstack)
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
         assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));
         CX_LEAVE_SCOPE(cx);
+        /* PL_curcop points somewhere inside this loop body.
+         * Unless it is reset, any warnings, errors, or caller()
+         * lookups inside the loop condition will display a
+         * misleading line number. */
+        PL_curcop = cx->blk_oldcop;
     }
     return NORMAL;
 }

@@ -692,7 +692,7 @@ while (<>) {
 print "ok\n";
 CODE
         $code =~ s/tmpinplace/$tmpinplace/;
-        fresh_perl_like($code, qr/^Cannot complete in-place edit of \Q$tmpinplace\E\/foo: .* - line 5, <> line \d+\./, { },
+        fresh_perl_like($code, qr/^Cannot complete in-place edit of \Q$tmpinplace\E\/foo: .* - line 3, <> line \d+\./, { },
                        "chdir while in-place editing (no at-functions)");
     }
 
