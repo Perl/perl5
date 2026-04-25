@@ -415,8 +415,8 @@ our %Modules = (
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.21.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Sun Feb 25 19:56:46 2024',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.22.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Apr 25 14:46:45 2026',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
