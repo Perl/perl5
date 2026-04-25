@@ -4975,28 +4975,37 @@ Perl_localize(pTHX_ OP *o, I32 lex)
             }
             if (sigil && (*s == ';' || *s == '=')) {
                 bool should_warn = TRUE;
-                if (PL_parser->last_lop_op == OP_OPEN || PL_parser->last_lop_op == OP_OPEN_DIR) {
-                    /* horrible hack on top of a horrible hack: avoid warning
-                     * on 'open my $foo, $bar;' and 'opendir my $foo, $bar;' */
-                    const char *t = PL_parser->last_lop, *stop = PL_parser->bufend;
+                switch (PL_parser->last_lop_op) {
+                    case OP_OPEN:
+                    case OP_OPEN_DIR:
+                    case OP_SOCKET:
+                    case OP_ACCEPT:
+                    {
+                        /* horrible hack on top of a horrible hack: avoid warning
+                         * on 'open/opendir/socket/accept my $foo, $bar;'
+                         * [GH #4186] */
+                        const char *t = PL_parser->last_lop, *stop = PL_parser->bufend;
 
-                    /* optional whitespace */
-                    for (; t < stop && memCHRs(" \t\n", *t); t++) {}
-                    /* keyword 1: one of open, CORE::open, opendir, CORE::opendir */
-                    for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
-                    /* whitespace */
-                    for (; t < stop && memCHRs(" \t\n", *t); t++) {}
-                    /* keyword 2: one of my, our, state, local */
-                    for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
-                    /* optional whitespace */
-                    for (; t < stop && memCHRs(" \t\n", *t); t++) {
-                        if (t == PL_parser->oldoldbufptr) {
-                            break;
+                        /* optional whitespace */
+                        for (; t < stop && memCHRs(" \t\n", *t); t++) {}
+                        /* keyword 1: one of open, CORE::open, opendir, CORE::opendir */
+                        for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
+                        /* whitespace */
+                        for (; t < stop && memCHRs(" \t\n", *t); t++) {}
+                        /* keyword 2: one of my, our, state, local */
+                        for (; t < stop && (isWORDCHAR(*t) || UTF8_IS_CONTINUED(*t) || *t == ':'); t++) {}
+                        /* optional whitespace */
+                        for (; t < stop && memCHRs(" \t\n", *t); t++) {
+                            if (t == PL_parser->oldoldbufptr) {
+                                break;
+                            }
                         }
-                    }
 
-                    if (t == PL_parser->oldoldbufptr) {
-                        should_warn = FALSE;
+                        if (t == PL_parser->oldoldbufptr) {
+                            should_warn = FALSE;
+                        }
+
+                        break;
                     }
                 }
                 if (should_warn) {
