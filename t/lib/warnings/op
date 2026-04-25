@@ -930,6 +930,30 @@ Parentheses missing around "my" list at - line 5.
 Parentheses missing around "our" list at - line 12.
 Parentheses missing around "local" list at - line 19.
 ########
+# NAME don't warn on 'socket/accept my $x, $y'
+# NOTE GH #4186 reprise
+use warnings 'parenthesis';
+my ($domain, $type, $protocol);
+if (0) {
+    socket my $socket, $domain, $type, $protocol;
+    accept my $newsocket, $socket;
+    CORE::socket my $socket, $domain, $type, $protocol;
+    CORE::accept CORE::my $newsocket, $socket;
+}
+if (0) {
+    socket our $socket, $domain, $type, $protocol;
+    accept our $newsocket, $socket;
+    CORE::socket CORE::our $socket, $domain, $type, $protocol;
+    CORE::accept CORE::our $newsocket, $socket;
+}
+if (0) {
+    socket local $socket, $domain, $type, $protocol;
+    accept local $newsocket, $socket;
+    CORE::socket CORE::local $socket, $domain, $type, $protocol;
+    CORE::accept CORE::local $newsocket, $socket;
+}
+EXPECT
+########
 # op.c
 use warnings 'bareword' ;
 print (ABC || 1) ;
