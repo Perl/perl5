@@ -1023,34 +1023,11 @@ PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 }
 
 PERLIO_FUNCS_DECL(PerlIO_remove) = {
-    sizeof(PerlIO_funcs),
-    "pop",
-    0,
-    PERLIO_K_DUMMY | PERLIO_K_UTF8,
-    PerlIOPop_pushed,
-    NULL,
-    PerlIOBase_open,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* flush */
-    NULL,                       /* fill */
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* get_base */
-    NULL,                       /* get_bufsiz */
-    NULL,                       /* get_ptr */
-    NULL,                       /* get_cnt */
-    NULL,                       /* set_ptrcnt */
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "pop",
+    .kind = PERLIO_K_DUMMY | PERLIO_K_UTF8,
+    .Pushed = PerlIOPop_pushed,
+    .Open = PerlIOBase_open,
 };
 
 static const char code_point_warning[] =
@@ -1460,34 +1437,33 @@ PerlIOScalar_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
 }
 
 static PERLIO_FUNCS_DECL(PerlIO_scalar) = {
-    sizeof(PerlIO_funcs),
-    "scalar",
-    sizeof(PerlIOScalar),
-    PERLIO_K_BUFFERED | PERLIO_K_RAW,
-    PerlIOScalar_pushed,
-    PerlIOScalar_popped,
-    PerlIOScalar_open,
-    PerlIOBase_binmode,
-    PerlIOScalar_arg,
-    PerlIOScalar_fileno,
-    PerlIOScalar_dup,
-    PerlIOScalar_read,
-    NULL, /* unread */
-    PerlIOScalar_write,
-    PerlIOScalar_seek,
-    PerlIOScalar_tell,
-    PerlIOScalar_close,
-    PerlIOScalar_flush,
-    PerlIOScalar_fill,
-    PerlIOScalar_eof,
-    PerlIOBase_error,
-    PerlIOBase_clearerr,
-    PerlIOBase_setlinebuf,
-    PerlIOScalar_get_base,
-    PerlIOScalar_bufsiz,
-    PerlIOScalar_get_ptr,
-    PerlIOScalar_get_cnt,
-    PerlIOScalar_set_ptrcnt,
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "scalar",
+    .size = sizeof(PerlIOScalar),
+    .kind = PERLIO_K_BUFFERED | PERLIO_K_RAW,
+    .Pushed = PerlIOScalar_pushed,
+    .Popped = PerlIOScalar_popped,
+    .Open = PerlIOScalar_open,
+    .Binmode = PerlIOBase_binmode,
+    .Getarg = PerlIOScalar_arg,
+    .Fileno = PerlIOScalar_fileno,
+    .Dup = PerlIOScalar_dup,
+    .Read = PerlIOScalar_read,
+    .Write = PerlIOScalar_write,
+    .Seek = PerlIOScalar_seek,
+    .Tell = PerlIOScalar_tell,
+    .Close = PerlIOScalar_close,
+    .Flush =PerlIOScalar_flush,
+    .Fill = PerlIOScalar_fill,
+    .Eof = PerlIOScalar_eof,
+    .Error = PerlIOBase_error,
+    .Clearerr = PerlIOBase_clearerr,
+    .Setlinebuf = PerlIOBase_setlinebuf,
+    .Get_base = PerlIOScalar_get_base,
+    .Get_bufsiz = PerlIOScalar_bufsiz,
+    .Get_ptr = PerlIOScalar_get_ptr,
+    .Get_cnt = PerlIOScalar_get_cnt,
+    .Set_ptrcnt = PerlIOScalar_set_ptrcnt,
 };
 
 
@@ -2286,96 +2262,28 @@ PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 }
 
 PERLIO_FUNCS_DECL(PerlIO_utf8) = {
-    sizeof(PerlIO_funcs),
-    "utf8",
-    0,
-    PERLIO_K_DUMMY | PERLIO_K_UTF8 | PERLIO_K_MULTIARG,
-    PerlIOUtf8_pushed,
-    NULL,
-    PerlIOBase_open,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* flush */
-    NULL,                       /* fill */
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* get_base */
-    NULL,                       /* get_bufsiz */
-    NULL,                       /* get_ptr */
-    NULL,                       /* get_cnt */
-    NULL,                       /* set_ptrcnt */
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "utf8",
+    .kind = PERLIO_K_DUMMY | PERLIO_K_UTF8 | PERLIO_K_MULTIARG,
+    .Pushed = PerlIOUtf8_pushed,
+    .Open = PerlIOBase_open,
 };
 
 PERLIO_FUNCS_DECL(PerlIO_byte) = {
-    sizeof(PerlIO_funcs),
-    "bytes",
-    0,
-    PERLIO_K_DUMMY | PERLIO_K_MULTIARG,
-    PerlIOUtf8_pushed,
-    NULL,
-    PerlIOBase_open,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* flush */
-    NULL,                       /* fill */
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* get_base */
-    NULL,                       /* get_bufsiz */
-    NULL,                       /* get_ptr */
-    NULL,                       /* get_cnt */
-    NULL,                       /* set_ptrcnt */
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "bytes",
+    .kind = PERLIO_K_DUMMY | PERLIO_K_MULTIARG,
+    .Pushed = PerlIOUtf8_pushed,
+    .Open = PerlIOBase_open,
 };
 
 PERLIO_FUNCS_DECL(PerlIO_raw) = {
-    sizeof(PerlIO_funcs),
-    "raw",
-    0,
-    PERLIO_K_DUMMY,
-    PerlIORaw_pushed,
-    PerlIOBase_popped,
-    PerlIOBase_open,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* flush */
-    NULL,                       /* fill */
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,                       /* get_base */
-    NULL,                       /* get_bufsiz */
-    NULL,                       /* get_ptr */
-    NULL,                       /* get_cnt */
-    NULL,                       /* set_ptrcnt */
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "raw",
+    .kind = PERLIO_K_DUMMY,
+    .Pushed = PerlIORaw_pushed,
+    .Popped = PerlIOBase_popped,
+    .Open = PerlIOBase_open,
 };
 /*--------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
@@ -3289,34 +3197,28 @@ PerlIOUnix_close(pTHX_ PerlIO *f)
 }
 
 PERLIO_FUNCS_DECL(PerlIO_unix) = {
-    sizeof(PerlIO_funcs),
-    "unix",
-    sizeof(PerlIOUnix),
-    PERLIO_K_RAW,
-    PerlIOUnix_pushed,
-    PerlIOBase_popped,
-    PerlIOUnix_open,
-    PerlIOBase_binmode,         /* binmode */
-    NULL,
-    PerlIOUnix_fileno,
-    PerlIOUnix_dup,
-    PerlIOUnix_read,
-    PerlIOBase_unread,
-    PerlIOUnix_write,
-    PerlIOUnix_seek,
-    PerlIOUnix_tell,
-    PerlIOUnix_close,
-    PerlIOBase_noop_ok,         /* flush */
-    PerlIOBase_noop_fail,       /* fill */
-    PerlIOBase_eof,
-    PerlIOBase_error,
-    PerlIOBase_clearerr,
-    PerlIOBase_setlinebuf,
-    NULL,                       /* get_base */
-    NULL,                       /* get_bufsiz */
-    NULL,                       /* get_ptr */
-    NULL,                       /* get_cnt */
-    NULL,                       /* set_ptrcnt */
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "unix",
+    .size = sizeof(PerlIOUnix),
+    .kind = PERLIO_K_RAW,
+    .Pushed = PerlIOUnix_pushed,
+    .Popped = PerlIOBase_popped,
+    .Open = PerlIOUnix_open,
+    .Binmode = PerlIOBase_binmode,
+    .Fileno = PerlIOUnix_fileno,
+    .Dup = PerlIOUnix_dup,
+    .Read = PerlIOUnix_read,
+    .Unread = PerlIOBase_unread,
+    .Write = PerlIOUnix_write,
+    .Seek = PerlIOUnix_seek,
+    .Tell = PerlIOUnix_tell,
+    .Close = PerlIOUnix_close,
+    .Flush = PerlIOBase_noop_ok,
+    .Fill = PerlIOBase_noop_fail,
+    .Eof = PerlIOBase_eof,
+    .Error = PerlIOBase_error,
+    .Clearerr = PerlIOBase_clearerr,
+    .Setlinebuf = PerlIOBase_setlinebuf,
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -4147,48 +4049,38 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 
 
 PERLIO_FUNCS_DECL(PerlIO_stdio) = {
-    sizeof(PerlIO_funcs),
-    "stdio",
-    sizeof(PerlIOStdio),
-    PERLIO_K_BUFFERED|PERLIO_K_RAW,
-    PerlIOStdio_pushed,
-    PerlIOBase_popped,
-    PerlIOStdio_open,
-    PerlIOBase_binmode,         /* binmode */
-    NULL,
-    PerlIOStdio_fileno,
-    PerlIOStdio_dup,
-    PerlIOStdio_read,
-    PerlIOStdio_unread,
-    PerlIOStdio_write,
-    PerlIOStdio_seek,
-    PerlIOStdio_tell,
-    PerlIOStdio_close,
-    PerlIOStdio_flush,
-    PerlIOStdio_fill,
-    PerlIOStdio_eof,
-    PerlIOStdio_error,
-    PerlIOStdio_clearerr,
-    PerlIOStdio_setlinebuf,
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "stdio",
+    .size = sizeof(PerlIOStdio),
+    .kind = PERLIO_K_BUFFERED|PERLIO_K_RAW,
+    .Pushed = PerlIOStdio_pushed,
+    .Popped = PerlIOBase_popped,
+    .Open = PerlIOStdio_open,
+    .Binmode = PerlIOBase_binmode,
+    .Fileno = PerlIOStdio_fileno,
+    .Dup = PerlIOStdio_dup,
+    .Read = PerlIOStdio_read,
+    .Unread = PerlIOStdio_unread,
+    .Write = PerlIOStdio_write,
+    .Seek = PerlIOStdio_seek,
+    .Tell = PerlIOStdio_tell,
+    .Close = PerlIOStdio_close,
+    .Flush = PerlIOStdio_flush,
+    .Fill = PerlIOStdio_fill,
+    .Eof = PerlIOStdio_eof,
+    .Error = PerlIOStdio_error,
+    .Clearerr = PerlIOStdio_clearerr,
+    .Setlinebuf = PerlIOStdio_setlinebuf,
 #ifdef FILE_base
-    PerlIOStdio_get_base,
-    PerlIOStdio_get_bufsiz,
-#else
-    NULL,
-    NULL,
+    .Get_base = PerlIOStdio_get_base,
+    .Get_bufsiz = PerlIOStdio_get_bufsiz,
 #endif
 #ifdef USE_STDIO_PTR
-    PerlIOStdio_get_ptr,
-    PerlIOStdio_get_cnt,
+    .Get_ptr = PerlIOStdio_get_ptr,
+    .Get_cnt = PerlIOStdio_get_cnt,
 #   if defined(HAS_FAST_STDIO) && defined(USE_FAST_STDIO)
-    PerlIOStdio_set_ptrcnt,
-#   else
-    NULL,
+    .Set_ptrcnt = PerlIOStdio_set_ptrcnt,
 #   endif /* HAS_FAST_STDIO && USE_FAST_STDIO */
-#else
-    NULL,
-    NULL,
-    NULL,
 #endif /* USE_STDIO_PTR */
 };
 
@@ -4786,34 +4678,33 @@ PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 
 
 PERLIO_FUNCS_DECL(PerlIO_perlio) = {
-    sizeof(PerlIO_funcs),
-    "perlio",
-    sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED|PERLIO_K_RAW,
-    PerlIOBuf_pushed,
-    PerlIOBuf_popped,
-    PerlIOBuf_open,
-    PerlIOBase_binmode,         /* binmode */
-    NULL,
-    PerlIOBase_fileno,
-    PerlIOBuf_dup,
-    PerlIOBuf_read,
-    PerlIOBuf_unread,
-    PerlIOBuf_write,
-    PerlIOBuf_seek,
-    PerlIOBuf_tell,
-    PerlIOBuf_close,
-    PerlIOBuf_flush,
-    PerlIOBuf_fill,
-    PerlIOBase_eof,
-    PerlIOBase_error,
-    PerlIOBase_clearerr,
-    PerlIOBase_setlinebuf,
-    PerlIOBuf_get_base,
-    PerlIOBuf_bufsiz,
-    PerlIOBuf_get_ptr,
-    PerlIOBuf_get_cnt,
-    PerlIOBuf_set_ptrcnt,
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "perlio",
+    .size = sizeof(PerlIOBuf),
+    .kind = PERLIO_K_BUFFERED|PERLIO_K_RAW,
+    .Pushed = PerlIOBuf_pushed,
+    .Popped = PerlIOBuf_popped,
+    .Open = PerlIOBuf_open,
+    .Binmode = PerlIOBase_binmode,
+    .Fileno = PerlIOBase_fileno,
+    .Dup = PerlIOBuf_dup,
+    .Read = PerlIOBuf_read,
+    .Unread = PerlIOBuf_unread,
+    .Write = PerlIOBuf_write,
+    .Seek = PerlIOBuf_seek,
+    .Tell = PerlIOBuf_tell,
+    .Close = PerlIOBuf_close,
+    .Flush = PerlIOBuf_flush,
+    .Fill = PerlIOBuf_fill,
+    .Eof = PerlIOBase_eof,
+    .Error = PerlIOBase_error,
+    .Clearerr = PerlIOBase_clearerr,
+    .Setlinebuf = PerlIOBase_setlinebuf,
+    .Get_base = PerlIOBuf_get_base,
+    .Get_bufsiz = PerlIOBuf_bufsiz,
+    .Get_ptr = PerlIOBuf_get_ptr,
+    .Get_cnt = PerlIOBuf_get_cnt,
+    .Set_ptrcnt = PerlIOBuf_set_ptrcnt,
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -4909,34 +4800,32 @@ PerlIOPending_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 }
 
 PERLIO_FUNCS_DECL(PerlIO_pending) = {
-    sizeof(PerlIO_funcs),
-    "pending",
-    sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED|PERLIO_K_RAW,  /* not sure about RAW here */
-    PerlIOPending_pushed,
-    PerlIOBuf_popped,
-    NULL,
-    PerlIOBase_binmode,         /* binmode */
-    NULL,
-    PerlIOBase_fileno,
-    PerlIOBuf_dup,
-    PerlIOPending_read,
-    PerlIOBuf_unread,
-    PerlIOBuf_write,
-    PerlIOPending_seek,
-    PerlIOBuf_tell,
-    PerlIOPending_close,
-    PerlIOPending_flush,
-    PerlIOPending_fill,
-    PerlIOBase_eof,
-    PerlIOBase_error,
-    PerlIOBase_clearerr,
-    PerlIOBase_setlinebuf,
-    PerlIOBuf_get_base,
-    PerlIOBuf_bufsiz,
-    PerlIOBuf_get_ptr,
-    PerlIOBuf_get_cnt,
-    PerlIOPending_set_ptrcnt,
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "pending",
+    .size = sizeof(PerlIOBuf),
+    .kind = PERLIO_K_BUFFERED|PERLIO_K_RAW,  /* not sure about RAW here */
+    .Pushed = PerlIOPending_pushed,
+    .Popped = PerlIOBuf_popped,
+    .Binmode = PerlIOBase_binmode,
+    .Fileno = PerlIOBase_fileno,
+    .Dup = PerlIOBuf_dup,
+    .Read = PerlIOPending_read,
+    .Unread = PerlIOBuf_unread,
+    .Write = PerlIOBuf_write,
+    .Seek = PerlIOPending_seek,
+    .Tell = PerlIOBuf_tell,
+    .Close = PerlIOPending_close,
+    .Flush = PerlIOPending_flush,
+    .Fill = PerlIOPending_fill,
+    .Eof = PerlIOBase_eof,
+    .Error = PerlIOBase_error,
+    .Clearerr = PerlIOBase_clearerr,
+    .Setlinebuf = PerlIOBase_setlinebuf,
+    .Get_base = PerlIOBuf_get_base,
+    .Get_bufsiz = PerlIOBuf_bufsiz,
+    .Get_ptr = PerlIOBuf_get_ptr,
+    .Get_cnt = PerlIOBuf_get_cnt,
+    .Set_ptrcnt = PerlIOPending_set_ptrcnt,
 };
 
 
@@ -5268,34 +5157,33 @@ PerlIOCrlf_binmode(pTHX_ PerlIO *f)
 }
 
 PERLIO_FUNCS_DECL(PerlIO_crlf) = {
-    sizeof(PerlIO_funcs),
-    "crlf",
-    sizeof(PerlIOCrlf),
-    PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW,
-    PerlIOCrlf_pushed,
-    PerlIOBuf_popped,         /* popped */
-    PerlIOBuf_open,
-    PerlIOCrlf_binmode,       /* binmode */
-    NULL,
-    PerlIOBase_fileno,
-    PerlIOBuf_dup,
-    PerlIOBuf_read,             /* generic read works with ptr/cnt lies */
-    PerlIOCrlf_unread,          /* Put CR,LF in buffer for each '\n' */
-    PerlIOCrlf_write,           /* Put CR,LF in buffer for each '\n' */
-    PerlIOBuf_seek,
-    PerlIOBuf_tell,
-    PerlIOBuf_close,
-    PerlIOCrlf_flush,
-    PerlIOBuf_fill,
-    PerlIOBase_eof,
-    PerlIOBase_error,
-    PerlIOBase_clearerr,
-    PerlIOBase_setlinebuf,
-    PerlIOBuf_get_base,
-    PerlIOBuf_bufsiz,
-    PerlIOBuf_get_ptr,
-    PerlIOCrlf_get_cnt,
-    PerlIOCrlf_set_ptrcnt,
+    .fsize = sizeof(PerlIO_funcs),
+    .name = "crlf",
+    .size = sizeof(PerlIOCrlf),
+    .kind = PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW,
+    .Pushed = PerlIOCrlf_pushed,
+    .Popped = PerlIOBuf_popped,
+    .Open = PerlIOBuf_open,
+    .Binmode = PerlIOCrlf_binmode,
+    .Fileno = PerlIOBase_fileno,
+    .Dup = PerlIOBuf_dup,
+    .Read = PerlIOBuf_read,         /* generic read works with ptr/cnt lies */
+    .Unread = PerlIOCrlf_unread,    /* Put CR,LF in buffer for each '\n' */
+    .Write = PerlIOCrlf_write,      /* Put CR,LF in buffer for each '\n' */
+    .Seek = PerlIOBuf_seek,
+    .Tell = PerlIOBuf_tell,
+    .Close = PerlIOBuf_close,
+    .Flush = PerlIOCrlf_flush,
+    .Fill = PerlIOBuf_fill,
+    .Eof = PerlIOBase_eof,
+    .Error = PerlIOBase_error,
+    .Clearerr = PerlIOBase_clearerr,
+    .Setlinebuf = PerlIOBase_setlinebuf,
+    .Get_base = PerlIOBuf_get_base,
+    .Get_bufsiz = PerlIOBuf_bufsiz,
+    .Get_ptr = PerlIOBuf_get_ptr,
+    .Get_cnt = PerlIOCrlf_get_cnt,
+    .Set_ptrcnt = PerlIOCrlf_set_ptrcnt,
 };
 
 PerlIO *
