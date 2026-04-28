@@ -488,7 +488,7 @@ document|https://github.com/Perl/perl5/blob/blead/pod/perlgov.pod>, in the
 I<blead> branch of Perl's git repository.  Because it's git, you can also see
 how the membership has changed over time.
 
-=head1 Steering Council Members
+=head2 Steering Council Members
 
 =over
 
@@ -500,11 +500,11 @@ how the membership has changed over time.
 
 =back
 
-=head1 Core Team Members
+=head2 Core Team Members
 
 The current members of the Perl Core Team are:
 
-=head2 Active Members
+=head3 Active Members
 
 =over 4
 
@@ -568,7 +568,7 @@ The current members of the Perl Core Team are:
 
 =back
 
-=head2 Inactive Members
+=head3 Inactive Members
 
 =over 4
 
