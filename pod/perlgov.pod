@@ -490,6 +490,9 @@ how the membership has changed over time.
 
 =head2 Steering Council Members
 
+These are the members of the Steering Council elected to be responsible for
+the release of perl from version 5.43.1 onward through version 5.44.0:
+
 =over
 
 =item * Aristotle Pagaltzis
@@ -502,9 +505,10 @@ how the membership has changed over time.
 
 =head2 Core Team Members
 
-The current members of the Perl Core Team are:
-
 =head3 Active Members
+
+These are the active members of the Perl Core Team as of the last update
+on April 11, 2026:
 
 =over 4
 
@@ -569,6 +573,9 @@ The current members of the Perl Core Team are:
 =back
 
 =head3 Inactive Members
+
+These are the inactive members of the Perl Core Team as of the last update
+on July 1, 2023:
 
 =over 4
 
