@@ -6321,7 +6321,7 @@ EXTCONST runops_proc_t PL_runops_std
 EXTCONST runops_proc_t PL_runops_dbg
   INIT(Perl_runops_debug);
 
-#define EXT_MGVTBL EXTCONST MGVTBL
+#define EXT_MGVTBL EXT MGVTBL
 
 #define PERL_MAGIC_READONLY_ACCEPTABLE 0x40
 #define PERL_MAGIC_VALUE_MAGIC 0x80
