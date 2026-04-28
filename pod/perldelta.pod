@@ -405,6 +405,19 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Line number information is stored rather than discarded when an anonymous
+subroutine is encountered during compilation. This should improve the
+accuracy of line numbers emitted by diagnostic messages and `caller()`
+for code following an anonymous subroutine declaration.
+
+Note that (i) this change could break any tests that hardcode the
+less-accurate line numbers (ii) further improvements to line number
+accuracy may follow within this development cycle.
+
+[GH #24396]
+
+=item *
+
 XXX
 
 =back
