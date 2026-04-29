@@ -243,6 +243,16 @@ but all I<must> be done in the run up to a release.
 
 =head3 Dual-life CPAN module synchronisation
 
+The Perl core ships with so-called "dual-life" modules, which are also
+available via CPAN. Some of them are "core-first", others are "CPAN-first".
+The goal of the synchronisation step is to ensure they don't drift too
+far apart from each other between their respective releases.
+
+Synchronisation can happen at any point during the development phase
+(except feature freeze).
+
+=head4 Find which modules are currently not synchronised
+
 To see which core distro versions differ from the current CPAN versions:
 
  $ ./perl -Ilib Porting/core-cpan-diff -x -a
@@ -297,13 +307,22 @@ F<Porting/Maintainers.pl>, as well as checksums updated via:
 
  $ cd t; ../perl -I../lib porting/customized.t --regen
 
-=head4 Sync CPAN modules with the corresponding cpanE<sol> distro
+=head4 Sync CPAN modules with the corresponding F<cpan/> distributions
+
+Before synchronising a distribution, you should check if a Pull Request
+exists for it.  If such a PR exists, the synchronisation will happen when
+the PR is merged.  If it's tagged as C<defer-next-dev> (meaning next dev
+I<cycle>), do not merge the request or synchronise the module manually.
 
 In most cases, once a new version of a distribution shipped with core has been
-uploaded to CPAN, the core version thereof can be synchronized automatically
+uploaded to CPAN, the core version thereof can be synchronised automatically
 with the program F<Porting/sync-with-cpan>. For example:
 
  $ perl Porting/sync-with-cpan Archive::Tar
+
+Note that for blead-first dual-life modules, the F<Porting/sync-with-cpan>
+script will need the C<--type dist> option, to look for the module in
+the correct directory.
 
 (But see the comments at the beginning of that program.  In particular, it has
 not yet been exercised on Windows as much as it has on Unix-like platforms.)
@@ -340,6 +359,11 @@ Restore any files mentioned in the C<CUSTOMIZED> section, using
 C<git checkout>. Make any new customizations if necessary. Also,
 restore any files that are mentioned in C<@IGNORE>, but were checked
 into the repository anyway.
+
+For example, F<version.pm> is a case of C<CUSTOMIZED> distribution
+where the blead version of the file is preferred over the CPAN version.
+This means that F<cpan/version/lib/version.pm> is not modified by the
+sync, and you'll have to apply the relevant changes manually.
 
 =item *
 
