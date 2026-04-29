@@ -2,7 +2,7 @@ package SelfLoader;
 use 5.008;
 use strict;
 use IO::Handle;
-our $VERSION = "1.28";
+our $VERSION = "1.29";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
