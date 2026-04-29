@@ -2881,7 +2881,6 @@ my @unresolved_visibility_overrides = qw(
     SVf_READONLY
     SVf_ROK
     SVf_THINKFIRST
-    SvGMAGICAL
     SvGMAGICAL_off
     SvGMAGICAL_on
     Sv_Grow
@@ -2904,7 +2903,6 @@ my @unresolved_visibility_overrides = qw(
     SvIVXx
     SvLENx
     SvMAGIC
-    SvMAGICAL
     SvMAGICAL_off
     SvMAGICAL_on
     SV_MUTABLE_RETURN
@@ -2974,7 +2972,6 @@ my @unresolved_visibility_overrides = qw(
     SvPV_flags_const_nolen
     sv_pvn_force_nomg
     SvREFCNT_IMMORTAL
-    SvRMAGICAL
     SvRMAGICAL_off
     SvRMAGICAL_on
     SvRV_const
@@ -2985,7 +2982,6 @@ my @unresolved_visibility_overrides = qw(
     SvSetSV_nosteal_and
     SVs_GMG
     SvSHARED_HEK_FROM_PV
-    SvSMAGICAL
     SvSMAGICAL_off
     SvSMAGICAL_on
     SVs_OBJECT
