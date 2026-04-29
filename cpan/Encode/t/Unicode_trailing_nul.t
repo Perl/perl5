@@ -16,7 +16,7 @@ use File::Spec;
 
 my $foo = Encode::decode("UTF-16LE", "/\0v\0a\0r\0/\0f\0f\0f\0f\0f\0f\0/\0u\0s\0e\0r\0s\0/\0s\0u\0p\0e\0r\0m\0a\0n\0");
 
-my ($fh, $path) = File::Temp::tempfile( CLEANUP => 1 );
+my ($fh, $path) = File::Temp::tempfile( UNLINK => 1 );
 
 note "temp file: $path";
 
