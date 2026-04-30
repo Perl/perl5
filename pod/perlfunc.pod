@@ -6672,9 +6672,8 @@ Perl.
 =item *
 
 As of Perl v5.20.0 C<rand()> uses the C<drand48> pseudorandom number generator
-to generate random numbers. As a PRNG C<drand48> should be sufficient for most
-non-cryptographic needs. If you need cryptographic random numbers check CPAN
-for crypto safe alternatives.
+(PRNG) to generate numbers that appear random but are deterministic.
+It is sufficient for games, generating test data or cases where repeatability is needed.
 
 =back
 
@@ -6682,11 +6681,12 @@ for crypto safe alternatives.
 
 =item B<Security:>
 
-B<C<rand> is not cryptographically secure.  You should not rely
-on it in security-sensitive situations.>  As of this writing, a
-number of third-party CPAN modules offer random number generators
-intended by their authors to be cryptographically secure,
-including:
+B<C<rand> is not suitable for anything related to security, authentication or encryption.>
+Do not use it for generating passwords, session ids, authentication tokens, salts, or encryption keys.
+The return values are predictable, and systems that rely on C<rand> are easily broken.
+
+A number of third-party CPAN modules offer access to system sources of randomness,
+or random number generators that are suitable for security purposes, including:
 
 =back
 
