@@ -2553,6 +2553,7 @@ BEGIN { $build_subclass->(
     'is_synthetic',  # Bool: var like 'THIS': we pretend it was in the sig
 
     # values derived from both the XSUB's signature and/or INPUT line
+    'sentinel',      # Str:  The C constant expression to map undef to
     'type',          # Str:  The C type of the parameter
     'no_init',       # Bool: don't initialise the parameter
 
@@ -2589,12 +2590,16 @@ sub parse {
     # Decompose parameter into its components.
     # Note that $name can be either 'foo' or 'length(foo)'
 
-    my ($out_type, $type, $name, $sp1, $sp2, $default) =
+    my ($out_type, $maybe, $sentinel, $type, $name, $sp1, $sp2, $default) =
         $param_text =~
             /^
                  (?:
                      (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
                      \b\s*
+                 )?
+                 (
+                     MAYBE (?: \( ([+-]? \w+) \) | \b)?
+                     \s*
                  )?
                  (.*?)                             # optional type
                  \s*
@@ -2622,6 +2627,9 @@ sub parse {
 
     undef $type unless length($type) && $type =~ /\S/;
     $self->{var} = $name;
+
+    $sentinel = 'NULL' if $maybe and not defined $sentinel;
+    $self->{sentinel} = $sentinel;
 
     # Check for duplicates
 
@@ -2827,8 +2835,8 @@ sub lookup_input_typemap {
     my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
     my                               $xbody = shift;
 
-    my ($type, $arg_num, $var, $init, $no_init, $default)
-        = @{$self}{qw(type arg_num var init no_init default)};
+    my ($type, $arg_num, $var, $init, $no_init, $default, $sentinel)
+        = @{$self}{qw(type arg_num var init no_init default sentinel)};
     my $arg = $pxs->ST($arg_num);
 
     # whitespace-tidy the type
@@ -3011,7 +3019,7 @@ EOF
         $init_template = $expr;
     }
 
-    return ($init_template, $eval_vars, 1);
+    return ($init_template, $eval_vars, $sentinel, 1);
 }
 
 
@@ -3320,7 +3328,7 @@ sub as_input_code {
                 . "doesn't have input_typemap_vals")
         unless $lookup;
 
-    my ($init_template, $eval_vars, $is_template) = @$lookup;
+    my ($init_template, $eval_vars, $sentinel, $is_template) = @$lookup;
 
     return unless defined $init_template; # an error occurred
 
@@ -3335,6 +3343,27 @@ sub as_input_code {
 
     # Now finally, emit the actual variable declaration and initialisation
     # line(s). The variable type and name will already have been emitted.
+
+    my %overrides = (
+        SvPVbyte_nolen => 'SvPVbyte_nomg(%s, PL_na',
+        SvPVutf8_nolen => 'SvPVutf8_nomg(%s, PL_na',
+    );
+    if ($init_template && defined $sentinel) {
+        $init_template =~ s/^(?!\A)/\t/g;
+        $init_template =~ s/(Sv(?:[IUN]V|PV(?:|byte|utf8)?))(|_nolen)\((\$arg)/ $overrides{$1.$2} ? sprintf $overrides{$1.$2}, $3 : "$1_nomg$2($3" /e;
+
+        my $if_null = "\$var = $sentinel;";
+        $if_null .= "\n\t\tSTRLEN_length_of_\$var = 0;" if $self->{length_param};
+
+        $init_template = <<END;
+	SvGETMAGIC(\$arg);
+	if (SvOK(\$arg)) {
+	$init_template;
+	} else {
+		$if_null;
+	}
+END
+    }
 
     my $init_code =
         length $init_template
