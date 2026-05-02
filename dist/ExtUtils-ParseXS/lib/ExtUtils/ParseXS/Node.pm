@@ -2447,6 +2447,7 @@ BEGIN { $build_subclass->(
     'extern_C',       # Bool: saw 'extern C'
     'static',         # Bool: saw 'static'
     'use_early_targ', # Bool: emit an early dTARG for backcompat
+    'retval_sentinel' # Str:  The C constant to map undef from
 )};
 
 
@@ -2471,6 +2472,8 @@ sub parse {
     my $type = $line;
 
     $self->{no_output} = 1 if $type =~ s/^NO_OUTPUT\s+//;
+
+    $self->{retval_sentinel} = defined($1) ? $1 : 'NULL' if $type =~ s/^\s* MAYBE (?: \( (-? \w+) \) )? \s*//x;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -3046,8 +3049,8 @@ sub lookup_output_typemap {
     my                               $xbody   = shift;
     my                               $out_num = shift;
 
-    my ($type, $num, $var, $do_setmagic, $output_code)
-        = @{$self}{qw(type arg_num var do_setmagic output_code)};
+    my ($type, $num, $var, $do_setmagic, $output_code, $sentinel)
+        = @{$self}{qw(type arg_num var do_setmagic output_code sentinel)};
 
     # values to return
     my ($expr, $eval_vars, $is_template, $saw_DAE);
@@ -3244,7 +3247,7 @@ sub lookup_output_typemap {
         $saw_DAE = 1;
     }
 
-    return $expr, $eval_vars, $is_template, $saw_DAE;
+    return $expr, $eval_vars, $is_template, $saw_DAE, $sentinel;
 }
 
 
@@ -3569,7 +3572,7 @@ sub as_output_code {
                 . "doesn't have output_typemap_vals")
         unless $lookup;
 
-    my ($expr, $eval_vars, $is_template, $saw_DAE) = @$lookup;
+    my ($expr, $eval_vars, $is_template, $saw_DAE, $sentinel) = @$lookup;
 
     return unless defined $expr; # error
 
@@ -3634,8 +3637,18 @@ sub as_output_code {
         my $code = defined $output_code
                 ? "\t$output_code\n"
                 : $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
-        print $code;
 
+        if (defined $sentinel) {
+            $code = <<END;
+	if ($var == $sentinel) {
+		sv_setsv($arg, &PL_sv_undef);
+	} else {
+	$code;
+	}
+END
+        }
+
+        print $code;
         # For parameters in the OUTPUT section, honour the SETMAGIC in force
         # at the time. For parameters instead being output because of an OUT
         # keyword in the signature, assume set magic always.
@@ -3758,6 +3771,24 @@ sub as_output_code {
             # declaring 'SV* RETVALSV' as an intermediate var.
             $retvar = $var if $ntype eq "SVPtr";
         }
+        if (defined $sentinel) {
+            if ($var eq $retvar) {
+                $evalexpr = <<END;
+	if ($var == $sentinel) {
+		$retvar = &PL_sv_undef;
+	}
+END
+            }
+            else {
+                $evalexpr = <<END;
+	if ($var == $sentinel) {
+		$retvar = &PL_sv_undef;
+	} else {
+	$evalexpr;
+	}
+END
+            }
+        }
     }
     else {
         # Handle this (eval-expanded) form of typemap:
@@ -3784,7 +3815,17 @@ sub as_output_code {
         #   SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG)
         #               ? PAD_SV(PL_op->op_targ) : sv_newmortal()
 
-        if (   $pxs->{config_optimize}
+        if (defined $sentinel) {
+            $evalexpr = <<END;
+	if ($var == $sentinel) {
+		sv_setsv($retvar, &PL_sv_undef);
+	} else {
+	$evalexpr;
+	}
+END
+            $want_newmortal = 1;
+        }
+        elsif (   $pxs->{config_optimize}
                 && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
                 && !$xbody->{output_part}{targ_used})
         {
@@ -4059,6 +4100,7 @@ sub parse {
                 type         => $xsub->{decl}{return_type}{type},
                 no_init      => 1, # just declare the var, don't initialise it
                 is_synthetic => 1,
+                sentinel     => $xsub->{decl}{return_type}{retval_sentinel},
             } );
 
         push @{$self->{kids}}, $param;

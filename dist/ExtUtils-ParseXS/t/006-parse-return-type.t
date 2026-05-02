@@ -71,6 +71,32 @@ EOF
             [  0, qr/^\s+int\s+B\s+=/m,      "has B decl"    ],
             [  0, qr/\QRETVAL = foo(A, B);/, "has autocall"  ],
         ],
+
+        [
+            "test MAYBE char*",
+            Q(<<'EOF'),
+                | MAYBE char* foo()
+EOF
+            [  0, qr/if \(RETVAL == NULL\)/, '' ],
+            # [  0, qr/asdf/, ''],
+        ],
+
+        [
+            "test MAYBE int",
+            Q(<<'EOF'),
+                | MAYBE(-1) int foo()
+EOF
+            [  0, qr/if \(RETVAL == -1\)/, '' ],
+        ],
+
+        [
+            "test MAYBE SV*",
+            Q(<<'EOF'),
+                | MAYBE SV* foo()
+EOF
+            [  0, qr/if \(RETVAL == NULL\)/, '' ],
+            [  0, qr/RETVAL = &PL_sv_undef;/, ''],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

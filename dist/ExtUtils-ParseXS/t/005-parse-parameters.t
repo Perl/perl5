@@ -182,6 +182,8 @@ EOF
                 |foo(OUT MAYBE char* output)
 EOF
             [ 1, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [ 0, qr/if \(output == NULL\)/, 'Check for NULL check' ],
+            [ 0, qr/sv_setsv\(ST\(0\), &PL_sv_undef\)/, ''],
         ],
 
         [
