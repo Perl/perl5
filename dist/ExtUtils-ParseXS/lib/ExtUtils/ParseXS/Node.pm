@@ -3280,16 +3280,6 @@ sub as_input_code {
         my $xsauto_var = $lenp->{var};
         print "\tSTRLEN\tSTRLEN_length_of_$var;\n";
         print "\t$lenp->{type}\t$xsauto_var;\n";
-
-        # The "var = SvPV()" line will be emitted by the main body of this
-        # function. Note that the T_PV typemap entry will have already
-        # been overridden in lookup_input_typemap() during parse time
-        # to change SvPV_nolen() to SvPV() or similar.
-        #
-        # The final assign should be deferred to come after all
-        # declarations.
-        $xbody->{input_part}{deferred_code_lines} .=
-            "\n\t$xsauto_var = STRLEN_length_of_$var;\n";
     }
 
     # Emit the variable's type and name.
@@ -3417,6 +3407,19 @@ sub as_input_code {
                 "Internal error: typemap doesn't start with '\$var='\n");
 
         printf "%s;\n", $init_code;
+    }
+
+    if ($self->{length_param}) {
+        # The "var = SvPV()" line will be emitted by the main body of this
+        # function. Note that the T_PV typemap entry will have already
+        # been overridden in lookup_input_typemap() during parse time
+        # to change SvPV_nolen() to SvPV() or similar.
+        #
+        # The final assign should be deferred to come after all
+        # declarations.
+
+        $xbody->{input_part}{deferred_code_lines} .=
+            "\n\t$self->{length_param}{var} = STRLEN_length_of_$var;\n";
     }
 
     if (defined $defer) {
