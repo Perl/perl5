@@ -171,7 +171,8 @@ accurately specify where line breaks can occur.
  xsub_decl         = return_type
                      xsub_name "(" parameters ")" "const" ?
 
- return_type       = "NO_OUTPUT" ? "extern \"C\"" ? "static" ? C_type
+ return_type       = "NO_OUTPUT" ? maybe ? "extern \"C\"" ? "static" ?
+                      C_type
 
  C_type            = [const char *]  // etc: any valid C type
 
@@ -186,6 +187,7 @@ accurately specify where line breaks can occur.
 
  parameter         = (
                        in_out_decl ?
+                       maybe ?
                        C_type ?
                        /\w+/   // variable name
                        // Default or optional value:
@@ -197,6 +199,9 @@ accurately specify where line breaks can occur.
                      )
 
  in_out_decl       = "IN" | "OUT" | "IN_OUT" | "OUTLIST" | "IN_OUTLIST"
+
+ maybe             = "MAYBE"
+                     ( "(" "-" ? /\w+/ ")" ) ?
 
  cases             = (
                         "CASE:" ( C_expression | empty )
@@ -1268,6 +1273,15 @@ There are similar macros
 which allow you to return Perl's true and false values, or to return
 an empty list.
 
+Since ExtUtils::ParseXS 3.64, you can also use the C<MAYBE> modifier to
+return undef:
+
+    MAYBE(-1) int
+    file_size(char *filename)
+
+If no argument is given to C<MAYBE>, C<NULL> is assumed to be the sentinel
+value.
+
 If your XSUB will always explicitly return a special SV and won't ever
 require typemap conversions (e.g. it always returns via C<XSRETURN_YES> or
 C<XSRETURN_NO>), then just declare the return type as C<SV*>.
@@ -2071,6 +2085,12 @@ C<die()> with a meaningful error message on error. The XSUB's return type
 of C<int> is only meaningful for declaring C<RETVAL> and for doing the
 autocall.
 
+It can also be prefixed with C<MAYBE> or C<MAYBE(sentinel)>. In such an XSUB,
+if the return value is equal to the given sentinel (which defaults to C<NULL>
+if none is given explicitly), then C<undef> shall be returned instead of the
+usual typemapped value. This value should either be a number (e.g. C<-1>) or
+a C constant (e.g. C<LIB_NO_ERROR>).
+
 The return type can also include the C<extern "C"> and C<static>
 modifiers, which if present must be in that order, and come between any
 C<NO_OUTPUT> keyword and the return type. The C<extern> declaration must
@@ -2162,6 +2182,7 @@ Some examples of valid XSUB parameter declarations:
     char *foo = NO_INIT   # doesn't complain if arg missing
     OUT char *foo         # caller's arg gets updated
     IN_OUTLIST char *foo  # parameter value gets returned
+    MAYBE char *foo       # parameter value may be undef
     int length(foo)       # pseudo-parameter that gets the length of foo
     foo                   # placeholder, or parameter without type
     SV*                   # placeholder
@@ -2284,6 +2305,14 @@ C_ARGS: Keyword> to override the missing argument. For example:
     void
     foo(int a, b, char *c)
         C_ARGS: a, c
+
+=head3 XSUB parameters with sentinels
+
+Sometimes you want to map undef to a sentinel value such as C<NULL> or C<-1>.
+The C<MAYBE> modifier allows you to do this, while still using the usual
+typemap logic for any defined values. If an arguments it given to the C<MAYBE>
+(e.g. C<MAYBE(-1)>) then that value is used as the sentinel, otherwise C<NULL>
+is used.
 
 =head3 Updating and returning parameter values: the IN_OUT etc keywords
 
