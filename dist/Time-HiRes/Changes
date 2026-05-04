@@ -20,6 +20,7 @@ Revision history for the Perl extension Time::HiRes.
  - don't try to suppress C++ compatibility warnings in C++ builds, since
    that warns.
  - Fix sleep's prototype to match CORE::sleep (;$).
+ - t/nanosleep.t: improve robustness on busy systems.
 
 1.9764 [2020-08-10]
  - Fix a bunch of repeated-word typos
