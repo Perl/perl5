@@ -26,11 +26,23 @@ ok $one == $two || $two == $three
 
 SKIP: {
     skip "no gettimeofday", 2 unless &Time::HiRes::d_gettimeofday;
-    my $f = Time::HiRes::time();
-    Time::HiRes::nanosleep(500_000_000);
-    my $f2 = Time::HiRes::time();
-    my $d = $f2 - $f;
+    my $max_trials = 10;
+    my $trials = 0;
+    my $f;
+    my $f2;
+    my $d;
+    while ($trials++ < $max_trials) {
+        $f = Time::HiRes::time();
+        Time::HiRes::nanosleep(500_000_000);
+        $f2 = Time::HiRes::time();
+        $d = $f2 - $f;
+
+        # don't test the low-end, if this takes less than the low-end
+        # we have a real problem
+        last if $d < 0.9;
+
+        note "fail trial $trials/$max_trials d $d";
+    }
     cmp_ok $d, '>', 0.4, "nanosleep for more than 0.4 sec";
-    skip "flapping test - more than 0.9 sec could be necessary...", 1 if $ENV{CI};
     cmp_ok $d, '<', 0.9 or diag("# slept $d secs $f to $f2\n");
 }
