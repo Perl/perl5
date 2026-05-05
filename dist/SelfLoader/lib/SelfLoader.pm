@@ -98,7 +98,7 @@ sub _load_stubs {
     croak("$callpack doesn't contain an __DATA__ token")
         unless defined fileno($fh);
     # Protect: fork() shares the file pointer between the parent and the kid
-    if(seek($fh, tell($fh), 0)) {
+    if(sysseek($fh, tell($fh), 0)) {
       open my $nfh, '<&', $fh or croak "reopen: $!";# dup() the fd
       close $fh or die "close: $!";                 # autocloses, but be
                                                     # paranoid
