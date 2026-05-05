@@ -5907,7 +5907,10 @@ case "$intsize" in
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#$i_stdint I_STDINT
+#ifdef I_STDINT
 #include <stdint.h>
+#endif
 #include <stdio.h>
 int main()
 {
@@ -17503,9 +17506,9 @@ $rm_try
     esac
 esac
 
+: Check the syntax of LC_ALL when categories are set to different locales
 case "$perl_lc_all_separator$perl_lc_all_category_positions_init" in
   "")
-    : Check the syntax of LC_ALL when categories are set to different locales
     echo " "
     $echo "Checking the syntax of LC_ALL when categories are set to different locales..." >&4
 

@@ -142,12 +142,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fcntl HAS_FCNTL		/**/
 
-/* HAS_FDOPENDIR:
- * This symbol, if defined, indicates that the fdopendir routine is
- * available to open a directory descriptor.
- */
-#$d_fdopendir HAS_FDOPENDIR		/**/
-
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -560,12 +554,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to issue a shell command.
  */
 #$d_system HAS_SYSTEM	/**/
-
-/* HAS_SYSRANDOM:
- *	This symbol, if defined, indicates that the system has the
- *	sys/random.h header file.
- */
-#$i_sysrandom HAS_SYSRANDOM	/**/
 
 /* HAS_TCGETPGRP:
  *	This symbol, if defined, indicates that the tcgetpgrp routine is
@@ -1615,12 +1603,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_flexfnam	FLEXFILENAMES		/**/
 
-/* HAS_GETENTROPY:
- *	This symbol, if defined, indicates that the getentropy routine is
- *	available.
- */
-#$d_getentropy HAS_GETENTROPY		/**/
-
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.
@@ -2543,6 +2525,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fdim HAS_FDIM		/**/
 
+/* HAS_FDOPENDIR:
+ *	This symbol, if defined, indicates that the fdopendir() routine is
+ *	available to open directories using an opened file descriptor already
+ *	referring to that directory.
+ */
+#$d_fdopendir HAS_FDOPENDIR		/**/
+
 /* HAS_FEGETROUND:
  *	This symbol, if defined, indicates that the fegetround routine is
  *	available to return the macro corresponding to the current rounding
@@ -2783,6 +2772,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to get the current working directory.
  */
 #$d_getcwd HAS_GETCWD		/**/
+
+/* HAS_GETENTROPY:
+ *	This symbol, if defined, indicates that the getentropy system call
+ *	is available to retrieve fill a buffer with random bytes.
+ */
+#$d_getentropy HAS_GETENTROPY		/**/
 
 /* HAS_GETESPWNAM:
  *	This symbol, if defined, indicates that the getespwnam system call is
@@ -3863,7 +3858,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that <stdckdint.h> exists and
  *	can be included.
  */
-#$i_stdckdint	I_STDCKDINT		/**/
+#$i_stdckdint I_STDCKDINT		/**/
 
 /* I_STDINT:
  *	This symbol, if defined, indicates that <stdint.h> exists and
@@ -3894,6 +3889,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	should be included.
  */
 #$i_sysmount	I_SYS_MOUNT		/**/
+
+/* I_SYS_RANDOM:
+ *	This symbol, if defined, indicates that <sys/random.h> exists and
+ *	should be included.
+ */
+#$i_sysrandom	I_SYS_RANDOM		/**/
 
 /* I_SYS_STATFS:
  *	This symbol, if defined, indicates that <sys/statfs.h> exists.
