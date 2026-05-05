@@ -888,6 +888,11 @@ d_fdim (d_fdim.U):
 	This variable conditionally defines the HAS_FDIM symbol, which
 	indicates to the C program that the fdim() routine is available.
 
+d_fdopendir (d_fdopendir.U):
+	This variable conditionally defines HAS_FDOPENDIR if fdopendir() is
+	available to open a directory using an opened file descriptor already
+	referring to that directory.
+
 d_fds_bits (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FDS_BITS symbol,
 	which indicates if your fd_set typedef contains the fds_bits member.
@@ -946,11 +951,6 @@ d_fmax (d_fmax.U):
 d_fmin (d_fmin.U):
 	This variable conditionally defines the HAS_FMIN symbol, which
 	indicates to the C program that the fmin() routine is available.
-
-d_fdopendir (d_fdopendir.U):
-	This variable conditionally defines the HAS_FORK symbol, which
-	indicates that the fdopen routine is available to open a
-	directory descriptor.
 
 d_fork (d_fork.U):
 	This variable conditionally defines the HAS_FORK symbol, which
@@ -1093,6 +1093,10 @@ d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
 	indicates to the C program that the getcwd() routine is available
 	to get the current working directory.
+
+d_getentropy (d_getentropy.U):
+	This variable conditionally defines HAS_GETENTROPY if getentropy()
+	is available to fill a buffer with random bytes.
 
 d_getenv_preserves_other_thread (d_getenv_thread.U):
 	This variable conditionally defines the GETENV_PRESERVES_OTHER_THREAD
@@ -1972,9 +1976,8 @@ d_perl_lc_all_separator (disparate_lc_all.U):
 d_perl_lc_all_uses_name_value_pairs (disparate_lc_all.U):
 	This symbol, if defined, indicates that the string returned by
 	setlocale(LC_ALL, NULL) uses 'name=value;' pairs to indicate what each
-	category's locale is when they aren't all set to the same locale.  Note
-	the semicolon between each pair.  When not defined, the platform uses
-	positional notation (see 'perl_lc_all_category_positions_init').
+	category's locale is when they aren't all set to the same locale.
+	When not defined, the platform uses positional notation.
 
 d_perl_otherlibdirs (otherlibdirs.U):
 	This variable conditionally defines PERL_OTHERLIBDIRS, which
@@ -3795,6 +3798,10 @@ i_syspoll (i_syspoll.U):
 	This variable conditionally defines the I_SYS_POLL symbol, which
 	indicates to the C program that it should include <sys/poll.h>.
 
+i_sysrandom (i_sysrandom.U):
+	This variable conditionally defines the I_SYS_RANDOM symbol,
+	and indicates whether a C program should include <sys/random.h>.
+
 i_sysresrc (i_sysresrc.U):
 	This variable conditionally defines the I_SYS_RESOURCE symbol,
 	and indicates whether a C program should include <sys/resource.h>.
@@ -4137,7 +4144,7 @@ installvendorscript (vendorscript.U):
 
 intmaxsize (intsize.U):
 	This variable contains the value of the INTMAXSIZE symbol, which
-	indicates to the C program how many bytes there are in intmax_t.
+	indicates to the C program how many bytes there are in an intmax_t.
 
 intsize (intsize.U):
 	This variable contains the value of the INTSIZE symbol, which
@@ -4717,28 +4724,13 @@ perl_lc_all_category_positions_init (disparate_lc_all.U):
 	element [0] is the first category in the string returned by
 	setlocale(LC_ALL, NULL) when not all categories are the same, on
 	systems that use a positional notation.  After element [0] is
-	$lc_all_separator, then the category given by element [1], and so on.
-	For example, at the time this was written, the value in config.sh for
-	FreeBSD boxes is:
-            perl_lc_all_category_positions_init='{ 1, 2, 3, 4, 5, 6 }'
-	And the result of running this program
-            LC_ALL=C ./perl -Ilib -MPOSIX                               \
-                            -le 'setlocale(LC_MONETARY, "fr_FR.UTF-8"); \
-                                 print setlocale(LC_ALL)'
-	is
-            C/C/fr_FR.UTF-8/C/C/C
-	This shows that the LC_MONETARY category on FreeBSD occupies the third
-	position in the string returned by querying LC_ALL.  (See
-	perl_lc_all_separator for the source of the forward slash.)
+	$lc_all_separator_init, then the category given by element [1], and so on.
 
 perl_lc_all_separator (disparate_lc_all.U):
-	This symbol, when defined, gives the substring, enclosed in double
-	quotes, used to separate categories in the aggregated string returned
-	by setlocale(LC_ALL, NULL) when not all categories are in the same
-	locale.  This is for systems that use a positional notation as opposed
-	to 'name=value' pairs.  For example, at the time this was written, the
-	value in config.sh for FreeBSD boxes is:
-            perl_lc_all_separator='"/"'
+	This symbol, when defined, gives the substring used to separate
+	categories in the aggregated string returned by setlocale(LC_ALL, NULL)
+	when not all categories are in the same locale.  This is for systems
+	that use a positional notation as opposed to 'name=value' pairs.
 
 PERL_PATCHLEVEL (Oldsyms.U):
 	This symbol reflects the patchlevel, if available. Will usually
