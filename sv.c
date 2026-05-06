@@ -17160,10 +17160,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     if (proto_perl->Ipsig_name) {
-        Newx(PL_psig_name, 2 * SIG_SIZE, SV*);
-        sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, 2 * SIG_SIZE,
+        Newx(PL_psig_name, SIG_SIZE, SV*);
+        Newx(PL_psig_ptr,  SIG_SIZE, SV*);
+        sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, SIG_SIZE,
                             param);
-        PL_psig_ptr = PL_psig_name + SIG_SIZE;
+        sv_dup_inc_multiple(proto_perl->Ipsig_ptr,  PL_psig_ptr,  SIG_SIZE,
+                            param);
     }
     else {
         PL_psig_ptr	= (SV**)NULL;

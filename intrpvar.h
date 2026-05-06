@@ -871,8 +871,7 @@ PERLVARI(I, ctype_name, const char *, NULL)   /* Name of current ctype locale */
    signal handler dispatches.  */
 PERLVAR(I, psig_ptr,	SV **)
 /* Array of names of signals, indexed by signal number, for (re)use as the first
-   argument to a signal handler.   Only one block of memory is allocated for
-   both psig_name and psig_ptr.  */
+   argument to a signal handler. */
 PERLVAR(I, psig_name,	SV **)
 
 #if defined(PERL_IMPLICIT_SYS)
