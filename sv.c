@@ -17153,7 +17153,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     if (proto_perl->Ipsig_pend) {
-        Newxz(PL_psig_pend, SIG_SIZE, int);
+        Newxz(PL_psig_pend, SIG_SIZE, PERL_ATOMIC(int));
     }
     else {
         PL_psig_pend = NULL;
@@ -17161,11 +17161,17 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     if (proto_perl->Ipsig_name) {
         Newx(PL_psig_name, SIG_SIZE, SV*);
-        Newx(PL_psig_ptr,  SIG_SIZE, SV*);
+        Newx(PL_psig_ptr,  SIG_SIZE, PERL_ATOMIC(SV*));
         sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, SIG_SIZE,
                             param);
-        sv_dup_inc_multiple(proto_perl->Ipsig_ptr,  PL_psig_ptr,  SIG_SIZE,
-                            param);
+        /* Can't use sv_dup_inc_multiple() here as we're dealing with
+         * atomic pointers, which may not necessarily be the same
+         * size etc as ordinary pointers */
+        PERL_ATOMIC(SV*)* src = proto_perl->Ipsig_ptr;
+        PERL_ATOMIC(SV*)* dst = PL_psig_ptr;
+        for (SSize_t i = 0; i< SIG_SIZE; i++) {
+            *dst++ = sv_dup_inc(*src++, param);
+        }
     }
     else {
         PL_psig_ptr  = NULL;

@@ -530,8 +530,9 @@ PERLVAR(I, statusvalue_vms, U32)
 PERLVAR(I, statusvalue_posix, I32)
 #endif
 
-PERLVARI(I, sig_pending, int, 0)	/* Number if highest signal pending */
-PERLVAR(I, psig_pend, int *)		/* per-signal "count" of pending */
+/* Number of signals pending */
+PERLVARI(I, sig_pending, PERL_ATOMIC(int), 0)
+PERLVAR(I,  psig_pend, PERL_ATOMIC(int) *) /* per-signal "count" of pending */
 
 /* shortcuts to various I/O objects */
 PERLVAR(I, stdingv,	GV *)		/*  *STDIN      */
@@ -869,7 +870,7 @@ PERLVARI(I, ctype_name, const char *, NULL)   /* Name of current ctype locale */
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
-PERLVAR(I, psig_ptr,	SV **)
+PERLVAR(I, psig_ptr,	PERL_ATOMIC(SV*) *)
 /* Array of names of signals, indexed by signal number, for (re)use as the first
    argument to a signal handler. */
 PERLVAR(I, psig_name,	SV **)

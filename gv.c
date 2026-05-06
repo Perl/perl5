@@ -2161,8 +2161,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     I32 i;
                     if (!PL_psig_name) {
                         Newxz(PL_psig_name, SIG_SIZE, SV*);
-                        Newxz(PL_psig_ptr,  SIG_SIZE, SV*);
-                        Newxz(PL_psig_pend, SIG_SIZE, int);
+                        Newxz(PL_psig_ptr,  SIG_SIZE, PERL_ATOMIC(SV*));
+                        Newxz(PL_psig_pend, SIG_SIZE, PERL_ATOMIC(int));
                     } else {
                         /* I think that the only way to get here is to re-use an
                            embedded perl interpreter, where the previous
@@ -2174,8 +2174,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                            before we get here. I suspect that this is one of
                            those "doctor, it hurts when I do this" bugs.  */
                         Zero(PL_psig_name, SIG_SIZE, SV*);
-                        Zero(PL_psig_ptr,  SIG_SIZE, SV*);
-                        Zero(PL_psig_pend, SIG_SIZE, int);
+                        Zero(PL_psig_ptr,  SIG_SIZE, PERL_ATOMIC(SV*));
+                        Zero(PL_psig_pend, SIG_SIZE, PERL_ATOMIC(int));
                     }
                     GvMULTI_on(gv);
                     hv = GvHVn(gv);

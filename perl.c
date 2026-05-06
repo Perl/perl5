@@ -1513,7 +1513,7 @@ perl_destruct(pTHXx)
     {
         /* We need to NULL PL_psig_pend first, so that
            signal handlers know not to use it */
-        int *psig_save = PL_psig_pend;
+        PERL_ATOMIC(int) *psig_save = PL_psig_pend;
         PL_psig_pend = NULL;
         Safefree(psig_save);
     }
