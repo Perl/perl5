@@ -17156,7 +17156,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         Newxz(PL_psig_pend, SIG_SIZE, int);
     }
     else {
-        PL_psig_pend	= (int*)NULL;
+        PL_psig_pend = NULL;
     }
 
     if (proto_perl->Ipsig_name) {
@@ -17168,8 +17168,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
                             param);
     }
     else {
-        PL_psig_ptr	= (SV**)NULL;
-        PL_psig_name	= (SV**)NULL;
+        PL_psig_ptr  = NULL;
+        PL_psig_name = NULL;
     }
 
     if (flags & CLONEf_COPY_STACKS) {
