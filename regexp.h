@@ -186,6 +186,8 @@ typedef struct regexp {
     U32 lastparen;           /* highest close paren matched ($+) */
     U32 lastcloseparen;      /* last close paren matched ($^N) */
     regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
+    regexp_paren_pair *offs_spare; /* To minimise allocation churn when this
+                                    * regex was the last successful match */
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
 
     /*---------------------------------------------------------------------- */
@@ -196,6 +198,9 @@ typedef struct regexp {
     /* original flags used to compile the pattern, may differ from
      * extflags in various ways */
     PERL_BITFIELD32 compflags:9;
+
+    /* Is offs_spare already in use? */
+    PERL_BITFIELD32 offs_spare_used:1;
 
     /*---------------------------------------------------------------------- */
 

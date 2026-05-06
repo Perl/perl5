@@ -13491,6 +13491,8 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     SvREFCNT_dec(r->saved_copy);
 #endif
     Safefree(RXp_OFFSp(r));
+    if (r->offs_spare)
+        Safefree(r->offs_spare);
     if (r->logical_to_parno) {
         Safefree(r->logical_to_parno);
         Safefree(r->parno_to_logical);
@@ -13601,6 +13603,11 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
         const I32 npar = srx->nparens+1;
         NewCopy(RXp_OFFSp(srx), RXp_OFFSp(drx), npar, regexp_paren_pair);
     }
+
+    /* If the copy needs offs_spare, it will lazily allocate it.*/
+    drx->offs_spare = NULL;
+    drx->offs_spare_used = FALSE;
+
     if (srx->substrs) {
         int i;
         Newx(drx->substrs, 1, struct reg_substr_data);
@@ -13805,6 +13812,10 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     npar = r->nparens+1;
     NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
+
+    /* If the clone needs offs_spare, it will lazily allocate it.*/
+    ret->offs_spare = NULL;
+    ret->offs_spare_used = FALSE;
 
     if (ret->substrs) {
         /* Do it this way to avoid reading from *r after the StructCopy().

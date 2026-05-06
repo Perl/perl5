@@ -3699,6 +3699,12 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
 
 
 
+static void S_clear_offs_spare(pTHX_ regexp *prog)
+{
+    PERL_UNUSED_CONTEXT;
+    prog->offs_spare_used = FALSE;
+}
+
 /*
  - regexec_flags - match a regexp against a string
  */
@@ -3732,6 +3738,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     regmatch_info reginfo_buf __attribute__uninitialized__;
     regmatch_info *const reginfo = &reginfo_buf;
     regexp_paren_pair *swap = NULL;
+    bool offs_spare_used = FALSE;
     I32 oldsave;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -3954,14 +3961,49 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         /* We have to be careful. If the previous successful match
            was from this regex we don't want a subsequent partially
            successful match to clobber the old results.
-           So when we detect this possibility we add a swap buffer
-           to the re, and switch the buffer each match. If we fail,
-           we switch it back; otherwise we leave it swapped.
+
+           So when we detect this possibility we use a swap buffer
+           and revert back to the original buffer if the match fails.
         */
         swap = RXp_OFFSp(prog);
-        /* avoid leak if we die, or clean up anyway if match completes */
-        SAVEFREEPV(swap);
-        Newxz(RXp_OFFSp(prog), (prog->nparens + 1), regexp_paren_pair);
+        if (UNLIKELY(prog->offs_spare_used)) {
+            /* This regex is re-entering. The number of swap buffers needed
+             * is not statically determinable, so heap allocations are
+             * unavoidable. */
+            SAVEFREEPV(swap);
+            Newx(RXp_OFFSp(prog), (prog->nparens + 1), regexp_paren_pair);
+        } else {
+            /* This regex is not re-entering (at least, not yet), so
+             * only one swap buffer is needed and this is kept as a
+             * regex-local spare. This means that code like:
+             *     while ($x =~ /(.)/g) { ... }
+             * does not do a calloc+free in every loop iteration.*/
+            regexp_paren_pair * const old_offs_spare = prog->offs_spare;
+            prog->offs_spare = swap; /* Stash the successful match offs */
+            prog->offs_spare_used = TRUE;
+            offs_spare_used = TRUE;
+            SAVEDESTRUCTOR_X(S_clear_offs_spare, prog);
+
+            if (old_offs_spare) {
+                /* Nice! There is already a buffer ready to use. */
+                RXp_OFFSp(prog) = old_offs_spare;
+            } else {
+                /* Lazily allocate the per-regex spare buffer. */
+                Newx(RXp_OFFSp(prog), (prog->nparens + 1), regexp_paren_pair);
+            }
+        }
+
+        /* Initialize in the same way that S_regtry does it. */
+        if (prog->nparens) {
+            regexp_paren_pair *pp = RXp_OFFSp(prog);
+            I32 i;
+            for (i = prog->nparens; i > 0; i--) {
+                ++pp;
+                pp->start = -1;
+                pp->end = -1;
+            }
+        }
+
         DEBUG_BUFFERS_r(re_exec_indentf(
             "rex = 0x%" UVxf " saving  offs: orig = 0x%" UVxf " new = 0x%" UVxf "\n",
             0,
@@ -4369,19 +4411,28 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     if (swap) {
         /* we failed :-( roll it back.
-         * Since the swap buffer will be freed on scope exit which follows
-         * shortly, restore the old captures by copying 'swap's original
-         * data to the new offs buffer
+         * Restore the old captures by copying 'swap's original data to
+         * the new offs buffer. The regex-local offs_spare will be
+         * retained, any heap allocated swaps will be freed on scope
+         * exit which follows shortly.
          */
         DEBUG_BUFFERS_r(re_exec_indentf(
-            "rex = 0x%" UVxf " rolling back offs: 0x%" UVxf " will be freed; restoring data to =0x%" UVxf "\n",
+            "rex = 0x%" UVxf " rolling back offs: 0x%" UVxf " %s; restoring data to =0x%" UVxf "\n",
             0,
             PTR2UV(prog),
             PTR2UV(RXp_OFFSp(prog)),
+            offs_spare_used ? "kept as offs_spare" : "will be freed",
             PTR2UV(swap)
         ));
 
-        Copy(swap, RXp_OFFSp(prog), prog->nparens + 1, regexp_paren_pair);
+        if (offs_spare_used) {
+            prog->offs_spare = RXp_OFFSp(prog);
+            RXp_OFFSp(prog)  = swap;
+            prog->offs_spare_used = FALSE;
+        } else {
+            Copy(swap, RXp_OFFSp(prog), prog->nparens + 1, regexp_paren_pair);
+        }
+
     }
 
     /* clean up; this will trigger destructors that will free all slabs
