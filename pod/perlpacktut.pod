@@ -966,7 +966,7 @@ we can draw memory maps, showing where the extra 4 bytes are hidden:
 
    0           +4          +8
    +--+--+--+--+--+--+--+--+
-   |     l     |  h  |c1|c2|
+   |     l     |  s  |c1|c2|
    +--+--+--+--+--+--+--+--+
    dense_t
 
