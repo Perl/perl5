@@ -457,6 +457,67 @@ jobs:
   # \ V  V / | ' \/ _` / _ \ V  V (_-<
   #  \_/\_/|_|_||_\__,_\___/\_/\_//__/
 
+  windows-msvc143-utf8acp:
+    name: "Windows msvc143 (UTF-8 ACP)"
+    runs-on: windows-2025
+    timeout-minutes: 120
+    needs: sanity_check
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          cd win32
+          nmake CCTYPE=MSVC143 CFG=Debug
+      # Embed the per-process UTF-8 ACP opt-in (Windows 10 1903+) into
+      # the freshly-built perl.exe so the rest of the job runs as if
+      # the system code page were CP_UTF8. External .manifest files
+      # are ignored when an embedded one is present, so we rewrite it
+      # with mt.exe.  t/win32/cp_utf8_acp.t skips on legacy ACP and
+      # runs under TODO on UTF-8 ACP — failures there document the
+      # bug without breaking the build.
+      - name: Enable UTF-8 ACP for perl.exe
+        shell: pwsh
+        run: |
+          $perl = "$pwd\perl.exe"
+          if (-not (Test-Path $perl)) { throw "perl.exe not found at $perl" }
+          $manifest = @'
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+            <application xmlns="urn:schemas-microsoft-com:asm.v3">
+              <windowsSettings>
+                <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
+              </windowsSettings>
+            </application>
+          </assembly>
+          '@
+          Set-Content -Path perl-utf8.manifest -Value $manifest -Encoding UTF8
+          $before = (& $perl -e 'require Win32; print Win32::GetACP()')
+          Write-Host "GetACP() before manifest patch: $before"
+          $mt = Get-ChildItem -Path 'C:\Program Files (x86)\Windows Kits\10\bin' -Recurse -Filter mt.exe -ErrorAction SilentlyContinue |
+                Where-Object { $_.FullName -match 'x64\\mt\.exe$' } |
+                Select-Object -First 1
+          if (-not $mt) { throw 'mt.exe not found' }
+          & $mt.FullName -manifest perl-utf8.manifest "-outputresource:${perl};1"
+          $after = (& $perl -e 'require Win32; print Win32::GetACP()')
+          Write-Host "GetACP() after manifest patch:  $after"
+          if ($after -ne '65001') { throw "GetACP() returned $after; expected 65001" }
+      - name: Show Config
+        shell: cmd
+        run: |
+          .\perl.exe -V
+          .\perl.exe -e "use Config; print Config::config_sh"
+      - name: Run Tests
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          cd win32
+          nmake CCTYPE=MSVC143 CFG=Debug test
+
   windows-msvc143:
     name: "Windows msvc143"
     runs-on: windows-2025
