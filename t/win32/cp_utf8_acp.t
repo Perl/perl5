@@ -113,4 +113,37 @@ note("GetACP() = $acp");
     }
 }
 
+# Cwd::getdcwd (Win32-only XS sub, separate _getdcwd CRT call)
+{
+    my $dcwd = Cwd::getdcwd();
+    TODO: {
+        local our $TODO = '_getdcwd does not set SvUTF8 under CP_UTF8 ACP';
+        ok(defined $dcwd && utf8::is_utf8($dcwd),
+           "Cwd::getdcwd() has SvUTF8 flag");
+    }
+}
+
+# readlink — needs an actual symlink. Symlink creation on Windows
+# requires Developer Mode or admin; skip cleanly when symlink() fails.
+{
+    my $home = Cwd::getcwd();
+    my $tmp  = tempdir(CLEANUP => 1);
+    chdir $tmp or die "chdir $tmp: $!";
+    open(my $fh, '>', 'target.txt') or die "open target: $!";
+    close $fh;
+    my $made = eval { symlink('target.txt', 'link') } ? 1 : 0;
+    SKIP: {
+        skip 'symlink not allowed (need developer mode or admin)', 1
+            unless $made;
+        my $value = readlink 'link';
+        TODO: {
+            local our $TODO = 'win32_readlink does not set SvUTF8 under CP_UTF8 ACP';
+            ok(defined $value && utf8::is_utf8($value),
+               "readlink() has SvUTF8 flag (got: "
+               . (defined $value ? "'$value'" : 'undef') . ')');
+        }
+    }
+    chdir $home;
+}
+
 done_testing();
