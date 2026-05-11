@@ -543,12 +543,12 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
                 break;
             case 'B':
             case 'b':
-                len = (len + 7)/8;
+                len = (len / 8) + !!(len % 8);
                 size = 1;
                 break;
             case 'H':
             case 'h':
-                len = (len + 1)/2;
+                len = (len / 2) + !!(len % 2);
                 size = 1;
                 break;
 
