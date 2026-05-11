@@ -24,7 +24,7 @@ use strict;
 use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
             $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING $SAME_PERMISSIONS
             $INSECURE_EXTRACT_MODE $ZERO_PAD_NUMBERS @ISA @EXPORT $RESOLVE_SYMLINK
-            $EXTRACT_BLOCK_SIZE
+            $EXTRACT_BLOCK_SIZE $EXTRACT_HARDLINK
          ];
 
 @ISA                    = qw[Exporter];
@@ -32,7 +32,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "3.04";
+$VERSION                = "3.06";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -41,6 +41,7 @@ $INSECURE_EXTRACT_MODE  = 0;
 $ZERO_PAD_NUMBERS       = 0;
 $RESOLVE_SYMLINK        = $ENV{'PERL5_AT_RESOLVE_SYMLINK'} || 'speed';
 $EXTRACT_BLOCK_SIZE     = 1024 * 1024 * 1024;
+$EXTRACT_HARDLINK       = 0;
 
 BEGIN {
     use Config;
@@ -922,19 +923,19 @@ sub _extract_file {
     ### only update the timestamp if it's not a symlink; that will change the
     ### timestamp of the original. This addresses bug #33669: Could not update
     ### timestamp warning on symlinks
-    if( not -l $full ) {
+    if( not -l $full and not ( $entry->is_hardlink and ON_UNIX and $EXTRACT_HARDLINK ) ) {
         utime time, $entry->mtime - TIME_OFFSET, $full or
             $self->_error( qq[Could not update timestamp] );
     }
 
-    if( $CHOWN && CAN_CHOWN->() and not -l $full ) {
+    if( $CHOWN && CAN_CHOWN->() and not -l $full and not ( $entry->is_hardlink and ON_UNIX and $EXTRACT_HARDLINK ) ) {
         CORE::chown( $entry->uid, $entry->gid, $full ) or
             $self->_error( qq[Could not set uid/gid on '$full'] );
     }
 
     ### only chmod if we're allowed to, but never chmod symlinks, since they'll
     ### change the perms on the file they're linking too...
-    if( $CHMOD and not -l $full ) {
+    if( $CHMOD and not -l $full and not ( $entry->is_hardlink and ON_UNIX and $EXTRACT_HARDLINK ) ) {
         my $mode = $entry->mode;
         unless ($SAME_PERMISSIONS) {
             $mode &= ~(oct(7000) | umask);
@@ -968,7 +969,7 @@ sub _make_special_file {
 
     } elsif ( $entry->is_hardlink ) {
         my $fail;
-        if( ON_UNIX ) {
+        if( ON_UNIX && $EXTRACT_HARDLINK ) {
             link( $entry->linkname, $file ) or $fail++;
 
         } else {
@@ -2117,6 +2118,12 @@ set this variable to C<true>.
 
 Note that this is a backwards incompatible change from version
 C<1.36> and before.
+
+=head2 $Archive::Tar::EXTRACT_HARDLINK
+
+Prior to version C<3.06> Archive::Tar would honour hardlinks in
+archives. Version C<3.06> and onwards will skip hardlinks unless
+this flag is set. Exercise caution when enabling this.
 
 =head2 $Archive::Tar::HAS_PERLIO
 
