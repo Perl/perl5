@@ -56,8 +56,13 @@ my %bit_names = (
             # These are the control characters that there are mnemonics for
             MNEMONIC_CNTRL          => [ ord "\a", ord "\b", ord "\e", ord "\f",
                                          ord "\n", ord "\r", ord "\t" ],
-            MAGICAL => [ 001, 003, 004, 005, 006, 007, 010, 011, 014, 015,
-                         016, 017, 020, 023, 024, 025, 026, 027,
+            MAGICAL =>
+                       [
+                         ord("\cA"), ord("\cC"), ord("\cD"), ord("\cE"),
+                         ord("\cF"), ord("\cG"), ord("\cH"), ord("\cI"),
+                         ord("\cL"), ord("\cM"), ord("\cN"), ord("\cO"),
+                         ord("\cP"), ord("\cS"), ord("\cT"), ord("\cU"),
+                         ord("\cV"), ord("\cW"),
                          ord('0'), ord('1'), ord('2'), ord('3'), ord('4'),
                          ord('5'), ord('6'), ord('7'), ord('8'), ord('9'),
                          ord('a'), ord('b'),
