@@ -459,7 +459,7 @@ jobs:
 
   windows-msvc143:
     name: "Windows msvc143"
-    runs-on: windows-2025
+    runs-on: windows-2022
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_msvc143 == 'true'))
