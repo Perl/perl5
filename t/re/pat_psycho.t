@@ -216,7 +216,6 @@ EOF
     { # sec #147
         $Config{ptrsize} == 4
           or skip "these only fail on x32 and use too much memory on x64", 2;
-        local $::TODO = "This crashes";
         # original case
         fresh_perl_like('/\x{10000}{1073741824}/',
                         qr/Regexp out of space/, {}, "ssize_t overflow");
