@@ -210,7 +210,8 @@ static int S_check_tm(const struct TM *tm)
     assert(tm->tm_yday >= 0);
     assert(tm->tm_yday <= length_of_year[IS_LEAP(tm->tm_year)]);
 
-#ifdef HAS_TM_TM_GMTOFF
+#if defined(HAS_TM_TM_GMTOFF) && ! defined(__MVS__)
+    /* z/OS appears to not use this, always set to 0 or 0x500010DBE8 */
     assert(tm->tm_gmtoff >= -24 * 60 * 60);
     assert(tm->tm_gmtoff <=  24 * 60 * 60);
 #endif
