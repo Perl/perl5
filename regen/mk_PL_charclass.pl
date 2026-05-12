@@ -56,13 +56,7 @@ my %bit_names = (
             # These are the control characters that there are mnemonics for
             MNEMONIC_CNTRL          => [ ord "\a", ord "\b", ord "\e", ord "\f",
                                          ord "\n", ord "\r", ord "\t" ],
-            MAGICAL =>
-                       [
-                         ord("\cA"), ord("\cC"), ord("\cD"), ord("\cE"),
-                         ord("\cF"), ord("\cG"), ord("\cH"), ord("\cI"),
-                         ord("\cL"), ord("\cM"), ord("\cN"), ord("\cO"),
-                         ord("\cP"), ord("\cS"), ord("\cT"), ord("\cU"),
-                         ord("\cV"), ord("\cW"),
+            MAGICAL => [
                          ord('0'), ord('1'), ord('2'), ord('3'), ord('4'),
                          ord('5'), ord('6'), ord('7'), ord('8'), ord('9'),
                          ord('a'), ord('b'),
@@ -75,6 +69,19 @@ my %bit_names = (
                          ord('$'),
                        ],
             UNDERSCORE => [ ord('_') ],
+);
+
+# The control characters are the same on all platforms, regardless of
+# character set, so are defined in absolute terms in a separate table, which
+# is not subject to conversion to native.
+my %abs_bit_names = (
+            MAGICAL => [
+                         ord("\cA"), ord("\cC"), ord("\cD"), ord("\cE"),
+                         ord("\cF"), ord("\cG"), ord("\cH"), ord("\cI"),
+                         ord("\cL"), ord("\cM"), ord("\cN"), ord("\cO"),
+                         ord("\cP"), ord("\cS"), ord("\cT"), ord("\cU"),
+                         ord("\cV"), ord("\cW"),
+                       ],
 );
 
 sub uniques {
@@ -275,7 +282,7 @@ sub Punct_and_Symbols {
 my @bits;   # Each element is a bit map for a single code point
 
 # For each bit type, calculate which code points should have it set
-foreach my $bit_name (sort keys %bit_names) {
+foreach my $bit_name (keys %bit_names) {
     my @code_points;
 
     my $property = $bit_name;   # The bit name is the same as its property,
@@ -297,6 +304,14 @@ foreach my $bit_name (sort keys %bit_names) {
         last if $cp > 0xFF;
         $bits[$cp] .= '|' if $bits[$cp];
         $bits[$cp] .= "(1U<<CC_${bit_name}_)";
+    }
+}
+
+my @abs_bits;
+foreach my $bit_name (keys %abs_bit_names) {
+    foreach my $cp ($abs_bit_names{$bit_name}->@*) {
+        $abs_bits[$cp] .= '|' if $abs_bits[$cp];
+        $abs_bits[$cp] .= "(1U<<CC_${bit_name}_)";
     }
 }
 
@@ -388,13 +403,24 @@ foreach my $charset (get_supported_code_pages()) {
         my $i8;
         $i8 = $utf_to_i8[$index] if @utf_to_i8;
 
+        # This entry is to contain both the translated values, and the
+        # absolute ones
+        my @this_bits;
+        push @this_bits, split /\|/, $bits[$ord] if $bits[$ord];
+        push @this_bits, split /\|/, $abs_bits[$index] if $abs_bits[$index];
+
         $out[$index] = "/* ";
         $out[$index] .= sprintf "0x%02X ", $index if $ord != $index;
         $out[$index] .= sprintf "U+%02X ", $ord;
         $out[$index] .= sprintf "I8=%02X ", $i8 if defined $i8 && $i8 != $ord;
         $out[$index] .= "$name */ ";
-        $out[$index] .= $bits[$ord];
 
+        # Sort the class names alphabetically in the entry; ignoring the
+        # trailing underscore keeps the same ordering as has always been the
+        # case for this table.
+        $out[$index] .= join '|', sort {     $a =~ s/\B_\b//r
+                                         cmp $b =~ s/\B_\b//r
+                                       } @this_bits;
         $out[$index] .= ",\n";
     }
     $out[-1] =~ s/,$//;     # No trailing comma in the final entry
