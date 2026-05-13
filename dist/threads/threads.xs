@@ -777,6 +777,35 @@ S_ithread_run(void * arg)
     MUTEX_LOCK(&thread->mutex);
     S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 
+    /* This a workaround for a 'valgrind --helgind' false positive, due to
+     * the fact that behind the scenes, the MUTEX_UNLOCK() macro does a
+     * reset of errno *after* the mutex is unlocked.
+     *
+     * When we reach this point in S_ithread_run(), the OS thread is about
+     * to exit, and so its TLS will be freed by the threads library and
+     * available to be reallocated to the next thread which is created.
+     * But helgrind sees the write to errno in TLS just done by the
+     * MUTEX_UNLOCK() in S_ithread_dec_free() above, and a later write to
+     * the new thread's errno, as two different threads writing to to same
+     * memory address while a lock wasn't held. The harmless workaround
+     * below does a final write to errno before the thread quits, but while
+     * holding a lock. The code below following the MUTEX_LOCK() is an
+     * unrolled MUTEX_UNLOCK() but without the trailing errno restore.
+     * A better solution is probably needed.
+     */
+#ifdef perl_pthread_mutex_unlock
+    {
+        int err;
+        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+        errno = 0;
+        if ((err = perl_pthread_mutex_unlock((&MY_POOL.create_destruct_mutex)))) {
+            Perl_croak_nocontext(                               \
+                        "panic: MUTEX_UNLOCK (%d) [%s:%d]",
+                             err, __FILE__, __LINE__);
+        }
+    }
+#endif
+
 #ifdef WIN32
     return ((DWORD)0);
 #else
