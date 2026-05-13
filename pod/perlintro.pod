@@ -672,8 +672,8 @@ Some brief examples:
                      adjacent)
  /(\d\s){3}/         three digits, each followed by a whitespace
                      character (eg "3 4 5 ")
- /(a.)+/             matches a string in which every odd-numbered
-                     letter is a (eg "abacadaf")
+ /^(a.)+/            matches a string in which every odd-numbered
+                     letter is 'a' (eg "abacadaf")
 
  # This loop reads from STDIN, and prints non-blank lines:
  while (<>) {
