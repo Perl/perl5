@@ -155,6 +155,7 @@ my $passthru_headers = qr/^= (?: over | item | back | cut )/xms;
 my ($major, $minor, $point_with_maybe_rc) = split(/\./, $version);
 my ($point) = split(/-/, $point_with_maybe_rc);
 my $last_version = join('.', $major, ($point == 0 ? ($minor - 2, 0) : ($minor, $point-1)));
+my $next_version = join('.', $major, ($point == 0 && $minor % 2 == 0 ? ($minor + 1, 0) : ($minor, $point+1)));
 
 # Oldest version ("previous stable") that still has full support.
 # This is supposed to match the "Version Support Status" table in perlpolicy.pod
@@ -196,6 +197,7 @@ foreach my $line (@pod_lines) {
 
     $line =~ s/\Q5.X.Y\E/$version/g;
     $line =~ s/\Q5.LAST\E/$last_version/g;
+    $line =~ s/\Q5.NEXT\E/$next_version/g;
     $line =~ s/\Q5.X\E\b/$major.$minor/g;
     $line =~ s/\Q5.OLDSUPPORT\E/$old_support/g;
 
