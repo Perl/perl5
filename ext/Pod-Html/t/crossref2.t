@@ -16,6 +16,9 @@ use Pod::Html::Util qw(
 my $debug = 0;
 my $startdir = cwd();
 END { chdir($startdir) or die("Cannot change back to $startdir: $!"); }
+
+plan  skip_all => 'HTML is not compatible with EBCDIC' if ord("A") != 65;
+
 my ($expect_raw, $args);
 { local $/; $expect_raw = <DATA>; }
 

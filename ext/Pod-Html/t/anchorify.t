@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Pod::Html::Util qw( anchorify relativize_url );
 use Test::More;
+plan  skip_all => 'HTML is not compatible with EBCDIC' if ord("A") != 65;
 
 my @filedata;
 {

@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Pod::Html;
 use Test::More;
+plan  skip_all => 'HTML is not compatible with EBCDIC' if ord("A") != 65;
 
 my $podfile = "$$.pod";
 my $infile = "$$.in";

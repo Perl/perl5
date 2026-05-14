@@ -65,7 +65,7 @@ test -h os390.c || ln -s os390/os390.c os390.c
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
-  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii"
+  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii -I /data/zopen/usr/local/include"
 else
   ebcdic=true
   def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
