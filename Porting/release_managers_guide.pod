@@ -356,7 +356,9 @@ hash.
 =item *
 
 Restore any files mentioned in the C<CUSTOMIZED> section, using
-C<git checkout>. Make any new customizations if necessary. Also,
+C<git checkout>, if necessary. (Customization is supposed to be temporary
+until upstream accepts our patches, so check whether it is still needed.)
+Add any customizations that may newly be needed now. Also,
 restore any files that are mentioned in C<@IGNORE>, but were checked
 into the repository anyway.
 
@@ -364,6 +366,8 @@ For example, F<version.pm> is a case of C<CUSTOMIZED> distribution
 where the blead version of the file is preferred over the CPAN version.
 This means that F<cpan/version/lib/version.pm> is not modified by the
 sync, and you'll have to apply the relevant changes manually.
+(Though F<version.pm> is special in that this will I<always> be the case,
+not just temporarily.)
 
 =item *
 
