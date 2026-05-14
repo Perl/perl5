@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+# Test creating / destroying threads within BEGIN blocks
+
 BEGIN {
     use Config;
     if (! $Config{'useithreads'}) {
