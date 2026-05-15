@@ -64,7 +64,6 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvXSUBANY(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
 #define CvGV(sv)	Perl_CvGV(aTHX_ (CV *)(sv))
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
-#define CvHASGV(cv)	cBOOL(SvANY(cv)->xcv_gv_u.xcv_gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
 #  define CvFILE_set_from_cop(sv, cop)	\
@@ -78,6 +77,27 @@ See L<perlguts/Autoloading with XSUBs>.
 /* For use when you only have a XPVCV*, not a real CV*.
    Must be assert protected as in Perl_CvDEPTH before use. */
 #define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
+
+/*
+=for apidoc Am|bool|CvHasNAME|CV *cv
+
+Returns true if the CV has a name, either by having a name HEK or a GV. This
+macro does not indicate which. If additionally L</CvHasNAME_HEK> is true, then
+the name can be found in L</CvNAME_HEK>. If C<CvHasNAME_HEK> is false, the
+name can be found via the L</CvGV>.
+
+=cut
+*/
+
+/* This union is shared by both .xcv_gv and .xcv_hek, so the boolean truth of
+ * it indicates that either one is set
+ */
+#define CvHasNAME(cv)   ((bool)SvANY(cv)->xcv_gv_u.xcv_gv)
+
+/* Back-compat */
+#ifndef PERL_CORE
+#  define CvHASGV(cv)  CvHasNAME(cv)
+#endif
 
 /* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
 #define CvPADLIST(sv)	  (*(assert_(!CvISXSUB((CV*)(sv))) \

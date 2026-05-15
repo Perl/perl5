@@ -12150,7 +12150,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     assert(cv);
     assert(SvREFCNT((SV*)cv) != 0);
 
-    if (!CvHASGV(cv)) {
+    if (!CvHasNAME(cv)) {
         if (isGV(gv))
             CvGV_set(cv, gv);
         else {

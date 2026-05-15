@@ -6323,10 +6323,10 @@ static void
 S_croak_undefined_subroutine(pTHX_ CV const *cv, GV const *gv)
 {
     if (cv) {
-        if (CvLEXICAL(cv) && CvHASGV(cv))
+        if (CvLEXICAL(cv) && CvHasNAME(cv))
             croak("Undefined subroutine &%" SVf " called",
                        SVfARG(cv_name((CV*)cv, NULL, 0)));
-        else /* pp_entersub triggers when (CvANON(cv) || !CvHASGV(cv)) */
+        else /* pp_entersub triggers when (CvANON(cv) || !CvHasNAME(cv)) */
             croak("Undefined subroutine called");
     } else { /* pp_entersub triggers when (!cv) after `try_autoload` */
         SV *sub_name = newSV_type_mortal(SVt_PV);
@@ -6440,9 +6440,9 @@ PP(pp_entersub)
         GV* autogv;
 
         /* anonymous or undef'd function leaves us no recourse */
-        if (CvLEXICAL(cv) && CvHASGV(cv))
+        if (CvLEXICAL(cv) && CvHasNAME(cv))
             S_croak_undefined_subroutine(aTHX_ cv, NULL);
-        if (CvANON(cv) || !CvHASGV(cv))
+        if (CvANON(cv) || !CvHasNAME(cv))
             S_croak_undefined_subroutine(aTHX_ cv, NULL);
 
         /* autoloaded stub? */
