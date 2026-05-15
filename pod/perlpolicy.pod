@@ -97,6 +97,16 @@ A new stable release series is typically produced once a year.
 
 =head1 MAINTENANCE AND SUPPORT
 
+These are the "officially" supported perl versions
+as of the release of Perl 5.42:
+
+    Version track    Start date      Support status
+    -------------    -----------     --------------
+    5.42.x           2025-Jul-03     Full support (current stable)
+    5.40.x           2024-Jun-09     Full support (previous stable)
+    5.38.x           2023-Jul-02     Security fixes only
+    [ Any older stable release ]     End of life
+
 Perl is developed by a community, not a corporate entity. Every change
 contributed to the Perl core is the result of a donation. Typically, these
 donations are contributions of code or time by individual members of our
@@ -114,33 +124,7 @@ and maintain releases of Perl.
 This document codifies the support and maintenance commitments that
 the Perl community should expect from Perl's developers:
 
-=head2 Version Support Status
-
-The following table summarizes the current support status.  It is updated
-with each stable release.
-
-    Version    Released     Support status
-    -------    --------     --------------
-    5.42.x     2025-Jul     Full support (current stable)
-    5.40.x     2024-Jun     Full support (previous stable)
-    5.38.x     2023-Jul     Security fixes only
-    5.36.x     2022-May     End of life
-    5.34.x     2021-May     End of life
-
-Only the latest point release in each series (e.g., 5.42.1, not 5.42.0)
-receives patches.  Development releases (odd-numbered series like 5.43.x)
-are not supported.
-
-=head2 Support Details
-
 =over
-
-=item *
-
-We "officially" support the two most recent stable release series.  5.38.x
-and earlier are now out of support.  As of the release of 5.44.0, we will
-"officially" end support for Perl 5.40.x, other than providing security
-updates as described below.
 
 =item *
 
