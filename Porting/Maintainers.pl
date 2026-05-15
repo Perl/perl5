@@ -696,8 +696,8 @@ our %Modules = (
     },
 
     'IO::Socket::IP' => {
-        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.43.tar.gz',
-        'SYNCINFO'     => 'tib on Wed Dec  4 17:32:19 2024',
+        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.44.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri May 15 06:56:20 2026',
         'FILES'        => q[cpan/IO-Socket-IP],
         'EXCLUDED'     => [
             qr{^examples/},
