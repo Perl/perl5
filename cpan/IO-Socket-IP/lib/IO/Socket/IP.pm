@@ -3,12 +3,12 @@
 #
 #  (C) Paul Evans, 2010-2024 -- leonerd@leonerd.org.uk
 
-package IO::Socket::IP 0.43;
+package IO::Socket::IP 0.44;
 
 use v5.14;
 use warnings;
 
-use base qw( IO::Socket );
+use parent qw( IO::Socket );
 
 use Carp;
 
@@ -1199,7 +1199,7 @@ sub join_addr
 
 package # hide from indexer
    IO::Socket::IP::_ForINET;
-use base qw( IO::Socket::IP );
+use parent qw( IO::Socket::IP );
 
 sub configure
 {
@@ -1213,7 +1213,7 @@ sub configure
 
 package # hide from indexer
    IO::Socket::IP::_ForINET6;
-use base qw( IO::Socket::IP );
+use parent qw( IO::Socket::IP );
 
 sub configure
 {
