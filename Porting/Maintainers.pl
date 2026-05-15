@@ -1339,10 +1339,6 @@ our %Modules = (
     'Win32' => {
         'DISTRIBUTION' => 'JDB/Win32-0.59.tar.gz',
         'FILES'        => q[cpan/Win32],
-        'CUSTOMIZED'   => [
-            'Win32.pm',
-            'Win32.xs'
-         ],
     },
 
     'Win32API::File' => {
