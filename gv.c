@@ -3226,7 +3226,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
            numifying instead of C's "+0". */
         gv = gv_fetchmeth_pvn(stash, cooky, l, -1, 0);
         cv = 0;
-        if (gv && (cv = GvCV(gv)) && CvHASGV(cv)) {
+        if (gv && (cv = GvCV(gv)) && CvHasNAME(cv)) {
             const HEK * const gvhek = CvGvNAME_HEK(cv);
             const HEK * const stashek =
                 HvNAME_HEK(CvHasNAME_HEK(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
