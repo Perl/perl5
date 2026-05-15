@@ -97,7 +97,7 @@ A new stable release series is typically produced once a year.
 
 =head1 MAINTENANCE AND SUPPORT
 
-Perl 5 is developed by a community, not a corporate entity. Every change
+Perl is developed by a community, not a corporate entity. Every change
 contributed to the Perl core is the result of a donation. Typically, these
 donations are contributions of code or time by individual members of our
 community. On occasion, these donations come in the form of corporate
@@ -170,7 +170,7 @@ Perl at the time of their code freeze.
 
 As a vendor, you may have a requirement to backport security fixes
 beyond our 3 year support commitment.  We can provide limited support and
-advice to you as you do so and, where possible will try to apply
+advice to you as you do so, and where possible we will try to apply
 those patches to the relevant -maint branches in git, though we may or
 may not choose to make numbered releases or "official" patches
 available. See L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
