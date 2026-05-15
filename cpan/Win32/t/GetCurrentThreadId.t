@@ -1,38 +1,43 @@
 use strict;
 use Config qw(%Config);
-use Test;
+use Test::More;
 use Win32;
 
-my $fork_emulation = $Config{ccflags} =~ /PERL_IMPLICIT_SYS/;
+# Cygwin builds set useithreads=define but use the OS's real fork(),
+# not the Win32 fork emulation — so gate on $^O as well.
+my $fork_emulation = $^O eq 'MSWin32' && ($Config{useithreads} // '') eq 'define';
 
-my $tests = $fork_emulation ? 4 : 2;
-plan tests => $tests;
+plan tests => $fork_emulation ? 4 : 2;
 
 my $pid = $$+0; # make sure we don't copy any magic to $pid
 
 if ($^O eq "cygwin") {
-    skip(!defined &Cygwin::pid_to_winpid,
-	 Cygwin::pid_to_winpid($pid),
-	 Win32::GetCurrentProcessId());
+    SKIP: {
+        skip 'Cygwin::pid_to_winpid is not available', 1
+            if !defined &Cygwin::pid_to_winpid;
+
+        is(Cygwin::pid_to_winpid($pid), Win32::GetCurrentProcessId());
+    }
 }
 else {
-    ok($pid, Win32::GetCurrentProcessId());
+    is($pid, Win32::GetCurrentProcessId());
 }
 
 if ($fork_emulation) {
     # This test relies on the implementation detail that the fork() emulation
     # uses the negative value of the thread id as a pseudo process id.
     if (my $child = fork) {
-	waitpid($child, 0);
-	exit 0;
+        Test::More->builder->no_ending(1);
+        waitpid($child, 0);
+        exit $?;
     }
-    ok(-$$, Win32::GetCurrentThreadId());
+    is(-$$, Win32::GetCurrentThreadId());
 
     # GetCurrentProcessId() should still return the real PID
-    ok($pid, Win32::GetCurrentProcessId());
-    ok($$ != Win32::GetCurrentProcessId());
+    is($pid, Win32::GetCurrentProcessId());
+    isnt($$, Win32::GetCurrentProcessId());
 }
 else {
     # here we just want to see something.
-    ok(Win32::GetCurrentThreadId() > 0);
+    cmp_ok(Win32::GetCurrentThreadId(), '>', 0);
 }

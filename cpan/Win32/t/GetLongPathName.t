@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use Test::More;
 use Win32;
 
 my @paths = qw(
@@ -43,11 +43,7 @@ my %expect;
 
 plan tests => scalar(@paths);
 
-my $i = 1;
 for (@paths) {
     my $got = Win32::GetLongPathName($_);
-    print "# '$_' => expect '$expect{$_}' => got '$got'\n";
-    print "not " unless $expect{$_} eq $got;
-    print "ok $i\n";
-    ++$i;
+    is $expect{$_}, $got;
 }

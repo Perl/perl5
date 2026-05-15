@@ -1843,8 +1843,9 @@ XS(w32_HttpGetFile)
                 bAborted = TRUE;
                 Perl_warn(aTHX_ "Win32::HttpGetFile: setting proxy options failed");
             }
-            Safefree(ProxyInfo.lpszProxy);
-            Safefree(ProxyInfo.lpszProxyBypass);
+            /* WinHttpGetProxyForUrl allocates these with GlobalAlloc. */
+            if (ProxyInfo.lpszProxy)       GlobalFree(ProxyInfo.lpszProxy);
+            if (ProxyInfo.lpszProxyBypass) GlobalFree(ProxyInfo.lpszProxyBypass);
         }
     }
 
