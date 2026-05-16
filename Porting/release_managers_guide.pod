@@ -563,7 +563,9 @@ described below in L</"Update Module::CoreList">).
 
 =head3 Bump the version number
 
-Increase the version number (e.g. from 5.12.0 to 5.12.1).
+(Note: the example version numbers are incorrect for a MAINT release.)
+
+Increase the version number (e.g. from 5.41.13 to 5.42.0).
 
 For a release candidate for a stable perl, this should happen a week or two
 before the first release candidate to allow sufficient time for testing and
@@ -573,16 +575,16 @@ bump the version further.
 
 There is a tool to semi-automate this process:
 
- $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
+ $ ./perl -Ilib Porting/bump-perl-version -i 5.41.13 5.42.0
 
-Remember that this tool is largely just grepping for '5.10.0' or whatever,
+Remember that this tool is largely just grepping for '5.41.13' or whatever,
 so it will generate false positives. Be careful not change text like
-"this was fixed in 5.10.0"!
+"this was fixed in 5.41.13"!
 
 Use git status and git diff to select changes you want to keep.
 
 Be particularly careful with F<INSTALL>, which contains a mixture of
-C<5.10.0>-type strings, some of which need bumping on every release, and
+C<5.41.13>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
 See below in L</"Update INSTALL"> for more details.
 
@@ -646,6 +648,7 @@ When the version number is bumped, you should also update Module::CoreList
 version number.
 
 =for checklist skip RC BLEAD-FINAL MAINT
+
 =head3 Prepare an end of support note (if necessary)
 
 For the I<final> BLEAD-POINT release in a development cycle, the
@@ -1603,24 +1606,74 @@ reports to arise. (The opposite problem -- trying to figure out why there
 introduced later -- shouldn't arise for MAINT releases since they should,
 in theory, only contain bug fixes but never regressions.))
 
-=for checklist skip RC MAINT
+=for checklist skip RC MAINT BLEAD-FINAL
 
-=head3 Bump the version number
+=head3 Bump the point version number
 
-Increase the version number (e.g. from 5.12.0 to 5.12.1).
+Increase the minor version number (e.g. from 5.X.Y to 5.NEXT).
 
 There is a tool to semi-automate this process:
 
- $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
+ $ ./perl -Ilib Porting/bump-perl-version -i 5.X.Y 5.NEXT
 
-Remember that this tool is largely just grepping for '5.10.0' or whatever,
+Remember that this tool is largely just grepping for '5.X.Y' or whatever,
 so it will generate false positives. Be careful not change text like
-"this was fixed in 5.10.0"!
+"this was fixed in 5.X.Y"!
 
 Use git status and git diff to select changes you want to keep.
 
 Be particularly careful with F<INSTALL>, which contains a mixture of
-C<5.10.0>-type strings, some of which need bumping on every release, and
+C<5.X.Y>-type strings, some of which need bumping on every release, and
+some of which need to be left unchanged.
+See below in L</"Update INSTALL"> for more details.
+
+After editing, you may need to regen opcodes:
+
+ $ ./perl -Ilib regen/opcode.pl
+
+Test your changes:
+
+ $ git clean -xdf   # careful if you don't have local files to keep!
+ $ ./Configure -des -Dusedevel
+ $ make
+ $ make test_harness
+
+Do note that at this stage, porting tests will fail. They will continue
+to fail until you've updated Module::CoreList, as described below.
+
+Commit your changes:
+
+ $ git status
+ $ git diff
+ # Review the delta carefully
+ $ git commit -a -m 'Bump the perl version in various places for 5.X.Y'
+
+At this point you may want to compare the commit with a previous bump to
+see if they look similar.  See commit L<48b1717bed|https://github.com/Perl/perl5/commit/48b1717bed> for an example of a
+previous version bump.
+
+When the version number is bumped, you should also update Module::CoreList
+(as described in L</"Update Module::CoreList">) to reflect the new
+version number.
+
+=for checklist skip RC MAINT BLEAD-POINT
+
+=head3 Bump the version number for the new dev cycle
+
+Increase the version number (e.g. from 5.X.Y to 5.NEXT).
+
+There is a tool to semi-automate this process:
+
+ $ ./perl -Ilib Porting/bump-perl-version -i 5.X.Y 5.NEXT
+
+Remember that this tool is largely just grepping for '5.X.Y' or whatever,
+so it will generate false positives. Be careful not change text like
+"this was fixed in 5.X.Y"!
+
+Use git status and git diff to select changes you want to keep.
+
+Be particularly careful with F<INSTALL>, which contains a mixture of
+C<5.X.Y>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
 See below in L</"Update INSTALL"> for more details.
 
