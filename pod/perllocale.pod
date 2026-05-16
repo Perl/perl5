@@ -343,7 +343,7 @@ C<ucfirst()>, and C<lcfirst()>) use C<LC_CTYPE>
 
 B<The variables L<C<$!>|perlvar/$ERRNO>> (and its synonyms C<$ERRNO> and
 C<$OS_ERROR>) B<and> L<C<$^E>|perlvar/$EXTENDED_OS_ERROR>> (and its synonym
-C<$EXTENDED_OS_ERROR>) when used as strings use C<LC_MESSAGES>  On
+C<$EXTENDED_OS_ERROR>) when used as strings use C<LC_MESSAGES>.  On
 platforms that lack this category C<LC_CTYPE> is used instead.
 
 =back

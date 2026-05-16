@@ -1294,7 +1294,7 @@ X<@+> X<@LAST_MATCH_END>
 
 This array holds the offsets of the ends of the last successful
 match and any matching capture buffers that the pattern contains.
-(See L</Scoping Rules of Regex Variables>)
+(See L</Scoping Rules of Regex Variables>.)
 
 The number of elements it contains will be one more than the number
 of capture buffers in the pattern, regardless of which capture buffers

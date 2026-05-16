@@ -98,7 +98,7 @@ or
 
 to install it locally.  (Remember that if you do this, you'll have to
 put C<use lib "/my/perl_directory";> near the top of the program that
-is to use this module.
+is to use this module.)
 
 D. INSTALL
 

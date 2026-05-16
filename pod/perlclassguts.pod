@@ -311,7 +311,7 @@ exception is thrown.
 If the C<op_private> field includes the C<OPpINITFIELDS> flag, this indicates
 that the op begins the special C<xhv_class_initfields_cv> CV. In this case it
 should additionally take the second value from the arguments list, which
-should be a plain HV pointer (I<directly>, not via RV). and bind it to the
+should be a plain HV pointer (I<directly>, not via RV), and bind it to the
 second pad slot, where the generated optree will expect to find it.
 
 =head2 OP_INITFIELD
