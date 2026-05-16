@@ -584,7 +584,7 @@ See S<C<o recallCommand>>, too.
 =item !! cmd
 X<debugger command, !!>
 
-Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT) See
+Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT). See
 S<C<o shellBang>>, also.  Note that the user's current shell (well,
 their C<$ENV{SHELL}> variable) will be used, which can interfere
 with proper interpretation of exit status or signal and coredump
