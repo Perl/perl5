@@ -6,15 +6,15 @@ use warnings;
 use bytes;
 
 use Compress::Raw::Zlib  2.218 ;
-use IO::Compress::Base::Common  2.219 qw(:Status );
+use IO::Compress::Base::Common  2.220 qw(:Status );
 
-use IO::Uncompress::Base  2.219 ;
-use IO::Uncompress::Adapter::Inflate  2.219 ;
+use IO::Uncompress::Base  2.220 ;
+use IO::Uncompress::Adapter::Inflate  2.220 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.219';
+$VERSION = '2.220';
 $RawInflateError = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
