@@ -449,7 +449,7 @@ sub _tests_from_manifest {
 		if (    ord "A" != 65
 		     && defined $extension
 		     && $extension =~ m! \b (?:
-						Archive-Tar/
+						dummy-that-wont-match-anything
 					      | Config-Perl-V/
 				              | CPAN-Meta/
 					      | CPAN-Meta-YAML/
