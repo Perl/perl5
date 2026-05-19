@@ -139,7 +139,7 @@ esac
           -e '/^#.*<built-in>/d' \
           -e '/^#.*<command line>/d' \
           -e '/^#.*<command-line>/d' \
-          -e '/".*In file included from.*:/d' \'
+          -e '/".*In file included from.*:/d' \
 	    -e '/^#.*"-"/d' \
 	    -e '/^#.*git_version\.h/d' \
 	    -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
