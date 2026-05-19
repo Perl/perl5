@@ -71,8 +71,6 @@ typedef perl_os_thread pthread_t;
 #define PERL_ITHR_THREAD_EXIT_ONLY   8 /* exit() only exits current thread */
 #define PERL_ITHR_DIED              32 /* Thread finished by dying */
 
-#define PERL_ITHR_UNCALLABLE  (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
-
 
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
@@ -238,7 +236,7 @@ S_ithread_clear(pTHX_ ithread *thread)
     bool self_thx; /* the caller's interpreter is the same as the thread's */
 
     assert(   (thread->state & PERL_ITHR_FINISHED)
-           && (thread->state & PERL_ITHR_UNCALLABLE));
+           && (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
 
 #ifdef THREAD_SIGNAL_BLOCKING
     /* We temporarily set the interpreter context to the interpreter being
@@ -324,7 +322,7 @@ S_ithread_dec_free(pTHX_ ithread *thread)
         return;
     }
     assert((thread->state & PERL_ITHR_FINISHED) &&
-           (thread->state & PERL_ITHR_UNCALLABLE));
+           (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
 
     MUTEX_UNLOCK(&thread->mutex);
 
@@ -1343,7 +1341,7 @@ ithread_list(...)
             MUTEX_UNLOCK(&thread->mutex);
 
             /* Ignore detached or joined threads */
-            if (state & PERL_ITHR_UNCALLABLE) {
+            if (state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)) {
                 continue;
             }
 
@@ -1427,7 +1425,7 @@ ithread_join(...)
         current_thread = S_ithread_get(aTHX);
 
         MUTEX_LOCK(&thread->mutex);
-        if ((join_err = (thread->state & PERL_ITHR_UNCALLABLE))) {
+        if ((join_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))) {
             MUTEX_UNLOCK(&thread->mutex);
             Perl_croak(aTHX_ (join_err & PERL_ITHR_DETACHED)
                                 ? "Cannot join a detached thread"
@@ -1558,7 +1556,8 @@ ithread_detach(...)
         thread = S_SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         MUTEX_LOCK(&thread->mutex);
-        if (! (detach_err = (thread->state & PERL_ITHR_UNCALLABLE))) {
+        if (! (detach_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))))
+        {
             /* Thread is detachable */
             thread->state |= PERL_ITHR_DETACHED;
 #ifdef WIN32
@@ -1739,7 +1738,7 @@ ithread_object(...)
                     MUTEX_LOCK(&thread->mutex);
                     state = thread->state;
                     MUTEX_UNLOCK(&thread->mutex);
-                    if (! (state & PERL_ITHR_UNCALLABLE)) {
+                    if (! (state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
                         RETVAL = S_ithread_to_SV(aTHX_ Nullsv,
                                                 thread, classname, TRUE);
                         have_obj = 1;
@@ -1855,7 +1854,7 @@ ithread_is_joinable(...)
         thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
         MUTEX_LOCK(&thread->mutex);
         RETVAL = ((thread->state & PERL_ITHR_FINISHED) &&
-                 ! (thread->state & PERL_ITHR_UNCALLABLE))
+                 ! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))
             ? &PL_sv_yes : &PL_sv_no;
         MUTEX_UNLOCK(&thread->mutex);
     OUTPUT: RETVAL
