@@ -17117,10 +17117,9 @@ Perl_rcpv_free(pTHX_ char *pv)
         return NULL;
     RCPV *rcpv = RCPVx(pv);
 
+    OP_REFCNT_LOCK;
     assert(rcpv->refcount);
     assert(rcpv->len);
-
-    OP_REFCNT_LOCK;
     if (--rcpv->refcount == 0) {
         rcpv->len = 0;
         PerlMemShared_free(rcpv);
