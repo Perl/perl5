@@ -280,11 +280,11 @@ S_ithread_clear(pTHX_ ithread *thread)
             thread->err = Nullsv;
         }
 
+        thread->interp = NULL;
         MUTEX_UNLOCK(&thread->mutex);
         perl_destruct(interp);
         MUTEX_LOCK(&thread->mutex);
         perl_free(interp);
-        thread->interp = NULL;
     }
     if (self_thx)
         aTHX = NULL;
