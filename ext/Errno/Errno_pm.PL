@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.38";
+our $VERSION = "1.39";
 
 my %err = ();
 
@@ -245,7 +245,17 @@ sub write_errno_pm {
 		$inhibit_linemarkers;
 	    open(CPPO,"$cpp errno.c |") or
 		die "Cannot run '$cpp errno.c'";
-	} else {
+	} elsif ($^O eq 'os390') {
+	    # XXX This could be because the pipe is reading with the wrong
+	    # character set, so there may be a better way to solve this, and
+	    # this branch might not need to be taken on z/OS ascii mode
+	    my $cpp = default_cpp() . $inhibit_linemarkers;
+            $cpp =~ s/ $Config{cppminus} \s* $ //x;
+	    system "$cpp errno.c > errno.i" ;
+	    open(CPPO,"<", 'errno.i') or die "Cannot open errno.i";
+            unlink 'errno.i';
+	}
+	else {
 	    my $cpp = default_cpp() . $inhibit_linemarkers;
 	    open(CPPO,"$cpp < errno.c |")
 		or die "Cannot exec $cpp";
