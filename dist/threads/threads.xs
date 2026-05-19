@@ -69,7 +69,6 @@ typedef perl_os_thread pthread_t;
 #define PERL_ITHR_JOINED             2 /* Thread is being / has been joined */
 #define PERL_ITHR_FINISHED           4 /* Thread has finished execution */
 #define PERL_ITHR_THREAD_EXIT_ONLY   8 /* exit() only exits current thread */
-#define PERL_ITHR_NONVIABLE         16 /* Thread creation failed */
 #define PERL_ITHR_DIED              32 /* Thread finished by dying */
 
 #define PERL_ITHR_UNCALLABLE  (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
@@ -238,10 +237,8 @@ S_ithread_clear(pTHX_ ithread *thread)
 #endif
     bool self_thx; /* the caller's interpreter is the same as the thread's */
 
-    assert(((thread->state & PERL_ITHR_FINISHED) &&
-            (thread->state & PERL_ITHR_UNCALLABLE))
-                ||
-           (thread->state & PERL_ITHR_NONVIABLE));
+    assert(   (thread->state & PERL_ITHR_FINISHED)
+           && (thread->state & PERL_ITHR_UNCALLABLE));
 
 #ifdef THREAD_SIGNAL_BLOCKING
     /* We temporarily set the interpreter context to the interpreter being
@@ -321,7 +318,6 @@ S_ithread_dec_free(pTHX_ ithread *thread)
     dMY_POOL_thr(thread);
     bool self_thx; /* the caller's interpreter is the same as the thread's */
 
-    if (! (thread->state & PERL_ITHR_NONVIABLE)) {
         assert(thread->count > 0);
         if (--thread->count > 0) {
             MUTEX_UNLOCK(&thread->mutex);
@@ -329,7 +325,7 @@ S_ithread_dec_free(pTHX_ ithread *thread)
         }
         assert((thread->state & PERL_ITHR_FINISHED) &&
                (thread->state & PERL_ITHR_UNCALLABLE));
-    }
+
     MUTEX_UNLOCK(&thread->mutex);
 
     /* Main thread (0) is immortal and should never get here */
@@ -1147,7 +1143,9 @@ S_ithread_create(
     if (setstack_err || create_err)
 #endif
     {
-        thread->state |= PERL_ITHR_NONVIABLE;
+        /* force the freeing of the otherwise-unused thread and interp */
+        thread->count = 1;
+        thread->state |= (PERL_ITHR_FINISHED | PERL_ITHR_JOINED);
         S_ithread_dec_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
