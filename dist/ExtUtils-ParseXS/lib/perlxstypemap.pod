@@ -283,7 +283,7 @@ Note that this typemap does not decrement the reference count
 when returning the reference to an SV*.
 See also: T_SVREF_REFCOUNT_FIXED
 
-=item T_SVREF_FIXED
+=item T_SVREF_REFCOUNT_FIXED
 
 Used to pass in and return a reference to an SV.
 This is a fixed
