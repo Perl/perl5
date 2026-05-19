@@ -318,13 +318,13 @@ S_ithread_dec_free(pTHX_ ithread *thread)
     dMY_POOL_thr(thread);
     bool self_thx; /* the caller's interpreter is the same as the thread's */
 
-        assert(thread->count > 0);
-        if (--thread->count > 0) {
-            MUTEX_UNLOCK(&thread->mutex);
-            return;
-        }
-        assert((thread->state & PERL_ITHR_FINISHED) &&
-               (thread->state & PERL_ITHR_UNCALLABLE));
+    assert(thread->count > 0);
+    if (--thread->count > 0) {
+        MUTEX_UNLOCK(&thread->mutex);
+        return;
+    }
+    assert((thread->state & PERL_ITHR_FINISHED) &&
+           (thread->state & PERL_ITHR_UNCALLABLE));
 
     MUTEX_UNLOCK(&thread->mutex);
 
