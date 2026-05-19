@@ -192,6 +192,14 @@ pass("loaded");
     eval q{&share(sub {})};
     like($@, qr/Cannot share subs yet/, "err sub share");
 
+    eval q{&threads::shared::_id(1)};
+    like($@, qr/Argument to _id needs to be passed as ref/,
+                "err _id not ref");
+
+    eval q{&threads::shared::_refcnt(1)};
+    like($@, qr/Argument to _refcnt needs to be passed as ref/,
+                "err _refcnt not ref");
+
     eval q{&share(1)};
     like($@, qr/Argument to share needs to be passed as ref/,
                 "err share not ref");
