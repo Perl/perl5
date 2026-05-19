@@ -91,6 +91,7 @@ typedef struct _ithread {
     int gimme;                  /* Context of create */
     SV *init_function;          /* Code to run */
     AV *params;                 /* Args to pass function */
+    struct my_pool *pool;       /* which thread pool we belong to */
 #ifdef WIN32
     DWORD  thr;                 /* OS's idea if thread id */
     HANDLE handle;              /* OS's waitable handle */
@@ -124,7 +125,7 @@ START_MY_CXT
  * multiple interpreters, then there will be a pool for each interpreter
  * which has done 'use threads' at least once.
  */
-typedef struct {
+typedef struct my_pool {
     /* Structure for 'main' thread
      * Also forms the 'base' for the doubly-linked list of threads */
     ithread main_thread;
@@ -143,10 +144,14 @@ typedef struct {
     IV page_size;
 } my_pool_t;
 
+/* get the pool from the current interpreter's PL_modglobal */
 #define dMY_POOL \
     SV *my_pool_sv = *hv_fetch(PL_modglobal, MY_POOL_KEY,               \
                                sizeof(MY_POOL_KEY)-1, TRUE);            \
     my_pool_t *my_poolp = INT2PTR(my_pool_t*, SvUV(my_pool_sv))
+
+/* get the pool from a thread structure */
+#define dMY_POOL_thr(thr) my_pool_t *my_poolp = thr->pool
 
 #define MY_POOL (*my_poolp)
 
@@ -313,7 +318,7 @@ S_ithread_dec_free(pTHX_ ithread *thread)
 #ifdef WIN32
     HANDLE handle;
 #endif
-    dMY_POOL;
+    dMY_POOL_thr(thread);
     bool self_thx; /* the caller's interpreter is the same as the thread's */
 
     if (! (thread->state & PERL_ITHR_NONVIABLE)) {
@@ -616,7 +621,7 @@ S_ithread_run(void * arg)
 
     dTHXa(thread->interp);
 
-    dMY_POOL;
+    dMY_POOL_thr(thread);
 
     /* The following mutex lock + mutex unlock pair explained.
      *
@@ -907,6 +912,7 @@ S_ithread_create(
      *          { threads->create(sub{...}); } threads->object(1)->join;
      */
     thread->count = 3;
+    thread->pool = my_pool;
 
     MUTEX_INIT(&thread->mutex);
 
