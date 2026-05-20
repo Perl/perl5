@@ -588,34 +588,13 @@ C<5.41.13>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
 See below in L</"Update INSTALL"> for more details.
 
-For the first RC release leading up to a BLEAD-FINAL release, update
-F<pod/perlpolicy.pod>: both the version support status table and the
-description of which releases are now "officially" supported.
-
-That description should match up with these following notes, used to
-fill the C<END OF SUPPORT NOTE> placeholder when preparing the
-release announcement email.
-
-For a BLEAD-FINAL RC release:
-
-    Support for the 5.OLDSUPPORT.x release series will end shortly.
-    Please refer to L<perlpolicy> for version support information.
-
-For a BLEAD-FINAL release:
-
-    Support for the 5.OLDSUPPORT.x release series has now ended.
-    Please refer to L<perlpolicy> for version support information.
-
-MAINT release announcements must not contain C<END OF SUPPORT NOTE> text.
-
-When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
-C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
-you're releasing, unless you're absolutely sure the release you're about to
-make is 100% binary compatible to an earlier release. Note: for BLEAD-POINT
-releases the bump should have already occurred at the end of the previous
-release and this is something you would have to do at the very end.
 When releasing a MAINT perl version, the C<PERL_API_*> constants C<MUST NOT>
 be changed as we aim to guarantee binary compatibility in maint branches.
+
+When doing a BLEAD-FINAL release, make sure the C<PERL_API_*> constants
+in F<patchlevel.h> are in sync with the version you're releasing,
+unless you're absolutely sure the release you're about to make is 100%
+binary compatible to an earlier release.
 
 After editing, you may need to regen opcodes:
 
@@ -639,31 +618,22 @@ Commit your changes:
 
  $ git commit -a -m 'Bump the perl version in various places for 5.X.Y'
 
-At this point you may want to compare the commit with a previous bump to
-see if they look similar.  See commit L<f7cf42bb69|https://github.com/Perl/perl5/commit/f7cf42bb69> for an example of a
-previous version bump.
+At this point you may want to compare the commit with
+a previous bump to see if they look similar.  See commit
+L<f7cf42bb69|https://github.com/Perl/perl5/commit/f7cf42bb69> for an
+example of a previous version bump.
 
 When the version number is bumped, you should also update Module::CoreList
 (as described below in L</"Update Module::CoreList">) to reflect the new
 version number.
 
-=for checklist skip RC BLEAD-FINAL MAINT
+=for checklist skip BLEAD-POINT
 
-=head3 Prepare an end of support note (if necessary)
+=head3 Update the "Version Support Status" section in perlpolicy
 
-For the I<final> BLEAD-POINT release in a development cycle, the
-release announcement email should note the upcoming end of support
-for the oldest of the currently supported release series.
-
-Replace the C<END OF SUPPORT NOTE> placeholder with this text:
-
-    Support for the 5.OLDSUPPORT.x release series will end shortly.
-    Please refer to L<perlpolicy> for version support information.
-
-Check L<perlpolicy> to confirm the affected VERSION before sending!
-
-For all other BLEAD-POINT releases, there is no need for an
-C<END OF SUPPORT NOTE>.
+For the first RC release leading up to a BLEAD-FINAL release, update
+F<pod/perlpolicy.pod>: both the version support status table and the
+description of which releases are now "officially" supported.
 
 =head3 Update INSTALL
 
@@ -1448,9 +1418,50 @@ Be sure to commit your change:
 =head3 Announce to p5p
 
 Mail perl5-porters@perl.org to announce your new release, with a quote you prepared earlier.
+
+=head4 Prepare the announcement email
+
 Get the SHA256 digests from the PAUSE email responses.
 
-Use the template at Porting/release_announcement_template.txt
+Use the template at F<Porting/release_announcement_template.txt>.
+
+=for checklist skip RC BLEAD-FINAL MAINT
+
+=head4 Add an end of support note (if necessary)
+
+For the I<final> BLEAD-POINT release in a development cycle, the
+release announcement email should note the upcoming end of support
+for the oldest of the currently supported release series.
+
+Replace the C<END OF SUPPORT NOTE> placeholder with this text:
+
+    Support for the 5.OLDSUPPORT.x release series will end shortly.
+    Please refer to L<perlpolicy> for version support information.
+
+Check F<pod/perlpolicy.pod> to confirm the affected VERSION before sending!
+
+For all other BLEAD-POINT releases, there is no need for an
+C<END OF SUPPORT NOTE>.
+
+=for checklist skip BLEAD-POINT MAINT
+
+=head4 Add an end of support note
+
+For the BLEAD-FINAL (and corresponding RC) release in a development cycle,
+the release announcement email should note the end of support
+for the oldest of the currently supported release series.
+
+For a BLEAD-FINAL RC release:
+
+    Support for the 5.OLDSUPPORT.x release series will end shortly.
+    Please refer to L<perlpolicy> for version support information.
+
+For a BLEAD-FINAL release:
+
+    Support for the 5.OLDSUPPORT.x release series has now ended.
+    Please refer to L<perlpolicy> for version support information.
+
+=head4 Finalize and send the email
 
 Send a carbon copy to C<noc@metacpan.org>
 
