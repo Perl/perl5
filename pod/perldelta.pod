@@ -33,7 +33,12 @@ XXX Any security-related notices go here. In particular, any security
 vulnerabilities closed should be noted here rather than in the
 L</Selected Bug Fixes> section.
 
-[ List each security issue as a =head2 entry ]
+=head2 CVE-2026-8376 - Buffer overflow in Perl_study_chunk
+
+Repeated fixed string buffer overflow check counted characters not
+bytes.
+
+CVE-2026-8376
 
 =head1 Incompatible Changes
 
