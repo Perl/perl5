@@ -493,6 +493,7 @@ do_test('typeglob',
   FLAGS = \\(MULTI(?:,IN_PAD)?\\)
   NAME = "a"
   NAMELEN = 1
+  GvNAME_HEK = $ADDR
   GvSTASH = $ADDR\\t"main"
   FLAGS = $ADDR					# $] >=5.021004
   GP = $ADDR
