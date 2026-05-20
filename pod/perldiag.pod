@@ -6453,6 +6453,13 @@ so there can't be any left to fill later parameters.
 overload it: Perl refuses to use the object's underlying structure
 for the smart match.
 
+=item Socket address truncated in %s()
+
+(W io) The operating system reported a socket address length larger than
+Perl's supplied buffer for the C<%s()> call.  Perl truncated the address
+to the buffer size to avoid reading or writing past the end of that
+buffer.
+
 =item Sorry, hash keys must be smaller than 2**31 bytes
 
 (F) You tried to create a hash containing a very large key, where "very
