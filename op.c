@@ -16973,8 +16973,8 @@ ignored, otherwise the contents of the pv pointer will be copied into
 the new buffer or if it is NULL the function will do nothing and return NULL.
 
 If the RCPVf_USE_STRLEN flag is set then the len argument is ignored and
-recomputed using C<strlen(pv)>. It is an error to combine RCPVf_USE_STRLEN
-and RCPVf_NO_COPY at the same time.
+recomputed using C<strlen(pv)>, so C<pv> must not be null. It is an error
+to combine RCPVf_USE_STRLEN and RCPVf_NO_COPY at the same time.
 
 Under DEBUGGING rcpv_new() will assert() if it is asked to create a 0 length
 shared string unless the RCPVf_ALLOW_EMPTY flag is set.
@@ -17001,17 +17001,20 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags)
     PERL_UNUSED_CONTEXT;
     RCPV *rcpv;
 
-    /* Musn't use both at the same time */
-    assert((flags & (RCPVf_NO_COPY|RCPVf_USE_STRLEN))!=
-                    (RCPVf_NO_COPY|RCPVf_USE_STRLEN));
-
-    if (!pv && (flags & RCPVf_NO_COPY) == 0)
-        return NULL;
+    if ((flags & (RCPVf_NO_COPY|RCPVf_USE_STRLEN))
+            == (RCPVf_NO_COPY|RCPVf_USE_STRLEN))
+    {
+        croak("panic: rcpv_new() got both RCPVf_NO_COPY and RCPVf_USE_STRLEN");
+    }
 
     if (flags & RCPVf_USE_STRLEN) {
-        assert(pv);
+        if (!pv) {
+            croak("panic: rcpv_new() got NULL pv with RCPVf_USE_STRLEN");
+        }
         len = strlen(pv);
     }
+    else if (!pv && (flags & RCPVf_NO_COPY) == 0)
+        return NULL;
 
     assert(len || (flags & RCPVf_ALLOW_EMPTY));
 
