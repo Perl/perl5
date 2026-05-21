@@ -208,7 +208,10 @@ pass("loaded");
                 "err share not ref");
 
     eval q{my $x: shared; $x = sub{};};
-    like($@, qr/Invalid value for shared scalar/, "err share invalid assign");
+    like($@, qr/Invalid value for shared scalar/, "err share invalid sub assign");
+
+    eval q{my $x: shared; $x = *ABC};
+    like($@, qr/Invalid value for shared scalar/, "err share invalid glob assign");
 
     eval q{my $x; lock($x);};
     like($@, qr/lock can only be used on shared values/, "err unshared lock");

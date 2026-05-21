@@ -931,7 +931,11 @@ sharedsv_scalar_store(pTHX_ SV *sv, SV *ssv)
         } else {
             allowed = FALSE;
         }
-    } else {
+    }
+    else if (SvTYPE(sv) == SVt_PVGV) {
+        allowed = FALSE;
+    }
+    else {
         SvTEMP_off(sv);
         SHARED_CONTEXT;
         sv_setsv_nomg(ssv, sv);
@@ -960,12 +964,6 @@ sharedsv_scalar_mg_set(pTHX_ SV *sv, MAGIC *mg)
     SV *ssv = (SV*)(mg->mg_ptr);
     assert(ssv);
     ENTER_LOCK;
-    if (SvTYPE(ssv) < SvTYPE(sv)) {
-        dTHXc;
-        SHARED_CONTEXT;
-        sv_upgrade(ssv, SvTYPE(sv));
-        CALLER_CONTEXT;
-    }
     sharedsv_scalar_store(aTHX_ sv, ssv);
     LEAVE_LOCK;
     return (0);
