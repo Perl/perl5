@@ -182,7 +182,10 @@ pass("loaded");
     like($@, qr/\QUsage: shared_clone(REF)/, "err shared_clone usage");
 
     eval q{shared_clone(\*foo)};
-    like($@, qr/Unsupported ref type: GLOB/, "err shared_clone ref type");
+    like($@, qr/Unsupported ref type: GLOB/, "err shared_clone ref GLOB");
+
+    eval q{shared_clone(*foo)};
+    like($@, qr/Unsupported scalar type: GLOB/, "err shared_clone scalar GLOB");
 
     # shared.xs errors
 
