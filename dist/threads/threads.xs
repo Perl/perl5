@@ -1170,13 +1170,13 @@ CLANG_DIAG_RESTORE
 #endif /* USE_ITHREADS */
 
 
-MODULE = threads    PACKAGE = threads    PREFIX = ithread_
+MODULE = threads    PACKAGE = threads
 PROTOTYPES: DISABLE
 
 #ifdef USE_ITHREADS
 
 SV*
-ithread_create(...)
+create(...)
     PREINIT:
         char *classname;
         ithread *thread;
@@ -1306,7 +1306,7 @@ ithread_create(...)
 
 
 void
-ithread_list(...)
+list(...)
     PREINIT:
         char *classname;
         ithread *thread;
@@ -1372,7 +1372,7 @@ ithread_list(...)
 
 
 SV*
-ithread_self(...)
+self(...)
     PREINIT:
         char *classname;
         ithread *thread;
@@ -1390,7 +1390,7 @@ ithread_self(...)
 
 
 UV
-ithread_tid(...)
+tid(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1401,7 +1401,7 @@ ithread_tid(...)
 
 
 void
-ithread_join(...)
+join(...)
     PREINIT:
         ithread *thread;
         ithread *current_thread;
@@ -1537,14 +1537,14 @@ ithread_join(...)
 
 
 void
-ithread_yield(...)
+yield(...)
     CODE:
         PERL_UNUSED_VAR(items);
         YIELD;
 
 
 void
-ithread_detach(...)
+detach(...)
     PREINIT:
         ithread *thread;
         int detach_err;
@@ -1600,7 +1600,7 @@ ithread_detach(...)
 
 
 void
-ithread_kill(...)
+kill(...)
     PREINIT:
         ithread *thread;
         char *sig_name;
@@ -1658,14 +1658,14 @@ ithread_kill(...)
 
 
 void
-ithread_DESTROY(...)
+DESTROY(...)
     CODE:
         PERL_UNUSED_VAR(items);
         sv_unmagic(SvRV(ST(0)), PERL_MAGIC_shared_scalar);
 
 
 IV
-ithread_equal(...)
+equal(...)
     PREINIT:
         int are_equal = 0;
     CODE:
@@ -1687,7 +1687,7 @@ ithread_equal(...)
 
 
 SV*
-ithread_object(...)
+object(...)
     PREINIT:
         char *classname;
         SV *arg;
@@ -1756,7 +1756,7 @@ ithread_object(...)
 
 
 UV
-ithread__handle(...);
+_handle(...);
     PREINIT:
         ithread *thread;
     CODE:
@@ -1771,7 +1771,7 @@ ithread__handle(...);
 
 
 IV
-ithread_get_stack_size(...)
+get_stack_size(...)
     PREINIT:
         IV stack_size;
         dMY_POOL;
@@ -1790,7 +1790,7 @@ ithread_get_stack_size(...)
 
 
 IV
-ithread_set_stack_size(...)
+set_stack_size(...)
     PREINIT:
         IV old_size;
         dMY_POOL;
@@ -1812,7 +1812,7 @@ ithread_set_stack_size(...)
 
 
 SV*
-ithread_is_running(...)
+is_running(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1829,7 +1829,7 @@ ithread_is_running(...)
 
 
 SV*
-ithread_is_detached(...)
+is_detached(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1842,7 +1842,7 @@ ithread_is_detached(...)
 
 
 SV*
-ithread_is_joinable(...)
+is_joinable(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1861,7 +1861,7 @@ ithread_is_joinable(...)
 
 
 SV*
-ithread_wantarray(...)
+wantarray(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1874,7 +1874,7 @@ ithread_wantarray(...)
 
 
 void
-ithread_set_thread_exit_only(...)
+set_thread_exit_only(...)
     PREINIT:
         ithread *thread;
     CODE:
@@ -1898,7 +1898,7 @@ ithread_set_thread_exit_only(...)
 
 
 SV*
-ithread_error(...)
+error(...)
     PREINIT:
         ithread *thread;
         SV *err = NULL;
