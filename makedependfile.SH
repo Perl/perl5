@@ -114,6 +114,7 @@ esac
     # next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
     # and get dropped.)  At the end, we unjoin very long lines to avoid
     # preprocessor limitations
+
     ( $echo "#line 2 \"$file\"";                               \
       $sed -n <$file                                           \
 	-e "/^${filebase}_init(/q"                             \
@@ -125,6 +126,7 @@ esac
         -e '}'                                                 \
 	-e 's/\\\n//g'                                         \
 	-e '/^#line/d'                                         \
+	-e '/^#[    ]+[0-9][0-9]* /d'                          \
 	-e '/^[ 	]*#/{'                                 \
 	    -e 's|[ 	]*/\*[^*].*$||'                        \
 	    -e 's|[ 	]*/\*\*[^/].*$||'                      \
