@@ -132,26 +132,6 @@ esac
 	    -e p                                               \
 	-e '}' | $grep -v ":" ) >UU/$file.c
 
-    if [ "$osname" = os390 ]; then
-        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c | \
-        $sed \
-    	    -e '/^#.*<stdin>/d' \
-          -e '/^#.*<builtin>/d' \
-          -e '/^#.*<built-in>/d' \
-          -e '/^#.*<command line>/d' \
-          -e '/^#.*<command-line>/d' \
-          -e '/".*In file included from.*:/d' \
-	    -e '/^#.*"-"/d' \
-	    -e '/^#.*git_version\.h/d' \
-	    -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
-	    -e 's/^[	 ]*#[	 ]*line/#/' \
-	    -e '/^# *[0-9][0-9]* *[".\/]/!d' \
-	    -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
-	    -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
-	    -e 's|: \./|: |' \
-	    -e 's|\.c\.c|.c|' $uwinfix | \
-        $uniq | $sort | $uniq >>$outfile
-    else
         $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
         $sed \
 	    -e '1d' \
@@ -160,6 +140,7 @@ esac
             -e '/^#.*<built-in>/d' \
             -e '/^#.*<command line>/d' \
             -e '/^#.*<command-line>/d' \
+            -e '/".*In file included from.*:/d' \
 	    -e '/^#.*"-"/d' \
 	    -e '/^#.*"\/.*\/"/d' \
 	    -e '/: file path prefix .* never used$/d' \
@@ -174,7 +155,6 @@ esac
         $uniq | $sort | $uniq >> $outfile
         rm $$.cout
         rm $$.cerr
-    fi
     $echo "$filebase\$(OBJ_EXT): $@" >>$outfile
 
 !NO!SUBS!
