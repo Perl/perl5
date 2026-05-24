@@ -140,6 +140,8 @@ if ($ebcdic_code_page) {
     my $charset = $charset[0];
     my $a2e = get_a2n($charset);
 
+    my $LATIN1_TO_EBCDIC = "";
+    $LATIN1_TO_EBCDIC .= quotemeta chr $a2e->[$_] for 0..255;
 
     print "Translating to EBCDIC...\n";
 
@@ -192,23 +194,37 @@ if ($ebcdic_code_page) {
                 $xlated .= $cur;
             }
         }
-        elsif (-B $file) {   # Binary files aren't translated
-            print STDERR "$file is binary\n";
-            close $fh or die "Couldn't close $file: $!";
-            next;
-        }
         else {
-            if (   ! utf8::decode($text)
-                || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
-            {
-                # Here, either $text isn't legal UTF-8; or it is, but it
-                # consists entirely of one of the 160 ASCII and control
-                # characters whose EBCDIC representation is the same whether
-                # UTF-EBCDIC or not.  This means we just translate
-                # byte-by-byte from Latin1 to EBCDIC.
-                $xlated = ($text =~ s/(.)/chr $a2e->[ord $1]/rsge);
+            my $has_alien_encoding = 0;
+            if ($text =~ / ^ =encoding \s+ (\S*) \s* $ /mx) {
+                my $encoding = $1;
+                $has_alien_encoding =
+                    $encoding !~ /  ^ (?:  utf -? 8
+                                         | cp -? 1252
+                                         | ascii
+                                         | (?: iso -? )? 8859 -? 1 \b
+                                      )
+                                    \b
+                                /ix;
+
             }
-            else {
+
+            if ($has_alien_encoding) {
+                print STDERR "$file has alien encoding\n";
+                close $fh or die "Couldn't close $file: $!";
+                next;
+            }
+            elsif ($text =~ / ^ [\000-\177]* $ /x) {
+
+                # Here, $text consists entirely of one of the 160 ASCII and
+                # control characters whose EBCDIC representation is the same
+                # whether UTF-EBCDIC or not.  Just translate directly
+                no warnings 'misc';     # Harmless here to have replacement
+                                        # string longer
+                $xlated = eval "\$text =~ tr/\000-\177/$LATIN1_TO_EBCDIC/r";
+                die $@ if $@;
+            }
+            elsif (utf8::decode($text)) {
 
                 # Here, $text is legal UTF-8, and the representation of some
                 # character(s) in it it matters if is encoded in UTF-EBCDIC or
@@ -216,6 +232,18 @@ if ($ebcdic_code_page) {
                 # UTF-8 characters instead of the input bytes.  We convert to
                 # UTF-EBCDIC.
                 $xlated = ($text =~ s/(.)/cp_2_utfbytes(ord $1, $charset)/rsge);
+            }
+            elsif (! -T $file) {   # Binary files aren't translated (don't use
+                                   # -B, because that accepts empty files)
+                print STDERR "$file is binary\n";
+                close $fh or die "Couldn't close $file: $!";
+                next;
+            }
+            else {
+
+                # Here, $text isn't legal UTF-8; assume it is Latin1
+                $xlated = eval "\$text =~ tr/\000-\377/$LATIN1_TO_EBCDIC/r";
+                die $@ if $@;
             }
         }
 
