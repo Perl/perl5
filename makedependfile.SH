@@ -136,7 +136,11 @@ $echo "Finding dependencies for $filebase$_o"
         -e '# Remove any embedded new lines to give an exact representation'\
         -e '# of the lines joined with their continuations'                 \
         -e 's/\\\n//g'                                                      \
+                                                                            \
+        -e '# Delete two styles of lines that specify the line number'      \
         -e '/^#line/d'                                                      \
+        -e '/^#[    ]+[0-9][0-9]* /d'                                       \
+                                                                            \
         -e '/^[ 	]*#/{'                                              \
             -e 's|[ 	]*/\*[^*].*$||'                                     \
             -e 's|[ 	]*/\*\*[^/].*$||'                                   \
