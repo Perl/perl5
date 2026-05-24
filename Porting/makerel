@@ -42,9 +42,10 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -x ] [ -n ]
     -n           do not make any tarballs, just the directory
     -c           perform a cleanup before building: clean git repo and target
                  directory/tarballs
-    -e           Make the outputs be translated into EBCDIC.  (They can then
+    -e[1047|037] Make the outputs be translated into EBCDIC.  (They can then
                  be downloaded directly to an EBCDIC platform without needing
-                 any further translation.)
+                 any further translation.)  1047 is assumed if the argument to
+                 -e is omitted.
 EOF
 
 my $relroot = "..";
@@ -60,9 +61,12 @@ GetOptions (
              "x"   => \$additional_xz,
              "n"   => \$no_tarballs,
              "c"   => \$cleanup_first,
-             "e"   => \$ebcdic_code_page,
+             "e:s" => \$ebcdic_code_page,
             )
 or die usage;
+
+$ebcdic_code_page = "1047" if defined $ebcdic_code_page
+                                 && ! $ebcdic_code_page;
 
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
@@ -209,8 +213,9 @@ if ($ebcdic_code_page) {
 
     require './regen/charset_translations.pl';
 
-    # Translation tables, so far only to 1047
-    my @charset = grep { /1047/ } get_supported_code_pages();
+    # Translation tables
+    my @charset = grep { /$ebcdic_code_page/ } get_supported_code_pages();
+    die "Unknown EBCDIC code page '$ebcdic_code_page'" unless @charset;
 
     my $charset = $charset[0];
     my $a2e = get_a2n($charset);
