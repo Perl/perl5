@@ -40,7 +40,7 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -x ] [ -n ]
 		 in patchlevel.h (or blank, if none)
     -x           make a .xz file in addition to a .gz file
     -n           do not make any tarballs, just the directory
-    -c cleanup   perform a cleanup before building: clean git repo and target
+    -c           perform a cleanup before building: clean git repo and target
                  directory/tarballs
     -e           Make the outputs be translated into EBCDIC.  (They can then
                  be downloaded directly to an EBCDIC platform without needing
