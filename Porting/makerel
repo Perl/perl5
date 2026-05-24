@@ -130,6 +130,8 @@ my @exe = map   { my ($f) = split; glob($f) }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
 
 if ($ebcdic_code_page) {
+    die "$0 must be run on an ASCII platform" if ord("A") != 65;
+
     require './regen/charset_translations.pl';
 
     # Translation tables, so far only to 1047
@@ -138,7 +140,6 @@ if ($ebcdic_code_page) {
     my $charset = $charset[0];
     my $a2e = get_a2n($charset);
 
-    die "$0 must be run on an ASCII platform" if ord("A") != 65;
 
     print "Translating to EBCDIC...\n";
 
