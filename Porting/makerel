@@ -26,7 +26,7 @@ use warnings;
 
 use ExtUtils::Manifest qw(manicheck);
 $ExtUtils::Manifest::Quiet = 1;
-use Getopt::Std;
+use Getopt::Long;
 use Digest::SHA;
 
 $|=1;
@@ -47,12 +47,22 @@ usage: $0 [ -r rootdir ] [-s suffix ] [ -x ] [ -n ]
                  any further translation.)
 EOF
 
-my %opts;
-getopts('exncr:s:', \%opts) or usage;
+my $relroot = "..";
+my $suffix;
+my $additional_xz = 0;
+my $no_tarballs = 0;
+my $cleanup_first = 0;
+my $ebcdic_code_page = undef;
 
-@ARGV && usage;
-
-my $relroot = defined $opts{r} ? $opts{r} : "..";
+GetOptions (
+             "r=s" => \$relroot,
+             "s:s" => \$suffix,
+             "x"   => \$additional_xz,
+             "n"   => \$no_tarballs,
+             "c"   => \$cleanup_first,
+             "e"   => \$ebcdic_code_page,
+            )
+or die usage;
 
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
@@ -79,12 +89,12 @@ $lpatch_tags   = join "-", @lpatch_tags;
 my $perl = "perl-$vers";
 my $reldir = "$perl";
 
-$lpatch_tags = $opts{s} if defined $opts{s};
+$lpatch_tags = $suffix if defined $suffix;
 $reldir .= "-$lpatch_tags" if $lpatch_tags;
 
 print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 
-cleanup($relroot, $reldir) if $opts{c};
+cleanup($relroot, $reldir) if $cleanup_first;
 
 print "Cross-checking the MANIFEST...\n";
 my @missfile = manicheck();
@@ -100,7 +110,7 @@ print "\n";
 print "Creating $relroot/$reldir release directory...\n";
 die "$relroot/$reldir release directory already exists [consider using -c]\n"   if -e "$relroot/$reldir";
 die "$relroot/$reldir.tar.gz release file already exists [consider using -c]\n" if -e "$relroot/$reldir.tar.gz";
-die "$relroot/$reldir.tar.xz release file already exists [consider using -c]\n" if $opts{x} && -e "$relroot/$reldir.tar.xz";
+die "$relroot/$reldir.tar.xz release file already exists [consider using -c]\n" if $additional_xz && -e "$relroot/$reldir.tar.xz";
 mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
 
@@ -119,7 +129,7 @@ my @exe = map   { my ($f) = split; glob($f) }
           map   { split "\n" }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
 
-if ($opts{e}) {
+if ($ebcdic_code_page) {
     require './regen/charset_translations.pl';
 
     # Translation tables, so far only to 1047
@@ -269,7 +279,7 @@ warn $out if $out;
 
 chdir ".." or die $!;
 
-exit if $opts{n};
+exit if $no_tarballs;
 
 my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
 
@@ -277,7 +287,8 @@ my $tar_cmd = "tar cf - --format=ustar $reldir";
 
 my $output_7z;
 my $have_7z;
-if (! $opts{e}) {
+if (! $ebcdic_code_page) {
+
     print "Checking if you have 7z...\n";
     $output_7z = `7z 2>&1`;
     $have_7z = defined $output_7z && $output_7z =~ /7-Zip/;
@@ -302,7 +313,7 @@ if ($have_7z) {
     }
 }
 
-if ($opts{x}) {
+if ($additional_xz) {
     print "Creating and compressing the tar.xz file with xz...\n";
     $cmd = "$tar_cmd | xz -z -c > $reldir.tar.xz";
     system($cmd) == 0 or die "$cmd failed";
