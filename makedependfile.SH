@@ -132,11 +132,6 @@ esac
 	    -e p                                               \
 	-e '}' | $grep -v ":" ) >UU/$file.c
 
-    # We're not sure why this was there; the #endif is extraneous on modern z/OS
-    #if [ "$osname" = os390 -a "$file" = perly.c ]; then
-    #   $echo '#endif' >>UU/$file.c
-    #fi
-
     if [ "$osname" = os390 ]; then
         $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c | \
         $sed \
