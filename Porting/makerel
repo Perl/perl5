@@ -132,6 +132,81 @@ my @exe = map   { my ($f) = split; glob($f) }
 if ($ebcdic_code_page) {
     die "$0 must be run on an ASCII platform" if ord("A") != 65;
 
+    my @known_binary_files = qw(
+        cpan/Archive-Tar/t/src/linktest/linktest_missing_dir.tar
+        cpan/Archive-Tar/t/src/linktest/linktest_with_dir.tar
+        cpan/Archive-Tar/t/src/long/bar.tar
+        cpan/Archive-Tar/t/src/long/foo.tbz
+        cpan/Archive-Tar/t/src/long/foo.tgz
+        cpan/Archive-Tar/t/src/long/prefix-directory-concat.tar
+        cpan/Archive-Tar/t/src/short/bar.tar
+        cpan/Archive-Tar/t/src/short/foo.tbz
+        cpan/Archive-Tar/t/src/short/foo.tgz
+        cpan/Encode/t/big5-eten.enc
+        cpan/Encode/t/big5-hkscs.enc
+        cpan/Encode/t/enc_module.enc
+        cpan/Encode/t/gb2312.enc
+        cpan/Encode/t/jisx0201.enc
+        cpan/Encode/t/jisx0208.enc
+        cpan/Encode/t/jisx0212.enc
+        cpan/Encode/t/ksc5601.enc
+        cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm
+        cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch2/Config.pm
+        cpan/IO-Compress/t/files/bad-efs.zip
+        cpan/IO-Compress/t/files/encrypt-aes.zip
+        cpan/IO-Compress/t/files/encrypt-standard.zip
+        cpan/IO-Compress/t/files/jar.zip
+        cpan/IO-Compress/t/files/test.ods
+        cpan/IO-Compress/t/files/testfile1.odt
+        cpan/IO-Compress/t/files/time-invalid.zip
+        cpan/IO-Compress/t/files/time-zero.zip
+        cpan/IPC-Cmd/t/src/x.tgz
+        cpan/Pod-Checker/t/pod/empty.xr
+        os2/diff.configure
+        win32/perlexe.ico
+    );
+
+    my %known_binary_files;
+    $known_binary_files{$_} = 1 for @known_binary_files;
+
+    my @known_alien_encoding_files = qw(
+        cpan/Pod-Simple/t/corpus/2202jp.txt
+        cpan/Pod-Simple/t/corpus/2202jpx.txt
+        cpan/Pod-Simple/t/corpus/2202jpy.txt
+        cpan/Pod-Simple/t/corpus/2202jpz.txt
+        cpan/Pod-Simple/t/corpus/8859_7.pod
+        cpan/Pod-Simple/t/corpus/cp1256.txt
+        cpan/Pod-Simple/t/corpus/fet_cont.txt
+        cpan/Pod-Simple/t/corpus/fet_dup.txt
+        cpan/Pod-Simple/t/corpus/iso6.txt
+        cpan/Pod-Simple/t/corpus/koi8r.txt
+        cpan/Pod-Simple/t/corpus/laozi38.txt
+        cpan/Pod-Simple/t/corpus/laozi38b.txt
+        cpan/Pod-Simple/t/corpus/laozi38p.pod
+        cpan/Pod-Simple/t/corpus/nonesuch.txt
+        cpan/Pod-Simple/t/corpus/pasternak_cp1251.txt
+        cpan/Pod-Simple/t/corpus/s2763_sjis.txt
+        cpan/Pod-Simple/t/corpus/thai_iso11.txt
+        cpan/Pod-Simple/t/corpus2/fiqhakbar_iso6.txt
+        cpan/Pod-Simple/t/enc-chars.t
+        cpan/Pod-Simple/t/encod02.t
+        cpan/Pod-Simple/t/encod03.t
+    );
+
+    my %known_alien_encoding_files;
+    $known_alien_encoding_files{$_} = 1 for @known_alien_encoding_files;
+
+    my @known_utf16_files = qw(
+        cpan/CPAN-Meta-YAML/t/data/utf_16_le_bom.yml
+        cpan/Module-Metadata/corpus/BOMTest/UTF16BE.pm
+        cpan/Module-Metadata/corpus/BOMTest/UTF16LE.pm
+        cpan/Pod-Simple/t/corpus2/polish_utf16be_bom.txt
+        cpan/Pod-Simple/t/corpus2/polish_utf16le_bom.txt
+    );
+
+    my %known_utf16_files;
+    $known_utf16_files{$_} = 1 for @known_utf16_files;
+
     require './regen/charset_translations.pl';
 
     # Translation tables, so far only to 1047
@@ -165,12 +240,14 @@ if ($ebcdic_code_page) {
         if ($potential_BOM eq "\xFE\xFF") {
             $utf16_high = 0;
             $utf16_low = 1;
-            print STDERR "$file is UTF-16BE\n";
+            print STDERR "$file is UTF-16BE\n"
+                                            unless $known_utf16_files{$file};
         }
         elsif ($potential_BOM eq "\xFF\xFE") {
             $utf16_high = 1;
             $utf16_low = 0;
-            print STDERR "$file is UTF-16LE\n";
+            print STDERR "$file is UTF-16LE\n"
+                                            unless $known_utf16_files{$file};
         }
 
         if ($utf16_high || $utf16_low) {
@@ -210,7 +287,8 @@ if ($ebcdic_code_page) {
             }
 
             if ($has_alien_encoding) {
-                print STDERR "$file has alien encoding\n";
+                print STDERR "$file has alien encoding\n"
+                                    unless $known_alien_encoding_files{$file};
                 close $fh or die "Couldn't close $file: $!";
                 next;
             }
@@ -235,7 +313,8 @@ if ($ebcdic_code_page) {
             }
             elsif (! -T $file) {   # Binary files aren't translated (don't use
                                    # -B, because that accepts empty files)
-                print STDERR "$file is binary\n";
+                print STDERR "$file is binary\n"
+                                            unless $known_binary_files{$file};
                 close $fh or die "Couldn't close $file: $!";
                 next;
             }
