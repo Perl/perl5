@@ -144,7 +144,8 @@ if ($ebcdic_code_page) {
     print "Translating to EBCDIC...\n";
 
     open my $mani_fh, "<", "MANIFEST" or die "Can't read copied MANIFEST: $!";
-    my @manifest = <$mani_fh>;  # Slurp in whole thing before the file gets trashed
+    my @manifest = <$mani_fh>;  # Slurp in whole thing before the file gets
+                                # trashed
     close $mani_fh or die "Couldn't close MANIFEST: $!";
     while (defined ($_ = shift @manifest)) {
         chomp;
