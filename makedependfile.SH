@@ -132,7 +132,9 @@ esac
 	    -e 's|[ 	]*/\*\*[^/].*$||'                      \
             -e 's/.\{255\}/&\n/g'                              \
 	    -e p                                               \
-	-e '}' | $grep -v ":" ) >UU/$file.c
+	-e '}'                                                 \
+	-e '/^#.*git_version\.h/d' \
+        | $grep -v ":" ) >UU/$file.c
 
     $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
     $sed \
@@ -146,7 +148,6 @@ esac
         -e '/^#.*"-"/d' \
         -e '/^#.*"\/.*\/"/d' \
         -e '/: file path prefix .* never used$/d' \
-        -e '/^#.*git_version\.h/d' \
         -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
         -e 's/^[	 ]*#[	 ]*line/#/' \
         -e '/^# *[0-9][0-9]* *[".\/]/!d' \
