@@ -391,6 +391,11 @@ since the syntax hides the C<BEGIN> sub.
 
 [GH #24464]
 
+=item *
+
+Many potential threads-related race conditions have been fixed in the perl
+core and the two L<threads> and L<threads::shared> modules.
+
 =back
 
 =head1 Known Problems
