@@ -132,29 +132,29 @@ esac
 	    -e p                                               \
 	-e '}' | $grep -v ":" ) >UU/$file.c
 
-        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
-        $sed \
-	    -e '1d' \
-	    -e '/^#.*<stdin>/d' \
-            -e '/^#.*<builtin>/d' \
-            -e '/^#.*<built-in>/d' \
-            -e '/^#.*<command line>/d' \
-            -e '/^#.*<command-line>/d' \
-            -e '/".*In file included from.*:/d' \
-	    -e '/^#.*"-"/d' \
-	    -e '/^#.*"\/.*\/"/d' \
-	    -e '/: file path prefix .* never used$/d' \
-	    -e '/^#.*git_version\.h/d' \
-	    -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
-	    -e 's/^[	 ]*#[	 ]*line/#/' \
-	    -e '/^# *[0-9][0-9]* *[".\/]/!d' \
-	    -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
-	    -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
-	    -e 's|: \./|: |' \
-            -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr | \
-        $uniq | $sort | $uniq >> $outfile
-        rm $$.cout
-        rm $$.cerr
+    $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
+    $sed \
+        -e '1d' \
+        -e '/^#.*<stdin>/d' \
+        -e '/^#.*<builtin>/d' \
+        -e '/^#.*<built-in>/d' \
+        -e '/^#.*<command line>/d' \
+        -e '/^#.*<command-line>/d' \
+        -e '/".*In file included from.*:/d' \
+        -e '/^#.*"-"/d' \
+        -e '/^#.*"\/.*\/"/d' \
+        -e '/: file path prefix .* never used$/d' \
+        -e '/^#.*git_version\.h/d' \
+        -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
+        -e 's/^[	 ]*#[	 ]*line/#/' \
+        -e '/^# *[0-9][0-9]* *[".\/]/!d' \
+        -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
+        -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
+        -e 's|: \./|: |' \
+        -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr | \
+    $uniq | $sort | $uniq >> $outfile
+    rm $$.cout
+    rm $$.cerr
     $echo "$filebase\$(OBJ_EXT): $@" >>$outfile
 
 !NO!SUBS!
