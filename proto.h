@@ -3895,6 +3895,15 @@ Perl_newOP(pTHX_ I32 optype, I32 flags)
 #define PERL_ARGS_ASSERT_NEWOP                  \
         Perl_assert_aTHX
 
+PERL_CALLCONV OP *
+Perl_newOPTARROWOP(pTHX_ OP *deref_op, OP *lhs_op)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWOPTARROWOP          \
+        Perl_assert_aTHX; assert(deref_op); assert(lhs_op)
+
 PERL_CALLCONV PADNAMELIST *
 Perl_newPADNAMELIST(size_t max)
         __attribute__warn_unused_result__;
@@ -8788,6 +8797,15 @@ Perl_ck_open(pTHX_ OP *o)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_CK_OPEN               \
+        Perl_assert_aTHX; assert(o)
+
+PERL_CALLCONV OP *
+Perl_ck_optarrow(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_OPTARROW           \
         Perl_assert_aTHX; assert(o)
 
 PERL_CALLCONV OP *

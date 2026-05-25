@@ -2640,6 +2640,13 @@ C<push>, C<pop>, C<shift>, C<splice>, C<unshift>, and C<values> to be called wit
 scalar argument.  This experiment is considered unsuccessful, and
 has been removed.  The C<postderef> feature may meet your needs better.
 
+=item Experimental "?->" operator requires 'use feature "optional_chaining"'
+
+(F) The C<< ?-> >> safe navigation operator is experimental and must be
+explicitly enabled:
+
+    use feature 'optional_chaining';
+
 =item Experimental subroutine signatures not enabled
 
 (F) To use subroutine signatures, you must first enable them:
@@ -5033,6 +5040,14 @@ was expecting an operator.  The parser has assumed you really meant to
 use an operator, but this is highly likely to be incorrect.  For
 example, if you say "*foo *foo" it will be interpreted as if you said
 "*foo * 'foo'".
+
+=item optional chaining is experimental
+
+(S experimental::optional_chaining) The C<< ?-> >> safe navigation operator
+is experimental. If you want to use the feature, disable the warning with
+C<no warnings 'experimental::optional_chaining'>, but know that in doing
+so you are taking the risk that your code may break in a future Perl
+version.
 
 =item Optional parameter lacks default expression
 

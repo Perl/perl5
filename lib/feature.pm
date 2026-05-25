@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 
 our %feature = (
     fc                              => 'feature_fc',
@@ -31,6 +31,7 @@ our %feature = (
     declared_refs                   => 'feature_myref',
     unicode_strings                 => 'feature_unicode',
     multidimensional                => 'feature_multidimensional',
+    optional_chaining               => 'feature_optional_chaining',
     bareword_filehandles            => 'feature_bareword_filehandles',
     extra_paired_delimiters         => 'feature_more_delims',
     apostrophe_as_package_separator => 'feature_apos_as_name_sep',
@@ -46,7 +47,7 @@ our %feature_bundle = (
     "5.37"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures smartmatch state unicode_eval unicode_strings)],
     "5.39"    => [qw(apostrophe_as_package_separator bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures smartmatch state try unicode_eval unicode_strings)],
     "5.41"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state try unicode_eval unicode_strings)],
-    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer enhanced_xx evalbytes extra_paired_delimiters fc indirect isa keyword_all keyword_any module_true multidimensional postderef_qq refaliasing say signatures smartmatch state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(apostrophe_as_package_separator bareword_filehandles bitwise class current_sub declared_refs defer enhanced_xx evalbytes extra_paired_delimiters fc indirect isa keyword_all keyword_any module_true multidimensional optional_chaining postderef_qq refaliasing say signatures smartmatch state switch try unicode_eval unicode_strings)],
     "default" => [qw(apostrophe_as_package_separator bareword_filehandles indirect multidimensional smartmatch)],
 );
 
@@ -415,6 +416,78 @@ to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
 
 This feature is available starting in Perl 5.36.
+
+=head2 The 'optional_chaining' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::optional_chaining";
+
+This feature enables the C<< ?-> >> safe navigation operator.  It behaves
+exactly like C<< -> >> except that when the left-hand side is C<undef> the
+entire expression short-circuits to C<undef> (in scalar context) or an empty
+list (in list context), rather than throwing a runtime error.
+
+    use feature 'optional_chaining';
+    no warnings 'experimental::optional_chaining';
+
+=head3 Supported forms
+
+All dereference and invocation forms are supported:
+
+    $hash?->{key}          # hash element
+    $array?->[index]       # array element
+    $code?->()             # code reference call (no args)
+    $code?->(args)         # code reference call (with args)
+    $obj?->method          # method call (no args)
+    $obj?->method(args)    # method call (with args)
+    $obj?->&method         # lexical method call (my method)
+    $obj?->&method(args)   # lexical method call with args
+    $aref?->@*             # postfix array dereference
+    $href?->%*             # postfix hash dereference
+
+=head3 Short-circuit semantics
+
+When the left-hand side is C<undef>, the right-hand side — including any
+subscript expressions, arguments, or method names — is B<not> evaluated:
+
+    my $i = 0;
+    my $u = undef;
+    $u?->[$i++];   # $i is still 0 — subscript not evaluated
+    $u?->(f());    # f() is not called
+
+=head3 Chaining
+
+C<< ?-> >> can be chained; each step short-circuits independently:
+
+    my $city = $user?->{address}?->{city};
+    my $val  = $obj?->next?->value;
+
+=head3 Lvalue use
+
+When the left-hand side is defined, C<< ?-> >> can be used as an lvalue:
+
+    $hash?->{key} = 42;       # assigns if $hash is defined
+    $array?->[0]  = 99;       # assigns if $array is defined
+
+    ($h?->{k}, $other) = (1, 'x');  # list assignment; undef ?-> slot
+                                     # is silently skipped
+
+When the left-hand side is C<undef>, the assignment is silently discarded
+(no autovivification, no error).
+
+=head3 Equivalence
+
+    my $city = $user?->{address}?->{city};
+
+is equivalent to:
+
+    my $city = defined($user) && defined($user->{address})
+                   ? $user->{address}{city} : undef;
+
+This feature is available starting in Perl 5.44.
 
 =head2 The 'enhanced_xx' feature
 
