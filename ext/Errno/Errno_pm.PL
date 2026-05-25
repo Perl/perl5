@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.38";
+our $VERSION = "1.39";
 
 my %err = ();
 
@@ -58,7 +58,8 @@ sub process_file {
             warn "Cannot open '$file'";
             return;
 	}     
-    } elsif ($Config{gccversion} ne '' && $^O ne 'darwin' ) {
+    }
+    elsif ($Config{gccversion} ne '' && $^O ne 'darwin' && $^O ne 'os390') {
 	# With the -dM option, gcc outputs every #define it finds
 	unless(open(FH,"$Config{cc} -E -dM $Config{cppflags} $file |")) {
             warn "Cannot open '$file'";
@@ -245,7 +246,16 @@ sub write_errno_pm {
 		$inhibit_linemarkers;
 	    open(CPPO,"$cpp errno.c |") or
 		die "Cannot run '$cpp errno.c'";
-	} else {
+	} elsif ($^O eq 'os390') {
+	    # XXX This could be because the pipe is reading with the wrong
+	    # character set, so there may be a better way to solve this
+	    my $cpp = default_cpp() . $inhibit_linemarkers;
+            $cpp =~ s/ $Config{cppminus} \s* $ //x;
+	    system "$cpp errno.c > errno.i" ;
+	    open(CPPO,"<", 'errno.i') or die "Cannot open errno.i";
+            unlink 'errno.i';
+	}
+	else {
 	    my $cpp = default_cpp() . $inhibit_linemarkers;
 	    open(CPPO,"$cpp < errno.c |")
 		or die "Cannot exec $cpp";
