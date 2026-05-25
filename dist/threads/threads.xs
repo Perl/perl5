@@ -804,14 +804,10 @@ S_ithread_create(
 
 
     /* Allocate thread structure in context of the main thread's interpreter */
-    {
-        MUTEX_LOCK(&my_pool->create_destruct_mutex);
-        PERL_SET_CONTEXT(my_pool->main_thread.interp);
-        thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
-        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
-    }
-
+    PERL_SET_CONTEXT(my_pool->main_thread.interp);
+    thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
     PERL_SET_CONTEXT(aTHX);
+
     if (!thread) {
         {
           int fd = PerlIO_fileno(Perl_error_log);
