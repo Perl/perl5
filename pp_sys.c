@@ -2014,6 +2014,7 @@ PP_wrapped(pp_sysread, 0, 1)
         if (bufsize >= 256)
             bufsize = 255;
 #endif
+        const Sock_size_t namesize = bufsize;
         buffer = SvGROW(bufsv, (STRLEN)(length+1));
         /* 'offset' means 'flags' here */
         count = PerlSock_recvfrom(fd, buffer, length, offset,
@@ -2041,6 +2042,9 @@ PP_wrapped(pp_sysread, 0, 1)
         if (bufsize == sizeof namebuf)
             bufsize = 0;
 #endif
+        /* recvfrom() may return a length larger than the supplied buffer. */
+        if (bufsize > namesize)
+            bufsize = namesize;
         sv_setpvn(TARG, namebuf, bufsize);
         PUSHs(TARG);
         RETURN;
@@ -2834,6 +2838,7 @@ PP_wrapped(pp_accept, 2, 0)
 #else
     Sock_size_t len = sizeof namebuf;
 #endif
+    const Sock_size_t namesize = len;
     GV * const ggv = MUTABLE_GV(POPs);
     GV * const ngv = MUTABLE_GV(POPs);
     int fd;
@@ -2872,6 +2877,10 @@ PP_wrapped(pp_accept, 2, 0)
 #ifdef __SCO_VERSION__
     len = sizeof (struct sockaddr_in); /* OpenUNIX 8 somehow truncates info */
 #endif
+
+    /* accept() may return a length larger than the supplied buffer. */
+    if (len > namesize)
+        len = namesize;
 
     PUSHp(namebuf, len);
     RETURN;
@@ -2998,6 +3007,7 @@ PP_wrapped(pp_getpeername, 1, 0)
 #else
     len = 256;
 #endif
+    const Sock_size_t namesize = len;
     sv = sv_2mortal(newSV(len+1));
     (void)SvPOK_only(sv);
     SvCUR_set(sv, len);
@@ -3032,6 +3042,10 @@ PP_wrapped(pp_getpeername, 1, 0)
     if (len == BOGUS_GETNAME_RETURN)
         len = sizeof(struct sockaddr);
 #endif
+    /* getpeername() and getsockname() may return a length larger than the
+     * supplied buffer. */
+    if (len > namesize)
+        len = namesize;
     SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
     PUSHs(sv);
