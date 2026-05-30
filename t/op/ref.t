@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(265);
+plan(476);
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -240,6 +240,25 @@ for (
     my ($desc, $type, $ref) = @$_;
     is (ref $ref, $type, "ref() for ref to $desc");
     like ("$ref", qr/^$type\(0x[0-9a-f]+\)$/, "stringify for ref to $desc");
+
+    # Test the ref_cmp optimization
+    ok( (ref $ref eq $type), "op_ref_cmp: (ref eq $type)");
+    ok(!(ref $ref ne $type), "op_ref_cmp: (ref ne $type)");
+
+    my $o = bless {}, $type;
+    ok( (ref $o eq $type), "op_ref_cmp: (ref object eq $type)");
+    ok( !(ref $o ne $type), "op_ref_cmp: (ref object ne $type)");
+
+    ok( (builtin::reftype $ref eq $type), "op_ref_cmp: (reftype eq $type)");
+    ok(!(builtin::reftype $ref ne $type), "op_ref_cmp: (reftype ne $type)");
+
+    my $o = bless {}, $type;
+    ok( (builtin::reftype $o eq 'HASH'), "op_ref_cmp: (reftype object eq 'HASH')");
+    if ($desc =~ / hash$/) {
+        ok( !(builtin::reftype $o ne $type), "op_ref_cmp: (reftype object ne $type)");
+    } else {
+        ok( (builtin::reftype $o ne $type), "op_ref_cmp: (reftype object ne $type)");
+    }
 }
 
 is (ref *STDOUT{IO}, 'IO::File', 'IO refs are blessed into IO::File');
@@ -954,6 +973,68 @@ EOF
     }
 }
 
+# (ref $x eq/ne 'SOME-BUILTIN-TYPE) -> op_ref_cmp: further testing
+{
+    my ($rav, $rhv, $rcv, $rqr, $r) = ([], {}, sub{}, qr//, undef);
+
+    # Some generic, light testing of "ne" true results
+    ok( (ref \'SCALAR' ne 'HASH'), "ref_cmp: (ref \'SCALAR' ne 'HASH') is true");
+    ok( (ref $rav ne 'HASH'), "ref_cmp: (ref [] ne 'HASH') is true");
+
+    # Explicitly test jumping over cond_expr
+    $res = ref $rav eq 'ARRAY' ? 1 : 0;
+    is($res, 1, "ref_cmp: ref [] eq 'ARRAY' ? 1 : 0; yields 1");
+    $res = ref $rav eq 'HASH'  ? 1 : 0;
+    is($res, 0, "ref_cmp: ref [] eq 'HASH'  ? 1 : 0; yields 0");
+
+    $res = ref $rav ne 'HASH'  ? 1 : 0;
+    is($res, 1, "ref_cmp: ref [] ne 'HASH'  ? 1 : 0; yields 1");
+    $res = ref $rav ne 'ARRAY' ? 1 : 0;
+    is($res, 0, "ref_cmp: ref [] ne 'ARRAY' ? 1 : 0; yields 0");
+
+    # Explicitly test jumping over op_and
+    $res = ref $rav eq 'ARRAY' && 'OP_AND';
+    is($res, 'OP_AND', "ref_cmp: ref [] eq 'ARRAY' && 'OP_AND'; yields 'OP_AND'");
+    $res = ref $rav eq 'HASH' && 'OP_AND';
+    is($res, '', "ref_cmp: ref [] eq 'HASH' && 'OP_AND'; yields ''");
+
+    $res = ref $rav ne 'HASH' && 'OP_AND';
+    is($res, 'OP_AND', "ref_cmp: ref [] ne 'HASH' && 'OP_AND'; yields 'OP_AND'");
+    $res = ref $rav ne 'ARRAY' && 'OP_AND';
+    is($res, '', "ref_cmp: ref [] ne 'ARRAY' && 'OP_AND'; yields ''");
+
+    # Test that things work when the result of the comparison
+    # is immediately returned by a subroutine. Also tests the
+    # result when the argument is not SvROK.
+    sub eq_uer {
+        return ref $_[0] eq 'CODE';
+    }
+    ok(eq_uer( $rcv ), "ref_cmp: sub { $_[0] eq 'CODE' } return value is true");
+    ok( !eq_uer( 'CODE' ), "ref_cmp: sub { $_[0] eq 'CODE' } return value is false");
+
+    sub ne_ter {
+        return ref $_[0] ne 'HASH';
+    }
+    ok( !ne_ter( $rhv ), "ref_cmp: sub { $_[0] ne 'HASH' } return value is false");
+    ok( ne_ter( 'HASH' ), "ref_cmp: sub { $_[0] ne 'HASH' } return value is true");
+
+    sub eq_type {
+        return builtin::reftype $_[0] eq 'CODE';
+    }
+    ok(eq_type( $rcv), "ref_cmp: sub { $_[0] eq 'CODE' } reftype returns true");
+    sub ne_type {
+        return builtin::reftype $_[0] ne 'HASH';
+    }
+
+    # Testing for '' and 'Regexp', supported since common on CPAN
+    my $no;
+    ok( (ref $no eq ''), "ref_cmp: (ref \$undef eq '') is true");
+    ok( (builtin::reftype $no eq ''), "ref_cmp: (reftype \$undef eq '') is true");
+    ok( (ref $rqr eq 'Regexp'), "ref_cmp: (ref qr// eq 'Regexp') is true");
+    ok( (builtin::reftype $rqr eq 'REGEXP'), "ref_cmp: (reftype qr// eq 'REGEXP') is true");
+
+}
+
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();
 curr_test($test + 3);
@@ -974,4 +1055,3 @@ package FINALE;
 DESTROY {
     print $_[0][0];
 }
-

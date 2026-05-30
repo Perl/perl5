@@ -234,6 +234,7 @@ PERL_CALLCONV PP(pp_readline) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_readlink) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_redo) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_ref) __attribute__visibility__("hidden");
+PERL_CALLCONV PP(pp_ref_cmp) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_refaddr) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_refassign) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_refgen) __attribute__visibility__("hidden");

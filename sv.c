@@ -18589,6 +18589,9 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
                 : PL_op->op_type == OP_MULTICONCAT
                     && (PL_op->op_private & OPpMULTICONCAT_FAKE)
                 ? "sprintf"
+                : PL_op->op_type == OP_REF_CMP
+                ? ((PL_op->op_private & OPpREF_CMP_NE)
+                    ? "string ne" : "string eq")
                 : OP_DESC(PL_op);
         if (uninit_sv && PL_curpad) {
             varname = find_uninit_var(PL_op, uninit_sv, 0, &desc);

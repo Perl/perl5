@@ -199,7 +199,8 @@ use strict;
     # find which ops use 0,1,2,3 or 4 bits of op_private for arg count info
 
     $args0{$_} = 1 for qw(entersub avhvswitch
-                       rv2hv aelemfastlex_store);                  # UNOPs that usurp bit 0
+                       rv2hv aelemfastlex_store
+                       ref_cmp);                  # UNOPs that usurp bit 0
 
     # Historically, bit ops used bit 0 to indicate 'use integer' in scope;
     # For now, ban use of bits 0..1 as an arg count, in order to detect
@@ -950,6 +951,32 @@ addbits('methstart',
 addbits('initfield',
     1 => qw(OPpINITFIELD_AV INITFIELD_AV),
     2 => qw(OPpINITFIELD_HV INITFIELD_HV),
+);
+
+addbits('ref_cmp',
+    '0..3' => {
+        mask_def => 'OPpREF_CMP_MASK',
+        enum => [ qw(
+            1  OPpREF_CMP_ARRAY   ARRAY
+            2  OPpREF_CMP_HASH    HASH
+            3  OPpREF_CMP_CODE    CODE
+            4  OPpREF_CMP_REF     REF
+            5  OPpREF_CMP_SCALAR  SCALAR
+            6  OPpREF_CMP_GLOB    GLOB
+            7  OPpREF_CMP_REGEXP  REGEXP
+            8  OPpREF_CMP_OBJECT  OBJECT
+            9  OPpREF_CMP_LVALUE  LVALUE
+            10 OPpREF_CMP_IO      IO
+            11 OPpREF_CMP_FORMAT  FORMAT
+            12 OPpREF_CMP_VSTRING VSTRING
+            13 OPpREF_CMP_INVLIST INVLIST
+            14 OPpREF_CMP_REGEXP_PKG  Regexp
+            15 OPpREF_CMP_EMPTYSTR   emptyStr
+         )],
+    },
+    5 => qw(OPpREF_CMP_SKIPLOGOP SKIPLOGOP),
+    6 => qw(OPpREF_CMP_AND AND),
+    7 => qw(OPpREF_CMP_NE NE),
 );
 
 1;

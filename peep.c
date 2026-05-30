@@ -4403,6 +4403,14 @@ Perl_rpeep(pTHX_ OP *o)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
             break;
 
+        case OP_REF_CMP:
+            /* The OP will jump directly to the LOGOP's
+             * op_other or op_next pointer. */
+            if (o->op_next->op_type == OP_COND_EXPR)
+                o->op_private |= OPpREF_CMP_SKIPLOGOP;
+            else if (o->op_next->op_type == OP_AND)
+                o->op_private |= (OPpREF_CMP_SKIPLOGOP|OPpREF_CMP_AND);
+            break;
         case OP_CUSTOM: {
             Perl_cpeep_t cpeep =
                 XopENTRYCUSTOM(o, xop_peep);

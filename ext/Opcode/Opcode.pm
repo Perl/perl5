@@ -1,4 +1,4 @@
-package Opcode 1.71;
+package Opcode 1.72;
 
 use strict;
 
@@ -413,8 +413,8 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     once
 
-    rv2gv refgen srefgen ref refassign lvref lvrefslice lvavref
-    blessed refaddr reftype
+    rv2gv refgen srefgen ref ref_cmp refassign lvref lvrefslice
+    lvavref blessed refaddr reftype
 
     bless -- could be used to change ownership of objects
 	     (reblessing)

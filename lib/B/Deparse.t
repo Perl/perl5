@@ -3664,3 +3664,25 @@ elsif ($y) {
 map +{$_, 1}, 1;
 grep +{$_, 1}, 1;
 sort +{$_, 1}, @ARGV;
+####
+# Deparse of (ref($x) eq 'SOME-BUILTIN-TYPE') optimized into OP_REF_CMP
+my($x, $y);
+$y = ref $x eq 'SCALAR'  ? 'SCALAR'  : 'OTHER';
+$y = ref $x eq 'VSTRING' ? 'VSTRING' : 'OTHER';
+$y = ref $x eq 'REF'     ? 'REF'     : 'OTHER';
+$y = ref $x eq 'GLOB'    ? 'GLOB'    : 'OTHER';
+$y = ref $x eq 'LVALUE'  ? 'LVALUE'  : 'OTHER';
+$y = ref $x eq 'REGEXP'  ? 'REGEXP'  : 'OTHER';
+$y = ref $x eq 'ARRAY'   ? 'ARRAY'   : 'OTHER';
+$y = ref $x eq 'HASH'    ? 'HASH'    : 'OTHER';
+$y = ref $x eq 'CODE'    ? 'CODE'    : 'OTHER';
+$y = ref $x eq 'FORMAT'  ? 'FORMAT'  : 'OTHER';
+$y = ref $x eq 'IO'      ? 'IO'      : 'OTHER';
+####
+# Deparse of (ref($x) eq 'SOME-BUILTIN-TYPE') optimized into OP_REF_CMP
+my($x, $y);
+if (ref $x ne 'VSTRING') {
+();
+}
+$y = ref $x ne 'HASH' ? 'OTHER' : 'HASH';
+print 1 if ref $_[0] ne 'CODE';

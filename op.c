@@ -4486,6 +4486,60 @@ S_is_control_transfer(pTHX_ OP *op)
     return false;
 }
 
+static U8
+S_ref_cmp_type(pTHX_ OP * constop)
+{
+    SV *sv = cSVOPx_sv(constop);
+
+    if (!SvPOK(sv) || SvUTF8(sv)) return 0;
+
+    STRLEN len;
+    const char *str = SvPV_const(sv, len);
+
+    switch (len) {
+
+        case 0:
+            return OPpREF_CMP_EMPTYSTR;
+        case 2:
+            if (memcmp(str, "IO", 2) == 0)
+                return OPpREF_CMP_IO;
+            break;
+        case 3:
+            if (memcmp(str, "REF", 3) == 0)
+                return OPpREF_CMP_REF;
+            break;
+        case 4:
+            if (memcmp(str, "CODE", 4) == 0)
+                return OPpREF_CMP_CODE;
+            if (memcmp(str, "GLOB", 4) == 0)
+                return OPpREF_CMP_GLOB;
+            if (memcmp(str, "HASH", 4) == 0)
+                return OPpREF_CMP_HASH;
+            break;
+        case 5:
+            if (memcmp(str, "ARRAY", 5) == 0)
+                return OPpREF_CMP_ARRAY;
+            break;
+        case 6:
+            if (memcmp(str, "FORMAT", 6) == 0)
+                return OPpREF_CMP_FORMAT;
+            if (memcmp(str, "LVALUE", 6) == 0)
+                return OPpREF_CMP_LVALUE;
+            if (memcmp(str, "REGEXP", 6) == 0)
+                return OPpREF_CMP_REGEXP;
+            if (memcmp(str, "Regexp", 6) == 0)
+                return OPpREF_CMP_REGEXP_PKG;
+            if (memcmp(str, "SCALAR", 6) == 0)
+                return OPpREF_CMP_SCALAR;
+            break;
+        case 7:
+            if (memcmp(str, "VSTRING", 7) == 0)
+                return OPpREF_CMP_VSTRING;
+            break;
+    }
+    return 0;
+}
+
 OP *
 Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
 {
@@ -4500,8 +4554,36 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
         (void)S_is_control_transfer(aTHX_ left);
     if (!right)
         right = newOP(OP_NULL, 0);
+
+{
+    /* Check for ref/reftype $x eq/ne 'BUILTIN_TYPE' */
+    OP *splice = NULL;
+    U8 builtin_u8 = 0;
+
+    if ((OP_TYPE_IS(left, OP_REF) || OP_TYPE_IS(left, OP_REFTYPE))&& OP_TYPE_IS(right, OP_CONST)) {
+        splice = left;
+        builtin_u8 = S_ref_cmp_type(aTHX_ right);
+        goto ref_seqne_check;
+    } else if ((OP_TYPE_IS(right, OP_REF) || OP_TYPE_IS(right, OP_REFTYPE)) && OP_TYPE_IS(left, OP_CONST)) {
+        splice = right;
+        builtin_u8 = S_ref_cmp_type(aTHX_ left);
+      ref_seqne_check:
+        if ((type ==OP_SEQ || type == OP_SNE) && builtin_u8) {
+            U8 flags = OP_TYPE_IS(splice, OP_REFTYPE) ? OPf_SPECIAL : 0;
+            if (type == OP_SNE) builtin_u8 |= OPpREF_CMP_NE;
+            OP *referant = op_sibling_splice(splice,NULL,1,NULL);
+            scalar(referant);
+            op_free(left); op_free(right);
+            op = newUNOP(OP_REF_CMP, flags, referant);
+            op->op_private = builtin_u8;
+            return op;
+        }
+    }
+}
+
     scalar(left);
     scalar(right);
+
     NewOp(0, bop, 1, BINOP);
     op = (OP*)bop;
     ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP);
@@ -4562,6 +4644,10 @@ Perl_cmpchain_finish(pTHX_ OP *ch)
 
     if (ch->op_type != OP_NULL) {
         OPCODE cmpoptype = ch->op_type;
+
+        if (cmpoptype == OP_REF_CMP)
+            return ch;
+
         ch = CHECKOP(cmpoptype, ch);
         if(!ch->op_next && ch->op_type == cmpoptype)
             ch = fold_constants(op_integerize(op_std_init(ch)));
