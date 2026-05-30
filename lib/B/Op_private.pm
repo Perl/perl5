@@ -211,6 +211,29 @@ my @bf = (
         bitmask   => 15,
     },
     {
+        mask_def  => 'OPpREF_CMP_MASK',
+        bitmin    => 0,
+        bitmax    => 3,
+        bitmask   => 15,
+        enum      => [
+            1, 'OPpREF_CMP_ARRAY', 'ARRAY',
+            2, 'OPpREF_CMP_HASH', 'HASH',
+            3, 'OPpREF_CMP_CODE', 'CODE',
+            4, 'OPpREF_CMP_REF', 'REF',
+            5, 'OPpREF_CMP_SCALAR', 'SCALAR',
+            6, 'OPpREF_CMP_GLOB', 'GLOB',
+            7, 'OPpREF_CMP_REGEXP', 'REGEXP',
+            8, 'OPpREF_CMP_OBJECT', 'OBJECT',
+            9, 'OPpREF_CMP_LVALUE', 'LVALUE',
+            10, 'OPpREF_CMP_IO', 'IO',
+            11, 'OPpREF_CMP_FORMAT', 'FORMAT',
+            12, 'OPpREF_CMP_VSTRING', 'VSTRING',
+            13, 'OPpREF_CMP_INVLIST', 'INVLIST',
+            14, 'OPpREF_CMP_REGEXP_PKG', 'Regexp',
+            15, 'OPpREF_CMP_EMPTYSTR', 'emptyStr',
+        ],
+    },
+    {
         label     => 'range',
         mask_def  => 'OPpPADRANGE_COUNTMASK',
         bitcount_def => 'OPpPADRANGE_COUNTSHIFT',
@@ -279,10 +302,10 @@ $bits{abs}{0} = $bf[0];
 @{$bits{accept}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 @{$bits{add}}{1,0} = ($bf[1], $bf[1]);
 $bits{aeach}{0} = $bf[0];
-@{$bits{aelem}}{5,4,1,0} = ($bf[9], $bf[9], $bf[1], $bf[1]);
-@{$bits{aelemfast}}{7,6,5,4,3,2,1,0} = ($bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7]);
-@{$bits{aelemfast_lex}}{7,6,5,4,3,2,1,0} = ($bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7]);
-@{$bits{aelemfastlex_store}}{7,6,5,4,3,2,1,0} = ($bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7]);
+@{$bits{aelem}}{5,4,1,0} = ($bf[10], $bf[10], $bf[1], $bf[1]);
+@{$bits{aelemfast}}{7,6,5,4,3,2,1,0} = ($bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8]);
+@{$bits{aelemfast_lex}}{7,6,5,4,3,2,1,0} = ($bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8]);
+@{$bits{aelemfastlex_store}}{7,6,5,4,3,2,1,0} = ($bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8], $bf[8]);
 $bits{akeys}{0} = $bf[0];
 $bits{alarm}{0} = $bf[0];
 $bits{and}{0} = $bf[0];
@@ -293,7 +316,7 @@ $bits{anonconst}{0} = $bf[0];
 $bits{anywhile}{0} = $bf[0];
 $bits{argcheck}{0} = $bf[0];
 @{$bits{argdefelem}}{7,6,0} = ('OPpARG_IF_UNDEF', 'OPpARG_IF_FALSE', $bf[0]);
-@{$bits{argelem}}{2,1,0} = ($bf[8], $bf[8], $bf[0]);
+@{$bits{argelem}}{2,1,0} = ($bf[9], $bf[9], $bf[0]);
 @{$bits{atan2}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 $bits{av2arylen}{0} = $bf[0];
 $bits{avalues}{0} = $bf[0];
@@ -320,7 +343,7 @@ $bits{cmpchain_dup}{0} = $bf[0];
 @{$bits{concat}}{6,1,0} = ('OPpCONCAT_NESTED', $bf[1], $bf[1]);
 $bits{cond_expr}{0} = $bf[0];
 @{$bits{connect}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
-@{$bits{const}}{7,6,5,4,3,2,1} = ($bf[11], $bf[11], 'OPpCONST_BARE', 'OPpCONST_ENTERED', 'OPpCONST_STRICT', 'OPpCONST_SHORTCIRCUIT', 'OPpCONST_NOVER');
+@{$bits{const}}{7,6,5,4,3,2,1} = ($bf[12], $bf[12], 'OPpCONST_BARE', 'OPpCONST_ENTERED', 'OPpCONST_STRICT', 'OPpCONST_SHORTCIRCUIT', 'OPpCONST_NOVER');
 @{$bits{coreargs}}{7,6,1,0} = ('OPpCOREARGS_PUSHMARK', 'OPpCOREARGS_SCALARMOD', 'OPpCOREARGS_DEREF2', 'OPpCOREARGS_DEREF1');
 $bits{cos}{0} = $bf[0];
 @{$bits{crypt}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
@@ -339,7 +362,7 @@ $bits{each}{0} = $bf[0];
 @{$bits{entereval}}{6,5,4,3,2,1,0} = ('OPpEVAL_EVALSV', 'OPpEVAL_RE_REPARSING', 'OPpEVAL_COPHH', 'OPpEVAL_BYTES', 'OPpEVAL_UNICODE', 'OPpEVAL_HAS_HH', $bf[0]);
 $bits{entergiven}{0} = $bf[0];
 $bits{enteriter}{3} = 'OPpITER_DEF';
-@{$bits{entersub}}{5,4,0} = ($bf[9], $bf[9], 'OPpENTERSUB_INARGS');
+@{$bits{entersub}}{5,4,0} = ($bf[10], $bf[10], 'OPpENTERSUB_INARGS');
 $bits{entertry}{0} = $bf[0];
 $bits{entertrycatch}{0} = $bf[0];
 $bits{enterwhen}{0} = $bf[0];
@@ -412,7 +435,7 @@ $bits{grepwhile}{0} = $bf[0];
 @{$bits{gsockopt}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 @{$bits{gt}}{1,0} = ($bf[1], $bf[1]);
 $bits{gv}{5} = 'OPpEARLY_CV';
-@{$bits{helem}}{5,4,1,0} = ($bf[9], $bf[9], $bf[1], $bf[1]);
+@{$bits{helem}}{5,4,1,0} = ($bf[10], $bf[10], $bf[1], $bf[1]);
 @{$bits{helemexistsor}}{7,0} = ('OPpHELEMEXISTSOR_DELETE', $bf[0]);
 $bits{hex}{0} = $bf[0];
 @{$bits{i_add}}{1,0} = ($bf[1], $bf[1]);
@@ -466,7 +489,7 @@ $bits{log}{0} = $bf[0];
 $bits{lstat}{0} = $bf[0];
 @{$bits{lt}}{1,0} = ($bf[1], $bf[1]);
 $bits{lvavref}{0} = $bf[0];
-@{$bits{lvref}}{5,4,0} = ($bf[10], $bf[10], $bf[0]);
+@{$bits{lvref}}{5,4,0} = ($bf[11], $bf[11], $bf[0]);
 $bits{mapstart}{0} = $bf[0];
 $bits{mapwhile}{0} = $bf[0];
 $bits{method}{0} = $bf[0];
@@ -499,8 +522,8 @@ $bits{orassign}{0} = $bf[0];
 $bits{ord}{0} = $bf[0];
 @{$bits{pack}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 $bits{padhv}{0} = 'OPpPADHV_ISKEYS';
-@{$bits{padrange}}{6,5,4,3,2,1,0} = ($bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6]);
-@{$bits{padsv}}{5,4} = ($bf[9], $bf[9]);
+@{$bits{padrange}}{6,5,4,3,2,1,0} = ($bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7], $bf[7]);
+@{$bits{padsv}}{5,4} = ($bf[10], $bf[10]);
 $bits{padsv_store}{0} = $bf[0];
 $bits{paramstore}{0} = $bf[0];
 @{$bits{paramtest}}{7,6,0} = ('OPpPARAM_IF_UNDEF', 'OPpPARAM_IF_FALSE', $bf[0]);
@@ -525,8 +548,9 @@ $bits{readlink}{0} = $bf[0];
 @{$bits{recv}}{3,2,1,0} = ($bf[5], $bf[5], $bf[5], $bf[5]);
 $bits{redo}{0} = $bf[0];
 $bits{ref}{0} = $bf[0];
+@{$bits{ref_cmp}}{7,6,5,3,2,1,0} = ('OPpREF_CMP_NE', 'OPpREF_CMP_AND', 'OPpREF_CMP_SKIPLOGOP', $bf[6], $bf[6], $bf[6], $bf[6]);
 $bits{refaddr}{0} = $bf[0];
-@{$bits{refassign}}{5,4,1,0} = ($bf[10], $bf[10], $bf[1], $bf[1]);
+@{$bits{refassign}}{5,4,1,0} = ($bf[11], $bf[11], $bf[1], $bf[1]);
 $bits{refgen}{0} = $bf[0];
 $bits{reftype}{0} = $bf[0];
 $bits{regcmaybe}{0} = $bf[0];
@@ -542,9 +566,9 @@ $bits{rewinddir}{0} = $bf[0];
 $bits{rmdir}{0} = $bf[0];
 $bits{rv2av}{0} = $bf[0];
 @{$bits{rv2cv}}{7,5,0} = ('OPpENTERSUB_NOPAREN', 'OPpMAY_RETURN_CONSTANT', $bf[0]);
-@{$bits{rv2gv}}{6,5,4,2,0} = ('OPpALLOW_FAKE', $bf[9], $bf[9], 'OPpDONT_INIT_GV', $bf[0]);
+@{$bits{rv2gv}}{6,5,4,2,0} = ('OPpALLOW_FAKE', $bf[10], $bf[10], 'OPpDONT_INIT_GV', $bf[0]);
 $bits{rv2hv}{0} = 'OPpRV2HV_ISKEYS';
-@{$bits{rv2sv}}{5,4,0} = ($bf[9], $bf[9], $bf[0]);
+@{$bits{rv2sv}}{5,4,0} = ($bf[10], $bf[10], $bf[0]);
 @{$bits{sassign}}{7,6,1,0} = ('OPpASSIGN_CV_TO_GV', 'OPpASSIGN_BACKWARDS', $bf[1], $bf[1]);
 $bits{scalar}{0} = $bf[0];
 $bits{schomp}{0} = $bf[0];
@@ -735,6 +759,25 @@ our %defines = (
     OPpPARAM_IF_UNDEF        => 128,
     OPpPV_IS_UTF8            => 128,
     OPpREFCOUNTED            =>  64,
+    OPpREF_CMP_AND           =>  64,
+    OPpREF_CMP_ARRAY         =>   1,
+    OPpREF_CMP_CODE          =>   3,
+    OPpREF_CMP_EMPTYSTR      =>  15,
+    OPpREF_CMP_FORMAT        =>  11,
+    OPpREF_CMP_GLOB          =>   6,
+    OPpREF_CMP_HASH          =>   2,
+    OPpREF_CMP_INVLIST       =>  13,
+    OPpREF_CMP_IO            =>  10,
+    OPpREF_CMP_LVALUE        =>   9,
+    OPpREF_CMP_MASK          =>  15,
+    OPpREF_CMP_NE            => 128,
+    OPpREF_CMP_OBJECT        =>   8,
+    OPpREF_CMP_REF           =>   4,
+    OPpREF_CMP_REGEXP        =>   7,
+    OPpREF_CMP_REGEXP_PKG    =>  14,
+    OPpREF_CMP_SCALAR        =>   5,
+    OPpREF_CMP_SKIPLOGOP     =>  32,
+    OPpREF_CMP_VSTRING       =>  12,
     OPpREPEAT_DOLIST         =>  64,
     OPpREVERSE_INPLACE       =>   8,
     OPpRV2HV_ISKEYS          =>   1,
@@ -861,6 +904,24 @@ our %labels = (
     OPpPARAM_IF_UNDEF        => 'IF_UNDEF',
     OPpPV_IS_UTF8            => 'UTF',
     OPpREFCOUNTED            => 'REFC',
+    OPpREF_CMP_AND           => 'AND',
+    OPpREF_CMP_ARRAY         => 'ARRAY',
+    OPpREF_CMP_CODE          => 'CODE',
+    OPpREF_CMP_EMPTYSTR      => 'emptyStr',
+    OPpREF_CMP_FORMAT        => 'FORMAT',
+    OPpREF_CMP_GLOB          => 'GLOB',
+    OPpREF_CMP_HASH          => 'HASH',
+    OPpREF_CMP_INVLIST       => 'INVLIST',
+    OPpREF_CMP_IO            => 'IO',
+    OPpREF_CMP_LVALUE        => 'LVALUE',
+    OPpREF_CMP_NE            => 'NE',
+    OPpREF_CMP_OBJECT        => 'OBJECT',
+    OPpREF_CMP_REF           => 'REF',
+    OPpREF_CMP_REGEXP        => 'REGEXP',
+    OPpREF_CMP_REGEXP_PKG    => 'Regexp',
+    OPpREF_CMP_SCALAR        => 'SCALAR',
+    OPpREF_CMP_SKIPLOGOP     => 'SKIPLOGOP',
+    OPpREF_CMP_VSTRING       => 'VSTRING',
     OPpREPEAT_DOLIST         => 'DOLIST',
     OPpREVERSE_INPLACE       => 'INPLACE',
     OPpRV2HV_ISKEYS          => 'KEYS',
@@ -940,6 +1001,7 @@ our %ops_using = (
     OPpPARAM_IF_FALSE        => [qw(paramtest)],
     OPpPV_IS_UTF8            => [qw(dump goto last next redo)],
     OPpREFCOUNTED            => [qw(leave leaveeval leavesub leavesublv leavewrite)],
+    OPpREF_CMP_AND           => [qw(ref_cmp)],
     OPpREPEAT_DOLIST         => [qw(repeat)],
     OPpREVERSE_INPLACE       => [qw(reverse)],
     OPpRV2HV_ISKEYS          => [qw(rv2hv)],
@@ -987,6 +1049,8 @@ $ops_using{OPpOPEN_IN_RAW} = $ops_using{OPpOPEN_IN_CRLF};
 $ops_using{OPpOPEN_OUT_CRLF} = $ops_using{OPpOPEN_IN_CRLF};
 $ops_using{OPpOPEN_OUT_RAW} = $ops_using{OPpOPEN_IN_CRLF};
 $ops_using{OPpPARAM_IF_UNDEF} = $ops_using{OPpPARAM_IF_FALSE};
+$ops_using{OPpREF_CMP_NE} = $ops_using{OPpREF_CMP_AND};
+$ops_using{OPpREF_CMP_SKIPLOGOP} = $ops_using{OPpREF_CMP_AND};
 $ops_using{OPpSELF_IN_PAD} = $ops_using{OPpINITFIELDS};
 $ops_using{OPpSLICE} = $ops_using{OPpKVSLICE};
 $ops_using{OPpSORT_INPLACE} = $ops_using{OPpSORT_DESCEND};

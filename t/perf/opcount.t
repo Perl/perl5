@@ -1339,4 +1339,21 @@ test_opcount(0, "Don't fold string repetition above a multiplier threshold",
                     repeat      => 1,
                 });
 
+# OP_REF_SEQ
+test_opcount(0, "(ref \$x eq 'SCALAR') optimizes to OP_REF_SEQ",
+                sub { (ref $_ eq 'SCALAR') and print; },
+                {
+                    const => 0,
+                    ref   => 0,
+                    seq   => 0
+                });
+
+test_opcount(0, "(ref \$x ne 'SCALAR') optimizes to OP_REF_SEQ",
+                sub { (ref $_ eq 'SCALAR') and print; },
+                {
+                    const => 0,
+                    ref   => 0,
+                    seq   => 0
+                });
+
 done_testing();

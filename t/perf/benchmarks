@@ -2025,6 +2025,28 @@
         code    => '$x = ref $r',
     },
 
+    # These patterns optimized into an OP_REF_CMP
+    'func::ref_cmp::eq_true' => {
+        desc    => '(ref $r eq "ARRAY") is true',
+        setup   => 'my $r = []',
+        code    => 'if (ref $r eq "ARRAY") {}',
+    },
+    'func::ref_cmp::eq_false' => {
+        desc    => '(ref $r eq "ARRAY") is false',
+        setup   => 'my $r = []',
+        code    => 'if (ref $r eq "HASH") {}',
+    },
+    'func::ref_cmp::ne_false' => {
+        desc    => '(ref $r ne "SCALAR") is true',
+        setup   => 'my $r = []',
+        code    => 'if (ref $r ne "SCALAR") {}',
+    },
+    'func::ref_cmp::ne_true' => {
+        desc    => '(ref $r ne "SCALAR") is false',
+        setup   => 'my $r = []',
+        code    => 'if (ref $r ne "ARRAY") {}',
+    },
+
     'func::sort::num' => {
         desc    => 'plain numeric sort',
         setup   => 'my (@a, @b); @a = reverse 1..10;',

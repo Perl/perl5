@@ -582,6 +582,191 @@ PP(pp_ref)
 
 }
 
+/* Optimized ref + eq, ref + ne, reftype + eq, or reftype +ne,
+ * where the comparison is with a constant string matching one
+ * of the built-in types:
+ * SCALAR:     SCALAR, VSTRING, REF, GLOB, LVALUE, REGEXP
+ * NON-SCALAR: ARRAY, HASH, CODE, FORMAT, IO
+ * or the empty string ''.
+ *
+ * It also supports the matching 'Regexp' for qr// patterns,
+ * but this can only ever match with ref not reftype.
+*/
+
+PP(pp_ref_cmp)
+{
+    const U8 op_private = PL_op->op_private;
+    const U8 wanted = op_private & OPpREF_CMP_MASK;
+
+    SV * const sv = *PL_stack_sp;
+    SvGETMAGIC(sv);
+
+    if (LIKELY(SvROK(sv))) {
+        SV * const rsv = SvRV(sv);
+        bool is_reftype = PL_op->op_flags & OPf_SPECIAL;
+        if (UNLIKELY(!is_reftype && SvOBJECT(rsv))) {
+            HEK * namehek = HvNAME_HEK(SvSTASH(rsv));
+            if (namehek) {
+                /* Note: There's potential to juice this path further by storing the U32 hash
+                 *       of the desired value and comparing it to namehek's hash.
+                 *       The existing length comparisons may be a good enough filter... */
+                I32 namelen = HEK_LEN(namehek);
+                assert(namelen != HEf_SVKEY); /* Stash name HEKs are never HEf_SVKEY */
+
+                if ((U32)namelen <= 7) { /* Is it 0-7 chars long? */
+                    const char * name = HEK_KEY(namehek);
+                    switch(namelen) {
+                        case 0:
+                            if (wanted == (OPpREF_CMP_EMPTYSTR))
+                                goto matched;
+                            break;
+                        case 2:
+                            if (wanted == (OPpREF_CMP_IO) && memEQs(name,2,"IO"))
+                                goto matched;
+                            break;
+                        case 3:
+                            if (wanted == (OPpREF_CMP_REF) && memEQs(name,3,"REF"))
+                                goto matched;
+                            break;
+                        case 4:
+                            if ( (wanted == (OPpREF_CMP_CODE) && memEQs(name,4,"CODE"))
+                              || (wanted == (OPpREF_CMP_GLOB) && memEQs(name,4,"GLOB"))
+                              || (wanted == (OPpREF_CMP_HASH) && memEQs(name,4,"HASH"))
+                            )
+                                goto matched;
+                            break;
+                        case 5:
+                            if (wanted == (OPpREF_CMP_ARRAY) && memEQs(name,5,"ARRAY"))
+                                goto matched;
+                            break;
+                        case 6:
+                            if ( (wanted == (OPpREF_CMP_SCALAR) && memEQs(name,6,"SCALAR"))
+                              || (wanted == (OPpREF_CMP_LVALUE) && memEQs(name,6,"LVALUE"))
+                              || (wanted == (OPpREF_CMP_REGEXP) && memEQs(name,6,"REGEXP"))
+                              || (wanted == (OPpREF_CMP_REGEXP_PKG) && memEQs(name,6,"Regexp"))
+                              || (wanted == (OPpREF_CMP_FORMAT) && memEQs(name,6,"FORMAT"))
+                            )
+                                goto matched;
+                            break;
+                        case 7:
+                            if (wanted == (OPpREF_CMP_VSTRING) && memEQs(name,7,"VSTRING"))
+                                goto matched;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        } else {
+            /* Loosly aligns with "dodgy type check" in Perl_sv_reftype */
+            switch(SvTYPE(rsv)) {
+                case SVt_NULL:
+                case SVt_IV:
+                case SVt_NV:
+                case SVt_PV:
+                case SVt_PVIV:
+                case SVt_PVNV:
+                case SVt_PVMG:
+                    if (SvVOK(rsv)) {
+                        if (wanted == OPpREF_CMP_VSTRING)
+                            goto matched;
+                    } else if (SvROK(rsv)) {
+                        if (wanted == OPpREF_CMP_REF)
+                            goto matched;
+                    } else if (wanted == OPpREF_CMP_SCALAR)
+                        goto matched;
+                    break;
+                case SVt_PVLV:
+                    if (SvROK(rsv)) {
+                        if (wanted == OPpREF_CMP_REF)
+                            goto matched;
+                    } else if (isALPHA_FOLD_EQ(LvTYPE(rsv), 't')) {
+                        if (wanted == (OPpREF_CMP_SCALAR))
+                            goto matched;
+                    } else {
+                        if (wanted == OPpREF_CMP_LVALUE)
+                            goto matched;
+                    }
+                    break;
+                case SVt_PVGV:
+                    if (isGV_with_GP(rsv)) {
+                        if (wanted == OPpREF_CMP_GLOB)
+                            goto matched;
+                    } else {
+                        if (wanted == (OPpREF_CMP_SCALAR))
+                            goto matched;
+                    }
+                    break;
+                case SVt_REGEXP:
+                    if (wanted == OPpREF_CMP_REGEXP)
+                        goto matched;
+                    break;
+                case SVt_PVAV:
+                    if (wanted == OPpREF_CMP_ARRAY)
+                        goto matched;
+                    break;
+                case SVt_PVHV:
+                    if (wanted == OPpREF_CMP_HASH)
+                        goto matched;
+                    break;
+                case SVt_PVCV:
+                    if (wanted == OPpREF_CMP_CODE)
+                         goto matched;
+                    break;
+                case SVt_PVFM:
+                    if (wanted == OPpREF_CMP_FORMAT)
+                        goto matched;
+                    break;
+                case SVt_PVIO:
+                    if (wanted == OPpREF_CMP_IO)
+                        goto matched;
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        if ((PL_op->op_flags & OPf_SPECIAL) && !PL_localizing
+            && ckWARN(WARN_UNINITIALIZED)) {
+
+            report_uninit(NULL);
+        }
+        if (wanted == OPpREF_CMP_EMPTYSTR)
+            goto matched;
+    }
+
+    /* No match */
+    if (op_private & OPpREF_CMP_NE) goto matched_for_real;
+
+    not_matched:
+    if (LIKELY(op_private & OPpREF_CMP_SKIPLOGOP)) {
+        OP *next = PL_op->op_next;
+        assert( OP_TYPE_IS(next, OP_COND_EXPR) || OP_TYPE_IS(next, OP_AND) );
+        if (op_private & OPpREF_CMP_AND)
+            rpp_replace_1_IMM_NN(&PL_sv_no);
+        else
+            rpp_popfree_1();
+        return cLOGOPx(next)->op_next;
+    }
+    rpp_replace_1_IMM_NN(&PL_sv_no);
+    return NORMAL;
+
+    /* Match found */
+    matched:
+    if (op_private & OPpREF_CMP_NE) {
+        goto not_matched;
+    }
+    matched_for_real:
+    if (LIKELY(op_private & OPpREF_CMP_SKIPLOGOP)) {
+        rpp_popfree_1();
+        OP *next = PL_op->op_next;
+        assert( OP_TYPE_IS(next, OP_COND_EXPR) || OP_TYPE_IS(next, OP_AND) );
+        return cLOGOPx(next)->op_other;
+    }
+    rpp_replace_1_IMM_NN(&PL_sv_yes);
+    return NORMAL;
+
+}
 
 PP(pp_bless)
 {
