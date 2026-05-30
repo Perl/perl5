@@ -4683,7 +4683,7 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 }
 
 
-U64
+U32
 Perl_seed(pTHX)
 {
     PERL_ARGS_ASSERT_SEED;
