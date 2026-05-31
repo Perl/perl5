@@ -4651,7 +4651,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 #endif
 
 /* Splitmix64 is a simple PRNG and integer hashing function. It was
- * introduced in 2015: https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf
+ * introducted in 2015: https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf
  * Examples: https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64
  */
 static U64
