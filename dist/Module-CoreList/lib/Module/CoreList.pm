@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20260520';
+our $VERSION = '5.20260601';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -458,7 +458,7 @@ sub changes_between {
     5.040004 => '2026-03-29',
     5.042002 => '2026-03-29',
     5.043010 => '2026-04-20',
-    5.043011 => '2026-05-20',
+    5.043011 => '2026-06-01',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -24693,12 +24693,50 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.043011 => {
-        delta_from => 5.04301,
+        delta_from => 5.043010,
         changed => {
+            'Archive::Tar'          => '3.10',
+            'Archive::Tar::Constant'=> '3.10',
+            'Archive::Tar::File'    => '3.10',
             'B::Op_private'         => '5.043011',
+            'Compress::Zlib'        => '2.220',
             'Config'                => '5.043011',
-            'Module::CoreList'      => '5.20260520',
-            'Module::CoreList::Utils'=> '5.20260520',
+            'Encode'                => '3.24',
+            'Errno'                 => '1.39',
+            'HTTP::Tiny'            => '0.094',
+            'IO::Compress'          => '2.220',
+            'IO::Compress::Adapter::Bzip2'=> '2.220',
+            'IO::Compress::Adapter::Deflate'=> '2.220',
+            'IO::Compress::Adapter::Identity'=> '2.220',
+            'IO::Compress::Base'    => '2.220',
+            'IO::Compress::Base::Common'=> '2.220',
+            'IO::Compress::Bzip2'   => '2.220',
+            'IO::Compress::Deflate' => '2.220',
+            'IO::Compress::Gzip'    => '2.220',
+            'IO::Compress::Gzip::Constants'=> '2.220',
+            'IO::Compress::RawDeflate'=> '2.220',
+            'IO::Compress::Zip'     => '2.220',
+            'IO::Compress::Zip::Constants'=> '2.220',
+            'IO::Compress::Zlib::Constants'=> '2.220',
+            'IO::Compress::Zlib::Extra'=> '2.220',
+            'IO::Socket::IP'        => '0.44',
+            'IO::Uncompress::Adapter::Bunzip2'=> '2.220',
+            'IO::Uncompress::Adapter::Identity'=> '2.220',
+            'IO::Uncompress::Adapter::Inflate'=> '2.220',
+            'IO::Uncompress::AnyInflate'=> '2.220',
+            'IO::Uncompress::AnyUncompress'=> '2.220',
+            'IO::Uncompress::Base'  => '2.220',
+            'IO::Uncompress::Bunzip2'=> '2.220',
+            'IO::Uncompress::Gunzip'=> '2.220',
+            'IO::Uncompress::Inflate'=> '2.220',
+            'IO::Uncompress::RawInflate'=> '2.220',
+            'IO::Uncompress::Unzip' => '2.220',
+            'Module::CoreList'      => '5.20260601',
+            'Module::CoreList::Utils'=> '5.20260601',
+            'SelfLoader'            => '1.29',
+            'Socket'                => '2.041',
+            'Storable'              => '3.41',
+            'XS::Typemap'           => '0.22',
         },
         removed => {
         }
@@ -26462,7 +26500,7 @@ sub is_core
         }
     },
     5.043011 => {
-        delta_from => 5.04301,
+        delta_from => 5.043010,
         changed => {
         },
         removed => {
