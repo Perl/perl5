@@ -155,12 +155,13 @@ Perl_seed(pTHX)
     U64 epoch = when;
 #endif
 
-    UV pid      = PerlProc_getpid();
-    UV time_ptr = PTR2UV(&when);
+    UV pid       = PerlProc_getpid();
+    UV time_ptr  = PTR2UV(&when);
+    UV stack_ptr = PTR2UV(PL_stack_sp);
 
     /* epoch in microseconds is ~52 bits, PIDs are ~22 bits, PTRs are ~48 bits.
-     * We mix the bits for all three together to get a good spread of entropy */
-    U64 tmp = (time_ptr << 16) | (pid << 8) | (epoch);
+     * We mix the bits for all four together to get a good spread of entropy */
+    U64 tmp = ROTL64(time_ptr, 16) ^ ROTL32(pid, 8) ^ epoch ^ stack_ptr;
     U64 ret = splitmix64(&tmp);
 
     /* PerlIO_printf(Perl_debug_log, "XXXX: TIME:%lu PID:%lu PTR:%lu\n", epoch, pid, time_ptr); */
@@ -168,3 +169,4 @@ Perl_seed(pTHX)
 
     return ret;
 }
+
