@@ -38,11 +38,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-/* For get_entropy() on non-Linux systems (MacOS, Android) we need sys/random.h */
-#ifdef I_SYS_RANDOM
-#include <sys/random.h>
-#endif
-
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 int putenv(char *);

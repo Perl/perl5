@@ -14,7 +14,7 @@
 #include "perl.h"
 
 /* For get_entropy() on non-Linux systems (MacOS, Android) we need sys/random.h */
-#ifdef HAS_SYSRANDOM
+#ifdef I_SYS_RANDOM
 #include <sys/random.h>
 #endif
 
