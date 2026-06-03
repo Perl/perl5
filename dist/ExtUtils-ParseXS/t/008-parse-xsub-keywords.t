@@ -1024,6 +1024,15 @@ EOF
             qr{\QError: duplicate INTERFACE name: 'f1'},
                    "got expected err" ],
         ],
+        [
+            'INTERFACE with OUT arguments',
+            Q(<<'EOF'),
+                |void
+                |foo(OUT int value)
+                |    INTERFACE: abc
+EOF
+            [  0, qr{\(int\*\)}, "OUT argument" ],
+        ],
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);

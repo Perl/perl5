@@ -1,6 +1,7 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
 3.64
+  - Respect output arguments in INTERFACES
   - PERL_UNUSED_VAR() the CV declared when an ALIAS or
     XSINTERFACE_FUNC_SET has been seen.
 
