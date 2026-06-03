@@ -32,7 +32,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "3.10";
+$VERSION                = "3.12";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -971,7 +971,7 @@ sub _make_special_file {
                     qq[' has absolute target. Not extracting under SECURE EXTRACT MODE] );
                 return;
             }
-            if( grep { $_ eq '..' } File::Spec->splitdir($linkname) ) {
+            if( !defined _symlinks_resolver( $entry->full_path, $linkname, 1 ) ) {
                 $self->_error( qq[Symlink '] . $entry->full_path .
                     qq[' target attempts traversal. Not extracting under SECURE EXTRACT MODE] );
                 return;
@@ -999,7 +999,7 @@ sub _make_special_file {
                     qq[the shared inode.] );
                 return;
             }
-            if( grep { $_ eq '..' } File::Spec->splitdir($linkname) ) {
+            if( !defined _symlinks_resolver( $entry->full_path, $linkname, 1 ) ) {
                 $self->_error( qq[Hardlink '] . $entry->full_path .
                     qq[' target '$linkname' attempts traversal. Not ] .
                     qq[extracting under SECURE EXTRACT MODE: extraction ] .
@@ -2024,7 +2024,7 @@ sub no_string_support {
 }
 
 sub _symlinks_resolver{
-  my ($src, $trg) = @_;
+  my ($src, $trg, $strict) = @_;
   my @src = split /[\/\\]/, $src;
   my @trg = split /[\/\\]/, $trg;
   pop @src; #strip out current object name
@@ -2037,6 +2037,7 @@ sub _symlinks_resolver{
     next if $part eq '.'; #ignore current
     if($part eq '..'){
       #got to parent
+      return if $strict && !@src;
       pop @src;
     }
     else{
