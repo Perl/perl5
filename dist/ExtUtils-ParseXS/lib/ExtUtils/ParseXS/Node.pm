@@ -1726,11 +1726,15 @@ EOF
     # in particular, when emitting one of:
     #      XSANY.any_i32 = $value;
     #      XSINTERFACE_FUNC_SET(cv, $value);
+    #
+    # It may be that all of the uses are guarded by false conditionals,
+    # so make sure we don't get an unused variable warning.
 
     if ($pxs->{need_boot_cv}) {
         print $self->Q(<<"EOF");
             |    $open_brace
             |        CV * cv;
+            |        PERL_UNUSED_VAR(cv);
             |
 EOF
     }
