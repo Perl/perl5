@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.64
+  - PERL_UNUSED_VAR() the CV declared when an ALIAS or
+    XSINTERFACE_FUNC_SET has been seen.
+
 3.63 Sun Apr  5 2026
   - allow 'length(foo)' to work with any 'foo' type that has
         'SvPV_nolen()' or similar in its typemap, not just that it maps
