@@ -21,6 +21,8 @@ unless ( $PERL_CORE or exists $Config{'i_poll'} ) {
 
 #--- Write the Makefile
 
+(my $mm_version = ExtUtils::MakeMaker->VERSION) =~ tr/_//d;
+
 WriteMakefile(
     VERSION_FROM => "IO.pm",
     NAME         => "IO",
@@ -39,8 +41,8 @@ WriteMakefile(
             clean       => { FILES => 'typemap' },
         )
     ),
-    ( $define                                      ? ( DEFINE    => $define ) : () ),
-    ( ( ExtUtils::MakeMaker->VERSION() gt '6.30' ) ? ( 'LICENSE' => 'perl' )  : () ),
+    ( $define                ? ( DEFINE  => $define ) : () ),
+    ( ( $mm_version > 6.30 ) ? ( LICENSE => 'perl' )  : () ),
     META_MERGE => {
         resources => {
             license     => 'http://dev.perl.org/licenses/',
