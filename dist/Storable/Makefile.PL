@@ -34,7 +34,9 @@ WriteMakefile(
     META_MERGE          => {
         "meta-spec" => { version => 2 },
         resources   => {
-            bugtracker => 'https://github.com/Perl/perl5/issues',
+            bugtracker => {
+                web => 'https://github.com/Perl/perl5/issues',
+            },
         },
         provides    => {
             'Storable'  => {
