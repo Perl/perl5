@@ -45,7 +45,7 @@ WriteMakefile(
     ( ( $mm_version > 6.30 ) ? ( LICENSE => 'perl' )  : () ),
     META_MERGE => {
         resources => {
-            license     => 'http://dev.perl.org/licenses/',
+            license     => 'https://dev.perl.org/licenses/',
             bugtracker  => 'https://github.com/perl/perl5/issues',
             repository  => 'https://github.com/Perl/perl5/tree/blead/dist/IO',
             MailingList => 'http://lists.perl.org/list/perl5-porters.html',
