@@ -663,7 +663,7 @@ Perl_rpp_pop_1_norc(pTHX)
 Push one or two SVs onto the stack, incrementing their reference counts
 and updating C<PL_stack_sp>. With the C<x> variants, it extends the stack
 first. The C<IMM> variants assume that the single argument is an immortal
-such as <&PL_sv_undef> and, for efficiency, will skip incrementing its
+such as C<&PL_sv_undef> and, for efficiency, will skip incrementing its
 reference count.
 
 =cut
@@ -774,7 +774,7 @@ The C<_NN> variant assumes that the pointer on the stack to the SV being
 freed is non-NULL.
 
 The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
-that the single argument is an immortal such as <&PL_sv_undef> and, for
+that the single argument is an immortal such as C<&PL_sv_undef> and, for
 efficiency, will skip incrementing its reference count.
 
 =cut
@@ -849,7 +849,7 @@ The C<_NN> variant assumes that the pointers on the stack to the SVs being
 freed are non-NULL.
 
 The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
-that the single argument is an immortal such as <&PL_sv_undef> and, for
+that the single argument is an immortal such as C<&PL_sv_undef> and, for
 efficiency, will skip incrementing its reference count.
 =cut
 */
