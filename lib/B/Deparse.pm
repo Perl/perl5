@@ -4047,7 +4047,13 @@ sub mapop {
     $kid = $kid->first->sibling; # skip a pushmark
     my $code = $kid->first; # skip a null
     if (is_scope $code) {
-	$code = "{" . $self->deparse($code, 0) . "} ";
+	my $body = $self->deparse($code, 0);
+	# If we are looking at a scope here, "{" will
+	# be mistaken for an anonymous hash unless we
+	# put, say, a null statement before it.
+	# e.g. map {; { %$_; } } { car => 'cdr' };
+	$body =~ s/^\{/;{/;
+	$code = "{" . $body . "} ";
     } else {
 	$code = $self->deparse($code, 24);
         # Disambiguate anonhash from a block

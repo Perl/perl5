@@ -3738,3 +3738,15 @@ my $count_one = () = $str =~ /$pat/;
 # caller with complex arg, multiple subscript lslice optimised away
 my $x;
 (caller $x->[3]{'apples'})[1,2,3];
+####
+# [GH #23373] map with blocks beginning with a scope
+my(@r, @a);
+@r = map({;{
+    %$_;
+}} @a);
+####
+# [GH #23373] grep with blocks beginning with a scope
+my(@s, @a);
+@s = grep({;{
+    %$_;
+}} @a);
