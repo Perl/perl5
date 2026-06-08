@@ -317,14 +317,18 @@ Use of uninitialized value $y in concatenation (.) or string at - line 8.
 use warnings 'uninitialized';
 my $x;
 { my $y = 3 + length $x; }
-{ our $y = 3 + length $x; }
+{ our $y = 3 + length $x; undef $y; }
 { my $y = "foo" . length $x; }
-{ our $y = "foo" . length $x; }
+{ our $y = "foo" . length $x; undef $y; }
+{ my $y .= "foo" . length $x; }
+{ our $y .= "foo" . length $x; undef $y; }
 EXPECT
 Use of uninitialized value length($x) in addition (+) at - line 4.
 Use of uninitialized value length($x) in addition (+) at - line 5.
 Use of uninitialized value length($x) in concatenation (.) or string at - line 6.
 Use of uninitialized value length($x) in concatenation (.) or string at - line 7.
+Use of uninitialized value length($x) in concatenation (.) or string at - line 8.
+Use of uninitialized value length($x) in concatenation (.) or string at - line 9.
 ########
 # pp_hot.c [pp_aelem]
 {
