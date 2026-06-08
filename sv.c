@@ -18510,8 +18510,11 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (
                 obase->op_type == OP_MULTICONCAT
                 && (obase->op_flags & OPf_STACKED)
-                && !(obase->op_private & OPpMULTICONCAT_APPEND)
-                && !OpHAS_SIBLING(kid)
+                && (
+                    obase->op_private & OPpMULTICONCAT_APPEND
+                        ? kid == o
+                        : !OpHAS_SIBLING(kid)
+                )
             ) {
                 /* target of multiconcat op, not an input value */
                 continue;
