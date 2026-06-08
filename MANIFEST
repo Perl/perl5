@@ -1243,6 +1243,20 @@ cpan/HTTP-Tiny/corpus/redirect-07.txt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/corpus/redirect-08.txt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/corpus/redirect-09.txt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/corpus/redirect-10.txt	Test file related to HTTP::Tiny
+cpan/HTTP-Tiny/corpus/redirect-11.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-12.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-13.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-14.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-15.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-16.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-17.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-18.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-19.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-20.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-21.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-22.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-23.txt	HTTP-Tiny
+cpan/HTTP-Tiny/corpus/redirect-24.txt	HTTP-Tiny
 cpan/HTTP-Tiny/corpus/snake-oil.crt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/lib/HTTP/Tiny.pm		Module related to HTTP::Tiny
 cpan/HTTP-Tiny/t/000_load.t		Test file related to HTTP::Tiny

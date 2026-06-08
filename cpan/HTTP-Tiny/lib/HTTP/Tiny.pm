@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.094';
+our $VERSION = '0.096';
 
 sub _croak { require Carp; Carp::croak(@_) }
 
@@ -15,9 +15,19 @@ sub _croak { require Carp; Carp::croak(@_) }
 #pod This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 #pod
 #pod =for :list
-#pod * C<agent> — A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If
+#pod * C<agent> — A user-agent string (defaults to 'C<HTTP-Tiny/$VERSION>'). If
 #pod   C<agent> — ends in a space character, the default user-agent string is
 #pod   appended.
+#pod * C<allow_credentialed_redirects> - If a C<3XX> redirects to a different scheme,
+#pod   host or port, by default HTTP::Tiny will strip away caller-supplied
+#pod   C<Authorization>, C<Cookie> and C<Proxy-Authorization> headers from the
+#pod   redirected request and from all subsequent requests in the chain. Set this to a
+#pod   true value to revert to the legacy behavior of forwarding those headers.
+#pod   Default is C<false>.
+#pod * C<allow_downgrade> — If a C<3XX> redirect changes the scheme from C<https> to
+#pod   plain C<http>, HTTP::Tiny will by default refuse to follow it, returning the
+#pod   C<3XX> response. Set this to a true value to revert to the legacy behavior of
+#pod   redirecting C<https> to C<http>. Default is C<false>.
 #pod * C<cookie_jar> — An instance of L<HTTP::CookieJar> — or equivalent class
 #pod   that supports the C<add> and C<cookie_header> methods
 #pod * C<default_headers> — A hashref of default headers to apply to requests
@@ -81,9 +91,9 @@ sub _croak { require Carp; Carp::croak(@_) }
 my @attributes;
 BEGIN {
     @attributes = qw(
-        cookie_jar default_headers http_proxy https_proxy keep_alive
-        local_address max_redirect max_size proxy no_proxy
-        SSL_options verify_SSL
+        allow_credentialed_redirects allow_downgrade cookie_jar default_headers
+        http_proxy https_proxy keep_alive local_address max_redirect max_size
+        proxy no_proxy SSL_options verify_SSL
     );
     my %persist_ok = map {; $_ => 1 } qw(
         cookie_jar default_headers max_redirect max_size
@@ -227,7 +237,7 @@ sub _set_proxies {
 #pod URL must have unsafe characters escaped and international domain names encoded.
 #pod See C<request()> for valid options and a description of the response.
 #pod
-#pod The C<success> field of the response will be true if the status code is 2XX.
+#pod The C<success> field of the response will be true if the status code is C<2XX>.
 #pod
 #pod =cut
 
@@ -260,7 +270,7 @@ HERE
 #pod encoded.  See C<request()> for valid options and a description of the response.
 #pod Any C<content-type> header or content in the options hashref will be ignored.
 #pod
-#pod The C<success> field of the response will be true if the status code is 2XX.
+#pod The C<success> field of the response will be true if the status code is C<2XX>.
 #pod
 #pod =cut
 
@@ -301,8 +311,8 @@ sub post_form {
 #pod may specify a different C<If-Modified-Since> header yourself in the C<<
 #pod $options->{headers} >> hash.
 #pod
-#pod The C<success> field of the response will be true if the status code is 2XX
-#pod or if the status code is 304 (unmodified).
+#pod The C<success> field of the response will be true if the status code is C<2XX>
+#pod or if the status code is C<304> (unmodified).
 #pod
 #pod If the file was modified and the server response includes a properly
 #pod formatted C<Last-Modified> header, the file modification time will
@@ -364,8 +374,7 @@ sub mirror {
 #pod how this applies to redirection.
 #pod
 #pod If the URL includes a "user:password" stanza, they will be used for Basic-style
-#pod authorization headers.  (Authorization headers will not be included in a
-#pod redirected request.) For example:
+#pod authorization headers.  For example:
 #pod
 #pod     $http->request('GET', 'http://Aladdin:open sesame@example.com/');
 #pod
@@ -373,6 +382,10 @@ sub mirror {
 #pod be percent-escaped:
 #pod
 #pod     $http->request('GET', 'http://john%40example.com:password@example.com/');
+#pod
+#pod Caller-supplied C<Authorization>, C<Cookie> and C<Proxy-Authorization> headers
+#pod are stripped on cross-origin redirects. See L</new>'s
+#pod C<allow_credentialed_redirects> attribute to opt out.
 #pod
 #pod A hashref of options may be appended to modify the request.
 #pod
@@ -427,7 +440,7 @@ sub mirror {
 #pod
 #pod =for :list
 #pod * C<success> —
-#pod     Boolean indicating whether the operation returned a 2XX status code
+#pod     Boolean indicating whether the operation returned a C<2XX> status code
 #pod * C<url> —
 #pod     URL that provided the response. This is the URL of the request unless
 #pod     there were redirections, in which case it is the last URL queried
@@ -458,6 +471,7 @@ sub mirror {
 #pod =cut
 
 my %idempotent = map { $_ => 1 } qw/GET HEAD PUT DELETE OPTIONS TRACE/;
+my %sensitive_headers = map { $_ => 1 } qw/authorization cookie proxy-authorization/;
 
 sub request {
     my ($self, $method, $url, $args) = @_;
@@ -842,6 +856,7 @@ sub _prepare_headers_and_cb {
     for ($self->{default_headers}, $args->{headers}) {
         next unless defined;
         while (my ($k, $v) = each %$_) {
+            next if $args->{_strip_credentials} && exists $sensitive_headers{lc $k};
             $request->{headers}{lc $k} = $v;
             $request->{header_case}{lc $k} = $k;
         }
@@ -969,9 +984,24 @@ sub _maybe_redirect {
         and $headers->{location}
         and @{$args->{_redirects}} < $self->{max_redirect}
     ) {
-        my $location = ($headers->{location} =~ /^\//)
+        my $location = $headers->{location} =~ m{^//}
+        ? "$request->{scheme}:$headers->{location}"
+        : $headers->{location} =~ m{^/}
             ? "$request->{scheme}://$request->{host_port}$headers->{location}"
-            : $headers->{location} ;
+            : $headers->{location};
+        my ($to_scheme, $to_host, $to_port) = $self->_split_url($location);
+        if (!$self->{allow_downgrade} && $request->{scheme} eq 'https' && $to_scheme eq 'http' ) {
+            return;
+        }
+        if (
+            !$self->{allow_credentialed_redirects}
+            && (   $request->{scheme} ne $to_scheme
+                || $request->{host} ne $to_host
+                || $request->{port} ne $to_port )
+        ) {
+            $args->{_strip_credentials} = 1;
+        }
+
         return (($status eq '303' ? 'GET' : $method), $location);
     }
     return;
@@ -1776,7 +1806,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.094
+version 0.096
 
 =head1 SYNOPSIS
 
@@ -1821,7 +1851,15 @@ This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 
 =item *
 
-C<agent> — A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> — ends in a space character, the default user-agent string is appended.
+C<agent> — A user-agent string (defaults to 'C<HTTP-Tiny/$VERSION>'). If C<agent> — ends in a space character, the default user-agent string is appended.
+
+=item *
+
+C<allow_credentialed_redirects> - If a C<3XX> redirects to a different scheme, host or port, by default HTTP::Tiny will strip away caller-supplied C<Authorization>, C<Cookie> and C<Proxy-Authorization> headers from the redirected request and from all subsequent requests in the chain. Set this to a true value to revert to the legacy behavior of forwarding those headers. Default is C<false>.
+
+=item *
+
+C<allow_downgrade> — If a C<3XX> redirect changes the scheme from C<https> to plain C<http>, HTTP::Tiny will by default refuse to follow it, returning the C<3XX> response. Set this to a true value to revert to the legacy behavior of redirecting C<https> to C<http>. Default is C<false>.
 
 =item *
 
@@ -1919,7 +1957,7 @@ These methods are shorthand for calling C<request()> for the given method.  The
 URL must have unsafe characters escaped and international domain names encoded.
 See C<request()> for valid options and a description of the response.
 
-The C<success> field of the response will be true if the status code is 2XX.
+The C<success> field of the response will be true if the status code is C<2XX>.
 
 =head2 post_form
 
@@ -1937,7 +1975,7 @@ The URL must have unsafe characters escaped and international domain names
 encoded.  See C<request()> for valid options and a description of the response.
 Any C<content-type> header or content in the options hashref will be ignored.
 
-The C<success> field of the response will be true if the status code is 2XX.
+The C<success> field of the response will be true if the status code is C<2XX>.
 
 =head2 mirror
 
@@ -1953,8 +1991,8 @@ C<If-Modified-Since> header with the modification timestamp of the file.  You
 may specify a different C<If-Modified-Since> header yourself in the C<<
 $options->{headers} >> hash.
 
-The C<success> field of the response will be true if the status code is 2XX
-or if the status code is 304 (unmodified).
+The C<success> field of the response will be true if the status code is C<2XX>
+or if the status code is C<304> (unmodified).
 
 If the file was modified and the server response includes a properly
 formatted C<Last-Modified> header, the file modification time will
@@ -1974,8 +2012,7 @@ Don't use C<get> when you really want C<GET>.  See L</LIMITATIONS> for
 how this applies to redirection.
 
 If the URL includes a "user:password" stanza, they will be used for Basic-style
-authorization headers.  (Authorization headers will not be included in a
-redirected request.) For example:
+authorization headers.  For example:
 
     $http->request('GET', 'http://Aladdin:open sesame@example.com/');
 
@@ -1983,6 +2020,10 @@ If the "user:password" stanza contains reserved characters, they must
 be percent-escaped:
 
     $http->request('GET', 'http://john%40example.com:password@example.com/');
+
+Caller-supplied C<Authorization>, C<Cookie> and C<Proxy-Authorization> headers
+are stripped on cross-origin redirects. See L</new>'s
+C<allow_credentialed_redirects> attribute to opt out.
 
 A hashref of options may be appended to modify the request.
 
@@ -2041,7 +2082,7 @@ will have the following keys:
 
 =item *
 
-C<success> — Boolean indicating whether the operation returned a 2XX status code
+C<success> — Boolean indicating whether the operation returned a C<2XX> status code
 
 =item *
 
@@ -2121,6 +2162,8 @@ host has closed its end of the socket.
 
 =for Pod::Coverage SSL_options
 agent
+allow_credentialed_redirects
+allow_downgrade
 cookie_jar
 default_headers
 http_proxy
@@ -2336,10 +2379,10 @@ L<URI::_punycode> and L<Net::IDN::Encode>.
 =item *
 
 Redirection is very strict against the specification.  Redirection is only
-automatic for response codes 301, 302, 307 and 308 if the request method is
-'GET' or 'HEAD'.  Response code 303 is always converted into a 'GET'
-redirection, as mandated by the specification.  There is no automatic support
-for status 305 ("Use proxy") redirections.
+automatic for response codes C<301>, C<302>, C<307> and C<308> if the request
+method is 'GET' or 'HEAD'.  Response code C<303> is always converted into a
+'GET' redirection, as mandated by the specification.  There is no automatic
+support for status C<305> ("Use proxy") redirections.
 
 =item *
 
