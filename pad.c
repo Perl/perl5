@@ -1154,8 +1154,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     *out_flags = 0;
 
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-        "Pad findlex cv=0x%" UVxf " searching \"%.*s\" seq=%d%s\n",
-                           PTR2UV(cv), (int)namelen, namepv, (int)seq,
+        "Pad findlex cv=0x%" UVxf " searching \"%.*s\" seq=%" U32uf
+        " flags=%" U32uf "%s\n",
+                           PTR2UV(cv), (int)namelen, namepv, seq, flags,
+                           
         out_capture ? " capturing" : "" ));
 
     /* first, search this pad */
@@ -1315,7 +1317,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     U32 recurse_flags = flags;
     if(new_capturep == &new_capture)
         recurse_flags |= padadd_STALEOK;
-    if(CvIsMETHOD(cv))
+    if(CvIsMETHOD(cv) || fieldok)
         recurse_flags |= padfind_FIELD_OK;
 
     offset = pad_findlex(namepv, namelen, recurse_flags,
