@@ -21,7 +21,10 @@
 
 me=$0
 
-# Prepend your favorites with Configure -Dccflags=your_favorites
+# Prepend your favorites with Configure -Aprepend:ccflags="your favorites"
+#                                       -Aprepend:cppflags="your favourites"
+# No others get prepended, so for example, passing in a non-empty ldflags
+# overrides anything set here.
 
 archobjs="os390.o"
 
@@ -146,8 +149,8 @@ case "$ldflags" in
 esac
 
 # msf symbol information is now in NOLOAD section and so, while on disk,
-# does not require time to load but is useful in problem determination if required,
-# so it is no longer necessary to link with -Wl,EDIT=NO
+# does not require time to load but is useful in problem determination if
+# required, so it is no longer necessary to link with -Wl,EDIT=NO
 
 # In order to build with dynamic be sure to specify:
 #   Configure -Dusedl
@@ -205,9 +208,9 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
 esac
 
-# The following should always be used.  Perhaps newer threads will work, but
-# when khw tried, other things would have had to be changed to get it to work,
-# so left as-is.
+# The following should always be used.  Not doing this causes compilation
+# errors in 3.1, and presumably earlier, with different function signatures
+# than perl expects.
 d_oldpthreads='define'
 
 # Header files to include.
@@ -218,6 +221,8 @@ esac
 case "$i_systime" in
 '') i_systime='define' ;;
 esac
+
+# Untested if this still is needed
 case "$d_pthread_atfork" in
 '') d_pthread_atfork='undef' ;;
 esac
