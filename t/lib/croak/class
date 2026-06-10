@@ -222,3 +222,44 @@ X->new for 0;
 EXPECT
 Exiting subroutine via last at - line 7.
 Can't "last" outside a loop block at - line 7.
+########
+# NAME GH 24418 test case
+use v5.40;
+use experimental 'class';
+
+class Foo {
+    field $message :param :reader;
+
+    use overload '""' => method ($,$) { $message }, fallback => 1;
+}
+
+say Foo->new(message => "yeehaaw");
+EXPECT
+OPTIONS nonfatal
+yeehaaw
+########
+# NAME GH 23446 test case
+use experimental "class";
+class Foo;
+field $foo = 42;
+use overload q{""} => method (@) { $foo };
+EXPECT
+OPTIONS nonfatal
+########
+# NAME GH 24418 clarifying test case
+use v5.40;
+use experimental 'class';
+
+class Foo {
+    field $message :param :reader;
+
+    sub foo {
+        return method () { $message };
+    }
+}
+
+my $meth = Foo->foo;
+say Foo->new(message => "yeehaw")->$meth();
+EXPECT
+OPTIONS nonfatal
+yeehaw
