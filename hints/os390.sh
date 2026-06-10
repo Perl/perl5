@@ -211,8 +211,14 @@ define)
    # module such as a DLL
    ccflags="$ccflags -D_SHR_ENVIRON"
 
-   cccdlflags="-c $def_os390_cccdlflags"
-   lddlflags="$def_os390_cccdlflags"
+   case "$def_os390_cccdlflags" in
+     '') lddlflags="-m64" # Revert this after merging
+                          # https://github.com/Perl/perl5/pull/24465
+        ;;
+     *) cccdlflags="-c $def_os390_cccdlflags"
+        lddlflags="$def_os390_cccdlflags"
+        ;;
+   esac
 
    # The following will need to be modified for the installed libperl.x.
    # The modification to Config.pm is done by the installperl script after the
