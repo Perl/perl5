@@ -366,7 +366,20 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Allow field lookups within methods in nested scopes to succeed,
+previously they could complain that C<Field $fieldname is not
+accessible outside a method...>.
+
+This was most confusingly broken with a use:
+
+  class A {
+    field $fieldname;
+    use overload '""' => method (@) { $fieldname };
+  }
+
+since the syntax hides the C<BEGIN> sub.
+
+[GH #24464]
 
 =back
 
