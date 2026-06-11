@@ -64,13 +64,10 @@ def_os390_defs="$def_os390_defs -DOS390 -DZOS -DOEMVS";
 #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
 def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
 
-# For 31-bit addressing mode, we should use xplink (eXtended Performance linking)
-# For 64-bit addressing mode, the standard linkage works well
-
 case "$use64bitall" in
-'')
-# defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
-  def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
+'undef') echo "32-bit compilation not currently supported" >&4
+    # Though it could easily be added.  IBM says no such hardware now exists
+    exit 1;
   ;;
 *)
   case "$cc" in
