@@ -2935,7 +2935,24 @@ PP_wrapped(pp_ssockopt,(PL_op->op_type == OP_GSOCKOPT) ? 3 : 4 , 0)
         (void)SvPOK_only(sv);
         SvCUR_set(sv, PERL_GETSOCKOPT_SIZE);
         *SvEND(sv) ='\0';
+
+#ifdef OEMVS
+
+        /* Work around z/OS limitation.  The buffer size parameter on this
+         * platform must be the precise sizeof the type being returned.  Other
+         * platforms, and the POSIX standard, require it to be large enough to
+         * hold the returned value, not necessarily the precise sizeof.  On
+         * z/OS 3.1 all currently handled options but SO_LINGER are of type
+         * int */
+        if (optname == SO_LINGER) {
+            len = sizeof(struct linger);
+        }
+        else {
+            len = sizeof(int);
+        }
+#else
         len = SvCUR(sv);
+#endif
         if (PerlSock_getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
             goto nuts2;
 #if defined(_AIX)
