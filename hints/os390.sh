@@ -188,13 +188,13 @@ esac
 # You might want to override some of this with things like:
 #  Configure -Dusedl -Ddlext=so -Ddlsrc=dl_dllload.xs.
 case "$usedl" in
-'')
+'undef')
    usedl='n'
    case "$dlext" in
    '') dlext='none' ;;
    esac
    ;;
-define)
+*)
    case "$useshrplib" in
    '') useshrplib='true' ;;
    esac
