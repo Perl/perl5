@@ -4507,6 +4507,13 @@ Perl_newSV_true(pTHX)
         Perl_assert_aTHX
 
 PERL_CALLCONV SV *
+Perl_newSVattrdefinition(pTHX_ const struct PerlAttributeDefinition *attrib)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWSVATTRDEFINITION    \
+        Perl_assert_aTHX; assert(attrib)
+
+PERL_CALLCONV SV *
 Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)

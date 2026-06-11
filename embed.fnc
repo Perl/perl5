@@ -2554,6 +2554,8 @@ ARdp	|SV *	|newSV		|const STRLEN len
 Ciop	|SV *	|new_sv 	|NN const char *file			\
 				|int line				\
 				|NN const char *func
+Apx	|SV *	|newSVattrdefinition							\
+				|NN const struct PerlAttributeDefinition *attrib
 Rp	|SV *	|newSVavdefelem |NN AV *av				\
 				|SSize_t ix				\
 				|bool extendible
