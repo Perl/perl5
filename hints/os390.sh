@@ -17,19 +17,26 @@
 # z/OS 2.4 Support added thanks to:
 #     Mike Fulton
 #     Karl Williamson
-#     Igor Todorovsky
 #
+# The z/OS 'cc' and 'ld' are insufficient for our needs, so we use c99 instead
+# c99 has compiler options specified via standard Unix-style options, but some
+# options need to be specified using -Wc,<compiler-option> or -Wl,<link-option>
+me=$0
+case "$cc" in
+'') cc='c99' ;;
+esac
+case "$ld" in
+'') ld='c99' ;;
+esac
+
 # Prepend your favorites with Configure -Dccflags=your_favorites
 
 # This overrides the name the compiler was called with.  'ext' is required for
 # "unicode literals" to be enabled
-def_os390_cflags='-std=c99 -D_EXT -fvisibility=default -D_POSIX_C_SOURCE=200809L -D_XPLATFORM_SOURCE=1';
+def_os390_cflags='-qlanglvl=extc1x';
 
 # For #ifdefs in code
 def_os390_defs="-DOS390 -DZOS";
-
-def_os390_defs="$def_os390_defs -Duserelocatableinc -Duse64bitall"
-use64bitall=define
 
 # Turn on POSIX compatibility modes
 #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
@@ -39,41 +46,31 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
 # For 64-bit addressing mode, the standard linkage works well
 
 case "$use64bitall" in
-'') echo "32-bit compilation not currently supported" >&4
-    # Though it could easily be added.  IBM says no such hardware now exists
-    exit 1;
+'')
+  def_os390_cflags="$def_os390_cflags -qxplink"
+  def_os390_cccdlflags="-qxplink"
+  def_os390_ldflags="-qxplink"
+# defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
+  def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
   ;;
 *)
-  # Use clang for 64-bit
-  case "$cc" in
-  '') cc='clang' ;;
-  esac
-  case "$ld" in
-  '') ld='clang' ;;
-  esac
-  def_os390_cflags="$def_os390_cflags -m64"
-  def_os390_cccdlflags="$def_os390_cflags $def_os390_cflags"
-  def_os390_ldflags="-Wl,-bedit=no -m64"
+  def_os390_cflags="$def_os390_cflags -Wc,lp64"
+  def_os390_cccdlflags="$def_os390_cflags -Wl,lp64"
+  def_os390_ldflags="-Wl,lp64"
 esac
-
-arch_main_objs=""
-archobjs="os390.o"
-
-# Help make find os390.c
-test -h os390.c || ln -s os390/os390.c os390.c
 
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
-  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii -I /data/zopen/usr/local/include"
+  def_os390_cflags="$def_os390_cflags -qascii"
 else
   ebcdic=true
-  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
-  def_os390_cflags="$def_os390_cflags -fexec-charset=IBM-1047"
 fi
 
 # Export all externally defined functions and variables in the compilation
 # unit so that a DLL application can use them.
+def_os390_cflags="$def_os390_cflags -qexportall";
+def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
 
 # 3296= #include file not found;
 # 4108= The use of keyword &1 is non-portable
@@ -82,8 +79,9 @@ fi
 #          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
 # 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
 #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
+def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
 
-def_os390_defs="$def_os390_defs -DMAXSIG=42 -DNSIG=42";     # maximum signal number; not furnished by IBM
+def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
 def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
 
 # ensure that the OS/390 yacc generated parser is reentrant.
@@ -99,7 +97,7 @@ def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_AE_BIMOD
 # Combine -D with cflags
 case "$ccflags" in
 '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
-*)  ccflags="$ccflags $cppflags $def_os390_cflags $def_os390_defs" ;;
+*)  ccflags="$ccflags $def_os390_cflags $def_os390_defs" ;;
 esac
 
 # Turning on optimization causes perl to not even compile from miniperl.  You
@@ -111,7 +109,7 @@ esac
 # To link via definition side decks we need the dll option
 # You can override this with Configure -Ucccdlflags or somesuch.
 case "$cccdlflags" in
-'') cccdlflags="$def_os390_cccdlflags -shared";;
+'') cccdlflags="$def_os390_cccdlflags -Wl,dll";;
 esac
 
 case "$so" in
@@ -222,19 +220,26 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-# Some header files on z/OS have trigraphs in them that clang doesn't handle
-# without this option.
-cppflags="-trigraphs"
+# We have our own cppstdin script.  This is not a variable since
+# Configure sees the presence of the script file.
+# We put system header -D definitions in so that Configure
+# can find the shmat() prototype in <sys/shm.h> and various
+# other things.  Unfortunately, cppflags occurs too late to be of
+# value external to the script.  This may need to be revisited
+#
+# khw believes some of this is obsolete.  DOLLARINNAMES allows '$' in variable
+# names, for whatever reason
+# NOLOC says to use the 1047 code page, and no locale
+case "$usedl" in
+define)
+echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -D_SHR_ENVIRON -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+   ;;
+*)
+echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
+   ;;
+esac
 
-# Suppress the trigraph warnings, and some headers have pragmas that clang
-# isn't familiar with
-def_os390_cflags="$def_os390_cflags -Wno-trigraphs -Wno-unknown-pragmas"
-
-# The compilation of shm.h that is supposed to show if that file includes a
-# prototype definition currently results in garbage (reason unknown) so the
-# grep fails.
-d_shmatprototype='define'
-
+#
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
