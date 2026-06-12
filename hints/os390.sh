@@ -28,6 +28,11 @@ me=$0
 
 archobjs="os390.o"
 
+# This doesn't change the value in Configure, but for now is good enough for
+# the rest of this file.  The correct value would be
+#  os390_ver=$(uname -Iv).$(uname -Ir)"
+os390_ver=$(uname -Iv)
+
 def_os390_cccdlflags=""
 def_os390_cflags=""
 def_os390_cppflags=""
@@ -96,8 +101,6 @@ else
   def_os390_cflags="$def_os390_cflags -fexec-charset=IBM-1047"
 fi
 
-def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
-
 # ensure that the OS/390 yacc generated parser is reentrant.
 def_os390_defs="$def_os390_defs -DYYDYNAMIC";
 
@@ -114,6 +117,27 @@ def_os390_defs="$def_os390_defs -D_OPEN_SYS_SOCK_IPV6"
 def_os390_defs="$def_os390_defs -D_XOPEN_SOURCE=600"
 def_os390_defs="$def_os390_defs -D_XOPEN_SOURCE_EXTENDED"
 
+# These seem to work as of version 3.1, but didn't use to.  It's unknown when
+# they started to work.  khw thinks it was 2.5-ish, so didn't bother adding a
+# check for 3.1 vs 3.0
+if [ "$os390_ver" -lt 3 ]; then
+    d_gethostbyname_r='undef'
+    d_gethostent_r='undef'
+
+    # maximum signal number; not furnished by IBM
+    def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";
+
+    # Configure says this exists, but it doesn't work properly.  See
+    # <54DCE073.4010100@khwilliamson.com>
+    d_dir_dd_fd='undef'
+
+    # Turning on optimization causes perl to not even compile from miniperl.
+    # You can override this with Configure -Doptimize='-O2' or somesuch.
+    case "$optimize" in
+      '') optimize=' ' ;;
+    esac
+fi
+
 # Some header files on z/OS have trigraphs in them that clang doesn't handle
 # without this option.
 def_os390_cppflags="$def_os390_cppflags -trigraphs"
@@ -129,12 +153,6 @@ cppflags="$cppflags $def_os390_cppflags"
 case "$ccflags" in
 '') ccflags="$def_os390_cflags $def_os390_defs"  ;;
 *)  ccflags="$ccflags $def_os390_cflags $def_os390_defs" ;;
-esac
-
-# Turning on optimization causes perl to not even compile from miniperl.  You
-# can override this with Configure -Doptimize='-O2' or somesuch.
-case "$optimize" in
-'') optimize=' ' ;;
 esac
 
 case "$so" in
@@ -295,21 +313,16 @@ EOWARN
    fi
 fi
 
-# These exist, but there is something wrong with either them, or our reentr.[ch],
-# and no one has felt it important enough to investigate/fix.  The
-# non-reentrant versions seem to work, but will have races in threads.
-d_gethostbyaddr_r='undef'
-d_gethostbyname_r='undef'
-d_gethostent_r='undef'
+# Doesn't find the prototype
+case "d_gethostbyaddr" in)
+  d_gethostbyaddr_r='undef'
+  ;;
+esac
 
 # nan() used to not work as expected: nan("") or nan("0") returned zero, not a
 # nan.  This may have been a C89 issue.
 # http://www-01.ibm.com/support/knowledgecenter/SSLTBW_1.12.0/com.ibm.zos.r12.bpxbd00/nan.htm%23nan?lang=en
 #d_nan='undef'
-
-# Configure says this exists, but it doesn't work properly.  See
-# <54DCE073.4010100@khwilliamson.com>
-d_dir_dd_fd='undef'
 
 ############################################################################
 # Thread support
