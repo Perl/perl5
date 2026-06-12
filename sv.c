@@ -4032,6 +4032,9 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
     case SVt_PVFM:
         location = (SV **) &GvFORM(dsv);
         goto common;
+    case SVt_PVOBJ:
+        croak("Can't assign reference to %s into a GLOB", sv_reftype(sref, false));
+
     default:
         location = &GvSV(dsv);
         import_flag = GVf_IMPORTED_SV;
