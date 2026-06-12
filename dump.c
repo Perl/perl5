@@ -50,6 +50,32 @@ static const char* const svtypenames[SVt_LAST] = {
     "PVOBJ",
 };
 
+/*
+=for apidoc svtypename
+
+Returns a human-readable string name corresponding to the given C<SvTYPE()>
+value; specifically the part after the C<SVt_> prefix. For example when given
+C<SVt_PVMG> it will return C<"PVMG">.  This is a direct representation of the
+underlying C-level type value and distinguishes the various scalar types from
+each other, but does not consider things like vstring magic.
+
+For a more Perl-centric result that more closely matches the behaviour of the
+C<ref()> perl function, see instead C</sv_reftype>.
+
+=cut
+*/
+
+const char *
+Perl_svtypename(U8 type)
+{
+    PERL_ARGS_ASSERT_SVTYPENAME;
+
+    if (type < SVt_LAST)
+        return svtypenames[type];
+    else
+        return NULL;
+}
+
 
 static const char* const svshorttypenames[SVt_LAST] = {
     "UNDEF",
