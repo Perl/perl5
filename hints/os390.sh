@@ -105,8 +105,14 @@ def_os390_defs="$def_os390_defs -DYYDYNAMIC";
 # expect it to
 def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
 
-# Set up feature test macros required for features available on supported z/OS systems
-def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
+# Set up feature test macros required for features available on supported z/OS
+# systems
+def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3"
+def_os390_defs="$def_os390_defs -D_UNIX03_SOURCE=1"
+def_os390_defs="$def_os390_defs -D_OPEN_SYS_FILE_EXT=1"
+def_os390_defs="$def_os390_defs -D_OPEN_SYS_SOCK_IPV6"
+def_os390_defs="$def_os390_defs -D_XOPEN_SOURCE=600"
+def_os390_defs="$def_os390_defs -D_XOPEN_SOURCE_EXTENDED"
 
 # Some header files on z/OS have trigraphs in them that clang doesn't handle
 # without this option.
