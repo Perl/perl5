@@ -69,3 +69,10 @@ $# is no longer supported as of Perl 5.30 at - line 1.
 $a = $*;
 EXPECT
 $* is no longer supported as of Perl 5.30 at - line 1.
+########
+# NAME assigning object to glob disallowed [GH#24469]
+use feature 'class'; no warnings 'experimental::class';
+class C {}
+*x = C->new;
+EXPECT
+Can't assign reference to OBJECT into a GLOB at - line 3.
