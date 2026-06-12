@@ -6991,6 +6991,12 @@ Perl_sv_vstring_get(pTHX_ SV * const sv, STRLEN *lenp)
 #define PERL_ARGS_ASSERT_SV_VSTRING_GET         \
         Perl_assert_aTHX; assert(sv)
 
+PERL_CALLCONV const char *
+Perl_svtypename(U8 type)
+        __attribute__warn_unused_result__
+        __attribute__pure__;
+#define PERL_ARGS_ASSERT_SVTYPENAME
+
 PERL_CALLCONV void
 Perl_switch_to_global_locale(pTHX)
         Perl_attribute_nonnull_aTHX;

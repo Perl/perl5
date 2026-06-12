@@ -3773,6 +3773,7 @@ Cip	|bool	|SvTRUE_common	|NN SV *sv				\
 				|const bool sv_2bool_is_fallback
 Adip	|bool	|SvTRUE_NN	|NN SV *sv
 Adip	|bool	|SvTRUE_nomg	|NULLOK SV *sv
+APTdp	|const char *|svtypename|U8 type
 ARdp	|char * |sv_uni_display |NN SV *dsv				\
 				|NN SV *ssv				\
 				|STRLEN pvlim				\
