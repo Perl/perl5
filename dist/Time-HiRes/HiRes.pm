@@ -12,7 +12,7 @@ our @EXPORT = qw( );
 # More or less this same list is in Makefile.PL.  Should unify.
 our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
                  getitimer setitimer nanosleep clock_gettime clock_getres
-                 clock clock_nanosleep
+                 clock clock_nanosleep hrtime
                  CLOCKS_PER_SEC
                  CLOCK_BOOTTIME
                  CLOCK_HIGHRES
@@ -45,7 +45,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
                  TIMER_ABSTIME
                  d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
                  d_nanosleep d_clock_gettime d_clock_getres
-                 d_clock d_clock_nanosleep d_hires_stat
+                 d_clock d_clock_nanosleep d_hrtime d_hires_stat
                  d_futimens d_utimensat d_hires_utime
                  stat lstat utime
                 );
@@ -75,6 +75,7 @@ sub AUTOLOAD {
 
 sub import {
     for my $i (@_[1 .. $#_]) {
+
         if (($i eq 'clock_getres'    && !&d_clock_getres)    ||
             ($i eq 'clock_gettime'   && !&d_clock_gettime)   ||
             ($i eq 'clock_nanosleep' && !&d_clock_nanosleep) ||
@@ -82,6 +83,7 @@ sub import {
             ($i eq 'nanosleep'       && !&d_nanosleep)       ||
             ($i eq 'usleep'          && !&d_usleep)          ||
             ($i eq 'utime'           && !&d_hires_utime)     ||
+            ($i eq 'hrtime'          && !&d_hrtime)          ||
             ($i eq 'ualarm'          && !&d_ualarm)) {
             require Carp;
             Carp::croak("Time::HiRes::$i(): unimplemented in this platform");

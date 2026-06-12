@@ -1409,6 +1409,33 @@ clock_gettime(clock_id = 0)
 
 #endif /*  #if defined(TIME_HIRES_CLOCK_GETTIME) */
 
+#if defined(TIME_HIRES_CLOCK_GETTIME)
+
+void
+hrtime()
+    PPCODE:
+        struct timespec ts;
+        int status;
+#  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
+        status = syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &ts);
+#  else
+        status = clock_gettime(CLOCK_MONOTONIC, &ts);
+#  endif
+        if (status == 0) {
+            UV ret = (UV)ts.tv_sec * (UV)IV_1E9 + (UV)ts.tv_nsec;
+            EXTEND(SP, 1);
+            PUSHs(sv_2mortal(newSVuv(ret)));
+        }
+
+#else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
+
+void
+hrtime()
+    PPCODE:
+        croak("Time::HiRes::hrtime(): unimplemented in this platform");
+
+#endif  /* #if defined(TIME_HIRES_CLOCK_GETTIME) */
+
 #if defined(TIME_HIRES_CLOCK_GETRES)
 
 NV
