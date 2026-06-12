@@ -17,17 +17,9 @@
 # z/OS 2.4 Support added thanks to:
 #     Mike Fulton
 #     Karl Williamson
-#
-# The z/OS 'cc' and 'ld' are insufficient for our needs, so we use c99 instead
-# c99 has compiler options specified via standard Unix-style options, but some
-# options need to be specified using -Wc,<compiler-option> or -Wl,<link-option>
+#     Igor Todorovsky
+
 me=$0
-case "$cc" in
-'') cc='c99' ;;
-esac
-case "$ld" in
-'') ld='c99' ;;
-esac
 
 # Prepend your favorites with Configure -Dccflags=your_favorites
 
@@ -39,9 +31,23 @@ def_os390_cppflags=""
 def_os390_defs=""
 def_os390_ldflags=""
 
-# This overrides the name the compiler was called with.  'ext' is required for
-# "unicode literals" to be enabled
-def_os390_cflags='$def_os390_cflags -qlanglvl=extc1x';
+# We now require C99
+def_os390_cflags="$def_os390_cflags -std=c99"
+
+# Certain extensions to z/OS library functions and extra library functions are
+# available only when this is defined.  For example, to enable "unicode literals"
+def_os390_cflags="$def_os390_cflags -D_EXT=1"
+
+# Export all externally defined functions and variables in the compilation
+# unit so that a DLL application can use them. 'default' really should be named
+# 'public'
+def_os390_cflags="$def_os390_cflags -fvisibility=default"
+
+# Use the behaviors for various library functions specified by POSIX 2008.
+def_os390_cflags="$def_os390_cflags -D_POSIX_C_SOURCE=200809L"
+
+# Various values that we need are not available unless this is set
+def_os390_cflags="$def_os390_cflags -D_XPLATFORM_SOURCE=1";
 
 # For #ifdefs in code
 def_os390_defs="$def_os390_defs -DOS390 -DZOS";
@@ -55,30 +61,30 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
 
 case "$use64bitall" in
 '')
-  def_os390_cflags="$def_os390_cflags -qxplink"
-  def_os390_cccdlflags="$def_os390_cccdlflags -qxplink"
-  def_os390_ldflags="$def_os390_ldflags -qxplink"
 # defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
   ;;
 *)
-  def_os390_cflags="$def_os390_cflags -Wc,lp64"
-  def_os390_cccdlflags="$def_os390_cccdlflags $def_os390_cflags -Wl,lp64"
-  def_os390_ldflags="$def_os390_ldflags -Wl,lp64"
+  case "$cc" in
+  '') cc='clang' ;;
+  esac
+  case "$ld" in
+  '') ld='clang' ;;
+  esac
+  def_os390_cflags="$def_os390_cflags -m64"
+  def_os390_ldflags="$def_os390_ldflags -m64"
+  ;;
 esac
 
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
-  def_os390_cflags="$def_os390_cflags -qascii"
+  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii"
 else
   ebcdic=true
+  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
+  def_os390_cflags="$def_os390_cflags -fexec-charset=IBM-1047"
 fi
-
-# Export all externally defined functions and variables in the compilation
-# unit so that a DLL application can use them.
-def_os390_cflags="$def_os390_cflags -qexportall";
-def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
 
 # 3296= #include file not found;
 # 4108= The use of keyword &1 is non-portable
@@ -102,6 +108,14 @@ def_os390_defs="$def_os390_defs -DNO_LOCALE_MESSAGES"
 # Set up feature test macros required for features available on supported z/OS systems
 def_os390_defs="$def_os390_defs -D_OPEN_THREADS=3 -D_UNIX03_SOURCE=1 -D_AE_BIMODAL=1 -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -D_ENHANCED_ASCII_EXT=0xFFFFFFFF -D_OPEN_SYS_FILE_EXT=1 -D_OPEN_SYS_SOCK_IPV6 -D_XOPEN_SOURCE=600 -D_XOPEN_SOURCE_EXTENDED"
 
+# Some header files on z/OS have trigraphs in them that clang doesn't handle
+# without this option.
+def_os390_cppflags="$def_os390_cppflags -trigraphs"
+
+# Suppress the trigraph warnings, and some headers have pragmas that clang
+# isn't familiar with
+def_os390_cflags="$def_os390_cflags -Wno-trigraphs -Wno-unknown-pragmas"
+
 # Time to set the external 'cppflags'
 cppflags="$cppflags $def_os390_cppflags"
 
@@ -115,12 +129,6 @@ esac
 # can override this with Configure -Doptimize='-O2' or somesuch.
 case "$optimize" in
 '') optimize=' ' ;;
-esac
-
-# To link via definition side decks we need the dll option
-# You can override this with Configure -Ucccdlflags or somesuch.
-case "$cccdlflags" in
-'') cccdlflags="$def_os390_cccdlflags -Wl,dll";;
 esac
 
 case "$so" in
