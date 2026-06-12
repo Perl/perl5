@@ -279,6 +279,12 @@ case "$d_shmatprototype" in
 '') d_shmatprototype='define' ;;
 esac
 
+# z/OS sets this to either 0 or the illegal 0x500010DBE8.  So, say it's
+# unvavailable.
+case "$d_tm_tm_gmtoff" in
+'') d_tm_tm_gmtoff='undef' ;;
+esac
+
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
