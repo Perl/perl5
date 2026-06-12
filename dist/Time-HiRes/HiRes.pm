@@ -75,7 +75,6 @@ sub AUTOLOAD {
 
 sub import {
     for my $i (@_[1 .. $#_]) {
-
         if (($i eq 'clock_getres'    && !&d_clock_getres)    ||
             ($i eq 'clock_gettime'   && !&d_clock_gettime)   ||
             ($i eq 'clock_nanosleep' && !&d_clock_nanosleep) ||
@@ -154,6 +153,10 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   clock_nanosleep(CLOCK_REALTIME, time()*1e9 + 10e9, TIMER_ABSTIME);
 
   my $ticktock = clock();
+
+  use Time::HiRes qw( hrtime );
+
+  my $nanoseconds = hrtime();
 
   use Time::HiRes qw( stat lstat );
 
@@ -430,6 +433,21 @@ somewhat like the second value returned by the times() of core Perl,
 but not necessarily identical.  Note that due to backward
 compatibility limitations the returned value may wrap around at about
 2147 seconds or at about 36 minutes.
+
+=item hrtime ()
+
+Returns a 64-bit unsigned integer representing the value of the
+CLOCK_MONOTONIC clock in nanoseconds.  This is a monotonic clock,
+meaning that it is unaffected by system clock adjustments.  The
+reference epoch of this clock is not specified, so only I<differences>
+between hrtime() values are meaningful.
+
+On 64bit systems the counter will roll after 584 years. On 32bit
+systems the counter will roll after ~4.2 seconds.
+
+This function was added in Time::HiRes 1.9780 and requires a
+system that supports clock_gettime() (i.e., a POSIX-like system
+or equivalent).
 
 =item stat
 
