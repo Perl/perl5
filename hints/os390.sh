@@ -52,8 +52,8 @@ def_os390_cflags="$def_os390_cflags -D_POSIX_C_SOURCE=200809L"
 # Various values that we need are not available unless this is set
 def_os390_cflags="$def_os390_cflags -D_XPLATFORM_SOURCE=1";
 
-# For #ifdefs in code
-def_os390_defs="$def_os390_defs -DOS390 -DZOS";
+# For #ifdefs in code to mark this as z/OS.  OEMVS is a synonym for __MVS__
+def_os390_defs="$def_os390_defs -DOS390 -DZOS -DOEMVS";
 
 # Turn on POSIX compatibility modes
 #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
@@ -90,7 +90,6 @@ else
 fi
 
 def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
-def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
 
 # ensure that the OS/390 yacc generated parser is reentrant.
 def_os390_defs="$def_os390_defs -DYYDYNAMIC";
