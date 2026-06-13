@@ -265,7 +265,13 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-#
+# In ASCII mode, if this is used, it causes generating some Makefiles to fail
+# due to EBCDIC being generated.  Pod-Checker is one.  It appears to work in
+# EBCDIC mode, but turning off anyway to be safe.
+case "$d_pipe2" in
+'') d_pipe2='undef' ;;
+esac
+
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
