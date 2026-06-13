@@ -1411,9 +1411,9 @@ clock_gettime(clock_id = 0)
 
 #if defined(TIME_HIRES_CLOCK_GETTIME)
 
-void
+UV
 hrtime()
-    PPCODE:
+    CODE:
         struct timespec ts;
         int status;
 #  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
@@ -1421,11 +1421,11 @@ hrtime()
 #  else
         status = clock_gettime(CLOCK_MONOTONIC, &ts);
 #  endif
-        if (status == 0) {
-            UV ret = (UV)ts.tv_sec * (UV)IV_1E9 + (UV)ts.tv_nsec;
-            EXTEND(SP, 1);
-            PUSHs(sv_2mortal(newSVuv(ret)));
-        }
+        if (status != 0)
+            XSRETURN_EMPTY;
+        RETVAL = (UV)ts.tv_sec * (UV)IV_1E9 + (UV)ts.tv_nsec;
+    OUTPUT:
+        RETVAL
 
 #else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
 
