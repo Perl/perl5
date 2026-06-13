@@ -86,15 +86,6 @@ else
   def_os390_cflags="$def_os390_cflags -fexec-charset=IBM-1047"
 fi
 
-# 3296= #include file not found;
-# 4108= The use of keyword &1 is non-portable
-#       We care about this because it
-#       actually means it didn't do what we expected. e.g.,
-#          INFORMATIONAL CCN4108 ./proto.h:4534 The use of keyword '__attribute__' is non-portable.
-# 3159= Bit field type specified for &1 is not valid. Type &2 assumed.
-#       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
-def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
-
 def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
 def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
 
