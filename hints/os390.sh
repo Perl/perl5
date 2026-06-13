@@ -272,6 +272,13 @@ case "$d_pipe2" in
 '') d_pipe2='undef' ;;
 esac
 
+# Configure's compilation of shm.h that is supposed to show if that file
+# includes a prototype definition currently results in garbage (reason unknown,
+# but maybe it's the same one as pipe2() not working) so the grep fails.
+case "$d_shmatprototype" in
+'') d_shmatprototype='define' ;;
+esac
+
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
