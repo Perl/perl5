@@ -239,25 +239,6 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-# We have our own cppstdin script.  This is not a variable since
-# Configure sees the presence of the script file.
-# We put system header -D definitions in so that Configure
-# can find the shmat() prototype in <sys/shm.h> and various
-# other things.  Unfortunately, cppflags occurs too late to be of
-# value external to the script.  This may need to be revisited
-#
-# khw believes some of this is obsolete.  DOLLARINNAMES allows '$' in variable
-# names, for whatever reason
-# NOLOC says to use the 1047 code page, and no locale
-case "$usedl" in
-define)
-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -D_SHR_ENVIRON -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
-   ;;
-*)
-echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_ALL_SOURCE -E -Wc,"LANGLVL(DOLLARINNAMES)",NOLOC ${1+"$@"} .$$.c | fgrep -v "??="; rm .$$.c' > cppstdin
-   ;;
-esac
-
 #
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
