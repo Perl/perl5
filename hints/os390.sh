@@ -160,7 +160,7 @@ def_os390_cflags="$def_os390_cflags -Wno-trigraphs -Wno-unknown-pragmas"
 cppflags="$cppflags $def_os390_cppflags"
 
 # Combine -D with cflags
-ccflags="$ccflags $def_os390_cflags $def_os390_defs"
+ccflags="$ccflags $def_os390_cflags $cppflags $def_os390_defs"
 
 case "$so" in
 '') so='a' ;;
