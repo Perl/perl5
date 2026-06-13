@@ -34,28 +34,28 @@ archobjs="os390.o"
 os390_ver=$(uname -Iv)
 
 def_os390_cccdlflags=""
-def_os390_cflags=""
+def_os390_ccflags=""
 def_os390_cppflags=""
 def_os390_defs=""
 def_os390_ldflags=""
 
 # We now require C99
-def_os390_cflags="$def_os390_cflags -std=c99"
+def_os390_ccflags="$def_os390_ccflags -std=c99"
 
 # Certain extensions to z/OS library functions and extra library functions are
 # available only when this is defined.  For example, to enable "unicode literals"
-def_os390_cflags="$def_os390_cflags -D_EXT=1"
+def_os390_ccflags="$def_os390_ccflags -D_EXT=1"
 
 # Export all externally defined functions and variables in the compilation
 # unit so that a DLL application can use them. 'default' really should be named
 # 'public'
-def_os390_cflags="$def_os390_cflags -fvisibility=default"
+def_os390_ccflags="$def_os390_ccflags -fvisibility=default"
 
 # Use the behaviors for various library functions specified by POSIX 2008.
-def_os390_cflags="$def_os390_cflags -D_POSIX_C_SOURCE=200809L"
+def_os390_ccflags="$def_os390_ccflags -D_POSIX_C_SOURCE=200809L"
 
 # Various values that we need are not available unless this is set
-def_os390_cflags="$def_os390_cflags -D_XPLATFORM_SOURCE=1";
+def_os390_ccflags="$def_os390_ccflags -D_XPLATFORM_SOURCE=1";
 
 # For #ifdefs in code to mark this as z/OS.  OEMVS is a synonym for __MVS__
 def_os390_defs="$def_os390_defs -DOS390 -DZOS -DOEMVS";
@@ -76,7 +76,7 @@ case "$use64bitall" in
   case "$ld" in
   '') ld='clang' ;;
   esac
-  def_os390_cflags="$def_os390_cflags -m64"
+  def_os390_ccflags="$def_os390_ccflags -m64"
   def_os390_ldflags="$def_os390_ldflags -m64"
   ;;
 esac
@@ -87,7 +87,7 @@ test -h os390.c || ln -s os390/os390.c os390.c
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
-  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ascii"
+  def_os390_ccflags="$def_os390_ccflags -fzos-le-char-mode=ascii"
 
   # Enhanced ASCII support provides the ability to convert between ASCII and
   # EBCDIC
@@ -107,8 +107,8 @@ if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   startperl='#!/bin/env perl'
 else
   ebcdic=true
-  def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
-  def_os390_cflags="$def_os390_cflags -fexec-charset=IBM-1047"
+  def_os390_ccflags="$def_os390_ccflags -fzos-le-char-mode=ebcdic"
+  def_os390_ccflags="$def_os390_ccflags -fexec-charset=IBM-1047"
 fi
 
 # ensure that the OS/390 yacc generated parser is reentrant.
@@ -154,13 +154,13 @@ def_os390_cppflags="$def_os390_cppflags -trigraphs"
 
 # Suppress the trigraph warnings, and some headers have pragmas that clang
 # isn't familiar with
-def_os390_cflags="$def_os390_cflags -Wno-trigraphs -Wno-unknown-pragmas"
+def_os390_ccflags="$def_os390_ccflags -Wno-trigraphs -Wno-unknown-pragmas"
 
 # Time to set the external 'cppflags'
 cppflags="$cppflags $def_os390_cppflags"
 
 # Combine -D with cflags
-ccflags="$ccflags $def_os390_cflags $cppflags $def_os390_defs"
+ccflags="$ccflags $def_os390_ccflags $cppflags $def_os390_defs"
 
 case "$so" in
 '') so='a' ;;
