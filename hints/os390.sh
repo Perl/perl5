@@ -31,6 +31,8 @@ esac
 
 # Prepend your favorites with Configure -Dccflags=your_favorites
 
+archobjs="os390.o"
+
 # This overrides the name the compiler was called with.  'ext' is required for
 # "unicode literals" to be enabled
 def_os390_cflags='-qlanglvl=extc1x';
