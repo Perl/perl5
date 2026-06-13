@@ -33,12 +33,18 @@ esac
 
 archobjs="os390.o"
 
+def_os390_cccdlflags=""
+def_os390_cflags=""
+def_os390_cppflags=""
+def_os390_defs=""
+def_os390_ldflags=""
+
 # This overrides the name the compiler was called with.  'ext' is required for
 # "unicode literals" to be enabled
-def_os390_cflags='-qlanglvl=extc1x';
+def_os390_cflags='$def_os390_cflags -qlanglvl=extc1x';
 
 # For #ifdefs in code
-def_os390_defs="-DOS390 -DZOS";
+def_os390_defs="$def_os390_defs -DOS390 -DZOS";
 
 # Turn on POSIX compatibility modes
 #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
@@ -50,15 +56,15 @@ def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
 case "$use64bitall" in
 '')
   def_os390_cflags="$def_os390_cflags -qxplink"
-  def_os390_cccdlflags="-qxplink"
-  def_os390_ldflags="-qxplink"
+  def_os390_cccdlflags="$def_os390_cccdlflags -qxplink"
+  def_os390_ldflags="$def_os390_ldflags -qxplink"
 # defines a BSD-like socket interface for the function prototypes and structures involved (not required with 64-bit)
   def_os390_defs="$def_os390_defs -D_OE_SOCKETS";
   ;;
 *)
   def_os390_cflags="$def_os390_cflags -Wc,lp64"
-  def_os390_cccdlflags="$def_os390_cflags -Wl,lp64"
-  def_os390_ldflags="-Wl,lp64"
+  def_os390_cccdlflags="$def_os390_cccdlflags $def_os390_cflags -Wl,lp64"
+  def_os390_ldflags="$def_os390_ldflags -Wl,lp64"
 esac
 
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
