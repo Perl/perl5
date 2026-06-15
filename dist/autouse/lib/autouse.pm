@@ -1,11 +1,11 @@
 package autouse;
+use 5.006;
+use strict;
+use warnings;
 
-#use strict;		# debugging only
-use 5.006;		# use warnings
+our $VERSION = '1.12';
 
-$autouse::VERSION = '1.12';
-
-$autouse::DEBUG ||= 0;
+our $DEBUG ||= 0;
 
 sub vet_import ($);
 
@@ -30,7 +30,7 @@ sub import {
 
     # It is not loaded: need to do real work.
     my $callpkg = caller(0);
-    print "autouse called from $callpkg\n" if $autouse::DEBUG;
+    print "autouse called from $callpkg\n" if $DEBUG;
 
     my $index;
     for my $f (@_) {
@@ -54,13 +54,15 @@ sub import {
                 vet_import $module;
             }
             no warnings qw(redefine prototype);
+            no strict 'refs';
             *$closure_import_func = \&{"${module}::$closure_func"};
             print "autousing $module; "
                   ."imported $closure_func as $closure_import_func\n"
-                if $autouse::DEBUG;
+                if $DEBUG;
             goto &$closure_import_func;
         };
 
+        no strict 'refs';
         if (defined $proto) {
             *$closure_import_func = eval "sub ($proto) { goto &\$load_sub }"
                 || die;

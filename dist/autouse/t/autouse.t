@@ -1,4 +1,6 @@
 #!./perl
+use strict;
+use warnings;
 
 BEGIN {
     require Config;
