@@ -5,6 +5,7 @@ use Config;
 use Errno qw();
 use File::Temp qw(tempdir);
 use Test::More;
+use Cwd ();
 
 if($^O eq "cygwin") {
     # This test skipping should be removed when the Cygwin bug is fixed.
@@ -13,13 +14,15 @@ if($^O eq "cygwin") {
 my $prefix = $Config{prefix};
 my $osvers = $Config{osvers};
 
+my $cwd = Cwd::getcwd();
+END { chdir $cwd; }
+
 my $tmp = tempdir(CLEANUP => 1);
 unless(mkdir("$tmp/testdir") && chdir("$tmp/testdir") && rmdir("$tmp/testdir")){
     plan skip_all => "can't be in non-existent directory";
 }
 
 plan tests => 8;
-require Cwd;
 
 my @acceptable_errnos = (&Errno::ENOENT, (defined &Errno::ESTALE ? &Errno::ESTALE : ()));
 foreach my $type (qw(regular perl)) {
@@ -58,7 +61,5 @@ foreach my $type (qw(regular perl)) {
 }
 
 chdir $tmp or die "$tmp: $!";
-
-END { chdir $tmp; }
 
 1;
