@@ -157,6 +157,7 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   use Time::HiRes qw( hrtime );
 
   my $nanoseconds = hrtime();
+  my ($seconds, $nanosec) = hrtime(1);
 
   use Time::HiRes qw( stat lstat );
 
@@ -436,11 +437,17 @@ compatibility limitations the returned value may wrap around at about
 
 =item hrtime ()
 
+=item hrtime ($as_array)
+
 Returns a 64-bit unsigned integer representing the value of the
-CLOCK_MONOTONIC clock in nanoseconds.  This is a monotonic clock,
-meaning that it is unaffected by system clock adjustments.  The
-reference epoch of this clock is not specified, so only I<differences>
-between hrtime() values are meaningful.
+CLOCK_MONOTONIC clock in nanoseconds.  When called with a true
+argument, returns a two-element array of (seconds, nanoseconds)
+from the same clock.
+
+This is a monotonic clock, meaning that it is unaffected by system
+clock adjustments.  The reference epoch of this clock is not
+specified, so only I<differences> between hrtime() values are
+meaningful.
 
 On 64bit systems the counter will roll after 584 years. On 32bit
 systems the counter will roll after ~4.2 seconds.
