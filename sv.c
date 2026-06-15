@@ -1585,6 +1585,7 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
+    case SVt_PVOBJ:
         /* diag_listed_as: Can't coerce %s to %s in %s */
         croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
                    OP_DESC(PL_op));
@@ -1697,6 +1698,7 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
+    case SVt_PVOBJ:
         /* diag_listed_as: Can't coerce %s to %s in %s */
         croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
                    OP_DESC(PL_op));
