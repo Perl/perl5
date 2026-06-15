@@ -15,10 +15,6 @@ WriteMakefile(
     ( $EUMM_VERSION >= 6.31 ? ( LICENSE => 'perl_5' ) : () ),
     dist       => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     META_MERGE => {
-        recommends => {
-            'Test::Pod'           => 1.18,
-            'Test::Pod::Coverage' => 1.04
-        },
         resources => {
             license     => 'http://dev.perl.org/licenses/',
             bugtracker  => 'https://github.com/Perl/perl5/issues',
