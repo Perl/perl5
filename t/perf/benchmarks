@@ -2487,7 +2487,7 @@
         code    => '/^[acgt]+/',
     },
     'regex::anyof_plus::floating' => {
-        desc    => '/[acgt]+where match starts at position 0 for 100 chars/',
+        desc    => '/[acgt]+/ where match starts at position 0 for 100 chars/',
         setup   => '$_ = "a" x 100;',
         code    => '/[acgt]+/',
     },
@@ -2507,4 +2507,163 @@
         setup   => '$_ = ("a" x 20)',
         code    => '/^(?:(.)(.))*[XY]/',
     },
+
+    # ----------------------------------------------------------------
+    #
+    # Test regex intuit, which is a pre-scan of the string looking for a
+    # known fixed and/or floating substring, to either quickly fail the
+    # match or to find the earliest position in the string where the
+    # pattern could match.
+
+    # Test various intuit "try to fail quickly" tricks
+
+    'regex::intuit::fail_too_short' => {
+        desc    => 'quick fail due to string being too short',
+        setup   => '$_ = "x";',
+        code    => '/abc.*defg/gc',
+    },
+    'regex::intuit::Aanch_fail_notbos' => {
+        desc    => '\A quick fail due to not at beginning of string',
+        setup   => '$_ = "x" x 10_000;',
+        pre     => 'pos() = 1;',
+        code    => '/\A.*xxx/gc',
+    },
+    'regex::intuit::anch_fail_too_long' => {
+        desc    => 'quick fail due to anchored both ends',
+        setup   => '$_ = "abcd"',
+        code    => '/^abc$/gc',
+    },
+    'regex::intuit::anch_fail_too_long_n' => {
+        desc    => 'quick fail due to anchored both ends with \n',
+        setup   => '$_ = "ab\n"',
+        code    => '/^abc$/gc',
+    },
+    'regex::intuit::mlanch::fail_notbos' => {
+        desc    => '/^/m (not so) quick fail due to not at beginning of line',
+        setup   => '$_ = " xxx" . (" " x 10_000);',
+        pre     => 'pos() = 1;',
+        code    => '/^xxx/gm',
+    },
+
+    do {
+        # Generate intuit benchmarks for various combinations of anchor,
+        # anchored/floating substring, synthetic class.
+        #
+        # $i_foo are integers indicating different permutations of foo in
+        #          the pattern.
+        #
+        # $m_foo are booleans indicating whether the foo part of the pattern
+        # will match.
+        #
+        # $rx_foo are snippets of the regex being constructed.
+        #
+        # @s_foo are snippets of perl code that collectively will make up
+        # the code to be evalled which generates the string to be matched
+        # against. If an element has punctuation chars (apart from '-')
+        # it is treated as perl code; otherwise it it treated as part of a
+        # string literal - these latter will be concatted together and a
+        # pair of quotes wrapped round them
+        use warnings;
+        use strict;
+
+        my @benchmarks;
+
+        for my $i_anchor (0..3) { # 0=none  1=\A  2=\G  3=/^/m
+            for my $m_anchor (0,1) {
+                my $rx_anchor = ('', '\A', '\G', '^')[$i_anchor];
+                my $mod =       ('', '',   'gc', 'm')[$i_anchor];
+                my @s_anchor  = ('"-" x 1000',
+                                 "",
+                                 '"-" x 10', # paired with pos() == 0
+                                 '("-" x 100 . "\n") x 10'
+                                )[$i_anchor];
+
+                push @s_anchor, $m_anchor ?  '-9-'  : '-x-';
+
+                for my $i_stclass (0..1) { # 0=none 1=[AB]
+                    for my $m_stclass (0,1) {
+                        my $rx_class = $i_stclass ? '[AB]' : '';
+                        my @s_stclass = $m_stclass ? 'A' : '';
+
+                        for my $i_fixed (0..2) { # 0=none 1=short 2=long
+                            for my $m_fixed (0,1) {
+                                my $rx_fixed = ('', 'cat', 'systematical')[$i_fixed];
+                                my @s_fixed = $m_fixed ?  $rx_fixed : 'PQR';
+
+                                for my $i_float (0..2) { # 0=none 1=short 2=long
+                                    for my $m_float (0,1) {
+                                        my $rx_float =
+                                             ('', 'dog', 'planetesimal')[$i_float];
+                                        my @s_float = "('-' x 1000)";
+                                        push @s_float, $m_float ? $rx_float : 'XYZ';
+
+                                        my $id =    "an${i_anchor}${m_anchor}"
+                                                 . "_cl${i_stclass}${m_stclass}"
+                                                 . "_fx${i_fixed}${m_fixed}"
+                                                 . "_fl${i_float}${m_float}";
+
+                                        # Assemble all the code and
+                                        # literal string snippets into a
+                                        # single perl expression suitable
+                                        # for eval
+                                        my @s;
+                                        my $was_str;
+                                        for (@s_anchor, @s_stclass,
+                                                   @s_fixed, @s_float)
+                                        {
+                                            next unless defined;
+                                            next unless length;
+
+                                            if (/[^\w-]/) {
+                                                # code snippet
+                                                push @s, $_;
+                                                $was_str = 0;
+                                            }
+                                            else {
+                                                # literal string snippet;
+                                                # concat where possible
+                                                if ($was_str) {
+                                                    $s[-1] .= $_;
+                                                }
+                                                else {
+                                                    push @s, $_;
+                                                }
+                                                $was_str = 1;
+                                            }
+                                        }
+
+                                        @s = map { /[^\w-]/ ? $_ : qq{'$_'} } @s;
+                                        my $s = join ' . ', @s;
+                                        $s = "($s)";
+
+
+                                        my $pattern =
+                                               "/$rx_anchor$rx_class.\\d.$rx_fixed"
+                                             . ".*$rx_float/$mod";
+
+                                        push @benchmarks,
+                                                "regex::intuit::$id",
+                                                {
+                                                    desc => "$s =~ $pattern",
+                                                    setup => "\$_ = $s;",
+                                                    $mod =~ /g/
+                                                        ? (pre => 'pos() = 10;')
+                                                        : (),
+                                                    code  => $pattern,
+                                                };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        @benchmarks;
+    },
+
+
+    # XXX more intuit tests needed here
+
+    # XXX millions more general regex tests needed here
 ];
