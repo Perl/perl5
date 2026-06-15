@@ -715,6 +715,7 @@
 # define sv_recode_to_utf8(a,b)                 Perl_sv_recode_to_utf8(aTHX_ a,b)
 # define sv_ref(a,b,c)                          Perl_sv_ref(aTHX_ a,b,c)
 # define sv_reftype(a,b)                        Perl_sv_reftype(aTHX_ a,b)
+# define sv_reftype_id(a)                       Perl_sv_reftype_id(aTHX_ a)
 # define sv_regex_global_pos_clear(a)           Perl_sv_regex_global_pos_clear(aTHX_ a)
 # define sv_regex_global_pos_get(a,b,c)         Perl_sv_regex_global_pos_get(aTHX_ a,b,c)
 # define sv_regex_global_pos_set(a,b,c)         Perl_sv_regex_global_pos_set(aTHX_ a,b,c)

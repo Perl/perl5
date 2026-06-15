@@ -7378,6 +7378,14 @@ Perl_sv_reftype(pTHX_ const SV * const sv, const int ob)
 #define PERL_ARGS_ASSERT_SV_REFTYPE             \
         Perl_assert_aTHX; assert(sv)
 
+PERL_CALLCONV U8
+Perl_sv_reftype_id(pTHX_ const SV * const sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_REFTYPE_ID          \
+        Perl_assert_aTHX; assert(sv)
+
 PERL_CALLCONV void
 Perl_sv_regex_global_pos_clear(pTHX_ SV *sv)
         Perl_attribute_nonnull_aTHX

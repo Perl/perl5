@@ -4496,45 +4496,19 @@ S_ref_cmp_type(pTHX_ OP * constop)
     STRLEN len;
     const char *str = SvPV_const(sv, len);
 
-    switch (len) {
+    /* Compare against the builtin types */
+    for (unsigned int i = 0; i < 14; i++) {
+        if (strcmp(PL_sv_reftype_lookup[i], str) == 0) {
+            return i;
+        }
+    }
 
+    switch (len) {
         case 0:
             return OPpREF_CMP_EMPTYSTR;
-        case 2:
-            if (memcmp(str, "IO", 2) == 0)
-                return OPpREF_CMP_IO;
-            break;
-        case 3:
-            if (memcmp(str, "REF", 3) == 0)
-                return OPpREF_CMP_REF;
-            break;
-        case 4:
-            if (memcmp(str, "CODE", 4) == 0)
-                return OPpREF_CMP_CODE;
-            if (memcmp(str, "GLOB", 4) == 0)
-                return OPpREF_CMP_GLOB;
-            if (memcmp(str, "HASH", 4) == 0)
-                return OPpREF_CMP_HASH;
-            break;
-        case 5:
-            if (memcmp(str, "ARRAY", 5) == 0)
-                return OPpREF_CMP_ARRAY;
-            break;
         case 6:
-            if (memcmp(str, "FORMAT", 6) == 0)
-                return OPpREF_CMP_FORMAT;
-            if (memcmp(str, "LVALUE", 6) == 0)
-                return OPpREF_CMP_LVALUE;
-            if (memcmp(str, "REGEXP", 6) == 0)
-                return OPpREF_CMP_REGEXP;
             if (memcmp(str, "Regexp", 6) == 0)
                 return OPpREF_CMP_REGEXP_PKG;
-            if (memcmp(str, "SCALAR", 6) == 0)
-                return OPpREF_CMP_SCALAR;
-            break;
-        case 7:
-            if (memcmp(str, "VSTRING", 7) == 0)
-                return OPpREF_CMP_VSTRING;
             break;
     }
     return 0;
