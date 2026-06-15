@@ -1097,20 +1097,24 @@ Perl_re_intuit_start(pTHX_
              * caller will have set strpos = pos()-4; we look for the substr
              * at position pos()-4+1, which lines up with the "a" */
 
-            if (prog->check_offset_min == prog->check_offset_max) {
+            if (prog->anchored_substr || prog->anchored_utf8) {
                 /* Substring at constant offset from beg-of-str... */
-                SSize_t slen = SvCUR(check);
-                char *s = HOP3c(strpos, prog->check_offset_min, strend);
+
+                SV *anchored_sv = utf8_target ? prog->anchored_utf8
+                                           : prog->anchored_substr;
+                SSize_t slen = SvCUR(anchored_sv);
+                SSize_t offset = prog->substrs->data[0].min_offset;
+                char *s = HOP3c(strpos, offset, strend);
 
                 DEBUG_EXECUTE_r(re_printf(
-                    "  Looking for check substr at fixed offset %" IVdf "...\n",
-                    (IV)prog->check_offset_min));
+                    "  Looking for anchored substr at fixed offset %" IVdf "...\n",
+                    (IV)offset));
 
-                if (SvTAIL(check)) {
+                if (SvTAIL(anchored_sv)) {
                     /* In this case, the regex is anchored at the end too.
                      * Unless it's a multiline match, the lengths must match
                      * exactly, give or take a \n.  NB: slen >= 1 since
-                     * the last char of check is \n */
+                     * the last char of anchored is \n */
                     if (!multiline
                         && (   strend - s > slen
                             || strend - s < slen - 1
@@ -1124,8 +1128,8 @@ Perl_re_intuit_start(pTHX_
                     slen--;
                 }
                 if (slen && (strend - s < slen
-                    || *SvPVX_const(check) != *s
-                    || (slen > 1 && (memNE(SvPVX_const(check), s, slen)))))
+                    || *SvPVX_const(anchored_sv) != *s
+                    || (slen > 1 && (memNE(SvPVX_const(anchored_sv), s, slen)))))
                 {
                     DEBUG_EXECUTE_r(re_printf(
                                     "  String not equal...\n"));
