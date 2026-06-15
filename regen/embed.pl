@@ -2059,24 +2059,11 @@ my @unresolved_visibility_overrides = qw(
     OPpPAD_STATE
     OPpPV_IS_UTF8
     OPpREF_CMP_MASK
-    OPpREF_CMP_SCALAR
-    OPpREF_CMP_VSTRING
-    OPpREF_CMP_REF
-    OPpREF_CMP_GLOB
-    OPpREF_CMP_LVALUE
-    OPpREF_CMP_REGEXP
-    OPpREF_CMP_ARRAY
-    OPpREF_CMP_HASH
-    OPpREF_CMP_CODE
-    OPpREF_CMP_FORMAT
-    OPpREF_CMP_IO
-    OPpREF_CMP_INVLIST
-    OPpREF_CMP_OBJECT
+    OPpREF_CMP_REGEXP_PKG
+    OPpREF_CMP_EMPTYSTR
     OPpREF_CMP_SKIPLOGOP
     OPpREF_CMP_AND
     OPpREF_CMP_NE
-    OPpREF_CMP_REGEXP_PKG
-    OPpREF_CMP_EMPTYSTR
     OPpREFCOUNTED
     OPpREPEAT_DOLIST
     OPpREVERSE_INPLACE
@@ -2996,6 +2983,19 @@ my @unresolved_visibility_overrides = qw(
     SvRMAGICAL_off
     SvRMAGICAL_on
     SvRV_const
+    SVrt_SCALAR
+    SVrt_VSTRING
+    SVrt_REF
+    SVrt_GLOB
+    SVrt_LVALUE
+    SVrt_REGEXP
+    SVrt_ARRAY
+    SVrt_HASH
+    SVrt_CODE
+    SVrt_FORMAT
+    SVrt_IO
+    SVrt_INVLIST
+    SVrt_OBJECT
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on

@@ -28,13 +28,8 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
          OPpPARAM_IF_UNDEF OPpPARAM_IF_FALSE
-         OPpREF_CMP_MASK OPpREF_CMP_SCALAR OPpREF_CMP_VSTRING
-         OPpREF_CMP_REF OPpREF_CMP_GLOB OPpREF_CMP_LVALUE
-         OPpREF_CMP_REGEXP OPpREF_CMP_ARRAY OPpREF_CMP_HASH
-         OPpREF_CMP_CODE OPpREF_CMP_FORMAT OPpREF_CMP_IO
-         OPpREF_CMP_OBJECT OPpREF_CMP_INVLIST
+         OPpREF_CMP_MASK OPpREF_CMP_REGEXP_PKG OPpREF_CMP_EMPTYSTR
          OPpREF_CMP_SKIPLOGOP OPpREF_CMP_AND OPpREF_CMP_NE
-         OPpREF_CMP_REGEXP_PKG OPpREF_CMP_EMPTYSTR
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
          CVf_NOWARN_AMBIGUOUS CVf_LVALUE CVf_IsMETHOD
@@ -64,6 +59,9 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_MASK
         MDEREF_SHIFT
         OPpSTATEMENT
+        SVrt_SCALAR SVrt_VSTRING SVrt_REF SVrt_GLOB SVrt_LVALUE
+        SVrt_REGEXP SVrt_ARRAY SVrt_HASH SVrt_CODE SVrt_FORMAT
+        SVrt_IO SVrt_OBJECT SVrt_INVLIST
     );
 
 our $AUTOLOAD;
@@ -2773,6 +2771,7 @@ sub pp_ref_cmp {
 
     my $l;
     my $id = $_[1]->private & OPpREF_CMP_MASK;
+
     my $enum = $B::Op_private::bits{ref_cmp}{0}{enum};
     for my ($ix, $name, $label) (@$enum) {
         if ($id == $ix) {

@@ -3655,7 +3655,7 @@ AMTdip	|void	|SvREFCNT_inc_void					\
 				|NULLOK SV *sv
 ARdp	|const char *|sv_reftype|NN const SV * const sv 		\
 				|const int ob
-
+CRp	|U8	|sv_reftype_id	|NN const SV * const sv
 Adp	|void	|sv_regex_global_pos_clear				\
 				|NN SV *sv
 ARdp	|bool	|sv_regex_global_pos_get				\

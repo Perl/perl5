@@ -2909,6 +2909,16 @@ macro family.
 
 #define SvVSTRING(sv, len)  (sv_vstring_get(sv, &(len)))
 
+/* These next two declarations, and the matching pieces in sv.c, were
+ * added for use by Perl_sv_reftype and pp_ref_cmp.
+ *
+ * If external visibility is required in the future, it should be
+ * via a new function rather than directly. */
+#ifdef PERL_CORE
+#define PL_sv_reftype_lookup_MAX 14
+extern const char *const PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

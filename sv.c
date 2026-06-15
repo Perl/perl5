@@ -11413,6 +11413,78 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
     return SvPVX(sv);
 }
 
+/* PL_sv_reftype_lookup is currently for the direct use of PL_sv_reftype
+ * and the generation of OP_REF_CMP. The contents and ordering below
+ * are mirrored by the SVrt_* constants defined in op_private for
+ * OP_REF_CMP but also used below by Perl_sv_reftype_id.
+*/
+const char * const PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX] = {
+    "UNKNOWN", /* 0 */
+    "ARRAY",   /* 1 */
+    "HASH",    /* 2 */
+    "CODE",    /* 3 */
+    "REF",     /* 5 */
+    "SCALAR",  /* 6 */
+    "GLOB",    /* 4 */
+    "REGEXP",  /* 7 */
+    "OBJECT",  /* 8 */
+    "LVALUE",  /* 9 */
+    "IO",      /* 10 */
+    "FORMAT",  /* 11 */
+    "VSTRING", /* 12 */
+    "INVLIST", /* 13 */
+};
+
+U8
+Perl_sv_reftype_id(pTHX_ const SV *const sv)
+{
+    PERL_ARGS_ASSERT_SV_REFTYPE_ID;
+
+    /* WARNING - There is code, for instance in mg.c, that assumes that
+     * the only reason that sv_reftype(sv,0) would return a string starting
+     * with 'L' or 'S' is that it is a LVALUE or a SCALAR.
+     * Yes this a dodgy way to do type checking, but it saves practically reimplementing
+     * this routine inside other subs, and it saves time.
+     * Do not change this assumption without searching for "dodgy type check" in
+     * the code.
+     * - Yves */
+    switch (SvTYPE(sv)) {
+        case SVt_PVAV:          return SVrt_ARRAY;
+        case SVt_PVHV:          return SVrt_HASH;
+
+        case SVt_NULL:
+        case SVt_IV:
+        case SVt_NV:
+        case SVt_PV:
+        case SVt_PVIV:
+        case SVt_PVNV:
+        case SVt_PVMG:
+                                if (SvVOK(sv))
+                                    return SVrt_VSTRING;
+                                if (SvROK(sv))
+                                    return SVrt_REF;
+                                else
+                                    return SVrt_SCALAR;
+
+        case SVt_PVCV:          return SVrt_CODE;
+        case SVt_PVGV:          return (isGV_with_GP(sv)
+                                    ? SVrt_GLOB : SVrt_SCALAR);
+        case SVt_REGEXP:        return SVrt_REGEXP;
+        case SVt_PVOBJ:         return SVrt_OBJECT;
+        case SVt_PVLV:          return (SvROK(sv) ? SVrt_REF
+                                /* tied lvalues should appear to be
+                                 * scalars for backwards compatibility */
+                                : (isALPHA_FOLD_EQ(LvTYPE(sv), 't'))
+                                    ? SVrt_SCALAR : SVrt_LVALUE);
+        case SVt_PVFM:          return SVrt_FORMAT;
+        case SVt_PVIO:          return SVrt_IO;
+        case SVt_INVLIST:       return SVrt_INVLIST;
+        default:                break;
+    }
+
+    return 0;
+}
+
 /*
 =for apidoc sv_reftype
 
@@ -11432,46 +11504,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
         return SvPV_nolen_const(sv_ref(NULL, sv, ob));
     }
     else {
-        /* WARNING - There is code, for instance in mg.c, that assumes that
-         * the only reason that sv_reftype(sv,0) would return a string starting
-         * with 'L' or 'S' is that it is a LVALUE or a SCALAR.
-         * Yes this a dodgy way to do type checking, but it saves practically reimplementing
-         * this routine inside other subs, and it saves time.
-         * Do not change this assumption without searching for "dodgy type check" in
-         * the code.
-         * - Yves */
-        switch (SvTYPE(sv)) {
-        case SVt_NULL:
-        case SVt_IV:
-        case SVt_NV:
-        case SVt_PV:
-        case SVt_PVIV:
-        case SVt_PVNV:
-        case SVt_PVMG:
-                                if (SvVOK(sv))
-                                    return "VSTRING";
-                                if (SvROK(sv))
-                                    return "REF";
-                                else
-                                    return "SCALAR";
-
-        case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
-                                /* tied lvalues should appear to be
-                                 * scalars for backwards compatibility */
-                                : (isALPHA_FOLD_EQ(LvTYPE(sv), 't'))
-                                    ? "SCALAR" : "LVALUE");
-        case SVt_PVAV:		return "ARRAY";
-        case SVt_PVHV:		return "HASH";
-        case SVt_PVCV:		return "CODE";
-        case SVt_PVGV:		return (char *) (isGV_with_GP(sv)
-                                    ? "GLOB" : "SCALAR");
-        case SVt_PVFM:		return "FORMAT";
-        case SVt_PVIO:		return "IO";
-        case SVt_INVLIST:	return "INVLIST";
-        case SVt_REGEXP:	return "REGEXP";
-        case SVt_PVOBJ:         return "OBJECT";
-        default:		return "UNKNOWN";
-        }
+        return PL_sv_reftype_lookup[ sv_reftype_id(sv) ];
     }
 }
 

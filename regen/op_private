@@ -953,23 +953,29 @@ addbits('initfield',
     2 => qw(OPpINITFIELD_HV INITFIELD_HV),
 );
 
+# Note: Some of the the ref_cmp private flags deviate from the
+# normal naming convention because they are also used within sv.c
+# by Perl_sv_reftype_id and it would seem a bit weird for that
+# function to use a set of OPp* flags. However, maintaining a
+# separate set of flags and keeping the two sets in sync is also
+# undesirable. So this is a compromise.
 addbits('ref_cmp',
     '0..3' => {
         mask_def => 'OPpREF_CMP_MASK',
         enum => [ qw(
-            1  OPpREF_CMP_ARRAY   ARRAY
-            2  OPpREF_CMP_HASH    HASH
-            3  OPpREF_CMP_CODE    CODE
-            4  OPpREF_CMP_REF     REF
-            5  OPpREF_CMP_SCALAR  SCALAR
-            6  OPpREF_CMP_GLOB    GLOB
-            7  OPpREF_CMP_REGEXP  REGEXP
-            8  OPpREF_CMP_OBJECT  OBJECT
-            9  OPpREF_CMP_LVALUE  LVALUE
-            10 OPpREF_CMP_IO      IO
-            11 OPpREF_CMP_FORMAT  FORMAT
-            12 OPpREF_CMP_VSTRING VSTRING
-            13 OPpREF_CMP_INVLIST INVLIST
+            1  SVrt_ARRAY   ARRAY
+            2  SVrt_HASH    HASH
+            3  SVrt_CODE    CODE
+            4  SVrt_REF     REF
+            5  SVrt_SCALAR  SCALAR
+            6  SVrt_GLOB    GLOB
+            7  SVrt_REGEXP  REGEXP
+            8  SVrt_OBJECT  OBJECT
+            9  SVrt_LVALUE  LVALUE
+            10 SVrt_IO      IO
+            11 SVrt_FORMAT  FORMAT
+            12 SVrt_VSTRING VSTRING
+            13 SVrt_INVLIST INVLIST
             14 OPpREF_CMP_REGEXP_PKG  Regexp
             15 OPpREF_CMP_EMPTYSTR   emptyStr
          )],
