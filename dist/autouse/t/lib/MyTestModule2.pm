@@ -1,9 +1,10 @@
 package MyTestModule2;
+use strict;
 use warnings;
 
-@ISA = Exporter;
-require Exporter;
-@EXPORT_OK = 'test_function2';
+use Exporter;
+our @ISA = qw(Exporter);
+our @EXPORT_OK = 'test_function2';
 
 sub test_function2 {
     return 'works';
