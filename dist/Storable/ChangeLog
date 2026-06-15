@@ -1,9 +1,44 @@
 Release history for Storable
 
+3.41 - 2026-06-06 11:07:54
+
+  - fix possible overflow when unpacking hook data
+
+3.40 - 2026-03-20 14:06:42
+
+  - fix XS to use correct return types and not rely on an old hack in
+    ExtUtils::ParseXS
+  - fix documented maintainers
+
+3.39 - 2025-09-23 06:27:34
+
+  - use utf8_to_bytes_overwrite when possible for less mallocs
+
+3.38 - 2025-08-20 19:40:22
+
+  - fix C functions being called with wrong types
+
+3.37 - 2025-04-21 01:51:01
+
+  - use SvVSTRING from Devel::PPPort
+
+3.36 - 2025-03-21 12:49:33
+
+  - use new SvVSTRING core function when possible
+
+3.35 - 2024-09-20 11:18:14
+
+  - remove use of bareword filehandles
+  - remove more remnants of perl 5.004 compatibility code
+
+3.34 - 2024-08-29 13:23:40
+
   - reorganize files to match modern standards
   - use strict in library
   - use strict and warnings in tests
   - normaize whitespace in code
+  - remove use of indirect object syntax
+  - remove code for compatibility with perl versions older than 5.6
   - other minor cleanups
 
 3.33 - 2024-07-11 00:41:35
