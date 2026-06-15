@@ -1,7 +1,7 @@
 Revision history for Perl extension Exporter.
 
 5.79 Mon April 6 2026
-     - Fully implement documented $SIG{__WARN/DIE__} behavior
+     - Fix to work with new, more correct, $SIG{__WARN/DIE__} behavior
      - Remove indirect calls to import() method
 
 5.78 Sat December 30 2023
