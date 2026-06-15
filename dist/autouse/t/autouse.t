@@ -89,11 +89,11 @@ SKIP: {
     *MyTestModule2::test_function2 = \&test_function2;
     require MyTestModule2;
     is $w, undef,
-       'no redefinition warning when clobbering autouse stub with new sub';
+        'no redefinition warning when clobbering autouse stub with new sub';
     undef $w;
     MyTestModule2->import('test_function2');
     is $w, undef,
-       'no redefinition warning when clobbering autouse stub via *a=\&b';
+        'no redefinition warning when clobbering autouse stub via *a=\&b';
 }
 SKIP: {
     skip "Fails in 5.15.5 and below (perl bug)", 1 if $] < 5.0150051;
@@ -107,5 +107,5 @@ SKIP: {
     *Hash::Util::all_keys = \&all_keys;
     require Hash::Util;
     is $w, undef,
-      'no redefinition warning when clobbering autouse stub with new XSUB';
+        'no redefinition warning when clobbering autouse stub with new XSUB';
 }
