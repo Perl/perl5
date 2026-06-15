@@ -146,6 +146,8 @@ sub test_many {
             else {
                 $str = $out;
             }
+            $str = ''
+                if !defined $str;
             local $TODO = $todo if $flags & TODO;
 
             if ($flags & NOT) {
