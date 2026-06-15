@@ -2,7 +2,7 @@ package MyTestModule;
 use strict;
 
 sub test_function {
-  return 'works';
+    return 'works';
 }
 
 1;

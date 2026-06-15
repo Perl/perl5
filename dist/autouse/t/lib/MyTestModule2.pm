@@ -6,7 +6,7 @@ require Exporter;
 @EXPORT_OK = 'test_function2';
 
 sub test_function2 {
-  return 'works';
+    return 'works';
 }
 
 1;
