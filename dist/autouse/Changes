@@ -1,0 +1,20 @@
+1.11  Sun, 13 Mar 2016 18:45:00 -0400
+  * skip a failing test on very old perls
+
+1.10  Wed,  9 Mar 2016 18:38:00 -0400
+  * bump up the Scalar::Util requirement to match use of isdual
+
+1.09  Sun,  6 Mar 2016 15:33:15 -0400
+  * update a test that used ok() when it meant like()
+
+1.08  Thu,  5 Jun 2014 19:07:40 -0400
+  * Add descriptions for tests in dist/autouse/t/autouse.t lacking them.
+  * Fix autouse test, failing since commit 52102bb4f9
+
+1.07  Tue, 11 Sep 2012 09:52:12 -0400
+  * Restore autouse’s exemption from redef warnings.
+  * Add authority metadata.
+
+1.06  Fri, 10 Dec 2010 23:13:40 +0100
+  * First upload to cpan. Identical with version 1.06 in the perl core. Upstream
+    for this module is still blead perl.
