@@ -10,9 +10,11 @@ BEGIN {
     }
 }
 
+use lib 't/lib';
+use autouse ();
+
 my ($ok1, $ok2);
 BEGIN {
-    require autouse;
     eval {
         "autouse"->import('Scalar::Util' => 'Scalar::Util::set_prototype(&$)');
     };
@@ -74,8 +76,6 @@ like( $@, qr/^\Qautoused module Env has unique import() method/,
 # Check that UNIVERSAL.pm doesn't interfere with modules that don't use
 # Exporter and have no import() of their own.
 require UNIVERSAL;
-require File::Spec;
-unshift @INC, File::Spec->catdir('t', 'lib'), 'lib';
 autouse->import("MyTestModule" => 'test_function');
 my $ret = test_function();
 is( $ret, 'works', "No interference from UNIVERSAL.pm" );
