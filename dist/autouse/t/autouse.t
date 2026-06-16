@@ -5,7 +5,7 @@ use warnings;
 use lib 't/lib';
 use autouse ();
 
-use Test::More tests => 19;
+use Test::More tests => 18;
 
 eval {
     "autouse"->import('MyTestModuleNormal' => 'MyTestModuleNormal::test_function_normal');
@@ -19,6 +19,9 @@ like( $@, qr/^autouse into different package attempted/, "Catch autouse into dif
 
 use autouse 'MyTestModuleWithProto' => qw(test_function_another(@) test_function_with_proto(&$));
 
+ok !exists $INC{'MyTestModuleWithProto.pm'},
+    'Module not yet loaded';
+
 is prototype(\&test_function_with_proto), '&$',
     'specified prototype set correctly';
 
@@ -27,6 +30,9 @@ is eval { test_function_with_proto(sub {}, 1) }, 'works',
 
 is prototype(\&test_function_with_proto), '&$',
     'prototype still correct after call';
+
+ok exists $INC{'MyTestModuleWithProto.pm'},
+    'Module has been lazily loaded';
 
 is prototype(\&test_function_another), '@',
     'specified incorrect prototype set correctly';
@@ -53,14 +59,6 @@ use autouse 'Carp' => qw(carp croak);
         "Failure message received as expected" );
 }
 
-
-# Test that autouse's lazy module loading works.
-use autouse 'Errno' => qw(EPERM);
-
-my $mod_file = 'Errno.pm';   # just fine and portable for %INC
-ok( !exists $INC{$mod_file}, "Module not yet loaded" );
-ok( EPERM, "Access a constant from that module" ); # test if non-zero
-ok( exists $INC{$mod_file}, "Module has been lazily loaded" );
 
 use autouse Env => "something";
 eval { something() };
