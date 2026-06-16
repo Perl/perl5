@@ -3522,6 +3522,7 @@ dist/Attribute-Handlers/t/constants.t			Test constants and Attribute::Handlers
 dist/Attribute-Handlers/t/data_convert.t		Test attribute data conversion
 dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
 dist/Attribute-Handlers/t/multi.t			See if Attribute::Handlers works
+dist/autouse/Changes				autouse change log
 dist/autouse/lib/autouse.pm			Load and call a function only when it's used
 dist/autouse/t/autouse.t			See if autouse works
 dist/autouse/t/lib/MyTestModule.pm		Test module for autouse
