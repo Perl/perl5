@@ -2,46 +2,40 @@
 use strict;
 use warnings;
 
-BEGIN {
-    require Config;
-    if ($Config::Config{'extensions'} !~ m!\bList/Util\b!){
-	print "1..0 # Skip -- Perl configured without List::Util module\n";
-	exit 0;
-    }
-}
-
 use lib 't/lib';
 use autouse ();
 
-my ($ok1, $ok2);
-BEGIN {
-    eval {
-        "autouse"->import('Scalar::Util' => 'Scalar::Util::set_prototype(&$)');
-    };
-    $ok1 = !$@;
+use Test::More tests => 19;
 
-    eval {
-        "autouse"->import('Scalar::Util' => 'Foo::min');
-    };
-    $ok2 = $@;
+eval {
+    "autouse"->import('MyTestModuleNormal' => 'MyTestModuleNormal::test_function_normal');
+};
+is( $@, '', "Import of fully qualified function from same package works");
 
-    "autouse"->import('Scalar::Util' => qw(isdual set_prototype(&$)));
-}
+eval {
+    "autouse"->import('MyTestModuleNormal' => 'Foo::min');
+};
+like( $@, qr/^autouse into different package attempted/, "Catch autouse into different package" );
 
-use Test::More tests => 15;
+use autouse 'MyTestModuleWithProto' => qw(test_function_another(@) test_function_with_proto(&$));
 
-ok( $ok1, "Function from package with custom 'import()' correctly imported" );
-like( $ok2, qr/^autouse into different package attempted/, "Catch autouse into different package" );
+is prototype(\&test_function_with_proto), '&$',
+    'specified prototype set correctly';
 
-ok( isdual($!),
-    "Function imported via 'autouse' performs as expected");
+is eval { test_function_with_proto(sub {}, 1) }, 'works',
+    "Function imported via 'autouse' performs as expected";
 
+is prototype(\&test_function_with_proto), '&$',
+    'prototype still correct after call';
 
-# set_prototype() has a prototype of &$.  Make sure that's preserved.
-sub sum { return $_[0] + $_[1] };
-is( (set_prototype \&sum, '$$'), \&sum,
-    "Subroutine prototype preserved after import via 'autouse'");
+is prototype(\&test_function_another), '@',
+    'specified incorrect prototype set correctly';
 
+is eval { test_function_another() }, 'works',
+    "Function imported via 'autouse' with incorrect prototype performs as expected";
+
+is prototype(\&test_function_another), undef,
+    'specified incorrect prototype updated to real prototype';
 
 # Example from the docs.
 use autouse 'Carp' => qw(carp croak);
