@@ -15,8 +15,23 @@ if ($core) {
 }
 
 my @names = ({ name => 'HEf_SVKEY', macro => 1, type => "IV" },
-             qw(SVTYPEMASK SVt_PVGV SVt_PVHV PAD_FAKELEX_ANON
+             qw(SVTYPEMASK PAD_FAKELEX_ANON
                 PAD_FAKELEX_MULTI SVpad_STATE SVpad_TYPED SVpad_OUR));
+
+{
+    # Collect up the names of all the SVt_* constants for SvTYPE etc...
+    # These live in an enum in sv.h, not #define
+    my $path = File::Spec->catfile($headerpath, 'sv.h');
+    open my $fh, '<', $path or die "Cannot open $path: $!";
+
+    my $in_enum;
+    while (<$fh>) {
+        $in_enum++, next if m/enum\s*{/;
+        $in_enum = 0, next if m/^\s*}/;
+
+        push @names, {name => $1, macro => 1} if $in_enum and m/^\s*(SVt_\w+)/;
+    }
+}
 
 my @depend;
 
