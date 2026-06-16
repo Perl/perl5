@@ -5200,6 +5200,9 @@ newSVpvf_blank()
     OUTPUT:
         RETVAL
 
+const char *
+svtypename(U8 type)
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
