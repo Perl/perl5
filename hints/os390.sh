@@ -81,6 +81,9 @@ case "$use64bitall" in
   ;;
 esac
 
+# Help 'make' find os390.c
+test -h os390.c || ln -s os390/os390.c os390.c
+
 myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
