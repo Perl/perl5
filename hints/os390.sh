@@ -102,6 +102,9 @@ if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
     '') userelocatableinc="define" ;;
   esac
 
+  # Find perl base on PATH environment variable rather than hardcoding install
+  # location
+  startperl='#!/bin/env perl'
 else
   ebcdic=true
   def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
