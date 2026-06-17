@@ -2420,10 +2420,16 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
                 /* The code above should have guaranteed that we don't get here
                  * with conditions other than these */
+#ifndef EBCDIC
+                /* But it turns out it can get here with a too-short
+                 * malformation on EBCDIC.  This was discovered so close to
+                 * 5.44, that this temporary solution was made, so as to avoid
+                 * any possible effect on any ASCII platform.  GH #24481 */
                 assert (! (orig_problems & ~( UTF8_GOT_LONG
                                              |UTF8_GOT_LONG_WITH_VALUE
                                              |UTF8_GOT_PERL_EXTENDED
                                              |UTF8_GOT_NONCHAR)));
+#endif
                 message = form(nonchar_cp_format, input_uv);
                 break;
 
