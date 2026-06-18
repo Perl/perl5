@@ -359,10 +359,18 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
     svend = &sva[SvREFCNT(sva) - 1];
     sv = sva + 1;
     while (sv < svend) {
+svend = &sva[SvREFCNT(sva) - 1];
+    sv = sva + 1;
+    while (sv < svend) {
         SvARENA_CHAIN_SET(sv, (sv + 1));
 #ifdef DEBUGGING
         SvREFCNT(sv) = 0;
 #endif
+        /* ---> INJECT MUTEX INITIALIZATION HERE <--- */
+        if (pthread_mutex_init(&sv->sv_lock, NULL) != 0) {
+            Perl_croak(aTHX_ "Panic: Failed to initialize SV mutex lock in arena.");
+        }
+
         /* Must always set typemask because it's always checked in on cleanup
            when the arenas are walked looking for objects.  */
         SvFLAGS(sv) = SVTYPEMASK;
@@ -372,9 +380,13 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 #ifdef DEBUGGING
     SvREFCNT(sv) = 0;
 #endif
+
+    /* ---> INJECT MUTEX INITIALIZATION FOR THE LAST SV <--- */
+    if (pthread_mutex_init(&sv->sv_lock, NULL) != 0) {
+        Perl_croak(aTHX_ "Panic: Failed to initialize final SV mutex lock in arena.");
+    }
     SvFLAGS(sv) = SVTYPEMASK;
 }
-
 /* visit(): call the named function for each non-free SV in the arenas
  * whose flags field matches the flags/mask args. */
 
