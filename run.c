@@ -34,6 +34,40 @@
  */
 
 #include <sys/mman.h>  /* Put this at the very top of run.c with other includes */
+/* ========================================================= */
+/* MULTICORE JIT: X86_64 MACHINE CODE EMITTER                */
+/* ========================================================= */
+#include <stdint.h>
+#include <sys/mman.h>
+
+typedef struct {
+    uint8_t* start_addr;
+    uint8_t* current_ptr;
+    size_t   max_size;
+} JITState;
+
+/* Write a single byte to the executable buffer */
+static inline void emit8(JITState* jit, uint8_t byte) {
+    if (jit->current_ptr >= jit->start_addr + jit->max_size) {
+        Perl_croak(aTHX_ "Panic: JIT Buffer Overflow");
+    }
+    *(jit->current_ptr++) = byte;
+}
+
+/* Write a 32-bit instruction/offset (Little Endian) */
+static inline void emit32(JITState* jit, uint32_t val) {
+    emit8(jit, val & 0xFF);
+    emit8(jit, (val >> 8) & 0xFF);
+    emit8(jit, (val >> 16) & 0xFF);
+    emit8(jit, (val >> 24) & 0xFF);
+}
+
+/* Write a 64-bit pointer/register value */
+static inline void emit64(JITState* jit, uint64_t val) {
+    emit32(jit, val & 0xFFFFFFFF);
+    emit32(jit, (val >> 32) & 0xFFFFFFFF);
+}
+/* ========================================================= */
 
 int
 Perl_runops_jit(pTHX)
