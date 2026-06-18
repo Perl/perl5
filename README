@@ -30,9 +30,15 @@ from various publishers.  See pod/perlbook.pod for more information.
 If you're using a relatively modern operating system and want to
 install this version of Perl locally, run the following commands:
 
-    ./Configure -des -Dprefix=$HOME/localperl
+    ./Configure -des -Dprefix=$HOME/localperl -Dusethreads -Dusedevel
     make test
     make install
+
+**Note for JIT/Multicore Users:** Because this engine utilizes hardware-level 
+threading and direct memory mapping (`mmap`), your operating system must 
+support POSIX threads (`pthreads`) and allow executable memory allocation. 
+The `-Dusethreads` flag is strictly required during configuration to enable 
+the concurrent variable locking mechanisms.
 
 This will configure and compile perl for your platform, run the regression
 tests, and install perl in a subdirectory "localperl" of your home directory.
