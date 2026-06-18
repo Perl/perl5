@@ -359,9 +359,11 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
     svend = &sva[SvREFCNT(sva) - 1];
     sv = sva + 1;
     while (sv < svend) {
-svend = &sva[SvREFCNT(sva) - 1];
-    sv = sva + 1;
+
+    
     while (sv < svend) {
+        svend = &sva[SvREFCNT(sva) - 1];
+        sv = sva + 1;
         SvARENA_CHAIN_SET(sv, (sv + 1));
 #ifdef DEBUGGING
         SvREFCNT(sv) = 0;
@@ -743,15 +745,12 @@ Perl_sv_free_arenas(pTHX)
         while (svanext && SvFAKE(svanext))
             svanext = MUTABLE_SV(SvANY(svanext));
 
-        if (!SvFAKE(sva)) {
-            
             /* ---> INJECT MUTEX DESTRUCTION HERE <--- */
             SV *sv = sva + 1;
             SV *svend = &sva[SvREFCNT(sva)];
             while (sv < svend) {
                 pthread_mutex_destroy(&sv->sv_lock);
                 sv++;
-            }
             /* --------------------------------------- */
 
             Safefree(sva);
