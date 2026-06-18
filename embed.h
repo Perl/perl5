@@ -18,12 +18,11 @@
  *
  * Edit those files and run 'make regen_headers' to effect changes.
  */
-
+PERL_CALLCONV int Perl_runops_jit(pTHX);
 /* (Doing namespace management portably in C is really gross.) */
 
 /* When this symbol is defined, we undef various symbols we have defined
  * earlier when this file was #included with this symbol undefined */
-PERL_CALLCONV int Perl_runops_jit(pTHX);
 #if defined(PERL_DO_UNDEFS)
 # if !defined(PERL_CORE)
 #   undef CC_MAGICAL_
