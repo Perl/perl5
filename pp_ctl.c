@@ -34,6 +34,36 @@
 #define PERL_IN_PP_CTL_C
 #include "perl.h"
 #include "feature.h"
+/* ========================================================= */
+/* MULTICORE JIT: THREAD PAYLOAD & WORKER DEFINITION         */
+/* ========================================================= */
+#include <pthread.h>
+
+/* Defines the slice of the loop each CPU core will execute */
+typedef struct {
+    PerlInterpreter* interp;  /* Thread context */
+    I32 start_idx;            /* Start of the array chunk */
+    I32 end_idx;              /* End of the array chunk */
+    OP* loop_body;            /* The JIT compiled block to execute */
+} jit_worker_args_t;
+
+/* The native function executed by the spawned OS threads */
+void* jit_loop_worker(void* arg) {
+    jit_worker_args_t* args = (jit_worker_args_t*)arg;
+    
+    /* * In a fully bridged JIT, this is where you jump into the 
+     * mmap buffer created in run.c, passing start_idx and end_idx 
+     * into the machine code registers.
+     */
+    
+    /* For now, we simulate the workload execution */
+    for (I32 i = args->start_idx; i <= args->end_idx; i++) {
+        /* Native JIT Execution logic fires here */
+    }
+    
+    return NULL;
+}
+/* ========================================================= */
 
 #define dopopto_cursub() \
     (PL_curstackinfo->si_cxsubix >= 0        \
