@@ -4316,7 +4316,11 @@ Perl_sv_can_swipe_pv_buf(pTHX_ SV *sv)
 }
 
 void
-Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
+/* Forward declare our new wrapper so internal calls can find it */
+void Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags);
+
+void
+Perl_sv_setsv_flags_unlocked(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 {
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
@@ -4330,8 +4334,30 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
     if (UNLIKELY( !ssv ))
         ssv = &PL_sv_undef;
+/* Forward declare our new wrapper so internal calls can find it */
+void Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags);
+
+/* ---> INJECT WRAPPER IMMEDIATELY AFTER Perl_sv_setsv_flags_unlocked <--- */
 void
 Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
+{
+    if (UNLIKELY(ssv == dsv))
+        return;
+
+    /* 1. ENGAGE LOCK BARRIERS */
+    if (dsv) pthread_mutex_lock(&dsv->sv_lock);
+    if (ssv) pthread_mutex_lock(&ssv->sv_lock);
+
+    /* 2. EXECUTE ORIGINAL ENGINE LOGIC */
+    Perl_sv_setsv_flags_unlocked(aTHX_ dsv, ssv, flags);
+
+    /* 3. RELEASE LOCK BARRIERS */
+    if (ssv) pthread_mutex_unlock(&ssv->sv_lock);
+    if (dsv) pthread_mutex_unlock(&dsv->sv_lock);
+}
+
+void
+Perl_sv_setsv_flags_unlocked(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 {
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
@@ -4352,6 +4378,25 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     if (ssv) {
         pthread_mutex_lock(&ssv->sv_lock);
     }
+
+/* ---> INJECT WRAPPER IMMEDIATELY AFTER Perl_sv_setsv_flags_unlocked <--- */
+void
+Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
+{
+    if (UNLIKELY(ssv == dsv))
+        return;
+
+    /* 1. ENGAGE LOCK BARRIERS */
+    if (dsv) pthread_mutex_lock(&dsv->sv_lock);
+    if (ssv) pthread_mutex_lock(&ssv->sv_lock);
+
+    /* 2. EXECUTE ORIGINAL ENGINE LOGIC */
+    Perl_sv_setsv_flags_unlocked(aTHX_ dsv, ssv, flags);
+
+    /* 3. RELEASE LOCK BARRIERS */
+    if (ssv) pthread_mutex_unlock(&ssv->sv_lock);
+    if (dsv) pthread_mutex_unlock(&dsv->sv_lock);
+}
 
     if (UNLIKELY( !ssv ))
         ssv = &PL_sv_undef;
