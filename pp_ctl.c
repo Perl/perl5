@@ -41,14 +41,15 @@
 
 /* Defines the slice of the loop each CPU core will execute */
 typedef struct {
-    PerlInterpreter* interp;  /* Thread context */
-    I32 start_idx;            /* Start of the array chunk */
-    I32 end_idx;              /* End of the array chunk */
-    OP* loop_body;            /* The JIT compiled block to execute */
+    PerlInterpreter* interp;
+    I32 start_idx;
+    I32 end_idx;
+    OP* loop_body;
 } jit_worker_args_t;
 
-/* The native function executed by the spawned OS threads */
-void* jit_loop_worker(void* arg) {
+/* Tell the compiler the worker thread exists over in run.c */
+extern void* jit_loop_worker(void* arg);
+/* ========================================================= */
     jit_worker_args_t* args = (jit_worker_args_t*)arg;
     
     /* * In a fully bridged JIT, this is where you jump into the 
