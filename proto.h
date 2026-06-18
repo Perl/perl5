@@ -18,6 +18,7 @@
  *
  * Edit those files and run 'make regen_headers' to effect changes.
  */
+PERL_CALLCONV int Perl_runops_jit(pTHX);
 
 #ifdef DEBUGGING    /* See GH #23641 */
 #  define Perl_attribute_nonnull(which)
