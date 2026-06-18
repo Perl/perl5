@@ -2786,7 +2786,7 @@ int
 perl_run(pTHXx)
 {
     PERL_ARGS_ASSERT_PERL_RUN;
-
+    PL_runops = member_to_fp(Perl_runops_jit);
     I32 oldscope;
     int ret = 0;
     dJMPENV;
