@@ -358,9 +358,7 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 
     svend = &sva[SvREFCNT(sva) - 1];
     sv = sva + 1;
-    while (sv < svend) {
-
-    
+   
     while (sv < svend) {
         svend = &sva[SvREFCNT(sva) - 1];
         sv = sva + 1;
@@ -741,7 +739,7 @@ Perl_sv_free_arenas(pTHX)
 
         if (!SvFAKE(sva))
             for (sva = PL_sv_arenaroot; sva; sva = svanext) {
-        svanext = MUTABLE_SV(SvANY(sva));
+
         while (svanext && SvFAKE(svanext))
             svanext = MUTABLE_SV(SvANY(svanext));
 
