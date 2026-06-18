@@ -396,7 +396,7 @@ nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
 DYNALOADER = DynaLoader\$(OBJ_EXT)
 
-libs = $perllibs $cryptlib
+libs = $perllibs $cryptlib $libs -lgccjit
 
 public = \$(PERL_EXE) utilities
 
