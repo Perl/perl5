@@ -285,6 +285,12 @@ case "$d_tm_tm_gmtoff" in
 '') d_tm_tm_gmtoff='undef' ;;
 esac
 
+# z/OS has these elements in 'struct stat', but often (maybe always) sets them
+# each to -1, an illegal value.
+case "$d_statblks" in
+'') d_statblks='undef' ;;
+esac
+
 # Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
