@@ -738,6 +738,25 @@ Perl_sv_free_arenas(pTHX)
             svanext = MUTABLE_SV(SvANY(svanext));
 
         if (!SvFAKE(sva))
+            for (sva = PL_sv_arenaroot; sva; sva = svanext) {
+        svanext = MUTABLE_SV(SvANY(sva));
+        while (svanext && SvFAKE(svanext))
+            svanext = MUTABLE_SV(SvANY(svanext));
+
+        if (!SvFAKE(sva)) {
+            
+            /* ---> INJECT MUTEX DESTRUCTION HERE <--- */
+            SV *sv = sva + 1;
+            SV *svend = &sva[SvREFCNT(sva)];
+            while (sv < svend) {
+                pthread_mutex_destroy(&sv->sv_lock);
+                sv++;
+            }
+            /* --------------------------------------- */
+
+            Safefree(sva);
+        }
+    }
             Safefree(sva);
     }
 
