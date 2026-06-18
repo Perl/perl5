@@ -33,21 +33,22 @@
  *     [p.600 of _The Lord of the Rings_, III/xi: "The Palantír"]
  */
 
-int
-Perl_runops_standard(pTHX)
-{
-    PERL_ARGS_ASSERT_RUNOPS_STANDARD;
-
-    OP *op = PL_op;
-    PERL_DTRACE_PROBE_OP(op);
-    while ((PL_op = op = op->op_ppaddr(aTHX))) {
-        PERL_DTRACE_PROBE_OP(op);
+/* Concept patch for run.c to replace the serial loop with a JIT hook */
+int Perl_runops_jit(pTHX) {
+    /* If the current opcode tree block hasn't been compiled to machine code yet */
+    if (!PL_op->op_jit_compiled_address) {
+        // Your custom JIT compiler engine compiles the opcode stream here
+        PL_op->op_jit_compiled_address = compile_op_tree_to_native_machine_code(PL_op);
     }
-    PERL_ASYNC_CHECK();
-
-    TAINT_NOT;
+    
+    /* Jump directly to the compiled native CPU execution block bypass interpreter loop */
+    typedef void (*jit_func_t)(PerlInterpreter*);
+    jit_func_t run_native = (jit_func_t)PL_op->op_jit_compiled_address;
+    run_native(aTHX); 
+    
     return 0;
 }
+
 
 
 #ifdef PERL_RC_STACK
