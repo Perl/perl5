@@ -25,6 +25,101 @@
 #define PERL_IN_RUN_C
 #include "perl.h"
 
+#include "EXTERN.h"
+#define PERL_IN_RUN_C
+#include "perl.h"
+
+/* ========================================================= */
+/* MULTICORE JIT: COMPILER, EMITTER, AND THREAD WORKER       */
+/* ========================================================= */
+#include <stdint.h>
+#include <sys/mman.h>
+#include <pthread.h>
+
+/* 1. Worker Arguments Payload */
+typedef struct {
+    PerlInterpreter* interp;
+    I32 start_idx;
+    I32 end_idx;
+    OP* loop_body;
+} jit_worker_args_t;
+
+/* 2. JIT State & Emitters */
+typedef struct {
+    uint8_t* start_addr;
+    uint8_t* current_ptr;
+    size_t   max_size;
+} JITState;
+
+static inline void emit8(JITState* jit, uint8_t byte) {
+    if (jit->current_ptr >= jit->start_addr + jit->max_size)
+        Perl_croak(aTHX_ "Panic: JIT Buffer Overflow");
+    *(jit->current_ptr++) = byte;
+}
+
+/* 3. The Opcode Translator (Step 2) */
+void compile_loop_to_x86_64(pTHX_ JITState* jit, OP* loop_start) {
+    emit8(jit, 0x55);       /* push rbp      */
+    emit8(jit, 0x48);       /* mov rbp, rsp  */
+    emit8(jit, 0x89);
+    emit8(jit, 0xE5);
+
+    OP* current_op = loop_start;
+    while (current_op != NULL) {
+        switch(current_op->op_type) {
+            case OP_NEXTSTATE: break;
+            case OP_IADD:
+                emit8(jit, 0x58); emit8(jit, 0x59);
+                emit8(jit, 0x48); emit8(jit, 0x01); emit8(jit, 0xC8);
+                emit8(jit, 0x50);
+                break;
+            case OP_MULT:
+                emit8(jit, 0x58); emit8(jit, 0x5A);
+                emit8(jit, 0x48); emit8(jit, 0x0F); emit8(jit, 0xAF); emit8(jit, 0xC2);
+                emit8(jit, 0x50);
+                break;
+        }
+        current_op = current_op->op_next;
+        if (current_op && current_op->op_type == OP_UNSTACK) break;
+    }
+    emit8(jit, 0x5D);       /* pop rbp */
+    emit8(jit, 0xC3);       /* ret     */
+}
+
+/* 4. The Worker Thread (Step 3) */
+void* jit_loop_worker(void* arg) {
+    jit_worker_args_t* args = (jit_worker_args_t*)arg;
+    PerlInterpreter* my_perl = args->interp; 
+
+    size_t page_size = 4096;
+    void* code_buffer = mmap(NULL, page_size, PROT_READ | PROT_WRITE, 
+                             MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+
+    JITState jit;
+    jit.start_addr = (uint8_t*)code_buffer;
+    jit.current_ptr = jit.start_addr;
+    jit.max_size = page_size;
+
+    compile_loop_to_x86_64(my_perl, &jit, args->loop_body);
+    mprotect(code_buffer, page_size, PROT_READ | PROT_EXEC);
+
+    typedef void (*jit_func_t)(PerlInterpreter*);
+    jit_func_t native_loop = (jit_func_t)code_buffer;
+
+    for (I32 i = args->start_idx; i <= args->end_idx; i++) {
+        native_loop(my_perl); 
+    }
+
+    munmap(code_buffer, page_size);
+    return NULL;
+}
+/* ========================================================= */
+
+/*
+ * 'Away now, Shadowfax!  Run, greatheart, run as you have never run before!
+ ...
+ */
+
 /*
  * 'Away now, Shadowfax!  Run, greatheart, run as you have never run before!
  *  Now we are come to the lands where you were foaled, and every stone you
