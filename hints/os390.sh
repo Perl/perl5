@@ -379,5 +379,6 @@ $define|true|[yY]*)
    d_setlocale="undef"
    d_setlocale_accepts_any_locale_name="undef"
    d_has_C_UTF8="false"
+;;
 esac
 EOCBU
