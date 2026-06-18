@@ -33,6 +33,47 @@
  *     [p.600 of _The Lord of the Rings_, III/xi: "The Palantír"]
  */
 
+#include <sys/mman.h>  /* Put this at the very top of run.c with other includes */
+
+int
+Perl_runops_jit(pTHX)
+{
+    /* 1. Track if the current opcode block has already been compiled */
+    if (!PL_op->op_jit_compiled_address) {
+        
+        // Define an arbitrary page size (usually 4096 bytes or use sysconf(_SC_PAGESIZE))
+        size_t page_size = 4096; 
+
+        // ALLOCATE: Request writable memory from the OS kernel
+        void* code_buffer = mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+        
+        if (code_buffer == MAP_FAILED) {
+            Perl_croak(aTHX_ "JIT Error: Failed to allocate executable memory allocation.");
+        }
+
+        // WRITE: Copy or compile your machine instructions into code_buffer here
+        // (e.g., your compiler logic iterates over PL_op and writes x86_64/ARM bytes)
+        // compile_to_buffer(code_buffer, PL_op);
+
+        // PROTECT: Flip the memory flags to strictly "Read + Execute" (No longer writable)
+        if (mprotect(code_buffer, page_size, PROT_READ | PROT_EXEC) != 0) {
+            Perl_croak(aTHX_ "JIT Error: Failed to set memory protection to executable.");
+        }
+
+        // Save the address so you don't re-compile this loop next time it runs
+        PL_op->op_jit_compiled_address = code_buffer;
+    }
+    
+    /* 2. EXECUTE: Cast the saved memory buffer into a callable function pointer */
+    typedef void (*jit_func_t)(PerlInterpreter*);
+    jit_func_t run_native = (jit_func_t)PL_op->op_jit_compiled_address;
+    
+    // Jump directly into the native CPU instructions
+    run_native(aTHX); 
+    
+    return 0;
+}
+
 /* Concept patch for run.c to replace the serial loop with a JIT hook */
 int Perl_runops_jit(pTHX) {
     /* If the current opcode tree block hasn't been compiled to machine code yet */
