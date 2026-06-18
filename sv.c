@@ -4330,7 +4330,37 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
     if (UNLIKELY( !ssv ))
         ssv = &PL_sv_undef;
+void
+Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
+{
+    PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
+    U32 sflags;
+    int dtype;
+    svtype stype;
+    unsigned int both_type;
+
+    if (UNLIKELY( ssv == dsv ))
+        return;
+
+    /* ---> INJECT LOCK BARRIER HERE <--- */
+    /* Lock the destination SV so no other thread can overwrite it */
+    pthread_mutex_lock(&dsv->sv_lock);
+    
+    /* Optionally lock the source SV if we are reading from it to prevent 
+       it from mutating during the copy */
+    if (ssv) {
+        pthread_mutex_lock(&ssv->sv_lock);
+    }
+
+    if (UNLIKELY( !ssv ))
+        ssv = &PL_sv_undef;
+
+    stype = SvTYPE(ssv);
+    dtype = SvTYPE(dsv);
+    both_type = (stype | dtype);
+
+    /* ... [Rest of the massive function remains exactly the same] ... */
     stype = SvTYPE(ssv);
     dtype = SvTYPE(dsv);
     both_type = (stype | dtype);
