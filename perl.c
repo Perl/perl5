@@ -1786,7 +1786,11 @@ code: one should get that from L</perl_destruct>.
 
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
-{
+{    
+    /* Inside perl.c, locate where PL_runops is assigned */
+    /* Replace: PL_runops = member_to_fp(Perl_runops_standard); */
+    PL_runops = member_to_fp(Perl_runops_jit);
+    
     PERL_ARGS_ASSERT_PERL_PARSE;
 
     I32 oldscope;
