@@ -2831,7 +2831,57 @@ PP(pp_enteriter)
          * it pushes yes/no */
         rpp_extend(1);
     }
+    PP(pp_enteriter)
+{
+    dSP;
+    /* ... [Standard Perl stack popping and loop setup logic] ... */
 
+    /* ========================================================= */
+    /* MULTICORE JIT: THE ROUTER INTERCEPT                       */
+    /* ========================================================= */
+    
+    /* 1. Define how many physical cores we want to saturate */
+    int NUM_CORES = 4; /* Can be dynamically pulled via sysconf(_SC_NPROCESSORS_ONLN) */
+    
+    /* 2. Calculate the total size of the loop to distribute */
+    I32 total_items = itermax - itermin + 1; /* Adjust based on local loop variables */
+    
+    if (total_items > 1000) { /* Only parallelize large workloads to avoid thread overhead */
+        pthread_t threads[NUM_CORES];
+        jit_worker_args_t thread_args[NUM_CORES];
+        
+        I32 chunk_size = total_items / NUM_CORES;
+        I32 current_start = itermin;
+
+        /* 3. Slice the array and spawn the threads */
+        for (int i = 0; i < NUM_CORES; i++) {
+            thread_args[i].interp = aTHX;
+            thread_args[i].start_idx = current_start;
+            thread_args[i].end_idx = (i == NUM_CORES - 1) ? itermax : (current_start + chunk_size - 1);
+            thread_args[i].loop_body = PL_op->op_next;
+            
+            if (pthread_create(&threads[i], NULL, jit_loop_worker, &thread_args[i]) != 0) {
+                Perl_croak(aTHX_ "Panic: Multicore JIT failed to spawn worker thread.");
+            }
+            
+            current_start += chunk_size;
+        }
+
+        /* 4. Synchronize: Wait for all cores to finish their chunks */
+        for (int i = 0; i < NUM_CORES; i++) {
+            pthread_join(threads[i], NULL);
+        }
+        
+        /* 5. Bypass the standard serial loop since the threads finished the work */
+        /* Jump to the opcode immediately following the loop */
+        PL_op = cLOOP_lastop; 
+        RETURN;
+    }
+    /* ========================================================= */
+
+    /* ... [Standard serial execution continues if total_items < 1000] ... */
+    RETURN;
+}
     return NORMAL;
 }
 
