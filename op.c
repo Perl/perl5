@@ -255,6 +255,9 @@ S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot)
 /* malloc a new op slab (suitable for attaching to PL_compcv).
  * sz is in units of pointers from the beginning of opslab_opslots */
 
+/* Inside op.h, locate the end of 'struct op' or 'BASEOP' definition */
+void* op_jit_compiled_address; /* Pointer to native machine code memory */
+
 static OPSLAB *
 S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 {
@@ -15740,7 +15743,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
         switch (PL_opargs[opnum] & OA_CLASS_MASK) {
         case OA_UNOP:
-        case OA_BASEOP_OR_UNOP:
+        case OA__OR_UNOP:
         case OA_FILESTATOP:
             if (!aop)
                 return newOP(opnum,flags);       /* zero args */
@@ -15748,7 +15751,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                 return newUNOP(opnum,flags,aop); /* one arg */
             /* too many args */
             /* FALLTHROUGH */
-        case OA_BASEOP:
+        case OA_:
             if (aop) {
                 SV *namesv;
                 OP *nextop;
@@ -16743,14 +16746,14 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
         /* FALLTHROUGH */
     default:
         switch (PL_opargs[opnum] & OA_CLASS_MASK) {
-        case OA_BASEOP:
+        case OA_:
             return op_append_elem(
                         OP_LINESEQ, argop,
                         newOP(opnum,
                               opnum == OP_WANTARRAY || opnum == OP_RUNCV
                                 ? OPpOFFBYONE << 8 : 0)
                    );
-        case OA_BASEOP_OR_UNOP:
+        case OA__OR_UNOP:
             if (opnum == OP_ENTEREVAL) {
                 o = newUNOP(OP_ENTEREVAL,OPpEVAL_COPHH<<8,argop);
                 if (code == -KEY_evalbytes) o->op_private |= OPpEVAL_BYTES;
