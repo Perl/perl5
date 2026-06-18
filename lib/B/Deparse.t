@@ -3659,3 +3659,8 @@ elsif ($y) {
 }
 >>>>
 {;};
+####
+# Deparse +{} as anonymous hash, not block
+map +{$_, 1}, 1;
+grep +{$_, 1}, 1;
+sort +{$_, 1}, @ARGV;

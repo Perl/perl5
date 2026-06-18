@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.89;
+package B::Deparse 1.90;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -3889,7 +3889,13 @@ sub indirop {
 	$indir = '{$b cmp $a} ';
     }
     for (; !null($kid); $kid = $kid->sibling) {
-	$expr = $self->deparse($kid, !$indir && $kid == $firstkid && $name eq "sort" && $firstkid->name eq "entersub" ? 16 : 6);
+        my $is_first = !$indir && $kid == $firstkid;
+        $expr = $self->deparse($kid, $is_first && $name eq "sort" && $firstkid->name eq "entersub" ? 16 : 6);
+
+        # Disambiguate anonhash from block
+        # e.g. sort +{ $_ => 1 }, @array;
+        $expr = '+'.$expr if $is_first && $expr =~ /^{/;
+
 	push @exprs, $expr;
     }
     my $name2;
@@ -3947,6 +3953,9 @@ sub mapop {
 	$code = "{" . $self->deparse($code, 0) . "} ";
     } else {
 	$code = $self->deparse($code, 24);
+        # Disambiguate anonhash from a block
+        # e.g. map +{ $_ => 1 }, @array
+        $code = '+'.$code if $code =~ /^{/;
 	$code .= ", " if !null($kid->sibling);
     }
     $kid = $kid->sibling;
