@@ -19,6 +19,7 @@ configpm				Produces lib/Config.pm
 Configure				Portability tool
 configure.com				Configure-equivalent for VMS
 configure.gnu				Crude emulation of GNU configure
+CONTRIBUTING.md				Guidelines on how to contribute to the project
 cop.h					Control operator header
 Copying					The GNU General Public License
 cv.h					Code value header
