@@ -1785,6 +1785,26 @@ code: one should get that from L</perl_destruct>.
         }
 
 int
+perl_run(pTHX)
+{
+    dJMPENV;
+    int old_status;
+
+    PERL_ARGS_ASSERT_PERL_RUN;
+
+    /* ========================================================= */
+    /* INJECT YOUR JIT HOOK OVERRIDE HERE                        */
+    /* ========================================================= */
+    PL_runops = member_to_fp(Perl_runops_jit);
+    /* ========================================================= */
+
+    old_status = STATUS_GET;
+    if (!old_status) {
+        if (PL_minus_c) {
+#ifndef PERL_OBJECT
+            /* Don't run the script if -c (compile only) flag is passed */
+
+int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {    
     /* Inside perl.c, locate where PL_runops is assigned */
