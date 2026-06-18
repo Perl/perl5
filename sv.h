@@ -245,7 +245,19 @@ typedef struct hek HEK;
 struct STRUCT_SV {		/* struct sv { */
     SV_HEAD_(void*);
     SV_HEAD_UNION_;
+    void*    sv_any;     /* Pointer to type-specific body structural data */
+    U32      sv_refcnt;  /* Perl's internal reference counting engine */
+    U32      sv_flags;   /* Bit fields for scalar type tracking flags */
+    
+    /* ========================================================= */
+    /* INJECT YOUR MULTICORE MUTEX LOCK HERE                     */
+    /* ========================================================= */
+    pthread_mutex_t sv_interp_lock; 
+    /* ========================================================= */
 };
+
+
+
 
 struct gv {
     SV_HEAD_(XPVGV*);		/* pointer to xpvgv body */
