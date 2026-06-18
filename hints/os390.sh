@@ -92,6 +92,13 @@ if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
 
   # Allows ability to have bimodal ASCII/EBCDIC support
   def_os390_defs="$def_os390_defs -D_AE_BIMODAL=1"
+
+  # zopen wants @INC entries relocated at runtime based on the path to the perl
+  # binary
+  case "$userelocatableinc" in
+    '') userelocatableinc="define" ;;
+  esac
+
 else
   ebcdic=true
   def_os390_cflags="$def_os390_cflags -fzos-le-char-mode=ebcdic"
