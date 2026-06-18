@@ -1,0 +1,19 @@
+# NATIVE JIT & MULTICORE EXECUTION
+
+This specific build of Perl 5 has been heavily modified at the C engine level 
+to support Native Just-In-Time (NJIT) compilation and true multicore parallel 
+execution. 
+
+Unlike standard Perl—which evaluates scripts serially using an opcode 
+dispatcher—this engine intercepts loop control structures (like `foreach`) 
+and compiles the opcodes directly into raw x86_64/ARM machine instructions. 
+
+Key architectural enhancements include:
+* **Multicore Router:** Large loop iterations are automatically sliced and 
+  distributed across physical CPU cores using native POSIX threads (`pthreads`).
+* **Shared-Memory Concurrency:** The core variable types (SVs, AVs, HVs) have 
+  been upgraded with native mutex locks (`sv_interp_lock`), allowing concurrent 
+  data mutation across cores without corrupting the memory arenas.
+* **W^X Memory Security:** The JIT compiler allocates dedicated memory pages 
+  for machine code, utilizing strict Write XOR Execute (`mprotect`) security 
+  barriers to prevent buffer injection vulnerabilities.
