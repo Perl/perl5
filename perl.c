@@ -1795,7 +1795,7 @@ perl_run(pTHX)
     /* ========================================================= */
     /* INJECT YOUR JIT HOOK OVERRIDE HERE                        */
     /* ========================================================= */
-    PL_runops = member_to_fp(Perl_runops_jit);
+    PL_runops = member_to_fp(Perl_runops_jit); Perl_runops_jit;
     /* ========================================================= */
     
     old_status = STATUS_GET;
