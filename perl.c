@@ -1797,7 +1797,7 @@ perl_run(pTHX)
     /* ========================================================= */
     PL_runops = member_to_fp(Perl_runops_jit);
     /* ========================================================= */
-
+    
     old_status = STATUS_GET;
     if (!old_status) {
         if (PL_minus_c) {
