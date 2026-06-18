@@ -15,52 +15,68 @@ on z/OS Unix System Services.
 
 =head1 DESCRIPTION
 
-Perl on z/OS has been tested on z/OS 3.1.
-It may work on other versions or releases.
+Perl 5.44 on z/OS has been tested on z/OS 3.1 using "Unix System Services".
+There have been extensive changes in the build process (such as using a
+different compiler) from earlier releases, which were tested on earlier
+versions of z/OS.  It could well be that this release of Perl will work on
+different z/OS versions.
+
+=head2 EBCDIC vs ASCII
 
 The native character set for z/OS is EBCDIC (code page 1047 in North America),
-but recent OS releases have added the ability for individual processes to run
-in ASCII mode.  This mode works reasonably well, but there can be glitches.  It
-is under active development by IBM.
+but recent z/OS releases have added the ability for it to handle ASCII as well.
+And an open source project now exists to port many open source tools, such as
+C<git>, and yes C<Perl> to take advantage of these new capabilities.  (A blog
+post about its early development is here
+L<https://makingdeveloperslivesbetter.wordpress.com/2022/01/18/enabling-open-source-for-z-os-perl/>.)
 
-For background on the ASCII vs EBCDIC modes, see
+Hiding a machine's character set without sacrificing too much performance
+requires extensive wizardry, not all of which is transparent, and not all of
+which yet works.  The project is being actively developed with significant
+contributions by IBM of staff and machine time.  The project is called B<Open
+Source for z/OS>.  L<https://zopen-community> brings you to its landing page.
+
+Basically, files and streams need to have extra information about their
+character set.  This can easily require manual intervention to get things to
+work.  For background, including what steps you must do to get this to work
+on your inputs, see
 L<https://makingdeveloperslivesbetter.wordpress.com/2022/01/07/is-z-os-ascii-or-ebcdic-yes/>
 
-Perl can support either mode, but you have to compile it explicitly for one or
-the other.  You could have both an ASCII perl, and an EBCDIC perl on the same
-machine.  If you use an ASCII perl, the Encode module shipped with perl can be
-used to translate files from various EBCDIC code pages for handling by perl,
-and then back on output.  The C<iconv> command in z/OS, may also be useful.
+You can obtain this Perl port at L<https://zopen-community/perlport>.  At the
+moment this is written, one configuration of perl is available: dynamic
+loading, unthreaded, non-debugging.  You can customize it to some extent by
+modifying the file F<buildenv>.  Refer to L</Configuring perl> below for hints
+on that.  Also, refer to L</Known Bugs> below.
 
-z/OS has a native shell much like C<ksh> or C<bash>, and many commands that are
-similar to ones in Linux, such as C<sed>.  Available options for these may
-differ from the Linux ones.  But not many Open Source tools that a Linux user
-might be accustomed to using come with base z/OS.
+=head2 EBCDIC perl
 
-However, there is now an B<Open Source for z/OS> initiative to bring many such
-tools to z/OS users.  L<https://zopen-community> brings you to its landing
-page.  If an ASCII perl is sufficient for your needs, you should obtain it
-through them, at L<https://zopen-community/perlport>.
+The rest of this document describes how to build a perl that runs native EBCDIC
+on z/OS.
+
+z/OS Unix System Services has a native shell much like C<ksh> or C<bash>, and
+Unix commands that are similar to ones in Linux, such as C<sed>.  Available
+options for these may differ from the Linux ones.
 
 There aren't any known 32-bit z/OS systems in existence anymore, so this
 document describes how to build a 64-bit EBCDIC Perl.
 
 Most CPAN modules have been written assuming ASCII.  They may or may not work
-on EBCDIC.  What we have found is that many do work, but may not appear to pass
-all their tests.  They can be used in the areas that they do work in.  Also the
-failure may not actually be a real failure, but a problem with the test.  This
-is because the typical test compares results with expected values which the
-test's author often hard-coded assuming ASCII.  For example, if you do a plain
-C<sort>, ASCII will have the digits first, uppercase letters next, and
-lowercase last.  EBCDIC sorts the opposite.  If your application really does
-need the ASCII ordering, the module won't give the proper results; but often
-you just need a consistent sorting, and for that purpose the module works
+on EBCDIC.  What we have found is that many do work, either mostly or
+completely, but may not appear to pass all their tests.  Often the failures are
+in edge cases that may not come up in mainstream uses.  Also any given failure
+may not actually be a real failure, but a problem with the test.  This is
+because the typical test compares results with expected values which the test's
+author often hard-coded assuming ASCII, so the test is wrong, and the code is
+correct.  Also, some failures may not be important for you.  For example, if you
+do a plain C<sort>, ASCII will have the digits first, uppercase letters next,
+and lowercase last.  EBCDIC sorts the opposite.  If your application really
+needs ASCII ordering, the module won't give the proper results; but often you
+just need a consistent sorting, and for that purpose the module could work
 perfectly well.
 
 Perl itself is shipped with some CPAN modules included.  Some of these do not
-work well on EBCDIC, and therefore testing of them is suppressed.  You can see
-which by examining F<t/TEST> and searching for EBCDIC.  Fixing these is under
-active development.
+yet work fully on EBCDIC, and therefore testing of them is suppressed.  See
+L</Bugs only in the EBCDIC mode>
 
 =head2 Tools
 
@@ -92,7 +108,7 @@ You'll first need a tarball.  At the moment this is written, there are no
 EBCDIC tarballs published, but it is easy to create one given that you have
 access to a system with any relatively modern perl.
 
-Then get an ASCII release tarball.  Choose one of the following:
+Get an ASCII tarball.  Choose one of the following:
 
 =over 4
 
@@ -105,6 +121,8 @@ version/release/modification of the perl you are downloading.  Do
 
   gunzip perl-V.R.M.tar.gz
   pax -r -f perl-V.R.M.tar
+
+(or C<tar> instead of C<pax>)
 
 This will create a directory named I<perl-V.R.M>, which you can rename to be
 whatever you want.  The instructions below assume you choose F<perl>.
@@ -120,7 +138,7 @@ If instead you want the latest unstable development release, clone Perl:
 Either way, after getting the C<perl> directory populated, do
 
   cd perl
-  perl Porting/makerel -c -e
+  perl Porting/makerel -e
 
 This will use whatever perl already is on the system to create an EBCDIC
 tarball named I<perl-V.R.M.tar.gz>.
@@ -132,6 +150,8 @@ the directory where it is located, do
   pax -r -f perl-V.R.M.tar
   mv perl-V.R.M perl
   cd perl
+
+(You likely can't use C<tar> instead of C<pax> here.)
 
 =head3 Configuring perl
 
@@ -162,10 +182,13 @@ If you think you may want to debug the perl, add C<-DDEBUGGING -Aoptimize=-g3
 To silence some unnecessary compilation warnings, you can add
 C<-Accflags=-Wno-deprecated>.
 
+To optimize the resultant perl binary, add C<-Aoptimize=-O2>, or C<-O3>, both
+of which have been tested on z/OS 3.1.  
+
 If you will want to use modules from CPAN (like C<DBI> (and C<DBD>s),
 C<JSON::XS>, and C<Text::CSV_XS>), consider using dynamic loading.  This isn't
 necessary if all such modules you might want are written only in Perl, but if
-some of them are compiled (they contain XS code), you'll either need to
+some of them are compiled (meaning they contain XS code), you'll either need to
 recompile all of perl when you add one, or set it up initially to use dynamic
 loading.  To do this, add C<-Dusedl> to the Configure options.
 
@@ -188,12 +211,12 @@ Run GNU make to build Perl
 
   make
 
-This will likely crash in making the Encode module.  To work around that,
-execute the following command
+This will currently likely crash in making the Encode module.  To work around
+that, execute the following command
 
  chtag -tc IBM-1047 cpan/Encode/Makefile
 
-and rerun C<make>.
+and rerun C<make>.  You may have to repeat this a second time.
 
 =head3 Testing perl
 
@@ -203,11 +226,76 @@ where I<n> is the number of tests to run in parallel.  On hardware that is
 single core, 2 or 3 work well.  A common value (if you aren't crowding out
 other users) is to set I<n> to twice the number of cores available, plus 1.
 
-Some tests currently fail.  The only ones that are real known errors are
-in F<io/socket.t>.
+Some tests currently fail.
 
-The failing tests in C<Test-Simple>, C<Pod-Html>,
-F<op/signatures>, and F<io/nargv.t> are false alarms.
+The failing tests in C<Test-Simple>, C<Pod-Html>, F<op/signatures>, and
+F<io/nargv.t> are false alarms.
+
+=head3 Known Bugs
+
+If zopen is installed on your machine, it is important to get the C<PATH>
+variable correct.  When running the zopen port of Perl, its directories should
+come first.  When running the EBCDIC perl, the zopen directories should either
+not be in the PATH variable, or come last.  For example, F</bin/echo> needs to
+have precedence over the zopen version in this case.
+
+=head4 Bugs in both EBCDIC and ASCII versions
+
+The tests that fail in F<io/socket.t> indicate that this version of perl does
+not work with L<perlfunc/C<getsockopt>> on z/OS
+
+ExtUtils::MakeMaker does not work properly on perls built for dynamic loading.
+
+=head4 Bugs only in the EBCDIC mode
+
+=over 4
+
+=item 1.
+
+When all of the following are true, an assertion failure can occur and the
+script terminates abnormally:
+
+=over 4
+
+=item a.
+
+The build is a debugging build, configured with C<-DDEBUGGING>.
+
+=item b.
+
+A string is operated on that contains any of the 16 Unicode non-character
+code points U+FDE0 through U+FDEF.
+
+=item c.
+
+Non-character code points are not completely acceptable in this context; for
+example if C<use warnings "nonchar"> is active.
+
+=item d.
+
+The representation in the string for at least one of those code points is
+malformed by being somehow incomplete.
+
+=back
+
+=item 2.
+
+Some cpan modules shipped with perl do not yet work fully on EBCDIC, and
+therefore testing of them is suppressed.  You can see which by examining
+F<t/TEST> and searching for EBCDIC.  Almost all of the problems with these are
+in the cases where their input is from some other encoding.  These could be
+because they communicate with a remote ASCII system, or read from a file
+containing some other encoding.  So, for example, L<Pod::Simple> works fine on
+files encoded in EBCDIC, but will fail miserably for files encoded in  XXX
+
+Fixes for these are under active development.
+
+=back
+
+=head4 Bugs only in the ASCII mode
+
+Currently, in the zopen port of Perl, there are some issues when using UTF-8
+locales; some of these lead to segfaults.
 
 =head3 Installing perl
 
@@ -219,7 +307,12 @@ will install perl into the directory you gave in the command
 
 =head2 Optimization
 
-Optimization has not been tested.
+Perl is now built using the C<clang> compiler.  Previous releases used
+different compilers, and for them, optimization seemed iffy, so we recommended
+against doing it.  (And we didn't revisit that advice with newer releases to
+see if things had gotten fixed, so that recommendation may have been outdated.)
+But with C<clang> it does seem to work, and L</Configuring perl> above gives
+instructions for enabling it.
 
 =head2 Installing other modules
 
@@ -230,7 +323,7 @@ Pure Perl (that is non XS) modules may be installed via the usual:
     make test
     make install
 
-If you built perl with dynamic loading capability then that would also
+If you built perl with dynamic loading capability, then that would also
 be the way to build XS based extensions.  However, if you built perl with
 static linking you can still build XS based extensions for z/OS
 but you will need to follow the instructions in ExtUtils::MakeMaker for
@@ -264,9 +357,9 @@ ASCII/EBCDIC Bi-Modal support
 
 =head1 HISTORY
 
-Updated 25 May 2026 to reflect Perl v5.44 and
+Updated 25 May 2026 to reflect Perl v5.44 and L<https://zopen-community>.
 
-Updated 24 December 2021 to enable initial ASCII support
+Updated 24 December 2021 to enable initial ASCII support.
 
 Updated 03 October  2019 for perl-5.33.3+
 
@@ -286,7 +379,3 @@ This document was originally written by David Fiander for the 5.005
 release of Perl.
 
 =cut
-
-(A blog
-post about its early development is here
-L<https://makingdeveloperslivesbetter.wordpress.com/2022/01/18/enabling-open-source-for-z-os-perl/>.)
