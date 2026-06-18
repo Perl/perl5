@@ -45,6 +45,8 @@
 #    include <sys/uio.h>
 #  endif
 
+extern int Perl_runops_jit(pTHX);
+
 union control_un {
   struct cmsghdr cm;
   char control[CMSG_SPACE(sizeof(int))];
