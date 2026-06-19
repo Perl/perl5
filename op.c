@@ -6081,7 +6081,6 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_BASEOP_OR_UNOP
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP
-        || type == OP_SASSIGN
         || type == OP_ENTERTRY
         || type == OP_ENTERTRYCATCH
         || type == OP_CUSTOM
