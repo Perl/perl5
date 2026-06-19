@@ -14267,8 +14267,10 @@ S_maybe_targlex(pTHX_ OP *o)
                 kid->op_flags =   (kid->op_flags & ~OPf_WANT)
                                 | (o->op_flags   &  OPf_WANT);
               swipe_and_detach:
+                assert(kid->op_targ);
+                PADOFFSET temp = kid->op_targ;
                 kid->op_targ = kkid->op_targ;
-                kkid->op_targ = 0;
+                kkid->op_targ = temp;
                 /* Now we do not need PADSV and SASSIGN.
                  * Detach kid and free the rest. */
                 op_sibling_splice(o, NULL, 1, NULL);

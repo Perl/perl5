@@ -1836,8 +1836,12 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
         SvFLAGS(sv) &= ~SVs_PADTMP;
 
-    if (po < PL_padix)
+    if (po <= PL_padix)
         PL_padix = po - 1;
+#if defined(USE_ITHREADS)
+    if (po <= PL_constpadix)
+        PL_constpadix = po - 1;
+#endif
 #endif
 }
 
