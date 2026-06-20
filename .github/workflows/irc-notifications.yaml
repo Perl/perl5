@@ -2,7 +2,7 @@ name: "Push Notification"
 on:
   issues:
     types: [opened, reopened, closed]
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, closed]
   push:
 # add create for tracking tags
@@ -124,7 +124,7 @@ jobs:
             ${{ github.event.compare }}
 
       - name: Shorten issue/PR fields
-        if: github.event_name == 'pull_request' || github.event_name == 'issues'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'issues'
         id: shorten
         env:
           TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
@@ -154,14 +154,14 @@ jobs:
           echo "# done"
 
       - name: checking BODY and TITLE variable
-        if: github.event_name == 'pull_request' || github.event_name == 'issues'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'issues'
         run: |
           echo "BODY: $BODY"
           echo "TITLE: $TITLE"
 
       - name: irc opened pull request
         uses: mauke/notify-irc@v1.1
-        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.action == 'opened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: irc reopened pull request
         uses: mauke/notify-irc@v1.1
-        if: github.event_name == 'pull_request' && github.event.action == 'reopened'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.action == 'reopened'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -185,7 +185,7 @@ jobs:
 
       - name: irc merged pull request
         uses: mauke/notify-irc@v1.1
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -197,7 +197,7 @@ jobs:
 
       - name: irc closed pull request
         uses: mauke/notify-irc@v1.1
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.action == 'closed' && github.event.pull_request.merged == false
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
@@ -209,7 +209,7 @@ jobs:
 
       - name: irc synchronize pull request
         uses: mauke/notify-irc@v1.1
-        if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.action == 'synchronize'
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
