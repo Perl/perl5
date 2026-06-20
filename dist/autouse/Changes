@@ -1,3 +1,9 @@
+1.12
+  * use strict and warnings consistently
+  * test using sample modules rather than core modules to ensure predictable
+    loading
+  * other test refactoring
+
 1.11  Sun, 13 Mar 2016 18:45:00 -0400
   * skip a failing test on very old perls
 
