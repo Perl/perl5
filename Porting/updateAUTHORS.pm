@@ -44,7 +44,7 @@ my %field_spec= (
     "s"  => "commit_subject",
 );
 
-my $Collate= Unicode::Collate->new(level => 1, indentical => 1);
+my $Collate= Unicode::Collate->new(level => 1, identical => 1);
 my @field_codes= sort keys %field_spec;
 my @field_names= map { $field_spec{$_} } @field_codes;
 my $tformat= "=" . join "%x09", map { "%" . $_ } @field_codes;
