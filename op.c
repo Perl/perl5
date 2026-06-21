@@ -6187,6 +6187,61 @@ Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth)
     return newMETHOP_internal(type, flags, NULL, const_meth);
 }
 
+
+
+/* S_maybe_targlex is invoked when constructing a new OP_SASSIGN.
+ * It implements the TARGMY optimization, where the OP_SASSIGN
+ * and OP_PADSV in the following tree are discarded, with the
+ * remaining OP's op_targ offset taken from the OP_PADSV.
+ *     <2> sassign
+ *      |_  <2> some_op
+ *      |_  <1> padsv
+*/
+
+static OP *
+S_maybe_targlex(pTHX_ OP *o)
+{
+    OP * const kid = cLISTOPo->op_first;
+    /* has a disposable target? */
+    if ((PL_opargs[kid->op_type] & OA_TARGLEX)
+        && !(kid->op_flags & OPf_STACKED)
+        /* Cannot steal the second time! */
+        && !(kid->op_private & OPpTARGET_MY)
+        )
+    {
+        OP * const kkid = OpSIBLING(kid);
+
+        /* Can just relocate the target. */
+        if (kkid && kkid->op_type == OP_PADSV) {
+            if (kid->op_type == OP_EMPTYAVHV) {
+                kid->op_flags |= kid->op_flags |
+                    (o->op_flags & (OPf_WANT|OPf_PARENS));
+                kid->op_private |= OPpTARGET_MY |
+                              (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
+                goto swipe_and_detach;
+            } else if (!(kkid->op_private & OPpLVAL_INTRO)
+                   || (kkid->op_private & OPpPAD_STATE))
+            {
+                kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
+                /* give the lexical op the context of the parent sassign */
+                kid->op_flags =   (kid->op_flags & ~OPf_WANT)
+                                | (o->op_flags   &  OPf_WANT);
+              swipe_and_detach:
+                assert(kid->op_targ);
+                PADOFFSET temp = kid->op_targ;
+                kid->op_targ = kkid->op_targ;
+                kkid->op_targ = temp;
+                /* Now we do not need PADSV and SASSIGN.
+                 * Detach kid and free the rest. */
+                op_sibling_splice(o, NULL, 1, NULL);
+                op_free(o);
+                return kid;
+            }
+        }
+    }
+    return o;
+}
+
 /*
 =for apidoc newBINOP
 
@@ -14234,51 +14289,6 @@ Perl_ck_smartmatch(pTHX_ OP *o)
         }
     }
 
-    return o;
-}
-
-
-static OP *
-S_maybe_targlex(pTHX_ OP *o)
-{
-    OP * const kid = cLISTOPo->op_first;
-    /* has a disposable target? */
-    if ((PL_opargs[kid->op_type] & OA_TARGLEX)
-        && !(kid->op_flags & OPf_STACKED)
-        /* Cannot steal the second time! */
-        && !(kid->op_private & OPpTARGET_MY)
-        )
-    {
-        OP * const kkid = OpSIBLING(kid);
-
-        /* Can just relocate the target. */
-        if (kkid && kkid->op_type == OP_PADSV) {
-            if (kid->op_type == OP_EMPTYAVHV) {
-                kid->op_flags |= kid->op_flags |
-                    (o->op_flags & (OPf_WANT|OPf_PARENS));
-                kid->op_private |= OPpTARGET_MY |
-                              (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
-                goto swipe_and_detach;
-            } else if (!(kkid->op_private & OPpLVAL_INTRO)
-                   || (kkid->op_private & OPpPAD_STATE))
-            {
-                kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
-                /* give the lexical op the context of the parent sassign */
-                kid->op_flags =   (kid->op_flags & ~OPf_WANT)
-                                | (o->op_flags   &  OPf_WANT);
-              swipe_and_detach:
-                assert(kid->op_targ);
-                PADOFFSET temp = kid->op_targ;
-                kid->op_targ = kkid->op_targ;
-                kkid->op_targ = temp;
-                /* Now we do not need PADSV and SASSIGN.
-                 * Detach kid and free the rest. */
-                op_sibling_splice(o, NULL, 1, NULL);
-                op_free(o);
-                return kid;
-            }
-        }
-    }
     return o;
 }
 
