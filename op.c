@@ -6235,47 +6235,46 @@ Perl_newMETHOP_named (pTHX_ I32 type, I32 flags, SV* const_meth)
 */
 
 static OP *
-S_maybe_targlex(pTHX_ OP *o)
+S_maybe_targlex(pTHX_ const U32 op_flags, OP * const kid, OP * const kkid)
 {
-    OP * const kid = cLISTOPo->op_first;
+    /* Caller should have checked OA_TARGLEX */
+    assert(PL_opargs[kid->op_type] & OA_TARGLEX);
     /* has a disposable target? */
-    if ((PL_opargs[kid->op_type] & OA_TARGLEX)
-        && !(kid->op_flags & OPf_STACKED)
+    if ( !(kid->op_flags & OPf_STACKED)
         /* Cannot steal the second time! */
         && !(kid->op_private & OPpTARGET_MY)
         )
     {
-        OP * const kkid = OpSIBLING(kid);
+        assert(kkid && OP_TYPE_IS(kkid, OP_PADSV));
 
         /* Can just relocate the target. */
-        if (kkid && kkid->op_type == OP_PADSV) {
-            if (kid->op_type == OP_EMPTYAVHV) {
-                kid->op_flags |= kid->op_flags |
-                    (o->op_flags & (OPf_WANT|OPf_PARENS));
-                kid->op_private |= OPpTARGET_MY |
+        PADOFFSET op_targ_temp = kid->op_targ;
+
+        if (OP_TYPE_IS(kid, OP_EMPTYAVHV)) {
+            kid->op_flags |= op_flags & (OPf_WANT|OPf_PARENS);
+            kid->op_private |= OPpTARGET_MY |
                               (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
-                goto swipe_and_detach;
-            } else if (!(kkid->op_private & OPpLVAL_INTRO)
-                   || (kkid->op_private & OPpPAD_STATE))
-            {
-                kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
-                /* give the lexical op the context of the parent sassign */
-                kid->op_flags =   (kid->op_flags & ~OPf_WANT)
-                                | (o->op_flags   &  OPf_WANT);
-              swipe_and_detach:
-                assert(kid->op_targ);
-                PADOFFSET temp = kid->op_targ;
-                kid->op_targ = kkid->op_targ;
-                kkid->op_targ = temp;
-                /* Now we do not need PADSV and SASSIGN.
-                 * Detach kid and free the rest. */
-                op_sibling_splice(o, NULL, 1, NULL);
-                op_free(o);
-                return kid;
-            }
+            goto swipe_and_detach;
+        } else if (!(kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) ) {
+            /* Note: OP_ONCE is not currently supported. At present,
+             * this branch prevents an OP_SASSIGN being created, but
+             * creation of the OP_ONCE structure used for a 'state'
+             * declaration occurs via Perl_ck_sassign. */
+            kid->op_private |= OPpTARGET_MY;
+            /* give the lexical op the context of the intended sassign */
+            kid->op_flags = (kid->op_flags & ~OPf_WANT)
+                                | (op_flags & OPf_WANT);
+          swipe_and_detach:
+            kid->op_targ = kkid->op_targ;
+            kkid->op_targ = op_targ_temp;
+            /* Now we do not need the OP_PADSV.
+             * Free it, along with the now-unused pad slot. */
+            op_free(kkid);
+            assert(kid->op_private & OPpTARGET_MY);
+            return kid;
         }
     }
-    return o;
+    return NULL;
 }
 
 /*
@@ -6304,7 +6303,20 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     if (!first)
         first = newOP(OP_NULL, 0);
-    else if (type != OP_SASSIGN && S_is_control_transfer(aTHX_ first)) {
+
+    else if (type == OP_SASSIGN) {
+        if (last && OP_TYPE_IS(last, OP_PADSV)
+            /* Most of the often very common OP_TYPES fail this check, which
+             * is why it's here and not in S_maybe_targlex(). */
+            && (PL_opargs[first->op_type] & OA_TARGLEX)
+        ) {
+            /* Try to implement the TARGMY optimization now, instead of unpicking
+             * an OP_SASSIGN OP later. */
+            OP *targmy = S_maybe_targlex(aTHX_ flags, first, last);
+            if (targmy)
+                return targmy; /* source == targmy, last has already been freed. */
+        }
+    } else if (S_is_control_transfer(aTHX_ first)) {
         /* Skip OP_SASSIGN.
          * '$x = return 42' is represented by (SASSIGN (RETURN 42) (GVSV *x));
          * in other words, OP_SASSIGN has its operands "backwards". Skip the
@@ -14349,7 +14361,7 @@ Perl_ck_sassign(pTHX_ OP *o)
             return S_newONCEOP(aTHX_ o, kkid);
         }
     }
-    return S_maybe_targlex(aTHX_ o);
+    return o;
 }
 
 
