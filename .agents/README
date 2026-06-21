@@ -1,0 +1,19 @@
+This directory is the canonical source for repository agent skills.
+
+The skill definitions under `.agents/skills/` are used by Codex in this
+repository, and they are validated by `.agents/validate-skills.pl`.
+The skill tree is documented in `pod/perlagentskills.pod`.
+
+The matching `.claude/skills/` tree is a compatibility mirror for Claude
+Code. The validator expects the mirror to exist and to stay byte-for-byte in
+sync with the canonical copies in `.agents/skills/`.
+
+To refresh the mirror automatically, run:
+
+`./perl -Ilib .agents/validate-skills.pl --sync-claude`
+
+In short:
+
+- Edit `.agents/skills/...` first.
+- Keep `.claude/skills/...` in sync.
+- Do not assume Claude Code reads `.agents/skills/`.

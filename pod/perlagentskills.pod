@@ -1,0 +1,161 @@
+=encoding utf8
+
+=head1 NAME
+
+perlagentskills - Perl core agent skill files
+
+=head1 DESCRIPTION
+
+This document describes the agent skill files shipped with the Perl core
+repository. These files give repository-aware coding agents short routing
+instructions and focused references for common Perl core development work.
+
+The canonical skill tree is F<.agents/skills/>. The F<.claude/skills/> tree
+is a compatibility mirror for tools that read Claude-style skill files.
+Edit F<.agents/skills/> first, then refresh and validate the mirror.
+
+=head1 TREE LAYOUT
+
+Each skill lives in its own directory under F<.agents/skills/>:
+
+    .agents/skills/SKILL-NAME/SKILL.md
+    .agents/skills/SKILL-NAME/references/*.md
+
+The F<SKILL.md> file is intentionally short. It names the trigger, gives the
+first workflow steps, and points to one level of reference files. Reference
+files carry the operational details: important core files, useful searches,
+regeneration commands, validation tests, and risk checks.
+
+Do not duplicate large amounts of Perl's existing documentation in a skill.
+Point to the relevant files under F<pod/>, F<Porting/>, F<regen/>, F<t/>,
+or the source tree instead.
+
+=head1 SKILL GROUPS
+
+=head2 Orientation and shared workflow
+
+=over 4
+
+=item * F<perl-core-orientation>
+
+Find the right source files, documentation, tests, and tools for a Perl core
+change.
+
+=item * F<perl-core-hacking>
+
+Shared internals patch workflow: keep changes small, respect API boundaries,
+check generated files, and route subsystem work to narrower skills.
+
+=item * F<perl-core-build-test-debug>
+
+Configure, build, run tests, use F<./perl>, debug failures, choose harness
+parallelism, and run focused targets.
+
+=item * F<perl-core-archaeology>
+
+Investigate when and why behavior changed using git history, blame, pickaxe,
+bisect helpers, mailing list archives, issue trackers, release notes, and
+upstream CPAN history.
+
+=back
+
+=head2 Core subsystems
+
+=over 4
+
+=item * F<perl-sv-magic-memory>
+
+SV, AV, HV, CV, refcounts, mortals, magic, save stack, arenas, allocation,
+and ownership.
+
+=item * F<perl-parser-optree-ops>
+
+Lexer, parser, optrees, ops, pp functions, check functions, pads, scopes, and
+opcode regeneration.
+
+=item * F<perl-regex-engine>
+
+Regex compiler, executor, optimizer, regnodes, generated regex files, debug
+output, and F<t/re> tests.
+
+=item * F<perl-core-portability>
+
+C portability, EBCDIC, locale, threads, multiplicity, globals, platform
+hints, cross builds, and platform-specific source.
+
+=item * F<perl-configure-build-system>
+
+F<Configure>, F<config_h.SH>, F<configpm>, F<Makefile.SH>, F<makedepend>,
+F<hints/>, F<Cross/>, and platform build conventions.
+
+=back
+
+=head2 Generated files, APIs, XS, and visible behavior
+
+=over 4
+
+=item * F<perl-generated-files>
+
+Map generated outputs to their generators, run the right regeneration target,
+and validate derived files.
+
+=item * F<perl-embed-fnc>
+
+F<embed.fnc>, generated prototypes, public and internal API docs, export
+metadata, and symbol visibility.
+
+=item * F<perl-xs-embedding>
+
+XS, embedding, typemaps, stack macros, boot functions, context handling, and
+extension-facing compatibility.
+
+=item * F<perl-language-library>
+
+Language behavior, builtins, pragmata, diagnostics, core modules, dual-life
+modules, deprecations, and user-visible library behavior.
+
+=item * F<perl-core-docs-release>
+
+POD, perldelta, release notes, F<MANIFEST>, maintainer metadata, and
+documentation style.
+
+=back
+
+=head1 VALIDATION
+
+Run the repository validator after changing skills:
+
+    ./perl -Ilib .agents/validate-skills.pl --sync-claude
+    ./perl -Ilib .agents/validate-skills.pl
+    ./perl -Ilib -c .agents/validate-skills.pl
+    make test_porting
+
+The first command refreshes F<.claude/skills/> from F<.agents/skills/> before
+validating. The second checks the canonical tree and mirror. The third checks
+the validator syntax. F<make test_porting> is a good broader validation target
+for changes that affect documentation, metadata, generated-file checks, or
+repository policy.
+
+To generate a Markdown index of repository files mentioned by the skills, run:
+
+    ./perl -Ilib .agents/validate-skills.pl --file-index
+
+=head1 ADDING OR CHANGING SKILLS
+
+Keep each F<SKILL.md> concise and operational. Put detailed guidance in a
+reference file under the same skill directory. Keep references one level deep.
+
+When adding a new skill or reference file, add it to F<MANIFEST> with a short
+description. Use F<make manisort> to sort the manifest after editing it. Use
+F<t/porting/manifest.t> or F<Porting/manicheck> to find missing or stale
+entries.
+
+When changing F<pod/*.pod> files or adding this document to another branch,
+also check F<perl.pod>, F<perltoc.pod>, F<Porting/pod_rules.pl>, and the
+porting POD tests described by the F<perl-core-docs-release> skill.
+
+=head1 SEE ALSO
+
+L<perlhack>, L<perlsource>, L<perlgit>, L<perldocstyle>, L<perlpodstyle>
+
+=cut

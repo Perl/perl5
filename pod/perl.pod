@@ -177,6 +177,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlpolicy          Perl development policies
     perlgov             Perl Rules of Governance
     perlgit             Using git with the Perl repository
+    perlagentskills     Perl core agent skill files
 
 =head2 History
 
@@ -483,4 +484,3 @@ how many more is left as an exercise to the reader.
 
 The three principal virtues of a programmer are Laziness,
 Impatience, and Hubris.  See the Camel Book for why.
-
