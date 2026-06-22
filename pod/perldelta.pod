@@ -2,37 +2,12 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as XXX needs
-to be processed before release. ]
-
-perldelta - what is new for perl v5.43.12
+perldelta - what is new for perl v5.44.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.43.11 release and the 5.43.12
+This document describes differences between the 5.42.0 release and the 5.44.0
 release.
-
-If you are upgrading from an earlier release such as 5.43.10, first read
-L<perl54311delta>, which describes differences between 5.43.10 and 5.43.11.
-
-=head1 Notice
-
-This is not a real release, but prepares for the Perl 5.43 development cycle.
-It has no real changes from Perl 5.42.0.
-
-=over
-
-=item *
-
-The ibm-clang/ibm-clang_r IBM Open XL C/C++ compiler is now supported for AIX
-7.2 and 7.3. This is the recommended compiler to use when compiling Perl on
-these versions of AIX.
-
-=back
-
-XXX Any important notices here
-
-XXX Any important notices here
 
 =head1 Core Enhancements
 
@@ -75,7 +50,7 @@ input list item on each iteration. New in this version, the two features may
 now be used together, allowing multiple iteration variables where any of them
 are permitted to be reference aliases.
 
-    use v5.42;
+    use v5.44;
     use feature qw( refaliasing declared_refs );
 
     my %hash = (
@@ -122,43 +97,17 @@ portion of a pattern inadvertently has been treated as a comment instead
 of what you intended.  This behavior is enabled by S<C<use feature
 "enhanced_xx">>.  See L<perlre/E<sol>x and  E<sol>xx>.
 
-XXX New core language features go here. Summarize user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
-XXX New core language features go here. Summarize user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
 =head1 Security
 
 =head2 CVE-2026-8376 - Buffer overflow in Perl_study_chunk
 
-Repeated fixed string buffer overflow check counted characters not
-bytes.
-
-CVE-2026-8376
-
-XXX Any security-related notices go here. In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
-XXX Any security-related notices go here. In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
+Perl_study_chunk in regcomp_study.c checked the size of the joined substring
+buffer in characters rather than bytes. On 32-bit builds, this can lead to
+an integer overflow of the size of the buffer leading to out-of-bounds writes.
 
 =head1 Incompatible Changes
 
-=head2 Unicode rules are now fully enforced on identifier and regular
-expression group names.
+=head2 Unicode rules are now fully enforced on identifier and regular expression group names.
 
 Before Unicode, Perl accepted any C<\w> character in an identifier or other
 name, except the first character couldn't be a digit.  Later, Unicode
@@ -173,7 +122,7 @@ the above properties, Unicode added recommendations to further restrict
 legal identifier names.  These were added to counter cases where, for
 example, programmers snuck code past reviewers using characters that
 look like other ones.  The two properties are C<Identifier_Status> and
-C<Identifier_Type>.  L<https://www.unicode.org/reports/tr39/>.  Perl
+C<Identifier_Type>.  See L<https://www.unicode.org/reports/tr39/>.  Perl
 currently doesn't do anything with these, except to furnish you the
 ability to use them in regular expressions.)
 
@@ -186,7 +135,7 @@ It turns out that there are about 160 characters that match C<\w> but
 not the Unicode C<XID> properties.  Thus they are illegal according to
 Unicode.  Those are now explicitly forbidden in both Perl identifiers
 and regular expression group names.  Previously, it was likely that
-their use in identifiers wouldn't work anyway; they could be accepted as
+their use in identifiers wouldn't work anyway; they could be accepted
 initially as legal, but other code would later reject them, but with a
 message that had nothing to do with the underlying problem.  However
 group names in regular expression patterns could contain illegal
@@ -204,22 +153,6 @@ Another 8 are generic modifiers that add shapes around other characters;
 isolated forms.  The other two are GREEK YPOGEGRAMMENI and VERTICAL
 TILDE.
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report. See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report. See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head1 Deprecations
 
 =over 4
@@ -230,9 +163,9 @@ Using C<goto> to jump into the body of a loop or other block construct from
 outside is no longer permitted.
 [L<GH #23618|https://github.com/Perl/perl5/issues/23618>]
 
-=back
+=item *
 
-=head2 C<m/...[...].../xx> has new restrictions
+C<m/...[...].../xx> has new restrictions
 
 Using an unescaped C<#> or literal vertical space is now deprecated in a
 regular expression bracketed character class that is compiled with the
@@ -253,67 +186,7 @@ Use constructs like C<\n> instead of literal vertical space.
 
 =back
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<deprecated>-category
-warnings to alert you to this fact. To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use. Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
 =back
-
-[ List each other deprecation as a =head2 entry ]
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<deprecated>-category
-warnings to alert you to this fact. To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use. Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
 
@@ -322,7 +195,7 @@ as an updated module in the L</Modules and Pragmata> section.
 =item *
 
 Simple (non-overflowing) addition (C<+>), subtraction (C<->) and
-multiplication (C<*>) of IVs are slightly sped up, as long as
+multiplication (C<*>) of integers are slightly sped up, as long as
 sufficient underlying C compiler support is available.
 
 =back
@@ -333,32 +206,6 @@ sufficient underlying C compiler support is available.
 
 Populating a hash from a list of key/value pairs, when the keys are constant
 string operands known at compile time, is commonly now faster. [L<GH #24228|https://github.com/Perl/perl5/issues/24228>]
-
-=back
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
@@ -439,26 +286,12 @@ code, as well as its documentation.
 
 New entry for "New object system and C<class> syntax".
 
-=back
-
-=head2 New Documentation
-
-=over 4
-
 =item *
 
 L<perlapi> now contains information about how to find what release of
-Perl first contained an API element
+Perl first contained an API element.
 
 =back
-
-=head2 Changes to Existing Documentation
-
-We have attempted to update the documentation to reflect the changes listed in
-this document.  If you find any we have missed, open an issue at
-L<https://github.com/Perl/perl5/issues>.
-
-Additionally, the following selected changes have been made:
 
 =head3 L<perlxs>
 
@@ -469,72 +302,6 @@ Additionally, the following selected changes have been made:
 The reference manual for writing Perl XS code has been completely rewritten and
 modernized.  It is about twice the size of the old file, and promotes more
 modern XS syntax, such as ANSI signatures.
-
-=back
-
-XXX Changes to files in F<pod/> go here. Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-We have attempted to update the documentation to reflect the changes
-listed in this document. If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues>.
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-Additionally, the following selected changes have been made:
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
-
-XXX Changes to files in F<pod/> go here. Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-We have attempted to update the documentation to reflect the changes
-listed in this document. If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues>.
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-Additionally, the following selected changes have been made:
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
 
 =back
 
@@ -555,57 +322,6 @@ L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
 This warning was issued in the reverse order (right-to-left) when both
 operands of a binary operator are uninitialized values.  This is now
 fixed to be consistent with evaluation order of operands.
-
-=back
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages. For the complete list of
-diagnostic messages, see L<perldiag>.
-
-=head2 New Diagnostics
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-L<Can't redeclare catch variable as "%s"|perldiag/"Can't redeclare catch variable as "%s"">
-
-(F) A C<my>, C<our> or C<state> keyword was used with the exception variable in
-a C<catch> block:
-
-    try { ... }
-    catch (my $e) { ... }
-    # or catch (our $e) { ... }
-    # or catch (state $e) { ... }
-
-This is not valid syntax. C<catch> takes a bare variable name, which is
-automatically lexically declared.
-[L<GH #23222|https://github.com/Perl/perl5/issues/23222>]
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-L<Possible attempt to escape whitespace in qw() list|perldiag/"Possible attempt to escape whitespace in qw() list">
-
-(W qw) qw() lists contain items separated by whitespace; contrary to
-what some might expect, backslash characters cannot be used to "protect"
-whitespace from being split, but are instead treated as literal data.
-
-Note that this warnings is I<only> emitted when the backslash is followed
-by actual whitespace (that C<qw> splits on).
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-=over 4
 
 =item *
 
@@ -634,71 +350,10 @@ invalid.  Whatever comes after it is irrelevant (in this case, C<\x27>),
 and including it in the message might lead the reader to think that it
 somehow does matter.
 
-=back
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-=head2 New Diagnostics
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-L<Use of "goto" to jump into a construct is no longer permitted|perldiag/"Use of "goto" to jump into a construct is no longer permitted">
-
-(F) You have used C<goto LABEL;> or C<goto EXPR;> in an attempt to jump into
-the body of a loop or other block construct from the outside.  As of Perl 5.44,
-this throws an exception.
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-=over 4
-
 =item *
 
 The error C<Unrecognised parameters for "%s" constructor: %s> has been changed
 to C<Unrecognized parameters for "%s" constructor: %s>.
-
-=item *
-
-The deprecation warning
-C<Attempt to call undefined %s method with arguments ("%s"%s) via package "%s" (Perhaps you forgot to load the package?)>
-has been changed to
-C<Attempt to call undefined %s method with arguments via package "%s" (Perhaps you forgot to load the package?)>
-and is now a fatal error.
-
-=back
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages. For the complete list of
-diagnostic messages, see L<perldiag>.
-
-=head2 New Diagnostics
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-L<\x{%X} is a \w char that isn't valid in a name "%s"
-|perldiag/\x{%X} is a \w char that isn't valid in a name "%s">
-
-In most cases where this message now appears, an error would have
-occurred anyway, but the text would not have been helpful in finding the
-problem.
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-=over 4
 
 =item *
 
@@ -733,17 +388,7 @@ enabled by default.
 
 =back
 
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages. For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into L</New Errors>
-and L</New Warnings>
 
 =head3 New Errors
 
@@ -751,7 +396,36 @@ and L</New Warnings>
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Can't redeclare catch variable as "%s"|perldiag/"Can't redeclare catch variable as "%s"">
+
+(F) A C<my>, C<our> or C<state> keyword was used with the exception variable in
+a C<catch> block:
+
+    try { ... }
+    catch (my $e) { ... }
+    # or catch (our $e) { ... }
+    # or catch (state $e) { ... }
+
+This is not valid syntax. C<catch> takes a bare variable name, which is
+automatically lexically declared.
+[L<GH #23222|https://github.com/Perl/perl5/issues/23222>]
+
+=item *
+
+L<Use of "goto" to jump into a construct is no longer permitted|perldiag/"Use of "goto" to jump into a construct is no longer permitted">
+
+(F) You have used C<goto LABEL;> or C<goto EXPR;> in an attempt to jump into
+the body of a loop or other block construct from the outside.  As of Perl 5.44,
+this throws an exception.
+
+=item *
+
+L<\x{%X} is a \w char that isn't valid in a name "%s"
+|perldiag/\x{%X} is a \w char that isn't valid in a name "%s">
+
+In most cases where this message now appears, an error would have
+occurred anyway, but the text would not have been helpful in finding the
+problem.
 
 =back
 
@@ -761,99 +435,14 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Possible attempt to escape whitespace in qw() list|perldiag/"Possible attempt to escape whitespace in qw() list">
 
-=back
+(W qw) qw() lists contain items separated by whitespace; contrary to
+what some might expect, backslash characters cannot be used to "protect"
+whitespace from being split, but are instead treated as literal data.
 
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages. For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into L</New Errors>
-and L</New Warnings>
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use F<XXX> with program names to get proper documentation linking. ]
-
-=head2 F<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use F<XXX> with program names to get proper documentation linking. ]
-
-=head2 F<XXX>
-
-=over 4
-
-=item *
-
-XXX
+Note that this warning is I<only> emitted when the backslash is followed
+by actual whitespace (that C<qw> splits on).
 
 =back
 
@@ -887,36 +476,6 @@ was to force all GVs to initialize their SV slot on creation. [L<GH #24177|https
 
 =back
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here. Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here. Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
 
 Tests were added and changed to reflect the other additions and
@@ -931,82 +490,14 @@ Karl Williamson gave a talk at TPRC 2025 asking people to contribute
 tests to find old issues that are no longer a problem, and todo tests
 to reflect reproduction cases for known outstanding bugs.
 (L<video link|https://www.youtube.com/watch?v=CwX4Xsf5y5E>)
-It gained renewed interest this month,
+It gained renewed interest this year,
 leading to an uptick in test submissions from new authors,
 for which we are extremely grateful.
-
-=back
-
-Tests were added and changed to reflect the other additions and changes in this
-release.
-
-Tests were added and changed to reflect the other additions and
-changes in this release. Furthermore, these significant changes were
-made:
-
-=over 4
 
 =item *
 
 When testing embedding, add a sanity check to ensure the C<libperl> we
 link against matches the perl we are building.  [L<GH #22125|https://github.com/Perl/perl5/issues/22125>]
-
-=back
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here. Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release. Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here. Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release. Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
@@ -1016,137 +507,39 @@ XXX
 
 =over 4
 
-=item Win32
-
-Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
-defined.
-
-=back
-
-=head2 Platform-Specific Notes
-
-=over 4
-
-=item AIX
-
-Thread-safe locale handling has been turned off on all releases due to
-apparent bugs in the underlying operating system support.
-
-=back
-
-=head2 Platform-Specific Notes
-
-=over 4
-
 =item Windows
 
-A compilation error in unthreaded builds using MSVC introduced in Perl 5.43.5
+=over
+
+=item * Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
+defined.
+
+=item * A compilation error in unthreaded builds using MSVC introduced in Perl 5.43.5
 has been fixed.  [L<GH #23952|https://github.com/Perl/perl5/issues/23952>]
 
 =back
 
-=head2 Platform-Specific Notes
+=item OpenBSD
 
 =over 4
 
-=item OpenBSD
-
-When testing embedding, ensure we link against the correct static
+=item * When testing embedding, ensure we link against the correct static
 libperl. [L<GH #22125|https://github.com/Perl/perl5/issues/22125>]
 
 =back
 
-XXX Any changes to platform support should be listed in the sections below.
+=item AIX
 
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
+=over
 
-=head2 New Platforms
+=item * Thread-safe locale handling has been turned off on all releases due to
+apparent bugs in the underlying operating system support.
 
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
+=item * The ibm-clang/ibm-clang_r IBM Open XL C/C++ compiler is now supported for AIX
+7.2 and 7.3. This is the recommended compiler to use when compiling Perl on
+these versions of AIX.
 
 =back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility. However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility. However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
 
 =back
 
@@ -1156,13 +549,10 @@ XXX
 
 =item *
 
-The XS parser, L<ExtUtils::ParseXS>, has been extensively restructured
-internally. Most of these changes shouldn't be visible externally, but
-might affect XS code which was using invalid or unsupported syntax.
-
-=back
-
-=over 4
+The XS parser, L<ExtUtils::ParseXS>, has been further extensively restructured
+internally.  Most of these changes shouldn't be visible externally, but might
+affect XS code which was using invalid or unsupported syntax.  Several minor
+bug-fixes were included.
 
 =item *
 
@@ -1182,8 +572,8 @@ saving is unrealistic.
 
 =item *
 
-C<SvPV_shrink_to_cur> has been revised to include a byte for COW, so that
-the resulting string could be COWed in the future.
+C<SvPV_shrink_to_cur> has been revised to include a byte for copy-on-write
+(COW), so that the resulting string could be COWed in the future.
 
 It also now uses C<Perl_expected_size>, compared against the current
 buffer size, and does not try to do a reallocation if the requested
@@ -1206,10 +596,6 @@ may currently expand to nothing.)  With this release, you can add
 C<assert()> statements yourself to F<embed.fnc> that will be
 incorporated into the generated macro, beyond the system-generated ones.
 Comments and examples in F<embed.fnc> give details.
-
-=back
-
-=over 4
 
 =item *
 
@@ -1242,34 +628,19 @@ have we opened their use up to XS writers.  At the same time, a new
 variant has been added, C<STATIC_ASSERT_EXPR> which is suitable for use
 in an expression, such as a comma expression in a C macro.
 
-=back
-
-=over 4
-
 =item *
 
-C<Perl_sv_backoff>, which undoes the OOK string offset mechanism now only moves
-the string buffer contents to the start of the buffer if `SvOK(sv)` is true.
+C<Perl_sv_backoff>, which undoes the C<OOK> string offset mechanism now only moves
+the string buffer contents to the start of the buffer if C<SvOK(sv)> is true.
 Historically, the buffer contents were always moved, but if the buffer contents
 are defunct and no longer required, doing that incurs an unnecessary cost
 proportional to the size of the shifted contents.
 
-(The assumption in this change is that `SvOK(sv)` is a valid indicator of
+(The assumption in this change is that C<SvOK(sv)> is a valid indicator of
 whether the string buffer contents are "live" or not.)
 
 See [L<GH #23967|https://github.com/Perl/perl5/issues/23967>] for an example of
 where such a copy was noticeable.
-
-=item *
-
-The XS parser, L<ExtUtils::ParseXS>, has been further extensively restructured
-internally.  Most of these changes shouldn't be visible externally, but might
-affect XS code which was using invalid or unsupported syntax.  Several minor
-bug-fixes were included.
-
-=back
-
-=over 4
 
 =item *
 
@@ -1324,10 +695,6 @@ repetition operator. Constant folding will not be attempted if the
 operand is a numerical constant above C<PERL_FOLD_REPEAT_LIMIT>.
 See [L<GH #20586|https://github.com/Perl/perl5/issues/20586>] and [L<GH #23561|https://github.com/Perl/perl5/issues/23561>] for background.
 
-=back
-
-=over 4
-
 =item *
 
 Dedicated check functions C<Perl_ck_anonhash> and C<Perl_ck_aassign> have been
@@ -1363,10 +730,6 @@ The macro L<perlapi/C<fromCTRL>> has been added to be the inverse of the
 existing L<perlapi/C<toCTRL>>.  C<toCTRL('A')> yields 1 (the control
 character C<SOH> on all platforms Perl works on); C<fromCTRL(1)>
 yields 'A'.
-
-=back
-
-=over 4
 
 =item *
 
@@ -1416,34 +779,6 @@ existing users of that name to build successfully.
 
 =back
 
-XXX Changes which affect the interface available to C<XS> code go here. Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Changes which affect the interface available to C<XS> code go here. Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Selected Bug Fixes
 
 =over 4
@@ -1455,13 +790,9 @@ L<overload>ed objects which have no method for that operator but have
 a C<0+> method and the C<fallback> option set to TRUE,
 perl will normally call the C<0+> method for the left operand first
 and then call one for the right operand, i.e. in the same order
-with operand evaluation order.
+as operand evaluation.
 But if C<S<use integer;>> is in effect, the C<0+> methods used to be
 called in wrong (reverse) order.
-
-=back
-
-=over 4
 
 =item *
 
@@ -1494,10 +825,6 @@ These have been fixed.  [L<GH #23405|https://github.com/Perl/perl5/issues/23405>
 Several error conditions in the C<pack> and C<unpack> operations were
 not detected and now are.
 
-=back
-
-=over 4
-
 =item * INTERFACE keyword in XS
 
 INTERFACE keyword in XS
@@ -1507,8 +834,6 @@ Fixed a couple of issues with the INTERFACE keyword in XS.
 [L<GH #23640|https://github.com/Perl/perl5/issues/23640>]
 
 =item * C<&CORE::__CLASS__> no longer returns invalid results
-
-C<&CORE::__CLASS__> no longer returns invalid results
 
 C<CORE::__CLASS__> would work as expected when used as a bareword or aliased:
 
@@ -1531,8 +856,6 @@ returning incorrect results.
 
 =item * C<parse_subsignature()> can now handle empty subroutine signatures
 
-C<parse_subsignature()> can now handle empty subroutine signatures
-
 Previously, calling the C<parse_subsignature()> API function with an empty
 signature would cause a "Syntax error" failure, requiring code which calls it
 to detect the special case and take appropriate steps.  This is now fixed,
@@ -1540,10 +863,6 @@ returning the same optree that the parser would yield for a regular empty
 signature during normal parse time.
 
 [L<GH #17689|https://github.com/Perl/perl5/issues/17689>]
-
-=back
-
-=over 4
 
 =item *
 
@@ -1578,10 +897,6 @@ least 255 characters.
 Fixed parsing of array names starting with a digit in double-quotish
 context under C<use utf8;>.
 
-=back
-
-=over 4
-
 =item *
 
 S<C<use 5.42>> now turns on S<C<use source::encoding "ascii">> for the
@@ -1601,11 +916,7 @@ ref. [L<GH #18669|https://github.com/Perl/perl5/issues/18669>].
 
 =item *
 
-Don't warn about jumping into a construct if we're DIE-ing [L<GH #23922|https://github.com/Perl/perl5/pull/23922>]
-
-=back
-
-=over 4
+Don't warn about jumping into a construct if we're DIE-ing [L<GH #23922|https://github.com/Perl/perl5/pull/23922>].
 
 =item *
 
@@ -1619,19 +930,9 @@ pattern has finished matching.
 =item *
 
 C<DB::sub> is not meant to be called for sub calls from the DB package, but
-called to overloaded subs for overloaded values used in the DB package would
-result in calls in DB::sub.  Fixed the check for the current package in
-amagic_call().  [L<GH #24001|https://github.com/Perl/perl5/issues/24001>]
-
-=item *
-
-pregexec() handles zero-length strings again, fixing an assert failure in
-Package-Stash-XS (which Moose depends upon).  This had been broken in Perl
-5.43.4.  [L<GH #23903|https://github.com/Perl/perl5/issues/23903>]
-
-=back
-
-=over 4
+calls to overloaded subs for overloaded values used in the DB package would
+result in calls to DB::sub.  Fixed the check for the current package in
+amagic_call().  [L<GH #24001|https://github.com/Perl/perl5/issues/24001>].
 
 =item *
 
@@ -1650,10 +951,6 @@ earlier releases, and is now fixed.  This bug was evident from perl
 space in the L<POSIX/strftime> function, and in XS code with any of
 L<perlapi/my_strftime>, L<perlapi/sv_strftime_ints>, or
 L<perlapi/sv_strftime_tm>.
-
-=back
-
-=over 4
 
 =item *
 
@@ -1698,10 +995,6 @@ items, leading to potential stack corruption. For example:
 
 [L<GH #24212|https://github.com/Perl/perl5/issues/24212>]
 
-=back
-
-=over 4
-
 =item *
 
 On debugging perls, instantiating a class with an array field with an empty
@@ -1726,87 +1019,9 @@ had been re-used, random data.  Discussed in [L<GH #24187|https://github.com/Per
 
 =back
 
-XXX Important bug fixes in the core language are summarized here. Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-XXX Include references to GitHub issues and PRs as: [GH #12345] and the release
-manager will later use a regex to expand these into links.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Important bug fixes in the core language are summarized here. Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-XXX Include references to GitHub issues and PRs as: [GH #12345] and the release
-manager will later use a regex to expand these into links.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here. Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here. Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the F<perldelta> of a previous release.
-
-=back
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the F<perldelta> of a previous release.
-
-=back
+None
 
 =head1 Obituary
 
@@ -1825,17 +1040,11 @@ legacy daily.
 
 Well volunteered, Matt. Rest in peace.
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
-
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
-
 =head1 Acknowledgements
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.43.11..HEAD
+  perl Porting/acknowledgements.pl v5.42.0..HEAD
 
 =head1 Reporting Bugs
 
