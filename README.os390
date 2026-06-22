@@ -241,44 +241,9 @@ have precedence over the zopen version in this case.
 
 =head4 Bugs in both EBCDIC and ASCII versions
 
-The tests that fail in F<io/socket.t> indicate that this version of perl does
-not work with L<perlfunc/C<getsockopt>> on z/OS
-
 ExtUtils::MakeMaker does not work properly on perls built for dynamic loading.
 
 =head4 Bugs only in the EBCDIC mode
-
-=over 4
-
-=item 1.
-
-When all of the following are true, an assertion failure can occur and the
-script terminates abnormally:
-
-=over 4
-
-=item a.
-
-The build is a debugging build, configured with C<-DDEBUGGING>.
-
-=item b.
-
-A string is operated on that contains any of the 16 Unicode non-character
-code points U+FDE0 through U+FDEF.
-
-=item c.
-
-Non-character code points are not completely acceptable in this context; for
-example if C<use warnings "nonchar"> is active.
-
-=item d.
-
-The representation in the string for at least one of those code points is
-malformed by being somehow incomplete.
-
-=back
-
-=item 2.
 
 Some cpan modules shipped with perl do not yet work fully on EBCDIC, and
 therefore testing of them is suppressed.  You can see which by examining
@@ -286,11 +251,10 @@ F<t/TEST> and searching for EBCDIC.  Almost all of the problems with these are
 in the cases where their input is from some other encoding.  These could be
 because they communicate with a remote ASCII system, or read from a file
 containing some other encoding.  So, for example, L<Pod::Simple> works fine on
-files encoded in EBCDIC, but will fail miserably for files encoded in  XXX
+files encoded in EBCDIC, but will fail miserably for files encoded in a
+Cyrillic encoding.
 
 Fixes for these are under active development.
-
-=back
 
 =head4 Bugs only in the ASCII mode
 
