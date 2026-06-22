@@ -1042,9 +1042,45 @@ Well volunteered, Matt. Rest in peace.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.44.0 represents approximately 12 months of development since Perl
+5.42.0 and contains approximately 270,000 lines of changes across 1,300
+files from 71 authors.
 
-  perl Porting/acknowledgements.pl v5.42.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 110,000 lines of changes to 860 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.42.1:
+
+Alexander Karelas, Aristotle Pagaltzis, Arne Johannessen, Bartosz Jarzyna,
+Branislav Zahradník, brian d foy, Chad Granum, Chris 'BinGOs' Williams,
+Chris Prather, Christian Hansen, Craig A. Berry, Dagfinn Ilmari Mannsåker,
+Dan Book, Dan Church, Daniel Dragan, Daniel Laügt, Daniel Tang, Dan Kogai,
+Dave Cross, David Mitchell, Dmitrii Kuvaiskii, E. Choroba, Ed J, Elvin
+Aslanov, Eric Herman, Eugen Konkov, Graham Knop, Harald Jörg, H.Merijn
+Brand, Igor Todorovski, James Cook, James E Keenan, James Raspass, Jörg
+Thomas, Karen Etheridge, Karl Williamson, Leon Timmermans, Lukas Mai, Marc
+Reisner, Masahiro Iuchi, Matthew Horsfall, Maxim Vuets, Max Maischein,
+Nicolas R, Olaf Alders, Paul Evans, Paul Marquess, Peter John Acklam,
+Philippe Bruhat (BooK), Ricardo Signes, Richard Leach, Robert Rothenberg,
+Ryan Carsten Schmidt, Samuel Smith, Samuel Young, Scott Baker, Sevan
+Janiyan, Shirakata Kentaro, Sisyphus, Stan Ulbrych, Stefan Adams, Štěpán
+Němec, Steve Hay, TAKAI Kousuke, Thibault Duponchelle, Toby Inkster, Tomasz
+Konojacki, Tom Wyant, Tony Cook, Unicode Consortium, Yitzchak
+Scott-Thoennes.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
