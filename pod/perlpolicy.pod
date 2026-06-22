@@ -102,9 +102,9 @@ as of the release of Perl 5.42:
 
     Version track    Start date      Support status
     -------------    -----------     --------------
-    5.42.x           2025-Jul-03     Full support (current stable)
-    5.40.x           2024-Jun-09     Full support (previous stable)
-    5.38.x           2023-Jul-02     Security fixes only
+    5.44.x           2026-unknown    Full support (current stable)
+    5.42.x           2025-Jul-03     Full support (previous stable)
+    5.40.x           2024-Jun-09     Security fixes only
     [ Any older stable release ]     End of life
 
 Perl is developed by a community, not a corporate entity. Every change
