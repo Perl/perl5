@@ -1047,11 +1047,14 @@ not detected and now are.
 
 =item * INTERFACE keyword in XS
 
-INTERFACE keyword in XS
+C<INTERFACE> is now compatible with ISO/IEC 9899:2024 ("C23"), which is the
+default language version used by GCC 15. Previously, it generated code that
+failed to compile as C23.
 
-Fixed a couple of issues with the INTERFACE keyword in XS.
+Secondly, C<INTERFACE> now supports Perl package names as C types (i.e.
+C<Foo::Bar> gets auto-converted to C<Foo__Bar>).
 
-[L<GH #23640|https://github.com/Perl/perl5/issues/23640>]
+[L<GH #23192|https://github.com/Perl/perl5/issues/23192>]
 
 =item * C<&CORE::__CLASS__> no longer returns invalid results
 
