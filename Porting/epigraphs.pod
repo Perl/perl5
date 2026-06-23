@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.44.0-RC1 - Frank Herbert - Dune Messiah
+
+L<Announced on 2026-07-22 by Leon Timmermans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/06/msg271001.html>
+
+Empires do not suffer emptiness of purpose at the time of their creation.
+It is when they have become established that aims are lost and replaced by
+vague ritual.
+
 =head2 v5.43.11 - Isaac Asimov, Foundation
 
 L<Announced on 2026-06-01 by Paul Evans|https://nntp.perl.org/group/perl.perl5.porters/2026/06/msg270960.html>
