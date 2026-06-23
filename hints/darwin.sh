@@ -527,3 +527,17 @@ d_mkostemp=undef
 # Apparently the MACH-O format can't support _Thread_local in shared objects,
 # but clang isn't wise to this, so our probe works but the build fails...
 d_thread_local=undef
+
+# from man readdir_r
+#     The readdir_r() interface is deprecated because it cannot be used
+#     correctly unless {NAME_MAX} is a fixed value.
+# This note is present in the 10.15.7 man pages, but not the 10.13.6
+# man page.
+#
+# OS X 10.15 is kernel version 19 (https://en.wikipedia.org/wiki/MacOS)
+#
+# https://man.freebsd.org/cgi/man.cgi?query=readdir_r&apropos=0&sektion=0&manpath=macOS+10.15.7&format=html
+case "$osvers" in
+    [0-9].*|1[0-8].*) ;;
+    *) d_readdir_r=undef ;;
+esac
