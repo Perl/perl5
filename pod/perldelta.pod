@@ -39,6 +39,13 @@ Perl_study_chunk in regcomp_study.c checked the size of the joined substring
 buffer in characters rather than bytes. On 32-bit builds, this can lead to
 an integer overflow of the size of the buffer leading to out-of-bounds writes.
 
+=head2 CVE-2026-57432 - Buffer overflow in S_measure_struct
+
+If you call C<pack> or C<unpack> to operate on a structure whose computed size
+is too large to fit in memory, an integer overflow could happen that would
+result in a buffer overflow. This usually happens as a result of embedding a
+large number as the repeat count for an item.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
