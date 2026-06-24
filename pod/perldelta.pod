@@ -218,6 +218,8 @@ string operands known at compile time is commonly now faster. [L<GH #24228|https
 
 L<Archive::Tar> has been upgraded from version 3.04 to 3.12.
 
+This fixes CVE-2026-9538, CVE-2026-42496, and CVE-2026-42497.
+
 =item *
 
 L<attributes> has been upgraded from version 0.36 to 0.37.
@@ -342,6 +344,8 @@ L<Getopt::Std> has been upgraded from version 1.14 to 1.15.
 
 L<HTTP::Tiny> has been upgraded from version 0.090 to 0.096.
 
+This fixes CVE-2026-7010 and CVE-2026-7017.
+
 =item *
 
 L<IO> has been upgraded from version 1.55 to 1.56.
@@ -349,6 +353,8 @@ L<IO> has been upgraded from version 1.55 to 1.56.
 =item *
 
 L<IO::Compress> has been upgraded from version 2.213 to 2.220.
+
+This fixes CVE-2025-15649, CVE-2026-48961, CVE-2026-48962, and CVE-2026-48959.
 
 =item *
 
@@ -414,9 +420,13 @@ L<SelfLoader> has been upgraded from version 1.28 to 1.29.
 
 L<Socket> has been upgraded from version 2.038 to 2.041.
 
+This fixes CVE-2026-12087.
+
 =item *
 
 L<Storable> has been upgraded from version 3.37 to 3.41.
+
+This fixes CVE-2026-57433.
 
 =item *
 
