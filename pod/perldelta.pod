@@ -72,9 +72,6 @@ for seeding the internal PRNG. Previously Perl would read raw bytes from the
 F</dev/urandom> device. Perl now seeds itself in this order (and falls through
 upon failure):
 
-Note that the internal PRNG is still unsuitable for security applications.
-See L<perlfunc/rand EXPR> for a discussion of security.
-
 =over
 
 =item 1.
@@ -90,6 +87,9 @@ F</dev/urandom> on systems that have it
 Hash of internal state variables: Unix time, process ID, and pointer value
 
 =back
+
+Note that the internal PRNG is still unsuitable for security applications.
+See L<perlfunc/rand EXPR> for a discussion of security.
 
 =head2 Enhanced operation of regular expression patterns under /xx
 
