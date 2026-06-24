@@ -4,18 +4,14 @@ perlclass - Perl class syntax reference
 
 =head1 SYNOPSIS
 
-    use v5.38;
+    use v5.42;
     use feature 'class';
 
     class My::Example 1.234 {
-        field $x;
-
-        ADJUST {
-            $x = "Hello, world";
-        }
+        field $message = "Hello, world";
 
         method print_message {
-            say $x;
+            say $message;
         }
     }
 
@@ -174,7 +170,7 @@ will not appear in the arguments list as far as the signature is concerned.
         }
     }
 
-Just like regular subroutines, methods I<can> be anonymous:
+Just like regular subroutines, methods B<can> be anonymous:
 
     class AnonMethodFactory {
 
@@ -323,7 +319,16 @@ named C<new> and is invoked like a method call on the class name:
     my $object = My::Class->new(%arguments);
 
 During object construction, class fields are looked up in the C<%arguments>
-hash and populated where possible.
+hash and populated with the found keys according to C<:param> attributes. If
+any C<%arguments> key was not declared as a C<:param> field, an exception is
+raised with a list of surplus key. This means that B<the constructor is
+strict by default>.
+
+In addition, the constructor does not need to be called in the class context
+exclusively. It works just as well to call it on an instance of a class, which
+will automatically create another instance of the same class:
+
+    my $other_object = $object->new(%arguments);
 
 =head2 Adjustment
 
@@ -348,14 +353,16 @@ they are declared).
     #   x = 42
 
 C<ADJUST> blocks are syntactically similar to L<C<BEGIN> or C<INIT>
-blocks|perlmod/BEGIN, UNITCHECK, CHECK, INIT and END>, which only run once.
-However, C<ADJUST> blocks, like methods, have access to C<$self> (a lexical
+blocks|perlmod/BEGIN, UNITCHECK, CHECK, INIT and END>, which only run once
+during compilation phase. However, C<ADJUST> blocks run each time an object is
+instantiated, and much like methods, have access to C<$self> (a lexical
 variable holding the object being constructed) as well as all object fields
 created up to that point.
 
 =head2 Lifetime
 
-After the construction phase, the object is ready to be used.
+After the construction phase, the object is ready to be used. Same as blessed
+references, native objects are always subclasses of L<UNIVERSAL>.
 
 Using C<blessed> (C<Scalar::Util::blessed> or C<builtin::blessed>) on the
 object will return the name of the class, while C<reftype>
@@ -366,6 +373,19 @@ C<'OBJECT'>.
 
 An object is destroyed when the last reference to it goes away, just as with
 other data structures in Perl.
+
+Same as with bless-based objects, attaching behavior on object destruction is
+done by defining a C<DESTROY> method. See L<perlobj/Destructors> for more
+details.
+
+    class WithDestructor {
+        method DESTROY () {
+            say "destroying $self";
+        }
+    }
+
+    my $obj = WithDestructor->new;
+    undef $obj; # destroying Test=OBJECT(0x2e4307e0)
 
 =head1 TODO
 
