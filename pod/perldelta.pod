@@ -93,13 +93,17 @@ as an updated module in the L</Modules and Pragmata> section.
 XXX Changes which enhance performance without changing behaviour go here.
 There may well be none in a stable release.
 
-[ List each enhancement as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Some pattern matches against long strings are now faster: in particular
+where the pattern: is anchored; contains a short fixed substring; and
+contains a floating substring which is as long or longer than than the
+fixed substring; but where the fixed substring isn't present in the
+target string. For example this match will be rejected much faster now:
+
+    "-" x 10_000_000 =~ /^abc.*def/
 
 =back
 
