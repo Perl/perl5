@@ -72,6 +72,9 @@ for seeding the internal PRNG. Previously Perl would read raw bytes from the
 F</dev/urandom> device. Perl now seeds itself in this order (and falls through
 upon failure):
 
+Note that the internal PRNG is still unsuitable for security applications.
+See L<perlfunc/rand EXPR> for a discussion of security.
+
 =over
 
 =item 1.
