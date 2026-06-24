@@ -2,6 +2,7 @@ use v5.40;
 
 use Test::More;
 use XS::APItest;
+use Config ();
 
 our %ATTRIBUTES_APPLIED;
 
@@ -51,6 +52,15 @@ BEGIN {
         ':red attribute applied to lexical array' );
     is( $ATTRIBUTES_APPLIED{'red/my %lexhash'}, "h-arg",
         ':red attribute applied to lexical hash' );
+}
+
+# Attribute definitions survive thread cloning
+# (this is mostly a test of the underlying SVt_INTERNAL implementation)
+SKIP: {
+    last SKIP unless $Config::Config{usethreads};
+
+    require threads;
+    threads->create( sub { return 123 } )->join;
 }
 
 done_testing;
