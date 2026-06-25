@@ -385,7 +385,7 @@ details.
     }
 
     my $obj = WithDestructor->new;
-    undef $obj; # destroying Test=OBJECT(0x2e4307e0)
+    undef $obj; # destroying WithDestructor=OBJECT(0x2e4307e0)
 
 =head1 TODO
 
