@@ -11,21 +11,6 @@ release.
 
 =head1 Core Enhancements
 
-=head2 Reported argument counts in C<method> signatures now account for C<$self>
-
-In previous versions of Perl, the exception message thrown by a C<method>
-subroutine with a signature when it does not receive an appropriate number of
-arguments to match its declared parameters failed to account for the implied
-C<$self> parameter, causing the numbers in the message to be 1 fewer than
-intended.
-
-This has now been fixed, so messages report the correct number of arguments
-including the object invocant.
-
-=head2 Unicode 17.0 is supported
-
-See L<https://www.unicode.org/versions/Unicode17.0.0/>.
-
 =head2 Named Parameters in Signatures
 
 This adds a major new ability to subroutine signatures, allowing callers
@@ -65,6 +50,19 @@ are permitted to be reference aliases.
 Currently both the C<refaliasing> and C<declared_refs> features remain
 B<experimental>.
 
+=head2 Enhanced operation of regular expression patterns under /xx
+
+Experimentally, the C</xx> pattern modifier can allow bracketed
+character classes (I<e.g.>, C<[a-zA-Z]> to extend across multiple lines
+and to contain comments, and to warn you of potential cases where a
+portion of a pattern inadvertently has been treated as a comment instead
+of what you intended.  This behavior is enabled by S<C<use feature
+"enhanced_xx">>.  See L<perlre/E<sol>x and  E<sol>xx>.
+
+=head2 Unicode 17.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode17.0.0/>.
+
 =head2 New source of entropy for PRNG seeding
 
 Perl now uses the C<getentropy()> system call to fetch random bytes suitable
@@ -90,15 +88,6 @@ Hash of internal state variables: Unix time, process ID, and pointer value
 
 Note that the internal PRNG is still unsuitable for security applications.
 See L<perlfunc/rand EXPR> for a discussion of security.
-
-=head2 Enhanced operation of regular expression patterns under /xx
-
-Experimentally, the C</xx> pattern modifier can allow bracketed
-character classes (I<e.g.>, C<[a-zA-Z]> to extend across multiple lines
-and to contain comments, and to warn you of potential cases where a
-portion of a pattern inadvertently has been treated as a comment instead
-of what you intended.  This behavior is enabled by S<C<use feature
-"enhanced_xx">>.  See L<perlre/E<sol>x and  E<sol>xx>.
 
 =head1 Security
 
@@ -1005,6 +994,19 @@ existing users of that name to build successfully.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Reported argument counts in C<method> signatures now account for C<$self>
+
+In previous versions of Perl, the exception message thrown by a C<method>
+subroutine with a signature when it does not receive an appropriate number of
+arguments to match its declared parameters failed to account for the implied
+C<$self> parameter, causing the numbers in the message to be 1 fewer than
+intended.
+
+This has now been fixed, so messages report the correct number of arguments
+including the object invocant.
 
 =item *
 
