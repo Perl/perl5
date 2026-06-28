@@ -5,21 +5,21 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.212 qw(:Status );
-use IO::Compress::Zlib::Constants 2.212 ;
+use IO::Compress::Base::Common  2.220 qw(:Status );
+use IO::Compress::Zlib::Constants 2.220 ;
 
-use IO::Uncompress::RawInflate  2.212 ;
+use IO::Uncompress::RawInflate  2.220 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.212';
+$VERSION = '2.220';
 $InflateError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);
 @EXPORT_OK = qw( $InflateError inflate ) ;
 %EXPORT_TAGS = %IO::Uncompress::RawInflate::DEFLATE_CONSTANTS ;
-push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
+$EXPORT_TAGS{all} = [ defined $EXPORT_TAGS{all} ? @{ $EXPORT_TAGS{all} } : (), @EXPORT_OK ] ;
 Exporter::export_ok_tags('all');
 
 
@@ -1010,7 +1010,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2024 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2026 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.212 ;
+use IO::Uncompress::RawInflate 2.220 ;
 
-use Compress::Raw::Zlib 2.212 () ;
-use IO::Compress::Base::Common 2.212 qw(:Status );
-use IO::Compress::Gzip::Constants 2.212 ;
-use IO::Compress::Zlib::Extra 2.212 ;
+use Compress::Raw::Zlib 2.218 () ;
+use IO::Compress::Base::Common 2.220 qw(:Status );
+use IO::Compress::Gzip::Constants 2.220 ;
+use IO::Compress::Zlib::Extra 2.220 ;
 
 require Exporter ;
 
@@ -23,12 +23,12 @@ our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GunzipError);
 @ISA = qw(IO::Uncompress::RawInflate Exporter);
 @EXPORT_OK = qw( $GunzipError gunzip );
 %EXPORT_TAGS = %IO::Uncompress::RawInflate::DEFLATE_CONSTANTS ;
-push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
+$EXPORT_TAGS{all} = [ defined $EXPORT_TAGS{all} ? @{ $EXPORT_TAGS{all} } : (), @EXPORT_OK ] ;
 Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.212';
+$VERSION = '2.220';
 
 sub new
 {
@@ -1138,7 +1138,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2024 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2026 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

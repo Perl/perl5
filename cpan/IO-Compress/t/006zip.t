@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  Test::NoWarnings->import; 1 };
 
-    plan tests => 108 + $extra ;
+    plan tests => 115 + $extra ;
 
     use_ok('IO::Compress::Zip', qw(:all)) ;
     use_ok('IO::Uncompress::Unzip', qw(unzip $UnzipError)) ;
@@ -401,4 +401,42 @@ EOM
     my $line = <$u>;
 
     is $line, qq["key","value"\n], "got line 1 from second member";
+}
+
+
+{
+    title "bad datetime";
+    # https://github.com/pmqs/IO-Compress/issues/65
+
+    {
+        # files/time-zero.zip has the modification time set to zero
+        my $file1 = "t/files/time-zero.zip";
+        my $u = IO::Uncompress::Unzip->new( $file1)
+            or die "Cannot open $file1: $UnzipError";
+
+        isa_ok $u, "IO::Uncompress::Unzip";
+
+        my $name = $u->getHeaderInfo()->{Name};
+
+        my $hdr = $u->getHeaderInfo();
+        is $hdr->{Name}, 'hello.txt', "Name is 'hello.txt'";
+        is $hdr->{Time}, 0, "Time is zero";
+    }
+
+
+    {
+        # files/time-invalid.zip has the modification time set to an invalid date
+        my $file1 = "t/files/time-invalid.zip";
+        my $u = IO::Uncompress::Unzip->new( $file1)
+            or die "Cannot open $file1: $UnzipError";
+
+        isa_ok $u, "IO::Uncompress::Unzip";
+
+        my $name = $u->getHeaderInfo()->{Name};
+
+        my $hdr = $u->getHeaderInfo();
+        is $hdr->{Name}, 'hello.txt', "Name is 'hello.txt'";
+        is $hdr->{Time}, 0, "Time is zero";
+    }
+
 }
