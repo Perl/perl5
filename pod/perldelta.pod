@@ -726,9 +726,6 @@ link against matches the perl we are building.  [L<GH #22125|https://github.com/
 =item * Fix builds with C<USE_IMP_SYS> defined but C<USE_ITHREADS> not
 defined.
 
-=item * A compilation error in unthreaded builds using MSVC introduced in Perl 5.43.5
-has been fixed.  [L<GH #23952|https://github.com/Perl/perl5/issues/23952>]
-
 =back
 
 =item OpenBSD
