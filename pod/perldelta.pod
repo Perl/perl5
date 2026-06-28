@@ -1238,16 +1238,12 @@ When a scalar variable used as the target of a filehandle is C<undef>'ed
 while being output, garbage bytes would be left in that scalar.
 [L<GH #24008|https://github.com/Perl/perl5/issues/24008>]
 
-=over 4
-
 =item *
 
-Additionally, there was a case that would expose garbage bytes in the
-target scalar or even trigger a segmentation fault when that scalar is
-output on it (as in C<< open $fh, '>', \$str; print $fh $str; >>).
-This is also fixed.  [L<GH #24199|https://github.com/Perl/perl5/issues/24199>]
-
-=back
+When a scalar variable was used as the target of a filehandle and also
+was output onto itself, garbage could result, or even trigger a
+segmentation fault (as in C<< open $fh, '>', \$str; print $fh $str; >>).
+[L<GH #24199|https://github.com/Perl/perl5/issues/24199>]
 
 =item *
 
