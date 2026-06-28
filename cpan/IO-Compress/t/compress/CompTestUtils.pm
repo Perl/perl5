@@ -719,7 +719,7 @@ sub dumpObj
         print "#\n# dumpOBJ from $file line $line \n" ;
     }
 
-    my $max = 0 ;;
+    my $max = 0 ;
     foreach my $k (keys %{ *$obj })
     {
         $max = length $k if length $k > $max ;

@@ -666,8 +666,7 @@ our %Modules = (
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.213.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Aug 28 14:24:42 2024',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.220.tar.gz',
         'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
@@ -678,6 +677,7 @@ our %Modules = (
             't/010examples-bzip2.t',
             't/010examples-zlib.t',
             't/cz-05examples.t',
+            'SECURITY.md',
         ],
     },
 
