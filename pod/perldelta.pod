@@ -1019,19 +1019,15 @@ to tied hashes in list assignments.
 
 =item *
 
-L<perlapi/defer_error>, formerly known as C<qerror>, and
-L<perlapi/op_clear> are now part of the API.
+A new function, L<perlapi/defer_error>, has been added to report
+errors in compiling a perl program.  L<perlapi/qerror> is a deprecated
+alias for it.  Previously, C<qerror> existed but was undocumented.
 
-Perl 5.43.2 hid Perl non-API function declarations unless you defined
-C<PERL_EXT> or C<PERL_CORE>, so these non-API functions no longer had
-visible declarations.
+[L<GH #23676|https://github.com/Perl/perl5/issues/23676>]
 
-A small number of CPAN modules used these APIs and a stricter GCC 15
-started enforcing C99 disallowing implicit function declarations,
-producing build failures.
+=item *
 
-Added qerror() as a deprecated public alias for defer_error() to allow
-existing users of that name to build successfully.
+L<perlapi/op_clear> is now part of the API.
 
 [L<GH #23676|https://github.com/Perl/perl5/issues/23676>]
 
