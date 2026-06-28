@@ -129,8 +129,7 @@ our @IGNORABLE = qw(
 our %Modules = (
 
     'Archive::Tar' => {
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-3.04.tar.gz',
-        'SYNCINFO'     => 'mauke on Wed Mar 19 08:01:30 2025',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-3.12.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
         'EXCLUDED'     => [
