@@ -488,6 +488,11 @@ Additionally, the following selected changes have been made:
 Auto-generation of this document now includes the line number of the source
 code, as well as its documentation.
 
+=item *
+
+It now contains information about how to find what release of
+Perl first contained an API element.
+
 =back
 
 =head3 L<perlexperiment>
@@ -497,11 +502,6 @@ code, as well as its documentation.
 =item *
 
 New entry for "New object system and C<class> syntax".
-
-=item *
-
-L<perlapi> now contains information about how to find what release of
-Perl first contained an API element.
 
 =back
 
