@@ -750,6 +750,55 @@ these versions of AIX.
 
 =back
 
+=item z/OS
+
+=over
+
+=item * clang is now the only supported compiler
+
+=item * A single test failure remains for the core Perl test suite
+
+It is for a misleading warning message in an edge case for reading
+malformed UTF-8 in F<XS-APItest/t/utf8_warn00.t>.  (Several instances of
+the same failure occur.)
+
+=item * Some cpan modules shipped with core have known problems:
+
+=over
+
+=item Encode
+
+=item ExtUtils-MakeMaker
+
+=item HTTP-Tiny
+
+=item IO-Compress
+
+=item JSON-PP
+
+=item libnet
+
+=item MIME-Base64
+
+=item PerlIO-via-QuotedPrint
+
+=item Pod-Checker
+
+=item podlators
+
+=item Pod-Simple
+
+=back
+
+Check for updates to these on cpan.
+
+=item * You can get a perl that works in ASCII mode
+
+An open source project has been created to modify the official perl to
+work on z/OS in ASCII mode.  See L<https://github.com/zopencommunity/perlport>.
+
+=back
+
 =back
 
 =head1 Internal Changes
