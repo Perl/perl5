@@ -220,6 +220,7 @@ if ($^O ne 'msys') # symlink tests fail on Windows/msys2
 		}
 
     { #use case 1 - in memory extraction
+      local $Archive::Tar::INSECURE_EXTRACT_MODE=1;
 			my $t=Archive::Tar->new;
 			$t->read( $archname );
 			my $r = eval{ $t->extract };
@@ -231,6 +232,7 @@ if ($^O ne 'msys') # symlink tests fail on Windows/msys2
 
 		{ #use case 2 - iter extraction
 		  #$DB::single = 2;
+      local $Archive::Tar::INSECURE_EXTRACT_MODE=1;
 			my $next=Archive::Tar->iter( $archname, 1 );
 			my $failed = 0;
 			#use Data::Dumper;
@@ -269,17 +271,25 @@ if ($^O ne 'msys') # symlink tests fail on Windows/msys2
 
 ### bug 103279
 ### retain trailing whitespace on filename
-{
+SKIP: {
   ok( 1,                      "Testing bug 103279" );
 	my $tar = $Class->new;
 	isa_ok( $tar, $Class,       "   Object" );
-	ok( $tar->add_data( 'white_space   ', '' ),
+	ok( open my $fh, '>', 'white_space   ' );
+	ok( close $fh );
+	if (-e 'white_space' && $^O eq 'MSWin32') {
+		# Creating a file under Windows using a name with trailing whitespace
+		# sometimes results in the created filename being stripped of that
+		# whitespace. I.e. open './foo  ' -> creates './foo'.
+		# This is known to only happen with *some* versions of Perl for
+		# Windows, so we must test.
+		skip 'Windows tries to be clever', 1;
+	}
+	ok( $tar->add_files( 'white_space   ' ),
 				    "   Add file <white_space   > containing filename with trailing whitespace");
+	ok( unlink 'white_space   ' );
 	ok( $tar->extract(),        "	Extract filename with trailing whitespace" );
-  SKIP: {
-    skip "Windows tries to be clever", 1 if $^O eq 'MSWin32';
-	  ok( ! -e 'white_space',     "	<white_space> should not exist" );
-  }
+	ok( ! -e 'white_space',     "	<white_space> should not exist" );
 	ok( -e 'white_space   ',    "	<white_space   > should exist" );
 	unlink foreach ('white_space   ', 'white_space');
 }
