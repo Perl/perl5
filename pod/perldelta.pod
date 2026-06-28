@@ -151,8 +151,8 @@ TILDE.
 
 =item *
 
-Using C<goto> to jump into the body of a loop or other block construct from
-outside is no longer permitted.
+Deprecated since 5.12, using C<goto> to jump into the body of a loop or
+other block construct from outside is no longer permitted.
 [L<GH #23618|https://github.com/Perl/perl5/issues/23618>]
 
 =item *
@@ -196,8 +196,8 @@ sufficient underlying C compiler support is available.
 
 =item *
 
-Populating a hash from a list of key/value pairs, when the keys are constant
-string operands known at compile time, is commonly now faster. [L<GH #24228|https://github.com/Perl/perl5/issues/24228>]
+Populating a hash from a list of key/value pairs when the keys are constant
+string operands known at compile time is commonly now faster. [L<GH #24228|https://github.com/Perl/perl5/issues/24228>]
 
 =back
 
@@ -845,7 +845,7 @@ for malformed input.  Previously it used the NUL character.
 =item *
 
 For core Perl maintainers, the syntax of F<embed.fnc> has been extended.
-Every function, C<foo()>, named in this file has generated for it a
+Every function, C<foo()>, named in that file has generated for it a
 macro named C<PERL_ARGS_ASSERT_FOO>.  The macro expands to C<assert()>
 calls that do basic sanity checking for each argument to C<foo()> that
 we currently deem as being appropriate to have such checking.  (That
@@ -1158,9 +1158,9 @@ contain C<chr(0xE9)>. [L<GH #23377|https://github.com/Perl/perl5/issues/23377>]
 We have long claimed to support identifiers up to about 255 characters
 long.  However this was actually true only for identifiers that
 consisted of only ASCII characters.  The real upper limit was as few as
-64 characters for identifiers written in other languages, for example,
-Chinese or Osage.  Now an identifier in any language may contain at
-least 255 characters.
+64 characters for identifiers written in languages using non-ASCII
+characters, for example, Chinese or Osage.  Now an identifier in any
+language may contain at least 255 characters.
 
 =item *
 
