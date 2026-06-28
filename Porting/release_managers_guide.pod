@@ -1356,6 +1356,27 @@ Be sure to commit your change:
 
  $ git commit -m 'Disarm RCnnn bump' patchlevel.h
 
+=for checklist skip MAINT
+
+=head3 Prepare an end of support note (if necessary)
+
+As a stable release approaches, the C<END OF SUPPORT NOTE> placeholder in
+F<Porting/release_announcement_template.txt> must mention the upcoming end
+of support for the oldest of the currently supported release series.
+Check L<perlpolicy> to confirm the affected VERSION.
+
+The I<final> BLEAD-POINT and RC releases should state:
+
+ Support for the 5.[VERSION].x release series will end shortly.
+ Please refer to L<perlpolicy> for version support information.
+
+The BLEAD-FINAL release should state:
+
+ Support for the 5.[VERSION].x release series has now ended.
+ Please refer to L<perlpolicy> for version support information.
+
+Non-final BLEAD-POINT and MAINT releases should omit this placeholder.
+
 =head3 Announce to p5p
 
 Mail perl5-porters@perl.org to announce your new release, with a quote you prepared earlier.
