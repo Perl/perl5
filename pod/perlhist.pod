@@ -844,6 +844,7 @@ the strings?).
  Eric       5.43.9       2026-Mar-20
  Philippe   5.43.10      2026-Apr-20
  Paul E     5.43.11      2026-Jun-01
+ Leon T     5.44.0-RC1   2027-Jul-22
 
 =head2 SELECTED RELEASE SIZES
 
