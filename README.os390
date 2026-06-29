@@ -231,6 +231,10 @@ Some tests currently fail.
 The failing tests in C<Test-Simple>, C<Pod-Html>, F<op/signatures>, and
 F<io/nargv.t> are false alarms.
 
+The failing tests in F<XS-APItest/t/utf8_warn00.t> show that the generated
+warning for a particular very edge case is not exactly as expected and is
+somewhat misleading.
+
 =head3 Known Bugs
 
 If zopen is installed on your machine, it is important to get the C<PATH>
