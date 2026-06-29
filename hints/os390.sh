@@ -352,8 +352,8 @@ EOWARN
 fi
 
 # Doesn't find the prototype
-case "d_gethostbyaddr" in)
-  d_gethostbyaddr_r='undef'
+case "d_gethostbyaddr" in
+  "") d_gethostbyaddr_r='undef'
   ;;
 esac
 
