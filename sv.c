@@ -13759,6 +13759,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         escape_it = TRUE;
                     }
                     argsv = MUTABLE_SV(va_arg(*args, void*));
+                    assert(argsv);
                     eptr = SvPV_const(argsv, elen);
                     if (DO_UTF8(argsv))
                         is_utf8 = TRUE;
@@ -13769,6 +13770,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                          width == 7 || width == 8)
                 {        /* HEKf, HEKf256, HEKf_QUOTEDPREFIX, HEKf256_QUOTEDPREFIX */
                     HEK * const hek = va_arg(*args, HEK *);
+                    assert(hek);
                     eptr = HEK_KEY(hek);
                     elen = HEK_LEN(hek);
                     if (HEK_UTF8(hek))
@@ -13784,6 +13786,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
                 else if (width == 1) {
                     eptr = va_arg(*args,char *);
+                    assert(eptr);
                     elen = strlen(eptr);
                     escape_it = TRUE;
                     width = 0;
@@ -13791,6 +13794,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
                 else if (width == 6 || width == 10) {
                     HV *hv = va_arg(*args, HV *);
+                    assert(hv);
                     eptr = HvNAME(hv);
                     elen = HvNAMELEN(hv);
                     if (HvNAMEUTF8(hv))
