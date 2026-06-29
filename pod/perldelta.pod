@@ -1172,11 +1172,11 @@ used to be parsed incorrectly.
 
 =item *
 
-Perl 5.42.0 does not handle the transition to/from daylight savings time
-properly.  The time and/or timezone can be off by an hour in the
-intervals surrounding such transitions.  This is a regression from
-earlier releases, and is now fixed.  This bug was evident from perl
-space in the L<POSIX/strftime> function, and in XS code with any of
+Perl 5.42.0 did not handle the transition to/from daylight savings time
+properly, fixed in 5.42.1.  The time and/or timezone could be off by an
+hour in the intervals surrounding such transitions.  This was a
+regression from earlier releases.  This bug was evident from perl space
+in the L<POSIX/strftime> function, and in XS code with any of
 L<perlapi/my_strftime>, L<perlapi/sv_strftime_ints>, or
 L<perlapi/sv_strftime_tm>.
 
