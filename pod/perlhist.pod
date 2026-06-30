@@ -846,6 +846,7 @@ the strings?).
  Paul E     5.43.11      2026-Jun-01
  Leon T     5.44.0-RC1   2026-Jun-22
  Leon T     5.44.0-RC2   2026-Jul-08
+ Leon T     5.44.0       2026-Jul-15
 
 =head2 SELECTED RELEASE SIZES
 
@@ -938,6 +939,7 @@ explained below.
  5.38.0        15793 139  29070 1270 48250 3219  11950 2863   9129 239
  5.40.0        15995 139  28627 1406 49524 3482  12448 2995   9471 234
  5.42.0        11659 139  33084 1464 49895 3492  12725 3016   9793 239
+ 5.44.0        12153 140  33870 1484 50502 3516  12991 3043   9997 245
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -1320,6 +1322,23 @@ the Perl source distribution for somewhat more selected releases.
  vms          544     12       548     12       547     12
  vos            8      7        12      7        12      7
  win32        982     45      1016     47      1025     47
+
+ ======================================================================
+
+                   5.44.0
+
+ Configure     616      1
+ Cross         126     15
+ h2pl           24     15
+ hints         363     84
+ os2           580     70
+ plan9         330     20
+ Porting      1702     79
+ qnx             5      4
+ utils         782     52
+ vms           547     12
+ vos            12      7
+ win32        1030     48
 
 =head2 SELECTED PATCH SIZES
 
