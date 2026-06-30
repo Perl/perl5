@@ -9202,22 +9202,27 @@ NULL
                 if (!reginfo->poscache_maxiter) {
                     /* start the countdown: Postpone detection until we
                      * know the match is not *that* much linear. */
-                    reginfo->poscache_maxiter
-                        =    (reginfo->strend - reginfo->strbeg + 1)
-                           * (FLAGS(scan)>>4);
-                    /* possible overflow for long strings and many CURLYX's */
-                    if (reginfo->poscache_maxiter < 0)
-                        reginfo->poscache_maxiter = I32_MAX;
-                    reginfo->poscache_iter = reginfo->poscache_maxiter;
+                    STRLEN len = reginfo->strend - reginfo->strbeg;
+                    /* number of participating WHILEMs */
+                    U8 n = (FLAGS(scan)>>4);
+
+                    /* Only do the calculations and enable the cache if it
+                     * won't overflow. This test is equivalent to:
+                     *    ((len + 1) * n  + 7) <= max(STRLEN)
+                     */
+                    if (len < ((~(STRLEN)0) - 7)/n) {
+                        reginfo->poscache_maxiter = (len + 1) * n;
+                        reginfo->poscache_iter = reginfo->poscache_maxiter;
+                    }
                 }
 
                 if (reginfo->poscache_iter == 1) {
                     reginfo->poscache_iter--;
                     /* initialise cache */
-                    const SSize_t size = (reginfo->poscache_maxiter + 7)/8;
+                    const STRLEN size = (reginfo->poscache_maxiter + 7)/8;
                     regmatch_info_aux *const aux = reginfo->info_aux;
                     if (aux->poscache) {
-                        if ((SSize_t)reginfo->poscache_size < size) {
+                        if (reginfo->poscache_size < size) {
                             Renew(aux->poscache, size, char);
                             reginfo->poscache_size = size;
                         }
