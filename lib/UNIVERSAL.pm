@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 
 # UNIVERSAL.pm should not contain any methods/subs, they
 # are all defined in universal.c
@@ -103,7 +103,7 @@ itself.  For example, logging or serialization may be roles.
 C<DOES> and C<isa> are similar, in that if either is true, you know that the
 object or class on which you call the method can perform specific behavior.
 However, C<DOES> is different from C<isa> in that it does not care I<how> the
-invocand performs the operations, merely that it does.  (C<isa> of course
+invocant performs the operations, merely that it does.  (C<isa> of course
 mandates an inheritance relationship.  Other relationships include aggregation,
 delegation, and mocking.)
 
@@ -141,7 +141,7 @@ calling the coderef will cause an error.
 
 You may call C<can> as a class (static) method or an object method.
 
-Again, the same rule about having a valid invocand applies -- use an C<eval>
+Again, the same rule about having a valid invocant applies -- use an C<eval>
 block or C<blessed> if you need to be extra paranoid.
 
 =item C<VERSION ( [ REQUIRE ] )>
