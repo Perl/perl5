@@ -9211,7 +9211,8 @@ NULL
                     reginfo->poscache_iter = reginfo->poscache_maxiter;
                 }
 
-                if (reginfo->poscache_iter-- == 0) {
+                if (reginfo->poscache_iter == 1) {
+                    reginfo->poscache_iter--;
                     /* initialise cache */
                     const SSize_t size = (reginfo->poscache_maxiter + 7)/8;
                     regmatch_info_aux *const aux = reginfo->info_aux;
@@ -9232,11 +9233,10 @@ NULL
                     );
                 }
 
-                if (reginfo->poscache_iter < 0) {
+                if (reginfo->poscache_iter == 0) {
                     /* have we already failed at this position? */
                     SSize_t offset, mask;
 
-                    reginfo->poscache_iter = -1; /* stop eventual underflow */
                     offset  = (FLAGS(scan) & 0xf) - 1
                                 +   (locinput - reginfo->strbeg)
                                   * (FLAGS(scan)>>4);
@@ -9252,6 +9252,8 @@ NULL
                     ST.cache_offset = offset;
                     ST.cache_mask   = mask;
                 }
+                else
+                    reginfo->poscache_iter--;
             }
 
             /* Prefer B over A for minimal matching. */
