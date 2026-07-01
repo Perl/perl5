@@ -5118,6 +5118,7 @@ ext/XS-APItest/APItest_autoloadtest.xs		XS::APItest AUTOLOADtest XS split
 ext/XS-APItest/APItest_backrefs.xs		XS::APItest backrefs-related XS split
 ext/XS-APItest/APItest_bool_internals.xs	XS::APItest BoolInternals-related XS split
 ext/XS-APItest/APItest_BS			autogenerate APItest.bs
+ext/XS-APItest/APItest_cv_refcounted_anysv.xs	XS::APItest CvREFCOUNTED_ANYSV-related XS split
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
