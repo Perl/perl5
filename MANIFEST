@@ -5123,6 +5123,7 @@ ext/XS-APItest/APItest_global_locale.xs		XS::APItest global_locale-related XS sp
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
+ext/XS-APItest/APItest_misc_runtime.xs		XS::APItest misc runtime XS split
 ext/XS-APItest/APItest_ptr_table.xs		XS::APItest ptr_table-related XS split
 ext/XS-APItest/APItest_rwmacro.xs		XS::APItest RWMacro-related XS split
 ext/XS-APItest/APItest_savestack.xs		XS::APItest savestack-related XS split
