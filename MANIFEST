@@ -5116,6 +5116,7 @@ ext/XS-APItest/APItest.xs			XS::APItest extension
 ext/XS-APItest/APItest_BS			autogenerate APItest.bs
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_ptr_table.xs		XS::APItest ptr_table-related XS split
+ext/XS-APItest/APItest_temp_lv.xs		XS::APItest temp lvalue XS split
 ext/XS-APItest/APItest_utf8.xs			XS::APItest utf8-related XS split
 ext/XS-APItest/core.c				Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc			Code common to core.c and notcore.c
