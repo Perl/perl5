@@ -10,9 +10,9 @@ This document describes the agent skill files shipped with the Perl core
 repository. These files give repository-aware coding agents short routing
 instructions and focused references for common Perl core development work.
 
-The canonical skill tree is F<.agents/skills/>. The F<.claude/skills/> tree
-is a compatibility mirror for tools that read Claude-style skill files.
-Edit F<.agents/skills/> first, then refresh and validate the mirror.
+The canonical skill tree is F<.agents/skills/>. Root F<AGENTS.md> contains
+repository-wide agent directives, and root F<CLAUDE.md> tells Claude to use
+F<AGENTS.md> and the canonical skill tree.
 
 =head1 TREE LAYOUT
 
@@ -125,16 +125,14 @@ documentation style.
 
 Run the repository validator after changing skills:
 
-    ./perl -Ilib .agents/validate-skills.pl --sync-claude
     ./perl -Ilib .agents/validate-skills.pl
     ./perl -Ilib -c .agents/validate-skills.pl
     make test_porting
 
-The first command refreshes F<.claude/skills/> from F<.agents/skills/> before
-validating. The second checks the canonical tree and mirror. The third checks
-the validator syntax. F<make test_porting> is a good broader validation target
-for changes that affect documentation, metadata, generated-file checks, or
-repository policy.
+The first command checks the canonical skill tree and confirms that every skill
+is documented here. The second checks the validator syntax. F<make
+test_porting> is a good broader validation target for changes that affect
+documentation, metadata, generated-file checks, or repository policy.
 
 To generate a Markdown index of repository files mentioned by the skills, run:
 

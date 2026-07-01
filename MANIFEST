@@ -28,38 +28,10 @@
 .agents/skills/perl-xs-embedding/references/xs-embedding.md			Agent skill reference: Perl XS and embedding
 .agents/skills/perl-xs-embedding/SKILL.md					Agent skill: Perl XS and embedding workflow
 .agents/validate-skills.pl		Validator for repository agent skills
-.claude/README				Notes on Claude skill mirror directory
-.claude/skills/perl-configure-build-system/references/configure-build-system.md	Claude skill mirror reference: Perl Configure and build system
-.claude/skills/perl-configure-build-system/SKILL.md				Claude skill mirror: Perl Configure and build system workflow
-.claude/skills/perl-core-archaeology/references/core-archaeology.md		Claude skill mirror reference: Perl core archaeology
-.claude/skills/perl-core-archaeology/SKILL.md					Claude skill mirror: Perl core archaeology workflow
-.claude/skills/perl-core-build-test-debug/references/testing-debugging.md	Claude skill mirror reference: Perl core testing and debugging
-.claude/skills/perl-core-build-test-debug/SKILL.md				Claude skill mirror: Perl core build, test, and debug workflow
-.claude/skills/perl-core-docs-release/references/docs-release.md		Claude skill mirror reference: Perl core documentation and release workflow
-.claude/skills/perl-core-docs-release/SKILL.md					Claude skill mirror: Perl core documentation and release workflow
-.claude/skills/perl-core-hacking/references/core-change-workflow.md		Claude skill mirror reference: Perl core change workflow
-.claude/skills/perl-core-hacking/SKILL.md					Claude skill mirror: Perl core hacking workflow
-.claude/skills/perl-core-orientation/references/source-map.md			Claude skill mirror reference: Perl core source map
-.claude/skills/perl-core-orientation/SKILL.md					Claude skill mirror: Perl core repository orientation
-.claude/skills/perl-core-portability/references/core-portability.md		Claude skill mirror reference: Perl core portability
-.claude/skills/perl-core-portability/SKILL.md					Claude skill mirror: Perl core portability workflow
-.claude/skills/perl-embed-fnc/references/embed-fnc-guide.md			Claude skill mirror reference: embed.fnc guide
-.claude/skills/perl-embed-fnc/SKILL.md						Claude skill mirror: embed.fnc workflow
-.claude/skills/perl-generated-files/references/generated-files.md		Claude skill mirror reference: Perl generated files
-.claude/skills/perl-generated-files/SKILL.md					Claude skill mirror: Perl generated files workflow
-.claude/skills/perl-language-library/references/language-library.md		Claude skill mirror reference: Perl language and library work
-.claude/skills/perl-language-library/SKILL.md					Claude skill mirror: Perl language and library workflow
-.claude/skills/perl-parser-optree-ops/references/parser-optree-ops.md		Claude skill mirror reference: Perl parser, optree, and ops
-.claude/skills/perl-parser-optree-ops/SKILL.md					Claude skill mirror: Perl parser, optree, and ops workflow
-.claude/skills/perl-regex-engine/references/regex-engine-map.md			Claude skill mirror reference: Perl regex engine map
-.claude/skills/perl-regex-engine/SKILL.md					Claude skill mirror: Perl regex engine workflow
-.claude/skills/perl-sv-magic-memory/references/sv-magic-memory.md		Claude skill mirror reference: Perl SV, magic, and memory
-.claude/skills/perl-sv-magic-memory/SKILL.md					Claude skill mirror: Perl SV, magic, and memory workflow
-.claude/skills/perl-xs-embedding/references/xs-embedding.md			Claude skill mirror reference: Perl XS and embedding
-.claude/skills/perl-xs-embedding/SKILL.md					Claude skill mirror: Perl XS and embedding workflow
 .dir-locals.el				Emacs control file
 .editorconfig				EditorConfig style file
 .metaconf-exclusions.txt		Symbols that should ignored when generating Configure
+AGENTS.md				Repository-wide coding agent directives
 Artistic				The "Artistic License"
 asan_ignore				Errors to skip under clang's Addresss Sanitizer
 AUTHORS					Contact info for contributors
@@ -72,6 +44,7 @@ cflags.SH				A script that emits C compilation flags per file
 Changes					Describe how to peruse changes between releases
 charclass_invlists.inc			Generated compiled-in inversion lists
 class.c					Internals of the `use feature 'class'` object system
+CLAUDE.md				Claude instructions for repository agent context
 CODE_OF_CONDUCT.md			Information on where to find the Standards of Conduct
 config_h.SH				Produces config.h
 configpm				Produces lib/Config.pm

@@ -3,30 +3,21 @@ use strict;
 use warnings;
 use File::Find qw(find);
 use File::Spec;
-use File::Compare qw(compare);
-use File::Copy qw(copy);
-use File::Path qw(make_path remove_tree);
 
 my $root = '.agents/skills';
-my $claude = '.claude/skills';
 my $skills_pod = 'pod/perlagentskills.pod';
 my $ok = 1;
-my $sync_claude = 0;
 my $file_index = 0;
 
 for my $arg (@ARGV) {
-    if ($arg eq '--sync-claude') {
-        $sync_claude = 1;
-    }
-    elsif ($arg eq '--file-index') {
+    if ($arg eq '--file-index') {
         $file_index = 1;
     }
     elsif ($arg eq '--help') {
         print <<"EOF";
-Usage: $0 [--sync-claude] [--file-index]
+Usage: $0 [--file-index]
 
   --file-index   Print a Markdown index of repo files mentioned by skills.
-  --sync-claude  Update .claude/skills from .agents/skills before validating.
 EOF
         exit 0;
     }
@@ -48,32 +39,6 @@ sub slurp {
     my $text = <$fh>;
     close $fh;
     return $text;
-}
-
-sub copy_tree {
-    my ($src, $dst) = @_;
-
-    find(
-        {
-            no_chdir => 1,
-            wanted => sub {
-                my $path = $File::Find::name;
-                my $rel = File::Spec->abs2rel($path, $src);
-                return if $rel eq '.';
-
-                my $target = File::Spec->catfile($dst, $rel);
-                if (-d $path) {
-                    make_path($target) unless -d $target;
-                    return;
-                }
-
-                my (undef, $dir) = File::Spec->splitpath($target);
-                make_path($dir) unless -d $dir;
-                copy($path, $target) or die "copy($path, $target): $!";
-            },
-        },
-        $src
-    );
 }
 
 sub mention_candidates {
@@ -235,42 +200,15 @@ for my $skill (@skills) {
         fail("$file: missing relative link $link") unless -e $target;
     }
 
-    if ($sync_claude) {
-        my $mirror = "$claude/$skill";
-        remove_tree($mirror) if -e $mirror;
-        copy_tree($dir, $mirror);
-    }
-
-    my $mirror = "$claude/$skill";
-    fail("$skill: missing Claude mirror") unless -d $mirror;
-    fail("$skill: Claude mirror must be a real directory, not a symlink") if -l $mirror;
-    my $mirror_file = "$mirror/SKILL.md";
-    fail("$skill: missing Claude SKILL.md") unless -f $mirror_file;
-    fail("$skill: Claude SKILL.md differs from canonical copy")
-        if -f $mirror_file && compare($file, $mirror_file) != 0;
-
     my $refdir = "$dir/references";
     if (-d $refdir) {
         opendir my $rdh, $refdir or do { fail("$refdir: $!"); next };
         for my $ref (grep { !/^\./ && -f "$refdir/$_" } readdir $rdh) {
-            my $canonical = "$refdir/$ref";
-            my $copy = "$mirror/references/$ref";
-            fail("$skill: missing Claude reference $ref") unless -f $copy;
-            fail("$skill: Claude reference $ref differs from canonical copy")
-                if -f $copy && compare($canonical, $copy) != 0;
+            fail("$refdir/$ref: reference file must be Markdown")
+                unless $ref =~ /[.]md\z/;
         }
         closedir $rdh;
     }
-}
-
-if ($sync_claude) {
-    opendir my $cdh, $claude or die "Cannot open $claude: $!";
-    for my $entry (grep { !/^\./ } readdir $cdh) {
-        next if grep { $_ eq $entry } @skills;
-        my $path = "$claude/$entry";
-        remove_tree($path) if -d $path;
-    }
-    closedir $cdh;
 }
 
 find(
