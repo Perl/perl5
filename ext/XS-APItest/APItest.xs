@@ -1852,24 +1852,7 @@ INCLUDE: APItest_temp_lv.xs
 
 INCLUDE: APItest_ptr_table.xs
 
-MODULE = XS::APItest::AutoLoader        PACKAGE = XS::APItest::AutoLoader
-
-SV *
-AUTOLOAD()
-    CODE:
-        RETVAL = newSVpvn_flags(SvPVX(cv), SvCUR(cv), SvUTF8(cv));
-    OUTPUT:
-        RETVAL
-
-SV *
-AUTOLOADp(...)
-    PROTOTYPE: *$
-    CODE:
-        PERL_UNUSED_ARG(items);
-        RETVAL = newSVpvn_flags(SvPVX(cv), SvCUR(cv), SvUTF8(cv));
-    OUTPUT:
-        RETVAL
-
+INCLUDE: APItest_autoload.xs
 
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
