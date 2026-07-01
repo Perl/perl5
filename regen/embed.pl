@@ -2930,6 +2930,13 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     MGv2_SIZEOF_FLAGS_
     NV_BODYLESS_UNION_
     OFFUNISKIP_helper_
+    OPpCALLER_PKG
+    OPpCALLER_FILE
+    OPpCALLER_LINE
+    OPpCALLER_SUB
+    OPpCALLER_HINTS
+    OPpCALLER_BITS
+    OPpCALLER_HINTH
     pTHX_2
     pTHX_3
     pTHX_4

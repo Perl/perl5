@@ -1338,6 +1338,37 @@ test_opcount(0, "Don't fold string repetition above a multiplier threshold",
                 {
                     repeat      => 1,
                 });
+# GH #23369 - optimize away the list slice of "(caller \d?)[...]"
+test_opcount(0, "No list slice in (caller)[0]",
+                sub { my $x = (caller)[0] },
+                {
+                    lslice => 0,
+                    const  => 0
+                });
+test_opcount(0, "Still a list slice in (caller)[4]",
+                sub { my $x = (caller)[4] },
+                {
+                    lslice => 1,
+                    const  => 1
+                });
+test_opcount(0, "No list slice in (caller)[0,1,2,3]",
+                sub { my $x = (caller)[0,1,2,3] },
+                {
+                    lslice => 0,
+                    const  => 0
+                });
+test_opcount(0, "No list slice in (caller)[8,9,10]",
+                sub { my $x = (caller)[8,9,10] },
+                {
+                    lslice => 0,
+                    const  => 0
+                });
+test_opcount(0, "Still a list slice in (caller)[3,4,5,6,7,8]",
+                sub { my $x = (caller)[3,4,5,6,7,8] },
+                {
+                    lslice => 1,
+                    const  => 6
+                });
 
 # OP_REF_SEQ
 test_opcount(0, "(ref \$x eq 'SCALAR') optimizes to OP_REF_SEQ",

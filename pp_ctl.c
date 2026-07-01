@@ -2312,6 +2312,81 @@ Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
     return cx;
 }
 
+static void
+S_caller_push_pkg(pTHX_ const HEK *stash_hek)
+{
+    if (!stash_hek)
+        rpp_push_IMM(&PL_sv_undef);
+    else {
+        dTARGET;
+        sv_sethek(TARG, stash_hek);
+        rpp_push_1(TARG);
+    }
+}
+
+static void
+S_caller_push_line(pTHX_ const PERL_CONTEXT *cx)
+{
+    const COP *lcop = lcop = closest_cop(cx->blk_oldcop,
+                                         OpSIBLING(cx->blk_oldcop),
+                                         cx->blk_sub.retop, TRUE);
+    if (!lcop)
+        lcop = cx->blk_oldcop;
+    rpp_push_1_norc( newSVuv( (UV)(CopLINE(lcop)) ) );
+}
+
+static void
+S_caller_push_sub_hasargs(pTHX_ const PERL_CONTEXT *cx, const PERL_CONTEXT *dbcx, const bool want_hasargs)
+{
+    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
+        /* So is ccstack[dbcxix]. */
+        if (CvHasNAME(dbcx->blk_sub.cv)) {
+            rpp_push_1(cv_name(dbcx->blk_sub.cv, 0, 0));
+            if (want_hasargs)
+                rpp_push_IMM(boolSV(CxHASARGS(cx)));
+        }
+        else {
+            rpp_push_1_norc( newSVpvs("(unknown)"));
+            if (want_hasargs)
+                rpp_push_IMM(boolSV(CxHASARGS(cx)));
+        }
+    }
+    else {
+        rpp_push_1_norc( newSVpvs("(eval)") );
+        if (want_hasargs)
+            rpp_push_IMM(&PL_sv_zero);
+    }
+}
+
+static void
+S_caller_push_bitmask(pTHX_ const PERL_CONTEXT *cx)
+{
+    SV * mask ;
+    char *old_warnings = cx->blk_oldcop->cop_warnings;
+
+    if  (old_warnings == pWARN_NONE)
+        mask = newSVpvn(WARN_NONEstring, WARNsize) ;
+    else if (old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0)
+        mask = &PL_sv_undef ;
+    else if (old_warnings == pWARN_ALL ||
+              (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
+        mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+    }
+    else
+        mask = newSVpvn(old_warnings, RCPV_LEN(old_warnings));
+    rpp_push_1_norc(mask);
+}
+
+static void
+S_caller_push_cop_hints_hash(pTHX_ const PERL_CONTEXT *cx)
+{
+    if (cx->blk_oldcop->cop_hints_hash) {
+        rpp_push_1_norc( newRV_noinc(MUTABLE_SV(cop_hints_2hv(cx->blk_oldcop, 0))) );
+    } else {
+        rpp_push_IMM(&PL_sv_undef);
+    }
+}
+
 PP(pp_caller)
 {
     const PERL_CONTEXT *cx;
@@ -2320,12 +2395,11 @@ PP(pp_caller)
     const HEK *stash_hek;
     bool has_arg = false;
     I32 count = cBOOL(PL_op->op_private & OPpOFFBYONE);
-    const COP *lcop;
 
     if (PL_op->op_flags & OPf_KIDS) {
         if (PL_stack_sp[0]) {
             has_arg = true;
-            count += (IV)SvIVx(PL_stack_sp[0]);
+            count += SvIV(PL_stack_sp[0]);
         }
         rpp_popfree_1();
     }
@@ -2338,9 +2412,9 @@ PP(pp_caller)
      * harness, gcov showed that pp_caller never had to extend the stack.
      * Consolidating the EXTENDs was found to shrink pp_caller by 46
      * instructions on a non-DEBUGGING, non-threaded gcc build.
-     * Additionally, subsequent commits will cause pp_caller to push
-     * a varying assortment of SV*s to the stack, so an early catch-all
-     * check will be even more desirable at that point.*/
+     * Additionally, optimization of the caller-lslice pattern can now
+     * cause pp_caller a varying assortment of SV*s to the stack, so an
+     * early catch-all check is definitely preferable.*/
     rpp_extend(11);
 
     cx = caller_cx(count, &dbcx);
@@ -2392,49 +2466,110 @@ PP(pp_caller)
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
       : NULL;
-    if (gimme != G_LIST) {
-        if (!stash_hek)
-            rpp_push_IMM(&PL_sv_undef);
+
+    if (UNLIKELY(gimme == G_VOID))
+        return NORMAL;
+
+    /* Non-zero subscripts means that a caller->lslice optree has been
+     * optimized away. Only the indicated subscripts must be returned. */
+    U8 subscripts = PL_op->op_private &~ OPpOFFBYONE;
+
+    if (gimme == G_SCALAR) {
+        if(!subscripts)
+            S_caller_push_pkg(aTHX_ stash_hek);
         else {
-            dTARGET;
-            sv_sethek(TARG, stash_hek);
-            rpp_push_1(TARG);
+            /* Perl_scalarvoid might have toggled off superfluous bits
+             * at compile time, but just in case execution is somewhere
+             * where context is determined at runtime...*/
+            U32 msb_subscript = 1 << msbit_pos32((U32)subscripts);
+
+            switch(msb_subscript) {
+                case OPpCALLER_PKG:
+                    S_caller_push_pkg(aTHX_ stash_hek);
+                    break;
+                case OPpCALLER_FILE:
+                    rpp_push_1_norc(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
+                    break;
+                case OPpCALLER_LINE:
+                    S_caller_push_line(aTHX_ cx);
+                    break;
+                case OPpCALLER_SUB:
+                    if (!has_arg) {
+                        rpp_push_IMM(&PL_sv_undef);
+                    } else S_caller_push_sub_hasargs(aTHX_ cx, dbcx, false);
+                    break;
+                case OPpCALLER_HINTS:
+                    if (!has_arg) {
+                        rpp_push_IMM(&PL_sv_undef);
+                    } else {
+                        rpp_push_1_norc(newSViv( (IV)(CopHINTS_get(cx->blk_oldcop)) ));
+                    }
+                    break;
+                case OPpCALLER_BITS:
+                    if (!has_arg) {
+                        rpp_push_IMM(&PL_sv_undef);
+                    } else S_caller_push_bitmask(aTHX_ cx);
+                    break;
+                case OPpCALLER_HINTH:
+                    if (!has_arg)
+                        rpp_push_IMM(&PL_sv_undef);
+                    else S_caller_push_cop_hints_hash(aTHX_ cx);
+                    break;
+                default:
+                    NOT_REACHED;
+            }
         }
         return NORMAL;
     }
 
-    if (!stash_hek)
-        rpp_push_IMM(&PL_sv_undef);
-    else {
-        dTARGET;
-        sv_sethek(TARG, stash_hek);
-        rpp_push_1(TARG);
+    if (subscripts) {
+        if (subscripts & OPpCALLER_PKG)
+            S_caller_push_pkg(aTHX_ stash_hek);
+        if (subscripts & OPpCALLER_FILE)
+            rpp_push_1_norc(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
+        if (subscripts & OPpCALLER_LINE)
+            S_caller_push_line(aTHX_ cx);
+
+        if (!has_arg) {
+            int f = (subscripts & (OPpCALLER_SUB|OPpCALLER_HINTS|OPpCALLER_BITS|OPpCALLER_HINTH));
+
+            /* Compilers may recognise this loop and substitute popcnt */
+            int cnt = 0;
+            while(f != 0) {
+                f &= f - 1;
+                cnt++;
+            }
+
+            while (cnt) {
+                rpp_push_IMM(&PL_sv_undef);
+                cnt--;
+            }
+        } else {
+            if (subscripts & OPpCALLER_SUB)
+                S_caller_push_sub_hasargs(aTHX_ cx, dbcx, false);
+            if (subscripts & OPpCALLER_HINTS)
+                rpp_push_1_norc(newSViv( (IV)(CopHINTS_get(cx->blk_oldcop)) ));
+            if (subscripts & OPpCALLER_BITS)
+                S_caller_push_bitmask(aTHX_ cx);
+            if (subscripts & OPpCALLER_HINTH)
+                S_caller_push_cop_hints_hash(aTHX_ cx);
+        }
+        return NORMAL;
     }
+
+    /* No lslice optimization is in effect. This is straightforward
+     * pp_caller from here onwards. */
+    S_caller_push_pkg(aTHX_ stash_hek);
+
     rpp_push_1_norc(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
-    lcop = closest_cop(cx->blk_oldcop, OpSIBLING(cx->blk_oldcop),
-                       cx->blk_sub.retop, TRUE);
-    if (!lcop)
-        lcop = cx->blk_oldcop;
-    rpp_push_1_norc( newSVuv( (UV)(CopLINE(lcop)) ) );
+
+    S_caller_push_line(aTHX_ cx);
 
     if (!has_arg)
         return NORMAL;
 
-    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-        /* So is ccstack[dbcxix]. */
-        if (CvHasNAME(dbcx->blk_sub.cv)) {
-            rpp_push_1(cv_name(dbcx->blk_sub.cv, 0, 0));
-            rpp_push_IMM(boolSV(CxHASARGS(cx)));
-        }
-        else {
-            rpp_push_1_norc( newSVpvs_flags("(unknown)", 0));
-            rpp_push_IMM(boolSV(CxHASARGS(cx)));
-        }
-    }
-    else {
-        rpp_push_1_norc( newSVpvs_flags("(eval)", 0) );
-        rpp_push_IMM(&PL_sv_zero);
-    }
+    S_caller_push_sub_hasargs(aTHX_ cx, dbcx, true);
+
     gimme = cx->blk_gimme;
     if (gimme == G_VOID)
         rpp_push_IMM(&PL_sv_undef);
@@ -2472,28 +2607,9 @@ PP(pp_caller)
     }
 
     rpp_push_1_norc(newSViv( (IV)(CopHINTS_get(cx->blk_oldcop)) ));
-    {
-        SV * mask ;
-        char *old_warnings = cx->blk_oldcop->cop_warnings;
 
-        if  (old_warnings == pWARN_NONE)
-            mask = newSVpvn(WARN_NONEstring, WARNsize) ;
-        else if (old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0)
-            mask = &PL_sv_undef ;
-        else if (old_warnings == pWARN_ALL ||
-                  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
-            mask = newSVpvn(WARN_ALLstring, WARNsize) ;
-        }
-        else
-            mask = newSVpvn(old_warnings, RCPV_LEN(old_warnings));
-        rpp_push_1_norc(mask);
-    }
-
-    if (cx->blk_oldcop->cop_hints_hash) {
-        rpp_push_1_norc( newRV_noinc(MUTABLE_SV(cop_hints_2hv(cx->blk_oldcop, 0))) );
-    } else {
-        rpp_push_IMM(&PL_sv_undef);
-    }
+    S_caller_push_bitmask(aTHX_ cx);
+    S_caller_push_cop_hints_hash(aTHX_ cx);
 
     return NORMAL;
 }

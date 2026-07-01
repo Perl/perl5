@@ -9443,6 +9443,15 @@ Perl_ck_bitop(pTHX_ OP *o)
         Perl_assert_aTHX; assert(o)
 
 PERL_CALLCONV OP *
+Perl_ck_caller(pTHX_ OP *o)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_CK_CALLER             \
+        Perl_assert_aTHX; assert(o)
+
+PERL_CALLCONV OP *
 Perl_ck_classname(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)

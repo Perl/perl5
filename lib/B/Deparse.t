@@ -3701,3 +3701,16 @@ my($str, $pat);
 my $count_all = () = $str =~ /$pat/g;
 my $count_more += () = $str =~ /$pat/g;
 my $count_one = () = $str =~ /$pat/;
+####
+# caller with single subscript lslice optimised away
+(caller)[3];
+####
+# caller with multiple subscript lslice optimised away
+(caller)[1,2,3];
+####
+# deeper caller with multiple subscript lslice optimised away
+(caller 2)[1,2,3];
+####
+# caller with complex arg, multiple subscript lslice optimised away
+my $x;
+(caller $x->[3]{'apples'})[1,2,3];

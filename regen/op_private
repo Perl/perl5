@@ -191,7 +191,7 @@ use strict;
     # (i.e. in the pp() functions). Thus they must always have 4 bits
     # allocated
     $maxarg{$_} = 1 for qw(
-        binmode bless caller chdir close enterwrite eof exit fileno getc
+        binmode bless chdir close enterwrite eof exit fileno getc
         getpgrp gmtime index mkdir rand reset setpgrp sleep srand sysopen
         tell umask
     );
@@ -200,7 +200,7 @@ use strict;
 
     $args0{$_} = 1 for qw(entersub avhvswitch
                        rv2hv aelemfastlex_store
-                       ref_cmp);                  # UNOPs that usurp bit 0
+                       ref_cmp caller);                  # UNOPs that usurp bit 0
 
     # Historically, bit ops used bit 0 to indicate 'use integer' in scope;
     # For now, ban use of bits 0..1 as an arg count, in order to detect
@@ -987,6 +987,16 @@ addbits('ref_cmp',
 
 addbits('match',
     7 => qw(OPpMATCH_JUST_COUNT JUST_COUNT),
+);
+
+addbits('caller',
+    0 => qw(OPpCALLER_PKG   PKG),
+    1 => qw(OPpCALLER_FILE  FILE),
+    2 => qw(OPpCALLER_LINE  LINE),
+    3 => qw(OPpCALLER_SUB   SUB),
+    4 => qw(OPpCALLER_HINTS HINTS),
+    5 => qw(OPpCALLER_BITS  BITS),
+    6 => qw(OPpCALLER_HINTH HINTH),
 );
 
 1;
