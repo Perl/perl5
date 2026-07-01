@@ -5128,6 +5128,7 @@ ext/XS-APItest/APItest_misc_runtime.xs		XS::APItest misc runtime XS split
 ext/XS-APItest/APItest_optree_cophh.xs		XS::APItest optree and cophh XS split
 ext/XS-APItest/APItest_optree_multicall.xs	XS::APItest optree and multicall XS split
 ext/XS-APItest/APItest_ptr_table.xs		XS::APItest ptr_table-related XS split
+ext/XS-APItest/APItest_runtime_helpers.xs	XS::APItest runtime helper XS split
 ext/XS-APItest/APItest_runtime_hooks.xs		XS::APItest runtime hooks XS split
 ext/XS-APItest/APItest_rwmacro.xs		XS::APItest RWMacro-related XS split
 ext/XS-APItest/APItest_savestack.xs		XS::APItest savestack-related XS split
