@@ -5128,6 +5128,7 @@ ext/XS-APItest/APItest_rwmacro.xs		XS::APItest RWMacro-related XS split
 ext/XS-APItest/APItest_savestack.xs		XS::APItest savestack-related XS split
 ext/XS-APItest/APItest_temp_lv.xs		XS::APItest temp lvalue XS split
 ext/XS-APItest/APItest_utf8.xs			XS::APItest utf8-related XS split
+ext/XS-APItest/APItest_vstring.xs		XS::APItest vstring-related XS split
 ext/XS-APItest/core.c				Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc			Code common to core.c and notcore.c
 ext/XS-APItest/exception.c			XS::APItest extension
