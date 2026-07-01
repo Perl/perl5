@@ -9195,6 +9195,28 @@ NULL
              * relevant CURLLYX/WHILEM op pairs there are, while the
              * bottom 4-bits is the identifying index number of this
              * WHILEM.
+             *
+             * The main variables associated with the SLC are:
+             *
+             * reginfo->poscache_maxiter
+             *     If zero, indicates that the SLC has not yet been
+             *     triggered, or that it has been subsequently disabled
+             *     again.
+             *     Otherwise, its (positive) value is used for two
+             *     different purposes:
+             *       - what value to start an initial (or reset)
+             *         countdown from;
+             *       - the size to alloc() the cache in bits.
+             *     Currently these values are the same, but they needn't
+             *     be in principle.
+             *
+             * reginfo->poscache_iter
+             *    Only has meaning if poscache_maxiter is non-zero. In
+             *    that case, it represents a countdown initialised
+             *    from poscache_maxiter.
+             *    If it reaches 1, the cache is malloced/realloced if
+             *    necessary, and then zeroed. When it reaches 0, the cache
+             *    is used.
              */
 
             if (FLAGS(scan)) {
