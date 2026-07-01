@@ -2147,9 +2147,10 @@ PP_wrapped(pp_sysread, 0, 1)
                 charskip  = 0;
             }
         }
-        /* If we have not 'got' the number of _characters_ we 'wanted' get some more
-           provided amount read (count) was what was requested (length)
-         */
+
+        /* If we have not 'got' the number of _characters_ we 'wanted' get
+         * some more provided amount read (count) was what was requested
+         * (length) */
         if (got < wanted && count == length) {
             length = wanted - got;
             offset = bend - SvPVX_const(bufsv);
