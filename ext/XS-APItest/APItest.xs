@@ -6923,14 +6923,7 @@ INCLUDE: APItest_cv_refcounted_anysv.xs
 
 INCLUDE: APItest_global_locale.xs
 
-MODULE = XS::APItest            PACKAGE = XS::APItest::savestack
-
-IV
-get_savestack_ix()
-    CODE:
-        RETVAL = PL_savestack_ix;
-    OUTPUT:
-        RETVAL
+INCLUDE: APItest_savestack.xs
 
 MODULE = XS::APItest            PACKAGE = XS::APItest::vstring
 

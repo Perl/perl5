@@ -5125,6 +5125,7 @@ ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
 ext/XS-APItest/APItest_ptr_table.xs		XS::APItest ptr_table-related XS split
 ext/XS-APItest/APItest_rwmacro.xs		XS::APItest RWMacro-related XS split
+ext/XS-APItest/APItest_savestack.xs		XS::APItest savestack-related XS split
 ext/XS-APItest/APItest_temp_lv.xs		XS::APItest temp lvalue XS split
 ext/XS-APItest/APItest_utf8.xs			XS::APItest utf8-related XS split
 ext/XS-APItest/core.c				Test API functions when PERL_CORE is defined
