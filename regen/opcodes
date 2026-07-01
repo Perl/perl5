@@ -308,7 +308,7 @@ leavesublv	lvalue subroutine return	ck_null		1
 argcheck	check subroutine arguments	ck_null		+
 argelem		subroutine argument	ck_null		+
 argdefelem	subroutine argument default value	ck_null		|
-caller		caller			ck_fun		t%	S?
+caller		caller			ck_caller	t%	S?
 warn		warn			ck_fun		imst@	L
 die		die			ck_fun		imst@	L
 reset		symbol reset		ck_fun		is%	S?

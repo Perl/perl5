@@ -23,13 +23,15 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
          OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
-         OPpCONCAT_NESTED OPpMATCH_JUST_COUNT
+         OPpCONCAT_NESTED OPpOFFBYONE OPpMATCH_JUST_COUNT
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
          OPpPARAM_IF_UNDEF OPpPARAM_IF_FALSE
          OPpREF_CMP_MASK OPpREF_CMP_REGEXP_PKG OPpREF_CMP_EMPTYSTR
          OPpREF_CMP_SKIPLOGOP OPpREF_CMP_AND OPpREF_CMP_NE
+         OPpCALLER_PKG OPpCALLER_FILE OPpCALLER_LINE OPpCALLER_SUB
+         OPpCALLER_HINTS OPpCALLER_BITS OPpCALLER_HINTH         
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
          CVf_NOWARN_AMBIGUOUS CVf_LVALUE CVf_IsMETHOD
@@ -2821,7 +2823,25 @@ sub pp_akeys { unop(@_, "keys") }
 sub pp_pop { unop(@_, "pop") }
 sub pp_shift { unop(@_, "shift") }
 
-sub pp_caller { unop(@_, "caller") }
+sub pp_caller {
+    my $private = $_[1]->private;
+    my ($pre, $post) = ('', '');
+    if ($private && $private != OPpOFFBYONE) {
+        # A list slice was optimized away.
+        $pre = '(';
+
+        # Bits:       0,1,2,3,4,5,6 map to
+        # Subscripts: 0,1,2,3,8,9,10
+        my $bits = join ',',
+                   map { $_ < 4 ? $_ : $_ + 4 }
+                   grep { $private & (1 << $_) }
+                   (0,1,2,3,4,5,6);
+
+        $post = ")[$bits]";
+    }
+    $pre . unop(@_, "caller") . $post;
+
+}
 sub pp_reset { unop(@_, "reset") }
 sub pp_exit { unop(@_, "exit") }
 sub pp_prototype { unop(@_, "prototype") }

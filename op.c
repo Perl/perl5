@@ -2080,6 +2080,17 @@ Perl_scalar(pTHX_ OP *o)
             /* impose scalar context on everything except the condition */
             next_kid = OpSIBLING(cUNOPo->op_first);
             break;
+        case OP_CALLER:
+            {
+                U8 caller_private = o->op_private &~ OPpOFFBYONE;
+                /* If there is more than one of the ex-lslice optimization
+                 * bits set, unset all but the last of them. */
+                if (caller_private) {
+                    o->op_private = (1U << msbit_pos32(caller_private))
+                        | (o->op_private & OPpOFFBYONE);
+                }
+            }
+            break;
 
         default:
             if (o->op_flags & OPf_KIDS)
@@ -9000,6 +9011,76 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     return doop;
 }
 
+static OP *
+S_maybe_caller_lslice(pTHX_ OP *subscript, OP *listval)
+{
+    assert(OP_TYPE_IS(listval, OP_CALLER));
+    assert(OP_TYPE_IS(subscript, OP_LIST) || OP_TYPE_IS(subscript, OP_CONST));
+
+    /* If there is a single constant subscript or an ascending order
+     * of constant subscripts, pp_caller can be made to emit only the
+     * specified return values, rather than it returning all values
+     * a lslice then being necessary to filter them.
+     *
+     * At present, only subscripts 0 - 3 and 8-9 are supported, as these
+     * seem to predominate on CPAN. Supporting the full set would probably
+     * require OP_CALLER to gain an aux buffer. */
+    U8 subscript_flags = 0;
+    IV last_ix = -1;
+
+    OP *kid = (OP_TYPE_IS(subscript, OP_CONST))
+                ? subscript : cLISTOPx(subscript)->op_first;
+
+    if (OP_TYPE_IS(kid, OP_PUSHMARK))
+        kid = OpSIBLING(kid);
+
+    while (kid) {
+        if (!OP_TYPE_IS(kid, OP_CONST)) {
+            return NULL;
+        }
+        SV *sv = cSVOPx_sv(kid);
+        if (SvOK(sv) != (SVf_IOK|SVp_IOK)) {
+            return NULL;
+        }
+        IV this_ix = SvIVX(sv);
+        if (this_ix <= last_ix)
+            return NULL;
+
+        switch(this_ix) {
+            case 0:
+                subscript_flags |= OPpCALLER_PKG;
+                break;
+            case 1:
+                subscript_flags |= OPpCALLER_FILE;
+                break;
+            case 2:
+                subscript_flags |= OPpCALLER_LINE;
+                break;
+            case 3:
+                subscript_flags |= OPpCALLER_SUB;
+                break;
+            case 8:
+                subscript_flags |= OPpCALLER_HINTS;
+                break;
+            case 9:
+                subscript_flags |= OPpCALLER_BITS;
+                break;
+            case 10:
+                subscript_flags |= OPpCALLER_HINTH;
+                break;
+            default:
+                return NULL;
+        }
+        last_ix = this_ix;
+        kid = OpSIBLING(kid);
+    }
+    listval->op_private |= subscript_flags;
+
+    op_free(subscript);
+
+    return listval;
+}
+
 /*
 =for apidoc_section $optree_construction
 
@@ -9020,6 +9101,13 @@ OP *
 Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 {
     PERL_ARGS_ASSERT_NEWSLICEOP;
+
+    if ( OP_TYPE_IS(listval, OP_CALLER) &&
+         (OP_TYPE_IS(subscript, OP_LIST) || OP_TYPE_IS(subscript, OP_CONST))
+    ) {
+        OP *o = S_maybe_caller_lslice(aTHX_ subscript, listval);
+        if (o) return o;
+    }
 
     return newBINOP(OP_LSLICE, flags,
             list(op_force_list(subscript)),
@@ -14204,6 +14292,17 @@ Perl_ck_fun(pTHX_ OP *o)
         if (oa && oa != OA_LIST)
             return too_few_arguments_pv(o,OP_DESC(o), 0);
     }
+    return o;
+}
+
+OP *
+Perl_ck_caller(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_CALLER;
+    o = ck_fun(o);
+    /* The caller->lslice optimization will use bits 0-6. Make sure
+     * that the argument count bits are cleared. */
+    o->op_private &= ~OPpARG4_MASK;
     return o;
 }
 

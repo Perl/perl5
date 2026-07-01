@@ -1515,6 +1515,7 @@
 #     define ck_anonhash(a)                     Perl_ck_anonhash(aTHX_ a)
 #     define ck_backtick(a)                     Perl_ck_backtick(aTHX_ a)
 #     define ck_bitop(a)                        Perl_ck_bitop(aTHX_ a)
+#     define ck_caller(a)                       Perl_ck_caller(aTHX_ a)
 #     define ck_classname(a)                    Perl_ck_classname(aTHX_ a)
 #     define ck_cmp(a)                          Perl_ck_cmp(aTHX_ a)
 #     define ck_concat(a)                       Perl_ck_concat(aTHX_ a)

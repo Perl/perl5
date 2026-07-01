@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 115 ); # some tests are run in a BEGIN block
+    plan( tests => 126 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -447,3 +447,38 @@ if (t1) {
 }
 END
     'GH #16872 (part) - caller line number if (t1) {} elsif (t2) {}';
+
+{
+    # Optimizing away an lslice doesn't mess up return values
+    BEGIN {$^H{"fancycaller/boop"} = 1;}
+    package fancycaller {
+        use strict;
+        use warnings;
+        sub plain_list { return caller 1; }
+        sub noslice_bigrun { return (caller 1)[0,1,2,3,8,9,10] }
+        sub noslice_sub { return (caller 1)[3] }
+        sub noslice_sctx { my $x = (caller 1)[1,2,3]; return $x }
+        sub call_me_maybe {
+            my @trace = plain_list();
+            my @bigrun = noslice_bigrun();
+            my $noslice_sub = noslice_sub();
+            my $noslice_sctx = noslice_sctx();
+            ::is $bigrun[0], $trace[0], "Optimized caller lslice returns correct package";
+            ::is($bigrun[1], $trace[1], "Optimized caller lslice returns correct file");
+            ::is $bigrun[2], $trace[2], "Optimized caller lslice returns correct line number";
+            ::is $bigrun[3], $trace[3], "Optimised caller lslice returns correct sub";
+            ::is $bigrun[4], $trace[8], "Optimized caller lslice returns correct _hasargs_";
+            ::is $bigrun[5], $trace[9], "Optimized caller lslice returns correct bitmask";
+            ::is $bigrun[6]->%*, $trace[10]->%*, "Optimized caller lslice returns correct hint hash";
+            ::is $noslice_sub, $trace[3], "Optimized caller lslice (single subscript) is correct";
+            ::is $noslice_sctx, $trace[3], "Optimized caller lslice is correct in scalar context";
+        }
+    }
+    fancycaller::call_me_maybe();
+
+    sub no_arg_hinthash { (caller)[0,2,3,10] }
+    my $result = join ":", no_arg_hinthash();
+    is $result, "main:12449::", "Optimized caller lslice with no arg returns correctly";
+    sub scalar_gives_filename { (caller 0)[0,1] }
+    like scalar scalar_gives_filename(), qr![/\\]caller\.t$!, "Optimized caller lslice in runtime scalar context";
+}
