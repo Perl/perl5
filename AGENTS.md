@@ -6,7 +6,7 @@ asks for a different approach.
 
 ## Prime Directives
 
-- Keep changes small, incremental, and reviewable.
+- Keep changes to existing code or infra small, incremental, and reviewable.
 - Prefer self-contained commits that include code, tests, documentation, and
   generated-file updates required by the change.
 - Add or update tests for behavior changes, bug fixes, generated-file checks,
