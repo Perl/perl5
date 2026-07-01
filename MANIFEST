@@ -5133,6 +5133,7 @@ ext/XS-APItest/APItest_runtime_hooks.xs		XS::APItest runtime hooks XS split
 ext/XS-APItest/APItest_runtime_utils.xs		XS::APItest runtime utility XS split
 ext/XS-APItest/APItest_rwmacro.xs		XS::APItest RWMacro-related XS split
 ext/XS-APItest/APItest_savestack.xs		XS::APItest savestack-related XS split
+ext/XS-APItest/APItest_sv_compare_custom.xs	XS::APItest SV compare and custom XS split
 ext/XS-APItest/APItest_temp_lv.xs		XS::APItest temp lvalue XS split
 ext/XS-APItest/APItest_unicode_case.xs		XS::APItest Unicode case XS split
 ext/XS-APItest/APItest_unicode_charclass.xs	XS::APItest Unicode charclass XS split
