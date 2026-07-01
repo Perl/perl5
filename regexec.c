@@ -9199,6 +9199,22 @@ NULL
 
             if (FLAGS(scan)) {
 
+#ifdef DEBUGGING
+                if (reginfo->poscache_maxiter) {
+                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
+                        "  iter=%" UVuf " maxiter=%" UVuf "\n",
+                    depth,
+                    (UV)reginfo->poscache_iter,
+                    (UV)reginfo->poscache_maxiter)
+                );
+                }
+                else {
+                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
+                        "  maxiter=0\n", depth)
+                    );
+                }
+#endif
+
                 if (!reginfo->poscache_maxiter) {
                     /* start the countdown: Postpone detection until we
                      * know the match is not *that* much linear. */
@@ -9232,9 +9248,9 @@ NULL
                         reginfo->poscache_size = size;
                         Newxz(aux->poscache, size, char);
                     }
-                    DEBUG_EXECUTE_r( re_printf(
+                    DEBUG_EXECUTE_r( re_exec_indentf(
       "%sWHILEM: Detected a super-linear match, switching on caching%s...\n",
-                              PL_colors[4], PL_colors[5])
+                              depth, PL_colors[4], PL_colors[5])
                     );
                 }
 
