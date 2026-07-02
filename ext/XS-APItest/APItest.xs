@@ -14,6 +14,44 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/*
+ * MAINTAINER NOTE
+ *
+ * This file is intentionally limited to the shared scaffolding for
+ * XS::APItest:
+ *
+ *   - global/shared C helpers used by multiple XS split files
+ *   - MY_CXT definition and initialization
+ *   - keyword-parser/plugin support that is tightly coupled to this file
+ *   - top-level BOOT/CLONE setup that must remain centralized
+ *   - other deeply shared or structurally central code that would become
+ *     less clear if spread across multiple files
+ *
+ * Most test-facing XSUBs should not be added here directly.
+ * Prefer adding new code in a domain-specific file such as:
+ *
+ *   ext/XS-APItest/APItest_*.xs
+ *
+ * Shared helper code that is reused by multiple split files should usually
+ * live in a small, focused include file:
+ *
+ *   ext/XS-APItest/APItest_*.inc
+ *
+ * Guidelines:
+ *
+ *   - keep files domain-focused rather than growing a general dump file
+ *   - prefer low-coupling splits; leave tightly coupled parser/setup code here
+ *   - search for "Include Files Go Here" for the C and XS insertion points
+ *   - if adding a new file, update MANIFEST and run make manisort
+ *   - ensure changes work under root-level:
+ *         make test
+ *         make test_harness TEST_FILES='...'
+ *   - when splitting code, preserve test coverage and test effectiveness
+ *
+ * The goal is to keep XS::APItest navigable, so it is easier to judge
+ * completeness and easier to determine where new tests and helpers belong.
+ */
+
 /* PERL_VERSION_xx sanity checks */
 #if !PERL_VERSION_EQ(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
 #  error PERL_VERSION_EQ(major, minor, patch) is false; expected true
@@ -157,6 +195,7 @@ typedef struct {
 
 START_MY_CXT
 
+/* C Include Files Go Here - shared C support includes for split XS::APItest domains. */
 #include "APItest_magic_hash_support.inc"
 
 /* indirect functions to test the [pa]MY_CXT macros */
@@ -938,6 +977,7 @@ static int my_keyword_plugin(pTHX_
 
 typedef SV *nullable_SV;
 
+/* XS Include Files Go Here - domain-specific XS splits begin in the MODULE section below. */
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
