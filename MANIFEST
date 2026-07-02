@@ -5124,6 +5124,7 @@ ext/XS-APItest/APItest_global_locale.xs		XS::APItest global_locale-related XS sp
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
+ext/XS-APItest/APItest_magic_hash_support.inc	XS::APItest magic/hash support include
 ext/XS-APItest/APItest_misc_runtime.xs		XS::APItest misc runtime XS split
 ext/XS-APItest/APItest_misc_xsub_basics.xs	XS::APItest misc basic XSUB split
 ext/XS-APItest/APItest_optree_cophh.xs		XS::APItest optree and cophh XS split
