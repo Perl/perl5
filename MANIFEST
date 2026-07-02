@@ -5142,6 +5142,7 @@ ext/XS-APItest/APItest_unicode_charclass.xs	XS::APItest Unicode charclass XS spl
 ext/XS-APItest/APItest_unicode_utf8.xs		XS::APItest Unicode utf8 XS split
 ext/XS-APItest/APItest_utf8.xs			XS::APItest utf8-related XS split
 ext/XS-APItest/APItest_vstring.xs		XS::APItest vstring-related XS split
+ext/XS-APItest/APItest_xop_blockhooks.xs	XS::APItest XOP and blockhook XS split
 ext/XS-APItest/APItest_xsub_handshake.xs	XS::APItest XSUB handshake XS split
 ext/XS-APItest/core.c				Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc			Code common to core.c and notcore.c
