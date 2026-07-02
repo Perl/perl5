@@ -133,6 +133,97 @@ Paired with follow-up instructions telling the agent what to read or run next.
 Overly broad searches are less helpful because they produce too many unrelated
 matches and make it harder for the agent to decide where to read next.
 
+=head1 FAQ
+
+=head2 Why isn't MANIFEST enough for routing decisions?
+
+F<MANIFEST> is useful as a distribution inventory, and for many files its short
+description is genuinely helpful. But it is not a routing guide.
+
+In particular, F<MANIFEST> usually does not tell an agent or contributor:
+
+=over 4
+
+=item *
+
+MANIFEST is very large, it can be helpful to know about key files with less
+context overheads.
+
+=item *
+
+which file is the canonical source versus a generated output;
+
+=item *
+
+which nearby tests are the narrowest ones to run first;
+
+=item *
+
+which POD or Porting document explains the local workflow or policy;
+
+=item *
+
+which files are often edited together as part of one subsystem change;
+
+=item *
+
+which search patterns are likely to find the owning code, diagnostics, or
+maintenance scripts.
+
+=back
+
+The skill tree is meant to complement F<MANIFEST>, not replace it. A good
+agent will often consult both: F<MANIFEST> for inventory and distribution
+membership, and the skill references for routing, validation, regeneration, and
+workflow context.
+
+=head2 Why do the examples prefer C<rg> instead of C<git grep>?
+
+Mostly because the skill files are optimizing for fast repository navigation by
+agents, and C<rg> is a strong general-purpose default for that job.
+
+Advantages of C<rg> in this context include:
+
+=over 4
+
+=item *
+
+it is typically very fast on large trees;
+
+=item *
+
+it works the same way across tracked files, untracked-but-present files, and
+generated files in the working tree;
+
+=item *
+
+its output format is convenient for line-number-oriented navigation;
+
+=item *
+
+many agents and developer workflows already use it as the default text search
+tool.
+
+=back
+
+This is not a statement that C<git grep> is bad. C<git grep> is also useful,
+especially when you specifically want to restrict results to tracked files in
+the repository. The examples use C<rg> because it is a good default for the
+mixed navigation tasks these skills are trying to support.
+
+=head2 Will these skill files, this POD, and the related tests be installed with Perl?
+
+We do not have a final answer to that yet.
+
+The immediate goal is to develop the skill files in the repository, test how
+useful they are in practice, and refine them based on real agent and
+maintainer experience. That experimentation comes first, and suggestions are
+very welcome.
+
+Only after that will we decide whether some of this material should be bundled
+with installed Perl, shipped only in the source repository, split between the
+two, or handled some other way.
+
 =head1 SKILL GROUPS
 
 =head2 Orientation and shared workflow
