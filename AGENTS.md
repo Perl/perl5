@@ -26,7 +26,9 @@ asks for a different approach.
 - Add every new distribution file to `MANIFEST` with a short description, then
   run `make manisort`.
 - Use focused validation first, then broaden. `make test_porting` is a good
-  broad check for documentation, metadata, generated-file, and policy changes.
+  broad check for documentation, metadata, generated-file, and policy changes;
+  for preliminary screening, `TEST_JOBS=N make -jN test_porting` is a
+  reasonable parallel form.
 - Use code archaeology when it helps explain bug reports, surprising behavior,
   compatibility constraints, or old design choices.
 

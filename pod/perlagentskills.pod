@@ -30,6 +30,104 @@ Do not duplicate large amounts of Perl's existing documentation in a skill.
 Point to the relevant files under F<pod/>, F<Porting/>, F<regen/>, F<t/>,
 or the source tree instead.
 
+=head1 HOW AGENTS USE THESE FILES
+
+These skills are not meant to be read like a human tutorial from top to bottom.
+They are written to help coding agents route themselves quickly to the right
+part of the repository, then read the real source or canonical documentation.
+
+In practice, an agent often works in two stages:
+
+=over 4
+
+=item *
+
+First, it uses the short workflow notes, file lists, and C<rg -n> searches to
+find likely files and line-number anchors.
+
+=item *
+
+Second, once it has identified a likely file, it opens or reads that file more
+closely instead of continuing to grep the whole repository.
+
+=back
+
+This is why many searches are designed as navigation aids rather than complete
+content dumps. A compact C<rg -n> result is often more useful to an agent than
+a large context-heavy excerpt, because the agent can then jump directly to the
+relevant file and inspect the surrounding code or POD in order.
+
+=head2 Why The Search Blocks Exist
+
+The search blocks in the reference files are there to make common navigation
+tasks cheap and repeatable:
+
+=over 4
+
+=item *
+
+Find the owning subsystem or document when the agent only has a vague user
+request, symbol name, warning text, or file name.
+
+=item *
+
+Distinguish generator inputs from generated outputs by looking for phrases such
+as C<DO NOT EDIT>, C<Generated from>, C<regen_*>, C<autodoc>, or C<buildtoc>.
+
+=item *
+
+Locate the narrowest relevant tests, porting checks, or maintenance scripts
+before falling back to broad runs.
+
+=item *
+
+Show the names and line numbers of likely entry points so the agent can open a
+small number of files deliberately instead of guessing.
+
+=back
+
+These searches are suggestions, not mandatory commands. They are meant to bias
+the agent toward good first moves.
+
+=head2 Templates Versus Literal Commands
+
+Some searches contain placeholders such as C<E<lt>FILEE<gt>>,
+C<E<lt>STEME<gt>>, C<E<lt>FEATUREE<gt>>, or C<E<lt>DIAGNOSTICE<gt>>. Those are
+templates to be filled in with the concrete file, symbol, feature, module, or
+diagnostic being investigated. They are intentionally written that way because a
+generic search recipe is often useful across many related tasks.
+
+Literal commands, by contrast, should be runnable as written and should point
+at stable repository entry points such as F<pod/perlhack.pod>, F<regen/>,
+F<t/porting/>, or specific source files.
+
+=head2 What Good Search Guidance Looks Like
+
+Useful search guidance for agents is usually:
+
+=over 4
+
+=item *
+
+Narrow enough to produce a manageable candidate set.
+
+=item *
+
+Anchored in files that plausibly own the behavior being discussed.
+
+=item *
+
+Biased toward canonical inputs rather than derived outputs.
+
+=item *
+
+Paired with follow-up instructions telling the agent what to read or run next.
+
+=back
+
+Overly broad searches are less helpful because they produce too many unrelated
+matches and make it harder for the agent to decide where to read next.
+
 =head1 SKILL GROUPS
 
 =head2 Orientation and shared workflow
@@ -125,18 +223,13 @@ documentation style.
 
 Run the repository validator after changing skills:
 
-    ./perl -Ilib .agents/validate-skills.pl
-    ./perl -Ilib -c .agents/validate-skills.pl
+    ./perl -I. -Ilib t/porting/perlagentskills.t
     make test_porting
 
-The first command checks the canonical skill tree and confirms that every skill
-is documented here. The second checks the validator syntax. F<make
-test_porting> is a good broader validation target for changes that affect
-documentation, metadata, generated-file checks, or repository policy.
-
-To generate a Markdown index of repository files mentioned by the skills, run:
-
-    ./perl -Ilib .agents/validate-skills.pl --file-index
+The first command checks that the canonical skill tree and this document stay
+in sync. F<make test_porting> is a good broader validation target for changes
+that affect documentation, metadata, generated-file checks, or repository
+policy.
 
 =head1 ADDING OR CHANGING SKILLS
 

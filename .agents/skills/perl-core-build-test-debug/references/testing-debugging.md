@@ -16,7 +16,7 @@ After building the tree, run project Perl scripts with the built interpreter and
 
 ```sh
 ./perl -Ilib some_script.pl
-./perl -Ilib -c .agents/validate-skills.pl
+./perl -I. -Ilib t/porting/perlagentskills.t
 ```
 
 Do not use bare `./perl some_script.pl` for project scripts that need core modules; without `-Ilib`, `@INC` may point at install paths that do not exist yet.
@@ -49,7 +49,7 @@ Useful patterns from the repo root:
 ```sh
 make test_harness TEST_FILES='op/foo.t'
 make test_harness TEST_FILES='re/*.t'
-TEST_JOBS=4 make test_harness
+TEST_JOBS=4 make -j4 test_harness
 make test-reonly
 ```
 
@@ -68,6 +68,10 @@ Distinguish make parallelism from harness parallelism:
 - `TEST_JOBS=N make test_harness`: Perl test harness parallelism through `TAP::Harness`.
 - `TEST_JOBS=19 PERL_TEST_HARNESS_ASAP=1 make -j19 test_harness`: documented combined form from `pod/perlhack.pod`.
 - `make test-reonly`: focused regex-engine target for `t/re/*.t` and `ext/re/t/*.t` after the required build prep.
+
+Use parallel workers for broad preliminary validation when you want throughput more than deterministic ordering. Prefer the combined form `TEST_JOBS=N make -jN ...` when both make prerequisites and harness jobs can benefit.
+
+When reproducing or debugging a failure, prefer a single worker so output order and timing are easier to reason about. Run the failing test directly, or use a serial form such as `TEST_JOBS=1 make test_harness TEST_FILES='op/foo.t'`.
 
 Use `make test_harness TEST_ARGS='...'` when you need harness options, and `make test_harness TEST_FILES='...'` when you need a file subset.
 
@@ -98,12 +102,15 @@ Examples:
 
 ```sh
 make test_porting
+TEST_JOBS=8 make -j8 test_porting
 ./perl -Ilib t/porting/regen.t
 ./perl -Ilib t/porting/manifest.t
 ./perl -Ilib t/porting/podcheck.t
 ./perl -Ilib t/porting/args_assert.t
 ./perl -Ilib t/porting/globvar.t
 ```
+
+Use the parallel `TEST_JOBS=N make -jN test_porting` form for screening runs. If a porting test fails and you need to reproduce or inspect it cleanly, rerun the individual test or drop back to one worker.
 
 ## Debugging and Profiling
 
@@ -121,6 +128,7 @@ Useful areas:
 ## Failure Triage
 
 - Re-run a failing test alone before broadening.
+- When a failure first appears under parallel workers, rerun it serially before assuming the root cause.
 - Check environment sensitivity: locale, threads, parallelism, current directory, and randomization.
 - For generated-file failures, identify the generator and rerun regen before editing output by hand.
 - For platform failures, search `README.*`, `hints/`, and existing skip/todo logic.

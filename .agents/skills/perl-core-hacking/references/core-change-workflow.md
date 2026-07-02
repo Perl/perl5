@@ -45,10 +45,12 @@
 
 ## Common Commands
 
+Replace the angle-bracket placeholders with a concrete symbol, behavior, file stem, or diagnostic.
+
 ```sh
-rg -n "symbol_or_behavior" *.c *.h pod lib ext dist cpan t Porting regen
-rg -n "PERL_ARGS_ASSERT|Newx|Safefree|SvREFCNT|SAVE|LEAVE|ENTER" file.c
-rg -n "perldelta|Incompatible|Deprecations|Internal Changes" pod/perldelta.pod
+rg -n "<SYMBOL>|<BEHAVIOR>|<DIAGNOSTIC>" *.c *.h pod lib ext dist cpan t Porting regen
+rg -n "PERL_ARGS_ASSERT|Newx|Safefree|SvREFCNT|SAVE|LEAVE|ENTER" <FILE>.c <FILE>.h
+rg -n "perldelta|Incompatible|Deprecations|Internal Changes|<FEATURE>" pod/perldelta.pod
 ```
 
 Targeted tests usually start with a specific `t/foo/bar.t`, `t/porting/*.t`, or extension test. See `perl-core-build-test-debug` for test command selection.

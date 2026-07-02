@@ -41,7 +41,8 @@ Use platform-specific smoke results when local hardware cannot exercise the risk
 ## Useful Searches
 
 ```sh
-rg -n "EBCDIC|NATIVE|ASCII|is[A-Z_a-z]+_A|LATIN1|UTF-8|utf8" *.c *.h pod t regen
-rg -n "locale|LC_|setlocale|uselocale|thread|MULTIPLICITY|PERL_IMPLICIT_CONTEXT|dTHX|pTHX" *.c *.h t ext
-rg -n "VMS|WIN32|OS2|AIX|__GNUC__|HAS_|I_\\w+|d_\\w+|hints|Cross" *.c *.h Configure config_h.SH hints Cross win32 vms os2
+rg -n "UTF_EBCDIC|EBCDIC|NATIVE_TO_(LATIN1|UNI)|LATIN1_TO_NATIVE|UNI_TO_NATIVE|NATIVE_UTF8_TO_I8|I8_TO_NATIVE_UTF8" handy.h utf8.h ebcdic_tables.h regen/charset_translations.pl pod/perlebcdic.pod
+rg -n "locale|LC_|setlocale|uselocale|sync_locale|utf8 locale" locale.c perl.h pod/perllocale.pod t/run/locale.t ext/XS-APItest/t/locale.t
+rg -n "MULTIPLICITY|PERL_IMPLICIT_CONTEXT|dTHX|pTHX|aTHX|thread" perl.h intrpvar.h perlvars.h thread.h sv.c mg.c t/op/threads.t ext/XS-APItest/t/thread.t
+rg -n "WIN32|VMS|OS2|AIX|HAS_|I_\\w+|d_\\w+" Configure config_h.SH hints Cross win32 vms os2 README.*
 ```

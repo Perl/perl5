@@ -29,9 +29,11 @@ Changes can cross ownership boundaries. If fixing a core-visible bug requires to
 
 ## Useful Searches
 
+Replace the angle-bracket placeholders with the concrete feature, function, module, or diagnostic you are investigating.
+
 ```sh
-rg -n "function_or_feature" pod lib ext dist cpan t
-rg -n "CUSTOMIZED|Maintainers|DISTRIBUTION|FILES|UPSTREAM" Porting/Maintainers* t/porting/customized.*
-rg -n "deprecated|experimental|incompatible|perldelta" pod Porting t
-rg -n "croak|warning|diagnostic|unicode class|blessed|package separator" pod lib ext dist cpan t
+rg -n "<FEATURE>|<FUNCTION>|<MODULE>|<DIAGNOSTIC>" pod/perl*.pod lib ext dist cpan t
+rg -n "^(DISTRIBUTION|UPSTREAM|FILES)\\b|<MODULE>|<DISTRO>" Porting/Maintainers t/porting/customized.dat
+rg -n "deprecated|experimental|incompatible|perldelta|<FEATURE>" pod/perlpolicy.pod pod/perldeprecation.pod pod/perlexperiment.pod pod/perldelta.pod t
+rg -n "<DIAGNOSTIC>|croak|warning" t/lib/croak t/lib/warnings pod/perldiag.pod lib ext dist cpan t
 ```
