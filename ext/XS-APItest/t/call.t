@@ -394,4 +394,4 @@ fresh_perl_like('use XS::APItest;'
               , qr/\Q loadable library and perl binaries are mismatched (got first handshake\E/);
 fresh_perl_like('use XS::APItest;'
               .'XS::APItest::XSUB::test_mismatch_xs_handshake_bad_struct_and_ver("Dog");'
-              , qr/\QPerl API version v1.1337.0 of APItest.xs does not match\E/);
+              , qr/\QPerl API version v1.1337.0 of \E(?:\.\/)?APItest\w*\.xs\Q does not match\E/);
