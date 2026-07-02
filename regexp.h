@@ -793,6 +793,7 @@ typedef struct {
     SSize_t pos;        /* the original value of pos() in pos_magic */
     SV   *final_replsv; /* the final value of $^R. */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
+    U8   subbeg_flags;  /* flags describing the original subbeg state */
 } regmatch_info_aux_eval;
 
 

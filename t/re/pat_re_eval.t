@@ -25,7 +25,7 @@ BEGIN {
 our @global;
 
 
-plan tests => 552;  # Update this when adding/deleting tests.
+plan tests => 555;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1042,6 +1042,7 @@ sub run_tests {
     }
 
     # BEGIN in compiled blocks shouldn't mess with $1 et al
+    # Related: GH #16952, RT #134026, GH #24338.
 
     {
 	use re 'eval';
@@ -1049,6 +1050,32 @@ sub run_tests {
 	ok("ABBCA" =~ /^(.)(??{$code1})\1$/, '(?{}) BEGIN and $1');
 	my $code2 = '(B)(??{ BEGIN { "X" =~ /X/ } $1 =~ /(.)/ ? $1 : ""})(C)';
 	ok("ABBCA" =~ /^(.)(??{$code2})\1$/, '(?{}) BEGIN and $1 mark 2');
+
+        fresh_perl_is(<<'CODE', "foo-o\nfoo-o\n", {}, '[perl #16952] failed (?{}) branch keeps prior captures');
+use re 'eval';
+for ("foo", "bar") {
+    /f(o)o|(?{})baz/;
+    print "$&-$1\n";
+}
+CODE
+
+        fresh_perl_is(<<'CODE', "bb", {}, '[perl #16952] failed (?{}) branch does not assert fetching $&');
+use re 'eval';
+my ($good, $bad) = qw(ab c);
+for ($good, $bad) {
+    /b|(?{})d/;
+    print $&;
+}
+CODE
+
+        fresh_perl_is(<<'CODE', "a: b\ncd: b\n", {}, '[perl #16952] substitution form does not assert fetching $&');
+use re 'eval';
+my ($good, $bad) = qw(ab cd);
+for ($good, $bad) {
+    s/ b | (?{ 1; }) e //x;
+    print "$_: $&\n";
+}
+CODE
     }
 
     # check that the optimiser is applied to code blocks: see if aelem has
