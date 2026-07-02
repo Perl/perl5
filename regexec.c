@@ -215,6 +215,15 @@ static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
 static void S_cleanup_regmatch_info_aux(pTHX_ void *arg);
 static regmatch_state * S_push_slab(pTHX);
 
+enum {
+    /* The original subbeg state existed before we pointed RXp_SUBBEG at the
+     * current string for /(?{...})/. */
+    EVAL_STATE_HAS_SUBBEG    = 0x01,
+    /* The original subbeg state owned its buffer directly, as opposed to
+     * keeping it alive via saved_copy. */
+    EVAL_STATE_SUBBEG_COPIED = 0x02
+};
+
 #define REGCP_OTHER_ELEMS 3
 #define REGCP_FRAME_ELEMS 1
 /* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
@@ -11489,12 +11498,18 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     eval_state->curpm = PL_curpm;
     PL_curpm_under = PL_curpm;
     PL_curpm = PL_reg_curpm;
-    /* Temporarily set RXp_SUBBEG to the current string so that $1 etc
-     * are valid during code execution. If the current subbeg is a copy,
-     * then restore it at the end so that it gets properly freed when
-     * subbeg is finally updated after a successful match.
-     */
-    if (RXp_MATCH_COPIED(rex)) {
+    /* Temporarily set RXp_SUBBEG to the current string so that $1 etc are
+     * valid during code execution. We must save any existing copied or COW
+     * backed state so that cleanup can restore both the pointer values and
+     * the ownership flags. */
+    if (RXp_MATCH_COPIED(rex)
+#ifdef PERL_ANY_COW
+        || RXp_SAVED_COPY(rex)
+#endif
+    ) {
+        eval_state->subbeg_flags = EVAL_STATE_HAS_SUBBEG;
+        if (RXp_MATCH_COPIED(rex))
+            eval_state->subbeg_flags |= EVAL_STATE_SUBBEG_COPIED;
         eval_state->subbeg     = RXp_SUBBEG(rex);
         eval_state->sublen     = RXp_SUBLEN(rex);
         eval_state->suboffset  = RXp_SUBOFFSET(rex);
@@ -11502,10 +11517,12 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
 #ifdef PERL_ANY_COW
         eval_state->saved_copy = RXp_SAVED_COPY(rex);
 #endif
+        /* The temporary subbeg aliases the current target string, so
+         * RXp_MATCH_COPIED must be off for this state. */
         RXp_MATCH_COPIED_off(rex);
     }
     else
-        eval_state->subbeg = NULL;
+        eval_state->subbeg_flags = 0;
     RXp_SUBBEG(rex) = (char *)reginfo->strbeg;
     RXp_SUBOFFSET(rex) = 0;
     RXp_SUBCOFFSET(rex) = 0;
@@ -11530,7 +11547,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 
         /* undo the effects of S_setup_eval_state() */
 
-        if (eval_state->subbeg) {
+        if (eval_state->subbeg_flags & EVAL_STATE_HAS_SUBBEG) {
             regexp * const rex = ReANY(eval_state->rx);
             RXp_SUBBEG(rex) = eval_state->subbeg;
             RXp_SUBLEN(rex)     = eval_state->sublen;
@@ -11539,7 +11556,12 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 #ifdef PERL_ANY_COW
             RXp_SAVED_COPY(rex) = eval_state->saved_copy;
 #endif
-            RXp_MATCH_COPIED_on(rex);
+            if (eval_state->subbeg_flags & EVAL_STATE_SUBBEG_COPIED)
+                RXp_MATCH_COPIED_on(rex);
+            else
+                /* When the original state used saved_copy we restore that
+                 * borrowed/COW state without claiming ownership of RXp_SUBBEG. */
+                RXp_MATCH_COPIED_off(rex);
         }
         if (eval_state->pos_magic)
         {
