@@ -10,6 +10,11 @@ This document describes the agent skill files shipped with the Perl core
 repository. These files give repository-aware coding agents short routing
 instructions and focused references for common Perl core development work.
 
+It is repository-contributor documentation, not ordinary end-user language
+documentation. It is indexed alongside the rest of the source-tree POD so that
+contributors and maintainers can find it through the usual documentation
+indexes.
+
 The canonical skill tree is F<.agents/skills/>. Root F<AGENTS.md> contains
 repository-wide agent directives, and root F<CLAUDE.md> tells Claude to use
 F<AGENTS.md> and the canonical skill tree.
