@@ -46,6 +46,10 @@ is too large to fit in memory, an integer overflow could happen that would
 result in a buffer overflow. This usually happens as a result of embedding a
 large number as the repeat count for an item.
 
+=head2 CVE-2026-13221 - Regex trie 16-bit field overflow
+
+The trie optimization in the regex engine could overflow in an alternation with more than ~65k branches. This could cause both false positives and false negatives on such regular expressions.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
