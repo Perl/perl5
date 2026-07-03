@@ -4,17 +4,17 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.220 qw(:Status );
-use IO::Compress::RawDeflate 2.220 ();
-use IO::Compress::Adapter::Deflate 2.220 ;
-use IO::Compress::Adapter::Identity 2.220 ;
-use IO::Compress::Zlib::Extra 2.220 ;
-use IO::Compress::Zip::Constants 2.220 ;
+use IO::Compress::Base::Common  2.222 qw(:Status );
+use IO::Compress::RawDeflate 2.222 ();
+use IO::Compress::Adapter::Deflate 2.222 ;
+use IO::Compress::Adapter::Identity 2.222 ;
+use IO::Compress::Zlib::Extra 2.222 ;
+use IO::Compress::Zip::Constants 2.222 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.218 ();
+use Compress::Raw::Zlib  2.222 ();
 
 BEGIN
 {
@@ -47,17 +47,18 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.220';
+$VERSION = '2.222';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
 @EXPORT_OK = qw( $ZipError zip ) ;
 %EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
 
-$EXPORT_TAGS{all} = [ defined $EXPORT_TAGS{all} ? @{ $EXPORT_TAGS{all} } : (), @EXPORT_OK ] ;
+my @zip_methods = qw( ZIP_CM_STORE ZIP_CM_DEFLATE ZIP_CM_BZIP2 ZIP_CM_LZMA ZIP_CM_XZ ZIP_CM_ZSTD ) ;
+$EXPORT_TAGS{all} = [ defined $EXPORT_TAGS{all} ? @{ $EXPORT_TAGS{all} } : (), @EXPORT_OK, @zip_methods ] ;
 
-$EXPORT_TAGS{zip_method} = [qw( ZIP_CM_STORE ZIP_CM_DEFLATE ZIP_CM_BZIP2 ZIP_CM_LZMA ZIP_CM_XZ ZIP_CM_ZSTD)];
-push @{ $EXPORT_TAGS{all} }, @{ $EXPORT_TAGS{zip_method} };
+$EXPORT_TAGS{zip_method} = [ @zip_methods ];
+push @{ $EXPORT_TAGS{constants} }, @zip_methods ;
 
 Exporter::export_ok_tags('all');
 

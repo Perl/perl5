@@ -8,12 +8,12 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.220 () ;
-use IO::Compress::Adapter::Deflate 2.220 ;
+use IO::Compress::RawDeflate 2.222 () ;
+use IO::Compress::Adapter::Deflate 2.222 ;
 
-use IO::Compress::Base::Common  2.220 qw(:Status );
-use IO::Compress::Gzip::Constants 2.220 ;
-use IO::Compress::Zlib::Extra 2.220 ;
+use IO::Compress::Base::Common  2.222 qw(:Status );
+use IO::Compress::Gzip::Constants 2.222 ;
+use IO::Compress::Zlib::Extra 2.222 ;
 
 BEGIN
 {
@@ -25,7 +25,7 @@ BEGIN
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-$VERSION = '2.220';
+$VERSION = '2.222';
 $GzipError = '' ;
 
 @ISA    = qw(IO::Compress::RawDeflate Exporter);
