@@ -2654,7 +2654,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     assert(s0 == e || ! UTF8_IS_CONTINUATION(*s0));
 
     STRLEN continuations = 0;
-    STRLEN len = 0;
+    STRLEN count = 0;
     const U8 * s = s0;
 
     /* For EBCDIC and short strings, we count the characters.  The boundary
@@ -2676,12 +2676,12 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
                 goto warn_and_return;
             }
 
-            len++;
+            count++;
             s += expected_byte_count;
         }
 
         if (LIKELY(e == s)) {
-            return len;
+            return count;
         }
 
       warn_and_return:
