@@ -2694,69 +2694,70 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         return count;
     }
 
-    /* Count continuations, word-at-a-time.
-     *
-     * We need to stop before the final start character in order to
-     * preserve the limited error checking that's always been done */
-    const U8 * e_limit = e - UTF8_MAXBYTES;
-
-    /* Process up to a full word boundary. */
-    while (s < per_byte_end ) {
-        const Size_t skip = UTF8SKIP(s);
-
-        continuations += skip - 1;
-        s += skip;
-    }
-
-    /* Adjust back down any overshoot */
-    continuations -= s - per_byte_end;
-    s = per_byte_end;
-
-    do { /* Process per-word */
-
-        /* The idea for counting continuation bytes came from
-         * https://www.daemonology.net/blog/2008-06-05-faster-utf8-strlen.html
-         * One thing it does that this doesn't is to prefetch the buffer
-         *      __builtin_prefetch(&s[256], 0, 0);
+        /* Count continuations, word-at-a-time.
          *
-         * A continuation byte has the upper 2 bits be '10', and the rest
-         * dont-cares.  The VARIANTS mask zeroes out all but the upper bit of
-         * each byte in the word.  That gets shifted to the byte's lowest bit,
-         * and 'anded' with the complement of the 2nd highest bit of the byte,
-         * which has also been shifted to that position.  Hence the bit in that
-         * position will be 1 iff the upper bit is 1 and the next one is 0.  We
-         * then use the same integer multiplcation and shifting that are used
-         * in variant_under_utf8_count() to count how many of those are set in
-         * the word. */
+         * We need to stop before the final start character in order to
+         * preserve the limited error checking that's always been done */
+        const U8 * e_limit = e - UTF8_MAXBYTES;
 
-        continuations += (((((* (const PERL_UINTMAX_T *) s)
-                                            & PERL_VARIANTS_WORD_MASK) >> 7)
-                      & (((~ (* (const PERL_UINTMAX_T *) s))) >> 6))
-                  * PERL_COUNT_MULTIPLIER)
-                >> ((PERL_WORDSIZE - 1) * CHARBITS);
-        s += PERL_WORDSIZE;
-    } while (s + PERL_WORDSIZE <= e_limit);
+        /* Process up to a full word boundary. */
+        while (s < per_byte_end ) {
+            const Size_t skip = UTF8SKIP(s);
 
-    /* Process remainder per-byte */
-    while (s < e) {
-	if (UTF8_IS_CONTINUATION(*s)) {
-            continuations++;
-            s++;
-            continue;
+            continuations += skip - 1;
+            s += skip;
         }
 
-        /* Here is a starter byte.  Use UTF8SKIP from now on */
-        do {
-            ptrdiff_t expected_byte_count = UTF8SKIP(s);
-            if (UNLIKELY(e - s  < expected_byte_count)) {
-                break;
+        /* Adjust back down any overshoot */
+        continuations -= s - per_byte_end;
+        s = per_byte_end;
+
+        do { /* Process per-word */
+
+            /* The idea for counting continuation bytes came from
+             * https://www.daemonology.net/blog/2008-06-05-faster-utf8-strlen.html
+             * One thing it does that this doesn't is to prefetch the buffer
+             *      __builtin_prefetch(&s[256], 0, 0);
+             *
+             * A continuation byte has the upper 2 bits be '10', and the rest
+             * dont-cares.  The VARIANTS mask zeroes out all but the upper bit
+             * of each byte in the word.  That gets shifted to the byte's
+             * lowest bit, and 'anded' with the complement of the 2nd highest
+             * bit of the byte, which has also been shifted to that position.
+             * Hence the bit in that position will be 1 iff the upper bit is 1
+             * and the next one is 0.  We then use the same integer
+             * multiplcation and shifting that are used in
+             * variant_under_utf8_count() to count how many of those are set
+             * in the word. */
+
+            continuations += (((((* (const PERL_UINTMAX_T *) s)
+                                              & PERL_VARIANTS_WORD_MASK) >> 7)
+                          & (((~ (* (const PERL_UINTMAX_T *) s))) >> 6))
+                      * PERL_COUNT_MULTIPLIER)
+                    >> ((PERL_WORDSIZE - 1) * CHARBITS);
+            s += PERL_WORDSIZE;
+        } while (s + PERL_WORDSIZE <= e_limit);
+
+        /* Process remainder per-byte */
+        while (s < e) {
+            if (UTF8_IS_CONTINUATION(*s)) {
+                continuations++;
+                s++;
+                continue;
             }
 
-            continuations += expected_byte_count- 1;
-            s += expected_byte_count;
-        } while (s < e);
+    /* Here is a starter byte.  Use UTF8SKIP from now on */
+    do {
+        ptrdiff_t expected_byte_count = UTF8SKIP(s);
+        if (UNLIKELY(e - s  < expected_byte_count)) {
+            break;
+        }
 
-        break;
+        continuations += expected_byte_count- 1;
+        s += expected_byte_count;
+    } while (s < e);
+
+    break;
     }
 
     if (LIKELY(e == s)) {
