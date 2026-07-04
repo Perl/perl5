@@ -2747,7 +2747,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             }
 
     /* Here is a starter byte.  Use UTF8SKIP from now on */
-    do {
+    while (s < e) {
         ptrdiff_t expected_byte_count = UTF8SKIP(s);
         if (UNLIKELY(e - s  < expected_byte_count)) {
             break;
@@ -2755,7 +2755,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
         continuations += expected_byte_count- 1;
         s += expected_byte_count;
-    } while (s < e);
+    }
 
     break;
     }
