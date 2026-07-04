@@ -1528,7 +1528,8 @@ Perl_valid_utf8_to_uv(const U8 *s, STRLEN *retlen)
  * platform. */
 #  define WORTH_PER_WORD_LOOP_BINMODE(s, e, full_words_needed)      \
        /* Note multiple evaluations of 's' */                       \
-       ( ( ( (s) + BYTES_REMAINING_IN_WORD(s)                       \
+         (assert(full_words_needed > 0),                            \
+         ( ( (s) + BYTES_REMAINING_IN_WORD(s)                       \
                  + (full_words_needed) * PERL_WORDSIZE) < (e) )     \
         ? ((s) + BYTES_REMAINING_IN_WORD(s))                        \
         : NULL)
