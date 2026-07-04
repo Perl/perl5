@@ -3,7 +3,6 @@
 # 
 # List files (or glob patterns) one per line relative to the repo root
 # Lines starting with a pound and empty lines will be ignored
-.agents/validate-skills.pl
 Configure
 Makefile.SH
 Policy_sh.SH
