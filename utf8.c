@@ -2653,7 +2653,6 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     PERL_ARGS_ASSERT_UTF8_LENGTH;
     assert(s0 == e || ! UTF8_IS_CONTINUATION(*s0));
 
-    STRLEN continuations = 0;
     STRLEN count = 0;
     const U8 * s = s0;
 
@@ -2693,10 +2692,10 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
         return count;
     }
+    {   /* Count continuations, word-at-a-time. */
+        STRLEN continuations = 0;
 
-        /* Count continuations, word-at-a-time.
-         *
-         * We need to stop before the final start character in order to
+        /* We need to stop before the final start character in order to
          * preserve the limited error checking that's always been done */
         const U8 * e_limit = e - UTF8_MAXBYTES;
 
@@ -2747,6 +2746,12 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             s++;
         }
 
+        /* Convert continuations to character count.  The total number of
+         * characters is the total number of bytes minus the ones that are
+         * just continuations */
+        count = s - s0 - continuations;
+    }
+
     /* Here, we have processed as much as we dare per-word.  Count characters
      * directly, using UTF8SKIP from now on */
     while (s < e) {
@@ -2755,16 +2760,13 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             break;
         }
 
-        continuations += expected_byte_count- 1;
+        count++;
         s += expected_byte_count;
     }
 
     if (LIKELY(e == s)) {
-        return s - s0 - continuations;
+        return count;
     }
-
-    /* Convert to characters */
-    s -= continuations;
 
     goto warn_and_return;
 }
