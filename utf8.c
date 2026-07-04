@@ -2683,14 +2683,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             return count;
         }
 
-      warn_and_return:
-        if (PL_op)
-            ck_warner_d(packWARN(WARN_UTF8),
-                        "%s in %s", unees, OP_DESC(PL_op));
-        else
-            ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
-
-        return count;
+        goto warn_and_return;
     }
     {   /* Count continuations, word-at-a-time. */
         STRLEN continuations = 0;
@@ -2768,7 +2761,14 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         return count;
     }
 
-    goto warn_and_return;
+  warn_and_return:
+    if (PL_op)
+        ck_warner_d(packWARN(WARN_UTF8),
+                    "%s in %s", unees, OP_DESC(PL_op));
+    else
+        ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
+
+    return count;
 }
 
 /*
