@@ -2756,9 +2756,9 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         s += expected_byte_count;
     }
 
-    if (LIKELY(e == s)) {
-        return count;
-    }
+    /* Here, should have worked all the way through */
+    assert(e == s);
+    return count;
 
   warn_and_return:
     if (PL_op)
