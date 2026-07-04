@@ -2757,7 +2757,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     while (s < e) {
         ptrdiff_t expected_byte_count = UTF8SKIP(s);
         if (UNLIKELY(e - s  < expected_byte_count)) {
-            break;
+            goto warn_and_return;
         }
 
         count++;
