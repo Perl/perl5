@@ -2691,7 +2691,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         else
             ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
 
-        return s - s0;
+        return count;
     }
 
     /* Count continuations, word-at-a-time.
