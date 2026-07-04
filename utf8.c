@@ -2738,15 +2738,17 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
             s += PERL_WORDSIZE;
         } while (s + PERL_WORDSIZE <= e_limit);
 
-        /* Process remainder per-byte */
-        while (s < e) {
-            if (UTF8_IS_CONTINUATION(*s)) {
-                continuations++;
-                s++;
-                continue;
-            }
+        /* Using 'e_limit' causes us to finish a bit early, so that there is
+         * always at least one character left.  If we're in the middle of one,
+         * finish it out.  Note there is no check that the number of
+         * continuations for this character is correct */
+        while (s < e && UTF8_IS_CONTINUATION(*s)) {
+            continuations++;
+            s++;
+        }
 
-    /* Here is a starter byte.  Use UTF8SKIP from now on */
+    /* Here, we have processed as much as we dare per-word.  Count characters
+     * directly, using UTF8SKIP from now on */
     while (s < e) {
         ptrdiff_t expected_byte_count = UTF8SKIP(s);
         if (UNLIKELY(e - s  < expected_byte_count)) {
@@ -2755,9 +2757,6 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
         continuations += expected_byte_count- 1;
         s += expected_byte_count;
-    }
-
-    break;
     }
 
     if (LIKELY(e == s)) {
