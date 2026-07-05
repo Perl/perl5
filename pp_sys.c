@@ -1924,15 +1924,15 @@ PP_wrapped(pp_sysread, 0, 1)
     IO *io;
     char *buffer;
     STRLEN orig_size;
-    SSize_t length;
+    SSize_t length;     /* How many bytes to read */
     SSize_t count;
     SV *bufsv;
     STRLEN blen;
     int fp_utf8;
     int buffer_utf8;
     SV *read_target;
-    Size_t got = 0;
-    Size_t wanted;
+    Size_t chars_got = 0;   /* Only used in pp_read with a UTF-8 fp */
+    Size_t chars_wanted;    /* Only used in pp_read with a UTF-8 fp */
     bool charstart = FALSE;
     STRLEN charskip = 0;
     STRLEN skip = 0;
@@ -1979,7 +1979,12 @@ PP_wrapped(pp_sysread, 0, 1)
                        "%s() isn't allowed on :utf8 handles",
                        OP_DESC(PL_op));
         }
+
+        /* This function can handle UTF-8 input for pp_read.  In that case,
+         * 'length', and 'wanted' count characters, not bytes.*/
+
         buffer = SvPVutf8_force(bufsv, blen);
+
         /* UTF-8 may not have been set if they are all low bytes */
         SvUTF8_on(bufsv);
         buffer_utf8 = 0;
@@ -1995,7 +2000,7 @@ PP_wrapped(pp_sysread, 0, 1)
     charstart = TRUE;
     charskip  = 0;
     skip = 0;
-    wanted = length;
+    chars_wanted = length;  /* Unused unless pp_read with a UTF-8 fp */
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
@@ -2141,7 +2146,7 @@ PP_wrapped(pp_sysread, 0, 1)
                 goto more_bytes;
             }
             else {
-                got++;
+                chars_got++;
                 buffer += skip;
                 charstart = TRUE;
                 charskip  = 0;
@@ -2151,13 +2156,13 @@ PP_wrapped(pp_sysread, 0, 1)
         /* If we have not 'got' the number of _characters_ we 'wanted' get
          * some more provided amount read (count) was what was requested
          * (length) */
-        if (got < wanted && count == length) {
-            length = wanted - got;
+        if (chars_got < chars_wanted && count == length) {
+            length = chars_wanted - chars_got;
             offset = bend - SvPVX_const(bufsv);
             goto more_bytes;
         }
         /* return value is character count */
-        count = got;
+        count = chars_got;
         SvUTF8_on(bufsv);
     }
     else if (buffer_utf8) {
