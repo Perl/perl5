@@ -35,8 +35,6 @@
 #define PERL_IN_LONG_NAMES_C
 #include "perl.h"
 
-#ifdef USE_THREADS
-
 #if !defined(USE_ITHREADS)
 void
 Perl_CopFILEGV_set(pTHX_ COP *c, GV *gv)
@@ -1049,7 +1047,5 @@ Perl_whichsig(pTHX_ const char *sig)
     return whichsig(sig);
 }
 
-
-#endif
 
 /* ex: set ro ft=c: */

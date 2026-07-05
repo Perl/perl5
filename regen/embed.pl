@@ -4556,8 +4556,6 @@ sub generate_proto_h {
             if $static_inline;
         $ret = "#${ind}ifndef NO_MATHOMS\n$ret\n#${ind}endif"
             if $binarycompat;
-        $ret = "#${ind}ifdef USE_THREADS\n$ret\n#${ind}endif"
-            if $has_mflag;
 
         $ret .= @attrs ? "\n\n" : "\n";
 
@@ -5742,8 +5740,6 @@ sub generate_long_names_c {
 #define PERL_IN_LONG_NAMES_C
 #include "perl.h"
 
-#ifdef USE_THREADS
-
 EOT
 
     for my $full_name (sort keys %{$longs}) {
@@ -5804,11 +5800,6 @@ EOT
         my $group = $hp->group_content([$parser_object]);
         print $fh $hp->lines_as_str($group), "\n";;
     }
-
-    print $fh <<~'EOT';
-
-        #endif
-        EOT
 
     read_only_bottom_close_and_rename($fh) if ! $error_count;
 }
