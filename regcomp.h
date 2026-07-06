@@ -1305,6 +1305,11 @@ typedef struct reg_ac_data_ reg_ac_data;
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
 #define IS_TRIE_AC(op) ((op)==AHOCORASICK || (op)==AHOCORASICKC)
 
+#define TRIE_DATA_SLOT(p) ARG1u(p)
+#define TRIE_DATA_SLOT_set(p, val) ARG1u_SET((p), (val))
+#define TRIE_NEXT(p) NEXT_OFF(p)
+#define TRIE_NEXT_set(p, val) NEXT_OFF_set((p), (val))
+
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
 #define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))

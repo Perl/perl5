@@ -3457,7 +3457,7 @@ Perl_study_chunk(pTHX_
                check there too. */
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
-            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG1u(scan) ];
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ TRIE_DATA_SLOT(scan) ];
             SSize_t max1 = 0, min1 = OPTIMIZE_INFTY;
             regnode_ssc accum;
 
@@ -3586,7 +3586,7 @@ Perl_study_chunk(pTHX_
         }
 #else
         else if (REGNODE_TYPE(OP(scan)) == TRIE) {
-            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG1u(scan) ];
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ TRIE_DATA_SLOT(scan) ];
             U8 *bang = NULL;
 
             min += trie->minlen;

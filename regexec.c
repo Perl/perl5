@@ -3267,7 +3267,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         {
             DECL_TRIE_TYPE(c);
             /* what trie are we using right now */
-            reg_ac_data *aho = (reg_ac_data*)progi->data->data[ ARG1u( c ) ];
+            reg_ac_data *aho = (reg_ac_data*)progi->data->data[ TRIE_DATA_SLOT(c) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[aho->trie];
             HV *widecharmap = MUTABLE_HV(progi->data->data[ aho->trie + 1 ]);
 
@@ -4681,11 +4681,13 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 #endif
 
 /* reg_check_named_buff_matched()
+ *
  * Checks to see if a named buffer has matched. The data array of
- * buffer numbers corresponding to the buffer is expected to reside
- * in the regexp->data->data array in the slot stored in the ARG1u() of
- * node involved. Note that this routine doesn't actually care about the
- * name, that information is not preserved from compilation to execution.
+ * buffer numbers corresponding to the buffer is expected to reside in
+ * the regexp->data->data array in the slot stored in the TRIE_DATA_SLOT()
+ * of the node involved. Note that this routine doesn't actually care about
+ * the name, that information is not preserved from compilation to execution.
+ *
  * Returns the index of the leftmost defined buffer with the given name
  * or 0 if non of the buffers matched.
  */
@@ -6980,13 +6982,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 /* what trie are we using right now */
                 reg_trie_data * const trie
-                    = (reg_trie_data*)rexi->data->data[ ARG1u( scan ) ];
+                    = (reg_trie_data*)rexi->data->data[ TRIE_DATA_SLOT(scan) ];
                 ST.before_paren = trie->before_paren;
                 ST.after_paren = trie->after_paren;
                 assert(ST.before_paren <= rex->nparens);
                 assert(ST.after_paren <= rex->nparens);
 
-                HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG1u( scan ) + 1 ]);
+                HV * widecharmap = MUTABLE_HV(rexi->data->data[ TRIE_DATA_SLOT(scan) + 1 ]);
                 U32 state = trie->startstate;
 
                 if (FLAGS(scan) == EXACTL || FLAGS(scan) == EXACTFLU8) {
@@ -7176,7 +7178,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U16 word;
                 U16 const nextword = ST.nextword;
                 reg_trie_wordinfo * const wordinfo
-                    = ((reg_trie_data*)rexi->data->data[ARG1u(ST.me)])->wordinfo;
+                    = ((reg_trie_data*)rexi->data->data[TRIE_DATA_SLOT(ST.me)])->wordinfo;
                 for (word = ST.topword; word; word = wordinfo[word].prev) {
                     if (word > nextword && (!min || word < min))
                         min = word;
@@ -7200,7 +7202,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             {
                 U32 chars; /* how many chars to skip */
                 reg_trie_data * const trie
-                    = (reg_trie_data*)rexi->data->data[ARG1u(ST.me)];
+                    = (reg_trie_data*)rexi->data->data[TRIE_DATA_SLOT(ST.me)];
 
                 assert((trie->wordinfo[ST.nextword].len - trie->prefixlen)
                             >=  ST.firstchars);
@@ -7256,7 +7258,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.after_paren = ST.j_after_paren[ST.nextword];
                 assert(ST.after_paren <= rex->nparens);
             } else {
-                scan = ST.me + NEXT_OFF(ST.me);
+                scan = ST.me + TRIE_NEXT(ST.me);
             }
 
 
@@ -7281,7 +7283,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* only one choice left - just continue */
             DEBUG_EXECUTE_r({
                 AV *const trie_words
-                    = MUTABLE_AV(rexi->data->data[ARG1u(ST.me)+TRIE_WORDS_OFFSET]);
+                    = MUTABLE_AV(rexi->data->data[TRIE_DATA_SLOT(ST.me)+TRIE_WORDS_OFFSET]);
                 SV ** const tmp = trie_words
                         ? av_fetch(trie_words, ST.nextword - 1, 0) : NULL;
                 SV *sv= tmp ? sv_newmortal() : NULL;

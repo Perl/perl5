@@ -227,15 +227,15 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
         else if ( REGNODE_TYPE(op)  == TRIE ) {
             const regnode *this_trie = node;
-            const U32 n = ARG1u(node);
-            const reg_ac_data * const ac = IS_TRIE_AC(op) ?
-               (reg_ac_data *)ri->data->data[n] :
+            const U32 slot = TRIE_DATA_SLOT(node);
+            const reg_ac_data * const ac = op >= AHOCORASICK ?
+               (reg_ac_data *)ri->data->data[slot] :
                NULL;
             const reg_trie_data * const trie =
-                (reg_trie_data*)ri->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
+                (reg_trie_data*)ri->data->data[!IS_TRIE_AC(op) ? slot : ac->trie];
 #ifdef DEBUGGING
             AV *const trie_words
-                           = MUTABLE_AV(ri->data->data[n + TRIE_WORDS_OFFSET]);
+                           = MUTABLE_AV(ri->data->data[slot + TRIE_WORDS_OFFSET]);
 #endif
             const regnode *nextbranch= NULL;
             I32 word_idx;
@@ -583,7 +583,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     } else if (k == TRIE) {
         /* print the details of the trie in dumpuntil instead, as
          * progi->data isn't available here */
-        const U32 n = ARG1u(o);
+        const U32 n = TRIE_DATA_SLOT(o);
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)progi->data->data[n] :
                NULL;

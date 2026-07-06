@@ -2049,7 +2049,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
 #ifdef TRIE_STCLASS
         else if (REGNODE_TYPE(OP(first)) == TRIE &&
-                ((reg_trie_data *)RExC_rxi->data->data[ ARG1u(first) ])->minlen > 0)
+                ((reg_trie_data *)RExC_rxi->data->data[ TRIE_DATA_SLOT(first) ])->minlen > 0)
         {
             /* this can happen only on restudy
              * Search for "restudy" in this file to find
