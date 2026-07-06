@@ -2626,8 +2626,9 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 =for apidoc utf8_length
 
 Returns the number of characters in the sequence of UTF-8-encoded bytes starting
-at C<s> and ending at the byte just before C<e>.  If <s> and <e> point to the
-same place, it returns 0 with no warning raised.
+at C<s> (which must be positioned at the start of a character) and ending at
+the byte just before C<e>.  If <s> and <e> point to the same place, it returns
+0 with no warning raised.
 
 If C<e E<lt> s> or if the scan would end up past C<e>, it raises a UTF8 warning
 and returns the number of valid characters.
@@ -2650,6 +2651,7 @@ STRLEN
 Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 {
     PERL_ARGS_ASSERT_UTF8_LENGTH;
+    assert(s0 == e || ! UTF8_IS_CONTINUATION(*s0));
 
     STRLEN continuations = 0;
     STRLEN len = 0;
