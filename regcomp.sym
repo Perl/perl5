@@ -194,12 +194,12 @@ LNBREAK     LNBREAK,    none      ; generic newline pattern
 #* structure.
 # NOTE: the relative order of the TRIE-like regops  is significant
 
-TRIE        TRIE,       trie 1    ; Match many EXACT(F[ALU]?)? at once. flags==type
-TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass data
+TRIE            TRIE,trie 1         ; Match many EXACT(F[ALU]?)? at once. flags==type
+TRIEC           TRIE,trie charclass ; Same as TRIE, but with embedded charclass data
 
 # For start classes, contains an added fail table.
-AHOCORASICK     TRIE,   trie 1    ; Aho Corasick stclass. flags==type
-AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded charclass data
+AHOCORASICK     TRIE,trie 1         ; Aho Corasick stclass. flags==type
+AHOCORASICKC    TRIE,trie charclass ; Same as AHOCORASICK, but with embedded charclass data
 
 #*Do nothing types
 
