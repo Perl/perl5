@@ -1371,7 +1371,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         /* Find the node we are going to overwrite */
         if ( first != startbranch || OP( last ) == BRANCH ) {
             /* branch sub-chain */
-            NEXT_OFF_set(first, last - first);
+            TRIE_NEXT_set(first, last - first);
             /* whole branch chain */
         }
         /* But first we check to see if there is a common prefix we can
@@ -1475,7 +1475,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             trie->prefixlen = (state-1);
             if (str) {
                 regnode *n = REGNODE_AFTER(convert);
-                NEXT_OFF_set(convert, n - convert);
+                TRIE_NEXT_set(convert, n - convert);
                 trie->startstate = state;
                 trie->minlen -= (state - 1);
                 trie->maxlen -= (state - 1);
@@ -1505,7 +1505,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 if (trie->maxlen) {
                     convert = n;
                 } else {
-                    NEXT_OFF_set(convert, tail - convert);
+                    TRIE_NEXT_set(convert, tail - convert);
                     DEBUG_r(optimize= n);
                 }
             }
@@ -1513,8 +1513,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if (!jumper)
             jumper = last;
         if ( trie->maxlen ) {
-            NEXT_OFF_set( convert, tail - convert);
-            ARG1u_SET( convert, data_slot );
+            TRIE_NEXT_set(convert, tail - convert);
+            TRIE_DATA_SLOT_set(convert, data_slot);
             /* Store the offset to the first unabsorbed branch in
                jump[0], which is otherwise unused by the jump logic.
                We use this when dumping a trie and during optimisation. */
@@ -1640,7 +1640,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
    'cdgu'.
  */
  /* add a fail transition */
-    const U32 trie_offset = ARG1u(source);
+    const U32 trie_offset = TRIE_DATA_SLOT(source);
     reg_trie_data *trie = (reg_trie_data *)RExC_rxi->data->data[trie_offset];
     U32 *q;
     const U32 ucharcount = trie->uniquecharcount;
@@ -1673,7 +1673,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     }
     OP(stclass) = (OP(stclass) == TRIE) ? AHOCORASICK : AHOCORASICKC;
 
-    ARG1u_SET( stclass, data_slot );
+    TRIE_DATA_SLOT_set(stclass, data_slot);
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie = trie_offset;
