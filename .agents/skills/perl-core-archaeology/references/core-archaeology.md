@@ -61,7 +61,9 @@ Use external sources to establish rationale, not as a substitute for commit evid
 - Broader Perl list archive index: `https://www.nntp.perl.org/`
 - CPAN/module history: `https://metacpan.org/`, upstream repository from `META.*`, and `Porting/Maintainers*`.
 
-Search for commit subjects, ticket IDs, exact symbols, function names, old diagnostics, and author names. Ticket references may appear as `perl #12345`, `RT #12345`, `GH #12345`, `github #12345`, or URLs.
+Search for commit subjects, ticket IDs, exact symbols, function names, old diagnostics, and author names. Ticket references may appear as `perl #12345`, `RT #12345`, `GH #12345`, `Issue #12345`, `github #12345`, or URLs.
+
+For this repository, `GH #12345` and `Issue #12345` refer to GitHub issue 12345 in `Perl/perl5`, at `https://github.com/Perl/perl5/issues/12345`.
 
 For commits with `Message-ID`, search the p5p archive by the message ID or subject. For `p4raw-*` metadata, keep the imported Git commit as the stable local reference, but include the Perforce change number when it explains integrations or backports.
 
@@ -70,6 +72,7 @@ For commits with `Message-ID`, search the p5p archive by the message ID or subje
 Code archaeology is often useful before fixing bug reports or GitHub issues, especially when the report describes old behavior, a regression window, a historical ticket, or behavior that may have been intentional.
 
 - Current GitHub issues database: `https://github.com/Perl/perl5/issues`
+- Issue URL pattern for shorthand references like `GH #12345` or `Issue #12345`: `https://github.com/Perl/perl5/issues/12345`
 - Historical perl5 RT tracker: `https://rt.perl.org/Public/Dist/Display.html?Name=perl5`
 - Search local commits first with issue IDs from the report: `git log --all --grep='GH #12345\|github #12345\|perl #12345\|RT #12345'`.
 - Search tests and docs for the same ID or diagnostic text before editing; old tests often encode the intended behavior more clearly than the issue thread.
