@@ -2665,27 +2665,18 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
     const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s0, e, 12);
     if (! per_byte_end) {
-        while (s < e) { /* Count characters directly */
-
-            /* Take extra care to not exceed 'e' (which would be undefined
-             * behavior) should the input be malformed, with a partial
-             * character at the end */
-            ptrdiff_t expected_byte_count = UTF8SKIP(s);
-            if (UNLIKELY(e - s  < expected_byte_count)) {
+        /* Not worth per-word.  This will always be the case when the input is
+         * empty, which needs special handling to prevent *e from being
+         * accessed */
+        if (UNLIKELY(e <= s0)) {
+            if (e < s0) {   /* Bad input */
                 goto warn_and_return;
             }
 
-            count++;
-            s += expected_byte_count;
+            return 0;
         }
-
-        if (LIKELY(e == s)) {
-            return count;
-        }
-
-        goto warn_and_return;
     }
-    {   /* Count continuations, word-at-a-time. */
+    else {  /* Count continuations, word-at-a-time. */
         STRLEN continuations = 0;
 
         /* We need to stop before the final start character in order to
@@ -2748,6 +2739,10 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     /* Here, we have processed as much as we dare per-word.  Count characters
      * directly, using UTF8SKIP from now on */
     while (s < e) {
+
+        /* Take extra care to not exceed 'e' (which would be undefined
+         * behavior) should the input be malformed, with a partial character
+         * at the end */
         ptrdiff_t expected_byte_count = UTF8SKIP(s);
         if (UNLIKELY(e - s  < expected_byte_count)) {
             goto warn_and_return;
