@@ -2036,6 +2036,7 @@ my @unresolved_visibility_overrides = qw(
     OPpLVREF_ITER
     OPpLVREF_SV
     OPpLVREF_TYPE
+    OPpMATCH_JUST_COUNT
     OPpMAYBE_LVSUB
     OPpMAYBE_TRUEBOOL
     OPpMAY_RETURN_CONSTANT
