@@ -985,6 +985,10 @@ addbits('ref_cmp',
     7 => qw(OPpREF_CMP_NE NE),
 );
 
+addbits('match',
+    7 => qw(OPpMATCH_JUST_COUNT JUST_COUNT),
+);
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:
