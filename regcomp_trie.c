@@ -462,40 +462,42 @@ is the recommended Unicode-aware way of saying
             tmp = newSVpvn_utf8(STRING(noper), STR_LEN(noper), UTF);    \
         else                                                    \
             tmp = newSVpvn_utf8( "", 0, UTF );                  \
-        av_push_simple( trie_words, tmp );                             \
+        av_push_simple( trie_words, tmp );                      \
     });                                                         \
                                                                 \
     curword++;                                                  \
+    assert(curword <= word_count);                              \
     trie->wordinfo[curword].prev   = 0;                         \
     trie->wordinfo[curword].len    = wordlen;                   \
     trie->wordinfo[curword].accept = state;                     \
                                                                 \
     if ( noper_next < tail ) {                                  \
         if (!trie->jump) {                                      \
-            trie->jump = (U16 *) PerlMemShared_calloc( word_count + 1, \
-                                                 sizeof(U16) ); \
-            trie->j_before_paren = (U16 *) PerlMemShared_calloc( word_count + 1, \
-                                                 sizeof(U16) ); \
-            trie->j_after_paren = (U16 *) PerlMemShared_calloc( word_count + 1, \
-                                                 sizeof(U16) ); \
+            trie->jump = (TRIE_JUMP_TYPE *) PerlMemShared_calloc( word_count + 1, sizeof(TRIE_JUMP_TYPE) ); \
+            trie->j_before_paren = (U16 *) PerlMemShared_calloc( word_count + 1, sizeof(U16) ); \
+            trie->j_after_paren = (U16 *) PerlMemShared_calloc( word_count + 1, sizeof(U16) );  \
         }                                                       \
-        assert(inRANGE(noper_next - convert, 0, U16_MAX));      \
+        assert(noper_next > convert);                           \
+        assert(curword <= word_count);                          \
+        assert(!trie->jump[curword]);                           \
+        assert((noper_next - convert) >= 0);                    \
+        assert((noper_next - convert) <= TRIE_JUMP_TYPE_MAX);   \
         trie->jump[curword] = noper_next - convert;             \
         U16 set_before_paren;                                   \
         U16 set_after_paren;                                    \
         if (OP(cur) == BRANCH) {                                \
-            set_before_paren = ARG1a(cur);                       \
-            set_after_paren = ARG1b(cur);                        \
+            set_before_paren = ARG1a(cur);                      \
+            set_after_paren = ARG1b(cur);                       \
         } else {                                                \
-            set_before_paren = ARG2a(cur);                     \
-            set_after_paren = ARG2b(cur);                      \
+            set_before_paren = ARG2a(cur);                      \
+            set_after_paren = ARG2b(cur);                       \
         }                                                       \
         trie->j_before_paren[curword] = set_before_paren;       \
         trie->j_after_paren[curword] = set_after_paren;         \
         if (!jumper)                                            \
             jumper = noper_next;                                \
         if (!nextbranch)                                        \
-            nextbranch = regnext(cur);                           \
+            nextbranch = regnext(cur);                          \
     }                                                           \
                                                                 \
     if ( dupe ) {                                               \
@@ -1519,8 +1521,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                jump[0], which is otherwise unused by the jump logic.
                We use this when dumping a trie and during optimisation. */
             if (trie->jump) {
-                assert(inRANGE(nextbranch - convert, 0, U16_MAX));
-                trie->jump[0] = (U16)(nextbranch - convert);
+                assert(nextbranch > convert);
+                assert((nextbranch - convert) <= TRIE_JUMP_TYPE_MAX);
+                assert(trie->jump[0] == 0);
+                assert(nextbranch <= tail);
+
+                trie->jump[0] = nextbranch - convert;
             }
 
             /* If the start state is not accepting (meaning there is no empty string/NOTHING)
