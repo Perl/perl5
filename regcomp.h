@@ -445,6 +445,10 @@ struct regnode_ssc {
 #define ARG2i(p) ARG_VALUE(ARG2i_LOC(p))
 #define ARG2a(p) ARG_VALUE(ARG2a_LOC(p))
 #define ARG2b(p) ARG_VALUE(ARG2b_LOC(p))
+#define ARG2u_AFTERCC(p) ARG_VALUE(ARG2u_AFTERCC_LOC(p))
+#define ARG2i_AFTERCC(p) ARG_VALUE(ARG2i_AFTERCC_LOC(p))
+#define ARG2a_AFTERCC(p) ARG_VALUE(ARG2a_AFTERCC_LOC(p))
+#define ARG2b_AFTERCC(p) ARG_VALUE(ARG2b_AFTERCC_LOC(p))
 
 #define ARG3u(p) ARG_VALUE(ARG3u_LOC(p))
 #define ARG3i(p) ARG_VALUE(ARG3i_LOC(p))
@@ -462,6 +466,10 @@ struct regnode_ssc {
 #define ARG2i_SET(p, val) ARG__SET(ARG2i_LOC(p), (val))
 #define ARG2a_SET(p, val) ARG__SET(ARG2a_LOC(p), (val))
 #define ARG2b_SET(p, val) ARG__SET(ARG2b_LOC(p), (val))
+#define ARG2u_AFTERCC_SET(p, val) ARG__SET(ARG2u_AFTERCC_LOC(p), (val))
+#define ARG2i_AFTERCC_SET(p, val) ARG__SET(ARG2i_AFTERCC_LOC(p), (val))
+#define ARG2a_AFTERCC_SET(p, val) ARG__SET(ARG2a_AFTERCC_LOC(p), (val))
+#define ARG2b_AFTERCC_SET(p, val) ARG__SET(ARG2b_AFTERCC_LOC(p), (val))
 
 #define ARG3u_SET(p, val) ARG__SET(ARG3u_LOC(p), (val))
 #define ARG3i_SET(p, val) ARG__SET(ARG3i_LOC(p), (val))
@@ -565,6 +573,12 @@ struct regnode_ssc {
 #define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2.i32)
 #define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16a)
 #define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16b)
+/* For regnodes that store a trailing U32 after an inline charclass bitmap,
+ * such as regnode_charclass_trie and regnode_charclass_posixl. */
+#define ARG2u_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.u32)
+#define ARG2i_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.i32)
+#define ARG2a_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.hi_lo.u16a)
+#define ARG2b_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.hi_lo.u16b)
 #define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3.u32)
 #define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3.i32)
 #define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.u16a)
@@ -1310,20 +1324,23 @@ typedef struct reg_ac_data_ reg_ac_data;
 #define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
 #define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
-#define IS_LONG_TRIE(op) ((op)==LTRIE || (op)==LTRIEC)
+#define IS_LONG_TRIE(op) (REGNODE_TYPE(op) == TRIE && REGNODE_OFF_BY_ARG(op))
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==LTRIEC || (op)==AHOCORASICKC)
 #define IS_TRIE_AC(op) ((op)==AHOCORASICK || (op)==AHOCORASICKC)
 
-#define TRIE_DATA_SLOT(p) (IS_LONG_TRIE(OP(p)) ? ARG2u(p) : ARG1u(p))
+#define TRIE_DATA_SLOT(p) ((OP(p) == LTRIEC) ? ARG2u_AFTERCC(p)              \
+                          : REGNODE_OFF_BY_ARG(OP(p)) ? ARG2u(p) : ARG1u(p))
 #define TRIE_DATA_SLOT_set(p, val) STMT_START {                            \
-    if (IS_LONG_TRIE(OP(p)))                                               \
+    if (OP(p) == LTRIEC)                                                   \
+        ARG2u_AFTERCC_SET((p), (val));                                     \
+    else if (REGNODE_OFF_BY_ARG(OP(p)))                                    \
         ARG2u_SET((p), (val));                                             \
     else                                                                   \
         ARG1u_SET((p), (val));                                             \
 } STMT_END
-#define TRIE_NEXT(p) (IS_LONG_TRIE(OP(p)) ? ARG1u(p) : NEXT_OFF(p))
+#define TRIE_NEXT(p) (REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p))
 #define TRIE_NEXT_set(p, val) STMT_START {                                 \
-    if (IS_LONG_TRIE(OP(p)))                                               \
+    if (REGNODE_OFF_BY_ARG(OP(p)))                                         \
         ARG1u_SET((p), (val));                                             \
     else                                                                   \
         NEXT_OFF_set((p), (val));                                          \

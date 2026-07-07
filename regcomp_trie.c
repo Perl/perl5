@@ -1354,6 +1354,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
     {   /* Modify the program and insert the new TRIE node */
         U8 nodetype =(U8) flags;
+        U8 trie_op = TRIE;
         char *str = NULL;
 
 #ifdef DEBUGGING
@@ -1515,6 +1516,29 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if (!jumper)
             jumper = last;
         if ( trie->maxlen ) {
+            const bool use_long_trie = ((tail - convert) > U16_MAX);
+            const Size_t trie_room = (
+                (trie->jump && trie->jump[1])
+                    ? trie->jump[1] * sizeof(struct regnode)
+                    : (Size_t)((char *)jumper - (char *)convert)
+            );
+
+            if (use_long_trie) {
+                assert((tail - convert) <= U32_MAX);
+                assert(trie_room >= sizeof(tregnode_LTRIE));
+                trie_op = LTRIE;
+            }
+
+            if ( !trie->states[trie->startstate].wordnum
+                 && trie->bitmap
+                 && trie_room >= (use_long_trie
+                                    ? sizeof(tregnode_LTRIEC)
+                                    : sizeof(tregnode_TRIEC)) )
+            {
+                trie_op = use_long_trie ? LTRIEC : TRIEC;
+            }
+
+            OP( convert ) = trie_op;
             TRIE_NEXT_set(convert, tail - convert);
             TRIE_DATA_SLOT_set(convert, data_slot);
             /* Store the offset to the first unabsorbed branch in
@@ -1529,22 +1553,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 trie->jump[0] = nextbranch - convert;
             }
 
-            /* If the start state is not accepting (meaning there is no empty string/NOTHING)
-             *   and there is a bitmap
-             *   and the first "jump target" node we found leaves enough room
-             * then convert the TRIE node into a TRIEC node, with the bitmap
-             * embedded inline in the opcode - this is hypothetically faster.
-             */
-            if ( !trie->states[trie->startstate].wordnum
-                 && trie->bitmap
-                 && ( (char *)jumper - (char *)convert) >= (int)sizeof(tregnode_TRIEC) )
-            {
-                OP( convert ) = TRIEC;
-                Copy(trie->bitmap, ((tregnode_TRIEC *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
+            if (OP(convert) == TRIEC || OP(convert) == LTRIEC) {
+                Copy(trie->bitmap, ANYOF_BITMAP(convert), ANYOF_BITMAP_SIZE, char);
                 PerlMemShared_free(trie->bitmap);
                 trie->bitmap= NULL;
-            } else
-                OP( convert ) = TRIE;
+            }
 
             /* store the type in the flags */
             FLAGS(convert) = nodetype;
@@ -1666,18 +1679,20 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-    if ( OP(source) == TRIE ) {
-        tregnode_TRIE *op = (tregnode_TRIE *)
-            PerlMemShared_calloc(1, sizeof(tregnode_TRIE));
-        StructCopy(source, op, tregnode_TRIE);
+    if (IS_ANYOF_TRIE(OP(source))) {
+        tregnode_AHOCORASICKC *op = (tregnode_AHOCORASICKC *)
+            PerlMemShared_calloc(1, sizeof(tregnode_AHOCORASICKC));
+        OP(op) = AHOCORASICKC;
+        FLAGS(op) = FLAGS(source);
+        Copy(ANYOF_BITMAP(source), ANYOF_BITMAP(op), ANYOF_BITMAP_SIZE, char);
         stclass = (regnode *)op;
     } else {
-        tregnode_TRIEC *op = (tregnode_TRIEC *)
-            PerlMemShared_calloc(1, sizeof(tregnode_TRIEC));
-        StructCopy(source, op, tregnode_TRIEC);
+        tregnode_AHOCORASICK *op = (tregnode_AHOCORASICK *)
+            PerlMemShared_calloc(1, sizeof(tregnode_AHOCORASICK));
+        OP(op) = AHOCORASICK;
+        FLAGS(op) = FLAGS(source);
         stclass = (regnode *)op;
     }
-    OP(stclass) = (OP(stclass) == TRIE) ? AHOCORASICK : AHOCORASICKC;
 
     TRIE_DATA_SLOT_set(stclass, data_slot);
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
