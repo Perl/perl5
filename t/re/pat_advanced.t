@@ -2727,7 +2727,6 @@ EOF_DEBUG_OUT
         fresh_perl_is(<<~'PROG', , "", {}, "Avoid trie overflow");
             my $x = join "|", "aaa".."mzz";
             my $y = join "|", "naa".."zzz";
-            use re 'Debug';
             "fnord" =~ m/(?:$x)|(?:$y)/;
             PROG
     }
