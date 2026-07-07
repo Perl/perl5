@@ -15,7 +15,7 @@
  * not the System V one.
  */
 typedef U32 TRIE_JUMP_TYPE;
-enum { TRIE_JUMP_TYPE_MAX = U32_MAX };
+#define TRIE_JUMP_TYPE_MAX U32_MAX
 
 #ifndef PLUGGABLE_RE_EXTENSION
 /* we don't want to include this stuff if we are inside of

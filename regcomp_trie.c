@@ -25,6 +25,46 @@
                                ? (TRIE_LIST_CUR( idx ) - 1)           \
                                : 0 )
 
+#ifndef RE_PREFER_LONG_TRIE
+#  define RE_PREFER_LONG_TRIE 0
+#endif
+
+
+static U8
+S_select_trie_op(pTHX_ const Size_t trie_room, const U32 needed_next,
+                 const bool want_charclass)
+{
+    assert(needed_next <= U32_MAX);
+
+    if (RE_PREFER_LONG_TRIE || needed_next > U16_MAX) {
+        if (want_charclass && trie_room >= sizeof(tregnode_LTRIEC)) {
+            return LTRIEC;
+        }
+        if (trie_room >= sizeof(tregnode_LTRIE)) {
+            return LTRIE;
+        }
+        if (needed_next <= U16_MAX && trie_room >= sizeof(tregnode_TRIE)) {
+            return TRIE;
+        }
+    }
+    else {
+        if (want_charclass && trie_room >= sizeof(tregnode_TRIEC)) {
+            return TRIEC;
+        }
+        if (trie_room >= sizeof(tregnode_TRIE)) {
+            return TRIE;
+        }
+        if (want_charclass && trie_room >= sizeof(tregnode_LTRIEC)) {
+            return LTRIEC;
+        }
+        if (trie_room >= sizeof(tregnode_LTRIE)) {
+            return LTRIE;
+        }
+    }
+
+    return 0;
+}
+
 
 #ifdef DEBUGGING
 /*
@@ -1516,26 +1556,27 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         if (!jumper)
             jumper = last;
         if ( trie->maxlen ) {
-            const bool use_long_trie = ((tail - convert) > U16_MAX);
+            const U32 needed_next = tail - convert;
             const Size_t trie_room = (
                 (trie->jump && trie->jump[1])
                     ? trie->jump[1] * sizeof(struct regnode)
                     : (Size_t)((char *)jumper - (char *)convert)
             );
+            const bool want_charclass = !trie->states[trie->startstate].wordnum
+                                        && trie->bitmap;
 
-            if (use_long_trie) {
-                assert((tail - convert) <= U32_MAX);
-                assert(trie_room >= sizeof(tregnode_LTRIE));
-                trie_op = LTRIE;
-            }
+            trie_op = S_select_trie_op(aTHX_ trie_room, needed_next,
+                                       want_charclass);
 
-            if ( !trie->states[trie->startstate].wordnum
-                 && trie->bitmap
-                 && trie_room >= (use_long_trie
-                                    ? sizeof(tregnode_LTRIEC)
-                                    : sizeof(tregnode_TRIEC)) )
-            {
-                trie_op = use_long_trie ? LTRIEC : TRIEC;
+            if (!trie_op) {
+                DEBUG_TRIE_COMPILE_r(
+                    re_indentf("No trie node type fits at %d (need next=%" UVuf ", room=%" UVuf ")\n",
+                        depth+1,
+                        REG_NODE_NUM(convert),
+                        (UV)needed_next,
+                        (UV)trie_room)
+                );
+                return 0;
             }
 
             OP( convert ) = trie_op;
