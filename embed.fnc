@@ -155,23 +155,25 @@
 :         However, this is contrary to the C standard, many of those have been
 :         changed, and the remainder should be.
 :
+: The 'X' flag is like the 'C' flag in that the elements it marks need to be
+:         accessible everywhere.  But they must be used with their full
+:         'Perl_' forms by code that isn't part of core.  (That means the 'p'
+:         flag must necessarily also be present.)  Adding the 'E' flag allows
+:         the short name to also be used by code that is part of a PERL_EXT
+:         extension.  Necessarily, this flag is only applicable to functions
+:
+:         This flag can be used for functions that are called from a
+:         public macro, the name of which isn't derived from the function name.
+:         You'll have to write the macro yourself, and from within it, refer to
+:         the function in its full 'Perl_' form with any necessary thread
+:         context parameter.
+:
 : The 'E' flag is used instead for elements that are supposed to be used only
 :         in the core, plus extensions compiled with the PERL_EXT symbol
 :         defined.  Again, on some platforms, functions marked with this will
 :         be visible everywhere, so one of the /[iIpS]/ flags is generally
 :         needed.  Also note that an XS writer can always cheat and pretend to
 :         be an extension by #defining PERL_EXT.
-:
-: The 'X' flag applies only to functions.  It is similar to the 'C' flag in
-:         that the function (whose entry better have the 'p' flag) is
-:         accessible everywhere on all platforms.  However the short name macro
-:         that normally gets generated is suppressed outside the core.  (Except
-:         it is also visible in PERL_EXT extensions if the 'E' flag is also
-:         specified.)  This flag is used for functions that are called from a
-:         public macro, the name of which isn't derived from the function name.
-:         You'll have to write the macro yourself, and from within it, refer to
-:         the function in its full 'Perl_' form with any necessary thread
-:         context parameter.
 :
 : AUTOMATIC SORTING and FORMATTING of this file
 :
@@ -202,12 +204,12 @@
 :
 :   The contents of ARGS_ASSERT are determined by
 :       1)  constraints you give in this file for an argument.  Historically,
-:	    each such constraint has been positioned between the '|' that marks
-:	    the beginning of a parameter definition, and the the definition
-:	    itself, like
+:           each such constraint has been positioned between the '|' that marks
+:           the beginning of a parameter definition, and the the definition
+:           itself, like
 :               |NN const char * const name
-:	    But it can come anywhere in the definition, and some prefer it to
-:	    come at the end, as it modifies the argument.
+:           But it can come anywhere in the definition, and some prefer it to
+:           come at the end, as it modifies the argument.
 :               |const char * const name NN
 :       2)  the internal logic used by code that reads this file.
 :       3)  explicit asserts that you add in this file.
