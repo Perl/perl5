@@ -56,9 +56,15 @@ esac
 # We need .. when we are in the x2p directory if we are using the
 # cppstdin wrapper script.
 # Put .. and . first so that we pick up the present cppstdin, not
-# an older one lying about in /usr/local/bin.
-PATH=".$path_sep..$path_sep$PATH"
-export PATH
+# an older one lying about in /usr/local/bin.  Do not do this for a
+# direct compiler command like "ccache gcc -E", or ccache may resolve
+# gcc against an unrelated ./gcc or ../gcc path entry.
+case "$cppstdin" in
+cppstdin|*/cppstdin|cppstdin\ *|*/cppstdin\ *)
+    PATH=".$path_sep..$path_sep$PATH"
+    export PATH
+    ;;
+esac
 
 case "$osname" in
 amigaos) cat=/bin/cat ;; # must be absolute
@@ -132,14 +138,14 @@ esac
     #fi
 
     if [ "$osname" = os390 ]; then
-        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c |
+        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c | \
         $sed \
     	    -e '/^#.*<stdin>/d' \
           -e '/^#.*<builtin>/d' \
           -e '/^#.*<built-in>/d' \
           -e '/^#.*<command line>/d' \
           -e '/^#.*<command-line>/d' \
-          -e '/".*In file included from.*:/d' \'
+          -e '/".*In file included from.*:/d' \
 	    -e '/^#.*"-"/d' \
 	    -e '/^#.*git_version\.h/d' \
 	    -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
@@ -169,8 +175,8 @@ esac
 	    -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
 	    -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
 	    -e 's|: \./|: |' \
-           -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr| \
-        $uniq | $sort | $uniq >>$outfile
+            -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr | \
+        $uniq | $sort | $uniq >> $outfile
         rm $$.cout
         rm $$.cerr
     fi
