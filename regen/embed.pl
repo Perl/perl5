@@ -4026,6 +4026,7 @@ sub generate_proto_h {
         my $never_returns = ( $flags =~ /r/ );
         my $binarycompat = ( $flags =~ /b/ );
         my $has_mflag = ( $flags =~ /m/ );
+        my $has_Xflag = ( $flags =~ /X/ );
         my $has_mpflags = $has_mflag && $flags =~ /p/;
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
@@ -4522,7 +4523,7 @@ sub generate_proto_h {
         $ret = "#${ind}if defined(PERL_CORE) || defined(PERL_EXT)\n"
              . $ret
              . "\n#${ind}endif"
-          if $extensions_only;
+          if $extensions_only && ! $has_Xflag;
 
         # We don't hide the ARGS_ASSERT macro; having that defined does no
         # harm, and otherwise some inline functions that are looking for it
