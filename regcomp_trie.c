@@ -1671,7 +1671,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         StructCopy(source, op, tregnode_TRIEC);
         stclass = (regnode *)op;
     }
-    OP(stclass)+=2; /* convert the TRIE type to its AHO-CORASICK equivalent */
+    OP(stclass) = (OP(stclass) == TRIE) ? AHOCORASICK : AHOCORASICKC;
 
     ARG1u_SET( stclass, data_slot );
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );

@@ -1303,7 +1303,7 @@ typedef struct reg_ac_data_ reg_ac_data;
 #define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
-#define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
+#define IS_TRIE_AC(op) ((op)==AHOCORASICK || (op)==AHOCORASICKC)
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
