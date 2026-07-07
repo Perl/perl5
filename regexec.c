@@ -6754,9 +6754,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     REGCP_SET(orig_savestack_ix);
 
     while (scan != NULL) {
-        next = scan + NEXT_OFF(scan);
-        if (next == scan)
-            next = NULL;
+        next = regnext(scan);
         state_num = OP(scan);
 
       reenter_switch:
