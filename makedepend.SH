@@ -66,9 +66,15 @@ esac
 # We need .. when we are in the x2p directory if we are using the
 # cppstdin wrapper script.
 # Put .. and . first so that we pick up the present cppstdin, not
-# an older one lying about in /usr/local/bin.
-PATH=".$path_sep..$path_sep$PATH"
-export PATH
+# an older one lying about in /usr/local/bin.  Do not do this for a
+# direct compiler command like "ccache gcc -E", or ccache may resolve
+# gcc against an unrelated ./gcc or ../gcc path entry.
+case "$cppstdin" in
+cppstdin|*/cppstdin|cppstdin\ *|*/cppstdin\ *)
+    PATH=".$path_sep..$path_sep$PATH"
+    export PATH
+    ;;
+esac
 
 case "$osname" in
 amigaos) cat=/bin/cat ;; # must be absolute
