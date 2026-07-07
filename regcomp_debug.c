@@ -228,7 +228,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         else if ( REGNODE_TYPE(op)  == TRIE ) {
             const regnode *this_trie = node;
             const U32 slot = TRIE_DATA_SLOT(node);
-            const reg_ac_data * const ac = op >= AHOCORASICK ?
+            const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)ri->data->data[slot] :
                NULL;
             const reg_trie_data * const trie =
