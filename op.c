@@ -9134,6 +9134,59 @@ Perl_newARGDEFELEMOP(pTHX_ I32 flags, OP *expr, I32 argindex)
     return o;
 }
 
+/* my $count = () = $str =~ /$pat/g;
+ * Looking to turn something like this:
+ *     <2> aassign[t4] sKS
+ *       <1> ex-list lK
+ *         <0> pushmark s
+ *         </> match()[$x:1,4] lK
+ *           <|> regcomp(other->8) sK
+ *             <0> padsv[$pat:2,4] s
+ *       <1> ex-list lK
+ *         <0> pushmark s
+ *         <0> stub lPRM*
+ * into just:
+ *     </> match()[$x:1,4] lK
+ *       <|> regcomp(other->8) sK
+ *         <0> padsv[$pat:2,4] s
+ */
+
+static OP *
+S_maybe_match_count(pTHX_ OP *aassign)
+{
+    assert(OP_TYPE_IS(aassign, OP_AASSIGN));
+    OP *exl1 = cBINOPx(aassign)->op_first;
+    assert(exl1 && OP_TYPE_IS_OR_WAS(exl1, OP_LIST));
+
+    /* Check for the matching RHS of the OP_AASSIGN tree */
+    OP *exl2 = OpSIBLING(exl1);
+    assert(exl2 && OP_TYPE_IS_OR_WAS(exl2, OP_LIST));
+    OP *pmk2 = cUNOPx(exl2)->op_first;
+    assert(pmk2 && OP_TYPE_IS(pmk2, OP_PUSHMARK));
+    OP *aa_left = OpSIBLING(pmk2);
+    if (aa_left && !(OP_TYPE_IS(aa_left, OP_STUB) &&
+                     !aa_left->op_moresib &&
+                     !(aa_left->op_flags & OPf_KIDS))
+    )
+        return aassign;
+
+    /* Check for the matching LHS of the OP_AASSIGN tree */
+    OP *pmk1 = cUNOPx(exl1)->op_first;
+    assert(pmk1 && OP_TYPE_IS(pmk1, OP_PUSHMARK));
+    OP *aa_right = OpSIBLING(pmk1);
+    if (aa_right && OP_TYPE_IS(aa_right, OP_MATCH) &&
+                  !aa_right->op_moresib) {
+        /* This is the optree we were looking for */
+        OP *match = op_sibling_splice(exl1, pmk1, 1, NULL);
+        match->op_flags = match->op_flags & ~OPf_WANT;
+        match->op_private |= OPpMATCH_JUST_COUNT;
+        op_free(aassign);
+        return match;
+    }
+
+    return aassign;
+}
+
 /*
 =for apidoc newASSIGNOP
 
@@ -9348,6 +9401,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                 scalar(right));
     }
     else {
+        if(UNLIKELY(OP_TYPE_IS(right, OP_AASSIGN)))
+            right = S_maybe_match_count(aTHX_ right);
         o = newBINOP(OP_SASSIGN, flags,
             scalar(right), op_lvalue(scalar(left), OP_SASSIGN) );
     }

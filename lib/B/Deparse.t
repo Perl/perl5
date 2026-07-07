@@ -3686,3 +3686,9 @@ if (ref $x ne 'VSTRING') {
 }
 $y = ref $x ne 'HASH' ? 'OTHER' : 'HASH';
 print 1 if ref $_[0] ne 'CODE';
+####
+# Deparse match-counting idiom
+my($str, $pat);
+my $count_all = () = $str =~ /$pat/g;
+my $count_more += () = $str =~ /$pat/g;
+my $count_one = () = $str =~ /$pat/;

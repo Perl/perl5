@@ -3751,6 +3751,15 @@ PP(pp_match)
     /* We need to know this in case we fail out early - pos() must be reset */
     global = dynpm->op_pmflags & PMf_GLOBAL;
 
+    /* In the common idiom for counting the number of matches,
+     *     $count = () = $str =~ /.../g;
+     * pp_match must generate all the matches, but it doesn't need
+     * to emit them all as new mortal SVs. Instead, it can determine
+     * how many matches there were and just push that onto the stack. */
+    const bool just_count = (PL_op->op_private & OPpMATCH_JUST_COUNT) ? true : false;
+    const bool all_matches = just_count || gimme == G_LIST;
+    UV match_count = 0;
+
     /* PMdf_USED is set after a ?? matches once */
     if (
 #ifdef USE_ITHREADS
@@ -3815,7 +3824,7 @@ PP(pp_match)
          * only on the first iteration. Therefore we need to copy $' as well
          * as $&, to make the rest of the string available for captures in
          * subsequent iterations */
-        if (! (global && gimme == G_LIST))
+        if (! (global && all_matches))
             r_flags |= REXEC_COPY_SKIP_POST;
     };
 #ifdef PERL_SAWAMPERSAND
@@ -3848,7 +3857,7 @@ PP(pp_match)
 
     /* update pos */
 
-    if (global && (gimme != G_LIST || (dynpm->op_pmflags & PMf_CONTINUE))) {
+    if (global && ((!all_matches) || (dynpm->op_pmflags & PMf_CONTINUE))) {
         if (!mg)
             mg = sv_magicext_mglob(TARG);
         MgBYTEPOS_set(mg, TARG, truebase, RXp_OFFS_END(prog,0));
@@ -3858,7 +3867,7 @@ PP(pp_match)
             mg->mg_flags &= ~MGf_MINMATCH;
     }
 
-    if ((!RXp_NPARENS(prog) && !global) || gimme != G_LIST) {
+    if ((!RXp_NPARENS(prog) && !global) || !all_matches) {
         LEAVE_SCOPE(oldsave);
         if (sp_base)
             rpp_popfree_1(); /* free arg */
@@ -3866,7 +3875,7 @@ PP(pp_match)
         return NORMAL;
     }
 
-    /* push captures on stack */
+    /* push captures on stack (or just the number of them if JUST_COUNT) */
 
     {
         const I32 logical_nparens = RXp_LOGICAL_NPARENS(prog);
@@ -3890,10 +3899,16 @@ PP(pp_match)
            Frankly I probably would have done it differently, but it works so
            I am leaving it. - Yves */
         I32 logical_paren = (global && !logical_nparens) ? 1 : 0;
+
         I32 *l2p = RXp_LOGICAL_TO_PARNO(prog);
         /* This is used to step through the physical parens associated
            with a given logical paren. */
         I32 *p2l_next = RXp_PARNO_TO_LOGICAL_NEXT(prog);
+
+        if (just_count) {
+            match_count += logical_nparens + logical_paren;
+            goto carry_on;
+        }
 
         rpp_extend(logical_nparens + logical_paren);    /* devious code ... */
         EXTEND_MORTAL(logical_nparens + logical_paren); /* ... see above */
@@ -3950,6 +3965,7 @@ PP(pp_match)
                 }
             }
         }
+  carry_on:
         if (global) {
             curpos = (UV)RXp_OFFS_END(prog,0);
             had_zerolen = RXp_ZERO_LEN(prog);
@@ -3957,6 +3973,8 @@ PP(pp_match)
             goto play_it_again;
         }
         LEAVE_SCOPE(oldsave);
+        if (just_count)
+            goto ret_count;
         goto ret_list;
     }
     NOT_REACHED; /* NOTREACHED */
@@ -3969,9 +3987,18 @@ PP(pp_match)
             mg->mg_len = -1;
     }
     LEAVE_SCOPE(oldsave);
-    if (gimme != G_LIST) {
+    if (just_count) {
+      ret_count:
         if (sp_base)
             rpp_popfree_1(); /* free arg */
+        rpp_push_1_norc(newSVuv(match_count));
+        return NORMAL;
+    }
+    if (!all_matches) {
+        if (sp_base)
+            rpp_popfree_1(); /* free arg */
+        else
+            rpp_extend(1);
         rpp_push_IMM(&PL_sv_no);
         return NORMAL;
     }
