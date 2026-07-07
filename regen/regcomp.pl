@@ -248,10 +248,13 @@ sub process_flags {
 
         push @selected, $node->{name} if $set;
     }
+    my $bits = unpack("B*", $bitmap);
+
     my $out_string= join ', ', @selected, 0;
     $out_string =~ s/(.{1,70},) /$1\n    /g;
 
     my $out_mask= join ', ', map { sprintf "0x%02X", ord $_ } split '', $bitmap;
+
 
     return $comment . <<"EOP";
 #define REGNODE_\U$varname\E(node) (PL_${varname}_bitmask[(node) >> 3] & (1 << ((node) & 7)))
@@ -259,6 +262,7 @@ sub process_flags {
 EXTCONST U8 PL_${varname}\[] __attribute__deprecated__
 INIT({ $out_string });
 
+/* $varname: $bits */
 EXTCONST U8 PL_${varname}_bitmask[] INIT({ $out_mask });
 EOP
 }
