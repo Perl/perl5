@@ -201,6 +201,10 @@ TRIEC           TRIE,trie charclass ; Same as TRIE, but with embedded charclass 
 AHOCORASICK     TRIE,trie 1         ; Aho Corasick stclass. flags==type
 AHOCORASICKC    TRIE,trie charclass ; Same as AHOCORASICK, but with embedded charclass data
 
+# Long trie ops.  Keep these paired with TRIE/TRIEC.
+LTRIE           TRIE,trie 2 . 1              ; Match many EXACT(F[ALU]?)? at once. flags==type, long jump
+LTRIEC          TRIE,trie charclass_trie . 1 ; Same as TRIE, but with embedded charclass data, long jump
+
 #*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.

@@ -336,11 +336,19 @@ struct regnode_bbm {
  * regnode has a U32, which is what reganode() allocates as a unit.  Therefore
  * no field can require stricter alignment than U32. */
     
-/* also used by trie */
+/* also used by TRIEC */
 struct regnode_charclass {
     union regnode_head head;
     union regnode_arg arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
+};
+
+/* also used by LTRIEC */
+struct regnode_charclass_trie {
+    union regnode_head head;
+    union regnode_arg arg1;
+    char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
+    union regnode_arg arg2;
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */

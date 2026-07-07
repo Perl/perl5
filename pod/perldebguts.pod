@@ -739,6 +739,12 @@ will be lost.
  AHOCORASICKC     trie       Same as AHOCORASICK, but with embedded
                   charclass  charclass data
 
+ LTRIE            trie 2 1   Match many EXACT(F[ALU]?)? at once.
+                             flags==type, long jump
+ LTRIEC           trie       Same as TRIE, but with embedded charclass
+                  charclass_ data, long jump
+                  trie 1
+
  # Do nothing types
 
  NOTHING          no         Match empty string.
