@@ -23,7 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
          OPpSPLIT_ASSIGN OPpSPLIT_LEX
          OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
-         OPpCONCAT_NESTED
+         OPpCONCAT_NESTED OPpMATCH_JUST_COUNT
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
@@ -6873,7 +6873,12 @@ sub matchop {
     }
 }
 
-sub pp_match { matchop(@_, "m", "/") }
+sub pp_match {
+    my $fixup = ($_[1]->private & OPpMATCH_JUST_COUNT)
+              ? '() = '
+              : '' ;
+    $fixup.matchop(@_, "m", "/");
+}
 sub pp_qr { matchop(@_, "qr", "") }
 
 sub pp_runcv { unop(@_, "__SUB__"); }
