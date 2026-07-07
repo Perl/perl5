@@ -2939,7 +2939,7 @@ Cp	|I32	|regexec_flags	|NN REGEXP * const rx			\
 Cp	|void	|regfree_internal					\
 				|NN REGEXP * const rx
 Cp	|void	|reginitcolors
-EXp	|SV *	|reg_named_buff |NN REGEXP * const rx			\
+Ap	|SV *	|reg_named_buff |NN REGEXP * const rx			\
 				|NULLOK SV * const key			\
 				|NULLOK SV * const value		\
 				|const U32 flags
@@ -2957,7 +2957,7 @@ Cp	|SV *	|reg_named_buff_fetch					\
 Cp	|SV *	|reg_named_buff_firstkey				\
 				|NN REGEXP * const r			\
 				|const U32 flags
-EXp	|SV *	|reg_named_buff_iter					\
+Ap	|SV *	|reg_named_buff_iter					\
 				|NN REGEXP * const rx			\
 				|NULLOK const SV * const lastkey	\
 				|const U32 flags
@@ -2967,25 +2967,21 @@ Cp	|SV *	|reg_named_buff_nextkey 				\
 Cp	|SV *	|reg_named_buff_scalar					\
 				|NN REGEXP * const r			\
 				|const U32 flags
-: FIXME - is anything in re using this now?
-EXp	|void	|reg_numbered_buff_fetch				\
+Ap	|void	|reg_numbered_buff_fetch				\
 				|NN REGEXP * const re			\
 				|const I32 paren			\
 				|NULLOK SV * const sv
 
-: FIXME - is anything in re using this now?
-EXp	|void	|reg_numbered_buff_fetch_flags				\
+Ap	|void	|reg_numbered_buff_fetch_flags				\
 				|NN REGEXP * const re			\
 				|const I32 paren			\
 				|NULLOK SV * const sv			\
 				|U32 flags
-: FIXME - is anything in re using this now?
-EXp	|I32	|reg_numbered_buff_length				\
+Ap	|I32	|reg_numbered_buff_length				\
 				|NN REGEXP * const r			\
 				|NN const SV * const sv 		\
 				|const I32 paren
-: FIXME - is anything in re using this now?
-EXp	|void	|reg_numbered_buff_store				\
+Ap	|void	|reg_numbered_buff_store				\
 				|NN REGEXP * const rx			\
 				|const I32 paren			\
 				|NULLOK SV const * const value

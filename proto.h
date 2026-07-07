@@ -5448,6 +5448,10 @@ Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent, SV *key, U32 hash,
 #define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_SV   \
         Perl_assert_aTHX; assert(key)
 
+PERL_CALLCONV SV *
+Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF         \
         Perl_assert_aTHX; assert(rx)
 
@@ -5481,6 +5485,10 @@ Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const r, const U32 flags)
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF_FIRSTKEY \
         Perl_assert_aTHX; assert(r)
 
+PERL_CALLCONV SV *
+Perl_reg_named_buff_iter(pTHX_ REGEXP * const rx, const SV * const lastkey, const U32 flags)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF_ITER    \
         Perl_assert_aTHX; assert(rx)
 
@@ -5498,15 +5506,32 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF_SCALAR  \
         Perl_assert_aTHX; assert(r)
 
+PERL_CALLCONV void
+Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren, SV * const sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH \
         Perl_assert_aTHX; assert(re)
 
+PERL_CALLCONV void
+Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren, SV * const sv, U32 flags)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH_FLAGS \
         Perl_assert_aTHX; assert(re)
 
+PERL_CALLCONV I32
+Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv, const I32 paren)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_LENGTH \
         Perl_assert_aTHX; assert(r); assert(sv)
 
+PERL_CALLCONV void
+Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren, SV const * const value)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_STORE \
         Perl_assert_aTHX; assert(rx)
 
@@ -8989,31 +9014,6 @@ Perl_parse_ident_msg(pTHX_ const char *s, const char *end, bool is_utf8, HV **fa
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
-PERL_CALLCONV SV *
-Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-PERL_CALLCONV SV *
-Perl_reg_named_buff_iter(pTHX_ REGEXP * const rx, const SV * const lastkey, const U32 flags)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-PERL_CALLCONV void
-Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren, SV * const sv)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-PERL_CALLCONV void
-Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren, SV * const sv, U32 flags)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-PERL_CALLCONV I32
-Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv, const I32 paren)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2);
-PERL_CALLCONV void
-Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren, SV const * const value)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
 PERL_CALLCONV SV *
 Perl_reg_qr_package(pTHX_ REGEXP * const rx)
         Perl_attribute_nonnull_aTHX
