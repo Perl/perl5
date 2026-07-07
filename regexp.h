@@ -14,6 +14,9 @@
  * Caveat:  this is V8 regexp(3) [actually, a reimplementation thereof],
  * not the System V one.
  */
+typedef U32 TRIE_JUMP_TYPE;
+enum { TRIE_JUMP_TYPE_MAX = U32_MAX };
+
 #ifndef PLUGGABLE_RE_EXTENSION
 /* we don't want to include this stuff if we are inside of
    an external regex engine based on the core one - like re 'debug'*/
@@ -976,7 +979,7 @@ typedef struct regmatch_state {
 
             U32         accepted;   /* how many accepting states left */
             bool        longfold;   /* saw a fold with a 1->n char mapping */
-            U16         *jump;      /* positive offsets from me */
+            TRIE_JUMP_TYPE   *jump;      /* positive offsets from me */
             U16         *j_before_paren;
             U16         *j_after_paren;
             regnode     *me;        /* Which node am I - needed for jump tries*/

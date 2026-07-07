@@ -1246,7 +1246,7 @@ struct reg_trie_data_ {
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
-    U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
+    TRIE_JUMP_TYPE  *jump;           /* optional 1 indexed array of offsets before tail
                                         for the node following a given word. */
     U16             *j_before_paren; /* optional 1 indexed array of parno reset data
                                         for the given jump. */

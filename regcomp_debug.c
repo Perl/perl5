@@ -258,7 +258,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                            : "???"
                 );
                 if (trie->jump) {
-                    U16 dist = trie->jump[word_idx+1];
+                    TRIE_JUMP_TYPE dist = trie->jump[word_idx+1];
                     re_printf("(%" UVuf ")\n",
                                (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
