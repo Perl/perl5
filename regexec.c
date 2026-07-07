@@ -6915,6 +6915,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 #undef  ST
 #define ST st->u.trie
+        case LTRIEC:
         case TRIEC: /* (ab|cd) with known charclass */
             /* In this case the charclass data is available inline so
                we can fail fast without a lot of extra overhead.
@@ -6931,6 +6932,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 NOT_REACHED; /* NOTREACHED */
             }
             /* FALLTHROUGH */
+        case LTRIE:
         case TRIE:  /* (ab|cd)  */
             /* the basic plan of execution of the trie is:
              * At the beginning, run though all the states, and
