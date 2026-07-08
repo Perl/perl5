@@ -1,351 +1,1843 @@
-# regcomp.sym
-#
-# File has two sections, divided by a line of dashes '-'. 
-#
-# Lines beginning with # are ignored, except for those that start with #*
-# which are included in pod/perldebguts.pod.  # within a line may be part
-# of a description.
-#
-# First section is for regops, second section is for regmatch-states
-#
-# Note that the order in this file is important.
-#
-# Format for first section: 
-# NAME \s+ TYPE, arg-description [struct regnode suffix] [flags] [longjump] ; DESCRIPTION
-#   arg-description is currently unused
-#   suffix is appended to 'struct_regnode_' giving which one to use.  If empty,
-#       it means plain 'struct regnode'.  If the regnode is a string one, this
-#       should instead refer to the base regnode, without the char[1] element
-#       of the structure
-#   flag <S> means is REGNODE_SIMPLE; flag <V> means is REGNODE_VARIES; <.> is
-#       a placeholder
-#   longjump is 1 if the (first) argument holds the next offset (instead of the
-#       usual 'next_offset' field
-#
-# run perl regen.pl after editing this file
+=pod
 
-#                             +- suffix of which struct regnode to use e.g.,
-#                             | +- flags  (S or V)               struct regnode_1
-#                         un- | | +- longjmp (0, blank, or 1)  blank means 0
-# Name        Type       used | | | ; comment
-# --------------------------------------------------------------------------
-# IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches.
-# UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches.
-# SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
-# IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
-# GROUPP      GROUPP,     num 1     ; Whether the group matched.
-#
-# If we were to start running out of regnodes, many of the ones that are
-# complements could be combined with their non-complement mates.  For example,
-# POSIXU could have the flags field have the bottom bit mean do we complement
-# or not, and the type be shifted left 1 bit.  Then all that would be needed to
-# extract which to do is a mask for the complement bit, and a right shift for
-# the other, an inconsequential increase in instructions.  It might actually be
-# clearer and slightly faster given the case statement and assignment are
-# removed.  Note that not everything could be collapsed: NPOSIXA, for example,
-# would require special handling for performance.
+=head1 NAME
 
+regcomp.sym - regex node and state definitions for regen/regcomp.pl
 
-#* Exit points
+=head1 DESCRIPTION
 
-END         END,        no        ; End of program.
-SUCCEED     END,        no        ; Return from a subroutine, basically.
+This file is the canonical Perl-data source consumed by
+F<regen/regcomp.pl>.  It defines the regex opcodes and regmatch states used
+to generate F<regnodes.h> and the regnode table in F<pod/perldebguts.pod>.
 
-#* Line Start Anchors:
-#Note flags field for SBOL indicates if it is a /^/ or a /\A/
-SBOL        BOL,        no        ; Match "" at beginning of line: /^/, /\A/
-MBOL        BOL,        no        ; Same, assuming multiline: /^/m
+Order is significant.  Preserve the existing order of groups and the order of
+entries within each group unless you are intentionally changing regex opcode or
+state numbering semantics.
 
-#* Line End Anchors:
-SEOL        EOL,        no        ; Match "" at end of line: /$/
-MEOL        EOL,        no        ; Same, assuming multiline: /$/m
-EOS         EOL,        no        ; Match "" at end of string: /\z/
+=head1 TOP-LEVEL STRUCTURE
 
-#* Match Start Anchors:
-GPOS        GPOS,       no        ; Matches where last m//g left off.
+The file returns a single hashref with these keys:
 
-#* Word Boundary Opcodes:
-# The regops that have varieties that vary depending on the character set regex
-# modifiers have to ordered thusly: /d, /l, /u, /a, /aa.  This is because code
-# in regcomp.c uses the enum value of the modifier as an offset from the /d
-# version.  The complements must come after the non-complements.
-# BOUND, POSIX and their complements are affected, as well as EXACTF.
-BOUND       BOUND,      no        ; Like BOUNDA for non-utf8, otherwise like BOUNDU
-BOUNDL      BOUND,      no        ; Like BOUND/BOUNDU, but \w and \W are defined by current locale
-BOUNDU      BOUND,      no        ; Match "" at any boundary of a given type using /u rules.
-BOUNDA      BOUND,      no        ; Match "" at any boundary between \w\W or \W\w, where \w is [_a-zA-Z0-9]
-# All NBOUND nodes are required by code in regexec.c to be greater than all BOUND ones
-NBOUND      NBOUND,     no        ; Like NBOUNDA for non-utf8, otherwise like BOUNDU
-NBOUNDL     NBOUND,     no        ; Like NBOUND/NBOUNDU, but \w and \W are defined by current locale
-NBOUNDU     NBOUND,     no        ; Match "" at any non-boundary of a given type using /u rules.
-NBOUNDA     NBOUND,     no        ; Match "" between any \w\w or \W\W, where \w is [_a-zA-Z0-9]
+=over 4
 
-#* [Special] alternatives:
-REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
-SANY        REG_ANY,    no 0 S    ; Match any one character.
-ANYOF       ANYOF,      sv charclass S    ; Match character in (or not in) this class, single char match only
-ANYOFD      ANYOF,      sv charclass S    ; Like ANYOF, but /d is in effect
-ANYOFL      ANYOF,      sv charclass S    ; Like ANYOF, but /l is in effect
-ANYOFPOSIXL ANYOF,      sv charclass_posixl S    ; Like ANYOFL, but matches [[:posix:]] classes
+=item * C<ops_groups>
 
-# Must be sequential
-ANYOFH      ANYOFH,     sv 1 S    ; Like ANYOF, but only has "High" matches, none in the bitmap; the flags field contains the lowest matchable UTF-8 start byte
-ANYOFHb     ANYOFH,     sv 1 S    ; Like ANYOFH, but all matches share the same UTF-8 start byte, given in the flags field
-ANYOFHr     ANYOFH,     sv 1 S    ; Like ANYOFH, but the flags field contains packed bounds for all matchable UTF-8 start bytes.
-ANYOFHs     ANYOFH,     sv:str 1 S    ; Like ANYOFHb, but has a string field that gives the leading matchable UTF-8 bytes; flags field is len
-ANYOFR      ANYOFR,     packed 1  S  ; Matches any character in the range given by its packed args: upper 12 bits is the max delta from the base lower 20; the flags field contains the lowest matchable UTF-8 start byte
-ANYOFRb     ANYOFR,     packed 1  S ; Like ANYOFR, but all matches share the same UTF-8 start byte, given in the flags field
-# There is no ANYOFRr because khw doesn't think there are likely to be
-# real-world cases where such a large range is used.
-#
-# And khw doesn't believe an ANYOFRs (which would behave like ANYOFHs) is
-# actually worth it.  On two-byte UTF-8, the first byte alone is all we need,
-# and ANYOFR already does that.  And we don't consider non-Unicode code points
-# or EBCDIC for performance decisions.  If we had it, we would be comparing the
-# strings, and if they are equal convert to UV and then test to see if it is in
-# the range.  The fast DFA we now use to do the conversion is slower than
-# comparing the strings, but not by much, and negligible in 2 or 3 byte
-# operations.  (We don't have to compare the final byte as it has to be
-# different or else this wouldn't be a range.)  So we might as well dispense
-# with the comparisons that ANYOFRs would do, and go directly to do the
-# conversion.
+An ordered arrayref of opcode groups.
 
-ANYOFHbbm   ANYOFHbbm   none bbm S ; Like ANYOFHb, but only for 2-byte UTF-8 characters; uses a bitmap to match the continuation byte
+=item * C<state_groups>
 
-ANYOFM      ANYOFM,     byte 1 S  ; Like ANYOF, but matches an invariant byte as determined by the mask and arg
-NANYOFM     ANYOFM,     byte 1 S  ; complement of ANYOFM
+An ordered arrayref of state groups.
 
-#* POSIX Character Classes:
-# Order of the below is important.  See ordering comment above.
-POSIXD      POSIXD,     none 0 S   ; Some [[:class:]] under /d; the FLAGS field gives which one
-POSIXL      POSIXD,     none 0 S   ; Some [[:class:]] under /l; the FLAGS field gives which one
-POSIXU      POSIXD,     none 0 S   ; Some [[:class:]] under /u; the FLAGS field gives which one
-POSIXA      POSIXD,     none 0 S   ; Some [[:class:]] under /a; the FLAGS field gives which one
-NPOSIXD     NPOSIXD,    none 0 S   ; complement of POSIXD, [[:^class:]]
-NPOSIXL     NPOSIXD,    none 0 S   ; complement of POSIXL, [[:^class:]]
-NPOSIXU     NPOSIXD,    none 0 S   ; complement of POSIXU, [[:^class:]]
-NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
-# End of order being important
+=back
 
-CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
+=head1 OPCODE GROUPS
 
-#* Alternation
+Each entry in C<ops_groups> is a hashref with:
 
-#* BRANCH        The set of branches constituting a single choice are
-#*               hooked together with their "next" pointers, since
-#*               precedence prevents anything being concatenated to
-#*               any individual branch.  The "next" pointer of the last
-#*               BRANCH in a choice points to the thing following the
-#*               whole choice.  This is also where the final "next"
-#*               pointer of each individual branch points; each branch
-#*               starts with the operand node of a BRANCH node.
-#*
-BRANCH      BRANCH,     node 1 V  ; Match this alternative, or the next...
+=over 4
 
-#*Literals
-# NOTE: the relative ordering of these types is important do not change it
-# By convention, folding nodes begin with EXACTF; A digit 8 is in the name if
-# and only if it it requires a UTF-8 target string in order to successfully
-# match.
+=item * C<GROUP>
 
-EXACT       EXACT,      str       ; Match this string (flags field is the length).
+The logical group/block name.  Groups are emitted as blocks, so relative
+ordering within a group is preserved.
 
-#* In a long string node, the U32 argument is the length, and is
-#* immediately followed by the string.
-LEXACT      EXACT,  len:str 1; Match this long string (preceded by length; flags unused).
-EXACTL      EXACT,      str       ; Like EXACT, but /l is in effect (used so locale-related warnings can be checked for)
-EXACTF      EXACT,      str       ; Like EXACT, but match using /id rules; (string not UTF-8, ASCII folded; non-ASCII not)
-EXACTFL     EXACT,      str       ; Like EXACT, but match using /il rules; (string not likely to be folded)
-EXACTFU     EXACT,      str	  ; Like EXACT, but match using /iu rules; (string folded)
+=item * C<TYPE>
 
-# The reason MICRO and SHARP S aren't folded in non-UTF8 patterns is because
-# they would fold to something that requires UTF-8.  SHARP S would normally
-# fold to 'ss', but because of /aa, it instead folds to a pair of LATIN SMALL
-# LETTER LONG S characters (U+017F)
-EXACTFAA    EXACT,      str	  ; Like EXACT, but match using /iaa rules; (string folded except MICRO in non-UTF8 patterns; doesn't contain SHARP S unless UTF-8; folded length <= unfolded)
-# must immediately follow EXACTFAA
-EXACTFAA_NO_TRIE  EXACT, str	  ; Like EXACTFAA, (string not UTF-8, folded except: MICRO, SHARP S; folded length <= unfolded, not currently trie-able)
+The regnode type shared by the group.  This may be a string type name, an arrayref
+of types, or a special value C<"__MIXED__">, which allows the type to contain ops of
+any type without validation.
 
-# End of important relative ordering.
+=item * C<pod>
 
-EXACTFUP    EXACT,      str	  ; Like EXACT, but match using /iu rules; (string not UTF-8, folded except MICRO: hence Problematic)
-# In order for a non-UTF-8 EXACTFAA to think the pattern is pre-folded when
-# matching a UTF-8 target string, there would have to be something like an
-# EXACTFAA_MICRO which would not be considered pre-folded for UTF-8 targets,
-# since the fold of the MICRO SIGN would not be done, and would be
-# representable in the UTF-8 target string.
+Optional text emitted into the generated regnode table in
+F<pod/perldebguts.pod>.  A scalar is one paragraph.  An arrayref of strings
+is one paragraph which will be reflowed.  A nested arrayref starts a new
+paragraph; only two levels are supported.
 
-EXACTFLU8   EXACT,      str	  ; Like EXACTFU, but use /il, UTF-8, (string is folded, and everything in it is above 255
-EXACT_REQ8   EXACT,      str      ; Like EXACT, but only UTF-8 encoded targets can match
-LEXACT_REQ8  EXACT,  len:str 1    ; Like LEXACT, but only UTF-8 encoded targets can match
-EXACTFU_REQ8 EXACT,    str        ; Like EXACTFU, but only UTF-8 encoded targets can match
-# One could add EXACTFAA8 and something that has the same effect for /l,
-# but these would be extremely uncommon
+=item * C<comment>
 
-EXACTFU_S_EDGE EXACT,   str       ; /di rules, but nothing in it precludes /ui, except begins and/or ends with [Ss]; (string not UTF-8; compile-time only)
+Optional maintainer-facing notes about ordering, invariants, or implementation
+constraints.
 
-#*New charclass like patterns
-LNBREAK     LNBREAK,    none      ; generic newline pattern
+=item * C<ops>
 
-#*Trie Related
+An ordered arrayref of opcode definitions.
 
-#* Behave the same as A|LIST|OF|WORDS would. The '..C' variants
-#* have inline charclass data (ascii only), the 'C' store it in the
-#* structure.
-# NOTE: the relative order of the TRIE-like regops  is significant
+=back
 
-TRIE            TRIE,trie 1         ; Match many EXACT(F[ALU]?)? at once. flags==type
-TRIEC           TRIE,trie charclass ; Same as TRIE, but with embedded charclass data
+Each regop definition may contain:
 
-# For start classes, contains an added fail table.
-AHOCORASICK     TRIE,trie 1         ; Aho Corasick stclass. flags==type
-AHOCORASICKC    TRIE,trie charclass ; Same as AHOCORASICK, but with embedded charclass data
+=over 4
 
-# Long trie ops.  Keep these paired with TRIE/TRIEC.
-LTRIE           TRIE,trie 2 . 1              ; Match many EXACT(F[ALU]?)? at once. flags==type, long jump
-LTRIEC          TRIE,trie charclass_trie . 1 ; Same as TRIE, but with embedded charclass data, long jump
+=item * C<NAME>
 
-#*Do nothing types
+The opcode name.
 
-NOTHING     NOTHING,    no        ; Match empty string.
-#*A variant of above which delimits a group, thus stops optimizations
-TAIL        NOTHING,    no        ; Match empty string. Can jump here from outside.
+=item * C<TYPE>
 
-#*Loops
+Optional if the containing group's C<TYPE> is a single string, otherwise mandatory.
+When specified must comply with the groups C<TYPE> definition. See above for details.
 
-#* STAR,PLUS    '?', and complex '*' and '+', are implemented as
-#*               circular BRANCH structures.  Simple cases
-#*               (one character per match) are implemented with STAR
-#*               and PLUS for speed and to minimize recursive plunges.
-#*
-STAR        STAR,       node 0 V  ; Match this (simple) thing 0 or more times: /A{0,}B/ where A is width 1 char
-PLUS        PLUS,       node 0 V  ; Match this (simple) thing 1 or more times: /A{1,}B/ where A is width 1 char
+=item * C<desc>
 
-CURLY       CURLY,      sv 3 V    ; Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1 char
-CURLYN      CURLY,      no 3 V    ; Capture next-after-this simple thing: /(A){m,n}B/ where A is width 1 char
-CURLYM      CURLY,      no 3 V    ; Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A is fixed-length
-CURLYX      CURLY,      sv 3 V    ; Match/Capture this complex thing {n,m} times.
+Description of what the regop does.  It follows the same scalar/arrayref
+paragraph rules as C<pod>.
 
-#*This terminator creates a loop structure for CURLYX
-WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.
+=item * C<struct>
 
-#*Buffer related
+Optional regnode structure name such as C<regnode_1> or
+C<regnode_charclass>.  Omit it for plain C<regnode>.
 
-#*OPEN,CLOSE,GROUPP     ...are numbered at compile time.
-OPEN        OPEN,       num 1     ; Mark this point in input as start of #n.
-CLOSE       CLOSE,      num 1     ; Close corresponding OPEN of #n.
-SROPEN      SROPEN,     none      ; Same as OPEN, but for script run
-SRCLOSE     SRCLOSE,    none      ; Close preceding SROPEN
+=item * C<pod>
 
-REF         REF,        num 2 V   ; Match some already matched string
-REFF        REF,        num 2 V   ; Match already matched string, using /di rules.
-REFFL       REF,        num 2 V   ; Match already matched string, using /li rules.
-# REFF[AU]N? could have been implemented using the FLAGS field of the
-# regnode, but by having a separate node type, we can use the existing switch
-# statement to avoid some tests
-REFFU       REF,        num 2 V   ; Match already matched string, using /ui.
-REFFA       REF,        num 2 V   ; Match already matched string, using /aai rules.
+Optional per-op text which is intended to be emitted into the generated regnode table
+in perldebguts.pod.  It follows the same scalar/arrayref paragraph rules as
+group-level C<pod>.
 
-#*Named references.  Code in regcomp.c assumes that these all are after
-#*the numbered references
-REFN        REF,        no-sv 2 V ; Match some already matched string
-REFFN       REF,        no-sv 2 V ; Match already matched string, using /di rules.
-REFFLN      REF,        no-sv 2 V ; Match already matched string, using /li rules.
-REFFUN      REF,        num   2 V ; Match already matched string, using /ui rules.
-REFFAN      REF,        num   2 V ; Match already matched string, using /aai rules.
+=item * C<comment>
 
-#*Support for long RE
-LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
-BRANCHJ     BRANCHJ,    off 2 V 1 ; BRANCH with long offset.
+Optional maintainer-facing notes for this op.
 
-#*Special Case Regops
-IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current
-UNLESSM     BRANCHJ,    off 1 . 1 ; Fails if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current
-SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
-IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
-GROUPP      GROUPP,     num 1     ; Whether the group matched.
+=item * C<attr>
 
-#*The heavy worker
+Optional hashref of non-default attributes.  Recognized keys currently include
+C<arg_spec>, C<simple>, C<varies>, C<off_by_arg>, and C<str_arg>.
 
-EVAL        EVAL,       evl/flags 2 ; Execute some Perl code.
+=back
 
-#*Modifiers
+=head1 STATE GROUPS
 
-MINMOD      MINMOD,     no        ; Next operator is not greedy.
-LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
+Each entry in C<state_groups> is a hashref with:
 
-#*This is not used yet
-RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
+=over 4
 
-#*Regex Subroutines
-GOSUB       GOSUB,      num/ofs 2    ; recurse to paren arg1 at (signed) ofs arg2
+=item * C<TYPE>
 
-#*Special conditionals
-GROUPPN     GROUPPN,    no-sv 1   ; Whether the group matched.
-INSUBP      INSUBP,     num 1     ; Whether we are in a specific recurse.  
-DEFINEP     DEFINEP,    none 1    ; Never execute directly.               
+The base opcode/state name used to form the generated state names.
 
-#*Backtracking Verbs
-ENDLIKE     ENDLIKE,    none      ; Used only for the type field of verbs
-OPFAIL      ENDLIKE,    no-sv 1   ; Same as (?!), but with verb arg
-ACCEPT      ENDLIKE,    no-sv/num 2   ; Accepts the current matched string, with verbar
+=item * C<transitions>
 
-#*Verbs With Arguments
-VERB        VERB,       no-sv 1   ; Used only for the type field of verbs
-PRUNE       VERB,       no-sv 1   ; Pattern fails at this startpoint if no-backtracking through this 
-MARKPOINT   VERB,       no-sv 1   ; Push the current location for rollback by cut.
-SKIP        VERB,       no-sv 1   ; On failure skip forward (to the mark) before retrying
-COMMIT      VERB,       no-sv 1   ; Pattern fails outright if backtracking through this
-CUTGROUP    VERB,       no-sv 1   ; On failure go to the next alternation in the group
+The compact transition specification used to expand regmatch states.
 
-#*Control what to keep in $&.
-KEEPS       KEEPS,      no        ; $& begins here.
+=item * C<pod>
 
-#*Validate that lookbehind IFMATCH and UNLESSM end at the right place
-LOOKBEHIND_END   END,        no        ; Return from lookbehind (IFMATCH/UNLESSM) and validate position
+Optional text emitted into the generated regnode table.  It follows the same
+scalar/arrayref paragraph rules as opcode-group C<pod>.
 
-# NEW STUFF SOMEWHERE ABOVE THIS LINE.  Stuff that regexec.c: find_byclass()
-# and regrepeat() use should go way above, near LNBREAK to allow a more compact
-# jump table to be generated for their switch() statements
+=item * C<comment>
 
-################################################################################
+Optional maintainer-facing notes.
 
-#*SPECIAL  REGOPS
+=back
 
-#* This is not really a node, but an optimized away piece of a "long"
-#* node.  To simplify debugging output, we mark it as if it were a node
-OPTIMIZED   NOTHING,    off       ; Placeholder for dump.
+=head1 NOTES
 
-#* Special opcode with the property that no opcode in a compiled program
-#* will ever be of this type. Thus it can be used as a flag value that
-#* no other opcode has been seen. END is used similarly, in that an END
-#* node can't be optimized. So END implies "unoptimizable" and PSEUDO
-#* mean "not seen anything to optimize yet".
-PSEUDO      PSEUDO,     off       ; Pseudo opcode for internal use.
+The C<pod> and C<comment> fields serve different purposes.  C<pod> is for
+generated documentation output; C<comment> is for source-maintainer guidance,
+we put the latter in the data structure so it can be regenerated via code if
+necessary.
 
-REGEX_SET   REGEX_SET,  depth p S ; Regex set, temporary node used in pre-optimization compilation
+=cut
 
--------------------------------------------------------------------------------
-# Format for second section:
-# REGOP \t typelist [ \t typelist]
-# typelist= namelist
-#         = namelist:FAIL
-#         = name:count
-
-# Anything below is a state
-#
-#
-TRIE            next:FAIL
-EVAL            B,postponed_A,postponed_B:FAIL
-CURLYX          end:FAIL
-WHILEM          A_pre,A_min,A_max,B_min,B_max:FAIL
-BRANCH          next:FAIL
-CURLYM          A,B:FAIL
-IFMATCH         A:FAIL
-CURLY           B_min,B_max:FAIL
-COMMIT          next:FAIL
-MARKPOINT       next:FAIL
-SKIP            next:FAIL
-CUTGROUP        next:FAIL
-KEEPS           next:FAIL
-REF             next:FAIL
+return {
+  "ops_groups" => [
+      {
+        "GROUP" => "END",
+        "TYPE" => "END",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "END",
+              "TYPE" => "END",
+              "desc" => "End of program.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "SUCCEED",
+              "TYPE" => "END",
+              "desc" => "Return from a subroutine, basically.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "LOOKBEHIND_END",
+              "TYPE" => "END",
+              "desc" =>
+                "Return from lookbehind (IFMATCH/UNLESSM) and validate " .
+                "position when they do",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Exit points",
+      },
+      #################################
+      {
+        "GROUP" => "BOL",
+        "TYPE" => "BOL",
+        "comment" =>
+          "Note flags field for SBOL indicates if it is a /^/ or a " .
+          "/\\A/",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "SBOL",
+              "TYPE" => "BOL",
+              "desc" => "Match \"\" at beginning of line: /^/, /\\A/",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "MBOL",
+              "TYPE" => "BOL",
+              "desc" => "Same, assuming multiline: /^/m",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Line Start Anchors:",
+      },
+      #################################
+      {
+        "GROUP" => "EOL",
+        "TYPE" => "EOL",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "SEOL",
+              "TYPE" => "EOL",
+              "desc" => "Match \"\" at end of line: /\$/",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "MEOL",
+              "TYPE" => "EOL",
+              "desc" => "Same, assuming multiline: /\$/m",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EOS",
+              "TYPE" => "EOL",
+              "desc" => "Match \"\" at end of string: /\\z/",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Line End Anchors:",
+      },
+      #################################
+      {
+        "GROUP" => "GPOS",
+        "TYPE" => "GPOS",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "GPOS",
+              "TYPE" => "GPOS",
+              "desc" => "Matches where last m//g left off.",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Match Start Anchors:",
+      },
+      #################################
+      {
+        "GROUP" => "BOUND",
+        "TYPE" => "BOUND",
+        "comment" =>
+          "The regops that have varieties that vary depending on " .
+          "the character set regex modifiers have to ordered " .
+          "thusly: /d, /l, /u, /a, /aa.  This is because code in " .
+          "regcomp.c uses the enum value of the modifier as an " .
+          "offset from the /d version.  The complements must come " .
+          "after the non-complements. BOUND, POSIX and their " .
+          "complements are affected, as well as EXACTF.",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "BOUND",
+              "TYPE" => "BOUND",
+              "desc" => "Like BOUNDA for non-utf8, otherwise like BOUNDU",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "BOUNDL",
+              "TYPE" => "BOUND",
+              "desc" =>
+                "Like BOUND/BOUNDU, but \\w and \\W are defined by " .
+                "current locale",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "BOUNDU",
+              "TYPE" => "BOUND",
+              "desc" =>
+                "Match \"\" at any boundary of a given type using /u " .
+                "rules.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "BOUNDA",
+              "TYPE" => "BOUND",
+              "desc" =>
+                "Match \"\" at any boundary between \\w\\W or \\W\\w, " .
+                "where \\w is [_a-zA-Z0-9]",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Word Boundary Opcodes:",
+      },
+      #################################
+      {
+        "GROUP" => "NBOUND",
+        "TYPE" => "NBOUND",
+        "comment" =>
+          "All NBOUND nodes are required by code in regexec.c to be " .
+          "greater than all BOUND nodes",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "NBOUND",
+              "TYPE" => "NBOUND",
+              "desc" => "Like NBOUNDA for non-utf8, otherwise like BOUNDU",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NBOUNDL",
+              "TYPE" => "NBOUND",
+              "desc" =>
+                "Like NBOUND/NBOUNDU, but \\w and \\W are defined by " .
+                "current locale",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NBOUNDU",
+              "TYPE" => "NBOUND",
+              "desc" =>
+                "Match \"\" at any non-boundary of a given type using " .
+                "/u rules.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NBOUNDA",
+              "TYPE" => "NBOUND",
+              "desc" =>
+                "Match \"\" between any \\w\\w or \\W\\W, where \\w is " .
+                "[_a-zA-Z0-9]",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "REG_ANY",
+        "TYPE" => "REG_ANY",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "REG_ANY",
+              "TYPE" => "REG_ANY",
+              "attr" => {
+                  "simple" => 1,
+                },
+              "desc" => "Match any one character (except newline).",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "SANY",
+              "TYPE" => "REG_ANY",
+              "attr" => {
+                  "simple" => 1,
+                },
+              "desc" => "Match any one character.",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "[Special] alternatives:",
+      },
+      #################################
+      {
+        "GROUP" => "ANYOF",
+        "TYPE" => "ANYOF",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ANYOF",
+              "TYPE" => "ANYOF",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Match character in (or not in) this class, single " .
+                "char match only",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass",
+            },
+            {
+              "NAME" => "ANYOFD",
+              "TYPE" => "ANYOF",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" => "Like ANYOF, but /d is in effect",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass",
+            },
+            {
+              "NAME" => "ANYOFL",
+              "TYPE" => "ANYOF",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" => "Like ANYOF, but /l is in effect",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass",
+            },
+            {
+              "NAME" => "ANYOFPOSIXL",
+              "TYPE" => "ANYOF",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" => "Like ANYOFL, but matches [[:posix:]] classes",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass_posixl",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "ANYOFH",
+        "TYPE" => "ANYOFH",
+        "comment" => "Must be sequential",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ANYOFH",
+              "TYPE" => "ANYOFH",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOF, but only has \"High\" matches, none in " .
+                "the bitmap; the flags field contains the lowest " .
+                "matchable UTF-8 start byte",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "ANYOFHb",
+              "TYPE" => "ANYOFH",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOFH, but all matches share the same UTF-8 " .
+                "start byte, given in the flags field",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "ANYOFHr",
+              "TYPE" => "ANYOFH",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOFH, but the flags field contains packed " .
+                "bounds for all matchable UTF-8 start bytes.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "ANYOFHs",
+              "TYPE" => "ANYOFH",
+              "attr" => {
+                  "arg_spec" => "sv:str",
+                  "simple" => 1,
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Like ANYOFHb, but has a string field that gives the " .
+                "leading matchable UTF-8 bytes; flags field is len",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "ANYOFR",
+        "TYPE" => "ANYOFR",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ANYOFR",
+              "TYPE" => "ANYOFR",
+              "attr" => {
+                  "arg_spec" => "packed",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Matches any character in the range given by its " .
+                "packed args: upper 12 bits is the max delta from the " .
+                "base lower 20; the flags field contains the lowest " .
+                "matchable UTF-8 start byte",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "ANYOFRb",
+              "TYPE" => "ANYOFR",
+              "attr" => {
+                  "arg_spec" => "packed",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOFR, but all matches share the same UTF-8 " .
+                "start byte, given in the flags field",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "ANYOFHbbm",
+        "TYPE" => "ANYOFHbbm",
+        "comment" =>
+          "There is no ANYOFRr because khw doesn't think there are " .
+          "likely to be real-world cases where such a large range " .
+          "is used. And khw doesn't believe an ANYOFRs (which would " .
+          "behave like ANYOFHs) is actually worth it.  On two-byte " .
+          "UTF-8, the first byte alone is all we need, and ANYOFR " .
+          "already does that.  And we don't consider non-Unicode " .
+          "code points or EBCDIC for performance decisions.  If we " .
+          "had it, we would be comparing the strings, and if they " .
+          "are equal convert to UV and then test to see if it is in " .
+          "the range.  The fast DFA we now use to do the conversion " .
+          "is slower than comparing the strings, but not by much, " .
+          "and negligible in 2 or 3 byte operations.  (We don't " .
+          "have to compare the final byte as it has to be different " .
+          "or else this wouldn't be a range.) So we might as well " .
+          "dispense with the comparisons that ANYOFRs would do, and " .
+          "go directly to do the conversion.",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ANYOFHbbm",
+              "TYPE" => "ANYOFHbbm",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOFHb, but only for 2-byte UTF-8 characters; " .
+                "uses a bitmap to match the continuation byte",
+              "line" => __LINE__,
+              "struct" => "regnode_bbm",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "ANYOFM",
+        "TYPE" => "ANYOFM",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ANYOFM",
+              "TYPE" => "ANYOFM",
+              "attr" => {
+                  "arg_spec" => "byte",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Like ANYOF, but matches an invariant byte as " .
+                "determined by the mask and arg",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "NANYOFM",
+              "TYPE" => "ANYOFM",
+              "attr" => {
+                  "arg_spec" => "byte",
+                  "simple" => 1,
+                },
+              "desc" => "complement of ANYOFM",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "POSIXD",
+        "TYPE" => "POSIXD",
+        "comment" =>
+          "Order of the below is important.  See ordering comment " .
+          "above.",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "POSIXD",
+              "TYPE" => "POSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Some [[:class:]] under /d; the FLAGS field gives " .
+                "which one",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "POSIXL",
+              "TYPE" => "POSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Some [[:class:]] under /l; the FLAGS field gives " .
+                "which one",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "POSIXU",
+              "TYPE" => "POSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Some [[:class:]] under /u; the FLAGS field gives " .
+                "which one",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "POSIXA",
+              "TYPE" => "POSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Some [[:class:]] under /a; the FLAGS field gives " .
+                "which one",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "POSIX Character Classes:",
+      },
+      #################################
+      {
+        "GROUP" => "NPOSIXD",
+        "TYPE" => "NPOSIXD",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "NPOSIXD",
+              "TYPE" => "NPOSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" => "complement of POSIXD, [[:^class:]]",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NPOSIXL",
+              "TYPE" => "NPOSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" => "complement of POSIXL, [[:^class:]]",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NPOSIXU",
+              "TYPE" => "NPOSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" => "complement of POSIXU, [[:^class:]]",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "NPOSIXA",
+              "TYPE" => "NPOSIXD",
+              "attr" => {
+                  "arg_spec" => "none",
+                  "simple" => 1,
+                },
+              "desc" => "complement of POSIXA, [[:^class:]]",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "CLUMP",
+        "TYPE" => "CLUMP",
+        "comment" => "End of order being important",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "CLUMP",
+              "TYPE" => "CLUMP",
+              "attr" => {
+                  "varies" => 1,
+                },
+              "desc" => "Match any extended grapheme cluster sequence",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "BRANCH",
+        "TYPE" => "BRANCH",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "BRANCH",
+              "TYPE" => "BRANCH",
+              "attr" => {
+                  "arg_spec" => "node",
+                  "varies" => 1,
+                },
+              "desc" => "Match this alternative, or the next...",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+        "pod" => [
+            ["Alternation"],
+            [
+              "BRANCH The set of branches constituting a single choice are",
+              "hooked together with their \"next\" pointers, since",
+              "precedence prevents anything being concatenated to",
+              "any individual branch.  The \"next\" pointer of the last",
+              "BRANCH in a choice points to the thing following the",
+              "whole choice.  This is also where the final \"next\"",
+              "pointer of each individual branch points; each branch",
+              "starts with the operand node of a BRANCH node.",
+            ],
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "EXACT",
+        "TYPE" => "EXACT",
+        "comment" =>
+          "NOTE: the relative ordering of these types is important " .
+          "do not change it By convention, folding nodes begin with " .
+          "EXACTF; A digit 8 is in the name if and only if it it " .
+          "requires a UTF-8 target string in order to successfully " .
+          "match.",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "EXACT",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" => "Match this string (flags field is the length).",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "LEXACT",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "len:str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Match this long string (preceded by length; flags " .
+                "unused).",
+              "line" => __LINE__,
+              "pod" => [
+                  "In a long string node, the U32 argument is the length, and " .
+                  "is",
+                  "immediately followed by the string.",
+                ],
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "EXACTL",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Like EXACT, but /l is in effect (used so " .
+                "locale-related warnings can be checked for)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTF",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Like EXACT, but match using /id rules; (string not " .
+                "UTF-8, ASCII folded; non-ASCII not)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFL",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Like EXACT, but match using /il rules; (string not " .
+                "likely to be folded)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFU",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" => "Like EXACT, but match using /iu rules; (string folded)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFAA",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "comment" =>
+                "The reason MICRO and SHARP S aren't folded in " .
+                "non-UTF8 patterns is because they would fold to " .
+                "something that requires UTF-8. SHARP S would " .
+                "normally fold to 'ss', but because of /aa, it " .
+                "instead folds to a pair of LATIN SMALL LETTER LONG " .
+                "S characters (U+017F)",
+              "desc" =>
+                "Like EXACT, but match using /iaa rules; (string " .
+                "folded except MICRO in non-UTF8 patterns; doesn't " .
+                "contain SHARP S unless UTF-8; folded length <= " .
+                "unfolded)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFAA_NO_TRIE",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "comment" => "must immediately follow EXACTFAA",
+              "desc" =>
+                "Like EXACTFAA, (string not UTF-8, folded except: " .
+                "MICRO, SHARP S; folded length <= unfolded, not " .
+                "currently trie-able)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFUP",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "comment" => "End of important relative ordering.",
+              "desc" =>
+                "Like EXACT, but match using /iu rules; (string not " .
+                "UTF-8, folded except MICRO: hence Problematic)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFLU8",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "comment" =>
+                "In order for a non-UTF-8 EXACTFAA to think the " .
+                "pattern is pre-folded when matching a UTF-8 target " .
+                "string, there would have to be something like an " .
+                "EXACTFAA_MICRO which would not be considered " .
+                "pre-folded for UTF-8 targets, since the fold of " .
+                "the MICRO SIGN would not be done, and would be " .
+                "representable in the UTF-8 target string.",
+              "desc" =>
+                "Like EXACTFU, but use /il, UTF-8, (string is folded, " .
+                "and everything in it is above 255",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACT_REQ8",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" => "Like EXACT, but only UTF-8 encoded targets can match",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "LEXACT_REQ8",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "len:str",
+                  "str_arg" => 1,
+                },
+              "desc" => "Like LEXACT, but only UTF-8 encoded targets can match",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "EXACTFU_REQ8",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" => "Like EXACTFU, but only UTF-8 encoded targets can match",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACTFU_S_EDGE",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "comment" =>
+                "One could add EXACTFAA8 and something that has the " .
+                "same effect for /l, but these would be extremely " .
+                "uncommon",
+              "desc" =>
+                "/di rules, but nothing in it precludes /ui, except " .
+                "begins and/or ends with [Ss]; (string not UTF-8; " .
+                "compile-time only)",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Literals",
+      },
+      #################################
+      {
+        "GROUP" => "LNBREAK",
+        "TYPE" => "LNBREAK",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "LNBREAK",
+              "TYPE" => "LNBREAK",
+              "attr" => {
+                  "arg_spec" => "none",
+                },
+              "desc" => "generic newline pattern",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "New charclass like patterns",
+      },
+      #################################
+      {
+        "GROUP" => "TRIE",
+        "TYPE" => "TRIE",
+        "comment" =>
+          "NOTE: the relative order of the TRIE-like regops is " .
+          "significant",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "TRIE",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "desc" => "Match many EXACT(F[ALU]?)? at once. flags==type",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "TRIEC",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "desc" => "Same as TRIE, but with embedded charclass data",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass",
+            },
+            {
+              "NAME" => "AHOCORASICK",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "comment" => "For start classes, contains an added fail table.",
+              "desc" => "Aho Corasick stclass. flags==type",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "AHOCORASICKC",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "desc" => "Same as AHOCORASICK, but with embedded charclass data",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass",
+            },
+            {
+              "NAME" => "LTRIE",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "desc" => "Same as TRIE, but with longjump support",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "LTRIEC",
+              "TYPE" => "TRIE",
+              "attr" => {
+                  "arg_spec" => "trie",
+                },
+              "desc" => "Same as TRIEC, but with longjump support",
+              "line" => __LINE__,
+              "struct" => "regnode_charclass_trie",
+            },
+          ],
+        "pod" => [
+            ["Trie Related"],
+            [
+              "Behave the same as A|LIST|OF|WORDS would. The '..C' variants",
+              "have inline charclass data (ascii only), the 'C' store it in the",
+              "structure.",
+            ],
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "NOTHING",
+        "TYPE" => "NOTHING",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "NOTHING",
+              "TYPE" => "NOTHING",
+              "desc" => "Match empty string.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "TAIL",
+              "TYPE" => "NOTHING",
+              "desc" => "Match empty string. Can jump here from outside.",
+              "line" => __LINE__,
+              "pod" =>
+                "A variant of above which delimits a group, thus stops " .
+                "optimizations",
+            },
+            {
+              "NAME" => "OPTIMIZED",
+              "TYPE" => "NOTHING",
+              "desc" =>
+                "This is not really a node, but an optimized away " .
+                "piece of a \"long\" node.  To simplify debugging " .
+                "output, we mark it as if it were a node",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Do nothing types",
+      },
+      #################################
+      {
+        "GROUP" => "STAR",
+        "TYPE" => "STAR",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "STAR",
+              "TYPE" => "STAR",
+              "attr" => {
+                  "arg_spec" => "node",
+                  "varies" => 1,
+                },
+              "desc" =>
+                "Match this (simple) thing 0 or more times: /A{0,}B/ " .
+                "where A is width 1 char",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => [
+            ["Loops"],
+            [
+              "STAR,PLUS '?', and complex '*' and '+', are implemented as",
+              "circular BRANCH structures.  Simple cases",
+              "(one character per match) are implemented with STAR",
+              "and PLUS for speed and to minimize recursive plunges.",
+            ],
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "PLUS",
+        "TYPE" => "PLUS",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "PLUS",
+              "TYPE" => "PLUS",
+              "attr" => {
+                  "arg_spec" => "node",
+                  "varies" => 1,
+                },
+              "desc" =>
+                "Match this (simple) thing 1 or more times: /A{1,}B/ " .
+                "where A is width 1 char",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "CURLY",
+        "TYPE" => ["CURLY", "WHILEM"],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "CURLY",
+              "TYPE" => "CURLY",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "varies" => 1,
+                },
+              "desc" =>
+                "Match this (simple) thing {n,m} times: /A{m,n}B/ " .
+                "where A is width 1 char",
+              "line" => __LINE__,
+              "struct" => "regnode_3",
+            },
+            {
+              "NAME" => "CURLYN",
+              "TYPE" => "CURLY",
+              "attr" => {
+                  "varies" => 1,
+                },
+              "desc" =>
+                "Capture next-after-this simple thing: /(A){m,n}B/ " .
+                "where A is width 1 char",
+              "line" => __LINE__,
+              "struct" => "regnode_3",
+            },
+            {
+              "NAME" => "CURLYM",
+              "TYPE" => "CURLY",
+              "attr" => {
+                  "varies" => 1,
+                },
+              "desc" =>
+                "Capture this medium-complex thing {n,m} times: " .
+                "/(A){m,n}B/ where A is fixed-length",
+              "line" => __LINE__,
+              "struct" => "regnode_3",
+            },
+            {
+              "NAME" => "CURLYX",
+              "TYPE" => "CURLY",
+              "attr" => {
+                  "arg_spec" => "sv",
+                  "varies" => 1,
+                },
+              "desc" => "Match/Capture this complex thing {n,m} times.",
+              "line" => __LINE__,
+              "struct" => "regnode_3",
+            },
+            {
+              "NAME" => "WHILEM",
+              "TYPE" => "WHILEM",
+              "attr" => {
+                  "varies" => 1,
+                },
+              "desc" => "Do curly processing and see if rest matches.",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "CAPTURE-PARENS",
+        "TYPE" => [ "OPEN", "CLOSE" ],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "OPEN",
+              "TYPE" => "OPEN",
+              "attr" => {
+                  "arg_spec" => "num",
+                },
+              "desc" => "Mark this point in input as start of #n.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "CLOSE",
+              "TYPE" => "CLOSE",
+              "attr" => {
+                  "arg_spec" => "num",
+                },
+              "desc" => "Close corresponding OPEN of #n.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+        "pod" => [
+            ["Buffer related"],
+            ["OPEN,CLOSE,GROUPP ...are numbered at compile time."],
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "SCRIPT-RUN",
+        "TYPE" => [ "SROPEN", "SRCLOSE" ],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "SROPEN",
+              "TYPE" => "SROPEN",
+              "attr" => {
+                  "arg_spec" => "none",
+                },
+              "desc" => "Start a script run",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "SRCLOSE",
+              "TYPE" => "SRCLOSE",
+              "attr" => {
+                  "arg_spec" => "End a script run",
+                },
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Script Run",
+      },
+      #################################
+      {
+        "GROUP" => "REF",
+        "TYPE" => "REF",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "REF",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match some already matched string",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFF",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /di rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFL",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /li rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFU",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "comment" =>
+                "REFF[AU]N? could have been implemented using the " .
+                "FLAGS field of the regnode, but by having a " .
+                "separate node type, we can use the existing switch " .
+                "statement to avoid some tests",
+              "desc" => "Match already matched string, using /ui.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFA",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /aai rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFN",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                  "varies" => 1,
+                },
+              "desc" => "Match some already matched string",
+              "line" => __LINE__,
+              "pod" => [
+                  "Named references.  Code in regcomp.c assumes that these all " .
+                  "are after",
+                  "the numbered references",
+                ],
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFN",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /di rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFLN",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /li rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFUN",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /ui rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "REFFAN",
+              "TYPE" => "REF",
+              "attr" => {
+                  "arg_spec" => "num",
+                  "varies" => 1,
+                },
+              "desc" => "Match already matched string, using /aai rules.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "BRANCHJ and LONGJMP",
+        "TYPE" => [ "BRANCHJ", "LONGJMP" ],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "BRANCHJ",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                  "varies" => 1,
+                },
+              "desc" => "BRANCH with long offset.",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "IFMATCH",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                },
+              "desc" =>
+                "Succeeds if the following matches; non-zero flags " .
+                "\"f\", next_off \"o\" means lookbehind assertion " .
+                "starting \"f..(f-o)\" characters before current",
+              "line" => __LINE__,
+              "pod" => "Special Case Regops",
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "UNLESSM",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                },
+              "desc" =>
+                "Fails if the following matches; non-zero flags \"f\", " .
+                "next_off \"o\" means lookbehind assertion starting " .
+                "\"f..(f-o)\" characters before current",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "SUSPEND",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                  "varies" => 1,
+                },
+              "desc" => "\"Independent\" sub-RE.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "IFTHEN",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                  "varies" => 1,
+                },
+              "desc" => "Switch, should be preceded by switcher.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "RENUM",
+              "TYPE" => "BRANCHJ",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                },
+              "desc" =>
+                "Group with independently numbered parens. Not used " .
+                "yet.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "LONGJMP",
+              "TYPE" => "LONGJMP",
+              "attr" => {
+                  "arg_spec" => "off",
+                  "off_by_arg" => 1,
+                },
+              "desc" => "Jump far away.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+        "pod" => "Support for long RE",
+      },
+      #################################
+      {
+        "GROUP" => "MINMOD",
+        "TYPE" => "MINMOD",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "MINMOD",
+              "TYPE" => "MINMOD",
+              "desc" => "Next operator is not greedy.",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Modifiers",
+      },
+      #################################
+      {
+        "GROUP" => "LOGICAL",
+        "TYPE" => "LOGICAL",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "LOGICAL",
+              "TYPE" => "LOGICAL",
+              "desc" => "Next opcode should set the flag only.",
+              "line" => __LINE__,
+            },
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "CODE-AND-SUBS",
+        "TYPE" => [ "EVAL", "GOSUB" ],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "EVAL",
+              "TYPE" => "EVAL",
+              "attr" => {
+                  "arg_spec" => "evl/flags",
+                },
+              "desc" =>
+                "Execute some Perl code. Used by other opcodes in some " .
+                "cases",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+            {
+              "NAME" => "GOSUB",
+              "TYPE" => "GOSUB",
+              "attr" => {
+                  "arg_spec" => "num/ofs",
+                },
+              "desc" => "recurse to paren arg1 at (signed) ofs arg2",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+          ],
+        "pod" => "Regex Code And Subroutines",
+      },
+      #################################
+      {
+        "GROUP" => "PREDICATES",
+        "TYPE" => [ "GROUPP", "GROUPPN", "INSUBP", "DEFINEP" ],
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "GROUPP",
+              "TYPE" => "GROUPP",
+              "attr" => {
+                  "arg_spec" => "num",
+                },
+              "desc" => "Whether the group matched.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "GROUPPN",
+              "TYPE" => "GROUPPN",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "Whether the named group matched.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "INSUBP",
+              "TYPE" => "INSUBP",
+              "attr" => {
+                  "arg_spec" => "num",
+                },
+              "desc" => "Whether we are in a specific recurse.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "DEFINEP",
+              "TYPE" => "DEFINEP",
+              "attr" => {
+                  "arg_spec" => "none",
+                },
+              "desc" =>
+                "Define regex subroutines. Contents never executed " .
+                "directly, disallows 'no' branch in conditional.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+        "pod" => "Special conditionals used in (?(COND)YES|NO) constructs",
+      },
+      #################################
+      {
+        "GROUP" => "VERBS WITH ENDLIKE BEHAVIOR",
+        "TYPE" => "ENDLIKE",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "ENDLIKE",
+              "TYPE" => "ENDLIKE",
+              "attr" => {
+                  "arg_spec" => "none",
+                },
+              "desc" => "Used only for the type field of verbs",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "OPFAIL",
+              "TYPE" => "ENDLIKE",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "Same as (?!), but with verb arg",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "ACCEPT",
+              "TYPE" => "ENDLIKE",
+              "attr" => {
+                  "arg_spec" => "no-sv/num",
+                },
+              "desc" => "Accepts the current matched string, with verbar",
+              "line" => __LINE__,
+              "struct" => "regnode_2",
+            },
+          ],
+        "pod" => "Backtracking Verbs that are similar to an END opcode",
+      },
+      #################################
+      {
+        "GROUP" => "VERB",
+        "TYPE" => "VERB",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "VERB",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "Used only for the type field of verbs",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "PRUNE",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" =>
+                "Pattern fails at this startpoint if no-backtracking " .
+                "through this",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "MARKPOINT",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "Push the current location for rollback by cut.",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "SKIP",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "On failure skip forward (to the mark) before retrying",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "COMMIT",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "Pattern fails outright if backtracking through this",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+            {
+              "NAME" => "CUTGROUP",
+              "TYPE" => "VERB",
+              "attr" => {
+                  "arg_spec" => "no-sv",
+                },
+              "desc" => "On failure go to the next alternation in the group",
+              "line" => __LINE__,
+              "struct" => "regnode_1",
+            },
+          ],
+        "pod" => "Verbs With Arguments",
+      },
+      #################################
+      {
+        "GROUP" => "KEEPS",
+        "TYPE" => "KEEPS",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "KEEPS",
+              "TYPE" => "KEEPS",
+              "desc" => "\$& begins here.",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => "Control what to keep in \$&.",
+      },
+      #################################
+      {
+        "GROUP" => "PSEUDO",
+        "TYPE" => "PSEUDO",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "PSEUDO",
+              "TYPE" => "PSEUDO",
+              "attr" => {
+                  "arg_spec" => "off",
+                },
+              "desc" => "Pseudo opcode for internal use.",
+              "line" => __LINE__,
+            },
+          ],
+        "pod" => [
+            [
+              "Special opcode with the property that no opcode in a compiled " .
+              "program will ever be of this type. Thus it can be used as a " .
+              "flag value that no other opcode has been seen."
+            ],
+            [
+              "END is used similarly, in that an END node can't be optimized. " .
+              "So END implies \"unoptimizable\" and PSEUDO means \"not seen " .
+              "anything to optimize yet\"."
+            ],
+          ],
+      },
+      #################################
+      {
+        "GROUP" => "REGEX_SET",
+        "TYPE" => "REGEX_SET",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "REGEX_SET",
+              "TYPE" => "REGEX_SET",
+              "attr" => {
+                  "arg_spec" => "depth",
+                  "simple" => 1,
+                },
+              "desc" =>
+                "Regex set, temporary node used in pre-optimization " .
+                "compilation",
+              "line" => __LINE__,
+              "struct" => "regnode_p",
+            },
+          ],
+      },
+    ],
+  "state_groups" => [
+      {
+        "TYPE" => "TRIE",
+        "comment" =>
+          "State transition format: REGOP \\t typelist [ \\t " .
+          "typelist].  typelist = namelist, namelist:FAIL, or " .
+          "name:count.  Anything below is a state.",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "EVAL",
+        "line" => __LINE__,
+        "transitions" => "B,postponed_A,postponed_B:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "CURLYX",
+        "line" => __LINE__,
+        "transitions" => "end:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "WHILEM",
+        "line" => __LINE__,
+        "transitions" => "A_pre,A_min,A_max,B_min,B_max:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "BRANCH",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "CURLYM",
+        "line" => __LINE__,
+        "transitions" => "A,B:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "IFMATCH",
+        "line" => __LINE__,
+        "transitions" => "A:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "CURLY",
+        "line" => __LINE__,
+        "transitions" => "B_min,B_max:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "COMMIT",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "MARKPOINT",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "SKIP",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "CUTGROUP",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "KEEPS",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+      #################################
+      {
+        "TYPE" => "REF",
+        "line" => __LINE__,
+        "transitions" => "next:FAIL",
+      },
+    ],
+};
