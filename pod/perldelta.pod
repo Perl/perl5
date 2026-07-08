@@ -356,7 +356,7 @@ L<IO> has been upgraded from version 1.55 to 1.56.
 
 =item *
 
-L<IO::Compress> has been upgraded from version 2.213 to 2.220.
+L<IO::Compress> has been upgraded from version 2.213 to 2.223.
 
 This fixes CVE-2025-15649, CVE-2026-48961, CVE-2026-48962, and CVE-2026-48959.
 
@@ -370,7 +370,7 @@ L<Math::BigInt> has been upgraded from version 2.005002 to 2.005003.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20250702 to 5.20260622.
+L<Module::CoreList> has been upgraded from version 5.20250702 to 5.20260708.
 
 =item *
 
@@ -467,6 +467,10 @@ L<Time::Piece> has been upgraded from version 1.36 to 1.41.
 =item *
 
 L<Unicode::UCD> has been upgraded from version 0.81 to 0.83.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.17 to 1.18.
 
 =item *
 
