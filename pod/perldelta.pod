@@ -201,18 +201,10 @@ Simple (non-overflowing) addition (C<+>), subtraction (C<->) and
 multiplication (C<*>) of integers are slightly sped up, as long as
 sufficient underlying C compiler support is available.
 
-=back
-
-=over 4
-
 =item *
 
 Populating a hash from a list of key/value pairs when the keys are constant
 string operands known at compile time is commonly now faster. [L<GH #24228|https://github.com/Perl/perl5/issues/24228>]
-
-=back
-
-=over 4
 
 =item *
 
