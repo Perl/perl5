@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.44.0-RC2 - Frank Herbert - Dune Messiah
+
+L<Announced on 2026-07-08 by Leon Timmermans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271044.html>
+
+Here lies a toppled god—
+His fall was not a small one.
+We did but build his pedestal,
+A narrow and a tall one.
+
 =head2 v5.44.0-RC1 - Frank Herbert - Dune Messiah
 
 L<Announced on 2026-07-22 by Leon Timmermans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/06/msg271001.html>
