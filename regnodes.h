@@ -157,262 +157,273 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SUCCEED_t8_pb                       6  /*      0x006 */
 #define SUCCEED_t8_p8                       7  /*      0x007 */
 
-#define SBOL                          2        /* 0x02 Match "" at beginning
-                                                  of line: /^/, /\A/ */
-#define SBOL_tb                          4     /*      0x004 */
-#define SBOL_t8                          5     /*      0x005 */
-#define SBOL_tb_pb                          8  /*      0x008 */
-#define SBOL_tb_p8                          9  /*      0x009 */
-#define SBOL_t8_pb                         10  /*      0x00a */
-#define SBOL_t8_p8                         11  /*      0x00b */
+#define LOOKBEHIND_END                2        /* 0x02 Return from lookbehind
+                                                  (IFMATCH/UNLESSM) and
+                                                  validate position when they
+                                                  do */
+#define LOOKBEHIND_END_tb                4     /*      0x004 */
+#define LOOKBEHIND_END_t8                5     /*      0x005 */
+#define LOOKBEHIND_END_tb_pb                8  /*      0x008 */
+#define LOOKBEHIND_END_tb_p8                9  /*      0x009 */
+#define LOOKBEHIND_END_t8_pb               10  /*      0x00a */
+#define LOOKBEHIND_END_t8_p8               11  /*      0x00b */
 
-#define BOL                           2        /* 0x02 Match "" at beginning
+#define SBOL                          3        /* 0x03 Match "" at beginning
                                                   of line: /^/, /\A/ */
-#define BOL_tb                           4     /*      0x004 */
-#define BOL_t8                           5     /*      0x005 */
-#define BOL_tb_pb                           8  /*      0x008 */
-#define BOL_tb_p8                           9  /*      0x009 */
-#define BOL_t8_pb                          10  /*      0x00a */
-#define BOL_t8_p8                          11  /*      0x00b */
+#define SBOL_tb                          6     /*      0x006 */
+#define SBOL_t8                          7     /*      0x007 */
+#define SBOL_tb_pb                         12  /*      0x00c */
+#define SBOL_tb_p8                         13  /*      0x00d */
+#define SBOL_t8_pb                         14  /*      0x00e */
+#define SBOL_t8_p8                         15  /*      0x00f */
 
-#define MBOL                          3        /* 0x03 Same, assuming
+#define BOL                           3        /* 0x03 Match "" at beginning
+                                                  of line: /^/, /\A/ */
+#define BOL_tb                           6     /*      0x006 */
+#define BOL_t8                           7     /*      0x007 */
+#define BOL_tb_pb                          12  /*      0x00c */
+#define BOL_tb_p8                          13  /*      0x00d */
+#define BOL_t8_pb                          14  /*      0x00e */
+#define BOL_t8_p8                          15  /*      0x00f */
+
+#define MBOL                          4        /* 0x04 Same, assuming
                                                   multiline: /^/m */
-#define MBOL_tb                          6     /*      0x006 */
-#define MBOL_t8                          7     /*      0x007 */
-#define MBOL_tb_pb                         12  /*      0x00c */
-#define MBOL_tb_p8                         13  /*      0x00d */
-#define MBOL_t8_pb                         14  /*      0x00e */
-#define MBOL_t8_p8                         15  /*      0x00f */
+#define MBOL_tb                          8     /*      0x008 */
+#define MBOL_t8                          9     /*      0x009 */
+#define MBOL_tb_pb                         16  /*      0x010 */
+#define MBOL_tb_p8                         17  /*      0x011 */
+#define MBOL_t8_pb                         18  /*      0x012 */
+#define MBOL_t8_p8                         19  /*      0x013 */
 
-#define SEOL                          4        /* 0x04 Match "" at end of
+#define SEOL                          5        /* 0x05 Match "" at end of
                                                   line: /$/ */
-#define SEOL_tb                          8     /*      0x008 */
-#define SEOL_t8                          9     /*      0x009 */
-#define SEOL_tb_pb                         16  /*      0x010 */
-#define SEOL_tb_p8                         17  /*      0x011 */
-#define SEOL_t8_pb                         18  /*      0x012 */
-#define SEOL_t8_p8                         19  /*      0x013 */
+#define SEOL_tb                         10     /*      0x00a */
+#define SEOL_t8                         11     /*      0x00b */
+#define SEOL_tb_pb                         20  /*      0x014 */
+#define SEOL_tb_p8                         21  /*      0x015 */
+#define SEOL_t8_pb                         22  /*      0x016 */
+#define SEOL_t8_p8                         23  /*      0x017 */
 
-#define EOL                           4        /* 0x04 Match "" at end of
+#define EOL                           5        /* 0x05 Match "" at end of
                                                   line: /$/ */
-#define EOL_tb                           8     /*      0x008 */
-#define EOL_t8                           9     /*      0x009 */
-#define EOL_tb_pb                          16  /*      0x010 */
-#define EOL_tb_p8                          17  /*      0x011 */
-#define EOL_t8_pb                          18  /*      0x012 */
-#define EOL_t8_p8                          19  /*      0x013 */
+#define EOL_tb                          10     /*      0x00a */
+#define EOL_t8                          11     /*      0x00b */
+#define EOL_tb_pb                          20  /*      0x014 */
+#define EOL_tb_p8                          21  /*      0x015 */
+#define EOL_t8_pb                          22  /*      0x016 */
+#define EOL_t8_p8                          23  /*      0x017 */
 
-#define MEOL                          5        /* 0x05 Same, assuming
+#define MEOL                          6        /* 0x06 Same, assuming
                                                   multiline: /$/m */
-#define MEOL_tb                         10     /*      0x00a */
-#define MEOL_t8                         11     /*      0x00b */
-#define MEOL_tb_pb                         20  /*      0x014 */
-#define MEOL_tb_p8                         21  /*      0x015 */
-#define MEOL_t8_pb                         22  /*      0x016 */
-#define MEOL_t8_p8                         23  /*      0x017 */
+#define MEOL_tb                         12     /*      0x00c */
+#define MEOL_t8                         13     /*      0x00d */
+#define MEOL_tb_pb                         24  /*      0x018 */
+#define MEOL_tb_p8                         25  /*      0x019 */
+#define MEOL_t8_pb                         26  /*      0x01a */
+#define MEOL_t8_p8                         27  /*      0x01b */
 
-#define EOS                           6        /* 0x06 Match "" at end of
+#define EOS                           7        /* 0x07 Match "" at end of
                                                   string: /\z/ */
-#define EOS_tb                          12     /*      0x00c */
-#define EOS_t8                          13     /*      0x00d */
-#define EOS_tb_pb                          24  /*      0x018 */
-#define EOS_tb_p8                          25  /*      0x019 */
-#define EOS_t8_pb                          26  /*      0x01a */
-#define EOS_t8_p8                          27  /*      0x01b */
+#define EOS_tb                          14     /*      0x00e */
+#define EOS_t8                          15     /*      0x00f */
+#define EOS_tb_pb                          28  /*      0x01c */
+#define EOS_tb_p8                          29  /*      0x01d */
+#define EOS_t8_pb                          30  /*      0x01e */
+#define EOS_t8_p8                          31  /*      0x01f */
 
-#define GPOS                          7        /* 0x07 Matches where last m//g
+#define GPOS                          8        /* 0x08 Matches where last m//g
                                                   left off. */
-#define GPOS_tb                         14     /*      0x00e */
-#define GPOS_t8                         15     /*      0x00f */
-#define GPOS_tb_pb                         28  /*      0x01c */
-#define GPOS_tb_p8                         29  /*      0x01d */
-#define GPOS_t8_pb                         30  /*      0x01e */
-#define GPOS_t8_p8                         31  /*      0x01f */
+#define GPOS_tb                         16     /*      0x010 */
+#define GPOS_t8                         17     /*      0x011 */
+#define GPOS_tb_pb                         32  /*      0x020 */
+#define GPOS_tb_p8                         33  /*      0x021 */
+#define GPOS_t8_pb                         34  /*      0x022 */
+#define GPOS_t8_p8                         35  /*      0x023 */
 
-#define BOUND                         8        /* 0x08 Like BOUNDA for
+#define BOUND                         9        /* 0x09 Like BOUNDA for
                                                   non-utf8, otherwise like
                                                   BOUNDU */
-#define BOUND_tb                        16     /*      0x010 */
-#define BOUND_t8                        17     /*      0x011 */
-#define BOUND_tb_pb                        32  /*      0x020 */
-#define BOUND_tb_p8                        33  /*      0x021 */
-#define BOUND_t8_pb                        34  /*      0x022 */
-#define BOUND_t8_p8                        35  /*      0x023 */
+#define BOUND_tb                        18     /*      0x012 */
+#define BOUND_t8                        19     /*      0x013 */
+#define BOUND_tb_pb                        36  /*      0x024 */
+#define BOUND_tb_p8                        37  /*      0x025 */
+#define BOUND_t8_pb                        38  /*      0x026 */
+#define BOUND_t8_p8                        39  /*      0x027 */
 
-#define BOUNDL                        9        /* 0x09 Like BOUND/BOUNDU, but
+#define BOUNDL                       10        /* 0x0a Like BOUND/BOUNDU, but
                                                   \w and \W are defined by
                                                   current locale */
-#define BOUNDL_tb                       18     /*      0x012 */
-#define BOUNDL_t8                       19     /*      0x013 */
-#define BOUNDL_tb_pb                       36  /*      0x024 */
-#define BOUNDL_tb_p8                       37  /*      0x025 */
-#define BOUNDL_t8_pb                       38  /*      0x026 */
-#define BOUNDL_t8_p8                       39  /*      0x027 */
+#define BOUNDL_tb                       20     /*      0x014 */
+#define BOUNDL_t8                       21     /*      0x015 */
+#define BOUNDL_tb_pb                       40  /*      0x028 */
+#define BOUNDL_tb_p8                       41  /*      0x029 */
+#define BOUNDL_t8_pb                       42  /*      0x02a */
+#define BOUNDL_t8_p8                       43  /*      0x02b */
 
-#define BOUNDU                       10        /* 0x0a Match "" at any
+#define BOUNDU                       11        /* 0x0b Match "" at any
                                                   boundary of a given type
                                                   using /u rules. */
-#define BOUNDU_tb                       20     /*      0x014 */
-#define BOUNDU_t8                       21     /*      0x015 */
-#define BOUNDU_tb_pb                       40  /*      0x028 */
-#define BOUNDU_tb_p8                       41  /*      0x029 */
-#define BOUNDU_t8_pb                       42  /*      0x02a */
-#define BOUNDU_t8_p8                       43  /*      0x02b */
+#define BOUNDU_tb                       22     /*      0x016 */
+#define BOUNDU_t8                       23     /*      0x017 */
+#define BOUNDU_tb_pb                       44  /*      0x02c */
+#define BOUNDU_tb_p8                       45  /*      0x02d */
+#define BOUNDU_t8_pb                       46  /*      0x02e */
+#define BOUNDU_t8_p8                       47  /*      0x02f */
 
-#define BOUNDA                       11        /* 0x0b Match "" at any
+#define BOUNDA                       12        /* 0x0c Match "" at any
                                                   boundary between \w\W or
                                                   \W\w, where \w is
                                                   [_a-zA-Z0-9] */
-#define BOUNDA_tb                       22     /*      0x016 */
-#define BOUNDA_t8                       23     /*      0x017 */
-#define BOUNDA_tb_pb                       44  /*      0x02c */
-#define BOUNDA_tb_p8                       45  /*      0x02d */
-#define BOUNDA_t8_pb                       46  /*      0x02e */
-#define BOUNDA_t8_p8                       47  /*      0x02f */
+#define BOUNDA_tb                       24     /*      0x018 */
+#define BOUNDA_t8                       25     /*      0x019 */
+#define BOUNDA_tb_pb                       48  /*      0x030 */
+#define BOUNDA_tb_p8                       49  /*      0x031 */
+#define BOUNDA_t8_pb                       50  /*      0x032 */
+#define BOUNDA_t8_p8                       51  /*      0x033 */
 
-#define NBOUND                       12        /* 0x0c Like NBOUNDA for
+#define NBOUND                       13        /* 0x0d Like NBOUNDA for
                                                   non-utf8, otherwise like
                                                   BOUNDU */
-#define NBOUND_tb                       24     /*      0x018 */
-#define NBOUND_t8                       25     /*      0x019 */
-#define NBOUND_tb_pb                       48  /*      0x030 */
-#define NBOUND_tb_p8                       49  /*      0x031 */
-#define NBOUND_t8_pb                       50  /*      0x032 */
-#define NBOUND_t8_p8                       51  /*      0x033 */
+#define NBOUND_tb                       26     /*      0x01a */
+#define NBOUND_t8                       27     /*      0x01b */
+#define NBOUND_tb_pb                       52  /*      0x034 */
+#define NBOUND_tb_p8                       53  /*      0x035 */
+#define NBOUND_t8_pb                       54  /*      0x036 */
+#define NBOUND_t8_p8                       55  /*      0x037 */
 
-#define NBOUNDL                      13        /* 0x0d Like NBOUND/NBOUNDU,
+#define NBOUNDL                      14        /* 0x0e Like NBOUND/NBOUNDU,
                                                   but \w and \W are defined by
                                                   current locale */
-#define NBOUNDL_tb                      26     /*      0x01a */
-#define NBOUNDL_t8                      27     /*      0x01b */
-#define NBOUNDL_tb_pb                      52  /*      0x034 */
-#define NBOUNDL_tb_p8                      53  /*      0x035 */
-#define NBOUNDL_t8_pb                      54  /*      0x036 */
-#define NBOUNDL_t8_p8                      55  /*      0x037 */
+#define NBOUNDL_tb                      28     /*      0x01c */
+#define NBOUNDL_t8                      29     /*      0x01d */
+#define NBOUNDL_tb_pb                      56  /*      0x038 */
+#define NBOUNDL_tb_p8                      57  /*      0x039 */
+#define NBOUNDL_t8_pb                      58  /*      0x03a */
+#define NBOUNDL_t8_p8                      59  /*      0x03b */
 
-#define NBOUNDU                      14        /* 0x0e Match "" at any
+#define NBOUNDU                      15        /* 0x0f Match "" at any
                                                   non-boundary of a given type
                                                   using /u rules. */
-#define NBOUNDU_tb                      28     /*      0x01c */
-#define NBOUNDU_t8                      29     /*      0x01d */
-#define NBOUNDU_tb_pb                      56  /*      0x038 */
-#define NBOUNDU_tb_p8                      57  /*      0x039 */
-#define NBOUNDU_t8_pb                      58  /*      0x03a */
-#define NBOUNDU_t8_p8                      59  /*      0x03b */
+#define NBOUNDU_tb                      30     /*      0x01e */
+#define NBOUNDU_t8                      31     /*      0x01f */
+#define NBOUNDU_tb_pb                      60  /*      0x03c */
+#define NBOUNDU_tb_p8                      61  /*      0x03d */
+#define NBOUNDU_t8_pb                      62  /*      0x03e */
+#define NBOUNDU_t8_p8                      63  /*      0x03f */
 
-#define NBOUNDA                      15        /* 0x0f Match "" between any
+#define NBOUNDA                      16        /* 0x10 Match "" between any
                                                   \w\w or \W\W, where \w is
                                                   [_a-zA-Z0-9] */
-#define NBOUNDA_tb                      30     /*      0x01e */
-#define NBOUNDA_t8                      31     /*      0x01f */
-#define NBOUNDA_tb_pb                      60  /*      0x03c */
-#define NBOUNDA_tb_p8                      61  /*      0x03d */
-#define NBOUNDA_t8_pb                      62  /*      0x03e */
-#define NBOUNDA_t8_p8                      63  /*      0x03f */
+#define NBOUNDA_tb                      32     /*      0x020 */
+#define NBOUNDA_t8                      33     /*      0x021 */
+#define NBOUNDA_tb_pb                      64  /*      0x040 */
+#define NBOUNDA_tb_p8                      65  /*      0x041 */
+#define NBOUNDA_t8_pb                      66  /*      0x042 */
+#define NBOUNDA_t8_p8                      67  /*      0x043 */
 
-#define REG_ANY                      16        /* 0x10 Match any one character
+#define REG_ANY                      17        /* 0x11 Match any one character
                                                   (except newline). */
-#define REG_ANY_tb                      32     /*      0x020 */
-#define REG_ANY_t8                      33     /*      0x021 */
-#define REG_ANY_tb_pb                      64  /*      0x040 */
-#define REG_ANY_tb_p8                      65  /*      0x041 */
-#define REG_ANY_t8_pb                      66  /*      0x042 */
-#define REG_ANY_t8_p8                      67  /*      0x043 */
+#define REG_ANY_tb                      34     /*      0x022 */
+#define REG_ANY_t8                      35     /*      0x023 */
+#define REG_ANY_tb_pb                      68  /*      0x044 */
+#define REG_ANY_tb_p8                      69  /*      0x045 */
+#define REG_ANY_t8_pb                      70  /*      0x046 */
+#define REG_ANY_t8_p8                      71  /*      0x047 */
 
-#define SANY                         17        /* 0x11 Match any one
+#define SANY                         18        /* 0x12 Match any one
                                                   character. */
-#define SANY_tb                         34     /*      0x022 */
-#define SANY_t8                         35     /*      0x023 */
-#define SANY_tb_pb                         68  /*      0x044 */
-#define SANY_tb_p8                         69  /*      0x045 */
-#define SANY_t8_pb                         70  /*      0x046 */
-#define SANY_t8_p8                         71  /*      0x047 */
+#define SANY_tb                         36     /*      0x024 */
+#define SANY_t8                         37     /*      0x025 */
+#define SANY_tb_pb                         72  /*      0x048 */
+#define SANY_tb_p8                         73  /*      0x049 */
+#define SANY_t8_pb                         74  /*      0x04a */
+#define SANY_t8_p8                         75  /*      0x04b */
 
-#define ANYOF                        18        /* 0x12 Match character in (or
+#define ANYOF                        19        /* 0x13 Match character in (or
                                                   not in) this class, single
                                                   char match only */
-#define ANYOF_tb                        36     /*      0x024 */
-#define ANYOF_t8                        37     /*      0x025 */
-#define ANYOF_tb_pb                        72  /*      0x048 */
-#define ANYOF_tb_p8                        73  /*      0x049 */
-#define ANYOF_t8_pb                        74  /*      0x04a */
-#define ANYOF_t8_p8                        75  /*      0x04b */
+#define ANYOF_tb                        38     /*      0x026 */
+#define ANYOF_t8                        39     /*      0x027 */
+#define ANYOF_tb_pb                        76  /*      0x04c */
+#define ANYOF_tb_p8                        77  /*      0x04d */
+#define ANYOF_t8_pb                        78  /*      0x04e */
+#define ANYOF_t8_p8                        79  /*      0x04f */
 
-#define ANYOFD                       19        /* 0x13 Like ANYOF, but /d is
+#define ANYOFD                       20        /* 0x14 Like ANYOF, but /d is
                                                   in effect */
-#define ANYOFD_tb                       38     /*      0x026 */
-#define ANYOFD_t8                       39     /*      0x027 */
-#define ANYOFD_tb_pb                       76  /*      0x04c */
-#define ANYOFD_tb_p8                       77  /*      0x04d */
-#define ANYOFD_t8_pb                       78  /*      0x04e */
-#define ANYOFD_t8_p8                       79  /*      0x04f */
+#define ANYOFD_tb                       40     /*      0x028 */
+#define ANYOFD_t8                       41     /*      0x029 */
+#define ANYOFD_tb_pb                       80  /*      0x050 */
+#define ANYOFD_tb_p8                       81  /*      0x051 */
+#define ANYOFD_t8_pb                       82  /*      0x052 */
+#define ANYOFD_t8_p8                       83  /*      0x053 */
 
-#define ANYOFL                       20        /* 0x14 Like ANYOF, but /l is
+#define ANYOFL                       21        /* 0x15 Like ANYOF, but /l is
                                                   in effect */
-#define ANYOFL_tb                       40     /*      0x028 */
-#define ANYOFL_t8                       41     /*      0x029 */
-#define ANYOFL_tb_pb                       80  /*      0x050 */
-#define ANYOFL_tb_p8                       81  /*      0x051 */
-#define ANYOFL_t8_pb                       82  /*      0x052 */
-#define ANYOFL_t8_p8                       83  /*      0x053 */
+#define ANYOFL_tb                       42     /*      0x02a */
+#define ANYOFL_t8                       43     /*      0x02b */
+#define ANYOFL_tb_pb                       84  /*      0x054 */
+#define ANYOFL_tb_p8                       85  /*      0x055 */
+#define ANYOFL_t8_pb                       86  /*      0x056 */
+#define ANYOFL_t8_p8                       87  /*      0x057 */
 
-#define ANYOFPOSIXL                  21        /* 0x15 Like ANYOFL, but
+#define ANYOFPOSIXL                  22        /* 0x16 Like ANYOFL, but
                                                   matches [[:posix:]] classes
                                                */
-#define ANYOFPOSIXL_tb                  42     /*      0x02a */
-#define ANYOFPOSIXL_t8                  43     /*      0x02b */
-#define ANYOFPOSIXL_tb_pb                  84  /*      0x054 */
-#define ANYOFPOSIXL_tb_p8                  85  /*      0x055 */
-#define ANYOFPOSIXL_t8_pb                  86  /*      0x056 */
-#define ANYOFPOSIXL_t8_p8                  87  /*      0x057 */
+#define ANYOFPOSIXL_tb                  44     /*      0x02c */
+#define ANYOFPOSIXL_t8                  45     /*      0x02d */
+#define ANYOFPOSIXL_tb_pb                  88  /*      0x058 */
+#define ANYOFPOSIXL_tb_p8                  89  /*      0x059 */
+#define ANYOFPOSIXL_t8_pb                  90  /*      0x05a */
+#define ANYOFPOSIXL_t8_p8                  91  /*      0x05b */
 
-#define ANYOFH                       22        /* 0x16 Like ANYOF, but only
+#define ANYOFH                       23        /* 0x17 Like ANYOF, but only
                                                   has "High" matches, none in
                                                   the bitmap; the flags field
                                                   contains the lowest
                                                   matchable UTF-8 start byte
                                                */
-#define ANYOFH_tb                       44     /*      0x02c */
-#define ANYOFH_t8                       45     /*      0x02d */
-#define ANYOFH_tb_pb                       88  /*      0x058 */
-#define ANYOFH_tb_p8                       89  /*      0x059 */
-#define ANYOFH_t8_pb                       90  /*      0x05a */
-#define ANYOFH_t8_p8                       91  /*      0x05b */
+#define ANYOFH_tb                       46     /*      0x02e */
+#define ANYOFH_t8                       47     /*      0x02f */
+#define ANYOFH_tb_pb                       92  /*      0x05c */
+#define ANYOFH_tb_p8                       93  /*      0x05d */
+#define ANYOFH_t8_pb                       94  /*      0x05e */
+#define ANYOFH_t8_p8                       95  /*      0x05f */
 
-#define ANYOFHb                      23        /* 0x17 Like ANYOFH, but all
+#define ANYOFHb                      24        /* 0x18 Like ANYOFH, but all
                                                   matches share the same UTF-8
                                                   start byte, given in the
                                                   flags field */
-#define ANYOFHb_tb                      46     /*      0x02e */
-#define ANYOFHb_t8                      47     /*      0x02f */
-#define ANYOFHb_tb_pb                      92  /*      0x05c */
-#define ANYOFHb_tb_p8                      93  /*      0x05d */
-#define ANYOFHb_t8_pb                      94  /*      0x05e */
-#define ANYOFHb_t8_p8                      95  /*      0x05f */
+#define ANYOFHb_tb                      48     /*      0x030 */
+#define ANYOFHb_t8                      49     /*      0x031 */
+#define ANYOFHb_tb_pb                      96  /*      0x060 */
+#define ANYOFHb_tb_p8                      97  /*      0x061 */
+#define ANYOFHb_t8_pb                      98  /*      0x062 */
+#define ANYOFHb_t8_p8                      99  /*      0x063 */
 
-#define ANYOFHr                      24        /* 0x18 Like ANYOFH, but the
+#define ANYOFHr                      25        /* 0x19 Like ANYOFH, but the
                                                   flags field contains packed
                                                   bounds for all matchable
                                                   UTF-8 start bytes. */
-#define ANYOFHr_tb                      48     /*      0x030 */
-#define ANYOFHr_t8                      49     /*      0x031 */
-#define ANYOFHr_tb_pb                      96  /*      0x060 */
-#define ANYOFHr_tb_p8                      97  /*      0x061 */
-#define ANYOFHr_t8_pb                      98  /*      0x062 */
-#define ANYOFHr_t8_p8                      99  /*      0x063 */
+#define ANYOFHr_tb                      50     /*      0x032 */
+#define ANYOFHr_t8                      51     /*      0x033 */
+#define ANYOFHr_tb_pb                     100  /*      0x064 */
+#define ANYOFHr_tb_p8                     101  /*      0x065 */
+#define ANYOFHr_t8_pb                     102  /*      0x066 */
+#define ANYOFHr_t8_p8                     103  /*      0x067 */
 
-#define ANYOFHs                      25        /* 0x19 Like ANYOFHb, but has a
+#define ANYOFHs                      26        /* 0x1a Like ANYOFHb, but has a
                                                   string field that gives the
                                                   leading matchable UTF-8
                                                   bytes; flags field is len */
-#define ANYOFHs_tb                      50     /*      0x032 */
-#define ANYOFHs_t8                      51     /*      0x033 */
-#define ANYOFHs_tb_pb                     100  /*      0x064 */
-#define ANYOFHs_tb_p8                     101  /*      0x065 */
-#define ANYOFHs_t8_pb                     102  /*      0x066 */
-#define ANYOFHs_t8_p8                     103  /*      0x067 */
+#define ANYOFHs_tb                      52     /*      0x034 */
+#define ANYOFHs_t8                      53     /*      0x035 */
+#define ANYOFHs_tb_pb                     104  /*      0x068 */
+#define ANYOFHs_tb_p8                     105  /*      0x069 */
+#define ANYOFHs_t8_pb                     106  /*      0x06a */
+#define ANYOFHs_t8_p8                     107  /*      0x06b */
 
-#define ANYOFR                       26        /* 0x1a Matches any character
+#define ANYOFR                       27        /* 0x1b Matches any character
                                                   in the range given by its
                                                   packed args: upper 12 bits
                                                   is the max delta from the
@@ -420,839 +431,833 @@ typedef struct regnode                           tregnode_WHILEM;
                                                   field contains the lowest
                                                   matchable UTF-8 start byte
                                                */
-#define ANYOFR_tb                       52     /*      0x034 */
-#define ANYOFR_t8                       53     /*      0x035 */
-#define ANYOFR_tb_pb                      104  /*      0x068 */
-#define ANYOFR_tb_p8                      105  /*      0x069 */
-#define ANYOFR_t8_pb                      106  /*      0x06a */
-#define ANYOFR_t8_p8                      107  /*      0x06b */
+#define ANYOFR_tb                       54     /*      0x036 */
+#define ANYOFR_t8                       55     /*      0x037 */
+#define ANYOFR_tb_pb                      108  /*      0x06c */
+#define ANYOFR_tb_p8                      109  /*      0x06d */
+#define ANYOFR_t8_pb                      110  /*      0x06e */
+#define ANYOFR_t8_p8                      111  /*      0x06f */
 
-#define ANYOFRb                      27        /* 0x1b Like ANYOFR, but all
+#define ANYOFRb                      28        /* 0x1c Like ANYOFR, but all
                                                   matches share the same UTF-8
                                                   start byte, given in the
                                                   flags field */
-#define ANYOFRb_tb                      54     /*      0x036 */
-#define ANYOFRb_t8                      55     /*      0x037 */
-#define ANYOFRb_tb_pb                     108  /*      0x06c */
-#define ANYOFRb_tb_p8                     109  /*      0x06d */
-#define ANYOFRb_t8_pb                     110  /*      0x06e */
-#define ANYOFRb_t8_p8                     111  /*      0x06f */
+#define ANYOFRb_tb                      56     /*      0x038 */
+#define ANYOFRb_t8                      57     /*      0x039 */
+#define ANYOFRb_tb_pb                     112  /*      0x070 */
+#define ANYOFRb_tb_p8                     113  /*      0x071 */
+#define ANYOFRb_t8_pb                     114  /*      0x072 */
+#define ANYOFRb_t8_p8                     115  /*      0x073 */
 
-#define ANYOFHbbm                    28        /* 0x1c Like ANYOFHb, but only
+#define ANYOFHbbm                    29        /* 0x1d Like ANYOFHb, but only
                                                   for 2-byte UTF-8 characters;
                                                   uses a bitmap to match the
                                                   continuation byte */
-#define ANYOFHbbm_tb                    56     /*      0x038 */
-#define ANYOFHbbm_t8                    57     /*      0x039 */
-#define ANYOFHbbm_tb_pb                   112  /*      0x070 */
-#define ANYOFHbbm_tb_p8                   113  /*      0x071 */
-#define ANYOFHbbm_t8_pb                   114  /*      0x072 */
-#define ANYOFHbbm_t8_p8                   115  /*      0x073 */
+#define ANYOFHbbm_tb                    58     /*      0x03a */
+#define ANYOFHbbm_t8                    59     /*      0x03b */
+#define ANYOFHbbm_tb_pb                   116  /*      0x074 */
+#define ANYOFHbbm_tb_p8                   117  /*      0x075 */
+#define ANYOFHbbm_t8_pb                   118  /*      0x076 */
+#define ANYOFHbbm_t8_p8                   119  /*      0x077 */
 
-#define ANYOFM                       29        /* 0x1d Like ANYOF, but matches
+#define ANYOFM                       30        /* 0x1e Like ANYOF, but matches
                                                   an invariant byte as
                                                   determined by the mask and
                                                   arg */
-#define ANYOFM_tb                       58     /*      0x03a */
-#define ANYOFM_t8                       59     /*      0x03b */
-#define ANYOFM_tb_pb                      116  /*      0x074 */
-#define ANYOFM_tb_p8                      117  /*      0x075 */
-#define ANYOFM_t8_pb                      118  /*      0x076 */
-#define ANYOFM_t8_p8                      119  /*      0x077 */
+#define ANYOFM_tb                       60     /*      0x03c */
+#define ANYOFM_t8                       61     /*      0x03d */
+#define ANYOFM_tb_pb                      120  /*      0x078 */
+#define ANYOFM_tb_p8                      121  /*      0x079 */
+#define ANYOFM_t8_pb                      122  /*      0x07a */
+#define ANYOFM_t8_p8                      123  /*      0x07b */
 
-#define NANYOFM                      30        /* 0x1e complement of ANYOFM */
-#define NANYOFM_tb                      60     /*      0x03c */
-#define NANYOFM_t8                      61     /*      0x03d */
-#define NANYOFM_tb_pb                     120  /*      0x078 */
-#define NANYOFM_tb_p8                     121  /*      0x079 */
-#define NANYOFM_t8_pb                     122  /*      0x07a */
-#define NANYOFM_t8_p8                     123  /*      0x07b */
+#define NANYOFM                      31        /* 0x1f complement of ANYOFM */
+#define NANYOFM_tb                      62     /*      0x03e */
+#define NANYOFM_t8                      63     /*      0x03f */
+#define NANYOFM_tb_pb                     124  /*      0x07c */
+#define NANYOFM_tb_p8                     125  /*      0x07d */
+#define NANYOFM_t8_pb                     126  /*      0x07e */
+#define NANYOFM_t8_p8                     127  /*      0x07f */
 
-#define POSIXD                       31        /* 0x1f Some [[:class:]] under
+#define POSIXD                       32        /* 0x20 Some [[:class:]] under
                                                   /d; the FLAGS field gives
                                                   which one */
-#define POSIXD_tb                       62     /*      0x03e */
-#define POSIXD_t8                       63     /*      0x03f */
-#define POSIXD_tb_pb                      124  /*      0x07c */
-#define POSIXD_tb_p8                      125  /*      0x07d */
-#define POSIXD_t8_pb                      126  /*      0x07e */
-#define POSIXD_t8_p8                      127  /*      0x07f */
+#define POSIXD_tb                       64     /*      0x040 */
+#define POSIXD_t8                       65     /*      0x041 */
+#define POSIXD_tb_pb                      128  /*      0x080 */
+#define POSIXD_tb_p8                      129  /*      0x081 */
+#define POSIXD_t8_pb                      130  /*      0x082 */
+#define POSIXD_t8_p8                      131  /*      0x083 */
 
-#define POSIXL                       32        /* 0x20 Some [[:class:]] under
+#define POSIXL                       33        /* 0x21 Some [[:class:]] under
                                                   /l; the FLAGS field gives
                                                   which one */
-#define POSIXL_tb                       64     /*      0x040 */
-#define POSIXL_t8                       65     /*      0x041 */
-#define POSIXL_tb_pb                      128  /*      0x080 */
-#define POSIXL_tb_p8                      129  /*      0x081 */
-#define POSIXL_t8_pb                      130  /*      0x082 */
-#define POSIXL_t8_p8                      131  /*      0x083 */
+#define POSIXL_tb                       66     /*      0x042 */
+#define POSIXL_t8                       67     /*      0x043 */
+#define POSIXL_tb_pb                      132  /*      0x084 */
+#define POSIXL_tb_p8                      133  /*      0x085 */
+#define POSIXL_t8_pb                      134  /*      0x086 */
+#define POSIXL_t8_p8                      135  /*      0x087 */
 
-#define POSIXU                       33        /* 0x21 Some [[:class:]] under
+#define POSIXU                       34        /* 0x22 Some [[:class:]] under
                                                   /u; the FLAGS field gives
                                                   which one */
-#define POSIXU_tb                       66     /*      0x042 */
-#define POSIXU_t8                       67     /*      0x043 */
-#define POSIXU_tb_pb                      132  /*      0x084 */
-#define POSIXU_tb_p8                      133  /*      0x085 */
-#define POSIXU_t8_pb                      134  /*      0x086 */
-#define POSIXU_t8_p8                      135  /*      0x087 */
+#define POSIXU_tb                       68     /*      0x044 */
+#define POSIXU_t8                       69     /*      0x045 */
+#define POSIXU_tb_pb                      136  /*      0x088 */
+#define POSIXU_tb_p8                      137  /*      0x089 */
+#define POSIXU_t8_pb                      138  /*      0x08a */
+#define POSIXU_t8_p8                      139  /*      0x08b */
 
-#define POSIXA                       34        /* 0x22 Some [[:class:]] under
+#define POSIXA                       35        /* 0x23 Some [[:class:]] under
                                                   /a; the FLAGS field gives
                                                   which one */
-#define POSIXA_tb                       68     /*      0x044 */
-#define POSIXA_t8                       69     /*      0x045 */
-#define POSIXA_tb_pb                      136  /*      0x088 */
-#define POSIXA_tb_p8                      137  /*      0x089 */
-#define POSIXA_t8_pb                      138  /*      0x08a */
-#define POSIXA_t8_p8                      139  /*      0x08b */
+#define POSIXA_tb                       70     /*      0x046 */
+#define POSIXA_t8                       71     /*      0x047 */
+#define POSIXA_tb_pb                      140  /*      0x08c */
+#define POSIXA_tb_p8                      141  /*      0x08d */
+#define POSIXA_t8_pb                      142  /*      0x08e */
+#define POSIXA_t8_p8                      143  /*      0x08f */
 
-#define NPOSIXD                      35        /* 0x23 complement of POSIXD,
+#define NPOSIXD                      36        /* 0x24 complement of POSIXD,
                                                   [[:^class:]] */
-#define NPOSIXD_tb                      70     /*      0x046 */
-#define NPOSIXD_t8                      71     /*      0x047 */
-#define NPOSIXD_tb_pb                     140  /*      0x08c */
-#define NPOSIXD_tb_p8                     141  /*      0x08d */
-#define NPOSIXD_t8_pb                     142  /*      0x08e */
-#define NPOSIXD_t8_p8                     143  /*      0x08f */
+#define NPOSIXD_tb                      72     /*      0x048 */
+#define NPOSIXD_t8                      73     /*      0x049 */
+#define NPOSIXD_tb_pb                     144  /*      0x090 */
+#define NPOSIXD_tb_p8                     145  /*      0x091 */
+#define NPOSIXD_t8_pb                     146  /*      0x092 */
+#define NPOSIXD_t8_p8                     147  /*      0x093 */
 
-#define NPOSIXL                      36        /* 0x24 complement of POSIXL,
+#define NPOSIXL                      37        /* 0x25 complement of POSIXL,
                                                   [[:^class:]] */
-#define NPOSIXL_tb                      72     /*      0x048 */
-#define NPOSIXL_t8                      73     /*      0x049 */
-#define NPOSIXL_tb_pb                     144  /*      0x090 */
-#define NPOSIXL_tb_p8                     145  /*      0x091 */
-#define NPOSIXL_t8_pb                     146  /*      0x092 */
-#define NPOSIXL_t8_p8                     147  /*      0x093 */
+#define NPOSIXL_tb                      74     /*      0x04a */
+#define NPOSIXL_t8                      75     /*      0x04b */
+#define NPOSIXL_tb_pb                     148  /*      0x094 */
+#define NPOSIXL_tb_p8                     149  /*      0x095 */
+#define NPOSIXL_t8_pb                     150  /*      0x096 */
+#define NPOSIXL_t8_p8                     151  /*      0x097 */
 
-#define NPOSIXU                      37        /* 0x25 complement of POSIXU,
+#define NPOSIXU                      38        /* 0x26 complement of POSIXU,
                                                   [[:^class:]] */
-#define NPOSIXU_tb                      74     /*      0x04a */
-#define NPOSIXU_t8                      75     /*      0x04b */
-#define NPOSIXU_tb_pb                     148  /*      0x094 */
-#define NPOSIXU_tb_p8                     149  /*      0x095 */
-#define NPOSIXU_t8_pb                     150  /*      0x096 */
-#define NPOSIXU_t8_p8                     151  /*      0x097 */
+#define NPOSIXU_tb                      76     /*      0x04c */
+#define NPOSIXU_t8                      77     /*      0x04d */
+#define NPOSIXU_tb_pb                     152  /*      0x098 */
+#define NPOSIXU_tb_p8                     153  /*      0x099 */
+#define NPOSIXU_t8_pb                     154  /*      0x09a */
+#define NPOSIXU_t8_p8                     155  /*      0x09b */
 
-#define NPOSIXA                      38        /* 0x26 complement of POSIXA,
+#define NPOSIXA                      39        /* 0x27 complement of POSIXA,
                                                   [[:^class:]] */
-#define NPOSIXA_tb                      76     /*      0x04c */
-#define NPOSIXA_t8                      77     /*      0x04d */
-#define NPOSIXA_tb_pb                     152  /*      0x098 */
-#define NPOSIXA_tb_p8                     153  /*      0x099 */
-#define NPOSIXA_t8_pb                     154  /*      0x09a */
-#define NPOSIXA_t8_p8                     155  /*      0x09b */
+#define NPOSIXA_tb                      78     /*      0x04e */
+#define NPOSIXA_t8                      79     /*      0x04f */
+#define NPOSIXA_tb_pb                     156  /*      0x09c */
+#define NPOSIXA_tb_p8                     157  /*      0x09d */
+#define NPOSIXA_t8_pb                     158  /*      0x09e */
+#define NPOSIXA_t8_p8                     159  /*      0x09f */
 
-#define CLUMP                        39        /* 0x27 Match any extended
+#define CLUMP                        40        /* 0x28 Match any extended
                                                   grapheme cluster sequence */
-#define CLUMP_tb                        78     /*      0x04e */
-#define CLUMP_t8                        79     /*      0x04f */
-#define CLUMP_tb_pb                       156  /*      0x09c */
-#define CLUMP_tb_p8                       157  /*      0x09d */
-#define CLUMP_t8_pb                       158  /*      0x09e */
-#define CLUMP_t8_p8                       159  /*      0x09f */
+#define CLUMP_tb                        80     /*      0x050 */
+#define CLUMP_t8                        81     /*      0x051 */
+#define CLUMP_tb_pb                       160  /*      0x0a0 */
+#define CLUMP_tb_p8                       161  /*      0x0a1 */
+#define CLUMP_t8_pb                       162  /*      0x0a2 */
+#define CLUMP_t8_p8                       163  /*      0x0a3 */
 
-#define BRANCH                       40        /* 0x28 Match this alternative,
+#define BRANCH                       41        /* 0x29 Match this alternative,
                                                   or the next... */
-#define BRANCH_tb                       80     /*      0x050 */
-#define BRANCH_t8                       81     /*      0x051 */
-#define BRANCH_tb_pb                      160  /*      0x0a0 */
-#define BRANCH_tb_p8                      161  /*      0x0a1 */
-#define BRANCH_t8_pb                      162  /*      0x0a2 */
-#define BRANCH_t8_p8                      163  /*      0x0a3 */
+#define BRANCH_tb                       82     /*      0x052 */
+#define BRANCH_t8                       83     /*      0x053 */
+#define BRANCH_tb_pb                      164  /*      0x0a4 */
+#define BRANCH_tb_p8                      165  /*      0x0a5 */
+#define BRANCH_t8_pb                      166  /*      0x0a6 */
+#define BRANCH_t8_p8                      167  /*      0x0a7 */
 
-#define EXACT                        41        /* 0x29 Match this string
+#define EXACT                        42        /* 0x2a Match this string
                                                   (flags field is the length).
                                                */
-#define EXACT_tb                        82     /*      0x052 */
-#define EXACT_t8                        83     /*      0x053 */
-#define EXACT_tb_pb                       164  /*      0x0a4 */
-#define EXACT_tb_p8                       165  /*      0x0a5 */
-#define EXACT_t8_pb                       166  /*      0x0a6 */
-#define EXACT_t8_p8                       167  /*      0x0a7 */
+#define EXACT_tb                        84     /*      0x054 */
+#define EXACT_t8                        85     /*      0x055 */
+#define EXACT_tb_pb                       168  /*      0x0a8 */
+#define EXACT_tb_p8                       169  /*      0x0a9 */
+#define EXACT_t8_pb                       170  /*      0x0aa */
+#define EXACT_t8_p8                       171  /*      0x0ab */
 
-#define LEXACT                       42        /* 0x2a Match this long string
+#define LEXACT                       43        /* 0x2b Match this long string
                                                   (preceded by length; flags
                                                   unused). */
-#define LEXACT_tb                       84     /*      0x054 */
-#define LEXACT_t8                       85     /*      0x055 */
-#define LEXACT_tb_pb                      168  /*      0x0a8 */
-#define LEXACT_tb_p8                      169  /*      0x0a9 */
-#define LEXACT_t8_pb                      170  /*      0x0aa */
-#define LEXACT_t8_p8                      171  /*      0x0ab */
+#define LEXACT_tb                       86     /*      0x056 */
+#define LEXACT_t8                       87     /*      0x057 */
+#define LEXACT_tb_pb                      172  /*      0x0ac */
+#define LEXACT_tb_p8                      173  /*      0x0ad */
+#define LEXACT_t8_pb                      174  /*      0x0ae */
+#define LEXACT_t8_p8                      175  /*      0x0af */
 
-#define EXACTL                       43        /* 0x2b Like EXACT, but /l is
+#define EXACTL                       44        /* 0x2c Like EXACT, but /l is
                                                   in effect (used so
                                                   locale-related warnings can
                                                   be checked for) */
-#define EXACTL_tb                       86     /*      0x056 */
-#define EXACTL_t8                       87     /*      0x057 */
-#define EXACTL_tb_pb                      172  /*      0x0ac */
-#define EXACTL_tb_p8                      173  /*      0x0ad */
-#define EXACTL_t8_pb                      174  /*      0x0ae */
-#define EXACTL_t8_p8                      175  /*      0x0af */
+#define EXACTL_tb                       88     /*      0x058 */
+#define EXACTL_t8                       89     /*      0x059 */
+#define EXACTL_tb_pb                      176  /*      0x0b0 */
+#define EXACTL_tb_p8                      177  /*      0x0b1 */
+#define EXACTL_t8_pb                      178  /*      0x0b2 */
+#define EXACTL_t8_p8                      179  /*      0x0b3 */
 
-#define EXACTF                       44        /* 0x2c Like EXACT, but match
+#define EXACTF                       45        /* 0x2d Like EXACT, but match
                                                   using /id rules; (string not
                                                   UTF-8, ASCII folded;
                                                   non-ASCII not) */
-#define EXACTF_tb                       88     /*      0x058 */
-#define EXACTF_t8                       89     /*      0x059 */
-#define EXACTF_tb_pb                      176  /*      0x0b0 */
-#define EXACTF_tb_p8                      177  /*      0x0b1 */
-#define EXACTF_t8_pb                      178  /*      0x0b2 */
-#define EXACTF_t8_p8                      179  /*      0x0b3 */
+#define EXACTF_tb                       90     /*      0x05a */
+#define EXACTF_t8                       91     /*      0x05b */
+#define EXACTF_tb_pb                      180  /*      0x0b4 */
+#define EXACTF_tb_p8                      181  /*      0x0b5 */
+#define EXACTF_t8_pb                      182  /*      0x0b6 */
+#define EXACTF_t8_p8                      183  /*      0x0b7 */
 
-#define EXACTFL                      45        /* 0x2d Like EXACT, but match
+#define EXACTFL                      46        /* 0x2e Like EXACT, but match
                                                   using /il rules; (string not
                                                   likely to be folded) */
-#define EXACTFL_tb                      90     /*      0x05a */
-#define EXACTFL_t8                      91     /*      0x05b */
-#define EXACTFL_tb_pb                     180  /*      0x0b4 */
-#define EXACTFL_tb_p8                     181  /*      0x0b5 */
-#define EXACTFL_t8_pb                     182  /*      0x0b6 */
-#define EXACTFL_t8_p8                     183  /*      0x0b7 */
+#define EXACTFL_tb                      92     /*      0x05c */
+#define EXACTFL_t8                      93     /*      0x05d */
+#define EXACTFL_tb_pb                     184  /*      0x0b8 */
+#define EXACTFL_tb_p8                     185  /*      0x0b9 */
+#define EXACTFL_t8_pb                     186  /*      0x0ba */
+#define EXACTFL_t8_p8                     187  /*      0x0bb */
 
-#define EXACTFU                      46        /* 0x2e Like EXACT, but match
+#define EXACTFU                      47        /* 0x2f Like EXACT, but match
                                                   using /iu rules; (string
                                                   folded) */
-#define EXACTFU_tb                      92     /*      0x05c */
-#define EXACTFU_t8                      93     /*      0x05d */
-#define EXACTFU_tb_pb                     184  /*      0x0b8 */
-#define EXACTFU_tb_p8                     185  /*      0x0b9 */
-#define EXACTFU_t8_pb                     186  /*      0x0ba */
-#define EXACTFU_t8_p8                     187  /*      0x0bb */
+#define EXACTFU_tb                      94     /*      0x05e */
+#define EXACTFU_t8                      95     /*      0x05f */
+#define EXACTFU_tb_pb                     188  /*      0x0bc */
+#define EXACTFU_tb_p8                     189  /*      0x0bd */
+#define EXACTFU_t8_pb                     190  /*      0x0be */
+#define EXACTFU_t8_p8                     191  /*      0x0bf */
 
-#define EXACTFAA                     47        /* 0x2f Like EXACT, but match
+#define EXACTFAA                     48        /* 0x30 Like EXACT, but match
                                                   using /iaa rules; (string
                                                   folded except MICRO in
                                                   non-UTF8 patterns; doesn't
                                                   contain SHARP S unless
                                                   UTF-8; folded length <=
                                                   unfolded) */
-#define EXACTFAA_tb                     94     /*      0x05e */
-#define EXACTFAA_t8                     95     /*      0x05f */
-#define EXACTFAA_tb_pb                    188  /*      0x0bc */
-#define EXACTFAA_tb_p8                    189  /*      0x0bd */
-#define EXACTFAA_t8_pb                    190  /*      0x0be */
-#define EXACTFAA_t8_p8                    191  /*      0x0bf */
+#define EXACTFAA_tb                     96     /*      0x060 */
+#define EXACTFAA_t8                     97     /*      0x061 */
+#define EXACTFAA_tb_pb                    192  /*      0x0c0 */
+#define EXACTFAA_tb_p8                    193  /*      0x0c1 */
+#define EXACTFAA_t8_pb                    194  /*      0x0c2 */
+#define EXACTFAA_t8_p8                    195  /*      0x0c3 */
 
-#define EXACTFAA_NO_TRIE             48        /* 0x30 Like EXACTFAA, (string
+#define EXACTFAA_NO_TRIE             49        /* 0x31 Like EXACTFAA, (string
                                                   not UTF-8, folded except:
                                                   MICRO, SHARP S; folded
                                                   length <= unfolded, not
                                                   currently trie-able) */
-#define EXACTFAA_NO_TRIE_tb             96     /*      0x060 */
-#define EXACTFAA_NO_TRIE_t8             97     /*      0x061 */
-#define EXACTFAA_NO_TRIE_tb_pb            192  /*      0x0c0 */
-#define EXACTFAA_NO_TRIE_tb_p8            193  /*      0x0c1 */
-#define EXACTFAA_NO_TRIE_t8_pb            194  /*      0x0c2 */
-#define EXACTFAA_NO_TRIE_t8_p8            195  /*      0x0c3 */
+#define EXACTFAA_NO_TRIE_tb             98     /*      0x062 */
+#define EXACTFAA_NO_TRIE_t8             99     /*      0x063 */
+#define EXACTFAA_NO_TRIE_tb_pb            196  /*      0x0c4 */
+#define EXACTFAA_NO_TRIE_tb_p8            197  /*      0x0c5 */
+#define EXACTFAA_NO_TRIE_t8_pb            198  /*      0x0c6 */
+#define EXACTFAA_NO_TRIE_t8_p8            199  /*      0x0c7 */
 
-#define EXACTFUP                     49        /* 0x31 Like EXACT, but match
+#define EXACTFUP                     50        /* 0x32 Like EXACT, but match
                                                   using /iu rules; (string not
                                                   UTF-8, folded except MICRO:
                                                   hence Problematic) */
-#define EXACTFUP_tb                     98     /*      0x062 */
-#define EXACTFUP_t8                     99     /*      0x063 */
-#define EXACTFUP_tb_pb                    196  /*      0x0c4 */
-#define EXACTFUP_tb_p8                    197  /*      0x0c5 */
-#define EXACTFUP_t8_pb                    198  /*      0x0c6 */
-#define EXACTFUP_t8_p8                    199  /*      0x0c7 */
+#define EXACTFUP_tb                    100     /*      0x064 */
+#define EXACTFUP_t8                    101     /*      0x065 */
+#define EXACTFUP_tb_pb                    200  /*      0x0c8 */
+#define EXACTFUP_tb_p8                    201  /*      0x0c9 */
+#define EXACTFUP_t8_pb                    202  /*      0x0ca */
+#define EXACTFUP_t8_p8                    203  /*      0x0cb */
 
-#define EXACTFLU8                    50        /* 0x32 Like EXACTFU, but use
+#define EXACTFLU8                    51        /* 0x33 Like EXACTFU, but use
                                                   /il, UTF-8, (string is
                                                   folded, and everything in it
                                                   is above 255 */
-#define EXACTFLU8_tb                   100     /*      0x064 */
-#define EXACTFLU8_t8                   101     /*      0x065 */
-#define EXACTFLU8_tb_pb                   200  /*      0x0c8 */
-#define EXACTFLU8_tb_p8                   201  /*      0x0c9 */
-#define EXACTFLU8_t8_pb                   202  /*      0x0ca */
-#define EXACTFLU8_t8_p8                   203  /*      0x0cb */
+#define EXACTFLU8_tb                   102     /*      0x066 */
+#define EXACTFLU8_t8                   103     /*      0x067 */
+#define EXACTFLU8_tb_pb                   204  /*      0x0cc */
+#define EXACTFLU8_tb_p8                   205  /*      0x0cd */
+#define EXACTFLU8_t8_pb                   206  /*      0x0ce */
+#define EXACTFLU8_t8_p8                   207  /*      0x0cf */
 
-#define EXACT_REQ8                   51        /* 0x33 Like EXACT, but only
+#define EXACT_REQ8                   52        /* 0x34 Like EXACT, but only
                                                   UTF-8 encoded targets can
                                                   match */
-#define EXACT_REQ8_tb                  102     /*      0x066 */
-#define EXACT_REQ8_t8                  103     /*      0x067 */
-#define EXACT_REQ8_tb_pb                  204  /*      0x0cc */
-#define EXACT_REQ8_tb_p8                  205  /*      0x0cd */
-#define EXACT_REQ8_t8_pb                  206  /*      0x0ce */
-#define EXACT_REQ8_t8_p8                  207  /*      0x0cf */
+#define EXACT_REQ8_tb                  104     /*      0x068 */
+#define EXACT_REQ8_t8                  105     /*      0x069 */
+#define EXACT_REQ8_tb_pb                  208  /*      0x0d0 */
+#define EXACT_REQ8_tb_p8                  209  /*      0x0d1 */
+#define EXACT_REQ8_t8_pb                  210  /*      0x0d2 */
+#define EXACT_REQ8_t8_p8                  211  /*      0x0d3 */
 
-#define LEXACT_REQ8                  52        /* 0x34 Like LEXACT, but only
+#define LEXACT_REQ8                  53        /* 0x35 Like LEXACT, but only
                                                   UTF-8 encoded targets can
                                                   match */
-#define LEXACT_REQ8_tb                 104     /*      0x068 */
-#define LEXACT_REQ8_t8                 105     /*      0x069 */
-#define LEXACT_REQ8_tb_pb                 208  /*      0x0d0 */
-#define LEXACT_REQ8_tb_p8                 209  /*      0x0d1 */
-#define LEXACT_REQ8_t8_pb                 210  /*      0x0d2 */
-#define LEXACT_REQ8_t8_p8                 211  /*      0x0d3 */
+#define LEXACT_REQ8_tb                 106     /*      0x06a */
+#define LEXACT_REQ8_t8                 107     /*      0x06b */
+#define LEXACT_REQ8_tb_pb                 212  /*      0x0d4 */
+#define LEXACT_REQ8_tb_p8                 213  /*      0x0d5 */
+#define LEXACT_REQ8_t8_pb                 214  /*      0x0d6 */
+#define LEXACT_REQ8_t8_p8                 215  /*      0x0d7 */
 
-#define EXACTFU_REQ8                 53        /* 0x35 Like EXACTFU, but only
+#define EXACTFU_REQ8                 54        /* 0x36 Like EXACTFU, but only
                                                   UTF-8 encoded targets can
                                                   match */
-#define EXACTFU_REQ8_tb                106     /*      0x06a */
-#define EXACTFU_REQ8_t8                107     /*      0x06b */
-#define EXACTFU_REQ8_tb_pb                212  /*      0x0d4 */
-#define EXACTFU_REQ8_tb_p8                213  /*      0x0d5 */
-#define EXACTFU_REQ8_t8_pb                214  /*      0x0d6 */
-#define EXACTFU_REQ8_t8_p8                215  /*      0x0d7 */
+#define EXACTFU_REQ8_tb                108     /*      0x06c */
+#define EXACTFU_REQ8_t8                109     /*      0x06d */
+#define EXACTFU_REQ8_tb_pb                216  /*      0x0d8 */
+#define EXACTFU_REQ8_tb_p8                217  /*      0x0d9 */
+#define EXACTFU_REQ8_t8_pb                218  /*      0x0da */
+#define EXACTFU_REQ8_t8_p8                219  /*      0x0db */
 
-#define EXACTFU_S_EDGE               54        /* 0x36 /di rules, but nothing
+#define EXACTFU_S_EDGE               55        /* 0x37 /di rules, but nothing
                                                   in it precludes /ui, except
                                                   begins and/or ends with
                                                   [Ss]; (string not UTF-8;
                                                   compile-time only) */
-#define EXACTFU_S_EDGE_tb              108     /*      0x06c */
-#define EXACTFU_S_EDGE_t8              109     /*      0x06d */
-#define EXACTFU_S_EDGE_tb_pb              216  /*      0x0d8 */
-#define EXACTFU_S_EDGE_tb_p8              217  /*      0x0d9 */
-#define EXACTFU_S_EDGE_t8_pb              218  /*      0x0da */
-#define EXACTFU_S_EDGE_t8_p8              219  /*      0x0db */
+#define EXACTFU_S_EDGE_tb              110     /*      0x06e */
+#define EXACTFU_S_EDGE_t8              111     /*      0x06f */
+#define EXACTFU_S_EDGE_tb_pb              220  /*      0x0dc */
+#define EXACTFU_S_EDGE_tb_p8              221  /*      0x0dd */
+#define EXACTFU_S_EDGE_t8_pb              222  /*      0x0de */
+#define EXACTFU_S_EDGE_t8_p8              223  /*      0x0df */
 
-#define LNBREAK                      55        /* 0x37 generic newline pattern
+#define LNBREAK                      56        /* 0x38 generic newline pattern
                                                */
-#define LNBREAK_tb                     110     /*      0x06e */
-#define LNBREAK_t8                     111     /*      0x06f */
-#define LNBREAK_tb_pb                     220  /*      0x0dc */
-#define LNBREAK_tb_p8                     221  /*      0x0dd */
-#define LNBREAK_t8_pb                     222  /*      0x0de */
-#define LNBREAK_t8_p8                     223  /*      0x0df */
+#define LNBREAK_tb                     112     /*      0x070 */
+#define LNBREAK_t8                     113     /*      0x071 */
+#define LNBREAK_tb_pb                     224  /*      0x0e0 */
+#define LNBREAK_tb_p8                     225  /*      0x0e1 */
+#define LNBREAK_t8_pb                     226  /*      0x0e2 */
+#define LNBREAK_t8_p8                     227  /*      0x0e3 */
 
-#define TRIE                         56        /* 0x38 Match many
+#define TRIE                         57        /* 0x39 Match many
                                                   EXACT(F[ALU]?)? at once.
                                                   flags==type */
-#define TRIE_tb                        112     /*      0x070 */
-#define TRIE_t8                        113     /*      0x071 */
-#define TRIE_tb_pb                        224  /*      0x0e0 */
-#define TRIE_tb_p8                        225  /*      0x0e1 */
-#define TRIE_t8_pb                        226  /*      0x0e2 */
-#define TRIE_t8_p8                        227  /*      0x0e3 */
+#define TRIE_tb                        114     /*      0x072 */
+#define TRIE_t8                        115     /*      0x073 */
+#define TRIE_tb_pb                        228  /*      0x0e4 */
+#define TRIE_tb_p8                        229  /*      0x0e5 */
+#define TRIE_t8_pb                        230  /*      0x0e6 */
+#define TRIE_t8_p8                        231  /*      0x0e7 */
 
-#define TRIEC                        57        /* 0x39 Same as TRIE, but with
+#define TRIEC                        58        /* 0x3a Same as TRIE, but with
                                                   embedded charclass data */
-#define TRIEC_tb                       114     /*      0x072 */
-#define TRIEC_t8                       115     /*      0x073 */
-#define TRIEC_tb_pb                       228  /*      0x0e4 */
-#define TRIEC_tb_p8                       229  /*      0x0e5 */
-#define TRIEC_t8_pb                       230  /*      0x0e6 */
-#define TRIEC_t8_p8                       231  /*      0x0e7 */
+#define TRIEC_tb                       116     /*      0x074 */
+#define TRIEC_t8                       117     /*      0x075 */
+#define TRIEC_tb_pb                       232  /*      0x0e8 */
+#define TRIEC_tb_p8                       233  /*      0x0e9 */
+#define TRIEC_t8_pb                       234  /*      0x0ea */
+#define TRIEC_t8_p8                       235  /*      0x0eb */
 
-#define AHOCORASICK                  58        /* 0x3a Aho Corasick stclass.
+#define AHOCORASICK                  59        /* 0x3b Aho Corasick stclass.
                                                   flags==type */
-#define AHOCORASICK_tb                 116     /*      0x074 */
-#define AHOCORASICK_t8                 117     /*      0x075 */
-#define AHOCORASICK_tb_pb                 232  /*      0x0e8 */
-#define AHOCORASICK_tb_p8                 233  /*      0x0e9 */
-#define AHOCORASICK_t8_pb                 234  /*      0x0ea */
-#define AHOCORASICK_t8_p8                 235  /*      0x0eb */
+#define AHOCORASICK_tb                 118     /*      0x076 */
+#define AHOCORASICK_t8                 119     /*      0x077 */
+#define AHOCORASICK_tb_pb                 236  /*      0x0ec */
+#define AHOCORASICK_tb_p8                 237  /*      0x0ed */
+#define AHOCORASICK_t8_pb                 238  /*      0x0ee */
+#define AHOCORASICK_t8_p8                 239  /*      0x0ef */
 
-#define AHOCORASICKC                 59        /* 0x3b Same as AHOCORASICK,
+#define AHOCORASICKC                 60        /* 0x3c Same as AHOCORASICK,
                                                   but with embedded charclass
                                                   data */
-#define AHOCORASICKC_tb                118     /*      0x076 */
-#define AHOCORASICKC_t8                119     /*      0x077 */
-#define AHOCORASICKC_tb_pb                236  /*      0x0ec */
-#define AHOCORASICKC_tb_p8                237  /*      0x0ed */
-#define AHOCORASICKC_t8_pb                238  /*      0x0ee */
-#define AHOCORASICKC_t8_p8                239  /*      0x0ef */
+#define AHOCORASICKC_tb                120     /*      0x078 */
+#define AHOCORASICKC_t8                121     /*      0x079 */
+#define AHOCORASICKC_tb_pb                240  /*      0x0f0 */
+#define AHOCORASICKC_tb_p8                241  /*      0x0f1 */
+#define AHOCORASICKC_t8_pb                242  /*      0x0f2 */
+#define AHOCORASICKC_t8_p8                243  /*      0x0f3 */
 
-#define LTRIE                        60        /* 0x3c Match many
-                                                  EXACT(F[ALU]?)? at once.
-                                                  flags==type, long jump */
-#define LTRIE_tb                       120     /*      0x078 */
-#define LTRIE_t8                       121     /*      0x079 */
-#define LTRIE_tb_pb                       240  /*      0x0f0 */
-#define LTRIE_tb_p8                       241  /*      0x0f1 */
-#define LTRIE_t8_pb                       242  /*      0x0f2 */
-#define LTRIE_t8_p8                       243  /*      0x0f3 */
+#define LTRIE                        61        /* 0x3d Same as TRIE, but with
+                                                  longjump support */
+#define LTRIE_tb                       122     /*      0x07a */
+#define LTRIE_t8                       123     /*      0x07b */
+#define LTRIE_tb_pb                       244  /*      0x0f4 */
+#define LTRIE_tb_p8                       245  /*      0x0f5 */
+#define LTRIE_t8_pb                       246  /*      0x0f6 */
+#define LTRIE_t8_p8                       247  /*      0x0f7 */
 
-#define LTRIEC                       61        /* 0x3d Same as TRIE, but with
-                                                  embedded charclass data,
-                                                  long jump */
-#define LTRIEC_tb                      122     /*      0x07a */
-#define LTRIEC_t8                      123     /*      0x07b */
-#define LTRIEC_tb_pb                      244  /*      0x0f4 */
-#define LTRIEC_tb_p8                      245  /*      0x0f5 */
-#define LTRIEC_t8_pb                      246  /*      0x0f6 */
-#define LTRIEC_t8_p8                      247  /*      0x0f7 */
+#define LTRIEC                       62        /* 0x3e Same as TRIEC, but with
+                                                  longjump support */
+#define LTRIEC_tb                      124     /*      0x07c */
+#define LTRIEC_t8                      125     /*      0x07d */
+#define LTRIEC_tb_pb                      248  /*      0x0f8 */
+#define LTRIEC_tb_p8                      249  /*      0x0f9 */
+#define LTRIEC_t8_pb                      250  /*      0x0fa */
+#define LTRIEC_t8_p8                      251  /*      0x0fb */
 
-#define NOTHING                      62        /* 0x3e Match empty string. */
-#define NOTHING_tb                     124     /*      0x07c */
-#define NOTHING_t8                     125     /*      0x07d */
-#define NOTHING_tb_pb                     248  /*      0x0f8 */
-#define NOTHING_tb_p8                     249  /*      0x0f9 */
-#define NOTHING_t8_pb                     250  /*      0x0fa */
-#define NOTHING_t8_p8                     251  /*      0x0fb */
+#define NOTHING                      63        /* 0x3f Match empty string. */
+#define NOTHING_tb                     126     /*      0x07e */
+#define NOTHING_t8                     127     /*      0x07f */
+#define NOTHING_tb_pb                     252  /*      0x0fc */
+#define NOTHING_tb_p8                     253  /*      0x0fd */
+#define NOTHING_t8_pb                     254  /*      0x0fe */
+#define NOTHING_t8_p8                     255  /*      0x0ff */
 
-#define TAIL                         63        /* 0x3f Match empty string. Can
+#define TAIL                         64        /* 0x40 Match empty string. Can
                                                   jump here from outside. */
-#define TAIL_tb                        126     /*      0x07e */
-#define TAIL_t8                        127     /*      0x07f */
-#define TAIL_tb_pb                        252  /*      0x0fc */
-#define TAIL_tb_p8                        253  /*      0x0fd */
-#define TAIL_t8_pb                        254  /*      0x0fe */
-#define TAIL_t8_p8                        255  /*      0x0ff */
+#define TAIL_tb                        128     /*      0x080 */
+#define TAIL_t8                        129     /*      0x081 */
+#define TAIL_tb_pb                        256  /*      0x100 */
+#define TAIL_tb_p8                        257  /*      0x101 */
+#define TAIL_t8_pb                        258  /*      0x102 */
+#define TAIL_t8_p8                        259  /*      0x103 */
 
-#define STAR                         64        /* 0x40 Match this (simple)
+#define OPTIMIZED                    65        /* 0x41 This is not really a
+                                                  node, but an optimized away
+                                                  piece of a "long" node.  To
+                                                  simplify debugging output,
+                                                  we mark it as if it were a
+                                                  node */
+#define OPTIMIZED_tb                   130     /*      0x082 */
+#define OPTIMIZED_t8                   131     /*      0x083 */
+#define OPTIMIZED_tb_pb                   260  /*      0x104 */
+#define OPTIMIZED_tb_p8                   261  /*      0x105 */
+#define OPTIMIZED_t8_pb                   262  /*      0x106 */
+#define OPTIMIZED_t8_p8                   263  /*      0x107 */
+
+#define STAR                         66        /* 0x42 Match this (simple)
                                                   thing 0 or more times:
                                                   /A{0,}B/ where A is width 1
                                                   char */
-#define STAR_tb                        128     /*      0x080 */
-#define STAR_t8                        129     /*      0x081 */
-#define STAR_tb_pb                        256  /*      0x100 */
-#define STAR_tb_p8                        257  /*      0x101 */
-#define STAR_t8_pb                        258  /*      0x102 */
-#define STAR_t8_p8                        259  /*      0x103 */
+#define STAR_tb                        132     /*      0x084 */
+#define STAR_t8                        133     /*      0x085 */
+#define STAR_tb_pb                        264  /*      0x108 */
+#define STAR_tb_p8                        265  /*      0x109 */
+#define STAR_t8_pb                        266  /*      0x10a */
+#define STAR_t8_p8                        267  /*      0x10b */
 
-#define PLUS                         65        /* 0x41 Match this (simple)
+#define PLUS                         67        /* 0x43 Match this (simple)
                                                   thing 1 or more times:
                                                   /A{1,}B/ where A is width 1
                                                   char */
-#define PLUS_tb                        130     /*      0x082 */
-#define PLUS_t8                        131     /*      0x083 */
-#define PLUS_tb_pb                        260  /*      0x104 */
-#define PLUS_tb_p8                        261  /*      0x105 */
-#define PLUS_t8_pb                        262  /*      0x106 */
-#define PLUS_t8_p8                        263  /*      0x107 */
+#define PLUS_tb                        134     /*      0x086 */
+#define PLUS_t8                        135     /*      0x087 */
+#define PLUS_tb_pb                        268  /*      0x10c */
+#define PLUS_tb_p8                        269  /*      0x10d */
+#define PLUS_t8_pb                        270  /*      0x10e */
+#define PLUS_t8_p8                        271  /*      0x10f */
 
-#define CURLY                        66        /* 0x42 Match this (simple)
+#define CURLY                        68        /* 0x44 Match this (simple)
                                                   thing {n,m} times: /A{m,n}B/
                                                   where A is width 1 char */
-#define CURLY_tb                       132     /*      0x084 */
-#define CURLY_t8                       133     /*      0x085 */
-#define CURLY_tb_pb                       264  /*      0x108 */
-#define CURLY_tb_p8                       265  /*      0x109 */
-#define CURLY_t8_pb                       266  /*      0x10a */
-#define CURLY_t8_p8                       267  /*      0x10b */
+#define CURLY_tb                       136     /*      0x088 */
+#define CURLY_t8                       137     /*      0x089 */
+#define CURLY_tb_pb                       272  /*      0x110 */
+#define CURLY_tb_p8                       273  /*      0x111 */
+#define CURLY_t8_pb                       274  /*      0x112 */
+#define CURLY_t8_p8                       275  /*      0x113 */
 
-#define CURLYN                       67        /* 0x43 Capture next-after-this
+#define CURLYN                       69        /* 0x45 Capture next-after-this
                                                   simple thing: /(A){m,n}B/
                                                   where A is width 1 char */
-#define CURLYN_tb                      134     /*      0x086 */
-#define CURLYN_t8                      135     /*      0x087 */
-#define CURLYN_tb_pb                      268  /*      0x10c */
-#define CURLYN_tb_p8                      269  /*      0x10d */
-#define CURLYN_t8_pb                      270  /*      0x10e */
-#define CURLYN_t8_p8                      271  /*      0x10f */
+#define CURLYN_tb                      138     /*      0x08a */
+#define CURLYN_t8                      139     /*      0x08b */
+#define CURLYN_tb_pb                      276  /*      0x114 */
+#define CURLYN_tb_p8                      277  /*      0x115 */
+#define CURLYN_t8_pb                      278  /*      0x116 */
+#define CURLYN_t8_p8                      279  /*      0x117 */
 
-#define CURLYM                       68        /* 0x44 Capture this
+#define CURLYM                       70        /* 0x46 Capture this
                                                   medium-complex thing {n,m}
                                                   times: /(A){m,n}B/ where A
                                                   is fixed-length */
-#define CURLYM_tb                      136     /*      0x088 */
-#define CURLYM_t8                      137     /*      0x089 */
-#define CURLYM_tb_pb                      272  /*      0x110 */
-#define CURLYM_tb_p8                      273  /*      0x111 */
-#define CURLYM_t8_pb                      274  /*      0x112 */
-#define CURLYM_t8_p8                      275  /*      0x113 */
+#define CURLYM_tb                      140     /*      0x08c */
+#define CURLYM_t8                      141     /*      0x08d */
+#define CURLYM_tb_pb                      280  /*      0x118 */
+#define CURLYM_tb_p8                      281  /*      0x119 */
+#define CURLYM_t8_pb                      282  /*      0x11a */
+#define CURLYM_t8_p8                      283  /*      0x11b */
 
-#define CURLYX                       69        /* 0x45 Match/Capture this
+#define CURLYX                       71        /* 0x47 Match/Capture this
                                                   complex thing {n,m} times.
                                                */
-#define CURLYX_tb                      138     /*      0x08a */
-#define CURLYX_t8                      139     /*      0x08b */
-#define CURLYX_tb_pb                      276  /*      0x114 */
-#define CURLYX_tb_p8                      277  /*      0x115 */
-#define CURLYX_t8_pb                      278  /*      0x116 */
-#define CURLYX_t8_p8                      279  /*      0x117 */
+#define CURLYX_tb                      142     /*      0x08e */
+#define CURLYX_t8                      143     /*      0x08f */
+#define CURLYX_tb_pb                      284  /*      0x11c */
+#define CURLYX_tb_p8                      285  /*      0x11d */
+#define CURLYX_t8_pb                      286  /*      0x11e */
+#define CURLYX_t8_p8                      287  /*      0x11f */
 
-#define WHILEM                       70        /* 0x46 Do curly processing and
+#define WHILEM                       72        /* 0x48 Do curly processing and
                                                   see if rest matches. */
-#define WHILEM_tb                      140     /*      0x08c */
-#define WHILEM_t8                      141     /*      0x08d */
-#define WHILEM_tb_pb                      280  /*      0x118 */
-#define WHILEM_tb_p8                      281  /*      0x119 */
-#define WHILEM_t8_pb                      282  /*      0x11a */
-#define WHILEM_t8_p8                      283  /*      0x11b */
+#define WHILEM_tb                      144     /*      0x090 */
+#define WHILEM_t8                      145     /*      0x091 */
+#define WHILEM_tb_pb                      288  /*      0x120 */
+#define WHILEM_tb_p8                      289  /*      0x121 */
+#define WHILEM_t8_pb                      290  /*      0x122 */
+#define WHILEM_t8_p8                      291  /*      0x123 */
 
-#define OPEN                         71        /* 0x47 Mark this point in
+#define OPEN                         73        /* 0x49 Mark this point in
                                                   input as start of #n. */
-#define OPEN_tb                        142     /*      0x08e */
-#define OPEN_t8                        143     /*      0x08f */
-#define OPEN_tb_pb                        284  /*      0x11c */
-#define OPEN_tb_p8                        285  /*      0x11d */
-#define OPEN_t8_pb                        286  /*      0x11e */
-#define OPEN_t8_p8                        287  /*      0x11f */
+#define OPEN_tb                        146     /*      0x092 */
+#define OPEN_t8                        147     /*      0x093 */
+#define OPEN_tb_pb                        292  /*      0x124 */
+#define OPEN_tb_p8                        293  /*      0x125 */
+#define OPEN_t8_pb                        294  /*      0x126 */
+#define OPEN_t8_p8                        295  /*      0x127 */
 
-#define CLOSE                        72        /* 0x48 Close corresponding
+#define CLOSE                        74        /* 0x4a Close corresponding
                                                   OPEN of #n. */
-#define CLOSE_tb                       144     /*      0x090 */
-#define CLOSE_t8                       145     /*      0x091 */
-#define CLOSE_tb_pb                       288  /*      0x120 */
-#define CLOSE_tb_p8                       289  /*      0x121 */
-#define CLOSE_t8_pb                       290  /*      0x122 */
-#define CLOSE_t8_p8                       291  /*      0x123 */
+#define CLOSE_tb                       148     /*      0x094 */
+#define CLOSE_t8                       149     /*      0x095 */
+#define CLOSE_tb_pb                       296  /*      0x128 */
+#define CLOSE_tb_p8                       297  /*      0x129 */
+#define CLOSE_t8_pb                       298  /*      0x12a */
+#define CLOSE_t8_p8                       299  /*      0x12b */
 
-#define SROPEN                       73        /* 0x49 Same as OPEN, but for
-                                                  script run */
-#define SROPEN_tb                      146     /*      0x092 */
-#define SROPEN_t8                      147     /*      0x093 */
-#define SROPEN_tb_pb                      292  /*      0x124 */
-#define SROPEN_tb_p8                      293  /*      0x125 */
-#define SROPEN_t8_pb                      294  /*      0x126 */
-#define SROPEN_t8_p8                      295  /*      0x127 */
+#define SROPEN                       75        /* 0x4b Start a script run */
+#define SROPEN_tb                      150     /*      0x096 */
+#define SROPEN_t8                      151     /*      0x097 */
+#define SROPEN_tb_pb                      300  /*      0x12c */
+#define SROPEN_tb_p8                      301  /*      0x12d */
+#define SROPEN_t8_pb                      302  /*      0x12e */
+#define SROPEN_t8_p8                      303  /*      0x12f */
 
-#define SRCLOSE                      74        /* 0x4a Close preceding SROPEN
-                                               */
-#define SRCLOSE_tb                     148     /*      0x094 */
-#define SRCLOSE_t8                     149     /*      0x095 */
-#define SRCLOSE_tb_pb                     296  /*      0x128 */
-#define SRCLOSE_tb_p8                     297  /*      0x129 */
-#define SRCLOSE_t8_pb                     298  /*      0x12a */
-#define SRCLOSE_t8_p8                     299  /*      0x12b */
+#define SRCLOSE                      76        /* 0x4c */
+#define SRCLOSE_tb                     152     /*      0x098 */
+#define SRCLOSE_t8                     153     /*      0x099 */
+#define SRCLOSE_tb_pb                     304  /*      0x130 */
+#define SRCLOSE_tb_p8                     305  /*      0x131 */
+#define SRCLOSE_t8_pb                     306  /*      0x132 */
+#define SRCLOSE_t8_p8                     307  /*      0x133 */
 
-#define REF                          75        /* 0x4b Match some already
+#define REF                          77        /* 0x4d Match some already
                                                   matched string */
-#define REF_tb                         150     /*      0x096 */
-#define REF_t8                         151     /*      0x097 */
-#define REF_tb_pb                         300  /*      0x12c */
-#define REF_tb_p8                         301  /*      0x12d */
-#define REF_t8_pb                         302  /*      0x12e */
-#define REF_t8_p8                         303  /*      0x12f */
+#define REF_tb                         154     /*      0x09a */
+#define REF_t8                         155     /*      0x09b */
+#define REF_tb_pb                         308  /*      0x134 */
+#define REF_tb_p8                         309  /*      0x135 */
+#define REF_t8_pb                         310  /*      0x136 */
+#define REF_t8_p8                         311  /*      0x137 */
 
-#define REFF                         76        /* 0x4c Match already matched
+#define REFF                         78        /* 0x4e Match already matched
                                                   string, using /di rules. */
-#define REFF_tb                        152     /*      0x098 */
-#define REFF_t8                        153     /*      0x099 */
-#define REFF_tb_pb                        304  /*      0x130 */
-#define REFF_tb_p8                        305  /*      0x131 */
-#define REFF_t8_pb                        306  /*      0x132 */
-#define REFF_t8_p8                        307  /*      0x133 */
+#define REFF_tb                        156     /*      0x09c */
+#define REFF_t8                        157     /*      0x09d */
+#define REFF_tb_pb                        312  /*      0x138 */
+#define REFF_tb_p8                        313  /*      0x139 */
+#define REFF_t8_pb                        314  /*      0x13a */
+#define REFF_t8_p8                        315  /*      0x13b */
 
-#define REFFL                        77        /* 0x4d Match already matched
+#define REFFL                        79        /* 0x4f Match already matched
                                                   string, using /li rules. */
-#define REFFL_tb                       154     /*      0x09a */
-#define REFFL_t8                       155     /*      0x09b */
-#define REFFL_tb_pb                       308  /*      0x134 */
-#define REFFL_tb_p8                       309  /*      0x135 */
-#define REFFL_t8_pb                       310  /*      0x136 */
-#define REFFL_t8_p8                       311  /*      0x137 */
+#define REFFL_tb                       158     /*      0x09e */
+#define REFFL_t8                       159     /*      0x09f */
+#define REFFL_tb_pb                       316  /*      0x13c */
+#define REFFL_tb_p8                       317  /*      0x13d */
+#define REFFL_t8_pb                       318  /*      0x13e */
+#define REFFL_t8_p8                       319  /*      0x13f */
 
-#define REFFU                        78        /* 0x4e Match already matched
+#define REFFU                        80        /* 0x50 Match already matched
                                                   string, using /ui. */
-#define REFFU_tb                       156     /*      0x09c */
-#define REFFU_t8                       157     /*      0x09d */
-#define REFFU_tb_pb                       312  /*      0x138 */
-#define REFFU_tb_p8                       313  /*      0x139 */
-#define REFFU_t8_pb                       314  /*      0x13a */
-#define REFFU_t8_p8                       315  /*      0x13b */
+#define REFFU_tb                       160     /*      0x0a0 */
+#define REFFU_t8                       161     /*      0x0a1 */
+#define REFFU_tb_pb                       320  /*      0x140 */
+#define REFFU_tb_p8                       321  /*      0x141 */
+#define REFFU_t8_pb                       322  /*      0x142 */
+#define REFFU_t8_p8                       323  /*      0x143 */
 
-#define REFFA                        79        /* 0x4f Match already matched
+#define REFFA                        81        /* 0x51 Match already matched
                                                   string, using /aai rules. */
-#define REFFA_tb                       158     /*      0x09e */
-#define REFFA_t8                       159     /*      0x09f */
-#define REFFA_tb_pb                       316  /*      0x13c */
-#define REFFA_tb_p8                       317  /*      0x13d */
-#define REFFA_t8_pb                       318  /*      0x13e */
-#define REFFA_t8_p8                       319  /*      0x13f */
+#define REFFA_tb                       162     /*      0x0a2 */
+#define REFFA_t8                       163     /*      0x0a3 */
+#define REFFA_tb_pb                       324  /*      0x144 */
+#define REFFA_tb_p8                       325  /*      0x145 */
+#define REFFA_t8_pb                       326  /*      0x146 */
+#define REFFA_t8_p8                       327  /*      0x147 */
 
-#define REFN                         80        /* 0x50 Match some already
+#define REFN                         82        /* 0x52 Match some already
                                                   matched string */
-#define REFN_tb                        160     /*      0x0a0 */
-#define REFN_t8                        161     /*      0x0a1 */
-#define REFN_tb_pb                        320  /*      0x140 */
-#define REFN_tb_p8                        321  /*      0x141 */
-#define REFN_t8_pb                        322  /*      0x142 */
-#define REFN_t8_p8                        323  /*      0x143 */
+#define REFN_tb                        164     /*      0x0a4 */
+#define REFN_t8                        165     /*      0x0a5 */
+#define REFN_tb_pb                        328  /*      0x148 */
+#define REFN_tb_p8                        329  /*      0x149 */
+#define REFN_t8_pb                        330  /*      0x14a */
+#define REFN_t8_p8                        331  /*      0x14b */
 
-#define REFFN                        81        /* 0x51 Match already matched
+#define REFFN                        83        /* 0x53 Match already matched
                                                   string, using /di rules. */
-#define REFFN_tb                       162     /*      0x0a2 */
-#define REFFN_t8                       163     /*      0x0a3 */
-#define REFFN_tb_pb                       324  /*      0x144 */
-#define REFFN_tb_p8                       325  /*      0x145 */
-#define REFFN_t8_pb                       326  /*      0x146 */
-#define REFFN_t8_p8                       327  /*      0x147 */
+#define REFFN_tb                       166     /*      0x0a6 */
+#define REFFN_t8                       167     /*      0x0a7 */
+#define REFFN_tb_pb                       332  /*      0x14c */
+#define REFFN_tb_p8                       333  /*      0x14d */
+#define REFFN_t8_pb                       334  /*      0x14e */
+#define REFFN_t8_p8                       335  /*      0x14f */
 
-#define REFFLN                       82        /* 0x52 Match already matched
+#define REFFLN                       84        /* 0x54 Match already matched
                                                   string, using /li rules. */
-#define REFFLN_tb                      164     /*      0x0a4 */
-#define REFFLN_t8                      165     /*      0x0a5 */
-#define REFFLN_tb_pb                      328  /*      0x148 */
-#define REFFLN_tb_p8                      329  /*      0x149 */
-#define REFFLN_t8_pb                      330  /*      0x14a */
-#define REFFLN_t8_p8                      331  /*      0x14b */
+#define REFFLN_tb                      168     /*      0x0a8 */
+#define REFFLN_t8                      169     /*      0x0a9 */
+#define REFFLN_tb_pb                      336  /*      0x150 */
+#define REFFLN_tb_p8                      337  /*      0x151 */
+#define REFFLN_t8_pb                      338  /*      0x152 */
+#define REFFLN_t8_p8                      339  /*      0x153 */
 
-#define REFFUN                       83        /* 0x53 Match already matched
+#define REFFUN                       85        /* 0x55 Match already matched
                                                   string, using /ui rules. */
-#define REFFUN_tb                      166     /*      0x0a6 */
-#define REFFUN_t8                      167     /*      0x0a7 */
-#define REFFUN_tb_pb                      332  /*      0x14c */
-#define REFFUN_tb_p8                      333  /*      0x14d */
-#define REFFUN_t8_pb                      334  /*      0x14e */
-#define REFFUN_t8_p8                      335  /*      0x14f */
+#define REFFUN_tb                      170     /*      0x0aa */
+#define REFFUN_t8                      171     /*      0x0ab */
+#define REFFUN_tb_pb                      340  /*      0x154 */
+#define REFFUN_tb_p8                      341  /*      0x155 */
+#define REFFUN_t8_pb                      342  /*      0x156 */
+#define REFFUN_t8_p8                      343  /*      0x157 */
 
-#define REFFAN                       84        /* 0x54 Match already matched
+#define REFFAN                       86        /* 0x56 Match already matched
                                                   string, using /aai rules. */
-#define REFFAN_tb                      168     /*      0x0a8 */
-#define REFFAN_t8                      169     /*      0x0a9 */
-#define REFFAN_tb_pb                      336  /*      0x150 */
-#define REFFAN_tb_p8                      337  /*      0x151 */
-#define REFFAN_t8_pb                      338  /*      0x152 */
-#define REFFAN_t8_p8                      339  /*      0x153 */
+#define REFFAN_tb                      172     /*      0x0ac */
+#define REFFAN_t8                      173     /*      0x0ad */
+#define REFFAN_tb_pb                      344  /*      0x158 */
+#define REFFAN_tb_p8                      345  /*      0x159 */
+#define REFFAN_t8_pb                      346  /*      0x15a */
+#define REFFAN_t8_p8                      347  /*      0x15b */
 
-#define LONGJMP                      85        /* 0x55 Jump far away. */
-#define LONGJMP_tb                     170     /*      0x0aa */
-#define LONGJMP_t8                     171     /*      0x0ab */
-#define LONGJMP_tb_pb                     340  /*      0x154 */
-#define LONGJMP_tb_p8                     341  /*      0x155 */
-#define LONGJMP_t8_pb                     342  /*      0x156 */
-#define LONGJMP_t8_p8                     343  /*      0x157 */
-
-#define BRANCHJ                      86        /* 0x56 BRANCH with long
+#define BRANCHJ                      87        /* 0x57 BRANCH with long
                                                   offset. */
-#define BRANCHJ_tb                     172     /*      0x0ac */
-#define BRANCHJ_t8                     173     /*      0x0ad */
-#define BRANCHJ_tb_pb                     344  /*      0x158 */
-#define BRANCHJ_tb_p8                     345  /*      0x159 */
-#define BRANCHJ_t8_pb                     346  /*      0x15a */
-#define BRANCHJ_t8_p8                     347  /*      0x15b */
+#define BRANCHJ_tb                     174     /*      0x0ae */
+#define BRANCHJ_t8                     175     /*      0x0af */
+#define BRANCHJ_tb_pb                     348  /*      0x15c */
+#define BRANCHJ_tb_p8                     349  /*      0x15d */
+#define BRANCHJ_t8_pb                     350  /*      0x15e */
+#define BRANCHJ_t8_p8                     351  /*      0x15f */
 
-#define IFMATCH                      87        /* 0x57 Succeeds if the
+#define IFMATCH                      88        /* 0x58 Succeeds if the
                                                   following matches; non-zero
                                                   flags "f", next_off "o"
                                                   means lookbehind assertion
                                                   starting "f..(f-o)"
                                                   characters before current */
-#define IFMATCH_tb                     174     /*      0x0ae */
-#define IFMATCH_t8                     175     /*      0x0af */
-#define IFMATCH_tb_pb                     348  /*      0x15c */
-#define IFMATCH_tb_p8                     349  /*      0x15d */
-#define IFMATCH_t8_pb                     350  /*      0x15e */
-#define IFMATCH_t8_p8                     351  /*      0x15f */
+#define IFMATCH_tb                     176     /*      0x0b0 */
+#define IFMATCH_t8                     177     /*      0x0b1 */
+#define IFMATCH_tb_pb                     352  /*      0x160 */
+#define IFMATCH_tb_p8                     353  /*      0x161 */
+#define IFMATCH_t8_pb                     354  /*      0x162 */
+#define IFMATCH_t8_p8                     355  /*      0x163 */
 
-#define UNLESSM                      88        /* 0x58 Fails if the following
+#define UNLESSM                      89        /* 0x59 Fails if the following
                                                   matches; non-zero flags "f",
                                                   next_off "o" means
                                                   lookbehind assertion
                                                   starting "f..(f-o)"
                                                   characters before current */
-#define UNLESSM_tb                     176     /*      0x0b0 */
-#define UNLESSM_t8                     177     /*      0x0b1 */
-#define UNLESSM_tb_pb                     352  /*      0x160 */
-#define UNLESSM_tb_p8                     353  /*      0x161 */
-#define UNLESSM_t8_pb                     354  /*      0x162 */
-#define UNLESSM_t8_p8                     355  /*      0x163 */
+#define UNLESSM_tb                     178     /*      0x0b2 */
+#define UNLESSM_t8                     179     /*      0x0b3 */
+#define UNLESSM_tb_pb                     356  /*      0x164 */
+#define UNLESSM_tb_p8                     357  /*      0x165 */
+#define UNLESSM_t8_pb                     358  /*      0x166 */
+#define UNLESSM_t8_p8                     359  /*      0x167 */
 
-#define SUSPEND                      89        /* 0x59 "Independent" sub-RE.
+#define SUSPEND                      90        /* 0x5a "Independent" sub-RE.
                                                */
-#define SUSPEND_tb                     178     /*      0x0b2 */
-#define SUSPEND_t8                     179     /*      0x0b3 */
-#define SUSPEND_tb_pb                     356  /*      0x164 */
-#define SUSPEND_tb_p8                     357  /*      0x165 */
-#define SUSPEND_t8_pb                     358  /*      0x166 */
-#define SUSPEND_t8_p8                     359  /*      0x167 */
+#define SUSPEND_tb                     180     /*      0x0b4 */
+#define SUSPEND_t8                     181     /*      0x0b5 */
+#define SUSPEND_tb_pb                     360  /*      0x168 */
+#define SUSPEND_tb_p8                     361  /*      0x169 */
+#define SUSPEND_t8_pb                     362  /*      0x16a */
+#define SUSPEND_t8_p8                     363  /*      0x16b */
 
-#define IFTHEN                       90        /* 0x5a Switch, should be
+#define IFTHEN                       91        /* 0x5b Switch, should be
                                                   preceded by switcher. */
-#define IFTHEN_tb                      180     /*      0x0b4 */
-#define IFTHEN_t8                      181     /*      0x0b5 */
-#define IFTHEN_tb_pb                      360  /*      0x168 */
-#define IFTHEN_tb_p8                      361  /*      0x169 */
-#define IFTHEN_t8_pb                      362  /*      0x16a */
-#define IFTHEN_t8_p8                      363  /*      0x16b */
+#define IFTHEN_tb                      182     /*      0x0b6 */
+#define IFTHEN_t8                      183     /*      0x0b7 */
+#define IFTHEN_tb_pb                      364  /*      0x16c */
+#define IFTHEN_tb_p8                      365  /*      0x16d */
+#define IFTHEN_t8_pb                      366  /*      0x16e */
+#define IFTHEN_t8_p8                      367  /*      0x16f */
 
-#define GROUPP                       91        /* 0x5b Whether the group
-                                                  matched. */
-#define GROUPP_tb                      182     /*      0x0b6 */
-#define GROUPP_t8                      183     /*      0x0b7 */
-#define GROUPP_tb_pb                      364  /*      0x16c */
-#define GROUPP_tb_p8                      365  /*      0x16d */
-#define GROUPP_t8_pb                      366  /*      0x16e */
-#define GROUPP_t8_p8                      367  /*      0x16f */
-
-#define EVAL                         92        /* 0x5c Execute some Perl code.
-                                               */
-#define EVAL_tb                        184     /*      0x0b8 */
-#define EVAL_t8                        185     /*      0x0b9 */
-#define EVAL_tb_pb                        368  /*      0x170 */
-#define EVAL_tb_p8                        369  /*      0x171 */
-#define EVAL_t8_pb                        370  /*      0x172 */
-#define EVAL_t8_p8                        371  /*      0x173 */
-
-#define MINMOD                       93        /* 0x5d Next operator is not
-                                                  greedy. */
-#define MINMOD_tb                      186     /*      0x0ba */
-#define MINMOD_t8                      187     /*      0x0bb */
-#define MINMOD_tb_pb                      372  /*      0x174 */
-#define MINMOD_tb_p8                      373  /*      0x175 */
-#define MINMOD_t8_pb                      374  /*      0x176 */
-#define MINMOD_t8_p8                      375  /*      0x177 */
-
-#define LOGICAL                      94        /* 0x5e Next opcode should set
-                                                  the flag only. */
-#define LOGICAL_tb                     188     /*      0x0bc */
-#define LOGICAL_t8                     189     /*      0x0bd */
-#define LOGICAL_tb_pb                     376  /*      0x178 */
-#define LOGICAL_tb_p8                     377  /*      0x179 */
-#define LOGICAL_t8_pb                     378  /*      0x17a */
-#define LOGICAL_t8_p8                     379  /*      0x17b */
-
-#define RENUM                        95        /* 0x5f Group with
+#define RENUM                        92        /* 0x5c Group with
                                                   independently numbered
-                                                  parens. */
-#define RENUM_tb                       190     /*      0x0be */
-#define RENUM_t8                       191     /*      0x0bf */
-#define RENUM_tb_pb                       380  /*      0x17c */
-#define RENUM_tb_p8                       381  /*      0x17d */
-#define RENUM_t8_pb                       382  /*      0x17e */
-#define RENUM_t8_p8                       383  /*      0x17f */
+                                                  parens. Not used yet. */
+#define RENUM_tb                       184     /*      0x0b8 */
+#define RENUM_t8                       185     /*      0x0b9 */
+#define RENUM_tb_pb                       368  /*      0x170 */
+#define RENUM_tb_p8                       369  /*      0x171 */
+#define RENUM_t8_pb                       370  /*      0x172 */
+#define RENUM_t8_p8                       371  /*      0x173 */
 
-#define GOSUB                        96        /* 0x60 recurse to paren arg1
+#define LONGJMP                      93        /* 0x5d Jump far away. */
+#define LONGJMP_tb                     186     /*      0x0ba */
+#define LONGJMP_t8                     187     /*      0x0bb */
+#define LONGJMP_tb_pb                     372  /*      0x174 */
+#define LONGJMP_tb_p8                     373  /*      0x175 */
+#define LONGJMP_t8_pb                     374  /*      0x176 */
+#define LONGJMP_t8_p8                     375  /*      0x177 */
+
+#define MINMOD                       94        /* 0x5e Next operator is not
+                                                  greedy. */
+#define MINMOD_tb                      188     /*      0x0bc */
+#define MINMOD_t8                      189     /*      0x0bd */
+#define MINMOD_tb_pb                      376  /*      0x178 */
+#define MINMOD_tb_p8                      377  /*      0x179 */
+#define MINMOD_t8_pb                      378  /*      0x17a */
+#define MINMOD_t8_p8                      379  /*      0x17b */
+
+#define LOGICAL                      95        /* 0x5f Next opcode should set
+                                                  the flag only. */
+#define LOGICAL_tb                     190     /*      0x0be */
+#define LOGICAL_t8                     191     /*      0x0bf */
+#define LOGICAL_tb_pb                     380  /*      0x17c */
+#define LOGICAL_tb_p8                     381  /*      0x17d */
+#define LOGICAL_t8_pb                     382  /*      0x17e */
+#define LOGICAL_t8_p8                     383  /*      0x17f */
+
+#define EVAL                         96        /* 0x60 Execute some Perl code.
+                                                  Used by other opcodes in
+                                                  some cases */
+#define EVAL_tb                        192     /*      0x0c0 */
+#define EVAL_t8                        193     /*      0x0c1 */
+#define EVAL_tb_pb                        384  /*      0x180 */
+#define EVAL_tb_p8                        385  /*      0x181 */
+#define EVAL_t8_pb                        386  /*      0x182 */
+#define EVAL_t8_p8                        387  /*      0x183 */
+
+#define GOSUB                        97        /* 0x61 recurse to paren arg1
                                                   at (signed) ofs arg2 */
-#define GOSUB_tb                       192     /*      0x0c0 */
-#define GOSUB_t8                       193     /*      0x0c1 */
-#define GOSUB_tb_pb                       384  /*      0x180 */
-#define GOSUB_tb_p8                       385  /*      0x181 */
-#define GOSUB_t8_pb                       386  /*      0x182 */
-#define GOSUB_t8_p8                       387  /*      0x183 */
+#define GOSUB_tb                       194     /*      0x0c2 */
+#define GOSUB_t8                       195     /*      0x0c3 */
+#define GOSUB_tb_pb                       388  /*      0x184 */
+#define GOSUB_tb_p8                       389  /*      0x185 */
+#define GOSUB_t8_pb                       390  /*      0x186 */
+#define GOSUB_t8_p8                       391  /*      0x187 */
 
-#define GROUPPN                      97        /* 0x61 Whether the group
+#define GROUPP                       98        /* 0x62 Whether the group
                                                   matched. */
-#define GROUPPN_tb                     194     /*      0x0c2 */
-#define GROUPPN_t8                     195     /*      0x0c3 */
-#define GROUPPN_tb_pb                     388  /*      0x184 */
-#define GROUPPN_tb_p8                     389  /*      0x185 */
-#define GROUPPN_t8_pb                     390  /*      0x186 */
-#define GROUPPN_t8_p8                     391  /*      0x187 */
+#define GROUPP_tb                      196     /*      0x0c4 */
+#define GROUPP_t8                      197     /*      0x0c5 */
+#define GROUPP_tb_pb                      392  /*      0x188 */
+#define GROUPP_tb_p8                      393  /*      0x189 */
+#define GROUPP_t8_pb                      394  /*      0x18a */
+#define GROUPP_t8_p8                      395  /*      0x18b */
 
-#define INSUBP                       98        /* 0x62 Whether we are in a
+#define GROUPPN                      99        /* 0x63 Whether the named group
+                                                  matched. */
+#define GROUPPN_tb                     198     /*      0x0c6 */
+#define GROUPPN_t8                     199     /*      0x0c7 */
+#define GROUPPN_tb_pb                     396  /*      0x18c */
+#define GROUPPN_tb_p8                     397  /*      0x18d */
+#define GROUPPN_t8_pb                     398  /*      0x18e */
+#define GROUPPN_t8_p8                     399  /*      0x18f */
+
+#define INSUBP                      100        /* 0x64 Whether we are in a
                                                   specific recurse. */
-#define INSUBP_tb                      196     /*      0x0c4 */
-#define INSUBP_t8                      197     /*      0x0c5 */
-#define INSUBP_tb_pb                      392  /*      0x188 */
-#define INSUBP_tb_p8                      393  /*      0x189 */
-#define INSUBP_t8_pb                      394  /*      0x18a */
-#define INSUBP_t8_p8                      395  /*      0x18b */
+#define INSUBP_tb                      200     /*      0x0c8 */
+#define INSUBP_t8                      201     /*      0x0c9 */
+#define INSUBP_tb_pb                      400  /*      0x190 */
+#define INSUBP_tb_p8                      401  /*      0x191 */
+#define INSUBP_t8_pb                      402  /*      0x192 */
+#define INSUBP_t8_p8                      403  /*      0x193 */
 
-#define DEFINEP                      99        /* 0x63 Never execute directly.
+#define DEFINEP                     101        /* 0x65 Define regex
+                                                  subroutines. Contents never
+                                                  executed directly, disallows
+                                                  'no' branch in conditional.
                                                */
-#define DEFINEP_tb                     198     /*      0x0c6 */
-#define DEFINEP_t8                     199     /*      0x0c7 */
-#define DEFINEP_tb_pb                     396  /*      0x18c */
-#define DEFINEP_tb_p8                     397  /*      0x18d */
-#define DEFINEP_t8_pb                     398  /*      0x18e */
-#define DEFINEP_t8_p8                     399  /*      0x18f */
+#define DEFINEP_tb                     202     /*      0x0ca */
+#define DEFINEP_t8                     203     /*      0x0cb */
+#define DEFINEP_tb_pb                     404  /*      0x194 */
+#define DEFINEP_tb_p8                     405  /*      0x195 */
+#define DEFINEP_t8_pb                     406  /*      0x196 */
+#define DEFINEP_t8_p8                     407  /*      0x197 */
 
-#define ENDLIKE                     100        /* 0x64 Used only for the type
+#define ENDLIKE                     102        /* 0x66 Used only for the type
                                                   field of verbs */
-#define ENDLIKE_tb                     200     /*      0x0c8 */
-#define ENDLIKE_t8                     201     /*      0x0c9 */
-#define ENDLIKE_tb_pb                     400  /*      0x190 */
-#define ENDLIKE_tb_p8                     401  /*      0x191 */
-#define ENDLIKE_t8_pb                     402  /*      0x192 */
-#define ENDLIKE_t8_p8                     403  /*      0x193 */
+#define ENDLIKE_tb                     204     /*      0x0cc */
+#define ENDLIKE_t8                     205     /*      0x0cd */
+#define ENDLIKE_tb_pb                     408  /*      0x198 */
+#define ENDLIKE_tb_p8                     409  /*      0x199 */
+#define ENDLIKE_t8_pb                     410  /*      0x19a */
+#define ENDLIKE_t8_p8                     411  /*      0x19b */
 
-#define OPFAIL                      101        /* 0x65 Same as (?!), but with
+#define OPFAIL                      103        /* 0x67 Same as (?!), but with
                                                   verb arg */
-#define OPFAIL_tb                      202     /*      0x0ca */
-#define OPFAIL_t8                      203     /*      0x0cb */
-#define OPFAIL_tb_pb                      404  /*      0x194 */
-#define OPFAIL_tb_p8                      405  /*      0x195 */
-#define OPFAIL_t8_pb                      406  /*      0x196 */
-#define OPFAIL_t8_p8                      407  /*      0x197 */
+#define OPFAIL_tb                      206     /*      0x0ce */
+#define OPFAIL_t8                      207     /*      0x0cf */
+#define OPFAIL_tb_pb                      412  /*      0x19c */
+#define OPFAIL_tb_p8                      413  /*      0x19d */
+#define OPFAIL_t8_pb                      414  /*      0x19e */
+#define OPFAIL_t8_p8                      415  /*      0x19f */
 
-#define ACCEPT                      102        /* 0x66 Accepts the current
+#define ACCEPT                      104        /* 0x68 Accepts the current
                                                   matched string, with verbar
                                                */
-#define ACCEPT_tb                      204     /*      0x0cc */
-#define ACCEPT_t8                      205     /*      0x0cd */
-#define ACCEPT_tb_pb                      408  /*      0x198 */
-#define ACCEPT_tb_p8                      409  /*      0x199 */
-#define ACCEPT_t8_pb                      410  /*      0x19a */
-#define ACCEPT_t8_p8                      411  /*      0x19b */
+#define ACCEPT_tb                      208     /*      0x0d0 */
+#define ACCEPT_t8                      209     /*      0x0d1 */
+#define ACCEPT_tb_pb                      416  /*      0x1a0 */
+#define ACCEPT_tb_p8                      417  /*      0x1a1 */
+#define ACCEPT_t8_pb                      418  /*      0x1a2 */
+#define ACCEPT_t8_p8                      419  /*      0x1a3 */
 
-#define VERB                        103        /* 0x67 Used only for the type
+#define VERB                        105        /* 0x69 Used only for the type
                                                   field of verbs */
-#define VERB_tb                        206     /*      0x0ce */
-#define VERB_t8                        207     /*      0x0cf */
-#define VERB_tb_pb                        412  /*      0x19c */
-#define VERB_tb_p8                        413  /*      0x19d */
-#define VERB_t8_pb                        414  /*      0x19e */
-#define VERB_t8_p8                        415  /*      0x19f */
+#define VERB_tb                        210     /*      0x0d2 */
+#define VERB_t8                        211     /*      0x0d3 */
+#define VERB_tb_pb                        420  /*      0x1a4 */
+#define VERB_tb_p8                        421  /*      0x1a5 */
+#define VERB_t8_pb                        422  /*      0x1a6 */
+#define VERB_t8_p8                        423  /*      0x1a7 */
 
-#define PRUNE                       104        /* 0x68 Pattern fails at this
+#define PRUNE                       106        /* 0x6a Pattern fails at this
                                                   startpoint if
                                                   no-backtracking through this
                                                */
-#define PRUNE_tb                       208     /*      0x0d0 */
-#define PRUNE_t8                       209     /*      0x0d1 */
-#define PRUNE_tb_pb                       416  /*      0x1a0 */
-#define PRUNE_tb_p8                       417  /*      0x1a1 */
-#define PRUNE_t8_pb                       418  /*      0x1a2 */
-#define PRUNE_t8_p8                       419  /*      0x1a3 */
+#define PRUNE_tb                       212     /*      0x0d4 */
+#define PRUNE_t8                       213     /*      0x0d5 */
+#define PRUNE_tb_pb                       424  /*      0x1a8 */
+#define PRUNE_tb_p8                       425  /*      0x1a9 */
+#define PRUNE_t8_pb                       426  /*      0x1aa */
+#define PRUNE_t8_p8                       427  /*      0x1ab */
 
-#define MARKPOINT                   105        /* 0x69 Push the current
+#define MARKPOINT                   107        /* 0x6b Push the current
                                                   location for rollback by
                                                   cut. */
-#define MARKPOINT_tb                   210     /*      0x0d2 */
-#define MARKPOINT_t8                   211     /*      0x0d3 */
-#define MARKPOINT_tb_pb                   420  /*      0x1a4 */
-#define MARKPOINT_tb_p8                   421  /*      0x1a5 */
-#define MARKPOINT_t8_pb                   422  /*      0x1a6 */
-#define MARKPOINT_t8_p8                   423  /*      0x1a7 */
+#define MARKPOINT_tb                   214     /*      0x0d6 */
+#define MARKPOINT_t8                   215     /*      0x0d7 */
+#define MARKPOINT_tb_pb                   428  /*      0x1ac */
+#define MARKPOINT_tb_p8                   429  /*      0x1ad */
+#define MARKPOINT_t8_pb                   430  /*      0x1ae */
+#define MARKPOINT_t8_p8                   431  /*      0x1af */
 
-#define SKIP                        106        /* 0x6a On failure skip forward
+#define SKIP                        108        /* 0x6c On failure skip forward
                                                   (to the mark) before
                                                   retrying */
-#define SKIP_tb                        212     /*      0x0d4 */
-#define SKIP_t8                        213     /*      0x0d5 */
-#define SKIP_tb_pb                        424  /*      0x1a8 */
-#define SKIP_tb_p8                        425  /*      0x1a9 */
-#define SKIP_t8_pb                        426  /*      0x1aa */
-#define SKIP_t8_p8                        427  /*      0x1ab */
+#define SKIP_tb                        216     /*      0x0d8 */
+#define SKIP_t8                        217     /*      0x0d9 */
+#define SKIP_tb_pb                        432  /*      0x1b0 */
+#define SKIP_tb_p8                        433  /*      0x1b1 */
+#define SKIP_t8_pb                        434  /*      0x1b2 */
+#define SKIP_t8_p8                        435  /*      0x1b3 */
 
-#define COMMIT                      107        /* 0x6b Pattern fails outright
+#define COMMIT                      109        /* 0x6d Pattern fails outright
                                                   if backtracking through this
                                                */
-#define COMMIT_tb                      214     /*      0x0d6 */
-#define COMMIT_t8                      215     /*      0x0d7 */
-#define COMMIT_tb_pb                      428  /*      0x1ac */
-#define COMMIT_tb_p8                      429  /*      0x1ad */
-#define COMMIT_t8_pb                      430  /*      0x1ae */
-#define COMMIT_t8_p8                      431  /*      0x1af */
+#define COMMIT_tb                      218     /*      0x0da */
+#define COMMIT_t8                      219     /*      0x0db */
+#define COMMIT_tb_pb                      436  /*      0x1b4 */
+#define COMMIT_tb_p8                      437  /*      0x1b5 */
+#define COMMIT_t8_pb                      438  /*      0x1b6 */
+#define COMMIT_t8_p8                      439  /*      0x1b7 */
 
-#define CUTGROUP                    108        /* 0x6c On failure go to the
+#define CUTGROUP                    110        /* 0x6e On failure go to the
                                                   next alternation in the
                                                   group */
-#define CUTGROUP_tb                    216     /*      0x0d8 */
-#define CUTGROUP_t8                    217     /*      0x0d9 */
-#define CUTGROUP_tb_pb                    432  /*      0x1b0 */
-#define CUTGROUP_tb_p8                    433  /*      0x1b1 */
-#define CUTGROUP_t8_pb                    434  /*      0x1b2 */
-#define CUTGROUP_t8_p8                    435  /*      0x1b3 */
+#define CUTGROUP_tb                    220     /*      0x0dc */
+#define CUTGROUP_t8                    221     /*      0x0dd */
+#define CUTGROUP_tb_pb                    440  /*      0x1b8 */
+#define CUTGROUP_tb_p8                    441  /*      0x1b9 */
+#define CUTGROUP_t8_pb                    442  /*      0x1ba */
+#define CUTGROUP_t8_p8                    443  /*      0x1bb */
 
-#define KEEPS                       109        /* 0x6d $& begins here. */
-#define KEEPS_tb                       218     /*      0x0da */
-#define KEEPS_t8                       219     /*      0x0db */
-#define KEEPS_tb_pb                       436  /*      0x1b4 */
-#define KEEPS_tb_p8                       437  /*      0x1b5 */
-#define KEEPS_t8_pb                       438  /*      0x1b6 */
-#define KEEPS_t8_p8                       439  /*      0x1b7 */
-
-#define LOOKBEHIND_END              110        /* 0x6e Return from lookbehind
-                                                  (IFMATCH/UNLESSM) and
-                                                  validate position */
-#define LOOKBEHIND_END_tb              220     /*      0x0dc */
-#define LOOKBEHIND_END_t8              221     /*      0x0dd */
-#define LOOKBEHIND_END_tb_pb              440  /*      0x1b8 */
-#define LOOKBEHIND_END_tb_p8              441  /*      0x1b9 */
-#define LOOKBEHIND_END_t8_pb              442  /*      0x1ba */
-#define LOOKBEHIND_END_t8_p8              443  /*      0x1bb */
-
-#define OPTIMIZED                   111        /* 0x6f Placeholder for dump.
-                                               */
-#define OPTIMIZED_tb                   222     /*      0x0de */
-#define OPTIMIZED_t8                   223     /*      0x0df */
-#define OPTIMIZED_tb_pb                   444  /*      0x1bc */
-#define OPTIMIZED_tb_p8                   445  /*      0x1bd */
-#define OPTIMIZED_t8_pb                   446  /*      0x1be */
-#define OPTIMIZED_t8_p8                   447  /*      0x1bf */
+#define KEEPS                       111        /* 0x6f $& begins here. */
+#define KEEPS_tb                       222     /*      0x0de */
+#define KEEPS_t8                       223     /*      0x0df */
+#define KEEPS_tb_pb                       444  /*      0x1bc */
+#define KEEPS_tb_p8                       445  /*      0x1bd */
+#define KEEPS_t8_pb                       446  /*      0x1be */
+#define KEEPS_t8_p8                       447  /*      0x1bf */
 
 #define PSEUDO                      112        /* 0x70 Pseudo opcode for
                                                   internal use. */
@@ -1633,116 +1638,116 @@ typedef struct regnode                           tregnode_WHILEM;
 EXTCONST char * const PL_regnode_name[]  INIT( {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
-	"SBOL",                  	/* 0x02 */
-	"MBOL",                  	/* 0x03 */
-	"SEOL",                  	/* 0x04 */
-	"MEOL",                  	/* 0x05 */
-	"EOS",                   	/* 0x06 */
-	"GPOS",                  	/* 0x07 */
-	"BOUND",                 	/* 0x08 */
-	"BOUNDL",                	/* 0x09 */
-	"BOUNDU",                	/* 0x0a */
-	"BOUNDA",                	/* 0x0b */
-	"NBOUND",                	/* 0x0c */
-	"NBOUNDL",               	/* 0x0d */
-	"NBOUNDU",               	/* 0x0e */
-	"NBOUNDA",               	/* 0x0f */
-	"REG_ANY",               	/* 0x10 */
-	"SANY",                  	/* 0x11 */
-	"ANYOF",                 	/* 0x12 */
-	"ANYOFD",                	/* 0x13 */
-	"ANYOFL",                	/* 0x14 */
-	"ANYOFPOSIXL",           	/* 0x15 */
-	"ANYOFH",                	/* 0x16 */
-	"ANYOFHb",               	/* 0x17 */
-	"ANYOFHr",               	/* 0x18 */
-	"ANYOFHs",               	/* 0x19 */
-	"ANYOFR",                	/* 0x1a */
-	"ANYOFRb",               	/* 0x1b */
-	"ANYOFHbbm",             	/* 0x1c */
-	"ANYOFM",                	/* 0x1d */
-	"NANYOFM",               	/* 0x1e */
-	"POSIXD",                	/* 0x1f */
-	"POSIXL",                	/* 0x20 */
-	"POSIXU",                	/* 0x21 */
-	"POSIXA",                	/* 0x22 */
-	"NPOSIXD",               	/* 0x23 */
-	"NPOSIXL",               	/* 0x24 */
-	"NPOSIXU",               	/* 0x25 */
-	"NPOSIXA",               	/* 0x26 */
-	"CLUMP",                 	/* 0x27 */
-	"BRANCH",                	/* 0x28 */
-	"EXACT",                 	/* 0x29 */
-	"LEXACT",                	/* 0x2a */
-	"EXACTL",                	/* 0x2b */
-	"EXACTF",                	/* 0x2c */
-	"EXACTFL",               	/* 0x2d */
-	"EXACTFU",               	/* 0x2e */
-	"EXACTFAA",              	/* 0x2f */
-	"EXACTFAA_NO_TRIE",      	/* 0x30 */
-	"EXACTFUP",              	/* 0x31 */
-	"EXACTFLU8",             	/* 0x32 */
-	"EXACT_REQ8",            	/* 0x33 */
-	"LEXACT_REQ8",           	/* 0x34 */
-	"EXACTFU_REQ8",          	/* 0x35 */
-	"EXACTFU_S_EDGE",        	/* 0x36 */
-	"LNBREAK",               	/* 0x37 */
-	"TRIE",                  	/* 0x38 */
-	"TRIEC",                 	/* 0x39 */
-	"AHOCORASICK",           	/* 0x3a */
-	"AHOCORASICKC",          	/* 0x3b */
-	"LTRIE",                 	/* 0x3c */
-	"LTRIEC",                	/* 0x3d */
-	"NOTHING",               	/* 0x3e */
-	"TAIL",                  	/* 0x3f */
-	"STAR",                  	/* 0x40 */
-	"PLUS",                  	/* 0x41 */
-	"CURLY",                 	/* 0x42 */
-	"CURLYN",                	/* 0x43 */
-	"CURLYM",                	/* 0x44 */
-	"CURLYX",                	/* 0x45 */
-	"WHILEM",                	/* 0x46 */
-	"OPEN",                  	/* 0x47 */
-	"CLOSE",                 	/* 0x48 */
-	"SROPEN",                	/* 0x49 */
-	"SRCLOSE",               	/* 0x4a */
-	"REF",                   	/* 0x4b */
-	"REFF",                  	/* 0x4c */
-	"REFFL",                 	/* 0x4d */
-	"REFFU",                 	/* 0x4e */
-	"REFFA",                 	/* 0x4f */
-	"REFN",                  	/* 0x50 */
-	"REFFN",                 	/* 0x51 */
-	"REFFLN",                	/* 0x52 */
-	"REFFUN",                	/* 0x53 */
-	"REFFAN",                	/* 0x54 */
-	"LONGJMP",               	/* 0x55 */
-	"BRANCHJ",               	/* 0x56 */
-	"IFMATCH",               	/* 0x57 */
-	"UNLESSM",               	/* 0x58 */
-	"SUSPEND",               	/* 0x59 */
-	"IFTHEN",                	/* 0x5a */
-	"GROUPP",                	/* 0x5b */
-	"EVAL",                  	/* 0x5c */
-	"MINMOD",                	/* 0x5d */
-	"LOGICAL",               	/* 0x5e */
-	"RENUM",                 	/* 0x5f */
-	"GOSUB",                 	/* 0x60 */
-	"GROUPPN",               	/* 0x61 */
-	"INSUBP",                	/* 0x62 */
-	"DEFINEP",               	/* 0x63 */
-	"ENDLIKE",               	/* 0x64 */
-	"OPFAIL",                	/* 0x65 */
-	"ACCEPT",                	/* 0x66 */
-	"VERB",                  	/* 0x67 */
-	"PRUNE",                 	/* 0x68 */
-	"MARKPOINT",             	/* 0x69 */
-	"SKIP",                  	/* 0x6a */
-	"COMMIT",                	/* 0x6b */
-	"CUTGROUP",              	/* 0x6c */
-	"KEEPS",                 	/* 0x6d */
-	"LOOKBEHIND_END",        	/* 0x6e */
-	"OPTIMIZED",             	/* 0x6f */
+	"LOOKBEHIND_END",        	/* 0x02 */
+	"SBOL",                  	/* 0x03 */
+	"MBOL",                  	/* 0x04 */
+	"SEOL",                  	/* 0x05 */
+	"MEOL",                  	/* 0x06 */
+	"EOS",                   	/* 0x07 */
+	"GPOS",                  	/* 0x08 */
+	"BOUND",                 	/* 0x09 */
+	"BOUNDL",                	/* 0x0a */
+	"BOUNDU",                	/* 0x0b */
+	"BOUNDA",                	/* 0x0c */
+	"NBOUND",                	/* 0x0d */
+	"NBOUNDL",               	/* 0x0e */
+	"NBOUNDU",               	/* 0x0f */
+	"NBOUNDA",               	/* 0x10 */
+	"REG_ANY",               	/* 0x11 */
+	"SANY",                  	/* 0x12 */
+	"ANYOF",                 	/* 0x13 */
+	"ANYOFD",                	/* 0x14 */
+	"ANYOFL",                	/* 0x15 */
+	"ANYOFPOSIXL",           	/* 0x16 */
+	"ANYOFH",                	/* 0x17 */
+	"ANYOFHb",               	/* 0x18 */
+	"ANYOFHr",               	/* 0x19 */
+	"ANYOFHs",               	/* 0x1a */
+	"ANYOFR",                	/* 0x1b */
+	"ANYOFRb",               	/* 0x1c */
+	"ANYOFHbbm",             	/* 0x1d */
+	"ANYOFM",                	/* 0x1e */
+	"NANYOFM",               	/* 0x1f */
+	"POSIXD",                	/* 0x20 */
+	"POSIXL",                	/* 0x21 */
+	"POSIXU",                	/* 0x22 */
+	"POSIXA",                	/* 0x23 */
+	"NPOSIXD",               	/* 0x24 */
+	"NPOSIXL",               	/* 0x25 */
+	"NPOSIXU",               	/* 0x26 */
+	"NPOSIXA",               	/* 0x27 */
+	"CLUMP",                 	/* 0x28 */
+	"BRANCH",                	/* 0x29 */
+	"EXACT",                 	/* 0x2a */
+	"LEXACT",                	/* 0x2b */
+	"EXACTL",                	/* 0x2c */
+	"EXACTF",                	/* 0x2d */
+	"EXACTFL",               	/* 0x2e */
+	"EXACTFU",               	/* 0x2f */
+	"EXACTFAA",              	/* 0x30 */
+	"EXACTFAA_NO_TRIE",      	/* 0x31 */
+	"EXACTFUP",              	/* 0x32 */
+	"EXACTFLU8",             	/* 0x33 */
+	"EXACT_REQ8",            	/* 0x34 */
+	"LEXACT_REQ8",           	/* 0x35 */
+	"EXACTFU_REQ8",          	/* 0x36 */
+	"EXACTFU_S_EDGE",        	/* 0x37 */
+	"LNBREAK",               	/* 0x38 */
+	"TRIE",                  	/* 0x39 */
+	"TRIEC",                 	/* 0x3a */
+	"AHOCORASICK",           	/* 0x3b */
+	"AHOCORASICKC",          	/* 0x3c */
+	"LTRIE",                 	/* 0x3d */
+	"LTRIEC",                	/* 0x3e */
+	"NOTHING",               	/* 0x3f */
+	"TAIL",                  	/* 0x40 */
+	"OPTIMIZED",             	/* 0x41 */
+	"STAR",                  	/* 0x42 */
+	"PLUS",                  	/* 0x43 */
+	"CURLY",                 	/* 0x44 */
+	"CURLYN",                	/* 0x45 */
+	"CURLYM",                	/* 0x46 */
+	"CURLYX",                	/* 0x47 */
+	"WHILEM",                	/* 0x48 */
+	"OPEN",                  	/* 0x49 */
+	"CLOSE",                 	/* 0x4a */
+	"SROPEN",                	/* 0x4b */
+	"SRCLOSE",               	/* 0x4c */
+	"REF",                   	/* 0x4d */
+	"REFF",                  	/* 0x4e */
+	"REFFL",                 	/* 0x4f */
+	"REFFU",                 	/* 0x50 */
+	"REFFA",                 	/* 0x51 */
+	"REFN",                  	/* 0x52 */
+	"REFFN",                 	/* 0x53 */
+	"REFFLN",                	/* 0x54 */
+	"REFFUN",                	/* 0x55 */
+	"REFFAN",                	/* 0x56 */
+	"BRANCHJ",               	/* 0x57 */
+	"IFMATCH",               	/* 0x58 */
+	"UNLESSM",               	/* 0x59 */
+	"SUSPEND",               	/* 0x5a */
+	"IFTHEN",                	/* 0x5b */
+	"RENUM",                 	/* 0x5c */
+	"LONGJMP",               	/* 0x5d */
+	"MINMOD",                	/* 0x5e */
+	"LOGICAL",               	/* 0x5f */
+	"EVAL",                  	/* 0x60 */
+	"GOSUB",                 	/* 0x61 */
+	"GROUPP",                	/* 0x62 */
+	"GROUPPN",               	/* 0x63 */
+	"INSUBP",                	/* 0x64 */
+	"DEFINEP",               	/* 0x65 */
+	"ENDLIKE",               	/* 0x66 */
+	"OPFAIL",                	/* 0x67 */
+	"ACCEPT",                	/* 0x68 */
+	"VERB",                  	/* 0x69 */
+	"PRUNE",                 	/* 0x6a */
+	"MARKPOINT",             	/* 0x6b */
+	"SKIP",                  	/* 0x6c */
+	"COMMIT",                	/* 0x6d */
+	"CUTGROUP",              	/* 0x6e */
+	"KEEPS",                 	/* 0x6f */
 	"PSEUDO",                	/* 0x70 */
 	"REGEX_SET",             	/* 0x71 */
 	/* ------------ States ------------- */
@@ -1811,771 +1816,771 @@ EXTCONST struct regnode_meta PL_regnode_info[]  INIT( {
         .off_by_arg = 0
     },
     {
-        /* #2 op SBOL */
-        .type = BOL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #3 op MBOL */
-        .type = BOL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #4 op SEOL */
-        .type = EOL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #5 op MEOL */
-        .type = EOL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #6 op EOS */
-        .type = EOL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #7 op GPOS */
-        .type = GPOS,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #8 op BOUND */
-        .type = BOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #9 op BOUNDL */
-        .type = BOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #10 op BOUNDU */
-        .type = BOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #11 op BOUNDA */
-        .type = BOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #12 op NBOUND */
-        .type = NBOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #13 op NBOUNDL */
-        .type = NBOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #14 op NBOUNDU */
-        .type = NBOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #15 op NBOUNDA */
-        .type = NBOUND,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #16 op REG_ANY */
-        .type = REG_ANY,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #17 op SANY */
-        .type = REG_ANY,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #18 op ANYOF */
-        .type = ANYOF,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOF),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #19 op ANYOFD */
-        .type = ANYOF,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFD),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #20 op ANYOFL */
-        .type = ANYOF,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFL),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #21 op ANYOFPOSIXL */
-        .type = ANYOF,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFPOSIXL),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #22 op ANYOFH */
-        .type = ANYOFH,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFH),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #23 op ANYOFHb */
-        .type = ANYOFH,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFHb),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #24 op ANYOFHr */
-        .type = ANYOFH,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFHr),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #25 op ANYOFHs */
-        .type = ANYOFH,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFHs),
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #26 op ANYOFR */
-        .type = ANYOFR,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFR),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #27 op ANYOFRb */
-        .type = ANYOFR,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFRb),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #28 op ANYOFHbbm */
-        .type = ANYOFHbbm,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFHbbm),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #29 op ANYOFM */
-        .type = ANYOFM,
-        .arg_len = EXTRA_SIZE(tregnode_ANYOFM),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #30 op NANYOFM */
-        .type = ANYOFM,
-        .arg_len = EXTRA_SIZE(tregnode_NANYOFM),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #31 op POSIXD */
-        .type = POSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #32 op POSIXL */
-        .type = POSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #33 op POSIXU */
-        .type = POSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #34 op POSIXA */
-        .type = POSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #35 op NPOSIXD */
-        .type = NPOSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #36 op NPOSIXL */
-        .type = NPOSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #37 op NPOSIXU */
-        .type = NPOSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #38 op NPOSIXA */
-        .type = NPOSIXD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #39 op CLUMP */
-        .type = CLUMP,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #40 op BRANCH */
-        .type = BRANCH,
-        .arg_len = EXTRA_SIZE(tregnode_BRANCH),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #41 op EXACT */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #42 op LEXACT */
-        .type = EXACT,
-        .arg_len = EXTRA_SIZE(tregnode_LEXACT),
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #43 op EXACTL */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #44 op EXACTF */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #45 op EXACTFL */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #46 op EXACTFU */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #47 op EXACTFAA */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #48 op EXACTFAA_NO_TRIE */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #49 op EXACTFUP */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #50 op EXACTFLU8 */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #51 op EXACT_REQ8 */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #52 op LEXACT_REQ8 */
-        .type = EXACT,
-        .arg_len = EXTRA_SIZE(tregnode_LEXACT_REQ8),
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #53 op EXACTFU_REQ8 */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #54 op EXACTFU_S_EDGE */
-        .type = EXACT,
-        .arg_len = 0,
-        .arg_len_varies = 1,
-        .off_by_arg = 0
-    },
-    {
-        /* #55 op LNBREAK */
-        .type = LNBREAK,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #56 op TRIE */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_TRIE),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #57 op TRIEC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_TRIEC),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #58 op AHOCORASICK */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICK),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #59 op AHOCORASICKC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICKC),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #60 op LTRIE */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_LTRIE),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #61 op LTRIEC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_LTRIEC),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #62 op NOTHING */
-        .type = NOTHING,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #63 op TAIL */
-        .type = NOTHING,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #64 op STAR */
-        .type = STAR,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #65 op PLUS */
-        .type = PLUS,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #66 op CURLY */
-        .type = CURLY,
-        .arg_len = EXTRA_SIZE(tregnode_CURLY),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #67 op CURLYN */
-        .type = CURLY,
-        .arg_len = EXTRA_SIZE(tregnode_CURLYN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #68 op CURLYM */
-        .type = CURLY,
-        .arg_len = EXTRA_SIZE(tregnode_CURLYM),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #69 op CURLYX */
-        .type = CURLY,
-        .arg_len = EXTRA_SIZE(tregnode_CURLYX),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #70 op WHILEM */
-        .type = WHILEM,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #71 op OPEN */
-        .type = OPEN,
-        .arg_len = EXTRA_SIZE(tregnode_OPEN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #72 op CLOSE */
-        .type = CLOSE,
-        .arg_len = EXTRA_SIZE(tregnode_CLOSE),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #73 op SROPEN */
-        .type = SROPEN,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #74 op SRCLOSE */
-        .type = SRCLOSE,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #75 op REF */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REF),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #76 op REFF */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFF),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #77 op REFFL */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFL),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #78 op REFFU */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFU),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #79 op REFFA */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFA),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #80 op REFN */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #81 op REFFN */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #82 op REFFLN */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFLN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #83 op REFFUN */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFUN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #84 op REFFAN */
-        .type = REF,
-        .arg_len = EXTRA_SIZE(tregnode_REFFAN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #85 op LONGJMP */
-        .type = LONGJMP,
-        .arg_len = EXTRA_SIZE(tregnode_LONGJMP),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #86 op BRANCHJ */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_BRANCHJ),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #87 op IFMATCH */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_IFMATCH),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #88 op UNLESSM */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_UNLESSM),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #89 op SUSPEND */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_SUSPEND),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #90 op IFTHEN */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_IFTHEN),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #91 op GROUPP */
-        .type = GROUPP,
-        .arg_len = EXTRA_SIZE(tregnode_GROUPP),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #92 op EVAL */
-        .type = EVAL,
-        .arg_len = EXTRA_SIZE(tregnode_EVAL),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #93 op MINMOD */
-        .type = MINMOD,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #94 op LOGICAL */
-        .type = LOGICAL,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #95 op RENUM */
-        .type = BRANCHJ,
-        .arg_len = EXTRA_SIZE(tregnode_RENUM),
-        .arg_len_varies = 0,
-        .off_by_arg = 1
-    },
-    {
-        /* #96 op GOSUB */
-        .type = GOSUB,
-        .arg_len = EXTRA_SIZE(tregnode_GOSUB),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #97 op GROUPPN */
-        .type = GROUPPN,
-        .arg_len = EXTRA_SIZE(tregnode_GROUPPN),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #98 op INSUBP */
-        .type = INSUBP,
-        .arg_len = EXTRA_SIZE(tregnode_INSUBP),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #99 op DEFINEP */
-        .type = DEFINEP,
-        .arg_len = EXTRA_SIZE(tregnode_DEFINEP),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #100 op ENDLIKE */
-        .type = ENDLIKE,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #101 op OPFAIL */
-        .type = ENDLIKE,
-        .arg_len = EXTRA_SIZE(tregnode_OPFAIL),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #102 op ACCEPT */
-        .type = ENDLIKE,
-        .arg_len = EXTRA_SIZE(tregnode_ACCEPT),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #103 op VERB */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_VERB),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #104 op PRUNE */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_PRUNE),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #105 op MARKPOINT */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_MARKPOINT),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #106 op SKIP */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_SKIP),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #107 op COMMIT */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_COMMIT),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #108 op CUTGROUP */
-        .type = VERB,
-        .arg_len = EXTRA_SIZE(tregnode_CUTGROUP),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #109 op KEEPS */
-        .type = KEEPS,
-        .arg_len = 0,
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #110 op LOOKBEHIND_END */
+        /* #2 op LOOKBEHIND_END */
         .type = END,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #111 op OPTIMIZED */
+        /* #3 op SBOL */
+        .type = BOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #4 op MBOL */
+        .type = BOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #5 op SEOL */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #6 op MEOL */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #7 op EOS */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #8 op GPOS */
+        .type = GPOS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #9 op BOUND */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #10 op BOUNDL */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #11 op BOUNDU */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #12 op BOUNDA */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #13 op NBOUND */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #14 op NBOUNDL */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #15 op NBOUNDU */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #16 op NBOUNDA */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #17 op REG_ANY */
+        .type = REG_ANY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #18 op SANY */
+        .type = REG_ANY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #19 op ANYOF */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #20 op ANYOFD */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFD),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #21 op ANYOFL */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #22 op ANYOFPOSIXL */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFPOSIXL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #23 op ANYOFH */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFH),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #24 op ANYOFHb */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHb),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #25 op ANYOFHr */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHr),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #26 op ANYOFHs */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHs),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #27 op ANYOFR */
+        .type = ANYOFR,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFR),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #28 op ANYOFRb */
+        .type = ANYOFR,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFRb),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #29 op ANYOFHbbm */
+        .type = ANYOFHbbm,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHbbm),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #30 op ANYOFM */
+        .type = ANYOFM,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #31 op NANYOFM */
+        .type = ANYOFM,
+        .arg_len = EXTRA_SIZE(tregnode_NANYOFM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #32 op POSIXD */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #33 op POSIXL */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #34 op POSIXU */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #35 op POSIXA */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #36 op NPOSIXD */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #37 op NPOSIXL */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #38 op NPOSIXU */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #39 op NPOSIXA */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #40 op CLUMP */
+        .type = CLUMP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #41 op BRANCH */
+        .type = BRANCH,
+        .arg_len = EXTRA_SIZE(tregnode_BRANCH),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #42 op EXACT */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #43 op LEXACT */
+        .type = EXACT,
+        .arg_len = EXTRA_SIZE(tregnode_LEXACT),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #44 op EXACTL */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #45 op EXACTF */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #46 op EXACTFL */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #47 op EXACTFU */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #48 op EXACTFAA */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #49 op EXACTFAA_NO_TRIE */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #50 op EXACTFUP */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #51 op EXACTFLU8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #52 op EXACT_REQ8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #53 op LEXACT_REQ8 */
+        .type = EXACT,
+        .arg_len = EXTRA_SIZE(tregnode_LEXACT_REQ8),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #54 op EXACTFU_REQ8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #55 op EXACTFU_S_EDGE */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #56 op LNBREAK */
+        .type = LNBREAK,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #57 op TRIE */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_TRIE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #58 op TRIEC */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_TRIEC),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #59 op AHOCORASICK */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICK),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #60 op AHOCORASICKC */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICKC),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #61 op LTRIE */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_LTRIE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #62 op LTRIEC */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_LTRIEC),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #63 op NOTHING */
         .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #64 op TAIL */
+        .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #65 op OPTIMIZED */
+        .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #66 op STAR */
+        .type = STAR,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #67 op PLUS */
+        .type = PLUS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #68 op CURLY */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLY),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #69 op CURLYN */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #70 op CURLYM */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #71 op CURLYX */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYX),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #72 op WHILEM */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #73 op OPEN */
+        .type = OPEN,
+        .arg_len = EXTRA_SIZE(tregnode_OPEN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #74 op CLOSE */
+        .type = CLOSE,
+        .arg_len = EXTRA_SIZE(tregnode_CLOSE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #75 op SROPEN */
+        .type = SROPEN,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #76 op SRCLOSE */
+        .type = SRCLOSE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #77 op REF */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #78 op REFF */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #79 op REFFL */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #80 op REFFU */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFU),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #81 op REFFA */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFA),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #82 op REFN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #83 op REFFN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #84 op REFFLN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFLN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #85 op REFFUN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFUN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #86 op REFFAN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFAN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #87 op BRANCHJ */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_BRANCHJ),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #88 op IFMATCH */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_IFMATCH),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #89 op UNLESSM */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_UNLESSM),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #90 op SUSPEND */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_SUSPEND),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #91 op IFTHEN */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_IFTHEN),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #92 op RENUM */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_RENUM),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #93 op LONGJMP */
+        .type = LONGJMP,
+        .arg_len = EXTRA_SIZE(tregnode_LONGJMP),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #94 op MINMOD */
+        .type = MINMOD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #95 op LOGICAL */
+        .type = LOGICAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #96 op EVAL */
+        .type = EVAL,
+        .arg_len = EXTRA_SIZE(tregnode_EVAL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #97 op GOSUB */
+        .type = GOSUB,
+        .arg_len = EXTRA_SIZE(tregnode_GOSUB),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #98 op GROUPP */
+        .type = GROUPP,
+        .arg_len = EXTRA_SIZE(tregnode_GROUPP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #99 op GROUPPN */
+        .type = GROUPPN,
+        .arg_len = EXTRA_SIZE(tregnode_GROUPPN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #100 op INSUBP */
+        .type = INSUBP,
+        .arg_len = EXTRA_SIZE(tregnode_INSUBP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #101 op DEFINEP */
+        .type = DEFINEP,
+        .arg_len = EXTRA_SIZE(tregnode_DEFINEP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #102 op ENDLIKE */
+        .type = ENDLIKE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #103 op OPFAIL */
+        .type = ENDLIKE,
+        .arg_len = EXTRA_SIZE(tregnode_OPFAIL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #104 op ACCEPT */
+        .type = ENDLIKE,
+        .arg_len = EXTRA_SIZE(tregnode_ACCEPT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #105 op VERB */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_VERB),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #106 op PRUNE */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_PRUNE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #107 op MARKPOINT */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_MARKPOINT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #108 op SKIP */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_SKIP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #109 op COMMIT */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_COMMIT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #110 op CUTGROUP */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_CUTGROUP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #111 op KEEPS */
+        .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
@@ -2979,8 +2984,8 @@ INIT({ CLUMP, BRANCH, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM, REF,
     BRANCHJ, SUSPEND, IFTHEN,
     0 });
 
-/* varies: 000000000000000000000000000000001000000000000001000000000000000001111111111110000101111100000110000000000000000000000000 */
-EXTCONST U8 PL_varies_bitmask[] INIT({ 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x00, 0x00, 0x7F, 0xF8, 0x5F, 0x06, 0x00, 0x00, 0x00 });
+/* varies: 000000000000000000000000000000000000000000000011000000000000000011111100111000011111111100001100000000000000000000000000 */
+EXTCONST U8 PL_varies_bitmask[] INIT({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0xFC, 0xE1, 0xFF, 0x0C, 0x00, 0x00, 0x00 });
 
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
@@ -2992,8 +2997,8 @@ INIT({ REG_ANY, SANY, ANYOF, ANYOFD, ANYOFL, ANYOFPOSIXL, ANYOFH, ANYOFHb,
     POSIXL, POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU, NPOSIXA, REGEX_SET,
     0 });
 
-/* simple: 000000000000000011111111111111110111111100000000000000000000000000000000000000000000000000000000000000000000000000000010 */
-EXTCONST U8 PL_simple_bitmask[] INIT({ 0x00, 0x00, 0xFF, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 });
+/* simple: 000000000000000011111110111111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000010 */
+EXTCONST U8 PL_simple_bitmask[] INIT({ 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 });
 
 /* Is 'op', known to be of type EXACT, folding? */
 #define isEXACTFish(op) (assert(REGNODE_TYPE(op) == EXACT), (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
