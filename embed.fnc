@@ -3930,6 +3930,7 @@ Cp	|UV	|to_utf8_upper_flags_					\
 				|NN U8 *ustrp				\
 				|NULLOK STRLEN *lenp			\
 				|bool flags
+Em	|U32	|TRIE_JUMP_TYPE_MAX
 
 Xop	|bool	|try_amagic_bin |int method				\
 				|int flags

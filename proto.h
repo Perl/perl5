@@ -9068,6 +9068,8 @@ S_should_warn_nl(const char *pv)
 # endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
+/* PERL_CALLCONV U32
+TRIE_JUMP_TYPE_MAX(void); */
 /* PERL_CALLCONV U8 *
 Perl_utf16_to_utf8(U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 /* PERL_CALLCONV U8 *
