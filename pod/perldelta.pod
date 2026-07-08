@@ -212,6 +212,15 @@ string operands known at compile time is commonly now faster. [L<GH #24228|https
 
 =back
 
+=over 4
+
+=item *
+
+Processing of signatures at the start of a subroutine under the C<signatures>
+feature is now more efficient at runtime.
+
+=back
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
