@@ -2744,8 +2744,9 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         /* Take extra care to not exceed 'e' (which would be undefined
          * behavior) should the input be malformed, with a partial character
          * at the end */
-        ptrdiff_t expected_byte_count = UTF8SKIP(s);
-        if (UNLIKELY(e - s  < expected_byte_count)) {
+        U8 expected_byte_count = UTF8SKIP(s);
+        ptrdiff_t got_bytes = e - s;
+        if (UNLIKELY(got_bytes < expected_byte_count)) {
             warn_text = unees;
             goto warn_and_return;
         }
