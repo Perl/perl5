@@ -2671,11 +2671,6 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
          * empty, which needs special handling to prevent *e from being
          * accessed */
         if (UNLIKELY(e <= s0)) {
-            if (e < s0) {   /* Bad input */
-                warn_text = unees;
-                goto warn_and_return;
-            }
-
             return 0;
         }
     }
