@@ -1713,7 +1713,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     U32 *fail;
     reg_ac_data *aho;
     const U32 data_slot = reg_add_data( pRExC_state, STR_WITH_LEN("T"));
-    regnode *stclass;
+    regnode *stclass = NULL;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_UNUSED_CONTEXT;
@@ -1735,6 +1735,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         stclass = (regnode *)op;
     }
 
+    assert(OP(stclass)==AHOCORASICK || OP(stclass)==AHOCORASICK);
     TRIE_DATA_SLOT_set(stclass, data_slot);
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
