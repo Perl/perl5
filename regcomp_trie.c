@@ -1735,8 +1735,13 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         stclass = (regnode *)op;
     }
 
-    assert(OP(stclass)==AHOCORASICK || OP(stclass)==AHOCORASICK);
-    TRIE_DATA_SLOT_set(stclass, data_slot);
+    assert(OP(stclass)==AHOCORASICK || OP(stclass)==AHOCORASICKC);
+    /* AHOCORASICK nodes are short TRIE's, some compilers arn't smart
+     * enough to know that the normal TRIE_DATA_SLOT_set() macro wont
+     * ever access undefined memory because of the opcode guards. So we
+     * just use the short macro instead here.
+     */
+    SHORT_TRIE_DATA_SLOT_set(stclass, data_slot);
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie = trie_offset;
