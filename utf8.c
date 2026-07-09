@@ -2651,7 +2651,6 @@ STRLEN
 Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 {
     PERL_ARGS_ASSERT_UTF8_LENGTH;
-    assert(s0 == e || ! UTF8_IS_CONTINUATION(*s0));
 
     STRLEN count = 0;
     const U8 * s = s0;
@@ -2666,6 +2665,8 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
      * time spent isn't large either way */
     const U8 * per_byte_end = WORTH_PER_WORD_LOOP(s, e, 12);
 
+    /* Better be a character start */
+    assert(! UTF8_IS_CONTINUATION(*s));
 
     if (! per_byte_end) {
         /* Not worth per-word.  This will always be the case when the input is
@@ -2676,6 +2677,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         }
     }
     else {  /* Count continuations, word-at-a-time. */
+
         STRLEN continuations = 0;
 
         /* We need to stop before the final start character in order to
