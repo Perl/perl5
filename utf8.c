@@ -2656,6 +2656,8 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     STRLEN count = 0;
     const U8 * s = s0;
 
+    const char * warn_text = NULL;
+
     /* For EBCDIC and short strings, we count the characters.  The boundary
      * was determined by eyeballing the output of Porting/bench.pl and
      * choosing a number where the continuations method gave better results (on
@@ -2670,6 +2672,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
          * accessed */
         if (UNLIKELY(e <= s0)) {
             if (e < s0) {   /* Bad input */
+                warn_text = unees;
                 goto warn_and_return;
             }
 
@@ -2745,6 +2748,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
          * at the end */
         ptrdiff_t expected_byte_count = UTF8SKIP(s);
         if (UNLIKELY(e - s  < expected_byte_count)) {
+            warn_text = unees;
             goto warn_and_return;
         }
 
@@ -2759,9 +2763,9 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
   warn_and_return:
     if (PL_op)
         ck_warner_d(packWARN(WARN_UTF8),
-                    "%s in %s", unees, OP_DESC(PL_op));
+                    "%s in %s", warn_text, OP_DESC(PL_op));
     else
-        ck_warner_d(packWARN(WARN_UTF8), "%s", unees);
+        ck_warner_d(packWARN(WARN_UTF8), "%s", warn_text);
 
     return count;
 }
