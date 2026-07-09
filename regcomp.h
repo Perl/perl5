@@ -1330,13 +1330,20 @@ typedef struct reg_ac_data_ reg_ac_data;
 
 #define TRIE_DATA_SLOT(p) ((OP(p) == LTRIEC) ? ARG2u_AFTERCC(p)              \
                           : REGNODE_OFF_BY_ARG(OP(p)) ? ARG2u(p) : ARG1u(p))
-#define TRIE_DATA_SLOT_set(p, val) STMT_START {                            \
+#define SHORT_TRIE_DATA_SLOT_set(p, val) STMT_START {                      \
+    ARG1u_SET((p), (val));                                                 \
+} STMT_END
+#define LONG_TRIE_DATA_SLOT_set(p, val) STMT_START {                       \
     if (OP(p) == LTRIEC)                                                   \
         ARG2u_AFTERCC_SET((p), (val));                                     \
-    else if (REGNODE_OFF_BY_ARG(OP(p)))                                    \
-        ARG2u_SET((p), (val));                                             \
     else                                                                   \
-        ARG1u_SET((p), (val));                                             \
+        ARG2u_SET((p), (val));                                             \
+} STMT_END
+#define TRIE_DATA_SLOT_set(p, val) STMT_START {                            \
+    if (REGNODE_OFF_BY_ARG(OP(p)))                                         \
+        LONG_TRIE_DATA_SLOT_set((p), (val));                               \
+    else                                                                   \
+        SHORT_TRIE_DATA_SLOT_set((p), (val));                              \
 } STMT_END
 #define TRIE_NEXT(p) (REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p))
 #define TRIE_NEXT_set(p, val) STMT_START {                                 \
