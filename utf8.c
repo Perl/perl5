@@ -2664,8 +2664,9 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
      * a 64 bit system, khw not having access to a 32 bit system with
      * cachegrind).  The number isn't critical, as at these sizes, the total
      * time spent isn't large either way */
+    const U8 * per_byte_end = WORTH_PER_WORD_LOOP(s, e, 12);
 
-    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s0, e, 12);
+
     if (! per_byte_end) {
         /* Not worth per-word.  This will always be the case when the input is
          * empty, which needs special handling to prevent *e from being
