@@ -18,6 +18,8 @@ use feature 'state';
 my %known_bad_locales = (   # XXX eventually will need version info if and
                             # when these get fixed.
     solaris => [ 'vi_VN.UTF-8', ],  # Use of U+A8 segfaults: GH #20578
+    cygwin => [ 'bs_BA', 'uz_UZ', ], # As of v5.44 and gcc 14.4.
+                   # See http://nntp.perl.org/group/perl.perl5.porters/271040 
 );
 
 eval { require POSIX; POSIX->import('locale_h'); };
