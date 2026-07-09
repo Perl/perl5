@@ -692,10 +692,6 @@ by actual whitespace (that C<qw> splits on).
 
 C23 F<< <stdckdint.h> >> and associated macros are now used if available.
 
-=back
-
-=over 4
-
 =item *
 
 It is now possible to pass to F<Configure> the values dealing with POSIX
