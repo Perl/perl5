@@ -8135,6 +8135,15 @@ Perl_utf8_length(pTHX_ const U8 *s0, const U8 *e)
 #define PERL_ARGS_ASSERT_UTF8_LENGTH            \
         Perl_assert_aTHX; assert(s0); assert(e); assert(s0 <= e)
 
+PERL_CALLCONV STRLEN
+Perl_utf8_length_maybe_partial(pTHX_ const U8 *s0, const U8 *e, U8 *partial_char_info)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_UTF8_LENGTH_MAYBE_PARTIAL \
+        Perl_assert_aTHX; assert(s0); assert(e); assert(s0 <= e)
+
 PERL_CALLCONV U8 *
 Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp)
         Perl_attribute_nonnull_aTHX

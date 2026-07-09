@@ -2623,15 +2623,80 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 }
 
 /*
-=for apidoc utf8_length
+=for apidoc      utf8_length
+=for apidoc_item utf8_length_maybe_partial
 
-Returns the number of characters in the sequence of UTF-8-encoded bytes starting
-at C<s> (which must be positioned at the start of a character) and ending at
-the byte just before C<e>.  If <s> and <e> point to the same place, it returns
-0 with no warning raised.
+These each return the number of complete characters in the sequence of
+UTF-8-encoded bytes starting at C<s> and ending at the byte just before C<e>.
+Their purpose is to quickly do the count on inputs known to be syntactically
+valid UTF-8; only minimal error checking is done.
 
-If C<e E<lt> s> or if the scan would end up past C<e>, it raises a UTF8 warning
-and returns the number of valid characters.
+The difference between them is that C<utf8_length_maybe_partial> has extra
+hooks to aid code that is reading from a byte-oriented stream where the
+read can stop in the middle of a character, leaving that character only
+partially specified.
+
+C<utf8_length> will die under DEBUGGING builds if the first byte doesn't start
+a character, and raises a warning in the C<utf8> class if the final one is
+incomplete.
+
+C<utf8_length_maybe_partial> takes an extra parameter that returns to the
+caller that the final character needs some continuation bytes to fully specify
+it, and/or that the first bytes in the sequence should form the completion of
+such a character (likely left over from a previous call).
+
+Again, both functions return the number of complete characters encountered in
+the input.
+
+The input <s> and <e> may point to the same place, in which case 0 is returned
+with no warning raised nor other action taken.
+
+The returned value will likely be wrong unless the input is well-formed UTF-8.
+You may instead want to use C<L</is_utf8_string_loclen>> and similar that
+verify the correctness of the string, while also counting how many characters
+it contains.  Their validity checking slow these functions down greatly
+compared to the ones documented here.
+
+C<utf8_length_maybe_partial> takes an extra parameter, a pointer to an array
+of two U8 elements.  If the pointer is NULL, the function's behavior is
+identical to C<utf8_length>.  Otherwise, upon return, the two elements will be
+set to give information about any trailing partial character in the input.
+If the input sequence ends with a complete character, both elements will be 0;
+if it ends with a partial character, element C<[0]> will contain how many
+bytes of that character actually are present in the input, and C<[1]> will
+contain how many missing bytes are needed to form a complete character.
+
+On entry, element C<[0]> is always ignored; element C[<1]> is used so that the
+sequence C<s> may actually not have to start at the beginning of a character,
+but that the first C<[1]> bytes are expected to be continuation bytes that
+complete that character.  Similarly to plain C<utf8_length>, this function
+dies on DEBUGGING builds if the next byte after these doesn't start a character.
+
+This extra parameter allows a caller of C<utf8_length_maybe_partial> to deal with partial characters in various ways.  Typically,
+
+
+=over
+
+=item 1
+
+It can simply pass the partial bytes back to its caller to handle.
+
+=item 2
+
+It can read some more and append any new bytes to the end of what has already
+been read.
+
+=item 3
+
+It can cache the bytes comprising the partial character returned, and return
+to its caller up through the final completed character, then prepend those
+bytes to the next call.
+
+=back
+
+The only checking this function does is to make sure that C<e> isn't less than
+C<s> on input, and that the final few bytes of the input form complete
+syntactically valid characters.
 
 =cut
 
@@ -2648,12 +2713,23 @@ and returns the number of valid characters.
 */
 
 STRLEN
-Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
+Perl_utf8_length_maybe_partial(pTHX_ const U8 * s0, const U8 * const e,
+                                     U8 * partial_char_info)
 {
-    PERL_ARGS_ASSERT_UTF8_LENGTH;
+    PERL_ARGS_ASSERT_UTF8_LENGTH_MAYBE_PARTIAL;
 
     STRLEN count = 0;
     const U8 * s = s0;
+
+    /* If we have hanging continuations missing from the previous call, gobble
+     * as many up as there are available and needed */
+    if (partial_char_info) {
+        while (s < e && partial_char_info[1] > 0 && UTF8_IS_CONTINUATION(*s)) {
+            s++;
+            partial_char_info[1]--;
+            partial_char_info[0]++;
+        }
+    }
 
     const char * warn_text = NULL;
 
@@ -2665,19 +2741,43 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
      * time spent isn't large either way */
     const U8 * per_byte_end = WORTH_PER_WORD_LOOP(s, e, 12);
 
+    if (partial_char_info && partial_char_info[1] > 0) {
+
+        /* To get here, we need more continuations, but the next byte isn't
+         * one. */
+        warn_text = unexpected_non_continuation_text(s0 - partial_char_info[0],
+                                                       partial_char_info[0]
+                                                     + partial_char_info[1],
+                                                     s - s0,
+                                                     partial_char_info[1]);
+        goto warn_and_return;
+    }
+    else {
+
+        /* To get here, we have parsed any expected initial continuations.  If
+         * there were some, it means we have completed the previous partial
+         * character */
+        if (s > s0) {
+            count = 1;
+        }
+    }
+
+    if (s >= e) {
+
+        /* Here, we have parsed any expected and available initial
+         * continuations, and correspondingly adjusted how many are still
+         * expected.  It could be that the input still doesn't extend to the
+         * end of the the first character.  But we're all set up for next time */
+        return count;
+    }
+
     /* Better be a character start */
     assert(! UTF8_IS_CONTINUATION(*s));
 
-    if (! per_byte_end) {
-        /* Not worth per-word.  This will always be the case when the input is
-         * empty, which needs special handling to prevent *e from being
-         * accessed */
-        if (UNLIKELY(e <= s0)) {
-            return 0;
-        }
-    }
-    else {  /* Count continuations, word-at-a-time. */
+    /* No missing continuations left; start the real work from here */
+    s0 = s;
 
+    if (per_byte_end) {
         STRLEN continuations = 0;
 
         /* We need to stop before the final start character in order to
@@ -2734,7 +2834,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         /* Convert continuations to character count.  The total number of
          * characters is the total number of bytes minus the ones that are
          * just continuations */
-        count = s - s0 - continuations;
+        count += s - s0 - continuations;
     }
 
     /* Here, we have processed as much as we dare per-word.  Count characters
@@ -2747,8 +2847,15 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
         U8 expected_byte_count = UTF8SKIP(s);
         ptrdiff_t got_bytes = e - s;
         if (UNLIKELY(got_bytes < expected_byte_count)) {
-            warn_text = unees;
-            goto warn_and_return;
+            if (partial_char_info) {
+                partial_char_info[0] = got_bytes;
+                partial_char_info[1] = expected_byte_count - got_bytes;
+                return count;
+            }
+            else {
+                warn_text = unees;
+                goto warn_and_return;
+            }
         }
 
         count++;
@@ -2757,6 +2864,12 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
 
     /* Here, should have worked all the way through */
     assert(e == s);
+
+    /* This return is for a complete character */
+    if (partial_char_info) {
+        partial_char_info[0] = partial_char_info[1] = 0;
+    }
+
     return count;
 
   warn_and_return:

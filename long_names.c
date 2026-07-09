@@ -951,6 +951,14 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * 
     return utf8_hop_safe(s, off, start, end);
 }
 
+STRLEN
+Perl_utf8_length(pTHX_ const U8 *s0, const U8 *e)
+{
+    PERL_ARGS_ASSERT_UTF8_LENGTH;
+
+    return utf8_length(s0, e);
+}
+
 bool
 Perl_utf8_to_uv(const U8 * const s, const U8 * const e, UV *cp_p, Size_t *advance_p)
 {
