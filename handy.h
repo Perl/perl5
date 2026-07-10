@@ -619,26 +619,53 @@ parameter indicates the number of bytes to compare.  Returns true or false.  (A
 wrapper for C<strncmp>).
 
 =for apidoc Am|bool|memEQ|char* s1|char* s2|STRLEN len
-Test two buffers (which may contain embedded C<NUL> characters, to see if they
-are equal.  The C<len> parameter indicates the number of bytes to compare.
-Returns true or false.  It is undefined behavior if either of the buffers
-doesn't contain at least C<len> bytes.
+Test two buffers (which may contain embedded C<NUL> characters) to see if they
+are equal for exactly C<len> bytes.  Returns true or false.  It is undefined
+behavior if either buffer does not contain at least C<len> bytes.
+
+Use this when both operands are buffers and the caller has already established
+the length to compare.  This macro does not check that the overall lengths of
+the two strings are equal; if C<len> comes from only one operand, it can return
+true for two unequal-length strings that merely share the same first C<len>
+bytes.
+
+If one operand is a C<ptr>/length pair and the other is a string literal, use
+C<memEQs()> instead.
 
 =for apidoc Am|bool|memEQs|char* s1|STRLEN l1|"s2"
-Like L</memEQ>, but the second string is a literal enclosed in double quotes,
-C<l1> gives the number of bytes in C<s1>.
-Returns true or false.
+Test whether the buffer C<s1>, whose length is C<l1>, exactly matches the
+string literal C<s2>.  The second operand must be a literal enclosed in double
+quotes.  Returns false if C<l1> is not equal to the length of C<s2>; otherwise
+returns whether the bytes are equal.
+
+Use this when comparing a C<ptr>/length pair against a string constant.  Unlike
+C<memEQ()>, this macro includes the length-equality check, so no separate guard
+is needed to avoid accepting a matching prefix of a longer or shorter string.
 
 =for apidoc Am|bool|memNE|char* s1|char* s2|STRLEN len
-Test two buffers (which may contain embedded C<NUL> characters, to see if they
-are not equal.  The C<len> parameter indicates the number of bytes to compare.
-Returns true or false.  It is undefined behavior if either of the buffers
-doesn't contain at least C<len> bytes.
+Test two buffers (which may contain embedded C<NUL> characters) to see if they
+are not equal within the first C<len> bytes.  Returns true or false.  It is
+undefined behavior if either buffer does not contain at least C<len> bytes.
+
+Use this when both operands are buffers and the caller has already established
+the length to compare.  This macro does not check that the overall lengths of
+the two strings are equal; if C<len> comes from only one operand, it can return
+false for two unequal-length strings that merely share the same first C<len>
+bytes.
+
+If one operand is a C<ptr>/length pair and the other is a string literal, use
+C<memNEs()> instead.
 
 =for apidoc Am|bool|memNEs|char* s1|STRLEN l1|"s2"
-Like L</memNE>, but the second string is a literal enclosed in double quotes,
-C<l1> gives the number of bytes in C<s1>.
-Returns true or false.
+Test whether the buffer C<s1>, whose length is C<l1>, does not exactly match
+the string literal C<s2>.  The second operand must be a literal enclosed in
+double quotes.  Returns true if C<l1> is not equal to the length of C<s2>;
+otherwise returns whether the bytes differ.
+
+Use this when comparing a C<ptr>/length pair against a string constant.  Unlike
+C<memNE()>, this macro includes the length-equality check, so no separate guard
+is needed to avoid treating a matching prefix of a longer or shorter string as
+equal.
 
 =for apidoc Am|bool|memCHRs|"list"|char c
 Returns the position of the first occurrence of the byte C<c> in the literal

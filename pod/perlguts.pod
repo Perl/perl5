@@ -3854,9 +3854,13 @@ comparison of two SVs, and handle UTF-8ness properly.  Note, however,
 that Unicode specifies a much fancier mechanism for collation, available
 via the L<Unicode::Collate> module.
 
-To just compare two strings for equality/non-equality, you can just use
-L<C<memEQ()>|perlapi/memEQ> and L<C<memNE()>|perlapi/memEQ> as usual,
-except the strings must be both UTF-8 or not UTF-8 encoded.
+To compare two strings for equality/non-equality, use
+L<C<memEQ()>|perlapi/memEQ> and L<C<memNE()>|perlapi/memNE> when both operands
+are buffers and you have already established the length to compare.  If you are
+comparing a C<ptr>/length pair against a string literal, prefer
+L<C<memEQs()>|perlapi/memEQs> and L<C<memNEs()>|perlapi/memNEs>, which also
+check that the lengths match.  In all cases, the strings must be both UTF-8 or
+not UTF-8 encoded.
 
 To compare two strings case-insensitively, use
 L<C<foldEQ_utf8()>|perlapi/foldEQ_utf8> (the strings don't have to have
