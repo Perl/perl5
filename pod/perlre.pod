@@ -383,9 +383,17 @@ X</p> X<regex, preserve> X<regexp, preserve>
 Preserve the string matched such that C<${^PREMATCH}>, C<${^MATCH}>, and
 C<${^POSTMATCH}> are available for use after matching.
 
-In Perl 5.20 and higher this is ignored. Due to a new copy-on-write
-mechanism, C<${^PREMATCH}>, C<${^MATCH}>, and C<${^POSTMATCH}> will be available
-after the match regardless of the modifier.
+This modifier still affects whether those variables are guaranteed to be
+defined after a successful match.  What changed in Perl 5.20 is the
+performance cost of preserving match strings: a copy-on-write mechanism
+largely eliminated the old global penalty associated with match copying.
+This does not make the modifier useless: some match operations, such as
+scalar matches with C</g>, may still avoid preserving the whole matched
+string unless C</p> is present.
+
+Some older Perl releases, including versions from Perl 5.20 through
+Perl 5.42, incorrectly documented this modifier as being ignored after
+Perl 5.20.  That was a documentation bug.
 
 =item B<C<a>>, B<C<d>>, B<C<l>>, and B<C<u>>
 X</a> X</d> X</l> X</u>

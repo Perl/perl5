@@ -972,9 +972,12 @@ C<@+> instead:
 As of Perl 5.10, the C<${^PREMATCH}>, C<${^MATCH}> and C<${^POSTMATCH}>
 variables may be used.  These are only set if the C</p> modifier is
 present.  Consequently they do not penalize the rest of the program.  In
-Perl 5.20, C<${^PREMATCH}>, C<${^MATCH}> and C<${^POSTMATCH}> are available
-whether the C</p> has been used or not (the modifier is ignored), and
-C<$`>, C<$'> and C<$&> do not cause any speed difference.
+Perl 5.20, copy-on-write largely eliminated the old performance costs of
+C<$`>, C<$'> and C<$&>, but C<${^PREMATCH}>, C<${^MATCH}> and
+C<${^POSTMATCH}> are still only guaranteed to be defined after a
+successful match with C</p>.  This remains relevant for some operations,
+such as scalar matches with C</g>, which may otherwise avoid preserving
+the whole matched string.
 
 =head2 Non-capturing groupings
 
@@ -1680,7 +1683,11 @@ you don't want the position reset after failure to match, add the
 C</c>, as in C</regexp/gc>.  The current position in the string is
 associated with the string, not the regexp.  This means that different
 strings have different positions and their respective positions can be
-set or read independently.
+set or read independently.  For performance, scalar matches with C</g>
+do not preserve the whole matched string by default.  They do not simply
+rely on copy-on-write for that, since copy-on-write sharing is bounded
+and some target strings cannot use it.  Use C</p> if you need
+C<${^PREMATCH}>, C<${^MATCH}>, or C<${^POSTMATCH}> after such a match.
 
 In list context, C</g> returns a list of matched groupings, or if
 there are no groupings, a list of matches to the whole regexp.  So if
@@ -3032,4 +3039,3 @@ Haworth, Ronald J Kimball, and Joe Smith for all their helpful
 comments.
 
 =cut
-

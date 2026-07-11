@@ -531,6 +531,24 @@ New entry for "New object system and C<class> syntax".
 
 =back
 
+=head3 L<perlre>, L<perlop>, L<perlretut>, L<perlvar>, L<perlreapi>
+
+=over 4
+
+=item *
+
+The documentation for the regular expression C</p> modifier has been
+corrected.  Some older Perl releases, including versions from Perl 5.20
+through Perl 5.42, incorrectly stated that C</p> was ignored after
+Perl 5.20 because of copy-on-write.  News of its demise was somewhat
+premature.  In fact, C</p> still controls
+whether C<${^PREMATCH}>, C<${^MATCH}>, and C<${^POSTMATCH}> are
+guaranteed to be defined, and it remains relevant for operations such as
+scalar matches with C</g>, which avoid copying the target string by
+default.
+
+=back
+
 =head3 L<perlxs>
 
 =over 4

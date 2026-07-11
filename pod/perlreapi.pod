@@ -149,7 +149,23 @@ TODO: Document those cases.
 
 =item C</p> - RXf_PMf_KEEPCOPY
 
-TODO: Document this
+This corresponds to the C</p> pattern modifier.  If present, the engine
+must preserve sufficient match-string state for C<${^PREMATCH}>,
+C<${^MATCH}>, and C<${^POSTMATCH}> to be retrieved after a successful
+match.  This affects the numbered capture callbacks that fetch those
+variables.  In particular, code paths that would otherwise preserve only
+part of the matched string, such as scalar matches with C</g>, must still
+provide the full information needed when this modifier is in effect.
+Those scalar C</g> code paths are optimized not to copy the target string
+by default, and do not simply rely on copy-on-write: copy-on-write sharing
+is bounded, and some target strings cannot be shared that way at all, so
+depending on it would still leave those paths vulnerable to repeated
+copying.
+
+In core this may be present either on the compiled regex itself or on the
+PMOP that invoked it, such as in C</$qr/p>.  Engine implementations should
+therefore preserve behavior consistent with the numbered-buffer callbacks
+when this modifier is in effect.
 
 =item Character set
 
