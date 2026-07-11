@@ -32,7 +32,7 @@ sub first_release_raw {
 
     my @perls = $version
         ? grep { exists $utilities{$_}{ $util } &&
-                        $utilities{$_}{ $util } ge $version } keys %utilities
+                        $utilities{$_}{ $util } >= $version } keys %utilities
         : grep { exists $utilities{$_}{ $util }             } keys %utilities;
 
     return grep { exists $Module::CoreList::released{$_} } @perls;
@@ -47,7 +47,7 @@ sub first_release_by_date {
 sub first_release {
     my @perls = &first_release_raw;
     return unless @perls;
-    return (sort { $a cmp $b } @perls)[0];
+    return (sort { $a <=> $b } @perls)[0];
 }
 
 sub removed_from {
@@ -63,10 +63,10 @@ sub removed_from_by_date {
 sub removed_raw {
   my $util = shift;
   $util = shift if eval { $util->isa(__PACKAGE__) };
-  return unless my @perls = sort { $a cmp $b } first_release_raw($util);
+  return unless my @perls = sort { $a <=> $b } first_release_raw($util);
   @perls = grep { exists $Module::CoreList::released{$_} } @perls;
   my $last = pop @perls;
-  my @removed = grep { $_ > $last } sort { $a cmp $b } keys %utilities;
+  my @removed = grep { $_ > $last } sort { $a <=> $b } keys %utilities;
   return @removed;
 }
 

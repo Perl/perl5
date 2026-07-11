@@ -1763,7 +1763,7 @@ CORE::evalbytes '';
 ####
 # feature features when feature has been disabled by use VERSION
 # CONTEXT no warnings 'deprecated';
-use feature (sprintf(":%vd", $^V));
+use feature (sprintf(":%s", $^V =~ /^v(5\.\d+|\d+)/g));
 use 1;
 CORE::say $_;
 CORE::state $x;
@@ -1794,7 +1794,7 @@ CORE::evalbytes '';
 # (the above test with CONTEXT, and the output is equivalent but different)
 # CONTEXT use feature ':5.10'; no warnings 'deprecated';
 # feature features when feature has been disabled by use VERSION
-use feature (sprintf(":%vd", $^V));
+use feature (sprintf(":%s", $^V =~ /^v(5\.\d+|\d+)/g));
 use 1;
 CORE::say $_;
 CORE::state $x;

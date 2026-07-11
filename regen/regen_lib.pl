@@ -377,7 +377,7 @@ sub perl_version {
     die "can't locate PERL_REVISION in '$plh'"   unless defined $v1;
     die "can't locate PERL_VERSION in '$plh'"    unless defined $v2;
     die "can't locate PERL_SUBVERSION in '$plh'" unless defined $v3;
-    return ($v1,$v2,$v3, sprintf("%d.%03d%03d", $v1, $v2, $v3));
+    return ($v2,$v3, 0, sprintf("%d.%03d%03d", $v2, $v3, 0));
 }
 
 

@@ -86,7 +86,7 @@ print "# $@\nnot " if $@;
 print "ok ",$i++," - require v5 ignores sub named v5\n";
 
 eval { require 10.0.2; };
-print "# $@\nnot " unless $@ =~ /^\QPerl v10.0.2 required\E/;
+print "# $@\nnot " if $@;
 print "ok ",$i++," - require 10.0.2\n";
 
 my $ver = 5.005_63;
@@ -97,12 +97,12 @@ print "ok ",$i++," - require 5.005_63\n";
 # check inaccurate fp
 $ver = 10.2;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^\QPerl v10.200.0 required\E/;
+print "# $@\nnot " if $@;
 print "ok ",$i++," - require 10.2\n";
 
 $ver = 10.000_02;
 eval { require $ver; };
-print "# $@\nnot " unless $@ =~ /^\QPerl v10.0.20 required\E/;
+print "# $@\nnot " if $@;
 print "ok ",$i++," - require 10.000_02\n";
 
 print "not " unless 5.5.1 gt v5.5;

@@ -38,8 +38,9 @@ use warnings;
 use strict;
 use Test::More;
 
-use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
-                                    # logic to add CORE::
+# to avoid relying on the feature logic to add CORE::
+use feature (sprintf(":%s", $^V =~ /^v(5\.\d+|\d+)/g));
+
 use B::Deparse;
 my $deparse = B::Deparse->new();
 

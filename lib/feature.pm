@@ -75,8 +75,9 @@ $feature_bundle{"5.38"} = $feature_bundle{"5.37"};
 $feature_bundle{"5.40"} = $feature_bundle{"5.39"};
 $feature_bundle{"5.42"} = $feature_bundle{"5.41"};
 $feature_bundle{"5.43"} = $feature_bundle{"5.41"};
-$feature_bundle{"5.44"} = $feature_bundle{"5.41"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
+$feature_bundle{"43"} = $feature_bundle{"5.41"};
+$feature_bundle{"44"} = $feature_bundle{"5.41"};
 my %noops = (
     postderef => 1,
     lexical_subs => 1,
@@ -858,7 +859,7 @@ The following feature bundles are available:
             module_true postderef_qq say signatures
             state try unicode_eval unicode_strings
 
-  :5.44     bitwise current_sub evalbytes fc isa
+  :44       bitwise current_sub evalbytes fc isa
             module_true postderef_qq say signatures
             state try unicode_eval unicode_strings
 
