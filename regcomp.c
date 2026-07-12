@@ -4604,6 +4604,17 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             }
         }
         chain = latest;
+        if (UNLIKELY(chain > U16_MAX && ! RExC_use_BRANCHJ)) {
+            /* A later link from an early node can overflow once the emitted
+             * program has grown this large.  Switch formats now, instead of
+             * finishing this (potentially very large) compilation pass only
+             * to discover the overflow while joining the branches. */
+            RExC_use_BRANCHJ = 1;
+            if (! IN_PARENS_PASS) {
+                *flagp |= RESTART_PARSE;
+                return 0;
+            }
+        }
         c++;
     }
     if (chain == 0) {	/* Loop ran zero times. */
