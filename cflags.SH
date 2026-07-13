@@ -341,6 +341,9 @@ case "$cc" in
       ;;
     esac
   done
+  # g++ warns about things that are perfectly valid C99 and we've chosen not
+  # to worry about. Quiet these warnings
+  warn="$warn -Wno-missing-field-initializers"
   ;;
 esac
 
