@@ -3737,9 +3737,6 @@ Perl_op_class(pTHX_ const OP *o)
         return (o->op_flags & OPf_KIDS) ? OPclass_UNOP : OPclass_BASEOP;
     }
 
-    if (o->op_type == OP_SASSIGN)
-        return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPclass_UNOP : OPclass_BINOP);
-
     if (o->op_type == OP_AELEMFAST) {
 #ifdef USE_ITHREADS
             return OPclass_PADOP;
