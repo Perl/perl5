@@ -1205,7 +1205,7 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name)
 #define NotSupported(e) ((e) == ENOSYS)
 #endif
 
-static int
+static void
 S_argvout_free(pTHX_ SV *io, MAGIC *mg)
 {
     PERL_UNUSED_ARG(io);
@@ -1214,14 +1214,16 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg)
        successfully deleted too */
     assert(IoTYPE(io) != IoTYPE_PIPE);
 
-    /* mg_obj can be NULL if a thread is created with the handle open, in which
+    /* MgAUXSV can be NULL if a thread is created with the handle open, in which
      case we leave any clean up to the parent thread */
-    if (mg->mg_obj) {
+    if (MgAUXSV(mg)) {
+        SV *auxsv = MgAUXSV(mg);
+
 #ifdef ARGV_USE_ATFUNCTIONS
         SV **dir_psv;
         DIR *dir;
 
-        dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+        dir_psv = av_fetch((AV*)auxsv, ARGVMG_ORIG_DIRP, FALSE);
         assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
         dir = INT2PTR(DIR *, SvIV(*dir_psv));
 #endif
@@ -1233,9 +1235,9 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg)
                 SV **pid_psv;
                 PerlIO *iop = IoIFP(io);
 
-                assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+                assert(SvTYPE(auxsv) == SVt_PVAV);
 
-                pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
+                pid_psv = av_fetch((AV*)auxsv, ARGVMG_ORIG_PID, FALSE);
 
                 assert(pid_psv && *pid_psv);
 
@@ -1243,7 +1245,7 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg)
                     /* if we get here the file hasn't been closed explicitly by the
                        user and hadn't been closed implicitly by nextargv(), so
                        abandon the edit */
-                    SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+                    SV **temp_psv = av_fetch((AV*)auxsv, ARGVMG_TEMP_NAME, FALSE);
                     const char *temp_pv = SvPVX(*temp_psv);
 
                     assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
@@ -1266,20 +1268,18 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg)
             closedir(dir);
 #endif
     }
-
-    return 0;
 }
 
-static int
-S_argvout_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
+static void
+S_argvout_clone(pTHX_ SV *sv, MAGIC *mg, SV *osv, MAGIC *omg, CLONE_PARAMS *param)
 {
+    PERL_UNUSED_VAR(sv);
+    PERL_UNUSED_VAR(osv);
+    PERL_UNUSED_VAR(omg);
     PERL_UNUSED_ARG(param);
 
     /* ideally we could just remove the magic from the SV but we don't get the SV here */
-    SvREFCNT_dec(mg->mg_obj);
-    mg->mg_obj = NULL;
-
-    return 0;
+    MgAUXSV_set(mg, NULL);
 }
 
 /* Magic of this type has an AV containing the following:
@@ -1297,17 +1297,13 @@ If we have unlinkat(), renameat(), fchmodat(), dirfd() we also keep:
    6: the DIR * for the current directory when we open the file, stored as an IV
  */
 
-static const MGVTBL argvout_vtbl =
-    {
-        NULL, /* svt_get */
-        NULL, /* svt_set */
-        NULL, /* svt_len */
-        NULL, /* svt_clear */
-        S_argvout_free, /* svt_free */
-        NULL, /* svt_copy */
-        S_argvout_dup,  /* svt_dup */
-        NULL /* svt_local */
-    };
+static const struct MagicFunctions magicfuncs_argvout = {
+    .ver   = 2,
+    .shape = MGv2s_BASE,
+
+    .free_mg  = &S_argvout_free,
+    .clone_mg = &S_argvout_clone,
+};
 
 static bool
 S_is_fork_open(const char *name)
@@ -1420,7 +1416,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 Gid_t filegid;
                 AV *magic_av = NULL;
                 SV *temp_name_sv = NULL;
-                MAGIC *mg;
 
                 TAINT_PROPER("inplace open");
                 if (oldlen == 1 && *PL_oldname == '-') {
@@ -1509,9 +1504,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #endif
                 setdefout(PL_argvoutgv);
                 sv_setsv(GvSVn(PL_argvoutgv), temp_name_sv);
-                mg = sv_magicext((SV*)GvIOp(PL_argvoutgv), (SV*)magic_av, PERL_MAGIC_uvar, &argvout_vtbl, NULL, 0);
-                mg->mg_flags |= MGf_DUP;
-                SvREFCNT_dec(magic_av);
+                sv_magicv2_add((SV *)GvIOp(PL_argvoutgv), &magicfuncs_argvout, 0, (SV *)magic_av);
                 PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                 if (PL_lastfd >= 0) {
                     (void)PerlLIO_fstat(PL_lastfd,&statbuf);
@@ -1858,10 +1851,10 @@ Perl_do_close(pTHX_ GV *gv, bool is_explict)
         }
         return FALSE;
     }
-    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
-        && mg->mg_obj) {
+    if ((mg = sv_magicv2_find_by_funcs((SV*)io, &magicfuncs_argvout))
+        && MgAUXSV(mg)) {
         retval = argvout_final(mg, io, is_explict);
-        mg_freeext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl);
+        sv_magicv2_remove((SV*)io, mg);
     }
     else {
         retval = io_close(io, NULL, is_explict, FALSE);
