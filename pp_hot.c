@@ -6313,6 +6313,253 @@ S_croak_undefined_subroutine(pTHX_ CV const *cv, GV const *gv)
     NOT_REACHED; /* NOTREACHED */
 }
 
+static bool
+S_featureclass_escapehatch(pTHX_ CV* cv) {
+    /* Assuming some stuff about the CV if it made it to this function. */
+    assert(!CvISXSUB(cv));
+    assert(!CvNODEBUG(cv));
+
+    if (CvIsCLASS_FASTREADER(cv)) {
+        /* A :reader does not take arguments. If some have been supplied, punt
+         * to the real method to grumble about it. */
+        if (UNLIKELY(PL_stack_sp != (PL_stack_base + TOPMARK + 2))) {
+            return false;
+        }
+    } else {
+        assert(CvIsCLASS_FASTWRITER(cv));
+        /* Only scalar :writer is implemented, so there should be a single
+           argument on the stack. If not, punt to the full method. */
+        if (UNLIKELY(PL_stack_sp != (PL_stack_base + TOPMARK + 3))) {
+            return false;
+        }
+    }
+
+    /* S_opmethod_stash has already handled this SV*, so extracting it again
+     * is not ideal. This may be revisited in a future commit. */
+    SV* const objr = *(PL_stack_base + TOPMARK + 1);
+
+    /* Try to ensure that the accessor is being called by an object... */
+    if (UNLIKELY(!objr) || UNLIKELY(!SvROK(objr)))
+        return false;
+    SV* const obj = SvRV(objr);
+    if (UNLIKELY(!SvOBJECT(obj) || UNLIKELY(SvTYPE(obj) != SVt_PVOBJ)))
+        return false;
+
+    /* Use the CV's padix field to pull the field SV* out of the object */
+    U32 const fieldix = CvCLASS_PADIX(cv);
+    SV** const fields = ObjectFIELDS(obj);
+    assert(fieldix <= ObjectMAXFIELD(obj));
+
+    SV* fsv = fields[fieldix];
+    assert(fsv);
+
+    /* Pop the CV */
+    rpp_popfree_1();
+
+    /* Won't call pp_entersub, so pop the associated markstack entry. */
+    (void)POPMARK;
+
+    U8 gimme = GIMME_V;
+    int fsv_type = SvTYPE(fsv);
+
+    if (CvIsCLASS_FASTWRITER(cv)) {
+        SV* argsv = *PL_stack_sp;
+
+/* QA feedback needed: Does tainting need to be considered here?
+ *        assert(TAINTING_get || !TAINT_get);
+ *        if (UNLIKELY(TAINT_get) && !SvTAINTED(argsv))
+ *            TAINT_NOT;
+*/
+
+        assert(SvTYPE(fsv) <= SVt_PVMG);
+        assert(fsv != argsv);
+
+#if NVSIZE <= IVSIZE
+        if ((fsv_type <= SVt_NV) && argsv && (SvTYPE(argsv) <= SVt_NV)) {
+#else
+        if ((fsv_type <= SVt_IV) && argsv && (SvTYPE(argsv) <= SVt_IV)) {
+#endif
+            /* Fast bodiless assignment as per Perl_sv_setsv_flags */
+            STATIC_ASSERT_STMT(SVt_NULL == 0);
+            STATIC_ASSERT_STMT(SVt_IV   == 1);
+            STATIC_ASSERT_STMT(SVt_NV   == 2);
+            assert(!SvGMAGICAL(argsv));
+            assert(!SvGMAGICAL(fsv));
+
+            U32 sflags;
+            U32 new_dflags;
+            SV *old_rv = NULL;
+            int dtype = SvTYPE(argsv);
+
+            /* minimal subset of SV_CHECK_THINKFIRST_COW_DROP(fsv) */
+            if (SvREADONLY(fsv))
+                croak_no_modify();
+            if (SvROK(fsv)) {
+                if (SvWEAKREF(fsv))
+                    sv_unref_flags(fsv, 0);
+                else
+                    old_rv = SvRV(fsv);
+                SvROK_off(fsv);
+            }
+            sflags = SvFLAGS(argsv);
+
+            if (sflags & (SVf_IOK|SVf_ROK)) {
+                SET_SVANY_FOR_BODYLESS_IV(fsv);
+                new_dflags = SVt_IV;
+
+                if (sflags & SVf_ROK) {
+                    fsv->sv_u.svu_rv = SvREFCNT_inc(SvRV(argsv));
+                    new_dflags |= SVf_ROK;
+                }
+                else {
+                    /* both src and dst are <= SVt_IV, so sv_any points to the
+                     * head; so access the head directly
+                     */
+                    assert(    &(argsv->sv_u.svu_iv)
+                            == &(((XPVIV*) SvANY(argsv))->xiv_iv));
+                    assert(    &(fsv->sv_u.svu_iv)
+                            == &(((XPVIV*) SvANY(fsv))->xiv_iv));
+                    fsv->sv_u.svu_iv = argsv->sv_u.svu_iv;
+                    new_dflags |= (SVf_IOK|SVp_IOK|(sflags & SVf_IVisUV));
+                }
+            }
+#if NVSIZE <= IVSIZE
+            else if (sflags & SVf_NOK) {
+                SET_SVANY_FOR_BODYLESS_NV(fsv);
+                new_dflags = (SVt_NV|SVf_NOK|SVp_NOK);
+
+                /* both src and dst are <= SVt_MV, so sv_any points to the
+                 * head; so access the head directly
+                 */
+                assert(    &(argsv->sv_u.svu_nv)
+                        == &(((XPVNV*) SvANY(argsv))->xnv_u.xnv_nv));
+                assert(    &(fsv->sv_u.svu_nv)
+                        == &(((XPVNV*) SvANY(fsv))->xnv_u.xnv_nv));
+                fsv->sv_u.svu_nv = argsv->sv_u.svu_nv;
+            }
+#endif
+            else {
+                new_dflags = dtype; /* turn off everything except the type */
+            }
+            /* Should preserve some fsv flags - at least SVs_TEMP, */
+            /* so cannot just set SvFLAGS(fsv) = new_dflags        */
+            /* First clear the flags that we do want to clobber    */
+            SvFLAGS(fsv) &= ~(SVTYPEMASK|SVf_OK|SVf_IVisUV);
+            /* Now set the new flags */
+            SvFLAGS(fsv) |= new_dflags;
+
+            SvREFCNT_dec(old_rv);
+        } else {
+            sv_setsv(fsv, argsv);
+            SvSETMAGIC(fsv);
+        }
+
+        if (gimme == G_VOID)
+            rpp_popfree_2(); /* Pop invocant and argument */
+        else
+            rpp_popfree_1(); /* Pop argument, leave invocant on the stack */
+
+    } else {
+        assert((SvTYPE(fsv) <= SVt_PVMG)
+            || (SvTYPE(fsv) == SVt_PVAV)
+            || (SvTYPE(fsv) == SVt_PVHV)
+        );
+
+        /* Possible enhancement: bake in the field type at compile time? (via CvFLAGS?) */
+        switch (gimme) {
+            case G_VOID:
+                /* Pop the invocant */
+                rpp_popfree_1();
+                break;
+            case G_SCALAR: {
+                SV* rsv = NULL;
+
+                switch (fsv_type) {
+                    default:
+                        rpp_replace_at_norc(PL_stack_sp, newSVsv(fsv));
+                        break;
+                    case SVt_PVAV: {
+                        // Doing it like a padav with no flags set
+                        const SSize_t maxarg = AvFILL(MUTABLE_AV(fsv)) + 1;
+                        rpp_replace_at_norc(PL_stack_sp,
+                            newSViv( (maxarg) ? maxarg : 0 ));
+                        break;
+                    }
+                    case SVt_PVHV: {
+                        // Doing it like a padhv with no flags set
+                        MAGIC *is_tied_mg = SvRMAGICAL(fsv)
+                            ? mg_find(MUTABLE_SV(fsv), PERL_MAGIC_tied)
+                            : NULL;
+                        rsv = (LIKELY(!is_tied_mg))
+                            ? newSViv(HvUSEDKEYS(fsv))
+                            : magic_scalarpack(MUTABLE_HV(fsv), is_tied_mg)
+                            ;
+                        rpp_replace_at_norc(PL_stack_sp, rsv);
+                        break;
+                    }
+                }
+                break;
+            }
+            case G_LIST: {
+                switch (fsv_type) {
+                    case SVt_PVAV: {
+                        /* Pop the invocant */
+                        rpp_popfree_1();
+
+                        // S_pushav except mortal copies of everything
+                        const SSize_t maxarg = AvFILL(fsv) + 1;
+                        rpp_extend(maxarg);
+                        assert(!SvRMAGICAL(fsv)); // Or is this possible/permitted?
+                        PADOFFSET i;
+                        for (i=0; i < (PADOFFSET)maxarg; i++) {
+                            SV* sv = AvARRAY(fsv)[i];
+                            SV* rsv = LIKELY(sv) ? newSVsv(sv) : newSV_type(SVt_NULL);
+                            rpp_push_1_norc(rsv);
+                         };
+                        break;
+                    }
+                    case SVt_PVHV: {
+                        /* Pop the invocant */
+                        rpp_popfree_1();
+
+                        // hv_pushkv((HV*)fsv, 3) except mortal copies of values
+                        assert(!SvRMAGICAL(fsv)); // Or is this possible/permitted?
+
+                        HV* hv = MUTABLE_HV(fsv);
+                        (void)hv_iterinit(hv);
+                        Size_t nkeys = HvUSEDKEYS(hv);
+                        SSize_t ext;
+                        if(nkeys) {
+                            HE *entry;
+                            assert(nkeys <= (SSize_t_MAX >> 1));
+                            ext = nkeys * 2;
+                            EXTEND_MORTAL(nkeys);
+                            rpp_extend(ext);
+                            while ((entry = hv_iternext(hv))) {
+                                SV *keysv = newSVhek(HeKEY_hek(entry));
+                                rpp_push_1_norc(keysv);
+                                rpp_push_1_norc(newSVsv(HeVAL(entry)));
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        rpp_replace_at_norc(PL_stack_sp, newSVsv(fsv));
+                }
+                break;
+            }
+            default:
+                NOT_REACHED;
+                break;
+        }
+    }
+
+    /* The stack should now look the same as it would if the :reader
+     * CV had been executed normally. pp_entersub should now just do
+     *    return NORMAL;*/
+    return true;
+}
+
 PP(pp_entersub)
 {
     GV *gv;
@@ -6390,6 +6637,13 @@ PP(pp_entersub)
           do_die:
             DIE(aTHX_ "Not a CODE reference");
         }
+    }
+
+    /* Some CVs associated with the class feature might shortcut a full
+     * method call. They are entirely responsible for correctly adjusting
+     * the stack in place of entersub/leavesub.*/
+    if (UNLIKELY(CvIsCLASS_FLAGSACTIVE(cv)) && S_featureclass_escapehatch(aTHX_ cv)) {
+        return NORMAL;
     }
 
     /* At this point we want to save PL_savestack_ix, either by doing a

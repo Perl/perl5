@@ -1218,8 +1218,18 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
+    if (cv) {
         CvIsMETHOD_on(cv);
+
+        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+        /* Store the fieldix in the xpvcv and tag the CV for the
+         * attention of OP_METHOD_* OPs, for situations in which
+         * they can bypass normal method execution and reach into
+         * the class instance to pull out the SV and place
+         * it directly onto the stack. */
+        CvIsCLASS_FASTREADER_on(cv);
+        CvCLASS_PADIX_set(cv, fieldix);
+    }
 }
 
 static void
@@ -1287,8 +1297,18 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     OP *nameop = newSVOP(OP_CONST, 0, value);
 
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
+    if (cv) {
         CvIsMETHOD_on(cv);
+
+        U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+        /* Store the fieldix in the xpvcv and tag the CV for the
+         * attention of OP_METHOD_* OPs, for situations in which
+         * they can bypass normal method execution and reach into
+         * the class instance to pull out the SV and place
+         * it directly onto the stack. */
+        CvIsCLASS_FASTWRITER_on(cv);
+        CvCLASS_PADIX_set(cv, fieldix);
+    }
 }
 
 static struct {

@@ -160,6 +160,53 @@ See L<perlguts/Autoloading with XSUBs>.
                                     reference-counted stack */
 #define CVf_EVAL_COMPILED 0x400000 /* an eval CV is fully compiled */
 
+/* Flags specific to perlclass CVs, used for the likes of triggering
+ * alternative code flows - such as fast accesors - inside pp_entersub */
+/* 4 bits have been reserved as of 2026. Multiple possible uses come to
+ * mind, warranting that many flag combinations, and it is desirable
+ * to have a simple bitmask test for checking "is there class-specific
+ * behaviour for this CV?" */
+
+/*
+=for apidoc_section $CV
+
+=for apidoc    Chx|bool|CVf_IsCLASS_MASK|bool
+
+Experimental
+
+=for apidoc    Chx|bool|CVf_IsCLASS_CONSTRUCTOR|bool
+
+Experimental
+
+=for apidoc    Chx|bool|CVf_IsCLASS_FASTREADER|bool
+
+Experimental
+
+=for apidoc    Chx|bool|CVf_IsCLASS_FASTWRITER|bool
+
+Experimental
+
+=for apidoc    Chx|bool|CVf_IsCLASS_METHOD|bool
+
+Experimental
+
+=cut
+*/
+#define CVf_IsCLASS_MASK        0xF000000 /* Test for any permutation set */
+#define CVf_IsCLASS_CONSTRUCTOR 0x1000000 /* RESERVED FOR FUTURE USE */
+                                          /* RL has some ideas to explore */
+#define CVf_IsCLASS_FASTREADER  0x2000000 /* can shortcut perlclass :reader */
+#define CVf_IsCLASS_FASTWRITER  0x4000000 /* can shortcut perlclass :writer */
+                                          /* Could use other flags in the
+                                           * future to indicate simple defaults
+                                           * or constraints. */
+#define CVf_IsCLASS_METHOD      0x8000000 /* RESERVED FOR FUTURE USE */
+                                          /* Perhaps to trigger the work currently
+                                           * done by pp_methstart, without that
+                                           * having to be a separate OP? */
+                                          /* Perhaps CVf_IsMETHOD is pulled up to
+                                           * be 0x8000000 ? */
+
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
 
@@ -299,6 +346,21 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 #  define CvMETHOD(cv)          CvNOWARN_AMBIGUOUS(cv)
 #  define CvMETHOD_on(cv)       CvNOWARN_AMBIGUOUS_on(cv)
 #  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(cv)
+#endif
+
+/* Helper macros for the perlclass implementation, specifically
+ * for use within class.c and by pp_entersub to implement fast
+ * (shortcutting) :reader and :writer accessors. */
+#ifdef PERL_CORE
+#  define CvCLASS_PADIX(cv)             (((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_class_fieldix)
+#  define CvCLASS_PADIX_set(cv,fieldix)   ((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_class_fieldix = (fieldix)
+#  define CvIsCLASS_FLAGSACTIVE(cv)         (CvFLAGS(cv) & CVf_IsCLASS_MASK)
+#  define CvIsCLASS_FASTREADER(cv)          (CvFLAGS(cv) & CVf_IsCLASS_FASTREADER)
+#  define CvIsCLASS_FASTREADER_on(cv)       (CvFLAGS(cv) |= CVf_IsCLASS_FASTREADER)
+#  define CvIsCLASS_FASTREADER_off(cv)      (CvFLAGS(cv) &= ~CVf_IsCLASS_FASTREADER)
+#  define CvIsCLASS_FASTWRITER(cv)          (CvFLAGS(cv) & CVf_IsCLASS_FASTWRITER)
+#  define CvIsCLASS_FASTWRITER_on(cv)       (CvFLAGS(cv) |= CVf_IsCLASS_FASTWRITER)
+#  define CvIsCLASS_FASTWRITER_off(cv)      (CvFLAGS(cv) &= ~CVf_IsCLASS_FASTWRITER)
 #endif
 
 /* Flags for newXS_flags  */

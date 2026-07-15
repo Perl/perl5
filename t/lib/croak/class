@@ -222,3 +222,25 @@ X->new for 0;
 EXPECT
 Exiting subroutine via last at - line 7.
 Can't "last" outside a loop block at - line 7.
+########
+# NAME Reader accessor call on a non-object
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class F {
+    field $x :reader;
+}
+F::x({});
+EXPECT
+Cannot invoke method "x" on a non-instance at - line 5.
+########
+# NAME Writer accessor call on a non-object
+use v5.42;
+use feature 'class';
+no warnings 'experimental::class';
+class F {
+    field $x :writer;
+}
+F::set_x(12,34);
+EXPECT
+Cannot invoke method "set_x" on a non-instance at - line 5.
