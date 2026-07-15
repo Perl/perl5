@@ -1068,6 +1068,17 @@ In Perl 5.20.0 a new copy-on-write system was enabled by default, which
 finally fixes most of the performance issues with these three variables, and
 makes them safe to use anywhere.
 
+However, for performance reasons, some operations still avoid preserving
+the whole matched string unless explicitly asked to do so.  In particular,
+scalar matches with C</g> do not copy the target string by default, and do
+not rely on the copy-on-write mechanism for C<${^PREMATCH}>,
+C<${^MATCH}>, and C<${^POSTMATCH}>; use C</p> if you need those variables
+to be available there.  Relying on copy-on-write alone would still leave
+those matches open to quadratic behavior: the sharing count is finite, so
+it is not hard to construct code that exhausts it and falls back to
+repeated copying, and some strings are not copy-on-write sharable in the
+first place.
+
 The C<Devel::NYTProf> and C<Devel::FindAmpersand> modules can help you
 find uses of these problematic match variables in your code.
 

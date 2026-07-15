@@ -2171,9 +2171,12 @@ Options (specified by the following modifiers) are:
         x's means \t and the SPACE character are ignored within
         square-bracketed character classes
     p   When matching preserve a copy of the matched string so
-        that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be
-        defined (ignored starting in v5.20 as these are always
-        defined starting in that release)
+        that ${^PREMATCH}, ${^MATCH}, and ${^POSTMATCH} will
+        be defined; since v5.20, copy-on-write has largely
+        removed the old performance penalty, but the modifier
+        still controls whether these variables are guaranteed
+        to be defined, and may still matter for operations
+        such as scalar matches with /g
     o   Compile pattern only once.
     a   ASCII-restrict: Use ASCII for \d, \s, \w and [[:posix:]]
         character classes; specifying two a's adds the further
@@ -2356,7 +2359,12 @@ The position after the last match can be read or set using the C<pos()>
 function; see L<perlfunc/pos>.  A failed match normally resets the
 search position to the beginning of the string, but you can avoid that
 by adding the C</c> modifier (for example, C<m//gc>).  Modifying the target
-string also resets the search position.
+string also resets the search position.  For performance, these scalar
+C</g> matches do not preserve the whole matched string by default.
+They do not simply rely on copy-on-write for that, since copy-on-write
+sharing is bounded and some target strings cannot use it.  Use C</p> if
+you need C<${^PREMATCH}>, C<${^MATCH}>, or C<${^POSTMATCH}> after such a
+match.
 
 =item C<\G I<assertion>>
 
