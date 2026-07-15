@@ -3983,8 +3983,12 @@ ARTdmp	|U8 *	|utf8_hop_safe	|MPTR const U8 *s			\
 				|SSize_t off				\
 				|SPTR const U8 * const start		\
 				|EPTRge const U8 * const end
-ARdp	|STRLEN |utf8_length	|SPTR const U8 *s0			\
+ARdmp	|STRLEN |utf8_length	|SPTR const U8 *s0			\
 				|EPTRge const U8 *e
+ARdp	|STRLEN |utf8_length_maybe_partial				\
+				|SPTR const U8 *s0			\
+				|EPTRge const U8 *e			\
+				|NULLOK U8 *partial_char_info
 ATdmp	|UV	|utf8n_to_uvchr |NN const U8 *s 			\
 				|STRLEN curlen				\
 				|NULLOK STRLEN *retlen			\

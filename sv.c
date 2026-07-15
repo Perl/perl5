@@ -9577,70 +9577,44 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
             char *bend = buffer + bytesread;
             char *bufp = buffer;
             size_t charcount = 0;
-            bool charstart = TRUE;
-            STRLEN skip = 0;
+            U8 partial_char_info[2] = { 0, 0 };
 
-            while (charcount < recsize) {
-                /* count accumulated characters */
-                while (bufp < bend) {
-                    if (charstart) {
-                        skip = UTF8SKIP(bufp);
-                    }
-                    if (bufp + skip > bend) {
-                        /* partial at the end */
-                        charstart = FALSE;
-                        break;
-                    }
-                    else {
-                        ++charcount;
-                        bufp += skip;
-                        charstart = TRUE;
-                    }
+            do {
+                charcount += utf8_length_maybe_partial((U8 *) bufp, (U8 *) bend,
+                                                       partial_char_info);
+                /* Done if got enough with nothing dangling */
+                if (charcount >= recsize && partial_char_info[1] == 0) {
+                    break;
                 }
 
-                if (charcount < recsize) {
-                    STRLEN readsize;
-                    STRLEN bufp_offset = bufp - buffer;
-                    SSize_t morebytesread;
+                /* Read enough bytes to match at least the start bytes for
+                 * each character we're going to read, plus the missing
+                 * continuation bytes for an uncompleted character (minus 1 to
+                 * account for that character being completed).  (Using MAX
+                 * makes sure this always evaluates to a sane value.) */
+                STRLEN readsize = MAX(1,   recsize - charcount
+                                         + partial_char_info[1] - 1);
 
-                    /* originally I read enough to fill any incomplete
-                       character and the first byte of the next
-                       character if needed, but if there's many
-                       multi-byte encoded characters we're going to be
-                       making a read call for every character beyond
-                       the original read size.
+                buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
+                bend = buffer + bytesread;
+                SSize_t morebytesread = PerlIO_read(fp, bend, readsize);
+                if (morebytesread <= 0) {
+                    /* we're done, if we still have incomplete
+                       characters the check code in sv_gets() will warn about
+                       them.
 
-                       So instead, read the rest of the character if
-                       any, and enough bytes to match at least the
-                       start bytes for each character we're going to
-                       read.
+                        I'd originally considered doing PerlIO_ungetc() on all
+                        but the lead character of the incomplete character,
+                        but read() doesn't do that, so I don't.
                     */
-                    if (charstart)
-                        readsize = recsize - charcount;
-                    else
-                        readsize = skip - (bend - bufp) + recsize - charcount - 1;
-                    buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
-                    bend = buffer + bytesread;
-                    morebytesread = PerlIO_read(fp, bend, readsize);
-                    if (morebytesread <= 0) {
-                        /* we're done, if we still have incomplete
-                           characters the check code in sv_gets() will
-                           warn about them.
-
-                           I'd originally considered doing
-                           PerlIO_ungetc() on all but the lead
-                           character of the incomplete character, but
-                           read() doesn't do that, so I don't.
-                        */
-                        break;
-                    }
-
-                    /* prepare to scan some more */
-                    bytesread += morebytesread;
-                    bend = buffer + bytesread;
-                    bufp = buffer + bufp_offset;
+                    break;
                 }
-            }
+
+                /* prepare for next iteration */
+                bufp = buffer + bytesread;
+                bytesread += morebytesread;
+                bend = bufp + morebytesread;
+            } while (true);
         }
     }
 

@@ -1924,20 +1924,18 @@ PP_wrapped(pp_sysread, 0, 1)
     IO *io;
     char *buffer;
     STRLEN orig_size;
-    SSize_t length;
+    SSize_t length;     /* How many bytes to read */
     SSize_t count;
     SV *bufsv;
     STRLEN blen;
     int fp_utf8;
     int buffer_utf8;
     SV *read_target;
-    Size_t got = 0;
-    Size_t wanted;
-    bool charstart = FALSE;
-    STRLEN charskip = 0;
-    STRLEN skip = 0;
+    Size_t chars_got = 0;   /* Only used in pp_read with a UTF-8 fp */
+    Size_t chars_wanted;    /* Only used in pp_read with a UTF-8 fp */
     GV * const gv = MUTABLE_GV(*++MARK);
     int fd;
+    U8 partial_info[2] = { 0, 0 };
 
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
         && gv && (io = GvIO(gv)) )
@@ -1979,7 +1977,12 @@ PP_wrapped(pp_sysread, 0, 1)
                        "%s() isn't allowed on :utf8 handles",
                        OP_DESC(PL_op));
         }
+
+        /* This function can handle UTF-8 input for pp_read.  In that case,
+         * 'length', and 'wanted' count characters, not bytes.*/
+
         buffer = SvPVutf8_force(bufsv, blen);
+
         /* UTF-8 may not have been set if they are all low bytes */
         SvUTF8_on(bufsv);
         buffer_utf8 = 0;
@@ -1992,10 +1995,7 @@ PP_wrapped(pp_sysread, 0, 1)
         blen = sv_len_utf8_nomg(bufsv);
     }
 
-    charstart = TRUE;
-    charskip  = 0;
-    skip = 0;
-    wanted = length;
+    chars_wanted = length;  /* Unused unless pp_read with a UTF-8 fp */
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
@@ -2124,39 +2124,77 @@ PP_wrapped(pp_sysread, 0, 1)
     SvCUR_set(read_target, count+(buffer - SvPVX_const(read_target)));
     *SvEND(read_target) = '\0';
     (void)SvPOK_only(read_target);
+
     if (fp_utf8 && !IN_BYTES) {
-        /* Look at utf8 we got back and count the characters */
+
+        /* pp_read is the only OP implemented by this code that accepts UTF-8
+         * handles.  Its API is in terms of character counts instead of
+         * byte lengths.  But the actual IO functions operate in terms of
+         * bytes.  So conversions must be done.
+         *
+         * We have to assume that the input will all be single byte
+         * characters, because it could be, and if we requested more bytes
+         * than are ever going to be available, we could delay or hang the
+         * read() return unnecessarily.
+         *
+         * So above, we requested to read that many bytes.  If there are any
+         * multi-byte characters present in the input, that number will be
+         * too small.  If the read() returned all the bytes requested, there
+         * could be more already available, so we adjust the requested length
+         * and loop to get more, as many times as necessary.
+         *
+         * But if the read() returns fewer bytes than requested, the rest of
+         * the information isn't currently availabe, so we should return that
+         * to our caller to let them decide how to handle it.
+         *
+         * Except, we currently only return complete characters.  Because of
+         * the 1 byte == 1 character assumption, the read can easily stop in
+         * the middle of a multi-byte character.  We currently unconditionally
+         * loop to get the missing bytes, even if the read() has signalled
+         * that nothing is currently available.  XXX khw thinks it would be
+         * better in that case if the complete characters are returned
+         * immediately, and the available bytes from that final character be
+         * cached so as to be prefixed when the caller next does a read.
+         *
+         * Above, we did the read().  Now convert the byte length that got
+         * returned into the number of actual characters */
         const char *bend = buffer + count;
-        while (buffer < bend) {
-            if (charstart) {
-                skip = UTF8SKIP(buffer);
-                charskip = 0;
-            }
-            if (buffer - charskip + skip > bend) {
-                /* partial character - try for rest of it */
-                length = skip - (bend-buffer);
-                offset = bend - SvPVX_const(bufsv);
-                charstart = FALSE;
-                charskip += count;
-                goto more_bytes;
-            }
-            else {
-                got++;
-                buffer += skip;
-                charstart = TRUE;
-                charskip  = 0;
-            }
-        }
-        /* If we have not 'got' the number of _characters_ we 'wanted' get some more
-           provided amount read (count) was what was requested (length)
-         */
-        if (got < wanted && count == length) {
-            length = wanted - got;
+        chars_got += utf8_length_maybe_partial((U8 *) buffer, (U8 *) bend,
+                                               partial_info);
+
+        /* utf8_length_maybe_partial() signals that the final character was
+         * incomplete by not counting that character in its return value, and
+         * by setting 'partial_info[1]' to how many bytes are necessary
+         * to complete it.
+         *
+         * If we have read the requested number of complete characters, we are
+         * done, and can return immediately.  Buf we never return a partial
+         * character, so always try the read again for those.
+         *
+         * In contrast, we do return fewer than the requested complete
+         * characters when the read() indicates that that's all the
+         * information it currently has available. */
+        if (   partial_info[1]    /* Must loop */
+
+                /* Need more info    ...  and it may be available */
+            || (chars_got < chars_wanted && count == length))
+                /* XXX Should PerlIO_get_cnt be checked too? */
+        {
+            /* If this loop iteration actually read some bytes, we will need
+             * fewer next time.  Recalculate.  We need at least the missing
+             * ones required to complete a partial character, minus 1 to
+             * account for that character being completed, plus at least one
+             * for each character totally unread.  (Using MAX makes sure this
+             * always evaluates to a sane value.) */
+            length = MAX(1,   chars_wanted - chars_got
+                            + partial_info[1] - 1);
+
             offset = bend - SvPVX_const(bufsv);
             goto more_bytes;
         }
+
         /* return value is character count */
-        count = got;
+        count = chars_got;
         SvUTF8_on(bufsv);
     }
     else if (buffer_utf8) {
