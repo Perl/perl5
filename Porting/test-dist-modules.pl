@@ -85,6 +85,9 @@ if (@dists) {
     for my $dist (@dists) {
         -d "dist/$dist" or die "dist/$dist not a directory\n";
     }
+    # we might only want to test Devel-PPPort, it has already been
+    # tested, so don't do it again
+    @dists = grep { $_ ne "Devel-PPPort" } @dists;
 }
 else {
     opendir my $distdir, "dist"
