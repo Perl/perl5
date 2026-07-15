@@ -848,6 +848,8 @@ the strings?).
  Leon T     5.44.0-RC2   2026-Jul-08
  Leon T     5.44.0       2026-Jul-15
 
+ Leon T     5.45.0       2026-Jul-16
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
