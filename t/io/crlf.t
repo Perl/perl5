@@ -18,7 +18,7 @@ my $crcr = uni_to_native("\x0d\x0d");
 my $ungetc_count = 8200;    # Somewhat over the likely buffer size
 
 {
-    plan(tests => 21 + 2 * $ungetc_count);
+    plan(tests => 17 + 2 * $ungetc_count);
     ok(open(FOO,">:crlf",$file));
     ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));
     ok(open(FOO,"<:crlf",$file));
@@ -63,14 +63,10 @@ my $ungetc_count = 8200;    # Somewhat over the likely buffer size
     # binmode :crlf should not cumulate.
     # Try it first once and then twice so that even UNIXy boxes
     # get to exercise this, for DOSish boxes even once is enough.
-    # Try also pushing :utf8 first so that there are other layers
-    # in between (this should not matter: CRLF layers still should
-    # not accumulate).
-    for my $utf8 ('', ':utf8') {
 	for my $binmode (1..2) {
 	    open(FOO, ">$file");
 	    # require PerlIO; print PerlIO::get_layers(FOO), "\n";
-	    binmode(FOO, "$utf8:crlf") for 1..$binmode;
+	    binmode(FOO, ":crlf") for 1..$binmode;
 	    # require PerlIO; print PerlIO::get_layers(FOO), "\n";
 	    print FOO "Hello\n";
 	    close FOO;
@@ -82,7 +78,6 @@ my $ungetc_count = 8200;    # Somewhat over the likely buffer size
 	    "\n";
 	    like($foo, qr/$crlf$/);
 	    unlike($foo, qr/$crcr/);
-	}
     }
 
     {

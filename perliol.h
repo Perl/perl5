@@ -57,7 +57,7 @@ struct _PerlIO_funcs {
 #define PERLIO_K_BUFFERED	0x00000002
 #define PERLIO_K_CANCRLF	0x00000004
 #define PERLIO_K_FASTGETS	0x00000008
-#define PERLIO_K_DUMMY		0x00000010
+#define PERLIO_K_DUMMY		0x00000000 /* DEPRECATED */
 #define PERLIO_K_UTF8		0x00008000
 #define PERLIO_K_DESTRUCT	0x00010000
 #define PERLIO_K_MULTIARG	0x00020000
@@ -111,6 +111,7 @@ EXTCONST PerlIO_funcs PerlIO_perlio;
 EXTCONST PerlIO_funcs PerlIO_stdio;
 EXTCONST PerlIO_funcs PerlIO_crlf;
 EXTCONST PerlIO_funcs PerlIO_utf8;
+EXTCONST PerlIO_funcs PerlIO_utf8_lax;
 EXTCONST PerlIO_funcs PerlIO_byte;
 EXTCONST PerlIO_funcs PerlIO_raw;
 EXTCONST PerlIO_funcs PerlIO_pending;
