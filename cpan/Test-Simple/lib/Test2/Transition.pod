@@ -306,14 +306,6 @@ something new (Test2) to completely rewrite it in a sane way.
 
 Still broken as of version: 0.32
 
-=item Net::BitTorrent
-
-The tests for this module directly access L<Test::Builder> hash keys. Most, if
-not all of these hash keys have public API methods that could be used instead
-to avoid the problem.
-
-Still broken in version: 0.052
-
 =item Test::Group
 
 It monkeypatches Test::Builder, and calls it "black magic" in the code.

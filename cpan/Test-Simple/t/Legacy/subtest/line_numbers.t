@@ -13,6 +13,16 @@ BEGIN {
     }
 }
 
+# Detect the line numbering behaviour of this version of perl
+our $use_block_end;
+BEGIN {
+    sub X { my (undef, undef, $line) = caller;
+            $use_block_end++ if ($line != shift);
+    }
+    X __LINE__, # $use_block_end = 0
+    sub { }     # $use_block_end = 1
+}
+
 use strict;
 use warnings;
 
@@ -37,12 +47,13 @@ our %line;
     test_err("#   Failed test 'namehere'");
     test_err("#   at $0 line $line{outerfail1}.");
 
+    BEGIN{ $line{outerfail1} = __LINE__ + ($use_block_end ? 6 : 1) }
     subtest namehere => sub {
         plan tests => 3;
         ok 1;
         ok 0; BEGIN{ $line{innerfail1} = __LINE__ }
         ok 1;
-    }; BEGIN{ $line{outerfail1} = __LINE__ }
+    };
     
     test_test("un-named inner tests");
 }
@@ -59,23 +70,25 @@ our %line;
     test_err("#   Failed test 'namehere'");
     test_err("#   at $0 line $line{outerfail2}.");
 
+    BEGIN{ $line{outerfail2} = __LINE__ + ($use_block_end ? 6 : 1) }
     subtest namehere => sub {
         plan tests => 3;
         ok 1, "first is good";
         ok 0, "second is bad"; BEGIN{ $line{innerfail2} = __LINE__ }
         ok 1, "third is good";
-    }; BEGIN{ $line{outerfail2} = __LINE__ }
+    };
     
     test_test("named inner tests");
 }
 
 sub run_the_subtest {
+    BEGIN{ $line{outerfail3} = __LINE__ + ($use_block_end ? 6 : 1) }
     subtest namehere => sub {
         plan tests => 3;
         ok 1, "first is good";
         ok 0, "second is bad"; BEGIN{ $line{innerfail3} = __LINE__ }
         ok 1, "third is good";
-    }; BEGIN{ $line{outerfail3} = __LINE__ }
+    };
 }
 {
     test_out("# Subtest: namehere");
@@ -102,9 +115,10 @@ sub run_the_subtest {
     test_err(q{#   Failed test 'No tests run for subtest "namehere"'});
     test_err( "#   at $0 line $line{outerfail4}.");
 
+    BEGIN{ $line{outerfail4} = __LINE__ + ($use_block_end ? 3 : 1) }
     subtest namehere => sub {
         done_testing;
-    }; BEGIN{ $line{outerfail4} = __LINE__ }
+    };
 
     test_test("lineno in 'No tests run' diagnostic");
 }
@@ -121,10 +135,11 @@ sub run_the_subtest {
     test_err("#   Failed test 'namehere'");
     test_err("#   at $0 line $line{is_outer_fail}.");
 
+    BEGIN{ $line{is_outer_fail} = __LINE__  + ($use_block_end ? 4 : 1) }
     subtest namehere => sub {
         plan tests => 1;
         is 'foo', 'bar', 'foo is bar'; BEGIN{ $line{is_fail} = __LINE__ }
-    }; BEGIN{ $line{is_outer_fail} = __LINE__ }
+    };
 
     test_test("diag indent for is() in subtest");
 }

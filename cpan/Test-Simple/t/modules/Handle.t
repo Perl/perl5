@@ -80,13 +80,13 @@ my $err = dies { $h->HANDLE_INCLUDE('FASDFASasfdfasfagasAFDSS', 'fasd') };
 
 like(
     $err,
-    qr|Test2/Handle\.pm line 52 \(called from ${ \__FILE__ } line $line\)\.|,
+    qr|Test2/Handle\.pm line 52 \(called from ${\ quotemeta(__FILE__) } line $line\)\.|,
     "Error reported to the ideal place"
 );
 
 like(
     dies { $line = __LINE__; $h->do_nothing },
-    qr/"do_nothing" is not provided by this T2 handle at ${ \__FILE__ } line $line/,
+    qr/"do_nothing" is not provided by this T2 handle at ${\ quotemeta(__FILE__) } line $line/,
     "Useful error when we do not have method",
 );
 

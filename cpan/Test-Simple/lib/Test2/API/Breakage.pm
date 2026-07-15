@@ -2,7 +2,7 @@ package Test2::API::Breakage;
 use strict;
 use warnings;
 
-our $VERSION = '1.302219';
+our $VERSION = '1.302222';
 
 
 use Test2::Util qw/pkg_to_file/;
@@ -43,7 +43,6 @@ sub upgrade_required {
 
 sub known_broken {
     return (
-        'Net::BitTorrent'       => '0.052',
         'Test::Able'            => '0.11',
         'Test::Aggregate'       => '0.373',
         'Test::Flatten'         => '0.11',

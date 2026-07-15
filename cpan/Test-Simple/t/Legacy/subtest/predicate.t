@@ -13,6 +13,17 @@ BEGIN {
     }
 }
 
+
+# Detect the line numbering behaviour of this version of perl
+our $use_block_end;
+BEGIN {
+    sub X { my (undef, undef, $line) = caller;
+            $use_block_end++ if ($line != shift);
+    }
+    X __LINE__, # $use_block_end = 0
+    sub { }     # $use_block_end = 1
+}
+
 use strict;
 use warnings;
 
@@ -156,11 +167,12 @@ sub barfoo_ok_2 ($;$) {
     test_err("#   Failed test 'outergroup'");
     test_err("#   at $0 line $line{outercall}.");
 
+    BEGIN{ $line{outercall} = __LINE__ + ( $use_block_end ? 5 : 1 ) }
     subtest outergroup => sub {
         plan tests => 2;
         ok 1, "this passes";
         barfoo_ok_2 "foot", "namehere"; BEGIN{ $line{ipredcall} = __LINE__ }
-    }; BEGIN{ $line{outercall} = __LINE__ }
+    };
 
     test_test("outergroup with internal barfoo_ok_2 failing line numbers");
 }

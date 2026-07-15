@@ -5,6 +5,16 @@ use Test2::Tools::Subtest qw/subtest_streamed subtest_buffered/;
 
 use File::Temp qw/tempfile/;
 
+# Detect the line numbering behaviour of this version of perl
+our $use_block_end;
+BEGIN {
+    sub X { my (undef, undef, $line) = caller;
+            $use_block_end++ if ($line != shift);
+    }
+    X __LINE__, # $use_block_end = 0
+    sub { }     # $use_block_end = 1
+}
+
 # A bug in older perls causes a strange error AFTER the program appears to be
 # done if this test is run.
 # "Size magic not implemented."
@@ -83,7 +93,7 @@ like(
 my @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => __LINE__ + ( $use_block_end ? 4 : 1 );
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -112,7 +122,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => __LINE__ + ( $use_block_end ? 4 : 1 );
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(0, "fail");
@@ -141,7 +151,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_streamed 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -329,7 +339,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_buffered 'foo' => sub {
             plan 1;
             push @lines => __LINE__ + 1;
@@ -359,7 +369,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_buffered 'foo' => sub {
             skip_all 'bleh';
             push @lines => __LINE__ + 1;

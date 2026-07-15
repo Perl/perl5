@@ -11,7 +11,7 @@ use Test2::Mock();
 
 use base 'Exporter';
 
-our $VERSION = '1.302219';
+our $VERSION = '1.302222';
 
 our @CARP_NOT = (__PACKAGE__, 'Test2::Mock');
 our @EXPORT = qw/mock mocked/;
@@ -188,7 +188,11 @@ sub _generate_class {
     my $prefix = __PACKAGE__;
 
     for (1 .. 100) {
-        my $postfix = join '', map { chr(rand(26) + 65) } 1 .. 32;
+        my $postfix = join '', map {
+            my $cp = rand(26) + 65;
+            $cp = utf8::unicode_to_native($cp) if "$]" >= 5.008;
+            chr($cp);
+        } 1 .. 32;
         my $class = $prefix . '::__TEMP__::' . $postfix;
         my $file = $class;
         $file =~ s{::}{/}g;
