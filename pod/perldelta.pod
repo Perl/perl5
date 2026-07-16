@@ -27,6 +27,22 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Magic v2
+
+This version introduces a whole new set of API functions, data structures, and
+related items that provides a new kind of variable magic; providing the
+ability to attach user-supplied trigger functions to behaviours on existing
+variables.
+
+The eventual intention of this new version is to extend magic with new trigger
+functions that can apply at different times to those currently supported, and
+to allow magic to be attached to new kinds of items than are currently
+permitted. Right now as of this iteration, it does not offer any new abilities
+but simply changes the shape and structure of existing things to allow space
+for those extensions to be made at a later date.
+
+For more details, see L<perlguts/Magic v2>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
