@@ -67,55 +67,57 @@ cppstdin|*/cppstdin|cppstdin\ *|*/cppstdin\ *)
 esac
 
 case "$osname" in
-amigaos) cat=/bin/cat ;; # must be absolute
+    amigaos) cat=/bin/cat ;; # must be absolute
 esac
 
-    case "$osname" in
+case "$osname" in
     os2)      uwinfix="-e s,\\\\\\\\,/,g" ;;
     cygwin)   uwinfix="-e s,\\\\\\\\,/,g" ;;
     posix-bc) uwinfix="-e s/\\*POSIX(\\(.*\\))/\\1/" ;;
     vos)      uwinfix="-e s/\#/\\\#/" ;;
     *)        uwinfix="" ;;
-    esac
-    case "$file" in
+esac
+case "$file" in
     *.c) filebase=`basename $file .c` ;;
     *.y) filebase=`basename $file .y` ;;
-    esac
-    case "$file" in
+esac
+case "$file" in
     */*) finc="-I`echo $file | sed 's#/[^/]*$##'`" ;;
     *)   finc= ;;
-    esac
-    $echo "Finding dependencies for $filebase$_o"
-    # Below, we strip out all but preprocessor directives.
-    # We have to take care of situations like
-    #       #if defined(FOO) BAR   /* comment line 1
-    #                                 more comment lines */
-    # If we just delete text starting from the '/*' to the end of line, we will
-    # screw up cases like
-    #      #if defined(FOO)    /* comment */ \
-    #          && defined(BAR) /* comment */ \
-    #          && defined(BAZ) /* comment */ \
-    #               etc.
-    # Also, in lines like
-    #      #defined FOO(a,b)    a/**/b
-    # the comment may be important and so needs to be retained.
-    # This code processes the single-line comments first; it assumes there is
-    # at most one straightforward comment per continued preprocessor line,
-    # replacing each non-empty comment (and its surrounding white space) by a
-    # single space.  (sed only has a greedy '*' quantifier, so this doesn't
-    # work right if there are multiple comments per line, and strings can look
-    # like comments to it; both are unlikely in a preprocessor statement.) Any
-    # continuation line is joined, and the process repeated on the enlarged
-    # line as long as there are continuations.  At the end, if there are any
-    # comments remaining, they are either completely empty or are like the
-    # first situation.  The latter are just deleted by first deleting to the
-    # end of line (including preceding white space) things that start with '/*'
-    # and the next char isn't a '*'; then things that start with '/**', but the
-    # next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
-    # and get dropped.)  At the end, we unjoin very long lines to avoid
-    # preprocessor limitations
+esac
 
-    ( $echo "#line 2 \"$file\"";                               \
+$echo "Finding dependencies for $filebase$_o"
+
+# Below, we strip out all but preprocessor directives.
+# We have to take care of situations like
+#       #if defined(FOO) BAR   /* comment line 1
+#                                 more comment lines */
+# If we just delete text starting from the '/*' to the end of line, we will
+# screw up cases like
+#      #if defined(FOO)    /* comment */ \
+#          && defined(BAR) /* comment */ \
+#          && defined(BAZ) /* comment */ \
+#               etc.
+# Also, in lines like
+#      #defined FOO(a,b)    a/**/b
+# the comment may be important and so needs to be retained.
+# This code processes the single-line comments first; it assumes there is
+# at most one straightforward comment per continued preprocessor line,
+# replacing each non-empty comment (and its surrounding white space) by a
+# single space.  (sed only has a greedy '*' quantifier, so this doesn't
+# work right if there are multiple comments per line, and strings can look
+# like comments to it; both are unlikely in a preprocessor statement.) Any
+# continuation line is joined, and the process repeated on the enlarged
+# line as long as there are continuations.  At the end, if there are any
+# comments remaining, they are either completely empty or are like the
+# first situation.  The latter are just deleted by first deleting to the
+# end of line (including preceding white space) things that start with '/*'
+# and the next char isn't a '*'; then things that start with '/**', but the
+# next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
+# and get dropped.)  At the end, we unjoin very long lines to avoid
+# preprocessor limitations
+
+(     $echo "#line 2 \"$file\"";                               \
       $sed -n <$file                                           \
 	-e "/^${filebase}_init(/q"                             \
         -e ': tstcont'                                         \
@@ -133,32 +135,33 @@ esac
             -e 's/.\{255\}/&\n/g'                              \
 	    -e p                                               \
 	-e '}'                                                 \
-	-e '/^#.*git_version\.h/d' \
-        | $grep -v ":" ) >UU/$file.c
+	-e '/^#.*git_version\.h/d'                             \
+        | $grep -v ":"                                         \
+) >UU/$file.c
 
-    $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
-    $sed \
-        -e '1d' \
-        -e '/^#.*<stdin>/d' \
-        -e '/^#.*<builtin>/d' \
-        -e '/^#.*<built-in>/d' \
-        -e '/^#.*<command line>/d' \
-        -e '/^#.*<command-line>/d' \
-        -e '/".*In file included from.*:/d' \
-        -e '/^#.*"-"/d' \
-        -e '/^#.*"\/.*\/"/d' \
-        -e '/: file path prefix .* never used$/d' \
-        -e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
-        -e 's/^[	 ]*#[	 ]*line/#/' \
-        -e '/^# *[0-9][0-9]* *[".\/]/!d' \
-        -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/' \
-        -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
-        -e 's|: \./|: |' \
-        -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr | \
-    $uniq | $sort | $uniq >> $outfile
-    rm $$.cout
-    rm $$.cerr
-    $echo "$filebase\$(OBJ_EXT): $@" >>$outfile
+# Run the preprocess, and remove all the following irrelevant lines
+$cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
+$sed -e '1d'                                                    \
+     -e '/^#.*<stdin>/d'                                        \
+     -e '/^#.*<builtin>/d'                                      \
+     -e '/^#.*<built-in>/d'                                     \
+     -e '/^#.*<command line>/d'                                 \
+     -e '/^#.*<command-line>/d'                                 \
+     -e '/".*In file included from.*:/d'                        \
+     -e '/^#.*"-"/d'                                            \
+     -e '/^#.*"\/.*\/"/d'                                       \
+     -e '/: file path prefix .* never used$/d'                  \
+     -e 's#\.[0-9][0-9]*\.c#'"$file.c#"                         \
+     -e 's/^[	 ]*#[	 ]*line/#/'                             \
+     -e '/^# *[0-9][0-9]* *[".\/]/!d'                           \
+     -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/'          \
+     -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/' \
+     -e 's|: \./|: |'                                           \
+     -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr                 \
+| $uniq | $sort | $uniq >> $outfile
+rm $$.cout
+rm $$.cerr
+$echo "$filebase\$(OBJ_EXT): $@" >>$outfile
 
 !NO!SUBS!
 $eunicefix makedependfile
