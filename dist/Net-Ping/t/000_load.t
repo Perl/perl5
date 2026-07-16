@@ -12,5 +12,5 @@ BEGIN {
     use_ok( 'Net::Ping' )   || print "No Net::Ping!\n";
 }
 
-note( "Testing Net::Ping $Net::Ping::VERSION, Perl $] on $^O, $^X" );
+diag( "Testing Net::Ping $Net::Ping::VERSION, Perl $] on $^O, $^X" );
 
