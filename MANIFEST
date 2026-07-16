@@ -5114,6 +5114,7 @@ ext/Win32CORE/Win32CORE.pm		Win32CORE extension (stubs for Win32 CORE subs)
 ext/XS-APItest/APItest.pm			XS::APItest extension
 ext/XS-APItest/APItest.xs			XS::APItest extension
 ext/XS-APItest/APItest_autoload.xs		XS::APItest AUTOLOAD-related XS split
+ext/XS-APItest/APItest_autoloadtest.xs		XS::APItest AUTOLOADtest XS split
 ext/XS-APItest/APItest_BS			autogenerate APItest.bs
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_ptr_table.xs		XS::APItest ptr_table-related XS split
