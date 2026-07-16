@@ -550,9 +550,8 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
         superstash = gv_stashsv(superclassname, 0);
     }
     if(!superstash || !HvSTASH_IS_CLASS(superstash))
-        /* TODO: This would be a useful feature addition */
-        croak("Class :isa attribute requires a class but %" HvNAMEf_QUOTEDPREFIX " is not one",
-            HvNAMEfARG(superstash));
+        croak("Class :isa attribute requires a class but %" SVf_QUOTEDPREFIX " is not one",
+            superclassname);
 
     if(superclassver && SvOK(superclassver))
         ensure_module_version(superclassname, superclassver);

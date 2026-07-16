@@ -263,3 +263,18 @@ say Foo->new(message => "yeehaw")->$meth();
 EXPECT
 OPTIONS nonfatal
 yeehaw
+########
+# NAME isa that doesn't define the class GH 24157
+--FILE-- Mod24517.pm
+package MOD24517; # different capitalisation to filename
+
+1;
+--FILE--
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class X :isa(Mod24517) {
+  field $x;
+}
+EXPECT
+Class :isa attribute requires a class but "Mod24517" is not one at - line 4.
