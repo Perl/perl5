@@ -1048,7 +1048,7 @@ our %Modules = (
     },
 
     'Storable' => {
-        'DISTRIBUTION' => 'NWCLARK/Storable-3.25.tar.gz',
+        'DISTRIBUTION' => 'HAARG/Storable-3.41.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [
             qr{^t/compat/},
