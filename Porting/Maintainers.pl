@@ -894,7 +894,7 @@ our %Modules = (
             qw(t/603_meta.t),
             qw(t/604_manifest.t),
             qw(t/appveyor-test.bat),
-
+            qr{\.github/},
         ],
     },
 
