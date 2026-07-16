@@ -73,7 +73,7 @@ is($p->ping($fail_ip), 0, "Can't reach $fail_ip");
 
 if ($p->ping('google.com')) { # check for firewall
   foreach (qw(google.com www.google.com www.wisc.edu
-              yahoo.com www.yahoo.com www.about.com)) {
+              yahoo.com www.yahoo.com www.duckduckgo.com)) {
     isnt($p->ping($_), 0, "Can ping $_");
   }
 } else {

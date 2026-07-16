@@ -879,7 +879,8 @@ our %Modules = (
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.76.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.77.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu Jul 16 15:34:17 2026',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
             qr{^\.[awc]},
