@@ -905,7 +905,7 @@ next item.
 
 Use them with mutexes.
 
-Since v5.44, perl furnishes wrapper macros to make many of the above calls
+Since v5.46, perl furnishes wrapper macros to make many of the above calls
 thread-safe.  If you surround a function call with the macros designed
 for it that are found in F<perl_lock_definitions.h>, you automatically
 make it thread-safe, as long as all other executing threads have done
@@ -926,12 +926,12 @@ C<PERL_TZSET_UNLOCK> macros to wrap C<tzset> with, making it
 thread-safe.
 
 There are a few functions that are callable from Perl code that use
-mutexes somewhat prior to v5.44.  You can call them to get thread-safety
+mutexes somewhat prior to v5.46.  You can call them to get thread-safety
 a little further back if you use L<perlcall> to access them.  An example
 is C<tzset>.
 
 Otherwise, you can say that your module is thread-safe when used with
-perls 5.44 or later.
+perls 5.46 or later.
 
 =item *
 
@@ -1269,7 +1269,7 @@ the global locale are affected.  Almost all the locale-related functions
 in the list directly under L</Dealing with embedded perls and threads>
 have undefined behavior if another thread interrupts their execution and
 changes the locale.  Under threads, another thread could do exactly that.
-Starting in v5.44, if all threads wrap those function calls with the
+Starting in v5.46, if all threads wrap those function calls with the
 locking macros designed for each and found in F<perl_lock_definitions.h>,
 that interruption doesn't happen.  But, the thread may still find itself
 executing in an unexpected locale, with bad results.
