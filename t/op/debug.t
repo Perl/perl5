@@ -170,4 +170,51 @@ CODE
                   "overloading call from non-DB does break into DB::sub");
 }
 
+{
+    # smartmatch against a subref uses call_sv
+    # The use of this from inside the DB package shouldn't result in
+    # a call to DB::sub
+    # Make sure we test calls from a non-DB package too
+    # github #24001
+    local $ENV{PERL5DB} = 1;
+    fresh_perl_is(<<'CODE', <<'EXPECT', { switches => [ "-d" ] }, "call_sv from DB");
+print "Before\n";
+DB::doit();
+NonDB::doit();
+print "After\n";
+
+sub f {
+  print "In f\n";
+  0;
+}
+
+package DB;
+
+sub doit {
+  0 ~~ \&main::f
+}
+
+sub DB {}
+
+sub sub {
+  print "sub $DB::sub\n";
+  goto &$DB::sub;
+}
+
+package NonDB;
+
+sub doit {
+  0 ~~ \&main::f;
+}
+CODE
+Before
+sub DB::doit
+In f
+sub NonDB::doit
+sub main::f
+In f
+After
+EXPECT
+}
+
 done_testing();

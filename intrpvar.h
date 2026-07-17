@@ -141,6 +141,8 @@ PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 
 The stash for the package code will be compiled into.
 
+You should use C<CopSTASH(PL_curcop)> to get the current runtime package.
+
 On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.

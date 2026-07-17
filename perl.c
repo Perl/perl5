@@ -3221,6 +3221,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 arg_flags)
     oldmark = TOPMARK;
 
     if (PERLDB_SUB && PL_curstash != PL_debstash
+          && !CopSTASH_eq(PL_curcop, PL_debstash)
            /* Handle first BEGIN of -d. */
           && (PL_DBcv || (PL_DBcv = GvCV(PL_DBsub)))
            /* Try harder, since this may have been a sighandler, thus
