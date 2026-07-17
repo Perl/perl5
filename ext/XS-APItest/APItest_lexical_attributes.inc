@@ -25,8 +25,20 @@ S_apply_attribute_red(pTHX_
         }
 
         case PERL_ATTRTARGET_PKGSCOPED:
-            warn("TODO: apply attribute :red to package scoped target at gv=%p", target->pkgscoped.namegv);
+        {
+            switch(SvTYPE(target->pkgscoped.sv)) {
+                case SVt_PVAV: sv_catpvs(keysv, "@"); break;
+                case SVt_PVCV: sv_catpvs(keysv, "&"); break;
+                case SVt_PVHV: sv_catpvs(keysv, "%"); break;
+                default:       sv_catpvs(keysv, "$"); break;
+            }
+            GV *gv = target->pkgscoped.namegv;
+            HV *stash = GvSTASH(gv);
+            sv_catpvn(keysv, HvNAME(stash), HvNAMELEN(stash));
+            sv_catpvs(keysv, "::");
+            sv_catpvn(keysv, GvNAME(gv), GvNAMELEN(gv));
             break;
+        }
 
         default:
             croak("Unsure how to apply :red to a non-package scoped target");
