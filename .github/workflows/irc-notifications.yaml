@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     # only on main repo
-    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
+    if: github.repository == 'Perl/perl5'
 
     env:
       server: ssl.irc.perl.org
