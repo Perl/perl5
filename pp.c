@@ -1152,9 +1152,10 @@ S_postincdec_common(pTHX_ SV *sv, SV *targ)
     const bool inc =
         PL_op->op_type == OP_POSTINC || PL_op->op_type == OP_I_POSTINC;
 
+    SvGETMAGIC(sv);
     if (SvROK(sv))
         TARG = sv_newmortal();
-    sv_setsv(TARG, sv);
+    sv_setsv_flags(TARG, sv, SV_DO_COW_SVSETSV);
     if (inc)
         sv_inc_nomg(sv);
     else
