@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.83';
+our $VERSION = '0.84';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -2461,18 +2461,6 @@ is passed, it would be set to 1 if the return is valid; or 0 if the return is
 C<undef>.  Note that the numeric value returned need not be a whole number.
 C<num("\N{TIBETAN DIGIT HALF ZERO}")>, for example returns -0.5.
 
-=cut
-
-#A few characters to which Unicode doesn't officially
-#assign a numeric value are considered numeric by C<num>.
-#These are:
-
-# EULER CONSTANT             0.5772...  (this is NOT Euler's number)
-# SCRIPT SMALL E             2.71828... (this IS Euler's number)
-# GREEK SMALL LETTER PI      3.14159...
-
-=pod
-
 If the string is more than one character, C<undef> is returned unless
 all its characters are decimal digits (that is, they would match C<\d+>),
 from the same script.  For example if you have an ASCII '0' and a Bengali
@@ -2533,6 +2521,8 @@ change these into digits, and then call C<num> on the result.
 
 sub num ($;$) {
     my ($string, $retlen_ref) = @_;
+    croak __PACKAGE__, "::num: second parameter must be a scalar reference"
+                        if defined $retlen_ref && ref $retlen_ref ne "SCALAR";
 
     if (defined $retlen_ref) {
         eval { $$retlen_ref = 0; 1 }    # Initialize to assume failure
