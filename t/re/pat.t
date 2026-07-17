@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1301;  # Update this when adding/deleting tests.
+plan tests => 1302;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2691,6 +2691,14 @@ PROG
             $foo =~ s{^$foo[/\\]?}{};
             print $foo, "\n";
             PROG
+    }
+
+    {   # GH 24339
+        fresh_perl_is(<<~'PROG', "", {}, "intuit_more bug compiles");
+        use strict;
+        my ($prevDecade, $decade, $year) = (0, 1, 2);
+        qr/\A(?:1[0-9][0-9]{2}|20[0-$prevDecade][0-9]|20$decade[0-$year])\Z/o;
+        PROG
     }
 
 } # End of sub run_tests
