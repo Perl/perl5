@@ -32,6 +32,7 @@
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
+#   undef MGv2f_WITH_KEYHEK
 #   undef new_XPV
 #   undef new_XPVIV
 #   undef pTHX_10
@@ -330,6 +331,7 @@
 # define looks_like_number(a)                   Perl_looks_like_number(aTHX_ a)
 # define lsbit_pos32                            Perl_lsbit_pos32
 # define magic_dump(a)                          Perl_magic_dump(aTHX_ a)
+# define magicv2_localize_copy(a,b,c)           Perl_magicv2_localize_copy(aTHX_ a,b,c)
 # define markstack_grow()                       Perl_markstack_grow(aTHX)
 # define mess_sv(a,b)                           Perl_mess_sv(aTHX_ a,b)
 # define mg_clear(a)                            Perl_mg_clear(aTHX_ a)
@@ -341,6 +343,7 @@
 # define mg_freeext(a,b,c)                      Perl_mg_freeext(aTHX_ a,b,c)
 # define mg_get(a)                              Perl_mg_get(aTHX_ a)
 # define mg_magical                             Perl_mg_magical
+# define mg_ptr_store(a,b,c)                    Perl_mg_ptr_store(aTHX_ a,b,c)
 # define mg_set(a)                              Perl_mg_set(aTHX_ a)
 # define mg_size(a)                             Perl_mg_size(aTHX_ a)
 # define mini_mktime                            Perl_mini_mktime
@@ -693,6 +696,14 @@
 # define sv_len_utf8_nomg(a)                    Perl_sv_len_utf8_nomg(aTHX_ a)
 # define sv_magic(a,b,c,d,e)                    Perl_sv_magic(aTHX_ a,b,c,d,e)
 # define sv_magicext(a,b,c,d,e,f)               Perl_sv_magicext(aTHX_ a,b,c,d,e,f)
+# define sv_magicv2_add(a,b,c,d)                Perl_sv_magicv2_add(aTHX_ a,b,c,d)
+# define sv_magicv2_find_by_auxsv(a,b)          Perl_sv_magicv2_find_by_auxsv(aTHX_ a,b)
+# define sv_magicv2_find_by_funcs(a,b)          Perl_sv_magicv2_find_by_funcs(aTHX_ a,b)
+# define sv_magicv2_find_or_add(a,b)            Perl_sv_magicv2_find_or_add(aTHX_ a,b)
+# define sv_magicv2_findnext_by_auxsv(a,b,c)    Perl_sv_magicv2_findnext_by_auxsv(aTHX_ a,b,c)
+# define sv_magicv2_findnext_by_funcs(a,b,c)    Perl_sv_magicv2_findnext_by_funcs(aTHX_ a,b,c)
+# define sv_magicv2_remove(a,b)                 Perl_sv_magicv2_remove(aTHX_ a,b)
+# define sv_magicv2_remove_by_funcs(a,b)        Perl_sv_magicv2_remove_by_funcs(aTHX_ a,b)
 # define sv_mortalcopy_flags(a,b)               Perl_sv_mortalcopy_flags(aTHX_ a,b)
 # define sv_newmortal()                         Perl_sv_newmortal(aTHX)
 # define sv_newref(a)                           Perl_sv_newref(aTHX_ a)
@@ -1448,6 +1459,8 @@
 #   endif
 #   if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 #     define mg_free_struct(a,b)                Perl_mg_free_struct(aTHX_ a,b)
+#     define mgv2_copy(a,b)                     Perl_mgv2_copy(aTHX_ a,b)
+#     define sv_magicv2_attach(a,b,c)           Perl_sv_magicv2_attach(aTHX_ a,b,c)
 #   endif
 #   if defined(PERL_IN_MRO_C)
 #     define mro_clean_isarev(a,b,c,d,e,f)      S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)

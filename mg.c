@@ -34,6 +34,291 @@ plus space for some flags and pointers.  For example, a tied variable has
 a MAGIC structure that contains a pointer to the object associated with the
 tie.
 
+=head2 Magic v2
+
+Magic v2 is currently considered B<experimental>.
+
+New in Perl version 5.45.2, the Magic system has been greatly extended by
+defining an entire new version. This "Magic v2" brings new data structures
+which define the sets of trigger functions and other metadata associated with
+that kind of magic, and new data structures, functions, and macros to use to
+attach them to SVs and manage those attachments.
+
+Whereas in the original (version 1) definition, user code was expected to
+directly access fields of the MAGIC structure attached to individual SVs, the
+data structure used by version 2 is considered opaque, and should only be
+manipulated via the various C<Mg...> named macros.
+
+The principal improvement is the addition of the C<struct MagicFunctions>
+structure to replace the previous C<struct MGVTBL>. It fills a similar role
+in that it provides pointers to various "trigger functions" (i.e. definitions
+of the new behaviour that the magic wishes to add), but also provides a number
+of metadata fields that were missing from the first version and couldn't
+easily be added. These metadata fields provide extra information about the
+overall kind of magic (as opposed to being about any particular SV
+attachment), as well as a version number to greatly simplify any future
+extensions of the structure to address any shortcomings from here onwards.
+
+=for apidoc Ay||struct MagicFunctions
+=for apidoc_flag MGv2f_WITH_KEYIV
+=for apidoc_flag MGv2f_WITH_KEYSV
+=for apidoc_flag MGv2f_ALWAYS_WEAK_AUXSV
+
+The base structure definition used by Magic v2 to store metadata and common
+functions for any magic definition. This can be considered as if it were a
+C<struct> having the following definition:
+
+    struct MagicFunctions {
+        U32 ver;
+        enum MagicShape shape;
+        U32 flags;
+        const char *debug_name;
+        size_t user_size;
+
+        void (*free_mg) (pTHX_ SV *sv, MAGIC *mg);
+        void (*clone_mg)(pTHX_ SV *nsv, MAGIC *nmg,
+                         SV *osv, MAGIC *omg, CLONE_PARAMS *params);
+    };
+
+In practice, you should always use C99-style named initialiser syntax to set
+the values of any of these fields when declaring a
+S<C<const struct MagicFunctions>> in your code, as for internal
+implementation reasons the C<ver> field is not actually the first field in
+the structure. Attempting to initialise these by positional index alone will
+result in the wrong fields receiving the values, and likely cause a
+compiletime error, if not a runtime crash.
+
+=over 4
+
+=item C<ver> field
+
+Gives the version number of "Magic" for this structure. The API described here
+is numbered version 2. All magic functions structures must set this field to
+this number. 
+
+Later versions of this API may increase the number. This field allows the
+interpreter to detect which version of the structure this is, and so access
+the fields appropriately. It gives a way to change the structure in future
+versions without breaking existing source code.
+
+=item C<shape> field
+
+Describes what kind of functions structure this actually is. This is an
+enumeration of one of the C<enum MagicShape> constants. For the basic
+functions structure the value is C<MGv2s_BASE>. Other structure shapes are
+described below; each having its own corresponding constant for this field.
+
+=over 4
+
+=item C<MGv2s_BASE>
+
+Indicates that this structure is the basic version without additional
+extensions.
+
+=item C<MGv2s_SCALARVAR>
+
+Indicates that the structure is in fact of type
+S<C<struct ScalarVarMagicFunctions>>.
+
+=item C<MGv2s_ARRAYVAR>
+
+Indicates that the structure is in fact of type
+S<C<struct ArrayVarMagicFunctions>>.
+
+=item C<MGv2s_HASHVAR>
+
+Indicates that the structure is in fact of type
+S<C<struct HashVarMagicFunctions>>.
+
+=back
+
+When attaching this magic structure to a specific SV, the L</SvTYPE> of the
+SV is checked to see if it is compatible with the shape given by the magic
+functions.
+
+=item C<flags> field
+
+A bitfield containing flags that provide minor adjustments to the specific
+behaviour of the magic definition. The particular constants are described
+below, having names beginning C<MGv2f_...>.
+
+=over 4
+
+=item C<MGv2f_WITH_KEYIV>
+
+Presence of this flag allows use of the C<MgKEYIV> field accessor, causing
+magic attachment structures to be allocated with enough storage space to store
+it.
+
+=item C<MGv2f_WITH_KEYSV>
+
+Presence of this flag allows use of the C<MgKEYSV> field accessor, causing
+magic attachment structures to be allocated with enough storage space to store
+it.
+
+=item C<MGv2f_ALWAYS_WEAK_AUXSV>
+
+This flag implies that every attachment of this magic will set the
+C<MgWEAK_AUXSV> flag.
+
+=back
+
+=item C<debug_name> field
+
+An optional string pointer that may be used by C<sv_dump()> when printing
+details about a magic attachment that uses this functions structure. This is
+purely of interest to human readers when debugging; perl will not otherwise
+use this field for any purpose.
+
+=item C<user_size> field
+
+An optional size in bytes that increases the memory allocation for every
+C<MAGIC> structure allocated for this set of functions when attached to an
+SV. This area can be accessed by the L</MgUSERSTRUCT> macro.
+
+=item C<free_mg> trigger function
+
+An optional pointer to a function to be invoked at the time the magic
+attachment is destroyed. This is usually at the time the SV itself is
+destroyed (likely by a call to L</SvREFCNT_dec> or similar); but could also
+happen earlier by a specific call to L</sv_magicv2_remove>.
+
+=item C<clone_mg> trigger function
+
+An optional pointer to a function to be invoked during the interpreter
+cloning process for creating a new thread. This is invoked just after the
+magic structure has been copied to the new SV in the new interpreter, after
+any L</MgAUXSV> or L</MgKEYSV> pointers have been cloned.
+
+=back
+
+In addition to this basic functions structure, the design of Magic v2 allows
+for "subtypes" of function structure to be defined. Each type of magic is
+likely using one of these extended types, which allows it to provide specific
+trigger functions for specific situations that may occur to the kind of SV it
+is attached to.
+
+=for apidoc Ay||struct ScalarVarMagicFunctions
+
+This structure extends the basic C<struct MagicFunctions> by adding the
+following fields to store more trigger functions. It may only be applied to
+SVs that represent scalar values - i.e. whose type is C<SVt_PVMG> or below,
+or the special C<SVt_PVLV>.
+
+    struct ScalarVarMagicFunctions {
+        ...
+
+        void (*localize_mg)(pTHX_ SV *nsv, SV *osv, MAGIC *omg);
+        void (*pre_get) (pTHX_ SV *sv, MAGIC *mg);
+        void (*post_set)(pTHX_ SV *sv, MAGIC *mg);
+    };
+
+For this structure, the C<shape> field takes the value C<MGv2s_SCALARVAR>.
+
+=over 4
+
+=item C<localize_mg> trigger function
+
+An optional pointer to a function to be invoked as part of a C<local>
+operation on a variable with this magic attached. It is passed a pointer to
+the new SV that was created as part of the localisation operation. If it
+wishes the magic to also apply to the new SV it can copy itself there.
+
+A convenient API function, L</magicv2_localize_copy>, is provided to cover
+simple cases. It may be sufficient simply to use this function directly
+(remember to include the C<Perl_> prefix on its name):
+
+    .localize_mg = &Perl_magicv2_localize_copy,
+
+If more complex behaviour is required, provide your own function here. You
+may call the provided function to perform the basic copy operation first,
+before customising its result afterwards.
+
+If the trigger function is absent, it indicates that the magic should be
+considered not to be relevant to the variable, but only to its current value.
+After the SV is saved away as part of a C<local> expression, the magic
+attachment is not applied to the new SV that is placed into that variable.
+
+=item C<pre_get> trigger function
+
+An optional pointer to a function to be invoked just before a read-like
+operation on the SV, such as a call to C<SvIV> or C<SvPV>.
+
+As this operation runs before a value is read from the SV and returned to
+the caller, this trigger function has the opportunity to set whatever result
+it wishes the caller to observe into the SV, by using the various
+C<sv_setfoo()> API functions.
+
+=item C<post_set> trigger function
+
+An optional pointer to a function to be invoked just after a write-like
+operation on the SV, such as a call to C<sv_setiv_mg()> or C<sv_setpvn_mg()>.
+
+As this operation runs after the new value is written into the SV, this
+trigger function can inspect the updated contents of the SV to find out what
+new value was written. It should use the various C<_nomg>-suffixed versions
+of the accessor macros, to ensure it reads the actual stored value and does
+not inadvertently invoke "get" magic v1 or "pre_get" magic v2 functions on the
+SV.
+
+=back
+
+=for apidoc Ay||struct ArrayVarMagicFunctions
+
+This structure extends the basic C<struct MagicFunctions> by adding the
+following fields to store more trigger functions. It may only be applied to
+array variables - i.e. those whose type is C<SVt_PVAV>.
+
+    struct ArrayVarMagicFunctions {
+        ...
+
+        void (*localize_mg)(pTHX_ SV *nsv, SV *osv, MAGIC *omg);
+        void (*clear)(pTHX_ SV *sv, MAGIC *mg);
+    };
+
+For this structure, the C<shape> field takes the value C<MGv2s_ARRAYVAR>.
+
+=over 4
+
+=item C<localize_mg> trigger function
+
+Performs the same as for C<struct ScalarVarMagicFunctions>.
+
+=item C<clear> trigger function
+
+An optional pointer to a function to be invoked just after an operation that
+clears the array, such as C<undef @array>.
+
+=back
+
+=for apidoc Ay||struct HashVarMagicFunctions
+
+This structure extends the basic C<struct MagicFunctions> by adding the
+following fields to store more trigger functions. It may only be applied to
+hash variables - i.e. those whose type is C<SVt_PVHV>.
+
+    struct HashVarMagicFunctions {
+        ...
+
+        void (*localize_mg)(pTHX_ SV *nsv, SV *osv, MAGIC *omg);
+        void (*clear)(pTHX_ SV *sv, MAGIC *mg);
+    };
+
+For this structure, the C<shape> field takes the value C<MGv2s_HASHVAR>.
+
+=over 4
+
+=item C<localize_mg> trigger function
+
+Performs the same as for C<struct ScalarVarMagicFunctions>.
+
+=item C<clear> trigger function
+
+An optional pointer to a function to be invoked just after an operation that
+clears the hash, such as C<undef %hash>.
+
+=back
+
 =for apidoc Ayh||MAGIC
 
 =cut
@@ -139,14 +424,48 @@ Perl_mg_magical(SV *sv)
     SvMAGICAL_off(sv);
     if ((mg = SvMAGIC(sv))) {
         do {
-            const MGVTBL* const vtbl = mg->mg_virtual;
-            if (vtbl) {
-                if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
-                    SvGMAGICAL_on(sv);
-                if (vtbl->svt_set)
-                    SvSMAGICAL_on(sv);
-                if (vtbl->svt_clear)
-                    SvRMAGICAL_on(sv);
+            if (MgIsV2(mg)) {
+                switch (MgFUNCS(mg)->shape) {
+                    case MGv2s_BASE:
+                        break;
+
+                    case MGv2s_SCALARVAR:
+                    {
+                        const struct ScalarVarMagicFunctions *funcs = MgSCALARVARFUNCS(mg);
+                        if (funcs->pre_get)
+                            SvGMAGICAL_on(sv);
+                        if (funcs->post_set)
+                            SvSMAGICAL_on(sv);
+                        break;
+                    }
+
+                    case MGv2s_ARRAYVAR:
+                    {
+                        const struct ArrayVarMagicFunctions *funcs = MgARRAYVARFUNCS(mg);
+                        if (funcs->clear)
+                            SvRMAGICAL_on(sv);
+                        break;
+                    }
+
+                    case MGv2s_HASHVAR:
+                    {
+                        const struct HashVarMagicFunctions *funcs = MgHASHVARFUNCS(mg);
+                        if (funcs->clear)
+                            SvRMAGICAL_on(sv);
+                        break;
+                    }
+                }
+            }
+            else {
+                const MGVTBL* const vtbl = mg->mg_virtual;
+                if (vtbl) {
+                    if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
+                        SvGMAGICAL_on(sv);
+                    if (vtbl->svt_set)
+                        SvSMAGICAL_on(sv);
+                    if (vtbl->svt_clear)
+                        SvRMAGICAL_on(sv);
+                }
             }
         } while ((mg = mg->mg_moremagic));
         if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)))
@@ -185,7 +504,15 @@ Perl_mg_get(pTHX_ SV *sv)
         const MGVTBL * const vtbl = mg->mg_virtual;
         MAGIC * const nextmg = mg->mg_moremagic;	/* it may delete itself */
 
-        if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
+        if (MgIsV2(mg)) {
+            if (MgFUNCS(mg)->shape == MGv2s_SCALARVAR) {
+                const struct ScalarVarMagicFunctions *funcs = MgSCALARVARFUNCS(mg);
+
+                if (funcs->pre_get)
+                    funcs->pre_get(aTHX_ sv, mg);
+            }
+        }
+        else if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 
             /* taint's mg get is so dumb it doesn't need flag saving */
             if (mg->mg_type != PERL_MAGIC_taint) {
@@ -290,7 +617,16 @@ Perl_mg_set(pTHX_ SV *sv)
         if (PL_localizing == 2
             && PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
             continue;
-        if (vtbl && vtbl->svt_set)
+
+        if (MgIsV2(mg)) {
+            if (MgFUNCS(mg)->shape == MGv2s_SCALARVAR) {
+                const struct ScalarVarMagicFunctions *funcs = MgSCALARVARFUNCS(mg);
+
+                if (funcs->post_set)
+                    funcs->post_set(aTHX_ sv, mg);
+            }
+        }
+        else if (vtbl && vtbl->svt_set)
             vtbl->svt_set(aTHX_ sv, mg);
     }
 
@@ -355,7 +691,19 @@ Perl_mg_clear(pTHX_ SV *sv)
 
         nextmg = mg->mg_moremagic; /* it may delete itself */
 
-        if (vtbl && vtbl->svt_clear)
+        if (MgIsV2(mg)) {
+            if (MgFUNCS(mg)->shape == MGv2s_ARRAYVAR) {
+                const struct ArrayVarMagicFunctions *funcs = MgARRAYVARFUNCS(mg);
+                if (funcs->clear)
+                    funcs->clear(aTHX_ sv, mg);
+            }
+            else if (MgFUNCS(mg)->shape == MGv2s_HASHVAR) {
+                const struct HashVarMagicFunctions *funcs = MgHASHVARFUNCS(mg);
+                if (funcs->clear)
+                    funcs->clear(aTHX_ sv, mg);
+            }
+        }
+        else if (vtbl && vtbl->svt_clear)
             vtbl->svt_clear(aTHX_ sv, mg);
     }
 
@@ -491,18 +839,43 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
         return;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-        const MGVTBL* const vtbl = mg->mg_virtual;
-        if (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
-            continue;
-                
-        if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
-            (void)vtbl->svt_local(aTHX_ nsv, mg);
-        else
-            sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
-                            mg->mg_ptr, mg->mg_len);
+        if (MgIsV2(mg)) {
+            switch(MgFUNCS(mg)->shape) {
+                case MGv2s_BASE:
+                    /* does not support localisation */
+                    break;
 
-        /* container types should remain read-only across localization */
-        SvFLAGS(nsv) |= SvREADONLY(sv);
+                case MGv2s_SCALARVAR:
+                    if(MgSCALARVARFUNCS(mg)->localize_mg)
+                        (*MgSCALARVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
+                    break;
+
+                case MGv2s_ARRAYVAR:
+                    if(MgARRAYVARFUNCS(mg)->localize_mg)
+                        (*MgARRAYVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
+                    break;
+
+                case MGv2s_HASHVAR:
+                    if(MgHASHVARFUNCS(mg)->localize_mg)
+                        (*MgHASHVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
+                    break;
+            }
+        }
+        else {
+            /* legacy v1 magic */
+            if (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
+                continue;
+
+            const MGVTBL* const vtbl = mg->mg_virtual;
+            if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
+                (void)vtbl->svt_local(aTHX_ nsv, mg);
+            else
+                sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
+                                mg->mg_ptr, mg->mg_len);
+
+            /* container types should remain read-only across localization */
+            SvFLAGS(nsv) |= SvREADONLY(sv);
+        }
     }
 
     if (SvTYPE(nsv) >= SVt_PVMG && SvMAGIC(nsv)) {
@@ -515,28 +888,102 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
     }	    
 }
 
+/*
+=for apidoc magicv2_localize_copy
+
+Intended to be called as the C<localize_mg> trigger function of a
+C<ScalarVarMagicFunctions>, C<ArrayVarMagicFunctions> or
+C<HashVarMagicFunctions>. This function will attach the same Magic v2
+functions and flags as given in the original magic in I<omg>, onto the new
+SV in I<nsv>. It then copies a variety of fields from the original into
+the new magic, taking care to maintain reference counts if appropriate. A
+pointer to the newly-added magic is returned.
+
+=over 4
+
+=item *
+
+C<MgPRIV> is copied.
+
+=item *
+
+C<MgAUXSV> is copied, with an incremented reference count if C<MgWEAK_AUXSV>
+is not set.
+
+=item *
+
+If both C<MgPTR> and C<MgPTRLEN> are set, a new structure area is allocated of
+the same size in I<nmg> and the contents of the old one are bytewise copied.
+If only one of these two fields is set, its value is copied without further
+modification.
+
+=item *
+
+If C<MgKEYIV> is valid its value is copied. If C<MgKEYSV> is valid its value
+is copied with an incremented reference count.
+
+=item *
+
+If the magic functions structure indicates a non-zero C<.user_size> size, this
+area is bytewise copied.
+
+=back
+
+=cut
+*/
+
+MAGIC *
+Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+{
+    PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY;
+
+    MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
+    mgv2_copy(omg, nmg);
+
+    return nmg;
+}
+
 void
 Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MG_FREE_STRUCT;
 
-    const MGVTBL* const vtbl = mg->mg_virtual;
-    if (vtbl && vtbl->svt_free)
-        vtbl->svt_free(aTHX_ sv, mg);
+    if(MgIsV2(mg)) {
+        const struct MagicFunctions *funcs = MgFUNCS(mg);
+        if (funcs->free_mg)
+            funcs->free_mg(aTHX_ sv, mg);
 
-    if(mg->mg_ptr) {
-        if (mg->mg_type == PERL_MAGIC_regex_global)
-            NOOP;
-        else if (mg->mg_len > 0)
-            Safefree(mg->mg_ptr);
-        else if (mg->mg_len == HEf_SVKEY)
-            SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
-        else if (mg->mg_type == PERL_MAGIC_utf8)
-            Safefree(mg->mg_ptr);
+        if(MgHasKEYSV(mg))
+            SvREFCNT_dec(MgKEYSV(mg));
+
+        if(MgPTR(mg) && MgPTRLEN(mg)) {
+            Safefree(MgPTR(mg));
+        }
+
+        if(MgAUXSV(mg) && !MgWEAK_AUXSV(mg)) {
+            SvREFCNT_dec(MgAUXSV(mg));
+        }
+    }
+    else {
+        const MGVTBL* const vtbl = mg->mg_virtual;
+        if (vtbl && vtbl->svt_free)
+            vtbl->svt_free(aTHX_ sv, mg);
+
+        if(mg->mg_ptr) {
+            if (mg->mg_type == PERL_MAGIC_regex_global)
+                NOOP;
+            else if (mg->mg_len > 0)
+                Safefree(mg->mg_ptr);
+            else if (mg->mg_len == HEf_SVKEY)
+                SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
+            else if (mg->mg_type == PERL_MAGIC_utf8)
+                Safefree(mg->mg_ptr);
+        }
+
+        if (mg->mg_flags & MGf_REFCOUNTED)
+            SvREFCNT_dec(mg->mg_obj);
     }
 
-    if (mg->mg_flags & MGf_REFCOUNTED)
-        SvREFCNT_dec(mg->mg_obj);
     Safefree(mg);
 }
 

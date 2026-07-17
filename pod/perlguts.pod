@@ -1437,6 +1437,18 @@ macro C<SvPOK_on> would need to be called instead of C<SvIOK_on>.
 
 =head2 Magic Variables
 
+Perl version 5.43.8 added a new set of structures, functions, and related
+infrastructure currently called "Magic v2", intended as an overhaul of the
+original MAGIC system that had been in place beforehand. This section of
+the document is now split into two parts, one for each version.
+
+Firstly we'll describe the original system, partly for historical interest
+and to explain how existing code works. Afterwards, we will introduce the
+newer "Magic v2" by contrasting with the original and explaining what is new
+and why it was added, as well as how to use it.
+
+=head2 Original MAGIC
+
 [This section still under construction.  Ignore everything here.  Post no
 bills.  Everything not permitted is forbidden.]
 
@@ -1457,7 +1469,7 @@ linked list of C<struct magic>'s, typedef'ed to C<MAGIC>.
 
 Note this is current as of patchlevel 0, and could change at any time.
 
-=head2 Assigning Magic
+=head3 Assigning Magic
 
 Perl adds magic to an SV using the sv_magic function:
 
@@ -1522,7 +1534,7 @@ virtual table, use C<sv_unmagicext> instead:
 
     int sv_unmagicext(SV *sv, int type, MGVTBL *vtbl);
 
-=head2 Magic Virtual Tables
+=head3 Magic Virtual Tables
 
 The C<mg_virtual> field in the C<MAGIC> structure is a pointer to an
 C<MGVTBL>, which is a structure of function pointers and stands for
@@ -1805,7 +1817,7 @@ For example, calls to the C<sv_cat*()> functions typically need to be
 followed by C<SvSETMAGIC()>, but they don't need a prior C<SvGETMAGIC()>
 since their implementation handles 'get' magic.
 
-=head2 Finding Magic
+=head3 Finding Magic
 
     MAGIC *mg_find(SV *sv, int type); /* Finds the magic pointer of that
                                        * type */
@@ -1829,7 +1841,7 @@ This routine checks to see what types of magic C<sv> has.  If the mg_type
 field is an uppercase letter, then the mg_obj is copied to C<nsv>, but
 the mg_type field is changed to be the lowercase letter.
 
-=head2 Understanding the Magic of Tied Hashes and Arrays
+=head3 Understanding the Magic of Tied Hashes and Arrays
 
 Tied hashes and arrays are magical beasts of the C<PERL_MAGIC_tied>
 magic type.
@@ -1916,6 +1928,263 @@ the creation of all the mortal variables required to invoke the methods).
 This overhead will be comparatively small if the TIE methods are themselves
 substantial, but if they are only a few statements long, the overhead
 will not be insignificant.
+
+=head2 Magic v2
+
+The entire section above has explained the "historic" original MAGIC system,
+so now we will move on to the newer "Magic v2".
+
+"Magic v2" follows a broadly similar design to original MAGIC, in that it
+permits specific I<kinds> of behaviour to be specified in terms of trigger
+functions that are invoked at various times. Pointers to these functions are
+stored in a structure, this time called C<struct MagicFunctions>, and it is
+this structure which is pointed to by attachments made on individual target
+SVs. Like with original MAGIC, these attachments can also store additional
+data that the magic trigger functions can make use of alongside that target
+SV.
+
+The C<struct MagicFunctions> structure can be thought of as being like a
+class definition, in that it describes a set of behaviours in general. It
+should be declared C<static const> in a module that provides it, as it won't
+need to be visible to any other code, and it won't be modified during
+runtime.
+
+Owing to its development history, original MAGIC has a two-level arrangement
+for identifying different kinds of magic, with many internally-defined tables
+having API-level visible identities that can be identified by the I<mg_type>
+field of the MAGIC structure or the I<how> parameter to several of the API
+functions. If that type is C<PERL_MAGIC_ext> or similar, the additional
+virtual functions pointer identifies the particular magic involved. Magic v2
+is much simpler here, lacking that first-level "type" distinction. Various
+kinds of v2 magic are entirely identified by a pointer to the functions
+structure, and generally even most internally-defined structures are not
+exposed as API-level names.
+
+The central design of the original MGVTBL did not leave any room for
+versioning or metadata, or any way to be able to extend the structure in
+future. The C<MGf_COPY>, C<MGf_DUP> and C<MGf_LOCAL> flags already illustrate
+the limitation of that approach. Therefore, the C<struct MagicFunctions>
+structure begins with two fields, called I<ver> and I<shape>, that between
+them aim to describe exactly what sort of structure it is, as well as provide
+ability to extend and change that structure in future versions of perl, when
+new abilities are added.
+
+=head3 Attaching Magic
+
+Magic v2 is attached to an SV using a similar function than original MAGIC:
+
+    MAGIC *sv_magicv2_add(SV *sv, struct MagicFunctions *funcs,
+                          U32 flags, SV *auxsv);
+
+This creates a new instance of a magic structure associated with the given
+functions structure and stores it in the SV. For a more detailed description
+of the arguments and flags to this function see its entry in L<perlapi>.
+
+Often the behaviour added by magic requires storing extra data in the
+attachment to each SV. The Magic v2 mechanism provides four ways this can be
+achieved, offering various tradeoffs of simplicity of use vs flexibility.
+Magic can store data in an SV pointer in C<MgAUXSV>, the storage provided
+by either C<MgKEYIV> or C<MgKEYSV>, the storage provided by C<MgPTR> and
+C<MgPTRLEN>, and and the extra storage offered by C<user_size> and
+C<MgUSERSTRUCT>. These four features are not alternatives to each other;
+each can be used independently of the others, or in combination, to achieve
+the desired effect.
+
+=head3 Storing an SV in C<MgAUXSV>
+
+The simplest way to store extra data in a magic attachment on an SV is to put
+that data into another SV, and store that second SV in the "aux SV" area.
+This is initially set by using the C<auxsv> parameter to the
+C<sv_magicv2_add()> function, and thereafter accessed by the C<MgAUXSV> macro
+on the Magic structure. Any kind of SV can be used for this purpose.
+
+    SV *more_data = newSVpvs("here is my extra data");
+    MAGIC *mg = sv_magicv2_add(target_sv, &my_magic_funcs, 0, more_data);
+
+    warn("The extra data is %" SVf, SVfARG(MgAUXSV(mg)));
+
+When cloning the interpreter for a new thread, Perl will automatically clone
+the aux SV as well, storing the updated pointer in the magic structure in the
+new thread. When destroying the magic attachment it will automatically
+decrement the reference count in the referred SV, reclaiming it if necessary.
+This usually means the user code does not need to take any additional steps
+when using this method of storing data.
+
+=head3 Using the C<MgKEYIV> or C<MgKEYSV>
+
+If the magic attachment relates to a specific element of an AV or HV, it can
+be necessary or useful to additionally store the index or key of that element
+with the magic structure. This is the intended purpose of the C<MgKEYIV> and
+C<MgKEYSV> macros, and their corresponding C<MgKEYIV_set> and C<MgKEYSV_set>
+mutators.
+
+To use these, the C<MGv2f_WITH_KEYIV> or C<MGv2f_WITH_KEYSV> flag needs to be
+present, either passed to the C<sv_magicv2_add> function call, or set in the
+C<flags> field of the C<struct MagicFunctions> structure. Once the magic
+attachment structure is created, the relevant field access macro can be used
+as an lvalue to set it, or the corresponding C<_set> variant can be passed a
+new value.
+
+    MAGIC *mg = sv_magicv2_add(target_sv, &my_magic_funcs,
+                               MGv2f_WITH_KEYIV, NULL);
+    /* the following two lines are equivalent; you may use either style */
+    MgKEYIV(mg) = idx;
+    MgKEYIV_set(mg, idx);
+
+    warn("The element index is %" IVdf, MgKEYIV(mg));
+
+When using a SV pointer as a key argument, remember that the key is shared by
+any C<local>'ized copies of the containing variable, so it should not be
+modified once created. As it is intended to set this field initially when the
+magic is created and then leave it unmodified, using the C<MgKEYSV> macro as
+an lvalue to set its value will I<not> decrement the reference count of a
+previous SV referred there. If you are replacing the SV pointer, you must
+remember to do this manually.
+
+    if(MgKEYSV(mg))
+        SvREFCNT_dec(MgKEYSV(mg));
+
+    MgKEYSV(mg) = newSVsv(newkey);
+
+Alternatively, this is made simpler by using the C<MgKEYSV_set> macro, which
+handles this for you.
+
+    MgKEYSV_set(mg, newSVsv(newkey));
+
+=head3 Using the C<MgPTR> and C<MgPTRLEN>
+
+Each of these first two methods of storing extra data allow one additional
+value to be stored in the magic structure - either in the C<MgAUXSV> pointer,
+or one of the C<MgKEYIV> or C<MgKEYSV> fields. If the user code needs to store
+more different fields of data than this, it has a number of options. It could
+use some sort of aggregate data structure at the SV level (such as an AV or
+HV) to store multiple elements, but this consumes more memory and requires
+more indirect pointer accesses, impacting its performance. There are two
+further ways to add extra data in the form of an arbitrary C-level data
+structure; which could contain a C<struct> of the user's design.
+
+The C<MgPTR_set> and C<MgPTRLEN_set> macros can be used together to set the
+pointer and corresponding length values in the magic structure itself, to
+manage an allocated buffer:
+
+    struct MyExtraData {
+        int x;
+        UV y;
+        size_t len;
+        char **many_ptrs;
+    };
+
+    MAGIC *mg = sv_magicv2_add(target_sv, &my_magic_funcs, 0, NULL);
+
+    struct MyExtraData *dat;
+    Newx(dat, struct MyExtraData, 1);
+    *dat = ...;
+
+    MgPTR_set(mg, dat);
+    MgPTRLEN_set(mg, sizeof(*dat));
+
+    ((struct MyExtraData *)MgPTR(mg))->y = 1234;
+
+Alternatively, the C<mg_ptr_store> function will allocate a buffer of
+arbitrary size and place its pointer and length into the structure. The user
+code can then use C<MgPTR>, suitably cast, to access this buffer for its own
+purposes. Passing in a NULL pointer to C<mg_ptr_store> causes it to allocate a
+new uninitialised buffer without copying existing data into it.
+
+    struct MyExtraData {
+        int x;
+        UV y;
+        size_t len;
+        char **many_ptrs;
+    };
+
+    MAGIC *mg = sv_magicv2_add(target_sv, &my_magic_funcs, 0, NULL);
+    mg_ptr_store(mg, NULL, sizeof(struct MyExtraData));
+
+    ((struct MyExtraData *)MgPTR(mg))->y = 1234;
+
+=head3 Using C<.user_size> and C<MgUSERSTRUCT>
+
+While the C<MgPTR> area is a useful place to store some arbitrary C-level
+pointer in the magic attachment, it is not in fact ideal if the user code is
+simply using this as a buffer to store its own structural data. It involves
+an additional level of pointer access, which affects CPU performance and cache
+efficiency. It also involves making two separate memory allocations, doubling
+the C<malloc> overhead involved.
+
+Instead of this, the user code can ask the magic system to over-allocate its
+own structure and dedicate those spare bytes of storage to the user code,
+keeping the entire thing in one place in memory.
+
+When the C<user_size> field of the magic functions structure is given a
+non-zero value, any time the magic internals needs to allocate a structure, it
+will add this number of extra bytes. Being a structure of a size given by the
+user code means it can be sized sufficiently for whatever the user code wishes
+to store there (provided that is a single fixed size).
+
+Note however, that due to possible alignment limitations, the user code must
+not use any type in this structure which requires an alignment of larger
+granularity than a regular data pointer, as perl may not be able to guarantee
+correct alignment. If that is required, the user code must allocate its own
+structures and store pointers using the C<MgPTR> technique above.
+
+    struct MyExtraData {
+        int x;
+        UV y;
+        size_t len;
+        char **many_ptrs;
+    };
+    struct MagicFunctions my_magic_funcs = {
+        ...
+        .user_size = sizeof(struct MyExtraData),
+    };
+
+    MAGIC *mg = sv_magicv2_add(target_sv, &my_magic_funcs, 0, NULL);
+
+    MgUSERSTRUCT(mg, struct MyExtraData)->y = 1234;
+
+When freeing the structure or cloning it for a new interpreter thread, this
+extra storage area is accounted for and copied if necessary, so user code may
+not be required to handle basic structures that do not refer to other
+allocated memory. If other memory is allocated and stored in the structure,
+make sure to handle it correctly by providing the C<free_mg> and C<clone_mg>
+trigger functions.
+
+=head3 Handling Localization In Magic
+
+By default, Perl will not perform any extra work when C<local> is applied to a
+variable with magic annotations on it. Behaviour can be added by use of the
+C<localize_mg> trigger function on the C<ScalarVarMagicFunctions>,
+C<ArrayVarMagicFunctions> and C<HashVarMagicFunctions> structures.
+
+In many cases, it is entirely sufficient for localisation purposes to call the
+the L<perlapi/magicv2_localize_copy> function. You can use this function
+directly in your magic functions structure by setting its address as that of
+the C<localize_mg> trigger. Remember that it needs to point to the actual
+function and not the API compatibility wrapper macro, so remember to include
+the leading C<Perl_...> prefix on its name:
+
+    const struct ScalarVarMagicFunctions magic_funcs = {
+        ...,
+        .localize_mg = &Perl_magicv2_localize_copy,
+    };
+
+If your magic makes use of the pointer area or the C<MgUSERSTRUCT> area to
+store additional pointers that require further memory management, you will
+have to account for these yourself. However, you can still call this function
+at the start of your own handler function, before performing any extra work
+yourself that may be required, such as calling C<SvREFCNT_inc> on your own
+stored pointers.
+
+    static MAGIC *
+    S_magic_localize(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+    {
+	MAGIC *nmg = magicv2_localize_copy(nsv, osv, omg);
+
+	SvREFCNT_inc(MgUSERSTRUCT(mg, struct MyExtraData)->othersv);
+
+	return nmg;
+    }
 
 =head2 Localizing changes
 

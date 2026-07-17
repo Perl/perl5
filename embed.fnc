@@ -2210,6 +2210,10 @@ p	|int	|magic_setvec	|NN SV *sv				\
 				|NN MAGIC *mg
 p	|U32	|magic_sizepack |NN SV *sv				\
 				|NN MAGIC *mg
+Adp	|MAGIC *|magicv2_localize_copy					\
+				|NN SV *nsv				\
+				|NN SV *osv				\
+				|NN MAGIC *omg
 p	|int	|magic_wipepack |NN SV *sv				\
 				|NN MAGIC *mg
 
@@ -2247,6 +2251,9 @@ dp	|void	|mg_localize	|NN SV *sv				\
 				|NN SV *nsv				\
 				|bool setmagic
 ATdp	|void	|mg_magical	|NN SV *sv
+Adp	|void	|mg_ptr_store	|NN MAGIC *mg				\
+				|NULLOK const void *ptr 		\
+				|STRLEN len
 Adp	|int	|mg_set 	|NN SV *sv
 Cp	|I32	|mg_size	|NN SV *sv
 ATdp	|void	|mini_mktime	|NN struct tm *ptm
@@ -3516,6 +3523,33 @@ Adp	|MAGIC *|sv_magicext	|NN SV * const sv			\
 : exported for re.pm
 EXp	|MAGIC *|sv_magicext_mglob					\
 				|NN SV *sv
+Adpx	|MAGIC *|sv_magicv2_add |NN SV *sv				\
+				|NN const struct MagicFunctions *funcs	\
+				|U32 flags				\
+				|NULLOK SV *auxsv
+Adpx	|MAGIC *|sv_magicv2_find_by_auxsv				\
+				|NN const SV *sv			\
+				|NN const SV *auxsv
+Adpx	|MAGIC *|sv_magicv2_find_by_funcs				\
+				|NN const SV *sv			\
+				|NN const struct MagicFunctions *funcs
+Adpx	|MAGIC *|sv_magicv2_findnext_by_auxsv				\
+				|NN const SV *sv			\
+				|NN const SV *auxsv			\
+				|NN MAGIC *mg
+Adpx	|MAGIC *|sv_magicv2_findnext_by_funcs				\
+				|NN const SV *sv			\
+				|NN const struct MagicFunctions *funcs	\
+				|NN MAGIC *mg
+Adpx	|MAGIC *|sv_magicv2_find_or_add 				\
+				|NN SV *sv				\
+				|NN const struct MagicFunctions *funcs
+Adpx	|void	|sv_magicv2_remove					\
+				|NN SV *sv				\
+				|NN MAGIC *mg
+Adpx	|void	|sv_magicv2_remove_by_funcs				\
+				|NN SV *sv				\
+				|NN const struct MagicFunctions *funcs
 Adp	|SV *	|sv_2mortal	|NULLOK SV * const sv
 ARdmp	|SV *	|sv_mortalcopy	|NULLOK SV * const oldsv
 ARdp	|SV *	|sv_mortalcopy_flags					\
@@ -5090,6 +5124,12 @@ Tp	|bool	|translate_substr_offsets				\
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 p	|void	|mg_free_struct |NN SV *sv				\
 				|NN MAGIC *mg
+p	|void	|mgv2_copy	|NN const MAGIC *smg			\
+				|NN MAGIC *dmg
+p	|MAGIC *|sv_magicv2_attach					\
+				|NN SV *sv				\
+				|NN const struct MagicFunctions *funcs	\
+				|U32 flags
 #endif
 #if defined(PERL_IN_MRO_C)
 S	|void	|mro_clean_isarev					\

@@ -5132,6 +5132,8 @@ ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
 ext/XS-APItest/APItest_magic_hash_support.inc	XS::APItest magic/hash support include
+ext/XS-APItest/APItest_magicv2.inc		XS::APItest Magic v2 support include
+ext/XS-APItest/APItest_magicv2.xs		XS::APItest Magic v2 XS split
 ext/XS-APItest/APItest_misc_runtime.xs		XS::APItest misc runtime XS split
 ext/XS-APItest/APItest_misc_xsub_basics.xs	XS::APItest misc basic XSUB split
 ext/XS-APItest/APItest_optree_cophh.xs		XS::APItest optree and cophh XS split
@@ -5228,6 +5230,8 @@ ext/XS-APItest/t/looprest.t			test recursive descent statement-sequence parsing
 ext/XS-APItest/t/lvalue.t			Test XS lvalue functions
 ext/XS-APItest/t/magic.t			test attaching, finding, and removing magic
 ext/XS-APItest/t/magic_chain.t			test low-level MAGIC chain handling
+ext/XS-APItest/t/magicv2.t			XS::APItest: tests for Magic-v2 related APIs
+ext/XS-APItest/t/magicv2-threads.t		XS::APItest: tests for Magic-v2 related APIs across multiple threads
 ext/XS-APItest/t/Markers.pm			Helper for ./blockhooks.t
 ext/XS-APItest/t/mortal_destructor.t		Test mortal_destructor api.
 ext/XS-APItest/t/mro.t				Test mro plugin api

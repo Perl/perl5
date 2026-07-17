@@ -6483,6 +6483,386 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
     return mg;
 }
 
+/* Magic v2 */
+
+/*
+=for apidoc sv_magicv2_add
+
+Adds a Magic (of version 2) to an SV, upgrading it if necessary to being of
+type C<SVt_PVMG>.
+
+If C<auxsv> is non-NULL it should point to a different SV than C<sv>.  It will
+be stored in the MAGIC structure as C<MgAUXSV>, without incrementing the
+refcount.  The reference count will be automatically decremented when the
+magic is destroyed, unless the C<MgWEAK_AUXSV> flag is set.
+
+Returns a pointer to the newly-added MAGIC structure, in case the caller
+wishes to adjust its fields with the various structure access macros, or store
+it for some other purpose. This is optional; the structure is retained by the
+SV itself so it is fine for the caller to ignore the return value.
+
+=cut
+*/
+
+/* behaviour shared by sv_magicv2_add and mg_localize */
+MAGIC *
+Perl_sv_magicv2_attach(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_ATTACH;
+
+    SvUPGRADE(sv, SVt_PVMG);
+
+    MAGIC *mg = (MAGIC *)safecalloc(1, MGv2_SIZEOF_FLAGS_(flags) + funcs->user_size);
+    mg->mg_moremagic = SvMAGIC(sv);
+    SvMAGIC_set(sv, mg);
+
+    /* The choice of ext vs extvalue isn't significant here, as mg_localize()
+     * will have its own behaviour for Magic v2 anyway
+     */
+    mg->mg_type = PERL_MAGIC_ext;
+    mg->mg_virtual = (MGVTBL *)funcs;
+    mg->mg_len = 0;
+    mg->mg_ptr = NULL;
+    mg->mg_flags |= MGf_MGv2 | (flags & MGv2f_WITH_MASK);
+
+    mg_magical(sv);
+
+    return mg;
+}
+
+MAGIC *
+Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags, SV *auxsv)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_ADD;
+    U8 svt = SvTYPE(sv);
+
+    if(funcs->ver != 2)
+        croak("Unsupported MagicFunctions->ver value of %u", (unsigned int)funcs->ver);
+
+    switch(funcs->shape) {
+        case MGv2s_BASE:
+            /* valid on any kind of SV */
+            break;
+
+        case MGv2s_SCALARVAR:
+            if(svt > SVt_PVMG && svt != SVt_PVLV)
+                goto bad_shape;
+            break;
+
+        case MGv2s_ARRAYVAR:
+            if(svt != SVt_PVAV)
+                goto bad_shape;
+            break;
+
+        case MGv2s_HASHVAR:
+            if(svt != SVt_PVHV)
+                goto bad_shape;
+            break;
+
+        default:
+            croak("Unrecognized magicfuncs->shape value %d", funcs->shape);
+bad_shape:
+            croak("Cannot apply magicfuncs shape %d to SV type %d", funcs->shape, SvTYPE(sv));
+    }
+
+    MAGIC *mg = sv_magicv2_attach(sv, funcs, flags | funcs->flags);
+
+    mg->mg_obj = auxsv; /* do not bump refcount */
+
+    MgPRIV(mg)  = 0;
+
+    if(!(funcs->flags & MGv2f_ALWAYS_WEAK_AUXSV))
+        MgFLAGS(mg) |= MGv2f_REFCOUNTED_AUXSV;
+
+    return mg;
+}
+
+void
+Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
+{
+    PERL_ARGS_ASSERT_MGV2_COPY;
+
+    MgFLAGS(dmg) = MgFLAGS(smg);
+    MgPRIV(dmg)  = MgPRIV(smg);
+    MgAUXSV_set(dmg, MgAUXSV(smg));
+
+    void *sptr = MgPTR(smg);
+    STRLEN slen = MgPTRLEN(smg);
+    if(sptr && slen)
+        mg_ptr_store(dmg, sptr, slen);
+    else if(sptr)
+        MgPTR_set(dmg, sptr);
+    else if(slen)
+        MgPTRLEN_set(dmg, slen);
+
+    if(!MgWEAK_AUXSV(smg))
+        MgWEAK_AUXSV_off(dmg);
+
+    if(MgAUXSV(dmg) && !MgWEAK_AUXSV(dmg))
+        SvREFCNT_inc_void_NN(MgAUXSV(dmg));
+
+    switch(MgFLAGS(smg) & MGv2f_WITH_MASK) {
+        case 0:
+            break;
+
+        case MGv2f_WITH_KEYIV:
+            MgKEYIV(dmg) = MgKEYIV(smg);
+            break;
+
+        case MGv2f_WITH_KEYSV:
+            MgKEYSV(dmg) = SvREFCNT_inc(MgKEYSV(smg));
+            break;
+    }
+
+    size_t usersize = MgFUNCS(smg)->user_size;
+    if(usersize)
+        Copy(MgUSERSTRUCT(smg, void *), MgUSERSTRUCT(dmg, void *), usersize, char);
+}
+
+/*
+=for apidoc mg_ptr_store
+
+Helper function to manage the buffer storage area used by C<MgPTR> and
+C<MgPTRLEN>. A new buffer is allocated of C<len> bytes long. If C<ptr>
+is not NULL the buffer is then initialised by a copy of that length of bytes
+from C<ptr>. This buffer pointer is stored in the magic structure, to be
+accessed by C<MgPTR> and length C<MgPTRLEN>. If a prior buffer was already in
+place, it is deallocated afterwards.
+
+Because the new buffer is allocated and copied before the old buffer is
+deallocated, it is safe to use this function to grow or shrink that buffer by
+taking a copy of its existing contents; e.g. by passing the current value of
+C<MgPTR> as the C<ptr> argument.
+
+=cut
+*/
+
+void
+Perl_mg_ptr_store(pTHX_ MAGIC *mg, const void *ptr, STRLEN len)
+{
+    PERL_ARGS_ASSERT_MG_PTR_STORE;
+
+    void *was_ptr = MgPTR(mg);
+    STRLEN was_len = MgPTRLEN(mg);
+
+    /* Copy it before releasing the old value, in case of
+     * memmove-style overlaps */
+    void *new_ptr = ptr ? savepvn((const char *)ptr, len)
+                        : safemalloc(len);
+    MgPTR_set(mg, new_ptr);
+    MgPTRLEN_set(mg, len);
+
+    if(was_ptr && was_len)
+        Safefree(was_ptr);
+}
+
+static MAGIC *
+S_sv_magicv2_find(pTHX_ const SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void *key), const void *key, MAGIC *mg)
+{
+    if(SvTYPE(sv) < SVt_PVMG || !SvMAGICAL(sv))
+        return NULL;
+
+    if(mg)
+        mg = mg->mg_moremagic;
+    else
+        mg = SvMAGIC(sv);
+    for(/**/; mg; mg = mg->mg_moremagic) {
+        /* Don't really need to look at mg->mg_type since we're going to
+         * filter on the virtual table anyway
+         */
+        if(!MgIsV2(mg))
+            continue;
+
+        if((*filter)(aTHX_ (MAGIC *)mg, key))
+            return (MAGIC *)mg;
+    }
+
+    return NULL;
+}
+
+static bool
+S_filter_mgv2_hk      (pTHX_ MAGIC *mg, const void *key) { return mg == key; }
+
+static bool
+S_filter_mgv2_by_funcs(pTHX_ MAGIC *mg, const void *key) { return MgFUNCS(mg) == key; }
+
+/*
+=for apidoc sv_magicv2_find_by_funcs
+
+Finds the MAGIC pointer on the SV for the first magic using the functions
+structure given by C<funcs>.  Returns C<NULL> if no such MAGIC is found.
+
+=cut
+*/
+
+MAGIC *
+Perl_sv_magicv2_find_by_funcs(pTHX_ const SV *sv, const struct MagicFunctions *funcs)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_FIND_BY_FUNCS;
+    return S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs, NULL);
+}
+
+/*
+=for apidoc sv_magicv2_findnext_by_funcs
+
+Finds the MAGIC pointer on the SV for the next magic using the functions
+structure given by C<funcs>, presuming that C<mg> already points at the
+previous one (as found by a previous call to this function, or
+C<sv_magicv2_find_by_funcs>).  Returns C<NULL> if no such magic is found.
+
+Note that it is B<not> safe to remove magic attachments from the SV while
+iterating them in a loop using this function.
+
+=cut
+*/
+
+MAGIC *
+Perl_sv_magicv2_findnext_by_funcs(pTHX_ const SV *sv, const struct MagicFunctions *funcs, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_FINDNEXT_BY_FUNCS;
+    return S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs, mg);
+}
+
+static bool
+S_filter_mgv2_by_auxsv(pTHX_ MAGIC *mg, const void *key) { return MgAUXSV(mg) == key; }
+
+/*
+=for apidoc sv_magicv2_find_by_auxsv
+
+Finds the MAGIC pointer on the SV for the first magic whose C<MgAUXSV> pointer
+is equal to that given by C<auxsv>.  Returns C<NULL> if no such MAGIC is found.
+
+=cut
+*/
+
+MAGIC *
+Perl_sv_magicv2_find_by_auxsv(pTHX_ const SV *sv, const SV *auxsv)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_FIND_BY_AUXSV;
+    return S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_by_auxsv, auxsv, NULL);
+}
+
+/*
+=for apidoc sv_magicv2_findnext_by_auxsv
+
+Finds the MAGIC pointer on the SV for the next magic whose C<MgAUXSV> pointer
+is equal to that given by C<auxsv>, presuming that C<mg> already points at the
+previous one (as found by a previous call to this function, or
+C<sv_magicv2_find_by_auxsv>).  Returns C<NULL> if no such magic is found.
+
+Note that it is B<not> safe to remove magic attachments from the SV while
+iterating them in a loop using this function.
+
+=cut
+*/
+
+MAGIC *
+Perl_sv_magicv2_findnext_by_auxsv(pTHX_ const SV *sv, const SV *auxsv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_FINDNEXT_BY_AUXSV;
+    return S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_by_auxsv, auxsv, mg);
+}
+
+static void
+S_sv_magicv2_remove(pTHX_ SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void *key), const void *key)
+{
+    /* Don't check SvMAGICAL as that is temporarily switched off while magic
+     * functions are running. This permits us to remove the very magic that
+     * is actively running, allowing magics to remove themselves
+     */
+    if(SvTYPE(sv) < SVt_PVMG)
+        return;
+
+    bool mg_magical_again = false;
+
+    MAGIC *prevmg = NULL, *nextmg;
+    for(MAGIC *mg = SvMAGIC(sv); mg; prevmg = mg, mg = nextmg) {
+        nextmg = mg->mg_moremagic;
+        if(!MgIsV2(mg))
+            continue;
+
+        if(!(*filter)(aTHX_ (MAGIC *)mg, key))
+            continue;
+
+        if(prevmg)
+            prevmg->mg_moremagic = nextmg;
+        else
+            SvMAGIC_set(sv, nextmg);
+        mg->mg_moremagic = NULL;
+        mg_magical_again = true;
+
+        mg_free_struct(sv, mg);
+        mg = prevmg;
+    }
+
+    if(mg_magical_again)
+        mg_magical(sv);
+}
+
+/*
+=for apidoc sv_magicv2_find_or_add
+
+A shortcut for the common behaviour of first attempting to find an existing
+MAGIC on an SV, or creating one if it does not exist.
+
+If adding a new magic structure, this will be created with no aux SV, and zero
+flags.
+
+=cut
+*/
+
+MAGIC *
+Perl_sv_magicv2_find_or_add(pTHX_ SV *sv, const struct MagicFunctions *funcs)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_FIND_OR_ADD;
+
+    MAGIC *mg = sv_magicv2_find_by_funcs(sv, funcs);
+    if(!mg)
+        mg = sv_magicv2_add(sv, funcs, 0, NULL);
+
+    return mg;
+}
+
+/*
+=for apidoc sv_magicv2_remove
+
+Removes a single instance of a MAGIC from the SV.
+
+It is safe to call this from within a magic trigger function, to allow a magic
+structure to remove itself from the SV.
+
+If the associated magic functions structure has a C<free> trigger function, it
+will be invoked as part of this call. The reference count of a stored
+C<MgAUXSV> is decremented, unless the C<MgWEAK_AUXSV> flag is set.
+
+=cut
+*/
+
+void
+Perl_sv_magicv2_remove(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE;
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_hk, mg);
+}
+
+/*
+=for apidoc sv_magicv2_remove_by_funcs
+
+Removes every magic attachment on the SV whose functions structure is given by
+C<funcs>. This is equivalent to calling C<sv_magicv2_remove> on each of them
+in turn, invoking any C<free> trigger functions and decrementing any
+associated SV refcounts.
+
+=cut
+*/
+
+void
+Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_FUNCS;
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs);
+}
+
 MAGIC *
 Perl_sv_magicext_mglob(pTHX_ SV *sv)
 {
@@ -15091,6 +15471,44 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
             /* when joining, we let the individual SVs add themselves to
              * backref as needed. */
             continue;
+
+        if (MgIsV2(mg)) {
+            const struct MagicFunctions *funcs = MgFUNCS(mg);
+            size_t mgsize = MgSIZEOF(mg) + funcs->user_size;
+
+            MAGIC *nmg = (MAGIC *)safecalloc(1, mgsize);
+            *mgprev_p = (MAGIC *)nmg;
+            mgprev_p = &(nmg->mg_moremagic);
+
+            Copy(mg, nmg, mgsize, char); /* copy the entire structure including user data */
+
+            void *optr  = MgPTR(mg);
+            STRLEN olen = MgPTRLEN(mg);
+            if(optr && olen) {
+                MgPTR_set(nmg, savepvn((char *)optr, olen));
+            }
+
+            if(MgAUXSV(nmg)) {
+                if(MgWEAK_AUXSV(nmg))
+                    nmg->mg_obj = sv_dup    (MgAUXSV(nmg), param);
+                else
+                    nmg->mg_obj = sv_dup_inc(MgAUXSV(nmg), param);
+            }
+
+            if(MgHasKEYSV(nmg)) {
+                MgKEYSV(nmg) = sv_dup_inc(MgKEYSV(nmg), param);
+            }
+
+            if(funcs->clone_mg) {
+                /* TODO: Once we are no longer layered on top of MAGIC, then we should
+                 * have direct access to the osv and nsv values. For now we will just
+                 * pass them in as NULL
+                 */
+                (*funcs->clone_mg)(aTHX_ /* nsv = */ NULL, nmg, /* osv = */ NULL, mg, param);
+            }
+
+            continue;
+        }
 
         Newx(nmg, 1, MAGIC);
         *mgprev_p = nmg;

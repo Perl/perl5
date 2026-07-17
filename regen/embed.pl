@@ -1755,6 +1755,12 @@ my @unresolved_visibility_overrides = qw(
     MgTAINTEDDIR
     MgTAINTEDDIR_off
     MgTAINTEDDIR_on
+    MgARRAYVARFUNCS
+    MgHASHVARFUNCS
+    MgSCALARVARFUNCS
+    MgSIZEOF
+    MGv2f_REFCOUNTED_AUXSV
+    MGv2f_WITH_MASK
     MICRO_SIGN
     MICRO_SIGN_NATIVE
     MICRO_SIGN_UTF8
@@ -3628,6 +3634,7 @@ my @undocumented_always_visible = qw(
     DEBUG_yv
     DEBUG_yv_TEST
     MAX_UNICODE_UTF8_BYTES
+    MGf_MGv2
 
     assert_scalar_or_IO_
     DEBUG__
@@ -3672,6 +3679,8 @@ my @undocumented_always_visible = qw(
     EXTEND_SAFE_N_
     MEM_WRAP_NEEDS_RUNTIME_CHECK_
     MEM_WRAP_WILL_WRAP_
+    MGv2_ASSERT_AND_CAST_FUNCS_
+    MGv2_SIZEOF_FLAGS_
     NV_BODYLESS_UNION_
     RXf_PMf_CHARSET_SHIFT_
     RXf_PMf_SHIFT_COMPILETIME_

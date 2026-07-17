@@ -3620,6 +3620,15 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
 #define PERL_ARGS_ASSERT_MAGIC_WIPEPACK         \
         Perl_assert_aTHX; assert(sv); assert(mg)
 
+PERL_CALLCONV MAGIC *
+Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3);
+#define PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY  \
+        Perl_assert_aTHX; assert(nsv); assert(osv); assert(omg)
+
 PERL_CALLCONV Malloc_t
 Perl_malloc(MEM_SIZE nbytes)
         __attribute__malloc__
@@ -3732,6 +3741,13 @@ Perl_mg_magical(SV *sv)
         Perl_attribute_nonnull(1);
 #define PERL_ARGS_ASSERT_MG_MAGICAL             \
         assert(sv)
+
+PERL_CALLCONV void
+Perl_mg_ptr_store(pTHX_ MAGIC *mg, const void *ptr, STRLEN len)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_MG_PTR_STORE           \
+        Perl_assert_aTHX; assert(mg)
 
 PERL_CALLCONV int
 Perl_mg_set(pTHX_ SV *sv)
@@ -7151,6 +7167,72 @@ Perl_sv_magicext_mglob(pTHX_ SV *sv)
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_MAGICEXT_MGLOB      \
         Perl_assert_aTHX; assert(sv)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags, SV *auxsv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_ADD         \
+        Perl_assert_aTHX; assert(sv); assert(funcs)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_find_by_auxsv(pTHX_ const SV *sv, const SV *auxsv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_FIND_BY_AUXSV \
+        Perl_assert_aTHX; assert(sv); assert(auxsv)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_find_by_funcs(pTHX_ const SV *sv, const struct MagicFunctions *funcs)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_FIND_BY_FUNCS \
+        Perl_assert_aTHX; assert(sv); assert(funcs)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_find_or_add(pTHX_ SV *sv, const struct MagicFunctions *funcs)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_FIND_OR_ADD \
+        Perl_assert_aTHX; assert(sv); assert(funcs)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_findnext_by_auxsv(pTHX_ const SV *sv, const SV *auxsv, MAGIC *mg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_FINDNEXT_BY_AUXSV \
+        Perl_assert_aTHX; assert(sv); assert(auxsv); assert(mg)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_findnext_by_funcs(pTHX_ const SV *sv, const struct MagicFunctions *funcs, MAGIC *mg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_FINDNEXT_BY_FUNCS \
+        Perl_assert_aTHX; assert(sv); assert(funcs); assert(mg)
+
+PERL_CALLCONV void
+Perl_sv_magicv2_remove(pTHX_ SV *sv, MAGIC *mg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE      \
+        Perl_assert_aTHX; assert(sv); assert(mg)
+
+PERL_CALLCONV void
+Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_FUNCS \
+        Perl_assert_aTHX; assert(sv); assert(funcs)
 
 PERL_CALLCONV SV *
 Perl_sv_mortalcopy(pTHX_ SV * const oldsv)
@@ -10869,6 +10951,24 @@ Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_MG_FREE_STRUCT        \
         Perl_assert_aTHX; assert(sv); assert(mg)
+
+PERL_CALLCONV void
+Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_MGV2_COPY             \
+        Perl_assert_aTHX; assert(smg); assert(dmg)
+
+PERL_CALLCONV MAGIC *
+Perl_sv_magicv2_attach(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_SV_MAGICV2_ATTACH     \
+        Perl_assert_aTHX; assert(sv); assert(funcs)
 
 #endif /* defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C) */
 #if defined(PERL_IN_MRO_C)

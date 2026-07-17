@@ -198,6 +198,8 @@ START_MY_CXT
 /* C Include Files Go Here - shared C support includes for split XS::APItest domains. */
 #include "APItest_magic_hash_support.inc"
 
+#include "APItest_magicv2.inc"
+
 /* indirect functions to test the [pa]MY_CXT macros */
 
 int
@@ -1044,3 +1046,5 @@ INCLUDE: APItest_global_locale.xs
 INCLUDE: APItest_savestack.xs
 
 INCLUDE: APItest_vstring.xs
+
+INCLUDE: APItest_magicv2.xs

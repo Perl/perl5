@@ -737,6 +737,11 @@ not a scalar (i.e. an array or hash).  At the present version, these are only
 permitted on scalar fields.  You will have to manually create a writer
 accessor method yourself.
 
+=item Cannot apply magicfuncs shape %d to SV type %d
+
+(F) An XS module attempted to attach a Magic v2 structure to an SV, but the
+value of its C<shape> field is not compatible with the type of the SV.
+
 =item Cannot assign :param(%s) to field %s because that name is already in use
 
 (F) An attempt was made to apply a parameter name to a field, when the name
@@ -7617,6 +7622,12 @@ whereabouts in the regular expression the escape was discovered.
 (F) You attempted to add a named attribute to a C<field> definition, but
 perl does not recognise the name of the requested attribute.
 
+=item Unrecognized magicfuncs->shape value %d
+
+(F) An XS module attempted to attach a Magic v2 structure to an SV, but the
+value of its C<shape> field is not one of the recognised constants. This must
+take one of the C<MGv2s_*> values listed in L<perlapi>.
+
 =item Unrecognized named parameter '%s' to subroutine '%s'
 
 =item Unrecognized named parameters '%s' to subroutine '%s'
@@ -7669,6 +7680,16 @@ At least, Configure doesn't think so.
 Note that under some systems, like OS/2, there may be different flavors
 of Perl executables, some of which may support fork, some not.  Try
 changing the name you call Perl by to C<perl_>, C<perl__>, and so on.
+
+=item Unsupported MagicFunctions->ver value of %u
+
+(F) An XS module attempted to attach a Magic v2 structure to an SV, but the
+value of its C<ver> field is not supported as a valid version.
+
+If the reported value is zero, it is likely the author forgot to initialise
+that field of the structure. If the number is larger than 2, it likely means
+the XS module is written for a later version of Magic than this version of
+perl can support.
 
 =item Unsupported script encoding %s
 
