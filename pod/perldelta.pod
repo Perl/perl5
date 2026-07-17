@@ -97,6 +97,18 @@ in L<perlfunc/ref>, is C<Regexp>, or is the empty string C<''>.
 
 =item *
 
+Counting the number of matches within a string using the following common
+idiom is now more streamlined.
+
+    C<my $count = () = $str =~ /$pat/g;>
+
+Instead of pushing all matches to the stack as mortal SVs, just so that
+the list assignment can count them, C<pp_match> maintains an internal
+count during matching and pushes just that upon completion.
+[GH #24558]
+
+=item *
+
 XXX
 
 =back
