@@ -323,7 +323,7 @@ Perl_boot_core_PerlIO(pTHX)
 #endif
 
 
-/*======================================================================================*/
+/*--------------------------------------------------------------------------------------*/
 /*
  * Implement all the PerlIO interface ourselves.
  */
@@ -5486,7 +5486,7 @@ Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 #undef HAS_FGETPOS
 
 
-/*======================================================================================*/
+/*--------------------------------------------------------------------------------------*/
 /*
  * Now some functions in terms of above which may be needed even if we are
  * not in true PerlIO mode
