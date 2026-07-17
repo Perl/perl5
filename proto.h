@@ -9437,6 +9437,16 @@ Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *at
         Perl_assert_aTHX; assert(target); assert(attrname)
 
 #endif /* defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C) */
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C)
+PERL_CALLCONV void
+Perl_store_attr_in_padname(pTHX_ PADNAME *pn, OP *attr)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+# define PERL_ARGS_ASSERT_STORE_ATTR_IN_PADNAME \
+        Perl_assert_aTHX; assert(pn); assert(attr)
+
+#endif /* defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C) */
 #if defined(PERL_IN_AV_C)
 static MAGIC *
 S_get_aux_mg(pTHX_ AV *av)
@@ -11054,14 +11064,12 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 #endif /* defined(PERL_IN_MRO_C) */
 #if defined(PERL_IN_OP_C)
 static void
-S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
+S_apply_attrs_my(pTHX_ OP *target, OP *attrs, OP **import_opsp)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_4);
+        Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_APPLY_ATTRS_MY        \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
-        assert(target); assert(import_opsp)
+        Perl_assert_aTHX; assert(target); assert(import_opsp)
 
 static I32
 S_assignment_type(pTHX_ const OP *o)

@@ -243,9 +243,10 @@ S_targetname(pTHX_ struct PerlAttributeTarget *target)
  * an attribute that isn't in the builtin list
  */
 enum {
-    UNKNOWN_RETURN,   /* return the unrecognised ones */
-    UNKNOWN_RETURN_DUP, /* return a duplicated list of the unrecognised ones */
-    UNKNOWN_ERROR,    /* throw an exception */
+    UNKNOWN_RETURN,        /* return the unrecognised ones */
+    UNKNOWN_RETURN_DUP,    /* return a duplicated list of the unrecognised ones */
+    UNKNOWN_PADNAME_MAGIC, /* add padname attribute magic */
+    UNKNOWN_ERROR,         /* throw an exception */
 };
 
 /* Code mostly stolen from op.c but since the longterm plan is that op.c won't
@@ -350,6 +351,11 @@ S_apply_attribute(pTHX_ struct PerlAttributeTarget *target, OP *attr, int unknow
         case UNKNOWN_RETURN:
         case UNKNOWN_RETURN_DUP:
             return false;
+
+        case UNKNOWN_PADNAME_MAGIC:
+            assert(target->kind == PERL_ATTRTARGET_LEXICAL);
+            store_attr_in_padname(target->lexical.padname, svop_dup(attr));
+            return true;
 
         case UNKNOWN_ERROR:
             croak("Unrecognized attribute :%" SVf " on %s", SVfARG(name), targetname(target));
@@ -495,10 +501,17 @@ Perl_apply_attributes_lexical(pTHX_ PADOFFSET padix, OP *attrlist)
             .padname = PadnamelistARRAY(PL_comppad_name)[padix],
         },
     };
-    /* UNKNOWN_ERROR means there won't ever be a return value; we can
-     * ignore it
+
+    /* `field` declarations do not (currently) permit padname attribute
+     * magic, but regular lexicals do
      */
-    (void)S_apply_attributes(aTHX_ &target, attrlist, UNKNOWN_ERROR);
+    if(PadnameIsFIELD(target.lexical.padname))
+        /* UNKNOWN_ERROR means there won't ever be a return value; we can
+         * ignore it
+         */
+        (void)S_apply_attributes(aTHX_ &target, attrlist, UNKNOWN_ERROR);
+    else
+        (void)S_apply_attributes(aTHX_ &target, attrlist, UNKNOWN_PADNAME_MAGIC);
 }
 
 /*

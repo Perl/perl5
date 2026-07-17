@@ -4007,13 +4007,104 @@ S_import_attributes_module(pTHX_ HV *stash, SV *target, OP *attrs)
                     dup_attrlist(attrs))));
 }
 
+/***
+ * TODO(leonerd): This whole setup is a temporary workaround for the fact that
+ * we don't yet have PADNAME Magic. Ideally we would create a MagicV2
+ * structure to represent magic on a PADNAME, and give it trigger functions
+ * for times like `post_intromy` for generating optree fragments. Until then,
+ * this is handled by a bunch of specialcase logic which looks for this exact
+ * magic type and does custom behaviour inline.
+ */
+
 static void
-S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
+padname_attribute_free(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_UNUSED_ARG(sv);
+
+    if(MgPTR(mg)) {
+        op_free((OP *)MgPTR(mg));
+        MgPTR_set(mg, NULL);
+    }
+}
+
+static const struct MagicFunctions magicfuncs_padname_attribute = {
+    .ver = 2,
+    .shape = MGv2s_BASE,
+    .debug_name = "padname_attribute",
+
+    .free_mg = &padname_attribute_free,
+};
+
+/* attr must be a SINGLE attribute stored in OP_CONST, not a list of them.
+ * A reference to it will be stored; it is the caller's responsibility to
+ * dup it if appropriate. */
+void
+Perl_store_attr_in_padname(pTHX_ PADNAME *pn, OP *attr)
+{
+    PERL_ARGS_ASSERT_STORE_ATTR_IN_PADNAME;
+    assert(attr->op_type == OP_CONST);
+
+    padname_upgrade_sv(pn);
+    SV *pnsv = PadnameSV(pn);
+    assert(pnsv);
+
+    MAGIC *mg;
+    if(SvMAGICAL(pnsv) &&
+            (mg = sv_magicv2_find_by_funcs(pnsv, &magicfuncs_padname_attribute))) {
+        MgPTR_set(mg, op_append_elem(OP_LIST, (OP *)MgPTR(mg),
+                    attr));
+    }
+    else {
+        mg = sv_magicv2_add(pnsv, &magicfuncs_padname_attribute, 0, NULL);
+        MgPTR_set(mg, attr);
+    }
+}
+
+static void
+S_genops_post_intromy(pTHX_ PADOFFSET padix, PADNAME *pn, MAGIC *mg, OP **import_opsp)
+{
+    PERL_UNUSED_ARG(pn);
+
+    /* Ensure that attributes.pm is loaded. */
+    /* Don't force the C<use> if we don't need it. */
+    SV **svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
+    if (svp && *svp != &PL_sv_undef)
+        NOOP;	/* already in %INC */
+    else
+        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs(ATTRSMODULE), NULL);
+
+    /* check for C<my Dog $spot> when deciding package */
+    HV *stash = PAD_COMPNAME_TYPE(padix);
+    if (!stash)
+        stash = PL_curstash;
+
+    OP *attrs = (OP *)MgPTR(mg);
+
+    /* @args = ("packagename", \$varref, @attrs) */
+    OP *args = op_prepend_elem(OP_LIST,
+            newSVOP(OP_CONST, 0, newSVhek(HvNAME_HEK(stash))),
+            op_prepend_elem(OP_LIST,
+                newUNOP(OP_REFGEN, 0, newPADxVOP(OP_PADSV, 0, padix)),
+                attrs));
+
+    /* Make a method call to import
+     *   attributes->import(@args) */
+    OP *pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
+    OP *imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_WANT_VOID,
+            op_append_elem(OP_LIST,
+                op_prepend_elem(OP_LIST, pack, args),
+                newMETHOP_named(OP_METHOD_NAMED, 0, newSVpvs_share("import"))));
+
+    *import_opsp = op_append_elem(OP_LIST, *import_opsp, imop);
+
+    /* It has now been consumed */
+    MgPTR_set(mg, NULL);
+}
+
+static void
+S_apply_attrs_my(pTHX_ OP *target, OP *attrs, OP **import_opsp)
 {
     PERL_ARGS_ASSERT_APPLY_ATTRS_MY;
-
-    OP *pack, *imop, *arg;
-    SV *meth, *stashsv, **svp;
 
     if (!attrs)
         return;
@@ -4022,37 +4113,21 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
            target->op_type == OP_PADHV ||
            target->op_type == OP_PADAV);
 
-    /* Ensure that attributes.pm is loaded. */
-    /* Don't force the C<use> if we don't need it. */
-    svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
-    if (svp && *svp != &PL_sv_undef)
-        NOOP;	/* already in %INC */
-    else
-        load_module(PERL_LOADMOD_NOIMPORT, newSVpvs(ATTRSMODULE), NULL);
+    PADOFFSET padix = target->op_targ;
+    assert(padix);
 
-    /* Need package name for method call. */
-    pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
+    apply_attributes_lexical(padix, attrs);
 
-    /* Build up the real arg-list. */
-    stashsv = newSVhek(HvNAME_HEK(stash));
-
-    arg = newPADxVOP(OP_PADSV, 0, target->op_targ);
-    arg = op_prepend_elem(OP_LIST,
-                       newSVOP(OP_CONST, 0, stashsv),
-                       op_prepend_elem(OP_LIST,
-                                    newUNOP(OP_REFGEN, 0,
-                                            arg),
-                                    dup_attrlist(attrs)));
-
-    /* Fake up a method call to import */
-    meth = newSVpvs_share("import");
-    imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_WANT_VOID,
-                   op_append_elem(OP_LIST,
-                               op_prepend_elem(OP_LIST, pack, arg),
-                               newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
-
-    /* Combine the ops. */
-    *import_opsp = op_append_elem(OP_LIST, *import_opsp, imop);
+    PADNAME *pn;
+    SV *pnsv;
+    if((pn = PadnamelistARRAY(PL_comppad_name)[padix]) &&
+            PadnameIsFULLSV(pn) &&
+            (pnsv = PadnameSV(pn)) &&
+            SvMAGICAL(pnsv)) {
+        MAGIC *mg = sv_magicv2_find_by_funcs(pnsv, &magicfuncs_padname_attribute);
+        if(mg)
+            S_genops_post_intromy(aTHX_ padix, pn, mg, import_opsp);
+    }
 }
 
 /*
@@ -4282,17 +4357,11 @@ S_declare_var_attributes(pTHX_ OP *o, OP *attrs, OP **import_opsp)
         return o;
     }
     else if (attrs && type != OP_PUSHMARK) {
-        HV *stash;
-
         assert(PL_parser);
         PL_parser->in_my = KEY_NULL;
         PL_parser->in_my_stash = NULL;
 
-        /* check for C<my Dog $spot> when deciding package */
-        stash = PAD_COMPNAME_TYPE(o->op_targ);
-        if (!stash)
-            stash = PL_curstash;
-        apply_attrs_my(stash, o, attrs, import_opsp);
+        apply_attrs_my(o, attrs, import_opsp);
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
