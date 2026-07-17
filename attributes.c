@@ -244,8 +244,49 @@ S_targetname(pTHX_ struct PerlAttributeTarget *target)
  */
 enum {
     UNKNOWN_RETURN,   /* return the unrecognised ones */
+    UNKNOWN_RETURN_DUP, /* return a duplicated list of the unrecognised ones */
     UNKNOWN_ERROR,    /* throw an exception */
 };
+
+/* Code mostly stolen from op.c but since the longterm plan is that op.c won't
+ * do this any more, I won't bother making a shared function
+ */
+
+#define svop_dup(o)  S_svop_dup(aTHX_ o)
+static OP *
+S_svop_dup(pTHX_ OP *o)
+{
+    return newSVOP(o->op_type, o->op_flags, SvREFCNT_inc(cSVOPo_sv));
+}
+
+#define import_attributes_module(stash, sv, attrs)  S_import_attributes_module(aTHX_ stash, sv, attrs)
+static void
+S_import_attributes_module(pTHX_ HV *stash, SV *sv, OP *attrs)
+{
+    SV * const stashsv = newSVhek(HvNAME_HEK(stash));
+
+    /* Duplicate the attrs list since caller might have mortalised it and
+     * Perl_load_module will just eat it anyway
+     */
+    if (attrs->op_type == OP_LIST) {
+        OP *newattrs = newLISTOP(OP_LIST, 0, NULL, NULL);
+        for(OP *kid = OpSIBLING(cLISTOPx(attrs)->op_first); kid; kid = OpSIBLING(kid))
+            newattrs = op_append_elem(OP_LIST, newattrs, svop_dup(kid));
+        attrs = newattrs;
+    }
+    else
+        attrs = svop_dup(attrs);
+
+    Perl_load_module(
+            aTHX_ PERL_LOADMOD_IMPORT_OPS,
+            newSVpvs("attributes"),
+            NULL,
+            op_prepend_elem(OP_LIST,
+                newSVOP(OP_CONST, 0, stashsv),
+                op_prepend_elem(OP_LIST,
+                    newSVOP(OP_CONST, 0, newRV(sv)),
+                    attrs)));
+}
 
 static const struct PerlAttributeDefinition *
 S_find_attribute(pTHX_ SV *name)
@@ -307,6 +348,7 @@ S_apply_attribute(pTHX_ struct PerlAttributeTarget *target, OP *attr, int unknow
 
     switch(unknown) {
         case UNKNOWN_RETURN:
+        case UNKNOWN_RETURN_DUP:
             return false;
 
         case UNKNOWN_ERROR:
@@ -323,6 +365,8 @@ S_apply_attribute(pTHX_ struct PerlAttributeTarget *target, OP *attr, int unknow
  *
  * If unknown==UNKNOWN_RETURN, the attrlist is consumed by this function, and a
  *   possibly smaller sublist of filtered elements is returned
+ * If unknown==UNKNOWN_RETURN_DUP, the attrlist is regarded as read-only, not
+ *   modified, but the returned list is pre-mortalised.
  * If unknown!=UNKNOWN_RETURN, the attrlist is regarded as read-only, not
  *   modified, and it is the caller's responsibility to free it when finished
  */
@@ -347,6 +391,8 @@ S_apply_attributes(pTHX_ struct PerlAttributeTarget *target, OP *attrlist, int u
             return NULL;
         }
 
+        if (unknown == UNKNOWN_RETURN_DUP)
+            return svop_dup(attrlist);
         return attrlist;
     }
 
@@ -354,6 +400,7 @@ S_apply_attributes(pTHX_ struct PerlAttributeTarget *target, OP *attrlist, int u
     assert(prev->op_type == OP_PUSHMARK);
     OP *o = OpSIBLING(prev);
 
+    OP *retlist = NULL;
     OP *next;
     for(; o; o = next) {
         next = OpSIBLING(o);
@@ -365,9 +412,21 @@ S_apply_attributes(pTHX_ struct PerlAttributeTarget *target, OP *attrlist, int u
             }
         }
         else {
+            if(unknown == UNKNOWN_RETURN_DUP) {
+                if(!retlist) {
+                    retlist = newLISTOP(OP_LIST, 0, NULL, NULL);
+                    SAVEFREEOP(retlist);
+                }
+
+                retlist = op_append_elem(OP_LIST, retlist,
+                        svop_dup(o));
+            }
             prev = o;
         }
     }
+
+    if(retlist)
+        return retlist;
 
     if(OpHAS_SIBLING(cLISTOPx(attrlist)->op_first))
         return attrlist;
@@ -408,10 +467,18 @@ Perl_apply_attributes_pkgscoped(pTHX_ SV *sv, GV *namegv, OP *attrlist)
             .namegv = namegv,
         },
     };
-    /* UNKNOWN_ERROR means there won't ever be a return value; we can
-     * ignore it
+    /* If sv is not SVt_PVCV, it means this is an `our` variable attribute,
+     * and so unknown attributes need legacy-v1 handling by the
+     * `attributes->import` mechanism
      */
-    (void)S_apply_attributes(aTHX_ &target, attrlist, UNKNOWN_ERROR);
+    bool sv_is_cv = SvTYPE(sv) == SVt_PVCV;
+
+    OP *remains = S_apply_attributes(aTHX_ &target, attrlist,
+            sv_is_cv ? UNKNOWN_ERROR : UNKNOWN_RETURN_DUP);
+
+    if (remains && !sv_is_cv) {
+        import_attributes_module(GvSTASH(namegv), sv, remains);
+    }
 }
 
 // Caller must free attrlist

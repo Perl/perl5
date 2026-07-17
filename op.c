@@ -4222,6 +4222,12 @@ S_cant_declare(pTHX_ OP *o)
                                                              "my"));
 }
 
+/* Performs the early compile-time effects of declaring all the attributes
+ * given in `attrs`, to the declaration (or list of declarations) given in `o`.
+ * `o` must be an "our" variable declaration (OP_RV2xV on a GV), "my" variable
+ * declaration (OP_PADxV), or OP_LIST containing just these.
+ * The `attrs` op or list of ops will be consumed by this function.
+ */
 static OP *
 S_declare_var_attributes(pTHX_ OP *o, OP *attrs, OP **import_opsp)
 {
@@ -4240,23 +4246,23 @@ S_declare_var_attributes(pTHX_ OP *o, OP *attrs, OP **import_opsp)
         for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
             declare_var_attributes(kid, attrs, import_opsp);
         return o;
-    } else if (type == OP_UNDEF || type == OP_STUB) {
+    }
+
+    if (type == OP_UNDEF || type == OP_STUB)
         return o;
-    } else if (type == OP_RV2SV ||	/* "our" declaration */
-               type == OP_RV2AV ||
-               type == OP_RV2HV) {
+
+    if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
+        /* "our" declaration */
         if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
             S_cant_declare(aTHX_ o);
         } else if (attrs) {
             GV * const gv = cGVOPx_gv(cUNOPo->op_first);
-            assert(PL_parser);
-            PL_parser->in_my = KEY_NULL;
-            PL_parser->in_my_stash = NULL;
-            import_attributes_module(GvSTASH(gv),
-                    (type == OP_RV2SV ? GvSVn(gv) :
-                     type == OP_RV2AV ? MUTABLE_SV(GvAVn(gv)) :
-                     type == OP_RV2HV ? MUTABLE_SV(GvHVn(gv)) : MUTABLE_SV(gv)),
-                    attrs);
+            SV *target = type == OP_RV2SV ? GvSVn(gv) :
+                         type == OP_RV2AV ? MUTABLE_SV(GvAVn(gv)) :
+                         type == OP_RV2HV ? MUTABLE_SV(GvHVn(gv)) :
+                                            MUTABLE_SV(gv);
+
+            apply_attributes_pkgscoped(target, gv, attrs);
         }
         o->op_private |= OPpOUR_INTRO;
         return o;
