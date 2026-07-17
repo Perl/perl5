@@ -89,6 +89,55 @@ There may well be none in a stable release.
 
 =item *
 
+Common list slices of C<caller> return values will be more efficient.
+Specifically, C<caller> will output only the required values indicated by
+slice subscript(s) with no actual slicing being necessary.
+
+This has been implemented such that the OP type of C<caller> need not
+change and with minimal modification to the function internals, but
+consequently not every conceivable slice can be optimized.
+
+The most common slices seen in core and on CPAN are supported.
+Specifically, any of the following single subscripts
+(e.g. C<(caller $depth)[3]>) or an ascending run of these subscripts
+(e.g. C<(caller $depth)[8,9,10]>) will be optimized:
+
+=over 8
+
+=item *
+
+0 - package
+
+=item *
+
+1 - filename
+
+=item *
+
+2 - line
+
+=item *
+
+3 - subroutine
+
+=item *
+
+8 - hints
+
+=item *
+
+9 - bit mask
+
+=item *
+
+10 - hint hash
+
+=back
+
+[GH #23369]
+
+=item *
+
 XXX
 
 =back
