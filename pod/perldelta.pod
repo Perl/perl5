@@ -89,6 +89,14 @@ There may well be none in a stable release.
 
 =item *
 
+C<OP_REF_CMP> has been added to streamline expressions such as
+C<(ref $x eq 'SCALAR')> where (i) the first operator is C<ref> or
+C<reftype>, (ii) the comparison is C<eq> or C<ne>, and (iii) the value
+being compared against is one of the internal reftype strings mentioned
+in L<perlfunc/ref>, is C<Regexp>, or is the empty string C<''>.
+
+=item *
+
 XXX
 
 =back
