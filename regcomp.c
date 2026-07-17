@@ -146,7 +146,7 @@ EXTERN_C const struct regexp_engine wild_reg_engine;
 #include "regcomp_internal.h"
 #include "feature.h"
 
-/* =========================================================
+/* ---------------------------------------------------------
  * BEGIN edit_distance stuff.
  *
  * This calculates how many single character changes of any type are needed to
@@ -289,7 +289,7 @@ S_edit_distance(const UV* src,
 }
 
 /* END of edit_distance() stuff
- * ========================================================= */
+ * --------------------------------------------------------- */
 
 #ifdef PERL_RE_BUILD_AUX
 /* add a data member to the struct reg_data attached to this regex, it should

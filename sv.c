@@ -128,7 +128,7 @@
 static const char S_destroy[] = "DESTROY";
 #define S_destroy_len (sizeof(S_destroy)-1)
 
-/* ============================================================================
+/* ----------------------------------------------------------------------------
 
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
@@ -223,7 +223,7 @@ Public API:
 
 =cut
 
- * ========================================================================= */
+ * ------------------------------------------------------------------------- */
 
 /*
  * "A time to plant, and a time to uproot what was planted..."
@@ -14785,7 +14785,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     SvTAINT(sv);
 }
 
-/* =========================================================================
+/* -------------------------------------------------------------------------
 
 =for apidoc_section $embedding
 
@@ -14799,7 +14799,7 @@ During the course of a cloning, a hash table is used to map old addresses
 to new addresses.  The table is created and manipulated with the
 ptr_table_* functions.
 
- * =========================================================================*/
+ * -------------------------------------------------------------------------*/
 
 
 #if defined(USE_ITHREADS)

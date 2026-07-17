@@ -1521,7 +1521,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 #  undef OVERRIDE_AND_SAVEPV
 #endif
 
-/*==========================================================================
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  * Here starts the code that gives a uniform interface to its callers, hiding
  * the differences between platforms.
  *
@@ -1537,7 +1537,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
                                     ((const char *) setlocale(cat, locale))
 #endif
 
-/*==========================================================================
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  * Here is the main posix layer.  It is the same as the base one unless the
  * system is lacking LC_ALL, or there are categories that we ignore, but that
  * the system libc knows about */
@@ -1666,7 +1666,7 @@ S_posix_setlocale_with_complications(pTHX_ const int cat,
 #endif
 
 /* End of posix layer
- *==========================================================================
+ *-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *
  * The next layer up is to catch vagaries and bugs in the libc setlocale return
  * value.  The return is not guaranteed to be stable.
@@ -1860,7 +1860,7 @@ S_stdize_locale(pTHX_ const int category,
 
 /* End of stdize_locale layer
  *
- * ==========================================================================
+ * -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *
  * The next many lines form several implementations of a layer above the
  * close-to-the-metal 'posix' and 'stdized' macros.  They are used to present a
@@ -1905,7 +1905,7 @@ S_stdize_locale(pTHX_ const int category,
  * but each may be a mortalized copy.  If you need something stable across
  * calls, you need to savepv() the result yourself.
  *
- *===========================================================================*/
+ *-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 #if    (! defined(USE_LOCALE_THREADS) && ! defined(USE_POSIX_2008_LOCALE))    \
     || (  defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE))
@@ -1953,7 +1953,7 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
 
 #  endif
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 #elif   defined(USE_LOCALE_THREADS)                 \
    && ! defined(USE_THREAD_SAFE_LOCALE)
 
@@ -2019,7 +2019,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define TOGGLE_LOCK(i)    POSIX_SETLOCALE_LOCK
 #  define TOGGLE_UNLOCK(i)  POSIX_SETLOCALE_UNLOCK
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 #elif defined(USE_POSIX_2008_LOCALE)
 #  ifndef LC_ALL
@@ -2639,14 +2639,14 @@ S_bool_setlocale_2008_i(pTHX_
     return false;
 }
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 #else
 #  error Unexpected Configuration
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 /* Each implementation above is based on two fundamental macros #defined above:
  *  1) either a querylocale_r or a querylocale_i
@@ -2723,7 +2723,7 @@ S_bool_setlocale_2008_i(pTHX_
 #  error No bool_setlocale() form defined
 #endif
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 /* Most of the cases in this file just toggle the locale briefly; but there are
  * a few instances where a longer toggled interval, over multiple operations,
@@ -2835,7 +2835,7 @@ S_update_PL_curlocales_i(pTHX_
 
 #  endif  /* Need PL_curlocales[] */
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
 #if defined(USE_LOCALE)
 
@@ -9200,7 +9200,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     new_LC_ALL("C", true /* Don't shortcut */);
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 
     /* Now ready to override the initialization with the values that the user
      * wants.  This is done in the global locale as explained in the
@@ -10570,7 +10570,7 @@ Perl_strxfrm(pTHX_ SV * src)
 #  define WHICH_LC_INDEX LC_MESSAGES_INDEX_
 #endif
 
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 /* First set of implementations, when have strerror_l() */
 
 #if defined(USE_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
@@ -10661,7 +10661,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     return errstr;
 }
 #  endif    /* Above is using strerror_l */
-/*===========================================================================*/
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 #else       /* Below is not using strerror_l */
 #  if ! defined(USE_LOCALE_CTYPE) && ! defined(USE_LOCALE_MESSAGES)
 

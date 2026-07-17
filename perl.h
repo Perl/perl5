@@ -114,8 +114,8 @@ functions with no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #  define HAS_C99 1
 #endif
 
-/* =========================================================================
- * The defines from here to the following ===== line are unfortunately
+/* -------------------------------------------------------------------------
+ * The defines from here to the following ----- line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
 
 /* See L<perlguts/"The Perl API"> for detailed notes on
@@ -155,7 +155,7 @@ functions with no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #endif
 
 /* end of makedef.pl logic duplication.  But there are other groups below.
- * ========================================================================= */
+ * ------------------------------------------------------------------------- */
 
 /*
 =for apidoc_section $directives
@@ -1155,8 +1155,8 @@ violations are fatal.
 #   include <xlocale.h>
 #endif
 
-/* =========================================================================
- * The defines from here to the following ===== line are unfortunately
+/* -------------------------------------------------------------------------
+ * The defines from here to the following ----- line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
 
 /* If not forbidden, we enable locale handling if either 1) the POSIX 2008
@@ -1185,7 +1185,7 @@ violations are fatal.
 #endif
 
 /* end of makedef.pl logic duplication.  But there are other groups below.
- * ========================================================================= */
+ * ------------------------------------------------------------------------- */
 
 /* Even if not using locales, this header should be #included so as to #define
  * some symbols which avoid #ifdefs to get things to compile.  But make sure
@@ -1255,8 +1255,8 @@ typedef enum {
                                   { 12, 11, 10, 9, 8, 7, 5, 4, 3, 2, 1, 0 }
 #    define  PERL_LC_ALL_SEPARATOR "/ = /"
 #  endif
-/* =========================================================================
- * The defines from here to the following ===== line are unfortunately
+/* -------------------------------------------------------------------------
+ * The defines from here to the following ----- line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
 
 #  if defined(USE_THREADS) && ! defined(NO_LOCALE_THREADS)
@@ -1349,7 +1349,7 @@ typedef enum {
 #endif
 
 /* end of makedef.pl logic duplication
- * ========================================================================= */
+ * ------------------------------------------------------------------------- */
 
 #ifdef PERL_CORE
 
