@@ -7544,8 +7544,8 @@ typedef struct am_table_short AMTS;
  * thread-safe, reproduced at the bottom of regen/lock_definitions.pl.
  * This is unfortunately incomplete.  It doesn't include the ones that just
  * access environment variables, for example.  Linux documents some more as
- * well; some of those might just be documentating that the Linux
- * implementation is non-compliant; or it might be it is an oversight in POSIX.
+ * well; some of those might just be documenting that the Linux implementation
+ * is non-compliant; or it might be it is an oversight in POSIX.
  *
  * The macros only work when you unlock before requesting another lock.
  * Otherwise, deadlock is possible.  The macros are crafted so that they safely
