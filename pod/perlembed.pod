@@ -722,9 +722,9 @@ itself after a certain number of requests, to ensure that memory
 consumption is minimized.  You'll also want to scope your variables
 with L<perlfunc/my> whenever possible.
 
+To illustrate this, we create a file C<persistent.pl>:
 
  package Embed::Persistent;
- #persistent.pl
 
  use strict;
  our %Cache;
@@ -784,9 +784,9 @@ with L<perlfunc/my> whenever possible.
 
  1;
 
- __END__
+This file will be hardcoded to be loaded in our C program, whose code is
+located in C<persistent.c>:
 
- /* persistent.c */
  #include <EXTERN.h>
  #include <perl.h>
 
