@@ -20,6 +20,7 @@ deemed necessary by the Steering Council.
   2025-07-02  5.42.0  ✓       Philippe Bruhat
   2026-03-08  5.42.1  ✓       Steve Hay
   2026-03-29  5.42.2  ✓       Steve Hay
+  2026-08-02  5.42.3          Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -38,7 +39,7 @@ you should reset the version numbers to the next blead series.
 =head2 Perl 5.45
 
   2026-07-15  5.45.0  ✓       Leon Timmermans   (tag only)
-  2026-07-??  5.45.1  ✓       Paul Evans
+  2026-07-??  5.45.1          Paul Evans
 
 =head1 VICTIMS
 
