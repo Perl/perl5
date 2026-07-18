@@ -98,7 +98,7 @@ A new stable release series is typically produced once a year.
 =head1 MAINTENANCE AND SUPPORT
 
 These are the "officially" supported perl versions
-as of the release of Perl 5.42:
+as of the release of Perl 5.44:
 
     Version track    Start date      Support status
     -------------    -----------     --------------
