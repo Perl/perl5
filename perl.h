@@ -7804,10 +7804,10 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_ENVr_LCr_LOCK(m)             STMT_START {                    \
                                                 PERL_ENVr_LOCK;             \
-                                                LOCALE_READ_LOCK;           \
+                                                PERL_LCr_LOCK(m);           \
                                             } STMT_END
 #  define PERL_ENVr_LCr_UNLOCK(m)           STMT_START {                    \
-                                                LOCALE_READ_UNLOCK;         \
+                                                PERL_LCr_UNLOCK(m);         \
                                                 PERL_ENVr_UNLOCK;           \
                                             } STMT_END
 #  define PERL_ENVr_LCx_LOCK(m)             STMT_START {                    \
