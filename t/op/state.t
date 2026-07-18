@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 170;
+plan tests => 171;
 
 # Before loading feature.pm, test it with CORE::
 ok eval 'CORE::state $x = 1;', 'CORE::state outside of feature.pm scope';
@@ -527,6 +527,15 @@ for (1,2) {
     $res = join '', gh_18630A , gh_18630A;
     is($res, "b2b2", 'ARRAY copied successfully in subroutine exit');
     is(scalar gh_18630A, 2, 'gh_18630A scalar call returns element count');
+}
+
+# [GH #24571] / [GH #24570] OP_EMPTYAVHV cannot set up the OP_ONCE tree, so
+#                           S_maybe_targlex should return without optimizing.
+
+{
+    sub got_once { state $cache = {} }
+    got_once()->{foo} = 'bar';
+    is(got_once()->{foo}, 'bar', 'gh_24571 No S_maybe_targlex breakage');
 }
 
 __DATA__
