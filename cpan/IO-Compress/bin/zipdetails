@@ -29,7 +29,7 @@ use Encode;
 use Getopt::Long;
 use List::Util qw(min max);
 
-my $VERSION = '4.006' ;
+my $VERSION = '4.008' ;
 
 sub fatal_tryWalk;
 sub fatal_truncated ;
@@ -2419,7 +2419,7 @@ sub redactFilename
     $filename =~ s(.)(X)g
         if $opt_Redact;
 
-    return $filename;
+    return wantarray ? ($filename, $filename, 0)  : $filename;
 }
 
 sub validateDirectory
@@ -8251,8 +8251,10 @@ L<https://github.com/pmqs/zipdetails/issues>.
 The primary reference for Zip files is
 L<APPNOTE.TXT|https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT>.
 
-An alternative reference is the Info-Zip appnote. This is available from
-L<ftp://ftp.info-zip.org/pub/infozip/doc/>
+If you need to investigate the extra fields that are used in zip
+files the "appnote" document covers a lot of them.
+The Info-ZIP zip distribution, available at L<https://infozip.sourceforge.net/>,
+contains additional extra field definitions. Look for the file "extrafld.txt".
 
 For details of WinZip AES encryption see L<AES Encryption Information:
 Encryption Specification AE-1 and
