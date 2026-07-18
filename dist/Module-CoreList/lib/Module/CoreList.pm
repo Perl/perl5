@@ -24779,8 +24779,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'IO::Uncompress::Inflate'=> '2.223',
             'IO::Uncompress::RawInflate'=> '2.223',
             'IO::Uncompress::Unzip' => '2.223',
-            'Module::CoreList'      => '5.20260708',
-            'Module::CoreList::Utils'=> '5.20260708',
+            'Module::CoreList'      => '5.20260715',
+            'Module::CoreList::Utils'=> '5.20260715',
             'UNIVERSAL'             => '1.18',
         },
         removed => {

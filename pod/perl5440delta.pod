@@ -371,7 +371,7 @@ L<Math::BigInt> has been upgraded from version 2.005002 to 2.005003.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20250702 to 5.20260708.
+L<Module::CoreList> has been upgraded from version 5.20250702 to 5.20260715.
 
 =item *
 
