@@ -658,6 +658,14 @@ this throws an exception.
 
 =item *
 
+L<Pack template structure size is too large|perldiag/"Pack template structure size is too large">
+
+(F) You called C<pack> or C<unpack> to operate on a structure, whose
+computed size is too large to fit in memory.  This usually happens as a
+result of embedding a large number as the repeat count for an item.
+
+=item *
+
 L<\x{%X} is a \w char that isn't valid in a name "%s"
 |perldiag/\x{%X} is a \w char that isn't valid in a name "%s">
 
