@@ -153,13 +153,13 @@ change the path following the C<-I>.
 You may have to add extra libraries as well.  Which ones?
 Perhaps those printed by
 
-   perl -MConfig -e 'print $Config{libs}'
+    perl -MConfig -e 'print $Config{libs}'
 
 Provided your perl binary was properly configured and installed the
 B<ExtUtils::Embed> module will determine all of this information for
 you:
 
-   % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
+    % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
 
 If the B<ExtUtils::Embed> module isn't part of your Perl distribution,
 you can retrieve it from
@@ -185,16 +185,16 @@ version of I<miniperlmain.c> containing the essentials of embedding:
 
  int main(int argc, char **argv, char **env)
  {
-	PERL_SYS_INIT3(&argc,&argv,&env);
-        my_perl = perl_alloc();
-        perl_construct(my_perl);
-	PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-        perl_parse(my_perl, NULL, argc, argv, (char **)NULL);
-        perl_run(my_perl);
-        perl_destruct(my_perl);
-        perl_free(my_perl);
-	PERL_SYS_TERM();
-	exit(EXIT_SUCCESS);
+     PERL_SYS_INIT3(&argc,&argv,&env);
+     my_perl = perl_alloc();
+     perl_construct(my_perl);
+     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+     perl_parse(my_perl, NULL, argc, argv, (char **)NULL);
+     perl_run(my_perl);
+     perl_destruct(my_perl);
+     perl_free(my_perl);
+     PERL_SYS_TERM();
+     exit(EXIT_SUCCESS);
  }
 
 Notice that we don't use the C<env> pointer.  Normally handed to
@@ -248,30 +248,30 @@ In this example we'll use C<call_argv>.
 
 That's shown below, in a program I'll call I<showtime.c>.
 
-    #include <EXTERN.h>
-    #include <perl.h>
+ #include <EXTERN.h>
+ #include <perl.h>
 
-    static PerlInterpreter *my_perl;
+ static PerlInterpreter *my_perl;
 
-    int main(int argc, char **argv, char **env)
-    {
-        char *args[] = { NULL };
-	PERL_SYS_INIT3(&argc,&argv,&env);
-        my_perl = perl_alloc();
-        perl_construct(my_perl);
+ int main(int argc, char **argv, char **env)
+ {
+     char *args[] = { NULL };
+     PERL_SYS_INIT3(&argc,&argv,&env);
+     my_perl = perl_alloc();
+     perl_construct(my_perl);
 
-        perl_parse(my_perl, NULL, argc, argv, NULL);
-	PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+     perl_parse(my_perl, NULL, argc, argv, NULL);
+     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
-        /*** skipping perl_run() ***/
+     /*** skipping perl_run() ***/
 
-        call_argv("showtime", G_DISCARD | G_NOARGS, args);
+     call_argv("showtime", G_DISCARD | G_NOARGS, args);
 
-        perl_destruct(my_perl);
-        perl_free(my_perl);
-	PERL_SYS_TERM();
-	exit(EXIT_SUCCESS);
-    }
+     perl_destruct(my_perl);
+     perl_free(my_perl);
+     PERL_SYS_TERM();
+     exit(EXIT_SUCCESS);
+ }
 
 where I<showtime> is a Perl subroutine that takes no arguments (that's the
 I<G_NOARGS>) and for which I'll ignore the return value (that's the
@@ -279,18 +279,18 @@ I<G_DISCARD>).  Those flags, and others, are discussed in L<perlcall>.
 
 I'll define the I<showtime> subroutine in a file called I<showtime.pl>:
 
- print "I shan't be printed.";
+    print "I shan't be printed.";
 
- sub showtime {
-     print time;
- }
+    sub showtime {
+        print time;
+    }
 
 Simple enough. Now compile and run:
 
- % cc -o showtime showtime.c \
-     `perl -MExtUtils::Embed -e ccopts -e ldopts`
- % showtime showtime.pl
- 818284590
+    % cc -o showtime showtime.c \
+        `perl -MExtUtils::Embed -e ccopts -e ldopts`
+    % showtime showtime.pl
+    818284590
 
 yielding the number of seconds that elapsed between January 1, 1970
 (the beginning of the Unix epoch), and the moment I began writing this
@@ -364,19 +364,19 @@ If you compile and run I<string.c>, you'll see the results of using
 I<SvIV()> to create an C<int>, I<SvNV()> to create a C<float>, and
 I<SvPV()> to create a string:
 
-   a = 9
-   a = 9.859600
-   a = Just Another Perl Hacker
+    a = 9
+    a = 9.859600
+    a = Just Another Perl Hacker
 
 In the example above, we've created a global variable to temporarily
 store the computed value of our eval'ed expression.  It is also
 possible and in most cases a better strategy to fetch the return value
 from I<eval_pv()> instead.  Example:
 
-   ...
-   SV *val = eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
-   printf("%s\n", SvPV_nolen(val));
-   ...
+    ...
+    SV *val = eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
+    printf("%s\n", SvPV_nolen(val));
+    ...
 
 This way, we avoid namespace pollution by not creating global
 variables and we've simplified our code as well.
@@ -387,20 +387,20 @@ The I<eval_sv()> function lets us evaluate strings of Perl code, so we can
 define some functions that use it to "specialize" in matches and
 substitutions: I<match()>, I<substitute()>, and I<matches()>.
 
-   I32 match(SV *string, char *pattern);
+    I32 match(SV *string, char *pattern);
 
 Given a string and a pattern (e.g., C<m/clasp/> or C</\b\w*\b/>, which
 in your C program might appear as "/\\b\\w*\\b/"), match()
 returns 1 if the string matches the pattern and 0 otherwise.
 
-   int substitute(SV **string, char *pattern);
+    int substitute(SV **string, char *pattern);
 
 Given a pointer to an C<SV> and an C<=~> operation (e.g.,
 C<s/bob/robert/g> or C<tr[A-Z][a-z]>), substitute() modifies the string
 within the C<SV> as according to the operation, returning the number of
 substitutions made.
 
-   SSize_t matches(SV *string, char *pattern, AV **matches);
+    SSize_t matches(SV *string, char *pattern, AV **matches);
 
 Given an C<SV>, a pattern, and a pointer to an empty C<AV>,
 matches() evaluates C<$string =~ $pattern> in a list context, and
@@ -450,7 +450,7 @@ been wrapped here):
      SV *command = newSV(0), *retval;
 
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
- 	      SvPV_nolen(string), pattern);
+               SvPV_nolen(string), pattern);
 
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -472,7 +472,7 @@ been wrapped here):
      SV *command = newSV(0), *retval;
 
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
- 	      SvPV_nolen(*string), pattern);
+               SvPV_nolen(*string), pattern);
 
      retval = my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -495,7 +495,7 @@ been wrapped here):
      SSize_t num_matches;
 
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
- 	      SvPV_nolen(string), pattern);
+               SvPV_nolen(string), pattern);
 
      my_eval_sv(command, TRUE);
      SvREFCNT_dec(command);
@@ -521,25 +521,25 @@ been wrapped here):
 
      text = newSV(0);
      sv_setpv(text, "When he is at a convenience store and the "
-	"bill comes to some amount like 76 cents, Maynard is "
-	"aware that there is something he *should* do, something "
-	"that will enable him to get back a quarter, but he has "
-	"no idea *what*.  He fumbles through his red squeezey "
-	"changepurse and gives the boy three extra pennies with "
-	"his dollar, hoping that he might luck into the correct "
-	"amount.  The boy gives him back two of his own pennies "
-	"and then the big shiny quarter that is his prize. "
-	"-RICHH");
+         "bill comes to some amount like 76 cents, Maynard is "
+         "aware that there is something he *should* do, something "
+         "that will enable him to get back a quarter, but he has "
+         "no idea *what*.  He fumbles through his red squeezey "
+         "changepurse and gives the boy three extra pennies with "
+         "his dollar, hoping that he might luck into the correct "
+         "amount.  The boy gives him back two of his own pennies "
+         "and then the big shiny quarter that is his prize. "
+         "-RICHH");
 
      if (match(text, "m/quarter/")) /** Does text contain 'quarter'? **/
- 	printf("match: Text contains the word 'quarter'.\n\n");
+         printf("match: Text contains the word 'quarter'.\n\n");
      else
- 	printf("match: Text doesn't contain the word 'quarter'.\n\n");
+         printf("match: Text doesn't contain the word 'quarter'.\n\n");
 
      if (match(text, "m/eighth/")) /** Does text contain 'eighth'? **/
- 	printf("match: Text contains the word 'eighth'.\n\n");
+         printf("match: Text contains the word 'eighth'.\n\n");
      else
- 	printf("match: Text doesn't contain the word 'eighth'.\n\n");
+         printf("match: Text doesn't contain the word 'eighth'.\n\n");
 
      /** Match all occurrences of /wi../ **/
      num_matches = matches(text, "m/(wi..)/g", &match_list);
@@ -553,14 +553,14 @@ been wrapped here):
      /** Remove all vowels from text **/
      num_matches = substitute(&text, "s/[aeiou]//gi");
      if (num_matches) {
- 	printf("substitute: s/[aeiou]//gi...%lu substitutions made.\n",
- 	       (unsigned long)num_matches);
- 	printf("Now text is: %s\n\n", SvPV_nolen(text));
+         printf("substitute: s/[aeiou]//gi...%lu substitutions made.\n",
+                (unsigned long)num_matches);
+         printf("Now text is: %s\n\n", SvPV_nolen(text));
      }
 
      /** Attempt a substitution **/
      if (!substitute(&text, "s/Perl/C/")) {
- 	printf("substitute: s/Perl/C...No substitution made.\n\n");
+         printf("substitute: s/Perl/C...No substitution made.\n\n");
      }
 
      SvREFCNT_dec(text);
@@ -572,23 +572,23 @@ been wrapped here):
 
 which produces the output (again, long lines have been wrapped here)
 
-  match: Text contains the word 'quarter'.
+ match: Text contains the word 'quarter'.
 
-  match: Text doesn't contain the word 'eighth'.
+ match: Text doesn't contain the word 'eighth'.
 
-  matches: m/(wi..)/g found 2 matches...
-  match: will
-  match: with
+ matches: m/(wi..)/g found 2 matches...
+ match: will
+ match: with
 
-  substitute: s/[aeiou]//gi...139 substitutions made.
-  Now text is: Whn h s t  cnvnnc str nd th bll cms t sm mnt lk 76 cnts,
-  Mynrd s wr tht thr s smthng h *shld* d, smthng tht wll nbl hm t gt
-  bck qrtr, bt h hs n d *wht*.  H fmbls thrgh hs rd sqzy chngprs nd
-  gvs th by thr xtr pnns wth hs dllr, hpng tht h mght lck nt th crrct
-  mnt.  Th by gvs hm bck tw f hs wn pnns nd thn th bg shny qrtr tht s
-  hs prz. -RCHH
+ substitute: s/[aeiou]//gi...139 substitutions made.
+ Now text is: Whn h s t  cnvnnc str nd th bll cms t sm mnt lk 76 cnts,
+ Mynrd s wr tht thr s smthng h *shld* d, smthng tht wll nbl hm t gt
+ bck qrtr, bt h hs n d *wht*.  H fmbls thrgh hs rd sqzy chngprs nd
+ gvs th by thr xtr pnns wth hs dllr, hpng tht h mght lck nt th crrct
+ mnt.  Th by gvs hm bck tw f hs wn pnns nd thn th bg shny qrtr tht s
+ hs prz. -RCHH
 
-  substitute: s/Perl/C...No substitution made.
+ substitute: s/Perl/C...No substitution made.
 
 =head2 Fiddling with the Perl stack from your C program
 
@@ -631,40 +631,45 @@ deep breath...
  static void
  PerlPower(int a, int b)
  {
-   dSP;                            /* initialize stack pointer      */
-   ENTER;                          /* everything created after here */
-   SAVETMPS;                       /* ...is a temporary variable.   */
-   PUSHMARK(SP);                   /* remember the stack pointer    */
-   XPUSHs(sv_2mortal(newSViv(a))); /* push the base onto the stack  */
-   XPUSHs(sv_2mortal(newSViv(b))); /* push the exponent onto stack  */
-   PUTBACK;                      /* make local stack pointer global */
-   call_pv("expo", G_SCALAR);      /* call the function             */
-   SPAGAIN;                        /* refresh stack pointer         */
-                                 /* pop the return value from stack */
-   printf ("%d to the %dth power is %d.\n", a, b, POPi);
-   PUTBACK;
-   FREETMPS;                       /* free that return value        */
-   LEAVE;                       /* ...and the XPUSHed "mortal" args.*/
+     dSP;                        /* initialize stack pointer         */
+     ENTER;                      /* everything created after here    */
+     SAVETMPS;                   /* ...is a temporary variable.      */
+     PUSHMARK(SP);               /* remember the stack pointer       */
+
+     /* push the base (a) and the exponent (b) onto the stack */
+     XPUSHs(sv_2mortal(newSViv(a)));
+     XPUSHs(sv_2mortal(newSViv(b)));
+
+     PUTBACK;                    /* make local stack pointer global  */
+     call_pv("expo", G_SCALAR);  /* call the function                */
+     SPAGAIN;                    /* refresh stack pointer            */
+
+     /* pop the return value from stack  */
+     printf ("%d to the %dth power is %d.\n", a, b, POPi);
+
+     PUTBACK;
+     FREETMPS;                   /* free that return value           */
+     LEAVE;                      /* ...and the XPUSHed "mortal" args.*/
  }
 
  int main (int argc, char **argv, char **env)
  {
-   char *my_argv[] = { "", "power.pl", NULL };
+     char *my_argv[] = { "", "power.pl", NULL };
 
-   PERL_SYS_INIT3(&argc,&argv,&env);
-   my_perl = perl_alloc();
-   perl_construct( my_perl );
+     PERL_SYS_INIT3(&argc,&argv,&env);
+     my_perl = perl_alloc();
+     perl_construct( my_perl );
 
-   perl_parse(my_perl, NULL, 2, my_argv, (char **)NULL);
-   PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-   perl_run(my_perl);
+     perl_parse(my_perl, NULL, 2, my_argv, (char **)NULL);
+     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+     perl_run(my_perl);
 
-   PerlPower(3, 4);                      /*** Compute 3 ** 4 ***/
+     PerlPower(3, 4);                      /*** Compute 3 ** 4 ***/
 
-   perl_destruct(my_perl);
-   perl_free(my_perl);
-   PERL_SYS_TERM();
-   exit(EXIT_SUCCESS);
+     perl_destruct(my_perl);
+     perl_free(my_perl);
+     PERL_SYS_TERM();
+     exit(EXIT_SUCCESS);
  }
 
 
@@ -744,28 +749,28 @@ with L<perlfunc/my> whenever possible.
         &&
         $Cache{$package}{mtime} <= $mtime)
      {
-        # we have compiled this subroutine already,
-        # it has not been updated on disk, nothing left to do
-        print STDERR "already compiled $package->handler\n";
+         # we have compiled this subroutine already,
+         # it has not been updated on disk, nothing left to do
+         print STDERR "already compiled $package->handler\n";
      }
      else {
-        local *FH;
-        open FH, $filename or die "open '$filename' $!";
-        local($/) = undef;
-        my $sub = <FH>;
-        close FH;
+         local *FH;
+         open FH, $filename or die "open '$filename' $!";
+         local($/) = undef;
+         my $sub = <FH>;
+         close FH;
 
-        #wrap the code into a subroutine inside our unique package
-        my $eval = qq{package $package; sub handler { $sub; }};
-        {
-            # hide our variables within this block
-            my($filename,$mtime,$package,$sub);
-            eval $eval;
-        }
-        die $@ if $@;
+         #wrap the code into a subroutine inside our unique package
+         my $eval = qq{package $package; sub handler { $sub; }};
+         {
+             # hide our variables within this block
+             my($filename,$mtime,$package,$sub);
+             eval $eval;
+         }
+         die $@ if $@;
 
-        #cache it unless we're cleaning out each time
-        $Cache{$package}{mtime} = $mtime unless $delete;
+         #cache it unless we're cleaning out each time
+         $Cache{$package}{mtime} = $mtime unless $delete;
      }
 
      eval {$package->handler;};
@@ -806,8 +811,8 @@ with L<perlfunc/my> whenever possible.
 
      PERL_SYS_INIT3(&argc,&argv,&env);
      if((my_perl = perl_alloc()) == NULL) {
-        fprintf(stderr, "no memory!");
-        exit(EXIT_FAILURE);
+         fprintf(stderr, "no memory!");
+         exit(EXIT_FAILURE);
      }
      perl_construct(my_perl);
 
@@ -816,21 +821,22 @@ with L<perlfunc/my> whenever possible.
      failing = perl_parse(my_perl, NULL, 2, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
      if(!failing)
-	failing = perl_run(my_perl);
+         failing = perl_run(my_perl);
      if(!failing) {
-        while(printf("Enter file name: ") &&
-              fgets(filename, BUFFER_SIZE, stdin)) {
+         while(printf("Enter file name: ") &&
+               fgets(filename, BUFFER_SIZE, stdin)) {
 
-            filename[strlen(filename)-1] = '\0'; /* strip \n */
-            /* call the subroutine,
-                     passing it the filename as an argument */
-            args[0] = filename;
-            call_argv("Embed::Persistent::eval_file",
-                           G_DISCARD | G_EVAL, args);
+             filename[strlen(filename)-1] = '\0'; /* strip \n */
+             /* call the subroutine,
+                passing it the filename as an argument */
+             args[0] = filename;
+             call_argv("Embed::Persistent::eval_file",
+                       G_DISCARD | G_EVAL, args);
 
-            /* check $@ */
-            if(SvTRUE(ERRSV))
-                fprintf(stderr, "eval error: %s\n", SvPV_nolen(ERRSV));
+             /* check $@ */
+             if(SvTRUE(ERRSV))
+                 fprintf(stderr, "eval error: %s\n",
+                         SvPV_nolen(ERRSV));
         }
      }
 
@@ -843,28 +849,28 @@ with L<perlfunc/my> whenever possible.
 
 Now compile:
 
- % cc -o persistent persistent.c \
-        `perl -MExtUtils::Embed -e ccopts -e ldopts`
+    % cc -o persistent persistent.c \
+           `perl -MExtUtils::Embed -e ccopts -e ldopts`
 
 Here's an example script file:
 
- #test.pl
- my $string = "hello";
- foo($string);
+    #test.pl
+    my $string = "hello";
+    foo($string);
 
- sub foo {
-     print "foo says: @_\n";
- }
+    sub foo {
+        print "foo says: @_\n";
+    }
 
 Now run:
 
- % persistent
- Enter file name: test.pl
- foo says: hello
- Enter file name: test.pl
- already compiled Embed::test_2epl->handler
- foo says: hello
- Enter file name: ^C
+    % persistent
+    Enter file name: test.pl
+    foo says: hello
+    Enter file name: test.pl
+    already compiled Embed::test_2epl->handler
+    foo says: hello
+    Enter file name: ^C
 
 =head2 Execution of END blocks
 
@@ -1016,14 +1022,14 @@ the more esoteric perl_clone()).
 
 Compile as usual:
 
- % cc -o multiplicity multiplicity.c \
-  `perl -MExtUtils::Embed -e ccopts -e ldopts`
+    % cc -o multiplicity multiplicity.c \
+     `perl -MExtUtils::Embed -e ccopts -e ldopts`
 
 Run it, Run it:
 
- % multiplicity
- Hi, I'm one_perl
- Hi, I'm two_perl
+    % multiplicity
+    Hi, I'm one_perl
+    Hi, I'm two_perl
 
 =head2 Using Perl modules, which themselves use C libraries, from your C
 program
@@ -1044,7 +1050,7 @@ Your interpreter doesn't know how to communicate with these extensions
 on its own.  A little glue will help.  Up until now you've been
 calling I<perl_parse()>, handing it NULL for the second argument:
 
- perl_parse(my_perl, NULL, argc, my_argv, NULL);
+    perl_parse(my_perl, NULL, argc, my_argv, NULL);
 
 That's where the glue code can be inserted to create the initial contact
 between Perl and linked C/C++ routines. Let's take a look some pieces of
@@ -1059,10 +1065,10 @@ I<perlmain.c> to see how Perl does this:
  EXTERN_C void
  xs_init(pTHX)
  {
-        char *file = __FILE__;
-        /* DynaLoader is a special case */
-        newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
-        newXS("Socket::bootstrap", boot_Socket, file);
+     char *file = __FILE__;
+     /* DynaLoader is a special case */
+     newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+     newXS("Socket::bootstrap", boot_Socket, file);
  }
 
 Simply put: for each extension linked with your Perl executable
@@ -1082,7 +1088,7 @@ is rarely any need to link in any other extensions statically.
 Once you have this code, slap it into the second argument of I<perl_parse()>:
 
 
- perl_parse(my_perl, xs_init, argc, my_argv, NULL);
+    perl_parse(my_perl, xs_init, argc, my_argv, NULL);
 
 
 Then compile:
@@ -1177,3 +1183,4 @@ Copyright (C) 1995, 1996, 1997, 1998 Doug MacEachern and Jon Orwant.  All
 Rights Reserved.
 
 This document may be distributed under the same terms as Perl itself.
+
