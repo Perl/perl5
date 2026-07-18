@@ -494,17 +494,20 @@ my %valid_sections = (
                 4) We don't know about it.
 
             See L<perlclib/Dealing with embedded perls and threads> for more
-            details.  F<regen/lock_definitions.pl> can be patched to add new
-            functions or revise existing data.
+            details.  The macro definitions are based on man pages (especially
+            Linux ones), and our experience.  We also know from experience
+            that man pages can be wrong or incomplete, and the behavior of any
+            given function may be platform dependent.  Patches to update our
+            knowledge base in F<regen/lock_definitions.pl> are welcome.
 
             For a function 'foo', the locking/unlocking macros are named
 
              PERL_FOO_LOCK
              PERL_FOO_UNLOCK
 
-            Note that just because a function is on this list, doesn't mean it
-            is a good idea for you to use it.  Some are obsolete; some are
-            implemented on only one or a few platforms; some have better
+            Note that just because a function is on the list below, doesn't
+            mean it is a good idea for you to use it.  Some are obsolete; some
+            are implemented on only one or a few platforms; some have better
             alternatives.  Before using a given lock, look it up in
             F<perl_lock_definitions.h> to see what notes and cautions are
             given for it.
