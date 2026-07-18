@@ -138,6 +138,8 @@ XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any cont
 
 L<Archive::Tar> has been upgraded from version 3.04 to 3.12.
 
+This fixes CVE-2026-9538, CVE-2026-42496, and CVE-2026-42497.
+
 =item *
 
 L<Compress::Raw::Bzip2> has been upgraded from version 2.213 to 2.218.
@@ -146,9 +148,13 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.213 to 2.218.
 
 L<HTTP::Tiny> has been upgraded from version 0.090 to 0.096.
 
+This fixes CVE-2026-7010 and CVE-2026-7017.
+
 =item *
 
 L<IO::Compress> has been upgraded from version 2.213 to 2.223.
+
+This fixes CVE-2025-15649, CVE-2026-48961, CVE-2026-48962, and CVE-2026-48959.
 
 =item *
 
@@ -158,9 +164,13 @@ L<Module::CoreList> has been upgraded from version 5.20260329_42 to 5.20260802_4
 
 L<Socket> has been upgraded from version 2.038 to 2.041.
 
+This fixes CVE-2026-12087.
+
 =item *
 
 L<Storable> has been upgraded from version 3.37 to 3.37_01.
+
+This fixes CVE-2026-57433.
 
 =back
 
