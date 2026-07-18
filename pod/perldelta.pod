@@ -142,11 +142,11 @@ L<HTTP::Tiny> has been upgraded from version 0.090 to 0.096.
 
 =item *
 
-L<IO::Compress> has been upgraded from version 2.213 to 2.220.
+L<IO::Compress> has been upgraded from version 2.213 to 2.223.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20260329_42 to 5.20260719_42.
+L<Module::CoreList> has been upgraded from version 5.20260329_42 to 5.20260802_42.
 
 =item *
 
