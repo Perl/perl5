@@ -6312,10 +6312,8 @@ Perl_set_caret_X(pTHX)
         Perl_assert_aTHX
 
 PERL_CALLCONV void
-Perl_set_context(void *t)
-        Perl_attribute_nonnull(1);
-#define PERL_ARGS_ASSERT_SET_CONTEXT            \
-        assert(t)
+Perl_set_context(void *t);
+#define PERL_ARGS_ASSERT_SET_CONTEXT
 
 PERL_CALLCONV void
 Perl_set_numeric_standard(pTHX_ const char *file, const line_t caller_line)

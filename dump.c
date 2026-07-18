@@ -2971,14 +2971,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         if (isREGEXP(sv)) goto dumpregexp;
         if (!isGV_with_GP(sv))
             break;
-        {
+        if (GvNAME_HEK(sv)) {
             SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
             dump_indent(level, file, "  NAME = \"%s\"\n",
                                      generic_pv_escape(tmpsv, GvNAME(sv),
                                                        GvNAMELEN(sv),
                                                        GvNAMEUTF8(sv)));
+            dump_indent(level, file, "  NAMELEN = %" IVdf "\n", (IV)GvNAMELEN(sv));
         }
-        dump_indent(level, file, "  NAMELEN = %" IVdf "\n", (IV)GvNAMELEN(sv));
+        dump_indent(level, file, "  GvNAME_HEK = 0x%" UVxf "\n", (UV)GvNAME_HEK(sv));
         do_hv_dump (level, file, "  GvSTASH", GvSTASH(sv));
         dump_indent(level, file, "  FLAGS = 0x%" UVxf "\n", (UV)GvFLAGS(sv));
         dump_indent(level, file, "  GP = 0x%" UVxf "\n", PTR2UV(GvGP(sv)));

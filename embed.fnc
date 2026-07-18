@@ -3261,7 +3261,7 @@ EXpx	|char * |scan_word	|NN char *s				\
 Cp	|U64	|seed
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 ep	|void	|set_caret_X
-CTdp	|void	|set_context	|NN void *t
+CTdp	|void	|set_context	|NULLOK void *t
 Adp	|void	|setdefout	|NN GV *gv
 Tp	|void	|setfd_cloexec	|int fd
 p	|void	|setfd_cloexec_for_nonsysfd				\

@@ -117,6 +117,11 @@ PERLVAR(G, locale_mutex, perl_RnW1_mutex_t)   /* Mutex related to locale handlin
 #endif
 
 #ifdef USE_POSIX_2008_LOCALE
+/* This variable is initialised just once, at process start-up time, to
+ * the value of newlocale(..., "C",...) and is unchanged afterwards. It
+ * provides an always-present "C" thread locale which any thread can
+ * switch to.
+ */
 PERLVARI(G, C_locale_obj, locale_t, NULL)
 #endif
 
@@ -181,7 +186,6 @@ PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 #ifdef MULTIPLICITY
 # ifdef USE_ITHREADS
 PERLVAR(G, my_ctx_mutex, perl_mutex)
-PERLVARI(G, veto_switch_non_tTHX_context, int, FALSE)
 # endif
 PERLVARI(G, my_cxt_index, int,	0)
 #endif

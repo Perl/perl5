@@ -1416,6 +1416,33 @@ typedef enum {
 /* Use all the "standard" definitions */
 #include <stdlib.h>
 
+/* Define PERL_ATOMIC as a type modifier which, on platforms which support
+ * it, makes the type atomic: e.g.
+ *
+ *     PERL_ATOMIC(int) i = 0;
+ *     i += 2; // thread-safe
+ *
+ * Not ready for production use, so currently only enabled manually rather
+ * than via a Configure probe.
+ */
+#ifdef PERL_USE_ATOMIC
+#  ifdef __cplusplus
+#    include <atomic>
+#    define PERL_ATOMIC(atype) std::atomic<atype>
+#  else
+#    include <stdatomic.h>
+   /* 2 indicates guaranteed to be lock-free */
+#    if ATOMIC_INT_LOCK_FREE == 2 && ATOMIC_POINTER_LOCK_FREE == 2
+#      define PERL_ATOMIC(atype) _Atomic(atype)
+#    endif
+#  endif
+#endif
+
+#ifndef PERL_ATOMIC
+#  define PERL_ATOMIC(atype) atype
+#endif
+
+
 /* If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 #    if defined(__amigaos4__)
@@ -6419,7 +6446,7 @@ INIT({
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 #  define PERL_SET_LOCALE_CONTEXT(i)                                        \
       STMT_START {                                                          \
-          if (LIKELY(! PL_veto_switch_non_tTHX_context))                    \
+          if (LIKELY(! (i)->Iveto_switch_non_tTHX_context))                 \
                 Perl_switch_locale_context(i);                              \
       } STMT_END
 

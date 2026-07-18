@@ -1507,13 +1507,14 @@ perl_destruct(pTHXx)
     free_tied_hv_pool();
     Safefree(PL_op_mask);
     Safefree(PL_psig_name);
-    PL_psig_name = (SV**)NULL;
-    PL_psig_ptr = (SV**)NULL;
+    PL_psig_name = NULL;
+    Safefree(PL_psig_ptr);
+    PL_psig_ptr = NULL;
     {
         /* We need to NULL PL_psig_pend first, so that
            signal handlers know not to use it */
-        int *psig_save = PL_psig_pend;
-        PL_psig_pend = (int*)NULL;
+        PERL_ATOMIC(int) *psig_save = PL_psig_pend;
+        PL_psig_pend = NULL;
         Safefree(psig_save);
     }
     nuke_stacks();
@@ -2064,6 +2065,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef PERL_RELOCATABLE_INCPUSH
                              " PERL_RELOCATABLE_INCPUSH"
+#  endif
+#  ifdef PERL_USE_ATOMIC
+                             " PERL_USE_ATOMIC"
 #  endif
 #  ifdef PERL_USE_DEVEL
                              " PERL_USE_DEVEL"

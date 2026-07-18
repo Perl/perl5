@@ -16556,6 +16556,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_ARGS_ASSERT_PERL_CLONE;
 #endif		/* PERL_IMPLICIT_SYS */
 
+    /* Set this very early - it will shortly be overwritten by the
+     * PoisonNew below and need setting again, but it must be set before
+     * PERL_SET_THX() is called */
+    PL_veto_switch_non_tTHX_context = false;
+
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     my_perl->Iphase = PERL_PHASE_CONSTRUCT;
@@ -16596,6 +16601,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_locale_mutex_depth = 0;
     PL_locale_mutex_readers = 0;
 #endif
+
+    PL_veto_switch_non_tTHX_context = false;
 
 #ifdef PERL_IMPLICIT_SYS
     /* host pointers */
@@ -17146,21 +17153,29 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     if (proto_perl->Ipsig_pend) {
-        Newxz(PL_psig_pend, SIG_SIZE, int);
+        Newxz(PL_psig_pend, SIG_SIZE, PERL_ATOMIC(int));
     }
     else {
-        PL_psig_pend	= (int*)NULL;
+        PL_psig_pend = NULL;
     }
 
     if (proto_perl->Ipsig_name) {
-        Newx(PL_psig_name, 2 * SIG_SIZE, SV*);
-        sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, 2 * SIG_SIZE,
+        Newx(PL_psig_name, SIG_SIZE, SV*);
+        Newx(PL_psig_ptr,  SIG_SIZE, PERL_ATOMIC(SV*));
+        sv_dup_inc_multiple(proto_perl->Ipsig_name, PL_psig_name, SIG_SIZE,
                             param);
-        PL_psig_ptr = PL_psig_name + SIG_SIZE;
+        /* Can't use sv_dup_inc_multiple() here as we're dealing with
+         * atomic pointers, which may not necessarily be the same
+         * size etc as ordinary pointers */
+        PERL_ATOMIC(SV*)* src = proto_perl->Ipsig_ptr;
+        PERL_ATOMIC(SV*)* dst = PL_psig_ptr;
+        for (SSize_t i = 0; i< SIG_SIZE; i++) {
+            *dst++ = sv_dup_inc(*src++, param);
+        }
     }
     else {
-        PL_psig_ptr	= (SV**)NULL;
-        PL_psig_name	= (SV**)NULL;
+        PL_psig_ptr  = NULL;
+        PL_psig_name = NULL;
     }
 
     if (flags & CLONEf_COPY_STACKS) {

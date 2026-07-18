@@ -1,4 +1,38 @@
 #!perl -w
+#
+# Test perl's headers with C++ compilers.
+#
+# This searches for a C++ compiler based on the supplied C compiler, and
+# checks that compiler for any options controlling the C++ standard
+# requested, including simple checks that the compiler supports that
+# standard.
+#
+# If a C++ compiler is found, test compilation of the same simple code
+# as above but with the perl headers included after any C++ headers.
+#
+# Ideally we'd also test runtime, but would require more complex test
+# code, which is left to later contributors.
+#
+# Tested at various times with:
+#
+#  - MSVC
+#  - gcc
+#  - clang
+#  - Oracle/Sun Development Workshop cc (CC is the C++ compiler), on
+#    Oracle Linux
+#  - Intel oneAPI compiler (llvm based apparently, and now free to use)
+#  - Intel classic compiler (discontinued)
+#
+# Currently this probes the compiler for C++ sanity with the perl
+# ccflags, since icc (Intel classic) would successfully build the sample
+# without perl's ccflags, but then fail with both the headers and perl's
+# ccflags.  It turned out to fail with just the ccflags, and since the
+# primary intent is to test the headers, I probe *with* ccflags.
+#
+# The Sun Workshop compiler failed to build the C++11 or 14 sample at
+# all in my testing, which may have been due to an installation problem.
+
+
 BEGIN {
     chdir "t" if -d "t";
     require './test.pl';

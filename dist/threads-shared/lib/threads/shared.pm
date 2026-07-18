@@ -8,7 +8,7 @@ use Config;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.73'; # Please update the pod, too.
+our $VERSION = '1.74'; # Please update the pod, too.
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -85,6 +85,23 @@ sub shared_clone
     return $make_shared->(shift, {});
 }
 
+# helper function for $make_shared
+
+sub _report_unsupported_clone {
+    my ($item) = @_;
+
+    my $ref_type = reftype($item);
+    my $category = defined $ref_type ? 'ref' : 'scalar';
+    $ref_type = reftype(\$item) unless defined $ref_type;
+
+    require Carp;
+    if (! defined($threads::shared::clone_warn)) {
+        Carp::croak("Unsupported $category type: ", $ref_type);
+    } elsif ($threads::shared::clone_warn) {
+        Carp::carp("Unsupported $category type: ", $ref_type);
+    }
+}
+
 
 ### Internal Functions ###
 
@@ -93,11 +110,27 @@ sub shared_clone
 $make_shared = sub {
     my ($item, $cloned) = @_;
 
+    # Just return the item if
+    #   - not a ref,
+    #   - and not one of the unsupported types
+
+    my $ref_type = reftype($item);
+    if (!defined $ref_type) {
+        $ref_type = reftype(\$item);
+        # some scalar types are currently uncloneable.
+        # XXX probably should be more in this list.
+        if ($ref_type =~ /^ (GLOB|CODE) $/x) {
+            _report_unsupported_clone($item);
+            return;
+        }
+        return $item;
+    }
+
     # Just return the item if:
-    # 1. Not a ref;
-    # 2. Already shared; or
-    # 3. Not running 'threads'.
-    return $item if (! ref($item) || is_shared($item) || ! $threads::threads);
+    # Already shared; or
+    # Not running 'threads'.
+    return $item if (is_shared($item) || ! $threads::threads);
+
 
     # Check for previously cloned references
     #   (this takes care of circular refs as well)
@@ -109,7 +142,6 @@ $make_shared = sub {
 
     # Make copies of array, hash and scalar refs and refs of refs
     my $copy;
-    my $ref_type = reftype($item);
 
     # Copy an array ref
     if ($ref_type eq 'ARRAY') {
@@ -159,13 +191,8 @@ $make_shared = sub {
         }
 
     } else {
-        require Carp;
-        if (! defined($threads::shared::clone_warn)) {
-            Carp::croak("Unsupported ref type: ", $ref_type);
-        } elsif ($threads::shared::clone_warn) {
-            Carp::carp("Unsupported ref type: ", $ref_type);
-        }
-        return undef;
+        _report_unsupported_clone($item);
+        return;
     }
 
     # If input item is an object, then bless the copy into the same class
@@ -196,7 +223,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.73
+This document describes threads::shared version 1.74
 
 =head1 SYNOPSIS
 

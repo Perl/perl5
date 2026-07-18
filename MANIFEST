@@ -4641,6 +4641,7 @@ dist/threads/t/stress_string.t		Test with multiple threads, string cv argument.
 dist/threads/t/thread.t			General ithread tests from thr5005
 dist/threads/t/unique.t			Test unique attribute with threads
 dist/threads/t/version.t		Test that pod version matches code version.
+dist/threads/t/zz_deadlock.t		Test that code doesn't deadlock
 dist/threads/threads.h			threads compatibility helper
 dist/threads/threads.xs			ithreads
 dist/threads-shared/hints/linux.pl		thread shared variables
@@ -4654,6 +4655,7 @@ dist/threads-shared/t/clone.t			Test shared cloning
 dist/threads-shared/t/cond.t			Test condition variables
 dist/threads-shared/t/disabled.t		Test threads::shared when threads are disabled.
 dist/threads-shared/t/dualvar.t			Test dual-valued variables
+dist/threads-shared/t/err.t			Test warnings and errors
 dist/threads-shared/t/hv_refs.t			Test shared hashes containing references
 dist/threads-shared/t/hv_simple.t		Tests for basic shared hash functionality.
 dist/threads-shared/t/no_share.t		Tests for disabled share on variables.
