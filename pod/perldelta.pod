@@ -35,10 +35,9 @@ L</Selected Bug Fixes> section.
 
 =head2 CVE-2026-8376 - Buffer overflow in Perl_study_chunk
 
-Repeated fixed string buffer overflow check counted characters not
-bytes.
-
-CVE-2026-8376
+Perl_study_chunk in regcomp_study.c checked the size of the joined substring
+buffer in characters rather than bytes. On 32-bit builds, this can lead to
+an integer overflow of the size of the buffer leading to out-of-bounds writes.
 
 =head1 Incompatible Changes
 
