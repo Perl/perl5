@@ -17,7 +17,9 @@ plan(1);
 
 my %rogue_defines = ();
 
-open my $fh, '<', 'config.h' or die "Can't open config.h: $!";
+my $config_h = $^O eq 'MSWin32' ? 'win32\full\config.h' : 'config.h';
+
+open my $fh, '<', $config_h or die "Can't open $config_h: $!";
 my $seen_config_start = 0;
 while (<$fh>) {
     $seen_config_start = 1 if m/^#define _config_h_/;
