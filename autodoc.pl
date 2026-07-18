@@ -1288,7 +1288,11 @@ sub parse_config_h {
     # Process config.h
     die "Can't find $config_h" unless -e $config_h;
     open my $fh, '<', $config_h or die "Can't open $config_h: $!";
+    my $seen_config_start = 0;
     while (<$fh>) {
+
+        $seen_config_start = 1 if m/^#define _config_h_/;
+        next unless $seen_config_start;
 
         # Look for lines like /* FOO_BAR:
         # By convention all config.h descriptions begin like that
