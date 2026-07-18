@@ -6249,7 +6249,8 @@ S_maybe_targlex(pTHX_ const U32 op_flags, OP * const kid, OP * const kkid)
         /* Can just relocate the target. */
         PADOFFSET op_targ_temp = kid->op_targ;
 
-        if (OP_TYPE_IS(kid, OP_EMPTYAVHV)) {
+        if (OP_TYPE_IS(kid, OP_EMPTYAVHV) &&
+                !(kkid->op_private & OPpPAD_STATE)) {
             kid->op_flags |= op_flags & (OPf_WANT|OPf_PARENS);
             kid->op_private |= OPpTARGET_MY |
                               (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
