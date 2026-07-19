@@ -1730,31 +1730,6 @@ $!: Looking for optional libraries
 $!: see if nm is to be used to determine whether a symbol is defined or not
 $!: get list of predefined functions in a handy place
 $!: see if we have sigaction or sigprocmask
-$ IF (ccname .EQS. "DEC" .AND. Dec_C_Version .GE. 50200000) .OR. (ccname .EQS. "CXX")
-$ THEN
-$   Has_Dec_C_Sockets = "T"
-$   echo ""
-$   echo4 "Hmm... Looks like you have Dec C Berkeley networking support."
-$ ELSE
-$   Has_Dec_C_Sockets = "F"
-$ ENDIF
-$!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   echo ""
-$   echo "You have sockets available via the C library. Should socket support"
-$   echo "be built into Perl?"
-$   dflt = "DECC"
-$   rp = "Choose socket support option (NONE"
-$   IF Has_Dec_C_Sockets THEN rp = rp + ",DECC"
-$   rp = rp + ") [''dflt'] "
-$   GOSUB myread
-$   Has_Dec_C_Sockets = "F"
-$   Has_socketshr = "F"
-$   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
-$   IF ans.eqs."decc" THEN Has_Dec_C_Sockets = "T"
-$ ENDIF
-$!
 $!
 $! Ask if they want to build with VMS_DEBUG perl
 $ echo ""
@@ -2661,10 +2636,6 @@ $ dflt = dflt - "IPC/SysV"            ! needs to be ported
 $ dflt = dflt - "NDBM_File"           ! needs porting/special library
 $ dflt = dflt - "ODBM_File"           ! needs porting/special library
 $ dflt = dflt - "Sys/Syslog"          ! needs porting/special library "GDBM_File macro LOG_DEBUG"
-$ IF .NOT. Has_Dec_C_Sockets
-$ THEN
-$   dflt = dflt - "Socket"            ! optional on VMS
-$ ENDIF
 $ dflt = dflt - "Win32API/File" - "Win32"  ! need Dave Cutler's other project
 $ dflt = dflt - "Amiga/ARexx" - "Amiga/Exec" ! this is not AmigaOS
 $ nonxs_ext = nonxs_ext - "Win32CORE"
@@ -3583,37 +3554,31 @@ $ i_socks = tmp
 $!
 $! Check the prototype for select
 $!
-$ IF Has_Dec_C_Sockets
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ WS "#include <types.h>"
+$ IF i_unistd .EQS. "define" THEN WS "#include <unistd.h>"
+$ WS "#include <time.h>"
+$ WS "#include <socket.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "fd_set *foo;"
+$ WS "int bar;"
+$ WS "foo = NULL;"
+$ WS "bar = select(2, foo, foo, foo, NULL);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ GOSUB compile_ok
+$ IF compile_status .NE. good_compile
 $ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   WS "#include <types.h>"
-$   IF i_unistd .EQS. "define" THEN WS "#include <unistd.h>"
-$   WS "#include <time.h>"
-$   WS "#include <socket.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "fd_set *foo;"
-$   WS "int bar;"
-$   WS "foo = NULL;"
-$   WS "bar = select(2, foo, foo, foo, NULL);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   GOSUB compile_ok
-$   IF compile_status .NE. good_compile
-$   THEN
-$!   Okay, select failed.  Must be an int *
-$     selecttype = "int *"
-$     echo4 "select() NOT found."
-$   ELSE
-$     selecttype="fd_set *"
-$     echo4 "select() found."
-$   ENDIF
-$ ELSE
-$   ! No sockets, so stick in an int * : no select, so pick a harmless default
+$! Okay, select failed.  Must be an int *
 $   selecttype = "int *"
+$   echo4 "select() NOT found."
+$ ELSE
+$   selecttype="fd_set *"
+$   echo4 "select() found."
 $ ENDIF
 $!
 $! Check to see if fd_set exists
@@ -3623,11 +3588,8 @@ $ OS
 $ WS "#include <stdlib.h>"
 $ WS "#include <stdio.h>"
 $ WS "#include <types.h>"
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   WS "#include <time.h>"
-$   WS "#include <socket.h>"
-$ ENDIF
+$ WS "#include <time.h>"
+$ WS "#include <socket.h>"
 $ WS "int main()"
 $ WS "{"
 $ WS "fd_set *foo;"
@@ -3791,12 +3753,9 @@ $ GOSUB inlibc
 $ d_ftello = tmp
 $!
 $!: see if this is a netdb.h system
-$ IF Has_Dec_C_Sockets
-$ THEN 
-$   tmp = "netdb.h"
-$   GOSUB inhdr
-$   i_netdb = tmp
-$ ENDIF
+$ tmp = "netdb.h"
+$ GOSUB inhdr
+$ i_netdb = tmp
 $!
 $! Check for h_errno
 $!
@@ -3824,34 +3783,28 @@ $ ENDIF
 $!
 $! Check to see if gethostname exists
 $!
-$ IF Has_Dec_C_Sockets
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ WS "#include <types.h>"
+$ WS "#include <time.h>"
+$ WS "#include <socket.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "char name[100];"
+$ WS "int bar, baz;"
+$ WS "bar = 100;"
+$ WS "baz = gethostname(name, bar);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ GOSUB link_ok
+$ IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
 $ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   WS "#include <types.h>"
-$   WS "#include <time.h>"
-$   WS "#include <socket.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "char name[100];"
-$   WS "int bar, baz;"
-$   WS "bar = 100;"
-$   WS "baz = gethostname(name, bar);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   GOSUB link_ok
-$   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
-$   THEN
-$     d_gethname="define"
-$     echo4 "gethostname() found."
-$   ELSE
-$     d_gethname="undef"
-$   ENDIF
+$   d_gethname="define"
+$   echo4 "gethostname() found."
 $ ELSE
-$   ! No sockets, so no gethname
-$   d_gethname = "undef"
+$   d_gethname="undef"
 $ ENDIF
 $!
 $! Check for sys/file.h
@@ -4473,328 +4426,240 @@ $ d_setproctitle = tmp
 $!
 $! Check for <netinet/in.h>
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   tmp = "netinet/in.h"
-$   GOSUB inhdr
-$   i_niin = tmp
-$ ELSE
-$   i_niin="undef"
-$ ENDIF
+$ tmp = "netinet/in.h"
+$ GOSUB inhdr
+$ i_niin = tmp
 $!
 $! Check for <arpa/inet.h>
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   tmp = "arpa/inet.h"
-$   GOSUB inhdr
-$   i_arpainet = tmp
-$ ELSE
-$   i_arpainet="undef"
-$ ENDIF
+$ tmp = "arpa/inet.h"
+$ GOSUB inhdr
+$ i_arpainet = tmp
 $!
 $! Check for <sys/un.h>
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   tmp = "sys/un.h"
-$   GOSUB inhdr
-$   i_sysun = tmp
-$ ELSE
-$   i_sysun="undef"
-$ ENDIF
-$!
+$ tmp = "sys/un.h"
+$ GOSUB inhdr
+$ i_sysun = tmp
 $!
 $! Check for <netinet/tcp.h>
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   tmp = "netinet/tcp.h"
-$   GOSUB inhdr
-$   i_netinettcp = tmp
-$ ELSE
-$   i_netinettcp="undef"
-$ ENDIF
+$ tmp = "netinet/tcp.h"
+$ GOSUB inhdr
+$ i_netinettcp = tmp
 $!
 $! Check for endhostent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "endhostent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "endhostent"
-$   GOSUB inlibc
-$   d_endhent = tmp
-$ ELSE
-$   d_endhent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "endhostent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "endhostent"
+$ GOSUB inlibc
+$ d_endhent = tmp
 $!
 $! Check for endnetent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "endnetent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "endnetent"
-$   GOSUB inlibc
-$   d_endnent = tmp
-$ ELSE
-$   d_endnent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "endnetent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "endnetent"
+$ GOSUB inlibc
+$ d_endnent = tmp
 $!
 $! Check for endprotoent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "endprotoent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "endprotoent"
-$   GOSUB inlibc
-$   d_endpent = tmp
-$ ELSE
-$   d_endpent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "endprotoent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "endprotoent"
+$ GOSUB inlibc
+$ d_endpent = tmp
 $!
 $! Check for endservent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "endservent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "endservent"
-$   GOSUB inlibc
-$   d_endsent = tmp
-$ ELSE
-$   d_endsent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "endservent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "endservent"
+$ GOSUB inlibc
+$ d_endsent = tmp
 $!
 $! Check for sethostent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "sethostent(1);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "sethostent"
-$   GOSUB inlibc
-$   d_sethent = tmp
-$ ELSE
-$   d_sethent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "sethostent(1);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "sethostent"
+$ GOSUB inlibc
+$ d_sethent = tmp
 $!
 $! Check for setnetent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "setnetent(1);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "setnetent"
-$   GOSUB inlibc
-$   d_setnent = tmp
-$ ELSE
-$   d_setnent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "setnetent(1);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "setnetent"
+$ GOSUB inlibc
+$ d_setnent = tmp
 $!
 $! Check for setprotoent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "setprotoent(1);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "setprotoent"
-$   GOSUB inlibc
-$   d_setpent = tmp
-$ ELSE
-$   d_setpent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "setprotoent(1);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "setprotoent"
+$ GOSUB inlibc
+$ d_setpent = tmp
 $!
 $! Check for setservent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "setservent(1);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "setservent"
-$   GOSUB inlibc
-$   d_setsent = tmp
-$ ELSE
-$   d_setsent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "setservent(1);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "setservent"
+$ GOSUB inlibc
+$ d_setsent = tmp
 $!
 $! Check for gethostent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "gethostent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "gethostent"
-$   GOSUB inlibc
-$   d_gethent = tmp
-$ ELSE
-$   d_gethent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "gethostent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "gethostent"
+$ GOSUB inlibc
+$ d_gethent = tmp
 $!
 $! Check for getnetent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "getnetent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "getnetent"
-$   GOSUB inlibc
-$   d_getnent = tmp
-$ ELSE
-$   d_getnent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "getnetent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "getnetent"
+$ GOSUB inlibc
+$ d_getnent = tmp
 $!
 $! Check for getprotoent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "getprotoent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "getprotoent"
-$   GOSUB inlibc
-$   d_getpent = tmp
-$ ELSE
-$   d_getpent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "getprotoent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "getprotoent"
+$ GOSUB inlibc
+$ d_getpent = tmp
 $!
 $! Check for getservent
 $!
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "getservent();"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   tmp = "getservent"
-$   GOSUB inlibc
-$   d_getsent = tmp
-$ ELSE
-$   d_getsent="undef"
-$ ENDIF
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "getservent();"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "getservent"
+$ GOSUB inlibc
+$ d_getsent = tmp
 $!
 $!
 $! Check for sa_len
 $!
-$ echo4 "Checking the availability of sa_len in the sockaddr struct ..."
-$ IF Has_Dec_C_Sockets
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#define _SOCKADDR_LEN"
+$ WS "#include <types.h>"
+$ WS "#include <socket.h>"
+$ WS "#include <string.h>"
+$ WS "int main() {"
+$ WS "struct sockaddr sa;"
+$ WS "memset((char *)&sa, 0, sizeof(sa));"
+$ WS "return (sa.sa_len);"
+$ WS "}"
+$ CS
+$ GOSUB compile_ok
+$ IF compile_status .EQ. good_compile
 $ THEN
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#define _SOCKADDR_LEN"
-$   WS "#include <types.h>"
-$   WS "#include <socket.h>"
-$   WS "#include <string.h>"
-$   WS "int main() {"
-$   WS "struct sockaddr sa;"
-$   WS "memset((char *)&sa, 0, sizeof(sa));"
-$   WS "return (sa.sa_len);"
-$   WS "}"
-$   CS
-$   GOSUB compile_ok
-$   IF compile_status .EQ. good_compile
-$   THEN
-$     d_sockaddr_sa_len="define"
-$     echo "You have sa_len in the sockaddr struct."
-$   ELSE
-$     d_sockaddr_sa_len="undef"
-$     echo "You do not have sa_len in the sockaddr struct."
-$   ENDIF
+$   d_sockaddr_sa_len="define"
+$   echo "You have sa_len in the sockaddr struct."
 $ ELSE
 $   d_sockaddr_sa_len="undef"
 $   echo "You do not have sa_len in the sockaddr struct."
@@ -4803,28 +4668,22 @@ $!
 $! Check for sin6_scope_id
 $!
 $ echo4 "Checking the availability of sin6_scope_id in the struct sockaddr_in6 ..."
-$ IF Has_Dec_C_Sockets
+$ OS
+$ WS "#include <types.h>"
+$ WS "#include <socket.h>"
+$ WS "#include <in.h>"
+$ WS "#include <string.h>"
+$ WS "int main() {"
+$ WS "struct sockaddr_in6 sin6;"
+$ WS "memset((char *)&sin6, 0, sizeof(sin6));"
+$ WS "return (sin6.sin6_scope_id);"
+$ WS "}"
+$ CS
+$ GOSUB compile_ok
+$ IF compile_status .EQ. good_compile
 $ THEN
-$   OS
-$   WS "#include <types.h>"
-$   WS "#include <socket.h>"
-$   WS "#include <in.h>"
-$   WS "#include <string.h>"
-$   WS "int main() {"
-$   WS "struct sockaddr_in6 sin6;"
-$   WS "memset((char *)&sin6, 0, sizeof(sin6));"
-$   WS "return (sin6.sin6_scope_id);"
-$   WS "}"
-$   CS
-$   GOSUB compile_ok
-$   IF compile_status .EQ. good_compile
-$   THEN
-$     d_sin6_scope_id="define"
-$     echo "You have sin6_scope_id in the sockaddr_in6 struct."
-$   ELSE
-$     d_sin6_scope_id="undef"
-$     echo "You do not have sin6_scope_id in the sockaddr_in6 struct."
-$   ENDIF
+$   d_sin6_scope_id="define"
+$   echo "You have sin6_scope_id in the sockaddr_in6 struct."
 $ ELSE
 $   d_sin6_scope_id="undef"
 $   echo "You do not have sin6_scope_id in the sockaddr_in6 struct."
@@ -4847,30 +4706,25 @@ $ d_nanosleep = tmp
 $!
 $! Check for socklen_t
 $!
-$ IF Has_Dec_C_Sockets
+$ echo4 "Checking to see if you have socklen_t..."
+$ OS
+$ WS "#include <stdlib.h>"
+$ WS "#include <stdio.h>"
+$ IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "socklen_t x = 16;"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ GOSUB link_ok
+$ IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
 $ THEN
-$   echo4 "Checking to see if you have socklen_t..."
-$   OS
-$   WS "#include <stdlib.h>"
-$   WS "#include <stdio.h>"
-$   IF i_netdb .EQS. "define" THEN WS "#include <netdb.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "socklen_t x = 16;"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   GOSUB link_ok
-$   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
-$   THEN
-$     d_socklen_t="define"
-$     echo "You have socklen_t."
-$   ELSE
-$     d_socklen_t="undef"
-$     echo "You do not have socklen_t."
-$   ENDIF
+$   d_socklen_t="define"
+$   echo "You have socklen_t."
 $ ELSE
 $   d_socklen_t="undef"
+$   echo "You do not have socklen_t."
 $ ENDIF
 $!
 $! Check for pthread_yield
@@ -5315,60 +5169,34 @@ $ d_stdio_ptr_lval_sets_cnt="undef"
 $ d_stdio_ptr_lval_nochange_cnt="define"
 $ usefaststdio="undef"
 $!
-$! Sockets?
-$ if Has_Dec_C_Sockets
-$ THEN
-$   d_vms_do_sockets="define"
-$   d_htonl="define"
-$   d_socket="define"
-$   d_sockpair = "undef"
-$   if (vms_ver .GES. "8.2")
-$   then
-$     echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
-$     d_sockpair = "define"
-$   endif
-$   d_select="define"
-$   netdb_hlen_type="int"
-$   netdb_host_type="char *"
-$   netdb_name_type="char *"
-$   netdb_net_type="long"
-$   d_gethbyaddr="define"
-$   d_gethbyname="define"
-$   d_getnbyaddr="define"
-$   d_getnbyname="define"
-$   d_getpbynumber="define"
-$   d_getpbyname="define"
-$   d_getsbyport="define"
-$   d_getsbyname="define"
-$   d_gethostprotos="define"
-$   d_getnetprotos="define"
-$   d_getprotoprotos="define"
-$   d_getservprotos="define"
-$   socksizetype="size_t"
-$ ELSE
-$   d_vms_do_sockets="undef"
-$   d_htonl="undef"
-$   d_socket="undef"
-$   d_socketpair = "undef"
-$   d_select="undef"
-$   netdb_hlen_type="int"
-$   netdb_host_type="char *"
-$   netdb_name_type="char *"
-$   netdb_net_type="long"
-$   d_gethbyaddr="undef"
-$   d_gethbyname="undef"
-$   d_getnbyaddr="undef"
-$   d_getnbyname="undef"
-$   d_getpbynumber="undef"
-$   d_getpbyname="undef"
-$   d_getsbyport="undef"
-$   d_getsbyname="undef"
-$   d_gethostprotos="undef"
-$   d_getnetprotos="undef"
-$   d_getprotoprotos="undef"
-$   d_getservprotos="undef"
-$   socksizetype="undef"
-$ ENDIF
+$! Sockets
+$ d_htonl="define"
+$ d_socket="define"
+$ d_sockpair = "undef"
+$ if (vms_ver .GES. "8.2")
+$ then
+$   echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
+$   d_sockpair = "define"
+$ endif
+$ d_select="define"
+$ netdb_hlen_type="int"
+$ netdb_host_type="char *"
+$ netdb_name_type="char *"
+$ netdb_net_type="long"
+$ d_gethbyaddr="define"
+$ d_gethbyname="define"
+$ d_getnbyaddr="define"
+$ d_getnbyname="define"
+$ d_getpbynumber="define"
+$ d_getpbyname="define"
+$ d_getsbyport="define"
+$ d_getsbyname="define"
+$ d_gethostprotos="define"
+$ d_getnetprotos="define"
+$ d_getprotoprotos="define"
+$ d_getservprotos="define"
+$ socksizetype="size_t"
+$!
 $! Threads
 $ d_oldpthreads="undef"
 $ IF use_threads
@@ -6323,7 +6151,6 @@ $ WC "d_vendorlib='undef'"
 $ WC "d_vendorscript='undef'"
 $ WC "d_vfork='define'"
 $ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'" ! VMS
-$ WC "d_vms_do_sockets='" + d_vms_do_sockets + "'" ! VMS
 $ WC "d_vms_shorten_long_symbols='" + d_vms_shorten_long_symbols + "'" ! VMS
 $ WC "d_void_closedir='define'"
 $ WC "d_voidsig='undef'"
@@ -6948,11 +6775,6 @@ $ IF use_debugging_perl THEN WC "#define DEBUGGING"
 $ IF use_two_pot_malloc THEN WC "#define TWO_POT_OPTIMIZE"
 $ IF use_pack_malloc THEN WC "#define PACK_MALLOC"
 $ IF use_debugmalloc THEN WC "#define DEBUGGING_MSTATS"
-$ IF (Has_Dec_C_Sockets)
-$ THEN
-$    WC "#define VMS_DO_SOCKETS"
-$    WC "#define DECCRTL_SOCKETS"
-$ ENDIF
 $! This is VMS-specific for now
 $ WC "#''d_setenv' HAS_SETENV"
 $ IF d_secintgenv THEN WC "#define SECURE_INTERNAL_GETENV"
@@ -7007,12 +6829,6 @@ $   DECCXX_REPLACE = "DECCXX=DECCXX=1"
 $ ELSE
 $   DECCXX_REPLACE = "DECCXX="
 $ ENDIF
-$ IF Has_Dec_C_Sockets
-$ THEN
-$   SOCKET_REPLACE = "SOCKET=DECC_SOCKETS=1"
-$ ELSE
-$   SOCKET_REPLACE = "SOCKET="
-$ ENDIF
 $ IF use_threads
 $ THEN
 $   THREAD_REPLACE = "THREAD=THREADED=1"
@@ -7053,7 +6869,6 @@ $ WC := write CONFIG
 $ WC "''DECC_REPLACE'"
 $ WC "''DECCXX_REPLACE'"
 $ WC "''ARCH_TYPE'"
-$ WC "''SOCKET_REPLACE'"
 $ WC "''THREAD_REPLACE'"
 $ WC "''C_Compiler_Replace'"
 $ WC "''MALLOC_REPLACE'"

@@ -25,7 +25,6 @@
 ~DECCXX~
 ~ARCH-TYPE~ = 1
 ~THREAD~
-~SOCKET~
 ~MALLOC~
 ~CC~
 ~MTK~
@@ -74,10 +73,6 @@ PERL_VERSION = ~PV~
 .ifdef MALLOC
 MALLOC_O = malloc$(O)
 MALLOC_C = malloc$(C)
-.endif
-
-.ifdef DECC_SOCKETS
-SOCKET=1
 .endif
 
 ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION)]

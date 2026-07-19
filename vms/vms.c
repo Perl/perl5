@@ -11208,10 +11208,8 @@ Perl_my_flush(pTHX_ FILE *fp)
 {
     int res;
     if ((res = fflush(fp)) == 0 && fp) {
-#ifdef VMS_DO_SOCKETS
         Stat_t s;
         if (fstat(fileno(fp), &s.crtl_stat) == 0 && !S_ISSOCK(s.st_mode))
-#endif
             res = fsync(fileno(fp));
     }
 /*
