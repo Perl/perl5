@@ -6751,20 +6751,8 @@ $ IF use_debugging_perl THEN WC "#define DEBUGGING"
 $ IF use_two_pot_malloc THEN WC "#define TWO_POT_OPTIMIZE"
 $ IF use_pack_malloc THEN WC "#define PACK_MALLOC"
 $ IF use_debugmalloc THEN WC "#define DEBUGGING_MSTATS"
-$! This is VMS-specific for now
-$ WC "#''d_setenv' HAS_SETENV"
 $ IF d_secintgenv THEN WC "#define SECURE_INTERNAL_GETENV"
 $ IF d_alwdeftype THEN WC "#define ALWAYS_DEFTYPES"
-$ IF use64bitint .OR. use64bitint .EQS. "define"
-$ THEN
-$   WC "#define USE_64_BIT_INT"
-$ ENDIF
-$ IF uselongdouble .OR. uselongdouble .EQS. "define"
-$ THEN
-$   WC "#define USE_LONG_DOUBLE"
-$ ENDIF
-$ IF use64bitall .OR. use64bitall .EQS. "define" THEN -
-    WC "#define USE_64_BIT_ALL"
 $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
 $ IF shorten_long_symbols THEN WC "#define VMS_SHORTEN_LONG_SYMBOLS"
 $ IF use_ieee_math THEN WC "#define USE_IEEE"
