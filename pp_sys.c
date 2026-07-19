@@ -2005,7 +2005,7 @@ PP_wrapped(pp_sysread, 0, 1)
             SETERRNO(EBADF,SS_IVCHAN);
             goto say_undef;
         }
-#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
+#if defined(__VMS) || defined(__QNXNTO__)
         bufsize = sizeof (struct sockaddr_in);
 #else
         bufsize = sizeof namebuf;
@@ -2836,7 +2836,7 @@ PP_wrapped(pp_accept, 2, 0)
     dSP; dTARGET;
     IO *nstio;
     char namebuf[MAXPATHLEN];
-#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
+#if defined(__VMS) || defined(__QNXNTO__)
     Sock_size_t len = sizeof (struct sockaddr_in);
 #else
     Sock_size_t len = sizeof namebuf;
@@ -3047,7 +3047,7 @@ PP_wrapped(pp_getpeername, 1, 0)
     case OP_GETPEERNAME:
         if (PerlSock_getpeername(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
             goto nuts2;
-#if defined(VMS_DO_SOCKETS) && defined (DECCRTL_SOCKETS)
+#ifdef __VMS
         {
             static const char nowhere[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
             /* If the call succeeded, make sure we don't have a zeroed port/addr */

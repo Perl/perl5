@@ -5918,9 +5918,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef USE_SOCKS
                              " USE_SOCKS"
 #  endif
-#  ifdef VMS_DO_SOCKETS
-                             " VMS_DO_SOCKETS"
-#  endif
 #  ifdef VMS_SHORTEN_LONG_SYMBOLS
                              " VMS_SHORTEN_LONG_SYMBOLS"
 #  endif
