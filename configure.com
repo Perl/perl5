@@ -1,4 +1,3 @@
-
 $! OpenVMS configuration procedure for Perl -- do not attempt to run under DOS
 $ sav_ver = 'F$VERIFY(0)'
 $ on control_y then goto clean_up
@@ -6947,7 +6946,6 @@ $ ! around the 255 character command line limit)
 $ OPEN/APPEND CONFIG [-]config.local
 $ IF use_debugging_perl THEN WC "#define DEBUGGING"
 $ IF use_two_pot_malloc THEN WC "#define TWO_POT_OPTIMIZE"
-$ IF mymalloc THEN WC "#define EMBEDMYMALLOC"
 $ IF use_pack_malloc THEN WC "#define PACK_MALLOC"
 $ IF use_debugmalloc THEN WC "#define DEBUGGING_MSTATS"
 $ IF (Has_Dec_C_Sockets)
