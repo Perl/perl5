@@ -119,10 +119,6 @@ static int (*decw_term_port)
     void * char_buffer,
     void * char_change_buffer) = 0;
 
-#if defined(NEED_AN_H_ERRNO)
-dEXT int h_errno;
-#endif
-
 #if defined(__DECC) || defined(__DECCXX)
 #pragma member_alignment save
 #pragma nomember_alignment longword

@@ -3757,30 +3757,6 @@ $ tmp = "netdb.h"
 $ GOSUB inhdr
 $ i_netdb = tmp
 $!
-$! Check for h_errno
-$!
-$ echo4 "Checking to see if you have h_errno..."
-$ OS
-$ WS "#include <stdlib.h>"
-$ WS "#include <stdio.h>"
-$ IF i_unistd .EQS. "define" THEN WS "#include <unistd.h>"
-$ IF i_netdb  .EQS. "define" THEN WS "#include <netdb.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "h_errno = 3;"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ GOSUB link_ok
-$ IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
-$ THEN
-$   d_herrno="define"
-$   echo "You have h_errno."
-$ ELSE
-$   d_herrno="undef"
-$   echo "You do not have h_errno."
-$ ENDIF
-$!
 $! Check to see if gethostname exists
 $!
 $ OS
@@ -6792,7 +6768,6 @@ $ IF use64bitall .OR. use64bitall .EQS. "define" THEN -
 $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
 $ IF shorten_long_symbols THEN WC "#define VMS_SHORTEN_LONG_SYMBOLS"
 $ IF use_ieee_math THEN WC "#define USE_IEEE"
-$ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
 $ WC "#define PERL_EXTERNAL_GLOB"
 $ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
