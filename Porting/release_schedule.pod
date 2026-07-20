@@ -53,7 +53,7 @@ consent of the Steering Council.)
   Abigail <abigail@abigail.be>
   Aristotle Pagaltzis <pagaltzis@gmx.de>
   Ask Bjørn Hansen <ask@perl.org>
-  Chris Williams <bingos@cpan.org>
+  Chris Williams <chris@bingosnet.co.uk>
   Dave Cross <dave@perlhacks.com>
   Dave Rolsky <autarch@urth.org>
   David Golden <dagolden@cpan.org>
