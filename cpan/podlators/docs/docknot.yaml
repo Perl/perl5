@@ -15,14 +15,14 @@ format: v1
 
 name: podlators
 maintainer: Russ Allbery <rra@cpan.org>
-version: v6.0.2
+version: v6.1.0
 synopsis: format POD source into various output formats
 
 license:
   name: Perl
 copyrights:
   - holder: Russ Allbery <rra@cpan.org>
-    years: 1999-2024
+    years: 1999-2026
 
 build:
   type: ExtUtils::MakeMaker

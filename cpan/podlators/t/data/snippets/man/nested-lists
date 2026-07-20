@@ -19,7 +19,8 @@ Should be a bullet.
 =back
 
 [output]
-.IP "First level" 4
+.TP 4
+First level
 .IX Item "First level"
 Blah blah blah....
 .RS 4

@@ -9,6 +9,6 @@ Fonts in items
 =back
 
 [output]
-.ie n .IP "1. Check fonts in @CARP_NOT test." 4
-.el .IP "1. Check fonts in \f(CW@CARP_NOT\fR test." 4
+.TP 4
+1. Check fonts in \f(CR@CARP_NOT\fR test.
 .IX Item "1. Check fonts in @CARP_NOT test."

@@ -11,5 +11,6 @@ Not bullet.
 =back
 
 [output]
-.IP * 4
+.TP 4
+*
 Not bullet.

@@ -12,7 +12,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Text v6.0.2;
+package Pod::Text v6.1.0;
 
 use 5.012;
 use parent qw(Pod::Simple);
@@ -313,7 +313,7 @@ sub output {
                 $$self{ENCODING} = $encoding;
             }
         }
-        if ($encoding) {
+        if ($encoding && $encoding ne 'none') {
             my $check = sub {
                 my ($char) = @_;
                 my $display = '"\x{' . hex($char) . '}"';
@@ -651,10 +651,12 @@ sub cmd_c {
          }xms;
     }
     $text =~ m{
-      ^\s*
+      \A\s*
       (?:
          ( [\'\`\"] ) .* \1                  # already quoted
        | \` .* \'                            # `quoted'
+       | \x{201C} .* \x{201D}                # already quoted (Unicode)
+       | . \"                                # one character and double quote
        | $extra
       )
       \s*\z
@@ -921,17 +923,24 @@ with the POD rendered and the code left intact.
 
 =item encoding
 
-[5.00] Specifies the encoding of the output.  The value must be an encoding
-recognized by the L<Encode> module (see L<Encode::Supported>).  If the output
-contains characters that cannot be represented in this encoding, that is an
-error that will be reported as configured by the C<errors> option.  If error
-handling is other than C<die>, the unrepresentable character will be replaced
-with the Encode substitution character (normally C<?>).
+[6.1.0] Specifies the encoding of the output.  The value must be an encoding
+recognized by the L<Encode> module (see L<Encode::Supported>) or the special
+value C<none>.  If the output contains characters that cannot be represented
+in this encoding, that is an error that will be reported as configured by the
+C<errors> option.  If error handling is other than C<die>, the unrepresentable
+character will be replaced with the Encode substitution character (normally
+C<?>).
 
 If the output file handle has a PerlIO encoding layer set, this parameter will
 be ignored and no encoding will be done by Pod::Man.  It will instead rely on
 the encoding layer to make whatever output encoding transformations are
 desired.
+
+As a special case, if the encoding is set to C<none>, no encoding will be done
+and characters will be output in Perl's internal representation.  This option
+only makes sense in combination with output_string().  It is intended for
+special cases when the results of formatting are kept in memory and will be
+encoded for output at some later step.
 
 WARNING: The input encoding of the POD source is independent from the output
 encoding, and setting this option does not affect the interpretation of the
@@ -1078,7 +1087,7 @@ to the scalar variable pointed to by REF, rather than C<STDOUT>.  For example:
     $man->parse_file('/some/input/file');
 
 Be aware that the output in that variable will already be encoded (see
-L</Encoding>).
+L</Encoding>) unless the C<encoding> option to Pod::Text is set to C<none>.
 
 =item parse_file(PATH)
 
@@ -1211,6 +1220,8 @@ encoding changes.  The L<Encode> module is now used for all output encoding
 rather than PerlIO layers, which fixes earlier problems with output to
 scalars.
 
+Pod::Text 6.1.0 added support for the C<none> option to C<encoding>.
+
 =head1 CAVEATS
 
 Line wrapping is done only at ASCII spaces and tabs, rather than using a
@@ -1226,15 +1237,15 @@ Pod::Simple.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2002, 2004, 2006, 2008-2009, 2012-2016, 2018-2019, 2022 Russ
-Allbery <rra@cpan.org>
+Copyright 1999-2002, 2004, 2006, 2008-2009, 2012-2016, 2018-2019, 2022,
+2024-2026 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Encode::Locale>, L<Encode::Supproted>, L<Pod::Simple>,
+L<Encode::Locale>, L<Encode::Supported>, L<Pod::Simple>,
 L<Pod::Text::Termcap>, L<perlpod(1)>, L<pod2text(1)>
 
 The current version of this module is always available from its web site at

@@ -10,13 +10,13 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Text::Color v6.0.2;
+package Pod::Text::Color v6.1.0;
 
 use 5.012;
 use parent qw(Pod::Text);
 use warnings;
 
-use Term::ANSIColor qw(color colored);
+use Term::ANSIColor qw(color colored colorstrip);
 
 ##############################################################################
 # Overrides
@@ -25,30 +25,32 @@ use Term::ANSIColor qw(color colored);
 # Make level one headings bold.
 sub cmd_head1 {
     my ($self, $attrs, $text) = @_;
-    $text =~ s/\s+$//;
+    $text =~ s{ \s+ \z }{}xms;
     local $Term::ANSIColor::EACHLINE = "\n";
-    $self->SUPER::cmd_head1 ($attrs, colored ($text, 'bold'));
+    $self->SUPER::cmd_head1($attrs, colored($text, 'bold'));
+    return;
 }
 
 # Make level two headings bold.
 sub cmd_head2 {
     my ($self, $attrs, $text) = @_;
-    $text =~ s/\s+$//;
-    $self->SUPER::cmd_head2 ($attrs, colored ($text, 'bold'));
+    $text =~ s{ \s+ \z }{}xms;
+    $self->SUPER::cmd_head2($attrs, colored($text, 'bold'));
+    return;
 }
 
 # Fix the various formatting codes.
-sub cmd_b { return colored ($_[2], 'bold')   }
-sub cmd_f { return colored ($_[2], 'cyan')   }
-sub cmd_i { return colored ($_[2], 'yellow') }
+sub cmd_b { my (undef, undef, $text) = @_; return colored($text, 'bold') }
+sub cmd_f { my (undef, undef, $text) = @_; return colored($text, 'cyan') }
+sub cmd_i { my (undef, undef, $text) = @_; return colored($text, 'yellow') }
 
 # Analyze a single line and return any formatting codes in effect at the end
 # of that line.
 sub end_format {
     my ($self, $line) = @_;
-    my $reset = color ('reset');
+    my $reset = color('reset');
     my $current;
-    while ($line =~ /(\e\[[\d;]+m)/g) {
+    while ($line =~ m{ ( \e\[ [\d;]+ m ) }xmsg) {
         my $code = $1;
         if ($code eq $reset) {
             undef $current;
@@ -63,69 +65,80 @@ sub end_format {
 sub output_code {
     my ($self, $code) = @_;
     local $Term::ANSIColor::EACHLINE = "\n";
-    $code = colored ($code, 'green');
-    $self->output ($code);
+    $code = colored($code, 'green');
+    $self->output($code);
+    return;
 }
 
 # Strip all of the formatting from a provided string, returning the stripped
-# version.  We will eventually want to use colorstrip() from Term::ANSIColor,
-# but it's fairly new so avoid the tight dependency.
+# version.
 sub strip_format {
     my ($self, $text) = @_;
-    $text =~ s/\e\[[\d;]*m//g;
-    return $text;
+    return colorstrip($text);
 }
 
 # We unfortunately have to override the wrapping code here, since the normal
 # wrapping code gets really confused by all the escape sequences.
 sub wrap {
-    my $self = shift;
-    local $_ = shift;
-    my $output = '';
-    my $spaces = ' ' x $$self{MARGIN};
-    my $width = $$self{opt_width} - $$self{MARGIN};
+    my ($self, $text) = @_;
+    my $output = q{};
+    my $spaces = q{ } x $self->{MARGIN};
+    my $width = $self->{opt_width} - $self->{MARGIN};
 
-    # $codes matches a single special sequence.  $char matches any number of
-    # special sequences preceding a single character other than a newline.
-    # $shortchar matches some sequence of $char ending in codes followed by
-    # whitespace or the end of the string.  $longchar matches exactly $width
-    # $chars, used when we have to truncate and hard wrap.
-    my $code = '(?:\e\[[\d;]+m)';
-    my $char = "(?>$code*[^\\n])";
-    my $shortchar = '^(' . $char . "{0,$width}(?>$code*)" . ')(?:[ \t\n]+|\z)';
-    my $longchar = '^(' . $char . "{$width})";
-    while (length > $width) {
-        if (s/$shortchar// || s/$longchar//) {
+    # Matches a single escape sequence.
+    my $code = qr{ (?: \e\[ [\d;]+ m ) }xms;
+
+    # Matches any number of escape sequences preceding a single character
+    # other than a newline.  Prevent backtracking to optimize the final
+    # regular expression matching since $code is complex.
+    my $char = qr{ (?> $code* [^\n] ) }xms;
+
+    # Matches some sequence of $char up to $width characters, ending in codes
+    # followed by whitespace or the end of the string.  This detects a valid
+    # break point.  The extracted text is placed in $1.
+    my $shortchar = qr{
+        \A
+        ( ${char}{0,$width} (?> $code* ) )
+        (?: [ \t\n]+ | \z )
+    }xms;
+
+    # Matches exactly $width $chars, used when we have to hard wrap in the
+    # middle of an unbroken string.  The extracted text is placed in $1.
+    my $longchar = qr{ \A ( ${char}{$width} ) }xms;
+
+    # Extract one line at a time from $text and wrap it.
+    while (length($text) > $width) {
+        if ($text =~ s{$shortchar}{}xms || $text =~ s{$longchar}{}xms) {
             $output .= $spaces . $1 . "\n";
         } else {
             last;
         }
     }
-    $output .= $spaces . $_;
+    $output .= $spaces . $text;
 
     # less -R always resets terminal attributes at the end of each line, so we
     # need to clear attributes at the end of lines and then set them again at
     # the start of the next line.  This requires a second pass through the
     # wrapped string, accumulating any attributes we see, remembering them,
     # and then inserting the appropriate sequences at the newline.
-    if ($output =~ /\n/) {
-        my @lines = split (/\n/, $output);
+    if ($output =~ m{\n}xms) {
+        my @lines = split(m{\n}xms, $output);
         my $start_format;
         for my $line (@lines) {
-            if ($start_format && $line =~ /\S/) {
-                $line =~ s/^(\s*)(\S)/$1$start_format$2/;
+            if ($start_format && $line =~ m{\S}xms) {
+                $line =~ s{ \A (\s*) (\S) }{$1$start_format$2}xms;
             }
-            $start_format = $self->end_format ($line);
+            $start_format = $self->end_format($line);
             if ($start_format) {
-                $line .= color ('reset');
+                $line .= color('reset');
             }
         }
-        $output = join ("\n", @lines);
+        $output = join("\n", @lines);
     }
 
     # Fix up trailing whitespace and return the results.
-    $output =~ s/\s+$/\n\n/;
-    $output;
+    $output =~ s{ \s+ \z }{\n\n}xms;
+    return $output;
 }
 
 ##############################################################################

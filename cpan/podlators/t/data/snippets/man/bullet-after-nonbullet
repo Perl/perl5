@@ -18,8 +18,10 @@ Also not a bullet.
 =back
 
 [output]
-.IP foo 4
+.TP 4
+foo
 .IX Item "foo"
 Not a bullet.
-.IP * 4
+.TP 4
+*
 Also not a bullet.

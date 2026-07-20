@@ -84,12 +84,12 @@ sub _stderr_restore {
 #            exception - Text of exception (with file and line stripped)
 sub read_snippet {
     my ($path) = @_;
-    $path = File::Spec->catfile('t', 'data', 'snippets', $path);
+    my $fullpath = File::Spec->catfile('t', 'data', 'snippets', $path);
     my %data;
 
     # Read the sections and store them in the %data hash.
     my ($line, $section);
-    open(my $fh, '<', $path) or BAIL_OUT("cannot open $path: $!");
+    open(my $fh, '<', $fullpath) or BAIL_OUT("cannot open $fullpath: $!");
     while (defined($line = <$fh>)) {
         if ($line =~ m{ \A \s* \[ (\S+) \] \s* \z }xms) {
             $section = $1;
@@ -98,18 +98,22 @@ sub read_snippet {
             $data{$section} .= $line;
         }
     }
-    close($fh) or BAIL_OUT("cannot close $path: $!");
+    close($fh) or BAIL_OUT("cannot close $fullpath: $!");
 
     # Strip trailing blank lines from all sections.
     for my $section (keys %data) {
         $data{$section} =~ s{ \n\s+ \z }{\n}xms;
     }
 
-    # Clean up the name section by removing newlines and extra space.
+    # Clean up the name section by removing newlines and extra space and add
+    # the filename.
     if ($data{name}) {
         $data{name} =~ s{ \A \s+ }{}xms;
         $data{name} =~ s{ \s+ \z }{}xms;
         $data{name} =~ s{ \s+ }{ }xmsg;
+        $data{name} = $path . ': ' . $data{name};
+    } else {
+        $data{name} = $path;
     }
 
     # Turn the options section into a hash.
@@ -576,7 +580,7 @@ Russ Allbery <rra@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2015-2016, 2018-2020, 2022, 2024 Russ Allbery <rra@cpan.org>
+Copyright 2015-2016, 2018-2020, 2022, 2024, 2026 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

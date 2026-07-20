@@ -24,4 +24,4 @@ Function: \fBfoo()\fR, \fBbar::baz()\fR, \fB_private::_stuff()\fR
 .PP
 Manpage: \fBfoo\fR\|(1), \fBPod::Man\fR\|(3perl), \fBgit\-rebase\fR\|(1)
 .PP
-Variables: \f(CW$foo\fR, \f(CW@bar::baz\fR, \f(CW%Pod::Blah\fR
+Variables: \f(CR$foo\fR, \f(CR@bar::baz\fR, \f(CR%Pod::Blah\fR

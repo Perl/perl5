@@ -11,6 +11,6 @@ Foo C<bar> baz.
 
 [output]
 .ie n .SH "FOO ""BAR BAZ"
-.el .SH "FOO \f(CWBAR\fP BAZ"
+.el .SH "FOO \f(CRBAR\fP BAZ"
 .IX Header "FOO BAR BAZ"
-Foo \f(CW\*(C`bar\*(C'\fR baz.
+Foo \f(CR\*(C`bar\*(C'\fR baz.

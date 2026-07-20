@@ -6,5 +6,5 @@ C<> in headers
 
 [output]
 .ie n .SH """one"" and ""two"""
-.el .SH "\f(CWone\fP and \f(CWtwo\fP"
+.el .SH "\f(CRone\fP and \f(CRtwo\fP"
 .IX Header "one and two"

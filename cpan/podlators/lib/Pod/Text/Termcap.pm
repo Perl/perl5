@@ -10,7 +10,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Text::Termcap v6.0.2;
+package Pod::Text::Termcap v6.1.0;
 
 use 5.012;
 use parent qw(Pod::Text);

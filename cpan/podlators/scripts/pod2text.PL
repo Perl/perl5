@@ -35,8 +35,8 @@ print "Extracting $file (with variable substitutions)\n";
 # use $Config{...} to use Configure variables.
 print {$out} <<"PREAMBLE" or die "Cannot write to $file: $!\n";
 $Config{startperl}
-    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-        if 0; # ^ Run only under a shell
+eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+  if 0;    # ^ Run only under a shell
 PREAMBLE
 
 # In the following, Perl variables are not expanded during extraction.
@@ -56,41 +56,87 @@ use Getopt::Long qw(GetOptions);
 use Pod::Text ();
 use Pod::Usage qw(pod2usage);
 
-# Clean up $0 for error reporting.
-$0 =~ s%.*/%%;
+# Format a single POD file.
+#
+# $parser - Pod::Text object to use.
+# $input  - Input file, - or undef for standard input
+# $output - Output file, - or undef for standard output
+#
+# Returns: 0 on no errors, 1 if there was an error
+sub format_file {
+    my ($parser, $input, $output) = @_;
+    $parser->parse_from_file($input, $output);
+    if ($parser->{CONTENTLESS}) {
+        if (defined($input) && $input ne q{-}) {
+            warn "$0: unable to format $input\n";
+        } else {
+            warn "$0: unable to format standard input\n";
+        }
+        if (defined($output) && $output ne q{-} && !-s $output) {
+            unlink($output);
+        }
+        return 1;
+    }
+    return 0;
+}
 
-# Take an initial pass through our options, looking for one of the form
-# -<number>.  We turn that into -w <number> for compatibility with the
-# original pod2text script.
+# Clean up $0 for error reporting.
+$0 =~ s{ .*/ }{}xms;
+
+# For compatibility with the original pod2text script, take an initial pass
+# through our options, looking for one of the form -<number>.  If found, turn
+# it into -w <number>.
+## no critic (ControlStructures::ProhibitCStyleForLoops)
 for (my $i = 0; $i < @ARGV; $i++) {
-    last if $ARGV[$i] =~ /^--$/;
-    if ($ARGV[$i] =~ /^-(\d+)$/) {
-        splice (@ARGV, $i++, 1, '-w', $1);
+    last if $ARGV[$i] eq q{--};
+    if ($ARGV[$i] =~ m{ \A -(\d+) \z }xms) {
+        splice(@ARGV, $i++, 1, '-w', $1);
     }
 }
+## use critic
 
 # Insert -- into @ARGV before any single dash argument to hide it from
 # Getopt::Long; we want to interpret it as meaning stdin (which Pod::Simple
 # does correctly).
 my $stdin;
-@ARGV = map { $_ eq '-' && !$stdin++ ? ('--', $_) : $_ } @ARGV;
+local @ARGV = map { $_ eq q{-} && !$stdin++ ? (q{--}, $_) : $_ } @ARGV;
 
 # Parse our options.  Use the same names as Pod::Text for simplicity.
 my %options;
-Getopt::Long::config ('bundling');
-GetOptions (\%options, 'alt|a', 'code', 'color|c', 'encoding|e=s', 'errors=s',
-            'guesswork=s', 'help|h', 'indent|i=i', 'loose|l',
-            'margin|left-margin|m=i', 'nourls', 'overstrike|o', 'quotes|q=s',
-            'sentence|s', 'stderr', 'termcap|t', 'utf8|u', 'width|w=i')
-    or exit 1;
-pod2usage (0) if $options{help};
+Getopt::Long::config('bundling');
+GetOptions(
+    \%options,
+    'alt|a',
+    'code',
+    'color|c',
+    'encoding|e=s',
+    'errors=s',
+    'guesswork=s',
+    'help|h',
+    'indent|i=i',
+    'loose|l',
+    'margin|left-margin|m=i',
+    'nourls',
+    'overstrike|o',
+    'quotes|q=s',
+    'sentence|s',
+    'stderr',
+    'termcap|t',
+    'utf8|u',
+    'width|w=i',
+) or exit 1;
+if ($options{help}) {
+    pod2usage(0);
+}
 
-# Figure out what formatter we're going to use.  -c overrides -t.
+# Figure out what formatter we're going to use.  --color overrides --termcap.
 my $formatter = 'Pod::Text';
 if ($options{color}) {
     $formatter = 'Pod::Text::Color';
     eval { require Term::ANSIColor };
-    if ($@) { die "-c (--color) requires Term::ANSIColor be installed\n" }
+    if ($@) {
+        die "-c (--color) requires Term::ANSIColor be installed\n";
+    }
     require Pod::Text::Color;
 } elsif ($options{termcap}) {
     $formatter = 'Pod::Text::Termcap';
@@ -99,32 +145,30 @@ if ($options{color}) {
     $formatter = 'Pod::Text::Overstrike';
     require Pod::Text::Overstrike;
 }
-delete @options{'color', 'termcap', 'overstrike'};
+delete @options{ qw(color termcap overstrike) };
 
-# If neither stderr nor errors is set, default to errors = die.
-if (!defined $options{stderr} && !defined $options{errors}) {
+# If neither stderr nor errors is set, default to errors = die rather than the
+# Pod::Text default of pod.
+if (!defined($options{stderr}) && !defined($options{errors})) {
     $options{errors} = 'die';
 }
 
-# Initialize and run the formatter.
-my $parser = $formatter->new (%options);
+# If given no arguments, read from stdin and write to stdout.
+if (!@ARGV) {
+    push(@ARGV, q{-});
+}
+
+# Initialize and run the formatter, pulling a pair of input and output off at
+# a time.  For each file, we check whether the document was completely empty
+# and, if so, remove the created file and exit with a non-zero exit status.
+my $parser = $formatter->new(%options);
 my $status = 0;
-do {
-    my ($input, $output) = splice (@ARGV, 0, 2);
-    $parser->parse_from_file ($input, $output);
-    if ($parser->{CONTENTLESS}) {
-        $status = 1;
-        if (defined $input) {
-            warn "$0: unable to format $input\n";
-        } else {
-            warn "$0: unable to format standard input\n";
-        }
-        if (defined ($output) and $output ne '-') {
-            unlink $output unless (-s $output);
-        }
-    }
-} while (@ARGV);
-exit $status;
+while (@ARGV) {
+    my ($input, $output) = splice(@ARGV, 0, 2);
+    my $result = format_file($parser, $input, $output);
+    $status ||= $result;
+}
+exit($status);
 
 __END__
 
@@ -270,6 +314,8 @@ is indented; for the latter, see B<-i> option.
 
 [2.5.0] Normally, LZ<><> formatting codes with a URL but anchor text are
 formatted to show both the anchor text and the URL.  In other words:
+
+=for ProhibitVerbatimMarkup allow next
 
     L<foo|http://example.com/>
 

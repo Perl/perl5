@@ -113,7 +113,7 @@ our @TESTS = (
 
 # Run all of the tests.
 for my $test (@TESTS) {
-    my ($link, @expected) = @$test;
+    my ($link, @expected) = @{$test};
     my @results = parselink($link);
     my $pretty = $link;
     $pretty =~ s{\n}{\\n}xmsg;

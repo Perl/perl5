@@ -5,13 +5,17 @@ Disable quoting guesswork
 guesswork none
 
 [input]
+=encoding UTF-8
+
 =head1 QUOTING
 
 Suppress quotes:
 C<"foo">,
 C<'foo'>,
 C<`foo`>,
-C<`foo'>
+C<`foo'>,
+C<.">,
+C<“foo”>
 
 All these should now be quoted:
 C<$#f>,
@@ -32,7 +36,7 @@ C<0xdeadbeef>
 
 [output]
 QUOTING
-    Suppress quotes: "foo", 'foo', `foo`, `foo'
+    Suppress quotes: "foo", 'foo', `foo`, `foo', .", “foo”
 
     All these should now be quoted: "$#f", "$foo[4]", "$foo{bar}", "%foo",
     "@foo", "&foo", "*foo", "$foo->("bar")", "&foo::baz("bar")", "&foo()",

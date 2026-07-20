@@ -18,7 +18,7 @@ price is $100."
 These should be identical.
 .PP
 Bippity boppity boo "The
-price is \f(CW$100\fR."
+price is \f(CR$100\fR."
 .PP
 Bippity boppity boo "The
-price is \f(CW$100\fR."
+price is \f(CR$100\fR."

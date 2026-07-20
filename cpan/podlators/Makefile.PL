@@ -21,24 +21,6 @@ use Config;
 use ExtUtils::MakeMaker;
 use File::Spec;
 
-# Determine the version of the distribution, since we need it outside of
-# ExtUtils::MakeMaker to add some additional metadata. This is a very simple
-# parser since it only has to handle the syntax my modules use.
-#
-# Returns: Distribution version as a string
-sub dist_version {
-    my ($path) = @_;
-    open(my $fh, '<', $path) or die "$0: cannot open $path: $!\n";
-    while (defined(my $line = <$fh>)) {
-        if ($line =~ m{ \A package \s+ \S+ \s+ (v[\d.]+) }xms) {
-            close($fh) or die "$0: cannot close $path: $!\n";
-            return $1;
-        }
-    }
-    close($fh) or die "$0: cannot close $path: $!\n";
-    die "$0: cannot find version in lib/Pod/Man.pm\n";
-}
-
 # Generate full paths for scripts distributed in the bin directory.  Appends
 # the .com extension to scripts on VMS, unless they already have the .PL
 # extension.
@@ -79,7 +61,7 @@ sub man1pod {
 
 # The hash of all the metadata.  This will be modified before WriteMakefile to
 # remove keys not supported by the local version of ExtUtils::MakeMaker.
-my $dist_version = dist_version(File::Spec->catfile(qw(lib Pod Man.pm)));
+my $dist_version = MM->parse_version(File::Spec->catfile(qw(lib Pod Man.pm)));
 my %metadata = (
     NAME             => 'Pod',
     DISTNAME         => 'podlators',
@@ -158,19 +140,6 @@ my %metadata = (
         },
     },
 );
-
-# Remove keys that aren't supported by this version of ExtUtils::MakeMaker.
-# This hash maps keys to the minimum supported version.
-my %supported = (
-    LICENSE          => 6.31,
-    META_ADD         => 6.46,
-    MIN_PERL_VERSION => 6.48,
-);
-for my $key (keys(%supported)) {
-    if ($ExtUtils::MakeMaker::VERSION < $supported{$key}) {
-        delete $metadata{$key};
-    }
-}
 
 # Generate the actual Makefile.  Pick an arbitrary module to pull the version
 # from, since they should all have the same version.

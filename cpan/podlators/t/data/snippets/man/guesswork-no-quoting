@@ -5,6 +5,8 @@ Disable quoting guesswork
 guesswork none
 
 [input]
+=encoding UTF-8
+
 =head1 QUOTING
 
 Suppress quotes:
@@ -12,6 +14,8 @@ C<"foo">,
 C<'foo'>,
 C<`foo`>,
 C<`foo'>,
+C<.">,
+C<“foo”>
 
 All these should now be quoted:
 C<$#f>,
@@ -34,24 +38,26 @@ C<0xdeadbeef>
 .SH QUOTING
 .IX Header "QUOTING"
 Suppress quotes:
-\&\f(CW"foo"\fR,
-\&\f(CW\*(Aqfoo\*(Aq\fR,
-\&\f(CW\`foo\`\fR,
-\&\f(CW\`foo\*(Aq\fR,
+\&\f(CR"foo"\fR,
+\&\f(CR\*(Aqfoo\*(Aq\fR,
+\&\f(CR\`foo\`\fR,
+\&\f(CR\`foo\*(Aq\fR,
+\&\f(CR."\fR,
+\&\f(CR“foo”\fR
 .PP
 All these should now be quoted:
-\&\f(CW\*(C`$#f\*(C'\fR,
-\&\f(CW\*(C`$foo[4]\*(C'\fR,
-\&\f(CW\*(C`$foo{bar}\*(C'\fR,
-\&\f(CW\*(C`%foo\*(C'\fR,
-\&\f(CW\*(C`@foo\*(C'\fR,
-\&\f(CW\*(C`&foo\*(C'\fR,
-\&\f(CW\*(C`*foo\*(C'\fR,
-\&\f(CW\*(C`$foo\->("bar")\*(C'\fR,
-\&\f(CW\*(C`&foo::baz("bar")\*(C'\fR,
-\&\f(CW\*(C`&foo()\*(C'\fR,
-\&\f(CW\*(C`foo( "bar" )\*(C'\fR,
-\&\f(CW\*(C`\-1000\*(C'\fR,
-\&\f(CW\*(C`132.123\*(C'\fR,
-\&\f(CW\*(C`5e\-7\*(C'\fR,
-\&\f(CW\*(C`0xdeadbeef\*(C'\fR
+\&\f(CR\*(C`$#f\*(C'\fR,
+\&\f(CR\*(C`$foo[4]\*(C'\fR,
+\&\f(CR\*(C`$foo{bar}\*(C'\fR,
+\&\f(CR\*(C`%foo\*(C'\fR,
+\&\f(CR\*(C`@foo\*(C'\fR,
+\&\f(CR\*(C`&foo\*(C'\fR,
+\&\f(CR\*(C`*foo\*(C'\fR,
+\&\f(CR\*(C`$foo\->("bar")\*(C'\fR,
+\&\f(CR\*(C`&foo::baz("bar")\*(C'\fR,
+\&\f(CR\*(C`&foo()\*(C'\fR,
+\&\f(CR\*(C`foo( "bar" )\*(C'\fR,
+\&\f(CR\*(C`\-1000\*(C'\fR,
+\&\f(CR\*(C`132.123\*(C'\fR,
+\&\f(CR\*(C`5e\-7\*(C'\fR,
+\&\f(CR\*(C`0xdeadbeef\*(C'\fR

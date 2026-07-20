@@ -6,7 +6,7 @@
 # which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2019, 2021, 2024 Russ Allbery <eagle@eyrie.org>
+# Copyright 2019, 2021, 2024-2025 Russ Allbery <eagle@eyrie.org>
 # Copyright 2013-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -46,15 +46,17 @@ skip_unless_author('Spelling tests');
 # Load prerequisite modules.
 use_prereq('Test::Spelling');
 
-# Check all POD in the Perl distribution.  Add the examples and t/lib
+# Check all POD in the Perl distribution.  Add the examples, pod, and t/lib
 # directories if they exist.  Also add any files in usr/bin or usr/sbin, which
 # are widely used in Stanford-internal packages.
-my @files = all_pod_files();
-if (-d 'examples') {
-    push(@files, all_pod_files('examples'));
+my @files;
+if (-d 'blib' || -d 'lib') {
+    push(@files, all_pod_files());
 }
-if (-d File::Spec->catfile('t', 'lib')) {
-    push(@files, all_pod_files(File::Spec->catfile('t', 'lib')));
+for my $optional ('examples', 'pod', File::Spec->catfile('t', 'lib')) {
+    if (-d $optional) {
+        push(@files, all_pod_files($optional));
+    }
 }
 for my $dir (qw(usr/bin usr/sbin)) {
     if (-d $dir) {

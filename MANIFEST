@@ -2168,6 +2168,7 @@ cpan/podlators/t/data/snippets/termcap/term-unknown		podlators
 cpan/podlators/t/data/snippets/termcap/width			podlators
 cpan/podlators/t/data/snippets/termcap/wrapping			podlators
 cpan/podlators/t/data/snippets/text/alt				podlators
+cpan/podlators/t/data/snippets/text/c-with-newline		podlators
 cpan/podlators/t/data/snippets/text/c-with-spaces		podlators
 cpan/podlators/t/data/snippets/text/code			podlators
 cpan/podlators/t/data/snippets/text/cpp				podlators test
@@ -2236,6 +2237,7 @@ cpan/podlators/t/style/strict.t					podlators test
 cpan/podlators/t/text/color.t					podlators test
 cpan/podlators/t/text/invalid.t					Test file related to podlators
 cpan/podlators/t/text/iso-8859-1.t				Test file related to podlators
+cpan/podlators/t/text/no-encoding.t				podlators
 cpan/podlators/t/text/overstrike.t				podlators test
 cpan/podlators/t/text/snippets.t				Test file related to podlators
 cpan/podlators/t/text/termcap.t					podlators test

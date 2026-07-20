@@ -14,7 +14,8 @@ Bar.
 =head1 NEXT
 
 [output]
-.IP Foo 4
+.TP 4
+Foo
 .IX Item "Foo"
 Bar.
 .SH NEXT

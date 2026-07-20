@@ -23,7 +23,8 @@ Line
 =back
 
 [output]
-.IP A 4
+.TP 4
+A
 .IX Item "A"
 Line
 .RS 4
@@ -34,6 +35,7 @@ Line
 .RE
 .RS 4
 .RE
-.IP B 4
+.TP 4
+B
 .IX Item "B"
 Line

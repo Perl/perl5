@@ -19,15 +19,19 @@ Lists not parsed as numbers
 =back
 
 [output]
-.IP "1. Not a number" 4
+.TP 4
+1. Not a number
 .IX Item "1. Not a number"
 .PD 0
-.IP "2. Spaced right" 4
+.TP 4
+2. Spaced right
 .IX Item "2. Spaced right"
 .PD
-.IP "1 Not a number" 2
+.TP 2
+1 Not a number
 .IX Item "1 Not a number"
 .PD 0
-.IP "2 Spaced right" 2
+.TP 2
+2 Spaced right
 .IX Item "2 Spaced right"
 .PD

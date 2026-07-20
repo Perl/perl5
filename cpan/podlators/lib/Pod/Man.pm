@@ -12,7 +12,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Man v6.0.2;
+package Pod::Man v6.1.0;
 
 use 5.012;
 use parent qw(Pod::Simple);
@@ -294,7 +294,7 @@ sub init_fonts {
     # implementations what fixed bold-italic may be called (if it's even
     # available), so default to just bold.
     #<<<
-    $self->{opt_fixed}           ||= 'CW';
+    $self->{opt_fixed}           ||= 'CR';
     $self->{opt_fixedbold}       ||= 'CB';
     $self->{opt_fixeditalic}     ||= 'CI';
     $self->{opt_fixedbolditalic} ||= 'CB';
@@ -548,6 +548,8 @@ sub quote_literal {
       ^\s*
       (?:
          ( [\'\"] ) .* \1                    # already quoted
+       | \x{201C} .* \x{201D}                # already quoted (Unicode)
+       | . \"                                # one character and double quote
        | \\\*\(Aq .* \\\*\(Aq                # quoted and escaped
        | \\?\` .* ( \' | \\?\` | \\\*\(Aq )  # `quoted' or `quoted`
        | $extra
@@ -1085,11 +1087,15 @@ $preamble
 .\\"
 .IX Title $index
 .TH $name $section $date $release $center
-.\\" For nroff, turn off justification.  Always turn off hyphenation; it makes
-.\\" way too many mistakes in technical documents.
+.\\" For nroff, turn off justification. Always turn off hyphenation. String
+.\\" and register settings are required by groff 1.23.0 and later. Changing
+.\\" tag separation back to 1n is required by groff 1.24.0 and later.
+.if n .ds AD l
 .if n .ad l
+.nr HY 0
 .nh
 ----END OF HEADER----
+#"# unconfuse Emacs cperl-mode
 
     # If the language was specified, output the language configuration.
     if ($self->{opt_language}) {
@@ -1462,7 +1468,12 @@ sub item_common {
 
     # Now, output the item tag itself.
     $item = $self->mapfonts($item, '\fR');
-    $self->output($self->switchquotes('.IP', $item, $$self{INDENT}));
+    if ($type eq 'bullet' || $type eq 'number') {
+        $self->output($self->switchquotes('.IP', $item, $$self{INDENT}));
+    } else {
+        $self->output(".TP $$self{INDENT}\n");
+        $self->output($self->protect("$item\n"));
+    }
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
     $$self{SHIFTWAIT} = 0;
@@ -1620,9 +1631,6 @@ sub preamble_template {
 .    \}
 .\}
 .rr rF
-.\"
-.\" Required to disable full justification in groff 1.23.0.
-.if n .ds AD l
 ----END OF PREAMBLE----
 
     if ($$self{ENCODING} eq 'roff') {
@@ -1707,8 +1715,9 @@ __END__
 =for stopwords
 en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic stderr utf8 UTF-8
 Allbery Sean Burke Ossanna Solaris formatters troff uppercased Christiansen
-nourls parsers Kernighan lquote rquote unrepresentable mandoc NetBSD PostScript
-SMP macOS EBCDIC fallbacks manref reflowed reflowing FH overridable
+nourls parsers Kernighan lquote rquote unrepresentable mandoc NetBSD
+PostScript SMP macOS EBCDIC fallbacks manref reflowed reflowing FH overridable
+intersentence
 
 =head1 NAME
 
@@ -1742,7 +1751,7 @@ backward-compatible output mangling on such systems, set the C<encoding>
 option to C<roff> (the default in earlier Pod::Man versions).  See the
 C<encoding> option and L</ENCODING> for more details.
 
-See L</COMPATIBILTY> for the versions of Pod::Man with significant
+See L</COMPATIBILITY> for the versions of Pod::Man with significant
 backward-incompatible changes (other than constructor options, whose versions
 are documented below), and the versions of Perl that included them.
 
@@ -1765,14 +1774,17 @@ this option is not specified, is C<User Contributed Perl Documentation>.
 
 =item date
 
-[4.00] Sets the left-hand footer for the C<.TH> macro.  If this option is not
-set, the contents of the environment variable POD_MAN_DATE, if set, will be
-used.  Failing that, the value of SOURCE_DATE_EPOCH, the modification date of
-the input file, or the current time if stat() can't find that file (which will
-be the case if the input is from C<STDIN>) will be used.  If taken from any
-source other than POD_MAN_DATE (which is used verbatim), the date will be
+[4.00] Sets the centered page footer for the C<.TH> macro.  If this option is
+not set, the contents of the environment variable POD_MAN_DATE, if set, will
+be used.  Failing that, the value of SOURCE_DATE_EPOCH, the modification date
+of the input file, or the current time if stat() can't find that file (which
+will be the case if the input is from C<STDIN>) will be used.  If taken from
+any source other than POD_MAN_DATE (which is used verbatim), the date will be
 formatted as C<YYYY-MM-DD> and will be based on UTC (so that the output will
 be reproducible regardless of local time zone).
+
+Note that some system C<an> macro sets assume that the centered footer will be
+a modification date and will prepend something like C<Last modified: >.
 
 =item encoding
 
@@ -1826,8 +1838,9 @@ The default is C<pod>.
 
 =item fixed
 
-[1.00] The fixed-width font to use for verbatim text and code.  Defaults to
-C<CW>.  Some systems prefer C<CR> instead.  Only matters for B<troff> output.
+[6.1.0] The fixed-width font to use for verbatim text and code.  Defaults to
+C<CR>.  Solaris systems historically preferred C<CW> instead.  Only matters
+for B<troff> output.
 
 =item fixedbold
 
@@ -1976,14 +1989,10 @@ options is set, C<lquote> or C<rquote> overrides C<quotes>.
 
 =item release
 
-[1.00] Set the centered footer for the C<.TH> macro.  By default, this is set
-to the version of Perl you run Pod::Man under.  Setting this to the empty
-string will cause some *roff implementations to use the system default value.
-
-Note that some system C<an> macro sets assume that the centered footer will be
-a modification date and will prepend something like C<Last modified: >.  If
-this is the case for your target system, you may want to set C<release> to the
-last modified date and C<date> to the version number.
+[1.12] Set the left-hand page footer for the C<.TH> macro.  By default, this
+is set to the version of Perl you run Pod::Man under.  Setting this to the
+empty string will cause some *roff implementations to use the system default
+value.
 
 =item section
 
@@ -2201,7 +2210,7 @@ B<mandoc>, it's behavior is probably the same as the BSD hosts.
 
 Notes:
 
-=over 4
+=over 5
 
 =item [1]
 
@@ -2331,13 +2340,17 @@ also dropped attempts to add subtle formatting corrections in the output that
 would only be visible when typeset with B<troff>, which had previously been a
 significant source of bugs.
 
-Pod::Man v6.0.0 and later unconditionally convert C<-> to the C<\-> *roff
-escape, representing an ASCII hyphen-minus.  Earlier versions attempted to use
-heuristics to decide when a given C<-> character should translate to a
-hyphen-minus or a true hyphen, but these heuristics were buggy and fragile.
-v6.0.0 and later also unconditionally convert C<`> and C<'> to ASCII grave
-accent and apostrophe marks instead of the default *roff behavior of
-interpreting them as paired quotes.
+Pod::Man v6.0.0 and later, included in Perl 5.41.2, unconditionally convert
+C<-> to the C<\-> *roff escape, representing an ASCII hyphen-minus.  Earlier
+versions attempted to use heuristics to decide when a given C<-> character
+should translate to a hyphen-minus or a true hyphen, but these heuristics were
+buggy and fragile.  v6.0.0 and later also unconditionally convert C<`> and
+C<'> to ASCII grave accent and apostrophe marks instead of the default *roff
+behavior of interpreting them as paired quotes.
+
+Pod::Man v6.1.0 and later use C<CR> as the default fixed-width font instead of
+C<CW>, as was used in previous versions.  This should only matter for B<troff>
+output.
 
 =head1 BUGS
 
@@ -2355,32 +2368,60 @@ nice to support as an option for those who want to use it.
 
 =head2 Sentence spacing
 
-Pod::Man copies the input spacing verbatim to the output *roff document.  This
-means your output will be affected by how B<nroff> generally handles sentence
-spacing.
+It is difficult to write POD documents such that the resulting *roff output
+has consistent intersentence spacing.  For most documents, writing the POD
+using whatever conventions you prefer and letting the *roff output be
+inconsistent is probably the best trade-off to make.  But if you want to dive
+into the details, read on.
 
-B<nroff> dates from an era in which it was standard to use two spaces after
+Pod::Man copies the input spacing verbatim to the output *roff document.  This
+means your output will be affected by how *roff handles sentence spacing.
+
+*roff dates from an era in which it was standard to use two spaces after
 sentences, and will always add two spaces after a line-ending period (or
-similar punctuation) when reflowing text.  For example, the following input:
+similar punctuation) when reflowing text, with one exception mentioned below.
+For example, the following input:
 
     =pod
 
     One sentence.
     Another sentence.
 
-will result in two spaces after the period when the text is reflowed.  If you
-use two spaces after sentences anyway, this will be consistent, although you
-will have to be careful to not end a line with an abbreviation such as C<e.g.>
-or C<Ms.>.  Output will also be consistent if you use the *roff style guide
-(and L<XKCD 1285|https://xkcd.com/1285/>) recommendation of putting a line
-break after each sentence, although that will consistently produce two spaces
-after each sentence, which may not be what you want.
+will result in two spaces after the period in B<nroff> output when the text is
+reflowed.
 
-If you prefer one space after sentences (which is the more modern style), you
-will unfortunately need to ensure that no line in the middle of a paragraph
-ends in a period or similar sentence-ending paragraph.  Otherwise, B<nroff>
-will add a two spaces after that sentence when reflowing, and your output
-document will have inconsistent spacing.
+One significant exception, however, is that different versions of groff vary
+in their interpretation of C<."> (a sentence ending with an ASCII double
+quote).  Versions of groff prior to 1.24.0 treat this as the end of a sentence
+if there are two spaces after the closing quote, or if it comes at the end of
+a line.  Later versions will never treat this as the end of a sentence and
+will collapse any following spaces down to a single space.  For consistent
+behavior for documents written in POD, you must use Unicode double quotes
+(C<“”>, U+201C and U+201D) and declare UTF-8 encoding (or some other Unicode
+encoding).  The Unicode closing double-quote, when preceded by a period and
+followed by two spaces or the end of the line, will always be interpreted as
+the end of a sentence in modern versions of groff.
+
+Therefore, if you want two spaces after sentences in the B<nroff> output, you
+can achieve this by using Unicode double quotes and using two spaces after
+periods that end a sentence.  You will have to be careful to not end a line
+with an abbreviation such as C<e.g.> or C<Ms.>.  Alternately, you can use the
+*roff style guide (and L<XKCD 1285|https://xkcd.com/1285/>) recommendation of
+putting a line break after each sentence, but you will still need to use
+Unicode double quotes.
+
+If you prefer one space after sentences (which is the more modern style), your
+best option is to configure your local *roff installation to always format man
+pages that way, rather than attempt to force this result via your POD source.
+For example, for groff, L<groff_man_style(7)> documents putting:
+
+    .\" Put only one space after the end of a sentence.
+    .ss 12 0 \" See groff(7).
+
+in F</usr/share/groff/site-tmac/man.local> (on Debian-derived systems,
+F</etc/groff/man.local> is used instead).  This will affect all man pages
+formatted with groff on that system, regardless of how their source is
+formatted.
 
 =head2 Hyphens and quotes
 
@@ -2422,7 +2463,7 @@ recognition and all bugs are mine.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2020, 2022-2024 Russ Allbery <rra@cpan.org>
+Copyright 1999-2020, 2022-2026 Russ Allbery <rra@cpan.org>
 
 Substantial contributions by Sean Burke <sburke@cpan.org>.
 

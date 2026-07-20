@@ -6,7 +6,7 @@
 # which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2021-2024 Russ Allbery <eagle@eyrie.org>
+# Copyright 2021-2025 Russ Allbery <eagle@eyrie.org>
 # Copyright 2012-2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -19,21 +19,28 @@
 
 -bal=1          # put line breaks after a label
 -bbao           # put line breaks before any operator
--bfvt=2         # no newline before "or" after closing brace
--nbbc           # don't force blank lines before comments (bad for else blocks)
--boc            # do not re-break lists, since perltidy is awful at this
 -cpb            # put opening brace on same line as closing paren
 -ce             # cuddle braces around else
+-bfvt=2         # no newline before "or" after closing brace
+-nwn            # do not weld for multiline formatting (closer to Python black)
+-nbbc           # don't force blank lines before comments (bad for else blocks)
+-boc            # do not re-break lists, since perltidy is awful at this
+-kbb=')'        # please, please stop trying to cuddle closing function parens
 -l=79           # usually use 78, but don't want 79-long lines reformatted
 -nlop           # disable vertical alignment of logical and ternary expressions
 -vil='=>'       # enable vertical alignment for hash definitions
 -pt=2           # don't add extra whitespace around parentheses
 -sbt=2          # ...or square brackets
 -nsfs           # no space before semicolon in for (not that I use this form)
+-nwrs='A'       # don't add a space between a colon and an attribute
 -xci            # improve indentation of nested structures
+-mci            # minimize continuation indentation
+-qwaf           # format qw lists using parentheses like function calls
 -drc            # delete repeated commas in a list
 -wtc=m          # add trailing commas to all multi-line lists
 -atc            # add trailing commas where needed
 -dtc            # delete trailing commas where needed
--dwic           # remove commas interfering with welds
+-altc           # add trailing comma to long arguments (perlcritic needs this)
+-dwic           # delete commas that interfere with welding
+-dia            # delete interbracket arrows
 -viu            # align trailing unless with if (not that I use unless)

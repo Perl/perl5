@@ -135,7 +135,7 @@ if ($options{official} && !defined($options{center})) {
 # Delete flags that are only used in pod2man, not in Pod::Man. lax is accepted
 # only for backward compatibility and does nothing.
 my $verbose = $options{verbose};
-delete @options{qw(verbose lax official)};
+delete @options{ qw(verbose lax official) };
 
 # If neither stderr nor errors is set, default to errors = die rather than the
 # Pod::Man default of pod.
@@ -229,11 +229,14 @@ below.
 
 =item B<-d> I<string>, B<--date>=I<string>
 
-[4.00] Set the left-hand footer string for the C<.TH> macro to I<string>.  By
+[4.00] Set the centered page footer for the C<.TH> macro to I<string>.  By
 default, the first of POD_MAN_DATE, SOURCE_DATE_EPOCH, the modification date
 of the input file, or the current date (if input comes from C<STDIN>) will be
-used, and the date will be in UTC.  See L<Pod::Man/CLASS METHODS> for more
+used.  The default time zone is UTC.  See L<Pod::Man/CLASS METHODS> for more
 details.
+
+Note that some system C<an> macro sets assume that the centered footer will be
+a modification date and will prepend something like C<Last modified: >.
 
 =item B<-e> I<encoding>, B<--encoding>=I<encoding>
 
@@ -456,15 +459,10 @@ options is set, B<--lquote> or B<--rquote> overrides B<--quotes>.
 
 =item B<-r> I<version>, B<--release>=I<version>
 
-[1.00] Set the centered footer for the C<.TH> macro to I<version>.  By
+[1.12] Set the left-hand footer for the C<.TH> macro to I<version>.  By
 default, this is set to the version of Perl you run B<pod2man> under.  Setting
 this to the empty string will cause some *roff implementations to use the
 system default value.
-
-Note that some system C<an> macro sets assume that the centered footer will be
-a modification date and will prepend something like C<Last modified: >.  If
-this is the case for your target system, you may want to set B<--release> to
-the last modified date and B<--date> to the version number.
 
 =item B<-s> I<string>, B<--section>=I<string>
 
@@ -539,7 +537,7 @@ and Tom Christiansen.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999-2001, 2004, 2006, 2008, 2010, 2012-2019, 2022-2024 Russ Allbery
+Copyright 1999-2001, 2004, 2006, 2008, 2010, 2012-2019, 2022-2025 Russ Allbery
 <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it

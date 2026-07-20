@@ -9,4 +9,4 @@ Escape both `this' and C<`this'> (and don't surround it in quotes).
 [output]
 .SH "Quote escaping"
 .IX Header "Quote escaping"
-Escape both \`this\*(Aq and \f(CW\`this\*(Aq\fR (and don\*(Aqt surround it in quotes).
+Escape both \`this\*(Aq and \f(CR\`this\*(Aq\fR (and don\*(Aqt surround it in quotes).
