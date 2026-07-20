@@ -405,6 +405,18 @@ since the syntax hides the C<BEGIN> sub.
 
 Many potential threads-related race conditions have been fixed in the perl
 core and the two L<threads> and L<threads::shared> modules.
+=item *
+
+Line numbers reported by C<caller()> and diagnostic messages are now more
+accurate when the relevant COP has been optimized out (occurring often
+when the line is the first in an C<elsif> block, or when the line is
+inside a loop condition (such as within a C<while ()>).
+[GH #24387]
+[GH #24389]
+
+Note that (i) these changes could break any tests that hardcode the
+less-accurate line numbers (ii) further improvements to line number
+accuracy will hopefully follow within this development cycle. 
 
 =back
 
