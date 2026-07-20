@@ -405,6 +405,7 @@ since the syntax hides the C<BEGIN> sub.
 
 Many potential threads-related race conditions have been fixed in the perl
 core and the two L<threads> and L<threads::shared> modules.
+
 =item *
 
 Line numbers reported by C<caller()> and diagnostic messages are now more
