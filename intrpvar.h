@@ -77,6 +77,8 @@ PERLVAR(I, curpm_under,        PMOP *)                /* what to do \ interps in
 PERLVAR(I, tainting,	bool)		/* ? doing taint checks */
 PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
 
+PERLVAR(I, valuemagic_annotations, SV *) /* temporary holder of value magics during current op */
+
 /* PL_delaymagic is currently used for two purposes: to assure simultaneous
  * updates in ($<,$>) = ..., and to assure atomic update in push/unshift
  * @ISA, It works like this: a few places such as pp_push set the DM_DELAY
