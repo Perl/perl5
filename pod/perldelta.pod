@@ -348,6 +348,12 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item VMS
+
+Socket support is no longer a configure-time option on OpenVMS; sockets will
+always be available in Perl and are based on the universal socket support in the
+CRTL.
+
 =back
 
 =head1 Internal Changes
