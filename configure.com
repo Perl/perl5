@@ -1756,6 +1756,14 @@ $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
 $   IF ans.eqs."decc" THEN Has_Dec_C_Sockets = "T"
 $ ENDIF
 $!
+$! If openssl is a concealed device name, that "device" is the root
+$! of our OpenSSL installation.
+$ IF F$TRNLNM(F$PARSE("openssl",,,"DEVICE") - ":",,,,,"CONCEALED")
+$ THEN
+$   openssl_prefix = "/" + F$PARSE("openssl",,,"DEVICE") - ":"
+$ ELSE
+$   openssl_prefix = ""
+$ ENDIF
 $!
 $! Ask if they want to build with VMS_DEBUG perl
 $ echo ""
@@ -6574,6 +6582,7 @@ $ WC "obj_ext='" + obj_ext + "'"
 $ WC "old_pthread_create_joinable='" + old_pthread_create_joinable + "'"
 $ WC "oldarchlib='" + oldarchlib + "'"
 $ WC "oldarchlibexp='" + oldarchlibexp + "'"
+$ WC "openssl_prefix='" + openssl_prefix + "'"
 $ WC "optimize='" + optimize + "'"
 $ WC "osname='" + osname + "'"
 $ WC "osvers='" + osvers + "'"

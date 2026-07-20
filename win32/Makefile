@@ -234,6 +234,15 @@ EXTRALIBDIRS	=
 #
 #EMAIL		=
 
+# Try to locate OpenSSL installation, if any.
+!IF EXISTS($(PROGRAMFILES)\OpenSSL-Win64\bin\openssl.exe) && "$(WIN64)" == "define"
+OPENSSL_PREFIX = $(PROGRAMFILES)\OpenSSL-Win64
+!ELSEIF EXISTS($(PROGRAMFILES)\OpenSSL-Win32\bin\openssl.exe)
+OPENSSL_PREFIX = $(PROGRAMFILES)\OpenSSL-Win32
+!ELSE
+OPENSSL_PREFIX =
+!ENDIF
+
 ##
 ## Build configuration ends.
 ##
@@ -826,6 +835,7 @@ CFG_VARS	=					\
 		"libpth=$(CCLIBDIR:"=\");$(EXTRALIBDIRS:"=\")"	\
 		"libc=$(LIBC)"				\
 		"make=$(MAKE_BARE)"				\
+		"openssl_prefix=$(OPENSSL_PREFIX)"	\
 		"static_ext=$(STATIC_EXT)"		\
 		"usethreads=$(USE_ITHREADS)"		\
 		"useithreads=$(USE_ITHREADS)"		\

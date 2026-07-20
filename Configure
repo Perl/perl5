@@ -1262,6 +1262,7 @@ uvoformat=''
 uvuformat=''
 uvxformat=''
 pidtype=''
+openssl_prefix=''
 prefix=''
 prefixexp=''
 installprivlib=''
@@ -5360,6 +5361,15 @@ case "$ans" in
 none) libs=' ';;
 *) libs="$ans";;
 esac
+
+: see if OpenSSL is available
+for thisdir in $libpth; do
+	p=$(dirname $thisdir) # parent of lib/ directory
+	if test -x "$p/bin/openssl$exe_ext" || test -x "$p/sbin/openssl$exe_ext"; then
+		openssl_prefix=$p
+		break
+	fi
+done
 
 : determine optimization, if desired, or use for debug flag also
 case "$optimize" in
@@ -25892,6 +25902,7 @@ nvtype='$nvtype'
 o_nonblock='$o_nonblock'
 obj_ext='$obj_ext'
 old_pthread_create_joinable='$old_pthread_create_joinable'
+openssl_prefix='$openssl_prefix'
 optimize='$optimize'
 orderlib='$orderlib'
 osname='$osname'
