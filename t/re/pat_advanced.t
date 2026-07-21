@@ -1535,6 +1535,26 @@ sub run_tests {
     }
 
     {
+        my $s = "abb";
+        $s =~ s{^(?|(a)|(b)) (?|(a)|(b)) ((\2)*)}{${&}z}x;
+        is($s, "abbz", "numeric backrefs find the matching branch-reset capture");
+    }
+
+    {
+        my @tests = (
+            [qr/^(?|(a)|(b)) (?|(a)|(b)) ((\2)*)$/x, "aaa", "first physical capture"],
+            [qr/^(?|(a)|(b)) (?|(a)|(b)) ((\2)*)$/x, "bbb", "second physical capture"],
+            [qr/^(?|(a)|(b)) (?|(a)|(b)) ((\g{2})*)$/x, "abbb", "\\g{N} backreference"],
+            [qr/^(?|(a)|(b)|(c)) (?|(a)|(b)|(c)) ((\2)*)$/x, "accc", "three-way branch reset"],
+            [qr/^(?|(a)|(b)) (?|(a)|(b))\2$/x, "aaa", "backreference after branch reset"],
+            [qr/^(?|(a)|(b)) (?|(a)|(b))\1\2$/x, "aaaa", "multiple branch-reset backreferences"],
+        );
+        for my $test (@tests) {
+            like($test->[1], $test->[0], "branch reset: $test->[2]");
+        }
+    }
+
+    {
         use warnings;
         my $message = "ASCII pattern that really is UTF-8";
         my @w;
