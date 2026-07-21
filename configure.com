@@ -1994,7 +1994,7 @@ $   shorten_long_symbols = ans
 $! IEEE math?
 $ echo ""
 $ echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers on"
-$ echo "Alpha and Itanium, but if you need G_FLOAT for binary compatibility"
+$ echo "post-VAX systems, but if you need G_FLOAT for binary compatibility"
 $ echo "with an external library or existing data, you may wish to disable"
 $ echo "the IEEE math option."
 $ bool_dflt = use_ieee_math
@@ -2839,10 +2839,7 @@ $ IF use_ieee_math
 $ THEN
 $   extra_flags = "''extra_flags'" + "/float=ieee/ieee=denorm"
 $ ELSE
-$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
-$   THEN
-$     extra_flags = "''extra_flags'" + "/float=g_float"
-$   ENDIF
+$   extra_flags = "''extra_flags'" + "/float=g_float"
 $ ENDIF
 $ names_flags = ""
 $ IF be_case_sensitive
@@ -3104,6 +3101,7 @@ $ d_long_double_style_ieee_std = "undef"
 $ d_long_double_style_vax = "undef"
 $ IF useieee .OR. useieee .EQS. "define"
 $ THEN
+$   doublekind = "3"     ! DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN
 $   d_double_has_inf = "define"
 $   d_double_has_nan = "define"
 $   d_double_has_negative_zero = "define"
@@ -3151,6 +3149,7 @@ $   d_tgamma = "define"
 $   d_trunc = "define"
 $   d_truncl = "define"
 $ ELSE
+$   doublekind = "11"    ! DOUBLE_IS_VAX_G_FLOAT
 $   d_double_style_vax = "define"
 $   IF uselongdouble .OR. uselongdouble .EQS. "define"
 $   THEN
@@ -6153,7 +6152,7 @@ $ WC "direntrytype='struct dirent'"
 $ WC "dlext='" + dlext + "'"
 $ WC "dlobj='" + dlobj + "'"
 $ WC "dlsrc='dl_vms.xs'"
-$ WC "doublekind='3'"
+$ WC "doublekind='" + doublekind + "'"
 $ WC "doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'"
 $ WC "doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'"
 $ WC "doublemantbits='" + doublemantbits + "'"
