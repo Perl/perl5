@@ -8301,7 +8301,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             type = OP(scan);
             n = ARG1u(scan);  /* which paren pair */
             if (rex->logical_to_parno) {
-                n = rex->logical_to_parno[n];
+                /* The compiler has already mapped this from logical to
+                 * physical; only search the other physical buffers sharing
+                 * the same logical number. */
                 do {
                     if ( RXp_LASTPAREN(rex) < n ||
                          RXp_OFFS_START(rex,n) == -1 ||
