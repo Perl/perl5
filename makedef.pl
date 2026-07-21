@@ -643,6 +643,14 @@ unless ($Config{d_wcrtomb}) {
     ++$skip{PL_wcrtomb_ps};
 }
 
+unless ($Config{d_double_has_inf}) {
+    ++$skip{PL_inf};
+}
+
+unless ($Config{d_double_has_nan}) {
+    ++$skip{PL_nan};
+}
+
 ###############################################################################
 
 # At this point all skip lists should be completed, as we are about to test
