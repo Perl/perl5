@@ -848,7 +848,7 @@ the strings?).
  Leon T     5.44.0-RC2   2026-Jul-08
  Leon T     5.44.0       2026-Jul-15
 
- Leon T     5.45.0       2026-Jul-16
+ Leon T     5.45.0       2026-Jul-16     The 5.45 development track
  Paul E     5.45.1       2026-Jul-21
 
 =head2 SELECTED RELEASE SIZES
