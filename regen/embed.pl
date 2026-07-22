@@ -3401,6 +3401,10 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     UTF8_WARN_SURROGATE_BIT_POS_
 );
 
+# The keys are files that have documentation outside the normal apidoc lines,
+# and all the definitions are assumed to exist.
+my %assume_symbols_documented_files = map { $_ => 1 } qw();
+
 # Keep lists of symbols to undef under various conditions.  We can initialize
 # the two ones for perl extensions with the lists above.
 my %always_undefs;
@@ -4734,18 +4738,26 @@ sub set_flags_visibility {
     #       core but nowhere else
     #   1   The symbol is supposed to be visible everywhere
 
-    # Use the stored flags if new ones empty.  If those don't exist, assume
-    # visible everywhere for symbols that Perl reserves for its use, and
-    # hidden visibility for everything else.
+    # Use the stored flags if new ones empty.  Look for special handling
+    # request otherwise.
     my $flags = $raw_flags // $visibility{$name}{flags_raw};
     if (! defined $flags) {
-        if ($name =~ $names_reserved_for_perl_use_re) {
+        if ($assume_symbols_documented_files{$file}) {
+
+            # Every definition in $file is assumed to have documentation and
+            # is visible everywhere
+            $flags = 'Am';
+        }
+        elsif ($name =~ $names_reserved_for_perl_use_re) {
+
+            # Symbols that Perl reserves for its use are assumed to be
+            # everywhere visible.
             $flags = 'A';
 
             # But note that this is an assumption; so can avoid warning later.
             $visibility{$name}{flags_implicit} = 1;
         }
-        else {
+        else {  # Hidden visibility for everything else.
             $flags = 'e';
         }
     }
@@ -5206,11 +5218,14 @@ sub find_undefs {
             # Just the symbol, no arglist nor definition
             $name =~ s/ (?: \s | \( ) .* //x;
 
-            # Call the subroutine with an 'undef' third parameter for symbols
-            # reserved for Perl-use.  That tells it to consider these to be
-            # always visible unless otherwise directed
-            set_flags_visibility($name, $hdr, $line->{start_line_num}, undef)
-                                  if $name =~ $names_reserved_for_perl_use_re;
+            # Call the subroutine with an 'undef' third parameter for these
+            # reasons, to signal it to handle them specially.
+            if (   $assume_symbols_documented_files{$hdr}
+                || $name =~ $names_reserved_for_perl_use_re)
+            {
+                set_flags_visibility($name, $hdr, $line->{start_line_num},
+                                     undef);
+            }
 
             # Calculate $name's actual visibility for later use.
             my $stringified_conds = get_and_set_cpp_visibility($name, $line);
