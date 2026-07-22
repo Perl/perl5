@@ -145,6 +145,8 @@ my $names_reserved_for_perl_use_re =
 # as ones that turn on a special debugging mode.
 my %per_file_definitions = (
         'perl.h'             => { 'H_PERL' => 0 },
+        'win32/config_H.gc'  => { '_config_h_' => 0 },
+        'win32/config_H.vc'  => { '_config_h_' => 0 },
 );
 
 # This is a list of symbols that are:
@@ -261,7 +263,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     BSD_GETPGRP
     BSDish
     BSD_SETPGRP
-    BYTEORDER
     CALL_BLOCK_HOOKS
     CALL_FPTR
     CALLREGCOMP
@@ -612,8 +613,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     do_exec
     DOSISH
     DOUBLE_BIG_ENDIAN
-    DOUBLE_HAS_INF
-    DOUBLE_HAS_NAN
     DOUBLE_IS_IEEE_FORMAT
     DOUBLE_IS_VAX_FLOAT
     DOUBLE_LITTLE_ENDIAN
@@ -877,13 +876,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_EXTRA_LONG_UTF8
     HAS_GETPGRP
     HAS_GROUP
-    HAS_HTONL
-    HAS_HTONS
     HAS_IOCTL
     HAS_KILL
     HAS_NONLATIN1_FOLD_CLOSURE
-    HAS_NTOHL
-    HAS_NTOHS
     HAS_PASSWD
     HAS_POSIX_2008_LOCALE
     HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
@@ -1895,7 +1890,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PP_wrapped
     PRESCAN_VERSION
     PRINTF_FORMAT_NULL_OK
-    PRIVLIB_EXP
     PRIVSHIFT
     ProgLen
     pthread_addr_t
@@ -2410,7 +2404,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     share_hek_hek
     sharepvn
     SHARP_S_SKIP
-    SH_PATH
     SHUTDOWN_TERM
     sI
     SIMPLE
@@ -3358,6 +3351,8 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
 # and all the definitions are assumed to exist.
 my %assume_symbols_documented_files = map { $_ => 1 } qw(
     perl_lock_definitions.h
+    win32/config_H.gc
+    win32/config_H.vc
 );
 
 # Keep lists of symbols to undef under various conditions.  We can initialize
@@ -3370,8 +3365,10 @@ my %non_ext_undefs = %needed_by_ext;
 my %need_longs;
 
 # Create lists of headers and C files to examine.  Use all top level .c files,
-# and all top level .h files that aren't on the $skip_files list.
-my @header_list;
+# and all top level .h files that aren't on the $skip_files list.  (A couple
+# header files aren't named typically; its simplest to just add them
+# directly.)
+my @header_list = qw(win32/config_H.gc win32/config_H.vc);
 my @c_list;
 open my $mf, "<", "MANIFEST" or die "Can't open MANIFEST: $!";
 while (defined (my $file = <$mf>)) {
