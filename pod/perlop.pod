@@ -2184,10 +2184,8 @@ Options (specified by the following modifiers) are:
     d   Use Unicode or native charset, as in 5.12 and earlier.
     n   Non-capture mode. Don't let () fill in $1, $2, etc...
 
-If a precompiled pattern is embedded in a larger pattern then the effect
-of C<"msixpluadn"> will be propagated appropriately.  The effect that the
-C</o> modifier has is not propagated, being restricted to those patterns
-explicitly using it.
+Embedding a precompiled pattern in a larger pattern does not change it
+nor its settings.
 
 The C</a>, C</d>, C</l>, and C</u> modifiers (added in Perl 5.14)
 control the character set rules, but C</a> is the only one you are likely
