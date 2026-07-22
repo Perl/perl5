@@ -859,22 +859,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     G_WRITING_TO_STDERR
     HADNV
     HASARENA
-    HASATTRIBUTE_ALWAYS_INLINE
-    HASATTRIBUTE_DEPRECATED
-    HASATTRIBUTE_FORMAT
-    HASATTRIBUTE_MALLOC
-    HASATTRIBUTE_NONNULL
-    HASATTRIBUTE_NORETURN
-    HASATTRIBUTE_PURE
-    HASATTRIBUTE_UNUSED
-    HASATTRIBUTE_VISIBILITY
-    HASATTRIBUTE_WARN_UNUSED_RESULT
     HAS_BUILTIN_UNREACHABLE
     HAS_C99
-    HAS_CHOWN
     HAS_EXTENDED_OS_ERRNO
     HAS_EXTRA_LONG_UTF8
-    HAS_GETPGRP
     HAS_GROUP
     HAS_IOCTL
     HAS_KILL
@@ -882,9 +870,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_PASSWD
     HAS_POSIX_2008_LOCALE
     HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
-    HAS_SETPGRP
-    HAS_SETREGID
-    HAS_SETREUID
     HAS_UTIME
     HAS_WAIT
     hasWARNBIT
@@ -1889,7 +1874,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PP
     PP_wrapped
     PRESCAN_VERSION
-    PRINTF_FORMAT_NULL_OK
     PRIVSHIFT
     ProgLen
     pthread_addr_t
@@ -2802,7 +2786,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USE_PWENT_FPTR
     USE_PWENT_PTR
     USE_QUERYLOCALE
-    USE_REENTRANT_API
     USER_PROP_MUTEX_INIT
     USER_PROP_MUTEX_LOCK
     USER_PROP_MUTEX_TERM
@@ -3353,6 +3336,7 @@ my %assume_symbols_documented_files = map { $_ => 1 } qw(
     perl_lock_definitions.h
     win32/config_H.gc
     win32/config_H.vc
+    config_h.SH
 );
 
 # Keep lists of symbols to undef under various conditions.  We can initialize
@@ -5234,7 +5218,20 @@ sub find_undefs {
                 next;
             }
         }
-    }   # Done with headers
+    }   # Done with headers, except for config.h
+
+    # We can't examine config.h directly because it is not under source code
+    # control, and the outputs of this program are.  However, config_h.SH is
+    # under source control, and we can infer from it the symbols that config.h
+    # will eventually contain.  All of them are considered public.
+    my $config_name = "config_h.SH";
+    open my $config_fh, "<", $config_name or die "Can't open $config_name: $!";
+    while (<$config_fh>) {
+                    # Pattern based on manual inspection of $config_name
+        next unless / ^ \# (?: define | \$ (?: d_ )? \w+ ) \s+ (\w+) /x;
+        set_flags_visibility($1, $config_name, $., undef);
+    }
+    close $config_fh, or die "Can't close config_h.SH: $!";
 
     # Now look through the C and pod files.  Any preprocessor constraints in
     # these affect only the containing files, so no need to look for cpp
@@ -5277,10 +5274,8 @@ sub find_undefs {
         if (! defined $cpp_visibility) {
 
             # To get here we have a macro without having encountered its
-            # #define.  This can legitimately happen when that definition is
-            # in config.h, which we don't (and can't examine); or it could be
-            # the result of some flaw somewhere.  But there is no real harm
-            # done unless we are trying to restrict the external visibility.
+            # #define.  There is no real harm done unless we are trying to
+            # restrict the external visibility.
             if ($flags_visibility ne '1') {
                 warn "'$name' unexpectedly has no C preprocessor conditions"
                    . " for #defining it; found in "
@@ -5289,8 +5284,6 @@ sub find_undefs {
             }
             $cpp_visibility = 1;    # Assume worst case
 
-            # (The reason we can't examine config.h is that it is not under
-            # source code control, and the outputs of this program are.)
         }
 
         if ($cpp_visibility eq '0') {
