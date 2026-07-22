@@ -170,7 +170,6 @@ my %per_file_definitions = (
 # For all modules that aren't deliberately using particular names, all the
 # other symbols on it are namespace pollutants.
 my %unresolved_visibility_overrides = map { $_ => 1 } qw(
-    _
     ABORT
     ABS_IV_MIN
     ALIGNED_TYPE
@@ -3213,6 +3212,7 @@ my %needed_by_ext = map { $_ => 1 } qw(
 # part have a trailing underscore, indicating the intent for this symbol to
 # not be directly usable by XS code
 my %undocumented_always_visible = map { $_ => 1 } qw(
+    _
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off
     CvHasNAME_HEK_on
