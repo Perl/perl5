@@ -134,6 +134,14 @@ L<Announced on 2025-07-20 by Richard Leach|https://www.nntp.perl.org/group/perl.
   they emerge, surprised for a moment by how hot they are to touch.
     'This is ultra fine,' says Joe. 'It goes into Wotsits.'
 
+=head2 v5.42.3-RC1 - Grayson Perry, "The Descent of Man"
+
+L<Announced on 2026-07-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271107.html>
+
+The Default Male gaze does not just dominate cinema, it looks down on
+society like the Eye of Sauron in The Lord of the Rings.  Every other
+identity group is 'othered' by it.
+
 =head2 v5.42.2 - Edgar Allan Poe, "The Pit and the Pendulum" (in "Tales of Mystery and Imagination")
 
 L<Announced on 2026-03-29 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/03/msg270839.html>
@@ -321,6 +329,14 @@ L<Announced on 2024-07-02 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/gr
   We find that in research a certain amount of intelligent ignorance
   is essential to progress; for, if you know too much, you won't try
   the thing.
+
+=head2 v5.40.5-RC1 - Grayson Perry, "The Descent of Man"
+
+L<Announced on 2026-07-22 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271106.html>
+
+Default Man feels he is the reference point from which all other values
+and cultures are judged.  He might not be aware of it, but Default Man
+thinks he is the zero longitude of identities.
 
 =head2 v5.40.4 - Edgar Allan Poe, "The Masque of the Red Death" (in "Tales of Mystery and Imagination")
 
