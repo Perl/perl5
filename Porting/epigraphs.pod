@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.45.1 - Mike Oldfield - Far Above The Clouds
+
+L<Announced on 2026-07-22 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271102.html>
+
+  And the man in the rain picked up his bag of secrets, and journeyed
+  up the mountainside, far above the clouds, and nothing was ever heard
+  from him again...
+  ...except for the sound of Tubular Bells.
+
 =head2 v5.44.0 - Frank Herbert - Dune
 
 L<Announced on 2026-07-15 by Leon Timmermans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271063.html>
