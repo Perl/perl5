@@ -3,7 +3,7 @@
 #
 # Regenerate (overwriting only if changed):
 #
-#    pod/perldebguts.pod
+#    pod/perlreguts.pod
 #    regnodes.h
 #
 # from information stored in
@@ -12,7 +12,7 @@
 #    op_reg_common.h
 #    regexp.h
 #
-# pod/perldebguts.pod is not completely regenerated.  Only the table of
+# pod/perlreguts.pod is not completely regenerated.  Only the table of
 # regexp nodes is replaced; other parts remain unchanged.
 #
 # Accepts the standard regen_lib -q and -v args.
@@ -38,7 +38,7 @@
 #
 # this script might end up eval()ing something like C<0x1> and then
 # C<0x2> and then C<(0x1|0x2)> the results of which it then might use in
-# constructing a data structure, or pod in perldebguts, or a comment in
+# constructing a data structure, or pod in perlreguts, or a comment in
 # C<regnodes.h>. It also would separate out the "X", "Y", and "Z" and
 # use them, and would also use the data in the line comment if present.
 #
@@ -888,7 +888,7 @@ regen/regcomp.pl - generate regex node metadata from regcomp.sym
 
 This file is the canonical Perl-data source consumed by
 F<regen/regcomp.pl>.  It defines the regex opcodes and regmatch states used
-to generate F<regnodes.h> and the regnode table in F<pod/perldebguts.pod>.
+to generate F<regnodes.h> and the regnode table in F<pod/perlreguts.pod>.
 
 Order is significant.  Preserve the existing order of groups and the order of
 entries within each group unless you are intentionally changing regex opcode or
@@ -930,7 +930,7 @@ any type without validation.
 =item * C<pod>
 
 Optional text emitted into the generated regnode table in
-F<pod/perldebguts.pod>.  A scalar is one paragraph.  An arrayref of strings
+F<pod/perlreguts.pod>.  A scalar is one paragraph.  An arrayref of strings
 is one paragraph which will be reflowed.  A nested arrayref starts a new
 paragraph; only two levels are supported.
 
@@ -973,7 +973,7 @@ C<regnode_charclass>.  Omit it for plain C<regnode>.
 =item * C<pod>
 
 Optional per-op text which is intended to be emitted into the generated regnode table
-in perldebguts.pod.  It follows the same scalar/arrayref paragraph rules as
+in perlreguts.pod.  It follows the same scalar/arrayref paragraph rules as
 group-level C<pod>.
 
 =item * C<comment>
@@ -1073,91 +1073,84 @@ EOP
    switching on utf8ness */
 EOT
 
+    my $previous_name;
     for my $node (@ops) {
-        print_state_def_line($out, $node->{name}, $node->{id}, rendered_desc($node));
+        my $base_expr = defined $previous_name
+            ? "($previous_name + 1)"
+            : "0";
+        print_state_def_line(
+            $out, $node->{name}, $node->{id}, rendered_desc($node), $base_expr
+        );
         if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
-            print_state_def_line($out, $alias, $node->{id}, rendered_desc($node));
+            print_state_def_line(
+                $out, $alias, $node->{id}, "type alias for $node->{name}",
+                $node->{name}
+            );
         }
+        $previous_name = $node->{name};
     }
 
     print $out "\t/* ------------ States ------------- */\n";
+    $previous_name = "REGNODE_MAX";
     for my $node (@states) {
-        print_state_def_line($out, $node->{name}, $node->{id}, $node->{comment});
+        my $base_expr = "($previous_name + 1)";
+        print_state_def_line(
+            $out, $node->{name}, $node->{id}, $node->{comment}, $base_expr
+        );
+        $previous_name = $node->{name};
     }
 }
 
 sub print_state_def_line
 {
-    my ($fh, $name, $id, $comment) = @_;
+    my ($fh, $name, $id, $comment, $base_expr) = @_;
 
     # The sub-names are like '_tb' or '_tb_p8' = max 6 chars wide
     my $name_col_width = $base_name_width + 6;
-    my $base_id_width = 3;  # Max is '255' or 3 cols
-    my $mid_id_width  = 3;  # Max is '511' or 3 cols
-    my $full_id_width = 3;  # Max is '1023' but not close to using the 4th
-
-    my $line = "#define " . $name;
-    $line .= " " x ($name_col_width - length($name));
-
-    $line .= sprintf "%*s", $base_id_width, $id;
-    $line .= " " x $mid_id_width;
-    $line .= " " x ($full_id_width + 2);
-
-    $line .= "/* ";
-    my $hanging = length $line;     # Indent any subsequent line to this pos
-    $line .= sprintf "0x%02x", $id;
-
+    my $line = sprintf("/* 0x%02x : %3d\n", $id, $id);
     my $columns = 78;
 
-    # From the documentation: 'In fact, every resulting line will have length
-    # of no more than "$columns - 1"'
-    $line = wrap($columns + 1, "", " " x $hanging, "$line $comment");
-    chomp $line;            # wrap always adds a trailing \n
-    $line =~ s/ \s+ $ //x;  # trim, just in case.
-
-    # The comment may have wrapped.  Find the final \n and measure the length
-    # to the end.  If it is short enough, just append the ' */' to the line.
-    # If it is too close to the end of the space available, add an extra line
-    # that consists solely of blanks and the ' */'
-    my $len = length($line); my $rindex = rindex($line, "\n");
-    if (length($line) - rindex($line, "\n") - 1 <= $columns - 3) {
-        $line .= " */\n";
-    }
-    else {
-        $line .= "\n" . " " x ($hanging - 3) . "*/\n";
-    }
+    # Keep the expanded value and description on a separate line from the
+    # definition, so renumbering only changes this comment.
+    my $wrapped = wrap($columns + 1, "", "   ", "   $name - $comment");
+    chomp $wrapped;         # wrap always adds a trailing \n
+    $line .= $wrapped . " */\n";
 
     print $fh $line;
 
-    # And add the 2 subsidiary #defines used when switching on
-    # with_t_UTF8nes()
-    my $with_id_t = $id * 2;
-    for my $with (qw(tb  t8)) {
-        my $with_name = "${name}_$with";
-        print  $fh "#define ", $with_name;
-        print  $fh " " x ($name_col_width - length($with_name) + $base_id_width);
-        printf $fh "%*s", $mid_id_width, $with_id_t;
-        print  $fh " " x $full_id_width;
-        printf $fh "  /*";
-        print  $fh " " x (4 + 2);  # 4 is width of 0xHH that the base entry uses
-        printf $fh "0x%03x */\n", $with_id_t;
+    $line = "#define " . $name;
+    $line .= " " x ($name_col_width - length($name));
+    $line .= $base_expr;
+    print $fh "$line\n";
 
-        $with_id_t++;
+    # And add the 2 subsidiary #defines used when switching on
+    # with_t_UTF8nes().
+    my @with_t = (
+        [ tb => "(($name) * 2)" ],
+        [ t8 => "(($name) * 2 + 1)" ],
+    );
+    for my $with (@with_t) {
+        my ($suffix, $expr) = @$with;
+        my $with_name = "${name}_$suffix";
+        print  $fh "#define ", $with_name;
+        print  $fh " " x ($name_col_width - length($with_name));
+        print  $fh $expr, "\n";
     }
 
     # Finally add the 4 subsidiary #defines used when switching on
-    # with_tp_UTF8nes()
-    my $with_id_tp = $id * 4;
-    for my $with (qw(tb_pb  tb_p8  t8_pb  t8_p8)) {
-        my $with_name = "${name}_$with";
+    # with_tp_UTF8nes().
+    my @with_tp = (
+        [ tb_pb => "(($name) * 4)" ],
+        [ tb_p8 => "(($name) * 4 + 1)" ],
+        [ t8_pb => "(($name) * 4 + 2)" ],
+        [ t8_p8 => "(($name) * 4 + 3)" ],
+    );
+    for my $with (@with_tp) {
+        my ($suffix, $expr) = @$with;
+        my $with_name = "${name}_$suffix";
         print  $fh "#define ", $with_name;
-        print  $fh " " x ($name_col_width - length($with_name) + $base_id_width + $mid_id_width);
-        printf $fh "%*s", $full_id_width, $with_id_tp;
-        printf $fh "  /*";
-        print  $fh " " x (4 + 2);  # 4 is width of 0xHH that the base entry uses
-        printf $fh "0x%03x */\n", $with_id_tp;
-
-        $with_id_tp++;
+        print  $fh " " x ($name_col_width - length($with_name));
+        print  $fh $expr, "\n";
     }
 
     print $fh "\n"; # Blank line separates groups for clarity
@@ -1456,8 +1449,8 @@ EOC
 
 }
 
-sub do_perldebguts {
-    my $guts= open_new( 'pod/perldebguts.pod', '>' );
+sub do_perlreguts {
+    my $guts= open_new( 'pod/perlreguts.pod', '>' );
 
     my $node;
     my $code;
@@ -1475,8 +1468,8 @@ EOD
     my $old_fh= select($guts);
     $~= "GuTS";
 
-    open my $oldguts, '<', 'pod/perldebguts.pod'
-        or die "$0 cannot open pod/perldebguts.pod for reading: $!";
+    open my $oldguts, '<', 'pod/perlreguts.pod'
+        or die "$0 cannot open pod/perlreguts.pod for reading: $!";
     while (<$oldguts>) {
         print;
         last if /=for regcomp.pl begin/;
@@ -1508,7 +1501,7 @@ END_OF_DESCR
         last if /=for regcomp.pl end/;
     }
     do { print } while <$oldguts>; #win32 can't unlink an open FH
-    close $oldguts or die "Error closing pod/perldebguts.pod: $!";
+    close $oldguts or die "Error closing pod/perlreguts.pod: $!";
     select $old_fh;
     close_and_rename($guts);
 }
@@ -1579,4 +1572,4 @@ print_process_EXACTish($out);
 print $out "\n#endif /* $confine_to_core */\n";
 read_only_bottom_close_and_rename($out);
 
-do_perldebguts();
+do_perlreguts();
