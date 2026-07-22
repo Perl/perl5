@@ -2286,7 +2286,7 @@ my_snprintf()
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
+#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) croak("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
 #if defined(USE_LOCALE_NUMERIC) || defined(USE_QUADMATH)
 #  define my_snprintf Perl_my_snprintf
@@ -5235,9 +5235,8 @@ contexts in C, and in all contexts in C++.
 #  define Perl_assert(what)                                                 \
         ((what)                                                             \
          ? ((void) 0)                                                       \
-         : (Perl_croak_nocontext("Assertion %s failed:"                     \
-                                 " file \"" __FILE__ "\", line %" LINE_Tf,  \
-                                 STRINGIFY(what), (line_t) __LINE__),       \
+         : (croak("Assertion %s failed: file \"" __FILE__ "\", line %"      \
+                  LINE_Tf, STRINGIFY(what), (line_t) __LINE__),             \
             (void) 0))
 #  define Perl_assert_(what)    assert(what),
 #else
@@ -6608,9 +6607,9 @@ INIT({
                     "%s: %" LINE_Tf ": locking " name "; new lock depth=1;" \
                     " this thread reader count=%d\n",                       \
                     __FILE__, (line_t) __LINE__, rcounter));                \
-            if (xcounter < 0) (Perl_croak_nocontext("panic: "               \
-                              "%s: %" LINE_Tf ": locking " name "; new lock"\
-                              " depth=%d; this thread reader count=%d\n",   \
+            if (xcounter < 0) (croak("panic: %s: %" LINE_Tf ": locking "    \
+                               name "; new lock depth=%d; this thread"      \
+                               " reader count=%d\n",                        \
                               __FILE__, (line_t) __LINE__, xcounter,        \
                               rcounter));                                   \
                                                                             \
@@ -6624,10 +6623,9 @@ INIT({
                         (mutex)->readers_count));                           \
             }                                                               \
             else {                                                          \
-                Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting"  \
-                                     " to convert non-exclusive lock on "   \
-                                     name " to exclusive\n",                \
-                                     __FILE__, (line_t) __LINE__);          \
+                croak("panic: %s: %" LINE_Tf ": attempting to convert"      \
+                      " non-exclusive lock on name to exclusive\n",         \
+                      __FILE__, (line_t) __LINE__);                         \
             }                                                               \
                                                                             \
             xcounter = 1;                                                   \
@@ -6647,10 +6645,9 @@ INIT({
                     "mutex " name ": all threads reader count is %zd\n",    \
                     (mutex)->readers_count));                               \
             if (cond_to_panic_if_already_locked) {                          \
-                Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting"  \
-                                     " to lock " name " incompatibly: %s\n",\
-                                     __FILE__, (line_t) __LINE__,           \
-                                STRINGIFY(cond_to_panic_if_already_locked));\
+                croak("panic: %s: %" LINE_Tf ": attempting to lock " name   \
+                      " incompatibly: %s\n", __FILE__, (line_t) __LINE__,   \
+                      STRINGIFY(cond_to_panic_if_already_locked));          \
             }                                                               \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
@@ -6670,10 +6667,9 @@ INIT({
                     __FILE__, (line_t) __LINE__, rcounter));                \
         }                                                                   \
         else if (xcounter <= 0) {                                           \
-            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to"   \
-                                 " unlock already unlocked " name           \
-                                 "; depth was %d\n",                        \
-                                 __FILE__, (line_t) __LINE__, xcounter);    \
+            croak("panic: %s: %" LINE_Tf ": attempting to unlock already"   \
+                  " unlocked " name "; depth was %d\n",                     \
+                  __FILE__, (line_t) __LINE__, xcounter);                   \
         }                                                                   \
         else {                                                              \
             xcounter--;                                                     \
@@ -6692,7 +6688,7 @@ INIT({
             DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                     "%s: %" LINE_Tf ": read locking " name "; no writers\n",\
                     __FILE__, (line_t) __LINE__));                          \
-            if (xcounter != 0) Perl_croak_nocontext("panic: %s: %" LINE_Tf  \
+            if (xcounter != 0) croak("panic: %s: %" LINE_Tf                 \
                                     ": read locking " name "; writers=%d\n",\
                                     __FILE__, (line_t) __LINE__, xcounter); \
             PERL_READ_LOCK(mutex);                                          \
@@ -6720,10 +6716,11 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (xcounter <= 0) {    /* No exclusive lock */                     \
-            if (xcounter != 0) Perl_croak_nocontext("panic: %s: %" LINE_Tf  \
-                            ": read unlocking " name "; writers=%d; this"   \
-                            " thread reader count=%d\n",                    \
-                           __FILE__, (line_t) __LINE__, xcounter, rcounter);\
+            if (xcounter != 0) croak("panic: %s: %" LINE_Tf  ": read"       \
+                                     " unlocking " name "; writers=%d;"     \
+                                     " this thread reader count=%d\n",      \
+                                     __FILE__, (line_t) __LINE__, xcounter, \
+                                     rcounter);                             \
             DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
                     "%s: %" LINE_Tf ": read unlocking " name "; no writers;"\
                     " this thread reader count=%d\n",                       \
@@ -6747,11 +6744,9 @@ INIT({
                     xcounter, rcounter));                                   \
         }                                                                   \
         else {                                                              \
-            Perl_croak_nocontext("panic: %s: %" LINE_Tf ": attempting to"   \
-                                 " read unlock already unlocked " name      \
-                                 "; readers count was %zd\n",               \
-                                 __FILE__, (line_t) __LINE__,               \
-                                 (mutex)->readers_count);                   \
+            croak("panic: %s: %" LINE_Tf ": attempting to read unlock"      \
+                  " already unlocked " name "; readers count was %zd\n",    \
+                  __FILE__, (line_t) __LINE__, (mutex)->readers_count);     \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
