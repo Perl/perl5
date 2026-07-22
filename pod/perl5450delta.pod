@@ -1,0 +1,235 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5450delta - what is new for perl v5.45.0
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.44.0 release and the 5.45.0
+release.
+
+If you are upgrading from an earlier release such as 5.43.0, first read
+L<perl5440delta>, which describes differences between 5.43.0 and 5.44.0.
+
+=head1 Incompatible Changes
+
+=head2 Mutex locks for C<getprotoent> and C<getservent> are removed
+
+The macros C<GETPROTOENT_LOCK> and C<GETSERVENT_LOCK> macros are
+removed, along with their unlocking counterparts.  These macros, though
+never documented, were intended to create thread safety when using their
+corresponding functions in a threaded-perl.  But they didn't actually
+furnish that, so using them would give a false sense of security.
+Another thread simultaneously accessing the database could move the
+pointers, so these would act unpredictably.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Some pattern matches against long strings are now faster: in particular
+where the pattern: is anchored; contains a short fixed substring; and
+contains a floating substring which is as long or longer than than the
+fixed substring; but where the fixed substring isn't present in the
+target string. For example this match will be rejected much faster now:
+
+    "-" x 10_000_000 =~ /^abc.*def/
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<autouse> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.63 to 3.64.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.63 to 3.64.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<feature> has been upgraded from version 2.02 to 2.03.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.16 to 4.18.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20260715 to 5.20260720.
+
+=item *
+
+L<podlators> has been upgraded from version v6.0.2 to v6.1.0.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302219 to 1.302222.
+
+=item *
+
+L<threads> has been upgraded from version 2.45 to 2.46.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.73 to 1.74.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.50 to 1.51.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+Socket support is no longer a configure-time option on OpenVMS; sockets will
+always be available in Perl and are based on the universal socket support in the
+CRTL.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Added new API function C<export_lexical()> which does the same lexical export
+that the L<builtin/export_lexically> function does.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Allow field lookups within methods in nested scopes to succeed,
+previously they could complain that C<Field $fieldname is not
+accessible outside a method...>.
+
+This was most confusingly broken with a use:
+
+  class A {
+    field $fieldname;
+    use overload '""' => method (@) { $fieldname };
+  }
+
+since the syntax hides the C<BEGIN> sub.
+
+[L<GH #24464|https://github.com/Perl/perl5/issues/24464>]
+
+=item *
+
+Many potential threads-related race conditions have been fixed in the perl
+core and the two L<threads> and L<threads::shared> modules.
+
+=item *
+
+Line numbers reported by C<caller()> and diagnostic messages are now more
+accurate when the relevant COP has been optimized out (occurring often
+when the line is the first in an C<elsif> block, or when the line is
+inside a loop condition (such as within a C<while ()>).
+[L<GH #24387|https://github.com/Perl/perl5/issues/24387>]
+[L<GH #24389|https://github.com/Perl/perl5/issues/24389>]
+
+Note that (i) these changes could break any tests that hardcode the
+less-accurate line numbers (ii) further improvements to line number
+accuracy will hopefully follow within this development cycle. 
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.45.1 represents approximately 1 week of development since Perl 5.44.0
+and contains approximately 36,000 lines of changes across 470 files from 19
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 12,000 lines of changes to 310 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.45.1:
+
+Andrew Fresh, Chad Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, David Mitchell, Georgij Tsarin, Graham Knop, James E
+Keenan, Karl Williamson, Leon Timmermans, Lukas Mai, Paul Evans, Philippe
+Bruhat (BooK), Richard Leach, Russ Allbery, Steve Hay, Tony Cook, Yves
+Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
