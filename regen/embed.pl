@@ -169,7 +169,7 @@ my %per_file_definitions = (
 #
 # For all modules that aren't deliberately using particular names, all the
 # other symbols on it are namespace pollutants.
-my @unresolved_visibility_overrides = qw(
+my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     _
     ABORT
     ABS_IV_MIN
@@ -3150,7 +3150,7 @@ my @unresolved_visibility_overrides = qw(
 # This is a list of symbols that are used by the OS and which perl may need to
 # define or redefine, and which aren't otherwise currently detectable by this
 # program's algorithms as being such.  They are not namespace pollutants
-my @system_symbols = qw(
+my %system_symbols = map { $_ => 1 } qw(
     environ
     htonl
     htons
@@ -3178,7 +3178,7 @@ my @system_symbols = qw(
 
 # This is a list of symbols that are needed by the ext/re module, and are not
 # documented.  They become undefined for any other modules.
-my @needed_by_ext_re = qw(
+my %needed_by_ext_re = map { $_ => 1 } qw(
     FAIL_
     first_upper_bit_set_byte_number
     invlist_intersection_complement_2nd_
@@ -3191,7 +3191,7 @@ my @needed_by_ext_re = qw(
 
 # This is a list of symbols that are needed by various ext/ modules, and are
 # not documented.  They become undefined for any other modules.
-my @needed_by_ext = qw(
+my %needed_by_ext = map { $_ => 1 } qw(
     OPpPARAM_IF_FALSE
     OPpPARAM_IF_UNDEF
     OPpSELF_IN_PAD
@@ -3200,7 +3200,7 @@ my @needed_by_ext = qw(
 # This is a list of symbols that are needed to be visible everywhere and are
 # not documented, and we don't plan to document them any time soon.
 # Effectively these are symbols that would otherwise be in
-# @unresolved_visibility_overrides, but we have resolved them to here.
+# %unresolved_visibility_overrides, but we have resolved them to here.
 #
 # Think twice about adding a symbol to this list.  Would it be better to
 # instead document the symbol?  Or maybe its name could easily be changed to
@@ -3212,7 +3212,7 @@ my @needed_by_ext = qw(
 # The list has two parts, separated by a blank line.  The names in the second
 # part have a trailing underscore, indicating the intent for this symbol to
 # not be directly usable by XS code
-my @undocumented_always_visible = qw(
+my %undocumented_always_visible = map { $_ => 1 } qw(
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off
     CvHasNAME_HEK_on
@@ -3398,22 +3398,6 @@ my @undocumented_always_visible = qw(
     UTF8_WARN_SUPER_BIT_POS_
     UTF8_WARN_SURROGATE_BIT_POS_
 );
-
-# Turn all the lists above into hashes
-my %unresolved_visibility_overrides;
-$unresolved_visibility_overrides{$_} = 1 for @unresolved_visibility_overrides;
-
-my %system_symbols;
-$system_symbols{$_} = 1 for @system_symbols;
-
-my %needed_by_ext_re;
-$needed_by_ext_re{$_} = 1 for @needed_by_ext_re;
-
-my %needed_by_ext;
-$needed_by_ext{$_} = 1 for @needed_by_ext;
-
-my %undocumented_always_visible;
-$undocumented_always_visible{$_} = 1 for @undocumented_always_visible;
 
 # Keep lists of symbols to undef under various conditions.  We can initialize
 # the two ones for perl extensions with the lists above.
