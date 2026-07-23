@@ -2784,9 +2784,9 @@ ATdo	|void	|perl_free	|NN PerlInterpreter *my_perl
 
 Cop	|const char *|PerlIO_context_layers				\
 				|NULLOK const char *mode
-ATdo	|const char *|Perl_langinfo					\
+ABTdo	|const char *|Perl_langinfo					\
 				|const nl_item item
-ATdo	|const char *|Perl_langinfo8					\
+ABTdo	|const char *|Perl_langinfo8					\
 				|const nl_item item			\
 				|NN utf8ness_t *utf8ness
 p	|int	|PerlLIO_dup2_cloexec					\
