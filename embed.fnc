@@ -501,6 +501,11 @@
 :
 :          proto.h: add __attribute__malloc__
 :
+:   'B'  Provided for backward compatibility. This is used for elements that
+:        exist only or mainly because existing code uses them, but new code
+:        should not.  The only current effect of this flag is to add a note for
+:        the item in perlapi or perlintern.
+:
 :   'b'  Binary backward compatibility. This is used for functions which are
 :        kept only to not have to change legacy applications that call them. If
 :        there are no such legacy applications in a Perl installation for all

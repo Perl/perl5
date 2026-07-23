@@ -4016,7 +4016,7 @@ sub generate_proto_h {
         my ($flags, $ret_type, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
         if ($flags =~
-             m/([^ aA b C dD eE fF h iI mM nN oO pP Rr sS T uU v W xX ; ])/xx)
+            m/([^ aA bB C dD eE fF h iI mM nN oO pP Rr sS T uU v W xX ; ])/xx)
         {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
@@ -4042,6 +4042,8 @@ sub generate_proto_h {
             die_at_end "$plain_func: b flag without M flag requires D flag"
                                             if $flags !~ /M/ && $flags !~ /D/;
         }
+        die_at_end "$plain_func: b and B flags are mutually exclusive"
+                                                     if $flags =~ tr/bB// > 1;
 
         my $C_required_flags = '[pIimbs]';
         die_at_end
