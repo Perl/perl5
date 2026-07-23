@@ -158,6 +158,7 @@ print $h <<EOF;
 #    undef HAS_SETNETENT_R
 #    undef HAS_SETPROTOENT_R
 #    undef HAS_SETSERVENT_R
+#    undef NETDB_R_OBSOLETE     /* Has now already served its purpose */
 #  endif
 
 #  ifdef I_PWD
@@ -431,6 +432,10 @@ EOF
 #  endif
 
 EOF
+    # The elements of this array existed only to decide the contents of the
+    # "USE_foo" macro just above.  #undef them so as to not pollute the name
+    # space
+    push @define, map { "#  undef $_\n" } @H;
 }
 
 define('BUFFER',  'B',

@@ -33,6 +33,7 @@
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
 #   undef MGv2f_WITH_KEYHEK
+#   undef NETDB_R_OBSOLETE
 #   undef new_XPV
 #   undef new_XPVIV
 #   undef pTHX_10
