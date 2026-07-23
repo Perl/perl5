@@ -140,7 +140,7 @@ definitely a reference SV that refers to an SV of the right type.
 
 /*
 =for apidoc_section $casting
-=for apidoc Am|bool|cBOOL|bool expr
+=for apidoc ABm|bool|cBOOL|bool expr
 
 Cast-to-bool.  When Perl was able to be compiled on pre-C99 compilers, a
 C<(bool)> cast didn't necessarily do the right thing, so this macro was
