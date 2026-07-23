@@ -3245,15 +3245,15 @@ p	|OP *	|sawparens	|NULLOK OP *o
 p	|OP *	|scalar 	|NULLOK OP *o
 : Used in pp_ctl.c
 p	|OP *	|scalarvoid	|NN OP *arg
-Adp	|NV	|scan_bin	|NN const char *start			\
+ABdp	|NV	|scan_bin	|NN const char *start			\
 				|STRLEN len				\
 				|NN STRLEN *retlen
-Adp	|NV	|scan_hex	|NN const char *start			\
+ABdp	|NV	|scan_hex	|NN const char *start			\
 				|STRLEN len				\
 				|NN STRLEN *retlen
 Cp	|char * |scan_num	|NN const char *start			\
 				|NN YYSTYPE *lvalp
-Adp	|NV	|scan_oct	|NN const char *start			\
+ABdp	|NV	|scan_oct	|NN const char *start			\
 				|STRLEN len				\
 				|NN STRLEN *retlen
 

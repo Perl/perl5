@@ -846,15 +846,15 @@ Other compromises kick in only when the result is within a digit of overflowing.
 /*
 =for apidoc scan_bin
 
-For backwards compatibility.  Use C<grok_bin> instead.
+Use C<grok_bin> instead.
 
 =for apidoc scan_hex
 
-For backwards compatibility.  Use C<grok_hex> instead.
+Use C<grok_hex> instead.
 
 =for apidoc scan_oct
 
-For backwards compatibility.  Use C<grok_oct> instead.
+Use C<grok_oct> instead.
 
 =cut
  */
