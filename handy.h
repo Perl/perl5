@@ -1128,7 +1128,7 @@ C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, C<isWORDCHAR_LC_utf8>, and
 C<isWORDCHAR_LC_utf8_safe> are also as described there, but additionally
 include the platform's native underscore.
 
-=for apidoc Am|bool|isALNUM         |UV ch
+=for apidoc ABm|bool|isALNUM         |UV ch
 =for apidoc_item  ||isALNUM_A       |UV ch
 =for apidoc_item  ||isALNUM_LC      |UV ch
 =for apidoc_item  ||isALNUM_LC_uvchr|UV ch
