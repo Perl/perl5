@@ -126,7 +126,7 @@ typedef enum {
 #include "regcharclass.h"
 #include "unicode_constants.h"
 
-/* For to_utf8_fold_flags, q.v. */
+/* For to_utf8_fold_flags_, q.v. */
 #define FOLD_FLAGS_LOCALE       0x1
 #define FOLD_FLAGS_FULL         0x2
 #define FOLD_FLAGS_NOMIX_ASCII  0x4
