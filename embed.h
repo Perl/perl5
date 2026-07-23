@@ -291,6 +291,7 @@
 #   undef KEY_xor
 #   undef KEY_y
 #   undef MGv2f_WITH_KEYHEK
+#   undef NETDB_R_OBSOLETE
 #   undef new_XPV
 #   undef new_XPVIV
 #   undef pTHX_10
