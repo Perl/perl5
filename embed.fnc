@@ -4097,7 +4097,7 @@ ATdmp	|bool	|utf8_to_uv	|SPTR const U8 * const s		\
 				|NULLOK Size_t *advance_p
 ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
-AMdip	|UV	|utf8_to_uvchr_buf					\
+ABMdip	|UV	|utf8_to_uvchr_buf					\
 				|SPTR const U8 *s			\
 				|EPTRge const U8 *send			\
 				|NULLOK STRLEN *retlen
