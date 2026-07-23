@@ -49,6 +49,17 @@ you should reset the version numbers to the next blead series.
 
   2026-07-15  5.45.0  ✓       Leon Timmermans   (tag only)
   2026-07-21  5.45.1  ✓       Paul Evans
+  2026-08-20  5.45.2          
+  2026-09-20  5.45.3          
+  2026-10-20  5.45.4          
+  2026-11-20  5.45.5          
+  2026-12-20  5.45.6          
+  2027-01-20  5.45.7          
+  2027-02-20  5.45.8                            Contentious changes freeze
+  2027-03-20  5.45.9                            User-visible changes
+                                                freeze
+  2027-04-20  5.46.0-RC1                        Full program freeze
+  2027-05-20  5.46.0                            New perl!
 
 =head1 VICTIMS
 
