@@ -75,14 +75,14 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-         qr/[ aA bC dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@\#? ] /xx;
+       qr/[ aA bB C dD eE fF h iI mM nN oO pP rR sS T uU v W xX y ;@\#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
 my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
 
 # Only certain flags dealing with what gets displayed, are acceptable for
 # apidoc_item
-my $item_flags_re = qr/[dD fF mM nN oO pT uU Wx;]/xx;
+my $item_flags_re = qr/[B dD fF mM nN oO pT uU Wx;]/xx;
 
 # Only certain flags are acceptable for apidoc_flag
 my $flag_flags_re = qr/[ A C dD eE h m n p u X ] /xx;
@@ -1862,6 +1862,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my @where_froms;
     my @deprecated;
     my @experimental;
+    my @back_compat;
     my @xrefs;
 
     for (my $i = 0; $i < @items; $i++) {
@@ -1879,6 +1880,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
 
             push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
             push @experimental, "C<$name>" if $item->{flags} =~ /x/;
+            push @back_compat, "C<$name>" if $item->{flags} =~ /B/;
         }
 
         # While we're going though the items, construct a nice list of where
@@ -1930,7 +1932,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     print $fh format_pod_indexes(\@xrefs);
     print $fh "\n" if @xrefs;
 
-    for my $which (\@deprecated, \@experimental) {
+    for my $which (\@deprecated, \@experimental, \@back_compat) {
         next unless $which->@*;
 
         my $is;
@@ -1966,11 +1968,19 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 new code; remove $it from existing code.
                 EOT
         }
-        else {
+        elsif ($which == \@experimental) {
             print $fh <<~"EOT";
 
                 NOTE: $list $is B<experimental> and may change or be
                 removed without notice.
+                EOT
+        }
+        else {
+            $list = ucfirst($list) if $list =~ /form/;
+            print $fh <<~"EOT";
+
+                $list $is provided for backwards compatibility with
+                existing code, and should not be used for new code.
                 EOT
         }
     }
