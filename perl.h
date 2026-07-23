@@ -5184,8 +5184,8 @@ Gid_t getegid (void);
         __FILE__, (line_t) __LINE__));
 /*
 =for apidoc_section $directives
-=for apidoc     ATmp|void|assert_|bool expr
-=for apidoc_item  Tm|    |__ASSERT_
+=for apidoc    ABTmp|void|assert_|bool expr
+=for apidoc_item BTm|    |__ASSERT_
 
 These are synonymous, used to wrap the libc C<assert()> call in comma
 expressions in macro expansions, but you probably don't want to use them nor
