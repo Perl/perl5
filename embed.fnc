@@ -2355,7 +2355,7 @@ Xp	|I32	|my_stat_flags	|NULLOK const U32 flags
 p	|const char *|my_strerror					\
 				|const int errnum			\
 				|NN utf8ness_t *utf8ness
-Adfp	|char * |my_strftime	|NN const char *fmt			\
+ABdfp	|char * |my_strftime	|NN const char *fmt			\
 				|int sec				\
 				|int min				\
 				|int hour				\
