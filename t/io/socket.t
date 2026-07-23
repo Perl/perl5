@@ -239,7 +239,7 @@ SKIP: {
 
 SKIP:
 {
-    eval { require Errno; defined &Errno::EMFILE }
+    eval { require Errno; defined &Errno::EMFILE && defined &Errno::EBADF }
       or skip "Can't load Errno or EMFILE not defined", 1;
     # stdio might return strange values in errno if it runs
     # out of FILE entries, and does on darwin
@@ -260,6 +260,15 @@ SKIP:
     }
     @socks == $sock_limit
       and skip "Didn't run out of open handles", 1;
+    local $::TODO;
+    # GH 24549
+    # Hopefully Apple will fix this before the full release of macos 27
+    # If not the osvers check will become a regexp match
+    if ($^O eq "darwin"
+        and $Config{osvers} eq "27.0.0"
+        and $! == Errno::EBADF()) {
+        $::TODO = "Darwin 27 socket() returns EBADF instead of EMFILE";
+    }
     is(0+$!, Errno::EMFILE(), "check correct errno for too many files");
 }
 
