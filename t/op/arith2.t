@@ -15,17 +15,12 @@ use strict;
 
 plan tests => 9;
 
-my $vms_no_ieee;
-if ($^O eq 'VMS') {
-     $vms_no_ieee = 1 unless defined($Config{useieee});
-}
-
 SKIP:
 {
     if ($^O eq 'vos') {
         skip "VOS raises SIGFPE instead of producing infinity", 1;
     }
-    elsif ($vms_no_ieee || !$Config{d_double_has_inf}) {
+    elsif (!$Config{d_double_has_inf}) {
         skip "the IEEE infinity model is unavailable in this configuration", 1;
     }
     # The computation of $v should overflow and produce "infinity"
