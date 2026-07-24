@@ -469,6 +469,17 @@ compute it.
 =cut
 */
 
+/* sanity check: hash action codes don't clash with G_DISCARD */
+STATIC_ASSERT_DECL(
+    (G_DISCARD & HV_DISABLE_UVAR_XKEY) == 0 &&
+    (G_DISCARD & HV_FETCH_ISSTORE) == 0 &&
+    (G_DISCARD & HV_FETCH_ISEXISTS) == 0 &&
+    (G_DISCARD & HV_FETCH_LVALUE) == 0 &&
+    (G_DISCARD & HV_FETCH_JUST_SV) == 0 &&
+    (G_DISCARD & HV_DELETE) == 0 &&
+    (G_DISCARD & HV_FETCH_EMPTY_HE) == 0
+);
+
 void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                int flags, int action, SV *val, U32 hash)
@@ -2683,6 +2694,9 @@ are set.
 
 =cut
 */
+
+/* sanity check: HV_NAME_SETALL doesn't clash with HVhek_UTF8 */
+STATIC_ASSERT_DECL((HV_NAME_SETALL & HVhek_UTF8) == 0);
 
 void
 Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)

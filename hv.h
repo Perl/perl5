@@ -121,7 +121,7 @@ struct xpvhv_aux {
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
 
-/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer 
+/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer
  * to an array of HEK pointers, this being the length. The first element is
  * the name of the stash, which may be NULL. If xhv_name_count is positive,
  * then *xhv_name is one of the effective names. If xhv_name_count is nega-
@@ -707,9 +707,9 @@ struct refcounted_he {
  * Passed in PERL_MAGIC_uvar calls
  */
 #define HV_DISABLE_UVAR_XKEY	0x01
-/* We need to ensure that these don't clash with G_DISCARD, which is 2, as it
+#define HV_FETCH_ISSTORE	0x02
+/* We need to ensure that these don't clash with G_DISCARD, which is 4, as it
    is documented as being passed to hv_delete().  */
-#define HV_FETCH_ISSTORE	0x04
 #define HV_FETCH_ISEXISTS	0x08
 #define HV_FETCH_LVALUE		0x10
 #define HV_FETCH_JUST_SV	0x20
