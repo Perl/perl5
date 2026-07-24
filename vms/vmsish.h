@@ -793,4 +793,11 @@ long int lroundl(long double __x);
 #ifdef USE_LONG_DOUBLE
 #  define NAN_COMPARE_BROKEN 1
 #endif
+
+/* USE_IEEE is VMS-only and shows up in the compile-time options in -V output. But
+ * it's now somewhat redundant with the platform-agnostic double classification
+ * system, so just track that.
+ */
+#define USE_IEEE DOUBLE_STYLE_IEEE
+
 #endif  /* __vmsish_h_included */
