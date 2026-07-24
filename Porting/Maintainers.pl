@@ -250,8 +250,8 @@ our %Modules = (
     },
 
     'Config::Perl::V' => {
-        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.39.tgz',
-        'SYNCINFO'     => 'jkeenan on Wed Feb 11 08:21:24 2026',
+        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.40.tgz',
+        'SYNCINFO'     => 'jkeenan on Fri Jul 24 06:55:45 2026',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => [qw(
             examples/show-v.pl

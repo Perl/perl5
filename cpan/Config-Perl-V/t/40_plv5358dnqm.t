@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 136;
+    my $tests = 137;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -39,10 +39,13 @@ foreach my $o (sort keys %$opt) {
     is ($conf->{build}{options}{$o}, 0, "Runtime option $o unset");
     }
 
-eval { require Digest::MD5; };
-my $md5 = $@ ? "0" x 32 : "3a52d65d54ee1032f878b51fb20c8efd";
-ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
-is ($sig, $md5, "MD5");
+SKIP: {
+    skip "ASCII-centric test", 2 unless ord "A" == 65;
+    eval { require Digest::MD5; };
+    my $md5 = $@ ? "0" x 32 : "3a52d65d54ee1032f878b51fb20c8efd";
+    ok (my $sig = Config::Perl::V::signature ($conf), "Get signature");
+    is ($sig, $md5, "MD5");
+    }
 
 is_deeply ($conf->{build}{patches}, [ ], "No patches");
 
