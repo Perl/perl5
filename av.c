@@ -151,9 +151,28 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 
             if (key <= newmax)
                 goto resized;
-#endif 
+#endif
             /* overflow-safe version of newmax = key + *maxp/5 */
             newmax = *maxp / 5;
+
+            if (newmax < 5) { /* This is a feels-about-right number. */
+                /* The newmax growth factor isn't making a meaningful
+                 * contribution yet. However, if an array has elements
+                 * added one-at-a-time, this means that it could undergo
+                 * multiple Renew() calls to add 1-2 elements at a time
+                 * until newmax helps to minimize that kind of churn.
+                 *
+                 * One example is Perl_sv_add_backreference, where if an
+                 * array has to be resized once, there's a very good
+                 * chance of it being resized multiple times in the
+                 * absence of a small-growth adjustment.
+                 *
+                 * This is an attempt at such an adjustment:
+                 */
+                 if (key - *maxp < 8)
+                     key = *maxp + 8; /* A feels-about-right number. */
+            }
+
             newmax = (key > SSize_t_MAX - newmax)
                         ? SSize_t_MAX : key + newmax;
           resize:
