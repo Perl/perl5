@@ -5,6 +5,29 @@ use Config;
 
 my $dtrace_o = $Config{dtraceobject} ? ' dtrace$(OBJ_EXT)' : '';
 
+# There are lots of additional files included in APItest.xs. We should scan
+# the file looking for include directives to build the `depends` list
+my @c_depends;
+my @obj_depends;
+{
+    open my $fh, "<", "APItest.xs" or die "Cannot open APItest.xs for read - $!";
+
+    while( <$fh> ) {
+        if( m/^#include\s+"(.*)"\s*$/ ) {
+            my $file = $1;
+            # ignore some known ones
+            next if grep { $file eq $_ } qw( EXTERN.h perl.h XSUB.h );
+
+            push @obj_depends, $file;
+        }
+        elsif( m/^INCLUDE:\s+(.*)\s*$/ ) {
+            my $file = $1;
+
+            push @c_depends, $file;
+        }
+    }
+}
+
 WriteMakefile(
     'NAME'		=> 'XS::APItest',
     'VERSION_FROM'	=> 'APItest.pm', # finds $VERSION
@@ -16,8 +39,12 @@ WriteMakefile(
     realclean => {FILES	=> 'const-c.inc const-xs.inc'},
     ($Config{gccversion} && $Config{d_attribute_deprecated} ?
       (CCFLAGS => $Config{ccflags} . ' -Wno-deprecated-declarations') : ()),
-    depend => { 'core.o' => 'core_or_not.inc',
-		'notcore.o' => 'core_or_not.inc' },
+    depend => {
+        'core.o' => 'core_or_not.inc',
+        'notcore.o' => 'core_or_not.inc',
+        'APItest.c' => join(' ', @c_depends),
+        'APItest$(OBJ_EXT)' => join(' ', @obj_depends),
+    },
 );
 
 my @names = (qw(HV_DELETE HV_DISABLE_UVAR_XKEY HV_FETCH_ISSTORE
