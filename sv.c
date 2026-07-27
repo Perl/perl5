@@ -1287,6 +1287,10 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             sv->sv_u.svu_rv = referent;
         }
         break;
+    case SVt_INTERNAL:
+        assert(old_type == SVt_NULL);
+        SvANY(sv) = NULL;
+        return;
     default:
         croak("panic: sv_upgrade to unknown type %lu",
                    (unsigned long)new_type);
@@ -16012,6 +16016,21 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
         SvANY(dsv)	= new_XNV();
 #endif
         SvNV_set(dsv, SvNVX(ssv));
+        break;
+    case SVt_INTERNAL:
+        {
+            /* The SvANY pointer of an SVt_INTERNAL points to its metadata
+             * This is shared static not cloned. Additionally, the actual data
+             * pointer is probably static memory anyway.
+             */
+            SvANY(dsv)  = SviMETA(ssv);
+            SviPTR(dsv) = SviPTR(ssv);
+
+            /* Currently nothing else to do but it's possible we might add a
+             * 'sv_clone' callback function to the SviMETA() structure
+             * sometime. If we do, invoke it here
+             */
+        }
         break;
     default:
         {
