@@ -346,6 +346,289 @@ PP(pp_methstart)
     return NORMAL;
 }
 
+/* Common XS reader accessor code for checking the calling
+ * context, croaking if called for, and returning the object. */
+PERL_STATIC_INLINE SV*
+S_class_reader_common(pTHX_ CV* cv) {
+    dXSARGS;
+    if (items != 1) {
+        UV expected = 1; /* Done like this for t/porting/diag.t */
+        GV* gv = CvGV(cv);
+        SV* cvname = newSV_type_mortal(SVt_PV);
+        gv_fullname4(cvname, gv, NULL, TRUE);
+        croak("Too many arguments for subroutine '%" SVf "' (got %" STACK_OFFdf "; expected %" UVuf ")",
+            cvname, items, expected);
+    }
+
+    SV *objr = *PL_stack_sp;
+#ifdef PERL_RC_STACK
+    assert(SvREFCNT(objr) > 1); /* Will get decremented by AV/HV reader in list context */
+    if (UNLIKELY(SvREFCNT(objr) == 1)) { /* Just in case it happens on a non-DEBUGGING build */
+        (void)sv_2mortal(SvREFCNT_inc_NN(objr));
+    }
+#endif
+    SV *obj = SvROK(objr) ? SvRV(objr) : NULL;
+
+    if(!obj || !SvOBJECT(obj) || SvTYPE(obj) != SVt_PVOBJ)
+    {
+        HEK *namehek = CvGvNAME_HEK(cv);
+        croak(namehek ? "Cannot invoke method %" HEKf_QUOTEDPREFIX " on a non-instance"
+                      : "Cannot invoke method on a non-instance",
+              namehek);
+    }
+
+    HV *stash = CvSTASH(cv);
+    if(stash != SvSTASH(obj) &&
+       /* Optimization note for the future: sv_derived_from_hv() seems inefficient for this use case,
+        * but it's a nest of static functions to unpick. */
+       !sv_derived_from_hv(objr, stash))
+        croak("Cannot invoke a method of %" HvNAMEf_QUOTEDPREFIX
+              " on an instance of %" HvNAMEf_QUOTEDPREFIX,
+              HvNAMEfARG(stash), HvNAMEfARG(SvSTASH(obj)));
+    return obj;
+}
+
+XS(class_reader_sv_xsub);
+XS(class_reader_sv_xsub)
+{
+    SV *obj = S_class_reader_common(aTHX_ cv);
+
+    const PADOFFSET fieldix = CvXSUBANY(cv).any_ssize;
+    assert((SSize_t)fieldix <= ObjectMAXFIELD(obj));
+
+    SV **fields = ObjectFIELDS(obj);
+
+    SV* const fsv = fields[fieldix];
+    SvGETMAGIC(fsv);
+
+    U8 gimme = GIMME_V;
+    if (gimme == G_VOID) {
+        rpp_popfree_1();
+        return;
+    }
+
+    dXSTARG;
+    SV *rsv = SvROK(fsv) ? sv_newmortal() : TARG;
+
+    /* TODO - optimize bodiless assignment here and in class_writer_sv_xsub */
+    sv_setsv_flags(rsv, fsv, SV_DO_COW_SVSETSV|SV_NOSTEAL);
+
+    rpp_replace_1_1_NN(rsv);
+    return;
+}
+
+XS(class_reader_av_xsub);
+XS(class_reader_av_xsub)
+{
+    SV *obj = S_class_reader_common(aTHX_ cv);
+
+    const PADOFFSET fieldix = CvXSUBANY(cv).any_ssize;
+    assert((SSize_t)fieldix <= ObjectMAXFIELD(obj));
+
+    SV **fields = ObjectFIELDS(obj);
+
+    SV* const fsv = fields[fieldix];
+    SvGETMAGIC(fsv);
+    assert(SvTYPE(fsv) == SVt_PVAV);
+
+    const size_t count = av_count((AV*)fsv);
+
+    U8 gimme = GIMME_V;
+    switch (gimme) {
+        case G_VOID:
+          rpp_popfree_1_NN();
+          return;
+        case G_SCALAR:
+        {
+            dXSTARG;
+            TARGi(count, 0);
+            rpp_replace_1_1_NN(TARG);
+            return;
+        }
+        case G_LIST:
+        {
+            rpp_popfree_1_NN();
+            rpp_extend(count);
+#ifndef PERL_RC_STACK
+                /* Note: rpp_push_1_norc() calls sv_2mortal(), which will
+                 * extend the mortals stack should this turn out to be
+                 * insuffient when handling a tied array. */
+            EXTEND_MORTAL(count);
+#endif
+
+            AV* const av = (AV*)fsv;
+            /* This is very like S_pushav in pp_hot.c, but instead of
+             * the retrieved SV onto the stack it pushes a copy. */
+            if (UNLIKELY(SvMAGICAL(av))) {
+                PADOFFSET i;
+                for (i=0; i < (PADOFFSET)count; i++) {
+                    SV ** const svp = av_fetch(av, i, FALSE);
+                    if (LIKELY(svp))
+                        rpp_push_1_norc(newSVsv_flags_NN(*svp, SV_GMAGIC|SV_DO_COW_SVSETSV));
+                    else if (UNLIKELY(PL_op->op_flags & OPf_MOD))
+                        rpp_push_1_norc(av_nonelem(av,i));
+                    else
+                        rpp_push_IMM(&PL_sv_undef);
+                }
+            } else {
+                PADOFFSET i;
+                for (i=0; i < (PADOFFSET)count; i++) {
+                    SV* sv = AvARRAY(av)[i];
+                    if (LIKELY(sv))
+                        rpp_push_1_norc(newSVsv_flags_NN(sv, SV_GMAGIC|SV_DO_COW_SVSETSV));
+                    else
+                        rpp_push_IMM(&PL_sv_undef);
+                }
+            }
+            return;
+        }
+    }
+    NOT_REACHED;
+}
+
+XS(class_reader_hv_xsub);
+XS(class_reader_hv_xsub)
+{
+    SV *obj = S_class_reader_common(aTHX_ cv);
+
+    const PADOFFSET fieldix = CvXSUBANY(cv).any_ssize;
+    assert((SSize_t)fieldix <= ObjectMAXFIELD(obj));
+
+    SV **fields = ObjectFIELDS(obj);
+
+    SV* const fsv = fields[fieldix];
+    SvGETMAGIC(fsv);
+    assert(SvTYPE(fsv) == SVt_PVHV);
+
+    const Size_t nkeys = HvUSEDKEYS(fsv);
+
+    U8 gimme = GIMME_V;
+    switch (gimme) {
+        case G_VOID:
+            rpp_popfree_1_NN();
+            return;
+        case G_SCALAR:
+        {
+            dXSTARG;
+            TARGi(nkeys, 1);
+            rpp_replace_1_1_NN(targ);
+            return;
+        }
+        case G_LIST:
+        {
+            rpp_popfree_1_NN();
+
+            HV *hv = MUTABLE_HV(fsv);
+            bool tied = SvRMAGICAL(hv) && (mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied)
+#ifdef DYNAMIC_ENV_FETCH  /* might not know number of keys yet */
+                                        || mg_find(MUTABLE_SV(hv), PERL_MAGIC_env)
+#endif
+            );
+
+            if (tied) { /* HvUSEDKEYS(fsv) cannot be relied upon here */
+                HE *entry;
+                while ((entry = hv_iternext(hv))) {
+                    rpp_extend(2);
+#ifndef PERL_RC_STACK
+                    /* hv_iterkeysv and hv_iterval (for tied hashes)
+                     * return a sv_newmortal() SV. */
+                    rpp_push_1(hv_iterkeysv(entry));
+                    rpp_push_1(hv_iterval(hv, entry));
+#else
+                    /* We don't want to return mortal SVs */
+                    rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+
+                    SV* const valsv = newSV_type(SVt_NULL);
+                    if (HeKLEN(entry) == HEf_SVKEY)
+                        mg_copy(MUTABLE_SV(hv), valsv, (char*)HeKEY_sv(entry), HEf_SVKEY);
+                    else
+                        mg_copy(MUTABLE_SV(hv), valsv, HeKEY(entry), HeKLEN(entry));
+                    rpp_push_1_norc(valsv);
+
+#endif
+                }
+            } else if (nkeys) {
+                assert(nkeys <= (Size_t_MAX >> 1));
+                SSize_t ext = nkeys * 2;
+                (void)hv_iterinit(hv);
+#ifndef PERL_RC_STACK
+                EXTEND_MORTAL(ext);
+#endif
+                rpp_extend(ext);
+
+                HE *entry;
+                while ((entry = hv_iternext(hv))) {
+                    rpp_push_1_norc(newSVhek(HeKEY_hek(entry)));
+                    rpp_push_1_norc(newSVsv(HeVAL(entry)));
+                }
+            }
+            return;
+        }
+    }
+    NOT_REACHED;
+}
+
+XS(class_writer_sv_xsub);
+XS(class_writer_sv_xsub)
+{
+    dXSARGS;
+
+    if (items != 2) {
+        UV expected = 2; /* Done like this for t/porting/diag.t */
+        GV* gv = CvGV(cv);
+        SV* cvname = newSV_type_mortal(SVt_PV);
+        gv_fullname4(cvname, gv, NULL, TRUE);
+        if (items < 2) {
+            croak("Too few arguments for subroutine '%" SVf "' (got %" UVuf "; expected %" UVuf ")",
+                cvname, (UV)items, expected);
+        } else {
+            croak("Too many arguments for subroutine '%" SVf "' (got %" UVuf "; expected %" UVuf ")",
+                cvname, (UV)items, expected);
+        }
+    }
+
+    SV *objr = ST(0);
+    SV *obj = SvROK(objr) ? SvRV(objr) : NULL;
+
+    if(!obj || !SvOBJECT(obj) || SvTYPE(obj) != SVt_PVOBJ)
+    {
+        HEK *namehek = CvGvNAME_HEK(cv);
+        croak(namehek ? "Cannot invoke method %" HEKf_QUOTEDPREFIX " on a non-instance"
+                      : "Cannot invoke method on a non-instance",
+              namehek);
+    }
+
+    if(CvSTASH(cv) != SvSTASH(obj) &&
+       !sv_derived_from_hv(obj, CvSTASH(cv)))
+        croak("Cannot invoke a method of %" HvNAMEf_QUOTEDPREFIX
+              " on an instance of %" HvNAMEf_QUOTEDPREFIX,
+              HvNAMEfARG(CvSTASH(cv)), HvNAMEfARG(SvSTASH(obj)));
+
+    const PADOFFSET fieldix = CvXSUBANY(cv).any_ssize;
+    assert((SSize_t)fieldix <= ObjectMAXFIELD(obj));
+
+    SV **fields = ObjectFIELDS(obj);
+
+    SV* const fsv = fields[fieldix];
+    assert(SvTYPE(fsv) <= SVt_PVMG);
+
+    SV *argsv = ST(1);
+    assert(fsv != argsv);
+
+    /* TODO - optimize bodiless assignment here and in class_reader_sv_xsub */
+    sv_setsv_flags(fsv, argsv, SV_DO_COW_SVSETSV|SV_NOSTEAL);
+    SvSETMAGIC(fsv);
+
+    U8 gimme = GIMME_V;
+    if (gimme == G_VOID) {
+        rpp_popfree_2_NN();
+    } else {
+        rpp_popfree_1_NN();
+    }
+    return;
+}
+
+
 static void
 invoke_class_seal(pTHX_ void *arg_)
 {
@@ -1115,6 +1398,7 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
  * during attributes declared on the same newly-field.
  */
 
+#if 0
 #define pad_import_field(fieldpn)  S_pad_import_field(aTHX_ fieldpn)
 static PADOFFSET
 S_pad_import_field(pTHX_ PADNAME *fieldpn)
@@ -1129,13 +1413,15 @@ S_pad_import_field(pTHX_ PADNAME *fieldpn)
 
     return padix;
 }
+#endif
 
 static void
 apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
 {
     if(!value)
         /* Default to name minus the sigil */
-        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+        value = newSVpvn_flags(PadnamePV(pn) + 1, PadnameLEN(pn) - 1,
+                        (PadnameUTF8(pn) ? SVf_UTF8 : 0) | SVs_TEMP);
 
     if(PadnamePV(pn)[0] != '$')
         croak("Only scalar fields can take a :param attribute");
@@ -1165,60 +1451,52 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 {
     if(value)
         SvREFCNT_inc(value);
-    else
+    else {
         /* Default to name minus the sigil */
-        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+        value = newSVpvn_flags(PadnamePV(pn) + 1, PadnameLEN(pn) - 1,
+                        (PadnameUTF8(pn) ? SVf_UTF8 : 0) | SVs_TEMP);
+    }
 
     if(!valid_identifier_sv(value))
         croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
 
-    I32 floor_ix = start_subparse(FALSE, 0);
-    SAVEFREESV(PL_compcv);
-    CvIsMETHOD_on(PL_compcv);
-
-    I32 save_ix = block_start(TRUE);
-
-    PADOFFSET padix;
-
-    padix = pad_add_name_pvs("$self", 0, NULL, NULL);
-    assert(padix == PADIX_SELF);
-
-    subsignature_start();
-    CvSIGNATURE_on(PL_compcv);
-
-    OP *sigop = subsignature_finish();
-
-    padix = pad_import_field(pn);
-    intro_my();
-
-    OP *retop;
+    /* This installs an instance of XS(class_reader_{TYPE}_xsub) as the reader. */
     {
-        OPCODE optype = 0;
-        switch(PadnamePV(pn)[0]) {
-            case '$': optype = OP_PADSV; break;
-            case '@': optype = OP_PADAV; break;
-            case '%': optype = OP_PADHV; break;
-            default: NOT_REACHED;
+        HV *stash = PadnameFIELDINFO(pn)->fieldstash;
+        assert(HvSTASH_IS_CLASS(stash));
+
+        const PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+        XSUBADDR_t reader_xsub = NULL;
+
+        char sigil = PadnamePV(pn)[0];
+        switch(sigil) {
+            case '$':
+                reader_xsub = class_reader_sv_xsub;
+                break;
+            case '@':
+                reader_xsub = class_reader_av_xsub;
+                break;
+            case '%':
+                reader_xsub = class_reader_hv_xsub;
+                break;
+            default:
+                NOT_REACHED;
         }
 
-        retop = newLISTOP(OP_RETURN, 0,
-            newOP(OP_PUSHMARK, 0),
-            newPADxVOP(optype, 0, padix));
-    }
+        HV *save_curstash = PL_curstash;
+        PL_curstash = stash;
 
-    OP *ops = newLISTOPn(OP_LINESEQ, 0,
-            sigop,
-            retop,
-            NULL);
-
-    SvREFCNT_inc(PL_compcv);
-    ops = block_end(save_ix, ops);
-
-    OP *nameop = newSVOP(OP_CONST, 0, value);
-
-    CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
+        CV *cv = newXS_flags(SvPV_nolen(value), reader_xsub,
+                             __FILE__, NULL,  SvUTF8(value) ? SVf_UTF8 : 0);
         CvIsMETHOD_on(cv);
+        CvXS_RCSTACK_on(cv);
+        CvXSUBANY(cv).any_ssize = fieldix;
+
+        CvSTASH_set(cv, HvREFCNT_inc_simple(stash));
+
+        PL_curstash = save_curstash;
+    }
 }
 
 static void
@@ -1232,13 +1510,43 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
         SvREFCNT_inc(value);
     else {
         /* Default to "set_" . name minus the sigil */
-        value = newSVpvs("set_");
+        value = newSVpvs_flags("set_", SVs_TEMP);
         sv_catpvn_flags(value, PadnamePV(pn) + 1, PadnameLEN(pn) - 1,
                 PadnameUTF8(pn) ? SV_CATUTF8 : 0);
     }
 
     if(!valid_identifier_sv(value))
         croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
+
+    /* This installs an instance of XS(class_writer_sv_xsub) as the writer */
+    {
+        HV *stash = PadnameFIELDINFO(pn)->fieldstash;
+        assert(HvSTASH_IS_CLASS(stash));
+
+        const PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+        XSUBADDR_t writer_xsub = class_writer_sv_xsub; /* Might have AV/HV writers in future */
+
+        HV *save_curstash = PL_curstash;
+        PL_curstash = stash;
+
+        CV *cv = newXS_flags(SvPV_nolen(value), writer_xsub,
+                             __FILE__, NULL, SvUTF8(value) ? SVf_UTF8 : 0 );
+
+        CvIsMETHOD_on(cv);
+        CvXS_RCSTACK_on(cv);
+        CvXSUBANY(cv).any_ssize = fieldix;
+
+        CvSTASH_set(cv, HvREFCNT_inc_simple(stash));
+
+        PL_curstash = save_curstash;
+    }
+    return;
+
+#if 0
+    /* This was the original code to implement an optree-based writer.
+     * Left here in case it's needed for e.g. implementing constraints.
+     */
 
     I32 floor_ix = start_subparse(FALSE, 0);
     SAVEFREESV(PL_compcv);
@@ -1288,6 +1596,7 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
     if (cv)
         CvIsMETHOD_on(cv);
+#endif
 }
 
 static struct {
