@@ -2070,6 +2070,12 @@ Perl_scalar(pTHX_ OP *o)
             next_kid = OpSIBLING(cUNOPo->op_first);
             break;
 
+        case OP_OPTARROW:
+            /* impose scalar context on the deref chain (sibling of lhs_op),
+             * not the condition (lhs_op/op_first) */
+            next_kid = OpSIBLING(cUNOPo->op_first);
+            break;
+
         default:
             if (o->op_flags & OPf_KIDS)
                 next_kid = cUNOPo->op_first; /* do all kids */
@@ -2648,6 +2654,12 @@ Perl_list(pTHX_ OP *o)
             next_kid = OpSIBLING(cUNOPo->op_first);
             break;
 
+        case OP_OPTARROW:
+            /* impose list context on the deref chain (sibling of lhs_op),
+             * not the condition (lhs_op/op_first) */
+            next_kid = OpSIBLING(cUNOPo->op_first);
+            break;
+
         default:
             if (!(o->op_flags & OPf_KIDS))
                 break;
@@ -2810,7 +2822,9 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
 
     /* find the padsv corresponding to $lex->{} or @{$lex}{} */
     if (rop) {
-        if (rop->op_first->op_type == OP_PADSV)
+        if (!rop->op_first)
+            rop = NULL; /* no first child: can't determine hash ref type */
+        else if (rop->op_first->op_type == OP_PADSV)
             /* @$hash{qw(keys here)} */
             rop = cUNOPx(rop->op_first);
         else {
@@ -3152,6 +3166,17 @@ S_check_or_warn_declared_refs(pTHX)
             "Declaring references is experimental");
 }
 
+#define check_or_warn_optional_chaining() S_check_or_warn_optional_chaining(aTHX)
+PERL_STATIC_INLINE void
+S_check_or_warn_optional_chaining(pTHX)
+{
+    if (!FEATURE_OPTIONAL_CHAINING_IS_ENABLED)
+        croak("Experimental \"?->\" operator requires "
+              "'use feature \"optional_chaining\"'");
+    ck_warner_d(packWARN(WARN_EXPERIMENTAL__OPTIONAL_CHAINING),
+            "optional chaining is experimental");
+}
+
 
 /*
 =for apidoc op_lvalue
@@ -3375,6 +3400,27 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         next_kid = OpSIBLING(cUNOPo->op_first);
         break;
 
+    case OP_OPTARROW:
+        /* Only mark as lvalue when we're genuinely the LHS of an assignment
+         * (type == OP_SASSIGN or OP_AASSIGN), not when op_lvalue is called
+         * for other reasons (e.g. OP_ENTERSUB for sub args).
+         *
+         * sassign: OPpOPTARROW_LVALUE — pp_optarrow pops both the undef LHS
+         *   and the RHS value, then jumps past the sassign entirely.
+         *
+         * aassign: OPpOPTARROW_LVALUE_AASSIGN — pp_optarrow replaces the
+         *   mutable undef on the stack top with the immortal &PL_sv_undef so
+         *   pp_aassign's SvIMMORTAL() guard silently skips that lelem slot,
+         *   consuming the corresponding RHS value without storing it.  The
+         *   remaining lvalue slots in the aassign LHS list continue normally. */
+        if (type == OP_SASSIGN)
+            o->op_private |= OPpOPTARROW_LVALUE;
+        else if (type == OP_AASSIGN)
+            o->op_private |= OPpOPTARROW_LVALUE_AASSIGN;
+        localize = 1;
+        next_kid = OpSIBLING(cUNOPo->op_first);
+        break;
+
     case OP_RV2AV:
     case OP_RV2HV:
         if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
@@ -3388,7 +3434,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_RV2GV:
         if (scalar_mod_type(o, type))
             goto nomod;
-        ref(cUNOPo->op_first, o->op_type);
+        /* op_first may be NULL when rv2hv/rv2av is inside an OP_OPTARROW
+         * tree — the LHS has been detached and reads from the stack. */
+        if (cUNOPo->op_first)
+            ref(cUNOPo->op_first, o->op_type);
         /* FALLTHROUGH */
     case OP_ASLICE:
     case OP_HSLICE:
@@ -3907,6 +3956,9 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
             if (type == OP_DEFINED)
                 o->op_flags |= OPf_SPECIAL;		/* don't create GV */
             type = o->op_type;
+            /* op_first may be NULL inside an OP_OPTARROW tree (LHS detached) */
+            if (!cUNOPo->op_first)
+                break;
             o = cUNOPo->op_first;
             continue;
 
@@ -13652,6 +13704,248 @@ Perl_ck_helemexistsor(pTHX_ OP *o)
 
     keyop->op_next = o;
 
+    return o;
+}
+
+/*
+=for apidoc newOPTARROWOP
+
+Constructs an C<OP_OPTARROW> (safe navigation / optional chaining) op.
+
+C<lhs_op> evaluates the left-hand side.  C<deref_op> is the dereference
+tree (rv2hv, rv2av, entersub, etc.) whose first grandchild is an
+C<OP_NULL> placeholder; that placeholder is nulled out by this function
+so the deref tree reads its operand from the top of the stack rather than
+re-evaluating it.
+
+At runtime: C<lhs_op> pushes the LHS value; C<pp_optarrow> checks it:
+if defined, jumps to C<deref_op> via C<op_other> (leaving LHS on stack
+for the deref to consume); if undef, pops the stack and falls through
+to the next op, producing an empty list.
+
+=cut
+*/
+OP *
+Perl_newOPTARROWOP(pTHX_ OP *deref_op, OP *lhs_op)
+{
+    PERL_ARGS_ASSERT_NEWOPTARROWOP;
+
+    /*
+     * ?-> LOGOP structure
+     * ====================
+     *
+     *   wrapper (OP_NULL, parent that LINKLIST rewires to continuation)
+     *     └── logop (OP_OPTARROW)
+     *           op_first = lhs_op        (evaluates and pushes the LHS value)
+     *           op_other = start of deref chain (rv2hv, rv2av, or pushmark for
+     *                                            entersub — see pp_optarrow)
+     *
+     * Runtime path for hash/array:
+     *   lhs_op → logop → [defined] rv2hv/rv2av → … → deref_op → wrapper
+     *                    [undef]   NORMAL → logop->op_next (→ wrapper after LINKLIST)
+     *
+     * Runtime path for coderef (handled in pp_optarrow, see pp.c):
+     *   lhs_op → logop → [defined] PUSHMARK(sp-1); jump past inner pushmark
+     *                              → … → entersub → wrapper
+     *                    [undef]   NORMAL → wrapper
+     *
+     * lhs_op is DETACHED from deref_op's tree in this function; after
+     * detachment the innermost child slot is empty, so rv2hv/rv2av read the
+     * operand directly from TOS (the value lhs_op pushed) rather than via a
+     * child pointer.
+     *
+     * Autovivification prevention
+     * ----------------------------
+     * doref() sets OPf_MOD|OPpDEREF on the innermost operand so that it
+     * auto-vivifies the variable in place.  We clear those flags on lhs_op
+     * after detachment, so ?-> never auto-vivifies.
+     *
+     * Multideref prevention
+     * ----------------------
+     * Setting OPf_SPECIAL on lhs_op blocks the peephole optimiser from
+     * collapsing padsv→rv2av→aelem into OP_MULTIDEREF (which would bypass
+     * pp_optarrow entirely).  The multideref check in peep.c requires
+     * OPf_MOD but not OPf_SPECIAL; with OPf_SPECIAL set the test fails.
+     */
+
+    /*
+     * Step 1 — detach lhs_op from deref_op's inner tree.
+     *
+     * Walk the first-child chain until we find the node whose first child IS
+     * lhs_op, then remove lhs_op from that slot.  For hash and array deref
+     * the chain is linear (elem → rv2xv → lhs_op) so the simple loop is
+     * sufficient.
+     *
+     * For entersub (coderef ?->), ck_subr has already null'd rv2cv and
+     * wrapped everything in an ex-list with a pushmark.  The execution chain
+     * produced by LINKLIST still starts at pushmark, and pp_optarrow handles
+     * the mark adjustment — so we do NOT need to detach lhs_op from the
+     * entersub tree here; we null it in place instead so that the chain
+     * includes a harmless no-op where lhs_op was.
+     */
+    bool coderef_padsv = FALSE;  /* set TRUE when dup-padsv strategy is used */
+    PADOFFSET cv_ferry_targ = NOT_IN_PAD; /* pad slot for non-padsv coderef path */
+    {
+        bool is_entersub = (deref_op->op_type == OP_ENTERSUB);
+        if (!is_entersub) {
+            /* Hash/array: detach along the first-child chain. */
+            OP *o = deref_op;
+            while (o) {
+                if (!(o->op_flags & OPf_KIDS))
+                    break;
+                OP *kid = cUNOPo->op_first;
+                if (!kid)
+                    break;
+                if (kid == lhs_op) {
+                    /* Detach: parent has no kids; rv2hv/rv2av reads from TOS */
+                    cUNOPo->op_first = NULL;
+                    o->op_flags &= ~OPf_KIDS;
+                    op_sibling_splice(o, NULL, -1, NULL);
+                    break;
+                }
+                o = kid;
+            }
+        }
+        else {
+            /* Entersub/coderef: ck_subr has reorganised the tree so lhs_op
+             * is not on the first-child path.  Search the whole tree for
+             * lhs_op and replace it with a placeholder.
+             *
+             * When lhs_op is a plain lexical scalar (OP_PADSV), the placeholder
+             * is a *duplicate* padsv reading the same pad slot.  At runtime:
+             *
+             *   outer lhs_op  -- pushes cv_ref to check for undef
+             *   pp_optarrow   -- pops cv_ref, jumps to inner pushmark
+             *   pushmark      -- marks arg start
+             *   [args...]     -- pushed normally
+             *   dup padsv     -- re-evaluates $sub, pushes cv_ref at TOS
+             *   ex-rv2cv      -- no-op (nulled by ck_subr)
+             *   entersub      -- reads cv_ref from TOS ✓
+             *
+             * When lhs_op is NOT a plain padsv (e.g. $obj->meth()), use a
+             * plain OP_NULL placeholder instead.  In that case the no-args
+             * form ($sub?->()) still works via PUSHMARK(sp-1) / skip-pushmark;
+             * the with-args form is a known limitation.
+             *
+             * OPpOPTARROW_CODEREF_PADSV tells pp_optarrow which strategy to use.
+             */
+            bool lhs_is_padsv = (lhs_op->op_type == OP_PADSV);
+
+            OP *search_stack[32];
+            int ss = 0;
+            search_stack[ss++] = deref_op;
+            bool found = FALSE;
+            while (ss > 0 && !found) {
+                OP *o = search_stack[--ss];
+                if (!(o->op_flags & OPf_KIDS))
+                    continue;
+                OP *prev = NULL;
+                OP *kid  = cUNOPo->op_first;
+                while (kid) {
+                    OP *sib = OpSIBLING(kid);
+                    if (kid == lhs_op) {
+                        OP *ph;
+                        if (lhs_is_padsv) {
+                            /* Duplicate padsv: reads same lexical variable.
+                             * Executed after args; pushes cv_ref at TOS for
+                             * entersub.  Must clear OPf_SPECIAL (set below on
+                             * the outer lhs_op to block multideref) and OPf_MOD
+                             * (cleared below to suppress autovivification). */
+                            ph = newPADxVOP(OP_PADSV,
+                                            lhs_op->op_flags & ~(OPf_SPECIAL|OPf_MOD),
+                                            lhs_op->op_targ);
+                        } else {
+                            /* General case: allocate a temporary pad slot to
+                             * ferry the CV past the argument list.
+                             * pp_optarrow will pop the CV, stash it in
+                             * logop->op_targ, then jump to inner pushmark.
+                             * This padsv placeholder reads it back after args
+                             * are evaluated, putting CV at TOS for entersub.
+                             * Same structure as the padsv-dup path. */
+                            cv_ferry_targ = pad_alloc(OP_PADSV, SVs_PADTMP);
+                            ph = newPADxVOP(OP_PADSV, OPf_WANT_SCALAR,
+                                            cv_ferry_targ);
+                        }
+                        ph->op_next = NULL; /* LINKLIST will set this */
+                        op_sibling_splice(o, prev, 1, ph);
+                        found = TRUE;
+                        break;
+                    }
+                    if (UNLIKELY(ss >= 32))
+                        Perl_croak(aTHX_
+                            "panic: newOPTARROWOP search_stack overflow");
+                    search_stack[ss++] = kid;
+                    prev = kid;
+                    kid  = sib;
+                }
+            }
+            assert(found); /* lhs_op must be a descendant of deref_op */
+            /* lhs_op is now free of the deref tree; use it as the outer
+             * evaluator (op_first of the logop) unchanged. */
+            if (lhs_is_padsv)
+                coderef_padsv = TRUE;
+        }
+    }
+
+    /* Clear autovivification flags; set OPf_SPECIAL to block multideref. */
+    lhs_op->op_private &= ~OPpDEREF;
+    lhs_op->op_flags   &= ~OPf_MOD;
+    lhs_op->op_flags   |=  OPf_SPECIAL;
+
+    /*
+     * Step 2 — build the LOGOP.
+     *
+     *   Entry → lhs_op → OPTARROW (logop)
+     *                      defined: op_other = start of deref chain
+     *                      undef:   NORMAL → logop->op_next (→ wrapper via LINKLIST)
+     *   wrapper (OP_NULL) → continuation
+     *
+     * After the parent LINKLIST call on wrapper, logop->op_next is rewritten
+     * from its initial value to wrapper, so both branches converge there.
+     *
+     * deref_op is spliced as a sibling of lhs_op inside the logop so that
+     * scalar()/list() context propagation can reach it (like AND/OR/COND_EXPR
+     * do for their branches).  The wrapper has no OPf_WANT set so that the
+     * parent's scalar()/list() call can propagate context all the way to
+     * deref_op — the entersub for coderef calls needs OPf_WANT on it so that
+     * GIMME_V returns the correct context.  (LINKLIST won't re-process
+     * deref_op since its op_next is already set.)
+     */
+    LOGOP *logop = alloc_LOGOP(OP_OPTARROW, lhs_op, LINKLIST(deref_op));
+    logop->op_flags |= OPf_KIDS;
+    if (coderef_padsv)
+        logop->op_private |= OPpOPTARROW_CODEREF_PADSV;
+    /* cv_ferry_targ is owned exclusively by the placeholder OP_PADSV child op
+     * (ph->op_targ = cv_ferry_targ set above).  Do NOT store it in logop->op_targ
+     * here: that would give two ops ownership of the same PADTMP slot, causing
+     * a double pad_free() when both ops are cleared.  Instead, pp_optarrow
+     * locates the slot at runtime by walking from op_other to the padsv. */
+
+    logop->op_next = LINKLIST(lhs_op);
+    lhs_op->op_next = (OP *)logop;
+
+    /* Make deref_op a sibling of lhs_op so context propagation (scalar/list)
+     * can reach the deref tree.  Must be done after LINKLIST so that
+     * LINKLIST(wrapper) won't re-traverse it. */
+    op_sibling_splice((OP*)logop, lhs_op, 0, deref_op);
+
+    /* Capture the return value: a custom PL_check[OP_OPTARROW] may free and
+     * replace logop; using the original pointer after CHECKOP would be a
+     * use-after-free. */
+    logop = (LOGOP *)CHECKOP(OP_OPTARROW, logop);
+
+    /* No OPf_WANT on wrapper: let the parent's scalar()/list() propagate. */
+    OP *wrapper = newUNOP(OP_NULL, 0, (OP *)logop);
+    deref_op->op_next = wrapper;
+
+    return wrapper;
+}
+
+OP *
+Perl_ck_optarrow(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_OPTARROW;
+    check_or_warn_optional_chaining();
     return o;
 }
 

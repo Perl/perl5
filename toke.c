@@ -440,7 +440,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (OPNUM, ADDOP),
     DEBUG_TOKEN (NONE,  ANDAND),
     DEBUG_TOKEN (NONE,  ANDOP),
-    DEBUG_TOKEN (NONE,  ARROW),
+    DEBUG_TOKEN (NONE,  ARROW),   /* also used for ?-> with ival=1 */
     DEBUG_TOKEN (OPNUM, ASSIGNOP),
     DEBUG_TOKEN (OPVAL, ATTRLIST),
     DEBUG_TOKEN (OPNUM, BITANDOP),
@@ -6283,6 +6283,7 @@ yyl_hyphen(pTHX_ char *s)
         else if (*s == '>') {
             s++;
             s = skipspace(s);
+            pl_yylval.ival = 0; /* normal -> not ?-> */
             if (((*s == '$' || *s == '&') && s[1] == '*')
               ||(*s == '$' && s[1] == '#' && s[2] == '*')
               ||((*s == '@' || *s == '%') && memCHRs("*[{", s[1]))
@@ -9807,7 +9808,40 @@ yyl_try(pTHX_ char *s)
     case '/':			/* may be division, defined-or, or pattern */
         return yyl_slash(aTHX_ s);
 
-     case '?':			/* conditional */
+     case '?':			/* conditional, or ?-> optional chaining */
+        /* Check for ?-> safe navigation operator (PPC0021) */
+        if (PL_expect == XOPERATOR
+            && s[1] == '-' && s[2] == '>'
+            && FEATURE_OPTIONAL_CHAINING_IS_ENABLED)
+        {
+            if (!PL_lex_allbrackets
+                && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+            {
+                TOKEN(0);
+            }
+            s += 3; /* consume '?', '-', '>' */
+            s = skipspace(s);
+            pl_yylval.ival = 1; /* flag: this is ?-> not -> */
+            if (((*s == '$' || *s == '&') && s[1] == '*')
+              ||(*s == '$' && s[1] == '#' && s[2] == '*')
+              ||((*s == '@' || *s == '%') && memCHRs("*[{", s[1]))
+              ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
+             )
+            {
+                PL_expect = XPOSTDEREF;
+                TOKEN(ARROW);
+            }
+            if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
+                s = force_word(s, METHCALL0, ALLOW_PACKAGE);
+                TOKEN(ARROW);
+            }
+            else if (*s == '$')
+                OPERATOR(ARROW);
+            else if (*s == '&')
+                OPERATOR(ARROW);
+            else
+                TERM(ARROW);
+        }
         s++;
         if (!PL_lex_allbrackets
             && PL_lex_fakeeof >= LEX_FAKEEOF_IFELSE)

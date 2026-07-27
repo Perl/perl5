@@ -5799,6 +5799,115 @@ other:
 }
 
 
+/* ?-> optional chaining operator (PPC0021).
+ * The LHS has already been evaluated and is on the stack.
+ * If it is undef, leave undef on the stack and short-circuit.
+ * If it is defined, jump to the deref chain (op_other).
+ *
+ * For hash/array dereferences (rv2hv, rv2av), op_other reads TOS directly,
+ * so we jump straight to it.
+ *
+ * For coderef calls ($sub?->()), op_other is a pushmark.  The normal
+ * pushmark would set its mark AT the current sp (where the CV already sits),
+ * but pp_entersub expects the mark to be BELOW the CV so that the CV is the
+ * last value from mark+1 to sp.  We push the mark manually at sp-1 (one
+ * slot below the CV) and then jump to the op AFTER the pushmark. */
+PP(pp_optarrow)
+{
+    PERL_ASYNC_CHECK();
+    SV * const sv = *PL_stack_sp;
+    if (!SvOK(sv)) {
+        if (UNLIKELY(PL_op->op_private & OPpOPTARROW_LVALUE)) {
+            /* sassign lvalue context: the RHS value is sitting just below us
+             * on the stack (pushed before the LHS was evaluated).  Pop both
+             * the undef LHS and the RHS, then skip the sassign op entirely.
+             * The wrapper's op_next is the sassign; its op_next is where we
+             * want to resume. */
+            OP *wrapper = cLOGOP->op_next;   /* the OP_NULL wrapper */
+            OP *assign  = wrapper->op_next;  /* sassign */
+            rpp_popfree_2_NN();              /* pop RHS and undef LHS */
+            return assign->op_next;          /* skip the sassign */
+        }
+        if (UNLIKELY(PL_op->op_private & OPpOPTARROW_LVALUE_AASSIGN)) {
+            /* aassign lvalue context: replace the mutable undef on the stack
+             * with the immortal &PL_sv_undef.  pp_aassign's SvIMMORTAL()
+             * guard will then silently skip this lelem slot, consuming the
+             * corresponding RHS value without storing it anywhere.  The
+             * remaining lvalue slots in the LHS list continue normally. */
+            rpp_replace_1_IMM_NN(&PL_sv_undef);
+        }
+        return NORMAL;  /* undef LHS: leave undef on stack, skip deref */
+    }
+    OP * const other = cLOGOP->op_other;
+    if (UNLIKELY(other->op_type == OP_PUSHMARK)) {
+        if (PL_op->op_private & OPpOPTARROW_CODEREF_PADSV) {
+            /* Coderef ?->() with dup-padsv strategy:
+             * Pop the cv_ref we pushed just to check for undef, then jump
+             * to the inner pushmark.  The normal call sequence then runs:
+             *   pushmark → [args...] → dup_padsv (re-evals $sub) → entersub
+             * The dup padsv pushes cv_ref at TOS after all args, which is
+             * exactly where entersub expects to find it. */
+            rpp_popfree_1_NN();
+            return other;  /* execute inner pushmark normally */
+        }
+        else {
+            /* Coderef ?->() with pad-ferry strategy (non-padsv LHS):
+             * Pop the CV off the stack, stash it in the temporary pad slot
+             * owned by the placeholder OP_PADSV, then jump to inner pushmark.
+             * Execution proceeds: pushmark → [args...] → padsv (re-pushes CV
+             * at TOS) → ex-rv2cv (noop) → entersub.  Works for any args.
+             *
+             * The ferry PADTMP slot is owned exclusively by the placeholder
+             * OP_PADSV child op; the logop has op_targ == 0.  To find the slot
+             * we walk the tree-sibling chain from the pushmark (op_other).
+             *
+             * The tree structure depends on call type:
+             *
+             *   Coderef call (?->(args)):
+             *     ex-list children: [pushmark, args..., ex-rv2cv(nulled)]
+             *     where ex-rv2cv's first child IS the placeholder padsv.
+             *     The last sibling is OP_NULL (nulled rv2cv); placeholder
+             *     is cUNOPx(last_sib)->op_first.
+             *
+             *   Method call (?->method or ?->method(args)):
+             *     entersub children: [pushmark, placeholder_padsv, method_named]
+             *     The last sibling is OP_METHOD_NAMED (or similar); the
+             *     placeholder is the second-to-last sibling.
+             *
+             * Using the tree-sibling chain (OpSIBLING) rather than the
+             * execution chain (op_next) avoids false matches on inner ex-rv2cv
+             * ops that appear in the execution chain when args are complex
+             * expressions (e.g. nested calls). */
+            OP *sib  = OpSIBLING(other); /* skip pushmark to first sibling */
+            OP *prev = sib;
+            while (OpSIBLING(sib)) {
+                prev = sib;
+                sib  = OpSIBLING(sib);
+            }
+            /* sib is the last sibling.  For coderef calls, sib is a nulled
+             * OP_NULL (ex-rv2cv) and the placeholder padsv is its first child.
+             * For method calls, sib is OP_METHOD_NAMED (or similar) and the
+             * placeholder padsv is the previous sibling (prev). */
+            PADOFFSET ferry_targ = (sib->op_type == OP_NULL)
+                ? cUNOPx(sib)->op_first->op_targ
+                : prev->op_targ;
+
+            SV *cv_sv = *PL_stack_sp;
+            /* Claim ownership of cv_sv BEFORE popping: under PERL_RC_STACK,
+             * rpp_popfree_1_NN() decrements the refcount and would free the
+             * SV if the stack were its last owner.  Increment first so that
+             * our local reference keeps it alive across the pop. */
+            SvREFCNT_inc_simple_void_NN(cv_sv);
+            rpp_popfree_1_NN();
+            SvREFCNT_dec(PL_curpad[ferry_targ]);
+            PL_curpad[ferry_targ] = cv_sv;
+            return other;         /* jump to inner pushmark */
+        }
+    }
+    return other;  /* hash/array: jump to rv2hv/rv2av */
+}
+
+
 /* @hash{'foo', 'bar'} */
 
 PP(pp_hslice)

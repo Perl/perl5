@@ -2476,6 +2476,8 @@ Cdp	|CV *	|newMYSUB	|I32 floor				\
 ARdp	|OP *	|newNULLLIST
 ARdp	|OP *	|newOP		|I32 optype				\
 				|I32 flags
+ARdp	|OP *	|newOPTARROWOP	|NN OP *deref_op			\
+				|NN OP *lhs_op
 ARTdpx	|PADNAMELIST *|newPADNAMELIST					\
 				|size_t max
 ARTdpx	|PADNAME *|newPADNAMEouter					\

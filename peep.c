@@ -1820,6 +1820,15 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
             flags = AAS_SAFE_SCALAR;
             break;
 
+        case OP_OPTARROW:
+            /* The ?-> operator: its child tree has been restructured by
+             * newOPTARROWOP (rv2hv/rv2av has had its op_first detached),
+             * so we must not descend into it.  The expression produces at
+             * most one scalar result. */
+            (*scalars_p)++;
+            flags = AAS_SAFE_SCALAR;
+            goto do_next;
+
         case OP_PUSHMARK:
         case OP_STUB:
             /* these are all no-ops; they don't push a potentially common SV

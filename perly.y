@@ -1286,28 +1286,59 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	|	term ARROW methodname PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->bar(list) */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, scalar($term), $optexpr),
-				    newMETHOP(OP_METHOD, 0, $methodname)));
+	|	term ARROW methodname PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->bar(list) or $foo?->bar(list) */
+			{ if ($ARROW) {
+			      OP *full = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        op_prepend_elem(OP_LIST, scalar($term), $optexpr),
+				        newMETHOP(OP_METHOD, 0, $methodname)));
+			      $$ = newOPTARROWOP(full, $term);
+			  } else {
+			      $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        op_prepend_elem(OP_LIST, scalar($term), $optexpr),
+				        newMETHOP(OP_METHOD, 0, $methodname)));
+			  }
 			}
-	|	term ARROW methodname                     /* $foo->bar */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST, scalar($term),
-				    newMETHOP(OP_METHOD, 0, $methodname)));
+	|	term ARROW methodname                     /* $foo->bar or $foo?->bar */
+			{ if ($ARROW) {
+			      OP *full = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST, scalar($term),
+				        newMETHOP(OP_METHOD, 0, $methodname)));
+			      $$ = newOPTARROWOP(full, $term);
+			  } else {
+			      $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST, scalar($term),
+				        newMETHOP(OP_METHOD, 0, $methodname)));
+			  }
 			}
-	|       term ARROW PERLY_AMPERSAND subname[method] PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->&bar(list) */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, scalar($term), $optexpr),
-				    newCVREF(0, $method)));
+	|       term ARROW PERLY_AMPERSAND subname[method] PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->&bar(list) or $foo?->&bar(list) */
+			{ if ($ARROW) {
+			      OP *full = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        op_prepend_elem(OP_LIST, scalar($term), $optexpr),
+				        newCVREF(0, $method)));
+			      $$ = newOPTARROWOP(full, $term);
+			  } else {
+			      $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        op_prepend_elem(OP_LIST, scalar($term), $optexpr),
+				        newCVREF(0, $method)));
+			  }
 			}
-	|       term ARROW PERLY_AMPERSAND subname[method] /* $foo->&bar */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    scalar($term),
-				    newCVREF(0, $method)));
+	|       term ARROW PERLY_AMPERSAND subname[method] /* $foo->&bar or $foo?->&bar */
+			{ if ($ARROW) {
+			      OP *full = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        scalar($term),
+				        newCVREF(0, $method)));
+			      $$ = newOPTARROWOP(full, $term);
+			  } else {
+			      $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
+				    op_append_elem(OP_LIST,
+				        scalar($term),
+				        newCVREF(0, $method)));
+			  }
 			}
 	|	METHCALL0 indirob optlistexpr           /* new Class @args */
 			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
@@ -1353,10 +1384,17 @@ subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE   
 	|	scalar[array] PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($expr));
 			}
-	|	term[array_reference] ARROW PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE      /* somearef->[$element] */
-			{ $$ = newBINOP(OP_AELEM, 0,
-					ref(newAVREF($array_reference),OP_RV2AV),
-					scalar($expr));
+	|	term[array_reference] ARROW PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE      /* somearef->[$element] or somearef?->[$element] */
+			{ if ($ARROW) {
+			      OP *full = newBINOP(OP_AELEM, 0,
+					  ref(newAVREF($array_reference), OP_RV2AV),
+					  scalar($expr));
+			      $$ = newOPTARROWOP(full, $array_reference);
+			  } else {
+			      $$ = newBINOP(OP_AELEM, 0,
+					  ref(newAVREF($array_reference),OP_RV2AV),
+					  scalar($expr));
+			  }
 			}
 	|	subscripted[array_reference] PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE    /* $foo->[$bar]->[$baz] */
 			{ $$ = newBINOP(OP_AELEM, 0,
@@ -1366,24 +1404,44 @@ subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE   
 	|	scalar[hash] PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($expr));
 			}
-	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE /* somehref->{bar();} */
-			{ $$ = newBINOP(OP_HELEM, 0,
-					ref(newHVREF($hash_reference),OP_RV2HV),
-					jmaybe($expr)); }
+	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE /* somehref->{bar();} or somehref?->{bar();} */
+			{ if ($ARROW) {
+			      OP *full = newBINOP(OP_HELEM, 0,
+					  ref(newHVREF($hash_reference), OP_RV2HV),
+					  jmaybe($expr));
+			      $$ = newOPTARROWOP(full, $hash_reference);
+			  } else {
+			      $$ = newBINOP(OP_HELEM, 0,
+					  ref(newHVREF($hash_reference),OP_RV2HV),
+					  jmaybe($expr));
+			  } }
 	|	subscripted[hash_reference] PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($expr)); }
-	|	term[code_reference] ARROW PERLY_PAREN_OPEN PERLY_PAREN_CLOSE          /* $subref->() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   newCVREF(0, scalar($code_reference)));
+	|	term[code_reference] ARROW PERLY_PAREN_OPEN PERLY_PAREN_CLOSE          /* $subref->() or $subref?->() */
+			{ if ($ARROW) {
+			      OP *full = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				       newCVREF(0, scalar($code_reference)));
+			      $$ = newOPTARROWOP(full, $code_reference);
+			  } else {
+			      $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				       newCVREF(0, scalar($code_reference)));
+			  }
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}
-	|	term[code_reference] ARROW PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE     /* $subref->(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   op_append_elem(OP_LIST, $expr,
-				       newCVREF(0, scalar($code_reference))));
+	|	term[code_reference] ARROW PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE     /* $subref->(@args) or $subref?->(@args) */
+			{ if ($ARROW) {
+			      OP *full = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				       op_append_elem(OP_LIST, $expr,
+				           newCVREF(0, scalar($code_reference))));
+			      $$ = newOPTARROWOP(full, $code_reference);
+			  } else {
+			      $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+				       op_append_elem(OP_LIST, $expr,
+				           newCVREF(0, scalar($code_reference))));
+			  }
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}

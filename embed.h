@@ -398,6 +398,7 @@
 # define newMYSUB(a,b,c,d,e)                    Perl_newMYSUB(aTHX_ a,b,c,d,e)
 # define newNULLLIST()                          Perl_newNULLLIST(aTHX)
 # define newOP(a,b)                             Perl_newOP(aTHX_ a,b)
+# define newOPTARROWOP(a,b)                     Perl_newOPTARROWOP(aTHX_ a,b)
 # define newPADNAMELIST                         Perl_newPADNAMELIST
 # define newPADNAMEouter                        Perl_newPADNAMEouter
 # define newPADNAMEpvn                          Perl_newPADNAMEpvn
@@ -1267,6 +1268,7 @@
 #     define ck_method(a)                       Perl_ck_method(aTHX_ a)
 #     define ck_null(a)                         Perl_ck_null(aTHX_ a)
 #     define ck_open(a)                         Perl_ck_open(aTHX_ a)
+#     define ck_optarrow(a)                     Perl_ck_optarrow(aTHX_ a)
 #     define ck_prototype(a)                    Perl_ck_prototype(aTHX_ a)
 #     define ck_readline(a)                     Perl_ck_readline(aTHX_ a)
 #     define ck_refassign(a)                    Perl_ck_refassign(aTHX_ a)

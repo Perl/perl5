@@ -608,6 +608,9 @@ is_tainted	is_tainted		ck_null		fs1
 # exists-or; not currently exposed as a Perl-callable op
 helemexistsor	hash element exists or	ck_helemexistsor	|	S S
 
+# optional chaining (?->); not currently exposed as a Perl-callable op
+optarrow	optional arrow	ck_optarrow	|	S
+
 methstart	method start		ck_null		+
 initfield	initialise field	ck_null		+
 

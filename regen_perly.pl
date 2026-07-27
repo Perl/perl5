@@ -143,7 +143,8 @@ while (<$tmph_fh>) {
 	print $h_fh <<h;
 #ifdef PERL_IN_TOKE_C
 static bool
-S_is_opval_token(int type) {
+S_is_opval_token(int type)
+{
     switch (type) {
 h
 	print $h_fh <<i for sort grep $tokens{$_} eq 'opval', keys %tokens;

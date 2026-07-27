@@ -199,6 +199,7 @@ PERL_CALLCONV PP(pp_oct) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_once) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_open) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_open_dir) __attribute__visibility__("hidden");
+PERL_CALLCONV PP(pp_optarrow) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_or) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_ord) __attribute__visibility__("hidden");
 PERL_CALLCONV PP(pp_pack) __attribute__visibility__("hidden");
