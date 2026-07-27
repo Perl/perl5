@@ -236,6 +236,28 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvHASEVAL_on(cv)	(CvFLAGS(cv) |= CVf_HASEVAL)
 #define CvHASEVAL_off(cv)	(CvFLAGS(cv) &= ~CVf_HASEVAL)
 
+/*
+=for apidoc Am|I32|CvHasNAME_HEK|CV *cv
+=for apidoc_item CVf_HasNAME_HEK
+
+If true, indicates that this CV has a name stored I<directly> into it, which
+is accessible by L</CvNAME_HEK>. This is normally only the case for named
+lexical subroutines (i.e. those created by C<my sub ...> syntax). Named
+package subroutines do not store their name this way; instead those are
+accessible via the L</CvGV>.
+
+In normal circumstances you would not need to check this flag just to see if
+the subroutine has a name as would be recognised by a Perl developer. For
+that purpose, see L</CvGvNAME_HEK>.
+
+This macro returns the value of the flag constant directly; it may be used to
+copy the flag from one CV to another; using something like
+
+    CvFLAGS(ncv) |= CvHasNAME_HEK(ocv);
+
+=cut
+*/
+
 #define CvHasNAME_HEK(cv)       (CvFLAGS(cv) & CVf_HasNAME_HEK)
 #define CvHasNAME_HEK_on(cv)    (CvFLAGS(cv) |= CVf_HasNAME_HEK)
 #define CvHasNAME_HEK_off(cv)   (CvFLAGS(cv) &= ~CVf_HasNAME_HEK)
@@ -312,6 +334,15 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
 
+/*
+=for apidoc ATi|HEK *|CvNAME_HEK|CV *cv
+
+If the CV is named with a hash key structure (i.e. L</CvHasNAME_HEK> is true),
+returns the name hash key structure. If not, returns C<NULL>.
+
+=cut
+*/
+
 PERL_STATIC_INLINE HEK *
 CvNAME_HEK(CV *sv)
 {
@@ -320,8 +351,17 @@ CvNAME_HEK(CV *sv)
         : 0;
 }
 
-/* helper for the common pattern:
-   CvHasNAME_HEK(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
+/*
+=for apidoc Am|HEK *|CvGvNAME_HEK|CV *cv
+
+Attempts to return a naming hash key structure associated with the CV; either
+by using L</CvNAME_HEK> or the L</GvNAME_HEK> of its L</CvGV>.
+
+Equivalent to the otherwise-common pattern:
+
+   CvHasNAME_HEK(cv) ? CvNAME_HEK((CV *)cv) : GvNAME_HEK(CvGV(cv))
+
+=cut
 */
 #define CvGvNAME_HEK(sv) ( \
         CvHasNAME_HEK((CV*)sv) ? \

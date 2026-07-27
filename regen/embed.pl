@@ -476,13 +476,11 @@ my @unresolved_visibility_overrides = qw(
     CVf_UNIQUE
     CVf_WEAKOUTSIDE
     CVf_XS_RCSTACK
-    CvGvNAME_HEK
     CvGV_set
     CvHASEVAL
     CvHASEVAL_off
     CvHASEVAL_on
     CvHASGV
-    CvHasNAME_HEK
     CvHSCXT
     CvIsMETHOD
     CvIsMETHOD_off
@@ -918,7 +916,6 @@ my @unresolved_visibility_overrides = qw(
     GvMULTI_on
     GvNAME
     GvNAME_get
-    GvNAME_HEK
     GvNAMELEN
     GvNAMELEN_get
     GvNAMEUTF8
@@ -980,7 +977,6 @@ my @unresolved_visibility_overrides = qw(
     hasWARNBIT
     HASWIDTH
     HEK_BASESIZE
-    HeKEY_hek
     HeKEY_sv
     HEKf
     HEKf256
@@ -989,16 +985,11 @@ my @unresolved_visibility_overrides = qw(
     HeKFLAGS
     HEK_FLAGS
     HEKf_QUOTEDPREFIX
-    HEK_HASH
-    HEK_KEY
-    HEK_LEN
     HeKLEN_UTF8
     HeKUTF8
-    HEK_UTF8
     HEK_UTF8_off
     HEK_UTF8_on
     HeKWASUTF8
-    HEK_WASUTF8
     HEK_WASUTF8_off
     HEK_WASUTF8_on
     HeNEXT
@@ -1095,7 +1086,6 @@ my @unresolved_visibility_overrides = qw(
     HvLAZYDEL_off
     HvLAZYDEL_on
     HvMAX
-    HvNAME_HEK
     HvNAME_HEK_NN
     HvPLACEHOLDERS
     HvPLACEHOLDERS_get
