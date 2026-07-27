@@ -43,6 +43,13 @@ the need to cast the result to the appropriate type.
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
+/*
+=for apidoc Am|HEK *|GvNAME_HEK|GV *gv
+Returns the package name directly as a hash key structure, or C<NULL> if
+there is no name associated.
+
+=cut
+*/
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS) && !defined(__INTEL_COMPILER)
 #  define GvGP(gv)							\

@@ -3295,6 +3295,15 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     unshare_hek_or_pvn (NULL, str, len, hash);
 }
 
+/*
+=for apidoc unshare_hek
+
+Decrements the reference count of the given hash key structure. If that was
+the last reference and its count has become zero, it is removed from the
+shared string table and its storage is reclaimed.
+
+=cut
+*/
 
 void
 Perl_unshare_hek(pTHX_ HEK *hek)
@@ -3399,10 +3408,31 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         Safefree(str);
 }
 
-/* get a (constant) string ptr from the global string table
- * string will get added if it is not already there.
- * len and hash must both be valid for str.
- */
+/*
+=for apidoc share_hek
+
+Returns a pointer to the hash key structure entry containing the string given
+by I<str> and I<len>. If the string should be considered as opaque bytes,
+I<len> must be positive. If the string should be considered as a UTF-8 encoded
+sequence of characters, I<len> must be negative. The hash value must have been
+previously computed (using C<PERL_HASH>); do not simply pass zero here.
+
+If the string was already present in the global string table (C<PL_strtab>),
+then its reference count is incremented and the pointer to it is returned. If
+not, it is added and a pointer to the new entry with reference count 1 is
+returned. (I.e. do not think of this as a "newHEK" function; its entire
+purpose is to return shared pointers if possible).
+
+Note that it is possible the returned C<HEK> does not have the C<HEK_UTF8>
+flag set on it, even though a UTF-8 encoded sequence was given here. This
+happens in the case that the codepoints encoded by the sequence fit entirely
+within the range 0 to 255; if this happens, the string is stored as if it was
+plain bytes, but the C<HEK_WASUTF8> flag is set on it instead to indicate
+this.
+
+=cut
+*/
+
 HEK *
 Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
 {

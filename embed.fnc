@@ -3289,7 +3289,7 @@ Xp	|void	|set_numeric_standard					\
 Xp	|void	|set_numeric_underlying 				\
 				|NN const char *file			\
 				|const line_t caller_line
-Cp	|HEK *	|share_hek	|NN const char *str			\
+Adp	|HEK *	|share_hek	|NN const char *str			\
 				|SSize_t len				\
 				|U32 hash
 Tp	|Signal_t|sighandler1	|int sig
@@ -3987,7 +3987,7 @@ Adp	|SSize_t|unpackstring	|SPTR const char *pat			\
 				|EPTRge const char *strend		\
 				|U32 flags
 : Used in gv.c, hv.c
-Cp	|void	|unshare_hek	|NULLOK HEK *hek
+Adp	|void	|unshare_hek	|NULLOK HEK *hek
 Cdp	|void	|unsharepvn	|NULLOK const char *sv			\
 				|I32 len				\
 				|U32 hash
