@@ -616,13 +616,16 @@ PP(pp_ref_cmp)
                 if ((U32)namelen <= 7) { /* Is it 0-7 chars long? */
                     const char * name = HEK_KEY(namehek);
 
-                    if (wanted <= SVrt_INVLIST && (strncmp(PL_sv_reftype_lookup[wanted],name, namelen) == 0))
+                    if (wanted <= SVrt_INVLIST
+                        && ((I32)strlen(PL_sv_reftype_lookup[wanted]) == namelen)
+                        && memEQ(PL_sv_reftype_lookup[wanted], name, namelen)
+                        )
                          goto matched;
 
                     if (namelen == 6 && (wanted == OPpREF_CMP_REGEXP_PKG && memEQs(name, 6, "Regexp")))
                          goto matched;
 
-                    if (namelen == 6 && wanted == OPpREF_CMP_EMPTYSTR)
+                    if (namelen == 0 && wanted == OPpREF_CMP_EMPTYSTR)
                          goto matched;
                 }
             }
