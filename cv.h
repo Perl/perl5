@@ -399,6 +399,14 @@ Equivalent to the otherwise-common pattern:
         CvHasNAME_HEK_on(cv)						     \
     )
 
+#define CvNAME_HEK_clear(sv) (                                   \
+        CvNAME_HEK((CV *)sv)                                      \
+            ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)     \
+            : (void)0,                                              \
+        (((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_gv_u.xcv_hek) = NULL, \
+        CvHasNAME_HEK_off(cv)                                         \
+    )
+
 /*
 
 =for apidoc m|bool|CvWEAKOUTSIDE|CV *cv
