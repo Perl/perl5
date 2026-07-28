@@ -103,7 +103,7 @@ All other macros must only be used on structures known to be Magic v2.
 =cut
 */
 
-#define MgIsV2(mg)  (mg->mg_flags & MGf_MGv2)
+#define MgIsV2(mg)  ((mg)->mg_flags & MGf_MGv2)
 
 /* Flag constants used by MgFLAGS() */
 #define MGv2f_REFCOUNTED_AUXSV  (1<<1)   /* must match MGf_REFCOUNTED */
@@ -263,9 +263,9 @@ not set.
 */
 #define MgAUXSV_set(mg, sv) \
     STMT_START { \
-        MAGIC *mg_ = mg; \
+        MAGIC *mg_ = (mg); \
         if(MgAUXSV(mg_) && !MgWEAK_AUXSV(mg_)) SvREFCNT_dec(MgAUXSV(mg_)); \
-        (mg_)->mg_obj = sv; \
+        (mg_)->mg_obj = (sv); \
     } STMT_END
 
 /*
@@ -364,18 +364,18 @@ if present.
 #define MgKEYIV(mg)     (*(assert(MgHasKEYIV(mg)), &((MAGICWithKeyIV *)mg)->keyiv))
 #define MgKEYSV(mg)     (*(assert(MgHasKEYSV(mg)), &((MAGICWithKeySV *)mg)->keysv))
 
-#define MgKEYIV_set(mg, iv)                   \
-    STMT_START {                              \
-        assert(MgHasKEYIV(mg));               \
-        ((MAGICWithKeyIV *)mg)->keyiv = (iv); \
+#define MgKEYIV_set(mg, iv)                     \
+    STMT_START {                                \
+        assert(MgHasKEYIV(mg));                 \
+        ((MAGICWithKeyIV *)(mg))->keyiv = (iv); \
     } STMT_END
 
-#define MgKEYSV_set(mg, sv)                   \
-    STMT_START {                              \
-        assert(MgHasKEYSV(mg));               \
-        if(MgKEYSV(mg))                       \
-            SvREFCNT_dec(MgKEYSV(mg));        \
-        ((MAGICWithKeySV *)mg)->keysv = (sv); \
+#define MgKEYSV_set(mg, sv)                     \
+    STMT_START {                                \
+        assert(MgHasKEYSV(mg));                 \
+        if(MgKEYSV(mg))                         \
+            SvREFCNT_dec(MgKEYSV(mg));          \
+        ((MAGICWithKeySV *)(mg))->keysv = (sv); \
     } STMT_END
 
 /*
@@ -392,7 +392,7 @@ L</MgKEYIV> or L</MgKEYSV> fields, and wish to manage their own storage.
 
 =cut
 */
-#define MgUSERSTRUCT(mg, type)  ((type)(((char *)mg) + MgSIZEOF(mg)))
+#define MgUSERSTRUCT(mg, type)  ((type)(((char *)(mg)) + MgSIZEOF(mg)))
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
