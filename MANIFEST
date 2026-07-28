@@ -5137,6 +5137,8 @@ ext/XS-APItest/APItest_cv_refcounted_anysv.xs	XS::APItest CvREFCOUNTED_ANYSV-rel
 ext/XS-APItest/APItest_global_locale.xs		XS::APItest global_locale-related XS split
 ext/XS-APItest/APItest_hash.xs			XS::APItest hash-related XS split
 ext/XS-APItest/APItest_hv_macro.xs		XS::APItest HvMacro-related XS split
+ext/XS-APItest/APItest_lexical_attributes.inc	XS::APItest lexical attributes-related support include
+ext/XS-APItest/APItest_lexical_attributes.xs	XS::APItest lexical attributes-related XS split
 ext/XS-APItest/APItest_magic.xs			XS::APItest magic-related XS split
 ext/XS-APItest/APItest_magic_hash_support.inc	XS::APItest magic/hash support include
 ext/XS-APItest/APItest_magicv2.inc		XS::APItest Magic v2 support include
@@ -5229,6 +5231,7 @@ ext/XS-APItest/t/keyword_plugin_threads.t	test keyword plugin loading from multi
 ext/XS-APItest/t/labelconst.aux			auxiliary file for label test
 ext/XS-APItest/t/labelconst.t			test recursive descent label parsing
 ext/XS-APItest/t/labelconst_utf8.aux		auxiliary file for label test in UTF-8
+ext/XS-APItest/t/lexicalattributes.t		Test XS registration of lexical (v2) attributes
 ext/XS-APItest/t/lexsub.t			Test XS registration of lexical subs
 ext/XS-APItest/t/load-module.t			test load_module()
 ext/XS-APItest/t/locale.t			test locale-related things
