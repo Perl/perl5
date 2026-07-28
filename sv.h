@@ -2915,8 +2915,12 @@ macro family.
  * If external visibility is required in the future, it should be
  * via a new function rather than directly. */
 #ifdef PERL_CORE
+typedef struct {
+    const char * str;
+    STRLEN len;
+} sv_reftype_entry;
 #define PL_sv_reftype_lookup_MAX 14
-extern const char *const PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
+extern const sv_reftype_entry PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
 #endif
 
 /*

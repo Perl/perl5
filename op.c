@@ -4497,7 +4497,7 @@ S_ref_cmp_type(pTHX_ OP * constop)
 
     /* Compare against the builtin types */
     for (unsigned int i = 0; i < 14; i++) {
-        if (strcmp(PL_sv_reftype_lookup[i], str) == 0) {
+        if (strcmp(PL_sv_reftype_lookup[i].str, str) == 0) {
             return i;
         }
     }

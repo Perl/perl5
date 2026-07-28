@@ -11798,21 +11798,22 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
  * are mirrored by the SVrt_* constants defined in op_private for
  * OP_REF_CMP but also used below by Perl_sv_reftype_id.
 */
-const char * const PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX] = {
-    "UNKNOWN", /* 0 */
-    "ARRAY",   /* 1 */
-    "HASH",    /* 2 */
-    "CODE",    /* 3 */
-    "REF",     /* 5 */
-    "SCALAR",  /* 6 */
-    "GLOB",    /* 4 */
-    "REGEXP",  /* 7 */
-    "OBJECT",  /* 8 */
-    "LVALUE",  /* 9 */
-    "IO",      /* 10 */
-    "FORMAT",  /* 11 */
-    "VSTRING", /* 12 */
-    "INVLIST", /* 13 */
+
+const sv_reftype_entry PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX] = {
+    {STR_WITH_LEN("UNKNOWN")}, /* 0 */
+    {STR_WITH_LEN("ARRAY")},   /* 1 */
+    {STR_WITH_LEN("HASH")},    /* 2 */
+    {STR_WITH_LEN("CODE")},    /* 3 */
+    {STR_WITH_LEN("REF")},     /* 5 */
+    {STR_WITH_LEN("SCALAR")},  /* 6 */
+    {STR_WITH_LEN("GLOB")},    /* 4 */
+    {STR_WITH_LEN("REGEXP")},  /* 7 */
+    {STR_WITH_LEN("OBJECT")},  /* 8 */
+    {STR_WITH_LEN("LVALUE")},  /* 9 */
+    {STR_WITH_LEN("IO")},      /* 10 */
+    {STR_WITH_LEN("FORMAT")},  /* 11 */
+    {STR_WITH_LEN("VSTRING")}, /* 12 */
+    {STR_WITH_LEN("INVLIST")}, /* 13 */
 };
 
 U8
@@ -11884,7 +11885,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
         return SvPV_nolen_const(sv_ref(NULL, sv, ob));
     }
     else {
-        return PL_sv_reftype_lookup[ sv_reftype_id(sv) ];
+        return PL_sv_reftype_lookup[ sv_reftype_id(sv) ].str;
     }
 }
 
