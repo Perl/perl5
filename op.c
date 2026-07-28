@@ -4532,6 +4532,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     /* Check for ref/reftype $x eq/ne 'BUILTIN_TYPE' */
     OP *splice = NULL;
     U8 builtin_u8 = 0;
+    bool has_targmy;
 
     if ((OP_TYPE_IS(left, OP_REF) || OP_TYPE_IS(left, OP_REFTYPE))&& OP_TYPE_IS(right, OP_CONST)) {
         splice = left;
@@ -4541,7 +4542,12 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
         splice = right;
         builtin_u8 = S_ref_cmp_type(aTHX_ left);
       ref_seqne_check:
-        if ((type ==OP_SEQ || type == OP_SNE) && builtin_u8) {
+        /* ref() doesn't support TARGMY. reftype() does and it does
+         * very occasionally get applied - see GH#24630. */
+        has_targmy = ((PL_opargs[splice->op_type] & OA_TARGLEX)
+                                && (splice->op_private & OPpTARGET_MY));
+
+        if ((type ==OP_SEQ || type == OP_SNE) && builtin_u8 && !has_targmy) {
             U8 flags = OP_TYPE_IS(splice, OP_REFTYPE) ? OPf_SPECIAL : 0;
             if (type == OP_SNE) builtin_u8 |= OPpREF_CMP_NE;
             OP *referant = op_sibling_splice(splice,NULL,1,NULL);
