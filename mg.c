@@ -936,6 +936,7 @@ MAGIC *
 Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
 {
     PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY;
+    PERL_UNUSED_ARG(osv);
 
     MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
     mgv2_copy(omg, nmg);
