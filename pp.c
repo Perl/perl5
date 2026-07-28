@@ -617,8 +617,8 @@ PP(pp_ref_cmp)
                     const char * name = HEK_KEY(namehek);
 
                     if (wanted <= SVrt_INVLIST
-                        && ((I32)strlen(PL_sv_reftype_lookup[wanted]) == namelen)
-                        && memEQ(PL_sv_reftype_lookup[wanted], name, namelen)
+                        && ((I32)PL_sv_reftype_lookup[wanted].len == namelen)
+                        && memEQ(PL_sv_reftype_lookup[wanted].str, name, namelen)
                         )
                          goto matched;
 
