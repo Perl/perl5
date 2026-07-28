@@ -148,7 +148,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_DYNFILE	0x1000	/* The filename is malloced  */
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 #define CVf_HASEVAL	0x4000	/* contains string eval  */
-#define CVf_NAMED	0x8000  /* Has a name HEK */
+#define CVf_HasNAME_HEK 0x8000  /* Has a name HEK */
 #define CVf_LEXICAL	0x10000 /* Omit package from name */
 #define CVf_ANONCONST	0x20000 /* :const - create anonconst op */
 #define CVf_SIGNATURE   0x40000 /* CV uses a signature */
@@ -236,9 +236,17 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvHASEVAL_on(cv)	(CvFLAGS(cv) |= CVf_HASEVAL)
 #define CvHASEVAL_off(cv)	(CvFLAGS(cv) &= ~CVf_HASEVAL)
 
-#define CvNAMED(cv)		(CvFLAGS(cv) & CVf_NAMED)
-#define CvNAMED_on(cv)		(CvFLAGS(cv) |= CVf_NAMED)
-#define CvNAMED_off(cv)		(CvFLAGS(cv) &= ~CVf_NAMED)
+#define CvHasNAME_HEK(cv)       (CvFLAGS(cv) & CVf_HasNAME_HEK)
+#define CvHasNAME_HEK_on(cv)    (CvFLAGS(cv) |= CVf_HasNAME_HEK)
+#define CvHasNAME_HEK_off(cv)   (CvFLAGS(cv) &= ~CVf_HasNAME_HEK)
+
+#ifndef PERL_CORE
+    /* Back-compatibility wrappers for its old name */
+#  define CVf_NAMED    CVf_HasNAME_HEK
+#  define CvNAMED      CvHasNAME_HEK
+#  define CvNAMED_on   CvHasNAME_HEK_on
+#  define CvNAMED_off  CvHasNAME_HEK_off
+#endif
 
 #define CvLEXICAL(cv)		(CvFLAGS(cv) & CVf_LEXICAL)
 #define CvLEXICAL_on(cv)	(CvFLAGS(cv) |= CVf_LEXICAL)
@@ -307,16 +315,16 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 PERL_STATIC_INLINE HEK *
 CvNAME_HEK(CV *sv)
 {
-    return CvNAMED(sv)
+    return CvHasNAME_HEK(sv)
         ? ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_hek
         : 0;
 }
 
 /* helper for the common pattern:
-   CvNAMED(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
+   CvHasNAME_HEK(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
 */
 #define CvGvNAME_HEK(sv) ( \
-        CvNAMED((CV*)sv) ? \
+        CvHasNAME_HEK((CV*)sv) ? \
             ((XPVCV*)MUTABLE_PTR(SvANY((SV*)sv)))->xcv_gv_u.xcv_hek\
             : GvNAME_HEK(CvGV( (SV*) sv)) \
         )
@@ -328,7 +336,7 @@ CvNAME_HEK(CV *sv)
             ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)	  \
             : (void)0,						   \
         ((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_gv_u.xcv_hek = (hek), \
-        CvNAMED_on(cv)						     \
+        CvHasNAME_HEK_on(cv)						     \
     )
 
 /*

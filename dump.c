@@ -2359,23 +2359,23 @@ const struct flag_to_name second_sv_flags_names[] = {
 };
 
 const struct flag_to_name cv_flags_names[] = {
-    {CVf_ANON, "ANON,"},
-    {CVf_UNIQUE, "UNIQUE,"},
-    {CVf_CLONE, "CLONE,"},
-    {CVf_CLONED, "CLONED,"},
-    {CVf_CONST, "CONST,"},
-    {CVf_NODEBUG, "NODEBUG,"},
-    {CVf_LVALUE, "LVALUE,"},
+    {CVf_ANON,             "ANON,"},
+    {CVf_UNIQUE,           "UNIQUE,"},
+    {CVf_CLONE,            "CLONE,"},
+    {CVf_CLONED,           "CLONED,"},
+    {CVf_CONST,            "CONST,"},
+    {CVf_NODEBUG,          "NODEBUG,"},
+    {CVf_LVALUE,           "LVALUE,"},
     {CVf_NOWARN_AMBIGUOUS, "NOWARN_AMBIGUOUS,"},
-    {CVf_WEAKOUTSIDE, "WEAKOUTSIDE,"},
-    {CVf_CVGV_RC, "CVGV_RC,"},
-    {CVf_DYNFILE, "DYNFILE,"},
-    {CVf_AUTOLOAD, "AUTOLOAD,"},
-    {CVf_HASEVAL, "HASEVAL,"},
-    {CVf_SLABBED, "SLABBED,"},
-    {CVf_NAMED, "NAMED,"},
-    {CVf_LEXICAL, "LEXICAL,"},
-    {CVf_ISXSUB, "ISXSUB,"},
+    {CVf_WEAKOUTSIDE,      "WEAKOUTSIDE,"},
+    {CVf_CVGV_RC,          "CVGV_RC,"},
+    {CVf_DYNFILE,          "DYNFILE,"},
+    {CVf_AUTOLOAD,         "AUTOLOAD,"},
+    {CVf_HASEVAL,          "HASEVAL,"},
+    {CVf_SLABBED,          "SLABBED,"},
+    {CVf_HasNAME_HEK,      "HasNAME_HEK,"},
+    {CVf_LEXICAL,          "LEXICAL,"},
+    {CVf_ISXSUB,           "ISXSUB,"},
     {CVf_ANONCONST,        "ANONCONST,"},
     {CVf_SIGNATURE,        "SIGNATURE,"},
     {CVf_REFCOUNTED_ANYSV, "REFCOUNTED_ANYSV,"},
@@ -3036,7 +3036,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                          (IV)CvXSUBANY(sv).any_i32);
             }
         }
-        if (CvNAMED(sv))
+        if (CvHasNAME_HEK(sv))
             dump_indent(level, file, "  NAME = \"%s\"\n",
                                         HEK_KEY(CvNAME_HEK((CV *)sv)));
         else do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));

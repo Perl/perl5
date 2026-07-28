@@ -1069,7 +1069,7 @@ PP(pp_undef)
                        SVfARG(CvANON((const CV *)sv)
                          ? newSVpvs_flags("(anonymous)", SVs_TEMP)
                          : newSVhek_mortal(
-                            CvNAMED(sv)
+                            CvHasNAME_HEK(sv)
                              ? CvNAME_HEK((CV *)sv)
                              : GvENAME_HEK(CvGV((const CV *)sv))
                            )

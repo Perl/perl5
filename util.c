@@ -6850,7 +6850,7 @@ Perl_dtrace_probe_call(pTHX_ CV *cv, bool is_call)
     const COP  *start;
     line_t      line;
 
-    if (CvNAMED(cv)) {
+    if (CvHasNAME_HEK(cv)) {
         HEK *hek = CvNAME_HEK(cv);
         func = HEK_KEY(hek);
     }

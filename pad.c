@@ -371,9 +371,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
     if (!(flags & CV_UNDEF_KEEP_NAME)) {
-        if (CvNAMED(&cvbody)) {
+        if (CvHasNAME_HEK(&cvbody)) {
             CvNAME_HEK_set(&cvbody, NULL);
-            CvNAMED_off(&cvbody);
+            CvHasNAME_HEK_off(&cvbody);
         }
         else CvGV_set(cv, NULL);
     }
@@ -492,7 +492,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
      * ref status of CvOUTSIDE and CvGV, and ANON, NAMED and
      * LEXICAL, which are used to determine the sub's name.  */
     CvFLAGS(&cvbody) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON|CVf_LEXICAL
-                   |CVf_NAMED);
+                   |CVf_HasNAME_HEK);
 }
 
 /*
@@ -2289,7 +2289,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
 
     CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
                                            : CvFILE(proto);
-    if (CvNAMED(proto))
+    if (CvHasNAME_HEK(proto))
          CvNAME_HEK_set(cv, share_hek_hek(CvNAME_HEK(proto)));
     else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
@@ -2382,7 +2382,7 @@ Perl_cv_name(pTHX_ CV *cv, SV *sv, U32 flags)
     {
         SV * const retsv = sv ? (sv) : sv_newmortal();
         if (SvTYPE(cv) == SVt_PVCV) {
-            if (CvNAMED(cv)) {
+            if (CvHasNAME_HEK(cv)) {
                 if (CvLEXICAL(cv) || flags & CV_NAME_NOTQUAL)
                     sv_sethek(retsv, CvNAME_HEK(cv));
                 else {

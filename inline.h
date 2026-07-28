@@ -241,7 +241,7 @@ Perl_CvGV(pTHX_ CV *sv)
 {
     PERL_ARGS_ASSERT_CVGV;
 
-    return CvNAMED(sv)
+    return CvHasNAME_HEK(sv)
         ? Perl_cvgv_from_hek(aTHX_ sv)
         : ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
 }

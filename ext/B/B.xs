@@ -2192,7 +2192,7 @@ SV *
 NAME_HEK(cv)
 	B::CV cv
     CODE:
-	RETVAL = CvNAMED(cv) ? newSVhek(CvNAME_HEK(cv)) : &PL_sv_undef;
+	RETVAL = CvHasNAME_HEK(cv) ? newSVhek(CvNAME_HEK(cv)) : &PL_sv_undef;
     OUTPUT:
 	RETVAL
 

@@ -246,7 +246,7 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 {
     PERL_ARGS_ASSERT_CVGV_SET;
 
-    GV * const oldgv = CvNAMED(cv) ? NULL : SvANY(cv)->xcv_gv_u.xcv_gv;
+    GV * const oldgv = CvHasNAME_HEK(cv) ? NULL : SvANY(cv)->xcv_gv_u.xcv_gv;
     HEK *hek;
 
     if (oldgv == gv)
@@ -266,7 +266,7 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
         CvLEXICAL_off(cv);
     }
 
-    CvNAMED_off(cv);
+    CvHasNAME_HEK_off(cv);
     SvANY(cv)->xcv_gv_u.xcv_gv = gv;
     assert(!CvCVGV_RC(cv));
 
@@ -308,12 +308,12 @@ Perl_cvgv_from_hek(pTHX_ CV *cv)
         gv_init_pvn(gv, CvSTASH(cv), HEK_KEY(CvNAME_HEK(cv)),
                 HEK_LEN(CvNAME_HEK(cv)),
                 SVf_UTF8 * cBOOL(HEK_UTF8(CvNAME_HEK(cv))));
-    if (!CvNAMED(cv)) { /* gv_init took care of it */
+    if (!CvHasNAME_HEK(cv)) { /* gv_init took care of it */
         assert (SvANY(cv)->xcv_gv_u.xcv_gv == gv);
         return gv;
     }
     unshare_hek(CvNAME_HEK(cv));
-    CvNAMED_off(cv);
+    CvHasNAME_HEK_off(cv);
     SvANY(cv)->xcv_gv_u.xcv_gv = gv;
     if (svp && *svp) SvREFCNT_inc_simple_void_NN(gv);
     CvCVGV_RC_on(cv);
@@ -531,7 +531,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
         /* Not actually a constant.  Just a regular sub.  */
         CV * const cv = (CV *)has_constant;
         GvCV_set(gv,cv);
-        if (CvNAMED(cv) && CvSTASH(cv) == stash && (
+        if (CvHasNAME_HEK(cv) && CvSTASH(cv) == stash && (
                CvNAME_HEK(cv) == GvNAME_HEK(gv)
             || (  HEK_LEN(CvNAME_HEK(cv)) == HEK_LEN(GvNAME_HEK(gv))
                && HEK_FLAGS(CvNAME_HEK(cv)) != HEK_FLAGS(GvNAME_HEK(gv))
@@ -1485,7 +1485,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
      * use that, but for lack of anything better we will use the sub's
      * original package to look up $AUTOLOAD.
      */
-    varstash = CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv));
+    varstash = CvHasNAME_HEK(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv));
     vargv = *(GV**)hv_fetch(varstash, S_autoload, S_autolen, TRUE);
     ENTER;
 
@@ -3229,7 +3229,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
         if (gv && (cv = GvCV(gv)) && CvHASGV(cv)) {
             const HEK * const gvhek = CvGvNAME_HEK(cv);
             const HEK * const stashek =
-                HvNAME_HEK(CvNAMED(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
+                HvNAME_HEK(CvHasNAME_HEK(cv) ? CvSTASH(cv) : GvSTASH(CvGV(cv)));
             if (memEQs(HEK_KEY(gvhek), HEK_LEN(gvhek), "nil")
              && stashek
              && memEQs(HEK_KEY(stashek), HEK_LEN(stashek), "overload")) {
@@ -4401,7 +4401,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
         (void)hv_deletehek(stash, gvnhek, G_DISCARD);
     } else if (GvMULTI(gv) && cv && SvREFCNT(cv) == 1 &&
             !SvOBJECT(cv) && !SvMAGICAL(cv) && !SvREADONLY(cv) &&
-            CvSTASH(cv) == stash && !CvNAMED(cv) && CvGV(cv) == gv &&
+            CvSTASH(cv) == stash && !CvHasNAME_HEK(cv) && CvGV(cv) == gv &&
             CvCONST(cv) && !CvNOWARN_AMBIGUOUS(cv) && !CvLVALUE(cv) && !CvUNIQUE(cv) &&
             !CvNODEBUG(cv) && !CvCLONE(cv) && !CvCLONED(cv) && !CvANON(cv) &&
             (namehek = GvNAME_HEK(gv)) &&
