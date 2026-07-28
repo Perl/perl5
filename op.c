@@ -12095,8 +12095,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             }
 
             SvPOK_off(cv);
-            CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs
-                                             | CvHasNAME_HEK(cv);
+            CvFLAGS(cv) = (CvFLAGS(PL_compcv) & ~CVf_HasNAME_HEK) |
+                    existing_builtin_attrs | CvHasNAME_HEK(cv);
             CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
             CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
             CvPADLIST_set(cv,CvPADLIST(PL_compcv));
@@ -12128,6 +12128,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
     else {
         cv = PL_compcv;
+        if(name && CvHasNAME_HEK(cv))
+            CvNAME_HEK_clear(cv);
+
         if (name && isGV(gv)) {
             GvCV_set(gv, cv);
             GvCVGEN(gv) = 0;

@@ -13540,7 +13540,16 @@ Perl_init_named_cv(pTHX_ CV *cv, OP *nameop)
     PERL_ARGS_ASSERT_INIT_NAMED_CV;
 
     if (nameop->op_type == OP_CONST) {
-        const char *const name = SvPV_nolen_const(((SVOP*)nameop)->op_sv);
+        SV *namesv = ((SVOP*)nameop)->op_sv;
+        STRLEN namlen;
+        const char *const name = SvPV_const(namesv, namlen);
+        bool name_is_utf8 = SvUTF8(namesv);
+
+        U32 hash;
+        PERL_HASH(hash, name, namlen);
+        CvNAME_HEK_set(cv, share_hek(
+            name, name_is_utf8 ? -(SSize_t)namlen : (SSize_t)namlen, hash));
+
         if (   strEQ(name, "BEGIN")
             || strEQ(name, "END")
             || strEQ(name, "INIT")

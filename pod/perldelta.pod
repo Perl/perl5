@@ -417,6 +417,11 @@ to update our knowledge base are welcome.
 More detail can be found in
 L<perlclib/Dealing with embedded perls and threads>.
 
+=item *
+
+During compiletime of a named subroutine, the name of the new sub
+currently being compiled is now accessible via C<CvNAME_HEK(PL_compcv)>.
+
 =back
 
 =head1 Selected Bug Fixes

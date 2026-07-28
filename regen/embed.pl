@@ -500,6 +500,7 @@ my @unresolved_visibility_overrides = qw(
     CvNAMED
     CvNAMED_off
     CvNAMED_on
+    CvNAME_HEK_clear
     CvNAME_HEK_set
     CvNODEBUG
     CvNODEBUG_off
