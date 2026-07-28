@@ -2858,6 +2858,10 @@ when you meant
 
 (or something like that).
 
+=item Found %s in the pad but it is not an attribute definition
+
+(F) TODO should write something here and maybe give it a better wording
+
 =item %s found where operator expected
 
 (S syntax) The Perl lexer knows whether to expect a term or an operator.

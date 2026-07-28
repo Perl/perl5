@@ -247,6 +247,43 @@ enum {
     UNKNOWN_ERROR,    /* throw an exception */
 };
 
+static const struct PerlAttributeDefinition *
+S_find_attribute(pTHX_ SV *name)
+{
+    /* Hunt in lexical pads first, before falling back to global table.
+     * The idea is to look for a lexical named `:$attrname`, whose value will
+     * be some special SV type that contains the
+     * struct PerlAttributeDefinition value directly. But we'd need an SV type
+     * for that first, and to ensure all the other bits of pad infrastructure
+     * can cope with these new `:` sigils.
+     */
+    SV *sigilname = newSVpvs_flags(":", SVs_TEMP);
+    sv_catsv(sigilname, name);
+    /* This is a bit inefficient. We don't care about pulling it to the
+     * current pad; we're just looking to grab the actual SV out of it.
+     */
+    PADOFFSET padix = pad_findmy_sv(sigilname, 0);
+    if(padix != NOT_IN_PAD) {
+        SV *defsv = PL_curpad[padix];
+        if(SvTYPE(defsv) != SVt_INTERNAL || SviMETA(defsv) != &internalsvmeta_attrdefinition)
+            croak("Found %" SVf " in the pad but it is not an attribute definition", sigilname);
+
+        return (const struct PerlAttributeDefinition *)SviPTR(defsv);
+    }
+
+    const char *namepv = SvPVX(name);
+
+    for(int i = 0; builtin_attributes[i].name; i++) {
+        /* These attribute names are not UTF-8 aware. All the builtin ones
+         * are pure ASCII so that's fine and hopefully the pad structure can
+         * handle non-ASCII user-defined ones. */
+        if(strEQ(namepv, builtin_attributes[i].name))
+            return builtin_attributes[i].def;
+    }
+
+    return NULL;
+}
+
 static bool
 S_apply_attribute(pTHX_ struct PerlAttributeTarget *target, OP *attr, int unknown)
 {
@@ -256,25 +293,9 @@ S_apply_attribute(pTHX_ struct PerlAttributeTarget *target, OP *attr, int unknow
     SV *name, *value;
     split_attr_nameval(cSVOPx_sv(attr), &name, &value);
 
-    const char *namepv = SvPVX(name);
+    const struct PerlAttributeDefinition *def = S_find_attribute(aTHX_ name);
 
-    /* TODO: Hunt in lexical pads first, before falling back to global table.
-     * The idea is to look for a lexical named `:$attrname`, whose value will
-     * be some special SV type that contains the
-     * struct PerlAttributeDefinition value directly. But we'd need an SV type
-     * for that first, and to ensure all the other bits of pad infrastructure
-     * can cope with these new `:` sigils.
-     */
-
-    for(int i = 0; builtin_attributes[i].name; i++) {
-        /* These attribute names are not UTF-8 aware. All the builtin ones
-         * are pure ASCII so that's fine and hopefully the pad structure can
-         * handle non-ASCII user-defined ones. */
-        if(!strEQ(namepv, builtin_attributes[i].name))
-            continue;
-
-        const struct PerlAttributeDefinition *def = builtin_attributes[i].def;
-
+    if(def) {
         if(def->flags & PERL_ATTRf_MUST_VALUE && !(value && SvOK(value)))
             croak("Attribute :%" SVf " on %s requires a value", SVfARG(name), targetname(target));
         if(def->flags & PERL_ATTRf_NO_VALUE && value && SvOK(value))
