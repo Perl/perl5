@@ -1015,8 +1015,34 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if (LIKELY(HvSHAREKEYS(hv))) {
         entry = new_HE();
         if (keysv_hek) {
-            HeKEY_hek(entry) = share_hek_hek(keysv_hek);
+            /* In threaded builds, keysv_hek will almost always be
+             * present in the PL_strtab of the *current* interpreter
+             * instance. It's safe in that scenario to just do:
+             *     HeKEY_hek(entry) = share_hek_hek(keysv_hek);
+             *
+             * However, XS code that is not thread safe might pass in a
+             * HEK that lives in a foreign instance of PL_strtab.
+             *
+             * share_hek_flags() handles this by doing a full HEK
+             * comparison and inserting a fresh HEK into the current
+             * PL_strtab if necessary.
+             *
+             * We attempt a cheaper check here first. */
+             const unsigned char keysv_flags = HEK_FLAGS(keysv_hek);
+             HE *sentry = (HvARRAY(PL_strtab))[hash & (I32)HvMAX(PL_strtab)];
+             for (;sentry; sentry = HeNEXT(sentry)) {
+                 HEK *candidate = HeKEY_hek(sentry);
+                 if (candidate == keysv_hek &&
+                     HEK_FLAGS(candidate) == keysv_flags) {
+                     /* Found it */
+                     HeKEY_hek(entry) = share_hek_hek(keysv_hek);
+                     break;
+                 }
+             }
+             if (UNLIKELY(!sentry)) /* keysv_hek not in this PL_strtab */
+                 goto safe_share;
         } else {
+          safe_share:
             HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
         }
     }
