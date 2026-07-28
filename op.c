@@ -11095,7 +11095,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
             sv_catpvs(name, "::");
             if (SvROK(gv)) {
                 assert (SvTYPE(SvRV_const(gv)) == SVt_PVCV);
-                assert (CvNAMED(SvRV_const(gv)));
+                assert (CvHasNAME_HEK(SvRV_const(gv)));
                 sv_cathek(name, CvNAME_HEK(MUTABLE_CV(SvRV_const(gv))));
             }
             else sv_catsv(name, (SV *)gv);
@@ -11363,7 +11363,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
         cv = *spot;
     else {
         assert (*spot && SvTYPE(*spot) == SVt_PVCV);
-        if (CvNAMED(*spot))
+        if (CvHasNAME_HEK(*spot))
             hek = CvNAME_HEK(*spot);
         else {
             U32 hash;
@@ -11479,7 +11479,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
         if (block) {
             bool free_file = CvFILE(cv) && CvDYNFILE(cv);
             cv_flags_t preserved_flags =
-                CvFLAGS(cv) & (CVf_BUILTIN_ATTRS|CVf_NAMED);
+                CvFLAGS(cv) & (CVf_BUILTIN_ATTRS|CVf_HasNAME_HEK);
             PADLIST *const temp_padl = CvPADLIST(cv);
             CV *const temp_cv = CvOUTSIDE(cv);
             const cv_flags_t other_flags =
@@ -12090,7 +12090,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
             SvPOK_off(cv);
             CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs
-                                             | CvNAMED(cv);
+                                             | CvHasNAME_HEK(cv);
             CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
             CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
             CvPADLIST_set(cv,CvPADLIST(PL_compcv));
@@ -12187,7 +12187,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
   attrs:
     if (attrs) {
         /* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
-        HV *stash = name && !CvNAMED(cv) && GvSTASH(CvGV(cv))
+        HV *stash = name && !CvHasNAME_HEK(cv) && GvSTASH(CvGV(cv))
                         ? GvSTASH(CvGV(cv))
                         : PL_curstash;
         if (!name)
@@ -15501,7 +15501,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
         return (CV*)gv;
     }
     else if (flags & RV2CVOPCV_MAYBE_NAME_GV) {
-        if (CvLEXICAL(cv) || CvNAMED(cv))
+        if (CvLEXICAL(cv) || CvHasNAME_HEK(cv))
             return NULL;
         if (!CvANON(cv) || !gv)
             gv = CvGV(cv);
@@ -16209,7 +16209,7 @@ Perl_ck_subr(pTHX_ OP *o)
                ideal for lexical subs, as its stringification will include
                the package.  But it is the best we can do.  */
             if (ckflags & CALL_CHECKER_REQUIRE_GV) {
-                if (!CvANON(cv) && (!CvNAMED(cv) || CvNAME_HEK(cv)))
+                if (!CvANON(cv) && (!CvHasNAME_HEK(cv) || CvNAME_HEK(cv)))
                     namegv = CvGV(cv);
             }
             else namegv = MUTABLE_GV(cv);

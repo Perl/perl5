@@ -7599,7 +7599,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     assert(GvGP(gv));
     assert(!CvANON(cv));
     assert(CvGV(cv) == gv);
-    assert(!CvNAMED(cv));
+    assert(!CvHasNAME_HEK(cv));
 
     /* will the CV shortly be freed by gp_free() ? */
     if (GvCV(gv) == cv && GvGP(gv)->gp_refcnt < 2 && SvREFCNT(cv) < 2) {
@@ -16245,7 +16245,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 }
                 assert(!CvSLABBED(dsv));
                 if (CvDYNFILE(dsv)) CvFILE(dsv) = SAVEPV(CvFILE(dsv));
-                if (CvNAMED(dsv))
+                if (CvHasNAME_HEK(dsv))
                     SvANY((CV *)dsv)->xcv_gv_u.xcv_hek =
                         hek_dup(CvNAME_HEK((CV *)ssv), param);
                 /* don't dup if copying back - CvGV isn't refcounted, so the

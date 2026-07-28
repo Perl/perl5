@@ -4233,7 +4233,7 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     if (!cv || !CvROOT(cv)) {
         const HEK * const hek = gv
                         ? GvENAME_HEK(gv)
-                        : cv && CvNAMED(cv)
+                        : cv && CvHasNAME_HEK(cv)
                            ? CvNAME_HEK(cv)
                            : cv && CvGV(cv) ? GvENAME_HEK(CvGV(cv)) : NULL;
         if (hek)

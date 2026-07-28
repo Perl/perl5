@@ -20,7 +20,7 @@ sub import {
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.92';
+    $B::VERSION = '1.93';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -93,6 +93,9 @@ our @specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
 {
     no warnings 'once';
     *CVf_METHOD = \&CVf_NOWARN_AMBIGUOUS;
+    *CVf_NAMED  = \&CVf_HasNAME_HEK;
+
+    push @B::EXPORT_OK, qw( CVf_METHOD CVf_NAMED );
 }
 
 {

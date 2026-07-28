@@ -482,6 +482,7 @@ my @unresolved_visibility_overrides = qw(
     CvHASEVAL_off
     CvHASEVAL_on
     CvHASGV
+    CvHasNAME_HEK
     CvHSCXT
     CvIsMETHOD
     CvIsMETHOD_off
@@ -3533,6 +3534,9 @@ my @needed_by_ext = qw(
 # part have a trailing underscore, indicating the intent for this symbol to
 # not be directly usable by XS code
 my @undocumented_always_visible = qw(
+    CVf_HasNAME_HEK
+    CvHasNAME_HEK_off
+    CvHasNAME_HEK_on
     DEBUG_A
     DEBUG_A_FLAG
     DEBUG_A_TEST
