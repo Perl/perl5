@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(476);
+plan(479);
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -1032,7 +1032,13 @@ EOF
     ok( (builtin::reftype $no eq ''), "ref_cmp: (reftype \$undef eq '') is true");
     ok( (ref $rqr eq 'Regexp'), "ref_cmp: (ref qr// eq 'Regexp') is true");
     ok( (builtin::reftype $rqr eq 'REGEXP'), "ref_cmp: (reftype qr// eq 'REGEXP') is true");
-
+    # GH# 24621 and adjacent bugs - reftype and ref use the same codepaths here
+    my $empty = bless {}, "BADBUG";
+    my $scala = bless {}, "SCALA";
+    my $ioNULL= bless {}, "IO\0X";
+    ok( (ref $empty ne ''),  "ref_cmp: ref ne '' for object blessed into 'BADBUG'");
+    ok( (ref $scala ne 'SCALAR'),  "ref_cmp: ref ne 'SCALAR' for object blessed into 'SCALA'");
+    ok( (ref $ioNULL ne 'IO'), "ref_cmp: ref ne 'IO' for object blessed into 'IO\\0X'");
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
