@@ -6440,10 +6440,10 @@ INIT({
 #endif
 
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
-#  define PERL_SET_LOCALE_CONTEXT(i)                                        \
-      STMT_START {                                                          \
-          if (LIKELY(! (i)->Iveto_switch_non_tTHX_context))                 \
-                Perl_switch_locale_context(i);                              \
+#  define PERL_SET_LOCALE_CONTEXT(i)                                             \
+      STMT_START {                                                               \
+          if (LIKELY(! ((PerlInterpreter *)(i))->Iveto_switch_non_tTHX_context)) \
+              Perl_switch_locale_context(i);                                     \
       } STMT_END
 
     /* In some Configurations there may be per-thread information that is
