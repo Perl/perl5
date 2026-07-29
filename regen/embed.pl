@@ -3508,6 +3508,11 @@ my @needed_by_ext = qw(
     OPpSELF_IN_PAD
 );
 
+# XXX This is a list of symbols that need to be always visible and that we
+# intend to document, but don't have the resources to do so immediately.
+my @pending_documentation_symbols = qw(
+);
+
 # This is a list of symbols that are needed to be visible everywhere and are
 # not documented, and we don't plan to document them any time soon.
 # Effectively these are symbols that would otherwise be in
