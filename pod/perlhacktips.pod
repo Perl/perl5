@@ -388,71 +388,27 @@ POSIX also reserves many symbols.  See Section 2.2.2 in
 L<https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html>.
 Perl also has conflicts with that.
 
-Perl reserves for its use any symbol whose name matches the pattern 
-C<$names_reserved_for_perl_use_re> found in F<regen/embed.pl>.  The
-details are complicated, but, simplified, come down to things beginning
-with C<Perl>, C<perl>, or C<PL_>, or ending with C<_pl_>.
+Perl reserves for its use any symbol beginning with C<Perl>, C<perl>,
+or C<PL_>.  Any time you introduce a macro into a header file that
+doesn't follow that convention, you are creating the possibility of a
+namespace clash with an existing XS module, unless you restrict it by,
+say,
 
-=head3 Symbol visibility
+ #ifdef PERL_CORE
+ #  define my_symbol
+ #endif
 
-For most of its life, Perl made little or no effort to hide its internal
-symbols or functions.  This has led to programmers using Perl to use
-functionality that was dependent on Perl internal implementation
-details, breaking when we unknowingly tried to change our
-implementation, and thus hindering progress.
+There are many symbols in header files that aren't of this form, and
+which are accessible from XS namespace, intentionally or not, just
+about anything in F<config.h>, for example.
 
-That has been changing in recent releases, and as of v5.44, the
-visibility of new symbols is restricted to just the perl core, unless an
-explicit declaration is made otherwise.  (Except symbol names which
-match the pattern C<$names_reserved_for_perl_use_re> found in
-F<regen/embed.pl> are made visible everywhere.)  This means you can add
-symbols with whatever C-compliant spelling you want, without fear that
-they will be misused by someone.
+Having to use one of these prefixes detracts from the readability of
+the code, and hasn't been an actual issue for non-trivial names. Things
+like perl defining its own C<MAX> macro have been problematic, but they
+were quickly discovered, and a S<C<#ifdef PERL_CORE>> guard added.
 
-Note that symbols not placed in header files have never been visible to
-outside code.
-
-You should consider several things before making a new symbol visible.
-The bottom line is "Who really needs to see it?"
-
-The best method is to document the symbol.  How to do this is described
-near the top of F<embed.fnc>, and that file can be used to mark a
-symbol's visibility.  But the main documentation remains using
-C<=for apidoc> lines in the source and various pods.  There are several
-advantages to doing this
-
-=over
-
-=item 1
-
-People will know how to use your symbol without having to puzzle it out
-from the code.  That might even be you 6 months from now.
-
-=item 2
-
-Various services are automatically generated for symbols naming
-functions, such as C<assert()>s for parameter input conditions.
-
-One service is that specifying the visibility with one of the flags for
-the purpose automatically makes sure the symbol has that visibility
-without you having to do anything else.
-
-=item 3
-
-Simple test cases can be automatically generated.
-
-=back
-
-Some symbols need to be visible everywhere even though they aren't
-supposed to be used directly by outside code.  These typically are
-helper functions or flag values, I<etc.>, used in a public macro.
-Strictly, those names should be ones that are of the form reserved for
-Perl's use, but those names are clumsy, and as long as the names aren't
-likely to clash with ones an author might choose, problems don't arise.
-
-If you choose to not document a new symbol that needs to be visible
-everywhere, add it to the array C<@undocumented_always_visible> in
-F<regen/embed.pl>.
+So there's no rule imposed about using such symbols, just be aware of
+the issues.
 
 =head3 Choosing good symbol names
 

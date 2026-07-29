@@ -36,7 +36,6 @@ In case the advice in this guide has been updated recently, read the
 latest version directly from the perl source:
 
   % perldoc pod/perlhack.pod
-  % perldoc pod/perlhacktips.pod
 
 =item * Create a branch for your change
 
