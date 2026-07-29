@@ -1,6 +1,7 @@
 .dir-locals.el				Emacs control file
 .editorconfig				EditorConfig style file
 .metaconf-exclusions.txt		Symbols that should ignored when generating Configure
+AI_POLICY.md				Guidelines on acceptable AI usage in this project
 Artistic				The "Artistic License"
 asan_ignore				Errors to skip under clang's Addresss Sanitizer
 AUTHORS					Contact info for contributors
