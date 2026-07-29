@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1298;  # Update this when adding/deleting tests.
+plan tests => 1300;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2647,6 +2647,20 @@ SKIP:
         unlike "",             $pat,               "code in array 16 not 1";
         unlike "XAB-B-=EC",    $pat,               "code in array 16 not 2";
 
+    }
+
+    {
+        # GH #24614
+        # On an anchored patten with utf8 fixed substring, where there is
+        # no equivalent non-utf8 substring which can be compared to a
+        # non-utf8 pattern, abandon intuit rather than trying to use a
+        # non-existent substr. It was necessary to run the match twice to
+        # trigger the bug, as the sub-optimal way intuit works meant that
+        # wasn't trying on the first iteration.
+
+        for my $i (1..2) {
+            ok("pqrs" !~ m{^\x{100}.+?AB}, "GH #24614 iter $i");
+        }
     }
 
     {

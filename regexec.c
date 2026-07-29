@@ -1097,11 +1097,12 @@ Perl_re_intuit_start(pTHX_
              * caller will have set strpos = pos()-4; we look for the substr
              * at position pos()-4+1, which lines up with the "a" */
 
-            if (prog->anchored_substr || prog->anchored_utf8) {
+            SV *anchored_sv = utf8_target ? prog->anchored_utf8
+                                       : prog->anchored_substr;
+
+            if (anchored_sv) {
                 /* Substring at constant offset from beg-of-str... */
 
-                SV *anchored_sv = utf8_target ? prog->anchored_utf8
-                                           : prog->anchored_substr;
                 SSize_t slen = SvCUR(anchored_sv);
                 SSize_t offset = prog->substrs->data[0].min_offset;
                 char *s = HOP3c(strpos, offset, strend);
