@@ -753,88 +753,6 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     return NULL;
 }
 
-#ifdef USE_ATTRIBUTES_FOR_PERLIO
-
-static int
-perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
-{
-    if (SvROK(sv)) {
-        IO * const io = GvIOn(GV_FROM_REF(sv));
-        PerlIO * const ifp = IoIFP(io);
-        PerlIO * const ofp = IoOFP(io);
-        warn("set %" SVf " %p %p %p",
-                  SVfARG(sv), (void*)io, (void*)ifp, (void*)ofp);
-    }
-    return 0;
-}
-
-static int
-perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
-{
-    if (SvROK(sv)) {
-        IO * const io = GvIOn(GV_FROM_REF(sv));
-        PerlIO * const ifp = IoIFP(io);
-        PerlIO * const ofp = IoOFP(io);
-        warn("get %" SVf " %p %p %p",
-                  SVfARG(sv), (void*)io, (void*)ifp, (void*)ofp);
-    }
-    return 0;
-}
-
-static int
-perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
-{
-    warn("clear %" SVf, SVfARG(sv));
-    return 0;
-}
-
-static int
-perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
-{
-    warn("free %" SVf, SVfARG(sv));
-    return 0;
-}
-
-MGVTBL perlio_vtab = {
-    perlio_mg_get,
-    perlio_mg_set,
-    NULL,                       /* len */
-    perlio_mg_clear,
-    perlio_mg_free
-};
-
-XS(XS_io_MODIFY_SCALAR_ATTRIBUTES); /* prototype to pass -Wmissing-prototypes */
-XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
-{
-    dXSARGS;
-    SV * const sv = SvRV(ST(1));
-    AV * const av = newAV();
-    MAGIC *mg;
-    int count = 0;
-    int i;
-    sv_magic(sv, MUTABLE_SV(av), PERL_MAGIC_ext, NULL, 0);
-    SvRMAGICAL_off(sv);
-    mg = mg_find(sv, PERL_MAGIC_ext);
-    mg->mg_virtual = &perlio_vtab;
-    mg_magical(sv);
-    warn("attrib %" SVf, SVfARG(sv));
-    for (i = 2; i < items; i++) {
-        STRLEN len;
-        const char * const name = SvPV_const(ST(i), len);
-        SV * const layer = PerlIO_find_layer(aTHX_ name, len, 1);
-        if (layer) {
-            av_push_simple(av, SvREFCNT_inc_simple_NN(layer));
-        }
-        else {
-            ST(count) = ST(i);
-            count++;
-        }
-    }
-    SvREFCNT_dec(av);
-    XSRETURN(count);
-}
-
-#endif                          /* USE_ATTRIBUTES_FOR_PERLIO */
 
 SV *
 PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
@@ -1503,10 +1421,6 @@ Perl_boot_core_PerlIO(pTHX)
 {
     PERL_ARGS_ASSERT_BOOT_CORE_PERLIO;
 
-#ifdef USE_ATTRIBUTES_FOR_PERLIO
-    newXS("io::MODIFY_SCALAR_ATTRIBUTES", XS_io_MODIFY_SCALAR_ATTRIBUTES,
-          __FILE__);
-#endif
     newXS("PerlIO::Layer::find", XS_PerlIO__Layer__find, __FILE__);
     newXS("PerlIO::Layer::NoWarnings", XS_PerlIO__Layer__NoWarnings, __FILE__);
 }

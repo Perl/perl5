@@ -2085,9 +2085,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef UNLINK_ALL_VERSIONS
                              " UNLINK_ALL_VERSIONS"
 #  endif
-#  ifdef USE_ATTRIBUTES_FOR_PERLIO
-                             " USE_ATTRIBUTES_FOR_PERLIO"
-#  endif
 #  ifdef USE_FAST_STDIO
                              " USE_FAST_STDIO"
 #  endif
