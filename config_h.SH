@@ -4485,6 +4485,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usesocks	USE_SOCKS		/**/
 #endif
 
+/* PERL_USE_TAINT:
+ *	This symbol, if defined, enables support for taint mode.
+ */
+#$usetaint PERL_USE_TAINT	/* use taint */
+
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up

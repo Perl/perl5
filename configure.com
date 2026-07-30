@@ -6539,6 +6539,7 @@ $ WC "useshortenedsymbols='" + useshortenedsymbols + "'"    ! VMS-specific
 $ WC "useshrplib='true'"
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
+$ WC "usetaint='define'"
 $ WC "usethreads='" + usethreads + "'"
 $ WC "usethreadupcalls='" + usethreadupcalls + "'"	! VMS-specific
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
