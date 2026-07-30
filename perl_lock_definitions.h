@@ -3384,6 +3384,10 @@
    /* mblen() Use mbrlen() instead */
 #  define PERL_MBLEN_LOCK    PERL_LCx_LOCK(0)
 #  define PERL_MBLEN_UNLOCK  PERL_LCx_UNLOCK(0)
+#  ifndef MBLEN_LOCK_
+#    define MBLEN_LOCK_    PERL_MBLEN_LOCK
+#    define MBLEN_UNLOCK_  PERL_MBLEN_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_MBRLEN_LOCK
@@ -3391,6 +3395,10 @@
    /* mbrlen() locking macros are only valid if '!ps' */
 #  define PERL_MBRLEN_LOCK
 #  define PERL_MBRLEN_UNLOCK
+#  ifndef MBRLEN_LOCK_
+#    define MBRLEN_LOCK_    PERL_MBRLEN_LOCK
+#    define MBRLEN_UNLOCK_  PERL_MBRLEN_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_MBRTOC16_LOCK
@@ -3412,6 +3420,10 @@
    /* mbrtowc() locking macros are only valid if '!ps' */
 #  define PERL_MBRTOWC_LOCK
 #  define PERL_MBRTOWC_UNLOCK
+#  ifndef MBRTOWC_LOCK_
+#    define MBRTOWC_LOCK_    PERL_MBRTOWC_LOCK
+#    define MBRTOWC_UNLOCK_  PERL_MBRTOWC_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_MBSINIT_LOCK
@@ -3443,6 +3455,10 @@
    /* mbtowc() Use mbrtowc() instead */
 #  define PERL_MBTOWC_LOCK    PERL_LCx_LOCK(0)
 #  define PERL_MBTOWC_UNLOCK  PERL_LCx_UNLOCK(0)
+#  ifndef MBTOWC_LOCK_
+#    define MBTOWC_LOCK_    PERL_MBTOWC_LOCK
+#    define MBTOWC_UNLOCK_  PERL_MBTOWC_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_MCHECK_LOCK
@@ -5250,6 +5266,10 @@
    /* wcrtomb() locking macros are only valid if '!ps' */
 #  define PERL_WCRTOMB_LOCK
 #  define PERL_WCRTOMB_UNLOCK
+#  ifndef WCRTOMB_LOCK_
+#    define WCRTOMB_LOCK_    PERL_WCRTOMB_LOCK
+#    define WCRTOMB_UNLOCK_  PERL_WCRTOMB_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_WCSCASECMP_LOCK
@@ -5348,6 +5368,10 @@
    /* wctomb() Use wcrtomb() instead */
 #  define PERL_WCTOMB_LOCK    PERL_LCx_LOCK(0)
 #  define PERL_WCTOMB_UNLOCK  PERL_LCx_UNLOCK(0)
+#  ifndef WCTOMB_LOCK_
+#    define WCTOMB_LOCK_    PERL_WCTOMB_LOCK
+#    define WCTOMB_UNLOCK_  PERL_WCTOMB_UNLOCK
+#  endif
 #endif
 
 #ifndef PERL_WCTRANS_LOCK

@@ -7920,18 +7920,6 @@ typedef struct am_table_short AMTS;
 #define LC_COLLATE_UNLOCK    LOCALE_UNLOCK
 #define LOCALE_LOCK          PERL_LCx_LOCK(0)
 #define LOCALE_UNLOCK        PERL_LCx_UNLOCK(0)
-#define MBLEN_LOCK_          PERL_MBLEN_LOCK
-#define MBLEN_UNLOCK_        PERL_MBLEN_UNLOCK
-#define MBRLEN_LOCK_         PERL_MBRLEN_LOCK
-#define MBRLEN_UNLOCK_       PERL_MBRLEN_UNLOCK
-#define MBRTOWC_LOCK_        PERL_MBRTOWC_LOCK
-#define MBRTOWC_UNLOCK_      PERL_MBRTOWC_UNLOCK
-#define MBTOWC_LOCK_         PERL_MBTOWC_LOCK
-#define MBTOWC_UNLOCK_       PERL_MBTOWC_UNLOCK
-#define WCRTOMB_LOCK_        PERL_WCRTOMB_LOCK
-#define WCRTOMB_UNLOCK_      PERL_WCRTOMB_UNLOCK
-#define WCTOMB_LOCK_         PERL_WCTOMB_LOCK
-#define WCTOMB_UNLOCK_       PERL_WCTOMB_UNLOCK
 
 /* End of locale/env synchronization */
 
