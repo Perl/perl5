@@ -756,6 +756,16 @@ This is now a synonym for dNOOP: declare nothing
 =for apidoc Amn;||dMY_CXT_SV
 Now a placeholder that declares nothing
 
+=for apidoc ABmn||pTHXo
+
+=for apidoc ABmn||pTHXo_
+
+=for apidoc ABmn||aTHXo
+
+=for apidoc ABmn||aTHXo_
+
+=for apidoc ABmn||dTHXo
+
 =cut
 */
 

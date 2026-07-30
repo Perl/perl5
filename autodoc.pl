@@ -1851,9 +1851,21 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my $flags = $item0->{flags};
 
     if ($pod !~ /\S/) {
-        die "Empty pod for $element_name ("
-           . where_from_string($item0->{file}, $item0->{line_num})
-           . ')';
+        if ($flags !~ /B/) {
+            die "Empty pod for $element_name ("
+              . where_from_string($item0->{file}, $item0->{line_num})
+              . ')';
+        }
+        else {
+            # We accept empty pod for backwards compatibilty-only elements.  
+            # Doing so allows a modicum of documentation without us having to
+            # work at figuring out what to say for something that shouldn't be
+            # being used anyway.
+            $pod = <<~EOT;
+                No further documentation is currently available.
+                Patches welcome.
+                EOT
+        }
     }
 
     print $fh "\n=over $description_indent\n";

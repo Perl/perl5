@@ -212,7 +212,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ASSERT_NOT_PTR
     assert_not_ROK
     aTHXa
-    aTHXo
     aTHXx
     AT_LEAST_ASCII_RESTRICTED
     AT_LEAST_UNI_SEMANTICS
@@ -643,7 +642,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     dTARG
     dTARGETSTACKED
     dTHX_DEBUGGING
-    dTHXo
     dTHXs
     dTHXx
     dTOPiv
@@ -1902,7 +1900,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     pTHX_9
     pTHX__FORMAT
     pTHX_FORMAT
-    pTHXo
     pTHX__VALUE
     pTHX_VALUE
     pTHXx
@@ -2932,7 +2929,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ZAPHOD32_WARN4
     ZAPHOD32_WARN5
     ZAPHOD32_WARN6
-    aTHXo_
     aTHXx_
     BASE_TWO_BYTE_HI_
     BASE_TWO_BYTE_LO_
@@ -3035,7 +3031,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
-    pTHXo_
     pTHX__VALUE_
     pTHX_VALUE_
     pTHXx_
