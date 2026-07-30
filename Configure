@@ -8593,6 +8593,10 @@ EOM
 	    esac
 	done
 
+	case "$dflt" in
+	    ''|' ') dflt='none' ;;
+	esac
+
 	case "$ldflags" in
 	    *-fstack-protector-strong*)
 		case "$dflt" in
@@ -8606,10 +8610,6 @@ EOM
 		    *) dflt="$dflt -fstack-protector" ;;
 		esac
 		;;
-	esac
-
-	case "$dflt" in
-	    ''|' ') dflt='none' ;;
 	esac
 
 	rp="Any special flags to pass to $ld to create a dynamically loaded library?"
