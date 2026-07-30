@@ -951,6 +951,7 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 #  define UNLESS_PERL_MEM_LOG(code)
 #endif
 
+#ifndef PERL_USE_TAINT
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
  * you get a perl without taint support, but doubtlessly with a lesser
  * degree of support. Do not do so unless you know exactly what it means
@@ -966,6 +967,9 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
  * DANGER! Using NO_TAINT_SUPPORT or SILENT_NO_TAINT_SUPPORT
  *         voids your nonexistent warranty!
  */
+#  define SILENT_NO_TAINT_SUPPORT
+#endif
+
 #if defined(SILENT_NO_TAINT_SUPPORT) && !defined(NO_TAINT_SUPPORT)
 #  define NO_TAINT_SUPPORT 1
 #endif

@@ -1383,6 +1383,7 @@ usensgetexecutablepath=''
 useperlio=''
 usequadmath=''
 usesocks=''
+usetaint=''
 d_oldpthreads=''
 useithreads=''
 usereentrant=''
@@ -23789,6 +23790,25 @@ case "$usesitecustomize" in
 	;;
     esac
 
+: Ask about taint
+case "$usetaint" in
+    $define|true|[Yy]*|'')
+       dflt="y"
+       ;;
+    *)
+       dflt="n"
+       ;;
+    esac
+
+rp='Would you like to build perl with support for taint mode?'
+. ./myread
+case "$ans" in
+y|Y) val="$define" ;;
+*)   val="$undef"  ;;
+esac
+set usetaint
+eval $setvar
+
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -26108,6 +26128,7 @@ userelocatableinc='$userelocatableinc'
 useshrplib='$useshrplib'
 usesitecustomize='$usesitecustomize'
 usesocks='$usesocks'
+usetaint='$usetaint'
 usethreads='$usethreads'
 usevendorprefix='$usevendorprefix'
 useversionedarchname='$useversionedarchname'

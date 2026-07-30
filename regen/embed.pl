@@ -3242,6 +3242,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     MGf_MGv2
     PADNAMEf_FULLSV
     PadnameIsFULLSV
+    SILENT_NO_TAINT_SUPPORT
     STRLEN_MAX
 
     assert_scalar_or_IO_
