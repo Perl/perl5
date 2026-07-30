@@ -150,26 +150,52 @@ my %per_file_definitions = (
 );
 
 # This is a list of symbols that are:
-#   1) not documented to be available for modules to use,
-#   2) not resolved as needed to be visible to any module (and that we don't
+#   1) not found by this program to be documented to be available for modules
+#      to use,
+#   2) not found in metacpan as of July 20, 2026.
+#   3) not resolved as needed to be visible to any module (and that we don't
 #      plan to document any time soon),
 #   3) but are nevertheless currently not kept by embed.h from being visible
 #      to the world.
 #
-# Strive to make this list empty.
+# There is now a second list, @symbols_used_on_metacpan, that contains symbols
+# that otherwise would be on this list, but are actually known to be used in
+# metacpan
 #
-# Symbols in class 2) above should instead be placed in
-# @undocumented_always_visible.
+# Strive to make both lists empty.
 #
-# The list does not include symbols that we have documented as being reserved
-# for perl's use, namely those that match the pattern just above.
-# There are two parts of the list; the second part contains the symbols which
+# That is, each item on the lists should be inspected and its status resolved.
+# Likely outcomes of this resolution include:
+#   1) This program is deficient, and correcting it leads to the affected
+#      items to no longer need to be on the lists.
+#   2) Document the symbol, typically via apidoc comment lines.  This is the
+#      preferred outcome, which has the added advantage that Devel::PPPort can
+#      automatically generate tests for it.
+#   3) Decide that the symbol should not be publicly exposed and remove it
+#      from its list, or maybe even that the symbol is obsolete, and remove it
+#      from our code.  This will cause cpan breakage for symbols on the
+#      @symbols_used_on_metacpan list, which will have to be dealt with.
+#   4) Decide that the symbol needs to be visible to just the 're' extension,
+#      or to any Perl extenstion module, and move it to %needed_by_ext_re or
+#      %needed_by_ext, respectively.
+#   5) Decide that the symbol should not be used directly by XS code, but does
+#      need to be publicly exposed because it occurs in the expansion of
+#      public macros.  It would be best to document such symbols with the
+#      apidoc 'C' flag, or to rename it to conform to those reserved for
+#      perl's use.  But failing that, the symbol can be moved to the
+#      %undocumented_always_visible list.
+#
+# The lists do not include symbols whose names match the pattern just above as
+# being reserved for perl's use.
+#
+# There are two parts of each list; the second part contains the symbols which
 # have a trailing underscore indicating the intent for this symbol to not be
 # directly usable by XS code.  The first part are those symbols without a
 # trailing underscore.
 #
 # For all modules that aren't deliberately using particular names, all the
-# other symbols on it are namespace pollutants.
+# other symbols on the lists are namespace pollutants.
+
 my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ABORT
     ABS_IV_MIN
@@ -947,8 +973,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
     HvAUXf_SCAN_STASH
-    HvCLASS_IS_SEALED
     HvCLASSf_SEALED
+    HvCLASS_IS_SEALED
     HV_DELETE
     HV_DISABLE_UVAR_XKEY
     HvEITER
@@ -1365,23 +1391,23 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MEM_WRAP_CHECK_1
     MEM_WRAP_CHECK_s
     MEXTEND
+    MgARRAYVARFUNCS
     MGf_BYTES
     MGf_GSKIP
     MGf_MINMATCH
     MGf_REFCOUNTED
     MGf_REQUIRE_GV
     MGf_TAINTEDDIR
+    MgHASHVARFUNCS
     MgPV
     MgPV_const
     MgPV_nolen_const
+    MgSCALARVARFUNCS
+    MgSIZEOF
     MgSV
     MgTAINTEDDIR
     MgTAINTEDDIR_off
     MgTAINTEDDIR_on
-    MgARRAYVARFUNCS
-    MgHASHVARFUNCS
-    MgSCALARVARFUNCS
-    MgSIZEOF
     MGv2f_REFCOUNTED_AUXSV
     MGv2f_WITH_MASK
     MICRO_SIGN
@@ -1685,12 +1711,12 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpPADRANGE_COUNTSHIFT
     OPpPAD_STATE
     OPpPV_IS_UTF8
-    OPpREF_CMP_MASK
-    OPpREF_CMP_REGEXP_PKG
-    OPpREF_CMP_EMPTYSTR
-    OPpREF_CMP_SKIPLOGOP
     OPpREF_CMP_AND
+    OPpREF_CMP_EMPTYSTR
+    OPpREF_CMP_MASK
     OPpREF_CMP_NE
+    OPpREF_CMP_REGEXP_PKG
+    OPpREF_CMP_SKIPLOGOP
     OPpREFCOUNTED
     OPpREPEAT_DOLIST
     OPpREVERSE_INPLACE
@@ -2598,20 +2624,20 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvREFCNT_IMMORTAL
     SvRMAGICAL_off
     SvRMAGICAL_on
-    SvRV_const
-    SVrt_SCALAR
-    SVrt_VSTRING
-    SVrt_REF
-    SVrt_GLOB
-    SVrt_LVALUE
-    SVrt_REGEXP
     SVrt_ARRAY
-    SVrt_HASH
     SVrt_CODE
     SVrt_FORMAT
-    SVrt_IO
+    SVrt_GLOB
+    SVrt_HASH
     SVrt_INVLIST
+    SVrt_IO
+    SVrt_LVALUE
     SVrt_OBJECT
+    SVrt_REF
+    SVrt_REGEXP
+    SVrt_SCALAR
+    SVrt_VSTRING
+    SvRV_const
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on
@@ -2929,6 +2955,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ZAPHOD32_WARN4
     ZAPHOD32_WARN5
     ZAPHOD32_WARN6
+
     aTHXx_
     BASE_TWO_BYTE_HI_
     BASE_TWO_BYTE_LO_
@@ -3058,6 +3085,25 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     XPVCV_COMMON_
     XPV_HEAD_
 );
+
+# These are symbols that meet the same requirements as
+# %unresolved_visibility_overrides, except they were found on metacpan as of
+# July 20, 2026.  See the comments above preceding
+# %unresolved_visibility_overrides.
+#
+# It might be that the cpan usage actually is for a different symbol with the
+# same name, hence our symbol is polluting their name space.  KEY_END, for
+# example would have been on this list, but the several cpan uses all turned
+# out to be looking for a key press of the 'END' key and there is a constant
+# with that name that we conflicted with.
+#
+# Most of the symbols on this list which have a trailing underscore were not
+# intended to be used directly by CPAN code, so their usage has leaked out.
+my @symbols_used_on_metacpan = qw(
+
+);
+
+$unresolved_visibility_overrides{$_} = 1 for @symbols_used_on_metacpan;
 
 # This is a list of symbols that are used by the OS and which perl may need to
 # define or redefine, and which aren't otherwise currently detectable by this
