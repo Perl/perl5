@@ -107,4 +107,4 @@ lddlflags="$lddlflags $ldflags"
 d_thread_local=undef
 
 # Broken: https://sourceware.org/pipermail/cygwin/2022-August/252043.html */
-d_newlocale=undef
+#d_newlocale=undef
