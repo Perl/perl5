@@ -3026,14 +3026,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LOCALE_UNLOCK_
     lsbit_pos_uintmax_
     LZC_TO_MSBIT_POS_
-    MBLEN_LOCK_
-    MBLEN_UNLOCK_
-    MBRLEN_LOCK_
-    MBRLEN_UNLOCK_
-    MBRTOWC_LOCK_
-    MBRTOWC_UNLOCK_
-    MBTOWC_LOCK_
-    MBTOWC_UNLOCK_
     MEM_WRAP_CHECK_
     msbit_pos_uintmax_
     NOT_IN_NUMERIC_STANDARD_
@@ -3058,10 +3050,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     utf8_safe_assert_
     UTF_FIRST_CONT_BYTE_110000_
     UTF_START_BYTE_110000_
-    WCRTOMB_LOCK_
-    WCRTOMB_UNLOCK_
-    WCTOMB_LOCK_
-    WCTOMB_UNLOCK_
     what_MULTI_CHAR_FOLD_utf8_safe_part0_
     what_MULTI_CHAR_FOLD_utf8_safe_part1_
     what_MULTI_CHAR_FOLD_utf8_safe_part2_
