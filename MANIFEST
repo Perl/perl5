@@ -1,6 +1,36 @@
+.agents/README				Notes on canonical repository agent skills
+.agents/skills/perl-configure-build-system/references/configure-build-system.md	Agent skill reference: Perl Configure and build system
+.agents/skills/perl-configure-build-system/SKILL.md				Agent skill: Perl Configure and build system workflow
+.agents/skills/perl-core-archaeology/references/core-archaeology.md		Agent skill reference: Perl core archaeology
+.agents/skills/perl-core-archaeology/SKILL.md					Agent skill: Perl core archaeology workflow
+.agents/skills/perl-core-build-test-debug/references/testing-debugging.md	Agent skill reference: Perl core testing and debugging
+.agents/skills/perl-core-build-test-debug/SKILL.md				Agent skill: Perl core build, test, and debug workflow
+.agents/skills/perl-core-docs-release/references/docs-release.md		Agent skill reference: Perl core documentation and release workflow
+.agents/skills/perl-core-docs-release/SKILL.md					Agent skill: Perl core documentation and release workflow
+.agents/skills/perl-core-hacking/references/core-change-workflow.md		Agent skill reference: Perl core change workflow
+.agents/skills/perl-core-hacking/SKILL.md					Agent skill: Perl core hacking workflow
+.agents/skills/perl-core-orientation/references/source-map.md			Agent skill reference: Perl core source map
+.agents/skills/perl-core-orientation/SKILL.md					Agent skill: Perl core repository orientation
+.agents/skills/perl-core-portability/references/core-portability.md		Agent skill reference: Perl core portability
+.agents/skills/perl-core-portability/SKILL.md					Agent skill: Perl core portability workflow
+.agents/skills/perl-embed-fnc/references/embed-fnc-guide.md			Agent skill reference: embed.fnc guide
+.agents/skills/perl-embed-fnc/SKILL.md						Agent skill: embed.fnc workflow
+.agents/skills/perl-generated-files/references/generated-files.md		Agent skill reference: Perl generated files
+.agents/skills/perl-generated-files/SKILL.md					Agent skill: Perl generated files workflow
+.agents/skills/perl-language-library/references/language-library.md		Agent skill reference: Perl language and library work
+.agents/skills/perl-language-library/SKILL.md					Agent skill: Perl language and library workflow
+.agents/skills/perl-parser-optree-ops/references/parser-optree-ops.md		Agent skill reference: Perl parser, optree, and ops
+.agents/skills/perl-parser-optree-ops/SKILL.md					Agent skill: Perl parser, optree, and ops workflow
+.agents/skills/perl-regex-engine/references/regex-engine-map.md			Agent skill reference: Perl regex engine map
+.agents/skills/perl-regex-engine/SKILL.md					Agent skill: Perl regex engine workflow
+.agents/skills/perl-sv-magic-memory/references/sv-magic-memory.md		Agent skill reference: Perl SV, magic, and memory
+.agents/skills/perl-sv-magic-memory/SKILL.md					Agent skill: Perl SV, magic, and memory workflow
+.agents/skills/perl-xs-embedding/references/xs-embedding.md			Agent skill reference: Perl XS and embedding
+.agents/skills/perl-xs-embedding/SKILL.md					Agent skill: Perl XS and embedding workflow
 .dir-locals.el				Emacs control file
 .editorconfig				EditorConfig style file
 .metaconf-exclusions.txt		Symbols that should ignored when generating Configure
+AGENTS.md				Repository-wide coding agent directives
 Artistic				The "Artistic License"
 asan_ignore				Errors to skip under clang's Addresss Sanitizer
 AUTHORS					Contact info for contributors
@@ -13,6 +43,7 @@ cflags.SH				A script that emits C compilation flags per file
 Changes					Describe how to peruse changes between releases
 charclass_invlists.inc			Generated compiled-in inversion lists
 class.c					Internals of the `use feature 'class'` object system
+CLAUDE.md				Claude instructions for repository agent context
 CODE_OF_CONDUCT.md			Information on where to find the Standards of Conduct
 config_h.SH				Produces config.h
 configpm				Produces lib/Config.pm
@@ -5863,6 +5894,7 @@ pod/perl587delta.pod			Perl changes in version 5.8.7
 pod/perl588delta.pod			Perl changes in version 5.8.8
 pod/perl589delta.pod			Perl changes in version 5.8.9
 pod/perl58delta.pod			Perl changes in version 5.8.0
+pod/perlagentskills.pod			Perl core agent skill files
 pod/perlapio.pod			Perl internal IO abstraction interface
 pod/perlartistic.pod			Perl Artistic License
 pod/perlbook.pod			Perl book information
@@ -6651,6 +6683,7 @@ t/porting/maintainers.t			Test that Porting/Maintainers.pl is up to date
 t/porting/makerel.t			Test that files used by Porting/makerel exist
 t/porting/manifest.t			Test that this MANIFEST file is well formed
 t/porting/merge-deltas.t		Test that the Porting/merge-deltas.pl script does its job
+t/porting/perlagentskills.t		Check agent skills match perlagentskills
 t/porting/perlfunc.t			Test that Functions_pm.PL can parse perlfunc.pod
 t/porting/pod_rules.t			Check that various pod lists are consistent
 t/porting/podcheck.t			Test the POD of shipped modules is well formed

@@ -1,0 +1,14 @@
+This directory is the canonical source for repository agent skills.
+
+The skill definitions under `.agents/skills/` are used by Codex in this
+repository, and their correspondence with `pod/perlagentskills.pod` is
+validated by `t/porting/perlagentskills.t`.
+The skill tree is documented in `pod/perlagentskills.pod`.
+Root `AGENTS.md` contains repository-wide agent directives, and root
+`CLAUDE.md` points Claude at `AGENTS.md` and this canonical skill tree.
+
+In short:
+
+- Edit `.agents/skills/...` first.
+- Keep `pod/perlagentskills.pod` in sync with the skill directories.
+- Run `./perl -I. -Ilib t/porting/perlagentskills.t` after skill edits.

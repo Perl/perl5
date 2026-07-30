@@ -1,0 +1,348 @@
+=encoding utf8
+
+=head1 NAME
+
+perlagentskills - Perl core agent skill files
+
+=head1 DESCRIPTION
+
+This document describes the agent skill files shipped with the Perl core
+repository. These files give repository-aware coding agents short routing
+instructions and focused references for common Perl core development work.
+
+It is repository-contributor documentation, not ordinary end-user language
+documentation. It is indexed alongside the rest of the source-tree POD so that
+contributors and maintainers can find it through the usual documentation
+indexes.
+
+The canonical skill tree is F<.agents/skills/>. Root F<AGENTS.md> contains
+repository-wide agent directives, and root F<CLAUDE.md> tells Claude to use
+F<AGENTS.md> and the canonical skill tree.
+
+=head1 TREE LAYOUT
+
+Each skill lives in its own directory under F<.agents/skills/>:
+
+    .agents/skills/SKILL-NAME/SKILL.md
+    .agents/skills/SKILL-NAME/references/*.md
+
+The F<SKILL.md> file is intentionally short. It names the trigger, gives the
+first workflow steps, and points to one level of reference files. Reference
+files carry the operational details: important core files, useful searches,
+regeneration commands, validation tests, and risk checks.
+
+Do not duplicate large amounts of Perl's existing documentation in a skill.
+Point to the relevant files under F<pod/>, F<Porting/>, F<regen/>, F<t/>,
+or the source tree instead.
+
+=head1 HOW AGENTS USE THESE FILES
+
+These skills are not meant to be read like a human tutorial from top to bottom.
+They are written to help coding agents route themselves quickly to the right
+part of the repository, then read the real source or canonical documentation.
+
+In practice, an agent often works in two stages:
+
+=over 4
+
+=item *
+
+First, it uses the short workflow notes, file lists, and C<rg -n> searches to
+find likely files and line-number anchors.
+
+=item *
+
+Second, once it has identified a likely file, it opens or reads that file more
+closely instead of continuing to grep the whole repository.
+
+=back
+
+This is why many searches are designed as navigation aids rather than complete
+content dumps. A compact C<rg -n> result is often more useful to an agent than
+a large context-heavy excerpt, because the agent can then jump directly to the
+relevant file and inspect the surrounding code or POD in order.
+
+=head2 Why The Search Blocks Exist
+
+The search blocks in the reference files are there to make common navigation
+tasks cheap and repeatable:
+
+=over 4
+
+=item *
+
+Find the owning subsystem or document when the agent only has a vague user
+request, symbol name, warning text, or file name.
+
+=item *
+
+Distinguish generator inputs from generated outputs by looking for phrases such
+as C<DO NOT EDIT>, C<Generated from>, C<regen_*>, C<autodoc>, or C<buildtoc>.
+
+=item *
+
+Locate the narrowest relevant tests, porting checks, or maintenance scripts
+before falling back to broad runs.
+
+=item *
+
+Show the names and line numbers of likely entry points so the agent can open a
+small number of files deliberately instead of guessing.
+
+=back
+
+These searches are suggestions, not mandatory commands. They are meant to bias
+the agent toward good first moves.
+
+=head2 Templates Versus Literal Commands
+
+Some searches contain placeholders such as C<E<lt>FILEE<gt>>,
+C<E<lt>STEME<gt>>, C<E<lt>FEATUREE<gt>>, or C<E<lt>DIAGNOSTICE<gt>>. Those are
+templates to be filled in with the concrete file, symbol, feature, module, or
+diagnostic being investigated. They are intentionally written that way because a
+generic search recipe is often useful across many related tasks.
+
+Literal commands, by contrast, should be runnable as written and should point
+at stable repository entry points such as F<pod/perlhack.pod>, F<regen/>,
+F<t/porting/>, or specific source files.
+
+=head2 What Good Search Guidance Looks Like
+
+Useful search guidance for agents is usually:
+
+=over 4
+
+=item *
+
+Narrow enough to produce a manageable candidate set.
+
+=item *
+
+Anchored in files that plausibly own the behavior being discussed.
+
+=item *
+
+Biased toward canonical inputs rather than derived outputs.
+
+=item *
+
+Paired with follow-up instructions telling the agent what to read or run next.
+
+=back
+
+Overly broad searches are less helpful because they produce too many unrelated
+matches and make it harder for the agent to decide where to read next.
+
+=head1 FAQ
+
+=head2 Why isn't MANIFEST enough for routing decisions?
+
+F<MANIFEST> is useful as a distribution inventory, and for many files its short
+description is genuinely helpful. But it is not a routing guide.
+
+In particular, F<MANIFEST> usually does not tell an agent or contributor:
+
+=over 4
+
+=item *
+
+MANIFEST is very large, it can be helpful to know about key files with less
+context overheads.
+
+=item *
+
+which file is the canonical source versus a generated output;
+
+=item *
+
+which nearby tests are the narrowest ones to run first;
+
+=item *
+
+which POD or Porting document explains the local workflow or policy;
+
+=item *
+
+which files are often edited together as part of one subsystem change;
+
+=item *
+
+which search patterns are likely to find the owning code, diagnostics, or
+maintenance scripts.
+
+=back
+
+The skill tree is meant to complement F<MANIFEST>, not replace it. A good
+agent will often consult both: F<MANIFEST> for inventory and distribution
+membership, and the skill references for routing, validation, regeneration, and
+workflow context.
+
+=head2 Why do the examples prefer C<rg> instead of C<git grep>?
+
+Mostly because the skill files are optimizing for fast repository navigation by
+agents, and C<rg> is a strong general-purpose default for that job.
+
+Advantages of C<rg> in this context include:
+
+=over 4
+
+=item *
+
+it is typically very fast on large trees;
+
+=item *
+
+it works the same way across tracked files, untracked-but-present files, and
+generated files in the working tree;
+
+=item *
+
+its output format is convenient for line-number-oriented navigation;
+
+=item *
+
+many agents and developer workflows already use it as the default text search
+tool.
+
+=back
+
+This is not a statement that C<git grep> is bad. C<git grep> is also useful,
+especially when you specifically want to restrict results to tracked files in
+the repository. The examples use C<rg> because it is a good default for the
+mixed navigation tasks these skills are trying to support.
+
+=head2 Will these skill files, this POD, and the related tests be installed with Perl?
+
+We do not have a final answer to that yet.
+
+The immediate goal is to develop the skill files in the repository, test how
+useful they are in practice, and refine them based on real agent and
+maintainer experience. That experimentation comes first, and suggestions are
+very welcome.
+
+Only after that will we decide whether some of this material should be bundled
+with installed Perl, shipped only in the source repository, split between the
+two, or handled some other way.
+
+=head1 SKILL GROUPS
+
+=head2 Orientation and shared workflow
+
+=over 4
+
+=item * F<perl-core-orientation>
+
+Find the right source files, documentation, tests, and tools for a Perl core
+change.
+
+=item * F<perl-core-hacking>
+
+Shared internals patch workflow: keep changes small, respect API boundaries,
+check generated files, and route subsystem work to narrower skills.
+
+=item * F<perl-core-build-test-debug>
+
+Configure, build, run tests, use F<./perl>, debug failures, choose harness
+parallelism, and run focused targets.
+
+=item * F<perl-core-archaeology>
+
+Investigate when and why behavior changed using git history, blame, pickaxe,
+bisect helpers, mailing list archives, issue trackers, release notes, and
+upstream CPAN history.
+
+=back
+
+=head2 Core subsystems
+
+=over 4
+
+=item * F<perl-sv-magic-memory>
+
+SV, AV, HV, CV, refcounts, mortals, magic, save stack, arenas, allocation,
+and ownership.
+
+=item * F<perl-parser-optree-ops>
+
+Lexer, parser, optrees, ops, pp functions, check functions, pads, scopes, and
+opcode regeneration.
+
+=item * F<perl-regex-engine>
+
+Regex compiler, executor, optimizer, regnodes, generated regex files, debug
+output, and F<t/re> tests.
+
+=item * F<perl-core-portability>
+
+C portability, EBCDIC, locale, threads, multiplicity, globals, platform
+hints, cross builds, and platform-specific source.
+
+=item * F<perl-configure-build-system>
+
+F<Configure>, F<config_h.SH>, F<configpm>, F<Makefile.SH>, F<makedepend>,
+F<hints/>, F<Cross/>, and platform build conventions.
+
+=back
+
+=head2 Generated files, APIs, XS, and visible behavior
+
+=over 4
+
+=item * F<perl-generated-files>
+
+Map generated outputs to their generators, run the right regeneration target,
+and validate derived files.
+
+=item * F<perl-embed-fnc>
+
+F<embed.fnc>, generated prototypes, public and internal API docs, export
+metadata, and symbol visibility.
+
+=item * F<perl-xs-embedding>
+
+XS, embedding, typemaps, stack macros, boot functions, context handling, and
+extension-facing compatibility.
+
+=item * F<perl-language-library>
+
+Language behavior, builtins, pragmata, diagnostics, core modules, dual-life
+modules, deprecations, and user-visible library behavior.
+
+=item * F<perl-core-docs-release>
+
+POD, perldelta, release notes, F<MANIFEST>, maintainer metadata, and
+documentation style.
+
+=back
+
+=head1 VALIDATION
+
+Run the repository validator after changing skills:
+
+    ./perl -I. -Ilib t/porting/perlagentskills.t
+    make test_porting
+
+The first command checks that the canonical skill tree and this document stay
+in sync. F<make test_porting> is a good broader validation target for changes
+that affect documentation, metadata, generated-file checks, or repository
+policy.
+
+=head1 ADDING OR CHANGING SKILLS
+
+Keep each F<SKILL.md> concise and operational. Put detailed guidance in a
+reference file under the same skill directory. Keep references one level deep.
+
+When adding a new skill or reference file, add it to F<MANIFEST> with a short
+description. Use F<make manisort> to sort the manifest after editing it. Use
+F<t/porting/manifest.t> or F<Porting/manicheck> to find missing or stale
+entries.
+
+When changing F<pod/*.pod> files or adding this document to another branch,
+also check F<perl.pod>, F<perltoc.pod>, F<Porting/pod_rules.pl>, and the
+porting POD tests described by the F<perl-core-docs-release> skill.
+
+=head1 SEE ALSO
+
+L<perlhack>, L<perlsource>, L<perlgit>, L<perldocstyle>, L<perlpodstyle>
+
+=cut
