@@ -185,7 +185,7 @@ violations, POD encoding issues, etc.
 =item * F<Maintainers>, F<Maintainers.pl>, and F<Maintainers.pm>
 
 These files contain information on who maintains which modules. Run
-C<perl Porting/Maintainers -M Module::Name> to find out more
+C<perl Porting/Maintainers --module Module::Name> to find out more
 information about a dual-life module.
 
 =item * F<podtidy>
