@@ -4,13 +4,11 @@
 
 package Maintainers;
 
+use 5.008;
 use strict;
 use warnings;
 
 use lib "Porting";
-# Please don't use post 5.008 features as this module is used by
-# Porting/makemeta, and that in turn has to be run by the perl just built.
-use 5.008;
 
 require "Maintainers.pl";
 our (%Modules, %Maintainers);
@@ -21,7 +19,7 @@ our @EXPORT_OK = qw(%Modules %Maintainers
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-our $VERSION = 0.14;
+our $VERSION = 0.15;
 
 require Exporter;
 
