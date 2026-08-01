@@ -3164,6 +3164,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the querylocale routine is
  *	available to return the name of the locale for a category mask.
  */
+/* HAS_GETLOCALENAME_L:
+ *	This symbol, if defined, indicates that the getlocalename_l routine is
+ *	available to return the name of the locale for a category.
+ */
 /* I_XLOCALE:
  *	This symbol, if defined, indicates to the C program that the
  *	header xlocale.h is available.  See also NEED_XLOCALE_H
@@ -3177,6 +3181,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_uselocale	HAS_USELOCALE	/**/
 #$d_duplocale	HAS_DUPLOCALE	/**/
 #$d_querylocale	HAS_QUERYLOCALE	/**/
+#$d_getlocalename_l	HAS_GETLOCALENAME_L	/**/
 #$xlocale_needed	NEED_XLOCALE_H	/**/
 #$i_xlocale	I_XLOCALE               /**/
 

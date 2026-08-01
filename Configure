@@ -699,6 +699,7 @@ d_nanosleep=''
 d_nearbyint=''
 d_duplocale=''
 d_freelocale=''
+d_getlocalename_l=''
 d_newlocale=''
 d_querylocale=''
 d_uselocale=''
@@ -12796,6 +12797,10 @@ eval $inlibc
 
 : see if querylocale exists
 set querylocale d_querylocale
+eval $inlibc
+
+: see if getlocalename_l exists
+set getlocalename_l d_getlocalename_l
 eval $inlibc
 
 : if we have xlocale.h, check whether it is needed
@@ -25204,6 +25209,7 @@ d_gethostbyname_r='$d_gethostbyname_r'
 d_gethostent_r='$d_gethostent_r'
 d_gethostprotos='$d_gethostprotos'
 d_getitimer='$d_getitimer'
+d_getlocalename_l='$d_getlocalename_l'
 d_getlogin='$d_getlogin'
 d_getlogin_r='$d_getlogin_r'
 d_getmnt='$d_getmnt'
