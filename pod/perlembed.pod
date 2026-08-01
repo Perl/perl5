@@ -733,10 +733,11 @@ To illustrate this, we create a file C<persistent.pl>:
  sub valid_package_name {
      my ($string) = @_;
 
-     $string =~ s{([^A-Za-z0-9/])}{sprintf('_%2x', unpack('C', $1))}eg;
+     # replace special characters (other than '/') with their hex codes
+     $string =~ s{ ( [^[:alnum:]/] ) }{ sprintf('_%2x', ord $1) }xeg;
 
      # second pass only for words starting with a digit
-     $string =~ s{/(\d)}{sprintf('/_%2x', unpack('C', $1))}eg;
+     $string =~ s{ / (\d) }{ sprintf('/_%2x', ord $1) }xeg;
 
      # Dress it up as a real package name
      $string =~ s{/}{::}g;
