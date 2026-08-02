@@ -5025,7 +5025,7 @@ this model, the less likely conflicts will occur.
 
 =head1 XS VERSION
 
-This document covers features supported by F<xsubpp> 3.64.
+This document covers features supported by F<xsubpp> 3.65.
 
 =head1 AUTHOR DIAGNOSTICS
 
