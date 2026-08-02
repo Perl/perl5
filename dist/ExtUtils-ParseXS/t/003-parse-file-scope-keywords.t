@@ -196,6 +196,31 @@ EOF
     test_many($preamble, 'boot_Foo', \@test_fns);
 }
 
+{
+    # Check for file/module name in boot code handshake.
+
+    my $preamble = Q(<<'EOF');
+EOF
+
+    my @test_fns = (
+        [
+            'file name in XS handshake',
+            Q(<<'EOF'),
+                |MODULE = Foo::Bar PACKAGE = Foo::Bar::Util
+                |
+                |PROTOTYPES:  DISABLE
+                |
+EOF
+
+            [  0, qr{^\s*#line \d+ \Q"(output) in Foo::Bar"\E}m,
+                "includes correct module name"
+            ],
+        ],
+
+    );
+
+    test_many($preamble, 'boot_Foo__Bar', \@test_fns);
+}
 
 {
     # Test reporting of bad syntax on MODULE lines.

@@ -1655,6 +1655,15 @@ sub as_code {
 
     # Emit the boot_Foo__Bar() C function / XSUB
 
+    my $set_file = '';
+    my $reset_file = '';
+    if ($pxs->{config_WantLineNumbers}) {
+        (my $module = $pxs->{MODULE_cname}) =~ tr/_/:/;
+        my $fake_file = "$pxs->{out_filename} in $module";
+        $set_file = 'ExtUtils::ParseXS::CountLines'->file_marker($fake_file);
+        $reset_file = 'ExtUtils::ParseXS::CountLines'->end_marker;
+    }
+
     print $self->Q(<<"EOF");
         |#ifdef __cplusplus
         |extern "C" $open_brace
@@ -1665,7 +1674,9 @@ sub as_code {
         |#if PERL_VERSION_LE(5, 21, 5)
         |    dVAR; dXSARGS;
         |#else
+        |$set_file
         |    dVAR; ${\($pxs->{VERSIONCHECK_value} ? 'dXSBOOTARGSXSAPIVERCHK;' : 'dXSBOOTARGSAPIVERCHK;')}
+        |$reset_file
         |#endif
 EOF
 
@@ -1704,10 +1715,12 @@ EOF
     if ($pxs->{VERSIONCHECK_value}) {
         print $self->Q(<<"EOF");
         |#if PERL_VERSION_LE(5, 21, 5)
+        |$set_file
         |    XS_VERSION_BOOTCHECK;
         |#  ifdef XS_APIVERSION_BOOTCHECK
         |    XS_APIVERSION_BOOTCHECK;
         |#  endif
+        |$reset_file
         |#endif
         |
 EOF
@@ -1715,7 +1728,9 @@ EOF
     else {
         print $self->Q(<<"EOF") ;
             |#if PERL_VERSION_LE(5, 21, 5) && defined(XS_APIVERSION_BOOTCHECK)
+            |$set_file
             |  XS_APIVERSION_BOOTCHECK;
+            |$reset_file
             |#endif
             |
 EOF
