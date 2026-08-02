@@ -123,7 +123,7 @@ release.
 =head1 Acknowledgements
 
 Perl 5.40.5 represents approximately 4 months of development since Perl 5.40.4
-and contains approximately 4,100 lines of changes across 130 files from 15
+and contains approximately 4,200 lines of changes across 130 files from 15
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
