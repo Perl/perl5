@@ -1220,7 +1220,7 @@ read_only_bottom_close_and_rename($l);
 #
 #       The implication is that these functions need to each have an
 #       exclusive lock associated with the tag, to avoid interference with
-#       other such functions, or the functions in m) that have the same tag.
+#       other such functions, or the functions in n) that have the same tag.
 #       Continuing the previous example, the function putenv() has
 #       "const:env".  This means it needs an exclusive lock on the mutex
 #       associated with "env", and all functions that contain just "env" for
