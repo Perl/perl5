@@ -20,7 +20,7 @@ deemed necessary by the Steering Council.
   2025-07-02  5.42.0  ✓       Philippe Bruhat
   2026-03-08  5.42.1  ✓       Steve Hay
   2026-03-29  5.42.2  ✓       Steve Hay
-  2026-08-02  5.42.3          Steve Hay
+  2026-08-02  5.42.3  ✓       Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
