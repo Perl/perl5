@@ -1,6 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.64
+3.65
+  - Mention module name in error message if XS handshake fails
+
+3.64 Sun Jul 26 2026
   - Respect output arguments in INTERFACES
   - PERL_UNUSED_VAR() the CV declared when an ALIAS or
     XSINTERFACE_FUNC_SET has been seen.
