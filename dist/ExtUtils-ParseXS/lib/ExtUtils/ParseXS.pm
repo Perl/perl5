@@ -148,6 +148,8 @@ BEGIN {
                         # but not yet processed.
   'lastline_no',        # The line number of lastline.
 
+  'out_filename',       # The name of the output file.
+
 
   # File-scoped configuration state:
 
@@ -363,16 +365,18 @@ sub process_file {
   chdir($self->{dir});
   my $pwd = cwd();
 
-  if ($self->{config_WantLineNumbers}) {
+  my $cfile;
+  if ( $Options{outfile} ) {
+    $cfile = $Options{outfile};
+  }
+  else {
     my $csuffix = $Options{csuffix};
-    my $cfile;
-    if ( $Options{outfile} ) {
-      $cfile = $Options{outfile};
-    }
-    else {
-      $cfile = $Options{filename};
-      $cfile =~ s/\.xs$/$csuffix/i or $cfile .= $csuffix;
-    }
+    $cfile = $Options{filename};
+    $cfile =~ s/\.xs$/$csuffix/i or $cfile .= $csuffix;
+  }
+  $self->{out_filename} = $cfile;
+
+  if ($self->{config_WantLineNumbers}) {
     tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $Options{output});
     select PSEUDO_STDOUT;
   }
