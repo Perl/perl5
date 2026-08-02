@@ -170,7 +170,7 @@ will not appear in the arguments list as far as the signature is concerned.
         }
     }
 
-Just like regular subroutines, methods B<can> be anonymous:
+Just like regular subroutines, methods are permitted to be anonymous:
 
     class AnonMethodFactory {
 
@@ -321,14 +321,8 @@ named C<new> and is invoked like a method call on the class name:
 During object construction, class fields are looked up in the C<%arguments>
 hash and populated with the found keys according to C<:param> attributes. If
 any C<%arguments> key was not declared as a C<:param> field, an exception is
-raised with a list of surplus key. This means that B<the constructor is
+raised with a list of surplus keys. This means that B<the constructor is
 strict by default>.
-
-In addition, the constructor does not need to be called in the class context
-exclusively. It works just as well to call it on an instance of a class, which
-will automatically create another instance of the same class:
-
-    my $other_object = $object->new(%arguments);
 
 =head2 Adjustment
 
@@ -374,19 +368,6 @@ C<'OBJECT'>.
 An object is destroyed when the last reference to it goes away, just as with
 other data structures in Perl.
 
-Same as with bless-based objects, attaching behavior on object destruction is
-done by defining a C<DESTROY> method. See L<perlobj/Destructors> for more
-details.
-
-    class WithDestructor {
-        method DESTROY () {
-            say "destroying $self";
-        }
-    }
-
-    my $obj = WithDestructor->new;
-    undef $obj; # destroying WithDestructor=OBJECT(0x2e4307e0)
-
 =head1 TODO
 
 This feature is still experimental and very incomplete. The following list
@@ -431,6 +412,13 @@ classes, methods, fields, ADJUST blocks, and other such class-related details.
 
 Ways in which out-of-core modules can interact with the class system,
 including an ability for them to provide new class or field attributes.
+
+=item * Destructors
+
+Currently, attaching behavior on object destruction is done by defining a
+C<DESTROY> method, same as for bless-based classes. Eventually, object
+destruction phasers will be implemented, but their semantics remain undecided
+at this time.
 
 =back
 
