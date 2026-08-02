@@ -82,8 +82,9 @@
  *
  * 1) Raw posix_setlocale().  This implementation is basically the libc
  *    setlocale(), with possibly minor tweaks.  This is used for startup, and
- *    always for unthreaded perls, and when the API for safe locale threading
- *    is identical to the unsafe API (Windows, currently).
+ *    for unthreaded perls (unless overriden by Configure), and when the API
+ *    for safe locale threading is identical to the unsafe API (Windows,
+ *    currently).
  *
  *    This implementation is composed of two layers:
  *      a)  posix_setlocale() implements the libc setlocale().  In most cases,
@@ -1880,7 +1881,7 @@ S_stdize_locale(pTHX_ const int category,
  *                      to panic.
  * 3) querylocale_X     to see what the given category's locale is
  *
- * 4) setlocale_i()     is defined only in those implementations where the bool
+ * 4) setlocale_i()     is defined only in those implementations where the set
  *                      and query forms are essentially the same, and can be
  *                      combined to save CPU time.
  *
@@ -1893,7 +1894,7 @@ S_stdize_locale(pTHX_ const int category,
  * implementations.  This makes each implementation shorter and clearer, and
  * removes duplication.
  *
- * Each implementation below is separated by ==== lines, and includes bool,
+ * Each implementation below is separated by -=-= lines, and includes bool,
  * void, and query macros.  The query macros are first, followed by any
  * functions needed to implement them.  Then come the bool, again followed by
  * any implementing functions  Then are the void macros; next is setlocale_i if
