@@ -370,6 +370,11 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item MacOS (Darwin)
+
+Use of mkostemp(3) enabled on macOS 10.12 Sierra (Darwin 16) and newer,
+where it is available.
+
 =back
 
 =head1 Internal Changes
