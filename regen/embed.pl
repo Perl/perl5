@@ -83,7 +83,6 @@ $skip_files{$_} = 1 for qw(
                             embed.h
                             embedvar.h
                             fakesdio.h
-                            perl_lock_definitions.h
                             nostdio.h
                             perl_langinfo.h
                             perlio.h
@@ -203,8 +202,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ASCII_RESTRICT_PAT_MOD
     ASCII_RESTRICT_PAT_MODS
     ASCII_TO_NATIVE
-    ASCTIME_LOCK
-    ASCTIME_UNLOCK
     ASSERT_CURPAD_ACTIVE
     ASSERT_CURPAD_LEGAL
     ASSERT_IS_LITERAL
@@ -405,8 +402,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     cSVOPx
     cSVOPx_sv
     cSVOPx_svp
-    CTIME_LOCK
-    CTIME_UNLOCK
     Ctl
     CTYPE256
     cUNOP
@@ -759,41 +754,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GCC_DIAG_RESTORE_DECL
     GCC_DIAG_RESTORE_STMT
     GETATARGET
-    GETENV_LOCK
-    GETENV_UNLOCK
     get_extended_os_errno
-    GETHOSTBYADDR_LOCK
-    GETHOSTBYADDR_UNLOCK
-    GETHOSTBYNAME_LOCK
-    GETHOSTBYNAME_UNLOCK
-    GETNETBYADDR_LOCK
-    GETNETBYADDR_UNLOCK
-    GETNETBYNAME_LOCK
-    GETNETBYNAME_UNLOCK
-    GETPROTOBYNAME_LOCK
-    GETPROTOBYNAME_UNLOCK
-    GETPROTOBYNUMBER_LOCK
-    GETPROTOBYNUMBER_UNLOCK
-    GETPROTOENT_LOCK
-    GETPROTOENT_UNLOCK
-    GETPWNAM_LOCK
-    GETPWNAM_UNLOCK
-    GETPWUID_LOCK
-    GETPWUID_UNLOCK
-    GETSERVBYNAME_LOCK
-    GETSERVBYNAME_UNLOCK
-    GETSERVBYPORT_LOCK
-    GETSERVBYPORT_UNLOCK
-    GETSERVENT_LOCK
-    GETSERVENT_UNLOCK
-    GETSPNAM_LOCK
-    GETSPNAM_UNLOCK
     GETTARGET
     GETTARGETSTACKED
     G_FAKINGEVAL
     GLOBAL_PAT_MOD
-    GMTIME_LOCK
-    GMTIME_UNLOCK
     G_NODEBUG
     GREEK_CAPITAL_LETTER_MU
     GREEK_SMALL_LETTER_MU
@@ -1331,8 +1296,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LOCALE_TERM
     LOCALE_UNLOCK
     LOCAL_PATCH_COUNT
-    LOCALTIME_LOCK
-    LOCALTIME_UNLOCK
     LOCK_DOLLARZERO_MUTEX
     LOCK_LC_NUMERIC_STANDARD
     LONGDOUBLE_BIG_ENDIAN
@@ -1449,8 +1412,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MI_INIT_WORKAROUND_PACK
     MIN_OFFUNI_VARIANT_CP
     Mkdir
-    MKTIME_LOCK
-    MKTIME_UNLOCK
     M_PAT_MODS
     msbit_pos
     MSPAGAIN
@@ -2525,10 +2486,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     STORE_LC_NUMERIC_SET_STANDARD
     strBEGINs
     Strerror
-    STRFMON_LOCK
-    STRFMON_UNLOCK
-    STRFTIME_LOCK
-    STRFTIME_UNLOCK
     STRUCT_OFFSET
     STRUCT_SV
     SUBVERSION
@@ -2766,8 +2723,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     TWO_BYTE_UTF8_TO_UNI
     TYPE_CHARS
     TYPE_DIGITS
-    TZSET_LOCK
-    TZSET_UNLOCK
     U16_MAX
     U16_MIN
     U32_MAX
@@ -3401,7 +3356,9 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
 
 # The keys are files that have documentation outside the normal apidoc lines,
 # and all the definitions are assumed to exist.
-my %assume_symbols_documented_files = map { $_ => 1 } qw();
+my %assume_symbols_documented_files = map { $_ => 1 } qw(
+    perl_lock_definitions.h
+);
 
 # Keep lists of symbols to undef under various conditions.  We can initialize
 # the two ones for perl extensions with the lists above.
