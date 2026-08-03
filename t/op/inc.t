@@ -506,4 +506,39 @@ EOC
     is $r4, 1.1, 'POSTDEC returns the coerced NV';
 }
 
+{
+    # Correctly handle various overloads (thanks, tonycoz)
+    package Eleven;
+    use overload
+      '0+' => sub { 11 },
+      fallback => 1;
+
+    package main;
+    my @ops = (
+    # TODO - non-integer overloads are pre-existingly buggy
+    #    [ 12, '0+ overload: PREINC' => sub { ++$_[0]; } ],
+    #    [ 12, '0+ overload: POSTINC' => sub { $_[0]++; } ],
+    #    [ 10, '0+ overload: PREDEC' => sub { --$_[0]; } ],
+    #    [ 10, '0+ overload: POSTDEC' => sub { $_[0]--; } ],
+    );
+
+
+    {
+        use integer;
+        push @ops,
+            [ 12, '0+ overload: integer PREINC' => sub { ++$_[0]; } ],
+            [ 12, '0+ overload: integer POSTINC' => sub { $_[0]++; } ],
+            [ 10, '0+ overload: integer PREDEC' => sub { --$_[0]; } ],
+            [ 10, '0+ overload: integer POSTDEC' => sub { $_[0]--; } ],
+        ;
+    }
+
+    for my $op (@ops) {
+        my ($res, $name, $cv) = @$op;
+        my $x = bless {}, "Eleven";
+        $cv->($x);
+        is $x, $res, $name;
+    }
+}
+
 done_testing();
