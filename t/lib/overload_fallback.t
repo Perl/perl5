@@ -22,8 +22,6 @@ use overload '+' => sub { die "unused"; };
 my $x = bless {}, 'main';
 ok (eval {$x eq 'stringvalue'}, 'fallback worked again');
 
-TODO: {
-  local $::TODO = 'RT #43356: Autogeneration of ++ is incorrect';
   fresh_perl_is(<<'EOC', '2', {}, 'RT #43356: Autogeneration of ++');
 use overload
     "0+"     => sub { ${$_[0]} },
@@ -32,7 +30,6 @@ use overload
 my $value = bless \(my $dummy = 1), __PACKAGE__;
 print ++$value;
 EOC
-}
 
 {
     my $warned = 0;
