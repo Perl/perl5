@@ -687,6 +687,10 @@ S_class_cleanup_definition(pTHX_ HV *stash)
     SvREFCNT_dec(aux->xhv_class_subclasses_pending_seal);
     aux->xhv_class_subclasses_pending_seal = NULL;
 
+    /* need to release the saved initializer ops in the context
+       of the CV any pad entries were created in */
+    resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+
     /* clean up the ops for defaults for fields, if any, since
        padname_free() doesn't.
     */
@@ -726,7 +730,6 @@ S_class_cleanup_definition(pTHX_ HV *stash)
     }
 
     /* field clean up */
-    resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
     SvREFCNT_dec(PL_compcv);
     Safefree(aux->xhv_class_suspended_initfields_compcv);
     aux->xhv_class_suspended_initfields_compcv = NULL;
