@@ -278,3 +278,14 @@ class X :isa(Mod24517) {
 }
 EXPECT
 Class :isa attribute requires a class but "Mod24517" is not one at - line 4.
+########
+# NAME class cleanup doesn't crash GH #24616
+use strict;
+use warnings;
+use experimental 'class';
+my $r;
+class Bug;
+field $_y = $r->{foo}{bar};
+method g() { $x }
+EXPECT
+Global symbol "$x" requires explicit package name (did you forget to declare "my $x"?) at - line 7.
