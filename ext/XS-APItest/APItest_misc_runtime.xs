@@ -105,3 +105,30 @@ valid_identifier(SV *s)
 
 const char *
 svtypename(U8 type)
+
+int
+test_sv_set_undef()
+    ALIAS:
+      XS::APItest::test_sv_set_undef = 1
+      XS::APItest::test_sv_set_PL_sv_undef = 2
+      XS::APItest::test_sv_setiv_temp = 3
+    CODE:
+        SV *sv = sv_newmortal();
+        if (!SvTEMP(sv))
+            XSRETURN_UNDEF;
+        switch (ix) {
+        case 1:
+            sv_set_undef(sv);
+            break;
+        /* other setters for comparison */
+        case 2:
+            sv_setsv(sv, &PL_sv_undef);
+            break;
+        case 3:
+            sv_setiv(sv, 0);
+            break;
+        }
+        RETVAL = SvTEMP(sv) ? 1 : 2;
+    OUTPUT:
+        RETVAL
+
