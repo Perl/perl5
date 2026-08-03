@@ -5341,7 +5341,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* USE_REENTRANT_API:
  *	This symbol, if defined, indicates that Perl should
  *	try to use the various _r versions of library functions.
- *	This is extremely experimental.
  */
 #$useithreads	USE_ITHREADS		/**/
 #$usethreads		USE_THREADS		/**/
