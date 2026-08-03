@@ -10529,8 +10529,8 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
             IV i;
             if (SvAMAGIC(sv) && AMG_CALLunary(sv, inc_amg))
                 return;
-            i = PTR2IV(SvRV(sv));
-            sv_unref(sv);
+            SV *wot = sv_2num(sv);
+            i = SvIV(wot);
             sv_setiv(sv, i);
         }
         else sv_force_normal_flags(sv, 0);
@@ -10717,8 +10717,8 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
             IV i;
             if (SvAMAGIC(sv) && AMG_CALLunary(sv, dec_amg))
                 return;
-            i = PTR2IV(SvRV(sv));
-            sv_unref(sv);
+            SV *wot = sv_2num(sv);
+            i = SvIV(wot);
             sv_setiv(sv, i);
         }
         else sv_force_normal_flags(sv, 0);

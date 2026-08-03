@@ -515,11 +515,10 @@ EOC
 
     package main;
     my @ops = (
-    # TODO - non-integer overloads are pre-existingly buggy
-    #    [ 12, '0+ overload: PREINC' => sub { ++$_[0]; } ],
-    #    [ 12, '0+ overload: POSTINC' => sub { $_[0]++; } ],
-    #    [ 10, '0+ overload: PREDEC' => sub { --$_[0]; } ],
-    #    [ 10, '0+ overload: POSTDEC' => sub { $_[0]--; } ],
+        [ 12, '0+ overload: PREINC' => sub { ++$_[0]; } ],
+        [ 12, '0+ overload: POSTINC' => sub { $_[0]++; } ],
+        [ 10, '0+ overload: PREDEC' => sub { --$_[0]; } ],
+        [ 10, '0+ overload: POSTDEC' => sub { $_[0]--; } ],
     );
 
 
