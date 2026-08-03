@@ -1994,7 +1994,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     REENTRANT_PROTO_V_D
     REENTRANT_PROTO_V_H
     REENTRANT_PROTO_V_ID
-    REENTR_MEMZERO
     REFCOUNTED_HE_EXISTS
     REFCOUNTED_HE_KEY_UTF8
     REGCOMP_INTERNAL_H

@@ -132,9 +132,9 @@ print $h <<EOF;
  * memzero out certain structures before calling the functions.
  */
 #  if defined(__OpenBSD__)
-#    define REENTR_MEMZERO(a,b) memzero(a,b)
+#    define PERL_REENTR_MEMZERO(a,b) memzero(a,b)
 #  else
-#    define REENTR_MEMZERO(a,b) 0
+#    define PERL_REENTR_MEMZERO(a,b) 0
 #  endif
 
 #  ifdef NETDB_R_OBSOLETE
@@ -738,7 +738,11 @@ EOF
             my $memzero = '';
             if($p =~ /D$/ &&
                 ($genfunc eq 'protoent' || $genfunc eq 'servent')) {
-                $memzero = 'REENTR_MEMZERO(&PL_reentrant_buffer->_' . $genfunc . '_data, sizeof(PL_reentrant_buffer->_' . $genfunc . '_data)),';
+                $memzero = 'PERL_REENTR_MEMZERO(&PL_reentrant_buffer->_'
+		         . $genfunc
+		         . '_data, sizeof(PL_reentrant_buffer->_'
+		         . $genfunc
+		         . '_data)),';
             }
             push @wrap, <<EOF;
 #      if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
