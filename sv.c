@@ -5335,16 +5335,12 @@ Perl_sv_set_undef(pTHX_ SV *sv)
         }
 
         if (SvROK(sv)) {
-            if (SvWEAKREF(sv))
-                sv_unref_flags(sv, 0);
-            else {
-                SV *rv = SvRV(sv);
-                SvFLAGS(sv) = type; /* quickly turn off all flags */
-                SvREFCNT_dec_NN(rv);
-                return;
-            }
+            sv_unref_flags(sv, 0);
+            assert(!SvOK(sv));
+            return;
         }
-        SvFLAGS(sv) = type; /* quickly turn off all flags */
+
+        SvOK_off(sv);
         return;
     }
 
