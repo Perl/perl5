@@ -45,7 +45,7 @@ you should reset the version numbers to the next blead series.
   2026-10-20  5.45.4          
   2026-11-20  5.45.5          
   2026-12-20  5.45.6          Max Maischein
-  2027-01-20  5.45.7          
+  2027-01-20  5.45.7          Richard Leach
   2027-02-20  5.45.8                            Contentious changes freeze
   2027-03-20  5.45.9                            User-visible changes
                                                 freeze
@@ -80,6 +80,7 @@ consent of the Steering Council.)
   Peter Martini <petercmartini@gmail.com>
   Philippe Bruhat <book@cpan.org>
   Ricardo Signes <rjbs@cpan.org>
+  Richard Leach <rich+perl@hyphen-dash-hyphen.info>
   Stevan Little <stevan@cpan.org>
   Steve Hay <steve.m.hay@googlemail.com>
   Tatsuhiko Miyagawa <miyagawa@bulknews.net>
