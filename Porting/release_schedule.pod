@@ -44,7 +44,7 @@ you should reset the version numbers to the next blead series.
   2026-09-20  5.45.3          
   2026-10-20  5.45.4          
   2026-11-20  5.45.5          
-  2026-12-20  5.45.6          
+  2026-12-20  5.45.6          Max Maischein
   2027-01-20  5.45.7          
   2027-02-20  5.45.8                            Contentious changes freeze
   2027-03-20  5.45.9                            User-visible changes
