@@ -449,6 +449,12 @@ happens within the correct CV.  Previously, if an error was thrown
 with an incomplete class this would release pad entries on the wrong
 CV and eventually crash.  [GH #24616]
 
+=item *
+
+sv_set_undef() no longer blindly clears the C<SVs_TEMP> flag.  This
+could break code that expected to detect mortal SVs, like constant
+folding.  [GH #24661]
+
 =back
 
 =head1 Known Problems
