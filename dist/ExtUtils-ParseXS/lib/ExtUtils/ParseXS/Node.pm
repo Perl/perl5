@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Symbol;
 
-our $VERSION = '3.64';
+our $VERSION = '3.65';
 
 =head1 NAME
 
@@ -2447,6 +2447,7 @@ BEGIN { $build_subclass->(
     'extern_C',       # Bool: saw 'extern C'
     'static',         # Bool: saw 'static'
     'use_early_targ', # Bool: emit an early dTARG for backcompat
+    'retval_sentinel' # Str:  The C constant to map undef from
 )};
 
 
@@ -2471,6 +2472,8 @@ sub parse {
     my $type = $line;
 
     $self->{no_output} = 1 if $type =~ s/^NO_OUTPUT\s+//;
+
+    $self->{retval_sentinel} = defined($1) ? $1 : 'NULL' if $type =~ s/^\s* MAYBE (?: \( (-? \w+) \) )? \s*//x;
 
     # Allow one-line declarations. This splits a single line like:
     #    int foo(....)
@@ -2553,6 +2556,7 @@ BEGIN { $build_subclass->(
     'is_synthetic',  # Bool: var like 'THIS': we pretend it was in the sig
 
     # values derived from both the XSUB's signature and/or INPUT line
+    'sentinel',      # Str:  The C constant expression to map undef to
     'type',          # Str:  The C type of the parameter
     'no_init',       # Bool: don't initialise the parameter
 
@@ -2589,12 +2593,16 @@ sub parse {
     # Decompose parameter into its components.
     # Note that $name can be either 'foo' or 'length(foo)'
 
-    my ($out_type, $type, $name, $sp1, $sp2, $default) =
+    my ($out_type, $maybe, $sentinel, $type, $name, $sp1, $sp2, $default) =
         $param_text =~
             /^
                  (?:
                      (IN|IN_OUT|IN_OUTLIST|OUT|OUTLIST)
                      \b\s*
+                 )?
+                 (
+                     MAYBE (?: \( ([+-]? \w+) \) | \b)?
+                     \s*
                  )?
                  (.*?)                             # optional type
                  \s*
@@ -2622,6 +2630,9 @@ sub parse {
 
     undef $type unless length($type) && $type =~ /\S/;
     $self->{var} = $name;
+
+    $sentinel = 'NULL' if $maybe and not defined $sentinel;
+    $self->{sentinel} = $sentinel;
 
     # Check for duplicates
 
@@ -2827,8 +2838,8 @@ sub lookup_input_typemap {
     my ExtUtils::ParseXS::Node::xsub $xsub  = shift;
     my                               $xbody = shift;
 
-    my ($type, $arg_num, $var, $init, $no_init, $default)
-        = @{$self}{qw(type arg_num var init no_init default)};
+    my ($type, $arg_num, $var, $init, $no_init, $default, $sentinel)
+        = @{$self}{qw(type arg_num var init no_init default sentinel)};
     my $arg = $pxs->ST($arg_num);
 
     # whitespace-tidy the type
@@ -3011,7 +3022,7 @@ EOF
         $init_template = $expr;
     }
 
-    return ($init_template, $eval_vars, 1);
+    return ($init_template, $eval_vars, $sentinel, 1);
 }
 
 
@@ -3038,8 +3049,8 @@ sub lookup_output_typemap {
     my                               $xbody   = shift;
     my                               $out_num = shift;
 
-    my ($type, $num, $var, $do_setmagic, $output_code)
-        = @{$self}{qw(type arg_num var do_setmagic output_code)};
+    my ($type, $num, $var, $do_setmagic, $output_code, $sentinel)
+        = @{$self}{qw(type arg_num var do_setmagic output_code sentinel)};
 
     # values to return
     my ($expr, $eval_vars, $is_template, $saw_DAE);
@@ -3236,7 +3247,7 @@ sub lookup_output_typemap {
         $saw_DAE = 1;
     }
 
-    return $expr, $eval_vars, $is_template, $saw_DAE;
+    return $expr, $eval_vars, $is_template, $saw_DAE, $sentinel;
 }
 
 
@@ -3280,16 +3291,6 @@ sub as_input_code {
         my $xsauto_var = $lenp->{var};
         print "\tSTRLEN\tSTRLEN_length_of_$var;\n";
         print "\t$lenp->{type}\t$xsauto_var;\n";
-
-        # The "var = SvPV()" line will be emitted by the main body of this
-        # function. Note that the T_PV typemap entry will have already
-        # been overridden in lookup_input_typemap() during parse time
-        # to change SvPV_nolen() to SvPV() or similar.
-        #
-        # The final assign should be deferred to come after all
-        # declarations.
-        $xbody->{input_part}{deferred_code_lines} .=
-            "\n\t$xsauto_var = STRLEN_length_of_$var;\n";
     }
 
     # Emit the variable's type and name.
@@ -3330,7 +3331,7 @@ sub as_input_code {
                 . "doesn't have input_typemap_vals")
         unless $lookup;
 
-    my ($init_template, $eval_vars, $is_template) = @$lookup;
+    my ($init_template, $eval_vars, $sentinel, $is_template) = @$lookup;
 
     return unless defined $init_template; # an error occurred
 
@@ -3345,6 +3346,27 @@ sub as_input_code {
 
     # Now finally, emit the actual variable declaration and initialisation
     # line(s). The variable type and name will already have been emitted.
+
+    my %overrides = (
+        SvPVbyte_nolen => 'SvPVbyte_nomg(%s, PL_na',
+        SvPVutf8_nolen => 'SvPVutf8_nomg(%s, PL_na',
+    );
+    if ($init_template && defined $sentinel) {
+        $init_template =~ s/^(?!\A)/\t/g;
+        $init_template =~ s/(Sv(?:[IUN]V|PV(?:|byte|utf8)?))(|_nolen)\((\$arg)/ $overrides{$1.$2} ? sprintf $overrides{$1.$2}, $3 : "$1_nomg$2($3" /e;
+
+        my $if_null = "\$var = $sentinel;";
+        $if_null .= "\n\t\tSTRLEN_length_of_\$var = 0;" if $self->{length_param};
+
+        $init_template = <<END;
+	SvGETMAGIC(\$arg);
+	if (SvOK(\$arg)) {
+	$init_template;
+	} else {
+		$if_null;
+	}
+END
+    }
 
     my $init_code =
         length $init_template
@@ -3417,6 +3439,19 @@ sub as_input_code {
                 "Internal error: typemap doesn't start with '\$var='\n");
 
         printf "%s;\n", $init_code;
+    }
+
+    if ($self->{length_param}) {
+        # The "var = SvPV()" line will be emitted by the main body of this
+        # function. Note that the T_PV typemap entry will have already
+        # been overridden in lookup_input_typemap() during parse time
+        # to change SvPV_nolen() to SvPV() or similar.
+        #
+        # The final assign should be deferred to come after all
+        # declarations.
+
+        $xbody->{input_part}{deferred_code_lines} .=
+            "\n\t$self->{length_param}{var} = STRLEN_length_of_$var;\n";
     }
 
     if (defined $defer) {
@@ -3537,7 +3572,7 @@ sub as_output_code {
                 . "doesn't have output_typemap_vals")
         unless $lookup;
 
-    my ($expr, $eval_vars, $is_template, $saw_DAE) = @$lookup;
+    my ($expr, $eval_vars, $is_template, $saw_DAE, $sentinel) = @$lookup;
 
     return unless defined $expr; # error
 
@@ -3602,8 +3637,18 @@ sub as_output_code {
         my $code = defined $output_code
                 ? "\t$output_code\n"
                 : $pxs->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
-        print $code;
 
+        if (defined $sentinel) {
+            $code = <<END;
+	if ($var == $sentinel) {
+		sv_setsv($arg, &PL_sv_undef);
+	} else {
+	$code;
+	}
+END
+        }
+
+        print $code;
         # For parameters in the OUTPUT section, honour the SETMAGIC in force
         # at the time. For parameters instead being output because of an OUT
         # keyword in the signature, assume set magic always.
@@ -3726,6 +3771,24 @@ sub as_output_code {
             # declaring 'SV* RETVALSV' as an intermediate var.
             $retvar = $var if $ntype eq "SVPtr";
         }
+        if (defined $sentinel) {
+            if ($var eq $retvar) {
+                $evalexpr = <<END;
+	if ($var == $sentinel) {
+		$retvar = &PL_sv_undef;
+	}
+END
+            }
+            else {
+                $evalexpr = <<END;
+	if ($var == $sentinel) {
+		$retvar = &PL_sv_undef;
+	} else {
+	$evalexpr;
+	}
+END
+            }
+        }
     }
     else {
         # Handle this (eval-expanded) form of typemap:
@@ -3752,7 +3815,17 @@ sub as_output_code {
         #   SV * targ = (PL_op->op_private & OPpENTERSUB_HASTARG)
         #               ? PAD_SV(PL_op->op_targ) : sv_newmortal()
 
-        if (   $pxs->{config_optimize}
+        if (defined $sentinel) {
+            $evalexpr = <<END;
+	if ($var == $sentinel) {
+		sv_setsv($retvar, &PL_sv_undef);
+	} else {
+	$evalexpr;
+	}
+END
+            $want_newmortal = 1;
+        }
+        elsif (   $pxs->{config_optimize}
                 && ExtUtils::Typemaps::OutputMap->targetable($evalexpr)
                 && !$xbody->{output_part}{targ_used})
         {
@@ -4027,6 +4100,7 @@ sub parse {
                 type         => $xsub->{decl}{return_type}{type},
                 no_init      => 1, # just declare the var, don't initialise it
                 is_synthetic => 1,
+                sentinel     => $xsub->{decl}{return_type}{retval_sentinel},
             } );
 
         push @{$self->{kids}}, $param;

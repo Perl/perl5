@@ -1,5 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.65
+  - Add MAYBE modifier to arguments and return values
+
 3.64
   - Respect output arguments in INTERFACES
   - PERL_UNUSED_VAR() the CV declared when an ALIAS or

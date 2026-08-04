@@ -142,6 +142,86 @@ EOF
 EOF
             [ERR, qr/Error: no OUTPUT definition for type 'myint'/m, "" ],
         ],
+
+        [
+            "test MAYBE",
+            Q(<<'EOF'),
+                |void
+                |foo(MAYBE char* input)
+EOF
+            [  0, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [  0, qr/input = NULL;/, 'falls back to setting to null'],
+        ],
+
+        [
+            "test MAYBE(-1)",
+            Q(<<'EOF'),
+                |void
+                |foo(MAYBE(-1) int input)
+EOF
+            [  0, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [  0, qr/input = -1;/, 'falls back to setting to -1'],
+        ],
+
+        [
+            "test MAYBE with length",
+            Q(<<'EOF'),
+                |void
+                |foo(MAYBE char* input, size_t length(input))
+EOF
+            [  0, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [  0, qr/input = NULL;/, 'falls back to setting to null'],
+            [  0, qr/STRLEN_length_of_input = 0;/, ''],
+            [  0, qr/SvPV_nomg\(ST\(0\), STRLEN_length_of_input\)/, 'uses SvPV_nomg'],
+        ],
+
+        [
+            "test MAYBE with OUT param",
+            Q(<<'EOF'),
+                |void
+                |foo(OUT MAYBE char* output)
+EOF
+            [ 1, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [ 0, qr/if \(output == NULL\)/, 'Check for NULL check' ],
+            [ 0, qr/sv_setsv\(ST\(0\), &PL_sv_undef\)/, ''],
+        ],
+
+        [
+            "test MAYBE with utf8 type strings",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |char* T_UTF8CHAR
+                |INPUT
+                |T_UTF8CHAR
+                |  $var = ($type)SvPVutf8_nolen($arg)
+                |EOF
+                |
+                |void
+                |foo(MAYBE char* input)
+EOF
+            [  0, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [  0, qr/input = NULL;/, 'falls back to setting to null'],
+            [  0, qr/SvPVutf8_nomg\(ST\(0\), PL_na\)/, 'uses PvPVutf8_nomg'],
+        ],
+
+        [
+            "test MAYBE with utf8 type strings and length",
+            Q(<<'EOF'),
+                |TYPEMAP: <<EOF
+                |char* T_UTF8CHAR
+                |INPUT
+                |T_UTF8CHAR
+                |  $var = ($type)SvPVutf8_nolen($arg)
+                |EOF
+                |
+                |void
+                |foo(MAYBE char* input, size_t length(input))
+EOF
+            [  0, qr/if \(SvOK\(ST\(0\)\)\)/, 'check for SvOK' ],
+            [  0, qr/input = NULL;/, 'falls back to setting to null'],
+            [  0, qr/SvPVutf8_nomg\(ST\(0\), STRLEN_length_of_input\)/, 'uses PvPVutf8_nomg'],
+        ],
+
     );
 
     test_many($preamble, 'XS_Foo_', \@test_fns);
