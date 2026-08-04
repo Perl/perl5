@@ -376,13 +376,8 @@ sub process_file {
   }
   $self->{out_filename} = $cfile;
 
-  if ($self->{config_WantLineNumbers}) {
-    tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $Options{output});
-    select PSEUDO_STDOUT;
-  }
-  else {
-    select $Options{output};
-  }
+  tie(*PSEUDO_STDOUT, 'ExtUtils::ParseXS::CountLines', $cfile, $Options{output});
+  select PSEUDO_STDOUT;
 
   $self->{typemaps_object} = process_typemaps( $Options{typemap}, $pwd );
 
@@ -410,7 +405,7 @@ sub process_file {
 
   chdir($orig_cwd);
   select($orig_fh);
-  untie *PSEUDO_STDOUT if tied *PSEUDO_STDOUT;
+  untie *PSEUDO_STDOUT;
   close $self->{in_fh};
 
   return 1;

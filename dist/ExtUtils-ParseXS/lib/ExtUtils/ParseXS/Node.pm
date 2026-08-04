@@ -1655,9 +1655,8 @@ sub as_code {
 
     # Emit the boot_Foo__Bar() C function / XSUB
 
-    my $set_file = '';
-    my $reset_file = '';
-    if ($pxs->{config_WantLineNumbers}) {
+    my ($set_file, $reset_file);
+    {
         (my $module = $pxs->{MODULE_cname}) =~ tr/_/:/;
         my $fake_file = "$pxs->{out_filename} in $module";
         $set_file = 'ExtUtils::ParseXS::CountLines'->file_marker($fake_file);
