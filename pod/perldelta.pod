@@ -444,7 +444,10 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Cleanup of field initialization ops for an incomplete class now
+happens within the correct CV.  Previously, if an error was thrown
+with an incomplete class this would release pad entries on the wrong
+CV and eventually crash.  [GH #24616]
 
 =back
 
