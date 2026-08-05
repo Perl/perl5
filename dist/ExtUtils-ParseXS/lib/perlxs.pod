@@ -1949,6 +1949,9 @@ syntax, and the keyword must be followed by one of these three forms:
 where C<FOO> can be just about any sequence of characters, which must be
 matched at the start of a subsequent line.
 
+Note that POD and line continuations aren't recognised within a TYPEMAP
+block.
+
 See L</Using Typemaps> and L<perlxstypemap> for more details on writing
 typemaps.
 
