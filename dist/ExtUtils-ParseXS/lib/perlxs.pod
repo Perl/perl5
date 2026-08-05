@@ -567,7 +567,9 @@ rest of the first line. (Yes, this is an implementation flaw.)
 It is best to include a blank line between each file-scoped item, and
 before the start of each XSUB. While some items I<are> processed correctly
 if they are on the line immediately preceding the start of an XSUB, the
-parser is inconsistent in their handling.
+parser is inconsistent in their handling. There should also be a blank
+line between any file-scoped keyword and a following C preprocessor
+directive (such as C<#ifdef>).
 
 An XSUB ends when C</\n\n\S/> is encountered: i.e. a blank line followed
 by something on column one. (This is why it's recommended to indent
@@ -1671,6 +1673,11 @@ This will insert two XSUBs into the Perl namespace, called
 C<Foo::Bar::read()> and C<Foo::Bar::write()>, which when called, will
 themselves call the C functions C<foobar_read()> and C<foobar_write()>.
 
+Note that prior to F<xsubpp> 3.61, it wasn't required to have a blank line
+between a C<MODULE> line and a following C preprocessor directive (such as
+C<#ifdef>). Now, similarly to other file-scoped directives, it is
+required.
+
 =head2 File-scoped XS Keywords and Directives
 
 After the first C<MODULE> keyword, everything else in the file consists of
@@ -1738,6 +1745,8 @@ it will be treated as the start of a new XSUB.
 The following file-scoped keywords are supported.  Note that the
 L<SCOPE|/The SCOPE: Keyword and typemap entry> can technically be a
 file-scoped keyword too, but is described further down as an XSUB keyword.
+There should be a blank line between any file-scoped keyword and a
+following C preprocessor directive (such as C<#ifdef>).
 
 =head3 The REQUIRE: Keyword
 
