@@ -1706,9 +1706,8 @@ Blank lines, which are discarded.
 Known C</^#/> C preprocessor directives, which are passed through as-is.
 Conditional ones, such as C<#if> and C<#else>, have some basic analysis
 performed on them which, in particular, allows two variants of the same
-XSUB to be declared without raising a "duplicate XSUB" warning. This
-warning suppression only works when an else branch is present. For example
-this works:
+XSUB to be declared without raising a "duplicate XSUB" warning. For
+example:
 
     #ifdef USE_2ARG
 
@@ -1720,15 +1719,10 @@ this works:
 
     #endif
 
-while this form will still raise warnings:
-
-    #ifdef USE_2ARG
-    ...
-    #endif
-
-    #ifndef USE_2ARG
-    ...
-    #endif
+The current restriction is that an XSUB can only be declared once within
+a block of lines delineated by a preprocessor branch. Prior to F<xsubpp>
+3.61, the restrictions were more onerous and false positives were
+possible.
 
 =item *
 
