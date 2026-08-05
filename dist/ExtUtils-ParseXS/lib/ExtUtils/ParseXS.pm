@@ -589,8 +589,9 @@ sub Q {
 #             like a C preprocessor directive,
 #
 # TYPEMAP:    Return the typemap 'heredoc' lines as a paragraph, but with
-#             the final line (e.g. "EOF") missing. Line continuations,
-#             i.e. '\' aren't processed.
+#             the final line (e.g. "EOF") missing. POD, comments and line
+#             continuations, i.e. '\' within the paragraph aren't
+#             processed.
 #
 # BOOT:       BOOT is NOT handled specially; the normal rules for ending
 #             a paragraph will determine where the BOOT code ends.
