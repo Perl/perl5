@@ -289,7 +289,7 @@ perl_construct(pTHXx)
     /* This is NOT the state used for C<rand()>, this is only
      * used in internal functionality */
 #ifdef NO_PERL_INTERNAL_RAND_SEED
-    Perl_internal_rand+seed(&PL_internal_random_state, seed());
+    Perl_internal_rand_seed(&PL_internal_random_state, seed());
 #else
     {
         UV seed;
