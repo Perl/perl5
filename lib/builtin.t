@@ -121,6 +121,17 @@ package FetchStoreCounter {
     is(reftype($obj),        "ARRAY", 'reftype yields basic container type for blessed object');
     is(reftype("not a ref"), undef,   'reftype yields undef for non-reference');
 
+    for my $result ($1) {
+        my $y = 1; # no constant folding
+        # $result is my, so TARGMY should apply
+        # $1 implements read-only-ness in it's magic
+        # so if set magic is called it throws an exception
+        ok(!eval { $result = reftype($y); 1 },
+           "magic called for TARGMY reftype");
+        ok(!eval { $result = refaddr($y); 1 },
+           "magic called for TARGMY refaddr");
+    }
+
     is(blessed($arr), undef, 'blessed yields undef for non-object');
     is(blessed($obj), "Object", 'blessed yields package name for object');
 

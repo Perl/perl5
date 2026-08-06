@@ -524,7 +524,7 @@ PP(pp_refaddr)
     if(SvROK(arg))
         sv_setuv_mg(TARG, PTR2UV(SvRV(arg)));
     else
-        sv_setsv(TARG, &PL_sv_undef);
+        sv_setsv_mg(TARG, &PL_sv_undef);
 
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
@@ -540,7 +540,7 @@ PP(pp_reftype)
     if(SvROK(arg))
         sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
     else
-        sv_setsv(TARG, &PL_sv_undef);
+        sv_setsv_mg(TARG, &PL_sv_undef);
 
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
