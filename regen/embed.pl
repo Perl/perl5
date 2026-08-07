@@ -474,7 +474,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvHASEVAL
     CvHASEVAL_off
     CvHASEVAL_on
-    CvHASGV
     CvHSCXT
     CvIsMETHOD
     CvIsMETHOD_off
