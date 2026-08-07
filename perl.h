@@ -290,6 +290,10 @@ Now a no-op.
 =for apidoc_item||CPERLarg_
 =for apidoc_item||_CPERLarg
 
+=for apidoc ABmn||PERL_OBJECT_THIS
+=for apidoc_item||_PERL_OBJECT_THIS
+=for apidoc_item||PERL_OBJECT_THIS_
+
 =cut
  */
 #  define STATIC static
