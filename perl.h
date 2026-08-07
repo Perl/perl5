@@ -6060,9 +6060,21 @@ interpreter phase you might do:
 #define phase_name(phase) (PL_phase_names[phase])
 
 #ifndef PERL_CORE
-/* Do not use this macro. It only exists for extensions that rely on PL_dirty
- * instead of using the newer PL_phase, which provides everything PL_dirty
- * provided, and more. */
+/*
+=for apidoc_section $globals
+=for apidoc ABm|bool|PL_dirty
+Do not use this macro. It only exists for extensions that rely on PL_dirty
+instead of using the newer PL_phase, which provides everything PL_dirty
+provided, and more.
+
+=for apidoc ABmn|STRLEN|PL_amagic_generation
+Now a synonym for C<L</PL_na>>.
+
+=for apidoc ABmn|SV*|PL_encoding
+Now returns a Null SV pointer.
+
+=cut
+*/
 #  define PL_dirty cBOOL(PL_phase == PERL_PHASE_DESTRUCT)
 
 #  define PL_amagic_generation PL_na
