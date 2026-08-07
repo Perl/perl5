@@ -1135,7 +1135,7 @@ Format FRED redefined at - line 5.
 ########
 # op.c
 use warnings 'exec' ;
-exec "$^X -e 1" ; 
+exec "\"$^X\" -e 1" ;
 my $a
 EXPECT
 Statement unlikely to be reached at - line 4.
@@ -1143,7 +1143,7 @@ Statement unlikely to be reached at - line 4.
 ########
 # op.c, no warning if exec isn't a statement.
 use warnings 'exec' ;
-$a || exec "$^X -e 1" ;
+$a || exec "\"$^X\" -e 1" ;
 my $a
 EXPECT
 ########
@@ -1177,7 +1177,7 @@ Can't use 'defined(%hash)' (Maybe you should just omit the defined()?) at - line
 ########
 # op.c
 no warnings 'exec' ;
-exec "$^X -e 1" ; 
+exec "\"$^X\" -e 1" ;
 my $a
 EXPECT
 
