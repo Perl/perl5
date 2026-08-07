@@ -15,8 +15,8 @@ test -z "$cc" && cc='gcc'
 if test -z "$plibpth"
 then
     plibpth=`gcc -print-file-name=libc.a`
-    plibpth=`dirname $plibpth`
-    plibpth=`cd $plibpth && pwd`
+    plibpth=`dirname "$plibpth"`
+    plibpth=`cd "$plibpth" && pwd`
 fi
 so='dll'
 # - eliminate -lc, implied by gcc and a symlink to libcygwin.a
