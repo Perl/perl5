@@ -134,7 +134,7 @@ sub readlist($list)
 sub run
 {
   my @args = ("-I" . File::Spec->catdir((File::Spec->updir) x 2, 'lib'), @_);
-  my $run = $perl =~ m/\s/ ? qq("$perl") : $perl;
+  my $run = $perl;
   for (@args) {
     $_ = qq("$_") if $^O eq 'VMS' && /^[^"]/;
     $run .= " $_";
