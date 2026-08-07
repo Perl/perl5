@@ -176,7 +176,7 @@ SKIP: {
           if $^O eq 'posix-bc';
 
         local $SIG{PIPE} = 'IGNORE';
-        open NIL, qq{|$Perl -e "exit 0"} or die "open failed: $!";
+        open NIL, qq{|"$Perl" -e "exit 0"} or die "open failed: $!";
         sleep 5;
         if (print NIL 'foo') {
             # If print was allowed we had better get an error on close
@@ -190,7 +190,7 @@ SKIP: {
     {
         # check that errno gets forced to 0 if the piped program exited 
         # non-zero
-        open NIL, qq{|$Perl -e "exit 23";} or die "fork failed: $!";
+        open NIL, qq{|"$Perl" -e "exit 23";} or die "fork failed: $!";
         $! = 1;
         ok(!close NIL,  'close failure on non-zero piped exit');
         is($!, '',      '       errno');
@@ -230,7 +230,7 @@ SKIP: {
 # check that status is unaffected by implicit close
 {
     local(*NIL);
-    open NIL, qq{|$Perl -e "exit 23"} or die "fork failed: $!";
+    open NIL, qq{|"$Perl" -e "exit 23"} or die "fork failed: $!";
     $? = 42;
     # NIL implicitly closed here
 }
@@ -261,7 +261,7 @@ SKIP: {
 \$SIG{ALRM}=sub{die};
 alarm 1;
 \$Perl = q\0$Perl\0;
-my \$cmd = qq(\$Perl -e "sleep 3");
+my \$cmd = qq("\$Perl" -e "sleep 3");
 my \$pid = open my \$fh, "|\$cmd" or die "\$!\n";
 close \$fh;
 PROG

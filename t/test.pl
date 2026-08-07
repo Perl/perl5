@@ -723,6 +723,7 @@ sub _create_runperl { # Create the string to qx in runperl().
     if ($runperl =~ m/\s/) {
         $runperl = qq{"$runperl"};
     }
+    my $perl_exe = $runperl;
     #- this allows, for example, to set PERL_RUNPERL_DEBUG=/usr/bin/valgrind
     if ($ENV{PERL_RUNPERL_DEBUG}) {
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
@@ -779,11 +780,11 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$args{stdin} =~ s/\r/\\r/g;
 
 	if ($is_mswin || $is_vms) {
-	    $runperl = qq{$Perl -e "print qq(} .
+	    $runperl = qq{$perl_exe -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}
 	else {
-	    $runperl = qq{$Perl -e 'print qq(} .
+	    $runperl = qq{$perl_exe -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
 	}
     } elsif (exists $args{stdin}) {
