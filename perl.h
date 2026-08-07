@@ -967,6 +967,8 @@ This is defined if and only if the compiler being used understands function
 prototypes.  Nowadays it is always defined, since perl won't compile at all on
 compilers without that capability.
 
+=for apidoc ABT||_|...
+
 =for apidoc AB#||I_LIMITS
 
 This is defined if and only if the compiler being used has F<limits.h>.
