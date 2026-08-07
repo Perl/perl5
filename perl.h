@@ -127,7 +127,15 @@ functions with no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #  endif
 #endif
 
-/* PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY */
+/*
+=for apidoc_section $concurrency
+=for apidoc AB#||PERL_IMPLICIT_CONTEXT
+
+This is a legacy synonym for MULTIPLICITY
+
+=cut
+*/
+
 #if defined(MULTIPLICITY)               \
  && ! defined(PERL_CORE)                \
  && ! defined(PERL_IMPLICIT_CONTEXT)
