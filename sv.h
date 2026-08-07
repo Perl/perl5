@@ -1232,6 +1232,17 @@ Use C<SVphv_OVERLOAD> instead.
 "AMAGIC" is short for "active magic"; a rather vague description of what we
 now call operator overloading.
 
+=for apidoc   ABm|bool|HvAMAGIC|HV * hv
+=for apidoc_item ||HvAMAGIC_on|HV * hv
+=for apidoc_item || HvAMAGIC_off|HV * hv
+
+Use, respectively,
+C<L</HvOVERLOAD>>,
+C<L</HvOVERLOAD_on>>,
+and C<L</HvOVERLOAD_off>> instead.
+"AMAGIC" is short for "active magic"; a rather vague description of what we
+now call operator overloading.
+
 =cut
 */
 

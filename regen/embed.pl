@@ -933,9 +933,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     htoni
     htovl
     htovs
-    HvAMAGIC
-    HvAMAGIC_off
-    HvAMAGIC_on
     HvARRAY
     HvAUX
     HvAUXf_IS_CLASS
