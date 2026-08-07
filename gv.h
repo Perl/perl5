@@ -247,6 +247,10 @@ Now always returns C<false>.
 
 Now are no-ops
 
+=for apidoc ABmn|GV*|Nullgv
+
+Null GV pointer
+
 =cut
 */
 

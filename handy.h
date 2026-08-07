@@ -15,19 +15,26 @@
 #define PERL_HANDY_H_
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc_section $casting
+=for apidoc BCmnU|type|Null|type
+
+Null pointer of type C<type>
+
+=cut
+*/
 #  define Null(type) ((type)NULL)
 
 /*
 =for apidoc_section $string
-=for apidoc AmnU||Nullch
+=for apidoc ABmnU||Nullch
 Null character pointer.  (No longer available when C<PERL_CORE> is
 defined.)
 
 =for apidoc_section $SV
-=for apidoc AmnU||Nullsv
+=for apidoc ABmnU||Nullsv
 Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
-
-=cut
 
 Below are signatures of functions from config.h which can't easily be gleaned
 from it, and are very unlikely to change

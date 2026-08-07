@@ -1452,12 +1452,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NOT_REACHED
     NSIG
     ntohi
-    Null
     Nullfp
-    Nullgv
-    Nullhe
-    Nullhek
-    Nullop
     NUM_ANYOF_CODE_POINTS
     NV_BIG_ENDIAN
     NV_DIG
