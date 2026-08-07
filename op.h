@@ -713,7 +713,12 @@ least an C<UNOP>.
 
 #define LINKLIST(o) ((o)->op_next ? (o)->op_next : op_linklist((OP*)o))
 
-/* no longer used anywhere in core */
+/*
+=for apidoc ABm|void|cv_ckproto|const CV *cv|const GV *gv|const char *p
+
+=cut
+*/
+
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \
    cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)

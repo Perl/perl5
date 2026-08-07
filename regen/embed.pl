@@ -419,7 +419,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvAUTOLOAD
     CvAUTOLOAD_off
     CvAUTOLOAD_on
-    cv_ckproto
     CvCLONE
     CvCLONED
     CvCLONED_off
