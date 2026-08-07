@@ -55,6 +55,7 @@ true)
 
 	pldlflags="$cccdlflags"
 	static_ldflags=''
+	pwd_sans_UU="`pwd | sed 's/\/UU$//'`"
 	case "${osname}${osvers}" in
 	darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
@@ -63,8 +64,9 @@ true)
 			     -current_version \
 				${revision}.${patchlevel}.${subversion}"
 		case "$osvers" in
-	        1[5-9]*|[2-9]*)
-			shrpldflags="$shrpldflags -install_name `pwd -P`/\$@ -Xlinker -headerpad_max_install_names"
+		1[5-9]*|[2-9]*)
+			pwdP="`pwd -P`"
+			shrpldflags="$shrpldflags -install_name `quote "$pwdP"`/\$@ -Xlinker -headerpad_max_install_names"
 			exeldflags="-Xlinker -headerpad_max_install_names"
 			;;
 		*)
@@ -105,7 +107,7 @@ true)
 				;;
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
-			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl="-L $archlibexp/CORE -L `quote "$pwd_sans_UU"` -lperl"
 			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		*)
@@ -117,13 +119,13 @@ true)
 				;;
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
-			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
+			linklibperl="-L $archlibexp/CORE -L `quote "$pwd_sans_UU"` -lperl"
 			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		esac
 		;;
 	hpux*)
-		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
+		linklibperl="-L `quote "$pwd_sans_UU"` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	os390*)
             shrpldflags='-shared'
@@ -168,7 +170,7 @@ test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
 exec "$@"
 EOT
 		chmod 755 preload
-		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
+		ldlibpth="$ldlibpth `quote "$pwd"`/preload `quote "$pwd"`/$libperl"
 	    fi
 	    ;;
 	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
@@ -1093,7 +1095,7 @@ $spitshell >>$Makefile <<!GROK!THIS!
 .PHONY: makeppport
 makeppport: \$(MINIPERL_EXE) \$(CONFIGPM)
 	-@for f in Makefile.PL PPPort_pm.PL RealPPPort_xs.PL ppport_h.PL; do \
-	(cd ext/Devel-PPPort && `pwd`/run.sh ../../$(MINIPERL_EXE) -I../../lib \$\$f); \
+	(cd ext/Devel-PPPort && `quote "$pwd"`/run.sh ../../$(MINIPERL_EXE) -I../../lib \$\$f); \
 	done
 
 !GROK!THIS!
