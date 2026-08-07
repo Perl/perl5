@@ -1224,9 +1224,17 @@ Turns on or off the L</HvOVERLOAD> flag.
 #define HvOVERLOAD(hv)          (SvFLAGS(hv) & SVphv_OVERLOAD)
 #define HvOVERLOAD_on(hv)       (perl_assert_HV_(hv) SvFLAGS(hv) |= SVphv_OVERLOAD)
 #define HvOVERLOAD_off(hv)      (perl_assert_HV_(hv) SvFLAGS(hv) &=~ SVphv_OVERLOAD)
-/* These used to be called "AMAGIC", for "active magic", a rather vague
- * description of what we now call operator overloading. */
 #ifndef PERL_CORE
+/*
+=for apidoc ABmn|U32|SVf_AMAGIC
+
+Use C<SVphv_OVERLOAD> instead.
+"AMAGIC" is short for "active magic"; a rather vague description of what we
+now call operator overloading.
+
+=cut
+*/
+
 #  define SVf_AMAGIC            SVphv_OVERLOAD
 #  define HvAMAGIC              HvOVERLOAD
 #  define HvAMAGIC_on           HvOVERLOAD_on
