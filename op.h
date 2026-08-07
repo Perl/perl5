@@ -539,6 +539,13 @@ typedef enum {
 } OPclass;
 
 
+/*
+=for apidoc ABm|bool|IS_PADGV|SV* sv
+=for apidoc ABm|bool|IS_PADCONST|SV* sv
+
+=cut
+*/
+
 #ifdef USE_ITHREADS
 #  define cGVOPx_gv(o)  ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
