@@ -756,7 +756,7 @@ sub process_executables_list {
                         . "seen both in --read file and on command line\n"
             if defined $label && $seen_from_reads{$label};
 
-        my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
+        my $r = qx('$perl' -e 'print qq(ok\n)' 2>&1);
         die "Error: unable to execute '$perl': $r\n" if $r ne "ok\n";
 
         push @results, [ $perl, $label,  { }, '' ];
@@ -1188,7 +1188,7 @@ sub grind_run {
                             . "valgrind --tool=cachegrind  --branch-sim=yes --cache-sim=yes "
                             . "--cachegrind-out-file=/dev/null "
                             . "$OPTS{grindargs} "
-                            . "$perl $OPTS{perlargs} $args - $counts->[$j] 2>&1";
+                            . "'$perl' $OPTS{perlargs} $args - $counts->[$j] 2>&1";
                     # for debugging and error messages
                     my $id = "$test/$label "
                         . ($i ? "active" : "empty") . "/"

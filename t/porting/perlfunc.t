@@ -38,4 +38,5 @@ if ( ord("A") == 193) {
     exit 0;
 }
 
-system "$^X ext/Pod-Functions/Functions_pm.PL --tap pod/perlfunc.pod";
+exec $^X, qw(ext/Pod-Functions/Functions_pm.PL --tap pod/perlfunc.pod);
+die "$^X: $!";
