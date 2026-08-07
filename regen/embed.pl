@@ -813,9 +813,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GvIMPORTED_SV
     GvIMPORTED_SV_off
     GvIMPORTED_SV_on
-    GvIN_PAD
-    GvIN_PAD_off
-    GvIN_PAD_on
     GvINTRO
     GvINTRO_off
     GvINTRO_on

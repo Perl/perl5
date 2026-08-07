@@ -236,6 +236,20 @@ Return the CV from the GV.
 #define GvONCE_FATAL_off(gv)	(GvFLAGS(gv) &= ~GVf_ONCE_FATAL)
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc ABm|bool|GvIN_PAD|GV* gv
+
+Now always returns C<false>.
+
+=for apidoc  ABm||GvIN_PAD_on|GV* gv
+=for apidoc_item||GvIN_PAD_off|GV* gv
+
+Now are no-ops
+
+=cut
+*/
+
 #  define GvIN_PAD(gv)		0
 #  define GvIN_PAD_on(gv)	NOOP
 #  define GvIN_PAD_off(gv)	NOOP
