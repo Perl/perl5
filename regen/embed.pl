@@ -2463,7 +2463,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvFAKE
     SvFAKE_off
     SvFAKE_on
-    SVf_AMAGIC
     SVf_BREAK
     SVf_FAKE
     SVf_IOK
