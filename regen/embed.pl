@@ -1419,10 +1419,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NEGATE_2IV
     NEGATE_2UV
     NEGATIVE_INDICES_VAR
-    New
     new_body_allocated
     new_body_from_arena
-    Newc
     new_NOARENA
     new_NOARENAZ
     NewOp
@@ -1432,7 +1430,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     new_XNV
     new_XPVMG
     new_XPVNV
-    Newz
     NEXT_LINE_CHAR
     NOARENA
     NOCAPTURE_PAT_MOD

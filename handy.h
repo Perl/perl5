@@ -3012,7 +3012,17 @@ enum mem_log_type {
 #define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safecalloc((n),sizeof(t)))))
 
 #ifndef PERL_CORE
-/* pre 5.9.x compatibility */
+/*
+=for apidoc      ABm|void|New|type x|void* ptr|int nitems|type
+=for apidoc_item    |void|Newc|type x|void* ptr|int nitems|type
+=for apidoc_item    |void|Newz|type x|void* ptr|int nitems|type
+
+Use respectively C<L</Newx>>, C<L</Newxc>>, and C<L</Newxz>>.
+
+=cut
+
+    pre 5.9.x compatibility
+*/
 #define New(x,v,n,t)	Newx(v,n,t)
 #define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
 #define Newz(x,v,n,t)	Newxz(v,n,t)
