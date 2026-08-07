@@ -992,7 +992,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     I8_TO_NATIVE
     I8_TO_NATIVE_UTF8
     IGNORE_PAT_MOD
-    I_LIMITS
     ILLEGAL_UTF8_BYTE
     IN_BYTES
     INCLUDE_PROTOTYPES
@@ -1142,7 +1141,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_STRICT_VERSION
     is_SURROGATE_utf8
     is_SURROGATE_utf8_safe
-    I_STDARG
     is_THREE_CHAR_FOLD_HEAD_latin1_safe
     is_THREE_CHAR_FOLD_HEAD_utf8_safe
     is_THREE_CHAR_FOLD_latin1_safe
@@ -2405,7 +2403,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SSPUSHPTR
     SSPUSHUV
     Stack_off_t_MAX
-    STANDARD_C
     StashHANDLER
     Stat
     Stat_t
