@@ -106,7 +106,7 @@ Red*) ;; # E.g. "Red Storm Protocol Release 2.1.0"
    exit 1 ;;
 esac
 run=$BUILD/run.sh
-cat > $run <<'__EOF2__'
+cat > "$run" <<'__EOF2__'
 #!/bin/sh
 #
 # $run
@@ -119,7 +119,7 @@ grep "^cata: exe .* signal " .yod$$o
 rm -f .yod$$o .yod$$e
 exit $status
 __EOF2__
-chmod 755 $run
+chmod 755 "$run"
 case "`cc -V 2>&1`" in
 *catamount*) ;; # E.g. "/opt/xt-pe/1.5.41/bin/snos64/cc: INFO: catamount target is being used"
 *) echo "Could not find 'cc' for catamount, aborting."
@@ -127,7 +127,7 @@ case "`cc -V 2>&1`" in
 esac
 
 cc=$BUILD/cc.sh
-cat > $cc <<__EOF3a__
+cat > "$cc" <<__EOF3a__
 #!/bin/sh
 #
 # $0
@@ -147,9 +147,9 @@ srct=''
 exe=''
 defs='-Dmain=catamain -Dexit=cataexit -D_exit=_cataexit'
 argv=''
-BUILD=$BUILD
+BUILD='$BUILD'
 __EOF3a__
-cat >> $cc <<'__EOF3b__'
+cat >> "$cc" <<'__EOF3b__'
 case "$1" in
 --cata_o) ;;
 *) if test ! -f catalib.o
@@ -242,7 +242,7 @@ case "$exe" in
    esac
    ;;
 esac
-cc -I$BUILD $argv 2> .cc$$e > .cc$$o
+cc -I"$BUILD" $argv 2> .cc$$e > .cc$$o
 status=$?
 egrep -v 'catamount target|'$$'\.c:$' .cc$$e 1>&2
 case "`grep "is not implemented" .cc$$e`" in
@@ -262,7 +262,7 @@ then
 fi
 exit $status
 __EOF3b__
-chmod 755 $cc
+chmod 755 "$cc"
 
 cat >cata.h<<__EOF6__
 #ifndef CATA_H

@@ -199,7 +199,7 @@ run=$run-$targetrun
 to=$to-$targetto
 from=$from-$targetfrom
 
-$cat >$run <<EOF
+$cat >"$run" <<EOF
 #!/bin/sh
 doexit="echo \\\$? >$targetdir/output.status"
 env=''
@@ -226,7 +226,7 @@ esac
 exe=\$1
 shift
 args=\$@
-$to \$exe > /dev/null 2>&1
+"$to" \$exe > /dev/null 2>&1
 
 # send copy results to /dev/null as otherwise it outputs speed stats which gets in our way.
 # sometimes there is no $?, I dunno why? we then get Cross/run-adb-shell: line 39: exit: XX: numeric argument required
@@ -234,9 +234,9 @@ adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args > $targetdir/
 
 rm output.stdout output.stderr output.status 2>/dev/null
 
-$from output.stdout
-$from output.stderr
-$from output.status
+"$from" output.stdout
+"$from" output.stderr
+"$from" output.status
 
 # We get back Ok\r\n on android for some reason, grrr:
 $cat output.stdout | $tr -d '\r'
@@ -252,15 +252,15 @@ rm output.stdout output.stderr output.status
 exit \$result_status
 
 EOF
-$chmod a+rx $run
+$chmod a+rx "$run"
 
-$cat >$targetmkdir <<EOF
+$cat >"$targetmkdir" <<EOF
 #!/bin/sh
 adb -s $targethost shell "mkdir -p \$@"
 EOF
-$chmod a+rx $targetmkdir
+$chmod a+rx "$targetmkdir"
 
-$cat >$to <<EOF
+$cat >"$to" <<EOF
 #!/bin/sh
 for f in \$@
 do
@@ -275,9 +275,9 @@ do
 done
 exit 0
 EOF
-$chmod a+rx $to
+$chmod a+rx "$to"
 
-$cat >$from <<EOF
+$cat >"$from" <<EOF
 #!/bin/sh
 for f in \$@
 do
@@ -286,7 +286,7 @@ do
 done
 exit 0
 EOF
-$chmod a+rx $from
+$chmod a+rx "$from"
 
 fi # Cross-compiling with adb
 
@@ -314,7 +314,7 @@ ldflags="$ldflags -L/system/lib"
 ;;
 esac
 
-osvers="`$run getprop ro.build.version.release`"
+osvers="`"$run" getprop ro.build.version.release`"
 
 # We want osname to be linux-android during Configure,
 # but plain 'android' afterwards.
@@ -324,7 +324,7 @@ case "$src" in
         ;;
 esac
 
-$cat <<'EOO' >> $pwd/config.arch
+$cat <<'EOO' >> "$pwd/config.arch"
 
 osname='android'
 eval "libpth='$libpth /system/lib /vendor/lib'"
