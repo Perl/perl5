@@ -709,10 +709,11 @@ sub _quote_args {
     my ($runperl, $args) = @_;
 
     foreach (@$args) {
-	# In VMS protect with doublequotes because otherwise
-	# DCL will lowercase -- unless already doublequoted.
-       $_ = q(").$_.q(") if $is_vms && !/^\"/ && length($_) > 0;
-       $runperl = $runperl . ' ' . $_;
+        my $arg = $_;
+        # In VMS protect with doublequotes because otherwise
+        # DCL will lowercase -- unless already doublequoted.
+        $arg = q(").$arg.q(") if $is_vms && $arg !~ /^\"/ && length($arg) > 0;
+        $runperl = $runperl . ' ' . $arg;
     }
     return $runperl;
 }
