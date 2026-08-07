@@ -94,7 +94,12 @@ name can be found via the L</CvGV>.
  */
 #define CvHasNAME(cv)   ((bool)SvANY(cv)->xcv_gv_u.xcv_gv)
 
-/* Back-compat */
+/*
+=for apidoc ABm|bool|CvHASGV|CV *cv
+A synonym for c<L</CvHasNAME>>
+
+=cut
+*/
 #ifndef PERL_CORE
 #  define CvHASGV(cv)  CvHasNAME(cv)
 #endif
