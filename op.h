@@ -1125,7 +1125,12 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
     ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
-/* for backwards compatibility only */
+/*
+=for apidoc ABm||OP_SIBLING|OP *o
+
+A synonym for C<L</OpSIBLING>>, which you should use instead.
+=cut
+*/
 #  define OP_SIBLING(o)		OpSIBLING(o)
 #endif
 
