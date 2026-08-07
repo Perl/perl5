@@ -286,6 +286,10 @@ Otherwise it has no effect.
 =for apidoc AmD|void|CPERLscope|void x
 Now a no-op.
 
+=for apidoc ABmn||CPERLarg
+=for apidoc_item||CPERLarg_
+=for apidoc_item||_CPERLarg
+
 =cut
  */
 #  define STATIC static
