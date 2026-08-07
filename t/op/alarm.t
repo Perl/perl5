@@ -38,7 +38,7 @@ eval {
     local $SIG{ALRM} = sub { $end_time = time; die "ALARM!\n" };
     $start_time = time;
     alarm 3;
-    system(qq{$Perl -e "sleep 6"});
+    system(qq{"$Perl" -e "sleep 6"});
     $end_time = time;
     alarm 0;
 };
@@ -57,7 +57,7 @@ is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
 {
     local $SIG{"ALRM"} = sub { die };
-    eval { alarm(1); my $x = qx($Perl -e "sleep 3"); alarm(0); };
+    eval { alarm(1); my $x = qx("$Perl" -e "sleep 3"); alarm(0); };
     chomp (my $foo = "foo\n");
     ok($foo eq "foo", '[perl #33928] chomp() fails after alarm(), `sleep`');
 }

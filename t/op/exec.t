@@ -45,13 +45,13 @@ SKIP: {
     skip("bug/feature of pdksh", 2) if $^O eq 'os2';
 
     my $tnum = curr_test();
-    $exit = system qq{$Perl -le "print q{ok $tnum - interp system(EXPR)"}};
+    $exit = system qq{"$Perl" -le "print q{ok $tnum - interp system(EXPR)"}};
     next_test();
     is( $exit, 0, '  exited 0' );
 }
 
 my $tnum = curr_test();
-$exit = system qq{$Perl -le "print q{ok $tnum - split & direct system(EXPR)"}};
+$exit = system qq{"$Perl" -le "print q{ok $tnum - split & direct system(EXPR)"}};
 next_test();
 is( $exit, 0, '  exited 0' );
 
@@ -68,7 +68,7 @@ is( $exit, 0, '  exited 0' );
 # Some basic piped commands.  Some OS's have trouble with "helpfully"
 # putting newlines on the end of piped output.  So we split this into
 # newline insensitive and newline sensitive tests.
-my $echo_out = `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`;
+my $echo_out = `"$Perl" -e "print 'ok'" | "$Perl" -le "print <STDIN>"`;
 $echo_out =~ s/\n\n/\n/g;
 is( $echo_out, "ok\n", 'piped echo emulation');
 
@@ -77,19 +77,19 @@ is( $echo_out, "ok\n", 'piped echo emulation');
     # piped output.
     local $TODO = 'VMS sticks newlines on everything' if $Is_VMS;
 
-    is( scalar `$Perl -e "print 'ok'"`,
+    is( scalar `"$Perl" -e "print 'ok'"`,
         "ok", 'no extra newlines on ``' );
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `"$Perl" -e "print 'ok'" | "$Perl" -e "print <STDIN>"`,
         "ok", 'no extra newlines on pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `"$Perl" -le "print 'ok'" | "$Perl" -le "print <STDIN>"`,
         "ok\n\n", 'doubled up newlines');
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `"$Perl" -e "print 'ok'" | "$Perl" -le "print <STDIN>"`,
         "ok\n", 'extra newlines on inside pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `"$Perl" -le "print 'ok'" | "$Perl" -e "print <STDIN>"`,
         "ok\n", 'extra newlines on outgoing pipes');
 
     {
@@ -100,10 +100,10 @@ is( $echo_out, "ok\n", 'piped echo emulation');
 }
 
 
-is( system(qq{$Perl -e "exit 0"}), 0,     'Explicit exit of 0' );
+is( system(qq{"$Perl" -e "exit 0"}), 0,     'Explicit exit of 0' );
 
 my $exit_one = $vms_exit_mode ? 4 << 8 : 1 << 8;
-is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
+is( system(qq{"$Perl" "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
     'Explicit exit of 1' );
 
 $rc = system { "lskdfj" } "lskdfj";
@@ -120,17 +120,17 @@ unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or
 }
 
 
-is( `$Perl -le "print 'ok'"`,   "ok\n",     'basic ``' );
+is( `"$Perl" -le "print 'ok'"`,   "ok\n",     'basic ``' );
 is( <<`END`,                    "ok\n",     '<<`HEREDOC`' );
-$Perl -le "print 'ok'"
+"$Perl" -le "print 'ok'"
 END
 
 is( <<~`END`,                   "ok\n",     '<<~`HEREDOC`' );
-  $Perl -le "print 'ok'"
+  "$Perl" -le "print 'ok'"
   END
 
 {
-    sub rpecho { qq($Perl -le "print '$_[0]'") }
+    sub rpecho { qq("$Perl" -le "print '$_[0]'") }
     is scalar(readpipe(rpecho("b"))), "b\n",
 	"readpipe with one argument in scalar context";
     is join(",", "a", readpipe(rpecho("b")), "c"), "a,b\n,c",

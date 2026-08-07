@@ -719,7 +719,7 @@ SKIP: {   # GH #20054
     fresh_perl_like(<<~EOT,
                         local \$ENV{LC_ALL} = "This is not a legal locale name";
                         local \$ENV{LANG} = "Nor this neither";
-                        system "\$^X -e1";
+                        system \$^X, "-e1";
                     EOT
                     qr/Falling back to the $fallback locale/,
                     {}, "check that illegal startup environment falls back");

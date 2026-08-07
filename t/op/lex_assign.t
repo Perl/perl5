@@ -17,7 +17,7 @@ $runme = $^X;
 %h = (1..6);
 $aref = \@a;
 $href = \%h;
-open OP, qq{$runme -le "print 'aaa Ok ok' for 1..100"|};
+open OP, qq{"$runme" -le "print 'aaa Ok ok' for 1..100"|};
 $chopit = 'aaaaaa';
 @chopar = (113 .. 119);
 $posstr = '123456';
@@ -262,7 +262,7 @@ done_testing();
 __END__
 ref $xref			# ref
 ref $cstr			# ref nonref
-`$runme -e "print qq[1\\n]"`				# backtick skip(MSWin32)
+`"$runme" -e "print qq[1\\n]"`				# backtick skip(MSWin32)
 `$undefed`			# backtick undef skip(MSWin32)
 '???'				# glob  (not currently OA_TARGLEX)
 <OP>				# readline
@@ -389,7 +389,7 @@ readlink 'non-existent', 'non-existent1' # readlink
 '???'				# fork
 '???'				# wait
 '???'				# waitpid
-system "$runme -e 0"		# system skip(VMS)
+system $runme, "-e", "0"	# system skip(VMS)
 '???'				# exec
 '???'				# kill
 getppid				# getppid

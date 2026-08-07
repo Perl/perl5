@@ -167,7 +167,7 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   # h2xs warns about what it is writing hence the (possibly unportable)
   # 2>&1 dupe:
   # does it run?
-  my $prog = "$^X $lib $extracted_program $args $dupe";
+  my $prog = "\"$^X\" $lib $extracted_program $args $dupe";
   @result = `$prog`;
   cmp_ok ($?, "==", 0, "running $prog ");
   $result = join("",@result);

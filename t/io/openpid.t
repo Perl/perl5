@@ -24,7 +24,7 @@ $SIG{HUP} = 'DEFAULT';
 $SIG{HUP} = 'IGNORE' if $^O eq 'interix';
 
 my $perl = which_perl();
-$perl .= qq[ "-I../lib"];
+$perl = qq["$perl" "-I../lib"];
 
 my @perl = ( which_perl(), "-I../lib" );
 

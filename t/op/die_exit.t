@@ -64,10 +64,10 @@ foreach my $test (@tests) {
     my($bang, $query, $code) = @$test;
     $code ||= 'die;';
     if ($^O eq 'MSWin32' || $^O eq 'VMS') {
-        system(qq{$^X -e "\$! = $bang; \$? = $query; $code"});
+        system(qq{"$^X" -e "\$! = $bang; \$? = $query; $code"});
     }
     else {
-        system(qq{$^X -e '\$! = $bang; \$? = $query; $code'});
+        system(qq{"$^X" -e '\$! = $bang; \$? = $query; $code'});
     }
     my $exit = $?;
 
