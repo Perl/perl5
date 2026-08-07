@@ -214,7 +214,7 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 =for apidoc AmU|void|dTHXa|PerlInterpreter * a
 On threaded perls, set C<pTHX> to C<a>; on unthreaded perls, do nothing
 
-=for apidoc AmU|void|dTHXoa|PerlInterpreter * a
+=for apidoc ABmU|void|dTHXoa|PerlInterpreter * a
 Now a synonym for C<L</dTHXa>>.
 
 =cut
@@ -747,13 +747,18 @@ code.
 #  define pTHX_12	12
 #endif
 
+#ifndef PERL_CORE
+
 /*
 =for apidoc_section $concurrency
-=for apidoc AmnU||dVAR
-This is now a synonym for dNOOP: declare nothing
+=for apidoc ABmnU||dVAR
+
+This is now a synonym for dNOOP: declare nothing.
+It used to be part of the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer
+exists
 
 =for apidoc_section $XS
-=for apidoc Amn;||dMY_CXT_SV
+=for apidoc ABmn;||dMY_CXT_SV
 Now a placeholder that declares nothing
 
 =for apidoc ABmn||pTHXo
@@ -769,13 +774,9 @@ Now a placeholder that declares nothing
 =cut
 */
 
-#ifndef PERL_CORE
-    /* Backwards compatibility macro for XS code. It used to be part of the
-     * PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
-#  define dVAR		dNOOP
+/* these are only defined for compatibility; should not be used internally. */
 
-    /* these are only defined for compatibility; should not be used internally.
-     * */
+#  define dVAR		dNOOP
 #  define dMY_CXT_SV    dNOOP
 #  ifndef pTHXo
 #    define pTHXo		pTHX
