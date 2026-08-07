@@ -2516,7 +2516,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvOKp
     SvOOK_on
     SvPADMY
-    SvPADMY_on
     SvPADSTALE
     SvPADSTALE_off
     SvPADSTALE_on
