@@ -483,9 +483,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvMETHOD
     CvMETHOD_off
     CvMETHOD_on
-    CvNAMED
-    CvNAMED_off
-    CvNAMED_on
     CvNAME_HEK_clear
     CvNAME_HEK_set
     CvNODEBUG

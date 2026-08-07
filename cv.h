@@ -288,11 +288,18 @@ copy the flag from one CV to another; using something like
 #define CvHasNAME_HEK_off(cv)   (CvFLAGS(cv) &= ~CVf_HasNAME_HEK)
 
 #ifndef PERL_CORE
-    /* Back-compatibility wrappers for its old name */
 /*
 =for apidoc  ABmn|I32|CVf_NAMED
 
 Use C<L</CVf_HasNAME_HEK>> instead
+
+=for apidoc  ABm|HEK *|CvNAMED
+=for apidoc_item||CvNAMED_on
+=for apidoc_item||CvNAMED_off
+
+Use, respectively, C<L</CvHasNAME_HEK>>,
+C<CvHasNAME_HEK_on>,
+and C<CvHasNAME_HEK_off> instead
 
 =cut
 */
