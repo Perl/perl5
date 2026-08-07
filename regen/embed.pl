@@ -2443,9 +2443,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvCANEXISTDELETE
     sv_cathek
     sv_catpvn_nomg_utf8_upgrade
-    SvCOMPILED
-    SvCOMPILED_off
-    SvCOMPILED_on
     SV_CONST_RETURN
     SV_CONSTS_COUNT
     SV_COW_OTHER_PVS
