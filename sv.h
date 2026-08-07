@@ -1402,6 +1402,18 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc ABm|bool|SvCOMPILED|SV* sv
+
+Now always returns C<false>.
+
+=for apidoc  ABm||SvCOMPILED_on|SV* sv
+=for apidoc_item||SvCOMPILED_off|SV* sv
+Now are no-ops
+
+=cut
+*/
+
 #  define SvCOMPILED(sv)	0
 #  define SvCOMPILED_on(sv)
 #  define SvCOMPILED_off(sv)
