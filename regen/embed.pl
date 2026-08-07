@@ -742,7 +742,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     Fstat
     FULL_TRIE_STUDY
     fwrite1
-    G_ARRAY
     GCC_DIAG_IGNORE
     GCC_DIAG_IGNORE_DECL
     GCC_DIAG_IGNORE_STMT

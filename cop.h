@@ -1235,7 +1235,15 @@ struct context {
 #define G_WANT          3
 
 #ifndef PERL_CORE
-   /* name prior to 5.31.1 */
+
+/*
+=for apidoc ABmn||G_ARRAY
+
+A synonym for C<L</G_LIST>>, which you should use instead.
+
+=cut
+
+   name prior to 5.31.1 */
 #  define G_ARRAY  G_LIST
 #endif
 
