@@ -3240,7 +3240,7 @@ bits.
 =head2 Background and MULTIPLICITY
 
 =for apidoc_section $concurrency
-=for apidoc Amnh||PERL_IMPLICIT_CONTEXT
+=for apidoc Amnh||MULTIPLICITY
 
 The Perl interpreter can be regarded as a closed box: it has an API
 for feeding it code or otherwise making it do things, but it also has
@@ -3257,9 +3257,6 @@ first argument. MULTIPLICITY makes multi-threaded perls possible (with the
 ithreads threading model, related to the macro USE_ITHREADS.)
 
 PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY.
-
-=for apidoc_section $concurrency
-=for apidoc Amnh||MULTIPLICITY
 
 To see whether you have non-const data you can use a BSD (or GNU)
 compatible C<nm>:
