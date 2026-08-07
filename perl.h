@@ -282,6 +282,9 @@ Now a no-op.
 =for apidoc_item||_PERL_OBJECT_THIS
 =for apidoc_item||PERL_OBJECT_THIS_
 
+=for apidoc ABm||CALL_FPTR|*fptr
+=for apidoc ABm||MEMBER_TO_FPTR|name
+
 =cut
  */
 #  define STATIC static

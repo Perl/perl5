@@ -260,7 +260,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     BSDish
     BSD_SETPGRP
     CALL_BLOCK_HOOKS
-    CALL_FPTR
     CALLREGCOMP
     CALLREGCOMP_ENG
     CALLREGDUPE
@@ -1333,7 +1332,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MDEREF_SHIFT
     memBEGINPs
     memBEGINs
-    MEMBER_TO_FPTR
     memENDPs
     memENDs
     memGE
