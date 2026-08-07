@@ -289,6 +289,14 @@ copy the flag from one CV to another; using something like
 
 #ifndef PERL_CORE
     /* Back-compatibility wrappers for its old name */
+/*
+=for apidoc  ABmn|I32|CVf_NAMED
+
+Use C<L</CVf_HasNAME_HEK>> instead
+
+=cut
+*/
+
 #  define CVf_NAMED    CVf_HasNAME_HEK
 #  define CvNAMED      CvHasNAME_HEK
 #  define CvNAMED_on   CvHasNAME_HEK_on
