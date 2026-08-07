@@ -4116,9 +4116,15 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex);
 #define PERL_EXIT_ABORT		0x08  /* Call abort() if Perl_my_exit() or Perl_my_failure_exit() called */
 
 #ifndef PERL_CORE
-/* format to use for version numbers in file/directory names */
-/* XXX move to Configure? */
-/* This was only ever used for the current version, and that can be done at
+/*
+=for apidoc_section $versioning
+=for apidoc ABmn|const char *|PERL_FS_VER_FMT
+Format to use for version numbers in file/directory names
+
+=cut
+
+ * XXX move to Configure?
+ * This was only ever used for the current version, and that can be done at
    compile time, as PERL_FS_VERSION, so should we just delete it?  */
 #  ifndef PERL_FS_VER_FMT
 #    define PERL_FS_VER_FMT	"%d.%d.%d"
