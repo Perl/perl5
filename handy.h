@@ -2865,7 +2865,12 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 =cut */
 
-/* Maintained for backwards-compatibility only. Use newSV() instead. */
+/*
+=for apidoc ABm|SV*|NEWSV|type x|STRLEN len
+Use newSV() instead.
+
+=cut
+ */
 #ifndef PERL_CORE
 #define NEWSV(x,len)	newSV(len)
 #endif
