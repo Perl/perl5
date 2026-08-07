@@ -1112,8 +1112,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isNON_BRACE_QUANTIFIER
     is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
-    IS_PADCONST
-    IS_PADGV
     is_PATWS_safe
     is_posix_ALPHA
     is_posix_ALPHANUMERIC
