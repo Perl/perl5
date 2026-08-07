@@ -1350,6 +1350,13 @@ C<sv_force_normal> does nothing.
 #define SVs_PADMY		0
 #define SvPADMY(sv)		(!(SvFLAGS(sv) & SVs_PADTMP))
 #ifndef PERL_CORE
+/*
+=for apidoc ABm||SvPADMY_on|SV * sv
+Use C<SvPADTMP_off> instead.  (Yes, the original is C<on> and the replacement
+is C<off>.)
+
+=cut
+*/
 # define SvPADMY_on(sv)		SvPADTMP_off(sv)
 #endif
 
