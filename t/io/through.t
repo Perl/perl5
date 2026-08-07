@@ -71,22 +71,22 @@ sub testpipe ($$$$$$) {
   my $fh;
   if ($how_w eq 'print') {	# AUTOFLUSH???
     # Should be shell-neutral:
-    open $fh, '-|', qq[$Perl -we "$set_out;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
+    open $fh, '-|', qq["$Perl" -we "$set_out;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
   } elsif ($how_w eq 'print/flush') {
     # shell-neutral and miniperl-enabled autoflush? qq(\x24\x7c) eq '$|'
     if ($::IS_ASCII) {
-        open $fh, '-|', qq[$Perl -we "$set_out;eval qq(\\x24\\x7c = 1) or die;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
+        open $fh, '-|', qq["$Perl" -we "$set_out;eval qq(\\x24\\x7c = 1) or die;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
     }
     else {
-        open $fh, '-|', qq[$Perl -we "$set_out;eval qq(\\x5b\\x4f = 1) or die;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
+        open $fh, '-|', qq["$Perl" -we "$set_out;eval qq(\\x5b\\x4f = 1) or die;print for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
     }
   } elsif ($how_w eq 'syswrite') {
     ### How to protect \$_
     if ($::IS_ASCII) {
-        open $fh, '-|', qq[$Perl -we "$set_out;eval qq(sub w {syswrite STDOUT, \\x24_} 1) or die; w() for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
+        open $fh, '-|', qq["$Perl" -we "$set_out;eval qq(sub w {syswrite STDOUT, \\x24_} 1) or die; w() for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
     }
     else {
-        open $fh, '-|', qq[$Perl -we "$set_out;eval qq(sub w {syswrite STDOUT, \\x5B_} 1) or die; w() for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
+        open $fh, '-|', qq["$Perl" -we "$set_out;eval qq(sub w {syswrite STDOUT, \\x5B_} 1) or die; w() for grep length, split /(.{1,$write_c})/s, qq($quoted)"] or die "open: $!";
     }
   } else {
     die "Unrecognized write: '$how_w'";
@@ -129,10 +129,10 @@ sub testfile ($$$$$$) {
 # shell-neutral and miniperl-enabled autoflush? qq(\x24\x7c) eq '$|'
 my $fh;
 if ($::IS_ASCII) {
-    open $fh, '-|', qq[$Perl -we "eval qq(\\x24\\x7c = 1) or die; binmode STDOUT; sleep 1, print for split //, qq(a\nb\n\nc\n\n\n)"] or die "open: $!";
+    open $fh, '-|', qq["$Perl" -we "eval qq(\\x24\\x7c = 1) or die; binmode STDOUT; sleep 1, print for split //, qq(a\nb\n\nc\n\n\n)"] or die "open: $!";
 }
 else {
-    open $fh, '-|', qq[$Perl -we "eval qq(\\x5B\\x4f = 1) or die; binmode STDOUT; sleep 1, print for split //, qq(a\nb\n\nc\n\n\n)"] or die "open: $!";
+    open $fh, '-|', qq["$Perl" -we "eval qq(\\x5B\\x4f = 1) or die; binmode STDOUT; sleep 1, print for split //, qq(a\nb\n\nc\n\n\n)"] or die "open: $!";
 }
 ok(1, 'open pipe');
 binmode $fh, q(:crlf);

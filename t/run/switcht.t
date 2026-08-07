@@ -22,14 +22,14 @@ my $Tmsg = 'while running with -t switch';
 
 is( ${^TAINT}, -1, '${^TAINT} == -1' );
 
-my $out = `$Perl -le "print q(Hello)"`;
+my $out = `"$Perl" -le "print q(Hello)"`;
 is( $out, "Hello\n",                      '`` worked' );
 like( $warning, qr/^Insecure .* $Tmsg/, '    taint warn' );
 
 {
     no warnings 'taint';
     $warning = '';
-    my $out = `$Perl -le "print q(Hello)"`;
+    my $out = `"$Perl" -le "print q(Hello)"`;
     is( $out, "Hello\n",                      '`` worked' );
     is( $warning, '',                       '   no warnings "taint"' );
 }

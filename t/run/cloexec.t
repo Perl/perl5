@@ -83,7 +83,7 @@ plan(tests => 22);
 sub test_not_inherited {
     my $expected_fd = shift;
     ok( -f $tmpfile2, "tmpfile '$tmpfile2' exists" );
-    my $cmd = qq{$Perl -e $quote$Child_prog$quote $expected_fd};
+    my $cmd = qq{"$Perl" -e $quote$Child_prog$quote $expected_fd};
     # Expect 'Bad file descriptor' or similar to be written to STDERR.
     local *SAVERR; open SAVERR, ">&STDERR";  # save original STDERR
     open STDERR, ">$tmperr" or die "open '$tmperr': $!";
@@ -103,7 +103,7 @@ sub test_not_inherited {
 sub test_inherited {
     my $expected_fd = shift;
     ok( -f $tmpfile1, "tmpfile '$tmpfile1' exists" );
-    my $cmd = qq{$Perl -e $quote$Child_prog$quote $expected_fd};
+    my $cmd = qq{"$Perl" -e $quote$Child_prog$quote $expected_fd};
     my $out = `$cmd`;
     my $rc  = $? >> 8;
     cmp_ok( $rc, '==', 0,

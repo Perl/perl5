@@ -188,7 +188,7 @@ SWTEST
     close $f or die "Could not close: $!";
     $r = runperl(
 	progfile    => $filename,
-	args	    => [ '-x=foo -y' ],
+	args	    => [ '-x=foo', '-y' ],
     );
     is( $r, 'foo1', '-s on the shebang line' );
 }

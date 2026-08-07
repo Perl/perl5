@@ -126,7 +126,7 @@ SKIP: {
     sub FETCH { $next_test + pop }
     tie my @tn, __PACKAGE__;
 
-    open( CMDPIPE, "|-", $PERL);
+    open( CMDPIPE, "|-", $PERL, "-");
 
     print CMDPIPE "\$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
 
@@ -149,7 +149,7 @@ END
 
     close CMDPIPE;
 
-    open( CMDPIPE, "|-", $PERL);
+    open( CMDPIPE, "|-", $PERL, "-");
     print CMDPIPE "\$t3 = $tn[3];\n", <<'END';
 
     { package X;
@@ -180,7 +180,7 @@ END
     $todo = ($Config{usecrosscompile} ? '# TODO: Not sure whats going on here when cross-compiling' : '');
     print $? & 0xFF ? "ok $tn[4]$todo\n" : "not ok $tn[4]$todo\n";
 
-    open(CMDPIPE, "|-", $PERL);
+    open(CMDPIPE, "|-", $PERL, "-");
     print CMDPIPE <<'END';
 
     sub PVBM () { 'foo' }
@@ -244,9 +244,9 @@ is((keys %h)[0], "foo\034bar");
 }
 
 # $?, $@, $$
-system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
+system qq["$PERL" "-I../lib" -e "use vmsish qw(hushed); exit(0)"];
 is $?, 0;
-system qq[$PERL "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
+system qq["$PERL" "-I../lib" -e "use vmsish qw(hushed); exit(1)"];
 isnt $?, 0;
 
 eval { die "foo\n" };
@@ -312,7 +312,7 @@ $$ = $pid; # Tests below use $$
 	$headmaybe = <<EOH ;
 \@rem ='
 \@echo off
-$perl -x \%0
+"$perl" -x \%0
 goto endofperl
 \@rem ';
 EOH
@@ -349,20 +349,21 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok close(SCRIPT) or diag $!;
     ok chmod(0755, $script) or diag $!;
-    $_ = $Is_VMS ? `$perl $script` : `$script`;
-    s/\.exe//i if $Is_Cygwin or $Is_os2;
-    s{is perl}{is $perl}; # for systems where $^X is only a basename
-    s{\\}{/}g;
-    if ($Is_MSWin32 || $Is_os2) {
-	is uc $_, uc $s1;
-    } else {
-  SKIP:
-     {
-	  skip "# TODO: Hit bug posix-2058; exec does not setup argv[0] correctly." if ($^O eq "vos");
-	  is $_, $s1;
-     }
+    SKIP: {
+        skip "can't test shebang because path to executable contains spaces"
+            if !$Is_VMS && $perl =~ / / && $headmaybe eq '';
+        $_ = $Is_VMS ? `$perl $script` : `"$script"`;
+        s/\.exe//i if $Is_Cygwin or $Is_os2;
+        s{is perl}{is $perl}; # for systems where $^X is only a basename
+        s{\\}{/}g;
+        if ($Is_MSWin32 || $Is_os2) {
+            is uc $_, uc $s1;
+        } else {
+            skip "# TODO: Hit bug posix-2058; exec does not setup argv[0] correctly." if ($^O eq "vos");
+            is $_, $s1;
+        }
     }
-    $_ = `$perl $script`;
+    $_ = `"$perl" "$script"`;
     s/\.exe//i if $Is_os2 or $Is_Cygwin;
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {

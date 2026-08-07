@@ -712,7 +712,7 @@ sub _quote_args {
         my $arg = $_;
         # In VMS protect with doublequotes because otherwise
         # DCL will lowercase -- unless already doublequoted.
-        $arg = q(").$arg.q(") if $is_vms && $arg !~ /^\"/ && length($arg) > 0;
+        $arg = q(").$arg.q(") if ($is_vms || $arg =~ /\s/) && $arg !~ /^\"/ && length($arg) > 0;
         $runperl = $runperl . ' ' . $arg;
     }
     return $runperl;

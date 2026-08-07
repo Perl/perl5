@@ -91,7 +91,7 @@ my $afile = tempfile();
 }
 {
     ok( open(my $f, '-|', <<EOC),     'open -|' );
-    $Perl -e "print qq(a row\\n); print qq(another row\\n)"
+    "$Perl" -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
 
     ok_cloexec($f);
@@ -101,7 +101,7 @@ EOC
 }
 {
     ok( open(my $f, '|-', <<EOC),     'open |-' );
-    $Perl -pe "s/^not //"
+    "$Perl" -pe "s/^not //"
 EOC
 
     ok_cloexec($f);
@@ -197,7 +197,7 @@ ok( -s $afile < 20,                     '       -s' );
 
 {
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
-    $Perl -e "print qq(a row\\n); print qq(another row\\n)"
+    "$Perl" -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
     ok_cloexec($f);
     my @rows = <$f>;
@@ -208,7 +208,7 @@ EOC
 
 {
     ok( open(local $f, '|-', <<EOC),  'open local $f, "|-", ...' );
-    $Perl -pe "s/^not //"
+    "$Perl" -pe "s/^not //"
 EOC
 
     ok_cloexec($f);
@@ -232,14 +232,14 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 {
     local *F;
     for (1..2) {
-	ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
+	ok( open(F, qq{"$Perl" -le "print 'ok'"|}), 'open to pipe' );
 	ok_cloexec(\*F);
 	is(scalar <F>, "ok\n",  '       readline');
 	ok( close F,            '       close' );
     }
 
     for (1..2) {
-	ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
+	ok( open(F, "-|", qq{"$Perl" -le "print 'ok'"}), 'open -|');
 	ok_cloexec(\*F);
 	is( scalar <F>, "ok\n", '       readline');
 	ok( close F,            '       close' );
@@ -390,7 +390,7 @@ is($@, '', 'no "Modification of a read-only value" when closing');
 {
     package p73626;
     sub TIESCALAR { bless {} }
-    sub FETCH { "$Perl -e 1"}
+    sub FETCH { qq["$Perl" -e 1]}
 
     tie my $p, 'p73626';
 
