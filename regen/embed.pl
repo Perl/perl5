@@ -456,7 +456,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CVf_LEXICAL
     CVf_LVALUE
     CVf_METHOD
-    CVf_NAMED
     CVf_NODEBUG
     CVf_NOWARN_AMBIGUOUS
     CVf_REFCOUNTED_ANYSV
