@@ -1747,6 +1747,12 @@ only be used as part of a larger operation
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc_section $string
+=for apidoc ABm|U32|BmFLAGS|SV* sv
+
+=cut
+*/
 #  define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
 #endif
 
@@ -1764,6 +1770,15 @@ only be used as part of a larger operation
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc_section $string
+=for apidoc   ABm|U32|BmRARE|SV* sv
+=for apidoc_item |U32|BmPREVIOUS|SV* sv
+
+These both now return 0
+
+=cut
+*/
 # define BmRARE(sv)	0
 # define BmPREVIOUS(sv)	0
 #endif
