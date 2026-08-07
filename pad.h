@@ -384,8 +384,43 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #  define PadnameLEN_set(pn, len)   (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_len = (len))
 #endif
 
-/* backward compatibility */
 #ifndef PERL_CORE
+/*
+=for apidoc ABmn||SvPAD_STATE
+
+=for apidoc ABmn||SvPAD_TYPED
+
+=for apidoc ABm||SvPAD_OUR|type pn
+
+=for apidoc ABmn||SvPAD_STATE_on
+
+=for apidoc ABm||SvPAD_TYPED_on|pn
+
+=for apidoc ABm||SvPAD_OUR_on|pn
+
+=for apidoc ABmn||SvOURSTASH
+
+=for apidoc ABmn||SvOURSTASH_set
+
+=for apidoc ABmn||SVpad_STATE
+
+=for apidoc ABmn||SVpad_TYPED
+
+=for apidoc ABmn||SVpad_OUR
+
+=for apidoc ABmn||PADNAMEt_OUTER
+
+=for apidoc ABmn||PADNAMEt_STATE
+
+=for apidoc ABmn||PADNAMEt_LVALUE
+
+=for apidoc ABmn||PADNAMEt_TYPED
+
+=for apidoc ABmn||PADNAMEt_OUR
+
+=cut
+*/
+
 #  define SvPAD_STATE           PadnameIsSTATE
 #  define SvPAD_TYPED           PadnameHasTYPE
 #  define SvPAD_OUR(pn)         cBOOL(PadnameOURSTASH(pn))
