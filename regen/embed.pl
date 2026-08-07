@@ -1712,7 +1712,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OpREFCNT_set
     OP_REFCNT_TERM
     OP_REFCNT_UNLOCK
-    OP_SIBLING
     OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
