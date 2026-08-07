@@ -2072,7 +2072,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                                         if $flags =~ /u/ && $flags !~ /[my]/;
 
             my $has_semicolon = $flags =~ /;/;
-            die "'U' and ';' flags are incompatible"
+            die "'U' and ';' flags are incompatible "
                . where_from_string($item->{file}, $item->{line_num})
                                             if $flags =~ /U/ && $has_semicolon;
 
