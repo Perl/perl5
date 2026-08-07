@@ -2095,6 +2095,10 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                 }
             }
 
+            die "'B' and 'D' flags are incompatible "
+               . where_from_string($item->{file}, $item->{line_num})
+                                            if $flags =~ tr/BD// > 1;
+
             my $ret = $item->{ret_type} // "";
             my @args;
             my $this_has_pTHX = 0;
