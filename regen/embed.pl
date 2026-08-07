@@ -1431,7 +1431,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NewOp
     NewOpSz
     new_SV
-    NEWSV
     NEW_VERSION
     new_XNV
     new_XPVMG
