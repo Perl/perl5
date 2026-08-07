@@ -285,6 +285,16 @@ Now a no-op.
 =for apidoc ABm||CALL_FPTR|*fptr
 =for apidoc ABm||MEMBER_TO_FPTR|name
 
+=for apidoc_section $compiler
+=for apidoc ABmn||STATIC
+
+This was used to declare a C variable C<static> in C compilers that
+understood that, and to do nothing in C compilers that did not, so that your
+program could compile, regardless.
+
+But such crippled compilers are long gone, so this always expands to
+C<static>, and you might as well just type the actual C keyword.
+
 =cut
  */
 #  define STATIC static
@@ -940,7 +950,19 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 #define DOSISH 1
 #endif
 
-/* These exist only for back-compat with XS modules. */
+/* These exist only for back-compat with XS modules.
+=for apidoc_section $compiler
+=for apidoc ABmn||VOL
+
+This was used to declare a C variable C<volatile> in C compilers that
+understood that, and to do nothing in C compilers that did not, so that your
+program could at least compile, regardless.
+
+But such crippled compilers are long gone, so this always expands to
+C<volatile>, and you might as well just type the actual C keyword.
+
+=cut
+*/
 #ifndef PERL_CORE
 #define VOL volatile
 #define CAN_PROTOTYPE

@@ -2411,7 +2411,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     STANDARD_C
     StashHANDLER
     Stat
-    STATIC
     Stat_t
     STATUS_ALL_FAILURE
     STATUS_ALL_SUCCESS
@@ -2808,7 +2807,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     vFAIL4
     VNORMAL
     VNUMIFY
-    VOL
     VSTRINGIFY
     vTHX
     VT_NATIVE
