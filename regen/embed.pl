@@ -287,7 +287,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CAN64BITHASH
     CAN_COW_FLAGS
     CAN_COW_MASK
-    CAN_PROTOTYPE
     CASE_STD_PMMOD_FLAGS_PARSE_SET
     CATCH_GET
     CATCH_SET
