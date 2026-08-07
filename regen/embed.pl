@@ -1768,11 +1768,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PadnameOURSTASH_set
     PadnameOUTER
     PadnamePROTOCV
-    PADNAMEt_LVALUE
-    PADNAMEt_OUR
-    PADNAMEt_OUTER
-    PADNAMEt_STATE
-    PADNAMEt_TYPED
     PadnameTYPE
     PadnameTYPE_set
     padnew_CLONE
@@ -2524,25 +2519,14 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvOK_off_exc_UV
     SvOKp
     SvOOK_on
-    SvOURSTASH
-    SvOURSTASH_set
     SvPADMY
     SvPADMY_on
-    SvPAD_OUR
-    SVpad_OUR
-    SvPAD_OUR_on
     SvPADSTALE
     SvPADSTALE_off
     SvPADSTALE_on
-    SvPAD_STATE
-    SVpad_STATE
-    SvPAD_STATE_on
     SvPADTMP
     SvPADTMP_off
     SvPADTMP_on
-    SvPAD_TYPED
-    SVpad_TYPED
-    SvPAD_TYPED_on
     SVpav_REAL
     SVpav_REIFY
     SvPCS_IMPORTED
