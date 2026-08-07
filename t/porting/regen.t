@@ -129,7 +129,7 @@ my @errors;
 foreach my $prog (@progs) {
     my $args = qq[-Ilib $prog --tap];
     note("./perl $args");
-    my $command = "$^X $args";
+    my $command = qq["$^X" $args];
     if (system $command) { # if it exits with an error...
         $command=~s/\s*--tap//;
         push @errors, $prog eq "regen.pl"

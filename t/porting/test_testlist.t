@@ -21,13 +21,13 @@ $ENV{PERL_TORTURE_TEST} = 1;
 $ENV{PERL_TEST_MEMORY} = 1;
 $ENV{PERL_BENCHMARK} = 1;
 
-for my $file (`$^X t/harness -dumptests`) {
+for my $file (`"$^X" t/harness -dumptests`) {
     chomp $file;
     $all{$file}++;
     $th{$file}++;
 }
 
-for my $file (`$^X t/TEST -dumptests`) {
+for my $file (`"$^X" t/TEST -dumptests`) {
     chomp $file;
     $all{$file}++;
     delete $th{$file} or $tt{$file}++;

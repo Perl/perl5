@@ -79,7 +79,7 @@ my $perl_headers = <<'HEADERS';
 
 HEADERS
 
-$ccflags .= " " . join " ", map { "-I$_" }
+$ccflags .= " " . join " ", map { qq("-I$_") }
   File::Spec->catdir($cwd, ".."),
   # win32 has special config.h handling during the build
   File::Spec->catdir($cwd, "..", "lib", "CORE");

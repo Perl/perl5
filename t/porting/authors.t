@@ -39,9 +39,10 @@ elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
 
     # gives the history of the branch being merged, excluding what it is
     # merged into
-    $revision_range = '"HEAD^1..HEAD^2"'
+    $revision_range = 'HEAD^1..HEAD^2'
         if $branch_head;
 }
 
-exec("$^X Porting/updateAUTHORS.pl --source_dir=$source_dir --validate $revision_range");
+exec $^X, 'Porting/updateAUTHORS.pl', "--source_dir=$source_dir", '--validate', $revision_range;
+die "$^X: $!";
 # EOF

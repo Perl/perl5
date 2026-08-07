@@ -28,14 +28,14 @@ skip_all "no valgrind" unless -x '/bin/valgrind' || -x '/usr/bin/valgrind';
 # Address sanitizer clashes horribly with cachegrind
 skip_all "not with ASAN" if $Config{ccflags} =~ /sanitize=address/;
 # If this takes more than 15 second then something is very wrong
-skip_all "cachegrind broken" if system "( ulimit -c 0; ulimit -t 15; valgrind -q --tool=cachegrind --cachegrind-out-file=/dev/null $^X -e0 ) 2>/dev/null";
+skip_all "cachegrind broken" if system "( ulimit -c 0; ulimit -t 15; valgrind -q --tool=cachegrind --cachegrind-out-file=/dev/null '$^X' -e0 ) 2>/dev/null";
 
 
 my $bench_pl = "Porting/bench.pl";
 
 ok -e $bench_pl, "$bench_pl exists and is executable";
 
-my $bench_cmd = "$^X -Ilib $bench_pl";
+my $bench_cmd = "'$^X' -Ilib $bench_pl";
 
 my ($out, $cmd);
 
@@ -404,7 +404,7 @@ my $resultfile2 = tempfile(); # benchmark results for 2 perls
 # the -j 2 is to minimally exercise its parallel facility.
 
 note("running cachegrind for 1st perl; may be slow...");
-$out = qx($bench_cmd -j 2 --write=$resultfile1 --tests=call::sub::empty $^X=p0 2>&1);
+$out = qx($bench_cmd -j 2 --write=$resultfile1 --tests=call::sub::empty '$^X'=p0 2>&1);
 is $out, "", "--write should produce no output (1 perl)";
 ok -s $resultfile1, "--write should create a non-empty results file (1 perl)";
 
@@ -412,7 +412,7 @@ ok -s $resultfile1, "--write should create a non-empty results file (1 perl)";
 # perls' functionality.
 
 note("running cachegrind for 2nd perl; may be slow...");
-$out = qx($bench_cmd -j 2 --read=$resultfile1 --write=$resultfile2 $^X=p1 2>&1);
+$out = qx($bench_cmd -j 2 --read=$resultfile1 --write=$resultfile2 '$^X'=p1 2>&1);
 is $out, "", "--write should produce no output (2 perls)"
     or diag("got: $out");
 ok -s $resultfile2, "--write should create a non-empty results file (2 perls)";
@@ -531,7 +531,7 @@ like $out, $format_qrs{percent2}, "2 reads; overlapping test sets";
 # A read defines what benchmarks to run
 
 note("running cachegrind on 1 perl; may be slow...");
-$out = qx($bench_cmd --read=t/porting/bench/callsub.json --tests=call::sub::empty $^X=p1 2>&1);
+$out = qx($bench_cmd --read=t/porting/bench/callsub.json --tests=call::sub::empty '$^X'=p1 2>&1);
 $out =~ s{^\./perl}{p0}m;
 $out =~ s{\Q./perl}{    p0};
 like $out, $format_qrs{percent2}, "1 read; 1 generate";
@@ -551,8 +551,8 @@ $bench_cmd
     --tests=call::sub::empty
     --autolabel
     --perlargs=-Ilib
-    $^X --args='-Ifoo/bar -Mstrict' --env='FOO=foo'
-    $^X --args='-Ifoo/bar'          --env='BAR=bar' --env='BAZ=baz'
+    '$^X' --args='-Ifoo/bar -Mstrict' --env='FOO=foo'
+    '$^X' --args='-Ifoo/bar'          --env='BAR=bar' --env='BAZ=baz'
     2>&1
 EOF
 $cmd =~ s/\n\s+/ /g;
