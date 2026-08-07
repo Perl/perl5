@@ -586,6 +586,13 @@ typedef enum {
 #define kSVOP_sv		cSVOPx_sv(kid)
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc ABmn|OP *|Nullop
+Null OP pointer.
+
+=cut
+*/
 #  define Nullop ((OP*)NULL)
 #endif
 
