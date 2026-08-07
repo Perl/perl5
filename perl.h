@@ -961,6 +961,24 @@ program could at least compile, regardless.
 But such crippled compilers are long gone, so this always expands to
 C<volatile>, and you might as well just type the actual C keyword.
 
+=for apidoc AB#||I_LIMITS
+
+This is defined if and only if the compiler being used has F<limits.h>.
+Nowadays it is always defined, since perl won't compile at all on compilers
+without that.
+
+=for apidoc AB#||I_STDARG
+
+This is defined if and only if the compiler being used has F<stdarg.h>.
+Nowadays it is always defined, since perl won't compile at all on compilers
+without that.
+
+=for apidoc AB#||STANDARD_C
+
+This is defined if and only if the compiler being used complies with an ANSI C
+standard.  Nowadays it is always defined, since perl only compiles on such
+compilers.
+
 =cut
 */
 #ifndef PERL_CORE
