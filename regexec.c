@@ -9195,28 +9195,72 @@ NULL
              * relevant CURLLYX/WHILEM op pairs there are, while the
              * bottom 4-bits is the identifying index number of this
              * WHILEM.
+             *
+             * The main variables associated with the SLC are:
+             *
+             * reginfo->poscache_maxiter
+             *     If zero, indicates that the SLC has not yet been
+             *     triggered, or that it has been subsequently disabled
+             *     again.
+             *     Otherwise, its (positive) value is used for two
+             *     different purposes:
+             *       - what value to start an initial (or reset)
+             *         countdown from;
+             *       - the size to alloc() the cache in bits.
+             *     Currently these values are the same, but they needn't
+             *     be in principle.
+             *
+             * reginfo->poscache_iter
+             *    Only has meaning if poscache_maxiter is non-zero. In
+             *    that case, it represents a countdown initialised
+             *    from poscache_maxiter.
+             *    If it reaches 1, the cache is malloced/realloced if
+             *    necessary, and then zeroed. When it reaches 0, the cache
+             *    is used.
              */
 
             if (FLAGS(scan)) {
 
+#ifdef DEBUGGING
+                if (reginfo->poscache_maxiter) {
+                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
+                        "  iter=%" UVuf " maxiter=%" UVuf "\n",
+                    depth,
+                    (UV)reginfo->poscache_iter,
+                    (UV)reginfo->poscache_maxiter)
+                );
+                }
+                else {
+                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
+                        "  maxiter=0\n", depth)
+                    );
+                }
+#endif
+
                 if (!reginfo->poscache_maxiter) {
                     /* start the countdown: Postpone detection until we
                      * know the match is not *that* much linear. */
-                    reginfo->poscache_maxiter
-                        =    (reginfo->strend - reginfo->strbeg + 1)
-                           * (FLAGS(scan)>>4);
-                    /* possible overflow for long strings and many CURLYX's */
-                    if (reginfo->poscache_maxiter < 0)
-                        reginfo->poscache_maxiter = I32_MAX;
-                    reginfo->poscache_iter = reginfo->poscache_maxiter;
+                    STRLEN len = reginfo->strend - reginfo->strbeg;
+                    /* number of participating WHILEMs */
+                    U8 n = (FLAGS(scan)>>4);
+
+                    /* Only do the calculations and enable the cache if it
+                     * won't overflow. This test is equivalent to:
+                     *    ((len + 1) * n  + 7) <= max(STRLEN)
+                     */
+                    if (len < ((~(STRLEN)0) - 7)/n) {
+                        reginfo->poscache_maxiter = (len + 1) * n;
+                        reginfo->poscache_iter = reginfo->poscache_maxiter;
+                    }
                 }
 
-                if (reginfo->poscache_iter-- == 0) {
+                if (reginfo->poscache_iter == 1) {
+                    reginfo->poscache_iter--;
                     /* initialise cache */
-                    const SSize_t size = (reginfo->poscache_maxiter + 7)/8;
+                    const STRLEN size = (reginfo->poscache_maxiter + 7)/8;
                     regmatch_info_aux *const aux = reginfo->info_aux;
                     if (aux->poscache) {
-                        if ((SSize_t)reginfo->poscache_size < size) {
+                        if (reginfo->poscache_size < size) {
                             Renew(aux->poscache, size, char);
                             reginfo->poscache_size = size;
                         }
@@ -9226,17 +9270,16 @@ NULL
                         reginfo->poscache_size = size;
                         Newxz(aux->poscache, size, char);
                     }
-                    DEBUG_EXECUTE_r( re_printf(
+                    DEBUG_EXECUTE_r( re_exec_indentf(
       "%sWHILEM: Detected a super-linear match, switching on caching%s...\n",
-                              PL_colors[4], PL_colors[5])
+                              depth, PL_colors[4], PL_colors[5])
                     );
                 }
 
-                if (reginfo->poscache_iter < 0) {
+                if (reginfo->poscache_iter == 0) {
                     /* have we already failed at this position? */
                     SSize_t offset, mask;
 
-                    reginfo->poscache_iter = -1; /* stop eventual underflow */
                     offset  = (FLAGS(scan) & 0xf) - 1
                                 +   (locinput - reginfo->strbeg)
                                   * (FLAGS(scan)>>4);
@@ -9252,6 +9295,8 @@ NULL
                     ST.cache_offset = offset;
                     ST.cache_mask   = mask;
                 }
+                else
+                    reginfo->poscache_iter--;
             }
 
             /* Prefer B over A for minimal matching. */

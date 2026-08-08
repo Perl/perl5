@@ -455,6 +455,16 @@ sv_set_undef() no longer blindly clears the C<SVs_TEMP> flag.  This
 could break code that expected to detect mortal SVs, like constant
 folding.  [GH #24661]
 
+=item *
+
+The regular expression engine's "super-linear cache" wasn't 64-bit clean
+and so could in principle overflow on huge (>256Mb) strings, resulting in
+incorrect matches and potential memory corruption. (The cache engages on
+nested variable-width patterns such as C</(a+)+/>, to avoid exponential
+backtracking.)
+
+[GH security issue #149]
+
 =back
 
 =head1 Known Problems
