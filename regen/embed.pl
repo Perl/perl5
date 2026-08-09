@@ -4161,8 +4161,12 @@ sub generate_proto_h {
                     while($which->@*) {
                         my $component = shift $which->@*;
 
-                        if(length($line) + length($component) > 78) {
-                            $ret .= $line . "; \\\n";
+                        if (length($line) + length($component)
+                                >  78
+                                  - 1   # Trailing semicolon
+                                  - 3   # Two blanks and the continuation
+                        ) {
+                            $ret .= $line . ";  \\\n";
                             $line = "";
                         }
 

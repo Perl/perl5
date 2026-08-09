@@ -196,8 +196,8 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, const char *attrstr, 
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_APPLY_ATTRS_STRING     \
-        Perl_assert_aTHX; assert(stashpv); assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); \
+        Perl_assert_aTHX; assert(stashpv); assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
         assert(attrstr)
 
 PERL_CALLCONV OP *
@@ -205,7 +205,7 @@ Perl_apply_builtin_cv_attributes(pTHX_ CV *cv, OP *attrlist)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_APPLY_BUILTIN_CV_ATTRIBUTES \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -286,8 +286,8 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp, SV *
         Perl_attribute_nonnull(pTHX_5)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_AV_EXTEND_GUTS         \
-        Perl_assert_aTHX; assert(!av || SvTYPE(av) == SVt_PVAV); assert(maxp); \
-        assert(allocp); assert(arrayp)
+        Perl_assert_aTHX; assert(!av || SvTYPE(av) == SVt_PVAV);  \
+        assert(maxp); assert(allocp); assert(arrayp)
 
 PERL_CALLCONV SV **
 Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
@@ -348,7 +348,7 @@ Perl_av_push(pTHX_ AV *av, SV *val)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_AV_PUSH                \
-        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV);  \
         assert(val)
 
 PERL_CALLCONV void
@@ -521,7 +521,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_CALL_LIST              \
-        Perl_assert_aTHX; assert(paramList); \
+        Perl_assert_aTHX; assert(paramList);  \
         assert(SvTYPE(paramList) == SVt_PVAV)
 
 PERL_CALLCONV SSize_t
@@ -602,7 +602,8 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         Perl_attribute_nonnull(pTHX_3)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE  \
-        Perl_assert_aTHX; assert(entersubop); assert(namegv); assert(protosv)
+        Perl_assert_aTHX; assert(entersubop); assert(namegv);  \
+        assert(protosv)
 
 PERL_CALLCONV OP *
 Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
@@ -618,7 +619,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO \
-        Perl_assert_aTHX; assert(entersubop); assert(namegv); assert(protosv)
+        Perl_assert_aTHX; assert(entersubop); assert(namegv);  \
+        assert(protosv)
 
 PERL_CALLCONV OP *
 Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
@@ -627,7 +629,8 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop, GV *namegv, SV *protos
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO_OR_LIST \
-        Perl_assert_aTHX; assert(entersubop); assert(namegv); assert(protosv)
+        Perl_assert_aTHX; assert(entersubop); assert(namegv);  \
+        assert(protosv)
 
 PERL_CALLCONV void
 Perl_ck_warner(pTHX_ U32 err, const char *pat, ...)
@@ -861,7 +864,7 @@ Perl_cv_clone(pTHX_ CV *proto)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_CLONE               \
-        Perl_assert_aTHX; assert(proto); \
+        Perl_assert_aTHX; assert(proto);  \
         assert(SvTYPE(proto) == SVt_PVCV || SvTYPE(proto) == SVt_PVFM)
 
 PERL_CALLCONV CV *
@@ -871,9 +874,9 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CV_CLONE_INTO          \
-        Perl_assert_aTHX; assert(proto); \
-        assert(SvTYPE(proto) == SVt_PVCV || SvTYPE(proto) == SVt_PVFM); \
-        assert(target); \
+        Perl_assert_aTHX; assert(proto);  \
+        assert(SvTYPE(proto) == SVt_PVCV || SvTYPE(proto) == SVt_PVFM);  \
+        assert(target);  \
         assert(SvTYPE(target) == SVt_PVCV || SvTYPE(target) == SVt_PVFM)
 
 PERL_CALLCONV SV *
@@ -892,7 +895,7 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
         Perl_attribute_nonnull_aTHX
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CV_FORGET_SLAB         \
-        Perl_assert_aTHX; \
+        Perl_assert_aTHX;  \
         assert(!cv || SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -902,8 +905,8 @@ Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER    \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); \
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
         assert(ckfun_p); assert(ckobj_p)
 
 PERL_CALLCONV void
@@ -914,8 +917,8 @@ Perl_cv_get_call_checker_flags(pTHX_ CV *cv, U32 gflags, Perl_call_checker *ckfu
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 #define PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER_FLAGS \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); \
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
         assert(ckfun_p); assert(ckobj_p); assert(ckflags_p)
 
 PERL_CALLCONV SV *
@@ -932,9 +935,9 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER    \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); assert(ckfun); \
-        assert(ckobj)
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
+        assert(ckfun); assert(ckobj)
 
 PERL_CALLCONV void
 Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj, U32 ckflags)
@@ -943,16 +946,16 @@ Perl_cv_set_call_checker_flags(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj,
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER_FLAGS \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); assert(ckfun); \
-        assert(ckobj)
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
+        assert(ckfun); assert(ckobj)
 
 PERL_CALLCONV void
 Perl_cv_undef(pTHX_ CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_UNDEF               \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -961,7 +964,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
         Perl_attribute_nonnull(pTHX_1)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CV_UNDEF_FLAGS         \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV GV *
@@ -969,7 +972,7 @@ Perl_cvgv_from_hek(pTHX_ CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_CVGV_FROM_HEK          \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -977,7 +980,7 @@ Perl_cvgv_set(pTHX_ CV *cv, GV *gv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_CVGV_SET               \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -985,8 +988,8 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *stash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_CVSTASH_SET            \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); \
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
         assert(!stash || SvTYPE(stash) == SVt_PVHV)
 
 PERL_CALLCONV void
@@ -1080,7 +1083,7 @@ Perl_delimcpy(char *to, const char *to_end, const char *from, const char *from_e
         Perl_attribute_nonnull(4)
         Perl_attribute_nonnull(6);
 #define PERL_ARGS_ASSERT_DELIMCPY               \
-        assert(to); assert(to_end); assert(from); assert(from_end); \
+        assert(to); assert(to_end); assert(from); assert(from_end);  \
         assert(retlen); assert(to <= to_end); assert(from <= from_end)
 
 PERL_CALLCONV char *
@@ -1091,7 +1094,7 @@ Perl_delimcpy_no_escape(char *to, const char *to_end, const char *from, const ch
         Perl_attribute_nonnull(4)
         Perl_attribute_nonnull(6);
 #define PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE     \
-        assert(to); assert(to_end); assert(from); assert(from_end); \
+        assert(to); assert(to_end); assert(from); assert(from_end);  \
         assert(retlen); assert(to <= to_end); assert(from <= from_end)
 
 PERL_CALLCONV void
@@ -1176,7 +1179,7 @@ Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_DO_HV_DUMP             \
-        Perl_assert_aTHX; assert(file); assert(name); \
+        Perl_assert_aTHX; assert(file); assert(name);  \
         assert(!sv || SvTYPE(sv) == SVt_PVHV)
 
 PERL_CALLCONV void
@@ -1187,7 +1190,8 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 #define PERL_ARGS_ASSERT_DO_JOIN                \
-        Perl_assert_aTHX; assert(sv); assert(delim); assert(mark); assert(sp)
+        Perl_assert_aTHX; assert(sv); assert(delim); assert(mark);  \
+        assert(sp)
 
 PERL_CALLCONV void
 Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
@@ -1539,7 +1543,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
         Perl_attribute_nonnull(pTHX_3)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_FBM_INSTR              \
-        Perl_assert_aTHX; assert(big); assert(bigend); assert(littlestr); \
+        Perl_assert_aTHX; assert(big); assert(bigend); assert(littlestr);  \
         assert(big <= bigend)
 
 PERL_CALLCONV SV *
@@ -1672,7 +1676,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char *s, const char *e, const bo
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME \
-        Perl_assert_aTHX; assert(s); assert(e); assert(error_msg); \
+        Perl_assert_aTHX; assert(s); assert(e); assert(error_msg);  \
         assert(s <= e)
 
 PERL_CALLCONV AV *
@@ -1701,7 +1705,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_GET_DB_SUB             \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV const char *
@@ -1842,7 +1846,7 @@ Perl_grok_infnan(pTHX_ const char **sp, const char *send)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_GROK_INFNAN            \
-        Perl_assert_aTHX; assert(sp); assert(*sp); assert(send); \
+        Perl_assert_aTHX; assert(sp); assert(*sp); assert(send);  \
         assert(*sp <= send)
 
 PERL_CALLCONV int
@@ -1866,7 +1870,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX     \
-        Perl_assert_aTHX; assert(sp); assert(*sp); assert(send); \
+        Perl_assert_aTHX; assert(sp); assert(*sp); assert(send);  \
         assert(*sp <= send)
 
 PERL_CALLCONV UV
@@ -2129,7 +2133,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT                \
-        Perl_assert_aTHX; assert(gv); \
+        Perl_assert_aTHX; assert(gv);  \
         assert(!stash || SvTYPE(stash) == SVt_PVHV); assert(name)
 
 PERL_CALLCONV void
@@ -2138,7 +2142,7 @@ Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, U32 flags)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_PV             \
-        Perl_assert_aTHX; assert(gv); \
+        Perl_assert_aTHX; assert(gv);  \
         assert(!stash || SvTYPE(stash) == SVt_PVHV); assert(name)
 
 PERL_CALLCONV void
@@ -2147,7 +2151,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_PVN            \
-        Perl_assert_aTHX; assert(gv); \
+        Perl_assert_aTHX; assert(gv);  \
         assert(!stash || SvTYPE(stash) == SVt_PVHV); assert(name)
 
 PERL_CALLCONV void
@@ -2156,7 +2160,7 @@ Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV *namesv, U32 flags)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_SV             \
-        Perl_assert_aTHX; assert(gv); \
+        Perl_assert_aTHX; assert(gv);  \
         assert(!stash || SvTYPE(stash) == SVt_PVHV); assert(namesv)
 
 PERL_CALLCONV void
@@ -2279,7 +2283,8 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_HV_DELETE_ENT          \
-        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV); assert(keysv)
+        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV);  \
+        assert(keysv)
 
 PERL_CALLCONV void
 Perl_hv_dump(pTHX_ HV *hv)
@@ -2309,7 +2314,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_HV_ENAME_ADD           \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(name)
 
 PERL_CALLCONV void
@@ -2319,7 +2324,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_HV_ENAME_DELETE        \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(name)
 
 PERL_CALLCONV bool
@@ -2336,7 +2341,8 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_EXISTS_ENT          \
-        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV); assert(keysv)
+        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV);  \
+        assert(keysv)
 
 PERL_CALLCONV SV **
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
@@ -2350,7 +2356,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_HV_FETCH_ENT           \
-        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV); assert(keysv)
+        Perl_assert_aTHX; assert(!hv || SvTYPE(hv) == SVt_PVHV);  \
+        assert(keysv)
 
 PERL_CALLCONV STRLEN
 Perl_hv_fill(pTHX_ HV * const hv)
@@ -2413,7 +2420,7 @@ Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
         Perl_attribute_nonnull(pTHX_3)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_ITERNEXTSV          \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(key); assert(retlen)
 
 PERL_CALLCONV SV *
@@ -2423,7 +2430,7 @@ Perl_hv_iterval(pTHX_ HV *hv, HE *entry)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_ITERVAL             \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(entry)
 
 PERL_CALLCONV void
@@ -2615,8 +2622,9 @@ Perl_init_named_cv(pTHX_ CV *cv, OP *nameop)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_INIT_NAMED_CV          \
-        Perl_assert_aTHX; assert(cv); \
-        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); assert(nameop)
+        Perl_assert_aTHX; assert(cv);  \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
+        assert(nameop)
 
 PERL_CALLCONV void
 Perl_init_stacks(pTHX)
@@ -2996,7 +3004,8 @@ Perl_load_charnames(pTHX_ SV *char_name, const char *context, const STRLEN conte
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_LOAD_CHARNAMES         \
-        Perl_assert_aTHX; assert(char_name); assert(context); assert(error_msg)
+        Perl_assert_aTHX; assert(char_name); assert(context);  \
+        assert(error_msg)
 
 PERL_CALLCONV void
 Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...)
@@ -3365,7 +3374,8 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_SCALARPACK       \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); assert(mg)
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
+        assert(mg)
 
 PERL_CALLCONV int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
@@ -3844,7 +3854,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash, const GV * c
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_MRO_PACKAGE_MOVED      \
-        Perl_assert_aTHX; assert(!stash || SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(!stash || SvTYPE(stash) == SVt_PVHV);  \
         assert(!oldstash || SvTYPE(oldstash) == SVt_PVHV); assert(gv)
 
 PERL_CALLCONV void
@@ -3883,7 +3893,7 @@ Perl_multideref_stringify(pTHX_ const OP *o, CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_MULTIDEREF_STRINGIFY   \
-        Perl_assert_aTHX; assert(o); \
+        Perl_assert_aTHX; assert(o);  \
         assert(!cv || SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV NV
@@ -4624,7 +4634,8 @@ Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWTRYCATCHOP          \
-        Perl_assert_aTHX; assert(tryblock); assert(catchvar); assert(catchblock)
+        Perl_assert_aTHX; assert(tryblock); assert(catchvar);  \
+        assert(catchblock)
 
 PERL_CALLCONV OP *
 Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
@@ -4741,7 +4752,7 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
         __attribute__warn_unused_result__
         __attribute__pure__;
 #define PERL_ARGS_ASSERT_NINSTR                 \
-        assert(big); assert(bigend); assert(little); assert(lend); \
+        assert(big); assert(bigend); assert(little); assert(lend);  \
         assert(big <= bigend); assert(little <= lend)
 
 PERL_CALLCONV void
@@ -4962,8 +4973,8 @@ Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, 
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 #define PERL_ARGS_ASSERT_PACKLIST               \
-        Perl_assert_aTHX; assert(cat); assert(pat); assert(patend); \
-        assert(beglist); assert(endlist); assert(pat <= patend); \
+        Perl_assert_aTHX; assert(cat); assert(pat); assert(patend);  \
+        assert(beglist); assert(endlist); assert(pat <= patend);  \
         assert(*patend == '\0')
 
 PERL_CALLCONV PADOFFSET
@@ -4971,7 +4982,7 @@ Perl_pad_add_anon(pTHX_ CV *func, I32 optype)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_ANON           \
-        Perl_assert_aTHX; assert(func); \
+        Perl_assert_aTHX; assert(func);  \
         assert(SvTYPE(func) == SVt_PVCV || SvTYPE(func) == SVt_PVFM)
 
 PERL_CALLCONV PADOFFSET
@@ -4979,8 +4990,8 @@ Perl_pad_add_name_pv(pTHX_ const char *name, const U32 flags, HV *typestash, HV 
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_PV        \
-        Perl_assert_aTHX; assert(name); \
-        assert(!typestash || SvTYPE(typestash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(name);  \
+        assert(!typestash || SvTYPE(typestash) == SVt_PVHV);  \
         assert(!ourstash || SvTYPE(ourstash) == SVt_PVHV)
 
 PERL_CALLCONV PADOFFSET
@@ -4988,8 +4999,8 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags, HV *t
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN       \
-        Perl_assert_aTHX; assert(namepv); \
-        assert(!typestash || SvTYPE(typestash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(namepv);  \
+        assert(!typestash || SvTYPE(typestash) == SVt_PVHV);  \
         assert(!ourstash || SvTYPE(ourstash) == SVt_PVHV)
 
 PERL_CALLCONV PADOFFSET
@@ -4997,8 +5008,8 @@ Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_SV        \
-        Perl_assert_aTHX; assert(name); \
-        assert(!typestash || SvTYPE(typestash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(name);  \
+        assert(!typestash || SvTYPE(typestash) == SVt_PVHV);  \
         assert(!ourstash || SvTYPE(ourstash) == SVt_PVHV)
 
 PERL_CALLCONV void
@@ -5007,7 +5018,7 @@ Perl_pad_add_weakref(pTHX_ CV *func)
         Perl_attribute_nonnull(pTHX_1)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PAD_ADD_WEAKREF        \
-        Perl_assert_aTHX; assert(func); \
+        Perl_assert_aTHX; assert(func);  \
         assert(SvTYPE(func) == SVt_PVCV || SvTYPE(func) == SVt_PVFM)
 
 PERL_CALLCONV PADOFFSET
@@ -5052,9 +5063,9 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
         Perl_attribute_nonnull(pTHX_3)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PAD_FIXUP_INNER_ANONS  \
-        Perl_assert_aTHX; assert(padlist); assert(old_cv); \
-        assert(SvTYPE(old_cv) == SVt_PVCV || SvTYPE(old_cv) == SVt_PVFM); \
-        assert(new_cv); \
+        Perl_assert_aTHX; assert(padlist); assert(old_cv);  \
+        assert(SvTYPE(old_cv) == SVt_PVCV || SvTYPE(old_cv) == SVt_PVFM);  \
+        assert(new_cv);  \
         assert(SvTYPE(new_cv) == SVt_PVCV || SvTYPE(new_cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -5322,8 +5333,8 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char *stringarg, char *strend, char *st
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_6);
 #define PERL_ARGS_ASSERT_PREGEXEC               \
-        Perl_assert_aTHX; assert(prog); assert(stringarg); assert(strend); \
-        assert(strbeg); assert(screamer); assert(strbeg <= stringarg); \
+        Perl_assert_aTHX; assert(prog); assert(stringarg); assert(strend);  \
+        assert(strbeg); assert(screamer); assert(strbeg <= stringarg);  \
         assert(stringarg <= strend)
 
 PERL_CALLCONV void
@@ -5467,7 +5478,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, const char * const strbeg,
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 #define PERL_ARGS_ASSERT_RE_INTUIT_START        \
-        Perl_assert_aTHX; assert(rx); assert(strbeg); assert(strpos); \
+        Perl_assert_aTHX; assert(rx); assert(strbeg); assert(strpos);  \
         assert(strend); assert(strbeg <= strpos); assert(strpos <= strend)
 
 PERL_CALLCONV SV *
@@ -5690,8 +5701,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend, char 
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_6);
 #define PERL_ARGS_ASSERT_REGEXEC_FLAGS          \
-        Perl_assert_aTHX; assert(rx); assert(stringarg); assert(strend); \
-        assert(strbeg); assert(sv); assert(strbeg <= stringarg); \
+        Perl_assert_aTHX; assert(rx); assert(stringarg); assert(strend);  \
+        assert(strbeg); assert(sv); assert(strbeg <= stringarg);  \
         assert(stringarg <= strend)
 
 PERL_CALLCONV void
@@ -5779,7 +5790,7 @@ Perl_rninstr(const char *big, const char *bigend, const char *little, const char
         __attribute__warn_unused_result__
         __attribute__pure__;
 #define PERL_ARGS_ASSERT_RNINSTR                \
-        assert(big); assert(bigend); assert(little); assert(lend); \
+        assert(big); assert(bigend); assert(little); assert(lend);  \
         assert(big <= bigend); assert(little <= lend)
 
 PERL_CALLCONV void
@@ -5913,7 +5924,7 @@ Perl_save_aelem(pTHX_ AV *av, SSize_t idx, SV **sptr)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_SAVE_AELEM             \
-        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV);  \
         assert(sptr)
 
 PERL_CALLCONV void
@@ -5922,7 +5933,7 @@ Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr, const U32 flags)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS       \
-        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV);  \
         assert(sptr)
 
 PERL_CALLCONV SSize_t
@@ -5965,7 +5976,7 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_SAVE_DELETE            \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(key)
 
 PERL_CALLCONV void
@@ -6040,7 +6051,7 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_SAVE_HDELETE           \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(keysv)
 
 PERL_CALLCONV void
@@ -6050,7 +6061,7 @@ Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_SAVE_HELEM             \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(key); assert(sptr)
 
 PERL_CALLCONV void
@@ -6060,7 +6071,7 @@ Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS       \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(key); assert(sptr)
 
 PERL_CALLCONV void
@@ -6484,7 +6495,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
         Perl_attribute_nonnull(pTHX_1)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH        \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -6712,7 +6723,7 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding, SV *ssv, int *offset, char *tstr
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 #define PERL_ARGS_ASSERT_SV_CAT_DECODE          \
-        Perl_assert_aTHX; assert(dsv); assert(encoding); assert(ssv); \
+        Perl_assert_aTHX; assert(dsv); assert(encoding); assert(ssv);  \
         assert(offset); assert(tstr)
 
 PERL_CALLCONV void
@@ -6912,7 +6923,8 @@ Perl_sv_derived_from_hv(pTHX_ SV *sv, HV *hv)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SV_DERIVED_FROM_HV     \
-        Perl_assert_aTHX; assert(sv); assert(hv); assert(SvTYPE(hv) == SVt_PVHV)
+        Perl_assert_aTHX; assert(sv); assert(hv);  \
+        assert(SvTYPE(hv) == SVt_PVHV)
 
 PERL_CALLCONV bool
 Perl_sv_derived_from_pv(pTHX_ SV *sv, const char * const name, U32 flags)
@@ -7507,7 +7519,8 @@ Perl_sv_reset(pTHX_ const char *s, HV * const stash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_RESET               \
-        Perl_assert_aTHX; assert(s); assert(!stash || SvTYPE(stash) == SVt_PVHV)
+        Perl_assert_aTHX; assert(s);  \
+        assert(!stash || SvTYPE(stash) == SVt_PVHV)
 
 PERL_CALLCONV void
 Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
@@ -8068,7 +8081,8 @@ Perl_tied_method(pTHX_ SV *methname, SV **mark, SV * const sv, const MAGIC * con
         Perl_attribute_nonnull(pTHX_4)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_TIED_METHOD            \
-        Perl_assert_aTHX; assert(methname); assert(mark); assert(sv); assert(mg)
+        Perl_assert_aTHX; assert(methname); assert(mark); assert(sv);  \
+        assert(mg)
 
 PERL_CALLCONV SSize_t
 Perl_tmps_grow_p(pTHX_ SSize_t ix)
@@ -8180,8 +8194,8 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 #define PERL_ARGS_ASSERT_UNPACKSTRING           \
-        Perl_assert_aTHX; assert(pat); assert(patend); assert(s); assert(strend); \
-        assert(pat <= patend); assert(s <= strend)
+        Perl_assert_aTHX; assert(pat); assert(patend); assert(s);  \
+        assert(strend); assert(pat <= patend); assert(s <= strend)
 
 PERL_CALLCONV void
 Perl_unshare_hek(pTHX_ HEK *hek)
@@ -8234,7 +8248,7 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 * const start, const U8 * 
         Perl_attribute_nonnull(4)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_UTF8_HOP_SAFE          \
-        assert(s); assert(start); assert(end); assert(start <= s); \
+        assert(s); assert(start); assert(end); assert(start <= s);  \
         assert(s <= end)
 
 PERL_CALLCONV STRLEN
@@ -9354,7 +9368,7 @@ perl_alloc_using(const struct IPerlMem **ipM, const struct IPerlMem **ipMS, cons
         Perl_attribute_nonnull(8)
         Perl_attribute_nonnull(9);
 # define PERL_ARGS_ASSERT_PERL_ALLOC_USING      \
-        assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); \
+        assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd);  \
         assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 
 # if defined(USE_ITHREADS)
@@ -9371,8 +9385,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags, const struct IPerlMem **
         Perl_attribute_nonnull(10)
         Perl_attribute_nonnull(11);
 #   define PERL_ARGS_ASSERT_PERL_CLONE_USING    \
-        assert(proto_perl); assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); \
-        assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
+        assert(proto_perl); assert(ipM); assert(ipMS); assert(ipMP);  \
+        assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS);  \
+        assert(ipP)
 
 # endif /* defined(USE_ITHREADS) */
 #else /* if !defined(PERL_IMPLICIT_SYS) */
@@ -9419,7 +9434,7 @@ Perl_XS_builtin_indexed(pTHX_ CV *cv)
         Perl_attribute_nonnull(pTHX_1)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_XS_BUILTIN_INDEXED    \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -9938,7 +9953,7 @@ Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_CLASS_ADD_ADJUST      \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV);  \
         assert(cv); assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -9947,7 +9962,7 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_CLASS_ADD_FIELD       \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV);  \
         assert(pn)
 
 PERL_CALLCONV void
@@ -9983,7 +9998,7 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
@@ -10063,7 +10078,8 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 # define PERL_ARGS_ASSERT_OPENN_CLEANUP         \
-        Perl_assert_aTHX; assert(gv); assert(io); assert(mode); assert(oname)
+        Perl_assert_aTHX; assert(gv); assert(io); assert(mode);  \
+        assert(oname)
 
 static IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int *savefd, char *savetype)
@@ -10075,7 +10091,7 @@ S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int 
         Perl_attribute_nonnull(pTHX_5)
         Perl_attribute_nonnull(pTHX_6);
 # define PERL_ARGS_ASSERT_OPENN_SETUP           \
-        Perl_assert_aTHX; assert(gv); assert(mode); assert(saveifp); \
+        Perl_assert_aTHX; assert(gv); assert(mode); assert(saveifp);  \
         assert(saveofp); assert(savefd); assert(savetype)
 
 # if !defined(DOSISH)
@@ -10114,7 +10130,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DO_TRANS_COUNT_INVMAP \
-        Perl_assert_aTHX; assert(sv); assert(invmap); \
+        Perl_assert_aTHX; assert(sv); assert(invmap);  \
         assert(SvTYPE(invmap) == SVt_PVAV)
 
 static Size_t
@@ -10124,7 +10140,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DO_TRANS_INVMAP       \
-        Perl_assert_aTHX; assert(sv); assert(invmap); \
+        Perl_assert_aTHX; assert(sv); assert(invmap);  \
         assert(SvTYPE(invmap) == SVt_PVAV)
 
 static Size_t
@@ -10215,7 +10231,7 @@ Perl_form_alien_digit_msg(pTHX_ const U8 which, const STRLEN valids_len, const c
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_FORM_ALIEN_DIGIT_MSG  \
-        Perl_assert_aTHX; assert(first_bad); assert(send); \
+        Perl_assert_aTHX; assert(first_bad); assert(send);  \
         assert(first_bad < send)
 
 PERL_CALLCONV bool
@@ -10236,7 +10252,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv, const char *
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_GROK_BSLASH_O         \
-        Perl_assert_aTHX; assert(s); assert(*s); assert(send); assert(uv); \
+        Perl_assert_aTHX; assert(s); assert(*s); assert(send); assert(uv);  \
         assert(message); assert(*s < send)
 
 PERL_CALLCONV bool
@@ -10248,7 +10264,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv, const char *
         Perl_attribute_nonnull(pTHX_4)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_GROK_BSLASH_X         \
-        Perl_assert_aTHX; assert(s); assert(*s); assert(send); assert(uv); \
+        Perl_assert_aTHX; assert(s); assert(*s); assert(send); assert(uv);  \
         assert(message); assert(*s < send)
 
 #endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) ||
@@ -10354,7 +10370,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, const svt
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_GV_MAGICALIZE         \
-        Perl_assert_aTHX; assert(gv); assert(stash); \
+        Perl_assert_aTHX; assert(gv); assert(stash);  \
         assert(SvTYPE(stash) == SVt_PVHV); assert(name)
 
 static void
@@ -10381,8 +10397,8 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name, STRLEN *len,
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 # define PERL_ARGS_ASSERT_PARSE_GV_STASH_NAME   \
-        Perl_assert_aTHX; assert(stash); assert(gv); assert(name); assert(*name); \
-        assert(len); assert(nambeg); assert(nambeg <= *name)
+        Perl_assert_aTHX; assert(stash); assert(gv); assert(name);  \
+        assert(*name); assert(len); assert(nambeg); assert(nambeg <= *name)
 
 static void
 S_require_tie_mod(pTHX_ GV *gv, const char varname, const char *name, STRLEN len, const U32 flags)
@@ -10480,7 +10496,7 @@ S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
         Perl_attribute_nonnull(2)
         Perl_attribute_nonnull(3);
 # define PERL_ARGS_ASSERT_HV_MAGIC_CHECK        \
-        assert(hv); assert(SvTYPE(hv) == SVt_PVHV); assert(needs_copy); \
+        assert(hv); assert(SvTYPE(hv) == SVt_PVHV); assert(needs_copy);  \
         assert(needs_store)
 
 PERL_STATIC_NO_RET void
@@ -10550,7 +10566,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
         Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY      \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(indexp)
 
 #endif /* defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) */
@@ -10590,7 +10606,7 @@ S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 wh
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 # define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_C_LOCALECONV \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(locale); assert(strings); assert(integers)
 
 static bool
@@ -10602,8 +10618,8 @@ S_strftime8(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_6);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
-        Perl_assert_aTHX; assert(fmt); assert(sv); assert(locale); assert(mytm); \
-        assert(result_utf8ness)
+        Perl_assert_aTHX; assert(fmt); assert(sv); assert(locale);  \
+        assert(mytm); assert(result_utf8ness)
 
 static bool
 S_strftime_tm(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *mytm)
@@ -10614,7 +10630,8 @@ S_strftime_tm(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm
         Perl_attribute_nonnull(pTHX_4)
         __attribute__format__(__strftime__,pTHX_1,0);
 # define PERL_ARGS_ASSERT_STRFTIME_TM           \
-        Perl_assert_aTHX; assert(fmt); assert(sv); assert(locale); assert(mytm)
+        Perl_assert_aTHX; assert(fmt); assert(sv); assert(locale);  \
+        assert(mytm)
 
 static SV *
 S_sv_strftime_common(pTHX_ SV *fmt, const char *locale, const struct tm *mytm)
@@ -10736,7 +10753,7 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
         Perl_attribute_nonnull(pTHX_4)
         Perl_attribute_nonnull(pTHX_5);
 #     define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV \
-        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(hv); assert(SvTYPE(hv) == SVt_PVHV);  \
         assert(locale); assert(strings); assert(integers)
 
 #   endif /*   defined(HAS_LOCALECONV) &&
@@ -11033,7 +11050,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name, const STRLEN l
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV      \
-        Perl_assert_aTHX; assert(isa); assert(SvTYPE(isa) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(isa); assert(SvTYPE(isa) == SVt_PVHV);  \
         assert(name); assert(!exceptions || SvTYPE(exceptions) == SVt_PVHV)
 
 static void
@@ -11043,9 +11060,10 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes, HV *s
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_5);
 # define PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME \
-        Perl_assert_aTHX; assert(stashes); assert(SvTYPE(stashes) == SVt_PVHV); \
-        assert(seen_stashes); assert(SvTYPE(seen_stashes) == SVt_PVHV); \
-        assert(!stash || SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stashes);  \
+        assert(SvTYPE(stashes) == SVt_PVHV); assert(seen_stashes);  \
+        assert(SvTYPE(seen_stashes) == SVt_PVHV);  \
+        assert(!stash || SvTYPE(stash) == SVt_PVHV);  \
         assert(!oldstash || SvTYPE(oldstash) == SVt_PVHV); assert(namesv)
 
 static AV *
@@ -11064,7 +11082,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **import_opsp)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_APPLY_ATTRS_MY        \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV);  \
         assert(target); assert(import_opsp)
 
 static I32
@@ -11106,7 +11124,7 @@ S_clear_special_blocks(pTHX_ const char * const fullname, GV * const gv, CV * co
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_CLEAR_SPECIAL_BLOCKS  \
-        Perl_assert_aTHX; assert(fullname); assert(gv); assert(cv); \
+        Perl_assert_aTHX; assert(fullname); assert(gv); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 static void
@@ -11169,7 +11187,7 @@ S_import_attributes_module(pTHX_ HV *stash, SV *target, OP *attrs)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_IMPORT_ATTRIBUTES_MODULE \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV);  \
         assert(target)
 
 static void
@@ -11260,7 +11278,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char * const fullname, GV * cons
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_PROCESS_SPECIAL_BLOCKS \
-        Perl_assert_aTHX; assert(fullname); assert(gv); assert(cv); \
+        Perl_assert_aTHX; assert(fullname); assert(gv); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 static OP *
@@ -11452,7 +11470,7 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash, HV *ourstash)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_PAD_ALLOC_NAME        \
-        Perl_assert_aTHX; assert(name); \
+        Perl_assert_aTHX; assert(name);  \
         assert(!ourstash || SvTYPE(ourstash) == SVt_PVHV)
 
 static void
@@ -11470,7 +11488,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV *cv,
         Perl_attribute_nonnull(pTHX_8)
         Perl_attribute_nonnull(pTHX_9);
 # define PERL_ARGS_ASSERT_PAD_FINDLEX           \
-        Perl_assert_aTHX; assert(namepv); assert(cv); assert(out_name); \
+        Perl_assert_aTHX; assert(namepv); assert(cv); assert(out_name);  \
         assert(out_flags)
 
 static void
@@ -11643,7 +11661,7 @@ S_incpush_if_exists(pTHX_ AV * const av, SV *dir, SV * const stem)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #   define PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS   \
-        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV);  \
         assert(dir); assert(stem)
 
 # endif /* !defined(PERL_IS_MINIPERL) */
@@ -11748,7 +11766,8 @@ static OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_DO_SMARTMATCH         \
-        Perl_assert_aTHX; assert(!seen_this || SvTYPE(seen_this) == SVt_PVHV); \
+        Perl_assert_aTHX;  \
+        assert(!seen_this || SvTYPE(seen_this) == SVt_PVHV);  \
         assert(!seen_other || SvTYPE(seen_other) == SVt_PVHV)
 
 static OP *
@@ -11762,8 +11781,8 @@ static bool
 S_doeval_compile(pTHX_ U8 gimme, CV *outside, U32 seq, HV *hh)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_DOEVAL_COMPILE        \
-        Perl_assert_aTHX; \
-        assert(!outside || SvTYPE(outside) == SVt_PVCV || SvTYPE(outside) == SVt_PVFM); \
+        Perl_assert_aTHX;  \
+        assert(!outside || SvTYPE(outside) == SVt_PVCV || SvTYPE(outside) == SVt_PVFM);  \
         assert(!hh || SvTYPE(hh) == SVt_PVHV)
 
 static OP *
@@ -11775,7 +11794,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
         Perl_attribute_nonnull(pTHX_6)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_DOFINDLABEL           \
-        Perl_assert_aTHX; assert(o); assert(label); assert(opstack); \
+        Perl_assert_aTHX; assert(o); assert(label); assert(opstack);  \
         assert(oplimit)
 
 static MAGIC *
@@ -11879,7 +11898,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_SAVE_LINES            \
-        Perl_assert_aTHX; assert(!array || SvTYPE(array) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(!array || SvTYPE(array) == SVt_PVAV);  \
         assert(sv)
 
 # if !defined(PERL_DISABLE_PMC)
@@ -11970,7 +11989,7 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_GROUP_END             \
-        Perl_assert_aTHX; assert(patptr); assert(patend); \
+        Perl_assert_aTHX; assert(patptr); assert(patend);  \
         assert(patptr <= patend)
 
 static SV *
@@ -12025,7 +12044,7 @@ S_pack_rec(pTHX_ SV *cat, struct tempsym *symptr, SV **beglist, SV **endlist)
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_PACK_REC              \
-        Perl_assert_aTHX; assert(cat); assert(symptr); assert(beglist); \
+        Perl_assert_aTHX; assert(cat); assert(symptr); assert(beglist);  \
         assert(endlist)
 
 static char *
@@ -12044,7 +12063,7 @@ S_unpack_rec(pTHX_ struct tempsym *symptr, const char *s, const char *strbeg, co
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_UNPACK_REC            \
-        Perl_assert_aTHX; assert(symptr); assert(s); assert(strbeg); \
+        Perl_assert_aTHX; assert(symptr); assert(s); assert(strbeg);  \
         assert(strend); assert(strbeg <= s); assert(s <= strend)
 
 #endif /* defined(PERL_IN_PP_PACK_C) */
@@ -12209,7 +12228,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_DOFORM                \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM); assert(gv)
 
 static SV *
@@ -12251,11 +12270,11 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
         Perl_assert_aTHX; assert(n)
 
 # define PERL_ARGS_ASSERT_JOIN_EXACT            \
-        Perl_assert_aTHX; assert(pRExC_state); assert(scan); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(scan);  \
         assert(min_subtract); assert(unfolded_multi_char)
 
 # define PERL_ARGS_ASSERT_MAKE_TRIE             \
-        Perl_assert_aTHX; assert(pRExC_state); assert(startbranch); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(startbranch);  \
         assert(first); assert(last); assert(tail)
 
 # define PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST \
@@ -12274,8 +12293,8 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
         Perl_assert_aTHX; assert(pRExC_state); assert(ssc)
 
 # define PERL_ARGS_ASSERT_STUDY_CHUNK           \
-        Perl_assert_aTHX; assert(pRExC_state); assert(scanp); assert(minlenp); \
-        assert(deltap); assert(last)
+        Perl_assert_aTHX; assert(pRExC_state); assert(scanp);  \
+        assert(minlenp); assert(deltap); assert(last)
 
 # if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_CALLCONV void
@@ -12379,18 +12398,18 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie, HV *widecharm
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
 #   define PERL_ARGS_ASSERT_DUMP_TRIE           \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(trie);  \
+        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV);  \
         assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
 
 #   define PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(trie);  \
+        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV);  \
         assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
 
 #   define PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(trie);  \
+        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV);  \
         assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
 
 # endif /* defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING) */
@@ -12439,8 +12458,8 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist)
 #endif
 #if defined(PERL_IN_REGCOMP_C)
 # define PERL_ARGS_ASSERT_ADD_MULTI_MATCH       \
-        Perl_assert_aTHX; \
-        assert(!multi_char_matches || SvTYPE(multi_char_matches) == SVt_PVAV); \
+        Perl_assert_aTHX;  \
+        assert(!multi_char_matches || SvTYPE(multi_char_matches) == SVt_PVAV);  \
         assert(multi_string)
 
 # define PERL_ARGS_ASSERT_CHANGE_ENGINE_SIZE    \
@@ -12456,23 +12475,23 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist)
         assert(src); assert(tgt)
 
 # define PERL_ARGS_ASSERT_EXECUTE_WILDCARD      \
-        Perl_assert_aTHX; assert(prog); assert(stringarg); assert(strend); \
-        assert(strbeg); assert(screamer); assert(strbeg <= stringarg); \
+        Perl_assert_aTHX; assert(prog); assert(stringarg); assert(strend);  \
+        assert(strbeg); assert(screamer); assert(strbeg <= stringarg);  \
         assert(stringarg <= strend); assert(*strend == '\0')
 
 # define PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE  \
-        Perl_assert_aTHX; assert(pRExC_state); assert(start); assert(end); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(start); assert(end);  \
         assert(start < end)
 
 # define PERL_ARGS_ASSERT_GROK_BSLASH_N         \
         Perl_assert_aTHX; assert(pRExC_state); assert(flagp)
 
 # define PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF  \
-        Perl_assert_aTHX; assert(pRExC_state); assert(flagp); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(flagp);  \
         assert(backref_parse_start)
 
 # define PERL_ARGS_ASSERT_HANDLE_NAMES_WILDCARD \
-        Perl_assert_aTHX; assert(wname); assert(prop_definition); \
+        Perl_assert_aTHX; assert(wname); assert(prop_definition);  \
         assert(strings)
 
 # define PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX \
@@ -12482,7 +12501,7 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist)
         Perl_assert_aTHX; assert(pRExC_state); assert(flagp)
 
 # define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY \
-        Perl_assert_aTHX; assert(name); assert(contents); \
+        Perl_assert_aTHX; assert(name); assert(contents);  \
         assert(user_defined_ptr); assert(msg)
 
 # define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT       \
@@ -12492,18 +12511,19 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist)
         Perl_assert_aTHX; assert(pRExC_state)
 
 # define PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS     \
-        Perl_assert_aTHX; assert(pRExC_state); assert(anyof_flags); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(anyof_flags);  \
         assert(invert); assert(ret); assert(flagp)
 
 # define PERL_ARGS_ASSERT_OUTPUT_POSIX_WARNINGS \
-        Perl_assert_aTHX; assert(pRExC_state); assert(posix_warnings); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(posix_warnings);  \
         assert(SvTYPE(posix_warnings) == SVt_PVAV)
 
 # define PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS \
         Perl_assert_aTHX; assert(pRExC_state)
 
 # define PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING  \
-        Perl_assert_aTHX; assert(name); assert(user_defined_ptr); assert(msg)
+        Perl_assert_aTHX; assert(name); assert(user_defined_ptr);  \
+        assert(msg)
 
 PERL_STATIC_NO_RET void
 S_re_croak(pTHX_ bool utf8, const char *pat, ...)
@@ -12565,8 +12585,9 @@ S_re_croak(pTHX_ bool utf8, const char *pat, ...)
         Perl_assert_aTHX; assert(pRExC_state); assert(Rx)
 
 # define PERL_ARGS_ASSERT_SKIP_BRACKETED_WHITE_SPACE \
-        Perl_assert_aTHX; assert(pRExC_state); assert(p_start); assert(p); \
-        assert(*p); assert(stop_p); assert(p_start <= *p); assert(*p <= stop_p)
+        Perl_assert_aTHX; assert(pRExC_state); assert(p_start); assert(p);  \
+        assert(*p); assert(stop_p); assert(p_start <= *p);  \
+        assert(*p <= stop_p)
 
 # define PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT \
         Perl_assert_aTHX; assert(pRExC_state); assert(p)
@@ -12583,8 +12604,8 @@ S_re_croak(pTHX_ bool utf8, const char *pat, ...)
 
 #   if defined(ENABLE_REGEX_SETS_DEBUGGING)
 #     define PERL_ARGS_ASSERT_DUMP_REGEX_SETS_STRUCTURES \
-        Perl_assert_aTHX; assert(pRExC_state); assert(stack); \
-        assert(SvTYPE(stack) == SVt_PVAV); assert(fence_stack); \
+        Perl_assert_aTHX; assert(pRExC_state); assert(stack);  \
+        assert(SvTYPE(stack) == SVt_PVAV); assert(fence_stack);  \
         assert(SvTYPE(fence_stack) == SVt_PVAV)
 
 #   endif
@@ -12811,8 +12832,9 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state, AV *stack, const I
         assert(s1); assert(s2)
 
 #   define PERL_ARGS_ASSERT_REG_SKIPCOMMENT     \
-        Perl_assert_aTHX; assert(pRExC_state); assert(p_start); assert(p); \
-        assert(*p); assert(p_end); assert(p_start <= *p); assert(*p <= p_end)
+        Perl_assert_aTHX; assert(pRExC_state); assert(p_start); assert(p);  \
+        assert(*p); assert(p_end); assert(p_start <= *p);  \
+        assert(*p <= p_end)
 
 #   if defined(PERL_CORE) || defined(PERL_EXT)
 PERL_STATIC_INLINE Size_t
@@ -12854,7 +12876,7 @@ Perl_populate_invlist_from_bitmap(pTHX_ const U8 *bitmap, const Size_t bitmap_le
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_TOKE_C)
 # define PERL_ARGS_ASSERT_IS_GRAPHEME           \
-        Perl_assert_aTHX; assert(strbeg); assert(s); assert(strend); \
+        Perl_assert_aTHX; assert(strbeg); assert(s); assert(strend);  \
         assert(strbeg <= s); assert(s < strend)
 
 #endif
@@ -13091,35 +13113,35 @@ S_unwind_scan_frames(pTHX_ void *p)
 #endif /* defined(PERL_IN_REGCOMP_STUDY_C) */
 #if defined(PERL_IN_REGEXEC_C)
 # define PERL_ARGS_ASSERT_ADVANCE_ONE_LB        \
-        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend); \
+        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend);  \
         assert(*curpos < strend)
 
 # define PERL_ARGS_ASSERT_ADVANCE_ONE_SB        \
-        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend); \
+        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend);  \
         assert(*curpos < strend)
 
 # define PERL_ARGS_ASSERT_ADVANCE_ONE_WB_       \
-        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend); \
+        Perl_assert_aTHX; assert(curpos); assert(*curpos); assert(strend);  \
         assert(*curpos < strend)
 
 # define PERL_ARGS_ASSERT_BACKUP_ONE_GCB        \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos);  \
         assert(strbeg <= *curpos)
 
 # define PERL_ARGS_ASSERT_BACKUP_ONE_LB_        \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos);  \
         assert(strbeg <= *curpos)
 
 # define PERL_ARGS_ASSERT_BACKUP_ONE_SB         \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(*curpos);  \
         assert(strbeg <= *curpos)
 
 # define PERL_ARGS_ASSERT_BACKUP_ONE_WB_BUT_OVER_EXTEND_FO \
-        Perl_assert_aTHX; assert(previous); assert(strbeg); assert(curpos); \
+        Perl_assert_aTHX; assert(previous); assert(strbeg); assert(curpos);  \
         assert(*curpos); assert(strbeg <= *curpos)
 
 # define PERL_ARGS_ASSERT_FIND_BYCLASS          \
-        Perl_assert_aTHX; assert(prog); assert(c); assert(s); assert(strend); \
+        Perl_assert_aTHX; assert(prog); assert(c); assert(s); assert(strend);  \
         assert(s <= strend)
 
 # define PERL_ARGS_ASSERT_FIND_NEXT_MASKED      \
@@ -13135,22 +13157,23 @@ S_unwind_scan_frames(pTHX_ void *p)
         Perl_assert_aTHX
 
 # define PERL_ARGS_ASSERT_ISFOO_UTF8_LC         \
-        Perl_assert_aTHX; assert(character); assert(e); assert(character < e)
+        Perl_assert_aTHX; assert(character); assert(e);  \
+        assert(character < e)
 
 # define PERL_ARGS_ASSERT_ISGCB                 \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos);  \
         assert(strbeg <= curpos)
 
 # define PERL_ARGS_ASSERT_ISLB                  \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend);  \
         assert(strbeg <= curpos); assert(curpos < strend)
 
 # define PERL_ARGS_ASSERT_ISSB                  \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend);  \
         assert(strbeg <= curpos); assert(curpos < strend)
 
 # define PERL_ARGS_ASSERT_ISWB                  \
-        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend); \
+        Perl_assert_aTHX; assert(strbeg); assert(curpos); assert(strend);  \
         assert(strbeg <= curpos); assert(curpos < strend)
 
 # define PERL_ARGS_ASSERT_REG_CHECK_NAMED_BUFF_MATCHED \
@@ -13172,13 +13195,14 @@ S_unwind_scan_frames(pTHX_ void *p)
         assert(s); assert(lim)
 
 # define PERL_ARGS_ASSERT_REGINCLASS            \
-        Perl_assert_aTHX; assert(n); assert(p); assert(p_end); assert(p < p_end)
+        Perl_assert_aTHX; assert(n); assert(p); assert(p_end);  \
+        assert(p < p_end)
 
 # define PERL_ARGS_ASSERT_REGMATCH              \
         Perl_assert_aTHX; assert(reginfo); assert(startpos); assert(prog)
 
 # define PERL_ARGS_ASSERT_REGREPEAT             \
-        Perl_assert_aTHX; assert(prog); assert(startposp); assert(p); \
+        Perl_assert_aTHX; assert(prog); assert(startposp); assert(p);  \
         assert(loceol); assert(reginfo); assert(max)
 
 # define PERL_ARGS_ASSERT_REGTRY                \
@@ -13192,12 +13216,12 @@ S_unwind_scan_frames(pTHX_ void *p)
 
 # if defined(DEBUGGING)
 #   define PERL_ARGS_ASSERT_DEBUG_START_MATCH   \
-        Perl_assert_aTHX; assert(prog); assert(start); assert(end); \
+        Perl_assert_aTHX; assert(prog); assert(start); assert(end);  \
         assert(blurb); assert(start <= end)
 
 #   define PERL_ARGS_ASSERT_DUMP_EXEC_POS       \
-        Perl_assert_aTHX; assert(locinput); assert(scan); assert(loc_regeol); \
-        assert(loc_bostr); assert(loc_reg_starttry); \
+        Perl_assert_aTHX; assert(locinput); assert(scan); assert(loc_regeol);  \
+        assert(loc_bostr); assert(loc_reg_starttry);  \
         assert(locinput <= loc_regeol)
 
 #   define PERL_ARGS_ASSERT_RE_EXEC_INDENTF     \
@@ -13572,7 +13596,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV *cv)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_ANONYMISE_CV_MAYBE    \
-        Perl_assert_aTHX; assert(gv); assert(cv); \
+        Perl_assert_aTHX; assert(gv); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 static void
@@ -13699,7 +13723,7 @@ S_sv_pos_b2u_midway(pTHX_ const U8 * const s, const U8 * const target, const U8 
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_SV_POS_B2U_MIDWAY     \
-        Perl_assert_aTHX; assert(s); assert(target); assert(end); \
+        Perl_assert_aTHX; assert(s); assert(target); assert(end);  \
         assert(s <= target); assert(target <= end)
 
 static STRLEN
@@ -13710,8 +13734,8 @@ S_sv_pos_u2b_cached(pTHX_ SV * const sv, MAGIC ** const mgp, const U8 * const st
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_CACHED     \
-        Perl_assert_aTHX; assert(sv); assert(mgp); assert(start); assert(send); \
-        assert(start < send)
+        Perl_assert_aTHX; assert(sv); assert(mgp); assert(start);  \
+        assert(send); assert(start < send)
 
 static STRLEN
 S_sv_pos_u2b_forwards(const U8 * const start, const U8 * const send, STRLEN * const uoffset_p, bool * const at_end, bool *canonical_position)
@@ -13721,7 +13745,7 @@ S_sv_pos_u2b_forwards(const U8 * const start, const U8 * const send, STRLEN * co
         Perl_attribute_nonnull(4)
         Perl_attribute_nonnull(5);
 # define PERL_ARGS_ASSERT_SV_POS_U2B_FORWARDS   \
-        assert(start); assert(send); assert(uoffset_p); assert(at_end); \
+        assert(start); assert(send); assert(uoffset_p); assert(at_end);  \
         assert(canonical_position); assert(start < send)
 
 static STRLEN
@@ -13847,7 +13871,7 @@ S_unreferenced_to_tmp_stack(pTHX_ AV * const unreferenced)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #   define PERL_ARGS_ASSERT_UNREFERENCED_TO_TMP_STACK \
-        Perl_assert_aTHX; assert(unreferenced); \
+        Perl_assert_aTHX; assert(unreferenced);  \
         assert(SvTYPE(unreferenced) == SVt_PVAV)
 
 # endif /* defined(USE_ITHREADS) */
@@ -13945,7 +13969,7 @@ S_incline(pTHX_ const char *s, const char *end)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_INCLINE               \
-        Perl_assert_aTHX; assert(s); assert(end); assert(s <= end); \
+        Perl_assert_aTHX; assert(s); assert(end); assert(s <= end);  \
         assert(*end == '\0')
 
 static int
@@ -13961,7 +13985,7 @@ S_intuit_more(pTHX_ char *s, char *e, U8 caller_context, char *caller_s, Size_t 
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_INTUIT_MORE           \
-        Perl_assert_aTHX; assert(s); assert(e); assert(s <= e); \
+        Perl_assert_aTHX; assert(s); assert(e); assert(s <= e);  \
         assert(*e == '\0')
 
 static bool
@@ -14001,7 +14025,7 @@ S_parse_ident(pTHX_ const char *s, const char * const s_end, char **d, char * co
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_PARSE_IDENT           \
-        Perl_assert_aTHX; assert(s); assert(s_end); assert(d); assert(*d); \
+        Perl_assert_aTHX; assert(s); assert(s_end); assert(d); assert(*d);  \
         assert(e); assert(s <= s_end); assert(*d < e)
 
 static char *
@@ -14049,7 +14073,7 @@ S_scan_ident(pTHX_ char *s, char *dest, char *dest_end, U32 flags)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 # define PERL_ARGS_ASSERT_SCAN_IDENT            \
-        Perl_assert_aTHX; assert(s); assert(dest); assert(dest_end); \
+        Perl_assert_aTHX; assert(s); assert(dest); assert(dest_end);  \
         assert(dest < dest_end)
 
 static char *
@@ -14196,7 +14220,7 @@ S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char *name, STRLEN len, U32 flag
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_ISA_LOOKUP            \
-        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV); \
+        Perl_assert_aTHX; assert(stash); assert(SvTYPE(stash) == SVt_PVHV);  \
         assert(namesv || name)
 
 static bool
@@ -14249,7 +14273,7 @@ S_to_utf8_case_(pTHX_ const UV original, const U8 *p, U8 *ustrp, STRLEN *lenp, S
         Perl_attribute_nonnull(pTHX_6)
         Perl_attribute_nonnull(pTHX_9);
 # define PERL_ARGS_ASSERT_TO_UTF8_CASE_         \
-        Perl_assert_aTHX; assert(ustrp); assert(lenp); assert(invlist); \
+        Perl_assert_aTHX; assert(ustrp); assert(lenp); assert(invlist);  \
         assert(invmap); assert(normal)
 
 static UV
@@ -14260,7 +14284,7 @@ S_turkic_fc(pTHX_ const U8 * const p, const U8 * const e, U8 *ustrp, STRLEN *len
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_TURKIC_FC             \
-        Perl_assert_aTHX; assert(p); assert(e); assert(ustrp); assert(lenp); \
+        Perl_assert_aTHX; assert(p); assert(e); assert(ustrp); assert(lenp);  \
         assert(p < e)
 
 static UV
@@ -14271,7 +14295,7 @@ S_turkic_lc(pTHX_ const U8 * const p0, const U8 * const e, U8 *ustrp, STRLEN *le
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_TURKIC_LC             \
-        Perl_assert_aTHX; assert(p0); assert(e); assert(ustrp); assert(lenp); \
+        Perl_assert_aTHX; assert(p0); assert(e); assert(ustrp); assert(lenp);  \
         assert(p0 < e)
 
 static UV
@@ -14282,7 +14306,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e, U8 *ustrp, STRLEN *len
         Perl_attribute_nonnull(pTHX_3)
         Perl_attribute_nonnull(pTHX_4);
 # define PERL_ARGS_ASSERT_TURKIC_UC             \
-        Perl_assert_aTHX; assert(p); assert(e); assert(ustrp); assert(lenp); \
+        Perl_assert_aTHX; assert(p); assert(e); assert(ustrp); assert(lenp);  \
         assert(p < e)
 
 static char *
@@ -14436,7 +14460,7 @@ Perl_CvGV(pTHX_ CV *sv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_CVGV                  \
-        Perl_assert_aTHX; assert(sv); \
+        Perl_assert_aTHX; assert(sv);  \
         assert(SvTYPE(sv) == SVt_PVCV || SvTYPE(sv) == SVt_PVFM)
 
 PERL_STATIC_INLINE Stack_off_t
@@ -14629,7 +14653,7 @@ Perl_av_push_simple(pTHX_ AV *av, SV *val)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_AV_PUSH_SIMPLE        \
-        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV); \
+        Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV);  \
         assert(val)
 
 PERL_STATIC_INLINE void
@@ -14928,7 +14952,7 @@ Perl_rpp_invoke_xs(pTHX_ CV *cv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_RPP_INVOKE_XS         \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_STATIC_INLINE bool
@@ -15241,7 +15265,7 @@ Perl_utf8_hop_overshoot(const U8 *s, SSize_t off, const U8 * const start, const 
         Perl_attribute_nonnull(4)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_UTF8_HOP_OVERSHOOT    \
-        assert(s); assert(start); assert(end); assert(start <= s); \
+        assert(s); assert(start); assert(end); assert(start <= s);  \
         assert(s <= end)
 
 PERL_STATIC_INLINE bool
@@ -15407,7 +15431,7 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_CX_PUSHFORMAT         \
-        Perl_assert_aTHX; assert(cx); assert(cv); \
+        Perl_assert_aTHX; assert(cx); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_STATIC_INLINE void
@@ -15438,7 +15462,7 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_CX_PUSHSUB            \
-        Perl_assert_aTHX; assert(cx); assert(cv); \
+        Perl_assert_aTHX; assert(cx); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_STATIC_INLINE void
@@ -15710,7 +15734,7 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_XS_WRAP               \
-        Perl_assert_aTHX; assert(xsub); assert(cv); \
+        Perl_assert_aTHX; assert(xsub); assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 #endif /* defined(PERL_RC_STACK) */
@@ -15775,7 +15799,7 @@ Perl_dtrace_probe_call(pTHX_ CV *cv, bool is_call)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_DTRACE_PROBE_CALL     \
-        Perl_assert_aTHX; assert(cv); \
+        Perl_assert_aTHX; assert(cv);  \
         assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
 
 PERL_CALLCONV void
