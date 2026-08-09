@@ -4158,21 +4158,21 @@ sub generate_proto_h {
 
                 my $line = "";
                 foreach my $which (\@asserts) {
-                while($which->@*) {
-                    my $component = shift $which->@*;
+                    while($which->@*) {
+                        my $component = shift $which->@*;
 
-                    if(length($line) + length($component) > 78) {
-                        $ret .= $line . "; \\\n";
-                        $line = "";
+                        if(length($line) + length($component) > 78) {
+                            $ret .= $line . "; \\\n";
+                            $line = "";
+                        }
+
+                        $line .= " " x 8 if !length $line;
+                        $line .= "; " if $line =~ m/\S/;
+                        $line .= $component;
                     }
 
-                    $line .= " " x 8 if !length $line;
-                    $line .= "; " if $line =~ m/\S/;
-                    $line .= $component;
-                }
-
-                $ret .= $line if length $line;
-                $ret .= "\n";
+                    $ret .= $line if length $line;
+                    $ret .= "\n";
                 }
             }
         }
