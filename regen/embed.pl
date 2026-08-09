@@ -4157,8 +4157,9 @@ sub generate_proto_h {
                 $ret .= " \\\n";
 
                 my $line = "";
-                while(@asserts) {
-                    my $component = shift @asserts;
+                foreach my $which (\@asserts) {
+                while($which->@*) {
+                    my $component = shift $which->@*;
 
                     if(length($line) + length($component) > 78) {
                         $ret .= $line . "; \\\n";
@@ -4172,6 +4173,7 @@ sub generate_proto_h {
 
                 $ret .= $line if length $line;
                 $ret .= "\n";
+                }
             }
         }
         $ret .= "\n";
