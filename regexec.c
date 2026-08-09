@@ -9246,9 +9246,9 @@ NULL
 
                     /* Only do the calculations and enable the cache if it
                      * won't overflow. This test is equivalent to:
-                     *    ((len + 1) * n  + 7) <= max(STRLEN)
+                     *    ((len + 1) * n  + 7) <= STRLEN_MAX
                      */
-                    if (len < ((~(STRLEN)0) - 7)/n) {
+                    if (len < (STRLEN_MAX - 7)/n) {
                         reginfo->poscache_maxiter = (len + 1) * n;
                         reginfo->poscache_iter = reginfo->poscache_maxiter;
                     }

@@ -14280,7 +14280,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 elen = va_arg(*args, UV);
                 /* if utf8 length is larger than 0x7ffff..., then it might
                  * have been a signed value that wrapped */
-                if (elen  > ((~(STRLEN)0) >> 1)) {
+                if (elen  > (STRLEN_MAX >> 1)) {
                     assert(0); /* in DEBUGGING build we want to crash */
                     elen = 0; /* otherwise we want to treat this as an empty string */
                 }
@@ -15101,7 +15101,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             char *s;
 
             /* signed value that's wrapped? */
-            assert(elen  <= ((~(STRLEN)0) >> 1));
+            assert(elen  <= (STRLEN_MAX >> 1));
 
             /* if zeros is non-zero, then it represents filler between
              * elen and precis. So adding elen and zeros together will
