@@ -6,7 +6,8 @@ BEGIN {
     set_up_inc( qw(. ../lib) );
 }
 
-plan( tests => 18 );
+use Config;
+my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b(*nla:=none)/;
 
 @oops = @ops = <op/*>;
 
@@ -120,7 +121,6 @@ SKIP: {
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 
 SKIP: {
-    use Config;
     skip("glob() works when cross-compiling, but this test doesn't", 1)
         if $Config{usecrosscompile};
 
@@ -150,3 +150,15 @@ SKIP: {
     }
 EOP
 }
+
+SKIP: {
+    skip "Debugging builds on Linux still problematic: GH 16869", 1
+        if ($Config{osname} eq 'linux' and $is_debugging_build);
+    fresh_perl(<<~'HERE', {});
+        my $glob = ("0" x 4094) . "?";
+        glob $glob;
+        HERE
+    is($?, 0, 'No assertion failure; GH 16869');
+}
+
+done_testing();

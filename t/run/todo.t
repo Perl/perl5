@@ -320,7 +320,12 @@ TODO: {
 }
 
 TODO: {
-    todo_skip "Test needs -DDEBUGGING", 1 unless $is_debugging_build;
+    todo_skip "Test needs -DDEBUGGING on Linux, no miniperl", 1
+        unless (
+            $is_debugging_build and
+            $Config{osname} eq 'linux' and
+            ! is_miniperl()
+        );
     local $::TODO = 'GH 16869';
     fresh_perl(<<~'HERE', {});
         my $glob = ("0" x 4094) . "?";
