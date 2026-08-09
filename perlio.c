@@ -1130,7 +1130,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
          * be the case on other 64-bit platforms.
          */
 #if Off_t_size >= Size_t_size
-        assert(len < ((~(STRLEN)0) >> 1));
+        assert(len < (STRLEN_MAX >> 1));
         if ((Off_t)len <= s->posn)
 	    return 0;
 #else

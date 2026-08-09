@@ -2462,6 +2462,7 @@ typedef UVTYPE UV;
 
 #define Size_t_MAX (~(Size_t)0)
 #define SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
+#define STRLEN_MAX (~(STRLEN)0)
 
 /*
 =for apidoc_section $integer
