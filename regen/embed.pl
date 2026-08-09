@@ -4158,16 +4158,16 @@ sub generate_proto_h {
 
                 my $line = "";
                 while(@asserts) {
-                    my $assert = shift @asserts;
+                    my $component = shift @asserts;
 
-                    if(length($line) + length($assert) > 78) {
+                    if(length($line) + length($component) > 78) {
                         $ret .= $line . "; \\\n";
                         $line = "";
                     }
 
                     $line .= " " x 8 if !length $line;
                     $line .= "; " if $line =~ m/\S/;
-                    $line .= $assert;
+                    $line .= $component;
                 }
 
                 $ret .= $line if length $line;
