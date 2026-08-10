@@ -121,11 +121,21 @@ package FetchStoreCounter {
     is(reftype($obj),        "ARRAY", 'reftype yields basic container type for blessed object');
     is(reftype("not a ref"), undef,   'reftype yields undef for non-reference');
 
+    # GH #24634: refaddr and reftype weren't invoking set magic
+    # on TARG, and TARG could be some lvalue with magic.
+    #
+    # The test here:
+    # - $1 implements read-only-ness in it's magic so if set
+    # magic is called it throws an exception.
+    # - $result is my, so TARGMY optimization should apply
+    # which makes the the assigned to variable the TARG of the OP,
+    # and
+    # - $result is an alias to $1 so $1's magic should be invoked
+    # when it is assigned to, throwing an exception.
+    #
+    # Before the fix the assignments weren't throwing exceptions
     for my $result ($1) {
         my $y = 1; # no constant folding
-        # $result is my, so TARGMY should apply
-        # $1 implements read-only-ness in it's magic
-        # so if set magic is called it throws an exception
         ok(!eval { $result = reftype($y); 1 },
            "magic called for TARGMY reftype");
         ok(!eval { $result = refaddr($y); 1 },
