@@ -1337,7 +1337,8 @@ our %Modules = (
     },
 
     'Win32' => {
-        'DISTRIBUTION' => 'JDB/Win32-0.59.tar.gz',
+        'DISTRIBUTION' => 'JDB/Win32-0.63.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Aug 10 12:20:37 2026',
         'FILES'        => q[cpan/Win32],
     },
 

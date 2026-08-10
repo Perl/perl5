@@ -1843,8 +1843,9 @@ XS(w32_HttpGetFile)
                 bAborted = TRUE;
                 Perl_warn(aTHX_ "Win32::HttpGetFile: setting proxy options failed");
             }
-            Safefree(ProxyInfo.lpszProxy);
-            Safefree(ProxyInfo.lpszProxyBypass);
+            /* WinHttpGetProxyForUrl allocates these with GlobalAlloc. */
+            if (ProxyInfo.lpszProxy)       GlobalFree(ProxyInfo.lpszProxy);
+            if (ProxyInfo.lpszProxyBypass) GlobalFree(ProxyInfo.lpszProxyBypass);
         }
     }
 
@@ -1976,7 +1977,7 @@ XS(w32_HttpGetFile)
      */
     if (bAborted) {
         if (bHttpError) {
-            SetLastError(dwHttpStatusCode + 1000000000);
+            error = dwHttpStatusCode + 1000000000;
         }
         else {
             DWORD msgFlags = bFileError
@@ -1994,22 +1995,31 @@ XS(w32_HttpGetFile)
                                 NULL)) {
                 wcsncpy(msgbuf, L"unable to format error message", ONE_K_BUFSIZE - 1);
             }
-            SetLastError(error);
         }
     }
 
+    /* Set the last error only after building the return values.
+     * wstr_to_sv() calls WideCharToMultiByte() and allocates SVs, either
+     * of which may clobber it (GH issue #62, seen on Cygwin DEBUGGING builds).
+     */
     if (GIMME_V == G_SCALAR) {
         EXTEND(SP, 1);
         ST(0) = !bAborted ? &PL_sv_yes : &PL_sv_no;
+        if (bAborted)
+            SetLastError(error);
         XSRETURN(1);
     }
     else if (GIMME_V == G_ARRAY) {
         EXTEND(SP, 2);
         ST(0) = !bAborted ? &PL_sv_yes : &PL_sv_no;
         ST(1) = wstr_to_sv(aTHX_ msgbuf);
+        if (bAborted)
+            SetLastError(error);
         XSRETURN(2);
     }
     else {
+        if (bAborted)
+            SetLastError(error);
         XSRETURN_EMPTY;
     }
 }

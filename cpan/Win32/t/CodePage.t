@@ -1,8 +1,6 @@
 use strict;
-use Test;
+use Test::More tests => 8;
 use Win32;
-
-plan tests => 8;
 
 my $ansicp = Win32::GetACP();
 ok($ansicp > 0 && $ansicp <= 65001);

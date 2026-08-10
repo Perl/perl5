@@ -3479,6 +3479,7 @@ cpan/version/t/09_list_util.t		Tests for version objects
 cpan/version/t/10_lyon.t		Tests for version objects
 cpan/version/t/11_taint.t		Tests for version objects
 cpan/version/t/coretests.pm		Tests for version objects
+cpan/Win32/CHANGES.md			Win32
 cpan/Win32/longpath.inc			Win32 extension long path support
 cpan/Win32/Makefile.PL			Win32 extension makefile writer
 cpan/Win32/t/CodePage.t			See if Win32 extension works
@@ -3493,8 +3494,9 @@ cpan/Win32/t/GetOSName.t		See if Win32 extension works
 cpan/Win32/t/GetOSVersion.t		See if Win32 extension works
 cpan/Win32/t/GetShortPathName.t		See if Win32 extension works
 cpan/Win32/t/GuidGen.t			See if Win32 extension works
+cpan/Win32/t/HttpGetFile.t		Win32
 cpan/Win32/t/Names.t			See if Win32 extension works
-cpan/Win32/t/Privileges.t
+cpan/Win32/t/Privileges.t		Test file related to Win32
 cpan/Win32/t/Unicode.t			See if Win32 extension works
 cpan/Win32/Win32.pm			Win32 extension Perl module
 cpan/Win32/Win32.xs			Win32 extension external subroutines

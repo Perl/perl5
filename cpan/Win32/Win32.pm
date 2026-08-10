@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.59_01';
+    $VERSION = '0.63';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -370,7 +370,7 @@ sub GetOSDisplayName {
 		$desc =~ s/^\s*//;
 		s/(200.)/$name Server $1/;
 	    }
-	    s/^Windows (20(03|08|12|16|19))/Windows Server $1/;
+	    s/^Windows (20(03|08|12|16|19|22|25))/Windows Server $1/;
             s/^Windows SAC/Windows Server/;
 	}
     }
@@ -559,8 +559,13 @@ sub _GetOSName {
         }
 	elsif ($major == 10) {
             if ($producttype == VER_NT_WORKSTATION) {
+                $os = $build < 22000 ? '10' : '11';
+
                 # Build numbers from https://en.wikipedia.org/wiki/Windows_10_version_history
-                $os = '10';
+                # Windows 10. Versions 1507 through 1903 each cover a build
+                # range to label preview/insider builds; from 1909 onward
+                # Microsoft ships releases as enablement packages on the
+                # same kernel build, so each version maps to one build.
                 if (9841 <= $build && $build <= 10240) {
                     $desc = " Version 1507";
                     $desc .= " (Preview Build $build)" if $build < 10240;
@@ -594,11 +599,52 @@ sub _GetOSName {
                     $desc = " Version 1903 (May 2019 Update)";
                     $desc .= " (Preview Build $build)" if $build < 18362;
                 }
+                elsif ($build == 18363) {
+                    $desc = " Version 1909 (November 2019 Update)";
+                }
+                elsif ($build == 19041) {
+                    $desc = " Version 2004 (May 2020 Update)";
+                }
+                elsif ($build == 19042) {
+                    $desc = " Version 20H2 (October 2020 Update)";
+                }
+                elsif ($build == 19043) {
+                    $desc = " Version 21H1 (May 2021 Update)";
+                }
+                elsif ($build == 19044) {
+                    $desc = " Version 21H2 (November 2021 Update)";
+                }
+                elsif ($build == 19045) {
+                    $desc = " Version 22H2 (2022 Update)";
+                }
+                # Build numbers from https://en.wikipedia.org/wiki/Windows_11_version_history
+                # Windows 11
+                elsif ($build == 22000) {
+                    $desc = " Version 21H2 (2021 Update)";
+                }
+                elsif ($build == 22621) {
+                    $desc = " Version 22H2 (2022 Update)";
+                }
+                elsif ($build == 22631) {
+                    $desc = " Version 23H2 (2023 Update)";
+                }
+                elsif ($build == 26100) {
+                    $desc = " Version 24H2 (2024 Update)";
+                }
+                elsif ($build == 26200) {
+                    $desc = " Version 25H2 (2025 Update)";
+                }
+                elsif ($build == 28000) {
+                    $desc = " Version 26H1 (2026 Update)";
+                }
                 else {
                     $desc = " Build $build";
                 }
             }
             else {
+                # Build numbers from  https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions
+                # https://learn.microsoft.com/en-us/windows-server/get-started/servicing-channels-comparison#annual-channel-ac
+                # Long-Term Servicing Channel (LTSC)
                 if ($build == 14393) {
                     $os = "2016";
                     $desc = "Version 1607";
@@ -607,7 +653,16 @@ sub _GetOSName {
                     $os = "2019";
                     $desc = "Version 1809";
                 }
+                elsif ($build == 20348) {
+                    $os = "2022";
+                    $desc = "Version 21H2";
+                }
+                elsif ($build == 26100) {
+                    $os = "2025";
+                    $desc = "Version 24H2";
+                }
                 else {
+                    # (Semi) Annual Channel (AC)
                     $os = "Server";
                     if ($build == 16299) {
                         $desc = "Version 1709";
@@ -617,6 +672,18 @@ sub _GetOSName {
                     }
                     elsif ($build == 18362) {
                         $desc = "Version 1903";
+                    }
+                    elsif ($build == 18363) {
+                        $desc = "Version 1909";
+                    }
+                    elsif ($build == 19041) {
+                        $desc = "Version 2004";
+                    }
+                    elsif ($build == 19042) {
+                        $desc = "Version 20H2";
+                    }
+                    elsif ($build == 25398) {
+                        $desc = "Version 23H2";
                     }
                     else {
                         $desc = "Build $build";
@@ -1128,6 +1195,9 @@ Currently the possible values for the OS name are
     Win10
     Win2016
     Win2019
+    Win2022
+    Win2025
+    Win11
     WinSAC
 
 This routine is just a simple interface into GetOSVersion().  More
@@ -1177,13 +1247,16 @@ Currently known values for ID MAJOR MINOR and BUILD are as follows:
     Windows Server 2008 R2   2      6       1       -
     Windows 8                2      6       2       -
     Windows Server 2012      2      6       2       -
-    Windows 8.1              2      6       2       -
-    Windows Server 2012 R2   2      6       2       -
-    
+    Windows 8.1              2      6       2/3     -
+    Windows Server 2012 R2   2      6       2/3     -
+
     Windows 10               2     10       0       -
     Windows Server 2016      2     10       0   14393
-    Windows Server 2019      2     10       0   17677
-    
+    Windows Server 2019      2     10       0   17763
+    Windows Server 2022      2     10       0   20348
+    Windows Server 2025      2     10       0   26100
+    Windows 11               2     10       0       -
+
 On Windows NT 4 SP6 and later this function returns the following
 additional values: SPMAJOR, SPMINOR, SUITEMASK, PRODUCTTYPE.
 
@@ -1202,6 +1275,15 @@ them.
 The version numbers for Windows 8 and Windows Server 2012 are
 identical; the PRODUCTTYPE field must be used to differentiate between
 them.
+
+The minor version number for Windows 8.1 and Windows Server 2012 R2
+depends on the running Perl version. Perl itself has been manifested
+for Windows 8.1 and Windows 10 starting from 5.24.0 (or more precisely
+from 5.23.3, if one takes development releases into account). Older
+releases of perl return the minor version as 2, while newer releases
+return it as 3. See Microsoft's L<Operating System
+Version|https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version>
+documentation for more details.
 
 For modern Windows releases, the major and minor version numbers are
 identical. The PRODUCTTYPE field must be used to differentiate between
@@ -1537,7 +1619,7 @@ DllUnregisterServer.
 =head2 Short Path Names
 
 There are many situations in which modern Windows systems will not have
-the L<short path name|https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#short-vs-long-names>
+the L<short path name|https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#short-vs-long-names>
 (also called 8.3 or MS-DOS) alias for long file names available.
 
 Short path support can be configured system-wide via the registry,
