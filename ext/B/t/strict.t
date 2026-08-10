@@ -21,7 +21,7 @@ use O ();
 
 foreach my $module (qw/B O/) {
     my $path  = $INC{ $module . '.pm' };
-    my $check = "$^X -cw -Mstrict $path 2>&1";
+    my $check = qq["$^X" -cw -Mstrict $path 2>&1];
     my $got   = `$check`;
     is( $got, "$path syntax OK\n", "$module.pm compiles without errors" )
       or diag($got);
