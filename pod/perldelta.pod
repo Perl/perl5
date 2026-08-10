@@ -471,6 +471,13 @@ string value and returning 9.
 
 =item *
 
+builtin::reftype() and builtin::refaddr() now call set magic for their
+output when their argument isn't a reference.  This would prevent
+propagation of the result if either function was called like
+C<$magical_lexical = reftype($maybe_ref)>.  Fixes #24634
+
+=item *
+
 Parsing an invalid signature that gives a slurpy parameter a default value no
 longer crashes when parser debugging is enabled.  [GH #24691]
 
