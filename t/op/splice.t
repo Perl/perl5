@@ -98,6 +98,23 @@ $#a++;
 is sprintf("%s", splice @a, 0, 1, undef), "",
   'splice handles nonexistent elems when array len stays the same';
 
+{
+    # GH #24659
+    package BaseA {
+        sub meth { __PACKAGE__ }
+    }
+    package BaseB {
+        sub meth { __PACKAGE__ }
+    }
+    splice(@Derived::ISA, 0, 0, "BaseA");
+    $Derived::ISA[0] = "BaseB";
+    is(Derived->meth, "BaseB", "magic invoked for grown");
+    @Derived::ISA = qw(BaseB BaseB BaseB);
+    splice(@Derived::ISA, 0, 2, "BaseB");
+    $Derived::ISA[0] = "BaseA";
+    is(Derived->meth, "BaseA", "magic invoked for shrunk");
+}
+
 # RT#131000
 {
     local $@;
@@ -112,6 +129,5 @@ is sprintf("%s", splice @a, 0, 1, undef), "",
 fresh_perl_is('my @data = (undef) x 4; splice @data, 1, 1;
     splice @data, 2, 1; $data[3] = undef; splice @data, 3, 1;',
     '', {}, 'GH#18667 - av_extend_guts must zero duplicate SV*s');
-
 
 done_testing;
