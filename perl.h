@@ -4205,8 +4205,8 @@ Obsolete form of C<UVuf>, which you should convert to instead use
  *  #define sv1_ PERL_UNIQUE_NAME(sv)
  * and it will expand to something very likely unique to your file, beginning
  * with 'PL_' which means there should be no name collision with the caller.
- * an underscore.  If two 'sv1_' are attempted to be defined, a compiler
- * warning will get raised, so you can change one of them. */
+ * If two 'sv1_' are attempted to be defined, a compiler warning will get
+ * raised, so you can change one of them. */
 #define PERL_UNIQUE_NAME(name)  CAT2(PL_, CAT2(name, __LINE__))
 
 #if !defined(DEBUGGING) && !defined(NDEBUG)
