@@ -167,7 +167,7 @@ EOF
 # for understanding of Config{'sh'} test see exec description in camel book
 my $cmd = 'print(scalar(<STDIN>))';
 $cmd = $Config{'sh'} =~ /sh/ ? "'$cmd'" : cmd_line($cmd);
-$pid = eval { open3 'WRITE', '>&STDOUT', 'ERROR', "$perl -e " . $cmd; };
+$pid = eval { open3 'WRITE', '>&STDOUT', 'ERROR', qq["$perl" -e ] . $cmd; };
 if ($@) {
 	print "error $@\n";
 	++$test;
