@@ -111,7 +111,7 @@ is($val->[0], 'hello', 'and return the correct value');
 
 my $path = join " ", map { qq["-I$_"] } @INC;
 
-$a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -anlwi.bak -e 1 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 $a =~ s/.*possible typo.*\n//;              # Remove warning line
 $a =~ s/.*-i used with no filenames.*\n//;  # Remove warning line
@@ -129,17 +129,17 @@ $b =~ s/our\\\(\\\@F\\\)/our[( ]\@F\\)?/; # accept both our @F and our(@F)
 like($a, qr/$b/,
    'command line flags deparse as BEGIN blocks setting control variables');
 
-$a = `$^X $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -e "use constant PI => 4" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, "use constant ('PI', 4);\n",
    "Proxy Constant Subroutines must not show up as (incorrect) prototypes");
 
-$a = `$^X $path "-MO=Deparse" -e "sub foo(){1}" 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -e "sub foo(){1}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, "sub foo () {\n    1;\n}\n",
    "Main prog consisting of just a constant (via empty proto)");
 
-$a = readpipe qq|$^X $path "-MO=Deparse"|
+$a = readpipe qq|"$^X" $path "-MO=Deparse"|
              .qq| -e "package F; sub f(){0} sub s{}"|
              .qq| -e "#line 123 four-five-six"|
              .qq| -e "package G; sub g(){0} sub s{}" 2>&1|;
@@ -191,7 +191,7 @@ eval <<EOFCODE and test($x);
 EOFCODE
 
 # Exotic sub declarations
-$a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODG', "sub :::: and sub ::::::");
 sub :::: {
@@ -203,7 +203,7 @@ sub :::::: {
 EOCODG
 
 # [perl #117311]
-$a = `$^X $path "-MO=Deparse,-l" -e "map{ eval(0) }()" 2>&1`;
+$a = `"$^X" $path "-MO=Deparse,-l" -e "map{ eval(0) }()" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODH', "[perl #117311] [PATCH] -l option ('#line ...') does not emit ^Ls in the output");
 #line 1 "-e"
@@ -227,7 +227,7 @@ EOCODE
 
 # [perl #62500]
 $a =
-  `$^X $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
+  `"$^X" $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODF', "CORE::GLOBAL::require override causing panick");
 sub BEGIN {
@@ -240,7 +240,7 @@ EOCODF
 
 # [perl #91384]
 $a =
-  `$^X $path "-MO=Deparse" -e "BEGIN{*Acme::Acme:: = *Acme::}" 2>&1`;
+  `"$^X" $path "-MO=Deparse" -e "BEGIN{*Acme::Acme:: = *Acme::}" 2>&1`;
 like($a, qr/-e syntax OK/,
     "Deparse does not hang when traversing stash circularities");
 
@@ -257,7 +257,7 @@ q<{
 
 # Strict hints in %^H are mercilessly suppressed
 $a =
-  `$^X $path "-MO=Deparse" -e "use strict; print;" 2>&1`;
+  `"$^X" $path "-MO=Deparse" -e "use strict; print;" 2>&1`;
 unlike($a, qr/BEGIN/,
     "Deparse does not emit strict hh hints");
 
@@ -278,7 +278,7 @@ SKIP: {
 }
 
 # multiple statements on format lines
-$a = `$^X $path "-MO=Deparse" -e "format =" -e "\@" -e "x();z()" -e. 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -e "format =" -e "\@" -e "x();z()" -e. 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODH', 'multiple statements on format lines');
 format STDOUT =
@@ -323,7 +323,7 @@ $x
 EOCODN
 
 # CORE::format
-$a = readpipe qq`$^X $path "-MO=Deparse" -e "use feature q|:all|;`
+$a = readpipe qq`"$^X" $path "-MO=Deparse" -e "use feature q|:all|;`
              .qq` my sub format; CORE::format =" -e. 2>&1`;
 like($a, qr/CORE::format/, 'CORE::format when lex format sub is in scope');
 
@@ -336,7 +336,7 @@ is($deparse->coderef2text(sub{ use utf8; /€/; }),
 
 # STDERR when deparsing sub calls
 # For a short while the output included 'While deparsing'
-$a = `$^X $path "-MO=Deparse" -e "foo()" 2>&1`;
+$a = `"$^X" $path "-MO=Deparse" -e "foo()" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODI', 'no extra output when deparsing foo()');
 foo();
@@ -372,26 +372,26 @@ sub _121050empty ( ) {
 EOCODP
 
 # CORE::no
-$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+$a = readpipe qq`"$^X" $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub no; CORE::no less" 2>&1`;
 like($a, qr/my sub no;\n.*CORE::no less;/s,
     'CORE::no after my sub no');
 
 # CORE::use
-$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+$a = readpipe qq`"$^X" $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub use; CORE::use less" 2>&1`;
 like($a, qr/my sub use;\n.*CORE::use less;/s,
     'CORE::use after my sub use');
 
 # CORE::__DATA__
-$a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
+$a = readpipe qq`"$^X" $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub __DATA__; `
              .qq`CORE::__DATA__" 2>&1`;
 like($a, qr/my sub __DATA__;\n.*CORE::__DATA__/s,
     'CORE::__DATA__ after my sub __DATA__');
 
 # sub declarations
-$a = readpipe qq`$^X $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
+$a = readpipe qq`"$^X" $path "-MO=Deparse" -e "sub foo{}" 2>&1`;
 like($a, qr/sub foo\s*\{\s+\}/, 'sub declarations');
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
            prog => 'sub f($); sub f($){}'),
@@ -423,7 +423,7 @@ SKIP : {
         }
       }';
     $prog =~ s/\n//g;
-    $a = readpipe qq`$^X $path "-MO=Deparse" -e "$prog" 2>&1`;
+    $a = readpipe qq`"$^X" $path "-MO=Deparse" -e "$prog" 2>&1`;
     $a =~ s/-e syntax OK\n//g;
     is($a, <<'EOCODJ', 'BEGIN blocks');
 sub BEGIN {
@@ -478,7 +478,7 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
 
 # [perl #115066]
 my $prog = 'use constant FOO => do { 1 }; no overloading; die';
-$a = readpipe qq`$^X $path "-MO=-qq,Deparse" -e "$prog" 2>&1`;
+$a = readpipe qq`"$^X" $path "-MO=-qq,Deparse" -e "$prog" 2>&1`;
 is($a, <<'EOCODK', '[perl #115066] use statements accidentally nested');
 use constant ('FOO', do {
     1
