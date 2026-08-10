@@ -457,6 +457,13 @@ folding.  [GH #24661]
 
 =item *
 
+builtin::reftype() and builtin::refaddr() now call set magic for their
+output when their argument isn't a reference.  This would prevent
+propagation of the result if either function was called like
+C<$magical_lexical = reftype($maybe_ref)>.  Fixes #24634
+
+=item *
+
 The regular expression engine's "super-linear cache" wasn't 64-bit clean
 and so could in principle overflow on huge (>256Mb) strings, resulting in
 incorrect matches and potential memory corruption. (The cache engages on
