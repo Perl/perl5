@@ -4,7 +4,7 @@ use strict;
 use Devel::SelfStubber;
 use File::Spec::Functions;
 
-my $runperl = $^X;
+my $runperl = qq["$^X"];
 
 # ensure correct output ordering for system() calls
 
