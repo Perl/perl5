@@ -6609,8 +6609,12 @@ PP_wrapped(pp_splice, 0, 1)
         Safefree(tmparyval);
     }
 
-    if (SvMAGICAL(ary))
+    if (UNLIKELY(SvMAGICAL(ary))) {
+        for (i = 0; i < newlen; ++i) {
+            mg_copy(MUTABLE_SV(ary), AvARRAY(ary)[offset+i], NULL, offset+i);
+        }
         mg_set(MUTABLE_SV(ary));
+    }
 
     SP = MARK;
     RETURN;
