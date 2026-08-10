@@ -396,11 +396,10 @@ with C<Perl>, C<perl>, or C<PL_>, or ending with C<_pl_>.
 =head3 Symbol visibility
 
 For most of its life, Perl made little or no effort to hide its internal
-symbols or functions.  This made it easy for programmers to, even
-inadvertently, use functionality that depended on Perl's internal
-implementation details.  When we tried to change those details, user
-functionality often broke, thus creating frictions, and slowing down
-adding improvements.
+symbols or functions.  This led to programmers using functionality that
+depended on Perl's internal implementation details.  When we tried to
+change those details, user functionality often broke, thus hindering
+progress.
 
 That has been changing in recent releases.  In 5.38, the default
 visibility of functions was changed to automatically be restricted to
