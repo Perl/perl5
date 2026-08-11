@@ -1459,7 +1459,7 @@ sub reduce_ones_and_zeros {
         # '^ 1 && foo' -> foo
         # '^ 1 || foo' -> 1     # Works cause || lower precedence than &&
         $changed |= $$ref =~ s/ ^ \s* 1 \s* && \s* //xg;
-        #$changed |= $$ref =~ s/ ^ \s* 1 \s* \|\| .* /1/xg;
+        $changed |= $$ref =~ s/ ^ \s* 1 \s* \|\| .* /1/xg;
 
         # '(1 && foo' -> (foo
         $changed |= $$ref =~ s/ \( \s* 1 \s* && \s* /(/xg;

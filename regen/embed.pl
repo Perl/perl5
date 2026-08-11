@@ -150,35 +150,58 @@ my %per_file_definitions = (
 );
 
 # This is a list of symbols that are:
-#   1) not documented to be available for modules to use,
-#   2) not resolved as needed to be visible to any module (and that we don't
+#   1) not found by this program to be documented to be available for modules
+#      to use,
+#   2) not found in metacpan as of July 20, 2026.
+#   3) not resolved as needed to be visible to any module (and that we don't
 #      plan to document any time soon),
 #   3) but are nevertheless currently not kept by embed.h from being visible
 #      to the world.
 #
-# Strive to make this list empty.
+# There is now a second list, @symbols_used_on_metacpan, that contains symbols
+# that otherwise would be on this list, but are actually known to be used in
+# metacpan
 #
-# Symbols in class 2) above should instead be placed in
-# @undocumented_always_visible.
+# Strive to make both lists empty.
 #
-# The list does not include symbols that we have documented as being reserved
-# for perl's use, namely those that match the pattern just above.
-# There are two parts of the list; the second part contains the symbols which
+# That is, each item on the lists should be inspected and its status resolved.
+# Likely outcomes of this resolution include:
+#   1) This program is deficient, and correcting it leads to the affected
+#      items to no longer need to be on the lists.
+#   2) Document the symbol, typically via apidoc comment lines.  This is the
+#      preferred outcome, which has the added advantage that Devel::PPPort can
+#      automatically generate tests for it.
+#   3) Decide that the symbol should not be publicly exposed and remove it
+#      from its list, or maybe even that the symbol is obsolete, and remove it
+#      from our code.  This will cause cpan breakage for symbols on the
+#      @symbols_used_on_metacpan list, which will have to be dealt with.
+#   4) Decide that the symbol needs to be visible to just the 're' extension,
+#      or to any Perl extenstion module, and move it to %needed_by_ext_re or
+#      %needed_by_ext, respectively.
+#   5) Decide that the symbol should not be used directly by XS code, but does
+#      need to be publicly exposed because it occurs in the expansion of
+#      public macros.  It would be best to document such symbols with the
+#      apidoc 'C' flag, or to rename it to conform to those reserved for
+#      perl's use.  But failing that, the symbol can be moved to the
+#      %undocumented_always_visible list.
+#
+# The lists do not include symbols whose names match the pattern just above as
+# being reserved for perl's use.
+#
+# There are two parts of each list; the second part contains the symbols which
 # have a trailing underscore indicating the intent for this symbol to not be
 # directly usable by XS code.  The first part are those symbols without a
 # trailing underscore.
 #
 # For all modules that aren't deliberately using particular names, all the
-# other symbols on it are namespace pollutants.
+# other symbols on the lists are namespace pollutants.
+
 my %unresolved_visibility_overrides = map { $_ => 1 } qw(
-    ABORT
     ABS_IV_MIN
     ALIGNED_TYPE
     ALIGNED_TYPE_NAME
     ALLOC_THREAD_KEY
     ALL_PARENS_COUNTED
-    ALWAYS_WARN_SUPER
-    AMG_CALLun
     AMGfallNEVER
     AMGfallNO
     AMGfallYES
@@ -187,50 +210,29 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     AMGf_want_list
     AMG_id2name
     AMG_id2namelen
-    AMT_AMAGIC
     AMT_AMAGIC_off
     AMT_AMAGIC_on
     AMTf_AMAGIC
-    ANGSTROM_SIGN
     ARABIC_DECIMAL_SEPARATOR_UTF8
     ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE
     ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s
     ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL
     ARGTARG
-    ASCII_FOLD_RESTRICTED
     ASCII_MORE_RESTRICT_PAT_MODS
     ASCII_PLATFORM_UTF8_MAXBYTES
-    ASCII_RESTRICTED
-    ASCII_RESTRICT_PAT_MOD
     ASCII_RESTRICT_PAT_MODS
     ASCII_TO_NATIVE
-    ASSERT_CURPAD_ACTIVE
     ASSERT_CURPAD_LEGAL
-    ASSERT_IS_LITERAL
     ASSERT_IS_PTR
     assert_not_glob
-    ASSERT_NOT_PTR
-    assert_not_ROK
     aTHXa
     aTHXx
-    AT_LEAST_ASCII_RESTRICTED
-    AT_LEAST_UNI_SEMANTICS
     Atoul
-    AvARYLEN
-    AvMAX
-    AvREAL
     AvREALISH
-    AvREAL_off
-    AvREAL_on
     AvREAL_only
-    AvREIFY
-    AvREIFY_off
-    AvREIFY_on
-    AvREIFY_only
     av_tindex_skip_len_mg
     av_top_index_skip_len_mg
     BADVERSION
-    BASEOP
     BhkENTRY
     BHKf_bhk_eval
     BHKf_bhk_post_end
@@ -238,110 +240,42 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     BHKf_bhk_start
     BhkFLAGS
     BIT_BUCKET
-    BIT_DIGITS
-    blk_eval
-    blk_format
-    blk_gimme
-    blk_givwhen
-    blk_loop
-    blk_oldcop
-    blk_oldmarksp
-    blk_oldpm
-    blk_oldsaveix
-    blk_oldscopesp
-    blk_oldsp
-    blk_old_tmpsfloor
-    blk_sub
     blk_u16
-    BmFLAGS
-    BmPREVIOUS
-    BmRARE
-    BmUSEFUL
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
     BSD_GETPGRP
-    BSDish
     BSD_SETPGRP
-    CALL_BLOCK_HOOKS
-    CALL_FPTR
-    CALLREGCOMP
-    CALLREGCOMP_ENG
     CALLREGDUPE
-    CALLREGDUPE_PVT
-    CALLREGEXEC
     CALLREGFREE
-    CALLREGFREE_PVT
     CALLREG_INTUIT_START
     CALLREG_INTUIT_STRING
-    CALLREG_NAMED_BUFF_ALL
     CALLREG_NAMED_BUFF_CLEAR
     CALLREG_NAMED_BUFF_COUNT
     CALLREG_NAMED_BUFF_DELETE
     CALLREG_NAMED_BUFF_EXISTS
-    CALLREG_NAMED_BUFF_FETCH
     CALLREG_NAMED_BUFF_FIRSTKEY
-    CALLREG_NAMED_BUFF_NEXTKEY
     CALLREG_NAMED_BUFF_SCALAR
     CALLREG_NAMED_BUFF_STORE
-    CALLREG_NUMBUF_FETCH
     CALLREG_NUMBUF_LENGTH
     CALLREG_NUMBUF_STORE
     CALLREG_PACKAGE
-    CALLRUNOPS
-    CAN64BITHASH
-    CAN_COW_FLAGS
-    CAN_COW_MASK
-    CAN_PROTOTYPE
-    CASE_STD_PMMOD_FLAGS_PARSE_SET
-    CATCH_GET
-    CATCH_SET
     cBINOP
-    cBINOPo
-    cBINOPx
     cCOP
-    cCOPo
-    cCOPx
     C_FAC_POSIX
-    cGVOP_gv
-    cGVOPo_gv
-    cGVOPx_gv
-    CHANGE_MULTICALL_FLAGS
     CHARSET_PAT_MODS
     CHECK_MALLOC_TAINT
     CHECK_MALLOC_TOO_LATE_FOR
     child_offset_bits
-    CHR_SVLEN
-    ckDEAD
     ckWARN2_non_literal_string
-    ckWARN2reg
-    ckWARN2reg_d
-    ckWARN3reg
-    ckWARN4reg
-    ckWARNdep
     ckWARNexperimental
     ckWARNexperimental_with_arg
-    ckWARNreg
-    ckWARNregdep
     CLANG_DIAG_IGNORE
     CLANG_DIAG_IGNORE_DECL
-    CLANG_DIAG_IGNORE_STMT
     CLANG_DIAG_PRAGMA
     CLANG_DIAG_RESTORE
     CLANG_DIAG_RESTORE_DECL
-    CLANG_DIAG_RESTORE_STMT
-    classnum_to_namedclass
-    CLEAR_ARGARRAY
-    CLEAR_OPTSTART
     cLISTOP
-    cLISTOPo
-    cLISTOPx
     cLOGOP
-    cLOGOPo
-    cLOGOPx
-    CLONEf_JOIN_IN
-    cLOOP
-    cLOOPo
-    cLOOPx
     CLUMP_2IV
     CLUMP_2UV
     cMETHOP
@@ -350,18 +284,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     cMETHOPo_meth
     cMETHOPo_rclass
     cMETHOP_rclass
-    cMETHOPx
-    cMETHOPx_meth
-    cMETHOPx_rclass
     COMBINING_DOT_ABOVE_UTF8
-    COMBINING_GRAVE_ACCENT_UTF8
     COMBINING_GREEK_YPOGEGRAMMENI_UTF8
-    COND_BROADCAST
-    COND_DESTROY
-    COND_INIT
-    COND_SIGNAL
-    COND_WAIT
-    CONTINUE_PAT_MOD
     COP_FEATURE_SIZE
     CopFEATURES_setfrom
     CopFILEAVx
@@ -371,204 +295,79 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CopFILE_setn_x
     CopFILE_set_x
     COPHH_EXISTS
-    CopHINTHASH_get
-    CopHINTHASH_set
-    CopHINTS_get
-    CopHINTS_set
-    CopLABEL_alloc
-    CopLINE_dec
-    CopLINE_inc
-    CopLINE_set
-    COP_SEQMAX_INC
-    COP_SEQ_RANGE_HIGH
-    COP_SEQ_RANGE_LOW
     CopSTASH_ne
-    copy_length
-    CowREFCNT
     cPADOP
     cPADOPo
-    cPADOPx
     cPMOP
-    cPMOPo
-    cPMOPx
-    cPVOP
-    cPVOPo
-    cPVOPx
     CR_NATIVE
-    cSVOP
-    cSVOPo
-    cSVOPo_sv
-    cSVOP_sv
-    cSVOPx
-    cSVOPx_sv
-    cSVOPx_svp
     Ctl
     CTYPE256
-    cUNOP
-    cUNOP_AUX
-    cUNOP_AUXo
-    cUNOP_AUXx
-    cUNOPo
-    cUNOPx
-    CvANON
     CvANONCONST
     CvANONCONST_off
     CvANONCONST_on
-    CvANON_off
-    CvANON_on
-    CvAUTOLOAD
-    CvAUTOLOAD_off
     CvAUTOLOAD_on
     cv_ckproto
-    CvCLONE
-    CvCLONED
     CvCLONED_off
     CvCLONED_on
-    CvCLONE_off
-    CvCLONE_on
-    CvCONST
-    CvCONST_off
-    CvCONST_on
-    CvCVGV_RC
     CvCVGV_RC_off
     CvCVGV_RC_on
     CvDEPTHunsafe
-    CvDYNFILE
     CvDYNFILE_off
     CvDYNFILE_on
-    CvEVAL
     CvEVAL_COMPILED
     CvEVAL_COMPILED_off
     CvEVAL_COMPILED_on
     CvEVAL_off
     CvEVAL_on
-    CVf_ANON
     CVf_ANONCONST
-    CVf_AUTOLOAD
-    CVf_BUILTIN_ATTRS
     CVf_CLONE
     CVf_CLONED
-    CVf_CONST
-    CVf_CVGV_RC
     CVf_DYNFILE
     CVf_EVAL_COMPILED
     CVf_HASEVAL
-    CvFILE
-    CvFILEGV
-    CvFILE_set_from_cop
-    CVf_IsMETHOD
     CVf_ISXSUB
-    CvFLAGS
-    CVf_LEXICAL
-    CVf_LVALUE
-    CVf_METHOD
     CVf_NAMED
-    CVf_NODEBUG
     CVf_NOWARN_AMBIGUOUS
     CVf_REFCOUNTED_ANYSV
     CVf_SIGNATURE
     CVf_UNIQUE
-    CVf_WEAKOUTSIDE
     CVf_XS_RCSTACK
-    CvGV_set
     CvHASEVAL
     CvHASEVAL_off
     CvHASEVAL_on
     CvHASGV
     CvHSCXT
-    CvIsMETHOD
     CvIsMETHOD_off
     CvIsMETHOD_on
-    CvISXSUB
     CvISXSUB_off
-    CvISXSUB_on
-    CvLEXICAL
     CvLEXICAL_off
-    CvLEXICAL_on
-    CvLVALUE
     CvLVALUE_off
-    CvLVALUE_on
-    CvMETHOD
-    CvMETHOD_off
-    CvMETHOD_on
-    CvNAMED
-    CvNAMED_off
-    CvNAMED_on
     CvNAME_HEK_clear
-    CvNAME_HEK_set
-    CvNODEBUG
-    CvNODEBUG_off
-    CvNODEBUG_on
     CvNOWARN_AMBIGUOUS
     CvNOWARN_AMBIGUOUS_off
     CvNOWARN_AMBIGUOUS_on
-    CvOUTSIDE
-    CvOUTSIDE_SEQ
-    CvPADLIST_set
-    CvPROTO
-    CvPROTOLEN
-    CvREFCOUNTED_ANYSV
     CvREFCOUNTED_ANYSV_off
-    CvREFCOUNTED_ANYSV_on
-    CvSIGNATURE
     CvSIGNATURE_off
     CvSIGNATURE_on
-    CvSPECIAL
     CvSPECIAL_off
-    CvSPECIAL_on
-    CvSTASH_set
-    CvUNIQUE
     CvUNIQUE_off
     CvUNIQUE_on
-    CvWEAKOUTSIDE
     CvWEAKOUTSIDE_off
-    CvWEAKOUTSIDE_on
     CvXS_RCSTACK
     CvXS_RCSTACK_off
     CvXS_RCSTACK_on
-    CvXSUB
-    CvXSUBANY
-    CX_CURPAD_SAVE
-    CX_CURPAD_SV
     CX_DEBUG
     CxEVALBLOCK
     CxEVAL_TXT_REFCNTED
-    CxFOREACH
-    CxHASARGS
-    CxITERVAR
-    CxLABEL
-    CxLABEL_len
     CxLABEL_len_flags
-    CxLVAL
-    CxMULTICALL
-    CxOLD_IN_EVAL
-    CxOLD_OP_TYPE
-    CxONCE
-    CxPADLOOP
-    CXp_EVALBLOCK
     CXp_FINALLY
     CXp_FOR_DEF
-    CXp_FOR_GV
     CXp_FOR_LVREF
-    CXp_FOR_PAD
-    CXp_HASARGS
-    CXp_MULTICALL
     CXp_ONCE
     CX_POP_SAVEARRAY
     CXp_REAL
-    CXp_SUB_RE
-    CXp_SUB_RE_FAKE
-    CXp_TRY
-    CXp_TRYBLOCK
     CX_PUSHSUB_GET_LVALUE_MASK
-    CxREALEVAL
-    cxstack_max
     CXt_DEFER
-    CxTRY
-    CxTRYBLOCK
-    CxTYPE
-    CxTYPE_is_LOOP
-    CXTYPEMASK
     dATARGET
     DBVARMG_COUNT
     DBVARMG_SIGNAL
@@ -576,41 +375,19 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     DBVARMG_TRACE
     DEBUG_DB_RECURSE_FLAG
     DEBUG_MASK
-    DEBUG_PEEP
     DEBUG_POST_STMTS
     DEBUG_PRE_STMTS
-    DEBUG_RExC_seen
     DEBUG_SBOX32_HASH
     DEBUG_SCOPE
     DEBUG_SHOW_STUDY_FLAG
-    DEBUG_STUDYDATA
     DEBUG_TOP_FLAG
     DEBUG_ZAPHOD32_HASH
-    DEFAULT_PAT_MOD
     DEFERRED_COULD_BE_OFFICIAL_MARKERc
     DEFERRED_COULD_BE_OFFICIAL_MARKERs
     DEFERRED_USER_DEFINED_INDEX
     del_body_by_type
-    DEL_NATIVE
-    DEPENDS_PAT_MOD
     DEPENDS_PAT_MODS
-    DEPENDS_SEMANTICS
-    DETACH
-    DIE
     DISABLE_LC_NUMERIC_CHANGES
-    dJMPENV
-    djSP
-    DM_ARRAY_ISA
-    DM_DELAY
-    DM_EGID
-    DM_EUID
-    DM_GID
-    DM_RGID
-    DM_RUID
-    DM_UID
-    dMY_CXT_INTERP
-    do_exec
-    DOSISH
     DOUBLE_BIG_ENDIAN
     DOUBLE_IS_IEEE_FORMAT
     DOUBLE_IS_VAX_FLOAT
@@ -623,7 +400,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     dPOPPOPiirl
     dPOPPOPnnrl
     dPOPPOPssrl
-    dPOPss
     dPOPTOPiirl
     dPOPTOPiirl_nomg
     dPOPTOPiirl_ul_nomg
@@ -635,26 +411,14 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     dPOPXiirl_ul_nomg
     dPOPXnnrl
     dPOPXssrl
-    DPTR2FPTR
     dSAVEDERRNO
-    dSAVE_ERRNO
-    dSS_ADD
-    dTARG
     dTARGETSTACKED
     dTHX_DEBUGGING
-    dTHXs
     dTHXx
     dTOPiv
     dTOPnv
-    dTOPss
     dTOPuv
-    DUMPUNTIL
-    DUP_WARNINGS
-    dXSUB_SYS
-    eC
-    eI
     EIGHT_BIT_UTF8_TO_NATIVE
-    EMBEDMYMALLOC
     ENV_INIT
     ENV_LOCK
     ENV_READ_LOCK
@@ -663,37 +427,24 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ENVr_LOCALEr_UNLOCK
     ENV_TERM
     ENV_UNLOCK
-    ESC_NATIVE
-    EVAL_INEVAL
-    EVAL_INREQUIRE
-    EVAL_KEEPERR
-    EVAL_NULL
     EVAL_RE_REPARSING
     EVAL_WARNONLY
-    EXEC_ARGV_CAST
     EXEC_PAT_MOD
     EXEC_PAT_MODS
-    EXPECT
-    EXPERIMENTAL_INPLACESCAN
     EXTEND_HWM_SET
-    EXTEND_MORTAL
     EXTEND_SKIP
     EXT_MGVTBL
     EXT_PAT_MODS
-    FAIL
-    FAIL2
     FAIL3
     FAKE_BIT_BUCKET
     FAKE_DEFAULT_SIGNAL_HANDLERS
     FAKE_PERSISTENT_SIGNAL_HANDLERS
     FALSE
     F_atan2_amg
-    FBMcf_TAIL
     FBMcf_TAIL_DOLLAR
     FBMcf_TAIL_DOLLARM
     FBMcf_TAIL_z
     FBMcf_TAIL_Z
-    FBMrf_MULTILINE
     F_cos_amg
     F_exp_amg
     FF_0DECIMAL
@@ -710,143 +461,66 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FF_LINEMARK
     FF_LINESNGL
     FF_LITERAL
-    Fflush
     FF_MORE
     FF_NEWLINE
     FF_SKIP
     FF_SPACE
-    FILTER_DATA
     FILTER_ISREADER
-    FILTER_READ
     FIT_ARENA
     FIT_ARENA0
     FIT_ARENAn
-    FITS_IN_8_BITS
     F_log_amg
     FmLINES
-    FOLD
-    FOLD_FLAGS_FULL
-    FOLD_FLAGS_LOCALE
-    FOLD_FLAGS_NOMIX_ASCII
     F_pow_amg
     FP_PINF
     FP_QNAN
-    FPTR2DPTR
     free_and_set_cop_warnings
     free_c_backtrace
-    FreeOp
-    FREE_THREAD_KEY
     FSEEKSIZE
     F_sin_amg
     F_sqrt_amg
-    Fstat
-    FULL_TRIE_STUDY
     fwrite1
     G_ARRAY
-    GCC_DIAG_IGNORE
     GCC_DIAG_IGNORE_DECL
-    GCC_DIAG_IGNORE_STMT
     GCC_DIAG_PRAGMA
-    GCC_DIAG_RESTORE
     GCC_DIAG_RESTORE_DECL
-    GCC_DIAG_RESTORE_STMT
     GETATARGET
     get_extended_os_errno
     GETTARGET
     GETTARGETSTACKED
     G_FAKINGEVAL
-    GLOBAL_PAT_MOD
-    G_NODEBUG
-    GREEK_CAPITAL_LETTER_MU
-    GREEK_SMALL_LETTER_MU
-    G_RE_REPARSING
     G_UNDEF_FILL
-    Gv_AMG
-    GvASSUMECV
     GvASSUMECV_off
-    GvASSUMECV_on
-    GV_AUTOLOAD
-    GvAVn
-    GV_CROAK
-    GvCVGEN
-    GvCV_set
-    GvCVu
-    GvEGV
     GvEGVx
-    GvENAME
     GvENAME_HEK
-    GvENAMELEN
     GvENAMEUTF8
     GvESTASH
     GVf_ASSUMECV
-    gv_fetchmethod_flags
-    GvFILE
-    GvFILEGV
-    GvFILE_HEK
     GvFILEx
-    GVf_IMPORTED
     GVf_IMPORTED_AV
     GVf_IMPORTED_CV
     GVf_IMPORTED_HV
     GVf_IMPORTED_SV
     GVf_INTRO
-    GvFLAGS
     GVf_MULTI
     GVF_NOADD
     GVf_ONCE_FATAL
-    GvFORM
     GVf_RESERVED
-    GvGP
-    GvGPFLAGS
-    GvGP_set
-    GvHVn
-    GvIMPORTED
-    GvIMPORTED_AV
     GvIMPORTED_AV_off
-    GvIMPORTED_AV_on
-    GvIMPORTED_CV
     GvIMPORTED_CV_off
-    GvIMPORTED_CV_on
-    GvIMPORTED_HV
     GvIMPORTED_HV_off
-    GvIMPORTED_HV_on
     GvIMPORTED_off
     GvIMPORTED_on
-    GvIMPORTED_SV
     GvIMPORTED_SV_off
-    GvIMPORTED_SV_on
-    GvIN_PAD
     GvIN_PAD_off
-    GvIN_PAD_on
-    GvINTRO
-    GvINTRO_off
     GvINTRO_on
-    GvIO
-    GvIOn
-    GvIOp
-    GvLINE
-    gv_method_changed
-    GvMULTI
     GvMULTI_off
-    GvMULTI_on
-    GvNAME
-    GvNAME_get
-    GvNAMELEN
-    GvNAMELEN_get
-    GvNAMEUTF8
-    GV_NOADD_MASK
     GvONCE_FATAL
     GvONCE_FATAL_off
     GvONCE_FATAL_on
-    GvREFCNT
-    GvSTASH
     GvXPVGV
-    G_WANT
     G_WARN_ALL_MASK
-    G_WARN_ALL_OFF
-    G_WARN_ALL_ON
     G_WARN_OFF
-    G_WARN_ON
     G_WARN_ONCE
     gwENVr_LOCALEr_LOCK
     gwENVr_LOCALEr_UNLOCK
@@ -862,64 +536,41 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_EXTENDED_OS_ERRNO
     HAS_EXTRA_LONG_UTF8
     HAS_GROUP
-    HAS_IOCTL
     HAS_KILL
-    HAS_NONLATIN1_FOLD_CLOSURE
-    HAS_PASSWD
     HAS_POSIX_2008_LOCALE
     HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
     HAS_UTIME
     HAS_WAIT
     hasWARNBIT
-    HASWIDTH
-    HEK_BASESIZE
-    HeKEY_sv
-    HEKf
     HEKf256
     HEKf256_QUOTEDPREFIX
-    HEKfARG
-    HeKFLAGS
-    HEK_FLAGS
     HEKf_QUOTEDPREFIX
     HeKLEN_UTF8
-    HeKUTF8
     HEK_UTF8_off
     HEK_UTF8_on
-    HeKWASUTF8
     HEK_WASUTF8_off
     HEK_WASUTF8_on
-    HeNEXT
     HINT_ALL_STRICT
     HINT_ASCII_ENCODING
-    HINT_BLOCK_SCOPE
-    HINT_BYTES
     HINT_EXPLICIT_STRICT_REFS
     HINT_EXPLICIT_STRICT_SUBS
     HINT_EXPLICIT_STRICT_VARS
     HINT_FEATURE_MASK
     HINT_FILETEST_ACCESS
-    HINT_INTEGER
     HINT_LEXICAL_IO_IN
     HINT_LEXICAL_IO_OUT
-    HINT_LOCALE
-    HINT_LOCALIZE_HH
     HINT_NEW_BINARY
     HINT_NEW_FLOAT
     HINT_NEW_INTEGER
     HINT_NEW_RE
     HINT_NEW_STRING
     HINT_NO_AMAGIC
-    HINT_RE_EVAL
     HINT_RE_FLAGS
     HINT_RE_TAINT
     HINTS_DEFAULT
     HINTS_REFCNT_INIT
     HINTS_REFCNT_TERM
-    HINT_STRICT_REFS
-    HINT_STRICT_SUBS
-    HINT_STRICT_VARS
     HINT_UNI_8_BIT
-    HINT_UTF8
     HS_APIVERLEN_MAX
     HS_CXT
     HSf_IMP_CXT
@@ -939,75 +590,34 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     htoni
     htovl
     htovs
-    HvAMAGIC
     HvAMAGIC_off
     HvAMAGIC_on
-    HvARRAY
-    HvAUX
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
     HvAUXf_SCAN_STASH
-    HvCLASS_IS_SEALED
     HvCLASSf_SEALED
-    HV_DELETE
-    HV_DISABLE_UVAR_XKEY
-    HvEITER
-    HvEITER_get
-    HvEITER_set
+    HvCLASS_IS_SEALED
     HvENAME_get
-    HvENAME_HEK
-    HvENAME_HEK_NN
     HvENAMELEN_get
-    HV_FETCH_EMPTY_HE
-    HV_FETCH_ISEXISTS
-    HV_FETCH_ISSTORE
-    HV_FETCH_JUST_SV
-    HV_FETCH_LVALUE
     HvHasENAME
     HvHasENAME_HEK
-    HvHASKFLAGS
     HvHASKFLAGS_off
     HvHASKFLAGS_on
     HvHasNAME
     HVhek_ENABLEHVKFLAGS
     HVhek_FREEKEY
     HVhek_KEYCANONICAL
-    HVhek_NOTSHARED
-    HVhek_PLACEHOLD
-    HVhek_UTF8
-    HVhek_WASUTF8
-    HvKEYS
     HvLASTRAND_get
-    HvLAZYDEL
     HvLAZYDEL_off
     HvLAZYDEL_on
-    HvMAX
-    HvNAME_HEK_NN
-    HvPLACEHOLDERS
-    HvPLACEHOLDERS_get
     HvPLACEHOLDERS_set
     HvRAND_get
-    HvRITER
-    HvRITER_get
-    HvRITER_set
-    HvSHAREKEYS
     HvSHAREKEYS_off
     HvSHAREKEYS_on
-    HvSTASH_IS_CLASS
-    HvTOTALKEYS
-    HvUSEDKEYS
-    HYPHEN_UTF8
-    I16_MAX
-    I16_MIN
-    I32_MAX
     I32_MAX_P1
-    I32_MIN
     I8_TO_NATIVE
-    I8_TO_NATIVE_UTF8
     IGNORE_PAT_MOD
-    I_LIMITS
     ILLEGAL_UTF8_BYTE
-    IN_BYTES
     INCLUDE_PROTOTYPES
     INCMARK
     INCPUSH_APPLLIB_EXP
@@ -1022,7 +632,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     init_os_extras
     INIT_THREADS
     INIT_TRACK_MEMPOOL
-    IN_LC
     IN_LC_ALL_COMPILETIME
     IN_LC_ALL_RUNTIME
     IN_LC_COMPILETIME
@@ -1030,96 +639,50 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     IN_LC_PARTIAL_RUNTIME
     IN_LC_RUNTIME
     IN_PARENS_PASS
-    inRANGE
     IN_SOME_LOCALE_FORM
     IN_SOME_LOCALE_FORM_COMPILETIME
     IN_SOME_LOCALE_FORM_RUNTIME
-    INT_64_T
-    INT_PAT_MODS
     IN_UNI_8_BIT
-    IN_UTF8_CTYPE_LOCALE
     IN_UTF8_TURKIC_LOCALE
     INVLIST_INDEX
-    IoANY
-    IOCPARM_LEN
     IOf_ARGV
     IOf_DIDTOP
     IOf_FAKE_DIRP
     IOf_NOLINE
     IOf_START
-    IoTYPE_APPEND
-    IoTYPE_CLOSED
-    IoTYPE_IMPLICIT
-    IoTYPE_NUMERIC
-    IoTYPE_PIPE
-    IoTYPE_RDONLY
-    IoTYPE_RDWR
-    IoTYPE_SOCKET
-    IoTYPE_STD
-    IoTYPE_WRONLY
     IPERLSYS_H
     isALNUMC_LC_utf8_safe
     isALNUMC_uni
     isALNUMC_utf8
     isALNUMC_utf8_safe
-    isALNUM_lazy_if_safe
-    isALNUM_LC_utf8
     isALNUM_LC_utf8_safe
     isALNUMU
-    isALNUM_uni
-    isALNUM_utf8
-    isALNUM_utf8_safe
-    isALPHA_FOLD_EQ
     isALPHA_FOLD_NE
     isALPHA_LC_utf8
     isALPHANUMERIC_LC_utf8
     isALPHANUMERIC_uni
     isALPHAU
-    isALPHA_uni
     isASCII_LC_utf8
     isASCII_uni
     ISA_VERSION_OBJ
-    isBACKSLASHED_PUNCT
     isBLANK_LC_uni
     isBLANK_LC_utf8
     isBLANK_uni
     isCASED_LC
     isCHARNAME_CONT
     isCNTRL_LC_utf8
-    isCNTRL_uni
-    isDIGIT_LC_utf8
-    isDIGIT_uni
-    is_FOLDS_TO_MULTI_utf8
     isGRAPH_LC_utf8
-    isGRAPH_uni
-    isGV
     isGV_with_GP_off
-    isGV_with_GP_on
     is_HANGUL_ED_utf8_safe
     is_HORIZWS_cp_high
-    is_HORIZWS_high
     isIDCONT_LC_utf8
-    isIDCONT_uni
-    isIDFIRST_lazy_if_safe
     isIDFIRST_LC_utf8
-    isIDFIRST_uni
     is_LARGER_NON_CHARS_utf8
     is_LAX_VERSION
-    isLEXWARN_off
     isLEXWARN_on
-    is_LNBREAK_latin1_safe
-    is_LNBREAK_safe
-    is_LNBREAK_utf8_safe
     isLOWER_LC_utf8
-    isLOWER_uni
-    is_MULTI_CHAR_FOLD_latin1_safe
-    is_MULTI_CHAR_FOLD_utf8_safe
     isNON_BRACE_QUANTIFIER
-    is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
-    IS_PADCONST
-    IS_PADGV
-    is_PATWS_safe
     is_posix_ALPHA
     is_posix_ALPHANUMERIC
     is_posix_ASCII
@@ -1137,27 +700,16 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_posix_WORDCHAR
     is_posix_XDIGIT
     isPRINT_LC_utf8
-    isPRINT_uni
-    is_PROBLEMATIC_LOCALE_FOLD_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8
-    is_PROBLEMATIC_LOCALE_FOLD_utf8
     isPSXSPC_LC_utf8
     isPSXSPC_uni
     isPUNCT_LC_utf8
-    isPUNCT_uni
     isQUANTIFIER
     is_QUOTEMETA_high
     isREGEXP
-    IS_SAFE_PATHNAME
     is_SHORTER_NON_CHARS_utf8
-    isSPACE_LC_utf8
-    isSPACE_uni
-    is_SPACE_utf8_safe_backwards
     is_STRICT_VERSION
     is_SURROGATE_utf8
     is_SURROGATE_utf8_safe
-    I_STDARG
     is_THREE_CHAR_FOLD_HEAD_latin1_safe
     is_THREE_CHAR_FOLD_HEAD_utf8_safe
     is_THREE_CHAR_FOLD_latin1_safe
@@ -1180,47 +732,30 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isU8_XDIGIT_LC
     isUNICODE_POSSIBLY_PROBLEMATIC
     isUPPER_LC_utf8
-    isUPPER_uni
-    IS_UTF8_CHAR
-    isUTF8_POSSIBLY_PROBLEMATIC
     is_VERTWS_cp_high
-    is_VERTWS_high
     isVERTWS_uni
-    isVERTWS_utf8
     isVERTWS_utf8_safe
     isVERTWS_uvchr
     isWARNf_on
     isWARN_on
     isWARN_ONCE
     isWORDCHAR_lazy_if_safe
-    isWORDCHAR_LC_utf8
-    isWORDCHAR_uni
     is_XDIGIT_cp_high
-    is_XDIGIT_high
     isXDIGIT_LC_utf8
-    isXDIGIT_uni
     is_XPERLSPACE_cp_high
-    is_XPERLSPACE_high
     IV_MAX_P1
     JE_OLD_STACK_HWM_restore
     JE_OLD_STACK_HWM_save
     JE_OLD_STACK_HWM_zero
     JMPENV_BOOTSTRAP
-    JMPENV_POP
-    JOIN
     kBINOP
     kCOP
-    KEEPCOPY_PAT_MOD
     KEEPCOPY_PAT_MODS
-    KELVIN_SIGN
     KEYWORD_PLUGIN_DECLINE
-    KEYWORD_PLUGIN_EXPR
     KEYWORD_PLUGIN_MUTEX_INIT
     KEYWORD_PLUGIN_MUTEX_LOCK
     KEYWORD_PLUGIN_MUTEX_TERM
     KEYWORD_PLUGIN_MUTEX_UNLOCK
-    KEYWORD_PLUGIN_STMT
-    kGVOP_gv
     kLISTOP
     kLOGOP
     kLOOP
@@ -1230,26 +765,17 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     kPVOP
     kSVOP
     kSVOP_sv
-    kUNOP
     kUNOP_AUX
     LARGE_HASH_HEURISTIC
-    LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE
     LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE
     LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE
     LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8
-    LATIN_CAPITAL_LETTER_SHARP_S
-    LATIN_CAPITAL_LETTER_SHARP_S_UTF8
-    LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS
-    LATIN_SMALL_LETTER_A_WITH_RING_ABOVE
     LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE
     LATIN_SMALL_LETTER_DOTLESS_I
     LATIN_SMALL_LETTER_DOTLESS_I_UTF8
-    LATIN_SMALL_LETTER_LONG_S
     LATIN_SMALL_LETTER_LONG_S_UTF8
-    LATIN_SMALL_LETTER_SHARP_S
     LATIN_SMALL_LETTER_SHARP_S_NATIVE
     LATIN_SMALL_LETTER_SHARP_S_UTF8
-    LATIN_SMALL_LETTER_Y_WITH_DIAERESIS
     LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE
     LATIN_SMALL_LIGATURE_LONG_S_T
     LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
@@ -1257,25 +783,15 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LATIN_SMALL_LIGATURE_ST_UTF8
     LC_COLLATE_LOCK
     LC_COLLATE_UNLOCK
-    LC_NUMERIC_LOCK
-    LC_NUMERIC_UNLOCK
-    LEAVE_SCOPE
-    LEX_NOTPARSING
     LF_NATIVE
-    LIB_INVARG
     LINE_Tf
-    LOC
     LOCALE_INIT
     LOCALE_LOCK
-    LOCALE_PAT_MOD
     LOCALE_PAT_MODS
     LOCALE_READ_LOCK
     LOCALE_READ_UNLOCK
     LOCALE_TERM
     LOCALE_UNLOCK
-    LOCAL_PATCH_COUNT
-    LOCK_DOLLARZERO_MUTEX
-    LOCK_LC_NUMERIC_STANDARD
     LONGDOUBLE_BIG_ENDIAN
     LONGDOUBLE_DOUBLEDOUBLE
     LONG_DOUBLE_EQUALS_DOUBLE
@@ -1289,110 +805,57 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LVf_NEG_LEN
     LVf_NEG_OFF
     LVf_OUT_OF_RANGE
-    LVRET
     LvSTARGOFF
-    LvTARG
-    LvTARGLEN
-    LvTARGOFF
-    LvTYPE
-    MADE_EXACT_TRIE
-    MADE_JUMP_TRIE
-    MADE_TRIE
     MALFORMED_UTF8_DIE
     MALFORMED_UTF8_WARN
     MALLOC_CHECK_TAINT
     MALLOC_CHECK_TAINT2
     MALLOC_INIT
-    MALLOC_OVERHEAD
     MALLOC_TERM
     MALLOC_TOO_LATE_FOR
-    MARKER1
-    MARKER2
     MARK_NAUGHTY
     MARK_NAUGHTY_EXP
-    MAXARG
     MAXARG3
     MAX_FOLD_FROMS
     MAX_LEGAL_CP
     MAX_MATCHES
-    MAXO
-    MAXPATHLEN
     MAX_PORTABLE_UTF8_TWO_BYTE
-    MAX_RECURSE_EVAL_NOCHANGE_DEPTH
     MAX_SAVEt
     MAXSYSFD
     MAX_UNICODE_UTF8
-    MAX_UTF8_TWO_BYTE
-    MDEREF_ACTION_MASK
-    MDEREF_AV_gvav_aelem
-    MDEREF_AV_gvsv_vivify_rv2av_aelem
-    MDEREF_AV_padav_aelem
-    MDEREF_AV_padsv_vivify_rv2av_aelem
-    MDEREF_AV_pop_rv2av_aelem
-    MDEREF_AV_vivify_rv2av_aelem
-    MDEREF_FLAG_last
-    MDEREF_HV_gvhv_helem
-    MDEREF_HV_gvsv_vivify_rv2hv_helem
-    MDEREF_HV_padhv_helem
-    MDEREF_HV_padsv_vivify_rv2hv_helem
-    MDEREF_HV_pop_rv2hv_helem
-    MDEREF_HV_vivify_rv2hv_helem
-    MDEREF_INDEX_const
-    MDEREF_INDEX_gvsv
-    MDEREF_INDEX_MASK
-    MDEREF_INDEX_none
-    MDEREF_INDEX_padsv
     MDEREF_MASK
-    MDEREF_reload
-    MDEREF_SHIFT
     memBEGINPs
-    memBEGINs
-    MEMBER_TO_FPTR
     memENDPs
     memENDs
     memGE
-    memGT
-    memLE
     MEM_LOG_ALLOC
     MEM_LOG_DEL_SV
     MEM_LOG_FREE
     MEM_LOG_NEW_SV
     MEM_LOG_REALLOC
     memLT
-    MEM_SIZE
-    MEM_SIZE_MAX
-    MEM_WRAP_CHECK
     MEM_WRAP_CHECK_1
     MEM_WRAP_CHECK_s
-    MEXTEND
-    MGf_BYTES
-    MGf_GSKIP
+    MgARRAYVARFUNCS
     MGf_MINMATCH
-    MGf_REFCOUNTED
     MGf_REQUIRE_GV
     MGf_TAINTEDDIR
-    MgPV
+    MgHASHVARFUNCS
     MgPV_const
-    MgPV_nolen_const
+    MgSCALARVARFUNCS
+    MgSIZEOF
     MgSV
     MgTAINTEDDIR
     MgTAINTEDDIR_off
     MgTAINTEDDIR_on
-    MgARRAYVARFUNCS
-    MgHASHVARFUNCS
-    MgSCALARVARFUNCS
-    MgSIZEOF
     MGv2f_REFCOUNTED_AUXSV
     MGv2f_WITH_MASK
-    MICRO_SIGN
     MICRO_SIGN_NATIVE
     MICRO_SIGN_UTF8
     MI_INIT_WORKAROUND_PACK
     MIN_OFFUNI_VARIANT_CP
-    Mkdir
     M_PAT_MODS
     msbit_pos
-    MSPAGAIN
     MSVC_DIAG_IGNORE
     MSVC_DIAG_IGNORE_DECL
     MSVC_DIAG_IGNORE_STMT
@@ -1401,8 +864,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MSVC_DIAG_RESTORE_STMT
     MULTILINE_PAT_MOD
     MUST_RESTART
-    MUTEX_DESTROY
-    MUTEX_INIT
     MUTEX_INIT_NEEDS_MUTEX_ZEROED
     MUTEX_LOCK
     MUTEX_UNLOCK
@@ -1410,25 +871,15 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MY_CXT_INDEX
     MY_CXT_INIT_ARG
     my_lstat
-    my_stat
-    namedclass_to_classnum
-    NAN_COMPARE_BROKEN
     NATIVE8_TO_UNI
-    NATIVE_BYTE_IS_INVARIANT
     NATIVE_SKIP
-    NATIVE_TO_ASCII
     NATIVE_TO_I8
-    NATIVE_TO_UTF
-    NATIVE_UTF8_TO_I8
-    nBIT_MASK
     nBIT_UMAX
     NBSP_NATIVE
     NBSP_UTF8
-    NDEBUG
     NEED_UTF8
     NEGATE_2IV
     NEGATE_2UV
-    NEGATIVE_INDICES_VAR
     New
     new_body_allocated
     new_body_from_arena
@@ -1438,8 +889,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NewOp
     NewOpSz
     new_SV
-    NEWSV
-    NEW_VERSION
     new_XNV
     new_XPVMG
     new_XPVNV
@@ -1451,39 +900,23 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NO_ENV_ARRAY_IN_MAIN
     NO_ENVIRON_ARRAY
     NofAMmeth
-    NOLINE
     NONDESTRUCT_PAT_MOD
     NONDESTRUCT_PAT_MODS
     NONV
-    NORETURN_FUNCTION_END
-    NORMAL
-    NO_TAINT_SUPPORT
     NOTE3
-    NOT_REACHED
-    NSIG
-    ntohi
-    Null
-    Nullfp
-    Nullgv
     Nullhe
     Nullhek
-    Nullop
-    NUM_ANYOF_CODE_POINTS
     NV_BIG_ENDIAN
-    NV_DIG
     NV_EPSILON
     NV_IMPLICIT_BIT
-    NV_INF
     NV_LITTLE_ENDIAN
     NV_MANT_DIG
-    NV_MAX
     NV_MAX_10_EXP
     NV_MAX_EXP
     NV_MIN
     NV_MIN_10_EXP
     NV_MIN_EXP
     NV_MIX_ENDIAN
-    NV_NAN
     NV_NAN_BITS
     NV_NAN_IS_QUIET
     NV_NAN_IS_SIGNALING
@@ -1517,94 +950,44 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NV_WITHIN_UV
     NV_X86_80_BIT
     OA_AVREF
-    OA_BASEOP_OR_UNOP
-    OA_CLASS_MASK
     OA_CVREF
     OA_DANGEROUS
     OA_DEFGV
     OA_FILEREF
-    OA_FILESTATOP
     OA_FOLDCONST
     OA_HVREF
-    OA_LIST
-    OA_LOOPEXOP
-    OA_MARK
-    OA_METHOP
     OA_OPTIONAL
     OA_OTHERINT
-    OA_RETSCALAR
     OA_SCALAR
     OA_SCALARREF
-    OASHIFT
-    OA_TARGET
-    OA_TARGLEX
-    OA_UNOP_AUX
-    ObjectFIELDS
     ObjectITERSVAT
-    ObjectMAXFIELD
-    OCSHIFT
     OCTAL_VALUE
-    OFFUNI_IS_INVARIANT
     OFFUNISKIP
-    ONCE_PAT_MOD
     ONCE_PAT_MODS
     ONE_IF_EBCDIC_ZERO_IF_NOT
     ONLY_LOCALE_MATCHES_INDEX
-    OOB_NAMEDCLASS
-    OOB_UNICODE
-    opASSIGN
     OP_CHECK_MUTEX_INIT
     OP_CHECK_MUTEX_LOCK
     OP_CHECK_MUTEX_TERM
     OP_CHECK_MUTEX_UNLOCK
-    OPCODE
     OPf_FOLDED
     OPf_KNOW
     OPf_LIST
-    OPf_MOD
-    OPf_PARENS
     OP_FREED
-    OPf_REF
-    OPf_SPECIAL
-    OPf_STACKED
-    OPf_WANT
-    OPf_WANT_LIST
-    OPf_WANT_SCALAR
-    OPf_WANT_VOID
-    OP_GIMME
-    OP_GIMME_REVERSE
     OP_IS_DIRHOP
-    OP_IS_FILETEST
-    OP_IS_FILETEST_ACCESS
     OP_IS_INFIX_BIT
     OP_IS_NUMCOMPARE
     OP_IS_SOCKET
     OP_IS_STAT
     OP_LVALUE_NO_CROAK
-    OPpALLOW_FAKE
-    OPpARG1_MASK
-    OPpARG2_MASK
     OPpARG3_MASK
-    OPpARG4_MASK
-    OPpARGELEM_AV
-    OPpARGELEM_HV
-    OPpARGELEM_MASK
-    OPpARGELEM_SV
     OPpARG_IF_FALSE
-    OPpARG_IF_UNDEF
-    OPpASSIGN_BACKWARDS
     OPpASSIGN_COMMON_AGG
     OPpASSIGN_COMMON_RC1
     OPpASSIGN_COMMON_SCALAR
-    OPpASSIGN_CV_TO_GV
     OPpASSIGN_TRUEBOOL
     OPpAVHVSWITCH_MASK
     OPpCONCAT_NESTED
-    OPpCONST_BARE
-    OPpCONST_ENTERED
-    OPpCONST_NOVER
-    OPpCONST_SHORTCIRCUIT
-    OPpCONST_STRICT
     OPpCONST_TOKEN_BITS
     OPpCONST_TOKEN_FILE
     OPpCONST_TOKEN_LINE
@@ -1613,47 +996,22 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpCONST_TOKEN_SHIFT
     OPpCOREARGS_DEREF1
     OPpCOREARGS_DEREF2
-    OPpCOREARGS_PUSHMARK
     OPpCOREARGS_SCALARMOD
     OPpDEFER_FINALLY
-    OPpDEREF
-    OPpDEREF_AV
-    OPpDEREF_HV
-    OPpDEREF_SV
-    OPpDONT_INIT_GV
-    OPpEMPTYAVHV_IS_HV
-    OPpENTERSUB_DB
-    OPpENTERSUB_HASTARG
-    OPpENTERSUB_INARGS
     OPpENTERSUB_LVAL_MASK
-    OPpENTERSUB_NOPAREN
     OPpEVAL_BYTES
     OPpEVAL_COPHH
-    OPpEVAL_EVALSV
-    OPpEVAL_HAS_HH
     OPpEVAL_RE_REPARSING
     OPpEVAL_UNICODE
-    OPpEXISTS_SUB
-    OPpFLIP_LINENUM
-    OPpFT_ACCESS
     OPpFT_AFTER_t
-    OPpFT_STACKED
-    OPpFT_STACKING
-    OPpHELEMEXISTSOR_DELETE
     OPpHINT_STRICT_REFS
-    OPpHUSH_VMSISH
     OPpINDEX_BOOLNEG
     OPpINITFIELD_AV
     OPpINITFIELD_HV
     OPpINITFIELDS
-    OPpITER_DEF
     OPpITER_INDEXED
     OPpITER_REFALIAS
-    OPpITER_REVERSED
     OPpKVSLICE
-    OPpLIST_GUESSED
-    OPpLVAL_DEFER
-    OPpLVAL_INTRO
     OPpLVALUE
     OPpLVREF_AV
     OPpLVREF_CV
@@ -1663,76 +1021,35 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpLVREF_SV
     OPpLVREF_TYPE
     OPpMATCH_JUST_COUNT
-    OPpMAYBE_LVSUB
     OPpMAYBE_TRUEBOOL
-    OPpMAY_RETURN_CONSTANT
     OPpMETH_NO_BAREWORD_IO
-    op_pmflags
-    op_pmoffset
-    OPpMULTICONCAT_APPEND
     OPpMULTICONCAT_FAKE
-    OPpMULTICONCAT_STRINGIFY
-    OPpMULTIDEREF_DELETE
-    OPpMULTIDEREF_EXISTS
     OPpOFFBYONE
-    OPpOPEN_IN_CRLF
-    OPpOPEN_IN_RAW
-    OPpOPEN_OUT_CRLF
-    OPpOPEN_OUT_RAW
-    OPpOUR_INTRO
     OPpPADHV_ISKEYS
-    OPpPADRANGE_COUNTMASK
-    OPpPADRANGE_COUNTSHIFT
-    OPpPAD_STATE
-    OPpPV_IS_UTF8
-    OPpREF_CMP_MASK
-    OPpREF_CMP_REGEXP_PKG
-    OPpREF_CMP_EMPTYSTR
-    OPpREF_CMP_SKIPLOGOP
     OPpREF_CMP_AND
+    OPpREF_CMP_EMPTYSTR
+    OPpREF_CMP_MASK
     OPpREF_CMP_NE
-    OPpREFCOUNTED
-    OPpREPEAT_DOLIST
+    OPpREF_CMP_REGEXP_PKG
+    OPpREF_CMP_SKIPLOGOP
     OPpREVERSE_INPLACE
     OPpRV2HV_ISKEYS
-    OPpSLICE
     OPpSLICEWARNING
-    OPpSORT_DESCEND
-    OPpSORT_INPLACE
-    OPpSORT_INTEGER
-    OPpSORT_NUMERIC
-    OPpSORT_REVERSE
-    OPpSPLIT_ASSIGN
     OPpSPLIT_IMPLIM
     OPpSPLIT_LEX
     OPpSTATEMENT
-    OPpSUBSTR_REPL_FIRST
-    OPpTARGET_MY
     OPpTRANS_ALL
     OPpTRANS_BITS
     OPpTRANS_CAN_FORCE_UTF8
-    OPpTRANS_COMPLEMENT
-    OPpTRANS_DELETE
-    OPpTRANS_FROM_UTF
-    OPpTRANS_GROWS
-    OPpTRANS_IDENTICAL
     OPpTRANS_MASK
     OPpTRANS_ONLY_UTF8_INVARIANTS
     OPpTRANS_SHIFT
-    OPpTRANS_SQUASH
-    OPpTRANS_TO_UTF
     OPpTRANS_USE_SVOP
     OPpTRUEBOOL
     OPpUNDEF_KEEP_PV
     OPpUSEINT
-    OpREFCNT_dec
-    OpREFCNT_inc
     OP_REFCNT_INIT
-    OP_REFCNT_LOCK
-    OpREFCNT_set
     OP_REFCNT_TERM
-    OP_REFCNT_UNLOCK
-    OP_SIBLING
     OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
@@ -1741,121 +1058,58 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OP_TYPE_ISNT_AND_WASNT_NN
     OP_TYPE_ISNT_NN
     OP_TYPE_IS_OR_WAS_NN
-    OpTYPE_set
-    OutCopFILE
     padadd_FIELD
-    padadd_NO_DUP_CHECK
     padadd_OUR
     padadd_STALEOK
-    padadd_STATE
     padalloc_NO_SV
     PAD_BASE_SV
     PAD_CLONE_VARS
     PAD_COMPNAME
     PAD_COMPNAME_FLAGS
-    PAD_COMPNAME_FLAGS_isOUR
     PAD_COMPNAME_GEN
     PAD_COMPNAME_GEN_set
-    PAD_COMPNAME_OURSTASH
     PAD_COMPNAME_PV
     PAD_COMPNAME_SV
-    PAD_COMPNAME_TYPE
-    PAD_FAKELEX_ANON
-    PAD_FAKELEX_MULTI
     padfind_FIELD_OK
     padname_dup_inc
     PADNAMEf_FIELD
-    PadnameFIELDINFO
-    PadnameFLAGS
     PADNAMEf_LVALUE
     PADNAMEf_OUR
     PADNAME_FROM_PV
     PADNAMEf_STATE
     PADNAMEf_TYPED
     PadnameHasTYPE
-    PadnameIsFIELD
-    PadnameIsOUR
-    PadnameIsSTATE
-    PadnameIsSTATE_on
     padnamelist_dup_inc
-    PadnamelistMAXNAMED
     PadnamelistREFCNT_inc
-    PadnameLVALUE
     PadnameLVALUE_on
-    PadnameOURSTASH
-    PadnameOURSTASH_set
-    PadnameOUTER
     PadnamePROTOCV
     PADNAMEt_LVALUE
-    PADNAMEt_OUR
-    PADNAMEt_OUTER
     PADNAMEt_STATE
-    PADNAMEt_TYPED
     PadnameTYPE
     PadnameTYPE_set
-    padnew_CLONE
-    padnew_SAVE
     padnew_SAVESUB
-    PAD_RESTORE_LOCAL
-    PAD_SAVE_LOCAL
     PAD_SAVE_SETNULLPAD
-    PAD_SET_CUR
-    PAD_SET_CUR_NOSAVE
-    PAD_SETSV
-    PAD_SV
-    PAD_SVl
     panic_write2
     PAREN_OFFSET
-    PAREN_SET
-    PAREN_TEST
-    PARENT_FAKELEX_FLAGS
-    PARENT_PAD_INDEX
-    PAREN_UNSET
-    PATCHLEVEL
-    Pause
-    PBITVAL
-    PBYTE
     PerlEnv_putenv
     PIPE_OPEN_MODE
     PIPESOCK_MODE
-    PL_DBsingle
-    PL_DBtrace
-    PL_last_in_gv
-    PL_ofsgv
-    PL_rs
     PMf_BASE_SHIFT
     PMf_CHARSET
     PMf_CODELIST_PRIVATE
     PMf_CONST
     PMf_CONTINUE
-    PMf_EVAL
-    PMf_EXTENDED
     PMf_EXTENDED_MORE
-    PMf_FOLD
-    PMf_GLOBAL
-    PMf_HAS_CV
     PMf_HAS_ERROR
-    PMf_IS_QR
-    PMf_KEEP
-    PMf_KEEPCOPY
-    PMf_MULTILINE
     PMf_NOCAPTURE
     PMf_NONDESTRUCT
-    PMf_ONCE
     PMf_RETAINT
-    PMf_SINGLELINE
     PMf_SPLIT
     PMf_STRICT
     PMf_USED
-    PMf_USE_RE_EVAL
     PMf_WILDCARD
-    PM_GETRE
     PM_GETRE_raw
-    PmopSTASH
-    PmopSTASHPV
-    PmopSTASHPV_set
     PmopSTASH_set
-    PM_SETRE
     PM_SETRE_raw
     PNf
     PNfARG
@@ -1864,34 +1118,19 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     POPMARK
     POPpconstx
     POPSTACK
-    POPSTACK_TO
-    POSIX_CC_COUNT
     POSIX_SETLOCALE_LOCK
     POSIX_SETLOCALE_UNLOCK
-    POSTPONED
-    PP
     PP_wrapped
     PRESCAN_VERSION
-    PRIVSHIFT
-    ProgLen
     pthread_addr_t
-    PTHREAD_ATFORK
-    PTHREAD_ATTR_SETDETACHSTATE
     pthread_condattr_default
     PTHREAD_CREATE
-    PTHREAD_CREATE_JOINABLE
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     PTHREAD_INIT_SELF
-    pthread_key_create
     pthread_keycreate
     pthread_mutexattr_default
-    pthread_mutexattr_init
-    pthread_mutexattr_settype
-    pTHX_1
     pTHX_12
-    pTHX_2
-    pTHX_3
     pTHX_4
     pTHX_5
     pTHX_6
@@ -1902,16 +1141,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     pTHX_FORMAT
     pTHX__VALUE
     pTHX_VALUE
-    pTHXx
-    PUSH_MULTICALL_FLAGS
     PUSHSTACK
     PUSHSTACKi
     PUSHSTACK_INIT_HWM
-    PUSHTARG
-    PVf_QUOTEDPREFIX
-    pWARN_ALL
-    pWARN_NONE
-    pWARN_STD
     QR_PAT_MODS
     QUESTION_MARK_CTRL
     RCPVf_ALLOW_EMPTY
@@ -1924,7 +1156,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     REENTRANT_PROTO_B_CCD
     REENTRANT_PROTO_B_CCS
     REENTRANT_PROTO_B_IBI
-    REENTRANT_PROTO_B_IBW
     REENTRANT_PROTO_B_SB
     REENTRANT_PROTO_B_SBI
     REENTRANT_PROTO_I_BI
@@ -1991,31 +1222,19 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     REENTRANT_PROTO_V_D
     REENTRANT_PROTO_V_H
     REENTRANT_PROTO_V_ID
-    REFCOUNTED_HE_EXISTS
     REFCOUNTED_HE_KEY_UTF8
     REGCOMP_INTERNAL_H
-    RegexLengthToShowInErrorMessages
     REG_FETCH_ABSOLUTE
     REGNODE_GUTS
-    REG_NODE_NUM
     REGNODE_OFFSET
     REGNODE_p
     REGNODE_STEP_OVER
-    REGTAIL
-    REGTAIL_STUDY
-    reg_warn_non_literal_string
     RE_OPTIMIZE_CURLYX_TO_CURLYM
     RE_OPTIMIZE_CURLYX_TO_CURLYN
-    REPORT_LOCATION
-    REPORT_LOCATION_ARGS
     REQUIRE_BRANCHJ
     REQUIRE_PARENS_PASS
     REQUIRE_UNI_RULES
-    REQUIRE_UTF8
-    ReREFCNT_dec
-    ReREFCNT_inc
     RESTART_PARSE
-    RESTORE_ERRNO
     RESTORE_WARNINGS
     RETPUSHNO
     RETPUSHUNDEF
@@ -2028,44 +1247,24 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RETURN_FAIL_ON_RESTART
     RETURN_FAIL_ON_RESTART_FLAGP
     RETURN_FAIL_ON_RESTART_OR_FLAGS
-    RETURNOP
-    RETURNX
-    RExC_close_parens
-    RExC_contains_locale
     RExC_copy_start_in_constructed
     RExC_copy_start_in_input
-    RExC_emit
-    RExC_emit_start
-    RExC_end
     RExC_end_op
-    RExC_flags
     RExC_frame_count
     RExC_frame_head
     RExC_frame_last
     RExC_in_lookaround
-    RExC_in_multi_char_class
     RExC_in_script_run
-    RExC_lastnum
-    RExC_lastparse
     RExC_latest_warn_offset
     RExC_logical_npar
     RExC_logical_to_parno
     RExC_logical_total_parens
-    RExC_maxlen
     RExC_mysv
     RExC_mysv1
     RExC_mysv2
-    RExC_naughty
-    RExC_nestroot
-    RExC_npar
-    RExC_open_parens
-    RExC_orig_utf8
-    RExC_paren_name_list
-    RExC_paren_names
     RExC_parens_buf_size
     RExC_parno_to_logical
     RExC_parno_to_logical_next
-    RExC_parse
     RExC_parse_inc
     RExC_parse_inc_by
     RExC_parse_incf
@@ -2074,86 +1273,35 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RExC_parse_inc_safef
     RExC_parse_inc_utf8
     RExC_parse_set
-    RExC_pm_flags
-    RExC_precomp
     RExC_precomp_end
     RExC_recode_x_to_native
-    RExC_recurse
-    RExC_recurse_count
-    RExC_rx
-    RExC_rxi
-    RExC_rx_sv
     RExC_save_copy_start_in_constructed
-    RExC_sawback
-    RExC_seen
     RExC_seen_d_op
-    RExC_seen_zerolen
     RExC_sets_depth
-    RExC_size
-    RExC_start
     RExC_strict
-    RExC_study_chunk_recursed
-    RExC_study_chunk_recursed_bytes
     RExC_study_chunk_recursed_count
     RExC_study_started
     RExC_total_parens
-    RExC_uni_semantics
     RExC_unlexed_names
     RExC_use_BRANCHJ
-    RExC_utf8
     RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS
     RExC_warned_WARN_EXPERIMENTAL__VLB
     RExC_warn_text
-    RExC_whilem_seen
-    REXEC_CHECKED
-    REXEC_FAIL_ON_UNDERFLOW
-    REXEC_IGNOREPOS
-    REXEC_NOT_FIRST
-    REXEC_SCREAM
     RMS_DIR
     RMS_FAC
     RMS_FEX
-    RMS_FNF
-    RMS_IFI
     RMS_ISI
-    RMS_PRV
-    ROTL32
-    ROTL64
-    ROTL_UV
-    ROTR32
-    ROTR64
-    ROTR_UV
     RsPARA
     RsRECORD
     RsSIMPLE
     RsSNARF
-    RUNOPS_DEFAULT
     RV2CVOPCV_FLAG_MASK
     RV2CVOPCV_RETURN_STUB
     RX_CHECK_SUBSTR
-    RX_COMPFLAGS
-    RX_ENGINE
-    RX_EXTFLAGS
     RXf_BASE_SHIFT
-    RXf_CHECK_ALL
     RXf_COPY_DONE
-    RXf_EVAL_SEEN
-    RXf_INTUIT_TAIL
-    RXf_IS_ANCHORED
-    RXf_MATCH_UTF8
-    RXf_PMf_CHARSET
-    RXf_PMf_COMPILETIME
-    RXf_PMf_EXTENDED_MORE
-    RXf_PMf_FLAGCOPYMASK
-    RXf_PMf_NOCAPTURE
     RXf_PMf_SPLIT
-    RXf_PMf_STD_PMMOD
-    RXf_PMf_STD_PMMOD_SHIFT
     RXf_PMf_STRICT
-    RXf_TAINTED
-    RXf_TAINTED_SEEN
-    RXf_UNBOUNDED_QUANTIFIER_SEEN
-    RXf_USE_INTUIT
     RXf_USE_INTUIT_ML
     RXf_USE_INTUIT_NOML
     RX_GOFS
@@ -2162,28 +1310,15 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RX_LASTPAREN
     RX_LOGICAL_NPARENS
     RX_LOGICAL_TO_PARNO
-    RX_MATCH_COPIED_off
-    RX_MATCH_COPIED_on
     RX_MATCH_COPIED_set
-    RX_MATCH_COPY_FREE
     RX_MATCH_TAINTED
-    RX_MATCH_TAINTED_off
-    RX_MATCH_TAINTED_on
-    RX_MATCH_TAINTED_set
     RX_MATCH_UTF8
     RX_MATCH_UTF8_off
-    RX_MATCH_UTF8_on
-    RX_MATCH_UTF8_set
-    RX_MINLEN
     RX_MINLENRET
     RX_MOTHER_RE
-    RX_NPARENS
-    RX_OFFSp
     RX_PARNO_TO_LOGICAL
     RX_PARNO_TO_LOGICAL_NEXT
-    RXp_COMPFLAGS
     RXp_ENGINE
-    RXp_EXTFLAGS
     RXp_GOFS
     RXp_HAS_CUTGROUP
     RXp_ISTAINTED
@@ -2191,14 +1326,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RXp_LASTPAREN
     RXp_LOGICAL_NPARENS
     RXp_LOGICAL_TO_PARNO
-    RXp_MATCH_COPIED
-    RXp_MATCH_COPIED_off
-    RXp_MATCH_COPIED_on
     RXp_MATCH_COPY_FREE
-    RXp_MATCH_TAINTED
     RXp_MATCH_TAINTED_off
-    RXp_MATCH_TAINTED_on
-    RXp_MATCH_UTF8
     RXp_MATCH_UTF8_off
     RXp_MATCH_UTF8_on
     RXp_MATCH_UTF8_set
@@ -2207,16 +1336,12 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RXp_MOTHER_RE
     RXp_NPARENS
     RXp_OFFSp
-    RXp_PAREN_NAMES
     RXp_PARNO_TO_LOGICAL
     RXp_PARNO_TO_LOGICAL_NEXT
     RXp_PPRIVATE
     RXp_PRE_PREFIX
     RX_PPRIVATE
     RXp_QR_ANONCV
-    RX_PRECOMP
-    RX_PRECOMP_const
-    RX_PRELEN
     RX_PRE_PREFIX
     RXp_SAVED_COPY
     RXp_SUBBEG
@@ -2234,101 +1359,23 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RX_SUBOFFSET
     RX_SUBSTRS
     RX_TAINT_on
-    RX_UTF8
-    RX_WRAPLEN
-    RX_WRAPPED
     RX_WRAPPED_const
     RX_ZERO_LEN
     safefree
-    SAVEADELETE
-    SAVECLEARSV
-    SAVECOMPILEWARNINGS
-    SAVECOMPPAD
-    SAVECOPFILE
-    SAVECOPFILE_FREE
     SAVECOPFILE_FREE_x
     SAVECOPFILE_x
-    SAVECOPLINE
-    SAVECOPSTASH_FREE
     SAVECURCOPWARNINGS
-    SAVE_ERRNO
     SAVEFREECOPHH
     SAVEFREEPADNAME
-    SAVEGENERICPV
     SAVEHDELETE
-    SAVEHINTS
-    SAVE_MASK
-    SAVEOP
     SAVEPADSVANDMORTALIZE
     SAVEPARSER
     SAVESETSVFLAGS
     SAVESHAREDPV
-    SAVESWITCHSTACK
-    SAVEt_ADELETE
-    SAVEt_AELEM
-    SAVEt_ALLOC
-    SAVEt_APTR
-    SAVEt_AV
-    SAVEt_BOOL
-    SAVEt_CLEARPADRANGE
-    SAVEt_CLEARSV
-    SAVEt_COMPILE_WARNINGS
-    SAVEt_COMPPAD
     SAVEt_CURCOP_WARNINGS
-    SAVEt_DELETE
-    SAVEt_DESTRUCTOR
-    SAVEt_DESTRUCTOR_X
-    SAVEt_FREECOPHH
-    SAVEt_FREEOP
-    SAVEt_FREEPADNAME
-    SAVEt_FREEPV
-    SAVEt_FREERCPV
     SAVEt_FREE_REXC_STATE
-    SAVEt_FREESV
-    SAVEt_GENERIC_PVREF
-    SAVEt_GENERIC_SVREF
-    SAVEt_GP
-    SAVEt_GVSLOT
-    SAVEt_GVSV
-    SAVEt_HELEM
-    SAVEt_HINTS
-    SAVEt_HINTS_HH
-    SAVEt_HPTR
-    SAVEt_HV
-    SAVEt_I16
-    SAVEt_I32
-    SAVEt_I32_SMALL
-    SAVEt_I8
-    SAVE_TIGHT_SHIFT
-    SAVEt_INT_SMALL
-    SAVEt_ITEM
-    SAVEt_IV
-    SAVEt_MORTALIZESV
-    SAVEt_NSTAB
-    SAVEt_OP
-    SAVEt_PADSV
-    SAVEt_PADSV_AND_MORTALIZE
     SAVEt_PADSV_NULL
-    SAVEt_PARSER
-    SAVEt_PPTR
-    SAVEt_RCPV
-    SAVEt_READONLY_OFF
-    SAVEt_REGCONTEXT
-    SAVEt_SAVESWITCHSTACK
-    SAVEt_SET_SVFLAGS
-    SAVEt_SHARED_PVREF
-    SAVEt_SPTR
-    SAVEt_STACK_POS
-    SAVEt_STRLEN
-    SAVEt_STRLEN_SMALL
-    SAVEt_SV
-    SAVEt_SVREF
-    SAVEt_TMPSFLOOR
-    SAVEt_VPTR
-    SAVEVPTR
-    SAWAMPERSAND_LEFT
     SAWAMPERSAND_MIDDLE
-    SAWAMPERSAND_RIGHT
     SBOX32_CHURN_ROUNDS
     SBOX32_MIX3
     SBOX32_MIX4
@@ -2341,112 +1388,53 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SBOX32_WARN4
     SBOX32_WARN5
     SBOX32_WARN6
-    sC
     SCAN_DEF
     SCAN_REPL
     SCAN_TR
     SCAN_VERSION
-    SCF_DO_STCLASS
-    SCF_DO_STCLASS_AND
-    SCF_DO_STCLASS_OR
-    SCF_DO_SUBSTR
     SCF_IN_DEFINE
-    SCF_SEEN_ACCEPT
-    SCF_TRIE_DOING_RESTUDY
-    SCF_TRIE_RESTUDY
-    SCF_WHILEM_VISITED_POS
     SCOPE_SAVES_SIGNAL_MASK
     Semctl
-    semun
     SETERRNO
-    SETi
-    SET_MARK_OFFSET
-    SETn
     SET_NUMERIC_STANDARD
     SET_NUMERIC_UNDERLYING
     SETp
-    SetProgLen
     SET_recode_x_to_native
-    SETs
     SET_SVANY_FOR_BODYLESS_IV
     SET_SVANY_FOR_BODYLESS_NV
-    SETTARG
-    SET_THR
     SET_THREAD_SELF
     SETu
-    SF_BEFORE_EOL
-    SF_BEFORE_MEOL
-    SF_BEFORE_SEOL
-    SF_HAS_EVAL
-    SF_HAS_PAR
-    SF_IN_PAR
-    SF_IS_INF
-    share_hek_hek
     sharepvn
-    SHARP_S_SKIP
     SHUTDOWN_TERM
-    sI
-    SIMPLE
-    Simple_vFAIL
     Simple_vFAILn
     SINGLE_PAT_MOD
-    SIPHASH_SEED_STATE
-    SIPROUND
-    S_IWOTH
-    S_IXOTH
-    Size_t_MAX
     SKIP_IF_CHAR
     SLOPPYDIVIDE
-    SOCKET_OPEN_MODE
     S_PAT_MODS
-    specialWARN
     SS_ACCVIO
     SS_ADD_BOOL
     SS_ADD_DPTR
     SS_ADD_DXPTR
-    SS_ADD_END
     SS_ADD_INT
     SS_ADD_IV
     SS_ADD_LONG
     SS_ADD_PTR
-    SS_ADD_UV
     SS_BUFFEROVF
-    ssc_add_cp
-    SSCHECK
-    ssc_init_zero
-    ssc_match_all_cp
     SS_DEVOFFLINE
-    SSGROW
-    SS_IVCHAN
-    SSize_t_MAX
-    SS_MAXPUSH
     SS_NOPRIV
     SS_NORMAL
     SSPOPBOOL
     SSPOPDPTR
     SSPOPDXPTR
-    SSPOPINT
-    SSPOPIV
     SSPOPLONG
-    SSPOPPTR
-    SSPOPUV
     SSPUSHBOOL
     SSPUSHDPTR
     SSPUSHDXPTR
-    SSPUSHINT
-    SSPUSHIV
     SSPUSHLONG
-    SSPUSHPTR
-    SSPUSHUV
-    Stack_off_t_MAX
-    STANDARD_C
     StashHANDLER
-    Stat
     STATIC
-    Stat_t
     STATUS_ALL_FAILURE
     STATUS_ALL_SUCCESS
-    STATUS_CURRENT
     STATUS_EXIT
     STATUS_EXIT_SET
     STATUS_NATIVE
@@ -2454,216 +1442,89 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     STATUS_UNIX
     STATUS_UNIX_EXIT_SET
     STATUS_UNIX_SET
-    STD_PAT_MODS
-    STD_PMMOD_FLAGS_CLEAR
-    STORE_LC_NUMERIC_SET_STANDARD
-    strBEGINs
-    Strerror
-    STRUCT_OFFSET
-    STRUCT_SV
-    SUBVERSION
     sv_2bool_nomg
-    sv_2nv
     sv_2pv_nomg
-    SvANY
-    SvARENA_CHAIN
     SvARENA_CHAIN_SET
-    SvCANCOW
-    SvCANEXISTDELETE
     sv_cathek
     sv_catpvn_nomg_utf8_upgrade
-    SvCOMPILED
     SvCOMPILED_off
     SvCOMPILED_on
-    SV_CONST_RETURN
     SV_CONSTS_COUNT
     SV_COW_OTHER_PVS
-    SV_COW_REFCNT_MAX
-    SV_COW_SHARED_HASH_KEYS
     SvDESTROYABLE
     SV_DO_COW_SVSETSV
-    SvEND_set
     SvENDx
     SVf256
     SVf32
-    SvFAKE
-    SvFAKE_off
-    SvFAKE_on
-    SVf_AMAGIC
-    SVf_BREAK
-    SVf_FAKE
-    SVf_IOK
-    SVf_IsCOW
-    SVf_IVisUV
-    SvFLAGS
-    SVf_NOK
-    SVf_OK
-    SVf_OOK
-    SVf_POK
-    SVf_PROTECT
-    SVf_READONLY
-    SVf_ROK
-    SVf_THINKFIRST
     SvGMAGICAL_off
     SvGMAGICAL_on
-    Sv_Grow
     SvGROW_mutable
-    SvIMMORTAL
     SvIMMORTAL_INTERP
     SvIMMORTAL_TRUE
     SvIOK_nog
     SvIOK_nogthink
-    SvIOKp_on
     SvIsCOW_off
-    SvIsCOW_on
     SvIsCOW_static
-    SvIS_FREED
-    SvIsUV
-    SvIsUV_off
-    SvIsUV_on
-    SvIV_please
-    SvIV_please_nomg
     SvIVXx
     SvLENx
     SvMAGIC
-    SvMAGICAL_off
-    SvMAGICAL_on
-    SV_MUTABLE_RETURN
     SvNIOK_nog
     SvNIOK_nogthink
-    SvNOK_nog
     SvNOK_nogthink
-    SvNOKp_on
     SvNVXx
-    SvOBJECT
-    SvOBJECT_off
-    SvOBJECT_on
-    SvOK_off
     SvOK_off_exc_UV
     SvOKp
     SvOOK_on
-    SvOURSTASH
-    SvOURSTASH_set
-    SvPADMY
-    SvPADMY_on
-    SvPAD_OUR
-    SVpad_OUR
-    SvPAD_OUR_on
-    SvPADSTALE
-    SvPADSTALE_off
-    SvPADSTALE_on
-    SvPAD_STATE
-    SVpad_STATE
-    SvPAD_STATE_on
-    SvPADTMP
-    SvPADTMP_off
-    SvPADTMP_on
-    SvPAD_TYPED
-    SVpad_TYPED
-    SvPAD_TYPED_on
-    SVpav_REAL
-    SVpav_REIFY
     SvPCS_IMPORTED
     SvPCS_IMPORTED_off
     SvPCS_IMPORTED_on
-    SvPEEK
-    SVpgv_GP
-    SVphv_CLONEABLE
     SVphv_HasAUX
     SVphv_HASKFLAGS
     SVphv_LAZYDEL
     SVphv_OVERLOAD
     SVphv_SHAREKEYS
-    SVp_IOK
-    SVp_NOK
     SvPOK_byte_nog
     SvPOK_byte_nogthink
     SvPOK_byte_pure_nogthink
     SvPOK_nog
     SvPOK_nogthink
     SvPOK_or_cached_IV
-    SvPOKp_on
     SvPOK_pure_nogthink
     SvPOK_utf8_nog
     SvPOK_utf8_nogthink
     SvPOK_utf8_pure_nogthink
-    SV_POSBYTES
-    SVp_POK
     SVppv_STATIC
-    SVprv_PCS_IMPORTED
     SVprv_WEAKREF
-    SVp_SCREAM
-    SvPV_flags_const_nolen
     sv_pvn_force_nomg
-    SvREFCNT_IMMORTAL
     SvRMAGICAL_off
     SvRMAGICAL_on
-    SvRV_const
-    SVrt_SCALAR
-    SVrt_VSTRING
-    SVrt_REF
-    SVrt_GLOB
-    SVrt_LVALUE
-    SVrt_REGEXP
     SVrt_ARRAY
-    SVrt_HASH
     SVrt_CODE
     SVrt_FORMAT
-    SVrt_IO
+    SVrt_GLOB
+    SVrt_HASH
     SVrt_INVLIST
+    SVrt_IO
+    SVrt_LVALUE
     SVrt_OBJECT
-    SvSCREAM
+    SVrt_REF
+    SVrt_REGEXP
+    SVrt_SCALAR
+    SVrt_VSTRING
     SvSCREAM_off
-    SvSCREAM_on
     SvSetSV_and
     SvSetSV_nosteal_and
-    SVs_GMG
-    SvSHARED_HEK_FROM_PV
-    SvSMAGICAL_off
-    SvSMAGICAL_on
-    SVs_OBJECT
-    SVs_RMG
-    SVs_SMG
-    SvTAIL
-    SvTEMP
-    SvTEMP_off
-    SvTEMP_on
-    SvTHINKFIRST
-    SvTIED_mg
-    SVt_MASK
-    SVt_PVBM
     SvTRUEx_nomg
-    SVt_RV
-    SVTYPEMASK
-    SV_UNDEF_RETURNS_NULL
     SvUOK_nog
     SvUOK_nogthink
-    SvVALID
-    SvWEAKREF
-    SvWEAKREF_off
     SvWEAKREF_on
     SWITCHSTACK
-    SYSTEM_GMTIME_MAX
-    SYSTEM_GMTIME_MIN
-    SYSTEM_LOCALTIME_MAX
-    SYSTEM_LOCALTIME_MIN
-    TARGi
-    TARGn
-    TARGu
-    tC
-    THR
     THREAD_CREATE_NEEDS_STACK
     THREAD_RET_TYPE
-    tI
-    toFOLD_LC
-    toFOLD_uni
-    toLOWER_uni
     TOO_LATE_FOR
     TOO_NAUGHTY
     TO_OUTPUT_WARNINGS
-    TOPi
     TOPl
-    TOPm1s
     TOPMARK
     TOPn
     to_posix_FOLD
@@ -2679,62 +1540,31 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     toU8_LOWER_LC
     toU8_UPPER_LC
     toUPPER_LATIN1_MOD
-    toUPPER_LC
-    toUPPER_uni
     toUSE_UNI_CHARSET_NOT_DEPENDS
-    TRIE_STCLASS
-    TRIE_STUDY_OPT
     TRUE
-    TRYAGAIN
     tryAMAGICbin_MG
-    tryAMAGICunDEREF
     tryAMAGICun_MG
     TS_W32_BROKEN_LOCALECONV
-    tTHX
     TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE
-    TWO_BYTE_UTF8_TO_NATIVE
-    TWO_BYTE_UTF8_TO_UNI
-    TYPE_CHARS
-    TYPE_DIGITS
-    U16_MAX
     U16_MIN
-    U32_MAX
     U32_MAX_P1
     U32_MAX_P1_HALF
     U32_MIN
-    U8_MAX
     U8_MIN
-    U8TO16_LE
-    U8TO32_LE
-    U8TO64_LE
     U_I
     U_L
-    UNICODE_ALLOW_ANY
     UNICODE_ALLOW_SUPER
     UNICODE_ALLOW_SURROGATE
     UNICODE_BYTE_ORDER_MARK
     UNICODE_DOT_DOT_VERSION
     UNICODE_DOT_VERSION
-    UNICODE_GREEK_CAPITAL_LETTER_SIGMA
-    UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA
-    UNICODE_GREEK_SMALL_LETTER_SIGMA
-    UNICODE_IS_32_CONTIGUOUS_NONCHARS
     UNICODE_IS_BYTE_ORDER_MARK
-    UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER
     UNICODE_IS_NONCHAR_GIVEN_NOT_SUPER
     UNICODE_MAJOR_VERSION
-    UNICODE_PAT_MOD
     UNICODE_PAT_MODS
-    UNICODE_SURROGATE_FIRST
     UNICODE_SURROGATE_LAST
-    UNI_IS_INVARIANT
-    UNI_SEMANTICS
     UNISKIP
     UNKNOWN_ERRNO_MSG
-    UNLINK
-    UNLOCK_DOLLARZERO_MUTEX
-    UNLOCK_LC_NUMERIC_STANDARD
-    UNOP_AUX_item_sv
     unpackWARN1
     unpackWARN2
     unpackWARN3
@@ -2744,25 +1574,19 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     uproot_SV
     U_S
     USE_BSDPGRP
-    USE_ENVIRON_ARRAY
     USE_GRENT_BUFFER
     USE_GRENT_FPTR
     USE_GRENT_PTR
-    USE_HASH_SEED
     USE_HOSTENT_BUFFER
     USE_HOSTENT_ERRNO
     USE_HOSTENT_PTR
-    USE_LEFT
-    USE_LOCALE
     USE_LOCALE_ADDRESS
-    USE_LOCALE_COLLATE
     USE_LOCALE_CTYPE
     USE_LOCALE_IDENTIFICATION
     USE_LOCALE_MEASUREMENT
     USE_LOCALE_MESSAGES
     USE_LOCALE_MONETARY
     USE_LOCALE_NAME
-    USE_LOCALE_NUMERIC
     USE_LOCALE_PAPER
     USE_LOCALE_SYNTAX
     USE_LOCALE_TELEPHONE
@@ -2790,85 +1614,41 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USE_SERVENT_PTR
     USE_SPENT_BUFFER
     USE_SPENT_PTR
-    USE_STAT_RDEV
-    USE_SYSTEM_GMTIME
-    USE_SYSTEM_LOCALTIME
     USE_THREAD_SAFE_LOCALE
-    USE_TM64
     USE_UTF8_IN_NAMES
-    UTF
-    UTF8_ACCUMULATE
-    UTF8_ALLOW_ANYUV
-    UTF8_ALLOW_DEFAULT
-    UTF8_ALLOW_FE_FF
-    UTF8_ALLOW_FFFF
     UTF8_ALLOW_LONG_AND_ITS_VALUE
-    UTF8_ALLOW_SURROGATE
     UTF8_DISALLOW_ABOVE_31_BIT
     UTF8_DISALLOW_FE_FF
-    UTF8_EIGHT_BIT_HI
-    UTF8_EIGHT_BIT_LO
     UTF8_GOT_ABOVE_31_BIT
     UTF8_GOT_LONG_WITH_VALUE
-    UTF8_IS_ABOVE_LATIN1
     UTF8_IS_ABOVE_LATIN1_START
-    UTF8_IS_CONTINUATION
-    UTF8_IS_CONTINUED
-    UTF8_IS_DOWNGRADEABLE_START
     UTF8_IS_NEXT_CHAR_DOWNGRADEABLE
     UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC
-    UTF8_IS_START
     UTF8_IS_START_base
-    UTF8_MAX_FOLD_CHAR_EXPAND
-    UTF8_MAXLEN
     UTF8_MIN_CONTINUATION_BYTE
-    utf8_to_utf16
     utf8_to_utf16_reversed
-    UTF8_TWO_BYTE_HI
     UTF8_TWO_BYTE_HI_nocast
-    UTF8_TWO_BYTE_LO
     UTF8_TWO_BYTE_LO_nocast
     UTF8_WARN_ABOVE_31_BIT
     UTF8_WARN_FE_FF
-    UTF_ACCUMULATION_SHIFT
     UTF_CONTINUATION_BYTE_INFO_BITS
-    UTF_CONTINUATION_MARK
-    UTF_CONTINUATION_MASK
     UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS
     UTF_FIRST_CONT_BYTE
-    UTF_IS_CONTINUATION_MASK
-    UTF_MIN_ABOVE_LATIN1_BYTE
     UTF_MIN_CONTINUATION_BYTE
-    UTF_MIN_START_BYTE
     UTF_START_BYTE
-    UTF_START_MARK
-    UTF_START_MASK
-    UTF_TO_NATIVE
     UV_MAX_P1
     UV_MAX_P1_HALF
     VCMP
-    vFAIL
-    vFAIL2
-    vFAIL2utf8f
-    vFAIL3
     vFAIL3utf8f
-    vFAIL4
     VNORMAL
     VNUMIFY
-    VOL
     VSTRINGIFY
-    vTHX
     VT_NATIVE
     vtohl
     vtohs
     VTYPECHECK
     VUTIL_REPLACE_CORE
     VVERIFY
-    vWARN
-    vWARN3
-    vWARN4
-    vWARN5
-    vWARN_dep
     VXS
     VXS_CLASS
     VXSp
@@ -2876,26 +1656,19 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     VXSXSDP
     want_vtbl_bm
     want_vtbl_fm
-    WARN_ALLstring
     WARN_DEFAULTstring
-    WARN_NONEstring
     warn_non_literal_string
     WARNshift
-    WARNsize
     what_MULTI_CHAR_FOLD_latin1_safe
     what_MULTI_CHAR_FOLD_utf8_safe
-    WIN32SCK_IS_STDSCK
-    withinCOUNT
     WORTH_PER_WORD_LOOP
     WORTH_PER_WORD_LOOP_BINMODE
     WSETLOCALE_LOCK
     WSETLOCALE_UNLOCK
     XDIGIT_VALUE
-    xI
     xio_any
     xio_dirp
     xI_offset
-    xiv_iv
     xlv_targoff
     XOPd_xop_class
     XOPd_xop_desc
@@ -2904,7 +1677,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     XOPd_xop_peep
     XOPf_xop_class
     XOPf_xop_desc
-    XOPf_xop_dump
     XOPf_xop_name
     XOPf_xop_peep
     XORSHIFT128_set
@@ -2912,14 +1684,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     XPUSHundef
     xpv_len
     XS_DYNAMIC_FILENAME
-    XS_INTERNAL
     XTENDED_PAT_MOD
-    xuv_uv
-    xV_FROM_REF
-    YIELD
-    YYEMPTY
-    YYSTYPE_IS_DECLARED
-    YYSTYPE_IS_TRIVIAL
     ZAPHOD32_FINALIZE
     ZAPHOD32_MIX
     ZAPHOD32_SCRAMBLE32
@@ -2929,22 +1694,15 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ZAPHOD32_WARN4
     ZAPHOD32_WARN5
     ZAPHOD32_WARN6
+
     aTHXx_
     BASE_TWO_BYTE_HI_
     BASE_TWO_BYTE_LO_
-    CC_ALPHA_
-    CC_ALPHANUMERIC_
-    CC_ASCII_
     CC_BINDIGIT_
-    CC_BLANK_
-    CC_CASED_
     CC_CHARNAME_CONT_
-    CC_CNTRL_
-    CC_DIGIT_
     CC_GRAPH_
     CC_IDFIRST_
     CC_IS_IN_SOME_FOLD_
-    CC_LOWER_
     CC_mask_A_
     CC_MNEMONIC_CNTRL_
     CC_NON_FINAL_FOLD_
@@ -2952,13 +1710,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CC_NONLATIN1_SIMPLE_FOLD_
     CC_OCTDIGIT_
     CC_PRINT_
-    CC_PUNCT_
     CC_QUOTEMETA_
-    CC_SPACE_
-    CC_UPPER_
-    CC_VERTSPACE_
-    CC_WORDCHAR_
-    CC_XDIGIT_
     CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG_
     CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_
     CHECK_AND_WARN_PROBLEMATIC_LOCALE_
@@ -2967,12 +1719,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     DFA_RETURN_FAILURE_
     DFA_RETURN_SUCCESS_
     DFA_TEASE_APART_FF_
-    FUNCTION__
     generic_func_utf8_safe_
     generic_invlist_utf8_safe_
     generic_invlist_uvchr_
     generic_isCC_
-    generic_isCC_A_
     generic_LC_
     generic_LC_base_
     generic_LC_func_utf8_safe_
@@ -2987,7 +1737,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     generic_uvchr_
     HAS_IGNORED_LOCALE_CATEGORIES_
     HIGHEST_REGCOMP_DOT_H_SYNC_
-    inRANGE_helper_
     is_MULTI_CHAR_FOLD_utf8_safe_part0_
     is_MULTI_CHAR_FOLD_utf8_safe_part1_
     is_MULTI_CHAR_FOLD_utf8_safe_part2_
@@ -3022,13 +1771,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LOCALE_UNLOCK_
     lsbit_pos_uintmax_
     LZC_TO_MSBIT_POS_
-    MEM_WRAP_CHECK_
     msbit_pos_uintmax_
     NOT_IN_NUMERIC_STANDARD_
     NOT_IN_NUMERIC_UNDERLYING_
     o1_
     OFFUNISKIP_helper_
-    __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
     pTHX__VALUE_
@@ -3053,11 +1800,1310 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     what_MULTI_CHAR_FOLD_utf8_safe_part5_
     what_MULTI_CHAR_FOLD_utf8_safe_part6_
     what_MULTI_CHAR_FOLD_utf8_safe_part7_
-    withinCOUNT_KNOWN_VALID_
     WRAP_U8_LC_
     XPVCV_COMMON_
     XPV_HEAD_
 );
+
+# These are symbols that meet the same requirements as
+# %unresolved_visibility_overrides, except they were found on metacpan as of
+# July 20, 2026.  See the comments above preceding
+# %unresolved_visibility_overrides.
+#
+# It might be that the cpan usage actually is for a different symbol with the
+# same name, hence our symbol is polluting their name space.  KEY_END, for
+# example would have been on this list, but the several cpan uses all turned
+# out to be looking for a key press of the 'END' key and there is a constant
+# with that name that we conflicted with.
+#
+# Most of the symbols on this list which have a trailing underscore were not
+# intended to be used directly by CPAN code, so their usage has leaked out.
+my @symbols_used_on_metacpan = qw(
+    ABORT
+    ALWAYS_WARN_SUPER
+    AMG_CALLun
+    AMT_AMAGIC
+    ANGSTROM_SIGN
+    ASCII_FOLD_RESTRICTED
+    ASCII_RESTRICTED
+    ASCII_RESTRICT_PAT_MOD
+    ASSERT_CURPAD_ACTIVE
+    ASSERT_IS_LITERAL
+    ASSERT_NOT_PTR
+    assert_not_ROK
+    AT_LEAST_ASCII_RESTRICTED
+    AT_LEAST_UNI_SEMANTICS
+    AvARYLEN
+    AvMAX
+    AvREAL
+    AvREAL_off
+    AvREAL_on
+    AvREIFY
+    AvREIFY_off
+    AvREIFY_on
+    AvREIFY_only
+    BASEOP
+    BIT_DIGITS
+    blk_eval
+    blk_format
+    blk_gimme
+    blk_givwhen
+    blk_loop
+    blk_oldcop
+    blk_oldmarksp
+    blk_oldpm
+    blk_oldsaveix
+    blk_oldscopesp
+    blk_oldsp
+    blk_old_tmpsfloor
+    blk_sub
+    BmFLAGS
+    BmPREVIOUS
+    BmRARE
+    BmUSEFUL
+    BSDish
+    CALL_BLOCK_HOOKS
+    CALL_FPTR
+    CALLREGCOMP
+    CALLREGCOMP_ENG
+    CALLREGDUPE_PVT
+    CALLREGEXEC
+    CALLREGFREE_PVT
+    CALLREG_NAMED_BUFF_ALL
+    CALLREG_NAMED_BUFF_FETCH
+    CALLREG_NAMED_BUFF_NEXTKEY
+    CALLREG_NUMBUF_FETCH
+    CALLRUNOPS
+    CAN64BITHASH
+    CAN_COW_FLAGS
+    CAN_COW_MASK
+    CAN_PROTOTYPE
+    CASE_STD_PMMOD_FLAGS_PARSE_SET
+    CATCH_GET
+    CATCH_SET
+    cBINOPo
+    cBINOPx
+    cCOPo
+    cCOPx
+    cGVOP_gv
+    cGVOPo_gv
+    cGVOPx_gv
+    CHANGE_MULTICALL_FLAGS
+    CHR_SVLEN
+    ckDEAD
+    ckWARN2reg
+    ckWARN2reg_d
+    ckWARN3reg
+    ckWARN4reg
+    ckWARNdep
+    ckWARNreg
+    ckWARNregdep
+    CLANG_DIAG_IGNORE_STMT
+    CLANG_DIAG_RESTORE_STMT
+    classnum_to_namedclass
+    CLEAR_ARGARRAY
+    CLEAR_OPTSTART
+    cLISTOPo
+    cLISTOPx
+    cLOGOPo
+    cLOGOPx
+    CLONEf_JOIN_IN
+    cLOOP
+    cLOOPo
+    cLOOPx
+    cMETHOPx
+    cMETHOPx_meth
+    cMETHOPx_rclass
+    COMBINING_GRAVE_ACCENT_UTF8
+    COND_BROADCAST
+    COND_DESTROY
+    COND_INIT
+    COND_SIGNAL
+    COND_WAIT
+    CONTINUE_PAT_MOD
+    CopHINTHASH_get
+    CopHINTHASH_set
+    CopHINTS_get
+    CopHINTS_set
+    CopLABEL_alloc
+    CopLINE_dec
+    CopLINE_inc
+    CopLINE_set
+    COP_SEQMAX_INC
+    COP_SEQ_RANGE_HIGH
+    COP_SEQ_RANGE_LOW
+    copy_length
+    CowREFCNT
+    cPADOPx
+    cPMOPo
+    cPMOPx
+    cPVOP
+    cPVOPo
+    cPVOPx
+    cSVOP
+    cSVOPo
+    cSVOPo_sv
+    cSVOP_sv
+    cSVOPx
+    cSVOPx_sv
+    cSVOPx_svp
+    cUNOP
+    cUNOP_AUX
+    cUNOP_AUXo
+    cUNOP_AUXx
+    cUNOPo
+    cUNOPx
+    CvANON
+    CvANON_off
+    CvANON_on
+    CvAUTOLOAD
+    CvAUTOLOAD_off
+    CvCLONE
+    CvCLONED
+    CvCLONE_off
+    CvCLONE_on
+    CvCONST
+    CvCONST_off
+    CvCONST_on
+    CvCVGV_RC
+    CvDYNFILE
+    CvEVAL
+    CVf_ANON
+    CVf_AUTOLOAD
+    CVf_BUILTIN_ATTRS
+    CVf_CONST
+    CVf_CVGV_RC
+    CvFILE
+    CvFILEGV
+    CvFILE_set_from_cop
+    CVf_IsMETHOD
+    CvFLAGS
+    CVf_LEXICAL
+    CVf_LVALUE
+    CVf_METHOD
+    CVf_NODEBUG
+    CVf_WEAKOUTSIDE
+    CvGV_set
+    CvIsMETHOD
+    CvISXSUB
+    CvISXSUB_on
+    CvLEXICAL
+    CvLEXICAL_on
+    CvLVALUE
+    CvLVALUE_on
+    CvMETHOD
+    CvMETHOD_off
+    CvMETHOD_on
+    CvNAMED
+    CvNAMED_off
+    CvNAMED_on
+    CvNAME_HEK_set
+    CvNODEBUG
+    CvNODEBUG_off
+    CvNODEBUG_on
+    CvOUTSIDE
+    CvOUTSIDE_SEQ
+    CvPADLIST_set
+    CvPROTO
+    CvPROTOLEN
+    CvREFCOUNTED_ANYSV
+    CvREFCOUNTED_ANYSV_on
+    CvSIGNATURE
+    CvSPECIAL
+    CvSPECIAL_on
+    CvSTASH_set
+    CvUNIQUE
+    CvWEAKOUTSIDE
+    CvWEAKOUTSIDE_on
+    CvXSUB
+    CvXSUBANY
+    CX_CURPAD_SAVE
+    CX_CURPAD_SV
+    CxFOREACH
+    CxHASARGS
+    CxITERVAR
+    CxLABEL
+    CxLABEL_len
+    CxLVAL
+    CxMULTICALL
+    CxOLD_IN_EVAL
+    CxOLD_OP_TYPE
+    CxONCE
+    CxPADLOOP
+    CXp_EVALBLOCK
+    CXp_FOR_GV
+    CXp_FOR_PAD
+    CXp_HASARGS
+    CXp_MULTICALL
+    CXp_SUB_RE
+    CXp_SUB_RE_FAKE
+    CXp_TRY
+    CXp_TRYBLOCK
+    CxREALEVAL
+    cxstack_max
+    CxTRY
+    CxTRYBLOCK
+    CxTYPE
+    CxTYPE_is_LOOP
+    CXTYPEMASK
+    DEBUG_PEEP
+    DEBUG_RExC_seen
+    DEBUG_STUDYDATA
+    DEFAULT_PAT_MOD
+    DEL_NATIVE
+    DEPENDS_PAT_MOD
+    DEPENDS_SEMANTICS
+    DETACH
+    DIE
+    dJMPENV
+    djSP
+    DM_ARRAY_ISA
+    DM_DELAY
+    DM_EGID
+    DM_EUID
+    DM_GID
+    DM_RGID
+    DM_RUID
+    DM_UID
+    dMY_CXT_INTERP
+    do_exec
+    DOSISH
+    dPOPss
+    DPTR2FPTR
+    dSAVE_ERRNO
+    dSS_ADD
+    dTARG
+    dTHXs
+    dTOPss
+    DUMPUNTIL
+    DUP_WARNINGS
+    dXSUB_SYS
+    eC
+    eI
+    EMBEDMYMALLOC
+    ESC_NATIVE
+    EVAL_INEVAL
+    EVAL_INREQUIRE
+    EVAL_KEEPERR
+    EVAL_NULL
+    EXEC_ARGV_CAST
+    EXPECT
+    EXPERIMENTAL_INPLACESCAN
+    EXTEND_MORTAL
+    FAIL
+    FAIL2
+    FBMcf_TAIL
+    FBMrf_MULTILINE
+    Fflush
+    FILTER_DATA
+    FILTER_READ
+    FITS_IN_8_BITS
+    FOLD
+    FOLD_FLAGS_FULL
+    FOLD_FLAGS_LOCALE
+    FOLD_FLAGS_NOMIX_ASCII
+    FPTR2DPTR
+    FreeOp
+    FREE_THREAD_KEY
+    Fstat
+    FULL_TRIE_STUDY
+    GCC_DIAG_IGNORE
+    GCC_DIAG_IGNORE_STMT
+    GCC_DIAG_RESTORE
+    GCC_DIAG_RESTORE_STMT
+    GLOBAL_PAT_MOD
+    G_NODEBUG
+    GREEK_CAPITAL_LETTER_MU
+    GREEK_SMALL_LETTER_MU
+    G_RE_REPARSING
+    Gv_AMG
+    GvASSUMECV
+    GvASSUMECV_on
+    GV_AUTOLOAD
+    GvAVn
+    GV_CROAK
+    GvCVGEN
+    GvCV_set
+    GvCVu
+    GvEGV
+    GvENAME
+    GvENAMELEN
+    gv_fetchmethod_flags
+    GvFILE
+    GvFILEGV
+    GvFILE_HEK
+    GVf_IMPORTED
+    GvFLAGS
+    GvFORM
+    GvGP
+    GvGPFLAGS
+    GvGP_set
+    GvHVn
+    GvIMPORTED
+    GvIMPORTED_AV
+    GvIMPORTED_AV_on
+    GvIMPORTED_CV
+    GvIMPORTED_CV_on
+    GvIMPORTED_HV
+    GvIMPORTED_HV_on
+    GvIMPORTED_SV
+    GvIMPORTED_SV_on
+    GvIN_PAD
+    GvIN_PAD_on
+    GvINTRO
+    GvINTRO_off
+    GvIO
+    GvIOn
+    GvIOp
+    GvLINE
+    gv_method_changed
+    GvMULTI
+    GvMULTI_on
+    GvNAME
+    GvNAME_get
+    GvNAMELEN
+    GvNAMELEN_get
+    GvNAMEUTF8
+    GV_NOADD_MASK
+    GvREFCNT
+    GvSTASH
+    G_WANT
+    G_WARN_ALL_OFF
+    G_WARN_ALL_ON
+    G_WARN_ON
+    HAS_IOCTL
+    HAS_NONLATIN1_FOLD_CLOSURE
+    HAS_PASSWD
+    HASWIDTH
+    HEK_BASESIZE
+    HeKEY_sv
+    HEKf
+    HEKfARG
+    HeKFLAGS
+    HEK_FLAGS
+    HeKUTF8
+    HeKWASUTF8
+    HeNEXT
+    HINT_BLOCK_SCOPE
+    HINT_BYTES
+    HINT_INTEGER
+    HINT_LOCALE
+    HINT_LOCALIZE_HH
+    HINT_RE_EVAL
+    HINT_STRICT_REFS
+    HINT_STRICT_SUBS
+    HINT_STRICT_VARS
+    HINT_UTF8
+    HvAMAGIC
+    HvARRAY
+    HvAUX
+    HV_DELETE
+    HV_DISABLE_UVAR_XKEY
+    HvEITER
+    HvEITER_get
+    HvEITER_set
+    HvENAME_HEK
+    HvENAME_HEK_NN
+    HV_FETCH_EMPTY_HE
+    HV_FETCH_ISEXISTS
+    HV_FETCH_ISSTORE
+    HV_FETCH_JUST_SV
+    HV_FETCH_LVALUE
+    HvHASKFLAGS
+    HVhek_NOTSHARED
+    HVhek_PLACEHOLD
+    HVhek_UTF8
+    HVhek_WASUTF8
+    HvKEYS
+    HvLAZYDEL
+    HvMAX
+    HvNAME_HEK_NN
+    HvPLACEHOLDERS
+    HvPLACEHOLDERS_get
+    HvRITER
+    HvRITER_get
+    HvRITER_set
+    HvSHAREKEYS
+    HvSTASH_IS_CLASS
+    HvTOTALKEYS
+    HvUSEDKEYS
+    HYPHEN_UTF8
+    I16_MAX
+    I16_MIN
+    I32_MAX
+    I32_MIN
+    I8_TO_NATIVE_UTF8
+    I_LIMITS
+    IN_BYTES
+    IN_LC
+    inRANGE
+    INT_64_T
+    INT_PAT_MODS
+    IN_UTF8_CTYPE_LOCALE
+    IoANY
+    IOCPARM_LEN
+    IoTYPE_APPEND
+    IoTYPE_CLOSED
+    IoTYPE_IMPLICIT
+    IoTYPE_NUMERIC
+    IoTYPE_PIPE
+    IoTYPE_RDONLY
+    IoTYPE_RDWR
+    IoTYPE_SOCKET
+    IoTYPE_STD
+    IoTYPE_WRONLY
+    isALNUM_lazy_if_safe
+    isALNUM_LC_utf8
+    isALNUM_uni
+    isALNUM_utf8
+    isALNUM_utf8_safe
+    isALPHA_FOLD_EQ
+    isALPHA_uni
+    isBACKSLASHED_PUNCT
+    isCNTRL_uni
+    isDIGIT_LC_utf8
+    isDIGIT_uni
+    is_FOLDS_TO_MULTI_utf8
+    isGRAPH_uni
+    isGV
+    isGV_with_GP_on
+    is_HORIZWS_high
+    isIDCONT_uni
+    isIDFIRST_lazy_if_safe
+    isIDFIRST_uni
+    isLEXWARN_off
+    is_LNBREAK_latin1_safe
+    is_LNBREAK_safe
+    is_LNBREAK_utf8_safe
+    isLOWER_uni
+    is_MULTI_CHAR_FOLD_latin1_safe
+    is_MULTI_CHAR_FOLD_utf8_safe
+    is_NONCHAR_utf8_safe
+    IS_PADCONST
+    IS_PADGV
+    is_PATWS_safe
+    isPRINT_uni
+    is_PROBLEMATIC_LOCALE_FOLD_cp
+    is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp
+    is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8
+    is_PROBLEMATIC_LOCALE_FOLD_utf8
+    isPUNCT_uni
+    IS_SAFE_PATHNAME
+    isSPACE_LC_utf8
+    isSPACE_uni
+    is_SPACE_utf8_safe_backwards
+    I_STDARG
+    isUPPER_uni
+    IS_UTF8_CHAR
+    isUTF8_POSSIBLY_PROBLEMATIC
+    is_VERTWS_high
+    isVERTWS_utf8
+    isWORDCHAR_LC_utf8
+    isWORDCHAR_uni
+    is_XDIGIT_high
+    isXDIGIT_uni
+    is_XPERLSPACE_high
+    JMPENV_POP
+    JOIN
+    KEEPCOPY_PAT_MOD
+    KELVIN_SIGN
+    KEYWORD_PLUGIN_EXPR
+    KEYWORD_PLUGIN_STMT
+    kGVOP_gv
+    kUNOP
+    LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE
+    LATIN_CAPITAL_LETTER_SHARP_S
+    LATIN_CAPITAL_LETTER_SHARP_S_UTF8
+    LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS
+    LATIN_SMALL_LETTER_A_WITH_RING_ABOVE
+    LATIN_SMALL_LETTER_LONG_S
+    LATIN_SMALL_LETTER_SHARP_S
+    LATIN_SMALL_LETTER_Y_WITH_DIAERESIS
+    LC_NUMERIC_LOCK
+    LC_NUMERIC_UNLOCK
+    LEAVE_SCOPE
+    LEX_NOTPARSING
+    LIB_INVARG
+    LOC
+    LOCALE_PAT_MOD
+    LOCAL_PATCH_COUNT
+    LOCK_DOLLARZERO_MUTEX
+    LOCK_LC_NUMERIC_STANDARD
+    LVRET
+    LvTARG
+    LvTARGLEN
+    LvTARGOFF
+    LvTYPE
+    MADE_EXACT_TRIE
+    MADE_JUMP_TRIE
+    MADE_TRIE
+    MALLOC_OVERHEAD
+    MARKER1
+    MARKER2
+    MAXARG
+    MAXO
+    MAXPATHLEN
+    MAX_RECURSE_EVAL_NOCHANGE_DEPTH
+    MAX_UTF8_TWO_BYTE
+    MDEREF_ACTION_MASK
+    MDEREF_AV_gvav_aelem
+    MDEREF_AV_gvsv_vivify_rv2av_aelem
+    MDEREF_AV_padav_aelem
+    MDEREF_AV_padsv_vivify_rv2av_aelem
+    MDEREF_AV_pop_rv2av_aelem
+    MDEREF_AV_vivify_rv2av_aelem
+    MDEREF_FLAG_last
+    MDEREF_HV_gvhv_helem
+    MDEREF_HV_gvsv_vivify_rv2hv_helem
+    MDEREF_HV_padhv_helem
+    MDEREF_HV_padsv_vivify_rv2hv_helem
+    MDEREF_HV_pop_rv2hv_helem
+    MDEREF_HV_vivify_rv2hv_helem
+    MDEREF_INDEX_const
+    MDEREF_INDEX_gvsv
+    MDEREF_INDEX_MASK
+    MDEREF_INDEX_none
+    MDEREF_INDEX_padsv
+    MDEREF_reload
+    MDEREF_SHIFT
+    memBEGINs
+    MEMBER_TO_FPTR
+    memGT
+    memLE
+    MEM_SIZE
+    MEM_SIZE_MAX
+    MEM_WRAP_CHECK
+    MEXTEND
+    MGf_BYTES
+    MGf_GSKIP
+    MGf_REFCOUNTED
+    MgPV
+    MgPV_nolen_const
+    MICRO_SIGN
+    Mkdir
+    MSPAGAIN
+    MUTEX_DESTROY
+    MUTEX_INIT
+    my_stat
+    namedclass_to_classnum
+    NAN_COMPARE_BROKEN
+    NATIVE_BYTE_IS_INVARIANT
+    NATIVE_TO_ASCII
+    NATIVE_TO_UTF
+    NATIVE_UTF8_TO_I8
+    nBIT_MASK
+    NDEBUG
+    NEGATIVE_INDICES_VAR
+    NEWSV
+    NEW_VERSION
+    NOLINE
+    NORETURN_FUNCTION_END
+    NORMAL
+    NO_TAINT_SUPPORT
+    NOT_REACHED
+    NSIG
+    ntohi
+    Null
+    Nullfp
+    Nullgv
+    Nullop
+    NUM_ANYOF_CODE_POINTS
+    NV_DIG
+    NV_INF
+    NV_MAX
+    NV_NAN
+    OA_BASEOP_OR_UNOP
+    OA_CLASS_MASK
+    OA_FILESTATOP
+    OA_LIST
+    OA_LOOPEXOP
+    OA_MARK
+    OA_METHOP
+    OA_RETSCALAR
+    OASHIFT
+    OA_TARGET
+    OA_TARGLEX
+    OA_UNOP_AUX
+    ObjectFIELDS
+    ObjectMAXFIELD
+    OCSHIFT
+    OFFUNI_IS_INVARIANT
+    ONCE_PAT_MOD
+    OOB_NAMEDCLASS
+    OOB_UNICODE
+    opASSIGN
+    OPCODE
+    OPf_MOD
+    OPf_PARENS
+    OPf_REF
+    OPf_SPECIAL
+    OPf_STACKED
+    OPf_WANT
+    OPf_WANT_LIST
+    OPf_WANT_SCALAR
+    OPf_WANT_VOID
+    OP_GIMME
+    OP_GIMME_REVERSE
+    OP_IS_FILETEST
+    OP_IS_FILETEST_ACCESS
+    OPpALLOW_FAKE
+    OPpARG1_MASK
+    OPpARG2_MASK
+    OPpARG4_MASK
+    OPpARGELEM_AV
+    OPpARGELEM_HV
+    OPpARGELEM_MASK
+    OPpARGELEM_SV
+    OPpARG_IF_UNDEF
+    OPpASSIGN_BACKWARDS
+    OPpASSIGN_CV_TO_GV
+    OPpCONST_BARE
+    OPpCONST_ENTERED
+    OPpCONST_NOVER
+    OPpCONST_SHORTCIRCUIT
+    OPpCONST_STRICT
+    OPpCOREARGS_PUSHMARK
+    OPpDEREF
+    OPpDEREF_AV
+    OPpDEREF_HV
+    OPpDEREF_SV
+    OPpDONT_INIT_GV
+    OPpEMPTYAVHV_IS_HV
+    OPpENTERSUB_DB
+    OPpENTERSUB_HASTARG
+    OPpENTERSUB_INARGS
+    OPpENTERSUB_NOPAREN
+    OPpEVAL_EVALSV
+    OPpEVAL_HAS_HH
+    OPpEXISTS_SUB
+    OPpFLIP_LINENUM
+    OPpFT_ACCESS
+    OPpFT_STACKED
+    OPpFT_STACKING
+    OPpHELEMEXISTSOR_DELETE
+    OPpHUSH_VMSISH
+    OPpITER_DEF
+    OPpITER_REVERSED
+    OPpLIST_GUESSED
+    OPpLVAL_DEFER
+    OPpLVAL_INTRO
+    OPpMAYBE_LVSUB
+    OPpMAY_RETURN_CONSTANT
+    op_pmflags
+    op_pmoffset
+    OPpMULTICONCAT_APPEND
+    OPpMULTICONCAT_STRINGIFY
+    OPpMULTIDEREF_DELETE
+    OPpMULTIDEREF_EXISTS
+    OPpOPEN_IN_CRLF
+    OPpOPEN_IN_RAW
+    OPpOPEN_OUT_CRLF
+    OPpOPEN_OUT_RAW
+    OPpOUR_INTRO
+    OPpPADRANGE_COUNTMASK
+    OPpPADRANGE_COUNTSHIFT
+    OPpPAD_STATE
+    OPpPV_IS_UTF8
+    OPpREFCOUNTED
+    OPpREPEAT_DOLIST
+    OPpSLICE
+    OPpSORT_DESCEND
+    OPpSORT_INPLACE
+    OPpSORT_INTEGER
+    OPpSORT_NUMERIC
+    OPpSORT_REVERSE
+    OPpSPLIT_ASSIGN
+    OPpSUBSTR_REPL_FIRST
+    OPpTARGET_MY
+    OPpTRANS_COMPLEMENT
+    OPpTRANS_DELETE
+    OPpTRANS_FROM_UTF
+    OPpTRANS_GROWS
+    OPpTRANS_IDENTICAL
+    OPpTRANS_SQUASH
+    OPpTRANS_TO_UTF
+    OpREFCNT_dec
+    OpREFCNT_inc
+    OP_REFCNT_LOCK
+    OpREFCNT_set
+    OP_REFCNT_UNLOCK
+    OP_SIBLING
+    OpTYPE_set
+    OutCopFILE
+    padadd_NO_DUP_CHECK
+    padadd_STATE
+    PAD_COMPNAME_FLAGS_isOUR
+    PAD_COMPNAME_OURSTASH
+    PAD_COMPNAME_TYPE
+    PAD_FAKELEX_ANON
+    PAD_FAKELEX_MULTI
+    PadnameFIELDINFO
+    PadnameFLAGS
+    PadnameIsFIELD
+    PadnameIsOUR
+    PadnameIsSTATE
+    PadnameIsSTATE_on
+    PadnamelistMAXNAMED
+    PadnameLVALUE
+    PadnameOURSTASH
+    PadnameOURSTASH_set
+    PadnameOUTER
+    PADNAMEt_OUR
+    PADNAMEt_OUTER
+    PADNAMEt_TYPED
+    padnew_CLONE
+    padnew_SAVE
+    PAD_RESTORE_LOCAL
+    PAD_SAVE_LOCAL
+    PAD_SET_CUR
+    PAD_SET_CUR_NOSAVE
+    PAD_SETSV
+    PAD_SV
+    PAD_SVl
+    PAREN_SET
+    PAREN_TEST
+    PARENT_FAKELEX_FLAGS
+    PARENT_PAD_INDEX
+    PAREN_UNSET
+    PATCHLEVEL
+    Pause
+    PBITVAL
+    PBYTE
+    PL_DBsingle
+    PL_DBtrace
+    PL_last_in_gv
+    PL_ofsgv
+    PL_rs
+    PMf_EVAL
+    PMf_EXTENDED
+    PMf_FOLD
+    PMf_GLOBAL
+    PMf_HAS_CV
+    PMf_IS_QR
+    PMf_KEEP
+    PMf_KEEPCOPY
+    PMf_MULTILINE
+    PMf_ONCE
+    PMf_SINGLELINE
+    PMf_USE_RE_EVAL
+    PM_GETRE
+    PmopSTASH
+    PmopSTASHPV
+    PmopSTASHPV_set
+    PM_SETRE
+    POPSTACK_TO
+    POSIX_CC_COUNT
+    POSTPONED
+    PP
+    PRIVSHIFT
+    ProgLen
+    PTHREAD_ATFORK
+    PTHREAD_ATTR_SETDETACHSTATE
+    PTHREAD_CREATE_JOINABLE
+    pthread_key_create
+    pthread_mutexattr_init
+    pthread_mutexattr_settype
+    pTHX_1
+    pTHX_2
+    pTHX_3
+    pTHXx
+    PUSH_MULTICALL_FLAGS
+    PUSHTARG
+    PVf_QUOTEDPREFIX
+    pWARN_ALL
+    pWARN_NONE
+    pWARN_STD
+    REENTRANT_PROTO_B_IBW
+    REFCOUNTED_HE_EXISTS
+    RegexLengthToShowInErrorMessages
+    REG_NODE_NUM
+    REGTAIL
+    REGTAIL_STUDY
+    reg_warn_non_literal_string
+    REPORT_LOCATION
+    REPORT_LOCATION_ARGS
+    REQUIRE_UTF8
+    ReREFCNT_dec
+    ReREFCNT_inc
+    RESTORE_ERRNO
+    RETURNOP
+    RETURNX
+    RExC_close_parens
+    RExC_contains_locale
+    RExC_emit
+    RExC_emit_start
+    RExC_end
+    RExC_flags
+    RExC_in_multi_char_class
+    RExC_lastnum
+    RExC_lastparse
+    RExC_maxlen
+    RExC_naughty
+    RExC_nestroot
+    RExC_npar
+    RExC_open_parens
+    RExC_orig_utf8
+    RExC_paren_name_list
+    RExC_paren_names
+    RExC_parse
+    RExC_pm_flags
+    RExC_precomp
+    RExC_recurse
+    RExC_recurse_count
+    RExC_rx
+    RExC_rxi
+    RExC_rx_sv
+    RExC_sawback
+    RExC_seen
+    RExC_seen_zerolen
+    RExC_size
+    RExC_start
+    RExC_study_chunk_recursed
+    RExC_study_chunk_recursed_bytes
+    RExC_uni_semantics
+    RExC_utf8
+    RExC_whilem_seen
+    REXEC_CHECKED
+    REXEC_FAIL_ON_UNDERFLOW
+    REXEC_IGNOREPOS
+    REXEC_NOT_FIRST
+    REXEC_SCREAM
+    RMS_FNF
+    RMS_IFI
+    RMS_PRV
+    ROTL32
+    ROTL64
+    ROTL_UV
+    ROTR32
+    ROTR64
+    ROTR_UV
+    RUNOPS_DEFAULT
+    RX_COMPFLAGS
+    RX_ENGINE
+    RX_EXTFLAGS
+    RXf_CHECK_ALL
+    RXf_EVAL_SEEN
+    RXf_INTUIT_TAIL
+    RXf_IS_ANCHORED
+    RXf_MATCH_UTF8
+    RXf_PMf_CHARSET
+    RXf_PMf_COMPILETIME
+    RXf_PMf_EXTENDED_MORE
+    RXf_PMf_FLAGCOPYMASK
+    RXf_PMf_NOCAPTURE
+    RXf_PMf_STD_PMMOD
+    RXf_PMf_STD_PMMOD_SHIFT
+    RXf_TAINTED
+    RXf_TAINTED_SEEN
+    RXf_UNBOUNDED_QUANTIFIER_SEEN
+    RXf_USE_INTUIT
+    RX_MATCH_COPIED_off
+    RX_MATCH_COPIED_on
+    RX_MATCH_COPY_FREE
+    RX_MATCH_TAINTED_off
+    RX_MATCH_TAINTED_on
+    RX_MATCH_TAINTED_set
+    RX_MATCH_UTF8_on
+    RX_MATCH_UTF8_set
+    RX_MINLEN
+    RX_NPARENS
+    RX_OFFSp
+    RXp_COMPFLAGS
+    RXp_EXTFLAGS
+    RXp_MATCH_COPIED
+    RXp_MATCH_COPIED_off
+    RXp_MATCH_COPIED_on
+    RXp_MATCH_TAINTED
+    RXp_MATCH_TAINTED_on
+    RXp_MATCH_UTF8
+    RXp_PAREN_NAMES
+    RX_PRECOMP
+    RX_PRECOMP_const
+    RX_PRELEN
+    RX_UTF8
+    RX_WRAPLEN
+    RX_WRAPPED
+    SAVEADELETE
+    SAVECLEARSV
+    SAVECOMPILEWARNINGS
+    SAVECOMPPAD
+    SAVECOPFILE
+    SAVECOPFILE_FREE
+    SAVECOPLINE
+    SAVECOPSTASH_FREE
+    SAVE_ERRNO
+    SAVEGENERICPV
+    SAVEHINTS
+    SAVE_MASK
+    SAVEOP
+    SAVESWITCHSTACK
+    SAVEt_ADELETE
+    SAVEt_AELEM
+    SAVEt_ALLOC
+    SAVEt_APTR
+    SAVEt_AV
+    SAVEt_BOOL
+    SAVEt_CLEARPADRANGE
+    SAVEt_CLEARSV
+    SAVEt_COMPILE_WARNINGS
+    SAVEt_COMPPAD
+    SAVEt_DELETE
+    SAVEt_DESTRUCTOR
+    SAVEt_DESTRUCTOR_X
+    SAVEt_FREECOPHH
+    SAVEt_FREEOP
+    SAVEt_FREEPADNAME
+    SAVEt_FREEPV
+    SAVEt_FREERCPV
+    SAVEt_FREESV
+    SAVEt_GENERIC_PVREF
+    SAVEt_GENERIC_SVREF
+    SAVEt_GP
+    SAVEt_GVSLOT
+    SAVEt_GVSV
+    SAVEt_HELEM
+    SAVEt_HINTS
+    SAVEt_HINTS_HH
+    SAVEt_HPTR
+    SAVEt_HV
+    SAVEt_I16
+    SAVEt_I32
+    SAVEt_I32_SMALL
+    SAVEt_I8
+    SAVE_TIGHT_SHIFT
+    SAVEt_INT_SMALL
+    SAVEt_ITEM
+    SAVEt_IV
+    SAVEt_MORTALIZESV
+    SAVEt_NSTAB
+    SAVEt_OP
+    SAVEt_PADSV
+    SAVEt_PADSV_AND_MORTALIZE
+    SAVEt_PARSER
+    SAVEt_PPTR
+    SAVEt_RCPV
+    SAVEt_READONLY_OFF
+    SAVEt_REGCONTEXT
+    SAVEt_SAVESWITCHSTACK
+    SAVEt_SET_SVFLAGS
+    SAVEt_SHARED_PVREF
+    SAVEt_SPTR
+    SAVEt_STACK_POS
+    SAVEt_STRLEN
+    SAVEt_STRLEN_SMALL
+    SAVEt_SV
+    SAVEt_SVREF
+    SAVEt_TMPSFLOOR
+    SAVEt_VPTR
+    SAVEVPTR
+    SAWAMPERSAND_LEFT
+    SAWAMPERSAND_RIGHT
+    sC
+    SCF_DO_STCLASS
+    SCF_DO_STCLASS_AND
+    SCF_DO_STCLASS_OR
+    SCF_DO_SUBSTR
+    SCF_SEEN_ACCEPT
+    SCF_TRIE_DOING_RESTUDY
+    SCF_TRIE_RESTUDY
+    SCF_WHILEM_VISITED_POS
+    semun
+    SETi
+    SET_MARK_OFFSET
+    SETn
+    SetProgLen
+    SETs
+    SETTARG
+    SET_THR
+    SF_BEFORE_EOL
+    SF_BEFORE_MEOL
+    SF_BEFORE_SEOL
+    SF_HAS_EVAL
+    SF_HAS_PAR
+    SF_IN_PAR
+    SF_IS_INF
+    share_hek_hek
+    SHARP_S_SKIP
+    sI
+    SIMPLE
+    Simple_vFAIL
+    SIPHASH_SEED_STATE
+    SIPROUND
+    S_IWOTH
+    S_IXOTH
+    Size_t_MAX
+    SOCKET_OPEN_MODE
+    specialWARN
+    SS_ADD_END
+    SS_ADD_UV
+    ssc_add_cp
+    SSCHECK
+    ssc_init_zero
+    ssc_match_all_cp
+    SSGROW
+    SS_IVCHAN
+    SSize_t_MAX
+    SS_MAXPUSH
+    SSPOPINT
+    SSPOPIV
+    SSPOPPTR
+    SSPOPUV
+    SSPUSHINT
+    SSPUSHIV
+    SSPUSHPTR
+    SSPUSHUV
+    Stack_off_t_MAX
+    STANDARD_C
+    Stat
+    Stat_t
+    STATUS_CURRENT
+    STD_PAT_MODS
+    STD_PMMOD_FLAGS_CLEAR
+    STORE_LC_NUMERIC_SET_STANDARD
+    strBEGINs
+    Strerror
+    STRUCT_OFFSET
+    STRUCT_SV
+    SUBVERSION
+    sv_2nv
+    SvANY
+    SvARENA_CHAIN
+    SvCANCOW
+    SvCANEXISTDELETE
+    SvCOMPILED
+    SV_CONST_RETURN
+    SV_COW_REFCNT_MAX
+    SV_COW_SHARED_HASH_KEYS
+    SvEND_set
+    SvFAKE
+    SvFAKE_off
+    SvFAKE_on
+    SVf_AMAGIC
+    SVf_BREAK
+    SVf_FAKE
+    SVf_IOK
+    SVf_IsCOW
+    SVf_IVisUV
+    SvFLAGS
+    SVf_NOK
+    SVf_OK
+    SVf_OOK
+    SVf_POK
+    SVf_PROTECT
+    SVf_READONLY
+    SVf_ROK
+    SVf_THINKFIRST
+    Sv_Grow
+    SvIMMORTAL
+    SvIOKp_on
+    SvIsCOW_on
+    SvIS_FREED
+    SvIsUV
+    SvIsUV_off
+    SvIsUV_on
+    SvIV_please
+    SvIV_please_nomg
+    SvMAGICAL_off
+    SvMAGICAL_on
+    SV_MUTABLE_RETURN
+    SvNOK_nog
+    SvNOKp_on
+    SvOBJECT
+    SvOBJECT_off
+    SvOBJECT_on
+    SvOK_off
+    SvOURSTASH
+    SvOURSTASH_set
+    SvPADMY
+    SvPADMY_on
+    SvPAD_OUR
+    SVpad_OUR
+    SvPAD_OUR_on
+    SvPADSTALE
+    SvPADSTALE_off
+    SvPADSTALE_on
+    SvPAD_STATE
+    SVpad_STATE
+    SvPAD_STATE_on
+    SvPADTMP
+    SvPADTMP_off
+    SvPADTMP_on
+    SvPAD_TYPED
+    SVpad_TYPED
+    SvPAD_TYPED_on
+    SVpav_REAL
+    SVpav_REIFY
+    SvPEEK
+    SVpgv_GP
+    SVphv_CLONEABLE
+    SVp_IOK
+    SVp_NOK
+    SvPOKp_on
+    SV_POSBYTES
+    SVp_POK
+    SVprv_PCS_IMPORTED
+    SVp_SCREAM
+    SvPV_flags_const_nolen
+    SvREFCNT_IMMORTAL
+    SvRV_const
+    SvSCREAM
+    SvSCREAM_on
+    SVs_GMG
+    SvSHARED_HEK_FROM_PV
+    SvSMAGICAL_off
+    SvSMAGICAL_on
+    SVs_OBJECT
+    SVs_RMG
+    SVs_SMG
+    SvTAIL
+    SvTEMP
+    SvTEMP_off
+    SvTEMP_on
+    SvTHINKFIRST
+    SvTIED_mg
+    SVt_MASK
+    SVt_PVBM
+    SVt_RV
+    SVTYPEMASK
+    SV_UNDEF_RETURNS_NULL
+    SvVALID
+    SvWEAKREF
+    SvWEAKREF_off
+    SYSTEM_GMTIME_MAX
+    SYSTEM_GMTIME_MIN
+    SYSTEM_LOCALTIME_MAX
+    SYSTEM_LOCALTIME_MIN
+    TARGi
+    TARGn
+    TARGu
+    tC
+    THR
+    tI
+    toFOLD_LC
+    toFOLD_uni
+    toLOWER_uni
+    TOPi
+    TOPm1s
+    toUPPER_LC
+    toUPPER_uni
+    TRIE_STCLASS
+    TRIE_STUDY_OPT
+    TRYAGAIN
+    tryAMAGICunDEREF
+    tTHX
+    TWO_BYTE_UTF8_TO_NATIVE
+    TWO_BYTE_UTF8_TO_UNI
+    TYPE_CHARS
+    TYPE_DIGITS
+    U16_MAX
+    U32_MAX
+    U8_MAX
+    U8TO16_LE
+    U8TO32_LE
+    U8TO64_LE
+    UNICODE_ALLOW_ANY
+    UNICODE_GREEK_CAPITAL_LETTER_SIGMA
+    UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA
+    UNICODE_GREEK_SMALL_LETTER_SIGMA
+    UNICODE_IS_32_CONTIGUOUS_NONCHARS
+    UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER
+    UNICODE_PAT_MOD
+    UNICODE_SURROGATE_FIRST
+    UNI_IS_INVARIANT
+    UNI_SEMANTICS
+    UNLINK
+    UNLOCK_DOLLARZERO_MUTEX
+    UNLOCK_LC_NUMERIC_STANDARD
+    UNOP_AUX_item_sv
+    USE_ENVIRON_ARRAY
+    USE_HASH_SEED
+    USE_LEFT
+    USE_LOCALE
+    USE_LOCALE_COLLATE
+    USE_LOCALE_NUMERIC
+    USE_STAT_RDEV
+    USE_SYSTEM_GMTIME
+    USE_SYSTEM_LOCALTIME
+    USE_TM64
+    UTF
+    UTF8_ACCUMULATE
+    UTF8_ALLOW_ANYUV
+    UTF8_ALLOW_DEFAULT
+    UTF8_ALLOW_FE_FF
+    UTF8_ALLOW_FFFF
+    UTF8_ALLOW_SURROGATE
+    UTF8_EIGHT_BIT_HI
+    UTF8_EIGHT_BIT_LO
+    UTF8_IS_ABOVE_LATIN1
+    UTF8_IS_CONTINUATION
+    UTF8_IS_CONTINUED
+    UTF8_IS_DOWNGRADEABLE_START
+    UTF8_IS_START
+    UTF8_MAX_FOLD_CHAR_EXPAND
+    UTF8_MAXLEN
+    utf8_to_utf16
+    UTF8_TWO_BYTE_HI
+    UTF8_TWO_BYTE_LO
+    UTF_ACCUMULATION_SHIFT
+    UTF_CONTINUATION_MARK
+    UTF_CONTINUATION_MASK
+    UTF_IS_CONTINUATION_MASK
+    UTF_MIN_ABOVE_LATIN1_BYTE
+    UTF_MIN_START_BYTE
+    UTF_START_MARK
+    UTF_START_MASK
+    UTF_TO_NATIVE
+    vFAIL
+    vFAIL2
+    vFAIL2utf8f
+    vFAIL3
+    vFAIL4
+    VOL
+    vTHX
+    vWARN
+    vWARN3
+    vWARN4
+    vWARN5
+    vWARN_dep
+    WARN_ALLstring
+    WARN_NONEstring
+    WARNsize
+    WIN32SCK_IS_STDSCK
+    withinCOUNT
+    xI
+    xiv_iv
+    XOPf_xop_dump
+    XS_INTERNAL
+    xuv_uv
+    xV_FROM_REF
+    YIELD
+    YYEMPTY
+    YYSTYPE_IS_DECLARED
+    YYSTYPE_IS_TRIVIAL
+
+    CC_ALPHA_
+    CC_ALPHANUMERIC_
+    CC_ASCII_
+    CC_BLANK_
+    CC_CASED_
+    CC_CNTRL_
+    CC_DIGIT_
+    CC_LOWER_
+    CC_PUNCT_
+    CC_SPACE_
+    CC_UPPER_
+    CC_VERTSPACE_
+    CC_WORDCHAR_
+    CC_XDIGIT_
+    FUNCTION__
+    generic_isCC_A_
+    inRANGE_helper_
+    MEM_WRAP_CHECK_
+    __PATCHLEVEL_H_INCLUDED__
+    withinCOUNT_KNOWN_VALID_
+);
+
+$unresolved_visibility_overrides{$_} = 1 for @symbols_used_on_metacpan;
 
 # This is a list of symbols that are used by the OS and which perl may need to
 # define or redefine, and which aren't otherwise currently detectable by this
