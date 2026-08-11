@@ -396,50 +396,100 @@ with C<Perl>, C<perl>, or C<PL_>, or ending with C<_pl_>.
 =head3 Symbol visibility
 
 For most of its life, Perl made little or no effort to hide its internal
-symbols or functions.  This has led to programmers using Perl to use
-functionality that was dependent on Perl internal implementation
-details, breaking when we unknowingly tried to change our
-implementation, and thus hindering progress.
+symbols or functions.  This made it easy for programmers to, even
+inadvertently, use functionality that depended on Perl's internal
+implementation details.  When we tried to change those details, user
+functionality often broke, thus creating frictions, and slowing down
+adding improvements.
 
-That has been changing in recent releases, and as of v5.44, the
-visibility of new symbols is restricted to just the perl core, unless an
-explicit declaration is made otherwise.  (Except symbol names which
-match the pattern C<$names_reserved_for_perl_use_re> found in
-F<regen/embed.pl> are made visible everywhere.)  This means you can add
-symbols with whatever C-compliant spelling you want, without fear that
-they will be misused by someone.
+That has been changing in recent releases.  In 5.38, the default
+visibility of functions was changed to automatically be restricted to
+just the Perl core.  This was extended in 5.44 to newly added macros.
+This means you can add these kinds of symbols with whatever C-compliant
+spelling you want, without fear that they will clash with a user's
+existing symbol or be misused by someone,
 
-Note that symbols not placed in header files have never been visible to
-outside code.
+You can override the default to make any symbol more visible as follows:
 
-You should consider several things before making a new symbol visible.
-The bottom line is "Who really needs to see it?"
+=over 4
 
-The best method is to document the symbol.  How to do this is described
-near the top of F<embed.fnc>, and that file can be used to mark a
-symbol's visibility.  But the main documentation remains using
-C<=for apidoc> lines in the source and various pods.  There are several
-advantages to doing this
+=item * To everyone
+
+=item * To modules considered to be Perl extensions
+
+=item * To just the regular expression (C<re>) extension.
+
+=back
+
+The methods to do this vary depending on the type of symbol.
+
+=over 4
+
+=item Functions
+
+Every function not static to a single file must have an entry in
+F<embed.fnc>.  Each entry will have various flags that apply to it,
+including some that determine its visibility.  They are listed in the
+comments at the beginning of the file.
+
+To restrict the visibilty to just the C<re> module, more work is needed,
+in the form of C preprocessor conditionals surrounding the entry, like
+so:
+
+ # if defined(PERL_EXT_RE_BUILD)
+     E...|return-type|function-name|arguments
+ # endif
+
+The C<E> flag restricts the symbol's visibility to Perl Extensions; and
+the #ifdef further to just the C<re> module.
+
+Static functions are not required to have an F<embed.fnc> entry, but
+doing so is encouraged, and has some advantages, and no downsides:
 
 =over
 
 =item 1
 
-People will know how to use your symbol without having to puzzle it out
-from the code.  That might even be you 6 months from now.
+The function can be referred to by its short name, without having to
+consider if it needs a thread-context parameter.
 
 =item 2
 
-Various services are automatically generated for symbols naming
-functions, such as C<assert()>s for parameter input conditions.
+Various services are automatically generated for functions, such as
+C<assert()>s for parameter sanity checking.
 
-One service is that specifying the visibility with one of the flags for
-the purpose automatically makes sure the symbol has that visibility
-without you having to do anything else.
+=back
 
-=item 3
+New services keep getting added, which mainly automatically will be
+applied to your function without any effort on your part.
 
-Simple test cases can be automatically generated.
+=item Macros
+
+You can put an entry for it in F<embed.fnc>, just like a function, but
+adding the C<m> (for macro) flag. 
+
+But it is often more convenient to specify the visibility at the place
+where the macro is documented via C<=for apidoc> lines.  The same flags
+as in F<embed.fnc> entries are recognized.  To restrict the visibility
+to just the C<re> module, you also need to use the same C preprocessor
+conditional as you would for a function.
+
+There is an exception for macros that don't have such entries.  Ones
+whose names match the pattern (C<$names_reserved_for_perl_use_re> are
+made visible, under the theory that you wouldn't have bothered to add
+the clumsier spelling if you didn't want them visible.
+
+=item Enums, Typedefs, Structs, and Unions
+
+These unfortunately by default are visible to everyone.  To restrict
+their visibility, you have to resort to C preprocessor conditionals
+surrounding them, like
+
+ # if defined(PERL_CORE)
+     typedef enum { ... } my_enum;
+ # endif
+
+Use C<PERL_EXT> to restrict the visibilty to perl extensions.
 
 =back
 
@@ -453,6 +503,8 @@ likely to clash with ones an author might choose, problems don't arise.
 If you choose to not document a new symbol that needs to be visible
 everywhere, add it to the array C<@undocumented_always_visible> in
 F<regen/embed.pl>.
+Note that symbols not placed in header files have never been visible to
+outside code.
 
 =head3 Choosing good symbol names
 
@@ -555,7 +607,7 @@ Therefore, if a macro does use variables, their names should be such
 that it is very unlikely that they would collide with any caller, now
 or forever.  One way to do that, now being used in the perl source, is
 to include the name of the macro itself as part of the name of each
-variable in the macro.  Suppose the macro is named C<SvPV>  Then we
+variable in the macro.  Suppose the macro is named C<SvPV>.  Then we
 could have
 
  int foo_svpv_ = 0;
