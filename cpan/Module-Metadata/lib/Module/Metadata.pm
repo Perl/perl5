@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2:tw=78
-package Module::Metadata; # git description: v1.000038-5-g7f7baae
+package Module::Metadata; # git description: v1.000039-4-gc6c006f
 # ABSTRACT: Gather package and POD information from perl module files
 
 # Adapted from Perl-licensed code originally distributed with
@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000039';
+our $VERSION = '1.000040';
 
 use Carp qw/croak/;
 use File::Spec;
@@ -861,7 +861,10 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 VERSION
 
-version 1.000039
+version 1.000040
+
+I use a linearly-increasing version numbering scheme. No meaning should be
+presumed or inferred from the version being less than 1.0.
 
 =head1 SYNOPSIS
 
@@ -1101,7 +1104,7 @@ assistance from David Golden (xdg) <dagolden@cpan.org>.
 
 =head1 CONTRIBUTORS
 
-=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Christian Walde Craig A. Berry Tatsuhiko Miyagawa tokuhirom 'BinGOs' Williams Mitchell Steinbrunner Edward Zborowski Erik Huelsmann Gareth Harper James Raspass Jerry D. Hedden Josh Jore Kent Fredric Leon Timmermans Peter Rabbitson Steve Hay
+=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Christian Walde Craig A. Berry Tatsuhiko Miyagawa tokuhirom 'BinGOs' Williams Mitchell Steinbrunner Edward Zborowski Erik Huelsmann Gareth Harper James Raspass Jerry D. Hedden Josh Jore Kent Fredric Leon Timmermans Paul "LeoNerd" Evans Peter Rabbitson Steve Hay
 
 =over 4
 
@@ -1196,6 +1199,10 @@ Kent Fredric <kentnl@cpan.org>
 =item *
 
 Leon Timmermans <fawaka@gmail.com>
+
+=item *
+
+Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
 
 =item *
 

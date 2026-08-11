@@ -2,9 +2,10 @@
 use strict;
 use warnings;
 
-use Config;
-use Test::More $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/
-    ? ( skip_all => 'No taint support' ) : ( tests => 2 );
+use Scalar::Util qw( tainted );
+use Test::More
+    ( tainted $0 ) ? ( tests => 2 ) : ( skip_all => 'No taint support' );
+
 use Module::Metadata;
 use Carp 'croak';
 
