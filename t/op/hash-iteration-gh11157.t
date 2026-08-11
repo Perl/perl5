@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 
+# Original report: https://rt-archive.perl.org/perl5/Ticket/Display.html?id=85026
+# Now:             https://github.com/perl/perl5/issues/11157
+
 BEGIN {
   chdir 't' if -d 't';
   require './test.pl';
@@ -57,7 +60,7 @@ plan(1);
 # Ok all preparation is done
 note <<"EOF"
 Found keys '$first_key' and '$second_key' on chain $riter
-Will now iterato to key '$first_key' then delete '$first_key' and '$second_key'.
+Will now iterate to key '$first_key' then delete '$first_key' and '$second_key'.
 EOF
 ;
 1 until $first_key eq each %hash;
