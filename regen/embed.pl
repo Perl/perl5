@@ -131,6 +131,9 @@ my $names_reserved_for_perl_use_re =
                             | ( _ | \b ) CPERL (arg | scope) ( _ | \b )
 
                             | _ (?: pl | PL) _ \b
+
+                              # Cast OP* arguments
+                            | \b c [A-Z_]+ [ox]? (?: _ [a-z]+ )? \b
                           /x;
 
 # This program looks at C preprocessor conditional expressions.  It turns out
@@ -290,16 +293,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CASE_STD_PMMOD_FLAGS_PARSE_SET
     CATCH_GET
     CATCH_SET
-    cBINOP
-    cBINOPo
-    cBINOPx
-    cCOP
-    cCOPo
-    cCOPx
     C_FAC_POSIX
-    cGVOP_gv
-    cGVOPo_gv
-    cGVOPx_gv
     CHANGE_MULTICALL_FLAGS
     CHARSET_PAT_MODS
     CHECK_MALLOC_TAINT
@@ -327,27 +321,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     classnum_to_namedclass
     CLEAR_ARGARRAY
     CLEAR_OPTSTART
-    cLISTOP
-    cLISTOPo
-    cLISTOPx
-    cLOGOP
-    cLOGOPo
-    cLOGOPx
     CLONEf_JOIN_IN
-    cLOOP
-    cLOOPo
-    cLOOPx
     CLUMP_2IV
     CLUMP_2UV
-    cMETHOP
-    cMETHOP_meth
-    cMETHOPo
-    cMETHOPo_meth
-    cMETHOPo_rclass
-    cMETHOP_rclass
-    cMETHOPx
-    cMETHOPx_meth
-    cMETHOPx_rclass
     COMBINING_DOT_ABOVE_UTF8
     COMBINING_GRAVE_ACCENT_UTF8
     COMBINING_GREEK_YPOGEGRAMMENI_UTF8
@@ -380,31 +356,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CopSTASH_ne
     copy_length
     CowREFCNT
-    cPADOP
-    cPADOPo
-    cPADOPx
-    cPMOP
-    cPMOPo
-    cPMOPx
-    cPVOP
-    cPVOPo
-    cPVOPx
     CR_NATIVE
-    cSVOP
-    cSVOPo
-    cSVOPo_sv
-    cSVOP_sv
-    cSVOPx
-    cSVOPx_sv
-    cSVOPx_svp
     Ctl
     CTYPE256
-    cUNOP
-    cUNOP_AUX
-    cUNOP_AUXo
-    cUNOP_AUXx
-    cUNOPo
-    cUNOPx
     CvANON
     CvANONCONST
     CvANONCONST_off
