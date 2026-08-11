@@ -1239,8 +1239,8 @@ You can see this in the following code snippet:
 This prints as follows:
 
  Argument       Output
- 'a(x)*b'    matched: <>
  'a(x*)b'    matched: undef
+ 'a(x)*b'    matched: <>
 
 Both patterns match, but leave the contents of the C<$1> capture group
 in different states.  Back references only match when the capture group
