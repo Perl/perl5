@@ -1,7 +1,4 @@
-
-require 5;
 package I18N::LangTags::List;
-#  Time-stamp: "2004-10-06 23:26:21 ADT"
 use strict;
 our (%Name, %Is_Disrec, $Debug);
 our $VERSION = '0.42';
@@ -14,11 +11,11 @@ our $VERSION = '0.42';
   my $count = 0;
   my($disrec,$tag,$name);
   my $last_name = '';
-  while(<I18N::LangTags::List::DATA>) {
+  while(my $line = <DATA>) {
     if($seeking) {
-      $seeking = 0 if m/=for woohah/;
+      $seeking = 0 if $line =~ m/=for woohah/;
     } elsif( ($disrec, $tag, $name) =
-          m/(\[?)\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/
+          $line =~ m/(\[?)\{([-0-9a-zA-Z]+)\}(?:\s*:)?\s*([^\[\]]+)/
     ) {
       $name =~ s/\s*[;\.]*\s*$//g;
       next unless $name;
@@ -26,7 +23,7 @@ our $VERSION = '0.42';
       print "<$tag> <$name>\n" if $Debug;
       $last_name = $Name{$tag} = $name;
       $Is_Disrec{$tag} = 1 if $disrec;
-    } elsif (m/[Ff]ormerly \"([-a-z0-9]+)\"/) {
+    } elsif ($line =~ m/[Ff]ormerly \"([-a-z0-9]+)\"/) {
       $Name{$1} = "$last_name (old tag)" if $last_name;
       $Is_Disrec{$1} = 1;
     }

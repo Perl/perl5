@@ -1,6 +1,11 @@
 use strict;
 use Test::More tests => 16;
-BEGIN {use_ok('I18N::LangTags::List');}
+BEGIN {
+    for ('mtfnpy') {
+        require I18N::LangTags::List;
+        is $_, 'mtfnpy', 'require I18N::LangTags::List does not clobber $_';
+    }
+}
 
 note("Perl v$], I18N::LangTags::List v$I18N::LangTags::List::VERSION");
 
