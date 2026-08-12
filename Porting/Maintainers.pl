@@ -18,14 +18,15 @@ use File::Glob qw(:case);
 # complain if it can't find them)
 
 our @IGNORABLE = qw(
-    .cvsignore .dualLivedDiffConfig .gitignore .github .perlcriticrc .perltidyrc
-    .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-    CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.md
-    CONTRIBUTING.mkdn COPYING Copying cpanfile CREDITS dist.ini GOALS HISTORY
-    INSTALL INSTALL.SKIP LICENCE LICENSE Makefile.PL MANIFEST MANIFEST.SKIP
-    META.json META.yml MYMETA.json MYMETA.yml NEW NEWS NOTES perlcritic.rc
-    ppport.h README README.md README.pod README.PATCHING SIGNATURE THANKS TODO
-    Todo VERSION WHATSNEW
+    .cvsignore .dualLivedDiffConfig .gitignore .github .perlcriticrc
+    .perltidyrc .travis.yml AGENTS.md ANNOUNCE Announce Artistic AUTHORS
+    BENCHMARK BUGS Build.PL CHANGELOG ChangeLog Changelog CHANGES Changes
+    CLAUDE.md CONTEXT.md CONTRIBUTING CONTRIBUTING.md CONTRIBUTING.mkdn COPYING
+    Copying cpanfile CREDITS dist.ini GEMINI.md GOALS HISTORY INSTALL
+    INSTALL.SKIP LICENCE LICENSE Makefile.PL MANIFEST MANIFEST.SKIP META.json
+    META.yml MEMORY.md MYMETA.json MYMETA.yml NEW NEWS NOTES perlcritic.rc
+    ppport.h README README.md README.pod README.PATCHING SIGNATURE SKILLS.md
+    THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
