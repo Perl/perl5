@@ -1058,7 +1058,7 @@ subattrlist
 	|	COLONATTR ATTRLIST
 			{
 			  OP *attrlist = $ATTRLIST;
-			  if(attrlist && !PL_parser->sig_seen)
+			  if(attrlist && !parser->sig_seen)
 			      attrlist = apply_builtin_cv_attributes(PL_compcv, attrlist);
 			  $$ = attrlist;
 			}
@@ -1239,7 +1239,7 @@ optsigsubbody
 
 /* Subroutine body with optional signature */
 sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN 
-			{ PL_parser->sig_seen = FALSE; }
+			{ parser->sig_seen = FALSE; }
 		stmtseq PERLY_BRACE_CLOSE
 			{
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
