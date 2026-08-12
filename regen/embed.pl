@@ -1378,9 +1378,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MgTAINTEDDIR
     MgTAINTEDDIR_off
     MgTAINTEDDIR_on
-    MgARRAYVARFUNCS
-    MgHASHVARFUNCS
-    MgSCALARVARFUNCS
     MgSIZEOF
     MGv2f_REFCOUNTED_AUXSV
     MGv2f_WITH_MASK
