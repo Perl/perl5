@@ -1,10 +1,6 @@
 use strict;
-BEGIN {
-    eval "use Test::More";
-    return unless $@;
-    print "1..0 # Skip: Test requires Test::More module\n";
-    exit 0;
-}
+use warnings;
+use Test::More;
 use Win32;
 
 my $tests = 16;
