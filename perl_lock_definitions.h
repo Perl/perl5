@@ -124,6 +124,56 @@
  * of these macros to avoid deadlock altogether.
  */
 
+/* The macros that include locale locking need to know (in some
+ * Configurations) which locale categories are affected.  This is done by
+ * passing a bit mask argument to them, with each affected category having a
+ * corresponding bit set.  The definitions below convert from category to its
+ * bit position. */
+#define PERL_LC_INDEX_TO_BIT(i) (1 << (i))
+#define PERL_LC_ALLb  PERL_LC_INDEX_TO_BIT(LC_ALL_INDEX_)
+
+/*  On platforms where the locale for a given category must be matched by the
+ *  LC_CTYPE locale to avoid potential mojibake, set things up to also
+ *  automatically include the LC_CTYPE bit. */
+#if defined(LC_CTYPE) && defined(PERL_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+#  define PERL_INCLUDE_CTYPE  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+#else
+#  define PERL_INCLUDE_CTYPE  0
+#endif
+
+/* Then #define the bit position for each category on the system that can play
+ * a part in the locking macro definitions */
+#ifdef LC_COLLATE
+#  define PERL_LC_COLLATEb  PERL_LC_INDEX_TO_BIT(LC_COLLATE_INDEX_)|PERL_INCLUDE_CTYPE
+#else
+#  define PERL_LC_COLLATEb  PERL_LC_CTYPEb
+#endif
+#ifdef LC_CTYPE
+#  define PERL_LC_CTYPEb  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+#else
+#  define PERL_LC_CTYPEb  PERL_LC_ALLb
+#endif
+#ifdef LC_MESSAGES
+#  define PERL_LC_MESSAGESb  PERL_LC_INDEX_TO_BIT(LC_MESSAGES_INDEX_)|PERL_INCLUDE_CTYPE
+#else
+#  define PERL_LC_MESSAGESb  PERL_LC_CTYPEb
+#endif
+#ifdef LC_MONETARY
+#  define PERL_LC_MONETARYb  PERL_LC_INDEX_TO_BIT(LC_MONETARY_INDEX_)|PERL_INCLUDE_CTYPE
+#else
+#  define PERL_LC_MONETARYb  PERL_LC_CTYPEb
+#endif
+#ifdef LC_NUMERIC
+#  define PERL_LC_NUMERICb  PERL_LC_INDEX_TO_BIT(LC_NUMERIC_INDEX_)|PERL_INCLUDE_CTYPE
+#else
+#  define PERL_LC_NUMERICb  PERL_LC_CTYPEb
+#endif
+#ifdef LC_TIME
+#  define PERL_LC_TIMEb  PERL_LC_INDEX_TO_BIT(LC_TIME_INDEX_)|PERL_INCLUDE_CTYPE
+#else
+#  define PERL_LC_TIMEb  PERL_LC_CTYPEb
+#endif
+
 #ifndef PERL_ADDMNTENT_LOCK
 
    /* addmntent() either was never in the POSIX Standard, or was removed as of
@@ -147,8 +197,8 @@
 #endif
 
 #ifndef PERL_ALPHASORT_LOCK
-#  define PERL_ALPHASORT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ALPHASORT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ALPHASORT_LOCK    PERL_LCr_LOCK(  PERL_LC_COLLATEb)
+#  define PERL_ALPHASORT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_ASCTIME_LOCK
@@ -160,8 +210,8 @@
 #    define PERL_ASCTIME_LOCK    PERL_ASCTIME_R_LOCK
 #    define PERL_ASCTIME_UNLOCK  PERL_ASCTIME_R_UNLOCK
 #  else
-#    define PERL_ASCTIME_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_ASCTIME_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_ASCTIME_LOCK    PERL_LCx_LOCK(  PERL_LC_TIMEb)
+#    define PERL_ASCTIME_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_TIMEb)
 #  endif
 #  ifndef ASCTIME_LOCK
 #    define ASCTIME_LOCK    PERL_ASCTIME_LOCK
@@ -172,36 +222,36 @@
 #ifndef PERL_ASCTIME_R_LOCK
 
    /* asctime_r() Obsolete; use Perl_sv_strftime_tm() instead */
-#  define PERL_ASCTIME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ASCTIME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ASCTIME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_ASCTIME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_ASPRINTF_LOCK
 
    /* asprintf() either was never in the POSIX Standard, or was removed as of
     *            POSIX 2001. */
-#  define PERL_ASPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ASPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ASPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_ASPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_ATOF_LOCK
-#  define PERL_ATOF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ATOF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ATOF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_ATOF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_ATOI_LOCK
-#  define PERL_ATOI_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ATOI_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ATOI_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_ATOI_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_ATOL_LOCK
-#  define PERL_ATOL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ATOL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ATOL_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_ATOL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_ATOLL_LOCK
-#  define PERL_ATOLL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ATOLL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ATOLL_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_ATOLL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_ATOMIC_INIT_LOCK
@@ -220,22 +270,22 @@
 #endif
 
 #ifndef PERL_BTOWC_LOCK
-#  define PERL_BTOWC_LOCK
-#  define PERL_BTOWC_UNLOCK
+#  define PERL_BTOWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_BTOWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_C16RTOMB_LOCK
 
    /* c16rtomb() locking macros are only valid if '!ps' */
-#  define PERL_C16RTOMB_LOCK
-#  define PERL_C16RTOMB_UNLOCK
+#  define PERL_C16RTOMB_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_C16RTOMB_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_C32RTOMB_LOCK
 
    /* c32rtomb() locking macros are only valid if '!ps' */
-#  define PERL_C32RTOMB_LOCK
-#  define PERL_C32RTOMB_UNLOCK
+#  define PERL_C32RTOMB_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_C32RTOMB_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_CATCLOSE_LOCK
@@ -309,8 +359,8 @@
     * clearerr_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                     locked the stream, but should not be used since not
     *                     standardized and not widely implemented */
-#  define PERL_CLEARERR_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_CLEARERR_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_CLEARERR_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_CLEARERR_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_CRYPT_LOCK
@@ -373,8 +423,8 @@
 #    define PERL_CTIME_LOCK    PERL_CTIME_R_LOCK
 #    define PERL_CTIME_UNLOCK  PERL_CTIME_R_UNLOCK
 #  else
-#    define PERL_CTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_CTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_CTIME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#    define PERL_CTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  endif
 #  ifndef CTIME_LOCK
 #    define CTIME_LOCK    PERL_CTIME_LOCK
@@ -388,8 +438,8 @@
     * ctime_r() has potential races with other threads concurrently using any
     *           of: itself, ctime(), daylight, localtime(), localtime_r(),
     *           mktime(), strftime(), timezone, tzname, or tzset(). */
-#  define PERL_CTIME_R_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_CTIME_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_CTIME_R_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_CTIME_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_CUSERID_LOCK
@@ -398,8 +448,8 @@
     * cuserid() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001.
     * cuserid() locking macros are only valid if '!string' */
-#  define PERL_CUSERID_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_CUSERID_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_CUSERID_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_CUSERID_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_DAYLIGHT_LOCK
@@ -408,8 +458,8 @@
     *          of: itself, ctime(), ctime_r(), localtime(), localtime_r(),
     *          mktime(), strftime(), timezone, tzname, or tzset().
     * daylight locking macros are only valid if its value is used read-only */
-#  define PERL_DAYLIGHT_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_DAYLIGHT_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_DAYLIGHT_LOCK    PERL_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_DAYLIGHT_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_DBM_CLEARERR_LOCK
@@ -558,8 +608,8 @@
 
 #ifndef PERL_DIRNAME_LOCK
 #  ifndef __GLIBC__
-#    define PERL_DIRNAME_LOCK    PERL_LCr_LOCK(0)
-#    define PERL_DIRNAME_UNLOCK  PERL_LCr_UNLOCK(0)
+#    define PERL_DIRNAME_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#    define PERL_DIRNAME_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #  else
 #    define PERL_DIRNAME_LOCK    NOOP
 #    define PERL_DIRNAME_UNLOCK  NOOP
@@ -577,8 +627,8 @@
 #endif
 
 #ifndef PERL_DPRINTF_LOCK
-#  define PERL_DPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_DPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_DPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_DPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_DRAND48_LOCK
@@ -987,16 +1037,16 @@
 
    /* err() either was never in the POSIX Standard, or was removed as of POSIX
     *       2001. */
-#  define PERL_ERR_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ERR_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ERR_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_ERR_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_ERROR_LOCK
 
    /* error() either was never in the POSIX Standard, or was removed as of
     *         POSIX 2001. */
-#  define PERL_ERROR_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ERROR_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ERROR_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_ERROR_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_ERROR_AT_LINE_LOCK
@@ -1004,16 +1054,16 @@
    /* error_at_line() either was never in the POSIX Standard, or was removed
     *                 as of POSIX 2001.
     * error_at_line() locking macros are only valid if 'error_one_per_line' */
-#  define PERL_ERROR_AT_LINE_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ERROR_AT_LINE_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ERROR_AT_LINE_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_ERROR_AT_LINE_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_ERRX_LOCK
 
    /* errx() either was never in the POSIX Standard, or was removed as of
     *        POSIX 2001. */
-#  define PERL_ERRX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ERRX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ERRX_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_ERRX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_ETHER_ATON_LOCK
@@ -1067,8 +1117,8 @@
     *              fputwc_unlocked(), fputws_unlocked(), fread_unlocked(),
     *              __fsetlocking(), fwrite_unlocked(), getc_unlocked(),
     *              getwc_unlocked(), putc_unlocked(), or putwc_unlocked(). */
-#  define PERL_FBUFSIZE_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FBUFSIZE_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FBUFSIZE_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FBUFSIZE_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FCLOSEALL_LOCK
@@ -1102,8 +1152,8 @@
     * fflush_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FFLUSH_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FFLUSH_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FFLUSH_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FFLUSH_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FGETC_UNLOCKED_LOCK
@@ -1121,8 +1171,8 @@
     * fgetc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_FGETC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FGETC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FGETC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FGETC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FGETGRENT_LOCK
@@ -1182,13 +1232,13 @@
     * fgets_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_FGETS_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FGETS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FGETS_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FGETS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FGETWC_LOCK
-#  define PERL_FGETWC_LOCK
-#  define PERL_FGETWC_UNLOCK
+#  define PERL_FGETWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_FGETWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FGETWC_UNLOCKED_LOCK
@@ -1207,13 +1257,13 @@
     * fgetwc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FGETWC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FGETWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FGETWC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_FGETWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FGETWS_LOCK
-#  define PERL_FGETWS_LOCK
-#  define PERL_FGETWS_UNLOCK
+#  define PERL_FGETWS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_FGETWS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FGETWS_UNLOCKED_LOCK
@@ -1232,21 +1282,21 @@
     * fgetws_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FGETWS_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FGETWS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FGETWS_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_FGETWS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FNMATCH_LOCK
-#  define PERL_FNMATCH_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_FNMATCH_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_FNMATCH_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_FNMATCH_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FORKPTY_LOCK
 
    /* forkpty() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_FORKPTY_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_FORKPTY_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_FORKPTY_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_FORKPTY_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FPENDING_LOCK
@@ -1261,13 +1311,13 @@
     *              fputwc_unlocked(), fputws_unlocked(), fread_unlocked(),
     *              __fsetlocking(), fwrite_unlocked(), getc_unlocked(),
     *              getwc_unlocked(), putc_unlocked(), or putwc_unlocked(). */
-#  define PERL_FPENDING_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPENDING_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPENDING_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FPENDING_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FPRINTF_LOCK
-#  define PERL_FPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_FPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_FPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_FPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_FPURGE_LOCK
@@ -1282,8 +1332,8 @@
     *            fputws_unlocked(), fread_unlocked(), __fsetlocking(),
     *            fwrite_unlocked(), getc_unlocked(), getwc_unlocked(),
     *            putc_unlocked(), or putwc_unlocked(). */
-#  define PERL_FPURGE_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPURGE_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPURGE_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FPURGE_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FPUTC_UNLOCKED_LOCK
@@ -1301,8 +1351,8 @@
     * fputc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_FPUTC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPUTC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPUTC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FPUTC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FPUTS_UNLOCKED_LOCK
@@ -1320,13 +1370,13 @@
     * fputs_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_FPUTS_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPUTS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPUTS_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FPUTS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FPUTWC_LOCK
-#  define PERL_FPUTWC_LOCK
-#  define PERL_FPUTWC_UNLOCK
+#  define PERL_FPUTWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_FPUTWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FPUTWC_UNLOCKED_LOCK
@@ -1345,13 +1395,13 @@
     * fputwc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FPUTWC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPUTWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPUTWC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_FPUTWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FPUTWS_LOCK
-#  define PERL_FPUTWS_LOCK
-#  define PERL_FPUTWS_UNLOCK
+#  define PERL_FPUTWS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_FPUTWS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FPUTWS_UNLOCKED_LOCK
@@ -1370,8 +1420,8 @@
     * fputws_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FPUTWS_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FPUTWS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FPUTWS_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_FPUTWS_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_FREAD_UNLOCKED_LOCK
@@ -1389,13 +1439,13 @@
     * fread_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_FREAD_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FREAD_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FREAD_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FREAD_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FSCANF_LOCK
-#  define PERL_FSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_FSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_FSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_FSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_FSETLOCKING_LOCK
@@ -1411,8 +1461,8 @@
     *                 fread_unlocked(), fwrite_unlocked(), getc_unlocked(),
     *                 getwc_unlocked(), putc_unlocked(), or putwc_unlocked().
     */
-#  define PERL_FSETLOCKING_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FSETLOCKING_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FSETLOCKING_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FSETLOCKING_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FTS_CHILDREN_LOCK
@@ -1451,8 +1501,8 @@
 #endif
 
 #ifndef PERL_FWPRINTF_LOCK
-#  define PERL_FWPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_FWPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_FWPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_FWPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_FWRITE_UNLOCKED_LOCK
@@ -1471,13 +1521,13 @@
     * fwrite_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                   locked the stream, but should not be used since not
     *                   standardized and not widely implemented */
-#  define PERL_FWRITE_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_FWRITE_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_FWRITE_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_FWRITE_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_FWSCANF_LOCK
-#  define PERL_FWSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_FWSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_FWSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_FWSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_GAMMA_LOCK
@@ -1512,8 +1562,8 @@
 #endif
 
 #ifndef PERL_GETADDRINFO_LOCK
-#  define PERL_GETADDRINFO_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETADDRINFO_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETADDRINFO_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETADDRINFO_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETALIASBYNAME_LOCK
@@ -1529,8 +1579,8 @@
 
    /* getaliasbyname_r() either was never in the POSIX Standard, or was
     *                    removed as of POSIX 2001. */
-#  define PERL_GETALIASBYNAME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETALIASBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETALIASBYNAME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETALIASBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETALIASENT_LOCK
@@ -1593,8 +1643,8 @@
     *                 getwc_unlocked(), putc_unlocked(), or putwc_unlocked().
     * getc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                 locked the stream */
-#  define PERL_GETC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_GETC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_GETC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GET_CURRENT_DIR_NAME_LOCK
@@ -1606,16 +1656,16 @@
 #endif
 
 #ifndef PERL_GETDATE_LOCK
-#  define PERL_GETDATE_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_GETDATE_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_GETDATE_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_GETDATE_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_GETDATE_R_LOCK
 
    /* getdate_r() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_GETDATE_R_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETDATE_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETDATE_R_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_GETDATE_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_GETENV_LOCK
@@ -1724,14 +1774,14 @@
 #    define PERL_GETGRGID_LOCK    PERL_GETGRGID_R_LOCK
 #    define PERL_GETGRGID_UNLOCK  PERL_GETGRGID_R_UNLOCK
 #  else
-#    define PERL_GETGRGID_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETGRGID_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETGRGID_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETGRGID_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #endif
 
 #ifndef PERL_GETGRGID_R_LOCK
-#  define PERL_GETGRGID_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETGRGID_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETGRGID_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETGRGID_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETGRNAM_LOCK
@@ -1739,22 +1789,22 @@
 #    define PERL_GETGRNAM_LOCK    PERL_GETGRNAM_R_LOCK
 #    define PERL_GETGRNAM_UNLOCK  PERL_GETGRNAM_R_UNLOCK
 #  else
-#    define PERL_GETGRNAM_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETGRNAM_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETGRNAM_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETGRNAM_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #endif
 
 #ifndef PERL_GETGRNAM_R_LOCK
-#  define PERL_GETGRNAM_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETGRNAM_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETGRNAM_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETGRNAM_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETGROUPLIST_LOCK
 
    /* getgrouplist() either was never in the POSIX Standard, or was removed as
     *                of POSIX 2001. */
-#  define PERL_GETGROUPLIST_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETGROUPLIST_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETGROUPLIST_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETGROUPLIST_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETHOSTBYADDR_LOCK
@@ -1765,8 +1815,8 @@
 #    define PERL_GETHOSTBYADDR_LOCK    PERL_GETHOSTBYADDR_R_LOCK
 #    define PERL_GETHOSTBYADDR_UNLOCK  PERL_GETHOSTBYADDR_R_UNLOCK
 #  else
-#    define PERL_GETHOSTBYADDR_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_GETHOSTBYADDR_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_GETHOSTBYADDR_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETHOSTBYADDR_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETHOSTBYADDR_LOCK
 #    define GETHOSTBYADDR_LOCK    PERL_GETHOSTBYADDR_LOCK
@@ -1779,8 +1829,8 @@
    /* gethostbyaddr_r() Obsolete; use getnameinfo() instead
     * gethostbyaddr_r() either was never in the POSIX Standard, or was removed
     *                   as of POSIX 2001. */
-#  define PERL_GETHOSTBYADDR_R_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETHOSTBYADDR_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETHOSTBYADDR_R_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETHOSTBYADDR_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETHOSTBYNAME_LOCK
@@ -1791,8 +1841,8 @@
 #    define PERL_GETHOSTBYNAME_LOCK    PERL_GETHOSTBYNAME_R_LOCK
 #    define PERL_GETHOSTBYNAME_UNLOCK  PERL_GETHOSTBYNAME_R_UNLOCK
 #  else
-#    define PERL_GETHOSTBYNAME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_GETHOSTBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_GETHOSTBYNAME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETHOSTBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETHOSTBYNAME_LOCK
 #    define GETHOSTBYNAME_LOCK    PERL_GETHOSTBYNAME_LOCK
@@ -1805,16 +1855,16 @@
    /* gethostbyname2() Obsolete; use getaddrinfo() instead
     * gethostbyname2() either was never in the POSIX Standard, or was removed
     *                  as of POSIX 2001. */
-#  define PERL_GETHOSTBYNAME2_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_GETHOSTBYNAME2_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_GETHOSTBYNAME2_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETHOSTBYNAME2_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETHOSTBYNAME2_R_LOCK
 
    /* gethostbyname2_r() either was never in the POSIX Standard, or was
     *                    removed as of POSIX 2001. */
-#  define PERL_GETHOSTBYNAME2_R_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETHOSTBYNAME2_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETHOSTBYNAME2_R_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETHOSTBYNAME2_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETHOSTBYNAME_R_LOCK
@@ -1822,8 +1872,8 @@
    /* gethostbyname_r() Obsolete; use getaddrinfo() instead
     * gethostbyname_r() either was never in the POSIX Standard, or was removed
     *                   as of POSIX 2001. */
-#  define PERL_GETHOSTBYNAME_R_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETHOSTBYNAME_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETHOSTBYNAME_R_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETHOSTBYNAME_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETHOSTENT_LOCK
@@ -1859,8 +1909,8 @@
 #endif
 
 #ifndef PERL_GETHOSTID_LOCK
-#  define PERL_GETHOSTID_LOCK    PERL_GENr_ENVr_LCr_LOCK(0)
-#  define PERL_GETHOSTID_UNLOCK  PERL_GENr_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETHOSTID_LOCK    PERL_GENr_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETHOSTID_UNLOCK  PERL_GENr_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETLOGIN_LOCK
@@ -1876,8 +1926,8 @@
 #    define PERL_GETLOGIN_LOCK    PERL_GETLOGIN_R_LOCK
 #    define PERL_GETLOGIN_UNLOCK  PERL_GETLOGIN_R_UNLOCK
 #  else
-#    define PERL_GETLOGIN_LOCK    PERL_ENVx_LCr_LOCK(0)
-#    define PERL_GETLOGIN_UNLOCK  PERL_ENVx_LCr_UNLOCK(0)
+#    define PERL_GETLOGIN_LOCK    PERL_ENVx_LCr_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETLOGIN_UNLOCK  PERL_ENVx_LCr_UNLOCK(PERL_LC_ALLb)
 #  endif
 #endif
 
@@ -1890,8 +1940,8 @@
     *              getutxid(), getutxline(), glob(), login(), logout(),
     *              pututline(), pututxline(), setutent(), setutxent(),
     *              utmpname(), or wordexp(). */
-#  define PERL_GETLOGIN_R_LOCK    PERL_ENVx_LCr_LOCK(0)
-#  define PERL_GETLOGIN_R_UNLOCK  PERL_ENVx_LCr_UNLOCK(0)
+#  define PERL_GETLOGIN_R_LOCK    PERL_ENVx_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETLOGIN_R_UNLOCK  PERL_ENVx_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETMNTENT_LOCK
@@ -1923,8 +1973,8 @@
 #endif
 
 #ifndef PERL_GETNAMEINFO_LOCK
-#  define PERL_GETNAMEINFO_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETNAMEINFO_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETNAMEINFO_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETNAMEINFO_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETNETBYADDR_LOCK
@@ -1932,8 +1982,8 @@
 #    define PERL_GETNETBYADDR_LOCK    PERL_GETNETBYADDR_R_LOCK
 #    define PERL_GETNETBYADDR_UNLOCK  PERL_GETNETBYADDR_R_UNLOCK
 #  else
-#    define PERL_GETNETBYADDR_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETNETBYADDR_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETNETBYADDR_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETNETBYADDR_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETNETBYADDR_LOCK
 #    define GETNETBYADDR_LOCK    PERL_GETNETBYADDR_LOCK
@@ -1945,8 +1995,8 @@
 
    /* getnetbyaddr_r() either was never in the POSIX Standard, or was removed
     *                  as of POSIX 2001. */
-#  define PERL_GETNETBYADDR_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETNETBYADDR_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETNETBYADDR_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETNETBYADDR_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETNETBYNAME_LOCK
@@ -1954,8 +2004,8 @@
 #    define PERL_GETNETBYNAME_LOCK    PERL_GETNETBYNAME_R_LOCK
 #    define PERL_GETNETBYNAME_UNLOCK  PERL_GETNETBYNAME_R_UNLOCK
 #  else
-#    define PERL_GETNETBYNAME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_GETNETBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_GETNETBYNAME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETNETBYNAME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETNETBYNAME_LOCK
 #    define GETNETBYNAME_LOCK    PERL_GETNETBYNAME_LOCK
@@ -1967,8 +2017,8 @@
 
    /* getnetbyname_r() either was never in the POSIX Standard, or was removed
     *                  as of POSIX 2001. */
-#  define PERL_GETNETBYNAME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETNETBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETNETBYNAME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETNETBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETNETENT_LOCK
@@ -2076,8 +2126,8 @@
 #    define PERL_GETPROTOBYNAME_LOCK    PERL_GETPROTOBYNAME_R_LOCK
 #    define PERL_GETPROTOBYNAME_UNLOCK  PERL_GETPROTOBYNAME_R_UNLOCK
 #  else
-#    define PERL_GETPROTOBYNAME_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETPROTOBYNAME_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETPROTOBYNAME_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETPROTOBYNAME_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETPROTOBYNAME_LOCK
 #    define GETPROTOBYNAME_LOCK    PERL_GETPROTOBYNAME_LOCK
@@ -2089,8 +2139,8 @@
 
    /* getprotobyname_r() either was never in the POSIX Standard, or was
     *                    removed as of POSIX 2001. */
-#  define PERL_GETPROTOBYNAME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETPROTOBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETPROTOBYNAME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETPROTOBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETPROTOBYNUMBER_LOCK
@@ -2098,8 +2148,8 @@
 #    define PERL_GETPROTOBYNUMBER_LOCK    PERL_GETPROTOBYNUMBER_R_LOCK
 #    define PERL_GETPROTOBYNUMBER_UNLOCK  PERL_GETPROTOBYNUMBER_R_UNLOCK
 #  else
-#    define PERL_GETPROTOBYNUMBER_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETPROTOBYNUMBER_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETPROTOBYNUMBER_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETPROTOBYNUMBER_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETPROTOBYNUMBER_LOCK
 #    define GETPROTOBYNUMBER_LOCK    PERL_GETPROTOBYNUMBER_LOCK
@@ -2111,8 +2161,8 @@
 
    /* getprotobynumber_r() either was never in the POSIX Standard, or was
     *                      removed as of POSIX 2001. */
-#  define PERL_GETPROTOBYNUMBER_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETPROTOBYNUMBER_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETPROTOBYNUMBER_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETPROTOBYNUMBER_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETPROTOENT_LOCK
@@ -2149,8 +2199,8 @@
    /* getpw() Obsolete; use getpwuid() instead
     * getpw() either was never in the POSIX Standard, or was removed as of
     *         POSIX 2001. */
-#  define PERL_GETPW_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETPW_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETPW_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETPW_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETPWENT_LOCK
@@ -2190,8 +2240,8 @@
 #    define PERL_GETPWNAM_LOCK    PERL_GETPWNAM_R_LOCK
 #    define PERL_GETPWNAM_UNLOCK  PERL_GETPWNAM_R_UNLOCK
 #  else
-#    define PERL_GETPWNAM_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETPWNAM_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETPWNAM_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETPWNAM_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETPWNAM_LOCK
 #    define GETPWNAM_LOCK    PERL_GETPWNAM_LOCK
@@ -2200,8 +2250,8 @@
 #endif
 
 #ifndef PERL_GETPWNAM_R_LOCK
-#  define PERL_GETPWNAM_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETPWNAM_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETPWNAM_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETPWNAM_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETPWUID_LOCK
@@ -2209,8 +2259,8 @@
 #    define PERL_GETPWUID_LOCK    PERL_GETPWUID_R_LOCK
 #    define PERL_GETPWUID_UNLOCK  PERL_GETPWUID_R_UNLOCK
 #  else
-#    define PERL_GETPWUID_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETPWUID_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETPWUID_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETPWUID_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETPWUID_LOCK
 #    define GETPWUID_LOCK    PERL_GETPWUID_LOCK
@@ -2219,8 +2269,8 @@
 #endif
 
 #ifndef PERL_GETPWUID_R_LOCK
-#  define PERL_GETPWUID_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETPWUID_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETPWUID_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETPWUID_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETRPCBYNAME_LOCK
@@ -2236,8 +2286,8 @@
 
    /* getrpcbyname_r() either was never in the POSIX Standard, or was removed
     *                  as of POSIX 2001. */
-#  define PERL_GETRPCBYNAME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETRPCBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETRPCBYNAME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETRPCBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETRPCBYNUMBER_LOCK
@@ -2253,8 +2303,8 @@
 
    /* getrpcbynumber_r() either was never in the POSIX Standard, or was
     *                    removed as of POSIX 2001. */
-#  define PERL_GETRPCBYNUMBER_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETRPCBYNUMBER_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETRPCBYNUMBER_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETRPCBYNUMBER_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETRPCENT_LOCK
@@ -2290,8 +2340,8 @@
 
    /* getrpcport() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_GETRPCPORT_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GETRPCPORT_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GETRPCPORT_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETRPCPORT_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETSERVBYNAME_LOCK
@@ -2301,8 +2351,8 @@
 #    define PERL_GETSERVBYNAME_LOCK    PERL_GETSERVBYNAME_R_LOCK
 #    define PERL_GETSERVBYNAME_UNLOCK  PERL_GETSERVBYNAME_R_UNLOCK
 #  else
-#    define PERL_GETSERVBYNAME_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETSERVBYNAME_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETSERVBYNAME_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETSERVBYNAME_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETSERVBYNAME_LOCK
 #    define GETSERVBYNAME_LOCK    PERL_GETSERVBYNAME_LOCK
@@ -2315,8 +2365,8 @@
    /* getservbyname_r() Obsolete; use getaddrinfo() instead
     * getservbyname_r() either was never in the POSIX Standard, or was removed
     *                   as of POSIX 2001. */
-#  define PERL_GETSERVBYNAME_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETSERVBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETSERVBYNAME_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETSERVBYNAME_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETSERVBYPORT_LOCK
@@ -2326,8 +2376,8 @@
 #    define PERL_GETSERVBYPORT_LOCK    PERL_GETSERVBYPORT_R_LOCK
 #    define PERL_GETSERVBYPORT_UNLOCK  PERL_GETSERVBYPORT_R_UNLOCK
 #  else
-#    define PERL_GETSERVBYPORT_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETSERVBYPORT_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETSERVBYPORT_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETSERVBYPORT_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETSERVBYPORT_LOCK
 #    define GETSERVBYPORT_LOCK    PERL_GETSERVBYPORT_LOCK
@@ -2340,8 +2390,8 @@
    /* getservbyport_r() Obsolete; use getnameinfo() instead
     * getservbyport_r() either was never in the POSIX Standard, or was removed
     *                   as of POSIX 2001. */
-#  define PERL_GETSERVBYPORT_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETSERVBYPORT_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETSERVBYPORT_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETSERVBYPORT_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETSERVENT_LOCK
@@ -2413,8 +2463,8 @@
 #    define PERL_GETSPNAM_LOCK    PERL_GETSPNAM_R_LOCK
 #    define PERL_GETSPNAM_UNLOCK  PERL_GETSPNAM_R_UNLOCK
 #  else
-#    define PERL_GETSPNAM_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_GETSPNAM_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_GETSPNAM_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_GETSPNAM_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #  ifndef GETSPNAM_LOCK
 #    define GETSPNAM_LOCK    PERL_GETSPNAM_LOCK
@@ -2426,8 +2476,8 @@
 
    /* getspnam_r() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_GETSPNAM_R_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GETSPNAM_R_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GETSPNAM_R_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETSPNAM_R_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GETTTYENT_LOCK
@@ -2617,13 +2667,13 @@
 #endif
 
 #ifndef PERL_GETWC_LOCK
-#  define PERL_GETWC_LOCK
-#  define PERL_GETWC_UNLOCK
+#  define PERL_GETWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_GETWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_GETWCHAR_LOCK
-#  define PERL_GETWCHAR_LOCK
-#  define PERL_GETWCHAR_UNLOCK
+#  define PERL_GETWCHAR_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_GETWCHAR_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_GETWCHAR_UNLOCKED_LOCK
@@ -2654,8 +2704,8 @@
     * getwc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_GETWC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_GETWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_GETWC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_GETWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_GLOB_LOCK
@@ -2666,8 +2716,8 @@
     *        getutent(), getutid(), getutline(), getutxent(), getutxid(),
     *        getutxline(), login(), logout(), pututline(), pututxline(),
     *        setutent(), setutxent(), utmpname(), or wordexp(). */
-#  define PERL_GLOB_LOCK    PERL_ENVx_LCr_LOCK(0)
-#  define PERL_GLOB_UNLOCK  PERL_ENVx_LCr_UNLOCK(0)
+#  define PERL_GLOB_LOCK    PERL_ENVx_LCr_LOCK(  PERL_LC_COLLATEb)
+#  define PERL_GLOB_UNLOCK  PERL_ENVx_LCr_UNLOCK(PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_GMTIME_LOCK
@@ -2678,8 +2728,8 @@
 #    define PERL_GMTIME_LOCK    PERL_GMTIME_R_LOCK
 #    define PERL_GMTIME_UNLOCK  PERL_GMTIME_R_UNLOCK
 #  else
-#    define PERL_GMTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_GMTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_GMTIME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#    define PERL_GMTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  endif
 #  ifndef GMTIME_LOCK
 #    define GMTIME_LOCK    PERL_GMTIME_LOCK
@@ -2688,13 +2738,13 @@
 #endif
 
 #ifndef PERL_GMTIME_R_LOCK
-#  define PERL_GMTIME_R_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_GMTIME_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_GMTIME_R_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_GMTIME_R_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_GRANTPT_LOCK
-#  define PERL_GRANTPT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_GRANTPT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_GRANTPT_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_GRANTPT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_HCREATE_LOCK
@@ -2757,52 +2807,52 @@
 #endif
 
 #ifndef PERL_ICONV_OPEN_LOCK
-#  define PERL_ICONV_OPEN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ICONV_OPEN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ICONV_OPEN_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_ICONV_OPEN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_ADDR_LOCK
-#  define PERL_INET_ADDR_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_ADDR_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_ADDR_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_ADDR_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_ATON_LOCK
 
    /* inet_aton() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_INET_ATON_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_ATON_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_ATON_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_ATON_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_NETWORK_LOCK
 
    /* inet_network() either was never in the POSIX Standard, or was removed as
     *                of POSIX 2001. */
-#  define PERL_INET_NETWORK_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_NETWORK_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_NETWORK_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_NETWORK_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_NTOA_LOCK
-#  define PERL_INET_NTOA_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_NTOA_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_NTOA_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_NTOA_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_NTOP_LOCK
-#  define PERL_INET_NTOP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_NTOP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_NTOP_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_NTOP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INET_PTON_LOCK
-#  define PERL_INET_PTON_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INET_PTON_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INET_PTON_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INET_PTON_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INITGROUPS_LOCK
 
    /* initgroups() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_INITGROUPS_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_INITGROUPS_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_INITGROUPS_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_INITGROUPS_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_INITSTATE_R_LOCK
@@ -2837,40 +2887,40 @@
 
    /* iruserok() either was never in the POSIX Standard, or was removed as of
     *            POSIX 2001. */
-#  define PERL_IRUSEROK_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_IRUSEROK_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_IRUSEROK_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_IRUSEROK_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_IRUSEROK_AF_LOCK
 
    /* iruserok_af() either was never in the POSIX Standard, or was removed as
     *               of POSIX 2001. */
-#  define PERL_IRUSEROK_AF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_IRUSEROK_AF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_IRUSEROK_AF_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_IRUSEROK_AF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_ISALNUM_LOCK
 
    /* isalnum() Use a Perl isALNUM-family macro instead */
-#  define PERL_ISALNUM_LOCK
-#  define PERL_ISALNUM_UNLOCK
+#  define PERL_ISALNUM_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISALNUM_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISALNUM_L_LOCK
-#  define PERL_ISALNUM_L_LOCK
-#  define PERL_ISALNUM_L_UNLOCK
+#  define PERL_ISALNUM_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISALNUM_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISALPHA_LOCK
 
    /* isalpha() Use a Perl isALPHA-family macro instead */
-#  define PERL_ISALPHA_LOCK
-#  define PERL_ISALPHA_UNLOCK
+#  define PERL_ISALPHA_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISALPHA_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISALPHA_L_LOCK
-#  define PERL_ISALPHA_L_LOCK
-#  define PERL_ISALPHA_L_UNLOCK
+#  define PERL_ISALPHA_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISALPHA_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISASCII_LOCK
@@ -2878,280 +2928,280 @@
    /* isascii() Use a Perl isASCII-family macro instead
     * isascii() Considered obsolete as being non-portable, but Perl makes it
     *           portable when using a macro */
-#  define PERL_ISASCII_LOCK
-#  define PERL_ISASCII_UNLOCK
+#  define PERL_ISASCII_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISASCII_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISASCII_L_LOCK
 
    /* isascii_l() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_ISASCII_L_LOCK
-#  define PERL_ISASCII_L_UNLOCK
+#  define PERL_ISASCII_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISASCII_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISBLANK_LOCK
 
    /* isblank() Use a Perl isBLANK-family macro instead */
-#  define PERL_ISBLANK_LOCK
-#  define PERL_ISBLANK_UNLOCK
+#  define PERL_ISBLANK_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISBLANK_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISBLANK_L_LOCK
-#  define PERL_ISBLANK_L_LOCK
-#  define PERL_ISBLANK_L_UNLOCK
+#  define PERL_ISBLANK_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISBLANK_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISCNTRL_LOCK
 
    /* iscntrl() Use a Perl isCNTRL-family macro instead */
-#  define PERL_ISCNTRL_LOCK
-#  define PERL_ISCNTRL_UNLOCK
+#  define PERL_ISCNTRL_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISCNTRL_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISCNTRL_L_LOCK
-#  define PERL_ISCNTRL_L_LOCK
-#  define PERL_ISCNTRL_L_UNLOCK
+#  define PERL_ISCNTRL_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISCNTRL_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISDIGIT_LOCK
 
    /* isdigit() Use a Perl isDIGIT-family macro instead */
-#  define PERL_ISDIGIT_LOCK
-#  define PERL_ISDIGIT_UNLOCK
+#  define PERL_ISDIGIT_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISDIGIT_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISDIGIT_L_LOCK
-#  define PERL_ISDIGIT_L_LOCK
-#  define PERL_ISDIGIT_L_UNLOCK
+#  define PERL_ISDIGIT_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISDIGIT_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISGRAPH_LOCK
 
    /* isgraph() Use a Perl isGRAPH-family macro instead */
-#  define PERL_ISGRAPH_LOCK
-#  define PERL_ISGRAPH_UNLOCK
+#  define PERL_ISGRAPH_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISGRAPH_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISGRAPH_L_LOCK
-#  define PERL_ISGRAPH_L_LOCK
-#  define PERL_ISGRAPH_L_UNLOCK
+#  define PERL_ISGRAPH_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISGRAPH_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISLOWER_LOCK
 
    /* islower() Use a Perl isLOWER-family macro instead */
-#  define PERL_ISLOWER_LOCK
-#  define PERL_ISLOWER_UNLOCK
+#  define PERL_ISLOWER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISLOWER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISLOWER_L_LOCK
-#  define PERL_ISLOWER_L_LOCK
-#  define PERL_ISLOWER_L_UNLOCK
+#  define PERL_ISLOWER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISLOWER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISPRINT_LOCK
 
    /* isprint() Use a Perl isPRINT-family macro instead */
-#  define PERL_ISPRINT_LOCK
-#  define PERL_ISPRINT_UNLOCK
+#  define PERL_ISPRINT_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISPRINT_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISPRINT_L_LOCK
-#  define PERL_ISPRINT_L_LOCK
-#  define PERL_ISPRINT_L_UNLOCK
+#  define PERL_ISPRINT_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISPRINT_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISPUNCT_LOCK
 
    /* ispunct() Use a Perl isPUNCT-family macro instead */
-#  define PERL_ISPUNCT_LOCK
-#  define PERL_ISPUNCT_UNLOCK
+#  define PERL_ISPUNCT_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISPUNCT_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISPUNCT_L_LOCK
-#  define PERL_ISPUNCT_L_LOCK
-#  define PERL_ISPUNCT_L_UNLOCK
+#  define PERL_ISPUNCT_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISPUNCT_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISSPACE_LOCK
 
    /* isspace() Use a Perl isSPACE-family macro instead */
-#  define PERL_ISSPACE_LOCK
-#  define PERL_ISSPACE_UNLOCK
+#  define PERL_ISSPACE_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISSPACE_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISSPACE_L_LOCK
-#  define PERL_ISSPACE_L_LOCK
-#  define PERL_ISSPACE_L_UNLOCK
+#  define PERL_ISSPACE_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISSPACE_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISUPPER_LOCK
 
    /* isupper() Use a Perl isUPPER-family macro instead */
-#  define PERL_ISUPPER_LOCK
-#  define PERL_ISUPPER_UNLOCK
+#  define PERL_ISUPPER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISUPPER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISUPPER_L_LOCK
-#  define PERL_ISUPPER_L_LOCK
-#  define PERL_ISUPPER_L_UNLOCK
+#  define PERL_ISUPPER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISUPPER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWALNUM_LOCK
 
    /* iswalnum() Use a Perl isALNUM-family macro instead */
-#  define PERL_ISWALNUM_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWALNUM_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWALNUM_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWALNUM_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWALNUM_L_LOCK
-#  define PERL_ISWALNUM_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWALNUM_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWALNUM_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWALNUM_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWALPHA_LOCK
 
    /* iswalpha() Use a Perl isALPHA-family macro instead */
-#  define PERL_ISWALPHA_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWALPHA_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWALPHA_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWALPHA_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWALPHA_L_LOCK
-#  define PERL_ISWALPHA_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWALPHA_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWALPHA_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWALPHA_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWBLANK_LOCK
 
    /* iswblank() Use a Perl isBLANK-family macro instead */
-#  define PERL_ISWBLANK_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWBLANK_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWBLANK_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWBLANK_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWBLANK_L_LOCK
-#  define PERL_ISWBLANK_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWBLANK_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWBLANK_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWBLANK_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWCNTRL_LOCK
 
    /* iswcntrl() Use a Perl isCNTRL-family macro instead */
-#  define PERL_ISWCNTRL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWCNTRL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWCNTRL_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWCNTRL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWCNTRL_L_LOCK
-#  define PERL_ISWCNTRL_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWCNTRL_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWCNTRL_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWCNTRL_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWDIGIT_LOCK
 
    /* iswdigit() Use a Perl isDIGIT-family macro instead */
-#  define PERL_ISWDIGIT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWDIGIT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWDIGIT_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWDIGIT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWDIGIT_L_LOCK
-#  define PERL_ISWDIGIT_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWDIGIT_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWDIGIT_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWDIGIT_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWGRAPH_LOCK
 
    /* iswgraph() Use a Perl isGRAPH-family macro instead */
-#  define PERL_ISWGRAPH_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWGRAPH_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWGRAPH_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWGRAPH_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWGRAPH_L_LOCK
-#  define PERL_ISWGRAPH_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWGRAPH_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWGRAPH_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWGRAPH_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWLOWER_LOCK
 
    /* iswlower() Use a Perl isLOWER-family macro instead */
-#  define PERL_ISWLOWER_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWLOWER_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWLOWER_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWLOWER_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWLOWER_L_LOCK
-#  define PERL_ISWLOWER_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWLOWER_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWLOWER_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWLOWER_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWPRINT_LOCK
 
    /* iswprint() Use a Perl isPRINT-family macro instead */
-#  define PERL_ISWPRINT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWPRINT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWPRINT_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWPRINT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWPRINT_L_LOCK
-#  define PERL_ISWPRINT_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWPRINT_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWPRINT_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWPRINT_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWPUNCT_LOCK
 
    /* iswpunct() Use a Perl isPUNCT-family macro instead */
-#  define PERL_ISWPUNCT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWPUNCT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWPUNCT_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWPUNCT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWPUNCT_L_LOCK
-#  define PERL_ISWPUNCT_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWPUNCT_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWPUNCT_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWPUNCT_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWSPACE_LOCK
 
    /* iswspace() Use a Perl isSPACE-family macro instead */
-#  define PERL_ISWSPACE_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWSPACE_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWSPACE_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWSPACE_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWSPACE_L_LOCK
-#  define PERL_ISWSPACE_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWSPACE_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWSPACE_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWSPACE_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWUPPER_LOCK
 
    /* iswupper() Use a Perl isUPPER-family macro instead */
-#  define PERL_ISWUPPER_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWUPPER_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWUPPER_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWUPPER_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWUPPER_L_LOCK
-#  define PERL_ISWUPPER_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWUPPER_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWUPPER_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWUPPER_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWXDIGIT_LOCK
 
    /* iswxdigit() Use a Perl isXDIGIT-family macro instead */
-#  define PERL_ISWXDIGIT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWXDIGIT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWXDIGIT_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWXDIGIT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISWXDIGIT_L_LOCK
-#  define PERL_ISWXDIGIT_L_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_ISWXDIGIT_L_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_ISWXDIGIT_L_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_ISWXDIGIT_L_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISXDIGIT_LOCK
 
    /* isxdigit() Use a Perl isXDIGIT-family macro instead */
-#  define PERL_ISXDIGIT_LOCK
-#  define PERL_ISXDIGIT_UNLOCK
+#  define PERL_ISXDIGIT_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISXDIGIT_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_ISXDIGIT_L_LOCK
-#  define PERL_ISXDIGIT_L_LOCK
-#  define PERL_ISXDIGIT_L_UNLOCK
+#  define PERL_ISXDIGIT_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_ISXDIGIT_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_JRAND48_LOCK
@@ -3237,8 +3287,8 @@
       *              built with a modern MS C runtime (UCRT as of this
       *              writing), also is; we dont know about other MingW builds
       */
-#    define PERL_LOCALECONV_LOCK
-#    define PERL_LOCALECONV_UNLOCK
+#    define PERL_LOCALECONV_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_NUMERICb|PERL_LC_MONETARYb)
+#    define PERL_LOCALECONV_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_NUMERICb|PERL_LC_MONETARYb)
 #  else
 
      /* localeconv() Use Perl_localeconv() instead
@@ -3250,8 +3300,8 @@
       *              derivatives, but khw knows of none, and hasnt really
       *              investigated, in part because of the past unreliability
       *              of vendor thread-safety claims. */
-#    define PERL_LOCALECONV_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_LOCALECONV_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_LOCALECONV_LOCK    PERL_LCx_LOCK(  PERL_LC_NUMERICb|PERL_LC_MONETARYb)
+#    define PERL_LOCALECONV_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_NUMERICb|PERL_LC_MONETARYb)
 #  endif
 #endif
 
@@ -3265,8 +3315,8 @@
 #    define PERL_LOCALTIME_LOCK    PERL_LOCALTIME_R_LOCK
 #    define PERL_LOCALTIME_UNLOCK  PERL_LOCALTIME_R_UNLOCK
 #  else
-#    define PERL_LOCALTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_LOCALTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_LOCALTIME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#    define PERL_LOCALTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  endif
 #  ifndef LOCALTIME_LOCK
 #    define LOCALTIME_LOCK    PERL_LOCALTIME_LOCK
@@ -3279,8 +3329,8 @@
    /* localtime_r() has potential races with other threads concurrently using
     *               any of: itself, ctime(), ctime_r(), daylight, localtime(),
     *               mktime(), strftime(), timezone, tzname, or tzset(). */
-#  define PERL_LOCALTIME_R_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_LOCALTIME_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_LOCALTIME_R_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_LOCALTIME_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_LOGIN_LOCK
@@ -3375,15 +3425,15 @@
 
    /* MB_CUR_MAX locking macros are only valid if its value is used read-only
     */
-#  define PERL_MB_CUR_MAX_LOCK
-#  define PERL_MB_CUR_MAX_UNLOCK
+#  define PERL_MB_CUR_MAX_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MB_CUR_MAX_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBLEN_LOCK
 
    /* mblen() Use mbrlen() instead */
-#  define PERL_MBLEN_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_MBLEN_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_MBLEN_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_MBLEN_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #  ifndef MBLEN_LOCK_
 #    define MBLEN_LOCK_    PERL_MBLEN_LOCK
 #    define MBLEN_UNLOCK_  PERL_MBLEN_UNLOCK
@@ -3393,8 +3443,8 @@
 #ifndef PERL_MBRLEN_LOCK
 
    /* mbrlen() locking macros are only valid if '!ps' */
-#  define PERL_MBRLEN_LOCK
-#  define PERL_MBRLEN_UNLOCK
+#  define PERL_MBRLEN_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBRLEN_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #  ifndef MBRLEN_LOCK_
 #    define MBRLEN_LOCK_    PERL_MBRLEN_LOCK
 #    define MBRLEN_UNLOCK_  PERL_MBRLEN_UNLOCK
@@ -3404,22 +3454,22 @@
 #ifndef PERL_MBRTOC16_LOCK
 
    /* mbrtoc16() locking macros are only valid if '!ps' */
-#  define PERL_MBRTOC16_LOCK
-#  define PERL_MBRTOC16_UNLOCK
+#  define PERL_MBRTOC16_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBRTOC16_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBRTOC32_LOCK
 
    /* mbrtoc32() locking macros are only valid if '!ps' */
-#  define PERL_MBRTOC32_LOCK
-#  define PERL_MBRTOC32_UNLOCK
+#  define PERL_MBRTOC32_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBRTOC32_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBRTOWC_LOCK
 
    /* mbrtowc() locking macros are only valid if '!ps' */
-#  define PERL_MBRTOWC_LOCK
-#  define PERL_MBRTOWC_UNLOCK
+#  define PERL_MBRTOWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBRTOWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #  ifndef MBRTOWC_LOCK_
 #    define MBRTOWC_LOCK_    PERL_MBRTOWC_LOCK
 #    define MBRTOWC_UNLOCK_  PERL_MBRTOWC_UNLOCK
@@ -3427,34 +3477,34 @@
 #endif
 
 #ifndef PERL_MBSINIT_LOCK
-#  define PERL_MBSINIT_LOCK
-#  define PERL_MBSINIT_UNLOCK
+#  define PERL_MBSINIT_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBSINIT_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBSNRTOWCS_LOCK
 
    /* mbsnrtowcs() locking macros are only valid if '!ps' */
-#  define PERL_MBSNRTOWCS_LOCK
-#  define PERL_MBSNRTOWCS_UNLOCK
+#  define PERL_MBSNRTOWCS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBSNRTOWCS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBSRTOWCS_LOCK
 
    /* mbsrtowcs() locking macros are only valid if '!ps' */
-#  define PERL_MBSRTOWCS_LOCK
-#  define PERL_MBSRTOWCS_UNLOCK
+#  define PERL_MBSRTOWCS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBSRTOWCS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBSTOWCS_LOCK
-#  define PERL_MBSTOWCS_LOCK
-#  define PERL_MBSTOWCS_UNLOCK
+#  define PERL_MBSTOWCS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_MBSTOWCS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_MBTOWC_LOCK
 
    /* mbtowc() Use mbrtowc() instead */
-#  define PERL_MBTOWC_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_MBTOWC_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_MBTOWC_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_MBTOWC_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #  ifndef MBTOWC_LOCK_
 #    define MBTOWC_LOCK_    PERL_MBTOWC_LOCK
 #    define MBTOWC_UNLOCK_  PERL_MBTOWC_UNLOCK
@@ -3499,8 +3549,8 @@
    /* mktime() has potential races with other threads concurrently using any
     *          of: itself, ctime(), ctime_r(), daylight, localtime(),
     *          localtime_r(), strftime(), timezone, tzname, or tzset(). */
-#  define PERL_MKTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_MKTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_MKTIME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_MKTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  ifndef MKTIME_LOCK
 #    define MKTIME_LOCK    PERL_MKTIME_LOCK
 #    define MKTIME_UNLOCK  PERL_MKTIME_UNLOCK
@@ -3556,18 +3606,18 @@
 #endif
 
 #ifndef PERL_NAN_LOCK
-#  define PERL_NAN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_NAN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_NAN_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_NAN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_NANF_LOCK
-#  define PERL_NANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_NANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_NANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_NANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_NANL_LOCK
-#  define PERL_NANL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_NANL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_NANL_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_NANL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_NEWLOCALE_LOCK
@@ -3583,8 +3633,8 @@
 #endif
 
 #ifndef PERL_NL_LANGINFO_LOCK
-#  define PERL_NL_LANGINFO_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_NL_LANGINFO_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_NL_LANGINFO_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_NL_LANGINFO_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_NRAND48_LOCK
@@ -3612,8 +3662,8 @@
 
    /* openpty() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_OPENPTY_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_OPENPTY_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_OPENPTY_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_OPENPTY_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_PERROR_LOCK
@@ -3630,8 +3680,8 @@
 #endif
 
 #ifndef PERL_PRINTF_LOCK
-#  define PERL_PRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_PRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_PRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_PRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_PROFIL_LOCK
@@ -3643,13 +3693,13 @@
 #endif
 
 #ifndef PERL_PSIGINFO_LOCK
-#  define PERL_PSIGINFO_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_PSIGINFO_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_PSIGINFO_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_PSIGINFO_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_PSIGNAL_LOCK
-#  define PERL_PSIGNAL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_PSIGNAL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_PSIGNAL_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_PSIGNAL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_PTSNAME_LOCK
@@ -3679,8 +3729,8 @@
     *                 getc_unlocked(), getwc_unlocked(), or putwc_unlocked().
     * putc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                 locked the stream */
-#  define PERL_PUTC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_PUTC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_PUTC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_PUTC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_PUTENV_LOCK
@@ -3756,13 +3806,13 @@
 #endif
 
 #ifndef PERL_PUTWC_LOCK
-#  define PERL_PUTWC_LOCK
-#  define PERL_PUTWC_UNLOCK
+#  define PERL_PUTWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_PUTWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_PUTWCHAR_LOCK
-#  define PERL_PUTWCHAR_LOCK
-#  define PERL_PUTWCHAR_UNLOCK
+#  define PERL_PUTWCHAR_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_PUTWCHAR_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_PUTWCHAR_UNLOCKED_LOCK
@@ -3793,8 +3843,8 @@
     * putwc_unlocked() Is thread-safe if flockfile() or ftrylockfile() have
     *                  locked the stream, but should not be used since not
     *                  standardized and not widely implemented */
-#  define PERL_PUTWC_UNLOCKED_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_PUTWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_PUTWC_UNLOCKED_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#  define PERL_PUTWC_UNLOCKED_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_PVALLOC_LOCK
@@ -3846,8 +3896,8 @@
       *               in Configure.  What we do instead is to assume that it
       *               is thread-safe, unless overriden by, say, a hints file
       *               specifying -Accflags='-DNO_THREAD_SAFE_QUERYLOCALE */
-#    define PERL_QUERYLOCALE_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_QUERYLOCALE_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_QUERYLOCALE_LOCK    PERL_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_QUERYLOCALE_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_ALLb)
 #  else
 
      /* querylocale() Use Perl_setlocale() instead
@@ -3859,8 +3909,8 @@
       *               replacement for this, but you should be using
       *               Perl_setlocale() which copes with the deficiencies in
       *               this. */
-#    define PERL_QUERYLOCALE_LOCK    PERL_LCr_LOCK(0)
-#    define PERL_QUERYLOCALE_UNLOCK  PERL_LCr_UNLOCK(0)
+#    define PERL_QUERYLOCALE_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#    define PERL_QUERYLOCALE_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #  endif
 #endif
 
@@ -3971,8 +4021,8 @@
 #endif
 
 #ifndef PERL_REGCOMP_LOCK
-#  define PERL_REGCOMP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_REGCOMP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_REGCOMP_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_REGCOMP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_REGERROR_LOCK
@@ -3981,56 +4031,56 @@
 #endif
 
 #ifndef PERL_REGEXEC_LOCK
-#  define PERL_REGEXEC_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_REGEXEC_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_REGEXEC_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_REGEXEC_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NCLOSE_LOCK
 
    /* res_nclose() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_RES_NCLOSE_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NCLOSE_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NCLOSE_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NCLOSE_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NINIT_LOCK
 
    /* res_ninit() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_RES_NINIT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NINIT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NINIT_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NINIT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NQUERY_LOCK
 
    /* res_nquery() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_RES_NQUERY_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NQUERY_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NQUERY_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NQUERY_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NQUERYDOMAIN_LOCK
 
    /* res_nquerydomain() either was never in the POSIX Standard, or was
     *                    removed as of POSIX 2001. */
-#  define PERL_RES_NQUERYDOMAIN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NQUERYDOMAIN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NQUERYDOMAIN_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NQUERYDOMAIN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NSEARCH_LOCK
 
    /* res_nsearch() either was never in the POSIX Standard, or was removed as
     *               of POSIX 2001. */
-#  define PERL_RES_NSEARCH_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NSEARCH_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NSEARCH_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NSEARCH_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RES_NSEND_LOCK
 
    /* res_nsend() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_RES_NSEND_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RES_NSEND_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RES_NSEND_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RES_NSEND_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_REXEC_LOCK
@@ -4055,34 +4105,34 @@
 
    /* rpmatch() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_RPMATCH_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RPMATCH_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RPMATCH_LOCK    PERL_LCr_LOCK(  PERL_LC_MESSAGESb)
+#  define PERL_RPMATCH_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_MESSAGESb)
 #endif
 
 #ifndef PERL_RUSEROK_LOCK
 
    /* ruserok() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_RUSEROK_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RUSEROK_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RUSEROK_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RUSEROK_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_RUSEROK_AF_LOCK
 
    /* ruserok_af() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_RUSEROK_AF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_RUSEROK_AF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_RUSEROK_AF_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_RUSEROK_AF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_SCANDIR_LOCK
-#  define PERL_SCANDIR_LOCK
-#  define PERL_SCANDIR_UNLOCK
+#  define PERL_SCANDIR_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb|PERL_LC_COLLATEb)
+#  define PERL_SCANDIR_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb|PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_SCANF_LOCK
-#  define PERL_SCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_SCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SECURE_GETENV_LOCK
@@ -4253,8 +4303,8 @@
 #    define PERL_SETLOCALE_LOCK    PERL_SETLOCALE_R_LOCK
 #    define PERL_SETLOCALE_UNLOCK  PERL_SETLOCALE_R_UNLOCK
 #  else
-#    define PERL_SETLOCALE_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_SETLOCALE_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_SETLOCALE_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_SETLOCALE_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #  endif
 #endif
 
@@ -4265,8 +4315,8 @@
       * setlocale_r() Use Perl_setlocale() instead
       * setlocale_r() either was never in the POSIX Standard, or was removed
       *               as of POSIX 2001. */
-#    define PERL_SETLOCALE_R_LOCK    PERL_ENVr_LCx_LOCK(0)
-#    define PERL_SETLOCALE_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#    define PERL_SETLOCALE_R_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_ALLb)
+#    define PERL_SETLOCALE_R_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_ALLb)
 #  else
 #    define PERL_SETLOCALE_R_LOCK    NOOP
 #    define PERL_SETLOCALE_R_UNLOCK  NOOP
@@ -4398,8 +4448,8 @@
 
    /* setrpcent() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_SETRPCENT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SETRPCENT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SETRPCENT_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_SETRPCENT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_SETSERVENT_LOCK
@@ -4560,13 +4610,13 @@
 #endif
 
 #ifndef PERL_SHM_OPEN_LOCK
-#  define PERL_SHM_OPEN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SHM_OPEN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SHM_OPEN_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_SHM_OPEN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_SHM_UNLINK_LOCK
-#  define PERL_SHM_UNLINK_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SHM_UNLINK_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SHM_UNLINK_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_SHM_UNLINK_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_SIGINTERRUPT_LOCK
@@ -4585,13 +4635,13 @@
 #endif
 
 #ifndef PERL_SNPRINTF_LOCK
-#  define PERL_SNPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SNPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SNPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_SNPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SPRINTF_LOCK
-#  define PERL_SPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_SPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SRAND48_LOCK
@@ -4627,8 +4677,8 @@
 #endif
 
 #ifndef PERL_SSCANF_LOCK
-#  define PERL_SSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_SSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SSIGNAL_LOCK
@@ -4644,21 +4694,21 @@
 
    /* strcasecmp() The POSIX Standard says results are undefined unless
     *              LC_CTYPE is the POSIX locale */
-#  define PERL_STRCASECMP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRCASECMP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRCASECMP_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_COLLATEb)
+#  define PERL_STRCASECMP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_STRCASESTR_LOCK
 
    /* strcasestr() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_STRCASESTR_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRCASESTR_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRCASESTR_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_STRCASESTR_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_STRCOLL_LOCK
-#  define PERL_STRCOLL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRCOLL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRCOLL_LOCK    PERL_LCr_LOCK(  PERL_LC_COLLATEb)
+#  define PERL_STRCOLL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_STRERROR_LOCK
@@ -4669,24 +4719,24 @@
 #    define PERL_STRERROR_LOCK    PERL_STRERROR_R_LOCK
 #    define PERL_STRERROR_UNLOCK  PERL_STRERROR_R_UNLOCK
 #  else
-#    define PERL_STRERROR_LOCK    PERL_LCx_LOCK(0)
-#    define PERL_STRERROR_UNLOCK  PERL_LCx_UNLOCK(0)
+#    define PERL_STRERROR_LOCK    PERL_LCx_LOCK(  PERL_LC_MESSAGESb)
+#    define PERL_STRERROR_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_MESSAGESb)
 #  endif
 #endif
 
 #ifndef PERL_STRERROR_L_LOCK
-#  define PERL_STRERROR_L_LOCK
-#  define PERL_STRERROR_L_UNLOCK
+#  define PERL_STRERROR_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_MESSAGESb)
+#  define PERL_STRERROR_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_MESSAGESb)
 #endif
 
 #ifndef PERL_STRERROR_R_LOCK
-#  define PERL_STRERROR_R_LOCK
-#  define PERL_STRERROR_R_UNLOCK
+#  define PERL_STRERROR_R_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_MESSAGESb)
+#  define PERL_STRERROR_R_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_MESSAGESb)
 #endif
 
 #ifndef PERL_STRFMON_LOCK
-#  define PERL_STRFMON_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRFMON_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRFMON_LOCK    PERL_LCr_LOCK(  PERL_LC_MONETARYb)
+#  define PERL_STRFMON_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_MONETARYb)
 #  ifndef STRFMON_LOCK
 #    define STRFMON_LOCK    PERL_STRFMON_LOCK
 #    define STRFMON_UNLOCK  PERL_STRFMON_UNLOCK
@@ -4694,29 +4744,29 @@
 #endif
 
 #ifndef PERL_STRFMON_L_LOCK
-#  define PERL_STRFMON_L_LOCK
-#  define PERL_STRFMON_L_UNLOCK
+#  define PERL_STRFMON_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_MONETARYb)
+#  define PERL_STRFMON_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_MONETARYb)
 #endif
 
 #ifndef PERL_STRFROMD_LOCK
 
    /* strfromd() Asynchronous unsafe */
-#  define PERL_STRFROMD_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRFROMD_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRFROMD_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_STRFROMD_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRFROMF_LOCK
 
    /* strfromf() Asynchronous unsafe */
-#  define PERL_STRFROMF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRFROMF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRFROMF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_STRFROMF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRFROML_LOCK
 
    /* strfroml() Asynchronous unsafe */
-#  define PERL_STRFROML_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRFROML_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRFROML_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_STRFROML_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRFTIME_LOCK
@@ -4725,8 +4775,8 @@
     * strftime() has potential races with other threads concurrently using any
     *            of: itself, ctime(), ctime_r(), daylight, localtime(),
     *            localtime_r(), mktime(), timezone, tzname, or tzset(). */
-#  define PERL_STRFTIME_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_STRFTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_STRFTIME_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_STRFTIME_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  ifndef STRFTIME_LOCK
 #    define STRFTIME_LOCK    PERL_STRFTIME_LOCK
 #    define STRFTIME_UNLOCK  PERL_STRFTIME_UNLOCK
@@ -4734,41 +4784,41 @@
 #endif
 
 #ifndef PERL_STRFTIME_L_LOCK
-#  define PERL_STRFTIME_L_LOCK
-#  define PERL_STRFTIME_L_UNLOCK
+#  define PERL_STRFTIME_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_TIMEb)
+#  define PERL_STRFTIME_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_STRNCASECMP_LOCK
 
    /* strncasecmp() The POSIX Standard says results are undefined unless
     *               LC_CTYPE is the POSIX locale */
-#  define PERL_STRNCASECMP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRNCASECMP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRNCASECMP_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_COLLATEb)
+#  define PERL_STRNCASECMP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_STRPTIME_LOCK
-#  define PERL_STRPTIME_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_STRPTIME_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_STRPTIME_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_STRPTIME_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_STRSIGNAL_LOCK
-#  define PERL_STRSIGNAL_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_STRSIGNAL_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_STRSIGNAL_LOCK    PERL_LCx_LOCK(  PERL_LC_MESSAGESb)
+#  define PERL_STRSIGNAL_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_MESSAGESb)
 #endif
 
 #ifndef PERL_STRTOD_LOCK
-#  define PERL_STRTOD_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOD_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOD_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOD_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOF_LOCK
-#  define PERL_STRTOF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOIMAX_LOCK
-#  define PERL_STRTOIMAX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOIMAX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOIMAX_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOIMAX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOK_LOCK
@@ -4779,62 +4829,62 @@
 #endif
 
 #ifndef PERL_STRTOL_LOCK
-#  define PERL_STRTOL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOL_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOLD_LOCK
-#  define PERL_STRTOLD_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOLD_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOLD_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOLD_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOLL_LOCK
-#  define PERL_STRTOLL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOLL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOLL_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOLL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOQ_LOCK
 
    /* strtoq() either was never in the POSIX Standard, or was removed as of
     *          POSIX 2001. */
-#  define PERL_STRTOQ_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOQ_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOQ_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOQ_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOUL_LOCK
-#  define PERL_STRTOUL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOUL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOUL_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOUL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOULL_LOCK
-#  define PERL_STRTOULL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOULL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOULL_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOULL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOUMAX_LOCK
-#  define PERL_STRTOUMAX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOUMAX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOUMAX_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOUMAX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRTOUQ_LOCK
 
    /* strtouq() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_STRTOUQ_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRTOUQ_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRTOUQ_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_STRTOUQ_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_STRVERSCMP_LOCK
 
    /* strverscmp() either was never in the POSIX Standard, or was removed as
     *              of POSIX 2001. */
-#  define PERL_STRVERSCMP_LOCK
-#  define PERL_STRVERSCMP_UNLOCK
+#  define PERL_STRVERSCMP_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_COLLATEb)
+#  define PERL_STRVERSCMP_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_STRXFRM_LOCK
-#  define PERL_STRXFRM_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_STRXFRM_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_STRXFRM_LOCK    PERL_LCr_LOCK(  PERL_LC_COLLATEb|PERL_LC_CTYPEb)
+#  define PERL_STRXFRM_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_COLLATEb|PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_SWAPCONTEXT_LOCK
@@ -4847,13 +4897,13 @@
 #endif
 
 #ifndef PERL_SWPRINTF_LOCK
-#  define PERL_SWPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SWPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SWPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_SWPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SWSCANF_LOCK
-#  define PERL_SWSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_SWSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_SWSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_SWSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_SYSCONF_LOCK
@@ -4862,8 +4912,8 @@
 #endif
 
 #ifndef PERL_SYSLOG_LOCK
-#  define PERL_SYSLOG_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_SYSLOG_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_SYSLOG_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_SYSLOG_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_SYSTEM_LOCK
@@ -4906,16 +4956,16 @@
 
    /* timegm() either was never in the POSIX Standard, or was removed as of
     *          POSIX 2001. */
-#  define PERL_TIMEGM_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_TIMEGM_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_TIMEGM_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_TIMEGM_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_TIMELOCAL_LOCK
 
    /* timelocal() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_TIMELOCAL_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_TIMELOCAL_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_TIMELOCAL_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_TIMEb)
+#  define PERL_TIMELOCAL_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_TIMEZONE_LOCK
@@ -4924,8 +4974,8 @@
     *          of: itself, ctime(), ctime_r(), daylight, localtime(),
     *          localtime_r(), mktime(), strftime(), tzname, or tzset().
     * timezone locking macros are only valid if its value is used read-only */
-#  define PERL_TIMEZONE_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_TIMEZONE_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_TIMEZONE_LOCK    PERL_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_TIMEZONE_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_TMPNAM_LOCK
@@ -4948,62 +4998,62 @@
 #ifndef PERL_TOLOWER_LOCK
 
    /* tolower() Use a Perl toLOWER-family macro instead */
-#  define PERL_TOLOWER_LOCK
-#  define PERL_TOLOWER_UNLOCK
+#  define PERL_TOLOWER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOLOWER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOLOWER_L_LOCK
 
    /* tolower_l() Use a Perl toLOWER-family macro instead */
-#  define PERL_TOLOWER_L_LOCK
-#  define PERL_TOLOWER_L_UNLOCK
+#  define PERL_TOLOWER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOLOWER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOUPPER_LOCK
 
    /* toupper() Use a Perl toUPPER-family macro instead */
-#  define PERL_TOUPPER_LOCK
-#  define PERL_TOUPPER_UNLOCK
+#  define PERL_TOUPPER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOUPPER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOUPPER_L_LOCK
 
    /* toupper_l() Use a Perl toUPPER-family macro instead */
-#  define PERL_TOUPPER_L_LOCK
-#  define PERL_TOUPPER_L_UNLOCK
+#  define PERL_TOUPPER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOUPPER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOWCTRANS_LOCK
-#  define PERL_TOWCTRANS_LOCK
-#  define PERL_TOWCTRANS_UNLOCK
+#  define PERL_TOWCTRANS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOWCTRANS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOWLOWER_LOCK
 
    /* towlower() Use a Perl toLOWER-family macro instead */
-#  define PERL_TOWLOWER_LOCK
-#  define PERL_TOWLOWER_UNLOCK
+#  define PERL_TOWLOWER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOWLOWER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOWLOWER_L_LOCK
 
    /* towlower_l() Use a Perl toLOWER-family macro instead */
-#  define PERL_TOWLOWER_L_LOCK
-#  define PERL_TOWLOWER_L_UNLOCK
+#  define PERL_TOWLOWER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOWLOWER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOWUPPER_LOCK
 
    /* towupper() Use a Perl toUPPER-family macro instead */
-#  define PERL_TOWUPPER_LOCK
-#  define PERL_TOWUPPER_UNLOCK
+#  define PERL_TOWUPPER_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOWUPPER_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TOWUPPER_L_LOCK
 
    /* towupper_l() Use a Perl toUPPER-family macro instead */
-#  define PERL_TOWUPPER_L_LOCK
-#  define PERL_TOWUPPER_L_UNLOCK
+#  define PERL_TOWUPPER_L_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_TOWUPPER_L_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_TSEARCH_LOCK
@@ -5065,8 +5115,8 @@
     *        itself, ctime(), ctime_r(), daylight, localtime(), localtime_r(),
     *        mktime(), strftime(), timezone, or tzset().
     * tzname locking macros are only valid if its value is used read-only */
-#  define PERL_TZNAME_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_TZNAME_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_TZNAME_LOCK    PERL_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_TZNAME_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_TZSET_LOCK
@@ -5074,8 +5124,8 @@
    /* tzset() has potential races with other threads concurrently using any
     *         of: itself, ctime(), ctime_r(), daylight, localtime(),
     *         localtime_r(), mktime(), strftime(), timezone, or tzname. */
-#  define PERL_TZSET_LOCK    PERL_ENVr_LCx_LOCK(0)
-#  define PERL_TZSET_UNLOCK  PERL_ENVr_LCx_UNLOCK(0)
+#  define PERL_TZSET_LOCK    PERL_ENVr_LCx_LOCK(  PERL_LC_TIMEb)
+#  define PERL_TZSET_UNLOCK  PERL_ENVr_LCx_UNLOCK(PERL_LC_TIMEb)
 #  ifndef TZSET_LOCK
 #    define TZSET_LOCK    PERL_TZSET_LOCK
 #    define TZSET_UNLOCK  PERL_TZSET_UNLOCK
@@ -5083,8 +5133,8 @@
 #endif
 
 #ifndef PERL_UNGETWC_LOCK
-#  define PERL_UNGETWC_LOCK
-#  define PERL_UNGETWC_UNLOCK
+#  define PERL_UNGETWC_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_UNGETWC_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_UNSETENV_LOCK
@@ -5138,134 +5188,134 @@
 
    /* vasprintf() either was never in the POSIX Standard, or was removed as of
     *             POSIX 2001. */
-#  define PERL_VASPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VASPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VASPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VASPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VDPRINTF_LOCK
-#  define PERL_VDPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VDPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VDPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VDPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VERR_LOCK
 
    /* verr() either was never in the POSIX Standard, or was removed as of
     *        POSIX 2001. */
-#  define PERL_VERR_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VERR_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VERR_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VERR_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VERRX_LOCK
 
    /* verrx() either was never in the POSIX Standard, or was removed as of
     *         POSIX 2001. */
-#  define PERL_VERRX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VERRX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VERRX_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VERRX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VERSIONSORT_LOCK
 
    /* versionsort() either was never in the POSIX Standard, or was removed as
     *               of POSIX 2001. */
-#  define PERL_VERSIONSORT_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VERSIONSORT_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VERSIONSORT_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VERSIONSORT_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VFPRINTF_LOCK
-#  define PERL_VFPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VFPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VFPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VFPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VFSCANF_LOCK
-#  define PERL_VFSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VFSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VFSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VFSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VFWPRINTF_LOCK
-#  define PERL_VFWPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VFWPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VFWPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_VFWPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VPRINTF_LOCK
-#  define PERL_VPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSCANF_LOCK
-#  define PERL_VSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSNPRINTF_LOCK
-#  define PERL_VSNPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VSNPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VSNPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VSNPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSPRINTF_LOCK
-#  define PERL_VSPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VSPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VSPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VSPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSSCANF_LOCK
-#  define PERL_VSSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VSSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VSSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_VSSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSWPRINTF_LOCK
-#  define PERL_VSWPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VSWPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VSWPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_VSWPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_VSYSLOG_LOCK
 
    /* vsyslog() either was never in the POSIX Standard, or was removed as of
     *           POSIX 2001. */
-#  define PERL_VSYSLOG_LOCK    PERL_ENVr_LCr_LOCK(0)
-#  define PERL_VSYSLOG_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
+#  define PERL_VSYSLOG_LOCK    PERL_ENVr_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VSYSLOG_UNLOCK  PERL_ENVr_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VWARN_LOCK
 
    /* vwarn() either was never in the POSIX Standard, or was removed as of
     *         POSIX 2001. */
-#  define PERL_VWARN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VWARN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VWARN_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VWARN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VWARNX_LOCK
 
    /* vwarnx() either was never in the POSIX Standard, or was removed as of
     *          POSIX 2001. */
-#  define PERL_VWARNX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VWARNX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VWARNX_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_VWARNX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_VWPRINTF_LOCK
-#  define PERL_VWPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_VWPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_VWPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_VWPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WARN_LOCK
 
    /* warn() either was never in the POSIX Standard, or was removed as of
     *        POSIX 2001. */
-#  define PERL_WARN_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WARN_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WARN_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_WARN_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_WARNX_LOCK
 
    /* warnx() either was never in the POSIX Standard, or was removed as of
     *         POSIX 2001. */
-#  define PERL_WARNX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WARNX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WARNX_LOCK    PERL_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_WARNX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_WCRTOMB_LOCK
 
    /* wcrtomb() locking macros are only valid if '!ps' */
-#  define PERL_WCRTOMB_LOCK
-#  define PERL_WCRTOMB_UNLOCK
+#  define PERL_WCRTOMB_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCRTOMB_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #  ifndef WCRTOMB_LOCK_
 #    define WCRTOMB_LOCK_    PERL_WCRTOMB_LOCK
 #    define WCRTOMB_UNLOCK_  PERL_WCRTOMB_UNLOCK
@@ -5273,101 +5323,101 @@
 #endif
 
 #ifndef PERL_WCSCASECMP_LOCK
-#  define PERL_WCSCASECMP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSCASECMP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSCASECMP_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCSCASECMP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSCHR_LOCK
-#  define PERL_WCSCHR_LOCK
-#  define PERL_WCSCHR_UNLOCK
+#  define PERL_WCSCHR_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCSCHR_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSCOLL_LOCK
-#  define PERL_WCSCOLL_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSCOLL_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSCOLL_LOCK    PERL_LCr_LOCK(  PERL_LC_COLLATEb)
+#  define PERL_WCSCOLL_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_COLLATEb)
 #endif
 
 #ifndef PERL_WCSFTIME_LOCK
-#  define PERL_WCSFTIME_LOCK
-#  define PERL_WCSFTIME_UNLOCK
+#  define PERL_WCSFTIME_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb|PERL_LC_TIMEb)
+#  define PERL_WCSFTIME_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb|PERL_LC_TIMEb)
 #endif
 
 #ifndef PERL_WCSNCASECMP_LOCK
-#  define PERL_WCSNCASECMP_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSNCASECMP_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSNCASECMP_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCSNCASECMP_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSNRTOMBS_LOCK
 
    /* wcsnrtombs() locking macros are only valid if '!ps' */
-#  define PERL_WCSNRTOMBS_LOCK
-#  define PERL_WCSNRTOMBS_UNLOCK
+#  define PERL_WCSNRTOMBS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCSNRTOMBS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSRCHR_LOCK
-#  define PERL_WCSRCHR_LOCK
-#  define PERL_WCSRCHR_UNLOCK
+#  define PERL_WCSRCHR_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCSRCHR_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSRTOMBS_LOCK
 
    /* wcsrtombs() locking macros are only valid if '!ps' */
-#  define PERL_WCSRTOMBS_LOCK
-#  define PERL_WCSRTOMBS_UNLOCK
+#  define PERL_WCSRTOMBS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCSRTOMBS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSTOD_LOCK
-#  define PERL_WCSTOD_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSTOD_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSTOD_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_WCSTOD_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WCSTOF_LOCK
-#  define PERL_WCSTOF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSTOF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSTOF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_WCSTOF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WCSTOIMAX_LOCK
-#  define PERL_WCSTOIMAX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSTOIMAX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSTOIMAX_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_WCSTOIMAX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WCSTOLD_LOCK
-#  define PERL_WCSTOLD_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSTOLD_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSTOLD_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_WCSTOLD_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WCSTOMBS_LOCK
-#  define PERL_WCSTOMBS_LOCK
-#  define PERL_WCSTOMBS_UNLOCK
+#  define PERL_WCSTOMBS_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCSTOMBS_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSTOUMAX_LOCK
-#  define PERL_WCSTOUMAX_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSTOUMAX_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSTOUMAX_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_WCSTOUMAX_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WCSWIDTH_LOCK
-#  define PERL_WCSWIDTH_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSWIDTH_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSWIDTH_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCSWIDTH_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCSXFRM_LOCK
-#  define PERL_WCSXFRM_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCSXFRM_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCSXFRM_LOCK    PERL_LCr_LOCK(  PERL_LC_COLLATEb|PERL_LC_CTYPEb)
+#  define PERL_WCSXFRM_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_COLLATEb|PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCTOB_LOCK
 
    /* wctob() Use wctomb() or wcrtomb() instead */
-#  define PERL_WCTOB_LOCK
-#  define PERL_WCTOB_UNLOCK
+#  define PERL_WCTOB_LOCK    PERL_ETSL_TOGGLE(  PERL_LC_CTYPEb)
+#  define PERL_WCTOB_UNLOCK  PERL_ETSL_UNTOGGLE(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCTOMB_LOCK
 
    /* wctomb() Use wcrtomb() instead */
-#  define PERL_WCTOMB_LOCK    PERL_LCx_LOCK(0)
-#  define PERL_WCTOMB_UNLOCK  PERL_LCx_UNLOCK(0)
+#  define PERL_WCTOMB_LOCK    PERL_LCx_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCTOMB_UNLOCK  PERL_LCx_UNLOCK(PERL_LC_CTYPEb)
 #  ifndef WCTOMB_LOCK_
 #    define WCTOMB_LOCK_    PERL_WCTOMB_LOCK
 #    define WCTOMB_UNLOCK_  PERL_WCTOMB_UNLOCK
@@ -5375,18 +5425,18 @@
 #endif
 
 #ifndef PERL_WCTRANS_LOCK
-#  define PERL_WCTRANS_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCTRANS_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCTRANS_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCTRANS_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCTYPE_LOCK
-#  define PERL_WCTYPE_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCTYPE_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCTYPE_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCTYPE_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WCWIDTH_LOCK
-#  define PERL_WCWIDTH_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WCWIDTH_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WCWIDTH_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb)
+#  define PERL_WCWIDTH_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb)
 #endif
 
 #ifndef PERL_WORDEXP_LOCK
@@ -5397,18 +5447,18 @@
     *           getutent(), getutid(), getutline(), getutxent(), getutxid(),
     *           getutxline(), glob(), login(), logout(), pututline(),
     *           pututxline(), setutent(), setutxent(), or utmpname(). */
-#  define PERL_WORDEXP_LOCK    PERL_ENVx_LCr_LOCK(0)
-#  define PERL_WORDEXP_UNLOCK  PERL_ENVx_LCr_UNLOCK(0)
+#  define PERL_WORDEXP_LOCK    PERL_ENVx_LCr_LOCK(  PERL_LC_ALLb)
+#  define PERL_WORDEXP_UNLOCK  PERL_ENVx_LCr_UNLOCK(PERL_LC_ALLb)
 #endif
 
 #ifndef PERL_WPRINTF_LOCK
-#  define PERL_WPRINTF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WPRINTF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WPRINTF_LOCK    PERL_LCr_LOCK(  PERL_LC_CTYPEb|PERL_LC_NUMERICb)
+#  define PERL_WPRINTF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_CTYPEb|PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WSCANF_LOCK
-#  define PERL_WSCANF_LOCK    PERL_LCr_LOCK(0)
-#  define PERL_WSCANF_UNLOCK  PERL_LCr_UNLOCK(0)
+#  define PERL_WSCANF_LOCK    PERL_LCr_LOCK(  PERL_LC_NUMERICb)
+#  define PERL_WSCANF_UNLOCK  PERL_LCr_UNLOCK(PERL_LC_NUMERICb)
 #endif
 
 #ifndef PERL_WSETLOCALE_LOCK

@@ -48,7 +48,8 @@ use that now, just in case.
 Perl furnishes macros that can "cure" many cases of multi-thread
 problems.  The functions they are generated for are listed in
 L<perlapi/Mutex locking macros>.  The macros themselves are listed
-alphabetically in F<perl_lock_definitions.h>.
+alphabetically in F<perl_lock_definitions.h>; most there also have
+explanatory commentary.
 
 =item *
 
@@ -110,7 +111,7 @@ C<sv>, C<av>, C<hv>, etc. represent variables of their respective types.
 Instead of the F<stdio.h> functions, you should use the Perl abstraction
 layer. Instead of C<FILE*> types, you need to be handling C<PerlIO*>
 types.  Don't forget that with the new PerlIO layered I/O abstraction
-C<FILE*> types may not even be available. See also the C<perlapio>
+C<FILE*> types may not even be available. See also the L<perlapio>
 documentation for more information about the following functions:
 
   Instead Of:                 Use:
@@ -546,7 +547,7 @@ code, you are affected by the current locale.
 The first thing to know about this list is that there are better
 alternatives to many of the functions, which it's highly likely that you
 should be using instead.  See L</libc functions to avoid> above.
-This includes using Perl IO L<perlapio>.
+This includes using Perl IO (L<perlapio>).
 
 The second thing to know is that Perl is documented to not pay attention
 to the current locale except for code executed within the scope of a
@@ -1287,13 +1288,19 @@ per-thread locales on some platforms, like most *BSD-based ones, is so
 buggy that the perl hints files for them deliberately turn off the
 possibility of using them.
 
-The converse is that on systems with only a global locale, having
-different threads using different locales is not likely to work well;
-and changing the locale is dangerous, and without use of the locking
-macros, often leads to crashes.
+Starting in Perl v5.46, it is possible to Configure perl to emulate
+thread-safe locales on systems lacking them.  This incurs a performance
+penalty, and it is critical that all functions called that access the
+locale be wrapped with the mutex locking macros in
+F<perl_lock_definitions.h>.  See XXX
 
-Perl has extensive code to work as well as possible on both types of
-systems.  You should always use C<Perl_setlocale()> to change and query
+On systems with only a global locale and not having the thread-safe
+emulation enabled, having different threads using different locales is
+not likely to work well; and changing the locale is dangerous, and
+without use of the locking macros, often leads to crashes.
+
+Perl has extensive code to work as well as possible on each type of
+system.  You should always use C<Perl_setlocale()> to change and query
 the locale, as it portably works across the range of possibilities.
 
 =head1 SEE ALSO

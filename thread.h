@@ -299,43 +299,34 @@
 
 #  define PERL_READ_LOCK(mutex)                                             \
     STMT_START {                                                            \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': locking for read; waiting to lock mutex briefly\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
         MUTEX_LOCK(&(mutex)->lock);                                         \
+        assert((mutex)->readers_count >= 0);                                           \
         (mutex)->readers_count++;                                           \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p: mutex 0x%p write locked! for readers"       \
-                " increment, new reader count is %zd\n", __FILE__,          \
-                (long) __LINE__, aTHX, mutex, (mutex)->readers_count));     \
+        DEBUG_K(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': locked (briefly) and incremented; %zd threads have read locks\n", __FILE__, (long) __LINE__, aTHX, mutex, (mutex)->readers_count));     \
         MUTEX_UNLOCK(&(mutex)->lock);                                       \
-        DEBUG_K(PerlIO_printf(Perl_debug_log, "%s: %ld: 0x%p: mutex 0x%p"   \
-                " write unlocked for readers increment\n", __FILE__,        \
-                (long) __LINE__, aTHX, mutex));                             \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': now unlocked after increment\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
     } STMT_END
 
 #  define PERL_READ_UNLOCK(mutex)                                           \
     STMT_START {                                                            \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': unlocking for read; waiting to lock mutex briefly\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
         MUTEX_LOCK(&(mutex)->lock);                                         \
         (mutex)->readers_count--;                                           \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p: mutex 0x%p write locked! for readers"       \
-                " decrement, new reader count is %zd\n", __FILE__,          \
-                (long) __LINE__, aTHX, mutex, (mutex)->readers_count));     \
+        DEBUG_K(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p' locked (briefly) and decremented; %zd threads now have read locks on it\n", __FILE__, (long) __LINE__, aTHX, mutex, (mutex)->readers_count));     \
         if ((mutex)->readers_count <= 0) {                                  \
             assert((mutex)->readers_count == 0);                            \
             (mutex)->readers_count = 0;                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %ld: 0x%p: mutex 0x%p write still locked! for"     \
-                    " readers decrement, about to signal\n", __FILE__,      \
-                    (long) __LINE__, aTHX, mutex));                         \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p' still momentarily locked; signalling it soon will be available\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
             COND_SIGNAL(&(mutex)->wakeup);                                  \
         }                                                                   \
         MUTEX_UNLOCK(&(mutex)->lock);                                       \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p: mutex 0x%p write unlocked for readers"      \
-                " decrement\n", __FILE__, (long) __LINE__, aTHX, mutex));   \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p' now unlocked after decrement\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
     } STMT_END
 
 #  define PERL_WRITE_LOCK(mutex)                                            \
     STMT_START {                                                            \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': waiting to lock exclusively\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
         MUTEX_LOCK(&(mutex)->lock);                                         \
         do {                                                                \
             if ((mutex)->readers_count <= 0) {                              \
@@ -343,30 +334,21 @@
                 (mutex)->readers_count = 0;                                 \
                 break;                                                      \
             }                                                               \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "mutex 0x%p write locked but there are %zd readers;"    \
-                    " sleeping until one releases\n",                       \
-                    aTHX, (mutex)->readers_count));                         \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': sleeping until one of %zd other thread readers releases\n",  __FILE__, (long) __LINE__, aTHX, mutex, (mutex)->readers_count));                         \
             COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);                    \
         }                                                                   \
         while (1);                                                          \
                                                                             \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p: mutex 0x%p write locked!\n",                \
-                __FILE__, (long) __LINE__, aTHX, mutex));                   \
+        DEBUG_K(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p': now exclusively locked\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
         /* Here, the mutex is locked, with no readers */                    \
     } STMT_END
 
 #  define PERL_WRITE_UNLOCK(mutex)                                          \
     STMT_START {                                                            \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p: mutex 0x%p about to signal, then write"     \
-                " unlock\n", __FILE__, (long) __LINE__, aTHX, mutex));      \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p' unlocking, but first signal any waiters\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
         COND_SIGNAL(&(mutex)->wakeup);                                      \
         MUTEX_UNLOCK(&(mutex)->lock);                                       \
-        DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
-                "%s: %ld: 0x%p mutex 0x%p: signalled, write unlocked\n",    \
-                __FILE__, (long) __LINE__, aTHX, mutex));                   \
+        DEBUG_Kv(PerlIO_printf(Perl_debug_log, "%s(thread.h): %ld: Thread 0x%p: Mutex '0x%p' unlocked\n", __FILE__, (long) __LINE__, aTHX, mutex));     \
     } STMT_END
 
 #  define PERL_RW_MUTEX_INIT(mutex)                                 \

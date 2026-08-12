@@ -127,7 +127,12 @@ sub perl_macro_family {
 }
 
 # Our data comes internally
-while (defined (my $line = <DATA>)) {
+my @DATA = <DATA>;
+close DATA;
+my %envs;
+my %locales;
+
+while (defined (my $line = shift @DATA)) {
 
     my (@cuses, @cdata);    # 'c' stands for continuation
     {
@@ -158,7 +163,7 @@ while (defined (my $line = <DATA>)) {
 
             last unless $continued;
 
-            $line = <DATA>;    # Repeat for the continuation line
+            $line = shift @DATA;    # Repeat for the continuation line
         } while (1);
     }
 
@@ -176,7 +181,7 @@ while (defined (my $line = <DATA>)) {
     # in a comma.  All such continuation lines have just the one field.
     if ($data) {
         while ($uses =~ / , \s* $/x) {
-            my $continuation = <DATA>;
+            my $continuation = shift @DATA;
             chomp $continuation;
             $uses .= $continuation;
         }
@@ -374,6 +379,7 @@ while (defined (my $line = <DATA>)) {
         my %entry;
         $entry{preprocessor} = $preprocessor;
         push $entry{categories}->@*, @categories if @categories;
+            $locales{$use} = 1 if @categories;
 
         foreach my $race (@races) {
 
@@ -400,6 +406,12 @@ while (defined (my $line = <DATA>)) {
         if (@signals) {
             push $entry{signals}->@*, @signals;
             $signal_issues{$use} = 1;
+        }
+
+        for my $lock (keys %locks) {
+            next unless $locks{$lock} eq 'r';
+            $locales{$use} = 1 if $lock eq 'locale';
+            $envs{$use} = 1, if $lock eq 'env';
         }
 
         $entry{locks}{$_} = $locks{$_} for keys %locks;
@@ -728,6 +740,56 @@ EOT
 # increases the possibility of deadlock, unless the code is carefully
 # crafted (and remains so during future maintenance).
 #
+# The locale macros take a mask parameter with each affected category having a
+# bit set in it.  The mask for LC_ALL is the same across all platforms.
+print $l <<~EOT;
+
+/* The macros that include locale locking need to know (in some
+ * Configurations) which locale categories are affected.  This is done by
+ * passing a bit mask argument to them, with each affected category having a
+ * corresponding bit set.  The definitions below convert from category to its
+ * bit position. */
+#define PERL_LC_INDEX_TO_BIT(i) (1 << (i))
+#define PERL_LC_ALLb  PERL_LC_INDEX_TO_BIT(LC_ALL_INDEX_)
+EOT
+
+print $l <<~EOT;
+
+/*  On platforms where the locale for a given category must be matched by the
+ *  LC_CTYPE locale to avoid potential mojibake, set things up to also
+ *  automatically include the LC_CTYPE bit. */
+#if defined(LC_CTYPE) && defined(PERL_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+#  define PERL_INCLUDE_CTYPE  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+#else
+#  define PERL_INCLUDE_CTYPE  0
+#endif
+
+/* Then #define the bit position for each category on the system that can play
+ * a part in the locking macro definitions */
+EOT
+
+# Create the mask for each category found in the DATA
+foreach my $cat (sort keys %categories) {
+    next if $cat eq "LC_ALL";
+    if ($cat eq "LC_CTYPE") {
+        print $l <<~EOT;
+            #ifdef LC_CTYPE
+            #  define PERL_LC_CTYPEb  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+            #else
+            #  define PERL_LC_CTYPEb  PERL_LC_ALLb
+            #endif
+            EOT
+    }
+    else {
+        print $l <<~EOT;
+            #ifdef $cat
+            #  define PERL_${cat}b  PERL_LC_INDEX_TO_BIT(${cat}_INDEX_)|PERL_INCLUDE_CTYPE
+            #else
+            #  define PERL_${cat}b  PERL_LC_CTYPEb
+            #endif
+            EOT
+    }
+}
 
 # Output the computed results for each use in the DATA
 foreach my $use (sort name_order keys %uses) {
@@ -855,6 +917,24 @@ foreach my $use (sort name_order keys %uses) {
                 $race_text = wrap($columns, "", $hanging, "$race_text.");
                 push @comments, split "\n", $race_text;
             }
+        }
+
+        # if just one race,  and this is the only function in it.
+        # see what locks in it.
+#            0 mutexes: make the race gen
+#            1 mutex: drop the race, make the mutex x,
+#            >1 mutexes: any x: drop the race
+#                        all r: Do Rcegl
+#        # multiple functions, will by now know closure of mutexes
+#            0 mutexes: make the race gen
+#            1 mutex: drop the race, make the mutex x,
+#            2 mutexes: both x: drop the race
+#                       one  x: drop the race
+#                       both r: 
+            
+        # make that the lock.
+        if ($entry->{races}) {
+            #XXX print STDERR __FILE__, ": ", __LINE__, ": $use: ", Dumper $entry->{races};
         }
 
         if ($entry->{conditions}) {
@@ -1024,20 +1104,26 @@ foreach my $use (sort name_order keys %uses) {
                     EOT
             }
             else {  # Here, does have locale issues
+                my $cats = join "|", map { "PERL_${_}b" }
+                                                     $entry->{categories}->@*;
                 if ($name || $locale_lock) {
-                    $name .= "_" if $name;
-                    $locale_lock = "r" unless $locale_lock;
-                    $name .= "LC$locale_lock";
-                    print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK    PERL_${name}_LOCK(0)
-                        #${dindent}define ${USE}_UNLOCK  PERL_${name}_UNLOCK(0)
-                        EOT
+                 $name .= "_" if $name;
+                 $locale_lock = "r" unless $locale_lock;
+                 $name .= "LC$locale_lock";
+                 print $l <<~EOT;
+                   #${dindent}define ${USE}_LOCK    PERL_${name}_LOCK(  $cats)
+                   #${dindent}define ${USE}_UNLOCK  PERL_${name}_UNLOCK($cats)
+                   EOT
                 }
                 else {
-                    print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK
-                        #${dindent}define ${USE}_UNLOCK
-                        EOT
+                   # This would otherwise be a no-op, but for thread-safe
+                   # locale emulation, need to know what locale categories
+                   # are involved.  ETSL stands for Emulate Thread-Safe
+                   # Locales
+                   print $l <<~EOT;
+                    #${dindent}define ${USE}_LOCK    PERL_ETSL_TOGGLE(  $cats)
+                    #${dindent}define ${USE}_UNLOCK  PERL_ETSL_UNTOGGLE($cats)
+                    EOT
                 }
             }
 

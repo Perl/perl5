@@ -3128,6 +3128,8 @@ my @pending_documentation_symbols = qw(
 # not be directly usable by XS code
 my %undocumented_always_visible = map { $_ => 1 } qw(
     _
+    CC_TOLOWER_
+    CC_TOUPPER_
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off
     CvHasNAME_HEK_on

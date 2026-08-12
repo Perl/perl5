@@ -56,7 +56,7 @@
 #  undef HAS_NL_LANGINFO
 #  undef HAS_NL_LANGINFO_L
 #  undef _UCRT
-#  ifdef USE_LOCALE
+#  ifndef NO_LOCALE
 #    define TS_W32_BROKEN_LOCALECONV
 #    ifdef USE_THREADS
 #      define EMULATE_THREAD_SAFE_LOCALES
@@ -1332,8 +1332,11 @@ typedef enum {
 #  endif
 
    /* POSIX 2008 has no means of finding out the current locale without a
-    * querylocale; so must keep track of it ourselves */
-#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
+    * querylocale; so must keep track of it ourselves.  And for thread-safe
+    * emulation, we keep track because the system doesn't have per-thread
+    * information */
+#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))        \
+   ||  defined(EMULATE_THREAD_SAFE_LOCALES)
 #    define USE_PL_CURLOCALES
 #  endif
 
@@ -4964,7 +4967,13 @@ Gid_t getegid (void);
 #  define DEBUG_A_TEST_ UNLIKELY(PL_debug & DEBUG_A_FLAG)
 #  define DEBUG_q_TEST_ UNLIKELY(PL_debug & DEBUG_q_FLAG)
 #  define DEBUG_M_TEST_ UNLIKELY(PL_debug & DEBUG_M_FLAG)
-#  define DEBUG_K_TEST_ UNLIKELY(PL_debug & DEBUG_K_FLAG)
+//#  define DEBUG_K_TEST_ UNLIKELY(PL_debug & DEBUG_K_FLAG)
+#  define DEBUG_K_TEST_                                                 \
+        (   UNLIKELY(DEBUG_LOCALE_INITIALIZATION_)                      \
+         || UNLIKELY(PL_debug & DEBUG_K_FLAG))
+#  define DEBUG_Kv_TEST_                                                \
+        (   UNLIKELY(DEBUG_LOCALE_INITIALIZATION_)                      \
+         || UNLIKELY(DEBUG_BOTH_FLAGS_TEST_(DEBUG_K_FLAG, DEBUG_v_FLAG)))
 #  define DEBUG_B_TEST_ UNLIKELY(PL_debug & DEBUG_B_FLAG)
 
 /* Locale initialization comes earlier than PL_debug gets set,
@@ -4982,7 +4991,7 @@ Gid_t getegid (void);
 #  define DEBUG_y_TEST_ UNLIKELY(PL_debug & DEBUG_y_FLAG)
 #  define DEBUG_Xv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_X_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Uv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_U_FLAG, DEBUG_v_FLAG)
-#  define DEBUG_Kv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_K_FLAG, DEBUG_v_FLAG)
+//#  define DEBUG_Kv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_K_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Pv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_P_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_yv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_y_FLAG, DEBUG_v_FLAG)
 
@@ -5203,6 +5212,10 @@ Gid_t getegid (void);
 #  define DEBUG_yv(a)
 #endif /* DEBUGGING */
 
+#define PERL_K_PREFIX(name)  "%s: %" LINE_Tf ": Thread 0x%p: Mutex '" name "' (0x%p): "
+#define PERL_K_PREFIX_ARGS(mutex)   __FILE__, (line_t) __LINE__, aTHX, mutex
+#define PERL_K_SUFFIX  " %s%zd threads have read locks on it, xcounter=%d, rcounter=%d\n"
+#define PERL_K_SUFFIX_ARGS(locked, m, x, r)  ((locked) ? "" : "?"), (m)->readers_count, x, r
 
 #define DEBUG_SCOPE(where) \
     DEBUG_l( \
@@ -6526,7 +6539,9 @@ INIT({
  * The other two counters, xcounter and rcounter, are local to the thread and
  * are passed to the macros, so are visible to the caller, but attempts to
  * change their contents would be disastrous.  The API-level macros hide these
- * from outside callers.  Each is initialized to 0 upon thread creation.
+ * from outside callers.  Each is initialized to 0 upon thread creation, and
+ * count how many nested exclusive locks (xcounter) and read locks (rcounter)
+ * this thread has on this mutex (1 = a single lock).
  *
  * These two counters are used to simulate recursive semaphores, so the
  * way things works is standardized even on systems that have some form of
@@ -6536,40 +6551,85 @@ INIT({
  * thread.  PERL_REENTRANT_LOCK locks the mutex if xcounter is zero, and
  * then increments xcounter.  If called when xcounter is not zero, the macro
  * knows it already has an exclusive lock on the mutex, and merely increments
- * xcounter.  Each corresponding PERL_REENTRANT_UNLOCK decrements xcounter
- * until it is 0, at which point it actually unlocks the mutex.  Since the
- * variable is per-thread, there is no race with other threads.
+ * xcounter.  It does not need to examine the R counter.  Each corresponding
+ * PERL_REENTRANT_UNLOCK decrements xcounter until it is 0, at which point it
+ * actually unlocks the mutex.  Since the variable is per-thread, there is no
+ * race with other threads.
  *
  * 'rcounter' similarly counts the depth of read locks from this thread.
+ *
+ * The high level description is that there is a single mutex for each
+ * resource.  A thread wanting access to that resource should lock the mutex
+ * using one of these macros.  There is nothing here to prevent a rogue thread
+ * from accessing the resource wrongly.  This all falls apart without the
+ * cooperation of all threads.
+ *
+ * If the thread wants exclusive (write) access to the mutex, the macro locks
+ * the mutex until done.  All other threads that attempt to access the mutex
+ * are denied it by the system, and hang until it is released.  A mutex wanting
+ * read-only access to the mutex also locks it, but only long enough to
+ * increment the R counter.  Any other threads attempting to access the mutex
+ * are locked out for the duration of that increment.  Another thread that also
+ * wants read-only access will similarly lock, increment the R counter, unlock,
+ * and proceed with its reading.  Thus the R counter always specifies how many
+ * threads have read-only access to the resource.  It is 0 if any thread has
+ * write-access.  It is never looked at nor changed unless the calling thread
+ * has exclusive access to it.  If a thread asks for exclusive access while
+ * other threads have read access, it will be able to lock the mutex, but these
+ * macros cause it to look at the R counter, and if that is non-zero, to
+ * immediately unlock the mutex and put itself on a list of threads waiting for
+ * all the readers to unlock.  That happens when the R counter goes to 0, and
+ * at that time the macros cause the system to awaken the waiting threads, who
+ * then will try again.
  *
  * Here are the cases in detail:
  *
  * PERL_REENTRANT_READ_LOCK: Requesting a read lock:
  *
- *      xcounter == 0; rcounter is anything
+ *      xcounter == 0; rcounter == 0
  *
  *          The thread locks the mutex.  If another thread has a lock on the
  *          mutex, the system will block this thread until that is released.
  *          If that lock is for a read lock, the wait will be brief, as all
- *          that is done is to increment the R counter field of the mutex
- *          structure, then release the lock.  If the other thread has an
- *          exclusive lock, this thread will hang for however long that takes.
+ *          that is done in the other thread is to increment the R counter
+ *          field of the mutex structure, then release the lock.  If the other
+ *          thread has an exclusive lock, this thread will hang for however
+ *          long that takes.
  *
  *          Once this thread has the mutex, it increments the R counter field,
  *          then releases the mutex.
  *
- *          rcounter is incremented.
+ *          rcounter is set to 1.
  *
  *          Note that in this and all cases below, the R counter in the mutex
  *          structure field is only accessed while the mutex is locked.
  *
+ *          The R counter gives the number of threads that have read locks on
+ *          this mutex
+ *
+ *      xcounter == 0; rcounter > 0
+ *
+ *          rcounter is incremented, thus giving the number of nested
+ *          read-locks this thread has on the mutex.
+ *
  *      xcounter > 0; rcounter is anything
  *
- *          The R counter field in the already-owned mutex struct is simply
- *          incremented, without trying to lock the mutex. rcounter is neither
- *          inspected nor changed in this scenario.
+ *          rcounter is incremented, thus giving the number of nested
+ *          read-locks this thread has on the mutex.
  *
- *          The system continues to prevent any other thread from locking this
+ *          This happens when the thread already owns the mutex for exclusive
+ *          access.  Adding a nested read-lock just changes that counter.
+ *
+ * PERL_REENTRANT_READ_UNLOCK: Releasing a read lock:
+ *
+ *      xcounter is anything; rcounter == 0
+ *
+ *          panics.  You can't release a non-existent lock.
+ *
+ *      xcounter is anything; rcounter > 0
+ *
+ *          rcounter is decremented, thus giving the number of remaining nested
+ *          read-locks this thread has on the mutex.
  *
  * PERL_REENTRANT_LOCK: Requesting an exclusive lock:
  *
@@ -6591,7 +6651,7 @@ INIT({
  *      xcounter >  0; rcounter is anything
  *
  *          This means this thread already owns an exclusive lock on this
- *          mutex.  xcounter is simply incremented, keeping it to be the number
+ *          mutex.  xcounter is simply incremented, making it be the number
  *          of nested exclusive locks this thread owns.
  *
  *          No attempt is made to re-lock the mutex.  Doing so would hang
@@ -6603,20 +6663,36 @@ INIT({
  *      xcounter == 0; rcounter > 0
  *
  *          This panics; otherwise this scenario could lead to deadlock.  If
- *          another thread has a read lock, this thread hangs until that one is
- *          released.  If that one instead requests an exclusive lock, it will
- *          hang until this thread releases its read lock, which it will never
- *          do because it is suspended.
+ *          another thread has a read lock, this thread would hang until that
+ *          one is released.  If that one instead requests an exclusive lock,
+ *          it will hang until this thread releases its read lock, which it
+ *          will never do because it is suspended.
  *
  *          Your code needs to be structured so as to not attempt this.  The
  *          panic is to greatly increase the odds of this happening during
  *          development, so that it can be fixed before the code is released.
  *
- * PERL_REENTRANT_UNLOCK, PERL_REENTRANT_READ_UNLOCK
+ * PERL_REENTRANT_UNLOCK: Releasing an exclusive lock:
  *
- *      Unlocking is essentially the reverse.  The respective counter is
- *      decremented and when zero is reached, the respective lock type is
- *      released.
+ *      xcounter <= 0; rcounter is anything
+ *
+ *          This panics; you can't release a mutex you don't own.
+ *
+ *      xcounter >  1; rcounter is anything
+ *
+ *          xcounter is decremented, meaning there is one less nesting level of
+ *          exclusive lock.
+ *
+ *      xcounter == 1; rcounter == 0
+ *
+ *          xcounter is set to 0 and the mutex released.
+ *
+ *      xcounter == 1; rcounter > 0
+ *
+ *          xcounter is set to 0 and the mutex released.  That rcounter is
+ *          non-zero is not really relevant.  It means that after the exclusive
+ *          access is gone, this thread still has a read-only lock that should
+ *          be reflected in the R counter.
  *
  * Note that if xcounter is non-zero, rcounter is not looked at; if a new read
  * lock/unlock request comes in, the mutex struct R counter is changed, and
@@ -6625,57 +6701,43 @@ INIT({
  * Clang improperly gives warnings for this, if not silenced:
  * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
  */
+            // print ALL counters, maybe more
 #define PERL_REENTRANT_LOCK(name, mutex, xcounter, rcounter,                \
                             cond_to_panic_if_already_locked)                \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (LIKELY(xcounter <= 0)) {                                        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": locking " name "; new lock depth=1;" \
-                    " this thread reader count=%d\n",                       \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
-            if (xcounter < 0) (croak("panic: %s: %" LINE_Tf ": locking "    \
-                               name "; new lock depth=%d; this thread"      \
-                               " reader count=%d\n",                        \
-                              __FILE__, (line_t) __LINE__, xcounter,        \
-                              rcounter));                                   \
+        if (LIKELY(xcounter == 0)) {                                        \
+            if (UNLIKELY(rcounter != 0)) {                                  \
+                if (rcounter > 0) {                                         \
+                    /* diag_listed_as: SKIPME */\
+                    croak("panic: " PERL_K_PREFIX(name) "Attempting to convert non-exclusive lock to exclusive; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));          \
+                }                                           \
+                else {\
+                    /* diag_listed_as: SKIPME */\
+                    croak("panic: " PERL_K_PREFIX(name) "This thread's read lock count < 0; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));          \
+                }\
+            }                                                               \
                                                                             \
             /* If this thread has no read locks on this mutex, it is a      \
              * simple exclusive lock */                                     \
-            if (rcounter <= 0) {                                            \
-                assert(rcounter == 0);                                      \
-                PERL_WRITE_LOCK(mutex);                                     \
-                DEBUG_K(PerlIO_printf(Perl_debug_log,                       \
-                        "locked " name " all threads reader count is %zd\n",\
-                        (mutex)->readers_count));                           \
-            }                                                               \
-            else {                                                          \
-                croak("panic: %s: %" LINE_Tf ": attempting to convert"      \
-                      " non-exclusive lock on name to exclusive\n",         \
-                      __FILE__, (line_t) __LINE__);                         \
-            }                                                               \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Trying to lock exclusively; waiting to lock mutex; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
+            PERL_WRITE_LOCK(mutex);                                     \
+            assert ((mutex)->readers_count == 0);\
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Now locked; continuing to hold it; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter)));          \
                                                                             \
             xcounter = 1;                                                   \
-            DEBUG_Kv(PerlIO_printf(Perl_debug_log,                          \
-                     "%s: %" LINE_Tf ": " name " locked; lock depth=1\n",   \
-                     __FILE__, (line_t) __LINE__));                         \
         }                                                                   \
-        else {  /* This thread already owns this mutex exclusively */       \
+        else if (LIKELY(xcounter > 0)) {  /* This thread already owns this mutex exclusively */       \
             xcounter++;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided locking " name "; new lock"  \
-                    " depth=%d, this thread reader count=%d; but will"      \
-                    " panic if '%s' is true\n", __FILE__, (line_t) __LINE__,\
-                    xcounter, rcounter,                                     \
-                    STRINGIFY(cond_to_panic_if_already_locked)));           \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "mutex " name ": all threads reader count is %zd\n",    \
-                    (mutex)->readers_count));                               \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Incremented nested exclusive lock; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter)));          \
             if (cond_to_panic_if_already_locked) {                          \
-                croak("panic: %s: %" LINE_Tf ": attempting to lock " name   \
-                      " incompatibly: %s\n", __FILE__, (line_t) __LINE__,   \
-                      STRINGIFY(cond_to_panic_if_already_locked));          \
+                    /* diag_listed_as: SKIPME */\
+                croak("panic: " PERL_K_PREFIX(name) "Increment failed because %s is true; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), STRINGIFY(cond_to_panic_if_already_locked), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter));          \
             }                                                               \
+        }                                                                   \
+        else {                                                              \
+                    /* diag_listed_as: SKIPME */\
+            croak("panic: " PERL_K_PREFIX(name) "This thread's write lock count < 0; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));          \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6683,58 +6745,39 @@ INIT({
 #define PERL_REENTRANT_UNLOCK(name, mutex, xcounter, rcounter)              \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {  /* Only a single level lock */        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log, "unlocking " name         \
-                    " all threads reader count is %zd\n",                   \
-                    (mutex)->readers_count));                               \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Unlocking exclusive lock; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter)));          \
             PERL_WRITE_UNLOCK(mutex);                                       \
             xcounter = 0;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": unlocking " name "; new lock"        \
-                    " depth=0; this thread reader count=%d\n",              \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "No longer locked; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
         }                                                                   \
-        else if (xcounter <= 0) {                                           \
-            croak("panic: %s: %" LINE_Tf ": attempting to unlock already"   \
-                  " unlocked " name "; depth was %d\n",                     \
-                  __FILE__, (line_t) __LINE__, xcounter);                   \
+        else if (LIKELY(xcounter > 1)) {                                           \
+            xcounter--;                                                     \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Decremented nested exclusive lock; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter)));          \
         }                                                                   \
         else {                                                              \
-            xcounter--;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided unlocking " name "; new lock"\
-                    " depth=%d; this thread reader count=%d; all threads"   \
-                    " reader count=%zd\n", __FILE__, (line_t) __LINE__,     \
-                    xcounter, rcounter, (mutex)->readers_count));           \
+                    /* diag_listed_as: SKIPME */\
+            croak("panic: " PERL_K_PREFIX(name) "Attempting to unlock unowned mutex; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));          \
         }                                                                   \
     } STMT_END
 
 #define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter, rcounter)           \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {    /* No exclusive lock */                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": read locking " name "; no writers\n",\
-                    __FILE__, (line_t) __LINE__));                          \
-            if (xcounter != 0) croak("panic: %s: %" LINE_Tf                 \
-                                    ": read locking " name "; writers=%d\n",\
-                                    __FILE__, (line_t) __LINE__, xcounter); \
+        if (LIKELY(xcounter == 0 && rcounter == 0)) { \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "Trying to lock for read; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
             PERL_READ_LOCK(mutex);                                          \
             (rcounter)++;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": " name " read locked; this thread"   \
-                    " reader new count=%d\n",                               \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "locked for read; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
+        }                                                                   \
+        else if (LIKELY(xcounter > 0 || rcounter > 0)) {                     \
+            /* This thread already has a lock on this mutex.     \
+             * Just increment the number of readers it has */               \
+            (rcounter)++;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "locking for read, but already owned exclusively; incremented reader lock count; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(1, mutex, xcounter, rcounter)));          \
         }                                                                   \
         else {                                                              \
-            /* This thread already has an exclusive lock on this mutex.     \
-             * Just increment the number of readers it has */               \
-            (mutex)->readers_count++;                                       \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided read locking " name          \
-                    "; lock depth=%d, this thread reader count=%d; all"     \
-                    " threads reader count=%zd\n",                          \
-                    __FILE__, (line_t) __LINE__, xcounter, rcounter,        \
-                    (mutex)->readers_count));                               \
+                    /* diag_listed_as: SKIPME */\
+            /*croak("panic: " PERL_K_PREFIX(name) "This thread's xcounter < 0; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));*/          \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6742,38 +6785,21 @@ INIT({
 #define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter, rcounter)         \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {    /* No exclusive lock */                     \
-            if (xcounter != 0) croak("panic: %s: %" LINE_Tf  ": read"       \
-                                     " unlocking " name "; writers=%d;"     \
-                                     " this thread reader count=%d\n",      \
-                                     __FILE__, (line_t) __LINE__, xcounter, \
-                                     rcounter);                             \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": read unlocking " name "; no writers;"\
-                    " this thread reader count=%d\n",                       \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
-            PERL_READ_UNLOCK(mutex);                                        \
-            (rcounter)--;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": " name " read unlocked this thread"  \
-                    " reader new count=%d\n",                               \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
+        if (LIKELY(rcounter == 1)) {                                       \
+            rcounter = 0;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "unlocking for read; decremented rcounter; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
+            if (LIKELY(xcounter == 0)) {                                       \
+                PERL_READ_UNLOCK(mutex);                                        \
+            }\
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "unlocked for read; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
         }                                                                   \
-        else if (LIKELY((mutex)->readers_count > 0)) {                      \
-            /* This thread already has an exclusive lock on this mutex.     \
-             * Just deccrement the number of readers it has */              \
-            (mutex)->readers_count--;                                       \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided read unlocking " name "; all"\
-                    " threads new reader count=%zd; lock depth=%d, this"    \
-                    " thread reader count=%d\n",                            \
-                    __FILE__, (line_t) __LINE__, (mutex)->readers_count,    \
-                    xcounter, rcounter));                                   \
+        else if (LIKELY(rcounter > 1)) {\
+            (rcounter)--;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log, PERL_K_PREFIX(name) "decremented rcounter; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter)));          \
         }                                                                   \
         else {                                                              \
-            croak("panic: %s: %" LINE_Tf ": attempting to read unlock"      \
-                  " already unlocked " name "; readers count was %zd\n",    \
-                  __FILE__, (line_t) __LINE__, (mutex)->readers_count);     \
+                    /* diag_listed_as: SKIPME */\
+            croak("panic: " PERL_K_PREFIX(name) "This thread's rcounter <= 0; " PERL_K_SUFFIX, PERL_K_PREFIX_ARGS(mutex), PERL_K_SUFFIX_ARGS(0, mutex, xcounter, rcounter));          \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -7637,7 +7663,18 @@ typedef struct am_table_short AMTS;
  *      GENx_ENVx_LCr_LOCK     GENx_ENVx_LCx_LOCK
  *
  * (Each actually has 'PERL_' prefixed to its name)
- */
+ *
+ * There are two pairs of macros that are the same across all implementations
+ * */
+#define PERL_ENVr_LOCK                          ENV_READ_LOCK
+#define PERL_ENVr_UNLOCK                        ENV_READ_UNLOCK
+
+#define PERL_ENVx_LOCK                          ENV_LOCK
+#define PERL_ENVx_UNLOCK                        ENV_UNLOCK
+
+/* And this is a no-op unless overridden when emulating thread-safe locales */
+#define PERL_ETSL_TOGGLE(m)                     NOOP
+#define PERL_ETSL_UNTOGGLE(m)                   NOOP
 
 #if defined(USE_THREAD_SAFE_LOCALE) || ! defined(USE_LOCALE)
 
@@ -7651,7 +7688,7 @@ typedef struct am_table_short AMTS;
       * What that means is that for this implementation:
       *     All GEN components of a lock macro use the LOCALE mutex
       *     Any LCr component of a lock macro is a no-op
-      *     XXX Any LCx component of a lock macro is a no-op
+      *     Any LCx component of a lock macro maps into GENx
       *
       * All macros that need to lock the two mutexes first lock the generic
       * (locale) mutex, then the environment one.  This prevents deadlock.
@@ -7662,12 +7699,6 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
 #  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
-
-#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
-#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
-
-#  define PERL_ENVx_LOCK                        ENV_LOCK
-#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
 
 #  define PERL_GENr_LOCK                        LOCALE_READ_LOCK
 #  define PERL_GENr_UNLOCK                      LOCALE_READ_UNLOCK
@@ -7757,13 +7788,10 @@ typedef struct am_table_short AMTS;
 #  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_GENx_ENVx_LOCK
 #  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_GENx_ENVx_UNLOCK
 
-#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
-#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
-
 #else
 
     /* In contrast, on platforms without thread-safe locales, the generic lock
-     * mostly uses the env mutex.  This is mainly because the core perl code is
+     * uses the env mutex.  This is mainly because the core perl code is
      * structured so that the ENV mutex is most often locked just around a
      * single libc call, whereas the locale mutex can be locked around
      * recursive calls.
@@ -7789,12 +7817,6 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
 #  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
-
-#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
-#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
-
-#  define PERL_ENVx_LOCK                        ENV_LOCK
-#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
 
 #  define PERL_GENr_LOCK                        PERL_ENVr_LOCK
 #  define PERL_GENr_UNLOCK                      PERL_ENVr_UNLOCK
@@ -7882,22 +7904,68 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_ENVx_LCx_LOCK(m)
 #  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_ENVx_LCx_UNLOCK(m)
+
+#  ifdef EMULATE_THREAD_SAFE_LOCALES
+
+     /* Here, are emulating safe locales.  This is a specialized form of where
+      * we use the ENV lock for the GEN one.  Hence most of the locks are the
+      * same.  We #undef the ones that are different and redefine them.
+      *
+      * Everything has to be treated as a write lock, as everything is done in
+      * the global locale, so we can't have another thread changing it, and
+      * this thread may well have to toggle the locale */
+#    undef  PERL_LCr_LOCK
+#    define PERL_LCr_LOCK(m)                    PERL_LCx_LOCK(m)
+
+#    undef  PERL_LCr_UNLOCK
+#    define PERL_LCr_UNLOCK(m)                  PERL_LCx_UNLOCK(m)
+
+     /* And we have a special routine to handle the write locks */
+#    undef  PERL_LCx_LOCK
+#    define PERL_LCx_LOCK(m)           category_lock(  m, __FILE__, __LINE__)
+
+#    undef  PERL_LCx_UNLOCK
+#    define PERL_LCx_UNLOCK(m)         category_unlock(m, __FILE__, __LINE__)
+
+     /* In the other implementations, once a category's locale is set, it
+      * remains so, but in this implementation the locale is essentially random
+      * until ready to use, and must be toggled into the correct state */
+#    undef  PERL_ETSL_TOGGLE
+#    define PERL_ETSL_TOGGLE(m)                 PERL_LCx_LOCK(m)
+
+#    undef  PERL_ETSL_UNTOGGLE
+#    define PERL_ETSL_UNTOGGLE(m)               PERL_LCx_UNLOCK(m)
+
+#    undef LC_NUMERIC_LOCK
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+            STMT_START {    \
+                /*LOCALE_LOCK_(cond_to_panic_if_already_locked);*/   \
+                PERL_ENVr_LCx_LOCK(PERL_LC_NUMERICb);\
+            } STMT_END
+
+#    undef LC_NUMERIC_UNLOCK
+#    define LC_NUMERIC_UNLOCK                                               \
+            STMT_START {    \
+                PERL_ENVr_LCx_UNLOCK(PERL_LC_NUMERICb);      \
+                /*LOCALE_UNLOCK_;*/   \
+            } STMT_END
+#  endif
 #endif
 
 /* This will be a no-op iff the perl is unthreaded. 'gw' stands for 'global
  * write', to indicate the caller wants to be able to access memory that isn't
  * thread specific, either to write to itself, or to prevent anyone else from
  * writing. */
-#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
-#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
+#define gwLOCALE_LOCK           PERL_GENx_LCr_LOCK(LC_ALL)
+#define gwLOCALE_UNLOCK         PERL_GENx_LCr_UNLOCK(LC_ALL)
 
 /* Similar to gwLOCALE_LOCK, there are functions that require both the locale
  * and environment to be constant during their execution, and don't change
  * either of those things, but do write to some sort of shared global space.
  * They require some sort of exclusive lock against similar functions, and a
  * read lock on both the locale and environment. */
-#define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(0)
-#define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(0)
+#define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(LC_ALL)
+#define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(LC_ALL)
 
 /* posix_setlocale() is used internally to mean the setlocale() libc function
  * defined in C89 and the POSIX Standard.  Windows implementations have
@@ -7939,14 +8007,14 @@ typedef struct am_table_short AMTS;
 #endif
 
 /* These spellings are retained for backwards compatibility */
-#define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK(0)
-#define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
-#define gwLOCALEr_LOCK       PERL_GENx_LCr_LOCK
-#define gwLOCALEr_UNLOCK     PERL_GENx_LCr_UNLOCK
+#define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK(LC_ALL)
+#define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK(LC_ALL)
+#define gwLOCALEr_LOCK       PERL_GENx_LCr_LOCK(LC_ALL)
+#define gwLOCALEr_UNLOCK     PERL_GENx_LCr_UNLOCK(LC_ALL)
 #define LC_COLLATE_LOCK      LOCALE_LOCK
 #define LC_COLLATE_UNLOCK    LOCALE_UNLOCK
-#define LOCALE_LOCK          PERL_LCx_LOCK(0)
-#define LOCALE_UNLOCK        PERL_LCx_UNLOCK(0)
+#define LOCALE_LOCK          PERL_LCx_LOCK(LC_ALL)
+#define LOCALE_UNLOCK        PERL_LCx_UNLOCK(LC_ALL)
 
 /* End of locale/env synchronization */
 
