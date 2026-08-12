@@ -146,7 +146,7 @@ which L</MgIsV2> is true.
 
 #define MGv2_ASSERT_AND_CAST_FUNCS_(mg, want_shape, type) \
     (assert(MgFUNCS(mg)->shape == want_shape),           \
-      ((const type *)MgFUNCS(mg)))
+      ((type)MgFUNCS(mg)))
 
 /* common to all magic v2 function structs */
 
@@ -176,7 +176,17 @@ struct ScalarVarMagicFunctions {
     void (*post_set)(pTHX_ SV *sv, MAGIC *mg);
 };
 
-#define MgSCALARVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_SCALARVAR, struct ScalarVarMagicFunctions)
+/*
+=for apidoc Am|const struct ScalarVarMagicFunctions *|MgSCALARVARFUNCS|MAGIC *mg
+Returns a pointer to the magic functions structure of the given Magic v2
+instance, cast to a type of C<const struct ScalarVarMagicFunctions>. On
+debugging perls this will additionally assert that the I<shape> field of the
+magic structure is compatible.
+
+=cut
+*/
+
+#define MgSCALARVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_SCALARVAR, const struct ScalarVarMagicFunctions *)
 
 struct ArrayVarMagicFunctions {
     _PERL_MAGICFUNCTIONS_COMMON_FIELDS;
@@ -185,7 +195,17 @@ struct ArrayVarMagicFunctions {
     void (*clear)(pTHX_ SV *sv, MAGIC *mg);
 };
 
-#define MgARRAYVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_ARRAYVAR, struct ArrayVarMagicFunctions)
+/*
+=for apidoc Am|const struct ArrayVarMagicFunctions *|MgARRAYVARFUNCS|MAGIC *mg
+Returns a pointer to the magic functions structure of the given Magic v2
+instance, cast to a type of C<const struct ArrayVarMagicFunctions>. On
+debugging perls this will additionally assert that the I<shape> field of the
+magic structure is compatible.
+
+=cut
+*/
+
+#define MgARRAYVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_ARRAYVAR, const struct ArrayVarMagicFunctions *)
 
 struct HashVarMagicFunctions {
     _PERL_MAGICFUNCTIONS_COMMON_FIELDS;
@@ -194,7 +214,17 @@ struct HashVarMagicFunctions {
     void (*clear)(pTHX_ SV *sv, MAGIC *mg);
 };
 
-#define MgHASHVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_HASHVAR, struct HashVarMagicFunctions)
+/*
+=for apidoc Am|const struct HashVarMagicFunctions *|MgHASHVARFUNCS|MAGIC *mg
+Returns a pointer to the magic functions structure of the given Magic v2
+instance, cast to a type of C<const struct HashVarMagicFunctions>. On
+debugging perls this will additionally assert that the I<shape> field of the
+magic structure is compatible.
+
+=cut
+*/
+
+#define MgHASHVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_HASHVAR, const struct HashVarMagicFunctions *)
 
 typedef struct {
     MAGIC  _magic;
