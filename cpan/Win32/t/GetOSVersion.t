@@ -1,11 +1,8 @@
 use strict;
-use Test;
+use Test::More tests => 1;
 use Win32;
-
-plan tests => 1;
 
 my $scalar = Win32::GetOSVersion();
 my @array  = Win32::GetOSVersion();
 
-print "not " unless $scalar == $array[4];
-print "ok 1\n";
+is $scalar, $array[4];

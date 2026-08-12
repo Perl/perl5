@@ -135,14 +135,34 @@ my @win10_tests = (
 ["10 [Version 1903 (May 2019 Update) (Preview Build 18204)]",      "10", 2, 10, 0, 0x00, 0, 0, 18204],
 ["10 [Version 1903 (May 2019 Update)]",                            "10", 2, 10, 0, 0x00, 0, 0, 18362],
 
+["10 [Version 1909 (November 2019 Update)]",                       "10", 2, 10, 0, 0x00, 0, 0, 18363],
+["10 [Version 2004 (May 2020 Update)]",                            "10", 2, 10, 0, 0x00, 0, 0, 19041],
+["10 [Version 20H2 (October 2020 Update)]",                        "10", 2, 10, 0, 0x00, 0, 0, 19042],
+["10 [Version 21H1 (May 2021 Update)]",                            "10", 2, 10, 0, 0x00, 0, 0, 19043],
+["10 [Version 21H2 (November 2021 Update)]",                       "10", 2, 10, 0, 0x00, 0, 0, 19044],
+["10 [Version 22H2 (2022 Update)]",                                "10", 2, 10, 0, 0x00, 0, 0, 19045],
+
+["11 [Version 21H2 (2021 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 22000],
+["11 [Version 22H2 (2022 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 22621],
+["11 [Version 23H2 (2023 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 22631],
+["11 [Version 24H2 (2024 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 26100],
+["11 [Version 25H2 (2025 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 26200],
+["11 [Version 26H1 (2026 Update)]",                                "11", 2, 10, 0, 0x00, 0, 0, 28000],
+
 ["2016 [Version 1607]",                                    "2016",    2, 10, 0, 0x07, 2, 0, 14393],
 ["2019 [Version 1809]",                                    "2019",    2, 10, 0, 0x07, 2, 0, 17763],
+["2022 [Version 21H2]",                                    "2022",    2, 10, 0, 0x07, 2, 0, 20348],
+["2025 [Version 24H2]",                                    "2025",    2, 10, 0, 0x07, 2, 0, 26100],
 
 ["Server [Version 1709]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 16299],
 ["Server [Version 1803]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 17134],
 # The 1809 version from the semi-annual channel will identify as "Windows Server 2019 Version 1809"
 #["Server [Version 1809]",                                 "Server",  2, 10, 0, 0x07, 2, 0, 17763],
 ["Server [Version 1903]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 18362],
+["Server [Version 1909]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 18363],
+["Server [Version 2004]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 19041],
+["Server [Version 20H2]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 19042],
+["Server [Version 23H2]",                                  "Server",  2, 10, 0, 0x07, 2, 0, 25398],
 ["Server [Build 12345]",                                   "Server",  2, 10, 0, 0x07, 2, 0, 12345],
 
 );
@@ -169,7 +189,7 @@ sub check {
     # and 2003/2008 start with "Windows Server"
     unless ($pretty eq "Win32s") {
 	my $prefix = "Windows";
-	$prefix .= " Server" if $pretty =~ /^20(03|08|12|16|19)/;
+	$prefix .= " Server" if $pretty =~ /^20(03|08|12|16|19|22|25)/;
 	$pretty = "$prefix $pretty";
     }
 
@@ -209,4 +229,3 @@ sub check {
 check($_, Win32::PROCESSOR_ARCHITECTURE_INTEL) for @intel_tests, @dual_tests, @win10_tests;
 check($_, Win32::PROCESSOR_ARCHITECTURE_AMD64) for @amd64_tests, @dual_tests;
 check($_, Win32::PROCESSOR_ARCHITECTURE_IA64)  for @ia64_tests;
-
