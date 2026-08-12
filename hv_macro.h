@@ -78,8 +78,5 @@
 #define ROTL_UV(x,r) ROTL32(x,r)
 #define ROTR_UV(x,r) ROTR32(x,r)
 #endif
-#if IVSIZE == 8
-#define CAN64BITHASH
-#endif
 
 #endif
