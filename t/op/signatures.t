@@ -1608,6 +1608,29 @@ CODE
                   }, "crash in named parameter handling");
 }
 
+SKIP: {
+    use Config;
+    skip "DEBUGGING build required", 1
+        unless $Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/
+            || $^O eq "VMS" && $Config{usedebugging_perl} eq "Y";
+
+    fresh_perl_is(<<'CODE', "ok\n",
+use feature "signatures";
+for my $source (
+    'sub t (@a =) {}',
+    'sub u (@a = 1) {}',
+) {
+    eval $source;
+    die $@ unless $@ =~ /A slurpy parameter may not have a default value/;
+}
+print "ok\n";
+CODE
+                  {
+                      stderr => "devnull",
+                      switches => [ "-Dpv" ],
+                  }, "invalid slurpy parameter leaves a valid parser stack value");
+}
+
 done_testing;
 
 1;

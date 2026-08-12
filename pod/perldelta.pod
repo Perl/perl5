@@ -438,6 +438,11 @@ XXX
 
 =item *
 
+Parsing an invalid signature that gives a slurpy parameter a default value no
+longer crashes when parser debugging is enabled.  [GH #24691]
+
+=item *
+
 Copy magic to the new elements when splice() inserts elements into a
 non-tied magical array.  In particular, assignment to an element of an
 C<@ISA> array where the element was added by splice() is now correctly
