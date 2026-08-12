@@ -1133,10 +1133,12 @@ sigslurpelem: sigslurpsigil sigvar
         |     sigslurpsigil sigvar ASSIGNOP
                         {
 			    yyerror("A slurpy parameter may not have a default value");
+			    $$ = NULL;
                         }
         |     sigslurpsigil sigvar ASSIGNOP term
                         {
 			    yyerror("A slurpy parameter may not have a default value");
+			    $$ = NULL;
                         }
         ;
 
