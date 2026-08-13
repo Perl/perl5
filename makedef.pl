@@ -1091,7 +1091,7 @@ elsif (PLATFORM eq 'os2') {
 		 ));
 }
 
-if ($define{USE_ITHREADS} && $define{I_PTHREAD}) {
+if ($define{USE_ITHREADS} && $Config{i_pthread}) {
     try_symbols(qw(
 		      perl_tsa_mutex_lock
 		      perl_tsa_mutex_unlock
