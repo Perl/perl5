@@ -28,6 +28,7 @@ our $VERSION = '0.42';
       $Is_Disrec{$1} = 1;
     }
   }
+  close DATA;
   die "No tags read??" unless $count;
 }
 #----------------------------------------------------------------------
