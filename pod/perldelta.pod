@@ -417,6 +417,13 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Copy magic to the new elements when splice() inserts elements into a
+non-tied magical array.  In particular, assignment to an element of an
+C<@ISA> array where the element was added by splice() is now correctly
+recognized when performing method lookup.  [GH #24659]
+
 =back
 
 =head1 Known Problems
