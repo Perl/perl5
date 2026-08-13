@@ -6506,8 +6506,17 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
 /* we don't use STMT_START/END here because it leads to
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
-    if (ST.cache_mask) \
-       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask; \
+    if (ST.cache_mask) {                                               \
+        DEBUG_EXECUTE_r({                                              \
+            regnode *whilem =                                          \
+                REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
+            re_exec_indentf(                                           \
+                "WHILEM[%d/%d]: (cache) marking failure at pos %" UVuf "\n",  \
+                depth, (FLAGS(whilem) & 0xf), (FLAGS(whilem)>>4),      \
+                (UV)(locinput - reginfo->strbeg));                     \
+        });                                                            \
+       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask;  \
+    }                                                                  \
     sayNO
 
 #define EVAL_CLOSE_PAREN_IS(st,expr)                        \
@@ -9229,7 +9238,7 @@ NULL
                         Newxz(aux->poscache, size, char);
                     }
                     DEBUG_EXECUTE_r( re_exec_indentf(
-      "%sWHILEM: Detected a super-linear match, switching on caching%s...\n",
+      "%sWHILEM: Detected a super-linear match, enabling cache%s...\n",
                               depth, PL_colors[4], PL_colors[5])
                     );
                 }
@@ -9244,8 +9253,10 @@ NULL
                     mask    = 1 << (offset % 8);
                     offset /= 8;
                     if (reginfo->info_aux->poscache[offset] & mask) {
-                        DEBUG_EXECUTE_r( re_exec_indentf("WHILEM: (cache) already tried at this position...\n",
-                            depth)
+                        DEBUG_EXECUTE_r( re_exec_indentf(
+                            "WHILEM[%d/%d]: (cache) already failed at pos %" UVuf "\n",
+                            depth, (FLAGS(scan) & 0xf), (FLAGS(scan)>>4),
+                            (UV)(locinput - reginfo->strbeg));
                         );
                         cur_curlyx->u.curlyx.count--;
                         sayNO; /* cache records failure */
