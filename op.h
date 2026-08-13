@@ -539,6 +539,13 @@ typedef enum {
 } OPclass;
 
 
+/*
+=for apidoc ABm|bool|IS_PADGV|SV* sv
+=for apidoc ABm|bool|IS_PADCONST|SV* sv
+
+=cut
+*/
+
 #ifdef USE_ITHREADS
 #  define cGVOPx_gv(o)  ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
@@ -579,6 +586,13 @@ typedef enum {
 #define kSVOP_sv		cSVOPx_sv(kid)
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc ABmn|OP *|Nullop
+Null OP pointer.
+
+=cut
+*/
 #  define Nullop ((OP*)NULL)
 #endif
 
@@ -699,7 +713,12 @@ least an C<UNOP>.
 
 #define LINKLIST(o) ((o)->op_next ? (o)->op_next : op_linklist((OP*)o))
 
-/* no longer used anywhere in core */
+/*
+=for apidoc ABm|void|cv_ckproto|const CV *cv|const GV *gv|const char *p
+
+=cut
+*/
+
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \
    cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)
@@ -1106,7 +1125,12 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
     ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
-/* for backwards compatibility only */
+/*
+=for apidoc ABm||OP_SIBLING|OP *o
+
+A synonym for C<L</OpSIBLING>>, which you should use instead.
+=cut
+*/
 #  define OP_SIBLING(o)		OpSIBLING(o)
 #endif
 

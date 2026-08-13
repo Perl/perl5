@@ -253,9 +253,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     blk_old_tmpsfloor
     blk_sub
     blk_u16
-    BmFLAGS
-    BmPREVIOUS
-    BmRARE
     BmUSEFUL
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
@@ -263,7 +260,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     BSDish
     BSD_SETPGRP
     CALL_BLOCK_HOOKS
-    CALL_FPTR
     CALLREGCOMP
     CALLREGCOMP_ENG
     CALLREGDUPE
@@ -291,7 +287,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CAN64BITHASH
     CAN_COW_FLAGS
     CAN_COW_MASK
-    CAN_PROTOTYPE
     CASE_STD_PMMOD_FLAGS_PARSE_SET
     CATCH_GET
     CATCH_SET
@@ -419,7 +414,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvAUTOLOAD
     CvAUTOLOAD_off
     CvAUTOLOAD_on
-    cv_ckproto
     CvCLONE
     CvCLONED
     CvCLONED_off
@@ -462,7 +456,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CVf_LEXICAL
     CVf_LVALUE
     CVf_METHOD
-    CVf_NAMED
     CVf_NODEBUG
     CVf_NOWARN_AMBIGUOUS
     CVf_REFCOUNTED_ANYSV
@@ -474,7 +467,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvHASEVAL
     CvHASEVAL_off
     CvHASEVAL_on
-    CvHASGV
     CvHSCXT
     CvIsMETHOD
     CvIsMETHOD_off
@@ -491,9 +483,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvMETHOD
     CvMETHOD_off
     CvMETHOD_on
-    CvNAMED
-    CvNAMED_off
-    CvNAMED_on
     CvNAME_HEK_clear
     CvNAME_HEK_set
     CvNODEBUG
@@ -742,7 +731,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     Fstat
     FULL_TRIE_STUDY
     fwrite1
-    G_ARRAY
     GCC_DIAG_IGNORE
     GCC_DIAG_IGNORE_DECL
     GCC_DIAG_IGNORE_STMT
@@ -815,9 +803,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GvIMPORTED_SV
     GvIMPORTED_SV_off
     GvIMPORTED_SV_on
-    GvIN_PAD
-    GvIN_PAD_off
-    GvIN_PAD_on
     GvINTRO
     GvINTRO_off
     GvINTRO_on
@@ -939,9 +924,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     htoni
     htovl
     htovs
-    HvAMAGIC
-    HvAMAGIC_off
-    HvAMAGIC_on
     HvARRAY
     HvAUX
     HvAUXf_IS_CLASS
@@ -1005,7 +987,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     I8_TO_NATIVE
     I8_TO_NATIVE_UTF8
     IGNORE_PAT_MOD
-    I_LIMITS
     ILLEGAL_UTF8_BYTE
     IN_BYTES
     INCLUDE_PROTOTYPES
@@ -1117,8 +1098,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isNON_BRACE_QUANTIFIER
     is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
-    IS_PADCONST
-    IS_PADGV
     is_PATWS_safe
     is_posix_ALPHA
     is_posix_ALPHANUMERIC
@@ -1157,7 +1136,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_STRICT_VERSION
     is_SURROGATE_utf8
     is_SURROGATE_utf8_safe
-    I_STDARG
     is_THREE_CHAR_FOLD_HEAD_latin1_safe
     is_THREE_CHAR_FOLD_HEAD_utf8_safe
     is_THREE_CHAR_FOLD_latin1_safe
@@ -1347,7 +1325,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MDEREF_SHIFT
     memBEGINPs
     memBEGINs
-    MEMBER_TO_FPTR
     memENDPs
     memENDs
     memGE
@@ -1426,21 +1403,17 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NEGATE_2IV
     NEGATE_2UV
     NEGATIVE_INDICES_VAR
-    New
     new_body_allocated
     new_body_from_arena
-    Newc
     new_NOARENA
     new_NOARENAZ
     NewOp
     NewOpSz
     new_SV
-    NEWSV
     NEW_VERSION
     new_XNV
     new_XPVMG
     new_XPVNV
-    Newz
     NEXT_LINE_CHAR
     NOARENA
     NOCAPTURE_PAT_MOD
@@ -1459,12 +1432,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NOT_REACHED
     NSIG
     ntohi
-    Null
     Nullfp
-    Nullgv
-    Nullhe
-    Nullhek
-    Nullop
     NUM_ANYOF_CODE_POINTS
     NV_BIG_ENDIAN
     NV_DIG
@@ -1729,7 +1697,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OpREFCNT_set
     OP_REFCNT_TERM
     OP_REFCNT_UNLOCK
-    OP_SIBLING
     OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
@@ -1783,11 +1750,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PadnameOURSTASH_set
     PadnameOUTER
     PadnamePROTOCV
-    PADNAMEt_LVALUE
-    PADNAMEt_OUR
-    PADNAMEt_OUTER
-    PADNAMEt_STATE
-    PADNAMEt_TYPED
     PadnameTYPE
     PadnameTYPE_set
     padnew_CLONE
@@ -2436,10 +2398,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SSPUSHPTR
     SSPUSHUV
     Stack_off_t_MAX
-    STANDARD_C
     StashHANDLER
     Stat
-    STATIC
     Stat_t
     STATUS_ALL_FAILURE
     STATUS_ALL_SUCCESS
@@ -2469,9 +2429,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvCANEXISTDELETE
     sv_cathek
     sv_catpvn_nomg_utf8_upgrade
-    SvCOMPILED
-    SvCOMPILED_off
-    SvCOMPILED_on
     SV_CONST_RETURN
     SV_CONSTS_COUNT
     SV_COW_OTHER_PVS
@@ -2486,7 +2443,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvFAKE
     SvFAKE_off
     SvFAKE_on
-    SVf_AMAGIC
     SVf_BREAK
     SVf_FAKE
     SVf_IOK
@@ -2539,25 +2495,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvOK_off_exc_UV
     SvOKp
     SvOOK_on
-    SvOURSTASH
-    SvOURSTASH_set
     SvPADMY
-    SvPADMY_on
-    SvPAD_OUR
-    SVpad_OUR
-    SvPAD_OUR_on
     SvPADSTALE
     SvPADSTALE_off
     SvPADSTALE_on
-    SvPAD_STATE
-    SVpad_STATE
-    SvPAD_STATE_on
     SvPADTMP
     SvPADTMP_off
     SvPADTMP_on
-    SvPAD_TYPED
-    SVpad_TYPED
-    SvPAD_TYPED_on
     SVpav_REAL
     SVpav_REIFY
     SvPCS_IMPORTED
@@ -2852,7 +2796,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     vFAIL4
     VNORMAL
     VNUMIFY
-    VOL
     VSTRINGIFY
     vTHX
     VT_NATIVE

@@ -15,19 +15,26 @@
 #define PERL_HANDY_H_
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc_section $casting
+=for apidoc BCmnU|type|Null|type
+
+Null pointer of type C<type>
+
+=cut
+*/
 #  define Null(type) ((type)NULL)
 
 /*
 =for apidoc_section $string
-=for apidoc AmnU||Nullch
+=for apidoc ABmnU||Nullch
 Null character pointer.  (No longer available when C<PERL_CORE> is
 defined.)
 
 =for apidoc_section $SV
-=for apidoc AmnU||Nullsv
+=for apidoc ABmnU||Nullsv
 Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
-
-=cut
 
 Below are signatures of functions from config.h which can't easily be gleaned
 from it, and are very unlikely to change
@@ -2858,7 +2865,12 @@ These each call C<PoisonWith(0xEF)> for catching access to freed memory.
 
 =cut */
 
-/* Maintained for backwards-compatibility only. Use newSV() instead. */
+/*
+=for apidoc ABm|SV*|NEWSV|type x|STRLEN len
+Use newSV() instead.
+
+=cut
+ */
 #ifndef PERL_CORE
 #define NEWSV(x,len)	newSV(len)
 #endif
@@ -3000,7 +3012,17 @@ enum mem_log_type {
 #define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safecalloc((n),sizeof(t)))))
 
 #ifndef PERL_CORE
-/* pre 5.9.x compatibility */
+/*
+=for apidoc      ABm|void|New|type x|void* ptr|int nitems|type
+=for apidoc_item    |void|Newc|type x|void* ptr|int nitems|type
+=for apidoc_item    |void|Newz|type x|void* ptr|int nitems|type
+
+Use respectively C<L</Newx>>, C<L</Newxc>>, and C<L</Newxz>>.
+
+=cut
+
+    pre 5.9.x compatibility
+*/
 #define New(x,v,n,t)	Newx(v,n,t)
 #define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
 #define Newz(x,v,n,t)	Newxz(v,n,t)

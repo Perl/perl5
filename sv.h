@@ -1224,9 +1224,28 @@ Turns on or off the L</HvOVERLOAD> flag.
 #define HvOVERLOAD(hv)          (SvFLAGS(hv) & SVphv_OVERLOAD)
 #define HvOVERLOAD_on(hv)       (perl_assert_HV_(hv) SvFLAGS(hv) |= SVphv_OVERLOAD)
 #define HvOVERLOAD_off(hv)      (perl_assert_HV_(hv) SvFLAGS(hv) &=~ SVphv_OVERLOAD)
-/* These used to be called "AMAGIC", for "active magic", a rather vague
- * description of what we now call operator overloading. */
 #ifndef PERL_CORE
+/*
+=for apidoc ABmn|U32|SVf_AMAGIC
+
+Use C<SVphv_OVERLOAD> instead.
+"AMAGIC" is short for "active magic"; a rather vague description of what we
+now call operator overloading.
+
+=for apidoc   ABm|bool|HvAMAGIC|HV * hv
+=for apidoc_item ||HvAMAGIC_on|HV * hv
+=for apidoc_item || HvAMAGIC_off|HV * hv
+
+Use, respectively,
+C<L</HvOVERLOAD>>,
+C<L</HvOVERLOAD_on>>,
+and C<L</HvOVERLOAD_off>> instead.
+"AMAGIC" is short for "active magic"; a rather vague description of what we
+now call operator overloading.
+
+=cut
+*/
+
 #  define SVf_AMAGIC            SVphv_OVERLOAD
 #  define HvAMAGIC              HvOVERLOAD
 #  define HvAMAGIC_on           HvOVERLOAD_on
@@ -1331,6 +1350,13 @@ C<sv_force_normal> does nothing.
 #define SVs_PADMY		0
 #define SvPADMY(sv)		(!(SvFLAGS(sv) & SVs_PADTMP))
 #ifndef PERL_CORE
+/*
+=for apidoc ABm||SvPADMY_on|SV * sv
+Use C<SvPADTMP_off> instead.  (Yes, the original is C<on> and the replacement
+is C<off>.)
+
+=cut
+*/
 # define SvPADMY_on(sv)		SvPADTMP_off(sv)
 #endif
 
@@ -1376,6 +1402,18 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc ABm|bool|SvCOMPILED|SV* sv
+
+Now always returns C<false>.
+
+=for apidoc  ABm||SvCOMPILED_on|SV* sv
+=for apidoc_item||SvCOMPILED_off|SV* sv
+Now are no-ops
+
+=cut
+*/
+
 #  define SvCOMPILED(sv)	0
 #  define SvCOMPILED_on(sv)
 #  define SvCOMPILED_off(sv)
@@ -1709,6 +1747,12 @@ only be used as part of a larger operation
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc_section $string
+=for apidoc ABm|U32|BmFLAGS|SV* sv
+
+=cut
+*/
 #  define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
 #endif
 
@@ -1726,6 +1770,15 @@ only be used as part of a larger operation
 #endif
 
 #ifndef PERL_CORE
+/*
+=for apidoc_section $string
+=for apidoc   ABm|U32|BmRARE|SV* sv
+=for apidoc_item |U32|BmPREVIOUS|SV* sv
+
+These both now return 0
+
+=cut
+*/
 # define BmRARE(sv)	0
 # define BmPREVIOUS(sv)	0
 #endif

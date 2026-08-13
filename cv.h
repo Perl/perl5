@@ -94,7 +94,12 @@ name can be found via the L</CvGV>.
  */
 #define CvHasNAME(cv)   ((bool)SvANY(cv)->xcv_gv_u.xcv_gv)
 
-/* Back-compat */
+/*
+=for apidoc ABm|bool|CvHASGV|CV *cv
+A synonym for c<L</CvHasNAME>>
+
+=cut
+*/
 #ifndef PERL_CORE
 #  define CvHASGV(cv)  CvHasNAME(cv)
 #endif
@@ -283,7 +288,22 @@ copy the flag from one CV to another; using something like
 #define CvHasNAME_HEK_off(cv)   (CvFLAGS(cv) &= ~CVf_HasNAME_HEK)
 
 #ifndef PERL_CORE
-    /* Back-compatibility wrappers for its old name */
+/*
+=for apidoc  ABmn|I32|CVf_NAMED
+
+Use C<L</CVf_HasNAME_HEK>> instead
+
+=for apidoc  ABm|HEK *|CvNAMED
+=for apidoc_item||CvNAMED_on
+=for apidoc_item||CvNAMED_off
+
+Use, respectively, C<L</CvHasNAME_HEK>>,
+C<CvHasNAME_HEK_on>,
+and C<CvHasNAME_HEK_off> instead
+
+=cut
+*/
+
 #  define CVf_NAMED    CVf_HasNAME_HEK
 #  define CvNAMED      CvHasNAME_HEK
 #  define CvNAMED_on   CvHasNAME_HEK_on

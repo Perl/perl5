@@ -127,7 +127,15 @@ functions with no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #  endif
 #endif
 
-/* PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY */
+/*
+=for apidoc_section $concurrency
+=for apidoc AB#||PERL_IMPLICIT_CONTEXT
+
+This is a legacy synonym for MULTIPLICITY
+
+=cut
+*/
+
 #if defined(MULTIPLICITY)               \
  && ! defined(PERL_CORE)                \
  && ! defined(PERL_IMPLICIT_CONTEXT)
@@ -214,7 +222,7 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 =for apidoc AmU|void|dTHXa|PerlInterpreter * a
 On threaded perls, set C<pTHX> to C<a>; on unthreaded perls, do nothing
 
-=for apidoc AmU|void|dTHXoa|PerlInterpreter * a
+=for apidoc ABmU|void|dTHXoa|PerlInterpreter * a
 Now a synonym for C<L</dTHXa>>.
 
 =cut
@@ -277,6 +285,27 @@ Otherwise it has no effect.
 =for apidoc_section $concurrency
 =for apidoc AmD|void|CPERLscope|void x
 Now a no-op.
+
+=for apidoc ABmn||CPERLarg
+=for apidoc_item||CPERLarg_
+=for apidoc_item||_CPERLarg
+
+=for apidoc ABmn||PERL_OBJECT_THIS
+=for apidoc_item||_PERL_OBJECT_THIS
+=for apidoc_item||PERL_OBJECT_THIS_
+
+=for apidoc ABm||CALL_FPTR|*fptr
+=for apidoc ABm||MEMBER_TO_FPTR|name
+
+=for apidoc_section $compiler
+=for apidoc ABmn||STATIC
+
+This was used to declare a C variable C<static> in C compilers that
+understood that, and to do nothing in C compilers that did not, so that your
+program could compile, regardless.
+
+But such crippled compilers are long gone, so this always expands to
+C<static>, and you might as well just type the actual C keyword.
 
 =cut
  */
@@ -759,13 +788,18 @@ code.
 #  define pTHX_12	12
 #endif
 
+#ifndef PERL_CORE
+
 /*
 =for apidoc_section $concurrency
-=for apidoc AmnU||dVAR
-This is now a synonym for dNOOP: declare nothing
+=for apidoc ABmnU||dVAR
+
+This is now a synonym for dNOOP: declare nothing.
+It used to be part of the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer
+exists
 
 =for apidoc_section $XS
-=for apidoc Amn;||dMY_CXT_SV
+=for apidoc ABmn;||dMY_CXT_SV
 Now a placeholder that declares nothing
 
 =for apidoc ABmn||pTHXo
@@ -781,13 +815,9 @@ Now a placeholder that declares nothing
 =cut
 */
 
-#ifndef PERL_CORE
-    /* Backwards compatibility macro for XS code. It used to be part of the
-     * PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
-#  define dVAR		dNOOP
+/* these are only defined for compatibility; should not be used internally. */
 
-    /* these are only defined for compatibility; should not be used internally.
-     * */
+#  define dVAR		dNOOP
 #  define dMY_CXT_SV    dNOOP
 #  ifndef pTHXo
 #    define pTHXo		pTHX
@@ -932,7 +962,45 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 #define DOSISH 1
 #endif
 
-/* These exist only for back-compat with XS modules. */
+/* These exist only for back-compat with XS modules.
+=for apidoc_section $compiler
+=for apidoc ABmn||VOL
+
+This was used to declare a C variable C<volatile> in C compilers that
+understood that, and to do nothing in C compilers that did not, so that your
+program could at least compile, regardless.
+
+But such crippled compilers are long gone, so this always expands to
+C<volatile>, and you might as well just type the actual C keyword.
+
+=for apidoc AB#||CAN_PROTOTYPE
+
+This is defined if and only if the compiler being used understands function
+prototypes.  Nowadays it is always defined, since perl won't compile at all on
+compilers without that capability.
+
+=for apidoc ABT||_|...
+
+=for apidoc AB#||I_LIMITS
+
+This is defined if and only if the compiler being used has F<limits.h>.
+Nowadays it is always defined, since perl won't compile at all on compilers
+without that.
+
+=for apidoc AB#||I_STDARG
+
+This is defined if and only if the compiler being used has F<stdarg.h>.
+Nowadays it is always defined, since perl won't compile at all on compilers
+without that.
+
+=for apidoc AB#||STANDARD_C
+
+This is defined if and only if the compiler being used complies with an ANSI C
+standard.  Nowadays it is always defined, since perl only compiles on such
+compilers.
+
+=cut
+*/
 #ifndef PERL_CORE
 #define VOL volatile
 #define CAN_PROTOTYPE
@@ -4048,9 +4116,15 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex);
 #define PERL_EXIT_ABORT		0x08  /* Call abort() if Perl_my_exit() or Perl_my_failure_exit() called */
 
 #ifndef PERL_CORE
-/* format to use for version numbers in file/directory names */
-/* XXX move to Configure? */
-/* This was only ever used for the current version, and that can be done at
+/*
+=for apidoc_section $versioning
+=for apidoc ABmn|const char *|PERL_FS_VER_FMT
+Format to use for version numbers in file/directory names
+
+=cut
+
+ * XXX move to Configure?
+ * This was only ever used for the current version, and that can be done at
    compile time, as PERL_FS_VERSION, so should we just delete it?  */
 #  ifndef PERL_FS_VER_FMT
 #    define PERL_FS_VER_FMT	"%d.%d.%d"
@@ -6003,9 +6077,21 @@ interpreter phase you might do:
 #define phase_name(phase) (PL_phase_names[phase])
 
 #ifndef PERL_CORE
-/* Do not use this macro. It only exists for extensions that rely on PL_dirty
- * instead of using the newer PL_phase, which provides everything PL_dirty
- * provided, and more. */
+/*
+=for apidoc_section $globals
+=for apidoc ABm|bool|PL_dirty
+Do not use this macro. It only exists for extensions that rely on PL_dirty
+instead of using the newer PL_phase, which provides everything PL_dirty
+provided, and more.
+
+=for apidoc ABmn|STRLEN|PL_amagic_generation
+Now a synonym for C<L</PL_na>>.
+
+=for apidoc ABmn|SV*|PL_encoding
+Now returns a Null SV pointer.
+
+=cut
+*/
 #  define PL_dirty cBOOL(PL_phase == PERL_PHASE_DESTRUCT)
 
 #  define PL_amagic_generation PL_na

@@ -477,6 +477,15 @@ whether it is valid to call C<HvAUX()>.
 #define HvLAZYDEL_off(hv)	(SvFLAGS(hv) &= ~SVphv_LAZYDEL)
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc ABmn|HE*|Nullhe
+
+Null HE pointer.
+
+=cut
+*/
+
 #  define Nullhe Null(HE*)
 #endif
 #define HeNEXT(he)		(he)->hent_next
@@ -512,6 +521,15 @@ whether it is valid to call C<HvAUX()>.
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
 #ifndef PERL_CORE
+
+/*
+=for apidoc ABmn|HE*|Nullhek
+
+Null HEK pointer.
+
+=cut
+*/
+
 #  define Nullhek Null(HEK*)
 #endif
 #define HEK_BASESIZE		STRUCT_OFFSET(HEK, hek_key[0])

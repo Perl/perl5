@@ -2075,7 +2075,7 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                                         if $flags =~ /u/ && $flags !~ /[my]/;
 
             my $has_semicolon = $flags =~ /;/;
-            die "'U' and ';' flags are incompatible"
+            die "'U' and ';' flags are incompatible "
                . where_from_string($item->{file}, $item->{line_num})
                                             if $flags =~ /U/ && $has_semicolon;
 
@@ -2097,6 +2097,10 @@ sub docout ($fh, $section_name, $element_name, $docref) {
                     $has_args = 1;
                 }
             }
+
+            die "'B' and 'D' flags are incompatible "
+               . where_from_string($item->{file}, $item->{line_num})
+                                            if $flags =~ tr/BD// > 1;
 
             my $ret = $item->{ret_type} // "";
             my @args;
