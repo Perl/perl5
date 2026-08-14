@@ -1235,7 +1235,7 @@ typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
   the state has no children (and will be accepting)
 */
 struct reg_trie_state_ {
-  U16 wordnum;
+  U32 wordnum;
   union {
     U32                base;
     reg_trie_trans_le* list;
@@ -1244,7 +1244,7 @@ struct reg_trie_state_ {
 
 /* info per word; indexed by wordnum */
 typedef struct {
-    U16  prev;	/* previous word in acceptance chain; eg in
+    U32  prev;	/* previous word in acceptance chain; eg in
                  * zzz|abc|ab/ after matching the chars abc, the
                  * accepted word is #2, and the previous accepted
                  * word is #3 */
