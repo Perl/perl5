@@ -1224,7 +1224,7 @@ struct reg_trie_trans_ {
 
 /* a transition list element for the list based representation */
 struct reg_trie_trans_list_elem_ {
-    U16 forid;
+    U32 forid;
     U32 newstate;
 };
 typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
@@ -1264,7 +1264,7 @@ typedef struct reg_trie_trans_    reg_trie_trans;
 struct reg_trie_data_ {
     U32             refcount;        /* number of times this trie is referenced */
     U32             lasttrans;       /* last valid transition element */
-    U16             *charmap;        /* byte to charid lookup array */
+    U32             *charmap;        /* byte to charid lookup array */
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
@@ -1276,7 +1276,7 @@ struct reg_trie_data_ {
                                         for the given jump. */
 
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
-    U16             uniquecharcount; /* unique chars in trie (width of trans table) */
+    U32             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             startstate;      /* initial state - used for common prefix optimisation */
     STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
     STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */

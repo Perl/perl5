@@ -22,7 +22,7 @@
 #define TRIE_LIST_CUR(state)  ( TRIE_LIST_ITEM( state, 0 ).forid )
 #define TRIE_LIST_LEN(state) ( TRIE_LIST_ITEM( state, 0 ).newstate )
 #define TRIE_LIST_USED(idx)  ( trie->states[state].trans.list         \
-                               ? (TRIE_LIST_CUR( idx ) - 1)           \
+                               ? (TRIE_LIST_CUR( idx ) - 1)            \
                                : 0 )
 
 #ifndef RE_PREFER_LONG_TRIE
@@ -200,7 +200,7 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
             depth+1, "------:-----+-----------------\n" );
 
     for( state = 1; state < next_alloc; state++ ) {
-        U16 charid;
+        U32 charid;
 
         re_indentf(" %4" UVXf " :",
             depth+1, (UV)state  );
@@ -249,7 +249,7 @@ S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie,
     PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE;
 
     U32 state;
-    U16 charid;
+    U32 charid;
     SV *sv = sv_newmortal();
     int colwidth = widecharmap ? 6 : 4;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -649,7 +649,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->startstate = 1;
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
-    trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
+    trie->charmap = (U32 *) PerlMemShared_calloc( 256, sizeof(U32) );
     if (flags == EXACT || flags == EXACT_REQ8 || flags == EXACTL)
         trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
@@ -952,7 +952,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
             regnode *noper   = REGNODE_AFTER( cur );
             U32 state        = 1;         /* required init */
-            U16 charid       = 0;         /* sanity init */
+            U32 charid       = 0;         /* sanity init */
             U32 wordlen      = 0;         /* required init */
 
             if (OP(noper) == NOTHING) {
@@ -987,14 +987,14 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         if ( !svpp ) {
                             charid = 0;
                         } else {
-                            charid = (U16)SvIV( *svpp );
+                            charid = (U32)SvIV( *svpp );
                         }
                     }
                     /* charid is now 0 if we dont know the char read, or
                      * nonzero if we do */
                     if ( charid ) {
 
-                        U16 check;
+                        U32 check;
                         U32 newstate = 0;
 
                         charid--;
@@ -1065,12 +1065,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 */
 
                 if (trie->states[state].trans.list) {
-                    U16 minid = TRIE_LIST_ITEM( state, 1).forid;
-                    U16 maxid = minid;
-                    U16 idx;
+                    U32 minid = TRIE_LIST_ITEM( state, 1).forid;
+                    U32 maxid = minid;
+                    U32 idx;
 
                     for( idx = 2 ; idx <= TRIE_LIST_USED( state ) ; idx++ ) {
-                        const U16 forid = TRIE_LIST_ITEM( state, idx).forid;
+                        const U32 forid = TRIE_LIST_ITEM( state, idx).forid;
                         if ( forid < minid ) {
                             minid = forid;
                         } else if ( forid > maxid ) {
@@ -1184,7 +1184,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
             U32 state        = 1;         /* required init */
 
-            U16 charid       = 0;         /* sanity init */
+            U32 charid       = 0;         /* sanity init */
             U32 accept_state = 0;         /* sanity init */
 
             U32 wordlen      = 0;         /* required init */
@@ -1218,7 +1218,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                                            (char*)&uvc,
                                                            sizeof( UV ),
                                                            0);
-                        charid = svpp ? (U16)SvIV(*svpp) : 0;
+                        charid = svpp ? (U32)SvIV(*svpp) : 0;
                     }
                     if ( charid ) {
                         charid--;
