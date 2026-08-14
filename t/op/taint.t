@@ -14,8 +14,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-use strict;
-use warnings;
+use v5.36; # not 5.40 because we don't want to stomp on `is_tainted`
 use Config;
 
 my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
@@ -103,11 +102,8 @@ sub taint_these :prototype(@) {
     for (@_) { $_ .= $TAINT }
 }
 
-# How to identify taint when you see it
-sub tainted :prototype($) {
-    local $@;   # Don't pollute caller's value.
-    not eval { no warnings; join("", @_), kill 0; 1 };
-}
+# just import the one from 'builtin' as a different name
+BEGIN { *tainted = \&builtin::is_tainted; }
 
 sub is_tainted {
     my $thing = shift;
