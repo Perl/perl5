@@ -319,6 +319,11 @@ made:
 
 =item *
 
+F<t/porting/customized.t>: Corrected to now check for entries in
+F<t/porting/customized.dat> that no longer need to be there.
+
+=item *
+
 XXX
 
 =back
