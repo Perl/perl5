@@ -1782,8 +1782,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     POSIX_SETLOCALE_LOCK
     POSIX_SETLOCALE_UNLOCK
     POSTPONED
-    PP
-    PP_wrapped
     PRESCAN_VERSION
     PRIVSHIFT
     ProgLen
