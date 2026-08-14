@@ -96,7 +96,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap,
     U32 state;
     SV *sv = sv_newmortal();
     int colwidth = widecharmap ? 6 : 4;
-    U16 word;
+    U32 word;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     re_indentf("Char : %-6s%-6s%-4s ",
@@ -492,7 +492,7 @@ is the recommended Unicode-aware way of saying
 } STMT_END
 
 #define TRIE_HANDLE_WORD(state) STMT_START {                    \
-    U16 dupe = trie->states[ state ].wordnum;                    \
+    U32 dupe = trie->states[ state ].wordnum;                    \
     regnode * const noper_next = regnext( noper );              \
                                                                 \
     DEBUG_r({                                                   \
@@ -604,7 +604,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     regnode *cur;
     STRLEN len = 0;
     UV uvc = 0;
-    U16 curword = 0;
+    U32 curword = 0;
     U32 next_alloc = 0;
     regnode *jumper = NULL;
     regnode *nextbranch = NULL;
@@ -1632,9 +1632,9 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
      *  already linked up earlier.
      */
     {
-        U16 word;
+        U32 word;
         U32 state;
-        U16 prev;
+        U32 prev;
 
         for (word = 1; word <= trie->wordcount; word++) {
             prev = 0;
