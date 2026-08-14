@@ -152,8 +152,11 @@ EOP
 }
 
 SKIP: {
-    skip "Debugging builds on Linux still problematic: GH 16869", 1
-        if ($Config{osname} eq 'linux' and $is_debugging_build);
+    skip "Debugging builds on Linux and Cygwin still problematic: GH 16869", 1
+        if (
+            ($Config{osname} eq 'linux' or $Config{osname} eq 'cygwin') and
+            $is_debugging_build
+        );
     fresh_perl(<<~'HERE', {});
         my $glob = ("0" x 4094) . "?";
         glob $glob;
