@@ -320,10 +320,10 @@ TODO: {
 }
 
 TODO: {
-    todo_skip "Test needs -DDEBUGGING on Linux, no miniperl", 1
+    todo_skip "Test needs -DDEBUGGING on Linux and on Cygwin, no miniperl", 1
         unless (
             $is_debugging_build and
-            $Config{osname} eq 'linux' and
+            ($Config{osname} eq 'linux' or $Config{osname} eq 'cygwin') and
             ! is_miniperl()
         );
     local $::TODO = 'GH 16869';
