@@ -5087,7 +5087,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
     switch(sflags & (SVp_IOK|SVp_NOK|SVf_ROK|SVp_POK|SVf_FAKE|SVppv_STATIC)) {
         case SVp_IOK:  /* [ 50% ]*/
             SvIV_set(dsv, SvIVX(ssv));
-            return dsv;
+            goto check_taint;
         case SVp_POK|SVp_IOK|SVp_NOK:  /* [ 3% ] */
             ASSUME(SvTYPE(dsv) != SVt_PVIV);
             SvNV_set(dsv, SvNVX(ssv));
@@ -5109,7 +5109,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
 
             SvIV_set(dsv, SvIVX(ssv));
             SvNV_set(dsv, SvNVX(ssv));
-            return dsv;
+            goto check_taint;
         case SVp_POK|SVp_NOK:  /* [ 3% ]*/
             SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             SvNV_set(dsv, SvNVX(ssv));
@@ -5120,7 +5120,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
              * propagate the latter. */
             SvFLAGS(dsv) &= ~SVprv_WEAKREF;
             SvRV_set(dsv, SvREFCNT_inc(SvRV(ssv)));
-            return dsv;
+            goto check_taint;
         default:  /* [ 2% ]*/
             SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             if(!SvOK(ssv))  /* [ ~2% ]*/
@@ -5137,14 +5137,14 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
              * Other cases are also rare but also trickier to handle,
              * so keeps this function smaller to not even try. */
             sv_setsv_flags(dsv,ssv,flags);
-            return dsv;
+            return dsv; /* sv_setsv_flags() has handled taint */
         case SVp_NOK:  /* [ << 1% ]*/
             ASSUME(SvTYPE(dsv) != SVt_PVIV);
             SvIV_set(dsv, 0); /* Initializing for code that blindly reads IV */
             SvNV_set(dsv, SvNVX(ssv));
-            return dsv;
+            goto check_taint;
     }
-    assert(SVp_POK); /* All other cases should have returned */
+    assert(SVp_POK); /* All other cases should jump to check_taint */
 
     S_newSVsv_flags_NN_POK(aTHX_ dsv, ssv, flags);
 
@@ -5167,6 +5167,7 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
             SvRMAGICAL_on(dsv);
         }
     }
+check_taint:
     if (SvTAINTED(ssv)) /* [ <<< 1% ] */
         SvTAINT(dsv);
     return dsv;
