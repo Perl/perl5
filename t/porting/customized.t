@@ -1,6 +1,8 @@
 #!./perl -w
 
 # Test that CUSTOMIZED files in Maintainers.pl have not been overwritten.
+# Test that each entry in customized.dat corresponds to CUSTOMIZED entry in
+# Maintainers.pl.
 
 BEGIN {
         # This test script uses a slightly atypical invocation of the 'standard'
@@ -30,9 +32,9 @@ sub filter_customized {
 
     my ($pat) = map { qr/$_/ }
         join ( '|' =>
-            map { ref $_ ? $_ : qr/\b\Q$_\E$/ } @{ $customized },
-            # https://github.com/Perl/perl5/issues/20228
-            qr/pod\/perlfilter\.pod/
+          map { ref $_ ? $_ : qr/\b\Q$_\E$/ } @{ $customized },
+          # https://github.com/Perl/perl5/issues/20228
+          qr/pod\/perlfilter\.pod/
         );
 
     return grep { $_ =~ $pat } @files;
@@ -49,9 +51,9 @@ my $digest_type = 'SHA-1';
 
 my $original_dir = File::Spec->rel2abs(File::Spec->curdir);
 my $data_dir = File::Spec->catdir('t', 'porting');
-my $customised = File::Spec->catfile($data_dir, 'customized.dat');
+my $customized = File::Spec->catfile($data_dir, 'customized.dat');
 
-my %customised;
+my %customized;
 
 my $regen = 0;
 
@@ -76,49 +78,59 @@ EOF
 my $data_fh;
 
 if ( $regen ) {
-  open $data_fh, '>:raw', $customised or die "Can't open $customised";
-  print $data_fh <<'#';
-# Regenerate this file using:
-#     cd t
-#     ./perl -I../lib porting/customized.t --regen
-#
+    open $data_fh, '>:raw', $customized or die "Can't open $customized";
+    print $data_fh <<~'END_OF_REGEN_MESSAGE';
+        # Regenerate this file using:
+        #    cd t; ./perl -I../lib porting/customized.t --regen; cd -
+        END_OF_REGEN_MESSAGE
 }
 else {
-  open $data_fh, '<:raw', $customised or die "Can't open $customised";
-  while (<$data_fh>) {
-    next if /^#/;
-    chomp;
-    my ($module,$file,$sha) = split ' ';
-    $customised{ $module }->{ $file } = $sha;
-  }
-  close $data_fh;
+    open $data_fh, '<:raw', $customized or die "Can't open $customized";
+    while (<$data_fh>) {
+        next if /^#/;
+        chomp;
+        my ($module,$file,$sha) = split ' ';
+        $customized{ $module }->{ $file } = $sha;
+    }
+    close $data_fh;
+}
+my %customized_seen = ();
+foreach my $module (keys %customized) {
+    foreach my $file (keys %{$customized{$module}}) {
+        $customized_seen{$file}++;
+    }
 }
 
+my %maintainers_seen = ();
 foreach my $module ( sort keys %Modules ) {
-  next unless my $files = $Modules{ $module }{CUSTOMIZED};
-  next unless @{ $files };
-  my @perl_files = my_get_module_files( $module );
-  foreach my $file ( @perl_files ) {
-    my $digest = Digest->new( $digest_type );
-    {
-      open my $fh, '<', $file or die "Can't open $file";
-      binmode $fh;
-      $digest->addfile( $fh );
-      close $fh;
+    next unless my $files = $Modules{ $module }{CUSTOMIZED};
+    next unless @{ $files };
+    my @perl_files = my_get_module_files( $module );
+    foreach my $file ( @perl_files ) {
+        my $digest = Digest->new( $digest_type );
+        open my $fh, '<', $file or die "Can't open $file";
+        binmode $fh;
+        $digest->addfile( $fh );
+        close $fh;
+        $maintainers_seen{$file}++;
+        my $id = $digest->hexdigest;
+        if ( $regen ) {
+            print $data_fh join(' ', $module, $file, $id), "\n";
+            next;
+        }
+        my $should_be = $customized{ $module }->{ $file };
+        is( $id, $should_be, "SHA for $file matches stashed SHA" );
     }
-    my $id = $digest->hexdigest;
-    if ( $regen ) {
-      print $data_fh join(' ', $module, $file, $id), "\n";
-      next;
-    }
-    my $should_be = $customised{ $module }->{ $file };
-    is( $id, $should_be, "SHA for $file matches stashed SHA" );
-  }
+}
+
+foreach my $f (sort keys %customized_seen) {
+    ok($maintainers_seen{$f},
+        "$f in $customized refers to CUSTOMIZED entry in \%Maintainers::Modules");
 }
 
 if ( $regen ) {
-  pass( "regenerated data file" );
-  close $data_fh;
+    pass( "regenerated data file" );
+    close $data_fh;
 }
 
 done_testing();
@@ -127,17 +139,17 @@ done_testing();
 
 =head1 NAME
 
-customized.t - Test that CUSTOMIZED files in Maintainers.pl have not been overwritten
+customized.t - Test that CUSTOMIZED files in F<Porting/Maintainers.pl> have not been overwritten
 
 =head1 SYNOPSIS
 
- cd t
- ./perl -I../lib porting/customized.t --regen
+    cd t; ./perl -I../lib porting/customized.t --regen; cd -
 
 =head1 DESCRIPTION
 
-customized.t checks that files listed in C<Maintainers.pl> that have been C<CUSTOMIZED>
-are not accidentally overwritten by CPAN module updates.
+F<t/porting/customized.t> checks that files listed in
+F<Porting/Maintainers.pl> that have been C<CUSTOMIZED> are not accidentally
+overwritten by CPAN module updates.
 
 =head1 OPTIONS
 
