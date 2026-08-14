@@ -1895,7 +1895,7 @@ STMT_START {                                                                \
             SV** const svpp = hv_fetch(widecharmap,                         \
                         (char*)&uvc, sizeof(UV), 0);                        \
             if (svpp)                                                       \
-                charid = (U16)SvIV(*svpp);                                  \
+                charid = (U32)SvIV(*svpp);                                  \
         }                                                                   \
     }                                                                       \
 } STMT_END
@@ -3337,7 +3337,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             while (s <= last_start) {
                 const U32 uniflags = UTF8_ALLOW_DEFAULT;
                 U8 *uc = (U8*)s;
-                U16 charid = 0;
+                U32 charid = 0;
                 U32 base = 1;
                 U32 state = 1;
                 UV uvc = 0;
@@ -7052,7 +7052,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 while ( state && uc <= (U8*)(loceol) ) {
                     UV uvc = 0;
-                    U16 charid = 0;
+                    U32 charid = 0;
                     U32 base = trie->states[ state ].trans.base;
                     U16 wordnum = trie->states[ state ].wordnum;
                     PERL_DEB(U32 old_state = state);
