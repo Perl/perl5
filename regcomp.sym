@@ -974,16 +974,6 @@ return {
               "struct" => "regnode_1",
             },
             {
-              "NAME" => "TRIEC",
-              "TYPE" => "TRIE",
-              "attr" => {
-                  "arg_spec" => "trie",
-                },
-              "desc" => "Same as TRIE, but with embedded charclass data",
-              "line" => __LINE__,
-              "struct" => "regnode_charclass",
-            },
-            {
               "NAME" => "AHOCORASICK",
               "TYPE" => "TRIE",
               "attr" => {
@@ -995,16 +985,6 @@ return {
               "struct" => "regnode_1",
             },
             {
-              "NAME" => "AHOCORASICKC",
-              "TYPE" => "TRIE",
-              "attr" => {
-                  "arg_spec" => "trie",
-                },
-              "desc" => "Same as AHOCORASICK, but with embedded charclass data",
-              "line" => __LINE__,
-              "struct" => "regnode_charclass",
-            },
-            {
               "NAME" => "LTRIE",
               "TYPE" => "TRIE",
               "attr" => {
@@ -1014,23 +994,12 @@ return {
               "line" => __LINE__,
               "struct" => "regnode_2",
             },
-            {
-              "NAME" => "LTRIEC",
-              "TYPE" => "TRIE",
-              "attr" => {
-                  "arg_spec" => "trie",
-                },
-              "desc" => "Same as TRIEC, but with longjump support",
-              "line" => __LINE__,
-              "struct" => "regnode_charclass_trie",
-            },
           ],
         "pod" => [
             ["Trie Related"],
             [
-              "Behave the same as A|LIST|OF|WORDS would. The '..C' variants",
-              "have inline charclass data (ascii only), the 'C' store it in the",
-              "structure.",
+              "Behave the same as A|LIST|OF|WORDS would. Trie data is stored",
+              "in a shared trie structure.",
             ],
           ],
       },
