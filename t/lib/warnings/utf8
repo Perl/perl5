@@ -704,11 +704,11 @@ $a = fc("\x{102}");
 $a = uc("\x{103}");
 $a = ucfirst("\x{104}");
 EXPECT
-Wide character (U+100) in lc at - line 14.
-Wide character (U+101) in lcfirst at - line 15.
-Wide character (U+102) in fc at - line 16.
-Wide character (U+103) in uc at - line 17.
-Wide character (U+104) in ucfirst at - line 18.
+Wide character (U+100) in lc under a non-UTF-8 locale at - line 14.
+Wide character (U+101) in lcfirst under a non-UTF-8 locale at - line 15.
+Wide character (U+102) in fc under a non-UTF-8 locale at - line 16.
+Wide character (U+103) in uc under a non-UTF-8 locale at - line 17.
+Wide character (U+104) in ucfirst under a non-UTF-8 locale at - line 18.
 ########
 # NAME Wide character in UTF-8 locale
 require '../loc_tools.pl';

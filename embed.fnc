@@ -5644,6 +5644,7 @@ Ep	|I32	|make_trie	|NN RExC_state_t *pRExC_state		\
 				|NN regnode *last			\
 				|NN regnode *tail			\
 				|U32 word_count 			\
+				|STRLEN octet_count			\
 				|U32 flags				\
 				|U32 depth
 Ep	|void	|populate_anyof_bitmap_from_invlist			\
@@ -5677,20 +5678,14 @@ Ep	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state		\
 				|bool was_mutate_ok
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
 ES	|void	|dump_trie	|NN const struct reg_trie_data_ *trie	\
-				|NULLOK HV *widecharmap 		\
-				|NN AV *revcharmap			\
 				|U32 depth
 ES	|void	|dump_trie_interim_list 				\
 				|NN const struct reg_trie_data_ *trie	\
-				|NULLOK HV *widecharmap 		\
-				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
 				|U32 depth
-ES	|void	|dump_trie_interim_table				\
+ES	|void	|dump_trie_physical					\
 				|NN const struct reg_trie_data_ *trie	\
-				|NULLOK HV *widecharmap 		\
-				|NN AV *revcharmap			\
-				|U32 next_alloc 			\
+				|U32 physical				\
 				|U32 depth
 # endif
 #endif /* defined(PERL_IN_REGCOMP_ANY) */
@@ -5934,7 +5929,7 @@ ERTXp	|bool	|regcurly	|SPTR const char *s			\
 #if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
 ES	|U8	|put_charclass_bitmap_innards				\
 				|NN SV *sv				\
-				|NULLOK char *bitmap			\
+				|NULLOK U8 *bitmap			\
 				|NULLOK SV *nonbitmap_invlist		\
 				|NULLOK SV *only_utf8_locale_invlist	\
 				|NULLOK const regnode * const node	\

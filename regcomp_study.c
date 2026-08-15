@@ -1830,6 +1830,7 @@ Perl_study_chunk(pTHX_
                         regnode *tail = scan;
                         U8 trietype = 0;
                         U32 count = 0;
+                        STRLEN octet_count = 0;
 
                         /* var tail is used because there may be a TAIL
                            regop in the way. Ie, the exacts will point to the
@@ -1921,24 +1922,25 @@ Perl_study_chunk(pTHX_
                               || EXACTFU_REQ8 == (X)                       \
                               || EXACTFUP == (X) )                          \
                            ? EXACTFU                                        \
-                           : ( EXACTFAA == (X) )                            \
-                             ? EXACTFAA                                     \
-                             : ( EXACTL == (X) )                            \
-                               ? EXACTL                                     \
-                               : ( EXACTFLU8 == (X) )                       \
-                                 ? EXACTFLU8                                \
-                                 : 0 )
+                             : ( EXACTFAA == (X) )                            \
+                               ? EXACTFAA                                     \
+                               : ( EXACTL == (X) )                            \
+                                 ? EXACTL                                     \
+                                 : ( EXACTFLU8 == (X) )                       \
+                                   ? EXACTFLU8                                \
+                                   : 0 )
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode * const noper = REGNODE_AFTER( cur );
                             U8 noper_type = OP( noper );
                             U8 noper_trietype = TRIE_TYPE( noper_type );
-#if defined(DEBUGGING) || defined(NOJUMPTRIE)
                             regnode * const noper_next = regnext( noper );
                             U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
                             U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) :0;
-#endif
+                            STRLEN noper_octets = noper_trietype == NOTHING
+                                ? noper_next_trietype ? STR_LEN(noper_next) : 0
+                                : noper_trietype ? STR_LEN(noper) : 0;
 
                             DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
@@ -1970,6 +1972,14 @@ Perl_study_chunk(pTHX_
                                         || ( trietype == NOTHING )
                                         || ( trietype == noper_trietype )
                                   )
+                                  /* Do not replace a common first node when
+                                   * its branches continue with a different
+                                   * trie type.  The octet-trie construction
+                                   * cannot preserve those suffix branches as
+                                   * a partial trie. */
+                                  && ( !noper_next_trietype
+                                       || noper_next_trietype == noper_trietype
+                                       || noper_trietype == NOTHING )
 #ifdef NOJUMPTRIE
                                   && noper_next >= tail
 #endif
@@ -2004,8 +2014,10 @@ Perl_study_chunk(pTHX_
                                         trietype = noper_trietype;
                                     prev = cur;
                                 }
-                                if (first)
+                                if (first) {
                                     count++;
+                                    octet_count += noper_octets;
+                                }
                             } /* end handle mergable triable node */
                             else {
                                 /* handle unmergable node -
@@ -2024,7 +2036,8 @@ Perl_study_chunk(pTHX_
                                     if ( trietype && trietype != NOTHING )
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail,
-                                                count, trietype, depth+1 );
+                                                count, octet_count,
+                                                trietype, depth+1 );
                                     prev = NULL; /* note: we clear/update
                                                     first, trietype etc below,
                                                     so we dont do it here */
@@ -2037,6 +2050,7 @@ Perl_study_chunk(pTHX_
                                     /* noper is triable, so we can start a new
                                      * trie sequence */
                                     count = 1;
+                                    octet_count = noper_octets;
                                     first = cur;
                                     trietype = noper_trietype;
                                 } else if (first) {
@@ -2066,10 +2080,10 @@ Perl_study_chunk(pTHX_
                                  * outside of the loop */
                                 made = make_trie( pRExC_state, startbranch,
                                                  first, scan, tail, count,
-                                                 trietype, depth+1 );
+                                                 octet_count, trietype,
+                                                 depth+1 );
 #ifdef TRIE_STUDY_OPT
-                                if ( ((made == MADE_EXACT_TRIE &&
-                                     startbranch == first)
+                                if ( ((made == MADE_EXACT_TRIE)
                                      || ( first_non_open == first )) &&
                                      depth == 0 ) {
                                     flags |= SCF_TRIE_RESTUDY;
@@ -3580,6 +3594,14 @@ Perl_study_chunk(pTHX_
 
             min += trie->minlen;
             delta += (trie->maxlen - trie->minlen);
+            /* The trie consumes encoded octets, while the start class built
+             * during the pre-trie branch study describes source characters.
+             * Do not retain that class as a shared filter for a UTF-8 octet
+             * trie; it can reject valid two-byte UTF-8 starts before TRIE is
+             * reached. */
+            if (!TRIE_RAW_INPUT_MODE(trie, FALSE)
+                    && data && data->start_class)
+                ssc_init_zero(pRExC_state, data->start_class);
             flags &= ~SCF_DO_STCLASS; /* xxx */
             if (flags & SCF_DO_SUBSTR) {
                 /* Cannot expect anything... */

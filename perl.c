@@ -103,6 +103,22 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
     }
 }
 
+static void
+S_init_native_octet_utf8(pTHX)
+{
+    U32 i;
+
+    /* The table is process-global, but initializing it here is harmless when
+     * another interpreter is constructed.  It depends only on the character
+     * set selected at compile time. */
+    for (i = 0; i < 256; i++) {
+        U8 * const end = uvoffuni_to_utf8_flags(
+            PL_native_octet_utf8[i].bytes, NATIVE_TO_UNI(i), 0);
+        PL_native_octet_utf8[i].len = (U8)(end -
+                                          PL_native_octet_utf8[i].bytes);
+    }
+}
+
 
 #ifndef PLATFORM_SYS_INIT_
 #  define PLATFORM_SYS_INIT_  NOOP
@@ -247,6 +263,7 @@ perl_construct(pTHXx)
 #endif
 
     init_constants();
+    S_init_native_octet_utf8(aTHX);
 
     SvREADONLY_on(&PL_sv_placeholder);
     SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
@@ -2062,6 +2079,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef PERL_RC_STACK
                              " PERL_RC_STACK"
+#  endif
+#  ifdef PERL_REGEX_OCTET_TRIE
+                             " PERL_REGEX_OCTET_TRIE"
 #  endif
 #  ifdef PERL_RELOCATABLE_INCPUSH
                              " PERL_RELOCATABLE_INCPUSH"

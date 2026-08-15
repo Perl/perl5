@@ -1815,11 +1815,21 @@ Perl_re_intuit_start(pTHX_
 
 /* 'uscan' is set to foldbuf, and incremented, so below the end of uscan is
  * 'foldbuf+sizeof(foldbuf)' */
-#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uc_end,      \
+#define REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uc_end,                  \
                              uscan, len, uvc, charid, foldlen, foldbuf,     \
-                             uniflags)                                      \
+                             uniflags, octet_scan, octets_remaining,       \
+                             octet_buffer)                                 \
 STMT_START {                                                                \
     STRLEN skiplen;                                                         \
+    if (TRIE_RAW_INPUT_MODE(trie, utf8_target)) {                            \
+        uvc = (U8)*uc;                                                       \
+        charid = uvc + 1;                                                    \
+        len = 1;                                                             \
+    } else if (TRIE_CONTAINS_WIDE(trie) && octets_remaining > 0) {            \
+        charid = *octet_scan++ + 1;                                          \
+        octets_remaining--;                                                  \
+        len = 0;                                                             \
+    } else {                                                                 \
     U8 flags = FOLD_FLAGS_FULL;                                             \
     switch (trie_type) {                                                    \
     case trie_flu8:                                                         \
@@ -1886,18 +1896,27 @@ STMT_START {                                                                \
         uvc = (UV)*uc;                                                      \
         len = 1;                                                            \
     }                                                                       \
-    if (uvc < 256) {                                                        \
-        charid = trie->charmap[ uvc ];                                      \
-    }                                                                       \
+    if (TRIE_CONTAINS_WIDE(trie)) {                                         \
+        const native_octet_utf8_t *octet;                                   \
+        U8 *end;                                                            \
+        if (!utf8_target && FITS_IN_8_BITS(uvc)) {                          \
+            /* Non-UTF-8 input is a native octet.  Use its cached UTF-8     \
+             * representation when the trie needs UTF-8 transitions. */     \
+            octet = &PL_native_octet_utf8[(U8)uvc];                        \
+            charid = octet->bytes[0] + 1;                                   \
+            octet_scan = octet->bytes + 1;                                  \
+            octets_remaining = octet->len - 1;                              \
+        } else {                                                            \
+            end = uvchr_to_utf8(octet_buffer, uvc);                         \
+            charid = octet_buffer[0] + 1;                                   \
+            octet_scan = octet_buffer + 1;                                  \
+            octets_remaining = (STRLEN)(end - octet_buffer - 1);            \
+        }                                                                       \
+    }                                                                        \
     else {                                                                  \
-        charid = 0;                                                         \
-        if (widecharmap) {                                                  \
-            SV** const svpp = hv_fetch(widecharmap,                         \
-                        (char*)&uvc, sizeof(UV), 0);                        \
-            if (svpp)                                                       \
-                charid = (U32)SvIV(*svpp);                                  \
-        }                                                                   \
+        charid = uvc + 1;                                                    \
     }                                                                       \
+    }                                                                        \
 } STMT_END
 
 #define DUMP_EXEC_POS(li,s,doutf8,depth)                    \
@@ -3257,10 +3276,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-      case AHOCORASICKC_tb_pb:
-      case AHOCORASICKC_tb_p8:
-      case AHOCORASICKC_t8_pb:
-      case AHOCORASICKC_t8_p8:
       case AHOCORASICK_tb_pb:
       case AHOCORASICK_tb_p8:
       case AHOCORASICK_t8_pb:
@@ -3270,7 +3285,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             /* what trie are we using right now */
             reg_ac_data *aho = (reg_ac_data*)progi->data->data[ TRIE_DATA_SLOT(c) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[aho->trie];
-            HV *widecharmap = MUTABLE_HV(progi->data->data[ aho->trie + 1 ]);
 
             const char *last_start = strend - trie->minlen;
 #ifdef DEBUGGING
@@ -3294,7 +3308,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             bool used_heap = false;
 
             U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-            U8 *bitmap = NULL;
+            U8 octet_buffer[ UTF8_MAXBYTES_CASE + 1 ];
+            const U8 *octet_scan = NULL;
+            STRLEN octets_remaining = 0;
             U8 **points_heap = NULL;
 
             DECLARE_AND_GET_RE_DEBUG_FLAGS;
@@ -3311,14 +3327,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 points = points_heap;
             }
 
-            if ( trie_type != trie_utf8_fold
-                 && (trie->bitmap || OP(c)==AHOCORASICKC) )
-            {
-                if (trie->bitmap)
-                    bitmap = (U8*)trie->bitmap;
-                else
-                    bitmap = (U8*)ANYOF_BITMAP(c);
-            }
+            /* Trie start-byte filtering is temporarily disabled while the
+             * post-prefix-extraction start state is being validated. */
             /* this is the Aho-Corasick algorithm modified a touch
                to include special handling for long "unknown char" sequences.
                The basic idea being that we use AC as long as we are dealing
@@ -3355,33 +3365,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     U32 word = aho->states[ state ].wordnum;
 
                     if( state == 1 ) {
-                        if ( bitmap ) {
-                            DEBUG_TRIE_EXECUTE_r(
-                                if (  uc <= (U8*)last_start
-                                    && !BITMAP_TEST(bitmap,*uc) )
-                                {
-                                    dump_exec_pos( (char *)uc, c, strend,
-                                        real_start,
-                                        (char *)uc, utf8_target, 0 );
-                                    re_printf(
-                                        " Scanning for legal start char...\n");
-                                }
-                            );
-                            if (utf8_target) {
-                                while (  uc <= (U8*)last_start
-                                       && !BITMAP_TEST(bitmap,*uc) )
-                                {
-                                    uc += UTF8SKIP(uc);
-                                }
-                            } else {
-                                while (  uc <= (U8*)last_start
-                                       && ! BITMAP_TEST(bitmap,*uc) )
-                                {
-                                    uc++;
-                                }
-                            }
-                            s = (char *)uc;
-                        }
                         if (uc >(U8*)last_start) break;
                     }
 
@@ -3395,12 +3378,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         if (base == 0) break;
 
                     }
-                    points[pointpos++ % maxlen]= uc;
-                    if (foldlen || uc < (U8*)strend) {
-                        REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
+                    if (!octets_remaining \
+                            && (!utf8_target || !UTF8_IS_CONTINUATION(*uc)))
+                        points[pointpos++ % maxlen]= uc;
+                    if (foldlen || octets_remaining || uc < (U8*)strend) {
+                        REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
                                              (U8 *) strend, uscan, len, uvc,
                                              charid, foldlen, foldbuf,
-                                             uniflags);
+                                             uniflags, octet_scan,
+                                             octets_remaining, octet_buffer);
                         DEBUG_TRIE_EXECUTE_r({
                             dump_exec_pos( (char *)uc, c, strend,
                                         real_start, s, utf8_target, 0);
@@ -3440,7 +3426,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             I32 offset;
                             if (charid &&
                                  ( ((offset = base + charid
-                                    - 1 - trie->uniquecharcount)) >= 0)
+                                    - 1 - TRIE_ALPHABET_SIZE)) >= 0)
                                  && ((U32)offset < trie->lasttrans)
                                  && trie->trans[offset].check == state
                                  && (tmp = trie->trans[offset].next))
@@ -6915,23 +6901,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 #undef  ST
 #define ST st->u.trie
-        case LTRIEC:
-        case TRIEC: /* (ab|cd) with known charclass */
-            /* In this case the charclass data is available inline so
-               we can fail fast without a lot of extra overhead.
-             */
-            if ( !   NEXTCHR_IS_EOS
-                &&   locinput < loceol
-                && ! ANYOF_BITMAP_TEST(scan, nextbyte))
-            {
-                DEBUG_EXECUTE_r(
-                    re_exec_indentf("%sTRIE: failed to match trie start class...%s\n",
-                              depth, PL_colors[4], PL_colors[5])
-                );
-                sayNO_SILENT;
-                NOT_REACHED; /* NOTREACHED */
-            }
-            /* FALLTHROUGH */
         case LTRIE:
         case TRIE:  /* (ab|cd)  */
             /* the basic plan of execution of the trie is:
@@ -6990,7 +6959,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 assert(ST.before_paren <= rex->nparens);
                 assert(ST.after_paren <= rex->nparens);
 
-                HV * widecharmap = MUTABLE_HV(rexi->data->data[ TRIE_DATA_SLOT(scan) + 1 ]);
                 U32 state = trie->startstate;
 
                 if (FLAGS(scan) == EXACTL || FLAGS(scan) == EXACTFLU8) {
@@ -7007,26 +6975,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                                                reginfo->strend);
                     }
                 }
-                if (   trie->bitmap
-                    && (     NEXTCHR_IS_EOS
-                        ||   locinput >= loceol
-                        || ! TRIE_BITMAP_TEST(trie, nextbyte)))
-                {
-                    if (trie->states[ state ].wordnum) {
-                         DEBUG_EXECUTE_r(
-                            re_exec_indentf("%sTRIE: matched empty string...%s\n",
-                                          depth, PL_colors[4], PL_colors[5])
-                        );
-                        if (!trie->jump)
-                            break;
-                    } else {
-                        DEBUG_EXECUTE_r(
-                            re_exec_indentf("%sTRIE: failed to match trie start class...%s\n",
-                                          depth, PL_colors[4], PL_colors[5])
-                        );
-                        sayNO_SILENT;
-                   }
-                }
+                /* Start-class filtering is disabled while trie prefix
+                 * extraction is being brought into alignment with the
+                 * executable start state. */
 
             {
                 U8 *uc = ( U8* )locinput;
@@ -7035,6 +6986,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 STRLEN foldlen = 0;
                 U8 *uscan = (U8*)NULL;
                 U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+                U8 octet_buffer[ UTF8_MAXBYTES_CASE + 1 ];
+                const U8 *octet_scan = NULL;
+                STRLEN octets_remaining = 0;
                 U32 charcount = 0; /* how many input chars we have matched */
                 U32 accepted = 0; /* how many accepting states have we seen? */
 
@@ -7050,7 +7004,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                    shortest accept state and the wordnum of the longest
                    accept state */
 
-                while ( state && uc <= (U8*)(loceol) ) {
+                while ( state && (uc <= (U8*)(loceol) || octets_remaining) ) {
                     UV uvc = 0;
                     U32 charid = 0;
                     U32 base = trie->states[ state ].trans.base;
@@ -7076,18 +7030,22 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
 
                     /* read a char and goto next state */
-                    if ( base && (foldlen || uc < (U8*)(loceol))) {
+                    if ( base && (foldlen || octets_remaining || uc < (U8*)(loceol))) {
                         I32 offset;
-                        REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
+                        REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
                                              (U8 *) loceol, uscan,
                                              len, uvc, charid, foldlen,
-                                             foldbuf, uniflags);
-                        charcount++;
+                                             foldbuf, uniflags, octet_scan,
+                                             octets_remaining, octet_buffer);
+                        if (TRIE_RAW_INPUT_MODE(trie, utf8_target) \
+                                ? (!utf8_target || !UTF8_IS_CONTINUATION(*uc)) \
+                                : len)
+                            charcount++;
                         if (foldlen > 0)
                             ST.longfold = true;
                         if (charid &&
                              ( ((offset =
-                              base + charid - 1 - trie->uniquecharcount)) >= 0)
+                              base + charid - 1 - TRIE_ALPHABET_SIZE)) >= 0)
 
                              && ((U32)offset < trie->lasttrans)
                              && trie->trans[offset].check == state)
@@ -7205,10 +7163,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U32 chars; /* how many chars to skip */
                 reg_trie_data * const trie
                     = (reg_trie_data*)rexi->data->data[TRIE_DATA_SLOT(ST.me)];
-
-                assert((trie->wordinfo[ST.nextword].len - trie->prefixlen)
+                assert((trie->wordinfo[ST.nextword].len - trie->prefixlen_chars)
                             >=  ST.firstchars);
-                chars = (trie->wordinfo[ST.nextword].len - trie->prefixlen)
+                chars = (trie->wordinfo[ST.nextword].len - trie->prefixlen_chars)
                             - ST.firstchars;
                 uc = ST.firstpos;
 
@@ -7254,7 +7211,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
             if (ST.jump && ST.jump[ST.nextword]) {
-                scan = ST.me + ST.jump[ST.nextword];
+                reg_trie_data * const trie
+                    = (reg_trie_data*)rexi->data->data[TRIE_DATA_SLOT(ST.me)];
+                scan = TRIE_JUMP_TARGET(ST.me, ST.jump, trie->jump_correction,
+                                        ST.nextword);
                 ST.before_paren = ST.j_before_paren[ST.nextword];
                 assert(ST.before_paren <= rex->nparens);
                 ST.after_paren = ST.j_after_paren[ST.nextword];

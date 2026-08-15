@@ -9209,7 +9209,7 @@ Perl_is_grapheme(pTHX_ const U8 *strbeg, const U8 *s, const U8 *strend, const UV
 # endif
 # if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
 static U8
-S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV *nonbitmap_invlist, SV *only_utf8_locale_invlist, const regnode * const node, const U8 flags, const bool force_as_is_display)
+S_put_charclass_bitmap_innards(pTHX_ SV *sv, U8 *bitmap, SV *nonbitmap_invlist, SV *only_utf8_locale_invlist, const regnode * const node, const U8 flags, const bool force_as_is_display)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 static SV *
@@ -12251,7 +12251,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract
         Perl_attribute_nonnull(pTHX_4)
         __attribute__visibility__("hidden");
 PERL_CALLCONV I32
-Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
+Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, STRLEN octet_count, U32 flags, U32 depth)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
@@ -12301,37 +12301,28 @@ Perl_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minl
         __attribute__visibility__("hidden");
 #   if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
 static void
-S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 depth)
+S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
         Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_3);
+        Perl_attribute_nonnull(pTHX_1);
 static void
-S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth)
+S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie, U32 next_alloc, U32 depth)
         Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_3);
+        Perl_attribute_nonnull(pTHX_1);
 static void
-S_dump_trie_interim_table(pTHX_ const struct reg_trie_data_ *trie, HV *widecharmap, AV *revcharmap, U32 next_alloc, U32 depth)
+S_dump_trie_physical(pTHX_ const struct reg_trie_data_ *trie, U32 physical, U32 depth)
         Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_3);
+        Perl_attribute_nonnull(pTHX_1);
 #   endif /* defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING) */
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
 #   define PERL_ARGS_ASSERT_DUMP_TRIE           \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
-        assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
+        Perl_assert_aTHX; assert(trie)
 
 #   define PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
-        assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
+        Perl_assert_aTHX; assert(trie)
 
-#   define PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_TABLE \
-        Perl_assert_aTHX; assert(trie); \
-        assert(!widecharmap || SvTYPE(widecharmap) == SVt_PVHV); \
-        assert(revcharmap); assert(SvTYPE(revcharmap) == SVt_PVAV)
+#   define PERL_ARGS_ASSERT_DUMP_TRIE_PHYSICAL  \
+        Perl_assert_aTHX; assert(trie)
 
 # endif /* defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING) */
 # if !defined(PERL_NO_INLINE_FUNCTIONS)

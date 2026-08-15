@@ -2048,6 +2048,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 RExC_rxi->regstclass = first;
         }
 #ifdef TRIE_STCLASS
+        /* Aho-Corasick consumes the same processed transition stream as the
+         * ordinary trie executor; it is a trie with failure links. */
         else if (REGNODE_TYPE(OP(first)) == TRIE &&
                 ((reg_trie_data *)RExC_rxi->data->data[ TRIE_DATA_SLOT(first) ])->minlen > 0)
         {
@@ -13757,11 +13759,8 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                     refcount = --trie->refcount;
                     OP_REFCNT_UNLOCK;
                     if ( !refcount ) {
-                        PerlMemShared_free(trie->charmap);
                         PerlMemShared_free(trie->states);
                         PerlMemShared_free(trie->trans);
-                        if (trie->bitmap)
-                            PerlMemShared_free(trie->bitmap);
                         if (trie->jump)
                             PerlMemShared_free(trie->jump);
                         if (trie->j_before_paren)

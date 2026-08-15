@@ -12,7 +12,6 @@
 
 typedef struct regnode_2                         tregnode_ACCEPT;
 typedef struct regnode_1                         tregnode_AHOCORASICK;
-typedef struct regnode_charclass                 tregnode_AHOCORASICKC;
 typedef struct regnode_charclass                 tregnode_ANYOF;
 typedef struct regnode_charclass                 tregnode_ANYOFD;
 typedef struct regnode_1                         tregnode_ANYOFH;
@@ -71,7 +70,6 @@ typedef struct regnode                           tregnode_LOGICAL;
 typedef struct regnode_1                         tregnode_LONGJMP;
 typedef struct regnode                           tregnode_LOOKBEHIND_END;
 typedef struct regnode_2                         tregnode_LTRIE;
-typedef struct regnode_charclass_trie            tregnode_LTRIEC;
 typedef struct regnode_1                         tregnode_MARKPOINT;
 typedef struct regnode                           tregnode_MBOL;
 typedef struct regnode                           tregnode_MEOL;
@@ -120,7 +118,6 @@ typedef struct regnode                           tregnode_SUCCEED;
 typedef struct regnode_1                         tregnode_SUSPEND;
 typedef struct regnode                           tregnode_TAIL;
 typedef struct regnode_1                         tregnode_TRIE;
-typedef struct regnode_charclass                 tregnode_TRIEC;
 typedef struct regnode_1                         tregnode_UNLESSM;
 typedef struct regnode_1                         tregnode_VERB;
 typedef struct regnode                           tregnode_WHILEM;
@@ -129,8 +126,8 @@ typedef struct regnode                           tregnode_WHILEM;
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	113
-#define REGMATCH_STATE_MAX    	157
+#define REGNODE_MAX           	110
+#define REGMATCH_STATE_MAX    	154
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
 #define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
@@ -761,18 +758,8 @@ typedef struct regnode                           tregnode_WHILEM;
 #define TRIE_t8_p8                  ((TRIE) * 4 + 3)
 
 /* 0x3a :  58
-   TRIEC - Same as TRIE, but with embedded charclass data */
-#define TRIEC                       (TRIE + 1)
-#define TRIEC_tb                    ((TRIEC) * 2)
-#define TRIEC_t8                    ((TRIEC) * 2 + 1)
-#define TRIEC_tb_pb                 ((TRIEC) * 4)
-#define TRIEC_tb_p8                 ((TRIEC) * 4 + 1)
-#define TRIEC_t8_pb                 ((TRIEC) * 4 + 2)
-#define TRIEC_t8_p8                 ((TRIEC) * 4 + 3)
-
-/* 0x3b :  59
    AHOCORASICK - Aho Corasick stclass. flags==type */
-#define AHOCORASICK                 (TRIEC + 1)
+#define AHOCORASICK                 (TRIE + 1)
 #define AHOCORASICK_tb              ((AHOCORASICK) * 2)
 #define AHOCORASICK_t8              ((AHOCORASICK) * 2 + 1)
 #define AHOCORASICK_tb_pb           ((AHOCORASICK) * 4)
@@ -780,19 +767,9 @@ typedef struct regnode                           tregnode_WHILEM;
 #define AHOCORASICK_t8_pb           ((AHOCORASICK) * 4 + 2)
 #define AHOCORASICK_t8_p8           ((AHOCORASICK) * 4 + 3)
 
-/* 0x3c :  60
-   AHOCORASICKC - Same as AHOCORASICK, but with embedded charclass data */
-#define AHOCORASICKC                (AHOCORASICK + 1)
-#define AHOCORASICKC_tb             ((AHOCORASICKC) * 2)
-#define AHOCORASICKC_t8             ((AHOCORASICKC) * 2 + 1)
-#define AHOCORASICKC_tb_pb          ((AHOCORASICKC) * 4)
-#define AHOCORASICKC_tb_p8          ((AHOCORASICKC) * 4 + 1)
-#define AHOCORASICKC_t8_pb          ((AHOCORASICKC) * 4 + 2)
-#define AHOCORASICKC_t8_p8          ((AHOCORASICKC) * 4 + 3)
-
-/* 0x3d :  61
+/* 0x3b :  59
    LTRIE - Same as TRIE, but with longjump support */
-#define LTRIE                       (AHOCORASICKC + 1)
+#define LTRIE                       (AHOCORASICK + 1)
 #define LTRIE_tb                    ((LTRIE) * 2)
 #define LTRIE_t8                    ((LTRIE) * 2 + 1)
 #define LTRIE_tb_pb                 ((LTRIE) * 4)
@@ -800,19 +777,9 @@ typedef struct regnode                           tregnode_WHILEM;
 #define LTRIE_t8_pb                 ((LTRIE) * 4 + 2)
 #define LTRIE_t8_p8                 ((LTRIE) * 4 + 3)
 
-/* 0x3e :  62
-   LTRIEC - Same as TRIEC, but with longjump support */
-#define LTRIEC                      (LTRIE + 1)
-#define LTRIEC_tb                   ((LTRIEC) * 2)
-#define LTRIEC_t8                   ((LTRIEC) * 2 + 1)
-#define LTRIEC_tb_pb                ((LTRIEC) * 4)
-#define LTRIEC_tb_p8                ((LTRIEC) * 4 + 1)
-#define LTRIEC_t8_pb                ((LTRIEC) * 4 + 2)
-#define LTRIEC_t8_p8                ((LTRIEC) * 4 + 3)
-
-/* 0x3f :  63
+/* 0x3c :  60
    NOTHING - Match empty string. */
-#define NOTHING                     (LTRIEC + 1)
+#define NOTHING                     (LTRIE + 1)
 #define NOTHING_tb                  ((NOTHING) * 2)
 #define NOTHING_t8                  ((NOTHING) * 2 + 1)
 #define NOTHING_tb_pb               ((NOTHING) * 4)
@@ -820,7 +787,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define NOTHING_t8_pb               ((NOTHING) * 4 + 2)
 #define NOTHING_t8_p8               ((NOTHING) * 4 + 3)
 
-/* 0x40 :  64
+/* 0x3d :  61
    TAIL - Match empty string. Can jump here from outside. */
 #define TAIL                        (NOTHING + 1)
 #define TAIL_tb                     ((TAIL) * 2)
@@ -830,7 +797,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define TAIL_t8_pb                  ((TAIL) * 4 + 2)
 #define TAIL_t8_p8                  ((TAIL) * 4 + 3)
 
-/* 0x41 :  65
+/* 0x3e :  62
    OPTIMIZED - This is not really a node, but an optimized away piece of a
    "long" node.  To simplify debugging output, we mark it as if it were a node */
 #define OPTIMIZED                   (TAIL + 1)
@@ -841,7 +808,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define OPTIMIZED_t8_pb             ((OPTIMIZED) * 4 + 2)
 #define OPTIMIZED_t8_p8             ((OPTIMIZED) * 4 + 3)
 
-/* 0x42 :  66
+/* 0x3f :  63
    STAR - Match this (simple) thing 0 or more times: /A{0,}B/ where A is width
    1 char */
 #define STAR                        (OPTIMIZED + 1)
@@ -852,7 +819,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define STAR_t8_pb                  ((STAR) * 4 + 2)
 #define STAR_t8_p8                  ((STAR) * 4 + 3)
 
-/* 0x43 :  67
+/* 0x40 :  64
    PLUS - Match this (simple) thing 1 or more times: /A{1,}B/ where A is width
    1 char */
 #define PLUS                        (STAR + 1)
@@ -863,7 +830,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define PLUS_t8_pb                  ((PLUS) * 4 + 2)
 #define PLUS_t8_p8                  ((PLUS) * 4 + 3)
 
-/* 0x44 :  68
+/* 0x41 :  65
    CURLY - Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1
    char */
 #define CURLY                       (PLUS + 1)
@@ -874,7 +841,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_t8_pb                 ((CURLY) * 4 + 2)
 #define CURLY_t8_p8                 ((CURLY) * 4 + 3)
 
-/* 0x45 :  69
+/* 0x42 :  66
    CURLYN - Capture next-after-this simple thing: /(A){m,n}B/ where A is width
    1 char */
 #define CURLYN                      (CURLY + 1)
@@ -885,7 +852,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYN_t8_pb                ((CURLYN) * 4 + 2)
 #define CURLYN_t8_p8                ((CURLYN) * 4 + 3)
 
-/* 0x46 :  70
+/* 0x43 :  67
    CURLYM - Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A
    is fixed-length */
 #define CURLYM                      (CURLYN + 1)
@@ -896,7 +863,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYM_t8_pb                ((CURLYM) * 4 + 2)
 #define CURLYM_t8_p8                ((CURLYM) * 4 + 3)
 
-/* 0x47 :  71
+/* 0x44 :  68
    CURLYX - Match/Capture this complex thing {n,m} times. */
 #define CURLYX                      (CURLYM + 1)
 #define CURLYX_tb                   ((CURLYX) * 2)
@@ -906,7 +873,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYX_t8_pb                ((CURLYX) * 4 + 2)
 #define CURLYX_t8_p8                ((CURLYX) * 4 + 3)
 
-/* 0x48 :  72
+/* 0x45 :  69
    WHILEM - Do curly processing and see if rest matches. */
 #define WHILEM                      (CURLYX + 1)
 #define WHILEM_tb                   ((WHILEM) * 2)
@@ -916,7 +883,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_t8_pb                ((WHILEM) * 4 + 2)
 #define WHILEM_t8_p8                ((WHILEM) * 4 + 3)
 
-/* 0x49 :  73
+/* 0x46 :  70
    OPEN - Mark this point in input as start of #n. */
 #define OPEN                        (WHILEM + 1)
 #define OPEN_tb                     ((OPEN) * 2)
@@ -926,7 +893,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define OPEN_t8_pb                  ((OPEN) * 4 + 2)
 #define OPEN_t8_p8                  ((OPEN) * 4 + 3)
 
-/* 0x4a :  74
+/* 0x47 :  71
    CLOSE - Close corresponding OPEN of #n. */
 #define CLOSE                       (OPEN + 1)
 #define CLOSE_tb                    ((CLOSE) * 2)
@@ -936,7 +903,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CLOSE_t8_pb                 ((CLOSE) * 4 + 2)
 #define CLOSE_t8_p8                 ((CLOSE) * 4 + 3)
 
-/* 0x4b :  75
+/* 0x48 :  72
    SROPEN - Start a script run */
 #define SROPEN                      (CLOSE + 1)
 #define SROPEN_tb                   ((SROPEN) * 2)
@@ -946,7 +913,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SROPEN_t8_pb                ((SROPEN) * 4 + 2)
 #define SROPEN_t8_p8                ((SROPEN) * 4 + 3)
 
-/* 0x4c :  76
+/* 0x49 :  73
    SRCLOSE -  */
 #define SRCLOSE                     (SROPEN + 1)
 #define SRCLOSE_tb                  ((SRCLOSE) * 2)
@@ -956,7 +923,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SRCLOSE_t8_pb               ((SRCLOSE) * 4 + 2)
 #define SRCLOSE_t8_p8               ((SRCLOSE) * 4 + 3)
 
-/* 0x4d :  77
+/* 0x4a :  74
    REF - Match some already matched string */
 #define REF                         (SRCLOSE + 1)
 #define REF_tb                      ((REF) * 2)
@@ -966,7 +933,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REF_t8_pb                   ((REF) * 4 + 2)
 #define REF_t8_p8                   ((REF) * 4 + 3)
 
-/* 0x4e :  78
+/* 0x4b :  75
    REFF - Match already matched string, using /di rules. */
 #define REFF                        (REF + 1)
 #define REFF_tb                     ((REFF) * 2)
@@ -976,7 +943,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFF_t8_pb                  ((REFF) * 4 + 2)
 #define REFF_t8_p8                  ((REFF) * 4 + 3)
 
-/* 0x4f :  79
+/* 0x4c :  76
    REFFL - Match already matched string, using /li rules. */
 #define REFFL                       (REFF + 1)
 #define REFFL_tb                    ((REFFL) * 2)
@@ -986,7 +953,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFL_t8_pb                 ((REFFL) * 4 + 2)
 #define REFFL_t8_p8                 ((REFFL) * 4 + 3)
 
-/* 0x50 :  80
+/* 0x4d :  77
    REFFU - Match already matched string, using /ui. */
 #define REFFU                       (REFFL + 1)
 #define REFFU_tb                    ((REFFU) * 2)
@@ -996,7 +963,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFU_t8_pb                 ((REFFU) * 4 + 2)
 #define REFFU_t8_p8                 ((REFFU) * 4 + 3)
 
-/* 0x51 :  81
+/* 0x4e :  78
    REFFA - Match already matched string, using /aai rules. */
 #define REFFA                       (REFFU + 1)
 #define REFFA_tb                    ((REFFA) * 2)
@@ -1006,7 +973,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFA_t8_pb                 ((REFFA) * 4 + 2)
 #define REFFA_t8_p8                 ((REFFA) * 4 + 3)
 
-/* 0x52 :  82
+/* 0x4f :  79
    REFN - Match some already matched string */
 #define REFN                        (REFFA + 1)
 #define REFN_tb                     ((REFN) * 2)
@@ -1016,7 +983,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFN_t8_pb                  ((REFN) * 4 + 2)
 #define REFN_t8_p8                  ((REFN) * 4 + 3)
 
-/* 0x53 :  83
+/* 0x50 :  80
    REFFN - Match already matched string, using /di rules. */
 #define REFFN                       (REFN + 1)
 #define REFFN_tb                    ((REFFN) * 2)
@@ -1026,7 +993,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFN_t8_pb                 ((REFFN) * 4 + 2)
 #define REFFN_t8_p8                 ((REFFN) * 4 + 3)
 
-/* 0x54 :  84
+/* 0x51 :  81
    REFFLN - Match already matched string, using /li rules. */
 #define REFFLN                      (REFFN + 1)
 #define REFFLN_tb                   ((REFFLN) * 2)
@@ -1036,7 +1003,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFLN_t8_pb                ((REFFLN) * 4 + 2)
 #define REFFLN_t8_p8                ((REFFLN) * 4 + 3)
 
-/* 0x55 :  85
+/* 0x52 :  82
    REFFUN - Match already matched string, using /ui rules. */
 #define REFFUN                      (REFFLN + 1)
 #define REFFUN_tb                   ((REFFUN) * 2)
@@ -1046,7 +1013,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFUN_t8_pb                ((REFFUN) * 4 + 2)
 #define REFFUN_t8_p8                ((REFFUN) * 4 + 3)
 
-/* 0x56 :  86
+/* 0x53 :  83
    REFFAN - Match already matched string, using /aai rules. */
 #define REFFAN                      (REFFUN + 1)
 #define REFFAN_tb                   ((REFFAN) * 2)
@@ -1056,7 +1023,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REFFAN_t8_pb                ((REFFAN) * 4 + 2)
 #define REFFAN_t8_p8                ((REFFAN) * 4 + 3)
 
-/* 0x57 :  87
+/* 0x54 :  84
    BRANCHJ - BRANCH with long offset. */
 #define BRANCHJ                     (REFFAN + 1)
 #define BRANCHJ_tb                  ((BRANCHJ) * 2)
@@ -1066,7 +1033,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define BRANCHJ_t8_pb               ((BRANCHJ) * 4 + 2)
 #define BRANCHJ_t8_p8               ((BRANCHJ) * 4 + 3)
 
-/* 0x58 :  88
+/* 0x55 :  85
    IFMATCH - Succeeds if the following matches; non-zero flags "f", next_off
    "o" means lookbehind assertion starting "f..(f-o)" characters before
    current */
@@ -1078,7 +1045,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define IFMATCH_t8_pb               ((IFMATCH) * 4 + 2)
 #define IFMATCH_t8_p8               ((IFMATCH) * 4 + 3)
 
-/* 0x59 :  89
+/* 0x56 :  86
    UNLESSM - Fails if the following matches; non-zero flags "f", next_off "o"
    means lookbehind assertion starting "f..(f-o)" characters before current */
 #define UNLESSM                     (IFMATCH + 1)
@@ -1089,7 +1056,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define UNLESSM_t8_pb               ((UNLESSM) * 4 + 2)
 #define UNLESSM_t8_p8               ((UNLESSM) * 4 + 3)
 
-/* 0x5a :  90
+/* 0x57 :  87
    SUSPEND - "Independent" sub-RE. */
 #define SUSPEND                     (UNLESSM + 1)
 #define SUSPEND_tb                  ((SUSPEND) * 2)
@@ -1099,7 +1066,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SUSPEND_t8_pb               ((SUSPEND) * 4 + 2)
 #define SUSPEND_t8_p8               ((SUSPEND) * 4 + 3)
 
-/* 0x5b :  91
+/* 0x58 :  88
    IFTHEN - Switch, should be preceded by switcher. */
 #define IFTHEN                      (SUSPEND + 1)
 #define IFTHEN_tb                   ((IFTHEN) * 2)
@@ -1109,7 +1076,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define IFTHEN_t8_pb                ((IFTHEN) * 4 + 2)
 #define IFTHEN_t8_p8                ((IFTHEN) * 4 + 3)
 
-/* 0x5c :  92
+/* 0x59 :  89
    RENUM - Group with independently numbered parens. Not used yet. */
 #define RENUM                       (IFTHEN + 1)
 #define RENUM_tb                    ((RENUM) * 2)
@@ -1119,7 +1086,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define RENUM_t8_pb                 ((RENUM) * 4 + 2)
 #define RENUM_t8_p8                 ((RENUM) * 4 + 3)
 
-/* 0x5d :  93
+/* 0x5a :  90
    LONGJMP - Jump far away. */
 #define LONGJMP                     (RENUM + 1)
 #define LONGJMP_tb                  ((LONGJMP) * 2)
@@ -1129,7 +1096,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define LONGJMP_t8_pb               ((LONGJMP) * 4 + 2)
 #define LONGJMP_t8_p8               ((LONGJMP) * 4 + 3)
 
-/* 0x5e :  94
+/* 0x5b :  91
    MINMOD - Next operator is not greedy. */
 #define MINMOD                      (LONGJMP + 1)
 #define MINMOD_tb                   ((MINMOD) * 2)
@@ -1139,7 +1106,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MINMOD_t8_pb                ((MINMOD) * 4 + 2)
 #define MINMOD_t8_p8                ((MINMOD) * 4 + 3)
 
-/* 0x5f :  95
+/* 0x5c :  92
    LOGICAL - Next opcode should set the flag only. */
 #define LOGICAL                     (MINMOD + 1)
 #define LOGICAL_tb                  ((LOGICAL) * 2)
@@ -1149,7 +1116,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define LOGICAL_t8_pb               ((LOGICAL) * 4 + 2)
 #define LOGICAL_t8_p8               ((LOGICAL) * 4 + 3)
 
-/* 0x60 :  96
+/* 0x5d :  93
    EVAL - Execute some Perl code. Used by other opcodes in some cases */
 #define EVAL                        (LOGICAL + 1)
 #define EVAL_tb                     ((EVAL) * 2)
@@ -1159,7 +1126,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_t8_pb                  ((EVAL) * 4 + 2)
 #define EVAL_t8_p8                  ((EVAL) * 4 + 3)
 
-/* 0x61 :  97
+/* 0x5e :  94
    GOSUB - recurse to paren arg1 at (signed) ofs arg2 */
 #define GOSUB                       (EVAL + 1)
 #define GOSUB_tb                    ((GOSUB) * 2)
@@ -1169,7 +1136,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define GOSUB_t8_pb                 ((GOSUB) * 4 + 2)
 #define GOSUB_t8_p8                 ((GOSUB) * 4 + 3)
 
-/* 0x62 :  98
+/* 0x5f :  95
    GROUPP - Whether the group matched. */
 #define GROUPP                      (GOSUB + 1)
 #define GROUPP_tb                   ((GROUPP) * 2)
@@ -1179,7 +1146,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define GROUPP_t8_pb                ((GROUPP) * 4 + 2)
 #define GROUPP_t8_p8                ((GROUPP) * 4 + 3)
 
-/* 0x63 :  99
+/* 0x60 :  96
    GROUPPN - Whether the named group matched. */
 #define GROUPPN                     (GROUPP + 1)
 #define GROUPPN_tb                  ((GROUPPN) * 2)
@@ -1189,7 +1156,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define GROUPPN_t8_pb               ((GROUPPN) * 4 + 2)
 #define GROUPPN_t8_p8               ((GROUPPN) * 4 + 3)
 
-/* 0x64 : 100
+/* 0x61 :  97
    INSUBP - Whether we are in a specific recurse. */
 #define INSUBP                      (GROUPPN + 1)
 #define INSUBP_tb                   ((INSUBP) * 2)
@@ -1199,7 +1166,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define INSUBP_t8_pb                ((INSUBP) * 4 + 2)
 #define INSUBP_t8_p8                ((INSUBP) * 4 + 3)
 
-/* 0x65 : 101
+/* 0x62 :  98
    DEFINEP - Define regex subroutines. Contents never executed directly,
    disallows 'no' branch in conditional. */
 #define DEFINEP                     (INSUBP + 1)
@@ -1210,7 +1177,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define DEFINEP_t8_pb               ((DEFINEP) * 4 + 2)
 #define DEFINEP_t8_p8               ((DEFINEP) * 4 + 3)
 
-/* 0x66 : 102
+/* 0x63 :  99
    ENDLIKE - Used only for the type field of verbs */
 #define ENDLIKE                     (DEFINEP + 1)
 #define ENDLIKE_tb                  ((ENDLIKE) * 2)
@@ -1220,7 +1187,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define ENDLIKE_t8_pb               ((ENDLIKE) * 4 + 2)
 #define ENDLIKE_t8_p8               ((ENDLIKE) * 4 + 3)
 
-/* 0x67 : 103
+/* 0x64 : 100
    OPFAIL - Same as (?!), but with verb arg */
 #define OPFAIL                      (ENDLIKE + 1)
 #define OPFAIL_tb                   ((OPFAIL) * 2)
@@ -1230,7 +1197,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define OPFAIL_t8_pb                ((OPFAIL) * 4 + 2)
 #define OPFAIL_t8_p8                ((OPFAIL) * 4 + 3)
 
-/* 0x68 : 104
+/* 0x65 : 101
    ACCEPT - Accepts the current matched string, with verbar */
 #define ACCEPT                      (OPFAIL + 1)
 #define ACCEPT_tb                   ((ACCEPT) * 2)
@@ -1240,7 +1207,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define ACCEPT_t8_pb                ((ACCEPT) * 4 + 2)
 #define ACCEPT_t8_p8                ((ACCEPT) * 4 + 3)
 
-/* 0x69 : 105
+/* 0x66 : 102
    VERB - Used only for the type field of verbs */
 #define VERB                        (ACCEPT + 1)
 #define VERB_tb                     ((VERB) * 2)
@@ -1250,7 +1217,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define VERB_t8_pb                  ((VERB) * 4 + 2)
 #define VERB_t8_p8                  ((VERB) * 4 + 3)
 
-/* 0x6a : 106
+/* 0x67 : 103
    PRUNE - Pattern fails at this startpoint if no-backtracking through this */
 #define PRUNE                       (VERB + 1)
 #define PRUNE_tb                    ((PRUNE) * 2)
@@ -1260,7 +1227,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define PRUNE_t8_pb                 ((PRUNE) * 4 + 2)
 #define PRUNE_t8_p8                 ((PRUNE) * 4 + 3)
 
-/* 0x6b : 107
+/* 0x68 : 104
    MARKPOINT - Push the current location for rollback by cut. */
 #define MARKPOINT                   (PRUNE + 1)
 #define MARKPOINT_tb                ((MARKPOINT) * 2)
@@ -1270,7 +1237,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MARKPOINT_t8_pb             ((MARKPOINT) * 4 + 2)
 #define MARKPOINT_t8_p8             ((MARKPOINT) * 4 + 3)
 
-/* 0x6c : 108
+/* 0x69 : 105
    SKIP - On failure skip forward (to the mark) before retrying */
 #define SKIP                        (MARKPOINT + 1)
 #define SKIP_tb                     ((SKIP) * 2)
@@ -1280,7 +1247,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SKIP_t8_pb                  ((SKIP) * 4 + 2)
 #define SKIP_t8_p8                  ((SKIP) * 4 + 3)
 
-/* 0x6d : 109
+/* 0x6a : 106
    COMMIT - Pattern fails outright if backtracking through this */
 #define COMMIT                      (SKIP + 1)
 #define COMMIT_tb                   ((COMMIT) * 2)
@@ -1290,7 +1257,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define COMMIT_t8_pb                ((COMMIT) * 4 + 2)
 #define COMMIT_t8_p8                ((COMMIT) * 4 + 3)
 
-/* 0x6e : 110
+/* 0x6b : 107
    CUTGROUP - On failure go to the next alternation in the group */
 #define CUTGROUP                    (COMMIT + 1)
 #define CUTGROUP_tb                 ((CUTGROUP) * 2)
@@ -1300,7 +1267,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CUTGROUP_t8_pb              ((CUTGROUP) * 4 + 2)
 #define CUTGROUP_t8_p8              ((CUTGROUP) * 4 + 3)
 
-/* 0x6f : 111
+/* 0x6c : 108
    KEEPS - $& begins here. */
 #define KEEPS                       (CUTGROUP + 1)
 #define KEEPS_tb                    ((KEEPS) * 2)
@@ -1310,7 +1277,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_t8_pb                 ((KEEPS) * 4 + 2)
 #define KEEPS_t8_p8                 ((KEEPS) * 4 + 3)
 
-/* 0x70 : 112
+/* 0x6d : 109
    PSEUDO - Pseudo opcode for internal use. */
 #define PSEUDO                      (KEEPS + 1)
 #define PSEUDO_tb                   ((PSEUDO) * 2)
@@ -1320,7 +1287,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define PSEUDO_t8_pb                ((PSEUDO) * 4 + 2)
 #define PSEUDO_t8_p8                ((PSEUDO) * 4 + 3)
 
-/* 0x71 : 113
+/* 0x6e : 110
    REGEX_SET - Regex set, temporary node used in pre-optimization compilation */
 #define REGEX_SET                   (PSEUDO + 1)
 #define REGEX_SET_tb                ((REGEX_SET) * 2)
@@ -1331,7 +1298,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REGEX_SET_t8_p8             ((REGEX_SET) * 4 + 3)
 
 	/* ------------ States ------------- */
-/* 0x72 : 114
+/* 0x6f : 111
    TRIE_next - state for TRIE */
 #define TRIE_next                   (REGNODE_MAX + 1)
 #define TRIE_next_tb                ((TRIE_next) * 2)
@@ -1341,7 +1308,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define TRIE_next_t8_pb             ((TRIE_next) * 4 + 2)
 #define TRIE_next_t8_p8             ((TRIE_next) * 4 + 3)
 
-/* 0x73 : 115
+/* 0x70 : 112
    TRIE_next_fail - state for TRIE */
 #define TRIE_next_fail              (TRIE_next + 1)
 #define TRIE_next_fail_tb           ((TRIE_next_fail) * 2)
@@ -1351,7 +1318,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define TRIE_next_fail_t8_pb        ((TRIE_next_fail) * 4 + 2)
 #define TRIE_next_fail_t8_p8        ((TRIE_next_fail) * 4 + 3)
 
-/* 0x74 : 116
+/* 0x71 : 113
    EVAL_B - state for EVAL */
 #define EVAL_B                      (TRIE_next_fail + 1)
 #define EVAL_B_tb                   ((EVAL_B) * 2)
@@ -1361,7 +1328,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_B_t8_pb                ((EVAL_B) * 4 + 2)
 #define EVAL_B_t8_p8                ((EVAL_B) * 4 + 3)
 
-/* 0x75 : 117
+/* 0x72 : 114
    EVAL_B_fail - state for EVAL */
 #define EVAL_B_fail                 (EVAL_B + 1)
 #define EVAL_B_fail_tb              ((EVAL_B_fail) * 2)
@@ -1371,7 +1338,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_B_fail_t8_pb           ((EVAL_B_fail) * 4 + 2)
 #define EVAL_B_fail_t8_p8           ((EVAL_B_fail) * 4 + 3)
 
-/* 0x76 : 118
+/* 0x73 : 115
    EVAL_postponed_A - state for EVAL */
 #define EVAL_postponed_A            (EVAL_B_fail + 1)
 #define EVAL_postponed_A_tb         ((EVAL_postponed_A) * 2)
@@ -1381,7 +1348,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_postponed_A_t8_pb      ((EVAL_postponed_A) * 4 + 2)
 #define EVAL_postponed_A_t8_p8      ((EVAL_postponed_A) * 4 + 3)
 
-/* 0x77 : 119
+/* 0x74 : 116
    EVAL_postponed_A_fail - state for EVAL */
 #define EVAL_postponed_A_fail       (EVAL_postponed_A + 1)
 #define EVAL_postponed_A_fail_tb    ((EVAL_postponed_A_fail) * 2)
@@ -1391,7 +1358,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_postponed_A_fail_t8_pb ((EVAL_postponed_A_fail) * 4 + 2)
 #define EVAL_postponed_A_fail_t8_p8 ((EVAL_postponed_A_fail) * 4 + 3)
 
-/* 0x78 : 120
+/* 0x75 : 117
    EVAL_postponed_B - state for EVAL */
 #define EVAL_postponed_B            (EVAL_postponed_A_fail + 1)
 #define EVAL_postponed_B_tb         ((EVAL_postponed_B) * 2)
@@ -1401,7 +1368,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_postponed_B_t8_pb      ((EVAL_postponed_B) * 4 + 2)
 #define EVAL_postponed_B_t8_p8      ((EVAL_postponed_B) * 4 + 3)
 
-/* 0x79 : 121
+/* 0x76 : 118
    EVAL_postponed_B_fail - state for EVAL */
 #define EVAL_postponed_B_fail       (EVAL_postponed_B + 1)
 #define EVAL_postponed_B_fail_tb    ((EVAL_postponed_B_fail) * 2)
@@ -1411,7 +1378,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define EVAL_postponed_B_fail_t8_pb ((EVAL_postponed_B_fail) * 4 + 2)
 #define EVAL_postponed_B_fail_t8_p8 ((EVAL_postponed_B_fail) * 4 + 3)
 
-/* 0x7a : 122
+/* 0x77 : 119
    CURLYX_end - state for CURLYX */
 #define CURLYX_end                  (EVAL_postponed_B_fail + 1)
 #define CURLYX_end_tb               ((CURLYX_end) * 2)
@@ -1421,7 +1388,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYX_end_t8_pb            ((CURLYX_end) * 4 + 2)
 #define CURLYX_end_t8_p8            ((CURLYX_end) * 4 + 3)
 
-/* 0x7b : 123
+/* 0x78 : 120
    CURLYX_end_fail - state for CURLYX */
 #define CURLYX_end_fail             (CURLYX_end + 1)
 #define CURLYX_end_fail_tb          ((CURLYX_end_fail) * 2)
@@ -1431,7 +1398,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYX_end_fail_t8_pb       ((CURLYX_end_fail) * 4 + 2)
 #define CURLYX_end_fail_t8_p8       ((CURLYX_end_fail) * 4 + 3)
 
-/* 0x7c : 124
+/* 0x79 : 121
    WHILEM_A_pre - state for WHILEM */
 #define WHILEM_A_pre                (CURLYX_end_fail + 1)
 #define WHILEM_A_pre_tb             ((WHILEM_A_pre) * 2)
@@ -1441,7 +1408,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_pre_t8_pb          ((WHILEM_A_pre) * 4 + 2)
 #define WHILEM_A_pre_t8_p8          ((WHILEM_A_pre) * 4 + 3)
 
-/* 0x7d : 125
+/* 0x7a : 122
    WHILEM_A_pre_fail - state for WHILEM */
 #define WHILEM_A_pre_fail           (WHILEM_A_pre + 1)
 #define WHILEM_A_pre_fail_tb        ((WHILEM_A_pre_fail) * 2)
@@ -1451,7 +1418,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_pre_fail_t8_pb     ((WHILEM_A_pre_fail) * 4 + 2)
 #define WHILEM_A_pre_fail_t8_p8     ((WHILEM_A_pre_fail) * 4 + 3)
 
-/* 0x7e : 126
+/* 0x7b : 123
    WHILEM_A_min - state for WHILEM */
 #define WHILEM_A_min                (WHILEM_A_pre_fail + 1)
 #define WHILEM_A_min_tb             ((WHILEM_A_min) * 2)
@@ -1461,7 +1428,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_min_t8_pb          ((WHILEM_A_min) * 4 + 2)
 #define WHILEM_A_min_t8_p8          ((WHILEM_A_min) * 4 + 3)
 
-/* 0x7f : 127
+/* 0x7c : 124
    WHILEM_A_min_fail - state for WHILEM */
 #define WHILEM_A_min_fail           (WHILEM_A_min + 1)
 #define WHILEM_A_min_fail_tb        ((WHILEM_A_min_fail) * 2)
@@ -1471,7 +1438,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_min_fail_t8_pb     ((WHILEM_A_min_fail) * 4 + 2)
 #define WHILEM_A_min_fail_t8_p8     ((WHILEM_A_min_fail) * 4 + 3)
 
-/* 0x80 : 128
+/* 0x7d : 125
    WHILEM_A_max - state for WHILEM */
 #define WHILEM_A_max                (WHILEM_A_min_fail + 1)
 #define WHILEM_A_max_tb             ((WHILEM_A_max) * 2)
@@ -1481,7 +1448,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_max_t8_pb          ((WHILEM_A_max) * 4 + 2)
 #define WHILEM_A_max_t8_p8          ((WHILEM_A_max) * 4 + 3)
 
-/* 0x81 : 129
+/* 0x7e : 126
    WHILEM_A_max_fail - state for WHILEM */
 #define WHILEM_A_max_fail           (WHILEM_A_max + 1)
 #define WHILEM_A_max_fail_tb        ((WHILEM_A_max_fail) * 2)
@@ -1491,7 +1458,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_A_max_fail_t8_pb     ((WHILEM_A_max_fail) * 4 + 2)
 #define WHILEM_A_max_fail_t8_p8     ((WHILEM_A_max_fail) * 4 + 3)
 
-/* 0x82 : 130
+/* 0x7f : 127
    WHILEM_B_min - state for WHILEM */
 #define WHILEM_B_min                (WHILEM_A_max_fail + 1)
 #define WHILEM_B_min_tb             ((WHILEM_B_min) * 2)
@@ -1501,7 +1468,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_B_min_t8_pb          ((WHILEM_B_min) * 4 + 2)
 #define WHILEM_B_min_t8_p8          ((WHILEM_B_min) * 4 + 3)
 
-/* 0x83 : 131
+/* 0x80 : 128
    WHILEM_B_min_fail - state for WHILEM */
 #define WHILEM_B_min_fail           (WHILEM_B_min + 1)
 #define WHILEM_B_min_fail_tb        ((WHILEM_B_min_fail) * 2)
@@ -1511,7 +1478,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_B_min_fail_t8_pb     ((WHILEM_B_min_fail) * 4 + 2)
 #define WHILEM_B_min_fail_t8_p8     ((WHILEM_B_min_fail) * 4 + 3)
 
-/* 0x84 : 132
+/* 0x81 : 129
    WHILEM_B_max - state for WHILEM */
 #define WHILEM_B_max                (WHILEM_B_min_fail + 1)
 #define WHILEM_B_max_tb             ((WHILEM_B_max) * 2)
@@ -1521,7 +1488,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_B_max_t8_pb          ((WHILEM_B_max) * 4 + 2)
 #define WHILEM_B_max_t8_p8          ((WHILEM_B_max) * 4 + 3)
 
-/* 0x85 : 133
+/* 0x82 : 130
    WHILEM_B_max_fail - state for WHILEM */
 #define WHILEM_B_max_fail           (WHILEM_B_max + 1)
 #define WHILEM_B_max_fail_tb        ((WHILEM_B_max_fail) * 2)
@@ -1531,7 +1498,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define WHILEM_B_max_fail_t8_pb     ((WHILEM_B_max_fail) * 4 + 2)
 #define WHILEM_B_max_fail_t8_p8     ((WHILEM_B_max_fail) * 4 + 3)
 
-/* 0x86 : 134
+/* 0x83 : 131
    BRANCH_next - state for BRANCH */
 #define BRANCH_next                 (WHILEM_B_max_fail + 1)
 #define BRANCH_next_tb              ((BRANCH_next) * 2)
@@ -1541,7 +1508,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define BRANCH_next_t8_pb           ((BRANCH_next) * 4 + 2)
 #define BRANCH_next_t8_p8           ((BRANCH_next) * 4 + 3)
 
-/* 0x87 : 135
+/* 0x84 : 132
    BRANCH_next_fail - state for BRANCH */
 #define BRANCH_next_fail            (BRANCH_next + 1)
 #define BRANCH_next_fail_tb         ((BRANCH_next_fail) * 2)
@@ -1551,7 +1518,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define BRANCH_next_fail_t8_pb      ((BRANCH_next_fail) * 4 + 2)
 #define BRANCH_next_fail_t8_p8      ((BRANCH_next_fail) * 4 + 3)
 
-/* 0x88 : 136
+/* 0x85 : 133
    CURLYM_A - state for CURLYM */
 #define CURLYM_A                    (BRANCH_next_fail + 1)
 #define CURLYM_A_tb                 ((CURLYM_A) * 2)
@@ -1561,7 +1528,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYM_A_t8_pb              ((CURLYM_A) * 4 + 2)
 #define CURLYM_A_t8_p8              ((CURLYM_A) * 4 + 3)
 
-/* 0x89 : 137
+/* 0x86 : 134
    CURLYM_A_fail - state for CURLYM */
 #define CURLYM_A_fail               (CURLYM_A + 1)
 #define CURLYM_A_fail_tb            ((CURLYM_A_fail) * 2)
@@ -1571,7 +1538,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYM_A_fail_t8_pb         ((CURLYM_A_fail) * 4 + 2)
 #define CURLYM_A_fail_t8_p8         ((CURLYM_A_fail) * 4 + 3)
 
-/* 0x8a : 138
+/* 0x87 : 135
    CURLYM_B - state for CURLYM */
 #define CURLYM_B                    (CURLYM_A_fail + 1)
 #define CURLYM_B_tb                 ((CURLYM_B) * 2)
@@ -1581,7 +1548,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYM_B_t8_pb              ((CURLYM_B) * 4 + 2)
 #define CURLYM_B_t8_p8              ((CURLYM_B) * 4 + 3)
 
-/* 0x8b : 139
+/* 0x88 : 136
    CURLYM_B_fail - state for CURLYM */
 #define CURLYM_B_fail               (CURLYM_B + 1)
 #define CURLYM_B_fail_tb            ((CURLYM_B_fail) * 2)
@@ -1591,7 +1558,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLYM_B_fail_t8_pb         ((CURLYM_B_fail) * 4 + 2)
 #define CURLYM_B_fail_t8_p8         ((CURLYM_B_fail) * 4 + 3)
 
-/* 0x8c : 140
+/* 0x89 : 137
    IFMATCH_A - state for IFMATCH */
 #define IFMATCH_A                   (CURLYM_B_fail + 1)
 #define IFMATCH_A_tb                ((IFMATCH_A) * 2)
@@ -1601,7 +1568,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define IFMATCH_A_t8_pb             ((IFMATCH_A) * 4 + 2)
 #define IFMATCH_A_t8_p8             ((IFMATCH_A) * 4 + 3)
 
-/* 0x8d : 141
+/* 0x8a : 138
    IFMATCH_A_fail - state for IFMATCH */
 #define IFMATCH_A_fail              (IFMATCH_A + 1)
 #define IFMATCH_A_fail_tb           ((IFMATCH_A_fail) * 2)
@@ -1611,7 +1578,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define IFMATCH_A_fail_t8_pb        ((IFMATCH_A_fail) * 4 + 2)
 #define IFMATCH_A_fail_t8_p8        ((IFMATCH_A_fail) * 4 + 3)
 
-/* 0x8e : 142
+/* 0x8b : 139
    CURLY_B_min - state for CURLY */
 #define CURLY_B_min                 (IFMATCH_A_fail + 1)
 #define CURLY_B_min_tb              ((CURLY_B_min) * 2)
@@ -1621,7 +1588,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_min_t8_pb           ((CURLY_B_min) * 4 + 2)
 #define CURLY_B_min_t8_p8           ((CURLY_B_min) * 4 + 3)
 
-/* 0x8f : 143
+/* 0x8c : 140
    CURLY_B_min_fail - state for CURLY */
 #define CURLY_B_min_fail            (CURLY_B_min + 1)
 #define CURLY_B_min_fail_tb         ((CURLY_B_min_fail) * 2)
@@ -1631,7 +1598,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_min_fail_t8_pb      ((CURLY_B_min_fail) * 4 + 2)
 #define CURLY_B_min_fail_t8_p8      ((CURLY_B_min_fail) * 4 + 3)
 
-/* 0x90 : 144
+/* 0x8d : 141
    CURLY_B_max - state for CURLY */
 #define CURLY_B_max                 (CURLY_B_min_fail + 1)
 #define CURLY_B_max_tb              ((CURLY_B_max) * 2)
@@ -1641,7 +1608,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_max_t8_pb           ((CURLY_B_max) * 4 + 2)
 #define CURLY_B_max_t8_p8           ((CURLY_B_max) * 4 + 3)
 
-/* 0x91 : 145
+/* 0x8e : 142
    CURLY_B_max_fail - state for CURLY */
 #define CURLY_B_max_fail            (CURLY_B_max + 1)
 #define CURLY_B_max_fail_tb         ((CURLY_B_max_fail) * 2)
@@ -1651,7 +1618,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_max_fail_t8_pb      ((CURLY_B_max_fail) * 4 + 2)
 #define CURLY_B_max_fail_t8_p8      ((CURLY_B_max_fail) * 4 + 3)
 
-/* 0x92 : 146
+/* 0x8f : 143
    COMMIT_next - state for COMMIT */
 #define COMMIT_next                 (CURLY_B_max_fail + 1)
 #define COMMIT_next_tb              ((COMMIT_next) * 2)
@@ -1661,7 +1628,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define COMMIT_next_t8_pb           ((COMMIT_next) * 4 + 2)
 #define COMMIT_next_t8_p8           ((COMMIT_next) * 4 + 3)
 
-/* 0x93 : 147
+/* 0x90 : 144
    COMMIT_next_fail - state for COMMIT */
 #define COMMIT_next_fail            (COMMIT_next + 1)
 #define COMMIT_next_fail_tb         ((COMMIT_next_fail) * 2)
@@ -1671,7 +1638,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define COMMIT_next_fail_t8_pb      ((COMMIT_next_fail) * 4 + 2)
 #define COMMIT_next_fail_t8_p8      ((COMMIT_next_fail) * 4 + 3)
 
-/* 0x94 : 148
+/* 0x91 : 145
    MARKPOINT_next - state for MARKPOINT */
 #define MARKPOINT_next              (COMMIT_next_fail + 1)
 #define MARKPOINT_next_tb           ((MARKPOINT_next) * 2)
@@ -1681,7 +1648,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MARKPOINT_next_t8_pb        ((MARKPOINT_next) * 4 + 2)
 #define MARKPOINT_next_t8_p8        ((MARKPOINT_next) * 4 + 3)
 
-/* 0x95 : 149
+/* 0x92 : 146
    MARKPOINT_next_fail - state for MARKPOINT */
 #define MARKPOINT_next_fail         (MARKPOINT_next + 1)
 #define MARKPOINT_next_fail_tb      ((MARKPOINT_next_fail) * 2)
@@ -1691,7 +1658,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MARKPOINT_next_fail_t8_pb   ((MARKPOINT_next_fail) * 4 + 2)
 #define MARKPOINT_next_fail_t8_p8   ((MARKPOINT_next_fail) * 4 + 3)
 
-/* 0x96 : 150
+/* 0x93 : 147
    SKIP_next - state for SKIP */
 #define SKIP_next                   (MARKPOINT_next_fail + 1)
 #define SKIP_next_tb                ((SKIP_next) * 2)
@@ -1701,7 +1668,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SKIP_next_t8_pb             ((SKIP_next) * 4 + 2)
 #define SKIP_next_t8_p8             ((SKIP_next) * 4 + 3)
 
-/* 0x97 : 151
+/* 0x94 : 148
    SKIP_next_fail - state for SKIP */
 #define SKIP_next_fail              (SKIP_next + 1)
 #define SKIP_next_fail_tb           ((SKIP_next_fail) * 2)
@@ -1711,7 +1678,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SKIP_next_fail_t8_pb        ((SKIP_next_fail) * 4 + 2)
 #define SKIP_next_fail_t8_p8        ((SKIP_next_fail) * 4 + 3)
 
-/* 0x98 : 152
+/* 0x95 : 149
    CUTGROUP_next - state for CUTGROUP */
 #define CUTGROUP_next               (SKIP_next_fail + 1)
 #define CUTGROUP_next_tb            ((CUTGROUP_next) * 2)
@@ -1721,7 +1688,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CUTGROUP_next_t8_pb         ((CUTGROUP_next) * 4 + 2)
 #define CUTGROUP_next_t8_p8         ((CUTGROUP_next) * 4 + 3)
 
-/* 0x99 : 153
+/* 0x96 : 150
    CUTGROUP_next_fail - state for CUTGROUP */
 #define CUTGROUP_next_fail          (CUTGROUP_next + 1)
 #define CUTGROUP_next_fail_tb       ((CUTGROUP_next_fail) * 2)
@@ -1731,7 +1698,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CUTGROUP_next_fail_t8_pb    ((CUTGROUP_next_fail) * 4 + 2)
 #define CUTGROUP_next_fail_t8_p8    ((CUTGROUP_next_fail) * 4 + 3)
 
-/* 0x9a : 154
+/* 0x97 : 151
    KEEPS_next - state for KEEPS */
 #define KEEPS_next                  (CUTGROUP_next_fail + 1)
 #define KEEPS_next_tb               ((KEEPS_next) * 2)
@@ -1741,7 +1708,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_t8_pb            ((KEEPS_next) * 4 + 2)
 #define KEEPS_next_t8_p8            ((KEEPS_next) * 4 + 3)
 
-/* 0x9b : 155
+/* 0x98 : 152
    KEEPS_next_fail - state for KEEPS */
 #define KEEPS_next_fail             (KEEPS_next + 1)
 #define KEEPS_next_fail_tb          ((KEEPS_next_fail) * 2)
@@ -1751,7 +1718,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_fail_t8_pb       ((KEEPS_next_fail) * 4 + 2)
 #define KEEPS_next_fail_t8_p8       ((KEEPS_next_fail) * 4 + 3)
 
-/* 0x9c : 156
+/* 0x99 : 153
    REF_next - state for REF */
 #define REF_next                    (KEEPS_next_fail + 1)
 #define REF_next_tb                 ((REF_next) * 2)
@@ -1761,7 +1728,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REF_next_t8_pb              ((REF_next) * 4 + 2)
 #define REF_next_t8_p8              ((REF_next) * 4 + 3)
 
-/* 0x9d : 157
+/* 0x9a : 154
    REF_next_fail - state for REF */
 #define REF_next_fail               (REF_next + 1)
 #define REF_next_fail_tb            ((REF_next_fail) * 2)
@@ -1833,62 +1800,59 @@ EXTCONST char * const PL_regnode_name[]  INIT( {
 	"EXACTFU_S_EDGE",        	/* 0x37 */
 	"LNBREAK",               	/* 0x38 */
 	"TRIE",                  	/* 0x39 */
-	"TRIEC",                 	/* 0x3a */
-	"AHOCORASICK",           	/* 0x3b */
-	"AHOCORASICKC",          	/* 0x3c */
-	"LTRIE",                 	/* 0x3d */
-	"LTRIEC",                	/* 0x3e */
-	"NOTHING",               	/* 0x3f */
-	"TAIL",                  	/* 0x40 */
-	"OPTIMIZED",             	/* 0x41 */
-	"STAR",                  	/* 0x42 */
-	"PLUS",                  	/* 0x43 */
-	"CURLY",                 	/* 0x44 */
-	"CURLYN",                	/* 0x45 */
-	"CURLYM",                	/* 0x46 */
-	"CURLYX",                	/* 0x47 */
-	"WHILEM",                	/* 0x48 */
-	"OPEN",                  	/* 0x49 */
-	"CLOSE",                 	/* 0x4a */
-	"SROPEN",                	/* 0x4b */
-	"SRCLOSE",               	/* 0x4c */
-	"REF",                   	/* 0x4d */
-	"REFF",                  	/* 0x4e */
-	"REFFL",                 	/* 0x4f */
-	"REFFU",                 	/* 0x50 */
-	"REFFA",                 	/* 0x51 */
-	"REFN",                  	/* 0x52 */
-	"REFFN",                 	/* 0x53 */
-	"REFFLN",                	/* 0x54 */
-	"REFFUN",                	/* 0x55 */
-	"REFFAN",                	/* 0x56 */
-	"BRANCHJ",               	/* 0x57 */
-	"IFMATCH",               	/* 0x58 */
-	"UNLESSM",               	/* 0x59 */
-	"SUSPEND",               	/* 0x5a */
-	"IFTHEN",                	/* 0x5b */
-	"RENUM",                 	/* 0x5c */
-	"LONGJMP",               	/* 0x5d */
-	"MINMOD",                	/* 0x5e */
-	"LOGICAL",               	/* 0x5f */
-	"EVAL",                  	/* 0x60 */
-	"GOSUB",                 	/* 0x61 */
-	"GROUPP",                	/* 0x62 */
-	"GROUPPN",               	/* 0x63 */
-	"INSUBP",                	/* 0x64 */
-	"DEFINEP",               	/* 0x65 */
-	"ENDLIKE",               	/* 0x66 */
-	"OPFAIL",                	/* 0x67 */
-	"ACCEPT",                	/* 0x68 */
-	"VERB",                  	/* 0x69 */
-	"PRUNE",                 	/* 0x6a */
-	"MARKPOINT",             	/* 0x6b */
-	"SKIP",                  	/* 0x6c */
-	"COMMIT",                	/* 0x6d */
-	"CUTGROUP",              	/* 0x6e */
-	"KEEPS",                 	/* 0x6f */
-	"PSEUDO",                	/* 0x70 */
-	"REGEX_SET",             	/* 0x71 */
+	"AHOCORASICK",           	/* 0x3a */
+	"LTRIE",                 	/* 0x3b */
+	"NOTHING",               	/* 0x3c */
+	"TAIL",                  	/* 0x3d */
+	"OPTIMIZED",             	/* 0x3e */
+	"STAR",                  	/* 0x3f */
+	"PLUS",                  	/* 0x40 */
+	"CURLY",                 	/* 0x41 */
+	"CURLYN",                	/* 0x42 */
+	"CURLYM",                	/* 0x43 */
+	"CURLYX",                	/* 0x44 */
+	"WHILEM",                	/* 0x45 */
+	"OPEN",                  	/* 0x46 */
+	"CLOSE",                 	/* 0x47 */
+	"SROPEN",                	/* 0x48 */
+	"SRCLOSE",               	/* 0x49 */
+	"REF",                   	/* 0x4a */
+	"REFF",                  	/* 0x4b */
+	"REFFL",                 	/* 0x4c */
+	"REFFU",                 	/* 0x4d */
+	"REFFA",                 	/* 0x4e */
+	"REFN",                  	/* 0x4f */
+	"REFFN",                 	/* 0x50 */
+	"REFFLN",                	/* 0x51 */
+	"REFFUN",                	/* 0x52 */
+	"REFFAN",                	/* 0x53 */
+	"BRANCHJ",               	/* 0x54 */
+	"IFMATCH",               	/* 0x55 */
+	"UNLESSM",               	/* 0x56 */
+	"SUSPEND",               	/* 0x57 */
+	"IFTHEN",                	/* 0x58 */
+	"RENUM",                 	/* 0x59 */
+	"LONGJMP",               	/* 0x5a */
+	"MINMOD",                	/* 0x5b */
+	"LOGICAL",               	/* 0x5c */
+	"EVAL",                  	/* 0x5d */
+	"GOSUB",                 	/* 0x5e */
+	"GROUPP",                	/* 0x5f */
+	"GROUPPN",               	/* 0x60 */
+	"INSUBP",                	/* 0x61 */
+	"DEFINEP",               	/* 0x62 */
+	"ENDLIKE",               	/* 0x63 */
+	"OPFAIL",                	/* 0x64 */
+	"ACCEPT",                	/* 0x65 */
+	"VERB",                  	/* 0x66 */
+	"PRUNE",                 	/* 0x67 */
+	"MARKPOINT",             	/* 0x68 */
+	"SKIP",                  	/* 0x69 */
+	"COMMIT",                	/* 0x6a */
+	"CUTGROUP",              	/* 0x6b */
+	"KEEPS",                 	/* 0x6c */
+	"PSEUDO",                	/* 0x6d */
+	"REGEX_SET",             	/* 0x6e */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -2347,700 +2311,679 @@ EXTCONST struct regnode_meta PL_regnode_info[]  INIT( {
         .off_by_arg = 0
     },
     {
-        /* #58 op TRIEC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_TRIEC),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #59 op AHOCORASICK */
+        /* #58 op AHOCORASICK */
         .type = TRIE,
         .arg_len = EXTRA_SIZE(tregnode_AHOCORASICK),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #60 op AHOCORASICKC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICKC),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #61 op LTRIE */
+        /* #59 op LTRIE */
         .type = TRIE,
         .arg_len = EXTRA_SIZE(tregnode_LTRIE),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #62 op LTRIEC */
-        .type = TRIE,
-        .arg_len = EXTRA_SIZE(tregnode_LTRIEC),
-        .arg_len_varies = 0,
-        .off_by_arg = 0
-    },
-    {
-        /* #63 op NOTHING */
+        /* #60 op NOTHING */
         .type = NOTHING,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #64 op TAIL */
+        /* #61 op TAIL */
         .type = NOTHING,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #65 op OPTIMIZED */
+        /* #62 op OPTIMIZED */
         .type = NOTHING,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #66 op STAR */
+        /* #63 op STAR */
         .type = STAR,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #67 op PLUS */
+        /* #64 op PLUS */
         .type = PLUS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #68 op CURLY */
+        /* #65 op CURLY */
         .type = CURLY,
         .arg_len = EXTRA_SIZE(tregnode_CURLY),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #69 op CURLYN */
+        /* #66 op CURLYN */
         .type = CURLY,
         .arg_len = EXTRA_SIZE(tregnode_CURLYN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #70 op CURLYM */
+        /* #67 op CURLYM */
         .type = CURLY,
         .arg_len = EXTRA_SIZE(tregnode_CURLYM),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #71 op CURLYX */
+        /* #68 op CURLYX */
         .type = CURLY,
         .arg_len = EXTRA_SIZE(tregnode_CURLYX),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #72 op WHILEM */
+        /* #69 op WHILEM */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #73 op OPEN */
+        /* #70 op OPEN */
         .type = OPEN,
         .arg_len = EXTRA_SIZE(tregnode_OPEN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #74 op CLOSE */
+        /* #71 op CLOSE */
         .type = CLOSE,
         .arg_len = EXTRA_SIZE(tregnode_CLOSE),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #75 op SROPEN */
+        /* #72 op SROPEN */
         .type = SROPEN,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #76 op SRCLOSE */
+        /* #73 op SRCLOSE */
         .type = SRCLOSE,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #77 op REF */
+        /* #74 op REF */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REF),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #78 op REFF */
+        /* #75 op REFF */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFF),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #79 op REFFL */
+        /* #76 op REFFL */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFL),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #80 op REFFU */
+        /* #77 op REFFU */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFU),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #81 op REFFA */
+        /* #78 op REFFA */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFA),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #82 op REFN */
+        /* #79 op REFN */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #83 op REFFN */
+        /* #80 op REFFN */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #84 op REFFLN */
+        /* #81 op REFFLN */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFLN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #85 op REFFUN */
+        /* #82 op REFFUN */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFUN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #86 op REFFAN */
+        /* #83 op REFFAN */
         .type = REF,
         .arg_len = EXTRA_SIZE(tregnode_REFFAN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #87 op BRANCHJ */
+        /* #84 op BRANCHJ */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_BRANCHJ),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #88 op IFMATCH */
+        /* #85 op IFMATCH */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_IFMATCH),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #89 op UNLESSM */
+        /* #86 op UNLESSM */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_UNLESSM),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #90 op SUSPEND */
+        /* #87 op SUSPEND */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_SUSPEND),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #91 op IFTHEN */
+        /* #88 op IFTHEN */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_IFTHEN),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #92 op RENUM */
+        /* #89 op RENUM */
         .type = BRANCHJ,
         .arg_len = EXTRA_SIZE(tregnode_RENUM),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #93 op LONGJMP */
+        /* #90 op LONGJMP */
         .type = LONGJMP,
         .arg_len = EXTRA_SIZE(tregnode_LONGJMP),
         .arg_len_varies = 0,
         .off_by_arg = 1
     },
     {
-        /* #94 op MINMOD */
+        /* #91 op MINMOD */
         .type = MINMOD,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #95 op LOGICAL */
+        /* #92 op LOGICAL */
         .type = LOGICAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #96 op EVAL */
+        /* #93 op EVAL */
         .type = EVAL,
         .arg_len = EXTRA_SIZE(tregnode_EVAL),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #97 op GOSUB */
+        /* #94 op GOSUB */
         .type = GOSUB,
         .arg_len = EXTRA_SIZE(tregnode_GOSUB),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #98 op GROUPP */
+        /* #95 op GROUPP */
         .type = GROUPP,
         .arg_len = EXTRA_SIZE(tregnode_GROUPP),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #99 op GROUPPN */
+        /* #96 op GROUPPN */
         .type = GROUPPN,
         .arg_len = EXTRA_SIZE(tregnode_GROUPPN),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #100 op INSUBP */
+        /* #97 op INSUBP */
         .type = INSUBP,
         .arg_len = EXTRA_SIZE(tregnode_INSUBP),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #101 op DEFINEP */
+        /* #98 op DEFINEP */
         .type = DEFINEP,
         .arg_len = EXTRA_SIZE(tregnode_DEFINEP),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #102 op ENDLIKE */
+        /* #99 op ENDLIKE */
         .type = ENDLIKE,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #103 op OPFAIL */
+        /* #100 op OPFAIL */
         .type = ENDLIKE,
         .arg_len = EXTRA_SIZE(tregnode_OPFAIL),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #104 op ACCEPT */
+        /* #101 op ACCEPT */
         .type = ENDLIKE,
         .arg_len = EXTRA_SIZE(tregnode_ACCEPT),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #105 op VERB */
+        /* #102 op VERB */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_VERB),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #106 op PRUNE */
+        /* #103 op PRUNE */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_PRUNE),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #107 op MARKPOINT */
+        /* #104 op MARKPOINT */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_MARKPOINT),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #108 op SKIP */
+        /* #105 op SKIP */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_SKIP),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #109 op COMMIT */
+        /* #106 op COMMIT */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_COMMIT),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #110 op CUTGROUP */
+        /* #107 op CUTGROUP */
         .type = VERB,
         .arg_len = EXTRA_SIZE(tregnode_CUTGROUP),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #111 op KEEPS */
+        /* #108 op KEEPS */
         .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #112 op PSEUDO */
+        /* #109 op PSEUDO */
         .type = PSEUDO,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #113 op REGEX_SET */
+        /* #110 op REGEX_SET */
         .type = REGEX_SET,
         .arg_len = EXTRA_SIZE(tregnode_REGEX_SET),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #114 state TRIE_next */
+        /* #111 state TRIE_next */
         .type = TRIE,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #115 state TRIE_next_fail */
+        /* #112 state TRIE_next_fail */
         .type = TRIE,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #116 state EVAL_B */
+        /* #113 state EVAL_B */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #117 state EVAL_B_fail */
+        /* #114 state EVAL_B_fail */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #118 state EVAL_postponed_A */
+        /* #115 state EVAL_postponed_A */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #119 state EVAL_postponed_A_fail */
+        /* #116 state EVAL_postponed_A_fail */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #120 state EVAL_postponed_B */
+        /* #117 state EVAL_postponed_B */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #121 state EVAL_postponed_B_fail */
+        /* #118 state EVAL_postponed_B_fail */
         .type = EVAL,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #122 state CURLYX_end */
+        /* #119 state CURLYX_end */
         .type = CURLYX,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #123 state CURLYX_end_fail */
+        /* #120 state CURLYX_end_fail */
         .type = CURLYX,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #124 state WHILEM_A_pre */
+        /* #121 state WHILEM_A_pre */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #125 state WHILEM_A_pre_fail */
+        /* #122 state WHILEM_A_pre_fail */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #126 state WHILEM_A_min */
+        /* #123 state WHILEM_A_min */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #127 state WHILEM_A_min_fail */
+        /* #124 state WHILEM_A_min_fail */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #128 state WHILEM_A_max */
+        /* #125 state WHILEM_A_max */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #129 state WHILEM_A_max_fail */
+        /* #126 state WHILEM_A_max_fail */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #130 state WHILEM_B_min */
+        /* #127 state WHILEM_B_min */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #131 state WHILEM_B_min_fail */
+        /* #128 state WHILEM_B_min_fail */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #132 state WHILEM_B_max */
+        /* #129 state WHILEM_B_max */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #133 state WHILEM_B_max_fail */
+        /* #130 state WHILEM_B_max_fail */
         .type = WHILEM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #134 state BRANCH_next */
+        /* #131 state BRANCH_next */
         .type = BRANCH,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #135 state BRANCH_next_fail */
+        /* #132 state BRANCH_next_fail */
         .type = BRANCH,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #136 state CURLYM_A */
+        /* #133 state CURLYM_A */
         .type = CURLYM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #137 state CURLYM_A_fail */
+        /* #134 state CURLYM_A_fail */
         .type = CURLYM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #138 state CURLYM_B */
+        /* #135 state CURLYM_B */
         .type = CURLYM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #139 state CURLYM_B_fail */
+        /* #136 state CURLYM_B_fail */
         .type = CURLYM,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #140 state IFMATCH_A */
+        /* #137 state IFMATCH_A */
         .type = IFMATCH,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #141 state IFMATCH_A_fail */
+        /* #138 state IFMATCH_A_fail */
         .type = IFMATCH,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #142 state CURLY_B_min */
+        /* #139 state CURLY_B_min */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #143 state CURLY_B_min_fail */
+        /* #140 state CURLY_B_min_fail */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #144 state CURLY_B_max */
+        /* #141 state CURLY_B_max */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #145 state CURLY_B_max_fail */
+        /* #142 state CURLY_B_max_fail */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #146 state COMMIT_next */
+        /* #143 state COMMIT_next */
         .type = COMMIT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #147 state COMMIT_next_fail */
+        /* #144 state COMMIT_next_fail */
         .type = COMMIT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #148 state MARKPOINT_next */
+        /* #145 state MARKPOINT_next */
         .type = MARKPOINT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #149 state MARKPOINT_next_fail */
+        /* #146 state MARKPOINT_next_fail */
         .type = MARKPOINT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #150 state SKIP_next */
+        /* #147 state SKIP_next */
         .type = SKIP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #151 state SKIP_next_fail */
+        /* #148 state SKIP_next_fail */
         .type = SKIP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #152 state CUTGROUP_next */
+        /* #149 state CUTGROUP_next */
         .type = CUTGROUP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #153 state CUTGROUP_next_fail */
+        /* #150 state CUTGROUP_next_fail */
         .type = CUTGROUP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #154 state KEEPS_next */
+        /* #151 state KEEPS_next */
         .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #155 state KEEPS_next_fail */
+        /* #152 state KEEPS_next_fail */
         .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #156 state REF_next */
+        /* #153 state REF_next */
         .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #157 state REF_next_fail */
+        /* #154 state REF_next_fail */
         .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,
@@ -3123,8 +3066,8 @@ INIT({ CLUMP, BRANCH, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM, REF,
     BRANCHJ, SUSPEND, IFTHEN,
     0 });
 
-/* varies: 000000000000000000000000000000000000000000000011000000000000000011111100111000011111111100001100000000000000000000000000 */
-EXTCONST U8 PL_varies_bitmask[] INIT({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0xFC, 0xE1, 0xFF, 0x0C, 0x00, 0x00, 0x00 });
+/* varies: 0000000000000000000000000000000000000000000000110000000010000000001111111111110010011111000000010000000000000000 */
+EXTCONST U8 PL_varies_bitmask[] INIT({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x80, 0x3F, 0xFC, 0x9F, 0x01, 0x00, 0x00 });
 
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
@@ -3136,8 +3079,8 @@ INIT({ REG_ANY, SANY, ANYOF, ANYOFD, ANYOFL, ANYOFPOSIXL, ANYOFH, ANYOFHb,
     POSIXL, POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU, NPOSIXA, REGEX_SET,
     0 });
 
-/* simple: 000000000000000011111110111111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000010 */
-EXTCONST U8 PL_simple_bitmask[] INIT({ 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 });
+/* simple: 0000000000000000111111101111111111111111000000000000000000000000000000000000000000000000000000000000000001000000 */
+EXTCONST U8 PL_simple_bitmask[] INIT({ 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40 });
 
 /* Is 'op', known to be of type EXACT, folding? */
 #define isEXACTFish(op) (assert(REGNODE_TYPE(op) == EXACT), (PL_EXACTFish_bitmask & (1U << (op - EXACT))))

@@ -4744,6 +4744,9 @@ struct Perl_OpDumpContext;
 #include "warnings.h"
 #include "utf8.h"
 
+/* Trie transitions use encoded octets rather than codepoints. */
+#define PERL_REGEX_OCTET_TRIE 1
+
 /* these would be in doio.h if there was such a file */
 #define my_stat()  my_stat_flags(SV_GMAGIC)
 #define my_lstat() my_lstat_flags(SV_GMAGIC)
@@ -8172,7 +8175,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
         STMT_START {                                                        \
             if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                                       "Wide character (U+%" UVXf ") in %s",\
+                                       "Wide character (U+%" UVXf ") in %s under a non-UTF-8 locale",\
                                        (UV) cp, OP_DESC(PL_op));            \
             }                                                               \
         }  STMT_END
@@ -8184,7 +8187,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                                           (const U8 *) (send),              \
                                           NULL);                            \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                        "Wide character (U+%" UVXf ") in %s",               \
+                        "Wide character (U+%" UVXf ") in %s under a non-UTF-8 locale", \
                         (UV) cp, OP_DESC(PL_op));                           \
             }                                                               \
         }  STMT_END

@@ -91,10 +91,8 @@ __END__
 #%MATCHED%
 #Freeing REx: "X(A|[B]Q||C|D)Y"
 Compiling REx "X(A|[B]Q||C|D)Y"
-[A-D]
 TRIE-EXACT
 <BQ>
-matched empty string
 Match successful!
 Found floating substr "Y" at offset 1 (rx_origin now 0)...
 Found anchored substr "X" at offset 0 (rx_origin now 0)...
@@ -104,7 +102,7 @@ minlen 2
 S:1/6   
 W:5
 L:0/2
-C:5/5
+C:5
 %MATCHED%
 ---
 #Compiling REx "[f][o][o][b][a][r]"
@@ -156,7 +154,7 @@ minlen 3
 #     word_info N:(prev,char)= 1:(0,1) 2:(0,1) 3:(0,1) 4:(0,1) 5:(0,1) 6:(0,1)
 # Final program:
 #    1: EXACT <ABC> (3)
-#    3: TRIEC-EXACT<S:4/10 W:6 L:1/1 C:24/7>[A-EGP] (20)
+#    3: TRIE-EXACT<S:4/10 W:6 L:1/1 C:24>[A-EGP] (20)
 #       <P> 
 #       <G> 
 #       <E> 
@@ -170,7 +168,7 @@ minlen 3
 # Guessed: match at offset 0
 # Matching REx "(?:ABCP|ABCG|ABCE|ABCB|ABCA|ABCD)" against "ABCD"
 #    0 <> <ABCD>               |  1:EXACT <ABC>(3)
-#    3 <ABC> <D>               |  3:TRIEC-EXACT<S:4/10 W:6 L:1/1 C:24/7>[A-EGP](20)
+#    3 <ABC> <D>               |  3:TRIE-EXACT<S:4/10 W:6 L:1/1 C:24>[A-EGP](20)
 #    3 <ABC> <D>               |    State:    4 Accepted:    0 Charid:  7 CP:  44 After State:    a
 #    4 <ABCD> <>               |    State:    a Accepted:    1 Charid:  7 CP:   0 After State:    0
 #                                   got 1 possible matches
@@ -181,12 +179,11 @@ minlen 3
 # Freeing REx: "(?:ABCP|ABCG|ABCE|ABCB|ABCA|ABCD)"
 %MATCHED%
 EXACT <ABC>
-TRIEC-EXACT
-[A-EGP]
+TRIE-EXACT
 S:4/10
 W:6
 L:1/1
-C:24/7
+C:24
 minlen 4
 (checking anchored)
 anchored "ABC" at 0

@@ -8542,7 +8542,7 @@ indicates that incorrect results are being obtained.  You should examine
 your code to determine how a wide character is getting to an operation
 that doesn't handle them.
 
-=item Wide character (U+%X) in %s
+=item Wide character (U+%X) in %s under a non-UTF-8 locale
 
 (W locale) While in a single-byte locale (I<i.e.>, a non-UTF-8
 one), a multi-byte character was encountered.   Perl considers this

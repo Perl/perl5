@@ -91,6 +91,14 @@ There may well be none in a stable release.
 
 XXX
 
+=item *
+
+The regular expression trie optimizer has been reworked to compile trie
+transitions as octets.  Large alternations can now avoid work that previously
+grew with both the number of alternatives and the amount of text skipped
+before a match, while preserving the existing matching semantics for native
+and UTF-8 strings.
+
 =back
 
 =head1 Modules and Pragmata
@@ -349,6 +357,19 @@ well.
 =item *
 
 XXX
+
+=item *
+
+The regular expression compiler's TRIE implementation has been changed to use
+the octets of the UTF-8 representation of the pattern in its internal table
+structures. Previous versions used a trie based on code points, which had
+various side effects that required additional complexity, especially because
+of Unicode's potentially very large alphabet. By switching to an octet-based
+representation, a large amount of this complexity could be removed, making
+the new code faster, easier to maintain, and easier to prove correct.
+
+Most users should not notice this change, except perhaps a slight performance
+improvement.
 
 =back
 

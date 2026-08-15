@@ -374,19 +374,12 @@ LNBREAK          none       generic newline pattern
 
 # Trie Related
 #
-# Behave the same as A|LIST|OF|WORDS would. The '..C' variants have inline
-# charclass data (ascii only), the 'C' store it in the structure.
+# Behave the same as A|LIST|OF|WORDS would. Trie data is stored in a shared
+# trie structure.
 TRIE             trie 1     Match many EXACT(F[ALU]?)? at once.
                             flags==type
-TRIEC            trie       Same as TRIE, but with embedded charclass
-                 charclass  data
 AHOCORASICK      trie 1     Aho Corasick stclass. flags==type
-AHOCORASICKC     trie       Same as AHOCORASICK, but with embedded
-                 charclass  charclass data
 LTRIE            trie 2     Same as TRIE, but with longjump support
-LTRIEC           trie       Same as TRIEC, but with longjump support
-                 charclass_
-                 trie
 
 # Do nothing types
 NOTHING          no         Match empty string.

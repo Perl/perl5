@@ -6741,6 +6741,9 @@ t/re/subst.t				See if substitution works
 t/re/subst_amp.t			See if $&-related substitution works
 t/re/subst_wamp.t			See if substitution works with $& present
 t/re/substT.t				See if substitution works with -T
+t/re/trie_bench.pl			Shared trie benchmark and regression cases
+t/re/trie_bench.t			Trie benchmark regression tests
+t/re/trie_byte.t			Test byte-oriented trie construction
 t/re/uniprops01.t			Test unicode \p{} regex constructs
 t/re/uniprops02.t			Test unicode \p{} regex constructs
 t/re/uniprops03.t			Test unicode \p{} regex constructs

@@ -246,8 +246,8 @@ a[bB]c	3	0+abc	-	Tanchored
 (?=abc)	0	0+abc	-	Tanchored,Tminlen=3,minlenret=0
 abc|abc	3	0+abc	-	isall
 abcd|abce	4	0+abc	-	-
-acde|bcde	4	1+cde	-	Tanchored,stclass=~[ab]
-acdef|bcdeg	5	1+cde	-	Tanchored,stclass=~[ab]
+acde|bcde	4	1+cde	-	Tanchored,stclass=AHOCORASICK-EXACT
+acdef|bcdeg	5	1+cde	-	Tanchored,stclass=AHOCORASICK-EXACT
 
 # same as above, floating
 .?abc	3	-	0:1+abc	-
