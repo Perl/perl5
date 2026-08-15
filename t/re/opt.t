@@ -246,8 +246,8 @@ a[bB]c	3	0+abc	-	Tanchored
 (?=abc)	0	0+abc	-	Tanchored,Tminlen=3,minlenret=0
 abc|abc	3	0+abc	-	isall
 abcd|abce	4	0+abc	-	-
-acde|bcde	4	1+cde	-	Tanchored,stclass=~[ab]
-acdef|bcdeg	5	1+cde	-	Tanchored,stclass=~[ab]
+acde|bcde	4	1+cde	-	Tanchored,stclass=AHOCORASICK-EXACT
+acdef|bcdeg	5	1+cde	-	Tanchored,stclass=AHOCORASICK-EXACT
 
 # same as above, floating
 .?abc	3	-	0:1+abc	-
@@ -278,7 +278,7 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 # Nested branches that should be flattened
 (?:mat3|mat4)|mat1|mat2	4	0+mat	-	-	flattened single nested branch
 ^(?:mat1|mat2|(?:mat3|mat4)|mat5|(?:mat6|mat7))$	4	0+mat	-	noscan,anchor SBOL	flattened multiple, simple branches
-(?:foo|bar|(?:baz|bop|bing)|zoop)	3	-	-	stclass=~AHOCORASICKC-EXACT\[bfz\]	flattened multiple branches
+(?:foo|bar|(?:baz|bop|bing)|zoop)	3	-	-	stclass=AHOCORASICK-EXACT	flattened multiple branches
 (?:(?:frog|fan)|fog)|(?:farce|(?:forge|flambe))	3	0+f	-	-	flattened multiple, deeper branches
 
 (?:(?:cat|dog|fish)|bird)x	4	-	3:4+x	-	flattened trie, trailing literal floats
