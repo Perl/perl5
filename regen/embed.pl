@@ -2487,7 +2487,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USE_TM64
     USE_UTF8_IN_NAMES
     UTF8_ACCUMULATE
-    UTF8_ALLOW_LONG_AND_ITS_VALUE
     UTF8_EIGHT_BIT_HI
     UTF8_EIGHT_BIT_LO
     UTF8_GOT_LONG_WITH_VALUE
@@ -2967,6 +2966,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     toLOWER_utf8_flags_
     toTITLE_utf8_flags_
     toUPPER_utf8_flags_
+    UTF8_ALLOW_LONG_AND_ITS_VALUE
     UTF8_CHECK_ONLY_BIT_POS_
     UTF8_DIE_IF_MALFORMED_BIT_POS_
     UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_
