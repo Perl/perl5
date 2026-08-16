@@ -500,13 +500,13 @@ B<Unless stated otherwise these options are considered experimental or
 insecure and are not recommended for production use.>
 
 Since Perl 5.18 we have included support for multiple hash functions,
-although from time to time we change which functions we support,
-and which function is default (currently SBOX+SIPHASH13 on 64 bit builds
-and SBOX+ZAPHOD32 for 32 bit builds). You can choose a different
-algorithm by defining one of the following symbols during configure.
-Note that there are security implications regarding which hash function you choose
-to use. The functions are listed roughly by how secure they are believed
-to be, with the one believed to be most secure at release time being PERL_HASH_FUNC_SIPHASH.
+although from time to time we change which functions we support, and
+which function is default (currently SBOX+SIPHASH13). You can choose a
+different algorithm by defining one of the following symbols during
+configure. Note that there are security implications regarding which
+hash function you choose to use. The functions are listed roughly by how
+secure they are believed to be, with the one believed to be most secure
+at release time being C<PERL_HASH_FUNC_SIPHASH>.
 
     PERL_HASH_FUNC_SIPHASH
     PERL_HASH_FUNC_SIPHASH13
