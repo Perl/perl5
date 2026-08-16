@@ -1328,6 +1328,9 @@ $email  =~ s/'/\\'/g if defined $email;
 $author ||= "A. U. Thor";
 $email  ||= 'a.u.thor@a.galaxy.far.far.away';
 
+$email =~ s/\@/ [at] /g;
+$email =~ s/\./ [dot] /g;
+
 $licence = sprintf << "DEFAULT", $^V;
 Copyright (C) ${\(1900 + (localtime) [5])} by $author
 
