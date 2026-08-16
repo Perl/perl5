@@ -280,7 +280,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CALLREG_NUMBUF_STORE
     CALLREG_PACKAGE
     CALLRUNOPS
-    CAN64BITHASH
     CAN_COW_FLAGS
     CAN_COW_MASK
     CASE_STD_PMMOD_FLAGS_PARSE_SET
