@@ -197,8 +197,6 @@ The following code should return 0x6421D9AA
 =cut
 */
 
-#ifdef CAN64BITHASH
-
 #define SIPROUND            \
   STMT_START {              \
     v0 += v1; v1=ROTL64(v1,13); v1 ^= v0; v0=ROTL64(v0,32); \
@@ -317,4 +315,3 @@ PERL_SIPHASH_FNC(
     ,SIPROUND;SIPROUND;SIPROUND;SIPROUND;
 )
 
-#endif /* defined(CAN64BITHASH) */

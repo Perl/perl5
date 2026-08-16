@@ -1,19 +1,6 @@
 #ifndef PERL_HV_MACRO_H_ /* compile once */
 #define PERL_HV_MACRO_H_
 
-#if IVSIZE == 8
-#define CAN64BITHASH
-#endif
-
-#ifdef CAN64BITHASH
-  #ifndef U64TYPE
-  /* This probably isn't going to work, but failing with a compiler error due to
-   lack of uint64_t is no worse than failing right now with an #error.  */
-  #define U64 uint64_t
-  #endif
-#endif
-
-
 /*-----------------------------------------------------------------------------
  * Endianess and util macros
  *
