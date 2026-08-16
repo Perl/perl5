@@ -215,3 +215,7 @@ GTAGS
 
 # Ignore any project local ccache dir.
 .ccache
+
+.agents
+AGENTS.md
+CLAUDE.md
