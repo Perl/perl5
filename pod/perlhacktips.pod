@@ -493,6 +493,11 @@ Use C<PERL_EXT> to restrict the visibilty to perl extensions.
 
 =back
 
+Note that in all cases, setting the visibility flag in an F<embed.fnc>
+entry or C<=for apidoc> line, cannot make the symbol more visible than
+any cpp conditionals do.  You can make a symbol less visible by using
+such a flag, but not more visible.
+
 Some symbols need to be visible everywhere even though they aren't
 supposed to be used directly by outside code.  These typically are
 helper functions or flag values, I<etc.>, used in a public macro.
