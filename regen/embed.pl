@@ -593,7 +593,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FAKE_BIT_BUCKET
     FAKE_DEFAULT_SIGNAL_HANDLERS
     FAKE_PERSISTENT_SIGNAL_HANDLERS
-    FALSE
     F_atan2_amg
     FBMcf_TAIL
     FBMcf_TAIL_DOLLAR
@@ -2379,7 +2378,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     toUPPER_LATIN1_MOD
     toUPPER_LC
     toUPPER_uni
-    TRUE
     tryAMAGICbin_MG
     tryAMAGICunDEREF
     tryAMAGICun_MG

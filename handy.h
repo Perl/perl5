@@ -62,6 +62,17 @@ from it, and are very unlikely to change
 #  define Nullsv Null(SV*)
 #endif
 
+/*
+=for apidoc ABmn|bool|TRUE
+This is a synonym for the C symbol C<true>, introduced in C99.  Perl now
+requires C99, so using this synonym is no longer needed.
+
+=for apidoc ABmn|bool|FALSE
+This is a synonym for the C symbol C<false>, introduced in C99.  Perl now
+requires C99, so using this synonym is no longer needed.
+
+=cut
+*/
 #ifdef TRUE
 #undef TRUE
 #endif
