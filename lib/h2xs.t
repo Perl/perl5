@@ -140,6 +140,28 @@ Writing $name/Changes
 Writing $name/MANIFEST
 EONOXSFILES
 
+"-X -f --module $name -b $thisversion --with=::Aux,::Deep::More", $], <<EONWITHFILES,
+Writing $name/lib/$name.pm
+Writing $name/lib/$name/Aux.pm
+Writing $name/lib/$name/Deep/More.pm
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/$name.t
+Writing $name/Changes
+Writing $name/MANIFEST
+EONWITHFILES
+
+"-X -f --module $name -b $thisversion --gitignore", $], <<EONGITFILES,
+Writing $name/lib/$name.pm
+Writing $name/Makefile.PL
+Writing $name/README
+Writing $name/t/$name.t
+Writing $name/.gitignore
+Writing $name/MANIFEST.SKIP
+Writing $name/Changes
+Writing $name/MANIFEST
+EONGITFILES
+
 "-f -n $name -b $thisversion $header", $], <<"EOXSFILES",
 Writing $name/ppport.h
 Writing $name/lib/$name.pm
