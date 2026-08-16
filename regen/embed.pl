@@ -177,7 +177,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ABORT
     ABS_IV_MIN
     ALIGNED_TYPE
-    ALIGNED_TYPE_NAME
     ALLOC_THREAD_KEY
     AMG_CALLun
     AMGfallNEVER
