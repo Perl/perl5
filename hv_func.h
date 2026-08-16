@@ -15,11 +15,7 @@
         || defined(PERL_HASH_FUNC_SIPHASH13) \
         || defined(PERL_HASH_FUNC_ZAPHOD32) \
     )
-#   ifdef CAN64BITHASH
-#       define PERL_HASH_FUNC_SIPHASH13
-#   else
-#       define PERL_HASH_FUNC_ZAPHOD32
-#   endif
+#   define PERL_HASH_FUNC_SIPHASH13
 #endif
 
 #ifndef PERL_HASH_USE_SBOX32_ALSO
