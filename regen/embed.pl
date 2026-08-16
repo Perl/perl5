@@ -313,7 +313,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     COND_SIGNAL
     COND_WAIT
     CONTINUE_PAT_MOD
-    COP_FEATURE_SIZE
     CopFEATURES_setfrom
     CopFILEAVx
     CopFILE_copy_x
@@ -2794,6 +2793,7 @@ my @pending_documentation_symbols = qw(
 # not be directly usable by XS code
 my %undocumented_always_visible = map { $_ => 1 } qw(
     _
+    COP_FEATURE_SIZE
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off
     CvHasNAME_HEK_on
