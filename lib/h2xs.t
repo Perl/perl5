@@ -194,6 +194,13 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   cmp_ok ($?, "==", 0, "running $prog ");
   $result = join("",@result);
 
+  unless ($args =~ /(?:^|\s)(?:-A|--omit-autoload)(?:\s|$)/) {
+    $expectation = "Warning: h2xs autoloading is retained for backwards "
+        . "compatibility, but is\ndiscouraged for new modern Perl projects. "
+        . "Consider using -A/--omit-autoload.\n"
+        . $expectation;
+  }
+
   #print "# expectation is >$expectation<\n";
   #print "# result is >$result<\n";
   # Was the output the list of files that were expected?

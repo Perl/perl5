@@ -267,6 +267,19 @@ Most of these are built within the directory F<utils>.
 entries for each change
 Use F<XXX> with program names to get proper documentation linking. ]
 
+=head2 F<h2xs>
+
+=over 4
+
+=item *
+
+F<h2xs> now warns when run without C<-A> or C<--omit-autoload>. Autoloading is
+retained for backwards compatibility, but is discouraged for new modern Perl
+projects. New users should generally start with F<perlnewdist>; F<h2xs>
+remains available for advanced XS, C-header, and compatibility workflows.
+
+=back
+
 =head2 F<XXX>
 
 =over 4

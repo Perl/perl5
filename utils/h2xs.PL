@@ -687,6 +687,11 @@ GetOptions(%options) || usage;
 
 usage if $opt_h;
 
+warn <<'EOD' unless $opt_A;
+Warning: h2xs autoloading is retained for backwards compatibility, but is
+discouraged for new modern Perl projects. Consider using -A/--omit-autoload.
+EOD
+
 $opt_gitignore = 1 if $opt_git;
 
 if( $opt_b ){
