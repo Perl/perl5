@@ -722,7 +722,8 @@ more platform independent Module::Build, allowing modules to be installed in a
 consistent manner.
 When using ExtUtils::MakeMaker, you can use "make dist" to create your
 package.  Tools exist to help you to build your module in a
-MakeMaker-friendly style.  These include ExtUtils::ModuleMaker and h2xs.
+MakeMaker-friendly style.  These include F<perlnewdist> and
+ExtUtils::ModuleMaker.  For advanced XS work, F<h2xs> is also available.
 See also L<perlnewmod>.
 
 =head2 Licensing
@@ -805,4 +806,3 @@ authors.
 =head1 AUTHOR
 
 Kirrily "Skud" Robert <skud@cpan.org>
-

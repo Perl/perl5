@@ -267,6 +267,20 @@ Most of these are built within the directory F<utils>.
 entries for each change
 Use F<XXX> with program names to get proper documentation linking. ]
 
+=head2 F<perlnewdist>
+
+=over 4
+
+=item *
+
+The new F<perlnewdist> utility provides a beginner-friendly way to create the
+initial files for a Perl distribution. It is a thin
+wrapper around L<h2xs>: it selects modern defaults, gathers author information,
+and can create additional pure-Perl modules or initialize a Git repository,
+while delegating the distribution scaffolding to F<h2xs>.
+
+=back
+
 =head2 F<h2xs>
 
 =over 4

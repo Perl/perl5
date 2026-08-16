@@ -71,6 +71,11 @@ extra-libraries argument.
 In spite of its name, I<h2xs> may also be used to create a skeleton pure
 Perl module. See the B<-X> option.
 
+For a beginner-friendly interface to the common task of creating a new
+distribution, see L<perlnewdist>. It is a thin wrapper around
+I<h2xs> which chooses modern defaults while leaving the detailed generation
+options available here.
+
 =head1 OPTIONS
 
 =over 5
@@ -451,7 +456,8 @@ Larry Wall and others
 
 =head1 SEE ALSO
 
-L<perl>, L<perlxstut>, L<ExtUtils::MakeMaker>, and L<AutoLoader>.
+L<perl>, L<perlnewdist>, L<perlxstut>, L<ExtUtils::MakeMaker>, and
+L<AutoLoader>.
 
 =head1 DIAGNOSTICS
 
