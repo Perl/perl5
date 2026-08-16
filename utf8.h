@@ -1262,8 +1262,26 @@ point's representation.
 #define UTF8_GOT_LONG_WITH_VALUE     (1U << UTF8_GOT_LONG_WITH_VALUE_BIT_POS_)
 #define UTF8_ALLOW_LONG_AND_ITS_VALUE       UTF8_GOT_LONG_WITH_VALUE
 
-/* For back compat, these old names are misleading for overlongs and
- * UTF_EBCDIC. */
+/*
+=for apidoc ABmnU|U32|UTF8_DISALLOW_ABOVE_31_BIT
+Instead use C<L</UTF8_DISALLOW_PERL_EXTENDED>>.
+
+=for apidoc ABmnU|U32|UTF8_GOT_ABOVE_31_BIT
+Instead use C<L</UTF8_GOT_PERL_EXTENDED>>.
+
+=for apidoc ABmnU|U32|UTF8_WARN_ABOVE_31_BIT
+Instead use C<L</UTF8_WARN_PERL_EXTENDED>>.
+
+=for apidoc ABmnU|U32|UTF8_DISALLOW_FE_FF
+Instead use C<L</UTF8_DISALLOW_PERL_EXTENDED>>.
+
+=for apidoc ABmnU|U32|UTF8_WARN_FE_FF
+Instead use C<L</UTF8_WARN_PERL_EXTENDED>>.
+
+=cut
+*
+* These old names are misleading for overlongs and UTF_EBCDIC.
+*/
 #define UTF8_DISALLOW_ABOVE_31_BIT      UTF8_DISALLOW_PERL_EXTENDED
 #define UTF8_GOT_ABOVE_31_BIT           UTF8_GOT_PERL_EXTENDED
 #define UTF8_WARN_ABOVE_31_BIT          UTF8_WARN_PERL_EXTENDED
@@ -1276,10 +1294,22 @@ point's representation.
 #define UTF8_DIE_IF_MALFORMED   (1U << UTF8_DIE_IF_MALFORMED_BIT_POS_)
 #define UTF8_FORCE_WARN_IF_MALFORMED                                        \
                                 (1U <<UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_)
+/*
+=for apidoc ABmnU|U32|UTF8_ALLOW_FE_FF
+=for apidoc_item |U32|UTF8_ALLOW_FFFF
+These unclearly-named flags to several functions now do nothing, as they
+now would select the function's default behavior.
 
-/* For backwards source compatibility.  They do nothing, as the default now
- * includes what they used to mean.  The first one's meaning was to allow the
- * just the single non-character 0xFFFF */
+See C<L</utf8_to_uv_flags>> for the modern flags to use.
+
+=for apidoc ABmnU|U32|UTF8_ALLOW_SURROGATE
+This flag to several functions now does nothing, as it would now select the
+function's default behavior.
+
+See C<L</utf8_to_uv_flags>> for the modern flags to use.
+
+=cut
+*/
 #define UTF8_ALLOW_FFFF 0
 #define UTF8_ALLOW_FE_FF 0
 #define UTF8_ALLOW_SURROGATE 0
@@ -1305,8 +1335,18 @@ point's representation.
                         |UTF8_ALLOW_LONG                                    \
                         |UTF8_ALLOW_OVERFLOW)
 
-/* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
- * not any malformed.  This is the default. */
+/*
+=for apidoc ABmnU|U32|UTF8_ALLOW_ANYUV
+=for apidoc_item |U32|UTF8_ALLOW_DEFAULT
+
+These flags cause the called function to accept any Perl-extended UTF-8 that
+evaluates to any UV on the platform.  But these are no longer needed nor do
+they do anything, as this is now the default behavior.
+
+See C<L</utf8_to_uv_flags>> for the modern flags to use.
+
+=cut
+*/
 #define UTF8_ALLOW_ANYUV   0
 #define UTF8_ALLOW_DEFAULT UTF8_ALLOW_ANYUV
 
@@ -1339,7 +1379,18 @@ point's representation.
 #define UNICODE_DISALLOW_ILLEGAL_INTERCHANGE                                  \
            (UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE|UNICODE_DISALLOW_NONCHAR)
 
-/* For backward source compatibility, as are now the default */
+/*
+=for apidoc ABmnU|U32|UNICODE_ALLOW_ANY
+=for apidoc_item |U32|UNICODE_ALLOW_SUPER
+=for apidoc_item |U32|UNICODE_ALLOW_SURROGATE
+
+These flags to several functions now do nothing, as they now would select the
+function's default behavior.
+
+See C<L</uv_to_utf8_flags>> for the modern flags to use.
+
+=cut
+*/
 #define UNICODE_ALLOW_SURROGATE 0
 #define UNICODE_ALLOW_SUPER     0
 #define UNICODE_ALLOW_ANY       0
