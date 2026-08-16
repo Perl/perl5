@@ -168,7 +168,7 @@ accuracy will hopefully follow within this development cycle.
 
 =head1 Acknowledgements
 
-Perl 5.45.1 represents approximately 1 week of development since Perl 5.44.0
+Perl 5.45.0 represents approximately 1 week of development since Perl 5.44.0
 and contains approximately 36,000 lines of changes across 470 files from 19
 authors.
 
@@ -177,7 +177,7 @@ approximately 12,000 lines of changes to 310 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
 community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.45.1:
+contributed the improvements that became Perl 5.45.0:
 
 Andrew Fresh, Chad Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn
 Ilmari Mannsåker, David Mitchell, Georgij Tsarin, Graham Knop, James E
