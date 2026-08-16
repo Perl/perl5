@@ -1461,7 +1461,6 @@ SBOX32_STATIC_INLINE U32 sbox32_hash_with_state(
     const U32 *state= (const U32 *)state_ch;
     U32 hash = *state;
     switch (key_len) {
-        default: return zaphod32_hash_with_state(state_ch, key, key_len);
         case_256_SBOX32(hash,state,key)
         case_255_SBOX32(hash,state,key)
         case_254_SBOX32(hash,state,key)
