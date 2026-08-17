@@ -179,8 +179,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ALIGNED_TYPE
     ALIGNED_TYPE_NAME
     ALLOC_THREAD_KEY
-    ALL_PARENS_COUNTED
-    ALWAYS_WARN_SUPER
     AMG_CALLun
     AMGfallNEVER
     AMGfallNO
@@ -200,10 +198,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s
     ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL
     ARGTARG
-    ASCII_FOLD_RESTRICTED
     ASCII_MORE_RESTRICT_PAT_MODS
     ASCII_PLATFORM_UTF8_MAXBYTES
-    ASCII_RESTRICTED
     ASCII_RESTRICT_PAT_MOD
     ASCII_RESTRICT_PAT_MODS
     ASCII_TO_NATIVE
@@ -216,8 +212,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     assert_not_ROK
     aTHXa
     aTHXx
-    AT_LEAST_ASCII_RESTRICTED
-    AT_LEAST_UNI_SEMANTICS
     Atoul
     AvARYLEN
     AvMAX
@@ -299,18 +293,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CHECK_MALLOC_TAINT
     CHECK_MALLOC_TOO_LATE_FOR
     child_offset_bits
-    CHR_SVLEN
     ckDEAD
-    ckWARN2_non_literal_string
-    ckWARN2reg
-    ckWARN2reg_d
-    ckWARN3reg
-    ckWARN4reg
-    ckWARNdep
-    ckWARNexperimental
-    ckWARNexperimental_with_arg
-    ckWARNreg
-    ckWARNregdep
     CLANG_DIAG_IGNORE
     CLANG_DIAG_IGNORE_DECL
     CLANG_DIAG_IGNORE_STMT
@@ -318,9 +301,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CLANG_DIAG_RESTORE
     CLANG_DIAG_RESTORE_DECL
     CLANG_DIAG_RESTORE_STMT
-    classnum_to_namedclass
     CLEAR_ARGARRAY
-    CLEAR_OPTSTART
     CLONEf_JOIN_IN
     CLUMP_2IV
     CLUMP_2UV
@@ -519,25 +500,17 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     DBVARMG_TRACE
     DEBUG_DB_RECURSE_FLAG
     DEBUG_MASK
-    DEBUG_PEEP
     DEBUG_POST_STMTS
     DEBUG_PRE_STMTS
-    DEBUG_RExC_seen
     DEBUG_SBOX32_HASH
     DEBUG_SCOPE
-    DEBUG_SHOW_STUDY_FLAG
-    DEBUG_STUDYDATA
     DEBUG_TOP_FLAG
     DEBUG_ZAPHOD32_HASH
     DEFAULT_PAT_MOD
-    DEFERRED_COULD_BE_OFFICIAL_MARKERc
-    DEFERRED_COULD_BE_OFFICIAL_MARKERs
-    DEFERRED_USER_DEFINED_INDEX
     del_body_by_type
     DEL_NATIVE
     DEPENDS_PAT_MOD
     DEPENDS_PAT_MODS
-    DEPENDS_SEMANTICS
     DETACH
     DIE
     DISABLE_LC_NUMERIC_CHANGES
@@ -591,11 +564,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     dTOPnv
     dTOPss
     dTOPuv
-    DUMPUNTIL
     DUP_WARNINGS
     dXSUB_SYS
-    eC
-    eI
     EIGHT_BIT_UTF8_TO_NATIVE
     EMBEDMYMALLOC
     ENV_INIT
@@ -617,15 +587,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     EXEC_PAT_MOD
     EXEC_PAT_MODS
     EXPECT
-    EXPERIMENTAL_INPLACESCAN
     EXTEND_HWM_SET
     EXTEND_MORTAL
     EXTEND_SKIP
     EXT_MGVTBL
     EXT_PAT_MODS
-    FAIL
-    FAIL2
-    FAIL3
     FAKE_BIT_BUCKET
     FAKE_DEFAULT_SIGNAL_HANDLERS
     FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -667,7 +633,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FITS_IN_8_BITS
     F_log_amg
     FmLINES
-    FOLD
     FOLD_FLAGS_FULL
     FOLD_FLAGS_LOCALE
     FOLD_FLAGS_NOMIX_ASCII
@@ -683,7 +648,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     F_sin_amg
     F_sqrt_amg
     Fstat
-    FULL_TRIE_STUDY
     fwrite1
     GCC_DIAG_IGNORE
     GCC_DIAG_IGNORE_DECL
@@ -810,7 +774,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_UTIME
     HAS_WAIT
     hasWARNBIT
-    HASWIDTH
     HEK_BASESIZE
     HeKEY_sv
     HEKf
@@ -964,7 +927,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     IN_LC_PARTIAL_COMPILETIME
     IN_LC_PARTIAL_RUNTIME
     IN_LC_RUNTIME
-    IN_PARENS_PASS
     inRANGE
     IN_SOME_LOCALE_FORM
     IN_SOME_LOCALE_FORM_COMPILETIME
@@ -974,7 +936,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     IN_UNI_8_BIT
     IN_UTF8_CTYPE_LOCALE
     IN_UTF8_TURKIC_LOCALE
-    INVLIST_INDEX
     IoANY
     IOCPARM_LEN
     IOf_ARGV
@@ -1014,7 +975,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isASCII_LC_utf8
     isASCII_uni
     ISA_VERSION_OBJ
-    isBACKSLASHED_PUNCT
     isBLANK_LC_uni
     isBLANK_LC_utf8
     isBLANK_uni
@@ -1049,7 +1009,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isLOWER_uni
     is_MULTI_CHAR_FOLD_latin1_safe
     is_MULTI_CHAR_FOLD_utf8_safe
-    isNON_BRACE_QUANTIFIER
     is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
     is_PATWS_safe
@@ -1079,7 +1038,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isPSXSPC_uni
     isPUNCT_LC_utf8
     isPUNCT_uni
-    isQUANTIFIER
     is_QUOTEMETA_high
     isREGEXP
     IS_SAFE_PATHNAME
@@ -1196,7 +1154,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LF_NATIVE
     LIB_INVARG
     LINE_Tf
-    LOC
     LOCALE_INIT
     LOCALE_LOCK
     LOCALE_PAT_MOD
@@ -1227,9 +1184,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LvTARGLEN
     LvTARGOFF
     LvTYPE
-    MADE_EXACT_TRIE
-    MADE_JUMP_TRIE
-    MADE_TRIE
     MALFORMED_UTF8_DIE
     MALFORMED_UTF8_WARN
     MALLOC_CHECK_TAINT
@@ -1238,10 +1192,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MALLOC_OVERHEAD
     MALLOC_TERM
     MALLOC_TOO_LATE_FOR
-    MARKER1
-    MARKER2
-    MARK_NAUGHTY
-    MARK_NAUGHTY_EXP
     MAXARG
     MAXARG3
     MAX_FOLD_FROMS
@@ -1328,7 +1278,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MSVC_DIAG_RESTORE_DECL
     MSVC_DIAG_RESTORE_STMT
     MULTILINE_PAT_MOD
-    MUST_RESTART
     MUTEX_DESTROY
     MUTEX_INIT
     MUTEX_INIT_NEEDS_MUTEX_ZEROED
@@ -1339,7 +1288,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MY_CXT_INIT_ARG
     my_lstat
     my_stat
-    namedclass_to_classnum
     NAN_COMPARE_BROKEN
     NATIVE8_TO_UNI
     NATIVE_BYTE_IS_INVARIANT
@@ -1353,7 +1301,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NBSP_NATIVE
     NBSP_UTF8
     NDEBUG
-    NEED_UTF8
     NEGATE_2IV
     NEGATE_2UV
     NEGATIVE_INDICES_VAR
@@ -1468,9 +1415,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ONCE_PAT_MOD
     ONCE_PAT_MODS
     ONE_IF_EBCDIC_ZERO_IF_NOT
-    ONLY_LOCALE_MATCHES_INDEX
-    OOB_NAMEDCLASS
-    OOB_UNICODE
     opASSIGN
     OP_CHECK_MUTEX_INIT
     OP_CHECK_MUTEX_LOCK
@@ -1651,7 +1595,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OpREFCNT_set
     OP_REFCNT_TERM
     OP_REFCNT_UNLOCK
-    OPTIMIZE_INFTY
     OP_TYPE_IS_COP_NN
     OP_TYPE_IS_NN
     OP_TYPE_ISNT
@@ -1718,16 +1661,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PAD_SV
     PAD_SVl
     panic_write2
-    PAREN_OFFSET
-    PAREN_SET
-    PAREN_TEST
     PARENT_FAKELEX_FLAGS
     PARENT_PAD_INDEX
-    PAREN_UNSET
     PATCHLEVEL
     Pause
-    PBITVAL
-    PBYTE
     PerlEnv_putenv
     PIPE_OPEN_MODE
     PIPESOCK_MODE
@@ -1781,10 +1718,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     POSIX_CC_COUNT
     POSIX_SETLOCALE_LOCK
     POSIX_SETLOCALE_UNLOCK
-    POSTPONED
     PRESCAN_VERSION
     PRIVSHIFT
-    ProgLen
     pthread_addr_t
     PTHREAD_ATFORK
     PTHREAD_ATTR_SETDETACHSTATE
@@ -1905,29 +1840,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     REFCOUNTED_HE_EXISTS
     REFCOUNTED_HE_KEY_UTF8
     REGCOMP_INTERNAL_H
-    RegexLengthToShowInErrorMessages
     REG_FETCH_ABSOLUTE
-    REGNODE_GUTS
-    REG_NODE_NUM
-    REGNODE_OFFSET
-    REGNODE_p
-    REGNODE_STEP_OVER
-    REGTAIL
-    REGTAIL_STUDY
-    reg_warn_non_literal_string
-    RE_OPTIMIZE_CURLYX_TO_CURLYM
-    RE_OPTIMIZE_CURLYX_TO_CURLYN
-    REPORT_LOCATION
-    REPORT_LOCATION_ARGS
-    REQUIRE_BRANCHJ
-    REQUIRE_PARENS_PASS
-    REQUIRE_UNI_RULES
-    REQUIRE_UTF8
     ReREFCNT_dec
     ReREFCNT_inc
-    RESTART_PARSE
     RESTORE_ERRNO
-    RESTORE_WARNINGS
     RETPUSHNO
     RETPUSHUNDEF
     RETPUSHYES
@@ -1936,86 +1852,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RETSETUNDEF
     RETSETYES
     RETURN
-    RETURN_FAIL_ON_RESTART
-    RETURN_FAIL_ON_RESTART_FLAGP
-    RETURN_FAIL_ON_RESTART_OR_FLAGS
     RETURNOP
     RETURNX
-    RExC_close_parens
-    RExC_contains_locale
-    RExC_copy_start_in_constructed
-    RExC_copy_start_in_input
-    RExC_emit
-    RExC_emit_start
-    RExC_end
-    RExC_end_op
-    RExC_flags
-    RExC_frame_count
-    RExC_frame_head
-    RExC_frame_last
-    RExC_in_lookaround
-    RExC_in_multi_char_class
-    RExC_in_script_run
-    RExC_lastnum
-    RExC_lastparse
-    RExC_latest_warn_offset
-    RExC_logical_npar
-    RExC_logical_to_parno
-    RExC_logical_total_parens
-    RExC_maxlen
-    RExC_mysv
-    RExC_mysv1
-    RExC_mysv2
-    RExC_naughty
-    RExC_nestroot
-    RExC_npar
-    RExC_open_parens
-    RExC_orig_utf8
-    RExC_paren_name_list
-    RExC_paren_names
-    RExC_parens_buf_size
-    RExC_parno_to_logical
-    RExC_parno_to_logical_next
-    RExC_parse
-    RExC_parse_inc
-    RExC_parse_inc_by
-    RExC_parse_incf
-    RExC_parse_inc_if_char
-    RExC_parse_inc_safe
-    RExC_parse_inc_safef
-    RExC_parse_inc_utf8
-    RExC_parse_set
-    RExC_pm_flags
-    RExC_precomp
-    RExC_precomp_end
-    RExC_recode_x_to_native
-    RExC_recurse
-    RExC_recurse_count
-    RExC_rx
-    RExC_rxi
-    RExC_rx_sv
-    RExC_save_copy_start_in_constructed
-    RExC_sawback
-    RExC_seen
-    RExC_seen_d_op
-    RExC_seen_zerolen
-    RExC_sets_depth
-    RExC_size
-    RExC_start
-    RExC_strict
-    RExC_study_chunk_recursed
-    RExC_study_chunk_recursed_bytes
-    RExC_study_chunk_recursed_count
-    RExC_study_started
-    RExC_total_parens
-    RExC_uni_semantics
-    RExC_unlexed_names
-    RExC_use_BRANCHJ
-    RExC_utf8
-    RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS
-    RExC_warned_WARN_EXPERIMENTAL__VLB
-    RExC_warn_text
-    RExC_whilem_seen
     REXEC_CHECKED
     REXEC_FAIL_ON_UNDERFLOW
     REXEC_IGNOREPOS
@@ -2252,20 +2090,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SBOX32_WARN4
     SBOX32_WARN5
     SBOX32_WARN6
-    sC
     SCAN_DEF
     SCAN_REPL
     SCAN_TR
     SCAN_VERSION
-    SCF_DO_STCLASS
-    SCF_DO_STCLASS_AND
-    SCF_DO_STCLASS_OR
-    SCF_DO_SUBSTR
-    SCF_IN_DEFINE
-    SCF_SEEN_ACCEPT
-    SCF_TRIE_DOING_RESTUDY
-    SCF_TRIE_RESTUDY
-    SCF_WHILEM_VISITED_POS
     SCOPE_SAVES_SIGNAL_MASK
     Semctl
     semun
@@ -2276,8 +2104,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SET_NUMERIC_STANDARD
     SET_NUMERIC_UNDERLYING
     SETp
-    SetProgLen
-    SET_recode_x_to_native
     SETs
     SET_SVANY_FOR_BODYLESS_IV
     SET_SVANY_FOR_BODYLESS_NV
@@ -2285,28 +2111,16 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SET_THR
     SET_THREAD_SELF
     SETu
-    SF_BEFORE_EOL
-    SF_BEFORE_MEOL
-    SF_BEFORE_SEOL
-    SF_HAS_EVAL
-    SF_HAS_PAR
-    SF_IN_PAR
-    SF_IS_INF
     share_hek_hek
     sharepvn
     SHARP_S_SKIP
     SHUTDOWN_TERM
-    sI
-    SIMPLE
-    Simple_vFAIL
-    Simple_vFAILn
     SINGLE_PAT_MOD
     SIPHASH_SEED_STATE
     SIPROUND
     S_IWOTH
     S_IXOTH
     Size_t_MAX
-    SKIP_IF_CHAR
     SLOPPYDIVIDE
     SOCKET_OPEN_MODE
     S_PAT_MODS
@@ -2322,10 +2136,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SS_ADD_PTR
     SS_ADD_UV
     SS_BUFFEROVF
-    ssc_add_cp
     SSCHECK
-    ssc_init_zero
-    ssc_match_all_cp
     SS_DEVOFFLINE
     SSGROW
     SS_IVCHAN
@@ -2543,17 +2354,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     TARGi
     TARGn
     TARGu
-    tC
     THR
     THREAD_CREATE_NEEDS_STACK
     THREAD_RET_TYPE
-    tI
     toFOLD_LC
     toFOLD_uni
     toLOWER_uni
     TOO_LATE_FOR
-    TOO_NAUGHTY
-    TO_OUTPUT_WARNINGS
     TOPi
     TOPl
     TOPm1s
@@ -2574,17 +2381,12 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     toUPPER_LATIN1_MOD
     toUPPER_LC
     toUPPER_uni
-    toUSE_UNI_CHARSET_NOT_DEPENDS
-    TRIE_STCLASS
-    TRIE_STUDY_OPT
     TRUE
-    TRYAGAIN
     tryAMAGICbin_MG
     tryAMAGICunDEREF
     tryAMAGICun_MG
     TS_W32_BROKEN_LOCALECONV
     tTHX
-    TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE
     TWO_BYTE_UTF8_TO_NATIVE
     TWO_BYTE_UTF8_TO_UNI
     TYPE_CHARS
@@ -2621,7 +2423,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     UNICODE_SURROGATE_FIRST
     UNICODE_SURROGATE_LAST
     UNI_IS_INVARIANT
-    UNI_SEMANTICS
     UNISKIP
     UNKNOWN_ERRNO_MSG
     UNLINK
@@ -2632,7 +2433,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     unpackWARN2
     unpackWARN3
     unpackWARN4
-    UPDATE_WARNINGS_LOC
     UPG_VERSION
     uproot_SV
     U_S
@@ -2689,7 +2489,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USE_THREAD_SAFE_LOCALE
     USE_TM64
     USE_UTF8_IN_NAMES
-    UTF
     UTF8_ACCUMULATE
     UTF8_ALLOW_ANYUV
     UTF8_ALLOW_DEFAULT
@@ -2740,12 +2539,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     UV_MAX_P1
     UV_MAX_P1_HALF
     VCMP
-    vFAIL
-    vFAIL2
-    vFAIL2utf8f
-    vFAIL3
-    vFAIL3utf8f
-    vFAIL4
     VNORMAL
     VNUMIFY
     VSTRINGIFY
@@ -2756,11 +2549,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     VTYPECHECK
     VUTIL_REPLACE_CORE
     VVERIFY
-    vWARN
-    vWARN3
-    vWARN4
-    vWARN5
-    vWARN_dep
     VXS
     VXS_CLASS
     VXSp
@@ -2771,7 +2559,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     WARN_ALLstring
     WARN_DEFAULTstring
     WARN_NONEstring
-    warn_non_literal_string
     WARNshift
     WARNsize
     what_MULTI_CHAR_FOLD_latin1_safe
@@ -2783,10 +2570,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     WSETLOCALE_LOCK
     WSETLOCALE_UNLOCK
     XDIGIT_VALUE
-    xI
     xio_any
     xio_dirp
-    xI_offset
     xiv_iv
     xlv_targoff
     XOPd_xop_class
