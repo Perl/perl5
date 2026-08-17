@@ -883,8 +883,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
     HvAUXf_SCAN_STASH
-    HvCLASS_IS_SEALED
     HvCLASSf_SEALED
+    HvCLASS_IS_SEALED
     HV_DELETE
     HV_DISABLE_UVAR_XKEY
     HvEITER
@@ -1305,11 +1305,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MgPV
     MgPV_const
     MgPV_nolen_const
+    MgSIZEOF
     MgSV
     MgTAINTEDDIR
     MgTAINTEDDIR_off
     MgTAINTEDDIR_on
-    MgSIZEOF
     MGv2f_REFCOUNTED_AUXSV
     MGv2f_WITH_MASK
     MICRO_SIGN
@@ -1604,12 +1604,12 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpPADRANGE_COUNTSHIFT
     OPpPAD_STATE
     OPpPV_IS_UTF8
-    OPpREF_CMP_MASK
-    OPpREF_CMP_REGEXP_PKG
-    OPpREF_CMP_EMPTYSTR
-    OPpREF_CMP_SKIPLOGOP
     OPpREF_CMP_AND
+    OPpREF_CMP_EMPTYSTR
+    OPpREF_CMP_MASK
     OPpREF_CMP_NE
+    OPpREF_CMP_REGEXP_PKG
+    OPpREF_CMP_SKIPLOGOP
     OPpREFCOUNTED
     OPpREPEAT_DOLIST
     OPpREVERSE_INPLACE
@@ -2491,20 +2491,20 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvREFCNT_IMMORTAL
     SvRMAGICAL_off
     SvRMAGICAL_on
-    SvRV_const
-    SVrt_SCALAR
-    SVrt_VSTRING
-    SVrt_REF
-    SVrt_GLOB
-    SVrt_LVALUE
-    SVrt_REGEXP
     SVrt_ARRAY
-    SVrt_HASH
     SVrt_CODE
     SVrt_FORMAT
-    SVrt_IO
+    SVrt_GLOB
+    SVrt_HASH
     SVrt_INVLIST
+    SVrt_IO
+    SVrt_LVALUE
     SVrt_OBJECT
+    SVrt_REF
+    SVrt_REGEXP
+    SVrt_SCALAR
+    SVrt_VSTRING
+    SvRV_const
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on
@@ -2821,6 +2821,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ZAPHOD32_WARN4
     ZAPHOD32_WARN5
     ZAPHOD32_WARN6
+
     aTHXx_
     BASE_TWO_BYTE_HI_
     BASE_TWO_BYTE_LO_
