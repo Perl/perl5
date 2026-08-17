@@ -1,5 +1,8 @@
 #ifndef PERL_REGCOMP_INTERNAL_H
 #define PERL_REGCOMP_INTERNAL_H
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+
 #ifndef RE_OPTIMIZE_CURLYX_TO_CURLYM
 #define RE_OPTIMIZE_CURLYX_TO_CURLYM 1
 #endif
@@ -1213,4 +1216,5 @@ static const scan_data_t zero_scan_data = {
 #define REGNODE_STEP_OVER(ret,t1,t2) \
     NEXT_OFF_set(REGNODE_p(ret), ((sizeof(t1)+sizeof(t2))/sizeof(regnode)));
 
+#endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 #endif /* PERL_REGCOMP_INTERNAL_H */
