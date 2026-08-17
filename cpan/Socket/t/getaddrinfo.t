@@ -1,7 +1,7 @@
 use v5.6.1;
 use strict;
 use warnings;
-use Test::More tests => 31;
+use Test::More tests => 32;
 
 use Socket qw(:addrinfo AF_INET SOCK_STREAM IPPROTO_TCP unpack_sockaddr_in inet_aton);
 
@@ -71,7 +71,8 @@ ok( $res[0]->{protocol} == 0 || $res[0]->{protocol} == IPPROTO_TCP,
 my $goodhost = "cpan.perl.org";
 
 SKIP: {
-    skip "Resolver has no answer for $goodhost", 2 unless gethostbyname( $goodhost );
+    skip "Resolver has no answer for host=$goodhost", 2 unless gethostbyname( $goodhost );
+    skip "Resolver has no answer for service=ftp", 2 unless getservbyname( "ftp", IPPROTO_TCP );
 
     ( $err, @res ) = getaddrinfo( "cpan.perl.org", "ftp", { socktype => SOCK_STREAM } );
     cmp_ok( $err, "==", 0, '$err == 0 for host=cpan.perl.org/service=ftp/socktype=STREAM' );
@@ -129,6 +130,10 @@ SKIP: {
 
     ( $err, @res ) = getaddrinfo( $goodhost, "ftp", { flags => AI_NUMERICHOST, socktype => SOCK_STREAM } );
     ok( $err != 0, "\$err != 0 for host=$goodhost/service=ftp/flags=AI_NUMERICHOST/socktype=SOCK_STREAM" );
+
+    # Here's a good time to check gai_strerror matches
+    cmp_ok( gai_strerror( $err ), 'eq', "$err",
+        'gai_strerror() yields same result as stringified $err' );
 }
 
 # Some sanity checking on the hints hash

@@ -580,6 +580,24 @@ static SV *err_to_SV(pTHX_ int err)
     return ret;
 }
 
+static void xs_gai_strerror(pTHX_ CV *cv)
+{
+    dXSARGS;
+
+    SV *ret;
+
+    PERL_UNUSED_ARG(cv);
+    if(items < 1 || items > 3)
+        croak("Usage: Socket::gai_strerror(errno)");
+
+    SP -= items;
+
+    ret = err_to_SV(aTHX_ SvIV(ST(0)));
+
+    PUSHs(ret);
+    XSRETURN(1);
+}
+
 static void xs_getaddrinfo(pTHX_ CV *cv)
 {
     dXSARGS;
@@ -768,7 +786,8 @@ INCLUDE: const-xs.inc
 
 BOOT:
 #ifdef HAS_GETADDRINFO
-        newXS("Socket::getaddrinfo", xs_getaddrinfo, __FILE__);
+        newXS("Socket::gai_strerror", xs_gai_strerror, __FILE__);
+        newXS("Socket::getaddrinfo",  xs_getaddrinfo,  __FILE__);
 #endif
 #ifdef HAS_GETNAMEINFO
         newXS("Socket::getnameinfo", xs_getnameinfo, __FILE__);

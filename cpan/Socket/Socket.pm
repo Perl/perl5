@@ -3,7 +3,7 @@ package Socket;
 use v5.6.1;
 use strict;
 
-our $VERSION = '2.041';
+our $VERSION = '2.042';
 
 =head1 NAME
 
@@ -59,8 +59,8 @@ C<:crlf> export tag:
     $sock->print("GET / HTTP/1.0$CRLF");
 
 The entire getaddrinfo() subsystem can be exported using the tag C<:addrinfo>;
-this exports the getaddrinfo() and getnameinfo() functions, and all the
-C<AI_*>, C<NI_*>, C<NIx_*> and C<EAI_*> constants.
+this exports the gai_strerror(), getaddrinfo() and getnameinfo() functions,
+and all the C<AI_*>, C<NI_*>, C<NIx_*> and C<EAI_*> constants.
 
 =cut
 
@@ -393,6 +393,17 @@ C<d.d.d.d> form for C<AF_INET> or C<hhhh:hhhh::hhhh> form for C<AF_INET6>.
 
 See also getnameinfo() for a more powerful and flexible function to turn
 socket addresses into human-readable textual representations.
+
+=head2 gai_strerror
+
+    $errstr = gai_strerror $err;
+
+I<Since version 2.042.>
+
+Converts a numerical C<getaddrinfo> or C<getnameinfo> error constant into its
+human-readable string message. Normally this function is not required, as the
+error value returned by those functions is a dualvar containing both numerical
+and stringy parts already.
 
 =head2 getaddrinfo
 
@@ -854,7 +865,7 @@ our @EXPORT_OK = qw(
 
     inet_pton inet_ntop
 
-    getaddrinfo getnameinfo
+    gai_strerror getaddrinfo getnameinfo
 
     AI_ADDRCONFIG AI_ALL AI_CANONIDN AI_CANONNAME AI_IDN
     AI_IDN_ALLOW_UNASSIGNED AI_IDN_USE_STD3_ASCII_RULES AI_NUMERICHOST
@@ -871,7 +882,7 @@ our @EXPORT_OK = qw(
 
 our %EXPORT_TAGS = (
     crlf     => [qw(CR LF CRLF $CR $LF $CRLF)],
-    addrinfo => [qw(getaddrinfo getnameinfo), grep m/^(?:AI|NI|NIx|EAI)_/, @EXPORT_OK],
+    addrinfo => [qw(gai_strerror getaddrinfo getnameinfo), grep m/^(?:AI|NI|NIx|EAI)_/, @EXPORT_OK],
     all      => [@EXPORT, @EXPORT_OK],
 );
 
@@ -941,13 +952,15 @@ my %errstr;
 if( defined &getaddrinfo ) {
     # These are not part of the API, nothing uses them, and deleting them
     # reduces the size of %Socket:: by about 12K
+    delete $Socket::{fake_gai_strerror};
     delete $Socket::{fake_getaddrinfo};
     delete $Socket::{fake_getnameinfo};
 } else {
     require Scalar::Util;
 
-    *getaddrinfo = \&fake_getaddrinfo;
-    *getnameinfo = \&fake_getnameinfo;
+    *gai_strerror = \&fake_gai_strerror;
+    *getaddrinfo  = \&fake_getaddrinfo;
+    *getnameinfo  = \&fake_getnameinfo;
 
     # These numbers borrowed from GNU libc's implementation, but since
     # they're only used by our emulation, it doesn't matter if the real
@@ -1018,6 +1031,12 @@ sub fake_makeerr
     my ( $errno ) = @_;
     my $errstr = $errno == 0 ? "" : ( $errstr{$errno} || $errno );
     return Scalar::Util::dualvar( $errno, $errstr );
+}
+
+sub fake_gai_strerror
+{
+    my ( $errno ) = @_;
+    return $errno == 0 ? "" : $errstr{$errno + 0};
 }
 
 sub fake_getaddrinfo
