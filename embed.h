@@ -149,6 +149,8 @@
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
 # define call_method(a,b)                       Perl_call_method(aTHX_ a,b)
 # define call_pv(a,b)                           Perl_call_pv(aTHX_ a,b)
+# define call_rand()                            Perl_call_rand(aTHX)
+# define call_srand(a)                          Perl_call_srand(aTHX_ a)
 # define call_sv(a,b)                           Perl_call_sv(aTHX_ a,b)
 # define caller_cx(a,b)                         Perl_caller_cx(aTHX_ a,b)
 # define cast_i32                               Perl_cast_i32

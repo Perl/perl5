@@ -29,7 +29,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 Undef-aware equality operators
 
-Four new operators have been added, which are similar to the regular equality operators except for their handling of C<undef>. Whereas the regular operators treat C<undef> as equal to the empty string or the number zero, these operators consider C<undef> to be a distinct value, equal to itself, but unequal to any defined value.
+Four new operators have been added, which are similar to the regular equality
+operators except for their handling of C<undef>. Whereas the regular operators
+treat C<undef> as equal to the empty string or the number zero, these operators
+consider C<undef> to be a distinct value, equal to itself, but unequal to any
+defined value.
 
     if( $x equ $y ) {
       # $x and $y are both undef, or
@@ -37,7 +41,9 @@ Four new operators have been added, which are similar to the regular equality op
       ...
     }
 
-This is approximately equal to the following, except that it is more efficient and avoids duplicate evaluation of operands or fetching of tied scalar values:
+This is approximately equal to the following, except that it is more
+efficient and avoids duplicate evaluation of operands or fetching of tied
+scalar values:
 
     if( (!defined $x and !defined $y) or
       (defined $x and defined $y and $x eq $y) ) {
@@ -45,6 +51,37 @@ This is approximately equal to the following, except that it is more efficient a
     }
 
 For more detail, see L<perlop/Equality Operators>.
+
+=head2 Localizable random number generators
+
+The new C<${^RNG}> variable can be localized to select a user-supplied random
+number generator for C<rand> and C<srand>.  An object provider implements
+C<rand_bytes> and C<srand> methods; an unblessed code reference is called
+directly.  The provider supplies the requested number of random bytes to
+C<rand>, while C<srand> passes the supplied seed to the provider.  This
+permits custom generators to accept seed values that the default generator
+would reject.
+
+When C<${^RNG}> is undefined, Perl continues to use its normal random number
+generator.  The provider's state is independent of Perl's default generator,
+and localizing C<${^RNG}> does not copy or restore that state.  See
+L<perlfunc/rand EXPR> and L<perlvar/${^RNG}> for more information.
+
+=head2 Magic v2
+
+This version introduces a whole new set of API functions, data structures, and
+related items that provides a new kind of variable magic; providing the
+ability to attach user-supplied trigger functions to behaviours on existing
+variables.
+
+The eventual intention of this new version is to extend magic with new trigger
+functions that can apply at different times to those currently supported, and
+to allow magic to be attached to new kinds of items than are currently
+permitted. Right now as of this iteration, it does not offer any new abilities
+but simply changes the shape and structure of existing things to allow space
+for those extensions to be made at a later date.
+
+For more details, see L<perlguts/Magic v2>.
 
 =head1 Security
 
@@ -180,6 +217,13 @@ release manager will have to investigate the situation carefully.)
 =head2 New Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<RNG::PCG> provides a small XS implementation of the two-dimensional
+PCG-XSH-RR pseudorandom number generator, and L<RNG::SHA> provides a
+pure-Perl SHA-256 based generator. Both can be used directly or as providers
+for the new C<${^RNG}> variable.
 
 =item *
 

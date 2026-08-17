@@ -538,6 +538,18 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
 #define PERL_ARGS_ASSERT_CALL_PV                \
         Perl_assert_aTHX; assert(sub_name)
 
+PERL_CALLCONV NV
+Perl_call_rand(pTHX)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_CALL_RAND              \
+        Perl_assert_aTHX
+
+PERL_CALLCONV void
+Perl_call_srand(pTHX_ Rand_seed_t seed)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_CALL_SRAND             \
+        Perl_assert_aTHX
+
 PERL_CALLCONV SSize_t
 Perl_call_sv(pTHX_ SV *sv, I32 flags)
         Perl_attribute_nonnull_aTHX

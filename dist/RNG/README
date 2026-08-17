@@ -1,0 +1,10 @@
+RNG
+
+This distribution provides pseudorandom number generators and documents the
+provider interface used by Perl's C<${^RNG}> variable. The generators are
+intended for
+simulations, testing, and other non-cryptographic uses. RNG::PCG is a small
+XS implementation of Melissa O'Neill's two-dimensional PCG-XSH-RR generator.
+RNG::SHA is a pure-Perl SHA-256 based generator using Digest::SHA.
+
+See the module documentation for details.
