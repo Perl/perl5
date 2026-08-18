@@ -3329,7 +3329,7 @@ PP(pp_i_postdec)
     }
 }
 
-#undef SvIsSimpleIV(sv)
+#undef SvIsSimpleIV
 
 /* High falutin' math. */
 
