@@ -1,5 +1,9 @@
 CHANGES
 -------
+2.77  2026-06-02 07:34:55 rurban
+      Minor
+      - Fix tests to about.com (GH #34)
+      - Replace broken cpm matrix tests with cpanm
 2.76  2025-09-08 08:39:55 rurban
       Features
       - use SOCK_DRGAM for ICMP under linux, which requires no root.

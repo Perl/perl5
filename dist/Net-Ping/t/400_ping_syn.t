@@ -41,7 +41,7 @@ my %webs = (
   # Hopefully all these web ports are open
   "yahoo.com." => 1,
   "www.yahoo.com." => 1,
-  "www.about.com." => 1,
+  "www.duckduckgo.com." => 1,
   "www.microsoft.com." => 1,
 );
 
