@@ -1439,7 +1439,11 @@ See C<L</uv_to_utf8_flags>> for the modern flags to use.
 /* Character classes could also allow \b, but not patterns in general */
 #define UNI_DISPLAY_REGEX       (UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 
-/* Should be removed; maybe deprecated, but not used in CPAN */
+/*
+=for apidoc ABm|U8|SHARP_S_SKIP
+
+=cut
+ */
 #define SHARP_S_SKIP 2
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
@@ -1450,8 +1454,12 @@ typedef enum {
     PL_utf8_to_bytes_use_temporary,
 } Perl_utf8_to_bytes_arg;
 
-/* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
- * retained solely for backwards compatibility */
+/*
+=for apidoc ADm|bool|IS_UTF8_CHAR|const U8 * const s|STRLEN n
+Use isUTF8_CHAR() instead.
+
+=cut
+*/
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
 
 #define MALFORMED_UTF8_DIE  TRUE

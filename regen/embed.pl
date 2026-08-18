@@ -1068,7 +1068,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isUNICODE_POSSIBLY_PROBLEMATIC
     isUPPER_LC_utf8
     isUPPER_uni
-    IS_UTF8_CHAR
     isUTF8_POSSIBLY_PROBLEMATIC
     is_VERTWS_cp_high
     is_VERTWS_high
@@ -2110,7 +2109,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SETu
     share_hek_hek
     sharepvn
-    SHARP_S_SKIP
     SHUTDOWN_TERM
     SINGLE_PAT_MOD
     SIPHASH_SEED_STATE
