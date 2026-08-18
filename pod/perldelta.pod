@@ -438,6 +438,15 @@ A new internal function, C<padname_upgrade_sv()> attaches an SV onto a
 PADNAME instance, which is used to store the name string of that padname.
 This SV can be used by code that wishes to attach magic onto the padname.
 
+=item *
+
+The C<integer> pragma previously lacked increment/decrement operators that
+implemented the documented pragma behaviour; these have now been added.
+Code or tests that depend upon increment/decrement behaving identically
+under both C<use integer> and C<no integer> may need revising.
+[GH #3564]
+[GH #24448]
+
 =back
 
 =head1 Selected Bug Fixes
@@ -474,6 +483,23 @@ nested variable-width patterns such as C</(a+)+/>, to avoid exponential
 backtracking.)
 
 [GH security issue #149]
+
+=item *
+
+The increment/decrement operators, under both C<use integer> and
+C<no integer>, check for I<GET> magic before testing if the supplied variable
+contains a reference.
+[GH #24448]
+
+=item *
+
+The increment/decrement operators, under both C<use integer> and
+C<no integer>, should now handle C<0+> overloading correctly.
+[GH #24448]
+
+=item *
+
+XXX
 
 =back
 
