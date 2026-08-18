@@ -12,18 +12,6 @@ release.
 If you are upgrading from an earlier release such as 5.43.0, first read
 L<perl5440delta>, which describes differences between 5.43.0 and 5.44.0.
 
-=head1 Incompatible Changes
-
-=head2 Mutex locks for C<getprotoent> and C<getservent> are removed
-
-The macros C<GETPROTOENT_LOCK> and C<GETSERVENT_LOCK> macros are
-removed, along with their unlocking counterparts.  These macros, though
-never documented, were intended to create thread safety when using their
-corresponding functions in a threaded-perl.  But they didn't actually
-furnish that, so using them would give a false sense of security.
-Another thread simultaneously accessing the database could move the
-pointers, so these would act unpredictably.
-
 =head1 Performance Enhancements
 
 =over 4
@@ -122,6 +110,37 @@ CRTL.
 
 Added new API function C<export_lexical()> which does the same lexical export
 that the L<builtin/export_lexically> function does.
+
+=item *
+
+Mutex locks for C<getprotoent> and C<getservent> are removed
+
+The macros C<GETPROTOENT_LOCK> and C<GETSERVENT_LOCK> macros are
+removed, along with their unlocking counterparts.  These macros, though
+never documented, were intended to create thread safety when using their
+corresponding functions in a threaded-perl.  But they didn't actually
+furnish that, so using them would give a false sense of security.
+Another thread simultaneously accessing the database could move the
+pointers, so these would act unpredictably.
+
+=item *
+
+New macros created for thread-safety in libc calls
+
+Many C library functions are not thread safe, but can be made so by
+using mutexes around them to lock out other threads from interrupting
+their execution.  Many macros have now been created for this purpose.
+Guidance for using them, and the functions they protect are listed in
+L<perlapi/Mutex locking macros>; their actual definitions are found in
+F<perl_lock_definitions.h>.  If you call a libc function, look in
+L<perlapi> to see if we have created locking macros for it.  The macros
+are based on man pages (especially Linux ones), and our experience.  We
+also know from experience that man pages can be wrong or incomplete, and
+the behavior of any given function may be platform dependent.  Patches
+to update our knowledge base are welcome.
+
+More detail can be found in
+L<perlclib/Dealing with embedded perls and threads>.
 
 =back
 
