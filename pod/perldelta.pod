@@ -132,7 +132,7 @@ in L<perlfunc/ref>, is C<Regexp>, or is the empty string C<''>.
 =item *
 
 Counting the number of matches within a string using the following common
-idiom is now more streamlined.
+idiom is now much more performant.
 
     C<my $count = () = $str =~ /$pat/g;>
 
