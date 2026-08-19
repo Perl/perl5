@@ -248,6 +248,12 @@ can be specified in the attribute.
     field $x :param;
     field $y :param(the_y_value);
 
+If the field name starts with an underscore, one underscore will be removed
+from the default parameter name:
+
+    field $_foo :param;   # equivalent to :param(foo)
+    field $__bar :param;  # equivalent to :param(_bar)
+
 If there is no defaulting expression, then the parameter is required by the
 constructor; the caller must pass it or an exception is thrown. With a
 defaulting expression this becomes optional.
@@ -271,6 +277,12 @@ leading sigil), but a different name can be specified in the attribute's value.
 
     # Generates a method
     method get_x () { return $x; }
+
+As with C<:param>, if the field name starts with an underscore, one underscore
+will be removed from the default method name:
+
+    field $_foo :reader;   # equivalent to :reader(foo)
+    field $__bar :reader;  # equivalent to :reader(_bar)
 
 Reader methods can be applied to non-scalar fields. When invoked in list
 context, they yield the contents of the field; in scalar context they yield
@@ -303,6 +315,12 @@ can be specified in the attribute's value.
 
     # Generates a method
     method write_x ($new) { ... }
+
+As with C<:reader>, if the field name starts with an underscore, one underscore
+will be removed from the default method name:
+
+    field $_foo :writer;   # equivalent to :writer(set_foo)
+    field $__bar :writer;  # equivalent to :writer(set__bar)
 
 Currently, writer accessors can only be applied to scalar fields.  Attempts
 to apply this attribute to a non-scalar field will result in a fatal exception

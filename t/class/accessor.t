@@ -23,6 +23,9 @@ no warnings 'experimental::class';
         field %h :reader() = qw( the hash );
 
         field $empty :reader;
+
+        field $_alpha :reader = 'A';
+        field $__beta :reader = 'B';
     }
 
     my $o = Testcase1->new;
@@ -49,6 +52,9 @@ no warnings 'experimental::class';
     is($o->s, "the scalar", ':reader does not expose internal SVs');
     ok(eq_array([$o->a], [qw( the array )]), ':reader does not expose internal AVs');
     ok(eq_hash({$o->h}, {qw( the hash )}), ':reader does not expose internal HVs');
+
+    is($o->alpha, 'A', ':reader strips a leading underscore');
+    is($o->_beta, 'B', ':reader strips one leading underscore only');
 }
 
 # writer accessors on scalars
@@ -56,6 +62,9 @@ no warnings 'experimental::class';
     class Testcase2 {
         field $s :reader :writer = "initial";
         field $xno :param :reader = "Eh-ehhh";
+        field $_alpha :reader :writer;
+        field $__beta :reader :writer;
+        field $_42 :reader(get_42) :writer;
     }
 
     my $o = Testcase2->new;
@@ -78,6 +87,13 @@ no warnings 'experimental::class';
         'Cannot write without :writer attribute');
     like($@, qr/^Can\'t locate object method \"set_xno\" via package \"Testcase2\"/,
         'Failure from writing without :writer');
+
+    $o->set_alpha('AA');
+    is($o->alpha, 'AA', ':writer strips a leading underscore');
+    $o->set__beta('BB');
+    is($o->_beta, 'BB', ':writer strips one leading underscore only');
+    $o->set_42('answer');
+    is($o->get_42, 'answer', ':writer accepts numeric field names');
 }
 
 # Alternative names

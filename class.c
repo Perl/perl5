@@ -1134,11 +1134,28 @@ S_pad_import_field(pTHX_ PADNAME *fieldpn)
 }
 
 static void
+padname_skip_underscore(const PADNAME *pn, const char **pname, STRLEN *plen) {
+    /* skip sigil */
+    const char *name = PadnamePV(pn) + 1;
+    STRLEN len = PadnameLEN(pn) - 1;
+    if (len > 0 && *name == '_') {
+        name++;
+        len--;
+    }
+    *pname = name;
+    *plen = len;
+}
+
+static void
 apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
 {
-    if(!value)
-        /* Default to name minus the sigil */
-        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+    if(!value) {
+        /* Default to name minus the sigil (and one underscore if present) */
+        const char *name;
+        STRLEN len;
+        padname_skip_underscore(pn, &name, &len);
+        value = newSVpvn_utf8(name, len, PadnameUTF8(pn));
+    }
 
     if(PadnamePV(pn)[0] != '$')
         croak("Only scalar fields can take a :param attribute");
@@ -1168,9 +1185,13 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 {
     if(value)
         SvREFCNT_inc(value);
-    else
-        /* Default to name minus the sigil */
-        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+    else {
+        /* Default to name minus the sigil (and one underscore if present) */
+        const char *name;
+        STRLEN len;
+        padname_skip_underscore(pn, &name, &len);
+        value = newSVpvn_utf8(name, len, PadnameUTF8(pn));
+    }
 
     if(!valid_identifier_sv(value))
         croak("%" SVf_QUOTEDPREFIX " is not a valid name for a generated method", value);
@@ -1234,10 +1255,12 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     if(value)
         SvREFCNT_inc(value);
     else {
-        /* Default to "set_" . name minus the sigil */
+        /* Default to "set_" . name minus the sigil (and one underscore if present) */
+        const char *name;
+        STRLEN len;
+        padname_skip_underscore(pn, &name, &len);
         value = newSVpvs("set_");
-        sv_catpvn_flags(value, PadnamePV(pn) + 1, PadnameLEN(pn) - 1,
-                PadnameUTF8(pn) ? SV_CATUTF8 : 0);
+        sv_catpvn_flags(value, name, len, PadnameUTF8(pn) ? SV_CATUTF8 : 0);
     }
 
     if(!valid_identifier_sv(value))
