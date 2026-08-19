@@ -91,8 +91,7 @@ sub setup_embed {
                       $_[1]->{embed}{flags}=~/[E]/ }),
         $parser->group_content($lines,
                 sub { $_[1]->{embed} &&
-                      $_[1]->{embed}{flags}!~/[AC]/ &&  # everything else.
-                      $_[1]->{embed}{flags}!~/[E]/ }),
+                      $_[1]->{embed}{flags}!~/[ACE]/ }) # everything else.
     );
 }
 
