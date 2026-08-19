@@ -298,3 +298,12 @@ class Foo {
 }
 EXPECT
 Can't use global $_ in "field" at - line 4, near "field $_"
+########
+# NAME :reader name must be valid identifier after stripping _
+use v5.44;
+use experimental 'class';
+class Foo {
+    field $_42 :reader;
+}
+EXPECT
+"42" is not a valid name for a generated method at - line 4.

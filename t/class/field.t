@@ -329,6 +329,24 @@ no warnings 'experimental::class';
     ok(eq_hash({$obj->hash}, {}), 'Hash field can have redundant initialiser');
 }
 
+{
+    class Testcase16 {
+        field $_alpha :param;
+        field $__beta :param;
+        field $gamma_ :param;
+
+        method values() { $_alpha, $__beta, $gamma_ }
+    }
+
+    my $obj = Testcase16->new(
+        alpha  => 'A',
+        _beta  => 'B',
+        gamma_ => 'G',
+    );
+
+    ok(eq_array([$obj->values], [qw(A B G)]), ':param strips one leading underscore');
+}
+
 SKIP: {
     eval { require XS::APItest; 1 }
         or skip "XS::APItest not available", 1;
