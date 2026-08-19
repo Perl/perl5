@@ -776,6 +776,19 @@ Perl_no_bareword_filehandle(pTHX_ const char *fhname)
     }
 }
 
+static const char *
+declaration_context(I32 k) {
+    switch (k) {
+        case KEY_catch:  return "\"catch\"";
+        case KEY_field:  return "\"field\"";
+        case KEY_my:     return "\"my\"";
+        case KEY_our:    return "\"our\"";
+        case KEY_sigvar: return "subroutine signature";
+        case KEY_state:  return "\"state\"";
+        default: return "???";
+    }
+}
+
 /* "register" allocation */
 
 PADOFFSET
@@ -801,9 +814,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
     /* complain about "my $<special_var>" etc etc */
     if (!is_our && (!is_idfirst || is_default)) {
-        const char * const type =
-              PL_parser->in_my == KEY_sigvar ? "subroutine signature" :
-              PL_parser->in_my == KEY_state  ? "\"state\""     : "\"my\"";
+        const char * const type = declaration_context(PL_parser->in_my);
 
         if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
          && isASCII(name[1])
