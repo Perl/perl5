@@ -61,6 +61,24 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Names derived from class fields skip a leading underscore
+
+If the name of a class field starts with an underscore, any derived constructor
+parameters (C<:param>) or methods (C<:reader>, C<:writer>) will skip that
+underscore:
+
+    class Foo {
+        field $_bar :param :reader :writer;
+        # Equivalent to:
+        #   field $_bar :param(bar) :reader(bar) :writer(set_bar);
+    }
+
+This is how L<Object::Pad> works, too.
+
+In previous versions of Perl, the underscore was retained, making the above
+declaration equivalent to C<< field $_bar :param(_bar) :reader(_bar)
+:writer(set__bar); >>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
