@@ -249,6 +249,7 @@ nl_langinfo(3)
 Number::Format
 Object::Accessor
 Object::InsideOut
+Object::Pad
 open(2)
 OS2::Proc
 OS2::WinObject
