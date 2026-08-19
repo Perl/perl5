@@ -165,6 +165,32 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.64 to 3.65.
+
+XS files compiled with this new version now output a slightly nicer message
+when loaded in an incompatible perl binary. For example:
+
+  XS.c in List::MoreUtils::XS: loadable library and perl binaries are
+   mismatched (got first handshake key 0xed00080, needed 0xee00080)
+
+The old message didn't include the module name, just the (potentially
+ambiguous) name of the C source file:
+
+  XS.c: loadable library and perl binaries are mismatched
+   (got first handshake key 0xed00080, needed 0xee00080)
+
+[GH #24646], [GH #15861], [GH #16654]
+
+=item *
+
+L<I18N::LangTags::List> has been upgraded from version 0.41 to 0.42.
+
+It no longer sets C<$_> to C<undef> when loaded, and it now closes an internal
+filehandle that it only uses during initialization (instead of keeping it open
+for the rest of the program's lifetime).
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -291,6 +317,12 @@ L</Platform Support> section, instead.
 =item *
 
 XXX
+
+=item *
+
+Perl can now be built from a directory whose path contains spaces. (However, a
+few module tests still fail.)
+[GH #24670]
 
 =back
 
@@ -447,6 +479,13 @@ under both C<use integer> and C<no integer> may need revising.
 [GH #3564]
 [GH #24448]
 
+=item *
+
+The values of C<G_DISCARD> and C<HV_FETCH_ISSTORE> no longer clash.
+C<G_DISCARD> is supposed to be unambiguously bitwise-or-able with any of the
+C<HV_FETCH_*> constants, but the collision with C<HV_FETCH_ISSTORE> was missed.
+[GH #24537]
+
 =back
 
 =head1 Selected Bug Fixes
@@ -516,6 +555,12 @@ platform specific bugs also go here.
 =item *
 
 XXX
+
+=item *
+
+Some of the CPAN module tests shipped with perl don't handle spaces in the
+build path yet.
+[GH #24670]
 
 =back
 
