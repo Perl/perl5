@@ -289,3 +289,12 @@ field $_y = $r->{foo}{bar};
 method g() { $x }
 EXPECT
 Global symbol "$x" requires explicit package name (did you forget to declare "my $x"?) at - line 7.
+########
+# NAME correct error message for globals in fields GH #24730
+use v5.44;
+use experimental 'class';
+class Foo {
+    field $_;
+}
+EXPECT
+Can't use global $_ in "field" at - line 4, near "field $_"
