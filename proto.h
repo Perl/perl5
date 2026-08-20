@@ -8416,10 +8416,9 @@ Perl_vcroak(pTHX_ const char *pat, va_list *args)
 
 PERL_CALLCONV void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
-        Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_VDEB                   \
-        Perl_assert_aTHX; assert(pat)
+        assert(pat)
 
 PERL_CALLCONV void
 Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
