@@ -296,8 +296,6 @@
 #   undef NETDB_R_OBSOLETE
 #   undef new_XPV
 #   undef new_XPVIV
-#   undef PP
-#   undef PP_wrapped
 #   undef pTHX_10
 #   undef pTHX_11
 #   undef SHY_NATIVE
