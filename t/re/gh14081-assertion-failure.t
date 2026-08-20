@@ -1,4 +1,5 @@
 #!./perl
+# https://github.com/perl/perl5/issues/14081
 use strict;
 use warnings;
 

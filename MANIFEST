@@ -4869,20 +4869,20 @@ ext/File-Find/t/correct-absolute-path-with-follow.t
 ext/File-Find/t/find.t					See if File::Find works
 ext/File-Find/t/lib/Testing.pm				Functions used in testing File-find
 ext/File-Find/t/taint.t					See if File::Find works with taint
-ext/File-Glob/bsd_glob.c		File::Glob extension run time code
-ext/File-Glob/bsd_glob.h		File::Glob extension header file
-ext/File-Glob/Changes			File::Glob extension changelog
-ext/File-Glob/Glob.pm			File::Glob extension module
-ext/File-Glob/Glob.xs			File::Glob extension external subroutines
-ext/File-Glob/Makefile.PL		File::Glob extension makefile writer
-ext/File-Glob/t/basic.t			See if File::Glob works
-ext/File-Glob/t/case.t			See if File::Glob works
-ext/File-Glob/t/global.t		See if File::Glob works
-ext/File-Glob/t/rt114984.t		See if File::Glob works
-ext/File-Glob/t/rt131211.t		See if File::Glob works
-ext/File-Glob/t/taint.t			See if File::Glob works
-ext/File-Glob/t/threads.t		See if File::Glob + threads works
-ext/File-Glob/TODO			File::Glob extension todo list
+ext/File-Glob/bsd_glob.c			File::Glob extension run time code
+ext/File-Glob/bsd_glob.h			File::Glob extension header file
+ext/File-Glob/Changes				File::Glob extension changelog
+ext/File-Glob/Glob.pm				File::Glob extension module
+ext/File-Glob/Glob.xs				File::Glob extension external subroutines
+ext/File-Glob/Makefile.PL			File::Glob extension makefile writer
+ext/File-Glob/t/basic.t				See if File::Glob works
+ext/File-Glob/t/case.t				See if File::Glob works
+ext/File-Glob/t/gh12430-glob-stack-extension.t	See if File::Glob works
+ext/File-Glob/t/gh15964-glob-pathological.t	See if File::Glob works
+ext/File-Glob/t/global.t			See if File::Glob works
+ext/File-Glob/t/taint.t				See if File::Glob works
+ext/File-Glob/t/threads.t			See if File::Glob + threads works
+ext/File-Glob/TODO				File::Glob extension todo list
 ext/FileCache/lib/FileCache.pm		Keep more files open than the system permits
 ext/FileCache/t/01open.t		See if FileCache works
 ext/FileCache/t/02maxopen.t		See if FileCache works
@@ -6449,6 +6449,7 @@ t/op/fork.t				See if fork works
 t/op/fresh_perl_utf8.t			UTF8 tests for pads and gvs
 t/op/getpid.t				See if $$ and getppid work with threads
 t/op/getppid.t				See if getppid works
+t/op/gh13170-die-destroy-recursion.t	Test die/DESTROY/recursion bug
 t/op/glob.t				See if <*> works
 t/op/gmagic.t				See if GMAGIC works
 t/op/goto.t				See if goto works
@@ -6539,7 +6540,6 @@ t/op/require_gh20577.t			Make sure updating %INC from an INC hook doesnt break @
 t/op/require_override.t			See if require handles no argument properly
 t/op/reset.t				See if reset operator works
 t/op/reverse.t				See if reverse operator works
-t/op/rt119311.t				Test bug #119311 (die/DESTROY/recursion)
 t/op/runlevel.t				See if die() works from perl_call_*()
 t/op/select.t				See if 0- and 1-argument select works
 t/op/setpgrpstack.t			See if setpgrp works
@@ -6683,6 +6683,7 @@ t/re/fold_grind_d.t			Wrapper for fold_grind.pl for /d testing
 t/re/fold_grind_l.t			Wrapper for fold_grind.pl for /l testing with a C locale
 t/re/fold_grind_T.t			Wrapper for fold_grind.pl for /l testing with a Turkic locale
 t/re/fold_grind_u.t			Wrapper for fold_grind.pl for /u testing
+t/re/gh14081-assertion-failure.t	Test assertion failure
 t/re/keep_tabs.t			Tests where \t can't be expanded.
 t/re/no_utf8_pm.t			Verify utf8.pm doesn't get loaded unless required
 t/re/opt.t				Test regexp optimizations
@@ -6731,7 +6732,6 @@ t/re/regexp_qr_embed_thr.t		See if regular expressions work with embedded qr// i
 t/re/regexp_trielist.t			See if regular expressions work with trie optimisation
 t/re/regexp_unicode_prop.t		See if unicode properties work in regular expressions as expected
 t/re/regexp_unicode_prop_thr.t		See if unicode properties work in regular expressions as expected under threads
-t/re/rt122747.t				Test rt122747 assert faile (requires DEBUGGING)
 t/re/rxcode.t				See if /(?{ code })/ works
 t/re/script_run.t			See if script runs works
 t/re/speed.t				See if optimisations are keeping things fast
