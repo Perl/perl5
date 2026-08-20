@@ -13,8 +13,6 @@ BEGIN {
 use Config;
 use strict;
 
-plan tests => 9;
-
 SKIP:
 {
     if ($^O eq 'vos') {
@@ -58,3 +56,30 @@ SKIP:
     # For flush-to-zero systems this may flush-to-zero, see PERL_SYS_FPU_INIT
     ok 2.2250738585072014e-308 != 0.0, 'min double';
 }
+
+{
+    my $nv_is_doubledouble = 0;
+    if( $Config{nvtype} eq 'long double' &&
+        $Config{longdblkind} >= 5 &&
+        $Config{longdblkind} <= 8 ) { $nv_is_doubledouble = 1 }
+
+    my @v = (2.5e-310); # Known to have sometimes been assigned as 0.
+                        # See https://github.com/Perl/perl5/issues/9338.
+
+    push @v, 4.9406564584124654e-324; # denorm_min when nvsize == 8 or
+                                      # when nvtype is DoubleDouble.
+
+    unless( $Config{nvsize} == 8 || $nv_is_doubledouble ) {
+       # Append, to @v, the smallest positive value that's subnormal
+       # for all remaining NV types. (This value is DENORM_MIN when
+       # the NV is the 80-bit extended precision long double.)
+       push @v, 3.64519953188247460253e-4951;
+    }
+
+    for my $n(@v) {
+      # Check that $n has not been constant-folded to 0.
+      cmp_ok($n, '>', 0, "$n > 0");
+    }
+}
+
+done_testing();
