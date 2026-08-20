@@ -4216,7 +4216,7 @@ Adp	|int	|vcmp		|NN SV *lhv				\
 				|NN SV *rhv
 Adprt	|void	|vcroak 	|NULLOK const char *pat 		\
 				|NULLOK va_list *args
-Adp	|void	|vdeb		|NN const char *pat			\
+Adpt	|void	|vdeb		|NN const char *pat			\
 				|NULLOK va_list *args
 Adpt	|void	|vfatal_warner	|U32 err				\
 				|NN const char *pat			\
