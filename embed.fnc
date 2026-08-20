@@ -2790,7 +2790,7 @@ p	|void	|peep		|NULLOK OP *o
 ATdo	|PerlInterpreter *|perl_alloc
 ATdo	|void	|perl_construct |NN PerlInterpreter *my_perl
 
-t: The reason for the 'u' flag is that this passes "aTHX_ x" to its callee: not
+: The reason for the 'u' flag is that this passes "aTHX_ x" to its callee: not
 : a legal C parameter
 Admu	|const XOP *|Perl_custom_op_xop 				\
 				|NN const OP *o
