@@ -38,7 +38,7 @@ tie.
 
 Magic v2 is currently considered B<experimental>.
 
-New in Perl version 5.45.2, the Magic system has been greatly extended by
+New in Perl version 5.45.3, the Magic system has been greatly extended by
 defining an entire new version. This "Magic v2" brings new data structures
 which define the sets of trigger functions and other metadata associated with
 that kind of magic, and new data structures, functions, and macros to use to
