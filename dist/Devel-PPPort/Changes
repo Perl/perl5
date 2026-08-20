@@ -1,5 +1,29 @@
 Revision history for Devel-PPPort
 
+3.74
+
+ * add SSize_t_MAX, Size_t_MAX, STRLEN_MAX
+
+3.73
+
+ * Note: the version wasn't increased here between perl releases
+   when it probably should have been.
+ * Add PERL_STACK_REALIGN, SvREFCNT_dec(), newSVbool(), mXPUSHpvs(),
+   SvVSTRING(), SvREFCNT_dec_NN(),
+
+3.72
+
+ * Add Stack_off_t
+ * fix PERL_VERSION_xx comparison macros
+
+3.71
+
+ * fix handling of signed klen in check_HeUTF8()
+
+3.70
+
+ * silence some maybe-uninitialized warnings
+
 3.68 - 2022-03-18
 
  * fix newSVsv_flags: rename variable to fix C++ compilation issue
