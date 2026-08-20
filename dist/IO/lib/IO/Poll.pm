@@ -12,7 +12,7 @@ use IO::Handle;
 use Exporter ();
 
 our @ISA = qw(Exporter);
-our $VERSION = "1.56";
+our $VERSION = "1.57";
 
 our @EXPORT = qw( POLLIN
 	      POLLOUT
