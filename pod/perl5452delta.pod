@@ -1,0 +1,434 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5452delta - what is new for perl v5.45.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.45.1 release and the 5.45.2
+release.
+
+If you are upgrading from an earlier release such as 5.44.0, first read
+L<perl5451delta>, which describes differences between 5.44.0 and 5.45.1.
+
+=head1 Core Enhancements
+
+=head2 Magic v2
+
+This version introduces a whole new set of API functions, data structures, and
+related items that provides a new kind of variable magic; providing the
+ability to attach user-supplied trigger functions to behaviours on existing
+variables.
+
+The eventual intention of this new version is to extend magic with new trigger
+functions that can apply at different times to those currently supported, and
+to allow magic to be attached to new kinds of items than are currently
+permitted. Right now as of this iteration, it does not offer any new abilities
+but simply changes the shape and structure of existing things to allow space
+for those extensions to be made at a later date.
+
+For more details, see L<perlguts/Magic v2>.
+
+=head1 Incompatible Changes
+
+=head2 Names derived from class fields skip a leading underscore
+
+If the name of a class field starts with an underscore, any derived constructor
+parameters (C<:param>) or methods (C<:reader>, C<:writer>) will skip that
+underscore:
+
+    class Foo {
+        field $_bar :param :reader :writer;
+        # Equivalent to:
+        #   field $_bar :param(bar) :reader(bar) :writer(set_bar);
+    }
+
+This is how L<Object::Pad> works, too.
+
+In previous versions of Perl, the underscore was retained, making the above
+declaration equivalent to C<< field $_bar :param(_bar) :reader(_bar)
+:writer(set__bar); >>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+C<OP_REF_CMP> has been added to streamline expressions such as
+C<(ref $x eq 'SCALAR')> where (i) the first operator is C<ref> or
+C<reftype>, (ii) the comparison is C<eq> or C<ne>, and (iii) the value
+being compared against is one of the internal reftype strings mentioned
+in L<perlfunc/ref>, is C<Regexp>, or is the empty string C<''>.
+
+=item *
+
+Counting the number of matches within a string using the following common
+idiom is now much more performant.
+
+    my $count = () = $str =~ /$pat/g;
+
+Instead of pushing all matches to the stack as mortal SVs, just so that
+the list assignment can count them, C<pp_match> maintains an internal
+count during matching and pushes just that upon completion.
+[L<GH #24558|https://github.com/Perl/perl5/issues/24558>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.92 to 1.93.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.89 to 1.90.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.39 to 0.40.
+
+=item *
+
+L<Devel::SelfStubber> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.64 to 3.65.
+
+XS files compiled with this new version now output a slightly nicer message
+when loaded in an incompatible perl binary. For example:
+
+  XS.c in List::MoreUtils::XS: loadable library and perl binaries are
+   mismatched (got first handshake key 0xed00080, needed 0xee00080)
+
+The old message didn't include the module name, just the (potentially
+ambiguous) name of the C source file:
+
+  XS.c: loadable library and perl binaries are mismatched
+   (got first handshake key 0xed00080, needed 0xee00080)
+
+[L<GH #24646|https://github.com/Perl/perl5/issues/24646>], [L<GH #15861|https://github.com/Perl/perl5/issues/15861>], [L<GH #16654|https://github.com/Perl/perl5/issues/16654>]
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.64 to 3.65.
+
+=item *
+
+L<I18N::LangTags::List> has been upgraded from version 0.41 to 0.42.
+
+It no longer sets C<$_> to C<undef> when loaded, and it now closes an internal
+filehandle that it only uses during initialization (instead of keeping it open
+for the rest of the program's lifetime).
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20260720 to 5.20260722.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000039 to 1.000040.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.77 to 2.78.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.71 to 1.72.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.21 to 0.22.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<Socket> has been upgraded from version 2.041 to 2.043.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9780 to 1.9781.
+
+=item *
+
+L<Win32> has been upgraded from version 0.59_01 to 0.64.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.51 to 1.52.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document. If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Expanded commentary on symbol visibility
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Cannot apply magicfuncs shape %d to SV type %d|perldiag/"Cannot apply magicfuncs shape %d to SV
+type %d">
+
+=item *
+
+L<Unrecognized magicfuncs-E<gt>shape value %d|perldiag/"Unrecognized magicfuncs-E<gt>shape value %d">
+
+=item *
+
+L<Unsupported MagicFunctions-E<gt>ver value of %u|perldiag/"Unsupported MagicFunctions-E<gt>ver value of %u">
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Perl can now be built from a directory whose path contains spaces. (However, a
+few module tests still fail.)
+[L<GH #24670|https://github.com/Perl/perl5/issues/24670>]
+
+=item *
+
+The C<-[DU]usetaint> option has been added to Configure.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release. Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+F<t/porting/customized.t>: Corrected to now check for entries in
+F<t/porting/customized.dat> that no longer need to be there.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item MacOS (Darwin)
+
+Use of mkostemp(3) enabled on macOS 10.12 Sierra (Darwin 16) and newer,
+where it is available.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+During compiletime of a named subroutine, the name of the new sub
+currently being compiled is now accessible via C<CvNAME_HEK(PL_compcv)>.
+
+=item *
+
+A new internal function, C<padname_upgrade_sv()> attaches an SV onto a
+PADNAME instance, which is used to store the name string of that padname.
+This SV can be used by code that wishes to attach magic onto the padname.
+
+=item *
+
+The C<integer> pragma previously lacked increment/decrement operators that
+implemented the documented pragma behaviour; these have now been added.
+Code or tests that depend upon increment/decrement behaving identically
+under both C<use integer> and C<no integer> may need revising.
+[L<GH #3564|https://github.com/Perl/perl5/issues/3564>]
+[L<GH #24448|https://github.com/Perl/perl5/issues/24448>]
+
+=item *
+
+The values of C<G_DISCARD> and C<HV_FETCH_ISSTORE> no longer clash.
+C<G_DISCARD> is supposed to be unambiguously bitwise-or-able with any of the
+C<HV_FETCH_*> constants, but the collision with C<HV_FETCH_ISSTORE> was missed.
+[L<GH #24537|https://github.com/Perl/perl5/issues/24537>]
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Cleanup of field initialization ops for an incomplete class now
+happens within the correct CV.  Previously, if an error was thrown
+with an incomplete class this would release pad entries on the wrong
+CV and eventually crash.  [L<GH #24616|https://github.com/Perl/perl5/issues/24616>]
+
+=item *
+
+sv_set_undef() no longer blindly clears the C<SVs_TEMP> flag.  This
+could break code that expected to detect mortal SVs, like constant
+folding.  [L<GH #24661|https://github.com/Perl/perl5/issues/24661>]
+
+=item *
+
+The regular expression engine's "super-linear cache" wasn't 64-bit clean
+and so could in principle overflow on huge (>256Mb) strings, resulting in
+incorrect matches and potential memory corruption. (The cache engages on
+nested variable-width patterns such as C</(a+)+/>, to avoid exponential
+backtracking.)
+
+[GH security issue #149]
+
+=item *
+
+The increment/decrement operators, under both C<use integer> and
+C<no integer>, check for I<GET> magic before testing if the supplied variable
+contains a reference.
+[L<GH #24448|https://github.com/Perl/perl5/issues/24448>]
+
+=item *
+
+The increment/decrement operators, under both C<use integer> and
+C<no integer>, should now handle C<0+> overloading correctly.
+[L<GH #24448|https://github.com/Perl/perl5/issues/24448>]
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+Some of the CPAN module tests shipped with perl don't handle spaces in the
+build path yet.
+[L<GH #24670|https://github.com/Perl/perl5/issues/24670>]
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+In L<perl5451delta>, we inadvertently noted a change about mutex locks in the
+section under "Incompatible Changes". That change should have been under
+"Internal Changes", and has since been moved.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.45.2 represents approximately 4 weeks of development since Perl
+5.45.1 and contains approximately 24,000 lines of changes across 320 files
+from 25 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 15,000 lines of changes to 220 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.45.2:
+
+Andreas König, Aristotle Pagaltzis, Bartosz Jarzyna, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Daniel Tang, David Mitchell, H.Merijn Brand, James E
+Keenan, Jan Dubois, Karen Etheridge, Karl Williamson, Leon Timmermans, Lukas
+Mai, Marc Reisner, Max Maischein, Paul Evans, Philippe Bruhat (BooK),
+Richard Leach, Sevan Janiyan, Stan Ulbrych, Steve Hay, theoremoon, Tony
+Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
