@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.45.2 - Charles F. Kettering
+
+L<Announced on 2026-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2026/08/msg271149.html>
+
+My interest is in the future because I am going to spend the rest of my life there.
+
 =head2 v5.45.1 - Mike Oldfield - Far Above The Clouds
 
 L<Announced on 2026-07-22 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2026/07/msg271102.html>
