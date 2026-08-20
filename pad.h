@@ -61,7 +61,7 @@ struct padname_fieldinfo;
     union {                             \
         char *	xpadn_pv;		\
         SV *    xpadn_sv;               \
-    };                                  \
+    } xpadn_name_u;                     \
     HV *	xpadn_ourstash;		\
     union {				\
         HV *	xpadn_typestash;	\
@@ -345,11 +345,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadARRAY(pad)		AvARRAY(pad)
 #define PadMAX(pad)		AvFILLp(pad)
 
-#define PadnamePV(pn)		(PadnameIsFULLSV(pn) ? SvPVX((pn)->xpadn_sv) : (pn)->xpadn_pv)
-#define PadnameLEN(pn)		(PadnameIsFULLSV(pn) ? SvCUR((pn)->xpadn_sv) : (pn)->xpadn_len)
+#define PadnamePV(pn)		(PadnameIsFULLSV(pn) ? SvPVX((pn)->xpadn_name_u.xpadn_sv) : (pn)->xpadn_name_u.xpadn_pv)
+#define PadnameLEN(pn)		(PadnameIsFULLSV(pn) ? SvCUR((pn)->xpadn_name_u.xpadn_sv) : (pn)->xpadn_len)
 #define PadnameUTF8(pn)		1
 #define PadnameSV(pn) \
-        (PadnameIsFULLSV(pn) ? (pn)->xpadn_sv : newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8|SVf_READONLY|SVf_PROTECT))
+        (PadnameIsFULLSV(pn) ? (pn)->xpadn_name_u.xpadn_sv : newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8|SVf_READONLY|SVf_PROTECT))
 #define PadnameFLAGS(pn)	(pn)->xpadn_flags
 #define PadnameIsOUR(pn)	cBOOL((pn)->xpadn_ourstash)
 #define PadnameOURSTASH(pn)	(pn)->xpadn_ourstash
@@ -380,7 +380,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PADNAMEf_FULLSV     0x80    /* padname stored in SVt_PV in xpadn_sv */
 
 #ifdef PERL_CORE
-#  define PadnamePV_set(pn, pv)     (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_pv = (pv))
+#  define PadnamePV_set(pn, pv)     (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_name_u.xpadn_pv = (pv))
 #  define PadnameLEN_set(pn, len)   (assert(!PadnameIsFULLSV(pn)), (pn)->xpadn_len = (len))
 #endif
 

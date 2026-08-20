@@ -2951,7 +2951,7 @@ Perl_padname_upgrade_sv(pTHX_ PADNAME *pn)
     SvUTF8_on(sv);
     SvREADONLY_on(sv);
 
-    pn->xpadn_sv = sv;
+    pn->xpadn_name_u.xpadn_sv = sv;
 
     PadnameFLAGS(pn) |= PADNAMEf_FULLSV;
     return pn;
@@ -2995,8 +2995,8 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
 
         if(PadnameIsFULLSV(src)) {
             char *pnpv = PadnamePV(dst);
-            dst->xpadn_sv = sv_dup_inc(src->xpadn_sv, param);
-            SvPVX(dst->xpadn_sv) = pnpv;
+            dst->xpadn_name_u.xpadn_sv = sv_dup_inc(src->xpadn_name_u.xpadn_sv, param);
+            SvPVX(dst->xpadn_name_u.xpadn_sv) = pnpv;
         }
     }
     ptr_table_store(PL_ptr_table, src, dst);
