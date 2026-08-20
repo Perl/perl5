@@ -1,5 +1,4 @@
-# tests for RT 131211
-#
+# https://github.com/Perl/perl5/issues/15964
 # non-matching glob("a*a*a*...") went exponential time on number of a*'s
 
 

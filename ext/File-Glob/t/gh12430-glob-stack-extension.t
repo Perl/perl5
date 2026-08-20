@@ -1,3 +1,4 @@
+# https://github.com/perl/perl5/issues/12430
 use strict;
 use warnings;
 use v5.16.0;
