@@ -291,7 +291,7 @@ sub send {
         # this is non-portable for "connected" UDP sockets
         $peer = $_[3];
     }
-    elsif (!defined getpeername($sock)) {
+    elsif (!defined getpeername($sock) && !$!{EOPNOTSUPP}) {
         # we're not connected, so we require a peer from somewhere
         $peer = $sock->peername;
 
