@@ -807,8 +807,10 @@ Amd|void|seedDrand01|Rand_seed_t x
 md|void|SETERRNO|int errcode|int vmserrcode
 Amd|void|Siglongjmp|jmp_buf env|int val
 Amd|int|Sigsetjmp|jmp_buf env|int savesigs
+Amn||Size_t_MAX
 AmnUd||SP
 Amnsd||SPAGAIN
+Amn||SSize_t_MAX
 Amd|SV*|ST|int ix
 Amnud||START_EXTERN_C
 Amnhd||START_MY_CXT
@@ -822,6 +824,7 @@ Amd|bool|strGE|char* s1|char* s2
 Amd|bool|strGT|char* s1|char* s2
 Amud|string|STRINGIFY|token x
 Amd|bool|strLE|char* s1|char* s2
+Amn||STRLEN_MAX
 Amd|bool|strLT|char* s1|char* s2
 Amd|bool|strNE|char* s1|char* s2
 Amd|bool|strnEQ|char* s1|char* s2|STRLEN len

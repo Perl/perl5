@@ -33,6 +33,9 @@ IVSIZE
 UVSIZE
 IVTYPE
 UVTYPE
+Size_t_MAX
+SSize_t_MAX
+STRLEN_MAX
 
 =implementation
 
@@ -288,6 +291,10 @@ UVTYPE
 __UNDEFINED__ UVTYPE unsigned IVTYPE
 __UNDEFINED__ UVSIZE IVSIZE
 
+__UNDEFINED__ Size_t_MAX  (~(Size_t)0)
+__UNDEFINED__ SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
+__UNDEFINED__ STRLEN_MAX  (~(STRLEN)0)
+
 =xsubs
 
 IV
@@ -318,9 +325,36 @@ uv_type()
         OUTPUT:
                 RETVAL
 
-=tests plan => 4
+UV
+size_t_max()
+        CODE:
+                RETVAL = Size_t_MAX;
+        OUTPUT:
+                RETVAL
+
+UV
+ssize_t_max()
+        CODE:
+                RETVAL = SSize_t_MAX;
+        OUTPUT:
+                RETVAL
+
+UV
+strlen_max()
+        CODE:
+                RETVAL = STRLEN_MAX;
+        OUTPUT:
+                RETVAL
+
+
+=tests plan => 9
 
 ok(&Devel::PPPort::iv_size());
 ok(&Devel::PPPort::uv_size());
 ok(&Devel::PPPort::iv_type());
 ok(&Devel::PPPort::uv_type());
+ok(&Devel::PPPort::size_t_max());
+ok(&Devel::PPPort::ssize_t_max());
+ok(&Devel::PPPort::strlen_max());
+is((&Devel::PPPort::size_t_max()-1)/2, &Devel::PPPort::ssize_t_max());
+is(&Devel::PPPort::size_t_max(), &Devel::PPPort::strlen_max());
