@@ -958,7 +958,10 @@ Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
             SvREFCNT_dec(MgKEYSV(mg));
 
         if(MgPTR(mg) && MgPTRLEN(mg)) {
-            Safefree(MgPTR(mg));
+            /* can't
+                Safefree(MgPTR(mg));
+              here because Safefree() requires an lvalue under -DPERL_POISON */
+            Safefree(mg->mg_ptr);
         }
 
         if(MgAUXSV(mg) && !MgWEAK_AUXSV(mg)) {
