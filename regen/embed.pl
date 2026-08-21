@@ -3104,6 +3104,7 @@ $cpp_ifdef_constraints{PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS} = 0;
 $cpp_ifdef_constraints{PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION} = 0;
 $cpp_ifdef_constraints{PERL_ENABLE_POSITIVE_ASSERTION_STUDY} = 0;
 $cpp_ifdef_constraints{PERL_ENABLE_TRIE_OPTIMISATION} = 0;
+$cpp_ifdef_constraints{ENABLE_REGEX_SETS_DEBUGGING} = 0;
 $cpp_ifdef_constraints{EXPERIMENTAL_INPLACESCAN} = 0;
 
 # Appears to be obsolete; App:s2p, etc were created to handle this
