@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.90;
+package B::Deparse 1.91;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -2767,18 +2767,27 @@ sub pp_undef {
 sub pp_study { unop(@_, "study") }
 sub pp_ref { unop(@_, "ref") }
 sub pp_ref_cmp { 
-    my $e = ($_[1]->private & OPpREF_CMP_NE) ? 'ne' : 'eq';
+    my ($self, $op, $cx) = @_;
+    my $e = ($op->private & OPpREF_CMP_NE) ? 'ne' : 'eq';
 
     my $l;
-    my $id = $_[1]->private & OPpREF_CMP_MASK;
-
+    my $id = $op->private & OPpREF_CMP_MASK;
     my $enum = $B::Op_private::bits{ref_cmp}{0}{enum};
     for my ($ix, $name, $label) (@$enum) {
         if ($id == $ix) {
             $l = $label;
         }
     }
-    return unop(@_, "ref")." $e '$l'";
+
+    my $quoted = $self->{'use_dumper'}
+                     ? $self->const_dumper(B::svref_2object(\$l), 0)
+                     : $self->quoted_const_str($l);
+
+    if ($op->flags & OPf_SPECIAL) { # reftype, but it's not a keyword
+        return $self->builtin1($op, $cx, 'reftype')." $e $quoted";
+    } else { # ref
+        return $self->unop($op, $cx, "ref")." $e $quoted";
+    }
 }
 sub pp_pos { maybe_local(@_, unop(@_, "pos")) }
 
