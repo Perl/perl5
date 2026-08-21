@@ -75,17 +75,17 @@ use strict;
 use warnings;
 
 my $known_flags_re =
-      qr/[ aA bB C dD eE fF h iI mM nN oO pP rR sS tT uU v W xX y ;@\#? ] /xx;
+    qr/[ aA bB C dD eE fF h iI mM nN oO Q pP rR sS tT uU v W xX y ;@\#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
-my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
+my $irrelevant_flags_re = qr/[ ab eE iI P Q rR X? ]/xx;
 
 # Only certain flags dealing with what gets displayed, are acceptable for
 # apidoc_item
 my $item_flags_re = qr/[B dD fF mM nN oO pT uU Wx;]/xx;
 
 # Only certain flags are acceptable for apidoc_flag
-my $flag_flags_re = qr/[ A C dD eE h m n p u X ] /xx;
+my $flag_flags_re = qr/[ A C dD eE h m n p Q u X ] /xx;
 
 # Certain functions have plain and no_context versions, and meet the criteria
 # stated here.  Each of their pods has been modified to have a marker line

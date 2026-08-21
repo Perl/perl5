@@ -175,6 +175,14 @@
 :         needed.  Also note that an XS writer can always cheat and pretend to
 :         be an extension by #defining PERL_EXT.
 :
+: The 'Q' flag is like the 'E' flag, but used for elements that are supposed to
+:	  be used only in the core, plus just a single extension, "re'.  'Q' is
+:	  derived from 'qr'
+:
+:	  This extension is singled out because it contains many many symbols
+:	  that are exclusive to it;  other extensions contain at most just a
+:	  few.
+:
 : AUTOMATIC SORTING and FORMATTING of this file
 :
 :   Don't spend any time trying to get your changes to this file to look nice,
@@ -748,6 +756,16 @@
 :          proto.h: function or macro is declared as Perl_foo rather than foo
 :                   (though the entries for macros will be commented out)
 :          embed.h: "#define foo Perl_foo" entries added
+:
+:   'Q'  Visible to the 're' extension:
+:
+:         in embed.h, change
+		"#ifdef PERL_CORE"
+:         into  "#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)"
+:
+:        To be usable when 're' is dynamically loaded, either:
+:        1) it must be static to its containing file (/[iIS]/ flags); or
+:        2) be combined with the 'X' flag.
 :
 :   'R'  Return value must not be ignored (also implied by 'a' and 'P' flags):
 :
