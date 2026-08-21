@@ -247,7 +247,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     blk_old_tmpsfloor
     blk_sub
     blk_u16
-    BmUSEFUL
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
     BSD_GETPGRP
