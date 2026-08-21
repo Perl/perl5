@@ -3176,7 +3176,7 @@ my %cpp_visible_to_extensions      = (
 # Create mnemonic single-character codes for these
 my %visibility_types = (
                           1 =>  \%cpp_always_externally_visible,
-                         '/' => \%cpp_visible_to_regex_extension,
+                         'Q' => \%cpp_visible_to_regex_extension,
                          'E' => \%cpp_visible_to_extensions,
                        );
 
@@ -3187,7 +3187,7 @@ my $never_visible_flags_re = qr/[$never_visible_flags]/;
 my $visible_everywhere_flags = "AC";
 my $visible_everywhere_flags_re = qr/[$visible_everywhere_flags]/;
 
-my $visible_outside_core_flags = "E$visible_everywhere_flags";
+my $visible_outside_core_flags = "EQ$visible_everywhere_flags";
 my $visible_outside_core_flags_re = qr/[$visible_outside_core_flags]/;
 
 my $visibility_flags = "$visible_outside_core_flags$never_visible_flags";
@@ -3285,7 +3285,7 @@ sub generate_proto_h {
         my ($flags, $ret_type, $plain_func, $args, $assertions ) =
                         @{$embed}{qw(flags return_type name args assertions)};
         if ($flags =~
-           m/([^ aA bB C dD eE fF h iI mM nN oO pP Rr sS tT uU v W xX ; ])/xx)
+         m/([^ aA bB C dD eE fF h iI mM nN oO pP Q Rr sS tT uU v W xX ; ])/xx)
         {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
@@ -3299,6 +3299,8 @@ sub generate_proto_h {
                                                      if $flags =~ tr/Ii// > 1;
         die_at_end "$plain_func: A, C, and S flags are all mutually exclusive"
                                                     if $flags =~ tr/ACS// > 1;
+        die_at_end "$plain_func: [ACEQ] flags are all mutually exclusive"
+                                                 if $flags =~ tr/ACEQ// > 1;
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                                     if $flags =~ tr/Sp// > 1;
         die_at_end "$plain_func: t and T flags are mutually exclusive"
@@ -3335,7 +3337,7 @@ sub generate_proto_h {
         my $has_mpflags = $has_mflag && $flags =~ /p/;
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
-        my $extensions_only = ( $flags =~ /E/ );
+        my $extensions_only = ( $flags =~ /[EQ]/ );
         my @asserts;
         my @attrs;
         my $func;
@@ -3826,10 +3828,12 @@ sub generate_proto_h {
         # Hide the prototype from non-authorized code.  This acts kind of like
         # __attribute__visibility__("hidden") for cases where that can't be
         # used.
-        $ret = "#${ind}if defined(PERL_CORE) || defined(PERL_EXT)\n"
-             . $ret
-             . "\n#${ind}endif"
-          if $extensions_only && ! $has_Xflag;
+        if ($extensions_only && ! $has_Xflag) {
+            my $type = ($flags =~ /Q/) ? "PERL_EXT_RE_BUILD" : "PERL_EXT";
+            $ret = "#${ind}if defined(PERL_CORE) || defined($type)\n"
+                 . $ret
+                 . "\n#${ind}endif"
+        }
 
         # We don't hide the ARGS_ASSERT macro; having that defined does no
         # harm, and otherwise some inline functions that are looking for it
@@ -4000,6 +4004,11 @@ sub embed_h {
             if ($flags !~ $visible_outside_core_flags_re) {
                 $always_undefs{$func} = 1
                   unless defined $unresolved_visibility_overrides{$func};
+            }
+            elsif ($flags =~ /Q/) {     # Visible to 're'
+                $non_ext_re_undefs{$func} = 1
+                  unless defined $unresolved_visibility_overrides{$func}
+                      or defined $needed_by_ext_re{$func};
             }
             elsif ($flags =~ /E/) {     # Visible to perl extensions
                 $non_ext_undefs{$func} = 1
@@ -4176,7 +4185,7 @@ sub embed_h {
 }
 
 sub generate_embed_h {
-    my ($all, $api, $ext, $core)= @_;
+    my ($all, $api, $ext, $ext_re, $core)= @_;
 
     my $em= open_buf_out(my $embed_buffer);
 
@@ -4193,6 +4202,8 @@ sub generate_embed_h {
 
     embed_h($em, '', $api);
     embed_h($em, '#if defined(PERL_CORE) || defined(PERL_EXT)', $ext);
+    embed_h($em, '#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)',
+            $ext_re);
     embed_h($em, '#if defined(PERL_CORE)', $core);
 
     print $em <<~'END';
@@ -4323,8 +4334,10 @@ sub set_flags_visibility {
     # determined by apidoc or embed.fnc lines.  The visibility is stored as
     # a single character mnemonic, as follows:
     #   0   The symbol is not supposed to be visible outside the perl core
-    #   E   The symbol is supposed to be visible to perl extensions and the
-    #       core but nowhere else
+    #   Q   The symbol is supposed to be visible to the 're' perl extension
+    #       and the core but nowhere else
+    #   E   The symbol is supposed to be visible to other perl extensions and
+    #       the core but nowhere else
     #   1   The symbol is supposed to be visible everywhere
 
     # Use the stored flags if new ones empty.  Look for special handling
@@ -4353,16 +4366,16 @@ sub set_flags_visibility {
 
     my $is_macro = $flags =~ /m/;
 
-    # Convert never to 0; always to 1; 'E' remains 'E'.
+    # Convert never to 0; always to 1; 'E' and 'Q' remain themselves.
     $flags =~ s/$discard_non_visibility_flags_re//g;
-    if ($flags =~ s/E//g) {
-        $flags .= 'E';          # Squeeze out multiple E's
+    if ($flags =~ s/([EQ])//g) {
+        $flags .= $1;           # Squeeze out redundant uses
         $flags =~ s/[eX]//g;    # These flags are irrelevant for our purposes
-        if ($flags ne 'E') {
-            die_at_end "'E' flag for $name can't have other visibility flag"
-                     . " except [eX], not '$raw_flags'; in $file line"
+        if (length $flags > 1) {
+            die_at_end "'[EQ]' flags for $name can't have other visibility"
+                     . " flag except [eX], not '$raw_flags'; in $file line"
                      . " $line_number";
-            $flags = 'E';
+            $flags = substr $flags, -1, 1;
         }
     }
     elsif ($flags eq "" || $flags =~ $never_visible_flags_re) {
@@ -4390,10 +4403,13 @@ sub set_flags_visibility {
     # Multiply to get the numeric numbers spread more widely than the
     # non-numeric one.
     if ($flags =~ / ^ -? \d+ $/x) {
-        $ordering = 2 * $flags;
+        $ordering = 3 * $flags;
+    }
+    elsif ($flags eq 'Q') {
+        $ordering = 1;
     }
     elsif ($flags eq 'E') {
-        $ordering = 1;
+        $ordering = 2;
     }
     else {
         die_at_end "Flag for $name '$flags' unrecognized in $file line"
@@ -4431,7 +4447,7 @@ sub get_and_set_cpp_visibility {
 
     # The stored visibility is the same as the codes used in
     # set_flags_visibility(), plus
-    #   /   The symbol is visible in the 'use re' extension, plus the perl
+    #   Q   The symbol is visible in the 'use re' extension, plus the perl
     #       core, but nowhere else
 
     my $file = $line->{source};
@@ -4500,7 +4516,7 @@ sub get_and_set_cpp_visibility {
 
     # See if the symbol is visible everywhere; and if not, if it is visible to
     # 'use 're'; and if not, if it is visible to other extensions.
-    for my $code (1, '/', 'E') {
+    for my $code (1, 'Q', 'E') {
         my %hash = (%this_file_conds, $visibility_types{$code}->%*);
         my $pattern = join "|", keys %hash;
         my $regex = qr/ \b defined \( ( $pattern ) \) /x;
@@ -4532,7 +4548,7 @@ sub get_and_set_cpp_visibility {
     elsif ($visibility_code eq 'E') {
         $ordering = 2;
     }
-    elsif ($visibility_code eq '/') {
+    elsif ($visibility_code eq 'Q') {
         $ordering = 1;
     }
     else {
@@ -4959,6 +4975,11 @@ sub find_undefs {
                 # Supposed to be hidden, but isn't.  #undef it to hide it
                 $always_undefs{$name} = 1;
             }
+            elsif ($flags_visibility =~ /Q/) {
+                # Supposed to be hidden from everything but the 're'
+                # extension, but isn't.
+                $non_ext_re_undefs{$name} = 1;
+            }
             elsif ($flags_visibility =~ /E/) {
                 # Supposed to be hidden from non-extensions, but isn't.
                 $non_ext_undefs{$name} = 1;
@@ -4976,8 +4997,8 @@ sub find_undefs {
             next;
         }
 
-        # The remaining legal codes are  '/' and 'E'
-        if ($cpp_visibility !~ m! ^ [/E] $ !x ) {
+        # The remaining legal codes are  'Q' and 'E'
+        if ($cpp_visibility !~ m! ^ [EQ] $ !x ) {
             die_at_end "Unexpected visibility code '$cpp_visibility' for"
                      . " '$name'";
             next;
@@ -5132,12 +5153,13 @@ EOT
 }
 
 sub update_headers {
-    my ($all, $api, $ext, $core) = setup_embed(); # see regen/embed_lib.pl
+    # see regen/embed_lib.pl
+    my ($all, $api, $ext_re, $ext, $core) = setup_embed();
     generate_proto_h($all);
     die_at_end "$unflagged_pointers pointer arguments to clean up\n"
                                                        if $unflagged_pointers;
     find_undefs($all);
-    generate_embed_h($all, $api, $ext, $core);
+    generate_embed_h($all, $api, $ext, $ext_re, $core);
     generate_long_names_c(\%need_longs);
     generate_embedvar_h();
     die "$error_count errors found" if $error_count;

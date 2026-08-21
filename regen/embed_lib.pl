@@ -87,11 +87,15 @@ sub setup_embed {
                       $_[1]->{embed}{flags}=~/[AC]/ }), # only API and private API
         $parser->group_content($lines,
                 sub { $_[1]->{embed} &&
-                      $_[1]->{embed}{flags}!~/[AC]/ &&  # otherwise Extensions
-                      $_[1]->{embed}{flags}=~/[E]/ }),
+                      $_[1]->{embed}{flags}!~/[AC]/ &&  # otherwise 'use re'
+                      $_[1]->{embed}{flags}=~/[Q]/ }),
         $parser->group_content($lines,
                 sub { $_[1]->{embed} &&
-                      $_[1]->{embed}{flags}!~/[ACE]/ }) # everything else.
+                      $_[1]->{embed}{flags}!~/[ACQ]/ &&  # otherwise other
+                      $_[1]->{embed}{flags}=~/[E]/ }),   # extensions
+        $parser->group_content($lines,
+                sub { $_[1]->{embed} &&
+                      $_[1]->{embed}{flags}!~/[ACEQ]/})  # everything else.
     );
 }
 
