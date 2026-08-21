@@ -3687,6 +3687,15 @@ if (ref $x ne 'VSTRING') {
 $y = ref $x ne 'HASH' ? 'OTHER' : 'HASH';
 print 1 if ref $_[0] ne 'CODE';
 ####
+# Deparse of (reftype($x) eq 'SOME-BUILTIN-TYPE') optimized into OP_REF_CMP
+my($x, $y);
+$y = builtin::reftype($x) eq 'SCALAR' ? 1 : 0;
+####
+# Deparse OP_REF_CMP reftype when use_dumper is true
+# OPTIONS -d
+my($x, $y);
+$y = ref $x eq "SCALAR" ? 1 : 0;
+####
 # Deparse match-counting idiom
 my($str, $pat);
 my $count_all = () = $str =~ /$pat/g;
