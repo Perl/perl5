@@ -13432,7 +13432,7 @@ Perl_re_printf(pTHX_ const char *fmt, ...)
 #   define PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA \
         Perl_assert_aTHX; assert(node)
 
-#   if defined(PERL_CORE) || defined(PERL_EXT)
+#   if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 PERL_CALLCONV SV *
 Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist)
         Perl_attribute_nonnull_aTHX
