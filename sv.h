@@ -1757,6 +1757,14 @@ only be used as part of a larger operation
 #endif
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
+/*
+=for apidoc_section $string
+=for apidoc Qm|IV|BmUSEFUL|SV* sv
+Used by regexec.c to help determine if using Boyers-Moore could speed up
+pattern matching of the string contained in C<sv>.
+
+=cut
+*/
 #  define BmUSEFUL(sv)							\
         (*({ SV *const bmuseful_ = MUTABLE_SV(sv);			\
             assert(SvTYPE(bmuseful_) >= SVt_PVIV);			\

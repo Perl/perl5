@@ -314,6 +314,7 @@
 #     undef utf16_to_utf8_reversed
 #   endif /* !defined(PERL_EXT) */
 #   if !defined(PERL_EXT_RE_BUILD)
+#     undef BmUSEFUL
 #     undef FAIL_
 #     undef first_upper_bit_set_byte_number
 #     undef invlist_intersection_complement_2nd_
@@ -322,7 +323,7 @@
 #     undef PARSE_IDENT_ERROR_TEXT
 #     undef RExC_parse_advance
 #     undef WARN_HELPER_
-#   endif
+#   endif /* !defined(PERL_EXT_RE_BUILD) */
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */
 
