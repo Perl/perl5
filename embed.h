@@ -1502,6 +1502,12 @@
 #   if !defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 #     define do_exec(a)                         Perl_do_exec(aTHX_ a)
 #   endif
+#   if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+#     define apply_attribute_isa(a,b,c)         Perl_apply_attribute_isa(aTHX_ a,b,c)
+#     define apply_attribute_param(a,b,c)       Perl_apply_attribute_param(aTHX_ a,b,c)
+#     define apply_attribute_reader(a,b,c)      Perl_apply_attribute_reader(aTHX_ a,b,c)
+#     define apply_attribute_writer(a,b,c)      Perl_apply_attribute_writer(aTHX_ a,b,c)
+#   endif
 #   if defined(PERL_IN_AV_C)
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
 #   endif
@@ -2444,8 +2450,6 @@
      defined(PERL_IN_TOKE_C)
 #   define class_add_ADJUST(a,b)                Perl_class_add_ADJUST(aTHX_ a,b)
 #   define class_add_field(a,b)                 Perl_class_add_field(aTHX_ a,b)
-#   define class_apply_attributes(a,b)          Perl_class_apply_attributes(aTHX_ a,b)
-#   define class_apply_field_attributes(a,b)    Perl_class_apply_field_attributes(aTHX_ a,b)
 #   define class_prepare_initfield_parse()      Perl_class_prepare_initfield_parse(aTHX)
 #   define class_prepare_method_parse(a)        Perl_class_prepare_method_parse(aTHX_ a)
 #   define class_seal_stash(a)                  Perl_class_seal_stash(aTHX_ a)
