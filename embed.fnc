@@ -6209,7 +6209,7 @@ Efp	|int	|re_printf	|NN const char *fmt			\
 				|...
 # endif
 # if defined(PERL_EXT_RE_BUILD)
-Ep	|SV *	|get_re_gclass_aux_data 				\
+Qp	|SV *	|get_re_gclass_aux_data 				\
 				|NULLOK const regexp *prog		\
 				|NN const struct regnode *node		\
 				|bool doinit				\

@@ -2462,12 +2462,14 @@
 #       define re_indentf(a,...)                Perl_re_indentf(aTHX_ a,__VA_ARGS__)
 #       define re_printf(...)                   Perl_re_printf(aTHX_ __VA_ARGS__)
 #     endif
-#     if defined(PERL_EXT_RE_BUILD)
-#       define get_re_gclass_aux_data(a,b,c,d,e,f) Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
-#     else
+#     if !defined(PERL_EXT_RE_BUILD)
 #       define get_regclass_aux_data(a,b,c,d,e,f) Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
 #     endif
 #   endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#   if   defined(PERL_EXT_RE_BUILD) && \
+       ( defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) )
+#     define get_re_gclass_aux_data(a,b,c,d,e,f) Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
+#   endif
 # endif /* defined(PERL_IN_REGEX_ENGINE) */
 # if defined(PERL_MEM_LOG)
 #   define mem_log_alloc                        Perl_mem_log_alloc
