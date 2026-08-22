@@ -2905,6 +2905,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     PadnameIsFULLSV
     SILENT_NO_TAINT_SUPPORT
     STRLEN_MAX
+    UTF8_ALLOW_LONG_AND_ITS_VALUE
 
     assert_scalar_or_IO_
     DEBUG__
@@ -2963,7 +2964,6 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     toLOWER_utf8_flags_
     toTITLE_utf8_flags_
     toUPPER_utf8_flags_
-    UTF8_ALLOW_LONG_AND_ITS_VALUE
     UTF8_CHECK_ONLY_BIT_POS_
     UTF8_DIE_IF_MALFORMED_BIT_POS_
     UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_
