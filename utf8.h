@@ -684,9 +684,10 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define UTF8_IS_ABOVE_LATIN1(c)     (assert(FITS_IN_8_BITS(c)),             \
                         (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
 
-/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
- * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
- * be well-formed. */
+/* Is the UTF8-encoded byte 'c' the first byte of a sequence that evaluates to
+ * a code point that can be represented by a single non-UTF8 byte?  Use
+ * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to be
+ * well-formed. */
 #define UTF8_IS_DOWNGRADEABLE_START(c)  (assert(FITS_IN_8_BITS(c)),         \
                 inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(c),                   \
                         UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
