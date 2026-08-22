@@ -1262,7 +1262,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MICRO_SIGN_NATIVE
     MICRO_SIGN_UTF8
     MI_INIT_WORKAROUND_PACK
-    MIN_OFFUNI_VARIANT_CP
     Mkdir
     M_PAT_MODS
     msbit_pos
@@ -1406,8 +1405,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ObjectMAXFIELD
     OCSHIFT
     OCTAL_VALUE
-    OFFUNI_IS_INVARIANT
-    OFFUNISKIP
     ONCE_PAT_MOD
     ONCE_PAT_MODS
     ONE_IF_EBCDIC_ZERO_IF_NOT
@@ -2687,7 +2684,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NOT_IN_NUMERIC_STANDARD_
     NOT_IN_NUMERIC_UNDERLYING_
     o1_
-    OFFUNISKIP_helper_
     __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
@@ -2901,6 +2897,9 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     KEY_UNITCHECK
     MAX_UNICODE_UTF8_BYTES
     MGf_MGv2
+    MIN_OFFUNI_VARIANT_CP
+    OFFUNI_IS_INVARIANT
+    OFFUNISKIP
     PADNAMEf_FULLSV
     PadnameIsFULLSV
     SILENT_NO_TAINT_SUPPORT
@@ -2953,6 +2952,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     MGv2_ASSERT_AND_CAST_FUNCS_
     MGv2_SIZEOF_FLAGS_
     NV_BODYLESS_UNION_
+    OFFUNISKIP_helper_
     RXf_PMf_CHARSET_SHIFT_
     RXf_PMf_SHIFT_COMPILETIME_
     RXf_PMf_SHIFT_NEXT_
