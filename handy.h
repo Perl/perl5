@@ -951,6 +951,10 @@ UTF-8 or not), C<isASCII> will give the correct results when called with any
 byte in any string encoded or not in UTF-8.  And similarly C<isASCII_utf8> and
 C<isASCII_utf8_safe> will work properly on any string encoded or not in UTF-8.
 
+These macros are often wrongly used to see if the input occupies a single byte.
+For that purpose, you should use C<L</UVCHR_IS_INVARIANT>>, as these do not
+give the correct result in all cases.
+
 =for apidoc Am|bool|isBLANK|UV ch
 =for apidoc_item ||isBLANK_A|UV ch
 =for apidoc_item ||isBLANK_LC|UV ch
