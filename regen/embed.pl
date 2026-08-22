@@ -1729,16 +1729,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     pthread_mutexattr_default
     pthread_mutexattr_init
     pthread_mutexattr_settype
-    pTHX_1
-    pTHX_12
-    pTHX_2
-    pTHX_3
-    pTHX_4
-    pTHX_5
-    pTHX_6
-    pTHX_7
-    pTHX_8
-    pTHX_9
     pTHX__FORMAT
     pTHX_FORMAT
     pTHX__VALUE
@@ -2953,6 +2943,17 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     MGv2_SIZEOF_FLAGS_
     NV_BODYLESS_UNION_
     OFFUNISKIP_helper_
+    pTHX_2
+    pTHX_3
+    pTHX_4
+    pTHX_5
+    pTHX_6
+    pTHX_7
+    pTHX_8
+    pTHX_9
+    pTHX_10
+    pTHX_11
+    pTHX_12
     RXf_PMf_CHARSET_SHIFT_
     RXf_PMf_SHIFT_COMPILETIME_
     RXf_PMf_SHIFT_NEXT_

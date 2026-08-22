@@ -225,6 +225,29 @@ On threaded perls, set C<pTHX> to C<a>; on unthreaded perls, do nothing
 =for apidoc ABmU|void|dTHXoa|PerlInterpreter * a
 Now a synonym for C<L</dTHXa>>.
 
+=for apidoc AmnU|U8|pTHX_1
+X<pTHX_2> X<pTHX_3> X<pTHX_4> X<pTHX_5> X<pTHX_6> X<pTHX_7> X<pTHX_8>
+X<pTHX_9> X<pTHX_10> X<pTHX_11> X<pTHX_12>
+Given an argument list that starts with C<L</pTHX_>>, returns the actual
+argument position number of the first non-pTHX_ argument.  On unthreaded
+builds, this will be 1; on threaded ones, 2.
+
+C<pTHX_2> .. C<pTHX_12> act correspondingly.
+
+These are typically used in constructs that communicate to the compiler
+something about the I<n>th argument, without the code having to take into
+account if this is a threaded or unthreaded build.
+
+For example,
+
+ void my_func(pTHX_, int a, int b, int c, int d, int e)
+ __attribute__nonnull__(pTHX_4);
+
+tells compilers that understand that directive that C<d> (the 4th non-pTHX_
+argument in the argument list) is not NULL.  (You can use this exact spelling in
+your code, and Perl will translate it to whatever equivalent form the compiler
+being used accepts (or nothing at all if it has no equivalent)).
+
 =cut
 */
 
