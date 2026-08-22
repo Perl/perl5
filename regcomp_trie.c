@@ -328,15 +328,15 @@ Inplace optimizes a sequence of 2 or more Branch-Exact nodes into a TRIE node.
 
 A trie is an N'ary tree where the branches are determined by digital
 decomposition of the key. IE, at the root node you look up the 1st character and
-follow that branch repeat until you find the end of the branches. Nodes can be
-marked as "accepting" meaning they represent a complete word. Eg:
+follow that branch.  Repeat until you find the end of the branches. Nodes can
+be marked as "accepting" meaning they represent a complete word. Eg:
 
   /he|she|his|hers/
 
-would convert into the following structure. Numbers represent states, letters
-following numbers represent valid transitions on the letter from that state, if
-the number is in square brackets it represents an accepting state, otherwise it
-will be in parenthesis.
+would convert into the following structure. Numbers represent states; letters
+following numbers represent valid transitions on the letter from that state.
+If the number is in square brackets it represents an accepting state,
+otherwise it will be in parenthesis.
 
       +-h->+-e->[3]-+-r->(8)-+-s->[9]
       |    |
