@@ -3138,21 +3138,64 @@ last-inclusive range.
 # endif
 #endif
 
-/* convenience debug macros */
+/*
+=for apidoc_section $debugging
+=for apidoc AmnU  |const char *|pTHX_FORMAT
+=for apidoc_item              ||pTHX_FORMAT_
+=for apidoc_item BU           ||pTHX__FORMAT
+=for apidoc_item              ||p_THX_FORMAT_
+=for apidoc_item              ||p_THX_FORMAT
+=for apidoc_item              ||pTHX_VALUE_
+=for apidoc_item              ||pTHX_VALUE
+=for apidoc_item              ||p_THX_VALUE_
+=for apidoc_item              ||p_THX_VALUE
+=for apidoc_item BU           ||pTHX__VALUE_
+=for apidoc_item BU           ||pTHX__VALUE
+
+Use these to display, typically in a warning or debugging statement, the
+current thread's value in a threaded perl, and nothing at all in an unthreaded
+one, without your code needing to know which type it is running in.
+
+The forms containing the string "FORMAT" go in the format string,
+and the ones containing "VALUE" are to be correspondingly positioned in the
+argument list.
+
+The forms containing the string "FORMAT" expand to use the term "Perl
+interpreter".
+
+The various underscore permutations allow for leading and/or trailing commas.
+Two underscores in a row are technically illegal in C, reserved for the
+implementation, so they should not be used in new code.
+
+=cut
+*/
 #ifdef USE_ITHREADS
-#define pTHX_FORMAT  "Perl interpreter: 0x%p"
-#define pTHX__FORMAT ", Perl interpreter: 0x%p"
-#define pTHX_VALUE_   (void *)my_perl,
-#define pTHX_VALUE    (void *)my_perl
-#define pTHX__VALUE_ ,(void *)my_perl,
-#define pTHX__VALUE  ,(void *)my_perl
+#  define pTHX_FORMAT_    "Perl interpreter: 0x%p,"
+#  define pTHX_FORMAT     "Perl interpreter: 0x%p"
+#  define p_THX_FORMAT_ ", Perl interpreter: 0x%p,"
+#  define p_THX_FORMAT  ", Perl interpreter: 0x%p"
+
+#  define pTHX__FORMAT  ", Perl interpreter: 0x%p"
+
+#  define pTHX_VALUE_    (void *)my_perl,
+#  define pTHX_VALUE     (void *)my_perl
+#  define p_THX_VALUE_  ,(void *)my_perl,
+#  define p_THX_VALUE   ,(void *)my_perl
+
+#  define pTHX__VALUE_  ,(void *)my_perl,
+#  define pTHX__VALUE   ,(void *)my_perl
 #else
-#define pTHX_FORMAT
-#define pTHX__FORMAT
-#define pTHX_VALUE_
-#define pTHX_VALUE
-#define pTHX__VALUE_
-#define pTHX__VALUE
+#  define pTHX_FORMAT_
+#  define pTHX_FORMAT
+#  define p_THX_FORMAT_
+#  define p_THX_FORMAT
+#  define pTHX__FORMAT
+#  define pTHX_VALUE_
+#  define pTHX_VALUE
+#  define p_THX_VALUE_
+#  define p_THX_VALUE
+#  define pTHX__VALUE_ 
+#  define pTHX__VALUE
 #endif /* USE_ITHREADS */
 
 /*

@@ -1722,10 +1722,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     PTHREAD_INIT_SELF
-    pTHX__FORMAT
-    pTHX_FORMAT
-    pTHX__VALUE
-    pTHX_VALUE
     pTHXx
     PUSH_MULTICALL_FLAGS
     PUSHSTACK
@@ -2670,8 +2666,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
-    pTHX__VALUE_
-    pTHX_VALUE_
     pTHXx_
     SAFE_FUNCTION__
     SBOX32_CASE_
