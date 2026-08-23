@@ -209,7 +209,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     assert_not_glob
     ASSERT_NOT_PTR
     assert_not_ROK
-    aTHXx
     Atoul
     AvARYLEN
     AvMAX
@@ -556,7 +555,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     dTARGETSTACKED
     dTHX_DEBUGGING
     dTHXs
-    dTHXx
     dTOPiv
     dTOPnv
     dTOPss
@@ -1721,7 +1719,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     PTHREAD_INIT_SELF
-    pTHXx
     PUSH_MULTICALL_FLAGS
     PUSHSTACK
     PUSHSTACKi
@@ -2564,7 +2561,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ZAPHOD32_WARN5
     ZAPHOD32_WARN6
 
-    aTHXx_
     BASE_TWO_BYTE_HI_
     BASE_TWO_BYTE_LO_
     CC_ALPHA_
@@ -2665,7 +2661,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     __PATCHLEVEL_H_INCLUDED__
     PLATFORM_SYS_INIT_
     PLATFORM_SYS_TERM_
-    pTHXx_
     SAFE_FUNCTION__
     SBOX32_CASE_
     SVf_

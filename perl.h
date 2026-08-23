@@ -857,6 +857,19 @@ Now a placeholder that declares nothing
 #  endif
 #endif
 
+/* These appear to be part of cleaning up PERL_OBJECT, which was an
+ * implementation of multiplicity using C++ objects.  Introduced in
+ * 0cb9638729211ea71a75ae8756c03ba21553bd53
+=for apidoc ABmn|PerlInterpreter*|pTHXx
+=for apidoc_item|PerlInterpreter*|pTHXx_
+
+=for apidoc ABmn|PerlInterpreter*|aTHXx
+=for apidoc_item|PerlInterpreter*|aTHXx_
+
+=for apidoc ABmn|void|dTHXx
+
+=cut
+*/
 #ifndef pTHXx
 #  define pTHXx		PerlInterpreter *my_perl
 #  define pTHXx_	pTHXx,
