@@ -223,6 +223,10 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 On threaded perls, declare C<aTHX> (C<my_perl>) and set it to C<a>; on
 unthreaded perls, do nothing.
 
+=for apidoc Am|PerlInterpreter *|aTHXa|PerlInterpreter * a
+On threaded perls, set C<aTHX> (C<my_perl>) to C<a>; on unthreaded perls, do
+nothing.
+
 =for apidoc ABmU|void|dTHXoa|PerlInterpreter * a
 Now a synonym for C<L</dTHXa>>.
 

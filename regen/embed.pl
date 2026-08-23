@@ -209,7 +209,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     assert_not_glob
     ASSERT_NOT_PTR
     assert_not_ROK
-    aTHXa
     aTHXx
     Atoul
     AvARYLEN
