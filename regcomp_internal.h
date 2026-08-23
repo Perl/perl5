@@ -160,6 +160,8 @@ struct RExC_state_t {
     HV         *unlexed_names;
     SV          *runtime_code_qr;       /* qr with the runtime code blocks */
     bool        use_BRANCHJ;
+    bool        have_flattened;
+    bool        unsafe_flatten;
     bool        sWARN_EXPERIMENTAL__VLB;
     bool        sWARN_EXPERIMENTAL__REGEX_SETS;
     /* DEBUGGING only fields, keep these LAST so that we do not
@@ -257,6 +259,8 @@ struct RExC_state_t {
 #define RExC_warn_text (pRExC_state->warn_text)
 #define RExC_in_script_run      (pRExC_state->in_script_run)
 #define RExC_use_BRANCHJ        (pRExC_state->use_BRANCHJ)
+#define RExC_have_flattened          (pRExC_state->have_flattened)
+#define RExC_unsafe_flatten          (pRExC_state->unsafe_flatten)
 #define RExC_warned_WARN_EXPERIMENTAL__VLB (pRExC_state->sWARN_EXPERIMENTAL__VLB)
 #define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
 #define RExC_unlexed_names (pRExC_state->unlexed_names)
