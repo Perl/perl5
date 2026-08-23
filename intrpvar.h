@@ -916,7 +916,7 @@ PERLVARI(I, veto_switch_non_tTHX_context, int, FALSE)
 #endif
 
 #ifdef USE_REENTRANT_API
-PERLVAR(I, reentrant_buffer, REENTR *)	/* here we store the _r buffers */
+PERLVAR(I, reentrant_buffer, PERL_REENTR *)  /* here we store the _r buffers */
 #endif
 
 PERLVAR(I, custom_op_names, HV *)	/* Names of user defined ops */

@@ -360,7 +360,7 @@ close DATA;
     }
 }
 
-my @struct; # REENTR struct members
+my @struct; # PERL_REENTR struct members
 my @size;   # struct member buffer size initialization code
 my @init;   # struct member buffer initialization (malloc) code
 my @free;   # struct member buffer release (free) code
@@ -799,7 +799,7 @@ typedef struct {
 
 @struct
     int dummy; /* cannot have empty structs */
-} REENTR;
+} PERL_REENTR;
 
 /* The wrappers. */
 
@@ -878,7 +878,7 @@ Perl_reentrant_init(pTHX) {
 
 #ifdef USE_REENTRANT_API
 
-        Newx(PL_reentrant_buffer, 1, REENTR);
+        Newx(PL_reentrant_buffer, 1, PERL_REENTR);
         Perl_reentrant_size(aTHX);
 
 @init

@@ -875,7 +875,7 @@ typedef struct {
 
 
     int dummy; /* cannot have empty structs */
-} REENTR;
+} PERL_REENTR;
 
 /* The wrappers. */
 
