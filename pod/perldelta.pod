@@ -348,6 +348,14 @@ well.
 
 =item *
 
+During regex compilation, C<S_reg> will attempt to flatten nested BRANCH
+structures, in an attempt to give the TRIE optimizer more alternations
+to consider. The intent is that patterns that were previously compiled
+into two or more adjacent TRIE nodes might now get compiled into a single
+(or at least, fewer) TRIE node(s).
+
+=item *
+
 XXX
 
 =back
