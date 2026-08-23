@@ -179,7 +179,7 @@ Perl_reentrant_init(pTHX) {
 
 #ifdef USE_REENTRANT_API
 
-        Newx(PL_reentrant_buffer, 1, REENTR);
+        Newx(PL_reentrant_buffer, 1, PERL_REENTR);
         Perl_reentrant_size(aTHX);
 
 #  ifdef HAS_ASCTIME_R
