@@ -3652,6 +3652,7 @@ sub generate_proto_h {
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /[EQ]/ );
         my @asserts;
+        my @unused;
         my @attrs;
         my $func;
         my $args_assert_line;
@@ -3825,6 +3826,7 @@ sub generate_proto_h {
                     my $nz =      ( $arg =~ s/\bNZ\b// );
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
                     my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
+                    my $unused = ( $arg =~ s/\bUNUSED\b// );
 
                     # Trim $arg and remove multiple blanks
                     $arg =~ s/^\s+//;
@@ -3902,6 +3904,13 @@ sub generate_proto_h {
                             $type_assert = "!$argname || $type_assert"
                                                                    if $nullok;
                             push @asserts, "assert($type_assert)";
+                        }
+
+                        # Exactly one of these expands to nothing.
+                        if ($unused) {
+                            $arg .= " __attribute__unused__";
+                            push @unused,
+                                 "PERL_UNUSED_ARG_FOR_ARGS_ASSERT($argname)";
                         }
 
                         # If this is a pointer to a character string argument,
@@ -4183,7 +4192,7 @@ sub generate_proto_h {
                 # "just work" as far as folding
                 my @end = '} STMT_END';
 
-                foreach my $which (\@asserts, \@end) {
+                foreach my $which (\@asserts, \@unused, \@end) {
 
                     # Look at each line that goes into the definition
                     while($which->@*) {

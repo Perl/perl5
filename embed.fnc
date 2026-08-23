@@ -224,8 +224,14 @@
 :   You may also add explicit asserts at the end of a function entry.
 :
 :   Sections below give more details of each item.  For readability,
-:   constraints are split into two sections, one for pointer parameters, and
-:   one for the rest.
+:   modifiers are split into three sections, first for ones that apply to any
+:   kind of parameter; second for constraints on pointer parameters, and
+:   third for the rest.
+:
+: *** Modifiers that apply to any parameter
+:
+:   UNUSED  Declare that this parameter is unused by the called function.  See
+:           the "UNUSED" entry in perlintern.
 :
 : *** Pointer parameter constraint modifiers
 :
@@ -4244,7 +4250,7 @@ Adprt	|void	|vcroak 	|NULLOK const char *pat 		\
 				|NULLOK va_list *args
 Adpt	|void	|vdeb		|NN const char *pat			\
 				|NULLOK va_list *args
-Adpt	|void	|vfatal_warner	|U32 err				\
+Adpt	|void	|vfatal_warner	|U32 err  UNUSED			\
 				|NN const char *pat			\
 				|NULLOK va_list *args
 Adpt	|char * |vform		|NN const char *pat			\
