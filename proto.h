@@ -8706,10 +8706,11 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
     STMT_START { assert(pat); } STMT_END
 
 PERL_CALLCONV void
-Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
+Perl_vfatal_warner(pTHX_ U32 err __attribute__unused__, const char *pat, va_list *args)
         Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_VFATAL_WARNER          \
-    STMT_START { assert(pat); } STMT_END
+    STMT_START { assert(pat); PERL_UNUSED_ARG_FOR_ARGS_ASSERT(err);  \
+    } STMT_END
 
 PERL_CALLCONV char *
 Perl_vform(pTHX_ const char *pat, va_list *args)

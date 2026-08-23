@@ -519,6 +519,11 @@ C<static>, and you might as well just type the actual C keyword.
 #endif
 #ifdef HASATTRIBUTE_UNUSED
 #  define __attribute__unused__             __attribute__((unused))
+
+   /* If available, use the attribute instead of PERL_UNUSED_ARG */
+#  define PERL_UNUSED_ARG_FOR_ARGS_ASSERT(a)
+#else
+#  define PERL_UNUSED_ARG_FOR_ARGS_ASSERT(a)  PERL_UNUSED_ARG(a)
 #endif
 #ifdef HASATTRIBUTE_WARN_UNUSED_RESULT
 #  define __attribute__warn_unused_result__ __attribute__((warn_unused_result))
@@ -575,6 +580,37 @@ C<static>, and you might as well just type the actual C keyword.
 #ifndef __attribute__uninitialized__
 #  define __attribute__uninitialized__
 #endif
+
+/*
+=for apidoc_section $compiler
+=for apidoc EmnU||UNUSED
+
+Add this symbol following a formal parameter in both a function's definition,
+and its F<embed.fnc> entry to indicate that, while this parameter is passed to
+the function, the function doesn't actually use it.
+
+Perl will arrange for the suppression of any warnings the compiler would
+otherwise raise about the parameter being present but not used, which it would
+if there are no code paths through the function that reference the parameter.
+
+If there are Configurations where the parameter actually does get used, it is
+better practice to not use this mechanism, but to instead use
+L<C<PERL_UNUSED_ARG>|perlapi/PERL_UNUSED_ARG> in the conditionally compiled
+sections that don't use it.
+
+You need to add C<UNUSED> in both places.  If you forget one, there are likely
+platforms on which the warning won't be suppressed.
+
+An example is:
+ : embed.fnc entry
+ Adpt|void|vfatal_warner|U32 err UNUSED|const char *pat|va_list *args
+
+ // First line of function defintion
+ Perl_vfatal_warner(pTHX_ U32 err UNUSED,const char*pat,va_list*args){
+
+=cut
+*/
+#define UNUSED __attribute__unused__
 
 /* Some OS warn on NULL format to printf */
 #ifdef PRINTF_FORMAT_NULL_OK
