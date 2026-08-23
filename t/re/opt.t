@@ -274,3 +274,16 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 # Must not have stclass=[x]
 (*ACCEPT)xyz	0	-	-	-
 (a(*ACCEPT)){2}	1	0+a	-	-
+
+# Nested branches that should be flattened
+(?:mat3|mat4)|mat1|mat2	4	0+mat	-	-	flattened single nested branch
+^(?:mat1|mat2|(?:mat3|mat4)|mat5|(?:mat6|mat7))$	4	0+mat	-	noscan,anchor SBOL	flattened multiple, simple branches
+(?:foo|bar|(?:baz|bop|bing)|zoop)	3	-	-	stclass=~AHOCORASICKC-EXACT\[bfz\]	flattened multiple branches
+(?:(?:frog|fan)|fog)|(?:farce|(?:forge|flambe))	3	0+f	-	-	flattened multiple, deeper branches
+
+(?:(?:cat|dog|fish)|bird)x	4	-	3:4+x	-	flattened trie, trailing literal floats
+(?:(?:(?:a|b)|(?:c|d))|(?:(?:e|f)|(?:g|h)))z	2	1+z	-	-	single-char trie, trailing literal anchored
+(?:(?:(?:aa|ab|ac)|(?:ba|bb|bc))|(?:(?:ca|cb|cc)|(?:da|db|dc)))e	3	2+e	-	-	two-char trie, trailing literal anchored
+
+# Nested branches that should not be flattened
+(?:(?:(?:|x)|(?:|y))|(?:(?:|z)|w))q	1	-	0:1+q	-	empty alternatives; prefix is zero-width, literal floats
