@@ -119,6 +119,7 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <opval> subscript_index
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -763,6 +764,18 @@ bare_statement_yadayada
 		}
 	;
 
+subscript_index
+	/* Array/list access subscript: [ selector expression ]
+	 * Value of nonterminal: selector expression
+	 */
+	:	PERLY_BRACKET_OPEN
+		expr
+		PERLY_BRACKET_CLOSE
+		{
+			$$ = $expr;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -1350,15 +1363,15 @@ subscripted:    gelem PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRAC
                         /* In this and all the hash accessors, PERLY_SEMICOLON is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
-	|	scalar[array] PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE          /* $array[$element] */
+	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
 			}
-	|	term[array_reference] ARROW PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE      /* somearef->[$element] */
+	|	term[array_reference] ARROW subscript_index[selector]      /* somearef->[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($selector));
 			}
-	|	subscripted[array_reference] PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE    /* $foo->[$bar]->[$baz] */
+	|	subscripted[array_reference] subscript_index[selector]    /* $foo->[$bar]->[$baz] */
 			{ $$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($selector));
@@ -1401,11 +1414,11 @@ subscripted:    gelem PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRAC
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}
-	|	PERLY_PAREN_OPEN expr[list] PERLY_PAREN_CLOSE PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE            /* list slice */
+	|	PERLY_PAREN_OPEN expr[list] PERLY_PAREN_CLOSE subscript_index[selector]            /* list slice */
 			{ $$ = newSLICEOP(0, $selector, $list); }
-	|	QWLIST PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE            /* list literal slice */
+	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE                 /* empty list slice! */
+	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE subscript_index[selector]                 /* empty list slice! */
 			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
 
@@ -1591,7 +1604,7 @@ term[product]	:	termbinop
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
 	|       subscripted
 			{ $$ = $subscripted; }
-	|	sliceme PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE                     /* array slice */
+	|	sliceme subscript_index[selector]                     /* array slice */
 			{ $$ = op_prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_ASLICE, 0,
@@ -1601,7 +1614,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $sliceme->op_private & OPpSLICEWARNING;
 			}
-	|	kvslice PERLY_BRACKET_OPEN expr[selector] PERLY_BRACKET_CLOSE                 /* array key/value slice */
+	|	kvslice subscript_index[selector]                 /* array key/value slice */
 			{ $$ = op_prepend_elem(OP_KVASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVASLICE, 0,
