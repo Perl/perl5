@@ -116,7 +116,7 @@ checkOptree ( name      => 'for my $var (@a)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1459 optree_for.t:90) v
+1  <;> nextstate(main 1459 optree_for.t:90) v:{
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t3] sKRM/1
@@ -128,7 +128,7 @@ checkOptree ( name      => 'for my $var (@a)',
 9  <2> leaveloop K/2
 a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:14) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:14) v:>,<,%,{
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t2] sKRM/1
@@ -146,7 +146,7 @@ checkOptree ( name      => 'for our $var (@a)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1466 optree_for.t:100) v
+1  <;> nextstate(main 1466 optree_for.t:100) v:{
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t4] sKRM/1
@@ -160,7 +160,7 @@ a  <|> and(other->8) K/1
 b  <2> leaveloop K/2
 c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%,{
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t2] sKRM/1
@@ -180,7 +180,7 @@ checkOptree ( name      => 'for my ($var) (@a)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1466 optree_for.t:100) v
+1  <;> nextstate(main 1466 optree_for.t:100) v:{
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t3] sKRM/1
@@ -192,7 +192,7 @@ checkOptree ( name      => 'for my ($var) (@a)',
 9  <2> leaveloop K/2
 a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%,{
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t2] sKRM/1
@@ -210,7 +210,7 @@ checkOptree ( name      => 'for my ($var) (@lexical)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1466 optree_for.t:100) v
+1  <;> nextstate(main 1466 optree_for.t:100) v:{
 2  <0> pushmark sM
 3  <0> padav[@lexical:FAKE::7] sRM
 4  <{> enteriter(next->5 last->8 redo->5)[$var:1481,1484] KPS/LVINTRO
@@ -221,7 +221,7 @@ checkOptree ( name      => 'for my ($var) (@lexical)',
 8  <2> leaveloop K/2
 9  <1> leavesub[2 refs] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%,{
 2  <0> pushmark sM
 3  <0> padav[@lexical:FAKE::2] sRM
 4  <{> enteriter(next->5 last->8 redo->5)[$var:1481,1484] KPS/LVINTRO
@@ -238,7 +238,7 @@ checkOptree ( name      => 'for my ($key, $value) (%h)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1466 optree_for.t:100) v
+1  <;> nextstate(main 1466 optree_for.t:100) v:{
 2  <0> pushmark sM
 3  <#> gv[*h] s
 4  <1> rv2hv[t4] lKM
@@ -250,7 +250,7 @@ checkOptree ( name      => 'for my ($key, $value) (%h)',
 9  <2> leaveloop K/2
 a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%,{
 2  <0> pushmark sM
 3  <$> gv(*h) s
 4  <1> rv2hv[t3] lKM
@@ -268,7 +268,7 @@ checkOptree ( name      => 'for my ($foo, $bar, $baz) (@a)',
               bcopts    => '-exec',
               strip_open_hints => 1,
               expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 1466 optree_for.t:100) v
+1  <;> nextstate(main 1466 optree_for.t:100) v:{
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t5] sKRM/1
@@ -280,7 +280,7 @@ checkOptree ( name      => 'for my ($foo, $bar, $baz) (@a)',
 9  <2> leaveloop K/2
 a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
+1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%,{
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t4] sKRM/1

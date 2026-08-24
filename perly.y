@@ -956,7 +956,6 @@ else
 	:	empty
 	|	KW_ELSE mblock
 			{
-			  ($mblock)->op_flags |= OPf_PARENS;
 			  $$ = op_scope($mblock);
 			}
 	|	KW_ELSIF PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock else[else.recurse]
