@@ -351,6 +351,9 @@
 # define amagic_call(a,b,c,d)                   Perl_amagic_call(aTHX_ a,b,c,d)
 # define amagic_deref_call(a,b)                 Perl_amagic_deref_call(aTHX_ a,b)
 # define api_version_assert                     Perl_api_version_assert
+# define apply_attributes_lexical(a,b)          Perl_apply_attributes_lexical(aTHX_ a,b)
+# define apply_attributes_pkgscoped(a,b,c)      Perl_apply_attributes_pkgscoped(aTHX_ a,b,c)
+# define apply_attributes_sv(a,b)               Perl_apply_attributes_sv(aTHX_ a,b)
 # define apply_attrs_string(a,b,c,d)            Perl_apply_attrs_string(aTHX_ a,b,c,d)
 # define apply_builtin_cv_attributes(a,b)       Perl_apply_builtin_cv_attributes(aTHX_ a,b)
 # define atfork_child                           Perl_atfork_child
@@ -681,6 +684,7 @@
 # define newSV_true()                           Perl_newSV_true(aTHX)
 # define newSV_type(a)                          Perl_newSV_type(aTHX_ a)
 # define newSV_type_mortal(a)                   Perl_newSV_type_mortal(aTHX_ a)
+# define newSVattrdefinition(a)                 Perl_newSVattrdefinition(aTHX_ a)
 # define newSVbool(a)                           Perl_newSVbool(aTHX_ a)
 # define newSVhek(a)                            Perl_newSVhek(aTHX_ a)
 # define newSVhek_mortal(a)                     Perl_newSVhek_mortal(aTHX_ a)
@@ -1499,6 +1503,12 @@
 #   if !defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 #     define do_exec(a)                         Perl_do_exec(aTHX_ a)
 #   endif
+#   if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+#     define apply_attribute_isa(a,b,c)         Perl_apply_attribute_isa(aTHX_ a,b,c)
+#     define apply_attribute_param(a,b,c)       Perl_apply_attribute_param(aTHX_ a,b,c)
+#     define apply_attribute_reader(a,b,c)      Perl_apply_attribute_reader(aTHX_ a,b,c)
+#     define apply_attribute_writer(a,b,c)      Perl_apply_attribute_writer(aTHX_ a,b,c)
+#   endif
 #   if defined(PERL_IN_AV_C)
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
 #   endif
@@ -1730,7 +1740,7 @@
 #     define mro_get_linear_isa_dfs(a,b)        S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #   endif
 #   if defined(PERL_IN_OP_C)
-#     define apply_attrs_my(a,b,c,d)            S_apply_attrs_my(aTHX_ a,b,c,d)
+#     define apply_attrs_my(a,b,c)              S_apply_attrs_my(aTHX_ a,b,c)
 #     define assignment_type(a)                 S_assignment_type(aTHX_ a)
 #     define bad_type_gv(a,b,c,d)               S_bad_type_gv(aTHX_ a,b,c,d)
 #     define bad_type_pv(a,b,c,d)               S_bad_type_pv(aTHX_ a,b,c,d)
@@ -2432,13 +2442,18 @@
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
 # endif
+# if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+#   define attrtarget_class(a,b)                Perl_attrtarget_class(aTHX_ a,b)
+#   define attrtarget_padname(a,b)              Perl_attrtarget_padname(aTHX_ a,b)
+# endif
+# if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C)
+#   define store_attr_in_padname(a,b)           Perl_store_attr_in_padname(aTHX_ a,b)
+# endif
 # if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
      defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
      defined(PERL_IN_TOKE_C)
 #   define class_add_ADJUST(a,b)                Perl_class_add_ADJUST(aTHX_ a,b)
 #   define class_add_field(a,b)                 Perl_class_add_field(aTHX_ a,b)
-#   define class_apply_attributes(a,b)          Perl_class_apply_attributes(aTHX_ a,b)
-#   define class_apply_field_attributes(a,b)    Perl_class_apply_field_attributes(aTHX_ a,b)
 #   define class_prepare_initfield_parse()      Perl_class_prepare_initfield_parse(aTHX)
 #   define class_prepare_method_parse(a)        Perl_class_prepare_method_parse(aTHX_ a)
 #   define class_seal_stash(a)                  Perl_class_seal_stash(aTHX_ a)

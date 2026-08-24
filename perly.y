@@ -136,8 +136,7 @@
 %type <opval> formname subname proto cont my_scalar my_var
 %type <opval> list_of_itervars my_list_of_itervars refgen_topic formblock
 %type <opval> subattrlist attrlist optattrlist myattrterm myterm
-%type <pval>  fieldvar /* pval is PADNAME */
-%type <opval> fielddecl
+%type <opval> fieldvar fielddecl
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil sigvar
@@ -285,7 +284,8 @@ bare_statement_class_declaration
 			$$ = NULL;
 			class_setup_stash(PL_curstash);
 			if ($optattrlist) {
-				class_apply_attributes(PL_curstash, $optattrlist);
+				SAVEFREEOP($optattrlist);
+				apply_attributes_sv((SV *)PL_curstash, $optattrlist);
 			}
 		}
 	;
@@ -301,7 +301,8 @@ bare_statement_class_definition
 			package ($package, $version);
 			class_setup_stash(PL_curstash);
 			if ($optattrlist) {
-				class_apply_attributes(PL_curstash, $optattrlist);
+				SAVEFREEOP($optattrlist);
+				apply_attributes_sv((SV *)PL_curstash, $optattrlist);
 			}
 		}
 		stmtseq
@@ -1742,42 +1743,40 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 
 /* "field" declarations */
 fieldvar:	scalar	%prec PERLY_PAREN_OPEN
-			{
-			  $$ = PadnamelistARRAY(PL_comppad_name)[$scalar->op_targ];
-			  op_free($scalar);
-			}
+			{ $$ = $scalar; }
 	|	hsh 	%prec PERLY_PAREN_OPEN
-			{
-			  $$ = PadnamelistARRAY(PL_comppad_name)[$hsh->op_targ];
-			  op_free($hsh);
-			}
+			{ $$ = $hsh; }
 	|	ary 	%prec PERLY_PAREN_OPEN
-			{
-			  $$ = PadnamelistARRAY(PL_comppad_name)[$ary->op_targ];
-			  op_free($ary);
-			}
+			{ $$ = $ary; }
 	;
 
 fielddecl
 	:	KW_FIELD fieldvar optattrlist
 			{
 			  parser->in_my = 0;
-			  if($optattrlist)
-			    class_apply_field_attributes((PADNAME *)$fieldvar, $optattrlist);
+			  if($optattrlist) {
+				  SAVEFREEOP($optattrlist);
+			          apply_attributes_lexical($fieldvar->op_targ, $optattrlist);
+			  }
+			  op_free($fieldvar);
 			  $$ = newOP(OP_NULL, 0);
 			}
 	|	KW_FIELD fieldvar optattrlist ASSIGNOP
 			{
 			  parser->in_my = 0;
-			  if($optattrlist)
-			    class_apply_field_attributes((PADNAME *)$fieldvar, $optattrlist);
+			  if($optattrlist) {
+				  SAVEFREEOP($optattrlist);
+				  apply_attributes_lexical($fieldvar->op_targ, $optattrlist);
+			  }
 			  ENTER;
 			  class_prepare_initfield_parse();
 			}
 		term
 			{
-			  class_set_field_defop((PADNAME *)$fieldvar, $ASSIGNOP, $term);
 			  LEAVE;
+			  PADNAME *pn = PadnamelistARRAY(PL_comppad_name)[$fieldvar->op_targ];
+			  class_set_field_defop(pn, $ASSIGNOP, $term);
+			  op_free($fieldvar);
 			  $$ = newOP(OP_NULL, 0);
 			}
 	;

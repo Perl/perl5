@@ -4702,6 +4702,7 @@ struct Perl_OpDumpContext;
 #include "scope.h"
 #include "warnings.h"
 #include "utf8.h"
+#include "attributes.h"
 
 /* these would be in doio.h if there was such a file */
 #define my_stat()  my_stat_flags(SV_GMAGIC)

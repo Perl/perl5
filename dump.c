@@ -48,6 +48,7 @@ static const char* const svtypenames[SVt_LAST] = {
     "PVFM",
     "PVIO",
     "PVOBJ",
+    "INTERNAL",
 };
 
 /*
@@ -2698,7 +2699,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             dump_indent(level, file, "  PV = 0\n");
     }
 
-    if (type >= SVt_PVMG) {
+    if (type >= SVt_PVMG && type < SVt_INTERNAL) {
         if (SvMAGIC(sv))
                 do_magic_dump(level, file, SvMAGIC(sv), nest+1, maxnest, dumpops, pvlim);
         if (SvSTASH(sv))
@@ -3331,6 +3332,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 do_sv_dump(level+1, file, field, nest+1, maxnest, dumpops, pvlim);
             }
         }
+        break;
+    case SVt_INTERNAL:
+        dump_indent(level, file, "  META = 0x%" UVxf "\n",
+                                 PTR2UV(SviMETA(sv)));
+        dump_indent(level, file, "      NAME = \"%s\"\n", SviMETA(sv)->name);
+        dump_indent(level, file, "  PTR = 0x%" UVxf "\n",
+                                 PTR2UV(SviPTR(sv)));
         break;
     }
     SvREFCNT_dec_NN(d);

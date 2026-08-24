@@ -895,6 +895,16 @@ ETXip	|void	|append_utf8_from_native_byte				\
 p	|SSize_t|apply		|I32 type				\
 				|NN SV **mark				\
 				|NN SV **sp
+Apx	|void	|apply_attributes_lexical				\
+				|PADOFFSET padix			\
+				|NULLOK OP *attrlist
+Apx	|void	|apply_attributes_pkgscoped				\
+				|NN SV *sv				\
+				|NN GV *namegv				\
+				|NULLOK OP *attrlist
+Apx	|void	|apply_attributes_sv					\
+				|NN SV *sv				\
+				|NULLOK OP *attrlist
 Apx	|void	|apply_attrs_string					\
 				|NN const char *stashpv 		\
 				|NN CV *cv				\
@@ -2544,6 +2554,8 @@ ARdp	|SV *	|newSV		|const STRLEN len
 Ciop	|SV *	|new_sv 	|NN const char *file			\
 				|int line				\
 				|NN const char *func
+Apx	|SV *	|newSVattrdefinition							\
+				|NN const struct PerlAttributeDefinition *attrib
 Rp	|SV *	|newSVavdefelem |NN AV *av				\
 				|SSize_t ix				\
 				|bool extendible
@@ -4547,6 +4559,36 @@ Adp	|PerlIO *|my_popen	|NN const char *cmd			\
 i	|bool	|PerlEnv_putenv |NN char *str
 # endif
 #endif
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+p	|void	|apply_attribute_isa					\
+				|NN struct PerlAttributeTarget *target	\
+				|NULLOK SV *attrvalue			\
+				|NULLOK void *data
+p	|void	|apply_attribute_param					\
+				|NN struct PerlAttributeTarget *target	\
+				|NULLOK SV *attrvalue			\
+				|NULLOK void *data
+p	|void	|apply_attribute_reader 				\
+				|NN struct PerlAttributeTarget *target	\
+				|NULLOK SV *attrvalue			\
+				|NULLOK void *data
+p	|void	|apply_attribute_writer 				\
+				|NN struct PerlAttributeTarget *target	\
+				|NULLOK SV *attrvalue			\
+				|NULLOK void *data
+: this should probably be public API?
+Cp	|HV *	|attrtarget_class					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+Cp	|PADNAME *|attrtarget_padname					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+#endif
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C)
+Cp	|void	|store_attr_in_padname					\
+				|NN PADNAME *pn 			\
+				|NN OP *attr
+#endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif
@@ -4569,12 +4611,6 @@ Cp	|void	|class_add_ADJUST					\
 				|NN CV *cv
 Cp	|void	|class_add_field|NN HV *stash				\
 				|NN PADNAME *pn
-Cp	|void	|class_apply_attributes 				\
-				|NN HV *stash				\
-				|NULLOK OP *attrlist
-Cp	|void	|class_apply_field_attributes				\
-				|NN PADNAME *pn 			\
-				|NULLOK OP *attrlist
 Cp	|void	|class_prepare_initfield_parse
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv
@@ -5170,8 +5206,7 @@ Sd	|AV *	|mro_get_linear_isa_dfs 				\
 				|U32 level
 #endif
 #if defined(PERL_IN_OP_C)
-S	|void	|apply_attrs_my |NN HV *stash				\
-				|NN OP *target				\
+S	|void	|apply_attrs_my |NN OP *target				\
 				|NULLOK OP *attrs			\
 				|NN OP **import_opsp
 RS	|I32	|assignment_type|NULLOK const OP *o

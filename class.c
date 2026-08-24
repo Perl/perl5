@@ -486,57 +486,20 @@ static void S_ensure_module_version(pTHX_ SV *module, SV *version)
     LEAVE;
 }
 
-#define split_attr_nameval(sv, namp, valp)  S_split_attr_nameval(aTHX_ sv, namp, valp)
-static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
+void
+Perl_apply_attribute_isa(pTHX_
+        struct PerlAttributeTarget *target,
+        SV *attrvalue, void *data)
 {
-    STRLEN svlen = SvCUR(sv);
-    U32 do_utf8 = SvUTF8(sv) ? SVf_UTF8 : 0;
+    PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_ISA;
+    PERL_UNUSED_ARG(data);
 
-    const char *paren_at = (const char *)memchr(SvPVX(sv), '(', svlen);
-    if(paren_at) {
-        STRLEN namelen = paren_at - SvPVX(sv);
-
-        if(SvPVX(sv)[svlen-1] != ')')
-            /* Should be impossible to reach this by parsing regular perl code
-             * by as class_apply_attributes() is XS-visible API it might still
-             * be reachable. As it's likely unreachable by normal perl code,
-             * don't bother listing it in perldiag.
-             */
-            /* diag_listed_as: SKIPME */
-            croak("Malformed attribute string");
-        *namp = newSVpvn_flags(SvPVX(sv), namelen, SVs_TEMP|do_utf8);
-
-        const char *value_at = paren_at + 1;
-        const char *value_max = SvPVX(sv) + svlen - 2;
-
-        /* TODO: We're only obeying ASCII whitespace here */
-
-        /* Trim whitespace at the start */
-        while(value_at < value_max && isSPACE(*value_at))
-            value_at += 1;
-        while(value_max > value_at && isSPACE(*value_max))
-            value_max -= 1;
-
-        if(value_max >= value_at)
-            *valp = newSVpvn_flags(value_at, value_max - value_at + 1, SVs_TEMP|do_utf8);
-        else
-            *valp = NULL;
-    }
-    else {
-        *namp = sv;
-        *valp = NULL;
-    }
-}
-
-static void
-apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
-{
-    assert(HvSTASH_IS_CLASS(stash));
+    HV *stash = attrtarget_class(target, "isa");
     struct xpvhv_aux *aux = HvAUX(stash);
 
     /* Parse `value` into name + version */
     SV *superclassname = sv_newmortal(), *superclassver = sv_newmortal();
-    const char *end = split_package_ver(value, superclassname, superclassver);
+    const char *end = split_package_ver(attrvalue, superclassname, superclassver);
     if(*end)
         croak("Unexpected characters while parsing class :isa attribute: %s", end);
 
@@ -572,7 +535,7 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
         SAVESETSVFLAGS((SV *)isa, SVf_READONLY|SVf_PROTECT, SVf_READONLY|SVf_PROTECT);
         SvREADONLY_off((SV *)isa);
 
-        av_push(isa, newSVsv(value));
+        av_push(isa, newSVsv(superclassname));
 
         LEAVE;
     }
@@ -594,67 +557,6 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
     if(superaux->xhv_class_param_map) {
         aux->xhv_class_param_map = newHVhv(superaux->xhv_class_param_map);
     }
-}
-
-static struct {
-    const char *name;
-    bool requires_value;
-    void (*apply)(pTHX_ HV *stash, SV *value);
-} const class_attributes[] = {
-    { .name           = "isa",
-      .requires_value = true,
-      .apply          = &apply_class_attribute_isa,
-    },
-    { NULL, false, NULL }
-};
-
-static void
-S_class_apply_attribute(pTHX_ HV *stash, OP *attr)
-{
-    assert(attr->op_type == OP_CONST);
-
-    SV *name, *value;
-    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
-
-    for(int i = 0; class_attributes[i].name; i++) {
-        /* TODO: These attribute names are not UTF-8 aware */
-        if(!strEQ(SvPVX(name), class_attributes[i].name))
-            continue;
-
-        if(class_attributes[i].requires_value && !(value && SvOK(value)))
-            croak("Class attribute %" SVf " requires a value", SVfARG(name));
-
-        (*class_attributes[i].apply)(aTHX_ stash, value);
-        return;
-    }
-
-    croak("Unrecognized class attribute %" SVf, SVfARG(name));
-}
-
-void
-Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
-{
-    PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES;
-
-    if(!attrlist)
-        return;
-    if(attrlist->op_type == OP_NULL) {
-        op_free(attrlist);
-        return;
-    }
-
-    if(attrlist->op_type == OP_LIST) {
-        OP *o = cLISTOPx(attrlist)->op_first;
-        assert(o->op_type == OP_PUSHMARK);
-        o = OpSIBLING(o);
-
-        for(; o; o = OpSIBLING(o))
-            S_class_apply_attribute(aTHX_ stash, o);
-    }
-    else
-        S_class_apply_attribute(aTHX_ stash, attrlist);
-
-    op_free(attrlist);
 }
 
 /*
@@ -1146,9 +1048,14 @@ padname_skip_underscore(const PADNAME *pn, const char **pname, STRLEN *plen) {
     *plen = len;
 }
 
-static void
-apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
+void
+Perl_apply_attribute_param(pTHX_ struct PerlAttributeTarget *target, SV *value, void *data)
 {
+    PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_PARAM;
+    PERL_UNUSED_ARG(data);
+
+    PADNAME *pn = attrtarget_padname(target, "param");
+
     if(!value) {
         /* Default to name minus the sigil (and one underscore if present) */
         const char *name;
@@ -1180,9 +1087,14 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
     (void)hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
 }
 
-static void
-apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
+void
+Perl_apply_attribute_reader(pTHX_ struct PerlAttributeTarget *target, SV *value, void *data)
 {
+    PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_READER;
+    PERL_UNUSED_ARG(data);
+
+    PADNAME *pn = attrtarget_padname(target, "reader");
+
     if(value)
         SvREFCNT_inc(value);
     else {
@@ -1245,9 +1157,14 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
         CvIsMETHOD_on(cv);
 }
 
-static void
-apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
+void
+Perl_apply_attribute_writer(pTHX_ struct PerlAttributeTarget *target, SV *value, void *data)
 {
+    PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_WRITER;
+    PERL_UNUSED_ARG(data);
+
+    PADNAME *pn = attrtarget_padname(target, "param");
+
     char sigil = PadnamePV(pn)[0];
     if(sigil != '$')
         croak("Cannot apply a :writer attribute to a non-scalar field");
@@ -1314,75 +1231,6 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
     CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
     if (cv)
         CvIsMETHOD_on(cv);
-}
-
-static struct {
-    const char *name;
-    bool requires_value;
-    void (*apply)(pTHX_ PADNAME *pn, SV *value);
-} const field_attributes[] = {
-    { .name           = "param",
-      .requires_value = false,
-      .apply          = &apply_field_attribute_param,
-    },
-    { .name           = "reader",
-      .requires_value = false,
-      .apply          = &apply_field_attribute_reader,
-    },
-    { .name           = "writer",
-      .requires_value = false,
-      .apply          = &apply_field_attribute_writer,
-    },
-    { NULL, false, NULL }
-};
-
-static void
-S_class_apply_field_attribute(pTHX_ PADNAME *pn, OP *attr)
-{
-    assert(attr->op_type == OP_CONST);
-
-    SV *name, *value;
-    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
-
-    for(int i = 0; field_attributes[i].name; i++) {
-        /* TODO: These attribute names are not UTF-8 aware */
-        if(!strEQ(SvPVX(name), field_attributes[i].name))
-            continue;
-
-        if(field_attributes[i].requires_value && !(value && SvOK(value)))
-            croak("Field attribute %" SVf " requires a value", SVfARG(name));
-
-        (*field_attributes[i].apply)(aTHX_ pn, value);
-        return;
-    }
-
-    croak("Unrecognized field attribute %" SVf, SVfARG(name));
-}
-
-void
-Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
-{
-    PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES;
-
-    if(!attrlist)
-        return;
-    if(attrlist->op_type == OP_NULL) {
-        op_free(attrlist);
-        return;
-    }
-
-    if(attrlist->op_type == OP_LIST) {
-        OP *o = cLISTOPx(attrlist)->op_first;
-        assert(o->op_type == OP_PUSHMARK);
-        o = OpSIBLING(o);
-
-        for(; o; o = OpSIBLING(o))
-            S_class_apply_field_attribute(aTHX_ pn, o);
-    }
-    else
-        S_class_apply_field_attribute(aTHX_ pn, attrlist);
-
-    op_free(attrlist);
 }
 
 void

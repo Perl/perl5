@@ -158,7 +158,9 @@ typedef enum {
         SVt_PVFM,	/* 14 */
         SVt_PVIO,	/* 15 */
         SVt_PVOBJ,      /* 16 */
-                        /* 17-31: Unused, though one should be reserved for a
+        SVt_INTERNAL,   /* 17; but keep this one last, add other perl-visible
+                           values above it */
+                        /* 18-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
@@ -228,6 +230,7 @@ typedef struct hek HEK;
         GP*	svu_gp;			\
         PerlIO *svu_fp;			\
         SV**    svu_fields;             \
+        const void *svu_cvptr;          \
     }	sv_u				\
     SV_HEAD_DEBUG_
 
@@ -2975,6 +2978,27 @@ typedef struct {
 #define PL_sv_reftype_lookup_MAX 14
 extern const sv_reftype_entry PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
 #endif
+
+/* Accessors on SVt_INTERNAL */
+struct PerlInternalSVMetadata {
+    const char *name;
+    /* TODO: maybe some flags, some free/clone management callback functions,
+     * etc... it's almost like we're recreating magic ;)
+     */
+};
+
+/*
+=for apidoc Cm|const struct PerlInternalSVMetadata *|SviMETA|NN SV *sv
+Returns the metadata pointer from an C<SVt_INTERNAL> SV.
+
+=for apidoc Cm|void *|SviPTR|NN SV *sv
+Returns the opaque internal data pointer from an C<SVt_INTERNAL> SV.
+
+=cut
+*/
+
+#define  SviMETA(sv) ((const struct PerlInternalSVMetadata *)(SvANY(sv)))
+#define  SviPTR(sv)  (sv->sv_u.svu_cvptr)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

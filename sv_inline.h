@@ -295,6 +295,8 @@ static const struct body_details bodies_by_type[] = {
       0,
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+
+    { 0, 0, 0, SVt_INTERNAL, TRUE, NONV, NOARENA, 0 },
 };
 
 #define new_body_allocated(sv_type)            \
@@ -510,6 +512,9 @@ Perl_newSV_type(pTHX_ const svtype type)
         }
 
         sv->sv_u.svu_rv = NULL;
+        break;
+    case SVt_INTERNAL:
+        SvANY(sv) = NULL;
         break;
     default:
         croak("panic: newSV_type() unknown type %lu", (unsigned long)type);
