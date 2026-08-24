@@ -489,15 +489,15 @@ You can also see membership changes over time using the commit history there.
 =head2 Steering Council Members
 
 These are the members of the Steering Council elected to be responsible for
-the release of perl from version 5.43.1 onward through version 5.44.0:
+the release of perl from version 5.45.1 onward through version 5.46.0:
 
 =over
 
-=item * Aristotle Pagaltzis
+=item * Paul Evans
+
+=item * Graham Knop
 
 =item * Leon Timmermans
-
-=item * Paul Evans
 
 =back
 
