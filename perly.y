@@ -120,6 +120,7 @@
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
 %type <opval> subscript_index
+%type <opval> subscript_keys
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -776,6 +777,20 @@ subscript_index
 		}
 	;
 
+subscript_keys
+	/* Hash access subscript: { selector expression }
+	 * Value of nonterminal: selector expression
+	 */
+	/* { expression } */
+	:	PERLY_BRACE_OPEN
+		expr
+		PERLY_SEMICOLON
+		PERLY_BRACE_CLOSE
+		{
+			$$ = $expr;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -1359,7 +1374,7 @@ methodname:	METHCALL0
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    gelem PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE        /* *main::{something} */
+subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
                         /* In this and all the hash accessors, PERLY_SEMICOLON is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
@@ -1376,14 +1391,14 @@ subscripted:    gelem PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRAC
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($selector));
 			}
-	|	scalar[hash] PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE    /* $foo{bar();} */
+	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
 			}
-	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE /* somehref->{bar();} */
+	|	term[hash_reference] ARROW subscript_keys[selector] /* somehref->{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
-	|	subscripted[hash_reference] PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE /* $foo->[bar]->{baz;} */
+	|	subscripted[hash_reference] subscript_keys[selector] /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
@@ -1624,7 +1639,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $kvslice->op_private & OPpSLICEWARNING;
 			}
-	|	sliceme PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE                 /* @hash{@keys} */
+	|	sliceme subscript_keys[selector]                 /* @hash{@keys} */
 			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
@@ -1634,7 +1649,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $sliceme->op_private & OPpSLICEWARNING;
 			}
-	|	kvslice PERLY_BRACE_OPEN expr[selector] PERLY_SEMICOLON PERLY_BRACE_CLOSE                 /* %hash{@keys} */
+	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVHSLICE, 0,
