@@ -1715,20 +1715,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PP_wrapped
     PRESCAN_VERSION
     PRIVSHIFT
-    pthread_addr_t
     PTHREAD_ATFORK
     PTHREAD_ATTR_SETDETACHSTATE
-    pthread_condattr_default
     PTHREAD_CREATE
     PTHREAD_CREATE_JOINABLE
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     PTHREAD_INIT_SELF
-    pthread_key_create
-    pthread_keycreate
-    pthread_mutexattr_default
-    pthread_mutexattr_init
-    pthread_mutexattr_settype
     pTHX__FORMAT
     pTHX_FORMAT
     pTHX__VALUE
@@ -2721,8 +2714,15 @@ my %system_symbols = map { $_ => 1 } qw(
     O_CREAT
     O_RDWR
     O_WRONLY
+    pthread_addr_t
     pthread_attr_init
+    pthread_condattr_default
     pthread_create
+    pthread_key_create
+    pthread_keycreate
+    pthread_mutexattr_default
+    pthread_mutexattr_init
+    pthread_mutexattr_settype
     setregid
     setreuid
     socketpair
