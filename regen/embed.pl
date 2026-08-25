@@ -161,8 +161,41 @@ my %per_file_definitions = (
 #
 # Strive to make this list empty.
 #
-# Symbols in class 2) above should instead be placed in
-# @undocumented_always_visible.
+# In almost all cases, it is best to document the symbol by using a
+#   =for apidoc
+# line for it (described in embed.fnc).  That line includes its visibility.
+# Then simply remove the symbol from the list.
+#
+# Nevertheless, there are cases where that isn't really desirable, or at least
+# currently feasible.  Such cases would legitimately include
+#   1) symbols whose meaning is clear from similarly named symbols.  For
+#      example we needn't document more than one of the many DEBUG_x-type
+#      macros.  One suffices.
+#   2) symbols that we'd like to have kept hidden, but one or two CPAN modules
+#      have dsicovered them, but we don't want to encourage further use.
+#   3) symbols where anyone who might want to use it would have to be quite
+#      familiar with that area of core, so could be presumed to be able to
+#      easily figure things out.
+#   4) there are probably other valid cases
+#
+# For such cases, the possible dispositions are:
+#
+# 1) If the decision is that the symbol should not be visible outside core,
+#    move it to @undocumented_always_hidden.
+#
+# 2) If the decision is that the symbol needs to be visible outside core,
+#    move it to one of:
+#       a) %needed_by_ext_re, if needed only by the 're' module
+#       b) %needed_by_ext, if needed only by any other perl extension
+#       c) @undocumented_always_visible, otherwise
+#
+# 3) If there isn't anyone who has the time currently to document the symbol,
+#    but it should be visible, move it to @pending_documentation_symbols
+#
+# 4) If we're not confident about the decision, but think there is a good
+#    possibility that it should not be visible, move it to
+#    @undocumented_potentially_always_hidden.  That will quickly document our
+#    current thinking to future maintainers.
 #
 # The list does not include symbols that we have documented as being reserved
 # for perl's use, namely those that match the pattern just above.
@@ -2745,6 +2778,21 @@ my %needed_by_ext = map { $_ => 1 } qw(
 # XXX This is a list of symbols that need to be always visible and that we
 # intend to document, but don't have the resources to do so immediately.
 my @pending_documentation_symbols = qw(
+);
+
+# This is a list of symbols that we have decided can be hidden from code
+# outside core.  This list exists just to document that decision, so you don't
+# have to go digging through commits.
+my @undocumented_always_hidden = qw(
+);
+
+# XXX This is a list of symbols that we think there is a good chance they
+# needn't be visible outside core, but are unable to make a definitive
+# decision on yet, so remain visible for now.  This list should only contain
+# names that have just a minuscule chance of colliding with something in any
+# module's name space.  Try harder to make a decision for names that could
+# clash.
+my @undocumented_potentially_always_hidden = qw(
 );
 
 # This is a list of symbols that are needed to be visible everywhere and are
