@@ -7912,9 +7912,6 @@ typedef struct am_table_short AMTS;
 #  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_GENx_ENVx_LOCK
 #  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_GENx_ENVx_UNLOCK
 
-#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
-#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
-
 #else
 
     /* In contrast, on platforms without thread-safe locales, the generic lock
