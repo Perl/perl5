@@ -8040,8 +8040,8 @@ typedef struct am_table_short AMTS;
  * write', to indicate the caller wants to be able to access memory that isn't
  * thread specific, either to write to itself, or to prevent anyone else from
  * writing. */
-#define gwLOCALE_LOCK           PERL_LCx_LOCK(0)
-#define gwLOCALE_UNLOCK         PERL_LCx_UNLOCK(0)
+#define gwLOCALE_LOCK           PERL_GENx_LCr_LOCK(0)
+#define gwLOCALE_UNLOCK         PERL_GENx_LCr_UNLOCK(0)
 
 /* Similar to gwLOCALE_LOCK, there are functions that require both the locale
  * and environment to be constant during their execution, and don't change
