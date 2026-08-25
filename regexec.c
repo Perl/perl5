@@ -6561,12 +6561,17 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
     st->resume_state = state;                               \
     goto push_yes_state;
 
-#define DEBUG_STATE_pp(pp)                                      \
+/* output a 'push #N' (push==1) or 'pop #N' (push==0) message */
+
+#define DEBUG_STATE_pp(push, extra_text)                        \
     DEBUG_STATE_r({                                             \
         DUMP_EXEC_POS(locinput, scan, utf8_target,depth);       \
-        re_printf(\
-            "%*s" pp " %s%s%s%s%s\n",                           \
+        re_printf(                                              \
+            "%*s%s #%u %s %s%s%s%s%s\n",                        \
             INDENT_CHARS(depth), "",                            \
+            push ? "push" : "pop",                              \
+            (unsigned int)(depth -1 + push),                    \
+            extra_text,                                         \
             REGNODE_NAME(st->resume_state),                     \
             ((st == yes_state || st == mark_state) ? "[" : ""), \
             ((st == yes_state) ? "Y" : ""),                     \
@@ -10323,7 +10328,7 @@ NULL
                         curyes = cur->u.yes.prev_yes_state;
                 }
             } else {
-                DEBUG_STATE_pp("push")
+                DEBUG_STATE_pp(1, "")
             });
             depth++;
             st->locinput = locinput;
@@ -10365,13 +10370,7 @@ NULL
                 PL_regmatch_slab = PL_regmatch_slab->prev;
                 st = SLAB_LAST(PL_regmatch_slab);
             }
-            DEBUG_STATE_r({
-                if (no_final) {
-                    DEBUG_STATE_pp("pop (no final)");
-                } else {
-                    DEBUG_STATE_pp("pop (yes)");
-                }
-            });
+            DEBUG_STATE_pp(0, no_final ? "(no final)" : "(yes)");
             depth--;
         }
 #else
@@ -10447,7 +10446,7 @@ NULL
         loceol = st->loceol;
         script_run_begin = st->sr0;
 
-        DEBUG_STATE_pp("pop");
+        DEBUG_STATE_pp(0, "");
         depth--;
         if (yes_state == st)
             yes_state = st->u.yes.prev_yes_state;
