@@ -1259,11 +1259,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     memGE
     memGT
     memLE
-    MEM_LOG_ALLOC
-    MEM_LOG_DEL_SV
-    MEM_LOG_FREE
-    MEM_LOG_NEW_SV
-    MEM_LOG_REALLOC
     memLT
     MEM_SIZE
     MEM_SIZE_MAX
@@ -2921,6 +2916,11 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     KEY_sigvar
     KEY_UNITCHECK
     MAX_UNICODE_UTF8_BYTES
+    MEM_LOG_ALLOC
+    MEM_LOG_DEL_SV
+    MEM_LOG_FREE
+    MEM_LOG_NEW_SV
+    MEM_LOG_REALLOC
     MGf_MGv2
     MIN_OFFUNI_VARIANT_CP
     OFFUNI_IS_INVARIANT
