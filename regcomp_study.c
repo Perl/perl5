@@ -2503,15 +2503,17 @@ Perl_study_chunk(pTHX_
                     f |= SCF_DO_STCLASS_AND;
                     f &= ~SCF_DO_STCLASS_OR;
                 }
-                /* Exclude from super-linear cache processing any {n,m}
-                   regops for which the combination of input pos and regex
-                   pos is not enough information to determine if a match
-                   will be possible.
 
-                   For example, in the regex /foo(bar\s*){4,8}baz/ with the
-                   regex pos at the \s*, the prospects for a match depend not
-                   only on the input position but also on how many (bar\s*)
-                   repeats into the {4,8} we are. */
+                /* Exclude from super-linear cache processing any nested
+                 * {n,m} regops for which the combination of input pos and
+                 * regex pos is not enough information to determine if a
+                 * match will be possible, due to the circumstances of
+                 * the outer quantifier (i.e. this node).
+
+                 * See the section on nested quantifiers in
+                 * L<perlreguts/The super-linear cache> for the criteria
+                 * on when its safe.
+                 */
                if ((mincount > 1) || (maxcount > 1 && maxcount != REG_INFTY))
                     f &= ~SCF_WHILEM_VISITED_POS;
 
@@ -2731,13 +2733,19 @@ Perl_study_chunk(pTHX_
                         FLAGS(oscan) = 0;
                 }
                 else if ((OP(oscan) == CURLYX)
+                        /* Possibly mark the corresponding WHILEM node as
+                         * being allowed to use the super-linear cache.
+                         *
+                         * Unless this quantifier has been disallowed
+                         * from using the super-linear cache by an outer
+                         * qualifier: */
                          && (flags & SCF_WHILEM_VISITED_POS)
-                         /* See the comment on a similar expression above.
-                            However, this time it's not a subexpression
-                            we care about, but the expression itself. */
+                         /* Or is non-infinite. See
+                          * L<perlreguts/The super-linear cache>
+                          * for why only inf quantifiers qualify */
                          && (maxcount == REG_INFTY)
-                         && data) {
-                    /* This stays as CURLYX, we can put the count/of pair. */
+                         && data)
+                {
                     /* Find WHILEM (as in regexec.c) */
                     regnode *nxt = oscan + NEXT_OFF(oscan);
 

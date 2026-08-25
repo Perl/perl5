@@ -1122,6 +1122,224 @@ the possible states are the regops themselves, plus a number of additional
 intermediate and failure states. A few of the states are implemented as
 subroutines but the bulk are inline code.
 
+=head3 The super-linear cache
+
+"Insanity is doing the same thing over and over again and expecting
+different results."
+
+Under some circumstances with quantifiers, it is possible for an NFA
+engine to encounter a combinatorial explosion of backtracking. The
+super-linear cache (SLC) is intended to avoid this happening under some
+circumstances.
+
+Consider this simple example:
+
+    ("a" x 20) =~ /^ ( (aa?) ){5,100} [b] /x;
+
+(This example works just the same using C<*> rather than C<{5,100}>, but
+the latter form is used here as it will shortly help illuminate an issue
+with non-infinite ranges.)
+
+This pattern will eventually fail, since the string doesn't include a 'b'
+character (which for this example is in a character class to stop intuit
+rejecting it immediately). But early on in execution the quantifier will
+have iterated 10 times, each time consuming 'aa'. So at that point the
+entire input string can be thought of as having been consumed in this
+fashion:
+
+    (aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)
+
+Then the 'b' isn't found and the pattern starts backtracking. The last
+C<aa?> is retried, this time consuming a single character, and an 11th
+iteration can proceed, resulting in:
+
+    (aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(a)(a)
+
+before again failing to find the 'b'. The backtracking continues until
+every possible permutation of 'a' and 'aa' in each iteration is tried,
+which may take a long time.
+
+Staying with this example, consider that after much iterating and
+backtracking, the engine may have reached this state:
+
+    (aa)(a)(a)
+
+where it has consumed four characters using three iterations. The rest of
+the match at this point can be thought of as the equivalent of:
+
+    ("a" x 16) =~ /^ ( (aa?) ){2,97} [b] /x;
+
+Running this will eventually fail, and after backtracking to the
+C<(aa)(a)(a)> state, it backtracks further and tries further permutations,
+after which it will eventually reach this state:
+
+    (a)(aa)(a)
+
+In a similar fashion to the previous state, the rest of the match at this
+point is equivalent to:
+
+    ("a" x 16) =~ /^ ( (aa?) ){2,97} [b] /x;
+
+But hold on: we know that this particular sub-match failed earlier on; so
+running the exact same match again must also fail. So, in principle, after
+the first set of backtracking back to the C<(aa)(a)(a)> state, we could
+record in a cache somewhere that the match failed for that particular
+quantifier when starting from string position 4 and with between 2 and 97
+iterations left. Then the next time the same quantifier finds itself at
+the same string position and with the same number of iterations left, it
+knows that it can fail itself immediately and backtrack, rather than
+pushing on and (eventually) failing again.
+
+This is the essence of the SLC.
+
+There are several caveats to to this in order to make a system which is
+both practical and logically correct (i.e. without false cache failures).
+
+=over
+
+=item *
+
+The obvious objection at this point is that recording a whole bunch of
+(quantifier-id, current string position, min iterations left, max
+iterations left) tuples will be extremely expensive in memory.
+
+We can reduce this complexity by using the SLC only on quantifiers which
+have a maximum of infinity (such as C<*>, C<+>, C<({5,}>), and make the
+quantifiers only use the cache after the minimum number of iterations has
+already been satisfied. Under these two conditions, the remaining number
+of iterations will always have a min of 0 and a max of infinity, so we
+don't need to record the min and max values any more.
+
+With this simplification, we just need to record a single bit of
+information ("failed already") for every (quantifier-id, current string
+position) tuple. We can achieve this by allocating a single bit array
+whose size is equal to the string length multiplied by the number of
+candidate quantifiers in the pattern. So for example when matching a 1
+Mbyte string against a pattern like C</(...)*(...)*/> which has two
+quantifiers, 2 million bits must be allocated.
+
+To avoid a potentially large malloc() for every match that has been marked
+as suitable for SLC, a countdown is initiated the first time a candidate
+C<WHILEM> node is reached; only after (string length) multiplied by
+(number of participating C<WHILEM> nodes) iterations is the cache actually
+allocated and initialised. This crude heuristic is an indication that the
+match has gone super-linear.
+
+=item *
+
+It is only used for quantifiers on I<variable-length> sub-patterns, i.e.
+those which are compiled to a C<CURLYX>/C<WHILEM> node pair. Quantifiers
+with simpler sub-patterns are less likely to exhibit exponential
+behaviour.
+
+=item *
+
+Non-regular pattern items such as backreferences (C<\g{1}>) and evals
+(C<(??{...})/>) break the assumption that running the same rest-of-pattern
+from the same position will give the same result each time. If these occur
+in the rest-of-pattern, the cache is reset. This is currently done at
+runtime.
+
+=item *
+
+Nested quantifiers can sometimes the break the assumption that running the
+rest-of-pattern from the same string position will always give the same
+result. To understand this issue, first consider a non-nested quantifier
+pattern, such as
+
+    / A (B)+ C /x
+
+where each capital letter represents an entire sub-pattern: for example,
+'A' might represent C<(pq)?rs>.
+
+During execution, A will have consumed some characters, then a number of
+iterations of the quantified sub-pattern B will have consumed some more
+characters, then the rest-of-pattern (in this case C) will be attempted,
+starting at string position p say. If C subsequently fails, then the
+engine backtracks to the quantifier, which marks in the cache that running
+the rest-of-pattern from position p will always fail. Subsequent attempts
+might see A consuming a different number of characters and the quantifier
+might iterate a different number of times, but if the quantifier is
+ever about to run the rest-of-pattern again from position p, the cache can
+be used to fail immediately, rather than running and failing C again.
+
+Now consider a nested pattern such as
+
+    / A ((B)+){2,5} C /x
+
+Here, the inner quantifier doesn't know how many times the outer
+quantifier has already iterated, nor that what's to the right of it can
+now vary depending on that iteration count. The rest-of-pattern after an
+inner quantifier run (from the viewpoint of that inner quantifier), rather
+than always being just C as in the non-nested example above, is now
+instead equivalent to
+
+    / ... ((B)+){1,4} C /x   # after the first  outer iteration
+    / ... ((B)+){0,3} C /x   # after the second outer iteration
+    / ... ((B)+){0,2} C /x   # after the third  outer iteration
+    etc
+
+This violates the assumption that the rest-of-pattern is always the same
+sub-pattern and that what's to the right will always pass or fail in the
+same way from the same string position.
+
+For it to be safe to use the cache in a nested quantifier, the rule is
+that the outer quantifier's still-to-go minimum and maximum values must
+both remain constant on the second, third, etc., iterations. Since such
+values normally count down until they reach zero or remain at infinity,
+This means that a minimum can only be be 0 or 1, and a maximum must be 0,
+1 or infinity. This effectively means that any outer quantifier other than
+C<?,*,+> disqualifies nested quantifiers from participating in the cache.
+
+[DAPM 2026: I suspect that this restriction is too severe, and that an
+outer quantifier like C<{1,5}> is safe. But I have neither been able to
+prove this to my satisfaction, nor able to find a counter-example. But my
+strong suspicion is that the outer must iterate at least twice (so is at
+minimum C<{2,...}>) so that the first iteration can fail and mark the
+cache, then the second incorrectly fail due to the cache.]
+
+There are some tests for nested quantifiers in F<t/re/re_tests> under the
+heading 'RT #79152'.
+
+=item *
+
+The number of cache-participating C<WHILEM> nodes is stored in the upper 4
+bits of each C<WHILEM>'s C<FLAGS()> field, while the identity of the
+particular C<WHILEM> (used as part of the index into the bit cache) is
+stored in the lower 4 bits. This means that a pattern can have a maximum
+of 16 participating C<WHILEM>s. If the flags field is zero, it indicates
+that this C<WHILEM> node won't participate in the cache mechanism.
+
+=back
+
+The runtime state of the SLC is mainly stored in various fields of the
+C<reginfo> struct, which is initialised at the start of a match.
+
+A pointer to the cache is stored in C<< reginfo->info_aux.poscache >>,
+which will be freed when matching ends (the aux structure is guaranteed to
+be freed even on abnormal termination), and its size is recorded in
+C<< reginfo->poscache_size >>.
+
+If zero, C<< reginfo->poscache_maxiter >> indicates that the SLC countdown
+has not yet been triggered (i.e. no candidate C<WHILEM> node has been
+executed yet), or that it has been subsequently disabled again. Otherwise,
+its (positive) value is used for two different purposes: what value to
+start an initial (or reset) countdown from; and the size to C<alloc()> the
+cache, in bits. Currently these values are the same, but in principle they
+needn't be.
+
+C<< reginfo->poscache_iter >> only has meaning if C<poscache_maxiter> is
+non-zero. In that case, it represents a countdown initialised from
+C<poscache_maxiter>. If it reaches 1, the cache is malloced/realloced if
+necessary, and then zeroed. When it reaches 0, the cache is used.
+
+The C<CACHEsayNO> macro is used at runtime in various places as a
+replacement for C<sayNO> to set a fail bit in the cache while popping the
+current state. The C<ST.cache_offset> and C<ST.cache_mask> fields are set
+by the current C<WHILEM> to the address in the cache of the byte and bit
+corresponding to the current match state. These are used by C<CACHEsayNO>
+to mark the cache during a subsequent unwinding.
+
 =head1 MISCELLANEOUS
 
 =head2 Unicode and Localisation Support

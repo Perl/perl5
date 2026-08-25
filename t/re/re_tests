@@ -1636,6 +1636,10 @@ a(.)\4294967298	ab\o{42}94967298	ya	$1	b	\d not converted to native; \o{} is
 [\_]	_	y	$&	_
 
 # RT #79152
+# Test the super-linear cache against nested quantifiers.
+# Note that the first half of each of these patterns is there purely
+# to soak up the initial cache countdown; the guts of the test is the
+# second half.
 (q1|.)*(q2|.)*(x(a|bc)*y){2,}	xayxay	y	$&	xayxay
 (q1|.)*(q2|.)*(x(a|bc)*y){2,3}	xayxay	y	$&	xayxay
 (q1|z)*(q2|z)*z{15}-.*?(x(a|bc)*y){2,3}Z	zzzzzzzzzzzzzzzz-xayxayxayxayZ	y	$&	zzzzzzzzzzzzzzzz-xayxayxayxayZ
