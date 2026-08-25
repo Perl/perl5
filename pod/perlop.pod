@@ -3970,11 +3970,11 @@ only to prevent breaking any pre-existing links to it from outside.
 
 =head2 Quote-Like Operators
 
-This section has been replaced by L</Simpler Quote-Like Operators>
+This section has been replaced by L</Simpler Quote-Like Operators>.
 
 =head2 Indented Here-docs
 
-This section has been merged into L</Here-docs>
+This section has been merged into L</Here-docs>.
 
 =head1 APPENDIX
 
