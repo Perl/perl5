@@ -6512,7 +6512,7 @@ removed as of Perl 5.24.
 
 =for Pod::Functions backquote quote a string
 
-Generalized quotes.  See L<perlop/"Quote-Like Operators">.
+Generalized quotes.  See L<perlop/Simpler Quote-Like Operators>.
 
 =item qr/STRING/
 
@@ -9989,7 +9989,7 @@ Portability issues: L<perlport/times>.
 
 The transliteration operator.  Same as
 L<C<yE<sol>E<sol>E<sol>>|/yE<sol>E<sol>E<sol>>.  See
-L<perlop/"Quote-Like Operators">.
+L<perlop/Transliteration Quote-Like Operators>.
 
 =item truncate FILEHANDLE,LENGTH
 X<truncate>
@@ -11009,7 +11009,7 @@ L<C<read>|/read FILEHANDLE,SCALAR,LENGTH,OFFSET>.  Unfortunately.
 
 The transliteration operator.  Same as
 L<C<trE<sol>E<sol>E<sol>>|/trE<sol>E<sol>E<sol>>.  See
-L<perlop/"Quote-Like Operators">.
+L<perlop/Transliteration Quote-Like Operators>.
 
 =back
 
