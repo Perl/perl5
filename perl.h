@@ -7794,6 +7794,10 @@ typedef struct am_table_short AMTS;
  * (Each actually has 'PERL_' prefixed to its name)
  */
 
+/* This is a no-op unless overridden when Emulating Thread-Safe Locales */
+#define PERL_ETSL_TOGGLE(m)                     NOOP
+#define PERL_ETSL_UNTOGGLE(m)                   NOOP
+
 #if defined(USE_THREAD_SAFE_LOCALE) || ! defined(USE_LOCALE)
 
      /* Without locale handling at all, the locale mutex is completely unused;
@@ -8040,16 +8044,16 @@ typedef struct am_table_short AMTS;
  * write', to indicate the caller wants to be able to access memory that isn't
  * thread specific, either to write to itself, or to prevent anyone else from
  * writing. */
-#define gwLOCALE_LOCK           PERL_GENx_LCr_LOCK(0)
-#define gwLOCALE_UNLOCK         PERL_GENx_LCr_UNLOCK(0)
+#define gwLOCALE_LOCK           PERL_GENx_LCr_LOCK(LC_ALL)
+#define gwLOCALE_UNLOCK         PERL_GENx_LCr_UNLOCK(LC_ALL)
 
 /* Similar to gwLOCALE_LOCK, there are functions that require both the locale
  * and environment to be constant during their execution, and don't change
  * either of those things, but do write to some sort of shared global space.
  * They require some sort of exclusive lock against similar functions, and a
  * read lock on both the locale and environment. */
-#define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(0)
-#define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(0)
+#define gwENVr_LOCALEr_LOCK     PERL_GENx_ENVr_LCr_LOCK(LC_ALL)
+#define gwENVr_LOCALEr_UNLOCK   PERL_GENx_ENVr_LCr_UNLOCK(LC_ALL)
 
 /* posix_setlocale() is used internally to mean the setlocale() libc function
  * defined in C89 and the POSIX Standard.  Windows implementations have
@@ -8091,14 +8095,14 @@ typedef struct am_table_short AMTS;
 #endif
 
 /* These spellings are retained for backwards compatibility */
-#define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK(0)
-#define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK(0)
-#define gwLOCALEr_LOCK       PERL_GENx_LCr_LOCK
-#define gwLOCALEr_UNLOCK     PERL_GENx_LCr_UNLOCK
+#define ENVr_LOCALEr_LOCK    PERL_ENVr_LCr_LOCK(LC_ALL)
+#define ENVr_LOCALEr_UNLOCK  PERL_ENVr_LCr_UNLOCK(LC_ALL)
+#define gwLOCALEr_LOCK       PERL_GENx_LCr_LOCK(LC_ALL)
+#define gwLOCALEr_UNLOCK     PERL_GENx_LCr_UNLOCK(LC_ALL)
 #define LC_COLLATE_LOCK      LOCALE_LOCK
 #define LC_COLLATE_UNLOCK    LOCALE_UNLOCK
-#define LOCALE_LOCK          PERL_LCx_LOCK(0)
-#define LOCALE_UNLOCK        PERL_LCx_UNLOCK(0)
+#define LOCALE_LOCK          PERL_LCx_LOCK(LC_ALL)
+#define LOCALE_UNLOCK        PERL_LCx_UNLOCK(LC_ALL)
 
 /* End of locale/env synchronization */
 
