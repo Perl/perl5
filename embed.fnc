@@ -4575,6 +4575,8 @@ Cp	|void	|class_apply_attributes 				\
 Cp	|void	|class_apply_field_attributes				\
 				|NN PADNAME *pn 			\
 				|NULLOK OP *attrlist
+Cp	|void	|class_declare_padvars					\
+				|NN CV *cv
 Cp	|void	|class_prepare_initfield_parse
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv

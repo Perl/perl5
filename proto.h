@@ -9912,6 +9912,14 @@ Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
         Perl_assert_aTHX; assert(pn)
 
 PERL_CALLCONV void
+Perl_class_declare_padvars(pTHX_ CV *cv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_CLASS_DECLARE_PADVARS \
+        Perl_assert_aTHX; assert(cv); \
+        assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM)
+
+PERL_CALLCONV void
 Perl_class_prepare_initfield_parse(pTHX)
         Perl_attribute_nonnull_aTHX;
 # define PERL_ARGS_ASSERT_CLASS_PREPARE_INITFIELD_PARSE \
