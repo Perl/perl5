@@ -30,6 +30,13 @@
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
 #   undef do_aexec
+#   undef F_atan2_amg
+#   undef F_cos_amg
+#   undef F_exp_amg
+#   undef F_log_amg
+#   undef F_pow_amg
+#   undef F_sin_amg
+#   undef F_sqrt_amg
 #   undef GET_aTHX_if_NULL
 #   undef HASATTRIBUTE_UNINITIALIZED
 #   undef is_WORD_BUT_NONCONT_safe

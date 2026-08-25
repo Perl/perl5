@@ -620,15 +620,12 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FAKE_BIT_BUCKET
     FAKE_DEFAULT_SIGNAL_HANDLERS
     FAKE_PERSISTENT_SIGNAL_HANDLERS
-    F_atan2_amg
     FBMcf_TAIL
     FBMcf_TAIL_DOLLAR
     FBMcf_TAIL_DOLLARM
     FBMcf_TAIL_z
     FBMcf_TAIL_Z
     FBMrf_MULTILINE
-    F_cos_amg
-    F_exp_amg
     FF_0DECIMAL
     FF_BLANK
     FF_CHECKCHOP
@@ -655,12 +652,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FIT_ARENA0
     FIT_ARENAn
     FITS_IN_8_BITS
-    F_log_amg
     FmLINES
     FOLD_FLAGS_FULL
     FOLD_FLAGS_LOCALE
     FOLD_FLAGS_NOMIX_ASCII
-    F_pow_amg
     FP_PINF
     FP_QNAN
     FPTR2DPTR
@@ -669,8 +664,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FreeOp
     FREE_THREAD_KEY
     FSEEKSIZE
-    F_sin_amg
-    F_sqrt_amg
     Fstat
     fwrite1
     GCC_DIAG_IGNORE
@@ -2781,6 +2774,13 @@ my @undocumented_always_hidden = qw(
 # module's name space.  Try harder to make a decision for names that could
 # clash.
 my @undocumented_potentially_always_hidden = qw(
+    F_atan2_amg
+    F_cos_amg
+    F_exp_amg
+    F_log_amg
+    F_pow_amg
+    F_sin_amg
+    F_sqrt_amg
 );
 
 # This is a list of symbols that are needed to be visible everywhere and are
