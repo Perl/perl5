@@ -254,8 +254,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     AvREIFY_off
     AvREIFY_on
     AvREIFY_only
-    av_tindex_skip_len_mg
-    av_top_index_skip_len_mg
     BADVERSION
     BASEOP
     BhkENTRY
@@ -2745,6 +2743,8 @@ my %system_symbols = map { $_ => 1 } qw(
 # This is a list of symbols that are needed by the ext/re module, and are not
 # documented.  They become undefined for any other modules.
 my %needed_by_ext_re = map { $_ => 1 } qw(
+    av_tindex_skip_len_mg
+    av_top_index_skip_len_mg
     FAIL_
     first_upper_bit_set_byte_number
     invlist_intersection_complement_2nd_
