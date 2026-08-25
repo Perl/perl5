@@ -8017,8 +8017,8 @@ typedef struct am_table_short AMTS;
 #  define PERL_GENr_ENVr_LCr_LOCK(m)            PERL_ENVr_LCr_LOCK(m)
 #  define PERL_GENr_ENVr_LCr_UNLOCK(m)          PERL_ENVr_LCr_UNLOCK(m)
 
-#  define PERL_GENr_ENVr_LCx_LOCK(m)            PERL_ENVr_LCr_LOCK(m)
-#  define PERL_GENr_ENVr_LCx_UNLOCK(m)          PERL_ENVr_LCr_UNLOCK(m)
+#  define PERL_GENr_ENVr_LCx_LOCK(m)            PERL_ENVr_LCx_LOCK(m)
+#  define PERL_GENr_ENVr_LCx_UNLOCK(m)          PERL_ENVr_LCx_UNLOCK(m)
 
 #  define PERL_GENr_ENVx_LCr_LOCK(m)            PERL_ENVx_LCr_LOCK(m)
 #  define PERL_GENr_ENVx_LCr_UNLOCK(m)          PERL_ENVx_LCr_UNLOCK(m)
