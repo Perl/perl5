@@ -27,6 +27,25 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Undef-aware equality operators
+
+Four new operators have been added, which are similar to the regular equality operators except for their handling of C<undef>. Whereas the regular operators treat C<undef> as equal to the empty string or the number zero, these operators consider C<undef> to be a distinct value, equal to itself, but unequal to any defined value.
+
+    if( $x equ $y ) {
+     # $x and $y are both undef, or
+     # $x and $y are both defined and equal
+     ...
+    }
+
+This is approximately equal to the following, except that it is more efficient and avoids duplicate evaluation of operands or fetching of tied scalar values:
+
+    if( (!defined $x and !defined $y) or
+        (defined $x and defined $y and $x eq $y) ) {
+      ...
+    }
+
+For more detail, see L<perlop/Equality Operators>.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
