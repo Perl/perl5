@@ -976,6 +976,19 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     assert(cv == PL_compcv);
     assert(HvSTASH_IS_CLASS(PL_curstash));
 
+    CvNOWARN_AMBIGUOUS_on(cv);
+    CvIsMETHOD_on(cv);
+}
+
+void
+Perl_class_declare_padvars(pTHX_ CV *cv)
+{
+    PERL_ARGS_ASSERT_CLASS_DECLARE_PADVARS;
+    PERL_UNUSED_ARG(cv);
+
+    assert(cv == PL_compcv);
+    assert(HvSTASH_IS_CLASS(PL_curstash));
+
     /* We expect this to be at the start of sub parsing, so there won't be
      * anything in the pad yet
      */
@@ -988,9 +1001,6 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     PERL_UNUSED_VAR(padix);
 
     intro_my();
-
-    CvNOWARN_AMBIGUOUS_on(cv);
-    CvIsMETHOD_on(cv);
 }
 
 #define find_op_methstart(o)  S_find_op_methstart(aTHX_ o)
