@@ -317,6 +317,8 @@
 #     undef utf16_to_utf8_reversed
 #   endif /* !defined(PERL_EXT) */
 #   if !defined(PERL_EXT_RE_BUILD)
+#     undef av_tindex_skip_len_mg
+#     undef av_top_index_skip_len_mg
 #     undef BmUSEFUL
 #     undef FAIL_
 #     undef first_upper_bit_set_byte_number
