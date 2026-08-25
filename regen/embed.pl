@@ -1252,10 +1252,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MDEREF_MASK
     MDEREF_reload
     MDEREF_SHIFT
-    memBEGINPs
-    memBEGINs
-    memENDPs
-    memENDs
     memGE
     memGT
     memLE
@@ -2171,7 +2167,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     STD_PAT_MODS
     STD_PMMOD_FLAGS_CLEAR
     STORE_LC_NUMERIC_SET_STANDARD
-    strBEGINs
     Strerror
     STRUCT_OFFSET
     STRUCT_SV
