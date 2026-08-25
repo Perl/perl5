@@ -1735,8 +1735,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     POSIX_CC_COUNT
     POSIX_SETLOCALE_LOCK
     POSIX_SETLOCALE_UNLOCK
-    PP
-    PP_wrapped
     PRESCAN_VERSION
     PRIVSHIFT
     PTHREAD_ATFORK
@@ -2927,6 +2925,8 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     OFFUNISKIP
     PADNAMEf_FULLSV
     PadnameIsFULLSV
+    PP
+    PP_wrapped
     SILENT_NO_TAINT_SUPPORT
     STRLEN_MAX
     UTF8_ALLOW_LONG_AND_ITS_VALUE
