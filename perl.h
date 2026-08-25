@@ -7792,9 +7792,16 @@ typedef struct am_table_short AMTS;
  *      GENx_ENVx_LCr_LOCK     GENx_ENVx_LCx_LOCK
  *
  * (Each actually has 'PERL_' prefixed to its name)
- */
+ *
+ * There are two pairs of macros that are the same across all implementations
+ * */
+#define PERL_ENVr_LOCK                          ENV_READ_LOCK
+#define PERL_ENVr_UNLOCK                        ENV_READ_UNLOCK
 
-/* This is a no-op unless overridden when Emulating Thread-Safe Locales */
+#define PERL_ENVx_LOCK                          ENV_LOCK
+#define PERL_ENVx_UNLOCK                        ENV_UNLOCK
+
+/* And this is a no-op unless overridden when Emulating Thread-Safe Locales */
 #define PERL_ETSL_TOGGLE(m)                     NOOP
 #define PERL_ETSL_UNTOGGLE(m)                   NOOP
 
@@ -7821,12 +7828,6 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
 #  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
-
-#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
-#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
-
-#  define PERL_ENVx_LOCK                        ENV_LOCK
-#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
 
 #  define PERL_GENr_LOCK                        LOCALE_READ_LOCK
 #  define PERL_GENr_UNLOCK                      LOCALE_READ_UNLOCK
@@ -7945,12 +7946,6 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
 #  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
-
-#  define PERL_ENVr_LOCK                        ENV_READ_LOCK
-#  define PERL_ENVr_UNLOCK                      ENV_READ_UNLOCK
-
-#  define PERL_ENVx_LOCK                        ENV_LOCK
-#  define PERL_ENVx_UNLOCK                      ENV_UNLOCK
 
 #  define PERL_GENr_LOCK                        PERL_ENVr_LOCK
 #  define PERL_GENr_UNLOCK                      PERL_ENVr_UNLOCK
