@@ -9166,62 +9166,19 @@ NULL
                 goto do_whilem_B_max;
             }
 
-            /* super-linear cache processing.
-             *
-             * The idea here is that for certain types of CURLYX/WHILEM -
-             * principally those whose upper bound is infinity (and
-             * excluding regexes that have things like \1 and other very
-             * non-regular expressiony things), then if a pattern like
-             * /....A*.../ fails and we backtrack to the WHILEM, then we
-             * make a note that this particular WHILEM op was at string
-             * position 47 (say) when the rest of pattern failed. Then, if
-             * we ever find ourselves back at that WHILEM, and at string
-             * position 47 again, we can just fail immediately rather than
-             * running the rest of the pattern again.
-             *
-             * This is very handy when patterns start to go
-             * 'super-linear', like in (a+)*(a+)*(a+)*, where you end up
-             * with a combinatorial explosion of backtracking.
-             *
-             * The cache is implemented as a bit array, with one bit per
-             * string byte position per WHILEM op (up to 16) - so its
-             * between 0.25 and 2x the string size.
-             *
-             * To avoid allocating a poscache buffer every time, we do an
-             * initially countdown; only after we have  executed a WHILEM
-             * op (string-length x #WHILEMs) times do we allocate the
-             * cache.
-             *
-             * The top 4 bits of FLAGS(scan) byte say how many different
-             * relevant CURLLYX/WHILEM op pairs there are, while the
-             * bottom 4-bits is the identifying index number of this
-             * WHILEM.
-             *
-             * The main variables associated with the SLC are:
-             *
-             * reginfo->poscache_maxiter
-             *     If zero, indicates that the SLC has not yet been
-             *     triggered, or that it has been subsequently disabled
-             *     again.
-             *     Otherwise, its (positive) value is used for two
-             *     different purposes:
-             *       - what value to start an initial (or reset)
-             *         countdown from;
-             *       - the size to alloc() the cache in bits.
-             *     Currently these values are the same, but they needn't
-             *     be in principle.
-             *
-             * reginfo->poscache_iter
-             *    Only has meaning if poscache_maxiter is non-zero. In
-             *    that case, it represents a countdown initialised
-             *    from poscache_maxiter.
-             *    If it reaches 1, the cache is malloced/realloced if
-             *    necessary, and then zeroed. When it reaches 0, the cache
-             *    is used.
-             */
-
             if (FLAGS(scan)) {
-
+                /* Super-linear cache processing.
+                 *
+                 * See L<perlreguts/The super-linear cache> for a detailed
+                 * background on how this works.
+                 *
+                 * For WHILEM nodes which can participate in the cache
+                 * (FLAGS() is non-zero), the processing at this point is to
+                 * first initiate a countdown. Then when on subsequent
+                 * iterations that reaches zero, the match has likely gone
+                 * super-linear and the cache is allocated and starts to be
+                 * used.
+                 */
 #ifdef DEBUGGING
                 if (reginfo->poscache_maxiter) {
                     DEBUG_OPTIMISE_MORE_r(re_exec_indentf(

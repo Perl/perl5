@@ -709,7 +709,15 @@ static const scan_data_t zero_scan_data = {
     0, 0, NULL, NULL, NULL
 };
 
-/* study flags */
+
+/* Flags for studying.
+ *
+ * The SF_  (scan)        flags are for the scan_data_t->data field.
+ * The SCF_ (study_chunk) flags are mainly for the flags parameter
+ *                        to Perl_study_chunk(), but some can also be used
+ *                        in scan_data_t->data, which is why they share a
+ *                        common bit space.
+ */
 
 #define SF_BEFORE_SEOL          0x0001
 #define SF_BEFORE_MEOL          0x0002
@@ -736,6 +744,12 @@ static const scan_data_t zero_scan_data = {
 #define SCF_DO_STCLASS_AND      0x0800
 #define SCF_DO_STCLASS_OR       0x1000
 #define SCF_DO_STCLASS          (SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
+
+/* SCF_WHILEM_VISITED_POS indicates to study_chunk() that either its
+ * caller is a CURLYX/WHILEM of a type which allows inner CURLYX/WHILEMs
+ * to partake in the super-linear cache, or that there is no enclosing
+ * CURLYX. See L<perlreguts/The super-linear cache> for more details.
+ */
 #define SCF_WHILEM_VISITED_POS  0x2000
 
 #define SCF_TRIE_RESTUDY        0x4000 /* Need to do restudy in study_chunk()?
