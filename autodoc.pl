@@ -1978,8 +1978,9 @@ sub docout ($fh, $section_name, $element_name, $docref) {
             print $fh <<~"EOT";
 
                 C<B<DEPRECATED!>>  It is planned to remove $list
-                from a future release of Perl.  Do not use $it for
-                new code; remove $it from existing code.
+                from a future release of Perl; it is kept only so current
+                code can continue to work during the transition.  Do not
+                use $it for new code; remove $it from existing code.
                 EOT
         }
         elsif ($which == \@experimental) {
