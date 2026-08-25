@@ -728,6 +728,56 @@ EOT
 # increases the possibility of deadlock, unless the code is carefully
 # crafted (and remains so during future maintenance).
 #
+# The locale macros take a mask parameter with each affected category having a
+# bit set in it.  The mask for LC_ALL is the same across all platforms.
+print $l <<~EOT;
+
+/* The macros that include locale locking need to know (in some
+ * Configurations) which locale categories are affected.  This is done by
+ * passing a bit mask argument to them, with each affected category having a
+ * corresponding bit set.  The definitions below convert from our internal
+ index for a category index to its bit position. */
+#define PERL_LC_INDEX_TO_BIT(i) (1 << (i))
+#define PERL_LC_ALLb  PERL_LC_INDEX_TO_BIT(LC_ALL_INDEX_)
+EOT
+
+print $l <<~EOT;
+
+/*  On platforms where the locale for a given category must be matched by the
+ *  LC_CTYPE locale to avoid potential mojibake, set things up to also
+ *  automatically include the LC_CTYPE bit. */
+#if defined(LC_CTYPE) && defined(PERL_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+#  define PERL_INCLUDE_CTYPE  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+#else
+#  define PERL_INCLUDE_CTYPE  0
+#endif
+
+/* Then #define the bit position for each category on the system that can play
+ * a part in the locking macro definitions */
+EOT
+
+# Create the mask for each category found in the DATA
+foreach my $cat (sort keys %categories) {
+    next if $cat eq "LC_ALL";
+    if ($cat eq "LC_CTYPE") {
+        print $l <<~EOT;
+            #ifdef LC_CTYPE
+            #  define PERL_LC_CTYPEb  PERL_LC_INDEX_TO_BIT(LC_CTYPE_INDEX_)
+            #else
+            #  define PERL_LC_CTYPEb  PERL_LC_ALLb
+            #endif
+            EOT
+    }
+    else {
+        print $l <<~EOT;
+            #ifdef $cat
+            #  define PERL_${cat}b  PERL_LC_INDEX_TO_BIT(${cat}_INDEX_)|PERL_INCLUDE_CTYPE
+            #else
+            #  define PERL_${cat}b  PERL_LC_CTYPEb
+            #endif
+            EOT
+    }
+}
 
 # Output the computed results for each use in the DATA
 foreach my $use (sort name_order keys %uses) {
@@ -1024,20 +1074,26 @@ foreach my $use (sort name_order keys %uses) {
                     EOT
             }
             else {  # Here, does have locale issues
+                my $cats = join "|", map { "PERL_${_}b" }
+                                                     $entry->{categories}->@*;
                 if ($name || $locale_lock) {
                     $name .= "_" if $name;
                     $locale_lock = "r" unless $locale_lock;
                     $name .= "LC$locale_lock";
                     print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK    PERL_${name}_LOCK(0)
-                        #${dindent}define ${USE}_UNLOCK  PERL_${name}_UNLOCK(0)
-                        EOT
+                   #${dindent}define ${USE}_LOCK    PERL_${name}_LOCK(  $cats)
+                   #${dindent}define ${USE}_UNLOCK  PERL_${name}_UNLOCK($cats)
+                   EOT
                 }
                 else {
+                    # This would otherwise be a no-op, but for thread-safe
+                    # locale emulation, need to know what locale categories
+                    # are involved.  ETSL stands for Emulate Thread-Safe
+                    # Locales
                     print $l <<~EOT;
-                        #${dindent}define ${USE}_LOCK
-                        #${dindent}define ${USE}_UNLOCK
-                        EOT
+                    #${dindent}define ${USE}_LOCK    PERL_ETSL_TOGGLE(  $cats)
+                    #${dindent}define ${USE}_UNLOCK  PERL_ETSL_UNTOGGLE($cats)
+                    EOT
                 }
             }
 
