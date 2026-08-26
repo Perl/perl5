@@ -1,4 +1,7 @@
-# New ops always go at the end
+# New ops usually go at the end, except in situations where related ops must
+# be grouped together, such as for float vs. integer numerical pairs which
+# must be adjacent, or groups of related ops that are detected by numerical
+# range comparison.
 # The restriction on having custom as the last op has been removed
 
 # A recapitulation of the format of this file:
