@@ -371,6 +371,7 @@
 # define av_push(a,b)                           Perl_av_push(aTHX_ a,b)
 # define av_push_simple(a,b)                    Perl_av_push_simple(aTHX_ a,b)
 # define av_shift(a)                            Perl_av_shift(aTHX_ a)
+# define av_splice_simple(a,b,c,d,e,f)          Perl_av_splice_simple(aTHX_ a,b,c,d,e,f)
 # define av_store(a,b,c)                        Perl_av_store(aTHX_ a,b,c)
 # define av_store_simple(a,b,c)                 Perl_av_store_simple(aTHX_ a,b,c)
 # define av_undef(a)                            Perl_av_undef(aTHX_ a)
