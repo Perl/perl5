@@ -484,7 +484,7 @@ S_trie_list_new(reg_trie_data *trie, const U32 state)
 }
 
 PERL_STATIC_INLINE void
-S_trie_list_transition(reg_trie_data *trie, U32 *state, const U32 octet,
+S_trie_list_transition(pTHX_ reg_trie_data *trie, U32 *state, const U32 octet,
                        U32 *next_alloc, U32 *state_capacity,
                        U32 **prev_states, STRLEN *transition_count)
 {
@@ -771,7 +771,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         }
 
                         for (bp = uc; bp < ep; bp++)
-                            S_trie_list_transition(trie, &state, *bp,
+                            S_trie_list_transition(aTHX_ trie, &state, *bp,
                                                     &next_alloc, &state_capacity,
                                                     &prev_states, &transition_count);
                         continue;
@@ -868,11 +868,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         }
 
                         for ( ; bp < ep; bp++)
-                            S_trie_list_transition(trie, &state, *bp,
+                            S_trie_list_transition(aTHX_ trie, &state, *bp,
                                                     &next_alloc, &state_capacity,
                                                     &prev_states, &transition_count);
                     } else {
-                        S_trie_list_transition(trie, &state, uvc,
+                        S_trie_list_transition(aTHX_ trie, &state, uvc,
                                                 &next_alloc, &state_capacity,
                                                 &prev_states, &transition_count);
                     }
