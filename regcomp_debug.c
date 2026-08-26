@@ -623,9 +623,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 (UV)TRIE_ALPHABET_SIZE);
           }
         });
-        /* The trie start bitmap is temporarily not displayed.  Prefix
-         * extraction is still being made authoritative, and displaying the
-         * pre-extraction mask here is misleading. */
         if (trie->before_paren || trie->after_paren)
             sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
                     (IV)trie->before_paren,(IV)trie->after_paren);

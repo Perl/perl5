@@ -1829,6 +1829,8 @@ Perl_study_chunk(pTHX_
                         regnode *prev = (regnode *)NULL;
                         regnode *tail = scan;
                         U8 trietype = 0;
+                        /* count is the number of source words; octet_count
+                         * is the total size of their trieable strings. */
                         U32 count = 0;
                         STRLEN octet_count = 0;
 
@@ -1922,13 +1924,13 @@ Perl_study_chunk(pTHX_
                               || EXACTFU_REQ8 == (X)                       \
                               || EXACTFUP == (X) )                          \
                            ? EXACTFU                                        \
-                             : ( EXACTFAA == (X) )                            \
-                               ? EXACTFAA                                     \
-                               : ( EXACTL == (X) )                            \
-                                 ? EXACTL                                     \
-                                 : ( EXACTFLU8 == (X) )                       \
-                                   ? EXACTFLU8                                \
-                                   : 0 )
+                             : ( EXACTFAA == (X) )                          \
+                               ? EXACTFAA                                   \
+                             : ( EXACTL == (X) )                            \
+                               ? EXACTL                                     \
+                             : ( EXACTFLU8 == (X) )                         \
+                               ? EXACTFLU8                                  \
+                             : 0 )
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {

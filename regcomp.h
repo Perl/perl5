@@ -1207,7 +1207,7 @@ struct reg_trie_trans_ {
 
 /* a transition list element for the list based representation */
 struct reg_trie_trans_list_elem_ {
-    U32 forid;
+    U32 octet;
     U32 newstate;
 };
 typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
@@ -1290,7 +1290,6 @@ struct reg_trie_data_ {
     U16             after_paren;
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
-    U8              bitmap[ANYOF_BITMAP_SIZE]; /* all octets, for debugging */
 #endif
 };
 
@@ -1332,14 +1331,6 @@ struct reg_ac_data_ {
     reg_trie_state   *states;
 };
 typedef struct reg_ac_data_ reg_ac_data;
-
-/* ANY_BIT doesn't use the structure, so we can borrow it here.
-   This is simpler than refactoring all of it as wed end up with
-   three different sets... */
-
-#define TRIE_BITMAP(p)		(((reg_trie_data *)(p))->bitmap)
-#define TRIE_BITMAP_SET(p, c) \
-    (BITMAP_BYTE(TRIE_BITMAP(p), c) |= ANYOF_BIT((U8)c))
 
 #define IS_LONG_TRIE(op) (REGNODE_TYPE(op) == TRIE && REGNODE_OFF_BY_ARG(op))
 #define IS_TRIE_AC(op) ((op)==AHOCORASICK)

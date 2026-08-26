@@ -19,25 +19,17 @@
 #include "regcomp_internal.h"
 
 /* During construction each state's transitions are kept in a sorted list.
- * Element zero is a header, not a transition.  The header's forid field is
+ * Element zero is a header, not a transition.  The header's octet field is
  * the next insertion position, so transitions occupy elements 1 through
- * forid - 1; its newstate field is the allocated capacity. */
+ * octet - 1; its newstate field is the allocated capacity. */
 #define TRIE_LIST_HEAD(state)      (trie->states[state].trans.list[0])
-#define TRIE_LIST_ITEM(state, idx) (trie->states[state].trans.list[idx])
-#define TRIE_LIST_CUR(state)       (TRIE_LIST_HEAD(state).forid)
+#define TRIE_LIST_ITEM(state, transition_index) \
+    (trie->states[state].trans.list[transition_index])
+#define TRIE_LIST_CUR(state)       (TRIE_LIST_HEAD(state).octet)
 #define TRIE_LIST_LEN(state)       (TRIE_LIST_HEAD(state).newstate)
 #define TRIE_LIST_USED(state)      (trie->states[state].trans.list       \
                                     ? TRIE_LIST_CUR(state) - 1           \
                                     : 0)
-
-#ifdef DEBUGGING
-#  define TRIE_MARK_OCTET(octet)                                            \
-    STMT_START {                                                           \
-        TRIE_BITMAP_SET(trie, octet);                                       \
-    } STMT_END
-#else
-#  define TRIE_MARK_OCTET(octet) NOOP
-#endif
 
 #ifndef RE_PREFER_LONG_TRIE
 #  define RE_PREFER_LONG_TRIE 0
@@ -71,9 +63,6 @@ S_select_trie_op(pTHX_ const Size_t trie_room, const U32 needed_next)
 
 
 #ifdef DEBUGGING
-
-#define TRIE_DEBUG_OCTET_USED(trie, octet) \
-    BITMAP_TEST((trie)->bitmap, octet)
 
 static void
 S_dump_trie_char(pTHX_ const reg_trie_data *trie, U32 octet,
@@ -116,13 +105,34 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
     U32 state;
     const int colwidth = 4;
     U32 word;
+    U8 debug_bitmap[ANYOF_BITMAP_SIZE];
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
+
+    /* Reconstruct the set of octets used by the executable trie for the
+     * diagnostic layout.  This is debug output only; the trie has no stored
+     * start bitmap. */
+    Zero(debug_bitmap, sizeof(debug_bitmap), U8);
+    for (state = trie->startstate; state < trie->statecount; state++) {
+        const U32 base = trie->states[state].trans.base;
+        U32 octet;
+
+        if (!base)
+            continue;
+        for (octet = 0; octet < TRIE_ALPHABET_SIZE; octet++) {
+            if (base + octet >= TRIE_ALPHABET_SIZE) {
+                const U32 slot = base + octet - TRIE_ALPHABET_SIZE;
+                if (slot < trie->lasttrans
+                        && trie->trans[slot].check == state)
+                    BITMAP_BYTE(debug_bitmap, octet) |= ANYOF_BIT((U8)octet);
+            }
+        }
+    }
 
     re_indentf("Char : %-6s%-6s%-4s ",
         depth+1, "Match","Base","Ofs" );
 
     for( state = 0 ; state < TRIE_ALPHABET_SIZE ; state++ ) {
-        if (!TRIE_DEBUG_OCTET_USED(trie, state))
+        if (!BITMAP_TEST(debug_bitmap, state))
             continue;
         S_dump_trie_char(aTHX_ trie, state, colwidth);
     }
@@ -130,7 +140,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
     re_indentf("State|-----------------------", depth+1);
 
     for( state = 0 ; state < TRIE_ALPHABET_SIZE ; state++ )
-        if (TRIE_DEBUG_OCTET_USED(trie, state))
+        if (BITMAP_TEST(debug_bitmap, state))
             re_printf("%.*s", colwidth, "--------");
     re_printf("\n");
 
@@ -161,7 +171,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
             re_printf("+%2" UVXf "[ ", (UV)ofs);
 
             for ( ofs = 0 ; ofs < TRIE_ALPHABET_SIZE ; ofs++ ) {
-                if (!TRIE_DEBUG_OCTET_USED(trie, ofs))
+                if (!BITMAP_TEST(debug_bitmap, ofs))
                     continue;
                 if ( ( base + ofs >= TRIE_ALPHABET_SIZE )
                         && ( base + ofs - TRIE_ALPHABET_SIZE
@@ -213,7 +223,9 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
             depth+1, "------:-----+-----------------\n" );
 
     for( state = 1; state < next_alloc; state++ ) {
-        U32 idx;
+        /* The first list element is the header; transition_index addresses
+         * the transitions. */
+        U32 transition_index;
 
         re_indentf(" %4" UVXf " :",
             depth+1, (UV)state  );
@@ -224,17 +236,19 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
                 trie->states[ state ].wordnum
             );
         }
-        for( idx = 1 ; idx <= TRIE_LIST_USED( state ) ; idx++ ) {
-            const U32 forid = TRIE_LIST_ITEM(state, idx).forid;
-            if (forid <= U8_MAX && isPRINT_A((U8)forid)
-                    && forid != ' ' && forid != '\\' && forid != '\'') {
-                re_printf(" '%c'", (int)forid);
+        for (transition_index = 1;
+             transition_index <= TRIE_LIST_USED(state);
+             transition_index++) {
+            const U32 octet = TRIE_LIST_ITEM(state, transition_index).octet;
+            if (octet <= U8_MAX && isPRINT_A((U8)octet)
+                    && octet != ' ' && octet != '\\' && octet != '\'') {
+                re_printf(" '%c'", (int)octet);
             } else {
-                re_printf("%*.*X", colwidth, 2, (unsigned)forid);
+                re_printf("%*.*X", colwidth, 2, (unsigned)octet);
             }
             re_printf("=%4" UVXf " | ",
-                      (UV)TRIE_LIST_ITEM(state, idx).newstate);
-            if (!(idx % 10))
+                      (UV)TRIE_LIST_ITEM(state, transition_index).newstate);
+            if (!(transition_index % 10))
                 re_printf("\n%*s| ",
                     (int)((depth * 2) + 14), "");
         }
@@ -423,15 +437,15 @@ is the recommended Unicode-aware way of saying
         || OP(noper) == EXACTL || OP(noper) == EXACTFLU8)
 
 PERL_STATIC_INLINE void
-S_trie_list_push(reg_trie_data *trie, const U32 state, const U32 fid,
+S_trie_list_push(reg_trie_data *trie, const U32 state, const U32 octet,
                  const U32 newstate, const U32 position)
 {
-    /* Element zero is the list header, not a transition.  Its forid field
+    /* Element zero is the list header, not a transition.  Its octet field
      * stores the next insertion position (one past the last transition),
      * while newstate stores the allocated capacity.  Transition records
-     * occupy elements 1 through forid - 1 and remain sorted by forid. */
+     * occupy elements 1 through octet - 1 and remain sorted by octet. */
     reg_trie_trans_le *list = trie->states[state].trans.list;
-    const U32 used = list[0].forid;
+    const U32 used = list[0].octet;
 
     if (used >= list[0].newstate) {
         const U32 new_len = list[0].newstate * 2;
@@ -440,13 +454,14 @@ S_trie_list_push(reg_trie_data *trie, const U32 state, const U32 fid,
         list[0].newstate = new_len;
     }
 
-    /* An insertion at the end is the common fast path. */
+    /* Appending is the common fast path; an insertion before the end also
+     * has to move the later transition records out of the way. */
     if (position < used)
         Move(&list[position], &list[position + 1], used - position,
              reg_trie_trans_le);
-    list[position].forid = fid;
+    list[position].octet = octet;
     list[position].newstate = newstate;
-    list[0].forid++;
+    list[0].octet++;
 }
 
 PERL_STATIC_INLINE void
@@ -464,7 +479,7 @@ S_trie_list_new(reg_trie_data *trie, const U32 state)
      * states cheap to create. */
     const U32 initial_len = (state == 1) ? 16 : 4;
     Newx(trie->states[state].trans.list, initial_len, reg_trie_trans_le);
-    trie->states[state].trans.list[0].forid = 1;
+    trie->states[state].trans.list[0].octet = 1;
     trie->states[state].trans.list[0].newstate = initial_len;
 }
 
@@ -478,17 +493,16 @@ S_trie_list_transition(reg_trie_data *trie, U32 *state, const U32 octet,
     reg_trie_trans_le *list;
     const U32 current_state = *state;
 
-    TRIE_MARK_OCTET(octet);
     if (!trie->states[current_state].trans.list)
         S_trie_list_new(trie, current_state);
     list = trie->states[current_state].trans.list;
 
-    for (check = 1; check <= list[0].forid - 1; check++) {
-        if (list[check].forid == octet) {
+    for (check = 1; check <= list[0].octet - 1; check++) {
+        if (list[check].octet == octet) {
             newstate = list[check].newstate;
             break;
         }
-        if (list[check].forid > octet)
+        if (list[check].octet > octet)
             break;
     }
     if (!newstate) {
@@ -828,6 +842,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     if ( trie_needs_codepoint_processing ) {
                         const U8 *bp;
                         const U8 *ep;
+                        /* Extended codepoints may require more than the
+                         * four octets needed for Unicode scalar values, so
+                         * this must use UTF8_MAXBYTES rather than
+                         * MAX_UNICODE_UTF8_BYTES.  The extra octet is for
+                         * the terminating NUL expected by the encoder. */
                         U8 encoded[UTF8_MAXBYTES + 1];
 
                         if (!is_utf8 && FITS_IN_8_BITS(uvc)) {
@@ -948,9 +967,6 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         } /* end list construction */
 
         /* The list pass has also completed the source analysis. */
-#ifdef DEBUGGING
-        Zero(trie->bitmap, sizeof(trie->bitmap), U8);
-#endif
         trie->before_paren = OP(first) == BRANCH
                      ? ARG1a(first)
                      : ARG2a(first); /* BRANCHJ */
@@ -1012,17 +1028,18 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                 if (trie->states[state].trans.list) {
                     const U32 used = TRIE_LIST_USED( state );
-                    const U32 minid = TRIE_LIST_ITEM( state, 1).forid;
-                    const U32 maxid = TRIE_LIST_ITEM( state, used).forid;
-                    const U32 frame_span = maxid - minid;
+                    const U32 min_octet = TRIE_LIST_ITEM( state, 1).octet;
+                    const U32 max_octet = TRIE_LIST_ITEM( state, used).octet;
+                    const U32 frame_span = max_octet - min_octet;
                     const U32 frame_width = frame_span + 1;
                     bool placed = false;
-                    U32 idx;
+                    U32 transition_index;
 
-                    /* A state's transitions form a frame from minid through
-                     * maxid.  Sparse frames may fit into holes left by earlier
-                     * frames.  Try the first available position.  The
-                     * frame may extend beyond table_highwater, provided it
+                    /* A state's transitions form a frame from min_octet
+                     * through max_octet.  Sparse frames may fit into holes
+                     * left by earlier frames.  Try the first available
+                     * position.  The frame may extend beyond table_highwater,
+                     * provided it
                      * fits in the allocation and its occupied slots do not
                      * clash. */
                     while (next_hole < table_highwater
@@ -1050,21 +1067,27 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                   transition_capacity - old_capacity,
                                   reg_trie_trans );
                         }
-                        for (idx = 1; idx <= used; idx++) {
+                        for (transition_index = 1;
+                             transition_index <= used;
+                             transition_index++) {
                             const U32 tid = next_hole
-                                           + TRIE_LIST_ITEM( state, idx ).forid
-                                           - minid;
+                                           + TRIE_LIST_ITEM(state,
+                                                            transition_index).octet
+                                           - min_octet;
                             if (trie->trans[ tid ].next)
                                 break;
                         }
-                        if (idx > used) {
-                            base = TRIE_ALPHABET_SIZE + next_hole - minid;
-                            for (idx = 1; idx <= used; idx++) {
+                        if (transition_index > used) {
+                            base = TRIE_ALPHABET_SIZE + next_hole - min_octet;
+                            for (transition_index = 1;
+                                 transition_index <= used;
+                                 transition_index++) {
                                 const U32 tid = base
                                                - TRIE_ALPHABET_SIZE
-                                               + TRIE_LIST_ITEM( state, idx ).forid;
+                                               + TRIE_LIST_ITEM(state,
+                                                                transition_index).octet;
                                 trie->trans[ tid ].next = TRIE_LIST_ITEM( state,
-                                                                    idx ).newstate;
+                                                                    transition_index ).newstate;
                                 trie->trans[ tid ].check = state;
                             }
                             if (candidate_end > table_highwater)
@@ -1094,15 +1117,15 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                               reg_trie_trans );
                     }
                     if (!placed) {
-                        base = TRIE_ALPHABET_SIZE + table_highwater - minid;
+                        base = TRIE_ALPHABET_SIZE + table_highwater - min_octet;
                     }
                     /* A one-transition frame can occupy one existing hole;
                      * it does not need its full frame width to be reserved. */
-                    if ( !placed && maxid == minid ) {
+                    if ( !placed && max_octet == min_octet ) {
                         U32 set = 0;
                         for ( ; next_hole < table_highwater ; next_hole++ ) {
                             if ( ! trie->trans[ next_hole ].next ) {
-                                base = TRIE_ALPHABET_SIZE + next_hole - minid;
+                                base = TRIE_ALPHABET_SIZE + next_hole - min_octet;
                                 trie->trans[ next_hole ].next = TRIE_LIST_ITEM( state,
                                                                    1).newstate;
                                 trie->trans[ next_hole ].check = state;
@@ -1122,12 +1145,15 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                 next_hole++;
                         }
                     } else if (!placed) {
-                        for ( idx = 1; idx <= TRIE_LIST_USED( state ) ; idx++ ) {
+                        for (transition_index = 1;
+                             transition_index <= TRIE_LIST_USED(state);
+                             transition_index++) {
                             const U32 tid = base
                                            - TRIE_ALPHABET_SIZE
-                                           + TRIE_LIST_ITEM( state, idx ).forid;
+                                           + TRIE_LIST_ITEM(state,
+                                                            transition_index).octet;
                             trie->trans[ tid ].next = TRIE_LIST_ITEM( state,
-                                                                idx ).newstate;
+                                                                transition_index ).newstate;
                             trie->trans[ tid ].check = state;
                         }
                         table_highwater += frame_width;
