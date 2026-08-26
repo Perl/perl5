@@ -575,10 +575,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
-        /* Using is_utf8_string() (via PERL_PV_UNI_DETECT)
-         * is a crude hack but it may be the best for now since
-         * we have no flag "this EXACTish node was UTF-8"
-         * --jhi */
+        /* This is only diagnostic formatting.  Trie construction uses the
+         * node type and the pattern flags to classify its source; it must not
+         * infer the encoding from the contents of the string. */
         pv_pretty(sv, STRING(o), STR_LEN(o), PL_dump_re_max_len,
                   PL_colors[0], PL_colors[1],
                   PERL_PV_ESCAPE_UNI_DETECT |

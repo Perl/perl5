@@ -1829,9 +1829,9 @@ Perl_study_chunk(pTHX_
                         regnode *prev = (regnode *)NULL;
                         regnode *tail = scan;
                         U8 trietype = 0;
-                        /* count is the number of source words; octet_count
+                        /* word_count is the number of source words; octet_count
                          * is the total size of their trieable strings. */
-                        U32 count = 0;
+                        U32 word_count = 0;
                         STRLEN octet_count = 0;
 
                         /* var tail is used because there may be a TAIL
@@ -1985,7 +1985,7 @@ Perl_study_chunk(pTHX_
 #ifdef NOJUMPTRIE
                                   && noper_next >= tail
 #endif
-                                  && count < U16_MAX)
+                                  && word_count < U16_MAX)
                             {
                                 /* Handle mergable triable node Either we are
                                  * the first node in a new trieable sequence,
@@ -2017,7 +2017,7 @@ Perl_study_chunk(pTHX_
                                     prev = cur;
                                 }
                                 if (first) {
-                                    count++;
+                                    word_count++;
                                     octet_count += noper_octets;
                                 }
                             } /* end handle mergable triable node */
@@ -2038,7 +2038,7 @@ Perl_study_chunk(pTHX_
                                     if ( trietype && trietype != NOTHING )
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail,
-                                                count, octet_count,
+                                                word_count, octet_count,
                                                 trietype, depth+1 );
                                     prev = NULL; /* note: we clear/update
                                                     first, trietype etc below,
@@ -2051,7 +2051,7 @@ Perl_study_chunk(pTHX_
                                 ){
                                     /* noper is triable, so we can start a new
                                      * trie sequence */
-                                    count = 1;
+                                    word_count = 1;
                                     octet_count = noper_octets;
                                     first = cur;
                                     trietype = noper_trietype;
@@ -2059,7 +2059,7 @@ Perl_study_chunk(pTHX_
                                     /* if we already saw a first but the
                                      * current node is not triable then we have
                                      * to reset the first information. */
-                                    count = 0;
+                                    word_count = 0;
                                     first = NULL;
                                     trietype = 0;
                                 }
@@ -2081,7 +2081,7 @@ Perl_study_chunk(pTHX_
                                  * a trie, so we have to construct it here
                                  * outside of the loop */
                                 made = make_trie( pRExC_state, startbranch,
-                                                 first, scan, tail, count,
+                                                 first, scan, tail, word_count,
                                                  octet_count, trietype,
                                                  depth+1 );
 #ifdef TRIE_STUDY_OPT

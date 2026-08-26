@@ -318,7 +318,7 @@ S_dump_trie_physical(pTHX_ const struct reg_trie_data_ *trie,
   last       : Thing following the last branch.
                May be the same as tail.
   tail       : item following the branch sequence
-  count      : words in the sequence
+  word_count : words in the sequence
   flags      : currently the OP() type we will be building one of /EXACT(|F|FA|FU|FU_SS|L|FLU8)/
   depth      : indent depth
 
