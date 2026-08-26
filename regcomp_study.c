@@ -3509,8 +3509,10 @@ Perl_study_chunk(pTHX_
 
                     if (trie->jump[word]) {
                         if (!nextbranch)
-                            nextbranch = trie_node + trie->jump[0];
-                        scan = trie_node + trie->jump[word];
+                            nextbranch = TRIE_JUMP_FIRST_UNABSORBED_BRANCH(
+                                trie_node, trie->jump, trie->jump_correction);
+                        scan = TRIE_JUMP_TARGET(trie_node, trie->jump,
+                                                trie->jump_correction, word);
                         /* We go from the jump point to the branch that follows
                            it. Note this means we need the vestigal unused
                            branches even though they arent otherwise used. */
