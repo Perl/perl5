@@ -272,8 +272,7 @@ sub sh {
 SKIP: {
     use Config;
     # debugging builds will detect this failure and panic
-    skip "DEBUGGING build" if $::Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/
-                              or $^O eq 'VMS' && $::Config{usedebugging_perl} eq 'Y';
+    skip "DEBUGGING build" if Internals::DEBUGGING;
     local $::TODO = 'cheat and optimise my (....) = @_';
     local @_ = 1..3;
     &f17;
