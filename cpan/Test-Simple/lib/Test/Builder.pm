@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Scalar::Util qw/blessed reftype weaken/;
 
@@ -261,8 +261,8 @@ sub child {
 
 sub finalize {
     my $self = shift;
-    my $ok = 1;
-    ($ok) = @_ if @_;
+    my $end_hub = 1;
+    ($end_hub) = @_ if @_;
 
     my $st_ctx = $self->ctx;
     my $chub = $self->{Hub} || return $st_ctx->release;
@@ -284,7 +284,7 @@ sub finalize {
     delete $ctx->hub->meta(__PACKAGE__, {})->{child};
 
     $chub->finalize($trace->snapshot(hid => $chub->hid, nested => $chub->nested), 1)
-        if $ok
+        if $end_hub
         && $chub->count
         && !$chub->no_ending
         && !$chub->ended;
@@ -396,6 +396,12 @@ sub subtest {
         $err = "Subtest ended with exit code $code" if $code;
     }
 
+    # Record the exception inside the subtest so it fails and says why. The
+    # exception is still rethrown below, this only stops the subtest reporting
+    # success for code that never finished.
+    $st_ctx->send_event('Exception', error => $err)
+        if !$ok && defined($err);
+
     my $st_hub  = $st_ctx->hub;
     my $plan  = $st_hub->plan;
     my $count = $st_hub->count;
@@ -405,7 +411,7 @@ sub subtest {
         $st_ctx->diag('No tests run!');
     }
 
-    $child->finalize($st_ctx->trace);
+    $child->finalize;
 
     $ctx->release;
 

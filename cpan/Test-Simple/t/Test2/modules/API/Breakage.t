@@ -52,7 +52,7 @@ for my $meth (qw/upgrade_suggested upgrade_required known_broken/) {
 
         my @report = $CLASS->report;
 
-        $_ =~ s{\S+/Breakage\.pm}{Breakage.pm}g for @report;
+        $_ =~ s{\b(version [\d.]+ at) \S.*?/Breakage\.pm (line \d+)\b}{$1 Breakage.pm $2}g for @report;
 
         is_deeply(
             [sort @report],

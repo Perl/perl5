@@ -2,7 +2,7 @@ package Test2::API::InterceptResult::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use List::Util   qw/first/;
 use Test2::Util  qw/pkg_to_file/;
@@ -907,7 +907,7 @@ Returns an empty list if no assertion is present.
 
 =item $bool = $event->has_subtest
 
-True if a subetest is present in this event.
+True if a subtest is present in this event.
 
 =item $undef_or_hashref = $event->the_subtest
 

@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -795,6 +795,10 @@ considered a skip.
   };
 
 Returns true if the subtest passed, false otherwise.
+
+If the code dies, the subtest fails and the exception is reported inside it.
+The exception is then rethrown, so it still reaches your test file and ends it
+the way any other uncaught exception would.
 
 Due to how subtests work, you may omit a plan if you desire.  This adds an
 implicit C<done_testing()> to the end of your subtest.  The following two

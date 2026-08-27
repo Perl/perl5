@@ -10,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 
 my $INST;
@@ -1213,7 +1213,7 @@ It will execute the codeblock, intercepting any generated events in the
 process. It will return an array reference with all the generated event
 objects. All events should be subclasses of L<Test2::Event>.
 
-As of version 1.302178 the events array that is returned is blssed as an
+As of version 1.302178 the events array that is returned is blessed as an
 L<Test2::API::InterceptResult> instance. L<Test2::API::InterceptResult>
 Provides a helpful interface for filtering and/or inspecting the events list
 overall, or individual events within the list.

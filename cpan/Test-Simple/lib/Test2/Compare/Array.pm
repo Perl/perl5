@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Test2::Util::HashBase qw/inref meta ending items order for_each/;
 
@@ -104,6 +104,16 @@ sub add_filter {
 sub add_for_each {
     my $self = shift;
     push @{$self->{+FOR_EACH}} => @_;
+}
+
+sub verify_build {
+    my $self = shift;
+
+    return unless @{$self->{+FOR_EACH}};
+    return unless $self->{+ENDING};
+    return if keys %{$self->{+ITEMS}};
+
+    $self->throw_build_error("'end' with no items specified requires an empty array, which discards the 'all_items' checks; use 'etc' instead of 'end' to check every item without bounding the array");
 }
 
 sub deltas {

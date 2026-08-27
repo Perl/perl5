@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Test2::Util::HashBase qw/inref meta ending items order for_each_key for_each_val/;
 
@@ -85,6 +85,16 @@ sub add_for_each_key {
 sub add_for_each_val {
     my $self = shift;
     push @{$self->{+FOR_EACH_VAL}} => @_;
+}
+
+sub verify_build {
+    my $self = shift;
+
+    return unless @{$self->{+FOR_EACH_KEY}} || @{$self->{+FOR_EACH_VAL}};
+    return unless $self->{+ENDING};
+    return if keys %{$self->{+ITEMS}};
+
+    $self->throw_build_error("'end' with no fields specified requires an empty hash, which discards the 'all_keys' and 'all_values' checks; use 'etc' instead of 'end' to check every key and value without bounding the hash");
 }
 
 sub deltas {
