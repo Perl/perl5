@@ -121,6 +121,7 @@
 %type <opval> bare_statement_yadayada
 %type <opval> subscript_index
 %type <opval> subscript_keys
+%type <opval> subscriptable_reference
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -791,6 +792,18 @@ subscript_keys
 		}
 	;
 
+subscriptable_reference
+	/* Expression that is treated by `subscript` nonterminal as a reference
+	 * Produces: reference expression
+	 */
+	:	subscripted
+	|	term
+		ARROW
+		{
+			$$ = $term;
+		}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -1393,12 +1406,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
 			}
-	|	term[array_reference] ARROW subscript_index[selector]      /* somearef->[$element] */
-			{ $$ = newBINOP(OP_AELEM, 0,
-					ref(newAVREF($array_reference),OP_RV2AV),
-					scalar($selector));
-			}
-	|	subscripted[array_reference] subscript_index[selector]    /* $foo->[$bar]->[$baz] */
+	|	subscriptable_reference[array_reference] subscript_index[selector]    /* $ref->[..]; $foo{$bar}[..] */
 			{ $$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($selector));
@@ -1406,36 +1414,18 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
 			}
-	|	term[hash_reference] ARROW subscript_keys[selector] /* somehref->{bar();} */
+	|	subscriptable_reference[hash_reference] subscript_keys[selector] /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
-	|	subscripted[hash_reference] subscript_keys[selector] /* $foo->[bar]->{baz;} */
-			{ $$ = newBINOP(OP_HELEM, 0,
-					ref(newHVREF($hash_reference),OP_RV2HV),
-					jmaybe($selector)); }
-	|	term[code_reference] ARROW PERLY_PAREN_OPEN PERLY_PAREN_CLOSE          /* $subref->() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   newCVREF(0, scalar($code_reference)));
-			  if (parser->expect == XBLOCK)
-			      parser->expect = XOPERATOR;
-			}
-	|	term[code_reference] ARROW PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE     /* $subref->(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   op_append_elem(OP_LIST, $expr,
-				       newCVREF(0, scalar($code_reference))));
-			  if (parser->expect == XBLOCK)
-			      parser->expect = XOPERATOR;
-			}
-
-	|	subscripted[code_reference] PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE   /* $foo->{bar}->(@args) */
+	|	subscriptable_reference[code_reference] PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE   /* $subref->(@args); $foo->{bar}(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   op_append_elem(OP_LIST, $expr,
 					       newCVREF(0, scalar($code_reference))));
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}
-	|	subscripted[code_reference] PERLY_PAREN_OPEN PERLY_PAREN_CLOSE        /* $foo->{bar}->() */
+	|	subscriptable_reference[code_reference] PERLY_PAREN_OPEN PERLY_PAREN_CLOSE   /* $subref->(); $foo->{bar}() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar($code_reference)));
 			  if (parser->expect == XBLOCK)
