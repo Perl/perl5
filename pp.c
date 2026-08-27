@@ -2317,6 +2317,40 @@ PP(pp_ne)
 }
 
 
+PP(pp_neu)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(!(lundef && rundef)));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(ne_amg, AMGf_numeric|AMGf_no_GETMAGIC))
+        return NORMAL;
+
+    /* a copy-paste of the logic from pp_ne */
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_IMM_NN(boolSV(
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) != SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) != SvNVX(right))
+        : (do_ncmp(left, right) != 0)
+    ));
+    return NORMAL;
+}
+
+
 /* compare left and right SVs. Returns:
  * -1: <
  *  0: ==
@@ -2469,6 +2503,30 @@ PP(pp_seq)
 }
 
 
+PP(pp_sequ)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(lundef && rundef));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(seq_amg, AMGf_no_GETMAGIC))
+        return NORMAL;
+
+    rpp_replace_2_IMM_NN(boolSV(sv_eq_flags(left, right, 0)));;
+    return NORMAL;
+}
+
+
 PP(pp_sne)
 {
     if (rpp_try_AMAGIC_2(sne_amg, 0))
@@ -2476,6 +2534,30 @@ PP(pp_sne)
 
     SV *right = PL_stack_sp[0];
     SV *left  = PL_stack_sp[-1];
+
+    rpp_replace_2_IMM_NN(boolSV(!sv_eq_flags(left, right, 0)));
+    return NORMAL;
+}
+
+
+PP(pp_sneu)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(!(lundef && rundef)));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(sne_amg, AMGf_no_GETMAGIC))
+        return NORMAL;
 
     rpp_replace_2_IMM_NN(boolSV(!sv_eq_flags(left, right, 0)));
     return NORMAL;
@@ -3077,6 +3159,60 @@ PP(pp_i_ne)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
 
     rpp_replace_2_IMM_NN(boolSV(left != right));
+    return NORMAL;
+}
+
+
+PP(pp_i_equ)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(lundef && rundef));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(eq_amg, AMGf_numeric|AMGf_no_GETMAGIC))
+        return NORMAL;
+
+    IV ileft    = SvIV_nomg(left);
+    IV iright   = SvIV_nomg(right);
+
+    rpp_replace_2_IMM_NN(boolSV(ileft == iright));
+    return NORMAL;
+}
+
+
+PP(pp_i_neu)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(!(lundef && rundef)));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(ne_amg, AMGf_numeric|AMGf_no_GETMAGIC))
+        return NORMAL;
+
+    IV ileft    = SvIV_nomg(left);
+    IV iright   = SvIV_nomg(right);
+
+    rpp_replace_2_IMM_NN(boolSV(ileft != iright));
     return NORMAL;
 }
 

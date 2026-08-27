@@ -3431,6 +3431,11 @@ sub pp_i_ge { binop(@_, ">=", 15) }
 sub pp_i_le { binop(@_, "<=", 15) }
 sub pp_i_ncmp { maybe_targmy(@_, \&binop, "<=>", 14) }
 
+sub pp_equ { binop(@_, "===", 14) }
+sub pp_neu { binop(@_, "!==", 14) }
+sub pp_i_equ { binop(@_, "===", 14) }
+sub pp_i_neu { binop(@_, "!==", 14) }
+
 sub pp_seq { binop(@_, "eq", 14) }
 sub pp_sne { binop(@_, "ne", 14) }
 sub pp_slt { binop(@_, "lt", 15) }
@@ -3438,6 +3443,9 @@ sub pp_sgt { binop(@_, "gt", 15) }
 sub pp_sge { binop(@_, "ge", 15) }
 sub pp_sle { binop(@_, "le", 15) }
 sub pp_scmp { maybe_targmy(@_, \&binop, "cmp", 14) }
+
+sub pp_sequ { binop(@_, "equ", 14) }
+sub pp_sneu { binop(@_, "neu", 14) }
 
 sub pp_isa { binop(@_, "isa", 15) }
 

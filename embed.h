@@ -89,6 +89,7 @@
 #   undef KEY_endservent
 #   undef KEY_eof
 #   undef KEY_eq
+#   undef KEY_equ
 #   undef KEY_eval
 #   undef KEY_evalbytes
 #   undef KEY_exec
@@ -172,6 +173,7 @@
 #   undef KEY_msgrcv
 #   undef KEY_msgsnd
 #   undef KEY_ne
+#   undef KEY_neu
 #   undef KEY_next
 #   undef KEY_no
 #   undef KEY_not

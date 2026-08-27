@@ -9,10 +9,11 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan (tests => 343);
+plan (tests => 347);
 
 use strict;
 use warnings;
+no warnings qw( experimental::equ );
 
 my $can_config = eval { require Config; 1 };
 
@@ -85,6 +86,8 @@ $dummy  =  $var  >=   1 ; check_count '>=';
 $dummy  =  $var  >    1 ; check_count '>';
 $dummy  =  $var  !=   1 ; check_count '!=';
 $dummy  =  $var <=>   1 ; check_count '<=>';
+$dummy  =  $var  ===  1 ; check_count '===';
+$dummy  =  $var  !==  1 ; check_count '!==';
 
 # String comparison
 $dummy  =  $var  lt   1 ; check_count 'lt';
@@ -94,6 +97,8 @@ $dummy  =  $var  ge   1 ; check_count 'ge';
 $dummy  =  $var  gt   1 ; check_count 'gt';
 $dummy  =  $var  ne   1 ; check_count 'ne';
 $dummy  =  $var cmp   1 ; check_count 'cmp';
+$dummy  =  $var  equ  1 ; check_count 'equ';
+$dummy  =  $var  neu  1 ; check_count 'neu';
 
 # Bitwise operators
 $dummy  =  $var   &   1 ; check_count '&';

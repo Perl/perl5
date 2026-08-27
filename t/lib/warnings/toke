@@ -1856,3 +1856,14 @@ syntax error at - line 3, near "foo bar"
 use warnings;
 $SIG{INT} = uc'default';
 EXPECT
+########
+use warnings;
+"abc" equ "xyz";
+"abc" neu "xyz";
+123 === 456;
+123 !== 456;
+EXPECT
+The 'equ' operator is experimental at - line 2.
+The 'neu' operator is experimental at - line 3.
+The '===' operator is experimental at - line 4.
+The '!==' operator is experimental at - line 5.

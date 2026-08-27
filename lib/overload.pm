@@ -1,4 +1,4 @@
-package overload 1.41;
+package overload 1.42;
 
 use v5.42;
 no strict 'refs';
@@ -574,6 +574,23 @@ then it will not be called again - avoiding infinite recursion.
     nomethod  fallback  =
 
 See L</Special Keys for C<use overload>>.
+
+=back
+
+There are also some operators that perl does not allow to be directly
+overloaded.
+
+=over 5
+
+=item * I<Undef-aware Equality>
+
+    ===  !==  equ  neu
+
+The four undef-aware equality operators do not allow specific overloading.
+They are internally implemented in terms of a C<defined> test (which itself
+cannot be overloaded), combined with a following call to the base
+non undef-aware versions of those operators. This call will use any
+overloading behaviour defined by those regular operators.
 
 =back
 

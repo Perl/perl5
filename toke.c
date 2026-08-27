@@ -7219,6 +7219,13 @@ yyl_bang(pTHX_ char *s)
             TOKEN(0);
         }
 
+        if (s[0] == '=') {
+            ck_warner_d(packWARN(WARN_EXPERIMENTAL__EQU),
+                    "The '!==' operator is experimental");
+            s++;
+            ChEop(OP_NEU);
+        }
+
         ChEop(OP_NE);
     }
 
@@ -8691,6 +8698,13 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
             return REPORT(0);
         ChEop(OP_SEQ);
 
+    case KEY_equ:
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__EQU),
+                    "The 'equ' operator is experimental");
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+            return REPORT(0);
+        ChEop(OP_SEQU);
+
     case KEY_exists:
         UNI(OP_EXISTS);
 
@@ -8990,6 +9004,13 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
             return REPORT(0);
         ChEop(OP_SNE);
+
+    case KEY_neu:
+        ck_warner_d(packWARN(WARN_EXPERIMENTAL__EQU),
+                    "The 'neu' operator is experimental");
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+            return REPORT(0);
+        ChEop(OP_SNEU);
 
     case KEY_no:
         s = tokenize_use(0, s);
@@ -9914,6 +9935,12 @@ yyl_try(pTHX_ char *s)
                 {
                     s -= 2;
                     TOKEN(0);
+                }
+                if (s[0] == '=') {
+                    ck_warner_d(packWARN(WARN_EXPERIMENTAL__EQU),
+                            "The '===' operator is experimental");
+                    s++;
+                    ChEop(OP_EQU);
                 }
                 ChEop(OP_EQ);
             }

@@ -229,6 +229,10 @@ EXTCONST char* const PL_op_name[] INIT({
 	"i_eq",
 	"ne",
 	"i_ne",
+	"equ",
+	"i_equ",
+	"neu",
+	"i_neu",
 	"ncmp",
 	"i_ncmp",
 	"slt",
@@ -237,6 +241,8 @@ EXTCONST char* const PL_op_name[] INIT({
 	"sge",
 	"seq",
 	"sne",
+	"sequ",
+	"sneu",
 	"scmp",
 	"bit_and",
 	"bit_xor",
@@ -663,6 +669,10 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"integer eq (==)",
 	"numeric ne (!=)",
 	"integer ne (!=)",
+	"undef-aware numeric eq (===)",
+	"undef-aware integer eq (===)",
+	"undef-aware numeric ne (!==)",
+	"undef-aware integer ne (!==)",
 	"numeric comparison (<=>)",
 	"integer comparison (<=>)",
 	"string lt",
@@ -671,6 +681,8 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"string ge",
 	"string eq",
 	"string ne",
+	"undef-aware string eq",
+	"undef-aware string ne",
 	"string comparison (cmp)",
 	"bitwise and (&)",
 	"bitwise xor (^)",
@@ -1102,6 +1114,10 @@ INIT({
 	Perl_pp_i_eq,
 	Perl_pp_ne,
 	Perl_pp_i_ne,
+	Perl_pp_equ,
+	Perl_pp_i_equ,
+	Perl_pp_neu,
+	Perl_pp_i_neu,
 	Perl_pp_ncmp,
 	Perl_pp_i_ncmp,
 	Perl_pp_slt,	/* implemented by Perl_pp_sle */
@@ -1110,6 +1126,8 @@ INIT({
 	Perl_pp_sge,	/* implemented by Perl_pp_sle */
 	Perl_pp_seq,
 	Perl_pp_sne,
+	Perl_pp_sequ,
+	Perl_pp_sneu,
 	Perl_pp_scmp,
 	Perl_pp_bit_and,
 	Perl_pp_bit_xor,	/* implemented by Perl_pp_bit_or */
@@ -1536,6 +1554,10 @@ INIT({
 	Perl_ck_cmp,		/* i_eq */
 	Perl_ck_cmp,		/* ne */
 	Perl_ck_cmp,		/* i_ne */
+	Perl_ck_cmp,		/* equ */
+	Perl_ck_cmp,		/* i_equ */
+	Perl_ck_cmp,		/* neu */
+	Perl_ck_cmp,		/* i_neu */
 	Perl_ck_null,		/* ncmp */
 	Perl_ck_null,		/* i_ncmp */
 	Perl_ck_scmp,		/* slt */
@@ -1544,6 +1566,8 @@ INIT({
 	Perl_ck_scmp,		/* sge */
 	Perl_ck_scmp,		/* seq */
 	Perl_ck_scmp,		/* sne */
+	Perl_ck_scmp,		/* sequ */
+	Perl_ck_scmp,		/* sneu */
 	Perl_ck_null,		/* scmp */
 	Perl_ck_bitop,		/* bit_and */
 	Perl_ck_bitop,		/* bit_xor */
@@ -1897,9 +1921,9 @@ INIT({
 
 /* Indexes into PL_check for the comparison function pointers */
 #ifdef PERL_IN_PEEP_C
-  #define PERL_CK_NULL  430
-  #define PERL_CK_EXISTS  431
-  #define PERL_CK_DELETE  432
+  #define PERL_CK_NULL  436
+  #define PERL_CK_EXISTS  437
+  #define PERL_CK_DELETE  438
 #endif
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -1988,6 +2012,10 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00011206,	/* i_eq */
 	0x00011226,	/* ne */
 	0x00011206,	/* i_ne */
+	0x00011226,	/* equ */
+	0x00011206,	/* i_equ */
+	0x00011226,	/* neu */
+	0x00011206,	/* i_neu */
 	0x0001122e,	/* ncmp */
 	0x0001120e,	/* i_ncmp */
 	0x00011206,	/* slt */
@@ -1996,6 +2024,8 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00011206,	/* sge */
 	0x00011206,	/* seq */
 	0x00011206,	/* sne */
+	0x00011206,	/* sequ */
+	0x00011206,	/* sneu */
 	0x0001120e,	/* scmp */
 	0x0001120e,	/* bit_and */
 	0x0001120e,	/* bit_xor */
@@ -2769,6 +2799,10 @@ EXTCONST I16  PL_op_private_bitdef_ix[]  INIT( {
       13, /* i_eq */
       13, /* ne */
       13, /* i_ne */
+      13, /* equ */
+      13, /* i_equ */
+      13, /* neu */
+      13, /* i_neu */
       13, /* ncmp */
       13, /* i_ncmp */
       13, /* slt */
@@ -2777,6 +2811,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[]  INIT( {
       13, /* sge */
       13, /* seq */
       13, /* sne */
+      13, /* sequ */
+      13, /* sneu */
       13, /* scmp */
      110, /* bit_and */
      110, /* bit_xor */
@@ -3138,7 +3174,7 @@ EXTCONST U16  PL_op_private_bitdefs[] INIT( {
     0x0b9e, 0x0694, 0x1df0, 0x674c, 0x6108, 0x4c45, /* const */
     0x46bc, 0x52f9, /* gvsv */
     0x1c55, /* gv */
-    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, scmp, smartmatch, lslice, xor, isa */
+    0x0067, /* gelem, lt, i_lt, gt, i_gt, le, i_le, ge, i_ge, eq, i_eq, ne, i_ne, equ, i_equ, neu, i_neu, ncmp, i_ncmp, slt, sgt, sle, sge, seq, sne, sequ, sneu, scmp, smartmatch, lslice, xor, isa */
     0x46bc, 0x65f8, 0x0917, /* padsv */
     0x46bc, 0x65f8, 0x0003, /* padsv_store, lvavref */
     0x46bc, 0x65f8, 0x08b4, 0x47ac, 0x63c9, /* padav */
@@ -3311,6 +3347,10 @@ EXTCONST U8 PL_op_private_valid[] INIT( {
     /* I_EQ       */ (OPpARG2_MASK),
     /* NE         */ (OPpARG2_MASK),
     /* I_NE       */ (OPpARG2_MASK),
+    /* EQU        */ (OPpARG2_MASK),
+    /* I_EQU      */ (OPpARG2_MASK),
+    /* NEU        */ (OPpARG2_MASK),
+    /* I_NEU      */ (OPpARG2_MASK),
     /* NCMP       */ (OPpARG2_MASK),
     /* I_NCMP     */ (OPpARG2_MASK),
     /* SLT        */ (OPpARG2_MASK),
@@ -3319,6 +3359,8 @@ EXTCONST U8 PL_op_private_valid[] INIT( {
     /* SGE        */ (OPpARG2_MASK),
     /* SEQ        */ (OPpARG2_MASK),
     /* SNE        */ (OPpARG2_MASK),
+    /* SEQU       */ (OPpARG2_MASK),
+    /* SNEU       */ (OPpARG2_MASK),
     /* SCMP       */ (OPpARG2_MASK),
     /* BIT_AND    */ (OPpUSEINT),
     /* BIT_XOR    */ (OPpUSEINT),

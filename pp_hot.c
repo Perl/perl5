@@ -1696,6 +1696,40 @@ PP(pp_eq)
 }
 
 
+PP(pp_equ)
+{
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SvGETMAGIC(left);
+    if(left != right)
+        SvGETMAGIC(right);
+
+    bool lundef = !SvOK(left), rundef = !SvOK(right);
+
+    if(lundef || rundef) {
+        rpp_replace_2_IMM_NN(boolSV(lundef && rundef));
+        return NORMAL;
+    }
+
+    if (rpp_try_AMAGIC_2(eq_amg, AMGf_numeric|AMGf_no_GETMAGIC))
+        return NORMAL;
+
+    /* a copy-paste of the logic from pp_eq */
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_IMM_NN(boolSV(
+        ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
+        ?    (SvIVX(left) == SvIVX(right))
+        : (flags_and & SVf_NOK)
+        ?    (SvNVX(left) == SvNVX(right))
+        : ( do_ncmp(left, right) == 0)
+    ));
+    return NORMAL;
+}
+
+
 PP(pp_preinc)
 {
     SV *sv = *PL_stack_sp;

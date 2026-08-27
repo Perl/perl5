@@ -181,6 +181,7 @@ __END__
 -endservent
 -eof
 -eq
+-equ
 +eval
 -evalbytes
 -exec
@@ -263,6 +264,7 @@ __END__
 -msgsnd
 +my
 -ne
+-neu
 +next
 +no
 -not
