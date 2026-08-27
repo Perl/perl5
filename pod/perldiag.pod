@@ -6790,6 +6790,12 @@ think the U.S. Government thinks it's a secret, or at least that they
 will continue to pretend that it is.  And if you quote me on that, I
 will deny it.
 
+=item The 'equ' operator is experimental
+
+(S experimental::equ) This warning is emitted if you use the C<equ>
+undef-aware equality operator.  This operator is currently experimental
+and its behaviour may change in future releases of Perl.
+
 =item The experimental declared_refs feature is not enabled
 
 (F) To declare references to variables, as in C<my \%x>, you must first enable
@@ -6802,6 +6808,24 @@ the feature:
 
 (F) The function indicated isn't implemented on this architecture,
 according to the probings of Configure.
+
+=item The 'neu' operator is experimental
+
+(S experimental::equ) This warning is emitted if you use the C<neu>
+undef-aware equality operator.  This operator is currently experimental
+and its behaviour may change in future releases of Perl.
+
+=item The '===' operator is experimental
+
+(S experimental::equ) This warning is emitted if you use the C<===>
+undef-aware equality operator.  This operator is currently experimental
+and its behaviour may change in future releases of Perl.
+
+=item The '!==' operator is experimental
+
+(S experimental::equ) This warning is emitted if you use the C<!==>
+undef-aware equality operator.  This operator is currently experimental
+and its behaviour may change in future releases of Perl.
 
 =item The private_use feature is experimental
 

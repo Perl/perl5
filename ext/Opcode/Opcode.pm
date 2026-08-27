@@ -1,4 +1,4 @@
-package Opcode 1.72;
+package Opcode 1.73;
 
 use strict;
 
@@ -319,8 +319,9 @@ invert_opset function.
     nbit_xor nbit_or sbit_and sbit_xor sbit_or negate i_negate not
     complement ncomplement scomplement
 
-    lt i_lt gt i_gt le i_le ge i_ge eq i_eq ne i_ne ncmp i_ncmp
-    slt sgt sle sge seq sne scmp
+    lt i_lt gt i_gt le i_le ge i_ge eq i_eq ne i_ne
+    equ i_equ neu i_neu ncmp i_ncmp
+    slt sgt sle sge seq sne sequ sneu scmp
     isa
 
     substr substr_left vec stringify study pos length index

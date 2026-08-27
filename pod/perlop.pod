@@ -140,7 +140,7 @@ values only, not array values.
     nonassoc    named unary operators
     nonassoc    isa
     chained     < > <= >= lt gt le ge
-    chain/na    == != eq ne <=> cmp ~~
+    chain/na    == != eq ne === !== equ neu <=> cmp ~~
     left        & &.
     left        | |. ^ ^.
     left        &&
@@ -645,6 +645,28 @@ $z">>, performs chained comparisons, in the manner described above in
 the section L</"Operator Precedence and Associativity">.
 Beware that they do not chain with relational operators, which have
 higher precedence.
+
+Each of these four operators has a variant whose name is one character longer,
+which has different behaviour to the base operator when either (or both) of
+its arguments is C<undef>. These operators, called the I<undef-aware equality
+operators>, consider that C<undef> is equal to another C<undef> but not equal
+to any defined value - even the number zero or the empty string. Furtheremore,
+these operators will not invoke warnings when invoked on undefined values,
+even when their base counterparts would. (Though other warnings are still
+possible, such as C<===> warning about non-numerical values).
+
+These four operators are currently considered B<experimental> and will emit
+warnings in the C<experimental::equ> category.
+
+Binary C<< "===" >> returns true if both arguments are C<undef>, or if both
+are defined and numerically equal as according to C<< "==" >>.
+
+Binary C<< "equ" >> returns true if both arguments are C<undef>, or if both
+are defined and stringwise equal as according to C<< "eq" >>.
+
+Binary C<< "!==" >> and C<< "neu" >> are the complements to these; returning
+true if exactly one argument is C<undef>, or if both are defined but not
+equal, either numerically or stringwise respectively.
 
 Binary C<< "<=>" >> returns -1, 0, or 1 depending on whether the left
 argument is numerically less than, equal to, or greater than the right
