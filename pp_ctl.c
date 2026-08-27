@@ -2532,13 +2532,7 @@ PP(pp_caller)
 
         if (!has_arg) {
             int f = (subscripts & (OPpCALLER_SUB|OPpCALLER_HINTS|OPpCALLER_BITS|OPpCALLER_HINTH));
-
-            /* Compilers may recognise this loop and substitute popcnt */
-            int cnt = 0;
-            while(f != 0) {
-                f &= f - 1;
-                cnt++;
-            }
+            unsigned cnt = bitcount32( (uint32_t)f );
 
             while (cnt) {
                 rpp_push_IMM(&PL_sv_undef);
