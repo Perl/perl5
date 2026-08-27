@@ -1552,12 +1552,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpPADRANGE_COUNTSHIFT
     OPpPAD_STATE
     OPpPV_IS_UTF8
-    OPpREF_CMP_AND
-    OPpREF_CMP_EMPTYSTR
-    OPpREF_CMP_MASK
-    OPpREF_CMP_NE
-    OPpREF_CMP_REGEXP_PKG
-    OPpREF_CMP_SKIPLOGOP
     OPpREFCOUNTED
     OPpREPEAT_DOLIST
     OPpREVERSE_INPLACE
@@ -2282,19 +2276,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvREFCNT_IMMORTAL
     SvRMAGICAL_off
     SvRMAGICAL_on
-    SVrt_ARRAY
-    SVrt_CODE
-    SVrt_FORMAT
-    SVrt_GLOB
-    SVrt_HASH
-    SVrt_INVLIST
-    SVrt_IO
-    SVrt_LVALUE
-    SVrt_OBJECT
-    SVrt_REF
-    SVrt_REGEXP
-    SVrt_SCALAR
-    SVrt_VSTRING
     SvRV_const
     SvSCREAM
     SvSCREAM_off
@@ -2980,6 +2961,13 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     OPpCALLER_HINTS
     OPpCALLER_BITS
     OPpCALLER_HINTH
+    OPpREF_CMP_AND
+    OPpREF_CMP_EMPTYSTR
+    OPpREF_CMP_L2R
+    OPpREF_CMP_MASK
+    OPpREF_CMP_NE
+    OPpREF_CMP_REGEXP_PKG
+    OPpREF_CMP_SKIPLOGOP
     pTHX_2
     pTHX_3
     pTHX_4
@@ -2998,6 +2986,19 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     STATIC_ASSERT_STRUCT_BODY_
     STATIC_ASSERT_STRUCT_NAME_
     SV_HEAD_DEBUG_
+    SVrt_ARRAY
+    SVrt_CODE
+    SVrt_FORMAT
+    SVrt_GLOB
+    SVrt_HASH
+    SVrt_INVLIST
+    SVrt_IO
+    SVrt_LVALUE
+    SVrt_OBJECT
+    SVrt_REF
+    SVrt_REGEXP
+    SVrt_SCALAR
+    SVrt_VSTRING
     toFOLD_utf8_flags_
     toLOWER_utf8_flags_
     toTITLE_utf8_flags_

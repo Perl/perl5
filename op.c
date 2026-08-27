@@ -4555,6 +4555,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     OP *splice = NULL;
     U8 builtin_u8 = 0;
     bool has_targmy;
+    U8 l2r = 0;
 
     if ((OP_TYPE_IS(left, OP_REF) || OP_TYPE_IS(left, OP_REFTYPE))&& OP_TYPE_IS(right, OP_CONST)) {
         splice = left;
@@ -4563,6 +4564,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     } else if ((OP_TYPE_IS(right, OP_REF) || OP_TYPE_IS(right, OP_REFTYPE)) && OP_TYPE_IS(left, OP_CONST)) {
         splice = right;
         builtin_u8 = S_ref_cmp_type(aTHX_ left);
+        l2r = OPpREF_CMP_L2R; /* Purely for B::Deparse */
       ref_seqne_check:
         /* ref() doesn't support TARGMY. reftype() does and it does
          * very occasionally get applied - see GH#24630. */
@@ -4576,7 +4578,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
             scalar(referant);
             op_free(left); op_free(right);
             op = newUNOP(OP_REF_CMP, flags, referant);
-            op->op_private = builtin_u8;
+            op->op_private = builtin_u8|l2r;
             return op;
         }
     }

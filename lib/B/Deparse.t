@@ -3696,6 +3696,14 @@ $y = builtin::reftype($x) eq 'SCALAR' ? 1 : 0;
 my($x, $y);
 $y = ref $x eq "SCALAR" ? 1 : 0;
 ####
+# Deparse ("SCALAR" eq ref $x) the expected way round
+my($x, $y);
+$y = 'SCALAR' eq ref $x ? 1 : 0;
+####
+# Deparse ("SCALAR" eq reftype $x) the expected way round
+my($x, $y);
+$y = 'SCALAR' eq builtin::reftype($x) ? 1 : 0;
+####
 # Deparse match-counting idiom
 my($str, $pat);
 my $count_all = () = $str =~ /$pat/g;
