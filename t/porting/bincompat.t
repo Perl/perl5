@@ -55,7 +55,7 @@ while (my ($index, $sub) = each @to_check) {
     is("@strs","@sorted_strs", "Strings are sorted for $var[$index] in $file[$index]");
 }
 
-my $v_is_debugging = !!grep /\bDEBUGGING\b/, @V[0, 1];
-is(Internals::DEBUGGING, $v_is_debugging, "check Internals::DEBUGGING");
+my $v_is_debugging = !!grep /\bDEBUGGING\b/, $V[1];
+is(Config::DEBUGGING, $v_is_debugging, "check Config::DEBUGGING");
 
 done_testing();

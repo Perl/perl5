@@ -270,10 +270,10 @@ sub sh {
 #    mark it as safe even though it isn't really. Hence it's a TODO.
 
 SKIP: {
-    use Config;
+    eval { require Config; 1 }
+      or skip "Cannot load Config: $@";
     # debugging builds will detect this failure and panic
-    skip "DEBUGGING build" if $::Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/
-                              or $^O eq 'VMS' && $::Config{usedebugging_perl} eq 'Y';
+    skip "DEBUGGING build" if Config::DEBUGGING();
     local $::TODO = 'cheat and optimise my (....) = @_';
     local @_ = 1..3;
     &f17;
