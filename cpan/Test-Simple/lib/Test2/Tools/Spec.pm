@@ -2,7 +2,7 @@ package Test2::Tools::Spec;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Carp qw/croak/;
 use Test2::Workflow qw/parse_args build current_build root_build init_root build_stack/;
@@ -301,7 +301,7 @@ supports isolation and/or concurrency via forking or threads.
 
 =head1 SYNOPSIS
 
-    use Test2::Bundle::Extended;
+    use Test2::V0;
     use Test2::Tools::Spec;
 
     describe foo => sub {
@@ -580,7 +580,7 @@ Same as:
 Sometimes you want to apply default attributes to all C<tests()> or C<case()>
 blocks. This can be done, and is lexical to your describe or package root!
 
-    use Test2::Bundle::Extended;
+    use Test2::V0;
     use Test2::Tools::Spec ':ALL';
 
     # All 'tests' blocks after this declaration will have C<<iso => 1>> by default

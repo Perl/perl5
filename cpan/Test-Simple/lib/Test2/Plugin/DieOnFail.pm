@@ -2,7 +2,7 @@ package Test2::Plugin::DieOnFail;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Test2::API qw/test2_add_callback_context_release/;
 
@@ -44,6 +44,19 @@ This gives the tools the ability to output any extra diagnostics they may need.
     T2->ok(1, "pass");
     T2->ok(0, "fail");
     T2->ok(1, "Will not run");
+
+=head1 FORKED AND ASYNC SUBTESTS
+
+This plugin acts on the pass/fail state of the hub in the process that is
+running, and a process that does not own its hub never sees that state. A
+forked subtest sends its events to the process that owns the hub instead of
+recording them locally, so inside one the hub reports no tests and no
+failures no matter what happened.
+
+A failure inside a forked subtest therefore does not throw there. It throws in
+the owning process once that subtest is finished and its events have been
+merged, by which point sibling subtests have run whatever they were going to
+run.
 
 =head1 SOURCE
 

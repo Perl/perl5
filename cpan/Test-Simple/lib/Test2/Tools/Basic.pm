@@ -2,7 +2,7 @@ package Test2::Tools::Basic;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Carp qw/croak/;
 use Test2::API qw/context/;
@@ -104,7 +104,9 @@ sub skip_all {
 sub done_testing {
     my $ctx = context();
     $ctx->hub->finalize($ctx->trace, 1);
+    my $count = $ctx->hub->count;
     $ctx->release;
+    return $count;
 }
 
 sub bail_out {
@@ -201,6 +203,8 @@ tests are run.
 
 Used to mark the end of testing. This is a safe way to have a dynamic or
 unknown number of tests.
+
+Returns the number of assertions that were made, which is 0 when none were.
 
 =item bail_out($reason)
 

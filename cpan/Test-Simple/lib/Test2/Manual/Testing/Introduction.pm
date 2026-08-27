@@ -2,7 +2,7 @@ package Test2::Manual::Testing::Introduction;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 1;
 
@@ -36,10 +36,10 @@ This is all the boilerplate you need.
 
 =over 4
 
-=item use Test2::V1 -ipP;
+=item C<use Test2::V1 -ipP;>
 
 This loads a collection of testing tools that will be described later in the
-tutorial. See L<Test2::V1> for more details, but for starters '-ipP' is a good
+tutorial. See L<Test2::V1> for more details, but for starters C<-ipP> is a good
 set of import flags.
 
 If you do not like importing a ton of symbols or enabling pragmas/plugins all

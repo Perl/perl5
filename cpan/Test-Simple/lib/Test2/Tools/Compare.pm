@@ -2,7 +2,7 @@ package Test2::Tools::Compare;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Carp qw/croak/;
 use Scalar::Util qw/reftype/;
@@ -1341,6 +1341,13 @@ Enforce that no keys are found in the hash other than those specified. This is
 essentially the C<use strict> of a hash check. This can be used anywhere in the
 hash builder, though typically it is placed at the end.
 
+C<all_keys()> and C<all_values()> do not specify any fields, so they do not
+keep C<end()> from rejecting a key. Using either or both together with
+C<end()> in a builder that specifies no fields throws an exception once the
+builder block finishes: such a check can only match an empty hash, which
+discards the C<all_keys()> and C<all_values()> checks. Use C<etc()> to check
+every key or value without limiting which keys the hash may have.
+
 =item etc()
 
 Ignore any extra keys found in the hash. This is the opposite of C<end()>.
@@ -1436,6 +1443,13 @@ block, and can call it any number of times with any number of arguments.
 Enforce that there are no indexes after the last one specified. This will not
 force checking of skipped indexes.
 
+C<all_items()> does not specify any indexes, so it does not keep C<end()> from
+rejecting an item. Using it together with C<end()> in a builder that specifies
+no items throws an exception once the builder block finishes: such a check can
+only match an empty array, which discards the C<all_items()> checks. Use
+C<etc()> to check every item without limiting how many items the array may
+have.
+
 =item etc()
 
 Ignore any extra items found in the array. This is the opposite of C<end()>.
@@ -1489,7 +1503,14 @@ block, and can call it any number of times with any number of arguments.
 
 =item end()
 
-Enforce that there are no more items after the last one specified.
+Enforce that the array contains no items other than the ones specified.
+
+C<all_items()> does not specify any items, so it does not keep C<end()> from
+rejecting an item. Using it together with C<end()> in a builder that specifies
+no items throws an exception once the builder block finishes: such a check can
+only match an empty array, which discards the C<all_items()> checks. Use
+C<etc()> to check every item without limiting how many items the array may
+have.
 
 =item etc()
 

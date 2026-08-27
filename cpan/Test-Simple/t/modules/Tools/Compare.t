@@ -1779,6 +1779,8 @@ subtest all_items_on_bag => sub {
                     ['[0]', 'a',                '=~', "$regx", $lines[0]],
                     ['[1]', 'aa',               '=~', "$regx", $lines[0]],
                     ['[2]', 'aaa',              '=~', "$regx", $lines[0]],
+                    ['[0]', 'a',                '!exists', '<DOES NOT EXIST>', ''],
+                    ['[2]', 'aaa',              '!exists', '<DOES NOT EXIST>', ''],
                 ],
             );
         },

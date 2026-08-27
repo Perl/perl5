@@ -2,7 +2,7 @@ package Test2::Compare;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Scalar::Util qw/blessed/;
 use Test2::Util qw/try/;
@@ -57,6 +57,8 @@ sub build {
     my ($ok, $err) = try { $code->($build); 1 };
     pop @BUILD;
     die $err unless $ok;
+
+    $build->verify_build;
 
     return $build;
 }
@@ -245,7 +247,9 @@ passed in is different from the current global.
 =item build($class, sub { ... })
 
 Run the provided codeblock with a new instance of C<$class> as the current
-build. Returns the new build.
+build. Returns the new build. Once the codeblock has run, C<verify_build> is
+called on the new build, so a class that rejects a combination of build
+directives can throw from there.
 
 =item $check = convert($thing)
 

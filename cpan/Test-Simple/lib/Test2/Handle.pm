@@ -2,7 +2,7 @@ package Test2::Handle;
 use strict;
 use warnings;
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 require Carp;
 require Test2::Util;
@@ -45,7 +45,7 @@ sub _HANDLE_INCLUDE {
 
     my $line = __LINE__ + 3;
     $self->{+IMPORT} = eval <<"    EOT" or die $@;
-#line $line ${ \__FILE__ }
+#line $line "${ \__FILE__ }"
         package $ns;
         sub {
             my (\$module, \$caller, \@imports) = \@_;
@@ -251,11 +251,11 @@ namespace.
 
 =item $inst = $class->import()
 
-Used to create a C<T2()> sub in your namsepace at import.
+Used to create a C<T2()> sub in your namespace at import.
 
 =item $inst->init()
 
-Internally used to intialize and validate the handle object.
+Internally used to initialize and validate the handle object.
 
 =item AUTOLOAD
 

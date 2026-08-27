@@ -2558,7 +2558,6 @@ cpan/Test-Harness/t/unicode.t					Test::Harness test
 cpan/Test-Harness/t/yamlish.t					Test::Harness test
 cpan/Test-Harness/t/yamlish-output.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t				Test::Harness test
-cpan/Test-Simple/CLAUDE.md							Test-Simple
 cpan/Test-Simple/lib/ok.pm							Module related to Test::Simple
 cpan/Test-Simple/lib/Test/Builder.pm						Module related to Test::Simple
 cpan/Test-Simple/lib/Test/Builder/Formatter.pm					Module related to Test::Simple
@@ -2761,7 +2760,6 @@ cpan/Test-Simple/lib/Test2/Workflow/Runner.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow/Task.pm					Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow/Task/Action.pm				Test-Simple
 cpan/Test-Simple/lib/Test2/Workflow/Task/Group.pm				Test-Simple
-cpan/Test-Simple/perltidyrc							Test-Simple
 cpan/Test-Simple/t/acceptance/OO.t						Test-Simple
 cpan/Test-Simple/t/acceptance/skip.t						Test-Simple
 cpan/Test-Simple/t/acceptance/spec.t						Test-Simple
@@ -2771,6 +2769,10 @@ cpan/Test-Simple/t/acceptance/Workflow-Acceptance2.t				Test-Simple
 cpan/Test-Simple/t/acceptance/Workflow-Acceptance3.t				Test-Simple
 cpan/Test-Simple/t/acceptance/Workflow-Acceptance4.t				Test-Simple
 cpan/Test-Simple/t/acceptance/Workflow-Acceptance5.t				Test-Simple
+cpan/Test-Simple/t/AI/modules/Compare/Base.t					Test-Simple
+cpan/Test-Simple/t/AI/regression/1073-done-testing-return.t			Test-Simple
+cpan/Test-Simple/t/AI/regression/1075-subtest-exception.t			Test-Simple
+cpan/Test-Simple/t/AI/regression/1086-all-items-with-end.t			Test-Simple
 cpan/Test-Simple/t/behavior/async_trace.t					Test-Simple
 cpan/Test-Simple/t/behavior/filtering.t						Test-Simple
 cpan/Test-Simple/t/behavior/Mocking.t						Test-Simple
@@ -2885,6 +2887,7 @@ cpan/Test-Simple/t/Legacy/subtest/for_do_t.test					Test file related to Test::S
 cpan/Test-Simple/t/Legacy/subtest/fork.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Legacy/subtest/implicit_done.t				Test file related to Test::Simple
 cpan/Test-Simple/t/Legacy/subtest/line_numbers.t				Test file related to Test::Simple
+cpan/Test-Simple/t/Legacy/subtest/plan.t					Test-Simple
 cpan/Test-Simple/t/Legacy/subtest/predicate.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Legacy/subtest/singleton.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Legacy/subtest/threads.t					Test file related to Test::Simple
@@ -3064,6 +3067,7 @@ cpan/Test-Simple/t/regression/812-todo.t					Test file related to Test::Simple
 cpan/Test-Simple/t/regression/817-subtest-todo.t				Test file related to Test::Simple
 cpan/Test-Simple/t/regression/862-intercept_tb_todo.t				Test file related to Test::Simple
 cpan/Test-Simple/t/regression/async_subtest_missing_parent.t			Test-Simple
+cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t			Test-Simple
 cpan/Test-Simple/t/regression/builder_does_not_init.t				Test file related to Test::Simple
 cpan/Test-Simple/t/regression/errors_facet.t					Test file related to Test::Simple
 cpan/Test-Simple/t/regression/fork_first.t					Test file related to Test::Simple
@@ -3098,6 +3102,7 @@ cpan/Test-Simple/t/Test2/behavior/subtest_bailout.t				Test file related to Test
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t			Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/Subtest_callback.t				Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t				Test file related to Test::Simple
+cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t				Test-Simple
 cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t				Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/Taint.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/trace_signature.t				Test file related to Test::Simple

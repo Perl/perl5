@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Test2::Compare::Base';
 
-our $VERSION = '1.302222';
+our $VERSION = '1.302224';
 
 use Test2::Util::HashBase qw/ending meta items for_each/;
 
@@ -52,6 +52,16 @@ sub add_item {
 sub add_for_each {
     my $self = shift;
     push @{$self->{+FOR_EACH}} => @_;
+}
+
+sub verify_build {
+    my $self = shift;
+
+    return unless @{$self->{+FOR_EACH}};
+    return unless $self->{+ENDING};
+    return if @{$self->{+ITEMS}};
+
+    $self->throw_build_error("'end' with no items specified requires an empty bag, which discards the 'all_items' checks; use 'etc' instead of 'end' to check every item without bounding the bag");
 }
 
 sub deltas {
@@ -109,9 +119,6 @@ sub deltas {
         my @checks = map { $convert->($_) } @for_each;
 
         for my $idx (0..$#list) {
-            # All items are matched if we have conditions for all items
-            delete $unmatched{$idx};
-
             my $val = $list[$idx];
 
             for my $check (@checks) {

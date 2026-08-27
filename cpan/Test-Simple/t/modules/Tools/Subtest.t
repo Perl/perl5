@@ -182,7 +182,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_streamed 'foo' => sub {
             plan 1;
             push @lines => __LINE__ + 1;
@@ -213,7 +213,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_streamed 'foo' => sub {
             skip_all 'bleh';
             push @lines => __LINE__ + 1;
@@ -253,7 +253,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => __LINE__ + ( $use_block_end ? 4 : 1 );
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -281,7 +281,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 4;
+        push @lines => __LINE__ + ( $use_block_end ? 4 : 1 );
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(0, "fail");
@@ -309,7 +309,7 @@ like(
 @lines = ();
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_buffered 'foo' => sub {
             push @lines => __LINE__ + 1;
             ok(1, "pass");
@@ -408,7 +408,7 @@ like(
 my $xyz = 0;
 like(
     intercept {
-        push @lines => __LINE__ + 5;
+        push @lines => __LINE__ + ( $use_block_end ? 5 : 1 );
         subtest_buffered 'foo' => {manual_skip_all => 1}, sub {
             skip_all 'bleh';
             $xyz = 1;
