@@ -144,7 +144,7 @@ my $export_funcs = uncomment <<'EOT';
 #    my %Export_Cache = (myconfig => 1, config_sh => 1, config_vars => 1,
 #                        config_re => 1, compile_date => 1, local_patches => 1,
 #                        bincompat_options => 1, non_bincompat_options => 1,
-#                        header_files => 1);
+#                        header_files => 1, DEBUGGING => 1);
 EOT
 
 my %export_ok = eval $export_funcs or die;
@@ -176,11 +176,12 @@ $config_txt .= sprintf uncomment << 'EOT', $], $export_funcs;
 #
 EOT
 
-$config_txt .= "sub $_;\n" foreach sort keys %export_ok;
+$config_txt .= "sub $_;\n" foreach sort grep $_ ne "DEBUGGING", keys %export_ok;
 
 my $myver = sprintf "%vd", $^V;
 
 $config_txt .= sprintf uncomment <<'ENDOFBEG', ($myver) x 3;
+#    sub DEBUGGING ();
 #
 #    # Define our own import method to avoid pulling in the full Exporter:
 #    sub import {
@@ -472,8 +473,7 @@ $heavy_txt .= sprintf uncomment <<'ENDOFBEG', $osname, $osname, $from, $osname, 
 #    # made to this file will be lost the next time perl is built.
 #
 #    package Config;
-#    use strict;
-#    use warnings;
+#    use v5.44;
 #    our %%Config;
 #
 #    sub bincompat_options {
@@ -808,6 +808,10 @@ $heavy_txt .= uncomment <<'ENDOFEND';
 #        }
 #    }
 #
+#    sub DEBUGGING :prototype() {
+#        state $is_debugging //= (Internals::V())[1] =~ /\bDEBUGGING\b/aa;
+#    }
+#
 #    # Called by the real AUTOLOAD
 #    sub launcher {
 #        undef &AUTOLOAD;
@@ -987,6 +991,11 @@ print CONFIG_POD uncomment <<'ENDOFTAIL';
 #
 #    Returns a list of the header files that should be used as dependencies for
 #    XS code, for this version of Perl on this platform.
+#
+#    =item DEBUGGING()
+#
+#    Returns a true value if perl was built with -DDEBUGGING or it's platform
+#    equivalent.
 #
 #    =back
 #
