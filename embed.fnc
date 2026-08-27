@@ -987,6 +987,8 @@ Adp	|void	|av_unshift	|NN AV *av				\
 Rp	|OP *	|bind_match	|I32 type				\
 				|NN OP *left				\
 				|NN OP *right
+ATdip	|unsigned|bitcount32	|uint32_t v
+ATdip	|unsigned|bitcount64	|uint64_t v
 : Used in perly.y
 ARdp	|OP *	|block_end	|I32 floor				\
 				|NULLOK OP *seq
