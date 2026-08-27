@@ -14595,6 +14595,14 @@ Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
 # define PERL_ARGS_ASSERT_AV_STORE_SIMPLE       \
         Perl_assert_aTHX; assert(av); assert(SvTYPE(av) == SVt_PVAV)
 
+PERL_STATIC_INLINE unsigned
+Perl_bitcount32(uint32_t v);
+# define PERL_ARGS_ASSERT_BITCOUNT32
+
+PERL_STATIC_INLINE unsigned
+Perl_bitcount64(uint64_t v);
+# define PERL_ARGS_ASSERT_BITCOUNT64
+
 PERL_STATIC_INLINE U8 *
 Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
         Perl_attribute_nonnull_aTHX
