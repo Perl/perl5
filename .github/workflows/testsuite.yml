@@ -715,10 +715,6 @@ jobs:
           - "-Dusethreads"
 
     steps:
-      - name: Install System dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v6
       - name: git cfg
         run: |
@@ -762,10 +758,6 @@ jobs:
           - "-Dusethreads -Accflags=-DPURIFY -Dcc='gcc -fsanitize=address' -Dld='gcc -fsanitize=address'"
 
     steps:
-      - name: Install System dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v6
       - name: git cfg
         run: |
