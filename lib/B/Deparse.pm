@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.91;
+package B::Deparse 1.92;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -29,7 +29,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpARG_IF_UNDEF OPpARG_IF_FALSE
          OPpPARAM_IF_UNDEF OPpPARAM_IF_FALSE
          OPpREF_CMP_MASK OPpREF_CMP_REGEXP_PKG OPpREF_CMP_EMPTYSTR
-         OPpREF_CMP_SKIPLOGOP OPpREF_CMP_AND OPpREF_CMP_NE
+         OPpREF_CMP_L2R OPpREF_CMP_SKIPLOGOP OPpREF_CMP_AND OPpREF_CMP_NE
          OPpCALLER_PKG OPpCALLER_FILE OPpCALLER_LINE OPpCALLER_SUB
          OPpCALLER_HINTS OPpCALLER_BITS OPpCALLER_HINTH         
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
@@ -2786,9 +2786,17 @@ sub pp_ref_cmp {
                      : $self->quoted_const_str($l);
 
     if ($op->flags & OPf_SPECIAL) { # reftype, but it's not a keyword
-        return $self->builtin1($op, $cx, 'reftype')." $e $quoted";
+        if ($op->private & OPpREF_CMP_L2R) {
+            return "$quoted $e ".$self->builtin1($op, $cx, 'reftype');
+        } else {
+            return $self->builtin1($op, $cx, 'reftype')." $e $quoted";
+        }
     } else { # ref
-        return $self->unop($op, $cx, "ref")." $e $quoted";
+        if ($op->private & OPpREF_CMP_L2R) {
+            return "$quoted $e ".$self->unop($op, $cx, "ref");
+        } else {
+            return $self->unop($op, $cx, "ref")." $e $quoted";
+        }
     }
 }
 sub pp_pos { maybe_local(@_, unop(@_, "pos")) }

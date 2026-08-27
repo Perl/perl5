@@ -980,6 +980,7 @@ addbits('ref_cmp',
             15 OPpREF_CMP_EMPTYSTR   emptyStr
          )],
     },
+    4 => qw(OPpREF_CMP_L2R L2R),
     5 => qw(OPpREF_CMP_SKIPLOGOP SKIPLOGOP),
     6 => qw(OPpREF_CMP_AND AND),
     7 => qw(OPpREF_CMP_NE NE),
