@@ -35,6 +35,7 @@ BEGIN {
 }
 
 use warnings;
+no warnings 'experimental::equ';
 use strict;
 use Test::More;
 
