@@ -6785,52 +6785,18 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(xcounter <= 0)) {                                        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": locking " name "; new lock depth=1;" \
-                    " this thread reader count=%d\n",                       \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
-            if (xcounter < 0) (croak("panic: %s: %" LINE_Tf ": locking "    \
-                               name "; new lock depth=%d; this thread"      \
-                               " reader count=%d\n",                        \
-                              __FILE__, (line_t) __LINE__, xcounter,        \
-                              rcounter));                                   \
                                                                             \
             /* If this thread has no read locks on this mutex, it is a      \
              * simple exclusive lock */                                     \
             if (rcounter <= 0) {                                            \
                 assert(rcounter == 0);                                      \
                 PERL_WRITE_LOCK(mutex);                                     \
-                DEBUG_K(PerlIO_printf(Perl_debug_log,                       \
-                        "locked " name " all threads reader count is %zd\n",\
-                        (mutex)->readers_count));                           \
-            }                                                               \
-            else {                                                          \
-                croak("panic: %s: %" LINE_Tf ": attempting to convert"      \
-                      " non-exclusive lock on name to exclusive\n",         \
-                      __FILE__, (line_t) __LINE__);                         \
             }                                                               \
                                                                             \
             xcounter = 1;                                                   \
-            DEBUG_Kv(PerlIO_printf(Perl_debug_log,                          \
-                     "%s: %" LINE_Tf ": " name " locked; lock depth=1\n",   \
-                     __FILE__, (line_t) __LINE__));                         \
         }                                                                   \
         else {  /* This thread already owns this mutex exclusively */       \
             xcounter++;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided locking " name "; new lock"  \
-                    " depth=%d, this thread reader count=%d; but will"      \
-                    " panic if '%s' is true\n", __FILE__, (line_t) __LINE__,\
-                    xcounter, rcounter,                                     \
-                    STRINGIFY(cond_to_panic_if_already_locked)));           \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "mutex " name ": all threads reader count is %zd\n",    \
-                    (mutex)->readers_count));                               \
-            if (cond_to_panic_if_already_locked) {                          \
-                croak("panic: %s: %" LINE_Tf ": attempting to lock " name   \
-                      " incompatibly: %s\n", __FILE__, (line_t) __LINE__,   \
-                      STRINGIFY(cond_to_panic_if_already_locked));          \
-            }                                                               \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6838,28 +6804,11 @@ INIT({
 #define PERL_REENTRANT_UNLOCK(name, mutex, xcounter, rcounter)              \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {  /* Only a single level lock */        \
-            DEBUG_K(PerlIO_printf(Perl_debug_log, "unlocking " name         \
-                    " all threads reader count is %zd\n",                   \
-                    (mutex)->readers_count));                               \
             PERL_WRITE_UNLOCK(mutex);                                       \
             xcounter = 0;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": unlocking " name "; new lock"        \
-                    " depth=0; this thread reader count=%d\n",              \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
-        }                                                                   \
-        else if (xcounter <= 0) {                                           \
-            croak("panic: %s: %" LINE_Tf ": attempting to unlock already"   \
-                  " unlocked " name "; depth was %d\n",                     \
-                  __FILE__, (line_t) __LINE__, xcounter);                   \
         }                                                                   \
         else {                                                              \
             xcounter--;                                                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided unlocking " name "; new lock"\
-                    " depth=%d; this thread reader count=%d; all threads"   \
-                    " reader count=%zd\n", __FILE__, (line_t) __LINE__,     \
-                    xcounter, rcounter, (mutex)->readers_count));           \
         }                                                                   \
     } STMT_END
 
@@ -6867,29 +6816,13 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (xcounter <= 0) {    /* No exclusive lock */                     \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": read locking " name "; no writers\n",\
-                    __FILE__, (line_t) __LINE__));                          \
-            if (xcounter != 0) croak("panic: %s: %" LINE_Tf                 \
-                                    ": read locking " name "; writers=%d\n",\
-                                    __FILE__, (line_t) __LINE__, xcounter); \
             PERL_READ_LOCK(mutex);                                          \
             (rcounter)++;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": " name " read locked; this thread"   \
-                    " reader new count=%d\n",                               \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
         }                                                                   \
         else {                                                              \
             /* This thread already has an exclusive lock on this mutex.     \
              * Just increment the number of readers it has */               \
             (mutex)->readers_count++;                                       \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided read locking " name          \
-                    "; lock depth=%d, this thread reader count=%d; all"     \
-                    " threads reader count=%zd\n",                          \
-                    __FILE__, (line_t) __LINE__, xcounter, rcounter,        \
-                    (mutex)->readers_count));                               \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6898,37 +6831,13 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (xcounter <= 0) {    /* No exclusive lock */                     \
-            if (xcounter != 0) croak("panic: %s: %" LINE_Tf  ": read"       \
-                                     " unlocking " name "; writers=%d;"     \
-                                     " this thread reader count=%d\n",      \
-                                     __FILE__, (line_t) __LINE__, xcounter, \
-                                     rcounter);                             \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": read unlocking " name "; no writers;"\
-                    " this thread reader count=%d\n",                       \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
             PERL_READ_UNLOCK(mutex);                                        \
             (rcounter)--;                                                   \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": " name " read unlocked this thread"  \
-                    " reader new count=%d\n",                               \
-                    __FILE__, (line_t) __LINE__, rcounter));                \
         }                                                                   \
         else if (LIKELY((mutex)->readers_count > 0)) {                      \
             /* This thread already has an exclusive lock on this mutex.     \
              * Just deccrement the number of readers it has */              \
             (mutex)->readers_count--;                                       \
-            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
-                    "%s: %" LINE_Tf ": avoided read unlocking " name "; all"\
-                    " threads new reader count=%zd; lock depth=%d, this"    \
-                    " thread reader count=%d\n",                            \
-                    __FILE__, (line_t) __LINE__, (mutex)->readers_count,    \
-                    xcounter, rcounter));                                   \
-        }                                                                   \
-        else {                                                              \
-            croak("panic: %s: %" LINE_Tf ": attempting to read unlock"      \
-                  " already unlocked " name "; readers count was %zd\n",    \
-                  __FILE__, (line_t) __LINE__, (mutex)->readers_count);     \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
