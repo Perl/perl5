@@ -7817,7 +7817,7 @@ typedef struct am_table_short AMTS;
       * What that means is that for this implementation:
       *     All GEN components of a lock macro use the LOCALE mutex
       *     Any LCr component of a lock macro is a no-op
-      *     XXX Any LCx component of a lock macro is a no-op
+      *     Any LCx component of a lock macro maps into GENx
       *
       * All macros that need to lock the two mutexes first lock the generic
       * (locale) mutex, then the environment one.  This prevents deadlock.
@@ -7920,32 +7920,23 @@ typedef struct am_table_short AMTS;
 #else
 
     /* In contrast, on platforms without thread-safe locales, the generic lock
-     * mostly uses the env mutex.  This is mainly because the core perl code is
+     * uses the env mutex.  This is mainly because the core perl code is
      * structured so that the ENV mutex is most often locked just around a
      * single libc call, whereas the locale mutex can be locked around
-     * recursive calls.
-     *
-     * First, the locks not involving the generic one are as you would expect,
-     * Second, GENr_ENV? converts to ENV? for either value of '?'
-     *         GENx_ENV? converts to ENVx for either value of '?'
-     * Third is a bit harder to understand.  In GENr_LCr, the GEN is protecting
-     * against some other thread simultaneously writing to some resource, say
-     * it is a global static buffer.  ENV is used to protect against all such
-     * accesses that don't involve locales, so this has to change to ENVr_LCr.
-     * It might be tempting to think plain LCr would work, but if there is a
-     * function that accesses that buffer without caring about locale, it would
-     * be using a plain GENr, and wouldn't block.  Similarly for the others.
-     *
-     * All macros that need to lock the two mutexes first lock the environment
-     * one, then the locale one.  This prevents deadlock.  It is unclear to khw
-     * if this order is best.
-     */
+     * recursive calls.  That means we can't do a locale read-lock.  Otherwise,
+     * we could try to convert a read lock into an exclusive lock, which we
+     * forbid because it could lead to deadlock.  So the read lock must
+     * actually do an exclusive lock */
 
-#  define PERL_LCr_LOCK(m)                      LOCALE_READ_LOCK
-#  define PERL_LCr_UNLOCK(m)                    LOCALE_READ_UNLOCK
+#  define PERL_LCr_LOCK(m)                      PERL_LCx_LOCK(m)
+#  define PERL_LCr_UNLOCK(m)                    PERL_LCx_UNLOCK(m)
 
 #  define PERL_LCx_LOCK(m)                      LOCALE_LOCK_(0)
 #  define PERL_LCx_UNLOCK(m)                    LOCALE_UNLOCK_
+
+    /* GENr_ENV? converts to ENV? for either value of '?'
+     * GENx_ENV? converts to ENVx for either value of '?'
+     */
 
 #  define PERL_GENr_LOCK                        PERL_ENVr_LOCK
 #  define PERL_GENr_UNLOCK                      PERL_ENVr_UNLOCK
