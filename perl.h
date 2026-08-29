@@ -6681,7 +6681,9 @@ INIT({
  * The other two counters, xcounter and rcounter, are local to the thread and
  * are passed to the macros, so are visible to the caller, but attempts to
  * change their contents would be disastrous.  The API-level macros hide these
- * from outside callers.  Each is initialized to 0 upon thread creation.
+ * from outside callers.  Each is initialized to 0 upon thread creation, and
+ * count how many nested exclusive locks (xcounter) and read locks (rcounter)
+ * this thread has on this mutex (1 = a single lock).
  *
  * These two counters are used to simulate recursive semaphores, so the
  * way things works is standardized even on systems that have some form of
@@ -6691,40 +6693,85 @@ INIT({
  * thread.  PERL_REENTRANT_LOCK locks the mutex if xcounter is zero, and
  * then increments xcounter.  If called when xcounter is not zero, the macro
  * knows it already has an exclusive lock on the mutex, and merely increments
- * xcounter.  Each corresponding PERL_REENTRANT_UNLOCK decrements xcounter
- * until it is 0, at which point it actually unlocks the mutex.  Since the
- * variable is per-thread, there is no race with other threads.
+ * xcounter.  It does not need to examine the R counter.  Each corresponding
+ * PERL_REENTRANT_UNLOCK decrements xcounter until it is 0, at which point it
+ * actually unlocks the mutex.  Since the variable is per-thread, there is no
+ * race with other threads.
  *
  * 'rcounter' similarly counts the depth of read locks from this thread.
+ *
+ * The high level description is that there is a single mutex for each
+ * resource.  A thread wanting access to that resource should lock the mutex
+ * using one of these macros.  There is nothing here to prevent a rogue thread
+ * from accessing the resource wrongly.  This all falls apart without the
+ * cooperation of all threads.
+ *
+ * If the thread wants exclusive (write) access to the mutex, the macro locks
+ * the mutex until done.  All other threads that attempt to access the mutex
+ * are denied it by the system, and hang until it is released.  A mutex wanting
+ * read-only access to the mutex also locks it, but only long enough to
+ * increment the R counter.  Any other threads attempting to access the mutex
+ * are locked out for the duration of that increment.  Another thread that also
+ * wants read-only access will similarly lock, increment the R counter, unlock,
+ * and proceed with its reading.  Thus the R counter always specifies how many
+ * threads have read-only access to the resource.  It is 0 if any thread has
+ * write-access.  It is never looked at nor changed unless the calling thread
+ * has exclusive access to it.  If a thread asks for exclusive access while
+ * other threads have read access, it will be able to lock the mutex, but these
+ * macros cause it to look at the R counter, and if that is non-zero, to
+ * immediately unlock the mutex and put itself on a list of threads waiting for
+ * all the readers to unlock.  That happens when the R counter goes to 0, and
+ * at that time the macros cause the system to awaken the waiting threads, who
+ * then will try again.
  *
  * Here are the cases in detail:
  *
  * PERL_REENTRANT_READ_LOCK: Requesting a read lock:
  *
- *      xcounter == 0; rcounter is anything
+ *      xcounter == 0; rcounter == 0
  *
  *          The thread locks the mutex.  If another thread has a lock on the
  *          mutex, the system will block this thread until that is released.
  *          If that lock is for a read lock, the wait will be brief, as all
- *          that is done is to increment the R counter field of the mutex
- *          structure, then release the lock.  If the other thread has an
- *          exclusive lock, this thread will hang for however long that takes.
+ *          that is done in the other thread is to increment the R counter
+ *          field of the mutex structure, then release the lock.  If the other
+ *          thread has an exclusive lock, this thread will hang for however
+ *          long that takes.
  *
  *          Once this thread has the mutex, it increments the R counter field,
  *          then releases the mutex.
  *
- *          rcounter is incremented.
+ *          rcounter is set to 1.
  *
  *          Note that in this and all cases below, the R counter in the mutex
  *          structure field is only accessed while the mutex is locked.
  *
+ *          The R counter gives the number of threads that have read locks on
+ *          this mutex
+ *
+ *      xcounter == 0; rcounter > 0
+ *
+ *          rcounter is incremented, thus giving the number of nested
+ *          read-locks this thread has on the mutex.
+ *
  *      xcounter > 0; rcounter is anything
  *
- *          The R counter field in the already-owned mutex struct is simply
- *          incremented, without trying to lock the mutex. rcounter is neither
- *          inspected nor changed in this scenario.
+ *          rcounter is incremented, thus giving the number of nested
+ *          read-locks this thread has on the mutex.
  *
- *          The system continues to prevent any other thread from locking this
+ *          This happens when the thread already owns the mutex for exclusive
+ *          access.  Adding a nested read-lock just changes that counter.
+ *
+ * PERL_REENTRANT_READ_UNLOCK: Releasing a read lock:
+ *
+ *      xcounter is anything; rcounter == 0
+ *
+ *          panics.  You can't release a non-existent lock.
+ *
+ *      xcounter is anything; rcounter > 0
+ *
+ *          rcounter is decremented, thus giving the number of remaining nested
+ *          read-locks this thread has on the mutex.
  *
  * PERL_REENTRANT_LOCK: Requesting an exclusive lock:
  *
@@ -6746,7 +6793,7 @@ INIT({
  *      xcounter >  0; rcounter is anything
  *
  *          This means this thread already owns an exclusive lock on this
- *          mutex.  xcounter is simply incremented, keeping it to be the number
+ *          mutex.  xcounter is simply incremented, making it be the number
  *          of nested exclusive locks this thread owns.
  *
  *          No attempt is made to re-lock the mutex.  Doing so would hang
@@ -6758,20 +6805,36 @@ INIT({
  *      xcounter == 0; rcounter > 0
  *
  *          This panics; otherwise this scenario could lead to deadlock.  If
- *          another thread has a read lock, this thread hangs until that one is
- *          released.  If that one instead requests an exclusive lock, it will
- *          hang until this thread releases its read lock, which it will never
- *          do because it is suspended.
+ *          another thread has a read lock, this thread would hang until that
+ *          one is released.  If that one instead requests an exclusive lock,
+ *          it will hang until this thread releases its read lock, which it
+ *          will never do because it is suspended.
  *
  *          Your code needs to be structured so as to not attempt this.  The
  *          panic is to greatly increase the odds of this happening during
  *          development, so that it can be fixed before the code is released.
  *
- * PERL_REENTRANT_UNLOCK, PERL_REENTRANT_READ_UNLOCK
+ * PERL_REENTRANT_UNLOCK: Releasing an exclusive lock:
  *
- *      Unlocking is essentially the reverse.  The respective counter is
- *      decremented and when zero is reached, the respective lock type is
- *      released.
+ *      xcounter <= 0; rcounter is anything
+ *
+ *          This panics; you can't release a mutex you don't own.
+ *
+ *      xcounter >  1; rcounter is anything
+ *
+ *          xcounter is decremented, meaning there is one less nesting level of
+ *          exclusive lock.
+ *
+ *      xcounter == 1; rcounter == 0
+ *
+ *          xcounter is set to 0 and the mutex released.
+ *
+ *      xcounter == 1; rcounter > 0
+ *
+ *          xcounter is set to 0 and the mutex released.  That rcounter is
+ *          non-zero is not really relevant.  It means that after the exclusive
+ *          access is gone, this thread still has a read-only lock that should
+ *          be reflected in the R counter.
  *
  * Note that if xcounter is non-zero, rcounter is not looked at; if a new read
  * lock/unlock request comes in, the mutex struct R counter is changed, and
@@ -6784,18 +6847,17 @@ INIT({
                             cond_to_panic_if_already_locked)                \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (LIKELY(xcounter <= 0)) {                                        \
+        if (LIKELY(xcounter == 0)) {                                        \
                                                                             \
             /* If this thread has no read locks on this mutex, it is a      \
              * simple exclusive lock */                                     \
-            if (rcounter <= 0) {                                            \
-                assert(rcounter == 0);                                      \
-                PERL_WRITE_LOCK(mutex);                                     \
-            }                                                               \
+            PERL_WRITE_LOCK(mutex);                                         \
+            assert ((mutex)->readers_count == 0);                           \
                                                                             \
             xcounter = 1;                                                   \
         }                                                                   \
-        else {  /* This thread already owns this mutex exclusively */       \
+        else {                                                              \
+            /* This thread already owns this mutex exclusively */           \
             xcounter++;                                                     \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
@@ -6815,14 +6877,14 @@ INIT({
 #define PERL_REENTRANT_READ_LOCK(name, mutex, xcounter, rcounter)           \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {    /* No exclusive lock */                     \
+        if (LIKELY(xcounter == 0 && rcounter == 0)) {                       \
             PERL_READ_LOCK(mutex);                                          \
             (rcounter)++;                                                   \
         }                                                                   \
         else {                                                              \
-            /* This thread already has an exclusive lock on this mutex.     \
+            /* This thread already has a lock on this mutex.                \
              * Just increment the number of readers it has */               \
-            (mutex)->readers_count++;                                       \
+            (rcounter)++;                                                   \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6830,14 +6892,14 @@ INIT({
 #define PERL_REENTRANT_READ_UNLOCK(name, mutex, xcounter, rcounter)         \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
-        if (xcounter <= 0) {    /* No exclusive lock */                     \
-            PERL_READ_UNLOCK(mutex);                                        \
-            (rcounter)--;                                                   \
+        if (LIKELY(rcounter == 1)) {                                        \
+            rcounter = 0;                                                   \
+            if (LIKELY(xcounter == 0)) {                                    \
+                PERL_READ_UNLOCK(mutex);                                    \
+            }                                                               \
         }                                                                   \
-        else if (LIKELY((mutex)->readers_count > 0)) {                      \
-            /* This thread already has an exclusive lock on this mutex.     \
-             * Just deccrement the number of readers it has */              \
-            (mutex)->readers_count--;                                       \
+        else {                                                              \
+            (rcounter)--;                                                   \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -7852,6 +7914,10 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_GENx_LOCK                        PERL_ENVx_LOCK
 #  define PERL_GENx_UNLOCK                      PERL_ENVx_UNLOCK
+
+    /* All macros that need to lock the two mutexes first lock the environment
+     * one, then the locale one.  This prevents deadlock.  It is unclear to khw
+     * if this order is best. */
 
 #  define PERL_ENVr_LCr_LOCK(m)             STMT_START {                    \
                                                 PERL_ENVr_LOCK;             \
