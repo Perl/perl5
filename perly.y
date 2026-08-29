@@ -120,6 +120,7 @@
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
 %type <ival>  parse_bare_statement
+%type <ival>  parse_block
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -190,6 +191,7 @@
 /* Top-level choice of what kind of thing yyparse was called to parse */
 grammar
 	:	parse_bare_statement
+	|	parse_block
 	|	GRAMPROG
 			{
 			  parser->expect = XSTATE;
@@ -210,19 +212,6 @@ grammar
 			{
 			  PL_eval_root = $optexpr;
 			  $$ = 0;
-			}
-	|	GRAMBLOCK
-			{
-			  parser->expect = XBLOCK;
-                          $<ival>$ = 0;
-			}
-		block
-			{
-			  PL_pad_reset_pending = TRUE;
-			  PL_eval_root = $block;
-			  $$ = 0;
-			  yyunlex();
-			  parser->yychar = yytoken = YYEOF;
 			}
 	|	GRAMFULLSTMT
 			{
@@ -767,6 +756,21 @@ parse_bare_statement
 			PL_eval_root = $barestmt;
 			$$ = 0;
 			yyunlex();
+			parser->yychar = yytoken = YYEOF;
+		}
+	;
+
+parse_block
+	:	GRAMBLOCK
+		{
+			parser->expect = XBLOCK;
+		}
+		block
+		{
+			PL_pad_reset_pending = TRUE;
+			PL_eval_root = $block;
+			$$ = 0;
+			yyunlex ();
 			parser->yychar = yytoken = YYEOF;
 		}
 	;
