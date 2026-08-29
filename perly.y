@@ -123,6 +123,7 @@
 %type <ival>  parse_block
 %type <ival>  parse_expression
 %type <ival>  parse_full_statement
+%type <ival>  parse_perl_program
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -196,17 +197,7 @@ grammar
 	|	parse_block
 	|	parse_expression
 	|	parse_full_statement
-	|	GRAMPROG
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		remember stmtseq
-			{
-			  newPROG(block_end($remember,$stmtseq));
-			  PL_compiling.cop_seq = 0;
-			  $$ = 0;
-			}
+	|	parse_perl_program
 	|	GRAMSTMTSEQ
 			{
 			  parser->expect = XSTATE;
@@ -781,6 +772,20 @@ parse_full_statement
 			$$ = 0;
 			yyunlex();
 			parser->yychar = yytoken = YYEOF;
+		}
+	;
+
+parse_perl_program
+	:	GRAMPROG
+		{
+			parser->expect = XSTATE;
+		}
+		remember
+		stmtseq
+		{
+			newPROG(block_end($remember,$stmtseq));
+			PL_compiling.cop_seq = 0;
+			$$ = 0;
 		}
 	;
 
