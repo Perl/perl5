@@ -5346,6 +5346,16 @@ Gid_t getegid (void);
 #  define DEBUG_yv(a)
 #endif /* DEBUGGING */
 
+#define PERL_K_PREFIXf(name)                                                \
+                "%s: %" LINE_Tf ": Thread 0x%p: Mutex '" name "' (0x%p): "
+#define PERL_K_PREFIXa(mutex)                                               \
+                         __FILE__, (line_t) __LINE__, aTHX, mutex
+#define PERL_K_SUFFIXf                                                      \
+        " %s%zd threads have read locks on it, xcounter=%d, rcounter=%d\n"
+/* Adds a '?' if the readers_count is not completely reliable, i.e., there
+ * could be a race */
+#define PERL_K_SUFFIXa(locked, m, x, r)                                     \
+                            ((locked) ? "" : "?"), (m)->readers_count, x, r
 
 #define DEBUG_SCOPE(where) \
     DEBUG_l( \
@@ -6848,17 +6858,64 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(xcounter == 0)) {                                        \
+            if (UNLIKELY(rcounter != 0)) {                                  \
+                if (rcounter > 0) {                                         \
+                    /* diag_listed_as: SKIPME */                            \
+                    croak("panic: " PERL_K_PREFIXf(name) "Attempting to"    \
+                          " convert non-exclusive lock to exclusive; "      \
+                          PERL_K_SUFFIXf,                                   \
+                          PERL_K_PREFIXa(mutex),                            \
+                          PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));    \
+                }                                                           \
+                else {                                                      \
+                    /* diag_listed_as: SKIPME */                            \
+                    croak("panic: " PERL_K_PREFIXf(name) "This thread's"    \
+                          " read lock count < 0; " PERL_K_SUFFIXf,          \
+                          PERL_K_PREFIXa(mutex),                            \
+                          PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));    \
+                }                                                           \
+            }                                                               \
                                                                             \
             /* If this thread has no read locks on this mutex, it is a      \
              * simple exclusive lock */                                     \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Trying to lock exclusively;"      \
+                    " waiting to lock mutex; " PERL_K_SUFFIXf,              \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
             PERL_WRITE_LOCK(mutex);                                         \
             assert ((mutex)->readers_count == 0);                           \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Now locked; continuing to hold"   \
+                    " it; " PERL_K_SUFFIXf,                                 \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(1, mutex, xcounter, rcounter)));         \
                                                                             \
             xcounter = 1;                                                   \
         }                                                                   \
-        else {                                                              \
+        else if (LIKELY(xcounter > 0)) {                                    \
             /* This thread already owns this mutex exclusively */           \
             xcounter++;                                                     \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Incremented nested exclusive"     \
+                    " lock; " PERL_K_SUFFIXf,                               \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(1, mutex, xcounter, rcounter)));         \
+            if (cond_to_panic_if_already_locked) {                          \
+                    /* diag_listed_as: SKIPME */                            \
+                croak("panic: " PERL_K_PREFIXf(name) "Increment failed"     \
+                      " because %s is true; " PERL_K_SUFFIXf,               \
+                      PERL_K_PREFIXa(mutex),                                \
+                      STRINGIFY(cond_to_panic_if_already_locked),           \
+                      PERL_K_SUFFIXa(1, mutex, xcounter, rcounter));        \
+            }                                                               \
+        }                                                                   \
+        else {                                                              \
+                    /* diag_listed_as: SKIPME */                            \
+            croak("panic: " PERL_K_PREFIXf(name) "This thread's write lock" \
+                  " count < 0; " PERL_K_SUFFIXf,                            \
+                  PERL_K_PREFIXa(mutex),                                    \
+                  PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));            \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6866,11 +6923,32 @@ INIT({
 #define PERL_REENTRANT_UNLOCK(name, mutex, xcounter, rcounter)              \
     STMT_START {                                                            \
         if (LIKELY(xcounter == 1)) {  /* Only a single level lock */        \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Unlocking exclusive lock; "       \
+                    PERL_K_SUFFIXf,                                         \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(1, mutex, xcounter, rcounter)));         \
             PERL_WRITE_UNLOCK(mutex);                                       \
             xcounter = 0;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "No longer locked; "               \
+                    PERL_K_SUFFIXf, PERL_K_PREFIXa(mutex),                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
+        }                                                                   \
+        else if (LIKELY(xcounter > 1)) {                                    \
+            xcounter--;                                                     \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Decremented nested exclusive"     \
+                    " lock; " PERL_K_SUFFIXf,                               \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(1, mutex, xcounter, rcounter)));         \
         }                                                                   \
         else {                                                              \
-            xcounter--;                                                     \
+                    /* diag_listed_as: SKIPME */\
+            croak("panic: " PERL_K_PREFIXf(name) "Attempting to unlock"     \
+                  " unowned mutex; " PERL_K_SUFFIXf,                        \
+                  PERL_K_PREFIXa(mutex),                                    \
+                  PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));            \
         }                                                                   \
     } STMT_END
 
@@ -6878,13 +6956,35 @@ INIT({
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(xcounter == 0 && rcounter == 0)) {                       \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "Trying to lock for read; "        \
+                    PERL_K_SUFFIXf,                                         \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
             PERL_READ_LOCK(mutex);                                          \
             (rcounter)++;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "locked for read; " PERL_K_SUFFIXf,\
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
         }                                                                   \
-        else {                                                              \
+        else if (LIKELY(xcounter > 0 || rcounter > 0)) {                    \
             /* This thread already has a lock on this mutex.                \
              * Just increment the number of readers it has */               \
             (rcounter)++;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "locking for read, but already"    \
+                    " owned exclusively; incremented reader lock count; "   \
+                    PERL_K_SUFFIXf,                                         \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(1, mutex, xcounter, rcounter)));         \
+        }                                                                   \
+        else {                                                              \
+                    /* diag_listed_as: SKIPME */                            \
+            croak("panic: " PERL_K_PREFIXf(name) "This thread's xcounter"   \
+                  " < 0; " PERL_K_SUFFIXf,                                  \
+                  PERL_K_PREFIXa(mutex),                                    \
+                  PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));            \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6894,12 +6994,34 @@ INIT({
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(rcounter == 1)) {                                        \
             rcounter = 0;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "unlocking for read; decremented"  \
+                    " rcounter; " PERL_K_SUFFIXf,                           \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
             if (LIKELY(xcounter == 0)) {                                    \
                 PERL_READ_UNLOCK(mutex);                                    \
             }                                                               \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "unlocked for read; "              \
+                    PERL_K_SUFFIXf,                                         \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
+        }                                                                   \
+        else if (LIKELY(rcounter > 1)) {                                    \
+            (rcounter)--;                                                   \
+            DEBUG_K(PerlIO_printf(Perl_debug_log,                           \
+                    PERL_K_PREFIXf(name) "decremented rcounter; "           \
+                    PERL_K_SUFFIXf,                                         \
+                    PERL_K_PREFIXa(mutex),                                  \
+                    PERL_K_SUFFIXa(0, mutex, xcounter, rcounter)));         \
         }                                                                   \
         else {                                                              \
-            (rcounter)--;                                                   \
+                    /* diag_listed_as: SKIPME */                            \
+            croak("panic: " PERL_K_PREFIXf(name) "This thread's rcounter"   \
+                  " <= 0; " PERL_K_SUFFIXf,                                 \
+                  PERL_K_PREFIXa(mutex),                                    \
+                  PERL_K_SUFFIXa(0, mutex, xcounter, rcounter));            \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
