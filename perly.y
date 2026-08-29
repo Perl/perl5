@@ -125,6 +125,7 @@
 %type <ival>  parse_full_statement
 %type <ival>  parse_perl_program
 %type <ival>  parse_statement_list
+%type <ival>  parse_sub_signature
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -200,16 +201,7 @@ grammar
 	|	parse_full_statement
 	|	parse_perl_program
 	|	parse_statement_list
-	|	GRAMSUBSIGNATURE
-			{
-			  parser->expect = XSTATE;
-			  $<ival>$ = 0;
-			}
-		subsigguts
-			{
-			  PL_eval_root = $subsigguts;
-			  $$ = 0;
-			}
+	|	parse_sub_signature
 	;
 
 bare_statement_block
@@ -777,6 +769,18 @@ parse_perl_program
 		{
 			newPROG(block_end($remember,$stmtseq));
 			PL_compiling.cop_seq = 0;
+			$$ = 0;
+		}
+	;
+
+parse_sub_signature
+	:	GRAMSUBSIGNATURE
+		{
+			parser->expect = XSTATE;
+		}
+		subsigguts
+		{
+			PL_eval_root = $subsigguts;
 			$$ = 0;
 		}
 	;
