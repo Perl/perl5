@@ -2779,7 +2779,6 @@ typedef U32 line_t;
 =for apidoc_section $memory
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
-=for apidoc_item |void*|safemalloc|size_t size
 
 The XSUB-writer's interface to the C C<malloc> function.
 
@@ -2791,6 +2790,9 @@ themselves.  This aid has been superseded by a new build option,
 PERL_MEM_LOG (see L<perlhacktips/PERL_MEM_LOG>).  The older API is still
 there for use in XS modules supporting older perls.
 
+=for apidoc ADm|void*|safemalloc|size_t size
+Use C<L</Newx>> instead.
+
 =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<malloc> function, with
 cast.  See also C<L</Newx>>.
@@ -2798,19 +2800,23 @@ cast.  See also C<L</Newx>>.
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
-=for apidoc_item |void*|safecalloc|size_t nitems|size_t item_size
 
 The XSUB-writer's interface to the C C<calloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
+=for apidoc ADm|void*|safecalloc|size_t size
+Use C<L</Newxz>> instead.
+
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
-=for apidoc_item |void*|saferealloc|void *ptr|size_t size
 
 The XSUB-writer's interface to the C C<realloc> function.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
+
+=for apidoc ADm|void*|saferealloc|size_t size
+Use C<L</Renew>> instead.
 
 =for apidoc Am|void|Renewc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<realloc> function, with
@@ -2822,6 +2828,9 @@ Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 The XSUB-writer's interface to the C C<free> function.
 
 This should B<ONLY> be used on memory obtained using L</"Newx"> and friends.
+
+=for apidoc ADm|void*|safefree|void* ptr
+Use C<L</Safefree>> instead.
 
 =for apidoc_section $string
 =for apidoc    Am|void  |Move |void* src|void* dest|int nitems|type

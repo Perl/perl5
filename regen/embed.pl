@@ -1957,7 +1957,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RX_WRAPPED
     RX_WRAPPED_const
     RX_ZERO_LEN
-    safefree
     SAVEADELETE
     SAVECLEARSV
     SAVECOMPILEWARNINGS
