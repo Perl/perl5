@@ -650,7 +650,7 @@ Each of these four operators has a variant whose name is one character longer,
 which has different behaviour to the base operator when either (or both) of
 its arguments is C<undef>. These operators, called the I<undef-aware equality
 operators>, consider that C<undef> is equal to another C<undef> but not equal
-to any defined value - even the number zero or the empty string. Furtheremore,
+to any defined value - even the number zero or the empty string. Furthermore,
 these operators will not invoke warnings when invoked on undefined values,
 even when their base counterparts would. (Though other warnings are still
 possible, such as C<===> warning about non-numerical values).
