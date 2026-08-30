@@ -3243,8 +3243,7 @@ package GH21477 {
 
     my $o = bless ['cat'];
 
-    # smartmatch is deprecated and will be removed in 5.042
-    no warnings 'deprecated';
+    # smartmatch is officially discouraged as of perl-5.42
 
     my @result = ($o ~~ 'cat');
     ::is(scalar(@result), 1, "GH #21477: return one result");
