@@ -1,7 +1,7 @@
 #! perl -w
 
 use strict ;
-require 5.006 ;
+require 5.008 ;
 
 use lib '.';
 use private::MakeUtil;
@@ -64,9 +64,6 @@ EOM
 }
 
 ParseCONFIG() ;
-
-UpDowngrade(getPerlFiles('MANIFEST'))
-    unless $ENV{PERL_CORE};
 
 my $OPT_Z_PREFIX =  '-DZ_PREFIX' ;
 my $OPT_ZLIB_INCLUDE = "-I$ZLIB_INCLUDE";

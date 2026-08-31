@@ -235,8 +235,8 @@ our %Modules = (
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.222.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Mar 11 21:59:54 2026',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.224.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Aug 31 18:33:49 2026',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
             qr{^examples/},

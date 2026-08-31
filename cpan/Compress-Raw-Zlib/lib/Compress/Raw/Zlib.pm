@@ -1,7 +1,7 @@
 
 package Compress::Raw::Zlib;
 
-require 5.006 ;
+require 5.008 ;
 require Exporter;
 use Carp ;
 
@@ -10,7 +10,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS);
 
-$VERSION = '2.222';
+$VERSION = '2.224';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

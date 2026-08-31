@@ -22,16 +22,7 @@ BEGIN
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    my $count = 0 ;
-    if ($] < 5.005) {
-        $count = 249 ;
-    }
-    elsif ($] >= 5.006) {
-        $count = 353 ;
-    }
-    else {
-        $count = 308 ;
-    }
+    my $count = 353 ;
 
     plan tests => $count + $extra;
 
@@ -1145,8 +1136,6 @@ if (0)
     cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ;
     is $X, "", "no output from second flush";
 }
-
-exit if $] < 5.006 ;
 
 title 'Looping Append test with substr output - substr the end of the string';
 foreach (1 .. 2)

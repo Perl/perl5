@@ -14,9 +14,6 @@ use Test::More ;
 
 BEGIN
 {
-    plan(skip_all => "lvalue sub tests need Perl ??")
-        if $] < 5.006 ;
-
     # use Test::NoWarnings, if available
     my $extra = 0 ;
     $extra = 1
