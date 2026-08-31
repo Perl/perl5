@@ -2327,11 +2327,11 @@ S_caller_push_pkg(pTHX_ const HEK *stash_hek)
 static void
 S_caller_push_line(pTHX_ const PERL_CONTEXT *cx)
 {
-    const COP *lcop = lcop = closest_cop(cx->blk_oldcop,
-                                         OpSIBLING(cx->blk_oldcop),
-                                         cx->blk_sub.retop, TRUE);
+    const COP *blk_old = cx->blk_oldcop;
+    const COP *lcop = closest_cop(blk_old, OpSIBLING(blk_old),
+                                           cx->blk_sub.retop, TRUE);
     if (!lcop)
-        lcop = cx->blk_oldcop;
+        lcop = blk_old;
     rpp_push_1_norc( newSVuv( (UV)(CopLINE(lcop)) ) );
 }
 
