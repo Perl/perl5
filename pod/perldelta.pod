@@ -32,15 +32,15 @@ here, but most should go in the L</Performance Enhancements> section.
 Four new operators have been added, which are similar to the regular equality operators except for their handling of C<undef>. Whereas the regular operators treat C<undef> as equal to the empty string or the number zero, these operators consider C<undef> to be a distinct value, equal to itself, but unequal to any defined value.
 
     if( $x equ $y ) {
-     # $x and $y are both undef, or
-     # $x and $y are both defined and equal
-     ...
+      # $x and $y are both undef, or
+      # $x and $y are both defined and equal
+      ...
     }
 
 This is approximately equal to the following, except that it is more efficient and avoids duplicate evaluation of operands or fetching of tied scalar values:
 
     if( (!defined $x and !defined $y) or
-        (defined $x and defined $y and $x eq $y) ) {
+      (defined $x and defined $y and $x eq $y) ) {
       ...
     }
 
