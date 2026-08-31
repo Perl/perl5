@@ -434,7 +434,32 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Since 5.28.0, the numeric value of a string would sometimes not get reset
+after the string was assigned to as part of a string concatenation. It
+required the following circumstances to all be present for the bug to
+manifest:
+
+=over
+
+=item *
+
+the string variable must be zero length and have just been used in numeric
+context, e.g. C<$s = ""; $n = $s + 1;>
+
+=item *
+
+then the variable must be the target of a string concatenation and also
+be used on the RHS, e.g.C<$s = "9$s";>
+
+=item *
+
+then if the string is used in numeric context again, the bug caused the
+old numeric value of 0 to be returned, rather than numifying the new
+string value and returning 9.
+
+=back
+
+[GH #24763]
 
 =item *
 
