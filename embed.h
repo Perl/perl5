@@ -880,6 +880,11 @@
 #   define pad_setsv(a,b)                       Perl_pad_setsv(aTHX_ a,b)
 #   define pad_sv(a)                            Perl_pad_sv(aTHX_ a)
 # endif
+# if defined(EMULATE_THREAD_SAFE_LOCALES)
+#   define category_lock(a,b,c)                 Perl_category_lock(aTHX_ a,b,c)
+#   define category_unlock(a,b,c)               Perl_category_unlock(aTHX_ a,b,c)
+#   define posix_LC_foo(a,b)                    Perl_posix_LC_foo(aTHX_ a,b)
+# endif
 # if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 #   define my_chsize(a,b)                       Perl_my_chsize(aTHX_ a,b)
 # endif
@@ -1415,6 +1420,10 @@
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
+#       if   defined(EMULATE_THREAD_SAFE_LOCALES) || \
+           ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
+#         define update_PL_curlocales_i(a,b,c)  S_update_PL_curlocales_i(aTHX_ a,b,c)
+#       endif
 #       if   defined(HAS_LOCALECONV) && \
            ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
 #         define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
@@ -1460,6 +1469,7 @@
              !defined(USE_POSIX_2008_LOCALE) */
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
+#         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #       endif
 #       if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 #         define Win_byte_string_to_wstring     S_Win_byte_string_to_wstring

@@ -1469,8 +1469,11 @@ typedef enum {
 #  endif
 
    /* POSIX 2008 has no means of finding out the current locale without a
-    * querylocale; so must keep track of it ourselves */
-#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
+    * querylocale; so must keep track of it ourselves.  And for thread-safe
+    * emulation, we keep track because the system doesn't have per-thread
+    * information */
+#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))        \
+   ||  defined(EMULATE_THREAD_SAFE_LOCALES)
 #    define USE_PL_CURLOCALES
 #  endif
 
@@ -8121,6 +8124,43 @@ typedef struct am_table_short AMTS;
 
 #  define PERL_GENx_ENVx_LCx_LOCK(m)            PERL_ENVx_LCx_LOCK(m)
 #  define PERL_GENx_ENVx_LCx_UNLOCK(m)          PERL_ENVx_LCx_UNLOCK(m)
+
+#  ifdef EMULATE_THREAD_SAFE_LOCALES
+
+     /* Here, are emulating safe locales.  This is a specialized form of where
+      * we use the ENV lock for the GEN one.  Hence most of the locks are the
+      * same.  We #undef the ones that are different and redefine them. */
+
+     /* We have a special routine to handle the write locks */
+#    undef  PERL_LCx_LOCK
+#    define PERL_LCx_LOCK(m)           category_lock(  m, __FILE__, __LINE__)
+
+#    undef  PERL_LCx_UNLOCK
+#    define PERL_LCx_UNLOCK(m)         category_unlock(m, __FILE__, __LINE__)
+
+     /* In the other implementations, once a category's locale is set, it
+      * remains so, but in this implementation the locale is essentially random
+      * until ready to use, and must be toggled into the correct state */
+#    undef  PERL_ETSL_TOGGLE
+#    define PERL_ETSL_TOGGLE(m)                 PERL_LCx_LOCK(m)
+
+#    undef  PERL_ETSL_UNTOGGLE
+#    define PERL_ETSL_UNTOGGLE(m)               PERL_LCx_UNLOCK(m)
+
+#    undef LC_NUMERIC_LOCK
+#    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
+            STMT_START {    \
+                /*LOCALE_LOCK_(cond_to_panic_if_already_locked);*/   \
+                PERL_ENVr_LCx_LOCK(PERL_LC_NUMERICb);\
+            } STMT_END
+
+#    undef LC_NUMERIC_UNLOCK
+#    define LC_NUMERIC_UNLOCK                                               \
+            STMT_START {    \
+                PERL_ENVr_LCx_UNLOCK(PERL_LC_NUMERICb);      \
+                /*LOCALE_UNLOCK_;*/   \
+            } STMT_END
+#  endif
 #endif
 
 /* This will be a no-op iff the perl is unthreaded. 'gw' stands for 'global
