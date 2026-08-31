@@ -2531,8 +2531,8 @@ PP(pp_caller)
             S_caller_push_line(aTHX_ cx);
 
         if (!has_arg) {
-            int f = (subscripts & (OPpCALLER_SUB|OPpCALLER_HINTS|OPpCALLER_BITS|OPpCALLER_HINTH));
-            unsigned cnt = bitcount32( (uint32_t)f );
+            U32 f = (subscripts & (OPpCALLER_SUB|OPpCALLER_HINTS|OPpCALLER_BITS|OPpCALLER_HINTH));
+            U32 cnt = bitcount32( f );
 
             while (cnt) {
                 rpp_push_IMM(&PL_sv_undef);
