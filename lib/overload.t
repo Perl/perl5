@@ -71,7 +71,6 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl'; require './charset_tools.pl' }
-plan tests => 5367;
 
 use Scalar::Util qw(tainted);
 
@@ -3254,3 +3253,69 @@ package GH21477 {
     ::is(scalar(@result), 1, "GH #21477: return one result - part 2");
     ::is($result[0], "", "GH #21477: return false");
 }
+
+run_multiple_progs('', \*DATA);
+
+done_testing();
+
+__DATA__
+# NAME simple overload redefinition GH24774
+package Opackage;
+use warnings 'redefine';
+use overload
+  '++' => sub { ++$_[0][0] };
+
+use overload
+  '++' => sub { ++$_[0][0] };
+EXPECT
+overload '++' for Opackage redefined at - line 7.
+########
+# NAME simple overload redefinition (no warnings redefine) GH24774
+package Opackage;
+use warnings;
+no warnings 'redefine';
+use overload
+  '++' => sub { ++$_[0][0] };
+
+use overload
+  '++' => sub { ++$_[0][0] };
+EXPECT
+########
+# NAME simple overload definition with fallback
+# fallback sets each GvCV to \&nil but leaves GvSV empty GH24774
+package Opackage;
+use warnings 'redefine';
+use overload
+  fallback => 1,
+  '++' => sub { ++$_[0][0] };
+EXPECT
+########
+# NAME define with name, redefine with name GH24774
+package Opackage;
+use warnings 'redefine';
+use overload
+  '++' => 'inc';
+use overload
+  '++' => 'inc';
+EXPECT
+overload '++' for Opackage redefined at - line 6.
+########
+# NAME define with name, redefine with sub GH24774
+package Opackage;
+use warnings 'redefine';
+use overload
+  '++' => 'inc';
+use overload
+  '++' => sub { ++$_[0][0] };
+EXPECT
+overload '++' for Opackage redefined at - line 6.
+########
+# NAME define with sub, redefine with name GH24774
+package Opackage;
+use warnings 'redefine';
+use overload
+  '++' => sub { ++$_[0][0] };
+use overload
+  '++' => 'inc';
+EXPECT
+overload '++' for Opackage redefined at - line 6.
