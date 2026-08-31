@@ -696,7 +696,7 @@ Add proposal for C<auto_regenerate> field.
 
 =item *
 
-Add C<index> field as a compliment to L</no_index>
+Add C<index> field as a complement to L</no_index>
 
 =item *
 

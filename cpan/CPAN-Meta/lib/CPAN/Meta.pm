@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta;
 
-our $VERSION = '2.150013';
+our $VERSION = '2.150015';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -649,7 +649,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.150013
+version 2.150015
 
 =head1 SYNOPSIS
 
@@ -1038,7 +1038,7 @@ Adam Kennedy <adamk@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Benjamin Noggle Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Dan Book Eric Wilhelm Graham Knop Gregor Hermann Karen Etheridge Kenichi Ishigaki Kent Fredric Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern Mohammad Anwar mohawk2 moznion Niko Tyni Olaf Alders Olivier Mengué Philippe Bruhat (BooK) Randy Sims Ricardo Signes Tomohiro Hosaka
+=for stopwords Ansgar Burchardt Avar Arnfjord Bjarmason Benjamin Noggle Christopher J. Madsen Chuck Adams Cory G Watson Damyan Ivanov Dan Book Eric Wilhelm Graham Knop Gregor Hermann James E Keenan Karen Etheridge Kenichi Ishigaki Kent Fredric Ken Williams Lars Dieckow Leon Timmermans majensen Mark Fowler Matt S Trout Michael G. Schwern Mohammad Anwar mohawk2 moznion Niko Tyni Olaf Alders Olivier Mengué Philippe Bruhat (BooK) Randy Sims Ricardo Signes Tomohiro Hosaka
 
 =over 4
 
@@ -1085,6 +1085,10 @@ Graham Knop <haarg@haarg.org>
 =item *
 
 Gregor Hermann <gregoa@debian.org>
+
+=item *
+
+James E Keenan <jkeenan@cpan.org>
 
 =item *
 

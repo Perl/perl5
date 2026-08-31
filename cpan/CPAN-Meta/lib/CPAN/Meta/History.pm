@@ -4,7 +4,7 @@ use strict;
 use warnings;
 package CPAN::Meta::History;
 
-our $VERSION = '2.150013';
+our $VERSION = '2.150015';
 
 1;
 
@@ -22,7 +22,7 @@ CPAN::Meta::History - history of CPAN Meta Spec changes
 
 =head1 VERSION
 
-version 2.150013
+version 2.150015
 
 =head1 DESCRIPTION
 

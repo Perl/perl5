@@ -3,12 +3,11 @@ use strict;
 use warnings;
 package CPAN::Meta::Validator;
 
-our $VERSION = '2.150013';
+our $VERSION = '2.150015';
 
 #pod =head1 SYNOPSIS
 #pod
-#pod   my $struct = decode_json_file('META.json');
-#pod
+#pod   my $struct = Parse::CPAN::Meta->load_file('META.json');
 #pod   my $cmv = CPAN::Meta::Validator->new( $struct );
 #pod
 #pod   unless ( $cmv->is_valid ) {
@@ -996,12 +995,11 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.150013
+version 2.150015
 
 =head1 SYNOPSIS
 
-  my $struct = decode_json_file('META.json');
-
+  my $struct = Parse::CPAN::Meta->load_file('META.json');
   my $cmv = CPAN::Meta::Validator->new( $struct );
 
   unless ( $cmv->is_valid ) {
