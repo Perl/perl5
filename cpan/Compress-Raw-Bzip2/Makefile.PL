@@ -1,7 +1,7 @@
 #! perl -w
 
 use strict ;
-require 5.006 ;
+require 5.008 ;
 
 use lib '.';
 use private::MakeUtil;
@@ -18,9 +18,6 @@ my $BZIP2_LIB = defined($ENV{BZIP2_LIB}) ? $ENV{BZIP2_LIB} : 'bzip2-src';
 my $BZIP2_INCLUDE = defined($ENV{BZIP2_INCLUDE}) ? $ENV{BZIP2_INCLUDE} : '.';
 
 #ParseCONFIG() ;
-
-UpDowngrade(getPerlFiles('MANIFEST'))
-    unless $ENV{PERL_CORE};
 
 WriteMakefile(
     NAME         => 'Compress::Raw::Bzip2',
@@ -43,12 +40,8 @@ WriteMakefile(
         : (LIBS => [ "-L$BZIP2_LIB -lbz2 " ])
     ),
 
-    (
-      $] >= 5.005
-        ? (ABSTRACT_FROM => 'lib/Compress/Raw/Bzip2.pm',
-            AUTHOR       => 'Paul Marquess <pmqs@cpan.org>')
-        : ()
-    ),
+    ABSTRACT_FROM => 'lib/Compress/Raw/Bzip2.pm',
+    AUTHOR       => 'Paul Marquess <pmqs@cpan.org>',
 
     INSTALLDIRS => ($] > 5.010  && $] < 5.011 ? 'perl' : 'site'),
 

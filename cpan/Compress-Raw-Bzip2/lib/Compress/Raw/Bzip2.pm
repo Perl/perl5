@@ -4,14 +4,14 @@ package Compress::Raw::Bzip2;
 use strict ;
 use warnings ;
 
-require 5.006 ;
+require 5.008 ;
 require Exporter;
 use Carp ;
 
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.218';
+$VERSION = '2.224';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

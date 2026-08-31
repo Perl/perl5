@@ -23,16 +23,7 @@ BEGIN
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    my $count = 0 ;
-    if ($] < 5.005) {
-        $count = 127 ;
-    }
-    elsif ($] >= 5.006) {
-        $count = 197 ;
-    }
-    else {
-        $count = 155 ;
-    }
+    my $count = 197 ;
 
     plan tests => $count + $extra;
 
@@ -585,7 +576,6 @@ if ($] >= 5.005)
     is $Z, $hello ;
 }
 
-exit if $] < 5.006 ;
 
 title 'Looping Append test with substr output - substr the end of the string';
 foreach (1 .. 2)
