@@ -5265,12 +5265,9 @@ Functions for finding the number of set bits in a C<uint64_t> or
 C<uint32_t>. The exact implementation may vary depending upon
 compiler, architecture level, and CPU.
 
-For now, both are implemented as recognisably standard SWAR
-functions. A capable compiler may optimize these to C<popcnt>
-or equivalent instructions.
-
-(e.g. A recent gcc/clang building at the x86-64-v2 architecture
-or above is expected recognise this code and swap in popcnt.)
+Some compilers may recognize the baseline C implementations and
+automatically replace them with CPU instructions such as
+C<popcnt> (for C<x86-64>) or C<cnt> + C<addv> (for C<ARM64>).
 
 =cut
 
@@ -5279,20 +5276,28 @@ or above is expected recognise this code and swap in popcnt.)
 PERL_STATIC_INLINE unsigned
 Perl_bitcount64(uint64_t v) {
     PERL_ARGS_ASSERT_BITCOUNT64;
+#if defined(__POPCNT__) && defined(__x86_64__)
+    return __builtin_popcountll(v);
+#else
     v = v - ((v >> 1) & 0x5555555555555555ULL);
     v = (v & 0x3333333333333333ULL) + ((v >> 2) & 0x3333333333333333ULL);
     v = (v + (v >> 4)) & 0x0F0F0F0F0F0F0F0FULL;
     return (unsigned)((v * 0x0101010101010101ULL) >> 56);
+#endif
 }
 
 
 PERL_STATIC_INLINE unsigned
 Perl_bitcount32(uint32_t v) {
     PERL_ARGS_ASSERT_BITCOUNT32;
+#if defined(__POPCNT__)
+    return __builtin_popcount(v);
+#else
     v = v - ((v >> 1) & 0x55555555U);
     v = (v & 0x33333333U) + ((v >> 2) & 0x33333333U);
     v = (v + (v >> 4)) & 0x0F0F0F0FU;
     return (unsigned)((v * 0x01010101U) >> 24);
+#endif
 }
 
 /*
