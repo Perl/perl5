@@ -23,16 +23,7 @@ BEGIN
     $extra = 1
         if eval { require Test::NoWarnings ;  Test::NoWarnings->import; 1 };
 
-    my $count = 0 ;
-    if ($] < 5.005) {
-        $count = 453 ;
-    }
-    else {
-        $count = 471 ;
-    }
-
-
-    plan tests => $count + $extra ;
+    plan tests => 471 + $extra ;
 
     use_ok('Compress::Zlib', qw(:ALL memGunzip memGzip zlib_version));
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -847,7 +838,6 @@ EOM
 
 }
 
-if ($] >= 5.005)
 {
     # test inflate with a substr
 
@@ -876,7 +866,6 @@ if ($] >= 5.005)
 
 }
 
-if ($] >= 5.005)
 {
     # deflate/inflate in scalar context
 

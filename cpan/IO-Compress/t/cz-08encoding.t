@@ -15,9 +15,6 @@ use CompTestUtils;
 
 BEGIN
 {
-    plan skip_all => "Encode is not available"
-        if $] < 5.006 ;
-
     eval { require Encode; Encode->import(); };
 
     plan skip_all => "Encode is not available"

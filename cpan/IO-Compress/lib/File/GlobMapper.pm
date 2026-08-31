@@ -3,30 +3,12 @@ package File::GlobMapper;
 use strict;
 use warnings;
 use Carp;
-
-our ($CSH_GLOB);
-
-BEGIN
-{
-    if ($] < 5.006)
-    {
-        require File::BSDGlob; File::BSDGlob->import(':glob');
-        $CSH_GLOB = File::BSDGlob::GLOB_CSH();
-        *globber = \&File::BSDGlob::csh_glob;
-    }
-    else
-    {
-        require File::Glob; File::Glob->import(':glob');
-        $CSH_GLOB = File::Glob::GLOB_CSH();
-        #*globber = \&File::Glob::bsd_glob;
-        *globber = \&File::Glob::csh_glob;
-    }
-}
+use File::Glob ':glob';
 
 our ($Error);
 
 our ($VERSION, @EXPORT_OK);
-$VERSION = '1.001';
+$VERSION = '1.002';
 @EXPORT_OK = qw( globmap );
 
 our $BEGIN_DELIM = "\xFF";
@@ -67,7 +49,7 @@ sub new
     my $inputGlob = shift ;
     my $outputGlob = shift ;
     # TODO -- flags needs to default to whatever File::Glob does
-    my $flags = shift || $CSH_GLOB ;
+    my $flags = shift || GLOB_CSH;
     #my $flags = shift ;
 
     $inputGlob =~ s/^\s*\<\s*//;
@@ -94,7 +76,7 @@ sub new
     $self->_parseOutputGlob()
         or return undef ;
 
-    my @inputFiles = globber($self->{InputGlob}, $flags) ;
+    my @inputFiles = File::Glob::csh_glob($self->{InputGlob}, $flags) ;
 
     if (GLOB_ERROR)
     {

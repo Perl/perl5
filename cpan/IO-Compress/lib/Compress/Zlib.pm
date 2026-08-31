@@ -1,23 +1,23 @@
 
 package Compress::Zlib;
 
-require 5.006 ;
+require 5.008 ;
 require Exporter;
 use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.223 ;
-use Compress::Raw::Zlib 2.222 ;
-use IO::Compress::Gzip 2.223 ;
-use IO::Uncompress::Gunzip 2.223 ;
+use IO::Compress::Base::Common 2.224 ;
+use Compress::Raw::Zlib 2.224 ;
+use IO::Compress::Gzip 2.224 ;
+use IO::Uncompress::Gunzip 2.224 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.223';
+$VERSION = '2.224';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.223 ;
+use IO::Compress::Gzip::Constants 2.224 ;
 
 sub memGzip($)
 {

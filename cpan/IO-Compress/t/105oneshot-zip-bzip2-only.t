@@ -14,9 +14,6 @@ use Test::More ;
 use CompTestUtils;
 
 BEGIN {
-    plan(skip_all => "oneshot needs Perl 5.005 or better - you have Perl $]" )
-        if $] < 5.005 ;
-
     plan(skip_all => "IO::Compress::Bzip2 not available" )
         unless eval { require IO::Compress::Bzip2;
                       require IO::Uncompress::Bunzip2;

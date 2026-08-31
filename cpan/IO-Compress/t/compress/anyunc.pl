@@ -54,7 +54,7 @@ sub run
             }
 
             {
-                my $unc = $AnyConstruct->can('new')->( $AnyConstruct, $input, Transparent => $trans
+                my $unc = $AnyConstruct->can('new')->( $AnyConstruct, $input, Transparent => $trans,
                                                     Append => 1 );
 
                 ok $unc, "  Created $AnyClass object"

@@ -7,10 +7,6 @@ use Test::More ;
 use CompTestUtils;
 
 BEGIN {
-    plan(skip_all => "oneshot needs Perl 5.005 or better - you have Perl $]" )
-        if $] < 5.005 ;
-
-
     # use Test::NoWarnings, if available
     my $extra = 0 ;
     $extra = 1
@@ -112,11 +108,6 @@ sub run
 
         SKIP:
         {
-            # Threaded 5.6.x seems to have a problem comparing filehandles.
-            use Config;
-
-            skip 'Cannot compare filehandles with threaded $]', 2
-                if $] >= 5.006  && $] < 5.007 && $Config{useithreads};
 
             my $lex = LexFile->new( my $out_file );
             open OUT, ">$out_file" ;

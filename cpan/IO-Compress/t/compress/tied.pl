@@ -11,24 +11,12 @@ our ($BadPerl, $UncompressClass);
 
 BEGIN
 {
-    plan(skip_all => "Tied Filehandle needs Perl 5.005 or better" )
-        if $] < 5.005 ;
-
     # use Test::NoWarnings, if available
     my $extra = 0 ;
     $extra = 1
         if eval { require Test::NoWarnings ;  Test::NoWarnings->import; 1 };
 
-    my $tests ;
-    $BadPerl = ($] >= 5.006 and $] <= 5.008) ;
-
-    if ($BadPerl) {
-        $tests = 241 ;
-    }
-    else {
-        $tests = 249 ;
-    }
-
+    my $tests = 249;
     plan tests => $tests + $extra ;
 
 }
@@ -150,10 +138,7 @@ sub run
             my $foo = "1234567890";
 
             ok syswrite($io, $foo, length($foo)) == length($foo) ;
-            if ( $] < 5.6 )
-              { is $io->syswrite($foo, length $foo), length $foo }
-            else
-              { is $io->syswrite($foo), length $foo }
+            is $io->syswrite($foo), length $foo;
             ok $io->syswrite($foo, length($foo)) == length $foo;
             ok $io->write($foo, length($foo), 5) == 5;
             ok $io->write("xxx\n", 100, -1) == 1;

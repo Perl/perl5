@@ -15,10 +15,6 @@ use File::Spec ;
 use CompTestUtils;
 
 BEGIN {
-    plan(skip_all => "oneshot needs Perl 5.005 or better - you have Perl $]" )
-        if $] < 5.005 ;
-
-
     # use Test::NoWarnings, if available
     my $extra = 0 ;
     $extra = 1

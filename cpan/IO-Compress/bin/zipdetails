@@ -29,7 +29,7 @@ use Encode;
 use Getopt::Long;
 use List::Util qw(min max);
 
-my $VERSION = '4.008' ;
+my $VERSION = '4.009' ;
 
 sub fatal_tryWalk;
 sub fatal_truncated ;
@@ -451,6 +451,7 @@ my $CentralDirectory = CentralDirectory->new();
 my $LocalDirectory = LocalDirectory->new();
 my $HeaderOffsetIndex = HeaderOffsetIndex->new();
 my $EOCD_Present = 0;
+my $OrphanZip64EOCD = 0;
 
 sub prOff
 {
@@ -2954,6 +2955,10 @@ sub Zip64EndCentralHeader
     print "\n";
     out $data, "ZIP64 END CENTRAL DIR RECORD", Value_V($signature);
 
+    # appnote 6.3.10, sec 4.4.1.4
+    warning $startRecordOffset, "Orphan ZIP64 END CENTRAL DIR RECORD: End Central Header fields have no 0xFFFF or 0xFFFFFFFF values."
+        if $OrphanZip64EOCD;
+
     need 8, Signatures::name($signature);
 
     my $size = out_Q "Size of record";
@@ -3052,6 +3057,10 @@ sub Zip64EndCentralLocator
 
     print "\n";
     out $data, "ZIP64 END CENTRAL DIR LOCATOR", Value_V($signature);
+
+    # appnote 6.3.10, sec 4.4.1.4
+    warning $startRecordOffset, "Orphan ZIP64 END CENTRAL DIR LOCATOR: End Central Header fields have no 0xFFFF or 0xFFFFFFFF values."
+        if $OrphanZip64EOCD;
 
     need 16, Signatures::name($signature);
 
@@ -6135,6 +6144,15 @@ sub findCentralDirectoryOffset
     return (0, 0)
         if ZIP_EOCD_MIN_SIZE + $commentLength + $trailingBytes  == $FILELEN ;
 
+    my $zip64LocHdrPresent = 0;
+    my $gotSig = 0;
+    if ($here >= ZIP64_END_CENTRAL_LOC_HDR_SIZE)
+    {
+        $gotSig = peekAtOffset($here - ZIP64_END_CENTRAL_LOC_HDR_SIZE, 4) ;
+        $zip64LocHdrPresent = defined $gotSig && unpack("V", $gotSig) == ZIP64_END_CENTRAL_LOC_HDR_SIG;
+    }
+
+
     if (needZip64EOCDLocator($diskNumber, $cdDiskNumber, $entriesOnThisDisk, $totalEntries, $centralDirOffset, $centralDirSize) &&
         ! emptyArchive($here, $diskNumber, $cdDiskNumber, $entriesOnThisDisk, $totalEntries, $centralDirOffset, $centralDirSize))
     {
@@ -6158,10 +6176,9 @@ sub findCentralDirectoryOffset
 
         # may look like there should be a zip64 entry, but not always the case
         {
-            my $gotSig = peekAtOffset($here - ZIP64_END_CENTRAL_LOC_HDR_SIZE, 4) ;
-            if (defined $gotSig && unpack("V", $gotSig) != ZIP64_END_CENTRAL_LOC_HDR_SIG)
+            if (! $zip64LocHdrPresent)
             {
-                warning $$here - ZIP64_END_CENTRAL_LOC_HDR_SIZE - 4, sprintf("Expected signature for " . Signatures::nameAndHex(ZIP64_END_CENTRAL_LOC_HDR_SIG) . " not found, got 0x%X", $gotSig);
+                warning $here - ZIP64_END_CENTRAL_LOC_HDR_SIZE - 4, sprintf("Expected signature for " . Signatures::nameAndHex(ZIP64_END_CENTRAL_LOC_HDR_SIG) . " not found, got 0x%X", $gotSig);
             }
             else
             {
@@ -6171,6 +6188,33 @@ sub findCentralDirectoryOffset
 
         ($centralDirOffset, $centralDirSize) = offsetFromZip64($fh, $here, ZIP_EOCD_MIN_SIZE + $commentLength + $trailingBytes)
             if $want_zip64;
+    }
+    elsif ($zip64LocHdrPresent)
+    {
+        # Use case where EOCD doesn't signal Zip64 EOCD headers, but they are present anyway
+
+        # Info-ziip 3.0 can create a zip file that has the zip64 eoch headers, but doesn't set any of the EOCD headers to FFFFFFFF
+        # Means we need to check for the zip64 eocd headers all the time.
+
+        my $loc_hdr_offset = $here - ZIP64_END_CENTRAL_LOC_HDR_SIZE;
+        $HeaderOffsetIndex->addOffset($loc_hdr_offset, ZIP64_END_CENTRAL_LOC_HDR_SIG) ;
+
+        # get the pointer to the ZIP64_EOCD header
+        my $data = peekAtOffset($loc_hdr_offset+8, 8) ;
+        my $cd64 = unpack "Q<", $data;
+
+        if ($cd64 + 4 < $FILELEN)
+        {
+            # check the signature os present
+            my $sig = peekAtOffset($cd64, 4) ;
+            my $zip64_hdr_sig_present = defined $sig && unpack("V", $sig) == ZIP64_END_CENTRAL_REC_HDR_SIG;
+
+            $HeaderOffsetIndex->addOffsetNoPrefix($cd64, ZIP64_END_CENTRAL_REC_HDR_SIG)
+                if $zip64_hdr_sig_present;
+
+        }
+
+        $OrphanZip64EOCD = 1;
     }
     elsif ($is64bit)
     {
@@ -7895,8 +7939,8 @@ the type of data:
 If the field contains an 8-bit, 16-bit, 32-bit or 64-bit numeric value, it
 will be displayed in both hex and decimal -- for example "C<002A (42)>".
 
-Note that Zip files store most numeric values in I<little-endian> encoding
-(there area few rare instances where I<big-endian> is used). The value read
+Note that Zip files store most numeric values in I<little-endian> encoding, although
+there are a few exceptions where I<big-endian> encoding is used. The value read
 from the zip file will have the I<endian> encoding removed before being
 displayed.
 
@@ -8267,7 +8311,7 @@ file.
 
 =head1 AUTHOR
 
-Paul Marquess F<pmqs@cpan.org>.
+Paul Marquess F<pmqs@outlook.com>.
 
 =head1 COPYRIGHT
 

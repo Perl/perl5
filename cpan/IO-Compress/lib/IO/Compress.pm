@@ -1,6 +1,6 @@
 package IO::Compress;
 
-our $VERSION = '2.223' ;
+our $VERSION = '2.224' ;
 
 =head1 NAME
 

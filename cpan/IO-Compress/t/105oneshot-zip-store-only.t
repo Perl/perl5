@@ -14,9 +14,6 @@ use Test::More ;
 use CompTestUtils;
 
 BEGIN {
-    plan(skip_all => "oneshot needs Perl 5.005 or better - you have Perl $]" )
-        if $] < 5.005 ;
-
     plan skip_all => "Lengthy Tests Disabled\n" .
                      "set COMPRESS_ZLIB_RUN_ALL or COMPRESS_ZLIB_RUN_MOST to run this test suite"
         unless defined $ENV{COMPRESS_ZLIB_RUN_ALL} or defined $ENV{COMPRESS_ZLIB_RUN_MOST};
