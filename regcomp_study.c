@@ -2514,7 +2514,7 @@ Perl_study_chunk(pTHX_
                  * L<perlreguts/The super-linear cache> for the criteria
                  * on when its safe.
                  */
-               if ((mincount > 1) || (maxcount > 1 && maxcount != REG_INFTY))
+                if ((mincount > 1) || (maxcount > 1 && maxcount != REG_INFTY))
                     f &= ~SCF_WHILEM_VISITED_POS;
 
                 /* This will finish on WHILEM, setting scan, or on NULL: */
