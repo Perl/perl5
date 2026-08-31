@@ -39,7 +39,7 @@ sub is {
     return $ok;
 }
 
-print "1..254\n";
+print "1..259\n";
 
 ($a, $b, $c) = qw(foo bar);
 
@@ -860,4 +860,41 @@ package RT132595 {
     my ($a, $b)  = qw(a b);
     ($a = 'A'.$b) .= 'c';
     is($a, "Abc", "RT #133441");
+}
+
+# GH #24763
+#
+# string vars which also had SvIOK etc set, sometimes didn't have those
+# flags turned off when the var was modified in a multiconcat
+{
+    # IOK
+
+    my $x;
+    my $i = "";
+    $i .= "";       # ensure its not COW
+
+    $x = $i + 0; # make $i IOK
+    $i = "7$i";
+    ok($i + 0 == 7, " GH #24763: 7");
+
+    $x = $i + 0; # make $i IOK
+    $i .= "8$i";
+    ok($i + 0 == 787, " GH #24763: 787");
+
+    $x = $i + 0; # make $i IOK
+    $i .= "9";
+    ok($i + 0 == 7879, " GH #24763: 7879");
+
+    # NOK
+
+    $i = "";
+    $i .= "";       # ensure its not COW
+
+    $x = $i + 0.1; # make $i NOK
+    $i = "1.5$i";
+    ok($i + 0.0 == 1.5, " GH #24763: 1.5");
+
+    $x = $i + 0.1; # make $i nOK
+    $i .= "0";
+    ok($i + 0.0 == 1.5, " GH #24763: 1.50");
 }

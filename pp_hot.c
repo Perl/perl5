@@ -854,6 +854,7 @@ PP(pp_multiconcat)
             U32 targ_utf8;
           stringify_targ:
             SvPV_force_nomg_nolen(targ);
+            SvNIOK_off(targ);
             targ_utf8 = SvFLAGS(targ) & SVf_UTF8;
             if (UNLIKELY(dst_utf8 & ~targ_utf8)) {
                  if (LIKELY(!IN_BYTES))
