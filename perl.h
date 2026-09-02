@@ -1060,6 +1060,15 @@ compilers.
 #  define UNLESS_PERL_MEM_LOG(code)
 #endif
 
+/* Macros for valuemagic support */
+/* TODO: allow these to be conditional like the taint ones are */
+#define VALUEMAGIC_CLEAR \
+    (UNLIKELY(PL_valuemagic_annotations && SvMAGICAL(PL_valuemagic_annotations)) && (valuemagic_clear(), false))
+#define VALUEMAGIC_FROM(ssv) \
+    if (UNLIKELY(ssv && SvMAGICAL(ssv))) { valuemagic_from(ssv); }
+#define VALUEMAGIC_APPLYTO(dsv) \
+    if (UNLIKELY(PL_valuemagic_annotations && SvMAGICAL(PL_valuemagic_annotations))) { valuemagic_applyto(dsv); }
+
 #ifndef PERL_USE_TAINT
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
  * you get a perl without taint support, but doubtlessly with a lesser
@@ -1172,9 +1181,12 @@ violations are fatal.
     /* Set to tainted if we are running under tainting mode */
 #   define TAINT		(PL_tainted = PL_tainting)
 
-#   define TAINT_NOT	(PL_tainted = FALSE)        /* Untaint */
+#   define TAINT_NOT	(PL_tainted = FALSE, VALUEMAGIC_CLEAR)        /* Untaint */
 #   define TAINT_IF(c)	if (UNLIKELY(c)) { TAINT; } /* Conditionally taint */
-#   define TAINT_IF_SV(sv)	if (UNLIKELY(sv && SvTAINTED(sv))) { TAINT; }
+#   define TAINT_IF_SV(sv)	STMT_START { \
+        if (UNLIKELY(sv && SvTAINTED(sv))) { TAINT; } \
+        VALUEMAGIC_FROM(sv);                          \
+        } STMT_END
 #   define TAINT_ENV()	if (UNLIKELY(PL_tainting)) { taint_env(); }
                                 /* croak or warn if tainting */
 #   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) {                \

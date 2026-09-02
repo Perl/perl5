@@ -3163,7 +3163,12 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     PP_wrapped
     SILENT_NO_TAINT_SUPPORT
     STRLEN_MAX
+    SVf_OK_no_VMG
+    SVs_VMG
     UTF8_ALLOW_LONG_AND_ITS_VALUE
+    VALUEMAGIC_APPLYTO
+    VALUEMAGIC_CLEAR
+    VALUEMAGIC_FROM
 
     assert_scalar_or_IO_
     DEBUG__

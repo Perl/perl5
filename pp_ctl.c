@@ -243,6 +243,8 @@ PP(pp_substcont)
 
         /* See "how taint works": pp_subst() in pp_hot.c */
         sv_catsv_nomg(dstr, *PL_stack_sp);
+        if (sv_has_valuemagic(*PL_stack_sp))
+            mg_propagate(*PL_stack_sp, dstr);
         rpp_popfree_1_NN();
         if (UNLIKELY(TAINT_get))
             cx->sb_rxtainted |= SUBST_TAINT_REPL;
@@ -281,6 +283,8 @@ PP(pp_substcont)
                 if (DO_UTF8(dstr))
                     SvUTF8_on(targ);
                 SvPV_set(dstr, NULL);
+                if (sv_has_valuemagic(dstr))
+                    mg_propagate(dstr, targ);
 
                 PL_tainted = 0;
                 retval = sv_newmortal();

@@ -1121,6 +1121,8 @@ PP(pp_undef)
             break;
         }
     default:
+        if (SvTYPE(sv) >= SVt_PVMG && SvMAGICAL(sv))
+            mg_unpropagate(sv);
         if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)
             && !(PL_op->op_private & OPpUNDEF_KEEP_PV)
         ) {
@@ -4459,6 +4461,7 @@ PP(pp_chr)
 
   ret:
     SvSETMAGIC(TARG);
+    VALUEMAGIC_APPLYTO(TARG);
     rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
@@ -4862,6 +4865,7 @@ PP_wrapped(pp_ucfirst, 1, 0)
 #endif
     if (dest != source && SvTAINTED(source))
         SvTAINT(dest);
+    VALUEMAGIC_APPLYTO(dest);
     SvSETMAGIC(dest);
     return NORMAL;
 }
@@ -5191,6 +5195,7 @@ PP_wrapped(pp_uc, 1, 0)
 #endif
     if (dest != source && SvTAINTED(source))
         SvTAINT(dest);
+    VALUEMAGIC_APPLYTO(dest);
     SvSETMAGIC(dest);
     return NORMAL;
 }
@@ -5411,6 +5416,7 @@ PP_wrapped(pp_lc, 1, 0)
 #endif
     if (dest != source && SvTAINTED(source))
         SvTAINT(dest);
+    VALUEMAGIC_APPLYTO(dest);
     SvSETMAGIC(dest);
     return NORMAL;
 }
@@ -5699,6 +5705,7 @@ PP_wrapped(pp_fc, 1, 0)
 #endif
     if (SvTAINTED(source))
         SvTAINT(dest);
+    VALUEMAGIC_APPLYTO(dest);
     SvSETMAGIC(dest);
     RETURN;
 }

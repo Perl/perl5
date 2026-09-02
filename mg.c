@@ -130,6 +130,11 @@ S<C<struct ArrayVarMagicFunctions>>.
 Indicates that the structure is in fact of type
 S<C<struct HashVarMagicFunctions>>.
 
+=item C<MGv2s_SCALARVALUE>
+
+Indicates that the structure is in fact of type
+S<C<struct ScalarValueMagicFunctions>>.
+
 =back
 
 When attaching this magic structure to a specific SV, the L</SvTYPE> of the
@@ -160,6 +165,14 @@ it.
 
 This flag implies that every attachment of this magic will set the
 C<MgWEAK_AUXSV> flag.
+
+=item C<MGv2f_SCALARVALUE_AUTOPROPAGATE>
+
+Presence of this flag on a C<struct ScalarValueMagicFunctions> structure
+indicates that any new SV values that are copied from an SV with that magic
+attached should apply a copy of the magic onto the newly-written SV, as part
+of the copy operation. In effect this allows the magic's effects to be copied
+along with the value.
 
 =back
 
@@ -319,6 +332,46 @@ clears the hash, such as C<undef %hash>.
 
 =back
 
+=for apidoc Axy||struct ScalarValueMagicFunctions
+
+This structure extends the basic C<struct MagicFunctions> by adding the
+following fields to store more trigger functions. It may only be applied to
+SVs that represent scalar values - i.e. whose type is C<SVt_PVMG> or below,
+or the special C<SVt_PVLV>.
+
+    struct ScalarValueMagicFunctions {
+        ...
+
+        void (*propagate)(pTHX_ SV *osv, MAGIC *omg,
+                             SV *nsv, MAGIC *nmg);
+    };
+
+For this structure the C<shape> field takes the value C<MGv2s_SCALARVALUE>.
+
+=over 4
+
+=item C<propagate> trigger function
+
+An optional pointer to a function to be invoked at the time the magic is copied
+from one SV to another, around the time that the scalar value itself is
+copied. When invoked, it is passed the original and new SVs, and the original
+magic value.
+
+If the C<flags> field has the C<MGv2f_SCALARVALUE_AUTOPROPAGATE> flag, then a
+new magic will be copied onto the new SV, and a pointer to it will also be
+passed to the C<propagate> trigger function. If this flag is not present then
+no magic will have been copied onto the new SV and so the C<nmg> argument will
+be passed as C<NULL>, though the trigger function can apply one if it wishes.
+This allows the copy to be applied conditionally, based on whether the trigger
+function decides to or not.
+
+=back
+
+In addition to any behaviour implied by the C<MGv2f_SCALARVALUE_AUTOPROPAGATE>
+flag or specifically provided by the C<propagate> trigger function, any magics
+of this type on an SV will be automatically removed by operations that
+overwrite the value stored in an SV, such as C<sv_setsv()> or C<sv_clear()>.
+
 =for apidoc Ayh||MAGIC
 
 =cut
@@ -422,6 +475,7 @@ Perl_mg_magical(SV *sv)
     const MAGIC* mg;
 
     SvMAGICAL_off(sv);
+    SvVMAGICAL_off(sv);
     if ((mg = SvMAGIC(sv))) {
         do {
             if (MgIsV2(mg)) {
@@ -454,6 +508,17 @@ Perl_mg_magical(SV *sv)
                             SvRMAGICAL_on(sv);
                         break;
                     }
+
+                    case MGv2s_SCALARVALUE:
+                        SvRMAGICAL_on(sv);
+                        if(SvTYPE(sv) <= SVt_PVMG)
+                            /* Only regular scalars can use the SVs_VMG flag.
+                             * If this was a SVt_REGEXP or similar, we'll just
+                             * have to ignore it and go the long way round
+                             */
+                            SvVMAGICAL_on(sv);
+                        SvGMAGICAL_on(sv); /* need GMAGICAL on so that mg_get is invoked */
+                        break;
                 }
             }
             else {
@@ -499,6 +564,8 @@ Perl_mg_get(pTHX_ SV *sv)
        list of magic. svt_get() may delete the current entry, add new
        magic to the head of the list, or upgrade the SV. AMS 20010810 */
 
+    const bool use_PL_valuemagic = (PL_valuemagic_annotations != NULL);
+
     newmg = cur = head = mg = SvMAGIC(sv);
     while (mg) {
         const MGVTBL * const vtbl = mg->mg_virtual;
@@ -510,6 +577,10 @@ Perl_mg_get(pTHX_ SV *sv)
 
                 if (funcs->pre_get)
                     funcs->pre_get(aTHX_ sv, mg);
+            }
+            else if (use_PL_valuemagic &&
+                        (MgFUNCS(mg)->shape == MGv2s_SCALARVALUE)) {
+                valuemagic_from(sv);
             }
         }
         else if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
@@ -711,6 +782,36 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
+void
+Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
+{
+    PERL_ARGS_ASSERT_MG_PROPAGATE;
+
+    if(SvTYPE(ssv) < SVt_PVMG || !SvMAGICAL(ssv))
+        return;
+
+    for(MAGIC *smg = SvMAGIC(ssv); smg; smg = smg->mg_moremagic) {
+        if (!MgIsV2(smg))
+            continue;
+
+        if (MgFUNCS(smg)->shape != MGv2s_SCALARVALUE)
+            continue;
+
+        assert(dsv);
+
+        const struct ScalarValueMagicFunctions *funcs = MgSCALARVALUEFUNCS(smg);
+
+        MAGIC *dmg = NULL;
+        if(funcs->flags & MGv2f_SCALARVALUE_AUTOPROPAGATE) {
+            dmg = sv_magicv2_attach(dsv, MgFUNCS(smg), MgFLAGS(smg));
+            mgv2_copy(smg, dmg);
+        }
+
+        if(funcs->propagate)
+            (*funcs->propagate)(aTHX_ ssv, smg, dsv, dmg);
+    }
+}
+
 static MAGIC*
 S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
 {
@@ -842,6 +943,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
         if (MgIsV2(mg)) {
             switch(MgFUNCS(mg)->shape) {
                 case MGv2s_BASE:
+                case MGv2s_SCALARVALUE:
                     /* does not support localisation */
                     break;
 
@@ -1014,6 +1116,7 @@ Perl_mg_free(pTHX_ SV *sv)
     }
     SvMAGIC_set(sv, NULL);
     SvMAGICAL_off(sv);
+    SvVMAGICAL_off(sv);
     return 0;
 }
 
@@ -1151,7 +1254,10 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
             logical_nparens = (I32)RX_NPARENS(rx);
 
         if (n != '+' && n != '-') {
+            mg_unpropagate(sv);
             CALLREG_NUMBUF_FETCH(rx,paren,sv);
+            if (sv_has_valuemagic((SV *)rx))
+                mg_propagate((SV *)rx, sv);
             return 0;
         }
         if (paren <= (I32)logical_nparens) {
@@ -1367,7 +1473,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         paren = mg->mg_len;
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
           do_numbuf_fetch:
+            mg_unpropagate(sv);
             CALLREG_NUMBUF_FETCH(rx,paren,sv);
+            if (sv_has_valuemagic((SV *)rx))
+                mg_propagate((SV *)rx, sv);
         }
         else
             goto set_undef;
@@ -4564,6 +4673,31 @@ Perl_magic_getdebugvar(pTHX_ SV *sv, MAGIC *mg)
     sv_setiv(sv, PL_DBcontrol[mg->mg_private]);
 
     return 0;
+}
+
+void
+Perl_valuemagic_from(pTHX_ SV *ssv)
+{
+    PERL_ARGS_ASSERT_VALUEMAGIC_FROM;
+
+    mg_propagate(ssv, PL_valuemagic_annotations);
+}
+
+void
+Perl_valuemagic_applyto(pTHX_ SV *dsv)
+{
+    PERL_ARGS_ASSERT_VALUEMAGIC_APPLYTO;
+
+    mg_unpropagate(dsv);
+    mg_propagate(PL_valuemagic_annotations, dsv);
+}
+
+void
+Perl_valuemagic_clear(pTHX)
+{
+    PERL_ARGS_ASSERT_VALUEMAGIC_CLEAR;
+
+    mg_unpropagate(PL_valuemagic_annotations);
 }
 
 /*

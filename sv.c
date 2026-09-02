@@ -4317,6 +4317,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     int dtype;
     svtype stype;
     unsigned int both_type;
+    bool src_has_valuemagic = false;
 
     if (UNLIKELY( ssv == dsv ))
         return;
@@ -4415,6 +4416,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
     SV_CHECK_THINKFIRST_COW_DROP(dsv);
     dtype = SvTYPE(dsv); /* THINKFIRST may have changed type */
+
+    if(dtype >= SVt_PVMG)
+        mg_unpropagate(dsv);
 
     /* There's a lot of redundancy below but we're going for speed here
      * Note: some of the cases below do return; rather than break; so the
@@ -4521,7 +4525,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
     case SVt_PVLV:
     case SVt_PVGV:
+        src_has_valuemagic = sv_has_valuemagic(ssv);
+        goto SVt_PVMG_common;
     case SVt_PVMG:
+        src_has_valuemagic = SvVMAGICAL(ssv);
+SVt_PVMG_common:
         if (SvGMAGICAL(ssv) && (flags & SV_GMAGIC)) {
             mg_get(ssv);
             if (SvTYPE(ssv) != stype)
@@ -4842,6 +4850,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     }
     if (SvTAINTED(ssv))
         SvTAINT(dsv);
+
+    if (src_has_valuemagic)
+        mg_propagate(ssv, dsv);
 }
 
 /* A helper for newSVsv_flags_NN, which does the heavy lifting for
@@ -5168,6 +5179,8 @@ S_newSVsv_flags_NN_PVxx(pTHX_ SV* dsv, SV* ssv, const I32 flags)
         }
     }
 check_taint:
+    if (SvVMAGICAL(ssv)) /* [ <<< 1% ] */
+        mg_propagate(ssv, dsv);
     if (SvTAINTED(ssv)) /* [ <<< 1% ] */
         SvTAINT(dsv);
     return dsv;
@@ -6556,6 +6569,11 @@ Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags,
                 goto bad_shape;
             break;
 
+        case MGv2s_SCALARVALUE:
+            if(svt > SVt_PVMG && svt != SVt_PVLV && svt != SVt_REGEXP)
+                goto bad_shape;
+            break;
+
         default:
             croak("Unrecognized magicfuncs->shape value %d", funcs->shape);
 bad_shape:
@@ -6570,6 +6588,11 @@ bad_shape:
 
     if(!(funcs->flags & MGv2f_ALWAYS_WEAK_AUXSV))
         MgFLAGS(mg) |= MGv2f_REFCOUNTED_AUXSV;
+
+    if(funcs->shape == MGv2s_SCALARVALUE)
+        if(!PL_valuemagic_annotations) {
+            PL_valuemagic_annotations = newSV_type(SVt_PVMG);
+        }
 
     return mg;
 }
@@ -6858,6 +6881,32 @@ Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs
 {
     PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_FUNCS;
     S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs);
+}
+
+static bool
+S_filter_mgv2_scalarvalue(pTHX_ MAGIC *mg, const void *key)
+{
+    PERL_UNUSED_ARG(key);
+    return MgFUNCS(mg)->shape == MGv2s_SCALARVALUE;
+}
+
+void
+Perl_mg_unpropagate(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_MG_UNPROPAGATE;
+
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_scalarvalue, NULL);
+}
+
+bool
+Perl_sv_has_valuemagic(pTHX_ const SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_HAS_VALUEMAGIC;
+
+    if (SvTYPE(sv) <= SVt_PVMG)
+        return SvVMAGICAL(sv);
+    else
+        return (bool)S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_scalarvalue, NULL, NULL);
 }
 
 MAGIC *
@@ -7709,6 +7758,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             else if (SvMAGIC(sv)) {
                 /* Free back-references before other types of magic. */
                 sv_unmagic(sv, PERL_MAGIC_backref);
+                mg_unpropagate(sv);
                 mg_free(sv);
             }
             SvMAGICAL_off(sv);

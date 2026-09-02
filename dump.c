@@ -2025,6 +2025,8 @@ Perl_do_magicv2_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I
             case MGv2s_SCALARVAR: shapename = "SCALARVAR"; break;
             case MGv2s_ARRAYVAR:  shapename = "ARRAYVAR";  break;
             case MGv2s_HASHVAR:   shapename = "HASHVAR";   break;
+            case MGv2s_SCALARVALUE:
+                                  shapename = "SCALARVALUE"; break;
         }
         if(shapename)
             dump_indent(level, file, "      SHAPE = %s\n", shapename);
@@ -2063,6 +2065,13 @@ Perl_do_magicv2_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I
                 const struct HashVarMagicFunctions *funcs = MgHASHVARFUNCS(mg);
                 if(funcs->clear)
                     dump_indent(level, file, "      CLEAR\n");
+                break;
+            }
+            case MGv2s_SCALARVALUE:
+            {
+                const struct ScalarValueMagicFunctions *funcs = MgSCALARVALUEFUNCS(mg);
+                if(funcs->propagate)
+                    Perl_dump_indent(aTHX_ level, file, "      PROPAGATE\n");
                 break;
             }
         }
@@ -2562,7 +2571,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         /* FALLTHROUGH */
     case SVt_PVMG:
     default:
-        if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpvs(d, "IsUV,");
+        if (type <= SVt_PVMG && SvVMAGICAL(sv))
+            sv_catpvs(d, "VMG,");
+        if (SvIsUV(sv) && !(flags & SVf_ROK))
+            sv_catpvs(d, "IsUV,");
         break;
 
     case SVt_PVAV:

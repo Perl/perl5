@@ -1352,6 +1352,8 @@ PP(pp_multiconcat)
                  * the PADTMP from OP_CONST. In later iterations this will
                  * be appended to */
                 nexttarg = PAD_SV(aux[PERL_MULTICONCAT_IX_PADTMP0].pad_offset);
+                if (UNLIKELY(SvMAGICAL(nexttarg)))
+                    mg_unpropagate(nexttarg);
                 nextappend = FALSE;
             }
             else {
@@ -3777,7 +3779,14 @@ PP(pp_match)
     strend = truebase + len;
     rxtainted = (RXp_ISTAINTED(prog) ||
                  (TAINT_get && (pm->op_pmflags & PMf_RETAINT)));
+    const bool targ_has_valuemagic = sv_has_valuemagic(TARG);
     TAINT_NOT;
+
+    if (rx && sv_has_valuemagic((SV *)rx))
+        mg_unpropagate((SV *)rx);
+    if (rx && targ_has_valuemagic)
+        /* REGEXP is still an SV; use it to store the value annotations from targ */
+        mg_propagate(TARG, (SV *)rx);
 
     /* We need to know this in case we fail out early - pos() must be reset */
     global = dynpm->op_pmflags & PMf_GLOBAL;
@@ -3978,11 +3987,13 @@ PP(pp_match)
                             "start=%zd, end=%zd, s=%p, strend=%p, len=%zd",
                             phys_paren, offs_start, offs_end, s, strend, len);
                     }
-                    rpp_push_1(newSVpvn_flags(s, len,
+                    SV *retsv = newSVpvn_flags(s, len,
                         (DO_UTF8(TARG))
                         ? SVf_UTF8|SVs_TEMP
-                        : SVs_TEMP)
-                    );
+                        : SVs_TEMP);
+                    if (targ_has_valuemagic)
+                        mg_propagate(TARG, retsv);
+                    rpp_push_1(retsv);
                     break;
                 } else if (!p2l_next || !(phys_paren = p2l_next[phys_paren])) {
                     /* Either logical_paren and phys_paren are the same and
@@ -5709,6 +5720,8 @@ PP(pp_subst)
         if (rpm->op_pmflags & PMf_NONDESTRUCT) {
             /* From here on down we're using the copy, and leaving the original
                untouched.  */
+            if (sv_has_valuemagic(TARG))
+                mg_propagate(TARG, dstr);
             TARG = dstr;
             retval = dstr;
             goto ret;
@@ -5730,6 +5743,8 @@ PP(pp_subst)
             SvCUR_set(TARG, SvCUR(dstr));
             SvLEN_set(TARG, SvLEN(dstr));
             SvFLAGS(TARG) |= SvUTF8(dstr);
+            if (SvVMAGICAL(dstr))
+                mg_propagate(dstr, TARG);
             SvPV_set(dstr, NULL);
             goto ret_iters;
         }

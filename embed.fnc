@@ -4230,6 +4230,10 @@ CRTdip	|UV	|valid_utf8_to_uv					\
 CRTdmp	|UV	|valid_utf8_to_uvchr					\
 				|NN const U8 *s 			\
 				|NULLOK STRLEN *retlen
+Cp	|void	|valuemagic_applyto					\
+				|NN SV *dsv
+Cp	|void	|valuemagic_clear
+Cp	|void	|valuemagic_from|NN SV *ssv
 CRTip	|unsigned int|variant_byte_number				\
 				|PERL_UINTMAX_T word
 Adp	|int	|vcmp		|NN SV *lhv				\
@@ -4481,6 +4485,9 @@ Cpx	|SV *	|sv_setsv_cow	|NULLOK SV *dsv 			\
 				|NN SV *ssv
 #endif
 #if defined(PERL_CORE)
+p	|void	|mg_propagate	|NN SV *ssv				\
+				|NULLOK SV *dsv
+p	|void	|mg_unpropagate |NN SV *sv
 p	|void	|opslab_force_free					\
 				|NN OPSLAB *slab
 p	|void	|opslab_free	|NN OPSLAB *slab
@@ -4490,6 +4497,8 @@ p	|void	|parser_free_nexttoke_ops				\
 				|NN yy_parser *parser			\
 				|NN OPSLAB *slab
 RTi	|bool	|should_warn_nl |NN const char *pv
+p	|bool	|sv_has_valuemagic					\
+				|NN const SV *sv
 # if defined(PERL_DEBUG_READONLY_OPS)
 ep	|void	|Slab_to_ro	|NN OPSLAB *slab
 ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
