@@ -6542,6 +6542,7 @@ $ WC "usesocks='undef'"
 $ WC "usetaint='define'"
 $ WC "usethreads='" + usethreads + "'"
 $ WC "usethreadupcalls='" + usethreadupcalls + "'"	! VMS-specific
+$ WC "usevaluemagic='undef'"
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
 $ WC "useversionedarchname='" + useversionedarchname + "'"
 $ WC "usevfork='true'"

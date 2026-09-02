@@ -4495,6 +4495,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$usetaint PERL_USE_TAINT	/* use taint */
 
+/* PERL_USE_VALUEMAGIC:
+ *	This symbol, if defined, enables support for Value Magic.
+ */
+#$usevaluemagic PERL_USE_VALUEMAGIC	/* use value magic */
+
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up
@@ -5351,6 +5356,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* USE_REENTRANT_API:
  *	This symbol, if defined, indicates that Perl should
  *	try to use the various _r versions of library functions.
+ *	This is extremely experimental.
  */
 #$useithreads	USE_ITHREADS		/**/
 #$usethreads		USE_THREADS		/**/

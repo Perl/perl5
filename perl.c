@@ -2084,6 +2084,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
                              " PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES"
 #  endif
+#  ifdef PERL_USE_VALUEMAGIC
+                             " PERL_USE_VALUEMAGIC"
+#  endif
 #  ifdef SILENT_NO_TAINT_SUPPORT
                              " SILENT_NO_TAINT_SUPPORT"
 #  endif

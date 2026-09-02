@@ -782,6 +782,8 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
+#if defined(PERL_USE_VALUEMAGIC)
+
 void
 Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
 {
@@ -811,6 +813,17 @@ Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
             (*funcs->propagate)(aTHX_ ssv, smg, dsv, dmg);
     }
 }
+
+#else
+
+void
+Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
+{
+    PERL_UNUSED_ARG(ssv);
+    PERL_UNUSED_ARG(dsv);
+}
+
+#endif
 
 static MAGIC*
 S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
