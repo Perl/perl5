@@ -7,3 +7,4 @@
 ^\.agents/
 ^AGENTS\.md$
 ^CLAUDE\.md$
+^Porting/check-ws-only-change
