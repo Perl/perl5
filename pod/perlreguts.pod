@@ -1048,9 +1048,21 @@ regop. An even more aggressive form of this is that a branch
 sequence of the form C<EXACT BRANCH ... EXACT> can be converted into a
 C<TRIE-EXACT> regop.
 
-All of this occurs in the routine C<study_chunk()> which uses a special
-structure C<scan_data_t> to store the analysis that it has performed, and
-does the "peep-hole" optimisations as it goes.
+=head4 study_chunk()
+
+All of the optimisations described above occur in the routine
+C<study_chunk()>, which is called from C<Perl_re_op_compile()> after
+C<reg()> is done. It uses a special structure C<scan_data_t> to store the
+analysis that it has performed, and does the "peep-hole" optimisations as
+it goes, in-place.
+
+The basic structure of C<study_chunk()> is recursive. By default it will
+linearly process all nodes until it reaches the node specified by the
+C<last> parameter, or an C<END> node if earlier. But when it encounters a
+sub-pattern such the 'A' in quantifiers like C<(A)+> or C<(A){1,5}>, it
+will recurse into that sub-pattern, with C<last> set to the end of that
+sub-pattern. Similarly for a branch such as C<A|B|C>, it will recurse for
+each sub-pattern A,B and C.
 
 The code involved in C<study_chunk()> is extremely cryptic. Be careful. :-)
 
