@@ -1389,6 +1389,7 @@ d_oldpthreads=''
 useithreads=''
 usereentrant=''
 usethreads=''
+usevaluemagic=''
 incpath=''
 mips_type=''
 usrinc=''
@@ -23814,6 +23815,25 @@ esac
 set usetaint
 eval $setvar
 
+: Ask about value magic
+case "$usevaluemagic" in
+    $define|true|[Yy]*)
+       dflt="y"
+       ;;
+    *)
+       dflt="n"
+       ;;
+    esac
+
+rp='Would you like to build perl with support for Value Magic?'
+. ./myread
+case "$ans" in
+y|Y) val="$define" ;;
+*)   val="$undef"  ;;
+esac
+set usevaluemagic
+eval $setvar
+
 : determine compiler compiler
 case "$yacc" in
 '')
@@ -26136,6 +26156,7 @@ usesitecustomize='$usesitecustomize'
 usesocks='$usesocks'
 usetaint='$usetaint'
 usethreads='$usethreads'
+usevaluemagic='$usevaluemagic'
 usevendorprefix='$usevendorprefix'
 useversionedarchname='$useversionedarchname'
 usevfork='$usevfork'

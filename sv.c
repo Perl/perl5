@@ -6883,6 +6883,8 @@ Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs
     S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs);
 }
 
+#if defined(PERL_USE_VALUEMAGIC)
+
 static bool
 S_filter_mgv2_scalarvalue(pTHX_ MAGIC *mg, const void *key)
 {
@@ -6908,6 +6910,23 @@ Perl_sv_has_valuemagic(pTHX_ const SV *sv)
     else
         return (bool)S_sv_magicv2_find(aTHX_ sv, &S_filter_mgv2_scalarvalue, NULL, NULL);
 }
+
+#else
+
+bool
+Perl_sv_has_valuemagic(pTHX_ const SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+    return false;
+}
+
+void
+Perl_mg_unpropagate(pTHX_ SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+}
+
+#endif
 
 MAGIC *
 Perl_sv_magicext_mglob(pTHX_ SV *sv)

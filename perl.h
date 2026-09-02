@@ -1061,13 +1061,20 @@ compilers.
 #endif
 
 /* Macros for valuemagic support */
-/* TODO: allow these to be conditional like the taint ones are */
-#define VALUEMAGIC_CLEAR \
+#if defined(PERL_USE_VALUEMAGIC)
+#  define VALUEMAGIC_CLEAR \
     (UNLIKELY(PL_valuemagic_annotations && SvMAGICAL(PL_valuemagic_annotations)) && (valuemagic_clear(), false))
-#define VALUEMAGIC_FROM(ssv) \
+#  define VALUEMAGIC_FROM(ssv) \
     if (UNLIKELY(ssv && SvMAGICAL(ssv))) { valuemagic_from(ssv); }
-#define VALUEMAGIC_APPLYTO(dsv) \
+#  define VALUEMAGIC_APPLYTO(dsv) \
     if (UNLIKELY(PL_valuemagic_annotations && SvMAGICAL(PL_valuemagic_annotations))) { valuemagic_applyto(dsv); }
+#  define sv_has_valuemagic(sv)    Perl_sv_has_valuemagic(aTHX_ sv)
+#else
+#  define VALUEMAGIC_CLEAR         NOOP
+#  define VALUEMAGIC_FROM(ssv)     NOOP
+#  define VALUEMAGIC_APPLYTO(dsv)  NOOP
+#  define sv_has_valuemagic(sv)    false
+#endif
 
 #ifndef PERL_USE_TAINT
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,

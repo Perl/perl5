@@ -581,7 +581,8 @@ EOT
 #proper lexicographical order of the keys
 my %seen_var;
 my @v_define = ( "taint_support=''\n",
-                 "taint_disabled=''\n" );
+                 "taint_disabled=''\n",
+                 "usevaluemagic=''\n" );
 $heavy_txt .= join('',
     map { $_->[-1] }
     sort {$a->[0] cmp $b->[0] }
@@ -622,6 +623,10 @@ $heavy_txt .= uncomment <<'EOF_TAINT_INIT';
 #        else {
 #            my $taint_support = 'define';
 #            s/^(taint_support=['"])(["'])/$1$taint_support$2/m;
+#        }
+#
+#        if ($defines =~ m/\b(PERL_USE_VALUEMAGIC)\b/) {
+#            s/^(usevaluemagic=['"])(["'])/$1define$2/m;
 #        }
 #    }
 EOF_TAINT_INIT

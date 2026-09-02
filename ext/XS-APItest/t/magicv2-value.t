@@ -7,6 +7,8 @@ use Test::More;
 use Config;
 plan skip_all => "Your perl was built without taint (and therefore value magic) support"
     unless $Config{taint_support};
+plan skip_all => "Your perl was built without value magic support"
+    unless $Config{usevaluemagic};
 
 use XS::APItest;
 
