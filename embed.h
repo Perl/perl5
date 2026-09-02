@@ -44,6 +44,7 @@
 #   undef isIDCONT_lazy_if_safe
 #   undef KEY_equ
 #   undef KEY_neu
+#   undef MGv2f_SCALARVALUE_AUTOPROPAGATE
 #   undef MGv2f_WITH_KEYHEK
 #   undef NETDB_R_OBSOLETE
 #   undef new_XPV
@@ -51,6 +52,9 @@
 #   undef SHY_NATIVE
 #   undef sv_2num
 #   undef SvRVx
+#   undef SvVMAGICAL
+#   undef SvVMAGICAL_off
+#   undef SvVMAGICAL_on
 #   undef UNI_DISPLAY_TR_
 #   if !defined(PERL_EXT)
 #     undef GV_CACHE_ONLY
@@ -845,6 +849,9 @@
 # define valid_identifier_pvn(a,b,c)            Perl_valid_identifier_pvn(aTHX_ a,b,c)
 # define valid_identifier_sv(a)                 Perl_valid_identifier_sv(aTHX_ a)
 # define valid_utf8_to_uv                       Perl_valid_utf8_to_uv
+# define valuemagic_applyto(a)                  Perl_valuemagic_applyto(aTHX_ a)
+# define valuemagic_clear()                     Perl_valuemagic_clear(aTHX)
+# define valuemagic_from(a)                     Perl_valuemagic_from(aTHX_ a)
 # define variant_byte_number                    Perl_variant_byte_number
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)
@@ -1206,11 +1213,14 @@
 #   define yyparse(a)                           Perl_yyparse(aTHX_ a)
 #   define yyquit()                             Perl_yyquit(aTHX)
 #   define yyunlex()                            Perl_yyunlex(aTHX)
+#   define mg_propagate(a,b)                    Perl_mg_propagate(aTHX_ a,b)
+#   define mg_unpropagate(a)                    Perl_mg_unpropagate(aTHX_ a)
 #   define opslab_force_free(a)                 Perl_opslab_force_free(aTHX_ a)
 #   define opslab_free(a)                       Perl_opslab_free(aTHX_ a)
 #   define opslab_free_nopad(a)                 Perl_opslab_free_nopad(aTHX_ a)
 #   define parser_free_nexttoke_ops(a,b)        Perl_parser_free_nexttoke_ops(aTHX_ a,b)
 #   define should_warn_nl                       S_should_warn_nl
+#   define sv_has_valuemagic(a)                 Perl_sv_has_valuemagic(aTHX_ a)
 #   if defined(DEBUGGING)
 #     define get_debug_opts(a,b)                Perl_get_debug_opts(aTHX_ a,b)
 #     define set_padlist                        Perl_set_padlist

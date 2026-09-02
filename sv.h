@@ -436,7 +436,8 @@ These guys don't need the curly blocks
 #define SVp_IOK		0x00001000  /* has valid non-public integer value */
 #define SVp_NOK		0x00002000  /* has valid non-public numeric value */
 #define SVp_POK		0x00004000  /* has valid non-public pointer value */
-#define SVp_SCREAM	0x00008000  /* currently unused on plain scalars */
+#define SVp_SCREAM	0x00008000  /* has various meanings depending on SV type */
+#define SVs_VMG         SVp_SCREAM  /* Scalar SV has value magic */
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 
@@ -492,6 +493,7 @@ These guys don't need the curly blocks
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
                          SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
+#define SVf_OK_no_VMG   (SVf_OK & ~SVs_VMG)
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
@@ -996,11 +998,11 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-                                 SvFLAGS(sv) &=	~(SVf_OK|		\
+                                 SvFLAGS(sv) &=	~(SVf_OK_no_VMG|	\
                                                   SVf_IVisUV|SVf_UTF8),	\
                                                         SvOOK_off(sv))
 #define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)			\
-                                 SvFLAGS(sv) &=	~(SVf_OK|		\
+                                 SvFLAGS(sv) &=	~(SVf_OK_no_VMG|	\
                                                   SVf_UTF8),		\
                                                         SvOOK_off(sv))
 
@@ -1090,11 +1092,11 @@ in gv.h: */
                                  SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
 #define SvPOK_only(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-                                 SvFLAGS(sv) &= ~(SVf_OK|		\
+                                 SvFLAGS(sv) &= ~(SVf_OK_no_VMG|	\
                                                   SVf_IVisUV|SVf_UTF8),	\
                                     SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv) assert_not_glob(sv)	\
-                                 SvFLAGS(sv) &= ~(SVf_OK|		\
+                                 SvFLAGS(sv) &= ~(SVf_OK_no_VMG|	\
                                                   SVf_IVisUV),		\
                                     SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
@@ -1189,6 +1191,18 @@ magic. Refer to L<perltie> for some examples of other magical methods.
 #define SvRMAGICAL(sv)		(SvFLAGS(sv) & SVs_RMG)
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
+
+/* This flag is only meaningful on SvTYPE <= SVt_PVMG. Do not use these macros
+ * on other SV types as they will get confused with the SVpgv_GP flag */
+#define SvVMAGICAL(sv)          (assert(SvTYPE(sv) <= SVt_PVMG), \
+                                    SvFLAGS(sv) & SVs_VMG)
+#define SvVMAGICAL_on(sv)       (assert(SvTYPE(sv) <= SVt_PVMG), \
+                                    SvFLAGS(sv) |= SVs_VMG)
+#define SvVMAGICAL_off(sv)      STMT_START {                      \
+                                    SV *_sv = (sv);               \
+                                    if (SvTYPE(_sv) <= SVt_PVMG)  \
+                                        SvFLAGS(_sv) &= ~SVs_VMG; \
+                                } STMT_END
 
 /*
 =for apidoc Am|bool|SvAMAGIC|SV * sv
@@ -1878,6 +1892,7 @@ Taint an SV.  Use C<SvTAINTED_on> instead.
         assert(TAINTING_get || !TAINT_get); \
         if (UNLIKELY(TAINT_get))	\
             SvTAINTED_on(sv);	        \
+        VALUEMAGIC_APPLYTO(sv);         \
     } STMT_END
 
 /*

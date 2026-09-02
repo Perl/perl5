@@ -5242,6 +5242,7 @@ ext/XS-APItest/t/magic.t			test attaching, finding, and removing magic
 ext/XS-APItest/t/magic_chain.t			test low-level MAGIC chain handling
 ext/XS-APItest/t/magicv2.t			XS::APItest: tests for Magic-v2 related APIs
 ext/XS-APItest/t/magicv2-threads.t		XS::APItest: tests for Magic-v2 related APIs across multiple threads
+ext/XS-APItest/t/magicv2-value.t		XS::APItest: tests for Magic-v2 related APIs on SCALARVALUE magic
 ext/XS-APItest/t/Markers.pm			Helper for ./blockhooks.t
 ext/XS-APItest/t/mortal_destructor.t		Test mortal_destructor api.
 ext/XS-APItest/t/mro.t				Test mro plugin api

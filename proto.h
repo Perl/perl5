@@ -8401,6 +8401,26 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash)
 #define PERL_ARGS_ASSERT_VALIDATE_PROTO         \
         Perl_assert_aTHX; assert(name)
 
+PERL_CALLCONV void
+Perl_valuemagic_applyto(pTHX_ SV *dsv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_VALUEMAGIC_APPLYTO     \
+        Perl_assert_aTHX; assert(dsv)
+
+PERL_CALLCONV void
+Perl_valuemagic_clear(pTHX)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_VALUEMAGIC_CLEAR       \
+        Perl_assert_aTHX
+
+PERL_CALLCONV void
+Perl_valuemagic_from(pTHX_ SV *ssv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_VALUEMAGIC_FROM        \
+        Perl_assert_aTHX; assert(ssv)
+
 PERL_CALLCONV int
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
         Perl_attribute_nonnull_aTHX
@@ -9110,6 +9130,22 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
 #endif
 #if defined(PERL_CORE)
 PERL_CALLCONV void
+Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_MG_PROPAGATE          \
+        Perl_assert_aTHX; assert(ssv)
+
+PERL_CALLCONV void
+Perl_mg_unpropagate(pTHX_ SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_MG_UNPROPAGATE        \
+        Perl_assert_aTHX; assert(sv)
+
+PERL_CALLCONV void
 Perl_opslab_force_free(pTHX_ OPSLAB *slab)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
@@ -9141,6 +9177,14 @@ Perl_parser_free_nexttoke_ops(pTHX_ yy_parser *parser, OPSLAB *slab)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_PARSER_FREE_NEXTTOKE_OPS \
         Perl_assert_aTHX; assert(parser); assert(slab)
+
+PERL_CALLCONV bool
+Perl_sv_has_valuemagic(pTHX_ const SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_SV_HAS_VALUEMAGIC     \
+        Perl_assert_aTHX; assert(sv)
 
 # if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV void

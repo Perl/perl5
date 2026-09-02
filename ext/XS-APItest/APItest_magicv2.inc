@@ -147,6 +147,35 @@ static const struct ArrayVarMagicFunctions magicfuncs_inc_after_clear_hash = {
     .clear = &magicfunc_inc,
 };
 
+/* we can't make this one `static` because -Wc++-compat gets upset if we do */
+extern const struct ScalarValueMagicFunctions magicfuncs_value;
+
+static void
+magicfunc_propagate(pTHX_ SV *osv, MAGIC *omg, SV *nsv, MAGIC *nmg)
+{
+    PERL_UNUSED_ARG(osv);
+
+    SV *auxsv = MgAUXSV(omg);
+
+    /* Only add this to nsv if it doesn't already have it */
+    for(nmg = sv_magicv2_find_by_funcs(nsv, (const struct MagicFunctions *)&magicfuncs_value);
+            nmg;
+            nmg = sv_magicv2_findnext_by_funcs(nsv, (const struct MagicFunctions *)&magicfuncs_value, nmg)) {
+        if(MgAUXSV(nmg) == auxsv)
+            return;
+    }
+
+    sv_magicv2_add(nsv, (const struct MagicFunctions *)&magicfuncs_value, 0, SvREFCNT_inc(auxsv));
+}
+
+const struct ScalarValueMagicFunctions magicfuncs_value = {
+    .ver   = 2,
+    .shape = MGv2s_SCALARVALUE,
+    .debug_name = "XS::APItest/value",
+
+    .propagate = magicfunc_propagate,
+};
+
 static const struct MagicFunctions *S_magicfuncs_by_name(pTHX_ SV *name)
 {
     char *namepv = SvPV_nolen(name);
@@ -162,5 +191,6 @@ static const struct MagicFunctions *S_magicfuncs_by_name(pTHX_ SV *name)
     if(strEQ(namepv, "inc_after_set"))   return (struct MagicFunctions *)&magicfuncs_inc_after_set;
     if(strEQ(namepv, "inc_after_clear_arr"))  return (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr;
     if(strEQ(namepv, "inc_after_clear_hash")) return (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash;
+    if(strEQ(namepv, "value"))           return (struct MagicFunctions *)&magicfuncs_value;
     croak("Unrecognised magicfuncs name %" SVf, SVfARG(name));
 }

@@ -226,6 +226,15 @@ taken as a literal character.
 The ticket for this experiment is
 L<[perl #23945]|https://github.com/Perl/perl5/issues/24209>.
 
+=item Value Magic in Magic v2
+
+Introduced in Perl 5.45.3.
+
+See L<perlapi/struct ScalarValueMagicFunctions> for the mechanism.
+
+The ticket for this experiment is
+L<[perl #24735]|https://github.com/Perl/perl5/issues/24735>.
+
 =back
 
 =head2 Accepted features

@@ -117,6 +117,7 @@ enum MagicShape {
     MGv2s_SCALARVAR,
     MGv2s_ARRAYVAR,
     MGv2s_HASHVAR,
+    MGv2s_SCALARVALUE,
 };
 
 /* Flag constants stored in MagicFunctions flags field. Defined so they don't
@@ -225,6 +226,26 @@ magic structure is compatible.
 */
 
 #define MgHASHVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_HASHVAR, const struct HashVarMagicFunctions *)
+
+#define MGv2f_SCALARVALUE_AUTOPROPAGATE   (1<<18)
+
+struct ScalarValueMagicFunctions {
+    _PERL_MAGICFUNCTIONS_COMMON_FIELDS;
+
+    void (*propagate)(pTHX_ SV *ssv, MAGIC *smg, SV *dsv, MAGIC *dmg);
+};
+
+/*
+=for apidoc Am|const struct ScalarValueMagicFunctions *|MgSCALARVALUEFUNCS|MAGIC *mg
+Returns a pointer to the magic functions structure of the given Magic v2
+instance, cast to a type of C<const struct ScalarValueMagicFunctions>. On
+debugging perls this will additionally assert that the I<shape> field of the
+magic structure is compatible.
+
+=cut
+*/
+
+#define MgSCALARVALUEFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_SCALARVALUE, const struct ScalarValueMagicFunctions *)
 
 typedef struct {
     MAGIC  _magic;
