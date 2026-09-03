@@ -908,21 +908,6 @@ XS(XS_PerlIO_get_layers)
     XSRETURN(0);
 }
 
-XS(XS_Internals_DEBUGGING); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Internals_DEBUGGING)
-{
-    dXSARGS;
-
-    if (items != 0)
-        croak_xs_usage(cv, "");
-
-#ifdef DEBUGGING
-    XSRETURN_YES;
-#else
-    XSRETURN_NO;
-#endif
-}
-
 XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_is_regexp)
 {
@@ -1346,7 +1331,6 @@ static const struct xsub_details these_details[] = {
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$", 0 },
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%", 0 },
     {"Internals::stack_refcounted", XS_Internals_stack_refcounted, NULL, 0 },
-    {"Internals::DEBUGGING", XS_Internals_DEBUGGING, NULL, 0 },
     {"constant::_make_const", XS_constant__make_const, "\\[$@]", 0 },
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@", 0 },
     {"re::is_regexp", XS_re_is_regexp, "$", 0 },

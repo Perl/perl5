@@ -100,7 +100,7 @@ for my $cmds (@commands) {
 	      ">\n";
 	if (system(@cmds,@args) != 0) {
 	    print "Failed, status($?)\n";
-	    if (Internals::DEBUGGING) {
+	    if (Config::DEBUGGING) {
 		print "Running again in debug mode\n";
 		$^D = 1; # -Dp
 		system(@cmds,@args);
@@ -112,7 +112,7 @@ for my $cmds (@commands) {
 	note "####### '$cmdstr'";
 	if (system($cmdstr) != 0) {
 	    print "Failed, status($?)\n";
-	    if (Internals::DEBUGGING) {
+	    if (Config::DEBUGGING) {
 		print "Running again in debug mode\n";
 		$^D = 1; # -Dp
 		system($cmdstr);

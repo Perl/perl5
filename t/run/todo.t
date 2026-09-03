@@ -292,7 +292,7 @@ TODO: {
 }
 
 TODO: {
-    todo_skip "Test needs -DDEBUGGING", 1 unless Internals::DEBUGGING;
+    todo_skip "Test needs -DDEBUGGING", 1 unless Config::DEBUGGING;
     local $::TODO = 'GH 16522';
     fresh_perl(<<~'HERE', { stderr => 'devnull' });
         END { exit 0 } # Consider compilation errors a success
@@ -302,7 +302,7 @@ TODO: {
 }
 
 TODO: {
-    todo_skip "Test needs -DDEBUGGING", 1 unless Internals::DEBUGGING;
+    todo_skip "Test needs -DDEBUGGING", 1 unless Config::DEBUGGING;
     local $::TODO = 'GH 16863';
     fresh_perl(<<~'HERE', { stderr => 'devnull' });
         END { exit 0 }
@@ -320,7 +320,7 @@ TODO: {
 TODO: {
     todo_skip "Test needs -DDEBUGGING on Linux and on Cygwin, no miniperl", 1
         unless (
-            Internals::DEBUGGING and
+            Config::DEBUGGING and
             ($Config{osname} eq 'linux' or $Config{osname} eq 'cygwin') and
             ! is_miniperl()
         );
@@ -333,7 +333,7 @@ TODO: {
 }
 
 TODO: {
-    todo_skip "Test needs -DDEBUGGING", 1 unless Internals::DEBUGGING;
+    todo_skip "Test needs -DDEBUGGING", 1 unless Config::DEBUGGING;
     local $::TODO = 'GH 16876';
     fresh_perl('$_ = "a"; s{ x | (?{ s{}{x} }) }{}gx;',
                { stderr => 'devnull' });

@@ -11,7 +11,7 @@ use Config;
 my $perlio_log = "perlio$$.txt";
 
 skip_all "DEBUGGING build required"
-  unless Internals::DEBUGGING;
+  unless Config::DEBUGGING;
 
 plan tests => 9;
 

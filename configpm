@@ -144,7 +144,7 @@ my $export_funcs = uncomment <<'EOT';
 #    my %Export_Cache = (myconfig => 1, config_sh => 1, config_vars => 1,
 #                        config_re => 1, compile_date => 1, local_patches => 1,
 #                        bincompat_options => 1, non_bincompat_options => 1,
-#                        header_files => 1);
+#                        header_files => 1, DEBUGGING => 1);
 EOT
 
 my %export_ok = eval $export_funcs or die;
@@ -808,6 +808,14 @@ $heavy_txt .= uncomment <<'ENDOFEND';
 #        }
 #    }
 #
+#    my $is_debugging;
+#    sub DEBUGGING {
+#        unless (defined $is_debugging) {
+#            $is_debugging = (Internals::V())[1] =~ /\bDEBUGGING\b/aa;
+#        }
+#        $is_debugging;
+#    }
+#
 #    # Called by the real AUTOLOAD
 #    sub launcher {
 #        undef &AUTOLOAD;
@@ -987,6 +995,11 @@ print CONFIG_POD uncomment <<'ENDOFTAIL';
 #
 #    Returns a list of the header files that should be used as dependencies for
 #    XS code, for this version of Perl on this platform.
+#
+#    =item DEBUGGING()
+#
+#    Returns a true value if perl was built with -DDEBUGGING or it's platform
+#    equivalent.
 #
 #    =back
 #
