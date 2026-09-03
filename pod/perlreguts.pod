@@ -1146,14 +1146,14 @@ circumstances.
 
 Consider this simple example:
 
-    ("a" x 20) =~ /^ ( (aa?) ){5,100} [b] /x;
+    ("a" x 20) =~ /^ ( (aa?) ){5,100} [bc] /x;
 
 (This example works just the same using C<*> rather than C<{5,100}>, but
 the latter form is used here as it will shortly help illuminate an issue
 with non-infinite ranges.)
 
 This pattern will eventually fail, since the string doesn't include a 'b'
-character (which for this example is in a character class to stop intuit
+or 'c' character (this example uses a character class to stop intuit
 rejecting it immediately). But early on in execution the quantifier will
 have iterated 10 times, each time consuming 'aa'. So at that point the
 entire input string can be thought of as having been consumed in this
@@ -1161,13 +1161,13 @@ fashion:
 
     (aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)
 
-Then the 'b' isn't found and the pattern starts backtracking. The last
-C<aa?> is retried, this time consuming a single character, and an 11th
-iteration can proceed, resulting in:
+Then the character class fails and the pattern starts backtracking. The
+last C<aa?> is retried, this time consuming a single character, and an
+11th iteration can proceed, resulting in:
 
     (aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(aa)(a)(a)
 
-before again failing to find the 'b'. The backtracking continues until
+before again failing the character class. The backtracking continues until
 every possible permutation of 'a' and 'aa' in each iteration is tried,
 which may take a long time.
 
@@ -1179,7 +1179,7 @@ backtracking, the engine may have reached this state:
 where it has consumed four characters using three iterations. The rest of
 the match at this point can be thought of as the equivalent of:
 
-    ("a" x 16) =~ /^ ( (aa?) ){2,97} [b] /x;
+    ("a" x 16) =~ /^ ( (aa?) ){2,97} [bc] /x;
 
 Running this will eventually fail, and after backtracking to the
 C<(aa)(a)(a)> state, it backtracks further and tries further permutations,
@@ -1190,7 +1190,7 @@ after which it will eventually reach this state:
 In a similar fashion to the previous state, the rest of the match at this
 point is equivalent to:
 
-    ("a" x 16) =~ /^ ( (aa?) ){2,97} [b] /x;
+    ("a" x 16) =~ /^ ( (aa?) ){2,97} [bc] /x;
 
 But hold on: we know that this particular sub-match failed earlier on; so
 running the exact same match again must also fail. So, in principle, after
@@ -1231,7 +1231,7 @@ Mbyte string against a pattern like C</(...)*(...)*/> which has two
 quantifiers, 2 million bits must be allocated.
 
 To avoid a potentially large malloc() for every match that has been marked
-as suitable for SLC, a countdown is initiated the first time a candidate
+as suitable for a SLC, a countdown is initiated the first time a candidate
 C<WHILEM> node is reached; only after (string length) multiplied by
 (number of participating C<WHILEM> nodes) iterations is the cache actually
 allocated and initialised. This crude heuristic is an indication that the
@@ -1239,10 +1239,10 @@ match has gone super-linear.
 
 =item *
 
-It is only used for quantifiers on I<variable-length> sub-patterns, i.e.
-those which are compiled to a C<CURLYX>/C<WHILEM> node pair. Quantifiers
-with simpler sub-patterns are less likely to exhibit exponential
-behaviour.
+The SLC is only used for quantifiers on I<variable-length> sub-patterns,
+i.e. those which are compiled to a C<CURLYX>/C<WHILEM> node pair.
+Quantifiers with simpler sub-patterns are less likely to exhibit
+exponential behaviour.
 
 =item *
 
@@ -1299,9 +1299,9 @@ For it to be safe to use the cache in a nested quantifier, the rule is
 that the outer quantifier's still-to-go minimum and maximum values must
 both remain constant on the second, third, etc., iterations. Since such
 values normally count down until they reach zero or remain at infinity,
-This means that a minimum can only be be 0 or 1, and a maximum must be 0,
-1 or infinity. This effectively means that any outer quantifier other than
-C<?,*,+> disqualifies nested quantifiers from participating in the cache.
+a minimum can only be be 0 or 1, and a maximum must be 0, 1 or infinity.
+This effectively means that any outer quantifier other than C<?,*,+>
+disqualifies nested quantifiers from participating in the cache.
 
 [DAPM 2026: I suspect that this restriction is too severe, and that an
 outer quantifier like C<{1,5}> is safe. But I have neither been able to
