@@ -14246,7 +14246,7 @@ Perl_ck_fun(pTHX_ OP *o)
                                 SV *namesv;
                                 targ = pad_alloc(OP_RV2GV, SVf_READONLY);
                                 namesv = PAD_SVl(targ);
-                                if (want_dollar && *name != '$')
+                                if (want_dollar && *name != Perl_Sigil_Scalar)
                                     sv_setpvs(namesv, "$");
                                 else
                                     SvPVCLEAR(namesv);
