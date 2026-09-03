@@ -1556,7 +1556,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
        || ! GET_HV_FETCH_TIE_FUNC)
       {
         SV * const module = newSVpvn(name, len);
-        const char type = varname == '[' ? Perl_Sigil_Scalar : '%';
+        const char type = varname == '[' ? Perl_Sigil_Scalar : Perl_Sigil_Hash;
         if ( flags & 1 )
             save_scalar(gv);
         load_module(PERL_LOADMOD_NOIMPORT, module, NULL);
@@ -2018,7 +2018,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                         packWARN(WARN_MISC),
                         "Variable \"%c%" UTF8f "\" is not imported",
                         sv_type == SVt_PVAV ? Perl_Sigil_Array :
-                        sv_type == SVt_PVHV ? '%' : Perl_Sigil_Scalar,
+                        sv_type == SVt_PVHV ? Perl_Sigil_Hash : Perl_Sigil_Scalar,
                         UTF8fARG(is_utf8, len, name));
                     if (GvCVu(*gvp))
                         ck_warner_d(

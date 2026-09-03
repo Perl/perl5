@@ -319,7 +319,7 @@ XS(XS_builtin_export_lexically)
                     bad = "an ARRAY";
                 break;
 
-            case '%':
+            case Perl_Sigil_Hash:
                 if(SvTYPE(rv) != SVt_PVHV)
                     bad = "a HASH";
                 break;
