@@ -2017,7 +2017,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                     ck_warner_d(
                         packWARN(WARN_MISC),
                         "Variable \"%c%" UTF8f "\" is not imported",
-                        sv_type == SVt_PVAV ? '@' :
+                        sv_type == SVt_PVAV ? Perl_Sigil_Array :
                         sv_type == SVt_PVHV ? '%' : Perl_Sigil_Scalar,
                         UTF8fARG(is_utf8, len, name));
                     if (GvCVu(*gvp))

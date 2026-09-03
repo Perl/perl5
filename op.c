@@ -1946,7 +1946,7 @@ S_op_varname_subscript(pTHX_ const OP *o, int subscript_type)
            o->op_type == OP_PADHV || o->op_type == OP_RV2HV);
     {
         const char funny  = o->op_type == OP_PADAV
-                         || o->op_type == OP_RV2AV ? '@' : '%';
+                         || o->op_type == OP_RV2AV ? Perl_Sigil_Array : '%';
         if (o->op_type == OP_RV2AV || o->op_type == OP_RV2HV) {
             GV *gv;
             if (cUNOPo->op_first->op_type != OP_GV

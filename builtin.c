@@ -314,7 +314,7 @@ XS(XS_builtin_export_lexically)
                     bad = "a SCALAR";
                 break;
 
-            case '@':
+            case Perl_Sigil_Array:
                 if(SvTYPE(rv) != SVt_PVAV)
                     bad = "an ARRAY";
                 break;
