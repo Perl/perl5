@@ -2997,6 +2997,24 @@ typedef struct {
 } sv_reftype_entry;
 #define PL_sv_reftype_lookup_MAX 14
 extern const sv_reftype_entry PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
+
+/*
+=for apidoc      Ay||Perl_Sigil
+=for apidoc_item Perl_Sigil_Array
+=for apidoc_item Perl_Sigil_Code
+=for apidoc_item Perl_Sigil_Hash
+=for apidoc_item Perl_Sigil_Scalar
+
+Identifies character literal used as a sigil - character used in the Perl code.
+
+=cut
+*/
+
+#define Perl_Sigil_Array  '@'
+#define Perl_Sigil_Code   '&'
+#define Perl_Sigil_Hash   '%'
+#define Perl_Sigil_Scalar '$'
+
 #endif
 
 /*
