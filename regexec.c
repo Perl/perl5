@@ -9180,7 +9180,10 @@ NULL
                 goto do_whilem_B_max;
             }
 
-            if (FLAGS(scan)) {
+            if (   FLAGS(scan)
+                   /* -1 => disable cache */
+                && PL_re_superlinear_cache_delay != -1)
+            {
                 /* Super-linear cache processing.
                  *
                  * See L<perlreguts/The super-linear cache> for a detailed
@@ -9222,7 +9225,26 @@ NULL
                      */
                     if (len < (STRLEN_MAX - 7)/n) {
                         reginfo->poscache_maxiter = (len + 1) * n;
-                        reginfo->poscache_iter = reginfo->poscache_maxiter;
+
+                        if (PL_re_superlinear_cache_delay == 0)
+                            /* use default value  */
+                            reginfo->poscache_iter =
+                                                reginfo->poscache_maxiter;
+                        else if (PL_re_superlinear_cache_delay > 0)
+                            /* use specified value  */
+                            reginfo->poscache_iter =
+                                                PL_re_superlinear_cache_delay;
+                        else {
+                            /* negative (-1 already checked for above)
+                             * use -N/1E6 scaling factor */
+                            NV delay =
+                                -(NV)PL_re_superlinear_cache_delay / 1E6
+                                 * (NV)reginfo->poscache_maxiter;
+                            reginfo->poscache_iter =
+                                delay >= (NV)STRLEN_MAX
+                                    ? STRLEN_MAX
+                                    : delay < 1 ? 1 : delay;
+                        }
                     }
                 }
 

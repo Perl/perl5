@@ -17210,6 +17210,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* RE engine related */
     PL_regmatch_slab	= NULL;
     PL_reg_curpm	= NULL;
+    PL_re_superlinear_cache_delay = proto_perl->Ire_superlinear_cache_delay;
 
     PL_sub_generation	= proto_perl->Isub_generation;
 
