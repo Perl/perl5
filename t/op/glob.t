@@ -154,7 +154,7 @@ SKIP: {
     skip "Debugging builds on Linux and Cygwin still problematic: GH 16869", 1
         if (
             ($Config{osname} eq 'linux' or $Config{osname} eq 'cygwin') and
-            Internals::DEBUGGING
+            Config::DEBUGGING
         );
     fresh_perl(<<~'HERE', {});
         my $glob = ("0" x 4094) . "?";
