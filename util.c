@@ -4716,6 +4716,9 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 #ifdef VMS
 #  include <starlet.h>
 #endif
+#ifdef WIN32
+BOOLEAN NTAPI SystemFunction036(PVOID RandomBuffer, ULONG RandomBufferLength);
+#endif
 
 /* Splitmix64 is a simple PRNG and integer hashing function. It was
  * introduced in 2015: https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf
@@ -4737,10 +4740,14 @@ Perl_seed(pTHX)
     PERL_ARGS_ASSERT_SEED;
 
    /*
-    * Attempt to read from /dev/urandom to generate a pseudo-random number.
-    * If that does not work, or it is unavailable, we fall back to gathering
+    * Attempt to read from the OS CSPRNG to generate a pseudo-random number.
+    * On Windows this is RtlGenRandom (SystemFunction036 from advapi32.dll);
+    * on Unix-like systems we try getentropy() and then /dev/urandom. If
+    * none of those are available or they fail, we fall back to gathering
     * several state variables and hashing them into a seed value.
     */
+
+    U64 seed;
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
 #ifndef PERL_NO_DEV_RANDOM
@@ -4756,7 +4763,6 @@ Perl_seed(pTHX)
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
 #endif
-    U64 seed;
 
 #ifdef HAS_GETENTROPY
     U8 ok = (getentropy(&seed, sizeof(seed)) == 0);
@@ -4777,6 +4783,14 @@ Perl_seed(pTHX)
         if (seed) {
             return seed;
         }
+    }
+#endif
+
+#ifdef WIN32
+    /* Ask the Windows OS CSPRNG (available since XP, already linked via
+     * advapi32) for seed material. */
+    if (SystemFunction036((PVOID)&seed, (ULONG)sizeof(seed))) {
+        return seed;
     }
 #endif
 
