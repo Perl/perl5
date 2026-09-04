@@ -2163,9 +2163,6 @@ associated with it.  If such an attribute list is present, it is
 broken up at space or colon boundaries and treated as though a
 C<use attributes> had been seen.  See L<attributes> for details
 about what attributes are currently supported.
-Unlike the limitation with the obsolescent C<use attrs>, the
-C<sub : ATTRLIST> syntax works to associate the attributes with
-a pre-declaration, and not just with a subroutine definition.
 
 The attributes must be valid as simple identifier names (without any
 punctuation other than the '_' character).  They may have a parameter
