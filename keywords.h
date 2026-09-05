@@ -13,7 +13,7 @@
  * Any changes made here will be lost!
  */
 
-#define KEY_NULL		0
+#define KEY_NULL		0	/* Placeholder for the default return of 0 */
 #define KEY___CLASS__		1
 #define KEY___DATA__		2
 #define KEY___END__		3
@@ -285,5 +285,5 @@
 #define KEY_y			269
 
 /* Generated from:
- * b0cc461f21539f3151a4508d1d1f7fcf43fb9b41d3c31a30ced8e3dc8771cdd3 regen/keywords.pl
+ * e23f0909b3767827dfe8ffda9d36bc4865c1fc4196ea3951fdb294ca495aea04 regen/keywords.pl
  * ex: set ro ft=c: */
