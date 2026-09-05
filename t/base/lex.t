@@ -123,10 +123,10 @@ print $foo;
 my $test = 31;
 
 { my $CX = "\cX";
-  my $CXY  ="\cXY";
+  my $CXY  ="\c_XY";
   $ {$CX} = 17;
   $ {$CXY} = 23;
-  if ($ {^XY} != 23) { print "not "  }
+  if ($ {^_XY} != 23) { print "not "  }
   print "ok $test\n"; $test++;
  
 # Does the old UNBRACED syntax still do what it used to?
@@ -134,7 +134,7 @@ my $test = 31;
   print "ok $test\n"; $test++;
 
   sub XX () { 6 }
-  $ {"\cQ\cXX"} = 119; 
+  $ {"\c_Q\c_XX"} = 119;
   $^Q = 5; #  This should be an unused ^Var.
   $N = 5;
   # The second caret here should be interpreted as an xor
@@ -145,54 +145,54 @@ my $test = 31;
   # $^FOO is always global; it doesn't make sense to 'my' it.
   # 
 
-  eval 'my $^X;';
-  print "not " unless index ($@, 'Can\'t use global $^X in "my"') > -1;
+  eval 'my ${^_X};';
+  print "not " unless index ($@, 'Can\'t use global $^_X in "my"') > -1;
   print "ok $test\n"; $test++;
 #  print "($@)\n" if $@;
 
-  eval 'my $ {^XYZ};';
-  print "not " unless index ($@, 'Can\'t use global $^XYZ in "my"') > -1;
+  eval 'my $ {^_XYZ};';
+  print "not " unless index ($@, 'Can\'t use global $^_XYZ in "my"') > -1;
   print "ok $test\n"; $test++;
 #  print "($@)\n" if $@;
 #
-  ${^TEST}= "splat";
-  @{^TEST}= ("foo", "bar");
-  %{^TEST}= ("foo" => "FOO", "bar" => "BAR" );
+  ${^_TEST}= "splat";
+  @{^_TEST}= ("foo", "bar");
+  %{^_TEST}= ("foo" => "FOO", "bar" => "BAR" );
   
-  print "not " if "${^TEST}" ne "splat";
+  print "not " if "${^_TEST}" ne "splat";
   print "ok $test\n"; $test++;
   
-  print "not " if "${ ^TEST }" ne "splat";
+  print "not " if "${ ^_TEST }" ne "splat";
   print "ok $test\n"; $test++;
 
-  print "not " if "${^TEST}[0]" ne "splat[0]";
+  print "not " if "${^_TEST}[0]" ne "splat[0]";
   print "ok $test\n"; $test++;
 
-  print "not " if "${^TEST[0]}" ne "foo";
+  print "not " if "${^_TEST[0]}" ne "foo";
   print "ok $test\n"; $test++;
 
-  print "not " if "${ ^TEST [1] }" ne "bar";
+  print "not " if "${ ^_TEST [1] }" ne "bar";
   print "ok $test\n"; $test++;
 
-  print "not " if "${^TEST}{foo}" ne "splat{foo}";
+  print "not " if "${^_TEST}{foo}" ne "splat{foo}";
   print "ok $test\n"; $test++;
 
-  print "not " if "${^TEST{foo}}" ne "FOO";
+  print "not " if "${^_TEST{foo}}" ne "FOO";
   print "ok $test\n"; $test++;
 
-  print "not " if "${ ^TEST {bar} }" ne "BAR";
+  print "not " if "${ ^_TEST {bar} }" ne "BAR";
   print "ok $test\n"; $test++;
 
 
 # Now let's make sure that caret variables are all forced into the main package.
   package Someother;
   $^Q = 'Someother';
-  $ {^Quixote} = 'Someother 2';
+  $ {^_Quixote} = 'Someother 2';
   $ {^M} = 'Someother 3';
   package main;
   print "not " unless $^Q eq 'Someother';
   print "ok $test\n"; $test++;
-  print "not " unless $ {^Quixote} eq 'Someother 2';
+  print "not " unless $ {^_Quixote} eq 'Someother 2';
   print "ok $test\n"; $test++;
   print "not " unless $ {^M} eq 'Someother 3';
   print "ok $test\n"; $test++;

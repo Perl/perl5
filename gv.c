@@ -2510,6 +2510,132 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
     }
 }
 
+/* Table of the "English names" aliases for punctuation variables */
+enum {
+    CARET_VARS_SUPERGLOBAL = '\xFE',
+    CARET_VARS_PREDEFINED  = '\xFF',
+};
+const struct {
+    const char *longname;
+          char  shortname;
+}
+english_names[] = {
+    /* The ground of all being. */
+    { "ARG",                            '_'    }, /* $_  */
+    /* Matching. */
+#if 0
+    /* the control character variables for the next three already exist */
+    { "MATCH",                          '&'    }, /* $&  */
+    { "PREMATCH",                       '`'    }, /* $`  */
+    { "POSTMATCH",                      '\''   }, /* $'  */
+#endif
+    { "LAST_PAREN_MATCH",               '+'    }, /* $+  */
+    { "LAST_SUBMATCH_RESULT",           'N'    }, /* $^N */
+    { "LAST_MATCH_START",               '-'    }, /* @-  just the ARRAY slot? */
+    { "LAST_MATCH_END",                 '+'    }, /* @+  just the ARRAY slot? */
+    /* Input. */
+    { "INPUT_LINE_NUMBER",              '.'    }, /* $.  */
+        { "NR",                         '.'    }, /* $.  */
+    { "INPUT_RECORD_SEPARATOR",         '/'    }, /* $/  */
+        { "RS",                         '/'    }, /* $/  */
+    /* Output. */
+    { "OUTPUT_AUTOFLUSH",               '|'    }, /* $|  */
+    { "OUTPUT_FIELD_SEPARATOR",         ','    }, /* $,  */
+        { "OFS",                        ','    }, /* $,  */
+    { "OUTPUT_RECORD_SEPARATOR",        '\\'   }, /* $\  */
+        { "ORS",                        '\\'   }, /* $\  */
+    /* Interpolation "constants". */
+    { "LIST_SEPARATOR",                 '"'    }, /* $"  */
+    { "SUBSCRIPT_SEPARATOR",            ';'    }, /* $;  */
+        { "SUBSEP",                     ';'    }, /* $;  */
+    /* Formats */
+    { "FORMAT_PAGE_NUMBER",             '%'    }, /* $%  */
+    { "FORMAT_LINES_PER_PAGE",          '='    }, /* $=  */
+    { "FORMAT_LINES_LEFT",              '-'    }, /* $-  just the SCALAR slot? */
+    { "FORMAT_NAME",                    '~'    }, /* $~  */
+    { "FORMAT_TOP_NAME",                '^'    }, /* $^  */
+    { "FORMAT_LINE_BREAK_CHARACTERS",   ':'    }, /* $:  */
+    { "FORMAT_FORMFEED",                'L'    }, /* $^L */
+    /* Error status. */
+    { "CHILD_ERROR",                    '?'    }, /* $?  */
+    { "OS_ERROR",                       '!'    }, /* $!  */
+        { "ERRNO",                      '!'    }, /* $!  */
+    { "EXTENDED_OS_ERROR",              'E'    }, /* $^E */
+    { "EVAL_ERROR",                     '@'    }, /* $@  */
+    /* Process info. */
+    { "PROCESS_ID",                     '$'    }, /* $$  */
+        { "PID",                        '$'    }, /* $$  */
+    { "REAL_USER_ID",                   '<'    }, /* $<  */
+        { "UID",                        '<'    }, /* $<  */
+    { "EFFECTIVE_USER_ID",              '>'    }, /* $>  */
+        { "EUID",                       '>'    }, /* $>  */
+    { "REAL_GROUP_ID",                  '('    }, /* $(  */
+        { "GID",                        '('    }, /* $(  */
+    { "EFFECTIVE_GROUP_ID",             ')'    }, /* $)  */
+        { "EGID",                       ')'    }, /* $)  */
+    { "PROGRAM_NAME",                   '0'    }, /* $0  */
+    /* Internals. */
+    { "PERL_VERSION",                   'V'    }, /* $^V */
+    { "OLD_PERL_VERSION",               ']'    }, /* $]  */
+    { "ACCUMULATOR",                    'A'    }, /* $^A */
+    { "COMPILING",                      'C'    }, /* $^C */
+    { "DEBUGGING",                      'D'    }, /* $^D */
+    { "SYSTEM_FD_MAX",                  'F'    }, /* $^F */
+    { "INPLACE_EDIT",                   'I'    }, /* $^I */
+    { "PERLDB",                         'P'    }, /* $^P */
+    { "LAST_REGEXP_CODE_RESULT",        'R'    }, /* $^R */
+    { "EXCEPTIONS_BEING_CAUGHT",        'S'    }, /* $^S */
+    { "BASETIME",                       'T'    }, /* $^T */
+    { "WARNING",                        'W'    }, /* $^W */
+    { "EXECUTABLE_NAME",                'X'    }, /* $^X */
+    { "OSNAME",                         'O'    }, /* $^O */
+    /* Deprecated. */
+ /* { "ARRAY_BASE",                     '['    }, */
+ /* { "OFMT",                           '#'    }, */
+ /* { "MULTILINE_MATCHING",             '*'    }, */
+
+    /* these are the classic superglobals */
+    { "ARGV",                           CARET_VARS_SUPERGLOBAL },
+    { "ENV",                            CARET_VARS_SUPERGLOBAL },
+    { "INC",                            CARET_VARS_SUPERGLOBAL },
+    { "SIG",                            CARET_VARS_SUPERGLOBAL },
+
+    /* these are just regular multi-character control character variables */
+    { "CAPTURE",                        CARET_VARS_PREDEFINED },
+    { "CHILD_ERROR_NATIVE",             CARET_VARS_PREDEFINED },
+    { "GLOBAL_PHASE",                   CARET_VARS_PREDEFINED },
+    { "HOOK",                           CARET_VARS_PREDEFINED },
+    { "LAST_FH",                        CARET_VARS_PREDEFINED },
+    { "LAST_SUCCESSFUL_PATTERN",        CARET_VARS_PREDEFINED },
+    { "LETTERS",                        CARET_VARS_PREDEFINED },
+    { "MATCH",                          CARET_VARS_PREDEFINED },
+    { "MAX_EVAL_BEGIN_DEPTH",           CARET_VARS_PREDEFINED },
+    { "MAX_NESTED_EVAL_BEGIN_BLOCKS",   CARET_VARS_PREDEFINED },
+    { "OPEN",                           CARET_VARS_PREDEFINED },
+    { "POSTMATCH",                      CARET_VARS_PREDEFINED },
+    { "PREMATCH",                       CARET_VARS_PREDEFINED },
+    { "RE_COMPILE_RECURSION_LIMIT",     CARET_VARS_PREDEFINED },
+    { "RE_DEBUG_FLAGS",                 CARET_VARS_PREDEFINED },
+    { "RE_TRIE_MAXBUF",                 CARET_VARS_PREDEFINED },
+    { "RE_TRIE_MAXBUFF",                CARET_VARS_PREDEFINED },
+    { "SAFE_LOCALES",                   CARET_VARS_PREDEFINED },
+    { "TAINT",                          CARET_VARS_PREDEFINED },
+    { "UNICODE",                        CARET_VARS_PREDEFINED },
+    { "UTF8CACHE",                      CARET_VARS_PREDEFINED },
+    { "UTF8LOCALE",                     CARET_VARS_PREDEFINED },
+    { "WARNING_BITS",                   CARET_VARS_PREDEFINED },
+    { "WARNING_HINTS",                  CARET_VARS_PREDEFINED },
+    { "WIDE_SYSTEM_CALLS",              CARET_VARS_PREDEFINED },
+    /* Deprecated and removed variables */
+    { "ENCODING",                       CARET_VARS_PREDEFINED },
+    { "WIN32_SLOPPY_STAT",              CARET_VARS_PREDEFINED },
+    /* Historical variables used in CPAN modules */
+    { "E_NCODING",                      CARET_VARS_PREDEFINED }, /* Encode */
+
+    /* end of the list */
+    { 0 },
+};
+
 /*
 =for apidoc      gv_fetchpv
 =for apidoc_item gv_fetchpvn
@@ -2616,6 +2742,47 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     }
 
     /* By this point we should have a stash and a name */
+
+    /* if the first character is between ^A and ^Z
+     * look the name up in english_names
+     */
+    if ( stash == PL_defstash && len > 1 && name[0] > 0 && name[0] <= 26 ) {
+
+        /* find the shortname, if any */
+        char shortname = 0;
+        const char *longname = NULL;
+        for ( int i = 0; english_names[i].longname; i++ ) {
+            if ( name[0] == ( english_names[i].longname[0] & 0x1F )
+              && strEQ( name+1, english_names[i].longname +1) )
+            {
+                  shortname = english_names[i].shortname;
+                  longname  = english_names[i].longname;
+                  break;
+            }
+        }
+        if ( shortname ) {
+            if ( shortname != CARET_VARS_PREDEFINED ) {
+                /* turn the shortname back to a control character */
+                    if ( shortname >= 'A' && shortname <= 'Z' )
+                      shortname &= 0x1F;
+
+                /* grab the GV by its shortname and insert it into
+                 * the PL_defstash symbol table by its long name
+                 */
+                GV *ogv = shortname != CARET_VARS_SUPERGLOBAL
+		  ? gv_fetchpvn_flags( &shortname, 1, GV_ADD|GV_ADDMG, sv_type )
+		  : gv_fetchpvn_flags( longname, strlen(longname), GV_ADD|GV_ADDMG, sv_type );
+                assert(ogv); /* shouldn't be NULL */
+                hv_store( PL_defstash, name, strlen(name), SvREFCNT_inc((SV *)ogv), 0 );
+                return ogv;
+            }
+        }
+        else { /* unknown control character variable */
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_MISC),
+                 "Unknown control character variable ^%c%s", name[0]|0x40, name+1);
+        }
+    }
+
     gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
         if (addmg) gv = (GV *)newSV_type(SVt_NULL);     /* tentatively */
