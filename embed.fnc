@@ -1383,9 +1383,6 @@ p	|void	|do_vop 	|I32 optype				\
 				|NN SV *left				\
 				|NN SV *right
 CDRdp	|U8	|dowantarray
-TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
-				|U32 seed
-TXop	|double |drand48_r	|NN perl_drand48_t *random_state
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
@@ -2803,6 +2800,10 @@ Adpx	|OP *	|parse_termexpr |U32 flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts					\
 				|NN const char **popt
+TXop	|NV	|pcg64_random_NV_r					\
+				|NN PL_RANDOM_STATE_TYPE *state
+TXop	|void	|pcg64_seed_r	|NN PL_RANDOM_STATE_TYPE *state 	\
+				|U64 seed1
 
 : peephole optimiser
 p	|void	|peep		|NULLOK OP *o

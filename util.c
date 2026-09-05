@@ -38,11 +38,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-/* For get_entropy() on non-Linux systems (MacOS, Android) we need sys/random.h */
-#ifdef I_SYS_RANDOM
-#include <sys/random.h>
-#endif
-
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 int putenv(char *);
@@ -4733,101 +4728,6 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 #  include <starlet.h>
 #endif
 
-/* Splitmix64 is a simple PRNG and integer hashing function. It was
- * introduced in 2015: https://gee.cs.oswego.edu/dl/papers/oopsla14.pdf
- * Examples: https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64
- */
-static U64
-splitmix64(U64 *state)
-{
-    U64 z = (*state += 0x9e3779b97f4a7c15);
-    z     = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
-    z     = (z ^ (z >> 27)) * 0x94d049bb133111eb;
-
-    return z ^ (z >> 31);
-}
-
-U64
-Perl_seed(pTHX)
-{
-    PERL_ARGS_ASSERT_SEED;
-
-   /*
-    * Attempt to read from /dev/urandom to generate a pseudo-random number.
-    * If that does not work, or it is unavailable, we fall back to gathering
-    * several state variables and hashing them into a seed value.
-    */
-
-/* This test is an escape hatch, this symbol isn't set by Configure. */
-#ifndef PERL_NO_DEV_RANDOM
-#ifndef PERL_RANDOM_DEVICE
-   /* /dev/random isn't used by default because reads from it will block
-    * if there isn't enough entropy available.  You can compile with
-    * PERL_RANDOM_DEVICE to it if you'd prefer Perl to block until there
-    * is enough real entropy to fill the seed. */
-#  ifdef __amigaos4__
-   /* https://wiki.amigaos.net/wiki/AmigaOS_Manual%3A_AmigaDOS_Additional_Amiga_Directories#Random-Handler_(RANDOM:) */
-#    define PERL_RANDOM_DEVICE "RANDOM:"
-#  else
-#    define PERL_RANDOM_DEVICE "/dev/urandom"
-#  endif
-#endif
-    U64 seed;
-
-#ifdef HAS_GETENTROPY
-    U8 ok = (getentropy(&seed, sizeof(seed)) == 0);
-    /* PerlIO_printf(Perl_debug_log, "Entropy: OK:%i Seed:%lu\n", ok, seed); */
-    if (ok) {
-        return seed;
-    }
-#endif
-
-    int fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
-    if (fd != -1) {
-        if (PerlLIO_read(fd, (void*)&seed, sizeof seed) != sizeof seed) {
-            seed = 0;
-        }
-
-        PerlLIO_close(fd);
-
-        if (seed) {
-            return seed;
-        }
-    }
-#endif
-
-    /* We only get this far if /dev/urandom is not available or the read fails.
-     * Grab several state variables and hash those for randomness instead. */
-
-#ifdef HAS_GETTIMEOFDAY
-    struct timeval when;
-
-    PerlProc_gettimeofday(&when,NULL);
-    /* Milliseconds */
-    U64 epoch = ((U64)when.tv_sec * 1000000) + when.tv_usec;
-#else
-    Time_t when;
-
-    (void)time(&when);
-    /* Seconds */
-    U64 epoch = when;
-#endif
-
-    UV pid       = PerlProc_getpid();
-    UV time_ptr  = PTR2UV(&when);
-    UV stack_ptr = PTR2UV(PL_stack_sp);
-
-    /* epoch in microseconds is ~52 bits, PIDs are ~22 bits, PTRs are ~48 bits.
-     * We mix the bits for all four together to get a good spread of entropy */
-    U64 tmp = ROTL64(time_ptr, 16) ^ ROTL32(pid, 8) ^ epoch ^ stack_ptr;
-    U64 ret = splitmix64(&tmp);
-
-    /* PerlIO_printf(Perl_debug_log, "XXXX: TIME:%lu PID:%lu PTR:%lu\n", epoch, pid, time_ptr); */
-    /* PerlIO_printf(Perl_debug_log, "SEED: %lu\n", ret); */
-
-    return ret;
-}
-
 void
 Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 {
@@ -4884,7 +4784,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 #endif /* NO_PERL_HASH_ENV */
     {
         for( i = 0; i < PERL_HASH_SEED_BYTES; i++ ) {
-            seed_buffer[i] = (unsigned char)(Perl_internal_drand48() * (U8_MAX+1));
+            seed_buffer[i] = (unsigned char)(Perl_internal_randd() * (U8_MAX+1));
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS
@@ -5990,7 +5890,7 @@ S_my_mkostemp(char *templte, int flags)
     do {
         int i;
         for (i = 1; i <= 6; ++i) {
-            templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
+            templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_randd() * TEMP_FILE_CH_COUNT)];
         }
 #ifdef VMS
         if (delete_on_close) {
@@ -6059,104 +5959,6 @@ Perl_get_re_arg(pTHX_ SV *sv)
     }
 
     return NULL;
-}
-
-/*
- * This code is derived from drand48() implementation from FreeBSD,
- * found in lib/libc/gen/_rand48.c.
- *
- * The U64 implementation is original, based on the POSIX
- * specification for drand48().
- */
-
-/*
-* Copyright (c) 1993 Martin Birgmeier
-* All rights reserved.
-*
-* You may redistribute unmodified or modified versions of this source
-* code provided that the above copyright notice and this and the
-* following conditions are retained.
-*
-* This software is provided ``as is'', and comes with no warranties
-* of any kind. I shall in no event be liable for anything that happens
-* to anyone/anything when using this software.
-*/
-
-#define FREEBSD_DRAND48_SEED_0   (0x330e)
-
-#ifdef PERL_DRAND48_QUAD
-
-#define DRAND48_MULT UINT64_C(0x5deece66d)
-#define DRAND48_ADD  0xb
-#define DRAND48_MASK UINT64_C(0xffffffffffff)
-
-#else
-
-#define FREEBSD_DRAND48_SEED_1   (0xabcd)
-#define FREEBSD_DRAND48_SEED_2   (0x1234)
-#define FREEBSD_DRAND48_MULT_0   (0xe66d)
-#define FREEBSD_DRAND48_MULT_1   (0xdeec)
-#define FREEBSD_DRAND48_MULT_2   (0x0005)
-#define FREEBSD_DRAND48_ADD      (0x000b)
-
-static const unsigned short rand48_mult_[3] = {
-    FREEBSD_DRAND48_MULT_0,
-    FREEBSD_DRAND48_MULT_1,
-    FREEBSD_DRAND48_MULT_2
-};
-static const unsigned short rand48_add_ = FREEBSD_DRAND48_ADD;
-
-#endif
-
-void
-Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
-{
-    PERL_ARGS_ASSERT_DRAND48_INIT_R;
-
-#ifdef PERL_DRAND48_QUAD
-    *random_state = FREEBSD_DRAND48_SEED_0 + ((U64)seed << 16);
-#else
-    random_state->seed[0] = FREEBSD_DRAND48_SEED_0;
-    random_state->seed[1] = (U16) seed;
-    random_state->seed[2] = (U16) (seed >> 16);
-#endif
-}
-
-double
-Perl_drand48_r(perl_drand48_t *random_state)
-{
-    PERL_ARGS_ASSERT_DRAND48_R;
-
-#ifdef PERL_DRAND48_QUAD
-    *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
-        & DRAND48_MASK;
-
-    return ldexp((double)*random_state, -48);
-#else
-    {
-    U32 accu;
-    U16 temp[2];
-
-    accu = (U32) rand48_mult_[0] * (U32) random_state->seed[0]
-         + (U32) rand48_add_;
-    temp[0] = (U16) accu;        /* lower 16 bits */
-    accu >>= sizeof(U16) * 8;
-    accu += (U32) rand48_mult_[0] * (U32) random_state->seed[1]
-          + (U32) rand48_mult_[1] * (U32) random_state->seed[0];
-    temp[1] = (U16) accu;        /* middle 16 bits */
-    accu >>= sizeof(U16) * 8;
-    accu += rand48_mult_[0] * random_state->seed[2]
-          + rand48_mult_[1] * random_state->seed[1]
-          + rand48_mult_[2] * random_state->seed[0];
-    random_state->seed[0] = temp[0];
-    random_state->seed[1] = temp[1];
-    random_state->seed[2] = (U16) accu;
-
-    return ldexp((double) random_state->seed[0], -48) +
-           ldexp((double) random_state->seed[1], -32) +
-           ldexp((double) random_state->seed[2], -16);
-    }
-#endif
 }
 
 #ifdef USE_C_BACKTRACE
