@@ -30,6 +30,7 @@
 #   undef CC_MAGICAL_
 #   undef CC_UNDERSCORE_
 #   undef do_aexec
+#   undef EMULATE_THREAD_SAFE_LOCALES
 #   undef F_atan2_amg
 #   undef F_cos_amg
 #   undef F_exp_amg

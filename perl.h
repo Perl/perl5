@@ -1481,6 +1481,11 @@ typedef enum {
      || (defined(WIN32) && (defined(_MSC_VER) || (defined(_UCRT))))
 #      define USE_THREAD_SAFE_LOCALE
 #    endif
+
+     /* Temporary during 5.45 development to find any bugs */
+#    if ! defined(USE_THREAD_SAFE_LOCALE)
+#      define EMULATE_THREAD_SAFE_LOCALES
+#    endif
 #  endif
 
 #  ifdef USE_POSIX_2008_LOCALE
@@ -5714,6 +5719,9 @@ EXTERN_C char **environ;  /* environment variables supplied via exec */
 #define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
                                 STRINGIFY(PERL_API_VERSION) "." \
                                 STRINGIFY(PERL_API_SUBVERSION)
+#if PERL_VERSION_GE(5,45,9)
+#  error Revert the commit that created this line
+#endif
 
 START_EXTERN_C
 
