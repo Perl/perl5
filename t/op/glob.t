@@ -7,7 +7,6 @@ BEGIN {
 }
 
 use Config;
-my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b(*nla:=none)/;
 
 @oops = @ops = <op/*>;
 
@@ -155,7 +154,7 @@ SKIP: {
     skip "Debugging builds on Linux and Cygwin still problematic: GH 16869", 1
         if (
             ($Config{osname} eq 'linux' or $Config{osname} eq 'cygwin') and
-            $is_debugging_build
+            Config::DEBUGGING
         );
     fresh_perl(<<~'HERE', {});
         my $glob = ("0" x 4094) . "?";
