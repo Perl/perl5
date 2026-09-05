@@ -46,6 +46,15 @@ This is approximately equal to the following, except that it is more efficient a
 
 For more detail, see L<perlop/Equality Operators>.
 
+=head2 Threads may be Configured to have locale thread-safety
+
+The Perl interpreter may now be Configured to emulate thread-safety in
+locale handling on systems that lack it.  Strictly speaking, this is
+a change to L<perl's internals|/Internal Changes>, but we're
+highlighting it here as well because it increases the portability
+possibilities of your locale-aware code on multi-threaded builds of
+perl.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
@@ -413,6 +422,22 @@ well.
 [ List each change as an =item entry ]
 
 =over 4
+
+=item *
+
+Threads may be Configured to have locale thread-safety
+
+The Perl interpreter may now be Configured to emulate thread-safety in
+locale handling on systems that lack it.  To do this, pass this to
+F<Configure>:
+
+ -Accflags=-DEMULATE_THREAD_SAFE_LOCALES
+
+This option will be ignored on builds that don't have threads, and on
+platforms where perl believes that the locale handling is thread-safe
+natively.
+
+See L<perllocale/Multi-threaded operation>.
 
 =item *
 

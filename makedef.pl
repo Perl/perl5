@@ -421,6 +421,32 @@ unless ($define{USE_PL_CUR_LC_ALL})
     );
 }
 
+unless ($define{USE_LOCALE} && (     $define{WIN32}
+                                || ! $define{USE_THREAD_SAFE_LOCALE}))
+{
+    ++$skip{$_} foreach qw(
+        PL_perl_controls_locale
+    );
+}
+
+unless ($define{EMULATE_THREAD_SAFE_LOCALES})
+{
+    ++$skip{$_} foreach qw(
+        PL_restore_locale
+        PL_restore_locale_depth
+        PL_NUMERIC_toggle_depth
+        Perl_category_lock
+        Perl_category_unlock
+    );
+}
+
+unless ($define{USE_PERL_SWITCH_LOCALE_CONTEXT})
+{
+    ++$skip{$_} foreach qw(
+        Perl_switch_locale_context
+    );
+}
+
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
                     PL_cur_locale_obj
