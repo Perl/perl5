@@ -255,6 +255,7 @@ __END__
 -getservent
 -getsockname
 -getsockopt
+ getspnam   defined(USE_REENTRANT_API) && defined(HAS_GETSPNAM_R)
 +given
 +glob
 -gmtime
