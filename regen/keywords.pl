@@ -22,6 +22,9 @@ my $c = open_new('keywords.c', '>',
 
 my %by_strength;
 
+# The symbols in this file are generally limited to the perl core
+print $h "#ifdef PERL_CORE\n\n";
+
 my $keynum = 0;
 my %needs_cpp_condition;    # Keyword needs #if's surrounding it
 my %comments;
@@ -29,6 +32,7 @@ while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
+    my $want_exported = s/\*//g;
     my ($strength, $keyword, $condition, $comment) =
                                     m/ ^
                                        ( [- +] )        # Strength
@@ -39,10 +43,22 @@ while (<DATA>) {
                                        \s* \z
                                      /x;
     die "Bad line '$_'" unless defined $strength;
-    print $h tab(5, "#define KEY_$keyword"),
+
+    my $define_indent = "  ";
+
+    # We wrap exported symbols with #endif ... #ifdef PERL_CORE.  Outdent them
+    # as well
+    if ($want_exported) {
+        print $h "\n#endif\n\n" if $want_exported;
+        $define_indent = "";
+    }
+
+    print $h tab(5, "#${define_indent}define KEY_$keyword"),
              $keynum++,
              ($comment) ? "\t/* $comment */" : "",
              "\n";
+    print $h "\n#ifdef PERL_CORE\n\n" if $want_exported;
+
     if (defined $condition) {
         $needs_cpp_condition{$keyword} = {
                                            condition => $condition,
@@ -54,6 +70,8 @@ while (<DATA>) {
     }
     $comments{$keyword} = $comment if defined $comment;
 }
+
+print $h "\n#endif\n";
 
 # If this hash changes, make sure the equivalent hash in
 # lib/B/Deparse.pm (%feature_keywords) is also updated.
@@ -142,7 +160,8 @@ read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 
 # Syntax of DATA is
 # column 1
-#   strength:
+#   Optional '*' meaning symbol needs to be visible outside core; followed by
+#   the strength:
 #       -       means keyword.c returns the negative of the keyword value
 #       +       means keyword.c returns the keyword value as-is
 #       blank   means keyword.c returns the keyword value as-is, and the item
@@ -173,7 +192,7 @@ __END__
 +DESTROY
 +END
 +INIT
-+UNITCHECK
+*+UNITCHECK
 -abs
 -accept
 -alarm
@@ -304,7 +323,7 @@ __END__
 -msgget
 -msgrcv
 -msgsnd
-+my
+*+my
 -ne
 -neu
 +next
@@ -315,7 +334,7 @@ __END__
 -opendir
 -or
 -ord
-+our
+*+our
 -pack
 +package
 -pipe
@@ -373,7 +392,7 @@ __END__
 -shmread
 -shmwrite
 -shutdown
- sigvar     # fake keyword representing a signature var
+* sigvar     # fake keyword representing a signature var
 -sin
 -sleep
 -socket
