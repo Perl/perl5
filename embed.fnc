@@ -4507,7 +4507,8 @@ ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
 #if defined(PERL_CORE) || defined(PERL_EXT)
 ERXdp	|bool	|isSCRIPT_RUN	|SPTR const U8 *s			\
 				|EPTRge const U8 *send			\
-				|const bool utf8_target
+				|const bool utf8_target 		\
+				|NULLOK U8 const **first_bad_pos
 ERTXdip |bool	|is_utf8_non_invariant_string				\
 				|NN const U8 * const s			\
 				|STRLEN len

@@ -9220,7 +9220,7 @@ Perl_utf16_to_utf8(U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 /* PERL_CALLCONV U8 *
 Perl_utf16_to_utf8_reversed(U8 *p, U8 *d, Size_t bytelen, Size_t *newlen); */
 PERL_CALLCONV bool
-Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
+Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target, U8 const **first_bad_pos)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)

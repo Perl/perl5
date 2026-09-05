@@ -17633,6 +17633,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Assigned_invlist       = sv_dup_inc(proto_perl->IAssigned_invlist, param);
     PL_GCB_invlist            = sv_dup_inc(proto_perl->IGCB_invlist, param);
     PL_HasMultiCharFold       = sv_dup_inc(proto_perl->IHasMultiCharFold, param);
+    PL_id_allowed             = sv_dup_inc(proto_perl->Iid_allowed, param);
     PL_InMultiCharFold        = sv_dup_inc(proto_perl->IInMultiCharFold, param);
     PL_Latin1                 = sv_dup_inc(proto_perl->ILatin1, param);
     PL_LB_invlist             = sv_dup_inc(proto_perl->ILB_invlist, param);

@@ -14210,6 +14210,8 @@ Perl_init_uniprops(pTHX)
 
     PL_utf8_perl_idstart = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_IDSTART]);
     PL_utf8_perl_idcont = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_IDCONT]);
+    PL_id_allowed =
+           new_invlist_C_array_(uni_prop_ptrs[UNI_IDENTIFIERSTATUS__ALLOWED]);
 
     PL_utf8_charname_begin = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_CHARNAME_BEGIN]);
     PL_utf8_charname_continue = new_invlist_C_array_(uni_prop_ptrs[UNI__PERL_CHARNAME_CONTINUE]);
