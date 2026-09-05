@@ -974,6 +974,13 @@ EXp	|void	|av_reify	|NN AV *av
 ipx	|void	|av_remove_offset					\
 				|NN AV *av
 ARdp	|SV *	|av_shift	|NN AV *av
+Adp	|Size_t |av_splice_simple					\
+				|NN AV *av				\
+				|SSize_t idx				\
+				|Size_t delcount			\
+				|Size_t inscount			\
+				|NULLOK SV **in_svs			\
+				|NULLOK SV **out_svs
 Adp	|SV **	|av_store	|NN AV *av				\
 				|SSize_t key				\
 				|NULLOK SV *val

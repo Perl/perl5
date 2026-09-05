@@ -981,6 +981,163 @@ Perl_av_shift(pTHX_ AV *av)
 }
 
 /*
+=for apidoc av_splice_simple
+
+Deletes a contiguous sub-sequence of elements within an array, and inserts
+another sub-sequence provided by the caller. Either sub-sequence may be empty.
+I<idx> may be negative; if so it starts counting backwards from the end of the
+initial array elements. The array must be a simple regular AV and not tied. It
+is permitted to have set magic.
+
+First, the sub-sequence of up to I<delcount> elements in the array from I<idx>
+onwards is removed, and either returned to the caller via the I<out_svs> array
+or discarded. Next, storage of the array is grown if required. Finally, the
+sub-sequence of I<inscount> elements given by the caller in I<in_svs> is
+inserted into the array starting at I<idx> onwards. Elements before I<idx> are
+preserved entirely. Elements after the deleted sub-sequence are moved upwards
+or downwards as required by the difference in the lengths of the two
+sub-sequences.
+
+If I<delcount> is non-zero but no I<out_svs> array is provided, the deleted
+SVs are discarded by C<SvREFCNT_dec>. If an array is provided, pointers are
+copied into it without modifying the reference count and it becomes the
+caller's responsiblity to discard them.
+
+If I<inscount> is non-zero but no I<in_svs> array is provided, the
+newly-created gap is filled with NULL pointers and the caller can use API
+functions like C<av_store> to fill the elements. If an array is provided,
+pointers are copied from it into the array without modifying the reference
+count and it is caller's responsibility to increment that if required.
+
+There must be no pointer aliasing between I<in_svs> itself and the array
+stored in the AV. However, individual SV pointers within it may be aliased, so
+long as the caller takes care to handle reference counts correctly. This may
+be used, for example, to implement an in-place rotation of the elements in the
+AV.
+
+This is B<mostly> identical to the operation of the Perl C<splice> function,
+but with some differences.
+
+=over 4
+
+=item *
+
+I<av> must not be tied.
+
+=item *
+
+I<delcount> may not be negative.
+
+=item *
+
+The caller must perform any reference count modification of inserted or
+returned SVs as necessary.
+
+=back
+
+=cut
+*/
+
+Size_t
+Perl_av_splice_simple(pTHX_ AV *av, SSize_t idx, Size_t delcount, Size_t inscount,
+        SV **in_svs, SV **out_svs)
+{
+    PERL_ARGS_ASSERT_AV_SPLICE_SIMPLE;
+
+    /* This does not work on tied AVs */
+    assert(!SvTIED_mg((const SV *)av, PERL_MAGIC_tied));
+
+    if (SvREADONLY(av))
+        croak_no_modify();
+
+    Size_t was_end = AvFILLp(av) + 1;
+    if (idx < 0)
+        idx += was_end;
+
+    if (idx < 0 || (Size_t)idx > was_end)
+        croak(PL_no_aelem, idx);
+
+    if (idx + delcount > was_end)
+        delcount = was_end - idx;
+
+    SV **svp = AvARRAY(av);
+
+    if (delcount) {
+        /* Rather than test inside every loop iteration, we'll write three
+         * different loops for the three cases
+         */
+        if (out_svs)
+            /* regardless of AvREAL it's now the caller's problem to handle
+             * refcounts */
+            for (Size_t i = 0; i < delcount; i++) {
+                SV *sv = svp[idx + i];
+                out_svs[i] = sv ? sv : &PL_sv_undef;
+                svp[idx + i] = NULL;
+            }
+        else if (AvREAL(av))
+            for (Size_t i = 0; i < delcount; i++) {
+                SvREFCNT_dec(svp[idx + i]);
+                svp[idx + i] = NULL;
+            }
+        else
+            for (Size_t i = 0; i < delcount; i++) {
+                svp[idx + i] = NULL;
+            }
+    }
+
+    SSize_t growth = inscount - delcount;
+    Size_t tailstart = idx + delcount;
+    Size_t tailcount = was_end - tailstart;
+
+    /* Any delete insert or delete from index zero might be doable by making
+     * use of the prealloc area; the gap between AvALLOC and AvARRAY
+     */
+    Size_t prealloc_gap = AvARRAY(av) - AvALLOC(av);
+
+    if ((idx == 0) && (growth != 0) && (growth < 0 || prealloc_gap > 0)) {
+        SSize_t adjust = growth;
+        if (adjust > 0 && (Size_t)adjust > prealloc_gap)
+            /* We can only account for some of it; do the rest by Move() */
+            adjust = prealloc_gap;
+
+        AvARRAY(av) -= adjust;
+        AvMAX(av)   += adjust;
+        AvFILLp(av) += adjust;
+        growth      -= adjust;
+        tailstart   += adjust;
+
+        svp = AvARRAY(av);
+    }
+
+    if (growth > 0) {
+        av_extend(av, was_end + growth);
+        svp = AvARRAY(av);
+    }
+    /* else don't bother to shrink the alloc */
+
+    AvFILLp(av) += growth;
+
+    if (tailcount && growth) {
+        Move(svp + tailstart, svp + tailstart + growth, tailcount, SV *);
+    }
+
+    /* Now insert the new elements */
+    if (inscount) {
+        if (in_svs)
+            for (Size_t i = 0; i < inscount; i++)
+                svp[idx + i] = in_svs[i];
+        else
+            for (Size_t i = 0; i < inscount; i++)
+                svp[idx + i] = NULL;
+    }
+
+    if (SvSMAGICAL(av))
+        mg_set(MUTABLE_SV(av));
+
+    return delcount;
+}
+
+/*
 =for apidoc      av_top_index
 =for apidoc_item av_tindex
 =for apidoc_item AvFILL

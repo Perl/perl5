@@ -5132,6 +5132,7 @@ ext/XS-APItest/APItest.pm			XS::APItest extension
 ext/XS-APItest/APItest.xs			XS::APItest extension
 ext/XS-APItest/APItest_autoload.xs		XS::APItest AUTOLOAD-related XS split
 ext/XS-APItest/APItest_autoloadtest.xs		XS::APItest AUTOLOADtest XS split
+ext/XS-APItest/APItest_av.xs			XS::APItest AV API-related XS split
 ext/XS-APItest/APItest_backrefs.xs		XS::APItest backrefs-related XS split
 ext/XS-APItest/APItest_bool_internals.xs	XS::APItest BoolInternals-related XS split
 ext/XS-APItest/APItest_BS			autogenerate APItest.bs
@@ -5175,6 +5176,7 @@ ext/XS-APItest/numeric.xs			XS::APItest wrappers for numeric.c
 ext/XS-APItest/t/addissub.t			test op check wrapping
 ext/XS-APItest/t/arrayexpr.t			test recursive descent expression parsing
 ext/XS-APItest/t/autoload.t			Test XS AUTOLOAD routines
+ext/XS-APItest/t/av.t				test av_* XS API functions
 ext/XS-APItest/t/BHK.pm				Helper for ./blockhooks.t
 ext/XS-APItest/t/Block.pm			Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t			test recursive descent block parsing
