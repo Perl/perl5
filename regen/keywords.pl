@@ -23,14 +23,24 @@ my $c = open_new('keywords.c', '>',
 my %by_strength;
 
 my $keynum = 0;
+my %needs_cpp_condition;    # Keyword needs #if's surrounding it
 while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    my ($strength, $keyword) = /^([- +])([A-Z_a-z2]+)/;
+    my ($strength, $keyword, $condition) =
+                             m/^ ( [- +] ) ( [A-Z_a-z2]+ ) (?: \s+ (.*) )? /x;
     die "Bad line '$_'" unless defined $strength;
     print $h tab(5, "#define KEY_$keyword"), $keynum++, "\n";
-    push @{$by_strength{$strength}}, $keyword;
+    if (defined $condition) {
+        $needs_cpp_condition{$keyword} = {
+                                           condition => $condition,
+                                           strength  => $strength,
+                                         };
+    }
+    else {
+        push @{$by_strength{$strength}}, $keyword;
+    }
 }
 
 # If this hash changes, make sure the equivalent hash in
@@ -61,7 +71,9 @@ my %feature_kw = (
     all       => 'keyword_all',
 );
 
-my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
+my %pos = map { ($_ => 1) } @{$by_strength{'+'}},
+                            grep { ($needs_cpp_condition{$_}{strength} eq '+')
+                                 } keys %needs_cpp_condition;
 
 my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
                                  TokenString   => 'name',
@@ -70,6 +82,8 @@ my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
                                 );
 
 $t->add_tokens(@{$by_strength{'+'}}, @{$by_strength{'-'}}, 'elseif');
+$t->add_tokens([ $_ ], $needs_cpp_condition{$_}{condition})
+                                                for keys %needs_cpp_condition;
 
 my $switch = $t->generate(Indent => '  ');
 
@@ -120,8 +134,11 @@ read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 #       -       means keyword.c returns the negative of the keyword value
 #       +       means keyword.c returns the keyword value as-is
 #       blank   is used for the placeholder for the default return of 0
-# column 2 up to line end
+# column 2 up to line end or a blank
 #   keyword name
+# columns following any blanks terminating column 2
+#   optional C preprocessor condition that restricts the keyword's
+#   availability
 
 __END__
 
