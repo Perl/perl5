@@ -1806,6 +1806,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             flags |= RESTART_PARSE;
         }
 
+        /* Branch flattening and (*THEN) nodes are incompatible. If both have
+         * been seen, trigger a reparse without any branch flattening. */
+        if (UNLIKELY(RExC_have_flattened && !RExC_unsafe_flatten
+               && (RExC_seen & REG_CUTGROUP_SEEN) )) {
+            RExC_unsafe_flatten = true;
+            flags |= RESTART_PARSE;
+        }
         /* We have that number in RExC_npar */
         RExC_total_parens = RExC_npar;
         RExC_logical_total_parens = RExC_logical_npar;
@@ -3036,6 +3043,200 @@ S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags,
     RExC_seen |= flags;
     RExC_in_lookaround = true;
     return 0; /* keep parsing! */
+}
+
+/* Helper for S_flatten_inner_branches
+ * Skips over any leading NOTHING/OPTIMIZED nodes.
+ */
+PERL_STATIC_INLINE regnode *
+S_content_head(pTHX_ regnode *wrapper)
+{
+    regnode *node = REGNODE_AFTER(wrapper);
+    while (OP(node) == NOTHING || OP(node) == OPTIMIZED) {
+        regnode *nx = regnext(node);
+        if (UNLIKELY(!nx))
+            break;
+        node = nx;
+    }
+    return node;
+}
+
+/* S_flatten_inner_branches */
+static void
+S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_br,
+                               regnode *ender, U32 depth)
+{
+
+    PERL_UNUSED_VAR(depth); /* Used for DEBUG_PARSE_r output */
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
+
+    regnode *prev_outer_br = NULL;
+    regnode *outer_br  = first_outer_br;
+
+    while (outer_br && OP(outer_br) == BRANCH) {
+        /* Get next outer BRANCH node - or the tail */
+        regnode *outer_successor = regnext(outer_br);
+        /* Follow REGNODE_AFTER(outer_br) to see what's inside this BRANCH */
+        regnode *first_inner_br = S_content_head(aTHX_ outer_br);
+
+        if (OP(first_inner_br) != BRANCH) { /* Not a nested BRANCH */
+            prev_outer_br = outer_br; outer_br = outer_successor; continue;
+        }
+
+        /* There is a set of inner BRANCH regnodes. Walk them to find the
+         * final one in the chain, checking for conditions (such as empty
+         * branch contents) that could corrupt the regex if flattened. */
+        regnode *last_inner_br = first_inner_br;
+         /* Note: This loop could check if flattening has a good chance of
+         * building bigger tries, or would result in offsets > U16_MAX, but
+         * with the anticipated move to 32 bit offsets, it shouldn't matter.
+         * If this code does create oversized offsets in the meantime, the
+         * surrounding code will reparse using BRANCHJ. */
+        bool unsafe = false;
+        while (1) {
+            regnode *inner_content = S_content_head(aTHX_ last_inner_br);
+            const U8 type = REGNODE_TYPE(OP(inner_content));
+            if (type == NOTHING) { /* Note: OPTIMIZED also has type == NOTHING */
+                unsafe = true; break;
+            }
+
+            if (OP(regnext(last_inner_br)) != BRANCH)
+                break;
+            last_inner_br = regnext(last_inner_br);
+        }
+        if (unsafe) {
+            prev_outer_br = outer_br; outer_br = outer_successor; continue;
+        }
+
+        /* It may not be safe to flatten if the regnode following the final
+         * inner BRANCH isn't a TAIL. Flattening is definitely not safe if
+         * the tail doesn't point to the expected outer TAIL. */
+        regnode *inner_ender = regnext(last_inner_br);
+        if (UNLIKELY(OP(inner_ender) != TAIL) || regnext(inner_ender) != ender) {
+            prev_outer_br = outer_br; outer_br = outer_successor; continue;
+        }
+
+        /* By this point, there is an inner BRANCH and it seems safe to
+         * flatten it. This is done by manipulating regnode offsets. */
+        const regnode_offset last_inner_off      = REGNODE_OFFSET(last_inner_br);
+        const regnode_offset outer_successor_off = REGNODE_OFFSET(outer_successor);
+        const regnode_offset first_inner_br_off  = REGNODE_OFFSET(first_inner_br);
+        const regnode_offset prev_outer_br_off = (prev_outer_br) ? REGNODE_OFFSET(prev_outer_br) : 0;
+
+        /* However, we cannot reliably tell if there is an outer *THEN yet to
+         * be parsed, in which case flattening could mess up the matching logic.
+         * If REG_CUTGROUP_SEEN was set during parsing, Perl_op_re_compile will
+         * check if RExC_have_flattened was also set, and if so, it triggers a
+         * reparse with no flattening. */
+        RExC_have_flattened = true;
+
+#ifdef DEBUGGING
+        U64 my_nalt = 0;
+        SV *debug_string = NULL;
+
+        DEBUG_PARSE_r({
+            debug_string = newSV_type(SVt_PV);
+        });
+#endif
+        /* Walk the inner BRANCH regnodes in turn. */
+        for (regnode *inner_br = first_inner_br; OP(inner_br) == BRANCH; inner_br = regnext(inner_br)) {
+            regnode *content_tail = S_content_head(aTHX_ inner_br);
+            assert(content_tail);
+#ifdef DEBUGGING
+            regnode *content_head = content_tail;
+#endif
+            /* Walk the regnodes within a single inner BRANCH to
+             * find the local tail (content_tail). */
+            regnode *nx = regnext(content_tail);
+            while (nx && nx != inner_ender && content_tail != ender) {
+                content_tail = nx;
+                nx = regnext(content_tail);
+            }
+            /* The inner tail shouldn't be an outer regnode. */
+            assert(content_tail != ender);
+
+            /* Flatten this inner BRANCH by effectively hoisting the
+             * contents to the level of the outer BRANCH. */
+            if (nx == inner_ender) {
+                const regnode_offset tail_off  = REGNODE_OFFSET(content_tail);
+                const regnode_offset ender_off = REGNODE_OFFSET(ender);
+
+                DEBUG_PARSE_r({
+                    if (my_nalt == 1) sv_catpvs(debug_string, "|");
+                    /* Not trying exhaustively to find an EXACT to report */
+                    U8 first_op = OP(content_head);
+                    regnode *lbl = (REGNODE_TYPE(first_op) == EXACT) ? content_head : NULL;
+
+                    DEBUG_PARSE_MSG("fltn");
+                    if (lbl) {
+                        re_printf("~ EXACT <%.*s> (brnc %" UVuf ") "
+                            "attach to TAIL (%" UVuf ")\n",
+                            (int) STR_LEN(lbl), STRING(lbl),
+                            (UV) REGNODE_OFFSET(lbl), (UV) ender_off);
+                        if (my_nalt < 2) {
+                            sv_catpvn(debug_string, STRING(lbl), STR_LEN(lbl));
+                        }
+                    } else {
+                        regprop(RExC_rx, RExC_mysv1, content_tail, NULL, pRExC_state);
+                        re_printf(" ~ route %s tail (%" UVuf
+                            ") to ender (%" UVuf ")\n",
+                            SvPV_nolen_const(RExC_mysv1),
+                            (UV) tail_off, (UV) ender_off);
+                        if (my_nalt < 2) {
+                            sv_catsv(debug_string, RExC_mysv1);
+                        }
+                    }
+                    my_nalt++;
+                });
+                /* Point the final regnode within the inner BRANCH to the
+                 * common outer TAIL regnode. */
+                NEXT_OFF_set(content_tail, ender_off - tail_off);
+            }
+        }
+
+        DEBUG_PARSE_r({
+            if (my_nalt > 2)
+                sv_catpvs(debug_string, "|...");
+            DEBUG_PARSE_MSG("fltn");
+            re_printf("~ %" UVuf " inner brnc%s (%" SVf ") lifted\n",
+                  my_nalt, (my_nalt == 1 ? "" : "s"), debug_string);
+
+
+            SvREFCNT_dec(debug_string);
+        });
+
+        /* Ensure that BRANCH takes up 2 units of space, as the
+         * following OP fixups assume that to be the case. */
+        assert(REGNODE_AFTER(outer_br) == outer_br + 2);
+
+        /* Fix up the relevant outer BRANCH regnode */
+        if (prev_outer_br) {
+            NEXT_OFF_set(prev_outer_br, first_inner_br_off - prev_outer_br_off);
+            OP(outer_br) = OPTIMIZED;
+            NEXT_OFF_set(outer_br, 0);
+        } else {
+            OP(outer_br) = NOTHING;
+
+            const regnode_offset outer_br_off = REGNODE_OFFSET(outer_br);
+            assert(first_inner_br_off >= outer_br_off);
+            NEXT_OFF_set(outer_br, first_inner_br_off - outer_br_off);
+        }
+
+        regnode *detritus = outer_br + NODE_STEP_REGNODE;
+        OP(detritus) = OPTIMIZED;
+        NEXT_OFF_set(detritus, 0);
+
+        /* Fix up the inner branch. */
+        NEXT_OFF_set(last_inner_br, outer_successor_off - last_inner_off);
+
+        /* .. and the inner content tail. */
+        OP(inner_ender) = OPTIMIZED; /* inner_ender was likely a TAIL node */
+        NEXT_OFF_set(inner_ender, 0);
+
+        /* Ready to go round again. */
+        outer_br = first_inner_br;
+        continue;
+    }
 }
 
 /* Below are the main parsing routines.
@@ -4448,6 +4649,25 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         is_nothing = 0;
                 }
             }
+
+            /* Note: the difference betweem BRANCH and BRANCHJ may disappear
+             * if/when the regex engine uses 32 bit offsets everywhere. */
+            if (! RExC_use_BRANCHJ
+                && ! RExC_unsafe_flatten
+                && (
+                    OP(REGNODE_p(ender)) == TAIL
+                 || OP(REGNODE_p(ender)) == END))
+            {
+                assert(OP(REGNODE_p(ret)) == BRANCH);
+                /* If there is a nested branch that can be safely hoisted
+                 * up to this branch's level, do so to flatten the pattern.
+                 * This will hopefully allow make_trie to fold in more
+                 * alternations and otherwise avoid the need to deepen the
+                 * state stack. */
+                (void) S_flatten_inner_branches(aTHX_ pRExC_state,
+                               REGNODE_p(ret), REGNODE_p(ender), depth);
+            }
+
             if (is_nothing) {
                 regnode * ret_as_regnode = REGNODE_p(ret);
                 br = REGNODE_TYPE(OP(ret_as_regnode)) != BRANCH

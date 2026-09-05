@@ -2209,6 +2209,15 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 /\F[A]B\Ec/	abc	y	$&	abc	-	Straddling \F [ \E ] works
 /\U[a]B\Ec/	ABc	y	$&	ABc	-	Straddling \U [ \E ] works
 
+# Flattening of nested branches should not change capture groups
+/^(?:(?:(a)|(b))|(?:(c)|(d)))e$/	ce	y	$3-$1	c-	-	Flatten 1
+/^(?:(?:(a)|(b))|(?:(c)|(d)))e$/	be	y	$2	b	-	Flatten 2
+/^(?:(?:(a)|(b))|(?:(c)|(d)))e$/	ae	y	$1	a	-	Flatten 3
+/^(?:(?:(a)|(b))|(?:(c)|(d)))e$/	de	y	$4	d	-	Flatten 4
+/^((?:(a)|(b))|(?:(c)|(d)))e$/	ce	y	$1-$4	c-c	-	Flatten out
+/^(?:(?:(?:(a)|(b))|(?:(c)|(d)))|(?:(e)|(f)))g$/	cg	y	$3	c	-	Flatten deep
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	(Don't) flatten *THEN
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
