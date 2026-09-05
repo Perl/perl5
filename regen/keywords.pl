@@ -275,6 +275,7 @@ __END__
 -getservent
 -getsockname
 -getsockopt
+ getspnam   defined(USE_SPENT_BUFFER)
 +given
 +glob
 -gmtime

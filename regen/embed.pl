@@ -2430,7 +2430,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USER_PROP_MUTEX_UNLOCK
     USE_SERVENT_BUFFER
     USE_SERVENT_PTR
-    USE_SPENT_BUFFER
     USE_SPENT_PTR
     USE_STAT_RDEV
     USE_SYSTEM_GMTIME
@@ -3321,6 +3320,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     toLOWER_utf8_flags_
     toTITLE_utf8_flags_
     toUPPER_utf8_flags_
+    USE_SPENT_BUFFER
     UTF8_CHECK_ONLY_BIT_POS_
     UTF8_DIE_IF_MALFORMED_BIT_POS_
     UTF8_FORCE_WARN_IF_MALFORMED_BIT_POS_
