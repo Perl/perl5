@@ -263,6 +263,14 @@ F<t/porting/customized.dat> that no longer need to be there.
 Use of mkostemp(3) enabled on macOS 10.12 Sierra (Darwin 16) and newer,
 where it is available.
 
+=item Windows
+
+Perl's PRNG seeding (used by C<rand>, C<srand>, hash seed initialization
+and per-thread C<drand48> state) now queries the Windows OS CSPRNG
+(C<RtlGenRandom>, exported as C<SystemFunction036> from F<advapi32.dll>)
+on native Windows builds. There is no F</dev/urandom> or C<getentropy()>
+on Windows, so this avoids the weak time/PID/pointer fallback
+
 =back
 
 =head1 Internal Changes
