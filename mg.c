@@ -1678,6 +1678,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\020':
         sv_setiv(sv, (IV)PL_perldb);
         break;
+    case '\022':		/* ^RE_SUPERLINEAR_CACHE_DELAY */
+        if (strEQ(remaining, "E_SUPERLINEAR_CACHE_DELAY"))
+            sv_setiv(sv, PL_re_superlinear_cache_delay);
+        break;
     case '\023':		/* ^S */
         if (nextchar == '\0') {
             if (PL_parser && PL_parser->lex_state != LEX_NOTPARSING)
@@ -3787,6 +3791,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
           if (PL_perldb && !PL_DBsingle)
               init_debugger();
       break;
+    case '\022':		/* ^RE_SUPERLINEAR_CACHE_DELAY */
+        if (strEQ(mg->mg_ptr+1, "E_SUPERLINEAR_CACHE_DELAY"))
+            PL_re_superlinear_cache_delay = SvIV(sv);
+        break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
         PL_basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
