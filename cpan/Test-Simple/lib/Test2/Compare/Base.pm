@@ -2,7 +2,7 @@ package Test2::Compare::Base;
 use strict;
 use warnings;
 
-our $VERSION = '1.302224';
+our $VERSION = '1.302225';
 
 use Carp qw/confess croak/;
 use Scalar::Util qw/blessed/;

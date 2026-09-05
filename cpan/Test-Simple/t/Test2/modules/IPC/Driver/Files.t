@@ -29,7 +29,21 @@ sub simple_capture(&) {
         };
     }
 
-    die $e unless $ok;
+    unless ($ok) {
+        # The captured buffers usually hold the only explanation of what went
+        # wrong (an "IPC Fatal Error:" message, for instance). Do not throw
+        # them away, or the failure is undiagnosable from a smoke report.
+        print STDERR "\n# Exception escaped a simple_capture block, dumping what was captured:\n";
+        for my $set (["STDOUT", $out], ["STDERR", $err]) {
+            my ($name, $text) = @$set;
+            next unless defined $text && length $text;
+            print STDERR "# Captured $name:\n";
+            for my $line (split /\n/, $text) {
+                print STDERR "#   $line\n";
+            }
+        }
+        die $e;
+    }
 
     return {
         STDOUT => $out,
@@ -134,10 +148,18 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     local *Test2::IPC::Driver::Files::driver_abort = sub {};
     local *Test2::IPC::Driver::Files::abort = sub {
         my $self = shift;
+        my ($msg) = @_;
         local $self->{no_fatal} = 1;
         local $self->{no_bail} = 1;
         $self->Test2::IPC::Driver::abort(@_);
-        die 255;
+
+        # Every abort in this block dies here, so a bare "die 255" identifies
+        # nothing but this line. Carry the message and a stack trace so an
+        # abort that escapes an eval names the check that actually failed.
+        $msg = "(no message)" unless defined $msg;
+        chomp($msg);
+        require Carp;
+        die Carp::longmess("255: IPC abort: $msg");
     };
 
     my $tmpdir;

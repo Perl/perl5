@@ -2558,6 +2558,7 @@ cpan/Test-Harness/t/unicode.t					Test::Harness test
 cpan/Test-Harness/t/yamlish.t					Test::Harness test
 cpan/Test-Harness/t/yamlish-output.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t				Test::Harness test
+cpan/Test-Simple/AI_AND_LLM_POLICY.md						Test-Simple
 cpan/Test-Simple/lib/ok.pm							Module related to Test::Simple
 cpan/Test-Simple/lib/Test/Builder.pm						Module related to Test::Simple
 cpan/Test-Simple/lib/Test/Builder/Formatter.pm					Module related to Test::Simple
