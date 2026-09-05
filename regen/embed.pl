@@ -3591,7 +3591,7 @@ sub generate_proto_h {
             or next;
 
         my $level= $_->{level};
-        my $ind= $level ? " " : "";
+        our $ind= $level ? " " : "";
         $ind .= "  " x ($level-1) if $level>1;
         my $inner_ind= $ind ? "  " : " ";
 
@@ -3652,6 +3652,7 @@ sub generate_proto_h {
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /[EQ]/ );
         my @asserts;
+        my @unused;
         my @attrs;
         my $func;
         my $args_assert_line;
@@ -3825,6 +3826,7 @@ sub generate_proto_h {
                     my $nz =      ( $arg =~ s/\bNZ\b// );
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
                     my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
+                    my $unused = ( $arg =~ s/\bUNUSED\b// );
 
                     # Trim $arg and remove multiple blanks
                     $arg =~ s/^\s+//;
@@ -3902,6 +3904,13 @@ sub generate_proto_h {
                             $type_assert = "!$argname || $type_assert"
                                                                    if $nullok;
                             push @asserts, "assert($type_assert)";
+                        }
+
+                        # Exactly one of these expands to nothing.
+                        if ($unused) {
+                            $arg .= " __attribute__unused__";
+                            push @unused,
+                                 "PERL_UNUSED_ARG_FOR_ARGS_ASSERT($argname)";
                         }
 
                         # If this is a pointer to a character string argument,
@@ -4151,30 +4160,104 @@ sub generate_proto_h {
         # We don't hide the ARGS_ASSERT macro; having that defined does no
         # harm, and otherwise some inline functions that are looking for it
         # would fail to compile.
+        my @args_assert;
         if ($args_assert_line || @asserts) {
-            $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
+            $ret .= "\n";
+
+            # Do some extra work to make it more human readable
+            push @args_assert,
+                             "#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
+
+            # This includes keeping track of the maximum length so that the
+            # continuation characters don't form a ragged right edge
+            my $max_length = length $args_assert[-1];
+
+            # Any subsequent lines are indented this much from the #define
+            my $extra_indent = 4;
+
             if (@asserts) {
-                $ret .= " \\\n";
+                local $ind = $ind . " " x $extra_indent;
 
-                my $line = "";
-                while(@asserts) {
-                    my $assert = shift @asserts;
+                # The first line of the expansion is always this
+                my $start = "${ind}STMT_START { ";
+                my $line = $start;
 
-                    if(length($line) + length($assert) > 78) {
-                        $ret .= $line . "; \\\n";
-                        $line = "";
+                # Any subsequent expansion lines are indented beyond it.
+                local $ind = " " x length $start;
+
+                my $first_item_on_line = 1;
+                my $is_multi_line = 0;
+
+                # Declaring this to be an array, allows the code below to
+                # "just work" as far as folding
+                my @end = '} STMT_END';
+
+                foreach my $which (\@asserts, \@unused, \@end) {
+
+                    # Look at each line that goes into the definition
+                    while($which->@*) {
+                        my $component = shift $which->@*;
+
+                        # It reads better if the STMT_END is on its own line,
+                        # closing up the definition, but not if the whole
+                        # thing fits on a single line.
+                        #
+                        # We also start a new line if the next component won't
+                        # fit in the space allotted.
+                        if (   $is_multi_line && $which == \@end
+                            || (length($line) + length($component))
+                                >  78
+                                  - 1   # Trailing semicolon
+                                  - 3   # Two blanks and the continuation
+                        ) {
+                            # Add the full line; the component needs a
+                            # semicolon
+                            push @args_assert, $line . ";";
+
+                            $max_length = length $args_assert[-1] if
+                                        length $args_assert[-1] > $max_length;
+
+                            # The STMT_END is outdented to be directly under
+                            # the STMT_START
+                            local $ind = " " x $extra_indent if $which == \@end;
+
+                            # Setup for the new line, including indentation
+                            $line = $ind;
+                            $is_multi_line = 1;
+                            $first_item_on_line = 1;
+                        }
+
+                        # This component is separated from any predecessor by
+                        # a semicolon
+                        $line .= "; " unless $first_item_on_line;
+                        $first_item_on_line = 0;
+                        $line .= $component;
                     }
-
-                    $line .= " " x 8 if !length $line;
-                    $line .= "; " if $line =~ m/\S/;
-                    $line .= $assert;
                 }
 
-                $ret .= $line if length $line;
-                $ret .= "\n";
+                # Here, all items have been assembled; include the final line
+                push @args_assert, $line if length $line;
+                $max_length = length $args_assert[-1] if
+                                        length $args_assert[-1] > $max_length;
+            }
+
+            # If there is only one line, output it directly
+            if (@args_assert == 1) {
+                $ret .= $args_assert[0] . "\n";
+            }
+            else {
+
+                # Otherwise add the trailing continuation for all but the
+                # final line;
+                for (my $i = 0; $i < @args_assert - 1; $i++) {
+                    $args_assert[$i] .= " " x (  $max_length
+                                            - length $args_assert[$i]);
+                    $args_assert[$i] .= '  \\';
+                }
+
+                $ret .= join("\n", @args_assert) . "\n";
             }
         }
-        $ret .= "\n";
 
         $ret = "#${ind}ifndef PERL_NO_INLINE_FUNCTIONS\n$ret\n#${ind}endif"
             if $static_inline;
@@ -4185,7 +4268,6 @@ sub generate_proto_h {
 
         print $pr $ret;
     }
-
 
     close $pr;
 

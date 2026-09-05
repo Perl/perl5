@@ -192,49 +192,57 @@
 :   will be sorted asciibetically.  (This all can cause hassles if the rules
 :   change between when you make changes here and when you rebase.)
 :
-: AUTOMATIC PARAMETER SANITY CHECKING
+: FUNCTION PARAMETER MODIFIERS
 :
-:   For each function entry in this file, regen/embed.pl, generates a macro
-:   that performs parameter sanity validation.  If the function is named
-:   'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.  You
-:   should place a call to that macro in foo() before any other code.  It will
-:   automatically expand to whatever checking is currently generated for 'foo'
-:   (often none).  These are mostly in the form of assert() calls, so they
-:   are only activated for DEBUGGING builds.  But for non-DEBUGGING builds,
-:   pointer parameters that must not point to NULL have a compiler directive
-:   that means the same as GCC and Clang's '__attribute__nonnull__' generated
-:   for them for compilers that we know understand it.
+:   For each pararmeter in each function entry in this file, you can add
+:   modifiers that declare something about it beyond its C type.  The current
+:   ones are listed in this section.
+
+:   Some modifiers always have an effect; others only in DEBUGGING builds.
+:   Currently, the effect is limited to changing the function declaration in
+:   proto.h and/or the contents of a customized macro that regen/embed.pl
+:   generates for every function listed in this file.  A porting test enforces
+:   that each function listed here calls its respective macro.  If the function
+:   is named 'foo()', the generated macro will be named 'PERL_ARGS_ASSERT_FOO'.
 :
-:   A porting test enforces that an ARGS_ASSERT macro has been included in all
-:   new functions added to this file.  Each call should be at the top of your
-:   function so that the sanity checks have passed before anything tries to use
-:   an argument.
+:   The macro could very well expand to nothing, or it could have, for example,
+:   assert() sanity validation statements about the various parameters, as
+:   determined by the modifiers specified in this file and/or by other logic
+:   that we deem appropriate.  You should place a call to that macro in foo()
+:   before any other code, so that the asserts are executed before the
+:   parameter is used.
 :
-:   The contents of ARGS_ASSERT are determined by
-:       1)  constraints you give in this file for an argument.  Historically,
-:           each such constraint has been positioned between the '|' that marks
-:           the beginning of a parameter definition, and the the definition
-:           itself, like
-:               |NN const char * const name
-:           But it can come anywhere in the definition, and some prefer it to
-:           come at the end, as it modifies the argument.
-:               |const char * const name NN
-:       2)  the internal logic used by code that reads this file.
-:       3)  explicit asserts that you add in this file.
+:   The modifiers are placed in this file anywhere in the parameter
+:   description.  Historically, each modifier has been positioned between the
+:   '|' that marks the beginning of a parameter definition, and the the
+:   definition itself, like
+:       |NN const char * const name
+:   But it can come anywhere in the definition, and some prefer it to come at
+:   the end, as it modifies the argument.
+:       |const char * const name NN
+:
+:   You may also add explicit asserts at the end of a function entry.
 :
 :   Sections below give more details of each item.  For readability,
-:   constraints are split into two sections, one for pointer parameters, and
-:   one for the rest.
+:   modifiers are split into three sections, first for ones that apply to any
+:   kind of parameter; second for constraints on pointer parameters, and
+:   third for the rest.
 :
-: *** Pointer Parameter Constraints
+: *** Modifiers that apply to any parameter
 :
-:   Every pointer parameter must have a constraint; one of the following:
+:   UNUSED  Declare that this parameter is unused by the called function.  See
+:           the "UNUSED" entry in perlintern.
+:
+: *** Pointer parameter constraint modifiers
+:
+:   Every pointer parameter must have a modifier constraint; one of the
+:   following:
 :
 :   NN      means the called function is expecting this pointer parameter to be
 :           non-NULL, and likely is not equipped to handle it being NULL.
 :   NULLOK  means the called function definitely can handle this parameter
 :           being NULL.  The reason you need to specify this at all is to tell
-:           future maintainers that you have considered the question about the
+:           future maintainers that you have considered this question about the
 :           parameter, and you have determined that this is the answer.
 :   SPTR    means that not only must this pointer parameter be non-NULL, it
 :           points to a position in a character string, which the called
@@ -4242,7 +4250,7 @@ Adprt	|void	|vcroak 	|NULLOK const char *pat 		\
 				|NULLOK va_list *args
 Adpt	|void	|vdeb		|NN const char *pat			\
 				|NULLOK va_list *args
-Adpt	|void	|vfatal_warner	|U32 err				\
+Adpt	|void	|vfatal_warner	|U32 err  UNUSED			\
 				|NN const char *pat			\
 				|NULLOK va_list *args
 Adpt	|char * |vform		|NN const char *pat			\

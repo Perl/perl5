@@ -2278,11 +2278,10 @@ Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
 }
 
 void
-Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
+Perl_vfatal_warner(pTHX_ U32 err UNUSED, const char *pat, va_list *args)
 {
     PERL_ARGS_ASSERT_VFATAL_WARNER;
     GET_aTHX_if_NULL;
-    PERL_UNUSED_ARG(err);
 
     SV * const msv = vmess(pat, args);
 
