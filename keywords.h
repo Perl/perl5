@@ -284,5 +284,5 @@
 #define KEY_y			268
 
 /* Generated from:
- * 6314472316769769d8176b08a4b0fe3c461bc38d52170a303f7abd00c5a56677 regen/keywords.pl
+ * db843bf6f87370ecc0fd7595d7bf63733a53118b0034b9870f8ec9c51e2a2df0 regen/keywords.pl
  * ex: set ro ft=c: */

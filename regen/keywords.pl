@@ -114,6 +114,14 @@ END
 
 read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 
+# Syntax of DATA is
+# column 1
+#   strength:
+#       -       means keyword.c returns the negative of the keyword value
+#       +       means keyword.c returns the keyword value as-is
+#       blank   is used for the placeholder for the default return of 0
+# column 2 up to line end
+#   keyword name
 
 __END__
 
