@@ -5582,6 +5582,7 @@ lib/perl5db/t/uncalled-subroutine			Tests for the Perl debugger
 lib/perl5db/t/with-subroutine				Tests for the Perl debugger
 lib/perlbug.t				Tests for the Perl bug reporter
 lib/PerlIO.pm				PerlIO support module
+lib/perlnewdist.t			See if perlnewdist creates expected distributions
 lib/Pod/t/Usage.t			See if Pod::Usage works
 lib/SelectSaver.pm			Enforce proper select scoping
 lib/SelectSaver.t			See if SelectSaver works
@@ -6859,6 +6860,7 @@ utils/Makefile.PL			Extract the utility scripts
 utils/perlbug.PL			A simple tool to submit a bug report
 utils/perldoc.PL			A simple tool to find & display perl's documentation
 utils/perlivp.PL			installation verification procedure
+utils/perlnewdist.PL			Create a new Perl distribution
 utils/piconv.PL				iconv(1), reinvented in perl
 utils/pl2pm.PL				A pl to pm translator
 utils/pod2html.PL			Translator to turn pod into HTML
