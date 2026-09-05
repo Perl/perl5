@@ -55,6 +55,11 @@ highlighting it here as well because it increases the portability
 possibilities of your locale-aware code on multi-threaded builds of
 perl.
 
+To find any problems with this capability, during the 5.45 development
+cycle it is currently turned on by default on threaded perls, just on
+systems without locale thread-safety.  See L</Internal Changes> for how
+to turn it off.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
@@ -445,17 +450,19 @@ into two or more adjacent TRIE nodes might now get compiled into a single
 
 =item *
 
-Threads may be Configured to have locale thread-safety
+Threads are Configured to have locale thread-safety
 
 The Perl interpreter may now be Configured to emulate thread-safety in
-locale handling on systems that lack it.  To do this, pass this to
-F<Configure>:
+locale handling on systems that lack it.  This feature is on by default
+during a portion of the 5.45 development cycle, so as to test it in the
+field, but the intention is to make it opt-in for the official 5.46
+release.  To turn it off, pass this to F<Configure>:
 
- -Accflags=-DEMULATE_THREAD_SAFE_LOCALES
+ -Accflags=-DNO_EMULATE_THREAD_SAFE_LOCALES
 
-This option will be ignored on builds that don't have threads, and on
-platforms where perl believes that the locale handling is thread-safe
-natively.
+The feature is never turned on for builds that don't have threads, and on
+platforms where perl believes that the locale handling is natively
+thread-safe.  
 
 See L<perllocale/Multi-threaded operation>.
 
