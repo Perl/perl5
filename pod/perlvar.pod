@@ -1027,12 +1027,14 @@ considered to be one of many good reasons to avoid C<goto LABEL>.
 
 =head3 Performance issues
 
-Traditionally in Perl, any use of any of the three variables  C<$`>, C<$&>
+In Perl prior to 5.20.0, any use of any of the three variables  C<$`>, C<$&>
 or C<$'> (or their C<use English> equivalents) anywhere in the code, caused
 all subsequent successful pattern matches to make a copy of the matched
 string, in case the code might subsequently access one of those variables.
 This imposed a considerable performance penalty across the whole program,
-so generally the use of these variables has been discouraged.
+so generally the use of these variables was discouraged. Most Perl textbooks
+and tutorials still reflect these ancient recommendations; but under recent
+versions of Perl, they are no longer necessary, as explained below.
 
 In Perl 5.6.0 the C<@-> and C<@+> dynamic arrays were introduced that
 supply the indices of successful matches. So you could for example do
@@ -1068,8 +1070,9 @@ In Perl 5.20.0 a new copy-on-write system was enabled by default, which
 finally fixes most of the performance issues with these three variables, and
 makes them safe to use anywhere.
 
-The C<Devel::NYTProf> and C<Devel::FindAmpersand> modules can help you
-find uses of these problematic match variables in your code.
+If you work with older Perl versions, when these match variables were still
+problematic, then the C<Devel::NYTProf> and C<Devel::FindAmpersand> modules
+can help you find uses of these variables in your code.
 
 =over 8
 
@@ -1141,9 +1144,6 @@ X<$&> X<$MATCH>
 The string matched by the last successful pattern match.
 (See L</Scoping Rules of Regex Variables>.)
 
-See L</Performance issues> above for the serious performance implications
-of using this variable (even once) in your code.
-
 This variable is read-only, and its value is dynamically scoped.
 
 Mnemonic: like C<&> in some editors.
@@ -1155,7 +1155,8 @@ It is only guaranteed to return a defined value when the pattern was
 compiled or executed with the C</p> modifier.
 
 This is similar to C<$&> (C<$MATCH>) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
+use the C</p> modifier when executing the pattern, and in versions
+prior to 5.20.0 it does not incur
 the performance penalty associated with that variable.
 
 See L</Performance issues> above.
@@ -1172,9 +1173,6 @@ X<$`> X<$PREMATCH>
 The string preceding whatever was matched by the last successful
 pattern match. (See L</Scoping Rules of Regex Variables>).
 
-See L</Performance issues> above for the serious performance implications
-of using this variable (even once) in your code.
-
 This variable is read-only, and its value is dynamically scoped.
 
 Mnemonic: C<`> often precedes a quoted string.
@@ -1186,7 +1184,8 @@ It is only guaranteed to return a defined value when the pattern was
 executed with the C</p> modifier.
 
 This is similar to C<$`> ($PREMATCH) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
+use the C</p> modifier when executing the pattern, and in versions
+prior to 5.20.0 it does not incur
 the performance penalty associated with that variable.
 
 See L</Performance issues> above.
@@ -1208,9 +1207,6 @@ pattern match. (See L</Scoping Rules of Regex Variables>). Example:
     /def/;
     print "$`:$&:$'\n";       # prints abc:def:ghi
 
-See L</Performance issues> above for the serious performance implications
-of using this variable (even once) in your code.
-
 This variable is read-only, and its value is dynamically scoped.
 
 Mnemonic: C<'> often follows a quoted string.
@@ -1222,7 +1218,8 @@ It is only guaranteed to return a defined value when the pattern was
 compiled or executed with the C</p> modifier.
 
 This is similar to C<$'> (C<$POSTMATCH>) except that to use it you must
-use the C</p> modifier when executing the pattern, and it does not incur
+use the C</p> modifier when executing the pattern, and in versions
+prior to 5.20.0 it does not incur
 the performance penalty associated with that variable.
 
 See L</Performance issues> above.
