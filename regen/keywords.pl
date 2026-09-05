@@ -373,6 +373,7 @@ __END__
 -shmread
 -shmwrite
 -shutdown
+ sigvar     # fake keyword representing a signature var
 -sin
 -sleep
 -socket
