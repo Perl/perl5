@@ -24,14 +24,25 @@ my %by_strength;
 
 my $keynum = 0;
 my %needs_cpp_condition;    # Keyword needs #if's surrounding it
+my %comments;
 while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    my ($strength, $keyword, $condition) =
-                             m/^ ( [- +] ) ( [A-Z_a-z2]+ ) (?: \s+ (.*) )? /x;
+    my ($strength, $keyword, $condition, $comment) =
+                                    m/ ^
+                                       ( [- +] )        # Strength
+                                       ( [A-Z_a-z2]+ )  # Keyword
+                                       (?: \s+ (.*) )?? # Cpp conditions
+                                       \s*
+                                       (?: \# \s* (.+) )?? # Comment
+                                       \s* \z
+                                     /x;
     die "Bad line '$_'" unless defined $strength;
-    print $h tab(5, "#define KEY_$keyword"), $keynum++, "\n";
+    print $h tab(5, "#define KEY_$keyword"),
+             $keynum++,
+             ($comment) ? "\t/* $comment */" : "",
+             "\n";
     if (defined $condition) {
         $needs_cpp_condition{$keyword} = {
                                            condition => $condition,
@@ -41,6 +52,7 @@ while (<DATA>) {
     else {
         push @{$by_strength{$strength}}, $keyword;
     }
+    $comments{$keyword} = $comment if defined $comment;
 }
 
 # If this hash changes, make sure the equivalent hash in
@@ -135,18 +147,18 @@ read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 #       +       means keyword.c returns the keyword value as-is
 #       blank   means keyword.c returns the keyword value as-is, and the item
 #               is not actually a keyword in the traditional sense, but has
-#               some special meaning to some code.  This includes the
-#               placeholder for the default return of 0, which, since it is
-#               the default, doesn't get anything generated for it.
+#               some special meaning to some code.
 # column 2 up to line end or a blank
 #   keyword name
-# columns following any blanks terminating column 2
+# columns following any blanks terminating column 2 up to any '#'
 #   optional C preprocessor condition that restricts the keyword's
 #   availability
+# columns beginning with a '#' (following \s*)
+#   optional comment
 
 __END__
 
- NULL
+ NULL  # Placeholder for the default return of 0
 -__CLASS__
 +__DATA__
 +__END__

@@ -3625,5 +3625,5 @@ unknown:
 }
 
 /* Generated from:
- * 2ac48fe252b1af606474c3a0465905d4ed45bd1a1eb21b37202c44dd13b104aa regen/keywords.pl
+ * 8ff88cd122cdea911b023b892c882992272a0f1759144dfccc7b5caf3941811b regen/keywords.pl
  * ex: set ro ft=c: */
