@@ -2095,7 +2095,7 @@
 #       define regnode_guts_debug(a,b,c)        S_regnode_guts_debug(aTHX_ a,b,c)
 #       define regtail_study(a,b,c,d)           S_regtail_study(aTHX_ a,b,c,d)
 #       if defined(ENABLE_REGEX_SETS_DEBUGGING)
-#         define dump_regex_sets_structures(a,b,c,d) S_dump_regex_sets_structures(aTHX_ a,b,c,d)
+#         define dump_regex_sets_structures(a,b,c,d,e) S_dump_regex_sets_structures(aTHX_ a,b,c,d,e)
 #       endif
 #     endif
 #   endif /* defined(PERL_IN_REGCOMP_C) */

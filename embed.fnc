@@ -5916,7 +5916,8 @@ ES	|void	|dump_regex_sets_structures				\
 				|NN RExC_state_t *pRExC_state		\
 				|NN AV *stack				\
 				|const IV fence 			\
-				|NN AV *fence_stack
+				|NN AV *fence_stack			\
+				|line_t line_number
 #   endif
 # endif
 #endif /* defined(PERL_IN_REGCOMP_C) */

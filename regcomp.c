@@ -8688,8 +8688,8 @@ redo_curchar:
 
 #ifdef ENABLE_REGEX_SETS_DEBUGGING
                     /* Enable with -Accflags=-DENABLE_REGEX_SETS_DEBUGGING */
-        DEBUG_U(dump_regex_sets_structures(pRExC_state,
-                                           stack, fence, fence_stack));
+        DEBUG_U(dump_regex_sets_structures(pRExC_state, stack, fence,
+                                           fence_stack,__LINE__));
 #endif
 
         top_index = av_tindex_skip_len_mg(stack);
@@ -9224,9 +9224,11 @@ redo_curchar:
             OP(REGNODE_p(node)) = ANYOFL;
             ANYOF_FLAGS(REGNODE_p(node)) |= ANYOFL_UTF8_LOCALE_REQD;
         }
+
+        /* Now able to advance to prepare for the next construct. */
+        nextchar(pRExC_state);
     }
 
-    nextchar(pRExC_state);
     return node;
 
   regclass_failed:
@@ -9238,7 +9240,8 @@ redo_curchar:
 
 static void
 S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
-                             AV * stack, const IV fence, AV * fence_stack)
+                             AV * stack, const IV fence, AV * fence_stack,
+                             line_t line_number)
 {   /* Dumps the stacks in handle_regex_sets() */
 
     const SSize_t stack_top = av_tindex_skip_len_mg(stack);
@@ -9248,6 +9251,9 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
     PERL_ARGS_ASSERT_DUMP_REGEX_SETS_STRUCTURES;
 
     PerlIO_printf(Perl_debug_log, "\nParse position is:%s\n", RExC_parse);
+    PerlIO_printf(Perl_debug_log, "    Called from line %" LINE_Tf "\n",
+                                  line_number);
+    PerlIO_printf(Perl_debug_log, "\nDepth is: %zu\n", RExC_sets_depth);
 
     if (stack_top < 0) {
         PerlIO_printf(Perl_debug_log, "Nothing on stack\n");
