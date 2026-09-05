@@ -18254,14 +18254,14 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
         STRLEN len;
         const char * const pv = SvPV_nomg_const((SV*)keyname, len);
 
-        *SvPVX(name) = '$';
+        *SvPVX(name) = Perl_Sigil_Scalar;
         sv_catpvf(name, "{%s}",
             pv_pretty(sv, pv, len, 32, NULL, NULL,
                     PERL_PV_PRETTY_DUMP | PERL_PV_ESCAPE_UNI_DETECT ));
         SvREFCNT_dec_NN(sv);
     }
     else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
-        *SvPVX(name) = '$';
+        *SvPVX(name) = Perl_Sigil_Scalar;
         sv_catpvf(name, "[%" IVdf "]", (IV)aindex);
     }
     else if (subscript_type == FUV_SUBSCRIPT_WITHIN) {
@@ -18327,7 +18327,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             (obase->op_private & (OPpTARGET_MY | OPpUNDEF_KEEP_PV)) == (OPpTARGET_MY | OPpUNDEF_KEEP_PV)
             && (!match || PAD_SVl(obase->op_targ) == uninit_sv)
         ) {
-            return varname(NULL, '$', obase->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
+            return varname(NULL, Perl_Sigil_Scalar, obase->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
         }
         break;
 
@@ -18384,7 +18384,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         if (match && subscript_type == FUV_SUBSCRIPT_WITHIN)
             break;
 
-        return varname(gv, (char)(hash ? '%' : '@'), obase->op_targ,
+        return varname(gv, (char)(hash ? Perl_Sigil_Hash : Perl_Sigil_Array), obase->op_targ,
                                     keysv, index, subscript_type);
       }
 
@@ -18396,7 +18396,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 break;
             if (match && (GvSV(gv) != uninit_sv))
                 break;
-            return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
+            return varname(gv, Perl_Sigil_Scalar, 0, NULL, 0, FUV_SUBSCRIPT_NONE);
         }
         /* ${expr} */
         return find_uninit_var(cUNOPx(obase)->op_first, uninit_sv, 1, desc_p);
@@ -18404,20 +18404,20 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_PADSV:
         if (match && PAD_SVl(obase->op_targ) != uninit_sv)
             break;
-        return varname(NULL, '$', obase->op_targ,
+        return varname(NULL, Perl_Sigil_Scalar, obase->op_targ,
                                     NULL, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_PADSV_STORE:
         if (match && PAD_SVl(obase->op_targ) != uninit_sv)
             goto do_op;
-        return varname(NULL, '$', obase->op_targ,
+        return varname(NULL, Perl_Sigil_Scalar, obase->op_targ,
                                     NULL, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_GVSV:
         gv = cGVOPx_gv(obase);
         if (!gv || (match && GvSV(gv) != uninit_sv) || !GvSTASH(gv))
             break;
-        return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
+        return varname(gv, Perl_Sigil_Scalar, 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_AELEMFAST_LEX:
         if (match) {
@@ -18429,7 +18429,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (!svp || *svp != uninit_sv)
                 break;
         }
-        return varname(NULL, '$', obase->op_targ,
+        return varname(NULL, Perl_Sigil_Scalar, obase->op_targ,
                        NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 
     case OP_AELEMFASTLEX_STORE:
@@ -18442,7 +18442,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (!svp || *svp != uninit_sv)
                 goto do_op;
         }
-        return varname(NULL, '$', obase->op_targ,
+        return varname(NULL, Perl_Sigil_Scalar, obase->op_targ,
                        NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 
     case OP_AELEMFAST:
@@ -18459,7 +18459,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 if (!svp || *svp != uninit_sv)
                     break;
             }
-            return varname(gv, '$', 0,
+            return varname(gv, Perl_Sigil_Scalar, 0,
                     NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
         }
         NOT_REACHED; /* NOTREACHED */
@@ -18535,10 +18535,10 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 }
             }
             if (obase->op_type == OP_HELEM)
-                return varname(gv, '%', o->op_targ,
+                return varname(gv, Perl_Sigil_Hash, o->op_targ,
                             kidsv, 0, FUV_SUBSCRIPT_HASH);
             else
-                return varname(gv, '@', o->op_targ, NULL,
+                return varname(gv, Perl_Sigil_Array, o->op_targ, NULL,
                     negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
                     FUV_SUBSCRIPT_ARRAY);
         }
@@ -18548,21 +18548,21 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (obase->op_type == OP_HELEM) {
                 SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);
                 if (keysv)
-                    return varname(gv, '%', o->op_targ,
+                    return varname(gv, Perl_Sigil_Hash, o->op_targ,
                                                 keysv, 0, FUV_SUBSCRIPT_HASH);
             }
             else {
                 const SSize_t index
                     = find_array_subscript((const AV *)sv, uninit_sv);
                 if (index >= 0)
-                    return varname(gv, '@', o->op_targ,
+                    return varname(gv, Perl_Sigil_Array, o->op_targ,
                                         NULL, index, FUV_SUBSCRIPT_ARRAY);
             }
             if (match)
                 break;
             return varname(gv,
                 (char)((o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
-                ? '@' : '%'),
+                ? Perl_Sigil_Array : Perl_Sigil_Hash),
                 o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
         }
         NOT_REACHED; /* NOTREACHED */
@@ -18700,14 +18700,14 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             assert(index_type != MDEREF_INDEX_none);
             if (index_gv) {
                 if (GvSV(index_gv) == uninit_sv)
-                    return varname(index_gv, '$', 0, NULL, 0,
+                    return varname(index_gv, Perl_Sigil_Scalar, 0, NULL, 0,
                                                     FUV_SUBSCRIPT_NONE);
                 else
                     return NULL;
             }
             if (index_targ) {
                 if (PL_curpad[index_targ] == uninit_sv)
-                    return varname(NULL, '$', index_targ,
+                    return varname(NULL, Perl_Sigil_Scalar, index_targ,
                                     NULL, 0, FUV_SUBSCRIPT_NONE);
                 else
                     return NULL;
@@ -18749,9 +18749,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 }
             }
             return is_hv
-                ? varname(agg_gv, '%', agg_targ,
+                ? varname(agg_gv, Perl_Sigil_Hash, agg_targ,
                                 index_const_sv, 0,    FUV_SUBSCRIPT_HASH)
-                : varname(agg_gv, '@', agg_targ,
+                : varname(agg_gv, Perl_Sigil_Array, agg_targ,
                                 NULL, index_const_iv, FUV_SUBSCRIPT_ARRAY);
         }
         else {
@@ -18759,14 +18759,14 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (is_hv) {
                 SV * const keysv = find_hash_subscript((const HV*)sv, uninit_sv);
                 if (keysv)
-                    return varname(agg_gv, '%', agg_targ,
+                    return varname(agg_gv, Perl_Sigil_Hash, agg_targ,
                                                 keysv, 0, FUV_SUBSCRIPT_HASH);
             }
             else {
                 const SSize_t index
                     = find_array_subscript((const AV *)sv, uninit_sv);
                 if (index >= 0)
-                    return varname(agg_gv, '@', agg_targ,
+                    return varname(agg_gv, Perl_Sigil_Array, agg_targ,
                                         NULL, index, FUV_SUBSCRIPT_ARRAY);
             }
             /* look for an element not found */
@@ -18783,7 +18783,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                         SV *report_index_sv = SvOK(index_sv) ? index_sv : &PL_sv_no;
                         HE *he = hv_fetch_ent(MUTABLE_HV(sv), report_index_sv, 0, 0);
                         if (!he) {
-                            return varname(agg_gv, '%', agg_targ,
+                            return varname(agg_gv, Perl_Sigil_Hash, agg_targ,
                                            report_index_sv, 0, FUV_SUBSCRIPT_HASH);
                         }
                     }
@@ -18792,7 +18792,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                         SV * const * const svp =
                             av_fetch(MUTABLE_AV(sv), index, FALSE);
                         if (!svp) {
-                            return varname(agg_gv, '@', agg_targ,
+                            return varname(agg_gv, Perl_Sigil_Array, agg_targ,
                                            NULL, index, FUV_SUBSCRIPT_ARRAY);
                         }
                     }
@@ -18801,7 +18801,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             if (match)
                 break;
             return varname(agg_gv,
-                is_hv ? '%' : '@',
+                is_hv ? Perl_Sigil_Hash : Perl_Sigil_Array,
                 agg_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
         }
         NOT_REACHED; /* NOTREACHED */
@@ -18826,7 +18826,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 gv = cGVOPx_gv(o);
                 if (match && GvSV(gv) != uninit_sv)
                     break;
-                return varname(gv, '$', 0,
+                return varname(gv, Perl_Sigil_Scalar, 0,
                             NULL, 0, FUV_SUBSCRIPT_NONE);
             }
             /* other possibilities not handled are:
@@ -18848,7 +18848,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 return newSVpvs_flags("$_", SVs_TEMP);
             else if (obase->op_targ
                   && uninit_sv == PAD_SVl(obase->op_targ))
-                return varname(NULL, '$', obase->op_targ, NULL, 0,
+                return varname(NULL, Perl_Sigil_Scalar, obase->op_targ, NULL, 0,
                                FUV_SUBSCRIPT_NONE);
         }
         goto do_op;
@@ -19001,7 +19001,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             else {
                 break;
             }
-            sv = varname(gv, '@', o->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
+            sv = varname(gv, Perl_Sigil_Array, o->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
         }
         if (sv) {
             const char *name = OP_NAME(obase);

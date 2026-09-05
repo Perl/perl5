@@ -1946,7 +1946,7 @@ S_op_varname_subscript(pTHX_ const OP *o, int subscript_type)
            o->op_type == OP_PADHV || o->op_type == OP_RV2HV);
     {
         const char funny  = o->op_type == OP_PADAV
-                         || o->op_type == OP_RV2AV ? '@' : '%';
+                         || o->op_type == OP_RV2AV ? Perl_Sigil_Array : Perl_Sigil_Hash;
         if (o->op_type == OP_RV2AV || o->op_type == OP_RV2HV) {
             GV *gv;
             if (cUNOPo->op_first->op_type != OP_GV
@@ -14246,7 +14246,7 @@ Perl_ck_fun(pTHX_ OP *o)
                                 SV *namesv;
                                 targ = pad_alloc(OP_RV2GV, SVf_READONLY);
                                 namesv = PAD_SVl(targ);
-                                if (want_dollar && *name != '$')
+                                if (want_dollar && *name != Perl_Sigil_Scalar)
                                     sv_setpvs(namesv, "$");
                                 else
                                     SvPVCLEAR(namesv);
