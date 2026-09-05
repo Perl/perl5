@@ -208,7 +208,7 @@ Perl_PerlLIO_dup_cloexec(pTHX_ int oldfd)
      * PERL_IMPLICIT_SYS builds.
      */
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_dup,
+        PL_strategy.dup,
         fcntl(oldfd, F_DUPFD_CLOEXEC, 0),
         PerlLIO_dup(oldfd));
 #else
@@ -228,7 +228,7 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
      * PERL_IMPLICIT_SYS builds.
      */
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_dup2,
+        PL_strategy.dup2,
         dup3(oldfd, newfd, O_CLOEXEC),
         PerlLIO_dup2(oldfd, newfd));
 #else
@@ -242,7 +242,7 @@ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
     PERL_ARGS_ASSERT_PERLLIO_OPEN_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_open,
+        PL_strategy.open,
         PerlLIO_open(file, flag | O_CLOEXEC),
         PerlLIO_open(file, flag));
 #else
@@ -256,7 +256,7 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
     PERL_ARGS_ASSERT_PERLLIO_OPEN3_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_open3,
+        PL_strategy.open3,
         PerlLIO_open3(file, flag | O_CLOEXEC, perm),
         PerlLIO_open3(file, flag, perm));
 #else
@@ -270,7 +270,7 @@ static int Internal_Perl_my_mkstemp_cloexec(char *templte)
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
 #  if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-	PL_strategy_mkstemp,
+	PL_strategy.mkstemp,
    	Perl_my_mkostemp(templte, O_CLOEXEC),
         Perl_my_mkstemp(templte));
 #  else
@@ -291,7 +291,7 @@ Perl_my_mkstemp_cloexec(char *templte)
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
 #  if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_mkstemp,
+        PL_strategy.mkstemp,
         Perl_my_mkostemp(templte, O_CLOEXEC),
         Perl_my_mkstemp(templte));
 #  else
@@ -306,7 +306,7 @@ Perl_my_mkostemp_cloexec(char *templte, int flags)
     PERL_ARGS_ASSERT_MY_MKOSTEMP_CLOEXEC;
 #if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_mkstemp,
+        PL_strategy.mkstemp,
         Perl_my_mkostemp(templte, flags | O_CLOEXEC),
         Perl_my_mkostemp(templte, flags));
 #else
@@ -325,7 +325,7 @@ Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
      * PERL_IMPLICIT_SYS builds.
      */
 #  if !defined(PERL_IMPLICIT_SYS) && defined(HAS_PIPE2) && defined(O_CLOEXEC)
-    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_pipe, pipefd,
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy.pipe, pipefd,
         pipe2(pipefd, O_CLOEXEC),
         PerlProc_pipe(pipefd));
 #  else
@@ -343,7 +343,7 @@ Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 
 #  if defined(SOCK_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_socket,
+        PL_strategy.socket,
         PerlSock_socket(domain, type | SOCK_CLOEXEC, protocol),
         PerlSock_socket(domain, type, protocol));
 #  else
@@ -365,7 +365,7 @@ Perl_PerlSock_accept_cloexec(pTHX_ int listenfd, struct sockaddr *addr,
      * on PERL_IMPLICIT_SYS builds.
      */
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
-        PL_strategy_accept,
+        PL_strategy.accept,
         accept4(listenfd, addr, addrlen, SOCK_CLOEXEC),
         PerlSock_accept(listenfd, addr, addrlen));
 #  else
@@ -384,7 +384,7 @@ Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol,
 {
     PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC;
 #  ifdef SOCK_CLOEXEC
-    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy_socketpair, pairfd,
+    DO_PIPEOPEN_EXPERIMENTING_CLOEXEC(PL_strategy.socketpair, pairfd,
         PerlSock_socketpair(domain, type | SOCK_CLOEXEC, protocol, pairfd),
         PerlSock_socketpair(domain, type, protocol, pairfd));
 #  else
