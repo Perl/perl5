@@ -3527,9 +3527,9 @@ EOS
     # https://github.com/Perl/perl5/issues/799
     my $prog = <<'EOS';
 sub problem {
-    $SIG{__DIE__} = sub {
+    $SIG{__DIE__} = sub { # The break point _should_ be set here.
         die "<b problem> will set a break point here.\n";
-    };    # The break point _should_ be set here.
+    };
     warn "This line will run even if you enter <c problem>.\n";
 }
 &problem;
@@ -3612,9 +3612,9 @@ EOS
 print "1\n";
 eval <<'EOC';
 sub problem {
-    $SIG{__DIE__} = sub {
+    $SIG{__DIE__} = sub {  # The break point _should_ be set here.
         die "<b problem> will set a break point here.\n";
-    };    # The break point _should_ be set here.
+    };
     warn "This line will run even if you enter <c problem>.\n";
 }
 EOC

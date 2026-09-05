@@ -4814,7 +4814,15 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     /* XXX Is the null PL_parser check necessary here? */
     assert(PL_parser); /* Let’s find out under debugging builds.  */
     if (PL_parser && PL_parser->parsed_sub) {
+
+        /* If this is an anonymous sub, it might have been declared in the
+         * middle of a statement. To avoid messing up the line numbering of
+         * that statement, note the copline prior to the newSTATEOP call
+         * and restore it straight afterwards. */
+        const line_t saved_copline = PL_parser->copline;
         o = newSTATEOP(0, NULL, NULL);
+        PL_parser->copline = saved_copline;
+
         op_null(o);
         retval = op_append_elem(OP_LINESEQ, retval, o);
     }
@@ -11880,6 +11888,13 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
     bool evanescent = FALSE;
     bool isBEGIN = FALSE;
+
+    /* If this is an anonymous sub, it might have been declared in the
+     * middle of a statement. To avoid messing up the line numbering of
+     * that statement, note the copline now and restore it later. */
+    const line_t note_copline = (!o && !o_is_gv)
+                                ? PL_parser->copline : NOLINE;
+
     OP *start = NULL;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
@@ -12346,7 +12361,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
   done:
     assert(!cv || evanescent || SvREFCNT((SV*)cv) != 0);
     if (PL_parser)
-        PL_parser->copline = NOLINE;
+        PL_parser->copline = note_copline;
     LEAVE_SCOPE(floor);
 
     assert(!cv || evanescent || SvREFCNT((SV*)cv) != 0);
