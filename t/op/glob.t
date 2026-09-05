@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use Config;
-my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b(*nla:=none)/;
+my $is_debugging_build = $Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/;
 
 @oops = @ops = <op/*>;
 
