@@ -12541,8 +12541,8 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
             if (PL_curpm && re == PM_GETRE(PL_curpm))
                  keepcopy = cBOOL(PL_curpm->op_pmflags & PMf_KEEPCOPY);
         }
-        if (!keepcopy)
-            goto ret_undef;
+
+        /* /p is a no-op, therefore always perform the copy */
     }
 
     if (!RXp_SUBBEG(rx))
