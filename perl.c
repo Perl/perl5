@@ -1361,8 +1361,11 @@ perl_destruct(pTHXx)
 
     /* constant strings */
     for (i = 0; i < SV_CONSTS_COUNT; i++) {
-        SvREFCNT_dec(PL_sv_consts[i]);
-        PL_sv_consts[i] = NULL;
+        SV * sv = PL_sv_consts[i];
+        if(sv) {
+            PL_sv_consts[i] = NULL;
+            SvREFCNT_dec_NN(sv);
+        }
     }
 
     /* Destruct the global string table. */
