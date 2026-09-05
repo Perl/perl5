@@ -1047,6 +1047,8 @@ CTadop	|Malloc_t|calloc	|MEM_SIZE elements			\
 				|MEM_SIZE size
 AOdp	|SSize_t|call_pv	|NN const char *sub_name		\
 				|I32 flags
+Ap	|NV	|call_rand
+Ap	|void	|call_srand	|Rand_seed_t seed
 AOdp	|SSize_t|call_sv	|NN SV *sv				\
 				|I32 flags
 : Used in several source files

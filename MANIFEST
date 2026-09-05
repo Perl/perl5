@@ -4486,6 +4486,16 @@ dist/PathTools/t/Spec-taint.t			See if File::Spec works with taint
 dist/PathTools/t/taint.t			See if Cwd works with taint
 dist/PathTools/t/tmpdir.t			See if File::Spec->tmpdir() works
 dist/PathTools/t/win32.t			See if Cwd works on Win32
+dist/RNG/Changes			RNG distribution
+dist/RNG/lib/RNG.pm			RNG provider interface
+dist/RNG/lib/RNG/PCG.pm			RNG::PCG Perl interface
+dist/RNG/lib/RNG/SHA.pm			RNG::SHA Perl interface
+dist/RNG/Makefile.PL			Build RNG
+dist/RNG/MANIFEST			RNG distribution
+dist/RNG/README				RNG distribution
+dist/RNG/RNG.xs				RNG::PCG XS implementation
+dist/RNG/t/pcg.t			See if RNG::PCG works
+dist/RNG/t/sha.t			See if RNG::SHA works
 dist/Safe/Changes			Changes for Safe.pm
 dist/Safe/Makefile.PL			Makefile.PL for Safe.pm
 dist/Safe/MANIFEST			MANIFEST for Safe.pm

@@ -1487,6 +1487,27 @@ unlike most other regex variables.
 
 This variable was added in Perl 5.005.
 
+=item ${^RNG}
+X<${^RNG}>
+
+This variable selects the pseudorandom number generator used by
+L<C<rand>|perlfunc/rand EXPR> and L<C<srand>|perlfunc/srand EXPR>.
+When it is undefined, the normal Perl pseudorandom number generator is used.
+The variable is an ordinary dynamically scoped scalar, so it can be localized
+with C<local>.
+
+If its value is an object, C<rand> calls its C<rand_bytes> method with the
+number of bytes it needs, and C<srand> calls its C<srand> method.  If its
+value is an unblessed code reference, C<rand> calls it with the requested byte
+count and C<srand> calls it with either the supplied seed or C<undef> when no
+seed was supplied.  Thus C<srand()> and C<srand(undef)> are equivalent for a
+custom generator.  The random-value callback or method must return a binary
+string containing exactly the requested number of bytes.  The provider is
+responsible for maintaining its own state; localizing this variable does not
+copy or restore that state.
+
+This variable was added in Perl v5.45.1.
+
 =item ${^RE_COMPILE_RECURSION_LIMIT}
 X<${^RE_COMPILE_RECURSION_LIMIT}>
 

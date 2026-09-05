@@ -6675,6 +6675,19 @@ As of Perl v5.20.0 C<rand()> uses the C<drand48> pseudorandom number generator
 (PRNG) to generate numbers that appear random but are deterministic.
 It is sufficient for games, generating test data or cases where repeatability is needed.
 
+=item *
+
+If C<${^RNG}> is defined, C<rand> obtains eight random bytes from its
+provider and scales them in the same way as the default generator.  If the
+provider is an object, C<rand> calls its C<rand_bytes> method with C<8> as
+its argument.  If the provider is an unblessed code reference, C<rand> calls
+it with C<8>.  The provider must return a binary string containing exactly
+eight bytes.  The provider is not implicitly seeded by C<rand>.
+
+The provider's state is separate from the state of Perl's default generator.
+Localizing C<${^RNG}> changes which provider is used, but does not copy or
+restore the state maintained by that provider.
+
 =back
 
 =over
@@ -9038,6 +9051,20 @@ it returns the seed.  To signal that your code will work I<only> on Perls
 of a recent vintage:
 
     use v5.14;	# so srand returns the seed
+
+If C<${^RNG}> is defined, C<srand> delegates to that provider instead of
+applying the normal numeric seed validation.  If the provider is an object,
+C<srand> calls its C<srand> method, passing the supplied seed when one was
+given.  If the provider is an unblessed code reference, C<srand> calls it
+with the supplied seed, or with C<undef> when no seed was supplied.
+Therefore C<srand()> and C<srand(undef)> are equivalent for a custom provider,
+and non-numeric seed values may be accepted by the provider.  The provider's
+return value is returned by C<srand>.
+
+The provider is responsible for maintaining its own state.  In particular,
+localizing C<${^RNG}> does not save and restore the provider's state; use the
+provider's own seeding or copying facilities when an independent or
+repeatable sequence is needed.
 
 If C<srand> is not called explicitly, it is called
 implicitly without a parameter at the first use of the

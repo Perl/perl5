@@ -152,6 +152,8 @@
 /Pod/Text/
 /Pod/Usage.pm
 /Pod/perldoc.pod
+/RNG.pm
+/RNG/
 /SDBM_File.pm
 /Safe.pm
 /Scalar/

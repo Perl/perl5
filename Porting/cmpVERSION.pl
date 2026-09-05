@@ -206,6 +206,20 @@ sub pm_file_from_xs {
         return "${base}.pm" if -f "${base}.pm";
     }
 
+    # A distribution-level XS file may implement a package below the
+    # distribution's top-level name.  Use its PACKAGE declaration when the
+    # conventional filename guesses do not identify the Perl module.
+    if (open my $fh, '<', $xs) {
+        while (my $line = <$fh>) {
+            next unless $line =~ /\bPACKAGE\s*=\s*([A-Za-z_][A-Za-z0-9_:]*)/;
+            (my $package = $1) =~ s!::!/!g;
+            my ($path) = $xs =~ m!^(.*)/!;
+            my $pm = "$path/lib/$package.pm";
+            return $pm if -f $pm;
+        }
+        close $fh;
+    }
+
     die "No idea which .pm file corresponds to '$xs', so aborting";
 }
 
