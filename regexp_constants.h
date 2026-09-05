@@ -14,8 +14,8 @@
  * important world scripts.  At 12 most of them are: including Arabic,
  * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
  * Japanese, nor Korean.  The regnode sizing data structure in regnodes.h currently
- * uses a U8, and the trie types TRIEC and AHOCORASICKC are larger than U8 for
- * shift values above 12.)  Be sure to benchmark before changing, as larger sizes
+ * uses a U8 for its node sizing data above this point.)  Be sure to benchmark
+ * before changing, as larger sizes
  * do significantly slow down the test suite. */
 
 #define NUM_ANYOF_CODE_POINTS   (1 << 8)
@@ -83,5 +83,5 @@
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * c4f76f4ba54f533e6b3c6197d2733a4f83f7bbf3c01e6d83b8950e291a3fe36a regen/mk_PL_charclass.pl
- * 20a6e3d507a66f4594586485568134873485b08e23383f3dc4e6b3047569267b regen/mk_invlists.pl
+ * 96b3ff442d0c9122f1bce72b7bc46c2ead13c3028c250f65aca689cd5e142d58 regen/mk_invlists.pl
  * ex: set ro ft=c: */

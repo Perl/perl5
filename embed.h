@@ -2033,7 +2033,7 @@
 #     define invlist_is_iterating               S_invlist_is_iterating
 #     define invlist_lowest                     S_invlist_lowest
 #     define join_exact(a,b,c,d,e,f,g)          Perl_join_exact(aTHX_ a,b,c,d,e,f,g)
-#     define make_trie(a,b,c,d,e,f,g,h)         Perl_make_trie(aTHX_ a,b,c,d,e,f,g,h)
+#     define make_trie(a,b,c,d,e,f,g,h,i)       Perl_make_trie(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define populate_anyof_bitmap_from_invlist(a,b) Perl_populate_anyof_bitmap_from_invlist(aTHX_ a,b)
 #     define reg_add_data                       Perl_reg_add_data
 #     define scan_commit(a,b,c,d)               Perl_scan_commit(aTHX_ a,b,c,d)
@@ -2041,9 +2041,9 @@
 #     define ssc_init(a,b)                      Perl_ssc_init(aTHX_ a,b)
 #     define study_chunk(a,b,c,d,e,f,g,h,i,j,k,l) Perl_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l)
 #     if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
-#       define dump_trie(a,b,c,d)               S_dump_trie(aTHX_ a,b,c,d)
-#       define dump_trie_interim_list(a,b,c,d,e) S_dump_trie_interim_list(aTHX_ a,b,c,d,e)
-#       define dump_trie_interim_table(a,b,c,d,e) S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
+#       define dump_trie(a,b)                   S_dump_trie(aTHX_ a,b)
+#       define dump_trie_interim_list(a,b,c)    S_dump_trie_interim_list(aTHX_ a,b,c)
+#       define dump_trie_physical(a,b,c)        S_dump_trie_physical(aTHX_ a,b,c)
 #     endif
 #   endif /* defined(PERL_IN_REGCOMP_ANY) */
 #   if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_SV_C)

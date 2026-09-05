@@ -380,6 +380,8 @@ PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, PVT__PERL_HASH_WORD_TYPE) /* pe
 PERLVARA(G, hash_chars, PERL_SINGLE_CHAR_HASH_CACHE_ELEMS, unsigned char) /* perl.c and hv.h */
 #endif
 
+PERLVARA(G, native_octet_utf8, 256, native_octet_utf8_t)
+
 /* The path separator can vary depending on whether we're running under DCL or
  * a Unix shell.
  */

@@ -108,8 +108,8 @@ print $regexp_constants_fh <<'EOF';
  * important world scripts.  At 12 most of them are: including Arabic,
  * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
  * Japanese, nor Korean.  The regnode sizing data structure in regnodes.h currently
- * uses a U8, and the trie types TRIEC and AHOCORASICKC are larger than U8 for
- * shift values above 12.)  Be sure to benchmark before changing, as larger sizes
+ * uses a U8 for its node sizing data above this point.)  Be sure to benchmark
+ * before changing, as larger sizes
  * do significantly slow down the test suite. */
 
 EOF

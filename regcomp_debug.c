@@ -260,11 +260,18 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 if (trie->jump) {
                     TRIE_JUMP_TYPE dist = trie->jump[word_idx+1];
                     re_printf("(%" UVuf ")\n",
-                               (UV)((dist ? this_trie + dist : next) - start));
+                               (UV)((dist
+                                     ? TRIE_JUMP_TARGET(this_trie, trie->jump,
+                                                       trie->jump_correction,
+                                                       word_idx+1)
+                                     : next) - start));
                     if (dist) {
                         if (!nextbranch)
-                            nextbranch = this_trie + trie->jump[0];
-                        DUMPUNTIL(this_trie + dist, nextbranch);
+                            nextbranch = TRIE_JUMP_FIRST_UNABSORBED_BRANCH(
+                                this_trie, trie->jump, trie->jump_correction);
+                        DUMPUNTIL(TRIE_JUMP_TARGET(this_trie, trie->jump,
+                                                   trie->jump_correction,
+                                                   word_idx+1), nextbranch);
                     }
                     if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
                         nextbranch = regnext((regnode *)nextbranch);
@@ -568,10 +575,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
-        /* Using is_utf8_string() (via PERL_PV_UNI_DETECT)
-         * is a crude hack but it may be the best for now since
-         * we have no flag "this EXACTish node was UTF-8"
-         * --jhi */
+        /* This is only diagnostic formatting.  Trie construction uses the
+         * node type and the pattern flags to classify its source; it must not
+         * infer the encoding from the contents of the string. */
         pv_pretty(sv, STRING(o), STR_LEN(o), PL_dump_re_max_len,
                   PL_colors[0], PL_colors[1],
                   PERL_PV_ESCAPE_UNI_DETECT |
@@ -594,31 +600,28 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
-          sv_catpvf(sv,
-            "<S:%" UVuf "/%" IVdf " W:%" UVuf " L:%" UVuf "/%" UVuf " C:%" UVuf "/%" UVuf ">",
-            (UV)trie->startstate,
-            (IV)trie->statecount-1, /* -1 because of the unused 0 element */
-            (UV)trie->wordcount,
-            (UV)trie->minlen,
-            (UV)trie->maxlen,
-            (UV)TRIE_CHARCOUNT(trie),
-            (UV)trie->uniquecharcount
-          );
+          if (!TRIE_RAW_INPUT_MODE(trie, FALSE)) {
+            sv_catpvf(sv,
+                "<S:%" UVuf "/%" IVdf " W:%" UVuf " L:%" UVuf "/%" UVuf " C:%" UVuf ">",
+                (UV)trie->startstate,
+                (IV)trie->statecount-1,
+                (UV)trie->wordcount,
+                (UV)trie->minlen,
+                (UV)trie->maxlen,
+                (UV)TRIE_CHARCOUNT(trie));
+          }
+          else {
+            sv_catpvf(sv,
+                "<S:%" UVuf "/%" IVdf " W:%" UVuf " L:%" UVuf "/%" UVuf " C:%" UVuf "/%" UVuf ">",
+                (UV)trie->startstate,
+                (IV)trie->statecount-1,
+                (UV)trie->wordcount,
+                (UV)trie->minlen,
+                (UV)trie->maxlen,
+                (UV)TRIE_CHARCOUNT(trie),
+                (UV)TRIE_ALPHABET_SIZE);
+          }
         });
-        if ( IS_ANYOF_TRIE(op) || trie->bitmap ) {
-            sv_catpvs(sv, "[");
-            (void) put_charclass_bitmap_innards(sv,
-                                                ((IS_ANYOF_TRIE(op))
-                                                 ? ANYOF_BITMAP(o)
-                                                 : TRIE_BITMAP(trie)),
-                                                NULL,
-                                                NULL,
-                                                NULL,
-                                                0,
-                                                false
-                                               );
-            sv_catpvs(sv, "]");
-        }
         if (trie->before_paren || trie->after_paren)
             sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
                     (IV)trie->before_paren,(IV)trie->after_paren);
@@ -746,7 +749,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         sv_catpvf(sv, "[%d]", FLAGS(o));
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
-        char * bitmap;
+        U8 * bitmap;
         U8 do_sep = 0;    /* Do we need to separate various components of the
                              output? */
         /* Set if there is still an unresolved user-defined property */
@@ -1411,7 +1414,7 @@ S_put_charclass_bitmap_innards_common(pTHX_
 
 static U8
 S_put_charclass_bitmap_innards(pTHX_ SV *sv,
-                                     char *bitmap,
+                                     U8 *bitmap,
                                      SV *nonbitmap_invlist,
                                      SV *only_utf8_locale_invlist,
                                      const regnode * const node,

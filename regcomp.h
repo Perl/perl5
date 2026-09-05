@@ -336,26 +336,17 @@ struct regnode_bbm {
  * regnode has a U32, which is what reganode() allocates as a unit.  Therefore
  * no field can require stricter alignment than U32. */
     
-/* also used by TRIEC */
 struct regnode_charclass {
     union regnode_head head;
     union regnode_arg arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
-};
-
-/* also used by LTRIEC */
-struct regnode_charclass_trie {
-    union regnode_head head;
-    union regnode_arg arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
-    union regnode_arg arg2;
+    U8 bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_posixl {
     union regnode_head head;
     union regnode_arg arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
+    U8 bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
     U32 classflags;	                        /* and run-time */
 };
 
@@ -375,7 +366,7 @@ struct regnode_charclass_posixl {
 struct regnode_ssc {
     union regnode_head head;
     union regnode_arg arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
+    U8 bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
     U32 classflags;	                /* ... and run-time */
 
     /* Auxiliary, only used during construction; NULL afterwards: list of code
@@ -573,12 +564,6 @@ struct regnode_ssc {
 #define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2.i32)
 #define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16a)
 #define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16b)
-/* For regnodes that store a trailing U32 after an inline charclass bitmap,
- * such as regnode_charclass_trie and regnode_charclass_posixl. */
-#define ARG2u_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.u32)
-#define ARG2i_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.i32)
-#define ARG2a_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.hi_lo.u16a)
-#define ARG2b_AFTERCC_LOC(p) (((struct regnode_charclass_trie *)p)->arg2.hi_lo.u16b)
 #define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3.u32)
 #define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3.i32)
 #define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.u16a)
@@ -1171,8 +1156,6 @@ END_EXTERN_C
  *       multicharacter strings resulting from casefolding the single-character
  *       entries in the character class
  *   t - trie struct
- *   u - trie struct's widecharmap (a HV, so can't share, must dup)
- *       also used for revcharmap and words under DEBUGGING
  *   T - aho-trie struct
  *   S - sv for named capture lookup
  * 20010712 mjd@plover.com
@@ -1224,27 +1207,36 @@ struct reg_trie_trans_ {
 
 /* a transition list element for the list based representation */
 struct reg_trie_trans_list_elem_ {
-    U16 forid;
+    U32 octet;
     U32 newstate;
 };
 typedef struct reg_trie_trans_list_elem_ reg_trie_trans_le;
 
-/* a state for compressed nodes. base is an offset
-  into an array of reg_trie_trans array. If wordnum is
-  nonzero the state is accepting. if base is zero then
-  the state has no children (and will be accepting)
-*/
+/* A state for compressed nodes. base is an offset into an array of
+ * reg_trie_trans. If wordnum is nonzero the state is accepting. If base is
+ * zero then the state has no children (and will be accepting).
+ *
+ * min_octet and max_octet describe the range of octets with transitions from
+ * this state. They are retained after the construction lists are discarded so
+ * the delayed Aho-Corasick construction can avoid scanning the whole octet
+ * alphabet. They are also useful when debugging the trie. Because trie
+ * construction and Aho construction are currently separate, these fields
+ * remain in the state structures for now; the call pattern could be changed
+ * in the future so this information is kept only until Aho construction.
+ */
 struct reg_trie_state_ {
-  U16 wordnum;
-  union {
-    U32                base;
-    reg_trie_trans_le* list;
-  } trans;
+    U32 wordnum;
+    U8 min_octet;
+    U8 max_octet;
+    union {
+        U32                base;
+        reg_trie_trans_le* list;
+    } trans;
 };
 
 /* info per word; indexed by wordnum */
 typedef struct {
-    U16  prev;	/* previous word in acceptance chain; eg in
+    U32  prev;	/* previous word in acceptance chain; eg in
                  * zzz|abc|ab/ after matching the chars abc, the
                  * accepted word is #2, and the previous accepted
                  * word is #3 */
@@ -1261,46 +1253,72 @@ typedef struct reg_trie_trans_    reg_trie_trans;
    should be dealt with in pregfree.
    refcount is first in both this and reg_ac_data_ to allow a space
    optimisation in Perl_regdupe.  */
+enum trie_flags {
+    TRIE_CP_INVARIANT = 1, /* codepoints invariant in UTF-8 */
+    TRIE_CP_AWKWARD = 2,   /* non-invariant codepoints <= 255 */
+    TRIE_CP_HIGH = 4,      /* codepoints > 255; absent from non-UTF-8 strings */
+    TRIE_CP_WIDE = TRIE_CP_AWKWARD | TRIE_CP_HIGH,
+    TRIE_FOLD_NATIVE = 8,
+    TRIE_FOLD_UNICODE = 16,
+    TRIE_FOLD_MASK = TRIE_FOLD_NATIVE | TRIE_FOLD_UNICODE
+};
+
 struct reg_trie_data_ {
     U32             refcount;        /* number of times this trie is referenced */
     U32             lasttrans;       /* last valid transition element */
-    U16             *charmap;        /* byte to charid lookup array */
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
-    char            *bitmap;         /* stclass bitmap */
     TRIE_JUMP_TYPE  *jump;           /* optional 1 indexed array of offsets before tail
                                         for the node following a given word. */
+    SSize_t         jump_correction; /* distance from original trie base */
     U16             *j_before_paren; /* optional 1 indexed array of parno reset data
                                         for the given jump. */
     U16             *j_after_paren;  /* optional 1 indexed array of parno reset data
                                         for the given jump. */
 
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
-    U16             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             startstate;      /* initial state - used for common prefix optimisation */
     STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
     STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
-    U32             prefixlen;       /* #chars in common prefix */
+    U32             prefixlen_octets; /* octets in common prefix */
+    U32             prefixlen_chars; /* source codepoints in common prefix */
     U32             statecount;      /* Build only - number of states in the states array 
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
+    U8              prop_flags;      /* TRIE_CP_* and TRIE_FOLD_* bit mask */
     U16             before_paren;
     U16             after_paren;
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
 #endif
 };
+
+/* A jump is stored relative to the original location of the trie.  The
+ * correction is normally zero; prefix extraction can use it to rebase the
+ * target without rewriting the jump table. */
+#define TRIE_JUMP_TARGET(node, jump, correction, word) \
+    ((node) + (jump)[word] - (correction))
+#define TRIE_JUMP_FIRST_UNABSORBED_BRANCH(node, jump, correction) \
+    ((node) + (jump)[0] - (correction))
+#define TRIE_JUMP_ROOM(trie) \
+    ((SSize_t)(trie)->jump[1] - (trie)->jump_correction)
+
+#define TRIE_CONTAINS_WIDE(trie) \
+    ((trie)->prop_flags & TRIE_CP_WIDE)
+#define TRIE_IS_FOLDED(trie) \
+    ((trie)->prop_flags & TRIE_FOLD_MASK)
+#define TRIE_RAW_INPUT_MODE(trie, utf8_target) \
+    ((utf8_target && !TRIE_IS_FOLDED(trie)) || \
+     (!utf8_target && !((trie)->prop_flags & (TRIE_CP_WIDE | TRIE_FOLD_MASK))))
 /* There is one (3 under DEBUGGING) pointers that logically belong in this
    structure, but are held outside as they need duplication on thread cloning,
    whereas the rest of the structure can be read only:
-    HV              *widecharmap;    code points > 255 to charid
 #ifdef DEBUGGING
     AV              *words;          Array of words contained in trie, for dumping
-    AV              *revcharmap;     Map of each charid back to its character representation
 #endif
 */
 
-#define TRIE_WORDS_OFFSET 2
+#define TRIE_WORDS_OFFSET 1
 
 typedef struct reg_trie_data_ reg_trie_data;
 
@@ -1314,30 +1332,15 @@ struct reg_ac_data_ {
 };
 typedef struct reg_ac_data_ reg_ac_data;
 
-/* ANY_BIT doesn't use the structure, so we can borrow it here.
-   This is simpler than refactoring all of it as wed end up with
-   three different sets... */
-
-#define TRIE_BITMAP(p)		(((reg_trie_data *)(p))->bitmap)
-#define TRIE_BITMAP_BYTE(p, c)	BITMAP_BYTE(TRIE_BITMAP(p), c)
-#define TRIE_BITMAP_SET(p, c)	(TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT((U8)c))
-#define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
-#define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
-
 #define IS_LONG_TRIE(op) (REGNODE_TYPE(op) == TRIE && REGNODE_OFF_BY_ARG(op))
-#define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==LTRIEC || (op)==AHOCORASICKC)
-#define IS_TRIE_AC(op) ((op)==AHOCORASICK || (op)==AHOCORASICKC)
+#define IS_TRIE_AC(op) ((op)==AHOCORASICK)
 
-#define TRIE_DATA_SLOT(p) ((OP(p) == LTRIEC) ? ARG2u_AFTERCC(p)              \
-                          : REGNODE_OFF_BY_ARG(OP(p)) ? ARG2u(p) : ARG1u(p))
+#define TRIE_DATA_SLOT(p) (REGNODE_OFF_BY_ARG(OP(p)) ? ARG2u(p) : ARG1u(p))
 #define SHORT_TRIE_DATA_SLOT_set(p, val) STMT_START {                      \
     ARG1u_SET((p), (val));                                                 \
 } STMT_END
 #define LONG_TRIE_DATA_SLOT_set(p, val) STMT_START {                       \
-    if (OP(p) == LTRIEC)                                                   \
-        ARG2u_AFTERCC_SET((p), (val));                                     \
-    else                                                                   \
-        ARG2u_SET((p), (val));                                             \
+    ARG2u_SET((p), (val));                                                 \
 } STMT_END
 #define TRIE_DATA_SLOT_set(p, val) STMT_START {                            \
     if (REGNODE_OFF_BY_ARG(OP(p)))                                         \
@@ -1353,10 +1356,13 @@ typedef struct reg_ac_data_ reg_ac_data;
         NEXT_OFF_set((p), (val));                                          \
 } STMT_END
 
-/* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
-#define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
-#define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
-#define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
+#define TRIE_ALPHABET_SIZE 256
+
+/* These defines assume a 256-octet trie alphabet, and state may be evaluated
+ * twice. */
+#define TRIE_NODENUM(state) (((state)-1)/(TRIE_ALPHABET_SIZE)+1)
+#define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(TRIE_ALPHABET_SIZE)+1) : (state))
+#define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(TRIE_ALPHABET_SIZE)+1) : (state))
 
 #ifdef DEBUGGING
 #define TRIE_CHARCOUNT(trie) ((trie)->charcount)
@@ -1364,7 +1370,7 @@ typedef struct reg_ac_data_ reg_ac_data;
 #define TRIE_CHARCOUNT(trie) (trie_charcount)
 #endif
 
-#define RE_TRIE_MAXBUF_INIT 65536
+#define RE_TRIE_MAXBUF_INIT 655360
 #define RE_TRIE_MAXBUF_NAME "\022E_TRIE_MAXBUF"
 #define RE_TRIE_PREFER_LONG_NAME "\022E_TRIE_PREFER_LONG"
 #define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
