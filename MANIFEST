@@ -6558,6 +6558,7 @@ t/op/sleep.t				See if sleep works
 t/op/smartkve.t				See if smart deref for keys/values/each works
 t/op/smartmatch.t			See if the ~~ operator works
 t/op/sort.t				See if sort works
+t/op/sort_const_range.t			Regression test for GH #19790 (gen_constant_list op_opt)
 t/op/splice.t				See if splice works
 t/op/split.t				See if split works
 t/op/split_unicode.t			Test split /\s/ and Unicode
