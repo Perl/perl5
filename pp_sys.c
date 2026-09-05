@@ -5341,7 +5341,7 @@ PP_wrapped(pp_ghostent,
         if (!hent) {
 #ifdef USE_REENTRANT_API
 #   ifdef USE_GETHOSTENT_ERRNO
-            h_errno = PL_reentrant_buffer->_gethostent_errno;
+            h_errno = PL_reentrant_buffer->gethostent_errno;
 #   endif
 #endif
             STATUS_UNIX_SET(h_errno);
@@ -5432,7 +5432,7 @@ PP_wrapped(pp_gnetent,
         if (!nent) {
 #ifdef USE_REENTRANT_API
 #   ifdef USE_GETNETENT_ERRNO
-             h_errno = PL_reentrant_buffer->_getnetent_errno;
+             h_errno = PL_reentrant_buffer->getnetent_errno;
 #   endif
 #endif
             STATUS_UNIX_SET(h_errno);
@@ -5786,7 +5786,7 @@ PP_wrapped(pp_gpwent,
 #   if defined(__CYGWIN__) && defined(USE_REENTRANT_API)
     /* Cygwin 1.5.3-1 has buggy getpwnam_r() and getpwuid_r():
      * the pw_comment is left uninitialized. */
-    PL_reentrant_buffer->_pwent_struct.pw_comment = NULL;
+    PL_reentrant_buffer->pwent_struct.pw_comment = NULL;
 #   endif
 
     switch (which) {
