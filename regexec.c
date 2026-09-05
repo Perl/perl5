@@ -1895,7 +1895,7 @@ STMT_START {                                                                \
             SV** const svpp = hv_fetch(widecharmap,                         \
                         (char*)&uvc, sizeof(UV), 0);                        \
             if (svpp)                                                       \
-                charid = (U16)SvIV(*svpp);                                  \
+                charid = (U32)SvIV(*svpp);                                  \
         }                                                                   \
     }                                                                       \
 } STMT_END
@@ -3337,7 +3337,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             while (s <= last_start) {
                 const U32 uniflags = UTF8_ALLOW_DEFAULT;
                 U8 *uc = (U8*)s;
-                U16 charid = 0;
+                U32 charid = 0;
                 U32 base = 1;
                 U32 state = 1;
                 UV uvc = 0;
@@ -7066,9 +7066,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 while ( state && uc <= (U8*)(loceol) ) {
                     UV uvc = 0;
-                    U16 charid = 0;
+                    U32 charid = 0;
                     U32 base = trie->states[ state ].trans.base;
-                    U16 wordnum = trie->states[ state ].wordnum;
+                    U32 wordnum = trie->states[ state ].wordnum;
                     PERL_DEB(U32 old_state = state);
 
                     if (wordnum) { /* it's an accept state */
@@ -7140,7 +7140,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 /* calculate total number of accept states */
                 {
-                    U16 w = ST.topword;
+                    U32 w = ST.topword;
                     accepted = 0;
                     while (w) {
                         w = trie->wordinfo[w].prev;
@@ -7190,9 +7190,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             {
                 /* Find next-highest word to process.  Note that this code
                  * is O(N^2) per trie run (O(N) per branch), so keep tight */
-                U16 min = 0;
-                U16 word;
-                U16 const nextword = ST.nextword;
+                U32 min = 0;
+                U32 word;
+                U32 const nextword = ST.nextword;
                 reg_trie_wordinfo * const wordinfo
                     = ((reg_trie_data*)rexi->data->data[TRIE_DATA_SLOT(ST.me)])->wordinfo;
                 for (word = ST.topword; word; word = wordinfo[word].prev) {

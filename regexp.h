@@ -985,8 +985,8 @@ typedef struct regmatch_state {
             regnode     *me;        /* Which node am I - needed for jump tries*/
             U8          *firstpos;  /* pos in string of first trie match */
             U32         firstchars; /* len in chars of firstpos from start */
-            U16         nextword;   /* next word to try */
-            U16         topword;    /* longest accepted word */
+            U32         nextword;   /* next word to try */
+            U32         topword;    /* longest accepted word */
         } trie;
 
         /* special types - these members are used to store state for special
