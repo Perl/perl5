@@ -71,8 +71,8 @@ my %feature_kw = (
     all       => 'keyword_all',
 );
 
-my %pos = map { ($_ => 1) } @{$by_strength{'+'}},
-                            grep { ($needs_cpp_condition{$_}{strength} eq '+')
+my %neg = map { ($_ => 1) } @{$by_strength{'-'}},
+                            grep { ($needs_cpp_condition{$_}{strength} eq '-')
                                  } keys %needs_cpp_condition;
 
 my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
@@ -108,7 +108,7 @@ END
 sub perl_keyword
 {
   my $k = shift;
-  my $sign = $pos{$k} ? '' : '-';
+  my $sign = $neg{$k} ? '-' : '';
 
   if ($k eq 'elseif') {
     return <<END;
@@ -133,7 +133,11 @@ read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 #   strength:
 #       -       means keyword.c returns the negative of the keyword value
 #       +       means keyword.c returns the keyword value as-is
-#       blank   is used for the placeholder for the default return of 0
+#       blank   means keyword.c returns the keyword value as-is, and the item
+#               is not actually a keyword in the traditional sense, but has
+#               some special meaning to some code.  This includes the
+#               placeholder for the default return of 0, which, since it is
+#               the default, doesn't get anything generated for it.
 # column 2 up to line end or a blank
 #   keyword name
 # columns following any blanks terminating column 2
