@@ -608,9 +608,41 @@ An example is:
  // First line of function defintion
  Perl_vfatal_warner(pTHX_ U32 err UNUSED,const char*pat,va_list*args){
 
+=for apidoc EmnU||DEBUG_ONLY
+
+Add this symbol following a formal parameter in both a function's definition,
+and its F<embed.fnc> entry to indicate that, while this parameter is passed to
+the function, the function only uses it in DEBUGGING builds.
+
+Thus it is like C<L</UNUSED>>, but indicates the parameter actually is used in
+DEBUGGING builds.
+
+Perl will arrange for the suppression of any warnings the compiler would
+otherwise raise about the parameter being present but not used, which it would
+if there are no code paths through the function in non-DEBUGGING builds that
+reference the parameter.
+
+If there are conditions besides the DEBUGGING one where the parameter actually
+does get used, it is better practice to not use this mechanism, but to instead
+use L<C<PERL_UNUSED_ARG>|perlapi/PERL_UNUSED_ARG> in the conditionally compiled
+sections that don't use it.
+
+You need to add C<DEBUG_ONLY> in both places.  If you forget one, there are
+likely platforms on which the warning won't be suppressed.
+
 =cut
 */
 #define UNUSED __attribute__unused__
+#ifndef DEBUGGING
+#  define DEBUG_ONLY  UNUSED
+#  define __attribute__unused_unless_debugging__  UNUSED
+#  define PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(a)                            \
+                                        PERL_UNUSED_ARG_FOR_ARGS_ASSERT(a)
+#else
+#  define DEBUG_ONLY
+#  define __attribute__unused_unless_debugging__
+#  define PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(a)
+#endif
 
 /* Some OS warn on NULL format to printf */
 #ifdef PRINTF_FORMAT_NULL_OK

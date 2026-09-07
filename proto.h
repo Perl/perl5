@@ -11017,10 +11017,12 @@ S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse
     } STMT_END
 
 static void
-S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index, const char *original_locale, const line_t caller_line)
+S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index, const char *original_locale, const line_t caller_line __attribute__unused_unless_debugging__)
         Perl_attribute_nonnull_aTHX;
 #   define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I \
-       STMT_START { Perl_assert_aTHX; } STMT_END
+       STMT_START { Perl_assert_aTHX;                                  \
+                    PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(caller_line);  \
+    } STMT_END
 
 static const char *
 S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size)
@@ -11046,11 +11048,13 @@ S_setlocale_failure_panic_via_i(pTHX_ const locale_category_index cat_index, con
     } STMT_END
 
 static const char *
-S_toggle_locale_i(pTHX_ const locale_category_index cat_index, const char *new_locale, const line_t caller_line)
+S_toggle_locale_i(pTHX_ const locale_category_index cat_index, const char *new_locale, const line_t caller_line __attribute__unused_unless_debugging__)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2);
 #   define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I     \
-       STMT_START { Perl_assert_aTHX; assert(new_locale); } STMT_END
+       STMT_START { Perl_assert_aTHX; assert(new_locale);              \
+                    PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(caller_line);  \
+    } STMT_END
 
 #   if defined(DEBUGGING)
 static char *
