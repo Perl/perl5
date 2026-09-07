@@ -1273,9 +1273,9 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg)
 static void
 S_argvout_clone(pTHX_ SV *sv, MAGIC *mg, SV *osv, MAGIC *omg, CLONE_PARAMS *param)
 {
-    PERL_UNUSED_VAR(sv);
-    PERL_UNUSED_VAR(osv);
-    PERL_UNUSED_VAR(omg);
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(osv);
+    PERL_UNUSED_ARG(omg);
     PERL_UNUSED_ARG(param);
 
     /* ideally we could just remove the magic from the SV but we don't get the SV here */
