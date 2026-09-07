@@ -3464,7 +3464,7 @@ bool
 Perl_amagic_applies(pTHX_ SV *sv, int method, int flags)
 {
     PERL_ARGS_ASSERT_AMAGIC_APPLIES;
-    PERL_UNUSED_VAR(flags);
+    PERL_UNUSED_ARG(flags);
 
     assert(method >= 0 && method < NofAMmeth);
 

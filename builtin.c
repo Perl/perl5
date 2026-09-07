@@ -463,7 +463,7 @@ Perl_XS_builtin_indexed(pTHX_ CV *cv)
     PERL_ARGS_ASSERT_XS_BUILTIN_INDEXED;
 
     dXSARGS;
-    PERL_UNUSED_VAR(cv);
+    PERL_UNUSED_ARG(cv);
 
     switch(GIMME_V) {
         case G_VOID:
