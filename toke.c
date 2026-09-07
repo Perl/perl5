@@ -14326,7 +14326,6 @@ Perl_keyword_plugin_standard(pTHX_
         char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
 {
     PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(keyword_ptr);
     PERL_UNUSED_ARG(keyword_len);
     PERL_UNUSED_ARG(op_ptr);
@@ -14338,7 +14337,6 @@ Perl_infix_plugin_standard(pTHX_
         char *operator_ptr, STRLEN operator_len, struct Perl_custom_infix **def)
 {
     PERL_ARGS_ASSERT_INFIX_PLUGIN_STANDARD;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(operator_ptr);
     PERL_UNUSED_ARG(operator_len);
     PERL_UNUSED_ARG(def);
@@ -14407,7 +14405,6 @@ Perl_wrap_keyword_plugin(pTHX_
     Perl_keyword_plugin_t new_plugin, Perl_keyword_plugin_t *old_plugin_p)
 {
 
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_KEYWORD_PLUGIN;
     if (*old_plugin_p) return;
     KEYWORD_PLUGIN_MUTEX_LOCK;
@@ -14444,7 +14441,6 @@ Perl_wrap_infix_plugin(pTHX_
     Perl_infix_plugin_t new_plugin, Perl_infix_plugin_t *old_plugin_p)
 {
 
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_INFIX_PLUGIN;
     if (*old_plugin_p) return;
     /* We use the same mutex as for PL_keyword_plugin as it's so rare either

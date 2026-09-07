@@ -119,7 +119,6 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 
     /* Sets the current number of elements stored in the inversion list.
      * Updates SvCUR correspondingly */
-    PERL_UNUSED_CONTEXT;
 
     assert(SvTYPE(invlist) == SVt_INVLIST);
 

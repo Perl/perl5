@@ -1716,7 +1716,6 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     regnode *stclass = NULL;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_UNUSED_CONTEXT;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif

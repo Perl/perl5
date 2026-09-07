@@ -2488,7 +2488,6 @@ Perl_hv_fill(pTHX_ HV *const hv)
     STRLEN count = 0;
     HE **ents = HvARRAY(hv);
 
-    PERL_UNUSED_CONTEXT;
     /* No keys implies no buckets used.
        One key can only possibly mean one bucket used.  */
     if (HvTOTALKEYS(hv) < 2)
@@ -3612,7 +3611,6 @@ I32
 Perl_hv_placeholders_get(pTHX_ const HV *hv)
 {
     PERL_ARGS_ASSERT_HV_PLACEHOLDERS_GET;
-    PERL_UNUSED_CONTEXT;
 
     MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_rhash);
 
@@ -4076,7 +4074,6 @@ no action occurs in this case.
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FREE;
-    PERL_UNUSED_CONTEXT;
 
     while (he) {
         struct refcounted_he *copy;
@@ -4114,7 +4111,6 @@ Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
     PERL_ARGS_ASSERT_REFCOUNTED_HE_INC;
 
-    PERL_UNUSED_CONTEXT;
     if (he) {
         HINTS_REFCNT_LOCK;
         he->refcounted_he_refcnt++;
@@ -4145,7 +4141,6 @@ const char *
 Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
 {
     PERL_ARGS_ASSERT_COP_FETCH_LABEL;
-    PERL_UNUSED_CONTEXT;
 
     struct refcounted_he *const chain = cop->cop_hints_hash;
 

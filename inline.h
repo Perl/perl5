@@ -4419,7 +4419,6 @@ PERL_STATIC_INLINE void
 Perl_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
 {
     PERL_ARGS_ASSERT_CX_POPWHEN;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(cx);
     assert(CxTYPE(cx) == CXt_WHEN);
 
@@ -4631,7 +4630,6 @@ PERL_STATIC_INLINE I32
 Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 {
     PERL_ARGS_ASSERT_FOLDEQ;
-    PERL_UNUSED_CONTEXT;
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -4656,7 +4654,6 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
      * does not check for this.  Nor does it check that the strings each have
      * at least 'len' characters. */
 
-    PERL_UNUSED_CONTEXT;
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -4954,7 +4951,6 @@ Perl_mortal_getenv(const char * str)
 PERL_STATIC_INLINE bool
 Perl_sv_isbool(pTHX_ const SV *sv)
 {
-    PERL_UNUSED_CONTEXT;
     return SvBoolFlagsOK(sv) && BOOL_INTERNALS_sv_isbool(sv);
 }
 
@@ -5074,7 +5070,6 @@ PERL_STATIC_INLINE char *
 Perl_savepv(pTHX_ const char *pv)
 {
     PERL_ARGS_ASSERT_SAVEPV;
-    PERL_UNUSED_CONTEXT;
 
     if (!pv)
         return NULL;
@@ -5094,7 +5089,6 @@ Perl_savepvn(pTHX_ const char *pv, Size_t len)
     PERL_ARGS_ASSERT_SAVEPVN;
 
     char *newaddr;
-    PERL_UNUSED_CONTEXT;
 
     Newx(newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
@@ -5172,7 +5166,6 @@ PERL_STATIC_INLINE MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
     PERL_ARGS_ASSERT_GET_VTBL;
-    PERL_UNUSED_CONTEXT;
 
     return (vtbl_id < 0 || vtbl_id >= magic_vtable_max)
         ? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;

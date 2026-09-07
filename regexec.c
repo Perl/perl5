@@ -3707,7 +3707,6 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
 
 static void S_clear_offs_spare(pTHX_ regexp *prog)
 {
-    PERL_UNUSED_CONTEXT;
     prog->offs_spare_used = FALSE;
 }
 

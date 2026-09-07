@@ -284,7 +284,6 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 
 #ifndef WIN32
     /* The context is unused in non-Windows */
-    PERL_UNUSED_CONTEXT;
 #endif
     slab->opslab_free_space = (U16)sz;
     slab->opslab_head = head ? head : slab;
@@ -567,7 +566,6 @@ void
 Perl_opslab_free(pTHX_ OPSLAB *slab)
 {
     PERL_ARGS_ASSERT_OPSLAB_FREE;
-    PERL_UNUSED_CONTEXT;
 
     OPSLAB *slab2;
     DEBUG_S_warn((aTHX_ "freeing slab %p", (void*)slab));
@@ -1565,7 +1563,6 @@ Perl_op_refcnt_lock(pTHX)
 {
     PERL_ARGS_ASSERT_OP_REFCNT_LOCK;
 
-    PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
 }
 
@@ -1583,7 +1580,6 @@ Perl_op_refcnt_unlock(pTHX)
 {
     PERL_ARGS_ASSERT_OP_REFCNT_UNLOCK;
 
-    PERL_UNUSED_CONTEXT;
     OP_REFCNT_UNLOCK;
 }
 
@@ -4357,7 +4353,6 @@ OP *
 Perl_sawparens(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_SAWPARENS;
-    PERL_UNUSED_CONTEXT;
 
     if (o)
         o->op_flags |= OPf_PARENS;
@@ -13336,7 +13331,6 @@ S_io_hints(pTHX_ OP *o)
         }
     }
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(o);
 #endif
 }
@@ -13429,7 +13423,6 @@ PERL_STATIC_INLINE bool
 is_dollar_bracket(pTHX_ const OP * const o)
 {
     const OP *kid;
-    PERL_UNUSED_CONTEXT;
     return o->op_type == OP_RV2SV && o->op_flags & OPf_KIDS
         && (kid = cUNOPx(o)->op_first)
         && kid->op_type == OP_GV
@@ -13572,7 +13565,6 @@ Perl_ck_concat(pTHX_ OP *o)
 
     const OP * const kid = cUNOPo->op_first;
 
-    PERL_UNUSED_CONTEXT;
 
     /* reuse the padtmp returned by the concat child */
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
@@ -14715,7 +14707,6 @@ Perl_ck_match(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_MATCH;
 
-    PERL_UNUSED_CONTEXT;
 
     return o;
 }
@@ -14787,7 +14778,6 @@ OP *
 Perl_ck_null(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_NULL;
-    PERL_UNUSED_CONTEXT;
     return o;
 }
 
@@ -16129,7 +16119,6 @@ Perl_cv_get_call_checker_flags(pTHX_ CV *cv, U32 gflags,
         Perl_call_checker *ckfun_p, SV **ckobj_p, U32 *ckflags_p)
 {
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER_FLAGS;
-    PERL_UNUSED_CONTEXT;
 
     MAGIC *callmg;
     callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
@@ -16148,7 +16137,6 @@ void
 Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 {
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
-    PERL_UNUSED_CONTEXT;
 
     U32 ckflags;
     cv_get_call_checker_flags(cv, CALL_CHECKER_REQUIRE_GV, ckfun_p, ckobj_p,
@@ -16349,7 +16337,6 @@ Perl_ck_svconst(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SVCONST;
 
     SV * const sv = cSVOPo->op_sv;
-    PERL_UNUSED_CONTEXT;
 #ifdef PERL_COPY_ON_WRITE
     /* Since the read-only flag may be used to protect a string buffer, we
        cannot do copy-on-write with existing read-only scalars that are not
@@ -17173,7 +17160,6 @@ void
 Perl_wrap_op_checker(pTHX_ Optype opcode,
     Perl_check_t new_checker, Perl_check_t *old_checker_p)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_OP_CHECKER;
 
     if (*old_checker_p) return;
@@ -17280,7 +17266,6 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags)
 {
     PERL_ARGS_ASSERT_RCPV_NEW;
 
-    PERL_UNUSED_CONTEXT;
     RCPV *rcpv;
 
     /* Musn't use both at the same time */
@@ -17336,7 +17321,6 @@ Perl_rcpv_free(pTHX_ char *pv)
 
     PERL_ARGS_ASSERT_RCPV_FREE;
 
-    PERL_UNUSED_CONTEXT;
 
     if (!pv)
         return NULL;
@@ -17376,7 +17360,6 @@ Perl_rcpv_copy(pTHX_ char *pv)
 
     PERL_ARGS_ASSERT_RCPV_COPY;
 
-    PERL_UNUSED_CONTEXT;
 
     if (!pv)
         return NULL;

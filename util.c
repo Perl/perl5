@@ -1353,7 +1353,6 @@ Perl_savesharedpv(pTHX_ const char *pv)
     char *newaddr;
     STRLEN pvlen;
 
-    PERL_UNUSED_CONTEXT;
 
     if (!pv)
         return NULL;
@@ -1370,7 +1369,6 @@ char *
 Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
     PERL_ARGS_ASSERT_SAVESHAREDPVN;
-    PERL_UNUSED_CONTEXT;
 
     char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
 
@@ -2361,7 +2359,6 @@ char *
 Perl_new_warnings_bitfield(pTHX_ char *buffer, const char *const bits,
                            STRLEN size) {
     PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD;
-    PERL_UNUSED_CONTEXT;
 
     const MEM_SIZE len_wanted = (size > WARNsize ? size : WARNsize);
 
@@ -3028,7 +3025,6 @@ Perl_rsignal_state(pTHX_ int signo)
     PERL_ARGS_ASSERT_RSIGNAL_STATE;
 
     struct sigaction oact;
-    PERL_UNUSED_CONTEXT;
 
     if (sigaction(signo, (struct sigaction *)NULL, &oact) == -1)
         return (Sighandler_t) SIG_ERR;
@@ -3067,7 +3063,6 @@ int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
     PERL_ARGS_ASSERT_RSIGNAL_RESTORE;
-    PERL_UNUSED_CONTEXT;
 
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
@@ -3737,7 +3732,6 @@ Perl_get_op_names(pTHX)
 {
     PERL_ARGS_ASSERT_GET_OP_NAMES;
 
-    PERL_UNUSED_CONTEXT;
     return (char **)PL_op_name;
 }
 
@@ -3758,7 +3752,6 @@ Perl_get_op_descs(pTHX)
 {
     PERL_ARGS_ASSERT_GET_OP_DESCS;
 
-    PERL_UNUSED_CONTEXT;
     return (char **)PL_op_desc;
 }
 
@@ -3767,7 +3760,6 @@ Perl_get_no_modify(pTHX)
 {
     PERL_ARGS_ASSERT_GET_NO_MODIFY;
 
-    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return PL_no_modify;
 }
 
@@ -3776,7 +3768,6 @@ Perl_get_opargs(pTHX)
 {
     PERL_ARGS_ASSERT_GET_OPARGS;
 
-    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (U32 *)PL_opargs;
 }
 
@@ -3785,7 +3776,6 @@ Perl_get_ppaddr(pTHX)
 {
     PERL_ARGS_ASSERT_GET_PPADDR;
 
-    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
     return (PPADDR_t*)PL_ppaddr;
 }
 
@@ -3794,7 +3784,6 @@ char *
 Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     PERL_ARGS_ASSERT_GETENV_LEN;
-    PERL_UNUSED_CONTEXT;
 
     char * const env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)
@@ -3953,7 +3942,6 @@ void
 Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 {
     PERL_ARGS_ASSERT_INIT_TM;
-    PERL_UNUSED_CONTEXT;
 
 #ifdef HAS_TM_TM_ZONE
     Time_t now;
@@ -4628,7 +4616,6 @@ void
 Perl_sv_nosharing(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_NOSHARING;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 }
 
@@ -4648,7 +4635,6 @@ bool
 Perl_sv_destroyable(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_DESTROYABLE;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 
     return TRUE;

@@ -692,6 +692,9 @@ Configurations, or when it is reserved for possible future use.
 Note that this warning is always suppressed for the gcc and clang compilers,
 even without the use of this macro.
 
+This macro is no longer used (nor even defined) in the Perl core, as the
+suppression is now automatically enabled for all compilers.
+
 =for apidoc Am;||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
@@ -706,7 +709,7 @@ compilation causes it be used just in some build Configurations.
 #  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
 #endif
 
-#if defined(MULTIPLICITY)
+#if defined(MULTIPLICITY) && ! defined(PERL_CORE)
 #  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #else
 #  define PERL_UNUSED_CONTEXT

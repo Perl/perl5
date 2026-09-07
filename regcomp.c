@@ -884,7 +884,6 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 {
     int n = 0;
     STRLEN s;
-    PERL_UNUSED_CONTEXT;
 
     for (s = 0; s < plen; s++) {
         if (   pRExC_state->code_blocks
@@ -13367,7 +13366,6 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     const int size = NODE_STEP_REGNODE + offset;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
     DEBUG_PARSE_FMT("inst"," - %s", REGNODE_NAME(op));
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
@@ -13647,7 +13645,6 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_RE_INTUIT_STRING;
-    PERL_UNUSED_CONTEXT;
 
     DEBUG_COMPILE_r(
         {

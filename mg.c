@@ -1316,7 +1316,6 @@ int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
     croak_no_modify();
@@ -2295,7 +2294,6 @@ Perl_csighandler_init(void)
 static void
 unblock_sigmask(pTHX_ void* newset)
 {
-    PERL_UNUSED_CONTEXT;
     sigprocmask(SIG_UNBLOCK, (sigset_t*)newset, NULL);
 }
 #endif
@@ -3049,7 +3047,6 @@ Perl_magic_cleararylen_p(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_CLEARARYLEN_P;
     PERL_UNUSED_ARG(sv);
-    PERL_UNUSED_CONTEXT;
 
     /* Reset the iterator when the array is cleared */
     if (sizeof(IV) == sizeof(SSize_t)) {
@@ -3391,7 +3388,6 @@ int
 Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETMGLOB;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     mg->mg_len = -1;
     return 0;
@@ -3448,7 +3444,6 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
      * RenE<eacute> Descartes said "I think not."
      * and vanished with a faint plop.
      */
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     if (mg->mg_ptr) {
         Safefree(mg->mg_ptr);
@@ -3482,7 +3477,6 @@ int
 Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETUTF8;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
     mg->mg_ptr = NULL;
@@ -4232,7 +4226,6 @@ I32
 Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 {
     PERL_ARGS_ASSERT_WHICHSIG_PVN;
-    PERL_UNUSED_CONTEXT;
 
     char* const* sigv;
 
