@@ -10996,16 +10996,6 @@ Perl_load_mathoms(void);
 # define PERL_ARGS_ASSERT_LOAD_MATHOMS
 
 PERL_CALLCONV UV
-Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_UTF8_TO_UVCHR         \
-    STMT_START { Perl_assert_aTHX; assert(s);          \
-                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV UV
 Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
