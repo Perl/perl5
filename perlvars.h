@@ -192,7 +192,7 @@ PERLVARI(G, my_cxt_index, int,	0)
 
 /* this is currently set without MUTEX protection, so keep it a type which
  * can be set atomically (ie not a bit field) */
-PERLVARI(G, veto_cleanup, int, FALSE)	/* exit without cleanup */
+PERLVARI(G, veto_cleanup, PERL_ATOMIC(int), FALSE)	/* exit without cleanup */
 
 /*
 =for apidoc AmnUx|Perl_keyword_plugin_t|PL_keyword_plugin
