@@ -3741,27 +3741,6 @@ Perl_get_op_names(pTHX)
     return (char **)PL_op_name;
 }
 
-/*
-=for apidoc get_op_descs
-
-Return a pointer to the array of all the descriptions of the various OPs
-Given an opcode from the enum in F<opcodes.h>, C<PL_op_desc[opcode]> returns a
-pointer to a C language string giving its description.
-
-=cut
-
-Deprecated since 5.38
-*/
-
-char **
-Perl_get_op_descs(pTHX)
-{
-    PERL_ARGS_ASSERT_GET_OP_DESCS;
-
-    PERL_UNUSED_CONTEXT;
-    return (char **)PL_op_desc;
-}
-
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
