@@ -258,6 +258,12 @@ being used accepts (or nothing at all if it has no equivalent)).
 
 #ifdef MULTIPLICITY
 #  define tTHX	PerlInterpreter*
+                              /* Effectively this says not to warn even if the
+                               * context is unused.  This makes sense; we often
+                               * have functions where that is currently a
+                               * placeholder in case it is ever needed.  For
+                               * core, regen/embed.pl adds code for compilers
+                               * that don't understand this */
 #  define pTHX  tTHX my_perl  __attribute__unused__
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
