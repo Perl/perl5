@@ -1352,6 +1352,12 @@ by the current C<WHILEM> to the address in the cache of the byte and bit
 corresponding to the current match state. These are used by C<CACHEsayNO>
 to mark the cache during a subsequent unwinding.
 
+The initial cache allocation countdown can be adjusted via
+C<PL_re_superlinear_cache_delay>, which is settable via
+C<${^RE_SUPERLINEAR_CACHE_DELAY}> or, on perls built with
+C<-DPERL_RE_SUPERLINEAR_CACHE_DELAY>, via the environment variable
+C<$PERL_RE_SUPERLINEAR_CACHE_DELAY>.
+
 =head1 MISCELLANEOUS
 
 =head2 Unicode and Localisation Support

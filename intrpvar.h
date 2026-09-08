@@ -1117,6 +1117,11 @@ PERLVARI(I, in_warnhook, bool, FALSE)
 #endif
 PERLVARI(I, load_mathoms, shutdown_proc_t, PERL_LOAD_MATHOMS_HOOK)
 
+/* Adjust how long before the regex engine's super-linear cache kicks
+ * in. This can be get/set from user-land via ${^RE_SUPERLINEAR_CACHE_DELAY}.
+ * See its description in perlvar for the meanings of its value. */
+PERLVARI(I, re_superlinear_cache_delay, IV, 0)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

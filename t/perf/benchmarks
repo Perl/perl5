@@ -2687,5 +2687,26 @@
 
     # XXX more intuit tests needed here
 
+    # regex superlinear-cache
+
+    'regex::slc::immediate' => {
+        desc    => '/slc: immediate',
+        setup   => '$_ = "aaaaa"; ${^RE_SUPERLINEAR_CACHE_DELAY}=1',
+        code    => '/^(aa?)*[bc]/',
+    },
+
+    'regex::slc::default' => {
+        desc    => '/slc: default',
+        setup   => '$_ = "aaaaa";',
+        code    => '/^(aa?)*[bc]/',
+    },
+
+    'regex::slc::never' => {
+        desc    => '/slc: never',
+        setup   => '$_ = "aaaaa"; ${^RE_SUPERLINEAR_CACHE_DELAY}=-1',
+        code    => '/^(aa?)*[bc]/',
+    },
+
+
     # XXX millions more general regex tests needed here
 ];

@@ -1377,6 +1377,21 @@ in a variety of ways:
 
   $ 3>foo3 PERL_MEM_LOG=3m perl ...
 
+=item PERL_RE_SUPERLINEAR_CACHE_DELAY
+X<PERL_RE_SUPERLINEAR_CACHE_DELAY>
+
+Setting this environment variable to the value C<NNN> causes an effect
+roughly equivalent to including this code at the start of the program:
+
+    BEGIN { ${^RE_SUPERLINEAR_CACHE_DELAY} = NNN; }
+
+See L<perlvar/"${^RE_SUPERLINEAR_CACHE_DELAY}"> for details.
+
+Note that this environment variable is only honoured if the perl
+interpreter has been built with the C<PERL_RE_SUPERLINEAR_CACHE_DELAY>
+define: see F<INSTALL>.
+
+
 =item PERL_ROOT (specific to the VMS port)
 X<PERL_ROOT>
 

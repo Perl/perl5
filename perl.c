@@ -2739,6 +2739,16 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
+#ifdef PERL_RE_SUPERLINEAR_CACHE_DELAY
+    {
+        const char *s = PerlEnv_getenv("PERL_RE_SUPERLINEAR_CACHE_DELAY");
+        if (s) {
+            SV *var = get_sv("\022E_SUPERLINEAR_CACHE_DELAY", GV_ADD);
+            sv_setpv_mg(var, s);
+        }
+    }
+#endif
+
     ENTER;
     PL_restartjmpenv = NULL;
     PL_restartop = 0;

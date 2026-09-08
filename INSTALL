@@ -647,6 +647,12 @@ configure this to 0 or another very low value, it will break a lot of
 code. If you want to set it to a low value use the run time variable
 C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> instead.
 
+=item PERL_RE_SUPERLINEAR_CACHE_DELAY
+
+This define builds a perl interpreter which checks the similarly-named
+environment variable C<$PERL_RE_SUPERLINEAR_CACHE_DELAY> on startup.
+See L<perlrun/ENVIRONMENT> for details.
+
 =back
 
 =head3 SOCKS
