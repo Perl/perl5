@@ -1817,16 +1817,6 @@ Perl_get_op_names(pTHX)
 #define PERL_ARGS_ASSERT_GET_OP_NAMES           \
     STMT_START { Perl_assert_aTHX; } STMT_END
 
-PERL_CALLCONV U32 *
-Perl_get_opargs(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_GET_OPARGS             \
-    STMT_START { Perl_assert_aTHX; } STMT_END
-
 PERL_CALLCONV PPADDR_t *
 Perl_get_ppaddr(pTHX)
         Perl_attribute_nonnull_aTHX

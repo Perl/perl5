@@ -1028,7 +1028,6 @@
 #   define force_locale_unlock()                Perl_force_locale_unlock(aTHX)
 #   define free_tied_hv_pool()                  Perl_free_tied_hv_pool(aTHX)
 #   define get_hash_seed(a)                     Perl_get_hash_seed(aTHX_ a)
-#   define get_opargs()                         Perl_get_opargs(aTHX)
 #   define gv_override(a,b)                     Perl_gv_override(aTHX_ a,b)
 #   define gv_setref(a,b)                       Perl_gv_setref(aTHX_ a,b)
 #   define gv_try_downgrade(a)                  Perl_gv_try_downgrade(aTHX_ a)
