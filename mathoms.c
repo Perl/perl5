@@ -115,42 +115,6 @@ Perl_huge(void)
 
 /*
 =for apidoc_section $unicode
-=for apidoc utf8_to_uvuni
-
-Returns the Unicode code point of the first character in the string C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-Some, but not all, UTF-8 malformations are detected, and in fact, some
-malformed input could cause reading beyond the end of the input buffer, which
-is one reason why this function is deprecated.  The other is that only in
-extremely limited circumstances should the Unicode versus native code point be
-of any interest to you.
-
-If C<s> points to one of the detected malformations, and UTF8 warnings are
-enabled, zero is returned and C<*retlen> is set (if C<retlen> doesn't point to
-NULL) to -1.  If those warnings are off, the computed value if well-defined (or
-the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
-is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
-next possible position in C<s> that could begin a non-malformed character.
-See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
-
-=cut
-
-Deprecated since 5.38 
-*/
-
-UV
-Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
-{
-    PERL_UNUSED_CONTEXT;
-    PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
-
-    return NATIVE_TO_UNI(valid_utf8_to_uv(s, retlen));
-}
-
-/*
-=for apidoc_section $unicode
 =for apidoc utf8n_to_uvuni
 
 Instead use L<perlapi/utf8_to_uv>, or rarely, L<perlapi/utf8_to_uv_flags>.

@@ -4174,8 +4174,6 @@ ATdip	|UV	|utf8_to_uv_or_die					\
 				|SPTR const U8 * const s		\
 				|EPTRge const U8 *e			\
 				|NULLOK Size_t *advance_p
-CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
-				|NULLOK STRLEN *retlen
 : Used in perly.y
 p	|void	|utilize	|int aver				\
 				|I32 floor				\
