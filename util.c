@@ -3755,14 +3755,6 @@ Perl_get_op_descs(pTHX)
     return (char **)PL_op_desc;
 }
 
-U32 *
-Perl_get_opargs(pTHX)
-{
-    PERL_ARGS_ASSERT_GET_OPARGS;    /* Deprecated since 5.38 */
-
-    return (U32 *)PL_opargs;
-}
-
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
