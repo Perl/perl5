@@ -2074,17 +2074,6 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-PERL_CALLCONV const char *
-Perl_get_no_modify(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_GET_NO_MODIFY          \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_CALLCONV char **
 Perl_get_op_descs(pTHX)
         Perl_attribute_nonnull_aTHX
