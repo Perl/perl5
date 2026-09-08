@@ -663,9 +663,25 @@ Example usage:
 /*
 =for apidoc Am;||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
-not used.  This situation can arise, for example, when a parameter is needed
-under some configuration conditions, but not others, so that C preprocessor
-conditional compilation causes it be used just in some build Configurations.
+not used.  This situation can arise for various reasons, among them:
+
+=over 4
+
+=item * The parameter is reserved for future use
+
+=item * The signature of this function must match another's
+
+And this implementation doesn't need this particular parameter.
+
+=item * The parameter is needed under just some configuration conditions
+
+Hence there are C preprocessor conditionals that cause the parameter be used
+just in some build Configurations.
+
+=back
+
+For the first two reasons, it results in cleaner code to not use this macro,
+but to instead use the mechanism described in L<C<UNUSED>|perlintern/UNUSED>.
 
 =for apidoc Amn;||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
