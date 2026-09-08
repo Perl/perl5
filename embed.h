@@ -206,7 +206,6 @@
 # define doing_taint                            Perl_doing_taint
 # define doref(a,b,c)                           Perl_doref(aTHX_ a,b,c)
 # define dounwind(a)                            Perl_dounwind(aTHX_ a)
-# define dowantarray()                          Perl_dowantarray(aTHX)
 # define dump_all()                             Perl_dump_all(aTHX)
 # define dump_eval()                            Perl_dump_eval(aTHX)
 # define dump_form(a)                           Perl_dump_form(aTHX_ a)

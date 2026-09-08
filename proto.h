@@ -1449,14 +1449,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 #define PERL_ARGS_ASSERT_DOUNWIND               \
     STMT_START { Perl_assert_aTHX; } STMT_END
 
-PERL_CALLCONV U8
-Perl_dowantarray(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_DOWANTARRAY            \
-    STMT_START { Perl_assert_aTHX; } STMT_END
-
 PERL_CALLCONV void
 Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
         Perl_attribute_nonnull(1);

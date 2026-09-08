@@ -1633,27 +1633,6 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
     return i;
 }
 
-/*
-=for apidoc_section $callback
-=for apidoc dowantarray
-
-Implements the deprecated L<perlapi/C<GIMME>>.
-
-=cut
-
-Deprecated since 5.38
-
-*/
-
-U8
-Perl_dowantarray(pTHX)
-{
-    PERL_ARGS_ASSERT_DOWANTARRAY;
-
-    const U8 gimme = block_gimme();
-    return (gimme == G_VOID) ? G_SCALAR : gimme;
-}
-
 /* note that this function has mostly been superseded by Perl_gimme_V */
 
 U8
