@@ -1390,7 +1390,6 @@ p	|void	|do_vop 	|I32 optype				\
 				|NN SV *sv				\
 				|NN SV *left				\
 				|NN SV *right
-CDRdp	|U8	|dowantarray
 TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
 				|U32 seed
 TXop	|double |drand48_r	|NN perl_drand48_t *random_state
