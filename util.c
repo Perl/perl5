@@ -3720,15 +3720,6 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
-PPADDR_t*
-Perl_get_ppaddr(pTHX)
-{
-    PERL_ARGS_ASSERT_GET_PPADDR;
-
-    PERL_UNUSED_CONTEXT;    /* Deprecated since 5.38 */
-    return (PPADDR_t*)PL_ppaddr;
-}
-
 #ifndef HAS_GETENV_LEN
 char *
 Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
