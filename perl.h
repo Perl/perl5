@@ -258,7 +258,7 @@ being used accepts (or nothing at all if it has no equivalent)).
 
 #ifdef MULTIPLICITY
 #  define tTHX	PerlInterpreter*
-#  define pTHX  tTHX my_perl PERL_UNUSED_DECL
+#  define pTHX  tTHX my_perl  __attribute__unused__
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
 #  define dTHXa(a)	pTHX = (tTHX)a
@@ -628,6 +628,10 @@ An example is:
  * marking unused variables (they need e.g. a #pragma) and therefore
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
+ *
+ * Nowadays, regen/embed.pl could easily be extended to deal with any such
+ * remaining compilers.  But the C23 standard moves the language to using
+ * postfix notation for this case.
 */
 
 /*
@@ -636,7 +640,8 @@ An example is:
 Tells the compiler that the parameter in the function prototype just before it
 is not necessarily expected to be used in the function.  Not that many
 compilers understand this, so this should only be used in cases where
-C<L</PERL_UNUSED_ARG>> can't conveniently be used.
+C<L</PERL_UNUSED_ARG>> can't conveniently be used.  (It works for all
+compilers.)
 
 Example usage:
 
@@ -651,7 +656,7 @@ Example usage:
 =cut
 */
 
-#ifndef PERL_UNUSED_DECL
+#if !defined(PERL_CORE) && !defined(PERL_UNUSED_DECL)
 #  define PERL_UNUSED_DECL __attribute__unused__
 #endif
 
@@ -4541,7 +4546,7 @@ where it has parity with the other two forms.
 
 #  define STATIC_ASSERT_DECL(COND)                                          \
      typedef STATIC_ASSERT_STRUCT_BODY_(COND, STATIC_ASSERT_STRUCT_NAME_)   \
-                    STATIC_ASSERT_STRUCT_NAME_ PERL_UNUSED_DECL
+                    STATIC_ASSERT_STRUCT_NAME_ __attribute__unused__
 
 #endif
 

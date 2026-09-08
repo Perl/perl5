@@ -1000,7 +1000,7 @@ Perl_csighandler1(int sig);
 #define PERL_ARGS_ASSERT_CSIGHANDLER1
 
 PERL_CALLCONV Signal_t
-Perl_csighandler3(int sig, Siginfo_t *info, void *uap);
+Perl_csighandler3(int sig, Siginfo_t *info __attribute__unused__, void *uap __attribute__unused__);
 #define PERL_ARGS_ASSERT_CSIGHANDLER3
 
 PERL_CALLCONV regexp_engine const *
@@ -6418,7 +6418,7 @@ perl_run(PerlInterpreter *my_perl)
     } STMT_END
 
 PERL_CALLCONV Signal_t
-Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
+Perl_perly_sighandler(int sig, Siginfo_t *info __attribute__unused__, void *uap __attribute__unused__, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
 
 PERL_CALLCONV const char *

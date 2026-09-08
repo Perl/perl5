@@ -2168,7 +2168,7 @@ Perl_csighandler1(int sig)
  */
 
 Signal_t
-Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Perl_csighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
 {
     PERL_ARGS_ASSERT_CSIGHANDLER3;
 
@@ -2187,15 +2187,6 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
         pthread_kill(PL_main_thread, sig);
         return;
     }
-#endif
-
-#ifdef PERL_USE_3ARG_SIGHANDLER
-#  if defined(__cplusplus) && defined(__GNUC__)
-    /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
-     * parameters would be warned about. */
-    PERL_UNUSED_ARG(sip);
-    PERL_UNUSED_ARG(uap);
-#  endif
 #endif
 
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -4288,7 +4279,7 @@ Perl_sighandler1(int sig)
 }
 
 Signal_t
-Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Perl_sighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
 {
     PERL_ARGS_ASSERT_SIGHANDLER3;
 
@@ -4305,8 +4296,8 @@ Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED
  */
 
 Signal_t
-Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
-                    void *uap PERL_UNUSED_DECL, bool safe)
+Perl_perly_sighandler(int sig, Siginfo_t *sip UNUSED,
+                    void *uap UNUSED, bool safe)
 {
     PERL_ARGS_ASSERT_PERLY_SIGHANDLER;
 
