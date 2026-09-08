@@ -99,7 +99,7 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'cloning constant subs');
 use constant x=>1;
 use threads;
 $SIG{__WARN__} = sub{};
-async sub {};
+async {;}->join;
 print "ok";
 EOI
 
