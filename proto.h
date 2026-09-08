@@ -1799,16 +1799,6 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 #define PERL_ARGS_ASSERT_GET_HV                 \
     STMT_START { Perl_assert_aTHX; assert(name); } STMT_END
 
-PERL_CALLCONV const char *
-Perl_get_no_modify(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_GET_NO_MODIFY          \
-    STMT_START { Perl_assert_aTHX; } STMT_END
-
 PERL_CALLCONV char **
 Perl_get_op_descs(pTHX)
         Perl_attribute_nonnull_aTHX
