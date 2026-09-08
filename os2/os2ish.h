@@ -275,7 +275,7 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 /* #define PERL_SYS_TERM_BODY() STMT_START {	\
     if (Perl_HAB_set) WinTerminate(Perl_hab);	} STMT_END */
 
-#define dXSUB_SYS int fake = OS2_XS_init() PERL_UNUSED_DECL
+#define dXSUB_SYS int fake = OS2_XS_init() __attribute__unused__
 
 #ifdef PERL_IS_AOUT
 /* #  define HAS_FORK */
