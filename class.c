@@ -1406,28 +1406,6 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
     PadnameREFCNT_inc(pn);
 }
 
-/* Adds a pad entry to PL_compcv to make the given field visible. This works
- * even before the field has been properly `intro_my()`'ed and is thus usable
- * during attributes declared on the same newly-field.
- */
-
-#if 0
-#define pad_import_field(fieldpn)  S_pad_import_field(aTHX_ fieldpn)
-static PADOFFSET
-S_pad_import_field(pTHX_ PADNAME *fieldpn)
-{
-    assert(PadnameIsFIELD(fieldpn));
-
-    /* We can't just pad_findmy_pvn() because the actual field may not have been
-     * intro_my()'ed yet */
-    PADNAME *name = newPADNAMEouter(fieldpn);
-    PADOFFSET padix = pad_alloc(OP_PADSV, SVs_PADMY|padalloc_NO_SV);
-    padnamelist_store(PL_comppad_name, padix, name);
-
-    return padix;
-}
-#endif
-
 static void
 padname_skip_underscore(const PADNAME *pn, const char **pname, STRLEN *plen) {
     /* skip sigil */
@@ -1449,7 +1427,8 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
         const char *name;
         STRLEN len;
         padname_skip_underscore(pn, &name, &len);
-        value = newSVpvn_flags(name, len, PadnameUTF8(pn) | SVs_TEMP);
+        value = newSVpvn_flags(name, len,
+                               SVs_TEMP | (PadnameUTF8(pn) ? SVf_UTF8 : 0));
     }
 
     if(PadnamePV(pn)[0] != '$')
@@ -1485,7 +1464,8 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
         const char *name;
         STRLEN len;
         padname_skip_underscore(pn, &name, &len);
-        value = newSVpvn_flags(name, len, PadnameUTF8(pn) | SVs_TEMP);
+        value = newSVpvn_flags(name, len,
+                               SVs_TEMP | (PadnameUTF8(pn) ? SVf_UTF8 : 0));
     }
 
     if(!valid_identifier_sv(value))
@@ -1575,61 +1555,6 @@ apply_field_attribute_writer(pTHX_ PADNAME *pn, SV *value)
         PL_curstash = save_curstash;
     }
     return;
-
-#if 0
-    /* This was the original code to implement an optree-based writer.
-     * Left here in case it's needed for e.g. implementing constraints.
-     */
-
-    I32 floor_ix = start_subparse(FALSE, 0);
-    SAVEFREESV(PL_compcv);
-    CvIsMETHOD_on(PL_compcv);
-
-    I32 save_ix = block_start(TRUE);
-
-    PADOFFSET padix;
-
-    padix = pad_add_name_pvs("$self", 0, NULL, NULL);
-    assert(padix == PADIX_SELF);
-
-    subsignature_start();
-    CvSIGNATURE_on(PL_compcv);
-
-    /* param pad variable doesn't technically need a name, so don't bother as
-     * reusing the field name will provoke a warning */
-    PADOFFSET param_padix = padix = pad_add_name_pvn("$", 1, 0, NULL, NULL);
-    intro_my();
-
-    subsignature_append_positional(param_padix, 0, NULL);
-
-    OP *sigop = subsignature_finish();
-
-    padix = pad_import_field(pn);
-    intro_my();
-
-    OP *assignop = newBINOP(OP_SASSIGN, 0,
-            newPADxVOP(OP_PADSV, 0, param_padix),
-            newPADxVOP(OP_PADSV, OPf_MOD|OPf_REF, padix));
-
-    OP *retop = newLISTOP(OP_RETURN, 0,
-            newOP(OP_PUSHMARK, 0),
-            newPADxVOP(OP_PADSV, 0, PADIX_SELF));
-
-    OP *ops = newLISTOPn(OP_LINESEQ, 0,
-            sigop,
-            assignop,
-            retop,
-            NULL);
-
-    SvREFCNT_inc(PL_compcv);
-    ops = block_end(save_ix, ops);
-
-    OP *nameop = newSVOP(OP_CONST, 0, value);
-
-    CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
-    if (cv)
-        CvIsMETHOD_on(cv);
-#endif
 }
 
 static struct {
