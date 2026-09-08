@@ -665,17 +665,21 @@ Example usage:
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
 under some configuration conditions, but not others, so that C preprocessor
-conditional compilation causes it be used just sometimes.
+conditional compilation causes it be used just in some build Configurations.
 
 =for apidoc Amn;||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
-a function is not used.  This situation can arise, for example, when a
-C preprocessor conditional compilation causes it be used just some times.
+a function is not used.  This situation can arise, for example, when a C
+preprocessor conditional compilation causes it be used just in some build
+Configurations, or when it is reserved for possible future use.
+
+Note that this warning is always suppressed for the gcc and clang compilers,
+even without the use of this macro.
 
 =for apidoc Am;||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
-compilation causes it be used just some times.
+compilation causes it be used just in some build Configurations.
 
 =cut
 */
