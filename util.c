@@ -3715,26 +3715,6 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
-/*
-=for apidoc get_op_names
-
-Return a pointer to the array of all the names of the various OPs
-Given an opcode from the enum in F<opcodes.h>, C<PL_op_name[opcode]> returns a
-pointer to a C language string giving its name.
-
-=cut
-
-Deprecated since 5.38
-*/
-
-char **
-Perl_get_op_names(pTHX)
-{
-    PERL_ARGS_ASSERT_GET_OP_NAMES;
-
-    return (char **)PL_op_name;
-}
-
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
