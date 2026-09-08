@@ -4085,10 +4085,6 @@ ATdip	|UV	|utf8n_to_uvchr_msgs					\
 				|const U32 flags			\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
-CDbdp	|UV	|utf8n_to_uvuni |NN const U8 *s 			\
-				|STRLEN curlen				\
-				|NULLOK STRLEN *retlen			\
-				|U32 flags
 Adpx	|U8 *	|utf8_to_bytes	|NN U8 *s				\
 				|NN STRLEN *lenp
 Cp	|bool	|utf8_to_bytes_ |NN U8 **s_ptr				\

@@ -113,31 +113,6 @@ Perl_huge(void)
 }
 #endif
 
-/*
-=for apidoc_section $unicode
-=for apidoc utf8n_to_uvuni
-
-Instead use L<perlapi/utf8_to_uv>, or rarely, L<perlapi/utf8_to_uv_flags>.
-
-This function was useful for code that wanted to handle both EBCDIC and
-ASCII platforms with Unicode properties, but starting in Perl v5.20, the
-distinctions between the platforms have mostly been made invisible to most
-code, so this function is quite unlikely to be what you want.  If you do need
-this precise functionality, use instead L<perlapi/C<utf8_to_uv>> or
-L<perlapi/C<utf8_to_uv_flags>> to calculate the native code point, and then
-convert to Unicode using L<perlapi/C<NATIVE_TO_UNI>>.
-
-=cut
-*/
-
-UV
-Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-{
-    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI; /* Deprecated since 5.38 */
-
-    return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
-}
-
 GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */

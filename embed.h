@@ -947,9 +947,6 @@
 #     define malloced_size                      Perl_malloced_size
 #   endif
 # endif
-# if !defined(NO_MATHOMS)
-#   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
-# endif
 # if defined(PERL_ANY_COW)
 #   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
 # endif
