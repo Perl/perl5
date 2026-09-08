@@ -3755,14 +3755,6 @@ Perl_get_op_descs(pTHX)
     return (char **)PL_op_desc;
 }
 
-const char *
-Perl_get_no_modify(pTHX)
-{
-    PERL_ARGS_ASSERT_GET_NO_MODIFY; /* Deprecated since 5.38 */
-
-    return PL_no_modify;
-}
-
 U32 *
 Perl_get_opargs(pTHX)
 {
