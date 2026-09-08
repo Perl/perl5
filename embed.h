@@ -236,7 +236,6 @@
 # define get_cv(a,b)                            Perl_get_cv(aTHX_ a,b)
 # define get_cvn_flags(a,b,c)                   Perl_get_cvn_flags(aTHX_ a,b,c)
 # define get_hv(a,b)                            Perl_get_hv(aTHX_ a,b)
-# define get_op_names()                         Perl_get_op_names(aTHX)
 # define get_ppaddr()                           Perl_get_ppaddr(aTHX)
 # define get_sv(a,b)                            Perl_get_sv(aTHX_ a,b)
 # define get_vtbl(a)                            Perl_get_vtbl(aTHX_ a)
