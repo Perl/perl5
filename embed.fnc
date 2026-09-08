@@ -1524,7 +1524,6 @@ MTp	|int	|get_extended_os_errno
 p	|void	|get_hash_seed	|NN unsigned char * const seed_buffer
 AOdp	|HV *	|get_hv 	|NN const char *name			\
 				|I32 flags
-DPRp	|U32 *	|get_opargs
 ADPRdp	|char **|get_op_descs
 ADPRdp	|char **|get_op_names
 CDPRp	|PPADDR_t *|get_ppaddr
