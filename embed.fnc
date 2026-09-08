@@ -1160,8 +1160,8 @@ ATdpr	|void	|croak_xs_usage |NN const CV * const cv 		\
 				|NN const char * const params
 CTp	|Signal_t|csighandler1	|int sig
 CTp	|Signal_t|csighandler3	|int sig				\
-				|NULLOK Siginfo_t *info 		\
-				|NULLOK void *uap
+				|NULLOK Siginfo_t *info UNUSED		\
+				|NULLOK void *uap UNUSED
 ATdmp	|bool	|c9strict_utf8_to_uv					\
 				|SPTR const U8 * const s		\
 				|EPTRge const U8 * const e		\
@@ -2856,8 +2856,8 @@ ATdo	|const char *|Perl_setlocale					\
 				|NULLOK const char *locale
 CTp	|Signal_t|perly_sighandler					\
 				|int sig				\
-				|NULLOK Siginfo_t *info 		\
-				|NULLOK void *uap			\
+				|NULLOK Siginfo_t *info UNUSED		\
+				|NULLOK void *uap UNUSED		\
 				|bool safe
 
 Admp	|const char *|phase_name|enum perl_phase phase
