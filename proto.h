@@ -2074,16 +2074,6 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-PERL_CALLCONV PPADDR_t *
-Perl_get_ppaddr(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-#define PERL_ARGS_ASSERT_GET_PPADDR             \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_CALLCONV SV *
 Perl_get_prop_definition(pTHX_ const int table_index)
         Perl_attribute_nonnull_aTHX
