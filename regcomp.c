@@ -3132,7 +3132,7 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
         RExC_have_flattened = true;
 
 #ifdef DEBUGGING
-        U64 my_nalt = 0;
+        UV my_nalt = 0;
         SV *debug_string = NULL;
 
         DEBUG_PARSE_r({
@@ -3187,7 +3187,9 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
                             sv_catsv(debug_string, RExC_mysv1);
                         }
                     }
-                    my_nalt++;
+                    /* my_nalt is a debugging indicator, shouldn't matter
+                     * if it tops out at UV_MAX */
+                    if (my_nalt < UV_MAX) my_nalt++;
                 });
                 /* Point the final regnode within the inner BRANCH to the
                  * common outer TAIL regnode. */
