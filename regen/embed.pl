@@ -3883,7 +3883,7 @@ sub generate_proto_h {
                         }
                     }
                     elsif (   defined $argname
-                        && ($args_assert_line || $binarycompat))
+                           && ($args_assert_line || $binarycompat))
                     {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
