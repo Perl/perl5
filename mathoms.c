@@ -174,24 +174,6 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
 }
 
-UV
-Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
-{
-    PERL_ARGS_ASSERT_UTF8_TO_UVCHR; /* Deprecated since 5.38 */
-
-    /* This function is unsafe if malformed UTF-8 input is given it, which is
-     * why the function is deprecated.  If the first byte of the input
-     * indicates that there are more bytes remaining in the sequence that forms
-     * the character than there are in the input buffer, it can read past the
-     * end.  But we can make it safe if the input string happens to be
-     * NUL-terminated, as many strings in Perl are, by refusing to read past a
-     * NUL, which is what UTF8_CHK_SKIP() does.  A NUL indicates the start of
-     * the next character anyway.  If the input isn't NUL-terminated, the
-     * function remains unsafe, as it always has been. */
-
-    return utf8_to_uvchr_buf(s, s + UTF8_CHK_SKIP(s), retlen);
-}
-
 GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */
