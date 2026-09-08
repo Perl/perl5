@@ -1742,6 +1742,9 @@
 #     if defined(PERL_DEBUG_READONLY_COW)
 #       define sv_buf_to_rw(a)                  S_sv_buf_to_rw(aTHX_ a)
 #     endif
+#     if defined(PERL_USE_VALUEMAGIC)
+#       define filter_mgv2_scalarvalue          S_filter_mgv2_scalarvalue
+#     endif
 #     if defined(USE_ITHREADS)
 #       define sv_dup_common(a,b)               S_sv_dup_common(aTHX_ a,b)
 #       define sv_dup_hvaux(a,b,c)              S_sv_dup_hvaux(aTHX_ a,b,c)

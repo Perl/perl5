@@ -3787,13 +3787,14 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
     STMT_START { Perl_assert_aTHX; assert(sv); assert(mg); } STMT_END
 
 PERL_CALLCONV MAGIC *
-Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv __attribute__unused__, MAGIC *omg)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
 #define PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY  \
     STMT_START { Perl_assert_aTHX; assert(nsv); assert(osv); assert(omg);  \
+                 PERL_UNUSED_ARG_FOR_ARGS_ASSERT(osv);                     \
     } STMT_END
 
 PERL_CALLCONV Malloc_t
@@ -10256,12 +10257,13 @@ Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
      STMT_START { Perl_assert_aTHX; assert(pn); } STMT_END
 
 PERL_CALLCONV void
-Perl_class_declare_padvars(pTHX_ CV *cv)
+Perl_class_declare_padvars(pTHX_ CV *cv __attribute__unused__)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 # define PERL_ARGS_ASSERT_CLASS_DECLARE_PADVARS \
      STMT_START { Perl_assert_aTHX; assert(cv);                              \
                   assert(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);  \
+                  PERL_UNUSED_ARG_FOR_ARGS_ASSERT(cv);                       \
     } STMT_END
 
 PERL_CALLCONV void
@@ -14290,6 +14292,15 @@ S_sv_unglob(pTHX_ SV * const sv, U32 flags)
         Perl_attribute_nonnull(pTHX_1);
 #   define PERL_ARGS_ASSERT_SV_UNGLOB           \
      STMT_START { Perl_assert_aTHX; assert(sv); } STMT_END
+
+# endif
+# if defined(PERL_USE_VALUEMAGIC)
+static void
+S_filter_mgv2_scalarvalue(MAGIC *mg, const void *key __attribute__unused__)
+        Perl_attribute_nonnull(1);
+#   define PERL_ARGS_ASSERT_FILTER_MGV2_SCALARVALUE \
+       STMT_START { assert(mg); PERL_UNUSED_ARG_FOR_ARGS_ASSERT(key);  \
+    } STMT_END
 
 # endif
 # if defined(USE_ITHREADS)

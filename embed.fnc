@@ -2258,7 +2258,7 @@ p	|U32	|magic_sizepack |NN SV *sv				\
 				|NN MAGIC *mg
 Adp	|MAGIC *|magicv2_localize_copy					\
 				|NN SV *nsv				\
-				|NN SV *osv				\
+				|NN SV *osv UNUSED			\
 				|NN MAGIC *omg
 p	|int	|magic_wipepack |NN SV *sv				\
 				|NN MAGIC *mg
@@ -4613,7 +4613,7 @@ Cp	|void	|class_apply_field_attributes				\
 				|NN PADNAME *pn 			\
 				|NULLOK OP *attrlist
 Cp	|void	|class_declare_padvars					\
-				|NN CV *cv
+				|NN CV *cv UNUSED
 Cp	|void	|class_prepare_initfield_parse
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv
@@ -6371,6 +6371,11 @@ S	|int	|sv_2iuv_non_preserve					\
 # endif
 # if defined(PERL_DEBUG_READONLY_COW)
 S	|void	|sv_buf_to_rw	|NN SV *sv
+# endif
+# if defined(PERL_USE_VALUEMAGIC)
+ST	|void	|filter_mgv2_scalarvalue				\
+				|MAGIC *mg NN				\
+				|const void *key UNUSED NULLOK
 # endif
 # if defined(USE_ITHREADS)
 RS	|SV *	|sv_dup_common	|NN const SV * const ssv		\
