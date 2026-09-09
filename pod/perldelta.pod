@@ -383,6 +383,10 @@ source tree.
 
 XXX
 
+=item MacOS (Darwin)
+
+Add support for building with Command Line Tools for Xcode 27.0
+
 =back
 
 =head2 Discontinued Platforms
