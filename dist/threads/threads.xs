@@ -330,16 +330,16 @@ S_ithread_dec_free(pTHX_ ithread *thread)
     assert(thread->tid != 0);
 
     /* Remove from circular list of threads */
+    MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
     if (thread->next) {
         /* the thread won't yet be in the list if we failed while
          * creating the thread and are now just cleaning up */
-        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         thread->next->prev = thread->prev;
         thread->prev->next = thread->next;
         thread->next = NULL;
         thread->prev = NULL;
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
     }
+    MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     /* Thread is now disowned */
     MUTEX_LOCK(&thread->mutex);
