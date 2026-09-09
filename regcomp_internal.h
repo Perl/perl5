@@ -49,7 +49,6 @@ struct RExC_state_t {
                                            and restoring 'copy_start' */
     char        *copy_start_in_input;   /* Position in input string
                                            corresponding to copy_start */
-    SSize_t     whilem_seen;            /* number of WHILEM in this expr */
     regnode     *emit_start;            /* Start of emitted-code area */
     regnode_offset emit;                /* Code-emit pointer */
     I32         naughty;                /* How bad is this pattern? */
@@ -206,7 +205,6 @@ struct RExC_state_t {
 #define RExC_end        (pRExC_state->end)
 #define RExC_parse      (pRExC_state->parse)
 #define RExC_latest_warn_offset (pRExC_state->latest_warn_offset )
-#define RExC_whilem_seen        (pRExC_state->whilem_seen)
 #define RExC_seen_d_op (pRExC_state->seen_d_op) /* Seen something that differs
                                                    under /d from /u ? */
 
@@ -691,7 +689,6 @@ struct scan_data_t {
     struct scan_data_substrs  substrs[2];
 
     I32 flags;             /* common SF_* and SCF_* flags */
-    I32 whilem_c;
     SSize_t *last_closep;
     regnode **last_close_opp; /* pointer to pointer to last CLOSE regop
                                  seen. DO NOT DEREFERENCE the regnode
@@ -710,7 +707,7 @@ static const scan_data_t zero_scan_data = {
         { NULL, 0, 0, 0, 0, 0 },
         { NULL, 0, 0, 0, 0, 0 },
     },
-    0, 0, NULL, NULL, NULL
+    0, NULL, NULL, NULL
 };
 
 

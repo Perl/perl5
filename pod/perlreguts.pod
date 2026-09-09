@@ -1308,14 +1308,16 @@ heading 'RT #79152'.
 
 =item *
 
-The number of cache-participating C<WHILEM> nodes is stored in the upper 4
-bits of each C<WHILEM>'s C<FLAGS()> field, while the identity of the
-particular C<WHILEM> (used as part of the index into the bit cache) is
-stored in the lower 4 bits. This means that a pattern can have a maximum
-of 16 participating C<WHILEM>s. If the flags field is zero, it indicates
-that this C<WHILEM> node won't participate in the cache mechanism.
+There is currently a hard limit of 15 cache-participating C<WHILEM> nodes
+per regex.
 
 =back
+
+In a compiled regex, a node id in the range 1-15 is stored in the
+C<FLAGS()> field of each participating C<WHILEM> node (a value of 0
+indicates that the node isn't suitable for the SLC). The field
+C<slc_whilem_seen> in the C<regexp_internal> structure indicates the total
+number of such  C<WHILEM> nodes.
 
 The runtime state of the SLC is mainly stored in various fields of the
 C<reginfo> struct, which is initialised at the start of a match.

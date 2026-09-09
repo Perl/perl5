@@ -132,6 +132,8 @@ typedef struct regexp_internal {
                                    only valid when RXp_PAREN_NAMES(prog) is true,
                                    0 means "no value" like any other index into the
                                    data array.*/
+        U8 slc_whilem_seen;     /* Num of WHILEMs using super-linear cache.
+                                   Same type as FLAGS() */
         regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 

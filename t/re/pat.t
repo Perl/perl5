@@ -2157,7 +2157,8 @@ EOP
     }
     {
         # [perl #129281] buffer write overflow, detected by ASAN, valgrind
-        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {}, "don't bump whilem_c too much");
+        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {},
+            "don't bump slc_whilem_seen too much");
     }
     {
         # RT #131893 - fails with ASAN -fsanitize=undefined

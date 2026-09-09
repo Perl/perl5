@@ -1682,7 +1682,6 @@ Perl_study_chunk(pTHX_
                     num++;
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                     if (data) {
-                        data_fake.whilem_c = data->whilem_c;
                         data_fake.last_closep = data->last_closep;
                         data_fake.last_close_opp = data->last_close_opp;
                     }
@@ -1731,7 +1730,6 @@ Perl_study_chunk(pTHX_
                     if (data) {
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
-                        data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
                         ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
@@ -2786,12 +2784,15 @@ Perl_study_chunk(pTHX_
                     if (OP(REGNODE_BEFORE(nxt)) == NOTHING) /* LONGJMP */
                         nxt += ARG1u(nxt);
                     nxt = REGNODE_BEFORE(nxt);
-                    if (FLAGS(nxt) & 0xf) {
-                        /* we've already set whilem count on this node */
-                    } else if (++data->whilem_c < 16) {
-                        assert(data->whilem_c <= RExC_whilem_seen);
-                        FLAGS(nxt) = (U8)(data->whilem_c
-                            | (RExC_whilem_seen << 4)); /* On WHILEM */
+                    if (
+                        /* we've not already set WHILEM count on this node */
+                        !FLAGS(nxt)
+                        /* max supported number of WHILEM nodes that can
+                         * participate in super-linear cache */
+                      && RExC_rxi->slc_whilem_seen < 15)
+                    {
+                        ++RExC_rxi->slc_whilem_seen;
+                        FLAGS(nxt) = RExC_rxi->slc_whilem_seen; /* On WHILEM */
                     }
                 }
                 if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
@@ -3204,7 +3205,6 @@ Perl_study_chunk(pTHX_
 
                 StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                 if (data) {
-                    data_fake.whilem_c = data->whilem_c;
                     data_fake.last_closep = data->last_closep;
                     data_fake.last_close_opp = data->last_close_opp;
                 }
@@ -3275,7 +3275,6 @@ Perl_study_chunk(pTHX_
                         pars++;
                     if (data_fake.flags & SF_HAS_EVAL)
                         data->flags |= SF_HAS_EVAL;
-                    data->whilem_c = data_fake.whilem_c;
                 }
                 if (f & SCF_DO_STCLASS_AND) {
                     if (flags & SCF_DO_STCLASS_OR) {
@@ -3385,7 +3384,6 @@ Perl_study_chunk(pTHX_
                         pars++;
                     if (data_fake.flags & SF_HAS_EVAL)
                         data->flags |= SF_HAS_EVAL;
-                    data->whilem_c = data_fake.whilem_c;
                     if ((flags & SCF_DO_SUBSTR) && data_fake.last_found) {
                         int i;
                         if (RExC_rx->minlen < *minnextp)
@@ -3516,7 +3514,6 @@ Perl_study_chunk(pTHX_
 
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                     if (data) {
-                        data_fake.whilem_c = data->whilem_c;
                         data_fake.last_closep = data->last_closep;
                         data_fake.last_close_opp = data->last_close_opp;
                     }
@@ -3571,7 +3568,6 @@ Perl_study_chunk(pTHX_
                     if (data) {
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
-                        data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
                         ssc_or(pRExC_state, &accum, (regnode_charclass *) &this_class);
