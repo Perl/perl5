@@ -6487,7 +6487,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
                 REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
             re_exec_indentf(                                           \
                 "WHILEM[%d/%d]: (cache) marking failure at pos %" UVuf "\n",  \
-                depth, (FLAGS(whilem) & 0xf), (FLAGS(whilem)>>4),      \
+                depth, (int)FLAGS(whilem), (int)rexi->slc_whilem_seen, \
                 (UV)(locinput - reginfo->strbeg));                     \
         });                                                            \
        reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask;  \
@@ -9164,7 +9164,8 @@ NULL
                      * know the match is not *that* much linear. */
                     STRLEN len = reginfo->strend - reginfo->strbeg;
                     /* number of participating WHILEMs */
-                    U8 n = (FLAGS(scan)>>4);
+                    U8 n = rexi->slc_whilem_seen;
+                    assert(FLAGS(scan) <= n);
 
                     /* Only do the calculations and enable the cache if it
                      * won't overflow. This test is equivalent to:
@@ -9221,15 +9222,16 @@ NULL
                     /* have we already failed at this position? */
                     SSize_t offset, mask;
 
-                    offset  = (FLAGS(scan) & 0xf) - 1
+                    offset  = FLAGS(scan) - 1
                                 +   (locinput - reginfo->strbeg)
-                                  * (FLAGS(scan)>>4);
+                                  * rexi->slc_whilem_seen;
                     mask    = 1 << (offset % 8);
                     offset /= 8;
                     if (reginfo->info_aux->poscache[offset] & mask) {
                         DEBUG_EXECUTE_r( re_exec_indentf(
                             "WHILEM[%d/%d]: (cache) already failed at pos %" UVuf "\n",
-                            depth, (FLAGS(scan) & 0xf), (FLAGS(scan)>>4),
+                            depth, (int)FLAGS(scan),
+                            (int)rexi->slc_whilem_seen,
                             (UV)(locinput - reginfo->strbeg));
                         );
                         cur_curlyx->u.curlyx.count--;

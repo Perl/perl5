@@ -1710,7 +1710,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_start = RExC_copy_start_in_constructed = RExC_copy_start_in_input = RExC_precomp = exp;
     RExC_precomp_end = RExC_end = exp + plen;
     RExC_nestroot = 0;
-    RExC_whilem_seen = 0;
     RExC_end_op = NULL;
     RExC_recurse = NULL;
     RExC_study_chunk_recursed = NULL;
@@ -1902,10 +1901,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_rx->nparens = RExC_total_parens - 1;
     RExC_rx->logical_nparens = RExC_logical_total_parens - 1;
-
-    /* Uses the upper 4 bits of the FLAGS field, so keep within that size */
-    if (RExC_whilem_seen > 15)
-        RExC_whilem_seen = 15;
 
     DEBUG_PARSE_r({
         re_printf(
@@ -2163,7 +2158,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             0, true);
         /* search for "restudy" in this file for a detailed explanation
          * of 'restudied' and SCF_TRIE_DOING_RESTUDY */
-
 
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
 
@@ -5214,7 +5208,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         {
             REQUIRE_BRANCHJ(flagp, 0);
         }
-        RExC_whilem_seen++;
         MARK_NAUGHTY_EXP(1, 4);     /* compound interest */
     }
 
@@ -14279,6 +14272,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 
 
     reti->name_list_idx = ri->name_list_idx;
+    reti->slc_whilem_seen = ri->slc_whilem_seen;
 
     SetProgLen(reti, len);
 

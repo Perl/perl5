@@ -100,8 +100,7 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
         debug_show_study_flags(data->flags," [","]");
 
         re_printf(
-            " Whilem_c: %" IVdf " Lcp: %" IVdf " %s",
-            (IV)data->whilem_c,
+            "Lcp: %" IVdf " %s",
             (IV)(data->last_closep ? *((data)->last_closep) : -1),
             is_inf ? "INF " : ""
         );
@@ -638,7 +637,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         sv_catpvs(sv, "}");
     }
     else if (k == WHILEM && FLAGS(o))                   /* Ordinal/of */
-        sv_catpvf(sv, "[%d/%d]", FLAGS(o) & 0xf, FLAGS(o)>>4);
+        sv_catpvf(sv, "[%d/%d]", (int)FLAGS(o), (int)progi->slc_whilem_seen);
     else if (k == REF || k == OPEN || k == CLOSE
              || k == GROUPP || op == ACCEPT)
     {
