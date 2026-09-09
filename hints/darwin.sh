@@ -539,3 +539,11 @@ case "$osvers" in
     [0-9].*|1[0-8].*) ;;
     *) d_readdir_r=undef ;;
 esac
+
+# dup3() and pipe2() are marked as available in Golden Gate onwards (27.0 / darwin 26)
+case "$osvers" in
+    [0-9].*|1[0-9].*|2[0-5].*)
+        d_dup3=undef
+        d_pipe2=undef
+        ;;
+esac
