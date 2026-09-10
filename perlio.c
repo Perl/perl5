@@ -411,7 +411,6 @@ PerlIO_verify_head(pTHX_ PerlIO *f)
     PerlIOl *head, *p;
     int seen = 0;
 #  ifndef PERL_IMPLICIT_SYS
-    PERL_UNUSED_CONTEXT;
 #  endif
     if (!PerlIOValid(f))
         return;
@@ -518,7 +517,6 @@ PerlIO_list_t *
 PerlIO_list_alloc(pTHX)
 {
     PerlIO_list_t *list;
-    PERL_UNUSED_CONTEXT;
     Newxz(list, 1, PerlIO_list_t);
     list->refcnt = 1;
     return list;
@@ -544,7 +542,6 @@ void
 PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 {
     PerlIO_pair_t *p;
-    PERL_UNUSED_CONTEXT;
 
     if (list->cur >= list->len) {
         const IV new_len = list->len + 8;
@@ -605,7 +602,6 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
             }
         }
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(proto);
     PERL_UNUSED_ARG(param);
 #endif
@@ -2162,7 +2158,6 @@ Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 IV
 PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(mode);
     PERL_UNUSED_ARG(arg);
     if (PerlIOValid(f)) {
@@ -2248,7 +2243,6 @@ IV
 PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
     PerlIOl * const l = PerlIOBase(f);
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(arg);
 
     l->flags &= ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE |
@@ -2341,7 +2335,6 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 IV
 PerlIOBase_popped(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(f);
     return 0;
 }
@@ -2399,7 +2392,6 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 IV
 PerlIOBase_noop_ok(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(f);
     return 0;
 }
@@ -2407,7 +2399,6 @@ PerlIOBase_noop_ok(pTHX_ PerlIO *f)
 IV
 PerlIOBase_noop_fail(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(f);
     return -1;
 }
@@ -2444,7 +2435,6 @@ PerlIOBase_close(pTHX_ PerlIO *f)
 IV
 PerlIOBase_eof(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     if (PerlIOValid(f)) {
         return (PerlIOBase(f)->flags & PERLIO_F_EOF) != 0;
     }
@@ -2454,7 +2444,6 @@ PerlIOBase_eof(pTHX_ PerlIO *f)
 IV
 PerlIOBase_error(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     if (PerlIOValid(f)) {
         return (PerlIOBase(f)->flags & PERLIO_F_ERROR) != 0;
     }
@@ -2475,7 +2464,6 @@ PerlIOBase_clearerr(pTHX_ PerlIO *f)
 void
 PerlIOBase_setlinebuf(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     if (PerlIOValid(f)) {
         PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
     }
@@ -2542,7 +2530,6 @@ S_more_refcounted_fds(pTHX_ const int new_fd)
     int *new_array;
 
 #ifndef PERL_IMPLICIT_SYS
-    PERL_UNUSED_CONTEXT;
 #endif
 
     DEBUG_i( PerlIO_debug("More fds - old=%d, need %d, new=%d\n",
@@ -2578,7 +2565,6 @@ void
 PerlIO_init(pTHX)
 {
     /* MUTEX_INIT(&PL_perlio_mutex) is done in PERL_SYS_INIT3(). */
-    PERL_UNUSED_CONTEXT;
 }
 
 void
@@ -2743,7 +2729,6 @@ static void
 S_lockcnt_dec(pTHX_ void* f)
 {
 #ifndef PERL_IMPLICIT_SYS
-    PERL_UNUSED_CONTEXT;
 #endif
     PerlIO_lockcnt((PerlIO*)f)--;
 }
@@ -2859,7 +2844,6 @@ PerlIOUnix_oflags(const char *mode)
 IV
 PerlIOUnix_fileno(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
     return PerlIOSelf(f, PerlIOUnix)->fd;
 }
 
@@ -2882,7 +2866,6 @@ PerlIOUnix_setfd(pTHX_ PerlIO *f, int fd, int imode)
     s->fd = fd;
     s->oflags = imode;
     PerlIOUnix_refcnt_inc(fd);
-    PERL_UNUSED_CONTEXT;
 }
 
 IV
@@ -2910,7 +2893,6 @@ PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     const int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     Off_t new_loc;
-    PERL_UNUSED_CONTEXT;
     if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
 #ifdef  ESPIPE
         SETERRNO(ESPIPE, LIB_INVARG);
@@ -3073,7 +3055,6 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 Off_t
 PerlIOUnix_tell(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     return PerlLIO_lseek(PerlIOSelf(f, PerlIOUnix)->fd, 0, SEEK_CUR);
 }
@@ -3156,7 +3137,6 @@ typedef struct {
 IV
 PerlIOStdio_fileno(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     if (PerlIOValid(f)) {
         FILE * const s = PerlIOSelf(f, PerlIOStdio)->stdio;
@@ -3437,7 +3417,6 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 static int
 PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     /* XXX this could use PerlIO_canset_fileno() and
      * PerlIO_set_fileno() support from Configure
@@ -3730,7 +3709,6 @@ IV
 PerlIOStdio_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
 
     return PerlSIO_fseek(stdio, offset, whence);
 }
@@ -3739,7 +3717,6 @@ Off_t
 PerlIOStdio_tell(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
 
     return PerlSIO_ftell(stdio);
 }
@@ -3748,7 +3725,6 @@ IV
 PerlIOStdio_flush(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
 
     if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE) {
         return PerlSIO_fflush(stdio);
@@ -3776,7 +3752,6 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
 IV
 PerlIOStdio_eof(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     return PerlSIO_feof(PerlIOSelf(f, PerlIOStdio)->stdio);
 }
@@ -3784,7 +3759,6 @@ PerlIOStdio_eof(pTHX_ PerlIO *f)
 IV
 PerlIOStdio_error(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     return PerlSIO_ferror(PerlIOSelf(f, PerlIOStdio)->stdio);
 }
@@ -3792,7 +3766,6 @@ PerlIOStdio_error(pTHX_ PerlIO *f)
 void
 PerlIOStdio_clearerr(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
     PerlSIO_clearerr(PerlIOSelf(f, PerlIOStdio)->stdio);
 }
@@ -3800,7 +3773,6 @@ PerlIOStdio_clearerr(pTHX_ PerlIO *f)
 void
 PerlIOStdio_setlinebuf(pTHX_ PerlIO *f)
 {
-    PERL_UNUSED_CONTEXT;
 
 #ifdef HAS_SETLINEBUF
     PerlSIO_setlinebuf(PerlIOSelf(f, PerlIOStdio)->stdio);
@@ -3814,7 +3786,6 @@ STDCHAR *
 PerlIOStdio_get_base(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
     return (STDCHAR*)PerlSIO_get_base(stdio);
 }
 
@@ -3822,7 +3793,6 @@ Size_t
 PerlIOStdio_get_bufsiz(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
     return PerlSIO_get_bufsiz(stdio);
 }
 #endif
@@ -3832,7 +3802,6 @@ STDCHAR *
 PerlIOStdio_get_ptr(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
     return (STDCHAR*)PerlSIO_get_ptr(stdio);
 }
 
@@ -3840,7 +3809,6 @@ SSize_t
 PerlIOStdio_get_cnt(pTHX_ PerlIO *f)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
     return PerlSIO_get_cnt(stdio);
 }
 
@@ -3848,7 +3816,6 @@ void
 PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 {
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
-    PERL_UNUSED_CONTEXT;
     if (ptr != NULL) {
 #  ifdef STDIO_PTR_LVALUE
         /* This is a long-standing infamous mess.  The root of the
@@ -3900,7 +3867,6 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 {
     FILE * stdio;
     int c;
-    PERL_UNUSED_CONTEXT;
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
         return -1;
     stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
@@ -4544,7 +4510,6 @@ STDCHAR *
 PerlIOBuf_get_base(pTHX_ PerlIO *f)
 {
     PerlIOBuf * const b = PerlIOSelf(f, PerlIOBuf);
-    PERL_UNUSED_CONTEXT;
 
     if (!b->buf) {
         if (!b->bufsiz)
@@ -5367,7 +5332,6 @@ Perl_PerlIO_save_errno(pTHX_ PerlIO *f)
 {
     PERL_ARGS_ASSERT_PERLIO_SAVE_ERRNO;
 
-    PERL_UNUSED_CONTEXT;
     if (!PerlIOValid(f))
         return;
     PerlIOBase(f)->err = errno;
@@ -5385,7 +5349,6 @@ Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 {
     PERL_ARGS_ASSERT_PERLIO_RESTORE_ERRNO;
 
-    PERL_UNUSED_CONTEXT;
     if (!PerlIOValid(f))
         return;
     SETERRNO(PerlIOBase(f)->err, PerlIOBase(f)->os_err);

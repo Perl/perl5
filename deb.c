@@ -71,7 +71,6 @@ Perl_deb(pTHX_ const char *pat, ...)
 #ifdef DEBUGGING
     vdeb(pat, &args);
 #else
-    PERL_UNUSED_CONTEXT;
 #endif /* DEBUGGING */
     va_end(args);
 }
@@ -97,7 +96,6 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
                       display_file, line);
     (void) PerlIO_vprintf(Perl_debug_log, pat, *args);
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(pat);
     PERL_UNUSED_ARG(args);
 #endif /* DEBUGGING */
@@ -120,7 +118,6 @@ Perl_debstackptrs(pTHX)     /* Currently unused in cpan and core */
                   PTR2UV(PL_mainstack), PTR2UV(AvFILLp(PL_curstack)),
                   PTR2UV(AvMAX(PL_curstack)));
 #else
-    PERL_UNUSED_CONTEXT;
 #endif /* DEBUGGING */
     return 0;
 }
@@ -181,7 +178,6 @@ S_deb_stack_n(pTHX_ SV** stack_base, SSize_t stack_min, SSize_t stack_max,
     while (1);
     PerlIO_printf(Perl_debug_log, "\n");
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(stack_base);
     PERL_UNUSED_ARG(stack_min);
     PERL_UNUSED_ARG(stack_max);
@@ -394,7 +390,6 @@ Perl_deb_stack_all(pTHX)
 
     PerlIO_printf(Perl_debug_log, "\n");
 #else
-    PERL_UNUSED_CONTEXT;
 #endif /* DEBUGGING */
 }
 

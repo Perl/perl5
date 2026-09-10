@@ -258,7 +258,13 @@ being used accepts (or nothing at all if it has no equivalent)).
 
 #ifdef MULTIPLICITY
 #  define tTHX	PerlInterpreter*
-#  define pTHX  tTHX my_perl PERL_UNUSED_DECL
+                              /* Effectively this says not to warn even if the
+                               * context is unused.  This makes sense; we often
+                               * have functions where that is currently a
+                               * placeholder in case it is ever needed.  For
+                               * core, regen/embed.pl adds code for compilers
+                               * that don't understand this */
+#  define pTHX  tTHX my_perl  __attribute__unused__
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
 #  define dTHXa(a)	pTHX = (tTHX)a
@@ -628,6 +634,10 @@ An example is:
  * marking unused variables (they need e.g. a #pragma) and therefore
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
+ *
+ * Nowadays, regen/embed.pl could easily be extended to deal with any such
+ * remaining compilers.  But the C23 standard moves the language to using
+ * postfix notation for this case.
 */
 
 /*
@@ -636,7 +646,8 @@ An example is:
 Tells the compiler that the parameter in the function prototype just before it
 is not necessarily expected to be used in the function.  Not that many
 compilers understand this, so this should only be used in cases where
-C<L</PERL_UNUSED_ARG>> can't conveniently be used.
+C<L</PERL_UNUSED_ARG>> can't conveniently be used.  (It works for all
+compilers.)
 
 Example usage:
 
@@ -651,7 +662,7 @@ Example usage:
 =cut
 */
 
-#ifndef PERL_UNUSED_DECL
+#if !defined(PERL_CORE) && !defined(PERL_UNUSED_DECL)
 #  define PERL_UNUSED_DECL __attribute__unused__
 #endif
 
@@ -663,19 +674,42 @@ Example usage:
 /*
 =for apidoc Am;||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
-not used.  This situation can arise, for example, when a parameter is needed
-under some configuration conditions, but not others, so that C preprocessor
-conditional compilation causes it be used just sometimes.
+not used.  This situation can arise for various reasons, among them:
+
+=over 4
+
+=item * The parameter is reserved for future use
+
+=item * The signature of this function must match another's
+
+And this implementation doesn't need this particular parameter.
+
+=item * The parameter is needed under just some configuration conditions
+
+Hence there are C preprocessor conditionals that cause the parameter be used
+just in some build Configurations.
+
+=back
+
+For the first two reasons, it results in cleaner code to not use this macro,
+but to instead use the mechanism described in L<C<UNUSED>|perlintern/UNUSED>.
 
 =for apidoc Amn;||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
-a function is not used.  This situation can arise, for example, when a
-C preprocessor conditional compilation causes it be used just some times.
+a function is not used.  This situation can arise, for example, when a C
+preprocessor conditional compilation causes it be used just in some build
+Configurations, or when it is reserved for possible future use.
+
+Note that this warning is always suppressed for the gcc and clang compilers,
+even without the use of this macro.
+
+This macro is no longer used (nor even defined) in the Perl core, as the
+suppression is now automatically enabled for all compilers.
 
 =for apidoc Am;||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
-compilation causes it be used just some times.
+compilation causes it be used just in some build Configurations.
 
 =cut
 */
@@ -686,7 +720,7 @@ compilation causes it be used just some times.
 #  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
 #endif
 
-#if defined(MULTIPLICITY)
+#if defined(MULTIPLICITY) && ! defined(PERL_CORE)
 #  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #else
 #  define PERL_UNUSED_CONTEXT
@@ -4518,7 +4552,7 @@ where it has parity with the other two forms.
 
 #  define STATIC_ASSERT_DECL(COND)                                          \
      typedef STATIC_ASSERT_STRUCT_BODY_(COND, STATIC_ASSERT_STRUCT_NAME_)   \
-                    STATIC_ASSERT_STRUCT_NAME_ PERL_UNUSED_DECL
+                    STATIC_ASSERT_STRUCT_NAME_ __attribute__unused__
 
 #endif
 

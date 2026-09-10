@@ -1316,7 +1316,6 @@ int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
     croak_no_modify();
@@ -2173,7 +2172,7 @@ Perl_csighandler1(int sig)
  */
 
 Signal_t
-Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Perl_csighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
 {
     PERL_ARGS_ASSERT_CSIGHANDLER3;
 
@@ -2192,15 +2191,6 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
         pthread_kill(PL_main_thread, sig);
         return;
     }
-#endif
-
-#ifdef PERL_USE_3ARG_SIGHANDLER
-#  if defined(__cplusplus) && defined(__GNUC__)
-    /* g++ doesn't support PERL_UNUSED_DECL, so the sip and uap
-     * parameters would be warned about. */
-    PERL_UNUSED_ARG(sip);
-    PERL_UNUSED_ARG(uap);
-#  endif
 #endif
 
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -2299,7 +2289,6 @@ Perl_csighandler_init(void)
 static void
 unblock_sigmask(pTHX_ void* newset)
 {
-    PERL_UNUSED_CONTEXT;
     sigprocmask(SIG_UNBLOCK, (sigset_t*)newset, NULL);
 }
 #endif
@@ -3053,7 +3042,6 @@ Perl_magic_cleararylen_p(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_CLEARARYLEN_P;
     PERL_UNUSED_ARG(sv);
-    PERL_UNUSED_CONTEXT;
 
     /* Reset the iterator when the array is cleared */
     if (sizeof(IV) == sizeof(SSize_t)) {
@@ -3395,7 +3383,6 @@ int
 Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETMGLOB;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     mg->mg_len = -1;
     return 0;
@@ -3452,7 +3439,6 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
      * RenE<eacute> Descartes said "I think not."
      * and vanished with a faint plop.
      */
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     if (mg->mg_ptr) {
         Safefree(mg->mg_ptr);
@@ -3486,7 +3472,6 @@ int
 Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETUTF8;
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
     mg->mg_ptr = NULL;
@@ -4240,7 +4225,6 @@ I32
 Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 {
     PERL_ARGS_ASSERT_WHICHSIG_PVN;
-    PERL_UNUSED_CONTEXT;
 
     char* const* sigv;
 
@@ -4303,7 +4287,7 @@ Perl_sighandler1(int sig)
 }
 
 Signal_t
-Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED_DECL)
+Perl_sighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
 {
     PERL_ARGS_ASSERT_SIGHANDLER3;
 
@@ -4320,8 +4304,8 @@ Perl_sighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSED
  */
 
 Signal_t
-Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
-                    void *uap PERL_UNUSED_DECL, bool safe)
+Perl_perly_sighandler(int sig, Siginfo_t *sip UNUSED,
+                    void *uap UNUSED, bool safe)
 {
     PERL_ARGS_ASSERT_PERLY_SIGHANDLER;
 

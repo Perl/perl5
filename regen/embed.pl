@@ -3652,10 +3652,12 @@ sub generate_proto_h {
         my $can_ignore = $flags !~ /[RP]/ && !$is_malloc;
         my $extensions_only = ( $flags =~ /[EQ]/ );
         my @asserts;
-        my @unused;
         my @attrs;
         my $func;
         my $args_assert_line;
+
+        # Never warn about the context parameter not getting used.
+        my @unused = "PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT";
 
         # A function always gets assertions for it
         if (! $has_mflag) {
@@ -3883,7 +3885,7 @@ sub generate_proto_h {
                         }
                     }
                     elsif (   defined $argname
-                        && ($args_assert_line || $binarycompat))
+                           && ($args_assert_line || $binarycompat))
                     {
                         if ($nn||$nz) {
                             push @asserts, "assert($argname)";
@@ -4285,9 +4287,12 @@ sub generate_proto_h {
         #if defined(MULTIPLICITY)
           #  define Perl_assert_aTHX             assert(aTHX)
           #  define Perl_attribute_nonnull_aTHX  __attribute__nonnull__(1)
+          #  define PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT                     \\
+                                    PERL_UNUSED_ARG_FOR_ARGS_ASSERT(my_perl)
         #else
           #  define Perl_assert_aTHX
           #  define Perl_attribute_nonnull_aTHX
+          #  define PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT
         #endif
 
         START_EXTERN_C

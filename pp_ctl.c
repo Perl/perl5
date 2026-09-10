@@ -426,7 +426,6 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    PERL_UNUSED_CONTEXT;
 
     /* deal with regexp_paren_pair items */
     if (!p || p[1] < RX_NPARENS(rx)) {
@@ -470,7 +469,6 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    PERL_UNUSED_CONTEXT;
     RX_MATCH_COPY_FREE(rx);
     RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
@@ -497,7 +495,6 @@ static void
 S_rxres_free(pTHX_ void **rsp)
 {
     PERL_ARGS_ASSERT_RXRES_FREE;
-    PERL_UNUSED_CONTEXT;
 
     UV * const p = (UV*)*rsp;
 
@@ -1718,7 +1715,6 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
     I32 i;
 
 #ifndef DEBUGGING
-    PERL_UNUSED_CONTEXT;
 #endif
 
     for (i = startingblock; i >= 0; i--) {
@@ -6065,7 +6061,6 @@ PP(pp_leavegiven)
     PERL_CONTEXT *cx;
     U8 gimme;
     SV **oldsp;
-    PERL_UNUSED_CONTEXT;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_GIVEN);

@@ -162,7 +162,6 @@ Perl_mro_meta_init(pTHX_ HV* stash)
 
     struct mro_meta* newmeta;
 
-    PERL_UNUSED_CONTEXT;
     assert(HvAUX(stash));
     assert(!(HvAUX(stash)->xhv_mro_meta));
     Newxz(newmeta, 1, struct mro_meta);
