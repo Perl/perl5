@@ -16120,15 +16120,13 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             case SVt_PV:
                 assert(sv_type_details->body_size);
 #ifndef PURIFY
-                if (sv_type_details->arena) {
-                    new_body = S_new_body(aTHX_ sv_type);
-                    new_body
-                        = (void*)((char*)new_body - sv_type_details->offset);
-                } else
+                assert(sv_type_details->arena);
+                new_body = S_new_body(aTHX_ sv_type);
+                new_body
+                    = (void*)((char*)new_body - sv_type_details->offset);
+#else
+                new_body = new_NOARENA(sv_type_details);
 #endif
-                {
-                    new_body = new_NOARENA(sv_type_details);
-                }
             }
         have_body:
             assert(new_body);
