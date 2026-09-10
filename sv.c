@@ -992,42 +992,43 @@ Perl_newSV_type_generic(pTHX_ const svtype type)
     PERL_ARGS_ASSERT_NEWSV_TYPE_GENERIC;
 
     SV *sv;
+    new_SV(sv);
+    SvFLAGS(sv) = type;
+    assert(!SvOK(sv));
+    /* Clear the sv_u slot, regardless of what
+     * might actually be stored inside it. */
+    sv->sv_u.svu_rv = NULL;
+
     void*      new_body;
     const struct body_details *type_details;
-
-    new_SV(sv);
-
     type_details = bodies_by_type + type;
-
-    SvFLAGS(sv) &= ~SVTYPEMASK;
-    SvFLAGS(sv) |= type;
 
     switch (type) {
     case SVt_NULL:
         break;
     case SVt_IV:
         SET_SVANY_FOR_BODYLESS_IV(sv);
-        SvIV_set(sv, 0);
+        assert(SvIVX(sv) == 0);
         break;
     case SVt_NV:
 #if NVSIZE <= IVSIZE
         SET_SVANY_FOR_BODYLESS_NV(sv);
+        assert(SvNVX(sv) == 0.0);
 #else
         SvANY(sv) = new_XNV();
-#endif
         SvNV_set(sv, 0);
+#endif
         break;
     case SVt_PVHV:
     case SVt_PVAV:
     case SVt_PVOBJ:
         assert(type_details->body_size);
-
 #ifndef PURIFY
         assert(type_details->arena);
         assert(type_details->arena_size);
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ type);
-        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        /* xpvav, xpvhv, xobject have no offset, no need to adjust new_body */
         assert(!(type_details->offset));
 #else
         /* We always allocated the full length item with PURIFY. To do this
@@ -1036,39 +1037,37 @@ Perl_newSV_type_generic(pTHX_ const svtype type)
 #endif
         SvANY(sv) = new_body;
 
-        SvSTASH_set(sv, NULL);
-        SvMAGIC_set(sv, NULL);
+        ((XPVMG*)new_body)->xmg_u.xmg_magic = NULL;
+        ((XPVMG*)new_body)->xmg_stash = NULL;
 
         switch(type) {
         case SVt_PVAV:
-            AvFILLp(sv) = -1;
-            AvMAX(sv) = -1;
-            AvALLOC(sv) = NULL;
+            ((XPVAV*)new_body)->xav_fill  = -1;
+            ((XPVAV*)new_body)->xav_max   = -1;
+            ((XPVAV*)new_body)->xav_alloc = NULL;
 
-            AvREAL_only(sv);
+            assert(!AvREIFY(sv));
+            AvREAL_on(sv);
+            assert(!sv->sv_u.svu_array); /* or svu_hash  */
             break;
         case SVt_PVHV:
-            HvTOTALKEYS(sv) = 0;
+            ((XPVHV*)new_body)->xhv_keys = 0;
             /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
-            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            ((XPVHV*)new_body)->xhv_max = PERL_HASH_DEFAULT_HvMAX;
 
             assert(!SvOK(sv));
-            SvOK_off(sv);
 #ifndef NODEFAULT_SHAREKEYS
             HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
-            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
-            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            assert(!sv->sv_u.svu_hash); /* or svu_hash  */
             break;
         case SVt_PVOBJ:
-            ObjectMAXFIELD(sv) = -1;
-            ObjectFIELDS(sv) = NULL;
+            ((XPVOBJ*)new_body)->xobject_maxfield = -1;
+            assert(!sv->sv_u.svu_fields); /* or svu_hash  */
             break;
         default:
             NOT_REACHED;
         }
-
-        sv->sv_u.svu_array = NULL; /* or svu_hash  */
         break;
 
     case SVt_PVIV:
@@ -1127,7 +1126,7 @@ Perl_newSV_type_generic(pTHX_ const svtype type)
             IoPAGE_LEN(sv) = 60;
         }
 
-        sv->sv_u.svu_rv = NULL;
+        assert(!sv->sv_u.svu_rv);
         break;
     default:
         croak("panic: newSV_type() unknown type %lu", (unsigned long)type);
