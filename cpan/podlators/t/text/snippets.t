@@ -2,7 +2,7 @@
 #
 # Test Pod::Text behavior with various snippets.
 #
-# Copyright 2002, 2004, 2006-2009, 2012, 2018-2020, 2022, 2024-2025
+# Copyright 2002, 2004, 2006-2009, 2012, 2018-2020, 2022, 2024-2026
 #     Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -15,7 +15,7 @@ use warnings;
 
 use lib 't/lib';
 
-use Test::More tests => 71;
+use Test::More tests => 73;
 use Test::Podlators qw(test_snippet);
 
 # Load the module.
@@ -30,7 +30,7 @@ my @snippets = qw(
     guesswork-quoting guesswork-no-quoting late-encoding link-rt link-url
     margin naive name-quotes name-quotes-none non-latin nonbreaking-space
     nonbreaking-space-l nonbreaking-wrap nourls periods quotes-opt
-    s-whitespace sentence-spacing utf8 verbatim
+    s-whitespace sentence-spacing utf8 verbatim wrap-width
 );
 
 # Run all the tests.

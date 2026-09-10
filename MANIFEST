@@ -2098,6 +2098,7 @@ cpan/podlators/t/data/snippets/color/nonbreaking-wrap		podlators
 cpan/podlators/t/data/snippets/color/tag-width			podlators
 cpan/podlators/t/data/snippets/color/tag-wrapping		podlators
 cpan/podlators/t/data/snippets/color/width			podlators
+cpan/podlators/t/data/snippets/color/wrap-width			podlators
 cpan/podlators/t/data/snippets/color/wrapping			podlators
 cpan/podlators/t/data/snippets/man/agrave			podlators
 cpan/podlators/t/data/snippets/man/backslash-man-ref		podlators
@@ -2163,6 +2164,7 @@ cpan/podlators/t/data/snippets/man/x-whitespace-entry		podlators
 cpan/podlators/t/data/snippets/man/zero-width-space		podlators
 cpan/podlators/t/data/snippets/overstrike/nonbreaking-wrap	podlators
 cpan/podlators/t/data/snippets/overstrike/tag-width		podlators
+cpan/podlators/t/data/snippets/overstrike/wrap-width		podlators
 cpan/podlators/t/data/snippets/overstrike/wrapping		podlators
 cpan/podlators/t/data/snippets/README.md			podlators
 cpan/podlators/t/data/snippets/termcap/escape-wrapping		podlators
@@ -2171,6 +2173,7 @@ cpan/podlators/t/data/snippets/termcap/tag-width		podlators
 cpan/podlators/t/data/snippets/termcap/tag-wrapping		podlators
 cpan/podlators/t/data/snippets/termcap/term-unknown		podlators
 cpan/podlators/t/data/snippets/termcap/width			podlators
+cpan/podlators/t/data/snippets/termcap/wrap-width		podlators
 cpan/podlators/t/data/snippets/termcap/wrapping			podlators
 cpan/podlators/t/data/snippets/text/alt				podlators
 cpan/podlators/t/data/snippets/text/c-with-newline		podlators
@@ -2210,6 +2213,7 @@ cpan/podlators/t/data/snippets/text/sentence-spacing		podlators
 cpan/podlators/t/data/snippets/text/utf8			podlators
 cpan/podlators/t/data/snippets/text/utf8-iso			podlators
 cpan/podlators/t/data/snippets/text/verbatim			podlators
+cpan/podlators/t/data/snippets/text/wrap-width			podlators
 cpan/podlators/t/data/termcap					podlators test
 cpan/podlators/t/docs/changes.t					Test file related to podlators
 cpan/podlators/t/docs/pod.t					podlators test

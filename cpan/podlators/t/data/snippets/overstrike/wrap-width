@@ -1,0 +1,21 @@
+[name]
+Wrap with too-long indent
+
+[input]
+=over 72
+
+This paragraph cannot be wrapped because the total margin is equal to the
+maximum width.
+
+=back
+
+[output]
+This paragraph cannot be wrapped because the total margin is equal to the
+maximum width.
+
+PPOODD  EERRRROORRSS
+    Hey! TThhee  aabboovvee  ddooccuummeenntt  hhaadd  ssoommee  ccooddiinngg  eerrrroorrss,,  wwhhiicchh  aarree  eexxppllaaiinneedd
+    bbeellooww::
+
+    Around line 6:
+        Margin is wider than the output width

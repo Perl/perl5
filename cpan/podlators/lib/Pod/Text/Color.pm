@@ -10,7 +10,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Text::Color v6.1.0;
+package Pod::Text::Color v6.1.1;
 
 use 5.012;
 use parent qw(Pod::Text);
@@ -84,6 +84,15 @@ sub wrap {
     my $output = q{};
     my $spaces = q{ } x $self->{MARGIN};
     my $width = $self->{opt_width} - $self->{MARGIN};
+
+    # Pathological margins make wrapping impossible. In this case, complain to
+    # the user and reset the margin to 0.
+    if ($width <= 0) {
+        my $error = 'Margin is wider than the output width';
+        $self->whine($self->line_count(), $error);
+        $spaces = q{};
+        $width = $self->{opt_width};
+    }
 
     # Matches a single escape sequence.
     my $code = qr{ (?: \e\[ [\d;]+ m ) }xms;
@@ -204,7 +213,7 @@ Russ Allbery <rra@cpan.org>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001, 2004, 2006, 2008, 2009, 2018-2019, 2022, 2024 Russ
+Copyright 1999, 2001, 2004, 2006, 2008, 2009, 2018-2019, 2022, 2024, 2026 Russ
 Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it

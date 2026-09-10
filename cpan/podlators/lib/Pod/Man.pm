@@ -12,7 +12,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Pod::Man v6.1.0;
+package Pod::Man v6.1.1;
 
 use 5.012;
 use parent qw(Pod::Simple);

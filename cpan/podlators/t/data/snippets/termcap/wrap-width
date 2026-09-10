@@ -1,0 +1,20 @@
+[name]
+Wrap with too-long indent
+
+[input]
+=over 76
+
+This paragraph cannot be wrapped because the total margin is equal to the
+maximum width.
+
+=back
+
+[output]
+This paragraph cannot be wrapped because the total margin is equal to the
+maximum width.
+
+[1mPOD ERRORS[m
+    Hey! [1mThe above document had some coding errors, which are explained below:[m
+
+    Around line 6:
+        Margin is wider than the output width
