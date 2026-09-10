@@ -6273,7 +6273,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         const bool islv = SvTYPE(sv) == SVt_PVLV;
         const svtype new_type =
           islv ? SVt_NULL : SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
-        SV *const temp = newSV_type(new_type);
+        SV *const temp = newSV_type_generic(new_type);
         regexp *old_rx_body;
 
         if (new_type == SVt_PVMG) {
