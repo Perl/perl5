@@ -1134,7 +1134,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         assert(new_type_details->arena_size);
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ new_type);
-        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        /* xpvav, xpvhv, xobject have no offset, no need to adjust new_body */
         assert(!(new_type_details->offset));
 #else
         /* We always allocated the full length item with PURIFY. To do this
@@ -1227,16 +1227,14 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
 #ifndef PURIFY
-        if(new_type_details->arena) {
-            /* This points to the start of the allocated area.  */
-            new_body = S_new_body(aTHX_ new_type);
-            Zero(new_body, new_type_details->body_size, char);
-            new_body = ((char *)new_body) - new_type_details->offset;
-        } else
+        assert(new_type_details->arena);
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ new_type);
+        Zero(new_body, new_type_details->body_size, char);
+        new_body = ((char *)new_body) - new_type_details->offset;
+#else
+        new_body = new_NOARENAZ(new_type_details);
 #endif
-        {
-            new_body = new_NOARENAZ(new_type_details);
-        }
         SvANY(sv) = new_body;
 
         if (old_type_details->copy) {
