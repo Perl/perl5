@@ -281,7 +281,7 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
       sizeof(XPVFM),
       0,
-      SVt_PVFM, TRUE, NONV, NOARENA,
+      SVt_PVFM, TRUE, NONV, HASARENA,
       FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
 
     { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
