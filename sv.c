@@ -7747,8 +7747,16 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
              * efficient than stepping through the general logic.
              */
 
-            if (SvROK(sv))
-                goto free_rv;
+            if (SvROK(sv)) {
+                /* This duplicates the same code used for RV-in-PV, but
+                 * duplication will help (some) compilers to produce
+                 * better code layout. */
+                SV * const target = SvRV(sv);
+                if (SvWEAKREF(sv))
+                    sv_del_backref(target, sv);
+                else
+                    next_sv = target;
+            }
             SvFLAGS(sv) &= SVf_BREAK;
             SvFLAGS(sv) |= SVTYPEMASK;
             goto free_head;
@@ -7956,7 +7964,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 /* Don't even bother with turning off the OOK flag.  */
             }
             if (SvROK(sv)) {
-            free_rv:
                 {
                     SV * const target = SvRV(sv);
                     if (SvWEAKREF(sv))
@@ -8028,13 +8035,13 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             SvFLAGS(sv) &= SVf_BREAK;
             SvFLAGS(sv) |= SVTYPEMASK;
 
-            if (sv_type_details->arena) {
-                del_body(((char *)SvANY(sv) + sv_type_details->offset),
-                         &PL_body_roots[arena_index]);
-            }
-            else if (sv_type_details->body_size) {
-                safefree(SvANY(sv));
-            }
+#ifndef PURIFY
+            assert(sv_type_details->arena);
+            del_body(((char *)SvANY(sv) + sv_type_details->offset),
+                     &PL_body_roots[arena_index]);
+#else
+            safefree(SvANY(sv));
+#endif
         }
 
       free_head:
