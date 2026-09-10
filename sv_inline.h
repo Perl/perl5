@@ -463,36 +463,21 @@ Perl_newSV_type(pTHX_ const svtype type)
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:
-        /* For a type known at compile time, it should be possible for the
-         * compiler to deduce the value of (type_details->arena), resolve
-         * that branch below, and inline the relevant values from
-         * bodies_by_type. Except, at least for gcc, it seems not to do that.
-         * We help it out here with two deviations from sv_upgrade:
-         * (1) Minor rearrangement here, so that PVFM - the only type at this
-         *     point not to be allocated from an array appears last, not PV.
-         * (2) The ASSUME() statement here for everything that isn't PVFM.
-         * Obviously this all only holds as long as it's a true reflection of
-         * the bodies_by_type lookup table. */
-#ifndef PURIFY
-         ASSUME(type_details->arena);
-#endif
-         /* FALLTHROUGH */
     case SVt_PVFM:
-
         assert(type_details->body_size);
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
 #ifndef PURIFY
-        if(type_details->arena) {
-            /* This points to the start of the allocated area.  */
-            new_body = S_new_body(aTHX_ type);
-            Zero(new_body, type_details->body_size, char);
-            new_body = ((char *)new_body) - type_details->offset;
-        } else
+        assert(type_details->arena);
+        assert(type_details->arena_size);
+
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        Zero(new_body, type_details->body_size, char);
+        new_body = ((char *)new_body) - type_details->offset;
+#else
+        new_body = new_NOARENAZ(type_details);
 #endif
-        {
-            new_body = new_NOARENAZ(type_details);
-        }
         SvANY(sv) = new_body;
 
         if (UNLIKELY(type == SVt_PVIO)) {
