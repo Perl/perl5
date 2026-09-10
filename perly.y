@@ -1267,7 +1267,7 @@ optsubbody
 subbody:	remember
 			{
 			  if (CvIsMETHOD(PL_compcv))
-			      class_declare_padvars(PL_compcv);
+			      class_method_parse_post_blockstart(PL_compcv);
 			}
 		PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
 			{
@@ -1289,7 +1289,7 @@ optsigsubbody
 sigsubbody:	remember
 			{
 			  if (CvIsMETHOD(PL_compcv))
-			      class_declare_padvars(PL_compcv);
+			      class_method_parse_post_blockstart(PL_compcv);
 			}
 		optsubsignature PERLY_BRACE_OPEN 
 			{ PL_parser->sig_seen = FALSE; }
