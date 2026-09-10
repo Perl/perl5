@@ -4686,6 +4686,13 @@ Perl_newSV_true(pTHX)
     STMT_START { Perl_assert_aTHX; } STMT_END
 
 PERL_CALLCONV SV *
+Perl_newSV_type_generic(pTHX_ const svtype type)
+        Perl_attribute_nonnull_aTHX
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSV_TYPE_GENERIC     \
+    STMT_START { Perl_assert_aTHX; } STMT_END
+
+PERL_CALLCONV SV *
 Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
