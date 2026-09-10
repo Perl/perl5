@@ -424,6 +424,14 @@ into two or more adjacent TRIE nodes might now get compiled into a single
 
 =item *
 
+The inline function C<Perl_newSV_type> now only handles the SV types most
+commonly seen at runtime. C<Perl_newSV_type_generic> has been added as
+a non-inline function that can handle all SV types. This change reduces
+binary bloating and increases the chances of C<Perl_newSV_type> being
+succesfully inlined.
+
+=item *
+
 XXX
 
 =back
