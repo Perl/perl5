@@ -2382,6 +2382,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_builtin_sub_overflow HAS_BUILTIN_SUB_OVERFLOW	/**/
 #$d_builtin_mul_overflow HAS_BUILTIN_MUL_OVERFLOW	/**/
 
+/* HAS_BUILTIN_POPCOUNT:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_popcount for counting the number of bits set in an
+ *	unsigned int.
+ */
+/* HAS_BUILTIN_POPCOUNTL:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_popcountl for counting the number of bits set in an
+ *	unsigned long.
+ */
+/* HAS_BUILTIN_POPCOUNTLL:
+ *	This symbol, if defined, indicates that the compiler supports
+ *	__builtin_popcountll for counting the number of bits set in an
+ *	unsigned long long.
+ */
+#$d_builtin_popcount HAS_BUILTIN_POPCOUNT		/**/
+#$d_builtin_popcountl HAS_BUILTIN_POPCOUNTL		/**/
+#$d_builtin_popcountll HAS_BUILTIN_POPCOUNTLL		/**/
+
 /* HAS_C99_VARIADIC_MACROS:
  *	If defined, the compiler supports C99 variadic macros.
  */
