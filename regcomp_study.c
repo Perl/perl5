@@ -1940,6 +1940,9 @@ Perl_study_chunk(pTHX_
                             regnode * const noper_next = regnext( noper );
                             U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
                             U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) :0;
+                            const bool noper_next_is_trie =
+                                noper_next && noper_next < tail
+                                && REGNODE_TYPE(noper_next_type) == TRIE;
                             STRLEN noper_octets = noper_trietype == NOTHING
                                 ? noper_next_trietype ? STR_LEN(noper_next) : 0
                                 : noper_trietype ? STR_LEN(noper) : 0;
@@ -1978,7 +1981,11 @@ Perl_study_chunk(pTHX_
                                    * its branches continue with a different
                                    * trie type.  The octet-trie construction
                                    * cannot preserve those suffix branches as
-                                   * a partial trie. */
+                                   * a partial trie.  An EXACT prefix split
+                                   * from an existing trie is likewise not an
+                                   * independent branch word and must remain
+                                   * attached to that trie. */
+                                  && !noper_next_is_trie
                                   && ( !noper_next_trietype
                                        || noper_next_trietype == noper_trietype
                                        || noper_trietype == NOTHING )
@@ -2044,7 +2051,10 @@ Perl_study_chunk(pTHX_
                                                     first, trietype etc below,
                                                     so we dont do it here */
                                 }
+                                /* The same extracted-prefix restriction
+                                 * applies when starting a fresh sequence. */
                                 if ( noper_trietype
+                                     && !noper_next_is_trie
 #ifdef NOJUMPTRIE
                                      && noper_next >= tail
 #endif

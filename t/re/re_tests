@@ -2220,7 +2220,70 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 # Nested branch flattening is not compatible with *THEN
 (?:zz|(?:a(*THEN)b|c)|d)	a	n	$&	a	-	(*THEN) stays nested (no match)
 (?:zz|(?:a(*THEN)b|c)|d)	d	y	$&	d	-	(*THEN) stays nested (match)
+
+# Prefixes extracted from jump tries must remain attached to those tries.
+# Otherwise an enclosing trie pass can discard the branch structure needed
+# by backtracking control verbs.  Keep both failing and successful paths here
+# to ensure that this protection does not disable prefix extraction itself.
 (?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	(Don't) flatten *THEN
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ab	y	$&	ab	-	extracted one-character prefix, successful SKIP path
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ac	n	-	-	-	extracted one-character prefix, SKIP blocks alternatives
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	xy	y	$&	xy	-	sibling THEN path remains reachable
+
+x(*THEN)y|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|a	aab	n	-	-	-	protected nested trie in middle
+x(*THEN)y|z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)	aab	n	-	-	-	protected nested trie last
+z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	extra sibling before protected trie
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|z|x(*THEN)y|a	aab	n	-	-	-	extra sibling after protected trie
+
+(?:(?:ab(*SKIP)c|abd)|ab(*COMMIT)c)|x(*THEN)y|ab	ababc	n	-	-	-	extracted two-character prefix
+(?:(?:ab(*SKIP)c|abd)|ab(*COMMIT)c)|x(*THEN)y|ab	abc	y	$&	abc	-	two-character prefix successful path
+(?:(?:foo(*SKIP)x|fooy)|foo(*COMMIT)x)|z(*THEN)q|foo	foofoox	n	-	-	-	extracted three-character prefix
+(?:(?:foo(*SKIP)x|fooy)|foo(*COMMIT)x)|z(*THEN)q|foo	foox	y	$&	foox	-	three-character prefix successful path
+(?:(?:prefix(*SKIP)X|prefixY)|prefix(*COMMIT)X)|other(*THEN)Z|prefix	prefixprefixX	n	-	-	-	long extracted prefix
+(?:(?:prefix(*SKIP)X|prefixY)|prefix(*COMMIT)X)|other(*THEN)Z|prefix	prefixX	y	$&	prefixX	-	long prefix successful path
+
+(?:(?:\x{100}(*SKIP)b|\x{100}c)|\x{100}(*COMMIT)b)|x(*THEN)y|\x{100}	\x{100}\x{100}b	n	-	-	-	UTF-8 prefix
+(?:(?:\x{100}(*SKIP)b|\x{100}c)|\x{100}(*COMMIT)b)|x(*THEN)y|\x{100}	\x{100}b	y	$&	\x{100}b	-	UTF-8 prefix successful path
+(?:(?:\x{100}\x{101}(*SKIP)b|\x{100}\x{101}c)|\x{100}\x{101}(*COMMIT)b)|x(*THEN)y|\x{100}\x{101}	\x{100}\x{101}\x{100}\x{101}b	n	-	-	-	multi-character UTF-8 prefix
+(?:(?:\x{100}\x{101}(*SKIP)b|\x{100}\x{101}c)|\x{100}\x{101}(*COMMIT)b)|x(*THEN)y|\x{100}\x{101}	\x{100}\x{101}b	y	$&	\x{100}\x{101}b	-	multi-character UTF-8 prefix successful path
+(?:(?:a\x00(*SKIP)b|a\x00c)|a\x00(*COMMIT)b)|x(*THEN)y|a\x00	a\x00a\x00b	n	-	-	-	prefix containing NUL
+(?:(?:a\x00(*SKIP)b|a\x00c)|a\x00(*COMMIT)b)|x(*THEN)y|a\x00	a\x00b	y	$&	a\x00b	-	prefix containing NUL successful path
+
+(?u:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	aab	n	-	-	-	extracted prefix under Unicode rules
+(?a:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	aab	n	-	-	-	extracted prefix under ASCII rules
+(?aa:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	aab	n	-	-	-	extracted prefix under strict ASCII rules
+(?l:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	aab	n	-	-	-	extracted prefix under locale rules
+(?i:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	AAB	n	-	-	-	folded trie adjacent case
+(?i:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)	AB	y	$&	AB	-	folded trie successful path
+(?ui:(?:(?:\x{100}(*SKIP)b|\x{100}c)|\x{100}(*COMMIT)b)|x(*THEN)y|\x{100})	\x{100}\x{100}b	n	-	-	-	folded UTF-8 prefix
+
+(?:(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|z)|q)|x(*THEN)y|a	aab	n	-	-	-	three nested alternation levels
+(?:(?:(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|z)|q)|r)|x(*THEN)y|a	aab	n	-	-	-	four nested alternation levels
+(?:(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|z)|q)|x(*THEN)y|a	z	y	$&	z	-	deeper nested sibling remains reachable
+
+(?:(?:a(*PRUNE)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	PRUNE continuation after extracted prefix
+(?:(?:a(*THEN)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	THEN continuation after extracted prefix
+(?:(?:a(*MARK:A)(*SKIP:A)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	named SKIP continuation after extracted prefix
+(?:(?:a(*MARK:A)(*SKIP:A)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ab	y	$&	ab	-	named SKIP successful path
+
+((?:(?:a(*SKIP)b|ac)|a(*COMMIT)b))|x(*THEN)y|a	aab	n	-	-	-	outer capture around protected trie
+((?:(?:a(*SKIP)b|ac)|a(*COMMIT)b))|x(*THEN)y|a	ab	y	$1	ab	-	outer capture successful path
+(?:(?:(?<skip>a)(*SKIP)b|(?<cee>ac))|(?<commit>a)(*COMMIT)b)|(?<ex>x)(*THEN)y|(?<plain>a)	aab	n	-	-	-	named captures around protected trie
+
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|(?:(?:m(*PRUNE)n|mo)|m(*COMMIT)n)|x(*THEN)y|a	aab	n	-	-	-	first of two protected nested tries
+(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|(?:(?:m(*PRUNE)n|mo)|m(*COMMIT)n)|x(*THEN)y|a	mmn	n	-	-	-	second of two protected nested tries
+(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)Z)|x(*THEN)y|aZ	aabZ	n	-	-	-	protected nested trie with trailing literal
+
+\A(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)\z	aab	n	-	-	-	anchored protected nested trie
+\A(?:(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a)\z	ab	y	$&	ab	-	anchored successful path
+
+# These do not require control-verb protection themselves, but exercise other
+# jump-trie continuations adjacent to the corrected optimizer boundary.
+(?:(?:ab(c)|ad(e))|af(g))|x(*THEN)y|a	abc	y	$1	c	-	capture continuation in first trie word
+(?:(?:ab(c)|ad(e))|af(g))|x(*THEN)y|a	ade	y	$2	e	-	capture continuation in second trie word
+(?:(?:ab(c)|ad(e))|af(g))|x(*THEN)y|a	afg	y	$3	g	-	capture continuation after nested trie
+(?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	abc	y	$&	abc	-	lookahead continuation in first trie word
+(?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	ade	y	$&	ade	-	lookahead continuation in second trie word
 
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
