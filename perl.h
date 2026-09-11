@@ -8488,13 +8488,14 @@ cannot have changed since the precalculation.
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                                "%s: %" LINE_Tf ": lc_numeric standard=%d\n",\
-                                __FILE__, __LINE__, PL_numeric_standard));  \
+                               __FILE__, (line_t)__LINE__,                  \
+                               PL_numeric_standard));                       \
             if (UNLIKELY(NOT_IN_NUMERIC_STANDARD_)) {                       \
                 Perl_set_numeric_standard(aTHX_ __FILE__, __LINE__);        \
             }                                                               \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                      "%s: %" LINE_Tf ": lc_numeric standard=%d\n",          \
-                     __FILE__, __LINE__, PL_numeric_standard));             \
+                     __FILE__, (line_t)__LINE__, PL_numeric_standard));     \
         } STMT_END
 
 #  define SET_NUMERIC_UNDERLYING()                                          \
