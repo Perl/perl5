@@ -186,7 +186,8 @@ static const struct body_details fake_hv_with_aux =
       SVt_PVHV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
 
-static const struct body_details bodies_by_type[] = {
+#ifdef DOINIT
+EXTCONST struct body_details PL_bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
 
@@ -296,10 +297,13 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
 };
+#else
+EXTCONST struct body_details PL_bodies_by_type[];
+#endif
 
 #define new_body_allocated(sv_type)            \
     (void *)((char *)S_new_body(aTHX_ sv_type) \
-             - bodies_by_type[sv_type].offset)
+             - PL_bodies_by_type[sv_type].offset)
 
 #ifdef PURIFY
 #if !(NVSIZE <= IVSIZE)
@@ -323,7 +327,7 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVMG()    new_body_allocated(SVt_PVMG)
 
 #define del_body_by_type(p, type)                               \
-    del_body(p + bodies_by_type[(type)].offset,                 \
+    del_body(p + PL_bodies_by_type[(type)].offset,                 \
              &PL_body_roots[(type)])
 
 #endif /* PURIFY */
@@ -399,7 +403,7 @@ Perl_newSV_type(pTHX_ const svtype type)
     const struct body_details *type_details;
     PERL_UNUSED_VAR(type_details);
 #if defined(PURIFY) || defined(DEBUGGING)
-    type_details = bodies_by_type + type;
+    type_details = PL_bodies_by_type + type;
 #endif
 
     switch (type) {
