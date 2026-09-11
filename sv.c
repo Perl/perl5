@@ -836,7 +836,7 @@ supporting the multiple body-types.
 If PURIFY is defined, or PERL_ARENA_SIZE=0, arenas are not used, and
 the (new|del)_X*V macros are mapped directly to malloc/free.
 
-For each sv-type, struct body_details bodies_by_type[] carries
+For each sv-type, struct body_details PL_bodies_by_type[] carries
 parameters which control these aspects of SV handling:
 
 Arena_size determines whether arenas are used for this body type, and if
@@ -856,7 +856,7 @@ For the sv-types that have no bodies, arenas are not used, so those
 PL_body_roots[sv_type] are unused, and can be overloaded.  In
 something of a special case, SVt_NULL is borrowed for HE arenas;
 PL_body_roots[HE_ARENA_ROOT_IX=SVt_NULL] is filled by S_more_he, but the
-bodies_by_type[SVt_NULL] slot is not used, as the table is not
+PL_bodies_by_type[SVt_NULL] slot is not used, as the table is not
 available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
 
 */
@@ -880,7 +880,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
 
     const struct body_details *type_details =
         (sv_type > SVt_IV)
-            ? bodies_by_type + sv_type
+            ? PL_bodies_by_type + sv_type
             : (sv_type == SVt_NULL)
                 ? NULL
                 : &fake_hv_with_aux
@@ -905,7 +905,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
         done_sanity_check = TRUE;
 
         while (i--)
-            assert (bodies_by_type[i].type == i);
+            assert (PL_bodies_by_type[i].type == i);
     }
 #endif
 
@@ -1001,7 +1001,7 @@ Perl_newSV_type_generic(pTHX_ const svtype type)
 
     void*      new_body;
     const struct body_details *type_details;
-    type_details = bodies_by_type + type;
+    type_details = PL_bodies_by_type + type;
 
     switch (type) {
     case SVt_NULL:
@@ -1083,13 +1083,13 @@ Perl_newSV_type_generic(pTHX_ const svtype type)
         /* For a type known at compile time, it should be possible for the
          * compiler to deduce the value of (type_details->arena), resolve
          * that branch below, and inline the relevant values from
-         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * PL_bodies_by_type. Except, at least for gcc, it seems not to do that.
          * We help it out here with two deviations from sv_upgrade:
          * (1) Minor rearrangement here, so that PVFM - the only type at this
          *     point not to be allocated from an array appears last, not PV.
          * (2) The ASSUME() statement here for everything that isn't PVFM.
          * Obviously this all only holds as long as it's a true reflection of
-         * the bodies_by_type lookup table. */
+         * the PL_bodies_by_type lookup table. */
 #ifndef PURIFY
          ASSUME(type_details->arena);
 #endif
@@ -1158,7 +1158,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     const svtype old_type = SvTYPE(sv);
     const struct body_details *new_type_details;
     const struct body_details *old_type_details
-        = bodies_by_type + old_type;
+        = PL_bodies_by_type + old_type;
     SV *referent = NULL;
 
     if (old_type == new_type)
@@ -1263,7 +1263,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         croak("sv_upgrade from type %d down to type %d",
                 (int)old_type, (int)new_type);
 
-    new_type_details = bodies_by_type + new_type;
+    new_type_details = PL_bodies_by_type + new_type;
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= new_type;
@@ -1475,7 +1475,7 @@ Perl_hv_auxalloc(pTHX_ HV *hv)
 {
     PERL_ARGS_ASSERT_HV_AUXALLOC;
 
-    const struct body_details *old_type_details = bodies_by_type + SVt_PVHV;
+    const struct body_details *old_type_details = PL_bodies_by_type + SVt_PVHV;
     void *old_body;
     void *new_body;
 
@@ -7890,13 +7890,13 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             /* Historically this check on type was needed so that the code to
              * free bodies wasn't reached for these types, because the arena
              * slots were re-used for HEs and pointer table entries. The
-             * metadata table `bodies_by_type` had the information for the sizes
+             * metadata table `PL_bodies_by_type` had the information for the sizes
              * for HEs and PTEs, hence the code here had to have a special-case
              * check to ensure that the "regular" body freeing code wasn't
-             * reached, and get confused by the "lies" in `bodies_by_type`.
+             * reached, and get confused by the "lies" in `PL_bodies_by_type`.
              *
              * However, it hasn't actually been needed for that reason since
-             * Aug 2010 (commit 829cd18aa7f45221), because `bodies_by_type` was
+             * Aug 2010 (commit 829cd18aa7f45221), because `PL_bodies_by_type` was
              * changed to always hold the accurate metadata for the SV types.
              * This was possible because PTEs were no longer allocated from the
              * "SVt_IV" arena, and the code to allocate HEs from the "SVt_NULL"
@@ -8188,7 +8188,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             }
             else {
                 arena_index = type;
-                sv_type_details = bodies_by_type + arena_index;
+                sv_type_details = PL_bodies_by_type + arena_index;
             }
 
             SvFLAGS(sv) &= SVf_BREAK;
@@ -16250,7 +16250,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             void *new_body;
             const svtype sv_type = SvTYPE(ssv);
             const struct body_details *sv_type_details
-                = bodies_by_type + sv_type;
+                = PL_bodies_by_type + sv_type;
 
             switch (sv_type) {
             default:
