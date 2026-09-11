@@ -1303,7 +1303,7 @@ strong suspicion is that the outer must iterate at least twice (so is at
 minimum C<{2,...}>) so that the first iteration can fail and mark the
 cache, then the second incorrectly fail due to the cache.]
 
-There are some tests for nested quantifiers in F<t/re/re_tests> under the
+There are some tests for nested quantifiers in F<t/re/pat.t> under the
 heading 'RT #79152'.
 
 =item *
