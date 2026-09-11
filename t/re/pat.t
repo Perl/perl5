@@ -2668,21 +2668,22 @@ SKIP:
     {
         # Test the super-linear cache
 
+        # Use the minimum countdown before enabling the cache, to ensure
+        # the cache is being exercised wherever possible:
+        local ${^RE_SUPERLINEAR_CACHE_DELAY} = 1;
+
         # RT #79152
         # Test the super-linear cache against nested quantifiers.
-        #
-        # Note that the first half of each of these patterns is there purely
-        # to soak up the initial cache countdown; the guts of the test is the
-        # second half.
-        ok("xayxay" =~ /(q1|.)*(q2|.)*(x(a|bc)*y){2,}/,  'SLC RT #79152 1');
-        is($&, "xayxay",                                 'SLC RT #79152 1 $&');
 
-        ok("xayxay" =~ /(q1|.)*(q2|.)*(x(a|bc)*y){2,3}/, 'SLC RT #79152 2');
-        is($&, "xayxay",                                 'SLC RT #79152 2 $&');
+        ok("xayxay" =~ /^.*(x(a|bc)*y){2,}/,  'SLC RT #79152 1');
+        is($&, "xayxay",                      'SLC RT #79152 1 $&');
 
-        ok("zzzzzzzzzzzzzzzz-xayxayxayxayZ"
-          =~ /(q1|z)*(q2|z)*z{15}-.*?(x(a|bc)*y){2,3}Z/, 'SLC RT #79152 3');
-        is($&, "zzzzzzzzzzzzzzzz-xayxayxayxayZ",         'SLC RT #79152 3 $&');
+        ok("xayxay" =~ /^.*(x(a|bc)*y){2,3}/, 'SLC RT #79152 2');
+        is($&, "xayxay",                      'SLC RT #79152 2 $&');
+
+        ok("xayxayxayxayZ"
+          =~ /^.*?(x(a|bc)*y){2,3}Z/,         'SLC RT #79152 3');
+        is($&, "xayxayxayxayZ",               'SLC RT #79152 3 $&');
 
         # This tested a bug in the positive part of the SLC, which
         # no longer exists; but might as well keep the test.
