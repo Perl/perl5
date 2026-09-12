@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1310;  # Update this when adding/deleting tests.
+plan tests => 1312;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2690,6 +2690,12 @@ SKIP:
         ok("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             =~ /^(a*?)(?!(a{6}|a{5})*$)/,     'SLC +ve');
         is($+[1], "12",                       'SLC +ve $+[1]');
+
+        # Test running a nested external sub-pattern
+
+        my $inner_qr = qr/(x(a|bc)*y)/;
+        ok("xayxay" =~ /^.*(??{ $inner_qr }){2,3}/, 'SLC nested qr');
+        is($&, "xayxay",                            'SLC nested qr $&');
 
     }
 
