@@ -1308,6 +1308,19 @@ heading 'RT #79152'.
 
 =item *
 
+In a similar fashion, a nested sub-pattern called by e.g. C<(?1)> or
+C<(?{{ $inner_qr })> may have a variable rest-of-pattern depending on what
+surrounds it. Because of this, none of its C<WHILEM> nodes are treated as
+suitable candidates for the SLC while executing the inner pattern. This is
+enforced by checking C<cur_eval>, which is non-zero whenever an inner
+pattern is being executed.
+
+Another reason for not using the cache is that the inner pattern will have
+a different set of C<WHILEM> node ids, and accommodating them would
+complicate the code.
+
+=item *
+
 There is currently a hard limit of 15 cache-participating C<WHILEM> nodes
 per regex.
 

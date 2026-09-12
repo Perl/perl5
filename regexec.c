@@ -8731,14 +8731,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             * At this point we expect the stack context to be
                             * set up correctly */
 
-                /* invalidate the S-L poscache. We're now executing a
-                 * different set of WHILEM ops (and their associated
-                 * indexes) against the same string, so the bits in the
-                 * cache are meaningless. Setting maxiter to zero forces
-                 * the cache to be invalidated and zeroed before reuse.
-                 * XXX This is too dramatic a measure. Ideally we should
-                 * save the old cache and restore when running the outer
-                 * pattern again */
                 reginfo->poscache_maxiter = 0;
 
                 /* the new regexp might have a different is_utf8_pat than we do */
@@ -9134,6 +9126,8 @@ NULL
             }
 
             if (   FLAGS(scan)
+                   /* not running a (??{...}) or (?N) sub-pattern */
+                && !cur_eval
                    /* -1 => disable cache */
                 && PL_re_superlinear_cache_delay != -1)
             {
