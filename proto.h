@@ -15876,6 +15876,11 @@ S_unwind_scan_frames(pTHX_ void *p)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                         \
     } STMT_END
 
+# define PERL_ARGS_ASSERT_CLEAR_OFFS_SPARE      \
+     STMT_START { Perl_assert_aTHX; assert(prog);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 # define PERL_ARGS_ASSERT_FIND_BYCLASS          \
      STMT_START { Perl_assert_aTHX; assert(prog); assert(c); assert(s);  \
                   assert(strend); assert(s <= strend);                   \
@@ -16046,6 +16051,10 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum *previous, const U8 * const str
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3)
         __attribute__warn_unused_result__;
+static void
+S_clear_offs_spare(pTHX_ regexp *prog)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 static char *
 S_find_byclass(pTHX_ regexp *prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo)
         Perl_attribute_nonnull_aTHX

@@ -2167,6 +2167,7 @@
 #     define backup_one_SB(a,b,c)               S_backup_one_SB(aTHX_ a,b,c)
 #     define backup_one_WB_but_over_Extend_FO(a,b,c,d) S_backup_one_WB_but_over_Extend_FO(aTHX_ a,b,c,d)
 #     define capture_clear(a,b,c,d)             S_capture_clear(aTHX_ a,b,c,d comma_aDEPTH)
+#     define clear_offs_spare(a)                S_clear_offs_spare(aTHX_ a)
 #     define find_byclass(a,b,c,d,e)            S_find_byclass(aTHX_ a,b,c,d,e)
 #     define find_next_masked                   S_find_next_masked
 #     define find_span_end                      S_find_span_end
