@@ -1487,7 +1487,10 @@
 #     define restore_magic(a)                   S_restore_magic(aTHX_ a)
 #     define save_magic_flags(a,b,c)            S_save_magic_flags(aTHX_ a,b,c)
 #     define unwind_handler_stack(a)            S_unwind_handler_stack(aTHX_ a)
-#   endif
+#     if defined(HAS_SIGPROCMASK)
+#       define unblock_sigmask(a)               S_unblock_sigmask(aTHX_ a)
+#     endif
+#   endif /* defined(PERL_IN_MG_C) */
 #   if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 #     define translate_substr_offsets           Perl_translate_substr_offsets
 #   endif
