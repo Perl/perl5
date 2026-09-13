@@ -441,6 +441,7 @@
 # define newSV_false()                          Perl_newSV_false(aTHX)
 # define newSV_true()                           Perl_newSV_true(aTHX)
 # define newSV_type(a)                          Perl_newSV_type(aTHX_ a)
+# define newSV_type_generic(a)                  Perl_newSV_type_generic(aTHX_ a)
 # define newSV_type_mortal(a)                   Perl_newSV_type_mortal(aTHX_ a)
 # define newSVbool(a)                           Perl_newSVbool(aTHX_ a)
 # define newSVhek(a)                            Perl_newSVhek(aTHX_ a)

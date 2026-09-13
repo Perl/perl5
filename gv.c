@@ -96,7 +96,7 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 
     if (!*where)
     {
-        *where = newSV_type(type);
+        *where = newSV_type_generic(type);
         if (   type == SVt_PVAV
             && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
         {

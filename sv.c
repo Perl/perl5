@@ -870,6 +870,127 @@ available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
         *root = (void*)thing_copy;			\
     } STMT_END
 
+extern const struct body_details bodies_by_type[] = {
+    /* HEs use this offset for their arena.  */
+    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
+
+    /* IVs are in the head, so the allocation size is 0.  */
+    { 0,
+      sizeof(IV), /* This is used to copy out the IV body.  */
+      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
+      NOARENA /* IVS don't need an arena  */, 0
+    },
+
+#if NVSIZE <= IVSIZE
+    { 0, sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, NOARENA, 0 },
+#else
+    { sizeof(NV), sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
+#endif
+
+    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_INVLIST, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVIV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+#if NVSIZE > 8 && PTRSIZE < 8 && MEM_ALIGNBYTES > 8
+    /* NV may need strict 16 byte alignment.
+
+       On 64-bit systems the NV ends up aligned despite the hack
+       avoiding allocation of xmg_stash and xmg_u, so only do this
+       for 32-bit systems.
+    */
+    { sizeof(XPVNV),
+      sizeof(XPVNV),
+      0,
+      SVt_PVNV, FALSE, HADNV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVNV)) },
+#else
+    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVNV, FALSE, HADNV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+#endif
+    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp)),
+      sizeof(regexp),
+      0,
+      SVt_REGEXP, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
+    },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
+      copy_length(XPVAV, xav_alloc),
+      0,
+      SVt_PVAV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
+      copy_length(XPVHV, xhv_max),
+      0,
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
+      sizeof(XPVCV),
+      0,
+      SVt_PVCV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
+      sizeof(XPVFM),
+      0,
+      SVt_PVFM, TRUE, NONV, NOARENA,
+      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
+      sizeof(XPVIO),
+      0,
+      SVt_PVIO, TRUE, NONV, HASARENA,
+      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVOBJ)),
+      copy_length(XPVOBJ, xobject_iter_sv_at),
+      0,
+      SVt_PVOBJ, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+};
+
+static const struct body_details fake_hv_with_aux =
+    /* The SVt_IV arena is used for (larger) PVHV bodies.  */
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX)),
+      copy_length(XPVHV, xhv_max),
+      0,
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
+
+static const struct body_details fake_rv =
+    { 0, 0, 0, SVt_IV, FALSE, NONV, NOARENA, 0 };
 
 void *
 Perl_more_bodies (pTHX_ const svtype sv_type)
@@ -971,6 +1092,168 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
         *(void**) start = (void *)next;
         start = next;
     }
+}
+
+/*
+=for apidoc newSV_type_generic
+
+Creates a new SV, of the type specified.
+The reference count for the new SV is set to 1.
+
+This function can create all types of SV, whereas the inline function
+C<newSV_type> specializes in the most common SV types and calls this
+function for everything else.
+
+=cut
+*/
+
+SV *
+Perl_newSV_type_generic(pTHX_ const svtype type)
+{
+    PERL_ARGS_ASSERT_NEWSV_TYPE_GENERIC;
+
+    SV *sv;
+    new_SV(sv);
+    SvFLAGS(sv) = type;
+    assert(!SvOK(sv));
+    /* Clear the sv_u slot, regardless of what
+     * might actually be stored inside it. */
+    sv->sv_u.svu_rv = NULL;
+
+    void*      new_body;
+    const struct body_details *type_details;
+    type_details = bodies_by_type + type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        assert(SvIVX(sv) == 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+        assert(SvNVX(sv) == 0.0);
+#else
+        SvANY(sv) = new_XNV();
+        SvNV_set(sv, 0);
+#endif
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(type_details->body_size);
+#ifndef PURIFY
+        assert(type_details->arena);
+        assert(type_details->arena_size);
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav, xpvhv, xobject have no offset, no need to adjust new_body */
+        assert(!(type_details->offset));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = new_NOARENAZ(type_details);
+#endif
+        SvANY(sv) = new_body;
+
+        ((XPVMG*)new_body)->xmg_u.xmg_magic = NULL;
+        ((XPVMG*)new_body)->xmg_stash = NULL;
+
+        switch(type) {
+        case SVt_PVAV:
+            ((XPVAV*)new_body)->xav_fill  = -1;
+            ((XPVAV*)new_body)->xav_max   = -1;
+            ((XPVAV*)new_body)->xav_alloc = NULL;
+
+            assert(!AvREIFY(sv));
+            AvREAL_on(sv);
+            assert(!sv->sv_u.svu_array); /* or svu_hash  */
+            break;
+        case SVt_PVHV:
+            ((XPVHV*)new_body)->xhv_keys = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            ((XPVHV*)new_body)->xhv_max = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            assert(!sv->sv_u.svu_hash); /* or svu_hash  */
+            break;
+        case SVt_PVOBJ:
+            ((XPVOBJ*)new_body)->xobject_maxfield = -1;
+            assert(!sv->sv_u.svu_fields); /* or svu_hash  */
+            break;
+        default:
+            NOT_REACHED;
+        }
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (type_details->arena), resolve
+         * that branch below, and inline the relevant values from
+         * bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(type_details->arena);
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(type_details->body_size);
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(type_details->arena) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, type_details->body_size, char);
+            new_body = ((char *)new_body) - type_details->offset;
+        } else
+#endif
+        {
+            new_body = new_NOARENAZ(type_details);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(deb("sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        assert(!sv->sv_u.svu_rv);
+        break;
+    default:
+        croak("panic: newSV_type() unknown type %lu", (unsigned long)type);
+    }
+
+    return sv;
 }
 
 /*
@@ -5990,7 +6273,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         const bool islv = SvTYPE(sv) == SVt_PVLV;
         const svtype new_type =
           islv ? SVt_NULL : SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
-        SV *const temp = newSV_type(new_type);
+        SV *const temp = newSV_type_generic(new_type);
         regexp *old_rx_body;
 
         if (new_type == SVt_PVMG) {
