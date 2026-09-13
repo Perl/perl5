@@ -2287,9 +2287,10 @@ Perl_csighandler_init(void)
 
 #if defined HAS_SIGPROCMASK
 static void
-unblock_sigmask(pTHX_ void* newset)
+S_unblock_sigmask(pTHX_ void* newset)
 {
-    PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_UNBLOCK_SIGMASK;
+
     sigprocmask(SIG_UNBLOCK, (sigset_t*)newset, NULL);
 }
 #endif
@@ -2326,7 +2327,7 @@ Perl_despatch_signals(pTHX)
                 SV* save_sv = newSVpvn((char *)(&newset), sizeof(sigset_t));
                 ENTER;
                 SAVEFREESV(save_sv);
-                SAVEDESTRUCTOR_X(unblock_sigmask, SvPV_nolen(save_sv));
+                SAVEDESTRUCTOR_X(S_unblock_sigmask, SvPV_nolen(save_sv));
             }
 #endif
 

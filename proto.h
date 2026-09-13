@@ -13286,6 +13286,15 @@ S_unwind_handler_stack(pTHX_ void *p)
      STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+# if defined(HAS_SIGPROCMASK)
+static void
+S_unblock_sigmask(pTHX_ void *newset)
+        Perl_attribute_nonnull_aTHX;
+#   define PERL_ARGS_ASSERT_UNBLOCK_SIGMASK     \
+       STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+# endif
 #endif /* defined(PERL_IN_MG_C) */
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 PERL_CALLCONV bool

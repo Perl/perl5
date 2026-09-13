@@ -5159,7 +5159,6 @@ Mbp	|OP *	|ref		|NULLOK OP *o				\
 				|I32 type
 #endif
 #if defined(PERL_IN_MG_C)
-
 S	|void	|fixup_errno_string					\
 				|NN SV *sv
 S	|SV *	|magic_methcall1|NN SV *sv				\
@@ -5178,7 +5177,11 @@ S	|void	|save_magic_flags					\
 				|U32 flags
 S	|void	|unwind_handler_stack					\
 				|NULLOK void *p
-#endif
+# if defined(HAS_SIGPROCMASK)
+static void
+S	|void	|unblock_sigmask|void *newset  NULLOK
+# endif
+#endif /* defined(PERL_IN_MG_C) */
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 Tp	|bool	|translate_substr_offsets				\
 				|STRLEN curlen				\
