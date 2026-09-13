@@ -1458,18 +1458,6 @@ Perl_dowantarray(pTHX)
     STMT_START { Perl_assert_aTHX; } STMT_END
 
 PERL_CALLCONV void
-Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
-        Perl_attribute_nonnull(1);
-#define PERL_ARGS_ASSERT_DRAND48_INIT_R         \
-    STMT_START { assert(random_state); } STMT_END
-
-PERL_CALLCONV double
-Perl_drand48_r(perl_drand48_t *random_state)
-        Perl_attribute_nonnull(1);
-#define PERL_ARGS_ASSERT_DRAND48_R              \
-    STMT_START { assert(random_state); } STMT_END
-
-PERL_CALLCONV void
 Perl_dump_all(pTHX)
         Perl_attribute_nonnull_aTHX;
 #define PERL_ARGS_ASSERT_DUMP_ALL               \
@@ -5441,6 +5429,18 @@ Perl_parser_free(pTHX_ const yy_parser *parser)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PARSER_FREE            \
     STMT_START { Perl_assert_aTHX; assert(parser); } STMT_END
+
+PERL_CALLCONV NV
+Perl_pcg64_random_NV_r(PL_RANDOM_STATE_TYPE *state)
+        Perl_attribute_nonnull(1);
+#define PERL_ARGS_ASSERT_PCG64_RANDOM_NV_R      \
+    STMT_START { assert(state); } STMT_END
+
+PERL_CALLCONV void
+Perl_pcg64_seed_r(PL_RANDOM_STATE_TYPE *state, U64 seed1)
+        Perl_attribute_nonnull(1);
+#define PERL_ARGS_ASSERT_PCG64_SEED_R           \
+    STMT_START { assert(state); } STMT_END
 
 PERL_CALLCONV void
 Perl_peep(pTHX_ OP *o)

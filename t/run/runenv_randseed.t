@@ -16,13 +16,13 @@ use warnings;
 for (1..2) {
     local $ENV{PERL_RAND_SEED} = 1;
     fresh_perl_is("print map { chr(utf8::unicode_to_native(rand(26)+65)) } 1..10",
-                  "BLVIOAEZTJ", undef, "Test randomness with PERL_RAND_SEED=1");
+                  "KQGIXHIGSJ", undef, "Test randomness with PERL_RAND_SEED=1");
 }
 
 for (1..2) {
     local $ENV{PERL_RAND_SEED} = 2;
     fresh_perl_is("print map { chr(utf8::unicode_to_native(rand(26)+65)) } 1..10",
-                  "XEOUOFRPQZ", undef, "Test randomness with PERL_RAND_SEED=2");
+                  "LSVGRQKRUA", undef, "Test randomness with PERL_RAND_SEED=2");
 }
 
 my %got;
@@ -54,13 +54,7 @@ EOF_TEST_CODE
         ]);
     is($err, "", "No exceptions forking.");
     my @parts= sort { $a cmp $b } split /\n/, $out;
-    my @want= (
-            "A:KNXDITWWJZ",
-            "B:WDQJGTBJQS",
-            "C:ZGYCCINIHE",
-            "D:UGLGAEXFBP",
-            "E:MQLTNZGZQB"
-    );
+    my @want= qw/A:LGLQCODWXB B:DCQOFDFZKK C:FMYATJTNEZ D:VLKWHMYRES E:EEXTFGYHDB/;
     is("@parts","@want","Works as expected with forks.");
 }
 
