@@ -13619,6 +13619,13 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;               \
     } STMT_END
 
+static OPSLAB *
+S_new_slab(pTHX_ OPSLAB *head, size_t sz)
+        Perl_attribute_nonnull_aTHX;
+# define PERL_ARGS_ASSERT_NEW_SLAB              \
+     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 static OP *
 S_no_fh_allowed(pTHX_ OP *o)
         Perl_attribute_nonnull_aTHX

@@ -258,6 +258,8 @@ S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot)
 static OPSLAB *
 S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 {
+    PERL_ARGS_ASSERT_NEW_SLAB;
+
     OPSLAB *slab;
     size_t sz_bytes = OpSLABSizeBytes(sz);
 
@@ -282,10 +284,6 @@ S_new_slab(pTHX_ OPSLAB *head, size_t sz)
 #endif
     slab->opslab_size = (U16)sz;
 
-#ifndef WIN32
-    /* The context is unused in non-Windows */
-    PERL_UNUSED_CONTEXT;
-#endif
     slab->opslab_free_space = (U16)sz;
     slab->opslab_head = head ? head : slab;
     DEBUG_S_warn((aTHX_ "allocated new op slab sz 0x%x, %p, head slab %p",

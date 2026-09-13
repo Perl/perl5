@@ -1533,6 +1533,7 @@
 #     define newGIVWHENOP(a,b,c,d,e)            S_newGIVWHENOP(aTHX_ a,b,c,d,e)
 #     define newMETHOP_internal(a,b,c,d)        S_newMETHOP_internal(aTHX_ a,b,c,d)
 #     define new_logop(a,b,c,d)                 S_new_logop(aTHX_ a,b,c,d)
+#     define new_slab(a,b)                      S_new_slab(aTHX_ a,b)
 #     define no_fh_allowed(a)                   S_no_fh_allowed(aTHX_ a)
 #     define op_integerize(a)                   S_op_integerize(aTHX_ a)
 #     define op_std_init(a)                     S_op_std_init(aTHX_ a)
