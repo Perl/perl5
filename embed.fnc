@@ -5260,6 +5260,7 @@ S	|void	|import_attributes_module				\
 				|NN SV *target				\
 				|NULLOK OP *attrs
 S	|void	|inplace_aassign|NN OP *o
+S	|void	|io_hints	|OP *o NN
 S	|bool	|is_dollar_bracket					\
 				|const OP * const o NN
 ST	|bool	|is_dup_mode	|NN const OP *o
