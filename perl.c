@@ -498,7 +498,6 @@ int
 Perl_nothreadhook(pTHX)
 {
     PERL_ARGS_ASSERT_NOTHREADHOOK;
-    PERL_UNUSED_CONTEXT;
 
     return 0;
 }
@@ -4143,7 +4142,6 @@ Perl_my_unexec(pTHX)
     /* unexec prints msg to stderr in case of failure */
     PerlProc_exit(status);
 #else
-    PERL_UNUSED_CONTEXT;
 #  ifdef VMS
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
 #  elif defined(WIN32) || defined(__CYGWIN__)
@@ -4446,8 +4444,6 @@ S_init_ids(pTHX)
     const Gid_t my_gid = PerlProc_getgid();
     const Gid_t my_egid = PerlProc_getegid();
 
-    PERL_UNUSED_CONTEXT;
-
     /* Should not happen: */
     CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
     TAINTING_set( TAINTING_get | (my_uid && (my_euid != my_uid || my_egid != my_gid)) );
@@ -4516,7 +4512,6 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
     char string[3] = "-x";
     const char *message = "program input from stdin";
 
-    PERL_UNUSED_CONTEXT;
     if (flag) {
         string[1] = flag;
         message = string;

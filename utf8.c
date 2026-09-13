@@ -3354,7 +3354,6 @@ Perl_bytes_to_utf8_free_me(pTHX_ const U8 *s, Size_t *lenp,
                                  void ** free_me_ptr)
 {
     PERL_ARGS_ASSERT_BYTES_TO_UTF8_FREE_ME;
-    PERL_UNUSED_CONTEXT;
 
     const U8 * const send = s + (*lenp);
     const Size_t variant_count = variant_under_utf8_count(s, send);

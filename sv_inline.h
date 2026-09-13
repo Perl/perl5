@@ -572,7 +572,6 @@ Perl_SvPVXtrue(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SVPVXTRUE;
 
-    PERL_UNUSED_CONTEXT;
 
     if (! (XPV *) SvANY(sv)) {
         return false;

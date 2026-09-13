@@ -143,7 +143,6 @@ Deprecated since 5.38
 UV
 Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uv(s, retlen));
