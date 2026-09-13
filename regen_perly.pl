@@ -28,6 +28,8 @@
 # Note also that this script is intended to be run on a UNIX system;
 # it may work elsewhere but no specific attempt has been made to make it
 # portable.
+#
+# Normally run with `make regen_perly`.  This requires a modern Bison.
 
 use v5.12;
 use warnings;

@@ -37,9 +37,19 @@ my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
 
 my %other_requirement = (
     "regen_perly.pl"        => "requires bison",
-    "regen/keywords.pl"     => "requires Devel::Tokenizer::C",
+    "regen/keywords.pl"     => "requires Devel::Tokenizer::C 0.05 or newer in the installed Perl",
     "regen/mk_invlists.pl"  => "needs the Perl you've just built",
     "regen/regcharclass.pl" => "needs the Perl you've just built",
+);
+
+my %regen_target = (
+    "regen_perly.pl"        => "make regen_perly",
+    "regen/keywords.pl"     => "make regen_keywords",
+    "regen/mk_invlists.pl"  => "make regen_invlist",
+    "regen/regcharclass.pl" => "make regen_charclass",
+    "regen.pl"              => "make regen",
+    "Porting/makemeta -j"   => "make regen_meta",
+    "Porting/makemeta -y"   => "make regen_meta",
 );
 
 my %skippable_script_for_target;
@@ -120,7 +130,9 @@ OUTER: foreach my $file (@files) {
     is("@bad", '', "generated $file is up to date");
     if (@bad && (my $skippable_script = $skippable_script_for_target{$file})) {
         my $reason = delete $other_requirement{$skippable_script};
-        diag("Note: $skippable_script must be run manually, because it $reason")
+        my $target = $regen_target{$skippable_script}
+                  // "./perl -Ilib $skippable_script";
+        diag("Note: run '$target' to update $file, because it $reason")
             if $reason;
     }
 }
@@ -132,9 +144,7 @@ foreach my $prog (@progs) {
     my $command = qq["$^X" $args];
     if (system $command) { # if it exits with an error...
         $command=~s/\s*--tap//;
-        push @errors, $prog eq "regen.pl"
-                          ? "make regen"
-                          : $command;
+        push @errors, $regen_target{$prog} // $command;
     }
 }
 if ( @errors ) {
@@ -142,5 +152,7 @@ if ( @errors ) {
     die "\n\nERROR. There are generated files which are NOT up to date.\n",
         "You should run the following commands to update these files:\n\n",
         $commands, "\n\n",
+        "Alternatively, run 'make regen-all'.  On Unix-like systems this includes\n",
+        "'make regen_perly' and requires a modern version of Bison.\n\n",
         "Once they are regenerated you should commit the changes.\n\n";
 }

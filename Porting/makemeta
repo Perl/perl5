@@ -23,6 +23,7 @@ getopts('nbyj', \%switches);
 =head1 SYNOPSIS
 
   ./perl -Ilib Porting/makemeta
+  make regen_meta
 
 =head1 OPTIONS
 

@@ -37,7 +37,7 @@ sub stack_trace {
     return "; called from line(s) $return";
 }
 
-print "Starting...\n" if DEBUG;
+print "Starting mk_invlists...\n" if DEBUG;
 
 # This program outputs charclass_invlists.inc, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
@@ -49,6 +49,8 @@ print "Starting...\n" if DEBUG;
 # in the headers is used to minimize the possibility of things getting
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
+#
+# Normally run with `make regen_invlist`.
 
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
@@ -1356,7 +1358,7 @@ sub _Perl_CCC_non0_non230 {
 sub expand_column($table_size, $splits, $enums, $x) {
     print STDERR __FILE__, ": ", __LINE__, ": Entering expand_column ",
                  stack_trace(), "\n",
-                 Dumper $x, $table_size, $enums, $splits if DEBUG;
+                 Dumper $x, $table_size, $enums, $splits if DEBUG > 1;
 
     # Expand a row or column denoted by $x into its constituents.  $x may be
     # one of:
@@ -1449,7 +1451,7 @@ sub expand_column($table_size, $splits, $enums, $x) {
     }
 
     print STDERR __FILE__, ": ", __LINE__, ": expanded column returning ",
-                 Dumper \@list if DEBUG;
+                 Dumper \@list if DEBUG > 1;
     return \@list;
 }
 
@@ -1490,7 +1492,7 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y, $me_too = undef) {
 
     # It's a lot easier to work with under debugging if the list is sorted.
     @list = sort { $a->[0] <=> $b->[0] or $a->[1] <=> $b->[1] } @list
-                                                                    if DEBUG;
+                                                            if DEBUG;
 
     return \@list;
 }
@@ -1501,7 +1503,7 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
                  Dumper $x, $y, $value, $rule, $has_unused, $me_too, $enums
-                                                                if DEBUG;
+                                                            if DEBUG > 1;
     # Set cells given by ($x,$y) in $table (whose size is $table_size) to
     # $value. $x and/or $y may expand to multiple cells.  All are set to
     # $value.  $splits, $enums, and $me_too give data to help in performing
@@ -1676,7 +1678,8 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
         }
 
         print STDERR __FILE__, ": ", __LINE__,
-          ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
+          ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y]
+                                                              if DEBUG > 1;
     }
 }
 

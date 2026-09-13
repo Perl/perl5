@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 #
 # regen.pl - a wrapper that runs all *.pl scripts to autogenerate files
+#
+# Normally run with `make regen`.
 
 require 5.004;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
