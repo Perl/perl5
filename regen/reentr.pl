@@ -382,10 +382,10 @@ sub pushssif {
 sub pushinitfree {
     my $func = shift;
     push @init, <<EOF;
-        Newx(PL_reentrant_buffer->_${func}_buffer, PL_reentrant_buffer->_${func}_size, char);
+        Newx(PL_reentrant_buffer->${func}_buffer, PL_reentrant_buffer->${func}_size, char);
 EOF
     push @free, <<EOF;
-        Safefree(PL_reentrant_buffer->_${func}_buffer);
+        Safefree(PL_reentrant_buffer->${func}_buffer);
 EOF
 }
 
@@ -519,12 +519,12 @@ for my $func (@seenf) {
         if (exists $small_bufsizes{$func}) {
             pushssif $ifdef;
             push @struct, <<EOF;
-        char*	_${func}_buffer;
-        size_t	_${func}_size;
+        char*	${func}_buffer;
+        size_t	${func}_size;
 EOF
             my $size = $small_bufsizes{$func};
             push @size, <<EOF;
-        PL_reentrant_buffer->_${func}_size = $size;
+        PL_reentrant_buffer->${func}_size = $size;
 EOF
             pushinitfree $func;
             pushssif $endif;
@@ -532,7 +532,7 @@ EOF
         elsif ($func =~ /^(gm|local)time$/) {
             pushssif $ifdef;
             push @struct, <<EOF;    # Fixed size
-        $seent{$func} _${func}_struct;
+        $seent{$func} ${func}_struct;
 EOF
             pushssif $endif;
         }
@@ -540,19 +540,19 @@ EOF
             pushssif $ifdef;
             push @struct, <<EOF;
 #  if CRYPT_R_PROTO == REENTRANT_PROTO_B_CCD
-        $seend{$func} _${func}_data;
+        $seend{$func} ${func}_data;
 #  else
-        $seent{$func} *_${func}_struct_buffer;
+        $seent{$func} *${func}_struct_buffer;
 #  endif
 EOF
             push @init, <<EOF;
 #  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
-        PL_reentrant_buffer->_${func}_struct_buffer = 0;
+        PL_reentrant_buffer->${func}_struct_buffer = 0;
 #  endif
 EOF
             push @free, <<EOF;
 #  if CRYPT_R_PROTO != REENTRANT_PROTO_B_CCD
-        Safefree(PL_reentrant_buffer->_${func}_struct_buffer);
+        Safefree(PL_reentrant_buffer->${func}_struct_buffer);
 #  endif
 EOF
             pushssif $endif;
@@ -566,28 +566,28 @@ EOF
             $genfunc =~ s/^get//;
             my $GENFUNC = uc $genfunc;
             push @struct, <<EOF;
-        $seent{$func}	_${genfunc}_struct;
-        char*	_${genfunc}_buffer;
-        size_t	_${genfunc}_size;
+        $seent{$func}	${genfunc}_struct;
+        char*	${genfunc}_buffer;
+        size_t	${genfunc}_size;
 EOF
             push @struct, <<EOF;
 #   ifdef USE_${GENFUNC}_PTR
-        $seent{$func}*	_${genfunc}_ptr;
+        $seent{$func}*	${genfunc}_ptr;
 #   endif
 EOF
             push @struct, <<EOF;
 #   ifdef USE_${GENFUNC}_FPTR
-        FILE*	_${genfunc}_fptr;
+        FILE*	${genfunc}_fptr;
 #   endif
 EOF
             push @init, <<EOF;
 #   ifdef USE_${GENFUNC}_FPTR
-        PL_reentrant_buffer->_${genfunc}_fptr = NULL;
+        PL_reentrant_buffer->${genfunc}_fptr = NULL;
 #   endif
 EOF
             my $sc = $genfunc eq 'grent' ?
                     '_SC_GETGR_R_SIZE_MAX' : '_SC_GETPW_R_SIZE_MAX';
-            my $sz = "_${genfunc}_size";
+            my $sz = "${genfunc}_size";
             push @size, <<EOF;
 #    if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
         PL_reentrant_buffer->$sz = sysconf($sc);
@@ -614,35 +614,35 @@ EOF
             my $d = $seend{$func};
             $d =~ s/\*$//; # snip: we need the base type.
             push @struct, <<EOF;
-        $seent{$func}	_${genfunc}_struct;
+        $seent{$func}	${genfunc}_struct;
 #   if $D
-        $d	_${genfunc}_data;
+        $d	${genfunc}_data;
 #   else
-        char*	_${genfunc}_buffer;
-        size_t	_${genfunc}_size;
+        char*	${genfunc}_buffer;
+        size_t	${genfunc}_size;
 #   endif
 #   ifdef USE_${GENFUNC}_PTR
-        $seent{$func}*	_${genfunc}_ptr;
+        $seent{$func}*	${genfunc}_ptr;
 #   endif
 EOF
             push @struct, <<EOF;
 #   ifdef USE_${GENFUNC}_ERRNO
-        int	_${genfunc}_errno;
+        int	${genfunc}_errno;
 #   endif
 EOF
             push @size, <<EOF;
 #  if !($D)
-        PL_reentrant_buffer->_${genfunc}_size = REENTRANTUSUALSIZE;
+        PL_reentrant_buffer->${genfunc}_size = REENTRANTUSUALSIZE;
 #  endif
 EOF
             push @init, <<EOF;
 #  if !($D)
-        Newx(PL_reentrant_buffer->_${genfunc}_buffer, PL_reentrant_buffer->_${genfunc}_size, char);
+        Newx(PL_reentrant_buffer->${genfunc}_buffer, PL_reentrant_buffer->${genfunc}_size, char);
 #  endif
 EOF
             push @free, <<EOF;
 #  if !($D)
-        Safefree(PL_reentrant_buffer->_${genfunc}_buffer);
+        Safefree(PL_reentrant_buffer->${genfunc}_buffer);
 #  endif
 EOF
             pushssif $endif;
@@ -651,22 +651,22 @@ EOF
             pushssif $ifdef;
             my $R = ifprotomatch($FUNC, grep {/R/} @p);
             push @struct, <<EOF;
-        $seent{$func}*	_${func}_struct;
-        size_t	_${func}_size;
+        $seent{$func}*	${func}_struct;
+        size_t	${func}_size;
 #   if $R
-        $seent{$func}*	_${func}_ptr;
+        $seent{$func}*	${func}_ptr;
 #   endif
 EOF
             push @size, <<EOF;
         /* This is the size Solaris recommends.
          * (though we go static, should use pathconf() instead) */
-        PL_reentrant_buffer->_${func}_size = sizeof($seent{$func}) + MAXPATHLEN + 1;
+        PL_reentrant_buffer->${func}_size = sizeof($seent{$func}) + MAXPATHLEN + 1;
 EOF
             push @init, <<EOF;
-        PL_reentrant_buffer->_${func}_struct = ($seent{$func}*)safemalloc(PL_reentrant_buffer->_${func}_size);
+        PL_reentrant_buffer->${func}_struct = ($seent{$func}*)safemalloc(PL_reentrant_buffer->${func}_size);
 EOF
             push @free, <<EOF;
-        Safefree(PL_reentrant_buffer->_${func}_struct);
+        Safefree(PL_reentrant_buffer->${func}_struct);
 EOF
             pushssif $endif;
         }
@@ -694,36 +694,36 @@ EOF
             my $w = '';
             substr($b, 0, $seenu{$func}) = '';
             if ($b =~ /R/) {
-                $true = "PL_reentrant_buffer->_${genfunc}_ptr";
+                $true = "PL_reentrant_buffer->${genfunc}_ptr";
             } elsif ($b =~ /S/) {
                 if ($func =~ /^readdir/) {
-                    $true = "PL_reentrant_buffer->_${genfunc}_struct";
+                    $true = "PL_reentrant_buffer->${genfunc}_struct";
                 } else {
-                    $true = "&PL_reentrant_buffer->_${genfunc}_struct";
+                    $true = "&PL_reentrant_buffer->${genfunc}_struct";
                 }
             } elsif ($b =~ /B/) {
-                $true = "PL_reentrant_buffer->_${genfunc}_buffer";
+                $true = "PL_reentrant_buffer->${genfunc}_buffer";
             }
             if (length $b) {
                 $w = join ", ",
                    map { $_ eq 'R'
-                         ?  "&PL_reentrant_buffer->_${genfunc}_ptr"
+                         ?  "&PL_reentrant_buffer->${genfunc}_ptr"
                          : $_ eq 'E'
-                           ? "&PL_reentrant_buffer->_${genfunc}_errno"
+                           ? "&PL_reentrant_buffer->${genfunc}_errno"
                            : $_ eq 'B'
-                             ? "PL_reentrant_buffer->_${genfunc}_buffer"
+                             ? "PL_reentrant_buffer->${genfunc}_buffer"
                              : $_ =~ /^[WI]$/
-                             ? "PL_reentrant_buffer->_${genfunc}_size"
+                             ? "PL_reentrant_buffer->${genfunc}_size"
                              : $_ eq 'H'
-                             ? "&PL_reentrant_buffer->_${genfunc}_fptr"
+                             ? "&PL_reentrant_buffer->${genfunc}_fptr"
                              : $_ eq 'D'
-                               ? "&PL_reentrant_buffer->_${genfunc}_data"
+                               ? "&PL_reentrant_buffer->${genfunc}_data"
                                : $_ eq 'S'
                                  ? ($func =~ /^readdir\d*$/
-                                   ? "PL_reentrant_buffer->_${genfunc}_struct"
+                                   ? "PL_reentrant_buffer->${genfunc}_struct"
                                    : $func =~ /^crypt$/
-                                     ? "PL_reentrant_buffer->_${genfunc}_struct_buffer"
-                                     : "&PL_reentrant_buffer->_${genfunc}_struct")
+                                     ? "PL_reentrant_buffer->${genfunc}_struct_buffer"
+                                     : "&PL_reentrant_buffer->${genfunc}_struct")
                                  : $_
                        } split '', $b;
                 $w = ", $w" if length $v;
@@ -740,9 +740,9 @@ EOF
                 ($genfunc eq 'protoent' || $genfunc eq 'servent')) {
                 $memzero = 'PERL_REENTR_MEMZERO(&PL_reentrant_buffer->_'
 		         . $genfunc
-		         . '_data, sizeof(PL_reentrant_buffer->_'
+		         . '_data, sizeof(PL_reentrant_buffer->'
 		         . $genfunc
-		         . '_data)),';
+		         . 'data)),';
             }
             push @wrap, <<EOF;
 #      if !defined($func) && ${FUNC}_R_PROTO == REENTRANT_PROTO_$p
@@ -968,11 +968,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_hostent_size <=
+            if (PL_reentrant_buffer->hostent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_hostent_buffer,
-                    &PL_reentrant_buffer->_hostent_size, char);
+            RenewDouble(PL_reentrant_buffer->hostent_buffer,
+                    &PL_reentrant_buffer->hostent_size, char);
             switch (key) {
                 case KEY_gethostbyaddr:
                     host_addr = va_arg(ap, char *);
@@ -1003,11 +1003,11 @@ Perl_reentrant_retry(const char *f, ...)
             Gid_t gid;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_grent_size <=
+            if (PL_reentrant_buffer->grent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_grent_buffer,
-                    &PL_reentrant_buffer->_grent_size, char);
+            RenewDouble(PL_reentrant_buffer->grent_buffer,
+                    &PL_reentrant_buffer->grent_size, char);
             switch (key) {
                 case KEY_getgrnam:
                     name = va_arg(ap, char *);
@@ -1040,11 +1040,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_netent_size <=
+            if (PL_reentrant_buffer->netent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_netent_buffer,
-                    &PL_reentrant_buffer->_netent_size, char);
+            RenewDouble(PL_reentrant_buffer->netent_buffer,
+                    &PL_reentrant_buffer->netent_size, char);
             switch (key) {
                 case KEY_getnetbyaddr:
                     net = va_arg(ap, Netdb_net_t);
@@ -1073,12 +1073,12 @@ Perl_reentrant_retry(const char *f, ...)
             char * name;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_pwent_size <=
+            if (PL_reentrant_buffer->pwent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 
 #    endif
-            RenewDouble(PL_reentrant_buffer->_pwent_buffer,
-                    &PL_reentrant_buffer->_pwent_size, char);
+            RenewDouble(PL_reentrant_buffer->pwent_buffer,
+                    &PL_reentrant_buffer->pwent_size, char);
             switch (key) {
                 case KEY_getpwnam:
                     name = va_arg(ap, char *);
@@ -1112,12 +1112,12 @@ Perl_reentrant_retry(const char *f, ...)
             char * name;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_spent_size <=
+            if (PL_reentrant_buffer->spent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 
 #    endif
-            RenewDouble(PL_reentrant_buffer->_spent_buffer,
-                    &PL_reentrant_buffer->_spent_size, char);
+            RenewDouble(PL_reentrant_buffer->spent_buffer,
+                    &PL_reentrant_buffer->spent_size, char);
             switch (key) {
                 case KEY_getspnam:
                     name = va_arg(ap, char *);
@@ -1140,11 +1140,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_protoent_size <=
+            if (PL_reentrant_buffer->protoent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_protoent_buffer,
-                    &PL_reentrant_buffer->_protoent_size, char);
+            RenewDouble(PL_reentrant_buffer->protoent_buffer,
+                    &PL_reentrant_buffer->protoent_size, char);
             switch (key) {
                 case KEY_getprotobyname:
                     name = va_arg(ap, char *);
@@ -1173,11 +1173,11 @@ Perl_reentrant_retry(const char *f, ...)
             int anint;
 
 #    ifdef PERL_REENTRANT_MAXSIZE
-            if (PL_reentrant_buffer->_servent_size <=
+            if (PL_reentrant_buffer->servent_size <=
                 PERL_REENTRANT_MAXSIZE / 2)
 #    endif
-            RenewDouble(PL_reentrant_buffer->_servent_buffer,
-                    &PL_reentrant_buffer->_servent_size, char);
+            RenewDouble(PL_reentrant_buffer->servent_buffer,
+                    &PL_reentrant_buffer->servent_size, char);
             switch (key) {
                 case KEY_getservbyname:
                     name = va_arg(ap, char *);
