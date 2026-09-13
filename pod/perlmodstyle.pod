@@ -542,11 +542,35 @@ DESCRIPTION
 =item *
 
 One or more sections or subsections giving greater detail of available
-methods and routines and any other relevant information.
+methods and routines and any other relevant information.  For example,
+
+=over 4
 
 =item *
 
-BUGS/CAVEATS/etc
+EXPORTS
+
+=item *
+
+METHODS
+
+=back
+
+=item *
+
+SECURITY CONSIDERATIONS
+
+=item *
+
+KNOWN ISSUES/CAVEATS/LIMITATIONS
+
+=item *
+
+SOURCE
+
+=item *
+
+SUPPORT/REPORTING ISSUES/BUGS
 
 =item *
 
@@ -568,39 +592,34 @@ method's subroutine.  This makes it easier to keep the documentation up
 to date, and avoids having to document each piece of code twice (once in
 POD and once in comments).
 
+The sections are described in more detail in L<perlpodstyle>.
+
 =head2 README, INSTALL, release notes, changelogs
 
-Your module should also include a README file describing the module and
+Your module should also include a F<README> file describing the module
+and any requirements (including external libraries or files), and
 giving pointers to further information (website, author email).
 
-An INSTALL file should be included, and should contain simple installation
-instructions.  When using ExtUtils::MakeMaker this will usually be:
+The F<README> should be a plain text file or markdown (F<README.md>) file.
+Note that files like F<README.pod> should not be included in the
+distribution, as they may confuse tools that interpret it as module
+documentation, including the installer.
 
-=over 4
+Installation instructions should be included, either as a section in F<README>
+or as a separate F<INSTALL> file. It should contain simple installation
+instructions.  When using L<ExtUtils::MakeMaker> this will usually be:
 
-=item perl Makefile.PL
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-=item make
+When using L<Module::Build>, this will usually be:
 
-=item make test
-
-=item make install
-
-=back
-
-When using Module::Build, this will usually be:
-
-=over 4
-
-=item perl Build.PL
-
-=item perl Build
-
-=item perl Build test
-
-=item perl Build install
-
-=back
+    perl Build.PL
+    perl Build
+    perl Build test
+    perl Build install
 
 Release notes or changelogs should be produced for each release of your
 software describing user-visible changes to your module, in terms
@@ -610,6 +629,57 @@ Unless you have good reasons for using some other format
 (for example, a format used within your company),
 the convention is to name your changelog file C<Changes>,
 and to follow the simple format described in L<CPAN::Changes::Spec>.
+
+=head2 Community Health Documents
+
+You may want to add additional documents to your distribution.
+
+=over 4
+
+=item F<LICENSE> or F<COPYING>
+
+This contains the full text of the license.
+
+=item F<SECURITY.md>
+
+This is a security policy that tells users how to report a security
+vulnerability, and how you will handle such reports.  See the CPAN
+L<Guidelines for Adding a Security Policy to Perl Distributions|https://security.metacpan.org/docs/guides/security-policy-for-authors.html> for more information.
+
+=item F<AI_POLICY.md>
+
+This outlines your policy on using AI/LLM tools for your distribution.
+Is AI used to identify bugs? Is AI used to fix bugs and add new features?
+Can AI tools make changes to code automatically without human interaction?
+
+=item F<CONTRIBUTING.md>
+
+This describes how users can participate in development and contribute
+issues or code changes.
+
+=item F<CODE_OF_CONDUCT.md>
+
+This document describes standards of behaviour of maintainers, conteributors and other community members of the project.
+This is often used for larger projects or projects with a large community of users.
+
+=item F<FUNDING.md>
+
+This is used to identify sponsors of projects, and to indicate how the
+project can be supported financially.
+
+=item F<GOVERNANCE.md>
+
+This will describe how the project is run, the different roles of
+people in the project, and how decisions are made.
+
+=item F<SUPPORT.md>
+
+This will describe how users can get support for a project. It
+indicates what aspects of the project you support (e.g. what Perl
+versions and releases), and where people can find help (forums, IRC
+channels, etc.)
+
+=back
 
 =head1 RELEASE CONSIDERATIONS
 
@@ -805,4 +875,3 @@ authors.
 =head1 AUTHOR
 
 Kirrily "Skud" Robert <skud@cpan.org>
-
