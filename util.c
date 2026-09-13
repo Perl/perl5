@@ -4726,9 +4726,6 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 #ifdef VMS
 #  include <starlet.h>
 #endif
-#ifdef WIN32
-BOOLEAN NTAPI SystemFunction036(PVOID RandomBuffer, ULONG RandomBufferLength);
-#endif
 
 void
 Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
