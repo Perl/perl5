@@ -1277,7 +1277,10 @@ CHMOD_W = chmod +w
 # with your existing copy of perl
 # (make regen_headers is kept for backwards compatibility)
 
-.PHONY: regen_headers regen_all
+.PHONY: regen_headers regen-headers regen_perly regen-perly \
+	regen_keywords regen-keywords regen_invlist regen-invlist \
+	regen_charclass regen-charclass \
+	regen_meta regen-meta regen_all regen-all
 
 regen:	FORCE
 	-perl regen.pl
@@ -1287,6 +1290,16 @@ regen_headers regen-headers:	FORCE
 
 regen_meta regen-meta:  META.yml META.json
 
+# Requires Devel::Tokenizer::C 0.05 or newer in the installed Perl.
+regen_keywords regen-keywords:
+	perl regen/keywords.pl
+
+regen_invlist regen-invlist:
+	$(RUN_PERL) regen/mk_invlists.pl
+
+regen_charclass regen-charclass:
+	$(RUN_PERL) regen/regcharclass.pl
+
 META.yml:   FORCE
 	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) Porting/makemeta -y
 
@@ -1294,7 +1307,22 @@ META.json:   FORCE
 	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) Porting/makemeta -j
 
 
-regen_all regen-all: regen regen_meta
+regen_all regen-all:
+	@echo "If this fails, run the regeneration steps one at a time:"
+	@echo "  make regen"
+	@echo "  make regen_perly"
+	@echo "  make regen_keywords"
+	@echo "  make regen_invlist"
+	@echo "  make regen_charclass"
+	@echo "  make regen_meta"
+	$(MAKE)
+	$(MAKE) regen
+	$(MAKE) regen_perly
+	$(MAKE) regen_keywords
+	$(MAKE) regen_invlist
+	$(MAKE) regen_charclass
+	$(MAKE) regen_meta
+	$(MAKE)
 
 .PHONY:	manisort manicheck
 

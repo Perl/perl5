@@ -7,9 +7,19 @@
 # from information stored in the DATA section of this file.
 #
 # Accepts the standard regen_lib -q and -v args.
+#
+# Normally run with `make regen_keywords`.
 
 use strict;
-use Devel::Tokenizer::C 0.05;
+BEGIN {
+    eval {
+        require Devel::Tokenizer::C;
+        Devel::Tokenizer::C->VERSION(0.05);
+        1;
+    } or die "regen/keywords.pl requires Devel::Tokenizer::C 0.05 or newer.\n",
+              "Install that module in the Perl used to run this script,\n",
+              "then run 'make regen_keywords' again.\n";
+}
 
 require './regen/regen_lib.pl';
 

@@ -1847,8 +1847,47 @@ test-reonly : reonly utils
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	cd ..\t && perl.exe harness $(OPT) -re \bpat\\/ $(EXTRA)
 
+.PHONY: regen regen-headers \
+	regen_keywords regen-keywords regen_invlist regen-invlist \
+	regen_charclass regen-charclass \
+	regen_meta regen-meta regen_all regen-all
+
 regen :
 	cd .. && regen.pl
+
+regen_headers regen-headers :
+	cd .. && regen.pl -v
+
+# Requires Devel::Tokenizer::C 0.05 or newer in the installed Perl.
+regen_keywords regen-keywords :
+	cd .. && perl regen\keywords.pl
+
+regen_invlist regen-invlist :
+	cd .. && perl.exe -Ilib regen\mk_invlists.pl
+
+regen_charclass regen-charclass :
+	cd .. && perl.exe -Ilib regen\regcharclass.pl
+
+regen_meta regen-meta :
+	cd .. && perl.exe -Ilib Porting\makemeta -y
+	cd .. && perl.exe -Ilib Porting\makemeta -j
+
+# regen_perly is omitted here.  It depends on tools only known to be
+# available on Unix-like systems.
+regen_all regen-all :
+	@echo If this fails, run the regeneration steps one at a time:
+	@echo   gmake regen
+	@echo   gmake regen_keywords
+	@echo   gmake regen_invlist
+	@echo   gmake regen_charclass
+	@echo   gmake regen_meta
+	$(PLMAKE)
+	$(PLMAKE) regen
+	$(PLMAKE) regen_keywords
+	$(PLMAKE) regen_invlist
+	$(PLMAKE) regen_charclass
+	$(PLMAKE) regen_meta
+	$(PLMAKE)
 
 test-notty : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
