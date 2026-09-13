@@ -8754,6 +8754,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.B = next;
                 ST.prev_eval = cur_eval;
                 cur_eval = st;
+                DEBUG_STACK_r({
+                    re_exec_indentf("EVAL/GOSUB: set cur_eval = %p; was %p\n",
+                        depth, cur_eval, ST.prev_eval);
+                });
                 /* now continue from first node in postoned RE */
                 PUSH_YES_STATE_GOTO(EVAL_postponed_A, startpoint, locinput,
                                     loceol, script_run_begin);
@@ -8765,10 +8769,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EVAL_postponed_B: /* cleanup the B part after a
                                   successful (??{A})B */
             /* note: this is called twice; first after popping B, then A */
-            DEBUG_STACK_r({
-                re_exec_indentf("EVAL_postponed_A/B cur_eval = %p prev_eval = %p\n",
-                    depth, cur_eval, ST.prev_eval);
-            });
 
 #define SET_RECURSE_LOCINPUT(STR,VAL)                                   \
             if ( cur_eval && CUR_EVAL.close_paren ) {                   \
@@ -8790,6 +8790,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             S_set_reg_curpm(aTHX_ rex_sv, reginfo);
             rex = ReANY(rex_sv);
             rexi = RXi_GET(rex);
+            DEBUG_STACK_r({
+                re_exec_indentf("EVAL_postponed_A/B set cur_eval = %p; was %p\n",
+                    depth, ST.prev_eval, cur_eval);
+            });
             cur_eval = ST.prev_eval;
             cur_curlyx = ST.prev_curlyx;
 
@@ -8810,12 +8814,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EVAL_postponed_A_fail: /* unsuccessfully ran A in (??{A})B */
         case EVAL_postponed_B_fail: /* unsuccessfully ran B in (??{A})B */
             /* note: this is called twice; first after popping B, then A */
-            DEBUG_STACK_r({
-                re_exec_indentf("EVAL_AB_fail cur_eval = %p prev_eval = %p\n",
-                    depth, cur_eval, ST.prev_eval);
-            });
 
-            SET_RECURSE_LOCINPUT("EVAL_AB_fail[before]", CUR_EVAL.prev_recurse_locinput);
+            SET_RECURSE_LOCINPUT("EVAL_postponed_A/B_fail[before]",
+                CUR_EVAL.prev_recurse_locinput);
 
             rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
@@ -8825,6 +8826,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             REGCP_UNWIND(ST.lastcp);
             regcppop(rex, &maxopenparen);
+            DEBUG_STACK_r({
+                re_exec_indentf("EVAL_postponed_A/B_fail set cur_eval = %p; was %p\n",
+                    depth, ST.prev_eval, cur_eval);
+            });
             cur_eval = ST.prev_eval;
             cur_curlyx = ST.prev_curlyx;
 
@@ -8833,7 +8838,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if ( nochange_depth )
                 nochange_depth--;
 
-            SET_RECURSE_LOCINPUT("EVAL_AB_fail[after]", cur_eval->locinput);
+            SET_RECURSE_LOCINPUT("EVAL_postponed_A/B_fail[after]",
+                cur_eval->locinput);
             sayNO_SILENT;
 #undef ST
 
@@ -9951,8 +9957,8 @@ NULL
                 st->u.eval.prev_eval = cur_eval;
                 cur_eval = CUR_EVAL.prev_eval;
                 DEBUG_EXECUTE_r(
-                    re_exec_indentf("END: EVAL trying tail ... (cur_eval = %p)\n",
-                                      depth, cur_eval););
+                    re_exec_indentf("END: EVAL trying tail ...  set cur_eval = %p; was %p\n",
+                                  depth, cur_eval, st->u.eval.prev_eval););
                 if ( nochange_depth )
                     nochange_depth--;
 
