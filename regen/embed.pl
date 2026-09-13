@@ -3080,6 +3080,7 @@ my @undocumented_potentially_always_hidden = qw(
 # not be directly usable by XS code
 my %undocumented_always_visible = map { $_ => 1 } qw(
     _
+    blk_defer
     blk_eval
     blk_format
     blk_gimme
