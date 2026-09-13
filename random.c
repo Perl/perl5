@@ -18,6 +18,10 @@
 #include <sys/random.h>
 #endif
 
+#ifdef WIN32
+BOOLEAN NTAPI SystemFunction036(PVOID RandomBuffer, ULONG RandomBufferLength);
+#endif
+
 // https://prng.di.unimi.it/#remarks
 static NV
 uint64_to_NV(U64 num)
@@ -95,10 +99,30 @@ Perl_seed(pTHX)
     PERL_ARGS_ASSERT_SEED;
 
    /*
-    * Attempt to read from /dev/urandom to generate a pseudo-random number.
-    * If that does not work, or it is unavailable, we fall back to gathering
+	* Attempt to read from the OS CSPRNG to generate a pseudo-random number.
+    * On Windows this is RtlGenRandom (SystemFunction036 from advapi32.dll);
+    * on Unix-like systems we try getentropy() and then /dev/urandom. If
+    * none of those are available or they fail, we fall back to gathering
     * several state variables and hashing them into a seed value.
     */
+
+    U64 seed;
+
+#ifdef HAS_GETENTROPY
+    U8 ok = (getentropy(&seed, sizeof(seed)) == 0);
+    /* PerlIO_printf(Perl_debug_log, "Entropy: OK:%i Seed:%lu\n", ok, seed); */
+    if (ok) {
+        return seed;
+    }
+#endif
+
+#ifdef WIN32
+    /* Ask the Windows OS CSPRNG (available since XP, already linked via
+     * advapi32) for seed material. */
+    if (SystemFunction036((PVOID)&seed, (ULONG)sizeof(seed))) {
+        return seed;
+    }
+#endif
 
 /* This test is an escape hatch, this symbol isn't set by Configure. */
 #ifndef PERL_NO_DEV_RANDOM
@@ -113,15 +137,6 @@ Perl_seed(pTHX)
 #  else
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
-#endif
-    U64 seed;
-
-#ifdef HAS_GETENTROPY
-    U8 ok = (getentropy(&seed, sizeof(seed)) == 0);
-    /* PerlIO_printf(Perl_debug_log, "Entropy: OK:%i Seed:%lu\n", ok, seed); */
-    if (ok) {
-        return seed;
-    }
 #endif
 
     int fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
