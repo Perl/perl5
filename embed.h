@@ -206,7 +206,6 @@
 # define doing_taint                            Perl_doing_taint
 # define doref(a,b,c)                           Perl_doref(aTHX_ a,b,c)
 # define dounwind(a)                            Perl_dounwind(aTHX_ a)
-# define dowantarray()                          Perl_dowantarray(aTHX)
 # define dump_all()                             Perl_dump_all(aTHX)
 # define dump_eval()                            Perl_dump_eval(aTHX)
 # define dump_form(a)                           Perl_dump_form(aTHX_ a)
@@ -237,9 +236,6 @@
 # define get_cv(a,b)                            Perl_get_cv(aTHX_ a,b)
 # define get_cvn_flags(a,b,c)                   Perl_get_cvn_flags(aTHX_ a,b,c)
 # define get_hv(a,b)                            Perl_get_hv(aTHX_ a,b)
-# define get_op_descs()                         Perl_get_op_descs(aTHX)
-# define get_op_names()                         Perl_get_op_names(aTHX)
-# define get_ppaddr()                           Perl_get_ppaddr(aTHX)
 # define get_sv(a,b)                            Perl_get_sv(aTHX_ a,b)
 # define get_vtbl(a)                            Perl_get_vtbl(aTHX_ a)
 # define getcwd_sv(a)                           Perl_getcwd_sv(aTHX_ a)
@@ -951,12 +947,6 @@
 #     define malloced_size                      Perl_malloced_size
 #   endif
 # endif
-# if !defined(NO_MATHOMS)
-#   define utf8_to_uvchr(a,b)                   Perl_utf8_to_uvchr(aTHX_ a,b)
-#   define utf8_to_uvuni(a,b)                   Perl_utf8_to_uvuni(aTHX_ a,b)
-#   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
-#   define uvuni_to_utf8(a,b)                   Perl_uvuni_to_utf8(aTHX_ a,b)
-# endif
 # if defined(PERL_ANY_COW)
 #   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
 # endif
@@ -1032,8 +1022,6 @@
 #   define force_locale_unlock()                Perl_force_locale_unlock(aTHX)
 #   define free_tied_hv_pool()                  Perl_free_tied_hv_pool(aTHX)
 #   define get_hash_seed(a)                     Perl_get_hash_seed(aTHX_ a)
-#   define get_no_modify()                      Perl_get_no_modify(aTHX)
-#   define get_opargs()                         Perl_get_opargs(aTHX)
 #   define gv_override(a,b)                     Perl_gv_override(aTHX_ a,b)
 #   define gv_setref(a,b)                       Perl_gv_setref(aTHX_ a,b)
 #   define gv_try_downgrade(a)                  Perl_gv_try_downgrade(aTHX_ a)

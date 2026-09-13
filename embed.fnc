@@ -1390,7 +1390,6 @@ p	|void	|do_vop 	|I32 optype				\
 				|NN SV *sv				\
 				|NN SV *left				\
 				|NN SV *right
-CDRdp	|U8	|dowantarray
 TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
 				|U32 seed
 TXop	|double |drand48_r	|NN perl_drand48_t *random_state
@@ -1525,11 +1524,6 @@ MTp	|int	|get_extended_os_errno
 p	|void	|get_hash_seed	|NN unsigned char * const seed_buffer
 AOdp	|HV *	|get_hv 	|NN const char *name			\
 				|I32 flags
-DPRp	|const char *|get_no_modify
-DPRp	|U32 *	|get_opargs
-ADPRdp	|char **|get_op_descs
-ADPRdp	|char **|get_op_names
-CDPRp	|PPADDR_t *|get_ppaddr
 ERXp	|SV *	|get_prop_definition					\
 				|const int table_index
 ERTXp	|const char * const *|get_prop_values				\
@@ -4091,10 +4085,6 @@ ATdip	|UV	|utf8n_to_uvchr_msgs					\
 				|const U32 flags			\
 				|NULLOK U32 *errors			\
 				|NULLOK AV **msgs
-CDbdp	|UV	|utf8n_to_uvuni |NN const U8 *s 			\
-				|STRLEN curlen				\
-				|NULLOK STRLEN *retlen			\
-				|U32 flags
 Adpx	|U8 *	|utf8_to_bytes	|NN U8 *s				\
 				|NN STRLEN *lenp
 Cp	|bool	|utf8_to_bytes_ |NN U8 **s_ptr				\
@@ -4138,8 +4128,6 @@ ATdmp	|bool	|utf8_to_uv	|SPTR const U8 * const s		\
 				|EPTRge const U8 * const e		\
 				|NN UV *cp_p				\
 				|NULLOK Size_t *advance_p
-ADbdp	|UV	|utf8_to_uvchr	|NN const U8 *s 			\
-				|NULLOK STRLEN *retlen
 ABMdip	|UV	|utf8_to_uvchr_buf					\
 				|SPTR const U8 *s			\
 				|EPTRge const U8 *send			\
@@ -4176,8 +4164,6 @@ ATdip	|UV	|utf8_to_uv_or_die					\
 				|SPTR const U8 * const s		\
 				|EPTRge const U8 *e			\
 				|NULLOK Size_t *advance_p
-CDbdp	|UV	|utf8_to_uvuni	|NN const U8 *s 			\
-				|NULLOK STRLEN *retlen
 : Used in perly.y
 p	|void	|utilize	|int aver				\
 				|I32 floor				\
@@ -4216,8 +4202,6 @@ Admp	|U8 *	|uv_to_utf8_msgs|NN U8 *d				\
 				|UV uv					\
 				|UV flags				\
 				|NULLOK HV **msgs
-CDbp	|U8 *	|uvuni_to_utf8	|NN U8 *d				\
-				|UV uv
 EXdpx	|bool	|validate_proto |NN SV *name				\
 				|NULLOK SV *proto			\
 				|bool warn				\
