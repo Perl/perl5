@@ -9367,9 +9367,16 @@ while test "$cont"; do
 		;;
 	*)  maildomain="$MAILDOMAIN";;
 	esac
+	dflt=''
+	case "$mydomain" in
+		'.(none)'|.nonet) dflt=`git config user.email 2>/dev/null`;;
+	esac
+	case "$dflt" in
+		'') dflt="$cf_by@$maildomain";;
+	esac
 	case "$cf_email" in
-	'') dflt="$cf_by@$maildomain";;
-	*)  dflt="$cf_email";;
+		'') :;;
+		*) dflt="$cf_email";;
 	esac
 	rp='What is your e-mail address?'
 	. ./myread
