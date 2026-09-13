@@ -209,10 +209,10 @@ Perl_rpp_free_2_(pTHX_ SV *const sv1,  SV *const sv2,
     else
         Perl_sv_free2(aTHX_ sv2, rc2);
 #else
-    PERL_UNUSED_VAR(sv1);
-    PERL_UNUSED_VAR(sv2);
-    PERL_UNUSED_VAR(rc1);
-    PERL_UNUSED_VAR(rc2);
+    PERL_UNUSED_ARG(sv1);
+    PERL_UNUSED_ARG(sv2);
+    PERL_UNUSED_ARG(rc1);
+    PERL_UNUSED_ARG(rc2);
 #endif
 }
 
