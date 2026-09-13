@@ -232,6 +232,9 @@
 :
 :   UNUSED  Declare that this parameter is unused by the called function.  See
 :           the "UNUSED" entry in perlintern.
+:   DEBUG_ONLY  Declare that this parameter is unused by the called function
+:	    except in DEBUGGING builds.  See the "DEBUG_ONLY" entry in
+:	    perlintern.
 :
 : *** Pointer parameter constraint modifiers
 :
@@ -5010,7 +5013,7 @@ S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
 So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
-				|const line_t caller_line
+				|const line_t caller_line DEBUG_ONLY
 S	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
 				|NULLOK char **buf			\
@@ -5030,7 +5033,7 @@ S	|void	|set_save_buffer_min_size				\
 So	|const char *|toggle_locale_i					\
 				|const locale_category_index cat_index	\
 				|NN const char *new_locale		\
-				|const line_t caller_line
+				|const line_t caller_line DEBUG_ONLY
 #   if defined(DEBUGGING)
 RS	|char * |my_setlocale_debug_string_i				\
 				|const locale_category_index cat_index	\

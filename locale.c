@@ -4722,7 +4722,7 @@ S_my_setlocale_debug_string_i(pTHX_
 static const char *
 S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                         const char * new_locale,
-                        const line_t caller_line)
+                        const line_t caller_line DEBUG_ONLY)
 {
     PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
 
@@ -4773,17 +4773,12 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                            category_names[cat_index], new_locale));
 
     return locale_to_restore_to;
-
-#  ifndef DEBUGGING
-    PERL_UNUSED_ARG(caller_line);
-#  endif
-
 }
 
 static void
 S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
                                  const char * restore_locale,
-                                 const line_t caller_line)
+                                 const line_t caller_line DEBUG_ONLY)
 {
     PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
 
@@ -4809,11 +4804,6 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
     void_setlocale_i_with_caller(cat_index, restore_locale,
                                   __FILE__, caller_line);
     TOGGLE_UNLOCK(cat_index);
-
-#  ifndef DEBUGGING
-    PERL_UNUSED_ARG(caller_line);
-#  endif
-
 }
 
 #endif
