@@ -364,16 +364,6 @@ TODO: {
 }
 
 TODO: {
-    local $::TODO = 'GH 20491';
-    use experimental 'defer';
-    my $deferred = 0;
-    do {
-        defer { $deferred = 1 };
-    };
-    is($deferred, 1, 'defer in single-expression do block runs when exiting block; GH 20491');
-}
-
-TODO: {
     local $::TODO = 'GH 21827';
     my $test = 18446744073709550592;
     my @warnings = capture_warnings(sub { localtime $test });

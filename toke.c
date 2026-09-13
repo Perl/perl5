@@ -8655,6 +8655,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_defer:
         ck_warner_d(packWARN(WARN_EXPERIMENTAL__DEFER), "defer is experimental");
+        PL_hints |= HINT_BLOCK_SCOPE;
         PREBLOCK(KW_DEFER);
 
     case KEY_do:

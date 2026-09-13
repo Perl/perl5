@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 33;
+plan 34;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -344,3 +344,11 @@ no warnings 'experimental::defer';
         "Got expected exception: can't goto out of defer block");
 }
 
+# [GH #20491]
+{
+    my $deferred = 0;
+    do {
+        defer { $deferred = 1 };
+    };
+    is($deferred, 1, 'defer in single-expression do block runs when exiting block; GH 20491');
+}
