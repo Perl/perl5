@@ -610,10 +610,10 @@ you need to do,
 like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be called once as a class method for every package that has it
 defined (or inherits it).  It will be called in the context of the new thread,
-so all modifications are made in the new area.  Currently CLONE is called with
-no parameters other than the invocant package name, but code should not assume
-that this will remain unchanged, as it is likely that in future extra parameters
-will be passed in to give more information about the state of cloning.
+so all modifications are made in the new area.  CLONE is called with
+the invocant package name and a C<CLONE_PARAMS*> cast into an integer. But in
+older releases no such argument was passed and code may have to take into
+account both cases (e.g. by giving it a default value).
 
 If you want to CLONE all objects you will need to keep track of them per
 package. This is simply done using a hash and Scalar::Util::weaken().
