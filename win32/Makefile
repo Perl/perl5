@@ -1310,17 +1310,17 @@ install : all installbare installhtml
 
 installbare : utils ..\pod\perltoc.pod
 	$(PERLEXE) ..\installperl
-	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
-	if exist $(PERLEXESTATIC) $(XCOPY) $(PERLEXESTATIC) $(INST_BIN)\*.*
-	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	if exist ..\perl*.pdb $(XCOPY) ..\perl*.pdb $(INST_BIN)\*.*
-	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
+	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) "$(INST_BIN)\*.*"
+	if exist $(PERLEXESTATIC) $(XCOPY) $(PERLEXESTATIC) "$(INST_BIN)\*.*"
+	$(XCOPY) $(GLOBEXE) "$(INST_BIN)\*.*"
+	if exist ..\perl*.pdb $(XCOPY) ..\perl*.pdb "$(INST_BIN)\*.*"
+	$(XCOPY) bin\*.bat "$(INST_SCRIPT)\*.*"
 
 installhtml : doc
-	$(RCOPY) $(HTMLDIR)\*.* $(INST_HTML)\*.*
+	$(RCOPY) $(HTMLDIR)\*.* "$(INST_HTML)\*.*"
 
 inst_lib : $(CONFIGPM)
-	$(RCOPY) ..\lib $(INST_LIB)\*.*
+	$(RCOPY) ..\lib "$(INST_LIB)\*.*"
 
 $(UNIDATAFILES) ..\pod\perluniprops.pod : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
 	cd ..\lib\unicore && \
