@@ -13295,6 +13295,8 @@ Perl_ck_anoncode(pTHX_ OP *o)
 static void
 S_io_hints(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_IO_HINTS;
+
 #if O_BINARY != 0 || O_TEXT != 0
     HV * const table =
         PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
@@ -13332,7 +13334,6 @@ S_io_hints(pTHX_ OP *o)
         }
     }
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(o);
 #endif
 }
@@ -13360,7 +13361,7 @@ Perl_ck_backtick(pTHX_ OP *o)
         op_free(o);
         return newop;
     }
-    S_io_hints(aTHX_ o);
+    io_hints(o);
     return o;
 }
 
@@ -14824,7 +14825,7 @@ Perl_ck_open(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_OPEN;
 
-    S_io_hints(aTHX_ o);
+    io_hints(o);
     {
          /* In case of three-arg dup open remove strictness
           * from the last arg if it is a bareword. */
