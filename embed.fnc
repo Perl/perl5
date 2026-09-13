@@ -1091,6 +1091,8 @@ Adfpt	|void	|ck_warner	|U32 err				\
 Adfpt	|void	|ck_warner_d	|U32 err				\
 				|NN const char *pat			\
 				|...
+Adpx	|void	|class_method_parse_post_blockstart			\
+				|NN CV *cv
 
 : Some static inline functions need predeclaration because they are used
 : inside other static inline functions.
@@ -4612,8 +4614,6 @@ Cp	|void	|class_apply_attributes 				\
 Cp	|void	|class_apply_field_attributes				\
 				|NN PADNAME *pn 			\
 				|NULLOK OP *attrlist
-Cp	|void	|class_declare_padvars					\
-				|NN CV *cv
 Cp	|void	|class_prepare_initfield_parse
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv
