@@ -233,6 +233,15 @@ for my $char ("٠", "٥", "٩") {
          "Can use various flags in a nested call");
 }
 
+{   # GH #24238
+    my $RE_CLASS_LOWER = qr/(?[ [a-z] ])/;
+    my $RE_CLASS_UPPER = qr/(?[ [A-Z] ])/;
+    my $RE_CLASS_DIGIT = qr/(?[ [0-9] ])/;
+    like ("y",
+          qr/(?[ $RE_CLASS_LOWER + $RE_CLASS_UPPER + $RE_CLASS_DIGIT ])/x,
+          "/x modifier works with nested sets");
+}
+
 done_testing();
 
 1;
