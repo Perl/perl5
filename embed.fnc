@@ -5291,6 +5291,8 @@ i	|OP *	|newMETHOP_internal					\
 				|I32 flags				\
 				|NULLOK OP *dynamic_meth		\
 				|NULLOK SV * const_meth
+S	|OPSLAB *|new_slab	|OPSLAB *head NULLOK			\
+				|size_t sz
 RS	|OP *	|no_fh_allowed	|NN OP *o
 i	|OP *	|op_integerize	|NN OP *o
 Ti	|U16	|opslab_slot_offset					\
