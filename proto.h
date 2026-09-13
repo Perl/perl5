@@ -13533,6 +13533,15 @@ S_inplace_aassign(pTHX_ OP *o)
     } STMT_END
 
 static bool
+S_is_dollar_bracket(pTHX_ const OP * const o)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_IS_DOLLAR_BRACKET     \
+     STMT_START { Perl_assert_aTHX; assert(o);          \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+static bool
 S_is_dup_mode(const OP *o)
         Perl_attribute_nonnull(1);
 # define PERL_ARGS_ASSERT_IS_DUP_MODE           \

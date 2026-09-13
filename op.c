@@ -13422,10 +13422,11 @@ check_precedence_not_vs_cmp(pTHX_ const OP *const o)
 }
 
 PERL_STATIC_INLINE bool
-is_dollar_bracket(pTHX_ const OP * const o)
+S_is_dollar_bracket(pTHX_ const OP * const o)
 {
+    PERL_ARGS_ASSERT_IS_DOLLAR_BRACKET;
+
     const OP *kid;
-    PERL_UNUSED_CONTEXT;
     return o->op_type == OP_RV2SV && o->op_flags & OPf_KIDS
         && (kid = cUNOPx(o)->op_first)
         && kid->op_type == OP_GV
@@ -13456,11 +13457,11 @@ Perl_ck_cmp(pTHX_ OP *o)
         const OP *kid = cUNOPo->op_first;
         if (kid &&
             (
-                (   is_dollar_bracket(aTHX_ kid)
+                (   is_dollar_bracket(kid)
                  && OpSIBLING(kid) && OpSIBLING(kid)->op_type == OP_CONST
                 )
              || (   kid->op_type == OP_CONST
-                 && (kid = OpSIBLING(kid)) && is_dollar_bracket(aTHX_ kid)
+                 && (kid = OpSIBLING(kid)) && is_dollar_bracket(kid)
                 )
            )
         )

@@ -1521,6 +1521,7 @@
 #     define gen_constant_list(a)               S_gen_constant_list(aTHX_ a)
 #     define import_attributes_module(a,b,c)    S_import_attributes_module(aTHX_ a,b,c)
 #     define inplace_aassign(a)                 S_inplace_aassign(aTHX_ a)
+#     define is_dollar_bracket(a)               S_is_dollar_bracket(aTHX_ a)
 #     define is_dup_mode                        S_is_dup_mode
 #     define is_handle_constructor              S_is_handle_constructor
 #     define is_standard_filehandle_name        S_is_standard_filehandle_name
