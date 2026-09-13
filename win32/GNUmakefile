@@ -1860,7 +1860,7 @@ regen_headers regen-headers :
 
 # Requires Devel::Tokenizer::C 0.05 or newer in the installed Perl.
 regen_keywords regen-keywords :
-	cd .. && perl regen\keywords.pl
+	cd .. && perl.exe regen\keywords.pl
 
 regen_invlist regen-invlist :
 	cd .. && perl.exe -Ilib regen\mk_invlists.pl
