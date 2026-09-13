@@ -1287,13 +1287,19 @@ per-thread locales on some platforms, like most *BSD-based ones, is so
 buggy that the perl hints files for them deliberately turn off the
 possibility of using them.
 
-The converse is that on systems with only a global locale, having
-different threads using different locales is not likely to work well;
-and changing the locale is dangerous, and without use of the locking
-macros, often leads to crashes.
+Starting in Perl v5.46, it is possible to Configure perl to emulate
+thread-safe locales on systems lacking them.  This incurs a performance
+penalty, and it is critical that all functions called that access the
+locale be wrapped with the mutex locking macros in
+F<perl_lock_definitions.h>.
 
-Perl has extensive code to work as well as possible on both types of
-systems.  You should always use C<Perl_setlocale()> to change and query
+On systems with only a global locale and not having the thread-safe
+emulation enabled, having different threads using different locales is
+not likely to work well; and changing the locale is dangerous, and
+without use of the locking macros, often leads to crashes.
+
+Perl has extensive code to work as well as possible on each type of
+system.  You should always use C<Perl_setlocale()> to change and query
 the locale, as it portably works across the range of possibilities.
 
 =head1 SEE ALSO

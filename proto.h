@@ -9017,6 +9017,30 @@ Perl_dump_sv_child(pTHX_ SV *sv)
      STMT_START { Perl_assert_aTHX; assert(sv); } STMT_END
 
 #endif
+#if defined(EMULATE_THREAD_SAFE_LOCALES)
+PERL_CALLCONV void
+Perl_category_lock(pTHX_ const UV mask, const char *file, const line_t caller_line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2);
+# define PERL_ARGS_ASSERT_CATEGORY_LOCK         \
+     STMT_START { Perl_assert_aTHX; assert(file); } STMT_END
+
+PERL_CALLCONV void
+Perl_category_unlock(pTHX_ const UV mask, const char *file, const line_t caller_line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2);
+# define PERL_ARGS_ASSERT_CATEGORY_UNLOCK       \
+     STMT_START { Perl_assert_aTHX; assert(file); } STMT_END
+
+# if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE int
+Perl_posix_LC_foo(pTHX_ const int c, const U8 classnum)
+        Perl_attribute_nonnull_aTHX;
+#   define PERL_ARGS_ASSERT_POSIX_LC_FOO        \
+     STMT_START { Perl_assert_aTHX; } STMT_END
+
+# endif
+#endif /* defined(EMULATE_THREAD_SAFE_LOCALES) */
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 PERL_CALLCONV I32
 Perl_my_chsize(pTHX_ int fd, Off_t length)
@@ -11061,6 +11085,16 @@ S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const
          STMT_START { Perl_assert_aTHX; } STMT_END
 
 #   endif
+#   if   defined(EMULATE_THREAD_SAFE_LOCALES) || \
+       ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
+static void
+S_update_PL_curlocales_i(pTHX_ const locale_category_index index, const char *new_locale, const line_t caller_line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2);
+#     define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
+         STMT_START { Perl_assert_aTHX; assert(new_locale); } STMT_END
+
+#   endif
 #   if   defined(HAS_LOCALECONV) && \
        ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
 static void
@@ -11205,9 +11239,9 @@ S_update_PL_curlocales_i(pTHX_ const locale_category_index index, const char *ne
            STMT_START { Perl_assert_aTHX; assert(new_locale); } STMT_END
 
 #     endif
-#   elif  defined(USE_LOCALE_THREADS) &&                  \
-         !defined(USE_THREAD_SAFE_LOCALE) &&              \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
+#   elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \
+          defined(USE_LOCALE_THREADS) &&          \
+         !defined(USE_THREAD_SAFE_LOCALE) /* &&
          !defined(USE_POSIX_2008_LOCALE) */
 static bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char *locale)
@@ -11222,10 +11256,10 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale)
 #     define PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R \
          STMT_START { Perl_assert_aTHX; } STMT_END
 
-#   endif /*  defined(USE_LOCALE_THREADS) &&
+#   endif /* !defined(EMULATE_THREAD_SAFE_LOCALES) &&
+              defined(USE_LOCALE_THREADS) &&
              !defined(USE_POSIX_2008_LOCALE) &&
-             !defined(USE_THREAD_SAFE_LOCALE) &&
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) */
+             !defined(USE_THREAD_SAFE_LOCALE) */
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 static wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char *byte_string);
