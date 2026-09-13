@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 34;
+plan 36;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -351,4 +351,41 @@ no warnings 'experimental::defer';
         defer { $deferred = 1 };
     };
     is($deferred, 1, 'defer in single-expression do block runs when exiting block; GH 20491');
+}
+
+# [GH #19240]
+{
+  our $gotostr;
+  sub gotofoo {
+    defer {
+      goto ham;
+      $gotostr .= "peas\n";
+      ham:
+      $gotostr .= "ham\n";
+    }
+    $gotostr .= "uh oh\n";
+  }
+  gotofoo();
+
+  is($gotostr, "uh oh\nham\n", 'goto within defer block, with trailing code present');
+
+  # With a twist: hopefully a +1 context level
+  sub goto2foo {
+    defer {
+      if ($gotostr) {
+        $gotostr .= "pineapple\n";
+        goto ham;
+        $gotostr .= "peas\n";
+      } else {
+        ham:
+        $gotostr .= "poppedecorn\n";
+      }
+    }
+    $gotostr .= "spam\n";
+
+  }
+  goto2foo();
+  is($gotostr, "uh oh\nham\nspam\npineapple\npoppedecorn\n",
+          'goto deep within defer block, with trailing code present');
+
 }

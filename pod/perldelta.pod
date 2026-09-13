@@ -534,6 +534,10 @@ needed if the call site has scalar context.
 
 [GH #23867]
 
+=item *
+
+C<goto> within a defer block should now work more consistently. [GH #19240]
+
 =back
 
 =head1 Known Problems
