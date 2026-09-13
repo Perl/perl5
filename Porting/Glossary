@@ -545,6 +545,21 @@ d_builtin_mul_overflow (d_builtin_overflow.U):
 	indicates that the compiler supports __builtin_mul_overflow(x,y,&z)
 	for safely multiplying x and y into z while checking for overflow.
 
+d_builtin_popcount (d_builtin_popcount.U):
+	This variable conditionally defines HAS_BUILTIN_POPCOUNT, which
+	indicates that the compiler supports __builtin_popcount(x) for
+	counting the number of bits set in an unsigned int x.
+
+d_builtin_popcountl (d_builtin_popcount.U):
+	This variable conditionally defines HAS_BUILTIN_POPCOUNTL, which
+	indicates that the compiler supports __builtin_popcountl(x) for
+	counting the number of bits set in an unsigned long x.
+
+d_builtin_popcountll (d_builtin_popcount.U):
+	This variable conditionally defines HAS_BUILTIN_POPCOUNTLL, which
+	indicates that the compiler supports __builtin_popcountll(x) for
+	counting the number of bits set in an unsigned long long x.
+
 d_builtin_sub_overflow (d_builtin_overflow.U):
 	This variable conditionally defines HAS_BUILTIN_SUB_OVERFLOW, which
 	indicates that the compiler supports __builtin_sub_overflow(x,y,&z)
@@ -1179,6 +1194,11 @@ d_gethostprotos (d_gethostprotos.U):
 d_getitimer (d_getitimer.U):
 	This variable conditionally defines the HAS_GETITIMER symbol, which
 	indicates to the C program that the getitimer() routine is available.
+
+d_getlocalename_l (d_newlocale.U):
+	This variable conditionally defines the HAS_GETLOCALENAME_L symbol,
+	which indicates to the C program that the getlocalename_l() routine is
+	available to return the name of the locale for a category.
 
 d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
@@ -5791,6 +5811,10 @@ usesitecustomize (d_sitecustomize.U):
 usesocks (usesocks.U):
 	This variable conditionally defines the USE_SOCKS symbol,
 	and indicates that Perl should be built to use SOCKS.
+
+usetaint (usetaint.U):
+	This setting controls whether support for taint mode (perl -T)
+	is compiled into the perl binary.
 
 usethreads (usethreads.U):
 	This variable conditionally defines the USE_THREADS symbol,

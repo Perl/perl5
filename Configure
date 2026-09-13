@@ -401,6 +401,9 @@ d_builtin_expect=''
 d_builtin_add_overflow=''
 d_builtin_mul_overflow=''
 d_builtin_sub_overflow=''
+d_builtin_popcount=''
+d_builtin_popcountl=''
+d_builtin_popcountll=''
 d_c99_variadic_macros=''
 d_casti32=''
 castflags=''
@@ -11668,6 +11671,90 @@ EOCP
 esac
 
 set d_builtin_expect
+eval $setvar
+$rm_try
+
+: Check if _builtin_popcount is supported by the compiler
+case "$d_builtin_popcount" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_popcount ..." >&4
+    cat >try.c <<'EOCP'
+int main(void) {
+    unsigned int x = 42;
+    const int phooey = __builtin_popcount(x);
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_popcount."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_popcount."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_popcount" ;;
+esac
+
+set d_builtin_popcount
+eval $setvar
+$rm_try
+
+: Check if _builtin_popcountl is supported by the compiler
+case "$d_builtin_popcountl" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_popcountl ..." >&4
+    cat >try.c <<'EOCP'
+int main(void) {
+    unsigned long x = 42;
+    const int phooey = __builtin_popcountl(x);
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_popcountl."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_popcountl."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_popcountl" ;;
+esac
+
+set d_builtin_popcountl
+eval $setvar
+$rm_try
+
+: Check if _builtin_popcountll is supported by the compiler
+case "$d_builtin_popcountll" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_popcountll ..." >&4
+    cat >try.c <<'EOCP'
+int main(void) {
+    unsigned long long x = 42;
+    const int phooey = __builtin_popcountll(x);
+    return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try; then
+        echo "Your C compiler supports __builtin_popcountll."
+        val="$define"
+    else
+        echo "Your C compiler doesn't seem to understand __builtin_popcountll."
+        val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_popcountll" ;;
+esac
+
+set d_builtin_popcountll
 eval $setvar
 $rm_try
 
@@ -25094,6 +25181,9 @@ d_builtin_add_overflow='$d_builtin_add_overflow'
 d_builtin_choose_expr='$d_builtin_choose_expr'
 d_builtin_expect='$d_builtin_expect'
 d_builtin_mul_overflow='$d_builtin_mul_overflow'
+d_builtin_popcount='$d_builtin_popcount'
+d_builtin_popcountl='$d_builtin_popcountl'
+d_builtin_popcountll='$d_builtin_popcountll'
 d_builtin_sub_overflow='$d_builtin_sub_overflow'
 d_c99_variadic_macros='$d_c99_variadic_macros'
 d_casti32='$d_casti32'
