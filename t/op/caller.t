@@ -315,10 +315,8 @@ sub dbdie {
 END
     "caller should not SEGV for eval '' stack frames";
 
-TODO: {
-    local $::TODO = 'RT #7165: line number should be consistent for multiline subroutine calls';
-    fresh_perl_is(<<'EOP', "6\n9\n", {}, 'RT #7165: line number should be consistent for multiline subroutine calls');
-      sub tagCall {
+fresh_perl_is(<<'EOP', "6\n9\n", {}, 'RT #7165: line number should be consistent for multiline subroutine calls');
+    sub tagCall {
         my ($package, $file, $line) = caller;
         print "$line\n";
       }
@@ -329,7 +327,6 @@ TODO: {
       tagCall
       sub {};
 EOP
-}
 
 $::testing_caller = 1;
 
