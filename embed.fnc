@@ -3546,6 +3546,7 @@ Adp	|int	|sv_isa 	|NULLOK SV *sv				\
 				|NN const char * const name
 ARdp	|bool	|sv_isa_sv	|NN SV *sv				\
 				|NN SV *namesv
+Aip	|bool	|sv_isbool	|const SV *sv NN
 Adp	|int	|sv_isobject	|NULLOK SV *sv
 Adip	|IV	|SvIV		|NN SV *sv
 Cmp	|IV	|sv_2iv 	|NN SV *sv
