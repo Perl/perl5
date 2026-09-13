@@ -22,16 +22,56 @@ my $c = open_new('keywords.c', '>',
 
 my %by_strength;
 
+# The symbols in this file are generally limited to the perl core
+print $h "#ifdef PERL_CORE\n\n";
+
 my $keynum = 0;
+my %needs_cpp_condition;    # Keyword needs #if's surrounding it
+my %comments;
 while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    my ($strength, $keyword) = /^([- +])([A-Z_a-z2]+)/;
+    my $want_exported = s/\*//g;
+    my ($strength, $keyword, $condition, $comment) =
+                                    m/ ^
+                                       ( [- +] )        # Strength
+                                       ( [A-Z_a-z2]+ )  # Keyword
+                                       (?: \s+ (.*) )?? # Cpp conditions
+                                       \s*
+                                       (?: \# \s* (.+) )?? # Comment
+                                       \s* \z
+                                     /x;
     die "Bad line '$_'" unless defined $strength;
-    print $h tab(5, "#define KEY_$keyword"), $keynum++, "\n";
-    push @{$by_strength{$strength}}, $keyword;
+
+    my $define_indent = "  ";
+
+    # We wrap exported symbols with #endif ... #ifdef PERL_CORE.  Outdent them
+    # as well
+    if ($want_exported) {
+        print $h "\n#endif\n\n" if $want_exported;
+        $define_indent = "";
+    }
+
+    print $h tab(5, "#${define_indent}define KEY_$keyword"),
+             $keynum++,
+             ($comment) ? "\t/* $comment */" : "",
+             "\n";
+    print $h "\n#ifdef PERL_CORE\n\n" if $want_exported;
+
+    if (defined $condition) {
+        $needs_cpp_condition{$keyword} = {
+                                           condition => $condition,
+                                           strength  => $strength,
+                                         };
+    }
+    else {
+        push @{$by_strength{$strength}}, $keyword;
+    }
+    $comments{$keyword} = $comment if defined $comment;
 }
+
+print $h "\n#endif\n";
 
 # If this hash changes, make sure the equivalent hash in
 # lib/B/Deparse.pm (%feature_keywords) is also updated.
@@ -61,7 +101,9 @@ my %feature_kw = (
     all       => 'keyword_all',
 );
 
-my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
+my %neg = map { ($_ => 1) } @{$by_strength{'-'}},
+                            grep { ($needs_cpp_condition{$_}{strength} eq '-')
+                                 } keys %needs_cpp_condition;
 
 my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
                                  TokenString   => 'name',
@@ -70,6 +112,8 @@ my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
                                 );
 
 $t->add_tokens(@{$by_strength{'+'}}, @{$by_strength{'-'}}, 'elseif');
+$t->add_tokens([ $_ ], $needs_cpp_condition{$_}{condition})
+                                                for keys %needs_cpp_condition;
 
 my $switch = $t->generate(Indent => '  ');
 
@@ -94,7 +138,7 @@ END
 sub perl_keyword
 {
   my $k = shift;
-  my $sign = $pos{$k} ? '' : '-';
+  my $sign = $neg{$k} ? '-' : '';
 
   if ($k eq 'elseif') {
     return <<END;
@@ -114,10 +158,26 @@ END
 
 read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 
+# Syntax of DATA is
+# column 1
+#   Optional '*' meaning symbol needs to be visible outside core; followed by
+#   the strength:
+#       -       means keyword.c returns the negative of the keyword value
+#       +       means keyword.c returns the keyword value as-is
+#       blank   means keyword.c returns the keyword value as-is, and the item
+#               is not actually a keyword in the traditional sense, but has
+#               some special meaning to some code.
+# column 2 up to line end or a blank
+#   keyword name
+# columns following any blanks terminating column 2 up to any '#'
+#   optional C preprocessor condition that restricts the keyword's
+#   availability
+# columns beginning with a '#' (following \s*)
+#   optional comment
 
 __END__
 
- NULL
+ NULL  # Placeholder for the default return of 0
 -__CLASS__
 +__DATA__
 +__END__
@@ -132,7 +192,7 @@ __END__
 +DESTROY
 +END
 +INIT
-+UNITCHECK
+*+UNITCHECK
 -abs
 -accept
 -alarm
@@ -226,6 +286,7 @@ __END__
 -getservent
 -getsockname
 -getsockopt
+ getspnam   defined(USE_REENTRANT_API) && defined(HAS_GETSPNAM_R)
 +given
 +glob
 -gmtime
@@ -262,7 +323,7 @@ __END__
 -msgget
 -msgrcv
 -msgsnd
-+my
+*+my
 -ne
 -neu
 +next
@@ -273,7 +334,7 @@ __END__
 -opendir
 -or
 -ord
-+our
+*+our
 -pack
 +package
 -pipe
@@ -331,6 +392,7 @@ __END__
 -shmread
 -shmwrite
 -shutdown
+* sigvar     # fake keyword representing a signature var
 -sin
 -sleep
 -socket

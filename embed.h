@@ -42,8 +42,6 @@
 #   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
-#   undef KEY_equ
-#   undef KEY_neu
 #   undef MGv2f_SCALARVALUE_AUTOPROPAGATE
 #   undef MGv2f_WITH_KEYHEK
 #   undef NETDB_R_OBSOLETE

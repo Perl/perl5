@@ -404,19 +404,7 @@ Perl_reentrant_retry(const char *f, ...)
 
 #endif
 
-    if (key == 0) {
-
-#ifdef HAS_GETSPNAM_R
-
-        /* This is a #define as has no corresponding keyword */
-        if (strEQ(f, "getspnam")) {
-            key = KEY_getspnam;
-        }
-
-#endif
-
-    }
-    else if (key < 0) {
+    if (key < 0) {
         key = -key;
     }
 
