@@ -6886,9 +6886,10 @@ Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs
 #if defined(PERL_USE_VALUEMAGIC)
 
 static bool
-S_filter_mgv2_scalarvalue(pTHX_ MAGIC *mg, const void *key)
+S_filter_mgv2_scalarvalue(pTHX_ MAGIC *mg, const void *key UNUSED)
 {
-    PERL_UNUSED_ARG(key);
+    PERL_ARGS_ASSERT_FILTER_MGV2_SCALARVALUE;
+
     return MgFUNCS(mg)->shape == MGv2s_SCALARVALUE;
 }
 
