@@ -18337,6 +18337,15 @@ Perl_single_1bit_pos32(U32 word)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SINGLE_1BIT_POS32
 
+PERL_STATIC_INLINE bool
+Perl_sv_isbool(pTHX_ const SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_SV_ISBOOL             \
+    STMT_START { Perl_assert_aTHX; assert(sv);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 # define PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC  \
     STMT_START { assert(sv); } STMT_END
 
