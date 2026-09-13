@@ -6086,6 +6086,8 @@ EWi	|void	|capture_clear	|NN regexp *rex 			\
 				|U16 from_ix				\
 				|U16 to_ix				\
 				|NN const char *str
+ES	|void	|clear_offs_spare					\
+				|regexp *prog  NN
 ERS	|char * |find_byclass	|NN regexp *prog			\
 				|NN const regnode *c			\
 				|SPTR char *s				\
