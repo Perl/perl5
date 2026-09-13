@@ -19,6 +19,23 @@ BEGIN { # Get the time the script started running; do it at compilation to
     $start_time= time;
 }
 
+# Set MKTABLES_TIMING=1 to report the time used by the major phases.  Set it
+# to 2 to report the time used by each input file as well.  Keep this based on
+# the built-in times() function so it also works with miniperl.
+my $timing_level = $ENV{MKTABLES_TIMING} || 0;
+my @last_times = times;
+sub report_timing($) {
+    return unless $timing_level;
+
+    my @now = times;
+    my $user = $now[0] - $last_times[0];
+    my $system = $now[1] - $last_times[1];
+    printf STDERR "mktables timing: %-32s user %.2fs system %.2fs total %.2fs\n",
+                  $_[0], $user, $system, $user + $system;
+    @last_times = @now;
+}
+sub timing_files() { return $timing_level > 1; }
+
 require 5.010_001;
 use strict;
 use warnings;
@@ -1508,15 +1525,6 @@ sub file_exists ($file=undef) {   # platform independent '-e'.  This program int
     return -e internal_file_to_platform($file);
 }
 
-sub objaddr($addr) {
-    # Returns the address of the blessed input object.
-    # It doesn't check for blessedness because that would do a string eval
-    # every call, and the program is structured so that this is never called
-    # for a non-blessed object.
-
-    return pack 'J', refaddr $addr;
-}
-
 # These are used only if $annotate is true.
 # The entire range of Unicode characters is examined to populate these
 # after all the input has been processed.  But most can be skipped, as they
@@ -1874,7 +1882,7 @@ package main;
 
             # Use typeglob to give the anonymous subroutine the name we want
             *$destroy_name = sub ($self) {
-                my $addr = pack 'J', refaddr $self;
+                my $addr = refaddr $self;
 
                 $self->$destroy_callback if $destroy_callback;
                 foreach my $field (keys %{$package_fields{$package}}) {
@@ -1969,7 +1977,7 @@ package main;
                 # determine using 'eq' for scalars and '==' otherwise.
                 *$subname = sub ($self, $value) {
                     use strict "refs";
-                    my $addr = pack 'J', refaddr $self;
+                    my $addr = refaddr $self;
                     if (ref $value) {
                         return if grep { $value == $_ } @{$field->{$addr}};
                     }
@@ -2001,7 +2009,7 @@ package main;
                     no strict "refs";
                     *$subname = sub ($_addr) {
                         use strict "refs";
-                        my $addr = pack 'J', refaddr $_addr;
+                        my $addr = refaddr $_addr;
                         if (ref $field->{$addr} ne 'ARRAY') {
                             my $type = ref $field->{$addr};
                             $type = 'scalar' unless $type;
@@ -2022,7 +2030,7 @@ package main;
                     no strict "refs";
                     *$subname = sub ($addr) {
                         use strict "refs";
-                        return $field->{pack 'J', refaddr $addr};
+                        return $field->{refaddr $addr};
                     }
                 }
             }
@@ -2032,7 +2040,7 @@ package main;
                 *$subname = sub ($self, $value) {
                     use strict "refs";
                     # $self is $_[0]; $value is $_[1]
-                    $field->{pack 'J', refaddr $self} = $value;
+                    $field->{refaddr $self} = $value;
                     return;
                 }
             }
@@ -2337,7 +2345,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do{ my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Set defaults
         $handler{$addr} = \&main::process_generic_property_file;
@@ -2665,7 +2673,7 @@ END
         # flag to make sure extracted files are processed early
         state $seen_non_extracted = 0;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $file = $file{$addr};
 
@@ -2884,6 +2892,9 @@ END
         # Then any special post-file handler.
         &{$post_handler{$addr}}($self) if $post_handler{$addr};
 
+        my $timing_file = defined $file ? $file : '<internal>';
+        main::report_timing("input $timing_file") if main::timing_files();
+
         # If any errors have been accumulated, output the counts (as the first
         # error message in each class was output when it was encountered).
         if ($errors{$addr}) {
@@ -2923,7 +2934,7 @@ END
         # been added via insert_lines() will be returned in $_ before the file
         # is read again.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Here the file is open (or if the handle is not a ref, is an open
         # 'virtual' file).  Get the next line; any inserted lines get priority
@@ -3112,7 +3123,7 @@ END
         # insertion code will sort and coalesce the individual code points
         # into appropriate ranges.)
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         while (1) {
 
@@ -3187,7 +3198,7 @@ END
 #        # an each_line_handler() on the line.
 #
 #        my $self = shift;
-#        my $addr = pack 'J', refaddr $self;
+#        my $addr = refaddr $self;
 #
 #        foreach my $inserted_ref (@{$added_lines{$addr}}) {
 #            my ($adjusted, $line) = @{$inserted_ref};
@@ -3226,7 +3237,7 @@ END
         # Each inserted line is an array, with the first element being 0 to
         # indicate that this line hasn't been adjusted, and needs to be
         # processed.
-        push @{$added_lines{pack 'J', refaddr $self}}, map { [ 0, $_ ] } @lines;
+        push @{$added_lines{refaddr $self}}, map { [ 0, $_ ] } @lines;
         return;
     }
 
@@ -3248,7 +3259,7 @@ END
 
         # Each inserted line is an array, with the first element being 1 to
         # indicate that this line has been adjusted
-        push @{$added_lines{pack 'J', refaddr $self}}, map { [ 1, $_ ] } @lines;
+        push @{$added_lines{refaddr $self}}, map { [ 1, $_ ] } @lines;
         return;
     }
 
@@ -3258,7 +3269,7 @@ END
         # However, since these lines can be stacked up, the return is an array
         # of all these hashes.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # If not accepting a list return, just return the first one.
         return shift @{$missings{$addr}} unless wantarray;
@@ -3330,7 +3341,7 @@ END
         # Hangul syllables in this release only are something else, so if
         # using such data, we have to override it
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $object = main::property_ref($property{$addr});
         $object->add_map($FIRST_REMOVED_HANGUL_SYLLABLE,
@@ -3342,7 +3353,7 @@ END
     sub _insert_property_into_line($self) {
         # Add a property field to $_, if this file requires it.
 
-        my $property = $property{pack 'J', refaddr $self};
+        my $property = $property{refaddr $self};
         $_ =~ s/(;|$)/; $property$1/;
         return;
     }
@@ -3354,7 +3365,7 @@ END
         # only outputs the first instance of each message, incrementing a
         # count so the totals can be output at the end of the file.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $message = 'Unexpected line' unless $message;
 
@@ -3427,7 +3438,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do{my $anonymous_scalar}, $class;
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         $iterator{$addr} = 0;
 
         return $self unless @_;
@@ -3442,21 +3453,21 @@ sub trace { return main::trace(@_); }
     }
 
     sub append_default($self, $new_default, $eval) {
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Pushes a default setting to the current list
         push $class_defaults{$addr}->@*, [ $new_default, $eval ];
     }
 
     sub set_final_default($self, $new_default) {
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         $other_default{$addr} = $new_default;
     }
 
     sub get_next_defaults($self) {
         # Iterates and returns the next class of defaults.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         if ($iterator{$addr}++ < $class_defaults{$addr}->@*) {
             return $class_defaults{$addr}->[$iterator{$addr}-1]->@*;
         }
@@ -3509,7 +3520,7 @@ package Alias;
         my $class = shift;
 
         my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $name{$addr} = shift;
         $loose_match{$addr} = shift;
@@ -3547,45 +3558,43 @@ sub trace { return main::trace(@_); }
 
 {   # Closure
 
-    main::setup_package();
-
-    my %start;
-    main::set_access('start', \%start, 'r', 's');
-
-    my %end;
-    main::set_access('end', \%end, 'r', 's');
-
-    my %value;
-    main::set_access('value', \%value, 'r', 's');
-
-    my %type;
-    main::set_access('type', \%type, 'r');
-
-    my %standard_form;
-    # The value in internal standard form.  Defined only if the type is 0.
-    main::set_access('standard_form', \%standard_form);
+    # There are hundreds of thousands of Range objects.  Store their fields
+    # in the object itself.  Using the general inside-out implementation here
+    # requires several hashes and an address lookup for every field access.
+    use constant {
+        R_START => 0,
+        R_END => 1,
+        R_VALUE => 2,
+        R_TYPE => 3,
+        R_STANDARD_FORM => 4,
+    };
 
     # Note that if these fields change, the dump() method should as well
 
+    sub _new($class, $_addr, $_end, $value, $type) {
+        # Internal constructor for callers which already have all the fields.
+        return bless [ $_addr, $_end, $value, $type, undef ], $class;
+    }
+
     sub new($class, $_addr, $_end, @_args) {
-        my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
-
-        $start{$addr} = $_addr;
-        $end{$addr}   = $_end;
-
         my %args = @_args;
 
         my $value = delete $args{'Value'};  # Can be 0
         $value = "" unless defined $value;
-        $value{$addr} = $value;
-
-        $type{$addr} = delete $args{'Type'} || 0;
+        my $type = delete $args{'Type'} || 0;
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        return $self;
+        return $class->_new($_addr, $_end, $value, $type);
     }
+
+    sub start($self) { return $self->[R_START] }
+    sub set_start($self, $value) { $self->[R_START] = $value; return }
+    sub end($self) { return $self->[R_END] }
+    sub set_end($self, $value) { $self->[R_END] = $value; return }
+    sub value($self) { return $self->[R_VALUE] }
+    sub set_value($self, $value) { $self->[R_VALUE] = $value; return }
+    sub type($self) { return $self->[R_TYPE] }
 
     use overload
         fallback => 0,
@@ -3595,14 +3604,12 @@ sub trace { return main::trace(@_); }
     ;
 
     sub _operator_stringify($self, $other="", $reversed=0) {
-        my $addr = pack 'J', refaddr $self;
-
         # Output it like '0041..0065 (value)'
-        my $return = sprintf("%04X", $start{$addr})
+        my $return = sprintf("%04X", $self->[R_START])
                         .  '..'
-                        . sprintf("%04X", $end{$addr});
-        my $value = $value{$addr};
-        my $type = $type{$addr};
+                        . sprintf("%04X", $self->[R_END]);
+        my $value = $self->[R_VALUE];
+        my $type = $self->[R_TYPE];
         $return .= ' (';
         $return .= "$value";
         $return .= ", Type=$type" if $type != 0;
@@ -3618,35 +3625,30 @@ sub trace { return main::trace(@_); }
         # of writing there are 368676 non-special objects, but the standard
         # form is only requested for 22047 of them - ie about 6%.
 
-        my $addr = pack 'J', refaddr $self;
+        return $self->[R_STANDARD_FORM] if defined $self->[R_STANDARD_FORM];
 
-        return $standard_form{$addr} if defined $standard_form{$addr};
-
-        my $value = $value{$addr};
-        return $value if $type{$addr};
-        return $standard_form{$addr} = main::standardize($value);
+        my $value = $self->[R_VALUE];
+        return $value if $self->[R_TYPE];
+        return $self->[R_STANDARD_FORM] = main::standardize($value);
     }
 
     sub count($self) {
-        my $addr = pack 'J', refaddr $self;
-        return $end{$addr} - $start{$addr} + 1;
+        return $self->[R_END] - $self->[R_START] + 1;
     }
 
     sub dump($self, $indent) {
         # Human, not machine readable.  For machine readable, comment out this
         # entire routine and let the standard one take effect.
-        my $addr = pack 'J', refaddr $self;
-
         my $return = $indent
-                    . sprintf("%04X", $start{$addr})
+                    . sprintf("%04X", $self->[R_START])
                     . '..'
-                    . sprintf("%04X", $end{$addr})
-                    . " '$value{$addr}';";
-        if (! defined $standard_form{$addr}) {
-            $return .= "(type=$type{$addr})";
+                    . sprintf("%04X", $self->[R_END])
+                    . " '" . $self->[R_VALUE] . "';";
+        if (! defined $self->[R_STANDARD_FORM]) {
+            $return .= "(type=" . $self->[R_TYPE] . ")";
         }
-        elsif ($standard_form{$addr} ne $value{$addr}) {
-            $return .= "(standard '$standard_form{$addr}')";
+        elsif ($self->[R_STANDARD_FORM] ne $self->[R_VALUE]) {
+            $return .= "(standard '" . $self->[R_STANDARD_FORM] . "')";
         }
         return $return;
     }
@@ -3680,30 +3682,16 @@ sub trace { return main::trace(@_); }
     # simpler tests
     my $max_init = -2;
 
-    main::setup_package();
-
-    my %ranges;
-    # The list of ranges
-    main::set_access('ranges', \%ranges, 'readable_array');
-
-    my %max;
-    # The highest code point in the list.  This was originally a method, but
-    # actual measurements said it was used a lot.
-    main::set_access('max', \%max, 'r');
-
-    my %each_range_iterator;
-    # Iterator position for each_range()
-    main::set_access('each_range_iterator', \%each_range_iterator);
-
-    my %owner_name_of;
-    # Name of parent this is attached to, if any.  Solely for better error
-    # messages.
-    main::set_access('owner_name_of', \%owner_name_of, 'p_r');
-
-    my %_search_ranges_cache;
-    # A cache of the previous result from _search_ranges(), for better
-    # performance
-    main::set_access('_search_ranges_cache', \%_search_ranges_cache);
+    # Range lists are also common temporary objects.  As with Range objects,
+    # keeping the fields in the object avoids the general inside-out hashes
+    # and their cleanup.
+    use constant {
+        RL_RANGES => 0,
+        RL_MAX => 1,
+        RL_ITERATOR => 2,
+        RL_OWNER_NAME => 3,
+        RL_SEARCH_CACHE => 4,
+    };
 
     sub new {
         my $class = shift;
@@ -3723,27 +3711,37 @@ sub trace { return main::trace(@_); }
         # infinitely loop on this.
         return _union($class, $initialize, %args) if defined $initialize;
 
-        $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
-
         # Optional parent object, only for debug info.
-        $owner_name_of{$addr} = delete $args{'Owner'};
-        $owner_name_of{$addr} = "" if ! defined $owner_name_of{$addr};
+        my $owner_name = delete $args{'Owner'};
+        $owner_name = "" if ! defined $owner_name;
 
         # Stringify, in case it is an object.
-        $owner_name_of{$addr} = "$owner_name_of{$addr}";
+        $owner_name = "$owner_name";
 
         # This is used only for error messages, and so a colon is added
-        $owner_name_of{$addr} .= ": " if $owner_name_of{$addr} ne "";
+        $owner_name .= ": " if $owner_name ne "";
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        $max{$addr} = $max_init;
+        return bless [ [], $max_init, undef, $owner_name, 0 ], $class;
+    }
 
-        $_search_ranges_cache{$addr} = 0;
-        $ranges{$addr} = [];
+    sub ranges($self) {
+        return scalar $self->[RL_RANGES]->@* unless wantarray;
+        return $self->[RL_RANGES]->@*;
+    }
 
-        return $self;
+    sub max($self) { return $self->[RL_MAX] }
+    sub _owner_name_of($self) { return $self->[RL_OWNER_NAME] }
+
+    sub dump($self, $indent) {
+        return main::simple_dumper({
+            ranges => $self->[RL_RANGES],
+            max => $self->[RL_MAX],
+            each_range_iterator => $self->[RL_ITERATOR],
+            owner_name_of => $self->[RL_OWNER_NAME],
+            _search_ranges_cache => $self->[RL_SEARCH_CACHE],
+        }, $indent);
     }
 
     use overload
@@ -3754,10 +3752,8 @@ sub trace { return main::trace(@_); }
     ;
 
     sub _operator_stringify($self, $other="", $reversed=0) {
-        my $addr = pack 'J', refaddr $self;
-
-        return "Range_List attached to '$owner_name_of{$addr}'"
-                                                if $owner_name_of{$addr};
+        return "Range_List attached to '" . $self->[RL_OWNER_NAME] . "'"
+                                                if $self->[RL_OWNER_NAME];
         return "anonymous Range_List " . \$self;
     }
 
@@ -3819,7 +3815,7 @@ sub trace { return main::trace(@_); }
             if (! defined $arg) {
                 my $message = "";
                 if (defined $self) {
-                    $message .= $owner_name_of{pack 'J', refaddr $self};
+                    $message .= $self->[RL_OWNER_NAME];
                 }
                 Carp::my_carp_bug($message . "Undefined argument to _union.  No union done.");
                 return;
@@ -3829,7 +3825,7 @@ sub trace { return main::trace(@_); }
             my $type = ref $arg;
             if ($type eq 'ARRAY') {
                 foreach my $element (@$arg) {
-                    push @records, Range->new($element, $element);
+                    push @records, Range->_new($element, $element, "", 0);
                     $input_count++;
                 }
             }
@@ -3844,7 +3840,7 @@ sub trace { return main::trace(@_); }
             else {
                 my $message = "";
                 if (defined $self) {
-                    $message .= $owner_name_of{pack 'J', refaddr $self};
+                    $message .= $self->[RL_OWNER_NAME];
                 }
                 Carp::my_carp_bug($message . "Cannot take the union of a $type.  No union done.");
                 return;
@@ -3891,7 +3887,7 @@ sub trace { return main::trace(@_); }
     }
 
     sub range_count($self) {        # Return the number of ranges in the range list
-        return scalar @{$ranges{pack 'J', refaddr $self}};
+        return scalar @{$self->[RL_RANGES]};
     }
 
     sub min($self) {
@@ -3901,12 +3897,10 @@ sub trace { return main::trace(@_); }
         # and having to worry about changing it as ranges are added and
         # deleted.
 
-        my $addr = pack 'J', refaddr $self;
-
         # If the range list is empty, return a large value that isn't adjacent
         # to any that could be in the range list, for simpler tests
-        return $MAX_WORKING_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
-        return $ranges{$addr}->[0]->start;
+        return $MAX_WORKING_CODEPOINT + 2 unless scalar @{$self->[RL_RANGES]};
+        return $self->[RL_RANGES]->[0]->start;
     }
 
     sub contains($self, $codepoint) {
@@ -3922,7 +3916,7 @@ sub trace { return main::trace(@_); }
         #   range[$i-1]->end < $codepoint <= range[$i]->end
         # So is in the table if and only iff it is at least the start position
         # of range $i.
-        return 0 if $ranges{pack 'J', refaddr $self}->[$i]->start > $codepoint;
+        return 0 if $self->[RL_RANGES]->[$i]->start > $codepoint;
         return $i + 1;
     }
 
@@ -3932,7 +3926,7 @@ sub trace { return main::trace(@_); }
         return unless $i;
 
         # contains() returns 1 beyond where we should look
-        return $ranges{pack 'J', refaddr $self}->[$i-1];
+        return $self->[RL_RANGES]->[$i-1];
     }
 
     sub value_of($self, $codepoint) {
@@ -3958,10 +3952,8 @@ sub trace { return main::trace(@_); }
         #   range[$i-1]->end < $codepoint <= range[$i]->end
         # Returns undef if no such $i is possible (e.g. at end of table), or
         # if there is an error.
-        my $addr = pack 'J', refaddr $self;
-
-        return if $code_point > $max{$addr};
-        my $r = $ranges{$addr};                # The current list of ranges
+        return if $code_point > $self->[RL_MAX];
+        my $r = $self->[RL_RANGES];                # The current list of ranges
         my $range_list_size = scalar @$r;
         my $i;
 
@@ -3970,7 +3962,7 @@ sub trace { return main::trace(@_); }
         # Use the cached result as the starting guess for this one, because,
         # an experiment on 5.1 showed that 90% of the time the cache was the
         # same as the result on the next call (and 7% it was one less).
-        $i = $_search_ranges_cache{$addr};
+        $i = $self->[RL_SEARCH_CACHE];
         $i = 0 if $i >= $range_list_size;   # Reset if no longer valid (prob.
                                             # from an intervening deletion
         #local $to_trace = 1 if main::DEBUG;
@@ -3985,7 +3977,7 @@ sub trace { return main::trace(@_); }
         {
             $i++;
             trace "next \$i is correct: $i" if main::DEBUG && $to_trace;
-            $_search_ranges_cache{$addr} = $i;
+            $self->[RL_SEARCH_CACHE] = $i;
             return $i;
         }
 
@@ -4032,7 +4024,7 @@ sub trace { return main::trace(@_); }
                     $lower = $i;
                     next;
                 }
-                Carp::my_carp_bug("$owner_name_of{$addr}Can't find where the range ought to go.  No action taken.");
+                Carp::my_carp_bug("$self->[RL_OWNER_NAME]Can't find where the range ought to go.  No action taken.");
                 return;
             }
             $i = $temp;
@@ -4046,7 +4038,7 @@ sub trace { return main::trace(@_); }
 
         # Here we have found the offset.  Cache it as a starting point for the
         # next call.
-        $_search_ranges_cache{$addr} = $i;
+        $self->[RL_SEARCH_CACHE] = $i;
         return $i;
     }
 
@@ -4146,40 +4138,38 @@ sub trace { return main::trace(@_); }
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        my $addr = pack 'J', refaddr $self;
-
         if ($operation ne '+' && $operation ne '-') {
-            Carp::my_carp_bug("$owner_name_of{$addr}First parameter to _add_delete must be '+' or '-'.  No action taken.");
+            Carp::my_carp_bug("$self->[RL_OWNER_NAME]First parameter to _add_delete must be '+' or '-'.  No action taken.");
             return;
         }
         unless (defined $start && defined $end) {
-            Carp::my_carp_bug("$owner_name_of{$addr}Undefined start and/or end to _add_delete.  No action taken.");
+            Carp::my_carp_bug("$self->[RL_OWNER_NAME]Undefined start and/or end to _add_delete.  No action taken.");
             return;
         }
         unless ($end >= $start) {
-            Carp::my_carp_bug("$owner_name_of{$addr}End of range (" . sprintf("%04X", $end) . ") must not be before start (" . sprintf("%04X", $start) . ").  No action taken.");
+            Carp::my_carp_bug("$self->[RL_OWNER_NAME]End of range (" . sprintf("%04X", $end) . ") must not be before start (" . sprintf("%04X", $start) . ").  No action taken.");
             return;
         }
         #local $to_trace = 1 if main::DEBUG;
 
         if ($operation eq '-') {
             if ($replace != $IF_NOT_EQUIVALENT) {
-                Carp::my_carp_bug("$owner_name_of{$addr}Replace => \$IF_NOT_EQUIVALENT is required when deleting a range from a range list.  Assuming Replace => \$IF_NOT_EQUIVALENT.");
+                Carp::my_carp_bug("$self->[RL_OWNER_NAME]Replace => \$IF_NOT_EQUIVALENT is required when deleting a range from a range list.  Assuming Replace => \$IF_NOT_EQUIVALENT.");
                 $replace = $IF_NOT_EQUIVALENT;
             }
             if ($type) {
-                Carp::my_carp_bug("$owner_name_of{$addr}Type => 0 is required when deleting a range from a range list.  Assuming Type => 0.");
+                Carp::my_carp_bug("$self->[RL_OWNER_NAME]Type => 0 is required when deleting a range from a range list.  Assuming Type => 0.");
                 $type = 0;
             }
             if ($value ne "") {
-                Carp::my_carp_bug("$owner_name_of{$addr}Value => \"\" is required when deleting a range from a range list.  Assuming Value => \"\".");
+                Carp::my_carp_bug("$self->[RL_OWNER_NAME]Value => \"\" is required when deleting a range from a range list.  Assuming Value => \"\".");
                 $value = "";
             }
         }
 
-        my $r = $ranges{$addr};               # The current list of ranges
+        my $r = $self->[RL_RANGES];               # The current list of ranges
         my $range_list_size = scalar @$r;     # And its size
-        my $max = $max{$addr};                # The current high code point in
+        my $max = $self->[RL_MAX];                # The current high code point in
                                               # the list of ranges
 
         # Do a special case requiring fewer machine cycles when the new range
@@ -4187,7 +4177,7 @@ sub trace { return main::trace(@_); }
         # structured so this is common.
         if ($start > $max) {
 
-            trace "$owner_name_of{$addr} $operation", sprintf("%04X..%04X (%s) type=%d; prev max=%04X", $start, $end, $value, $type, $max) if main::DEBUG && $to_trace;
+            trace "$self->[RL_OWNER_NAME] $operation", sprintf("%04X..%04X (%s) type=%d; prev max=%04X", $start, $end, $value, $type, $max) if main::DEBUG && $to_trace;
             return if $operation eq '-'; # Deleting a non-existing range is a
                                          # no-op
 
@@ -4201,9 +4191,7 @@ sub trace { return main::trace(@_); }
                 || @{$r}[-1]->value ne $value # values differ, can't extend.
                 || @{$r}[-1]->type != $type # types differ, can't extend.
             ) {
-                push @$r, Range->new($start, $end,
-                                     Value => $value,
-                                     Type => $type);
+                push @$r, Range->_new($start, $end, $value, $type);
             }
             else {
 
@@ -4214,13 +4202,13 @@ sub trace { return main::trace(@_); }
             }
 
             # This becomes the new maximum.
-            $max{$addr} = $end;
+            $self->[RL_MAX] = $end;
 
             return;
         }
         #local $to_trace = 0 if main::DEBUG;
 
-        trace "$owner_name_of{$addr} $operation", sprintf("%04X", $start) . '..' . sprintf("%04X", $end) . " ($value) replace=$replace" if main::DEBUG && $to_trace;
+        trace "$self->[RL_OWNER_NAME] $operation", sprintf("%04X", $start) . '..' . sprintf("%04X", $end) . " ($value) replace=$replace" if main::DEBUG && $to_trace;
 
         # Here, the input range isn't after the whole rest of the range list.
         # Most likely 'splice' will be needed.  The rest of the routine finds
@@ -4290,10 +4278,10 @@ sub trace { return main::trace(@_); }
             # existing range -- add a span to fill the part that this new
             # range occupies
             if ($start < $r->[$i]->start) {
-                push @gap_list, Range->new($start,
-                                           main::min($end,
-                                                     $r->[$i]->start - 1),
-                                           Type => $type);
+                push @gap_list, Range->_new($start,
+                                            main::min($end,
+                                                      $r->[$i]->start - 1),
+                                            "", $type);
                 trace "gap before $r->[$i] [$i], will add", $gap_list[-1] if main::DEBUG && $to_trace;
             }
 
@@ -4311,9 +4299,9 @@ sub trace { return main::trace(@_); }
                 # different values or types
                 if ($r->[$j-1]->end + 1 != $r->[$j]->start) {
                     push @gap_list,
-                        Range->new($r->[$j-1]->end + 1,
-                                   $r->[$j]->start - 1,
-                                   Type => $type);
+                        Range->_new($r->[$j-1]->end + 1,
+                                    $r->[$j]->start - 1,
+                                    "", $type);
                     trace "gap between $r->[$j-1] and $r->[$j] [$j], will add: $gap_list[-1]" if main::DEBUG && $to_trace;
                 }
             }
@@ -4330,10 +4318,10 @@ sub trace { return main::trace(@_); }
             # that there is a gap that needs filling after the final such
             # range to the end of the input range
             if ($r->[$j-1]->end < $end) {
-                    push @gap_list, Range->new(main::max($start,
-                                                         $r->[$j-1]->end + 1),
-                                               $end,
-                                               Type => $type);
+                    push @gap_list, Range->_new(main::max($start,
+                                                          $r->[$j-1]->end + 1),
+                                                $end,
+                                                "", $type);
                     trace "gap after $r->[$j-1], will add $gap_list[-1]" if main::DEBUG && $to_trace;
             }
 
@@ -4360,7 +4348,7 @@ sub trace { return main::trace(@_); }
         if ($replace == $MULTIPLE_BEFORE || $replace == $MULTIPLE_AFTER) {
 
             if ($start != $end) {
-                Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the range ($start..$end) contains more than one code point.  No action taken.");
+                Carp::my_carp_bug("$self->[RL_OWNER_NAME]Can't cope with adding a multiple record when the range ($start..$end) contains more than one code point.  No action taken.");
                 return;
             }
 
@@ -4434,10 +4422,7 @@ sub trace { return main::trace(@_); }
             my @return = splice @$r,
                                 $i,
                                 0,
-                                Range->new($start,
-                                           $end,
-                                           Value => $value,
-                                           Type => $type);
+                                Range->_new($start, $end, $value, $type);
             if (main::DEBUG && $to_trace) {
                 trace "After splice:";
                 trace 'i-2=[', $i-2, ']', $r->[$i-2] if $i >= 2;
@@ -4659,10 +4644,9 @@ sub trace { return main::trace(@_); }
 
             # The result will fill in any gap, replacing both sides, and
             # create one large range.
-            @replacement = Range->new($r->[$i-1]->start,
-                                      $r->[$j+1]->end,
-                                      Value => $value,
-                                      Type => $type);
+            @replacement = Range->_new($r->[$i-1]->start,
+                                       $r->[$j+1]->end,
+                                       $value, $type);
         }
         else {
 
@@ -4715,19 +4699,16 @@ sub trace { return main::trace(@_); }
                 && $start > $r->[$i]->start && $start <= $r->[$i]->end)
             {
                 push @replacement,
-                    Range->new($r->[$i]->start,
-                               $start - 1,
-                               Value => $r->[$i]->value,
-                               Type => $r->[$i]->type);
+                    Range->_new($r->[$i]->start,
+                                $start - 1,
+                                $r->[$i]->value,
+                                $r->[$i]->type);
             }
 
             # In the case of an insert or change, but not a delete, we have to
             # put in the new stuff;  this comes next.
             if ($operation eq '+') {
-                push @replacement, Range->new($start,
-                                              $end,
-                                              Value => $value,
-                                              Type => $type);
+                push @replacement, Range->_new($start, $end, $value, $type);
             }
 
             trace "Range at $j is $r->[$j]" if main::DEBUG && $to_trace && $j != $i;
@@ -4742,10 +4723,10 @@ sub trace { return main::trace(@_); }
                 && $end < $r->[$j]->end)
             {
                 push @replacement,
-                    Range->new($end + 1,
-                               $r->[$j]->end,
-                               Value => $r->[$j]->value,
-                               Type => $r->[$j]->type);
+                    Range->_new($end + 1,
+                                $r->[$j]->end,
+                                $r->[$j]->value,
+                                $r->[$j]->type);
             }
         }
 
@@ -4781,41 +4762,57 @@ sub trace { return main::trace(@_); }
         # performance.
         if ($operation eq '-' && @return) {
             if (@$r) {
-                $max{$addr} = $r->[-1]->end;
+                $self->[RL_MAX] = $r->[-1]->end;
             }
             else {  # Now empty
-                $max{$addr} = $max_init;
+                $self->[RL_MAX] = $max_init;
             }
         }
         return @return;
     }
 
+    # Add a range after the current last range.  The caller must provide a
+    # range which is ordered after, and does not overlap, the existing list.
+    # This avoids the search and splice work needed by _add_delete().
+    sub _append_range($self, $start, $end, $value = "", $type = 0) {
+        my $r = $self->[RL_RANGES];
+
+        if (@$r
+            && $r->[-1]->end + 1 == $start
+            && $r->[-1]->value eq $value
+            && $r->[-1]->type == $type)
+        {
+            $r->[-1]->set_end($end);
+        }
+        else {
+            push @$r, Range->_new($start, $end, $value, $type);
+        }
+        $self->[RL_MAX] = $end;
+        return;
+    }
+
     sub reset_each_range($self) {  # reset the iterator for each_range();
-        undef $each_range_iterator{pack 'J', refaddr $self};
+        undef $self->[RL_ITERATOR];
         return;
     }
 
     sub each_range($self) {
         # Iterate over each range in a range list.  Results are undefined if
         # the range list is changed during the iteration.
-        my $addr = pack 'J', refaddr $self;
-
         return if $self->is_empty;
 
-        $each_range_iterator{$addr} = -1
-                                if ! defined $each_range_iterator{$addr};
-        $each_range_iterator{$addr}++;
-        return $ranges{$addr}->[$each_range_iterator{$addr}]
-                        if $each_range_iterator{$addr} < @{$ranges{$addr}};
-        undef $each_range_iterator{$addr};
+        $self->[RL_ITERATOR] = -1
+                                if ! defined $self->[RL_ITERATOR];
+        $self->[RL_ITERATOR]++;
+        return $self->[RL_RANGES]->[$self->[RL_ITERATOR]]
+                        if $self->[RL_ITERATOR] < @{$self->[RL_RANGES]};
+        undef $self->[RL_ITERATOR];
         return;
     }
 
     sub count($self) {        # Returns count of code points in range list
-        my $addr = pack 'J', refaddr $self;
-
         my $count = 0;
-        foreach my $range (@{$ranges{$addr}}) {
+        foreach my $range (@{$self->[RL_RANGES]}) {
             $count += $range->count;
         }
         return $count;
@@ -4826,17 +4823,15 @@ sub trace { return main::trace(@_); }
     }
 
     sub is_empty($self) { # Returns boolean as to if a range list is empty
-        return scalar @{$ranges{pack 'J', refaddr $self}} == 0;
+        return scalar @{$self->[RL_RANGES]} == 0;
     }
 
     sub hash($self) {
         # Quickly returns a scalar suitable for separating tables into
         # buckets, i.e. it is a hash function of the contents of a table, so
         # there are relatively few conflicts.
-        my $addr = pack 'J', refaddr $self;
-
         # These are quickly computable.  Return looks like 'min..max;count'
-        return $self->min . "..$max{$addr};" . scalar @{$ranges{$addr}};
+        return $self->min . "..$self->[RL_MAX];" . scalar @{$self->[RL_RANGES]};
     }
 } # End closure for _Range_List_Base
 
@@ -4916,7 +4911,7 @@ sub trace { return main::trace(@_); }
             # If there is a gap before this range, the inverse will contain
             # that gap.
             if ($start > $max + 1) {
-                $new->add_range($max + 1, $start - 1);
+                $new->_append_range($max + 1, $start - 1);
             }
             $max = $end;
         }
@@ -4924,7 +4919,7 @@ sub trace { return main::trace(@_); }
         # And finally, add the gap from the end of the table to the max
         # possible code point
         if ($max < $MAX_WORKING_CODEPOINT) {
-            $new->add_range($max + 1, $MAX_WORKING_CODEPOINT);
+            $new->_append_range($max + 1, $MAX_WORKING_CODEPOINT);
         }
         return $new;
     }
@@ -5037,7 +5032,7 @@ sub trace { return main::trace(@_); }
                 my $end = main::min($range_a->end, $range_b->end);
                 if (! $check_if_overlapping) {
                     trace "adding intersection range ", sprintf("%04X", $start) . ".." . sprintf("%04X", $end) if main::DEBUG && $to_trace;
-                    $new->add_range($start, $end);
+                    $new->_append_range($start, $end);
                 }
 
                 # Skip ahead to the end of the current intersect
@@ -5193,8 +5188,42 @@ sub trace { return main::trace(@_); }
         # if the table covers all code points or a suitable code point can't
         # be found.  This used only for making the test script.
 
-        # Just find a valid code point of the inverse, if any.
-        return Range_List->new(Initialize => ~ $self)->get_valid_code_point;
+        my @ranges = $self->ranges;
+
+        # Search the gaps in the same order get_valid_code_point() would
+        # search the ranges of an inverted list.  Do this directly so that
+        # making the test script does not have to construct an inverted list
+        # for every table.
+        for my $try_hard (0, 1) {
+            my $gap_end = $MAX_WORKING_CODEPOINT;
+
+            for my $set (reverse @ranges) {
+                my $gap_start = $set->end + 1;
+                if ($gap_start <= $gap_end) {
+                    return $gap_end
+                                if is_code_point_usable($gap_end, $try_hard);
+
+                    my $trial_end = $gap_end;
+                    $trial_end = $MAX_UNICODE_CODEPOINT + 1
+                                if $trial_end > $MAX_UNICODE_CODEPOINT;
+                    for my $trial ($gap_start .. $trial_end - 1) {
+                        return $trial
+                                   if is_code_point_usable($trial, $try_hard);
+                    }
+                }
+
+                $gap_end = $set->start - 1;
+            }
+
+            if ($gap_end >= 0) {
+                return $gap_end if is_code_point_usable($gap_end, $try_hard);
+                for my $trial (0 .. $gap_end - 1) {
+                    return $trial if is_code_point_usable($trial, $try_hard);
+                }
+            }
+        }
+
+        return ();
     }
 } # end closure for Range_List
 
@@ -5382,7 +5411,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my %args = @_;
 
@@ -5567,7 +5596,7 @@ END
     sub ranges {
         # Returns the array of ranges associated with this table.
 
-        return $range_list{pack 'J', refaddr shift}->ranges;
+        return $range_list{refaddr shift}->ranges;
     }
 
     sub add_alias {
@@ -5608,7 +5637,7 @@ END
         # release
         $name = ucfirst($name) unless $name =~ /^k[A-Z]/;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Figure out if should be loosely matched if not already specified.
         if (! defined $loose_match) {
@@ -5669,7 +5698,7 @@ END
 
         # This name may be shorter than any existing ones, so clear the cache
         # of the shortest, so will have to be recalculated.
-        undef $short_name{pack 'J', refaddr $self};
+        undef $short_name{refaddr $self};
         return;
     }
 
@@ -5688,7 +5717,7 @@ END
         # Any name with alphabetics is preferred over an all numeric one, even
         # if longer.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # For efficiency, don't recalculate, but this means that adding new
         # aliases could change what the shortest is, so the code that does
@@ -5791,13 +5820,13 @@ END
     }
 
     sub add_description($self, $description) { # Adds the parameter as a short description.
-        push @{$description{pack 'J', refaddr $self}}, $description;
+        push @{$description{refaddr $self}}, $description;
 
         return;
     }
 
     sub add_note($self, $note) { # Adds the parameter as a short note.
-        push @{$note{pack 'J', refaddr $self}}, $note;
+        push @{$note{refaddr $self}}, $note;
 
         return;
     }
@@ -5808,7 +5837,7 @@ END
 
         chomp $comment;
 
-        push @{$comment{pack 'J', refaddr $self}}, $comment;
+        push @{$comment{refaddr $self}}, $comment;
 
         return;
     }
@@ -5818,7 +5847,7 @@ END
         # context, returns the array of comments.  In scalar, returns a string
         # of each element joined together with a period ending each.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         my @list = @{$comment{$addr}};
         return @list if wantarray;
         my $return = "";
@@ -5835,7 +5864,7 @@ END
         # Initialize the table with the argument which is any valid
         # initialization for range lists.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Replace the current range list with a new one of the same exact
         # type.
@@ -5889,7 +5918,7 @@ END
         # a range equals this one, don't write
         # the range
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         my $write_as_invlist = $write_as_invlist{$addr};
 
         # Start with the header
@@ -6545,7 +6574,7 @@ END
     sub set_status($self, $status, $info) {    # Set the table's status
         # status The status enum value
         # info Any message associated with it.
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $status{$addr} = $status;
         $status_info{$addr} = $info;
@@ -6553,7 +6582,7 @@ END
     }
 
     sub set_fate($self, $fate, $reason=undef) {  # Set the fate of a table
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         return if $fate{$addr} == $fate;    # If no-op
 
@@ -6587,7 +6616,7 @@ END
         # Don't allow changes to the table from now on.  This stores a stack
         # trace of where it was called, so that later attempts to modify it
         # can immediately show where it got locked.
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $locked{$addr} = "";
 
@@ -6611,7 +6640,7 @@ END
     sub carp_if_locked($self) {
         # Return whether a table is locked or not, and, by the way, complain
         # if is locked
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         return 0 if ! $locked{$addr};
         Carp::my_carp_bug("Can't modify a locked table. Stack trace of locking:\n$locked{$addr}\n\n");
@@ -6619,7 +6648,7 @@ END
     }
 
     sub set_file_path($self, @path) { # Set the final directory path for this table
-        @{$file_path{pack 'J', refaddr $self}} = @path;
+        @{$file_path{refaddr $self}} = @path;
         return
     }
 
@@ -6761,7 +6790,7 @@ sub trace { return main::trace(@_); }
                                     Write_As_Invlist => 0,
                                     %args);
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $anomalous_entries{$addr} = [];
         $default_map{$addr} = $default_map;
@@ -6813,7 +6842,7 @@ sub trace { return main::trace(@_); }
 
         $self->_range_list->add_map($lower, $upper,
                                     $string,
-                                    @_,
+                                    %args,
                                     Type => $type);
         return;
     }
@@ -6821,7 +6850,7 @@ sub trace { return main::trace(@_); }
     sub append_to_body($self) {
         # Adds to the written HERE document of the table's body any anomalous
         # entries in the table..
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         return "" unless @{$anomalous_entries{$addr}};
         return join("\n", @{$anomalous_entries{$addr}}) . "\n";
@@ -6870,7 +6899,7 @@ sub trace { return main::trace(@_); }
                             . " present, must be 'full_name'");
         }
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Convert the input to the standard equivalent, if any (won't have any
         # for $STRING properties)
@@ -6915,7 +6944,7 @@ sub trace { return main::trace(@_); }
 
     sub to_output_map($self) {
         # Returns boolean: should we write this map table?
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # If overridden, use that
         return $to_output_map{$addr} if defined $to_output_map{$addr};
@@ -6993,7 +7022,7 @@ END
         # No sense generating a comment if aren't going to write it out.
         return if ! $self->to_output_map;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $property = $self->property;
 
@@ -7172,7 +7201,7 @@ END
         # Called in the middle of write when it finds a range it doesn't know
         # how to handle.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $type = $range->type;
 
@@ -7314,7 +7343,7 @@ END
         # be for all ranges missing from it.  It also includes any code points
         # which have map_types that don't go in the main table.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $name = $self->property->swash_name;
 
@@ -7413,7 +7442,7 @@ END
     sub write($self) {
         # Write the table to the file.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Clear the temporaries
         undef @multi_code_point_maps;
@@ -7680,7 +7709,7 @@ sub trace { return main::trace(@_); }
                                       Format => $EMPTY_FORMAT,
                                       Write_As_Invlist => 1,
                                       );
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $conflicting{$addr} = [ ];
         $equivalents{$addr} = [ ];
@@ -7844,7 +7873,7 @@ sub trace { return main::trace(@_); }
                                         # be an optional parameter.
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Check if the conflicting name is exactly the same as any existing
         # alias in this table (as long as there is a real object there to
@@ -7887,7 +7916,7 @@ sub trace { return main::trace(@_); }
         }
 
         # Two tables are equivalent if they have the same leader.
-        return $leader{pack 'J', refaddr $self} == $leader{pack 'J', refaddr $other};
+        return $leader{refaddr $self} == $leader{refaddr $other};
         return;
     }
 
@@ -7924,7 +7953,7 @@ sub trace { return main::trace(@_); }
         my $are_equivalent = $self->is_set_equivalent_to($other);
         return if ! defined $are_equivalent || $are_equivalent;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         my $current_leader = ($related) ? $parent{$addr} : $leader{$addr};
 
         if ($related) {
@@ -7963,8 +7992,8 @@ sub trace { return main::trace(@_); }
             return;
         }
 
-        my $leader = pack 'J', refaddr $current_leader;
-        my $other_addr = pack 'J', refaddr $other;
+        my $leader = refaddr $current_leader;
+        my $other_addr = refaddr $other;
 
         # Any tables that are equivalent to or children of this table must now
         # instead be equivalent to or (children) to the new leader (parent),
@@ -7981,7 +8010,7 @@ sub trace { return main::trace(@_); }
             next if $table == $other;
             trace "setting $other to be the leader of $table, status=$status" if main::DEBUG && $to_trace;
 
-            my $table_addr = pack 'J', refaddr $table;
+            my $table_addr = refaddr $table;
             $leader{$table_addr} = $other;
             $matches_all{$table_addr} = $matches_all;
             $self->_set_range_list($other->_range_list);
@@ -8014,7 +8043,7 @@ sub trace { return main::trace(@_); }
             Carp::my_carp_bug("Can't set $self to be the complement of $other, which itself is the complement of " . $other->complement);
             return;
         }
-        $complement{pack 'J', refaddr $self} = $other;
+        $complement{refaddr $self} = $other;
 
         # Be sure the other property knows we are depending on them; or the
         # other table if it is one in the current property.
@@ -8302,7 +8331,7 @@ sub trace { return main::trace(@_); }
 
         return unless $debugging_build;
 
-        my $addr = pack 'J', refaddr $leader;
+        my $addr = refaddr $leader;
 
         if ($leader{$addr} != $leader) {
             Carp::my_carp_bug(<<END
@@ -8347,7 +8376,7 @@ END
 
         # Get list of all the parent tables that are equivalent to this one
         # (including itself).
-        my @parents = grep { $parent{main::objaddr $_} == $_ }
+        my @parents = grep { $parent{refaddr($_)} == $_ }
                             main::uniques($leader, @{$equivalents{$addr}});
         my $has_unrelated = (@parents >= 2);  # boolean, ? are there unrelated
                                               # tables
@@ -8370,7 +8399,7 @@ END
                 && $parent == $property->table('N')
                 && defined (my $yes = $property->table('Y')))
             {
-                my $yes_addr = pack 'J', refaddr $yes;
+                my $yes_addr = refaddr $yes;
                 @yes_perl_synonyms
                     = grep { $_->property == $perl }
                                     main::uniques($yes,
@@ -8386,12 +8415,12 @@ END
             my @conflicting;        # Will hold the table conflicts.
 
             # Look at the parent, any yes synonyms, and all the children
-            my $parent_addr = pack 'J', refaddr $parent;
+            my $parent_addr = refaddr $parent;
             for my $table ($parent,
                            @yes_perl_synonyms,
                            @{$children{$parent_addr}})
             {
-                my $table_addr = pack 'J', refaddr $table;
+                my $table_addr = refaddr $table;
                 my $table_property = $table->property;
 
                 # Tables are separated by a blank line to create a grouping.
@@ -8856,7 +8885,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my %args = @_;
 
         $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         $directory{$addr} = delete $args{'Directory'};
         $file{$addr} = delete $args{'File'};
@@ -8919,7 +8948,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             return;
         }
         else {
-            $map{pack 'J', refaddr $self}->delete_range($other, $other);
+            $map{refaddr $self}->delete_range($other, $other);
         }
         return $self;
     }
@@ -8932,7 +8961,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $name = shift;
         my %args = @_;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $table = $table_ref{$addr}{$name};
         my $standard_name = main::standardize($name);
@@ -9006,7 +9035,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
     sub delete_match_table($self, $table_to_remove) {
         # Delete the table referred to by $2 from the property $1.
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Remove all names that refer to it.
         foreach my $key (keys %{$table_ref{$addr}}) {
@@ -9021,7 +9050,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     sub table($self, $name) {
         # Return a pointer to the match table (with name given by the
         # parameter) associated with this property; undef if none.
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         return $table_ref{$addr}{$name} if defined $table_ref{$addr}{$name};
 
@@ -9039,7 +9068,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # Return a list of pointers to all the match tables attached to this
         # property
 
-        return main::uniques(values %{$table_ref{pack 'J', refaddr shift}});
+        return main::uniques(values %{$table_ref{refaddr shift}});
     }
 
     sub directory {
@@ -9048,7 +9077,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # priority;  'undef' is returned if the type isn't defined;
         # or $map_directory for everything else.
 
-        my $addr = pack 'J', refaddr shift;
+        my $addr = refaddr shift;
 
         return $directory{$addr} if defined $directory{$addr};
         return undef if $type{$addr} == $UNKNOWN;
@@ -9065,7 +9094,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # but otherwise the standard name is used.  This is different from the
         # external_name, so that the rest of the files, like in lib can use
         # the standard name always, without regard to historical precedent.
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Swash names are used only on either
         # 1) regular or internal-only map tables
@@ -9086,7 +9115,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # The whole point of this pseudo property is match tables.
         return 1 if $self == $perl;
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # Don't generate tables of code points that match the property values
         # of a string property.  Such a list would most likely have many
@@ -9113,7 +9142,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             return;
         }
 
-        return $map{pack 'J', refaddr $self}->map_add_or_replace_non_nulls($map{pack 'J', refaddr $other});
+        return $map{refaddr $self}->map_add_or_replace_non_nulls($map{refaddr $other});
     }
 
     sub set_proxy_for {
@@ -9149,7 +9178,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             return;
         }
 
-        $type{pack 'J', refaddr $self} = $type;
+        $type{refaddr $self} = $type;
         return if $type != $BINARY && $type != $FORCED_BINARY;
 
         my $yes = $self->table('Y');
@@ -9188,7 +9217,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $map = shift;    # What the range maps to.
         # Rest of parameters passed on.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         # If haven't the type of the property, gather information to figure it
         # out.
@@ -9237,7 +9266,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # We have been keeping track of what the property values have been,
         # and now have the necessary information to figure out the type.
 
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
 
         my $type = $type{$addr};
 
@@ -9293,7 +9322,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
     # $reaons - Ignored unless suppressing
     sub set_fate($self, $fate, $reason=undef) {
-        my $addr = pack 'J', refaddr $self;
+        my $addr = refaddr $self;
         if ($fate >= $SUPPRESSED) {
             $why_suppressed{$self->complete_name} = $reason;
         }
@@ -9371,7 +9400,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         *$sub = sub {
             use strict "refs";
             my $self = shift;
-            return $map{pack 'J', refaddr $self}->$sub(@_);
+            return $map{refaddr $self}->$sub(@_);
         }
     }
 
@@ -9784,7 +9813,7 @@ sub UCD_name ($table, $alias) {
         else {
 
             # Keep track of cycles in the input, and refuse to infinitely loop
-            my $addr = pack 'J', refaddr $item;
+            my $addr = refaddr $item;
             if (defined $main::already_output{$addr}) {
                 return "${indent}ALREADY OUTPUT: $item\n";
             }
@@ -9902,7 +9931,7 @@ sub dump_inside_out( $object, $fields_ref, @args ) {
     # Dump inside-out hashes in an object's state by converting them to a
     # regular hash and then calling simple_dumper on that.
 
-    my $addr = pack 'J', refaddr $object;
+    my $addr = refaddr $object;
 
     my %hash;
     foreach my $key (keys %$fields_ref) {
@@ -9923,7 +9952,7 @@ sub _operator_dot($self, $other="", $reversed=0) {
         }
         else {
             my $ref = ref $$which;
-            my $addr = pack 'J', refaddr $$which;
+            my $addr = refaddr $$which;
             $$which = "$ref ($addr)";
         }
     }
@@ -10881,6 +10910,10 @@ sub output_perl_charnames_line ($code_point, $name) {
                                          # have already had entries in the
                                          # current file, and info about each,
                                          # so don't have to recompute.
+        my %property_lookup;             # Property object and address, keyed
+                                         # by the name used in this file.
+        my %normalized_maps;             # Standard map for each property and
+                                         # spelling used in this file.
         my $property_name;               # property currently being worked on
         my $property_type;               # and its type
         my $previous_property_name = ""; # name from last time through loop
@@ -10935,12 +10968,22 @@ sub output_perl_charnames_line ($code_point, $name) {
             # property
             if ($previous_property_name ne $property_name) {
 
-                $property_object = property_ref($property_name);
+                if (exists $property_lookup{$property_name}) {
+                    ($property_object, $property_addr)
+                                      = $property_lookup{$property_name}->@*;
+                }
+                else {
+                    $property_object = property_ref($property_name);
+                    $property_addr = defined $property_object
+                                   ? refaddr $property_object
+                                   : undef;
+                    $property_lookup{$property_name}
+                                      = [ $property_object, $property_addr ];
+                }
                 if (! defined $property_object) {
                     $file->carp_bad_line("Unexpected property '$property_name'.  Skipped");
                     next LINE;
                 }
-                $property_addr = pack 'J', refaddr $property_object;
 
                 # Defer changing names until have a line that is acceptable
                 # (the 'next' statement above means is unacceptable)
@@ -11240,44 +11283,56 @@ END
             }
 
             if ($property_type != $STRING && $property_type != $UNKNOWN) {
-                my $table = $property_object->table($map);
-                if (defined $table) {
+                my $input_map = $map;
 
-                    # Unicode isn't very consistent about which synonym they
-                    # use in their .txt files, even within the same file, or
-                    # two files that are for the same property.  For enum
-                    # properties, we know already what all the synonyms are
-                    # (because we processed PropValueAliases already).
-                    # Therefore we can take the input and map it to a uniform
-                    # value now, saving us trouble later.
-                    #
-                    # Only if the map is well-behaved do we try this:
-                    # non-empty, all non-blank.
-                    if ($property_type == $ENUM && $map =~ / ^ \S+ $ /x) {
+                if ($property_type == $ENUM
+                    && exists $normalized_maps{$property_addr}{$input_map})
+                {
+                    $map = $normalized_maps{$property_addr}{$input_map};
+                }
+                else {
+                    my $table = $property_object->table($map);
+                    if (defined $table) {
 
-                        # Use existing practice as much as easily practicable,
-                        # so that code that has assumptions about spelling
-                        # doesn't have to change
-                        my $short_name = $property_object->short_name;
-                        if ($short_name =~ / ^ (BC | EA | GC  |HST | JT |
-                                                Lb | BT | BPT | NFCQC |
-                                                NFKCQC) $ /ix)
-                        {
-                            $map = $table->short_name;
+                        # Unicode isn't very consistent about which synonym
+                        # they use in their .txt files, even within the same
+                        # file, or two files that are for the same property.
+                        # For enum properties, we know already what all the
+                        # synonyms are (because we processed PropValueAliases
+                        # already).  Therefore we can take the input and map
+                        # it to a uniform value now, saving us trouble later.
+                        #
+                        # Only if the map is well-behaved do we try this:
+                        # non-empty, all non-blank.
+                        if ($property_type == $ENUM && $map =~ / ^ \S+ $ /x) {
+
+                            # Use existing practice as much as easily
+                            # practicable, so that code that has assumptions
+                            # about spelling doesn't have to change
+                            my $short_name = $property_object->short_name;
+                            if ($short_name =~ / ^ (BC | EA | GC  |HST | JT |
+                                                    Lb | BT | BPT | NFCQC |
+                                                    NFKCQC) $ /ix)
+                            {
+                                $map = $table->short_name;
+                            }
+                            elsif ($short_name !~ / ^ ( Ccc | Age | InSC | JG |
+                                                        SB) $ /ix)
+                            {
+                                $map = $table->full_name;
+                            }
                         }
-                        elsif ($short_name !~ / ^ ( Ccc | Age | InSC | JG |
-                                                    SB) $ /ix)
-                        {
-                            $map = $table->full_name;
+                        elsif ($table == $default_table) {
+
+                            # When it isn't an ENUM, we we can still tell if
+                            # this is a synonym for the default map.  If so,
+                            # use the default one instead.
+                            $map = $default_map;
                         }
                     }
-                    elsif ($table == $default_table) {
 
-                        # When it isn't an ENUM, we we can still tell if
-                        # this is a synonym for the default map.  If so, use
-                        # the default one instead.
-                        $map = $default_map;
-                    }
+                    $normalized_maps{$property_addr}{$input_map} = $map
+                                                if $property_type == $ENUM;
                 }
             }
 
@@ -11546,8 +11601,10 @@ END
         # magnitude fewer lines emitted.
 
         # $_ contains the input line.
-        # -1 in split means retain trailing null fields
-        (my $cp, @fields) = split /\s*;\s*/, $_, -1;
+        # UnicodeData.txt has semicolon-delimited fields with no surrounding
+        # whitespace.  Keep the literal split on this hot path.  The -1 means
+        # retain trailing null fields.
+        (my $cp, @fields) = split ';', $_, -1;
 
         #local $to_trace = 1 if main::DEBUG;
         trace $cp, @fields , $input_field_count if main::DEBUG && $to_trace;
@@ -13471,7 +13528,7 @@ sub setup_Unikemet{
 }
 
 sub filter_Unikemet_line {
-    $_ =~ s/;/,/g;      # mktables can't accept semi-colons
+    $_ =~ tr/;/,/;       # mktables can't accept semi-colons
     $_ =~ s/\t/; /g;
     $_ =~ s/ ^ U\+ //x;
     return;
@@ -18820,6 +18877,7 @@ sub write_all_tables() {
     } # End of looping through all properties.
 
     # Now have all the tables that will have files written for them.  Do it.
+    main::report_timing("write tables: collect") if main::timing_files();
     foreach my $table (@writables) {
         my @directory;
         my $filename;
@@ -18911,16 +18969,22 @@ sub write_all_tables() {
         $table->write;
     }
 
+    main::report_timing("write tables: files") if main::timing_files();
+
 
     # Write out the pod file
     make_pod;
+    main::report_timing("write tables: pod") if main::timing_files();
 
     # And Name.pm, UCD.pl
     make_Name_pm;
+    main::report_timing("write tables: Name.pm") if main::timing_files();
     make_UCD;
+    main::report_timing("write tables: UCD.pl") if main::timing_files();
 
     make_property_test_script() if $make_test_script;
     make_normalization_test_script() if $make_norm_test_script;
+    main::report_timing("write tables: tests") if main::timing_files();
     return;
 }
 
@@ -19202,6 +19266,8 @@ sub make_property_test_script() {
     # tests are added, it will perturb all later ones in the .t file
     srand 0;
 
+    main::report_timing("property tests: setup") if main::timing_files();
+
     $t_path = 'TestProp.pl' unless defined $t_path; # the traditional name
 
     # Create a list of what the %f representation is for each rational number.
@@ -19261,6 +19327,22 @@ Error('\\P{$name}');
 EOF_CODE
             }
         }
+
+        my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS }
+                                                     $property->aliases;
+
+        # Every property can optionally be prefixed by 'Is_', so test that
+        # those work by creating such an alias for each pre-existing one.
+        # This list is the same for every table in the property.
+        push @property_aliases, map { Alias->new("Is_" . $_->name,
+                                                $_->loose_match,
+                                                $_->make_re_pod_entry,
+                                                $_->ok_as_filename,
+                                                $_->status,
+                                                $_->ucd,
+                                                )
+                                     } @property_aliases;
+
         foreach my $table (sort { $a->has_dependency <=> $b->has_dependency
                                     or
                                   lc $a->name cmp lc $b->name
@@ -19279,20 +19361,7 @@ EOF_CODE
             # in the set_final_comment() for Tables
             my @table_aliases = grep { $_->status ne $INTERNAL_ALIAS } $table->aliases;
             next unless @table_aliases;
-            my @property_aliases = grep { $_->status ne $INTERNAL_ALIAS } $table->property->aliases;
             next unless @property_aliases;
-
-            # Every property can be optionally be prefixed by 'Is_', so test
-            # that those work, by creating such a new alias for each
-            # pre-existing one.
-            push @property_aliases, map { Alias->new("Is_" . $_->name,
-                                                    $_->loose_match,
-                                                    $_->make_re_pod_entry,
-                                                    $_->ok_as_filename,
-                                                    $_->status,
-                                                    $_->ucd,
-                                                    )
-                                         } @property_aliases;
             my $max = max(scalar @table_aliases, scalar @property_aliases);
             for my $j (0 .. $max - 1) {
 
@@ -19494,6 +19563,8 @@ EOF_CODE
         $property->DESTROY();
     }
 
+    main::report_timing("property tests: generate") if main::timing_files();
+
     # Make any test of the boundary (break) properties TODO if the code
     # doesn't match the version being compiled
     my $TODO_FAILING_BREAKS = ($version_of_mk_invlist_bounds ne $v_version)
@@ -19505,6 +19576,8 @@ EOF_CODE
         map "$_;\n",
         split /;\n/, $_
     } @output;
+
+    main::report_timing("property tests: format") if main::timing_files();
 
     # Cause there to be 'if' statements to only execute a portion of this
     # long-running test each time, so that we can have a bunch of .t's running
@@ -19550,6 +19623,8 @@ EOF_CODE
             (map {"    Test_WB('$_');\n"} @WB_tests),
         "}\n";
 
+    main::report_timing("property tests: chunk") if main::timing_files();
+
     &write($t_path,
            0,           # Not utf8;
            [$HEADER,
@@ -19558,6 +19633,8 @@ EOF_CODE
             @output_chunked,
             "Finished();\n",
            ]);
+
+    main::report_timing("property tests: write") if main::timing_files();
 
     return;
 }
@@ -20484,6 +20561,7 @@ if (! $rebuild) {
     exit(0);
 }
 print "$0: Must rebuild tables.\n" if $verbosity >= $VERBOSE;
+report_timing('before input processing');
 
 # Ready to do the major processing.  First create the perl pseudo-property.
 $perl = Property->new('perl', Type => $NON_STRING, Perl_Extension => 1);
@@ -20492,11 +20570,13 @@ $perl = Property->new('perl', Type => $NON_STRING, Perl_Extension => 1);
 foreach my $file (@input_file_objects) {
     $file->run;
 }
+report_timing('input processing');
 
 # Finish the table generation.
 
 print "Finishing processing Unicode properties\n" if $verbosity >= $PROGRESS;
 finish_Unicode();
+report_timing('finish Unicode');
 
 # For the very specialized case of comparing two Unicode versions...
 if (DEBUG && $compare_versions) {
@@ -20505,12 +20585,15 @@ if (DEBUG && $compare_versions) {
 
 print "Compiling Perl properties\n" if $verbosity >= $PROGRESS;
 compile_perl();
+report_timing('compile Perl properties');
 
 print "Creating Perl synonyms\n" if $verbosity >= $PROGRESS;
 add_perl_synonyms();
+report_timing('create Perl synonyms');
 
 print "Writing tables\n" if $verbosity >= $PROGRESS;
 write_all_tables();
+report_timing('write tables');
 
 # Write mktables.lst
 if ( $file_list and $make_list ) {

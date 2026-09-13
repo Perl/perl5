@@ -83,9 +83,9 @@
  * e015a6d4bde8dd0f8b72bf15ac9a4f588146ce6bc0bf8980e9dae8302cdbdc28 lib/unicore/extracted/DLineBreak.txt
  * 3dade4d96bd00d71b10022bf70b370090f3ca947f977ad4dc2854e06c4d074f6 lib/unicore/extracted/DNumType.txt
  * c84f084f83ec6852e1db6e7ef15f340a3af2df8cf0c386ac0d076c2cebd189e6 lib/unicore/extracted/DNumValues.txt
- * 50f73270fdef0981edb4e24be003f71001cf76876591fc8703276d65ef488c9b lib/unicore/mktables
+ * 9931e372f6528f37dccad70cc9280a6a0fcb3b9afd08eba16f212360881c4ffd lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 6bbb462516a4ea79e28d58cf387f0b4b63ba83c7d381cd61bdda0b188e148082 regen/mk_PL_charclass.pl
- * 40e5b8500d364b2adc31055248fc92e05e86fedc487abe5b303be24f38d30b18 regen/mk_invlists.pl
+ * 2fe950c6526e41c25308da86647024cfe2a1a05108bb8b6a095ce8ab88f43eee regen/mk_invlists.pl
  * ex: set ro ft=c: */
