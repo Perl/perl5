@@ -297,6 +297,8 @@ can also use the equivalent variables C<${^PREMATCH}>, C<${^MATCH}>
 and C<${^POSTMATCH}>, but for them to be defined, you have to
 specify the C</p> (preserve) modifier on your regular expression.
 In Perl 5.20, the use of C<$`>, C<$&> and C<$'> makes no speed difference.
+In Perl 5.44, specifying the C</p> modifier is not necessary any more:
+the match variables are always defined.
 
    $1, $2 ...  hold the Xth captured expr
    $+    Last parenthesized pattern match
