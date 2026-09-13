@@ -5802,6 +5802,10 @@ ES	|SV *	|handle_user_defined_property				\
 				|NN bool *user_defined_ptr		\
 				|NN SV *msg				\
 				|const STRLEN level
+ES	|bool	|has_runtime_code					\
+				|RExC_state_t * const pRExC_state NN	\
+				|char *pat  NN				\
+				|STRLEN plen
 EST	|bool	|is_ssc_worth_it|NN const RExC_state_t *pRExC_state	\
 				|NN const regnode_ssc *ssc
 ES	|void	|nextchar	|NN RExC_state_t *pRExC_state

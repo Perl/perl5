@@ -15118,6 +15118,11 @@ Perl_invlist_clone(pTHX_ SV * const invlist, SV *newlist)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;               \
     } STMT_END
 
+# define PERL_ARGS_ASSERT_HAS_RUNTIME_CODE      \
+     STMT_START { Perl_assert_aTHX; assert(pRExC_state); assert(pat);  \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
 # define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT       \
      STMT_START { assert(pRExC_state); assert(ssc); } STMT_END
 
@@ -15350,6 +15355,11 @@ S_handle_user_defined_property(pTHX_ const char *name, const STRLEN name_len, co
         Perl_attribute_nonnull(pTHX_7)
         Perl_attribute_nonnull(pTHX_8)
         Perl_attribute_nonnull(pTHX_9);
+static bool
+S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state, char *pat, STRLEN plen)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
 static bool
 S_is_ssc_worth_it(const RExC_state_t *pRExC_state, const regnode_ssc *ssc)
         Perl_attribute_nonnull(1)
