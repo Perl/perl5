@@ -31,8 +31,9 @@ my $parser= HeaderParser->new(
             delete $_->{sort} for @$group_ary;
         },
     );
+my $verbose = $ENV{REGEN_VERBOSE} ? 1 : 0;
 if (@ARGV and $ARGV[0] eq "-v") {
-    # ignore
+    $verbose = 1;
     shift @ARGV;
 }
 my $tap;
@@ -65,7 +66,7 @@ my $grouped_content_txt= $parser->lines_as_str(
 if ($grouped_content_txt ne $parser->{orig_content}) {
     if ($tap) {
         print "not ok - $0 $file\n";
-    } elsif (-t) {
+    } elsif ($verbose || -t) {
         print "Updating $file\n";
     }
     open my $fh,">",$new
@@ -80,4 +81,6 @@ if ($grouped_content_txt ne $parser->{orig_content}) {
         or die "Couldn't move embed.fnc.new to embed.fnc: $!";
 } elsif ($tap) {
     print "ok - $0 $file\n";
+} elsif ($verbose) {
+    print "No changes to $file\n";
 }

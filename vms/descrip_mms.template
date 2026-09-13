@@ -526,8 +526,39 @@ printconfig :
 regen :
 	$(INSTPERL) regen.pl
 
-regen_headers :
+regen_headers regen-headers :
 	$(INSTPERL) regen.pl -v
+
+# Requires Devel::Tokenizer::C 0.05 or newer in the installed Perl.
+regen_keywords regen-keywords :
+	$(INSTPERL) [.regen]keywords.pl
+
+regen_invlist regen-invlist :
+	$(PERL) [.regen]mk_invlists.pl
+
+regen_charclass regen-charclass :
+	$(PERL) [.regen]regcharclass.pl
+
+regen_meta regen-meta :
+	$(PERL) Porting/makemeta -y
+	$(PERL) Porting/makemeta -j
+
+# regen_perly is omitted here.  It depends on tools only known to be
+# available on Unix-like systems.
+regen_all regen-all :
+	@ write sys$output "If this fails, run the regeneration steps one at a time:"
+	@ write sys$output "  $(MMS) regen"
+	@ write sys$output "  $(MMS) regen_keywords"
+	@ write sys$output "  $(MMS) regen_invlist"
+	@ write sys$output "  $(MMS) regen_charclass"
+	@ write sys$output "  $(MMS) regen_meta"
+	$(MAKE)
+	$(MAKE) regen
+	$(MAKE) regen_keywords
+	$(MAKE) regen_invlist
+	$(MAKE) regen_charclass
+	$(MAKE) regen_meta
+	$(MAKE)
 
 .ifdef LINK_ONLY
 .else
