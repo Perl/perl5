@@ -1134,7 +1134,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         assert(new_type_details->arena_size);
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ new_type);
-        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        /* xpvav, xpvhv, xobject have no offset, no need to adjust new_body */
         assert(!(new_type_details->offset));
 #else
         /* We always allocated the full length item with PURIFY. To do this
@@ -1227,16 +1227,14 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
 #ifndef PURIFY
-        if(new_type_details->arena) {
-            /* This points to the start of the allocated area.  */
-            new_body = S_new_body(aTHX_ new_type);
-            Zero(new_body, new_type_details->body_size, char);
-            new_body = ((char *)new_body) - new_type_details->offset;
-        } else
+        assert(new_type_details->arena);
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ new_type);
+        Zero(new_body, new_type_details->body_size, char);
+        new_body = ((char *)new_body) - new_type_details->offset;
+#else
+        new_body = new_NOARENAZ(new_type_details);
 #endif
-        {
-            new_body = new_NOARENAZ(new_type_details);
-        }
         SvANY(sv) = new_body;
 
         if (old_type_details->copy) {
@@ -7751,8 +7749,16 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
              * efficient than stepping through the general logic.
              */
 
-            if (SvROK(sv))
-                goto free_rv;
+            if (SvROK(sv)) {
+                /* This duplicates the same code used for RV-in-PV, but
+                 * duplication will help (some) compilers to produce
+                 * better code layout. */
+                SV * const target = SvRV(sv);
+                if (SvWEAKREF(sv))
+                    sv_del_backref(target, sv);
+                else
+                    next_sv = target;
+            }
             SvFLAGS(sv) &= SVf_BREAK;
             SvFLAGS(sv) |= SVTYPEMASK;
             goto free_head;
@@ -7960,7 +7966,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 /* Don't even bother with turning off the OOK flag.  */
             }
             if (SvROK(sv)) {
-            free_rv:
                 {
                     SV * const target = SvRV(sv);
                     if (SvWEAKREF(sv))
@@ -8032,13 +8037,13 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             SvFLAGS(sv) &= SVf_BREAK;
             SvFLAGS(sv) |= SVTYPEMASK;
 
-            if (sv_type_details->arena) {
-                del_body(((char *)SvANY(sv) + sv_type_details->offset),
-                         &PL_body_roots[arena_index]);
-            }
-            else if (sv_type_details->body_size) {
-                safefree(SvANY(sv));
-            }
+#ifndef PURIFY
+            assert(sv_type_details->arena);
+            del_body(((char *)SvANY(sv) + sv_type_details->offset),
+                     &PL_body_roots[arena_index]);
+#else
+            safefree(SvANY(sv));
+#endif
         }
 
       free_head:
@@ -16122,15 +16127,13 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             case SVt_PV:
                 assert(sv_type_details->body_size);
 #ifndef PURIFY
-                if (sv_type_details->arena) {
-                    new_body = S_new_body(aTHX_ sv_type);
-                    new_body
-                        = (void*)((char*)new_body - sv_type_details->offset);
-                } else
+                assert(sv_type_details->arena);
+                new_body = S_new_body(aTHX_ sv_type);
+                new_body
+                    = (void*)((char*)new_body - sv_type_details->offset);
+#else
+                new_body = new_NOARENA(sv_type_details);
 #endif
-                {
-                    new_body = new_NOARENA(sv_type_details);
-                }
             }
         have_body:
             assert(new_body);
