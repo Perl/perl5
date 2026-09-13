@@ -1368,6 +1368,7 @@ usedefaultstrict=''
 dtrace=''
 usedtrace=''
 usefaststdio=''
+usegetexecpath=''
 usekernprocpathname=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
@@ -23571,6 +23572,76 @@ esac
 set usedefaultstrict
 eval $setvar
 
+: Determine if we can use getexecpath to find executing program
+echo " "
+echo "Determining whether we can use getexecpath to find executing program..." >&4
+$cat >try.c <<'EOM'
+
+#include <sys/param.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+int
+main(int argc, char **argv) {
+    char buf[MAXPATHLEN];
+    char *argv_leaf = strrchr(argv[0], '/');
+    char *buf_leaf;
+
+    if (!argv_leaf) {
+        fprintf(stderr, "Can't locate / in '%s'\n", argv[0]);
+        return 1;
+    }
+
+    if (getexecpath(buf, sizeof(buf)) != 0) {
+        perror("getexecpath");
+        return 2;
+    }
+
+    if (*buf != '/') {
+        fprintf(stderr, "Not an absolute path: '%s'\n", buf);
+        return 6;
+    }
+
+    if (strstr(buf, "/./")) {
+        fprintf(stderr, "Contains /./: '%s'\n", buf);
+        return 7;
+    }
+
+    if (strstr(buf, "/../")) {
+        fprintf(stderr, "Contains /../: '%s'\n", buf);
+        return 8;
+    }
+
+    buf_leaf = strrchr(buf, '/');
+    if (strcmp(buf_leaf, argv_leaf) != 0) {
+        fprintf(stderr, "Leafnames differ: '%s' vs '%s'\n", argv[0], buf);
+        return 9;
+    }
+
+    return 0;
+}
+EOM
+
+val=$undef
+set try
+if eval $compile_ok; then
+	if $run ./try; then
+		echo "You can use getexecpath to find the executing program." >&4
+		val="$define"
+	else
+		echo "Nope, getexecpath doesn't work here." >&4
+		val="$undef"
+	fi
+else
+	echo "I'm unable to compile the test program." >&4
+	echo "I'll assume no getexecpath here." >&4
+	val="$undef"
+fi
+$rm_try
+set usegetexecpath
+eval $setvar
+
 : Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
 echo " "
 echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
@@ -26135,6 +26206,7 @@ usedl='$usedl'
 usedtrace='$usedtrace'
 usefaststdio='$usefaststdio'
 useithreads='$useithreads'
+usegetexecpath='$usegetexecpath'
 usekernprocpathname='$usekernprocpathname'
 uselanginfo='$uselanginfo'
 uselargefiles='$uselargefiles'

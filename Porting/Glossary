@@ -5692,6 +5692,10 @@ useithreads (usethreads.U):
 	and indicates that Perl should be built to use the interpreter-based
 	threading implementation.
 
+usegetexecpath (usegetexecpath.U):
+	This variable, indicates that we can use getexecpath to get a full
+	path for the executable, and hence convert $^X to an absolute path.
+
 usekernprocpathname (usekernprocpathname.U):
 	This variable, indicates that we can use sysctl with
 	KERN_PROC_PATHNAME to get a full path for the executable, and hence
