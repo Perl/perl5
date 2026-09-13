@@ -358,4 +358,44 @@ no warnings 'experimental::try';
         'Parse error for catch without (VAR)');
 }
 
+# Adapted from GH#19240 as per GH#24825
+{
+  our $gotostr;
+  sub gotofoo {
+    try { }
+    catch ($e) { }
+    finally {
+      goto ham;
+      $gotostr .= "peas\n";
+      ham:
+      $gotostr .= "ham\n";
+    }
+    $gotostr .= "uh oh\n";
+  }
+
+  gotofoo();
+  is($gotostr, "ham\nuh oh\n", 'goto within finally block, with trailing code present');
+
+  # With a twist: hopefully a +1 context level
+  sub goto2foo {
+    try {}
+    catch ($e) { }
+    finally {
+      if ($gotostr) {
+        $gotostr .= "pineapple\n";
+        goto ham;
+        $gotostr .= "peas\n";
+      } else {
+        ham:
+        $gotostr .= "poppedecorn\n";
+      }
+    }
+    $gotostr .= "spam\n";
+  }
+
+  goto2foo();
+  is($gotostr, "ham\nuh oh\npineapple\npoppedecorn\nspam\n",
+          'goto deep within finally block, with trailing code present');
+}
+
 done_testing;
