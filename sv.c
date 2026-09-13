@@ -432,7 +432,6 @@ Perl_sv_report_used(pTHX)
 #ifdef DEBUGGING
     visit(do_report_used, 0, 0);
 #else
-    PERL_UNUSED_CONTEXT;
 #endif
 }
 
@@ -2035,7 +2034,6 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
                        )
 {
     PERL_ARGS_ASSERT_SV_2IUV_NON_PRESERVE;
-    PERL_UNUSED_CONTEXT;
 
     DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%" UVxf " NV=%" NVgf " inttype=%" UVXf "\n", SvPVX_const(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
@@ -8281,7 +8279,6 @@ SV *
 Perl_sv_newref(pTHX_ SV *const sv)
 {
     PERL_ARGS_ASSERT_SV_NEWREF;
-    PERL_UNUSED_CONTEXT;
 
     if (sv)
         (SvREFCNT(sv))++;
@@ -12409,7 +12406,6 @@ void
 Perl_sv_untaint(pTHX_ SV *const sv)
 {
     PERL_ARGS_ASSERT_SV_UNTAINT;
-    PERL_UNUSED_CONTEXT;
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
         MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
@@ -12430,7 +12426,6 @@ bool
 Perl_sv_tainted(pTHX_ SV *const sv)
 {
     PERL_ARGS_ASSERT_SV_TAINTED;
-    PERL_UNUSED_CONTEXT;
 
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
         const MAGIC * const mg = mg_find(sv, PERL_MAGIC_taint);
@@ -15440,7 +15435,6 @@ Duplicate a directory handle, returning a pointer to the cloned object.
 DIR *
 Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_DIRP_DUP;
 
     DIR *ret;
@@ -15650,7 +15644,6 @@ Perl_ptr_table_new(pTHX)
     PERL_ARGS_ASSERT_PTR_TABLE_NEW;
 
     PTR_TBL_t *tbl;
-    PERL_UNUSED_CONTEXT;
 
     Newx(tbl, 1, PTR_TBL_t);
     tbl->tbl_max	= 511;
@@ -15696,7 +15689,6 @@ void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
 {
     PERL_ARGS_ASSERT_PTR_TABLE_FETCH;
-    PERL_UNUSED_CONTEXT;
 
     PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, sv);
 
@@ -15719,7 +15711,6 @@ void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *const newsv)
 {
     PERL_ARGS_ASSERT_PTR_TABLE_STORE;
-    PERL_UNUSED_CONTEXT;
 
     PTR_TBL_ENT_t *tblent = ptr_table_find(tbl, oldsv);
 
@@ -15768,7 +15759,6 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
     UV newsize = oldsize * 2;
     UV i;
 
-    PERL_UNUSED_CONTEXT;
     Renew(ary, newsize, PTR_TBL_ENT_t*);
     Zero(&ary[oldsize], newsize-oldsize, PTR_TBL_ENT_t*);
     tbl->tbl_max = --newsize;
@@ -15808,7 +15798,6 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
 
     struct ptr_tbl_arena *arena;
 
-    PERL_UNUSED_CONTEXT;
 
     if (!tbl) {
         return;

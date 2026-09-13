@@ -484,7 +484,6 @@ Perl_regdump(pTHX_ const regexp *r)
         regdump_intflags("r->intflags: ", r->intflags);
     });
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);
 #endif  /* DEBUGGING */
 
@@ -1060,7 +1059,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             sv_catpvs(sv, ":NULL");
     }
 #else
-    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(o);
     PERL_UNUSED_ARG(prog);
