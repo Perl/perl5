@@ -61,7 +61,16 @@ Perl_set_caret_X(pTHX)
 #else
     /* We can try a platform-specific one if possible; if it fails, or we
      * aren't running on a suitable platform, we'll fall back to argv[0]. */
-# ifdef USE_KERN_PROC_PATHNAME
+# ifdef USE_GETEXECPATH
+    char buf[MAXPATHLEN];
+
+    if (getexecpath(buf, sizeof(buf)) == 0) {
+        sv_setpv(caret_x, buf);
+        SvPOK_only(caret_x);
+        SvTAINT(caret_x);
+        return;
+    }
+# elif defined(USE_KERN_PROC_PATHNAME)
     size_t size = 0;
     int mib[4];
     mib[0] = CTL_KERN;
