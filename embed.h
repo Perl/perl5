@@ -2071,6 +2071,7 @@
 #     define handle_possible_posix(a,b,c,d,e)   S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #     define handle_regex_sets(a,b,c,d)         S_handle_regex_sets(aTHX_ a,b,c,d)
 #     define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j) S_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#     define has_runtime_code(a,b,c)            S_has_runtime_code(aTHX_ a,b,c)
 #     define is_ssc_worth_it                    S_is_ssc_worth_it
 #     define nextchar(a)                        S_nextchar(aTHX_ a)
 #     define optimize_regclass(a,b,c,d,e,f,g,h,i,j) S_optimize_regclass(aTHX_ a,b,c,d,e,f,g,h,i,j)

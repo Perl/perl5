@@ -882,9 +882,10 @@ static bool
 S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
                     char *pat, STRLEN plen)
 {
+    PERL_ARGS_ASSERT_HAS_RUNTIME_CODE;
+
     int n = 0;
     STRLEN s;
-    PERL_UNUSED_CONTEXT;
 
     for (s = 0; s < plen; s++) {
         if (   pRExC_state->code_blocks
