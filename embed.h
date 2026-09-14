@@ -1448,7 +1448,7 @@
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(HAS_GETLOCALENAME_L)
-#           define querylocale_2024_l           S_querylocale_2024_l
+#           define querylocale_2024_l(a,b,c)    S_querylocale_2024_l(aTHX_ a,b,c)
 #         else
 #           define querylocale_2008_i(a,b)      S_querylocale_2008_i(aTHX_ a,b)
 #         endif

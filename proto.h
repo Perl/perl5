@@ -11185,8 +11185,10 @@ S_use_curlocale_scratch(pTHX)
 
 #     if defined(HAS_GETLOCALENAME_L)
 static const char *
-S_querylocale_2024_l(int category, locale_t locale_obj, line_t line);
-#       define PERL_ARGS_ASSERT_QUERYLOCALE_2024_L
+S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t line)
+        Perl_attribute_nonnull_aTHX;
+#       define PERL_ARGS_ASSERT_QUERYLOCALE_2024_L \
+           STMT_START { Perl_assert_aTHX; } STMT_END
 
 #     else
 static const char *

@@ -2067,10 +2067,9 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    define querylocale_i(i)      querylocale_r(categories[i])
 
 static const char *
-S_querylocale_2024_l(int category, locale_t locale_obj, line_t caller_line)
+S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t caller_line)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2024_L;
-    dTHX_DEBUGGING;
 
     const char * ret;
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
