@@ -119,6 +119,13 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <ival>  parse_bare_statement
+%type <ival>  parse_block
+%type <ival>  parse_expression
+%type <ival>  parse_full_statement
+%type <ival>  parse_perl_program
+%type <ival>  parse_statement_list
+%type <ival>  parse_sub_signature
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -187,86 +194,14 @@
 %% /* RULES */
 
 /* Top-level choice of what kind of thing yyparse was called to parse */
-grammar	:	GRAMPROG
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		remember stmtseq
-			{
-			  newPROG(block_end($remember,$stmtseq));
-			  PL_compiling.cop_seq = 0;
-			  $$ = 0;
-			}
-	|	GRAMEXPR
-			{
-			  parser->expect = XTERM;
-                          $<ival>$ = 0;
-			}
-		optexpr
-			{
-			  PL_eval_root = $optexpr;
-			  $$ = 0;
-			}
-	|	GRAMBLOCK
-			{
-			  parser->expect = XBLOCK;
-                          $<ival>$ = 0;
-			}
-		block
-			{
-			  PL_pad_reset_pending = TRUE;
-			  PL_eval_root = $block;
-			  $$ = 0;
-			  yyunlex();
-			  parser->yychar = yytoken = YYEOF;
-			}
-	|	GRAMBARESTMT
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		barestmt
-			{
-			  PL_pad_reset_pending = TRUE;
-			  PL_eval_root = $barestmt;
-			  $$ = 0;
-			  yyunlex();
-			  parser->yychar = yytoken = YYEOF;
-			}
-	|	GRAMFULLSTMT
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		fullstmt
-			{
-			  PL_pad_reset_pending = TRUE;
-			  PL_eval_root = $fullstmt;
-			  $$ = 0;
-			  yyunlex();
-			  parser->yychar = yytoken = YYEOF;
-			}
-	|	GRAMSTMTSEQ
-			{
-			  parser->expect = XSTATE;
-                          $<ival>$ = 0;
-			}
-		stmtseq
-			{
-			  PL_eval_root = $stmtseq;
-			  $$ = 0;
-			}
-	|	GRAMSUBSIGNATURE
-			{
-			  parser->expect = XSTATE;
-			  $<ival>$ = 0;
-			}
-		subsigguts
-			{
-			  PL_eval_root = $subsigguts;
-			  $$ = 0;
-			}
+grammar
+	:	parse_bare_statement
+	|	parse_block
+	|	parse_expression
+	|	parse_full_statement
+	|	parse_perl_program
+	|	parse_statement_list
+	|	parse_sub_signature
 	;
 
 bare_statement_block
@@ -763,6 +698,102 @@ bare_statement_yadayada
 		{
 			/* diag_listed_as: Unimplemented */
 			$$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0), newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
+		}
+	;
+
+parse_bare_statement
+	:	GRAMBARESTMT
+		{
+			parser->expect = XSTATE;
+		}
+		barestmt
+		{
+			PL_pad_reset_pending = TRUE;
+			PL_eval_root = $barestmt;
+			$$ = 0;
+			yyunlex();
+			parser->yychar = yytoken = YYEOF;
+		}
+	;
+
+parse_block
+	:	GRAMBLOCK
+		{
+			parser->expect = XBLOCK;
+		}
+		block
+		{
+			PL_pad_reset_pending = TRUE;
+			PL_eval_root = $block;
+			$$ = 0;
+			yyunlex ();
+			parser->yychar = yytoken = YYEOF;
+		}
+	;
+
+parse_expression
+	:	GRAMEXPR
+		{
+			parser->expect = XTERM;
+			$<ival>$ = 0;
+		}
+		optexpr
+		{
+			PL_eval_root = $optexpr;
+			$$ = 0;
+		}
+	;
+
+parse_full_statement
+	:	GRAMFULLSTMT
+		{
+			parser->expect = XSTATE;
+		}
+		fullstmt
+		{
+			PL_pad_reset_pending = TRUE;
+			PL_eval_root = $fullstmt;
+			$$ = 0;
+			yyunlex();
+			parser->yychar = yytoken = YYEOF;
+		}
+	;
+
+parse_perl_program
+	:	GRAMPROG
+		{
+			parser->expect = XSTATE;
+		}
+		remember
+		stmtseq
+		{
+			newPROG(block_end($remember,$stmtseq));
+			PL_compiling.cop_seq = 0;
+			$$ = 0;
+		}
+	;
+
+parse_sub_signature
+	:	GRAMSUBSIGNATURE
+		{
+			parser->expect = XSTATE;
+		}
+		subsigguts
+		{
+			PL_eval_root = $subsigguts;
+			$$ = 0;
+		}
+	;
+
+parse_statement_list
+	:	GRAMSTMTSEQ
+		{
+			parser->expect = XSTATE;
+		}
+		stmtseq
+		{
+			PL_eval_root = $stmtseq;
+			$$ = 0;
 		}
 	;
 
