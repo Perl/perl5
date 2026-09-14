@@ -40,6 +40,10 @@ S_apply_attribute_red(pTHX_
             break;
         }
 
+        case PERL_ATTRTARGET_LEXICAL:
+            sv_catpvf(keysv, "my %" PNf, PNfARG(target->lexical.padname));
+            break;
+
         default:
             croak("Unsure how to apply :red to a non-package scoped target");
     }

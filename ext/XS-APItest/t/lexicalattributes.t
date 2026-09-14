@@ -39,4 +39,18 @@ BEGIN {
         ':red attribute applied to all three vars' );
 }
 
+# Attributes on lexical variables
+{
+    my $lexscalar :red(s-arg);
+    my @lexarray  :red(a-arg);
+    my %lexhash   :red(h-arg);
+
+    is( $ATTRIBUTES_APPLIED{'red/my $lexscalar'}, "s-arg",
+        ':red attribute applied to lexical scalar' );
+    is( $ATTRIBUTES_APPLIED{'red/my @lexarray'}, "a-arg",
+        ':red attribute applied to lexical array' );
+    is( $ATTRIBUTES_APPLIED{'red/my %lexhash'}, "h-arg",
+        ':red attribute applied to lexical hash' );
+}
+
 done_testing;
