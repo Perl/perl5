@@ -1816,17 +1816,17 @@ Perl_re_intuit_start(pTHX_
 /* 'uscan' is set to foldbuf, and incremented, so below the end of uscan is
  * 'foldbuf+sizeof(foldbuf)' */
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uc_end,                  \
-                             uscan, len, uvc, charid, foldlen, foldbuf,     \
+                             uscan, len, uvc, octet, foldlen, foldbuf,      \
                              uniflags, octet_scan, octets_remaining,       \
                              octet_buffer)                                 \
 STMT_START {                                                                \
     STRLEN skiplen;                                                         \
     if (TRIE_RAW_INPUT_MODE(trie, utf8_target)) {                            \
         uvc = (U8)*uc;                                                       \
-        charid = uvc + 1;                                                    \
+        octet = uvc;                                                         \
         len = 1;                                                             \
-    } else if (TRIE_CONTAINS_WIDE(trie) && octets_remaining > 0) {            \
-        charid = *octet_scan++ + 1;                                          \
+    } else if (octets_remaining > 0) {                                       \
+        octet = *octet_scan++;                                               \
         octets_remaining--;                                                  \
         len = 0;                                                             \
     } else {                                                                 \
@@ -1896,25 +1896,22 @@ STMT_START {                                                                \
         uvc = (UV)*uc;                                                      \
         len = 1;                                                            \
     }                                                                       \
-    if (TRIE_CONTAINS_WIDE(trie)) {                                         \
-        const native_octet_utf8_t *octet;                                   \
+    {                                                                       \
+        const native_octet_utf8_t *native_octet;                            \
         U8 *end;                                                            \
         if (!utf8_target && FITS_IN_8_BITS(uvc)) {                          \
             /* Non-UTF-8 input is a native octet.  Use its cached UTF-8     \
-             * representation when the trie needs UTF-8 transitions. */     \
-            octet = &PL_native_octet_utf8[(U8)uvc];                        \
-            charid = octet->bytes[0] + 1;                                   \
-            octet_scan = octet->bytes + 1;                                  \
-            octets_remaining = octet->len - 1;                              \
+             * representation for the trie transition stream. */            \
+            native_octet = &PL_native_octet_utf8[(U8)uvc];                 \
+            octet = native_octet->bytes[0];                                 \
+            octet_scan = native_octet->bytes + 1;                           \
+            octets_remaining = native_octet->len - 1;                       \
         } else {                                                            \
             end = uvchr_to_utf8(octet_buffer, uvc);                         \
-            charid = octet_buffer[0] + 1;                                   \
+            octet = octet_buffer[0];                                        \
             octet_scan = octet_buffer + 1;                                  \
             octets_remaining = (STRLEN)(end - octet_buffer - 1);            \
-        }                                                                       \
-    }                                                                        \
-    else {                                                                  \
-        charid = uvc + 1;                                                    \
+        }                                                                   \
     }                                                                       \
     }                                                                        \
 } STMT_END
@@ -3347,7 +3344,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             while (s <= last_start) {
                 const U32 uniflags = UTF8_ALLOW_DEFAULT;
                 U8 *uc = (U8*)s;
-                U32 charid = 0;
+                U32 octet;
                 U32 base = 1;
                 U32 state = 1;
                 UV uvc = 0;
@@ -3360,7 +3357,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 #endif
                 U32 pointpos = 0;
 
-                while ( state && uc <= (U8*)strend ) {
+                while (state && (foldlen || octets_remaining
+                                 || uc < (U8*)strend)) {
                     bool failed = false;
                     U32 word = aho->states[ state ].wordnum;
 
@@ -3381,28 +3379,22 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     if (!octets_remaining \
                             && (!utf8_target || !UTF8_IS_CONTINUATION(*uc)))
                         points[pointpos++ % maxlen]= uc;
-                    if (foldlen || octets_remaining || uc < (U8*)strend) {
-                        REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
-                                             (U8 *) strend, uscan, len, uvc,
-                                             charid, foldlen, foldbuf,
-                                             uniflags, octet_scan,
-                                             octets_remaining, octet_buffer);
-                        DEBUG_TRIE_EXECUTE_r({
-                            dump_exec_pos( (char *)uc, c, strend,
-                                        real_start, s, utf8_target, 0);
-                            re_printf(
-                                "%sAHOC: Chid:0x%-2" UVXf " CP:0x%-4" UVXf " ",
-                                 PL_colors[4], (UV)charid, uvc);
-                            if (isPRINT_A(uvc))
-                                re_printf("'%c' ", (int)uvc );
-                            else
-                                re_printf("    " ); /* four spaces to match "'x' " */
-                        });
-                    }
-                    else {
-                        len = 0;
-                        charid = 0;
-                    }
+                    REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
+                                         (U8 *) strend, uscan, len, uvc,
+                                         octet, foldlen, foldbuf,
+                                         uniflags, octet_scan,
+                                         octets_remaining, octet_buffer);
+                    DEBUG_TRIE_EXECUTE_r({
+                        dump_exec_pos( (char *)uc, c, strend,
+                                    real_start, s, utf8_target, 0);
+                        re_printf(
+                            "%sAHOC: Octet:0x%-2" UVXf " CP:0x%-4" UVXf " ",
+                             PL_colors[4], (UV)octet, uvc);
+                        if (isPRINT_A(uvc))
+                            re_printf("'%c' ", (int)uvc );
+                        else
+                            re_printf("    " ); /* four spaces to match "'x' " */
+                    });
 
 
                     do {
@@ -3422,17 +3414,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 (UV)state, (UV)word);
                         });
                         if ( base ) {
-                            U32 tmp;
-                            I32 offset;
-                            if (charid &&
-                                 ( ((offset = base + charid
-                                    - 1 - TRIE_ALPHABET_SIZE)) >= 0)
-                                 && ((U32)offset < trie->lasttrans)
-                                 && trie->trans[offset].check == state
-                                 && (tmp = trie->trans[offset].next))
+                            const U32 offset = base + octet;
+                            if (trie->trans[offset].check == state)
                             {
                                 failed = false;
-                                state = tmp;
+                                state = trie->trans[offset].next;
                                 DEBUG_TRIE_EXECUTE_r(
                                     re_printf(" - good -> St:%#-6" UVxf "%s\n",
                                         (UV)state, PL_colors[5]));
@@ -7020,7 +7006,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 while ( state && (uc <= (U8*)(loceol) || octets_remaining) ) {
                     UV uvc = 0;
-                    U32 charid = 0;
+                    U32 octet = 0;
+                    assert(state < trie->statecount);
                     U32 base = trie->states[ state ].trans.base;
                     U32 wordnum = trie->states[ state ].wordnum;
                     PERL_DEB(U32 old_state = state);
@@ -7045,10 +7032,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                     /* read a char and goto next state */
                     if ( base && (foldlen || octets_remaining || uc < (U8*)(loceol))) {
-                        I32 offset;
                         REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
                                              (U8 *) loceol, uscan,
-                                             len, uvc, charid, foldlen,
+                                             len, uvc, octet, foldlen,
                                              foldbuf, uniflags, octet_scan,
                                              octets_remaining, octet_buffer);
                         if (TRIE_RAW_INPUT_MODE(trie, utf8_target) \
@@ -7057,14 +7043,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             charcount++;
                         if (foldlen > 0)
                             ST.longfold = true;
-                        if (charid &&
-                             ( ((offset =
-                              base + charid - 1 - TRIE_ALPHABET_SIZE)) >= 0)
-
-                             && ((U32)offset < trie->lasttrans)
-                             && trie->trans[offset].check == state)
+                        const U32 offset = base + octet;
+                        if (trie->trans[offset].check == state)
                         {
-                            state = trie->trans[offset].next;
+                            const U32 next_state = trie->trans[offset].next;
+                            assert(next_state < trie->statecount);
+                            state = next_state;
                         }
                         else {
                             state = 0;
@@ -7078,8 +7062,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     DEBUG_TRIE_EXECUTE_r(
                         DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
                         re_printf(
-                            "%sTRIE: Chid:0x%-2" UVXf " CP:0x%-4" UVXf " ",
-                            PL_colors[4], (UV)charid, uvc);
+                            "%sTRIE: Octet:0x%-2" UVXf " CP:0x%-4" UVXf " ",
+                            PL_colors[4], (UV)octet, uvc);
                         if (isPRINT_A(uvc))
                             re_printf("'%c' ", (int)uvc );
                         else
@@ -7087,7 +7071,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         re_printf(
                                 "St:0x%-4" UVXf " W:0x%-2" UVXf " - %s -> St: 0x%-4" UVXf "%s\n",
                                 (UV)old_state, (UV)wordnum,
-                                state ? "good" : charid ? "fail" : "last",
+                                state ? "good" : "fail",
                                 (UV)state, PL_colors[5]
 
                         );

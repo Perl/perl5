@@ -1191,15 +1191,12 @@ struct reg_data {
 #define RX_FLOAT_SUBSTR(rx)	(ReANY(rx)->float_substr)
 #define RX_FLOAT_UTF8(rx)	(ReANY(rx)->float_utf8)
 
-/* trie related stuff */
+/* Trie related stuff.  regcomp_trie.c describes the compressed base/check
+ * table layout. */
 
-/* a transition record for the state machine. the
-   check field determines which state "owns" the
-   transition. the char the transition is for is
-   determined by offset from the owning states base
-   field.  the next field determines which state
-   is to be transitioned to if any.
-*/
+/* A transition record for the state machine.  check identifies the state
+ * which owns the physical slot.  The owning state's base maps each input
+ * octet to its slot.  next identifies the destination state. */
 struct reg_trie_trans_ {
   U32 next;
   U32 check;
@@ -1265,7 +1262,7 @@ enum trie_flags {
 
 struct reg_trie_data_ {
     U32             refcount;        /* number of times this trie is referenced */
-    U32             lasttrans;       /* last valid transition element */
+    U32             lasttrans;       /* one past the transition allocation */
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     TRIE_JUMP_TYPE  *jump;           /* optional 1 indexed array of offsets before tail
