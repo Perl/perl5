@@ -5096,7 +5096,7 @@ S	|bool	|bool_setlocale_2008_i					\
 				|const line_t caller_line
 S	|locale_t|use_curlocale_scratch
 #     if defined(HAS_GETLOCALENAME_L)
-ST	|const char *|querylocale_2024_l				\
+S	|const char *|querylocale_2024_l				\
 				|int category				\
 				|locale_t locale_obj			\
 				|line_t line
