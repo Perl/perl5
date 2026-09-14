@@ -5,5 +5,5 @@
 ^\.git\b
 ^\.github/
 ^\.agents/
-AGENTS.md
-CLAUDE.md
+^AGENTS\.md$
+^CLAUDE\.md$
