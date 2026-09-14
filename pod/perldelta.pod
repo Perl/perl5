@@ -506,6 +506,34 @@ non-tied magical array.  In particular, assignment to an element of an
 C<@ISA> array where the element was added by splice() is now correctly
 recognized when performing method lookup.  [GH #24659]
 
+=item *
+
+Compilation of C<if>/C<elsif> or C<do> blocks now more reliably includes
+the construction of a new scope when C<my>, C<our>, C<state> or C<defer>
+keywords are present. Previously, a new scope might not have been correctly
+applied to very short blocks. This would have been noticeable through
+object destructors or C<defer> blocks running at the wrong time (when
+some outer scope was exited).
+
+The same logic now also applies to `else` blocks, which previously always
+introduced a new runtime scope, even if the contents of the block didn't
+need it. (That was a workaround to improve the accuracy of line number
+reporting for the first statement in the block, which should no longer
+be necessary.)
+
+[GH #23867]
+
+=item *
+
+Empty C<cond_expr> (C<if>/C<elsif> and C<else>) branches will not be
+optimized away when the context of the C<stub> OP is unknown. (Usually
+when the conditional expression is immediately before an implicit
+subroutine return.) In this situation, the C<stub> OP must be retained
+so that C<&PL_sv_undef> can be pushed onto the stack, which will be
+needed if the call site has scalar context.
+
+[GH #23867]
+
 =back
 
 =head1 Known Problems
