@@ -49,6 +49,9 @@
 # This means this file cannot be used for testing anything that the lexer
 # handles; in 5.12 this means just \N{NAME} and \N{U+...}.
 #
+# Set PERL_REGEXP_TEST_START and PERL_REGEXP_TEST_END to run a range of input
+# lines while keeping the original test numbering.
+#
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
 #
@@ -107,6 +110,8 @@ my @tests = <TESTS>;
 close TESTS;
 
 my $test_num = 0;
+my $first_test = $ENV{PERL_REGEXP_TEST_START} // 1;
+my $last_test = $ENV{PERL_REGEXP_TEST_END} // scalar @tests;
 
 # Some scenarios add extra tests to those just read in.  For those where there
 # is a character set translation, the added test will already have been
@@ -148,6 +153,10 @@ $::normalize_pat = $::normalize_pat; # silence warning
 TEST:
 foreach (@tests) {
     $test_num++;
+    if ($test_num < $first_test || $test_num > $last_test) {
+        print "ok $test_num # skipped outside requested test range\n";
+        next;
+    }
     if (!/\S/ || /^\s*#/ || /^__END__$/) {
         chomp;
         my ($not,$comment)= split /\s*#\s*/, $_, 2;

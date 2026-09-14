@@ -119,12 +119,10 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
         if (!base)
             continue;
         for (octet = 0; octet < TRIE_ALPHABET_SIZE; octet++) {
-            if (base + octet >= TRIE_ALPHABET_SIZE) {
-                const U32 slot = base + octet - TRIE_ALPHABET_SIZE;
-                if (slot < trie->lasttrans
-                        && trie->trans[slot].check == state)
-                    BITMAP_BYTE(debug_bitmap, octet) |= ANYOF_BIT((U8)octet);
-            }
+            const U32 slot = base + octet;
+            if (slot < trie->lasttrans
+                    && trie->trans[slot].check == state)
+                BITMAP_BYTE(debug_bitmap, octet) |= ANYOF_BIT((U8)octet);
         }
     }
 
@@ -162,10 +160,8 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
         if ( base ) {
             U32 ofs = 0;
 
-            while( ( base + ofs  < TRIE_ALPHABET_SIZE ) ||
-                   ( base + ofs - TRIE_ALPHABET_SIZE < trie->lasttrans
-                     && trie->trans[ base + ofs - TRIE_ALPHABET_SIZE ].check
-                                                                    != state))
+            while (base + ofs < trie->lasttrans
+                   && trie->trans[base + ofs].check != state)
                     ofs++;
 
             re_printf("+%2" UVXf "[ ", (UV)ofs);
@@ -173,14 +169,11 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
             for ( ofs = 0 ; ofs < TRIE_ALPHABET_SIZE ; ofs++ ) {
                 if (!BITMAP_TEST(debug_bitmap, ofs))
                     continue;
-                if ( ( base + ofs >= TRIE_ALPHABET_SIZE )
-                        && ( base + ofs - TRIE_ALPHABET_SIZE
-                                                        < trie->lasttrans )
-                        && trie->trans[ base + ofs
-                                    - TRIE_ALPHABET_SIZE ].check == state )
+                if (base + ofs < trie->lasttrans
+                        && trie->trans[base + ofs].check == state)
                 {
                    re_printf("%*" UVXf, colwidth,
-                    (UV)trie->trans[ base + ofs - TRIE_ALPHABET_SIZE ].next
+                    (UV)trie->trans[base + ofs].next
                    );
                 } else {
                     re_printf("%*s", colwidth,"   ." );
@@ -283,8 +276,7 @@ S_dump_trie_physical(pTHX_ const struct reg_trie_data_ *trie,
             continue;
         {
             const U32 state = trans->check;
-            const U32 octet = slot + TRIE_ALPHABET_SIZE
-                                     - trie->states[state].trans.base;
+            const U32 octet = slot - trie->states[state].trans.base;
             re_indentf("%8" UVXf "| #%4" UVXf " |",
                        depth+1,
                        (UV)slot,
@@ -538,19 +530,17 @@ S_trie_list_transition(pTHX_ reg_trie_data *trie, U32 *state, const U32 octet,
 
 PERL_STATIC_INLINE U32
 S_trie_trans_state(const reg_trie_data *trie, const U32 state,
-                   const U32 base, const U32 ucharcount, const U32 octet,
-                   const U32 special, const U32 ubound)
+                   const U32 base, const U32 octet, const U32 special)
 {
-    const U32 index = base - ucharcount + octet;
-
-    /* The packed table stores a transition at base - alphabet_size + octet.
+    /* The packed table stores a transition at base + octet.
      * The check field confirms that the physical slot belongs to this state.
      * During Aho-Corasick construction, special is the fallback transition
      * used when the lookup is performed from the root state. */
-    return base + octet >= ucharcount
-        && base + octet < ubound
-        && state == trie->trans[index].check
-        && trie->trans[index].next
+    if (!base)
+        return state == 1 ? special : 0;
+
+    const U32 index = base + octet;
+    return state == trie->trans[index].check
         ? trie->trans[index].next
         : state == 1 ? special : 0;
 }
@@ -638,6 +628,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
                        trie->wordcount+1, sizeof(reg_trie_wordinfo));
 
+#ifdef DEBUGGING
+    /* Allocate the optional word list only while regex debugging is enabled. */
     DEBUG_r({
         trie_words = newAV();
     });
@@ -645,10 +637,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     DEBUG_TRIE_COMPILE_r({
         re_indentf(
           "make_trie start == %d, first == %d, last == %d, tail == %d depth = %d\n",
-          depth+1,
+        depth+1,
           REG_NODE_NUM(startbranch), REG_NODE_NUM(first),
           REG_NODE_NUM(last), REG_NODE_NUM(tail), (int)depth);
     });
+#endif
 
    /* Find the node we are going to overwrite */
     if ( first == startbranch && OP( last ) != BRANCH ) {
@@ -993,25 +986,76 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         /* The list compiler has counted each distinct transition.  The flat
          * table has an unused slot zero, so this is the ideal number of
          * occupied entries.  The table itself may need more physical slots
-         * because a state's character-ID range can contain holes. */
+         * because a state's octet range can contain holes.
+         *
+         * This is the base/check trie/DFA table described in Aho, Sethi,
+         * and Ullman's Compilers: Principles, Techniques, and Tools,
+         * commonly called the Red Dragon Book.  That presentation permits
+         * negative offsets.  We reserve slot zero and require p >= 1 instead.
+         *
+         * Each state has offset data in trans.base.  If p is the physical
+         * table slot representing octet zero for that state, base is p.  The
+         * transition for input octet c is at trans[base + c].
+         *
+         * Each reg_trie_trans entry has next and check data.  next is the
+         * destination state.  check is the state which owns the physical
+         * slot.  A lookup is a transition only when check matches the current
+         * state.  The compiler can therefore overlap state frames.  It only
+         * assigns actual transitions to unoccupied slots, while a lookup into
+         * another state's slot fails its check.
+         *
+         * Slot zero is reserved.  The root state has p == 1, so it has a
+         * complete octet frame at slots 1 through 256.  Other states have
+         * p >= 1 and can use empty slots from that frame.  Their unpopulated
+         * frame slots can overlap transitions owned by earlier states.
+         *
+         * table_highwater records the packed portion of the table.
+         * safe_highwater records one past every possible octet lookup.  It
+         * reaches at least base + TRIE_ALPHABET_SIZE for every state, so the
+         * matching loops do not need minimum, maximum, or bounds checks.
+         * Newly allocated slots are zeroed, making every unowned lookup a
+         * failed transition.
+         */
 #ifdef DEBUGGING
         const STRLEN ideal_transition_count = transition_count - 1;
 #endif
-        STRLEN transition_capacity = transition_count;
+        /* Allow roughly 20% slack.  The root state needs one complete octet
+         * frame, and sparse frames can still expand the table. */
+        STRLEN transition_capacity = transition_count + transition_count / 5;
+        if (transition_capacity < TRIE_ALPHABET_SIZE + 1)
+            transition_capacity = TRIE_ALPHABET_SIZE + 1;
         trie->trans = (reg_trie_trans *)
             PerlMemShared_calloc( transition_capacity,
                                   sizeof(reg_trie_trans) );
         {
             U32 state;
-            /* table_highwater is one past the packed portion of trie->trans;
-             * next_hole is the first unused slot within that portion.  A
-             * non-zero next field marks an occupied slot, so holes can be
-             * reused without a separate occupancy map. */
-            U32 table_highwater = 0;
-            U32 next_hole = 0;
+            /* Slot zero is reserved.  The root state starts at slot one, so
+             * its complete octet frame occupies slots 1 through 256.  Other
+             * states can reuse its empty slots. */
+            U32 table_highwater = TRIE_ALPHABET_SIZE + 1;
+            U32 safe_highwater = TRIE_ALPHABET_SIZE + 1;
+            U32 next_hole = 1;
 
+            if (trie->states[1].trans.list) {
+                const U32 used = TRIE_LIST_USED(1);
+                const U32 base = 1;
+                U32 transition_index;
 
-            for( state = 1; state < next_alloc; state ++ ) {
+                for (transition_index = 1;
+                     transition_index <= used;
+                     transition_index++) {
+                    const U32 tid = base
+                                   + TRIE_LIST_ITEM(1,
+                                                    transition_index).octet;
+                    trie->trans[tid].next = TRIE_LIST_ITEM(1,
+                                                    transition_index).newstate;
+                    trie->trans[tid].check = 1;
+                }
+                Safefree(trie->states[1].trans.list);
+                trie->states[1].trans.base = base;
+            }
+
+            for( state = 2; state < next_alloc; state ++ ) {
                 U32 base = 0;
 
                 /*
@@ -1030,15 +1074,14 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     bool placed = false;
                     U32 transition_index;
 
-                    /* A state's transitions form a frame from min_octet
-                     * through max_octet.  Sparse frames may fit into holes
-                     * left by earlier frames.  Try the first available
-                     * position.  The frame may extend beyond table_highwater,
-                     * provided it
-                     * fits in the allocation and its occupied slots do not
-                     * clash. */
+                    /* next_hole is the physical slot for min_octet.  Its
+                     * octet-zero slot is next_hole - min_octet, which must
+                     * not be slot zero.  Sparse frames may fit into holes
+                     * left by earlier frames when their occupied slots do
+                     * not clash. */
                     while (next_hole < table_highwater
-                            && trie->trans[next_hole].next)
+                            && (next_hole <= min_octet
+                                || trie->trans[next_hole].next))
                         next_hole++;
                     /* Only sparse frames benefit from hole searching.  Small
                      * frames are cheap to try, while larger frames are tried
@@ -1047,9 +1090,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             && next_hole < table_highwater
                             && next_hole + frame_width >= next_hole) {
                         const U32 candidate_end = next_hole + frame_width;
-                        if (transition_capacity < candidate_end) {
+                        const U32 candidate_base = next_hole - min_octet;
+                        const U32 needed = MAX(candidate_end,
+                                               candidate_base
+                                                 + TRIE_ALPHABET_SIZE);
+                        if (transition_capacity < needed) {
                             const U32 old_capacity = transition_capacity;
-                            const U32 needed = candidate_end;
 
                             while (transition_capacity < needed)
                                 transition_capacity *= 2;
@@ -1073,12 +1119,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                 break;
                         }
                         if (transition_index > used) {
-                            base = TRIE_ALPHABET_SIZE + next_hole - min_octet;
+                            base = candidate_base;
                             for (transition_index = 1;
                                  transition_index <= used;
                                  transition_index++) {
                                 const U32 tid = base
-                                               - TRIE_ALPHABET_SIZE
                                                + TRIE_LIST_ITEM(state,
                                                                 transition_index).octet;
                                 trie->trans[ tid ].next = TRIE_LIST_ITEM( state,
@@ -1087,8 +1132,13 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             }
                             if (candidate_end > table_highwater)
                                 table_highwater = candidate_end;
+                            if (candidate_base + TRIE_ALPHABET_SIZE
+                                    > safe_highwater)
+                                safe_highwater = candidate_base
+                                               + TRIE_ALPHABET_SIZE;
                             while (next_hole < table_highwater
-                                    && trie->trans[next_hole].next)
+                                    && (next_hole <= min_octet
+                                        || trie->trans[next_hole].next))
                                 next_hole++;
                             placed = true;
                         }
@@ -1096,31 +1146,37 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                     /* Grow the physical table when the frame cannot fit at
                      * the current high-water mark. */
-                    if (!placed
-                            && transition_capacity < table_highwater + frame_width) {
-                        const U32 old_capacity = transition_capacity;
-                        const U32 needed = table_highwater + frame_width;
+                    if (!placed) {
+                        const U32 base_at_highwater = table_highwater
+                                                    - min_octet;
+                        const U32 needed = MAX(table_highwater + frame_width,
+                                               base_at_highwater
+                                                 + TRIE_ALPHABET_SIZE);
+                        if (transition_capacity < needed) {
+                            const U32 old_capacity = transition_capacity;
 
-                        while (transition_capacity < needed)
-                            transition_capacity *= 2;
-                        trie->trans = (reg_trie_trans *)
-                            PerlMemShared_realloc( trie->trans,
+                            while (transition_capacity < needed)
+                                transition_capacity *= 2;
+                            trie->trans = (reg_trie_trans *)
+                                PerlMemShared_realloc( trie->trans,
                                                      transition_capacity
                                                      * sizeof(reg_trie_trans) );
-                        Zero( trie->trans + old_capacity,
-                              transition_capacity - old_capacity,
-                              reg_trie_trans );
+                            Zero( trie->trans + old_capacity,
+                                  transition_capacity - old_capacity,
+                                  reg_trie_trans );
+                        }
                     }
                     if (!placed) {
-                        base = TRIE_ALPHABET_SIZE + table_highwater - min_octet;
+                        base = table_highwater - min_octet;
                     }
                     /* A one-transition frame can occupy one existing hole;
                      * it does not need its full frame width to be reserved. */
                     if ( !placed && max_octet == min_octet ) {
                         U32 set = 0;
                         for ( ; next_hole < table_highwater ; next_hole++ ) {
-                            if ( ! trie->trans[ next_hole ].next ) {
-                                base = TRIE_ALPHABET_SIZE + next_hole - min_octet;
+                            if (next_hole > min_octet
+                                && !trie->trans[next_hole].next) {
+                                base = next_hole - min_octet;
                                 trie->trans[ next_hole ].next = TRIE_LIST_ITEM( state,
                                                                    1).newstate;
                                 trie->trans[ next_hole ].check = state;
@@ -1136,7 +1192,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             next_hole = table_highwater;
                         } else {
                             while (next_hole < table_highwater
-                                    && trie->trans[next_hole].next)
+                                    && (next_hole <= min_octet
+                                        || trie->trans[next_hole].next))
                                 next_hole++;
                         }
                     } else if (!placed) {
@@ -1144,7 +1201,6 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                              transition_index <= TRIE_LIST_USED(state);
                              transition_index++) {
                             const U32 tid = base
-                                           - TRIE_ALPHABET_SIZE
                                            + TRIE_LIST_ITEM(state,
                                                             transition_index).octet;
                             trie->trans[ tid ].next = TRIE_LIST_ITEM( state,
@@ -1153,9 +1209,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         }
                         table_highwater += frame_width;
                         while (next_hole < table_highwater
-                                && trie->trans[next_hole].next)
+                                && (next_hole <= min_octet
+                                    || trie->trans[next_hole].next))
                             next_hole++;
                     }
+                    if (base + TRIE_ALPHABET_SIZE > safe_highwater)
+                        safe_highwater = base + TRIE_ALPHABET_SIZE;
                     Safefree(trie->states[ state ].trans.list);
                 }
                 /*
@@ -1165,9 +1224,19 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 */
                 trie->states[ state ].trans.base = base;
             }
-            /* Slot zero is reserved by the packed-table representation; keep
-             * it in the recorded range even when table_highwater is zero. */
-            trie->lasttrans = table_highwater + 1;
+            /* Every state needs a complete octet frame in the zeroed table. */
+            trie->lasttrans = safe_highwater;
+            if (transition_capacity < trie->lasttrans) {
+                const U32 old_capacity = transition_capacity;
+
+                trie->trans = (reg_trie_trans *)
+                    PerlMemShared_realloc(trie->trans,
+                                          trie->lasttrans
+                                            * sizeof(reg_trie_trans));
+                Zero(trie->trans + old_capacity,
+                     trie->lasttrans - old_capacity, reg_trie_trans);
+                transition_capacity = trie->lasttrans;
+            }
             assert(next_hole <= table_highwater);
             assert(table_highwater <= transition_capacity);
             DEBUG_TRIE_COMPILE_MORE_r(
@@ -1193,6 +1262,24 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->trans = (reg_trie_trans *)
         PerlMemShared_realloc( trie->trans, trie->lasttrans
                                * sizeof(reg_trie_trans) );
+
+#ifdef DEBUGGING
+    /* Validate the packed trie indexes while regex debugging is enabled.
+     * Move this outside DEBUG_r() to validate every full DEBUGGING build. */
+    DEBUG_r({
+    for (U32 state = 1; state < trie->statecount; state++) {
+        assert(!trie->states[state].trans.base
+               || trie->states[state].trans.base
+                    <= trie->lasttrans - TRIE_ALPHABET_SIZE);
+    }
+    for (U32 transition = 1; transition < trie->lasttrans; transition++) {
+        assert(!trie->trans[transition].check
+               || (trie->trans[transition].next
+                   && trie->trans[transition].check < trie->statecount
+                   && trie->trans[transition].next < trie->statecount));
+    }
+    });
+#endif
 
     {   /* Modify the program and insert the new TRIE node */
         U8 nodetype =(U8) flags;
@@ -1259,10 +1346,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                     for (ofs = min_octet; ofs <= max_octet; ofs++) {
                         const U32 index = trie->states[debug_state].trans.base
-                                        + ofs - TRIE_ALPHABET_SIZE;
-                        if (trie->states[debug_state].trans.base + ofs
-                                >= TRIE_ALPHABET_SIZE
-                            && index < trie->lasttrans
+                                        + ofs;
+                        if (index < trie->lasttrans
                             && trie->trans[index].check == debug_state) {
                             count++;
                             transition = ofs;
@@ -1336,13 +1421,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     const U32 max_octet = trie->states[state].max_octet;
 
                     for (ofs = min_octet; ofs <= max_octet; ofs++) {
-                        if (base + ofs >= TRIE_ALPHABET_SIZE
-                            && base + ofs - TRIE_ALPHABET_SIZE < trie->lasttrans
-                            && trie->trans[base + ofs - TRIE_ALPHABET_SIZE].check == state) {
+                        if (base + ofs < trie->lasttrans
+                            && trie->trans[base + ofs].check == state) {
                             if (++count > 1)
                                 break;
-                            next_state = trie->trans[base + ofs
-                                                   - TRIE_ALPHABET_SIZE].next;
+                            next_state = trie->trans[base + ofs].next;
                             utf8_prefix[octets] = (U8)ofs;
                         }
                     }
@@ -1398,9 +1481,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         count = 1;
 
                 for ( ofs = min_octet ; ofs <= max_octet ; ofs++ ) {
-                    if ( ( base + ofs >= TRIE_ALPHABET_SIZE ) &&
-                         ( base + ofs - TRIE_ALPHABET_SIZE < trie->lasttrans ) &&
-                         trie->trans[ base + ofs - TRIE_ALPHABET_SIZE ].check == state )
+                    if (base + ofs < trie->lasttrans
+                         && trie->trans[base + ofs].check == state)
                     {
                         if ( ++count > 1 ) {
                             /* more than one transition here, so we can exit the loop */
@@ -1661,9 +1743,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     const U32 trie_offset = TRIE_DATA_SLOT(source);
     reg_trie_data *trie = (reg_trie_data *)RExC_rxi->data->data[trie_offset];
     U32 *q;
-    const U32 ucharcount = TRIE_ALPHABET_SIZE;
     const U32 numstates = trie->statecount;
-    const U32 ubound = trie->lasttrans + ucharcount;
     U32 q_read = 0;
     U32 q_write = 0;
     U32 octet;
@@ -1716,8 +1796,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     if (base) {
         for ( octet = trie->states[1].min_octet;
               octet <= trie->states[1].max_octet; octet++ ) {
-            const U32 newstate = S_trie_trans_state(trie, 1, base, ucharcount,
-                                                    octet, 0, ubound);
+            const U32 newstate = S_trie_trans_state(trie, 1, base, octet, 0);
             if ( newstate ) {
                 q[ q_write ] = newstate;
                 /* set to point at the root */
@@ -1733,8 +1812,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
             for ( octet = aho->states[cur].min_octet;
                   octet <= aho->states[cur].max_octet; octet++ ) {
                 const U32 ch_state = S_trie_trans_state(trie, cur, base,
-                                                        ucharcount, octet, 1,
-                                                        ubound);
+                                                        octet, 1);
                 if (ch_state) {
                     U32 fail_state = cur;
                     U32 fail_base;
@@ -1742,10 +1820,10 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
                         fail_state = fail[ fail_state ];
                         fail_base = aho->states[ fail_state ].trans.base;
                     } while ( !S_trie_trans_state(trie, fail_state, fail_base,
-                                                  ucharcount, octet, 1, ubound) );
+                                                  octet, 1) );
 
                     fail_state = S_trie_trans_state(trie, fail_state, fail_base,
-                                                ucharcount, octet, 1, ubound);
+                                                octet, 1);
                     fail[ ch_state ] = fail_state;
                     if ( !aho->states[ ch_state ].wordnum && aho->states[ fail_state ].wordnum )
                     {
