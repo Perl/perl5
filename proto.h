@@ -193,23 +193,24 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 
 PERL_CALLCONV void
 Perl_apply_attributes_lexical(pTHX_ PADOFFSET padix, OP *attrlist)
-        Perl_attribute_nonnull_aTHX_;
-#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_LEXICAL
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_LEXICAL \
+    STMT_START { Perl_assert_aTHX; } STMT_END
 
 PERL_CALLCONV void
 Perl_apply_attributes_pkgscoped(pTHX_ SV *sv, GV *namegv, OP *attrlist)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_1)
-        Perl_attribute_nonnull_(pTHX_2);
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
 #define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_PKGSCOPED \
-        assert(sv); assert(namegv)
+    STMT_START { Perl_assert_aTHX; assert(sv); assert(namegv); } STMT_END
 
 PERL_CALLCONV void
 Perl_apply_attributes_sv(pTHX_ SV *sv, OP *attrlist)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_1);
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
 #define PERL_ARGS_ASSERT_APPLY_ATTRIBUTES_SV    \
-        assert(sv)
+    STMT_START { Perl_assert_aTHX; assert(sv); } STMT_END
 
 PERL_CALLCONV void
 Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, const char *attrstr, STRLEN len)
@@ -9705,21 +9706,55 @@ S_PerlEnv_putenv(pTHX_ char *str)
 # endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
 #if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+PERL_CALLCONV void
+Perl_apply_attribute_isa(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_ISA   \
+     STMT_START { Perl_assert_aTHX; assert(target); } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_param(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_PARAM \
+     STMT_START { Perl_assert_aTHX; assert(target); } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_reader(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_READER \
+     STMT_START { Perl_assert_aTHX; assert(target); } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_writer(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_WRITER \
+     STMT_START { Perl_assert_aTHX; assert(target); } STMT_END
+
 PERL_CALLCONV HV *
 Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_1)
-        Perl_attribute_nonnull_(pTHX_2);
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_ATTRTARGET_CLASS      \
-        assert(target); assert(attrname)
+     STMT_START { Perl_assert_aTHX; assert(target); assert(attrname);  \
+    } STMT_END
 
 PERL_CALLCONV PADNAME *
 Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
-        Perl_attribute_nonnull_aTHX_
-        Perl_attribute_nonnull_(pTHX_1)
-        Perl_attribute_nonnull_(pTHX_2);
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
 # define PERL_ARGS_ASSERT_ATTRTARGET_PADNAME    \
-        assert(target); assert(attrname)
+     STMT_START { Perl_assert_aTHX; assert(target); assert(attrname);  \
+    } STMT_END
 
 #endif /* defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C) */
 #if defined(PERL_IN_AV_C)
@@ -10276,22 +10311,6 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
      STMT_START { Perl_assert_aTHX; assert(stash);                \
                   assert(SvTYPE(stash) == SVt_PVHV); assert(pn);  \
     } STMT_END
-
-PERL_CALLCONV void
-Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-# define PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES \
-     STMT_START { Perl_assert_aTHX; assert(stash);    \
-                  assert(SvTYPE(stash) == SVt_PVHV);  \
-    } STMT_END
-
-PERL_CALLCONV void
-Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-# define PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES \
-     STMT_START { Perl_assert_aTHX; assert(pn); } STMT_END
 
 PERL_CALLCONV void
 Perl_class_declare_padvars(pTHX_ CV *cv)
