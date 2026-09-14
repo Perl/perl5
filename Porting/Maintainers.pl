@@ -1002,6 +1002,10 @@ our %Modules = (
 	],
     },
 
+    'RNG::PCG' => {
+        'FILES'        => q[dist/RNG],
+    },
+
     'podlators' => {
         'DISTRIBUTION' => 'RRA/podlators-vv6.1.1.tar.gz',
         'SYNCINFO'     => 'jkeenan on Thu Sep 10 17:59:21 2026',

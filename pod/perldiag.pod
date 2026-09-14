@@ -5906,6 +5906,27 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
+=item RNG provider did not return exactly one value
+
+(F) The custom random number generator installed in C<${^RNG}> returned more
+than one value, or did not return a value.  A provider must return exactly one
+value each time it is called.
+
+=item RNG provider rand_bytes() did not return a byte string
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return a byte string.
+
+=item RNG provider rand_bytes() did not return the requested byte count
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return exactly the number of bytes requested.
+
+=item ${^RNG} must be an object, a CODE reference, or undef
+
+(F) The value assigned to C<${^RNG}> was neither an object, an unblessed CODE
+reference, nor C<undef>.
+
 =item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
 "a-z" in regex; marked by S<<-- HERE> in m/%s/
 

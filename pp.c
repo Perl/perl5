@@ -3558,22 +3558,130 @@ PP(pp_sin)
    --Jarkko Hietaniemi	27 September 1998
  */
 
-PP_wrapped(pp_rand, MAXARG, 0)
+/* Call the provider installed in ${^RNG}.  This deliberately tests for an
+ * object before testing for a CODE reference: a blessed CODE reference is an
+ * object provider, not a callback provider. */
+static SV *
+S_rng_call(pTHX_ SV *provider, const char *method, SV *arg, bool has_arg)
 {
+    I32 count;
+    SV *ret;
+    SV *call_provider;
+
+    ENTER_with_name("call_RNG");
+    SAVETMPS;
+
+    /* Keep the provider alive if the callback changes ${^RNG}. */
+    call_provider = sv_2mortal(SvREFCNT_inc_simple_NN(provider));
+    PUSHMARK(PL_stack_sp);
+    if (sv_isobject(call_provider)) {
+        rpp_extend(has_arg ? 2 : 1);
+        rpp_push_1(call_provider);
+        if (has_arg)
+            rpp_push_1(arg);
+        count = call_method(method, G_SCALAR);
+    }
+    else {
+        if (has_arg)
+            rpp_xpush_1(arg);
+        count = call_sv(call_provider, G_SCALAR);
+    }
+    if (count != 1)
+        croak("RNG provider did not return exactly one value");
+
+    ret = newSVsv(*PL_stack_sp);
+    rpp_popfree_1_NN();
+
+    FREETMPS;
+    LEAVE_with_name("call_RNG");
+    return ret;
+}
+
+static SV *
+S_rng_provider(pTHX)
+{
+    SV * const provider = get_sv("\022NG", GV_ADD);
+    SvGETMAGIC(provider);
+    return provider;
+}
+
+static U64
+S_rng_u64(pTHX_ SV *provider)
+{
+    SV * const length = sv_2mortal(newSVuv(8));
+    SV * const result = S_rng_call(aTHX_ provider, "rand_bytes", length, TRUE);
+    const U8 *bytes;
+    STRLEN len;
+    U64 value = 0;
+    unsigned int i;
+
+    SvGETMAGIC(result);
+    if (!SvPOK(result))
+        croak("RNG provider rand_bytes() did not return a byte string");
+    bytes = (const U8 *)SvPVbyte_nomg(result, len);
+    if (len != 8)
+        croak("RNG provider rand_bytes() did not return the requested byte count");
+    for (i = 0; i < 8; i++)
+        value = (value << 8) | bytes[i];
+    SvREFCNT_dec_NN(result);
+    return value;
+}
+
+NV
+Perl_call_rand(pTHX)
+{
+    PERL_ARGS_ASSERT_CALL_RAND;
+    SV * const provider = S_rng_provider(aTHX);
+
+    if (SvOK(provider)) {
+        if (!sv_isobject(provider)
+            && (!SvROK(provider) || SvTYPE(SvRV(provider)) != SVt_PVCV))
+            croak("${^RNG} must be an object, a CODE reference, or undef");
+        return (NV)S_rng_u64(aTHX_ provider)
+            / ((NV)UINT64_C(0xffffffffffffffff) + 1.0);
+    }
+
     if (!PL_srand_called) {
-        Rand_seed_t s;
+        Rand_seed_t seed_value;
+
         if (PL_srand_override) {
-            /* env var PERL_RAND_SEED has been set so the user wants
-             * consistent srand() initialization. */
-            PERL_SRAND_OVERRIDE_GET(s);
-        } else {
-            /* Pseudo random initialization from context state and possible
-             * random devices */
-            s= (Rand_seed_t)seed();
+            PERL_SRAND_OVERRIDE_GET(seed_value);
         }
-        (void)seedDrand01(s);
+        else {
+            seed_value = (Rand_seed_t)seed();
+        }
+        (void)Perl_drand48_init_r(&PL_random_state, seed_value);
         PL_srand_called = TRUE;
     }
+
+    return Perl_drand48_r(&PL_random_state);
+}
+
+void
+Perl_call_srand(pTHX_ Rand_seed_t seed_value)
+{
+    PERL_ARGS_ASSERT_CALL_SRAND;
+    SV * const provider = S_rng_provider(aTHX);
+
+    if (SvOK(provider)) {
+        if (!sv_isobject(provider)
+            && (!SvROK(provider) || SvTYPE(SvRV(provider)) != SVt_PVCV))
+            croak("${^RNG} must be an object, a CODE reference, or undef");
+
+        /* seedDrand01() is also used by older XS code to initialize the
+         * default generator before its first Drand01() call.  With a custom
+         * provider, leave the provider alone.  Explicit Perl srand()
+         * dispatches to the provider in pp_srand(). */
+        return;
+    }
+
+    (void)Perl_drand48_init_r(&PL_random_state, seed_value);
+    PL_srand_called = TRUE;
+}
+
+PP_wrapped(pp_rand, MAXARG, 0)
+{
+    const NV random_value = Perl_call_rand(aTHX);
     {
         dSP;
         NV value;
@@ -3601,17 +3709,38 @@ PP_wrapped(pp_rand, MAXARG, 0)
             dTARGET;
             PUSHs(TARG);
             PUTBACK;
-            value *= Drand01();
+            value *= random_value;
             sv_setnv_mg(TARG, value);
         }
     }
     return NORMAL;
 }
 
+
 PP_wrapped(pp_srand, MAXARG, 0)
 {
     dSP; dTARGET;
+    SV * const provider = S_rng_provider(aTHX);
     UV anum;
+
+    if (SvOK(provider)) {
+        SV *result;
+
+        if (!sv_isobject(provider)
+            && (!SvROK(provider) || SvTYPE(SvRV(provider)) != SVt_PVCV))
+            croak("${^RNG} must be an object, a CODE reference, or undef");
+
+        /* Custom providers see an explicit undef for srand(), making it
+         * equivalent to srand(undef).  Explicit arguments are passed through
+         * without the default numeric validation. */
+        result = S_rng_call(aTHX_ provider, "srand",
+                            MAXARG >= 1 ? TOPs : &PL_sv_undef, TRUE);
+        if (MAXARG >= 1)
+            rpp_popfree_1_NN();
+        XPUSHs(result);
+        PUTBACK;
+        RETURN;
+    }
 
     if (MAXARG >= 1 && (TOPs || POPs)) {
         SV *top;
