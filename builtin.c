@@ -306,7 +306,7 @@ XS(XS_builtin_export_lexically)
                     bad = "a CODE";
                 break;
 
-            case '$':
+            case Perl_Sigil_Scalar:
                 /* Permit any of SVt_NULL to SVt_PVMG. Technically this also
                  * includes SVt_INVLIST but it isn't thought possible for pureperl
                  * code to ever manage to see one of those. */
@@ -314,12 +314,12 @@ XS(XS_builtin_export_lexically)
                     bad = "a SCALAR";
                 break;
 
-            case '@':
+            case Perl_Sigil_Array:
                 if(SvTYPE(rv) != SVt_PVAV)
                     bad = "an ARRAY";
                 break;
 
-            case '%':
+            case Perl_Sigil_Hash:
                 if(SvTYPE(rv) != SVt_PVHV)
                     bad = "a HASH";
                 break;
