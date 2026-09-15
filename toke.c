@@ -7052,7 +7052,13 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
         break;
     }
 
-    pl_yylval.ival = CopLINE(PL_curcop);
+    /* PL_copline contains the line number of the last-seen COP.
+     * CopLINE(PL_curcop) could have advanced past that. We
+     * likely want to save PL_curcop where possible to get
+     * more accurate line numbering for diagnostics/caller. */
+    pl_yylval.ival = (PL_copline == NOLINE)
+                     ? CopLINE(PL_curcop) : PL_copline;
+
     PL_copline = NOLINE;   /* invalidate current command line number */
     TOKEN(formbrack ? PERLY_EQUAL_SIGN : PERLY_BRACE_OPEN);
 }
