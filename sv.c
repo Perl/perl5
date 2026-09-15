@@ -835,7 +835,7 @@ supporting the multiple body-types.
 If PURIFY is defined, or PERL_ARENA_SIZE=0, arenas are not used, and
 the (new|del)_X*V macros are mapped directly to malloc/free.
 
-For each sv-type, struct body_details bodies_by_type[] carries
+For each sv-type, struct body_details PL_bodies_by_type[] carries
 parameters which control these aspects of SV handling:
 
 Arena_size determines whether arenas are used for this body type, and if
@@ -855,7 +855,7 @@ For the sv-types that have no bodies, arenas are not used, so those
 PL_body_roots[sv_type] are unused, and can be overloaded.  In
 something of a special case, SVt_NULL is borrowed for HE arenas;
 PL_body_roots[HE_ARENA_ROOT_IX=SVt_NULL] is filled by S_more_he, but the
-bodies_by_type[SVt_NULL] slot is not used, as the table is not
+PL_bodies_by_type[SVt_NULL] slot is not used, as the table is not
 available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
 
 */
@@ -879,7 +879,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
 
     const struct body_details *type_details =
         (sv_type > SVt_IV)
-            ? bodies_by_type + sv_type
+            ? PL_bodies_by_type + sv_type
             : (sv_type == SVt_NULL)
                 ? NULL
                 : &fake_hv_with_aux
@@ -904,7 +904,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
         done_sanity_check = TRUE;
 
         while (i--)
-            assert (bodies_by_type[i].type == i);
+            assert (PL_bodies_by_type[i].type == i);
     }
 #endif
 
@@ -973,6 +973,168 @@ Perl_more_bodies (pTHX_ const svtype sv_type)
 }
 
 /*
+=for apidoc newSV_type_generic
+
+Creates a new SV, of the type specified.
+The reference count for the new SV is set to 1.
+
+This function can create all types of SV, whereas the inline function
+C<newSV_type> specializes in the most common SV types and calls this
+function for everything else.
+
+=cut
+*/
+
+SV *
+Perl_newSV_type_generic(pTHX_ const svtype type)
+{
+    PERL_ARGS_ASSERT_NEWSV_TYPE_GENERIC;
+
+    SV *sv;
+    new_SV(sv);
+    SvFLAGS(sv) = type;
+    assert(!SvOK(sv));
+    /* Clear the sv_u slot, regardless of what
+     * might actually be stored inside it. */
+    sv->sv_u.svu_rv = NULL;
+
+    void*      new_body;
+    const struct body_details *type_details;
+    type_details = PL_bodies_by_type + type;
+
+    switch (type) {
+    case SVt_NULL:
+        break;
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        assert(SvIVX(sv) == 0);
+        break;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+        assert(SvNVX(sv) == 0.0);
+#else
+        SvANY(sv) = new_XNV();
+        SvNV_set(sv, 0);
+#endif
+        break;
+    case SVt_PVHV:
+    case SVt_PVAV:
+    case SVt_PVOBJ:
+        assert(type_details->body_size);
+#ifndef PURIFY
+        assert(type_details->arena);
+        assert(type_details->arena_size);
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ type);
+        /* xpvav, xpvhv, xobject have no offset, no need to adjust new_body */
+        assert(!(type_details->offset));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = new_NOARENAZ(type_details);
+#endif
+        SvANY(sv) = new_body;
+
+        ((XPVMG*)new_body)->xmg_u.xmg_magic = NULL;
+        ((XPVMG*)new_body)->xmg_stash = NULL;
+
+        switch(type) {
+        case SVt_PVAV:
+            ((XPVAV*)new_body)->xav_fill  = -1;
+            ((XPVAV*)new_body)->xav_max   = -1;
+            ((XPVAV*)new_body)->xav_alloc = NULL;
+
+            assert(!AvREIFY(sv));
+            AvREAL_on(sv);
+            assert(!sv->sv_u.svu_array); /* or svu_hash  */
+            break;
+        case SVt_PVHV:
+            ((XPVHV*)new_body)->xhv_keys = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            ((XPVHV*)new_body)->xhv_max = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            assert(!sv->sv_u.svu_hash); /* or svu_hash  */
+            break;
+        case SVt_PVOBJ:
+            ((XPVOBJ*)new_body)->xobject_maxfield = -1;
+            assert(!sv->sv_u.svu_fields); /* or svu_hash  */
+            break;
+        default:
+            NOT_REACHED;
+        }
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+        /* For a type known at compile time, it should be possible for the
+         * compiler to deduce the value of (type_details->arena), resolve
+         * that branch below, and inline the relevant values from
+         * PL_bodies_by_type. Except, at least for gcc, it seems not to do that.
+         * We help it out here with two deviations from sv_upgrade:
+         * (1) Minor rearrangement here, so that PVFM - the only type at this
+         *     point not to be allocated from an array appears last, not PV.
+         * (2) The ASSUME() statement here for everything that isn't PVFM.
+         * Obviously this all only holds as long as it's a true reflection of
+         * the PL_bodies_by_type lookup table. */
+#ifndef PURIFY
+         ASSUME(type_details->arena);
+#endif
+         /* FALLTHROUGH */
+    case SVt_PVFM:
+
+        assert(type_details->body_size);
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(type_details->arena) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ type);
+            Zero(new_body, type_details->body_size, char);
+            new_body = ((char *)new_body) - type_details->offset;
+        } else
+#endif
+        {
+            new_body = new_NOARENAZ(type_details);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(deb("sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        assert(!sv->sv_u.svu_rv);
+        break;
+    default:
+        croak("panic: newSV_type() unknown type %lu", (unsigned long)type);
+    }
+
+    return sv;
+}
+
+/*
 =for apidoc sv_upgrade
 
 Upgrade an SV to a more complex form.  Generally adds a new body type to the
@@ -995,7 +1157,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     const svtype old_type = SvTYPE(sv);
     const struct body_details *new_type_details;
     const struct body_details *old_type_details
-        = bodies_by_type + old_type;
+        = PL_bodies_by_type + old_type;
     SV *referent = NULL;
 
     if (old_type == new_type)
@@ -1100,7 +1262,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         croak("sv_upgrade from type %d down to type %d",
                 (int)old_type, (int)new_type);
 
-    new_type_details = bodies_by_type + new_type;
+    new_type_details = PL_bodies_by_type + new_type;
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= new_type;
@@ -1312,7 +1474,7 @@ Perl_hv_auxalloc(pTHX_ HV *hv)
 {
     PERL_ARGS_ASSERT_HV_AUXALLOC;
 
-    const struct body_details *old_type_details = bodies_by_type + SVt_PVHV;
+    const struct body_details *old_type_details = PL_bodies_by_type + SVt_PVHV;
     void *old_body;
     void *new_body;
 
@@ -5988,7 +6150,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         const bool islv = SvTYPE(sv) == SVt_PVLV;
         const svtype new_type =
           islv ? SVt_NULL : SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
-        SV *const temp = newSV_type(new_type);
+        SV *const temp = newSV_type_generic(new_type);
         regexp *old_rx_body;
 
         if (new_type == SVt_PVMG) {
@@ -7726,13 +7888,13 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             /* Historically this check on type was needed so that the code to
              * free bodies wasn't reached for these types, because the arena
              * slots were re-used for HEs and pointer table entries. The
-             * metadata table `bodies_by_type` had the information for the sizes
+             * metadata table `PL_bodies_by_type` had the information for the sizes
              * for HEs and PTEs, hence the code here had to have a special-case
              * check to ensure that the "regular" body freeing code wasn't
-             * reached, and get confused by the "lies" in `bodies_by_type`.
+             * reached, and get confused by the "lies" in `PL_bodies_by_type`.
              *
              * However, it hasn't actually been needed for that reason since
-             * Aug 2010 (commit 829cd18aa7f45221), because `bodies_by_type` was
+             * Aug 2010 (commit 829cd18aa7f45221), because `PL_bodies_by_type` was
              * changed to always hold the accurate metadata for the SV types.
              * This was possible because PTEs were no longer allocated from the
              * "SVt_IV" arena, and the code to allocate HEs from the "SVt_NULL"
@@ -8024,7 +8186,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             }
             else {
                 arena_index = type;
-                sv_type_details = bodies_by_type + arena_index;
+                sv_type_details = PL_bodies_by_type + arena_index;
             }
 
             SvFLAGS(sv) &= SVf_BREAK;
@@ -16077,7 +16239,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             void *new_body;
             const svtype sv_type = SvTYPE(ssv);
             const struct body_details *sv_type_details
-                = bodies_by_type + sv_type;
+                = PL_bodies_by_type + sv_type;
 
             switch (sv_type) {
             default:
