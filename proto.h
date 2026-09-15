@@ -13126,7 +13126,9 @@ static const char *
 S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t line)
         Perl_attribute_nonnull_aTHX;
 #       define PERL_ARGS_ASSERT_QUERYLOCALE_2024_L \
-           STMT_START { Perl_assert_aTHX; } STMT_END
+           STMT_START { Perl_assert_aTHX;                     \
+                        PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
 
 #     else
 static const char *
