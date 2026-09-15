@@ -6367,6 +6367,8 @@ L<perlre> and L<perlop>.
 =item print FILEHANDLE LIST
 X<print>
 
+=item print {FH_EXPRESSION} LIST
+
 =item print FILEHANDLE
 
 =item print LIST
@@ -6375,41 +6377,81 @@ X<print>
 
 =for Pod::Functions output a list to a filehandle
 
-Prints a string or a list of strings.  Returns true if successful.
-FILEHANDLE may be a scalar variable containing the name of or a reference
-to the filehandle, thus introducing one level of indirection.  (NOTE: If
-FILEHANDLE is a variable and the next token is a term, it may be
-misinterpreted as an operator unless you interpose a C<+> or put
-parentheses around the arguments.)  If FILEHANDLE is omitted, prints to the
-last selected (see L<C<select>|/select FILEHANDLE>) output handle.  If
-LIST is omitted, prints L<C<$_>|perlvar/$_> to the currently selected
-output handle.  To use FILEHANDLE alone to print the content of
-L<C<$_>|perlvar/$_> to it, you must use a bareword filehandle like
-C<FH>, not an indirect one like C<$fh>.  To set the default output handle
-to something other than STDOUT, use the select operation.
+Prints a string or a list of strings to the destination given by
+C<FILEHANDLE> or C<FH_EXPRESSION> (or if omitted, to the last selected
+output handle.  See L<C<select>|/select C<FILEHANDLE>>).  Returns
+C<true> if successful.
+
+If C<LIST> is omitted, prints the contents of L<C<$_>|perlvar/$_>.
+
+C<FILEHANDLE> may be a bareword, in which case it must be associated
+with a file, pipe, or descriptor.  That association is implicit for
+either of the barewords C<STDOUT> or C<STDERR>, or explicit by use of
+L</C<open>> or L</C<sysopen>>.  Further, that association must permit
+output, and must not have been broken by, for example, an intervening
+L</C<close>>.
+
+C<FILEHANDLE> may also be a scalar variable, in which case it must
+either contain the name of a valid bareword filehandle as described in
+the previous paragraph, or itself have been used in an C<open> or
+C<sysopen> call, and not have been closed in the meantime.
+
+C<FH_EXPRESSION> is an expression that evaluates to a scalar value
+C<FILEHANDLE>.
 
 The current value of L<C<$,>|perlvar/$,> (if any) is printed between
-each LIST item.  The current value of L<C<$\>|perlvar/$\> (if any) is
-printed after the entire LIST has been printed.  Because print takes a
-LIST, anything in the LIST is evaluated in list context, including any
-subroutines whose return lists you pass to
-C<print>.  Be careful not to follow the print
-keyword with a left
-parenthesis unless you want the corresponding right parenthesis to
-terminate the arguments to the print; put parentheses around all arguments
-(or interpose a C<+>, but that doesn't look as good).
+each C<LIST> item.  The current value of L<C<$\>|perlvar/$\> (if any) is
+printed after the entire C<LIST> has been printed.  Because print takes a
+C<LIST>, anything in the C<LIST> is evaluated in list context, including any
+subroutines whose return lists you pass to C<print>.
+
+C<print> can fail, returning C<false>, for any number of reasons,
+including no space available on the output device or the filehandle not
+currently being open for output.  Further, printing to a closed pipe or
+socket will also generate a SIGPIPE signal.  See L<perlipc> for more on
+signal handling.
+
+Note there is no comma between C<FILEHANDLE> and C<LIST>.  That helps
+the parser resolve ambiguities in what is meant, but even seasoned Perl
+programmers sometimes insert one out of habit.  Some people tend to use
+the S<C<print {FH_EXPRESSION} LIST>> form by simply enclosing
+C<FILEHANDLE> in braces, both to discourage them from adding the comma,
+and to make the filehandle really stand out:
+
+ print {$fh} -3;
+
+We'll have more to say below about using braces for more complicated cases. 
+
+Without the braces, ambiguities are still possible.  Consider
+
+ print $foo -3;
+ print $foo - 3;
+ print($foo -3);
+ print +$foo -3;
+
+Only a single blank differentiates the first two cases.  But the first
+prints C<-3> to the filehandle contained in C<$foo>; and the remaining
+ones print to the default filehandle the value obtained by subtracting
+C<3> from the contents of C<$foo>.  The final two examples show how
+parentheses or a plus can be used to force C<$foo> to be considered to
+be a variable.
+
+Another way of avoiding the comma gotcha and ambiguities is to use this
+form:
+
+ $foo->print(-3);
+
+In the S<C<print FILEHANDLE>> form (without a C<LIST>), C<FILEHANDLE>
+must be a bareword like C<FH>, not a scalar variable one like C<$fh>.
 
 If you're storing handles in an array or hash, or in general whenever
 you're using any expression more complex than a bareword handle or a plain,
 unsubscripted scalar variable to retrieve it, you will have to use a block
-returning the filehandle value instead, in which case the LIST may not be
+returning the filehandle value instead, in which case the C<LIST> may not be
 omitted:
 
     print { $files[$i] } "stuff\n";
     print { $OK ? *STDOUT : *STDERR } "stuff\n";
-
-Printing to a closed pipe or socket will generate a SIGPIPE signal.  See
-L<perlipc> for more on signal handling.
 
 =item printf FILEHANDLE FORMAT, LIST
 X<printf>
