@@ -981,10 +981,9 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
 }
 
 void
-Perl_class_declare_padvars(pTHX_ CV *cv)
+Perl_class_declare_padvars(pTHX_ CV *cv UNUSED)
 {
     PERL_ARGS_ASSERT_CLASS_DECLARE_PADVARS;
-    PERL_UNUSED_ARG(cv);
 
     assert(cv == PL_compcv);
     assert(HvSTASH_IS_CLASS(PL_curstash));
