@@ -103,7 +103,7 @@ use warnings;
 
 my $switches = "";
 
-my $is_debugging_build = $Config{config_args} =~ /\bDDEBUGGING\b(*nla:=none)/;
+my $is_debugging_build = $Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/;
 
 our $TODO;
 
