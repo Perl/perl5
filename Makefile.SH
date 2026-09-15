@@ -1699,6 +1699,9 @@ test_reonly test-reonly: test_prep_reonly
 test_porting test-porting: test_prep
 	TEST_ARGS='porting/*.t lib/diagnostics.t' TESTFILE=harness $(RUN_TESTS) choose
 
+test_regex_tests test-regex-tests: test_prep
+	TEST_ARGS='re/*.t ../ext/re/t/*.t' PERL_TEST_HARNESS_ASAP=1 TESTFILE=harness $(RUN_TESTS) choose
+
 !NO!SUBS!
 
 $spitshell>>$Makefile <<!GROK!THIS!
