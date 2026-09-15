@@ -3831,6 +3831,10 @@ sub generate_proto_h {
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
                     my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
                     my $unused = ( $arg =~ s/\bUNUSED\b// );
+                    my $debug_only = ( $arg =~ s/\bDEBUG_ONLY\b// );
+                    die_at_end
+                        ":$func: $arg Use only one of UNUSED, DEBUG_ONLY"
+                                                    if $unused && $debug_only;
 
                     # Trim $arg and remove multiple blanks
                     $arg =~ s/^\s+//;
@@ -3915,6 +3919,11 @@ sub generate_proto_h {
                             $arg .= " __attribute__unused__";
                             push @unused,
                                  "PERL_UNUSED_ARG_FOR_ARGS_ASSERT($argname)";
+                        }
+                        elsif ($debug_only) {
+                            $arg .= " __attribute__unused_unless_debugging__";
+                            push @unused,
+                              "PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT($argname)";
                         }
 
                         # If this is a pointer to a character string argument,

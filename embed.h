@@ -25,6 +25,7 @@
  * earlier when this file was #included with this symbol undefined */
 #if defined(PERL_DO_UNDEFS)
 # if !defined(PERL_CORE)
+#   undef __attribute__unused_unless_debugging__
 #   undef ALIGNED_TYPE_NAME
 #   undef AMGf_no_GETMAGIC
 #   undef CC_MAGICAL_
@@ -58,6 +59,7 @@
 #   undef SvVMAGICAL_on
 #   undef UNI_DISPLAY_TR_
 #   if !defined(PERL_EXT)
+#     undef DEBUG_ONLY
 #     undef GV_CACHE_ONLY
 #     undef invlist_intersection_
 #     undef invlist_subtract_
