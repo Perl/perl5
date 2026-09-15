@@ -362,7 +362,7 @@
         DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
                 "%s: %ld: 0x%p: mutex 0x%p about to signal, then write"     \
                 " unlock\n", __FILE__, (long) __LINE__, aTHX, mutex));      \
-        COND_SIGNAL(&(mutex)->wakeup);                                      \
+        COND_BROADCAST(&(mutex)->wakeup);                                      \
         MUTEX_UNLOCK(&(mutex)->lock);                                       \
         DEBUG_K(PerlIO_printf(Perl_debug_log,                               \
                 "%s: %ld: 0x%p mutex 0x%p: signalled, write unlocked\n",    \
