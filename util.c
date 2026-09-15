@@ -5328,7 +5328,7 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     dTHX;
 
 #ifndef HAS_VSNPRINTF
-    PERL_UNUSED_VAR(len);
+    PERL_UNUSED_ARG(len);
 #endif
     va_start(ap, format);
 #ifdef USE_QUADMATH
