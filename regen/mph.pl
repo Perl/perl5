@@ -4,9 +4,17 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Text::Wrap;
-use List::Util qw(shuffle min);
+use List::Util qw(min);
 
 use warnings 'FATAL' => 'all';
+
+# IMPORTANT: If this file changes then the production MPH data in
+# uni_keywords.h must be rebuilt.  From the repository root run:
+#
+#     ./perl -Ilib regen/mk_invlists.pl
+#
+# The generated header contains a digest of this file.  Even a comment-only
+# change requires regeneration.
 
 # The style of this file is determined by:
 #
@@ -60,32 +68,12 @@ sub new {
     $self{table_name}  ||= $base_name . "_table";
     $self{match_name}  ||= $base_name . "_match";
 
-    my $split_strategy;
     $self{simple_split} //= 0;
     if ($self{simple_split}) {
         $self{split_strategy}= "simple";
-        $self{randomize_squeeze}= 0;
     }
     else {
-        $self{split_strategy}= "squeeze";
-        $self{randomize_squeeze} //= 1;
-    }
-    if ($self{randomize_squeeze}) {
-        $self{max_same_in_squeeze} //= 5;
-        if (defined $self{srand_seed_was}) {
-            $self{srand_seed}= delete $self{srand_seed_was};
-        }
-        elsif (!defined $self{srand_seed}) {
-            $self{srand_seed}= srand();
-        }
-        else {
-            srand($self{srand_seed});
-        }
-        print "SRAND_SEED= $self{srand_seed}\n" if $DEBUG;
-    }
-    else {
-        $self{max_same}= 3;
-        delete $self{srand_seed};
+        $self{split_strategy}= "squeeze-weighted-two-direction";
     }
     return bless \%self, $class;
 }
@@ -585,8 +573,9 @@ sub _inc_popularity {
 sub _get_popularity {
     my ($popularity, $ofs, $len)= @_;
     my $res= {
-        reused_digits => 0,
-        popularity    => 0,
+        reused_digits    => 0,
+        popularity       => 0,
+        total_popularity => 0,
     };
     my $min_pop= undef;
     for my $idx ($ofs .. $ofs + $len - 1) {
@@ -595,6 +584,7 @@ sub _get_popularity {
         }
         else {
             my $pop= $popularity->[$idx];
+            $res->{total_popularity} += $pop;
             if (!defined $min_pop || $pop < $min_pop) {
                 $min_pop= $pop;
             }
@@ -609,8 +599,10 @@ sub _get_popularity {
 sub _merge_score {
     my ($s1, $s2)= @_;
     return +{
-        reused_digits => $s1->{reused_digits} + $s2->{reused_digits},
-        popularity    => min($s1->{popularity}, $s2->{popularity}),
+        reused_digits    => $s1->{reused_digits} + $s2->{reused_digits},
+        popularity       => min($s1->{popularity}, $s2->{popularity}),
+        total_popularity => $s1->{total_popularity}
+                          + $s2->{total_popularity},
     };
 }
 
@@ -634,6 +626,9 @@ sub _compare_score {
     if ($s1->{reused_digits} != $s2->{reused_digits}) {
         return $s1->{reused_digits} <=> $s2->{reused_digits};
     }
+    if ($s1->{total_popularity} != $s2->{total_popularity}) {
+        return $s1->{total_popularity} <=> $s2->{total_popularity};
+    }
     return $s1->{popularity} <=> $s2->{popularity};
 }
 
@@ -642,8 +637,9 @@ sub _compare_score {
 sub _most_popular_offset {
     my ($offsets_hash, $popularity, $buf_ref, $word)= @_;
     my $best_score= {
-        reused_digits => -1,
-        popularity    => -1,
+        reused_digits    => -1,
+        popularity       => -1,
+        total_popularity => -1,
     };
     my $best_pos= -1;
     my $offsets_ary= _get_offsets($offsets_hash, $buf_ref, $word);
@@ -679,8 +675,11 @@ sub _squeeze {
 
     for my $word (sort keys %$word_count) {
         my $count= $word_count->{$word};
+
+        # Weight every character by the full frequency of the fragment.  This
+        # favors long prefixes and suffixes which are used by many keys.
         _init_popularity(\%offsets_hash, \@popularity, $buf_ref, $word,
-            $count / length($word));
+            $count);
     }
 
     WORD:
@@ -688,8 +687,9 @@ sub _squeeze {
         my $best_pos1= -1;
         my $best_pos2= -1;
         my $best_score= {
-            reused_digits => -1,
-            popularity    => -1,
+            reused_digits    => -1,
+            popularity       => -1,
+            total_popularity => -1,
         };
         my $best_split;
 
@@ -790,15 +790,79 @@ sub _initial_covering_buf {
     return $res;
 }
 
+# Why do we squeeze the keys instead of using conventional compression?
+#
+# The point of the blob is to make key validation fast.  It is not a stream
+# which we decompress before using it.  It is a shared buffer containing
+# pieces of the keys.
+#
+# Each row in the minimal perfect hash stores the offsets and lengths of one
+# prefix and one suffix.  Once we hash a candidate key we can validate it with
+# at most two memcmp() calls against the blob.  We do not have to rebuild the
+# key.  We do not allocate memory or keep decompression state.  Invalid keys
+# are cheap to reject as well.
+#
+# The following results are from the 7,906-key Unicode data set used in
+# September 2026.  The keys contain 111,582 bytes before separators.  The
+# timings are from one development machine.  They are useful as relative
+# measurements only.
+#
+#   split strategy                    build time     blob bytes
+#   ----------------------------------------------------------------
+#   randomized squeeze                   ~34.2 s          9,132
+#   frequency-weighted, two-direction      ~9.1 s          9,212
+#   simple split                           ~1.9 s         11,348
+#
+# The weighted two-direction strategy builds about 3.7 times faster than the
+# randomized strategy.  The blob is 80 bytes larger, an increase of 0.88%.
+#
+# For comparison, general-purpose compressors produced the following stream
+# sizes.  The input was a sorted, newline-delimited copy of the same keys.
+#
+#   xz          21,884 bytes
+#   bzip2       22,919 bytes
+#   zstd        23,634 bytes
+#   gzip        26,689 bytes
+#   front coding approximately 51,392 bytes
+#
+# These figures are not direct alternatives to the blob sizes above.  A
+# compressed stream must be expanded before we can check arbitrary keys.
+# Another option is to add a block index and restart points.
+#
+# Every representation that supports random lookup also needs metadata for
+# each key.  In this design the fragment-specific part of a row is two U16 blob
+# offsets and two U8 lengths.  A design with one string reference and one
+# length might cut these six bytes in half.  This only applies if the same
+# field widths are enough.
+#
+# Another compression scheme may need wider offsets or lengths.  It may also
+# need block identifiers, restart points, or decoder state.  Few general
+# compression schemes handle fine-grained random access.  Adding it normally
+# takes index space and makes compression less effective.
+#
+# A fair comparison has to include the metadata needed by each representation.
+# Comparing only the compressed strings on one side with the lookup metadata
+# on the other side is not meaningful.  The stream results do show that these
+# keys have unusually repetitive prefixes and suffixes.  They do not compare
+# complete random-access representations.
+#
+# The squeeze algorithm first tries to reuse as many bytes as possible.  It
+# uses fragment frequency to decide between candidates with the same reused
+# byte count.  This favors long pieces which are used by many keys.
+#
+# Word order changes the greedy choices.  We squeeze from shortest to longest
+# until there is no improvement.  We then reverse the order and squeeze again.
+# This gets most of the benefit of randomized retries at a much lower
+# generation cost.  It also makes generation repeatable.  These comparisons
+# should be rerun if we make a large change to the Unicode key set or its
+# representation.
+
 sub build_split_words_squeeze {
     my ($self)= @_;
     # Thanks to Ilya Sashcheka for this algorithm
 
     my $hash= $self->{source_hash};
     my $length_all_keys= $self->{length_all_keys};
-    my $randomize= $self->{randomize_squeeze};
-    my $max_same= $self->{max_same_in_squeeze};
-
     my @words= sort keys %$hash;
     my %splits;
     my $split_points;
@@ -834,28 +898,21 @@ sub build_split_words_squeeze {
     printf "Pre squeeze buffer: %s\n", $buf        if $DEBUG > 1;
     printf "Pre squeeze length: %d\n", length $buf if $DEBUG;
 
-    my $same= 0;
-    my $counter= 0;
-    my $reverse_under= 2;
-    while ($same < $max_same) {
+    # Word order changes the choices made by _squeeze().  Start with the
+    # shortest words and squeeze until there is no improvement.  Then reverse
+    # the order and squeeze again.
+    my $direction_changes= 0;
+    while (1) {
         my ($new_buf, $new_split_points)=
             _squeeze(\@words, \%word_count, \%splits, \$buf);
         if (!$split_points or length($new_buf) < length($buf)) {
             $buf= $new_buf;
             $split_points= $new_split_points;
-            $same= 0;
         }
         else {
-            if ($same < $reverse_under or !$randomize) {
-                print "reversing words....\n" if $DEBUG;
-                @words= reverse @words;
-            }
-            else {
-                print "shuffling words....\n" if $DEBUG;
-                @words= shuffle @words;
-                $reverse_under= 1;
-            }
-            $same++;
+            last if $direction_changes++;
+            print "reversing words....\n" if $DEBUG;
+            @words= reverse @words;
         }
     }
 
@@ -900,10 +957,9 @@ sub build_split_words_simple {
 sub build_split_words {
     my ($self)= @_;
 
-    # The _simple algorithm does not compress nearly as well as the
-    # _squeeze algorithm, although it uses less memory and will likely
-    # be faster, especially if randomization is enabled. The default
-    # is to use _squeeze as our hash is not that large (~8k keys).
+    # The _simple algorithm does not compress nearly as well as _squeeze.  It
+    # uses less memory and is likely to be faster.  We use _squeeze by default
+    # because this hash is not very large (about 8k keys).
     my ($buf, $split_words);
     if ($self->{simple_split}) {
         ($buf, $split_words)= $self->build_split_words_simple();
@@ -971,7 +1027,11 @@ sub build_array_of_struct {
 
     my %defines;
     my %tests;
-    my @rows;
+    my @row_data;
+    my @column_widths= (0) x 6;
+
+    # Collect the rendered fields first.  Record the width of each column.
+    # Hard-coded widths become ragged when the data or value names grow.
     foreach my $row (@$second_level) {
         if (!defined $row->{idx} or !defined $row->{value}) {
             die "panic: No idx or value key in row data:", Dumper($row);
@@ -992,10 +1052,40 @@ sub build_array_of_struct {
         );
         $_ > U8_MAX and die "panic: value exceeds range of U8"
             for @u8;
-        push @rows, sprintf "  { %5d, %5d, %5d, %3d, %3d, %s }   /* %s%s */",
-            @u16, @u8, $row->{value}, $row->{prefix}, $row->{suffix};
+
+        # A leading minus means that the matched inversion list should be
+        # complemented.  Keep it in a separate column so all value names start
+        # at the same position.
+        my $value= "$row->{value}";
+        my $sign= ($value =~ s/^-//) ? "-" : " ";
+        my @fields= map { "$_" } @u16, @u8, $value;
+        for my $column (0 .. $#fields) {
+            my $width= length $fields[$column];
+            $column_widths[$column]= $width
+                if $column_widths[$column] < $width;
+        }
+        push @row_data,
+            [ \@fields, $sign, $row->{prefix} . $row->{suffix} ];
         ##.
     }
+
+    # Leave one space before each numeric column.  Right-align the numbers.
+    # Left-align the symbolic value.  This also lines up the comments.
+    $column_widths[$_]++ for 0 .. $#column_widths - 1;
+    my $row_format= "  {"
+        . join(", ", map { "%*s" } 0 .. $#column_widths - 1)
+        . ", %s%-*s }   /* %s */";
+    my @rows;
+    for my $row (@row_data) {
+        my ($fields, $sign, $key)= @$row;
+        my @format_args;
+        for my $column (0 .. $#column_widths - 1) {
+            push @format_args, $column_widths[$column], $fields->[$column];
+        }
+        push @rows, sprintf $row_format, @format_args, $sign,
+            $column_widths[-1], $fields->[-1], $key;
+    }
+
     $self->{rows_array}= \@rows;
     $self->{defines_hash}= \%defines;
     $self->{tests_hash}= \%tests;
@@ -1008,12 +1098,12 @@ sub make_algo {
     my (
         $second_level, $seed1,     $length_all_keys, $blob,
         $rows_array,   $blob_name, $struct_name,     $table_name,
-        $match_name,   $prefix,    $split_strategy,  $srand_seed,
+        $match_name,   $prefix,    $split_strategy,
         )
         = @{$self}{ qw(
             second_level   seed1       length_all_keys   blob
             rows_array     blob_name   struct_name       table_name
-            match_name     prefix      split_strategy    srand_seed
+            match_name     prefix      split_strategy
         ) };
 
     my $n= 0 + @$second_level;
@@ -1023,8 +1113,6 @@ sub make_algo {
     push @code, "/*\n";
     push @code, sprintf "generator script: %s\n", $0;
     push @code, sprintf "split strategy: %s\n",   $split_strategy;
-    push @code, sprintf "srand: %d\n", $srand_seed
-        if defined $srand_seed;
     push @code, sprintf "rows: %s\n",                $n;
     push @code, sprintf "seed: %s\n",                $seed1;
     push @code, sprintf "full length of keys: %d\n", $length_all_keys;
@@ -1054,7 +1142,9 @@ EOF_CODE
     push @code, sprintf "static const U32 ${prefix}_FNV32_PRIME = 0x%08x;\n\n",
         FNV32_PRIME;
 
-    push @code, "/* The comments give the input key for the row it is in */\n";
+    push @code, "/* The comments give the input key for the row it is in.\n";
+    push @code, " * A leading minus sign means to complement the inversion "
+        . "list. */\n";
     push @code,
         "static const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n",
         join(",\n", @$rows_array) . "\n};\n\n";
@@ -1114,7 +1204,7 @@ sub print_algo {
     my $ofh= $self->__ofh($to, "h_file");
 
     my $code= $self->make_algo();
-    print $to $code;
+    print $ofh $code;
 }
 
 sub print_main {
@@ -1213,12 +1303,12 @@ unless (caller) {
     {
         no warnings;
         do "../perl/lib/unicore/UCD.pl";
-        %hash= %utf8::loose_to_file_of;
+        %hash= %Unicode::UCD::loose_to_file_of;
     }
     if ($ENV{MERGE_KEYS}) {
         my @keys= keys %hash;
-        foreach my $loose (keys %utf8::loose_property_name_of) {
-            my $to= $utf8::loose_property_name_of{$loose};
+        foreach my $loose (keys %Unicode::UCD::loose_property_name_of) {
+            my $to= $Unicode::UCD::loose_property_name_of{$loose};
             next if $to eq $loose;
             foreach my $key (@keys) {
                 my $copy= $key;

@@ -21,6 +21,7 @@ CharClass::Matcher -- Generate C macros that match character classes efficiently
 =head1 SYNOPSIS
 
     perl regen/regcharclass.pl
+    make regen_charclass
 
 =head1 DESCRIPTION
 

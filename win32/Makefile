@@ -1363,6 +1363,40 @@ regen :
 	regen.pl
 	cd win32
 
+regen_headers regen-headers :
+	cd .. && regen.pl -v
+
+# Requires Devel::Tokenizer::C 0.05 or newer in the installed Perl.
+regen_keywords regen-keywords :
+	cd .. && perl.exe regen\keywords.pl
+
+regen_invlist regen-invlist :
+	cd .. && perl.exe -Ilib regen\mk_invlists.pl
+
+regen_charclass regen-charclass :
+	cd .. && perl.exe -Ilib regen\regcharclass.pl
+
+regen_meta regen-meta :
+	cd .. && perl.exe -Ilib Porting\makemeta -y
+	cd .. && perl.exe -Ilib Porting\makemeta -j
+
+# regen_perly is omitted here.  It depends on tools only known to be
+# available on Unix-like systems.
+regen_all regen-all :
+	@echo If this fails, run the regeneration steps one at a time:
+	@echo   nmake regen
+	@echo   nmake regen_keywords
+	@echo   nmake regen_invlist
+	@echo   nmake regen_charclass
+	@echo   nmake regen_meta
+	$(MAKE)
+	$(MAKE) regen
+	$(MAKE) regen_keywords
+	$(MAKE) regen_invlist
+	$(MAKE) regen_charclass
+	$(MAKE) regen_meta
+	$(MAKE)
+
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t

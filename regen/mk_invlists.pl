@@ -37,7 +37,7 @@ sub stack_trace {
     return "; called from line(s) $return";
 }
 
-print "Starting...\n" if DEBUG;
+print "Starting mk_invlists...\n" if DEBUG;
 
 # This program outputs charclass_invlists.inc, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
@@ -49,6 +49,8 @@ print "Starting...\n" if DEBUG;
 # in the headers is used to minimize the possibility of things getting
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
+#
+# Normally run with `make regen_invlist`.
 
 my $VERSION_DATA_STRUCTURE_TYPE = 148565664;
 
@@ -1032,6 +1034,32 @@ sub mk_invlist_from_sorted_cp_list($list_ref) {
     return @invlist;
 }
 
+sub mk_invlist_from_cp_list_and_ranges($list_ref, $ranges_ref) {
+
+    # Turn the individual code points and half-open ranges into a single
+    # inversion list.  Keep the ranges intact while sorting and merging them.
+    # Expanding a large range here would only recreate the same range below.
+
+    my @ranges = map { [ $_, $_ + 1 ] } $list_ref->@*;
+    push @ranges, map { [ $_->@* ] } $ranges_ref->@*;
+    return unless @ranges;
+
+    @ranges = sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
+                   @ranges;
+
+    my @invlist;
+    for my $range (@ranges) {
+        if (@invlist && $range->[0] <= $invlist[-1]) {
+            $invlist[-1] = $range->[1] if $range->[1] > $invlist[-1];
+        }
+        else {
+            push @invlist, $range->@*;
+        }
+    }
+
+    return @invlist;
+}
+
 print "Reading Case Folding rules.\n" if DEBUG;
 # Read in the Case Folding rules, and construct arrays of code points for the
 # properties we need.
@@ -1356,7 +1384,7 @@ sub _Perl_CCC_non0_non230 {
 sub expand_column($table_size, $splits, $enums, $x) {
     print STDERR __FILE__, ": ", __LINE__, ": Entering expand_column ",
                  stack_trace(), "\n",
-                 Dumper $x, $table_size, $enums, $splits if DEBUG;
+                 Dumper $x, $table_size, $enums, $splits if DEBUG > 1;
 
     # Expand a row or column denoted by $x into its constituents.  $x may be
     # one of:
@@ -1449,7 +1477,7 @@ sub expand_column($table_size, $splits, $enums, $x) {
     }
 
     print STDERR __FILE__, ": ", __LINE__, ": expanded column returning ",
-                 Dumper \@list if DEBUG;
+                 Dumper \@list if DEBUG > 1;
     return \@list;
 }
 
@@ -1490,7 +1518,7 @@ sub get_cell_list($table_size, $splits, $enums, $x, $y, $me_too = undef) {
 
     # It's a lot easier to work with under debugging if the list is sorted.
     @list = sort { $a->[0] <=> $b->[0] or $a->[1] <=> $b->[1] } @list
-                                                                    if DEBUG;
+                                                            if DEBUG;
 
     return \@list;
 }
@@ -1501,7 +1529,7 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
     print STDERR __FILE__, ": ", __LINE__, ": Entering set_cells",
                  stack_trace(), "\n",
                  Dumper $x, $y, $value, $rule, $has_unused, $me_too, $enums
-                                                                if DEBUG;
+                                                            if DEBUG > 1;
     # Set cells given by ($x,$y) in $table (whose size is $table_size) to
     # $value. $x and/or $y may expand to multiple cells.  All are set to
     # $value.  $splits, $enums, and $me_too give data to help in performing
@@ -1676,7 +1704,8 @@ sub set_cells($table, $table_size, $splits, $enums, $x, $y, $value, $rule,
         }
 
         print STDERR __FILE__, ": ", __LINE__,
-          ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y] if DEBUG;
+          ": Just set \$table->[$x][$y] = ", Dumper $table->[$x][$y]
+                                                              if DEBUG > 1;
     }
 }
 
@@ -3596,6 +3625,29 @@ foreach my $prop (@props) {
             $to_adjust = $map_format =~ /a/;
         }
 
+        my $charset_is_identity
+                        = ! grep { $a2n[$_] != $_ } 0 .. $#a2n;
+        my $needs_translation
+                        = (       (@invmap && $maps_to_code_point)
+                           || (    @invlist
+                               &&  $invlist[0] < 256
+                               && (    $invlist[0] != 0
+                                   || (scalar @invlist != 1
+                                       && $invlist[1] < 256))));
+
+        # Merge adjacent identical multi-code-point mappings when no
+        # translation is needed.  This keeps the generated map in canonical
+        # form.  (The translation code below used to do this.)
+        if ($charset_is_identity && @invmap) {
+            for (my $i = $#invmap; $i > 0; $i--) {
+                next unless ref $invmap[$i] && ref $invmap[$i - 1];
+                next unless join("\0", $invmap[$i]->@*)
+                         eq join("\0", $invmap[$i - 1]->@*);
+                splice @invlist, $i, 1;
+                splice @invmap, $i, 1;
+            }
+        }
+
         # Re-order the Unicode code points to native ones for this platform.
         # This is only needed for code points below 256, because native code
         # points are only in that range.  For inversion maps of properties
@@ -3618,11 +3670,7 @@ foreach my $prop (@props) {
         # of 0..256, as the remap will also include all of 0..256  (256 not
         # 255 because a re-ordering could cause 256 to need to be in the same
         # range as 255.)
-        if (       (@invmap && $maps_to_code_point)
-            || (    @invlist
-                &&  $invlist[0] < 256
-                && (    $invlist[0] != 0
-                    || (scalar @invlist != 1 && $invlist[1] < 256))))
+        if (! $charset_is_identity && $needs_translation)
         {
             $same_in_all_code_pages = 0;
             if (! @invmap) {    # Straight inversion list
@@ -3680,7 +3728,7 @@ foreach my $prop (@props) {
                                       ? 0xFFFF
                                       : 0x10FFFF;
 
-                my %mapped_lists;   # A hash whose keys are the buckets.
+                my %mapped;         # A hash whose keys are the buckets.
                 while (@invlist) {
                     last if $invlist[0] > $upper_limit;
 
@@ -3716,31 +3764,57 @@ foreach my $prop (@props) {
                     # through the range and put each translated code point in
                     # it into its bucket.
                     my $base_map = $invmap[0];
-                    for my $j ($invlist[0] .. $invlist[1] - 1) {
-                        if ($to_adjust
-                               # The 1st code point doesn't need adjusting
-                            && $j > $invlist[0]
+                    my $range_start = $invlist[0];
+                    my $range_end = $invlist[1] - 1;
+                    my $adjusts = $to_adjust
+                               && $base_map =~ $integer_or_float_re
+                               && $base_map ne $map_default;
 
-                               # Skip any non-numeric maps: these are outliers
-                               # that aren't code points.
-                            && $base_map =~ $integer_or_float_re
-
-                               #  'ne' because the default can be a string
-                            && $base_map ne $map_default)
-                        {
-                            # We adjust, by incrementing each the bucket and
-                            # the map.  For code point maps, translate to
-                            # native
-                            $base_map++;
-                            $bucket = ($maps_to_code_point)
-                                      ? a2n($base_map)
-                                      : $base_map;
+                    # Native code points only differ from Unicode below 256.
+                    # A constant mapping above that can stay as a range.
+                    # Expanding such a range can create as many as 0x110000
+                    # elements.
+                    if (! $adjusts) {
+                        my $low_end = ($range_end < 255) ? $range_end : 255;
+                        for my $j ($range_start .. $low_end) {
+                            push $mapped{$bucket}{points}->@*, a2n($j);
                         }
 
-                        # Add the native code point to the bucket for the
-                        # current map
-                        push @{$mapped_lists{$bucket}}, a2n($j);
-                    } # End of loop through all code points in the range
+                        my $high_start
+                                    = ($range_start > 255) ? $range_start : 256;
+                        if ($high_start <= $range_end) {
+                            push $mapped{$bucket}{ranges}->@*,
+                                                [ $high_start, $range_end + 1 ];
+                        }
+                    }
+                    else {
+                        for my $j ($range_start .. $range_end) {
+                            if ($to_adjust
+                                   # The first code point needs no adjustment.
+                                && $j > $invlist[0]
+
+                                   # Skip non-numeric maps.  They are outliers
+                                   # which aren't code points.
+                                && $base_map =~ $integer_or_float_re
+
+                                   # Use 'ne' because the default can be a
+                                   # string.
+                                && $base_map ne $map_default)
+                            {
+                                # Increment the map and use it to select the
+                                # next bucket.  Translate code point maps to
+                                # native.
+                                $base_map++;
+                                $bucket = ($maps_to_code_point)
+                                          ? a2n($base_map)
+                                          : $base_map;
+                            }
+
+                            # Add the native code point to the bucket for the
+                            # current map.
+                            push $mapped{$bucket}{points}->@*, a2n($j);
+                        } # End of loop through all code points in the range
+                    }
 
                     # Get ready for the next range
                     shift @invlist;
@@ -3749,33 +3823,30 @@ foreach my $prop (@props) {
 
                 # Here, @invlist and @invmap retain all the ranges from the
                 # originals that start with code points above $upper_limit.
-                # Each bucket in %mapped_lists contains all the code points
-                # that map to that bucket.  If the bucket is for a map to a
-                # single code point, the bucket has been converted to native.
-                # If something else (including multiple code points), no
-                # conversion is done.
+                # Each bucket in %mapped contains the code points and ranges
+                # that map to it.  The bucket key is in native form when the
+                # map is to a single code point.  Other bucket keys are not
+                # converted.  This includes maps to multiple code points.
                 #
                 # Now we recreate the inversion map into %xlated, but this
                 # time for the native character set.
                 my %xlated;
-                foreach my $bucket (keys %mapped_lists) {
+                foreach my $bucket (keys %mapped) {
 
                     # Sort and convert this bucket to an inversion list.  The
                     # result will be that ranges that start with even-numbered
                     # indexes will be for code points that map to this bucket;
                     # odd ones map to some other bucket, and are discarded
                     # below.
-                    @{$mapped_lists{$bucket}}
-                                    = sort{ $a <=> $b} @{$mapped_lists{$bucket}};
-                    @{$mapped_lists{$bucket}}
-                     = mk_invlist_from_sorted_cp_list(
-                                                    \@{$mapped_lists{$bucket}});
+                    my @mapped_list = mk_invlist_from_cp_list_and_ranges(
+                                            $mapped{$bucket}{points} // [],
+                                            $mapped{$bucket}{ranges} // []);
 
                     # Add each even-numbered range in the bucket to %xlated;
                     # so that the keys of %xlated become the range start code
                     # points, and the values are their corresponding maps.
-                    while (@{$mapped_lists{$bucket}}) {
-                        my $range_start = $mapped_lists{$bucket}->[0];
+                    for (my $i = 0; $i < @mapped_list; $i += 2) {
+                        my $range_start = $mapped_list[$i];
                         if ($bucket =~ /\cK/) {
                             @{$xlated{$range_start}} = split /\cK/, $bucket;
                         }
@@ -3787,15 +3858,12 @@ foreach my $prop (@props) {
                             # adjusting.
                             my $range_end = (     $to_adjust
                                                && $bucket != $map_default)
-                                            ? $mapped_lists{$bucket}->[1] - 1
+                                            ? $mapped_list[$i + 1] - 1
                                             : $range_start;
                             for my $i ($range_start .. $range_end) {
                                 $xlated{$i} = $bucket;
                             }
                         }
-                        shift @{$mapped_lists{$bucket}}; # Discard odd ranges
-                        shift @{$mapped_lists{$bucket}}; # Get ready for next
-                                                         # iteration
                     }
                 } # End of loop through all the buckets.
 
@@ -3836,8 +3904,9 @@ foreach my $prop (@props) {
                 unshift @invlist, @new_invlist;
             }
         }
-        elsif (@invmap) {   # inversion maps can't cope with this variable
-                            # being true, even if it could be true
+        elsif ($needs_translation
+               || @invmap) { # inversion maps can't cope with this variable
+                             # being true, even if it could be true
             $same_in_all_code_pages = 0;
         }
         else {
@@ -4201,8 +4270,6 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 
 read_only_bottom_close_and_rename($uni_pl, \@sources);
 
-print "Computing minimal perfect hash for unicode properties.\n" if DEBUG;
-
 if (my $file= $ENV{DUMP_KEYWORDS_FILE}) {
     require Data::Dumper;
 
@@ -4214,6 +4281,13 @@ if (my $file= $ENV{DUMP_KEYWORDS_FILE}) {
     print "Wrote keywords to '$file'.\n";
 }
 
+if ($ENV{SKIP_MPH}) {
+    print "Skipping minimal perfect hash for unicode properties.\n" if DEBUG;
+    exit 0;
+}
+
+print "Computing minimal perfect hash for unicode properties.\n" if DEBUG;
+
 my $keywords_fh = open_new('uni_keywords.h', '>',
                   {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
@@ -4224,11 +4298,6 @@ my $mph= MinimalPerfectHash->new(
     source_hash => \%keywords,
     match_name => "match_uniprop",
     simple_split => $ENV{SIMPLE_SPLIT} // 0,
-    randomize_squeeze => $ENV{RANDOMIZE_SQUEEZE} // 1,
-    max_same_in_squeeze => $ENV{MAX_SAME} // 5,
-    srand_seed => (lc($ENV{SRAND_SEED}//"") eq "auto")
-                  ? undef
-                  : $ENV{SRAND_SEED} // 1785235451, # I let perl pick a number
 );
 $mph->make_mph_with_split_keys();
 print $keywords_fh $mph->make_algo();
