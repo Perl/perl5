@@ -1,6 +1,7 @@
 package overload 1.42;
 
 use v5.42;
+use warnings ();
 no strict 'refs';
 
 our %ops = (
@@ -41,12 +42,19 @@ sub OVERLOAD {
             warnings::warnif("overload arg '$_' is invalid")
                 unless exists $ops_seen{$_};
             $sub = $arg{$_};
+            my $sym = $package . "::(" . $_;
             if (not ref $sub) {
-                $ {$package . "::(" . $_} = $sub;
+                ${$sym} = $sub;
                 $sub = \&nil;
             }
+            if (defined &$sym
+                && (\&$sym != \&nil ||
+                    defined $$sym && $$sym ne "")) {
+                warnings::warnif("redefine", "overload '$_' for $package redefined");
+            }
             #print STDERR "Setting '$ {'package'}::\cO$_' to \\&'$sub'.\n";
-            *{$package . "::(" . $_} = \&{ $sub };
+            no warnings 'redefine';
+            *$sym = \&{ $sub };
         }
     }
 }
