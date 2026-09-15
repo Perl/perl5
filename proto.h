@@ -1660,15 +1660,6 @@ Perl_dounwind(pTHX_ I32 cxix)
     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-PERL_CALLCONV U8
-Perl_dowantarray(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_DOWANTARRAY            \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_CALLCONV void
 Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
         Perl_attribute_nonnull(1);
@@ -2081,58 +2072,6 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 #define PERL_ARGS_ASSERT_GET_HV                 \
     STMT_START { Perl_assert_aTHX; assert(name);       \
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV const char *
-Perl_get_no_modify(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_GET_NO_MODIFY          \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV char **
-Perl_get_op_descs(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-#define PERL_ARGS_ASSERT_GET_OP_DESCS           \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV char **
-Perl_get_op_names(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-#define PERL_ARGS_ASSERT_GET_OP_NAMES           \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV U32 *
-Perl_get_opargs(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_GET_OPARGS             \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV PPADDR_t *
-Perl_get_ppaddr(pTHX)
-        Perl_attribute_nonnull_aTHX
-        __attribute__deprecated__
-        __attribute__warn_unused_result__
-        __attribute__pure__;
-#define PERL_ARGS_ASSERT_GET_PPADDR             \
-    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV SV *
@@ -10994,46 +10933,6 @@ Perl_malloced_size(void *p)
 PERL_CALLCONV void
 Perl_load_mathoms(void);
 # define PERL_ARGS_ASSERT_LOAD_MATHOMS
-
-PERL_CALLCONV UV
-Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_UTF8_TO_UVCHR         \
-    STMT_START { Perl_assert_aTHX; assert(s);          \
-                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV UV
-Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_UTF8_TO_UVUNI         \
-    STMT_START { Perl_assert_aTHX; assert(s);          \
-                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV UV
-Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI        \
-    STMT_START { Perl_assert_aTHX; assert(s);          \
-                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1)
-        __attribute__deprecated__;
-# define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
-    STMT_START { Perl_assert_aTHX; assert(d);          \
-                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
 
 # if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
