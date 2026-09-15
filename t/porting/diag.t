@@ -235,6 +235,7 @@ my %specialformats = (IVdf => 'd',
 		      PNf  => 's',
                       HvNAMEf => 's',
                       HvNAMEf_QUOTEDPREFIX => 'S',
+                      STACK_OFFdf => 'd',
                   );
 
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
