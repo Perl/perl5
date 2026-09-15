@@ -4807,6 +4807,7 @@ struct Perl_OpDumpContext;
 #include "scope.h"
 #include "warnings.h"
 #include "utf8.h"
+#include "attributes.h"
 
 /* Trie transitions use encoded octets rather than codepoints. */
 #define PERL_REGEX_OCTET_TRIE 1
