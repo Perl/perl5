@@ -3044,6 +3044,8 @@ my @undocumented_potentially_always_hidden = qw(
 my %undocumented_always_visible = map { $_ => 1 } qw(
     _
     COP_FEATURE_SIZE
+    CC_TOLOWER_
+    CC_TOUPPER_
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off
     CvHasNAME_HEK_on
