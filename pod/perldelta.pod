@@ -528,6 +528,13 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+On Windows, C<fork()> now preserves the parent's locale settings in the
+child.  Previously, a child could use locale-specific decimal separators
+without C<use locale>, and decimal literals compiled in the child could
+lose their fractional part.  [GH #24166]
+
+=item *
+
 Since 5.28.0, the numeric value of a string would sometimes not get reset
 after the string was assigned to as part of a string concatenation. It
 required the following circumstances to all be present for the bug to
