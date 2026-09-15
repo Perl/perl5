@@ -1853,11 +1853,19 @@ PerlProcGetTimeOfDay(const struct IPerlProc** piPerl, struct timeval *t, void *z
 }
 
 #ifdef USE_ITHREADS
+struct win32_fork_params {
+    PerlInterpreter *perl;
+#ifdef USE_LOCALE
+    char locale[1];
+#endif
+};
+
 PERL_STACK_REALIGN
 static THREAD_RET_TYPE
 win32_start_child(LPVOID arg)
 {
-    PerlInterpreter *my_perl = (PerlInterpreter*)arg;
+    win32_fork_params *params = (win32_fork_params *)arg;
+    PerlInterpreter *my_perl = params->perl;
     int status;
     HWND parent_message_hwnd;
 #ifdef PERL_SYNC_FORK
@@ -1868,6 +1876,18 @@ win32_start_child(LPVOID arg)
 
     PERL_SET_THX(my_perl);
     win32_checkTLS(my_perl);
+
+    /* thread_locale_init() starts in the C locale.  A forked child must
+     * inherit its parent's locales.  Restore them through Perl_setlocale()
+     * so Perl's locale state and LC_NUMERIC toggling stay in sync. */
+    thread_locale_init();
+#ifdef USE_LOCALE
+    if (! Perl_setlocale(LC_ALL, params->locale))
+        Perl_croak(aTHX_ "panic: cannot restore locale after fork");
+#endif
+#ifndef PERL_SYNC_FORK
+    PerlMemShared_free(params);
+#endif
 
 #ifdef PERL_SYNC_FORK
     w32_pseudo_id = id;
@@ -1986,6 +2006,20 @@ PerlProcFork(const struct IPerlProc** piPerl)
         errno = EAGAIN;
         return -1;
     }
+    Size_t params_size = sizeof(win32_fork_params);
+#ifdef USE_LOCALE
+    const char *parent_locale = Perl_setlocale(LC_ALL, NULL);
+    params_size += strlen(parent_locale);
+#endif
+    win32_fork_params *params =
+        (win32_fork_params *)PerlMemShared_malloc(params_size);
+    if (!params) {
+        errno = ENOMEM;
+        return -1;
+    }
+#ifdef USE_LOCALE
+    strcpy(params->locale, parent_locale);
+#endif
     h = new CPerlHost(*(CPerlHost*)w32_internal_host);
     PerlInterpreter *new_perl = perl_clone_using((PerlInterpreter*)aTHX,
                                                  CLONEf_COPY_STACKS,
@@ -2001,9 +2035,14 @@ PerlProcFork(const struct IPerlProc** piPerl)
                                                  );
     new_perl->Isys_intern.internal_host = h;
     h->host_perl = new_perl;
+    params->perl = new_perl;
 #  ifdef PERL_SYNC_FORK
-    id = win32_start_child((LPVOID)new_perl);
+    id = win32_start_child((LPVOID)params);
     PERL_SET_THX(aTHX);
+#    ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
+    switch_locale_context();
+#    endif
+    PerlMemShared_free(params);
 #  else
     if (w32_message_hwnd == INVALID_HANDLE_VALUE)
         w32_message_hwnd = win32_create_message_window();
@@ -2012,13 +2051,14 @@ PerlProcFork(const struct IPerlProc** piPerl)
         (w32_message_hwnd == NULL) ? (HWND)NULL : (HWND)INVALID_HANDLE_VALUE;
 #    ifdef USE_RTL_THREAD_API
     handle = (HANDLE)_beginthreadex((void*)NULL, 0, win32_start_child,
-                                    (void*)new_perl, 0, (unsigned*)&id);
+                                    (void*)params, 0, (unsigned*)&id);
 #    else
     handle = CreateThread(NULL, 0, win32_start_child,
-                          (LPVOID)new_perl, 0, &id);
+                          (LPVOID)params, 0, &id);
 #    endif
     PERL_SET_THX(aTHX);	/* XXX perl_clone*() set TLS */
     if (!handle) {
+        PerlMemShared_free(params);
         errno = EAGAIN;
         return -1;
     }

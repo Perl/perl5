@@ -167,6 +167,50 @@ EOF
     }
     setlocale(LC_NUMERIC, $original_locale);
 
+    SKIP: { # GH #24166
+        skip("Windows pseudofork test", 2) unless $Config{d_pseudofork};
+        skip("no locale available where LC_NUMERIC is a comma", 2) unless $comma;
+
+        delete local $ENV{LC_ALL};
+        local $ENV{LC_NUMERIC} = $comma;
+        fresh_perl_is(<<'EOF', "1.5 0.5", { eval $switches },
+            my $pid = fork();
+            die "fork: $!" unless defined $pid;
+            if (!$pid) {
+                # Parse the decimal literal after fork to exercise the child's locale.
+                eval q{ my $f = 1.5; print "$f ", 1/2; };
+                die $@ if $@;
+                exit 0;
+            }
+            waitpid($pid, 0);
+            die "child failed: $?" if $?;
+EOF
+            "Pseudofork does not enable locale for decimal parsing or formatting");
+
+        $ENV{LC_NUMERIC} = 'C';
+        fresh_perl_is(<<"EOF",
+            use POSIX qw(locale_h);
+            setlocale(LC_NUMERIC, "$comma") or die 'setlocale';
+            my \$before = setlocale(LC_ALL);
+            my \$pid = fork();
+            die "fork: \$!" unless defined \$pid;
+            if (!\$pid) {
+                print setlocale(LC_ALL) eq \$before ? "inherited\n" : "changed\n";
+                { use locale; my \$f = 1.5; print "\$f\n"; }
+                setlocale(LC_ALL, 'C') or die 'setlocale';
+                exit 0;
+            }
+            waitpid(\$pid, 0);
+            die "child failed: \$?" if \$?;
+            print setlocale(LC_ALL) eq \$before
+                    ? "parent unchanged\n" : "parent changed\n";
+            my \$f = 1.5;
+            print \$f;
+EOF
+            "inherited\n1,5\nparent unchanged\n1.5", { eval $switches },
+            "Pseudofork inherits mixed runtime locales without changing its parent");
+    }
+
     SKIP: {
         skip("no UTF-8 locale available where LC_NUMERIC radix isn't ASCII", 1 )
             unless $utf8_radix;
