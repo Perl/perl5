@@ -46,6 +46,7 @@ sub OVERLOAD {
                 $sub = \&nil;
             }
             #print STDERR "Setting '$ {'package'}::\cO$_' to \\&'$sub'.\n";
+            no warnings 'redefine';
             *{$package . "::(" . $_} = \&{ $sub };
         }
     }
