@@ -4315,14 +4315,14 @@ C<B::Generate> directly supports the creation of custom ops by name.
 
 Descriptions above occasionally refer to "the stack", but there are in fact
 many stack-like data structures within the perl interpreter. When otherwise
-unqualified, "the stack" usually refers to the value stack.
+unqualified, "the stack" usually refers to the argument stack.
 
 The various stacks have different purposes, and operate in slightly different
 ways. Their differences are noted below.
 
-=head2 Value Stack
+=head2 Argument Stack
 
-This stack stores the values that regular perl code is operating on, usually
+This stack stores the items that regular perl code is operating on, usually
 intermediate values of expressions within a statement. The stack itself is
 formed of an array of SV pointers.
 
@@ -4372,23 +4372,23 @@ removing it.
 =for apidoc_section $stack
 =for apidoc Amnh||TOPs
 
-Note specifically that SV pointers on the value stack do not contribute to the
-overall reference count of the xVs being referred to. If newly-created xVs are
-being pushed to the stack you must arrange for them to be destroyed at a
+Note specifically that SV pointers on the argument stack do not contribute to
+the overall reference count of the xVs being referred to. If newly-created xVs
+are being pushed to the stack you must arrange for them to be destroyed at a
 suitable time; usually by using one of the C<mPUSH*> macros or C<sv_2mortal()>
 to mortalise the xV.
 
 =head2 Mark Stack
 
-The value stack stores individual perl scalar values as temporaries between
+The argument stack stores individual perl scalar values as temporaries between
 expressions. Some perl expressions operate on entire lists; for that purpose
 we need to know where on the stack each list begins. This is the purpose of the
 mark stack.
 
 The mark stack stores integers as I32 values, which are the height of the
-value stack at the time before the list began; thus the mark itself actually
-points to the value stack entry one before the list. The list itself starts at
-C<mark + 1>.
+argument stack at the time before the list began; thus the mark itself
+actually points to the argument stack entry one before the list. The list
+itself starts at C<mark + 1>.
 
 The base of this stack is pointed to by the interpreter variable
 C<PL_markstack>, of type C<I32 *>.
@@ -4417,8 +4417,9 @@ marked stack slot; this is the usual macro that C code will use when operating
 on lists given on the stack.
 
 As noted above, the C<mark> variable itself will point at the most recently
-pushed value on the value stack before the list begins, and so the list itself
-starts at C<mark + 1>. The values of the list may be iterated by code such as
+pushed value on the argument stack before the list begins, and so the list
+itself starts at C<mark + 1>. The values of the list may be iterated by code
+such as
 
     for(SV **svp = mark + 1; svp <= PL_stack_sp; svp++) {
       SV *item = *svp;
@@ -4428,9 +4429,9 @@ starts at C<mark + 1>. The values of the list may be iterated by code such as
 Note specifically in the case that the list is already empty, C<mark> will
 equal C<PL_stack_sp>.
 
-Because the C<mark> variable is converted to a pointer on the value stack,
-extra care must be taken if C<EXTEND> or any of the C<XPUSH> macros are
-invoked within the function, because the stack may need to be moved to
+Because the C<mark> variable is converted to a pointer on the argument
+stack, extra care must be taken if C<EXTEND> or any of the C<XPUSH> macros
+are invoked within the function, because the stack may need to be moved to
 extend it and so the existing pointer will now be invalid. If this may be a
 problem, a possible solution is to track the mark offset as an integer and
 track the mark itself later on after the stack had been moved.
@@ -4443,10 +4444,10 @@ track the mark itself later on after the stack had been moved.
 
 =head2 Temporaries Stack
 
-As noted above, xV references on the main value stack do not contribute to the
-reference count of an xV, and so another mechanism is used to track when
-temporary values which live on the stack must be released. This is the job of
-the temporaries stack.
+As noted above, xV references on the main argument stack do not contribute
+to the reference count of an xV, and so another mechanism is used to track
+when temporary values which live on the stack must be released. This is the
+job of the temporaries stack.
 
 The temporaries stack stores pointers to xVs whose reference counts will be
 decremented soon.
@@ -4551,7 +4552,7 @@ C<ENTER>.
 
 =head2 Scope Stack
 
-As with the mark stack to the value stack, the scope stack forms a pair with
+As with the mark stack to the argument stack, the scope stack forms a pair with
 the save stack. The scope stack stores the height of the save stack at which
 nested scopes begin, and allows the save stack to be unwound back to that
 point when the scope is left.
