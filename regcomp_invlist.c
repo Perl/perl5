@@ -23,13 +23,19 @@ void
 Perl_populate_bitmap_from_invlist(pTHX_ SV * invlist, const UV offset, const U8 * bitmap, const Size_t len)
 {
     PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST;
+    ASSUME(invlist && bitmap);
 
     /* As the name says.  The zeroth bit corresponds to the code point given by
      * 'offset' */
 
     UV start, end;
 
-    Zero(bitmap, len, U8);
+    if (len == sizeof(U64)
+        && (    ((STRUCT_OFFSET(struct regnode_bbm, bitmap) % 8) == 0)
+                || (PTR2nat(bitmap) & 0x7) == 0))
+        *(U64*)bitmap = 0;
+    else
+        Zero(bitmap, len, U8);
 
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
