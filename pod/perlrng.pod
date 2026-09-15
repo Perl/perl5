@@ -1,0 +1,258 @@
+=head1 NAME
+
+perlrng - random numbers, random bytes, and random distributions
+
+=head1 DESCRIPTION
+
+Perl has two built-in functions for ordinary random numbers:
+C<rand()> and C<srand()>.  The C<rand()> function returns a pseudorandom
+number.  The C<srand()> function sets the starting state used by C<rand()>.
+
+This document starts with those functions and then builds up the ideas needed
+to use other random-number generators and higher-level random distributions.
+
+=head1 USING rand
+
+=head2 Random fractions
+
+With no argument, C<rand()> returns a floating point number greater than or
+equal to zero and less than one:
+
+    my $fraction = rand();
+
+In the literature this often referred to as C<U01>. For instance a famous RNG
+test framework is known as TestU01.
+
+=head2 Random numbers below a limit
+
+With a positive argument, C<rand(EXPR)> returns a number in the range from
+zero up to, but not including, the value of C<EXPR>:
+
+    my $percentage = rand(100);
+    my $angle = rand(2 * 3.141592653589793);
+
+The argument is converted to a number.  A zero argument is treated as one.
+See L<perlfunc/rand EXPR> for the full argument and return-value details.
+
+If an application needs an integer, use an appropriate integer distribution
+instead of relying on floating-point conversion.  In particular, avoid
+assuming that C<int(rand($n))> is the best way to implement every bounded
+integer operation.
+
+=head1 USING srand
+
+Calling C<srand(EXPR)> sets the state used by the currently selected random
+number generator:
+
+    srand(12345);
+    my @run = map { rand() } 1 .. 5;
+
+Calling C<srand()> chooses a seed for the current process.  Calling it again
+starts a new sequence.  The exact sequence is deterministic for a given
+generator, seed, and sequence of calls.  Programs must not assume that the
+sequence will stay the same across different Perl versions or different
+generators.
+
+Seeding does not make a generator cryptographically secure.  It only selects
+the initial state.  Do not use a predictable seed for secrets.  Generally
+it is not a good idea to call srand() more than once in a process, especially
+not with the default (legacy) RNG implementation Drand48.
+
+=head1 HOW PSEUDORANDOM NUMBERS WORK
+
+A pseudorandom number generator is a deterministic state machine.  It has a
+state, produces a value from that state, and advances the state.  The output
+looks random for the intended use, but the next output is determined by the
+current state.
+
+The state belongs to the generator.  Localizing C<${^RNG}> selects a different
+generator for the localized scope.  It does not copy or rewind the state of
+either generator:
+
+    my $first = rand();
+    {
+        local ${^RNG} = My::Generator->new(42);
+        my $other = rand();
+    }
+    my $second = rand();
+
+The first and second calls use the original generator.  The call in the
+localized scope uses the selected object.
+
+=head1 RANDOM BYTES
+
+The common low-level interface is C<builtin::rand_bytes>:
+
+    use builtin 'rand_bytes';
+
+    my $bytes = rand_bytes(16);
+
+It returns exactly the requested number of bytes from the currently selected
+generator.  The result is a byte string, not a character string.  A request
+for zero bytes returns an empty string without advancing the generator.
+
+The byte interface is the exchange format between generators and higher-level
+random algorithms.  It deliberately does not expose a generator's native
+word size.  A generator may use 48-bit, 64-bit, or another internal state
+format.
+
+Separate requests are separate operations.  Programs must not rely on this:
+
+    rand_bytes(1) . rand_bytes(3) eq rand_bytes(4)
+
+The same seed and the same sequence of calls does remain reproducible.
+
+The default generator continues to use Perl's historical 48-bit drand48-based
+state for C<rand()>.  Its byte adapter uses the high 32 bits from each state
+transition.  The low-order bits of a power-of-two LCG have short cycles, so
+the adapter does not present them as independent random bytes.
+
+=head1 BOUNDED INTEGER VALUES
+
+The C<RNG> distribution package provides an unbiased bounded integer helper:
+
+    use RNG;
+
+    my $index = RNG->uniform_int(10);  # 0 through 9
+
+The implementation uses rejection sampling.  It reads enough random bytes to
+cover the requested range and discards values outside that range.  It does
+not use a remainder operation that would make some results more likely than
+others.
+
+The result is an integer in C<0 .. LIMIT-1>.  C<LIMIT> must be a positive
+integer representable by the host Perl's native unsigned integer type.
+
+=head1 DICE AND CHOICES
+
+=head2 Fair dice
+
+Create a reusable die with C<RNG-E<gt>die>:
+
+    my $d20 = RNG->die(20);
+    my $roll = $d20->roll;       # 1 through 20
+
+Create a dice pool with C<RNG-E<gt>dice>:
+
+    my $dice = RNG->dice(3, $d20);
+    my $total = $dice->roll;    # 3 through 60
+    my $each  = $dice->rolls;   # an array reference of three results
+
+The pool calls its die once for each die.  C<roll> and C<pick> are synonyms
+that return the numeric sum.  C<rolls> returns the individual results from a
+new roll of the pool.
+
+=head2 Choosing values
+
+For equally likely scalar values, use a chooser:
+
+    my $colour = RNG->chooser([qw(red green blue)]);
+    my $picked = $colour->pick;
+
+The values must be defined, non-reference scalars and must be unique.  C<pick>
+and C<roll> are synonyms for a chooser.
+
+=head2 Weighted choices
+
+For weighted values, pass a hash whose keys are the possible results and whose
+values are their relative weights:
+
+    my $colour = RNG->weighted_chooser({
+        red   => 1,
+        green => 2,
+        blue  => 3,
+    });
+
+    my $picked = $colour->pick;
+
+The weights need not add up to one.  They must be finite and non-negative, and
+at least one must be positive.  A weight of zero means that the corresponding
+value is never selected.
+
+Weighted dice use the same representation but return an object with a C<roll>
+method:
+
+    my $loaded = RNG->weighted_die({
+        1 => 1,
+        2 => 1,
+        3 => 4,
+    });
+
+    my $face = $loaded->roll;
+
+The keys of a weighted input are strings.  A weighted die can be used in a
+dice pool only when its possible results are numeric.
+
+=head2 The alias method
+
+The weighted distributions build a reusable C<RNG::AliasTable>.  The table changes
+the problem from selecting among many weighted values to two small choices:
+
+=over
+
+=item * choose one table column uniformly;
+
+=item * choose the column's primary value or its alias.
+
+=back
+
+The table takes linear time to build.  Each later selection takes constant
+time.  Perl uses the numerically stable form of Michael D. Vose's alias
+method with scaled weights and a small/large worklist construction.  This is
+useful when the same weighted distribution will be sampled more than once.
+
+The table can also be constructed directly:
+
+    my $table = RNG::AliasTable->new({ red => 1, blue => 2 });
+    my $value = $table->pick;  # or $table->roll
+
+The method is described in Vose's paper
+L<https://doi.org/10.1109/32.92917> and explained in Keith Schwarz's
+L<Darts, Dice, and Coins|https://www.keithschwarz.com/darts-dice-coins/>.
+
+=head1 SELECTING A PROVIDER
+
+The C<${^RNG}> variable selects the provider used by C<rand>, C<srand>,
+C<builtin::rand_bytes>, and the distributions in L<RNG>:
+
+    use RNG::PCG;
+
+    my $rng = RNG::PCG->new(42);
+    {
+        local ${^RNG} = $rng;
+        my $roll = RNG->die(20)->roll;
+        my $bytes = builtin::rand_bytes(8);
+    }
+
+The value is dynamically scoped.  It must be either C<undef> or an object
+providing both C<rand_bytes> and C<srand>.  An unblessed code reference is not
+a provider.
+
+The provider's C<rand_bytes> method must return a binary string containing
+exactly the requested number of bytes.  The provider owns its state and
+decides how to interpret a seed passed to C<srand>.
+
+Some XS providers publish private native-word callbacks.  Perl may use those
+callbacks to make C<rand()> faster.  They are an optimization only.  The
+portable provider contract is the object-level byte and seed methods.
+
+=head1 SECURITY
+
+Randomness is not one property.  A generator can be useful for simulations,
+repeatable tests, games, or cryptographic secrets, and these uses have
+different requirements.
+
+The default generator and the small fast generators in the C<RNG> distribution
+are not cryptographic generators.  Use a provider designed for security when
+unpredictability matters.  The HMAC_DRBG provider can provide stronger
+properties when it is initialized and used according to its documentation,
+but the framework does not turn an unsuitable provider into a secure one.
+
+=head1 SEE ALSO
+
+L<perlfunc/rand EXPR>, L<perlfunc/srand EXPR>, L<perlvar/${^RNG}>,
+L<builtin/rand_bytes>, L<RNG>, C<RNG::AliasTable>, L<RNG::Drand48>,
+L<RNG::HMAC_DRBG>,
+L<RNG::PCG>, L<RNG::Wyrand>, and L<RNG::Xoshiro>.
+
+=cut

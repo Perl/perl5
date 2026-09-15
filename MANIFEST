@@ -4491,6 +4491,23 @@ dist/PathTools/t/Spec-taint.t			See if File::Spec works with taint
 dist/PathTools/t/taint.t			See if Cwd works with taint
 dist/PathTools/t/tmpdir.t			See if File::Spec->tmpdir() works
 dist/PathTools/t/win32.t			See if Cwd works on Win32
+dist/RNG/Changes			RNG distribution
+dist/RNG/lib/RNG.pm			RNG provider interface
+dist/RNG/lib/RNG/Drand48.pm		RNG::Drand48 Perl interface
+dist/RNG/lib/RNG/HMAC_DRBG.pm		RNG::HMAC_DRBG Perl interface
+dist/RNG/lib/RNG/PCG.pm			RNG::PCG Perl interface
+dist/RNG/lib/RNG/Wyrand.pm		RNG::Wyrand Perl interface
+dist/RNG/lib/RNG/Xoshiro.pm		RNG::Xoshiro Perl interface
+dist/RNG/Makefile.PL			Build RNG
+dist/RNG/MANIFEST			RNG distribution
+dist/RNG/README				RNG distribution
+dist/RNG/RNG.xs				RNG::PCG XS implementation
+dist/RNG/t/distributions.t		See if RNG distribution helpers work
+dist/RNG/t/drand48.t			See if RNG::Drand48 works
+dist/RNG/t/hmac_drbg.t			See if RNG::HMAC_DRBG works
+dist/RNG/t/pcg.t			See if RNG::PCG works
+dist/RNG/t/wyrand.t			See if RNG::Wyrand works
+dist/RNG/t/xoshiro.t			See if RNG::Xoshiro works
 dist/Safe/Changes			Changes for Safe.pm
 dist/Safe/Makefile.PL			Makefile.PL for Safe.pm
 dist/Safe/MANIFEST			MANIFEST for Safe.pm
@@ -5959,6 +5976,7 @@ pod/perlrepository.pod
 pod/perlrequick.pod			Perl regular expressions quick start
 pod/perlreref.pod			Perl regular expressions quick reference
 pod/perlretut.pod			Perl regular expressions tutorial
+pod/perlrng.pod				Perl random-number providers
 pod/perlrun.pod				Perl execution and options
 pod/perlsec.pod				Perl security
 pod/perlsecpolicy.pod			Perl security report handling policy

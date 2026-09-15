@@ -163,6 +163,8 @@
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
 # define call_method(a,b)                       Perl_call_method(aTHX_ a,b)
 # define call_pv(a,b)                           Perl_call_pv(aTHX_ a,b)
+# define call_rand()                            Perl_call_rand(aTHX)
+# define call_srand(a)                          Perl_call_srand(aTHX_ a)
 # define call_sv(a,b)                           Perl_call_sv(aTHX_ a,b)
 # define caller_cx(a,b)                         Perl_caller_cx(aTHX_ a,b)
 # define cast_i32                               Perl_cast_i32
@@ -1287,6 +1289,12 @@
 #   endif
 #   if defined(PERL_IN_AV_C)
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
+#   endif
+#   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) || \
+       defined(PERL_IN_PP_C)
+#     define call_rand_bytes(a)                 Perl_call_rand_bytes(aTHX_ a)
+#     define rng_refresh(a,b)                   Perl_rng_refresh(aTHX_ a,b)
+#     define translate_substr_offsets           Perl_translate_substr_offsets
 #   endif
 #   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 #     define XS_builtin_indexed(a)              Perl_XS_builtin_indexed(aTHX_ a)

@@ -1,0 +1,19 @@
+Revision history for RNG.
+
+[Unreleased]
+    - Add the RNG factory and reusable die, dice, chooser, and weighted
+      distribution objects, using Vose's alias method for weighted choices.
+    - Make rand_bytes the portable provider protocol and require providers to
+      be objects implementing rand_bytes and srand.
+    - Update the XS provider versions for the new protocol and high-bit
+      drand48 byte adapter.
+    - Add the XS RNG::Drand48 provider for comparison with Perl's built-in
+      drand48-based generator and the ${^RNG} interface.
+    - Add the XS RNG::HMAC_DRBG provider, with deterministic and secure
+      operating-system-seeded modes and an optional prediction-resistance
+      policy.
+    - Add the XS RNG::Wyrand and RNG::Xoshiro providers, including the
+      optional U64 callbacks used by the core fast path.
+
+0.01  2026-08-16
+    - Initial version.

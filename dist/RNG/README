@@ -1,0 +1,16 @@
+RNG
+
+This distribution provides pseudorandom number generators and documents the
+provider interface used by Perl's C<${^RNG}> variable. The generators are
+intended for
+simulations, testing, and other non-cryptographic uses. RNG::PCG is a small
+XS implementation of Melissa O'Neill's two-dimensional PCG-XSH-RR generator.
+RNG::Drand48 exposes Perl's built-in drand48-compatible generator through the
+same interface, primarily for comparison and compatibility testing.
+RNG::Wyrand and RNG::Xoshiro are additional fast XS generators for
+non-cryptographic use.
+RNG::HMAC_DRBG is an XS HMAC-SHA-256 provider following the HMAC_DRBG
+construction in NIST SP 800-90A; it offers deterministic and operating-system
+seeded modes, but is not FIPS validated.
+
+See the module documentation for details.

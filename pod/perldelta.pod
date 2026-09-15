@@ -27,6 +27,29 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Localizable random number generators
+
+The new C<${^RNG}> variable can be localized to select a user-supplied random
+number generator for C<rand>, C<srand>, and C<builtin::rand_bytes>.  An object
+provider implements C<rand_bytes> and C<srand> methods.  The provider supplies
+the requested number of random bytes to C<rand_bytes>, while C<srand> passes
+the supplied seed to the provider.  This
+permits custom generators to accept seed values that the default generator
+would reject.
+
+When C<${^RNG}> is undefined, Perl continues to use its normal random number
+generator.  The provider's state is independent of Perl's default generator,
+and localizing C<${^RNG}> does not copy or restore that state.  See
+L<perlrng>, L<perlfunc/rand EXPR>, and L<perlvar/${^RNG}> for more information.
+
+An XS provider may also implement the optional
+C<get_rand_u64_XS_func_addr> method.  When it returns a valid callback
+address, C<rand> can obtain 64-bit words without Perl method dispatch; the
+ordinary C<rand_bytes> interface remains the portable provider protocol.
+
+Only C<undef> or an object may be assigned to C<${^RNG}>.  Other scalar values
+are rejected when the value is used.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
@@ -112,6 +135,15 @@ release manager will have to investigate the situation carefully.)
 =head2 New Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<RNG::HMAC_DRBG> provides an HMAC-SHA-256 provider following the HMAC_DRBG
+construction in NIST SP 800-90A.  L<RNG::PCG> provides a small XS
+implementation of the two-dimensional PCG-XSH-RR pseudorandom number
+generator, while L<RNG::Wyrand> and L<RNG::Xoshiro> provide additional fast XS
+generators.  They can be used directly or as providers for the new C<${^RNG}>
+variable.
 
 =item *
 

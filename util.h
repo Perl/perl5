@@ -101,8 +101,8 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 
 #define PL_RANDOM_STATE_TYPE perl_drand48_t
 
-#define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
-#define Perl_drand48() (Perl_drand48_r(&PL_random_state))
+#define Perl_drand48_init(seed) (Perl_call_srand(aTHX_ (Rand_seed_t)(seed)))
+#define Perl_drand48() (Perl_call_rand(aTHX))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid interfering with the results

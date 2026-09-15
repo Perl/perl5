@@ -1,4 +1,4 @@
-package builtin 0.019;
+package builtin 0.020;
 
 use v5.40;
 
@@ -17,6 +17,7 @@ builtin - Perl pragma to import built-in utility functions
     use builtin qw(
         true false is_bool
         inf nan
+        rand_bytes
         weaken unweaken is_weak
         blessed refaddr reftype
         created_as_string created_as_number
@@ -186,6 +187,25 @@ Returns the floating-point "Not-a-Number" value. If the underlying numeric C
 type does not support such a value, it throws a runtime error instead.
 
 Available starting with Perl 5.40.
+
+=head2 rand_bytes
+
+    $bytes = rand_bytes($count);
+
+This function is currently B<experimental>.
+
+Returns exactly C<$count> random bytes from the generator selected by
+L<perlvar/${^RNG}>.  The result is a byte string, not a character string.
+The function is intended as the common low-level interface for random-number
+algorithms.  It does not make the selected generator suitable for
+cryptographic use.
+
+The default generator emits the higher-order bits of its historical
+drand48-based state.  A request consumes the generator in blocks, and callers
+must not rely on combining separate requests producing the same result as one
+larger request.
+
+Available starting with Perl 5.46.
 
 =head2 weaken
 
