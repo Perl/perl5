@@ -1039,6 +1039,7 @@ typedef struct regmatch_state {
             CHECKPOINT  cp;         /* see note above "struct branchlike" */
             CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
             bool	minmod;
+            bool        saved_seen_nonregular; /* previous seen_nonregular */
             int         parenfloor; /* how far back to strip paren data */
 
             /* these two are modified by WHILEM */
@@ -1055,6 +1056,7 @@ typedef struct regmatch_state {
             char        *save_lastloc;  /* previous curlyx.lastloc */
             I32		cache_offset;
             I32		cache_mask;
+            bool        saved_seen_nonregular; /* previous seen_nonregular */
         } whilem;
 
         struct {

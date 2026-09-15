@@ -1239,14 +1239,6 @@ exponential behaviour.
 
 =item *
 
-Non-regular pattern items such as backreferences (C<\g{1}>) and evals
-(C<(??{...})/>) break the assumption that running the same rest-of-pattern
-from the same position will give the same result each time. If these occur
-in the rest-of-pattern, the cache is reset. This is currently done at
-runtime.
-
-=item *
-
 Nested quantifiers can sometimes the break the assumption that running the
 rest-of-pattern from the same string position will always give the same
 result. To understand this issue, first consider a non-nested quantifier
@@ -1318,6 +1310,67 @@ pattern is being executed.
 Another reason for not using the cache is that the inner pattern will have
 a different set of C<WHILEM> node ids, and accommodating them would
 complicate the code.
+
+=item *
+
+More generally, non-regular node types (including not only C<(?1)>
+and C<(?{{ $inner_qr })> but also back-references like C<\g{1}> and
+conditionals like C<(?{cond|yes|no)>) break the assumption that running
+the same rest-of-pattern from the same position will give the same result
+each time.
+
+This is detected by setting the boolean variable C<seen_nonregular>
+whenever such a non-regular node is executed. Then during backtracking,
+skipping the marking of the cache if the variable is true.
+
+In the presence of multiple quantifiers such as
+
+    /A (B)* C (D)* E/
+
+a non-regular node encountered while executing a D iteration or E should
+disable cache setting in both C<(B)*> and C<(D)*> when backtracking on
+failure. Conversely, a non-regular node encountered in B or C should only
+affect C<(B)*>. Finally, such a node in A shouldn't affect either
+quantifier. This is because such a node should only disable a quantifier's
+cache if that node appears within that quantifier's rest-of-pattern.
+
+To support this per-quantifier selective behaviour, at the start of each
+new quantifier (i.e. when processing the C<CURLYX>), the current value of
+C<seen_nonregular> is saved and then the variable is set to false. On
+return (via either success or failure), the saved value is restored but
+also ORed with the current value.
+
+The variable is similarly saved, set to false and ORed on return when
+entering the 'rest of pattern' after a qualifier, i.e. C<WHILEM_B_min,max>
+states. Or to put it another way, the variable is saved/restored at each
+of the spaces in the example pattern above.
+
+Currently the value is not saved/restored between individual iterations of
+a quantifier; that is, the C<WHILEM_A_*> states don't process
+C<seen_nonregular>. This is based on the assumption that each iteration of
+B or D is likely to have similar results: they I<all> contain non-regular
+nodes, or none of them do. This won't be universal of course: B could
+represent the physical pattern C<(abc|\g{1})> and some iterations might
+match one and others the other. But where this occurs, the only effect is
+that the cache isn't set when in theory it was safe to do so; so more
+backtracking occurs than is strictly necessary. It's always possible at a
+later date to add C<WHILEM_A_min,max> branches and save/restore
+C<seen_nonregular> on a more fine-grained basis.
+
+This run-time mechanism has an advantage over a compile-time one in that
+the cache is disabled only if a non-regular node is actually executed,
+rather than just being on the possible execution path. For example.
+C<...(aaa|bbb\1)...> might never encounter the \1 if the string doesn't
+contain C<bbb>, while the regex compiler would have to disable the cache
+on the grounds that the C<\1> I<might> be executed.
+
+Note that a simple C<(?{...})> shouldn't affect the SLC, because in theory
+the eval can't have any side-effects on the execution of the
+rest-of-pattern if it doesn't also have non-regular nodes.
+[ DAPM 2026 - actually the eval can modify C<$_> etc which under some
+circumstances can change the string currently being matched against. But
+that is a more general bug in eval which should be addressed at some
+point. ]
 
 =item *
 

@@ -6483,7 +6483,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
 /* we don't use STMT_START/END here because it leads to
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
-    if (ST.cache_mask) {                                               \
+    if (ST.cache_mask &&!seen_nonregular) {                            \
         DEBUG_EXECUTE_r({                                              \
             regnode *whilem =                                          \
                 REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
@@ -6765,6 +6765,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                 false: plain (?=foo)
                                 true:  used as a condition: (?(?=foo))
                             */
+    bool seen_nonregular = false; /* we've encountered a non-regular node
+                                     type such as \1 or (??{...}. For more
+                                     details, see
+                                     L<perlreguts/The super-linear cache> */
     PAD* last_pad = NULL;
     dMULTICALL;
     U8 gimme = G_SCALAR;
@@ -8288,7 +8292,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
           do_nref_ref_common:
-            reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
+            seen_nonregular = true;
+
             if (RXp_LASTPAREN(rex) < n)
                 sayNO;
 
@@ -8733,7 +8738,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             * At this point we expect the stack context to be
                             * set up correctly */
 
-                reginfo->poscache_maxiter = 0;
+                seen_nonregular = true;
 
                 /* the new regexp might have a different is_utf8_pat than we do */
                 is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
@@ -8791,8 +8796,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             cur_eval = ST.prev_eval;
             cur_curlyx = ST.prev_curlyx;
 
-            /* Invalidate cache. See "invalidate" comment above. */
-            reginfo->poscache_maxiter = 0;
             if ( nochange_depth )
                 nochange_depth--;
 
@@ -8827,8 +8830,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             cur_eval = ST.prev_eval;
             cur_curlyx = ST.prev_curlyx;
 
-            /* Invalidate cache. See "invalidate" comment above. */
-            reginfo->poscache_maxiter = 0;
             if ( nochange_depth )
                 nochange_depth--;
 
@@ -8936,7 +8937,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case IFTHEN:   /*  (?(cond)A|B)  */
-            reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
+            seen_nonregular = true;
+
             if (sw)
                 next = REGNODE_AFTER_type(scan,tregnode_IFTHEN);
             else {
@@ -9062,6 +9064,8 @@ NULL
             minmod = 0;
             ST.count = -1;	/* this will be updated by WHILEM */
             ST.lastloc = NULL;  /* this will be updated by WHILEM */
+            ST.saved_seen_nonregular = seen_nonregular;
+            seen_nonregular = false;
 
             PUSH_YES_STATE_GOTO(CURLYX_end, REGNODE_BEFORE(next), locinput, loceol,
                                 script_run_begin);
@@ -9069,11 +9073,13 @@ NULL
         }
 
         case CURLYX_end: /* just finished matching all of A*B */
+            seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.prev_curlyx;
             sayYES;
             NOT_REACHED; /* NOTREACHED */
 
         case CURLYX_end_fail: /* just failed to match all of A*B */
+            seen_nonregular |= ST.saved_seen_nonregular;
             REGCP_UNWIND(ST.cp); /* LEAVE in disguise */
             cur_curlyx = ST.prev_curlyx;
             sayNO;
@@ -9251,6 +9257,8 @@ NULL
             if (cur_curlyx->u.curlyx.minmod) {
                 ST.save_curlyx = cur_curlyx;
                 cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
+                ST.saved_seen_nonregular = seen_nonregular;
+                seen_nonregular = false;
                 PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
                                     locinput, loceol, script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
@@ -9273,11 +9281,13 @@ NULL
 
         case WHILEM_B_min: /* just matched B in a minimal match */
         case WHILEM_B_max: /* just matched B in a maximal match */
+            seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
             sayYES;
             NOT_REACHED; /* NOTREACHED */
 
         case WHILEM_B_max_fail: /* just failed to match B in a maximal match */
+            seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
             cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
             cur_curlyx->u.curlyx.count--;
@@ -9305,11 +9315,14 @@ NULL
             /* now try B */
             ST.save_curlyx = cur_curlyx;
             cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
+            ST.saved_seen_nonregular = seen_nonregular;
+            seen_nonregular = false;
             PUSH_YES_STATE_GOTO(WHILEM_B_max, ST.save_curlyx->u.curlyx.B,
                                 locinput, loceol, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
         case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
+            seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
 
             if (cur_curlyx->u.curlyx.count >= /*max*/ARG2i(cur_curlyx->u.curlyx.me)) {
