@@ -980,13 +980,31 @@ Perl_class_prepare_method_parse(pTHX_ CV *cv)
     CvIsMETHOD_on(cv);
 }
 
+/*
+=for apidoc_section $optree_construction
+
+=for apidoc class_method_parse_post_blockstart
+
+Performs the steps necessary at compile-time of a C<method> subroutine that
+must be deferred until after the call to L</block_start>.  Only valid during
+parsing and compiling of a method subroutine, after having called
+L</start_subparse> with the C<CVf_IsMETHOD> flag set.
+
+Currently, its only purpose is to declare the C<$self> lexical variable,
+though in future versions it may perform any other steps that are necessary
+at this time.
+
+=cut
+*/
+
 void
-Perl_class_declare_padvars(pTHX_ CV *cv)
+Perl_class_method_parse_post_blockstart(pTHX_ CV *cv)
 {
-    PERL_ARGS_ASSERT_CLASS_DECLARE_PADVARS;
+    PERL_ARGS_ASSERT_CLASS_METHOD_PARSE_POST_BLOCKSTART;
     PERL_UNUSED_ARG(cv);
 
     assert(cv == PL_compcv);
+    assert(CvIsMETHOD(cv));
     assert(HvSTASH_IS_CLASS(PL_curstash));
 
     /* We expect this to be at the start of sub parsing, so there won't be
