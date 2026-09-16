@@ -1390,21 +1390,19 @@ C<reginfo> struct, which is initialised at the start of a match.
 
 A pointer to the cache is stored in C<< reginfo->info_aux.poscache >>,
 which will be freed when matching ends (the aux structure is guaranteed to
-be freed even on abnormal termination), and its size is recorded in
-C<< reginfo->poscache_size >>.
+be freed even on abnormal termination).
 
 If zero, C<< reginfo->poscache_maxiter >> indicates that the SLC countdown
 has not yet been triggered (i.e. no candidate C<WHILEM> node has been
-executed yet), or that it has been subsequently disabled again. Otherwise,
-its (positive) value is used for two different purposes: what value to
-start an initial (or reset) countdown from; and the size to C<alloc()> the
-cache, in bits. Currently these values are the same, but in principle they
-needn't be.
+executed yet). Otherwise, its (positive) value is used for two different
+purposes: what value to start an initial (or reset) countdown from; and
+the size to C<alloc()> the cache, in bits. Currently these values are the
+same, but in principle they needn't be.
 
 C<< reginfo->poscache_iter >> only has meaning if C<poscache_maxiter> is
 non-zero. In that case, it represents a countdown initialised from
-C<poscache_maxiter>. If it reaches 1, the cache is malloced/realloced if
-necessary, and then zeroed. When it reaches 0, the cache is used.
+C<poscache_maxiter>. If it reaches 1, the cache is malloced if necessary,
+and then zeroed. When it reaches 0, the cache is used.
 
 The C<CACHEsayNO> macro is used at runtime in various places as a
 replacement for C<sayNO> to set a fail bit in the cache while popping the

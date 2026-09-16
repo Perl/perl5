@@ -9207,17 +9207,9 @@ NULL
                     /* initialise cache */
                     const STRLEN size = (reginfo->poscache_maxiter + 7)/8;
                     regmatch_info_aux *const aux = reginfo->info_aux;
-                    if (aux->poscache) {
-                        if (reginfo->poscache_size < size) {
-                            Renew(aux->poscache, size, char);
-                            reginfo->poscache_size = size;
-                        }
-                        Zero(aux->poscache, size, char);
-                    }
-                    else {
-                        reginfo->poscache_size = size;
-                        Newxz(aux->poscache, size, char);
-                    }
+                    assert(!aux->poscache);
+                    Newxz(aux->poscache, size, char);
+
                     DEBUG_EXECUTE_r( re_exec_indentf(
       "%sWHILEM: Detected a super-linear match, enabling cache%s...\n",
                               depth, PL_colors[4], PL_colors[5])
