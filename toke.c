@@ -14324,24 +14324,20 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 }
 
 int
-Perl_keyword_plugin_standard(pTHX_
-        char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
+Perl_keyword_plugin_standard(pTHX_ char *keyword_ptr  UNUSED,
+                                   STRLEN keyword_len  UNUSED,
+                                   OP **op_ptr  UNUSED)
 {
     PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD;
-    PERL_UNUSED_ARG(keyword_ptr);
-    PERL_UNUSED_ARG(keyword_len);
-    PERL_UNUSED_ARG(op_ptr);
     return KEYWORD_PLUGIN_DECLINE;
 }
 
 STRLEN
-Perl_infix_plugin_standard(pTHX_
-        char *operator_ptr, STRLEN operator_len, struct Perl_custom_infix **def)
+Perl_infix_plugin_standard(pTHX_ char *operator_ptr  UNUSED,
+                                 STRLEN operator_len  UNUSED,
+                                 struct Perl_custom_infix **def  UNUSED)
 {
     PERL_ARGS_ASSERT_INFIX_PLUGIN_STANDARD;
-    PERL_UNUSED_ARG(operator_ptr);
-    PERL_UNUSED_ARG(operator_len);
-    PERL_UNUSED_ARG(def);
     return 0;
 }
 

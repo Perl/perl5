@@ -304,8 +304,6 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     SV *methodname;
     dSP;
 
-    PERL_UNUSED_ARG(flags);
-
     ENTER;
     SAVETMPS;
 
