@@ -5103,7 +5103,7 @@ S	|locale_t|use_curlocale_scratch
 S	|const char *|querylocale_2024_l				\
 				|int category				\
 				|locale_t locale_obj			\
-				|line_t line
+				|line_t line  DEBUG_ONLY
 #     else
 S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\

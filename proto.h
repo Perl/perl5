@@ -13139,11 +13139,12 @@ S_use_curlocale_scratch(pTHX)
 
 #     if defined(HAS_GETLOCALENAME_L)
 static const char *
-S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t line)
+S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t line __attribute__unused_unless_debugging__)
         Perl_attribute_nonnull_aTHX;
 #       define PERL_ARGS_ASSERT_QUERYLOCALE_2024_L \
-           STMT_START { Perl_assert_aTHX;                     \
-                        PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+           STMT_START { Perl_assert_aTHX;                           \
+                        PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;        \
+                        PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(line);  \
     } STMT_END
 
 #     else
