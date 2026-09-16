@@ -841,7 +841,6 @@ typedef struct {
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
     STRLEN poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
     STRLEN poscache_iter;    /* current countdown from _maxiter to zero */
-    STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
     bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */
