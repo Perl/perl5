@@ -1891,9 +1891,9 @@ and recommendations.  But, over the years, various improvements have
 been added to minimize the issues.
 
 Therefore, it is important to use the latest version of the Perl
-interpreter when working with Unicode.  Not unil Perl v5.44 is it fully
+interpreter when working with Unicode.  Not until Perl v5.44 is it fully
 hardened against known attack vectors.  And who knows what new ideas
-clever atackers may come up with in the future that we will have to
+clever attackers may come up with in the future that we will have to
 change to counter.  (Although no new ones have become known recently
 that the Unicode Standard wasn't prepared for.)  And CPAN modules can
 easily lag behind the interpreter itself.
