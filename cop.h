@@ -1025,6 +1025,10 @@ struct block_givwhen {
         SV *defsv_save; /* the original $_ */
 };
 
+/* defer/finally context */
+struct block_defer {
+        OP *defer_root; /* first op of the deferred block's optree */
+};
 
 
 /* context common to subroutines, evals and loops */
@@ -1047,6 +1051,7 @@ struct block {
         struct block_eval	blku_eval;
         struct block_loop	blku_loop;
         struct block_givwhen	blku_givwhen;
+        struct block_defer	blku_defer;
     } blk_u;
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
@@ -1063,6 +1068,7 @@ struct block {
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
 #define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
+#define blk_defer	cx_u.cx_blk.blk_u.blku_defer
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\

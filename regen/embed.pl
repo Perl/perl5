@@ -264,20 +264,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     BhkFLAGS
     BIT_BUCKET
     BIT_DIGITS
-    blk_eval
-    blk_format
-    blk_gimme
-    blk_givwhen
-    blk_loop
-    blk_oldcop
-    blk_oldmarksp
-    blk_oldpm
-    blk_oldsaveix
-    blk_oldscopesp
-    blk_oldsp
-    blk_old_tmpsfloor
-    blk_sub
-    blk_u16
     BOM_UTF8_FIRST_BYTE
     BOM_UTF8_TAIL
     BSD_GETPGRP
@@ -3043,6 +3029,21 @@ my @undocumented_potentially_always_hidden = qw(
 # not be directly usable by XS code
 my %undocumented_always_visible = map { $_ => 1 } qw(
     _
+    blk_defer
+    blk_eval
+    blk_format
+    blk_gimme
+    blk_givwhen
+    blk_loop
+    blk_oldcop
+    blk_oldmarksp
+    blk_oldpm
+    blk_oldsaveix
+    blk_oldscopesp
+    blk_oldsp
+    blk_old_tmpsfloor
+    blk_sub
+    blk_u16
     COP_FEATURE_SIZE
     CVf_HasNAME_HEK
     CvHasNAME_HEK_off

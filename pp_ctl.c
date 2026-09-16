@@ -3821,7 +3821,12 @@ PP(pp_goto)
                 continue;
             case CXt_BLOCK:
                 if (ix) {
-                    gotoprobe = OpSIBLING(cx->blk_oldcop);
+                    PERL_CONTEXT *encl = &cxstack[ix - 1];
+                    if (CxTYPE(encl) == CXt_DEFER
+                            && !(encl->cx_type & CXp_FINALLY))
+                        gotoprobe = encl->blk_defer.defer_root;
+                    else
+                        gotoprobe = OpSIBLING(cx->blk_oldcop);
                     in_block = TRUE;
                 } else
                     gotoprobe = PL_main_root;
@@ -6721,12 +6726,14 @@ PP(pp_break)
 static void
 invoke_defer_block_(pTHX_ U8 type, void * arg_)
 {
-    OP *start = (OP *) arg_;
+    OP *start = (OP *) cLOGOPx(arg_)->op_other;
 #ifdef DEBUGGING
     I32 was_cxstack_ix = cxstack_ix;
 #endif
 
     cx_pushblock(type, G_VOID, PL_stack_sp, PL_savestack_ix);
+    CX_CUR()->blk_defer.defer_root =
+        cUNOPx(cLOGOPx(arg_)->op_first)->op_first;
     ENTER;
     SAVETMPS;
 
@@ -6806,9 +6813,9 @@ invoke_finally_block(pTHX_ void * arg_)
 PP(pp_pushdefer)
 {
     if(PL_op->op_private & OPpDEFER_FINALLY)
-        SAVEDESTRUCTOR_X(invoke_finally_block, cLOGOP->op_other);
+        SAVEDESTRUCTOR_X(invoke_finally_block, PL_op);
     else
-        SAVEDESTRUCTOR_X(invoke_defer_block, cLOGOP->op_other);
+        SAVEDESTRUCTOR_X(invoke_defer_block, PL_op);
 
     return NORMAL;
 }
