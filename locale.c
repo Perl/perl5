@@ -8856,8 +8856,6 @@ S_give_perl_locale_control(pTHX_
 {
     PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL;
 
-    PERL_UNUSED_ARG(caller_line);
-
     /* This is called when the program is in the global locale and are
      * switching to per-thread (if available).  And it is called at
      * initialization time to do the same.
