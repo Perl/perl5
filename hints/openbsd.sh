@@ -55,7 +55,11 @@ alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-[2-4].*|m88k-5.[0-2]|hppa-3.[0-5
 	test -z "$usedl" && usedl=$define
 	# We use -fPIC here because -fpic is *NOT* enough for some of the
 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
-	cccdlflags="-DPIC -fPIC $cccdlflags"
+	PICFLAG=-fPIC
+	if [ -e /usr/share/mk/bsd.own.mk ]; then
+		PICFLAG=`make -f /usr/share/mk/bsd.own.mk -V PICFLAG`
+	fi
+	cccdlflags="-DPIC ${PICFLAG} $cccdlflags"
 	case "$osvers" in
 	[01].*|2.[0-7]|2.[0-7].*)
 		lddlflags="-Bshareable $lddlflags"
@@ -66,7 +70,7 @@ alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-[2-4].*|m88k-5.[0-2]|hppa-3.[0-5
 		;;
 	*) # from 3.1 onwards
 		ld=${cc:-cc}
-		lddlflags="-shared -fPIC $lddlflags"
+		lddlflags="-shared ${PICFLAG} $lddlflags"
 		libswanted=`echo $libswanted | sed 's/ dl / /'`
 		;;
 	esac
