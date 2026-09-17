@@ -534,9 +534,12 @@ Perl_newAVav(pTHX_ AV *oav)
 {
     PERL_ARGS_ASSERT_NEWAVAV;
 
+    if(UNLIKELY(!oav))
+        return newAV();
+
     Size_t count = av_count(oav);
 
-    if(UNLIKELY(!oav) || count == 0)
+    if(count == 0)
         return newAV();
 
     AV *ret = newAV_alloc_x(count);
