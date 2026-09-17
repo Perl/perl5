@@ -5020,7 +5020,19 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                  && memBEGINs(pat, pat_len, LATIN_SMALL_LETTER_LONG_S_UTF8
                                             LATIN_SMALL_LETTER_LONG_S_UTF8))
         {
+
+            /* Anything that folds to U+00DF is very specially handled.
+             * Anything beyond the first such character (U+1E9E) has to be
+             * manually added here */
+            static const U32 remaining_folds_to_17F_17F[] = {
+
+#ifdef SURSOLIDUM
+                                                               SURSOLIDUM
+#endif
+                                                             };
             first_fold_from = LATIN_CAPITAL_LETTER_SHARP_S;
+            remaining_fold_froms = remaining_folds_to_17F_17F;
+            folds_to_count = 1 + C_ARRAY_LENGTH(remaining_folds_to_17F_17F);
         }
         else if (UNLIKELY(    op == TURKISH
                           && (   isALPHA_FOLD_EQ(folded, 'i')

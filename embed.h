@@ -82,9 +82,12 @@
 #     undef first_upper_bit_set_byte_number
 #     undef invlist_intersection_complement_2nd_
 #     undef invlist_union_complement_2nd_
+#     undef LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S
+#     undef LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8
 #     undef PARSE_IDENT_ERROR_POSITION
 #     undef PARSE_IDENT_ERROR_TEXT
 #     undef RExC_parse_advance
+#     undef SURSOLIDUM
 #     undef WARN_HELPER_
 #   endif /* !defined(PERL_EXT_RE_BUILD) */
 # endif /* !defined(PERL_CORE) */
