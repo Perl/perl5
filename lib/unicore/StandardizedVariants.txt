@@ -1,6 +1,6 @@
-# StandardizedVariants-17.0.0.txt
-# Date: 2025-07-30
-# © 2025 Unicode®, Inc.
+# StandardizedVariants-18.0.0.txt
+# Date: 2026-07-29 [KWW]
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -87,6 +87,16 @@
 2ACC FE00; with stroke through bottom members; # SUPERSET OF ABOVE NOT EQUAL TO
 FF10 FE00; short diagonal stroke form; # FULLWIDTH DIGIT ZERO
 
+1DB10 FE00; with descender; # CARTESIAN EQUALS SIGN
+223D FE00; using lazy S; # REVERSED TILDE
+2243 FE00; using lazy S; # ASYMPTOTICALLY EQUAL TO
+22CD FE00; using lazy S; # REVERSED TILDE EQUALS
+2242 FE00; using lazy S; # MINUS TILDE
+2248 FE00; using lazy S; # ALMOST EQUAL TO
+2A6C FE00; using lazy S; # SIMILAR MINUS SIMILAR
+22DC FE00; with horizontal equal; # EQUAL TO OR LESS-THAN
+22DD FE00; with horizontal equal; # EQUAL TO OR GREATER-THAN
+
 # Mathematical alphabet script variants
 
 1D49C FE00; chancery style; #  MATHEMATICAL SCRIPT CAPITAL A
@@ -143,6 +153,8 @@ FF10 FE00; short diagonal stroke form; # FULLWIDTH DIGIT ZERO
 1D4B4 FE01; roundhand style; #  MATHEMATICAL SCRIPT CAPITAL Y
 1D4B5 FE01; roundhand style; #  MATHEMATICAL SCRIPT CAPITAL Z
 
+1D4CF FE02; kurrent style; #  MATHEMATICAL SCRIPT SMALL Z
+
 # East Asian punctuation positional and width variants
 
 2018 FE00; non-fullwidth form; # LEFT SINGLE QUOTATION MARK
@@ -173,6 +185,26 @@ FF1B FE00; corner-justified form; # FULLWIDTH SEMICOLON
 FF1B FE01; centered form; # FULLWIDTH SEMICOLON
 FF1F FE00; corner-justified form; # FULLWIDTH QUESTION MARK
 FF1F FE01; centered form; # FULLWIDTH QUESTION MARK
+
+# CJK strokes
+
+31C0 FE00; dotted T form; # CJK STROKE T
+31C6 FE00; curved Z form; # CJK STROKE HZG
+31C6 FE01; rising H form; # CJK STROKE HZG
+31C9 FE00; slanted S form; # CJK STROKE SZWG
+31CF FE00; curved starting N form; # CJK STROKE N
+31CF FE01; flat N form; # CJK STROKE N
+31D0 FE00; rising H form; # CJK STROKE H
+31D1 FE00; slanted S form; # CJK STROKE S
+31D2 FE00; flat P form; # CJK STROKE P
+31D4 FE00; to bottom left form; # CJK STROKE D
+31D5 FE00; slanted Z form; # CJK STROKE HZ
+31D7 FE00; slanted S form; # CJK STROKE SZ
+31DB FE00; slanted SD form; # CJK STROKE PD
+31DC FE00; upwards T form; # CJK STROKE PZ
+31DD FE00; horizontal H curved N form; # CJK STROKE TN
+31DD FE01; upwards T flat N form; # CJK STROKE TN
+31E5 FE00; slanted S form; # CJK STROKE SZP
 
 # Myanmar
 
@@ -223,66 +255,139 @@ A868 FE00; phags-pa letter reversed shaping subjoined ya; # PHAGS-PA SUBJOINED L
 
 # Mongolian
 
-1820 180B; second form; isolate medial final # MONGOLIAN LETTER A
-1820 180C; third form; medial # MONGOLIAN LETTER A
-1821 180B; second form; initial final # MONGOLIAN LETTER E
-1822 180B; second form; medial # MONGOLIAN LETTER I
+# Mongolian standardized variation sequences only make use of
+# Mongolian-specific "free variation selectors": U+180B..U+180D, U+180F
+# (FVS1, FVS2, FVS3, FVS4). They do not use generic variation selectors.
+#
+# The labels in field 1 are arbitrary, numbered descriptors
+# for each variation sequence, and do not have any systematic relationship
+# to the shapes of appropriate glyphs for display of each sequence.
+#
+# When field 1 contains the label "not in use", that means that the
+# variation sequence in question is no longer recommended for use in 
+# Mongolian encoding and shaping. However, they were initially 
+# defined for earlier, now-obsolete implementations.
+#
+# For detailed information about implementation of Mongolian shaping,
+# see UTN #57, "Encoding and Shaping of the Mongolian Script".
+
+1820 180B; second form; isolate initial medial final # MONGOLIAN LETTER A
+1820 180C; third form;  isolate initial final # MONGOLIAN LETTER A
+1820 180D; fourth form; isolate # MONGOLIAN LETTER A
+1821 180B; second form; isolate initial final # MONGOLIAN LETTER E
+1821 180C; third form;  isolate final # MONGOLIAN LETTER E
+1822 180B; second form; isolate initial medial # MONGOLIAN LETTER I
+1822 180C; third form;  isolate initial medial # MONGOLIAN LETTER I
+1822 180D; fourth form; isolate medial # MONGOLIAN LETTER I
 1823 180B; second form; medial final # MONGOLIAN LETTER O
-1824 180B; second form; medial # MONGOLIAN LETTER U
-1825 180B; second form; medial final # MONGOLIAN LETTER OE
-1825 180C; third form; medial # MONGOLIAN LETTER OE
-1826 180B; second form; isolate medial final # MONGOLIAN LETTER UE
-1826 180C; third form; medial # MONGOLIAN LETTER UE
-1828 180B; second form; initial medial # MONGOLIAN LETTER NA
-1828 180C; third form; medial # MONGOLIAN LETTER NA
-1828 180D; fourth form; medial # MONGOLIAN LETTER NA
+1823 180C; third form;  final # MONGOLIAN LETTER O
+1824 180B; second form; isolate initial medial final # MONGOLIAN LETTER U
+1824 180C; third form;  isolate initial final # MONGOLIAN LETTER U
+1824 180D; fourth form; isolate # MONGOLIAN LETTER U
+1825 180B; second form; isolate medial final # MONGOLIAN LETTER OE
+1825 180C; third form;  medial final # MONGOLIAN LETTER OE
+1825 180D; fourth form; medial final # MONGOLIAN LETTER OE
+1826 180B; second form; isolate initial medial final # MONGOLIAN LETTER UE
+1826 180C; third form;  isolate initial medial final # MONGOLIAN LETTER UE
+1826 180D; fourth form; isolate medial final # MONGOLIAN LETTER UE
+1828 180B; second form; isolate initial medial final # MONGOLIAN LETTER NA
+1828 180C; third form;  isolate initial medial final # MONGOLIAN LETTER NA
+1828 180D; fourth form; medial final # MONGOLIAN LETTER NA
 182A 180B; second form; final # MONGOLIAN LETTER BA
-182C 180B; second form; isolate initial medial # MONGOLIAN LETTER QA
-182C 180C; third form; medial # MONGOLIAN LETTER QA
-182C 180D; fourth form; medial # MONGOLIAN LETTER QA
-182D 180B; second form; initial medial final # MONGOLIAN LETTER GA
-182D 180C; third form; medial # MONGOLIAN LETTER GA
-182D 180D; fourth form; medial # MONGOLIAN LETTER GA
+182C 180B; second form; isolate initial medial final # MONGOLIAN LETTER QA
+182C 180C; third form;  isolate initial medial # MONGOLIAN LETTER QA
+182C 180D; fourth form; initial medial # MONGOLIAN LETTER QA
+182C 180F; fifth form;  isolate initial medial # MONGOLIAN LETTER QA
+182D 180B; second form; isolate initial medial final # MONGOLIAN LETTER GA
+182D 180C; third form;  isolate initial medial final # MONGOLIAN LETTER GA
+182D 180D; fourth form; initial medial final # MONGOLIAN LETTER GA
+182D 180F; fifth form;  isolate initial medial # MONGOLIAN LETTER GA
+182F 180B; second form; isolate initial # MONGOLIAN LETTER LA
 1830 180B; second form; final # MONGOLIAN LETTER SA
-1830 180C; third form; final # MONGOLIAN LETTER SA
+1830 180C; third form;  final # MONGOLIAN LETTER SA
+1831 180B; second form; isolate initial medial # MONGOLIAN LETTER SHA
+1831 180C; third form;  initial medial # MONGOLIAN LETTER SHA
 1832 180B; second form; medial # MONGOLIAN LETTER TA
-1833 180B; second form; initial medial final # MONGOLIAN LETTER DA
-1835 180B; second form; medial # MONGOLIAN LETTER JA
-1836 180B; second form; initial medial # MONGOLIAN LETTER YA
-1836 180C; third form; medial # MONGOLIAN LETTER YA
-1838 180B; second form; final # MONGOLIAN LETTER WA
+1832 180C; third form;  medial # MONGOLIAN LETTER TA
+1833 180B; second form; isolate initial medial final # MONGOLIAN LETTER DA
+1833 180C; third form;  initial medial # MONGOLIAN LETTER DA
+1835 180B; second form; isolate final # MONGOLIAN LETTER JA
+1836 180B; second form; isolate initial medial # MONGOLIAN LETTER YA
+1836 180C; third form;  initial medial # MONGOLIAN LETTER YA
+1836 180D; fourth form; medial # MONGOLIAN LETTER YA
+1838 180B; second form; medial final # MONGOLIAN LETTER WA
 1844 180B; second form; medial # MONGOLIAN LETTER TODO E
-1845 180B; second form; medial # MONGOLIAN LETTER TODO I
+1845 180B; second form; initial medial # MONGOLIAN LETTER TODO I
+1845 180C; third form;  medial # MONGOLIAN LETTER TODO I
+1845 180D; fourth form; medial # MONGOLIAN LETTER TODO I
 1846 180B; second form; medial # MONGOLIAN LETTER TODO O
 1847 180B; second form; isolate medial final # MONGOLIAN LETTER TODO U
-1847 180C; third form; medial # MONGOLIAN LETTER TODO U
-1848 180B; second form; medial # MONGOLIAN LETTER TODO OE
-1849 180B; second form; isolate medial # MONGOLIAN LETTER TODO UE
-184D 180B; second form; initial medial # MONGOLIAN LETTER TODO QA
-184E 180B; second form; medial # MONGOLIAN LETTER TODO GA
+1847 180C; third form;  medial final # MONGOLIAN LETTER TODO U
+1847 180D; fourth form; medial final # MONGOLIAN LETTER TODO U
+1848 180B; not in use;  # MONGOLIAN LETTER TODO OE
+1848 180C; third form;  medial # MONGOLIAN LETTER TODO OE
+1849 180B; second form; isolate medial final # MONGOLIAN LETTER TODO UE
+1849 180C; third form;  final # MONGOLIAN LETTER TODO UE
+184C 180B; second form; isolate initial medial # MONGOLIAN LETTER TODO PA
+184D 180B; second form; isolate initial medial # MONGOLIAN LETTER TODO QA
+184D 180C; third form;  initial medial # MONGOLIAN LETTER TODO QA
+184E 180B; second form; isolate initial medial # MONGOLIAN LETTER TODO GA
+184E 180C; third form;  initial medial # MONGOLIAN LETTER TODO GA
+184E 180D; fourth form; medial # MONGOLIAN LETTER TODO GA
+185C 180B; second form; isolate initial medial final # MONGOLIAN LETTER TODO DZA
 185D 180B; second form; medial final # MONGOLIAN LETTER SIBE E
-185E 180B; second form; medial final # MONGOLIAN LETTER SIBE I
-185E 180C; third form; medial final # MONGOLIAN LETTER SIBE I
+185D 180C; third form;  medial final # MONGOLIAN LETTER SIBE E
+185D 180D; fourth form; final # MONGOLIAN LETTER SIBE E
+185D 180F; fifth form;  final # MONGOLIAN LETTER SIBE E
+185E 180B; second form; isolate medial # MONGOLIAN LETTER SIBE I
+185E 180C; third form;  isolate medial # MONGOLIAN LETTER SIBE I
 1860 180B; second form; medial final # MONGOLIAN LETTER SIBE UE
-1863 180B; second form; medial # MONGOLIAN LETTER SIBE KA
-1868 180B; second form; initial medial # MONGOLIAN LETTER SIBE TA
-1868 180C; third form; medial # MONGOLIAN LETTER SIBE TA
-1869 180B; second form; initial medial # MONGOLIAN LETTER SIBE DA
+1860 180C; third form;  medial final # MONGOLIAN LETTER SIBE UE
+1860 180D; fourth form; final # MONGOLIAN LETTER SIBE UE
+1860 180F; fifth form;  final # MONGOLIAN LETTER SIBE UE
+1863 180B; second form; isolate initial medial # MONGOLIAN LETTER SIBE KA
+1863 180C; third form;  medial # MONGOLIAN LETTER SIBE KA
+1863 180D; fourth form; initial medial # MONGOLIAN LETTER SIBE KA
+1864 180B; second form; isolate initial medial # MONGOLIAN LETTER SIBE GA
+1864 180C; third form;  initial medial # MONGOLIAN LETTER SIBE GA
+1865 180B; second form; isolate initial medial # MONGOLIAN LETTER SIBE HA
+1865 180C; third form;  initial medial # MONGOLIAN LETTER SIBE HA
+1868 180B; second form; isolate initial medial # MONGOLIAN LETTER SIBE TA
+1868 180C; third form;  initial medial # MONGOLIAN LETTER SIBE TA
+1868 180D; fourth form; medial # MONGOLIAN LETTER SIBE TA
+1869 180B; second form; isolate initial medial # MONGOLIAN LETTER SIBE DA
+1869 180C; third form;  isolate initial medial # MONGOLIAN LETTER SIBE DA
+1869 180D; fourth form; initial # MONGOLIAN LETTER SIBE DA
 186F 180B; second form; initial medial # MONGOLIAN LETTER SIBE ZA
-1873 180B; second form; medial final # MONGOLIAN LETTER MANCHU I
-1873 180C; third form; medial final # MONGOLIAN LETTER MANCHU I
+186F 180C; third form;  initial medial # MONGOLIAN LETTER SIBE ZA
+1873 180B; second form; isolate medial final # MONGOLIAN LETTER MANCHU I
+1873 180C; third form;  isolate medial final # MONGOLIAN LETTER MANCHU I
 1873 180D; fourth form; medial # MONGOLIAN LETTER MANCHU I
-1874 180B; second form; medial final # MONGOLIAN LETTER MANCHU KA
-1874 180C; third form; medial final # MONGOLIAN LETTER MANCHU KA
-1874 180D; fourth form; medial # MONGOLIAN LETTER MANCHU KA
-1876 180B; second form; initial medial # MONGOLIAN LETTER MANCHU FA
+1874 180B; second form; isolate initial medial final # MONGOLIAN LETTER MANCHU KA
+1874 180C; third form;  isolate initial medial final # MONGOLIAN LETTER MANCHU KA
+1874 180D; fourth form; initial medial final # MONGOLIAN LETTER MANCHU KA
+1874 180F; fifth form;  medial # MONGOLIAN LETTER MANCHU KA
+1875 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU RA
+1876 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU FA
+1876 180C; third form;  initial medial # MONGOLIAN LETTER MANCHU FA
 1880 180B; second form; # MONGOLIAN LETTER ALI GALI ANUSVARA ONE
 1881 180B; second form; # MONGOLIAN LETTER ALI GALI VISARGA ONE
-1887 180B; second form; isolate final # MONGOLIAN LETTER ALI GALI A
-1887 180C; third form; final # MONGOLIAN LETTER ALI GALI A
-1887 180D; fourth form; final # MONGOLIAN LETTER ALI GALI A
-1888 180B; second form; final # MONGOLIAN LETTER ALI GALI I
-188A 180B; second form; initial medial # MONGOLIAN LETTER ALI GALI NGA
+1887 180B; not in use;  # MONGOLIAN LETTER ALI GALI A
+1887 180C; not in use;  # MONGOLIAN LETTER ALI GALI A
+1887 180D; not in use;  # MONGOLIAN LETTER ALI GALI A
+1888 180B; not in use;  # MONGOLIAN LETTER ALI GALI I
+188A 180B; not in use;  # MONGOLIAN LETTER ALI GALI NGA
+1892 180B; second form; isolate initial medial # MONGOLIAN LETTER ALI GALI PA
+189A 180B; second form; medial # MONGOLIAN LETTER MANCHU ALI GALI GHA
+189A 180C; third form;  medial # MONGOLIAN LETTER MANCHU ALI GALI GHA
+18A0 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU ALI GALI TA
+18A0 180C; third form;  initial medial # MONGOLIAN LETTER MANCHU ALI GALI TA
+18A1 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU ALI GALI DHA
+18A1 180C; third form;  initial medial # MONGOLIAN LETTER MANCHU ALI GALI DHA
+18A4 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU ALI GALI ZHA
+18A7 180B; second form; final # MONGOLIAN LETTER ALI GALI HALF YA
+18A8 180B; second form; isolate initial medial # MONGOLIAN LETTER MANCHU ALI GALI BHA
+18A8 180C; third form;  isolate initial medial # MONGOLIAN LETTER MANCHU ALI GALI BHA
 
 # Egyptian hieroglyph rotational variants
 

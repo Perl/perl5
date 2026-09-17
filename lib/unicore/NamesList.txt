@@ -1,15 +1,15 @@
 ; charset=UTF-8
-@@@	The Unicode Standard 17.0.0
-@@@+	NamesList-17.0.0.txt
-@+	Generation Date: 2025-07-30, 17:12:45 GMT
-	Unicode 17.0.0 final names list.
+@@@	The Unicode Standard 18.0.0
+@@@+	NamesList-18.0.0.txt
+@+	Generation Date: 2026-08-10, 15:32:05 GMT
+	Unicode 18.0.0 final names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		© 2025 Unicode®, Inc.
+@+		© 2026 Unicode®, Inc.
 	For terms of use and license, see https://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -1456,6 +1456,7 @@
 0194	LATIN CAPITAL LETTER GAMMA
 	* African
 	* lowercase is 0263
+	x (latin capital letter r with long leg - A7E2)
 0195	LATIN SMALL LETTER HV
 	= hwair
 	* Gothic transliteration
@@ -1519,6 +1520,7 @@
 01A3	LATIN SMALL LETTER OI
 	% LATIN SMALL LETTER GHA
 	* Pan-Turkic Latin alphabets, Tajik
+	x (latin small letter oi digraph - 1DF5E)
 01A4	LATIN CAPITAL LETTER P WITH HOOK
 01A5	LATIN SMALL LETTER P WITH HOOK
 	* African
@@ -1884,6 +1886,7 @@
 0223	LATIN SMALL LETTER OU
 	* Algonquin, Huron
 	x (digit eight - 0038)
+	x (latin small letter ou digraph - 1DF5F)
 0224	LATIN CAPITAL LETTER Z WITH HOOK
 	x (latin capital letter z with descender - 2C6B)
 0225	LATIN SMALL LETTER Z WITH HOOK
@@ -1978,6 +1981,7 @@
 0249	LATIN SMALL LETTER J WITH STROKE
 024A	LATIN CAPITAL LETTER SMALL Q WITH HOOK TAIL
 024B	LATIN SMALL LETTER Q WITH HOOK TAIL
+	* this is actually a small letter alpha with a hook tail
 024C	LATIN CAPITAL LETTER R WITH STROKE
 024D	LATIN SMALL LETTER R WITH STROKE
 	x (latin small letter r with middle tilde - 1D72)
@@ -2166,8 +2170,10 @@
 	* near-close near-back rounded vowel
 @+	* obsoleted by IPA in 1989
 	* preferred use is 028A latin small letter upsilon
+	* uppercase is A7DD
 	x (latin small letter omega - A7B7)
 	x (greek letter small capital omega - AB65)
+	x (latin small letter closed omega with long stem - 1DF75)
 0278	LATIN SMALL LETTER PHI
 	* voiceless bilabial fricative
 	* this is a non-casing letter
@@ -2188,6 +2194,7 @@
 	* this sound is spelled with 0159 in Czech
 	* preferred phonetic representation for Czech is 0072 031D
 	* in current use in Gaelic types (as glyph variant of 0072)
+	* uppercase is A7E2
 	x (latin small letter insular r - A783)
 	x (latin small letter insular s - A785)
 027D	LATIN SMALL LETTER R WITH TAIL
@@ -2198,7 +2205,7 @@
 	* voiced alveolar flap or tap
 	x (latin small letter long s - 017F)
 @		Sinological extension
-@+		Sinologists working on Chinese and other Sino-Tibetan languages often use some characters originally adapted by Karlgren from the Swedish Landsmålsalfabetet for the representation of apical vowels. 027F and 0285 are derived from straight and tailed versions of the italic (dotless) long i in that notation, but over time took on their own identity. The character names are misleading.
+@+		Sinologists working on Chinese and other Sino-Tibetan languages often use some characters originally adapted by Karlgren from the Swedish Landsmålsalfabetet for the representation of apical vowels. 027F and 0285 are derived from straight and tailed versions of the italic (dotless) long i in that notation, but over time took on their own identity. The character names are misleading. 
 027F	LATIN SMALL LETTER REVERSED R WITH FISHHOOK
 	= long i with left hook
 	= long leg turned iota (a misnomer)
@@ -2380,6 +2387,7 @@
 02AE	LATIN SMALL LETTER TURNED H WITH FISHHOOK
 	= turned h with left hook
 	* labialized apical dental vowel
+	x (latin small letter turned h - 0265)
 02AF	LATIN SMALL LETTER TURNED H WITH FISHHOOK AND TAIL
 	= turned h with left hook and tail
 	* labialized apical retroflex vowel
@@ -2512,6 +2520,7 @@
 	* precedes letter or syllable modified
 	x (apostrophe - 0027)
 	x (combining vertical line above - 030D)
+	x (modifier letter high and low vertical line - 208F)
 02C9	MODIFIER LETTER MACRON
 	* high level tone
 	* precedes or follows letter or syllable modified
@@ -3842,6 +3851,9 @@
 0555	ARMENIAN CAPITAL LETTER OH
 0556	ARMENIAN CAPITAL LETTER FEH
 @		Modifier letters
+0558	MODIFIER LETTER ARMENIAN SMALL EH
+	* used in dialectology for Karabakh or Artsakh Armenian
+	# <super> 0567
 0559	ARMENIAN MODIFIER LETTER LEFT HALF RING
 	x (modifier letter reversed comma - 02BD)
 	x (modifier letter left half ring - 02BF)
@@ -3917,6 +3929,12 @@
 	x (colon - 003A)
 058A	ARMENIAN HYPHEN
 	= yentamna
+@		Modifier letters
+@+		Used in dialectology for Karabakh or Artsakh Armenian
+058B	MODIFIER LETTER ARMENIAN SMALL INI
+	# <super> 056B
+058C	MODIFIER LETTER ARMENIAN SMALL YI
+	# <super> 0575
 @		Religious symbols
 058D	RIGHT-FACING ARMENIAN ETERNITY SIGN
 058E	LEFT-FACING ARMENIAN ETERNITY SIGN
@@ -3992,6 +4010,7 @@
 05BC	HEBREW POINT DAGESH OR MAPIQ
 	= shuruq
 	* falls within the base letter
+	* as dagesh, used either generically or as dagesh qal in texts that distinguish that from dagesh hazaq
 05BD	HEBREW POINT METEG
 	= siluq
 	* may be used as a Hebrew accent sof pasuq
@@ -4018,7 +4037,13 @@
 	x (hebrew letter nun - 05E0)
 05C7	HEBREW POINT QAMATS QATAN
 	x (hebrew point qamats - 05B8)
-@		Based on ISO 8859-8
+05C8	HEBREW POINT SHEVA NA MUDGASH
+	x (hebrew point sheva - 05B0)
+	* used in texts that distinguish sheva na from sheva naḥ
+05C9	HEBREW POINT DAGESH HAZAQ MUDGASH
+	x (hebrew point dagesh or mapiq - 05BC)
+	* used in texts that distinguish dagesh hazaq from dagesh qal
+@		Based on ISO/IEC 8859-8
 05D0	HEBREW LETTER ALEF
 	= aleph
 	x (alef symbol - 2135)
@@ -4151,8 +4176,8 @@
 @		Addition for Kashmiri
 0620	ARABIC LETTER KASHMIRI YEH
 	* used in Kashmiri to represent half ye / taler ye
-@		Based on ISO 8859-6
-@+		Arabic letter names follow romanization conventions derived from ISO 8859-6. These differ from the Literary Arabic pronunciation of the letter names. For example, 0628 ARABIC LETTER BEH has a Literary Arabic pronunciation of ba'.
+@		Based on ISO/IEC 8859-6
+@+		Arabic letter names follow romanization conventions derived from ISO/IEC 8859-6. These differ from the Literary Arabic pronunciation of the letter names. For example, 0628 ARABIC LETTER BEH has a Literary Arabic pronunciation of ba'.
 0621	ARABIC LETTER HAMZA
 	x (modifier letter right half ring - 02BE)
 0622	ARABIC LETTER ALEF WITH MADDA ABOVE
@@ -4195,7 +4220,7 @@
 	* Azerbaijani
 063E	ARABIC LETTER FARSI YEH WITH TWO DOTS ABOVE
 063F	ARABIC LETTER FARSI YEH WITH THREE DOTS ABOVE
-@		Based on ISO 8859-6
+@		Based on ISO/IEC 8859-6
 0640	ARABIC TATWEEL
 	= kashida
 	* inserted to stretch characters or to carry tashkil with no base letter
@@ -4217,7 +4242,7 @@
 	* loses its dots when used in combination with 0654
 	* retains its dots when used in combination with other combining marks
 	x (arabic letter yeh with two dots below and hamza above - 08A8)
-@		Tashkil from ISO 8859-6
+@		Tashkil from ISO/IEC 8859-6
 064B	ARABIC FATHATAN
 064C	ARABIC DAMMATAN
 	* a common alternative form is written as two intertwined dammas, one of which is turned 180 degrees
@@ -4489,6 +4514,7 @@
 	* Urdu
 06C4	ARABIC LETTER WAW WITH RING
 	* Kashmiri
+	x (arabic mathematical looped waw - 1EE85)
 06C5	ARABIC LETTER KIRGHIZ OE
 	* Kyrgyz
 	* a glyph variant occurs which replaces the looped tail with a horizontal bar through the tail
@@ -4550,6 +4576,7 @@
 	* smaller than the typical circular shape used for 0652
 06E0	ARABIC SMALL HIGH UPRIGHT RECTANGULAR ZERO
 	* the term "rectangular zero" is a translation of the Arabic name of this sign
+	x (arabic small low upright rectangular zero - 10EF0)
 06E1	ARABIC SMALL HIGH DOTLESS HEAD OF KHAH
 	= Arabic jazm
 	* presentation form of 0652, using font technology to select the variant is preferred
@@ -5132,7 +5159,7 @@
 	* Sundanese Pegon
 @		Abbreviation mark
 088E	ARABIC VERTICAL TAIL
-	* mark used to indicate abbreviations in early movable type texts from Iran
+	* mark used to indicate abbreviations in early movable type texts from Iran 
 	* only attested in final form
 @		Addition for Eastern Punjabi orthographies
 088F	ARABIC LETTER NOON WITH RING ABOVE
@@ -5254,6 +5281,7 @@
 08CF	ARABIC LARGE ROUND DOT BELOW
 08D0	ARABIC SUKUN BELOW
 08D1	ARABIC LARGE CIRCLE BELOW
+	x (arabic large circle above - 10ECF)
 08D2	ARABIC LARGE ROUND DOT INSIDE CIRCLE BELOW
 @		Quranic annotation signs
 08D3	ARABIC SMALL LOW WAW
@@ -6018,6 +6046,10 @@
 @		Virama
 0B4D	ORIYA SIGN VIRAMA
 @		Various signs
+0B53	ORIYA SIGN DOT ABOVE
+	* Kui
+0B54	ORIYA SIGN DOUBLE DOT ABOVE
+	* Kui
 0B55	ORIYA SIGN OVERLINE
 	* Kuvi, Kui
 0B56	ORIYA AI LENGTH MARK
@@ -10320,7 +10352,7 @@
 194E	LIMBU DIGIT EIGHT
 194F	LIMBU DIGIT NINE
 @@	1950	Tai Le	197F
-@+		Note the similarly named but distinct New Tai Lue script encoded at 1980-19DF.
+@+		Note the similarly named but distinct New Tai Lue script encoded at 1980-19DF. The Tai Le script is also known as Dehong Dai.
 @		Consonants
 1950	TAI LE LETTER KA
 1951	TAI LE LETTER XA
@@ -10770,6 +10802,9 @@
 	x (combining down tack below - 031E)
 1ADC	COMBINING DIAERESIS WITH RAISED LEFT DOT
 1ADD	COMBINING DOT-AND-RING BELOW
+@		Intermediate tone diacritics
+1ADE	COMBINING GRAVE-DOT
+1ADF	COMBINING DOT-ACUTE
 @		IPA positional variants
 @+		These are positional variants of diacritics that normally occur below a letter.
 1AE0	COMBINING LEFT TACK ABOVE
@@ -10808,6 +10843,15 @@
 	x (combining upwards arrow below - 034E)
 1AEB	COMBINING DOUBLE RIGHTWARDS ARROW ABOVE
 	x (combining double rightwards arrow below - 0362)
+@		Compound tone diacritics
+1AEC	COMBINING CARON-ACUTE
+1AED	COMBINING VERTICAL-LINE-DOUBLE-ACUTE
+1AEE	COMBINING DOUBLE GRAVE ACCENT BELOW
+1AEF	COMBINING DOUBLE ACUTE ACCENT BELOW
+1AF0	COMBINING DOUBLE COMMA ABOVE
+	x (combining comma above - 0313)
+	x (modifier letter double apostrophe - 02EE)
+	x (combining double open mark below - 1AB8)
 @@	1B00	Balinese	1B7F
 @		Various signs
 1B00	BALINESE SIGN ULU RICEM
@@ -11101,6 +11145,7 @@
 1BAD	SUNDANESE CONSONANT SIGN PASANGAN WA
 	= subjoined wa
 @		Additional consonants
+@+		These two letters are no longer used in modern Sundanese orthography.
 1BAE	SUNDANESE LETTER KHA
 1BAF	SUNDANESE LETTER SYA
 @		Digits
@@ -11829,6 +11874,7 @@
 1D81	LATIN SMALL LETTER D WITH PALATAL HOOK
 1D82	LATIN SMALL LETTER F WITH PALATAL HOOK
 1D83	LATIN SMALL LETTER G WITH PALATAL HOOK
+	x (latin small letter script g - 0261)
 1D84	LATIN SMALL LETTER K WITH PALATAL HOOK
 1D85	LATIN SMALL LETTER L WITH PALATAL HOOK
 1D86	LATIN SMALL LETTER M WITH PALATAL HOOK
@@ -13562,6 +13608,13 @@
 	# <sub> 0028
 208E	SUBSCRIPT RIGHT PARENTHESIS
 	# <sub> 0029
+@		Modifier letter
+208F	MODIFIER LETTER HIGH AND LOW VERTICAL LINE
+	* variable primary or secondary stress
+	* precedes letter or syllable modified
+	x (modifier letter vertical line - 02C8)
+	x (modifier letter low vertical line - 02CC)
+@		Subscripts
 2090	LATIN SUBSCRIPT SMALL LETTER A
 	# <sub> 0061
 2091	LATIN SUBSCRIPT SMALL LETTER E
@@ -13589,6 +13642,13 @@
 	# <sub> 0073
 209C	LATIN SUBSCRIPT SMALL LETTER T
 	# <sub> 0074
+@		Subscripts for other phonetic transcription
+209D	LATIN SUBSCRIPT SMALL LETTER W
+	# <sub> 0077
+209E	LATIN SUBSCRIPT SMALL LETTER Y
+	# <sub> 0079
+209F	LATIN SUBSCRIPT SMALL LETTER Z
+	# <sub> 007A
 @@	20A0	Currency Symbols	20CF
 @		Currency symbols
 @+		A number of currency symbols are found in other blocks. Fullwidth versions of some currency symbols are found in the Halfwidth and Fullwidth Forms block.
@@ -13654,6 +13714,7 @@
 	x (euro-currency sign - 20A0)
 20AD	KIP SIGN
 	* Laos
+	x (latin capital letter barred k - 1DF48)
 20AE	TUGRIK SIGN
 	* Mongolia
 	* also transliterated as tugrug, tugric, tugrog, togrog, tögrög
@@ -13708,6 +13769,10 @@
 	* Kyrgyzstan
 20C1	SAUDI RIYAL SIGN
 	* Saudi Arabia
+20C2	RUFIYAA SIGN
+	* Maldives
+20C3	UAE DIRHAM SIGN
+20C4	OMANI RIAL SIGN
 @@	20D0	Combining Diacritical Marks for Symbols	20FF
 @		Combining diacritical marks for symbols
 20D0	COMBINING LEFT HARPOON ABOVE
@@ -14180,6 +14245,7 @@
 @		Turned digits
 218A	TURNED DIGIT TWO
 	* digit for 10 in some duodecimal systems
+	x (latin capital letter script r - AB6C)
 218B	TURNED DIGIT THREE
 	* digit for 11 in some duodecimal systems
 	x (latin capital letter open e - 0190)
@@ -14331,9 +14397,9 @@
 	x (north east white arrow - 2B00)
 21E7	UPWARDS WHITE ARROW
 	= shift
-	= level 2 select (ISO 9995-7)
+	= level 2 select (ISO/IEC 9995-7)
 21E8	RIGHTWARDS WHITE ARROW
-	= group select (ISO 9995-7)
+	= group select (ISO/IEC 9995-7)
 21E9	DOWNWARDS WHITE ARROW
 21EA	UPWARDS WHITE ARROW FROM BAR
 	= caps lock
@@ -14484,6 +14550,7 @@
 	* used in astrological contexts for aspect semisquare
 	x (acute angle - 299F)
 2221	MEASURED ANGLE
+	x (measured angle with double arc - 1CEF9)
 2222	SPHERICAL ANGLE
 	= angle arc
 @		Relations
@@ -14569,18 +14636,23 @@
 223D	REVERSED TILDE
 	= lazy S
 	* reversed tilde and lazy S are glyph variants
+	~ 223D FE00 using lazy S
 223E	INVERTED LAZY S
 	= most positive
 @		Miscellaneous mathematical symbol
 223F	SINE WAVE
 	= alternating current
+	x (ac current - 23E6)
 @		Operator
 2240	WREATH PRODUCT
+	x (vertical tilde - 2E2F)
 @		Relations
 2241	NOT TILDE
 	: 223C 0338
 2242	MINUS TILDE
+	~ 2242 FE00 using lazy S
 2243	ASYMPTOTICALLY EQUAL TO
+	~ 2243 FE00 using lazy S
 2244	NOT ASYMPTOTICALLY EQUAL TO
 	: 2243 0338
 2245	APPROXIMATELY EQUAL TO
@@ -14590,6 +14662,7 @@
 	: 2245 0338
 2248	ALMOST EQUAL TO
 	= asymptotic to
+	~ 2248 FE00 using lazy S
 2249	NOT ALMOST EQUAL TO
 	: 2248 0338
 224A	ALMOST EQUAL OR EQUAL TO
@@ -14630,8 +14703,10 @@
 2263	STRICTLY EQUIVALENT TO
 2264	LESS-THAN OR EQUAL TO
 	x (less-than sign - 003C)
+	x (angle with underbar - 29A4)
 2265	GREATER-THAN OR EQUAL TO
 	x (greater-than sign - 003E)
+	x (reversed angle with underbar - 29A5)
 2266	LESS-THAN OVER EQUAL TO
 2267	GREATER-THAN OVER EQUAL TO
 2268	LESS-THAN BUT NOT EQUAL TO
@@ -14677,9 +14752,15 @@
 	= higher rank than
 	x (succeeds under relation - 22B1)
 227C	PRECEDES OR EQUAL TO
+	x (precedes above single-line equals sign - 2AAF)
+	x (precedes above equals sign - 2AB3)
 227D	SUCCEEDS OR EQUAL TO
+	x (succeeds above single-line equals sign - 2AB0)
+	x (succeeds above equals sign - 2AB4)
 227E	PRECEDES OR EQUIVALENT TO
+	x (precedes above almost equal to - 2AB7)
 227F	SUCCEEDS OR EQUIVALENT TO
+	x (succeeds above almost equal to - 2AB8)
 2280	DOES NOT PRECEDE
 	: 227A 0338
 2281	DOES NOT SUCCEED
@@ -14870,6 +14951,7 @@
 	x (caret insertion point - 2041)
 @		Relation
 22CD	REVERSED TILDE EQUALS
+	~ 22CD FE00 using lazy S
 @		Logical operators
 22CE	CURLY LOGICAL OR
 22CF	CURLY LOGICAL AND
@@ -14893,7 +14975,11 @@
 22DB	GREATER-THAN EQUAL TO OR LESS-THAN
 	~ 22DB FE00 with slanted equal
 22DC	EQUAL TO OR LESS-THAN
+	x (slanted equal to or less-than - 2A95)
+	~ 22DC FE00 with horizontal equal
 22DD	EQUAL TO OR GREATER-THAN
+	x (slanted equal to or greater-than - 2A96)
+	~ 22DD FE00 with horizontal equal
 22DE	EQUAL TO OR PRECEDES
 22DF	EQUAL TO OR SUCCEEDS
 22E0	DOES NOT PRECEDE OR EQUAL
@@ -15002,6 +15088,7 @@
 2313	SEGMENT
 	= position of a surface
 2314	SECTOR
+	x (sector with chord - 1CEF6)
 2315	TELEPHONE RECORDER
 2316	POSITION INDICATOR
 	= true position
@@ -15010,7 +15097,7 @@
 	x (equal and parallel to - 22D5)
 2318	PLACE OF INTEREST SIGN
 	= command key (1.0)
-	= operating system key (ISO 9995-7)
+	= operating system key (ISO/IEC 9995-7)
 2319	TURNED NOT SIGN
 	= line marker
 @		User interface symbols
@@ -15018,7 +15105,7 @@
 	x (alarm clock - 23F0)
 	x (clock face one oclock - 1F550)
 231B	HOURGLASS
-	= alchemical symbol for hour
+	x (white hourglass - 29D6)
 @		Quine corners
 @+		These form a set of four quine corners, for quincuncial arrangement. They are also used in upper and lower pairs in mathematics, or more rarely in editorial usage as alternatives to half brackets.
 231C	TOP LEFT CORNER
@@ -15113,7 +15200,7 @@
 	x (reversed empty set - 29B0)
 234A	APL FUNCTIONAL SYMBOL DOWN TACK UNDERBAR
 	= up tack underbar
-	* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2000 (APL Extended)
+	* preferred naming for APL tack symbols now follows the London Convention in ISO/IEC 13751:2001 (APL Extended)
 	x (up tack - 22A5)
 234B	APL FUNCTIONAL SYMBOL DELTA STILE
 234C	APL FUNCTIONAL SYMBOL QUAD DOWN CARET
@@ -15185,9 +15272,10 @@
 	* symbol for Negative Acknowledge
 @		Miscellaneous technical
 237C	RIGHT ANGLE WITH DOWNWARDS ZIGZAG ARROW
+	= azimuth
 @		Graphics for control codes
 237D	SHOULDERED OPEN BOX
-	* from ISO 9995-7
+	* from ISO/IEC 9995-7
 	* keyboard symbol for No Break Space
 	x (open box - 2423)
 237E	BELL SYMBOL
@@ -15196,7 +15284,7 @@
 237F	VERTICAL LINE WITH MIDDLE DOT
 	* from ISO 2047
 	* symbol for End of Medium
-@		Keyboard symbols from ISO 9995-7
+@		Keyboard symbols from ISO/IEC 9995-7
 2380	INSERTION SYMBOL
 2381	CONTINUOUS UNDERLINE SYMBOL
 2382	DISCONTINUOUS UNDERLINE SYMBOL
@@ -15224,13 +15312,14 @@
 2391	PASSIVE-PULL-DOWN-OUTPUT SYMBOL
 2392	PASSIVE-PULL-UP-OUTPUT SYMBOL
 2393	DIRECT CURRENT SYMBOL FORM TWO
+	x (straightness - 23E4)
 2394	SOFTWARE-FUNCTION SYMBOL
 	x (white hexagon - 2B21)
 @		APL
 2395	APL FUNCTIONAL SYMBOL QUAD
 	x (apl functional symbol squish quad - 2337)
 	x (white vertical rectangle - 25AF)
-@		Keyboard symbols from ISO 9995-7
+@		Keyboard symbols from ISO/IEC 9995-7
 2396	DECIMAL SEPARATOR KEY SYMBOL
 2397	PREVIOUS PAGE
 	x (back with leftwards arrow above - 1F519)
@@ -15366,8 +15455,11 @@
 23E3	BENZENE RING WITH CIRCLE
 @		Miscellaneous technical
 23E4	STRAIGHTNESS
+	= direct current symbol form one
+	x (direct current symbol form two - 2393)
 23E5	FLATNESS
 23E6	AC CURRENT
+	x (sine wave - 223F)
 23E7	ELECTRICAL INTERSECTION
 23E8	DECIMAL EXPONENT SYMBOL
 	* Algol-60 token for scientific notation literals
@@ -15484,7 +15576,7 @@
 2424	SYMBOL FOR NEWLINE
 @		Keyboard symbol
 2425	SYMBOL FOR DELETE FORM TWO
-	* from ISO 9995-7
+	* from ISO/IEC 9995-7
 	* keyboard symbol for undoable delete
 @		Specific symbol for control code
 2426	SYMBOL FOR SUBSTITUTE FORM TWO
@@ -16159,10 +16251,12 @@
 25CA	LOZENGE
 	x (white diamond suit - 2662)
 25CB	WHITE CIRCLE
+	* fifth day (taian) in a six-day annotation system (Rokuyō) used in Japanese traditional calendars
 	x (combining enclosing circle - 20DD)
 	x (large circle - 25EF)
 	x (heavy circle - 2B58)
 	x (ideographic number zero - 3007)
+	x (tomobiki symbol - 1F1AE)
 	x (full moon symbol - 1F315)
 25CC	DOTTED CIRCLE
 	* note that the reference glyph for this character is intentionally larger than the dotted circle glyph used to indicate combining characters in this standard; see, for example, 0300
@@ -16173,12 +16267,15 @@
 	x (direct hit - 1F3AF)
 	x (round target - 1F78B)
 25CF	BLACK CIRCLE
+	* fourth day (butsumetsu) in a six-day annotation system (Rokuyō) used in Japanese traditional calendars
 	x (black large circle - 2B24)
 	x (new moon symbol - 1F311)
 	x (large red circle - 1F534)
 25D0	CIRCLE WITH LEFT HALF BLACK
+	* first day (senshō) in a six-day annotation system (Rokuyō) used in Japanese traditional calendars
 	x (first quarter moon symbol - 1F313)
 25D1	CIRCLE WITH RIGHT HALF BLACK
+	* third day (sembu) in a six-day annotation system (Rokuyō) used in Japanese traditional calendars
 	x (last quarter moon symbol - 1F317)
 25D2	CIRCLE WITH LOWER HALF BLACK
 25D3	CIRCLE WITH UPPER HALF BLACK
@@ -16450,6 +16547,7 @@
 	x (mens symbol - 1F6B9)
 2643	JUPITER
 	= alchemical symbol for tin
+	x (alchemical symbol for moon-jupiter - 1CED3)
 2644	SATURN
 	= alchemical symbol for lead
 2645	URANUS
@@ -17907,7 +18005,9 @@
 	x (angle - 2220)
 29A3	REVERSED ANGLE
 29A4	ANGLE WITH UNDERBAR
+	x (less-than or equal to - 2264)
 29A5	REVERSED ANGLE WITH UNDERBAR
+	x (greater-than or equal to - 2265)
 29A6	OBLIQUE ANGLE OPENING UP
 29A7	OBLIQUE ANGLE OPENING DOWN
 29A8	MEASURED ANGLE WITH OPEN ARM ENDING IN ARROW POINTING UP AND RIGHT
@@ -17988,6 +18088,7 @@
 29D6	WHITE HOURGLASS
 	= vertical bowtie
 	= white framus
+	* simple form of the alchemical symbol for hour
 	x (hourglass - 231B)
 	x (alchemical symbol for hour - 1F76E)
 29D7	BLACK HOURGLASS
@@ -18072,7 +18173,7 @@
 	x (succeeds - 227B)
 	x (right-pointing angle bracket - 232A)
 @		Symbols used in game theory
-@+		TINY (pronounced "teenie") and MINY (pronounced "meenie") are symbols that yield infinitesimal values when applied to numbers in combinatorial game theory.
+@+		TINY and MINY are symbols that yield infinitesimal values when applied to numbers in combinatorial game theory.
 29FE	TINY
 	x (plus sign - 002B)
 29FF	MINY
@@ -18257,6 +18358,7 @@
 2A6B	TILDE OPERATOR WITH RISING DOTS
 	x (homothetic - 223B)
 2A6C	SIMILAR MINUS SIMILAR
+	~ 2A6C FE00 using lazy S
 2A6D	CONGRUENT WITH DOT ABOVE
 	x (approximately equal to - 2245)
 2A6E	EQUALS WITH ASTERISK
@@ -18360,7 +18462,9 @@
 2AB5	PRECEDES ABOVE NOT EQUAL TO
 2AB6	SUCCEEDS ABOVE NOT EQUAL TO
 2AB7	PRECEDES ABOVE ALMOST EQUAL TO
+	x (precedes or equivalent to - 227E)
 2AB8	SUCCEEDS ABOVE ALMOST EQUAL TO
+	x (succeeds or equivalent to - 227F)
 2AB9	PRECEDES ABOVE NOT ALMOST EQUAL TO
 2ABA	SUCCEEDS ABOVE NOT ALMOST EQUAL TO
 2ABB	DOUBLE PRECEDES
@@ -18947,7 +19051,7 @@
 2BEA	STAR WITH LEFT HALF BLACK
 2BEB	STAR WITH RIGHT HALF BLACK
 @		Two-headed arrow symbols
-@+		The following four arrow symbols are the preferred representation for fast cursor direction for ISO 9995-7.
+@+		The following four arrow symbols are the preferred representation for fast cursor direction for ISO/IEC 9995-7.
 2BEC	LEFTWARDS TWO-HEADED ARROW WITH TRIANGLE ARROWHEADS
 	= fast cursor left
 	x (leftwards two headed arrow - 219E)
@@ -19673,6 +19777,7 @@
 2E2F	VERTICAL TILDE
 	* used for Cyrillic yerik
 	x (combining vertical tilde - 033E)
+	x (wreath product - 2240)
 	x (cyrillic payerok - A67F)
 2E30	RING POINT
 	* used in Avestan
@@ -19707,7 +19812,7 @@
 	* indicates pronunciation on one side of the mouth only
 	x (section sign - 00A7)
 @		Dashes
-@+		These long dashes are shown in the code charts inside dashed square boxes because of their width. In production fonts they would simply display as extra-wide dashes.
+@+		These long dashes are shown in the code charts inside dashed square boxes because of their width. In production fonts they would simply display as extra-wide dashes. 
 2E3A	TWO-EM DASH
 	= omission dash
 	* may be used in Chinese for abrupt change of thought, inserting new content, or continuation of tone or sound
@@ -19807,6 +19912,16 @@
 2E5D	OBLIQUE HYPHEN
 	x (hyphen - 2010)
 	x (double oblique hyphen - 2E17)
+@		Punctuation used with the English Phonotypic Alphabet
+2E60	WIGGLY EXCLAMATION MARK
+	= smile mark, mirth mark, laughter mark
+	* wiggles are broader at top than at bottom
+2E61	INVERTED WIGGLY EXCLAMATION MARK
+	* may indicate sarcasm when used in sequence with 2E60
+	* used at the end of sentences, unlike 00A1
+2E62	LEFT PARENTHESIS WITH MIDDLE RING
+	x (ornate left parenthesis - FD3E)
+2E63	RIGHT PARENTHESIS WITH MIDDLE RING
 @@	2E80	CJK Radicals Supplement	2EFF
 @+		For the characters in this block whose representative glyph takes up only a portion of the em-box, the placement relative to the em-box is either centered or respects prototypical usage. The placement of the representative glyph is for informational purposes only, and should not be considered a recommendation for implementations.
 @		CJK radicals supplement
@@ -21667,8 +21782,11 @@
 31BF	BOPOMOFO LETTER AH
 @@	31C0	CJK Strokes	31EF
 @		CJK strokes
+@+		These characters are intended for the representation of CJK strokes in isolation, as for discussions of the structure of CJK ideographs or in indexes. See Appendix F of the core specification for many more examples of the CJK strokes, with the strokes shown highlighted in context.
 31C0	CJK STROKE T
+	* 2nd stroke of 5201
 	* 2nd stroke of 51B0
+	~ 31C0 FE00 dotted T form
 31C1	CJK STROKE WG
 	* 2nd stroke of 72D0
 31C2	CJK STROKE XG
@@ -21684,7 +21802,10 @@
 	* 1st stroke of 534D
 31C6	CJK STROKE HZG
 	* 1st stroke of 7FBD
+	* 1st stroke of 5201
 	* 1st stroke of 4E5F
+	~ 31C6 FE00 curved Z form
+	~ 31C6 FE01 rising H form
 31C7	CJK STROKE HP
 	* 1st stroke of 53C8
 	* 4th stroke of 4ECA
@@ -21693,6 +21814,7 @@
 31C9	CJK STROKE SZWG
 	* 3rd stroke of 5F13
 	* 2nd stroke of 9A6C
+	~ 31C9 FE00 slanted S form
 31CA	CJK STROKE HZT
 	* 2nd stroke of 8BA1
 	* 2nd stroke of 9CE9
@@ -21707,25 +21829,39 @@
 	* 1st stroke of 51F8
 31CF	CJK STROKE N
 	* 3rd stroke of 5927
+	* 1st stroke of 5165 G source
+	* 2nd stroke of 5EF4
+	~ 31CF FE00 curved starting N form
+	~ 31CF FE01 flat N form
 31D0	CJK STROKE H
 	* 1st stroke of 5927
 	* 1st stroke of 4E03
+	~ 31D0 FE00 rising H form
 31D1	CJK STROKE S
 	* 4th stroke of 4E2D
+	* 2nd stroke of 4E11
+	~ 31D1 FE00 slanted S form
 31D2	CJK STROKE P
+	* 1st stroke of 4E42
 	* 1st stroke of 4E4F
+	~ 31D2 FE00 flat P form
 31D3	CJK STROKE SP
 	* 1st stroke of 6708
 31D4	CJK STROKE D
 	* 3rd stroke of 4E38
+	* 2nd stroke of 5FC4
+	~ 31D4 FE00 to bottom left form
 31D5	CJK STROKE HZ
 	* 2nd stroke of 56DB
+	* 4th stroke of 4ECA
+	~ 31D5 FE00 slanted Z form
 31D6	CJK STROKE HG
 	* 1st stroke of 758B
 	* 1st stroke of 5B50
 31D7	CJK STROKE SZ
 	* 2nd stroke of 5C71
 	* 2nd stroke of 4E1C
+	~ 31D7 FE00 slanted S form
 31D8	CJK STROKE SWZ
 	* 6th stroke of 8085
 31D9	CJK STROKE ST
@@ -21735,11 +21871,18 @@
 31DB	CJK STROKE PD
 	* 1st stroke of 5DE1
 	* 1st stroke of 5973
+	~ 31DB FE00 slanted SD form
 31DC	CJK STROKE PZ
+	* 4th stroke of 248E5
 	* 3rd stroke of 516C
 	* 4th stroke of 5F18
+	~ 31DC FE00 upwards T form
 31DD	CJK STROKE TN
-	* 8th stroke of 5EFB
+	* stylistic alternative of N stroke in some fonts
+	* 1st stroke of 5165 non-G source
+	* last stroke of 8FB6
+	~ 31DD FE00 horizontal H curved N form
+	~ 31DD FE01 upwards T flat N form
 31DE	CJK STROKE SZZ
 	* 1st stroke of 5350
 	* 4th stroke of 4E9E
@@ -21758,10 +21901,13 @@
 	* 1st stroke of 98DE
 31E5	CJK STROKE SZP
 	* 8th stroke of 594A
+	* 3rd stroke of 4E13
+	~ 31E5 FE00 slanted S form
 @		Ideographic description character
 @+		This is a visibly displayed graphic character, not an invisible composition control. It is used with other characters from the Ideographic Description Characters block.
 31EF	IDEOGRAPHIC DESCRIPTION CHARACTER SUBTRACTION
 	* used to describe a character or a component with a stroke (or other component) removed
+@~	Standardized Variation Sequences
 @@	31F0	Katakana Phonetic Extensions	31FF
 @		Phonetic extensions for Ainu
 31F0	KATAKANA LETTER SMALL KU
@@ -25069,6 +25215,7 @@ A76B	LATIN SMALL LETTER ET
 	x (latin small letter yogh - 021D)
 A76C	LATIN CAPITAL LETTER IS
 A76D	LATIN SMALL LETTER IS
+	x (latin small letter c with right loop - 1DF92)
 A76E	LATIN CAPITAL LETTER CON
 	x (digit nine - 0039)
 A76F	LATIN SMALL LETTER CON
@@ -25087,9 +25234,11 @@ A778	LATIN SMALL LETTER UM
 @+		These letters are meant for transcriptions of medieval manuscripts, or for modern phonetic notations, for cases where the letters contrast with their Carolingian forms. For representing whole texts in an Insular style, one should use the regular Latin letters and display them with an Insular typeface.
 A779	LATIN CAPITAL LETTER INSULAR D
 A77A	LATIN SMALL LETTER INSULAR D
+	= d rotunda
 	* dental fricative [ð]
 	x (latin small letter eth - 00F0)
 	x (latin small letter delta - 1E9F)
+	x (latin small letter d rotunda with descending crossing loop - 1DF93)
 A77B	LATIN CAPITAL LETTER INSULAR F
 A77C	LATIN SMALL LETTER INSULAR F
 A77D	LATIN CAPITAL LETTER INSULAR G
@@ -25106,8 +25255,10 @@ A782	LATIN CAPITAL LETTER INSULAR R
 A783	LATIN SMALL LETTER INSULAR R
 	x (latin small letter r with long leg - 027C)
 A784	LATIN CAPITAL LETTER INSULAR S
+	x (latin capital letter r with long leg - A7E2)
 A785	LATIN SMALL LETTER INSULAR S
 	x (latin small letter long s - 017F)
+	x (latin small letter r with long leg - 027C)
 A786	LATIN CAPITAL LETTER INSULAR T
 A787	LATIN SMALL LETTER INSULAR T
 	* voiceless dental fricative [θ]
@@ -25189,6 +25340,7 @@ A799	LATIN SMALL LETTER F WITH STROKE
 	* also used in the Anthropos phonetic alphabet
 @		Archaic letters for Volapük
 A79A	LATIN CAPITAL LETTER VOLAPUK AE
+	* also used for the English Phonotypic Alphabet
 A79B	LATIN SMALL LETTER VOLAPUK AE
 A79C	LATIN CAPITAL LETTER VOLAPUK OE
 A79D	LATIN SMALL LETTER VOLAPUK OE
@@ -25323,6 +25475,7 @@ A7D6	LATIN CAPITAL LETTER MIDDLE SCOTS S
 A7D7	LATIN SMALL LETTER MIDDLE SCOTS S
 	* used in Middle Scots for s, ss, ser, sir, is, sis, etc.
 	x (latin small letter sharp s - 00DF)
+	x (latin small ligature long s with descender s - 1DF95)
 A7D8	LATIN CAPITAL LETTER SIGMOID S
 A7D9	LATIN SMALL LETTER SIGMOID S
 	* used in Middle Cornish, Middle English, and Middle Scots
@@ -25332,6 +25485,14 @@ A7DB	LATIN SMALL LETTER LAMBDA
 	x (greek small letter lamda - 03BB)
 A7DC	LATIN CAPITAL LETTER LAMBDA WITH STROKE
 	* lowercase is 019B
+A7DD	LATIN CAPITAL LETTER CLOSED OMEGA
+	* lowercase is 0277
+@		Addition for Xhosa
+A7E2	LATIN CAPITAL LETTER R WITH LONG LEG
+	* lowercase is 027C
+	x (latin capital letter gamma - 0194)
+	x (greek capital letter gamma - 0393)
+	x (latin capital letter insular s - A784)
 @		Modifier letters for Chatino (México)
 @+		These characters are also used as phonetic and phonemic wildcards.
 A7F1	MODIFIER LETTER CAPITAL S
@@ -26553,6 +26714,12 @@ AB6A	MODIFIER LETTER LEFT TACK
 AB6B	MODIFIER LETTER RIGHT TACK
 	* backed vocalic realization
 	x (combining right tack below - 0319)
+@		Letters for German dialectology
+AB6C	LATIN CAPITAL LETTER SCRIPT R
+	* lowercase is AB4B
+	x (turned digit two - 218A)
+AB6D	LATIN CAPITAL LETTER SCRIPT R WITH RING
+	* lowercase is AB4C
 @@	AB70	Cherokee Supplement	ABBF
 @+		The uppercase Cherokee syllables are encoded in the Cherokee block at 13A0-13FF. Lowercase ye, yi, yo, yu, yv, and mv are encoded in that same block.
 @		Lowercase syllables
@@ -32249,6 +32416,21 @@ FFFF	<not a character>
 	# <super> 1DF0A
 107BA	MODIFIER LETTER SMALL S WITH CURL
 	# <super> 1DF1E
+107BB	MODIFIER LETTER SMALL TURNED T
+	* historic form of 107B6
+	# <super> 0287
+107BC	MODIFIER LETTER INVERTED GLOTTAL STOP
+	* historic form of 107B7
+	# <super> 0296
+107BD	MODIFIER LETTER STRETCHED C
+	* historic form of A71D
+	x (modifier letter raised exclamation mark - A71D)
+	# <super> 0297
+107BE	MODIFIER LETTER SMALL TURNED K
+	# <super> 029E
+107BF	MODIFIER LETTER SMALL ESH WITH DOUBLE BAR
+	* historic form of 107B8
+	# <super> 1DF0B
 @@	10800	Cypriot Syllabary	1083F
 @		Syllables
 10800	CYPRIOT SYLLABLE A
@@ -33832,6 +34014,22 @@ FFFF	<not a character>
 	* only medial form is attested
 @		Letter used for Swahili
 10EC7	ARABIC LETTER YEH WITH FOUR DOTS BELOW
+@		Quranic marks
+10EC9	ARABIC SMALL BASELINE FATHA
+	* used to mark fatha when continuing recitation from the opening letters to the next verse
+10ECA	ARABIC SMALL BASELINE DOTLESS HEAD OF KHAH
+	* used to mark sukun when continuing recitation from the opening letters to the next verse
+10ECB	ARABIC NORTHEAST POINTING ARROWHEAD ABOVE
+	* used to mark changing of vowel to fatha or damma when starting recitation from the word
+10ECC	ARABIC NORTHEAST POINTING ARROWHEAD BELOW
+	* used to mark changing of vowel to kasra when starting recitation from the word
+10ECD	ARABIC SOUTHWEST POINTING ARROWHEAD BELOW
+	* used to mark changing of vowel to kasra when pausing recitation from the word
+10ECE	ARABIC SMALL CIRCLE ABOVE
+	* used to mark imalah sughra when pausing recitation from the word
+10ECF	ARABIC LARGE CIRCLE ABOVE
+	* used to mark deletion of the letter below it when pausing recitation
+	x (arabic large circle below - 08D1)
 @		Biblical punctuation mark
 10ED0	ARABIC BIBLICAL END OF VERSE
 	* used as end of verse marker in Urdu
@@ -33845,6 +34043,50 @@ FFFF	<not a character>
 10ED6	ARABIC LIGATURE QUDDISA SIRRUHUMAA
 10ED7	ARABIC LIGATURE QUDDISAT ASRAARUHUM
 10ED8	ARABIC LIGATURE NAWWARA ALLAAHU MARQADAH
+@		Crown letters
+10ED9	ARABIC CROWN LETTER BEH
+10EDA	ARABIC CROWN LETTER PEH
+10EDB	ARABIC CROWN LETTER TEH
+10EDC	ARABIC CROWN LETTER THEH
+10EDD	ARABIC CROWN LETTER JEEM
+10EDE	ARABIC CROWN LETTER HAH
+10EDF	ARABIC CROWN LETTER KHAH
+10EE0	ARABIC CROWN LETTER SEEN
+10EE1	ARABIC CROWN LETTER SHEEN
+10EE2	ARABIC CROWN LETTER SAD
+10EE3	ARABIC CROWN LETTER DAD
+10EE4	ARABIC CROWN LETTER TAH
+10EE5	ARABIC CROWN LETTER ZAH
+10EE6	ARABIC CROWN LETTER AIN
+10EE7	ARABIC CROWN LETTER GHAIN
+10EE8	ARABIC CROWN LETTER FEH
+10EE9	ARABIC CROWN LETTER QAF
+10EEA	ARABIC CROWN LETTER KAF
+10EEB	ARABIC CROWN LETTER MEEM
+10EEC	ARABIC CROWN LETTER NOON
+10EED	ARABIC CROWN LETTER HEH
+10EEE	ARABIC CROWN LETTER YEH
+@		Quranic marks
+10EF0	ARABIC SMALL LOW UPRIGHT RECTANGULAR ZERO
+	x (arabic small high upright rectangular zero - 06E0)
+	* used to mark long /iː/ vowel when pausing recitation
+10EF1	ARABIC SQUARE BELOW
+	* placed below the letter reh to indicate that the letter should be pronounced lightly without pharyngealization
+10EF2	ARABIC FILLED SQUARE BELOW
+	* placed below the letter lam to indicate that the letter should be pronounced with pharyngealization
+@		Quranic naql marks
+@+		These characters are used to mark naql, when there is a hamza after tanween, according to Warsh narration, the vowel of the hamza is moved to tanween so that it is pronounced as the letter noon.
+10EF3	ARABIC SMALL HIGH NOON WITH FATHA
+10EF4	ARABIC SMALL LOW NOON WITH FATHA
+10EF5	ARABIC SMALL HIGH NOON WITH DAMMA
+10EF6	ARABIC SMALL LOW NOON WITH DAMMA
+@		Quranic marks
+10EF7	ARABIC SMALL HIGH HEH INITIAL FORM
+	* used to indicate the end of the word should be pronounced with /h/ sound when pausing recitation
+10EF8	ARABIC SMALL HIGH WORD KABBIR
+	* used to mark place of takbeer at the end of the chapter
+@		Crown mark
+10EF9	ARABIC MARK CROWN
 @		Tanween mark used in Old Sindhi
 10EFA	ARABIC DOUBLE VERTICAL BAR BELOW
 	x (arabic kasratan - 064D)
@@ -34800,10 +35042,10 @@ FFFF	<not a character>
 @+		The Grantha script uses digits from the Tamil block.
 @		Various signs
 11300	GRANTHA SIGN COMBINING ANUSVARA ABOVE
-	* used in Prakrit language Jain texts for the linguistic anusvara
+	* used in Prakrit language texts for the linguistic anusvara
 11301	GRANTHA SIGN CANDRABINDU
 11302	GRANTHA SIGN ANUSVARA
-	* used in Prakrit language Jain texts to indicate gemination of the following consonant
+	* used in Prakrit language texts to indicate gemination of the following consonant
 11303	GRANTHA SIGN VISARGA
 @		Independent vowels
 11305	GRANTHA LETTER A
@@ -36304,6 +36546,10 @@ FFFF	<not a character>
 11B08	DEVANAGARI SIGN REVERSED NINE-LIKE BHALE
 11B09	DEVANAGARI SIGN MINDU
 	x (devanagari digit zero - 0966)
+@		Sindhi implosive letter
+11B0A	DEVANAGARI LETTER ALTERNATE DDDA
+	* used for digitization purposes but not in current use
+	x (devanagari letter da - 0926)
 @@	11B60	Sharada Supplement	11B7F
 @		Kashmiri vowel signs
 11B60	SHARADA VOWEL SIGN OE
@@ -36776,6 +37022,11 @@ FFFF	<not a character>
 11DE7	TOLONG SIKI DIGIT SEVEN
 11DE8	TOLONG SIKI DIGIT EIGHT
 11DE9	TOLONG SIKI DIGIT NINE
+@@	11DF0	Bengali Supplement	11DFF
+@		Sign
+11DF0	BENGALI SIGN COMBINING ANUSVARA ABOVE
+@		Addition for Sanskrit
+11DF1	BENGALI LETTER ALTERNATE BARGIYA BA
 @@	11EE0	Makasar	11EFF
 @+		This script is known indigenously as Ukiri' Jangangjangang and in English as Old Makasar.
 @		Consonants
@@ -37106,11 +37357,15 @@ FFFF	<not a character>
 12038	CUNEIFORM SIGN ASH
 	= 1 aš
 	x (cuneiform numeric sign two ash - 12400)
+	x (cuneiform numeric sign one n01 - 12550)
+	x (cuneiform numeric sign one n01 flat - 1264C)
 12039	CUNEIFORM SIGN ASH ZIDA TENU
 	= 1 aš tenû
 	= 1 diš tenû
 	= 1/2 iku
 	x (cuneiform numeric sign two ash tenu - 1244A)
+	x (cuneiform numeric sign one n08 - 12559)
+	x (cuneiform numeric sign one half iku curved variant form - 1258B)
 1203A	CUNEIFORM SIGN ASH KABA TENU
 1203B	CUNEIFORM SIGN ASH OVER ASH TUG2 OVER TUG2 TUG2 OVER TUG2 PAP
 1203C	CUNEIFORM SIGN ASH OVER ASH OVER ASH
@@ -37181,6 +37436,8 @@ FFFF	<not a character>
 	x (cuneiform numeric sign three dish - 12408)
 	x (cuneiform numeric sign nigidamin - 12456)
 	x (cuneiform numeric sign nigidaesh - 12457)
+	x (cuneiform numeric sign one n01 - 12550)
+	x (cuneiform numeric sign one n08 - 12559)
 1207A	CUNEIFORM SIGN DU
 1207B	CUNEIFORM SIGN DU OVER DU
 1207C	CUNEIFORM SIGN DU GUNU
@@ -37611,7 +37868,9 @@ FFFF	<not a character>
 12225	CUNEIFORM SIGN MAR
 12226	CUNEIFORM SIGN MASH
 	= 1/2 diš
+	* 12593 should be used for 1/2 aš curved
 	x (cuneiform numeric sign one ban2 - 1244F)
+	x (cuneiform numeric sign one ban2 curved - 12593)
 12227	CUNEIFORM SIGN MASH2
 12228	CUNEIFORM SIGN ME
 12229	CUNEIFORM SIGN MES
@@ -37619,6 +37878,7 @@ FFFF	<not a character>
 1222B	CUNEIFORM SIGN MIN
 	= 2 diš
 	x (cuneiform numeric sign three dish - 12408)
+	x (cuneiform numeric sign two n08 - 1255A)
 1222C	CUNEIFORM SIGN MU
 1222D	CUNEIFORM SIGN MU OVER MU
 1222E	CUNEIFORM SIGN MUG
@@ -37766,7 +38026,9 @@ FFFF	<not a character>
 	* same glyph as 1212D HI in all but the most archaizing texts
 	* the archaic reference glyph is formed by making a circular indentation with the end of the stylus
 	* used for logographic šar₂ and cuneiform 1 šar₂
+	* 12579 should be used for numeric 1 šar₂ curved
 	x (cuneiform numeric sign two shar2 - 12423)
+	x (cuneiform numeric sign one n45 - 12579)
 122BA	CUNEIFORM SIGN SHE
 122BB	CUNEIFORM SIGN SHE HU
 122BC	CUNEIFORM SIGN SHE OVER SHE GAD OVER GAD GAR OVER GAR
@@ -37854,11 +38116,15 @@ FFFF	<not a character>
 	= 1 u
 	= 1 bur₃
 	x (cuneiform numeric sign four u - 1240F)
+	x (cuneiform numeric sign one n14 - 12562)
+	x (cuneiform numeric sign one n14 flat - 12656)
 1230C	CUNEIFORM SIGN U GUD
 1230D	CUNEIFORM SIGN U U U
 	= 3 u
 	= 3 bur₃
 	x (cuneiform numeric sign four u - 1240F)
+	x (cuneiform numeric sign three n14 - 12564)
+	x (cuneiform numeric sign three n14 flat - 12658)
 1230E	CUNEIFORM SIGN U OVER U PA OVER PA GAR OVER GAR
 1230F	CUNEIFORM SIGN U OVER U SUR OVER SUR
 12310	CUNEIFORM SIGN U OVER U U REVERSED OVER U REVERSED
@@ -38009,12 +38275,16 @@ FFFF	<not a character>
 	= 2 u
 	= 2 bur₃
 	x (cuneiform numeric sign four u - 1240F)
+	x (cuneiform numeric sign two n14 - 12563)
+	x (cuneiform numeric sign two n14 flat - 12657)
 @@	12400	Cuneiform Numbers and Punctuation	1247F
 @		Common numeric signs
 @+		These are used in multiple metrological systems.
 12400	CUNEIFORM NUMERIC SIGN TWO ASH
 	= 2 iku
 	x (cuneiform sign ash - 12038)
+	x (cuneiform numeric sign two n01 - 12551)
+	x (cuneiform numeric sign two n01 flat - 1264D)
 12401	CUNEIFORM NUMERIC SIGN THREE ASH
 12402	CUNEIFORM NUMERIC SIGN FOUR ASH
 12403	CUNEIFORM NUMERIC SIGN FIVE ASH
@@ -38025,6 +38295,7 @@ FFFF	<not a character>
 12408	CUNEIFORM NUMERIC SIGN THREE DISH
 	x (cuneiform sign dish - 12079)
 	x (cuneiform sign min - 1222B)
+	x (cuneiform numeric sign three n08 - 1255B)
 12409	CUNEIFORM NUMERIC SIGN FOUR DISH
 	= 4 bariga
 1240A	CUNEIFORM NUMERIC SIGN FIVE DISH
@@ -38037,12 +38308,15 @@ FFFF	<not a character>
 	x (cuneiform sign u - 1230B)
 	x (cuneiform sign u u - 12399)
 	x (cuneiform sign u u u - 1230D)
+	x (cuneiform numeric sign four n14 - 12565)
+	x (cuneiform numeric sign four n14 flat - 12659)
 12410	CUNEIFORM NUMERIC SIGN FIVE U
 12411	CUNEIFORM NUMERIC SIGN SIX U
 12412	CUNEIFORM NUMERIC SIGN SEVEN U
 12413	CUNEIFORM NUMERIC SIGN EIGHT U
 12414	CUNEIFORM NUMERIC SIGN NINE U
 12415	CUNEIFORM NUMERIC SIGN ONE GESH2
+	x (cuneiform numeric sign one n34 - 1256B)
 12416	CUNEIFORM NUMERIC SIGN TWO GESH2
 12417	CUNEIFORM NUMERIC SIGN THREE GESH2
 12418	CUNEIFORM NUMERIC SIGN FOUR GESH2
@@ -38052,12 +38326,14 @@ FFFF	<not a character>
 1241C	CUNEIFORM NUMERIC SIGN EIGHT GESH2
 1241D	CUNEIFORM NUMERIC SIGN NINE GESH2
 1241E	CUNEIFORM NUMERIC SIGN ONE GESHU
+	x (cuneiform numeric sign one n48 - 12574)
 1241F	CUNEIFORM NUMERIC SIGN TWO GESHU
 12420	CUNEIFORM NUMERIC SIGN THREE GESHU
 12421	CUNEIFORM NUMERIC SIGN FOUR GESHU
 12422	CUNEIFORM NUMERIC SIGN FIVE GESHU
 12423	CUNEIFORM NUMERIC SIGN TWO SHAR2
 	x (cuneiform sign shar2 - 122B9)
+	x (cuneiform numeric sign two n45 - 1257A)
 12424	CUNEIFORM NUMERIC SIGN THREE SHAR2
 12425	CUNEIFORM NUMERIC SIGN THREE SHAR2 VARIANT FORM
 12426	CUNEIFORM NUMERIC SIGN FOUR SHAR2
@@ -38067,6 +38343,7 @@ FFFF	<not a character>
 1242A	CUNEIFORM NUMERIC SIGN EIGHT SHAR2
 1242B	CUNEIFORM NUMERIC SIGN NINE SHAR2
 1242C	CUNEIFORM NUMERIC SIGN ONE SHARU
+	x (cuneiform numeric sign one n50 - 12582)
 1242D	CUNEIFORM NUMERIC SIGN TWO SHARU
 1242E	CUNEIFORM NUMERIC SIGN THREE SHARU
 1242F	CUNEIFORM NUMERIC SIGN THREE SHARU VARIANT FORM
@@ -38076,6 +38353,8 @@ FFFF	<not a character>
 12433	CUNEIFORM NUMERIC SIGN SHAR2 TIMES GAL PLUS MIN
 @		Area measures
 12434	CUNEIFORM NUMERIC SIGN ONE BURU
+	x (cuneiform numeric sign one buru curved - 1258E)
+	x (cuneiform numeric sign one n50 - 12582)
 12435	CUNEIFORM NUMERIC SIGN TWO BURU
 12436	CUNEIFORM NUMERIC SIGN THREE BURU
 12437	CUNEIFORM NUMERIC SIGN THREE BURU VARIANT FORM
@@ -38111,6 +38390,7 @@ FFFF	<not a character>
 1244F	CUNEIFORM NUMERIC SIGN ONE BAN2
 	* 12226 should be used for 1/2 diš
 	x (cuneiform sign mash - 12226)
+	x (cuneiform numeric sign one ban2 curved - 12593)
 12450	CUNEIFORM NUMERIC SIGN TWO BAN2
 12451	CUNEIFORM NUMERIC SIGN THREE BAN2
 12452	CUNEIFORM NUMERIC SIGN FOUR BAN2
@@ -38120,10 +38400,12 @@ FFFF	<not a character>
 12456	CUNEIFORM NUMERIC SIGN NIGIDAMIN
 	= 2 bariga
 	x (cuneiform sign dish - 12079)
+	x (cuneiform numeric sign two n08 - 1255A)
 12457	CUNEIFORM NUMERIC SIGN NIGIDAESH
 	= 3 bariga
 @		Area measures
 12458	CUNEIFORM NUMERIC SIGN ONE ESHE3
+	x (cuneiform numeric sign one n22 - 1258C)
 12459	CUNEIFORM NUMERIC SIGN TWO ESHE3
 @		Fractions
 1245A	CUNEIFORM NUMERIC SIGN ONE THIRD DISH
@@ -38132,13 +38414,19 @@ FFFF	<not a character>
 1245D	CUNEIFORM NUMERIC SIGN ONE THIRD VARIANT FORM A
 	= 1/3 aš curved
 	= 1/3 diš curved
+	x (cuneiform numeric sign ninda2 times she plus one ash curved - 12598)
 1245E	CUNEIFORM NUMERIC SIGN TWO THIRDS VARIANT FORM A
 	= 2/3 aš curved
 	= 2/3 diš curved
+	x (cuneiform numeric sign ninda2 times she plus two ash curved - 12599)
 1245F	CUNEIFORM NUMERIC SIGN ONE EIGHTH ASH
 	= 1/8 iku
+	x (cuneiform numeric sign one eighth iku curved - 12587)
+	x (cuneiform numeric sign one eighth iku curved variant form - 12588)
 12460	CUNEIFORM NUMERIC SIGN ONE QUARTER ASH
 	= 1/4 iku
+	x (cuneiform numeric sign one n01 reversed - 12589)
+	x (cuneiform numeric sign one quarter iku curved variant form - 1258A)
 12461	CUNEIFORM NUMERIC SIGN OLD ASSYRIAN ONE SIXTH
 12462	CUNEIFORM NUMERIC SIGN OLD ASSYRIAN ONE QUARTER
 @		Capacity measures
@@ -38161,6 +38449,8 @@ FFFF	<not a character>
 1246C	CUNEIFORM NUMERIC SIGN SEVEN U VARIANT FORM
 1246D	CUNEIFORM NUMERIC SIGN EIGHT U VARIANT FORM
 1246E	CUNEIFORM NUMERIC SIGN NINE U VARIANT FORM
+@		Slanted numeral
+1246F	CUNEIFORM NUMERIC SIGN SEVEN ASH TENU
 @		Punctuation
 12470	CUNEIFORM PUNCTUATION SIGN OLD ASSYRIAN WORD DIVIDER
 	x (ugaritic word divider - 1039F)
@@ -38169,6 +38459,20 @@ FFFF	<not a character>
 12472	CUNEIFORM PUNCTUATION SIGN DIAGONAL COLON
 12473	CUNEIFORM PUNCTUATION SIGN DIAGONAL TRICOLON
 12474	CUNEIFORM PUNCTUATION SIGN DIAGONAL QUADCOLON
+@		Slanted numerals
+12475	CUNEIFORM NUMERIC SIGN EIGHT ASH TENU
+12476	CUNEIFORM NUMERIC SIGN NINE ASH TENU
+@		Numerals for Early Dynastic regnal years
+@+		These are used in regnal years of the rulers of the first dynasty of Lagaš.
+12477	CUNEIFORM NUMERIC SIGN ASH TIMES ONE DISH TENU
+12478	CUNEIFORM NUMERIC SIGN ASH TIMES TWO DISH TENU
+12479	CUNEIFORM NUMERIC SIGN ASH TIMES THREE DISH TENU
+1247A	CUNEIFORM NUMERIC SIGN ASH TIMES FOUR DISH TENU
+1247B	CUNEIFORM NUMERIC SIGN ASH TIMES FIVE DISH TENU
+1247C	CUNEIFORM NUMERIC SIGN ASH TIMES SIX DISH TENU
+1247D	CUNEIFORM NUMERIC SIGN ASH TIMES SEVEN DISH TENU
+1247E	CUNEIFORM NUMERIC SIGN ASH TIMES EIGHT DISH TENU
+1247F	CUNEIFORM NUMERIC SIGN ASH TIMES NINE DISH TENU
 @@	12480	Early Dynastic Cuneiform	1254F
 @		Signs
 12480	CUNEIFORM SIGN AB TIMES NUN TENU
@@ -38365,8 +38669,408 @@ FFFF	<not a character>
 1253F	CUNEIFORM SIGN URU TIMES LAK-668
 12540	CUNEIFORM SIGN URU TIMES LU3
 12541	CUNEIFORM SIGN ZA7
+	x (cuneiform numeric sign two n08 - 1255A)
 12542	CUNEIFORM SIGN ZU OVER ZU PLUS SAR
 12543	CUNEIFORM SIGN ZU5 TIMES THREE DISH TENU
+@@	12550	Archaic Cuneiform Numerals	1268F
+@+		Many of the reference glyphs for the higher numbers (THREE and above, in some cases TWO) have been rescaled to fit the code chart cells. They should be sized consistently with the corresponding ONE numerals.
+@		Common numerals
+@+		These are used in the sexagesimal discrete counting system and other metrological systems.
+12550	CUNEIFORM NUMERIC SIGN ONE N01
+	= 1 aš curved
+	* often used instead of diš in Early Dynastic counterparts of cuneiform metrological systems
+	x (cuneiform sign ash - 12038)
+	x (cuneiform sign dish - 12079)
+12551	CUNEIFORM NUMERIC SIGN TWO N01
+	x (cuneiform numeric sign two ash - 12400)
+12552	CUNEIFORM NUMERIC SIGN THREE N01
+12553	CUNEIFORM NUMERIC SIGN FOUR N01
+12554	CUNEIFORM NUMERIC SIGN FIVE N01
+12555	CUNEIFORM NUMERIC SIGN SIX N01
+12556	CUNEIFORM NUMERIC SIGN SEVEN N01
+12557	CUNEIFORM NUMERIC SIGN EIGHT N01
+12558	CUNEIFORM NUMERIC SIGN NINE N01
+12559	CUNEIFORM NUMERIC SIGN ONE N08
+	= 1 diš curved
+	= 1/2 iku curved
+	= 1 bariga curved
+	* used for one half in multiple metrological systems
+	* used in Early Dynastic capacity systems
+	x (cuneiform sign ash zida tenu - 12039)
+	x (cuneiform sign dish - 12079)
+	x (cuneiform sign mash - 12226)
+1255A	CUNEIFORM NUMERIC SIGN TWO N08
+	= 2 bariga curved
+	x (cuneiform sign min - 1222B)
+	x (cuneiform numeric sign nigidamin - 12456)
+1255B	CUNEIFORM NUMERIC SIGN THREE N08
+	= 3 bariga curved
+	* used in Early Dynastic capacity systems
+	x (cuneiform numeric sign three dish - 12408)
+	x (cuneiform numeric sign nigidaesh - 12457)
+1255C	CUNEIFORM NUMERIC SIGN FOUR N08
+1255D	CUNEIFORM NUMERIC SIGN FIVE N08
+1255E	CUNEIFORM NUMERIC SIGN SIX N08
+1255F	CUNEIFORM NUMERIC SIGN SEVEN N08
+12560	CUNEIFORM NUMERIC SIGN EIGHT N08
+12561	CUNEIFORM NUMERIC SIGN NINE N08
+12562	CUNEIFORM NUMERIC SIGN ONE N14
+	= 1 u curved
+	= 1 bur₃ curved
+	x (cuneiform sign u - 1230B)
+12563	CUNEIFORM NUMERIC SIGN TWO N14
+	x (cuneiform sign u u - 12399)
+12564	CUNEIFORM NUMERIC SIGN THREE N14
+	x (cuneiform sign u u u - 1230D)
+12565	CUNEIFORM NUMERIC SIGN FOUR N14
+	x (cuneiform numeric sign four u - 1240F)
+12566	CUNEIFORM NUMERIC SIGN FIVE N14
+12567	CUNEIFORM NUMERIC SIGN SIX N14
+12568	CUNEIFORM NUMERIC SIGN SEVEN N14
+12569	CUNEIFORM NUMERIC SIGN EIGHT N14
+1256A	CUNEIFORM NUMERIC SIGN NINE N14
+1256B	CUNEIFORM NUMERIC SIGN ONE N34
+	= 1 ŋeš₂ curved
+	x (cuneiform numeric sign one gesh2 - 12415)
+1256C	CUNEIFORM NUMERIC SIGN TWO N34
+1256D	CUNEIFORM NUMERIC SIGN THREE N34
+1256E	CUNEIFORM NUMERIC SIGN FOUR N34
+1256F	CUNEIFORM NUMERIC SIGN FIVE N34
+12570	CUNEIFORM NUMERIC SIGN SIX N34
+12571	CUNEIFORM NUMERIC SIGN SEVEN N34
+12572	CUNEIFORM NUMERIC SIGN EIGHT N34
+12573	CUNEIFORM NUMERIC SIGN NINE N34
+12574	CUNEIFORM NUMERIC SIGN ONE N48
+	= 1 ŋešʾu curved
+	x (cuneiform numeric sign one geshu - 1241E)
+12575	CUNEIFORM NUMERIC SIGN TWO N48
+12576	CUNEIFORM NUMERIC SIGN THREE N48
+12577	CUNEIFORM NUMERIC SIGN FOUR N48
+12578	CUNEIFORM NUMERIC SIGN FIVE N48
+12579	CUNEIFORM NUMERIC SIGN ONE N45
+	= 1 šar₂ curved
+	* 122B9 should be used for cuneiform 1 šar₂
+	* 122B9 should be used for logographic šar₂, even when curved
+	x (cuneiform sign shar2 - 122B9)
+1257A	CUNEIFORM NUMERIC SIGN TWO N45
+1257B	CUNEIFORM NUMERIC SIGN THREE N45
+1257C	CUNEIFORM NUMERIC SIGN FOUR N45
+1257D	CUNEIFORM NUMERIC SIGN FIVE N45
+1257E	CUNEIFORM NUMERIC SIGN SIX N45
+1257F	CUNEIFORM NUMERIC SIGN SEVEN N45
+12580	CUNEIFORM NUMERIC SIGN EIGHT N45
+12581	CUNEIFORM NUMERIC SIGN NINE N45
+12582	CUNEIFORM NUMERIC SIGN ONE N50
+	= 1 šarʾu curved
+	* used instead of 1258E in fourth millennium land area systems
+	x (cuneiform numeric sign one sharu - 1242C)
+	x (cuneiform numeric sign one buru - 12434)
+12583	CUNEIFORM NUMERIC SIGN TWO N50
+12584	CUNEIFORM NUMERIC SIGN THREE N50
+12585	CUNEIFORM NUMERIC SIGN FOUR N50
+12586	CUNEIFORM NUMERIC SIGN FIVE N50
+@		Numerals used for land areas
+@+		Together with N08, N01, N14, N45, and N50.
+12587	CUNEIFORM NUMERIC SIGN ONE EIGHTH IKU CURVED
+	x (cuneiform numeric sign one eighth ash - 1245F)
+12588	CUNEIFORM NUMERIC SIGN ONE EIGHTH IKU CURVED VARIANT FORM
+12589	CUNEIFORM NUMERIC SIGN ONE N01 REVERSED
+	= 1/4 iku curved
+	x (cuneiform numeric sign one quarter ash - 12460)
+1258A	CUNEIFORM NUMERIC SIGN ONE QUARTER IKU CURVED VARIANT FORM
+1258B	CUNEIFORM NUMERIC SIGN ONE HALF IKU CURVED VARIANT FORM
+	x (cuneiform sign ash zida tenu - 12039)
+1258C	CUNEIFORM NUMERIC SIGN ONE N22
+	= 1 eše₃ curved
+	x (cuneiform numeric sign one eshe3 - 12458)
+1258D	CUNEIFORM NUMERIC SIGN TWO N22
+1258E	CUNEIFORM NUMERIC SIGN ONE BURU CURVED
+	x (cuneiform numeric sign one buru - 12434)
+1258F	CUNEIFORM NUMERIC SIGN TWO BURU CURVED
+12590	CUNEIFORM NUMERIC SIGN THREE BURU CURVED
+12591	CUNEIFORM NUMERIC SIGN FOUR BURU CURVED
+12592	CUNEIFORM NUMERIC SIGN FIVE BURU CURVED
+@		Early Dynastic capacity measures
+12593	CUNEIFORM NUMERIC SIGN ONE BAN2 CURVED
+	= 1/2 aš curved
+	* used for one half in multiple metrological systems
+	x (cuneiform sign mash - 12226)
+	x (cuneiform numeric sign one ban2 - 1244F)
+12594	CUNEIFORM NUMERIC SIGN TWO BAN2 CURVED
+12595	CUNEIFORM NUMERIC SIGN THREE BAN2 CURVED
+12596	CUNEIFORM NUMERIC SIGN FOUR BAN2 CURVED
+12597	CUNEIFORM NUMERIC SIGN FIVE BAN2 CURVED
+@		Early Dynastic weight fractions
+12598	CUNEIFORM NUMERIC SIGN NINDA2 TIMES SHE PLUS ONE ASH CURVED
+	= 1/3 aš curved variant form
+	x (cuneiform numeric sign one third dish - 1245A)
+	x (cuneiform numeric sign one third variant form a - 1245D)
+12599	CUNEIFORM NUMERIC SIGN NINDA2 TIMES SHE PLUS TWO ASH CURVED
+	= 2/3 aš curved variant form
+	x (cuneiform numeric sign two thirds dish - 1245B)
+	x (cuneiform numeric sign two thirds variant form a - 1245E)
+@		Numerals used in the bisexagesimal system
+@+		Together with N08, N01, N14, and N34.
+1259A	CUNEIFORM NUMERIC SIGN ONE N51
+	= 1 ŋeš₂ curved doubled, 1 ŋešmin curved
+1259B	CUNEIFORM NUMERIC SIGN TWO N51
+1259C	CUNEIFORM NUMERIC SIGN THREE N51
+1259D	CUNEIFORM NUMERIC SIGN FOUR N51
+1259E	CUNEIFORM NUMERIC SIGN FIVE N51
+1259F	CUNEIFORM NUMERIC SIGN SIX N51
+125A0	CUNEIFORM NUMERIC SIGN SEVEN N51
+125A1	CUNEIFORM NUMERIC SIGN EIGHT N51
+125A2	CUNEIFORM NUMERIC SIGN NINE N51
+125A3	CUNEIFORM NUMERIC SIGN ONE N54
+	= 1 ŋešʾu curved doubled, 1 ŋešminʾu curved
+125A4	CUNEIFORM NUMERIC SIGN TWO N54
+125A5	CUNEIFORM NUMERIC SIGN THREE N54
+125A6	CUNEIFORM NUMERIC SIGN FOUR N54
+125A7	CUNEIFORM NUMERIC SIGN FIVE N54
+125A8	CUNEIFORM NUMERIC SIGN ONE N56
+125A9	CUNEIFORM NUMERIC SIGN TWO N56
+@		Fourth millennium grain capacity measures
+@+		Used with N01, N14, N45, N34, and N48.
+125AA	CUNEIFORM NUMERIC SIGN ONE N24
+125AB	CUNEIFORM NUMERIC SIGN ONE N26
+125AC	CUNEIFORM NUMERIC SIGN ONE N28
+125AD	CUNEIFORM NUMERIC SIGN ONE N29A
+125AE	CUNEIFORM NUMERIC SIGN ONE N29B
+125AF	CUNEIFORM NUMERIC SIGN ONE N30A
+125B0	CUNEIFORM NUMERIC SIGN ONE N30C
+125B1	CUNEIFORM NUMERIC SIGN ONE N30D
+125B2	CUNEIFORM NUMERIC SIGN ONE N30E
+125B3	CUNEIFORM NUMERIC SIGN ONE N31
+125B4	CUNEIFORM NUMERIC SIGN ONE N32
+125B5	CUNEIFORM NUMERIC SIGN ONE N33
+125B6	CUNEIFORM NUMERIC SIGN ONE N39A
+125B7	CUNEIFORM NUMERIC SIGN TWO N39A
+125B8	CUNEIFORM NUMERIC SIGN THREE N39A
+125B9	CUNEIFORM NUMERIC SIGN FOUR N39A
+125BA	CUNEIFORM NUMERIC SIGN ONE N39B
+125BB	CUNEIFORM NUMERIC SIGN TWO N39B
+125BC	CUNEIFORM NUMERIC SIGN THREE N39B
+125BD	CUNEIFORM NUMERIC SIGN FOUR N39B
+@		Numerals of sexagesimal system Sʹ
+@+		Used to count dead animals and jars of certain types of liquids.
+125BE	CUNEIFORM NUMERIC SIGN ONE N02
+125BF	CUNEIFORM NUMERIC SIGN TWO N02
+125C0	CUNEIFORM NUMERIC SIGN THREE N02
+125C1	CUNEIFORM NUMERIC SIGN FOUR N02
+125C2	CUNEIFORM NUMERIC SIGN FIVE N02
+125C3	CUNEIFORM NUMERIC SIGN SIX N02
+125C4	CUNEIFORM NUMERIC SIGN SEVEN N02
+125C5	CUNEIFORM NUMERIC SIGN EIGHT N02
+125C6	CUNEIFORM NUMERIC SIGN NINE N02
+125C7	CUNEIFORM NUMERIC SIGN ONE N15
+125C8	CUNEIFORM NUMERIC SIGN TWO N15
+125C9	CUNEIFORM NUMERIC SIGN THREE N15
+125CA	CUNEIFORM NUMERIC SIGN FOUR N15
+125CB	CUNEIFORM NUMERIC SIGN FIVE N15
+125CC	CUNEIFORM NUMERIC SIGN ONE N35
+125CD	CUNEIFORM NUMERIC SIGN TWO N35
+125CE	CUNEIFORM NUMERIC SIGN THREE N35
+125CF	CUNEIFORM NUMERIC SIGN FOUR N35
+125D0	CUNEIFORM NUMERIC SIGN FIVE N35
+@		Numerals of bisexagesimal system B*
+@+		Used in the fourth millennium to count rations of an unclear nature.
+125D1	CUNEIFORM NUMERIC SIGN ONE N06
+125D2	CUNEIFORM NUMERIC SIGN TWO N06
+125D3	CUNEIFORM NUMERIC SIGN THREE N06
+125D4	CUNEIFORM NUMERIC SIGN FOUR N06
+125D5	CUNEIFORM NUMERIC SIGN FIVE N06
+125D6	CUNEIFORM NUMERIC SIGN SIX N06
+125D7	CUNEIFORM NUMERIC SIGN SEVEN N06
+125D8	CUNEIFORM NUMERIC SIGN EIGHT N06
+125D9	CUNEIFORM NUMERIC SIGN NINE N06
+125DA	CUNEIFORM NUMERIC SIGN ONE N21
+125DB	CUNEIFORM NUMERIC SIGN TWO N21
+125DC	CUNEIFORM NUMERIC SIGN THREE N21
+125DD	CUNEIFORM NUMERIC SIGN FOUR N21
+125DE	CUNEIFORM NUMERIC SIGN FIVE N21
+125DF	CUNEIFORM NUMERIC SIGN ONE N38
+125E0	CUNEIFORM NUMERIC SIGN ONE N52
+125E1	CUNEIFORM NUMERIC SIGN TWO N52
+125E2	CUNEIFORM NUMERIC SIGN THREE N52
+125E3	CUNEIFORM NUMERIC SIGN FOUR N52
+125E4	CUNEIFORM NUMERIC SIGN FIVE N52
+125E5	CUNEIFORM NUMERIC SIGN SIX N52
+125E6	CUNEIFORM NUMERIC SIGN SEVEN N52
+125E7	CUNEIFORM NUMERIC SIGN EIGHT N52
+125E8	CUNEIFORM NUMERIC SIGN NINE N52
+125E9	CUNEIFORM NUMERIC SIGN ONE N60
+@		Numerals of capacity system Šʹ
+@+		Used in the fourth millennium to measure malted barley.
+125EA	CUNEIFORM NUMERIC SIGN ONE N24A
+125EB	CUNEIFORM NUMERIC SIGN ONE N40
+125EC	CUNEIFORM NUMERIC SIGN TWO N40
+125ED	CUNEIFORM NUMERIC SIGN THREE N40
+125EE	CUNEIFORM NUMERIC SIGN FOUR N40
+125EF	CUNEIFORM NUMERIC SIGN ONE N03
+125F0	CUNEIFORM NUMERIC SIGN TWO N03
+125F1	CUNEIFORM NUMERIC SIGN THREE N03
+125F2	CUNEIFORM NUMERIC SIGN FOUR N03
+125F3	CUNEIFORM NUMERIC SIGN FIVE N03
+125F4	CUNEIFORM NUMERIC SIGN ONE N18
+125F5	CUNEIFORM NUMERIC SIGN TWO N18
+125F6	CUNEIFORM NUMERIC SIGN THREE N18
+125F7	CUNEIFORM NUMERIC SIGN FOUR N18
+125F8	CUNEIFORM NUMERIC SIGN FIVE N18
+125F9	CUNEIFORM NUMERIC SIGN SIX N18
+125FA	CUNEIFORM NUMERIC SIGN SEVEN N18
+125FB	CUNEIFORM NUMERIC SIGN EIGHT N18
+125FC	CUNEIFORM NUMERIC SIGN NINE N18
+125FD	CUNEIFORM NUMERIC SIGN ONE N45A
+@		Numerals of capacity system Šʺ
+@+		Used in the fourth millennium to measure various kinds of emmer.
+125FE	CUNEIFORM NUMERIC SIGN ONE N24B
+125FF	CUNEIFORM NUMERIC SIGN ONE N26B
+12600	CUNEIFORM NUMERIC SIGN ONE N28B
+12601	CUNEIFORM NUMERIC SIGN ONE N29AB
+12602	CUNEIFORM NUMERIC SIGN ONE N41
+12603	CUNEIFORM NUMERIC SIGN TWO N41
+12604	CUNEIFORM NUMERIC SIGN THREE N41
+12605	CUNEIFORM NUMERIC SIGN FOUR N41
+12606	CUNEIFORM NUMERIC SIGN ONE N04
+12607	CUNEIFORM NUMERIC SIGN TWO N04
+12608	CUNEIFORM NUMERIC SIGN THREE N04
+12609	CUNEIFORM NUMERIC SIGN FOUR N04
+1260A	CUNEIFORM NUMERIC SIGN FIVE N04
+1260B	CUNEIFORM NUMERIC SIGN ONE N19
+1260C	CUNEIFORM NUMERIC SIGN TWO N19
+1260D	CUNEIFORM NUMERIC SIGN THREE N19
+1260E	CUNEIFORM NUMERIC SIGN FOUR N19
+1260F	CUNEIFORM NUMERIC SIGN FIVE N19
+12610	CUNEIFORM NUMERIC SIGN SIX N19
+12611	CUNEIFORM NUMERIC SIGN SEVEN N19
+12612	CUNEIFORM NUMERIC SIGN EIGHT N19
+12613	CUNEIFORM NUMERIC SIGN NINE N19
+12614	CUNEIFORM NUMERIC SIGN ONE N46
+12615	CUNEIFORM NUMERIC SIGN TWO N46
+12616	CUNEIFORM NUMERIC SIGN ONE N36
+12617	CUNEIFORM NUMERIC SIGN TWO N36
+12618	CUNEIFORM NUMERIC SIGN THREE N36
+12619	CUNEIFORM NUMERIC SIGN FOUR N36
+1261A	CUNEIFORM NUMERIC SIGN FIVE N36
+1261B	CUNEIFORM NUMERIC SIGN SIX N36
+1261C	CUNEIFORM NUMERIC SIGN SEVEN N36
+1261D	CUNEIFORM NUMERIC SIGN EIGHT N36
+1261E	CUNEIFORM NUMERIC SIGN NINE N36
+1261F	CUNEIFORM NUMERIC SIGN ONE N49
+12620	CUNEIFORM NUMERIC SIGN TWO N49
+12621	CUNEIFORM NUMERIC SIGN THREE N49
+12622	CUNEIFORM NUMERIC SIGN FOUR N49
+@		Numerals of capacity system Š*
+@+		Used in the fourth millennium to measure barley groats.
+12623	CUNEIFORM NUMERIC SIGN ONE N25
+12624	CUNEIFORM NUMERIC SIGN ONE N27
+12625	CUNEIFORM NUMERIC SIGN ONE N28C
+12626	CUNEIFORM NUMERIC SIGN ONE N29AC
+12627	CUNEIFORM NUMERIC SIGN ONE N30AC
+12628	CUNEIFORM NUMERIC SIGN ONE N30CC
+12629	CUNEIFORM NUMERIC SIGN ONE N42A
+1262A	CUNEIFORM NUMERIC SIGN TWO N42A
+1262B	CUNEIFORM NUMERIC SIGN THREE N42A
+1262C	CUNEIFORM NUMERIC SIGN FOUR N42A
+1262D	CUNEIFORM NUMERIC SIGN ONE N42B
+1262E	CUNEIFORM NUMERIC SIGN TWO N42B
+1262F	CUNEIFORM NUMERIC SIGN THREE N42B
+12630	CUNEIFORM NUMERIC SIGN FOUR N42B
+12631	CUNEIFORM NUMERIC SIGN ONE N05
+12632	CUNEIFORM NUMERIC SIGN TWO N05
+12633	CUNEIFORM NUMERIC SIGN THREE N05
+12634	CUNEIFORM NUMERIC SIGN FOUR N05
+12635	CUNEIFORM NUMERIC SIGN FIVE N05
+12636	CUNEIFORM NUMERIC SIGN ONE N20
+12637	CUNEIFORM NUMERIC SIGN TWO N20
+12638	CUNEIFORM NUMERIC SIGN THREE N20
+12639	CUNEIFORM NUMERIC SIGN FOUR N20
+1263A	CUNEIFORM NUMERIC SIGN FIVE N20
+1263B	CUNEIFORM NUMERIC SIGN SIX N20
+1263C	CUNEIFORM NUMERIC SIGN SEVEN N20
+1263D	CUNEIFORM NUMERIC SIGN EIGHT N20
+1263E	CUNEIFORM NUMERIC SIGN NINE N20
+1263F	CUNEIFORM NUMERIC SIGN ONE N47
+12640	CUNEIFORM NUMERIC SIGN TWO N47
+12641	CUNEIFORM NUMERIC SIGN ONE N37
+12642	CUNEIFORM NUMERIC SIGN TWO N37
+@		Numerals of system EN
+@+		Only attested in the Uruk IV period.
+12643	CUNEIFORM NUMERIC SIGN ONE N09
+12644	CUNEIFORM NUMERIC SIGN ONE N11
+12645	CUNEIFORM NUMERIC SIGN ONE N12
+12646	CUNEIFORM NUMERIC SIGN ONE N07A
+12647	CUNEIFORM NUMERIC SIGN TWO N07A
+12648	CUNEIFORM NUMERIC SIGN THREE N07A
+12649	CUNEIFORM NUMERIC SIGN ONE N07B
+1264A	CUNEIFORM NUMERIC SIGN TWO N07B
+1264B	CUNEIFORM NUMERIC SIGN THREE N07B
+@		Flat numerals
+@+		Rectangular numerals impressed with a flat tool, used in Ur in the Early Dynastic I–II period.
+1264C	CUNEIFORM NUMERIC SIGN ONE N01 FLAT
+	= 1 aš flat
+	x (cuneiform sign ash - 12038)
+1264D	CUNEIFORM NUMERIC SIGN TWO N01 FLAT
+1264E	CUNEIFORM NUMERIC SIGN THREE N01 FLAT
+1264F	CUNEIFORM NUMERIC SIGN FOUR N01 FLAT
+12650	CUNEIFORM NUMERIC SIGN FIVE N01 FLAT
+12651	CUNEIFORM NUMERIC SIGN SIX N01 FLAT
+12652	CUNEIFORM NUMERIC SIGN SEVEN N01 FLAT
+12653	CUNEIFORM NUMERIC SIGN EIGHT N01 FLAT
+12654	CUNEIFORM NUMERIC SIGN NINE N01 FLAT
+12655	CUNEIFORM NUMERIC SIGN ONE N08 FLAT
+12656	CUNEIFORM NUMERIC SIGN ONE N14 FLAT
+	= 1 u flat
+	x (cuneiform sign u - 1230B)
+12657	CUNEIFORM NUMERIC SIGN TWO N14 FLAT
+12658	CUNEIFORM NUMERIC SIGN THREE N14 FLAT
+12659	CUNEIFORM NUMERIC SIGN FOUR N14 FLAT
+1265A	CUNEIFORM NUMERIC SIGN FIVE N14 FLAT
+1265B	CUNEIFORM NUMERIC SIGN SIX N14 FLAT
+1265C	CUNEIFORM NUMERIC SIGN SEVEN N14 FLAT
+1265D	CUNEIFORM NUMERIC SIGN EIGHT N14 FLAT
+1265E	CUNEIFORM NUMERIC SIGN NINE N14 FLAT
+1265F	CUNEIFORM NUMERIC SIGN ONE N34 FLAT
+12660	CUNEIFORM NUMERIC SIGN TWO N34 FLAT
+12661	CUNEIFORM NUMERIC SIGN THREE N34 FLAT
+12662	CUNEIFORM NUMERIC SIGN FOUR N34 FLAT
+12663	CUNEIFORM NUMERIC SIGN FIVE N34 FLAT
+12664	CUNEIFORM NUMERIC SIGN SIX N34 FLAT
+12665	CUNEIFORM NUMERIC SIGN SEVEN N34 FLAT
+12666	CUNEIFORM NUMERIC SIGN EIGHT N34 FLAT
+12667	CUNEIFORM NUMERIC SIGN NINE N34 FLAT
+12668	CUNEIFORM NUMERIC SIGN ONE N45 FLAT
+12669	CUNEIFORM NUMERIC SIGN TWO N45 FLAT
+1266A	CUNEIFORM NUMERIC SIGN ONE N22 FLAT
+1266B	CUNEIFORM NUMERIC SIGN TWO N22 FLAT
+1266C	CUNEIFORM NUMERIC SIGN ONE N51 FLAT
+1266D	CUNEIFORM NUMERIC SIGN TWO N51 FLAT
+1266E	CUNEIFORM NUMERIC SIGN THREE N51 FLAT
+1266F	CUNEIFORM NUMERIC SIGN FOUR N51 FLAT
+12670	CUNEIFORM NUMERIC SIGN FIVE N51 FLAT
+12671	CUNEIFORM NUMERIC SIGN SIX N51 FLAT
+12672	CUNEIFORM NUMERIC SIGN SEVEN N51 FLAT
+12673	CUNEIFORM NUMERIC SIGN EIGHT N51 FLAT
+12674	CUNEIFORM NUMERIC SIGN NINE N51 FLAT
+12675	CUNEIFORM NUMERIC SIGN ONE N34 FLAT TENU
+	= 1 n39a flat
+12676	CUNEIFORM NUMERIC SIGN ONE N04 FLAT
+12677	CUNEIFORM NUMERIC SIGN TWO N04 FLAT
+12678	CUNEIFORM NUMERIC SIGN THREE N04 FLAT
+12679	CUNEIFORM NUMERIC SIGN FOUR N04 FLAT
+1267A	CUNEIFORM NUMERIC SIGN FIVE N04 FLAT
+1267B	CUNEIFORM NUMERIC SIGN ONE N19 FLAT
+1267C	CUNEIFORM NUMERIC SIGN TWO N19 FLAT
+1267D	CUNEIFORM NUMERIC SIGN THREE N19 FLAT
+1267E	CUNEIFORM NUMERIC SIGN FOUR N19 FLAT
+1267F	CUNEIFORM NUMERIC SIGN FIVE N19 FLAT
+12680	CUNEIFORM NUMERIC SIGN SIX N19 FLAT
+12681	CUNEIFORM NUMERIC SIGN SEVEN N19 FLAT
+12682	CUNEIFORM NUMERIC SIGN EIGHT N19 FLAT
+12683	CUNEIFORM NUMERIC SIGN NINE N19 FLAT
+12684	CUNEIFORM NUMERIC SIGN ONE N46 FLAT
+12685	CUNEIFORM NUMERIC SIGN TWO N46 FLAT
+12686	CUNEIFORM NUMERIC SIGN ONE N36 FLAT
 @@	12F90	Cypro-Minoan	12FFF
 @		Signs
 12F90	CYPRO-MINOAN SIGN CM001
@@ -38501,7 +39205,7 @@ FFFF	<not a character>
 1300E	EGYPTIAN HIEROGLYPH A012
 	* logogram (army) : mšꜥ
 1300F	EGYPTIAN HIEROGLYPH A013
-	* classifier rebel/enemy
+	* classifier rebel/enemy 
 13010	EGYPTIAN HIEROGLYPH A014
 	* classifier rebel, opponent : rḳ
 13011	EGYPTIAN HIEROGLYPH A014A
@@ -38661,7 +39365,7 @@ FFFF	<not a character>
 1305E	EGYPTIAN HIEROGLYPH C002C
 	* mirrored version of 1305B
 1305F	EGYPTIAN HIEROGLYPH C003
-	* logogram (Thot) : ḏhwty
+	* logogram (Thoth) : ḏhwty
 13060	EGYPTIAN HIEROGLYPH C004
 	* classifier Khnum : ẖnm.w
 13061	EGYPTIAN HIEROGLYPH C005
@@ -38829,7 +39533,7 @@ FFFF	<not a character>
 	* classifier grasping/holding : ꜣmm
 130AD	EGYPTIAN HIEROGLYPH D050
 	* not to be confused with 130B7
-	* 10000
+	* \10000
 	* logogram (finger) : ḏbꜥ
 130AE	EGYPTIAN HIEROGLYPH D050A
 	* \20000
@@ -38991,7 +39695,7 @@ FFFF	<not a character>
 130FA	EGYPTIAN HIEROGLYPH E034A
 	* variant of 130F9
 130FB	EGYPTIAN HIEROGLYPH E036
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 130FC	EGYPTIAN HIEROGLYPH E037
 	* logogram (symbol of the cycle of time) : wnšb
 130FD	EGYPTIAN HIEROGLYPH E038
@@ -39019,7 +39723,7 @@ FFFF	<not a character>
 13107	EGYPTIAN HIEROGLYPH F009
 	* logogram (strength) : pḥ.ty
 13108	EGYPTIAN HIEROGLYPH F010
-	* classifier throat associated action : sꜥm
+	* logogram (throat) : ḥt.yt
 13109	EGYPTIAN HIEROGLYPH F011
 	* classifier throat associated action : ꜥm
 1310A	EGYPTIAN HIEROGLYPH F012
@@ -39218,7 +39922,7 @@ FFFF	<not a character>
 1315C	EGYPTIAN HIEROGLYPH G025
 	* phonemogram : ꜣḫ
 1315D	EGYPTIAN HIEROGLYPH G026
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 1315E	EGYPTIAN HIEROGLYPH G026A
 	* classifier ibis : hb
 1315F	EGYPTIAN HIEROGLYPH G027
@@ -39252,7 +39956,7 @@ FFFF	<not a character>
 	* phonemogram : gb
 1316D	EGYPTIAN HIEROGLYPH G039
 	* duck
-	* logogram (son) : sꜣ
+	* logogram (son) : sꜣ 
 1316E	EGYPTIAN HIEROGLYPH G040
 	* phonemogram : pꜣ
 1316F	EGYPTIAN HIEROGLYPH G041
@@ -39431,7 +40135,7 @@ FFFF	<not a character>
 131BB	EGYPTIAN HIEROGLYPH M011
 	* logogram (to offer) : wdn
 131BC	EGYPTIAN HIEROGLYPH M012
-	* 1000
+	* \1000
 	* phonemogram : ḫꜣ
 131BD	EGYPTIAN HIEROGLYPH M012A
 	* \2000
@@ -39699,7 +40403,7 @@ FFFF	<not a character>
 13228	EGYPTIAN HIEROGLYPH NL008
 	* logogram (8th nome of Lower Egypt) : wꜥ-m-ḥww-ꞽꜣb.ty
 13229	EGYPTIAN HIEROGLYPH NL009
-	* logogram (9th nome of Lower Egypt) : ꜥnḏ.ty
+	* logogram (9th nome of Lower Egypt) : ꜥnḏ.ty 
 1322A	EGYPTIAN HIEROGLYPH NL010
 	* logogram (10th nome of Lower Egypt) : km-wr
 1322B	EGYPTIAN HIEROGLYPH NL011
@@ -39709,9 +40413,9 @@ FFFF	<not a character>
 1322D	EGYPTIAN HIEROGLYPH NL013
 	* logogram (13th nome of Lower Egypt) : ḥḳꜣ-ꜥnḏ.w
 1322E	EGYPTIAN HIEROGLYPH NL014
-	* logogram (14th nome of Upper Egypt) : ḫnt.y-ꞽꜣb.ty
+	* logogram (14th nome of Lower Egypt) : ḫnt.y-ꞽꜣb.ty
 1322F	EGYPTIAN HIEROGLYPH NL015
-	* logogram (Thot nome, 15th nome of Lower Egypt) : ḏhwty
+	* logogram (Thoth nome, 15th nome of Lower Egypt) : ḏhwty
 13230	EGYPTIAN HIEROGLYPH NL016
 	* logogram (First-of-fishes nome (16th nome of Lower Egypt)) : ḥꜣ.t-mḥ.yt
 13231	EGYPTIAN HIEROGLYPH NL017
@@ -39719,8 +40423,11 @@ FFFF	<not a character>
 13232	EGYPTIAN HIEROGLYPH NL017A
 	* logogram (17th nome of Lower Egypt (Diospolis)) : smꜣ-bḥd.t
 13233	EGYPTIAN HIEROGLYPH NL018
+	* logogram (18th nome of Lower Egypt) : ꞽm.ty-ḫnt.y
 13234	EGYPTIAN HIEROGLYPH NL019
+	* logogram (19th nome of Lower Egypt) : ꞽmty-pḥw
 13235	EGYPTIAN HIEROGLYPH NL020
+	* logogram (Sopdu, 20th nome of Lower Egypt) : spdw
 @		NU. Nomes of Upper Egypt
 13236	EGYPTIAN HIEROGLYPH NU001
 	* logogram (Nubia, 1st nome of Upper Egypt) : tꜣ-sty
@@ -39763,16 +40470,17 @@ FFFF	<not a character>
 13249	EGYPTIAN HIEROGLYPH NU018
 	* logogram (18th nome of Upper Egypt (known as nmty as well)) : dwn-ꜥn.wy
 1324A	EGYPTIAN HIEROGLYPH NU018A
+	* logogram (Nemty, 18th nome of Upper Egypt) : nmty
 1324B	EGYPTIAN HIEROGLYPH NU019
 	* logogram (place of Igai, 19th nome of Upper Egypt) : bw-ꞽgꜣꞽ
 1324C	EGYPTIAN HIEROGLYPH NU020
 	* logogram (20th nome of Upper Egypt) : nꜥr.t-ḫnt.t
 1324D	EGYPTIAN HIEROGLYPH NU021
-	* logogram (21th nome of Upper Egypt) : nꜥr.t-ph.t
+	* logogram (21st nome of Upper Egypt) : nꜥr.t-ph.t
 1324E	EGYPTIAN HIEROGLYPH NU022
-	* logogram (22th nome of Upper Egypt) : mdnꞽ.t
+	* logogram (22nd nome of Upper Egypt) : mdnꞽ.t
 1324F	EGYPTIAN HIEROGLYPH NU022A
-	* logogram (22th nome of Upper Egypt) : mdnꞽ.t
+	* logogram (22nd nome of Upper Egypt) : mdnꞽ.t
 @		O. Buildings, parts of buildings, etc.
 13250	EGYPTIAN HIEROGLYPH O001
 	* logogram (house, domain) : pr
@@ -39855,7 +40563,7 @@ FFFF	<not a character>
 13276	EGYPTIAN HIEROGLYPH O025
 	* classifier obelisk : tḫn
 13277	EGYPTIAN HIEROGLYPH O025A
-	* classifier solar temple : nḫn-rꜥ
+	* classifier solar temple : s.t-ꞽb-rꜥ
 13278	EGYPTIAN HIEROGLYPH O026
 	* classifier stela : wḏ
 13279	EGYPTIAN HIEROGLYPH O027
@@ -40351,7 +41059,7 @@ FFFF	<not a character>
 	* phonemogram : ꜣb/mr
 1334C	EGYPTIAN HIEROGLYPH U023A
 	* stylistic variant of 1334B
-	* phonemogram : mr
+	* phonemogram : ꜣb/mr
 1334D	EGYPTIAN HIEROGLYPH U024
 	* logogram (craftsman) : ḥmw.w
 1334E	EGYPTIAN HIEROGLYPH U025
@@ -40957,13 +41665,13 @@ FFFF	<not a character>
 13441	EGYPTIAN HIEROGLYPH FULL BLANK
 13442	EGYPTIAN HIEROGLYPH HALF BLANK
 13443	EGYPTIAN HIEROGLYPH LOST SIGN
-	~ 13443 FE00 expanded
+	~ 13443 FE00 expanded 
 13444	EGYPTIAN HIEROGLYPH HALF LOST SIGN
-	~ 13444 FE00 expanded
+	~ 13444 FE00 expanded 
 13445	EGYPTIAN HIEROGLYPH TALL LOST SIGN
-	~ 13445 FE00 expanded
+	~ 13445 FE00 expanded 
 13446	EGYPTIAN HIEROGLYPH WIDE LOST SIGN
-	~ 13446 FE00 expanded
+	~ 13446 FE00 expanded 
 @		Damage modifiers
 13447	EGYPTIAN HIEROGLYPH MODIFIER DAMAGED AT TOP START
 13448	EGYPTIAN HIEROGLYPH MODIFIER DAMAGED AT BOTTOM START
@@ -41003,11 +41711,11 @@ FFFF	<not a character>
 13468	EGYPTIAN HIEROGLYPH-13468
 	* logogram (enemies) : ḫft.yw
 13469	EGYPTIAN HIEROGLYPH-13469
-	* classifier human being (poor man) : šwꜣ.w
+	* classifier human being (poor man) : šwꜣ.w 
 1346A	EGYPTIAN HIEROGLYPH-1346A
 	* classifier human being : ḥnmm.t?
 1346B	EGYPTIAN HIEROGLYPH-1346B
-	* logogram (vocative interjection) : ꞽ
+	* logogram (vocative interjection) : ꞽ 
 1346C	EGYPTIAN HIEROGLYPH-1346C
 	* logogram (first person singular) : ꞽ
 1346D	EGYPTIAN HIEROGLYPH-1346D
@@ -41071,7 +41779,7 @@ FFFF	<not a character>
 1348B	EGYPTIAN HIEROGLYPH-1348B
 	* logogram (to fraternize) : snsn
 1348C	EGYPTIAN HIEROGLYPH-1348C
-	* logogram (to fraternize) : snsn
+	* logogram (to fraternize) : snsn 
 1348D	EGYPTIAN HIEROGLYPH-1348D
 	* classifier deserter/wanderer : tš
 1348E	EGYPTIAN HIEROGLYPH-1348E
@@ -41135,7 +41843,7 @@ FFFF	<not a character>
 	* phonemogram : ḳꞽs
 134AE	EGYPTIAN HIEROGLYPH-134AE
 134AF	EGYPTIAN HIEROGLYPH-134AF
-	* logogram (bowing down) : ḫꜣb/ksw
+	* logogram (bowing down) : ḫꜣb/ksw 
 @		A05. Man on the ground or in water
 134B0	EGYPTIAN HIEROGLYPH-134B0
 	* classifier falling : sḫr
@@ -41634,7 +42342,7 @@ FFFF	<not a character>
 135AE	EGYPTIAN HIEROGLYPH-135AE
 @		A18. Prisoner and enemy
 135AF	EGYPTIAN HIEROGLYPH-135AF
-	* classifier rebel/enemy
+	* classifier rebel/enemy 
 135B0	EGYPTIAN HIEROGLYPH-135B0
 	* classifier rebel : ẖꜥk-ꞽb
 135B1	EGYPTIAN HIEROGLYPH-135B1
@@ -41646,11 +42354,11 @@ FFFF	<not a character>
 135B4	EGYPTIAN HIEROGLYPH-135B4
 	* classifier rebel : sbꞽ
 135B5	EGYPTIAN HIEROGLYPH-135B5
-	* logogram (chiefs) : wr
+	* logogram (chiefs) : wr 
 135B6	EGYPTIAN HIEROGLYPH-135B6
 	* classifier Syrian : ḫr.y
 135B7	EGYPTIAN HIEROGLYPH-135B7
-	* classifier enemy/rebel (Xerxes) : ḫšryš
+	* classifier enemy/rebel (Xerxes) : ḫšryš 
 135B8	EGYPTIAN HIEROGLYPH-135B8
 	* classifier evil one : nbḏ
 135B9	EGYPTIAN HIEROGLYPH-135B9
@@ -41708,7 +42416,7 @@ FFFF	<not a character>
 	* logogram (prisoner) : sḳr-ꜥnḫ
 135D6	EGYPTIAN HIEROGLYPH-135D6
 135D7	EGYPTIAN HIEROGLYPH-135D7
-	* logogram (foreigner) : ḫꜣs.ty
+	* logogram (foreigner) : ḫꜣs.ty 
 135D8	EGYPTIAN HIEROGLYPH-135D8
 	* classifier to drive away : msn(ḥ)
 135D9	EGYPTIAN HIEROGLYPH-135D9
@@ -41775,11 +42483,11 @@ FFFF	<not a character>
 135F8	EGYPTIAN HIEROGLYPH-135F8
 	* logogram (Harsomtus) : ḥr-smꜣ-tꜣ.wy
 135F9	EGYPTIAN HIEROGLYPH-135F9
-	* logogram (Harsomtus) : ḥr-smꜣ-tꜣ.wy
+	* logogram (Harsomtus) : ḥr-smꜣ-tꜣ.wy 
 135FA	EGYPTIAN HIEROGLYPH-135FA
-	* logogram (Harsomtus) : ḥr-smꜣ-tꜣ.wy
+	* logogram (Harsomtus) : ḥr-smꜣ-tꜣ.wy 
 135FB	EGYPTIAN HIEROGLYPH-135FB
-	* logogram (to sing) : ḥsꞽ
+	* logogram (to sing) : ḥsꞽ 
 135FC	EGYPTIAN HIEROGLYPH-135FC
 	* phonemogram : ḥsꞽ
 135FD	EGYPTIAN HIEROGLYPH-135FD
@@ -42323,6 +43031,7 @@ FFFF	<not a character>
 13711	EGYPTIAN HIEROGLYPH-13711
 	* classifier to welcome : nyny
 13712	EGYPTIAN HIEROGLYPH-13712
+	* classifier mourners : ḥ(ꜣ)y.t
 13713	EGYPTIAN HIEROGLYPH-13713
 	* classifier mourners : ḥ(ꜣ)y.t
 13714	EGYPTIAN HIEROGLYPH-13714
@@ -42482,7 +43191,7 @@ FFFF	<not a character>
 13764	EGYPTIAN HIEROGLYPH-13764
 	* classifier divinity : ꞽn-ḥr-šw
 13765	EGYPTIAN HIEROGLYPH-13765
-	* logogram (Maat and Amon) : mꜣꜥ.t & ꞽmn
+	* logogram (Maat and Amon) : mꜣꜥ.t & ꞽmn 
 13766	EGYPTIAN HIEROGLYPH-13766
 	* logogram (Amon) : ꞽmn
 13767	EGYPTIAN HIEROGLYPH-13767
@@ -42515,7 +43224,7 @@ FFFF	<not a character>
 13776	EGYPTIAN HIEROGLYPH-13776
 	* logogram (to drive away) : sḥrꞽ
 13777	EGYPTIAN HIEROGLYPH-13777
-	* logogram (to drive away) : sḥrꞽ
+	* logogram (to drive away) : sḥrꞽ 
 13778	EGYPTIAN HIEROGLYPH-13778
 	* classifier driving away : sḥrꞽ
 13779	EGYPTIAN HIEROGLYPH-13779
@@ -42599,7 +43308,7 @@ FFFF	<not a character>
 137A1	EGYPTIAN HIEROGLYPH-137A1
 	* logogram (Re) : rꜥ
 137A2	EGYPTIAN HIEROGLYPH-137A2
-	* logogram (Re) : rꜥ
+	* logogram (Re) : rꜥ 
 137A3	EGYPTIAN HIEROGLYPH-137A3
 137A4	EGYPTIAN HIEROGLYPH-137A4
 	* logogram (Re) : rꜥ
@@ -42620,7 +43329,7 @@ FFFF	<not a character>
 137AC	EGYPTIAN HIEROGLYPH-137AC
 	* logogram (to live) : ꜥnḫ
 137AD	EGYPTIAN HIEROGLYPH-137AD
-	* logogram (eye of Horus) : ꞽr.t-ḥr
+	* logogram (eye of Horus) : ꞽr.t-ḥr 
 137AE	EGYPTIAN HIEROGLYPH-137AE
 	* phonemogram/logogram (lord) : nb
 137AF	EGYPTIAN HIEROGLYPH-137AF
@@ -42853,7 +43562,7 @@ FFFF	<not a character>
 13825	EGYPTIAN HIEROGLYPH-13825
 	* logogram (the flood) : hꜥpy
 13826	EGYPTIAN HIEROGLYPH-13826
-	* logogram (the Nile/the flood) : hꜥpy
+	* logogram (the Nile/the flood) : hꜥpy 
 13827	EGYPTIAN HIEROGLYPH-13827
 	* logogram (the Nile/the flood) : hꜥpy
 13828	EGYPTIAN HIEROGLYPH-13828
@@ -42943,7 +43652,7 @@ FFFF	<not a character>
 13852	EGYPTIAN HIEROGLYPH-13852
 	* classifier crocodile divinity : sbk-šmꜥ-nfr
 13853	EGYPTIAN HIEROGLYPH-13853
-	* phonemogram (first person for sbk-šmꜥ-nfr) : ꞽ
+	* phonemogram (first person for sbk-šmꜥ-nfr) : ꞽ 
 13854	EGYPTIAN HIEROGLYPH-13854
 13855	EGYPTIAN HIEROGLYPH-13855
 	* logogram (the one who watches her mansions) : rs.t-ḥw.wt=s
@@ -42956,7 +43665,7 @@ FFFF	<not a character>
 13858	EGYPTIAN HIEROGLYPH-13858
 	* classifier guardian : ḫsf-sby.w
 13859	EGYPTIAN HIEROGLYPH-13859
-	* classifier baboon divinity (i.e. Thot) : n.y-mꜣꜥ.t
+	* classifier baboon divinity (i.e. Thoth) : n.y-mꜣꜥ.t
 1385A	EGYPTIAN HIEROGLYPH-1385A
 	* logogram (Hapy) : ḥp.y
 @		C30. Tatenen
@@ -42978,9 +43687,9 @@ FFFF	<not a character>
 	* phonemogram : sw
 13863	EGYPTIAN HIEROGLYPH-13863
 	* logogram (Tatenen) : tꜣ-ṯnn
-@		C31. Thot
+@		C31. Thoth
 13864	EGYPTIAN HIEROGLYPH-13864
-	* logogram (Thot) : ḏhwty
+	* logogram (Thoth) : ḏhwty
 13865	EGYPTIAN HIEROGLYPH-13865
 	* phonemogram : ḥr.y-ꞽb
 13866	EGYPTIAN HIEROGLYPH-13866
@@ -42999,7 +43708,7 @@ FFFF	<not a character>
 	* logogram/phonemogram (to be great) : wr
 1386E	EGYPTIAN HIEROGLYPH-1386E
 1386F	EGYPTIAN HIEROGLYPH-1386F
-	* logogram (Thot) : ḏhwty
+	* logogram (Thoth) : ḏhwty
 13870	EGYPTIAN HIEROGLYPH-13870
 @		C32. Gods, varia
 13871	EGYPTIAN HIEROGLYPH-13871
@@ -43043,7 +43752,7 @@ FFFF	<not a character>
 13883	EGYPTIAN HIEROGLYPH-13883
 	* logogram/phonemogram (lord/lady) : nb
 13884	EGYPTIAN HIEROGLYPH-13884
-	* logogram/phonemogram (lady) : nb.t
+	* logogram/phonemogram (lady) : nb.t 
 13885	EGYPTIAN HIEROGLYPH-13885
 	* logogram (life) : ꜥnḫ
 13886	EGYPTIAN HIEROGLYPH-13886
@@ -43058,7 +43767,7 @@ FFFF	<not a character>
 1388B	EGYPTIAN HIEROGLYPH-1388B
 	* classifier divinity : ḥwt-ḥr
 1388C	EGYPTIAN HIEROGLYPH-1388C
-	* logogram (rejoicing) : nhm
+	* logogram (rejoicing) : nhm 
 1388D	EGYPTIAN HIEROGLYPH-1388D
 	* logogram (rejoicing) : nhm
 1388E	EGYPTIAN HIEROGLYPH-1388E
@@ -43217,7 +43926,7 @@ FFFF	<not a character>
 138DE	EGYPTIAN HIEROGLYPH-138DE
 	* logogram (Mut) : mw.t
 138DF	EGYPTIAN HIEROGLYPH-138DF
-	* logogram (together with \C98 and \C43A, representing the triad of Dendera) : ꞽwn.t
+	* logogram (together with \C98 and \C43A, representing the triad of Dendera) : ꞽwn.t 
 138E0	EGYPTIAN HIEROGLYPH-138E0
 	* classifier majesty : ḥm
 138E1	EGYPTIAN HIEROGLYPH-138E1
@@ -43273,7 +43982,7 @@ FFFF	<not a character>
 138F8	EGYPTIAN HIEROGLYPH-138F8
 	* logogram (the heavens/sky) : p.t
 138F9	EGYPTIAN HIEROGLYPH-138F9
-	* logogram (hour) : wnw.t
+	* logogram (hour) : wnw.t 
 138FA	EGYPTIAN HIEROGLYPH-138FA
 	* logogram (city, village) : nꞽw.t
 138FB	EGYPTIAN HIEROGLYPH-138FB
@@ -43565,7 +44274,7 @@ FFFF	<not a character>
 	* classifier eye related actions : dgꞽ
 @		D08. Udjat eye
 1398C	EGYPTIAN HIEROGLYPH-1398C
-	* logogram (the ""dazzling-eye"" (Egypt)) : bꜣḳ.t
+	* logogram (the dazzling-eye (Egypt)) : bꜣḳ.t
 1398D	EGYPTIAN HIEROGLYPH-1398D
 	* logogram (eye) : ꞽr.t
 1398E	EGYPTIAN HIEROGLYPH-1398E
@@ -43817,7 +44526,7 @@ FFFF	<not a character>
 13A05	EGYPTIAN HIEROGLYPH-13A05
 	* phono-repeater : fꜥg
 13A06	EGYPTIAN HIEROGLYPH-13A06
-	* logogram (Prosopopite nome) : mtr
+	* logogram (Prosopite nome) : mtr
 @		D31. Male genitals
 13A07	EGYPTIAN HIEROGLYPH-13A07
 	* classifier copulating : nk
@@ -43995,7 +44704,7 @@ FFFF	<not a character>
 	* phonemogram : ꞽw
 13A61	EGYPTIAN HIEROGLYPH-13A61
 13A62	EGYPTIAN HIEROGLYPH-13A62
-	* classifier (Oryx) : mꜣ-ḥḏ
+	* classifier (oryx) : mꜣ-ḥḏ
 13A63	EGYPTIAN HIEROGLYPH-13A63
 	* classifier roarer : hmhm.t(y)
 13A64	EGYPTIAN HIEROGLYPH-13A64
@@ -44110,7 +44819,7 @@ FFFF	<not a character>
 13A9B	EGYPTIAN HIEROGLYPH-13A9B
 	* phonemogram : ḫft-ḥr
 13A9C	EGYPTIAN HIEROGLYPH-13A9C
-	* logogram (given life like Re) : dꞽ-ꜥnḫ-mꞽ-rꜥ
+	* logogram (given life like Re) : dꞽ-ꜥnḫ-mꞽ-rꜥ 
 13A9D	EGYPTIAN HIEROGLYPH-13A9D
 13A9E	EGYPTIAN HIEROGLYPH-13A9E
 	* logogram (young lioness) : ḥwn.t
@@ -44164,7 +44873,7 @@ FFFF	<not a character>
 13AB7	EGYPTIAN HIEROGLYPH-13AB7
 	* logogram/Phonemogram (great one (female)) : wr.t
 13AB8	EGYPTIAN HIEROGLYPH-13AB8
-	* logogram/Phonemogram (great one (female)) : wr.t
+	* logogram/Phonemogram (great one (female)) : wr.t 
 13AB9	EGYPTIAN HIEROGLYPH-13AB9
 	* logogram (to rejoice) : bnhm
 13ABA	EGYPTIAN HIEROGLYPH-13ABA
@@ -44179,7 +44888,7 @@ FFFF	<not a character>
 13ABE	EGYPTIAN HIEROGLYPH-13ABE
 	* phonemogram : wn
 13ABF	EGYPTIAN HIEROGLYPH-13ABF
-	* logogram (Hermopolis magna, 15th nome of Upper Egypt) : wnw.t
+	* logogram (Hermopolis magna, 15th nome of Upper Egypt) : wnw.t 
 13AC0	EGYPTIAN HIEROGLYPH-13AC0
 @		E17. Lion
 13AC1	EGYPTIAN HIEROGLYPH-13AC1
@@ -44263,7 +44972,7 @@ FFFF	<not a character>
 13AE8	EGYPTIAN HIEROGLYPH-13AE8
 	* classifier monkey (divinity) : wpt
 13AE9	EGYPTIAN HIEROGLYPH-13AE9
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13AEA	EGYPTIAN HIEROGLYPH-13AEA
 	* logogram (king (of Upper Egypt)) : n(.y)-sw.t
 13AEB	EGYPTIAN HIEROGLYPH-13AEB
@@ -44559,7 +45268,7 @@ FFFF	<not a character>
 13B82	EGYPTIAN HIEROGLYPH-13B82
 	* logogram (throat) : ḥt.yt
 13B83	EGYPTIAN HIEROGLYPH-13B83
-	* logogram (throat) : ḥt.yt
+	* classifier throat associated action : sꜥm
 13B84	EGYPTIAN HIEROGLYPH-13B84
 13B85	EGYPTIAN HIEROGLYPH-13B85
 	* phonemogram : wsr
@@ -44994,22 +45703,22 @@ FFFF	<not a character>
 13C5C	EGYPTIAN HIEROGLYPH-13C5C
 	* logogram (god) : nṯr
 13C5D	EGYPTIAN HIEROGLYPH-13C5D
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13C5E	EGYPTIAN HIEROGLYPH-13C5E
 	* logogram (to be excellent) : ꞽḳr
 13C5F	EGYPTIAN HIEROGLYPH-13C5F
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13C60	EGYPTIAN HIEROGLYPH-13C60
 	* logogram (god) : nṯr
 13C61	EGYPTIAN HIEROGLYPH-13C61
 13C62	EGYPTIAN HIEROGLYPH-13C62
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13C63	EGYPTIAN HIEROGLYPH-13C63
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13C64	EGYPTIAN HIEROGLYPH-13C64
 	* logogram (god) : nṯr
 13C65	EGYPTIAN HIEROGLYPH-13C65
-	* logogram (Thot) : ḏḥwty
+	* logogram (Thoth) : ḏḥwty
 13C66	EGYPTIAN HIEROGLYPH-13C66
 	* phonemogram : ṯꜣ
 13C67	EGYPTIAN HIEROGLYPH-13C67
@@ -45017,7 +45726,7 @@ FFFF	<not a character>
 13C68	EGYPTIAN HIEROGLYPH-13C68
 	* logogram (god) : nṯr
 13C69	EGYPTIAN HIEROGLYPH-13C69
-	* classifier Thot : nb ḫmnw
+	* classifier Thoth : nb ḫmnw
 13C6A	EGYPTIAN HIEROGLYPH-13C6A
 	* logogram (god) : nṯr
 @		G12. Falcon
@@ -46346,7 +47055,7 @@ FFFF	<not a character>
 	* logogram (nome, district) : spꜣ.t
 13F07	EGYPTIAN HIEROGLYPH-13F07
 13F08	EGYPTIAN HIEROGLYPH-13F08
-	* logogram (9th nome of Lower Egypt) : wꜥ-m-ḥww
+	* logogram (9th nome of Lower Egypt) : ꜥnḏ.ty 
 13F09	EGYPTIAN HIEROGLYPH-13F09
 13F0A	EGYPTIAN HIEROGLYPH-13F0A
 	* classifier garden : ḥsp
@@ -46360,11 +47069,11 @@ FFFF	<not a character>
 13F0F	EGYPTIAN HIEROGLYPH-13F0F
 	* logogram (14th nome of Upper Egypt) : nḏf.t-pḥ.t
 13F10	EGYPTIAN HIEROGLYPH-13F10
-	* logogram (21th nome of Upper Egypt) : nꜥr.t-pḥ.t
+	* logogram (21st nome of Upper Egypt) : nꜥr.t-pḥ.t
 13F11	EGYPTIAN HIEROGLYPH-13F11
 	* logogram (14th nome of Upper Egypt) : nḏf.t-pḥ.t
 13F12	EGYPTIAN HIEROGLYPH-13F12
-	* logogram (14th nome of Upper Egypt) : ḫnt.y-ꞽꜣb.ty
+	* logogram (14th nome of Lower Egypt) : ḫnt.y-ꞽꜣb.ty
 13F13	EGYPTIAN HIEROGLYPH-13F13
 	* logogram (18th nome of Lower Egypt) : ꞽm.ty-ḫnt.y
 @		N13. Mountain range (desert)
@@ -46491,7 +47200,7 @@ FFFF	<not a character>
 13F4F	EGYPTIAN HIEROGLYPH-13F4F
 	* logogram (temple) : gs-pr
 13F50	EGYPTIAN HIEROGLYPH-13F50
-	* logogram (temple) : gs.w-pr.w
+	* logogram (temple) : gs.w-pr.w 
 13F51	EGYPTIAN HIEROGLYPH-13F51
 	* logogram (temple) : gs.w-pr.w
 13F52	EGYPTIAN HIEROGLYPH-13F52
@@ -46688,6 +47397,7 @@ FFFF	<not a character>
 	* logogram (to tie on, to don) : ꜥrḳ
 13FB9	EGYPTIAN HIEROGLYPH-13FB9
 13FBA	EGYPTIAN HIEROGLYPH-13FBA
+	* classifier (vault) : wrm.t
 13FBB	EGYPTIAN HIEROGLYPH-13FBB
 	* logogram (divine booth) : sḥ-nṯr
 13FBC	EGYPTIAN HIEROGLYPH-13FBC
@@ -46754,7 +47464,7 @@ FFFF	<not a character>
 13FDB	EGYPTIAN HIEROGLYPH-13FDB
 	* phonemogram/logogram (to beget, to ejaculate, to create) : bnbn
 13FDC	EGYPTIAN HIEROGLYPH-13FDC
-	* classifier solar temple : s.t-ꞽb-rꜥ
+	* classifier solar temple : nḫn-rꜥ
 @		O14. Stela
 13FDD	EGYPTIAN HIEROGLYPH-13FDD
 	* classifier shrine/chapel : ꞽtr.t
@@ -52566,6 +53276,8 @@ FFFF	<not a character>
 18C3C	KHITAN SMALL SCRIPT CHARACTER-18C3C
 18C3D	KHITAN SMALL SCRIPT CHARACTER-18C3D
 18C3E	KHITAN SMALL SCRIPT CHARACTER-18C3E
+	* used in Jurchen Small Script and possibly in Khitan Small Script
+	* glyph reflects the Jurchen Small Script form with angled legs
 18C3F	KHITAN SMALL SCRIPT CHARACTER-18C3F
 18C40	KHITAN SMALL SCRIPT CHARACTER-18C40
 18C41	KHITAN SMALL SCRIPT CHARACTER-18C41
@@ -52727,10 +53439,17 @@ FFFF	<not a character>
 18CD3	KHITAN SMALL SCRIPT CHARACTER-18CD3
 18CD4	KHITAN SMALL SCRIPT CHARACTER-18CD4
 18CD5	KHITAN SMALL SCRIPT CHARACTER-18CD5
+@		Jurchen Small Script characters
+@+	These characters are tentatively identified as Jurchen Small Script, encoded in the Khitan Small Script block due to similar clustering structure and limited evidence. This set also includes 18C3E. 
+18CD6	KHITAN SMALL SCRIPT CHARACTER-18CD6
+18CD7	KHITAN SMALL SCRIPT CHARACTER-18CD7
+18CD8	KHITAN SMALL SCRIPT CHARACTER-18CD8
+18CD9	KHITAN SMALL SCRIPT CHARACTER-18CD9
+18CDA	KHITAN SMALL SCRIPT CHARACTER-18CDA
 @		Indication of missing character
 18CFF	KHITAN SMALL SCRIPT CHARACTER-18CFF
 	* represents a lost or illegible character
-@@	18D00	Tangut Supplement	18D1E
+@@	18D00	Tangut Supplement	18D20
 @@	18D80	Tangut Components Supplement	18DFF
 @		Miscellaneous components
 18D80	TANGUT COMPONENT-769
@@ -52864,6 +53583,59 @@ FFFF	<not a character>
 18DF1	TANGUT COMPONENT-882
 @		Fourteen-stroke component
 18DF2	TANGUT COMPONENT-883
+@@	18E00	Jurchen	19191
+@@	191A0	Jurchen Radicals	191DF
+191A0	JURCHEN RADICAL-01
+191A1	JURCHEN RADICAL-02
+191A2	JURCHEN RADICAL-03
+191A3	JURCHEN RADICAL-04
+191A4	JURCHEN RADICAL-05
+191A5	JURCHEN RADICAL-06
+191A6	JURCHEN RADICAL-07
+191A7	JURCHEN RADICAL-08
+191A8	JURCHEN RADICAL-09
+191A9	JURCHEN RADICAL-10
+191AA	JURCHEN RADICAL-11
+191AB	JURCHEN RADICAL-12
+191AC	JURCHEN RADICAL-13
+191AD	JURCHEN RADICAL-14
+191AE	JURCHEN RADICAL-15
+191AF	JURCHEN RADICAL-16
+191B0	JURCHEN RADICAL-17
+191B1	JURCHEN RADICAL-18
+191B2	JURCHEN RADICAL-19
+191B3	JURCHEN RADICAL-20
+191B4	JURCHEN RADICAL-21
+191B5	JURCHEN RADICAL-22
+191B6	JURCHEN RADICAL-23
+191B7	JURCHEN RADICAL-24
+191B8	JURCHEN RADICAL-25
+191B9	JURCHEN RADICAL-26
+191BA	JURCHEN RADICAL-27
+191BB	JURCHEN RADICAL-28
+191BC	JURCHEN RADICAL-29
+191BD	JURCHEN RADICAL-30
+191BE	JURCHEN RADICAL-31
+191BF	JURCHEN RADICAL-32
+191C0	JURCHEN RADICAL-33
+191C1	JURCHEN RADICAL-34
+191C2	JURCHEN RADICAL-35
+191C3	JURCHEN RADICAL-36
+191C4	JURCHEN RADICAL-37
+191C5	JURCHEN RADICAL-38
+191C6	JURCHEN RADICAL-39
+191C7	JURCHEN RADICAL-40
+191C8	JURCHEN RADICAL-41
+191C9	JURCHEN RADICAL-42
+191CA	JURCHEN RADICAL-43
+191CB	JURCHEN RADICAL-44
+191CC	JURCHEN RADICAL-45
+191CD	JURCHEN RADICAL-46
+191CE	JURCHEN RADICAL-47
+191CF	JURCHEN RADICAL-48
+191D0	JURCHEN RADICAL-49
+191D1	JURCHEN RADICAL-50
+191D2	JURCHEN RADICAL-51
 @@	1AFF0	Kana Extended-B	1AFFF
 @+		This block contains tone marks occasionally used in furigana extensions to annotate Minnan Chinese.
 @		Tone marks
@@ -53468,6 +54240,23 @@ FFFF	<not a character>
 1B120	KATAKANA LETTER ARCHAIC YI
 1B121	KATAKANA LETTER ARCHAIC YE
 1B122	KATAKANA LETTER ARCHAIC WU
+@		Historic Hiragana digraph
+1B123	HIRAGANA DIGRAPH KOTO
+	* represents the Japanese word "koto" (thing)
+	# <vertical> 3053 3068
+@		Historic Katakana digraphs
+1B124	KATAKANA DIGRAPH TOKI
+	* represents the Japanese word "toki" (when... or time)
+	# <vertical> 30C8 30AD
+1B125	KATAKANA DIGRAPH TOTE
+	* represents the Japanese word "tote" (but or although)
+	# <vertical> 30C8 30C6
+1B126	KATAKANA DIGRAPH YORI
+	* represents the Japanese word "yori" (from)
+	# <vertical> 30E8 30EA
+@		Historic Katakana
+1B127	KATAKANA LETTER ALTERNATE NE
+1B128	KATAKANA LETTER ALTERNATE WI
 @@	1B130	Small Kana Extension	1B16F
 @		Historic small hiragana letters
 1B132	HIRAGANA LETTER SMALL KO
@@ -53480,6 +54269,9 @@ FFFF	<not a character>
 1B165	KATAKANA LETTER SMALL WE
 1B166	KATAKANA LETTER SMALL WO
 1B167	KATAKANA LETTER SMALL N
+1B168	KATAKANA LETTER SMALL ARCHAIC YE
+	* used for Marshallese transliteration
+	x (katakana letter archaic ye - 1B121)
 @@	1B170	Nushu	1B2FF
 @+		A more accurate spelling of the name of this script is Nüshu.
 @		One-stroke character
@@ -55187,6 +55979,18 @@ FFFF	<not a character>
 1CECE	BELLONA
 1CECF	AMPHITRITE
 1CED0	LEUKOTHEA
+@		Alchemical symbols
+1CED2	ALCHEMICAL SYMBOL FOR OIL INVERTED
+	x (alchemical symbol for oil - 1F746)
+1CED3	ALCHEMICAL SYMBOL FOR MOON-JUPITER
+	x (jupiter - 2643)
+1CED4	ALCHEMICAL SYMBOL FOR SALT OF TARTAR
+	x (alchemical symbol for tartar - 1F73F)
+@		Radix signs for historical mathematics
+1CEDD	SQUARE ROOT OF SQUARE ROOT
+	x (square root - 221A)
+1CEDE	SQUARE ROOT OF SQUARE ROOT OF SQUARE ROOT
+1CEDF	SQUARE ROOT OF SQUARE ROOT OF SQUARE ROOT OF SQUARE ROOT
 @		Symbols for geomantic figures
 1CEE0	GEOMANTIC FIGURE POPULUS
 1CEE1	GEOMANTIC FIGURE TRISTITIA
@@ -55208,6 +56012,42 @@ FFFF	<not a character>
 1CEF0	MEDIUM SMALL WHITE CIRCLE WITH HORIZONTAL BAR
 	* used in superscripted form to mean standard state (chemistry)
 	x (circle with horizontal bar - 29B5)
+@		Historic Leibnizian mathematical operators
+1CEF1	LEIBNIZIAN DIVISION SIGN
+	= division
+	x (division sign - 00F7)
+	x (division slash - 2215)
+	x (metrical breve - 23D1)
+	x (lower half circle - 25E1)
+1CEF2	LEIBNIZIAN MULTIPLICATION SIGN
+	= multiplication
+	x (multiplication sign - 00D7)
+	x (arc - 2312)
+	x (upper half circle - 25E0)
+1CEF3	LEIBNIZIAN MULTIPLICATION-DIVISION SIGN
+	* ambiguous operator sign
+	x (plus-minus sign - 00B1)
+	x (close up - 2050)
+	x (division times - 22C7)
+1CEF4	LEIBNIZIAN FRACTION REDUCTION SIGN-1
+	= division
+	* shows how numerator and denominator are divided equally to reduce a fraction
+1CEF5	LEIBNIZIAN FRACTION REDUCTION SIGN-2
+	= division
+	* shows how numerator and denominator are divided equally to reduce a fraction
+@		Sector and angle symbols
+1CEF6	SECTOR WITH CHORD
+	x (sector - 2314)
+1CEF7	SECTOR WITH DOUBLE ARC
+1CEF8	SECTOR WITH CHORD AND DOTTED ARC
+1CEF9	MEASURED ANGLE WITH DOUBLE ARC
+	x (measured angle - 2221)
+1CEFA	MEASURED ANGLE WITH CONCAVE ARC
+1CEFB	MEASURED ANGLE WITH DOUBLE CONCAVE ARC
+1CEFC	ANGLE OPENING UP
+	x (oblique angle opening up - 29A6)
+@		Miscellaneous geometrical symbol
+1CEFD	HYPERBOLA
 @@	1CF00	Znamenny Musical Notation	1CFCF
 @		Combining red marks
 1CF00	ZNAMENNY COMBINING MARK GORAZDO NIZKO S KRYZHEM ON LEFT
@@ -55739,6 +56579,11 @@ FFFF	<not a character>
 1D124	MUSICAL SYMBOL F CLEF OTTAVA BASSA
 1D125	MUSICAL SYMBOL DRUM CLEF-1
 1D126	MUSICAL SYMBOL DRUM CLEF-2
+@		Stress marks
+1D127	MUSICAL SYMBOL COMBINING STRESS
+	x (combining acute accent - 0301)
+1D128	MUSICAL SYMBOL COMBINING UNSTRESS
+	x (combining breve - 0306)
 @		Rest
 1D129	MUSICAL SYMBOL MULTIPLE MEASURE REST
 	* used to represent rests of arbitrary lengths, extending across multiple measures
@@ -55750,6 +56595,7 @@ FFFF	<not a character>
 		x (music sharp sign - 266F)
 1D12A	MUSICAL SYMBOL DOUBLE SHARP
 1D12B	MUSICAL SYMBOL DOUBLE FLAT
+	x (musical symbol triple flat - 1D260)
 1D12C	MUSICAL SYMBOL FLAT UP
 1D12D	MUSICAL SYMBOL FLAT DOWN
 1D12E	MUSICAL SYMBOL NATURAL UP
@@ -55846,9 +56692,11 @@ FFFF	<not a character>
 1D167	MUSICAL SYMBOL COMBINING TREMOLO-1
 1D168	MUSICAL SYMBOL COMBINING TREMOLO-2
 1D169	MUSICAL SYMBOL COMBINING TREMOLO-3
+	x (musical symbol combining tremolo-4 - 1D25B)
 1D16A	MUSICAL SYMBOL FINGERED TREMOLO-1
 1D16B	MUSICAL SYMBOL FINGERED TREMOLO-2
 1D16C	MUSICAL SYMBOL FINGERED TREMOLO-3
+	x (musical symbol fingered tremolo-4 - 1D25D)
 @		Augmentation dot
 1D16D	MUSICAL SYMBOL COMBINING AUGMENTATION DOT
 @		Flags
@@ -55977,6 +56825,11 @@ FFFF	<not a character>
 1D1D1	MUSICAL SYMBOL GREGORIAN F CLEF
 @		Accidental
 1D1D2	MUSICAL SYMBOL SQUARE B
+	= b quadratum (square b)
+	= b durum (hard b)
+	* use 266D for b rotundum (round b) or b molle (soft b)
+	x (music natural sign - 266E)
+	x (music sharp sign - 266F)
 @		Notes
 1D1D3	MUSICAL SYMBOL VIRGA
 1D1D4	MUSICAL SYMBOL PODATUS
@@ -56016,6 +56869,47 @@ FFFF	<not a character>
 @		Accidentals for quarter tones
 1D1E9	MUSICAL SYMBOL SORI
 1D1EA	MUSICAL SYMBOL KORON
+@		Stein-Zimmermann quarter-tone accidentals
+1D1EB	MUSICAL SYMBOL HALF SHARP
+	= quarter tone sharp
+1D1EC	MUSICAL SYMBOL ONE AND A HALF SHARP
+	= three-quarter tone sharp
+1D1ED	MUSICAL SYMBOL REVERSED FLAT
+	= quarter tone flat
+1D1EE	MUSICAL SYMBOL REVERSED FLAT AND FLAT
+	= three-quarter tone flat
+1D1EF	MUSICAL SYMBOL HALF SHARP UP
+1D1F0	MUSICAL SYMBOL HALF SHARP DOWN
+1D1F1	MUSICAL SYMBOL ONE AND A HALF SHARP UP
+1D1F2	MUSICAL SYMBOL ONE AND A HALF SHARP DOWN
+1D1F3	MUSICAL SYMBOL REVERSED FLAT UP
+1D1F4	MUSICAL SYMBOL REVERSED FLAT DOWN
+1D1F5	MUSICAL SYMBOL REVERSED FLAT AND FLAT UP
+1D1F6	MUSICAL SYMBOL REVERSED FLAT AND FLAT DOWN
+@		Digits with strokes
+@+		Used in figured bass music notation in Baroque and neo-Baroque compositions.
+1D1F7	MUSICAL SYMBOL DIGIT TWO WITH STROKE
+	= raised 2nd
+	x (latin capital letter rum rotunda - A75C)
+1D1F8	MUSICAL SYMBOL DIGIT FOUR WITH STROKE
+	= raised 4th
+1D1F9	MUSICAL SYMBOL DIGIT FIVE WITH STROKE
+	= raised 5th
+1D1FA	MUSICAL SYMBOL DIGIT SIX WITH STROKE
+	= raised 6th
+1D1FB	MUSICAL SYMBOL DIGIT SEVEN WITH STROKE
+	= raised 7th
+1D1FC	MUSICAL SYMBOL DIGIT NINE WITH STROKE
+	= raised 9th
+1D1FD	MUSICAL SYMBOL DIGIT FIVE WITH LOW STROKE
+	= diminished 5th
+1D1FE	MUSICAL SYMBOL DIGIT SEVEN WITH LOW STROKE
+	= lowered 7th
+	* not appropriate for the barred form of the digit 7 used in much of Europe
+@		Mensural rest
+1D1FF	MUSICAL SYMBOL LONGA REST
+	= quadruple whole-rest
+	x (musical symbol longa imperfecta rest - 1D1C2)
 @@	1D200	Ancient Greek Musical Notation	1D24F
 @		Ancient Greek vocalic notation
 @+		In a few instances vocalic and instrumental symbols have been unified with each other. In other instances they have been unified with regular Greek letters.
@@ -56184,6 +57078,84 @@ FFFF	<not a character>
 1D244	COMBINING GREEK MUSICAL PENTASEME
 	x (metrical pentaseme - 23D9)
 1D245	GREEK MUSICAL LEIMMA
+@@	1D250	Musical Symbols Supplement	1D28F
+@		Flags
+1D250	MUSICAL SYMBOL COMBINING FLAG-6
+	* creates 256th notes
+1D251	MUSICAL SYMBOL COMBINING FLAG-7
+	* creates 512th notes
+1D252	MUSICAL SYMBOL COMBINING FLAG-8
+	* creates \1024th notes
+@		Rests
+1D253	MUSICAL SYMBOL TWO HUNDRED FIFTY-SIXTH REST
+1D254	MUSICAL SYMBOL FIVE HUNDRED TWELFTH REST
+1D255	MUSICAL SYMBOL ONE THOUSAND TWENTY-FOURTH REST
+@		Turkish and Arabic accidentals
+1D256	MUSICAL SYMBOL FLAT WITH STROKE
+	= bakiye flat
+	= Arabic quarter-tone flat
+1D257	MUSICAL SYMBOL FLAT WITH DOUBLE STROKE
+	= büyük mücenneb flat
+1D258	MUSICAL SYMBOL FLAT WITH DOUBLE STEM
+	= Arabic three-quarter-tone flat
+1D259	MUSICAL SYMBOL HALF SHARP WITH STROKE
+	= küçük mücenneb sharp
+1D25A	MUSICAL SYMBOL SHARP WITH STROKE
+	= büyük mücenneb sharp
+@		Tremolos
+1D25B	MUSICAL SYMBOL COMBINING TREMOLO-4
+	x (musical symbol combining tremolo-3 - 1D169)
+1D25C	MUSICAL SYMBOL COMBINING TREMOLO-5
+1D25D	MUSICAL SYMBOL FINGERED TREMOLO-4
+	x (musical symbol fingered tremolo-3 - 1D16C)
+1D25E	MUSICAL SYMBOL FINGERED TREMOLO-5
+1D25F	MUSICAL SYMBOL COMBINING BUZZ ROLL STEM
+@		Accidental
+1D260	MUSICAL SYMBOL TRIPLE FLAT
+	x (musical symbol double flat - 1D12B)
+@		Baroque musical ornament
+1D261	MUSICAL SYMBOL SUSPENSION
+@		Barline
+1D262	MUSICAL SYMBOL HEAVY DOUBLE BARLINE
+@		System divider
+1D263	MUSICAL SYMBOL SYSTEM DIVIDER
+@		Niente dynamics
+1D264	MUSICAL SYMBOL NIENTE
+1D265	MUSICAL SYMBOL CRESCENDO WITH RING
+1D266	MUSICAL SYMBOL DECRESCENDO WITH RING
+@		Noteheads
+1D267	MUSICAL SYMBOL DIAMOND NOTEHEAD WHOLE
+1D268	MUSICAL SYMBOL DIAMOND NOTEHEAD WHITE
+1D269	MUSICAL SYMBOL DIAMOND NOTEHEAD BLACK
+1D26A	MUSICAL SYMBOL DIAMOND NOTEHEAD HALF-FILLED
+@		Holds and pauses
+1D26B	MUSICAL SYMBOL TRIANGULAR FERMATA
+1D26C	MUSICAL SYMBOL DOUBLE TRIANGULAR FERMATA
+1D26D	MUSICAL SYMBOL SQUARE FERMATA
+1D26E	MUSICAL SYMBOL DOUBLE SQUARE FERMATA
+1D26F	MUSICAL SYMBOL HENZE LONG FERMATA
+1D270	MUSICAL SYMBOL HENZE SHORT FERMATA
+1D271	MUSICAL SYMBOL CURLEW
+1D272	MUSICAL SYMBOL SALZEDO BREATH MARK
+@		Organ pedal markings
+1D273	MUSICAL SYMBOL ORGAN PEDAL HEEL
+1D274	MUSICAL SYMBOL ORGAN PEDAL TOE
+@		Clefs
+1D275	MUSICAL SYMBOL G CLEF OPTIONALLY OTTAVA BASSA
+1D276	MUSICAL SYMBOL DOUBLE G CLEF
+1D277	MUSICAL SYMBOL G CLEF OTTAVA BASSA WITH C CLEF
+1D278	MUSICAL SYMBOL C CLEF OTTAVA BASSA
+1D279	MUSICAL SYMBOL G CLEF QUINDICESIMA ALTA
+1D27A	MUSICAL SYMBOL G CLEF QUINDICESIMA BASSA
+1D27B	MUSICAL SYMBOL F CLEF QUINDICESIMA ALTA
+1D27C	MUSICAL SYMBOL F CLEF QUINDICESIMA BASSA
+1D27D	MUSICAL SYMBOL C CLEF QUINDICESIMA BASSA
+1D27E	MUSICAL SYMBOL TABLATURE CLEF
+@		Arpeggio
+1D27F	MUSICAL SYMBOL ARPEGGIATO UP WITH ARROW
+@		Bowing marks
+1D280	MUSICAL SYMBOL COMBINING STEM BOW BEHIND BRIDGE
+1D281	MUSICAL SYMBOL COMBINING STEM BOW ON TOP OF BRIDGE
 @@	1D2C0	Kaktovik Numerals	1D2DF
 @		Numerals
 1D2C0	KAKTOVIK NUMERAL ZERO
@@ -56823,6 +57795,7 @@ FFFF	<not a character>
 1D4CE	MATHEMATICAL SCRIPT SMALL Y
 	# <font> 0079 latin small letter y
 1D4CF	MATHEMATICAL SCRIPT SMALL Z
+	~ 1D4CF FE02 kurrent style
 	# <font> 007A latin small letter z
 @		Bold script symbols
 1D4D0	MATHEMATICAL BOLD SCRIPT CAPITAL A
@@ -57786,6 +58759,12 @@ FFFF	<not a character>
 	x (latin small letter dotless j - 0237)
 	x (mathematical italic small j - 1D457)
 	# <font> 0237 latin small letter dotless j
+@		Ligature long s
+1D6A6	MATHEMATICAL ITALIC SMALL LIGATURE LONG S WITH DESCENDER S
+	= sursolidum
+	* denotes fifth power of the unknown in historical mathematics
+	x (latin small ligature long s with descender s - 1DF95)
+	# <font> 1DF95 latin small ligature long s with descender s
 @		Bold Greek symbols
 1D6A8	MATHEMATICAL BOLD CAPITAL ALPHA
 	# <font> 0391 greek capital letter alpha
@@ -59182,6 +60161,39 @@ FFFF	<not a character>
 1DAAD	SIGNWRITING ROTATION MODIFIER-14
 1DAAE	SIGNWRITING ROTATION MODIFIER-15
 1DAAF	SIGNWRITING ROTATION MODIFIER-16
+@@	1DB00	Miscellaneous Symbols and Arrows Extended	1DBFF
+@		Leibnizian operators
+1DB00	LEIBNIZIAN EQUALS SIGN
+1DB01	LEIBNIZIAN EQUALS SIGN WITH DOUBLE VERTICALS
+1DB02	LEIBNIZIAN EQUALS SIGN WITH SMALL S
+1DB03	LEIBNIZIAN GREATER-THAN
+1DB04	LEIBNIZIAN LESS-THAN
+1DB05	LEIBNIZIAN GREATER-THAN WITH SMALL P
+1DB06	LEIBNIZIAN LESS-THAN WITH SMALL P
+1DB07	LEIBNIZIAN GREATER-THAN OR LESS-THAN
+1DB08	INVERTED SQUARE LEFT OPEN BOX OPERATOR
+1DB09	INVERTED SQUARE RIGHT OPEN BOX OPERATOR
+1DB0A	TWO-LINE GREATER-THAN
+1DB0B	TWO-LINE LESS-THAN
+1DB0C	COMMENSURABILITY
+1DB0D	INCOMMENSURABILITY
+1DB0E	COMMENSURABILITY IN SQUARE
+1DB0F	INCOMMENSURABILITY IN SQUARE
+1DB10	CARTESIAN EQUALS SIGN
+	~ 1DB10 FE00 with descender
+1DB11	LEIBNIZIAN CONGRUENCE
+1DB12	LEIBNIZIAN CONGRUENCE WITH VERTICAL BAR
+1DB13	LEIBNIZIAN CONGRUENCE-2
+1DB14	LEIBNIZIAN CONGRUENCE-2 INVERTED
+1DB15	LEIBNIZIAN CONGRUENCE-2 WITH HORIZONTAL BAR
+1DB16	LEIBNIZIAN CONGRUENCE-2 WITH HORIZONTAL AND VERTICAL BAR
+1DB17	LEIBNIZIAN COINCIDENCE
+1DB18	INVERTED LAZY S OVER LAZY S
+1DB19	LEIBNIZIAN SIMILARITY
+1DB1A	LEIBNIZIAN SIMILARITY-2
+1DB1B	LEIBNIZIAN DISSIMILARITY
+1DB1C	FACIT SYMBOL
+@~	Standardized Variation Sequences
 @@	1DF00	Latin Extended-G	1DFFF
 @		Extended IPA for disordered speech
 1DF00	LATIN SMALL LETTER FENG DIGRAPH WITH TRILL
@@ -59230,13 +60242,302 @@ FFFF	<not a character>
 1DF1D	LATIN SMALL LETTER C WITH RETROFLEX HOOK
 @		IPA extension
 1DF1E	LATIN SMALL LETTER S WITH CURL
-@		Letters for Malayalam transliteration
+@		Affricate ligatures
+1DF1F	LATIN SMALL LETTER D-ETH DIGRAPH
+1DF20	LATIN SMALL LETTER D-LEZH DIGRAPH
+1DF21	LATIN SMALL LETTER D-LEZH DIGRAPH WITH RETROFLEX HOOK
+1DF22	LATIN SMALL LETTER TL DIGRAPH WITH BELT
+1DF23	LATIN SMALL LETTER TL DIGRAPH WITH RETROFLEX HOOK AND BELT
+1DF24	LATIN SMALL LETTER T-THETA DIGRAPH
+@		Letters for romanized Malayalam
 1DF25	LATIN SMALL LETTER D WITH MID-HEIGHT LEFT HOOK
 1DF26	LATIN SMALL LETTER L WITH MID-HEIGHT LEFT HOOK
 1DF27	LATIN SMALL LETTER N WITH MID-HEIGHT LEFT HOOK
 1DF28	LATIN SMALL LETTER R WITH MID-HEIGHT LEFT HOOK
 1DF29	LATIN SMALL LETTER S WITH MID-HEIGHT LEFT HOOK
 1DF2A	LATIN SMALL LETTER T WITH MID-HEIGHT LEFT HOOK
+@		Ligatures of historical IPA letters
+1DF2B	LATIN SMALL LETTER DEZH DIGRAPH WITH CURL
+1DF2C	LATIN SMALL LETTER TESH DIGRAPH WITH CURL
+@		IPA letters with palatal hook
+1DF2D	LATIN SMALL LETTER D WITH HOOK AND PALATAL HOOK
+1DF2E	LATIN SMALL LETTER DZ DIGRAPH WITH PALATAL HOOK
+1DF2F	LATIN SMALL LETTER ETH WITH PALATAL HOOK
+1DF30	LATIN LETTER SMALL CAPITAL G WITH PALATAL HOOK
+1DF31	LATIN SMALL LETTER GAMMA WITH PALATAL HOOK
+1DF32	LATIN SMALL LETTER H WITH STROKE AND PALATAL HOOK
+1DF33	LATIN SMALL LETTER PHI WITH PALATAL HOOK
+1DF34	LATIN SMALL LETTER Q WITH PALATAL HOOK
+1DF35	LATIN LETTER SMALL CAPITAL R WITH PALATAL HOOK
+1DF36	LATIN LETTER SMALL CAPITAL INVERTED R WITH PALATAL HOOK
+1DF37	LATIN SMALL LETTER R WITH TAIL AND PALATAL HOOK
+1DF38	LATIN SMALL LETTER TS DIGRAPH WITH PALATAL HOOK
+1DF39	LATIN SMALL LETTER V WITH HOOK AND PALATAL HOOK
+1DF3A	LATIN LETTER PHARYNGEAL VOICED FRICATIVE WITH PALATAL HOOK
+1DF3B	LATIN SMALL LETTER BETA WITH PALATAL HOOK
+1DF3C	LATIN SMALL LETTER THETA WITH PALATAL HOOK
+1DF3D	LATIN SMALL LETTER CHI WITH PALATAL HOOK
+@		Barred letters
+1DF3E	LATIN SMALL LETTER BARRED TURNED H
+1DF3F	LATIN SMALL LETTER BARRED W
+1DF40	LATIN CAPITAL LETTER BARRED A
+1DF41	LATIN SMALL LETTER BARRED A
+1DF42	LATIN SMALL LETTER BARRED OPEN O
+1DF43	LATIN LETTER SMALL CAPITAL BARRED E
+1DF44	LATIN SMALL LETTER BARRED OPEN E
+1DF45	LATIN SMALL LETTER G WITH STROKE AND PALATAL HOOK
+1DF46	LATIN SMALL LETTER BARRED H
+1DF47	LATIN SMALL LETTER BARRED H WITH HOOK
+1DF48	LATIN CAPITAL LETTER BARRED K
+1DF49	LATIN SMALL LETTER BARRED K
+1DF4A	LATIN CAPITAL LETTER BARRED M
+1DF4B	LATIN SMALL LETTER BARRED M
+1DF4C	LATIN SMALL LETTER BARRED M WITH HOOK
+1DF4D	LATIN CAPITAL LETTER BARRED N
+1DF4E	LATIN SMALL LETTER BARRED N
+1DF4F	LATIN SMALL LETTER BARRED ENG
+1DF50	LATIN SMALL LETTER TURNED R WITH STROKE
+1DF51	LATIN CAPITAL LETTER BARRED V
+1DF52	LATIN SMALL LETTER BARRED V
+1DF53	LATIN SMALL LETTER BARRED CLOSED OMEGA
+1DF54	LATIN SMALL LETTER BARRED CHI
+1DF55	LATIN SMALL LETTER Y WITH LOW STROKE
+1DF56	LATIN LETTER GLOTTAL STOP WITH DOUBLE STROKE
+@		RFE letters
+1DF57	LATIN SMALL LETTER TURNED R WITH MID-HEIGHT LEFT HOOK
+	x (latin small letter r with mid-height left hook - 1DF28)
+1DF58	LATIN SMALL LETTER SPLIT O
+	x (latin small letter top half o - 1D16)
+	x (latin small letter bottom half o - 1D17)
+1DF59	LATIN SMALL LETTER SPLIT U
+@		ITA letters
+1DF5A	LATIN SMALL LETTER HALF A
+	* the form is between 0061 and 0251
+1DF5B	LATIN SMALL LETTER STRETCHED C-H DIGRAPH
+1DF5C	LATIN SMALL LETTER LUNATE EE
+1DF5D	LATIN SMALL LETTER IE
+1DF5E	LATIN SMALL LETTER OI DIGRAPH
+	x (latin small letter oi - 01A3)
+1DF5F	LATIN SMALL LETTER OU DIGRAPH
+	x (latin small letter ou - 0223)
+1DF60	LATIN SMALL LETTER OMEGA WITH LOOP
+	x (latin small letter oo - A74F)
+1DF61	LATIN SMALL LETTER R WITH LEFT TIE
+1DF62	LATIN SMALL LETTER ESH-H DIGRAPH
+1DF63	LATIN SMALL LETTER STRETCHED T-H DIGRAPH
+1DF64	LATIN SMALL LETTER REVERSED T-H DIGRAPH
+1DF65	LATIN SMALL LETTER WH DIGRAPH
+1DF66	LATIN SMALL LETTER REVERSED Z
+@		IPA letter with palatal curl
+1DF67	LATIN SMALL LETTER LEZH WITH CURL
+@		Additions for the English Phonotypic Alphabet
+1DF68	LATIN CAPITAL LETTER PHONOTYPIC A WITH SWASH
+1DF69	LATIN SMALL LETTER PHONOTYPIC A WITH SWASH
+	= latin small letter a with hook tail
+	* glyphic variants may show a top loop instead of a hook tail
+	x (latin small letter a with retroflex hook - 1D8F)
+1DF6A	LATIN CAPITAL LETTER PHONOTYPIC ROUNDTOP A
+1DF6B	LATIN SMALL LETTER PHONOTYPIC ROUNDTOP A
+	* italic and handwriting forms usually do not show a reversed a
+	* also used for romanized Malayalam
+1DF6C	LATIN CAPITAL LETTER REVERSED SCRUPLE
+	* denotes the sound [tʃ] in the English Phonotypic Alphabet
+	* denotes the sound [e] in the Slovene Metelko alphabet
+	x (cyrillic capital letter ukrainian ie - 0404)
+	x (scruple - 2108)
+	x (latin capital letter c with bar - A792)
+1DF6D	LATIN SMALL LETTER REVERSED SCRUPLE
+	x (greek lunate epsilon symbol - 03F5)
+1DF6E	LATIN CAPITAL LETTER PHONOTYPIC DIPHTHONG AI
+	x (latin capital letter i with stroke - 0197)
+	x (cross of jerusalem - 2629)
+	x (maltese cross - 2720)
+1DF6F	LATIN SMALL LETTER PHONOTYPIC DIPHTHONG AI
+	* also used for romanized Malayalam
+	* glyphic variants may show a hook tail instead of a curved descender
+	* handwritten forms may show a large crossbar like the capital form
+1DF70	LATIN SMALL LETTER I WITH PIGTAIL AT BOTTOM
+	* the italic form may show the pigtail at bottom to the right
+	x (latin small letter turned r - 0279)
+1DF71	LATIN SMALL LETTER STRETCHED I
+	* also used in the Dania phonetic alphabet
+1DF72	LATIN CAPITAL LETTER O WITH CURL
+	* the italic form may have the curl directed to the left
+1DF73	LATIN SMALL LETTER O WITH CURL
+	* also used for romanized Malayalam
+1DF74	LATIN CAPITAL LETTER CLOSED OMEGA WITH LONG STEM
+	x (latin capital letter oo - A74E)
+	x (latin capital letter closed omega - A7DD)
+1DF75	LATIN SMALL LETTER CLOSED OMEGA WITH LONG STEM
+	x (latin small letter closed omega - 0277)
+1DF76	LATIN CAPITAL LETTER TURNED CLOSED OMEGA
+1DF77	LATIN SMALL LETTER TURNED CLOSED OMEGA
+1DF78	LATIN CAPITAL LETTER PHONOTYPIC TH
+1DF79	LATIN SMALL LETTER PHONOTYPIC TH
+1DF7A	LATIN CAPITAL LETTER U WITH HOOK TAIL
+	* the hook tail may take the shape of the tail of a capital Q 
+1DF7B	LATIN SMALL LETTER U WITH HOOK TAIL
+	x (latin small letter u with retroflex hook - 1D99)
+	* also used for romanized Malayalam
+1DF7C	LATIN CAPITAL LETTER U WITH NOTCH AT BOTTOM
+1DF7D	LATIN SMALL LETTER U WITH NOTCH AT BOTTOM
+	x (latin small letter ui - AB50)
+1DF7E	LATIN CAPITAL LETTER REVERSED U
+1DF7F	LATIN SMALL LETTER REVERSED U
+@		Capital letter additions for the English Phonotypic Alphabet
+@+		These letters are not paired with any encoded lowercase letter.
+1DF80	LATIN CAPITAL LETTER A WITH TOPBAR
+1DF81	LATIN CAPITAL LETTER E WITH BENT TOPBAR
+@		Cossic letters
+@+		These characters are used in historic mathematical works on algebra.
+1DF90	LATIN SMALL LETTER C WITH LOW SLASH
+	= cubus
+	* denotes cube of the unknown
+1DF91	LATIN SMALL LETTER C WITH LOOPED CEDILLA
+	= census
+	* denotes square of the unknown
+1DF92	LATIN SMALL LETTER C WITH RIGHT LOOP
+	= cubus
+	* denotes cube of the unknown
+	x (latin small letter is - A76D)
+1DF93	LATIN SMALL LETTER D ROTUNDA WITH DESCENDING CROSSING LOOP
+	= dragma
+	* denotes numerus/constant
+	x (latin small letter delta - 1E9F)
+	x (german penny sign - 20B0)
+	x (latin small letter insular d - A77A)
+1DF94	LATIN SMALL LETTER R ROTUNDA WITH LOOP
+	= res, radix
+	* denotes the unknown
+	x (square root - 221A)
+	x (latin small letter r rotunda - A75B)
+	x (latin small letter rum rotunda - A75D)
+	x (latin letter small capital rum - A776)
+1DF95	LATIN SMALL LIGATURE LONG S WITH DESCENDER S
+	= sursolidum
+	* denotes fifth power of the unknown
+	x (latin small letter sharp s - 00DF)
+	x (latin small letter long s - 017F)
+	x (latin small letter middle scots s - A7D7)
+	x (mathematical italic small ligature long s with descender s - 1D6A6)
+	# 00DF latin small letter sharp s
+1DF96	LATIN SMALL LETTER LONG S WITH TOP LOOP
+	= sursolidum
+	* denotes fifth power of the unknown
+	x (latin small letter long s - 017F)
+	x (latin small letter long s with diagonal stroke - 1E9C)
+	x (latin small letter long s with high stroke - 1E9D)
+@		RFE modifier letters
+1DFCD	MODIFIER LETTER SMALL TURNED R WITH MID-HEIGHT LEFT HOOK
+	# <super> 1DF57
+1DFCE	MODIFIER LETTER SMALL SPLIT O
+	# <super> 1DF58
+1DFCF	MODIFIER LETTER SMALL SPLIT U
+	# <super> 1DF59
+@		Subscript letter for phonetic transcription
+1DFD0	LATIN SUBSCRIPT SMALL LETTER GAMMA
+	# <sub> 0263
+@		Phonetic modifier letters
+1DFD1	MODIFIER LETTER SMALL CAPITAL P
+	# <super> 1D18
+1DFD2	MODIFIER LETTER SMALL B WITH STROKE
+	# <super> 0180
+1DFD3	MODIFIER LETTER SMALL D WITH STROKE
+	# <super> 0111
+1DFD4	MODIFIER LETTER SMALL G WITH STROKE
+	# <super> 01E5
+1DFD5	MODIFIER LETTER SMALL L WITH STROKE
+	# <super> 0142
+1DFD6	MODIFIER LETTER SMALL L WITH BAR
+	# <super> 019A
+1DFD7	MODIFIER LETTER SMALL TURNED R WITH STROKE
+	# <super> 1DF50
+1DFD8	MODIFIER LETTER SMALL BARRED TURNED H
+	# <super> 1DF3E
+1DFD9	MODIFIER LETTER SMALL J WITH STROKE
+	# <super> 0249
+1DFDA	MODIFIER LETTER SMALL UPSILON WITH STROKE
+	# <super> 1D7F
+1DFDB	MODIFIER LETTER SMALL BARRED W
+	# <super> 1DF3F
+1DFDC	MODIFIER LETTER SMALL N WITH LONG RIGHT LEG
+	# <super> 019E
+1DFDD	MODIFIER LETTER SMALL R WITH LONG LEG
+	# <super> 027C
+1DFDE	MODIFIER LETTER SMALL DB DIGRAPH
+	# <super> 0238
+1DFDF	MODIFIER LETTER SMALL QP DIGRAPH
+	# <super> 0239
+1DFE0	MODIFIER LETTER SMALL DEZH DIGRAPH WITH CURL
+	# <super> 1DF2B
+1DFE1	MODIFIER LETTER SMALL DEZH DIGRAPH WITH RETROFLEX HOOK
+	# <super> 1DF19
+1DFE2	MODIFIER LETTER SMALL ESH WITH CURL
+	# <super> 0286
+1DFE3	MODIFIER LETTER SMALL ESH WITH RETROFLEX HOOK
+	# <super> 1D98
+1DFE4	MODIFIER LETTER SMALL TESH DIGRAPH WITH CURL
+	# <super> 1DF2C
+1DFE5	MODIFIER LETTER SMALL TESH DIGRAPH WITH RETROFLEX HOOK
+	# <super> 1DF1C
+1DFE6	MODIFIER LETTER SMALL EZH WITH CURL
+	# <super> 0293
+1DFE7	MODIFIER LETTER SMALL EZH WITH RETROFLEX HOOK
+	# <super> 1D9A
+@		Small capital modifier letters
+1DFE8	MODIFIER LETTER SMALL CAPITAL D
+	# <super> 1D05
+1DFE9	MODIFIER LETTER SMALL CAPITAL A
+	# <super> 1D00
+1DFEA	MODIFIER LETTER SMALL CAPITAL E
+	# <super> 1D07
+@		Sinological modifier letters
+1DFEB	MODIFIER LETTER SMALL REVERSED R WITH FISHHOOK
+	# <super> 027F
+1DFEC	MODIFIER LETTER SMALL SQUAT REVERSED ESH
+	# <super> 0285
+1DFED	MODIFIER LETTER SMALL TURNED H WITH FISHHOOK
+	# <super> 02AE
+1DFEE	MODIFIER LETTER SMALL TURNED H WITH FISHHOOK AND TAIL
+	# <super> 02AF
+1DFEF	MODIFIER LETTER SMALL D WITH CURL
+	# <super> 0221
+1DFF0	MODIFIER LETTER SMALL L WITH CURL
+	# <super> 0234
+1DFF1	MODIFIER LETTER SMALL N WITH CURL
+	# <super> 0235
+1DFF2	MODIFIER LETTER SMALL T WITH CURL
+	# <super> 0236
+@		Greek modifier letters
+1DFF3	MODIFIER LETTER SMALL GREEK PSI
+	x (modifier letter retroflex click with retroflex hook - 107B9)
+	# <super> 03C8
+1DFF4	MODIFIER LETTER SMALL GREEK OMEGA
+	# <super> 03C9
+@		IPA modifier letters with palatal hook
+1DFF5	MODIFIER LETTER SMALL D WITH PALATAL HOOK
+	# <super> 1D81
+1DFF6	MODIFIER LETTER SMALL H WITH PALATAL HOOK
+	# <super> A795
+1DFF7	MODIFIER LETTER SMALL N WITH PALATAL HOOK
+	# <super> 1D87
+1DFF8	MODIFIER LETTER SMALL S WITH PALATAL HOOK
+	# <super> 1D8A
+1DFF9	MODIFIER LETTER SMALL Z WITH PALATAL HOOK
+	# <super> 1D8E
+@		IPA voiceless implosive modifier letters
+1DFFA	MODIFIER LETTER SMALL C WITH HOOK
+	# <super> 0188
+1DFFB	MODIFIER LETTER SMALL K WITH HOOK
+	# <super> 0199
+1DFFC	MODIFIER LETTER SMALL P WITH HOOK
+	# <super> 01A5
+1DFFD	MODIFIER LETTER SMALL Q WITH HOOK
+	# <super> 02A0
+1DFFE	MODIFIER LETTER SMALL T WITH HOOK
+	# <super> 01AD
+1DFFF	MODIFIER LETTER SMALL T WITH HOOK AND RETROFLEX HOOK
+	# <super> 1DF09
 @@	1E000	Glagolitic Supplement	1E02F
 @		Combining letters
 1E000	COMBINING GLAGOLITIC LETTER AZU
@@ -60653,6 +61954,7 @@ FFFF	<not a character>
 1EE84	ARABIC MATHEMATICAL LOOPED HEH
 	# <font> 0647 arabic letter heh
 1EE85	ARABIC MATHEMATICAL LOOPED WAW
+	x (arabic letter waw with ring - 06C4)
 	# <font> 0648 arabic letter waw
 1EE86	ARABIC MATHEMATICAL LOOPED ZAIN
 	# <font> 0632 arabic letter zain
@@ -61433,6 +62735,11 @@ FFFF	<not a character>
 	* indicates intellectual property protection for integrated circuit layouts
 	x (copyright sign - 00A9)
 	x (circled latin capital letter m - 24C2)
+@		Symbol used in Japanese traditional calendars
+@+		This is part of a six-day annotation system (Rokuyō) used for divination purposes. The symbols constitute a set as follows: 25D0, 1F1AE, 25D1, 25CF, 25CB, 1F7DA.
+1F1AE	TOMOBIKI SYMBOL
+	* second day
+	* glyph can be represented with a T-shaped or Y-shaped bar inside the circle
 @		Regional indicator symbols
 @+		These characters can be used in pairs to represent regional codes. In some emoji implementations, certain pairs may be recognized and displayed by alternate means; for instance, an implementation might recognize F + R and display this combination with a symbol representing the flag of France.
 1F1E6	REGIONAL INDICATOR SYMBOL LETTER A
@@ -62514,7 +63821,7 @@ FFFF	<not a character>
 1F4D5	CLOSED BOOK
 1F4D6	OPEN BOOK
 	= read operator's manual
-	* similar to ISO/IEC 7000-0790 "Read operator's manual"
+	* similar to ISO 7000-0790 "Read operator's manual"
 	x (book - 1F56E)
 1F4D7	GREEN BOOK
 1F4D8	BLUE BOOK
@@ -63423,6 +64730,7 @@ FFFF	<not a character>
 1F6D6	HUT
 1F6D7	ELEVATOR
 1F6D8	LANDSLIDE
+1F6D9	LIGHTHOUSE
 @		Miscellaneous symbols
 1F6DC	WIRELESS
 1F6DD	PLAYGROUND SLIDE
@@ -63612,6 +64920,7 @@ FFFF	<not a character>
 	x (neptune - 2646)
 1F73F	ALCHEMICAL SYMBOL FOR TARTAR
 	= impure potassium tartrate
+	x (alchemical symbol for salt of tartar - 1CED4)
 1F740	ALCHEMICAL SYMBOL FOR TARTAR-2
 	= impure potassium tartrate
 1F741	ALCHEMICAL SYMBOL FOR QUICK LIME
@@ -63623,6 +64932,7 @@ FFFF	<not a character>
 1F745	ALCHEMICAL SYMBOL FOR ALUM
 1F746	ALCHEMICAL SYMBOL FOR OIL
 	x (tibetan sign rdel dkar gsum - 0F1C)
+	x (alchemical symbol for oil inverted - 1CED2)
 1F747	ALCHEMICAL SYMBOL FOR SPIRIT
 1F748	ALCHEMICAL SYMBOL FOR TINCTURE
 1F749	ALCHEMICAL SYMBOL FOR GUM
@@ -63696,6 +65006,7 @@ FFFF	<not a character>
 	x (alembic - 2697)
 @		Time
 1F76E	ALCHEMICAL SYMBOL FOR HOUR
+	* simple form is 29D6
 	x (hourglass - 231B)
 	x (white hourglass - 29D6)
 1F76F	ALCHEMICAL SYMBOL FOR NIGHT
@@ -63893,6 +65204,12 @@ FFFF	<not a character>
 @		Nine pointed star
 1F7D9	NINE POINTED WHITE STAR
 	* commonly used by members of the Bahá'í faith
+@		Symbol used in Japanese traditional calendars
+@+		This is part of a six-day annotation system (Rokuyō) used for divination purposes. The symbols constitute a set as follows: 25D0, 1F1AE, 25D1, 25CF, 25CB, 1F7DA.
+1F7DA	BLACK CIRCLE WITH WHITE VERTICAL BAR
+	* sixth day (shakkō)
+@		Circle
+1F7DB	BULLET IN DOUBLE CIRCLE
 @		Colored circles
 @+		For use with emoji. Constitute a set as follows: 26AA, 26AB, 1F534, 1F535, 1F7E0-1F7E4
 1F7E0	LARGE ORANGE CIRCLE
@@ -63917,6 +65234,26 @@ FFFF	<not a character>
 	x (heavy plus sign - 2795)
 	x (geta mark - 3013)
 	x (roman sextans sign - 10190)
+@		Circles
+1F7F1	CIRCLE WITH DOUBLE VERTICAL AND HORIZONTAL LINE
+1F7F2	DOUBLE CIRCLE WITH DOUBLE HORIZONTAL LINE
+1F7F3	CIRCLED BOTTOM RIGHT OBLIQUE HALF BLACK CIRCLE
+@		Half circles
+1F7F4	LEFT HALF WHITE CIRCLE
+1F7F5	RIGHT HALF WHITE CIRCLE
+@		Cubes
+1F7F6	TRANSPARENT CUBE
+1F7F7	WHITE CUBE
+@		Squares
+1F7F8	HORIZONTAL DOUBLE WHITE SMALL SQUARE
+1F7F9	VERTICAL DOUBLE WHITE SMALL SQUARE
+1F7FA	WHITE SQUARE WITH BOTTOM HALF BISECTED
+1F7FB	WHITE SQUARE WITH TOP HALF BISECTED
+1F7FC	WHITE SQUARE WITH HORIZONTAL AND VERTICAL BISECTING LINES
+@		Triangles and rhombus
+1F7FD	LOWER LEFT FLATTENED RIGHT TRIANGLE
+1F7FE	LOWER RIGHT FLATTENED RIGHT TRIANGLE
+1F7FF	RHOMBUS
 @@	1F800	Supplemental Arrows-C	1F8FF
 @		Arrows with triangle arrowheads
 1F800	LEFTWARDS ARROW WITH SMALL TRIANGLE ARROWHEAD
@@ -64349,6 +65686,7 @@ FFFF	<not a character>
 1F989	OWL
 1F98A	FOX FACE
 1F98B	BUTTERFLY
+	x (monarch butterfly - 1FACC)
 1F98C	DEER
 1F98D	GORILLA
 1F98E	LIZARD
@@ -64705,6 +66043,9 @@ FFFF	<not a character>
 1FA89	HARP
 1FA8A	TROMBONE
 @		Miscellaneous objects
+1FA8B	METEOR
+1FA8C	ERASER
+1FA8D	NET WITH HANDLE
 1FA8E	TREASURE CHEST
 1FA8F	SHOVEL
 1FA90	RINGED PLANET
@@ -64774,6 +66115,8 @@ FFFF	<not a character>
 1FAC6	FINGERPRINT
 @		Animals and nature
 1FAC8	HAIRY CREATURE
+1FACC	MONARCH BUTTERFLY
+	x (butterfly - 1F98B)
 1FACD	ORCA
 1FACE	MOOSE
 1FACF	DONKEY
@@ -64792,6 +66135,7 @@ FFFF	<not a character>
 1FADA	GINGER ROOT
 1FADB	PEA POD
 1FADC	ROOT VEGETABLE
+1FADD	PICKLE
 @		Miscellaneous
 1FADF	SPLATTER
 @		Faces
@@ -64809,6 +66153,7 @@ FFFF	<not a character>
 1FAE8	SHAKING FACE
 1FAE9	FACE WITH BAGS UNDER EYES
 1FAEA	DISTORTED FACE
+1FAEB	CRACKING FACE
 @		Emotion
 1FAEF	FIGHT CLOUD
 @		Hand symbols
@@ -64822,6 +66167,8 @@ FFFF	<not a character>
 1FAF6	HEART HANDS
 1FAF7	LEFTWARDS PUSHING HAND
 1FAF8	RIGHTWARDS PUSHING HAND
+1FAF9	LEFTWARDS THUMB SIGN
+1FAFA	RIGHTWARDS THUMB SIGN
 @@	1FB00	Symbols for Legacy Computing	1FBFF
 @		Block mosaic terminal graphic characters
 @+		The term "sextant" refers to block mosaics divided into six parts.
@@ -65190,7 +66537,7 @@ FFFF	<not a character>
 1FFFF	<not a character>
 @@	20000	CJK Unified Ideographs Extension B	2A6DF
 @@	2A700	CJK Unified Ideographs Extension C	2B73F
-@@	2B740	CJK Unified Ideographs Extension D	2B81D
+@@	2B740	CJK Unified Ideographs Extension D	2B81E
 @@	2B820	CJK Unified Ideographs Extension E	2CEAD
 @@	2CEB0	CJK Unified Ideographs Extension F	2EBE0
 @@	2EBF0	CJK Unified Ideographs Extension I	2EE5D
@@ -65257,6 +66604,7 @@ FFFF	<not a character>
 2F81C	CJK COMPATIBILITY IDEOGRAPH-2F81C
 	: 291DF
 2F81D	CJK COMPATIBILITY IDEOGRAPH-2F81D
+	x 20674
 	: 51F5
 2F81E	CJK COMPATIBILITY IDEOGRAPH-2F81E
 	: 5203
@@ -65290,6 +66638,7 @@ FFFF	<not a character>
 	x 20984
 	: 5349
 2F82D	CJK COMPATIBILITY IDEOGRAPH-2F82D
+	x 2D161
 	: 5351
 2F82E	CJK COMPATIBILITY IDEOGRAPH-2F82E
 	: 535A
@@ -65389,6 +66738,7 @@ FFFF	<not a character>
 2F85C	CJK COMPATIBILITY IDEOGRAPH-2F85C
 	: 5906
 2F85D	CJK COMPATIBILITY IDEOGRAPH-2F85D
+	x 21587
 	: 591A
 2F85E	CJK COMPATIBILITY IDEOGRAPH-2F85E
 	: 5922
@@ -65811,6 +67161,7 @@ FFFF	<not a character>
 2F92A	CJK COMPATIBILITY IDEOGRAPH-2F92A
 	: 3EAC
 2F92B	CJK COMPATIBILITY IDEOGRAPH-2F92B
+	x 248FD
 	: 73A5
 2F92C	CJK COMPATIBILITY IDEOGRAPH-2F92C
 	: 3EB8
@@ -65979,6 +67330,7 @@ FFFF	<not a character>
 2F97D	CJK COMPATIBILITY IDEOGRAPH-2F97D
 	: 8060
 2F97E	CJK COMPATIBILITY IDEOGRAPH-2F97E
+	x 2659D
 	: 265A8
 2F97F	CJK COMPATIBILITY IDEOGRAPH-2F97F
 	: 8070
@@ -66055,6 +67407,7 @@ FFFF	<not a character>
 2F9A3	CJK COMPATIBILITY IDEOGRAPH-2F9A3
 	: 83DC
 2F9A4	CJK COMPATIBILITY IDEOGRAPH-2F9A4
+	x 26D06
 	: 26C36
 2F9A5	CJK COMPATIBILITY IDEOGRAPH-2F9A5
 	: 26D6B
@@ -66313,6 +67666,7 @@ FFFF	<not a character>
 @@	30000	CJK Unified Ideographs Extension G	3134A
 @@	31350	CJK Unified Ideographs Extension H	323AF
 @@	323B0	CJK Unified Ideographs Extension J	33479
+@@	3D000	Small Seal	3FC3F
 @@	3FF80	Unassigned	3FFFF
 @		Noncharacters
 @+		These codes are intended for process-internal uses.

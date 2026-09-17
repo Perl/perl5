@@ -1,6 +1,6 @@
-# NamedSequences-17.0.0.txt
-# Date: 2025-07-30
-# © 2025 Unicode®, Inc.
+# NamedSequences-18.0.0.txt
+# Date: 2026-02-03
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -98,7 +98,7 @@ LATIN SMALL LETTER E WITH CIRCUMFLEX AND MACRON;00EA 0304
 LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND CARON;00CA 030C
 LATIN SMALL LETTER E WITH CIRCUMFLEX AND CARON;00EA 030C
 
-# Subset 4: Prominent use cases pulled from examples
+# Subset 4: Prominent use cases pulled from examples 
 # for Lithuanian and Tagalog in
 # Unicode 4.0 and early drafts of UAX #34. (2 total)
 

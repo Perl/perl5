@@ -1,38 +1,49 @@
-# ArabicShaping-17.0.0.txt
-# Date: 2025-08-14
-# © 2025 Unicode®, Inc.
+# ArabicShaping-18.0.0.txt
+# Date: 2026-08-18, 19:02:41 GMT
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
+#
+# Unicode Character Database
+#   For documentation, see https://www.unicode.org/reports/tr44/
 #
 # This file is a normative contributory data file in the
 # Unicode Character Database.
 #
-# This file defines the Joining_Type and Joining_Group property
+# This file lists the Joining_Type and Joining_Group property
 # values for Arabic, Syriac, N'Ko, Mandaic, and Manichaean positional
 # shaping, repeating in machine readable form the information
 # exemplified in various tables of The Unicode Standard core specification.
 #
-# This file also defines Joining_Type values for Mongolian, Phags-pa,
+# This file also lists Joining_Type values for Mongolian, Phags-pa,
 # Psalter Pahlavi, Sogdian, Old Uyghur, Chorasmian, and Adlam positional
 # shaping, and Joining_Type and Joining_Group values for Hanifi Rohingya
 # positional shaping, which are not listed in tables in the core
 # specification.
 #
-# Script          Section  Table(s)
+# The full definition of these properties are found in the derived property
+# files DerivedJoiningType.txt and DerivedJoiningGroup.txt.
 #
-# Arabic           9.2      9-3, 9-4, 9-5, 9-7, 9-8, 9-9, 9-10, 9-11, 9-13
-# Syriac           9.3      9-15, 9-16, 9-17, 9-18, 9-19
-# Mandaic          9.5      9-22, 9-23
-# Manichaean      10.5      10-4, 10-5, 10-6, 10-7
-# Psalter Pahlavi 10.6      --
-# Chorasmian      10.8      --
-# Mongolian       13.5      --
-# Phags-pa        14.4      14-7
-# Sogdian         14.10     --
-# Old Uyghur      14.11     --
-# Hanifi Rohingya 16.14     --
-# N'Ko            19.4      19-5
-# Adlam           19.9      --
+# Implementers are strongly encouraged to use the derived property files
+# DerivedJoiningType.txt and DerivedJoiningGroup.txt instead of the current
+# file, to avoid the complication of having to calculate the Joining_Type=T
+# values based on General_Category.
+#
+# Script          Table(s)
+#
+# Arabic          9-3, 9-4, 9-5, 9-7, 9-8, 9-9, 9-10, 9-11, 9-12, 9-14
+# Syriac          9-16, 9-17, 9-18, 9-19, 9-20
+# Mandaic         9-23, 9-24
+# Manichaean      10-4, 10-5, 10-6, 10-7
+# Psalter Pahlavi --
+# Chorasmian      --
+# Mongolian       --
+# Phags-pa        14-7
+# Sogdian         --
+# Old Uyghur      --
+# Hanifi Rohingya --
+# N'Ko            19-5
+# Adlam           --
 #
 # Each line contains four fields, separated by a semicolon.
 #
@@ -106,13 +117,6 @@
 # - Those that are not explicitly listed and that are of General_Category Mn, Me, or Cf
 #   are Joining_Type=T.
 # - All others not explicitly listed are Joining_Type=U.
-#
-# For an explicit listing of all characters of Joining_Type=T, see
-# the derived property file DerivedJoiningType.txt.
-# For an implementation that needs to parse for the values of
-# Joining_Type, it is recommended to use DerivedJoiningType.txt
-# instead of ArabicShaping.txt, to avoid the separate required step of
-# calculating the set for Joining_Type=T based on General_Category values.
 #
 # #############################################################
 
@@ -853,6 +857,28 @@ A873; PHAGS-PA CANDRABINDU; U; No_Joining_Group
 10EC4; KAF WITH VERTICAL 2 DOTS BELOW; D; KAF
 10EC6; THIN NOON; D; THIN NOON
 10EC7; DOTLESS YEH WITH 4 DOTS BELOW; D; YEH
+10ED9; CROWN BEH; L; CROWN BEH
+10EDA; DOTLESS CROWN BEH WITH 3 DOTS BELOW; L; CROWN BEH
+10EDB; DOTLESS CROWN BEH WITH 2 DOTS ABOVE; L; CROWN BEH
+10EDC; DOTLESS CROWN BEH WITH 3 DOTS ABOVE; L; CROWN BEH
+10EDD; CROWN HAH WITH DOT BELOW; L; CROWN HAH
+10EDE; CROWN HAH; L; CROWN HAH
+10EDF; CROWN HAH WITH DOT ABOVE; L; CROWN HAH
+10EE0; CROWN SEEN; L; CROWN SEEN
+10EE1; CROWN SEEN WITH 3 DOTS ABOVE; L; CROWN SEEN
+10EE2; CROWN SAD; L; CROWN SAD
+10EE3; CROWN SAD WITH DOT ABOVE; L; CROWN SAD
+10EE4; CROWN TAH; L; CROWN TAH
+10EE5; CROWN TAH WITH DOT ABOVE; L; CROWN TAH
+10EE6; CROWN AIN; L; CROWN AIN
+10EE7; CROWN AIN WITH DOT ABOVE; L; CROWN AIN
+10EE8; CROWN FEH; L; CROWN FEH
+10EE9; DOTLESS CROWN FEH WITH 2 DOTS ABOVE; L; CROWN FEH
+10EEA; CROWN KAF; L; CROWN KAF
+10EEB; CROWN MEEM; L; CROWN MEEM
+10EEC; DOTLESS CROWN BEH WITH DOT ABOVE; L; CROWN BEH
+10EED; CROWN HEH; L; CROWN HEH
+10EEE; DOTLESS CROWN BEH WITH 2 DOTS BELOW; L; CROWN BEH
 
 # Sogdian Characters
 

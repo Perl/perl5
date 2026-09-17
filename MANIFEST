@@ -5670,6 +5670,7 @@ lib/unicore/IndicPositionalCategory.txt		Unicode character database
 lib/unicore/IndicSyllabicCategory.txt		Unicode character database
 lib/unicore/intentional.txt			Unicode character database
 lib/unicore/Jamo.txt				Unicode character database
+lib/unicore/JurchenSources.txt			Unicode character database
 lib/unicore/LineBreak.txt			Unicode character database
 lib/unicore/Makefile				Unicode character database
 lib/unicore/mktables				Unicode character database generator
@@ -5679,6 +5680,7 @@ lib/unicore/NamedSqProv.txt			Unicode character database
 lib/unicore/NamesList.txt			Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database
 lib/unicore/NormTest.txt			Unicode character database
+lib/unicore/NushuSources.txt			Unicode character database
 lib/unicore/PropertyAliases.txt			Unicode character database
 lib/unicore/PropList.txt			Unicode character database
 lib/unicore/PropValueAliases.txt		Unicode character database
@@ -5686,8 +5688,10 @@ lib/unicore/README.perl				Unicode character database
 lib/unicore/ReadMe.txt				Unicode character database info
 lib/unicore/ScriptExtensions.txt		Unicode character database
 lib/unicore/Scripts.txt				Unicode character database
+lib/unicore/SealSources.txt			Unicode character database
 lib/unicore/SpecialCasing.txt			Unicode character database
 lib/unicore/StandardizedVariants.txt		Unicode character database
+lib/unicore/TangutSources.txt			Unicode character database
 lib/unicore/TestNorm.pl				Unicode character database
 lib/unicore/uni_keywords.pl			Indices into array in charclass_invlists.inc
 lib/unicore/UnicodeData.txt			Unicode character database
