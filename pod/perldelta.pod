@@ -46,6 +46,16 @@ This is approximately equal to the following, except that it is more efficient a
 
 For more detail, see L<perlop/Equality Operators>.
 
+=head2 Unicode 18.0 is supported
+
+Unicode's blog post about it is
+L<https://blog.unicode.org/2026/09/announcing-unicode-standard-version-180.html>.
+A more formal summary of changes is at
+L<https://www.unicode.org/versions/Unicode18.0.0>.  Some changes not
+readily visible at those places include changes to what is considered a
+grapheme in some South Asian languages, and adding support for some
+properties of historical East Asian languages.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
