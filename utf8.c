@@ -4532,12 +4532,14 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
 
         if (flags & FOLD_FLAGS_LOCALE) {
 
-#           define LONG_S_T      LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
+#         define LONG_S_T      LATIN_SMALL_LIGATURE_LONG_S_T_UTF8
 #         ifdef LATIN_CAPITAL_LETTER_SHARP_S_UTF8
 #           define CAP_SHARP_S   LATIN_CAPITAL_LETTER_SHARP_S_UTF8
+#         endif
+#ifdef CAP_SHARP_S
 
-            /* Special case these two characters, as what normally gets
-             * returned under locale doesn't work */
+            /* Special case these characters, as what normally gets returned
+             * under locale doesn't work */
             if (memBEGINs((char *) p, e - p, CAP_SHARP_S))
             {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
@@ -4546,6 +4548,17 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
                           "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
+
+#  ifdef SURSOLIDUM
+
+            if (memBEGINs((char *) p, e - p, LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8)) {
+                /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
+                ck_warner(packWARN(WARN_LOCALE),
+                          "Can't do fc(\"\\x{1DF95}\") on non-UTF-8 locale; "
+                          "resolved to \"\\x{17F}\\x{17F}\".");
+                goto return_long_s;
+            }
+#  endif
 #endif
             if (memBEGINs((char *) p, e - p, LONG_S_T)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
@@ -4600,6 +4613,9 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
                     if (original == LATIN_SMALL_LETTER_SHARP_S
 #ifdef LATIN_CAPITAL_LETTER_SHARP_S /* not defined in early Unicode releases */
                         || original == LATIN_CAPITAL_LETTER_SHARP_S
+#endif
+#ifdef SURSOLIDUM   /* not defined in early Unicode releases */
+                        || original == SURSOLIDUM
 #endif
                     ) {
                         goto return_long_s;
