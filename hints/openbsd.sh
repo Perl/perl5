@@ -116,6 +116,19 @@ m88k-3.4)
    ;;
 esac
 
+#
+# Unaligned access on alpha with -ftree-ter
+# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59679
+# More details
+# https://rt.perl.org/Public/Bug/Display.html?id=120888
+#
+case "${ARCH}-${osvers}" in
+    alpha-*)
+    ccflags="-fno-tree-ter $ccflags"
+    ;;
+esac
+
+# Special per-arch specific ccflags
 case "${ARCH}-${osvers}" in
     vax-*)
     ccflags="-DUSE_PERL_ATOF=0 $ccflags"
