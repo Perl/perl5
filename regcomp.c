@@ -7030,9 +7030,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * locale-problematic, they also have folds to above Latin1
                      * that aren't a problem.  Doing these now helps at
                      * runtime. */
-                    if (UNLIKELY(   ender == GREEK_CAPITAL_LETTER_MU
-                                 || ender == LATIN_CAPITAL_LETTER_SHARP_S))
-                    {
+                    if (   UNLIKELY(ender == GREEK_CAPITAL_LETTER_MU)
+#ifdef LATIN_CAPITAL_LETTER_SHARP_S
+                        || UNLIKELY(ender == LATIN_CAPITAL_LETTER_SHARP_S)
+#endif
+                    ) {
                         goto fold_anyway;
                     }
 
