@@ -1,6 +1,6 @@
-# DerivedNumericType-17.0.0.txt
-# Date: 2025-06-30, 06:20:22 GMT
-# © 2025 Unicode®, Inc.
+# DerivedNumericType-18.0.0.txt
+# Date: 2026-06-29, 15:25:04 GMT
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -169,7 +169,9 @@ F9FD          ; Numeric # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 1230B         ; Numeric # Lo       CUNEIFORM SIGN U
 1230D         ; Numeric # Lo       CUNEIFORM SIGN U U U
 12399         ; Numeric # Lo       CUNEIFORM SIGN U U
-12400..1246E  ; Numeric # Nl [111] CUNEIFORM NUMERIC SIGN TWO ASH..CUNEIFORM NUMERIC SIGN NINE U VARIANT FORM
+12400..1246F  ; Numeric # Nl [112] CUNEIFORM NUMERIC SIGN TWO ASH..CUNEIFORM NUMERIC SIGN SEVEN ASH TENU
+12475..1247F  ; Numeric # Nl  [11] CUNEIFORM NUMERIC SIGN EIGHT ASH TENU..CUNEIFORM NUMERIC SIGN ASH TIMES NINE DISH TENU
+12550..12686  ; Numeric # Nl [311] CUNEIFORM NUMERIC SIGN ONE N01..CUNEIFORM NUMERIC SIGN ONE N36 FLAT
 16B5B..16B61  ; Numeric # No   [7] PAHAWH HMONG NUMBER TENS..PAHAWH HMONG NUMBER TRILLIONS
 16E80..16E96  ; Numeric # No  [23] MEDEFAIDRIN DIGIT ZERO..MEDEFAIDRIN DIGIT THREE ALTERNATE FORM
 16FF4..16FF6  ; Numeric # Nl   [3] YANGQIN SIGN SLOW ONE BEAT..YANGQIN SIGN SLOW TWO BEATS
@@ -199,8 +201,10 @@ F9FD          ; Numeric # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 23B1B         ; Numeric # Lo       CJK UNIFIED IDEOGRAPH-23B1B
 2626D         ; Numeric # Lo       CJK UNIFIED IDEOGRAPH-2626D
 2F890         ; Numeric # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
+32403         ; Numeric # Lo       CJK UNIFIED IDEOGRAPH-32403
+324DF         ; Numeric # Lo       CJK UNIFIED IDEOGRAPH-324DF
 
-# Total code points: 1125
+# Total code points: 1450
 
 # ================================================
 

@@ -1,11 +1,11 @@
 # IdentifierStatus.txt
-# Date: 2025-08-01, 18:11:48 GMT
-# © 2025 Unicode®, Inc.
+# Date: 2026-04-13, 16:55:34 GMT
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
 # Unicode Security Mechanisms for UTS #39
-# Version: 17.0.0
+# Version: 18.0.0
 #
 # For documentation and usage, see https://www.unicode.org/reports/tr39
 #
@@ -1619,6 +1619,7 @@ AC00..D7A3    ; Allowed    # 2.0 [11172] HANGUL SYLLABLE GA..HANGUL SYLLABLE HIH
 11301         ; Allowed    # 7.0        GRANTHA SIGN CANDRABINDU
 11303         ; Allowed    # 7.0        GRANTHA SIGN VISARGA
 1133C         ; Allowed    # 7.0        GRANTHA SIGN NUKTA
+11B0A         ; Allowed    # 18.0       DEVANAGARI LETTER ALTERNATE DDDA
 1E7E0..1E7E6  ; Allowed    # 14.0   [7] ETHIOPIC SYLLABLE HHYA..ETHIOPIC SYLLABLE HHYO
 1E7E8..1E7EB  ; Allowed    # 14.0   [4] ETHIOPIC SYLLABLE GURAGE HHWA..ETHIOPIC SYLLABLE HHWE
 1E7ED..1E7EE  ; Allowed    # 14.0   [2] ETHIOPIC SYLLABLE GURAGE MWI..ETHIOPIC SYLLABLE GURAGE MWEE
@@ -1682,4 +1683,4 @@ AC00..D7A3    ; Allowed    # 2.0 [11172] HANGUL SYLLABLE GA..HANGUL SYLLABLE HIH
 28CD2         ; Allowed    # 3.1        CJK UNIFIED IDEOGRAPH-28CD2
 29D98         ; Allowed    # 3.1        CJK UNIFIED IDEOGRAPH-29D98
 
-# Total code points: 33791
+# Total code points: 33792
