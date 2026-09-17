@@ -5333,24 +5333,14 @@ S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strb
            * if the input matches what the DFA expects and then 'break's out of
            * the switch.  */
 
-          case GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant: ;
-            /* GB9c  \p{InCB=Consonant} [ \p{InCB=Extend} \p{InCB=Linker} ]*
-             *       \p{InCB=Linker}    [ \p{InCB=Extend} \p{InCB=Linker} ]*
-             *   ×   \p{InCB=Consonant}
-             *
-             *   This translates to, we can have any number of Linker and
-             *   Extend characters in a row, immediately preceded by a
-             *   Consonant, as long as there is at least one Linker. */
-            bool has_linker;
-            has_linker = false;
-            while (isGCB_InCB_Linker(prev) || isGCB_InCB_Extend(prev)) {
-                if (isGCB_InCB_Linker(prev)) {
-                    has_linker = true;
-                }
+          case GCB_InCB_Linker_then_InCB_Extend_v_InCB_Consonant:
+            /* GB9c  \p{InCB=Linker} \p{InCB=Extend}*  ×  \p{InCB=Consonant}
+             * */
+            while (isGCB_InCB_Extend(prev)) {
                 prev = backup_one_GCB(strbeg, &prev_pos, utf8_target);
             }
 
-            matched = has_linker && isGCB_InCB_Consonant(prev);
+            matched = isGCB_InCB_Linker(prev);
             break;
 
           case GCB_various_then_RI_v_RI: ;

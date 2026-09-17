@@ -2273,7 +2273,7 @@ sub output_GCB_table() {
                                         enum => 1,
                                         match_return => 1,
                                       },
-        GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant => {
+        GCB_InCB_Linker_then_InCB_Extend_v_InCB_Consonant => {
                                         enum => $gcb_enum++,
                                         match_return => 'GCB_NOBREAK',
                                         rule => '9c',
@@ -2359,13 +2359,13 @@ sub output_GCB_table() {
     # GB9b  Prepend  ×
     set_gcb_nobreak('Prepend', '*', '9b');
 
-    # GB9c  \p{InCB=Consonant} [ \p{InCB=Extend} \p{InCB=Linker} ]*
-    #       \p{InCB=Linker}    [ \p{InCB=Extend} \p{InCB=Linker} ]*
-    #   ×   \p{InCB=Consonant}
-    $dfa = 'GCB_InCB_Consonant_then_InCB_Extend_or_InCB_Linker_v_InCB_Consonant';
-    add_gcb_dfa( [ qw(InCB_Consonant
-                      InCB_Linker
-                      InCB_Extend) ], 'InCB_Consonant', $dfa, '9c');
+    # Do not break within certain combinations with Indic_Conjunct_Break
+    # (InCB)=Linker.
+    # GB9c  \p{InCB=Linker} \p{InCB=Extend}*  ×  \p{InCB=Consonant}
+    $dfa = 'GCB_InCB_Linker_then_InCB_Extend_v_InCB_Consonant';
+    $rule = '9c';
+    set_gcb_nobreak('InCB_Linker', 'InCB_Consonant', $rule);
+    add_gcb_dfa( 'InCB_Extend', 'InCB_Consonant', $dfa, '9c');
 
     # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
     $rule = 10;
@@ -2687,8 +2687,9 @@ sub output_LB_table() {
 
     # LB12a Do not break before NBSP and related characters, except after
     # spaces and hyphens.
-    # [^SP BA HY] × GL
-    set_lb_nobreak([ qw(^ SP BA HY HH) ], 'GL', '12a');
+    # [^SP HY HH] × GL
+    set_lb_nobreak([ qw(^ SP HY HH) ], 'GL', '12a');
+
 
     # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
     # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
