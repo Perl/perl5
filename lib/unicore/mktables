@@ -13399,21 +13399,12 @@ sub filter_early_version_name_alias_line {
     return;
 }
 
-sub setup_Unikemet{
+sub setup_cjk_like_scripts(%provisionals) {
 
-    # These are provisional properties, so aren't in PropAliases.txt
-    my %properties = (
-                      Core => { type => $ENUM, default => 'N' },
-                      FVal => $STRING,
-                      Func => $STRING,
-                      UniK => $STRING,
-                      AltSeq => {
-                                  type => $STRING,
-                                  default => '<code point>'
-                                },
-                     );
-    for my $property (keys %properties) {
-        my $type = $properties{$property};
+    # Provisional properties aren't in PropAliases.txt
+
+    for my $property (keys %provisionals) {
+        my $type = $provisionals{$property};
         my $default = "";
 
         if (ref $type) {
@@ -13421,13 +13412,26 @@ sub setup_Unikemet{
             $type = $type->{type};
         }
 
-        Property->new("kEH_$property",
+        Property->new($property,
                       Default_Map => $default,
                       Type => $type,
                       Status => $PROVISIONAL,
                      );
     }
+}
 
+sub setup_Unikemet{
+    my %provisionals = (
+                         kEH_Core   => { type => $ENUM, default => 'N' },
+                         kEH_FVal   => $STRING,
+                         kEH_Func   => $STRING,
+                         kEH_UniK   => $STRING,
+                         kEH_AltSeq => {
+                                         type => $STRING,
+                                         default => '<code point>'
+                                       },
+                       );
+    setup_cjk_like_scripts(%provisionals);
 
     my $keH_Core = property_ref('kEH_Core');
     $keH_Core->add_match_table('C');
