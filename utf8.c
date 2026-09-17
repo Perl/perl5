@@ -4546,10 +4546,8 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
                           "resolved to \"\\x{17F}\\x{17F}\".");
                 goto return_long_s;
             }
-            else
 #endif
-                 if (memBEGINs((char *) p, e - p, LONG_S_T))
-            {
+            if (memBEGINs((char *) p, e - p, LONG_S_T)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 ck_warner(packWARN(WARN_LOCALE),
                           "Can't do fc(\"\\x{FB05}\") on non-UTF-8 locale; "
@@ -4567,7 +4565,7 @@ Perl_to_utf8_fold_flags_(pTHX_ const U8 *p,
              * 255/256 boundary which is forbidden under /l, and so the code
              * wouldn't catch that they are equivalent (which they are only in
              * this release) */
-            else if (memBEGINs((char *) p, e - p, DOTTED_I)) {
+            if (memBEGINs((char *) p, e - p, DOTTED_I)) {
                 /* diag_listed_as: Can't do %s("%s") on non-UTF-8 locale; resolved to "%s". */
                 ck_warner(packWARN(WARN_LOCALE),
                           "Can't do fc(\"\\x{0130}\") on non-UTF-8 locale; "
