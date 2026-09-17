@@ -1,6 +1,6 @@
-# DerivedBinaryProperties-17.0.0.txt
-# Date: 2025-01-27, 18:09:10 GMT
-# © 2025 Unicode®, Inc.
+# DerivedBinaryProperties-18.0.0.txt
+# Date: 2026-02-03, 23:09:50 GMT
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -193,6 +193,8 @@
 2E5A          ; Bidi_Mirrored # Pe       TOP HALF RIGHT PARENTHESIS
 2E5B          ; Bidi_Mirrored # Ps       BOTTOM HALF LEFT PARENTHESIS
 2E5C          ; Bidi_Mirrored # Pe       BOTTOM HALF RIGHT PARENTHESIS
+2E62          ; Bidi_Mirrored # Ps       LEFT PARENTHESIS WITH MIDDLE RING
+2E63          ; Bidi_Mirrored # Pe       RIGHT PARENTHESIS WITH MIDDLE RING
 3008          ; Bidi_Mirrored # Ps       LEFT ANGLE BRACKET
 3009          ; Bidi_Mirrored # Pe       RIGHT ANGLE BRACKET
 300A          ; Bidi_Mirrored # Ps       LEFT DOUBLE ANGLE BRACKET
@@ -230,12 +232,17 @@ FF5F          ; Bidi_Mirrored # Ps       FULLWIDTH LEFT WHITE PARENTHESIS
 FF60          ; Bidi_Mirrored # Pe       FULLWIDTH RIGHT WHITE PARENTHESIS
 FF62          ; Bidi_Mirrored # Ps       HALFWIDTH LEFT CORNER BRACKET
 FF63          ; Bidi_Mirrored # Pe       HALFWIDTH RIGHT CORNER BRACKET
+1CEDD..1CEDF  ; Bidi_Mirrored # Sm   [3] SQUARE ROOT OF SQUARE ROOT..SQUARE ROOT OF SQUARE ROOT OF SQUARE ROOT OF SQUARE ROOT
 1D6DB         ; Bidi_Mirrored # Sm       MATHEMATICAL BOLD PARTIAL DIFFERENTIAL
 1D715         ; Bidi_Mirrored # Sm       MATHEMATICAL ITALIC PARTIAL DIFFERENTIAL
 1D74F         ; Bidi_Mirrored # Sm       MATHEMATICAL BOLD ITALIC PARTIAL DIFFERENTIAL
 1D789         ; Bidi_Mirrored # Sm       MATHEMATICAL SANS-SERIF BOLD PARTIAL DIFFERENTIAL
 1D7C3         ; Bidi_Mirrored # Sm       MATHEMATICAL SANS-SERIF BOLD ITALIC PARTIAL DIFFERENTIAL
+1DB03..1DB09  ; Bidi_Mirrored # Sm   [7] LEIBNIZIAN GREATER-THAN..INVERTED SQUARE RIGHT OPEN BOX OPERATOR
+1DB10         ; Bidi_Mirrored # Sm       CARTESIAN EQUALS SIGN
+1DB17..1DB18  ; Bidi_Mirrored # Sm   [2] LEIBNIZIAN COINCIDENCE..INVERTED LAZY S OVER LAZY S
+1DB1B         ; Bidi_Mirrored # Sm       LEIBNIZIAN DISSIMILARITY
 
-# Total code points: 554
+# Total code points: 570
 
 # EOF

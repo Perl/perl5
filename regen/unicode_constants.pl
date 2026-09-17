@@ -1023,6 +1023,7 @@ U+0307 string
 U+0345 string
 
 U+1E9E string_skip_if_undef
+U+1DF95 string_skip_if_undef
 
 U+FB05 string
 U+FB06 string

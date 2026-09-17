@@ -13420,6 +13420,38 @@ sub setup_cjk_like_scripts(%provisionals) {
     }
 }
 
+sub setup_Jurchen {
+    my %provisionals = (
+                         kJURC_NCReading => $STRING,
+                         kJURC_Numeric => $STRING,
+                         kJURC_RSUnicode => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Nushu {
+    my %provisionals = (
+                         kNSHU_Reading => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Seal {
+    my %provisionals = (
+                         kSEAL_MCJK => $STRING,
+                         kSEAL_Rad  => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Tangut {
+    my %provisionals = (
+                         kTGT_Numeric   => $STRING,
+                         kTGT_RSUnicode => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
 sub setup_Unikemet{
     my %provisionals = (
                          kEH_Core   => { type => $ENUM, default => 'N' },
@@ -20130,17 +20162,16 @@ my @input_file_objects = (
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
     Input_file->new('TangutSources.txt', v9.0.0,
-                    Skip => 'Specifies source mappings for Tangut ideographs'
-                          . ' and components. This data file also includes'
-                          . ' informative radical-stroke values that are used'
-                          . ' internally by Unicode',
+                    Pre_Handler => \&setup_Tangut,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('VerticalOrientation.txt', v10.0.0,
                     Property => 'Vertical_Orientation',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
     Input_file->new('NushuSources.txt', v10.0.0,
-                    Skip => 'Specifies source material for Nushu characters',
+                    Pre_Handler => \&setup_Nushu,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('EquivalentUnifiedIdeograph.txt', v11.0.0,
                     Property => 'Equivalent_Unified_Ideograph',
@@ -20207,6 +20238,14 @@ my @input_file_objects = (
                     # any properties, though we could create some.
                     Skip => $Unused_Skip,
                     UCD => 0,
+                   ),
+    Input_file->new('JurchenSources.txt', v18.0.0,
+                    Pre_Handler => \&setup_Jurchen,
+                    Each_Line_Handler => \&filter_unihan_line,
+                   ),
+    Input_file->new('SealSources.txt', v18.0.0,
+                    Pre_Handler => \&setup_Seal,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
 );
 

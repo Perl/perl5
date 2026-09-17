@@ -146,15 +146,15 @@ sub multi_char_folds ($$) {
         $output_folds{$_} = $cp_ref->[$i] for gen_combinations($this_fold_ref);
     }
 
-    # \x17F is the small LONG S, which folds to 's'.  Both Capital and small
-    # LATIN SHARP S fold to 'ss'.  Therefore, they should also match two 17F's
-    # in a row under regex /i matching.  But under /iaa regex matching, all
-    # three folds to 's' are prohibited, but the sharp S's should still match
-    # two 17F's.  This prohibition causes our regular regex algorithm that
-    # would ordinarily allow this match to fail.  This is the only instance in
-    # all Unicode of this kind of issue.  By adding a special case here, we
-    # can use the regular algorithm (with some other changes elsewhere as
-    # well).
+    # \x17F is the small LONG S, which folds to 's'.  Capital and small
+    # LATIN SHARP S plus LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S fold to
+    # 'ss'.  Therefore, they should also match two 17F's in a row under regex
+    # /i matching.  But under /iaa regex matching, all four folds to 's' are
+    # prohibited, but the others should still match two 17F's.  This
+    # prohibition causes our regular regex algorithm that would ordinarily
+    # allow this match to fail.  This is the only instance in all Unicode of
+    # this kind of issue.  By adding a special case here, we can use the
+    # regular algorithm (with some other changes elsewhere as well).
     #
     # It would be possible to re-write the above code to automatically detect
     # and handle this case, and any others that might eventually get added to
