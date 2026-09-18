@@ -3678,10 +3678,11 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
 
 
 static void
-S_clear_offs_spare(pTHX_ regexp *prog)
+S_clear_offs_spare(pTHX_ void *arg)
 {
     PERL_ARGS_ASSERT_CLEAR_OFFS_SPARE;
 
+    regexp *prog = (regexp *)arg;
     prog->offs_spare_used = FALSE;
 }
 
