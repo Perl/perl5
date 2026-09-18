@@ -8175,7 +8175,7 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 3b3bf8e4a24a4fc6ff714a4462d6a6d37ea2b5ca31d18816da2847e54a671de5 lib/unicore/mktables
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 40a2020ba2420e15332d3855a26138f4391b9f49fbb53aafcb9560e1e288dd5a regen/mk_PL_charclass.pl
+ * 6bbb462516a4ea79e28d58cf387f0b4b63ba83c7d381cd61bdda0b188e148082 regen/mk_PL_charclass.pl
  * 96b3ff442d0c9122f1bce72b7bc46c2ead13c3028c250f65aca689cd5e142d58 regen/mk_invlists.pl
  * a6ce8aefad005c081d4e04523e1f1f1a5a1bed5414ca4a421b5b16b73bfce6a4 regen/mph.pl
  * ex: set ro ft=c: */
