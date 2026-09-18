@@ -15891,7 +15891,7 @@ S_unwind_scan_frames(pTHX_ void *p)
     } STMT_END
 
 # define PERL_ARGS_ASSERT_CLEAR_OFFS_SPARE      \
-     STMT_START { Perl_assert_aTHX; assert(prog);       \
+     STMT_START { Perl_assert_aTHX; assert(arg);        \
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
@@ -16066,7 +16066,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum *previous, const U8 * const str
         Perl_attribute_nonnull(pTHX_3)
         __attribute__warn_unused_result__;
 static void
-S_clear_offs_spare(pTHX_ regexp *prog)
+S_clear_offs_spare(pTHX_ void *arg)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 static char *
