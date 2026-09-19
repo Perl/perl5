@@ -573,6 +573,8 @@ sub _optree {
             $else= $self->{strs}{ $trie->{''} }{cp}[0] unless defined $else;
             $else= $self->val_fmt($else) if $else > 9;
             $else= "len=$depth, $else";
+        } elsif ( $ret_type eq 'bool' ) {
+            $else= 1;
         }
     }
     # extract the meaningful keys from the trie, filter out '' as
@@ -1441,7 +1443,7 @@ sub render {
 # Opts are:
 # type             : 'cp', 'cp_high', 'generic', 'high', 'low', 'latin1',
 #                    'utf8', 'LATIN1', 'UTF8' 'backwards_UTF8'
-# ret_type         : 'cp' or 'len'
+# ret_type         : 'cp', 'len', or 'bool'
 # safe             : don't assume is well-formed UTF-8, so don't skip any range
 #                    checks, and add length guards to macro
 # no_length_checks : like safe, but don't add length guards.
@@ -1476,6 +1478,11 @@ sub make_macro {
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
+    # 'bool' combined with 'cp' is invalid: 'cp' macros already return
+    # a boolean-like result and can be used directly in boolean context.
+    if ($ret_type eq 'bool' && $type =~ /^cp/) {
+        die "Can't do a 'bool' ret_type on 'cp' type macro '$self->{op}'"
+    }
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1734,6 +1741,10 @@ EOF
 #               list, which is a pointer as to where to store the number of
 #               bytes matched, while also returning the code point.  The macro
 #               name is changed to 'what_len_BASE...'.  See pod for caveats
+# Appending '-bool' causes the macro to return a boolean rather than a
+#               length.  The macro name retains the 'is_' prefix.  Use this
+#               when the byte length of the match is not needed, as it can
+#               produce simpler generated code.
 #
 # Valid modifiers:
 #   safe        The input string is not necessarily valid UTF-8.  In
