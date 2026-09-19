@@ -10,7 +10,8 @@ use Text::Wrap();
 
 our $Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
 
-our $Verbose = 0;
+# REGEN_VERBOSE=1 has the same effect as passing -v.
+our $Verbose = $ENV{REGEN_VERBOSE} ? 1 : 0;
 @ARGV = grep { not($_ eq '-q' and $Verbose = -1) }
   grep { not($_ eq '--tap' and $TAP = 1) }
   grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;

@@ -492710,9 +492710,9 @@ static const U8 WB_dfa_table[] = {
  * dad3ef492d198d6f1dde4922b175f7371a27dfe62fce489f3e04807015a4c682 lib/unicore/extracted/DLineBreak.txt
  * 7c83684d3336b698381745b78a971c3e1242cb3fcac58604469086c19b6edcee lib/unicore/extracted/DNumType.txt
  * 139b976bdc288be01c80f018523da769cf2845109b5a7f0f8a432db64bfedcfa lib/unicore/extracted/DNumValues.txt
- * e3ac360c03d18779fea6d6497fbbe53798135da55e3764d3c9f90a79bbf7e8b5 lib/unicore/mktables
+ * e673c150170d98509ae3eca0549841737413fc5e807e534520a18c256dc01e3b lib/unicore/mktables
  * 8c30575264b2772c7a69c5bb6069a28f0e0a7a0df735871bde2d99ee674316ac lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 40a2020ba2420e15332d3855a26138f4391b9f49fbb53aafcb9560e1e288dd5a regen/mk_PL_charclass.pl
- * 96b3ff442d0c9122f1bce72b7bc46c2ead13c3028c250f65aca689cd5e142d58 regen/mk_invlists.pl
+ * 2d12ca5a42e6148f4cfde725f602c60eab8a71852dcbc0e073840d11cfa43442 regen/mk_invlists.pl
  * ex: set ro ft=c: */
