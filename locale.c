@@ -2067,7 +2067,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    define querylocale_i(i)      querylocale_r(categories[i])
 
 static const char *
-S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t caller_line)
+S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj,
+                     line_t caller_line  DEBUG_ONLY)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2024_L;
 
@@ -8854,8 +8855,6 @@ S_give_perl_locale_control(pTHX_
                            const line_t caller_line)
 {
     PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL;
-
-    PERL_UNUSED_ARG(caller_line);
 
     /* This is called when the program is in the global locale and are
      * switching to per-thread (if available).  And it is called at

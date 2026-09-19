@@ -3015,15 +3015,13 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 
 I32
-Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp  UNUSED)
 {
     PERL_ARGS_ASSERT_DO_IPCGET;
 
     const key_t key = (key_t)SvNVx(*++mark);
     SV *nsv = optype == OP_MSGGET ? NULL : *++mark;
     const I32 flags = SvIVx(*++mark);
-
-    PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
     switch (optype)
@@ -3050,7 +3048,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 }
 
 I32
-Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp  UNUSED)
 {
     PERL_ARGS_ASSERT_DO_IPCCTL;
 
@@ -3064,8 +3062,6 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     SV * const astr = *++mark;
     STRLEN infosize = 0;
     I32 getinfo = (cmd == IPC_STAT);
-
-    PERL_UNUSED_ARG(sp);
 
     switch (optype)
     {
@@ -3199,11 +3195,10 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 }
 
 I32
-Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
+Perl_do_msgsnd(pTHX_ SV **mark, SV **sp  UNUSED)
 {
     PERL_ARGS_ASSERT_DO_MSGSND;
 #ifdef HAS_MSG
-    PERL_UNUSED_ARG(sp);
 
     STRLEN len;
     const I32 id = SvIVx(*++mark);
@@ -3224,7 +3219,6 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
       return -1;
     }
 #else
-    PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
     croak("msgsnd not implemented");
@@ -3233,7 +3227,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 }
 
 SSize_t
-Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
+Perl_do_msgrcv(pTHX_ SV **mark, SV **sp  UNUSED)
 {
     PERL_ARGS_ASSERT_DO_MSGRCV;
 
@@ -3243,8 +3237,6 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     I32 flags;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
-
-    PERL_UNUSED_ARG(sp);
 
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
@@ -3274,7 +3266,6 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 
     return ret;
 #else
-    PERL_UNUSED_ARG(sp);
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
     croak("msgrcv not implemented");
@@ -3283,7 +3274,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 }
 
 I32
-Perl_do_semop(pTHX_ SV **mark, SV **sp)
+Perl_do_semop(pTHX_ SV **mark, SV **sp  UNUSED)
 {
     PERL_ARGS_ASSERT_DO_SEMOP;
 
@@ -3292,8 +3283,6 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
     const char * const opbuf = SvPVbyte(opstr, opsize);
-
-    PERL_UNUSED_ARG(sp);
 
     if (opsize < 3 * SHORTSIZE
         || (opsize % (3 * SHORTSIZE))) {
@@ -3329,11 +3318,10 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
 }
 
 I32
-Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp  UNUSED)
 {
 #ifdef HAS_SHM
     PERL_ARGS_ASSERT_DO_SHMIO;
-    PERL_UNUSED_ARG(sp);
 
     const IV iv_id = SvIVx(*++mark);
     SV *const mstr = *++mark;

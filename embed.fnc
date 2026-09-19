@@ -1875,10 +1875,10 @@ Admp	|I32	|ibcmp_utf8	|NN const char *s1			\
 				|UV l2					\
 				|bool u2
 
-eop	|STRLEN |infix_plugin_standard					\
-				|NN char *operator_ptr			\
-				|STRLEN operator_len			\
-				|NN struct Perl_custom_infix **def
+eop	|STRLEN |infix_plugin_standard						\
+				|NN char *operator_ptr	UNUSED			\
+				|STRLEN operator_len  UNUSED			\
+				|NN struct Perl_custom_infix **def  UNUSED
 : Used in toke.c
 p	|void	|init_argv_symbols					\
 				|int argc				\
@@ -2045,9 +2045,9 @@ Pp	|I32	|keyword	|NN const char *name			\
 				|bool all_keywords
 
 eop	|int	|keyword_plugin_standard				\
-				|NN char *keyword_ptr			\
-				|STRLEN keyword_len			\
-				|NN OP **op_ptr
+				|NN char *keyword_ptr  UNUSED		\
+				|STRLEN keyword_len  UNUSED		\
+				|NN OP **op_ptr  UNUSED
 
 Apx	|void	|leave_adjust_stacks					\
 				|NN SV **from_sp			\
@@ -3361,7 +3361,7 @@ Adp	|void	|sortsv 	|NULLOK SV **array			\
 Adp	|void	|sortsv_flags	|NULLOK SV **array			\
 				|size_t num_elts			\
 				|NN SVCOMPARE_t cmp			\
-				|U32 flags
+				|U32 flags  UNUSED
 Cp	|SV **	|stack_grow	|NN SV **sp				\
 				|NN SV **p				\
 				|SSize_t n
@@ -3506,7 +3506,7 @@ ARdp	|bool	|sv_does_pvn	|NN SV *sv				\
 				|U32 flags
 ARdp	|bool	|sv_does_sv	|NN SV *sv				\
 				|NN SV *namesv				\
-				|U32 flags
+				|U32 flags  UNUSED
 Adp	|void	|sv_dump	|NULLOK SV *sv
 Adp	|void	|sv_dump_depth	|NULLOK SV *sv				\
 				|I32 depth
@@ -4368,24 +4368,24 @@ Tdop	|int	|my_mkstemp	|NN char *templte
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_ipcctl	|I32 optype				\
 				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_ipcget	|I32 optype				\
 				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 : Defined in doio.c, used only in pp_sys.c
 p	|SSize_t|do_msgrcv	|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_msgsnd	|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_semop	|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_shmio	|I32 optype				\
 				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **sp  UNUSED
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
 #if defined(HAS_PIPE)
 Rp	|int	|PerlProc_pipe_cloexec					\
@@ -5103,7 +5103,7 @@ S	|locale_t|use_curlocale_scratch
 S	|const char *|querylocale_2024_l				\
 				|int category				\
 				|locale_t locale_obj			\
-				|line_t line
+				|line_t line  DEBUG_ONLY
 #     else
 S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\
