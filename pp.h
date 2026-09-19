@@ -568,9 +568,9 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define PUSHmortal	PUSHs(sv_newmortal())
 #define mPUSHp(p,l)	PUSHs(newSVpvn_flags((p), (l), SVs_TEMP))
 #define mPUSHpvs(s)     mPUSHp("" s "", sizeof(s)-1)
-#define mPUSHn(n)	sv_setnv(PUSHmortal, (NV)(n))
-#define mPUSHi(i)	sv_setiv(PUSHmortal, (IV)(i))
-#define mPUSHu(u)	sv_setuv(PUSHmortal, (UV)(u))
+#define mPUSHn(n)	mPUSHs(newSVnv((NV)(n)))
+#define mPUSHi(i)	mPUSHs(newSViv((IV)(i)))
+#define mPUSHu(u)	mPUSHs(newSVuv((UV)(u)))
 
 #define mXPUSHs(s)	XPUSHs(sv_2mortal(s))
 #define XPUSHmortal	XPUSHs(sv_newmortal())
