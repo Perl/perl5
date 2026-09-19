@@ -83,6 +83,15 @@
 /* Not for production use: */
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
 
+/* a cache pointer and countdown for a single super-linear cache compatible
+ * WHILEM node
+ */
+
+struct slc_cache_item {
+    U8 *slc_bitmap;
+    STRLEN slc_countdown;
+};
+
 /*
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
@@ -132,8 +141,12 @@ typedef struct regexp_internal {
                                    only valid when RXp_PAREN_NAMES(prog) is true,
                                    0 means "no value" like any other index into the
                                    data array.*/
+        U32 depth;              /* 1 = executing; 2+ = recursing */
         U8 slc_whilem_seen;     /* Num of WHILEMs using super-linear cache.
                                    Same type as FLAGS() */
+        struct slc_cache_item *slc; /* permanent array of super-linear cache
+                                       countdown / bitmap pointer pairs*/
+
         regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 

@@ -2687,26 +2687,32 @@
 
     # XXX more intuit tests needed here
 
-    # regex superlinear-cache
+    # regex super-linear cache (SLC)
 
     'regex::slc::immediate' => {
-        desc    => '/slc: immediate',
+        desc    => 'slc: no cache delay',
         setup   => '$_ = "aaaaa"; ${^RE_SUPERLINEAR_CACHE_DELAY}=1',
         code    => '/^(aa?)*[bc]/',
     },
 
     'regex::slc::default' => {
-        desc    => '/slc: default',
+        desc    => 'slc: default cache delay',
         setup   => '$_ = "aaaaa";',
         code    => '/^(aa?)*[bc]/',
     },
 
     'regex::slc::never' => {
-        desc    => '/slc: never',
+        desc    => 'slc: never cache',
         setup   => '$_ = "aaaaa"; ${^RE_SUPERLINEAR_CACHE_DELAY}=-1',
         code    => '/^(aa?)*[bc]/',
     },
 
+    'regex::slc::middle_ony' => {
+        desc    => 'slc: only middle of three quantifiers triggers cache',
+        setup   => '$_ = "a;bbbbbbbbbbbbbbbbbbbb;c";
+                    ${^RE_SUPERLINEAR_CACHE_DELAY}=-200_000',
+        code    => '/^(a|xy)+;(bb?)*bbbbbbbbbb;(c|xy)+$/',
+    },
 
     # XXX millions more general regex tests needed here
 ];
