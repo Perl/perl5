@@ -132,6 +132,10 @@ produce election mailings, and all that sort of thing.
 
 List of test files to ignore/skip for deparse tests.
 
+=head2 F<directory-diff.pl>
+
+Compare two installation trees of perl.
+
 =head2 F<docs-team-charter.pod>
 
 The charter of the Perl Documentation Team
