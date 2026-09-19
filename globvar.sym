@@ -8,6 +8,7 @@ PL_Yes
 PL_bincompat_options
 PL_bitcount
 PL_block_type
+PL_bodies_by_type
 PL_c9_utf8_dfa_tab
 PL_charclass
 PL_check
