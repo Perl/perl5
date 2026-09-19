@@ -12,7 +12,7 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 118;
+        plan tests => 122;
     }
 }
 
@@ -266,4 +266,54 @@ foreach (qw/ EXPORT_LIST PERL_ARCHIVE PERL_ARCHIVE_AFTER /)
     my $t = bless { NAME => "Foo", FULLPERL => $0, DIR => [] }, $class;
     $t->makeaperl( TARGET => "Tgt" );
     is_deeply( \@ARGV, \@targv, 'ARGV is not polluted by makeaperl' );
+}
+
+{
+    # Tests for _find_static_libs (Perl issue #24561)
+    require File::Path;
+    require File::Temp;
+    my $tmpdir = File::Temp::tempdir( 'MM-find_static_libs-XXXXXX', TMPDIR => 1, CLEANUP => 1 );
+    my $auto = File::Spec->catdir($tmpdir, 'auto');
+    File::Path::make_path(
+        File::Spec->catdir($auto, 'share', 'dist'),
+        File::Spec->catdir($auto, 'NoExtra'),
+        File::Spec->catdir($auto, 'NotXS'),
+        File::Spec->catdir($auto, 'GoodXS'),
+        File::Spec->catdir($auto, 'Vanishing'),
+    );
+
+    # share dir (pruned)
+    open my $fh, '>', File::Spec->catfile($auto, 'share', 'dist', 'share.a'); close $fh;
+    # No extralibs.ld
+    open $fh, '>', File::Spec->catfile($auto, 'NoExtra', 'NoExtra.a'); close $fh;
+    # Not XS
+    open $fh, '>', File::Spec->catfile($auto, 'NotXS', 'NotXS.a'); close $fh;
+    open $fh, '>', File::Spec->catfile($auto, 'NotXS', 'extralibs.ld'); close $fh;
+    # Good XS
+    open $fh, '>', File::Spec->catfile($auto, 'GoodXS', 'GoodXS.a'); close $fh;
+    open $fh, '>', File::Spec->catfile($auto, 'GoodXS', 'extralibs.ld'); close $fh;
+    # Vanishing (will be removed during scan to simulate concurrent deletion)
+    open $fh, '>', File::Spec->catfile($auto, 'Vanishing', 'Vanishing.a'); close $fh;
+    open $fh, '>', File::Spec->catfile($auto, 'Vanishing', 'extralibs.ld'); close $fh;
+
+    my $obj = bless {
+        BASEEXT => 'Test',
+        FULLEXT => 'XS/Test',
+        LIB_EXT => '.a',
+    }, $class;
+
+    no warnings 'redefine';
+    local *ExtUtils::MM_Unix::xs_static_lib_is_xs = sub {
+        my ($self, $file) = @_;
+        File::Path::remove_tree(File::Spec->catdir($auto, 'Vanishing'));
+        return $file =~ /GoodXS/;
+    };
+
+    my $found;
+    eval { $found = $obj->_find_static_libs([$tmpdir]); };
+    is( $@, '', '_find_static_libs does not die on concurrent directory removal' );
+    ok( ref $found eq 'HASH', '_find_static_libs returns a hashref' );
+    my @keys = keys %$found;
+    is( scalar(@keys), 1, 'found exactly 1 static lib' );
+    like( $keys[0], qr/GoodXS\.a\z/, 'found the expected XS static lib' );
 }
