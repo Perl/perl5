@@ -126,11 +126,20 @@ around - the F<.ph> file should be created by running F<h2ph> on the
 corresponding F<.h> file. See the L<h2ph> documentation for more on how
 to convert a whole bunch of header files at once.
 
+=item L<perlnewdist>
+
+F<perlnewdist> creates the initial files for a new Perl distribution. It is
+the recommended starting point for a new pure-Perl module or application.
+It creates the standard module, test, documentation, and build files, and
+can initialize a Git repository.
+
 =item L<h2xs>
 
 F<h2xs> converts C header files into XS modules, and will try and write
-as much glue between C libraries and Perl modules as it can. It's also
-very useful for creating skeletons of pure Perl modules.
+as much glue between C libraries and Perl modules as it can. It is the
+lower-level tool to use when working directly with XS, C headers, or the
+advanced extension-generation options; new pure-Perl distributions should
+normally start with F<perlnewdist>.
 
 =item L<enc2xs>
 
@@ -241,7 +250,7 @@ validate your packlists and even create a tarball from an installed module.
 
 L<perldoc>, L<pod2man>, L<pod2text>, L<pod2html>, L<pod2usage>,
 L<podchecker>, L<splain>, L<pl2pm>,
-L<perlbug>, L<h2ph>, L<h2xs>, L<enc2xs>,
+L<perlbug>, L<h2ph>, L<perlnewdist>, L<h2xs>, L<enc2xs>,
 L<xsubpp>, L<cpan>, L<encguess>, L<instmodsh>, L<json_pp>,
 L<piconv>, L<prove>, L<corelist>, L<ptar>,
 L<ptardiff>, L<shasum>, L<streamzip>, L<zipdetails>
