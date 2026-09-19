@@ -1748,9 +1748,6 @@ typedef struct {
 
 
 /* Special case this; if others came along, could automate it */
-#  ifdef HAS_GETSPNAM_R
-#    define KEY_getspnam -1
-#  endif
 
 #endif /* USE_REENTRANT_API */
 

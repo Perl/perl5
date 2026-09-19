@@ -13,276 +13,306 @@
  * Any changes made here will be lost!
  */
 
-#define KEY_NULL		0
-#define KEY___CLASS__		1
-#define KEY___DATA__		2
-#define KEY___END__		3
-#define KEY___FILE__		4
-#define KEY___LINE__		5
-#define KEY___PACKAGE__		6
-#define KEY___SUB__		7
-#define KEY_ADJUST		8
-#define KEY_AUTOLOAD		9
-#define KEY_BEGIN		10
-#define KEY_CHECK		11
-#define KEY_DESTROY		12
-#define KEY_END			13
-#define KEY_INIT		14
+#ifdef PERL_CORE
+
+#  define KEY_NULL		0	/* Placeholder for the default return of 0 */
+#  define KEY___CLASS__		1
+#  define KEY___DATA__		2
+#  define KEY___END__		3
+#  define KEY___FILE__		4
+#  define KEY___LINE__		5
+#  define KEY___PACKAGE__	6
+#  define KEY___SUB__		7
+#  define KEY_ADJUST		8
+#  define KEY_AUTOLOAD		9
+#  define KEY_BEGIN		10
+#  define KEY_CHECK		11
+#  define KEY_DESTROY		12
+#  define KEY_END		13
+#  define KEY_INIT		14
+
+#endif
+
 #define KEY_UNITCHECK		15
-#define KEY_abs			16
-#define KEY_accept		17
-#define KEY_alarm		18
-#define KEY_all			19
-#define KEY_and			20
-#define KEY_any			21
-#define KEY_atan2		22
-#define KEY_bind		23
-#define KEY_binmode		24
-#define KEY_bless		25
-#define KEY_break		26
-#define KEY_caller		27
-#define KEY_catch		28
-#define KEY_chdir		29
-#define KEY_chmod		30
-#define KEY_chomp		31
-#define KEY_chop		32
-#define KEY_chown		33
-#define KEY_chr			34
-#define KEY_chroot		35
-#define KEY_class		36
-#define KEY_close		37
-#define KEY_closedir		38
-#define KEY_cmp			39
-#define KEY_connect		40
-#define KEY_continue		41
-#define KEY_cos			42
-#define KEY_crypt		43
-#define KEY_dbmclose		44
-#define KEY_dbmopen		45
-#define KEY_default		46
-#define KEY_defer		47
-#define KEY_defined		48
-#define KEY_delete		49
-#define KEY_die			50
-#define KEY_do			51
-#define KEY_dump		52
-#define KEY_each		53
-#define KEY_else		54
-#define KEY_elsif		55
-#define KEY_endgrent		56
-#define KEY_endhostent		57
-#define KEY_endnetent		58
-#define KEY_endprotoent		59
-#define KEY_endpwent		60
-#define KEY_endservent		61
-#define KEY_eof			62
-#define KEY_eq			63
-#define KEY_equ			64
-#define KEY_eval		65
-#define KEY_evalbytes		66
-#define KEY_exec		67
-#define KEY_exists		68
-#define KEY_exit		69
-#define KEY_exp			70
-#define KEY_fc			71
-#define KEY_fcntl		72
-#define KEY_field		73
-#define KEY_fileno		74
-#define KEY_finally		75
-#define KEY_flock		76
-#define KEY_for			77
-#define KEY_foreach		78
-#define KEY_fork		79
-#define KEY_format		80
-#define KEY_formline		81
-#define KEY_ge			82
-#define KEY_getc		83
-#define KEY_getgrent		84
-#define KEY_getgrgid		85
-#define KEY_getgrnam		86
-#define KEY_gethostbyaddr	87
-#define KEY_gethostbyname	88
-#define KEY_gethostent		89
-#define KEY_getlogin		90
-#define KEY_getnetbyaddr	91
-#define KEY_getnetbyname	92
-#define KEY_getnetent		93
-#define KEY_getpeername		94
-#define KEY_getpgrp		95
-#define KEY_getppid		96
-#define KEY_getpriority		97
-#define KEY_getprotobyname	98
-#define KEY_getprotobynumber	99
-#define KEY_getprotoent		100
-#define KEY_getpwent		101
-#define KEY_getpwnam		102
-#define KEY_getpwuid		103
-#define KEY_getservbyname	104
-#define KEY_getservbyport	105
-#define KEY_getservent		106
-#define KEY_getsockname		107
-#define KEY_getsockopt		108
-#define KEY_given		109
-#define KEY_glob		110
-#define KEY_gmtime		111
-#define KEY_goto		112
-#define KEY_grep		113
-#define KEY_gt			114
-#define KEY_hex			115
-#define KEY_if			116
-#define KEY_index		117
-#define KEY_int			118
-#define KEY_ioctl		119
-#define KEY_isa			120
-#define KEY_join		121
-#define KEY_keys		122
-#define KEY_kill		123
-#define KEY_last		124
-#define KEY_lc			125
-#define KEY_lcfirst		126
-#define KEY_le			127
-#define KEY_length		128
-#define KEY_link		129
-#define KEY_listen		130
-#define KEY_local		131
-#define KEY_localtime		132
-#define KEY_lock		133
-#define KEY_log			134
-#define KEY_lstat		135
-#define KEY_lt			136
-#define KEY_m			137
-#define KEY_map			138
-#define KEY_method		139
-#define KEY_mkdir		140
-#define KEY_msgctl		141
-#define KEY_msgget		142
-#define KEY_msgrcv		143
-#define KEY_msgsnd		144
-#define KEY_my			145
-#define KEY_ne			146
-#define KEY_neu			147
-#define KEY_next		148
-#define KEY_no			149
-#define KEY_not			150
-#define KEY_oct			151
-#define KEY_open		152
-#define KEY_opendir		153
-#define KEY_or			154
-#define KEY_ord			155
-#define KEY_our			156
-#define KEY_pack		157
-#define KEY_package		158
-#define KEY_pipe		159
-#define KEY_pop			160
-#define KEY_pos			161
-#define KEY_print		162
-#define KEY_printf		163
-#define KEY_prototype		164
-#define KEY_push		165
-#define KEY_q			166
-#define KEY_qq			167
-#define KEY_qr			168
-#define KEY_quotemeta		169
-#define KEY_qw			170
-#define KEY_qx			171
-#define KEY_rand		172
-#define KEY_read		173
-#define KEY_readdir		174
-#define KEY_readline		175
-#define KEY_readlink		176
-#define KEY_readpipe		177
-#define KEY_recv		178
-#define KEY_redo		179
-#define KEY_ref			180
-#define KEY_rename		181
-#define KEY_require		182
-#define KEY_reset		183
-#define KEY_return		184
-#define KEY_reverse		185
-#define KEY_rewinddir		186
-#define KEY_rindex		187
-#define KEY_rmdir		188
-#define KEY_s			189
-#define KEY_say			190
-#define KEY_scalar		191
-#define KEY_seek		192
-#define KEY_seekdir		193
-#define KEY_select		194
-#define KEY_semctl		195
-#define KEY_semget		196
-#define KEY_semop		197
-#define KEY_send		198
-#define KEY_setgrent		199
-#define KEY_sethostent		200
-#define KEY_setnetent		201
-#define KEY_setpgrp		202
-#define KEY_setpriority		203
-#define KEY_setprotoent		204
-#define KEY_setpwent		205
-#define KEY_setservent		206
-#define KEY_setsockopt		207
-#define KEY_shift		208
-#define KEY_shmctl		209
-#define KEY_shmget		210
-#define KEY_shmread		211
-#define KEY_shmwrite		212
-#define KEY_shutdown		213
-#define KEY_sin			214
-#define KEY_sleep		215
-#define KEY_socket		216
-#define KEY_socketpair		217
-#define KEY_sort		218
-#define KEY_splice		219
-#define KEY_split		220
-#define KEY_sprintf		221
-#define KEY_sqrt		222
-#define KEY_srand		223
-#define KEY_stat		224
-#define KEY_state		225
-#define KEY_study		226
-#define KEY_sub			227
-#define KEY_substr		228
-#define KEY_symlink		229
-#define KEY_syscall		230
-#define KEY_sysopen		231
-#define KEY_sysread		232
-#define KEY_sysseek		233
-#define KEY_system		234
-#define KEY_syswrite		235
-#define KEY_tell		236
-#define KEY_telldir		237
-#define KEY_tie			238
-#define KEY_tied		239
-#define KEY_time		240
-#define KEY_times		241
-#define KEY_tr			242
-#define KEY_truncate		243
-#define KEY_try			244
-#define KEY_uc			245
-#define KEY_ucfirst		246
-#define KEY_umask		247
-#define KEY_undef		248
-#define KEY_unless		249
-#define KEY_unlink		250
-#define KEY_unpack		251
-#define KEY_unshift		252
-#define KEY_untie		253
-#define KEY_until		254
-#define KEY_use			255
-#define KEY_utime		256
-#define KEY_values		257
-#define KEY_vec			258
-#define KEY_wait		259
-#define KEY_waitpid		260
-#define KEY_wantarray		261
-#define KEY_warn		262
-#define KEY_when		263
-#define KEY_while		264
-#define KEY_write		265
-#define KEY_x			266
-#define KEY_xor			267
-#define KEY_y			268
+
+#ifdef PERL_CORE
+
+#  define KEY_abs		16
+#  define KEY_accept		17
+#  define KEY_alarm		18
+#  define KEY_all		19
+#  define KEY_and		20
+#  define KEY_any		21
+#  define KEY_atan2		22
+#  define KEY_bind		23
+#  define KEY_binmode		24
+#  define KEY_bless		25
+#  define KEY_break		26
+#  define KEY_caller		27
+#  define KEY_catch		28
+#  define KEY_chdir		29
+#  define KEY_chmod		30
+#  define KEY_chomp		31
+#  define KEY_chop		32
+#  define KEY_chown		33
+#  define KEY_chr		34
+#  define KEY_chroot		35
+#  define KEY_class		36
+#  define KEY_close		37
+#  define KEY_closedir		38
+#  define KEY_cmp		39
+#  define KEY_connect		40
+#  define KEY_continue		41
+#  define KEY_cos		42
+#  define KEY_crypt		43
+#  define KEY_dbmclose		44
+#  define KEY_dbmopen		45
+#  define KEY_default		46
+#  define KEY_defer		47
+#  define KEY_defined		48
+#  define KEY_delete		49
+#  define KEY_die		50
+#  define KEY_do		51
+#  define KEY_dump		52
+#  define KEY_each		53
+#  define KEY_else		54
+#  define KEY_elsif		55
+#  define KEY_endgrent		56
+#  define KEY_endhostent	57
+#  define KEY_endnetent		58
+#  define KEY_endprotoent	59
+#  define KEY_endpwent		60
+#  define KEY_endservent	61
+#  define KEY_eof		62
+#  define KEY_eq		63
+#  define KEY_equ		64
+#  define KEY_eval		65
+#  define KEY_evalbytes		66
+#  define KEY_exec		67
+#  define KEY_exists		68
+#  define KEY_exit		69
+#  define KEY_exp		70
+#  define KEY_fc		71
+#  define KEY_fcntl		72
+#  define KEY_field		73
+#  define KEY_fileno		74
+#  define KEY_finally		75
+#  define KEY_flock		76
+#  define KEY_for		77
+#  define KEY_foreach		78
+#  define KEY_fork		79
+#  define KEY_format		80
+#  define KEY_formline		81
+#  define KEY_ge		82
+#  define KEY_getc		83
+#  define KEY_getgrent		84
+#  define KEY_getgrgid		85
+#  define KEY_getgrnam		86
+#  define KEY_gethostbyaddr	87
+#  define KEY_gethostbyname	88
+#  define KEY_gethostent	89
+#  define KEY_getlogin		90
+#  define KEY_getnetbyaddr	91
+#  define KEY_getnetbyname	92
+#  define KEY_getnetent		93
+#  define KEY_getpeername	94
+#  define KEY_getpgrp		95
+#  define KEY_getppid		96
+#  define KEY_getpriority	97
+#  define KEY_getprotobyname	98
+#  define KEY_getprotobynumber	99
+#  define KEY_getprotoent	100
+#  define KEY_getpwent		101
+#  define KEY_getpwnam		102
+#  define KEY_getpwuid		103
+#  define KEY_getservbyname	104
+#  define KEY_getservbyport	105
+#  define KEY_getservent	106
+#  define KEY_getsockname	107
+#  define KEY_getsockopt	108
+#  define KEY_getspnam		109
+#  define KEY_given		110
+#  define KEY_glob		111
+#  define KEY_gmtime		112
+#  define KEY_goto		113
+#  define KEY_grep		114
+#  define KEY_gt		115
+#  define KEY_hex		116
+#  define KEY_if		117
+#  define KEY_index		118
+#  define KEY_int		119
+#  define KEY_ioctl		120
+#  define KEY_isa		121
+#  define KEY_join		122
+#  define KEY_keys		123
+#  define KEY_kill		124
+#  define KEY_last		125
+#  define KEY_lc		126
+#  define KEY_lcfirst		127
+#  define KEY_le		128
+#  define KEY_length		129
+#  define KEY_link		130
+#  define KEY_listen		131
+#  define KEY_local		132
+#  define KEY_localtime		133
+#  define KEY_lock		134
+#  define KEY_log		135
+#  define KEY_lstat		136
+#  define KEY_lt		137
+#  define KEY_m			138
+#  define KEY_map		139
+#  define KEY_method		140
+#  define KEY_mkdir		141
+#  define KEY_msgctl		142
+#  define KEY_msgget		143
+#  define KEY_msgrcv		144
+#  define KEY_msgsnd		145
+
+#endif
+
+#define KEY_my			146
+
+#ifdef PERL_CORE
+
+#  define KEY_ne		147
+#  define KEY_neu		148
+#  define KEY_next		149
+#  define KEY_no		150
+#  define KEY_not		151
+#  define KEY_oct		152
+#  define KEY_open		153
+#  define KEY_opendir		154
+#  define KEY_or		155
+#  define KEY_ord		156
+
+#endif
+
+#define KEY_our			157
+
+#ifdef PERL_CORE
+
+#  define KEY_pack		158
+#  define KEY_package		159
+#  define KEY_pipe		160
+#  define KEY_pop		161
+#  define KEY_pos		162
+#  define KEY_print		163
+#  define KEY_printf		164
+#  define KEY_prototype		165
+#  define KEY_push		166
+#  define KEY_q			167
+#  define KEY_qq		168
+#  define KEY_qr		169
+#  define KEY_quotemeta		170
+#  define KEY_qw		171
+#  define KEY_qx		172
+#  define KEY_rand		173
+#  define KEY_read		174
+#  define KEY_readdir		175
+#  define KEY_readline		176
+#  define KEY_readlink		177
+#  define KEY_readpipe		178
+#  define KEY_recv		179
+#  define KEY_redo		180
+#  define KEY_ref		181
+#  define KEY_rename		182
+#  define KEY_require		183
+#  define KEY_reset		184
+#  define KEY_return		185
+#  define KEY_reverse		186
+#  define KEY_rewinddir		187
+#  define KEY_rindex		188
+#  define KEY_rmdir		189
+#  define KEY_s			190
+#  define KEY_say		191
+#  define KEY_scalar		192
+#  define KEY_seek		193
+#  define KEY_seekdir		194
+#  define KEY_select		195
+#  define KEY_semctl		196
+#  define KEY_semget		197
+#  define KEY_semop		198
+#  define KEY_send		199
+#  define KEY_setgrent		200
+#  define KEY_sethostent	201
+#  define KEY_setnetent		202
+#  define KEY_setpgrp		203
+#  define KEY_setpriority	204
+#  define KEY_setprotoent	205
+#  define KEY_setpwent		206
+#  define KEY_setservent	207
+#  define KEY_setsockopt	208
+#  define KEY_shift		209
+#  define KEY_shmctl		210
+#  define KEY_shmget		211
+#  define KEY_shmread		212
+#  define KEY_shmwrite		213
+#  define KEY_shutdown		214
+
+#endif
+
+#define KEY_sigvar		215	/* fake keyword representing a signature var */
+
+#ifdef PERL_CORE
+
+#  define KEY_sin		216
+#  define KEY_sleep		217
+#  define KEY_socket		218
+#  define KEY_socketpair	219
+#  define KEY_sort		220
+#  define KEY_splice		221
+#  define KEY_split		222
+#  define KEY_sprintf		223
+#  define KEY_sqrt		224
+#  define KEY_srand		225
+#  define KEY_stat		226
+#  define KEY_state		227
+#  define KEY_study		228
+#  define KEY_sub		229
+#  define KEY_substr		230
+#  define KEY_symlink		231
+#  define KEY_syscall		232
+#  define KEY_sysopen		233
+#  define KEY_sysread		234
+#  define KEY_sysseek		235
+#  define KEY_system		236
+#  define KEY_syswrite		237
+#  define KEY_tell		238
+#  define KEY_telldir		239
+#  define KEY_tie		240
+#  define KEY_tied		241
+#  define KEY_time		242
+#  define KEY_times		243
+#  define KEY_tr		244
+#  define KEY_truncate		245
+#  define KEY_try		246
+#  define KEY_uc		247
+#  define KEY_ucfirst		248
+#  define KEY_umask		249
+#  define KEY_undef		250
+#  define KEY_unless		251
+#  define KEY_unlink		252
+#  define KEY_unpack		253
+#  define KEY_unshift		254
+#  define KEY_untie		255
+#  define KEY_until		256
+#  define KEY_use		257
+#  define KEY_utime		258
+#  define KEY_values		259
+#  define KEY_vec		260
+#  define KEY_wait		261
+#  define KEY_waitpid		262
+#  define KEY_wantarray		263
+#  define KEY_warn		264
+#  define KEY_when		265
+#  define KEY_while		266
+#  define KEY_write		267
+#  define KEY_x			268
+#  define KEY_xor		269
+#  define KEY_y			270
+
+#endif
 
 /* Generated from:
- * 6314472316769769d8176b08a4b0fe3c461bc38d52170a303f7abd00c5a56677 regen/keywords.pl
+ * 0da786ada1c9193a55f0df450f7f200c0eb83afc40778cc25e7708819bb3d4c7 regen/keywords.pl
  * ex: set ro ft=c: */
