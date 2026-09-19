@@ -1217,18 +1217,18 @@ don't need to record the min and max values any more.
 
 With this simplification, we just need to record a single bit of
 information ("failed already") for every (quantifier-id, current string
-position) tuple. We can achieve this by allocating a single bit array
-whose size is equal to the string length multiplied by the number of
-candidate quantifiers in the pattern. So for example when matching a 1
-Mbyte string against a pattern like C</(...)*(...)*/> which has two
-quantifiers, 2 million bits must be allocated.
+position) tuple. We can achieve this by potentially allocating, for each
+candidate quantifier in the pattern, a bit array whose size is equal to
+the string length. So for example when matching a 1 Mbyte string against a
+pattern like C</(...)*(...)*/> which has two quantifiers, two
+1-million-bit arrays might be allocated.
 
 To avoid a potentially large malloc() for every match that has been marked
-as suitable for a SLC, a countdown is initiated the first time a candidate
-C<WHILEM> node is reached; only after (string length) multiplied by
-(number of participating C<WHILEM> nodes) iterations is the cache actually
-allocated and initialised. This crude heuristic is an indication that the
-match has gone super-linear.
+as suitable for a SLC, a per-node countdown is initiated the first time a
+candidate C<WHILEM> node is reached; only when the number of iterations of
+that particular node is equal to the string length is a cache for that
+node actually allocated and initialised. This crude heuristic is an
+indication that the match has gone super-linear.
 
 =item *
 
@@ -1379,37 +1379,42 @@ per regex.
 
 =back
 
+=head4 The super-linear cache at run-time
+
 In a compiled regex, a node id in the range 1-15 is stored in the
 C<FLAGS()> field of each participating C<WHILEM> node (a value of 0
 indicates that the node isn't suitable for the SLC). The field
 C<slc_whilem_seen> in the C<regexp_internal> structure indicates the total
-number of such  C<WHILEM> nodes.
+number of such C<WHILEM> nodes.
 
-The runtime state of the SLC is mainly stored in various fields of the
-C<reginfo> struct, which is initialised at the start of a match.
+The runtime state is mainly contained in an array of (countdown, bitmap
+pointer) pairs, the size of which is equal to C<slc_whilem_seen>. This
+array is allocated the first time a regex starts to be executed, and is
+kept for future matches, pointed to from the C<slc> field in the
+C<regexp_internal> structure. It is not copied when cloning a thread; it
+relies instead on the first match run in the new thread to allocate it. In
+the rare event of a regex called recursively, a new array is allocated and
+freed after each execution of the pattern.
 
-A pointer to the cache is stored in C<< reginfo->info_aux.poscache >>,
-which will be freed when matching ends (the aux structure is guaranteed to
-be freed even on abnormal termination).
+C<< reginfo->info_aux->slc >> is used to point to the currently running
+array: either the permanent one, or a temporary recursive one.
 
-If zero, C<< reginfo->poscache_maxiter >> indicates that the SLC countdown
-has not yet been triggered (i.e. no candidate C<WHILEM> node has been
-executed yet). Otherwise, its (positive) value is used for two different
-purposes: what value to start an initial (or reset) countdown from; and
-the size to C<alloc()> the cache, in bits. Currently these values are the
-same, but in principle they needn't be.
+The first time a participating C<WHILEM> node is executed, the
+C<slc_countdown> field of the array entry indexed by C<FLAGS()> is
+initialised to the string length. Subsequent iterations of that node
+decrement the count. When it reaches zero, a bitmap with a number of bits
+equal to the size of string being matched against is allocated and pointed
+to from the C<slc_bitmap> field of the array entry. All such allocated
+bitmaps are freed at the end of the regex's execution. This is guaranteed
+even on croaking due to the cache array pointer being stored in the
+C<info_aux> structure, which is always processed during clean up.
 
-C<< reginfo->poscache_iter >> only has meaning if C<poscache_maxiter> is
-non-zero. In that case, it represents a countdown initialised from
-C<poscache_maxiter>. If it reaches 1, the cache is malloced if necessary,
-and then zeroed. When it reaches 0, the cache is used.
-
-The C<CACHEsayNO> macro is used at runtime in various places as a
-replacement for C<sayNO> to set a fail bit in the cache while popping the
-current state. The C<ST.cache_offset> and C<ST.cache_mask> fields are set
-by the current C<WHILEM> to the address in the cache of the byte and bit
-corresponding to the current match state. These are used by C<CACHEsayNO>
-to mark the cache during a subsequent unwinding.
+The C<CACHEsayNO> macro is used in various places as a replacement for
+C<sayNO> to set a fail bit in the cache while popping the current state.
+The C<ST.slc_byte> and C<ST.slc_mask> fields are set by the current
+C<WHILEM> to the address in the cache of the byte and bit corresponding to
+the current match state. These are used by C<CACHEsayNO> to mark the cache
+during a subsequent unwinding.
 
 The initial cache allocation countdown can be adjusted via
 C<PL_re_superlinear_cache_delay>, which is settable via

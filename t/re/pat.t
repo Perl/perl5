@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1313;  # Update this when adding/deleting tests.
+plan tests => 1314;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2713,7 +2713,10 @@ SKIP:
             "SLC backref"
         );
 
+        # multiple quantifiers
 
+        ok("aa;bbbbbbbbbbbbbbbbbbbb;cc"
+            =~ /^(aa?)*;(bb?)*bbbbbbbbbbbbbbbbbb;(cc?)*$/, "SLC multi");
     }
 
     {

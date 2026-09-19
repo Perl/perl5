@@ -1013,8 +1013,6 @@ Perl_re_intuit_start(pTHX_
     reginfo->strend = strend;
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->intuit = 1;
-    /* not actually used within intuit, but zero for safety anyway */
-    reginfo->poscache_maxiter = 0;
     reginfo->prog = NULL;
     reginfo->sv = NULL;
     reginfo->warned = false;
@@ -3871,12 +3869,13 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = false;
     reginfo->sv = sv;
-    reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     /* see how far we have to get to not match where we matched before */
     reginfo->till = stringarg + minend;
 
     /* zero for safety */
     reginfo->info_aux = NULL;
+
+    progi->depth++;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
@@ -3928,7 +3927,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
         reginfo->info_aux->old_regmatch_state = old_regmatch_state;
         reginfo->info_aux->old_regmatch_slab  = old_regmatch_slab;
-        reginfo->info_aux->poscache = NULL;
+        reginfo->info_aux->rexi = progi;
 
         SAVEDESTRUCTOR_X(S_cleanup_regmatch_info_aux, reginfo->info_aux);
 
@@ -3937,6 +3936,31 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         else
             reginfo->info_aux_eval = reginfo->info_aux->info_aux_eval = NULL;
     }
+
+    if (progi->slc_whilem_seen) {
+        /* Allocate array of cache pointers / countdowns for the
+         * super-linear cache; or if already present, zero its countdowns.
+         * Once allocated, it is permanently attached to the
+         * regex_internal struct. Except that on recursion, a new one
+         * is allocated and freed on every run.
+         */
+        struct slc_cache_item *slc = progi->depth > 1 ? NULL : progi->slc;
+        if (slc) {
+#ifdef DEBUGGING
+            for (U8 i = 0; i < progi->slc_whilem_seen; i++)
+                assert(!slc[i].slc_bitmap);
+#endif
+            Zero(slc, progi->slc_whilem_seen, struct slc_cache_item);
+        }
+        else {
+            Newxz(slc, progi->slc_whilem_seen, struct slc_cache_item);
+            if (progi->depth == 1)
+                progi->slc = slc; /* keep for future matches */
+        }
+        reginfo->info_aux->slc = slc;
+    }
+    else
+        reginfo->info_aux->slc = NULL;
 
     if (PL_curpm && (PM_GETRE(PL_curpm) == rx)) {
         /* We have to be careful. If the previous successful match
@@ -6481,7 +6505,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
 /* we don't use STMT_START/END here because it leads to
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
-    if (ST.cache_mask &&!seen_nonregular) {                            \
+    if (ST.slc_mask && !seen_nonregular) {                             \
         DEBUG_EXECUTE_r({                                              \
             regnode *whilem =                                          \
                 REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
@@ -6490,7 +6514,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
                 depth, (int)FLAGS(whilem), (int)rexi->slc_whilem_seen, \
                 (UV)(locinput - reginfo->strbeg));                     \
         });                                                            \
-       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask;  \
+       *ST.slc_byte |= ST.slc_mask;                                    \
     }                                                                  \
     sayNO
 
@@ -9104,8 +9128,7 @@ NULL
             A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
-            ST.cache_offset = 0;
-            ST.cache_mask = 0;
+            ST.slc_mask = 0;
 
             DEBUG_EXECUTE_r( re_exec_indentf("WHILEM: matched %ld out of %d..%d\n",
                   depth, (long)n, min, max)
@@ -9133,113 +9156,110 @@ NULL
 
             if (   FLAGS(scan)
                    /* not running a (??{...}) or (?N) sub-pattern */
-                && !cur_eval
-                   /* -1 => disable cache */
-                && PL_re_superlinear_cache_delay != -1)
+                && !cur_eval)
             {
-                /* Super-linear cache processing.
+                /* Super-linear cache (SLC) processing.
                  *
                  * See L<perlreguts/The super-linear cache> for a detailed
                  * background on how this works.
                  *
                  * For WHILEM nodes which can participate in the cache
-                 * (FLAGS() is non-zero), the processing at this point is to
-                 * first initiate a countdown. Then when on subsequent
+                 * (FLAGS() is non-zero), the processing at this point is
+                 * to first initiate a countdown. Then when on subsequent
                  * iterations that reaches zero, the match has likely gone
-                 * super-linear and the cache is allocated and starts to be
+                 * super-linear and the per-WHILEM cache is allocated and
                  * used.
                  */
-#ifdef DEBUGGING
-                if (reginfo->poscache_maxiter) {
+                assert(rexi->slc);
+                assert(reginfo->info_aux->slc);
+                struct slc_cache_item *item =
+                                &reginfo->info_aux->slc[FLAGS(scan)-1];
+
+                if (item->slc_bitmap) {
+                    /* Cache is live */
+                    STRLEN offset;
+                    U8     mask, *bytep;
+                  slc_is_live:
+                    offset = locinput - reginfo->strbeg;
+                    mask   = 1 << (offset % 8);
+                    bytep  = &item->slc_bitmap[offset/8];
+
+                    if (*bytep & mask) {
+                        /* We have already failed at this position */
+                        DEBUG_EXECUTE_r( re_exec_indentf(
+                            "WHILEM[%d/%d]: (cache) already failed at pos %"
+                                                                    UVuf "\n",
+                            depth, (int)FLAGS(scan),
+                            (int)rexi->slc_whilem_seen,
+                            (UV)(locinput - reginfo->strbeg))
+                        );
+                        cur_curlyx->u.curlyx.count--;
+                        sayNO;
+                    }
+
+                    /* Make cache index available to CACHEsayNO */
+                    ST.slc_byte = bytep;
+                    ST.slc_mask = mask;
+                }
+                else if (item->slc_countdown) {
+                    /* Cache is not yet live; currently counting down */
                     DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
-                        "  iter=%" UVuf " maxiter=%" UVuf "\n",
-                    depth,
-                    (UV)reginfo->poscache_iter,
-                    (UV)reginfo->poscache_maxiter)
-                );
+                        "  cache countdown=%" UVuf "\n", depth,
+                        (UV)item->slc_countdown)
+                    );
+
+                    if (!--item->slc_countdown) {
+                        /* countdown finished: alloc and use the cache:
+                         * 1 bit per string byte */
+                        Newxz(item->slc_bitmap,
+                              ((reginfo->strend - reginfo->strbeg + 1) + 7)/8,
+                              U8);
+
+                        DEBUG_EXECUTE_r( re_exec_indentf(
+                            "%sWHILEM[%d/%d]: detected a super-linear match, enabling cache%s...\n",
+                            depth, PL_colors[4],
+                            (int)FLAGS(scan),
+                            (int)rexi->slc_whilem_seen,
+                            PL_colors[5]
+                        ));
+
+                        goto slc_is_live;
+                    }
                 }
                 else {
-                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
-                        "  maxiter=0\n", depth)
-                    );
-                }
-#endif
+                    /* Cache is not yet live; countdown not yet started.
+                     * Initialise the countdown: postpone detection until
+                     * we know that the match is not *that* much
+                     * linear. Note that a degenerate zero-length
+                     * string will have the effect of not starting a
+                     * countdown */
+                    STRLEN count = reginfo->strend - reginfo->strbeg;
 
-                if (!reginfo->poscache_maxiter) {
-                    /* start the countdown: Postpone detection until we
-                     * know the match is not *that* much linear. */
-                    STRLEN len = reginfo->strend - reginfo->strbeg;
-                    /* number of participating WHILEMs */
-                    U8 n = rexi->slc_whilem_seen;
-                    assert(FLAGS(scan) <= n);
-
-                    /* Only do the calculations and enable the cache if it
-                     * won't overflow. This test is equivalent to:
-                     *    ((len + 1) * n  + 7) <= STRLEN_MAX
-                     */
-                    if (len < (STRLEN_MAX - 7)/n) {
-                        reginfo->poscache_maxiter = (len + 1) * n;
-
-                        if (PL_re_superlinear_cache_delay == 0)
-                            /* use default value  */
-                            reginfo->poscache_iter =
-                                                reginfo->poscache_maxiter;
-                        else if (PL_re_superlinear_cache_delay > 0)
+                    if (PL_re_superlinear_cache_delay) {
+                        /* Apply countdown modifier */
+                        if (PL_re_superlinear_cache_delay > 0)
                             /* use specified value  */
-                            reginfo->poscache_iter =
-                                                PL_re_superlinear_cache_delay;
+                            count = PL_re_superlinear_cache_delay;
+                        else if (PL_re_superlinear_cache_delay == -1)
+                            /* disable cache processing */
+                            count = 0;
                         else {
-                            /* negative (-1 already checked for above)
-                             * use -N/1E6 scaling factor */
+                             /* use -N/1E6 scaling factor */
                             NV delay =
                                 -(NV)PL_re_superlinear_cache_delay / 1E6
-                                 * (NV)reginfo->poscache_maxiter;
-                            reginfo->poscache_iter =
-                                delay >= (NV)STRLEN_MAX
+                                 * (NV)count;
+                            count = delay >= (NV)STRLEN_MAX
                                     ? STRLEN_MAX
                                     : delay < 1 ? 1 : delay;
                         }
                     }
-                }
 
-                if (reginfo->poscache_iter == 1) {
-                    reginfo->poscache_iter--;
-                    /* initialise cache */
-                    const STRLEN size = (reginfo->poscache_maxiter + 7)/8;
-                    regmatch_info_aux *const aux = reginfo->info_aux;
-                    assert(!aux->poscache);
-                    Newxz(aux->poscache, size, char);
-
-                    DEBUG_EXECUTE_r( re_exec_indentf(
-      "%sWHILEM: Detected a super-linear match, enabling cache%s...\n",
-                              depth, PL_colors[4], PL_colors[5])
+                    item->slc_countdown = count;
+                    DEBUG_OPTIMISE_MORE_r(re_exec_indentf(
+                        "  cache countdown initialised to %" UVuf "\n",
+                        depth, (UV)count)
                     );
                 }
-
-                if (reginfo->poscache_iter == 0) {
-                    /* have we already failed at this position? */
-                    SSize_t offset, mask;
-
-                    offset  = FLAGS(scan) - 1
-                                +   (locinput - reginfo->strbeg)
-                                  * rexi->slc_whilem_seen;
-                    mask    = 1 << (offset % 8);
-                    offset /= 8;
-                    if (reginfo->info_aux->poscache[offset] & mask) {
-                        DEBUG_EXECUTE_r( re_exec_indentf(
-                            "WHILEM[%d/%d]: (cache) already failed at pos %" UVuf "\n",
-                            depth, (int)FLAGS(scan),
-                            (int)rexi->slc_whilem_seen,
-                            (UV)(locinput - reginfo->strbeg));
-                        );
-                        cur_curlyx->u.curlyx.count--;
-                        sayNO; /* cache records failure */
-                    }
-                    ST.cache_offset = offset;
-                    ST.cache_mask   = mask;
-                }
-                else
-                    reginfo->poscache_iter--;
             }
 
             /* Prefer B over A for minimal matching. */
@@ -11588,10 +11608,23 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 {
     regmatch_info_aux *aux = (regmatch_info_aux *) arg;
     regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
+    regexp_internal *rexi = aux->rexi;
     regmatch_slab *s;
 
-    if (aux->poscache)
-        Safefree(aux->poscache);
+    assert(rexi->depth > 0);
+    rexi->depth--;
+
+    /* free any allocated super-linear caches */
+    if (aux->slc) {
+        U8 i;
+        for (i = 0; i < rexi->slc_whilem_seen; i++) {
+            Safefree(aux->slc[i].slc_bitmap);
+            aux->slc[i].slc_bitmap = NULL;
+        }
+    }
+    /* free the cache array too if it was used during recursion */
+    if (rexi->depth)
+            Safefree(aux->slc);
 
     if (eval_state) {
 
