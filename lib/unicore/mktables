@@ -50,7 +50,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v17.0.0;
+my $version_of_mk_invlist_bounds = v18.0.0;
 
 ##########################################################################
 #
@@ -13399,21 +13399,12 @@ sub filter_early_version_name_alias_line {
     return;
 }
 
-sub setup_Unikemet{
+sub setup_cjk_like_scripts(%provisionals) {
 
-    # These are provisional properties, so aren't in PropAliases.txt
-    my %properties = (
-                      Core => { type => $ENUM, default => 'N' },
-                      FVal => $STRING,
-                      Func => $STRING,
-                      UniK => $STRING,
-                      AltSeq => {
-                                  type => $STRING,
-                                  default => '<code point>'
-                                },
-                     );
-    for my $property (keys %properties) {
-        my $type = $properties{$property};
+    # Provisional properties aren't in PropAliases.txt
+
+    for my $property (keys %provisionals) {
+        my $type = $provisionals{$property};
         my $default = "";
 
         if (ref $type) {
@@ -13421,13 +13412,58 @@ sub setup_Unikemet{
             $type = $type->{type};
         }
 
-        Property->new("kEH_$property",
+        Property->new($property,
                       Default_Map => $default,
                       Type => $type,
                       Status => $PROVISIONAL,
                      );
     }
+}
 
+sub setup_Jurchen {
+    my %provisionals = (
+                         kJURC_NCReading => $STRING,
+                         kJURC_Numeric => $STRING,
+                         kJURC_RSUnicode => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Nushu {
+    my %provisionals = (
+                         kNSHU_Reading => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Seal {
+    my %provisionals = (
+                         kSEAL_MCJK => $STRING,
+                         kSEAL_Rad  => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Tangut {
+    my %provisionals = (
+                         kTGT_Numeric   => $STRING,
+                         kTGT_RSUnicode => $STRING,
+                       );
+    setup_cjk_like_scripts(%provisionals);
+}
+
+sub setup_Unikemet{
+    my %provisionals = (
+                         kEH_Core   => { type => $ENUM, default => 'N' },
+                         kEH_FVal   => $STRING,
+                         kEH_Func   => $STRING,
+                         kEH_UniK   => $STRING,
+                         kEH_AltSeq => {
+                                         type => $STRING,
+                                         default => '<code point>'
+                                       },
+                       );
+    setup_cjk_like_scripts(%provisionals);
 
     my $keH_Core = property_ref('kEH_Core');
     $keH_Core->add_match_table('C');
@@ -20126,17 +20162,16 @@ my @input_file_objects = (
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
     Input_file->new('TangutSources.txt', v9.0.0,
-                    Skip => 'Specifies source mappings for Tangut ideographs'
-                          . ' and components. This data file also includes'
-                          . ' informative radical-stroke values that are used'
-                          . ' internally by Unicode',
+                    Pre_Handler => \&setup_Tangut,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('VerticalOrientation.txt', v10.0.0,
                     Property => 'Vertical_Orientation',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
     Input_file->new('NushuSources.txt', v10.0.0,
-                    Skip => 'Specifies source material for Nushu characters',
+                    Pre_Handler => \&setup_Nushu,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
     Input_file->new('EquivalentUnifiedIdeograph.txt', v11.0.0,
                     Property => 'Equivalent_Unified_Ideograph',
@@ -20203,6 +20238,14 @@ my @input_file_objects = (
                     # any properties, though we could create some.
                     Skip => $Unused_Skip,
                     UCD => 0,
+                   ),
+    Input_file->new('JurchenSources.txt', v18.0.0,
+                    Pre_Handler => \&setup_Jurchen,
+                    Each_Line_Handler => \&filter_unihan_line,
+                   ),
+    Input_file->new('SealSources.txt', v18.0.0,
+                    Pre_Handler => \&setup_Seal,
+                    Each_Line_Handler => \&filter_unihan_line,
                    ),
 );
 

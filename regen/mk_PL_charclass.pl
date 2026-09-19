@@ -115,8 +115,8 @@ sub expand_invlist {
 # Read in the case fold mappings.
 my %folded_closure;
 my %simple_folded_closure;
-my @non_final_folds;
-my @non_latin1_simple_folds;
+my %non_final_folds;
+my %non_latin1_simple_folds;
 my @folds;
 use Unicode::UCD;
 
@@ -195,19 +195,17 @@ for (@folds) {
             # above is mutualy exclusive from the 'if below) and crosses
             # 255/256 boundary.  We keep track of the Latin1 code points
             # in such folds.
-            push @non_latin1_simple_folds, ($fold < 256)
-                                            ? $fold
-                                            : $from;
+            $non_latin1_simple_folds{ ($fold < 256)
+                                      ? $fold
+                                      : $from
+                                    } = $i;
         }
-        elsif ($i < @folded-1
-                && $fold < 256
-                && ! grep { $_ == $fold } @non_final_folds)
-        {
-            push @non_final_folds, $fold;
+        elsif ($i < @folded-1 && $fold < 256) {
+            $non_final_folds{$fold} = $i;
 
             # Also add the upper case, which in the latin1 range folds to
             # $fold
-            push @non_final_folds, ord uc chr $fold;
+            $non_final_folds{ord uc chr $fold} = $i;
         }
     }
 }
@@ -228,11 +226,9 @@ foreach my $folded (keys %simple_folded_closure) {
 
 # We have the single-character folds that cross the 255/256, like KELVIN
 # SIGN => 'k', but we need the closure, so add like 'K' to it
-foreach my $folded (@non_latin1_simple_folds) {
+foreach my $folded (keys %non_latin1_simple_folds) {
     foreach my $fold (@{$simple_folded_closure{$folded}}) {
-        if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
-            push @non_latin1_simple_folds, $fold;
-        }
+        $non_latin1_simple_folds{$fold} = $folded if $fold < 256;
     }
 }
 
@@ -255,11 +251,11 @@ sub Non_Latin1_Folds {
 sub Non_Latin1_Simple_Folds { # Latin1 code points that are folded to by
                               # non-Latin1 code points as single character
                               # folds
-    return @non_latin1_simple_folds;
+    return keys %non_latin1_simple_folds;
 }
 
 sub Non_Final_Folds {
-    return @non_final_folds;
+    return keys %non_final_folds;
 }
 
 sub Punct_and_Symbols {

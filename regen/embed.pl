@@ -3028,10 +3028,21 @@ my %needed_by_ext_re = map { $_ => 1 } qw(
     first_upper_bit_set_byte_number
     invlist_intersection_complement_2nd_
     invlist_union_complement_2nd_
+    is_MULTI_CHAR_FOLD_utf8_safe_part4_
+    is_MULTI_CHAR_FOLD_utf8_safe_part5_
+    is_MULTI_CHAR_FOLD_utf8_safe_part6_
+    is_MULTI_CHAR_FOLD_utf8_safe_part7_
     PARSE_IDENT_ERROR_POSITION
     PARSE_IDENT_ERROR_TEXT
     RExC_parse_advance
+    LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S
+    LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8
+    SURSOLIDUM
     WARN_HELPER_
+    what_MULTI_CHAR_FOLD_utf8_safe_part8_
+    what_MULTI_CHAR_FOLD_utf8_safe_part9_
+    what_MULTI_CHAR_FOLD_utf8_safe_part10_
+    what_MULTI_CHAR_FOLD_utf8_safe_part11_
 );
 
 # This is a list of symbols that are needed by various ext/ modules, and are

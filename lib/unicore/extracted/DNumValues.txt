@@ -1,6 +1,6 @@
-# DerivedNumericValues-17.0.0.txt
-# Date: 2025-06-30, 06:20:22 GMT
-# © 2025 Unicode®, Inc.
+# DerivedNumericValues-18.0.0.txt
+# Date: 2026-06-29, 15:25:04 GMT
+# © 2026 Unicode®, Inc.
 # Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use and license, see https://www.unicode.org/terms_of_use.html
 #
@@ -235,8 +235,9 @@ A833          ; 0.0625 ; ; 1/16 # No       NORTH INDIC FRACTION ONE SIXTEENTH
 A834          ; 0.125 ; ; 1/8 # No       NORTH INDIC FRACTION ONE EIGHTH
 11FCC         ; 0.125 ; ; 1/8 # No       TAMIL FRACTION ONE EIGHTH
 1245F         ; 0.125 ; ; 1/8 # Nl       CUNEIFORM NUMERIC SIGN ONE EIGHTH ASH
+12587..12588  ; 0.125 ; ; 1/8 # Nl   [2] CUNEIFORM NUMERIC SIGN ONE EIGHTH IKU CURVED..CUNEIFORM NUMERIC SIGN ONE EIGHTH IKU CURVED VARIANT FORM
 
-# Total code points: 7
+# Total code points: 9
 
 # ================================================
 
@@ -292,9 +293,10 @@ A830          ; 0.25 ; ; 1/4 # No       NORTH INDIC FRACTION ONE QUARTER
 11FD0         ; 0.25 ; ; 1/4 # No       TAMIL FRACTION ONE QUARTER
 12460         ; 0.25 ; ; 1/4 # Nl       CUNEIFORM NUMERIC SIGN ONE QUARTER ASH
 12462..12463  ; 0.25 ; ; 1/4 # Nl   [2] CUNEIFORM NUMERIC SIGN OLD ASSYRIAN ONE QUARTER..CUNEIFORM NUMERIC SIGN ONE QUARTER GUR
+12589..1258A  ; 0.25 ; ; 1/4 # Nl   [2] CUNEIFORM NUMERIC SIGN ONE N01 REVERSED..CUNEIFORM NUMERIC SIGN ONE QUARTER IKU CURVED VARIANT FORM
 1ECAD         ; 0.25 ; ; 1/4 # No       INDIC SIYAQ FRACTION ONE QUARTER
 
-# Total code points: 14
+# Total code points: 16
 
 # ================================================
 
@@ -304,8 +306,9 @@ A830          ; 0.25 ; ; 1/4 # No       NORTH INDIC FRACTION ONE QUARTER
 1245A         ; 0.33333333 ; ; 1/3 # Nl       CUNEIFORM NUMERIC SIGN ONE THIRD DISH
 1245D         ; 0.33333333 ; ; 1/3 # Nl       CUNEIFORM NUMERIC SIGN ONE THIRD VARIANT FORM A
 12465         ; 0.33333333 ; ; 1/3 # Nl       CUNEIFORM NUMERIC SIGN ELAMITE ONE THIRD
+12598         ; 0.33333333 ; ; 1/3 # Nl       CUNEIFORM NUMERIC SIGN NINDA2 TIMES SHE PLUS ONE ASH CURVED
 
-# Total code points: 6
+# Total code points: 7
 
 # ================================================
 
@@ -343,10 +346,11 @@ A831          ; 0.5 ; ; 1/2 # No       NORTH INDIC FRACTION ONE HALF
 11FD1..11FD2  ; 0.5 ; ; 1/2 # No   [2] TAMIL FRACTION ONE HALF-1..TAMIL FRACTION ONE HALF-2
 12226         ; 0.5 ; ; 1/2 # Lo       CUNEIFORM SIGN MASH
 12464         ; 0.5 ; ; 1/2 # Nl       CUNEIFORM NUMERIC SIGN ONE HALF GUR
+1258B         ; 0.5 ; ; 1/2 # Nl       CUNEIFORM NUMERIC SIGN ONE HALF IKU CURVED VARIANT FORM
 1ECAE         ; 0.5 ; ; 1/2 # No       INDIC SIYAQ FRACTION ONE HALF
 1ED3C         ; 0.5 ; ; 1/2 # No       OTTOMAN SIYAQ FRACTION ONE HALF
 
-# Total code points: 20
+# Total code points: 21
 
 # ================================================
 
@@ -375,8 +379,9 @@ A831          ; 0.5 ; ; 1/2 # No       NORTH INDIC FRACTION ONE HALF
 1245B         ; 0.66666667 ; ; 2/3 # Nl       CUNEIFORM NUMERIC SIGN TWO THIRDS DISH
 1245E         ; 0.66666667 ; ; 2/3 # Nl       CUNEIFORM NUMERIC SIGN TWO THIRDS VARIANT FORM A
 12466         ; 0.66666667 ; ; 2/3 # Nl       CUNEIFORM NUMERIC SIGN ELAMITE TWO THIRDS
+12599         ; 0.66666667 ; ; 2/3 # Nl       CUNEIFORM NUMERIC SIGN NINDA2 TIMES SHE PLUS TWO ASH CURVED
 
-# Total code points: 7
+# Total code points: 8
 
 # ================================================
 
@@ -543,6 +548,55 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 12434         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE BURU
 1244F         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE BAN2
 12458         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE ESHE3
+12477         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES ONE DISH TENU
+12550         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N01
+12559         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N08
+12562         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N14
+1256B         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N34
+12574         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N48
+12579         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N45
+12582         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N50
+1258C         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N22
+1258E         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE BURU CURVED
+12593         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE BAN2 CURVED
+1259A         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N51
+125A3         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N54
+125A8         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N56
+125AA..125B6  ; 1.0 ; ; 1 # Nl  [13] CUNEIFORM NUMERIC SIGN ONE N24..CUNEIFORM NUMERIC SIGN ONE N39A
+125BA         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N39B
+125BE         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N02
+125C7         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N15
+125CC         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N35
+125D1         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N06
+125DA         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N21
+125DF..125E0  ; 1.0 ; ; 1 # Nl   [2] CUNEIFORM NUMERIC SIGN ONE N38..CUNEIFORM NUMERIC SIGN ONE N52
+125E9..125EB  ; 1.0 ; ; 1 # Nl   [3] CUNEIFORM NUMERIC SIGN ONE N60..CUNEIFORM NUMERIC SIGN ONE N40
+125EF         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N03
+125F4         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N18
+125FD..12602  ; 1.0 ; ; 1 # Nl   [6] CUNEIFORM NUMERIC SIGN ONE N45A..CUNEIFORM NUMERIC SIGN ONE N41
+12606         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N04
+1260B         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N19
+12614         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N46
+12616         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N36
+1261F         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N49
+12623..12629  ; 1.0 ; ; 1 # Nl   [7] CUNEIFORM NUMERIC SIGN ONE N25..CUNEIFORM NUMERIC SIGN ONE N42A
+1262D         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N42B
+12631         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N05
+12636         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N20
+1263F         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N47
+12641         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N37
+12643..12646  ; 1.0 ; ; 1 # Nl   [4] CUNEIFORM NUMERIC SIGN ONE N09..CUNEIFORM NUMERIC SIGN ONE N07A
+12649         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N07B
+1264C         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N01 FLAT
+12655..12656  ; 1.0 ; ; 1 # Nl   [2] CUNEIFORM NUMERIC SIGN ONE N08 FLAT..CUNEIFORM NUMERIC SIGN ONE N14 FLAT
+1265F         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N34 FLAT
+12668         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N45 FLAT
+1266A         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N22 FLAT
+1266C         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N51 FLAT
+12675..12676  ; 1.0 ; ; 1 # Nl   [2] CUNEIFORM NUMERIC SIGN ONE N34 FLAT TENU..CUNEIFORM NUMERIC SIGN ONE N04 FLAT
+1267B         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N19 FLAT
+12684         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N46 FLAT
+12686         ; 1.0 ; ; 1 # Nl       CUNEIFORM NUMERIC SIGN ONE N36 FLAT
 16131         ; 1.0 ; ; 1 # Nd       GURUNG KHEMA DIGIT ONE
 16A61         ; 1.0 ; ; 1 # Nd       MRO DIGIT ONE
 16AC1         ; 1.0 ; ; 1 # Nd       TANGSA DIGIT ONE
@@ -576,7 +630,7 @@ FF11          ; 1.0 ; ; 1 # Nd       FULLWIDTH DIGIT ONE
 1FBF1         ; 1.0 ; ; 1 # Nd       SEGMENTED DIGIT ONE
 2092A         ; 1.0 ; ; 1 # Lo       CJK UNIFIED IDEOGRAPH-2092A
 
-# Total code points: 158
+# Total code points: 238
 
 # ================================================
 
@@ -710,6 +764,54 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 12450         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO BAN2
 12456         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN NIGIDAMIN
 12459         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO ESHE3
+12478         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES TWO DISH TENU
+12551         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N01
+1255A         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N08
+12563         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N14
+1256C         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N34
+12575         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N48
+1257A         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N45
+12583         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N50
+1258D         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N22
+1258F         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO BURU CURVED
+12594         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO BAN2 CURVED
+1259B         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N51
+125A4         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N54
+125A9         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N56
+125B7         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N39A
+125BB         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N39B
+125BF         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N02
+125C8         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N15
+125CD         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N35
+125D2         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N06
+125DB         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N21
+125E1         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N52
+125EC         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N40
+125F0         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N03
+125F5         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N18
+12603         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N41
+12607         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N04
+1260C         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N19
+12615         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N46
+12617         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N36
+12620         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N49
+1262A         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N42A
+1262E         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N42B
+12632         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N05
+12637         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N20
+12640         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N47
+12642         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N37
+12647         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N07A
+1264A         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N07B
+1264D         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N01 FLAT
+12657         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N14 FLAT
+12660         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N34 FLAT
+12669         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N45 FLAT
+1266B         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N22 FLAT
+1266D         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N51 FLAT
+12677         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N04 FLAT
+1267C         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N19 FLAT
+12685         ; 2.0 ; ; 2 # Nl       CUNEIFORM NUMERIC SIGN TWO N46 FLAT
 16132         ; 2.0 ; ; 2 # Nd       GURUNG KHEMA DIGIT TWO
 16A62         ; 2.0 ; ; 2 # Nd       MRO DIGIT TWO
 16AC2         ; 2.0 ; ; 2 # Nd       TANGSA DIGIT TWO
@@ -743,7 +845,7 @@ FF12          ; 2.0 ; ; 2 # Nd       FULLWIDTH DIGIT TWO
 1FBF2         ; 2.0 ; ; 2 # Nd       SEGMENTED DIGIT TWO
 22390         ; 2.0 ; ; 2 # Lo       CJK UNIFIED IDEOGRAPH-22390
 
-# Total code points: 158
+# Total code points: 206
 
 # ================================================
 
@@ -867,6 +969,46 @@ FF13          ; 3.0 ; ; 3 # Nd       FULLWIDTH DIGIT THREE
 1244B         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE ASH TENU
 12451         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE BAN2
 12457         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN NIGIDAESH
+12479         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES THREE DISH TENU
+12552         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N01
+1255B         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N08
+12564         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N14
+1256D         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N34
+12576         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N48
+1257B         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N45
+12584         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N50
+12590         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE BURU CURVED
+12595         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE BAN2 CURVED
+1259C         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N51
+125A5         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N54
+125B8         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N39A
+125BC         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N39B
+125C0         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N02
+125C9         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N15
+125CE         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N35
+125D3         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N06
+125DC         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N21
+125E2         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N52
+125ED         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N40
+125F1         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N03
+125F6         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N18
+12604         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N41
+12608         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N04
+1260D         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N19
+12618         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N36
+12621         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N49
+1262B         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N42A
+1262F         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N42B
+12633         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N05
+12638         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N20
+12648         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N07A
+1264B         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N07B
+1264E         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N01 FLAT
+12658         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N14 FLAT
+12661         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N34 FLAT
+1266E         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N51 FLAT
+12678         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N04 FLAT
+1267D         ; 3.0 ; ; 3 # Nl       CUNEIFORM NUMERIC SIGN THREE N19 FLAT
 16133         ; 3.0 ; ; 3 # Nd       GURUNG KHEMA DIGIT THREE
 16A63         ; 3.0 ; ; 3 # Nd       MRO DIGIT THREE
 16AC3         ; 3.0 ; ; 3 # Nd       TANGSA DIGIT THREE
@@ -901,7 +1043,7 @@ FF13          ; 3.0 ; ; 3 # Nd       FULLWIDTH DIGIT THREE
 22998         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-22998
 23B1B         ; 3.0 ; ; 3 # Lo       CJK UNIFIED IDEOGRAPH-23B1B
 
-# Total code points: 154
+# Total code points: 194
 
 # ================================================
 
@@ -1019,6 +1161,44 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 1244C         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR ASH TENU
 12452..12453  ; 4.0 ; ; 4 # Nl   [2] CUNEIFORM NUMERIC SIGN FOUR BAN2..CUNEIFORM NUMERIC SIGN FOUR BAN2 VARIANT FORM
 12469         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR U VARIANT FORM
+1247A         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES FOUR DISH TENU
+12553         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N01
+1255C         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N08
+12565         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N14
+1256E         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N34
+12577         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N48
+1257C         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N45
+12585         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N50
+12591         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR BURU CURVED
+12596         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR BAN2 CURVED
+1259D         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N51
+125A6         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N54
+125B9         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N39A
+125BD         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N39B
+125C1         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N02
+125CA         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N15
+125CF         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N35
+125D4         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N06
+125DD         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N21
+125E3         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N52
+125EE         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N40
+125F2         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N03
+125F7         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N18
+12605         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N41
+12609         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N04
+1260E         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N19
+12619         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N36
+12622         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N49
+1262C         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N42A
+12630         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N42B
+12634         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N05
+12639         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N20
+1264F         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N01 FLAT
+12659         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N14 FLAT
+12662         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N34 FLAT
+1266F         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N51 FLAT
+12679         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N04 FLAT
+1267E         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR N19 FLAT
 16134         ; 4.0 ; ; 4 # Nd       GURUNG KHEMA DIGIT FOUR
 16A64         ; 4.0 ; ; 4 # Nd       MRO DIGIT FOUR
 16AC4         ; 4.0 ; ; 4 # Nd       TANGSA DIGIT FOUR
@@ -1051,7 +1231,7 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 200E2         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-200E2
 2626D         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-2626D
 
-# Total code points: 144
+# Total code points: 182
 
 # ================================================
 
@@ -1172,6 +1352,37 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 1244D         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE ASH TENU
 12454..12455  ; 5.0 ; ; 5 # Nl   [2] CUNEIFORM NUMERIC SIGN FIVE BAN2..CUNEIFORM NUMERIC SIGN FIVE BAN2 VARIANT FORM
 1246A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE U VARIANT FORM
+1247B         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES FIVE DISH TENU
+12554         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N01
+1255D         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N08
+12566         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N14
+1256F         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N34
+12578         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N48
+1257D         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N45
+12586         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N50
+12592         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE BURU CURVED
+12597         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE BAN2 CURVED
+1259E         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N51
+125A7         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N54
+125C2         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N02
+125CB         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N15
+125D0         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N35
+125D5         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N06
+125DE         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N21
+125E4         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N52
+125F3         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N03
+125F8         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N18
+1260A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N04
+1260F         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N19
+1261A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N36
+12635         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N05
+1263A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N20
+12650         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N01 FLAT
+1265A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N14 FLAT
+12663         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N34 FLAT
+12670         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N51 FLAT
+1267A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N04 FLAT
+1267F         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE N19 FLAT
 16135         ; 5.0 ; ; 5 # Nd       GURUNG KHEMA DIGIT FIVE
 16A65         ; 5.0 ; ; 5 # Nd       MRO DIGIT FIVE
 16AC5         ; 5.0 ; ; 5 # Nd       TANGSA DIGIT FIVE
@@ -1203,7 +1414,7 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 1FBF5         ; 5.0 ; ; 5 # Nd       SEGMENTED DIGIT FIVE
 20121         ; 5.0 ; ; 5 # Lo       CJK UNIFIED IDEOGRAPH-20121
 
-# Total code points: 142
+# Total code points: 173
 
 # ================================================
 
@@ -1311,6 +1522,25 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 12440         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX VARIANT FORM ASH9
 1244E         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX ASH TENU
 1246B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX U VARIANT FORM
+1247C         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES SIX DISH TENU
+12555         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N01
+1255E         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N08
+12567         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N14
+12570         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N34
+1257E         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N45
+1259F         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N51
+125C3         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N02
+125D6         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N06
+125E5         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N52
+125F9         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N18
+12610         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N19
+1261B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N36
+1263B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N20
+12651         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N01 FLAT
+1265B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N14 FLAT
+12664         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N34 FLAT
+12671         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N51 FLAT
+12680         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX N19 FLAT
 16136         ; 6.0 ; ; 6 # Nd       GURUNG KHEMA DIGIT SIX
 16A66         ; 6.0 ; ; 6 # Nd       MRO DIGIT SIX
 16AC6         ; 6.0 ; ; 6 # Nd       TANGSA DIGIT SIX
@@ -1340,7 +1570,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 1FBF6         ; 6.0 ; ; 6 # Nd       SEGMENTED DIGIT SIX
 20AEA         ; 6.0 ; ; 6 # Lo       CJK UNIFIED IDEOGRAPH-20AEA
 
-# Total code points: 126
+# Total code points: 145
 
 # ================================================
 
@@ -1446,6 +1676,26 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 12429         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN SHAR2
 12441..12443  ; 7.0 ; ; 7 # Nl   [3] CUNEIFORM NUMERIC SIGN SEVEN VARIANT FORM IMIN3..CUNEIFORM NUMERIC SIGN SEVEN VARIANT FORM IMIN B
 1246C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN U VARIANT FORM
+1246F         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN ASH TENU
+1247D         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES SEVEN DISH TENU
+12556         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N01
+1255F         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N08
+12568         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N14
+12571         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N34
+1257F         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N45
+125A0         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N51
+125C4         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N02
+125D7         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N06
+125E6         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N52
+125FA         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N18
+12611         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N19
+1261C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N36
+1263C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N20
+12652         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N01 FLAT
+1265C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N14 FLAT
+12665         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N34 FLAT
+12672         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N51 FLAT
+12681         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN N19 FLAT
 16137         ; 7.0 ; ; 7 # Nd       GURUNG KHEMA DIGIT SEVEN
 16A67         ; 7.0 ; ; 7 # Nd       MRO DIGIT SEVEN
 16AC7         ; 7.0 ; ; 7 # Nd       TANGSA DIGIT SEVEN
@@ -1475,7 +1725,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 1FBF7         ; 7.0 ; ; 7 # Nd       SEGMENTED DIGIT SEVEN
 20001         ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-20001
 
-# Total code points: 126
+# Total code points: 146
 
 # ================================================
 
@@ -1578,6 +1828,26 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 1242A         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT SHAR2
 12444..12445  ; 8.0 ; ; 8 # Nl   [2] CUNEIFORM NUMERIC SIGN EIGHT VARIANT FORM USSU..CUNEIFORM NUMERIC SIGN EIGHT VARIANT FORM USSU3
 1246D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT U VARIANT FORM
+12475         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT ASH TENU
+1247E         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES EIGHT DISH TENU
+12557         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N01
+12560         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N08
+12569         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N14
+12572         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N34
+12580         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N45
+125A1         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N51
+125C5         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N02
+125D8         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N06
+125E7         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N52
+125FB         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N18
+12612         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N19
+1261D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N36
+1263D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N20
+12653         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N01 FLAT
+1265D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N14 FLAT
+12666         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N34 FLAT
+12673         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N51 FLAT
+12682         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT N19 FLAT
 16138         ; 8.0 ; ; 8 # Nd       GURUNG KHEMA DIGIT EIGHT
 16A68         ; 8.0 ; ; 8 # Nd       MRO DIGIT EIGHT
 16AC8         ; 8.0 ; ; 8 # Nd       TANGSA DIGIT EIGHT
@@ -1606,7 +1876,7 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 1F109         ; 8.0 ; ; 8 # No       DIGIT EIGHT COMMA
 1FBF8         ; 8.0 ; ; 8 # Nd       SEGMENTED DIGIT EIGHT
 
-# Total code points: 121
+# Total code points: 141
 
 # ================================================
 
@@ -1712,6 +1982,26 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1242B         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE SHAR2
 12446..12449  ; 9.0 ; ; 9 # Nl   [4] CUNEIFORM NUMERIC SIGN NINE VARIANT FORM ILIMMU..CUNEIFORM NUMERIC SIGN NINE VARIANT FORM ILIMMU A
 1246E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE U VARIANT FORM
+12476         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE ASH TENU
+1247F         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN ASH TIMES NINE DISH TENU
+12558         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N01
+12561         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N08
+1256A         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N14
+12573         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N34
+12581         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N45
+125A2         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N51
+125C6         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N02
+125D9         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N06
+125E8         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N52
+125FC         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N18
+12613         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N19
+1261E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N36
+1263E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N20
+12654         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N01 FLAT
+1265E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N14 FLAT
+12667         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N34 FLAT
+12674         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N51 FLAT
+12683         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE N19 FLAT
 16139         ; 9.0 ; ; 9 # Nd       GURUNG KHEMA DIGIT NINE
 16A69         ; 9.0 ; ; 9 # Nd       MRO DIGIT NINE
 16AC9         ; 9.0 ; ; 9 # Nd       TANGSA DIGIT NINE
@@ -1741,7 +2031,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1FBF9         ; 9.0 ; ; 9 # Nd       SEGMENTED DIGIT NINE
 2F890         ; 9.0 ; ; 9 # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
 
-# Total code points: 127
+# Total code points: 147
 
 # ================================================
 
@@ -2201,8 +2491,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 1D36D         ; 50.0 ; ; 50 # No       COUNTING ROD TENS DIGIT FIVE
 1EC7E         ; 50.0 ; ; 50 # No       INDIC SIYAQ NUMBER FIFTY
 1ED0E         ; 50.0 ; ; 50 # No       OTTOMAN SIYAQ NUMBER FIFTY
+324DF         ; 50.0 ; ; 50 # Lo       CJK UNIFIED IDEOGRAPH-324DF
 
-# Total code points: 29
+# Total code points: 30
 
 # ================================================
 
@@ -2323,8 +2614,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10E73         ; 200.0 ; ; 200 # No       RUMI NUMBER TWO HUNDRED
 1EC84         ; 200.0 ; ; 200 # No       INDIC SIYAQ NUMBER TWO HUNDRED
 1ED14         ; 200.0 ; ; 200 # No       OTTOMAN SIYAQ NUMBER TWO HUNDRED
+32403         ; 200.0 ; ; 200 # Lo       CJK UNIFIED IDEOGRAPH-32403
 
-# Total code points: 7
+# Total code points: 8
 
 # ================================================
 
