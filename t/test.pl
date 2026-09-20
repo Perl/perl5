@@ -729,6 +729,14 @@ sub _create_runperl { # Create the string to qx in runperl().
     if ($ENV{PERL_RUNPERL_DEBUG}) {
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
     }
+    { # remove default @INC for tests
+	local %ENV;
+	my $cmd = q{print "$_\n" for @INC};
+	my @inc = `$runperl -e '$cmd'`;
+	chomp @inc;
+	$runperl = $runperl . " " . join(" ", map { qq{"-M-lib=$_"} } @inc )
+	    if @inc;
+    }
     unless ($args{nolib}) {
 	$runperl = $runperl . ' "-I../lib" "-I." '; # doublequotes because of VMS
     }
