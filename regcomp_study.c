@@ -23,6 +23,9 @@
     Newx(and_withp, 1, regnode_ssc); \
     SAVEFREEPV(and_withp)
 
+/* Max number of WHILEM nodes which can participate in the super-linear
+ * cache. */
+#define SLC_MAX_WHILEM_NODES 30
 
 static void
 S_unwind_scan_frames(pTHX_ void *p)
@@ -2781,7 +2784,7 @@ Perl_study_chunk(pTHX_
                         !FLAGS(nxt)
                         /* max supported number of WHILEM nodes that can
                          * participate in super-linear cache */
-                      && RExC_rxi->slc_whilem_seen < 15)
+                      && RExC_rxi->slc_whilem_seen < SLC_MAX_WHILEM_NODES)
                     {
                         ++RExC_rxi->slc_whilem_seen;
                         FLAGS(nxt) = RExC_rxi->slc_whilem_seen; /* On WHILEM */

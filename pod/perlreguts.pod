@@ -1376,14 +1376,15 @@ point. ]
 
 =item *
 
-There is currently a hard limit of 15 cache-participating C<WHILEM> nodes
-per regex.
+There is currently a limit of 30 cache-participating C<WHILEM> nodes per
+regex. In theory this could in future be changed up a hard limit of 255.
+This is set by the C<SLC_MAX_WHILEM_NODES> define in F<regcomp_study.c>.
 
 =back
 
 =head4 The super-linear cache at run-time
 
-In a compiled regex, a node id in the range 1-15 is stored in the
+In a compiled regex, a node id in the range 1-30 is stored in the
 C<FLAGS()> field of each participating C<WHILEM> node (a value of 0
 indicates that the node isn't suitable for the SLC). The field
 C<slc_whilem_seen> in the C<regexp_internal> structure indicates the total
