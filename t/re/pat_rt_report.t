@@ -767,14 +767,12 @@ sub run_tests {
         is($ok,3, "Optimistic eval does not disable optimisations");
     }
 
-    SKIP: {
-        skip("test sensitive to SLC iterations", 1)
-            if ${^RE_SUPERLINEAR_CACHE_DELAY};
+    {
         my $message = '@-/@+ should not have undefined values; Bug 22614';
         local $_ = 'ab';
         our @len = ();
         /(.){1,}(?{push @len,0+@-})(.){1,}(?{})^/;
-        is("@len", "2 2 2", $message);
+        is(grep($_ != 2, @len), 0, $message);
     }
 
     {

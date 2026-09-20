@@ -2714,5 +2714,12 @@
         code    => '/^(a|xy)+;(bb?)*bbbbbbbbbb;(c|xy)+$/',
     },
 
+    'regex::slc::long_lead' => {
+        desc    => 'slc: iterating only near end of string',
+        setup   => '$_ = ("a" x 1000) . "a;bbbbbbbbbbbbbbbbbbbb";
+                    ${^RE_SUPERLINEAR_CACHE_DELAY}=-200_000',
+        code    => '/^a+;(bb?)*bbbbbbbbbb$/',
+    },
+
     # XXX millions more general regex tests needed here
 ];
