@@ -9233,7 +9233,7 @@ NULL
                      * linear. Note that a degenerate zero-length
                      * string will have the effect of not starting a
                      * countdown */
-                    STRLEN count = reginfo->strend - reginfo->strbeg;
+                    STRLEN count = reginfo->strend - locinput;
 
                     if (PL_re_superlinear_cache_delay) {
                         /* Apply countdown modifier */

@@ -1226,9 +1226,11 @@ pattern like C</(...)*(...)*/> which has two quantifiers, two
 To avoid a potentially large malloc() for every match that has been marked
 as suitable for a SLC, a per-node countdown is initiated the first time a
 candidate C<WHILEM> node is reached; only when the number of iterations of
-that particular node is equal to the string length is a cache for that
-node actually allocated and initialised. This crude heuristic is an
-indication that the match has gone super-linear.
+that particular node is equal to the remaining string length is a cache
+for that node actually allocated and initialised. This crude heuristic is
+an indication that the match has gone super-linear. Guess wrong and a
+cache will be unnecessarily allocated or, conversely, unnecessary
+backtracking will happen.
 
 =item *
 
