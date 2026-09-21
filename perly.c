@@ -21,6 +21,15 @@
  *
  */
 
+/*
+ *      A common mistake that people make when trying to design something
+ *      completely foolproof is to underestimate the ingenuity of
+ *      complete fools.
+ *              --Douglas Adams
+ *
+ *     [Chapter 12 of _Mostly Harmless_]
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
