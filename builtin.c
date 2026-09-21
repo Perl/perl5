@@ -7,6 +7,13 @@
  *
  */
 
+/*
+ *      Any sufficiently advanced technology is indistinguishable from magic.
+ *              --Arthur C. Clarke
+ *
+ *     [_Profiles of the Future_]
+ */
+
 /* This file contains the code that implements functions in perl's "builtin::"
  * namespace
  */
