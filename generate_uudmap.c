@@ -34,6 +34,14 @@
    Ditto when mg_data.h was added.
 */
 
+/*
+ *      The universe (which others call the Library) is composed of an
+ *      indefinite and perhaps infinite number of hexagonal galleries...
+ *              --Jorge Luis Borges
+ *
+ *     ["The Library of Babel"]
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 /* If it turns out that we need to make this conditional on config.sh derived
