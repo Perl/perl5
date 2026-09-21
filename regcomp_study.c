@@ -1,3 +1,11 @@
+/*
+ *      "Begin at the beginning," the King said gravely,
+ *      "and go on till you come to the end: then stop."
+ *              --the King
+ *
+ *     [Chapter XII of _Alice's Adventures in Wonderland_: "Alice's Evidence"]
+ */
+
 #ifdef PERL_EXT_RE_BUILD
 #include "re_top.h"
 #endif
