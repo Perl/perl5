@@ -5,6 +5,14 @@
  *
 */
 
+/*
+ *      Double, double toil and trouble;
+ *      Fire burn and cauldron bubble.
+ *              --The Weird Sisters
+ *
+ *     [Act IV, scene i of _Macbeth_]
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_DQUOTE_C
 #include "perl.h"
@@ -560,6 +568,13 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
 
     return TRUE;
 }
+
+/*
+ *      Whereof one cannot speak, thereof one must be silent.
+ *              --Ludwig Wittgenstein
+ *
+ *     [Proposition 7 of _Tractatus Logico-Philosophicus_]
+ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
