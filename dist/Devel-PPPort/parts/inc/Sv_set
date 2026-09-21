@@ -173,6 +173,8 @@ __UNDEFINED__ SvUV_set(sv, val) \
 
 #endif
 
+__UNDEFINED__ sv_set_undef(sv) sv_setpv(sv, NULL)
+
 =xsubs
 
 IV
@@ -238,7 +240,10 @@ sv_setsv_compile_test(sv)
                 sv_setsv_flags(sv, NULL, 0);
                 sv_setsv_flags(sv, NULL, SV_NOSTEAL);
 
-=tests plan => 15
+void
+sv_set_undef(SV *sv)
+
+=tests plan => 18
 
 my $foo = 5;
 is(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
@@ -276,6 +281,17 @@ is($bar->x(), 'hacker');
     is tied($scalar)->{store}, 0;
     is $copy2, 'string';
 
+my $quux_destroyed;
+{
+    my $x = 1;
+    Devel::PPPort::sv_set_undef($x);
+    ok !defined $x, '$x no longer defined';
+    $x = bless {}, "quux";
+    Devel::PPPort::sv_set_undef($x);
+    ok !defined $x, '$x no longer quux-like';
+    is $quux_destroyed, 1, "quux destroyed";
+}
+
 package TieScalarCounter;
 
 sub TIESCALAR {
@@ -302,3 +318,9 @@ sub x { 'foobar' }
 package bar;
 
 sub x { 'hacker' }
+
+package quux;
+
+sub DESTROY {
+  ++$quux_destroyed;
+}

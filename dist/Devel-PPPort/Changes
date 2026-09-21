@@ -1,5 +1,9 @@
 Revision history for Devel-PPPort
 
+3.75
+
+ * add sv_set_undef
+
 3.74
 
  * add SSize_t_MAX, Size_t_MAX, STRLEN_MAX
