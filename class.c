@@ -7,6 +7,13 @@
  *
  */
 
+/*
+ *      I ought to be thy Adam, but I am rather the fallen angel.
+ *              --The Creature
+ *
+ *     [Chapter X of _Frankenstein_]
+ */
+
 /* This file contains the code that implements perl's new `use feature 'class'`
  * object model
  */
