@@ -1,3 +1,12 @@
+/*
+ *      How often have I said to you that when you have eliminated
+ *      the impossible, whatever remains, however improbable,
+ *      must be the truth?
+ *              --Sherlock Holmes
+ *
+ *     [Chapter VI of _The Sign of the Four_]
+ */
+
 #ifdef PERL_EXT_RE_BUILD
 #include "re_top.h"
 #endif
