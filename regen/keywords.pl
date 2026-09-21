@@ -28,7 +28,17 @@ my $h = open_new('keywords.h', '>',
                    file => 'keywords.h', style => '*',
                    copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]});
 my $c = open_new('keywords.c', '>',
-                 { by => 'regen/keywords.pl', from => 'its data', style => '*'});
+                 { by => 'regen/keywords.pl', from => 'its data', style => '*',
+                   quote => <<'EOQ' });
+ */
+
+/*
+ *      If thought can corrupt language, language can also corrupt thought.
+ *              --George Orwell
+ *
+ *     ["Politics and the English Language"]
+ */
+EOQ
 
 my %by_strength;
 
