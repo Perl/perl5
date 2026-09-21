@@ -1,3 +1,11 @@
+/*
+ *      The world was so recent that many things lacked names,
+ *      and in order to indicate them it was necessary to point.
+ *              --Gabriel García Márquez
+ *
+ *     [Chapter I of _One Hundred Years of Solitude_]
+ */
+
 #ifdef PERL_EXT_RE_BUILD
 #include "re_top.h"
 #endif
