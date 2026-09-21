@@ -1,3 +1,11 @@
+/*
+ *      ...for the Ents loved the great trees;
+ *      and the wild woods, and the slopes of the high hills...
+ *              --Treebeard
+ *
+ *     [p.480 of _The Lord of the Rings_, III/iv: "Treebeard"]
+ */
+
 #ifdef PERL_EXT_RE_BUILD
 #include "re_top.h"
 #endif
