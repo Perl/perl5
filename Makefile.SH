@@ -681,7 +681,11 @@ lintflags = \
 	@echo `$(CCCMDSRC)` -S $*.c
 	@`$(CCCMDSRC)` -S $*.c
 
-all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT) common_build
+# Keep the Unicode data first after the makefile itself.  Parallel makes tend
+# to follow prerequisites from left to right, and mktables is a long-running
+# single job which should be started before the extension build fills the job
+# slots.  $(unidatafiles) already pulls in miniperl through uni.data.
+all: $(FIRSTMAKEFILE) $(unidatafiles) $(MINIPERL_EXE) $(generated_pods) $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT) common_build
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -1122,7 +1126,9 @@ $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git
 
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
-uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
+# $(CONFIGPM) depends on miniperl.  Put it first so that a parallel make
+# follows the complete mktables critical path as soon as miniperl is ready.
+uni.data: $(CONFIGPM) $(MINIPERL_EXE) lib/unicore/mktables
 	$(MINIPERL) lib/unicore/mktables -C lib/unicore -P pod -maketest -makenormtest -makelist -p
 #	Commented out so always runs, mktables looks at far more files than we
 #	can in this makefile to decide if needs to run or not
@@ -1696,8 +1702,10 @@ esac
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 # minitest can't depend on lib/Config.pm because that might be where miniperl
-# is crashing.
-minitest_prep: $(MINIPERL_EXE)
+# is crashing.  We need to make sure we depend on non-XS extensions, historically
+# this used to be via uni.data, but to allow Unicode table generation to start as
+# early as possible the dependency needs to be here.
+minitest_prep: $(MINIPERL_EXE) $(nonxs_ext)
 	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"

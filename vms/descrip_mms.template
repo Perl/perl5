@@ -273,7 +273,9 @@ utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.c
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
 utils5 = [.utils]corelist.com [.utils]ptargrep.com [.utils]zipdetails.com [.utils]encguess.com [.utils]streamzip.com
 
-all : base extras archcorefiles preplibrary [.pod]perltoc.pod
+# Keep the long-running Unicode generator on the first dependency path so a
+# parallel MMS build starts it before the extension tranche.
+all : unidatafiles.ts base extras archcorefiles preplibrary [.pod]perltoc.pod
 	@ QUALIFIERS := $(MMSQUALIFIERS)
 	@ QUALIFIERS = QUALIFIERS - """" - """"
 	@ write sys$output " "
@@ -408,7 +410,9 @@ $(ARCHDIR)Config_heavy.pl : [.lib]Config_heavy.pl
 $(ARCHDIR)vmspipe.com : vmspipe.com
         Copy $(MMS$SOURCE) $(ARCHDIR)
 
-unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsext
+# Config.pm depends on miniperl; list it first to keep mktables on the
+# dependency path followed first by parallel builds.
+unidatafiles.ts : [.lib]Config.pm $(MINIPERL_EXE) [.lib.unicore]mktables
 	$(MINIPERL) [.lib.unicore]mktables "-C" [.lib.unicore] "-P" [.pod] "-makelist" "-maketest" "-p"
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)

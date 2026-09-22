@@ -466,10 +466,13 @@ C<REGEN_VERBOSE=1> as an alternative to C<-v>.
 =item *
 
 The Unicode table generators have been optimized, reducing the time and peak
-memory needed to regenerate Unicode data.  On a full Unicode C<mktables>
-workload, generation is approximately 23% faster and uses 17% less peak
-memory.  The MPH squeeze path is also substantially faster, at the cost of a
-small increase in the generated data size.
+memory needed to regenerate Unicode data.  A full Unicode C<mktables> run is
+approximately 23% faster and uses 17% less peak memory.  The MPH squeeze path
+is also substantially faster, at the cost of a small increase in the
+generated data size.  Parallel builds now start C<mktables> as soon as
+miniperl and F<Config.pm> are available, allowing Unicode table generation to
+overlap extension builds.  Previously, it waited for every non-XS extension
+to finish.
 
 =item *
 

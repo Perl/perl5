@@ -844,6 +844,8 @@ CFG_VARS	=					\
 # Top targets
 #
 
+# Keep Unicode generation ahead of the extension tranche.  mktables is a
+# long-running single job, so starting it first shortens parallel builds.
 all : ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
 	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions \
 	$(PERLSTATIC)
@@ -1322,7 +1324,9 @@ installhtml : doc
 inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) ..\pod\perluniprops.pod : $(MINIPERL) $(CONFIGPM) ..\lib\unicore\mktables Extensions_nonxs
+# $(CONFIGPM) pulls in miniperl; list it first to keep the Unicode generator
+# on the first dependency path considered by parallel makes.
+$(UNIDATAFILES) ..\pod\perluniprops.pod : $(CONFIGPM) $(MINIPERL) ..\lib\unicore\mktables
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables -P ..\..\pod -maketest -makelist -p -check $@ $(FIRSTUNIFILE)
 

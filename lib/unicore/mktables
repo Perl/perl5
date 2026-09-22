@@ -1745,6 +1745,8 @@ sub clarify_code_point_count ($number) {
 }
 
 package Carp;
+use strict;
+use warnings;
 
 # These routines give a uniform treatment of messages in this program.  They
 # are placed in the Carp package to cause the stack trace to not include them,
@@ -1831,6 +1833,8 @@ sub carp_extra_args($args_ref) {
 }
 
 package main;
+use strict;
+use warnings;
 
 { # Closure
 
@@ -2053,6 +2057,8 @@ package main;
 }
 
 package Input_file;
+use strict;
+use warnings;
 
 # All input files use this object, which stores various attributes about them,
 # and provides for convenient, uniform handling.  The run method wraps the
@@ -3392,6 +3398,8 @@ END
 } # End closure
 
 package Multi_Default;
+use strict;
+use warnings;
 
 sub trace { return main::trace(@_); }
 
@@ -3478,6 +3486,8 @@ sub trace { return main::trace(@_); }
 }
 
 package Alias;
+use strict;
+use warnings;
 
 # An alias is one of the names that a table goes by.  This class defines them
 # including some attributes.  Everything is currently setup in the
@@ -3539,6 +3549,8 @@ package Alias;
 }
 
 package Range;
+use strict;
+use warnings;
 
 # A range is the basic unit for storing code points, and is described in the
 # comments at the beginning of the program.  Each range has a starting code
@@ -3655,6 +3667,8 @@ sub trace { return main::trace(@_); }
 } # End closure
 
 package _Range_List_Base;
+use strict;
+use warnings;
 
 # Base class for range lists.  A range list is simply an ordered list of
 # ranges, so that the ranges with the lowest starting numbers are first in it.
@@ -4836,7 +4850,10 @@ sub trace { return main::trace(@_); }
 } # End closure for _Range_List_Base
 
 package Range_List;
-use parent '-norequire', '_Range_List_Base';
+use strict;
+use warnings;
+# Don't use parent here, or mktables will not be able to run early.
+our @ISA = qw(_Range_List_Base);
 
 # A Range_List is a range list for match tables; i.e. the range values are
 # not significant.  Thus a number of operations can be safely added to it,
@@ -5228,7 +5245,10 @@ sub trace { return main::trace(@_); }
 } # end closure for Range_List
 
 package Range_Map;
-use parent '-norequire', '_Range_List_Base';
+use strict;
+use warnings;
+# Don't use parent here, or mktables will not be able to run early.
+our @ISA = qw(_Range_List_Base);
 
 # A Range_Map is a range list in which the range values (called maps) are
 # significant, and hence shouldn't be manipulated by our other code, which
@@ -6697,7 +6717,10 @@ END
 } # End closure
 
 package Map_Table;
-use parent '-norequire', '_Base_Table';
+use strict;
+use warnings;
+# Don't use parent here, or mktables will not be able to run early.
+our @ISA = qw(_Base_Table);
 
 # A Map Table is a table that contains the mappings from code points to
 # values.  There are two weird cases:
@@ -7559,7 +7582,10 @@ END
 } # End closure for Map_Table
 
 package Match_Table;
-use parent '-norequire', '_Base_Table';
+use strict;
+use warnings;
+# Don't use parent here, or mktables will not be able to run early.
+our @ISA = qw(_Base_Table);
 
 # A Match table is one which is a list of all the code points that have
 # the same property and property value, for use in \p{property=value}
@@ -8712,6 +8738,8 @@ END
 } # End closure for Match_Table
 
 package Property;
+use strict;
+use warnings;
 
 # The Property class represents a Unicode property, or the $perl
 # pseudo-property.  It contains a map table initialized empty at construction
@@ -9408,6 +9436,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 } # End closure
 
 package main;
+use strict;
+use warnings;
 
 sub display_chr {
     # Converts an ordinal printable character value to a displayable string,
@@ -17866,6 +17896,8 @@ END
     push @name, <<END;
 
 package charnames;
+use strict;
+use warnings;
 
 # This module contains machine-generated tables and code for the
 # algorithmically-determinable Unicode character names.  The following
@@ -17898,7 +17930,7 @@ $loose_names
 
     # And the following array gives the inverse mapping from code points to
     # names.  Lowest code points are first
-    \@code_points_ending_in_code_point = (
+    my \@code_points_ending_in_code_point = (
 $code_points_ending_in_code_point
     );
 
@@ -18029,7 +18061,7 @@ END
             my $L = $LBase + $SIndex / $NCount;
             my $V = $VBase + ($SIndex % $NCount) / $TCount;
             my $T = $TBase + $SIndex % $TCount;
-            $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
+            my $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
             $name .= $Jamo{$T} if $T != $TBase;
             return $name;
         }
