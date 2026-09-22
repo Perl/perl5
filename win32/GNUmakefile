@@ -1132,7 +1132,9 @@ CFG_VARS	=					\
 
 .PHONY: all info
 
-all : info rebasePE Extensions_nonxs $(PERLSTATIC)
+# Start the long-running Unicode generator before the extension build can
+# consume every parallel job slot.  Its own prerequisites pull in miniperl.
+all : info $(UNIDATAFILES) rebasePE Extensions_nonxs $(PERLSTATIC)
 
 info :
 ifeq ($(CCTYPE),GCC)
