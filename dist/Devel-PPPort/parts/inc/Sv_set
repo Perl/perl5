@@ -173,7 +173,11 @@ __UNDEFINED__ SvUV_set(sv, val) \
 
 #endif
 
-__UNDEFINED__ sv_set_undef(sv) sv_setpv(sv, NULL)
+#if { VERSION < 5.45.3 }
+/* GH 24661 - sv_set_undef() cleared flags it should not */
+#  undef sv_set_undef
+#  define sv_set_undef(sv) sv_setpv(sv, NULL)
+#endif
 
 =xsubs
 
