@@ -4,8 +4,8 @@ perldtrace - Perl's support for DTrace
 
 =head1 SYNOPSIS
 
- # dtrace -Zn 'perl::sub-entry, perl::sub-return { trace(copyinstr(arg0)) }'
- dtrace: description 'perl::sub-entry, perl::sub-return ' matched 10 probes
+ # dtrace -Zn 'perl*:::sub-entry, perl*:::sub-return { trace(copyinstr(arg0)) }'
+ dtrace: description 'perl*::sub-entry, perl*::sub-return ' matched 0 probes
 
  # perl -E 'sub outer { inner(@_) } sub inner { say shift } outer("hello")'
  hello
@@ -27,7 +27,7 @@ DTrace is a framework for comprehensive system- and application-level
 tracing. Perl is a DTrace I<provider>, meaning it exposes several
 I<probes> for instrumentation. You can use these in conjunction
 with kernel-level probes, as well as probes from other providers
-such as MySQL, in order to diagnose software defects, or even just
+such as PostgreSQL, in order to diagnose software defects, or even just
 your application's bottlenecks.
 
 Perl must be compiled with the C<-Dusedtrace> option in order to
@@ -140,6 +140,31 @@ C<Module::Name>-style names.
 =head1 EXAMPLES
 
 =over 4
+
+=item List available probes
+
+ # dtrace -P perl\* -c /usr/local/bin/perl -l
+
+   ID   PROVIDER            MODULE                          FUNCTION NAME
+ 1286  perl59340     libperl.dylib            Perl_dtrace_probe_load loaded-file
+ 1287  perl59340     libperl.dylib            Perl_dtrace_probe_load loading-file
+ 1288  perl59340     libperl.dylib              Perl_runops_standard op-entry
+ 1289  perl59340     libperl.dylib                 Perl_runops_debug op-entry
+ 1290  perl59340     libperl.dylib                        S_run_body op-entry
+ 1291  perl59340     libperl.dylib                          perl_run op-entry
+ 1292  perl59340     libperl.dylib                        perl_parse op-entry
+ 1293  perl59340     libperl.dylib                     perl_destruct op-entry
+ 1294  perl59340     libperl.dylib              Perl_dtrace_probe_op op-entry
+ 1295  perl59340     libperl.dylib           Perl_dtrace_probe_phase phase-change
+ 1296  perl59340     libperl.dylib                   Perl_cx_pushsub sub-entry
+ 1297  perl59340     libperl.dylib                      Perl_pp_sort sub-entry
+ 1298  perl59340     libperl.dylib                  Perl_pp_entersub sub-entry
+ 1299  perl59340     libperl.dylib                  Perl_pp_leavesub sub-entry
+ 1300  perl59340     libperl.dylib                   Perl_pp_require sub-entry
+ 1301  perl59340     libperl.dylib                   Perl_pp_dbstate sub-entry
+ 1302  perl59340     libperl.dylib                    Perl_cx_popsub sub-entry
+ 1303  perl59340     libperl.dylib            Perl_dtrace_probe_call sub-entry
+ 1304  perl59340     libperl.dylib            Perl_dtrace_probe_call sub-return
 
 =item Most frequently called functions
 
