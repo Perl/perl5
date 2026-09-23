@@ -855,6 +855,7 @@ the strings?).
  Leon T     5.45.0       2026-Jul-16     The 5.45 development track
  Paul E     5.45.1       2026-Jul-21
  Ether      5.45.2       2026-Aug-20
+ Philippe   5.45.3       2026-Sep-24
 
 =head2 SELECTED RELEASE SIZES
 
