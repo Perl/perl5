@@ -450,7 +450,7 @@ jobs:
           ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
-          TEST_JOBS=2 ./perl t/harness
+          TEST_JOBS=2 PERL_DTRACE_SUDO=sudo ./perl t/harness
 
   #         _         _
   # __ __ _(_)_ _  __| |_____ __ _____
