@@ -434,7 +434,7 @@ jobs:
       matrix:
         CONFIGURE_ARGS:
           - "-Uusethreads"
-          - "-Duseithreads -Duseshrplib"
+          - "-Duseithreads -Duseshrplib -Dusedtrace"
 
     steps:
       - uses: actions/checkout@v6
