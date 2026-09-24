@@ -2333,7 +2333,14 @@ Perl_category_lock(pTHX_ const UV mask,
 
 #  endif
 
-        assert(wanted);
+        /* On some platforms, notably those where the LC_ALL uses positional
+         * notation, this function can get called during set-up before the
+         * above variables are populated.  In that case, just use "C", as that
+         * should be the only legitimate locale this early on */
+        if (! wanted) {
+            assert(PL_phase == PERL_PHASE_CONSTRUCT);
+            wanted = "C";
+        }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                                "%s: wanted=%s\n",
