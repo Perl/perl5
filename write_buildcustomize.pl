@@ -47,13 +47,13 @@ my @toolchain = qw(
     cpan/Getopt-Long/lib
     cpan/Text-ParseWords/lib
     cpan/ExtUtils-PL2Bat/lib
+    cpan/parent/lib
 );
 
 # These are for XS building on Win32, since nonxs and xs build simultaneously
 # on Win32 if parallel building
 push @toolchain, qw(
     dist/ExtUtils-ParseXS/lib
-    cpan/parent/lib
     cpan/ExtUtils-Constant/lib
     dist/base/lib
 ) if $^O eq 'MSWin32';

@@ -681,7 +681,7 @@ lintflags = \
 	@echo `$(CCCMDSRC)` -S $*.c
 	@`$(CCCMDSRC)` -S $*.c
 
-all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT) common_build
+all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(unidatafiles) $(generated_pods) $(private) $(public) $(dynamic_ext) $(nonxs_ext) extras.make $(MANIFEST_SRT) common_build
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
@@ -1122,7 +1122,7 @@ $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git
 
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
-uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
+uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables
 	$(MINIPERL) lib/unicore/mktables -C lib/unicore -P pod -maketest -makenormtest -makelist -p
 #	Commented out so always runs, mktables looks at far more files than we
 #	can in this makefile to decide if needs to run or not
@@ -1698,7 +1698,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 # minitest can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
 minitest_prep: $(MINIPERL_EXE)
-	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
+	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles) $(nonxs_ext)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm, or the Unicode data files."
