@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.45.3 - Jasper Fforde - Shades of Grey                    
+
+L<Announced on 2026-09-24 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2026/09/msg271247.html>
+
+The safest course was actually the simplest-do nothing at all and hope
+everything turned out for the best. It wasn't a great plan, but it had
+the benefits of simplicity and a long tradition.
+
 =head2 v5.45.2 - Charles F. Kettering
 
 L<Announced on 2026-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2026/08/msg271149.html>
