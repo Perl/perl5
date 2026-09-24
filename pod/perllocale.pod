@@ -542,7 +542,14 @@ Perl avoids their use.
 However, beginning in Perl 5.46, Perl may be Configured to emulate
 thread-safe operations on any system lacking native thread-safe locales.
 This will decrease performance, so you may want to experiment if the
-amount of that decrease is acceptable for your needs.  To enable this,
+amount of that decrease is acceptable for your needs.  During a portion
+of the 5.45 development cycle, the feature is by default enabled so as
+to actually field test it.  To turn it off, add to the Configure call
+the option
+
+ -Accflags=-DNO_EMULATE_THREAD_SAFE_LOCALES
+
+To enable this feature on Perl versions where the default is not enabled,
 add to the Configure call the option
 
  -Accflags=-DEMULATE_THREAD_SAFE_LOCALES
