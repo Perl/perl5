@@ -8676,6 +8676,10 @@ S_sv_pos_u2b_midway(const U8 *const start, const U8 *send,
 {
     PERL_ARGS_ASSERT_SV_POS_U2B_MIDWAY;
 
+    /* Avoid unsigned underflow for offsets beyond the end. */
+    if (uoffset >= uend)
+        return send - start;
+
     STRLEN backw = uend - uoffset;
 
     if (uoffset < 2 * backw) {
@@ -8745,6 +8749,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
                 }
                 if ((*mgp)->mg_len != -1) {
                     /* And we know the end too.  */
+                    canonical_position = uoffset <= (STRLEN)(*mgp)->mg_len;
+                    at_end = uoffset >= (STRLEN)(*mgp)->mg_len;
                     boffset = boffset0
                         + sv_pos_u2b_midway(start + boffset0, send,
                                               uoffset - uoffset0,
@@ -8766,12 +8772,14 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
                     boffset0 = cache[3];
                 }
 
+                canonical_position = TRUE;
                 boffset = boffset0
                     + sv_pos_u2b_midway(start + boffset0,
                                           start + cache[1],
                                           uoffset - uoffset0,
                                           cache[0] - uoffset0);
             } else {
+                canonical_position = TRUE;
                 boffset = boffset0
                     + sv_pos_u2b_midway(start + boffset0,
                                           start + cache[3],
@@ -8784,6 +8792,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
             /* If we can take advantage of a passed in offset, do so.  */
             /* In fact, offset0 is either 0, or less than offset, so don't
                need to worry about the other possibility.  */
+            canonical_position = uoffset <= (STRLEN)(*mgp)->mg_len;
+            at_end = uoffset >= (STRLEN)(*mgp)->mg_len;
             boffset = boffset0
                 + sv_pos_u2b_midway(start + boffset0, send,
                                       uoffset - uoffset0,

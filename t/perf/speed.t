@@ -24,7 +24,7 @@ use 5.010;
 
 $| = 1;
 
-plan tests => 1;
+plan tests => 2;
 
 watchdog(60);
 
@@ -40,6 +40,15 @@ SKIP: {
     $x = "x" x 1_000_000;
     $y = $x for 1..1_000_000;
     pass("COW 1Mb strings");
+}
+
+{
+    # GH #24531: substr wasn't updating the UTF-8 position cache.
+    local ${^UTF8CACHE} = 1; # enable cache, disable debugging
+    my $s = "\x{100}" x 1_000_000;
+    my $part;
+    $part = substr($s, 500_000, 10) for 1..100_000;
+    is($part, "\x{100}" x 10, 'repeated substr on a UTF-8 string');
 }
 
 watchdog(0);
