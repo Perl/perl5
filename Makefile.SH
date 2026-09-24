@@ -204,10 +204,20 @@ for f in $dynamic_ext; do
    esac
 done
 
+: dependencies needed just to run the re tests
+dynamic_ext_testre=
+for f in $dynamic_ext; do
+    case $f in
+        Cwd|Encode|Fcntl|File/Glob|Hash/Util|IO|List/Util|POSIX|Storable|Time/HiRes|Unicode/Normalize|mro|re|threads)
+            base=`echo "$f" | sed 's/.*\///'`
+            dynamic_ext_testre="$dynamic_ext_testre lib/auto/$f/$base.$dlext"
+            ;;
+    esac
+done
+
 : Prepare dependency lists for Makefile.  Non-Unix systems likely will also
 : require changes in make_ext.pl
 dynamic_list=' '
-dynamic_ext_re="lib/auto/re/re.$dlext"
 extra_dep='
 cpan/Pod-Simple/pm_to_blib: dist/if/pm_to_blib
 ext/Pod-Functions/pm_to_blib: cpan/Pod-Simple/pm_to_blib cpan/Pod-Escapes/pm_to_blib pod/perlfunc.pod
@@ -385,7 +395,7 @@ $spitshell >>$Makefile <<!GROK!THIS!
 RUN_TESTS = \$(LDLIBPTH) ./runtests
 
 dynamic_ext = $dynamic_list
-dynamic_ext_re = $dynamic_ext_re
+dynamic_ext_testre = $dynamic_ext_testre
 static_ext = $static_list
 nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
@@ -1645,8 +1655,7 @@ test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(TEST_PERL_DLL)
 else
 # this is a dynamic build so we DO need to make_ext.pl for the re extension.
 $spitshell >>$Makefile <<'!NO!SUBS!'
-test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
-	$(MINIPERL) make_ext.pl $(dynamic_ext_re) MAKE="$(MAKE)" LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
+test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_testre) $(TEST_PERL_DLL) uni.data
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 !NO!SUBS!
 fi
