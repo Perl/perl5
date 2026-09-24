@@ -1195,7 +1195,7 @@ for a discussion about the cache's limitations.
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.45.3"
+of 5.45.4"
 
 =head2 make ithreads more robust
 
