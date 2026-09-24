@@ -494,8 +494,8 @@ sub min {
 
 # Smokes have shown this to be about the maximum numbers some platforms can
 # handle.  khw has tried 500 threads/1000 iterations on Linux
-my $thread_count = 15;
-my $iterations = 100;
+my $thread_count = (${^SAFE_LOCALES} == 1) ? 15 : 10;
+my $iterations = (${^SAFE_LOCALES} == 1) ? 100 : 50;
 
 my $alarm_clock = (1 * 10 * 60);    # A long time, just to prevent hanging
 
