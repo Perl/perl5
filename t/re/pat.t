@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1302;  # Update this when adding/deleting tests.
+plan tests => 1314;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2157,7 +2157,8 @@ EOP
     }
     {
         # [perl #129281] buffer write overflow, detected by ASAN, valgrind
-        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {}, "don't bump whilem_c too much");
+        fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {},
+            "don't bump slc_whilem_seen too much");
     }
     {
         # RT #131893 - fails with ASAN -fsanitize=undefined
@@ -2661,6 +2662,61 @@ SKIP:
         for my $i (1..2) {
             ok("pqrs" !~ m{^\x{100}.+?AB}, "GH #24614 iter $i");
         }
+    }
+
+
+    {
+        # Test the super-linear cache
+
+        # Use the minimum countdown before enabling the cache, to ensure
+        # the cache is being exercised wherever possible:
+        local ${^RE_SUPERLINEAR_CACHE_DELAY} = 1;
+
+        # RT #79152
+        # Test the super-linear cache against nested quantifiers.
+
+        ok("xayxay" =~ /^.*(x(a|bc)*y){2,}/,  'SLC RT #79152 1');
+        is($&, "xayxay",                      'SLC RT #79152 1 $&');
+
+        ok("xayxay" =~ /^.*(x(a|bc)*y){2,3}/, 'SLC RT #79152 2');
+        is($&, "xayxay",                      'SLC RT #79152 2 $&');
+
+        ok("xayxayxayxayZ"
+          =~ /^.*?(x(a|bc)*y){2,3}Z/,         'SLC RT #79152 3');
+        is($&, "xayxayxayxayZ",               'SLC RT #79152 3 $&');
+
+        # This tested a bug in the positive part of the SLC, which
+        # no longer exists; but might as well keep the test.
+        ok("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            =~ /^(a*?)(?!(a{6}|a{5})*$)/,     'SLC +ve');
+        is($+[1], "12",                       'SLC +ve $+[1]');
+
+        # Test running a nested external sub-pattern
+
+        my $inner_qr = qr/(x(a|bc)*y)/;
+        ok("xayxay" =~ /^.*(??{ $inner_qr }){2,3}/, 'SLC nested qr');
+        is($&, "xayxay",                            'SLC nested qr $&');
+
+        # Non-regular items such as back-references
+
+        ok( "aaabbbaa"
+          =~ /^
+                (a+)       # a
+                ([ab]+)*   # aabbb
+                (
+                    \g{1}  # a
+                    |
+                    cccc
+                )
+                [az]       # a
+            $/x,
+            "SLC backref"
+        );
+
+        # multiple quantifiers
+
+        ok("aa;bbbbbbbbbbbbbbbbbbbb;cc"
+            =~ /^(aa?)*;(bb?)*bbbbbbbbbbbbbbbbbb;(cc?)*$/, "SLC multi");
     }
 
     {

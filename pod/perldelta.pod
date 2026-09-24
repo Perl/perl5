@@ -186,6 +186,14 @@ grew with both the number of alternatives and the amount of text skipped
 before a match, while preserving the existing matching semantics for native
 and UTF-8 strings.
 
+=item *
+
+Changes have been made to the "super-linear cache", which is used to avoid
+excessive backtracking in some regexes which include quantifiers on
+variable-length sub-patterns, such as C<(a|bc)*> and C<(ab+){2,}>. This
+change may reduce the amount of backtracking that takes place, and may
+reduce the amount of temporary memory used for the cache.
+
 =back
 
 =head1 Modules and Pragmata

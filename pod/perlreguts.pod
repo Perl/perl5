@@ -1217,18 +1217,20 @@ don't need to record the min and max values any more.
 
 With this simplification, we just need to record a single bit of
 information ("failed already") for every (quantifier-id, current string
-position) tuple. We can achieve this by allocating a single bit array
-whose size is equal to the string length multiplied by the number of
-candidate quantifiers in the pattern. So for example when matching a 1
-Mbyte string against a pattern like C</(...)*(...)*/> which has two
-quantifiers, 2 million bits must be allocated.
+position) tuple. We can achieve this by potentially allocating, for each
+candidate quantifier in the pattern, a bit array whose size is equal to
+the string length. So for example when matching a 1 Mbyte string against a
+pattern like C</(...)*(...)*/> which has two quantifiers, two
+1-million-bit arrays might be allocated.
 
 To avoid a potentially large malloc() for every match that has been marked
-as suitable for a SLC, a countdown is initiated the first time a candidate
-C<WHILEM> node is reached; only after (string length) multiplied by
-(number of participating C<WHILEM> nodes) iterations is the cache actually
-allocated and initialised. This crude heuristic is an indication that the
-match has gone super-linear.
+as suitable for a SLC, a per-node countdown is initiated the first time a
+candidate C<WHILEM> node is reached; only when the number of iterations of
+that particular node is equal to the remaining string length is a cache
+for that node actually allocated and initialised. This crude heuristic is
+an indication that the match has gone super-linear. Guess wrong and a
+cache will be unnecessarily allocated or, conversely, unnecessary
+backtracking will happen.
 
 =item *
 
@@ -1236,14 +1238,6 @@ The SLC is only used for quantifiers on I<variable-length> sub-patterns,
 i.e. those which are compiled to a C<CURLYX>/C<WHILEM> node pair.
 Quantifiers with simpler sub-patterns are less likely to exhibit
 exponential behaviour.
-
-=item *
-
-Non-regular pattern items such as backreferences (C<\g{1}>) and evals
-(C<(??{...})/>) break the assumption that running the same rest-of-pattern
-from the same position will give the same result each time. If these occur
-in the rest-of-pattern, the cache is reset. This is currently done at
-runtime.
 
 =item *
 
@@ -1303,47 +1297,127 @@ strong suspicion is that the outer must iterate at least twice (so is at
 minimum C<{2,...}>) so that the first iteration can fail and mark the
 cache, then the second incorrectly fail due to the cache.]
 
-There are some tests for nested quantifiers in F<t/re/re_tests> under the
+There are some tests for nested quantifiers in F<t/re/pat.t> under the
 heading 'RT #79152'.
 
 =item *
 
-The number of cache-participating C<WHILEM> nodes is stored in the upper 4
-bits of each C<WHILEM>'s C<FLAGS()> field, while the identity of the
-particular C<WHILEM> (used as part of the index into the bit cache) is
-stored in the lower 4 bits. This means that a pattern can have a maximum
-of 16 participating C<WHILEM>s. If the flags field is zero, it indicates
-that this C<WHILEM> node won't participate in the cache mechanism.
+In a similar fashion, a nested sub-pattern called by e.g. C<(?1)> or
+C<(?{{ $inner_qr })> may have a variable rest-of-pattern depending on what
+surrounds it. Because of this, none of its C<WHILEM> nodes are treated as
+suitable candidates for the SLC while executing the inner pattern. This is
+enforced by checking C<cur_eval>, which is non-zero whenever an inner
+pattern is being executed.
+
+Another reason for not using the cache is that the inner pattern will have
+a different set of C<WHILEM> node ids, and accommodating them would
+complicate the code.
+
+=item *
+
+More generally, non-regular node types (including not only C<(?1)>
+and C<(?{{ $inner_qr })> but also back-references like C<\g{1}> and
+conditionals like C<(?{cond|yes|no)>) break the assumption that running
+the same rest-of-pattern from the same position will give the same result
+each time.
+
+This is detected by setting the boolean variable C<seen_nonregular>
+whenever such a non-regular node is executed. Then during backtracking,
+skipping the marking of the cache if the variable is true.
+
+In the presence of multiple quantifiers such as
+
+    /A (B)* C (D)* E/
+
+a non-regular node encountered while executing a D iteration or E should
+disable cache setting in both C<(B)*> and C<(D)*> when backtracking on
+failure. Conversely, a non-regular node encountered in B or C should only
+affect C<(B)*>. Finally, such a node in A shouldn't affect either
+quantifier. This is because such a node should only disable a quantifier's
+cache if that node appears within that quantifier's rest-of-pattern.
+
+To support this per-quantifier selective behaviour, at the start of each
+new quantifier (i.e. when processing the C<CURLYX>), the current value of
+C<seen_nonregular> is saved and then the variable is set to false. On
+return (via either success or failure), the saved value is restored but
+also ORed with the current value.
+
+The variable is similarly saved, set to false and ORed on return when
+entering the 'rest of pattern' after a qualifier, i.e. C<WHILEM_B_min,max>
+states. Or to put it another way, the variable is saved/restored at each
+of the spaces in the example pattern above.
+
+Currently the value is not saved/restored between individual iterations of
+a quantifier; that is, the C<WHILEM_A_*> states don't process
+C<seen_nonregular>. This is based on the assumption that each iteration of
+B or D is likely to have similar results: they I<all> contain non-regular
+nodes, or none of them do. This won't be universal of course: B could
+represent the physical pattern C<(abc|\g{1})> and some iterations might
+match one and others the other. But where this occurs, the only effect is
+that the cache isn't set when in theory it was safe to do so; so more
+backtracking occurs than is strictly necessary. It's always possible at a
+later date to add C<WHILEM_A_min,max> branches and save/restore
+C<seen_nonregular> on a more fine-grained basis.
+
+This run-time mechanism has an advantage over a compile-time one in that
+the cache is disabled only if a non-regular node is actually executed,
+rather than just being on the possible execution path. For example.
+C<...(aaa|bbb\1)...> might never encounter the \1 if the string doesn't
+contain C<bbb>, while the regex compiler would have to disable the cache
+on the grounds that the C<\1> I<might> be executed.
+
+Note that a simple C<(?{...})> shouldn't affect the SLC, because in theory
+the eval can't have any side-effects on the execution of the
+rest-of-pattern if it doesn't also have non-regular nodes.
+[ DAPM 2026 - actually the eval can modify C<$_> etc which under some
+circumstances can change the string currently being matched against. But
+that is a more general bug in eval which should be addressed at some
+point. ]
+
+=item *
+
+There is currently a limit of 30 cache-participating C<WHILEM> nodes per
+regex. In theory this could in future be changed up a hard limit of 255.
+This is set by the C<SLC_MAX_WHILEM_NODES> define in F<regcomp_study.c>.
 
 =back
 
-The runtime state of the SLC is mainly stored in various fields of the
-C<reginfo> struct, which is initialised at the start of a match.
+=head4 The super-linear cache at run-time
 
-A pointer to the cache is stored in C<< reginfo->info_aux.poscache >>,
-which will be freed when matching ends (the aux structure is guaranteed to
-be freed even on abnormal termination), and its size is recorded in
-C<< reginfo->poscache_size >>.
+In a compiled regex, a node id in the range 1-30 is stored in the
+C<FLAGS()> field of each participating C<WHILEM> node (a value of 0
+indicates that the node isn't suitable for the SLC). The field
+C<slc_whilem_seen> in the C<regexp_internal> structure indicates the total
+number of such C<WHILEM> nodes.
 
-If zero, C<< reginfo->poscache_maxiter >> indicates that the SLC countdown
-has not yet been triggered (i.e. no candidate C<WHILEM> node has been
-executed yet), or that it has been subsequently disabled again. Otherwise,
-its (positive) value is used for two different purposes: what value to
-start an initial (or reset) countdown from; and the size to C<alloc()> the
-cache, in bits. Currently these values are the same, but in principle they
-needn't be.
+The runtime state is mainly contained in an array of (countdown, bitmap
+pointer) pairs, the size of which is equal to C<slc_whilem_seen>. This
+array is allocated the first time a regex starts to be executed, and is
+kept for future matches, pointed to from the C<slc> field in the
+C<regexp_internal> structure. It is not copied when cloning a thread; it
+relies instead on the first match run in the new thread to allocate it. In
+the rare event of a regex called recursively, a new array is allocated and
+freed after each execution of the pattern.
 
-C<< reginfo->poscache_iter >> only has meaning if C<poscache_maxiter> is
-non-zero. In that case, it represents a countdown initialised from
-C<poscache_maxiter>. If it reaches 1, the cache is malloced/realloced if
-necessary, and then zeroed. When it reaches 0, the cache is used.
+C<< reginfo->info_aux->slc >> is used to point to the currently running
+array: either the permanent one, or a temporary recursive one.
 
-The C<CACHEsayNO> macro is used at runtime in various places as a
-replacement for C<sayNO> to set a fail bit in the cache while popping the
-current state. The C<ST.cache_offset> and C<ST.cache_mask> fields are set
-by the current C<WHILEM> to the address in the cache of the byte and bit
-corresponding to the current match state. These are used by C<CACHEsayNO>
-to mark the cache during a subsequent unwinding.
+The first time a participating C<WHILEM> node is executed, the
+C<slc_countdown> field of the array entry indexed by C<FLAGS()> is
+initialised to the string length. Subsequent iterations of that node
+decrement the count. When it reaches zero, a bitmap with a number of bits
+equal to the size of string being matched against is allocated and pointed
+to from the C<slc_bitmap> field of the array entry. All such allocated
+bitmaps are freed at the end of the regex's execution. This is guaranteed
+even on croaking due to the cache array pointer being stored in the
+C<info_aux> structure, which is always processed during clean up.
+
+The C<CACHEsayNO> macro is used in various places as a replacement for
+C<sayNO> to set a fail bit in the cache while popping the current state.
+The C<ST.slc_byte> and C<ST.slc_mask> fields are set by the current
+C<WHILEM> to the address in the cache of the byte and bit corresponding to
+the current match state. These are used by C<CACHEsayNO> to mark the cache
+during a subsequent unwinding.
 
 The initial cache allocation countdown can be adjusted via
 C<PL_re_superlinear_cache_delay>, which is settable via

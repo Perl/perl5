@@ -1070,7 +1070,6 @@ x(?#	-	c	-	Sequence (?#... not terminated
 ^(.)\s+.$(?(1))	A B	y	$1	A	# [perl #37688]
 (?:r?)*?r|(.{2,4})	abcde	y	$1	abcd
 (?!)+?|(.{2,4})	abcde	y	$1	abcd
-^(a*?)(?!(a{6}|a{5})*$)	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	y	$+[1]	12	# super-linear cache bug may return 18
 ^((?>(?:aa)?b)?)	aab	y	$1	aab
 ^((?:aa)*)(?:X+((?:\d+|-)(?:X+(.+))?))?$	aaaaX5	y	$1	aaaa
 X(A|B||C|D)Y	XXXYYY	y	$&	XY	# Trie w/ NOTHING
@@ -1634,15 +1633,6 @@ a(.)\4294967298	ab\o{42}94967298	ya	$1	b	\d not converted to native; \o{} is
 [\0005]	\0005	y	$&	\000
 [\0005]	5\000	y	$&	5
 [\_]	_	y	$&	_
-
-# RT #79152
-# Test the super-linear cache against nested quantifiers.
-# Note that the first half of each of these patterns is there purely
-# to soak up the initial cache countdown; the guts of the test is the
-# second half.
-(q1|.)*(q2|.)*(x(a|bc)*y){2,}	xayxay	y	$&	xayxay
-(q1|.)*(q2|.)*(x(a|bc)*y){2,3}	xayxay	y	$&	xayxay
-(q1|z)*(q2|z)*z{15}-.*?(x(a|bc)*y){2,3}Z	zzzzzzzzzzzzzzzz-xayxayxayxayZ	y	$&	zzzzzzzzzzzzzzzz-xayxayxayxayZ
 
 (?:(?:)foo|bar|zot|rt78356)	foo	y	$&	foo
 /\xe0\pL/i	\xc0a	y	$&	\xc0a
