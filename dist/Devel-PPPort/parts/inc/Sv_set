@@ -173,6 +173,12 @@ __UNDEFINED__ SvUV_set(sv, val) \
 
 #endif
 
+#if { VERSION < 5.45.3 }
+/* GH 24661 - sv_set_undef() cleared flags it should not */
+#  undef sv_set_undef
+#  define sv_set_undef(sv) sv_setpv(sv, NULL)
+#endif
+
 =xsubs
 
 IV
@@ -238,7 +244,19 @@ sv_setsv_compile_test(sv)
                 sv_setsv_flags(sv, NULL, 0);
                 sv_setsv_flags(sv, NULL, SV_NOSTEAL);
 
-=tests plan => 15
+void
+sv_set_undef(SV *sv)
+
+bool
+sv_set_undef_check_flags()
+        PREINIT:
+          SV *sv = sv_newmortal();
+        CODE:
+          sv_set_undef(sv);
+          RETVAL = SvTEMP(sv) != 0;
+        OUTPUT: RETVAL
+
+=tests plan => 19
 
 my $foo = 5;
 is(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
@@ -276,6 +294,20 @@ is($bar->x(), 'hacker');
     is tied($scalar)->{store}, 0;
     is $copy2, 'string';
 
+my $quux_destroyed;
+{
+    my $x = 1;
+    Devel::PPPort::sv_set_undef($x);
+    ok !defined $x, '$x no longer defined';
+    $x = bless {}, "quux";
+    Devel::PPPort::sv_set_undef($x);
+    ok !defined $x, '$x no longer quux-like';
+    is $quux_destroyed, 1, "quux destroyed";
+}
+
+ok(Devel::PPPort::sv_set_undef_check_flags(),
+   "check flags are handled correctly");
+
 package TieScalarCounter;
 
 sub TIESCALAR {
@@ -302,3 +334,9 @@ sub x { 'foobar' }
 package bar;
 
 sub x { 'hacker' }
+
+package quux;
+
+sub DESTROY {
+  ++$quux_destroyed;
+}
