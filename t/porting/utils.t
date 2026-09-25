@@ -49,6 +49,7 @@ close $fh or die $!;
 
 my @victims = (qw(installman installperl regen_perly.pl));
 my %excuses = (
+               'Porting/directory-diff.pl' => 'Algorithm::Diff',
                'Porting/git-deltatool' => 'Git::Wrapper',
                'Porting/podtidy' => 'Pod::Tidy',
                'Porting/leakfinder.pl' => 'XS::APItest',
