@@ -96,6 +96,7 @@ for file do
     pp_pack) ;;
     pp_sort) ;;
     pp_sys) ;;
+    random) ;;
     regcomp) ;;
     regexec) ;;
     run) ;;
