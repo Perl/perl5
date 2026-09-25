@@ -538,7 +538,7 @@ X<$_>
 If any element of LIST is an lvalue, you can modify it by modifying
 VAR inside the loop.  Conversely, if any element of LIST is NOT an
 lvalue, any attempt to modify that element will fail.  In other words,
-the C<foreach> loop index variable is an implicit alias for each item
+the C<foreach> loop variable is an implicit alias for each item
 in the list that you're looping over.
 X<alias>
 
