@@ -1492,7 +1492,7 @@ typedef enum {
 #    include "locale_table.h"
 #endif  /* USE_LOCALE */
 
-    LC_ALL_INDEX_   /* Always defined, even if no LC_ALL on system */
+    LC_ALL_INDEX_   /* Always defined */
 
 } locale_category_index;
 

@@ -1426,6 +1426,7 @@
 #       define calculate_LC_ALL_string(a,b,c,d) S_calculate_LC_ALL_string(aTHX_ a,b,c,d)
 #       define external_call_langinfo(a,b,c)    S_external_call_langinfo(aTHX_ a,b,c)
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
+#       define give_perl_locale_control(a,b)    S_give_perl_locale_control(aTHX_ a,b)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define native_querylocale_i(a)          S_native_querylocale_i(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
@@ -1447,11 +1448,6 @@
 #       endif
 #       if defined(HAS_NL_LANGINFO)
 #         define langinfo_sv_i(a,b,c,d,e)       S_langinfo_sv_i(aTHX_ a,b,c,d,e)
-#       endif
-#       if defined(LC_ALL)
-#         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
-#       else
-#         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
 #       endif
 #       if defined(USE_LOCALE_COLLATE)
 #         define new_collate(a,b)               S_new_collate(aTHX_ a,b)

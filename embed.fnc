@@ -5004,6 +5004,9 @@ RS	|locale_category_index|get_category_index_helper		\
 				|const int category			\
 				|NULLOK bool *success			\
 				|const line_t caller_line
+S	|void	|give_perl_locale_control				\
+				|NN const char *lc_all_string		\
+				|const line_t caller_line
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|const char *|native_querylocale_i				\
@@ -5075,15 +5078,6 @@ S	|const char *|langinfo_sv_i					\
 				|NN const char *locale			\
 				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
-#   endif
-#   if defined(LC_ALL)
-S	|void	|give_perl_locale_control				\
-				|NN const char *lc_all_string		\
-				|const line_t caller_line
-#   else
-S	|void	|give_perl_locale_control				\
-				|NN const char **curlocales		\
-				|const line_t caller_line
 #   endif
 #   if defined(USE_LOCALE_COLLATE)
 S	|void	|new_collate	|NN const char *newcoll 		\

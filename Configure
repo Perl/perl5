@@ -17616,20 +17616,12 @@ case "$perl_lc_all_separator$perl_lc_all_category_positions_init" in
 #include <string.h>
 #include <stdio.h>
 
-#ifndef LC_ALL
-
-int
-main (const int argc, const char ** argv)
-{
-}
-
-#else
-#  define C_ARRAY_LENGTH(a)  (sizeof(a)/sizeof((a)[0]))
-#  define strEQ(s1,s2) (strcmp(s1,s2) == 0)
-#  define strNE(s1,s2) (strcmp(s1,s2) != 0)
-#  define Copy(s,d,n,t) (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
-#  define memEQ(s1,s2,l) (memcmp(((const void *) (s1)), ((const void *) (s2)), l) == 0)
-#  define memNE(s1,s2,l) (! memEQ(s1,s2,l))
+#define C_ARRAY_LENGTH(a)  (sizeof(a)/sizeof((a)[0]))
+#define strEQ(s1,s2) (strcmp(s1,s2) == 0)
+#define strNE(s1,s2) (strcmp(s1,s2) != 0)
+#define Copy(s,d,n,t) (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t))
+#define memEQ(s1,s2,l) (memcmp(((const void *) (s1)), ((const void *) (s2)), l) == 0)
+#define memNE(s1,s2,l) (! memEQ(s1,s2,l))
 
 int
 main (const int argc, const char ** argv)
@@ -17642,95 +17634,95 @@ main (const int argc, const char ** argv)
      * locale.c */
     const int categories[] = {
 
-#  ifdef LC_CTYPE
+#ifdef LC_CTYPE
         LC_CTYPE,
-#  endif
-#  ifdef LC_NUMERIC
+#endif
+#ifdef LC_NUMERIC
         LC_NUMERIC,
-#  endif
-#  ifdef LC_COLLATE
+#endif
+#ifdef LC_COLLATE
         LC_COLLATE,
-#  endif
-#  ifdef LC_TIME
+#endif
+#ifdef LC_TIME
         LC_TIME,
-#  endif
-#  ifdef LC_MESSAGES
+#endif
+#ifdef LC_MESSAGES
         LC_MESSAGES,
-#  endif
-#  ifdef LC_MONETARY
+#endif
+#ifdef LC_MONETARY
         LC_MONETARY,
-#  endif
-#  ifdef LC_ADDRESS
+#endif
+#ifdef LC_ADDRESS
         LC_ADDRESS,
-#  endif
-#  ifdef LC_IDENTIFICATION
+#endif
+#ifdef LC_IDENTIFICATION
         LC_IDENTIFICATION,
-#  endif
-#  ifdef LC_MEASUREMENT
+#endif
+#ifdef LC_MEASUREMENT
         LC_MEASUREMENT,
-#  endif
-#  ifdef LC_PAPER
+#endif
+#ifdef LC_PAPER
         LC_PAPER,
-#  endif
-#  ifdef LC_TELEPHONE
+#endif
+#ifdef LC_TELEPHONE
         LC_TELEPHONE,
-#  endif
-#  ifdef LC_NAME
+#endif
+#ifdef LC_NAME
         LC_NAME,
-#  endif
-#  ifdef LC_SYNTAX
+#endif
+#ifdef LC_SYNTAX
         LC_SYNTAX,
-#  endif
-#  ifdef LC_TOD
+#endif
+#ifdef LC_TOD
         LC_TOD
-#  endif
+#endif
 
     };
 
     const char * category_names[] = {
 
-#  ifdef LC_CTYPE
+#ifdef LC_CTYPE
         "LC_CTYPE",
-#  endif
-#  ifdef LC_NUMERIC
+#endif
+#ifdef LC_NUMERIC
         "LC_NUMERIC",
-#  endif
-#  ifdef LC_COLLATE
+#endif
+#ifdef LC_COLLATE
         "LC_COLLATE",
-#  endif
-#  ifdef LC_TIME
+#endif
+#ifdef LC_TIME
         "LC_TIME",
-#  endif
-#  ifdef LC_MESSAGES
+#endif
+#ifdef LC_MESSAGES
         "LC_MESSAGES",
-#  endif
-#  ifdef LC_MONETARY
+#endif
+#ifdef LC_MONETARY
         "LC_MONETARY",
-#  endif
-#  ifdef LC_ADDRESS
+#endif
+#ifdef LC_ADDRESS
         "LC_ADDRESS",
-#  endif
-#  ifdef LC_IDENTIFICATION
+#endif
+#ifdef LC_IDENTIFICATION
         "LC_IDENTIFICATION",
-#  endif
-#  ifdef LC_MEASUREMENT
+#endif
+#ifdef LC_MEASUREMENT
         "LC_MEASUREMENT",
-#  endif
-#  ifdef LC_PAPER
+#endif
+#ifdef LC_PAPER
         "LC_PAPER",
-#  endif
-#  ifdef LC_TELEPHONE
+#endif
+#ifdef LC_TELEPHONE
         "LC_TELEPHONE",
-#  endif
-#  ifdef LC_NAME
+#endif
+#ifdef LC_NAME
         "LC_NAME",
-#  endif
-#  ifdef LC_SYNTAX
+#endif
+#ifdef LC_SYNTAX
         "LC_SYNTAX",
-#  endif
-#  ifdef LC_TOD
+#endif
+#ifdef LC_TOD
         "LC_TOD"
-#  endif
+#endif
 
     };
 
@@ -17937,7 +17929,6 @@ main (const int argc, const char ** argv)
 
 }
 
-#endif
 EOF
         set try
         if eval $compile_ok; then

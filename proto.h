@@ -12926,6 +12926,15 @@ S_get_category_index_helper(pTHX_ const int category, bool *success, const line_
        STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+static void
+S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#   define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
+       STMT_START { Perl_assert_aTHX; assert(lc_all_string);  \
+                    PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;      \
+    } STMT_END
+
 static const char *
 S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
         Perl_attribute_nonnull_aTHX;
@@ -13053,27 +13062,6 @@ S_langinfo_sv_i(pTHX_ const nl_item item, locale_category_index cat_index, const
 #     define PERL_ARGS_ASSERT_LANGINFO_SV_I     \
          STMT_START { Perl_assert_aTHX; assert(locale); assert(sv);  \
                       PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;           \
-    } STMT_END
-
-#   endif
-#   if defined(LC_ALL)
-static void
-S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_line)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-#     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
-         STMT_START { Perl_assert_aTHX; assert(lc_all_string);  \
-                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;      \
-    } STMT_END
-
-#   else
-static void
-S_give_perl_locale_control(pTHX_ const char **curlocales, const line_t caller_line)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-#     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
-         STMT_START { Perl_assert_aTHX; assert(curlocales);  \
-                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;   \
     } STMT_END
 
 #   endif
