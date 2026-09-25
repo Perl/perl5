@@ -3562,7 +3562,7 @@ S_append_padvar(pTHX_ PADOFFSET off, CV *cv, SV *out, int n,
                                  UTF8fARG(1, PadnameLEN(sv) - 1,
                                           PadnamePV(sv) + 1));
             if (is_scalar)
-                SvPVX(out)[cur] = '$';
+                SvPVX(out)[cur] = Perl_Sigil_Scalar;
         }
         else
             sv_catpvf(out, "[%" UVuf "]", (UV)(off+i));
