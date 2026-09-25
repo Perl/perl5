@@ -146,8 +146,8 @@ D_SCRIPT
         # the original test made sure that each file generated a loading-file then a loaded-file,
         # but that had a race condition when the kernel would push the perl process onto a different
         # CPU, so the DTrace output would appear out of order
-        qr{loading-file <strict\.pm>.*loading-file <HTTP/Tiny\.pm>.*loading-file <run/dtrace\.pl>}s,
-        qr{loaded-file <strict\.pm>.*loaded-file <HTTP/Tiny\.pm>.*loaded-file <run/dtrace\.pl>}s,
+        qr{loading-file <strict\.pm>.*loading-file <HTTP/Tiny\.pm>.*loading-file <./run/dtrace\.pl>}s,
+        qr{loaded-file <strict\.pm>.*loaded-file <HTTP/Tiny\.pm>.*loaded-file <./run/dtrace\.pl>}s,
     ],
     'loading-file, loaded-file probes',
 );
