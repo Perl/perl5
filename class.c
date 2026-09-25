@@ -1008,7 +1008,6 @@ void
 Perl_class_method_parse_post_blockstart(pTHX_ CV *cv)
 {
     PERL_ARGS_ASSERT_CLASS_METHOD_PARSE_POST_BLOCKSTART;
-    PERL_UNUSED_ARG(cv);
 
     assert(cv == PL_compcv);
     assert(CvIsMETHOD(cv));
