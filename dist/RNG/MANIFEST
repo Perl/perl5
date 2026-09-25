@@ -1,0 +1,16 @@
+Changes
+Makefile.PL
+README
+RNG.xs
+lib/RNG.pm
+lib/RNG/Drand48.pm
+lib/RNG/HMAC_DRBG.pm
+lib/RNG/PCG.pm
+lib/RNG/Wyrand.pm
+lib/RNG/Xoshiro.pm
+t/distributions.t
+t/drand48.t
+t/hmac_drbg.t
+t/pcg.t
+t/wyrand.t
+t/xoshiro.t

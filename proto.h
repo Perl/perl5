@@ -663,6 +663,20 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+PERL_CALLCONV NV
+Perl_call_rand(pTHX)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_CALL_RAND              \
+    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_call_srand(pTHX_ Rand_seed_t seed)
+        Perl_attribute_nonnull_aTHX;
+#define PERL_ARGS_ASSERT_CALL_SRAND             \
+    STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 PERL_CALLCONV SSize_t
 Perl_call_sv(pTHX_ SV *sv, I32 flags)
         Perl_attribute_nonnull_aTHX
@@ -11425,6 +11439,35 @@ S_get_aux_mg(pTHX_ AV *av)
     } STMT_END
 
 #endif
+#if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) || \
+    defined(PERL_IN_PP_C)
+PERL_CALLCONV SV *
+Perl_call_rand_bytes(pTHX_ STRLEN length)
+        Perl_attribute_nonnull_aTHX;
+# define PERL_ARGS_ASSERT_CALL_RAND_BYTES       \
+     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_rng_refresh(pTHX_ SV *provider, GV *gv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+# define PERL_ARGS_ASSERT_RNG_REFRESH           \
+     STMT_START { Perl_assert_aTHX; assert(provider); assert(gv);  \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;             \
+    } STMT_END
+
+PERL_CALLCONV bool
+Perl_translate_substr_offsets(STRLEN curlen, IV pos1_iv, bool pos1_is_uv, IV len_iv, bool len_is_uv, STRLEN *posp, STRLEN *lenp)
+        Perl_attribute_nonnull(6)
+        Perl_attribute_nonnull(7)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS \
+     STMT_START { assert(posp); assert(lenp); } STMT_END
+
+#endif /* defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) ||
+          defined(PERL_IN_PP_C) */
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 PERL_CALLCONV void
 Perl_XS_builtin_indexed(pTHX_ CV *cv)

@@ -3558,22 +3558,302 @@ PP(pp_sin)
    --Jarkko Hietaniemi	27 September 1998
  */
 
+static Perl_rng_u64_func S_rng_fast_u64(pTHX_ SV *provider);
+static void *S_rng_fast_state(pTHX_ SV *provider);
+static void S_rng_require_method(pTHX_ SV *provider, const char *method);
+
+static void
+S_rng_refresh(pTHX_ SV *provider, GV *gv)
+{
+    Perl_rng_u64_func u64 = NULL;
+    void *state = NULL;
+
+    PL_rng_gv = gv;
+    /* Clear the state first.  A non-NULL state is the fast-path invariant. */
+    PL_rng_u64_state = NULL;
+
+    if (!SvOK(provider)) {
+        PL_rng_u64 = NULL;
+        return;
+    }
+    if (!sv_isobject(provider))
+        croak("${^RNG} must be an object or undef");
+    S_rng_require_method(aTHX_ provider, "rand_bytes");
+    S_rng_require_method(aTHX_ provider, "srand");
+    u64 = S_rng_fast_u64(aTHX_ provider);
+    PL_rng_u64 = u64;
+    if (u64) {
+        state = S_rng_fast_state(aTHX_ provider);
+        if (state)
+            PL_rng_u64_state = state;
+    }
+}
+
+void
+Perl_rng_refresh(pTHX_ SV *provider, GV *gv)
+{
+    PERL_ARGS_ASSERT_RNG_REFRESH;
+    S_rng_refresh(aTHX_ provider, gv);
+}
+
+/* Call the object installed in ${^RNG}. */
+static SV *
+S_rng_call_sv(pTHX_ SV *provider, SV *callable, const char *method,
+              SV *arg, bool has_arg)
+{
+    I32 count;
+    SV *ret;
+    SV *call_provider;
+
+    ENTER_with_name("call_RNG");
+    SAVETMPS;
+
+    /* Keep the provider alive if the callback changes ${^RNG}. */
+    call_provider = sv_2mortal(SvREFCNT_inc_simple_NN(provider));
+    PUSHMARK(PL_stack_sp);
+    rpp_extend(has_arg ? 2 : 1);
+    rpp_push_1(call_provider);
+    if (has_arg)
+        rpp_push_1(arg);
+    count = callable ? call_sv(callable, G_SCALAR)
+                     : call_method(method, G_SCALAR);
+    if (count != 1)
+        croak("RNG provider did not return exactly one value");
+
+    ret = newSVsv(*PL_stack_sp);
+    rpp_popfree_1_NN();
+
+    FREETMPS;
+    LEAVE_with_name("call_RNG");
+    return ret;
+}
+
+static SV *
+S_rng_call(pTHX_ SV *provider, const char *method, SV *arg, bool has_arg)
+{
+    return S_rng_call_sv(aTHX_ provider, NULL, method, arg, has_arg);
+}
+
+static void
+S_rng_require_method(pTHX_ SV *provider, const char *method)
+{
+    SV * const method_name = sv_2mortal(newSVpv(method, 0));
+    SV * const callable = S_rng_call(aTHX_ provider, "can", method_name, TRUE);
+    const bool available = SvROK(callable)
+        && SvTYPE(SvRV(callable)) == SVt_PVCV;
+
+    SvREFCNT_dec_NN(callable);
+    if (!available)
+        croak("${^RNG} object must provide %s()", method);
+}
+
+static SV *
+S_rng_provider(pTHX)
+{
+    GV *gv = PL_rng_gv;
+
+    if (!gv) {
+        gv = PL_rng_gv = gv_fetchpvs("\022NG", GV_ADD, SVt_PV);
+    }
+
+    /* Localizing this magical scalar can defer its set magic until the
+     * value is used.  Refresh here so the cached fast-path state never
+     * describes an earlier localized value. */
+    S_rng_refresh(aTHX_ GvSV(gv), gv);
+    SV * const provider = GvSV(gv);
+    return provider;
+}
+
+static UV
+S_rng_fast_address(pTHX_ SV *provider, const char *method)
+{
+    SV * const method_name = sv_2mortal(newSVpv(method, 0));
+    SV *can;
+    SV *address;
+    UV value;
+
+    if (!sv_isobject(provider))
+        return 0;
+
+    can = S_rng_call(aTHX_ provider, "can", method_name, TRUE);
+    if (!SvROK(can) || SvTYPE(SvRV(can)) != SVt_PVCV
+        || !CvISXSUB((CV *)SvRV(can))) {
+        SvREFCNT_dec_NN(can);
+        return 0;
+    }
+
+    address = S_rng_call_sv(aTHX_ provider, can, method, NULL, FALSE);
+    SvREFCNT_dec_NN(can);
+    SvGETMAGIC(address);
+    if (!SvOK(address)) {
+        SvREFCNT_dec_NN(address);
+        return 0;
+    }
+    if (!SvIOK(address) || SvNOK(address) || SvPOK(address)
+        || (SvIOK_notUV(address) && SvIV(address) < 0))
+        croak("RNG fast provider callback address must be an integer");
+
+    value = SvUV(address);
+    SvREFCNT_dec_NN(address);
+    return value;
+}
+
+static Perl_rng_u64_func
+S_rng_fast_u64(pTHX_ SV *provider)
+{
+    return INT2PTR(Perl_rng_u64_func,
+        S_rng_fast_address(aTHX_ provider, "get_rand_u64_XS_func_addr"));
+}
+
+static void *
+S_rng_fast_state(pTHX_ SV *provider)
+{
+    return INT2PTR(void *,
+        S_rng_fast_address(aTHX_ provider, "get_rand_u64_XS_state_addr"));
+}
+
+static SV *
+S_rng_bytes(pTHX_ SV *provider, STRLEN length)
+{
+    SV * const result = S_rng_call(aTHX_ provider, "rand_bytes",
+                                   sv_2mortal(newSVuv(length)), TRUE);
+    const U8 *bytes;
+    STRLEN len;
+
+    SvGETMAGIC(result);
+    if (!SvPOK(result))
+        croak("RNG provider rand_bytes() did not return a byte string");
+    bytes = (const U8 *)SvPVbyte_nomg(result, len);
+    if (len != length)
+        croak("RNG provider rand_bytes() did not return the requested byte count");
+    PERL_UNUSED_VAR(bytes);
+    return result;
+}
+
+static U64
+S_rng_u64(pTHX_ SV *provider)
+{
+    SV * const result = S_rng_bytes(aTHX_ provider, 8);
+    const U8 *bytes;
+    STRLEN len;
+    U64 value = 0;
+    unsigned int i;
+
+    bytes = (const U8 *)SvPVbyte_nomg(result, len);
+    PERL_UNUSED_VAR(len);
+    for (i = 0; i < 8; i++)
+        value = (value << 8) | bytes[i];
+    SvREFCNT_dec_NN(result);
+    return value;
+}
+
+static void
+S_rng_seed_default(pTHX)
+{
+    Rand_seed_t seed_value;
+
+    if (PL_srand_called)
+        return;
+
+    if (PL_srand_override)
+        PERL_SRAND_OVERRIDE_GET(seed_value);
+    else
+        seed_value = (Rand_seed_t)seed();
+    (void)Perl_drand48_init_r(&PL_random_state, seed_value);
+    PL_srand_called = TRUE;
+}
+
+static SV *
+S_rng_default_bytes(pTHX_ STRLEN length)
+{
+    SV * const result = newSVpvn("", 0);
+    STRLEN offset = 0;
+
+    S_rng_seed_default(aTHX);
+    SvGROW(result, length + 1);
+    while (offset < length) {
+        const U64 value = (U64)(Perl_drand48_r(&PL_random_state)
+                                * (NV)UINT64_C(0x1000000000000));
+        U32 high = (U32)(value >> 16);
+        unsigned int i;
+
+        for (i = 0; i < 4 && offset < length; i++) {
+            ((U8 *)SvPVX(result))[offset++] = (U8)(high >> 24);
+            high <<= 8;
+        }
+    }
+    ((U8 *)SvPVX(result))[length] = '\0';
+    SvCUR_set(result, length);
+    SvPOK_on(result);
+    return result;
+}
+
+SV *
+Perl_call_rand_bytes(pTHX_ STRLEN length)
+{
+    PERL_ARGS_ASSERT_CALL_RAND_BYTES;
+    SV *provider = S_rng_provider(aTHX);
+
+    if (!length)
+        return newSVpvn("", 0);
+
+    if (!SvOK(provider))
+        return S_rng_default_bytes(aTHX_ length);
+
+    return S_rng_bytes(aTHX_ provider, length);
+}
+
+PERL_STATIC_INLINE NV
+S_call_rand(pTHX)
+{
+    PERL_ARGS_ASSERT_CALL_RAND;
+    SV *provider;
+
+    provider = S_rng_provider(aTHX);
+
+    if (SvOK(provider)) {
+        if (PL_rng_u64_state) {
+            /* A non-NULL state means that the callback and its state were
+             * both installed by S_rng_refresh(). */
+            return (NV)PL_rng_u64(aTHX_ PL_rng_u64_state)
+                / ((NV)UINT64_C(0xffffffffffffffff) + 1.0);
+        }
+        return (NV)S_rng_u64(aTHX_ provider)
+            / ((NV)UINT64_C(0xffffffffffffffff) + 1.0);
+    }
+
+    S_rng_seed_default(aTHX);
+
+    return Perl_drand48_r(&PL_random_state);
+}
+
+NV
+Perl_call_rand(pTHX)
+{
+    return S_call_rand(aTHX);
+}
+
+void
+Perl_call_srand(pTHX_ Rand_seed_t seed_value)
+{
+    PERL_ARGS_ASSERT_CALL_SRAND;
+    SV * const provider = S_rng_provider(aTHX);
+
+    if (SvOK(provider)) {
+        /* seedDrand01() is also used by older XS code to initialize the
+         * default generator before its first Drand01() call.  With a custom
+         * provider, leave the provider alone.  Explicit Perl srand()
+         * dispatches to the provider in pp_srand(). */
+        return;
+    }
+
+    (void)Perl_drand48_init_r(&PL_random_state, seed_value);
+    PL_srand_called = TRUE;
+}
+
 PP_wrapped(pp_rand, MAXARG, 0)
 {
-    if (!PL_srand_called) {
-        Rand_seed_t s;
-        if (PL_srand_override) {
-            /* env var PERL_RAND_SEED has been set so the user wants
-             * consistent srand() initialization. */
-            PERL_SRAND_OVERRIDE_GET(s);
-        } else {
-            /* Pseudo random initialization from context state and possible
-             * random devices */
-            s= (Rand_seed_t)seed();
-        }
-        (void)seedDrand01(s);
-        PL_srand_called = TRUE;
-    }
+    const NV random_value = S_call_rand(aTHX);
     {
         dSP;
         NV value;
@@ -3601,17 +3881,34 @@ PP_wrapped(pp_rand, MAXARG, 0)
             dTARGET;
             PUSHs(TARG);
             PUTBACK;
-            value *= Drand01();
+            value *= random_value;
             sv_setnv_mg(TARG, value);
         }
     }
     return NORMAL;
 }
 
+
 PP_wrapped(pp_srand, MAXARG, 0)
 {
     dSP; dTARGET;
+    SV * const provider = S_rng_provider(aTHX);
     UV anum;
+
+    if (SvOK(provider)) {
+        SV *result;
+
+        /* Custom providers see an explicit undef for srand(), making it
+         * equivalent to srand(undef).  Explicit arguments are passed through
+         * without the default numeric validation. */
+        result = S_rng_call(aTHX_ provider, "srand",
+                            MAXARG >= 1 ? TOPs : &PL_sv_undef, TRUE);
+        if (MAXARG >= 1)
+            rpp_popfree_1_NN();
+        XPUSHs(result);
+        PUTBACK;
+        RETURN;
+    }
 
     if (MAXARG >= 1 && (TOPs || POPs)) {
         SV *top;

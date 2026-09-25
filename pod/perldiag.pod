@@ -694,6 +694,16 @@ it's a VAX).
 (F) Your machine doesn't support NaN ("not a number") as a numeric value
 (probably because it's a VAX).
 
+=item builtin::rand_bytes() count is too large
+
+(F) The requested byte count cannot be represented by the size type used for
+Perl strings on this platform.
+
+=item builtin::rand_bytes() count must be a non-negative integer
+
+(F) The argument to C<builtin::rand_bytes> was undefined, non-numeric,
+negative, non-integral, infinite, or NaN.
+
 =item Builtin version bundle "%s" is not supported by Perl
 
 (F) You attempted to C<use builtin :ver> for a version number that is either
@@ -5905,6 +5915,37 @@ C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
+
+=item RNG fast provider callback address must be an integer
+
+(F) C<get_rand_u64_XS_func_addr> returned something other than C<undef>, zero,
+or an integer callback address.  An XS provider must return a callback address
+using Perl's established XS pointer-address convention.
+
+=item RNG provider did not return exactly one value
+
+(F) The custom random number generator installed in C<${^RNG}> returned more
+than one value, or did not return a value.  A provider must return exactly one
+value each time it is called.
+
+=item RNG provider rand_bytes() did not return a byte string
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return a byte string.
+
+=item RNG provider rand_bytes() did not return the requested byte count
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return exactly the number of bytes requested.
+
+=item ${^RNG} must be an object or undef
+
+(F) The value assigned to C<${^RNG}> was neither an object nor C<undef>.
+
+=item ${^RNG} object must provide %s()
+
+(F) The object assigned to C<${^RNG}> did not provide the required C<rand_bytes>
+or C<srand> method.
 
 =item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
 "a-z" in regex; marked by S<<-- HERE> in m/%s/

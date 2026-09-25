@@ -3661,6 +3661,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
     assert(generic_isCC_(*mg->mg_ptr, CC_MAGICAL_));
 
+    if (memEQs(mg->mg_ptr, mg->mg_len, "\022NG")) {
+        rng_refresh(sv, MUTABLE_GV(mg->mg_obj));
+        return 0;
+    }
+
     switch (*mg->mg_ptr) {
     case '\001':	/* ^A */
         if (SvOK(sv)) sv_copypv(PL_bodytarget, sv);
