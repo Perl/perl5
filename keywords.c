@@ -2512,7 +2512,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 8: /* 26 tokens of length 8 */
+    case 8: /* 27 tokens of length 8 */
       switch (name[0])
       {
         case 'A':
@@ -2767,6 +2767,19 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
                 }
 
                 goto unknown;
+
+#if defined(USE_SPENT_BUFFER)
+              case 's':
+                if (name[4] == 'p' &&
+                    name[5] == 'n' &&
+                    name[6] == 'a' &&
+                    name[7] == 'm')
+                {                                 /* getspnam         */
+                  return KEY_getspnam;
+                }
+
+                goto unknown;
+#endif /* defined(USE_SPENT_BUFFER) */
 
               default:
                 goto unknown;
@@ -3619,5 +3632,5 @@ unknown:
 }
 
 /* Generated from:
- * c62898f89dd6a63c0deff80c8c0e1c31656a9fb51fbcb2bd4c71ba6846c73228 regen/keywords.pl
+ * b6c7468f01a006b62ad98803b8736dd69a4d1b414ba8cc1593fd83693d3a7d48 regen/keywords.pl
  * ex: set ro ft=c: */
