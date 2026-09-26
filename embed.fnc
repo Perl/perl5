@@ -1058,6 +1058,8 @@ CTadop	|Malloc_t|calloc	|MEM_SIZE elements			\
 				|MEM_SIZE size
 AOdp	|SSize_t|call_pv	|NN const char *sub_name		\
 				|I32 flags
+Ap	|NV	|call_rand
+Ap	|void	|call_srand	|Rand_seed_t seed
 AOdp	|SSize_t|call_sv	|NN SV *sv				\
 				|I32 flags
 : Used in several source files
@@ -3105,6 +3107,8 @@ Admp	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
 Admp	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
+p	|void	|rng_clear
+p	|void	|rng_rebuild
 APTdp	|char * |rninstr	|SPTR const char *big			\
 				|EPTRge const char *bigend		\
 				|SPTR const char *little		\
@@ -4606,6 +4610,19 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
+#endif
+#if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) || \
+    defined(PERL_IN_PP_C)
+ep	|SV *	|call_rand_bytes|STRLEN length
+ep	|void	|rng_refresh	|NN SV *provider
+Tp	|bool	|translate_substr_offsets				\
+				|STRLEN curlen				\
+				|IV pos1_iv				\
+				|bool pos1_is_uv			\
+				|IV len_iv				\
+				|bool len_is_uv 			\
+				|NN STRLEN *posp			\
+				|NN STRLEN *lenp
 #endif
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 p	|void	|import_builtin_bundle					\

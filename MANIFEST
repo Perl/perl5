@@ -5981,6 +5981,7 @@ pod/perlrepository.pod
 pod/perlrequick.pod			Perl regular expressions quick start
 pod/perlreref.pod			Perl regular expressions quick reference
 pod/perlretut.pod			Perl regular expressions tutorial
+pod/perlrng.pod				Perl random-number providers
 pod/perlrun.pod				Perl execution and options
 pod/perlsec.pod				Perl security
 pod/perlsecpolicy.pod			Perl security report handling policy
@@ -6579,6 +6580,7 @@ t/op/require_gh20577.t			Make sure updating %INC from an INC hook doesnt break @
 t/op/require_override.t			See if require handles no argument properly
 t/op/reset.t				See if reset operator works
 t/op/reverse.t				See if reverse operator works
+t/op/rng/contract.t			Test the RNG framework integration contract
 t/op/runlevel.t				See if die() works from perl_call_*()
 t/op/select.t				See if 0- and 1-argument select works
 t/op/setpgrpstack.t			See if setpgrp works
@@ -6656,6 +6658,7 @@ t/perf/benchmarks			snippets of benchmarking/profiling code
 t/perf/benchmarks.t			test t/perf/benchmarks syntax
 t/perf/opcount.t			See if optimised subs have the right op counts
 t/perf/optree.t				Test presence of some op optimisations
+t/perf/rng-benchmarks			RNG provider fast-path benchmark snippets
 t/perf/speed.t				See if optimisations are keeping things fast
 t/perf/taint.t				See if optimisations are keeping things fast (taint issues)
 t/perl.supp				Perl valgrind suppressions

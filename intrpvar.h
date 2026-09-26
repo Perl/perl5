@@ -1130,6 +1130,10 @@ PERLVARI(I, load_mathoms, shutdown_proc_t, PERL_LOAD_MATHOMS_HOOK)
  * See its description in perlvar for the meanings of its value. */
 PERLVARI(I, re_superlinear_cache_delay, IV, 0)
 
+/* Cached state selected by the magical ${^RNG} provider variable. */
+PERLVARI(I, rng_provider, SV *, NULL)
+PERLVARI(I, rng_U01, Perl_rng_U01_func, NULL)
+PERLVARI(I, rng_U01_state, void *, NULL)
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

@@ -6479,6 +6479,9 @@ typedef void(*Perl_cpeep_t)(pTHX_ OP *, OP *);
 
 typedef void(*globhook_t)(pTHX);
 
+/* U01 means a uniform value in the half-open interval [0,1). */
+typedef NV (*Perl_rng_U01_func)(pTHX_ void *state);
+
 #define KEYWORD_PLUGIN_DECLINE 0
 #define KEYWORD_PLUGIN_STMT    1
 #define KEYWORD_PLUGIN_EXPR    2

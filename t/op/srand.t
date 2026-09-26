@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 10);
+plan(tests => 27);
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.
@@ -65,8 +65,20 @@ ok( !eq_array(\@first_run, \@second_run), 'srand() called automatically');
 my $seed = srand(1764);
 is( $seed, 1764, "return value" );
 
+my $string_seed = 'a reproducible string seed';
+srand($string_seed);
+my @string_seed_run = mk_rand;
+my $string_seed_state = srand($string_seed);
+srand($string_seed_state);
+ok(eq_array(\@string_seed_run, [mk_rand]),
+   'a nonnumeric string seed returns its built-in Drand48 state for replay');
+
+my $automatic_seed = srand;
+cmp_ok($automatic_seed, '<=', 0xffffffff,
+       'automatic built-in srand returns a 32-bit seed');
+
 $seed = srand(0);
-ok( $seed, "true return value for srand(0)");
+ok( defined($seed) && !$seed, "defined false return value for srand(0)");
 cmp_ok( $seed, '==', 0, "numeric 0 return value for srand(0)");
 
 {
@@ -79,7 +91,7 @@ cmp_ok( $seed, '==', 0, "numeric 0 return value for srand(0)");
 	};
 	$b = $seed + 0;
     }
-    is( $b, 0, "Quacks like a zero");
+    is( $b, 0, "is a zero");
     is( "@warnings", "", "Does not warn");
 }
 
@@ -89,5 +101,84 @@ cmp_ok( $seed, '==', 0, "numeric 0 return value for srand(0)");
     my $w = '';
     local $SIG{__WARN__} = sub { $w .= $_[0] };
     srand(2**100);
-    like($w, qr/^Integer overflow in srand at /, "got a warning");
+    is($w, '', "large string seeds do not warn");
+}
+
+for my $case (
+    [ 123.5,     123 ],
+    [ -123.5,    123 ],
+    [ '+123.5',  123 ],
+    [ '-123.5',  123 ],
+    [ '.5',         0 ],
+    [ '-.5',        0 ],
+) {
+    my ($seed, $integer) = @$case;
+
+    srand($seed);
+    my @fractional = mk_rand;
+    srand($integer);
+    ok(eq_array(\@fractional, [mk_rand]),
+       "$seed retains the built-in drand48 numeric compatibility path");
+}
+
+{
+    use warnings;
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w .= $_[0] };
+    srand('1e6');
+    is($w, '', 'exponent notation takes the string seed path');
+}
+
+{
+    use warnings;
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w .= $_[0] };
+    srand('18446744073709551616');
+    my @large_decimal = mk_rand;
+    srand(0);
+    ok(!eq_array(\@large_decimal, [mk_rand]),
+       'a decimal seed beyond U64 takes the string seed path');
+    is($w, '', 'a decimal seed beyond U64 does not warn');
+}
+
+{
+    my $wide = "caf\x{e9}";
+    my $octets = $wide;
+    utf8::upgrade($wide);
+    utf8::downgrade($octets, 1);
+    srand($wide);
+    my @wide = mk_rand;
+    srand($octets);
+    ok(eq_array(\@wide, [mk_rand]),
+       'UTF-8 seed storage does not change the seed octets');
+}
+
+{
+    srand(42);
+    my @number = mk_rand;
+    srand('42');
+    ok(eq_array(\@number, [mk_rand]), 'numeric and string integer seeds agree');
+}
+
+{
+    use warnings;
+    my $w = '';
+    my $seed;
+    local $SIG{__WARN__} = sub { $w .= $_[0] };
+    $seed = srand("4294967296");
+    like($w, qr/Integer overflow in srand/,
+         "a numeric seed wider than 32 bits warns");
+    cmp_ok($seed, '==', 0,
+           "a numeric seed wider than 32 bits retains its low bits");
+    ok(defined($seed) && !$seed,
+       'an overflow-reduced zero is defined and false');
+}
+
+{
+    use warnings;
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w .= $_[0] };
+    srand(bless {}, 'RNG::UnstringifiedReference');
+    like($w, qr/reference without string overloading/,
+         "an unstringified reference seed warns");
 }
