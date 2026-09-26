@@ -251,6 +251,7 @@
 # define get_av(a,b)                            Perl_get_av(aTHX_ a,b)
 # define get_cv(a,b)                            Perl_get_cv(aTHX_ a,b)
 # define get_cvn_flags(a,b,c)                   Perl_get_cvn_flags(aTHX_ a,b,c)
+# define get_entropy_portable(a,b,c)            Perl_get_entropy_portable(aTHX_ a,b,c)
 # define get_hv(a,b)                            Perl_get_hv(aTHX_ a,b)
 # define get_op_descs()                         Perl_get_op_descs(aTHX)
 # define get_op_names()                         Perl_get_op_names(aTHX)
