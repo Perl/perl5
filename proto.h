@@ -2069,6 +2069,15 @@ Perl_get_deprecated_property_msg(const Size_t warning_offset)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_DEPRECATED_PROPERTY_MSG
 
+PERL_CALLCONV void
+Perl_get_entropy_portable(pTHX_ U8 *buffer, STRLEN length, const char *failure)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_ENTROPY_PORTABLE   \
+    STMT_START { Perl_assert_aTHX; assert(buffer);     \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 PERL_CALLCONV int
 Perl_get_extended_os_errno(void)
         __attribute__visibility__("hidden");

@@ -6615,6 +6615,13 @@ END_EXTERN_C
    define HAVE_INTERP_INTERN  */
 #include "embed.h"
 
+/* Weak entropy always falls back to process state.  Strong entropy croaks
+ * with its supplied message when no operating-system entropy is available. */
+#define PERL_GET_WEAK_ENTROPY(buffer, length) \
+    get_entropy_portable((buffer), (length), NULL)
+#define PERL_GET_STRONG_ENTROPY(buffer, length, failure) \
+    get_entropy_portable((buffer), (length), (failure))
+
 START_EXTERN_C
 
 #  include "perlvars.h"

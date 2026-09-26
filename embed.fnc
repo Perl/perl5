@@ -1525,6 +1525,10 @@ eop	|void	|get_db_sub	|NULLOK SV **svp			\
 				|NN CV *cv
 ERTXp	|const char *|get_deprecated_property_msg			\
 				|const Size_t warning_offset
+Cp	|void	|get_entropy_portable					\
+				|NN U8 *buffer				\
+				|STRLEN length				\
+				|NULLOK const char *failure
 MTp	|int	|get_extended_os_errno
 : Only used in perl.c
 p	|void	|get_hash_seed	|NN unsigned char * const seed_buffer
@@ -3324,7 +3328,7 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|int allow_package			\
 				|NN STRLEN *slp
 Cp	|U64	|seed
-: Only used by perl.c/miniperl.c, but defined in caretx.c
+: Compatibility wrapper for XS modules which use Perl_seed()
 ep	|void	|set_caret_X
 CTdp	|void	|set_context	|NULLOK void *t
 Adp	|void	|setdefout	|NN GV *gv
