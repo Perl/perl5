@@ -6675,6 +6675,11 @@ As of Perl v5.20.0 C<rand()> uses the C<drand48> pseudorandom number generator
 (PRNG) to generate numbers that appear random but are deterministic.
 It is sufficient for games, generating test data or cases where repeatability is needed.
 
+=item *
+
+Assigning an alternative RNG to C<${^RNG}> can change the source of entropy
+used by C<rand>.  See L<perlrng> for details.
+
 =back
 
 =over
@@ -9039,6 +9044,19 @@ of a recent vintage:
 
     use v5.14;	# so srand returns the seed
 
+If C<${^RNG}> is defined, C<srand> delegates to that C<RNG::Provider>.
+Defined seed
+arguments are stringified as UTF-8 before they are passed to the provider.
+An absent or undefined seed calls the provider's C<srand> method without a
+seed argument.  If C<PERL_RAND_SEED> is set to a nonzero integer, that call
+instead receives its next deterministic seed value.  The provider's return
+value is returned by C<srand>.
+
+The provider is responsible for maintaining its own state.  In particular,
+localizing C<${^RNG}> does not save and restore the provider's state; use the
+provider's own seeding or copying facilities when an independent or
+repeatable sequence is needed.
+
 If C<srand> is not called explicitly, it is called
 implicitly without a parameter at the first use of the
 L<C<rand>|/rand EXPR> operator.  However, there are a few situations
@@ -9050,20 +9068,34 @@ after a L<C<fork>|/fork> to avoid child processes sharing the same seed
 value as the parent (and consequently each other).
 
 Do B<not> call C<srand()> (i.e., without an argument) more than once per
-process.  The internal state of the random number generator should
-contain more entropy than can be provided by any seed, so calling
-C<srand> again actually I<loses> randomness.
+process.  The internal state of the random number generator may contain more
+entropy than can be provided by the seed, so calling C<srand()> repeatedly may
+actually result in a less random result.  This is especially true of the
+default random number generator.
 
-Most implementations of C<srand> take an integer and will
-silently
-truncate decimal numbers.  This means C<srand(42)> will usually
-produce the same results as C<srand(42.1)>.  To be safe, always pass
-C<srand> an integer.
+You may use any defined value as a seed.  An integer seed has the same effect
+whether it is represented as a string or an integer in the code.  Thus,
+C<srand(42)> and C<srand("42")> are defined to produce the same result.  For
+a given random number generator, using the same constant string or numeric
+seed produces the same sequence.  A generator may hash a seed string to
+obtain enough bits to initialize itself.
 
-A typical use of the returned seed is for a test program which has too many
-combinations to test comprehensively in the time available to it each run.  It
-can test a random subset each time, and should there be a failure, log the seed
-used for that run so that it can later be used to reproduce the same results.
+Objects with string overloading use their string value.  A reference without
+string overloading issues a warning and uses its address as the seed.  Because
+that address will normally differ from run to run, use a constant string or
+numeric seed when you need a reproducible sequence.
+
+L<RNG::Seed> implements the C<RNG::SeedBase> interface for replaying raw
+provider seed material.  Other C<RNG::SeedBase> subclasses can supply raw
+seed octets too.  Pass an object returned by C<srand> back to the same
+provider to reproduce its initialization.  A redacted C<RNG::Seed> cannot be
+used as a seed; this avoids accidentally recording material from a secure
+generator.
+
+A typical use of the value returned by C<srand> is to report the seed state at
+the beginning of a run, especially during testing.  For instance, it can be
+convenient to test a random sample of cases.  Knowing the seed allows a
+failing test sequence to be rerun.
 
 If the C<PERL_RAND_SEED> environment variable is set to a nonzero
 integer during process startup then calls to C<srand()> with no

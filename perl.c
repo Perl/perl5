@@ -969,6 +969,7 @@ perl_destruct(pTHXx)
      * destructors and destructees still exist.  Some sv's might remain.
      * Non-referenced objects are on their own.
      */
+    Perl_rng_clear(aTHX);
     sv_clean_objs();
 
     SvREFCNT_dec(PL_valuemagic_annotations);

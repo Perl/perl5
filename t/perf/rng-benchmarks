@@ -1,0 +1,68 @@
+#!perl
+
+# Benchmarks for the built-in RNG and the distribution's ${^RNG} fast path.
+# A provider is selected with PERL_RNG_BENCH_PROVIDER.  When that variable is
+# absent, the workload uses the built-in generator.  This lets one run compare
+# blead's built-in generator, this branch's built-in generator, and every
+# provider under the same workload.  For example, after building both trees:
+#
+#   ./perl -Ilib Porting/bench.pl --benchfile=t/perf/rng-benchmarks \
+#       --tests=/func::rng/ \
+#       /path/to/blead/perl=blead --args='-I/path/to/blead/lib' \
+#       ./perl=branch --args='-Ilib' \
+#       ./perl=drand48 --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=Drand48 \
+#       ./perl=pcg --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=PCG
+#
+# Add Wyrand, Xoshiro, and HMAC_DRBG in the same way.  Only the branch
+# provider columns need the extra include paths and built RNG extension.
+# Porting/bench.pl measures Cachegrind instruction and cache counts.  Use
+# perf stat separately when wall-clock time or cycle counts are needed.
+# Its overall average mixes rand and srand workloads, so compare the
+# individual rows rather than that aggregate.
+
+my $provider_setup = q{
+    my $value;
+    if (my $provider = $ENV{PERL_RNG_BENCH_PROVIDER}) {
+        die "unknown RNG benchmark provider $provider\n"
+            unless $provider =~ /\A(?:Drand48|PCG|Wyrand|Xoshiro|HMAC_DRBG)\z/;
+        my $class = "RNG::$provider";
+        (my $file = $class) =~ s!::!/!g;
+        require "$file.pm";
+        ${^RNG} = $class->new(42);
+    }
+};
+
+my $shuffle_setup = "$provider_setup use List::Util qw(shuffle); "
+                 . "my \@input = 1 .. 100; my \@shuffled;";
+
+[
+    'func::rng::rand::no_limit' => {
+        desc    => 'rand() using the built-in or selected generator',
+        setup   => $provider_setup,
+        code    => '$value = rand();',
+    },
+    'func::rng::rand::limit' => {
+        desc    => 'rand(LIMIT) using the built-in or selected generator',
+        setup   => "$provider_setup my \$limit = 10;",
+        code    => '$value = rand($limit);',
+    },
+    'func::rng::shuffle::100' => {
+        desc    => 'List::Util::shuffle() over 100 items',
+        setup   => $shuffle_setup,
+        code    => '@shuffled = shuffle @input;',
+    },
+    'func::rng::srand::integer' => {
+        desc    => 'srand(INTEGER) using the built-in or selected generator',
+        setup   => $provider_setup,
+        code    => '$value = srand(42);',
+    },
+    'func::rng::srand::string' => {
+        desc    => 'srand(STRING) using the built-in or selected generator',
+        # blead warns after reducing an ordinary string to its legacy seed.
+        # The benchmark compares that path with the new string-seed path.
+        setup   => "no warnings 'overflow'; $provider_setup",
+        code    => '$value = srand("benchmark seed");',
+    },
+]

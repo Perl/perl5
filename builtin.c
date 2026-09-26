@@ -93,6 +93,34 @@ XS(XS_builtin_nan)
 #endif
 }
 
+XS(XS_builtin_rand_bytes);
+XS(XS_builtin_rand_bytes)
+{
+    dXSARGS;
+    NV count_nv;
+    NV integer;
+    UV count;
+
+    if (items != 1)
+        croak_xs_usage(cv, "count");
+
+    if (!SvOK(ST(0)) || !looks_like_number(ST(0)))
+        croak("builtin::rand_bytes() count must be a non-negative integer");
+
+    count_nv = SvNV(ST(0));
+    integer = Perl_floor(count_nv);
+    if (Perl_isnan(count_nv) || Perl_isinf(count_nv)
+        || count_nv < 0.0 || count_nv != integer || count_nv > (NV)UV_MAX)
+        croak("builtin::rand_bytes() count must be a non-negative integer");
+
+    count = SvUV(ST(0));
+    if ((NV)count != integer || (STRLEN)count != count)
+        croak("builtin::rand_bytes() count is too large");
+
+    ST(0) = Perl_call_rand_bytes(aTHX_ (STRLEN)count);
+    XSRETURN(1);
+}
+
 enum {
     BUILTIN_CONST_FALSE,
     BUILTIN_CONST_TRUE,
@@ -599,6 +627,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "false", SHORTVER(5,39), false, &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
     { "inf",        NO_BUNDLE, true,  &XS_builtin_inf,    &ck_builtin_const, BUILTIN_CONST_INF   },
     { "nan",        NO_BUNDLE, true,  &XS_builtin_nan,    &ck_builtin_const, BUILTIN_CONST_NAN   },
+    { "rand_bytes", NO_BUNDLE, true,  &XS_builtin_rand_bytes, &ck_builtin_func1, 0 },
 
     /* unary functions */
     { "is_bool",         NO_BUNDLE, true,  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL    },
