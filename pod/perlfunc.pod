@@ -9065,12 +9065,13 @@ combinations to test comprehensively in the time available to it each run.  It
 can test a random subset each time, and should there be a failure, log the seed
 used for that run so that it can later be used to reproduce the same results.
 
-If the C<PERL_RAND_SEED> environment variable is set to a non-negative
+If the C<PERL_RAND_SEED> environment variable is set to a nonzero
 integer during process startup then calls to C<srand()> with no
 arguments will initialize the perl random number generator with a
 consistent seed each time it is called, whether called explicitly with
-no arguments or implicitly via use of C<rand()>. The exact seeding that
-a given C<PERL_RAND_SEED> will produce is deliberately unspecified, but
+no arguments or implicitly via use of C<rand()>. A value of zero has the
+same effect as leaving C<PERL_RAND_SEED> unset. The exact seeding that a
+given C<PERL_RAND_SEED> will produce is deliberately unspecified, but
 using different values for C<PERL_RAND_SEED> should produce different
 results. This is intended for debugging and performance analysis and is
 only guaranteed to produce consistent results between invocations of the
