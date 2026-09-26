@@ -6687,6 +6687,7 @@ t/porting/test_bootstrap.t		Test that the instructions for test bootstrapping ar
 t/porting/test_testlist.t		Test that we t/harness and t/TEST and MANIFEST agree on our test list
 t/porting/update_authors.t		Tests for Porting/updateAUTHORS.pl
 t/porting/utils.t			Check that utility scripts still compile
+t/porting/win32_config.t		Check the Win32 U64 format configuration
 t/re/alpha_assertions.t			See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t				See if bracketed char classes [...] compile properly
 t/re/begin-once.t			Checking that /o freeze a variable in a RegExp
