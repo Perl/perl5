@@ -1346,14 +1346,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB,
-					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments (scalar ($target), $arguments),
-						newMETHOP (OP_METHOD, 0, $method)
-					)
+				$$ = build_method_invocation (
+					scalar ($target),
+					newMETHOP (OP_METHOD, 0, $method),
+					$arguments
 				);
 			}
 	|	/* $foo->bar */
@@ -1361,14 +1357,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		ARROW
 		methodname                  [method]
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB,
-					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments (scalar ($target), NULL),
-						newMETHOP (OP_METHOD, 0, $method)
-					)
+				$$ = build_method_invocation (
+					scalar ($target),
+					newMETHOP (OP_METHOD, 0, $method),
+					NULL
 				);
 			}
 	|	/* $foo->&bar(list) */
@@ -1380,14 +1372,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB,
-					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments (scalar ($target), $arguments),
-						newCVREF (0, $method)
-					)
+				$$ = build_method_invocation (
+					scalar ($target),
+					newCVREF (0, $method),
+					$arguments
 				);
 			}
 	|	/* $foo->&bar */
@@ -1396,14 +1384,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		PERLY_AMPERSAND
 		subname                     [method]
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB,
-					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments (scalar ($target), NULL),
-						newCVREF (0, $method)
-					)
+				$$ = build_method_invocation (
+					scalar ($target),
+					newCVREF (0, $method),
+					NULL
 				);
 			}
 	|	/* new Class @args */
@@ -1411,14 +1395,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		indirob                     [target]
 		optlistexpr                 [arguments]
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB,
-					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments ($target, $arguments),
-						newMETHOP (OP_METHOD, 0, $method)
-					)
+				$$ = build_method_invocation (
+					$target,
+					newMETHOP (OP_METHOD, 0, $method),
+					$arguments
 				);
 			}
 	|	/* method $object (@args) */
@@ -1428,13 +1408,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = op_convert_list (
-					OP_ENTERSUB, OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						build_method_invocation_arguments ($target, $arguments),
-						newMETHOP(OP_METHOD, 0, $method)
-					)
+				$$ = build_method_invocation (
+					$target,
+					newMETHOP (OP_METHOD, 0, $method),
+					$arguments
 				);
 			}
 	|	LSTOP optlistexpr                    /* print @args */
