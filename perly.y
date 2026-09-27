@@ -1420,16 +1420,33 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
-	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-                          $<opval>$ = newANONATTRSUB($startanonsub, 0, NULL, $block);
-                          /* prevent double op_free() if the following fails to parse */
-                          $block = NULL;
-                        }[anonattrsub]
-		    optlistexpr		%prec LSTOP  /* ... @bar */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				 op_append_elem(OP_LIST,
-				   op_prepend_elem(OP_LIST, $<opval>anonattrsub, $optlistexpr), $LSTOPSUB));
+	|	LSTOPSUB
+		startanonsub
+		block
+		/* sub f(&@);   f { foo } ... */
+			{
+				SvREFCNT_inc_simple_void(PL_compcv);
+				$<opval>$ = newANONATTRSUB($startanonsub, 0, NULL, $block);
+				/* prevent double op_free() if the following fails to parse */
+				$block = NULL;
+			}[anonattrsub]
+		optlistexpr
+		%prec LSTOP
+		/* ... @bar */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						op_prepend_elem (
+							OP_LIST,
+							$<opval>anonattrsub,
+							$optlistexpr
+						),
+						$LSTOPSUB
+					)
+				);
 			}
 	;
 
@@ -1458,18 +1475,36 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
-	|	subscriptable_reference[code_reference] PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE   /* $subref->(@args); $foo->{bar}(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   op_append_elem(OP_LIST, $expr,
-					       newCVREF(0, scalar($code_reference))));
-			  if (parser->expect == XBLOCK)
-			      parser->expect = XOPERATOR;
+	|	subscriptable_reference [code_reference]
+		PERLY_PAREN_OPEN
+		expr
+		PERLY_PAREN_CLOSE
+		/* $subref->(@args); $foo->{bar}(@args) */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						$expr,
+						newCVREF (0, scalar ($code_reference))
+					)
+				);
+				if (parser->expect == XBLOCK)
+					parser->expect = XOPERATOR;
 			}
-	|	subscriptable_reference[code_reference] PERLY_PAREN_OPEN PERLY_PAREN_CLOSE   /* $subref->(); $foo->{bar}() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   newCVREF(0, scalar($code_reference)));
-			  if (parser->expect == XBLOCK)
-			      parser->expect = XOPERATOR;
+	|	subscriptable_reference[code_reference]
+		PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+		/* $subref->(); $foo->{bar}() */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					newCVREF (0, scalar($code_reference))
+				);
+				if (parser->expect == XBLOCK)
+					parser->expect = XOPERATOR;
 			}
 	|	PERLY_PAREN_OPEN expr[list] PERLY_PAREN_CLOSE subscript_index[selector]            /* list slice */
 			{ $$ = newSLICEOP(0, $selector, $list); }
@@ -1703,19 +1738,56 @@ term[product]	:	termbinop
 			}
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
-	|	amper                                /* &foo; */
-			{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($amper)); }
-	|	amper PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                 /* &foo() or foo() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($amper));
-			}
-	|	amper PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE          /* &foo(@args) or foo(@args) */
+	|	amper
+		/* &foo; */
 			{
-			  $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST, $expr, scalar($amper)));
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					0,
+					scalar ($amper)
+				);
 			}
-	|	NOAMP subname optlistexpr       /* foo @args (no parens) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    op_append_elem(OP_LIST, $optlistexpr, scalar($subname)));
+	|	amper
+		PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+		/* &foo() or foo() */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					scalar ($amper)
+				);
+			}
+	|	amper
+		PERLY_PAREN_OPEN
+		expr
+		PERLY_PAREN_CLOSE
+		/* &foo(@args) or foo(@args) */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						$expr,
+						scalar ($amper)
+					)
+				);
+			}
+	|	NOAMP
+		subname
+		optlistexpr
+		/* foo @args (no parens) */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						$optlistexpr,
+						scalar ($subname)
+					)
+				);
 			}
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
 			{ $$ = newSVREF($operand); }
@@ -1746,10 +1818,27 @@ term[product]	:	termbinop
 	|	KW_REQUIRE term[operand]                         /* require Foo */
 			{ $$ = newUNOP(OP_REQUIRE, $KW_REQUIRE ? OPf_SPECIAL : 0, $operand); }
 	|	UNIOPSUB
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($UNIOPSUB)); }
-	|	UNIOPSUB term[operand]                        /* Sub treated as unop */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    op_append_elem(OP_LIST, $operand, scalar($UNIOPSUB))); }
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					scalar ($UNIOPSUB)
+				);
+			}
+	|	UNIOPSUB
+		term[operand]
+		/* Sub treated as unop */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						$operand,
+						scalar ($UNIOPSUB)
+					)
+				);
+			}
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP($FUNC0, 0); }
 	|	FUNC0 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
@@ -1758,8 +1847,15 @@ term[product]	:	termbinop
 			{ $$ = $FUNC0OP; }
 	|	FUNC0OP PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
 			{ $$ = $FUNC0OP; }
-	|	FUNC0SUB                             /* Sub treated as nullop */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($FUNC0SUB)); }
+	|	FUNC0SUB
+		/* Sub treated as nullop */
+			{
+				$$ = newUNOP (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					scalar ($FUNC0SUB)
+				);
+			}
 	|	FUNC1 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                        /* not () */
 			{ $$ = ($FUNC1 == OP_NOT)
                           ? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
