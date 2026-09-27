@@ -1761,7 +1761,7 @@ term[product]	:	termbinop
 	|	/* &foo(@args) or foo(@args) */
 		amper                       [function]
 		PERLY_PAREN_OPEN
-		expr
+		expr                        [arguments]
 		PERLY_PAREN_CLOSE
 			{
 				$$ = newUNOP (
@@ -1769,7 +1769,7 @@ term[product]	:	termbinop
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						$expr,
+						$arguments,
 						scalar ($function)
 					)
 				);
@@ -1777,14 +1777,14 @@ term[product]	:	termbinop
 	|	/* foo @args (no parens) */
 		NOAMP
 		subname                     [function]
-		optlistexpr
+		optlistexpr                 [arguments]
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						$optlistexpr,
+						$arguments,
 						scalar ($function)
 					)
 				);
@@ -1827,14 +1827,14 @@ term[product]	:	termbinop
 			}
 	|	/* Sub treated as unop */
 		UNIOPSUB                    [function]
-		term[operand]
+		term                        [arguments]
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						$operand,
+						$arguments,
 						scalar ($function)
 					)
 				);
