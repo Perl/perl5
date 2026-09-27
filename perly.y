@@ -1343,7 +1343,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		ARROW
 		methodname                  [method]
 		PERLY_PAREN_OPEN
-		optexpr
+		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
 				$$ = op_convert_list (
@@ -1351,7 +1351,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($target), $optexpr),
+						op_prepend_elem (OP_LIST, scalar ($target), $arguments),
 						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
@@ -1377,7 +1377,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		PERLY_AMPERSAND
 		subname                     [method]
 		PERLY_PAREN_OPEN
-		optexpr
+		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
 				$$ = op_convert_list (
@@ -1385,7 +1385,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($target), $optexpr),
+						op_prepend_elem (OP_LIST, scalar ($target), $arguments),
 						newCVREF (0, $method)
 					)
 				);
@@ -1409,14 +1409,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 	|	/* new Class @args */
 		METHCALL0                   [method]
 		indirob                     [target]
-		optlistexpr
+		optlistexpr                 [arguments]
 			{
 				$$ = op_convert_list (
 					OP_ENTERSUB,
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $target, $optlistexpr),
+						op_prepend_elem (OP_LIST, $target, $arguments),
 						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
@@ -1425,14 +1425,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		METHCALL                    [method]
 		indirob                     [target]
 		PERLY_PAREN_OPEN
-		optexpr
+		optexpr                     [arguments]
 		PERLY_PAREN_CLOSE
 			{
 				$$ = op_convert_list (
 					OP_ENTERSUB, OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $target, $optexpr),
+						op_prepend_elem (OP_LIST, $target, $arguments),
 						newMETHOP(OP_METHOD, 0, $method)
 					)
 				);
