@@ -1420,10 +1420,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
-	|	LSTOPSUB
+	|	/* sub f(&@);   f { foo } ... */
+		LSTOPSUB
 		startanonsub
 		block
-		/* sub f(&@);   f { foo } ... */
 			{
 				SvREFCNT_inc_simple_void(PL_compcv);
 				$<opval>$ = newANONATTRSUB($startanonsub, 0, NULL, $block);
@@ -1475,11 +1475,11 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
-	|	subscriptable_reference [code_reference]
+	|	/* $subref->(@args); $foo->{bar}(@args) */
+		subscriptable_reference [code_reference]
 		PERLY_PAREN_OPEN
 		expr
 		PERLY_PAREN_CLOSE
-		/* $subref->(@args); $foo->{bar}(@args) */
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1738,8 +1738,8 @@ term[product]	:	termbinop
 			}
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
-	|	amper
-		/* &foo; */
+	|	/* &foo; */
+		amper
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1747,10 +1747,10 @@ term[product]	:	termbinop
 					scalar ($amper)
 				);
 			}
-	|	amper
+	|	/* &foo() or foo() */
+		amper
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
-		/* &foo() or foo() */
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1758,11 +1758,11 @@ term[product]	:	termbinop
 					scalar ($amper)
 				);
 			}
-	|	amper
+	|	/* &foo(@args) or foo(@args) */
+		amper
 		PERLY_PAREN_OPEN
 		expr
 		PERLY_PAREN_CLOSE
-		/* &foo(@args) or foo(@args) */
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1774,10 +1774,10 @@ term[product]	:	termbinop
 					)
 				);
 			}
-	|	NOAMP
+	|	/* foo @args (no parens) */
+		NOAMP
 		subname
 		optlistexpr
-		/* foo @args (no parens) */
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1825,9 +1825,9 @@ term[product]	:	termbinop
 					scalar ($UNIOPSUB)
 				);
 			}
-	|	UNIOPSUB
+	|	/* Sub treated as unop */
+		UNIOPSUB
 		term[operand]
-		/* Sub treated as unop */
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
@@ -1847,8 +1847,8 @@ term[product]	:	termbinop
 			{ $$ = $FUNC0OP; }
 	|	FUNC0OP PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
 			{ $$ = $FUNC0OP; }
-	|	FUNC0SUB
-		/* Sub treated as nullop */
+	|	/* Sub treated as nullop */
+		FUNC0SUB
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
