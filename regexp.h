@@ -810,10 +810,11 @@ typedef struct {
  * the regmatch_state stack at the start of execution */
 
 typedef struct {
+    struct regexp_internal *rexi;
     regmatch_info_aux_eval *info_aux_eval;
     struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
     struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
-    char *poscache;	/* S-L cache of fail positions of WHILEMs */
+    struct slc_cache_item *slc; /* current super-liner cache array */
 } regmatch_info_aux;
 
 
@@ -839,9 +840,6 @@ typedef struct {
     char *cutpoint;      /* (*COMMIT) position (if any) */
     regmatch_info_aux      *info_aux; /* extra fields that need cleanup */
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
-    STRLEN poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
-    STRLEN poscache_iter;    /* current countdown from _maxiter to zero */
-    STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
     bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */
@@ -1039,6 +1037,7 @@ typedef struct regmatch_state {
             CHECKPOINT  cp;         /* see note above "struct branchlike" */
             CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
             bool	minmod;
+            bool        saved_seen_nonregular; /* previous seen_nonregular */
             int         parenfloor; /* how far back to strip paren data */
 
             /* these two are modified by WHILEM */
@@ -1053,8 +1052,9 @@ typedef struct regmatch_state {
             CHECKPOINT  cp;             /* see note above "struct branchlike" */
             CHECKPOINT  lastcp;         /* see note above "struct branchlike" */
             char        *save_lastloc;  /* previous curlyx.lastloc */
-            I32		cache_offset;
-            I32		cache_mask;
+            U8	        *slc_byte;
+            U8		slc_mask;
+            bool        saved_seen_nonregular; /* previous seen_nonregular */
         } whilem;
 
         struct {

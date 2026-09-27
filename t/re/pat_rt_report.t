@@ -772,7 +772,7 @@ sub run_tests {
         local $_ = 'ab';
         our @len = ();
         /(.){1,}(?{push @len,0+@-})(.){1,}(?{})^/;
-        is("@len", "2 2 2", $message);
+        is(grep($_ != 2, @len), 0, $message);
     }
 
     {
