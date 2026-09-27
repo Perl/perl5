@@ -167,6 +167,7 @@ TODO: {
 }
 
 TODO: {
+    todo_skip 1 if ($Config{usequadmath} or $Config{uselongdouble});
     local $TODO = "[GH 8859]";
     fresh_perl_is(<<~'EOF',
         my $mul = 2**32; my $a = 104712103; my $b = 50;
@@ -362,6 +363,7 @@ TODO: {
 }
 
 TODO: {
+    todo_skip 2 if ($Config{usequadmath} or $Config{uselongdouble});
     local $::TODO = 'GH 21827';
     my $test = 18446744073709550592;
     my @warnings = capture_warnings(sub { localtime $test });

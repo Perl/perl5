@@ -1228,4 +1228,30 @@ else {
     }
 }
 
+SKIP: {
+    skip "neither quadmath nor longdouble", 3
+        unless ($Config{usequadmath} or $Config{uselongdouble});
+    # un-TODOed versions of these tests found in t/run/todo.t
+    {
+        my $switches = "";
+        fresh_perl_is(<<~'EOF',
+            my $mul = 2**32; my $a = 104712103; my $b = 50;
+            my $c = 449735057880383538; # For these values, $mul * $a + $b == $c. Thus $diff should be zero.
+            my $diff = $c - ($a * $mul + $b);
+            printf "%.0f %.0f %.0f %.0f", $a, $b, $c, $diff;
+            #printf "\$c $c %0.f\n", $c;
+        EOF
+        "104712103 50 449735057880383538 0", { eval $switches }, "[GH 8859]");
+    }
+
+    {
+        my $test = 18446744073709550592;
+        my @warnings = capture_warnings(sub { localtime $test });
+        is(scalar @warnings, 2, 'Correct number of warnings captured; GH 21827');
+        for my $w (@warnings) {
+            like($w, qr/localtime\($test\)/, 'localtime() warnings reports correct value when given too large of a number; GH 21827');
+        }
+    }
+}
+
 done_testing();
