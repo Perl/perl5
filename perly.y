@@ -1351,7 +1351,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($target), $arguments),
+						build_method_invocation_arguments (scalar ($target), $arguments),
 						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
@@ -1366,7 +1366,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						scalar ($target),
+						build_method_invocation_arguments (scalar ($target), NULL),
 						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
@@ -1385,7 +1385,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($target), $arguments),
+						build_method_invocation_arguments (scalar ($target), $arguments),
 						newCVREF (0, $method)
 					)
 				);
@@ -1401,7 +1401,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						scalar ($target),
+						build_method_invocation_arguments (scalar ($target), NULL),
 						newCVREF (0, $method)
 					)
 				);
@@ -1416,7 +1416,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $target, $arguments),
+						build_method_invocation_arguments ($target, $arguments),
 						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
@@ -1432,7 +1432,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OP_ENTERSUB, OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $target, $arguments),
+						build_method_invocation_arguments ($target, $arguments),
 						newMETHOP(OP_METHOD, 0, $method)
 					)
 				);

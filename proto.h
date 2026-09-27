@@ -571,6 +571,16 @@ Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
                  assert(tokendata); PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+PERL_CALLCONV OP *
+Perl_build_method_invocation_arguments(pTHX_ OP *target, OP *arguments)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION_ARGUMENTS \
+    STMT_START { Perl_assert_aTHX; assert(target);          \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;       \
+    } STMT_END
+
 PERL_CALLCONV const char *
 Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format)
         Perl_attribute_nonnull_aTHX;
