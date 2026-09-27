@@ -4885,6 +4885,45 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+
+=for apidoc build_method_invocation_arguments
+
+    build_method_invocation_arguments ($target, $arguments);
+    build_method_invocation_arguments ($target, NULL);
+
+Build an C<OP *> representing the structure recognised as method call arguments.
+
+Arguments:
+
+=over
+
+=item C<target>
+
+Expression on which the method call is invoked.
+
+=item C<arguments>
+
+Expression (list) representing the method call arguments.
+
+=back
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_method_invocation_arguments (pTHX_ OP *target, OP *arguments)
+{
+    PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION_ARGUMENTS;
+
+    return arguments
+        ? op_prepend_elem (OP_LIST, target, arguments)
+        : target
+        ;
+}
+
+/*
 =for apidoc new_block_statement
 
 Returns a C<OP *> representing block as statement.
