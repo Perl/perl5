@@ -1339,7 +1339,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
 	|	/* $foo->bar(list) */
-		term
+		term                        [target]
 		ARROW
 		methodname
 		PERLY_PAREN_OPEN
@@ -1351,13 +1351,13 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($term), $optexpr),
+						op_prepend_elem (OP_LIST, scalar ($target), $optexpr),
 						newMETHOP (OP_METHOD, 0, $methodname)
 					)
 				);
 			}
 	|	/* $foo->bar */
-		term
+		term                        [target]
 		ARROW
 		methodname
 			{
@@ -1366,13 +1366,13 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						scalar ($term),
+						scalar ($target),
 						newMETHOP (OP_METHOD, 0, $methodname)
 					)
 				);
 			}
 	|	/* $foo->&bar(list) */
-		term
+		term                        [target]
 		ARROW
 		PERLY_AMPERSAND
 		subname                     [method]
@@ -1385,13 +1385,13 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, scalar ($term), $optexpr),
+						op_prepend_elem (OP_LIST, scalar ($target), $optexpr),
 						newCVREF (0, $method)
 					)
 				);
 			}
 	|	/* $foo->&bar */
-		term
+		term                        [target]
 		ARROW
 		PERLY_AMPERSAND
 		subname                     [method]
@@ -1401,14 +1401,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						scalar ($term),
+						scalar ($target),
 						newCVREF (0, $method)
 					)
 				);
 			}
 	|	/* new Class @args */
 		METHCALL0
-		indirob
+		indirob                     [target]
 		optlistexpr
 			{
 				$$ = op_convert_list (
@@ -1416,14 +1416,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $indirob, $optlistexpr),
+						op_prepend_elem (OP_LIST, $target, $optlistexpr),
 						newMETHOP (OP_METHOD, 0, $METHCALL0)
 					)
 				);
 			}
 	|	/* method $object (@args) */
 		METHCALL
-		indirob
+		indirob                     [target]
 		PERLY_PAREN_OPEN
 		optexpr
 		PERLY_PAREN_CLOSE
@@ -1432,7 +1432,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					OP_ENTERSUB, OPf_STACKED,
 					op_append_elem (
 						OP_LIST,
-						op_prepend_elem (OP_LIST, $indirob, $optexpr),
+						op_prepend_elem (OP_LIST, $target, $optexpr),
 						newMETHOP(OP_METHOD, 0, $METHCALL)
 					)
 				);
