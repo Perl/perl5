@@ -143,7 +143,6 @@ my %problematical_tests;
 # considered a TODO.
 my %known_bad_locales = (
                           irix => qr/ ^ (?: cs | hu | sk ) $/x,
-                          darwin => qr/ ^ lt_LT.ISO8859 /ix,
                           netbsd => qr/\bISO8859-2\b/i,
 
                           # NBSP is considered graphical in this locale, and
