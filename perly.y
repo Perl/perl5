@@ -1341,7 +1341,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 	|	/* $foo->bar(list) */
 		term                        [target]
 		ARROW
-		methodname
+		methodname                  [method]
 		PERLY_PAREN_OPEN
 		optexpr
 		PERLY_PAREN_CLOSE
@@ -1352,14 +1352,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					op_append_elem (
 						OP_LIST,
 						op_prepend_elem (OP_LIST, scalar ($target), $optexpr),
-						newMETHOP (OP_METHOD, 0, $methodname)
+						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
 			}
 	|	/* $foo->bar */
 		term                        [target]
 		ARROW
-		methodname
+		methodname                  [method]
 			{
 				$$ = op_convert_list (
 					OP_ENTERSUB,
@@ -1367,7 +1367,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					op_append_elem (
 						OP_LIST,
 						scalar ($target),
-						newMETHOP (OP_METHOD, 0, $methodname)
+						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
 			}
@@ -1407,7 +1407,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 				);
 			}
 	|	/* new Class @args */
-		METHCALL0
+		METHCALL0                   [method]
 		indirob                     [target]
 		optlistexpr
 			{
@@ -1417,12 +1417,12 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					op_append_elem (
 						OP_LIST,
 						op_prepend_elem (OP_LIST, $target, $optlistexpr),
-						newMETHOP (OP_METHOD, 0, $METHCALL0)
+						newMETHOP (OP_METHOD, 0, $method)
 					)
 				);
 			}
 	|	/* method $object (@args) */
-		METHCALL
+		METHCALL                    [method]
 		indirob                     [target]
 		PERLY_PAREN_OPEN
 		optexpr
@@ -1433,7 +1433,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					op_append_elem (
 						OP_LIST,
 						op_prepend_elem (OP_LIST, $target, $optexpr),
-						newMETHOP(OP_METHOD, 0, $METHCALL)
+						newMETHOP(OP_METHOD, 0, $method)
 					)
 				);
 			}
