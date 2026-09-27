@@ -1338,40 +1338,104 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	|	term ARROW methodname PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->bar(list) */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, scalar($term), $optexpr),
-				    newMETHOP(OP_METHOD, 0, $methodname)));
+	|	term
+		ARROW
+		methodname
+		PERLY_PAREN_OPEN
+		optexpr
+		PERLY_PAREN_CLOSE
+		/* $foo->bar(list) */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						op_prepend_elem (OP_LIST, scalar ($term), $optexpr),
+						newMETHOP (OP_METHOD, 0, $methodname)
+					)
+				);
 			}
-	|	term ARROW methodname                     /* $foo->bar */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST, scalar($term),
-				    newMETHOP(OP_METHOD, 0, $methodname)));
+	|	term
+		ARROW
+		methodname
+		/* $foo->bar */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						scalar ($term),
+						newMETHOP (OP_METHOD, 0, $methodname)
+					)
+				);
 			}
-	|       term ARROW PERLY_AMPERSAND subname[method] PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->&bar(list) */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, scalar($term), $optexpr),
-				    newCVREF(0, $method)));
+	|	term
+		ARROW
+		PERLY_AMPERSAND
+		subname                     [method]
+		PERLY_PAREN_OPEN
+		optexpr
+		PERLY_PAREN_CLOSE
+		/* $foo->&bar(list) */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						op_prepend_elem (OP_LIST, scalar ($term), $optexpr),
+						newCVREF (0, $method)
+					)
+				);
 			}
-	|       term ARROW PERLY_AMPERSAND subname[method] /* $foo->&bar */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    scalar($term),
-				    newCVREF(0, $method)));
+	|	term
+		ARROW
+		PERLY_AMPERSAND
+		subname                     [method]
+		/* $foo->&bar */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						scalar ($term),
+						newCVREF (0, $method)
+					)
+				);
 			}
-	|	METHCALL0 indirob optlistexpr           /* new Class @args */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, $indirob, $optlistexpr),
-				    newMETHOP(OP_METHOD, 0, $METHCALL0)));
+	|	METHCALL0
+		indirob
+		optlistexpr
+		/* new Class @args */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB,
+					OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						op_prepend_elem (OP_LIST, $indirob, $optlistexpr),
+						newMETHOP (OP_METHOD, 0, $METHCALL0)
+					)
+				);
 			}
-	|	METHCALL indirob PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE    /* method $object (@args) */
-			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST,
-				    op_prepend_elem(OP_LIST, $indirob, $optexpr),
-				    newMETHOP(OP_METHOD, 0, $METHCALL)));
+	|	METHCALL
+		indirob
+		PERLY_PAREN_OPEN
+		optexpr
+		PERLY_PAREN_CLOSE
+		/* method $object (@args) */
+			{
+				$$ = op_convert_list (
+					OP_ENTERSUB, OPf_STACKED,
+					op_append_elem (
+						OP_LIST,
+						op_prepend_elem (OP_LIST, $indirob, $optexpr),
+						newMETHOP(OP_METHOD, 0, $METHCALL)
+					)
+				);
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($LSTOP, 0, $optlistexpr); }
