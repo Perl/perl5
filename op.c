@@ -4885,6 +4885,29 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+=for apidoc build_function_invocation
+
+    build_function_invocation (flags, $function, $arguments);
+    build_function_invocation (flags, $function, NULL);
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_function_invocation (pTHX_ I32 flags, OP *code, OP *arguments)
+{
+    PERL_ARGS_ASSERT_BUILD_FUNCTION_INVOCATION;
+
+    return newUNOP (
+        OP_ENTERSUB,
+        flags,
+        op_append_elem (OP_LIST, arguments, code)
+    );
+}
+
+/*
 =for apidoc build_method_invocation
 
     build_method_invocation ($target, $method, $arguments);
