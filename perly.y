@@ -1434,17 +1434,13 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 		%prec LSTOP
 		/* ... @bar */
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					op_append_elem (
+					$function,
+					op_prepend_elem (
 						OP_LIST,
-						op_prepend_elem (
-							OP_LIST,
-							$<opval>anonattrsub,
-							$optlistexpr
-						),
-						$function
+						$<opval>anonattrsub,
+						$optlistexpr
 					)
 				);
 			}
@@ -1478,30 +1474,26 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 	|	/* $subref->(@args); $foo->{bar}(@args) */
 		subscriptable_reference [code_reference]
 		PERLY_PAREN_OPEN
-		expr
+		expr                    [arguments]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						$expr,
-						newCVREF (0, scalar ($code_reference))
-					)
+					newCVREF (0, scalar ($code_reference)),
+					$arguments
 				);
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
-	|	subscriptable_reference[code_reference]
+	|	subscriptable_reference [code_reference]
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
 		/* $subref->(); $foo->{bar}() */
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					newCVREF (0, scalar($code_reference))
+					newCVREF (0, scalar ($code_reference)),
+					NULL
 				);
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
@@ -1741,10 +1733,10 @@ term[product]	:	termbinop
 	|	/* &foo; */
 		amper                       [function]
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					0,
-					scalar ($function)
+					scalar ($function),
+					NULL
 				);
 			}
 	|	/* &foo() or foo() */
@@ -1752,10 +1744,10 @@ term[product]	:	termbinop
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					scalar ($function)
+					scalar ($function),
+					NULL
 				);
 			}
 	|	/* &foo(@args) or foo(@args) */
@@ -1764,14 +1756,10 @@ term[product]	:	termbinop
 		expr                        [arguments]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						$arguments,
-						scalar ($function)
-					)
+					scalar ($function),
+					$arguments
 				);
 			}
 	|	/* foo @args (no parens) */
@@ -1779,14 +1767,10 @@ term[product]	:	termbinop
 		subname                     [function]
 		optlistexpr                 [arguments]
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						$arguments,
-						scalar ($function)
-					)
+					scalar ($function),
+					$arguments
 				);
 			}
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
@@ -1795,9 +1779,17 @@ term[product]	:	termbinop
 			{ $$ = newAVREF($operand); }
 	|	term[operand] ARROW PERLY_PERCENT_SIGN PERLY_STAR
 			{ $$ = newHVREF($operand); }
-	|	term[operand] ARROW PERLY_AMPERSAND PERLY_STAR
-			{ $$ = newUNOP(OP_ENTERSUB, 0,
-				       scalar(newCVREF($PERLY_AMPERSAND,$operand))); }
+	|	term                        [code_reference]
+		ARROW
+		PERLY_AMPERSAND
+		PERLY_STAR
+			{
+				$$ = build_function_invocation (
+					0,
+					scalar (newCVREF ($PERLY_AMPERSAND, $code_reference)),
+					NULL
+				);
+			}
 	|	term[operand] ARROW PERLY_STAR PERLY_STAR	%prec PERLY_PAREN_OPEN
 			{ $$ = newGVREF(0,$operand); }
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
@@ -1819,24 +1811,20 @@ term[product]	:	termbinop
 			{ $$ = newUNOP(OP_REQUIRE, $KW_REQUIRE ? OPf_SPECIAL : 0, $operand); }
 	|	UNIOPSUB                    [function]
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					scalar ($function)
+					scalar ($function),
+					NULL
 				);
 			}
 	|	/* Sub treated as unop */
 		UNIOPSUB                    [function]
 		term                        [arguments]
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					op_append_elem (
-						OP_LIST,
-						$arguments,
-						scalar ($function)
-					)
+					scalar ($function),
+					$arguments
 				);
 			}
 	|	FUNC0                                /* Nullary operator */
@@ -1850,10 +1838,10 @@ term[product]	:	termbinop
 	|	/* Sub treated as nullop */
 		FUNC0SUB                    [function]
 			{
-				$$ = newUNOP (
-					OP_ENTERSUB,
+				$$ = build_function_invocation (
 					OPf_STACKED,
-					scalar ($function)
+					scalar ($function),
+					NULL
 				);
 			}
 	|	FUNC1 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                        /* not () */
