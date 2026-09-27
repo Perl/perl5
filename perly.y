@@ -1421,7 +1421,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	/* sub f(&@);   f { foo } ... */
-		LSTOPSUB
+		LSTOPSUB                    [function]
 		startanonsub
 		block
 			{
@@ -1444,7 +1444,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 							$<opval>anonattrsub,
 							$optlistexpr
 						),
-						$LSTOPSUB
+						$function
 					)
 				);
 			}
@@ -1739,27 +1739,27 @@ term[product]	:	termbinop
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
 	|	/* &foo; */
-		amper
+		amper                       [function]
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					0,
-					scalar ($amper)
+					scalar ($function)
 				);
 			}
 	|	/* &foo() or foo() */
-		amper
+		amper                       [function]
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					OPf_STACKED,
-					scalar ($amper)
+					scalar ($function)
 				);
 			}
 	|	/* &foo(@args) or foo(@args) */
-		amper
+		amper                       [function]
 		PERLY_PAREN_OPEN
 		expr
 		PERLY_PAREN_CLOSE
@@ -1770,13 +1770,13 @@ term[product]	:	termbinop
 					op_append_elem (
 						OP_LIST,
 						$expr,
-						scalar ($amper)
+						scalar ($function)
 					)
 				);
 			}
 	|	/* foo @args (no parens) */
 		NOAMP
-		subname
+		subname                     [function]
 		optlistexpr
 			{
 				$$ = newUNOP (
@@ -1785,7 +1785,7 @@ term[product]	:	termbinop
 					op_append_elem (
 						OP_LIST,
 						$optlistexpr,
-						scalar ($subname)
+						scalar ($function)
 					)
 				);
 			}
@@ -1817,16 +1817,16 @@ term[product]	:	termbinop
 			{ $$ = newOP(OP_REQUIRE, $KW_REQUIRE ? OPf_SPECIAL : 0); }
 	|	KW_REQUIRE term[operand]                         /* require Foo */
 			{ $$ = newUNOP(OP_REQUIRE, $KW_REQUIRE ? OPf_SPECIAL : 0, $operand); }
-	|	UNIOPSUB
+	|	UNIOPSUB                    [function]
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					OPf_STACKED,
-					scalar ($UNIOPSUB)
+					scalar ($function)
 				);
 			}
 	|	/* Sub treated as unop */
-		UNIOPSUB
+		UNIOPSUB                    [function]
 		term[operand]
 			{
 				$$ = newUNOP (
@@ -1835,7 +1835,7 @@ term[product]	:	termbinop
 					op_append_elem (
 						OP_LIST,
 						$operand,
-						scalar ($UNIOPSUB)
+						scalar ($function)
 					)
 				);
 			}
@@ -1848,12 +1848,12 @@ term[product]	:	termbinop
 	|	FUNC0OP PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
 			{ $$ = $FUNC0OP; }
 	|	/* Sub treated as nullop */
-		FUNC0SUB
+		FUNC0SUB                    [function]
 			{
 				$$ = newUNOP (
 					OP_ENTERSUB,
 					OPf_STACKED,
-					scalar ($FUNC0SUB)
+					scalar ($function)
 				);
 			}
 	|	FUNC1 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                        /* not () */
