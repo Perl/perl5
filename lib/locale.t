@@ -162,6 +162,12 @@ if ($os eq 'cygwin' && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) 
     $known_bad_locales{'cygwin'} = qr/ ^ ps_AF /ix;
 }
 
+# Per GH #24866, older versions of Darwin have bad lt_LT locales
+my ($osmajmin) = $Config{osvers} =~ /^(\d+\.\d+)/;
+if ($^O eq 'darwin' && $osmajmin < 24) {
+    $known_bad_locales{'darwin'} = qr/ ^ lt_LT.ISO8859 /ix;
+}
+
 use Dumpvalue;
 
 my $dumper = Dumpvalue->new(
