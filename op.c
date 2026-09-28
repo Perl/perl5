@@ -3663,7 +3663,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
         // If we got here, then our op came from an XS module that predates
         // 5.37.5’s change to the op tree, which we have to handle a bit
-        // diffrently to preserve backward compatibility.
+        // differently to preserve backward compatibility.
         //
         goto do_next;
     }
