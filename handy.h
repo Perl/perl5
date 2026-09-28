@@ -2000,6 +2000,58 @@ C<L</CC_mask_>>.
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
                                : PL_mod_latin1_uc[ (U8) (c) ])
+/*
+=for apidoc_section $locale_scn
+=for apidoc  Amn|bool|IN_UTF8_CTYPE_LOCALE
+=for apidoc_item|bool|IN_UTF8_TURKIC_LOCALE
+
+C<IN_UTF8_CTYPE_LOCALE> returns C<true> if the current underlying locale of the
+C<LC_CTYPE> category of the C program executing the Perl interpreter is a UTF-8
+locale.  
+
+Otherwise it returns C<false>.
+
+C<LC_CTYPE> affects what characters are considered, say, C<\w> versus
+punctuation, for example; as well as what characters are the upper/lower-case
+equivalents of other characters.
+Other locale categories also have strings that are affected by the locale.  For
+example, L<strftime(3)> is controlled by C<LC_TIME>, expressing weekday and
+month names in its current locale.   Implementations vary as to if you can get
+mojibake or not if C<LC_CTYPE> and C<LC_TIME> are set to different locales.
+Perl tries to shield you from this, temporarily switching C<LC_CTYPE> to be in
+sync with C<LC_TIME> when needed during function calls where we think it might
+matter.
+
+C<IN_UTF8_TURKIC_LOCALE> is like C<IN_UTF8_CTYPE_LOCALE>, but additionally
+requires the C<LC_CTYPE> locale to be a turkic one before returning C<true>.
+This is because Turkic languages have two characters that other locales using
+the Latin script do not:
+
+=over 4
+
+=item ı  U+131  LATIN SMALL LETTER DOTLESS I
+
+The uppercase of this is the ASCII C<I>.
+
+=item İ  U+130  LATIN CAPITAL LETTER I WITH DOT ABOVE
+
+The lowercase of this is the ASCII C<i>.
+
+=back
+
+These have different casing rules than in any other latin script locales, so
+require their own locale.
+
+Note that pure perl programs don't pay any attention to the underlying C locale
+unless operating in the scope of a C<use locale>.  C<L</IN_LOCALE>> returns
+C<true> if so.  Nor do most calls to functions in the L<POSIX> module, unless
+otherwise documented.
+
+For more information, see L<perllocale>.
+
+=cut
+*/
+
 #ifdef USE_LOCALE_CTYPE
 #  define IN_UTF8_CTYPE_LOCALE   PL_in_utf8_CTYPE_locale
 #  define IN_UTF8_TURKIC_LOCALE  PL_in_utf8_turkic_locale
