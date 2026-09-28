@@ -943,8 +943,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     INT_64_T
     INT_PAT_MODS
     IN_UNI_8_BIT
-    IN_UTF8_CTYPE_LOCALE
-    IN_UTF8_TURKIC_LOCALE
     IoANY
     IOCPARM_LEN
     IOf_ARGV
