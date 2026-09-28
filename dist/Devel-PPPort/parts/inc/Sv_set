@@ -16,6 +16,7 @@ SV_NOSTEAL
 sv_setsv_flags
 newSVsv_nomg
 newSVsv_flags
+sv_set_undef
 
 =implementation
 
