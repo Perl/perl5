@@ -119,9 +119,7 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 
             Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
 
-            if (key > *maxp - 10) {
-                newmax = key + *maxp;
-
+            if (key > *maxp) {
                 /* Zero everything above AvFILLp(av), which could be more
                  * elements than have actually been shifted. If we don't
                  * do this, trailing elements at the end of the resized
@@ -131,6 +129,7 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
                 goto resize;
             }
         } else if (*allocp) { /* a full SV* array exists */
+          resize:
 
 #ifdef Perl_safesysmalloc_size
             /* Whilst it would be quite possible to move this logic around
@@ -175,7 +174,6 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 
             newmax = (key > SSize_t_MAX - newmax)
                         ? SSize_t_MAX : key + newmax;
-          resize:
         {
           /* it should really be newmax+1 here, but if newmax
            * happens to equal SSize_t_MAX, then newmax+1 is

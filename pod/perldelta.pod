@@ -387,6 +387,20 @@ succesfully inlined.
 
 =item *
 
+When a shifted array is unshifted, C<Perl_av_extend_guts> used to perform
+a C<(key > *maxp - 10)> check and always reallocate. That check dates from
+Perl 3.0 and the rationale for it seems to have been lost to time. (It may
+have been to encourage array growth, but the general levers for doing so
+have changed significantly over time.)
+
+Always reallocating when it is not strictly necessary could cause Perl
+applications that repeatedly perform a mixture of C<shift>/C<push> operations
+(or similar) to suffer from unnecessary allocator thrashing.
+C<Perl_av_extend_guts> will now only reallocate if the array really is out
+of space and must be extended.
+
+=item *
+
 XXX
 
 =back
