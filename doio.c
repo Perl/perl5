@@ -3312,6 +3312,7 @@ Perl_do_semop(pTHX_ SV **mark)
         return result;
     }
 #else
+    PERL_UNUSED_ARG(mark);
     /* diag_listed_as: sem%s not implemented */
     croak("semop not implemented");
 #endif
@@ -3403,6 +3404,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark)
     }
     return shmdt(shm);
 #else
+    PERL_UNUSED_ARG(mark);
     /* diag_listed_as: shm%s not implemented */
     croak("shm I/O not implemented");
     return -1;
