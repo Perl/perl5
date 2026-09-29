@@ -4379,25 +4379,19 @@ Tdop	|int	|my_mkstemp	|NN char *templte
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_ipcctl	|I32 optype				\
-				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **mark
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_ipcget	|I32 optype				\
-				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **mark
 : Defined in doio.c, used only in pp_sys.c
-p	|SSize_t|do_msgrcv	|NN SV **mark				\
-				|NN SV **sp
+p	|SSize_t|do_msgrcv	|NN SV **mark
 : Defined in doio.c, used only in pp_sys.c
-p	|I32	|do_msgsnd	|NN SV **mark				\
-				|NN SV **sp
+p	|I32	|do_msgsnd	|NN SV **mark
 : Defined in doio.c, used only in pp_sys.c
-p	|I32	|do_semop	|NN SV **mark				\
-				|NN SV **sp
+p	|I32	|do_semop	|NN SV **mark
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_shmio	|I32 optype				\
-				|NN SV **mark				\
-				|NN SV **sp
+				|NN SV **mark
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
 #if defined(HAS_PIPE)
 Rp	|int	|PerlProc_pipe_cloexec					\

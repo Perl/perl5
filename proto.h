@@ -10726,69 +10726,63 @@ Perl_my_mkstemp(char *templte)
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32
-Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_ipcctl(pTHX_ I32 optype, SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_3)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_IPCCTL             \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV I32
-Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_ipcget(pTHX_ I32 optype, SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_3)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_IPCGET             \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV SSize_t
-Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
+Perl_do_msgrcv(pTHX_ SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_MSGRCV             \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV I32
-Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
+Perl_do_msgsnd(pTHX_ SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_MSGSND             \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV I32
-Perl_do_semop(pTHX_ SV **mark, SV **sp)
+Perl_do_semop(pTHX_ SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
-        Perl_attribute_nonnull(pTHX_2)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_SEMOP              \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV I32
-Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
+Perl_do_shmio(pTHX_ I32 optype, SV **mark)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_3)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_SHMIO              \
-     STMT_START { Perl_assert_aTHX; assert(mark); assert(sp);  \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
+     STMT_START { Perl_assert_aTHX; assert(mark);       \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
