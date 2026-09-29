@@ -89,6 +89,7 @@ case "$cc" in
 esac
 
 # Dragonfly leaks with a newlocale/freelocale combination.  See
-# https://bugs.dragonflybsd.org/issues/3361
-ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
+# https://bugs.dragonflybsd.org/issues/3361.  As of October 2026, their 6.4.3
+# is scheduled to contain a fix for this.
+d_uselocale='undef'
 

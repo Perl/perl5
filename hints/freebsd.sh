@@ -336,7 +336,7 @@ then
 fi
 
 # See https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950
-ccflags="${ccflags} -DNO_POSIX_2008_LOCALE"
+d_uselocale='undef'
 # localeconv() is supposed to be thread-safe on this platform when used with
 # POSIX 2008 locales, so when freebsd gets fixed, may want to find a way to
 # tell that to the code in locale.c that assumes that function isn't

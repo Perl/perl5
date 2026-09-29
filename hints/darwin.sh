@@ -346,7 +346,7 @@ ccflags="$ccflags -DNO_THREAD_SAFE_QUERYLOCALE"
 
 # But it doesn't much matter because the whole implementation has bugs [GH
 # #21556]
-ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
+d_uselocale='undef'
 
 # See comments in locale.c about this #define
 ccflags="$ccflags -DHAS_BROKEN_LANGINFO_CODESET"
