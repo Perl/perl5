@@ -115,7 +115,7 @@ L<perlguts>.
 
 Starting from 5.35.5 we now permit some C99 features in the core C
 source. However, code in dual life extensions still needs to be C89
-only, because it needs to compile against earlier version of Perl
+only, because it needs to compile against earlier versions of Perl
 running on older platforms.  Also note that our headers need to also be
 valid as C++, because XS extensions written in C++ need to include
 them, hence I<member structure initialisers> can't be used in headers.
