@@ -109,6 +109,31 @@ Perl's internal use (and this should be the common case), do not export
 it to the public API.  See the discussion about F<embed.pl> in
 L<perlguts>.
 
+=item *
+
+Changing C<$ccflags> in a F</hints> file.
+
+This may seem innocent enough, and often is, but it can lead to module
+breakage when their Makefile ignores the default CCFLAGS and sets it
+itself.  This can lead to head-scratching failures that take a while to
+diagnose.
+
+One case where this happens is when what is in the compiler flags has an
+effect on the size of the interpreter.  This can cause a handshake issue
+when the module is expecting a different size.  See, for example,
+L<https://github.com/Perl/perl5/issues/23306> and
+L<https://github.com/Perl/perl5/issues/24868>.
+
+If it is possible to achieve the desired effect without changing
+C<$ccflags>, it is better to do that.  For example, in the two tickets
+cited above, the need was to turn-off POSIX 2008 locale handling.  By
+having the hints file instead say that one of the functions needed for
+that feature isn't available, the same effect is achieved without
+involving CCFLAGS, so that nothing a module might do to that will change
+things.
+
+We don't know all the other possible gotchas like this.
+
 =back
 
 =head2 C99
