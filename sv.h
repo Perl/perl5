@@ -1726,7 +1726,13 @@ L</C<SV_CHECK_THINKFIRST_COW_DROP>> before calling this.
 =for apidoc Am|void|SvPV_free|SV * sv
 
 Frees the PV buffer in C<sv>, leaving things in a precarious state, so should
-only be used as part of a larger operation
+only be used as part of a larger operation.
+
+A C<SvTHINKFIRST> check of some kind must have been performed on the sv prior
+to using C<SvPV_free>, as it is not COW aware.
+
+C<SvCUR> and C<SvLEN> are left unchanged. It is the caller's responsibility
+to set them to values appropriate to the task in hand.
 
 =cut
 */
