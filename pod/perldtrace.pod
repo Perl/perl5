@@ -46,16 +46,16 @@ ships a F</usr/bin/perl> with DTrace support enabled.
 Perl's initial DTrace support was added, providing C<sub-entry> and
 C<sub-return> probes.
 
-=item 5.14.0
+=item 5.13.8
 
 The C<sub-entry> and C<sub-return> probes gain a fourth argument: the
 package name of the function.
 
-=item 5.16.0
+=item 5.15.1
 
 The C<phase-change> probe was added.
 
-=item 5.18.0
+=item 5.17.4
 
 The C<op-entry>, C<loading-file>, and C<loaded-file> probes were added.
 
