@@ -1840,6 +1840,7 @@ new(packname = "POSIX::Termios", ...)
 	    */
 	    memset(p, 0, 1 + sizeof(struct termios));
 #else
+	    RETVAL = NULL;
 	    not_here("termios");
 #endif
 	}
