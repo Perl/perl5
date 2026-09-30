@@ -13102,7 +13102,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #    define VCATPVFN_NV_TO_FV(nv,fv)                    \
             STMT_START {                                \
                 double dv_ = nv;                        \
-                fv = Perl_isnan(_dv) ? LDBL_QNAN : dv_; \
+                fv = Perl_isnan(dv_) ? LDBL_QNAN : dv_; \
             } STMT_END
 #  else
 #    define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)
