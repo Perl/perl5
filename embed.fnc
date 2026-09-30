@@ -1165,7 +1165,7 @@ ATdpr	|void	|croak_xs_usage |NN const CV * const cv 		\
 				|NN const char * const params
 CTp	|Signal_t|csighandler1	|int sig
 CTp	|Signal_t|csighandler3	|int sig				\
-				|NULLOK Siginfo_t *info UNUSED		\
+				|NULLOK UNUSED(Siginfo_t *info) 	\
 				|NULLOK void *uap UNUSED
 ATdmp	|bool	|c9strict_utf8_to_uv					\
 				|SPTR const U8 * const s		\
@@ -5026,7 +5026,7 @@ S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
 So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
-				|const line_t caller_line DEBUG_ONLY
+				|DEBUG_ONLY(const line_t caller_line)
 S	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
 				|NULLOK char **buf			\
