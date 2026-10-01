@@ -36,7 +36,7 @@ for my $file (`"$^X" t/TEST -dumptests`) {
 is(0+keys(%th), 0, "t/harness will not test anything that t/TEST does not")
     or print STDERR map { "# t/harness: $_\n" } sort keys %th;
 is(0+keys(%tt), 0, "t/TEST will not test anything that t/harness does not")
-    or print STDERR map { "# tTEST: $_\n" } sort keys %tt;
+    or print STDERR map { "# t/TEST: $_\n" } sort keys %tt;
 
 sub get_extensions {
     my %extensions;
