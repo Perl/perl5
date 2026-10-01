@@ -87,10 +87,9 @@ struct magic {
 
 #define whichsig(pv) whichsig_pv(pv)
 
-/* Magic v2
- * Was called "hooks" during development; there may still be remnants of that
- * name, or various prefixes like "HK..." or "Hk..." hanging around in code.
- */
+/************
+ * Magic v2 *
+ ************/
 
 /*
 =for apidoc_section $magic
