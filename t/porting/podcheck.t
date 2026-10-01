@@ -1586,13 +1586,13 @@ unless ($do_deltas) {
         my $another_problem = ($fixed_count == 1) ? "another problem" : "another set of problems";
         my $diff;
         if ($message) {
-            $diff = <<EOF;
-There were $original_count occurrences (now $current_count) in this pod of type
+            $diff = <<~EOF;
+There were $original_count occurrences (now $current_count) in $filename of type
 "$message",
 EOF
         } else {
             $diff = <<EOF;
-There are no longer any problems found in this pod!
+There are no longer any problems found in $filename!
 EOF
         }
 
