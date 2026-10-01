@@ -3793,8 +3793,20 @@ does when displayed.
 
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
 process that was built against a different build of perl than the
-said library was compiled against.  Reinstalling the XS module will
-likely fix this error.  This error is a less commonly seen subset of
+said library was compiled against.
+
+Reinstalling the XS module will likely fix this error.  But it may be
+that the XS module's Makefile wrongly discards the default compilation
+flags.  In this case, notify the module's maintainer.  You can tell if
+this is the case by inspecting its Makefile looking for lines of the
+form
+
+ CCFLAGS => foo
+
+The module's Makefile is broken if "foo" doesn't look like
+S<C<CCFLAGS => "$Config::Config{ccflags} ...>>
+
+This error is a less commonly seen subset of
 L<"Perl API version %s of %s does not match %s"|perldiag/"Perl API version %s of %s does not match %s">
 error.
 
