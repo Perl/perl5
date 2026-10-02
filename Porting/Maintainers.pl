@@ -520,7 +520,8 @@ our %Modules = (
     },
 
     'ExtUtils::PL2Bat' => {
-        'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.005.tar.gz',
+        'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.006.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri Oct  2 09:07:25 2026',
         'FILES'        => q[cpan/ExtUtils-PL2Bat],
         'EXCLUDED'     => [
             't/00-compile.t',

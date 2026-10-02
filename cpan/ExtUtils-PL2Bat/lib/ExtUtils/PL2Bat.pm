@@ -1,5 +1,5 @@
 package ExtUtils::PL2Bat;
-$ExtUtils::PL2Bat::VERSION = '0.005';
+$ExtUtils::PL2Bat::VERSION = '0.006';
 use strict;
 use warnings;
 
@@ -43,7 +43,8 @@ sub pl2bat {
 	\@set ErrorLevel=%ErrorLevel%
 	\@goto endofperl
 	:WinNT
-	\@perl $opts{ntargs}
+	\@perl $opts{ntargs} || goto :error
+	:error
 	\@set ErrorLevel=%ErrorLevel%
 	\@if NOT "%COMSPEC%" == "%SystemRoot%\\system32\\cmd.exe" \@goto endofperl
 	\@if %ErrorLevel% == 9009 \@echo You do not have Perl in your PATH.
@@ -122,7 +123,7 @@ ExtUtils::PL2Bat - Batch file creation to run perl scripts on Windows
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 OVERVIEW
 
