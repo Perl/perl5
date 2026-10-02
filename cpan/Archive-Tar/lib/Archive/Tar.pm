@@ -32,7 +32,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "3.12";
+$VERSION                = "3.14";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -247,7 +247,7 @@ sub _get_handle {
         ### reading. otherwise, just use what the user requested.
         my $magic = '';
         if( MODE_READ->($mode) ) {
-            open my $tmp, $file or do {
+            open my $tmp, '<', $file or do {
                 $self->_error( qq[Could not open '$file' for reading: $!] );
                 return;
             };

@@ -11,7 +11,7 @@ my $tartest = File::Spec->catfile("t", "ptargrep");
 my $foo = File::Spec->catfile("t", "ptargrep", "foo");
 my $tarfile = File::Spec->catfile("t", "ptargrep.tar");
 my $ptargrep = File::Spec->catfile($Bin, "..", "bin", "ptargrep");
-my $cmd = qq/$^X $ptargrep --list-only "file foo" $tarfile/;
+my $cmd = qq/"$^X" "$ptargrep" --list-only "file foo" $tarfile/;
 
 # create directory/files
 mkdir $tartest;

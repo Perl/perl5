@@ -11,7 +11,7 @@ my $tartest = File::Spec->catfile("t", "ptar");
 my $foo = File::Spec->catfile("t", "ptar", "foo");
 my $tarfile = File::Spec->catfile("t", "ptar.tar");
 my $ptar = File::Spec->catfile($Bin, "..", "bin", "ptar");
-my $cmd = "$^X $ptar";
+my $cmd = qq/"$^X" "$ptar"/;
 
 plan tests => 11;
 my $out;
