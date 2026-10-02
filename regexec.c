@@ -781,22 +781,47 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
 
     /* Returns the position of the first byte in the sequence between 's'
      * and 'send-1' inclusive that when ANDed with 'mask' yields 'byte';
-     * returns 'send' if none found.  It uses word-level operations instead of
-     * byte to speed up the process */
+     * returns 'send' if none found. */
 
-    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP(s, send, 1);
-    if (per_byte_end) {
+    /* Walk leading bytes until "s" is word-aligned, for the benefit of those
+     * platforms where unaligned access is much slower than aligned access. */
+    {
+        const U8 * const word_end = s + BYTES_REMAINING_IN_WORD(s);
+        const U8 * const per_byte_end = (word_end < send) ? word_end : send;
         while (s < per_byte_end ) {
             if (((*s) & mask) == byte) {
                 return s;
             }
             s++;
         }
+    }
+    /* Fast path: fixed-length masked reduction per PERL_FSE_SIZE block.
+     * This should vectorize given a capable compiler and compile target(s).
+     * Testing on an AMD Zen processor showed codegen improving and
+     * throughput increasing from:
+     *     bog standard build -> -march=x86-64-v2 -> -march=x86-64-v3
+     */
 
+    if (send - s >= PERL_FSE_SIZE) {
+        while (s + PERL_FSE_SIZE <= send) {
+            U8 hit = 0;
+            unsigned k;
+            for (k = 0; k < PERL_FSE_SIZE; k++) {
+                U8 d = (U8) (((U8) (s[k] & mask)) ^ byte);  /* 0 iff match */
+                hit |= (U8) (d == 0 ? 0xFF : 0x00);
+            }
+            if (hit) {
+                break; /* Let the per-word code find the first hit */
+            }
+            s += PERL_FSE_SIZE;
+        }
+    }
+
+    {
         PERL_UINTMAX_T word = PERL_COUNT_MULTIPLIER * byte;
         PERL_UINTMAX_T mask_word = PERL_COUNT_MULTIPLIER * mask;
 
-        do {
+        while (s + PERL_WORDSIZE <= send) {
             PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
 
             /* If 'masked' contains bytes with the bit pattern of 'byte' within
@@ -828,7 +853,7 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
             s += variant_byte_number(masked);
             return s;
 
-        } while (s + PERL_WORDSIZE <= send);
+        }
     }
 
     while (s < send) {
