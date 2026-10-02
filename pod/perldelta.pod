@@ -436,6 +436,11 @@ XXX
 
 =item *
 
+Builds with C<PERL_NO_COW> could crash when modifying or freeing boolean
+values. This has been fixed. [GH #19987]
+
+=item *
+
 C<goto> within a defer block should now work more consistently. [GH #19240]
 
 =back
