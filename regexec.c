@@ -667,6 +667,22 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
     NOT_REACHED; /* NOTREACHED */
 }
 
+/* To fit the widest registers currently available: AVX-512 */
+#define PERL_FSE_SIZE 64
+
+/* Clang seems to always successfully inline memcmp, even when S_find_span_end
+ * is itself inlined into a larger function, such as S_regrepeat.
+ *
+ * If gcc does not inline S_find_span_end into a large function, then it will
+ * reliably inline memcmp. However, testing showed that if S_find_span_end is
+ * inlined into a large function, the memcmp might not be inlined, with the
+ * result that performance drops to about half that of the non-memcmp version.
+ *
+ * (gcc version 14.2.0 and clang version 19.1.7 (3+b1) behaviours)
+ */
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((noinline))
+#endif
 static U8 *
 S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 {
@@ -676,21 +692,64 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
      * 'send-1' inclusive that isn't 'span_byte'; returns 'send' if none found.
      * */
 
-    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP_BINMODE(s, send, 1);
-    if (per_byte_end) {
-        while (s < per_byte_end ) {
-            if (*s != span_byte) {
-                return s;
-            }
-            s++;
+    /* Walk leading bytes until "s" is word-aligned. */
+    const U8 * const word_end = s + BYTES_REMAINING_IN_WORD(s);
+    const U8 * const per_byte_end = (word_end < send) ? word_end : send;
+    while (s < per_byte_end ) {
+        if (*s != span_byte) {
+            return s;
         }
+        s++;
+    }
 
+    /* There are two 512-bits-at-a-time implementations for S_find_span_end.
+     * A portable bit-masking version and one that uses memcmp.
+     *
+     * Throughput of both versions improves if the compiler is told to
+     * target more specific, newer CPUs rather than target all CPUs.
+     * For example, moving from generic -> x86-64-v2 -> x86-64-v3.
+     *
+     * The memcmp version can perform 30-40% better - or 40-50% worse -
+     * than the portable version. Which you get depends upon whether memcmp
+     * is inlined (better) or not (worse).
+     *     Clang is thought to always inline memcmp.
+     *     gcc _may_ inline memcmp - it will if S_find_span_end is _not_
+     *          inlined into some other function (e.g. S_regrepeat). If
+     *          it is, then inlining of memcmp is at the mercy of gcc's
+     *          optimization weightings and budgets.
+     *     MSVC (non-clang backend) seems to never inline memcmp.
+     */
+    if (WORTH_PER_WORD_LOOP_BINMODE(s, send, PERL_FSE_SIZE / PERL_WORDSIZE)) {
+#if defined(__GNUC__) || defined(__clang__)
+        U8 ref[PERL_FSE_SIZE];
+        memset(ref, span_byte, PERL_FSE_SIZE);
+        while (s + PERL_FSE_SIZE <= send) {
+            if (memcmp(s, ref, PERL_FSE_SIZE) != 0) {
+                break;          /* a non-span byte is in this block */
+            }
+            s += PERL_FSE_SIZE;
+        }
+#else
+        while (s + PERL_FSE_SIZE <= send) {
+            U8 acc = 0;
+            unsigned k;
+            for (k = 0; k < PERL_FSE_SIZE; k++) {
+                acc |= (U8) (s[k] ^ span_byte);
+            }
+            if (acc != 0) {
+                break; /* Let the per-word code find the first hit */
+            }
+            s += PERL_FSE_SIZE;
+        }
+#endif
+    }
+
+    /* Process per-word as long as we have at least a full word left */
+    if (WORTH_PER_WORD_LOOP_BINMODE(s, send, 1)) {
         /* Create a word filled with the bytes we are spanning */
         PERL_UINTMAX_T span_word = PERL_COUNT_MULTIPLIER * span_byte;
 
-        /* Process per-word as long as we have at least a full word left */
-        do {
-
+        while (s + PERL_WORDSIZE <= send) {
             /* Keep going if the whole word is composed of 'span_byte's */
             if ((* (PERL_UINTMAX_T *) s) == span_word)  {
                 s += PERL_WORDSIZE;
@@ -710,7 +769,7 @@ S_find_span_end(U8 * s, const U8 * send, const U8 span_byte)
 
             /* That reduces the problem to what this function solves */
             return s + first_upper_bit_set_byte_number(span_word);
-        } while (s + PERL_WORDSIZE <= send);
+        }
     }
 
     /* Process the straggler bytes beyond the final word boundary */
@@ -841,6 +900,8 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
 
     return s;
 }
+
+#undef PERL_FSE_SIZE
 
 /*
  * pregexec and friends
