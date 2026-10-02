@@ -853,19 +853,44 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
      * function.  Returns 'send' if none found.  Works like find_span_end(),
      * except for the AND */
 
-    const U8 * const per_byte_end = WORTH_PER_WORD_LOOP_BINMODE(s, send, 1);
-    if (per_byte_end) {
+    /* Walk leading bytes until "s" is word-aligned, for the benefit of those
+     * platforms where unaligned access is much slower than aligned access. */
+    {
+        const U8 * const word_end = s + BYTES_REMAINING_IN_WORD(s);
+        const U8 * const per_byte_end = (word_end < send) ? word_end : send;
         while (s < per_byte_end ) {
             if (((*s) & mask) != span_byte) {
                 return s;
             }
             s++;
         }
+    }
 
+    /* Fast path: fixed-length masked reduction per PERL_FSE_SIZE block.
+     * This should vectorize given a capable compiler and compile target(s).
+     * Testing on an AMD Zen processor showed codegen improving and
+     * throughput increasing from:
+     *     bog standard build -> -march=x86-64-v2 -> -march=x86-64-v3
+     */
+    if (send - s >= PERL_FSE_SIZE) {
+        while (s + PERL_FSE_SIZE <= send) {
+            U8 hit = 0;
+            unsigned k;
+            for (k = 0; k < PERL_FSE_SIZE; k++) {
+                hit |= (U8) (((U8) (s[k] & mask)) ^ span_byte);
+            }
+            if (hit != 0) {
+                break; /* Let the per-word code find the first hit */
+            }
+            s += PERL_FSE_SIZE;
+        }
+    }
+
+    {
         PERL_UINTMAX_T span_word = PERL_COUNT_MULTIPLIER * span_byte;
         PERL_UINTMAX_T mask_word = PERL_COUNT_MULTIPLIER * mask;
 
-        do {
+        while (s + PERL_WORDSIZE <= send) {
             PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
 
             if (masked == span_word) {
@@ -878,7 +903,7 @@ S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, const U8 mask)
             masked |= masked << 2;
             masked |= masked << 4;
             return s + first_upper_bit_set_byte_number(masked);
-        } while (s + PERL_WORDSIZE <= send);
+        }
     }
 
     while (s < send) {
