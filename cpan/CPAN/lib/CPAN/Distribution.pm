@@ -9,7 +9,7 @@ use File::Path ();
 use POSIX ":sys_wait_h"; 
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.34";
+$VERSION = "2.39";
 
 my $run_allow_installing_within_test = 1; # boolean; either in test or in install, there is no third option
 
@@ -1293,11 +1293,6 @@ sub new {
 sub look {
     my($self) = @_;
 
-    if ($^O eq 'MacOS') {
-      $self->Mac::BuildTools::look;
-      return;
-    }
-
     if (  $CPAN::Config->{'shell'} ) {
         $CPAN::Frontend->myprint(qq{
 Trying to open a subshell in the build directory...
@@ -1403,11 +1398,6 @@ sub readme {
     $local_file = CPAN::FTP->localize($readme,
                                       $local_wanted)
         or $CPAN::Frontend->mydie(qq{No $sans.readme found});
-
-    if ($^O eq 'MacOS') {
-        Mac::BuildTools::launch_file($local_file);
-        return;
-    }
 
     my $fh_pager = FileHandle->new;
     local($SIG{PIPE}) = "IGNORE";
@@ -2257,12 +2247,6 @@ is part of the perl-%s distribution. To install that, you need to run
         return;
     }
 
-    if ($^O eq 'MacOS') {
-        Mac::BuildTools::make($self);
-        $self->post_make();
-        return;
-    }
-
     my %env;
     while (my($k,$v) = each %ENV) {
         next if defined $v;
@@ -2647,9 +2631,13 @@ sub prefs {
             my $filler2 = int(66 - length($bs))/2;
             $filler2 = 0 if $filler2 < 0;
             $filler2 = " " x $filler2;
+            my $pretty = $self->pretty_id;
+            my $filler3 = int(66 - length($pretty))/2;
+            $filler3 = " " x $filler3;
             $CPAN::Frontend->myprint("
 $filler1 D i s t r o P r e f s $filler1
 $filler2 $bs $filler2
+$filler3 $pretty $filler3
 ");
             $CPAN::Frontend->mysleep(1);
             return $self->{prefs};
@@ -3230,9 +3218,9 @@ sub unsat_prereq {
         }
         # here need to flag as optional for recommends/suggests
         # -- xdg, 2012-04-01
-        $self->debug(sprintf "%s manadory?[%s]",
+        $self->debug(sprintf "%s mandatory?[%s]",
                      $self->pretty_id,
-                     $self->{mandatory})
+                     defined($self->{mandatory}) ? $self->{mandatory} : "<undef>")
             if $CPAN::DEBUG;
         my $optional = !$self->{mandatory}
             || $self->is_locally_optional($prereq_pm, $need_module);
@@ -3373,6 +3361,9 @@ sub prereq_pm {
                                           # but we must have run it
         || $self->{modulebuild};
     unless ($self->{build_dir}) {
+        return;
+    }
+    if ($self->{cleanup_after_install_done}) {
         return;
     }
     # no Makefile/Build means configuration aborted, so don't look for prereqs
@@ -3730,12 +3721,6 @@ sub test {
     $self->debug("Changed directory to $self->{build_dir}")
         if $CPAN::DEBUG;
 
-    if ($^O eq 'MacOS') {
-        Mac::BuildTools::make_test($self);
-        $self->post_test();
-        return;
-    }
-
     if ($self->{modulebuild}) {
         my $thm = CPAN::Shell->expand("Module","Test::Harness");
         my $v = $thm->inst_version;
@@ -3994,11 +3979,6 @@ sub clean {
         Carp::confess("Couldn't chdir to $self->{build_dir}: $!");
     $self->debug("Changed directory to $self->{build_dir}") if $CPAN::DEBUG;
 
-    if ($^O eq 'MacOS') {
-        Mac::BuildTools::make_clean($self);
-        return;
-    }
-
     my $system;
     if ($self->{modulebuild}) {
         unless (-f "Build") {
@@ -4194,12 +4174,6 @@ sub install {
 
     my $make = $self->{modulebuild} ? "Build" : "make";
     $CPAN::Frontend->myprint(sprintf "Running %s install for %s\n", $make, $self->pretty_id);
-
-    if ($^O eq 'MacOS') {
-        Mac::BuildTools::make_install($self);
-        $self->post_install();
-        return;
-    }
 
     my $system;
     if (my $commandline = $self->prefs->{install}{commandline}) {

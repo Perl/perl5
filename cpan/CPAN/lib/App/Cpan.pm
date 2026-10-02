@@ -6,7 +6,7 @@ use vars qw($VERSION);
 
 use if $] < 5.008 => 'IO::Scalar';
 
-$VERSION = '1.678';
+$VERSION = '1.679';
 
 =head1 NAME
 
@@ -1481,6 +1481,7 @@ sub _eval_version
 		package
 		  ExtUtils::MakeMaker::_version;
 
+        no warnings;
 		local $sigil$var;
 		\$$var=undef; do {
 			$line

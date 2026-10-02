@@ -3,7 +3,7 @@ package CPAN::Debug;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = "5.5001";
+$VERSION = "5.5002";
 # module is internal to CPAN.pm
 
 %CPAN::DEBUG = qw[
@@ -54,6 +54,7 @@ sub debug {
             if ($@) {
                 $CPAN::Frontend->myprint("Debug(\n" . $arg->as_string . ")\n");
             } else {
+                local $Data::Dumper::Sortkeys = 1;
                 $CPAN::Frontend->myprint("Debug(\n" . Data::Dumper::Dumper($arg) . ")\n");
             }
         } else {

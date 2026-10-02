@@ -274,8 +274,8 @@ our %Modules = (
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.38.tar.gz',
-        'SYNCINFO'     => 'tib on Mon Nov 18 08:14:50 2024',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.41.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri Oct  2 08:49:23 2026',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},

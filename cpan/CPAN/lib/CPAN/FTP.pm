@@ -15,7 +15,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5016";
+$VERSION = "5.5018";
 
 sub _plus_append_open {
     my($fh, $file) = @_;
@@ -367,7 +367,7 @@ sub localize_2021 {
         for my $prx (qw(https_proxy no_proxy)) {
             $ENV{$prx} = $CPAN::Config->{$prx} if $CPAN::Config->{$prx};
         }
-        $base = "https://cpan.org/";
+        $base = "https://www.cpan.org/";
     } else {
         my @missing_modules = grep { ! $CPAN::META->has_usable($_) } qw(HTTP::Tiny Net::SSLeay IO::Socket::SSL);
         my $miss = join ", ", map { "'$_'" } @missing_modules;
@@ -503,29 +503,6 @@ to get
 #-> sub CPAN::FTP::localize ;
 sub localize_1995ff {
     my($self,$file,$aslocal,$force,$with_defaults) = @_;
-    if ($^O eq 'MacOS') {
-        # Comment by AK on 2000-09-03: Uniq short filenames would be
-        # available in CHECKSUMS file
-        my($name, $path) = File::Basename::fileparse($aslocal, '');
-        if (length($name) > 31) {
-            $name =~ s/(
-                        \.(
-                           readme(\.(gz|Z))? |
-                           (tar\.)?(gz|Z) |
-                           tgz |
-                           zip |
-                           pm\.(gz|Z)
-                          )
-                       )$//x;
-            my $suf = $1;
-            my $size = 31 - length($suf);
-            while (length($name) > $size) {
-                chop $name;
-            }
-            $name .= $suf;
-            $aslocal = File::Spec->catfile($path, $name);
-        }
-    }
 
     return $aslocal if $self->have_promising_aslocal($aslocal, $force);
     my($maybe_restore) = 0;
@@ -599,7 +576,6 @@ sub localize_1995ff {
     } else {
         @levels = @all_levels;
     }
-    @levels = qw/dleasy/ if $^O eq 'MacOS';
     my($levelno);
     local $ENV{FTP_PASSIVE} =
         exists $CPAN::Config->{ftp_passive} ?

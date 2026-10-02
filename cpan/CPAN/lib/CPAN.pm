@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.38';
+$CPAN::VERSION = '2.41';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -66,7 +66,6 @@ sub _uniq;
 
 no lib ".";
 
-require Mac::BuildTools if $^O eq 'MacOS';
 if ($ENV{PERL5_CPAN_IS_RUNNING} && $$ != $ENV{PERL5_CPAN_IS_RUNNING}) {
     $ENV{PERL5_CPAN_IS_RUNNING_IN_RECURSION} ||= $ENV{PERL5_CPAN_IS_RUNNING};
     my @rec = _uniq split(/,/, $ENV{PERL5_CPAN_IS_RUNNING_IN_RECURSION}), $$;
@@ -1909,7 +1908,7 @@ B<Note>: This whole command currently is just a hack and will
 probably change in future versions of CPAN.pm, but the general
 approach will likely remain.
 
-B<Note>: See also L<smoke>
+B<Note>: See also L<smoke|/smoke ***EXPERIMENTAL COMMAND***>
 
 =head2 recompile
 
@@ -1953,7 +1952,7 @@ B<Note>: This whole command currently is just a hack and will
 probably change in future versions of CPAN.pm, but the general
 approach will likely remain.
 
-B<Note>: See also L<recent>
+B<Note>: See also L<recent|/recent ***EXPERIMENTAL COMMAND***>
 
 =head2 upgrade [Module|/Regexp/]...
 
@@ -3595,8 +3594,8 @@ See the source for details.
 
 =item use_inst($module)
 
-Similary to L<has_inst()> tries to load optional library but also dies if
-library is not available
+Similary to L</has_inst($module)> tries to load optional library but also
+dies if library is not available
 
 =item has_usable($module)
 

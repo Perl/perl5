@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename qw(basename);
-$VERSION = "5.5013";
+$VERSION = "5.5014";
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug); ## no critic
@@ -413,9 +413,6 @@ Can't continue cutting file '$file'.
             $tar->extract(@af) or
                 $CPAN::Frontend->mydie("Could not untar with Archive::Tar.");
         }
-
-        Mac::BuildTools::convert_files([$tar->list_files], 1)
-            if ($^O eq 'MacOS');
 
         return 1;
     }
