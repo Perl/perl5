@@ -288,6 +288,7 @@ our %Modules = (
                 PAUSE2015.pub
                 PAUSE2019.pub
                 PAUSE2021.pub
+                PAUSE2025.pub
                 SlayMakefile
                 t/00signature.t
                 t/04clean_load.t
