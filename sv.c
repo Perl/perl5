@@ -6861,7 +6861,7 @@ S_sv_magicv2_find(pTHX_ const SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void
 }
 
 static bool
-S_filter_mgv2_hk      (pTHX_ MAGIC *mg, const void *key) { return mg == key; }
+S_filter_mgv2_mg      (pTHX_ MAGIC *mg, const void *key) { return mg == key; }
 
 static bool
 S_filter_mgv2_by_funcs(pTHX_ MAGIC *mg, const void *key) { return MgFUNCS(mg) == key; }
@@ -7022,7 +7022,7 @@ void
 Perl_sv_magicv2_remove(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE;
-    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_hk, mg);
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_mg, mg);
 }
 
 /*
