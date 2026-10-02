@@ -6064,6 +6064,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 #else
             const char * const pvx = SvPVX_const(sv);
             const STRLEN len = SvCUR(sv);
+            const bool was_shared_hek = SvIsCOW_shared_hash(sv);
             SvIsCOW_off(sv);
             SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
@@ -6075,7 +6076,8 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
                 Move(pvx,SvPVX(sv),len,char);
                 *SvEND(sv) = '\0';
             }
-            unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
+            if (was_shared_hek)
+                unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 #endif
     }
 }
@@ -8170,7 +8172,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                      && !(SvTYPE(sv) == SVt_PVIO
                      && !(IoFLAGS(sv) & IOf_FAKE_DIRP)))
                 Safefree(SvPVX_mutable(sv));
-            else if (SvPVX_const(sv) && SvIsCOW(sv)) {
+            else if (SvPVX_const(sv) && SvIsCOW_shared_hash(sv)) {
                 unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
             }
 #endif
