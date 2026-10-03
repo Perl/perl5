@@ -12239,14 +12239,24 @@ S_optimize_regclass(pTHX_
             {
                 U8 ANYOFM_mask;
 
-                op = ANYOFM + inverted;
+                if (inverted && full_cp_count == 1) {
+                    /* Single excluded invariant byte -> NEXACTb.
+                     * This is common enough (searching for the first byte
+                     * after a long repeating prefix, searching for
+                     * "not a closing delimiter" that it's worth
+                     * specializing for. */
+                    op = NEXACTb;
+                    *ret = reg1node(pRExC_state, op, lowest_cp);
+                } else {
+                    op = ANYOFM + inverted;
 
-                /* We need to make the bits that differ be 0's */
-                ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
+                    /* We need to make the bits that differ be 0's */
+                    ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
 
-                /* The argument is the lowest code point */
-                *ret = reg1node(pRExC_state, op, lowest_cp);
-                FLAGS(REGNODE_p(*ret)) = ANYOFM_mask;
+                    /* The argument is the lowest code point */
+                    *ret = reg1node(pRExC_state, op, lowest_cp);
+                    FLAGS(REGNODE_p(*ret)) = ANYOFM_mask;
+                }
             }
 
           done_anyofm:
