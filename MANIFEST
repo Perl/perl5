@@ -4491,6 +4491,28 @@ dist/PathTools/t/Spec-taint.t			See if File::Spec works with taint
 dist/PathTools/t/taint.t			See if Cwd works with taint
 dist/PathTools/t/tmpdir.t			See if File::Spec->tmpdir() works
 dist/PathTools/t/win32.t			See if Cwd works on Win32
+dist/RNG/Changes			RNG distribution
+dist/RNG/lib/RNG.pm			RNG provider interface
+dist/RNG/lib/RNG/Drand48.pm		RNG::Drand48 Perl interface
+dist/RNG/lib/RNG/HMAC_DRBG.pm		RNG::HMAC_DRBG Perl interface
+dist/RNG/lib/RNG/PCG.pm			RNG::PCG Perl interface
+dist/RNG/lib/RNG/Provider.pm		RNG::Provider Perl interface
+dist/RNG/lib/RNG/Seed.pm		RNG::Seed Perl interface
+dist/RNG/lib/RNG/SeedBase.pm		RNG::SeedBase Perl interface
+dist/RNG/lib/RNG/Wyrand.pm		RNG::Wyrand Perl interface
+dist/RNG/lib/RNG/Xoshiro.pm		RNG::Xoshiro Perl interface
+dist/RNG/Makefile.PL			Build RNG
+dist/RNG/MANIFEST			RNG distribution
+dist/RNG/README				RNG distribution
+dist/RNG/RNG.xs				RNG::PCG XS implementation
+dist/RNG/t/compat.t			See if RNG works on supported older Perls
+dist/RNG/t/distributions.t		See if RNG distribution helpers work
+dist/RNG/t/drand48.t			See if RNG::Drand48 works
+dist/RNG/t/hmac_drbg.t			See if RNG::HMAC_DRBG works
+dist/RNG/t/pcg.t			See if RNG::PCG works
+dist/RNG/t/seed.t			See if RNG::Seed works
+dist/RNG/t/wyrand.t			See if RNG::Wyrand works
+dist/RNG/t/xoshiro.t			See if RNG::Xoshiro works
 dist/Safe/Changes			Changes for Safe.pm
 dist/Safe/Makefile.PL			Makefile.PL for Safe.pm
 dist/Safe/MANIFEST			MANIFEST for Safe.pm
@@ -5958,6 +5980,7 @@ pod/perlrepository.pod
 pod/perlrequick.pod			Perl regular expressions quick start
 pod/perlreref.pod			Perl regular expressions quick reference
 pod/perlretut.pod			Perl regular expressions tutorial
+pod/perlrng.pod				Perl random-number providers
 pod/perlrun.pod				Perl execution and options
 pod/perlsec.pod				Perl security
 pod/perlsecpolicy.pod			Perl security report handling policy
@@ -6556,6 +6579,7 @@ t/op/require_gh20577.t			Make sure updating %INC from an INC hook doesnt break @
 t/op/require_override.t			See if require handles no argument properly
 t/op/reset.t				See if reset operator works
 t/op/reverse.t				See if reverse operator works
+t/op/rng/contract.t			Test the RNG framework integration contract
 t/op/runlevel.t				See if die() works from perl_call_*()
 t/op/select.t				See if 0- and 1-argument select works
 t/op/setpgrpstack.t			See if setpgrp works
@@ -6633,6 +6657,7 @@ t/perf/benchmarks			snippets of benchmarking/profiling code
 t/perf/benchmarks.t			test t/perf/benchmarks syntax
 t/perf/opcount.t			See if optimised subs have the right op counts
 t/perf/optree.t				Test presence of some op optimisations
+t/perf/rng-benchmarks			RNG provider fast-path benchmark snippets
 t/perf/speed.t				See if optimisations are keeping things fast
 t/perf/taint.t				See if optimisations are keeping things fast (taint issues)
 t/perl.supp				Perl valgrind suppressions
@@ -6686,6 +6711,7 @@ t/porting/test_bootstrap.t		Test that the instructions for test bootstrapping ar
 t/porting/test_testlist.t		Test that we t/harness and t/TEST and MANIFEST agree on our test list
 t/porting/update_authors.t		Tests for Porting/updateAUTHORS.pl
 t/porting/utils.t			Check that utility scripts still compile
+t/porting/win32_config.t		Check the Win32 U64 format configuration
 t/re/alpha_assertions.t			See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t				See if bracketed char classes [...] compile properly
 t/re/begin-once.t			Checking that /o freeze a variable in a RegExp

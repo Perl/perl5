@@ -842,6 +842,12 @@ jobs:
             version
       - name: perl -V
         run: perl -V
+      - name: Install List::Util for RNG compatibility tests
+        if: matrix.perl-version == '5.24'
+        run: cpanm --notest List::Util
+      - name: Check List::Util version for RNG compatibility tests
+        if: matrix.perl-version == '5.24'
+        run: perl -MList::Util -e 'die "RNG needs List::Util 1.54 or later\n" if $List::Util::VERSION < 1.54'
       - name: Build and test dist modules
         run:
           perl Porting/test-dist-modules.pl -continue
@@ -871,4 +877,3 @@ jobs:
       - name: Build and test dist modules
         run:
           /usr/bin/perl Porting/test-dist-modules.pl -continue
-

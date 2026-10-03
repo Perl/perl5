@@ -164,6 +164,8 @@
 # define call_list(a,b)                         Perl_call_list(aTHX_ a,b)
 # define call_method(a,b)                       Perl_call_method(aTHX_ a,b)
 # define call_pv(a,b)                           Perl_call_pv(aTHX_ a,b)
+# define call_rand()                            Perl_call_rand(aTHX)
+# define call_srand(a)                          Perl_call_srand(aTHX_ a)
 # define call_sv(a,b)                           Perl_call_sv(aTHX_ a,b)
 # define caller_cx(a,b)                         Perl_caller_cx(aTHX_ a,b)
 # define cast_i32                               Perl_cast_i32
@@ -251,6 +253,7 @@
 # define get_av(a,b)                            Perl_get_av(aTHX_ a,b)
 # define get_cv(a,b)                            Perl_get_cv(aTHX_ a,b)
 # define get_cvn_flags(a,b,c)                   Perl_get_cvn_flags(aTHX_ a,b,c)
+# define get_entropy_portable(a,b,c)            Perl_get_entropy_portable(aTHX_ a,b,c)
 # define get_hv(a,b)                            Perl_get_hv(aTHX_ a,b)
 # define get_op_descs()                         Perl_get_op_descs(aTHX)
 # define get_op_names()                         Perl_get_op_names(aTHX)
@@ -1189,6 +1192,8 @@
 #   define release_RExC_state(a)                Perl_release_RExC_state(aTHX_ a)
 #   define report_evil_fh(a)                    Perl_report_evil_fh(aTHX_ a)
 #   define report_wrongway_fh(a,b)              Perl_report_wrongway_fh(aTHX_ a,b)
+#   define rng_clear()                          Perl_rng_clear(aTHX)
+#   define rng_rebuild()                        Perl_rng_rebuild(aTHX)
 #   define rpeep(a)                             Perl_rpeep(aTHX_ a)
 #   define rsignal_restore(a,b)                 Perl_rsignal_restore(aTHX_ a,b)
 #   define rsignal_save(a,b,c)                  Perl_rsignal_save(aTHX_ a,b,c)
@@ -1289,6 +1294,12 @@
 #   endif
 #   if defined(PERL_IN_AV_C)
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
+#   endif
+#   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) || \
+       defined(PERL_IN_PP_C)
+#     define call_rand_bytes(a)                 Perl_call_rand_bytes(aTHX_ a)
+#     define rng_refresh(a)                     Perl_rng_refresh(aTHX_ a)
+#     define translate_substr_offsets           Perl_translate_substr_offsets
 #   endif
 #   if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 #     define XS_builtin_indexed(a)              Perl_XS_builtin_indexed(aTHX_ a)

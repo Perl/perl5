@@ -244,12 +244,13 @@ else {
     $opt{ivsize} = 4;
     $opt{ivtype} = 'long';
     $opt{nv_preserves_uv_bits} = 32;
-    $opt{sPRIXU64} = '"lX"';
-    $opt{sPRId64} = '"ld"';
-    $opt{sPRIi64} = '"li"';
-    $opt{sPRIo64} = '"lo"';
-    $opt{sPRIu64} = '"lu"';
-    $opt{sPRIx64} = '"lx"';
+    # U64 remains the Windows 64-bit type when IV and UV are long.
+    $opt{sPRIXU64} = '"I64X"';
+    $opt{sPRId64} = '"I64d"';
+    $opt{sPRIi64} = '"I64i"';
+    $opt{sPRIo64} = '"I64o"';
+    $opt{sPRIu64} = '"I64u"';
+    $opt{sPRIx64} = '"I64x"';
     $opt{uvXUformat} = '"lX"';
     $opt{uvoformat} = '"lo"';
     $opt{uvsize} = 4;
