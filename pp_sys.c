@@ -1609,9 +1609,14 @@ PP_wrapped(pp_getc, MAXARG, 0)
         }
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
-        if (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
+        if (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY)) {
             report_evil_fh(gv);
-        SETERRNO(EBADF,RMS_IFI);
+            SETERRNO(EBADF,RMS_IFI);
+        }
+#ifdef USE_PERLIO
+        else if (IoIFP(io) && PerlIO_error(IoIFP(io)))
+            PerlIO_restore_errno(IoIFP(io));
+#endif
         RETPUSHUNDEF;
     }
     TAINT;
