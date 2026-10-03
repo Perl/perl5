@@ -123,7 +123,23 @@ wanted and not currently available, it's time to start coding.
 
 =over 3
 
-=item Start with F<module-starter> or F<h2xs>
+=item Start with F<perlnewdist>
+
+The F<perlnewdist> utility is the recommended way to start a new Perl
+distribution. Give it the name of the primary module:
+
+    perlnewdist Foo::Bar
+
+It creates the standard directory layout, a starter module, a test file,
+Makefile.PL, README, and Changes. The generated test should pass immediately.
+Use C<--with ::Name> to create additional modules below the primary module,
+and C<--xs> when the distribution needs native C code.
+
+On the first run, F<perlnewdist> asks for the author name and email address.
+It uses Git configuration to prefill those questions when possible and can
+save the answers in F<~/.perlnewdist>.
+
+=item Advanced generation with F<h2xs>
 
 The F<module-starter> utility is distributed as part of the
 L<Module::Starter|Module::Starter> CPAN package.  It creates a directory
@@ -134,18 +150,10 @@ the command line, thus:
     module-starter --module=Foo::Bar \
        --author="Your Name" --email=yourname@cpan.org
 
-If you do not wish to install the L<Module::Starter|Module::Starter>
-package from CPAN, F<h2xs> is an older tool, originally intended for the
-development of XS modules, which comes packaged with the Perl
-distribution.
-
-A typical invocation of L<h2xs|h2xs> for a pure Perl module is:
-
-    h2xs -AX --skip-exporter --use-new-tests -n Foo::Bar
-
-The C<-A> omits the Autoloader code, C<-X> omits XS elements,
-C<--skip-exporter> omits the Exporter code, C<--use-new-tests> sets up a
-modern testing environment, and C<-n> specifies the name of the module.
+F<h2xs> remains available for advanced work, particularly when generating
+XS from C header files or when exact control over the generated extension is
+needed. Its interface contains many historical options and is not normally
+the best starting point for a new pure-Perl distribution.
 
 =item Use L<strict|strict> and L<warnings|warnings>
 
@@ -194,8 +202,8 @@ export set - look at L<Exporter> for more details.
 
 The work isn't over until the paperwork is done, and you're going to
 need to put in some time writing some documentation for your module.
-C<module-starter> or C<h2xs> will provide a stub for you to fill in; if
-you're not sure about the format, look at L<perlpod> for an
+F<perlnewdist> will provide a stub for you to fill in; if you're not sure
+about the format, look at L<perlpod> for an
 introduction. Provide a good synopsis of how your module is used in
 code, a description, and then notes on the syntax and function of the
 individual subroutines or methods. Use Perl comments for developer notes
@@ -206,8 +214,8 @@ and POD for end-user notes.
 You're encouraged to create self-tests for your module to ensure it's
 working as intended on the myriad platforms Perl supports; if you upload
 your module to CPAN, a host of testers will build your module and send
-you the results of the tests. Again, C<module-starter> and C<h2xs>
-provide a test framework which you can extend - you should do something
+you the results of the tests. Again, F<perlnewdist> provides a test
+framework which you can extend - you should do something
 more than just checking your module will compile.
 L<Test::Simple|Test::Simple> and L<Test::More|Test::More> are good
 places to start when writing a test suite.
@@ -239,8 +247,8 @@ your request to be approved by the PAUSE administrators.
 
 =item Make the tarball
 
-Once again, C<module-starter> or C<h2xs> has done all the work for you.
-They produce the standard C<Makefile.PL> you see when you download and
+Once again, F<perlnewdist> has created the standard distribution files for
+you. It produces the standard C<Makefile.PL> you see when you download and
 install modules, and this produces a Makefile with a C<dist> target.
 
     perl Makefile.PL && make test && make distcheck && make dist
@@ -275,7 +283,7 @@ Updated by Kirrily "Skud" Robert, C<skud@cpan.org>
 
 =head1 SEE ALSO
 
-L<perlmod>, L<perlmodlib>, L<perlmodinstall>, L<h2xs>, L<strict>,
+L<perlmod>, L<perlmodlib>, L<perlmodinstall>, L<perlnewdist>, L<h2xs>, L<strict>,
 L<Carp>, L<Exporter>, L<perlpod>, L<Test::Simple>, L<Test::More>
 L<ExtUtils::MakeMaker>, L<Module::Build>, L<Module::Starter>
 L<https://www.cpan.org/>
