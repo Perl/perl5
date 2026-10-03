@@ -82,9 +82,9 @@ Windows, read L<perlrun>.
 =head2 Safety net
 
 Perl by default is very forgiving.  In order to make it more robust
-it is recommended to start every program with the following lines:
+it is recommended to start every program and module with the following
+lines:
 
- #!/usr/bin/perl
  use strict;
  use warnings;
 
@@ -107,7 +107,9 @@ declaration will also activate a
 L<"feature bundle"|feature/FEATURE BUNDLES>; a collection of named
 features that enable many of the more recent additions and changes to the
 language, as well as occasionally removing older features found to have
-been mistakes in design and discouraged.
+been mistakes in design and discouraged. It will also activate a
+L<"builtin bundle"|builtin/Version Bundles> if a version of C<v5.40> or
+higher is specified, making additional modern builtin functions available.
 
 =head2 Basic syntax overview
 
@@ -193,6 +195,16 @@ Scalar values can be used in various ways:
  print $animal;
  print "The animal is $animal\n";
  print "The square of $answer is ", $answer * $answer, "\n";
+
+When a variable hasn't been assigned a value, its value is the special
+scalar value C<undef>, which you can test for with C<defined> and pass
+around yourself.  If you try to print it (or use it in most stringy or
+numeric operations), you'll get a warning under C<use warnings;>.
+
+ my $thing;      # starts undef
+ $thing = undef; # makes it undef
+ undef $thing;   # also makes it undef
+ print $thing;   # Use of uninitialized value...
 
 Perl defines a number of special scalars with short names, often single
 punctuation marks or digits. These variables are used for all
@@ -425,6 +437,13 @@ conditional blocks more English like:
  print "Yow!" if $zippy;
  print "We have no bananas" unless $bananas;
 
+Some common conditions to test are C<defined> for values and C<exists> for
+hash keys (C<exists> is a distinct test from C<defined> on a hash key,
+because a hash key may exist and have a value of C<undef>).
+
+ print "No value set" unless defined $setting;
+ print "The answer is $answers{best}" if exists $answers{best};
+
 =item while
 
  while ( condition ) {
@@ -445,7 +464,7 @@ You can also use C<while> in a post-condition:
 
 Exactly like C:
 
- for ($i = 0; $i <= $max; $i++) {
+ for (my $i = 0; $i <= $max; $i++) {
      ...
  }
 
@@ -454,16 +473,17 @@ the more friendly list scanning C<foreach> loop.
 
 =item foreach
 
- foreach (@array) {
-     print "This element is $_\n";
+ foreach my $elem (@array) {
+     print "This element is $elem\n";
  }
 
- print $list[$_] foreach 0 .. $max;
-
- # you don't have to use the default $_ either...
- foreach my $key (keys %hash) {
-     print "The value of $key is $hash{$key}\n";
+ # $_ is used when a lexical variable is not declared
+ foreach (keys %hash) {
+     print "The value of $_ is $hash{$_}\n";
  }
+
+ # $_ is always used in the post-condition form
+ print $things[$_] foreach 0 .. $#things;
 
 The C<foreach> keyword is actually a synonym for the C<for>
 keyword.  See C<L<perlsyn/"Foreach Loops">>.
@@ -491,6 +511,10 @@ of the most common ones:
  -   subtraction
  *   multiplication
  /   division
+ **  exponentiation
+
+C<+> and C<-> can also be used as unary operators; C<+> has no effect on
+the value, but C<-> negates it.
 
 =item Numeric comparison
 
@@ -510,7 +534,7 @@ of the most common ones:
  le  less than or equal
  ge  greater than or equal
 
-(Why do we have separate numeric and string comparisons?  Because we don't
+Why do we have separate numeric and string comparisons?  Because we don't
 have special variable types, and Perl needs to know whether to sort
 numerically (where 99 is less than 100) or alphabetically (where 100 comes
 before 99).
@@ -521,18 +545,30 @@ before 99).
  ||  or
  !   not
 
-(C<and>, C<or> and C<not> aren't just in the above table as descriptions
+C<and>, C<or> and C<not> aren't just in the above table as descriptions
 of the operators.  They're also supported as operators in their own
 right.  They're more readable than the C-style operators, but have
 different precedence to C<&&> and friends.  Check L<perlop> for more
-detail.)
+detail.
+
+There's also the C<//> defined-or operator, which is like C<||> but only
+returns the second operand if the first is C<undef>.  It has no alphabetic
+lower-precedence alternative.
+
+The ternary C<?:> operator, like in many other languages, can be used
+as an inline if-then-else condition that returns a value or list.
+
+ my $response = $shouty ? 'YES' : 'yes';
 
 =item Miscellaneous
 
  =   assignment
  .   string concatenation
  x   string multiplication (repeats strings)
+ \   reference operator (returns a reference to the value)
  ..  range operator (creates a list of numbers or strings)
+ ++  auto-increment (adds 1 to the value)
+ --  auto-decrement (subtracts 1 from the value)
 
 =back
 
@@ -541,6 +577,10 @@ Many operators can be combined with a C<=> as follows:
  $x += 1;        # same as $x = $x + 1
  $x -= 1;        # same as $x = $x - 1
  $x .= "\n";     # same as $x = $x . "\n";
+
+Additional modern builtin functions and operators may be provided by
+L<feature> and L<builtin> (and automatically included by C<use VERSION>),
+so that introducing new ones doesn't break existing code.
 
 =head2 Files and I/O
 
@@ -552,10 +592,11 @@ but in short:
  open(my $out, ">",  "output.txt") or die "Can't open output.txt: $!";
  open(my $log, ">>", "my.log")     or die "Can't open my.log: $!";
 
-You can read from an open filehandle using the C<< <> >> operator.  In
-scalar context it reads a single line from the filehandle, and in list
-context it reads the whole file in, assigning each line to an element of
-the list:
+You can read from an open filehandle using the C<< <> >> operator, often
+referred to as the "diamond" operator, or "readline" as this is the named
+function it calls.  In scalar context it reads a single line from the
+filehandle, and in list context it reads the whole file in, assigning each
+line to an element of the list:
 
  my $line  = <$in>;
  my @lines = <$in>;
@@ -566,9 +607,27 @@ can be done a line at a time with Perl's looping constructs.
 
 The C<< <> >> operator is most often seen in a C<while> loop:
 
- while (<$in>) {     # assigns each line in turn to $_
-     print "Just read in this line: $_";
+ while (my $line = <$in>) { # clobbers $_ if no assignment given
+     print "Just read in this line: $line";
  }
+
+It's also often used as an empty diamond, which behind the scenes reads
+from the special C<ARGV> handle that reads from filenames passed on the
+commandline, or from C<STDIN> if no arguments are passed.  The "double
+diamond" C<<< <<>> >>> operator is safer for this case, as the regular
+diamond operator on C<ARGV> allows legacy behavior where the arguments can
+run programs.
+
+ perl -E'while (<>) { print }' 'yes|'   # oops, ran program!
+ perl -E'while (<<>>) { print }' 'yes|' # file not found
+ perl -E'while (<<>>) { print }' foo.txt bar.txt
+
+The C<< <> >> operator can also be a C<glob> if it does not exactly
+contain a single scalar variable or bareword handle.  It can be
+written directly as the C<readline> function to avoid this ambiguity.
+
+ my @txt_files = <*.txt>;           # glob not readline
+ my @lines = readline $handles{in}; # no misinterpretation
 
 We've already seen how to print to standard output using C<print()>.
 However, C<print()> can also take an optional first argument specifying
@@ -579,7 +638,8 @@ which filehandle to print to:
  print $log $logmessage;
 
 When you're done with your filehandles, you should C<close()> them
-(though to be honest, Perl will clean up after you if you forget):
+(though if you opened them in lexical variables, Perl will clean
+them up for you when the variable goes out of scope):
 
  close $in or die "$in: $!";
 
@@ -593,12 +653,12 @@ elsewhere.  However, in short:
 
 =item Simple matching
 
- if (/foo/)       { ... }  # true if $_ contains "foo"
+ if (m/foo/)      { ... }  # true if $_ contains "foo"
  if ($x =~ /foo/) { ... }  # true if $x contains "foo"
 
-The C<//> matching operator is documented in L<perlop>.  It operates on
-C<$_> by default, or can be bound to another variable using the C<=~>
-binding operator (also documented in L<perlop>).
+The C<//> matching operator is shorthand for C<m//> and is documented in
+L<perlop>.  It operates on C<$_> by default, or can be bound to another
+variable using the C<=~> binding operator (also documented in L<perlop>).
 
 =item Simple substitution
 
@@ -727,10 +787,15 @@ We can manipulate C<@_> in other ways too:
  my ($logmessage, $priority) = @_;       # common
  my $logmessage = $_[0];                 # uncommon, and ugly
 
+With the L<signatures|perlsub/Signatures> feature, included in feature
+bundles C<use v5.36> and higher, argument unpacking is rolled into the
+subroutine declaration, with options for advanced argument processing.
+
+ sub logger ($logmessage, $priority = 1) {
+
 Subroutines can also return values:
 
- sub square {
-     my $num = shift;
+ sub square ($num) {
      my $result = $num * $num;
      return $result;
  }
