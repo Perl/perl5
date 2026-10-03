@@ -39,6 +39,7 @@ require 5.004;  # keep this compatible, an old perl is all we may have before
                 # we build the new one
 
 use strict;
+use Text::Balanced qw(extract_bracketed);
 
 BEGIN {
     # Get function prototypes
@@ -3884,8 +3885,23 @@ sub generate_proto_h {
                     my $nz =      ( $arg =~ s/\bNZ\b// );
                     my $nullok =  ( $arg =~ s/\bNULLOK\b// );
                     my $nocheck = ( $arg =~ s/\bNOCHECK\b// );
-                    my $unused = ( $arg =~ s/\bUNUSED\b// );
-                    my $debug_only = ( $arg =~ s/\bDEBUG_ONLY\b// );
+
+                    my ($unused, $debug_only);
+                    for my $pair ( 
+                                   [ \$unused, 'UNUSED'],
+                                   [ \$debug_only, 'DEBUG_ONLY']
+                    ) {
+                        my $variable_ref = $pair->[0];
+                        my $name = $pair->[1];
+                        $$variable_ref = $arg =~ s/ \b$name\b (*pla:( \( )? ) //x;
+                        if ($$variable_ref && defined $1) {
+                            my $extracted = extract_bracketed($arg, "()");
+                            $extracted =~ s/ ^ \( //x;
+                            $extracted =~ s/ \) \z //x;
+                            $arg = "$extracted$arg";
+                        }
+                    }
+
                     die_at_end
                         ":$func: $arg Use only one of UNUSED, DEBUG_ONLY"
                                                     if $unused && $debug_only;

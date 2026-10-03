@@ -589,15 +589,22 @@ C<static>, and you might as well just type the actual C keyword.
 
 /*
 =for apidoc_section $compiler
-=for apidoc EmnU||UNUSED
+=for apidoc EmU||UNUSED|x
 
-Add this symbol following a formal parameter in both a function's definition,
+Enclose all parts of a formal parameter in both a function's definition,
 and its F<embed.fnc> entry to indicate that, while this parameter is passed to
 the function, the function doesn't actually use it.
 
 Perl will arrange for the suppression of any warnings the compiler would
 otherwise raise about the parameter being present but not used, which it would
 if there are no code paths through the function that reference the parameter.
+
+An example is:
+ : embed.fnc entry
+ Adpt|void|vfatal_warner|UNUSED(U32 err)|const char *pat|va_list *args
+
+ // First line of function defintion
+ Perl_vfatal_warner(pTHX_ UNUSED(U32 err),const char*pat,va_list*args)
 
 If there are Configurations where the parameter actually does get used, it is
 better practice to not use this mechanism, but to instead use
@@ -607,16 +614,17 @@ sections that don't use it.
 You need to add C<UNUSED> in both places.  If you forget one, there are likely
 platforms on which the warning won't be suppressed.
 
-An example is:
- : embed.fnc entry
- Adpt|void|vfatal_warner|U32 err UNUSED|const char *pat|va_list *args
+If you prefer, the F<embed.fnc> entry doesn't have to look like a macro call.
+All of the following have the same effect:
 
- // First line of function defintion
- Perl_vfatal_warner(pTHX_ U32 err UNUSED,const char*pat,va_list*args){
+ Adpt|void|vfatal_warner|U32 err UNUSED|const char *pat|va_list *args
+ Adpt|void|vfatal_warner|UNUSED U32 err|const char *pat|va_list *args
+ Adpt|void|vfatal_warner|U32 UNUSED err|const char *pat|va_list *args
+ Adpt|void|vfatal_warner|UNUSED(U32 err)|const char *pat|va_list *args
 
 =for apidoc EmnU||DEBUG_ONLY
 
-Add this symbol following a formal parameter in both a function's definition,
+Enclose all parts of a formal parameter in both a function's definition,
 and its F<embed.fnc> entry to indicate that, while this parameter is passed to
 the function, the function only uses it in DEBUGGING builds.
 
@@ -636,18 +644,23 @@ sections that don't use it.
 You need to add C<DEBUG_ONLY> in both places.  If you forget one, there are
 likely platforms on which the warning won't be suppressed.
 
+Like C<UNUSED>, the F<embed.fnc> entry doesn't have to look like a macro call,
+but can instead be a stand-alone keyword occuring anywhere in the parameter's
+entry, like:
+ |const line_t caller_line DEBUG_ONLY
+
 =cut
 */
-#define UNUSED __attribute__unused__
-#ifndef DEBUGGING
-#  define DEBUG_ONLY  UNUSED
-#  define __attribute__unused_unless_debugging__  UNUSED
-#  define PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(a)                            \
-                                        PERL_UNUSED_ARG_FOR_ARGS_ASSERT(a)
-#else
-#  define DEBUG_ONLY
+#define UNUSED(x)  x __attribute__unused__
+#ifdef DEBUGGING
+#  define DEBUG_ONLY(x) x
 #  define __attribute__unused_unless_debugging__
 #  define PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(a)
+#else
+#  define DEBUG_ONLY(x)  UNUSED(x)
+#  define __attribute__unused_unless_debugging__  __attribute__unused__
+#  define PERL_DEBUG_ONLY_ARG_FOR_ARGS_ASSERT(a)                            \
+                                        PERL_UNUSED_ARG_FOR_ARGS_ASSERT(a)
 #endif
 
 /* Some OS warn on NULL format to printf */
