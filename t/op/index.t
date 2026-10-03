@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 415 );
+plan( tests => 424 );
 
 run_tests() unless caller;
 
@@ -364,6 +364,18 @@ EOS
         utf8::upgrade($s);
         length($s);
         is(index($s, "", $len+1), 3, 'Overlong index doesn\'t confuse utf8 cache');
+    }
+
+    {
+        local ${^UTF8CACHE} = 1; # enable cache, disable debugging
+        for my $text ("", "abc", "\x{100}" x 3) {
+            my $s = $text;
+            utf8::upgrade($s);
+            my $len = length($s);
+            is(index($s, "", $len), $len, 'index at the cached end');
+            is(index($s, "", $len+1), $len, 'index beyond the cached end');
+            is(rindex($s, "", $len+1), $len, 'rindex beyond the cached end');
+        }
     }
 
 } # end of sub run_tests
