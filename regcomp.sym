@@ -575,6 +575,26 @@ return {
       },
       #################################
       {
+        "GROUP" => "NEXACTb",
+        "TYPE" => "NEXACTb",
+        "line" => __LINE__,
+        "ops" => [
+            {
+              "NAME" => "NEXACTb",
+              "TYPE" => "NEXACTb",
+              "attr" => {
+                "arg_spec" => "byte",
+                "simple"   => 1,
+              },
+              "desc" =>
+                "Match any byte except the nominated byte",
+            "line" => __LINE__,
+            "struct" => "regnode_1",
+          },
+        ],
+      },
+      #################################
+      {
         "GROUP" => "POSIXD",
         "TYPE" => "POSIXD",
         "comment" =>

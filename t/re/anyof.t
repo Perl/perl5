@@ -159,7 +159,7 @@ my @tests = (
 
     'ebcdic_ok_below_this_marker',
 
-    '(?i:[^:])' => 'NANYOFM[:]',
+    '(?i:[^:])' => 'NEXACTb[:]',
 
     '[^\n]' => 'REG_ANY',
 

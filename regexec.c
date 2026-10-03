@@ -2407,8 +2407,20 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NANYOFM_t8_p8: /* UTF-8ness does matter because can match UTF-8
                                   variants. */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
-                        (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
-                                                    (U8) ARG1u(c), FLAGS(c)));
+            (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
+                                        (U8) ARG1u(c), FLAGS(c)));
+        break;
+
+      case NEXACTb_tb_pb:
+      case NEXACTb_tb_p8:
+        REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
+           find_span_end((U8 *) s, (U8 *) strend, (U8) ARG1u(c)));
+        break;
+
+      case NEXACTb_t8_pb:
+      case NEXACTb_t8_p8:
+        REXEC_FBC_UTF8_CLASS_SCAN(
+           ! (UTF8SKIP(s) == 1 && (U8) *s == (U8) ARG1u(c)));
         break;
 
       /* These nodes all require at least one code point to be in UTF-8 to
@@ -7856,6 +7868,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
+        case NEXACTb: /*  /[^x]/ : single excluded byte  */
+            if (   NEXTCHR_IS_EOS
+                || (U8) ARG1u(scan) == UCHARAT(locinput)
+                || locinput >= loceol)
+            {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
         case ANYOFH:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
@@ -10837,6 +10859,27 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case NANYOFM_tb:
         scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol,
                                          (U8) ARG1u(p), FLAGS(p));
+        break;
+
+      case NEXACTb_t8:
+        {
+          const U8 nchar = (U8) ARG1u(p);
+          while (     hardcount < max
+                 &&   scan < this_eol
+                 &&  (UTF8SKIP(scan) != 1 || (U8) *scan != nchar))
+             {
+                 scan += UTF8SKIP(scan);
+                 hardcount++;
+             }
+        }
+        break;
+
+      case NEXACTb_tb:
+        {
+          char * found = (char *) memchr(scan, (U8) ARG1u(p),
+                                         this_eol - scan);
+          scan = found ? found : this_eol;
+        }
         break;
 
       case ANYOFH_tb: /* ANYOFH only can match UTF-8 targets */

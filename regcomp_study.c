@@ -3095,6 +3095,22 @@ Perl_study_chunk(pTHX_
                     break;
                   }
 
+                case NEXACTb:
+                  {
+                    SV* Nb_invlist = new_invlist_(2);
+                    Nb_invlist = add_cp_to_invlist(Nb_invlist,
+                                                   (U8) ARG1u(scan));
+                    if (flags & SCF_DO_STCLASS_OR) {
+                        ssc_union(data->start_class, Nb_invlist, true);
+                    }
+                    else if (flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(data->start_class, Nb_invlist, true);
+                        ssc_clear_locale(data->start_class);
+                    }
+                    SvREFCNT_dec_NN(Nb_invlist);
+                    break;
+                  }
+
                 case NPOSIXL:
                     invert = 1;
                     /* FALLTHROUGH */

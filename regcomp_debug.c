@@ -1006,6 +1006,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         SvREFCNT_dec(cp_list);
     }
+    else if (op == NEXACTb) {
+        sv_catpvf(sv, "[%s%c%s]",
+                       PL_colors[0], (int) ARG1u(o), PL_colors[1]);
+    }
     else if (k == ANYOFHbbm) {
         SV * cp_list = get_ANYOFHbbm_contents(o);
         sv_catpvf(sv, "[%s", PL_colors[0]);
