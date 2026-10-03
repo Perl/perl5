@@ -832,38 +832,18 @@ S_find_next_masked(U8 * s, const U8 * send, const U8 byte, const U8 mask)
         PERL_UINTMAX_T word = PERL_COUNT_MULTIPLIER * byte;
         PERL_UINTMAX_T mask_word = PERL_COUNT_MULTIPLIER * mask;
 
+        /* Process per-word as long as we have at least a full word left */
         while (s + PERL_WORDSIZE <= send) {
-            PERL_UINTMAX_T masked = (* (PERL_UINTMAX_T *) s) & mask_word;
-
-            /* If 'masked' contains bytes with the bit pattern of 'byte' within
-             * it, xoring with 'word' will leave each of the 8 bits in such
-             * bytes be 0, and no byte containing any other bit pattern will be
-             * 0. */
-            masked ^= word;
-
-            /* This causes the most significant bit to be set to 1 for any
-             * bytes in the word that aren't completely 0 */
-            masked |= masked << 1;
-            masked |= masked << 2;
-            masked |= masked << 4;
-
-            /* The msbits are the same as what marks a byte as variant, so we
-             * can use this mask.  If all msbits are 1, the word doesn't
-             * contain 'byte' */
-            if ((masked & PERL_VARIANTS_WORD_MASK) == PERL_VARIANTS_WORD_MASK) {
+            /* "masked" has zero byte where the mask matched. */
+            PERL_UINTMAX_T masked = ((* (PERL_UINTMAX_T *) s) & mask_word) ^ word;
+            /* "hits" has the high bit set where there were any zeroes. */
+            PERL_UINTMAX_T hits = (masked - PERL_COUNT_MULTIPLIER) & ~masked
+                                                     & PERL_VARIANTS_WORD_MASK;
+            if (hits == 0) {
                 s += PERL_WORDSIZE;
                 continue;
             }
-
-            /* Here, the msbit of bytes in the word that aren't 'byte' are 1,
-             * and any that are, are 0.  Complement and re-AND to swap that */
-            masked = ~ masked;
-            masked &= PERL_VARIANTS_WORD_MASK;
-
-            /* This reduces the problem to that solved by this function */
-            s += variant_byte_number(masked);
-            return s;
-
+            return s + first_upper_bit_set_byte_number(hits);
         }
     }
 
