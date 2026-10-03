@@ -1613,6 +1613,10 @@ PP_wrapped(pp_getc, MAXARG, 0)
             report_evil_fh(gv);
             SETERRNO(EBADF,RMS_IFI);
         }
+#ifdef USE_PERLIO
+        else if (IoIFP(io) && PerlIO_error(IoIFP(io)))
+            PerlIO_restore_errno(IoIFP(io));
+#endif
         RETPUSHUNDEF;
     }
     TAINT;
