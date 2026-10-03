@@ -34,4 +34,19 @@ cmp_ok($falsevar, 'eq', "");
     cmp_ok($truevar, 'eq', "1");
 }
 
+# GH #19987: these operations crashed with PERL_NO_COW.
+for my $value (0, 1) {
+    my $x = !!$value;
+    $x .= "x";
+    is($x, $value ? "1x" : "x", "append to boolean $value");
+
+    $x = !!$value;
+    undef $x;
+    ok(!defined $x, "undef boolean $value");
+
+    my $a = [!!$value];
+    undef $a;
+    ok(!defined $a, "free boolean $value");
+}
+
 done_testing();
