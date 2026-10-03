@@ -1255,12 +1255,12 @@
 #     define getenv_len(a,b)                    Perl_getenv_len(aTHX_ a,b)
 #   endif
 #   if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-#     define do_ipcctl(a,b,c)                   Perl_do_ipcctl(aTHX_ a,b,c)
-#     define do_ipcget(a,b,c)                   Perl_do_ipcget(aTHX_ a,b,c)
-#     define do_msgrcv(a,b)                     Perl_do_msgrcv(aTHX_ a,b)
-#     define do_msgsnd(a,b)                     Perl_do_msgsnd(aTHX_ a,b)
-#     define do_semop(a,b)                      Perl_do_semop(aTHX_ a,b)
-#     define do_shmio(a,b,c)                    Perl_do_shmio(aTHX_ a,b,c)
+#     define do_ipcctl(a,b)                     Perl_do_ipcctl(aTHX_ a,b)
+#     define do_ipcget(a,b)                     Perl_do_ipcget(aTHX_ a,b)
+#     define do_msgrcv(a)                       Perl_do_msgrcv(aTHX_ a)
+#     define do_msgsnd(a)                       Perl_do_msgsnd(aTHX_ a)
+#     define do_semop(a)                        Perl_do_semop(aTHX_ a)
+#     define do_shmio(a,b)                      Perl_do_shmio(aTHX_ a,b)
 #   endif
 #   if defined(HAS_PIPE)
 #     define PerlProc_pipe_cloexec(a)           Perl_PerlProc_pipe_cloexec(aTHX_ a)

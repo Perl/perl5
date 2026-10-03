@@ -331,7 +331,8 @@ typedef struct {
 } off_runs;             /* pseudo-stack element */
 
 PERL_STATIC_FORCE_INLINE void
-S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp,
+                          U32 flags  UNUSED)
 {
     PERL_ARGS_ASSERT_SORTSV_FLAGS_IMPL;
 
@@ -345,7 +346,6 @@ S_sortsv_flags_impl(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     gptr *which[3];
     off_runs stack[60], *stackp;
 
-    PERL_UNUSED_ARG(flags);
     if (nmemb <= 1) return;                     /* sorted trivially */
 
     if (nmemb <= SMALLSORT) aux = small;        /* use stack for aux array */
