@@ -560,6 +560,16 @@ Perl_boot_core_mro(pTHX)
     } STMT_END
 
 PERL_CALLCONV OP *
+Perl_build_function_invocation(pTHX_ I32 flags, OP *code, OP *arguments)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_FUNCTION_INVOCATION \
+    STMT_START { Perl_assert_aTHX; assert(code);       \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV OP *
 Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
@@ -569,6 +579,27 @@ Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
 #define PERL_ARGS_ASSERT_BUILD_INFIX_PLUGIN     \
     STMT_START { Perl_assert_aTHX; assert(lhs); assert(rhs);              \
                  assert(tokendata); PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV OP *
+Perl_build_method_invocation(pTHX_ OP *target, OP *method, OP *arguments)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(method);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;               \
+    } STMT_END
+
+PERL_CALLCONV OP *
+Perl_build_method_invocation_arguments(pTHX_ OP *target, OP *arguments)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION_ARGUMENTS \
+    STMT_START { Perl_assert_aTHX; assert(target);          \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;       \
     } STMT_END
 
 PERL_CALLCONV const char *
