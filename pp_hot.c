@@ -6886,6 +6886,8 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
         case OPpDEREF_HV:
             SvRV_set(sv, MUTABLE_SV(newHV()));
             break;
+        default:
+            NOT_REACHED; /* NOTREACHED */
         }
         SvROK_on(sv);
         SvSETMAGIC(sv);
