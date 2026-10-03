@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 36;
+plan tests => 38;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -90,6 +90,15 @@ fresh_perl_is('BEGIN{<>}', '',
 fresh_perl_is('print readline', 'foo',
               { switches => ['-w'], stdin => 'foo', stderr => 1 },
               'readline() defaults to *ARGV');
+
+{
+    open my $fh, '<', \q{} or die "open scalar handle failed: $!";
+    $! = 0;
+    my $ch = getc $fh;
+    is($ch, undef, 'getc returns undef at EOF');
+    is(0 + $!, 0, 'getc does not set errno at EOF');
+}
+
 
 # [perl #72720] Test that sv_gets clears any variables that should be
 # empty so if the read() aborts with EINTER, the TARG is actually
