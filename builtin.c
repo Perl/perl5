@@ -117,7 +117,11 @@ XS(XS_builtin_rand_bytes)
     if ((NV)count != integer || (STRLEN)count != count)
         croak("builtin::rand_bytes() count is too large");
 
-    ST(0) = Perl_call_rand_bytes(aTHX_ (STRLEN)count);
+    {
+        SV *result = Perl_call_rand_bytes(aTHX_ (STRLEN)count);
+        SPAGAIN;
+        ST(0) = result;
+    }
     XSRETURN(1);
 }
 

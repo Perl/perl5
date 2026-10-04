@@ -3621,30 +3621,34 @@ S_rng_srand_argument(pTHX_ SV *argument, bool has_argument)
     STRLEN length;
     SV *seed;
 
-    if (!has_argument || !argument || !SvOK(argument)) {
-        if (PL_srand_override) {
-            UV value;
+    if (has_argument && argument) {
+        SvGETMAGIC(argument);
+        if (SvOK(argument)) {
+            if (SvROK(argument) && S_rng_is_seed_object(aTHX_ argument)) {
+                S_rng_reject_redacted_seed(aTHX_ argument);
+                return newSVsv(argument);
+            }
+            if (SvROK(argument)
+                && !amagic_applies(argument, string_amg, AMGf_unary)) {
+                ck_warner(packWARN(WARN_MISC),
+                          "srand() argument is a reference without string overloading");
+                return newSVpvf("%" UVuf, PTR2UV(SvRV(argument)));
+            }
 
-            PERL_SRAND_OVERRIDE_GET(value);
-            return newSVpvf("%" UVuf, value);
+            bytes = SvPVutf8_nomg(argument, length);
+            seed = newSVpvn(bytes, length);
+            SvUTF8_on(seed);
+            return seed;
         }
-        return NULL;
     }
 
-    SvGETMAGIC(argument);
-    if (SvROK(argument) && S_rng_is_seed_object(aTHX_ argument))
-        return newSVsv(argument);
-    if (SvROK(argument)
-        && !amagic_applies(argument, string_amg, AMGf_unary)) {
-        ck_warner(packWARN(WARN_MISC),
-                  "srand() argument is a reference without string overloading");
-        return newSVpvf("%" UVuf, PTR2UV(SvRV(argument)));
-    }
+    if (PL_srand_override) {
+        UV value;
 
-    bytes = SvPVutf8(argument, length);
-    seed = newSVpvn(bytes, length);
-    SvUTF8_on(seed);
-    return seed;
+        PERL_SRAND_OVERRIDE_GET(value);
+        return newSVpvf("%" UVuf, value);
+    }
+    return NULL;
 }
 
 static U64
@@ -3830,7 +3834,6 @@ S_rng_reject_redacted_seed(pTHX_ SV *seed)
 {
     SV *is_redacted;
 
-    SvGETMAGIC(seed);
     if (!S_rng_is_seed_object(aTHX_ seed))
         return;
 
@@ -3938,6 +3941,17 @@ S_rng_u64(pTHX_ SV *provider)
     return value;
 }
 
+PERL_STATIC_INLINE NV
+S_rng_u64_to_NV_U01(U64 value)
+{
+#if NVMANTBITS < 63
+    return Perl_ldexp((NV)(value >> (63 - NVMANTBITS)),
+                      -(NVMANTBITS + 1));
+#else
+    return Perl_ldexp((NV)value, -64);
+#endif
+}
+
 static void
 S_rng_seed_default(pTHX)
 {
@@ -3960,10 +3974,12 @@ S_rng_seed_default(pTHX)
 static SV *
 S_rng_default_bytes(pTHX_ STRLEN length)
 {
-    SV * const result = newSV(length + 1);
-    STRLEN offset = 0;
+    SV *result;
+    STRLEN offset;
 
     S_rng_seed_default(aTHX);
+    result = newSV(length + 1);
+    offset = 0;
     while (offset < length) {
         const U64 value = Perl_drand48_raw_r(&PL_random_state);
         /* The low bits of an LCG has shorter periods, so emit the high
@@ -4011,8 +4027,7 @@ S_call_rand(pTHX)
              * both installed by S_rng_refresh(). */
             return PL_rng_U01(aTHX_ PL_rng_U01_state);
         }
-        return (NV)S_rng_u64(aTHX_ PL_rng_provider)
-            / ((NV)UINT64_C(0xffffffffffffffff) + 1.0);
+        return S_rng_u64_to_NV_U01(S_rng_u64(aTHX_ PL_rng_provider));
     }
 
     S_rng_seed_default(aTHX);
@@ -4043,55 +4058,47 @@ Perl_call_srand(pTHX_ Rand_seed_t seed_value)
     PL_srand_called = TRUE;
 }
 
-PP_wrapped(pp_rand, MAXARG, 0)
+PP(pp_rand)
 {
     const NV random_value = S_call_rand(aTHX);
-    {
-        dSP;
-        NV value;
+    dTARGET;
+    SV * const arg = MAXARG >= 1 ? *PL_stack_sp : NULL;
+    NV value;
 
-        if (MAXARG < 1)
-        {
-            EXTEND(SP, 1);
-            value = 1.0;
-        }
-        else {
-            SV * const sv = POPs;
-            if(!sv)
-                value = 1.0;
-            else
-                value = SvNV(sv);
-        }
+    if (!arg)
+        value = 1.0;
+    else
+        value = SvNV(arg);
     /* 1 of 2 things can be carried through SvNV, SP or TARG, SP was carried */
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-        if (! Perl_isnan(value) && value == 0.0)
+    if (! Perl_isnan(value) && value == 0.0)
 #else
-        if (value == 0.0)
+    if (value == 0.0)
 #endif
-            value = 1.0;
-        {
-            dTARGET;
-            PUSHs(TARG);
-            PUTBACK;
-            value *= random_value;
-            sv_setnv_mg(TARG, value);
-        }
+        value = 1.0;
+
+    value *= random_value;
+    sv_setnv_mg(TARG, value);
+    if (arg)
+        rpp_replace_1_1_NN(TARG);
+    else {
+        if (MAXARG)
+            rpp_popfree_to(PL_stack_sp - MAXARG);
+        rpp_xpush_1(TARG);
     }
     return NORMAL;
 }
 
 
-PP_wrapped(pp_srand, MAXARG, 0)
+PP(pp_srand)
 {
-    dSP; dTARGET;
+    dTARGET;
     SV * const provider = PL_rng_provider;
+    SV *argument = MAXARG >= 1 ? *PL_stack_sp : NULL;
     SV *seed;
     U64 anum;
 
-    if (MAXARG >= 1 && TOPs && SvOK(TOPs))
-        S_rng_reject_redacted_seed(aTHX_ TOPs);
-    seed = S_rng_srand_argument(aTHX_ MAXARG >= 1 ? TOPs : NULL,
-                                 MAXARG >= 1);
+    seed = S_rng_srand_argument(aTHX_ argument, MAXARG >= 1);
     if (seed)
         seed = sv_2mortal(seed);
 
@@ -4104,23 +4111,31 @@ PP_wrapped(pp_srand, MAXARG, 0)
         S_rng_clear_fast_path(aTHX);
         result = S_rng_call(aTHX_ provider, "srand", seed, seed != NULL);
         Perl_rng_rebuild(aTHX);
-        SPAGAIN;
-        if (MAXARG >= 1)
-            (void)POPs;
-        XPUSHs(result);
-        PUTBACK;
-        RETURN;
+        sv_setsv(TARG, result);
+        SvREFCNT_dec_NN(result);
+        if (argument)
+            rpp_replace_1_1_NN(TARG);
+        else {
+            if (MAXARG)
+                rpp_popfree_to(PL_stack_sp - MAXARG);
+            rpp_xpush_1(TARG);
+        }
+        return NORMAL;
     }
 
     anum = S_rng_drand48_seed(aTHX_ seed);
 
-    if (MAXARG >= 1)
-        (void)POPs;
-
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
-    XPUSHu(anum);
-    RETURN;
+    sv_setuv(TARG, anum);
+    if (argument)
+        rpp_replace_1_1_NN(TARG);
+    else {
+        if (MAXARG)
+            rpp_popfree_to(PL_stack_sp - MAXARG);
+        rpp_xpush_1(TARG);
+    }
+    return NORMAL;
 }
 
 PP(pp_int)

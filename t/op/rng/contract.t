@@ -15,7 +15,7 @@ use RNG::HMAC_DRBG ();
 use RNG::Seed ();
 use RNG::SeedBase ();
 
-plan(tests => 40);
+plan(tests => 45);
 
 sub mk_rand { map int rand 10000, 1..100; }
 
@@ -41,6 +41,15 @@ sub mk_rand { map int rand 10000, 1..100; }
 }
 
 {
+    package RNG::TiedScalar;
+    sub TIESCALAR { bless { value => $_[1], fetches => 0 }, $_[0] }
+    sub FETCH {
+        $_[0]{fetches}++;
+        return $_[0]{value};
+    }
+}
+
+{
     my $seed = bless { octets => "\x01\0\0\0" }, 'RNG::AlternativeSeed';
 
     srand($seed);
@@ -58,6 +67,19 @@ sub mk_rand { map int rand 10000, 1..100; }
 
     is(srand($raw), 1,
        'built-in Drand48 returns the state loaded from raw seed octets');
+}
+
+{
+    local ${^RNG} = undef;
+    my $tied;
+    my $tie_obj = tie $tied, 'RNG::TiedScalar', 'tied seed';
+    srand($tied);
+    my @from_tied = mk_rand;
+    is($tie_obj->{fetches}, 1,
+       'srand fetches a tied seed before checking its value');
+    srand('tied seed');
+    ok(eq_array(\@from_tied, [mk_rand]),
+       'srand uses the value fetched from a tied seed');
 }
 
 like(eval { srand(bless {}, 'RNG::InvalidSeed'); 1 } ? '' : $@,
@@ -126,9 +148,18 @@ package main;
 }
 
 {
+    package RNG::AllBitsSet;
+    our @ISA = 'RNG::Provider';
+    sub rand_bytes { "\xff" x $_[1] }
+}
+
+{
     package RNG::StackGrowth;
     our @ISA = 'RNG::Provider';
-    sub rand_bytes { "\0" x $_[1] }
+    sub rand_bytes {
+        grow(500);
+        "\x80" . "\0" x ($_[1] - 1)
+    }
     no warnings 'recursion';
     sub grow {
         my ($depth) = @_;
@@ -174,6 +205,12 @@ package main;
 }
 
 {
+    local ${^RNG} = bless {}, 'RNG::StackGrowth';
+    is(int rand(10), 5,
+       'provider rand survives stack growth during its callback');
+}
+
+{
     my $provider = RNG::TestObject->new;
     my $weak_provider = $provider;
 
@@ -210,6 +247,12 @@ package main;
 }
 
 {
+    local ${^RNG} = bless {}, 'RNG::AllBitsSet';
+    cmp_ok(rand(), '<', 1,
+           'rand() from an all-ones provider stays below one');
+}
+
+{
     no warnings 'experimental::builtin';
     use builtin 'rand_bytes';
     my $object = RNG::TestObject->new;
@@ -217,6 +260,12 @@ package main;
     is(unpack('H*', rand_bytes(4)), '80000000',
        'builtin::rand_bytes uses the selected provider');
     is($object->{length}, 4, 'builtin::rand_bytes forwards its length');
+
+    local ${^RNG} = bless {}, 'RNG::StackGrowth';
+    is(length(rand_bytes(4)), 4,
+       'builtin::rand_bytes survives stack growth in the provider callback');
+
+    local ${^RNG} = $object;
     is(rand_bytes(0), '', 'builtin::rand_bytes(0) returns an empty string');
     is($object->{calls}, 1, 'builtin::rand_bytes(0) does not advance the provider');
 

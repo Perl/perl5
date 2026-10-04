@@ -3334,8 +3334,8 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|STRLEN destlen 			\
 				|int allow_package			\
 				|NN STRLEN *slp
-Cp	|U64	|seed
 : Compatibility wrapper for XS modules which use Perl_seed()
+Cp	|U64	|seed
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 ep	|void	|set_caret_X
 CTdp	|void	|set_context	|NULLOK void *t
