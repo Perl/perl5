@@ -23,6 +23,16 @@ for my $method (qw(is_redacted bytes provider)) {
     sub provider { undef }
 }
 
+{
+    package RNG::Test::TiedScalar;
+
+    sub TIESCALAR { bless { value => $_[1], fetches => 0 }, $_[0] }
+    sub FETCH {
+        $_[0]{fetches}++;
+        return $_[0]{value};
+    }
+}
+
 my %width = (
     'RNG::Drand48'   => 6,
     'RNG::PCG'       => 16,
@@ -34,6 +44,10 @@ my %width = (
 for my $class (sort keys %width) {
     eval "require $class";
     BAIL_OUT("could not load $class: $@") if $@;
+
+    my $default_seed = $class->new;
+    is(length($default_seed->rand_bytes(8)), 8,
+       "$class accepts an omitted constructor seed");
 
     my $raw = RNG::Seed->from_bytes(chr(1) x $width{$class});
     my $left = $class->new(0);
@@ -59,6 +73,38 @@ for my $class (sort keys %width) {
     like(eval { $left->srand($wrong); 1 } ? '' : $@,
          qr/exactly \Q$width{$class}\E octets/,
          "$class rejects incorrectly sized raw material");
+
+    {
+        my $tied_seed;
+        my $tie_obj = tie $tied_seed, 'RNG::Test::TiedScalar', 'magic seed';
+        my $tied_rng = $class->new($tied_seed);
+        is($tie_obj->{fetches}, 1,
+           "$class constructor fetches a tied seed once");
+        is($tied_rng->rand_bytes(24), $class->new('magic seed')->rand_bytes(24),
+           "$class constructor uses the fetched seed value");
+    }
+
+    {
+        my $rng = $class->new('different seed');
+        my $tied_seed;
+        my $tie_obj = tie $tied_seed, 'RNG::Test::TiedScalar', 'magic seed';
+        $rng->srand($tied_seed);
+        is($tie_obj->{fetches}, 1,
+           "$class srand fetches a tied seed once");
+        is($rng->rand_bytes(24), $class->new('magic seed')->rand_bytes(24),
+           "$class srand uses the fetched seed value");
+    }
+
+    {
+        my $left = $class->new(42);
+        my $right = $class->new(42);
+        my $tied_limit;
+        my $tie_obj = tie $tied_limit, 'RNG::Test::TiedScalar', 5;
+        is($left->rand($tied_limit), $right->rand(5),
+           "$class rand uses a tied limit");
+        is($tie_obj->{fetches}, 1,
+           "$class rand fetches a tied limit once");
+    }
 }
 
 my $zero = RNG::Seed->from_bytes("\0" x 32);

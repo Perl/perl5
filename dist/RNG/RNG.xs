@@ -1201,13 +1201,15 @@ hmac_drbg_load_state_seed(hmac_drbg_data *state, const U8 *seed)
 static const U8 *
 hmac_drbg_input_octets(pTHX_ SV *input, STRLEN *length, const char *name)
 {
+    if (input)
+        SvGETMAGIC(input);
     if (!input || !SvOK(input)) {
         *length = 0;
         return NULL;
     }
     if (SvUTF8(input))
         croak("RNG::HMAC_DRBG %s must be an octet string", name);
-    return (const U8 *)SvPVbyte(input, *length);
+    return (const U8 *)SvPVbyte_nomg(input, *length);
 }
 
 static void
@@ -1361,7 +1363,10 @@ rand(self, limit = NULL)
 PREINIT:
     NV value;
 CODE:
-    value = (items < 2 || !SvOK(limit)) ? 1.0 : SvNV(limit);
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
     if (value == 0.0)
         value = 1.0;
     RETVAL = value * drand48_U01_fast(aTHX_ drand48_state(aTHX_ self));
@@ -1446,7 +1451,8 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
-    SvGETMAGIC(seed);
+    if (seed)
+        SvGETMAGIC(seed);
     state = newSVpvn(pcg_zero_state, sizeof(pcg_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1483,7 +1489,10 @@ rand(self, limit = NULL)
 PREINIT:
     NV value;
 CODE:
-    value = (items < 2 || !SvOK(limit)) ? 1.0 : SvNV(limit);
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
     if (value == 0.0)
         value = 1.0;
     RETVAL = value * pcg_rng_U01_fast(aTHX_ pcg_state(aTHX_ self));
@@ -1629,13 +1638,15 @@ PREINIT:
     STRLEN personalization_length = 0;
     const U8 *personalization_bytes = NULL;
 CODE:
+    if (personalization)
+        SvGETMAGIC(personalization);
     PERL_GET_STRONG_ENTROPY(entropy, sizeof(entropy),
                             "RNG::HMAC_DRBG could not obtain operating-system entropy");
     PERL_GET_STRONG_ENTROPY(nonce, sizeof(nonce),
                             "RNG::HMAC_DRBG could not obtain operating-system entropy");
     if (personalization && SvOK(personalization))
-        personalization_bytes = (const U8 *)SvPVutf8(personalization,
-                                                       personalization_length);
+        personalization_bytes = (const U8 *)SvPVutf8_nomg(
+            personalization, personalization_length);
     state = newSVpvn(hmac_drbg_zero_state, sizeof(hmac_drbg_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1678,7 +1689,10 @@ rand(self, limit = NULL)
 PREINIT:
     NV value;
 CODE:
-    value = (items < 2 || !SvOK(limit)) ? 1.0 : SvNV(limit);
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
     if (value == 0.0)
         value = 1.0;
     RETVAL = value * hmac_drbg_U01_fast(aTHX_ hmac_drbg_state(aTHX_ self));
@@ -1744,7 +1758,7 @@ CODE:
                         : newSVuv((items < 2 || !SvOK(seed)
                                    || (SvPOKp(seed) && !SvIOKp(seed)
                                                     && !SvNOKp(seed)))
-                                  ? 0 : SvUV(seed));
+                                  ? 0 : SvUV_nomg(seed));
 OUTPUT:
     RETVAL
 
@@ -1758,9 +1772,12 @@ PREINIT:
     hmac_drbg_data *state;
 PPCODE:
     state = hmac_drbg_state(aTHX_ self);
+    if (additional)
+        SvGETMAGIC(additional);
     if (additional && SvOK(additional))
         bytes = (const U8 *)(SvUTF8(additional)
-            ? SvPVutf8(additional, length) : SvPVbyte(additional, length));
+            ? SvPVutf8_nomg(additional, length)
+            : SvPVbyte_nomg(additional, length));
     if (state->secure)
         hmac_drbg_reseed_secure(aTHX_ state, bytes, length);
     else if (bytes) {
@@ -1781,9 +1798,14 @@ PREINIT:
 CODE:
     state = hmac_drbg_state(aTHX_ self);
     if (items > 1) {
-        if (!value || !SvOK(value) || SvUV(value) == 0)
+        UV interval;
+
+        if (value)
+            SvGETMAGIC(value);
+        if (!value || !SvOK(value)
+            || (interval = SvUV_nomg(value)) == 0)
             croak("RNG::HMAC_DRBG reseed interval must be positive");
-        state->reseed_interval = SvUV(value);
+        state->reseed_interval = interval;
     }
     RETVAL = (UV)state->reseed_interval;
 OUTPUT:
@@ -1798,9 +1820,14 @@ PREINIT:
 CODE:
     state = hmac_drbg_state(aTHX_ self);
     if (items > 1) {
-        if (value && SvTRUE(value) && !state->secure)
+        bool enabled;
+
+        if (value)
+            SvGETMAGIC(value);
+        enabled = value && SvTRUE_nomg(value);
+        if (enabled && !state->secure)
             croak("prediction resistance requires a secure HMAC_DRBG");
-        state->prediction_resistance = value && SvTRUE(value);
+        state->prediction_resistance = enabled;
     }
     RETVAL = state->prediction_resistance;
 OUTPUT:
@@ -1832,7 +1859,8 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
-    SvGETMAGIC(seed);
+    if (seed)
+        SvGETMAGIC(seed);
     state = newSVpvn(wyrand_zero_state, sizeof(wyrand_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1869,7 +1897,10 @@ rand(self, limit = NULL)
 PREINIT:
     NV value;
 CODE:
-    value = (items < 2 || !SvOK(limit)) ? 1.0 : SvNV(limit);
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
     if (value == 0.0)
         value = 1.0;
     RETVAL = value * wyrand_U01_fast(aTHX_ wyrand_state(aTHX_ self));
@@ -1925,7 +1956,8 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
-    SvGETMAGIC(seed);
+    if (seed)
+        SvGETMAGIC(seed);
     state = newSVpvn(xoshiro_zero_state, sizeof(xoshiro_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1962,7 +1994,10 @@ rand(self, limit = NULL)
 PREINIT:
     NV value;
 CODE:
-    value = (items < 2 || !SvOK(limit)) ? 1.0 : SvNV(limit);
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
     if (value == 0.0)
         value = 1.0;
     RETVAL = value * xoshiro_U01_fast(aTHX_ xoshiro_state(aTHX_ self));

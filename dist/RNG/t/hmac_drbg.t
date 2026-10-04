@@ -25,6 +25,15 @@ BEGIN {
     }
 }
 
+{
+    package RNG::HMAC_DRBG::TiedScalar;
+    sub TIESCALAR { bless { value => $_[1], fetches => 0 }, $_[0] }
+    sub FETCH {
+        $_[0]{fetches}++;
+        return $_[0]{value};
+    }
+}
+
 my $left = RNG::HMAC_DRBG->new('hello');
 my $right = RNG::HMAC_DRBG->new('hello');
 isa_ok($left, 'RNG::HMAC_DRBG');
@@ -48,6 +57,28 @@ my $nist_seed = RNG::HMAC_DRBG->seed_from_entropy(
              . '202122232425262728292a2b2c2d2e2f30313233343536'),
     pack('H*', '2021222324252627'),
 );
+{
+    my ($entropy, $nonce, $personalization);
+    my $entropy_tie = tie $entropy, 'RNG::HMAC_DRBG::TiedScalar',
+        pack('H*', '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f'
+                   . '202122232425262728292a2b2c2d2e2f30313233343536');
+    my $nonce_tie = tie $nonce, 'RNG::HMAC_DRBG::TiedScalar',
+        pack('H*', '2021222324252627');
+    my $personalization_tie = tie $personalization,
+        'RNG::HMAC_DRBG::TiedScalar', 'personalization';
+    my $tied_seed = RNG::HMAC_DRBG->seed_from_entropy(
+        $entropy, $nonce, $personalization);
+    my $ordinary_seed = RNG::HMAC_DRBG->seed_from_entropy(
+        pack('H*', '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f'
+                   . '202122232425262728292a2b2c2d2e2f30313233343536'),
+        pack('H*', '2021222324252627'), 'personalization');
+    is($entropy_tie->{fetches}, 1, 'seed_from_entropy fetches entropy once');
+    is($nonce_tie->{fetches}, 1, 'seed_from_entropy fetches nonce once');
+    is($personalization_tie->{fetches}, 1,
+       'seed_from_entropy fetches personalization once');
+    is($tied_seed->bytes, $ordinary_seed->bytes,
+       'seed_from_entropy uses the fetched input values');
+}
 isa_ok($nist_seed, 'RNG::Seed', 'standard input produces a replayable seed');
 is(length($nist_seed->bytes), 64, 'standard input seed holds Key and V');
 my $nist = RNG::HMAC_DRBG->new($nist_seed);
@@ -98,13 +129,20 @@ is($replay_left->rand_bytes(32), $replay_right->rand_bytes(32),
 
 my $reseeded = RNG::HMAC_DRBG->new(1);
 my $same_reseed = RNG::HMAC_DRBG->new(1);
-$reseeded->reseed('additional input');
 $same_reseed->reseed('additional input');
+my $additional;
+my $additional_tie = tie $additional,
+    'RNG::HMAC_DRBG::TiedScalar', 'additional input';
+$reseeded->reseed($additional);
+is($additional_tie->{fetches}, 1, 'reseed fetches tied input once');
 is($reseeded->rand_bytes(32), $same_reseed->rand_bytes(32),
-   'deterministic reseeding is reproducible');
+   'reseed uses the fetched input value');
 
 is($left->reseed_interval, 1_000_000, 'default reseed interval');
-$left->reseed_interval(2);
+my $interval;
+my $interval_tie = tie $interval, 'RNG::HMAC_DRBG::TiedScalar', 2;
+$left->reseed_interval($interval);
+is($interval_tie->{fetches}, 1, 'reseed_interval fetches a tied value once');
 is($left->reseed_interval, 2, 'reseed interval can be changed');
 my $reset = RNG::HMAC_DRBG->new('different');
 $reset->rand_bytes(16);
@@ -126,14 +164,25 @@ like(
 
 SKIP: {
     my $secure = eval { RNG::HMAC_DRBG->new_secure('test provider') };
-    skip "secure entropy unavailable: $@", 11 unless $secure;
+    skip "secure entropy unavailable: $@", 13 unless $secure;
+    my $personalization;
+    my $personalization_tie = tie $personalization,
+        'RNG::HMAC_DRBG::TiedScalar', 'test personalization';
+    RNG::HMAC_DRBG->new_secure($personalization);
+    is($personalization_tie->{fetches}, 1,
+       'new_secure fetches tied personalization once');
     is(length($secure->rand_bytes(64)), 64, 'secure provider returns requested bytes');
     ok(!$secure->prediction_resistance, 'secure provider starts without prediction resistance');
     ok($secure->rand_U01 >= 0 && $secure->rand_U01 < 1,
        'secure rand_U01 is in range');
     ok($secure->rand(10) >= 0 && $secure->rand(10) < 10,
        'secure rand is below its limit');
-    $secure->prediction_resistance(1);
+    my $prediction_resistance;
+    my $prediction_tie = tie $prediction_resistance,
+        'RNG::HMAC_DRBG::TiedScalar', 1;
+    $secure->prediction_resistance($prediction_resistance);
+    is($prediction_tie->{fetches}, 1,
+       'prediction_resistance fetches its tied value once');
     ok($secure->prediction_resistance, 'prediction resistance can be enabled');
     is(length($secure->rand_bytes(8)), 8, 'prediction-resistant generation works');
     $secure->srand(1234);
