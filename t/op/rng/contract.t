@@ -7,13 +7,15 @@ BEGIN {
 }
 
 use strict;
+use Config;
 use List::Util qw(shuffle);
 use Scalar::Util qw(weaken);
 use RNG::Provider ();
+use RNG::HMAC_DRBG ();
 use RNG::Seed ();
 use RNG::SeedBase ();
 
-plan(tests => 38);
+plan(tests => 40);
 
 sub mk_rand { map int rand 10000, 1..100; }
 
@@ -231,6 +233,20 @@ package main;
     srand(4321);
     is(rand_bytes(16), $first,
        'default builtin::rand_bytes follows the built-in seeded generator');
+}
+
+SKIP: {
+    skip 'debugging Perl required', 2 unless Config::DEBUGGING;
+
+    local $ENV{PERL_DEBUG_FORCE_FALLBACK_ENTROPY} = 1;
+    srand();
+    my $value = rand();
+    ok($value >= 0 && $value < 1,
+       'debug entropy override uses the fallback source for weak entropy');
+
+    my $error = eval { RNG::HMAC_DRBG->new_secure(); '' } || $@;
+    like($error, qr/RNG::HMAC_DRBG could not obtain operating-system entropy/,
+         'debug entropy override does not weaken strong entropy requests');
 }
 
 {

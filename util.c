@@ -4789,16 +4789,24 @@ S_fill_fallback_entropy(pTHX_ U8 *buffer, STRLEN length)
 void
 Perl_get_entropy_portable(pTHX_ U8 *buffer, STRLEN length, const char *failure)
 {
+    bool force_fallback = FALSE;
+
     PERL_ARGS_ASSERT_GET_ENTROPY_PORTABLE;
 
     if (!length)
         return;
 
+#ifdef DEBUGGING
+    force_fallback =
+        PerlEnv_getenv("PERL_DEBUG_FORCE_FALLBACK_ENTROPY") != NULL;
+#endif
+    PERL_UNUSED_VAR(force_fallback);
+
 #ifdef HAS_GETENTROPY
     /* getentropy() is limited to 256 octets per call.  Use it first when
      * Configure found it, then continue with the portable OS fallbacks if a
      * request cannot be completed. */
-    while (length) {
+    while (length && !force_fallback) {
         const STRLEN chunk = length > 256 ? 256 : length;
 
         if (getentropy(buffer, chunk) != 0)
@@ -4814,12 +4822,14 @@ Perl_get_entropy_portable(pTHX_ U8 *buffer, STRLEN length, const char *failure)
     {
         int fd = -1;
 #  ifdef O_NONBLOCK
-        fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, O_RDONLY | O_NONBLOCK);
+        if (!force_fallback)
+            fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE,
+                                      O_RDONLY | O_NONBLOCK);
 #  else
         /* Weak entropy must not deliberately block.  A caller which requires
          * strong entropy may use the configured device normally on this
          * unusual platform, accepting that the request can block. */
-        if (failure)
+        if (!force_fallback && failure)
             fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, O_RDONLY);
 #  endif
         if (fd != -1) {
@@ -4839,7 +4849,7 @@ Perl_get_entropy_portable(pTHX_ U8 *buffer, STRLEN length, const char *failure)
 #endif
 
 #ifdef WIN32
-    while (length) {
+    while (length && !force_fallback) {
         const ULONG chunk = length > (STRLEN)ULONG_MAX
                           ? ULONG_MAX : (ULONG)length;
         if (!SystemFunction036((PVOID)buffer, chunk))
