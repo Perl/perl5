@@ -11145,6 +11145,11 @@ characters).
 If 'error_detail' is not NULL, when a serious error is found, it creates a
 mortal hash containing details of the error, as follows:
 
+ {
+   'text'     => The error message
+   'position' => The byte offset into C<*s> that the error was found
+ }
+
 =cut
 */
 
