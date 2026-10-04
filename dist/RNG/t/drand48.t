@@ -13,6 +13,28 @@ isa_ok($rng, 'RNG::Drand48');
 is(length($rng->rand_bytes(0)), 0, 'rand_bytes accepts zero');
 is(length($rng->rand_bytes(17)), 17, 'rand_bytes returns the requested length');
 
+my $core_rand_bytes;
+{
+    no strict 'refs';
+    $core_rand_bytes = *{'builtin::rand_bytes'}{CODE};
+}
+SKIP: {
+    skip 'the host Perl has no built-in rand_bytes', 6
+        unless $RNG::HAS_NATIVE_RNG && $core_rand_bytes;
+
+    for my $length (1, 4, 5, 6, 17, 24) {
+        my $provider = RNG::Drand48->new(42);
+        my $core_bytes;
+        {
+            local ${^RNG} = undef;
+            srand(42);
+            $core_bytes = $core_rand_bytes->($length);
+        }
+        is($provider->rand_bytes($length), $core_bytes,
+           "provider rand_bytes matches core for $length bytes");
+    }
+}
+
 my $left = RNG::Drand48->new(42);
 my $right = RNG::Drand48->new(42);
 is_deeply(

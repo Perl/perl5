@@ -332,6 +332,8 @@ drand48_seed(rng_drand48_data *value, U64 seed)
 static U32
 drand48_next_u32(rng_drand48_data *state)
 {
+    /* The low bits of this LCG have shorter periods, so emit the high 32
+     * bits. */
     return (U32)(drand48_next(state) >> 16);
 }
 
