@@ -1705,6 +1705,12 @@ Perl_drand48_r(perl_drand48_t *random_state)
 #define PERL_ARGS_ASSERT_DRAND48_R              \
     STMT_START { assert(random_state); } STMT_END
 
+PERL_CALLCONV U64
+Perl_drand48_raw_r(perl_drand48_t *random_state)
+        Perl_attribute_nonnull(1);
+#define PERL_ARGS_ASSERT_DRAND48_RAW_R          \
+    STMT_START { assert(random_state); } STMT_END
+
 PERL_CALLCONV void
 Perl_dump_all(pTHX)
         Perl_attribute_nonnull_aTHX;

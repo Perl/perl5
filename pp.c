@@ -3960,23 +3960,27 @@ S_rng_seed_default(pTHX)
 static SV *
 S_rng_default_bytes(pTHX_ STRLEN length)
 {
-    SV * const result = newSVpvn("", 0);
+    SV * const result = newSV(length + 1);
     STRLEN offset = 0;
 
     S_rng_seed_default(aTHX);
-    SvGROW(result, length + 1);
     while (offset < length) {
-        const U64 value = (U64)(Perl_drand48_r(&PL_random_state)
-                                * (NV)UINT64_C(0x1000000000000));
-        U32 high = (U32)(value >> 16);
-        unsigned int i;
+        const U64 value = Perl_drand48_raw_r(&PL_random_state);
+        /* The low bits of an LCG has shorter periods, so emit the high
+         * 32 bits of the 48 bit state vector by throwing away the low 16
+         * bits. */
+        U32 word = (U32)(value >> 16);
+        STRLEN bytes_to_copy = length - offset;
 
-        for (i = 0; i < 4 && offset < length; i++) {
-            ((U8 *)SvPVX(result))[offset++] = (U8)(high >> 24);
-            high <<= 8;
+        assert(sizeof(word) == 4);
+        switch (bytes_to_copy) {
+            default: ((U8 *)SvPVX(result))[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  3: ((U8 *)SvPVX(result))[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  2: ((U8 *)SvPVX(result))[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  1: ((U8 *)SvPVX(result))[offset++] = (U8)(word & 0xFF);
         }
     }
-    ((U8 *)SvPVX(result))[length] = '\0';
+    SvPVX(result)[length] = '\0';
     SvCUR_set(result, length);
     SvPOK_on(result);
     return result;

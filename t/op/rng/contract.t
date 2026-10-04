@@ -13,7 +13,7 @@ use RNG::Provider ();
 use RNG::Seed ();
 use RNG::SeedBase ();
 
-plan(tests => 36);
+plan(tests => 38);
 
 sub mk_rand { map int rand 10000, 1..100; }
 
@@ -223,6 +223,14 @@ package main;
              qr/builtin::rand_bytes\(\) count must be a non-negative integer/,
              'builtin::rand_bytes rejects an invalid count');
     }
+
+    local ${^RNG} = undef;
+    srand(4321);
+    my $first = rand_bytes(16);
+    is(length($first), 16, 'default builtin::rand_bytes returns the requested length');
+    srand(4321);
+    is(rand_bytes(16), $first,
+       'default builtin::rand_bytes follows the built-in seeded generator');
 }
 
 {

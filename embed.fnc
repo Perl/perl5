@@ -1401,6 +1401,7 @@ CDRdp	|U8	|dowantarray
 TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
 				|U32 seed
 TXop	|double |drand48_r	|NN perl_drand48_t *random_state
+Tep	|U64	|drand48_raw_r	|NN perl_drand48_t *random_state
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
@@ -3335,6 +3336,7 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|NN STRLEN *slp
 Cp	|U64	|seed
 : Compatibility wrapper for XS modules which use Perl_seed()
+: Only used by perl.c/miniperl.c, but defined in caretx.c
 ep	|void	|set_caret_X
 CTdp	|void	|set_context	|NULLOK void *t
 Adp	|void	|setdefout	|NN GV *gv

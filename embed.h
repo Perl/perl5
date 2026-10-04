@@ -1048,6 +1048,7 @@
 #   define do_vecset(a)                         Perl_do_vecset(aTHX_ a)
 #   define do_vop(a,b,c,d)                      Perl_do_vop(aTHX_ a,b,c,d)
 #   define dofile(a,b)                          Perl_dofile(aTHX_ a,b)
+#   define drand48_raw_r                        Perl_drand48_raw_r
 #   define dump_all_perl(a)                     Perl_dump_all_perl(aTHX_ a)
 #   define dump_packsubs_perl(a,b)              Perl_dump_packsubs_perl(aTHX_ a,b)
 #   define dump_sub_perl(a,b)                   Perl_dump_sub_perl(aTHX_ a,b)

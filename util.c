@@ -6162,16 +6162,14 @@ Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
 #endif
 }
 
-double
-Perl_drand48_r(perl_drand48_t *random_state)
+PERL_STATIC_INLINE U64
+S_drand48_raw_r(perl_drand48_t *random_state)
 {
-    PERL_ARGS_ASSERT_DRAND48_R;
-
 #ifdef PERL_DRAND48_QUAD
     *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
         & DRAND48_MASK;
 
-    return ldexp((double)*random_state, -48);
+    return *random_state;
 #else
     {
     U32 accu;
@@ -6192,11 +6190,27 @@ Perl_drand48_r(perl_drand48_t *random_state)
     random_state->seed[1] = temp[1];
     random_state->seed[2] = (U16) accu;
 
-    return ldexp((double) random_state->seed[0], -48) +
-           ldexp((double) random_state->seed[1], -32) +
-           ldexp((double) random_state->seed[2], -16);
+    return ((U64)random_state->seed[2] << 32)
+         | ((U64)random_state->seed[1] << 16)
+         | (U64)random_state->seed[0];
     }
 #endif
+}
+
+U64
+Perl_drand48_raw_r(perl_drand48_t *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND48_RAW_R;
+
+    return S_drand48_raw_r(random_state);
+}
+
+double
+Perl_drand48_r(perl_drand48_t *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND48_R;
+
+    return ldexp((double)S_drand48_raw_r(random_state), -48);
 }
 
 #ifdef USE_C_BACKTRACE
