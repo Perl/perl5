@@ -127,20 +127,22 @@ struct slc_cache_item {
    private to the engine itself. It now lives here. */
 
 typedef struct regexp_internal {
-        regnode *regstclass;    /* Optional startclass as identified or constructed
-                                   by the optimiser */
-        struct reg_data *data;	/* Additional miscellaneous data used by the program.
-                                   Used to make it easier to clone and free arbitrary
-                                   data that the regops need. Often the ARG field of
-                                   a regop is an index into this structure. NOTE the
-                                   0th element of this structure is NEVER used and is
-                                   strictly reserved for internal purposes. */
+        regnode *regstclass;    /* Optional startclass as identified or
+                                   constructed by the optimiser */
+        struct reg_data *data;	/* Additional miscellaneous data used by the
+                                   program.  Used to make it easier to clone
+                                   and free arbitrary data that the regops
+                                   need. Often the ARG field of a regop is an
+                                   index into this structure. NOTE the 0th
+                                   element of this structure is NEVER used and
+                                   is strictly reserved for internal purposes.
+                                 */
         struct reg_code_blocks *code_blocks;/* positions of literal (?{}) */
         U32 proglen;            /* size of the compiled program in regnodes */
-        U32 name_list_idx;      /* Optional data index of an array of paren names,
-                                   only valid when RXp_PAREN_NAMES(prog) is true,
-                                   0 means "no value" like any other index into the
-                                   data array.*/
+        U32 name_list_idx;      /* Optional data index of an array of paren
+                                   names, only valid when RXp_PAREN_NAMES(prog)
+                                   is true, 0 means "no value" like any other
+                                   index into the data array.*/
         U32 depth;              /* 1 = executing; 2+ = recursing */
         U8 slc_whilem_seen;     /* Num of WHILEMs using super-linear cache.
                                    Same type as FLAGS() */
@@ -237,12 +239,12 @@ typedef struct regexp_internal {
  * into a regnode.
 
  * NOTE: Ideally we do not put pointers into the regnodes in a program. Instead
- * we put them in the "data" part of the regexp structure and store the index into
- * the data in the pointers in the regnode. This allows the pointer to be handled
- * properly during clone/free operations (eg refcount bookkeeping). See S_add_data(),
- * Perl_regdupe_internal(), Perl_regfree_internal() in regcomp.c for how the data
- * array can be used, the letters 'arsSu' all refer to different types of SV that
- * we already have support for in the data array.
+ * we put them in the "data" part of the regexp structure and store the index
+ * into the data in the pointers in the regnode. This allows the pointer to be
+ * handled properly during clone/free operations (eg refcount bookkeeping). See
+ * S_add_data(), Perl_regdupe_internal(), Perl_regfree_internal() in regcomp.c
+ * for how the data array can be used, the letters 'arsSu' all refer to
+ * different types of SV that we already have support for in the data array.
  */
 
 union regnode_arg {
@@ -262,7 +264,8 @@ struct regnode_string {
 
 struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     union regnode_head head;
-    U32 str_len_u32;    /* Only 18 bits allowed before would overflow 'next_off' */
+    U32 str_len_u32;    /* Only 18 bits allowed before would overflow
+                           'next_off' */
     char string[1];
 };
 
@@ -291,10 +294,10 @@ struct regnode_1 {
  * data structure. As a byproduct it also saves space, often we use a 16 bit
  * member to store indexes into the data[] array.
  *
- * Also note that the weird storage here is because regnodes are 32 bit aligned,
- * which means we cannot have a 64 bit aligned member. To make things more annoying
- * the size of a pointer may vary by platform. Thus we use a character array, and
- * then use inline functions to copy the data in or out.
+ * Also note that the weird storage here is because regnodes are 32 bit
+ * aligned, which means we cannot have a 64 bit aligned member. To make things
+ * more annoying the size of a pointer may vary by platform. Thus we use a
+ * character array, and then use inline functions to copy the data in or out.
  * */
 struct regnode_p {
     union regnode_head head;
@@ -302,7 +305,7 @@ struct regnode_p {
 };
 
 /* "Two Node" - similar to a regnode_1 but with space for an extra 32
- * bit value, or two 16 bit valus. The first fields must match regnode_1.
+ * bit value, or two 16 bit values. The first fields must match regnode_1.
  * Extra field can be accessed as (U32)ARG2u() (I32)ARG2i() or (U16)ARG2a()
  * and (U16)ARG2b() */
 struct regnode_2 {
@@ -367,16 +370,16 @@ struct regnode_charclass_posixl {
 
 /* A synthetic start class (SSC); is a regnode_charclass_posixl_fold, plus an
  * extra SV*, used only during regex construction and which is not used by the
- * main machinery in regexec.c and which does not get embedded in the final compiled
- * regex program.
+ * main machinery in regexec.c and which does not get embedded in the final
+ * compiled regex program.
  *
- * Because it does not get embedded it does not have to comply with the alignment
- * and sizing constraints required for a normal regnode structure: it MAY contain
- * pointers or members of whatever size needed and the compiler will do the right
- * thing. (Every other regnode type is 32 bit aligned.)
+ * Because it does not get embedded it does not have to comply with the
+ * alignment and sizing constraints required for a normal regnode structure: it
+ * MAY contain pointers or members of whatever size needed and the compiler
+ * will do the right thing. (Every other regnode type is 32 bit aligned.)
  *
- * Note that the 'next_off' field is unused, as the SSC stands alone, so there is
- * never a next node.
+ * Note that the 'next_off' field is unused, as the SSC stands alone, so there
+ * is never a next node.
  */
 struct regnode_ssc {
     union regnode_head head;
