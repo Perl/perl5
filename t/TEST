@@ -63,7 +63,6 @@ my %abs = (
 my %temp_no_core = (
      '../cpan/Compress-Raw-Bzip2' => 1,
      '../cpan/Compress-Raw-Zlib' => 1,
-     '../cpan/Devel-PPPort' => 1,
      '../cpan/Getopt-Long' => 1,
      '../cpan/IO-Compress' => 1,
      '../cpan/MIME-Base64' => 1,
