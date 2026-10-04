@@ -44,6 +44,15 @@ BEGIN {
 }
 
 {
+    package RNG::PCG::TiedSeed;
+    sub TIESCALAR { bless { value => $_[1], fetches => 0 }, $_[0] }
+    sub FETCH {
+        $_[0]{fetches}++;
+        return $_[0]{value};
+    }
+}
+
+{
     package RNG::PCG::CountingCan;
     our @ISA = qw(RNG::PCG);
     our $calls;
@@ -52,6 +61,16 @@ BEGIN {
 
 my $rng = RNG::PCG->new(42);
 isa_ok($rng, 'RNG::PCG');
+
+{
+    my $tied;
+    my $tie_obj = tie $tied, 'RNG::PCG::TiedSeed', 42;
+    my $from_tied = RNG::PCG->new($tied);
+    is($tie_obj->{fetches}, 1,
+       'a tied PCG seed is fetched once before checking its value');
+    is($from_tied->rand_bytes(8), RNG::PCG->new(42)->rand_bytes(8),
+       'a tied PCG seed initializes the generator from its fetched value');
+}
 is(ref($$rng), '', 'the state is a scalar');
 ok($rng->get_rand_U01_XS_func_addr > 0,
    'the XS provider publishes a callback address');

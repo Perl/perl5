@@ -53,7 +53,12 @@ static void rng_expand_seed(const U8 *label, STRLEN label_length,
 PERL_STATIC_INLINE NV
 rng_U64_to_NV_U01(U64 value)
 {
-    return (NV)value / ((NV)UINT64_C(0xffffffffffffffff) + 1.0);
+#if NVMANTBITS < 63
+    return Perl_ldexp((NV)(value >> (63 - NVMANTBITS)),
+                      -(NVMANTBITS + 1));
+#else
+    return Perl_ldexp((NV)value, -64);
+#endif
 }
 
 PERL_STATIC_INLINE NV
@@ -159,7 +164,7 @@ rng_raw_seed(pTHX_ SV *seed, SV **material, const U8 **bytes, STRLEN *length)
 {
     SV *redacted;
 
-    if (!seed || !sv_isobject(seed)
+    if (!seed || !SvROK(seed) || !sv_isobject(seed)
         || !sv_derived_from(seed, "RNG::SeedBase"))
         return FALSE;
 
@@ -172,11 +177,12 @@ rng_raw_seed(pTHX_ SV *seed, SV **material, const U8 **bytes, STRLEN *length)
 
     *material = rng_seed_method(aTHX_ seed, "bytes");
 
+    SvGETMAGIC(*material);
     if (!SvPOK(*material)) {
         SvREFCNT_dec_NN(*material);
         croak("RNG::SeedBase::bytes() did not return seed octets");
     }
-    *bytes = (const U8 *)SvPVbyte(*material, *length);
+    *bytes = (const U8 *)SvPVbyte_nomg(*material, *length);
     return TRUE;
 }
 
@@ -266,7 +272,15 @@ rng_drand48_seed(pTHX_ SV *seed, bool is_builtin)
     U64 numeric;
     STRLEN index;
 
-    if (!seed || !SvOK(seed)) {
+    if (!seed) {
+        U64 entropy;
+
+        PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
+        return entropy & mask;
+    }
+
+    SvGETMAGIC(seed);
+    if (!SvOK(seed)) {
         U64 entropy;
 
         PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
@@ -281,7 +295,7 @@ rng_drand48_seed(pTHX_ SV *seed, bool is_builtin)
         SvREFCNT_dec_NN(raw_material);
         return numeric;
     }
-    bytes = SvPVutf8(seed, length);
+    bytes = SvPVutf8_nomg(seed, length);
     if (rng_drand48_decimal_seed(bytes, length, &numeric)) {
         if (numeric > mask)
             ck_warner_d(packWARN(WARN_OVERFLOW),
@@ -388,7 +402,7 @@ rng_seed_bytes(pTHX_ SV *seed, U8 *automatic_seed,
                STRLEN automatic_seed_length, STRLEN *length)
 {
     if (seed && SvOK(seed)) {
-        const char *bytes = SvPVutf8(seed, *length);
+        const char *bytes = SvPVutf8_nomg(seed, *length);
         return (const U8 *)bytes;
     }
 
@@ -1432,6 +1446,7 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
+    SvGETMAGIC(seed);
     state = newSVpvn(pcg_zero_state, sizeof(pcg_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1482,6 +1497,8 @@ _srand(self, seed = NULL)
 PREINIT:
     U8 automatic_seed[16];
 CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
     if (items < 2 || !SvOK(seed)) {
         SV *raw;
         PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
@@ -1537,6 +1554,8 @@ PREINIT:
     STRLEN raw_seed_length = 0;
     SV *raw_material;
 CODE:
+    if (seed)
+        SvGETMAGIC(seed);
     state = newSVpvn(hmac_drbg_zero_state, sizeof(hmac_drbg_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1550,7 +1569,7 @@ CODE:
     }
     else {
         seed_bytes = seed && SvOK(seed)
-            ? (const U8 *)SvPVutf8(seed, seed_length)
+            ? (const U8 *)SvPVutf8_nomg(seed, seed_length)
             : (const U8 *)"";
         hmac_sha256_hash(hmac_drbg_seed_label,
                          sizeof(hmac_drbg_seed_label) - 1,
@@ -1683,6 +1702,8 @@ PREINIT:
     bool automatic = FALSE;
     bool raw_seed = FALSE;
 CODE:
+    if (seed)
+        SvGETMAGIC(seed);
     if (seed && SvOK(seed)
         && (raw_seed = rng_raw_seed(aTHX_ seed, &raw_material, &raw_bytes, &raw_length))) {
         rng_require_raw_seed_length(raw_material, raw_length,
@@ -1692,7 +1713,7 @@ CODE:
         seed_length = raw_length;
     }
     else if (seed && SvOK(seed))
-        seed_bytes = (const U8 *)SvPVutf8(seed, seed_length);
+        seed_bytes = (const U8 *)SvPVutf8_nomg(seed, seed_length);
     state = hmac_drbg_state(aTHX_ self);
     if (state->secure && (items < 2 || !SvOK(seed))) {
         hmac_drbg_reseed_secure(aTHX_ state, NULL, 0);
@@ -1811,6 +1832,7 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
+    SvGETMAGIC(seed);
     state = newSVpvn(wyrand_zero_state, sizeof(wyrand_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1861,6 +1883,8 @@ _srand(self, seed = NULL)
 PREINIT:
     U8 automatic_seed[8];
 CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
     if (items < 2 || !SvOK(seed)) {
         SV *raw;
         PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
@@ -1901,6 +1925,7 @@ new(class_name, seed = 0)
 PREINIT:
     SV *state;
 CODE:
+    SvGETMAGIC(seed);
     state = newSVpvn(xoshiro_zero_state, sizeof(xoshiro_zero_state));
     RETVAL = newRV_noinc(state);
     sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
@@ -1951,6 +1976,8 @@ _srand(self, seed = NULL)
 PREINIT:
     U8 automatic_seed[32];
 CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
     if (items < 2 || !SvOK(seed)) {
         SV *raw;
         PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
