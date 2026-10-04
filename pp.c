@@ -4100,6 +4100,7 @@ PP_wrapped(pp_srand, MAXARG, 0)
         S_rng_clear_fast_path(aTHX);
         result = S_rng_call(aTHX_ provider, "srand", seed, seed != NULL);
         Perl_rng_rebuild(aTHX);
+        SPAGAIN;
         if (MAXARG >= 1)
             (void)POPs;
         XPUSHs(result);
