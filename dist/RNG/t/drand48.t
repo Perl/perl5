@@ -12,6 +12,9 @@ my $rng = RNG::Drand48->new(42);
 isa_ok($rng, 'RNG::Drand48');
 is(length($rng->rand_bytes(0)), 0, 'rand_bytes accepts zero');
 is(length($rng->rand_bytes(17)), 17, 'rand_bytes returns the requested length');
+is(unpack('H*', RNG::Drand48->new(42)->rand_bytes(12)),
+   'be3099bebb48bb57c715701c',
+   'rand_bytes emits each word least significant byte first');
 
 my $core_rand_bytes;
 {

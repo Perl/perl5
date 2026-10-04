@@ -342,12 +342,19 @@ drand48_fill_bytes(rng_drand48_data *state, STRLEN length, U8 *bytes)
 {
     U32 word;
     STRLEN offset;
-    unsigned int i;
 
     for (offset = 0; offset < length; ) {
+        STRLEN bytes_to_copy = length - offset;
+
         word = drand48_next_u32(state);
-        for (i = 0; i < 4 && offset < length; i++)
-            bytes[offset++] = (U8)(word >> (24 - 8 * i));
+
+        assert(sizeof(word) == 4);
+        switch (bytes_to_copy) {
+            default: bytes[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  3: bytes[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  2: bytes[offset++] = (U8)(word & 0xFF); word >>= 8; /* FALLTHROUGH */
+            case  1: bytes[offset++] = (U8)(word & 0xFF);
+        }
     }
 }
 
