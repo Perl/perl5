@@ -5506,7 +5506,7 @@ sub find_undefs {
         delete $always_undefs{$name};   # No need to #undef it
 
         if (   $flags_visibility
-            && $flags_visibility !~ /E/
+            && $flags_visibility !~ /[EQ]/
             && ! defined $visibility{$name}{flags_implicit})
         {
             push @warnings, "'$name' cannot actually be seen outside of"
