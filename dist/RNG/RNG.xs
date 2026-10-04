@@ -138,17 +138,39 @@ rng_seed_method(pTHX_ SV *seed, const char *method)
     dSP;
     I32 count;
     SV *result;
+    SV *call_seed;
+#ifdef PERL_RC_STACK
+    const bool is_rc = rpp_stack_is_rc();
+#endif
 
     ENTER;
     SAVETMPS;
+    call_seed = sv_2mortal(SvREFCNT_inc_simple_NN(seed));
     PUSHMARK(SP);
-    XPUSHs(sv_2mortal(SvREFCNT_inc_simple_NN(seed)));
+    /* call_method() can run with either stack mode.  Keep the argument's
+     * stack reference balanced when the active stack is reference-counted. */
+#ifdef PERL_RC_STACK
+    rpp_extend(1);
+    SPAGAIN;
+#else
+    EXTEND(SP, 1);
+#endif
+    *++SP = call_seed;
+#ifdef PERL_RC_STACK
+    if (is_rc)
+        SvREFCNT_inc_simple_void_NN(call_seed);
+#endif
     PUTBACK;
     count = call_method(method, G_SCALAR);
     SPAGAIN;
     if (count != 1)
         croak("RNG::SeedBase method did not return exactly one value");
-    result = newSVsv(POPs);
+    result = newSVsv(TOPs);
+#ifdef PERL_RC_STACK
+    if (is_rc)
+        SvREFCNT_dec_NN(TOPs);
+#endif
+    SP--;
     PUTBACK;
     FREETMPS;
     LEAVE;

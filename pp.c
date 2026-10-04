@@ -3791,6 +3791,7 @@ S_rng_call_sv(pTHX_ SV *provider, SV *callable, const char *method,
      * mode-preserving push and pop protocol rather than using either stack's
      * convenience macros. */
     rpp_extend(has_arg ? 2 : 1);
+    SPAGAIN;
     *++SP = call_provider;
 #ifdef PERL_RC_STACK
     if (is_rc)

@@ -118,7 +118,7 @@ XS(XS_builtin_rand_bytes)
         croak("builtin::rand_bytes() count is too large");
 
     {
-        SV *result = Perl_call_rand_bytes(aTHX_ (STRLEN)count);
+        SV *result = sv_2mortal(Perl_call_rand_bytes(aTHX_ (STRLEN)count));
         SPAGAIN;
         ST(0) = result;
     }
