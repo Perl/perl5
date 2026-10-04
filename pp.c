@@ -3988,7 +3988,7 @@ Perl_call_rand_bytes(pTHX_ STRLEN length)
     PERL_ARGS_ASSERT_CALL_RAND_BYTES;
 
     if (!length)
-        return newSVpvn("", 0);
+        return newSVpvs("");
 
     if (!PL_rng_provider)
         return S_rng_default_bytes(aTHX_ length);
