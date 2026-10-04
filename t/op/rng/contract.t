@@ -13,7 +13,7 @@ use RNG::Provider ();
 use RNG::Seed ();
 use RNG::SeedBase ();
 
-plan(tests => 35);
+plan(tests => 36);
 
 sub mk_rand { map int rand 10000, 1..100; }
 
@@ -123,6 +123,21 @@ package main;
     sub rand_bytes { "\0" x $_[1] }
 }
 
+{
+    package RNG::StackGrowth;
+    our @ISA = 'RNG::Provider';
+    sub rand_bytes { "\0" x $_[1] }
+    no warnings 'recursion';
+    sub grow {
+        my ($depth) = @_;
+        grow($depth - 1) if $depth;
+    }
+    sub srand {
+        grow(500);
+        return 'stack-grown';
+    }
+}
+
 package main;
 
 {
@@ -147,6 +162,13 @@ package main;
        'an explicit string seed is dispatched to the provider');
     is($object->{modified_seed}, 'mutable-changed',
        'a provider may modify its normalized seed argument');
+}
+
+{
+    my $provider = bless {}, 'RNG::StackGrowth';
+    local ${^RNG} = $provider;
+    is(srand(), 'stack-grown',
+       'provider srand survives stack growth during its callback');
 }
 
 {
