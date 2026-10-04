@@ -72,10 +72,10 @@ $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 my $htoolnm;
 my $hgrind_ct;
 
-my $dump_tests = 0;
-if ($ARGV[0] && $ARGV[0] =~ /^-?-dumptests$/) {
+my $dump_manifested_tests = 0;
+if ($ARGV[0] && $ARGV[0] =~ /^-?-dump_manifested_tests$/) {
     shift;
-    $dump_tests = 1;
+    $dump_manifested_tests = 1;
 }
 
 if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
@@ -87,7 +87,7 @@ if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
 
-my (@tests, @re, @anti_re);
+my (@manifested_tests, @re, @anti_re);
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
@@ -126,13 +126,13 @@ $jobs ||= 1;
 
 my %total_time;
 sub _compute_tests_and_ordering($) {
-    my @tests = $_[0]->@*;
+    my @manifested_tests = $_[0]->@*;
 
     my %dir;
     my %all_dirs;
     my %map_file_to_dir;
 
-    if (!$dump_tests) {
+    if (!$dump_manifested_tests) {
         require App::Prove::State;
         if (!$state) {
             # silence unhelpful warnings from App::Prove::State about not having
@@ -150,12 +150,12 @@ sub _compute_tests_and_ordering($) {
             }
         }
         # For some reason get_tests returns *all* the tests previously run,
-        # (in the right order), not simply the selection in @tests
+        # (in the right order), not simply the selection in @manifested_tests
         # (in the right order). Not sure if this is a bug or a feature.
-        # Whatever, *we* are only interested in the ones that are in @tests
+        # Whatever, *we* are only interested in the ones that are in @manifested_tests
         my %seen;
-        @seen{@tests} = ();
-        @tests = grep {exists $seen{$_} } $state->get_tests(0, @tests);
+        @seen{@manifested_tests} = ();
+        @manifested_tests = grep {exists $seen{$_} } $state->get_tests(0, @manifested_tests);
     }
 
     my %times;
@@ -168,7 +168,7 @@ sub _compute_tests_and_ordering($) {
 
     my %partial_serials;
     # Preprocess the list of tests
-    for my $file (@tests) {
+    for my $file (@manifested_tests) {
         if ($is_win32) {
             $file =~ s,\\,/,g; # canonicalize path
         };
@@ -198,7 +198,7 @@ sub _compute_tests_and_ordering($) {
 
     my @alone_files;
     # Ready to figure out the timings.
-    for my $file (@tests) {
+    for my $file (@manifested_tests) {
         my $file_dir = $map_file_to_dir{$file};
 
         # if this is a file which must be processed alone
@@ -317,7 +317,7 @@ if (@ARGV) {
     # Note: we use glob even on *nix and not just on Windows
     # because arguments might be passed in via the TEST_ARGS
     # env var where they wont be expanded by the shell.
-    @tests = map(glob($_),@ARGV);
+    @manifested_tests = map(glob($_),@ARGV);
     # This is a hack to force config_heavy.pl to be loaded, before the
     # prep work for running a test changes directory.
     1 if $Config{d_fork};
@@ -334,9 +334,9 @@ if (@ARGV) {
 
     # but for now, run all directories in sequence.
 
-    unless (@tests) {
+    unless (@manifested_tests) {
         my @seq = <base/*.t>;
-        push @tests, @seq;
+        push @manifested_tests, @seq;
 
         my (@next, @last);
 
@@ -354,7 +354,7 @@ if (@ARGV) {
 
         if (@next) {
             @next = map { glob ("$_/*.t") } @next;
-            push @tests, @next;
+            push @manifested_tests, @next;
             push @seq, _compute_tests_and_ordering(\@next)->@*;
         }
 
@@ -365,11 +365,11 @@ if (@ARGV) {
         push @last, @ext_from_manifest;
 
         push @seq, _compute_tests_and_ordering(\@last)->@*;
-        push @tests, @last;
+        push @manifested_tests, @last;
 
         $rules = { seq => \@seq };
 
-        foreach my $test (@tests) {
+        foreach my $test (@manifested_tests) {
             delete $non_ext->{$test};
         }
 
@@ -382,11 +382,11 @@ if (@ARGV) {
     }
 }
 if ($is_win32) {
-    s,\\,/,g for @tests;
+    s,\\,/,g for @manifested_tests;
 }
 if (@re or @anti_re) {
     my @keepers;
-    foreach my $test (@tests) {
+    foreach my $test (@manifested_tests) {
         my $keep = 0;
         if (@re) {
             foreach my $re (@re) {
@@ -404,20 +404,20 @@ if (@re or @anti_re) {
             push @keepers, $test;
         }
     }
-    @tests= @keepers;
+    @manifested_tests= @keepers;
 }
 
 # Allow e.g., ./perl t/harness t/op/lc.t
-for (@tests) {
+for (@manifested_tests) {
     if (! -f $_ && !/^\.\./ && -f "../$_") {
         $_ = "../$_";
         s{^\.\./t/}{};
     }
 }
 
-dump_tests(\@tests) if $dump_tests;
+dump_manifested_tests(\@manifested_tests) if $dump_manifested_tests;
 
-filter_taint_tests(\@tests);
+filter_taint_tests(\@manifested_tests);
 
 my %options;
 
@@ -500,7 +500,7 @@ $h->callback(
              }
              );
 
-my $agg = $h->runtests(@tests);
+my $agg = $h->runtests(@manifested_tests);
 _cleanup_valgrind(\$htoolnm, \$hgrind_ct);
 printf "Finished test run at %s.\n", scalar(localtime);
 exit($agg->has_errors ? 1 : 0);
