@@ -10510,8 +10510,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 break;
             }   /* End of switch on char following backslash */
         } /* end of handling backslash escape sequences */
-        else if (   generic_isCC_(value, CC_VERTSPACE_)
-                 || is_VERTWS_cp_high(value))
+        else if ((value < 256) ? generic_isCC_(value, CC_VERTSPACE_)
+                               : is_VERTWS_cp_high(value))
         {
             if (strict && ! skip_white) {
                 vFAIL("Literal vertical space in [] is illegal except"
