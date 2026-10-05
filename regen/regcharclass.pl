@@ -1911,11 +1911,6 @@ EOF
 # Finally is 'title' which is output in comments associated with the macro
 # that are its title or description.
 #
-# In all cases the first (perhaps only) parameter to
-# the macro is a pointer to the first byte of the code point it is to test to
-# see if it is in the class determined by the macro.  In the case of non-UTF8,
-# the code point consists only of a single byte.
-#
 # A line beginning with '=>' begins the definition.  Lines between the first
 # one and it give an optional overview of what the macro does.  If one of
 # those lines begins with a scalar symbol, the code will replace the
