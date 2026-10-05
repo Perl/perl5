@@ -25,7 +25,7 @@ BEGIN {
 our @global;
 
 
-plan tests => 555;  # Update this when adding/deleting tests.
+plan tests => 556;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1020,15 +1020,31 @@ sub run_tests {
 	ok("a" !~ /^(a)(??{ \$1 })/, '(??{ ref })');
     }
 
-    # make sure the uninit warning from returning an undef var
-    # sees the right var
+    # Make sure the uninit warning from returning an undef var
+    # in (??{...}) displays the right line and doesn't display
+    # the wrong var. In an ideal world it would display $u2 as the
+    # undef return value, but that information is no longer available,
+    # so displaying nothing is better than displaying something wrong
+    # like $u1. Similarly, the op being executed is no longer available.
 
     {
 	my ($u1, $u2);
-	my $warn = '';
-	local $SIG{__WARN__} = sub {  $warn .= $_[0] };
-	$u1 =~ /(??{$u2})/ or die;
-	like($warn, qr/value \$u1 in pattern match.*\n.*value at/, 'uninit');
+	my @warn;
+	local $SIG{__WARN__} = sub {  push @warn, $_[0]; };
+        my $l = __LINE__;
+        my $l1 = $l + 3;
+        my $l2 = $l + 6;
+	$u1 =~ /(??{
+                # padding to make final expression be on a different line
+                my $x = 1;
+                $u2;
+                })/ or die;
+	like($warn[0],
+             qr{uninitialized value \$u1 in pattern match \Q(m//)\E at .* line $l1},
+             'uninit1');
+	like($warn[1],
+             qr/uninitialized value at .* line $l2/,
+             'uninit2');
     }
 
     # test that code blocks are called in scalar context
