@@ -137,7 +137,7 @@ my $dump_tests = 0;
         benchmark => \$::benchmark,
         core      => \$::core,
         v         => \$::verbose,
-        torture      => \$::torture,
+        torture   => \$::torture,
         utf8      => \$::with_utf8,
         utf16     => \$::with_utf16,
         taintwarn => \$::taintwarn,
@@ -149,7 +149,8 @@ my $dump_tests = 0;
         my $opt;
         if ($ARGV[$idx] =~ /^-?-(\S+)$/) {
             $opt = $1;
-        } else {
+        }
+        else {
             push @argv, $ARGV[$idx];
             next;
         }
@@ -181,7 +182,7 @@ if ($is_win32) {
     # (Windows only uses this script for miniperl.)
     my @argv;
     if (eval '@argv = map glob, @ARGV; 1') {
-    @ARGV = @argv;
+        @ARGV = @argv;
     }
     else {
         die "Failed to glob \@ARGV: $@";
@@ -272,12 +273,12 @@ sub _scan_test {
             $perl = '../../t/perl';
             $testswitch = "-I../.. -MTestInit=U2T";
             if ($2 eq 'cpan' || $2 eq 'dist') {
-            if($abs{$run_dir}) {
-                $testswitch = $testswitch . ',A';
-            }
-            if ($temp_no_core{$run_dir}) {
-                $testswitch = $testswitch . ',NC';
-            }
+                if($abs{$run_dir}) {
+                    $testswitch = $testswitch . ',A';
+                }
+                if ($temp_no_core{$run_dir}) {
+                    $testswitch = $testswitch . ',NC';
+                }
             }
         }
         elsif ($test =~ m!^\.\./lib!) {
@@ -333,15 +334,15 @@ sub _cmd {
                 require Cwd;
                 $Valgrind_Log = Cwd::abs_path("$options->{run_dir}/$Valgrind_Log");
             }
-            my $vg_opts = $ENV{VG_OPTS}
-           //   "--log-file=$Valgrind_Log "
-          . "--suppressions=$perl_supp --leak-check=yes "
-          . "--leak-resolution=high --show-reachable=yes "
-          . "--num-callers=50 --track-origins=yes";
-        # Force logging if not asked for (so cachegrind reporting works below)
-        if ($vg_opts !~ /--log-file/) {
-            $vg_opts = "--log-file=$Valgrind_Log $vg_opts";
-        }
+            my $vg_opts = $ENV{VG_OPTS} //
+                  "--log-file=$Valgrind_Log "
+                . "--suppressions=$perl_supp --leak-check=yes "
+                . "--leak-resolution=high --show-reachable=yes "
+                . "--num-callers=50 --track-origins=yes";
+            # Force logging if not asked for (so cachegrind reporting works below)
+            if ($vg_opts !~ /--log-file/) {
+                $vg_opts = "--log-file=$Valgrind_Log $vg_opts";
+            }
             $perl = "$valgrind_exe $vg_opts $perl";
         }
 
@@ -736,16 +737,16 @@ EOT
         }
         my $te = $::path_to_name{$test} . '.'
                 x ($dotdotdot - length($::path_to_name{$test})) .' ';
-    
+
         if (!$is_vms) {  # defer printing on VMS due to piping bug
             print $te;
             $te = '';
         }
-    
+
         (local $Valgrind_Log = "$test.valgrind-current") =~ s/^.*\///;
-    
+
         my $results = _run_test($test, $type);
-    
+
         my $failure;
         my $next = 0;
         my $seen_leader = 0;
@@ -841,26 +842,26 @@ EOT
                      # (so far happens only on os390)
         close $results;
         undef @junk;
-    
+
         if (not defined $failure) {
             $failure = 'FAILED--no leader found' unless $seen_leader;
         }
-    
+
         _check_valgrind(\$toolnm, \$grind_ct, \$test);
-    
+
         if ($type eq 'deparse' && !$ENV{KEEP_DEPARSE_FILES}) {
             unlink "./$test.dp";
         }
         if (not defined $failure and $next != $max) {
             $failure="FAILED--expected $max tests, saw $next";
         }
-    
+
         if( !defined $failure  # don't mask a test failure
             and $? )
         {
             $failure = "FAILED--non-zero wait status: $?";
         }
-    
+
         # Deparse? Should it have passed or failed?
         if ($type eq 'deparse' && $test =~ $deparse_failures) {
             if (!$failure) {
@@ -874,7 +875,7 @@ EOT
                 next;
             }
         }
-    
+
         if (defined $failure) {
             print "${te}$failure\n";
             $::bad_files = $::bad_files + 1;
@@ -926,7 +927,7 @@ EOT
         for my $test ( sort keys %failed_tests ) {
             print "\t$test\n";
         }
-    
+
         warn <<'SHRDLU_1';
 ### Since not all tests were successful, you may want to run some of
 ### them individually and examine any diagnostic messages they produce.
@@ -1021,7 +1022,7 @@ sub gather_conf_platform_info {
         chomp $_ for @platform;
     }
     unshift @platform, $OS;
-    
+
     return (
         conf => \%conf,
         platform => {
@@ -1071,21 +1072,23 @@ sub _check_valgrind {
         for my $i (0..$#valgrind) {
             local $_ = $valgrind[$i];
             if (/^==\d+== ERROR SUMMARY: (\d+) errors? /) {
-            $errors = $errors + $1;   # there may be multiple error summaries
-            } elsif (/^==\d+== LEAK SUMMARY:/) {
-            for my $off (1 .. 4) {
-                if ($valgrind[$i+$off] =~
-                /(?:lost|reachable):\s+\d+ bytes in (\d+) blocks/) {
-                    $leaks = $leaks + $1;
-                }
+                $errors = $errors + $1;   # there may be multiple error summaries
             }
+            elsif (/^==\d+== LEAK SUMMARY:/) {
+                for my $off (1 .. 4) {
+                    if ($valgrind[$i+$off] =~
+                    /(?:lost|reachable):\s+\d+ bytes in (\d+) blocks/) {
+                        $leaks = $leaks + $1;
+                    }
+                }
             }
         }
         if ($errors or $leaks) {
             if (rename $Valgrind_Log, "$$test.valgrind") {
             $$grind_ct = $$grind_ct + 1;
-            } else {
-            warn "$0: Failed to create '$$test.valgrind': $!\n";
+            }
+            else {
+                warn "$0: Failed to create '$$test.valgrind': $!\n";
             }
         }
     }
