@@ -41,7 +41,6 @@
 #   undef F_sqrt_amg
 #   undef GET_aTHX_if_NULL
 #   undef HASATTRIBUTE_UNINITIALIZED
-#   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
 #   undef KEY_equ

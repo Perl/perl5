@@ -6,6 +6,7 @@ use warnings;
 use warnings FATAL => 'all';
 use Data::Dumper;
 $Data::Dumper::Useqq= 1;
+use charnames qw();
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -400,6 +401,7 @@ my %n2a;        # Inversion of a2n, for each character set
 my %I8_2_utf;
 my %utf_2_I8;   # Inversion of I8_2_utf, for each EBCDIC character set
 my @identity = (0..255);
+my %seen;       # Only display items in this hash once
 
 sub new {
     my $class= shift;
@@ -413,6 +415,8 @@ sub new {
     my $self= bless {
         op    => $opt{op},
         title => $opt{title} || '',
+        overview => $opt{overview} || '',
+        charcount => $opt{charcount} || 1,
     }, $class;
 
     my $charset = $opt{charset};
@@ -1468,7 +1472,7 @@ sub render {
 }
 
 # make_macro
-# make a macro of a given type.
+# make a macro and its pod of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
 # type             : 'cp', 'cp_high', 'generic', 'high', 'low', 'latin1',
@@ -1508,6 +1512,7 @@ sub make_macro {
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
+    my $returns_cp = $ret_type eq 'cp';
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1516,10 +1521,159 @@ sub make_macro {
     } else {
         $method= 'optree';
     }
-    my @args= $type =~ /^cp/ ? 'cp' : 's';
-    push @args, "e" if $opts{safe};
-    push @args, "is_utf8" if $type =~ /generic/;
-    push @args, "len" if $ret_type eq 'both';
+
+    my $title = $self->{title};
+    my $overview = $self->{overview};
+    my $charcount = $self->{charcount};
+
+    my @args;
+    my $doc_arglist = "";
+    my $doc_text = "";
+
+    # Autogenerate an apidoc entry for this macro based on what we can glean
+    # from the inputs.  This turns out to do a decent job of it.
+    my $range = $type =~ /low/ ? "ASCII-range"
+              : $type =~ /high/ ? "above-Latin1 range"
+              : $type =~ /latin1/i ? "Latin1-range"
+              : "";
+
+    my $character;      # What spelling of 'character we are to use'
+    if ($charcount > 1) {
+        $character = 'character sequence';
+    }
+    else {
+
+        # 'strs' contains the byte or UTF-8 of each thing matched by this
+        # macro.  Choose one, and see if it has a name.  If not, such as for a
+        # surrogate, we use the term 'code point';
+        my @matches = sort keys $self->{strs}->%*;
+        $character = ( ! @matches
+                      || defined charnames::viacode(ord $matches[0]))
+                    ? 'character' : 'code point';
+    }
+
+    # $overview comes from <DATA>, and is optional.  Use it if furnished, as
+    # it is intended to be documentation.  It will be written so 'such a'
+    # makes sense.
+    my $matched;
+    if ($overview ne "") {
+        $doc_text = $overview . "\n";
+        $matched = "such a $character";
+        if ($range ne "") {
+            $matched .= " that is";
+            $matched .= " entirely" if $charcount > 1;
+            $matched .= " in the $range";
+        }
+    }
+    else {  # No $overview.  Fall back to using the (mandatory) title
+        $matched = "a $range";
+        $matched .= " " if $range ne "";
+        $matched .= "$character that matches $self->{title}";
+    }
+
+    my $otherwise = "Otherwise, it returns zero.\n";
+
+    if ($type =~ /^cp/) {
+        $args[0] = 'cp';
+        $doc_arglist .= "|UV cp";
+        $doc_text .= <<~EOT;
+            This returns non-zero if code point C<cp> is
+            $matched.
+
+            $otherwise
+            EOT
+    }
+    else {  # The input is a string
+        $args[0] = 's';     # The first agrument is always named 's'
+        $doc_arglist .= "|const U8 * s";
+
+        my $back = "";
+        my $sign = '-';
+        if ($opts{backwards}) {
+            $back = "BACK ";
+            $sign = '+';
+        }
+
+        my $sequence_bytes_description;
+        if ($opts{safe}) {
+            push @args, "e";
+            $doc_arglist .= "|const U8 * e";
+            $sequence_bytes_description =
+                "sequence of bytes starting at C<s>, and extending no further"
+              . " ${back}than S<C<e> $sign 1>";
+        }
+        else {
+            $sequence_bytes_description =
+                            "sequence of the next few bytes starting at C<s>";
+        }
+
+        if ($returns_cp) {
+            $doc_text .= <<~EOT;
+                This returns the code point that the input byte(s) form if
+                they match $matched.
+
+                It returns zero otherwise.  Fortunately C<NUL> is not matched
+                by this, or else disambiguation would be required.
+                EOT
+
+                # It's a bit presumptuous to assume that NUL will never be
+                # matched by some new macro coming along, but it is quite
+                # unlikely given that these macros are generally for very
+                # complicated things.
+        }
+        elsif ($type =~ /generic/) {
+            $doc_text .= <<~EOT;
+                This returns non-zero if the input byte(s) form $matched.
+
+                If C<is_utf8> is C<false>, the input is considered to be
+                Latin1, and the single byte at C<*s> is examined.
+
+                If C<is_utf8> is C<true>, the input is considered to be UTF-8,
+                and the
+                $sequence_bytes_description
+                are examined.
+                EOT
+        }
+        else {
+            $doc_text .= <<~EOT;
+                This returns non-zero if the
+                $sequence_bytes_description
+                form a valid UTF-8 representation of $matched.
+                EOT
+        }
+
+        $doc_text .= <<~EOT;
+
+        $otherwise
+        The value returned gives the number of bytes the matched
+        $character actually occupies.
+        EOT
+
+        if (! $opts{safe} && $type !~ /^cp/) {
+            $doc_text .= <<~EOT;
+
+                You need to be sure that the bytes at C<s> comprise at least
+                one complete $character before calling this; otherwise this
+                could read beyond its end.
+                EOT
+        }
+    }
+
+    # Fix any grammar problem of this sort coming from the result of
+    # concatenation
+    $doc_text =~ s/ \b a \  ([aeiou]) /an $1/gx;
+
+    if ($type =~ /generic/) {
+        push @args, "is_utf8";
+        $doc_arglist .= "|bool is_utf8";
+    }
+
+     if ($ret_type eq 'both') {
+        push @args, "len";
+        $doc_arglist .= "|STRLEN len";
+        warn "Generating apidoc for -both is currently unimplemented";
+    }
+
     my $pfx= $ret_type eq 'both'    ? 'what_len_' :
              $ret_type eq 'cp'      ? 'what_'     : 'is_';
     my $ext= $type     =~ /generic/ ? ''          : '_' . lc( $type );
@@ -1531,7 +1685,11 @@ sub make_macro {
     my $macro = "$pfx$self->{op}$ext";
     my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
-    return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
+    my $api_ret = ($returns_cp) ? 'UV' : 'STRLEN';
+    my $pod = "=for apidoc CT|$api_ret|$macro$doc_arglist\n$doc_text";
+
+    return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt ),
+           $pod;
 }
 
 # if we aren't being used as a module (highly likely) then process
@@ -1558,12 +1716,16 @@ EOF
     );
 
     print $out_fh <<~EOT;
+        /*
+        =for apidoc_section \$classification
+        */
 
         #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
         #  define PERL_REGCHARCLASS_H_
 
         EOT
-    my ( $op, $title, @txt, @types, %mods );
+
+    my ( $op, $title, @txt, @types, %mods, $overview, $charcount);
     my $doit= sub ($) {
         return unless $op;
 
@@ -1574,9 +1736,14 @@ EOF
         return if delete $mods{only_ebcdic_platform} && $charset !~ /ebcdic/i;
 
         print $out_fh "/*\n\t$op: $title for $charset\n\n";
+
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
-        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt,
-                                                        charset => $charset);
+        my $obj= __PACKAGE__->new( op => $op,
+                                   title => $title,
+                                   txt => \@txt,
+                                   overview => $overview,
+                                   charcount => $charcount,
+                                   charset => $charset);
 
         #die Dumper(\@types,\%mods);
 
@@ -1610,7 +1777,7 @@ EOF
                         && ($mod eq 'safe' || $mod eq 'no_length_checks')
                         && grep { 'fast' =~ $_ } @mods;
                 delete $mods{$mod};
-                my $macro= $obj->make_macro(
+                my ($macro, $api) = $obj->make_macro(
                     type     => $type,
                     ret_type => $ret,
                     safe     => $mod eq 'safe' && $type !~ /^cp/,
@@ -1619,6 +1786,20 @@ EOF
                                      && $type !~ /^cp/,
                     backwards => $backwards,
                 );
+
+                my $first_line = $api =~ s/\n.*//rs;
+
+                if (! $seen{$first_line}++) {
+                    print $out_fh <<~EOT;
+                        /*
+                        $api
+
+                        =cut
+                        */
+
+                        EOT
+                }
+
                 print $out_fh $macro, "\n";
             }
         }
@@ -1633,6 +1814,9 @@ EOF
         undef @txt;
         undef @types;
         undef %mods;
+        undef $overview;
+        undef $charcount;
+
         print $out_fh "\n", get_conditional_compile_line_start($charset);
         for (my $i = 0; $i < @data; $i++) {
             my $line = $data[$i];
@@ -1648,13 +1832,16 @@ EOF
 
                 $first_time = 0;
                 ( $op, my $flags, $title )= split /\s*:\s*/, $line, 3;
+                $charcount = ($flags =~ s/(\d)//)
+                             ? $1
+                             : 1;
 
                 @txt= ();
                 $title =~ s/ \s* \# .* //x;
 
                 # Now get the optional overview, which is all subsequent lines
                 # up to the marker that begins the definition.
-                my $overview = "";
+                $overview = "";
                 while ($i < @data - 1) {
                     last if $data[$i+1] =~ $definition_begin_re;
                     $i++;
@@ -1717,7 +1904,9 @@ EOF
 # value given by 'BASE'.  The rest of the names are described in the pod of
 # this file.
 #
-# 'flags' are currently ignored.
+# Only the numeric values of 'flags' are currently used.
+# These are '1', '2', or '3'.  They give the maximum
+# number of characters the macro can match.  If omitted, '1' is assumed.
 #
 # Finally is 'title' which is output in comments associated with the macro
 # that are its title or description.
@@ -1732,7 +1921,9 @@ EOF
 # those lines begins with a scalar symbol, the code will replace the
 # scalar with its contents.  This allows you to set up variables in the
 # program and then refer to them in these lines.  The impetus would be to
-# easily share text between multiple macros.
+# easily share text between multiple macros.  The overview is used to create
+# a documentation entry for this macro.  See the existing examples for how
+# this works.
 #
 # The '=>' line contains those two characters followed by the types of
 # macro(s) to be generated; these are specified below.  A colon follows the
@@ -1944,6 +2135,8 @@ LARGER_NON_CHARS: e :   # 5 bytes
 # Note that code in utf8.c is counting on the 'fast' version to look at no
 # more than two bytes
 SURROGATE: C : Surrogate code points
+Surrogate code points enable UTF-16 to be extended to be able to represent all
+Unicode code points
 => UTF8 :safe fast
 \p{_Perl_Surrogate}
 

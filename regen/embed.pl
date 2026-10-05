@@ -846,29 +846,17 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isCHARNAME_CONT
     isCNTRL_LC_utf8
     isDIGIT_LC_utf8
-    is_FOLDS_TO_MULTI_utf8
     isGRAPH_LC_utf8
     isGV_with_GP_off
     isGV_with_GP_on
-    is_HANGUL_ED_utf8_safe
-    is_HORIZWS_cp_high
-    is_HORIZWS_high
     isIDCONT_LC_utf8
     isIDFIRST_lazy_if_safe
     isIDFIRST_LC_utf8
-    is_LARGER_NON_CHARS_utf8
     is_LAX_VERSION
     isLEXWARN_off
     isLEXWARN_on
-    is_LNBREAK_latin1_safe
-    is_LNBREAK_safe
-    is_LNBREAK_utf8_safe
     isLOWER_LC_utf8
-    is_MULTI_CHAR_FOLD_latin1_safe
-    is_MULTI_CHAR_FOLD_utf8_safe
-    is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
-    is_PATWS_safe
     is_posix_ALPHA
     is_posix_ALPHANUMERIC
     is_posix_ASCII
@@ -886,23 +874,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_posix_WORDCHAR
     is_posix_XDIGIT
     isPRINT_LC_utf8
-    is_PROBLEMATIC_LOCALE_FOLD_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8
-    is_PROBLEMATIC_LOCALE_FOLD_utf8
     isPSXSPC_LC_utf8
     isPUNCT_LC_utf8
-    is_QUOTEMETA_high
-    is_SHORTER_NON_CHARS_utf8
     isSPACE_LC_utf8
-    is_SPACE_utf8_safe_backwards
     is_STRICT_VERSION
-    is_SURROGATE_utf8
-    is_SURROGATE_utf8_safe
-    is_THREE_CHAR_FOLD_HEAD_latin1_safe
-    is_THREE_CHAR_FOLD_HEAD_utf8_safe
-    is_THREE_CHAR_FOLD_latin1_safe
-    is_THREE_CHAR_FOLD_utf8_safe
     isU8_ALPHA_LC
     isU8_ALPHANUMERIC_LC
     isU8_ASCII_LC
@@ -921,19 +896,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isU8_XDIGIT_LC
     isUNICODE_POSSIBLY_PROBLEMATIC
     isUPPER_LC_utf8
-    is_VERTWS_cp_high
-    is_VERTWS_high
     isVERTWS_utf8
     isWARNf_on
     isWARN_on
     isWARN_ONCE
     isWORDCHAR_lazy_if_safe
     isWORDCHAR_LC_utf8
-    is_XDIGIT_cp_high
-    is_XDIGIT_high
     isXDIGIT_LC_utf8
-    is_XPERLSPACE_cp_high
-    is_XPERLSPACE_high
     IV_MAX_P1
     JE_OLD_STACK_HWM_restore
     JE_OLD_STACK_HWM_save
@@ -2117,8 +2086,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     WARN_NONEstring
     WARNshift
     WARNsize
-    what_MULTI_CHAR_FOLD_latin1_safe
-    what_MULTI_CHAR_FOLD_utf8_safe
     WIN32SCK_IS_STDSCK
     withinCOUNT
     WORTH_PER_WORD_LOOP
