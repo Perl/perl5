@@ -1599,27 +1599,28 @@ EOF
         undef %mods;
         print $out_fh "\n", get_conditional_compile_line_start($charset);
         my @data_copy = @data;
-        for (@data_copy) {
+        for (my $i = 0; $i < @data_copy; $i++) {
+            my $line = $data_copy[$i];
 
             # squeeze out comment and blanks
-            s/^ \s* (?: \# .* ) ? $ //x;
-            next unless /\S/;
-            chomp;
-            if ( /^[A-Z]/ ) {
+            $line =~ s/^ \s* (?: \# .* ) ? $ //x;
+            next unless $line =~ /\S/;
+            chomp $line;
+            if ($line =~ /^[A-Z]/ ) {
 
                 # This starts a new definition; do the previous one
                 $doit->($charset) unless $first_time;
 
                 $first_time = 0;
-                ( $op, $title )= split /\s*:\s*/, $_, 2;
+                ( $op, $title )= split /\s*:\s*/, $line, 2;
                 @txt= ();
-            } elsif ( s/$definition_begin_re// ) {
-                my ( $type, $modifier )= split /:/, $_;
+            } elsif ( $line =~ s/$definition_begin_re// ) {
+                my ( $type, $modifier )= split /:/, $line;
                 @types= split ' ', $type;
                 undef %mods;
                 map { $mods{$_} = 1 } split ' ',  $modifier;
             } else {
-                push @txt, "$_";
+                push @txt, $line;
             }
         }
         $doit->($charset);
