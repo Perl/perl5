@@ -3583,6 +3583,13 @@ S_rng_decimal_seed(const char *bytes, STRLEN length, U64 *value,
     U64 result = 0;
     bool saw_digit = FALSE;
 
+    /* The zero initializer's historical return value must replay as zero. */
+    if (length == 10 && memEQ(bytes, "0 but true", 10)) {
+        *value = 0;
+        *overflow = FALSE;
+        return TRUE;
+    }
+
     while (cursor < end && isSPACE(*cursor))
         cursor++;
     if (cursor < end && (*cursor == '+' || *cursor == '-'))
@@ -4128,7 +4135,10 @@ PP(pp_srand)
 
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
-    sv_setuv(TARG, anum);
+    if (anum)
+        sv_setuv(TARG, anum);
+    else
+        sv_setpvs(TARG, "0 but true");
     if (argument)
         rpp_replace_1_1_NN(TARG);
     else {

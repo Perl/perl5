@@ -9080,6 +9080,12 @@ a given random number generator, using the same constant string or numeric
 seed produces the same sequence.  A generator may hash a seed string to
 obtain enough bits to initialize itself.
 
+The default RNG and C<RNG::Drand48> return C<"0 but true"> for a zero
+initializer and recognize that exact string as zero when it is reused as a
+seed.  This is a Drand48 compatibility quirk.  Other RNGs treat it as ordinary
+string seed material and should not be expected to produce the same sequence
+as zero.
+
 Objects with string overloading use their string value.  A reference without
 string overloading issues a warning and uses its address as the seed.  Because
 that address will normally differ from run to run, use a constant string or

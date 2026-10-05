@@ -1,6 +1,8 @@
 Revision history for RNG.
 
 [Unreleased]
+    - Preserve the historical true zero-seed return for Drand48 and recognize
+      "0 but true" as zero when it is reused with that provider.
     - Add PCG RXS-M-XS 64/64 and PCG XSL-RR 128/64 MCG and LCG variants.
       The LCG increment is now derived from the seed, selecting a stream.
       Select a variant when constructing RNG::PCG. Use native 128-bit

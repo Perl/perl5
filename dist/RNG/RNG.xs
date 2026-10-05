@@ -227,6 +227,12 @@ rng_drand48_decimal_seed(const char *bytes, STRLEN length, U64 *value)
     U64 result = 0;
     bool saw_digit = FALSE;
 
+    /* The zero initializer's historical return value must replay as zero. */
+    if (length == 10 && memEQ(bytes, "0 but true", 10)) {
+        *value = 0;
+        return TRUE;
+    }
+
     /* This duplicates the old srand numeric conversion for decimal seeds:
      * ignore an optional sign and fractional component.  We cannot use
      * grok_number(), because it produces a UV.  RNG::Drand48 must recognize
@@ -266,6 +272,9 @@ static SV *
 rng_drand48_numeric_seed(U64 value)
 {
     char decimal[TYPE_CHARS(U64)];
+
+    if (!value)
+        return newSVpvs("0 but true");
 
     /* A 32-bit UV cannot hold the full 48-bit state.  Return a decimal
      * string in that case so srand() can replay the state exactly. */
@@ -1786,7 +1795,7 @@ CODE:
     value = (U32)rng_drand48_seed(aTHX_ seed, TRUE);
     seedDrand01(value);
     PL_srand_called = TRUE;
-    RETVAL = newSVuv(value);
+    RETVAL = rng_drand48_numeric_seed(value);
 OUTPUT:
     RETVAL
 

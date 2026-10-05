@@ -78,9 +78,14 @@ fractional part are ignored, as in the historical C<srand> numeric
 conversion.  The built-in retains the low 32 bits and this module retains the
 low 48 bits.  A value wider than the applicable width warns.  Other inputs
 are ordinary string seeds.  After any input, C<srand> returns the resulting
-Drand48 state, including numeric zero, even when it initializes that state by
-hashing an ordinary string seed.  It returns a decimal string when the 48-bit
-state does not fit in the host UV.
+Drand48 initializer, even when it hashes an ordinary string seed.  Passing
+that return value back to C<srand> recreates the sequence.  It returns a
+decimal string when the 48-bit initializer does not fit in the host UV.
+
+A zero initializer returns the historical string C<"0 but true">.  This
+module and the default RNG recognize that exact string as zero.  This is a
+Drand48 compatibility quirk.  Other RNGs treat it as ordinary string seed
+material and should not be expected to produce the same sequence as zero.
 
 =head1 SEE ALSO
 

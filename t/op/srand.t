@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 27);
+plan(tests => 29);
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.
@@ -77,8 +77,10 @@ my $automatic_seed = srand;
 cmp_ok($automatic_seed, '<=', 0xffffffff,
        'automatic built-in srand returns a 32-bit seed');
 
+# Truthiness is a historical Drand48 quirk that should not have been part
+# of the seed return value.  Preserve it for Drand48 compatibility only.
 $seed = srand(0);
-ok( defined($seed) && !$seed, "defined false return value for srand(0)");
+ok( $seed, "Drand48's historical true return value for srand(0)");
 cmp_ok( $seed, '==', 0, "numeric 0 return value for srand(0)");
 
 {
@@ -91,9 +93,17 @@ cmp_ok( $seed, '==', 0, "numeric 0 return value for srand(0)");
 	};
 	$b = $seed + 0;
     }
-    is( $b, 0, "is a zero");
+    is( $b, 0, "Quacks like a zero");
     is( "@warnings", "", "Does not warn");
 }
+
+my @zero_seed_run = mk_rand;
+srand($seed);
+ok(eq_array(\@zero_seed_run, [mk_rand]),
+   'the value returned by srand(0) replays the zero-seed sequence');
+srand('0 but true');
+ok(eq_array(\@zero_seed_run, [mk_rand]),
+   'the literal 0 but true string initializes Drand48 with zero');
 
 # [perl #40605]
 {
@@ -170,8 +180,8 @@ for my $case (
          "a numeric seed wider than 32 bits warns");
     cmp_ok($seed, '==', 0,
            "a numeric seed wider than 32 bits retains its low bits");
-    ok(defined($seed) && !$seed,
-       'an overflow-reduced zero is defined and false');
+    ok(defined($seed) && $seed,
+       'an overflow-reduced zero retains its historical true return');
 }
 
 {

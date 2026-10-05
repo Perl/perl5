@@ -52,6 +52,33 @@ is($reset->srand(42), 42, 'numeric srand returns its seed');
 is($reset->rand_U01, RNG::Drand48->new(42)->rand_U01,
    'srand resets the sequence');
 
+{
+    my $zero = RNG::Drand48->new(42);
+    my $seed = $zero->srand(0);
+    my $warning = '';
+
+    # Truthiness is a historical Drand48 quirk that should not have been part
+    # of the seed return value.  Preserve it for Drand48 compatibility only.
+    ok($seed, 'Drand48 retains its historical true return for srand(0)');
+    cmp_ok($seed, '==', 0, 'srand(0) returns numeric zero');
+    {
+        local $SIG{__WARN__} = sub { $warning .= $_[0] };
+        my $numeric = $seed + 0;
+        is($numeric, 0, 'the zero-seed return converts to zero');
+    }
+    is($warning, '', 'the zero-seed return converts without warnings');
+
+    my $sequence = $zero->rand_bytes(24);
+    $zero->srand($seed);
+    is($zero->rand_bytes(24), $sequence,
+       'the returned zero seed replays the original sequence');
+    $zero->srand('0 but true');
+    is($zero->rand_bytes(24), $sequence,
+       'the literal 0 but true string initializes Drand48 with zero');
+    is(RNG::Drand48->new('0 but true')->rand_bytes(24), $sequence,
+       'the constructor accepts the historical zero-seed return');
+}
+
 SKIP: {
     skip 'the old host RNG has no Drand48 provider hook', 2
         unless $RNG::HAS_NATIVE_RNG;
@@ -102,10 +129,10 @@ SKIP: {
     local $SIG{__WARN__} = sub { $warning .= $_[0] };
     $seed = $rng->srand('281474976710656');
 
-    is($seed, 0,
+    cmp_ok($seed, '==', 0,
        'a numeric string wider than 48 bits returns its retained bits');
-    ok(defined($seed) && !$seed,
-       'an overflow-reduced zero is defined and false');
+    ok(defined($seed) && $seed,
+       'an overflow-reduced zero retains its historical true return');
     like($warning, qr/Integer overflow in srand/,
          'the provider warns when a numeric seed exceeds 48 bits');
 }

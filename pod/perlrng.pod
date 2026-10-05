@@ -253,10 +253,16 @@ numeric conversion for decimal seeds.  They accept leading and trailing
 whitespace, an optional sign, decimal digits, and an optional fractional
 part.  The sign and fractional part are ignored.  The built-in keeps the low
 32 bits and C<RNG::Drand48> keeps the low 48 bits.  A value wider than that
-width warns.  C<srand> returns the resulting Drand48 state, including numeric
-zero, even when a string seed was hashed.  The built-in state fits in a UV;
-C<RNG::Drand48> returns a decimal string when its 48-bit state does not fit in
-the host UV.
+width warns.  C<srand> returns the resulting Drand48 initializer, even when
+a string seed was hashed.  Passing that value back recreates the sequence.
+The built-in initializer fits in a UV.  C<RNG::Drand48> returns a decimal
+string when its 48-bit initializer does not fit in the host UV.
+
+A zero initializer returns C<"0 but true">.  The default RNG and
+C<RNG::Drand48> recognize that exact string as zero, preserving seed replay.
+This is a Drand48 compatibility quirk.  Other RNGs treat it as ordinary string
+seed material and should not be expected to produce the same sequence as zero.
+
 
 Secure C<RNG::HMAC_DRBG> automatic initialization returns a redacted
 C<RNG::Seed>.  It records the provider but cannot reproduce the state; use an
