@@ -100,12 +100,12 @@ to see if it is acceptable.
 
 =item C<what_WHATEVER_FOO(arg1, ...)>
 
-A variant form of each of the C<is_> macro types described above can be generated, in
-which the code point and not the length is returned by the macro.  These have
-the same caveat as L</what_len_WHATEVER_FOO(arg1, ..., len)>, plus they should
-not be used where the set contains a NULL, as 0 is returned for two different
-cases: a) the set doesn't include the input code point; b) the set does
-include it, and it is a NULL.
+A variant form of each of the C<is_> macro types described above can be
+generated, in which the code point and not the length is returned by the
+macro.  These have the same caveat as L</what_len_WHATEVER_FOO(arg1, ...,
+len)>, plus they should not be used where the set contains a NULL, as 0 is
+returned for two different cases: a) the set doesn't include the input code
+point; b) the set does include it, and it is a NULL.
 
 =back
 
@@ -1424,7 +1424,7 @@ sub render {
                                                                  \@submacros);
 
     # Wrap length-returning macros in a cast so that ternaries returning
-    # integer constants don't trigger -Wtautological-constant-compare 
+    # integer constants don't trigger -Wtautological-constant-compare
     # when used in boolean context.
     if (($opts_ref->{ret_type} // 'len') eq 'len') {
         $rendered = "(STRLEN)( $rendered )";
@@ -1600,13 +1600,16 @@ EOF
         print $out_fh "\n", get_conditional_compile_line_start($charset);
         my @data_copy = @data;
         for (@data_copy) {
-            s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
+
+            # squeeze out comment and blanks
+            s/^ \s* (?: \# .* ) ? $ //x;
             next unless /\S/;
             chomp;
             if ( /^[A-Z]/ ) {
-                $doit->($charset) unless $first_time;  # This starts a new
-                                                       # definition; do the
-                                                       # previous one
+
+                # This starts a new definition; do the previous one
+                $doit->($charset) unless $first_time;
+
                 $first_time = 0;
                 ( $op, $title )= split /\s*:\s*/, $_, 2;
                 @txt= ();
