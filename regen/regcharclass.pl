@@ -1588,6 +1588,7 @@ EOF
         }
     };
 
+    my $definition_begin_re = qr/^=>/;
     my @data = <DATA>;
     foreach my $charset (get_supported_code_pages()) {
         my $first_time = 1;
@@ -1609,7 +1610,7 @@ EOF
                 $first_time = 0;
                 ( $op, $title )= split /\s*:\s*/, $_, 2;
                 @txt= ();
-            } elsif ( s/^=>// ) {
+            } elsif ( s/$definition_begin_re// ) {
                 my ( $type, $modifier )= split /:/, $_;
                 @types= split ' ', $type;
                 undef %mods;
