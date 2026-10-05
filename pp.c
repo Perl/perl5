@@ -3932,6 +3932,18 @@ S_rng_bytes(pTHX_ SV *provider, STRLEN length)
     return result;
 }
 
+/* Keep address-exposed locals out of pp_rand() so its hot path avoids the
+ * stack-protector check for code that runs only while seeding or on a
+ * provider fallback. */
+#if defined(__GNUC__) || defined(__clang__)
+#  define RNG_NOINLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#  define RNG_NOINLINE __declspec(noinline)
+#else
+#  define RNG_NOINLINE
+#endif
+
+RNG_NOINLINE
 static U64
 S_rng_u64(pTHX_ SV *provider)
 {
@@ -3960,13 +3972,11 @@ S_rng_u64_to_NV_U01(U64 value)
 #endif
 }
 
+RNG_NOINLINE
 static void
-S_rng_seed_default(pTHX)
+S_rng_seed_default_once(pTHX)
 {
     Rand_seed_t seed_value;
-
-    if (PL_srand_called)
-        return;
 
     if (PL_srand_override)
         PERL_SRAND_OVERRIDE_GET(seed_value);
@@ -3977,6 +3987,13 @@ S_rng_seed_default(pTHX)
     }
     (void)Perl_drand48_init_r(&PL_random_state, seed_value);
     PL_srand_called = TRUE;
+}
+
+PERL_STATIC_FORCE_INLINE void
+S_rng_seed_default(pTHX)
+{
+    if (!PL_srand_called)
+        S_rng_seed_default_once(aTHX);
 }
 
 static SV *
@@ -4009,6 +4026,8 @@ S_rng_default_bytes(pTHX_ STRLEN length)
     SvPOK_on(result);
     return result;
 }
+
+#undef RNG_NOINLINE
 
 SV *
 Perl_call_rand_bytes(pTHX_ STRLEN length)
