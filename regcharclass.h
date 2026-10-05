@@ -21,7 +21,7 @@
 
 #if 'A' == 65 /* ASCII/Latin1 */
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break: \R for ASCII/Latin1
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -81,7 +81,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace: \h \H for ASCII/Latin1
 
 	\p{HorizSpace}
 */
@@ -103,7 +103,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace: \v \V for ASCII/Latin1
 
 	\p{VertSpace}
 */
@@ -116,7 +116,7 @@
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for ASCII/Latin1
 
 	\p{XDigit}
 */
@@ -134,7 +134,7 @@
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for ASCII/Latin1
 
 	\p{XPerlSpace}
 */
@@ -157,7 +157,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for ASCII/Latin1
 
 	\p{XPerlSpace}
 */
@@ -186,7 +186,7 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for ASCII/Latin1
 
 	\p{_Perl_Nchar}
 */
@@ -203,7 +203,7 @@
 	: ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: 
+	SHORTER_NON_CHARS:  for ASCII/Latin1
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -217,7 +217,7 @@
 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: 
+	LARGER_NON_CHARS:  for ASCII/Latin1
 
 	0x1FFFE - 0x1FFFF
 	0x2FFFE - 0x2FFFF
@@ -245,7 +245,7 @@
 : ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) )
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for ASCII/Latin1
 
 	\p{_Perl_Surrogate}
 */
@@ -258,7 +258,7 @@
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for ASCII/Latin1
 
 	\p{_Perl_Quotemeta}
 */
@@ -313,7 +313,7 @@
 : ( ( 0xF3 == ((const U8*)s)[0] ) && ( 0xA0 == ((const U8*)s)[1] ) ) ? 4 : 0 ) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
@@ -981,7 +981,7 @@
 ( ((e)-(s) > 5) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
@@ -1024,7 +1024,7 @@
 : 0 )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
@@ -1049,7 +1049,7 @@
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ) && ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ) && ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
@@ -1058,7 +1058,7 @@
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ) && ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ) && ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
@@ -1130,7 +1130,7 @@
 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
@@ -1146,7 +1146,7 @@
 : 0 ) )
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for ASCII/Latin1
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
@@ -1175,7 +1175,7 @@
 : ( ( ( ( 0xF0 == ((const U8*)s)[0] ) && ( 0x9D == ((const U8*)s)[1] ) ) && ( 0xBE == ((const U8*)s)[2] ) ) && ( 0x95 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for ASCII/Latin1
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
@@ -1219,7 +1219,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for ASCII/Latin1
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
@@ -1263,7 +1263,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for ASCII/Latin1
 
 	\p{_Perl_PatWS}
 */
@@ -1281,7 +1281,7 @@
 : 0 ) )
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for ASCII/Latin1
 
 	0xD000 - 0xD7FF
 */
@@ -1290,7 +1290,7 @@
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x80, 0x9F) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for ASCII/Latin1
 
 	\p{_Perl_Word_But_NonCont}
 */
@@ -1331,7 +1331,7 @@
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break: \R for EBCDIC 1047
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -1380,7 +1380,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace: \h \H for EBCDIC 1047
 
 	\p{HorizSpace}
 */
@@ -1404,7 +1404,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace: \v \V for EBCDIC 1047
 
 	\p{VertSpace}
 */
@@ -1417,7 +1417,7 @@
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for EBCDIC 1047
 
 	\p{XDigit}
 */
@@ -1433,7 +1433,7 @@
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for EBCDIC 1047
 
 	\p{XPerlSpace}
 */
@@ -1458,7 +1458,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for EBCDIC 1047
 
 	\p{XPerlSpace}
 */
@@ -1487,7 +1487,7 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for EBCDIC 1047
 
 	\p{_Perl_Nchar}
 */
@@ -1508,7 +1508,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: 
+	SHORTER_NON_CHARS:  for EBCDIC 1047
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -1529,7 +1529,7 @@
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: 
+	LARGER_NON_CHARS:  for EBCDIC 1047
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -1552,7 +1552,7 @@
 : ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) )
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for EBCDIC 1047
 
 	\p{_Perl_Surrogate}
 */
@@ -1565,7 +1565,7 @@
 ( (STRLEN)( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x65, 0x66) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for EBCDIC 1047
 
 	\p{_Perl_Quotemeta}
 */
@@ -1634,7 +1634,7 @@
 : ( ( ( 0xED == ((const U8*)s)[0] ) && ( 0x70 == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x44) ) ) ? 5 : 0 ) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
@@ -2284,7 +2284,7 @@
 : ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
@@ -2327,7 +2327,7 @@
 : 0 )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
@@ -2352,7 +2352,7 @@
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
@@ -2361,7 +2361,7 @@
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
@@ -2431,7 +2431,7 @@
 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
@@ -2447,7 +2447,7 @@
 : 0 ) )
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 1047
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
@@ -2478,7 +2478,7 @@
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x66 == ((const U8*)s)[1] ) ) && ( 0x70 == ((const U8*)s)[2] ) ) && ( 0x64 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for EBCDIC 1047
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
@@ -2524,7 +2524,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for EBCDIC 1047
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
@@ -2568,7 +2568,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for EBCDIC 1047
 
 	\p{_Perl_PatWS}
 */
@@ -2582,7 +2582,7 @@
 : 0 ) )
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for EBCDIC 1047
 
 	0x1 - 0x0
 */
@@ -2591,7 +2591,7 @@
 ( (STRLEN)( 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for EBCDIC 1047
 
 	\p{_Perl_Word_But_NonCont}
 */
@@ -2640,7 +2640,7 @@
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break: \R for EBCDIC 037
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -2689,7 +2689,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace: \h \H for EBCDIC 037
 
 	\p{HorizSpace}
 */
@@ -2713,7 +2713,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace: \v \V for EBCDIC 037
 
 	\p{VertSpace}
 */
@@ -2726,7 +2726,7 @@
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for EBCDIC 037
 
 	\p{XDigit}
 */
@@ -2742,7 +2742,7 @@
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for EBCDIC 037
 
 	\p{XPerlSpace}
 */
@@ -2767,7 +2767,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for EBCDIC 037
 
 	\p{XPerlSpace}
 */
@@ -2796,7 +2796,7 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for EBCDIC 037
 
 	\p{_Perl_Nchar}
 */
@@ -2817,7 +2817,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: 
+	SHORTER_NON_CHARS:  for EBCDIC 037
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -2838,7 +2838,7 @@
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: 
+	LARGER_NON_CHARS:  for EBCDIC 037
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -2861,7 +2861,7 @@
 : ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) )
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for EBCDIC 037
 
 	\p{_Perl_Surrogate}
 */
@@ -2874,7 +2874,7 @@
 ( (STRLEN)( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x64, 0x65) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for EBCDIC 037
 
 	\p{_Perl_Quotemeta}
 */
@@ -2943,7 +2943,7 @@
 : ( ( ( 0xED == ((const U8*)s)[0] ) && ( 0x6A == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x44) ) ) ? 5 : 0 ) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
@@ -3593,7 +3593,7 @@
 : ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
@@ -3636,7 +3636,7 @@
 : 0 )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
@@ -3661,7 +3661,7 @@
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
@@ -3670,7 +3670,7 @@
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
@@ -3740,7 +3740,7 @@
 : 0 ) )
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
@@ -3756,7 +3756,7 @@
 : 0 ) )
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 037
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
@@ -3787,7 +3787,7 @@
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x65 == ((const U8*)s)[1] ) ) && ( 0x6A == ((const U8*)s)[2] ) ) && ( 0x63 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for EBCDIC 037
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
@@ -3833,7 +3833,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for EBCDIC 037
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
@@ -3877,7 +3877,7 @@
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for EBCDIC 037
 
 	\p{_Perl_PatWS}
 */
@@ -3891,7 +3891,7 @@
 : 0 ) )
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for EBCDIC 037
 
 	0x1 - 0x0
 */
@@ -3900,7 +3900,7 @@
 ( (STRLEN)( 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for EBCDIC 037
 
 	\p{_Perl_Word_But_NonCont}
 */
@@ -4004,6 +4004,6 @@
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 9273b1fa25dd4db4e49c22fec63c59ad6f96849c39939bda72bc62002fbb6061 regen/regcharclass.pl
+ * a592a1e24b8fa5b9c14c769096374748ee73a37515c8094c55f354941916c21f regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
