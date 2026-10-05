@@ -4689,6 +4689,6 @@ character actually occupies.
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 686c4c5f2672f357790908907493cf593ac46c9fc411846d64c5f95a1464a8fd regen/regcharclass.pl
+ * a28feb8fff10e3840d4c9ec635c92ffb8c2f5dd39cd276e817eada7dc68f686d regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
