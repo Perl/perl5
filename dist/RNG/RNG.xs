@@ -1773,7 +1773,8 @@ CODE:
         seedDrand01(rng_legacy_automatic_seed(aTHX));
         PL_srand_called = TRUE;
     }
-    output = newSV(length);
+    /* Allow space for the NUL, the COW refcount, and one spare byte. */
+    output = newSV(length + 3);
     SvPOK_on(output);
     SvCUR_set(output, length);
     for (offset = 0; offset < length; offset++)

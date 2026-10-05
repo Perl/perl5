@@ -8,6 +8,7 @@ Revision history for RNG.
       "0 but true" as zero when it is reused with that provider.
     - Check seed replay across all providers and add published PCG vectors.
       Correct the XSL-RR variants to output from the updated state.
+    - Fix zero-length rand_bytes requests in the older-Perl compatibility shim.
     - Add PCG RXS-M-XS 64/64 and PCG XSL-RR 128/64 MCG and LCG variants.
       The LCG increment is now derived from the seed, selecting a stream.
       Select a variant when constructing RNG::PCG. Use native 128-bit
