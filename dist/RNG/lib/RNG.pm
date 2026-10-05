@@ -3,6 +3,9 @@ package RNG;
 use v5.24;
 use strict;
 use warnings;
+BEGIN {
+    warnings->unimport('experimental::builtin') if $] >= 5.036;
+}
 
 use List::Util 1.54 ();
 use Scalar::Util qw(blessed looks_like_number refaddr);
@@ -42,7 +45,6 @@ BEGIN {
 
     *CORE::GLOBAL::rand = sub :prototype(;$) { return RNG::_compat_rand(@_) };
     *CORE::GLOBAL::srand = sub :prototype(;$) { return RNG::_compat_srand(@_) };
-    *builtin::rand_bytes = sub :prototype($) { return RNG::_compat_rand_bytes(@_) };
     $List::Util::RAND = sub { RNG::_compat_rand() };
 }
 
@@ -99,7 +101,7 @@ sub _compat_srand {
         : ($has_seed ? _legacy_srand($seed) : _legacy_srand());
 }
 
-sub _compat_rand_bytes {
+sub _compat_rand_bytes ($) {
     my ($length) = @_;
     my $provider = _provider();
 
@@ -109,6 +111,10 @@ sub _compat_rand_bytes {
     _load_xs() unless $provider;
     return $provider ? $provider->rand_bytes($length) : _legacy_rand_bytes($length);
 }
+
+# Preserve the builtin's one-argument prototype while avoiding a forwarding
+# Perl subroutine call on Perls without the native implementation.
+*builtin::rand_bytes = \&_compat_rand_bytes unless $HAS_NATIVE_RNG;
 
 sub _compat_rand {
     my ($limit) = @_;
@@ -135,16 +141,8 @@ sub _provider_srand {
     return RNG::Seed->from_bytes($provider->$method);
 }
 
-sub _bytes {
-    if ($HAS_NATIVE_RNG) {
-        no strict 'refs';
-        return &{'builtin::rand_bytes'}($_[1]);
-    }
-    return _compat_rand_bytes($_[1]);
-}
-
 sub _unit {
-    my $bytes = _bytes(undef, 6);
+    my $bytes = builtin::rand_bytes(6);
     my $value = ord(substr($bytes, 0, 1));
     my $i;
 
@@ -174,7 +172,7 @@ sub uniform_int {
     my $mask = $excess ? 255 >> $excess : 255;
 
     while (1) {
-        my $raw = _bytes(undef, $bytes);
+        my $raw = builtin::rand_bytes($bytes);
         my $value = ord(substr($raw, 0, 1)) & $mask;
         my $i;
 
