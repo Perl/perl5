@@ -123,8 +123,10 @@ my $is_vms   = $OS eq "VMS";
 my $is_win32 = $OS eq "MSWin32";
 my $is_os2   = $OS eq "os2";
 
+# Assign current contents of global @ARGV to a lexically scoped variable
+my @XARGV = @ARGV;
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
-@ARGV = grep($_,@ARGV) if $is_vms;
+@XARGV = grep($_,@XARGV) if $is_vms;
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
@@ -145,13 +147,13 @@ my $dump_manifested_tests = 0;
     );
 
     my @argv = ();
-    foreach my $idx (0..$#ARGV) {
+    foreach my $idx (0..$#XARGV) {
         my $opt;
-        if ($ARGV[$idx] =~ /^-?-(\S+)$/) {
+        if ($XARGV[$idx] =~ /^-?-(\S+)$/) {
             $opt = $1;
         }
         else {
-            push @argv, $ARGV[$idx];
+            push @argv, $XARGV[$idx];
             next;
         }
         if (my $ref = $opt_vars{$opt}) {
@@ -166,7 +168,7 @@ my $dump_manifested_tests = 0;
             die "Unknown option '$opt'\n";
         }
     }
-    @ARGV = @argv;
+    @XARGV = @argv;
 }
 
 chdir 't' if -f 't/TEST';
@@ -181,11 +183,11 @@ if ($is_win32) {
     # String eval to avoid loading File::Glob on non-miniperl.
     # (Windows only uses this script for miniperl.)
     my @argv;
-    if (eval '@argv = map glob, @ARGV; 1') {
-        @ARGV = @argv;
+    if (eval '@argv = map glob, @XARGV; 1') {
+        @XARGV = @argv;
     }
     else {
-        die "Failed to glob \@ARGV: $@";
+        die "Failed to glob \@XARGV: $@";
     }
 }
 
@@ -201,12 +203,12 @@ my %timings = (); # testname => [@et] pairs if $show_elapsed_time.
 
 # Roll your own File::Find!
 our @found;
-sub _find_tests { @found=(); push @ARGV, _find_files('\.t$', $_[0]) }
+sub _find_tests { @found = (); push @XARGV, _find_files('\.t$', $_[0]) }
 sub _find_files {
     my($patt, @dirs) = @_;
     for my $dir (@dirs) {
-        opendir DIR, $dir or die "Trouble opening $dir: $!";
-        foreach my $f (sort { $a cmp $b } readdir DIR) {
+        opendir my $DIRH, $dir or die "Trouble opening $dir: $!";
+        foreach my $f (sort { $a cmp $b } readdir $DIRH) {
             next if $skip{$f};
             $dir =~ s/(?<!\^)\.dir(;1)?$//i if $is_vms; # trim .DIR extension
             my $fullpath = "$dir/$f";
@@ -217,8 +219,9 @@ sub _find_files {
                 push @found, $fullpath;
             }
         }
+        closedir $DIRH, $dir or die "Trouble closing $dir: $!";
     }
-    @found;
+    return @found;
 }
 
 
@@ -446,8 +449,8 @@ sub _tests_from_manifest {
     my %non_ext;
     push @results, \%non_ext if $all;
     my $mani = '../MANIFEST';
-    if (open(MANI, $mani)) {
-        while (<MANI>) {
+    if (open($MANI, '<', $mani)) {
+        while (<$MANI>) {
             chomp;
             my ($file)= split /\t/, $_;
             if ($file =~ m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\z!) {
@@ -513,7 +516,7 @@ sub _tests_from_manifest {
                 $non_ext{$munged}++;
             }
         }
-        close MANI;
+        close $MANI;
     }
     else {
         warn "$0: cannot open $mani: $!\n";
@@ -561,7 +564,7 @@ sub filter_taint_tests {
 }
 
 
-unless (@ARGV) {
+unless (@XARGV) {
     # base first, as TEST bails out if that can't run
     # then comp, to validate that require works
     # then run, to validate that -M works
@@ -603,14 +606,14 @@ unless (@ARGV) {
     # a list, might fail if perl is really hosed, but they aren't needed for
     # make minitest, and the building of extensions will likely also fail if
     # something is that badly wrong.
-    push @ARGV, _tests_from_manifest($extensions, $known_extensions);
+    push @XARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
         _find_tests('japh') if $::torture or $ENV{PERL_TORTURE_TEST};
         _find_tests('benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
         _find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }
-@ARGV= do {
+@XARGV= do {
     my @order= (
         "test_pl",
         "base",
@@ -642,25 +645,29 @@ unless (@ARGV) {
     } map {
         my $root= /(\w+)/ ? $1 : "";
         [ $_, $idx++, $root, $order{$root}||=0 ]
-    } @ARGV;
+    } @XARGV;
 };
 
-dump_manifested_tests(\@ARGV) if $dump_manifested_tests;
+dump_manifested_tests(\@XARGV) if $dump_manifested_tests;
 
-filter_taint_tests(\@ARGV);
+# This is where we would have to calculate a list of generated tests
+# if we were to support subroutine dump_all_tests() and command-line switch
+# -dump_all_tests.
+
+filter_taint_tests(\@XARGV);
 
 if ($::deparse) {
-    _testprogs('deparse', '',   @ARGV);
+    _testprogs('deparse', '',   @XARGV);
 }
 elsif ($::with_utf16) {
     for my $e (0, 1) {
         for my $b (0, 1) {
             print STDERR "# ENDIAN $e BOM $b\n";
-            my @UARGV;
-            for my $a (@ARGV) {
+            my @UZZZZ;
+            for my $a (@XARGV) {
                 my $u = $a . "." . ($e ? "l" : "b") . "e" . ($b ? "b" : "");
                 my $f = $e ? "v" : "n";
-                push @UARGV, $u;
+                push @UZZZZ, $u;
                 unlink($u);
                 if (open(A, $a)) {
                     if (open(U, ">$u")) {
@@ -673,13 +680,13 @@ elsif ($::with_utf16) {
                     close(A);
                 }
             }
-            _testprogs('perl', '', @UARGV);
-            unlink(@UARGV);
+            _testprogs('perl', '', @UZZZZ);
+            unlink(@UZZZZ);
         }
     }
 }
 else {
-    _testprogs('perl',    '',   @ARGV);
+    _testprogs('perl',    '',   @XARGV);
 }
 
 sub _testprogs {
