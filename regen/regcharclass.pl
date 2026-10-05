@@ -1405,7 +1405,8 @@ sub _combine {
 # _render()
 # recursively convert an optree to text with reasonably neat formatting
 sub _render {
-    my ( $self, $op, $combine, $brace, $opts_ref, $def, $submacros )= @_;
+    my ( $self, $op, $combine, $left_indent, $brace, $opts_ref, $def,
+         $submacros )= @_;
     return 0 if ! defined $op;  # The set is empty
     if ( !ref $op ) {
         return $op;
@@ -1413,12 +1414,12 @@ sub _render {
     my $cond= $self->_cond_as_str( $op, $combine, $opts_ref );
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
-    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref, $def,
-                                                                    $submacros);
+    my $yes= $self->_render( $op->{yes}, $combine, $left_indent, 1, $opts_ref,
+                             $def, $submacros);
     return $yes if $cond eq '1';
 
-    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref, $def,
-                                                                    $submacros);
+    my $no= $self->_render( $op->{no},   $combine, $left_indent, 0, $opts_ref,
+                            $def, $submacros);
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
     return "$lb$cond ? $yes : $no$rb"
@@ -1434,9 +1435,9 @@ sub _render {
 
     my $str= "$lb$cond ?$yes$ind: $no$rb";
     if (length $str > 6000) {
-        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+        push @$submacros, sprintf "#${left_indent}define $def\n( %s )", "_part"
                                   . (my $yes_idx= 0+@$submacros) . "_", $yes;
-        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+        push @$submacros, sprintf "#${left_indent}define $def\n( %s )", "_part"
                                   . (my $no_idx= 0+@$submacros) . "_", $no;
         return sprintf "%s%s ? $def : $def%s", $lb, $cond,
                                     "_part${yes_idx}_", "_part${no_idx}_", $rb;
@@ -1454,9 +1455,12 @@ sub _render {
 sub render {
     my ( $self, $op, $combine, $opts_ref, $def_fmt )= @_;
 
+    my $ret = "";
+    my $left_indent = "";
+
     my @submacros;
-    my $rendered = $self->_render( $op, $combine, 0, $opts_ref, $def_fmt,
-                                                                 \@submacros);
+    my $rendered = $self->_render( $op, $combine, $left_indent, 0, $opts_ref,
+                                   $def_fmt, \@submacros);
 
     # Wrap length-returning macros in a cast so that ternaries returning
     # integer constants don't trigger -Wtautological-constant-compare
@@ -1464,11 +1468,12 @@ sub render {
     if (($opts_ref->{ret_type} // 'len') eq 'len') {
         $rendered = "(STRLEN)( $rendered )";
     }
-
-    my $macro= sprintf "#define $def_fmt\n( %s )", "", $rendered;
-    return join "\n\n",
-            map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) }
-                                                            @submacros, $macro;
+    my $macro= sprintf "#${left_indent}define $def_fmt\n( %s )", "", $rendered;
+    $ret .= join "\n\n", map {    "/*** GENERATED CODE ***/\n"
+                                . __macro( __clean( $_ ) )
+                             } @submacros, $macro;
+    $ret .= "#endif\n" if $left_indent;
+    return $ret;
 }
 
 # make_macro
