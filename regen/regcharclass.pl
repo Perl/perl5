@@ -1619,6 +1619,17 @@ EOF
                 ( $op, $title )= split /\s*:\s*/, $line, 2;
                 @txt= ();
                 $title =~ s/ \s* \# .* //x;
+
+                # Now get the optional overview, which is all subsequent lines
+                # up to the marker that begins the definition.
+                my $overview = "";
+                while ($i < @data - 1) {
+                    last if $data[$i+1] =~ $definition_begin_re;
+                    $i++;
+
+                    my $this_overview_line = $data[$i];
+                    $overview .= $this_overview_line;
+                }
             } elsif ( $line =~ s/$definition_begin_re// ) {
                 my ( $type, $modifier )= split /:/, $line;
                 @types= split ' ', $type;
@@ -1672,7 +1683,10 @@ EOF
 # see if it is in the class determined by the macro.  In the case of non-UTF8,
 # the code point consists only of a single byte.
 #
-# The second line must begin with a '=>' and be followed by the types of
+# A line beginning with '=>' begins the definition.  Lines between the first
+# one and it give an optional overview of what the macro does.
+#
+# The '=>' line contains those two characters followed by the types of
 # macro(s) to be generated; these are specified below.  A colon follows the
 # types, followed by the modifiers, also specified below.  At least one
 # modifier is required.
@@ -1788,19 +1802,24 @@ __DATA__
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
 LNBREAK: Line Break (\R)
+A few Unicode characters or character sequences act as line terminators.
+C<\R> in a regular expression pattern matches them.
 => generic UTF8 LATIN1 : safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 \p{VertSpace}
 
 HORIZWS: Horizontal Whitespace (\h, \H)
+A few Unicode characters are treated as horizontal space.
 => high cp_high : fast
 \p{HorizSpace}
 
 VERTWS: Vertical Whitespace (\v, \V)
+A few Unicode characters are treated as vertical space.
 => high cp_high : fast
 \p{VertSpace}
 
 XDIGIT: Hexadecimal digits
+A few Unicode characters are treated as hexadecimal digits.
 => high cp_high : fast
 \p{XDigit}
 
@@ -1809,6 +1828,7 @@ XPERLSPACE: \p{XPerlSpace}
 \p{XPerlSpace}
 
 SPACE: Backwards \p{XPerlSpace}
+Some Unicode characters are treated as space, both horizontal and vertical.
 => backwards_UTF8 : safe
 \p{XPerlSpace}
 
@@ -1871,6 +1891,8 @@ SURROGATE: Surrogate code points
 \p{_Perl_Surrogate}
 
 QUOTEMETA: Meta-characters that \Q should quote
+Most characters in a Perl program represent themselves, but there are a few
+"meta-characters" which mean something else unless escaped in some way.
 => high :fast
 \p{_Perl_Quotemeta}
 
@@ -1919,10 +1941,15 @@ PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
 PATWS: pattern white space
+Not all characters that are nominally space characters in Unicode are
+considered as such in regular expression patterns.  Sometimes we need to
+consider just the latter.
 => generic : safe
 \p{_Perl_PatWS}
 
 HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+For convenience of the implementation, certain Korean Hangul syllable characters
+have to be treated specially.
 => UTF8 :only_ascii_platform safe
 0xD000 - 0xD7FF
 
@@ -1932,5 +1959,7 @@ HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 # Always fails on EBCDIC; there are no ED Hanguls there
 
 WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+Some Unicode characters that match C<\w> can't be used in Perl names (such as
+identifiers and labels).
 => generic : safe
 \p{_Perl_Word_But_NonCont}
