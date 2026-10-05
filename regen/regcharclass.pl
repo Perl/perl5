@@ -1524,9 +1524,13 @@ WARNING: These macros are for internal Perl core use only, and may be
 changed or removed without notice.
 EOF
     );
-    print $out_fh "\n#ifndef PERL_REGCHARCLASS_H_ /* Guard against nested",
-                  " #includes */\n#define PERL_REGCHARCLASS_H_\n";
 
+    print $out_fh <<~EOT;
+
+        #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
+        #  define PERL_REGCHARCLASS_H_
+
+        EOT
     my ( $op, $title, @txt, @types, %mods );
     my $doit= sub ($) {
         return unless $op;

@@ -16,7 +16,8 @@
 
 
 #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
-#define PERL_REGCHARCLASS_H_
+#  define PERL_REGCHARCLASS_H_
+
 
 #if 'A' == 65 /* ASCII/Latin1 */
 /*
@@ -4003,6 +4004,6 @@
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * d5d1812fb20c5927adf1a655bfc729ee761bf087af336a24ad4423dae78dd1ae regen/regcharclass.pl
+ * 6dfcb4eae24b62240690132fd32e58957756db269d32053b7bc9330304ff1db2 regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
