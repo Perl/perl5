@@ -6914,11 +6914,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                      type such as \1 or (??{...}. For more
                                      details, see
                                      L<perlreguts/The super-linear cache> */
-    PAD* last_pad = NULL;
     dMULTICALL;
     U8 gimme = G_SCALAR;
-    CV *caller_cv = NULL;	/* who called us */
-    CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     char_class_number_ classnum;
@@ -6941,6 +6938,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #ifdef DEBUGGING
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #endif
+    /* some state used by (?{...}) and friends */
+    reginfo->last_pushed_cv = NULL;
+    reginfo->caller_cv      = NULL;
+    reginfo->last_pad       = NULL;
 
     /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
     multicall_oldcatch = 0;
@@ -8607,8 +8608,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);
 
-                if (!caller_cv)
-                    caller_cv = find_runcv(NULL);
+                if (!reginfo->caller_cv)
+                    reginfo->caller_cv = find_runcv(NULL);
 
                 n = ARG1u(scan);
 
@@ -8619,7 +8620,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     nop = (OP*)rexi->data->data[n+1];
                 }
                 else if (rexi->data->what[n] == 'l') { /* literal code */
-                    newcv = caller_cv;
+                    newcv = reginfo->caller_cv;
                     nop = (OP*)rexi->data->data[n];
                     assert(CvDEPTH(newcv));
                 }
@@ -8677,12 +8678,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * if PL_comppad has got messed up from backtracking
                  * through SAVECOMPPADs, then refresh the context.
                  */
-                if (newcv != last_pushed_cv || PL_comppad != last_pad)
+                if (   newcv      != reginfo->last_pushed_cv
+                    || PL_comppad != reginfo->last_pad)
                 {
                     U8 flags = (CXp_SUB_RE |
-                                ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
+                                ((newcv == reginfo->caller_cv)
+                                            ? CXp_SUB_RE_FAKE : 0));
                     SAVECOMPPAD();
-                    if (last_pushed_cv) {
+                    if (reginfo->last_pushed_cv) {
                         CHANGE_MULTICALL_FLAGS(newcv, flags);
                     }
                     else {
@@ -8691,14 +8694,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     /* see notes above */
                     CX_CUR()->blk_oldsaveix = orig_savestack_ix;
 
-                    last_pushed_cv = newcv;
+                    reginfo->last_pushed_cv = newcv;
                 }
                 else {
                     /* these assignments are just to silence compiler
                      * warnings */
                     multicall_cop = NULL;
                 }
-                last_pad = PL_comppad;
+                reginfo->last_pad = PL_comppad;
 
                 /* the initial nextstate you would normally execute
                  * at the start of an eval (which would cause error
@@ -10659,7 +10662,7 @@ NULL
     }
 
 
-    if (last_pushed_cv) {
+    if (reginfo->last_pushed_cv) {
         dSP;
         /* see "Some notes about MULTICALL" above, especially how
          * the POP_MULTICALL does the equivalent of the LEAVE_SCOPE
