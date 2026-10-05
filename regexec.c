@@ -8589,6 +8589,23 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             } else {
                 nochange_depth = 0;
             }
+
+            /* save *all* paren positions */
+            ST.cp = regcppush(rex, 0, maxopenparen);
+            REGCP_SET(ST.lastcp);
+
+            /* make $1 etc and pos available within called code */
+            RXp_OFFSp(rex)[0].end = locinput - reginfo->strbeg;
+            if (reginfo->info_aux_eval->pos_magic)
+                MgBYTEPOS_set(reginfo->info_aux_eval->pos_magic,
+                              reginfo->sv, reginfo->strbeg,
+                              locinput - reginfo->strbeg);
+
+            if (sv_yes_mark) {
+                SV *sv_mrk = get_sv("REGMARK", 1);
+                sv_setsv(sv_mrk, sv_yes_mark);
+            }
+
             {
                 /* execute the code in the {...} */
 
@@ -8598,15 +8615,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 COP * const ocurcop = PL_curcop;
                 OP *nop;
                 CV *newcv;
-
-                /* save *all* paren positions */
-                ST.cp = regcppush(rex, 0, maxopenparen);
-                REGCP_SET(ST.lastcp);
+                U32 n = ARG1u(scan);
 
                 if (!reginfo->caller_cv)
                     reginfo->caller_cv = find_runcv(NULL);
-
-                n = ARG1u(scan);
 
                 if (rexi->data->what[n] == 'r') { /* code from an external qr */
                     newcv = (ReANY(
@@ -8732,17 +8744,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DEBUG_STATE_r( re_printf(
                     "  re EVAL PL_op = 0x%" UVxf "\n", PTR2UV(nop)) );
 
-                RXp_OFFSp(rex)[0].end = locinput - reginfo->strbeg;
-                if (reginfo->info_aux_eval->pos_magic)
-                    MgBYTEPOS_set(reginfo->info_aux_eval->pos_magic,
-                                  reginfo->sv, reginfo->strbeg,
-                                  locinput - reginfo->strbeg);
-
-                if (sv_yes_mark) {
-                    SV *sv_mrk = get_sv("REGMARK", 1);
-                    sv_setsv(sv_mrk, sv_yes_mark);
-                }
-
                 /* we don't use MULTICALL here as we want to call the
                  * first op of the block of interest, rather than the
                  * first op of the sub. Also, we don't want to free
@@ -8806,6 +8807,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * be used again soon. This is safe as long as nothing
                  * in the regexp code uses the pad ! */
                 PL_op = oop;
+
                 PL_curcop = ocurcop;
                 regcp_restore(rex, ST.lastcp, &maxopenparen);
                 PL_curpm_under = PL_curpm;
