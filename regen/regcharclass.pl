@@ -1647,7 +1647,8 @@ EOF
                 $doit->($charset) unless $first_time;
 
                 $first_time = 0;
-                ( $op, $title )= split /\s*:\s*/, $line, 2;
+                ( $op, my $flags, $title )= split /\s*:\s*/, $line, 3;
+
                 @txt= ();
                 $title =~ s/ \s* \# .* //x;
 
@@ -1708,9 +1709,20 @@ EOF
 }
 
 # The form of the input is a series of definitions to make macros for.
-# The first line gives the base name of the macro, followed by a colon, and
-# then text to be used in comments associated with the macro that are its
-# title or description.  In all cases the first (perhaps only) parameter to
+# The first line of each definition is of the form
+#       BASE : flags : title
+#
+# BASE is the base name the macro.  Potentially multiple macros can be
+# generated from a single definition.  Their names will all have in common the
+# value given by 'BASE'.  The rest of the names are described in the pod of
+# this file.
+#
+# 'flags' are currently ignored.
+#
+# Finally is 'title' which is output in comments associated with the macro
+# that are its title or description.
+#
+# In all cases the first (perhaps only) parameter to
 # the macro is a pointer to the first byte of the code point it is to test to
 # see if it is in the class determined by the macro.  In the case of non-UTF8,
 # the code point consists only of a single byte.
@@ -1837,43 +1849,43 @@ __DATA__
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
-LNBREAK: Line Break (\R)
+LNBREAK: C2 : Line Break (\R)
 A few Unicode characters or character sequences act as line terminators.
 C<\R> in a regular expression pattern matches them.
 => generic UTF8 LATIN1 : safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 \p{VertSpace}
 
-HORIZWS: Horizontal Whitespace (\h, \H)
+HORIZWS: C : Horizontal Whitespace (\h, \H)
 A few Unicode characters are treated as horizontal space.
 => high cp_high : fast
 \p{HorizSpace}
 
-VERTWS: Vertical Whitespace (\v, \V)
+VERTWS: C : Vertical Whitespace (\v, \V)
 A few Unicode characters are treated as vertical space.
 => high cp_high : fast
 \p{VertSpace}
 
-XDIGIT: Hexadecimal digits
+XDIGIT: C : Hexadecimal digits
 A few Unicode characters are treated as hexadecimal digits.
 => high cp_high : fast
 \p{XDigit}
 
-XPERLSPACE: \p{XPerlSpace}
+XPERLSPACE: C : \p{XPerlSpace}
 => high cp_high : fast
 \p{XPerlSpace}
 
-SPACE: Backwards \p{XPerlSpace}
+SPACE: C : Backwards \p{XPerlSpace}
 Some Unicode characters are treated as space, both horizontal and vertical.
 => backwards_UTF8 : safe
 \p{XPerlSpace}
 
-NONCHAR: Non character code points
+NONCHAR: C :  Non character code points
 $nonchar_overview
 => UTF8 :safe
 \p{_Perl_Nchar}
 
-SHORTER_NON_CHARS:  # 3 bytes
+SHORTER_NON_CHARS: C :  # 3 bytes
 $nonchar_overview
 
 $nonchar_length_overview
@@ -1882,7 +1894,7 @@ It handles the shorter ones.
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
 
-LARGER_NON_CHARS:   # 4 bytes
+LARGER_NON_CHARS: C : # 4 bytes
 $nonchar_overview
 
 $nonchar_length_overview
@@ -1905,7 +1917,7 @@ It handles the longer ones.
 0xFFFFE - 0xFFFFF
 0x10FFFE - 0x10FFFF
 
-SHORTER_NON_CHARS:  # 4 bytes
+SHORTER_NON_CHARS: e :  # 4 bytes
 => UTF8 :only_ebcdic_platform fast
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
@@ -1913,7 +1925,7 @@ SHORTER_NON_CHARS:  # 4 bytes
 0x2FFFE - 0x2FFFF
 0x3FFFE - 0x3FFFF
 
-LARGER_NON_CHARS:   # 5 bytes
+LARGER_NON_CHARS: e :   # 5 bytes
 => UTF8 :only_ebcdic_platform fast
 0x4FFFE - 0x4FFFF
 0x5FFFE - 0x5FFFF
@@ -1931,92 +1943,92 @@ LARGER_NON_CHARS:   # 5 bytes
 
 # Note that code in utf8.c is counting on the 'fast' version to look at no
 # more than two bytes
-SURROGATE: Surrogate code points
+SURROGATE: C : Surrogate code points
 => UTF8 :safe fast
 \p{_Perl_Surrogate}
 
-QUOTEMETA: Meta-characters that \Q should quote
+QUOTEMETA: C : Meta-characters that \Q should quote
 Most characters in a Perl program represent themselves, but there are a few
 "meta-characters" which mean something else unless escaped in some way.
 => high :fast
 \p{_Perl_Quotemeta}
 
-MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: C3 : multi-char strings that are folded to by a single character
 $multi_overview
 => UTF8 UTF8-cp :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 
-MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: C3 : multi-char strings that are folded to by a single character
 $multi_overview
 => LATIN1 LATIN1-cp : safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 
-THREE_CHAR_FOLD: A three-character multi-char fold
+THREE_CHAR_FOLD: C3 : A three-character multi-char fold
 $three_overview
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', '3')
 
-THREE_CHAR_FOLD: A three-character multi-char fold
+THREE_CHAR_FOLD: C3 : A three-character multi-char fold
 $three_overview
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', '3')
 
-THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: C2 : The first two of three-character multi-char folds
 $three_overview
 Sometimes we are interested in just the first two of these.
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 
-THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: C2 : The first two of three-character multi-char folds
 $three_overview
 Sometimes we are interested in just the first two of these.
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 #
-#THREE_CHAR_FOLD_NON_FINAL: The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: C : The first or middle character of multi-char folds
 #=> UTF8 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('u', 'fm')
 #
-#THREE_CHAR_FOLD_NON_FINAL: The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: C : The first or middle character of multi-char folds
 #=> LATIN1 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('l', 'fm')
 
-FOLDS_TO_MULTI: characters that fold to multi-char strings
+FOLDS_TO_MULTI: C : characters that fold to multi-char strings
 $multi_overview
 => UTF8 :fast
 \p{_Perl_Folds_To_Multi_Char}
 
-PROBLEMATIC_LOCALE_FOLD : characters whose fold is problematic under locale
+PROBLEMATIC_LOCALE_FOLD : C : characters whose fold is problematic under locale
 $problematic_overview
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Folds}
 
-PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are problematic under locale
+PROBLEMATIC_LOCALE_FOLDEDS_START : C : The first folded character of folds which are problematic under locale
 $problematic_overview
 Some times we are interested in just the first character of those that fold to
 a sequence of more than one.
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
-PATWS: pattern white space
+PATWS: C : pattern white space
 Not all characters that are nominally space characters in Unicode are
 considered as such in regular expression patterns.  Sometimes we need to
 consider just the latter.
 => generic : safe
 \p{_Perl_PatWS}
 
-HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+HANGUL_ED: C : Hangul syllables whose first UTF-8 byte is \xED
 For convenience of the implementation, certain Korean Hangul syllable characters
 have to be treated specially.
 => UTF8 :only_ascii_platform safe
 0xD000 - 0xD7FF
 
-HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+HANGUL_ED: C : Hangul syllables whose first UTF-8 byte is \xED
 => UTF8 :only_ebcdic_platform safe
 0x1 - 0x0
 # Always fails on EBCDIC; there are no ED Hanguls there
 
-WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+WORD_BUT_NONCONT: C : Word characters that perhaps surprisingly are forbidden in names
 Some Unicode characters that match C<\w> can't be used in Perl names (such as
 identifiers and labels).
 => generic : safe
