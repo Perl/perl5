@@ -525,7 +525,9 @@ pcg_next_data(pcg_data *value)
 PERL_STATIC_INLINE U64
 pcg_next_u64(pcg_data *value)
 {
-    return ((U64)pcg_next_data(value) << 32) | pcg_next_data(value);
+    const U64 high = pcg_next_data(value);
+
+    return (high << 32) | pcg_next_data(value);
 }
 
 PERL_STATIC_INLINE void
