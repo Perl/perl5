@@ -9091,8 +9091,11 @@ string overloading issues a warning and uses its address as the seed.  Because
 that address will normally differ from run to run, use a constant string or
 numeric seed when you need a reproducible sequence.
 
-L<RNG::Seed> implements the C<RNG::SeedBase> interface for replaying raw
-provider seed material.  Other C<RNG::SeedBase> subclasses can supply raw
+L<RNG::Seed> objects created with C<from_bytes> implement the C<RNG::SeedBase>
+interface for replaying raw provider seed material.  String seed objects
+created with C<from_string> retain ordinary string seed expansion.  The
+bundled generators other than Drand48 return false explicit seed strings,
+such as C<""> and C<"0">, wrapped in these always-true string seed objects.  Other C<RNG::SeedBase> subclasses can supply raw
 seed octets too.  Pass an object returned by C<srand> back to the same
 provider to reproduce its initialization.  A redacted C<RNG::Seed> cannot be
 used as a seed; this avoids accidentally recording material from a secure

@@ -238,9 +238,10 @@ decides how to interpret a seed passed to C<srand>.
 Ordinary defined C<srand> arguments are converted to UTF-8 strings.  The
 bundled large-state generators expand that complete UTF-8 octet sequence with a
 provider-specific domain separator, rather than narrowing it to one machine
-word.  C<RNG::Seed> implements C<RNG::SeedBase>, which carries raw seed
-material when that expansion is not wanted; merely providing similarly named
-methods does not make an object raw seed material.  Other
+word.  C<RNG::Seed-E<gt>from_bytes> creates an C<RNG::Seed::Raw> object
+implementing C<RNG::SeedBase>, which carries raw seed material when that
+expansion is not wanted.  Merely providing similarly named methods does not
+make an object raw seed material.  Other
 C<RNG::SeedBase> subclasses are accepted through their C<bytes> method.  The
 accepted raw widths are 4 octets for the built-in Drand48 generator, 6 for
 C<RNG::Drand48>, 16 for C<RNG::PCG>, 8 for C<RNG::Wyrand>, 32 for
@@ -263,6 +264,10 @@ C<RNG::Drand48> recognize that exact string as zero, preserving seed replay.
 This is a Drand48 compatibility quirk.  Other RNGs treat it as ordinary string
 seed material and should not be expected to produce the same sequence as zero.
 
+The other bundled generators return a false explicit seed string, such as
+C<""> or C<"0">, wrapped in a true C<RNG::Seed> object.  The object stringifies
+to the original seed and uses ordinary string seed expansion when reused.
+It does not implement the raw-state C<RNG::SeedBase> interface.
 
 Secure C<RNG::HMAC_DRBG> automatic initialization returns a redacted
 C<RNG::Seed>.  It records the provider but cannot reproduce the state; use an

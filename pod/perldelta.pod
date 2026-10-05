@@ -35,8 +35,11 @@ provider implements C<rand_bytes> and C<srand> methods.  The provider supplies
 the requested number of random bytes to C<rand_bytes>, while C<srand> receives
 the normalized seed value.
 
-The new L<RNG::Seed> class represents replayable raw seed material for a
-provider.  Secure automatic initialization returns a redacted seed token,
+The new L<RNG::Seed> class represents replayable string or raw seed material
+for a provider.  The bundled generators other than Drand48 wrap false seed
+strings in always-true seed objects which preserve their string value and
+reproduce the same sequence when reused.  Secure automatic initialization
+returns a redacted seed token,
 which records the provider but cannot be used to reproduce the state.
 
 When C<${^RNG}> is undefined, Perl continues to use its normal random number

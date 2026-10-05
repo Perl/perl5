@@ -91,8 +91,10 @@ assembled in big-endian order.  LENGTH may be zero.
 =head2 srand( [SEED] )
 
 Reset the generator using SEED. An omitted or undefined seed obtains fresh
-seed material and returns a replayable C<RNG::Seed>; an explicit seed is
-returned unchanged.
+seed material and returns a replayable C<RNG::Seed>.  An explicit true seed
+is returned unchanged.  A false seed string is returned as a true
+C<RNG::Seed> object which stringifies to that seed and uses the same string
+expansion when replayed.
 
 =head1 SEE ALSO
 

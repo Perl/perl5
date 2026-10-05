@@ -2435,10 +2435,7 @@ CODE:
     if (raw_material)
         SvREFCNT_dec_NN(raw_material);
     RETVAL = automatic ? hmac_drbg_state_seed(aTHX_ state)
-                        : newSVuv((items < 2 || !SvOK(seed)
-                                   || (SvPOKp(seed) && !SvIOKp(seed)
-                                                    && !SvNOKp(seed)))
-                                  ? 0 : SvUV_nomg(seed));
+                        : seed && SvOK(seed) ? newSVsv(seed) : newSVuv(0);
 OUTPUT:
     RETVAL
 

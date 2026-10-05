@@ -21,6 +21,7 @@ t/drand48.t
 t/hmac_drbg.t
 t/pcg.t
 t/pcg_variants.t
+t/replay.t
 t/seed.t
 t/wyrand.t
 t/xoshiro.t

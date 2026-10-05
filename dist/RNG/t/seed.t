@@ -6,6 +6,37 @@ use lib 'lib';
 use RNG::Seed;
 use RNG::SeedBase ();
 
+for my $value ('', '0') {
+    my $seed = RNG::Seed->from_string($value);
+    ok($seed, 'a false string seed is a true object');
+    is("$seed", $value, 'stringification preserves the seed string');
+    ok(!$seed->isa('RNG::SeedBase'), 'a string seed is not raw state');
+    my $warning = '';
+    my $number;
+    {
+        local $SIG{__WARN__} = sub { $warning .= $_[0] };
+        $number = 0 + $seed;
+    }
+    is($number, 0, 'numeric conversion uses the stored string');
+    if (length $value) {
+        is($warning, '', 'numeric zero string converts without warnings');
+    }
+    else {
+        like($warning, qr/isn't numeric/,
+             'empty string retains its normal numeric warning');
+    }
+}
+
+{
+    my $seed = RNG::Seed->from_string("snowman \x{2603}");
+    is("$seed", "snowman \x{2603}", 'stringification preserves Unicode');
+    my $raw = RNG::Seed->from_bytes("\0\xff");
+    isa_ok($raw, 'RNG::Seed');
+    isa_ok($raw, 'RNG::SeedBase');
+    is("$raw", "\0\xff", 'raw seed stringification preserves octets');
+    ok($raw, 'a raw seed is a true object');
+}
+
 for my $method (qw(is_redacted bytes provider)) {
     like(eval { RNG::SeedBase->$method; 1 } ? '' : $@,
          qr/RNG::SeedBase is an abstract base class/,

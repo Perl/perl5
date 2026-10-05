@@ -127,7 +127,9 @@ sub _provider_srand {
 
     if (@seed && defined $seed[0]) {
         $provider->$method($seed[0]);
-        return $seed[0];
+        return $seed[0] if $seed[0];
+        require RNG::Seed;
+        return RNG::Seed->from_string($seed[0]);
     }
     require RNG::Seed;
     return RNG::Seed->from_bytes($provider->$method);

@@ -4515,6 +4515,7 @@ dist/RNG/t/drand48.t				See if RNG::Drand48 works
 dist/RNG/t/hmac_drbg.t				See if RNG::HMAC_DRBG works
 dist/RNG/t/pcg.t				See if RNG::PCG works
 dist/RNG/t/pcg_variants.t			Compare PCG variants with reference vectors
+dist/RNG/t/replay.t				Check seed replay for each RNG provider
 dist/RNG/t/seed.t				See if RNG::Seed works
 dist/RNG/t/wyrand.t				See if RNG::Wyrand works
 dist/RNG/t/xoshiro.t				See if RNG::Xoshiro works

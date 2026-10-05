@@ -40,7 +40,8 @@ sub srand {
         ? RNG::Seed->redacted(ref $self)
         : RNG::Seed->from_bytes($value)
         if $automatic;
-    return $seed[0];
+    return $seed[0] if $seed[0];
+    return RNG::Seed->from_string($seed[0]);
 }
 
 1;
@@ -95,7 +96,9 @@ purpose.  Formal conformance or validation is outside the scope of this
 module.
 
 Calling C<srand> with an explicit seed switches the object to deterministic
-mode.  Calling C<srand> without a seed on a secure object obtains fresh
+mode.  A false explicit seed string is returned as a true C<RNG::Seed> object
+which stringifies to that seed and uses the same string expansion when
+replayed.  Calling C<srand> without a seed on a secure object obtains fresh
 operating-system entropy instead.  On a platform where obtaining sufficient
 operating-system entropy can block, secure construction, reseeding, and this
 form of C<srand> can block too.

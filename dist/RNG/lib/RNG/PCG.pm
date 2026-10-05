@@ -144,7 +144,9 @@ zero.
 
 Reset the generator using SEED. Defined seeds are stringified as UTF-8 and
 hashed. An omitted or undefined seed obtains fresh seed material and returns
-a replayable C<RNG::Seed>; an explicit seed is returned unchanged.
+a replayable C<RNG::Seed>.  An explicit true seed is returned unchanged.
+A false seed string is returned as a true C<RNG::Seed> object which
+stringifies to that seed and uses the same string expansion when replayed.
 
 =head1 SEE ALSO
 
