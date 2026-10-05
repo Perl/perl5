@@ -138,6 +138,37 @@ License or the Artistic License, as specified in the README file.
 
 =cut
 
+# Here are some variables that are used below to share documenation snippets
+# between similar macros.
+my $nonchar_overview = <<EOT;
+Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
+and are guaranteed never to be, so that an application can treat them as
+reserved for its internal use.
+EOT
+
+my $nonchar_length_overview = <<EOT;
+All noncharacter code points can be represented in UTF-8 by sequences of bytes
+consisting of either of two lengths: a shorter length, and a longer one.
+(The actual count is different on ASCII versus EBCDIC platforms.)
+
+This macro exists because it is sometimes convenient to consider the two sets
+individually.
+EOT
+
+my $multi_overview = <<EOT;
+The casefold of some Unicode characters expands to two or three characters.
+EOT
+
+my $three_overview = <<EOT;
+The casefold of a few Unicode characters expands to three characters.
+EOT
+
+my $problematic_overview= <<EOT;
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+EOT
+
+
 # Sub naming convention:
 # __func : private subroutine, can not be called as a method
 # _func  : private method, not meant for external use
@@ -1628,6 +1659,7 @@ EOF
                     $i++;
 
                     my $this_overview_line = $data[$i];
+                    $this_overview_line =~ s/ ^ (\$\w+) /eval $1/xe;
                     $overview .= $this_overview_line;
                 }
             } elsif ( $line =~ s/$definition_begin_re// ) {
@@ -1684,7 +1716,11 @@ EOF
 # the code point consists only of a single byte.
 #
 # A line beginning with '=>' begins the definition.  Lines between the first
-# one and it give an optional overview of what the macro does.
+# one and it give an optional overview of what the macro does.  If one of
+# those lines begins with a scalar symbol, the code will replace the
+# scalar with its contents.  This allows you to set up variables in the
+# program and then refer to them in these lines.  The impetus would be to
+# easily share text between multiple macros.
 #
 # The '=>' line contains those two characters followed by the types of
 # macro(s) to be generated; these are specified below.  A colon follows the
@@ -1833,15 +1869,24 @@ Some Unicode characters are treated as space, both horizontal and vertical.
 \p{XPerlSpace}
 
 NONCHAR: Non character code points
+$nonchar_overview
 => UTF8 :safe
 \p{_Perl_Nchar}
 
 SHORTER_NON_CHARS:  # 3 bytes
+$nonchar_overview
+
+$nonchar_length_overview
+It handles the shorter ones.
 => UTF8 :only_ascii_platform fast
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
 
 LARGER_NON_CHARS:   # 4 bytes
+$nonchar_overview
+
+$nonchar_length_overview
+It handles the longer ones.
 => UTF8 :only_ascii_platform fast
 0x1FFFE - 0x1FFFF
 0x2FFFE - 0x2FFFF
@@ -1897,26 +1942,34 @@ Most characters in a Perl program represent themselves, but there are a few
 \p{_Perl_Quotemeta}
 
 MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+$multi_overview
 => UTF8 UTF8-cp :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 
 MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+$multi_overview
 => LATIN1 LATIN1-cp : safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 
 THREE_CHAR_FOLD: A three-character multi-char fold
+$three_overview
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', '3')
 
 THREE_CHAR_FOLD: A three-character multi-char fold
+$three_overview
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', '3')
 
 THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+$three_overview
+Sometimes we are interested in just the first two of these.
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 
 THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+$three_overview
+Sometimes we are interested in just the first two of these.
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 #
@@ -1929,14 +1982,19 @@ THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
 #%regcharclass_multi_char_folds::multi_char_folds('l', 'fm')
 
 FOLDS_TO_MULTI: characters that fold to multi-char strings
+$multi_overview
 => UTF8 :fast
 \p{_Perl_Folds_To_Multi_Char}
 
 PROBLEMATIC_LOCALE_FOLD : characters whose fold is problematic under locale
+$problematic_overview
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Folds}
 
 PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are problematic under locale
+$problematic_overview
+Some times we are interested in just the first character of those that fold to
+a sequence of more than one.
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
