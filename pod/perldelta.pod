@@ -441,6 +441,10 @@ all consecutive characters that had the same first I<byte> were skipped.
 
 =item *
 
+The offset of a \K is no longer narrowed on rollback at an offset >2GiB.
+
+=item *
+
 In some cases warnings that occurred while using unpack on an invalid
 UTF-8 marked string would result in an invalid free.  [GH #24913]
 
