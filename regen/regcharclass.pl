@@ -1787,16 +1787,16 @@ __DATA__
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
-LNBREAK: Line Break: \R
+LNBREAK: Line Break (\R)
 => generic UTF8 LATIN1 : safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 \p{VertSpace}
 
-HORIZWS: Horizontal Whitespace: \h \H
+HORIZWS: Horizontal Whitespace (\h, \H)
 => high cp_high : fast
 \p{HorizSpace}
 
-VERTWS: Vertical Whitespace: \v \V
+VERTWS: Vertical Whitespace (\v, \V)
 => high cp_high : fast
 \p{VertSpace}
 
