@@ -1542,7 +1542,7 @@ EOF
         return if delete $mods{only_ascii_platform} && $charset !~ /ascii/i;
         return if delete $mods{only_ebcdic_platform} && $charset !~ /ebcdic/i;
 
-        print $out_fh "/*\n\t$op: $title\n\n";
+        print $out_fh "/*\n\t$op: $title for $charset\n\n";
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
         my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt,
                                                         charset => $charset);
