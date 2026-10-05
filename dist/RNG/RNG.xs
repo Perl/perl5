@@ -17,6 +17,43 @@
     Perl_ck_warner_d(aTHX_ (category), (message))
 #endif
 
+/* Perl 5.24 has the conversion operations but not these no-magic wrappers.
+ * Copy read-only values and references before changing their encoding, as
+ * the native wrappers do.  Callers have already fetched get magic. */
+#ifndef SvPVbyte_nomg
+static char *
+rng_sv_pvbyte_nomg(pTHX_ SV *sv, STRLEN *length)
+{
+    if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
+        || isGV_with_GP(sv) || SvROK(sv)) {
+        SV *copy = sv_newmortal();
+        sv_copypv_nomg(copy, sv);
+        sv = copy;
+    }
+    sv_utf8_downgrade(sv, FALSE);
+    return SvPV_nomg(sv, *length);
+}
+#  define SvPVbyte_nomg(sv, length) \
+    rng_sv_pvbyte_nomg(aTHX_ (sv), &(length))
+#endif
+
+#ifndef SvPVutf8_nomg
+static char *
+rng_sv_pvutf8_nomg(pTHX_ SV *sv, STRLEN *length)
+{
+    if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
+        || isGV_with_GP(sv) || SvROK(sv)) {
+        SV *copy = sv_newmortal();
+        sv_copypv_nomg(copy, sv);
+        sv = copy;
+    }
+    sv_utf8_upgrade_nomg(sv);
+    return SvPV_nomg(sv, *length);
+}
+#  define SvPVutf8_nomg(sv, length) \
+    rng_sv_pvutf8_nomg(aTHX_ (sv), &(length))
+#endif
+
 #ifdef I_SYS_RANDOM
 #  include <sys/random.h>
 #endif

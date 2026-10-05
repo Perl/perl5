@@ -100,6 +100,21 @@ for my $class (sort keys %width) {
     is($left->rand_bytes(24), $right->rand_bytes(24),
        "$class accepts a SeedBase implementation with its own representation");
 
+    {
+        my $octets = "\xff" x $width{$class};
+        my $upgraded = $octets;
+        utf8::upgrade($upgraded);
+        $left->srand(RNG::Seed->from_bytes($upgraded));
+        $right->srand(RNG::Seed->from_bytes($octets));
+        is($left->rand_bytes(24), $right->rand_bytes(24),
+           "$class downgrades raw seed characters to their byte values");
+
+        my $wide = RNG::Seed->from_bytes("\x{100}" x $width{$class});
+        like(eval { $left->srand($wide); 1 } ? '' : $@,
+             qr/Wide character/,
+             "$class rejects raw seed characters that cannot be downgraded");
+    }
+
     my $wrong = RNG::Seed->from_bytes(chr(1) x ($width{$class} - 1));
     like(eval { $left->srand($wrong); 1 } ? '' : $@,
          qr/exactly \Q$width{$class}\E octets/,
