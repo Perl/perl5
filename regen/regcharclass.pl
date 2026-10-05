@@ -1618,6 +1618,7 @@ EOF
                 $first_time = 0;
                 ( $op, $title )= split /\s*:\s*/, $line, 2;
                 @txt= ();
+                $title =~ s/ \s* \# .* //x;
             } elsif ( $line =~ s/$definition_begin_re// ) {
                 my ( $type, $modifier )= split /:/, $line;
                 @types= split ' ', $type;

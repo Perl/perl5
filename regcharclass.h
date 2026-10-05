@@ -203,7 +203,7 @@
 	: ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 3 bytes
+	SHORTER_NON_CHARS: 
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -217,7 +217,7 @@
 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: # 4 bytes
+	LARGER_NON_CHARS: 
 
 	0x1FFFE - 0x1FFFF
 	0x2FFFE - 0x2FFFF
@@ -1508,7 +1508,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 4 bytes
+	SHORTER_NON_CHARS: 
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -1529,7 +1529,7 @@
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: # 5 bytes
+	LARGER_NON_CHARS: 
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -2817,7 +2817,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 4 bytes
+	SHORTER_NON_CHARS: 
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -2838,7 +2838,7 @@
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 ) )
 
 /*
-	LARGER_NON_CHARS: # 5 bytes
+	LARGER_NON_CHARS: 
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -4004,6 +4004,6 @@
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * f5f92e7b6a14e48c9dd7999dcd0be77048a7a4755d22dd035b39665d3ec1abef regen/regcharclass.pl
+ * 9273b1fa25dd4db4e49c22fec63c59ad6f96849c39939bda72bc62002fbb6061 regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
