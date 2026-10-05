@@ -1603,9 +1603,8 @@ EOF
         undef @types;
         undef %mods;
         print $out_fh "\n", get_conditional_compile_line_start($charset);
-        my @data_copy = @data;
-        for (my $i = 0; $i < @data_copy; $i++) {
-            my $line = $data_copy[$i];
+        for (my $i = 0; $i < @data; $i++) {
+            my $line = $data[$i];
 
             # squeeze out comment and blanks
             $line =~ s/^ \s* (?: \# .* ) ? $ //x;
