@@ -456,7 +456,7 @@ pcg_state_fast(SV *self)
     return (pcg_data *)SvPVX(SvRV(self));
 }
 
-static U32
+PERL_STATIC_INLINE U32
 pcg_next_data(pcg_data *value)
 {
     const U64 oldstate = value->state;
@@ -476,13 +476,13 @@ pcg_next_data(pcg_data *value)
     return result;
 }
 
-static U64
+PERL_STATIC_INLINE U64
 pcg_next_u64(pcg_data *value)
 {
     return ((U64)pcg_next_data(value) << 32) | pcg_next_data(value);
 }
 
-static void
+PERL_STATIC_INLINE void
 pcg_fill_bytes(pcg_data *state, STRLEN length, U8 *bytes)
 {
     U64 word;
@@ -496,14 +496,14 @@ pcg_fill_bytes(pcg_data *state, STRLEN length, U8 *bytes)
     }
 }
 
-static bool
+PERL_STATIC_INLINE bool
 pcg_rng_bytes(pTHX_ SV *self, STRLEN length, U8 *bytes)
 {
     pcg_fill_bytes(pcg_state(aTHX_ self), length, bytes);
     return TRUE;
 }
 
-static NV
+PERL_STATIC_INLINE NV
 pcg_rng_U01_fast(pTHX_ void *state)
 {
     return rng_U64_to_NV_U01(pcg_next_u64((pcg_data *)state));
@@ -539,6 +539,349 @@ pcg_seed(pTHX_ pcg_data *value, SV *seed)
     rng_expand_seed(pcg_seed_key, sizeof(pcg_seed_key) - 1, seed_bytes,
                     seed_len, material, sizeof(material));
     pcg_load_raw_seed(value, material);
+}
+
+/* PCG RXS-M-XS 64/64 uses the one-sequence 64-bit LCG and permutes each
+ * state into a 64-bit output. */
+typedef struct {
+    U64 state;
+} pcg_rxs_m_xs_data;
+
+#define PCG64_MULTIPLIER UINT64_C(6364136223846793005)
+#define PCG64_INCREMENT  UINT64_C(1442695040888963407)
+#define PCG_RXS_M_XS_MULTIPLIER UINT64_C(12605985483714917081)
+
+static const char pcg_rxs_m_xs_zero_state[sizeof(pcg_rxs_m_xs_data)] = { 0 };
+static const U8 pcg_rxs_m_xs_seed_key[] = "Perl PCG RXS-M-XS 64/64 seed v1";
+
+static pcg_rxs_m_xs_data *
+pcg_rxs_m_xs_state(pTHX_ SV *self)
+{
+    SV *state;
+
+    if (!SvROK(self) || !SvPOK(state = SvRV(self))
+        || SvCUR(state) != sizeof(pcg_rxs_m_xs_data))
+        croak("RNG::PCG::RXS_M_XS_64_64 object does not contain a valid state");
+    return (pcg_rxs_m_xs_data *)SvPVX(state);
+}
+
+static pcg_rxs_m_xs_data *
+pcg_rxs_m_xs_state_fast(SV *self)
+{
+    return (pcg_rxs_m_xs_data *)SvPVX(SvRV(self));
+}
+
+PERL_STATIC_INLINE U64
+pcg_rxs_m_xs_next(pcg_rxs_m_xs_data *value)
+{
+    const U64 state = value->state;
+    U64 word = ((state >> ((state >> 59) + 5)) ^ state)
+             * PCG_RXS_M_XS_MULTIPLIER;
+
+    value->state = state * PCG64_MULTIPLIER + PCG64_INCREMENT;
+    return (word >> 43) ^ word;
+}
+
+PERL_STATIC_INLINE void
+pcg_rxs_m_xs_fill_bytes(pcg_rxs_m_xs_data *state, STRLEN length, U8 *bytes)
+{
+    U64 word;
+    STRLEN offset;
+    unsigned int i;
+
+    for (offset = 0; offset < length; ) {
+        word = pcg_rxs_m_xs_next(state);
+        for (i = 0; i < 8 && offset < length; i++)
+            bytes[offset++] = (U8)(word >> (56 - 8 * i));
+    }
+}
+
+PERL_STATIC_INLINE NV
+pcg_rxs_m_xs_U01_fast(pTHX_ void *state)
+{
+    PERL_UNUSED_CONTEXT;
+    return rng_U64_to_NV_U01(pcg_rxs_m_xs_next((pcg_rxs_m_xs_data *)state));
+}
+
+static void
+pcg_rxs_m_xs_load_raw_seed(pcg_rxs_m_xs_data *value, const U8 *seed_bytes)
+{
+    value->state = U8TO64_LE(seed_bytes);
+}
+
+static void
+pcg_rxs_m_xs_seed(pTHX_ pcg_rxs_m_xs_data *value, SV *seed)
+{
+    U8 automatic_seed[8];
+    U8 material[8];
+    const U8 *seed_bytes;
+    STRLEN seed_len;
+    SV *raw_material;
+
+    if (rng_raw_seed(aTHX_ seed, &raw_material, &seed_bytes, &seed_len)) {
+        rng_require_raw_seed_length(raw_material, seed_len, sizeof(material),
+                                    "RNG::PCG::RXS_M_XS_64_64");
+        pcg_rxs_m_xs_load_raw_seed(value, seed_bytes);
+        SvREFCNT_dec_NN(raw_material);
+        return;
+    }
+    seed_bytes = rng_seed_bytes(aTHX_ seed, automatic_seed,
+                                sizeof(automatic_seed), &seed_len);
+    rng_expand_seed(pcg_rxs_m_xs_seed_key, sizeof(pcg_rxs_m_xs_seed_key) - 1,
+                    seed_bytes, seed_len, material, sizeof(material));
+    pcg_rxs_m_xs_load_raw_seed(value, material);
+}
+
+/* GCC-compatible compilers define __SIZEOF_INT128__ when the target supports
+ * native 128-bit integers.  Other compilers use the portable two-word form. */
+#if defined(__SIZEOF_INT128__) && __SIZEOF_INT128__ == 16
+typedef unsigned __int128 pcg_u128;
+#  define PCG_NATIVE_UINT128 1
+#  define PCG_U128(high, low) \
+    ((((pcg_u128)(high)) << 64) | (pcg_u128)(low))
+#endif
+typedef struct {
+    U64 state_hi;
+    U64 state_lo;
+    U64 increment_hi;
+    U64 increment_lo;
+} pcg_xsl_rr_data;
+
+#define PCG128_MULTIPLIER_HI UINT64_C(2549297995355413924)
+#define PCG128_MULTIPLIER_LO UINT64_C(4865540595714422341)
+
+static const char pcg_xsl_rr_zero_state[sizeof(pcg_xsl_rr_data)] = { 0 };
+static const U8 pcg_xsl_rr_lcg_seed_key[] = "Perl PCG XSL-RR 128/64 LCG seed v1";
+static const U8 pcg_xsl_rr_mcg_seed_key[] = "Perl PCG XSL-RR 128/64 MCG seed v1";
+
+static pcg_xsl_rr_data *
+pcg_xsl_rr_state(pTHX_ SV *self)
+{
+    SV *state;
+
+    if (!SvROK(self) || !SvPOK(state = SvRV(self))
+        || SvCUR(state) != sizeof(pcg_xsl_rr_data))
+        croak("PCG XSL-RR object does not contain a valid state");
+    return (pcg_xsl_rr_data *)SvPVX(state);
+}
+
+static pcg_xsl_rr_data *
+pcg_xsl_rr_state_fast(SV *self)
+{
+    return (pcg_xsl_rr_data *)SvPVX(SvRV(self));
+}
+
+#ifndef PCG_NATIVE_UINT128
+/* Return the high half and store the low half of the 64 by 64-bit product. */
+PERL_STATIC_INLINE U64
+pcg_multiply_wide_u64(U64 left, U64 right, U64 *low)
+{
+    const U64 left_low = (U32)left;
+    const U64 left_high = left >> 32;
+    const U64 right_low = (U32)right;
+    const U64 right_high = right >> 32;
+    const U64 low_product = left_low * right_low;
+    const U64 cross_left = left_low * right_high;
+    const U64 cross_right = left_high * right_low;
+    const U64 middle = (low_product >> 32) + (U32)cross_left
+                     + (U32)cross_right;
+
+    *low = (middle << 32) | (U32)low_product;
+    return left_high * right_high + (cross_left >> 32)
+         + (cross_right >> 32) + (middle >> 32);
+}
+#endif
+
+PERL_STATIC_INLINE U64
+pcg_xsl_rr_output(pcg_xsl_rr_data *value, unsigned int *rotation)
+{
+    U64 high;
+    U64 low;
+
+    high = value->state_hi;
+    low = value->state_lo;
+    *rotation = (unsigned int)(high >> 58);
+    return high ^ low;
+}
+
+PERL_STATIC_INLINE void
+pcg_xsl_rr_step_mcg(pcg_xsl_rr_data *value)
+{
+#ifdef PCG_NATIVE_UINT128
+    pcg_u128 state = PCG_U128(value->state_hi, value->state_lo);
+
+    state *= PCG_U128(PCG128_MULTIPLIER_HI, PCG128_MULTIPLIER_LO);
+    value->state_lo = (U64)state;
+    value->state_hi = (U64)(state >> 64);
+#else
+    U64 product_low;
+    U64 product_high;
+
+    product_high = pcg_multiply_wide_u64(value->state_lo,
+                                         PCG128_MULTIPLIER_LO, &product_low);
+    value->state_hi = product_high
+        + value->state_hi * PCG128_MULTIPLIER_LO
+        + value->state_lo * PCG128_MULTIPLIER_HI;
+    value->state_lo = product_low;
+#endif
+}
+
+PERL_STATIC_INLINE void
+pcg_xsl_rr_step_lcg(pcg_xsl_rr_data *value)
+{
+#ifdef PCG_NATIVE_UINT128
+    pcg_u128 state = PCG_U128(value->state_hi, value->state_lo);
+
+    state = state
+        * PCG_U128(PCG128_MULTIPLIER_HI, PCG128_MULTIPLIER_LO)
+        + PCG_U128(value->increment_hi, value->increment_lo);
+    value->state_lo = (U64)state;
+    value->state_hi = (U64)(state >> 64);
+#else
+    U64 product_low;
+    U64 product_high;
+    U64 next_low;
+    U64 carry;
+
+    product_high = pcg_multiply_wide_u64(value->state_lo,
+                                         PCG128_MULTIPLIER_LO, &product_low);
+    next_low = product_low + value->increment_lo;
+    carry = next_low < product_low;
+    value->state_hi = product_high
+        + value->state_hi * PCG128_MULTIPLIER_LO
+        + value->state_lo * PCG128_MULTIPLIER_HI
+        + value->increment_hi + carry;
+    value->state_lo = next_low;
+#endif
+}
+
+PERL_STATIC_INLINE U64
+pcg_xsl_rr_next_lcg(pcg_xsl_rr_data *value)
+{
+    unsigned int rotation;
+    U64 output;
+
+    /* PCG's XSL-RR 128/64 variants permute the updated state. */
+    pcg_xsl_rr_step_lcg(value);
+    output = pcg_xsl_rr_output(value, &rotation);
+    return (output >> rotation) | (output << ((-rotation) & 63));
+}
+
+PERL_STATIC_INLINE U64
+pcg_xsl_rr_next_mcg(pcg_xsl_rr_data *value)
+{
+    unsigned int rotation;
+    U64 output;
+
+    pcg_xsl_rr_step_mcg(value);
+    output = pcg_xsl_rr_output(value, &rotation);
+    return (output >> rotation) | (output << ((-rotation) & 63));
+}
+
+PERL_STATIC_INLINE void
+pcg_xsl_rr_fill_bytes_lcg(pcg_xsl_rr_data *state, STRLEN length, U8 *bytes)
+{
+    U64 word;
+    STRLEN offset;
+    unsigned int i;
+
+    for (offset = 0; offset < length; ) {
+        word = pcg_xsl_rr_next_lcg(state);
+        for (i = 0; i < 8 && offset < length; i++)
+            bytes[offset++] = (U8)(word >> (56 - 8 * i));
+    }
+}
+
+PERL_STATIC_INLINE void
+pcg_xsl_rr_fill_bytes_mcg(pcg_xsl_rr_data *state, STRLEN length, U8 *bytes)
+{
+    U64 word;
+    STRLEN offset;
+    unsigned int i;
+
+    for (offset = 0; offset < length; ) {
+        word = pcg_xsl_rr_next_mcg(state);
+        for (i = 0; i < 8 && offset < length; i++)
+            bytes[offset++] = (U8)(word >> (56 - 8 * i));
+    }
+}
+
+PERL_STATIC_INLINE NV
+pcg_xsl_rr_lcg_U01_fast(pTHX_ void *state)
+{
+    PERL_UNUSED_CONTEXT;
+    return rng_U64_to_NV_U01(pcg_xsl_rr_next_lcg((pcg_xsl_rr_data *)state));
+}
+
+PERL_STATIC_INLINE NV
+pcg_xsl_rr_mcg_U01_fast(pTHX_ void *state)
+{
+    PERL_UNUSED_CONTEXT;
+    return rng_U64_to_NV_U01(pcg_xsl_rr_next_mcg((pcg_xsl_rr_data *)state));
+}
+
+static void
+pcg_xsl_rr_export_raw_seed(pcg_xsl_rr_data *value, U8 *seed_bytes, bool mcg)
+{
+    U64 low;
+    U64 high;
+    unsigned int i;
+
+    low = value->state_lo;
+    high = value->state_hi;
+    for (i = 0; i < 8; i++) {
+        seed_bytes[i] = (U8)(low >> (8 * i));
+        seed_bytes[i + 8] = (U8)(high >> (8 * i));
+        if (!mcg) {
+            seed_bytes[i + 16] = (U8)(value->increment_lo >> (8 * i));
+            seed_bytes[i + 24] = (U8)(value->increment_hi >> (8 * i));
+        }
+    }
+}
+
+static void
+pcg_xsl_rr_load_raw_seed(pcg_xsl_rr_data *value, const U8 *seed_bytes,
+                         bool mcg)
+{
+    const U64 low = U8TO64_LE(seed_bytes) | (mcg ? 1 : 0);
+    const U64 high = U8TO64_LE(seed_bytes + 8);
+
+    value->state_lo = low;
+    value->state_hi = high;
+    if (!mcg) {
+        value->increment_lo = U8TO64_LE(seed_bytes + 16) | 1;
+        value->increment_hi = U8TO64_LE(seed_bytes + 24);
+    }
+}
+
+static void
+pcg_xsl_rr_seed(pTHX_ pcg_xsl_rr_data *value, SV *seed, bool mcg)
+{
+    U8 automatic_seed[32];
+    U8 material[32];
+    const STRLEN seed_width = mcg ? 16 : sizeof(material);
+    const U8 *seed_bytes;
+    STRLEN seed_len;
+    SV *raw_material;
+    const U8 *label = mcg ? pcg_xsl_rr_mcg_seed_key : pcg_xsl_rr_lcg_seed_key;
+    STRLEN label_length = mcg ? sizeof(pcg_xsl_rr_mcg_seed_key) - 1
+                              : sizeof(pcg_xsl_rr_lcg_seed_key) - 1;
+
+    if (rng_raw_seed(aTHX_ seed, &raw_material, &seed_bytes, &seed_len)) {
+        const STRLEN raw_seed_length = mcg ? 16 : sizeof(material);
+
+        rng_require_raw_seed_length(raw_material, seed_len, raw_seed_length,
+                                    mcg ? "RNG::PCG::XSL_RR_128_64_MCG"
+                                        : "RNG::PCG::XSL_RR_128_64_LCG");
+        pcg_xsl_rr_load_raw_seed(value, seed_bytes, mcg);
+        SvREFCNT_dec_NN(raw_material);
+        return;
+    }
+    seed_bytes = rng_seed_bytes(aTHX_ seed, automatic_seed,
+                                seed_width, &seed_len);
+    rng_expand_seed(label, label_length, seed_bytes, seed_len,
+                    material, seed_width);
+    pcg_xsl_rr_load_raw_seed(value, material, mcg);
 }
 
 /* wyrand is a small, fast 64-bit generator.  Its constants and state update
@@ -1467,7 +1810,7 @@ OUTPUT:
     RETVAL
 
 SV *
-new(class_name, seed = 0)
+_new(class_name, seed = 0)
     const char *class_name
     SV *seed
 PREINIT:
@@ -1539,6 +1882,312 @@ CODE:
     }
     else {
         pcg_seed(aTHX_ pcg_state(aTHX_ self), seed);
+        RETVAL = newSVsv(seed);
+    }
+OUTPUT:
+    RETVAL
+
+MODULE = RNG         PACKAGE = RNG::PCG::RXS_M_XS_64_64
+
+UV
+get_rand_U01_XS_func_addr(self)
+    SV *self
+CODE:
+    PERL_UNUSED_ARG(self);
+    RETVAL = PTR2UV(pcg_rxs_m_xs_U01_fast);
+OUTPUT:
+    RETVAL
+
+UV
+get_rand_U01_XS_state_addr(self)
+    SV *self
+CODE:
+    RETVAL = PTR2UV(pcg_rxs_m_xs_state_fast(self));
+OUTPUT:
+    RETVAL
+
+SV *
+new(class_name, seed = 0)
+    const char *class_name
+    SV *seed
+PREINIT:
+    SV *state;
+CODE:
+    if (seed)
+        SvGETMAGIC(seed);
+    state = newSVpvn(pcg_rxs_m_xs_zero_state,
+                     sizeof(pcg_rxs_m_xs_data));
+    RETVAL = newRV_noinc(state);
+    sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
+    pcg_rxs_m_xs_seed(aTHX_ pcg_rxs_m_xs_state(aTHX_ RETVAL), seed);
+OUTPUT:
+    RETVAL
+
+SV *
+rand_bytes(self, length)
+    SV *self
+    UV length
+CODE:
+    RETVAL = newSVpvn("", 0);
+    SvGROW(RETVAL, length + 1);
+    pcg_rxs_m_xs_fill_bytes(pcg_rxs_m_xs_state(aTHX_ self), length,
+                            (U8 *)SvPVX(RETVAL));
+    ((U8 *)SvPVX(RETVAL))[length] = '\0';
+    SvCUR_set(RETVAL, length);
+    SvPOK_on(RETVAL);
+OUTPUT:
+    RETVAL
+
+NV
+rand_U01(self)
+    SV *self
+CODE:
+    RETVAL = pcg_rxs_m_xs_U01_fast(aTHX_ pcg_rxs_m_xs_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+NV
+rand(self, limit = NULL)
+    SV *self
+    SV *limit
+PREINIT:
+    NV value;
+CODE:
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
+    if (value == 0.0)
+        value = 1.0;
+    RETVAL = value * pcg_rxs_m_xs_U01_fast(aTHX_
+                 pcg_rxs_m_xs_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+SV *
+_srand(self, seed = NULL)
+    SV *self
+    SV *seed
+PREINIT:
+    U8 automatic_seed[8];
+CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
+    if (items < 2 || !SvOK(seed)) {
+        SV *raw;
+        PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
+        pcg_rxs_m_xs_load_raw_seed(pcg_rxs_m_xs_state(aTHX_ self),
+                                   automatic_seed);
+        raw = newSVpvn((const char *)automatic_seed, sizeof(automatic_seed));
+        RETVAL = raw;
+    }
+    else {
+        pcg_rxs_m_xs_seed(aTHX_ pcg_rxs_m_xs_state(aTHX_ self), seed);
+        RETVAL = newSVsv(seed);
+    }
+OUTPUT:
+    RETVAL
+
+MODULE = RNG         PACKAGE = RNG::PCG::XSL_RR_128_64_MCG
+
+UV
+get_rand_U01_XS_func_addr(self)
+    SV *self
+CODE:
+    PERL_UNUSED_ARG(self);
+    RETVAL = PTR2UV(pcg_xsl_rr_mcg_U01_fast);
+OUTPUT:
+    RETVAL
+
+UV
+get_rand_U01_XS_state_addr(self)
+    SV *self
+CODE:
+    RETVAL = PTR2UV(pcg_xsl_rr_state_fast(self));
+OUTPUT:
+    RETVAL
+
+SV *
+new(class_name, seed = 0)
+    const char *class_name
+    SV *seed
+PREINIT:
+    SV *state;
+CODE:
+    if (seed)
+        SvGETMAGIC(seed);
+    state = newSVpvn(pcg_xsl_rr_zero_state, sizeof(pcg_xsl_rr_data));
+    RETVAL = newRV_noinc(state);
+    sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
+    pcg_xsl_rr_seed(aTHX_ pcg_xsl_rr_state(aTHX_ RETVAL), seed, TRUE);
+OUTPUT:
+    RETVAL
+
+SV *
+rand_bytes(self, length)
+    SV *self
+    UV length
+CODE:
+    RETVAL = newSVpvn("", 0);
+    SvGROW(RETVAL, length + 1);
+    pcg_xsl_rr_fill_bytes_mcg(pcg_xsl_rr_state(aTHX_ self), length,
+                              (U8 *)SvPVX(RETVAL));
+    ((U8 *)SvPVX(RETVAL))[length] = '\0';
+    SvCUR_set(RETVAL, length);
+    SvPOK_on(RETVAL);
+OUTPUT:
+    RETVAL
+
+NV
+rand_U01(self)
+    SV *self
+CODE:
+    RETVAL = pcg_xsl_rr_mcg_U01_fast(aTHX_ pcg_xsl_rr_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+NV
+rand(self, limit = NULL)
+    SV *self
+    SV *limit
+PREINIT:
+    NV value;
+CODE:
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
+    if (value == 0.0)
+        value = 1.0;
+    RETVAL = value * pcg_xsl_rr_mcg_U01_fast(aTHX_
+                 pcg_xsl_rr_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+SV *
+_srand(self, seed = NULL)
+    SV *self
+    SV *seed
+PREINIT:
+    U8 automatic_seed[16];
+CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
+    if (items < 2 || !SvOK(seed)) {
+        SV *raw;
+        PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
+        pcg_xsl_rr_load_raw_seed(pcg_xsl_rr_state(aTHX_ self),
+                                 automatic_seed, TRUE);
+        raw = newSV(sizeof(automatic_seed));
+        SvPOK_on(raw);
+        SvCUR_set(raw, sizeof(automatic_seed));
+        pcg_xsl_rr_export_raw_seed(pcg_xsl_rr_state(aTHX_ self),
+                                   (U8 *)SvPVX(raw), TRUE);
+        ((U8 *)SvPVX(raw))[sizeof(automatic_seed)] = '\0';
+        RETVAL = raw;
+    }
+    else {
+        pcg_xsl_rr_seed(aTHX_ pcg_xsl_rr_state(aTHX_ self), seed, TRUE);
+        RETVAL = newSVsv(seed);
+    }
+OUTPUT:
+    RETVAL
+
+MODULE = RNG         PACKAGE = RNG::PCG::XSL_RR_128_64_LCG
+
+UV
+get_rand_U01_XS_func_addr(self)
+    SV *self
+CODE:
+    PERL_UNUSED_ARG(self);
+    RETVAL = PTR2UV(pcg_xsl_rr_lcg_U01_fast);
+OUTPUT:
+    RETVAL
+
+UV
+get_rand_U01_XS_state_addr(self)
+    SV *self
+CODE:
+    RETVAL = PTR2UV(pcg_xsl_rr_state_fast(self));
+OUTPUT:
+    RETVAL
+
+SV *
+new(class_name, seed = 0)
+    const char *class_name
+    SV *seed
+PREINIT:
+    SV *state;
+CODE:
+    if (seed)
+        SvGETMAGIC(seed);
+    state = newSVpvn(pcg_xsl_rr_zero_state, sizeof(pcg_xsl_rr_data));
+    RETVAL = newRV_noinc(state);
+    sv_bless(RETVAL, gv_stashpv(class_name, GV_ADD));
+    pcg_xsl_rr_seed(aTHX_ pcg_xsl_rr_state(aTHX_ RETVAL), seed, FALSE);
+OUTPUT:
+    RETVAL
+
+SV *
+rand_bytes(self, length)
+    SV *self
+    UV length
+CODE:
+    RETVAL = newSVpvn("", 0);
+    SvGROW(RETVAL, length + 1);
+    pcg_xsl_rr_fill_bytes_lcg(pcg_xsl_rr_state(aTHX_ self), length,
+                              (U8 *)SvPVX(RETVAL));
+    ((U8 *)SvPVX(RETVAL))[length] = '\0';
+    SvCUR_set(RETVAL, length);
+    SvPOK_on(RETVAL);
+OUTPUT:
+    RETVAL
+
+NV
+rand_U01(self)
+    SV *self
+CODE:
+    RETVAL = pcg_xsl_rr_lcg_U01_fast(aTHX_ pcg_xsl_rr_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+NV
+rand(self, limit = NULL)
+    SV *self
+    SV *limit
+PREINIT:
+    NV value;
+CODE:
+    if (items >= 2 && limit)
+        SvGETMAGIC(limit);
+    value = (items < 2 || !limit || !SvOK(limit))
+          ? 1.0 : SvNV_nomg(limit);
+    if (value == 0.0)
+        value = 1.0;
+    RETVAL = value * pcg_xsl_rr_lcg_U01_fast(aTHX_
+                 pcg_xsl_rr_state(aTHX_ self));
+OUTPUT:
+    RETVAL
+
+SV *
+_srand(self, seed = NULL)
+    SV *self
+    SV *seed
+PREINIT:
+    U8 automatic_seed[32];
+CODE:
+    if (items >= 2 && seed)
+        SvGETMAGIC(seed);
+    if (items < 2 || !SvOK(seed)) {
+        SV *raw;
+        PERL_GET_WEAK_ENTROPY(automatic_seed, sizeof(automatic_seed));
+        pcg_xsl_rr_load_raw_seed(pcg_xsl_rr_state(aTHX_ self),
+                                 automatic_seed, FALSE);
+        raw = newSVpvn((const char *)automatic_seed, sizeof(automatic_seed));
+        RETVAL = raw;
+    }
+    else {
+        pcg_xsl_rr_seed(aTHX_ pcg_xsl_rr_state(aTHX_ self), seed, FALSE);
         RETVAL = newSVsv(seed);
     }
 OUTPUT:

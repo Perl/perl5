@@ -12,6 +12,37 @@ our @ISA = 'RNG::Provider';
 
 RNG::_load_xs();
 
+my %variant_class = (
+    'xsh-rr-64/32-ext' => __PACKAGE__,
+    'rxs-m-xs-64/64' => 'RNG::PCG::RXS_M_XS_64_64',
+    'xsl-rr-128/64-mcg' => 'RNG::PCG::XSL_RR_128_64_MCG',
+    'xsl-rr-128/64-lcg' => 'RNG::PCG::XSL_RR_128_64_LCG',
+);
+
+sub new {
+    my ($class, $seed, @options) = @_;
+
+    $seed = 0 unless @_ > 1;
+    return $class->_new($seed) unless @options;
+    CORE::die "RNG::PCG constructor options must be key/value pairs\n"
+        if @options % 2;
+
+    my %options = @options;
+    my $variant = delete $options{variant};
+    CORE::die "Unknown RNG::PCG constructor option: " . (keys %options)[0] . "\n"
+        if %options;
+    $variant = 'xsh-rr-64/32-ext' unless defined $variant;
+
+    my $variant_class = $variant_class{$variant};
+    CORE::die "Unknown RNG::PCG variant '$variant'\n"
+        unless defined $variant_class;
+    return $class->_new($seed) if $variant_class eq __PACKAGE__;
+
+    (my $file = $variant_class) =~ s!::!/!g;
+    require "$file.pm";
+    return $variant_class->new($seed);
+}
+
 sub rand_U01_callback {
     my ($self) = @_;
     return sub { $self->rand_U01 };
@@ -23,7 +54,7 @@ sub srand { RNG::_provider_srand($_[0], '_srand', @_[1 .. $#_]) }
 
 =head1 NAME
 
-RNG::PCG - a small two-dimensional PCG-XSH-RR pseudorandom number generator
+RNG::PCG - PCG pseudorandom number generators
 
 =head1 SYNOPSIS
 
@@ -32,6 +63,8 @@ RNG::PCG - a small two-dimensional PCG-XSH-RR pseudorandom number generator
     my $rng = RNG::PCG->new(42);
     my $number = $rng->rand(10);
 
+    my $pcg64 = RNG::PCG->new(42, variant => 'xsl-rr-128/64-mcg');
+
     {
         local ${^RNG} = $rng;
         print rand(10), "\n";
@@ -39,34 +72,43 @@ RNG::PCG - a small two-dimensional PCG-XSH-RR pseudorandom number generator
 
 =head1 DESCRIPTION
 
-This module implements Melissa O'Neill's two-dimensional PCG-XSH-RR
-generator. It uses a 64-bit base state and a two-element 32-bit extension
-array, avoiding any dependency on native 128-bit arithmetic. It is small,
-deterministic, and suitable for simulation, testing, and other uses where a
-non-cryptographic pseudorandom number generator is appropriate.
+This module provides several PCG variants. The default is the existing
+two-dimensional PCG-XSH-RR generator. It uses a 64-bit base state and a
+two-element 32-bit extension array, avoiding a dependency on native 128-bit
+arithmetic. Other choices are PCG RXS-M-XS 64/64 and PCG XSL-RR 128/64 with
+either an MCG or LCG state transition.
 
-The object stores its 128-bit state in a blessed scalar reference. Its
-C<rand_bytes> method combines successive 32-bit PCG outputs into a canonical
-big-endian byte string, so the provider interface is independent of Perl's
-native integer width. The object can be used directly as a provider for
-Perl's C<${^RNG}> variable. Its XS implementation provides
+Each object stores its state in a blessed scalar reference. Its
+C<rand_bytes> method combines successive outputs into a canonical big-endian
+byte string, so the provider interface is independent of Perl's native
+integer width. Each object can be used directly as a provider for Perl's
+C<${^RNG}> variable. Its XS implementation provides
 C<get_rand_U01_XS_func_addr> and C<get_rand_U01_XS_state_addr> methods, so Perl
 can discover a direct callback and its native state when the
 object is selected. After that setup,
 C<rand> can obtain U01 values without calling the Perl C<rand_bytes> method or
 constructing a temporary byte buffer for every request.
 
-This generator is not suitable for cryptography, security tokens, passwords,
-or any other security-sensitive use.
+The XSL-RR variants use native 128-bit arithmetic when the compiler target
+provides it. Other targets use a pair of 64-bit words. Each variant has a
+separate class and XS callback. The selected variant is fixed when the object
+is constructed.
+
+These generators are not suitable for cryptography, security tokens,
+passwords, or any other security-sensitive use.
 
 =head1 METHODS
 
 See L<RNG> for the provider interface used by C<${^RNG}>.
 
-=head2 new( SEED )
+=head2 new( SEED, variant =E<gt> NAME )
 
-Create a generator initialized from SEED. Defined seeds are stringified as
-UTF-8 and hashed. If SEED is omitted, it defaults to zero.
+Create a generator initialized from SEED. Defined ordinary seeds are
+stringified as UTF-8 and hashed. If SEED is omitted, it defaults to zero.
+NAME may be C<xsh-rr-64/32-ext> (the default), C<rxs-m-xs-64/64>,
+C<xsl-rr-128/64-mcg>, or C<xsl-rr-128/64-lcg>. The selected object is an
+instance of that variant's class. Each class can be loaded and constructed
+directly.
 
 =head2 rand( [LIMIT] )
 
@@ -95,8 +137,8 @@ them directly.
 =head2 rand_bytes( LENGTH )
 
 Advance the generator and return exactly LENGTH random bytes. Bytes are
-assembled from successive 32-bit PCG outputs in big-endian order. LENGTH may
-be zero.
+assembled from successive 64-bit outputs in big-endian order. LENGTH may be
+zero.
 
 =head2 srand( [SEED] )
 

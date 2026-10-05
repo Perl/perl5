@@ -122,7 +122,10 @@ Return the recorded provider name for a redacted seed.
 
 C<srand> accepts raw C<RNG::Seed> material only at the provider's native
 width: 4 octets for the built-in generator, 6 for C<RNG::Drand48>, 16 for
-C<RNG::PCG>, 8 for C<RNG::Wyrand>, and 32 for C<RNG::Xoshiro>.
+C<RNG::PCG>, 8 for C<RNG::PCG::RXS_M_XS_64_64>, 16 for
+C<RNG::PCG::XSL_RR_128_64_MCG>, 32 for
+C<RNG::PCG::XSL_RR_128_64_LCG> (16 state octets followed by 16 increment
+octets), 8 for C<RNG::Wyrand>, and 32 for C<RNG::Xoshiro>.
 C<RNG::HMAC_DRBG> uses a 64-octet C<Key || V> state seed. Raw material is
 never padded or truncated. An all-zero
 C<RNG::Xoshiro> raw state is adjusted to its documented valid state.

@@ -1,6 +1,11 @@
 Revision history for RNG.
 
 [Unreleased]
+    - Add PCG RXS-M-XS 64/64 and PCG XSL-RR 128/64 MCG and LCG variants.
+      The LCG increment is now derived from the seed, selecting a stream.
+      Select a variant when constructing RNG::PCG. Use native 128-bit
+      arithmetic where the compiler target supports it, with a two-word
+      fallback for other targets.
     - Add the RNG factory and reusable die, dice, chooser, and weighted
       distribution objects, using Vose's alias method for weighted choices.
     - Make rand_bytes the portable provider protocol and require providers to

@@ -6,6 +6,10 @@ lib/RNG.pm
 lib/RNG/Drand48.pm
 lib/RNG/HMAC_DRBG.pm
 lib/RNG/PCG.pm
+lib/RNG/PCG/Variant.pm
+lib/RNG/PCG/RXS_M_XS_64_64.pm
+lib/RNG/PCG/XSL_RR_128_64_LCG.pm
+lib/RNG/PCG/XSL_RR_128_64_MCG.pm
 lib/RNG/Provider.pm
 lib/RNG/Seed.pm
 lib/RNG/SeedBase.pm
@@ -16,6 +20,7 @@ t/compat.t
 t/drand48.t
 t/hmac_drbg.t
 t/pcg.t
+t/pcg_variants.t
 t/seed.t
 t/wyrand.t
 t/xoshiro.t
