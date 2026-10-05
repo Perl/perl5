@@ -2177,10 +2177,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_IGNORED_LOCALE_CATEGORIES_
     HIGHEST_REGCOMP_DOT_H_SYNC_
     inRANGE_helper_
-    is_MULTI_CHAR_FOLD_utf8_safe_part0_
-    is_MULTI_CHAR_FOLD_utf8_safe_part1_
-    is_MULTI_CHAR_FOLD_utf8_safe_part2_
-    is_MULTI_CHAR_FOLD_utf8_safe_part3_
     LC_ADDRESS_AVAIL_
     LC_COLLATE_AVAIL_
     LC_CTYPE_AVAIL_
@@ -2223,14 +2219,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     utf8_safe_assert_
     UTF_FIRST_CONT_BYTE_110000_
     UTF_START_BYTE_110000_
-    what_MULTI_CHAR_FOLD_utf8_safe_part0_
-    what_MULTI_CHAR_FOLD_utf8_safe_part1_
-    what_MULTI_CHAR_FOLD_utf8_safe_part2_
-    what_MULTI_CHAR_FOLD_utf8_safe_part3_
-    what_MULTI_CHAR_FOLD_utf8_safe_part4_
-    what_MULTI_CHAR_FOLD_utf8_safe_part5_
-    what_MULTI_CHAR_FOLD_utf8_safe_part6_
-    what_MULTI_CHAR_FOLD_utf8_safe_part7_
     withinCOUNT_KNOWN_VALID_
     WRAP_U8_LC_
     XPVCV_COMMON_
@@ -2844,10 +2832,6 @@ my %needed_by_ext_re = map { $_ => 1 } qw(
     first_upper_bit_set_byte_number
     invlist_intersection_complement_2nd_
     invlist_union_complement_2nd_
-    is_MULTI_CHAR_FOLD_utf8_safe_part4_
-    is_MULTI_CHAR_FOLD_utf8_safe_part5_
-    is_MULTI_CHAR_FOLD_utf8_safe_part6_
-    is_MULTI_CHAR_FOLD_utf8_safe_part7_
     PARSE_IDENT_ERROR_POSITION
     PARSE_IDENT_ERROR_TEXT
     RExC_parse_advance
@@ -2855,10 +2839,6 @@ my %needed_by_ext_re = map { $_ => 1 } qw(
     LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8
     SURSOLIDUM
     WARN_HELPER_
-    what_MULTI_CHAR_FOLD_utf8_safe_part8_
-    what_MULTI_CHAR_FOLD_utf8_safe_part9_
-    what_MULTI_CHAR_FOLD_utf8_safe_part10_
-    what_MULTI_CHAR_FOLD_utf8_safe_part11_
 );
 
 # This is a list of symbols that are needed by various ext/ modules, and are

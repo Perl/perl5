@@ -1457,6 +1457,15 @@ sub render {
 
     my $ret = "";
     my $left_indent = "";
+    if ($opts_ref->{flags} =~ /([QeE])/) {
+        $ret .= "\n#if defined(PERL_CORE)";
+        if ($opts_ref->{flags} =~ /([QE])/) {
+            $ret .= " || defined(";
+            $ret .= ($1 eq 'E') ? 'PERL_EXT)' : 'PERL_EXT_RE_BUILD)';
+        }
+        $ret .= "\n";
+        $left_indent = "  ";
+    }
 
     my @submacros;
     my $rendered = $self->_render( $op, $combine, $left_indent, 0, $opts_ref,
@@ -1691,7 +1700,7 @@ sub make_macro {
     my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
     my $api_ret = ($returns_cp) ? 'UV' : 'STRLEN';
-    my $pod = "=for apidoc CT|$api_ret|$macro$doc_arglist\n$doc_text";
+    my $pod = "=for apidoc $opts{flags}T|$api_ret|$macro$doc_arglist\n$doc_text";
 
     return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt ),
            $pod;
@@ -1730,7 +1739,7 @@ EOF
 
         EOT
 
-    my ( $op, $title, @txt, @types, %mods, $overview, $charcount);
+    my ( $op, $flags, $title, @txt, @types, %mods, $overview, $charcount);
     my $doit= sub ($) {
         return unless $op;
 
@@ -1790,6 +1799,7 @@ EOF
                     no_length_checks => $mod eq 'no_length_checks'
                                      && $type !~ /^cp/,
                     backwards => $backwards,
+                    flags => $flags,
                 );
 
                 my $first_line = $api =~ s/\n.*//rs;
@@ -1815,6 +1825,7 @@ EOF
     foreach my $charset (get_supported_code_pages()) {
         my $first_time = 1;
         undef $op;
+        undef $flags;
         undef $title;
         undef @txt;
         undef @types;
@@ -1836,7 +1847,7 @@ EOF
                 $doit->($charset) unless $first_time;
 
                 $first_time = 0;
-                ( $op, my $flags, $title )= split /\s*:\s*/, $line, 3;
+                ( $op, $flags, $title )= split /\s*:\s*/, $line, 3;
                 $charcount = ($flags =~ s/(\d)//)
                              ? $1
                              : 1;
@@ -1901,6 +1912,7 @@ EOF
 }
 
 # The form of the input is a series of definitions to make macros for.
+#
 # The first line of each definition is of the form
 #       BASE : flags : title
 #
@@ -1909,8 +1921,9 @@ EOF
 # value given by 'BASE'.  The rest of the names are described in the pod of
 # this file.
 #
-# Only the numeric values of 'flags' are currently used.
-# These are '1', '2', or '3'.  They give the maximum
+# 'flags' control the visibility of the generated macro and help generated
+# better pod for it.  The visibility ones are the same as listed in embed.fnc.
+# The other possible flags are '1', '2', or '3'.  These give the maximum
 # number of characters the macro can match.  If omitted, '1' is assumed.
 #
 # Finally is 'title' which is output in comments associated with the macro
@@ -2040,7 +2053,7 @@ __DATA__
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
-LNBREAK: C2 : Line Break (\R)
+LNBREAK: Q2 : Line Break (\R)
 A few Unicode characters or character sequences act as line terminators.
 C<\R> in a regular expression pattern matches them.
 => generic UTF8 LATIN1 : safe
@@ -2076,7 +2089,7 @@ $nonchar_overview
 => UTF8 :safe
 \p{_Perl_Nchar}
 
-SHORTER_NON_CHARS: C :  # 3 bytes
+SHORTER_NON_CHARS: e :  # 3 bytes
 $nonchar_overview
 
 $nonchar_length_overview
@@ -2085,7 +2098,7 @@ It handles the shorter ones.
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
 
-LARGER_NON_CHARS: C : # 4 bytes
+LARGER_NON_CHARS: e : # 4 bytes
 $nonchar_overview
 
 $nonchar_length_overview
@@ -2140,70 +2153,70 @@ Unicode code points
 => UTF8 :safe fast
 \p{_Perl_Surrogate}
 
-QUOTEMETA: C : Meta-characters that \Q should quote
+QUOTEMETA: Q : Meta-characters that \Q should quote
 Most characters in a Perl program represent themselves, but there are a few
 "meta-characters" which mean something else unless escaped in some way.
 => high :fast
 \p{_Perl_Quotemeta}
 
-MULTI_CHAR_FOLD: C3 : multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: Q3 : multi-char strings that are folded to by a single character
 $multi_overview
 => UTF8 UTF8-cp :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 
-MULTI_CHAR_FOLD: C3 : multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: Q3 : multi-char strings that are folded to by a single character
 $multi_overview
 => LATIN1 LATIN1-cp : safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 
-THREE_CHAR_FOLD: C3 : A three-character multi-char fold
+THREE_CHAR_FOLD: Q3 : A three-character multi-char fold
 $three_overview
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', '3')
 
-THREE_CHAR_FOLD: C3 : A three-character multi-char fold
+THREE_CHAR_FOLD: Q3 : A three-character multi-char fold
 $three_overview
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', '3')
 
-THREE_CHAR_FOLD_HEAD: C2 : The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: Q2 : The first two of three-character multi-char folds
 $three_overview
 Sometimes we are interested in just the first two of these.
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 
-THREE_CHAR_FOLD_HEAD: C2 : The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: Q2 : The first two of three-character multi-char folds
 $three_overview
 Sometimes we are interested in just the first two of these.
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 #
-#THREE_CHAR_FOLD_NON_FINAL: C : The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: Q : The first or middle character of multi-char folds
 #=> UTF8 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('u', 'fm')
 #
-#THREE_CHAR_FOLD_NON_FINAL: C : The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: Q : The first or middle character of multi-char folds
 #=> LATIN1 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('l', 'fm')
 
-FOLDS_TO_MULTI: C : characters that fold to multi-char strings
+FOLDS_TO_MULTI: Q : characters that fold to multi-char strings
 $multi_overview
 => UTF8 :fast
 \p{_Perl_Folds_To_Multi_Char}
 
-PROBLEMATIC_LOCALE_FOLD : C : characters whose fold is problematic under locale
+PROBLEMATIC_LOCALE_FOLD : Q : characters whose fold is problematic under locale
 $problematic_overview
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Folds}
 
-PROBLEMATIC_LOCALE_FOLDEDS_START : C : The first folded character of folds which are problematic under locale
+PROBLEMATIC_LOCALE_FOLDEDS_START : Q : The first folded character of folds which are problematic under locale
 $problematic_overview
 Some times we are interested in just the first character of those that fold to
 a sequence of more than one.
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
-PATWS: C : pattern white space
+PATWS: Q : pattern white space
 Not all characters that are nominally space characters in Unicode are
 considered as such in regular expression patterns.  Sometimes we need to
 consider just the latter.
@@ -2221,7 +2234,7 @@ HANGUL_ED: C : Hangul syllables whose first UTF-8 byte is \xED
 0x1 - 0x0
 # Always fails on EBCDIC; there are no ED Hanguls there
 
-WORD_BUT_NONCONT: C : Word characters that perhaps surprisingly are forbidden in names
+WORD_BUT_NONCONT: Q : Word characters that perhaps surprisingly are forbidden in names
 Some Unicode characters that match C<\w> can't be used in Perl names (such as
 identifiers and labels).
 => generic : safe
