@@ -21,7 +21,7 @@
 
 #if 'A' == 65 /* ASCII/Latin1 */
 /*
-	LNBREAK: Line Break: \R for ASCII/Latin1
+	LNBREAK: Line Break (\R) for ASCII/Latin1
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -81,7 +81,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H for ASCII/Latin1
+	HORIZWS: Horizontal Whitespace (\h, \H) for ASCII/Latin1
 
 	\p{HorizSpace}
 */
@@ -103,7 +103,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V for ASCII/Latin1
+	VERTWS: Vertical Whitespace (\v, \V) for ASCII/Latin1
 
 	\p{VertSpace}
 */
@@ -1331,7 +1331,7 @@
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 /*
-	LNBREAK: Line Break: \R for EBCDIC 1047
+	LNBREAK: Line Break (\R) for EBCDIC 1047
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -1380,7 +1380,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H for EBCDIC 1047
+	HORIZWS: Horizontal Whitespace (\h, \H) for EBCDIC 1047
 
 	\p{HorizSpace}
 */
@@ -1404,7 +1404,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V for EBCDIC 1047
+	VERTWS: Vertical Whitespace (\v, \V) for EBCDIC 1047
 
 	\p{VertSpace}
 */
@@ -2640,7 +2640,7 @@
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 /*
-	LNBREAK: Line Break: \R for EBCDIC 037
+	LNBREAK: Line Break (\R) for EBCDIC 037
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
@@ -2689,7 +2689,7 @@
 : 0 ) )
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H for EBCDIC 037
+	HORIZWS: Horizontal Whitespace (\h, \H) for EBCDIC 037
 
 	\p{HorizSpace}
 */
@@ -2713,7 +2713,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V for EBCDIC 037
+	VERTWS: Vertical Whitespace (\v, \V) for EBCDIC 037
 
 	\p{VertSpace}
 */
@@ -4004,6 +4004,6 @@
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * a592a1e24b8fa5b9c14c769096374748ee73a37515c8094c55f354941916c21f regen/regcharclass.pl
+ * c631428332d5408c6d6a0bf40ecf45a11a5dda879480203ac477b6ffd34ae0ea regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
