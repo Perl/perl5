@@ -1497,7 +1497,8 @@ sub make_macro {
     $ext .= "_no_length_checks" if $opts{no_length_checks};
     $ext .= "_backwards" if $opts{backwards};
     my $argstr= join ",", @args;
-    my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
+    my $macro = "$pfx$self->{op}$ext";
+    my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
     return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
 }
