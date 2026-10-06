@@ -18,15 +18,15 @@
         Perl_dtrace_probe_call(aTHX_ cv, TRUE);
 
 #  define PERL_DTRACE_PROBE_RETURN(cv)              \
-    if (PERL_SUB_ENTRY_ENABLED())                   \
+    if (PERL_SUB_RETURN_ENABLED())                   \
         Perl_dtrace_probe_call(aTHX_ cv, FALSE);
 
 #  define PERL_DTRACE_PROBE_FILE_LOADING(name)      \
-    if (PERL_SUB_ENTRY_ENABLED())                   \
+    if (PERL_LOADING_FILE_ENABLED())                   \
         Perl_dtrace_probe_load(aTHX_ name, TRUE);
 
 #  define PERL_DTRACE_PROBE_FILE_LOADED(name)       \
-    if (PERL_SUB_ENTRY_ENABLED())                   \
+    if (PERL_LOADED_FILE_ENABLED())                   \
         Perl_dtrace_probe_load(aTHX_ name, FALSE);
 
 #  define PERL_DTRACE_PROBE_OP(op)                  \
@@ -34,7 +34,7 @@
         Perl_dtrace_probe_op(aTHX_ op);
 
 #  define PERL_DTRACE_PROBE_PHASE(phase)            \
-    if (PERL_OP_ENTRY_ENABLED())                    \
+    if (PERL_PHASE_CHANGE_ENABLED())                    \
         Perl_dtrace_probe_phase(aTHX_ phase);
 
 #else
