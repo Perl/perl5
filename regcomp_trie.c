@@ -155,15 +155,15 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
     for( state = trie->startstate ; state < trie->statecount ; state++ ) {
         const U32 base = trie->states[ state ].trans.base;
 
-        re_indentf("#%4" UVXf "|", depth+1, (UV)state);
+        re_indentf("#%4" U32Xf "|", depth+1, state);
 
         if ( trie->states[ state ].wordnum ) {
-            re_printf(" W%4X", trie->states[ state ].wordnum );
+            re_printf(" W%4" U32Xf, trie->states[ state ].wordnum );
         } else {
             re_printf("%6s", "" );
         }
 
-        re_printf(" @%4" UVXf " ", (UV)base );
+        re_printf(" @%4" U32Xf " ", base );
 
         if ( base ) {
             U32 ofs = 0;
@@ -172,7 +172,7 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
                    && trie->trans[base + ofs].check != state)
                     ofs++;
 
-            re_printf("+%2" UVXf "[ ", (UV)ofs);
+            re_printf("+%2" U32Xf "[ ", ofs);
 
             for ( ofs = 0 ; ofs < TRIE_ALPHABET_SIZE ; ofs++ ) {
                 if (!BITMAP_TEST(debug_bitmap, ofs))
@@ -180,8 +180,8 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
                 if (base + ofs < trie->lasttrans
                         && trie->trans[base + ofs].check == state)
                 {
-                   re_printf("%*" UVXf, colwidth,
-                    (UV)trie->trans[base + ofs].next
+                   re_printf("%*" U32Xf, colwidth,
+                    trie->trans[base + ofs].next
                    );
                 } else {
                     re_printf("%*s", colwidth,"   ." );
@@ -196,9 +196,9 @@ S_dump_trie(pTHX_ const struct reg_trie_data_ *trie, U32 depth)
     re_indentf("word_info N:(prev,len)=",
                                 depth);
     for (word = 1; word <= trie->wordcount; word++) {
-        re_printf(" %d:(%d,%d)",
-            (int)word, (int)(trie->wordinfo[word].prev),
-            (int)(trie->wordinfo[word].len));
+        re_printf(" %" U32uf ":(%" U32uf ",%" U32uf ")",
+            word, trie->wordinfo[word].prev,
+            trie->wordinfo[word].len);
     }
     re_printf("\n" );
 }
@@ -228,12 +228,12 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
          * the transitions. */
         U32 transition_index;
 
-        re_indentf(" %4" UVXf " :",
-            depth+1, (UV)state  );
+        re_indentf(" %4" U32Xf " :",
+            depth+1, state  );
         if ( ! trie->states[ state ].wordnum ) {
             re_printf("%5s| ","");
         } else {
-            re_printf("W%4x| ",
+            re_printf("W%4" U32xf "| ",
                 trie->states[ state ].wordnum
             );
         }
@@ -247,8 +247,8 @@ S_dump_trie_interim_list(pTHX_ const struct reg_trie_data_ *trie,
             } else {
                 re_printf("%*.*X", colwidth, 2, (unsigned)octet);
             }
-            re_printf("=%4" UVXf " | ",
-                      (UV)TRIE_LIST_ITEM(state, transition_index).newstate);
+            re_printf("=%4" U32Xf " | ",
+                      TRIE_LIST_ITEM(state, transition_index).newstate);
             if (!(transition_index % 10))
                 re_printf("\n%*s| ",
                     (int)((depth * 2) + 14), "");
@@ -285,24 +285,24 @@ S_dump_trie_physical(pTHX_ const struct reg_trie_data_ *trie,
         {
             const U32 state = trans->check;
             const U32 octet = slot - trie->states[state].trans.base;
-            re_indentf("%8" UVXf "| #%4" UVXf " |",
+            re_indentf("%8" U32Xf "| #%4" U32Xf " |",
                        depth+1,
-                       (UV)slot,
-                       (UV)state);
+                       slot,
+                       state);
             if (trie->states[state].wordnum)
-                re_printf(" W%4" UVuf " |", (UV)trie->states[state].wordnum);
+                re_printf(" W%4" U32uf " |", trie->states[state].wordnum);
             else
                 re_printf("       |");
-            re_printf(" @%4" UVXf " | +%02" UVXf " |",
-                      (UV)trie->states[state].trans.base,
-                      (UV)octet);
+            re_printf(" @%4" U32Xf " | +%02" U32Xf " |",
+                      trie->states[state].trans.base,
+                      octet);
             re_printf(" ");
             S_dump_trie_physical_char(aTHX_ octet);
-            re_printf(" | %4" UVXf, (UV)trans->next);
+            re_printf(" | %4" U32Xf, trans->next);
             if (!trie->states[trans->next].trans.base
                     && trie->states[trans->next].wordnum)
-                re_printf(" (W%" UVuf ")",
-                          (UV)trie->states[trans->next].wordnum);
+                re_printf(" (W%" U32uf ")",
+                          trie->states[trans->next].wordnum);
             re_printf("\n");
         }
     }
@@ -1248,10 +1248,10 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             assert(next_hole <= table_highwater);
             assert(table_highwater <= transition_capacity);
             DEBUG_TRIE_COMPILE_MORE_r(
-                re_indentf("Compressed table: physical=%" UVuf
+                re_indentf("Compressed table: physical=%" U32uf
                            " ideal=%" UVuf " overhead=%" UVuf "\n",
                     depth+1,
-                    (UV)table_highwater,
+                    table_highwater,
                     (UV)ideal_transition_count,
                     (UV)(table_highwater - ideal_transition_count))
             );
@@ -1261,10 +1261,10 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         }
     }
     DEBUG_TRIE_COMPILE_MORE_r(
-            re_indentf("Statecount:%" UVxf " Lasttrans:%" UVxf "\n",
+            re_indentf("Statecount:%" U32xf " Lasttrans:%" U32xf "\n",
                 depth+1,
-                (UV)trie->statecount,
-                (UV)trie->lasttrans)
+                trie->statecount,
+                trie->lasttrans)
     );
     /* resize the trans array to remove unused space */
     trie->trans = (reg_trie_trans *)
@@ -1511,9 +1511,9 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     len = 1;
                     DEBUG_OPTIMISE_r({
                         SV *sv = sv_newmortal();
-                        re_indentf("Prefix State: %" UVuf " Ofs: %" UVuf " Char: '%s'\n",
+                        re_indentf("Prefix State: %" U32uf " Ofs: %" I32df " Char: '%s'\n",
                             depth+1,
-                            (UV)state, (UV)first_ofs,
+                            state, first_ofs,
                             pv_pretty(sv, ch, len, 6,
                                 PL_colors[0], PL_colors[1],
                                 PERL_PV_ESCAPE_FIRSTCHAR
@@ -1628,11 +1628,11 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
             if (!trie_op) {
                 DEBUG_TRIE_COMPILE_r(
-                    re_indentf("No trie node type fits at %d (need next=%" UVuf ", room=%" UVuf ")\n",
+                    re_indentf("No trie node type fits at %d (need next=%" U32uf ", room=%zu)\n",
                         depth+1,
                         REG_NODE_NUM(convert),
-                        (UV)needed_next,
-                        (UV)trie_room)
+                        needed_next,
+                        trie_room)
                 );
                 return 0;
             }
@@ -1849,11 +1849,11 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
      */
     fail[ 0 ] = fail[ 1 ] = 0;
     DEBUG_TRIE_COMPILE_r({
-        re_indentf("Stclass Failtable (%" UVuf " states): 0",
-                      depth, (UV)numstates
+        re_indentf("Stclass Failtable (%" U32uf " states): 0",
+                      depth, numstates
         );
         for( q_read = 1; q_read < numstates; q_read++ ) {
-            re_printf(", %" UVuf, (UV)fail[q_read]);
+            re_printf(", %" U32uf, fail[q_read]);
         }
         re_printf("\n");
     });
