@@ -8520,7 +8520,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #define CUR_EVAL cur_eval->u.eval
 
         {
-            SV *ret;
             REGEXP *re_sv;
             regexp *re;
             regexp_internal *rei;
@@ -8610,6 +8609,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 COP * const ocurcop = PL_curcop;
                 OP *nop;
                 CV *newcv;
+                SV *ret;
                 U32 n = ARG1u(scan);
 
                 if (!reginfo->caller_cv)
@@ -8761,15 +8761,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 PL_op = NULL;
 
-                re_sv = NULL;
                 if (logical == 0) {       /* /(?{ ... })/ and /(*{ ... })/ */
                     SV *replsv = save_scalar(PL_replgv);
                     sv_setsv(replsv, ret); /* $^R */
                     SvSETMAGIC(replsv);
                 }
                 else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
-                    sw = cBOOL(SvTRUE_NN(ret));
-                    logical = 0;
+                    if (!SvTRUE_NN(ret))
+                        ret = NULL;
                 }
                 else {                   /*  /(??{ ... })  */
                     /*  if its overloaded, let the regex compiler handle
@@ -8777,25 +8776,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if (SvGMAGICAL(ret))
                         ret = sv_mortalcopy(ret);
                     if (!SvAMAGIC(ret)) {
+                        MAGIC *mg;
                         SV *sv = ret;
                         if (SvROK(sv))
                             sv = SvRV(sv);
-                        if (SvTYPE(sv) == SVt_REGEXP)
-                            re_sv = (REGEXP*) sv;
-                        else if (SvSMAGICAL(ret)) {
-                            MAGIC *mg = mg_find(ret, PERL_MAGIC_qr);
-                            if (mg)
-                                re_sv = (REGEXP *) mg->mg_obj;
-                        }
 
-                        /* force any undef warnings here */
-                        if (!re_sv && !SvPOK(ret) && !SvNIOK(ret)) {
+                        if (SvTYPE(sv) == SVt_REGEXP)
+                            ret = sv;
+                        else if (   SvSMAGICAL(ret)
+                                 && ((mg = mg_find(ret, PERL_MAGIC_qr))))
+
+                            ret = mg->mg_obj;
+                        else if (!SvPOK(ret) && !SvNIOK(ret)) {
+                            /* force any undef warnings here */
                             ret = sv_mortalcopy(ret);
                             (void) SvPV_force_nolen(ret);
                         }
                     }
-
                 }
+
+                re_sv = (REGEXP*)ret;
 
                 /* *** Note that at this point we don't restore
                  * PL_comppad, (or pop the CxSUB) on the assumption it may
@@ -8809,6 +8809,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 PL_curpm = PL_reg_curpm;
 
                 if (logical != 2) {
+                    if (logical == 1) {
+                        sw = !!re_sv;
+                        logical = 0;
+                    }
                     PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol,
                                     script_run_begin);
                     /* NOTREACHED */
@@ -8821,11 +8825,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     /* extract RE object from returned value; compiling if
                      * necessary */
 
-                    if (re_sv) {
+                    if (SvTYPE(re_sv) == SVt_REGEXP) {
                         re_sv = reg_temp_copy(NULL, re_sv);
                     }
                     else {
                         U32 pm_flags = 0;
+                        SV *ret = (SV*)re_sv;
 
                         if (SvUTF8(ret) && IN_BYTES) {
                             /* In use 'bytes': make a copy of the octet
@@ -8859,6 +8864,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     SAVEFREESV(re_sv);
                     re = ReANY(re_sv);
                 }
+
                 RXp_MATCH_COPIED_off(re);
                 RXp_SUBBEG(re) = RXp_SUBBEG(rex);
                 RXp_SUBLEN(re) = RXp_SUBLEN(rex);
