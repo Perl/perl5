@@ -82,34 +82,47 @@ Windows, read L<perlrun>.
 =head2 Safety net
 
 Perl by default is very forgiving.  In order to make it more robust
-it is recommended to start every program and module with the following
-lines:
+it is recommended to start every program and module with the
+C<L<use VERSION;|perlfunc/use VERSION>> statement.  It requires the
+specified version of Perl or higher, so the version you choose
+depends on the minimum version of Perl you want the code to run on
+and the features you want to use.  C<use v5.36> or higher is
+recommended to automatically enable C<strict> and C<warnings> and
+make other modern features available.
+
+ use v5.36;    # but higher gets you newer stuff
+
+When using a C<VERSION> between C<v5.12> and C<v5.34>, be sure to
+separately include C<use warnings;>.  Lower versions don't enable
+either C<strict> or C<warnings> for you, so the standard boilerplate
+to enable these safety features is:
 
  use strict;
  use warnings;
 
-The two additional lines request from perl to catch various common
+C<strict> and C<warnings> request from perl to catch various common
 problems in your code.  They check different things so you need both.  A
-potential problem caught by C<use strict;> will cause your code to stop
-immediately when it is encountered, while C<use warnings;> will merely
+potential problem caught by C<strict> will cause your code to stop
+immediately when it is encountered, while C<warnings> will merely
 give a warning (like the command-line switch B<-w>) and let your code run.
 To read more about them, check their respective manual pages at L<strict>
 and L<warnings>.
 
-A C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration will
-enable both C<strict> and C<warnings>:
-
-  #!/usr/bin/perl
-  use v5.35;
-
-In addition to enabling the C<strict> and C<warnings> pragmata, this
-declaration will also activate a
+In addition to enabling the C<strict> and C<warnings> pragmata, the
+C<use VERSION;> declaration will also activate a
 L<"feature bundle"|feature/FEATURE BUNDLES>; a collection of named
 features that enable many of the more recent additions and changes to the
 language, as well as occasionally removing older features found to have
-been mistakes in design and discouraged. It will also activate a
-L<"builtin bundle"|builtin/Version Bundles> if a version of C<v5.40> or
-higher is specified, making additional modern builtin functions available.
+been mistakes in design and discouraged. If a version of C<v5.40> or
+higher is specified, it will also make available additional modern builtin
+functions from the version's L<"builtin bundle"|builtin/Version Bundles>.
+
+ # mostly equivalent to "use v5.40;"
+ BEGIN { require v5.40; }
+ use strict;
+ use warnings;
+ use feature ':5.40';
+ use builtin ':5.40';
 
 =head2 Basic syntax overview
 
