@@ -204,6 +204,7 @@ my %timings = (); # testname => [@et] pairs if $show_elapsed_time.
 # Roll your own File::Find!
 our @found;
 sub _find_tests { @found = (); push @XARGV, _find_files('\.t$', $_[0]) }
+sub _just_find_tests { @found = (); _find_files('\.t$', $_[0]) }
 sub _find_files {
     my($patt, @dirs) = @_;
     for my $dir (@dirs) {
@@ -653,6 +654,10 @@ dump_manifested_tests(\@XARGV) if $dump_manifested_tests;
 # This is where we would have to calculate a list of generated tests
 # if we were to support subroutine dump_all_tests() and command-line switch
 # -dump_all_tests.
+
+my @generated_tests = ();
+push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
+push @XARGV, @generated_tests;
 
 filter_taint_tests(\@XARGV);
 
