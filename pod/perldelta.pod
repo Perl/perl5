@@ -432,6 +432,15 @@ accuracy may follow within this development cycle.
 
 =item *
 
+A regular expression performing a greedy match of a UTF8 character may
+have incorrectly failed if the first attempt at a match was unsuccessful.
+Instead of skipping over all consecutive instances of that character,
+all consecutive characters that had the same first I<byte> were skipped.
+
+[GH #24916]
+
+=item *
+
 XXX
 
 =item *
