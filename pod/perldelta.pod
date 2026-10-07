@@ -441,6 +441,15 @@ all consecutive characters that had the same first I<byte> were skipped.
 
 =item *
 
+Regular expression compilation could have mistaken the width of a
+quantified subpattern (e.g. C<b{2}>) when a potentially infinite
+qualifier (e.g. C<+>) occured earlier in the pattern. This could lead to
+viable match candidates at the start of the target string being missed.
+
+[GH #24915]
+
+=item *
+
 In some cases warnings that occurred while using unpack on an invalid
 UTF-8 marked string would result in an invalid free.  [GH #24913]
 
