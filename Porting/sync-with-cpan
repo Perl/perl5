@@ -409,7 +409,7 @@ my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
 
 my $tail_pat = qr/\.(?:tar\.(?:g?z|bz2|Z)|zip|tgz|tbz)/;
-my $version_pat = qr/-v?([0-9._]+(?:-TRIAL[0-9]*)?)$tail_pat\z/;
+my $version_pat = qr/-(v?[0-9._]+(?:-TRIAL[0-9]*)?)$tail_pat\z/;
 
 my ($old_version) = $distribution =~ $version_pat;
 
