@@ -18,6 +18,7 @@ my $string = "";
 
 while (<$regen_fh>) {
     next unless /my \s+ $hash_name \s+ = \s+ /x;
+    <$regen_fh>;    # Don't include the header
 
     while (<$regen_fh>) {
         goto found if / ^ \s* \); /x;
