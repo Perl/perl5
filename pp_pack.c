@@ -323,7 +323,10 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len,
     /* We have enough characters for the buffer. Did we have problems ? */
     if (msgs) {
         while (av_count(msgs) > 0) {
-            HV * msg_hash = (HV *) av_shift(msgs);
+            SV * msg_rv = av_shift(msgs);
+            assert(SvROK(msg_rv));
+            assert(SvTYPE(SvRV(msg_rv)) == SVt_PVHV);
+            HV * msg_hash = (HV *)SvRV(msg_rv);
             SV ** packed_categories_p = hv_fetchs(msg_hash, "warn_categories", 0);
             if (packed_categories_p == NULL) {
                 continue;
