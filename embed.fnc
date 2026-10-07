@@ -4546,6 +4546,9 @@ p	|void	|parser_free_nexttoke_ops				\
 RTi	|bool	|should_warn_nl |NN const char *pv
 Mp	|bool	|sv_has_valuemagic					\
 				|NN const SV *sv
+Adpx	|void	|sv_magicv2_remove_by_shape				\
+				|NN SV *sv				\
+				|enum MagicShape shape
 # if defined(PERL_DEBUG_READONLY_OPS)
 ep	|void	|Slab_to_ro	|NN OPSLAB *slab
 ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
