@@ -1618,8 +1618,8 @@ described in C<L</utf8_to_uv_flags>>.  No array element is generated for
 malformations that are "allowed" by the input flags, in contrast to the
 bitmap returned in a non-NULL C<*errors>.
 
-Each element of the C<msgs> AV array is an anonymous hash with the following
-three key-value pairs:
+Each element of the C<msgs> AV array is a reference to an anonymous hash
+with the following three key-value pairs:
 
 =over 4
 
