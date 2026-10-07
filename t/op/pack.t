@@ -1340,7 +1340,7 @@ is(pack('L<L>', (0x12345678)x2),
 	       # print "# junk='$junk', list=(@list2)\n";
 	       $p = pack "$junk $end", @list2, @end;
 	       my @l = unpack "x[$junk] $end", $p;
-	       is(scalar @l, scalar @end);
+	       is(scalar @l, scalar @end, "unpack 'x[$junk] $end'");
 	       is("@l", "@end", "skipping x[$junk]");
 	     }
            }
