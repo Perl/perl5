@@ -319,6 +319,46 @@ not set.
     } STMT_END
 
 /*
+=for apidoc Am|void|MgAUXSV_set_inc|MAGIC *sv|SV *auxsv
+Sets a new value of the stored auxilliary SV pointer in the Magic v2
+structure, marking that it is not weak (i.e. the L</MgWEAK_AUXSV> flag is
+cleared), and increments the reference count of the stored pointer.
+
+It will decrement the reference count from the old value, if the weak flag
+was previously clear.
+
+=cut
+*/
+
+#define MgAUXSV_set_inc(mg, sv) \
+    STMT_START { \
+        MAGIC *mg_ = (mg); \
+        if(MgAUXSV(mg_) && !MgWEAK_AUXSV(mg_)) SvREFCNT_dec(MgAUXSV(mg_)); \
+        MgWEAK_AUXSV_off(mg_); \
+        (mg_)->mg_obj = SvREFCNT_inc(sv); \
+    } STMT_END
+
+/*
+=for apidoc Am|void|MgAUXSV_set_weak|MAGIC *sv|SV *auxsv
+Sets a new value of the stored auxilliary SV pointer in the Magic v2
+structure, marking that it is weak (i.e. the L</MgWEAK_AUXSV> flag is
+set). It does not increments the reference count of the stored pointer.
+
+It will decrement the reference count from the old value, if the weak flag
+was previously clear.
+
+=cut
+*/
+
+#define MgAUXSV_set_weak(mg, sv) \
+    STMT_START { \
+        MAGIC *mg_ = (mg); \
+        if(MgAUXSV(mg_) && !MgWEAK_AUXSV(mg_)) SvREFCNT_dec(MgAUXSV(mg_)); \
+        MgWEAK_AUXSV_on(mg_); \
+        (mg_)->mg_obj = (sv); \
+    } STMT_END
+
+/*
 =for apidoc      Am|void *|MgPTR|MAGIC *mg
 =for apidoc_item   |STRLEN|MgPTRLEN|MAGIC *mg
 
