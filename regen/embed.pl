@@ -187,10 +187,11 @@ my %per_file_definitions = (
 #    move it to one of:
 #       a) %needed_by_ext_re, if needed only by the 're' module
 #       b) %needed_by_ext, if needed only by any other perl extension
-#       c) @undocumented_always_visible, otherwise
-#
-# 3) If there isn't anyone who has the time currently to document the symbol,
-#    but it should be visible, move it to @pending_documentation_symbols
+#       c) @undocumented_always_visible if you don't think we really need to
+#          document the symbol
+#       d) @pending_documentation_symbols, otherwise.  This includes cases
+#          where you want to put off deciding if it ever ought to be
+#          documented.
 #
 # 4) If we're not confident about the decision, but think there is a good
 #    possibility that it should not be visible, move it to
@@ -3036,8 +3037,10 @@ my %needed_by_ext = map { $_ => 1 } qw(
     OPpSELF_IN_PAD
 );
 
-# XXX This is a list of symbols that need to be always visible and that we
-# intend to document, but don't have the resources to do so immediately.
+# XXX This is a list of symbols that need to be always visible and are
+# candidates to be documented, but we don't have the resources to document
+# them at this time, and want to put off the decision that they need not be
+# documented.
 my @pending_documentation_symbols = qw(
 );
 
@@ -3068,12 +3071,21 @@ my @undocumented_potentially_always_hidden = qw(
 # Effectively these are symbols that would otherwise be in
 # %unresolved_visibility_overrides, but we have resolved them to here.
 #
-# Think twice about adding a symbol to this list.  Would it be better to
-# instead document the symbol?  Or maybe its name could easily be changed to
-# match $names_reserved_for_perl_use_re?
-#
 # Typically these are symbols that are behind-the-scenes helpers whose use is
 # obvious from inspection of the things they help.
+#
+# Think twice about adding a symbol to this list:
+#
+#   Would it be better to instead document the symbol?
+#
+#   Or perhaps it should go into @pending_documentation_symbols -- maybe it
+#   should get documented some day, but it just ain't going to happen now.
+#
+#   Many symbols aren't very likely to conflict with names a module might
+#   choose, but if there is a reasonable chance of a conflict, our symbol name
+#   and all its uses should be changed as soon as practicable.  One
+#   possibility for that is to change the name to match
+#   $names_reserved_for_perl_use_re
 #
 # The list has two parts, separated by a blank line.  The names in the second
 # part have a trailing underscore, indicating the intent for this symbol to
