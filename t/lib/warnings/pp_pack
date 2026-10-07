@@ -73,3 +73,13 @@ Character in 'c' format wrapped in pack at - line 3.
 -128
 127
 -128
+########
+# NAME utf8 decoding warning collection GH24913
+use Encode qw(_utf8_on);
+my $y = "\xC0xxx";
+_utf8_on($y);
+use warnings "utf8";
+my ($z) = unpack("N", $y);
+EXPECT
+Malformed UTF-8 character: \xc0\x78 (unexpected non-continuation byte 0x78, immediately after start byte 0xc0; need 2 bytes, got 1) at - line 5.
+Malformed UTF-8 character: \xc0 (any UTF-8 sequence that starts with "\xc0" is overlong which can and should be represented with a different, shorter sequence) at - line 5.
