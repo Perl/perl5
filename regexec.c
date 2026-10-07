@@ -4096,8 +4096,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     if ((prog->anchored_substr || prog->anchored_utf8) && prog->intflags & PREGf_SKIP) {
         /* we have /x+whatever/ */
-        /* it must be a one character string (XXXX Except is_utf8_pat?) */
-        char ch;
 #ifdef DEBUGGING
         int did_match = 0;
 #endif
@@ -4105,14 +4103,26 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             if (! prog->anchored_utf8) {
                 to_utf8_substr(prog);
             }
-            ch = SvPVX_const(prog->anchored_utf8)[0];
+
+            const char * const ch = SvPVX_const(prog->anchored_utf8);
+            const STRLEN ch_bytes = UTF8SKIP(ch);
+            assert(ch_bytes <= (STRLEN)(strend - s));
+
             REXEC_FBC_UTF8_SCAN(
-                if (*s == ch) {
+                if (ch_bytes <= (STRLEN)(strend - s)
+                    && *s == *ch                     /* Did the first byte match? */
+                    && (ch_bytes == 1                /* and it's not a multi-byte char */
+                        || memEQ(s, ch, ch_bytes)    /* or else the whole char matches */
+                       )
+                ) {
                     DEBUG_EXECUTE_r( did_match = 1 );
                     if (regtry(reginfo, &s)) goto got_it;
-                    s += UTF8_SAFE_SKIP(s, strend);
-                    while (s < strend && *s == ch)
-                        s += UTF8SKIP(s);
+                    /* No match at this x, skip this run of x's */
+                    s += ch_bytes;
+                    while (ch_bytes <= (STRLEN)(strend - s)
+                           && *s == *ch
+                           && memEQ(s + 1, ch + 1, ch_bytes - 1))
+                        s += ch_bytes;
                 }
             );
 
@@ -4123,7 +4133,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                     NON_UTF8_TARGET_BUT_UTF8_REQUIRED(phooey);
                 }
             }
-            ch = SvPVX_const(prog->anchored_substr)[0];
+            const char ch = SvPVX_const(prog->anchored_substr)[0];
             REXEC_FBC_NON_UTF8_SCAN(
                 if (*s == ch) {
                     DEBUG_EXECUTE_r( did_match = 1 );
