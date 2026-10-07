@@ -311,7 +311,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len,
                 Perl_av_create_and_push(aTHX_ &msgs, av_shift(this_msgs));
             }
 
-            Safefree(this_msgs);
+            SvREFCNT_dec(this_msgs);
         }
 
         if (UNLIKELY(needs_swap))
@@ -340,7 +340,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len,
             }
         }
 
-        Safefree(msgs);
+        SvREFCNT_dec(msgs);
     }
 
     if (bad) {
