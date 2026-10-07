@@ -212,7 +212,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ABS_IV_MIN
     ALIGNED_TYPE
     ALLOC_THREAD_KEY
-    AMG_CALLun
     AMGfallNEVER
     AMGfallNO
     AMGfallYES
@@ -248,7 +247,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     AvMAX
     AvREAL
     AvREALISH
-    AvREAL_off
     AvREAL_on
     AvREAL_only
     AvREIFY
@@ -294,12 +292,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CALLREG_NUMBUF_LENGTH
     CALLREG_NUMBUF_STORE
     CALLREG_PACKAGE
-    CALLRUNOPS
     CAN_COW_FLAGS
     CAN_COW_MASK
     CASE_STD_PMMOD_FLAGS_PARSE_SET
-    CATCH_GET
-    CATCH_SET
     C_FAC_POSIX
     CHANGE_MULTICALL_FLAGS
     CHARSET_PAT_MODS
@@ -307,25 +302,16 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CHECK_MALLOC_TOO_LATE_FOR
     child_offset_bits
     ckDEAD
-    CLANG_DIAG_IGNORE
     CLANG_DIAG_IGNORE_DECL
-    CLANG_DIAG_IGNORE_STMT
     CLANG_DIAG_PRAGMA
-    CLANG_DIAG_RESTORE
     CLANG_DIAG_RESTORE_DECL
     CLANG_DIAG_RESTORE_STMT
     CLEAR_ARGARRAY
-    CLONEf_JOIN_IN
     CLUMP_2IV
     CLUMP_2UV
     COMBINING_DOT_ABOVE_UTF8
     COMBINING_GRAVE_ACCENT_UTF8
     COMBINING_GREEK_YPOGEGRAMMENI_UTF8
-    COND_BROADCAST
-    COND_DESTROY
-    COND_INIT
-    COND_SIGNAL
-    COND_WAIT
     CONTINUE_PAT_MOD
     CopFEATURES_setfrom
     CopFILEAVx
@@ -356,7 +342,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvANONCONST
     CvANONCONST_off
     CvANONCONST_on
-    CvANON_off
     CvANON_on
     CvAUTOLOAD
     CvAUTOLOAD_off
@@ -369,7 +354,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvCLONE_on
     CvCONST
     CvCONST_off
-    CvCONST_on
     CvCVGV_RC
     CvCVGV_RC_off
     CvCVGV_RC_on
@@ -410,7 +394,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CVf_UNIQUE
     CVf_WEAKOUTSIDE
     CVf_XS_RCSTACK
-    CvGV_set
     CvHASEVAL
     CvHASEVAL_off
     CvHASEVAL_on
@@ -418,7 +401,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvIsMETHOD
     CvIsMETHOD_off
     CvIsMETHOD_on
-    CvISXSUB
     CvISXSUB_off
     CvISXSUB_on
     CvLEXICAL
@@ -462,8 +444,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CvXS_RCSTACK
     CvXS_RCSTACK_off
     CvXS_RCSTACK_on
-    CvXSUB
-    CvXSUBANY
     CX_CURPAD_SAVE
     CX_CURPAD_SV
     CX_DEBUG
@@ -498,7 +478,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     CXp_TRYBLOCK
     CX_PUSHSUB_GET_LVALUE_MASK
     CxREALEVAL
-    cxstack_max
     CXt_DEFER
     CxTRY
     CxTRYBLOCK
@@ -526,7 +505,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     DETACH
     DIE
     DISABLE_LC_NUMERIC_CHANGES
-    dJMPENV
     djSP
     DM_ARRAY_ISA
     DM_DELAY
@@ -536,7 +514,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     DM_RGID
     DM_RUID
     DM_UID
-    dMY_CXT_INTERP
     do_exec
     DOSISH
     DOUBLE_BIG_ENDIAN
@@ -587,7 +564,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ENVr_LOCALEr_UNLOCK
     ENV_TERM
     ENV_UNLOCK
-    ESC_NATIVE
     EVAL_INEVAL
     EVAL_INREQUIRE
     EVAL_KEEPERR
@@ -626,14 +602,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FF_LINEMARK
     FF_LINESNGL
     FF_LITERAL
-    Fflush
     FF_MORE
     FF_NEWLINE
     FF_SKIP
     FF_SPACE
-    FILTER_DATA
     FILTER_ISREADER
-    FILTER_READ
     FIT_ARENA
     FIT_ARENA0
     FIT_ARENAn
@@ -652,13 +625,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     FSEEKSIZE
     Fstat
     fwrite1
-    GCC_DIAG_IGNORE
     GCC_DIAG_IGNORE_DECL
-    GCC_DIAG_IGNORE_STMT
     GCC_DIAG_PRAGMA
     GCC_DIAG_RESTORE
     GCC_DIAG_RESTORE_DECL
-    GCC_DIAG_RESTORE_STMT
     GETATARGET
     get_extended_os_errno
     GETTARGET
@@ -670,16 +640,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GREEK_SMALL_LETTER_MU
     G_RE_REPARSING
     G_UNDEF_FILL
-    Gv_AMG
     GvASSUMECV
     GvASSUMECV_off
     GvASSUMECV_on
     GV_AUTOLOAD
-    GvAVn
     GV_CROAK
     GvCVGEN
     GvCV_set
-    GvCVu
     GvEGV
     GvEGVx
     GvENAME
@@ -700,7 +667,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GVf_IMPORTED_SV
     GVf_INTRO
     GvFLAGS
-    GVf_MULTI
     GVF_NOADD
     GVf_ONCE_FATAL
     GvFORM
@@ -708,7 +674,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GvGP
     GvGPFLAGS
     GvGP_set
-    GvHVn
     GvIMPORTED
     GvIMPORTED_AV
     GvIMPORTED_AV_off
@@ -727,7 +692,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GvINTRO
     GvINTRO_off
     GvINTRO_on
-    GvIO
     GvIOn
     GvIOp
     GvLINE
@@ -735,24 +699,18 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     GvMULTI
     GvMULTI_off
     GvMULTI_on
-    GvNAME
     GvNAME_get
-    GvNAMELEN
     GvNAMELEN_get
-    GvNAMEUTF8
     GV_NOADD_MASK
     GvONCE_FATAL
     GvONCE_FATAL_off
     GvONCE_FATAL_on
     GvREFCNT
-    GvSTASH
     GvXPVGV
-    G_WANT
     G_WARN_ALL_MASK
     G_WARN_ALL_OFF
     G_WARN_ALL_ON
     G_WARN_OFF
-    G_WARN_ON
     G_WARN_ONCE
     gwENVr_LOCALEr_LOCK
     gwENVr_LOCALEr_UNLOCK
@@ -784,16 +742,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HEKf256_QUOTEDPREFIX
     HEKfARG
     HeKFLAGS
-    HEK_FLAGS
     HEKf_QUOTEDPREFIX
     HeKLEN_UTF8
-    HeKUTF8
     HEK_UTF8_off
     HEK_UTF8_on
     HeKWASUTF8
     HEK_WASUTF8_off
     HEK_WASUTF8_on
-    HeNEXT
     HINT_ALL_STRICT
     HINT_ASCII_ENCODING
     HINT_BLOCK_SCOPE
@@ -820,7 +775,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HINTS_DEFAULT
     HINTS_REFCNT_INIT
     HINTS_REFCNT_TERM
-    HINT_STRICT_REFS
     HINT_STRICT_SUBS
     HINT_STRICT_VARS
     HINT_UNI_8_BIT
@@ -844,7 +798,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     htoni
     htovl
     htovs
-    HvARRAY
     HvAUX
     HvAUXf_IS_CLASS
     HvAUXf_NO_DEREF
@@ -854,20 +807,14 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HV_DELETE
     HV_DISABLE_UVAR_XKEY
     HvEITER
-    HvEITER_get
-    HvEITER_set
     HvENAME_get
     HvENAME_HEK
     HvENAME_HEK_NN
     HvENAMELEN_get
-    HV_FETCH_EMPTY_HE
     HV_FETCH_ISEXISTS
-    HV_FETCH_ISSTORE
     HV_FETCH_JUST_SV
-    HV_FETCH_LVALUE
     HvHasENAME
     HvHasENAME_HEK
-    HvHASKFLAGS
     HvHASKFLAGS_off
     HvHASKFLAGS_on
     HvHasNAME
@@ -875,33 +822,20 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HVhek_FREEKEY
     HVhek_KEYCANONICAL
     HVhek_NOTSHARED
-    HVhek_PLACEHOLD
-    HVhek_UTF8
-    HVhek_WASUTF8
-    HvKEYS
     HvLASTRAND_get
     HvLAZYDEL
     HvLAZYDEL_off
     HvLAZYDEL_on
-    HvMAX
     HvNAME_HEK_NN
-    HvPLACEHOLDERS
-    HvPLACEHOLDERS_get
     HvPLACEHOLDERS_set
     HvRAND_get
     HvRITER
-    HvRITER_get
-    HvRITER_set
     HvSHAREKEYS
-    HvSHAREKEYS_off
     HvSHAREKEYS_on
     HvSTASH_IS_CLASS
-    HvTOTALKEYS
-    HvUSEDKEYS
     HYPHEN_UTF8
     I16_MAX
     I16_MIN
-    I32_MAX
     I32_MAX_P1
     I32_MIN
     I8_TO_NATIVE
@@ -916,7 +850,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     init_os_extras
     INIT_THREADS
     INIT_TRACK_MEMPOOL
-    IN_LC
     IN_LC_ALL_COMPILETIME
     IN_LC_ALL_RUNTIME
     IN_LC_COMPILETIME
@@ -981,7 +914,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_FOLDS_TO_MULTI_utf8
     isGRAPH_LC_utf8
     isGRAPH_uni
-    isGV
     isGV_with_GP_off
     isGV_with_GP_on
     is_HANGUL_ED_utf8_safe
@@ -1034,7 +966,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isPUNCT_uni
     is_QUOTEMETA_high
     isREGEXP
-    IS_SAFE_PATHNAME
     is_SHORTER_NON_CHARS_utf8
     isSPACE_LC_utf8
     isSPACE_uni
@@ -1089,7 +1020,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     JE_OLD_STACK_HWM_save
     JE_OLD_STACK_HWM_zero
     JMPENV_BOOTSTRAP
-    JMPENV_POP
     JOIN
     kBINOP
     kCOP
@@ -1145,7 +1075,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     LEAVE_SCOPE
     LEX_NOTPARSING
     LF_NATIVE
-    LIB_INVARG
     LINE_Tf
     LOCALE_INIT
     LOCALE_LOCK
@@ -1185,13 +1114,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MALLOC_OVERHEAD
     MALLOC_TERM
     MALLOC_TOO_LATE_FOR
-    MAXARG
     MAXARG3
     MAX_FOLD_FROMS
     MAX_LEGAL_CP
     MAX_MATCHES
     MAXO
-    MAXPATHLEN
     MAX_PORTABLE_UTF8_TWO_BYTE
     MAX_RECURSE_EVAL_NOCHANGE_DEPTH
     MAX_SAVEt
@@ -1233,7 +1160,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MGf_BYTES
     MGf_GSKIP
     MGf_MINMATCH
-    MGf_REFCOUNTED
     MGf_REQUIRE_GV
     MGf_TAINTEDDIR
     MgPV
@@ -1261,11 +1187,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     MSVC_DIAG_RESTORE_DECL
     MSVC_DIAG_RESTORE_STMT
     MULTILINE_PAT_MOD
-    MUTEX_DESTROY
-    MUTEX_INIT
     MUTEX_INIT_NEEDS_MUTEX_ZEROED
-    MUTEX_LOCK
-    MUTEX_UNLOCK
     my_binmode
     MY_CXT_INDEX
     MY_CXT_INIT_ARG
@@ -1275,7 +1197,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NATIVE8_TO_UNI
     NATIVE_BYTE_IS_INVARIANT
     NATIVE_SKIP
-    NATIVE_TO_ASCII
     NATIVE_TO_I8
     NATIVE_TO_UTF
     NATIVE_UTF8_TO_I8
@@ -1309,9 +1230,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     NONDESTRUCT_PAT_MOD
     NONDESTRUCT_PAT_MODS
     NONV
-    NORETURN_FUNCTION_END
-    NORMAL
-    NO_TAINT_SUPPORT
     NOTE3
     NOT_REACHED
     NSIG
@@ -1319,7 +1237,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     Nullfp
     NUM_ANYOF_CODE_POINTS
     NV_BIG_ENDIAN
-    NV_DIG
     NV_EPSILON
     NV_IMPLICIT_BIT
     NV_INF
@@ -1398,9 +1315,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     ONE_IF_EBCDIC_ZERO_IF_NOT
     opASSIGN
     OP_CHECK_MUTEX_INIT
-    OP_CHECK_MUTEX_LOCK
     OP_CHECK_MUTEX_TERM
-    OP_CHECK_MUTEX_UNLOCK
     OPCODE
     OPf_FOLDED
     OPf_KNOW
@@ -1410,11 +1325,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OP_FREED
     OPf_REF
     OPf_SPECIAL
-    OPf_STACKED
     OPf_WANT
-    OPf_WANT_LIST
-    OPf_WANT_SCALAR
-    OPf_WANT_VOID
     OP_GIMME
     OP_GIMME_REVERSE
     OP_IS_DIRHOP
@@ -1467,8 +1378,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpDONT_INIT_GV
     OPpEMPTYAVHV_IS_HV
     OPpENTERSUB_DB
-    OPpENTERSUB_HASTARG
-    OPpENTERSUB_INARGS
     OPpENTERSUB_LVAL_MASK
     OPpENTERSUB_NOPAREN
     OPpEVAL_BYTES
@@ -1497,7 +1406,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     OPpKVSLICE
     OPpLIST_GUESSED
     OPpLVAL_DEFER
-    OPpLVAL_INTRO
     OPpLVALUE
     OPpLVREF_AV
     OPpLVREF_CV
@@ -1633,13 +1541,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PAD_SET_CUR
     PAD_SET_CUR_NOSAVE
     PAD_SETSV
-    PAD_SV
     PAD_SVl
     panic_write2
     PARENT_FAKELEX_FLAGS
     PARENT_PAD_INDEX
-    PATCHLEVEL
-    Pause
     PerlEnv_putenv
     PIPE_OPEN_MODE
     PIPESOCK_MODE
@@ -1686,9 +1591,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PNfARG
     PoisonPADLIST
     POISON_SV_HEAD
-    POPMARK
     POPpconstx
-    POPSTACK
     POPSTACK_TO
     POSIX_CC_COUNT
     POSIX_SETLOCALE_LOCK
@@ -1696,17 +1599,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     PRESCAN_VERSION
     PRIVSHIFT
     PTHREAD_ATFORK
-    PTHREAD_ATTR_SETDETACHSTATE
     PTHREAD_CREATE
-    PTHREAD_CREATE_JOINABLE
     PTHREAD_GETSPECIFIC
     PTHREAD_GETSPECIFIC_INT
     PTHREAD_INIT_SELF
     PUSH_MULTICALL_FLAGS
     PUSHSTACK
-    PUSHSTACKi
     PUSHSTACK_INIT_HWM
-    PUSHTARG
     PVf_QUOTEDPREFIX
     pWARN_ALL
     pWARN_NONE
@@ -1804,7 +1703,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RETSETTARG
     RETSETUNDEF
     RETSETYES
-    RETURN
     RETURNOP
     RETURNX
     REXEC_CHECKED
@@ -1816,7 +1714,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RMS_FAC
     RMS_FEX
     RMS_FNF
-    RMS_IFI
     RMS_ISI
     RMS_PRV
     ROTL32
@@ -1941,11 +1838,9 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     RX_WRAPPED
     RX_WRAPPED_const
     RX_ZERO_LEN
-    safefree
     SAVEADELETE
     SAVECLEARSV
     SAVECOMPILEWARNINGS
-    SAVECOMPPAD
     SAVECOPFILE
     SAVECOPFILE_FREE
     SAVECOPFILE_FREE_x
@@ -1960,7 +1855,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SAVEHDELETE
     SAVEHINTS
     SAVE_MASK
-    SAVEOP
     SAVEPADSVANDMORTALIZE
     SAVEPARSER
     SAVESETSVFLAGS
@@ -2027,7 +1921,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SAVEt_SVREF
     SAVEt_TMPSFLOOR
     SAVEt_VPTR
-    SAVEVPTR
     SAWAMPERSAND_LEFT
     SAWAMPERSAND_MIDDLE
     SAWAMPERSAND_RIGHT
@@ -2050,7 +1943,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SCOPE_SAVES_SIGNAL_MASK
     Semctl
     semun
-    SETERRNO
     SETi
     SET_MARK_OFFSET
     SETn
@@ -2070,8 +1962,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SINGLE_PAT_MOD
     SIPHASH_SEED_STATE
     SIPROUND
-    S_IWOTH
-    S_IXOTH
     Size_t_MAX
     SLOPPYDIVIDE
     SOCKET_OPEN_MODE
@@ -2092,10 +1982,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SS_DEVOFFLINE
     SSGROW
     SS_IVCHAN
-    SSize_t_MAX
     SS_MAXPUSH
     SS_NOPRIV
-    SS_NORMAL
     SSPOPBOOL
     SSPOPDPTR
     SSPOPDXPTR
@@ -2115,10 +2003,8 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     Stack_off_t_MAX
     StashHANDLER
     Stat
-    Stat_t
     STATUS_ALL_FAILURE
     STATUS_ALL_SUCCESS
-    STATUS_CURRENT
     STATUS_EXIT
     STATUS_EXIT_SET
     STATUS_NATIVE
@@ -2129,14 +2015,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     STD_PAT_MODS
     STD_PMMOD_FLAGS_CLEAR
     STORE_LC_NUMERIC_SET_STANDARD
-    Strerror
-    STRUCT_OFFSET
     STRUCT_SV
     SUBVERSION
     sv_2bool_nomg
     sv_2nv
     sv_2pv_nomg
-    SvANY
     SvARENA_CHAIN
     SvARENA_CHAIN_SET
     SvCANCOW
@@ -2158,22 +2041,11 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvFAKE_off
     SvFAKE_on
     SVf_BREAK
-    SVf_FAKE
-    SVf_IOK
-    SVf_IsCOW
-    SVf_IVisUV
-    SvFLAGS
-    SVf_NOK
-    SVf_OK
     SVf_OOK
-    SVf_POK
     SVf_PROTECT
-    SVf_READONLY
-    SVf_ROK
     SVf_THINKFIRST
     SvGMAGICAL_off
     SvGMAGICAL_on
-    Sv_Grow
     SvGROW_mutable
     SvIMMORTAL
     SvIMMORTAL_INTERP
@@ -2185,15 +2057,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvIsCOW_on
     SvIsCOW_static
     SvIS_FREED
-    SvIsUV
     SvIsUV_off
-    SvIsUV_on
-    SvIV_please
     SvIV_please_nomg
     SvIVXx
     SvLENx
-    SvMAGIC
-    SvMAGICAL_off
     SvMAGICAL_on
     SV_MUTABLE_RETURN
     SvNIOK_nog
@@ -2202,9 +2069,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvNOK_nogthink
     SvNOKp_on
     SvNVXx
-    SvOBJECT
-    SvOBJECT_off
-    SvOBJECT_on
     SvOK_off
     SvOK_off_exc_UV
     SvOKp
@@ -2215,9 +2079,7 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SvPADSTALE_on
     SvPADTMP
     SvPADTMP_off
-    SvPADTMP_on
     SVpav_REAL
-    SVpav_REIFY
     SvPCS_IMPORTED
     SvPCS_IMPORTED_off
     SvPCS_IMPORTED_on
@@ -2229,60 +2091,44 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     SVphv_LAZYDEL
     SVphv_OVERLOAD
     SVphv_SHAREKEYS
-    SVp_IOK
-    SVp_NOK
     SvPOK_byte_nog
     SvPOK_byte_nogthink
     SvPOK_byte_pure_nogthink
     SvPOK_nog
     SvPOK_nogthink
     SvPOK_or_cached_IV
-    SvPOKp_on
     SvPOK_pure_nogthink
     SvPOK_utf8_nog
     SvPOK_utf8_nogthink
     SvPOK_utf8_pure_nogthink
     SV_POSBYTES
-    SVp_POK
     SVppv_STATIC
     SVprv_PCS_IMPORTED
     SVprv_WEAKREF
     SVp_SCREAM
     SvPV_flags_const_nolen
     sv_pvn_force_nomg
-    SvREFCNT_IMMORTAL
     SvRMAGICAL_off
-    SvRMAGICAL_on
     SvRV_const
     SvSCREAM
     SvSCREAM_off
     SvSCREAM_on
     SvSetSV_and
     SvSetSV_nosteal_and
-    SVs_GMG
     SvSHARED_HEK_FROM_PV
     SvSMAGICAL_off
     SvSMAGICAL_on
-    SVs_OBJECT
-    SVs_RMG
-    SVs_SMG
     SvTAIL
     SvTEMP
-    SvTEMP_off
     SvTEMP_on
     SvTHINKFIRST
-    SvTIED_mg
     SVt_MASK
-    SVt_PVBM
     SvTRUEx_nomg
-    SVt_RV
     SVTYPEMASK
     SV_UNDEF_RETURNS_NULL
     SvUOK_nog
     SvUOK_nogthink
     SvVALID
-    SvWEAKREF
-    SvWEAKREF_off
     SvWEAKREF_on
     SWITCHSTACK
     SYSTEM_GMTIME_MAX
@@ -2293,8 +2139,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     TARGn
     TARGu
     THR
-    THREAD_CREATE_NEEDS_STACK
-    THREAD_RET_TYPE
     toFOLD_LC
     toFOLD_uni
     toLOWER_uni
@@ -2382,7 +2226,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     USE_LEFT
     USE_LOCALE
     USE_LOCALE_ADDRESS
-    USE_LOCALE_COLLATE
     USE_LOCALE_CTYPE
     USE_LOCALE_IDENTIFICATION
     USE_LOCALE_MEASUREMENT
@@ -2511,7 +2354,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     XTENDED_PAT_MOD
     xuv_uv
     xV_FROM_REF
-    YIELD
     YYEMPTY
     YYSTYPE_IS_DECLARED
     YYSTYPE_IS_TRIVIAL
@@ -3042,6 +2884,164 @@ my %needed_by_ext = map { $_ => 1 } qw(
 # them at this time, and want to put off the decision that they need not be
 # documented.
 my @pending_documentation_symbols = qw(
+    AMG_CALLun
+    AvREAL_off
+    CALLRUNOPS
+    CATCH_GET
+    CATCH_SET
+    CLANG_DIAG_IGNORE
+    CLANG_DIAG_IGNORE_STMT
+    CLANG_DIAG_RESTORE
+    CLONEf_JOIN_IN
+    COND_BROADCAST
+    COND_DESTROY
+    COND_INIT
+    COND_SIGNAL
+    COND_WAIT
+    CvANON_off
+    CvCONST_on
+    CvGV_set
+    CvISXSUB
+    CvXSUB
+    CvXSUBANY
+    cxstack_max
+    dJMPENV
+    dMY_CXT_INTERP
+    ESC_NATIVE
+    Fflush
+    FILTER_DATA
+    FILTER_READ
+    GCC_DIAG_IGNORE
+    GCC_DIAG_IGNORE_STMT
+    GCC_DIAG_RESTORE_STMT
+    Gv_AMG
+    GvAVn
+    GvCVu
+    GVf_MULTI
+    GvHVn
+    GvIO
+    GvNAME
+    GvNAMELEN
+    GvNAMEUTF8
+    GvSTASH
+    G_WANT
+    G_WARN_ON
+    HEK_FLAGS
+    HeKUTF8
+    HeNEXT
+    HINT_STRICT_REFS
+    HvARRAY
+    HvEITER_get
+    HvEITER_set
+    HV_FETCH_EMPTY_HE
+    HV_FETCH_ISSTORE
+    HV_FETCH_LVALUE
+    HvHASKFLAGS
+    HVhek_PLACEHOLD
+    HVhek_UTF8
+    HVhek_WASUTF8
+    HvKEYS
+    HvMAX
+    HvPLACEHOLDERS
+    HvPLACEHOLDERS_get
+    HvRITER_get
+    HvRITER_set
+    HvSHAREKEYS_off
+    HvTOTALKEYS
+    HvUSEDKEYS
+    I32_MAX
+    IN_LC
+    isGV
+    IS_SAFE_PATHNAME
+    JMPENV_POP
+    LIB_INVARG
+    MAXARG
+    MAXPATHLEN
+    MGf_REFCOUNTED
+    MUTEX_DESTROY
+    MUTEX_INIT
+    MUTEX_LOCK
+    MUTEX_UNLOCK
+    NATIVE_TO_ASCII
+    NORETURN_FUNCTION_END
+    NORMAL
+    NO_TAINT_SUPPORT
+    NV_DIG
+    OP_CHECK_MUTEX_LOCK
+    OP_CHECK_MUTEX_UNLOCK
+    OPf_STACKED
+    OPf_WANT_LIST
+    OPf_WANT_SCALAR
+    OPf_WANT_VOID
+    OPpENTERSUB_HASTARG
+    OPpENTERSUB_INARGS
+    OPpLVAL_INTRO
+    PAD_SV
+    PATCHLEVEL
+    Pause
+    POPMARK
+    POPSTACK
+    PTHREAD_ATTR_SETDETACHSTATE
+    PTHREAD_CREATE_JOINABLE
+    PUSHSTACKi
+    PUSHTARG
+    RETURN
+    RMS_IFI
+    safefree
+    SAVECOMPPAD
+    SAVEOP
+    SAVEVPTR
+    SETERRNO
+    S_IWOTH
+    S_IXOTH
+    SSize_t_MAX
+    SS_NORMAL
+    Stat_t
+    STATUS_CURRENT
+    Strerror
+    STRUCT_OFFSET
+    SvANY
+    SVf_FAKE
+    SVf_IOK
+    SVf_IsCOW
+    SVf_IVisUV
+    SvFLAGS
+    SVf_NOK
+    SVf_OK
+    SVf_POK
+    SVf_READONLY
+    SVf_ROK
+    Sv_Grow
+    SvIsUV
+    SvIsUV_on
+    SvIV_please
+    SvMAGIC
+    SvMAGICAL_off
+    SvOBJECT
+    SvOBJECT_off
+    SvOBJECT_on
+    SvPADTMP_on
+    SVpav_REIFY
+    SVp_IOK
+    SVp_NOK
+    SvPOKp_on
+    SVp_POK
+    SvREFCNT_IMMORTAL
+    SvRMAGICAL_on
+    SVs_GMG
+    SVs_OBJECT
+    SVs_RMG
+    SVs_SMG
+    SvTEMP_off
+    SvTIED_mg
+    SVt_PVBM
+    SVt_RV
+    SvWEAKREF
+    SvWEAKREF_off
+    THREAD_CREATE_NEEDS_STACK
+    THREAD_RET_TYPE
+    USE_LOCALE_COLLATE
+    YIELD
 );
 
 # This is a list of symbols that we have decided can be hidden from code
@@ -3349,7 +3349,8 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     UTF8_WARN_NONCHAR_BIT_POS_
     UTF8_WARN_SUPER_BIT_POS_
     UTF8_WARN_SURROGATE_BIT_POS_
-);
+   ),
+   @pending_documentation_symbols;  # These are in the same classification
 
 # The keys are files that have documentation outside the normal apidoc lines,
 # and all the definitions are assumed to exist.
@@ -5483,9 +5484,8 @@ sub find_undefs {
 
         # Here #ifdef's in the code severely restrict the visibility of
         # $name, regardless of any flags.
-        warn "'$name' is needlessly in "
-           . ' %unnresolved_visibility_overrides or'
-           . ' %unresolved_visibility_but_only_if_header_explicitly_included'
+        warn "'$name' is needlessly in one of the "
+           . ' %unnresolved_visibility_overrides hashes'
                                    if $unresolved_visibility_overrides{$name};
         delete $always_undefs{$name};   # No need to #undef it
 
