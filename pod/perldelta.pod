@@ -441,7 +441,8 @@ all consecutive characters that had the same first I<byte> were skipped.
 
 =item *
 
-XXX
+In some cases warnings that occurred while using unpack on an invalid
+UTF-8 marked string would result in an invalid free.  [GH #24913]
 
 =item *
 
