@@ -2275,6 +2275,9 @@ z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	extra sibling before 
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	abc	y	$&	abc	-	lookahead continuation in first trie word
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	ade	y	$&	ade	-	lookahead continuation in second trie word
 
+# GH #24915
+x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
+
 # GH24916
 \x{e0}+j	\x{e0}\x{e9}\x{e0}j	y	$&	\x{e0}j
 \x{e0}+j	\x{e0}\x{e9}\x{e0}\x{e0}j	y	$&	\x{e0}\x{e0}j

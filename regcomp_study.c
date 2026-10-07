@@ -2620,7 +2620,9 @@ Perl_study_chunk(pTHX_
                 is_inf_internal |= deltanext == OPTIMIZE_INFTY
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
                 is_inf |= is_inf_internal;
-                if (is_inf) {
+
+                /* GH#24915: "is this chunk infinite?" (not: "Is the pattern infinite?") */
+                if (is_inf_internal) {
                     delta = OPTIMIZE_INFTY;
                 } else {
                     delta += (minnext + deltanext) * maxcount
