@@ -96,6 +96,9 @@
 
 # define AvFILL_(a)                             Perl_AvFILL_(aTHX_ a)
 # define Gv_AMupdate(a,b)                       Perl_Gv_AMupdate(aTHX_ a,b)
+# define MgAUXSV_set(a,b)                       Perl_MgAUXSV_set(aTHX_ a,b)
+# define MgAUXSV_set_inc(a,b)                   Perl_MgAUXSV_set_inc(aTHX_ a,b)
+# define MgAUXSV_set_weak(a,b)                  Perl_MgAUXSV_set_weak(aTHX_ a,b)
 # define SvAMAGIC_off                           Perl_SvAMAGIC_off
 # define SvAMAGIC_on                            Perl_SvAMAGIC_on
 # define SvGETMAGIC(a)                          Perl_SvGETMAGIC(aTHX_ a)

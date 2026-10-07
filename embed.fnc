@@ -2290,6 +2290,14 @@ Adfpt	|SV *	|mess		|NN const char *pat			\
 Adp	|SV *	|mess_sv	|NN SV *basemsg 			\
 				|bool consume
 CTdop	|Free_t |mfree		|Malloc_t where
+
+Adipx	|void	|MgAUXSV_set	|NN MAGIC *mg				\
+				|NULLOK SV *sv
+Adipx	|void	|MgAUXSV_set_inc|NN MAGIC *mg				\
+				|NULLOK SV *sv
+Adipx	|void	|MgAUXSV_set_weak					\
+				|NN MAGIC *mg				\
+				|NULLOK SV *sv
 Adp	|int	|mg_clear	|NN SV *sv
 Adp	|int	|mg_copy	|NN SV *sv				\
 				|NN SV *nsv				\

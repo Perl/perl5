@@ -17554,6 +17554,33 @@ Perl_CvGV(pTHX_ CV *sv)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                       \
     } STMT_END
 
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set(pTHX_ MAGIC *mg, SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_MGAUXSV_SET           \
+    STMT_START { Perl_assert_aTHX; assert(mg);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set_inc(pTHX_ MAGIC *mg, SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_MGAUXSV_SET_INC       \
+    STMT_START { Perl_assert_aTHX; assert(mg);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set_weak(pTHX_ MAGIC *mg, SV *sv)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_MGAUXSV_SET_WEAK      \
+    STMT_START { Perl_assert_aTHX; assert(mg);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 PERL_STATIC_INLINE Stack_off_t
 Perl_POPMARK(pTHX)
         Perl_attribute_nonnull_aTHX;
