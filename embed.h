@@ -974,6 +974,7 @@
 #   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
 # endif
 # if defined(PERL_CORE)
+#   define sv_magicv2_remove_by_shape(a,b)      Perl_sv_magicv2_remove_by_shape(aTHX_ a,b)
 #   define PerlLIO_dup2_cloexec(a,b)            Perl_PerlLIO_dup2_cloexec(aTHX_ a,b)
 #   define PerlLIO_dup_cloexec(a)               Perl_PerlLIO_dup_cloexec(aTHX_ a)
 #   define PerlLIO_open3_cloexec(a,b,c)         Perl_PerlLIO_open3_cloexec(aTHX_ a,b,c)

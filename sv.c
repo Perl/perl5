@@ -7043,6 +7043,27 @@ Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs
     S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs);
 }
 
+static bool
+S_filter_mgv2_by_shape(pTHX_ MAGIC *mg, const void *key) { return MgFUNCS(mg)->shape == PTR2IV(key); }
+
+/*
+=for apidoc sv_magicv2_remove_by_shape
+
+Removes every magic attachment on the SV whose functions structure has the
+given shape. This is equivalent to calling C<sv_magicv2_remove> on each of
+them in turn, invoking any C<free> trigger functions and decrementing any
+associated SV refcounts.
+
+=cut
+*/
+
+void
+Perl_sv_magicv2_remove_by_shape(pTHX_ SV *sv, enum MagicShape shape)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_SHAPE;
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_shape, INT2PTR(void *,shape));
+}
+
 #if defined(PERL_USE_VALUEMAGIC)
 
 static bool
