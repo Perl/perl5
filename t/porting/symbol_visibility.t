@@ -10,27 +10,36 @@ require './test.pl';
 plan(1);
 
 my $regen = '../regen/embed.pl';
-my $hash_name = '%unresolved_visibility_overrides';
+
+# Make sure the sum of the lengths of the contents of the lists hasn't
+# changed.
+my %list_names = (
+ '%unresolved_visibility_overrides' => 1,
+ '@unresolved_visibility_overrides_but_extensions_definitely_need_these' => 1,
+);
+my $list_re = join '|', keys %list_names;
 
 open my $regen_fh, '<', $regen or die "Can't open $regen: $!";
 
 my $string = "";
 
-while (<$regen_fh>) {
-    next unless /my \s+ $hash_name \s+ = \s+ /x;
-    <$regen_fh>;    # Don't include the header
+LIST:
+while (keys %list_names) {
+    while (defined (my $line = <$regen_fh>)) {
+        next unless $line =~ /my \s+ ($list_re) \s+ = \s+ /x;
+        delete $list_names{$1};
 
-    while (<$regen_fh>) {
-        goto found if / ^ \s* \); /x;
-        $string .= $_;
+        <$regen_fh>;    # Don't include the header
+
+        while (defined ($line = <$regen_fh>)) {
+            next LIST if $line =~ / ^ \s* \); /x;
+            $string .= $line;
+        }
+
+        last;
     }
-    
-    last;
 }
-
-die "Could not parse $regen";
-
-found:
+die "Could not parse $regen" if keys %list_names;
 
 close $regen_fh or die "Couldn't close $regen: $!";
 
@@ -44,13 +53,13 @@ close $data_fh or die "Couldn't close $length_file: $!";
 chomp $stored_length;
 
 if (! is($new_length, $stored_length,
-         "regen/embed.pl: '$hash_name' length unchanged"))
+         "regen/embed.pl: unresolved lists length unchanged"))
 {
     if ($new_length < $stored_length) {
         open my $data_fh, '>', $length_file
                                          or die "Can't open $length_file: $!";
         diag(<<~"EOT");
-            Thank you for removing symbol(s) from '$hash_name'.
+            Thank you for removing unresolved symbols.
             Now you must commit the change.
             EOT
 
@@ -58,10 +67,10 @@ if (! is($new_length, $stored_length,
         close $data_fh or die "Couldn't close $length_file: $!";
     }
     else {
-        diag(<<EOT);
-Thou shalt not add anything to $hash_name in
-$regen.  See "Symbol visibility" in perlhacktips.
-
+        my $msg = "Thou shalt not add any symbols to any of: "
+                . join " or ", keys(%list_names)
+                . "\nin $regen.  See \"Symbol visibility\" in perlhacktips.";
+        $msg .= <<EOT;
 The preferred solution is to document the symbols, as described in
 'embed.fnc'.  If you don't have time for that immediately, add them instead
 to '\@pending_documentation_symbols' for now.
