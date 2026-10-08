@@ -11448,6 +11448,46 @@ S_PerlEnv_putenv(pTHX_ char *str)
 # endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
 #if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_CLASS_C)
+PERL_CALLCONV void
+Perl_apply_attribute_isa(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_ISA   \
+     STMT_START { Perl_assert_aTHX; assert(target);     \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_param(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_PARAM \
+     STMT_START { Perl_assert_aTHX; assert(target);     \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_reader(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_READER \
+     STMT_START { Perl_assert_aTHX; assert(target);     \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV void
+Perl_apply_attribute_writer(pTHX_ struct PerlAttributeTarget *target, SV *attrvalue, void *data)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_APPLY_ATTRIBUTE_WRITER \
+     STMT_START { Perl_assert_aTHX; assert(target);     \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 PERL_CALLCONV HV *
 Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
         Perl_attribute_nonnull_aTHX
@@ -12136,25 +12176,6 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
      STMT_START { Perl_assert_aTHX; assert(stash);                \
                   assert(SvTYPE(stash) == SVt_PVHV); assert(pn);  \
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;            \
-    } STMT_END
-
-PERL_CALLCONV void
-Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-# define PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES \
-     STMT_START { Perl_assert_aTHX; assert(stash);      \
-                  assert(SvTYPE(stash) == SVt_PVHV);    \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
-PERL_CALLCONV void
-Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_1);
-# define PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES \
-     STMT_START { Perl_assert_aTHX; assert(pn);         \
-                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 PERL_CALLCONV void

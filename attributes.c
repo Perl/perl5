@@ -122,13 +122,39 @@ static const struct PerlAttributeDefinition attribute_method = {
     .apply = &S_apply_attribute_method,
 };
 
+/* other attributes from class.c */
+
+static const struct PerlAttributeDefinition attribute_isa = {
+    .flags = PERL_ATTRf_MUST_VALUE,
+    .apply = &Perl_apply_attribute_isa,
+};
+
+static const struct PerlAttributeDefinition attribute_param = {
+    .flags = PERL_ATTRf_MAY_VALUE,
+    .apply = &Perl_apply_attribute_param,
+};
+
+static const struct PerlAttributeDefinition attribute_reader = {
+    .flags = PERL_ATTRf_MAY_VALUE,
+    .apply = &Perl_apply_attribute_reader,
+};
+
+static const struct PerlAttributeDefinition attribute_writer = {
+    .flags = PERL_ATTRf_MAY_VALUE,
+    .apply = &Perl_apply_attribute_writer,
+};
+
 static const struct {
     const char *name;
     const struct PerlAttributeDefinition *def;
 } builtin_attributes[] = {
     { .name = "const",  .def = &attribute_const },
+    { .name = "isa",    .def = &attribute_isa },
     { .name = "lvalue", .def = &attribute_lvalue },
     { .name = "method", .def = &attribute_method },
+    { .name = "param",  .def = &attribute_param },
+    { .name = "reader", .def = &attribute_reader },
+    { .name = "writer", .def = &attribute_writer },
     {0},
 };
 
