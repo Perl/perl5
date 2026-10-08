@@ -2275,9 +2275,16 @@ z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	extra sibling before 
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	abc	y	$&	abc	-	lookahead continuation in first trie word
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	ade	y	$&	ade	-	lookahead continuation in second trie word
 
-# GH24916
-\x{e0}+j	\x{e0}\x{e9}\x{e0}j	y	$&	\x{e0}j
-\x{e0}+j	\x{e0}\x{e9}\x{e0}\x{e0}j	y	$&	\x{e0}\x{e0}j
+# GH #24916
+\x{e0}+j	\x{e0}\x{e9}\x{e0}j	y	$&	\x{e0}j	-	PLUS skip on char match, not first byte match #1
+\x{e0}+j	\x{e0}\x{e9}\x{e0}\x{e0}j	y	$&	\x{e0}\x{e0}j	-	PLUS skip on char match, not first byte match #2
+# GH #24916 follow-on
+(a+X(*SKIP)j)	aXaXj	y	$1	aXj	-	PLUS skip after (*SKIP) [ASCII]
+(\x{100}+X(*SKIP)j)	\x{100}X\x{100}Xj	y	$1	\x{100}Xj	-	PLUS skip after (*SKIP) [UTF8]
+(a+X(*MARK:m)(*SKIP:m)j)	aXaXj	y	$1	aXj	-	PLUS skip after (*SKIP:NAME) [ASCII]
+(\x{100}+X(*MARK:m)(*SKIP:m)j)	\x{100}X\x{100}Xj	y	$1	\x{100}Xj	-	PLUS skip after (*SKIP:NAME) [UTF8]
+a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
+\x{100}+X(*COMMIT)j	\x{100}X\x{100}Xj	n	-	-	-	PLUS skip after (*COMMIT) [UTF8]
 
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
