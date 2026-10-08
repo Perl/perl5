@@ -88,7 +88,7 @@ if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
 
-my (@tests, @re, @anti_re);
+my (@re, @anti_re);
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
@@ -313,6 +313,7 @@ sub sort_by_execution_order {
     return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
 }
 
+my @tests = (); 
 if (@ARGV) {
     # If you want these run in speed order, just use prove
 
