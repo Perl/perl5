@@ -4117,12 +4117,15 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 ) {
                     DEBUG_EXECUTE_r( did_match = 1 );
                     if (regtry(reginfo, &s)) goto got_it;
-                    /* No match at this x, skip this run of x's */
-                    s += ch_bytes;
-                    while (ch_bytes <= (STRLEN)(strend - s)
-                           && *s == *ch
-                           && memEQ(s + 1, ch + 1, ch_bytes - 1))
+                    /* regtry might have hit a (*SKIP) */
+                    if (! LAST_REGTRY_SKIPPED_FORWARD(reginfo)) {
+                        /* No match at this x, skip this run of x's */
                         s += ch_bytes;
+                        while (ch_bytes <= (STRLEN)(strend - s)
+                               && *s == *ch
+                               && memEQ(s + 1, ch + 1, ch_bytes - 1))
+                            s += ch_bytes;
+                    }
                 }
             );
 
@@ -4138,9 +4141,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 if (*s == ch) {
                     DEBUG_EXECUTE_r( did_match = 1 );
                     if (regtry(reginfo, &s)) goto got_it;
-                    s++;
-                    while (s < strend && *s == ch)
+                    /* regtry might have hit a (*SKIP) */
+                    if (! LAST_REGTRY_SKIPPED_FORWARD(reginfo)) {
                         s++;
+                        while (s < strend && *s == ch)
+                            s++;
+                    }
                 }
             );
         }

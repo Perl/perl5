@@ -441,6 +441,12 @@ all consecutive characters that had the same first I<byte> were skipped.
 
 =item *
 
+An anchored regular expressions starting with a repeating character could
+have incorrectly skipped later instances of that character if the match
+contained a C<(*SKIP)> and was initially unsuccessful.
+
+=item *
+
 In some cases warnings that occurred while using unpack on an invalid
 UTF-8 marked string would result in an invalid free.  [GH #24913]
 
