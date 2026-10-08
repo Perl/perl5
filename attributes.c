@@ -63,6 +63,21 @@ Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *at
     return target->lexical.padname;
 }
 
+static const struct PerlInternalSVMetadata internalsvmeta_attrdefinition = {
+    .name = "struct PerlAttributeDefinition",
+};
+
+SV *
+Perl_newSVattrdefinition(pTHX_ const struct PerlAttributeDefinition *attrib)
+{
+    PERL_ARGS_ASSERT_NEWSVATTRDEFINITION;
+
+    SV *sv = newSV_type(SVt_INTERNAL);
+    SvANY(sv) = &internalsvmeta_attrdefinition;
+    SviPTR(sv) = attrib;
+    return sv;
+}
+
 /* :const */
 
 static void
