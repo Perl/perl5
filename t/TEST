@@ -525,7 +525,7 @@ sub _tests_from_manifest {
     return @results;
 }
 
-sub dump_manifested_tests {
+sub dump_tests {
     my ($ary) = @_;
     for my $test (sort @$ary) {
         # convert it to a path from the root of the repo
@@ -650,7 +650,7 @@ unless (@XARGV) {
     } @XARGV;
 };
 
-dump_manifested_tests(\@XARGV) if $dump_manifested_tests;
+dump_tests(\@XARGV) if $dump_manifested_tests;
 
 # This is where we would have to calculate a list of generated tests
 # if we were to support subroutine dump_all_tests() and command-line switch
