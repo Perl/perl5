@@ -65,6 +65,7 @@ $::do_nothing = $::do_nothing = 1;
 require './TEST';
 our $Valgrind_Log;
 
+# The -v, -dump_tests, and -torture switches are also found in t/TEST
 my $Verbose = 0;
 $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 
@@ -100,7 +101,8 @@ while ($ARGV[0] && $ARGV[0]=~/^-?-(n?)re/) {
         while (@ARGV and $ARGV[0] !~ /^-/) {
             push @$ary, shift @ARGV;
         }
-    } else {
+    }
+    else {
         push @$ary, (split/=/,shift @ARGV)[1];
     }
 }
@@ -318,10 +320,12 @@ if (@ARGV) {
     # because arguments might be passed in via the TEST_ARGS
     # env var where they wont be expanded by the shell.
     @tests = map(glob($_),@ARGV);
+    # After this point we are no longer manipulating @ARGV.
     # This is a hack to force config_heavy.pl to be loaded, before the
     # prep work for running a test changes directory.
     1 if $Config{d_fork};
-} else {
+}
+else {
     # Ideally we'd get somewhere close to Tux's Oslo rules
     # my $rules = {
     #     par => [
@@ -360,6 +364,7 @@ if (@ARGV) {
 
         @last = map { glob ("$_/*.t") } @last;
 
+        # _tests_from_manifest() is defined in t/TEST
         my ($non_ext, @ext_from_manifest)=
             _tests_from_manifest($Config{extensions}, $Config{known_extensions}, "all");
         push @last, @ext_from_manifest;
@@ -392,7 +397,8 @@ if (@re or @anti_re) {
             foreach my $re (@re) {
                 $keep = 1 if $test=~/$re/;
             }
-        } else {
+        }
+        else {
             $keep = 1;
         }
         if (@anti_re) {
@@ -404,7 +410,7 @@ if (@re or @anti_re) {
             push @keepers, $test;
         }
     }
-    @tests= @keepers;
+    @tests = @keepers;
 }
 
 # Allow e.g., ./perl t/harness t/op/lc.t
@@ -415,8 +421,10 @@ for (@tests) {
     }
 }
 
+# dump_tests() is defined in t/TEST
 dump_tests(\@tests) if $dump_tests;
 
+# filter_taint_tests() is defined in t/TEST
 filter_taint_tests(\@tests);
 
 my %options;
