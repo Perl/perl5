@@ -220,7 +220,7 @@ sub _find_files {
                 push @found, $fullpath;
             }
         }
-        closedir $DIRH, $dir or die "Trouble closing $dir: $!";
+        closedir $DIRH or die "Trouble closing $dir: $!";
     }
     return @found;
 }
@@ -450,7 +450,7 @@ sub _tests_from_manifest {
     my %non_ext;
     push @results, \%non_ext if $all;
     my $mani = '../MANIFEST';
-    if (open($MANI, '<', $mani)) {
+    if (open(my $MANI, '<', $mani)) {
         while (<$MANI>) {
             chomp;
             my ($file)= split /\t/, $_;
@@ -587,8 +587,8 @@ unless (@XARGV) {
     my $configsh = '../config.sh';
     my ($extensions, $known_extensions);
     if (-f $configsh) {
-        open FH, $configsh or die "Can't open $configsh: $!";
-        while (<FH>) {
+        open my $FH, '<', $configsh or die "Can't open $configsh: $!";
+        while (<$FH>) {
             if (/^extensions=['"](.*)['"]$/) {
                 $extensions = $1;
             }
@@ -596,6 +596,7 @@ unless (@XARGV) {
                 $known_extensions = $1;
             }
         }
+        close $FH or die;
         if (!defined $known_extensions) {
             warn "No known_extensions line found in $configsh";
         }
@@ -668,25 +669,25 @@ elsif ($::with_utf16) {
     for my $e (0, 1) {
         for my $b (0, 1) {
             print STDERR "# ENDIAN $e BOM $b\n";
-            my @UZZZZ;
+            my @UARGV;
             for my $a (@XARGV) {
                 my $u = $a . "." . ($e ? "l" : "b") . "e" . ($b ? "b" : "");
                 my $f = $e ? "v" : "n";
-                push @UZZZZ, $u;
+                push @UARGV, $u;
                 unlink($u);
-                if (open(A, $a)) {
-                    if (open(U, ">$u")) {
-                        print U pack("$f", 0xFEFF) if $b;
-                        while (<A>) {
-                            print U pack("$f*", unpack("C*", $_));
+                if (open(my $A, '<', $a)) {
+                    if (open(my $U, '>', $u)) {
+                        print $U pack("$f", 0xFEFF) if $b;
+                        while (<$A>) {
+                            print $U pack("$f*", unpack("C*", $_));
                         }
-                        close(U);
+                        close($U);
                     }
-                    close(A);
+                    close($A);
                 }
             }
-            _testprogs('perl', '', @UZZZZ);
-            unlink(@UZZZZ);
+            _testprogs('perl', '', @UARGV);
+            unlink(@UARGV);
         }
     }
 }
@@ -1029,7 +1030,7 @@ sub gather_conf_platform_info {
     $conf{$_} = $Config::Config{$_} for
     grep /cc|git|config_arg\d+/, keys %Config::Config;
     if (-f '/proc/cpuinfo') {
-        open my $fh, '/proc/cpuinfo' or warn "$!: /proc/cpuinfo\n";
+        open my $fh, '<', '/proc/cpuinfo' or warn "$!: /proc/cpuinfo\n";
         @platform = grep /name|cpu/, <$fh>;
         chomp $_ for @platform;
     }
@@ -1056,9 +1057,9 @@ sub _check_valgrind {
     $$toolnm =~ s|.*/||;  # keep basename
     my @valgrind;    # gets content of file
     if (-e $Valgrind_Log) {
-        if (open(V, $Valgrind_Log)) {
-            @valgrind = <V>;
-            close V;
+        if (open(my $V, '<', $Valgrind_Log)) {
+            @valgrind = <$V>;
+            close $V;
         }
         else {
             warn "$0: Failed to open '$Valgrind_Log': $!\n";
