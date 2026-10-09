@@ -6,17 +6,33 @@ BEGIN {
 
 use strict;
 use warnings;
-use feature 'say';
+use File::Find;
 use File::Spec;
-use Data::Dumper;$Data::Dumper::Indent=1;
 
-my $thisperl = "$^X -Ilib";
+#use Data::Dumper;$Data::Dumper::Indent=1;
+
+my $THISPERL = "$^X -Ilib";
+
+# Once 'make' has run, there should be generated test files in
+# ../dist/Devel-PPPort/t.  Find them, format their names relative to ./t/,
+# sort them, then use that list as arguments to TEST, harness and runtests.
+
+my @raw_ppport_tests = ();
+sub wanted { $_ =~ m{\.t$} and push @raw_ppport_tests, (
+    File::Spec->catfile('..', 'dist', 'Devel-PPPort', 't', $_),
+); }
+find(\&wanted, ( './dist/Devel-PPPort/t' ));
+my @ppport_tests = sort @raw_ppport_tests;
+
 
 test_via_TEST( qw| op/args.t op/bool.t ../lib/vars.t | );
+test_via_TEST('base/cond.t', @ppport_tests);
 
 test_via_harness( qw| op/args.t op/bool.t ../lib/vars.t | );
+test_via_harness('base/cond.t', @ppport_tests);
 
 test_via_runtests( qw| op/args.t op/bool.t ../lib/vars.t | );
+test_via_runtests('base/cond.t', @ppport_tests);
 
 my (%th, %tt, %all);
 $ENV{PERL_TORTURE_TEST} = 1;
@@ -27,13 +43,13 @@ $ENV{PERL_BENCHMARK} = 1;
 # should be equal to the number of "manifested tests" dumped via
 #   ./perl -Ilib t/TEST   -dump_manifested_tests
 
-for my $file (`"$^X" t/TEST -dump_manifested_tests`) {
+for my $file (`$THISPERL t/TEST -dump_manifested_tests`) {
     chomp $file;
     $all{$file}++;
     $tt{$file}++;
 }
 
-for my $file (`"$^X" t/harness -dump_tests`) {
+for my $file (`$THISPERL t/harness -dump_tests`) {
     chomp $file;
     $all{$file}++;
     $th{$file}++;
@@ -67,12 +83,13 @@ sub test_via_TEST {
     my @these_tests = @_;
     my $test_lookup = get_TEST_reporting_names(@these_tests);
 
-    my @output = `$thisperl t/TEST @these_tests`;
+    my @output = `$THISPERL t/TEST @these_tests`;
     for my $l (@output) {
         chomp $l;
         next unless $l =~ m{^t/};
         my $root = (split /\s+/, $l)[0];
-        ok($test_lookup->{$root}, "$test_lookup->{$root} was tested via t/TEST");
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via t/TEST");
     }
 }
 
@@ -92,12 +109,13 @@ sub test_via_harness {
     my @these_tests = @_;
     my $test_lookup = get_harness_reporting_names(@these_tests);
 
-    my @output = `$thisperl t/harness @these_tests`;
+    my @output = `$THISPERL t/harness @these_tests`;
     for my $l (@output) {
         chomp $l;
         my $root = (split /\s+/, $l)[0];
         next unless $root =~ m/\.t$/;
-        ok($test_lookup->{$root}, "$test_lookup->{$root} was tested via t/harness");
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via t/harness");
     }
 }
 
@@ -112,6 +130,8 @@ sub get_harness_reporting_names {
 
 sub test_via_runtests {
     my @these_tests = @_;
+    # ./runtests choose produces output with test names formatted in
+    # same way as t/TEST
     my $test_lookup = get_TEST_reporting_names(@these_tests);
 
     ok(-f './runtests', "runtests is found in top level directory");
@@ -122,11 +142,17 @@ sub test_via_runtests {
         chomp $l;
         next unless $l =~ m{^t/};
         my $root = (split /\s+/, $l)[0];
-        ok($test_lookup->{$root}, "$test_lookup->{$root} was tested via ./runtests");
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via ./runtests");
     }
 }
 
 #################### SUBROUTINES NEEDING WORK ####################
+
+# These 2 subroutines were used in unit tests in earlier versions of
+# t/porting/test_testlist.t; Those tests need reworking and, when they do,
+# these subroutines will probably need reworking as well (e.g., better
+# encapsulation).
 
 sub get_extensions {
     my %extensions;
