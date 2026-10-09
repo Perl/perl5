@@ -373,6 +373,13 @@ else {
         push @seq, _compute_tests_and_ordering(\@last)->@*;
         push @tests, @last;
 
+        # _just_find_tests() is defined in t/TEST.
+        # If we're not passing specific tests on the command line, then we do
+        # not locate generated tests or run them.
+        my @generated_tests = ();
+        push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
+        push @tests, @generated_tests;
+
         $rules = { seq => \@seq };
 
         foreach my $test (@tests) {
@@ -430,11 +437,6 @@ for (@tests) {
 #   ./perl -Ilib t/TEST   -dump_manifested_tests
 
 dump_tests(\@tests) if $dump_tests;
-
-# _just_find_tests() is defined in t/TEST
-my @generated_tests = ();
-push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
-push @tests, @generated_tests;
 
 # filter_taint_tests() is defined in t/TEST
 filter_taint_tests(\@tests);
