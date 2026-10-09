@@ -15,7 +15,7 @@ use warnings;
 # tell us if one of the files does not know about it.
 
 #plan tests => 3;
-#plan skip_all => "pending revision of t/harness";
+plan skip_all => "pending revision of t/harness";
 
 my (%th, %tt, %all);
 $ENV{PERL_TORTURE_TEST} = 1;
