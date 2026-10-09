@@ -48,9 +48,23 @@ my $new_length = length $string;
 my $length_file = 'porting/symbol_visibility.dat';
 
 open my $data_fh, '<', $length_file or die "Can't open $length_file: $!";
-my $stored_length = <$data_fh>;
+my $stored_length = join "", <$data_fh>;
 close $data_fh or die "Couldn't close $length_file: $!";
 chomp $stored_length;
+
+if ($stored_length eq "") {
+    fail("$length_file shouldn't be empty");
+    exit 1;
+}
+
+# If there was a conflict, remove all but the final numeric value.  This makes
+# rebasing more convenient 
+$stored_length =~ s/^<<<<<<< HEAD\n\d+\n=======\n//;
+$stored_length =~ s/\n>>>>>>> .*//;
+if ($stored_length !~ /\d/ || $stored_length =~ /\D/) {
+    fail("Unexpected syntax in $length_file:\n$stored_length");
+    exit 1;
+}
 
 if (! is($new_length, $stored_length,
          "regen/embed.pl: unresolved lists length unchanged"))
