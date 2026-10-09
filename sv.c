@@ -6758,13 +6758,12 @@ bad_shape:
 }
 
 void
-Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
+Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg, U32 flags)
 {
     PERL_ARGS_ASSERT_MGV2_COPY;
 
     MgFLAGS(dmg) = MgFLAGS(smg);
     MgPRIV(dmg)  = MgPRIV(smg);
-    MgAUXSV_set(dmg, MgAUXSV(smg));
 
     void *sptr = MgPTR(smg);
     STRLEN slen = MgPTRLEN(smg);
@@ -6775,11 +6774,23 @@ Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
     else if(slen)
         MgPTRLEN_set(dmg, slen);
 
-    if(!MgWEAK_AUXSV(smg))
-        MgWEAK_AUXSV_off(dmg);
+    switch (flags & (MGv2f_COPY_AUXSV_INC|MGv2f_COPY_AUXSV_WEAKLY)) {
+        case 0: /* default */
+            if (!MgWEAK_AUXSV(smg))
+                MgWEAK_AUXSV_off(dmg);
+            MgAUXSV_set(dmg, MgAUXSV(smg));
+            if (MgAUXSV(dmg) && !MgWEAK_AUXSV(dmg))
+                SvREFCNT_inc_void_NN(MgAUXSV(dmg));
+            break;
 
-    if(MgAUXSV(dmg) && !MgWEAK_AUXSV(dmg))
-        SvREFCNT_inc_void_NN(MgAUXSV(dmg));
+        case MGv2f_COPY_AUXSV_INC:
+            MgAUXSV_set_inc(dmg, MgAUXSV(smg));
+            break;
+
+        case MGv2f_COPY_AUXSV_WEAKLY:
+            MgAUXSV_set_weak(dmg, MgAUXSV(smg));
+            break;
+    }
 
     switch(MgFLAGS(smg) & MGv2f_WITH_MASK) {
         case 0:
