@@ -441,6 +441,14 @@ all consecutive characters that had the same first I<byte> were skipped.
 
 =item *
 
+Following an unsuccessful earlier non-greedy match, a regular expression
+intended to perform a separate I<greedy> match could have instead
+performed a I<non-greedy> match because of skipped flag clearance.
+
+[GH #24926]
+
+=item *
+
 In some cases warnings that occurred while using unpack on an invalid
 UTF-8 marked string would result in an invalid free.  [GH #24913]
 
