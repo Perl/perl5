@@ -609,13 +609,16 @@ unless (@XARGV) {
     # make minitest, and the building of extensions will likely also fail if
     # something is that badly wrong.
     push @XARGV, _tests_from_manifest($extensions, $known_extensions);
+    my @generated_tests = ();
+    push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
+    push @XARGV, @generated_tests;
     unless ($::core) {
         _find_tests('japh') if $::torture or $ENV{PERL_TORTURE_TEST};
         _find_tests('benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
         _find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }
-@XARGV= do {
+@XARGV = do {
     my @order= (
         "test_pl",
         "base",
@@ -656,9 +659,6 @@ dump_tests(\@XARGV) if $dump_manifested_tests;
 # if we were to support subroutine dump_all_tests() and command-line switch
 # -dump_all_tests.
 
-my @generated_tests = ();
-push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
-push @XARGV, @generated_tests;
 
 filter_taint_tests(\@XARGV);
 
