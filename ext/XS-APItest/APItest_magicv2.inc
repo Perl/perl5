@@ -67,7 +67,7 @@ static const struct ScalarVarMagicFunctions magicfuncs_container_empty = {
     .shape = MGv2s_SCALARVAR,
     .debug_name = "XS::APItest/container_empty",
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
 };
 
 static const struct ScalarVarMagicFunctions magicfuncs_with_keyiv = {
@@ -76,7 +76,7 @@ static const struct ScalarVarMagicFunctions magicfuncs_with_keyiv = {
     .flags = MGv2f_WITH_KEYIV,
     .debug_name = "XS::APItest/with_keyiv",
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
 };
 
 static const struct ScalarVarMagicFunctions magicfuncs_with_keysv = {
@@ -85,7 +85,7 @@ static const struct ScalarVarMagicFunctions magicfuncs_with_keysv = {
     .flags = MGv2f_WITH_KEYSV,
     .debug_name = "XS::APItest/with_keysv",
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
 };
 
 static const struct MagicFunctions magicfuncs_inc_on_free = {
@@ -111,7 +111,7 @@ static const struct ScalarVarMagicFunctions magicfuncs_userstruct = {
     .debug_name = "XS::APItest/userstruct",
     .user_size = sizeof(struct TwoIVs),
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
 };
 
 static const struct ScalarVarMagicFunctions magicfuncs_grab_before_get = {
@@ -127,7 +127,7 @@ static const struct ScalarVarMagicFunctions magicfuncs_inc_after_set = {
     .shape = MGv2s_SCALARVAR,
     .debug_name = "XS::APItest/inc_after_set",
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
     .post_set = &magicfunc_inc_after_set,
 };
 
