@@ -126,8 +126,12 @@ if ($ENV{HARNESS_OPTIONS}) {
 
 $jobs ||= 1;
 
-my %total_time;
 sub _compute_tests_and_ordering($) {
+    my %total_time;
+    my sub sort_by_execution_order {
+        # Directories, ordered by total time descending then name ascending
+        return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
+    }
     my @tests = $_[0]->@*;
 
     my %dir;
@@ -306,11 +310,6 @@ sub _compute_tests_and_ordering($) {
     push @seq, map { +{ seq => $_ } } sort @alone_files if @alone_files;
 
     return \@seq;
-}
-
-sub sort_by_execution_order {
-    # Directories, ordered by total time descending then name ascending
-    return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
 }
 
 my @tests = (); 
