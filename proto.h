@@ -4430,12 +4430,34 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
     } STMT_END
 
 PERL_CALLCONV MAGIC *
-Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+Perl_magicv2_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);
-#define PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY  \
+#define PERL_ARGS_ASSERT_MAGICV2_COPY           \
+    STMT_START { Perl_assert_aTHX; assert(nsv); assert(osv); assert(omg);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                      \
+    } STMT_END
+
+PERL_CALLCONV MAGIC *
+Perl_magicv2_copy_inc_auxsv(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3);
+#define PERL_ARGS_ASSERT_MAGICV2_COPY_INC_AUXSV \
+    STMT_START { Perl_assert_aTHX; assert(nsv); assert(osv); assert(omg);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                      \
+    } STMT_END
+
+PERL_CALLCONV MAGIC *
+Perl_magicv2_copy_weak_auxsv(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3);
+#define PERL_ARGS_ASSERT_MAGICV2_COPY_WEAK_AUXSV \
     STMT_START { Perl_assert_aTHX; assert(nsv); assert(osv); assert(omg);  \
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                      \
     } STMT_END

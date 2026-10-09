@@ -2273,7 +2273,14 @@ p	|int	|magic_setvec	|NN SV *sv				\
 				|NN MAGIC *mg
 p	|U32	|magic_sizepack |NN SV *sv				\
 				|NN MAGIC *mg
-Adp	|MAGIC *|magicv2_localize_copy					\
+Adp	|MAGIC *|magicv2_copy	|NN SV *nsv				\
+				|NN SV *osv				\
+				|NN MAGIC *omg
+Adp	|MAGIC *|magicv2_copy_inc_auxsv 				\
+				|NN SV *nsv				\
+				|NN SV *osv				\
+				|NN MAGIC *omg
+Adp	|MAGIC *|magicv2_copy_weak_auxsv				\
 				|NN SV *nsv				\
 				|NN SV *osv				\
 				|NN MAGIC *omg

@@ -364,7 +364,9 @@
 # define looks_like_number(a)                   Perl_looks_like_number(aTHX_ a)
 # define lsbit_pos32                            Perl_lsbit_pos32
 # define magic_dump(a)                          Perl_magic_dump(aTHX_ a)
-# define magicv2_localize_copy(a,b,c)           Perl_magicv2_localize_copy(aTHX_ a,b,c)
+# define magicv2_copy(a,b,c)                    Perl_magicv2_copy(aTHX_ a,b,c)
+# define magicv2_copy_inc_auxsv(a,b,c)          Perl_magicv2_copy_inc_auxsv(aTHX_ a,b,c)
+# define magicv2_copy_weak_auxsv(a,b,c)         Perl_magicv2_copy_weak_auxsv(aTHX_ a,b,c)
 # define markstack_grow()                       Perl_markstack_grow(aTHX)
 # define mess_sv(a,b)                           Perl_mess_sv(aTHX_ a,b)
 # define mg_clear(a)                            Perl_mg_clear(aTHX_ a)
