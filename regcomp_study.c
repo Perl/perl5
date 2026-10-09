@@ -1528,7 +1528,7 @@ Perl_study_chunk(pTHX_
     /* vars about whether this pattern contains something that can match
      * infinitely long strings, eg, X* or X+ */
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
-    int is_inf_internal = 0;            /* The studied chunk is infinite */
+    int chunk_is_inf = 0;            /* The studied chunk is infinite */
 
     /* scan_data_t (struct) is used to hold information about the substrings
      * and start class we have extracted from the string */
@@ -1716,7 +1716,7 @@ Perl_study_chunk(pTHX_
                     if (min1 > minnext)
                         min1 = minnext;
                     if (deltanext == OPTIMIZE_INFTY) {
-                        is_inf = is_inf_internal = 1;
+                        is_inf = chunk_is_inf = 1;
                         max1 = OPTIMIZE_INFTY;
                     } else if (max1 < minnext + deltanext)
                         max1 = minnext + deltanext;
@@ -2170,7 +2170,7 @@ Perl_study_chunk(pTHX_
                     ( flags & SCF_IN_DEFINE )
                     ||
                     (
-                        (is_inf_internal || is_inf || (data && data->flags & SF_IS_INF))
+                        (chunk_is_inf || is_inf || (data && data->flags & SF_IS_INF))
                         &&
                         ( (flags & (SCF_DO_STCLASS | SCF_DO_SUBSTR)) == 0 )
                     )
@@ -2191,7 +2191,7 @@ Perl_study_chunk(pTHX_
                      * avoid wrongly applying other optimizations in the
                      * enclosing scope - see GH 18096, for example.
                      */
-                    is_inf = is_inf_internal = 1;
+                    is_inf = chunk_is_inf = 1;
                     scan = regnext(scan);
                     continue;
                 }
@@ -2229,7 +2229,7 @@ Perl_study_chunk(pTHX_
                         scan_commit(pRExC_state, data, minlenp, is_inf);
                         data->cur_is_floating = 1;
                     }
-                    is_inf = is_inf_internal = 1;
+                    is_inf = chunk_is_inf = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
@@ -2498,7 +2498,7 @@ Perl_study_chunk(pTHX_
                     /* Cannot extend fixed substrings */
                     data->cur_is_floating = 1; /* float */
                 }
-                is_inf = is_inf_internal = 1;
+                is_inf = chunk_is_inf = 1;
                 scan = regnext(scan);
                 goto optimize_curly_tail;
             case CURLY:
@@ -2617,12 +2617,12 @@ Perl_study_chunk(pTHX_
                 }
 
                 min += minnext * mincount;
-                is_inf_internal |= deltanext == OPTIMIZE_INFTY
+                chunk_is_inf |= deltanext == OPTIMIZE_INFTY
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
-                is_inf |= is_inf_internal;
+                is_inf |= chunk_is_inf;
 
                 /* GH#24915: "is this chunk infinite?" (not: "Is the pattern infinite?") */
-                if (is_inf_internal) {
+                if (chunk_is_inf) {
                     delta = OPTIMIZE_INFTY;
                 } else {
                     delta += (minnext + deltanext) * maxcount
@@ -2925,7 +2925,7 @@ Perl_study_chunk(pTHX_
                     scan_commit(pRExC_state, data, minlenp, is_inf);
                     data->cur_is_floating = 1; /* float */
                 }
-                is_inf = is_inf_internal = 1;
+                is_inf = chunk_is_inf = 1;
                 if (flags & SCF_DO_STCLASS_OR) {
                     if (OP(scan) == CLUMP) {
                         /* Actually is any start char, but very few code points
@@ -3481,7 +3481,7 @@ Perl_study_chunk(pTHX_
                     scan_commit(pRExC_state, data, minlenp, is_inf);
                     data->cur_is_floating = 1; /* float */
                 }
-                is_inf = is_inf_internal = 1;
+                is_inf = chunk_is_inf = 1;
                 if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
                     ssc_anything(data->start_class);
                 flags &= ~SCF_DO_STCLASS;
@@ -3572,7 +3572,7 @@ Perl_study_chunk(pTHX_
                     if (min1 > (SSize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
                     if (deltanext == OPTIMIZE_INFTY) {
-                        is_inf = is_inf_internal = 1;
+                        is_inf = chunk_is_inf = 1;
                         max1 = OPTIMIZE_INFTY;
                     } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
                         max1 = minnext + deltanext + trie->maxlen;
@@ -3697,7 +3697,7 @@ Perl_study_chunk(pTHX_
     DEBUG_STUDYDATA("pre-fin", data, depth, is_inf, min, stopmin, delta);
 
     /* is this pattern infinite? Eg, consider /(a|b+)/ */
-    if (is_inf_internal)
+    if (chunk_is_inf)
         delta = OPTIMIZE_INFTY;
 
     /* deal with (*ACCEPT), Eg, consider /(foo(*ACCEPT)|bop)bar/ */
