@@ -431,6 +431,11 @@ for (@tests) {
 
 dump_tests(\@tests) if $dump_tests;
 
+# _just_find_tests() is defined in t/TEST
+my @generated_tests = ();
+push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
+push @tests, @generated_tests;
+
 # filter_taint_tests() is defined in t/TEST
 filter_taint_tests(\@tests);
 
