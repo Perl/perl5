@@ -46,6 +46,13 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
+my $error_count = 0;
+sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
+                     # succeed.
+    warn shift;
+    $error_count++;
+}
+
 # This program has historically generated compatibility macros for a few
 # functions of the form Perl_FOO(pTHX_ ...).  Those macros would be named
 # FOO(...), and would expand outside the core to Perl_FOO_nocontext(...)
@@ -2494,8 +2501,12 @@ my @unresolved_visibility_overrides_but_extensions_definitely_need_these =
   );
 
 # Add to main list
-$unresolved_visibility_overrides{$_} = 1
-   for @unresolved_visibility_overrides_but_extensions_definitely_need_these;
+for my $symbol (@unresolved_visibility_overrides_but_extensions_definitely_need_these)
+{
+    die_at_end("$symbol in multiple unresolved lists")
+                         if defined $unresolved_visibility_overrides{$symbol};
+    $unresolved_visibility_overrides{$symbol} = 1;
+}
 
 # The keys of this hash are the header files that aren't automatically pulled
 # in by the typical module which uses: EXTERN.h, perl.h, and XSUB.h.  The
@@ -3586,13 +3597,6 @@ my $visibility_flags = "$visible_outside_core_flags$never_visible_flags";
 my $visibility_flags_re = qr/[$visibility_flags]/;
 
 my $discard_non_visibility_flags_re = qr/[^$visibility_flags]/;
-
-my $error_count = 0;
-sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
-                     # succeed.
-    warn shift;
-    $error_count++;
-}
 
 sub full_name ($$) { # Returns the function name with potentially the
                      # prefixes 'S_' or 'Perl_'
