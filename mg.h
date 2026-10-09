@@ -457,6 +457,15 @@ L</MgKEYIV> or L</MgKEYSV> fields, and wish to manage their own storage.
 */
 #define MgUSERSTRUCT(mg, type)  ((type)(((char *)(mg)) + MgSIZEOF(mg)))
 
+#ifdef PERL_CORE
+/* Flags used by mgv2_copy() */
+enum {
+    MGv2f_COPY_DEFAULT      = 0,      /* MgAUXSV is copied with same strength as original */
+    MGv2f_COPY_AUXSV_INC    = (1<<0), /* MgAUXSV is copied strongly with inc refcount */
+    MGv2f_COPY_AUXSV_WEAKLY = (1<<1), /* MgAUXSV is copied weakly */
+};
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

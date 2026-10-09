@@ -5245,7 +5245,8 @@ Tp	|bool	|translate_substr_offsets				\
 p	|void	|mg_free_struct |NN SV *sv				\
 				|NN MAGIC *mg
 p	|void	|mgv2_copy	|NN const MAGIC *smg			\
-				|NN MAGIC *dmg
+				|NN MAGIC *dmg				\
+				|U32 flags
 p	|MAGIC *|sv_magicv2_attach					\
 				|NN SV *sv				\
 				|NN const struct MagicFunctions *funcs	\

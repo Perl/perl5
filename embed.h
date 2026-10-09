@@ -1520,7 +1520,7 @@
 #   endif
 #   if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 #     define mg_free_struct(a,b)                Perl_mg_free_struct(aTHX_ a,b)
-#     define mgv2_copy(a,b)                     Perl_mgv2_copy(aTHX_ a,b)
+#     define mgv2_copy(a,b,c)                   Perl_mgv2_copy(aTHX_ a,b,c)
 #     define sv_magicv2_attach(a,b,c)           Perl_sv_magicv2_attach(aTHX_ a,b,c)
 #   endif
 #   if defined(PERL_IN_MRO_C)

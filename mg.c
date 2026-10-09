@@ -806,7 +806,7 @@ Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
         MAGIC *dmg = NULL;
         if (funcs->flags & MGv2f_SCALARVALUE_AUTOPROPAGATE) {
             dmg = sv_magicv2_attach(dsv, MgFUNCS(smg), MgFLAGS(smg));
-            mgv2_copy(smg, dmg);
+            mgv2_copy(smg, dmg, MGv2f_COPY_DEFAULT);
         }
 
         if (funcs->propagate)
@@ -1054,7 +1054,7 @@ Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
     PERL_UNUSED_ARG(osv);
 
     MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
-    mgv2_copy(omg, nmg);
+    mgv2_copy(omg, nmg, MGv2f_COPY_DEFAULT);
 
     return nmg;
 }

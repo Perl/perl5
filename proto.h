@@ -13420,7 +13420,7 @@ Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
     } STMT_END
 
 PERL_CALLCONV void
-Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
+Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg, U32 flags)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
