@@ -9696,9 +9696,11 @@ NULL
             /* handle the single-char capture called as a GOSUB etc */
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
             {
+                minmod = 0;
                 char *li = locinput;
-                if (!regrepeat(rex, &li, scan, loceol, reginfo, 1))
+                if (!regrepeat(rex, &li, scan, loceol, reginfo, 1)) {
                     sayNO;
+                }
                 SET_locinput(li);
                 goto fake_end;
             }
@@ -9740,6 +9742,7 @@ NULL
                         if (! S_setup_EXACTISH_ST(aTHX_ text_node,
                                                         &ST.Binfo, reginfo))
                         {
+                            minmod = 0;
                             sayNO;
                         }
                     }
