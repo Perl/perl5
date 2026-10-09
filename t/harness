@@ -423,6 +423,12 @@ for (@tests) {
 }
 
 # dump_tests() is defined in t/TEST
+# Assuming that no individual tests have been passed on the command-line as
+# arguments to t/harness, the number of tests dumped below via
+#   ./perl -lib t/harness -dump_tests
+# should be equal to the number of "manifested tests" dumped via
+#   ./perl -Ilib t/TEST   -dump_manifested_tests
+
 dump_tests(\@tests) if $dump_tests;
 
 # filter_taint_tests() is defined in t/TEST
