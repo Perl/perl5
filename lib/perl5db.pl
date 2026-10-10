@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.82';
+$VERSION = '1.83';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -4434,6 +4434,11 @@ sub _print_frame_message {
 sub DB::sub {
     my ( $al, $ret, @ret ) = "";
 
+    # keep a lexical copy, rather than relying on the global. the global
+    # variable could be overwritten if something inside this sub triggers
+    # another sub call, running DB::sub again. overloads for example.
+    my $sub = $DB::sub;
+
     # We stack the stack pointer and then increment it to protect us
     # from a situation that might unwind a whole bunch of call frames
     # at once. Localizing the stack pointer means that it will automatically
@@ -4455,13 +4460,13 @@ sub DB::sub {
         # Whether or not the autoloader was running, a scalar to put the
         # sub's return value in (if needed), and an array to put the sub's
         # return value in (if needed).
-        if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
+        if (!ref $sub && $sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
             print "creating new thread\n";
         }
 
         # If the last ten characters are '::AUTOLOAD', note we've traced
         # into AUTOLOAD for $sub.
-        if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+        if ( !ref $sub && length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
             no strict 'refs';
             $al = " for $$sub" if defined $$sub;
         }
@@ -4568,6 +4573,7 @@ sub DB::sub {
 } ## end sub _sub
 
 sub lsub : lvalue {
+    my $sub = $DB::sub;
 
     # We stack the stack pointer and then increment it to protect us
     # from a situation that might unwind a whole bunch of call frames
@@ -4595,13 +4601,13 @@ sub lsub : lvalue {
         # sub's return value in (if needed), and an array to put the sub's
         # return value in (if needed).
         my ( $al, $ret, @ret ) = "";
-        if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+        if ( !ref $sub && $sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
             print "creating new thread\n";
         }
 
         # If the last ten characters are C'::AUTOLOAD', note we've traced
         # into AUTOLOAD for $sub.
-        if ( length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
+        if ( !ref $sub && length($sub) > 10 && substr( $sub, -10, 10 ) eq '::AUTOLOAD' ) {
             $al = " for $$sub";
         }
 
