@@ -429,7 +429,7 @@ OUTPUT:
     RETVAL
 
 void
-CLONE(char* classname)
+CLONE(char* classname, ...)
 CODE:
     if (strEQ(classname, "Hash::Util::FieldHash")) {
         HUF_global(aTHX_ HUF_CLONE);
