@@ -193,7 +193,7 @@ would like.  See L<perlfaq5> for details.
 
 If the file to be opened contains binary data instead of text characters,
 then the C<MODE> argument to C<open> is a little different.  Instead of
-specifying the encoding, you tell Perl that your data are in raw bytes.
+specifying the encoding, you tell Perl that your data is in raw bytes.
 
     my $filename = "/some/path/to/a/binary/file/goes/here";
     my $encoding = ":raw :bytes"
