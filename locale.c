@@ -2494,7 +2494,8 @@ Perl_category_unlock(pTHX_ const UV mask,
 #    define querylocale_i(i)      querylocale_r(categories[i])
 
 static const char *
-S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj, line_t caller_line)
+S_querylocale_2024_l(pTHX_ int category, locale_t locale_obj,
+                     line_t caller_line  DEBUG_ONLY)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2024_L;
 
