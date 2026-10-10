@@ -2171,7 +2171,7 @@ Perl_csighandler1(int sig)
  */
 
 Signal_t
-Perl_csighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
+Perl_csighandler3(int sig, UNUSED(Siginfo_t *sip), UNUSED(void *uap))
 {
     PERL_ARGS_ASSERT_CSIGHANDLER3;
 
@@ -4288,7 +4288,7 @@ Perl_sighandler1(int sig)
 }
 
 Signal_t
-Perl_sighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
+Perl_sighandler3(int sig, UNUSED(Siginfo_t *sip), UNUSED(void *uap))
 {
     PERL_ARGS_ASSERT_SIGHANDLER3;
 
@@ -4305,8 +4305,8 @@ Perl_sighandler3(int sig, Siginfo_t *sip UNUSED, void *uap UNUSED)
  */
 
 Signal_t
-Perl_perly_sighandler(int sig, Siginfo_t *sip UNUSED,
-                    void *uap UNUSED, bool safe)
+Perl_perly_sighandler(int sig, UNUSED(Siginfo_t *sip),
+                      UNUSED(void *uap), bool safe)
 {
     PERL_ARGS_ASSERT_PERLY_SIGHANDLER;
 
