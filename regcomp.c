@@ -13982,6 +13982,9 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                     if ( !refcount ) {
                         PerlMemShared_free(aho->states);
                         PerlMemShared_free(aho->fail);
+                        /* if we have a bmh/start-char-map then release it */
+                        if (aho->prefilter)
+                            PerlMemShared_free(aho->prefilter);
                          /* do this last!!!! */
                         PerlMemShared_free(ri->data->data[n]);
                         /* we should only ever get called once, so

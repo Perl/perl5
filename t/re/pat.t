@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1315;  # Update this when adding/deleting tests.
+plan tests => 1588;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -36,6 +36,319 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    {
+        my $haystack = ("A" x 5000) . "cat";
+        ok($haystack =~ /walrus|cat/, 'AC finds a literal after a long rejected run');
+
+        $haystack = ("A" x 5000) . "dog";
+        ok($haystack !~ /walrus|cat/, 'AC rejects a long run with no literal');
+
+        my $zero_shift_match = "cacc" . ("c" x 5000);
+        ok($zero_shift_match =~ /acc|zdd/ && $-[0] == 1,
+           'AC zero-shift rejection does not skip a later match');
+
+        my $zero_shift_run = ("c" x 5000) . "acc";
+        ok($zero_shift_run =~ /acc|zdd/ && $-[0] == 5000,
+           'AC zero-shift map rejection skips a repeated octet run');
+
+        utf8::upgrade($zero_shift_run);
+        ok($zero_shift_run =~ /acc|zdd/ && $-[0] == 5000,
+           'AC zero-shift map rejection skips an ASCII run in UTF-8');
+
+        $zero_shift_run = "c" x 5000;
+        ok($zero_shift_run !~ /acc|zdd/,
+           'AC zero-shift map rejection handles a run ending at string end');
+
+        my $shift_one_run = ("e" x 5000) . "fghijY";
+        ok($shift_one_run =~ /abcdeX|fghijY/ && $-[0] == 5000,
+           'AC repeated-sequence scan handles rejected starts with shift one');
+
+        utf8::upgrade($shift_one_run);
+        ok($shift_one_run =~ /abcdeX|fghijY/ && $-[0] == 5000,
+           'AC shift-one repeated-sequence scan handles UTF-8 targets');
+
+        $shift_one_run = "e" x 5000;
+        ok($shift_one_run !~ /abcdeX|fghijY/,
+           'AC shift-one repeated-sequence scan rejects a long non-match');
+
+        my $alternating_run = ("AB" x 5001) . "barB";
+        ok($alternating_run =~ /fooA|barB/ && $-[0] == 10002,
+           'AC skips repeated UV blocks with rejected alternating starts');
+
+        for my $offset (0 .. 7) {
+            my $aligned_run = ("X" x $offset) . ("AB" x 5000) . "barB";
+            ok($aligned_run =~ /fooA|barB/ && $-[0] == $offset + 10000,
+               "AC repeated-block scan finds the match at offset $offset");
+        }
+
+        utf8::upgrade($alternating_run);
+        ok($alternating_run =~ /fooA|barB/ && $-[0] == 10002,
+           'AC skips repeated UV blocks in a UTF-8 target');
+
+        for my $offset (0 .. 7) {
+            my $aligned_run = ("X" x $offset) . ("AB" x 5000) . "barB";
+            utf8::upgrade($aligned_run);
+            ok($aligned_run =~ /fooA|barB/ && $-[0] == $offset + 10000,
+               "AC UTF-8 repeated-block scan finds offset $offset");
+        }
+
+        my $wide_alternating_run = ("\x{100}" x 5001) . "ba\x{200}";
+        ok($wide_alternating_run =~ /fo\x{100}|ba\x{200}/
+           && $-[0] == 5001,
+           'AC skips repeated UTF-8 character blocks at character boundaries');
+
+        $wide_alternating_run = "\x{100}" x 5001;
+        ok($wide_alternating_run !~ /fo\x{100}|ba\x{200}/,
+           'AC rejects repeated UTF-8 character blocks without a match');
+
+        $haystack = ("A" x 5000) . "cat";
+        ok($haystack =~ /(?:|walrus|cat)/ && $-[0] == 0 && $+[0] == 0,
+           'AC with an empty alternative keeps the earliest empty match');
+
+        my $six_octet_haystack = ("A" x 5000) . "catcat";
+        ok($six_octet_haystack =~ /walruswalrus|catcat/,
+           'AC combined prefilter handles six-octet literals');
+
+        $six_octet_haystack = ("A" x 5000) . "dogdog";
+        ok($six_octet_haystack !~ /walruswalrus|catcat/,
+           'AC combined prefilter rejects a six-octet near miss');
+
+        my $seven_octet_haystack = ("A" x 5000) . "catcatx";
+        ok($seven_octet_haystack =~ /walrusx|catcatx/,
+           'AC combined prefilter handles seven-octet literals');
+
+        $seven_octet_haystack = ("x" x 5000);
+        ok($seven_octet_haystack !~ /walrusx|catcatx/,
+           'AC BMH prefilter handles frequent anchor-octet candidates');
+
+        my $long_haystack = ("A" x 5000) . "catcatcatcat";
+        ok($long_haystack =~ /walruswalruswalruswalrus|catcatcatcat/,
+           'AC BMH prefilter finds a long literal after rejected input');
+
+        $long_haystack = ("A" x 5000) . "dogdogdogdog";
+        ok($long_haystack !~ /walruswalruswalruswalrus|catcatcatcat/,
+           'AC BMH prefilter rejects a long run with no literal');
+
+        my $very_long_a = "walrus" x 50;
+        my $very_long_b = "cat" x 100;
+        my $very_long_re = qr/\Q$very_long_a\E|\Q$very_long_b\E/;
+        my $very_long_haystack = ("A" x 5000) . $very_long_b;
+        ok($very_long_haystack =~ $very_long_re,
+           'AC BMH prefilter finds a 300-octet literal with capped shifts');
+
+        $very_long_haystack = ("A" x 5000) . ("dog" x 100);
+        ok($very_long_haystack !~ $very_long_re,
+           'AC BMH prefilter rejects a 300-octet near miss');
+
+        my @letters = 'a' .. 'z';
+        my @many_literals = map {
+            $letters[$_ % @letters] . sprintf('%06d', $_)
+        } 0 .. 255;
+        my $many_pattern = join '|', map { quotemeta($_) } @many_literals;
+        my $many_re = qr/(?:$many_pattern)/;
+        my $many_haystack = ("Z" x 5000) . $many_literals[-1];
+        ok($many_haystack =~ $many_re && $-[0] == 5000,
+           'AC high-alternative-count prefilter finds a late match');
+
+        $many_haystack = "Z" x 5000;
+        ok($many_haystack !~ $many_re,
+           'AC high-alternative-count prefilter rejects a non-match');
+
+        my $overlap_haystack = ("A" x 5000) . "abcdefghijk";
+        ok($overlap_haystack =~ /abcdefghij|defghijk/ && $-[0] == 5000
+           && $+[0] == 5010,
+           'AC BMH preserves the leftmost overlapping match');
+
+        my $utf8_ascii_haystack = ("A" x 5000) . "cat";
+        utf8::upgrade($utf8_ascii_haystack);
+        ok($utf8_ascii_haystack =~ /walrus|cat/ && $-[0] == 5000,
+           'AC start-octet table works for UTF-8 invariant literals');
+
+        my $latin1_ascii_haystack = ("A" x 5000) . "cat";
+        utf8::downgrade($latin1_ascii_haystack, 1);
+        ok($latin1_ascii_haystack =~ /walrus|cat/ && $-[0] == 5000,
+           'AC start-octet table works for Latin-1 invariant literals');
+
+        my $wide_only_re = qr/\x{400}foo|\x{800}bar/;
+        my $latin1_wide_haystack = "A" x 5000;
+        ok($latin1_wide_haystack !~ $wide_only_re,
+           'AC with only wide literals rejects a Latin-1 target');
+
+        my $utf8_wide_haystack = ("A" x 5000) . "\x{800}bar";
+        utf8::upgrade($utf8_wide_haystack);
+        ok($utf8_wide_haystack =~ $wide_only_re && $-[0] == 5000,
+           'AC with only wide literals still matches a UTF-8 target');
+
+        my $mixed_wide_re = qr/\x{400}foo|cat/;
+        $latin1_wide_haystack .= "cat";
+        ok($latin1_wide_haystack =~ $mixed_wide_re && $-[0] == 5000,
+           'AC wide-literal shortcut preserves Latin-1 alternatives');
+
+        ok("abc" =~ /(?:|\x{400}foo)/ && $-[0] == 0 && $+[0] == 0,
+           'AC wide-literal shortcut preserves an empty alternative');
+
+        my $trie_wide_re = qr/common\x{400}foo|common\x{800}bar/;
+        my $latin1_trie_haystack = ("X" x 5000) . "common";
+        ok($latin1_trie_haystack !~ $trie_wide_re,
+           'Trie with only wide suffixes rejects a Latin-1 target');
+
+        my $utf8_trie_haystack = ("X" x 5000) . "common\x{800}bar";
+        utf8::upgrade($utf8_trie_haystack);
+        ok($utf8_trie_haystack =~ $trie_wide_re && $-[0] == 5000,
+           'Trie with only wide suffixes still matches a UTF-8 target');
+        my $mixed_trie_re = qr/common\x{400}foo|commoncat/;
+        $latin1_trie_haystack .= "cat";
+        ok($latin1_trie_haystack =~ $mixed_trie_re && $-[0] == 5000,
+           'Trie wide-literal shortcut preserves Latin-1 alternatives');
+
+        my $utf8_haystack = ("\x{e9}" x 5000) . "\x{e9}cat";
+        utf8::upgrade($utf8_haystack);
+        ok($utf8_haystack =~ /\x{e9}cat|zebra/,
+           'UTF-8 AC finds a multi-byte literal after rejected input');
+
+        my $latin1_haystack = ("\xE9" x 5000) . "\xE9cat";
+        ok($latin1_haystack =~ /\x{e9}cat|zebra/,
+           'Latin-1 AC preserves matching for an awkward code point');
+
+        for my $encoding ('Latin-1', 'UTF-8') {
+            # The shortest word occupies two Latin-1 octets or three UTF-8
+            # octets.  Check both alternatives with each target encoding.
+            my $different_lengths_re = qr/\x{e9}a|zbc/;
+
+            for my $suffix ("\x{e9}a", 'zbc') {
+                my $target = ('Q' x 17) . $suffix;
+                utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                ok($target =~ $different_lengths_re && $-[0] == 17
+                   && $+[0] == length($target),
+                   "AC uses the effective literal length for $encoding");
+            }
+
+            # Excluding the wide word gives a nine-octet Latin-1 minimum.
+            # Including it gives a three-octet UTF-8 minimum.
+            my $mixed_lengths_re = qr/\x{100}x|abcdefghi/;
+            my $mixed_target = ('x' x 17) . 'abcdefghi';
+            utf8::upgrade($mixed_target) if $encoding eq 'UTF-8';
+
+            ok($mixed_target =~ $mixed_lengths_re && $-[0] == 17,
+               "AC mixed wide alternatives find a narrow word in $encoding");
+
+            $mixed_target = 'x' x 17;
+            utf8::upgrade($mixed_target) if $encoding eq 'UTF-8';
+
+            ok($mixed_target !~ $mixed_lengths_re,
+               "AC mixed wide alternatives reject a short miss in $encoding");
+
+            my $root_restart = ('a' x 17) . 'de';
+            utf8::upgrade($root_restart) if $encoding eq 'UTF-8';
+
+            ok($root_restart =~ /abc|de/ && $-[0] == 17 && $+[0] == 19,
+               "AC resets the point ring on repeated root transitions in $encoding");
+
+            my $fallback_target = 'abcdgu';
+            utf8::upgrade($fallback_target) if $encoding eq 'UTF-8';
+
+            ok($fallback_target =~ /abcdefg|cdgu/
+               && $-[0] == 2 && $+[0] == 6,
+               "AC keeps the point ring across a suffix failure transition in $encoding");
+
+            my $retry_target = 'abcdX';
+            utf8::upgrade($retry_target) if $encoding eq 'UTF-8';
+
+            ok($retry_target =~ /(?:abc|bcd)X/ && $-[0] == 1 && $+[0] == 5,
+               "AC retries an overlapping start after full-match rejection in $encoding");
+
+            # Prefilters are disabled for folds, but the point-ring changes
+            # apply there too.  One sharp s contributes two folded characters.
+            for my $case (["\x{df}x", 0, 2],
+                          ["s\x{df}x", 1, 3],
+                          ["s\x{df}ssx", 2, 5])
+            {
+                my ($target, $start, $end) = @$case;
+                utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                ok($target =~ /ssx|ab/iu && $-[0] == $start && $+[0] == $end,
+                   "AC keeps folded character offsets after root restarts in $encoding");
+            }
+
+            my $partial_fold = "\x{df}x";
+            utf8::upgrade($partial_fold) if $encoding eq 'UTF-8';
+
+            ok($partial_fold !~ /sx|ab/iu,
+               "AC rejects a match starting inside a multi-character fold in $encoding");
+
+            # Each unit's octets are rejected by the start map, but occur at
+            # BMH anchors.  Vary the alignment and the repeated word content.
+            for my $unit ('A', 'AB', 'AABB', 'AAAABBBB') {
+                for my $offset (0 .. 7) {
+                    my $run = ('X' x $offset) . ($unit x 8);
+                    my $late_match = $run . 'barB';
+                    utf8::upgrade($late_match) if $encoding eq 'UTF-8';
+
+                    ok($late_match =~ /fooA|barB/
+                       && $-[0] == length($run)
+                       && $+[0] == length($late_match),
+                       "AC $encoding repeated '$unit' finds a match at alignment $offset");
+
+                    utf8::upgrade($run) if $encoding eq 'UTF-8';
+
+                    ok($run !~ /fooA|barB/,
+                       "AC $encoding repeated '$unit' rejects a miss at alignment $offset");
+                }
+            }
+
+            # Include runs shorter than a UV and tails shorter than a UV.
+            # The helper must not read beyond the buffer or miss its last start.
+            for my $run_length (0 .. 15) {
+                my $short_run = 'A' x $run_length;
+                my $last_match = $short_run . 'barB';
+                utf8::upgrade($last_match) if $encoding eq 'UTF-8';
+
+                ok($last_match =~ /fooA|barB/ && $-[0] == $run_length,
+                   "AC $encoding short repeated run of length $run_length finds the last start");
+
+                utf8::upgrade($short_run) if $encoding eq 'UTF-8';
+
+                ok($short_run !~ /fooA|barB/,
+                   "AC $encoding short repeated run of length $run_length rejects a miss");
+            }
+        }
+
+        my $wide_minimum_target = ('x' x 17) . "\x{100}x";
+        ok($wide_minimum_target =~ /\x{100}x|abcdefghi/ && $-[0] == 17,
+           'AC uses the wide alternative that sets the UTF-8 minimum');
+
+        my $wide_fallback_target = "\x{e9}abc\x{100}du";
+        ok($wide_fallback_target =~ /\x{e9}abcdefg|c\x{100}du/
+           && $-[0] == 3 && $+[0] == 7,
+           'AC retains character offsets across a wide suffix failure transition');
+
+        # The UTF-8 prefixes exceed the 255-octet cap.  Their capped anchor
+        # lies on a continuation octet, which is valid for a BMH lookup.
+        my $long_latin1_word = 'a' . ("\x{e9}" x 150);
+        my $long_wide_word = 'b' . ("\x{100}" x 150);
+        my $long_encoded_re = qr/\Q$long_latin1_word\E|\Q$long_wide_word\E/;
+
+        for my $encoding ('Latin-1', 'UTF-8') {
+            my $target = ('Q' x 17) . $long_latin1_word;
+            utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+            ok($target =~ $long_encoded_re && $-[0] == 17
+               && $+[0] == length($target),
+               "AC long encoded literals match a Latin-1 word in $encoding");
+
+            $target = ('Q' x 17) . 'a' . ("\x{e9}" x 149) . 'z';
+            utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+            ok($target !~ $long_encoded_re,
+               "AC long encoded literals reject a near miss in $encoding");
+        }
+
+        my $long_wide_target = ('Q' x 17) . $long_wide_word;
+        ok($long_wide_target =~ $long_encoded_re && $-[0] == 17,
+           'AC capped shifts find a long wide word through continuation anchors');
+    }
+
     {
         # see https://github.com/Perl/perl5/issues/12948
         my $string="ABCDEFGHIJKL";

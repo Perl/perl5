@@ -95,6 +95,14 @@ Unicode case folding can join neighboring folded literals after the
 optimizer records their fixed substrings.
 L<[GH #19953]|https://github.com/Perl/perl5/issues/19953>
 
+=item *
+
+The Aho-Corasick regex scanner uses Boyer-Moore-Horspool shift tables to skip
+positions where no literal alternative can start.  It can also skip repeated
+blocks of octets that cannot start an alternative.  These filters apply to
+eligible case-sensitive literals, with separate shift tables for Latin-1 and
+UTF-8 targets.
+
 =back
 
 =head1 Modules and Pragmata

@@ -1342,6 +1342,7 @@ enum trie_flags {
     TRIE_CP_WIDE = TRIE_CP_AWKWARD | TRIE_CP_HIGH,
     TRIE_FOLD_NATIVE = 8,
     TRIE_FOLD_UNICODE = 16,
+    TRIE_CP_NO_LATIN1_WORDS = 32, /* every trie word has a codepoint > 255 */
     TRIE_FOLD_MASK = TRIE_FOLD_NATIVE | TRIE_FOLD_UNICODE
 };
 
@@ -1404,6 +1405,16 @@ struct reg_trie_data_ {
 
 typedef struct reg_trie_data_ reg_trie_data;
 
+/* Full filter allocation: one BMH table for each target encoding, then the
+ * encoding-masked start map. */
+#define REG_AC_PREFILTER_LATIN1_BMH_OFFSET 0
+#define REG_AC_PREFILTER_UTF8_BMH_OFFSET  256
+#define REG_AC_PREFILTER_MAP_OFFSET       512
+#define REG_AC_PREFILTER_MAP_SIZE         256
+#define REG_AC_PREFILTER_SIZE             (512 + REG_AC_PREFILTER_MAP_SIZE)
+#define REG_AC_PREFILTER_LATIN1_MASK      0x01
+#define REG_AC_PREFILTER_UTF8_MASK        0x02
+
 /* refcount is first in both this and reg_trie_data_ to allow a space
    optimisation in Perl_regdupe.  */
 struct reg_ac_data_ {
@@ -1411,6 +1422,16 @@ struct reg_ac_data_ {
     U32              trie;
     U32              *fail;
     reg_trie_state   *states;
+    /* The allocation contains the Latin-1 BMH table at offset 0, the UTF-8
+     * BMH table at 256, and the start map at 512.  Map entries use mask 0x01
+     * for Latin-1 starts and 0x02 for UTF-8 starts.  Each minlen is the
+     * shortest eligible literal length in that encoding's octets, capped
+     * at 255.  Zero means that encoding has no usable BMH table.
+     * The allocation is immutable and
+     * shared by regex clones through this AC structure's refcount. */
+    U8               *prefilter;
+    U8               latin1_minlen;
+    U8               utf8_minlen;
 };
 typedef struct reg_ac_data_ reg_ac_data;
 
