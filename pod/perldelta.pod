@@ -110,6 +110,14 @@ reduce the amount of temporary memory used for the cache.
 C<substr()> now updates the UTF-8 position cache correctly, avoiding
 repeated scans when accessing the same part of a string. [GH #24531]
 
+=item *
+
+The Aho-Corasick regex scanner uses Boyer-Moore-Horspool shift tables to skip
+positions where no literal alternative can start.  It can also skip repeated
+blocks of octets that cannot start an alternative.  These filters apply to
+eligible case-sensitive literals, with separate shift tables for Latin-1 and
+UTF-8 targets.
+
 =back
 
 =head1 Modules and Pragmata
