@@ -1426,7 +1426,8 @@ struct reg_ac_data_ {
      * BMH table at 256, and the start map at 512.  Map entries use mask 0x01
      * for Latin-1 starts and 0x02 for UTF-8 starts.  Each minlen is the
      * shortest eligible literal length in that encoding's octets, capped
-     * at 255.  Zero means that encoding has no usable BMH table.
+     * at 255.  Zero means that encoding has no usable BMH table.  Folded
+     * tries use only the start map and leave both lengths zero.
      * The allocation is immutable and
      * shared by regex clones through this AC structure's refcount. */
     U8               *prefilter;
