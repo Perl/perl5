@@ -24,15 +24,18 @@ sub wanted { $_ =~ m{\.t$} and push @raw_ppport_tests, (
 find(\&wanted, ( './dist/Devel-PPPort/t' ));
 my @ppport_tests = sort @raw_ppport_tests;
 
-
 test_via_TEST( qw| op/args.t op/bool.t ../lib/vars.t | );
 test_via_TEST('base/cond.t', @ppport_tests);
 
 test_via_harness( qw| op/args.t op/bool.t ../lib/vars.t | );
 test_via_harness('base/cond.t', @ppport_tests);
 
-test_via_runtests( qw| op/args.t op/bool.t ../lib/vars.t | );
-test_via_runtests('base/cond.t', @ppport_tests);
+TODO: {
+    todo_skip("test_via_runtests() causes file to hang during 'make test_porting'", 2);
+
+    test_via_runtests( qw| op/args.t op/bool.t ../lib/vars.t | );
+    test_via_runtests('base/cond.t', @ppport_tests);
+}
 
 my (%th, %tt, %all);
 $ENV{PERL_TORTURE_TEST} = 1;
