@@ -567,6 +567,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     STRLEN len = 0;
     UV uvc = 0;
     U32 curword = 0;
+    U32 latin1_word_count = 0;
     U32 next_alloc = 0;
     U32 state_capacity = 0;
     regnode *jumper = NULL;
@@ -720,6 +721,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             U32 state        = 1;         /* required init */
             U32 wordlen      = 0;         /* required init */
             int foldlen      = 0;
+            bool word_is_latin1 = TRUE;
             STRLEN minchars  = 0;
             STRLEN maxchars  = 0;
             lastbranch = cur;
@@ -765,6 +767,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         else if (UTF8_IS_ABOVE_LATIN1(*uc)) {
                             trie->prop_flags |= TRIE_CP_HIGH;
                             trie_needs_codepoint_processing = true;
+                            word_is_latin1 = FALSE;
                         }
                         else {
                             trie->prop_flags |= TRIE_CP_AWKWARD;
@@ -812,6 +815,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     else {
                         trie->prop_flags |= TRIE_CP_HIGH;
                         trie_needs_codepoint_processing = true;
+                        word_is_latin1 = FALSE;
                     }
 
                     /* The trie contains every character in the folded
@@ -911,6 +915,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                 curword++;
                 assert(curword <= word_count);
+                if (word_is_latin1)
+                    latin1_word_count++;
                 trie->wordinfo[curword].prev = 0;
                 trie->wordinfo[curword].len = wordlen;
                 trie->wordinfo[curword].accept = state;
@@ -966,6 +972,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             }
 
         } /* end list construction */
+
+        /* If every stored literal needs a codepoint unavailable in a
+         * non-UTF-8 target, the AC node cannot match that target at all. */
+        if ((flags == EXACT || flags == EXACT_REQ8)
+            && curword == word_count && !latin1_word_count)
+            trie->prop_flags |= TRIE_CP_NO_LATIN1_WORDS;
 
         /* The list pass has also completed the source analysis. */
         trie->before_paren = OP(first) == BRANCH
@@ -1725,6 +1737,84 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
              : MADE_TRIE;
 }
 
+/* Convert one trie path to the octets seen in a Latin-1 target.  A path with
+ * one octet per source character contains only UTF-8 invariant characters,
+ * so its octets already have the target representation.  Longer paths are
+ * UTF-8 encodings and can be downgraded only when every character fits in
+ * Latin-1.  The caller excludes case-folded tries. */
+static bool
+S_ac_path_as_latin1(const U8 *path, const U32 path_len, const U32 source_chars,
+                    U8 *latin1_path, U32 *latin1_len)
+{
+    if (path_len == source_chars) {
+        Copy(path, latin1_path, path_len, U8);
+        *latin1_len = path_len;
+        return TRUE;
+    }
+
+    if (path_len < source_chars)
+        return FALSE;
+
+    {
+        U32 pos = 0;
+        U32 out = 0;
+
+        while (pos < path_len) {
+            STRLEN char_len = 0;
+            const UV cp = valid_utf8_to_uv(path + pos, &char_len);
+
+            if (cp > 255 || !char_len || char_len > path_len - pos)
+                return FALSE;
+            latin1_path[out++] = (U8)cp;
+            pos += (U32)char_len;
+        }
+
+        if (out != source_chars)
+            return FALSE;
+        *latin1_len = out;
+    }
+
+    return TRUE;
+}
+
+#ifdef DEBUGGING
+static void
+S_dump_ac_prefilter_table(pTHX_ const char *name, const U8 *table,
+                          const U32 length, const U32 depth)
+{
+    U32 c;
+
+    re_indentf("%s\n", depth, name);
+    for (c = 0; c < length; c++) {
+        if (!(c % 16))
+            re_indentf("%02" UVXf ":", depth + 1, (UV)c);
+        re_printf(" %02" UVXf, (UV)table[c]);
+        if (c % 16 == 15)
+            re_printf("\n");
+    }
+}
+
+static void
+S_dump_ac_prefilters(pTHX_ const reg_ac_data *aho, const U32 depth)
+{
+    re_indentf("AC prefilters: Latin-1 m=%u, UTF-8 m=%u\n",
+               depth, (unsigned)aho->latin1_minlen,
+               (unsigned)aho->utf8_minlen);
+    if (!aho->prefilter)
+        return;
+
+    S_dump_ac_prefilter_table(aTHX_ "  start-octet map (0x01=Latin-1, 0x02=UTF-8):",
+                              aho->prefilter + REG_AC_PREFILTER_MAP_OFFSET,
+                              REG_AC_PREFILTER_MAP_SIZE, depth);
+    S_dump_ac_prefilter_table(aTHX_ "  Latin-1 BMH shifts:",
+                              aho->prefilter + REG_AC_PREFILTER_LATIN1_BMH_OFFSET,
+                              TRIE_ALPHABET_SIZE, depth);
+    S_dump_ac_prefilter_table(aTHX_ "  UTF-8 BMH shifts:",
+                              aho->prefilter + REG_AC_PREFILTER_UTF8_BMH_OFFSET,
+                              TRIE_ALPHABET_SIZE, depth);
+}
+#endif
+
 regnode *
 Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *source, U32 depth)
 {
@@ -1787,15 +1877,174 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     SHORT_TRIE_DATA_SLOT_set(stclass, data_slot);
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
+    aho->refcount = 1;
     aho->trie = trie_offset;
     aho->states = (reg_trie_state *)PerlMemShared_malloc( numstates * sizeof(reg_trie_state) );
     Copy( trie->states, aho->states, numstates, reg_trie_state );
+
+    /* Only unprefixed tries can be the first regex node and use this AC
+     * start class.  The constructor runs after prefix extraction.  An
+     * accepting root represents an empty alternative, which must be checked
+     * at the current position before any prefilter can skip ahead. */
+    if (FLAGS(source) == EXACT && trie->startstate == 1
+        && !trie->states[1].wordnum
+        && !trie->prefixlen_octets && !trie->prefixlen_chars
+        && !(trie->prop_flags & TRIE_FOLD_MASK)
+        && trie->minlen)
+    {
+        U32 *parents;
+        U32 *path_depths;
+        U8 *parent_octets;
+        U8 *path;
+        U8 *latin1_path;
+        U8 *start_map;
+        U8 *latin1_shift;
+        U8 *utf8_shift;
+        U32 max_path_len = 0;
+        U32 utf8_words = 0;
+        U32 latin1_minlen = 0;
+        U32 utf8_minlen = 255;
+
+        /* Recover each literal's path through the post-prefix trie.  This
+         * lets the two tables describe the octets actually scanned for each
+         * target encoding, including Latin-1 representations of UTF-8
+         * literals. */
+        Newxz(parents, numstates, U32);
+        Newxz(path_depths, numstates, U32);
+        Newxz(parent_octets, numstates, U8);
+
+        /* List construction gives each child a later state number than
+         * its parent, so the parent depth is known when we visit a child. */
+        for (U32 state = 1; state < numstates; state++) {
+            const U32 trans_base = trie->states[state].trans.base;
+            for (U32 ch = trie->states[state].min_octet;
+                 trans_base && ch <= trie->states[state].max_octet; ch++)
+            {
+                const U32 next = S_trie_trans_state(trie, state, trans_base,
+                                                    ch, 0);
+                if (next) {
+                    assert(next > state);
+                    parents[next] = state;
+                    parent_octets[next] = (U8)ch;
+                    path_depths[next] = path_depths[state] + 1;
+                    if (path_depths[next] > max_path_len)
+                        max_path_len = path_depths[next];
+                }
+            }
+        }
+
+        Newx(path, max_path_len ? max_path_len : 1, U8);
+        Newx(latin1_path, trie->maxlen ? trie->maxlen : 1, U8);
+
+        /* Build the BMH tables and start map from the trie after prefix
+         * extraction.  The scanner uses BMH to find candidates and the map
+         * to reject candidates whose first octet cannot start a literal. */
+        aho->prefilter = (U8 *)PerlMemShared_calloc(
+            REG_AC_PREFILTER_SIZE, sizeof(U8));
+        start_map = aho->prefilter + REG_AC_PREFILTER_MAP_OFFSET;
+        latin1_shift = aho->prefilter + REG_AC_PREFILTER_LATIN1_BMH_OFFSET;
+        utf8_shift = aho->prefilter + REG_AC_PREFILTER_UTF8_BMH_OFFSET;
+
+        /* First pass: find the anchor lengths and both possible start sets. */
+        for (U32 state = 2; state < numstates; state++) {
+            const U32 word = trie->states[state].wordnum;
+            U32 path_len;
+            U32 cursor;
+            U32 i;
+
+            if (!word)
+                continue;
+
+            path_len = path_depths[state];
+            cursor = state;
+            for (i = path_len; i; i--) {
+                path[i - 1] = parent_octets[cursor];
+                cursor = parents[cursor];
+            }
+
+            utf8_words++;
+            if (path_len < utf8_minlen)
+                utf8_minlen = path_len;
+            if (path_len)
+                start_map[path[0]] |= REG_AC_PREFILTER_UTF8_MASK;
+
+            {
+                U32 latin1_len = 0;
+                if (S_ac_path_as_latin1(path, path_len,
+                                        trie->wordinfo[word].len,
+                                        latin1_path, &latin1_len))
+                {
+                    if (!latin1_minlen || latin1_len < latin1_minlen)
+                        latin1_minlen = latin1_len;
+                    if (latin1_len)
+                        start_map[latin1_path[0]] |= REG_AC_PREFILTER_LATIN1_MASK;
+                }
+            }
+        }
+
+        if (latin1_minlen > 255)
+            latin1_minlen = 255;
+        if (!utf8_words)
+            utf8_minlen = 0;
+        aho->latin1_minlen = (U8)latin1_minlen;
+        aho->utf8_minlen = (U8)utf8_minlen;
+        if (utf8_minlen)
+            memset(utf8_shift, (int)utf8_minlen, TRIE_ALPHABET_SIZE);
+        if (latin1_minlen)
+            memset(latin1_shift, (int)latin1_minlen, TRIE_ALPHABET_SIZE);
+
+        /* Second pass: fill the BMH shifts from each target's effective
+         * literal representation. */
+        for (U32 state = 2; state < numstates; state++) {
+            const U32 word = trie->states[state].wordnum;
+            U32 path_len;
+            U32 cursor;
+            U32 i;
+
+            if (!word)
+                continue;
+
+            path_len = path_depths[state];
+            cursor = state;
+            for (i = path_len; i; i--) {
+                path[i - 1] = parent_octets[cursor];
+                cursor = parents[cursor];
+            }
+
+            for (i = 0; i < utf8_minlen; i++) {
+                const U8 distance = (U8)(utf8_minlen - 1 - i);
+                if (distance < utf8_shift[path[i]])
+                    utf8_shift[path[i]] = distance;
+            }
+
+            if (latin1_minlen) {
+                U32 latin1_len = 0;
+                if (S_ac_path_as_latin1(path, path_len,
+                                        trie->wordinfo[word].len,
+                                        latin1_path, &latin1_len))
+                {
+                    for (i = 0; i < latin1_minlen; i++) {
+                        const U8 distance = (U8)(latin1_minlen - 1 - i);
+                        if (distance < latin1_shift[latin1_path[i]])
+                            latin1_shift[latin1_path[i]] = distance;
+                    }
+                }
+            }
+        }
+
+        DEBUG_TRIE_COMPILE_r(S_dump_ac_prefilters(aTHX_ aho, depth));
+
+        Safefree(latin1_path);
+        Safefree(path);
+        Safefree(parent_octets);
+        Safefree(path_depths);
+        Safefree(parents);
+    }
     /* The breadth-first work queue can contain each state at most once, so
      * numstates entries suffice.  q_read and q_write address it as a
      * circular queue while q_write advances monotonically. */
     Newx( q, numstates, U32);
     aho->fail = (U32 *) PerlMemShared_calloc( numstates, sizeof(U32) );
-    aho->refcount = 1;
     fail = aho->fail;
     /* initialize fail[0..1] to be 1 so that we always have
        a valid final fail state */
