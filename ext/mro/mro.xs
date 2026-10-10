@@ -7,8 +7,44 @@
 static AV*
 S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level);
 
-static const struct mro_alg c3_alg =
+static struct mro_alg c3_alg =
     {S_mro_get_linear_isa_c3, "c3", 2, 0, 0};
+
+#define MY_CXT_KEY "mro::_guts"
+
+typedef struct {
+  SV *sv_UNIVERSAL;
+  SV *sv_dfs;
+  SV *sv_c3;
+  SV *sv_ISA;
+} my_cxt_t;
+
+START_MY_CXT
+
+static void
+init_MY_CXT(pTHX_ pMY_CXT)
+{
+  MY_CXT.sv_UNIVERSAL = newSVpvs_share("UNIVERSAL");
+  SvREADONLY_on(MY_CXT.sv_UNIVERSAL);
+  MY_CXT.sv_dfs = newSVpvs_share("dfs");
+  SvREADONLY_on(MY_CXT.sv_dfs);
+  MY_CXT.sv_c3 = newSVpvn_share("c3", sizeof("c3")-1, c3_alg.hash);
+  SvREADONLY_on(MY_CXT.sv_c3);
+  MY_CXT.sv_ISA = newSVpvs_share("ISA");
+  SvREADONLY_on(MY_CXT.sv_ISA);
+}
+
+static SV*
+S_mro_newSVsvhekok(pTHX_ SV* sv)
+{
+    char * pv = SvPVX(sv);
+    if (    ((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK)
+            && SvIsCOW_shared_hash(sv))
+        return newSVhek(SvSHARED_HEK_FROM_PV(pv));
+     else
+        return newSVsv(sv);
+}
+#define mro_newSVsvhekok(_sv) S_mro_newSVsvhekok(aTHX_ _sv)
 
 /*
 
@@ -30,7 +66,6 @@ static AV*
 S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 {
     AV* retval;
-    GV** gvp;
     GV* gv;
     AV* isa;
     const HEK* stashhek;
@@ -41,10 +76,10 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     stashhek = HvENAME_HEK(stash);
     if (!stashhek) stashhek = HvNAME_HEK(stash);
     if (!stashhek)
-      Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
+      Perl_croak_nocontext("Can't linearize anonymous symbol table");
 
     if (level > 100)
-        Perl_croak(aTHX_ "Recursive inheritance detected in package '%" HEKf
+        Perl_croak_nocontext("Recursive inheritance detected in package '%" HEKf
                          "'",
                           HEKfARG(stashhek));
 
@@ -56,9 +91,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
     }
 
     /* not in cache, make a new one */
-
-    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
-    isa = (gvp && (gv = *gvp) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
+    dMY_CXT;
+    HE* he = hv_fetch_ent(stash, MY_CXT.sv_ISA, FALSE, 0);
+    isa = (he && (gv = (GV*)HeVAL(he)) && isGV_with_GP(gv)) ? GvAV(gv) : NULL;
 
     /* For a better idea how the rest of this works, see the much clearer
        pure perl version in Algorithm::C3 0.01:
@@ -87,8 +122,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
             if(!isa_item_stash) {
                 /* if no stash, make a temporary fake MRO
                    containing just itself */
+                SV* nsv = mro_newSVsvhekok(isa_item);
                 AV* const isa_lin = newAV_alloc_xz(4);
-                av_push_simple(isa_lin, newSVsv(isa_item));
+                av_push_simple(isa_lin, nsv);
                 av_push_simple(seqs, MUTABLE_SV(isa_lin));
             }
             else {
@@ -117,16 +153,17 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 		    /* First entry is this class.  We happen to make a shared
 		       hash key scalar because it's the cheapest and fastest
 		       way to do it.  */
-		    *svp++ = newSVhek(stashhek);
+		    *svp++ = newSVhek(stashhek); /* Ex: Diamond_A */
 
 		    while(subrv_items--) {
 			/* These values are unlikely to be shared hash key
 			   scalars, so no point in adding code to optimising
 			   for a case that is unlikely to be true.
 			   (Or prove me wrong and do it.)  */
-
+			/* Update: Example SVPV HEK*s seen on this line:
+			   MRO_A MRO_B Diamond_A */
 			SV *const val = *subrv_p++;
-			*svp++ = newSVsv(val);
+			*svp++ = mro_newSVsvhekok(val);
 		    }
 
 		    SvREFCNT_inc(retval);
@@ -167,11 +204,12 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 }
             }
         }
-
+        {
         /* Initialize retval to build the return value in */
-        retval = newAV_alloc_xz(4);
-        av_push_simple(retval, newSVhek(stashhek)); /* us first */
-
+            SV* nsv = newSVhek(stashhek);
+            retval = newAV_alloc_xz(4);
+            av_push_simple(retval, nsv); /* us first */
+        }
         /* This loop won't terminate until we either finish building
            the MRO, or get an exception. */
         while(1) {
@@ -201,7 +239,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                        && (val = HeVAL(tail_entry))
                        && (SvIVX(val) > 0))
                            continue;
-                    winner = newSVsv(cand);
+                 /* Examples: SVPVHEK*s MRO_A HEK Diamond_B or a 0xd byte
+                    unprintable string. Rarely a NewXed buffer like "Test::O" */
+                    winner = mro_newSVsvhekok(cand);
                     av_push_simple(retval, winner);
                     /* note however that even when we find a winner,
                        we continue looping over @seqs to do housekeeping */
@@ -243,14 +283,12 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
             /* If we had candidates, but nobody won, then the @ISA
                hierarchy is not C3-incompatible */
             if(!winner) {
-                SV *errmsg;
-                Size_t i;
-
-                errmsg = newSVpvf(
+                SV *errmsg = newSVpvf(
                            "Inconsistent hierarchy during C3 merge of class '%" HEKf "':\n\t"
                             "current merge results [\n",
                             HEKfARG(stashhek));
-                for (i = 0; i < av_count(retval); i++) {
+                SSize_t count = av_count(retval);
+                for (SSize_t i = 0; i < count; i++) {
                     SV **elem = av_fetch(retval, i, 0);
                     sv_catpvf(errmsg, "\t\t%" SVf ",\n", SVfARG(*elem));
                 }
@@ -261,14 +299,17 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 SvREFCNT_dec(retval);
                 Safefree(heads);
 
-                Perl_croak(aTHX_ "%" SVf, SVfARG(errmsg));
+                Perl_croak_nocontext("%" SVf, SVfARG(errmsg));
             }
         }
     }
     else { /* @ISA was undefined or empty */
+/* Do this 1st, the next 2 AV* API calls are likely to be inlined and
+   optimize away alot of AvFILL/memset/Renew logic if nothing is between them. */
+        SV* nsv = newSVhek(stashhek);
         /* build a retval containing only ourselves */
         retval = newAV_alloc_xz(4);
-        av_push_simple(retval, newSVhek(stashhek));
+        av_push_simple(retval, nsv);
     }
 
  done:
@@ -297,6 +338,44 @@ __dopoptosub_at(const PERL_CONTEXT *cxstk, I32 startingblock) {
 
 MODULE = mro		PACKAGE = mro		PREFIX = mro_
 
+#ifdef MULTIPLICITY
+
+void CLONE (...)
+CODE:
+#undef memcpy
+#define memcpy(a,b,c) NOOP
+    {
+        MY_CXT_CLONE; /* possible declaration */
+        init_MY_CXT(aTHX_ aMY_CXT);
+    }
+#undef memcpy
+    /* skip implicit PUTBACK, returning @_ to caller, more efficient */
+    return;
+
+#endif
+
+void END(...)
+PREINIT:
+    SV * sv;
+PPCODE:
+    if (PL_perl_destruct_level) {
+        dMY_CXT;
+        sv = MY_CXT.sv_UNIVERSAL;
+        MY_CXT.sv_UNIVERSAL = NULL;
+        SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_dfs;
+        MY_CXT.sv_dfs = NULL;
+        SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_c3;
+        MY_CXT.sv_c3 = NULL;
+        SvREFCNT_dec_NN(sv);
+        sv = MY_CXT.sv_ISA;
+        MY_CXT.sv_ISA = NULL;
+        SvREFCNT_dec_NN(sv);
+    }
+	/* skip implicit PUTBACK, returning @_ to caller, more efficient*/
+    return;
+
 void
 mro_get_linear_isa(...)
   PROTOTYPE: $;$
@@ -313,15 +392,16 @@ mro_get_linear_isa(...)
 
     if(!class_stash) {
         /* No stash exists yet, give them just the classname */
+        SV* nsv = mro_newSVsvhekok(classname);
         AV* isalin = newAV_alloc_xz(4);
-        av_push_simple(isalin, newSVsv(classname));
+        av_push_simple(isalin, nsv);
         ST(0) = sv_2mortal(newRV_noinc(MUTABLE_SV(isalin)));
         XSRETURN(1);
     }
     else if(items > 1) {
 	const struct mro_alg *const algo = Perl_mro_get_from_name(aTHX_ ST(1));
 	if (!algo)
-	    Perl_croak(aTHX_ "Invalid mro name: '%" SVf "'", ST(1));
+	    Perl_croak_nocontext("Invalid mro name: '%" SVf "'", ST(1));
 	RETVAL = algo->resolve(aTHX_ class_stash, 0);
     }
     else {
@@ -336,20 +416,21 @@ mro_set_mro(...)
   PROTOTYPE: $$
   PREINIT:
     SV* classname;
+    SV* type;
     HV* class_stash;
     struct mro_meta* meta;
-  PPCODE:
+  CODE:
     if (items != 2)
 	croak_xs_usage(cv, "classname, type");
-
-    classname = ST(0);
+    type = POPs;
+    classname = POPs;
+    PUTBACK; /* return empty list */
     class_stash = gv_stashsv(classname, GV_ADD);
-    if(!class_stash) Perl_croak(aTHX_ "Cannot create class: '%" SVf "'!", SVfARG(classname));
+    if(!class_stash) Perl_croak_nocontext("Cannot create class: '%" SVf "'!", SVfARG(classname));
     meta = HvMROMETA(class_stash);
 
-    Perl_mro_set_mro(aTHX_ meta, ST(1));
-
-    XSRETURN_EMPTY;
+    Perl_mro_set_mro(aTHX_ meta, type);
+    return; /* skip implied PUTBACK; */
 
 void
 mro_get_mro(...)
@@ -357,6 +438,8 @@ mro_get_mro(...)
   PREINIT:
     SV* classname;
     HV* class_stash;
+    SV* retsv;
+    U32 which_my_cxt; /* rel offset MY_CXT, prevents 2 sep dMY_CXT deref lines */
   PPCODE:
     if (items != 1)
 	croak_xs_usage(cv, "classname");
@@ -366,13 +449,30 @@ mro_get_mro(...)
 
     if (class_stash) {
         const struct mro_alg *const meta = HvMROMETA(class_stash)->mro_which;
- 	ST(0) = newSVpvn_flags(meta->name, meta->length,
-			       SVs_TEMP
-			       | ((meta->kflags & HVhek_UTF8) ? SVf_UTF8 : 0));
+        if (memEQs(meta->name, meta->length, "dfs")) /* skipping meta->kflags & HVhek_UTF8 */
+            goto ret_dfs;
+        /* "c3" shows up here running mro's .t'es */
+        else if (memEQs(meta->name, meta->length, "c3")) {
+            which_my_cxt = STRUCT_OFFSET(my_cxt_t, sv_c3);
+            goto ret_my_cxt_hek;
+        }
+        else { /* pretty sure this string already exists inside PL_strtab by now */
+            I32 i32len = meta->kflags & HVhek_UTF8 ? -(I32)meta->length : (I32)meta->length;
+            retsv = sv_2mortal(newSVpvn_share(meta->name, i32len, meta->hash));
+        }
     } else {
-      ST(0) = newSVpvn_flags("dfs", 3, SVs_TEMP);
+        ret_dfs:
+        which_my_cxt = STRUCT_OFFSET(my_cxt_t, sv_dfs);
+
+        ret_my_cxt_hek:
+        {
+            dMY_CXT;
+            SV** svp = NUM2PTR(SV**,(PTR2nat(&MY_CXT)+which_my_cxt));
+            SV* svhek = *svp;
+            retsv = newSVhek_mortal(SvSHARED_HEK_FROM_PV(SvPVX(svhek)));
+        }
     }
-    XSRETURN(1);
+    PUSHs(retsv);
 
 void
 mro_get_isarev(...)
@@ -395,12 +495,13 @@ mro_get_isarev(...)
     if(isarev) {
         HE* iter;
         hv_iterinit(isarev);
-        while((iter = hv_iternext(isarev)))
-            av_push_simple(ret_array, newSVsv(hv_iterkeysv(iter)));
+        while((iter = hv_iternext(isarev))) {
+            assert(HeKLEN(iter) != HEf_SVKEY);
+            SV* ksv = newSVhek(HeKEY_hek(iter)); /* prev hv_iterkeysv(iter) */
+            av_push_simple(ret_array, ksv);
+        }
     }
-    mXPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
-
-    PUTBACK;
+    mPUSHs(newRV_noinc(MUTABLE_SV(ret_array)));
 
 void
 mro_is_universal(...)
@@ -408,37 +509,45 @@ mro_is_universal(...)
   PREINIT:
     SV* classname;
     HV* isarev;
-    char* classname_pv;
-    STRLEN classname_len;
     HE* he;
+    SV* rsv;
   PPCODE:
     if (items != 1)
 	croak_xs_usage(cv, "classname");
 
     classname = ST(0);
 
-    classname_pv = SvPV(classname,classname_len);
-
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
     isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
 
-    if((memEQs(classname_pv, classname_len, "UNIVERSAL"))
-        || (isarev && hv_existss(isarev, "UNIVERSAL")))
-        XSRETURN_YES;
-    else
-        XSRETURN_NO;
+    STRLEN classname_len;
+    const char* classname_pv = SvPV_const(classname, classname_len);
+    if(memEQs(classname_pv, classname_len, "UNIVERSAL"))
+        rsv = &PL_sv_yes;
+    else {
+        if (isarev) {
+            dMY_CXT;
+            if (hv_exists_ent(isarev, MY_CXT.sv_UNIVERSAL, 0))
+                rsv = &PL_sv_yes;
+            else
+                rsv = &PL_sv_no;
+        }
+        else
+            rsv = &PL_sv_no;
+    }
+    PUSHs(rsv);
 
 
 void
 mro_invalidate_all_method_caches(...)
   PROTOTYPE: 
   PPCODE:
+    SP = MARK;
+    PUTBACK;
     if (items != 0)
 	croak_xs_usage(cv, "");
-
     PL_sub_generation++;
-
-    XSRETURN_EMPTY;
+    return;
 
 void
 mro_get_pkg_gen(...)
@@ -446,23 +555,24 @@ mro_get_pkg_gen(...)
   PREINIT:
     SV* classname;
     HV* class_stash;
+    IV  RETVAL;
+    dXSTARG; /* CODE: + IV retval + prototypes seems to be broken in EU::PXS */
   PPCODE:
     if(items != 1)
 	croak_xs_usage(cv, "classname");
-    
     classname = ST(0);
-
-    class_stash = gv_stashsv(classname, 0);
-
-    mXPUSHi(class_stash ? HvMROMETA(class_stash)->pkg_gen : 0);
-    
+    PUSHs(TARG);
     PUTBACK;
+    class_stash = gv_stashsv(classname, 0);
+    RETVAL = class_stash ? HvMROMETA(class_stash)->pkg_gen : 0;
+    TARGi(RETVAL,1);
+    return;
 
 void
 mro__nextcan(...)
   PREINIT:
     SV* self = ST(0);
-    const I32 throw_nomethod = SvIVX(ST(1));
+    const bool throw_nomethod = cBOOL(SvIVX(ST(1)));
     I32 cxix = cxstack_ix;
     const PERL_CONTEXT *ccstack = cxstack;
     const PERL_SI *top_si = PL_curstackinfo;
@@ -494,7 +604,7 @@ mro__nextcan(...)
 
     hvname = HvNAME_get(selfstash);
     if (!hvname)
-        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
+        Perl_croak_nocontext("Can't use anonymous symbol table for method lookup");
 
     /* This block finds the contextually-enclosing fully-qualified subname,
        much like looking at (caller($i))[3] until you find a real sub that
@@ -507,7 +617,7 @@ mro__nextcan(...)
             /* we may be in a higher stacklevel, so dig down deeper */
             while (cxix < 0) {
                 if(top_si->si_type == PERLSI_MAIN)
-                    Perl_croak(aTHX_ "next::method/next::can/maybe::next::method must be used in method context");
+                    Perl_croak_nocontext("next::method/next::can/maybe::next::method must be used in method context");
                 top_si = top_si->si_prev;
                 ccstack = top_si->si_cxstack;
                 cxix = __dopoptosub_at(ccstack, top_si->si_cxix);
@@ -546,7 +656,7 @@ mro__nextcan(...)
 		subname = strrchr(fq_subname, ':');
             }
             if(!subname)
-                Perl_croak(aTHX_ "next::method/next::can/maybe::next::method cannot find enclosing method");
+                Perl_croak_nocontext("next::method/next::can/maybe::next::method cannot find enclosing method");
 
             subname_utf8 = SvUTF8(sv) ? 1 : 0;
             subname++;
@@ -565,8 +675,10 @@ mro__nextcan(...)
     /* Initialize the next::method cache for this stash
        if necessary */
     selfmeta = HvMROMETA(selfstash);
-    if(!(nmcache = selfmeta->mro_nextmethod)) {
-        nmcache = selfmeta->mro_nextmethod = newHV();
+    nmcache = selfmeta->mro_nextmethod;
+    if (!nmcache) {
+        nmcache = newHV();
+        selfmeta->mro_nextmethod = nmcache;
     }
     else { /* Use the cached coderef if it exists */
 	HE* cache_entry = hv_fetch_ent(nmcache, sv, 0, 0);
@@ -574,7 +686,7 @@ mro__nextcan(...)
 	    SV* const val = HeVAL(cache_entry);
 	    if(val == &PL_sv_undef) {
 		if(throw_nomethod)
-		    Perl_croak(aTHX_
+		    Perl_croak_nocontext(
                        "No next::method '%" SVf "' found for %" HEKf,
                         SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
@@ -589,8 +701,10 @@ mro__nextcan(...)
     /* beyond here is just for cache misses, so perf isn't as critical */
 
     stashname_len = subname - fq_subname - 2;
-    stashname = newSVpvn_flags(fq_subname, stashname_len,
-                                SVs_TEMP | (subname_utf8 ? SVf_UTF8 : 0));
+    {   /* strs like "Qux::foo" "TTop::foo" show up here */
+        I32 i32len = subname_utf8 ? -(I32)stashname_len : (I32)stashname_len;
+        stashname = sv_2mortal(newSVpvn_share(fq_subname, i32len, 0));
+    }
 
     /* has ourselves at the top of the list */
     linear_av = S_mro_get_linear_isa_c3(aTHX_ selfstash, 0);
@@ -656,11 +770,25 @@ mro__nextcan(...)
 
     (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);
     if(throw_nomethod)
-        Perl_croak(aTHX_ "No next::method '%" SVf "' found for %" HEKf,
+        Perl_croak_nocontext("No next::method '%" SVf "' found for %" HEKf,
                          SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
                         HEKfARG( HvNAME_HEK(selfstash) ));
     XSRETURN_EMPTY;
 
 BOOT:
+    {
+        U32 hash = c3_alg.hash;
+        if (hash == 0) {
+            assert(c3_alg.name == "c3" && c3_alg.length == (sizeof("c3")-1));
+            /* Using "c3" will aggressively SBOX32 CC const fold.
+               But RW const char * c3_alg.name can not. */
+            PERL_HASH(hash, "c3", (sizeof("c3")-1));
+            c3_alg.hash = hash;
+        }
+    }
     Perl_mro_register(aTHX_ &c3_alg);
+    {
+        MY_CXT_INIT;
+        init_MY_CXT(aTHX_ aMY_CXT);
+    }
