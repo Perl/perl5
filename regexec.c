@@ -2894,7 +2894,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
              * where if there were no expansion we should fail.  Unclear if
              * worth the expense */
 
-            while (s <= e) {
+            /* HOP3c clamps e to s when too few characters remain.  A
+             * nonempty folded literal cannot match at strend, where
+             * UTF8_SAFE_SKIP returns zero and cannot advance the loop. */
+            while (s < strend && s <= e) {
                 char *my_strend= (char *)strend;
                 if (   foldEQ_utf8_flags(s, &my_strend, 0,  utf8_target,
                                          pat_string, NULL, ln, is_utf8_pat,

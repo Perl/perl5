@@ -427,7 +427,11 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+A case-insensitive regular expression with a folded literal start class
+could loop indefinitely when searching at the end of a UTF-8 string.
+This could occur on a subsequent C</g> match after a successful match.
+
+[GH #24934]
 
 =item *
 
