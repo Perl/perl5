@@ -1,6 +1,6 @@
 use strict;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 BEGIN { push @INC, '.' }
 use t::Watchdog;
 
@@ -18,6 +18,7 @@ printf("# have_clock_gettime   = %d\n", &Time::HiRes::d_clock_gettime);
 printf("# have_clock_getres    = %d\n", &Time::HiRes::d_clock_getres);
 printf("# have_clock_nanosleep = %d\n", &Time::HiRes::d_clock_nanosleep);
 printf("# have_clock           = %d\n", &Time::HiRes::d_clock);
+printf("# have_hrtime          = %d\n", &Time::HiRes::d_hrtime);
 
 # Ideally, we'd like to test that the timers are rather precise.
 # However, if the system is busy, there are no guarantees on how
@@ -96,4 +97,15 @@ SKIP: {
         $clock[1] > $clock[0] &&
         $clock[2] > $clock[1] &&
         $clock[3] > $clock[2];
+}
+
+SKIP: {
+    skip "no hrtime", 1 unless &Time::HiRes::d_hrtime;
+    my @got = Time::HiRes::hrtime(1);
+    my $ok = @got == 2
+          && $got[0] >= 0
+          && $got[1] >= 0
+          && $got[1] < 1_000_000_000;
+    ok $ok
+        or print("# got: @got, size: " . scalar(@got) . "\n");
 }
