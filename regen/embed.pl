@@ -3207,6 +3207,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     VALUEMAGIC_FROM
 
     assert_scalar_or_IO_
+    CHANGE_MULTICALL_FLAGS_PREFIX_
     DEBUG__
     DEBUG_A_TEST_
     DEBUG_BOTH_FLAGS_TEST_
@@ -3251,6 +3252,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     MEM_WRAP_WILL_WRAP_
     MGv2_ASSERT_AND_CAST_FUNCS_
     MGv2_SIZEOF_FLAGS_
+    MULTICALL_PREFIX_
     NV_BODYLESS_UNION_
     OFFUNISKIP_helper_
     OPpCALLER_PKG
@@ -3267,6 +3269,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     OPpREF_CMP_NE
     OPpREF_CMP_REGEXP_PKG
     OPpREF_CMP_SKIPLOGOP
+    POP_MULTICALL_PREFIX_
     pTHX_2
     pTHX_3
     pTHX_4
@@ -3278,6 +3281,7 @@ my %undocumented_always_visible = map { $_ => 1 } qw(
     pTHX_10
     pTHX_11
     pTHX_12
+    PUSH_MULTICALL_FLAGS_PREFIX_
     RXf_PMf_CHARSET_SHIFT_
     RXf_PMf_SHIFT_COMPILETIME_
     RXf_PMf_SHIFT_NEXT_
