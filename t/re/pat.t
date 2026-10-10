@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1786;  # Update this when adding/deleting tests.
+plan tests => 2218;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -381,6 +381,48 @@ sub run_tests {
 
                     ok($run !~ /fooA|barB/,
                        "AC $encoding repeated '$unit' rejects a miss at alignment $offset");
+                }
+            }
+
+            # These rejected octets have the maximum BMH shift.  The start
+            # map independently permits repeated-window scanning, including
+            # when the shift reaches the 255-octet cap.
+            my $long_first = 'a' . ('Z' x 254);
+            my $long_second = 'b' . ('Y' x 254);
+            my $long_re = qr/\Q$long_first\E|\Q$long_second\E/;
+
+            for my $case ([3, qr/walrus|cat/, 'cat'],
+                          [8, qr/abcdefgh|ijklmnop/, 'ijklmnop'],
+                          [255, $long_re, $long_second])
+            {
+                my ($shift, $re, $word) = @$case;
+
+                for my $unit ('Q', 'QR', 'QQRR', 'QQQQRRRR') {
+                    for my $offset (0 .. 7) {
+                        my $run = ('X' x $offset) . ($unit x 320);
+                        my $target = $run . $word;
+                        utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                        ok($target =~ /$re/ && $-[0] == length($run)
+                           && $+[0] == length($target),
+                           "AC $encoding shift $shift repeated '$unit' finds the match at alignment $offset");
+
+                        utf8::upgrade($run) if $encoding eq 'UTF-8';
+
+                        ok($run !~ /$re/,
+                           "AC $encoding shift $shift repeated '$unit' rejects a miss at alignment $offset");
+                    }
+                }
+
+                # Differing windows must return to ordinary scanning without
+                # losing a viable start inside the next window.
+                for my $offset (0 .. 7) {
+                    my $run = ('Q' x 320) . ('R' x $offset);
+                    my $target = $run . $word;
+                    utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                    ok($target =~ /$re/ && $-[0] == length($run),
+                       "AC $encoding shift $shift finds a start in a differing window at offset $offset");
                 }
             }
 
