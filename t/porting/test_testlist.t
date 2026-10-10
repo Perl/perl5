@@ -75,7 +75,34 @@ for my $k (keys %tt) {
 is(scalar @missing_from_tt, 0,
     "No files found by t/harness missing from t/TEST");
 
-done_testing;
+# Tests below here were in perl-5.45.3 and earlier
+%th = (); %tt = (); %all = ();
+$ENV{PERL_TORTURE_TEST} = 1;
+$ENV{PERL_TEST_MEMORY} = 1;
+$ENV{PERL_BENCHMARK} = 1;
+
+for my $file (`$THISPERL t/harness -dump_tests`) {
+    chomp $file;
+    $all{$file}++;
+    $th{$file}++;
+}
+
+for my $file (`$THISPERL t/TEST -dump_manifested_tests`) {
+    chomp $file;
+    $all{$file}++;
+    delete $th{$file} or $tt{$file}++;
+}
+
+is(0+keys(%th), 0, "t/harness will not test anything that t/TEST does not")
+    or print STDERR map { "# t/harness: $_\n" } sort keys %th;
+is(0+keys(%tt), 0, "t/TEST will not test anything that t/harness does not")
+    or print STDERR map { "# t/TEST: $_\n" } sort keys %tt;
+
+my $missing = find_in_manifest_but_missing(\%all);
+is(0+keys(%$missing), 0, "Nothing in manifest that we wouldn't test")
+    or print STDERR map { "# $_\n" } sort keys %$missing;
+
+done_testing();
 
 ##### SUBROUTINES #####
 
@@ -147,13 +174,6 @@ sub test_via_runtests {
     }
 }
 
-#################### SUBROUTINES NEEDING WORK ####################
-
-# These 2 subroutines were used in unit tests in earlier versions of
-# t/porting/test_testlist.t; Those tests need reworking and, when they do,
-# these subroutines will probably need reworking as well (e.g., better
-# encapsulation).
-
 sub get_extensions {
     my %extensions;
     open my $ifh, "<", "config.sh"
@@ -183,6 +203,7 @@ sub get_extensions {
 }
 
 sub find_in_manifest_but_missing {
+    my $allref = shift;
     my $extension = get_extensions();
     my %missing;
     my $is_os2 = $^O eq "os2";
@@ -200,46 +221,9 @@ sub find_in_manifest_but_missing {
             my $path = $1;
             next unless $extension->{$path};
         }
-        $missing{$file}++ unless $all{$file};
+        $missing{$file}++ unless $allref->{$file};
     }
     close $ifh;
     return \%missing;
 }
 
-############### TO BE REWORKED ###############
-
-# Test that t/TEST and t/harness test the same files, and that all the
-# test files (.t files) listed in MANIFEST are tested by both.
-#
-# We enabled the various special tests as this simplifies our MANIFEST
-# parsing.  In theory if someone adds a new test directory this should
-# tell us if one of the files does not know about it.
-
-#
-##use Data::Dumper;
-##print STDERR Dumper [ sort keys %tt ]; print "\n";
-##print STDERR scalar keys %tt, "\n";
-##print STDERR Dumper [ sort keys %th ]; print "\n";
-##print STDERR scalar keys %th, "\n";
-#
-##my (%ttonly, %thonly, %both);
-##%ttonly = map { ! $th{$_} } keys %tt;
-##for my $k (keys %tt) {
-##    $ttonly{$k}++ unless $th{$k};
-##}
-##print STDERR "TT only: ", scalar keys %ttonly, "\n";
-##print STDERR Dumper \%ttonly;
-##
-##for my $k (keys %th) {
-##    $thonly{$k}++ unless $tt{$k};
-##}
-##print STDERR "TH only: ", scalar keys %thonly, "\n";
-##print STDERR Dumper \%thonly;
-##
-###%both = map { ! $th{$_} and ! $tt{$_} } keys %both;
-###print STDERR "BOTH: ", scalar keys %both, "\n";
-#
-##my $missing = find_in_manifest_but_missing();
-##is(0+keys(%$missing), 0, "Nothing in manifest that we wouldn't test")
-##    or print STDERR map { "# $_\n" } sort keys %$missing;
-#
