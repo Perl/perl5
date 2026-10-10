@@ -4893,6 +4893,114 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+=for apidoc build_function_invocation
+
+    build_function_invocation (flags, $function, $arguments);
+    build_function_invocation (flags, $function, NULL);
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_function_invocation (pTHX_ I32 flags, OP *code, OP *arguments)
+{
+    PERL_ARGS_ASSERT_BUILD_FUNCTION_INVOCATION;
+
+    return newUNOP (
+        OP_ENTERSUB,
+        flags,
+        op_append_elem (OP_LIST, arguments, code)
+    );
+}
+
+/*
+=for apidoc build_method_invocation
+
+    build_method_invocation ($target, $method, $arguments);
+    build_method_invocation ($target, $method, NULL);
+
+Build an C<OP *> representing the structure recognised as method invocation.
+
+Arguments:
+
+=over
+
+=item C<target>
+
+Expression on which the method invocation is invoked.
+
+=item C<method>
+
+Invoked method.
+
+=item C<arguments>
+
+Expression (list) representing the method invocation arguments.
+
+=back
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_method_invocation (pTHX_ OP *target, OP *method, OP *arguments)
+{
+    PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION;
+
+    return op_convert_list (
+        OP_ENTERSUB,
+        OPf_STACKED,
+        op_append_elem (
+            OP_LIST,
+            build_method_invocation_arguments (target, arguments),
+            method
+        )
+    );
+}
+
+/*
+=for apidoc build_method_invocation_arguments
+
+    build_method_invocation_arguments ($target, $arguments);
+    build_method_invocation_arguments ($target, NULL);
+
+Build an C<OP *> representing the structure recognised as method invocation arguments.
+
+Arguments:
+
+=over
+
+=item C<target>
+
+Expression on which the method call is invoked.
+
+=item C<arguments>
+
+Expression (list) representing the method call arguments.
+
+=back
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_method_invocation_arguments (pTHX_ OP *target, OP *arguments)
+{
+    PERL_ARGS_ASSERT_BUILD_METHOD_INVOCATION_ARGUMENTS;
+
+    return arguments
+        ? op_prepend_elem (OP_LIST, target, arguments)
+        : target
+        ;
+}
+
+/*
 =for apidoc new_block_statement
 
 Returns a C<OP *> representing block as statement.
