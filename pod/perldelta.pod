@@ -443,6 +443,12 @@ The regular expression optimizer no longer rejects valid matches when a
 positive lookahead can match an empty string. For example,
 C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
 
+=item *
+
+A case-insensitive regular expression with a folded literal start class
+could loop indefinitely when searching at the end of a UTF-8 string.
+This could occur on a subsequent C</g> match after a successful match.
+
 [GH #24943]
 
 =item *

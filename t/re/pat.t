@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1779;  # Update this when adding/deleting tests.
+plan tests => 1785;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -93,6 +93,33 @@ sub run_tests {
                        "folded start map rejects a repeated run under /i$charset, upgrade=$upgrade, case=$case_name");
                 }
             }
+        }
+    }
+
+    {
+        for my $trie_limit (65536, -1) {
+            local ${^RE_TRIE_MAXBUF} = $trie_limit;
+            my $pattern = "\\x{df}\\x{10000}\\x{100}|\\x{df}\\x{e9}a"
+                        . "(?#trie limit $trie_limit)";
+            my $re = qr/$pattern/i;
+            my $target = ("\x{df}" x 3) . "\x{10000}\x{100}";
+            my @matches;
+
+            while ($target =~ /$re/g) {
+                push @matches, "$-[0]:$+[0]";
+            }
+
+            is(join(',', @matches), '2:5',
+               "folded global match terminates at UTF-8 end, trie limit $trie_limit");
+
+            pos($target) = length($target);
+            ok($target !~ /$re/g,
+               "folded start class rejects UTF-8 end, trie limit $trie_limit");
+
+            my $empty = '';
+            utf8::upgrade($empty);
+            ok($empty !~ /$re/,
+               "folded start class rejects empty UTF-8 target, trie limit $trie_limit");
         }
     }
 
