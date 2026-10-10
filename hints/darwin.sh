@@ -280,13 +280,31 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 1.[0-3].*) # OS X 10.0.x
    lddlflags="-bundle -undefined suppress"
    ;;
-1.*)       # OS X 10.1
+[1-5].*)       # OS X 10.1 - OS X 10.1.x (though [2-4] never existed publicly)
    ldflags="${ldflags} -flat_namespace"
    lddlflags="-bundle -undefined suppress"
    ;;
-[2-6].*)   # OS X 10.1.x - 10.2.x (though [2-4] never existed publicly)
+6.*)   # OS X 10.2.x
    ldflags="${ldflags} -flat_namespace"
-   lddlflags="-bundle -undefined suppress"
+   # ld: -undefined error or -undefined define_a_way must be used when -twolevel_namespace is in effect
+   lddlflags="-bundle -undefined suppress -flat_namespace"
+   # setlocale(3): The current implementation supports only the "C" and "POSIX"
+   # locales for all but the LC_COLLATE, LC_CTYPE, and LC_TIME categories.
+   # perl: warning: Setting locale failed.
+   # perl: warning: Please check that your locale settings:
+   #     LC_ALL = (unset),
+   #     LC_CTYPE = (unset),
+   #     LC_NUMERIC = (unset),
+   #     LC_COLLATE = (unset),
+   #     LC_TIME = (unset),
+   #     LC_MESSAGES = (unset),
+   #     LC_MONETARY = (unset),
+   #     LANG = "en_US"
+   # are supported and installed on your system.
+   # perl: warning: Falling back to the standard locale ("C").
+   d_setlocale="undef"
+   # dyld: ./perl multiple definitions of symbol _Perl_add_above_Latin1_folds
+   static_ext="$static_ext re"
    ;;
 [7-8].*)   # OS X 10.3.x - 10.4.x
    lddlflags="-bundle -undefined dynamic_lookup"
