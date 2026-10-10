@@ -142,7 +142,7 @@ sub test_via_harness {
     my @output = `$THISPERL t/harness @these_tests`;
     for my $l (@output) {
         chomp $l;
-        my $root = (split /\s+/, $l)[0];
+        my $root = (split /\s+/, $l)[0] // '';
         next unless $root =~ m/\.t$/;
         ok($test_lookup->{$root},
             "$test_lookup->{$root} was tested via t/harness");
