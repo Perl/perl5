@@ -200,6 +200,8 @@ START_MY_CXT
 
 #include "APItest_magicv2.inc"
 
+#include "APItest_lexical_attributes.inc"
+
 /* indirect functions to test the [pa]MY_CXT macros */
 
 int
@@ -1048,3 +1050,5 @@ INCLUDE: APItest_savestack.xs
 INCLUDE: APItest_vstring.xs
 
 INCLUDE: APItest_magicv2.xs
+
+INCLUDE: APItest_lexical_attributes.xs
