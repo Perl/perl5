@@ -118,6 +118,11 @@ blocks of octets that cannot start an alternative.  These filters apply to
 eligible case-sensitive literals, with separate shift tables for Latin-1 and
 UTF-8 targets.
 
+Eligible case-insensitive literal alternatives use a start-octet map that
+includes their possible folds.  They do not use the shift tables, because
+folding can change encoded lengths.  Locale-dependent folding uses the
+existing scanner.
+
 =back
 
 =head1 Modules and Pragmata

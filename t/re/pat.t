@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1588;  # Update this when adding/deleting tests.
+plan tests => 1780;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -36,6 +36,66 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    {
+        my @folded_starts = (
+            ['ssx', "sSx"],
+            ['ssx', "\x{df}x"],
+            ['ssx', "\x{17f}sx"],
+            ['ssx', "\x{1e9e}x"],
+            ['ssx', "\x{1df95}x"],
+            ['kx', "\x{212a}x"],
+            ["\x{b5}x", "\x{39c}x"],
+            ['ffx', "\x{fb00}x"],
+            ['ffix', "\x{fb03}x"],
+            ["\x{3b9}\x{308}\x{301}x", "\x{390}x"],
+            ['sx', "\x{df}x"],
+            ['ssx', "s\x{df}x"],
+        );
+
+        for my $case (@folded_starts) {
+            my ($literal, $input) = @$case;
+            my $case_name = join(' ', map { sprintf '%X', ord $_ }
+                                      split //, "$literal:$input");
+
+            for my $charset ('u', 'a', 'aa', 'd') {
+                my ($trie_re, $plain_re);
+
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/(?i$charset:$literal|zoo)(?#with trie)/;
+                }
+
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/(?i$charset:$literal|zoo)(?#without trie)/;
+                }
+
+                for my $upgrade (0, 1) {
+                    my $target = ('Q' x 31) . $input;
+                    utf8::upgrade($target) if $upgrade;
+                    my @expected;
+                    my @got;
+
+                    while ($target =~ /$plain_re/g) {
+                        push @expected, "$-[0]:$+[0]";
+                    }
+
+                    while ($target =~ /$trie_re/g) {
+                        push @got, "$-[0]:$+[0]";
+                    }
+
+                    is(join(',', @got), join(',', @expected),
+                       "folded start map agrees with branches under /i$charset, upgrade=$upgrade, case=$case_name");
+
+                    my $miss = 'Q' x 77;
+                    utf8::upgrade($miss) if $upgrade;
+                    ok($miss !~ /$trie_re/,
+                       "folded start map rejects a repeated run under /i$charset, upgrade=$upgrade, case=$case_name");
+                }
+            }
+        }
+    }
+
     {
         my $haystack = ("A" x 5000) . "cat";
         ok($haystack =~ /walrus|cat/, 'AC finds a literal after a long rejected run');
@@ -257,8 +317,8 @@ sub run_tests {
             ok($retry_target =~ /(?:abc|bcd)X/ && $-[0] == 1 && $+[0] == 5,
                "AC retries an overlapping start after full-match rejection in $encoding");
 
-            # Prefilters are disabled for folds, but the point-ring changes
-            # apply there too.  One sharp s contributes two folded characters.
+            # Folded tries use only the start map.  One sharp s contributes
+            # two folded characters, so ring offsets count original input.
             for my $case (["\x{df}x", 0, 2],
                           ["s\x{df}x", 1, 3],
                           ["s\x{df}ssx", 2, 5])
