@@ -178,8 +178,104 @@ is a lexical C<$_> in scope.
         Stack_off_t ax = XS_SETXSUBFN_POPMARK;  \
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 
+
+/* The internals of dXSTARG and GetXSTARG are tightly coupled (de jure)
+   with the optree and P5 lang.  In practice, dXSTARG and OPpENTERSUB_HASTARG
+   haven't been modified since they were created in 5.5.61 in commit 8a7fc0dc30
+   9/10/1999 3:22:14 PM "s/dXS_TARGET/dXSTARG/ in change#4044" and in
+   commit d30110745a 8/26/1999 11:33:01 PM "Speeding up XSUB calls up to 66%"
+
+   dXSTARG is public API, but the implementation is opaque. OPpENTERSUB_HASTARG
+   is private API. Future hypothetical enhancements that could change dXSTARG
+   are GIMME_V == G_BOOL, call_sv_lval(), XS_MULTICALL. */
+
+
 #define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
                              ? PAD_SV(PL_op->op_targ) : sv_newmortal())
+
+/* GetXSTARG() is part of the interp's private API for now. It is intended
+   that in the future, it will be public API.  Timeframe is TBD.  It needs
+   more usage in PERL_CORE, to shake out potential API design flaws or CPAN XS
+   mousetraps before committing to support it publically.  Since it is private,
+   it can be renamed if needed. */
+
+#ifdef PERL_CORE
+
+/* A faster, more efficient variant of C<dXSTARG>.  Similar to the optree's
+   GETTARGET, but "specialized" for XSUBs written by core or written by CPAN.
+   The benefit of C<GetXSTARG> over C<dXSTARG> is that C<GetXSTARG> will return
+   C<NULL> if a targ C<SV *> isn't currently available and lets the user decide
+   how to go forward.  Meanwhile C<dXSTARG> will always internally call
+   C<sv_newmortal()> if a targ C<SV *> isn't available at that moment.
+   Do not evaluate this macro multiple times.  Save the result of this macro to
+   a C<SV*> var.
+
+   Just like C<dXSTARG>, the C<SV *> returned by C<GetXSTARG> may have stale
+   prior contents in it. */
+/*
+   You must test the returned value for C<NULL> and procede
+   accordingly.  Do not make any assumptions on why you did or did not get NULL
+   from this macro.  This macro is not a substitute for using L<GIMME_V>.
+   The non-NULL or NULL result of this macro has no correlation to what
+   C<@_> context, the caller PP/XS sub, has requested from your XSUB through
+   C<GIMME_V>.
+
+   Assume C<GIMME_V> can return <G_VOID> while at the same time C<GetXSTARG>
+   returns non-NULL.  Also assume C<if (!(sv = GetXSTARG()) && GIMME_V == G_SCALAR)>
+   can happen and therefore you very likely will need to allocate a new C<SV*>
+   and mortalize it.  It is discouraged and probably a bug, for an XSUB to
+   bump the C<SvREFCNT(sv)> on C<TARG> and save the C<SV*> for later use.
+   Do not make assumptions about C<TARG>'s C<SvREFCNT>, or what is the outer
+   container that really the C<SV*>.  Something else inside the interpreter
+   which is unspecified, owns C<SV* TARG>, and unspecified caller, probably
+   wants you to write into this C<SV*> as an lval, vs you doing a less
+   efficient C<sv_newmortal()>/C<sv_2mortal(newSVxxxv())>, and later on the
+   unspecified caller has to call <sv_setsv()>, and let the mortal stack dispose
+   of your short lived <SV*>.
+
+   Although this is undocumented and private to the interpreter and you may not
+   write code that is aware of this private implementation detail.  Keep in
+   mind the interpreter uses the C<SV* TARG> concept for both input and/or output
+   in various places between parts of itself and might be using C<SV* TARG> as
+   lvalue scratch pad in a loop.
+
+   Remember that the C<SV*> from C<dXSTARG> or C<GetXSTARG>, might be C<SvOK()>
+   and have stale prior contents that you need to wipe or free.  C<sv_setxxx()>
+   functions will always do this for you.  There is no guarentee the <SV*>
+   from C<dXSTARG> or C<GetXSTARG> will be set to C<undef> when you get it.
+   If you need to return C<undef>, you have 2 choices. Don't fetch and
+   don't use C<TARG>, and push C<&PL_sv_undef> on the stack.  The other choices
+   you have is to call, sorted most efficient to least efficient:
+
+   sv_setsv_undef(my_targ);       SvSETMAGIC(my_targ);
+   sv_setpv_mg(my_targ, NULL);
+   sv_setsv_mg(my_targ, NULL);
+   sv_setsv_mg(my_targ, &PL_sv_undef);  //more readable
+
+   Also consider, there is no clear guidance for this.  Do you think you the
+   PP or XS caller, that called your XSUB, if it is interested in getting a
+   C<@_> return value in the first place. Is the caller going to write it as
+   a true/false check, like C<if(do_xsub()) {0;}>, or will it write
+   C<my $result = do_xsub();> and capture your return value for future use.
+   The first probably don't set up a TARG for your to use. The 2nd probably
+   will, but there are no guarentees it will set one up ahead of time.
+
+   Returning address C<&PL_sv_undef> is much faster than C<sv_newmortal()> or
+   C<sv_set_undef()>.  C<sv_set_undef()> is faster than the caller later on
+   doing a C<sv_setsv()>.  C<sv_setsv()> has a quick bailout shortcut in it
+   if src and dest C<SV*>s are the same addr.
+
+   There is also no guarentee about what its C<SvTYPE()> is.
+   Always assume it is of type <SVt_NULL>, and it has no SV body until you
+   you test its type and possibly call C<SvUPGRADE> or <sv_setiv>/C<sv_setpvn>
+   on it.  There is no guarentee C<SvANY()> is non-NULL or C<SvANY()> contains
+   a valid address or points to initialized memory.  There is no guarentee
+   C<SvTYPE()> is at minimum C<SVt_IV> and reading C<SvIVX()> won't SEGV. */
+
+#define GetXSTARG() ((PL_op->op_private & OPpENTERSUB_HASTARG) \
+                             ? PAD_SV(PL_op->op_targ) : NULL)
+
+#endif
 
 /* Should be used before final PUSHi etc. if not in PPCODE section. */
 #define XSprePUSH (sp = PL_stack_base + ax - 1)
