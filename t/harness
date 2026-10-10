@@ -73,7 +73,7 @@ my $htoolnm;
 my $hgrind_ct;
 
 my $dump_tests = 0;
-if ($ARGV[0] && $ARGV[0] =~ /^-?-dumptests$/) {
+if ($ARGV[0] && $ARGV[0] =~ /^-?-dump_tests$/) {
     shift;
     $dump_tests = 1;
 }
