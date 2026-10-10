@@ -25,14 +25,19 @@ for (1..2) {
                   "XEOUOFRPQZ", undef, "Test randomness with PERL_RAND_SEED=2");
 }
 
-my %got;
-for my $try (1..10) {
-    local $ENV{PERL_RAND_SEED};
-    my ($out,$err)= runperl_and_capture({}, ['-e',"print map { chr(rand(26)+65) } 1..10;"]);
-    if ($err) { diag $err }
-    $got{$out}++;
+for my $seed (undef, 0) {
+    my %got;
+    for my $try (1..10) {
+        local $ENV{PERL_RAND_SEED} = $seed;
+        my ($out,$err)= runperl_and_capture({}, ['-e',"print map { chr(rand(26)+65) } 1..10;"]);
+        if ($err) { diag $err }
+        $got{$out}++;
+    }
+    ok(8 <= keys %got,
+       defined $seed
+           ? 'PERL_RAND_SEED=0 does not enable deterministic seeding'
+           : 'PERL_RAND_SEED unset does not enable deterministic seeding');
 }
-ok(8 <= keys %got, "Got at least 8 different strings");
 for (1..2) {
     local $ENV{PERL_RAND_SEED} = 1;
     my ($out,$err)= runperl_and_capture({}, ['-le',

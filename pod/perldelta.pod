@@ -27,6 +27,35 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Localizable random number generators
+
+The new C<${^RNG}> variable can be localized to select a user-supplied random
+number generator for C<rand>, C<srand>, and C<builtin::rand_bytes>.  An object
+provider implements C<rand_bytes> and C<srand> methods.  The provider supplies
+the requested number of random bytes to C<rand_bytes>, while C<srand> receives
+the normalized seed value.
+
+The new L<RNG::Seed> class represents replayable string or raw seed material
+for a provider.  The bundled generators other than Drand48 wrap false seed
+strings in always-true seed objects which preserve their string value and
+reproduce the same sequence when reused.  Secure automatic initialization
+returns a redacted seed token,
+which records the provider but cannot be used to reproduce the state.
+
+When C<${^RNG}> is undefined, Perl continues to use its normal random number
+generator.  The provider's state is independent of Perl's default generator,
+and localizing C<${^RNG}> does not copy or restore that state.  See
+L<perlrng>, L<perlfunc/rand EXPR>, and L<perlvar/${^RNG}> for more information.
+
+An XS provider may also implement the optional
+C<get_rand_U01_XS_func_addr> and C<get_rand_U01_XS_state_addr> methods.  When
+they return a valid callback address and state pointer, C<rand> can obtain a
+uniform C<[0,1)> value without Perl method dispatch.  The ordinary
+C<rand_bytes> interface remains the portable provider protocol.
+
+Only C<undef> or a C<RNG::Provider> object can be assigned to C<${^RNG}>.
+Other scalar values are rejected at assignment.
+
 =head1 Security
 
 XXX Any security-related notices go here. In particular, any security
@@ -126,6 +155,15 @@ release manager will have to investigate the situation carefully.)
 =head2 New Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<RNG::HMAC_DRBG> provides an HMAC-SHA-256 provider following the HMAC_DRBG
+construction in NIST SP 800-90A.  L<RNG::PCG> provides a small XS
+implementation of the two-dimensional PCG-XSH-RR pseudorandom number
+generator, while L<RNG::Wyrand> and L<RNG::Xoshiro> provide additional fast XS
+generators.  They can be used directly or as providers for the new C<${^RNG}>
+variable.
 
 =item *
 

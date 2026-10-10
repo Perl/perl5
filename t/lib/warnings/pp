@@ -23,6 +23,8 @@
 
   Invalid negative number (%s) in chr
 
+  Integer overflow in srand(): only using the low 32 bits
+
 __END__
 # pp.c
 use warnings 'substr' ;
@@ -136,3 +138,11 @@ use warnings 'utf8';
 my $chr = chr(-1);
 EXPECT
 Invalid negative number (-1) in chr at - line 2.
+########
+# pp.c
+use warnings 'overflow';
+srand "9999999999999999";
+no warnings 'overflow';
+srand "9999999999999999";
+EXPECT
+Integer overflow in srand(): only using the low 32 bits at - line 3.

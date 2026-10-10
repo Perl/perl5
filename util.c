@@ -38,9 +38,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-/* For get_entropy() on non-Linux systems (MacOS, Android) we need sys/random.h */
+/* getentropy() is declared here on systems which provide it. */
 #ifdef I_SYS_RANDOM
-#include <sys/random.h>
+# include <sys/random.h>
 #endif
 
 #ifdef __Lynx__
@@ -4735,28 +4735,11 @@ splitmix64(U64 *state)
     return z ^ (z >> 31);
 }
 
-U64
-Perl_seed(pTHX)
-{
-    PERL_ARGS_ASSERT_SEED;
-
-   /*
-    * Attempt to read from the OS CSPRNG to generate a pseudo-random number.
-    * On Windows this is RtlGenRandom (SystemFunction036 from advapi32.dll);
-    * on Unix-like systems we try getentropy() and then /dev/urandom. If
-    * none of those are available or they fail, we fall back to gathering
-    * several state variables and hashing them into a seed value.
-    */
-
-    U64 seed;
-
 /* This test is an escape hatch, this symbol isn't set by Configure. */
 #ifndef PERL_NO_DEV_RANDOM
 #ifndef PERL_RANDOM_DEVICE
-   /* /dev/random isn't used by default because reads from it will block
-    * if there isn't enough entropy available.  You can compile with
-    * PERL_RANDOM_DEVICE to it if you'd prefer Perl to block until there
-    * is enough real entropy to fill the seed. */
+   /* The configured source is always opened nonblocking by
+    * Perl_get_entropy_portable(). */
 #  ifdef __amigaos4__
    /* https://wiki.amigaos.net/wiki/AmigaOS_Manual%3A_AmigaDOS_Additional_Amiga_Directories#Random-Handler_(RANDOM:) */
 #    define PERL_RANDOM_DEVICE "RANDOM:"
@@ -4764,39 +4747,13 @@ Perl_seed(pTHX)
 #    define PERL_RANDOM_DEVICE "/dev/urandom"
 #  endif
 #endif
-
-#ifdef HAS_GETENTROPY
-    U8 ok = (getentropy(&seed, sizeof(seed)) == 0);
-    /* PerlIO_printf(Perl_debug_log, "Entropy: OK:%i Seed:%lu\n", ok, seed); */
-    if (ok) {
-        return seed;
-    }
 #endif
 
-    int fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, 0);
-    if (fd != -1) {
-        if (PerlLIO_read(fd, (void*)&seed, sizeof seed) != sizeof seed) {
-            seed = 0;
-        }
-
-        PerlLIO_close(fd);
-
-        if (seed) {
-            return seed;
-        }
-    }
-#endif
-
-#ifdef WIN32
-    /* Ask the Windows OS CSPRNG (available since XP, already linked via
-     * advapi32) for seed material. */
-    if (SystemFunction036((PVOID)&seed, (ULONG)sizeof(seed))) {
-        return seed;
-    }
-#endif
-
-    /* We only get this far if /dev/urandom is not available or the read fails.
-     * Grab several state variables and hash those for randomness instead. */
+static void
+S_fill_fallback_entropy(pTHX_ U8 *buffer, STRLEN length)
+{
+    /* We only use this after a nonblocking operating-system request fails.
+     * Mix readily available process state, then expand it with SplitMix64. */
 
 #ifdef HAS_GETTIMEOFDAY
     struct timeval when;
@@ -4819,12 +4776,105 @@ Perl_seed(pTHX)
     /* epoch in microseconds is ~52 bits, PIDs are ~22 bits, PTRs are ~48 bits.
      * We mix the bits for all four together to get a good spread of entropy */
     U64 tmp = ROTL64(time_ptr, 16) ^ ROTL32(pid, 8) ^ epoch ^ stack_ptr;
-    U64 ret = splitmix64(&tmp);
+    while (length) {
+        const U64 word = splitmix64(&tmp);
+        const STRLEN chunk = length > sizeof(word) ? sizeof(word) : length;
 
-    /* PerlIO_printf(Perl_debug_log, "XXXX: TIME:%lu PID:%lu PTR:%lu\n", epoch, pid, time_ptr); */
-    /* PerlIO_printf(Perl_debug_log, "SEED: %lu\n", ret); */
+        Copy(&word, buffer, chunk, U8);
+        buffer += chunk;
+        length -= chunk;
+    }
+}
 
-    return ret;
+void
+Perl_get_entropy_portable(pTHX_ U8 *buffer, STRLEN length, const char *failure)
+{
+    bool force_fallback = FALSE;
+
+    PERL_ARGS_ASSERT_GET_ENTROPY_PORTABLE;
+
+    if (!length)
+        return;
+
+#ifdef DEBUGGING
+    force_fallback =
+        PerlEnv_getenv("PERL_DEBUG_FORCE_FALLBACK_ENTROPY") != NULL;
+#endif
+    PERL_UNUSED_VAR(force_fallback);
+
+#ifdef HAS_GETENTROPY
+    /* getentropy() is limited to 256 octets per call.  Use it first when
+     * Configure found it, then continue with the portable OS fallbacks if a
+     * request cannot be completed. */
+    while (length && !force_fallback) {
+        const STRLEN chunk = length > 256 ? 256 : length;
+
+        if (getentropy(buffer, chunk) != 0)
+            break;
+        buffer += chunk;
+        length -= chunk;
+    }
+    if (!length)
+        return;
+#endif
+
+#ifndef PERL_NO_DEV_RANDOM
+    {
+        int fd = -1;
+#  ifdef O_NONBLOCK
+        if (!force_fallback)
+            fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE,
+                                      O_RDONLY | O_NONBLOCK);
+#  else
+        /* Weak entropy must not deliberately block.  A caller which requires
+         * strong entropy may use the configured device normally on this
+         * unusual platform, accepting that the request can block. */
+        if (!force_fallback && failure)
+            fd = PerlLIO_open_cloexec(PERL_RANDOM_DEVICE, O_RDONLY);
+#  endif
+        if (fd != -1) {
+            STRLEN offset = 0;
+            while (offset < length) {
+                const SSize_t got = PerlLIO_read(fd, buffer + offset,
+                                                 length - offset);
+                if (got <= 0)
+                    break;
+                offset += got;
+            }
+            PerlLIO_close(fd);
+            if (offset == length)
+                return;
+        }
+    }
+#endif
+
+#ifdef WIN32
+    while (length && !force_fallback) {
+        const ULONG chunk = length > (STRLEN)ULONG_MAX
+                          ? ULONG_MAX : (ULONG)length;
+        if (!SystemFunction036((PVOID)buffer, chunk))
+            break;
+        buffer += chunk;
+        length -= chunk;
+    }
+    if (!length)
+        return;
+#endif
+
+    if (failure)
+        croak("%s", failure);
+
+    S_fill_fallback_entropy(aTHX_ buffer, length);
+}
+
+U64
+Perl_seed(pTHX)
+{
+    U64 seed;
+
+    PERL_ARGS_ASSERT_SEED;
+    PERL_GET_WEAK_ENTROPY((U8 *)&seed, sizeof(seed));
+    return seed;
 }
 
 void
@@ -4909,8 +4959,9 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
          * hash insert, and is used as part of hash bucket chain
          * randomization and hash iterator randomization. */
         if (PL_hash_rand_bits_enabled == 1) {
-            /* random mode initialize from seed() like we would our RNG() */
-            PL_hash_rand_bits= seed();
+            U64 entropy;
+            PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
+            PL_hash_rand_bits= (UV)entropy;
         }
         else {
             /* Use a constant */
@@ -6121,16 +6172,14 @@ Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
 #endif
 }
 
-double
-Perl_drand48_r(perl_drand48_t *random_state)
+PERL_STATIC_INLINE U64
+S_drand48_raw_r(perl_drand48_t *random_state)
 {
-    PERL_ARGS_ASSERT_DRAND48_R;
-
 #ifdef PERL_DRAND48_QUAD
     *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
         & DRAND48_MASK;
 
-    return ldexp((double)*random_state, -48);
+    return *random_state;
 #else
     {
     U32 accu;
@@ -6151,11 +6200,27 @@ Perl_drand48_r(perl_drand48_t *random_state)
     random_state->seed[1] = temp[1];
     random_state->seed[2] = (U16) accu;
 
-    return ldexp((double) random_state->seed[0], -48) +
-           ldexp((double) random_state->seed[1], -32) +
-           ldexp((double) random_state->seed[2], -16);
+    return ((U64)random_state->seed[2] << 32)
+         | ((U64)random_state->seed[1] << 16)
+         | (U64)random_state->seed[0];
     }
 #endif
+}
+
+U64
+Perl_drand48_raw_r(perl_drand48_t *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND48_RAW_R;
+
+    return S_drand48_raw_r(random_state);
+}
+
+double
+Perl_drand48_r(perl_drand48_t *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND48_R;
+
+    return ldexp((double)S_drand48_raw_r(random_state), -48);
 }
 
 #ifdef USE_C_BACKTRACE

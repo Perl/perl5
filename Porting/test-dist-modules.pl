@@ -57,6 +57,18 @@ my %dist_config = (
     "threads-shared" => [ "DEFINE=-DHAS_PPPORT_H" ],
    );
 
+my %dist_min_perl = (
+    RNG => 5.024,
+);
+
+my %dist_make_test_config = (
+    # MakeMaker prepends the core library paths to its test command.  RNG's
+    # List::Util prerequisite is installed in site_perl, so put that ahead of
+    # the bundled old copy when testing this external distribution.
+    RNG => [ "PERL_LIB=$Config{sitelibexp}",
+             "PERL_ARCHLIB=$Config{sitearchexp}" ],
+);
+
 my $start = getcwd()
   or die "Cannot fetch current directory: $!\n";
 
@@ -123,6 +135,12 @@ if (@failures) {
 
 sub test_dist {
     my ($name) = @_;
+
+    if (exists $dist_min_perl{$name} && $] < $dist_min_perl{$name}) {
+        printf "*** Skipping %s (requires Perl %.3f) ***\n",
+            $name, $dist_min_perl{$name};
+        return;
+    }
 
     print "::group::Testing $name\n" if $github_ci;
     print "*** Testing $name ***\n";
@@ -233,7 +251,8 @@ EOM
         $failed = "Makefile.PL";
         die "$name: Makefile.PL failed\n" unless $continue;
     }
-    elsif (!run("make", "test", "TEST_VERBOSE=$verbose")) {
+    elsif (!run("make", "test", "TEST_VERBOSE=$verbose",
+               @{ $dist_make_test_config{$name} || [] })) {
         $failed = "make test";
         die "$name: make test failed\n" unless $continue;
     }

@@ -299,6 +299,7 @@ Readonly
 recvfrom(2)
 recvmsg(3)
 rename(2)
+RNG::AliasTable
 Role::Tiny
 RPerl
 s2p

@@ -306,7 +306,11 @@ perl_construct(pTHXx)
     /* This is NOT the state used for C<rand()>, this is only
      * used in internal functionality */
 #ifdef NO_PERL_INTERNAL_RAND_SEED
-    Perl_drand48_init_r(&PL_internal_random_state, seed());
+    {
+        U64 entropy;
+        PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
+        Perl_drand48_init_r(&PL_internal_random_state, (U32)entropy);
+    }
 #else
     {
         UV seed;
@@ -317,7 +321,11 @@ perl_construct(pTHXx)
             grok_number(env_pv, strlen(env_pv), &seed) != IS_NUMBER_IN_UV)
         {
             /* use a randomly generated seed */
-            seed = seed();
+            {
+                U64 entropy;
+                PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
+                seed = (UV)entropy;
+            }
         }
         Perl_drand48_init_r(&PL_internal_random_state, (U32)seed);
     }
@@ -961,6 +969,7 @@ perl_destruct(pTHXx)
      * destructors and destructees still exist.  Some sv's might remain.
      * Non-referenced objects are on their own.
      */
+    Perl_rng_clear(aTHX);
     sv_clean_objs();
 
     SvREFCNT_dec(PL_valuemagic_annotations);
@@ -2518,7 +2527,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (TAINT_get &&
         PerlProc_getuid() == PerlProc_geteuid() &&
         PerlProc_getgid() == PerlProc_getegid()) {
-        Perl_drand48_init_r(&PL_internal_random_state, seed());
+        U64 entropy;
+        PERL_GET_WEAK_ENTROPY((U8 *)&entropy, sizeof(entropy));
+        Perl_drand48_init_r(&PL_internal_random_state, (U32)entropy);
     }
 #endif
     if (DEBUG_h_TEST)

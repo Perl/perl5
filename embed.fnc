@@ -1058,6 +1058,8 @@ CTadop	|Malloc_t|calloc	|MEM_SIZE elements			\
 				|MEM_SIZE size
 AOdp	|SSize_t|call_pv	|NN const char *sub_name		\
 				|I32 flags
+Ap	|NV	|call_rand
+Ap	|void	|call_srand	|Rand_seed_t seed
 AOdp	|SSize_t|call_sv	|NN SV *sv				\
 				|I32 flags
 : Used in several source files
@@ -1399,6 +1401,7 @@ CDRdp	|U8	|dowantarray
 TXop	|void	|drand48_init_r |NN perl_drand48_t *random_state	\
 				|U32 seed
 TXop	|double |drand48_r	|NN perl_drand48_t *random_state
+Tep	|U64	|drand48_raw_r	|NN perl_drand48_t *random_state
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Adhp	|void	|dump_eval
@@ -1525,6 +1528,10 @@ eop	|void	|get_db_sub	|NULLOK SV **svp			\
 				|NN CV *cv
 ERTXp	|const char *|get_deprecated_property_msg			\
 				|const Size_t warning_offset
+Cp	|void	|get_entropy_portable					\
+				|NN U8 *buffer				\
+				|STRLEN length				\
+				|NULLOK const char *failure
 MTp	|int	|get_extended_os_errno
 : Only used in perl.c
 p	|void	|get_hash_seed	|NN unsigned char * const seed_buffer
@@ -3103,6 +3110,8 @@ Admp	|void	|resume_compcv_and_save 				\
 				|NN struct suspended_compcv *buffer
 Admp	|void	|resume_compcv_final					\
 				|NN struct suspended_compcv *buffer
+p	|void	|rng_clear
+p	|void	|rng_rebuild
 APTdp	|char * |rninstr	|SPTR const char *big			\
 				|EPTRge const char *bigend		\
 				|SPTR const char *little		\
@@ -3325,6 +3334,7 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|STRLEN destlen 			\
 				|int allow_package			\
 				|NN STRLEN *slp
+: Compatibility wrapper for XS modules which use Perl_seed()
 Cp	|U64	|seed
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 ep	|void	|set_caret_X
@@ -4604,6 +4614,19 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
+#endif
+#if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_MG_C) || \
+    defined(PERL_IN_PP_C)
+ep	|SV *	|call_rand_bytes|STRLEN length
+ep	|void	|rng_refresh	|NN SV *provider
+Tp	|bool	|translate_substr_offsets				\
+				|STRLEN curlen				\
+				|IV pos1_iv				\
+				|bool pos1_is_uv			\
+				|IV len_iv				\
+				|bool len_is_uv 			\
+				|NN STRLEN *posp			\
+				|NN STRLEN *lenp
 #endif
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 p	|void	|import_builtin_bundle					\

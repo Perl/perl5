@@ -4283,6 +4283,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned decimal integer.
  */
+/* U64uf:
+ *	This symbol defines the format string used for printing a U64
+ *	as an unsigned decimal integer.
+ */
 /* UVof:
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned octal integer.
@@ -4309,6 +4313,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define IVdf		$ivdformat		/**/
 #define UVuf		$uvuformat		/**/
+#$d_PRIu64 U64uf	$sPRIu64		/**/
 #define UVof		$uvoformat		/**/
 #define UVxf		$uvxformat		/**/
 #define UVXf		$uvXUformat		/**/

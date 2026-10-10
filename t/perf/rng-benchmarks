@@ -1,0 +1,158 @@
+#!perl
+
+# Benchmarks for the built-in RNG and the distribution's ${^RNG} fast path.
+# A provider is selected with PERL_RNG_BENCH_PROVIDER.  When that variable is
+# absent, the workload uses the built-in generator.  This lets one run compare
+# blead's built-in generator, this branch's built-in generator, and every
+# provider under the same workload.  For example, after building both trees:
+#
+#   ./perl -Ilib Porting/bench.pl --benchfile=t/perf/rng-benchmarks \
+#       --tests=/func::rng::rand/ \
+#       /path/to/blead/perl=blead --args='-I/path/to/blead/lib' \
+#       ./perl=branch --args='-Ilib' \
+#       ./perl=drand48 --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=Drand48 \
+#       ./perl=pcg --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=PCG
+#       ./perl=pcg-rxs --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=PCG::RXS_M_XS_64_64
+#       ./perl=pcg-xsl-mcg --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=PCG::XSL_RR_128_64_MCG
+#       ./perl=pcg-xsl-lcg --args='-Ilib -Idist/RNG/lib' \
+#           --env=PERL_RNG_BENCH_PROVIDER=PCG::XSL_RR_128_64_LCG
+#
+# Add the other PCG variants, Wyrand, Xoshiro, and HMAC_DRBG in the same way.
+# Only the branch provider columns need the extra include paths and built RNG
+# extension.
+# The rand_bytes benchmark exercises the branch's builtin API and should be
+# run separately with --tests=/func::rng::rand_bytes/.
+# Porting/bench.pl measures Cachegrind instruction and cache counts.  Use
+# perf stat separately when wall-clock time or cycle counts are needed.
+# Its overall average mixes rand and srand workloads, so compare the
+# individual rows rather than that aggregate.
+
+my $provider_setup = q{
+    my $value;
+    if (my $provider = $ENV{PERL_RNG_BENCH_PROVIDER}) {
+        require RNG;
+        die "unknown RNG benchmark provider $provider\n"
+            unless $provider =~ /\A(?:Drand48|PCG|PCG::RXS_M_XS_64_64|
+                PCG::XSL_RR_128_64_MCG|PCG::XSL_RR_128_64_LCG|
+                Wyrand|Xoshiro|HMAC_DRBG)\z/x;
+        my $class = "RNG::$provider";
+        (my $file = $class) =~ s!::!/!g;
+        require "$file.pm";
+        ${^RNG} = $class->new(42);
+    }
+};
+
+my $shuffle_setup = "$provider_setup use List::Util qw(shuffle); "
+                 . "my \@input = 1 .. 100; my \@shuffled;";
+
+# Each random-input workload has a fixed-input partner with the same rolling
+# statistics, sort, percentile, and hash work. The fixed partner reuses the
+# random sequence generated during setup. The random workload reseeds before
+# each measured pass so both workloads sort the same values.
+my @sample_workloads;
+for my $count (256, 1024, 4096) {
+    for my $source (qw(rand fixed)) {
+        my $sample_value = $source eq 'rand' ? 'rand()' : '$fixed_values[$i]';
+        my $setup = $provider_setup . "my \$count = $count; ";
+        if ($source eq 'fixed') {
+            $setup .= "srand(42); my \@fixed_values = map { rand() } "
+                    . "0 .. (\$count - 1); ";
+        }
+        $setup .= 'my $results;';
+
+        my $code = q{
+            my @values;
+            my ($sum, $sum_of_squares) = (0, 0);
+            my ($min, $max);
+            for my $i (0 .. $count - 1) {
+                my $value = __SAMPLE_VALUE__;
+                push @values, $value;
+                $sum += $value;
+                $sum_of_squares += $value * $value;
+                $min = $value if !defined($min) || $value < $min;
+                $max = $value if !defined($max) || $value > $max;
+            }
+
+            @values = sort { $a <=> $b } @values;
+            my $mean = $sum / $count;
+            my $stddev = sqrt(($sum_of_squares - $sum * $mean)
+                              / ($count - 1));
+            my $q1_index = int($count / 4);
+            my $median_index = int($count / 2);
+            my $q3_index = int(3 * $count / 4);
+            my $p90_index = int((90 * $count + 99) / 100) - 1;
+            my $p95_index = int((95 * $count + 99) / 100) - 1;
+            my $p99_index = int((99 * $count + 99) / 100) - 1;
+            $results = {
+                count           => $count,
+                sum             => $sum,
+                sum_of_squares  => $sum_of_squares,
+                mean            => $mean,
+                stddev          => $stddev,
+                min             => $min,
+                q1              => ($values[$q1_index - 1]
+                                    + $values[$q1_index]) / 2,
+                median          => ($values[$median_index - 1]
+                                    + $values[$median_index]) / 2,
+                q3              => ($values[$q3_index - 1]
+                                    + $values[$q3_index]) / 2,
+                p90             => $values[$p90_index],
+                p95             => $values[$p95_index],
+                p99             => $values[$p99_index],
+                max             => $max,
+            };
+        };
+        $code =~ s/__SAMPLE_VALUE__/$sample_value/;
+
+        push @sample_workloads,
+            "func::rng::sample::${source}::$count" => {
+                desc  => "$source input, rolling statistics, sort, and percentiles over $count values",
+                setup => $setup,
+                pre   => $source eq 'rand' ? 'srand(42)' : undef,
+                code  => $code,
+            };
+    }
+}
+
+my @benchmarks = (
+    'func::rng::rand::no_limit' => {
+        desc    => 'rand() using the built-in or selected generator',
+        setup   => $provider_setup,
+        code    => '$value = rand();',
+    },
+    'func::rng::rand::limit' => {
+        desc    => 'rand(LIMIT) using the built-in or selected generator',
+        setup   => "$provider_setup my \$limit = 10;",
+        code    => '$value = rand($limit);',
+    },
+    'func::rng::rand_bytes::512' => {
+        desc    => 'rand_bytes(512) using the built-in or selected generator',
+        setup   => "$provider_setup no warnings 'experimental::builtin'; "
+                 . "use builtin 'rand_bytes';",
+        code    => '$value = builtin::rand_bytes(512);',
+    },
+    'func::rng::shuffle::100' => {
+        desc    => 'List::Util::shuffle() over 100 items',
+        setup   => $shuffle_setup,
+        code    => '@shuffled = shuffle @input;',
+    },
+    'func::rng::srand::integer' => {
+        desc    => 'srand(INTEGER) using the built-in or selected generator',
+        setup   => $provider_setup,
+        code    => '$value = srand(42);',
+    },
+    'func::rng::srand::string' => {
+        desc    => 'srand(STRING) using the built-in or selected generator',
+        # blead warns after reducing an ordinary string to its legacy seed.
+        # The benchmark compares that path with the new string-seed path.
+        setup   => "no warnings 'overflow'; $provider_setup",
+        code    => '$value = srand("benchmark seed");',
+    },
+);
+
+push @benchmarks, @sample_workloads;
+\@benchmarks;
