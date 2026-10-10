@@ -1777,6 +1777,69 @@ S_ac_path_as_latin1(const U8 *path, const U32 path_len, const U32 source_chars,
     return TRUE;
 }
 
+/* The map describes original target octets, rather than trie transitions.
+ * A wide codepoint has only a UTF-8 entry.  Native Latin-1 codepoints have
+ * an entry for each target encoding. */
+static void
+S_ac_map_start_codepoint(pTHX_ U8 *map, const UV cp)
+{
+    U8 encoded[UTF8_MAXBYTES + 1];
+
+    if (cp <= 255)
+        map[(U8)cp] |= REG_AC_PREFILTER_LATIN1_MASK;
+    uv_to_utf8(encoded, cp);
+    map[encoded[0]] |= REG_AC_PREFILTER_UTF8_MASK;
+}
+
+/* Folded trie paths are UTF-8 encoded.  Visit only the first codepoint of
+ * each path, not every accepting word sharing that initial codepoint. */
+static void
+S_ac_map_folded_starts(pTHX_ const reg_trie_data *trie, const U32 state,
+                       U8 *path, const U32 path_len, U8 *map,
+                       SV **first_folds)
+{
+    const U32 base = trie->states[state].trans.base;
+
+    for (U32 ch = trie->states[state].min_octet;
+         base && ch <= trie->states[state].max_octet; ch++)
+    {
+        const U32 next = S_trie_trans_state(trie, state, base, ch, 0);
+
+        if (!next)
+            continue;
+
+        assert(path_len < UTF8_MAXBYTES);
+        path[path_len] = (U8)ch;
+        if (path_len + 1 == UTF8SKIP(path)) {
+            U8 folded[UTF8_MAXBYTES_CASE + 1];
+            STRLEN folded_len;
+            U32 first;
+            const U32 *remaining;
+            const UV cp = valid_utf8_to_uv(path, NULL);
+            const UV initial = to_uni_fold(cp, folded, &folded_len);
+            const Size_t count = inverse_folds_(initial, &first, &remaining);
+
+            /* Unicode folding, together with native /d fold pairs, covers all
+             * possible starts under /d and /aa.  It may admit false positives,
+             * but that is fine as AC rejects them using the actual folding rules. */
+            S_ac_map_start_codepoint(aTHX_ map, cp);
+            if (cp <= 255 && (trie->prop_flags & TRIE_FOLD_NATIVE))
+                S_ac_map_start_codepoint(aTHX_ map, PL_fold[(U8)cp]);
+            S_ac_map_start_codepoint(aTHX_ map, initial);
+            if (count) {
+                S_ac_map_start_codepoint(aTHX_ map, first);
+                for (Size_t i = 1; i < count; i++)
+                    S_ac_map_start_codepoint(aTHX_ map, remaining[i - 1]);
+            }
+            *first_folds = add_cp_to_invlist(*first_folds, initial);
+        }
+        else {
+            S_ac_map_folded_starts(aTHX_ trie, next, path, path_len + 1,
+                                   map, first_folds);
+        }
+    }
+}
+
 #ifdef DEBUGGING
 static void
 S_dump_ac_prefilter_table(pTHX_ const char *name, const U8 *table,
@@ -2039,6 +2102,43 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         Safefree(parent_octets);
         Safefree(path_depths);
         Safefree(parents);
+    }
+    else if (TRIE_IS_FOLDED(trie)
+             && FLAGS(source) != EXACTFLU8
+             && trie->startstate == 1 && !trie->states[1].wordnum
+             && !trie->prefixlen_octets && !trie->prefixlen_chars)
+    {
+        SV *first_folds = NULL;
+        U8 path[UTF8_MAXBYTES + 1];
+        U8 *start_map;
+        UV start, end;
+
+        /* BMH offsets in folded data do not describe the original target.
+         * Leave both anchor lengths zero and use only the start map.  Locale
+         * folding is excluded because its rules can change at execution. */
+        aho->prefilter = (U8 *)PerlMemShared_calloc(
+            REG_AC_PREFILTER_SIZE, sizeof(U8));
+        start_map = aho->prefilter + REG_AC_PREFILTER_MAP_OFFSET;
+        S_ac_map_folded_starts(aTHX_ trie, 1, path, 0, start_map, &first_folds);
+
+        /* A single target codepoint can supply several folded characters.
+         * Add every such codepoint whose fold begins with a possible first
+         * folded character.  We need not compare the rest of its fold: false
+         * positives are safe, including folds extending beyond a trie word
+         * into its following regex nodes. */
+        invlist_iterinit(PL_HasMultiCharFold);
+        while (invlist_iternext(PL_HasMultiCharFold, &start, &end)) {
+            for (UV cp = start; cp <= end; cp++) {
+                U8 folded[UTF8_MAXBYTES_CASE + 1];
+                STRLEN folded_len;
+                const UV initial = to_uni_fold(cp, folded, &folded_len);
+
+                if (first_folds && invlist_contains_cp_(first_folds, initial))
+                    S_ac_map_start_codepoint(aTHX_ start_map, cp);
+            }
+        }
+        SvREFCNT_dec(first_folds);
+        DEBUG_TRIE_COMPILE_r(S_dump_ac_prefilters(aTHX_ aho, depth));
     }
     /* The breadth-first work queue can contain each state at most once, so
      * numstates entries suffice.  q_read and q_write address it as a

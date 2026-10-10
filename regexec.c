@@ -3560,21 +3560,24 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         /* A prefilter may skip only from the AC root.  Once
                          * AC has consumed a prefix, its failure state must
                          * retain that partial-match information. */
-                        if (has_bmh && !foldlen && !octets_remaining) {
+                        if (prefilter && !foldlen && !octets_remaining) {
                             /* BMH positions its anchor by encoded octet
-                             * length, but candidate starts must be character
-                             * boundaries in UTF-8 targets. */
-                            while (uc <= (U8*)last_start) {
-                                U8 distance;
+                             * length.  Folded tries have no BMH table and
+                             * use only the map of original target starts.
+                             * Both require character boundaries in UTF-8. */
+                            while (uc < (U8*)strend && uc <= (U8*)last_start) {
+                                U8 distance = 0;
 
                                 if (utf8_target && UTF8_IS_CONTINUATION(*uc)) {
                                     uc++;
                                     pointpos = 0;
                                     continue;
                                 }
-                                if ((STRLEN)((U8*)strend - uc) < bmh_minlen)
-                                    break;
-                                distance = bmh_shift[uc[bmh_minlen - 1]];
+                                if (has_bmh) {
+                                    if ((STRLEN)((U8*)strend - uc) < bmh_minlen)
+                                        break;
+                                    distance = bmh_shift[uc[bmh_minlen - 1]];
+                                }
 
                                 /* For shifts zero and one, a start-map miss
                                  * proves independently that no literal starts
@@ -3593,7 +3596,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                     /* The helper consumes at least the
                                      * rejected octet at uc. */
                                     uc = (U8 *)S_scan_repeated_uv_blocks(
-                                        uc, (U8*)strend, (U8*)last_start,
+                                        uc, (U8*)strend,
+                                        MIN((U8*)last_start, (U8*)strend - 1),
                                         start_map, start_mask, utf8_target);
                                     pointpos = 0;
                                     continue;
@@ -3603,7 +3607,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 uc += distance;
                                 pointpos = 0;
                             }
-                            if (uc > (U8*)last_start)
+                            if (uc >= (U8*)strend || uc > (U8*)last_start)
                                 break;
                         }
                     }
