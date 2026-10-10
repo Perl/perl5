@@ -78,7 +78,7 @@ my $known_flags_re =
     qr/[ aA bB C dD eE fF h iI mM nN oO Q pP rR sS tT uU v W xX y ;@\#? ] /xx;
 
 # Flags that don't apply to this program, like implementation details.
-my $irrelevant_flags_re = qr/[ ab eE iI P Q rR X? ]/xx;
+my $irrelevant_flags_re = qr/[ ab eE iI P rR X? ]/xx;
 
 # Only certain flags dealing with what gets displayed, are acceptable for
 # apidoc_item

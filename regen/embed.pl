@@ -46,6 +46,13 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
+my $error_count = 0;
+sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
+                     # succeed.
+    warn shift;
+    $error_count++;
+}
+
 # This program has historically generated compatibility macros for a few
 # functions of the form Perl_FOO(pTHX_ ...).  Those macros would be named
 # FOO(...), and would expand outside the core to Perl_FOO_nocontext(...)
@@ -839,29 +846,17 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isCHARNAME_CONT
     isCNTRL_LC_utf8
     isDIGIT_LC_utf8
-    is_FOLDS_TO_MULTI_utf8
     isGRAPH_LC_utf8
     isGV_with_GP_off
     isGV_with_GP_on
-    is_HANGUL_ED_utf8_safe
-    is_HORIZWS_cp_high
-    is_HORIZWS_high
     isIDCONT_LC_utf8
     isIDFIRST_lazy_if_safe
     isIDFIRST_LC_utf8
-    is_LARGER_NON_CHARS_utf8
     is_LAX_VERSION
     isLEXWARN_off
     isLEXWARN_on
-    is_LNBREAK_latin1_safe
-    is_LNBREAK_safe
-    is_LNBREAK_utf8_safe
     isLOWER_LC_utf8
-    is_MULTI_CHAR_FOLD_latin1_safe
-    is_MULTI_CHAR_FOLD_utf8_safe
-    is_NONCHAR_utf8_safe
     IS_NUMERIC_RADIX
-    is_PATWS_safe
     is_posix_ALPHA
     is_posix_ALPHANUMERIC
     is_posix_ASCII
@@ -879,23 +874,10 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     is_posix_WORDCHAR
     is_posix_XDIGIT
     isPRINT_LC_utf8
-    is_PROBLEMATIC_LOCALE_FOLD_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp
-    is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8
-    is_PROBLEMATIC_LOCALE_FOLD_utf8
     isPSXSPC_LC_utf8
     isPUNCT_LC_utf8
-    is_QUOTEMETA_high
-    is_SHORTER_NON_CHARS_utf8
     isSPACE_LC_utf8
-    is_SPACE_utf8_safe_backwards
     is_STRICT_VERSION
-    is_SURROGATE_utf8
-    is_SURROGATE_utf8_safe
-    is_THREE_CHAR_FOLD_HEAD_latin1_safe
-    is_THREE_CHAR_FOLD_HEAD_utf8_safe
-    is_THREE_CHAR_FOLD_latin1_safe
-    is_THREE_CHAR_FOLD_utf8_safe
     isU8_ALPHA_LC
     isU8_ALPHANUMERIC_LC
     isU8_ASCII_LC
@@ -914,19 +896,13 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     isU8_XDIGIT_LC
     isUNICODE_POSSIBLY_PROBLEMATIC
     isUPPER_LC_utf8
-    is_VERTWS_cp_high
-    is_VERTWS_high
     isVERTWS_utf8
     isWARNf_on
     isWARN_on
     isWARN_ONCE
     isWORDCHAR_lazy_if_safe
     isWORDCHAR_LC_utf8
-    is_XDIGIT_cp_high
-    is_XDIGIT_high
     isXDIGIT_LC_utf8
-    is_XPERLSPACE_cp_high
-    is_XPERLSPACE_high
     IV_MAX_P1
     JE_OLD_STACK_HWM_restore
     JE_OLD_STACK_HWM_save
@@ -2110,8 +2086,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     WARN_NONEstring
     WARNshift
     WARNsize
-    what_MULTI_CHAR_FOLD_latin1_safe
-    what_MULTI_CHAR_FOLD_utf8_safe
     WIN32SCK_IS_STDSCK
     withinCOUNT
     WORTH_PER_WORD_LOOP
@@ -2203,10 +2177,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     HAS_IGNORED_LOCALE_CATEGORIES_
     HIGHEST_REGCOMP_DOT_H_SYNC_
     inRANGE_helper_
-    is_MULTI_CHAR_FOLD_utf8_safe_part0_
-    is_MULTI_CHAR_FOLD_utf8_safe_part1_
-    is_MULTI_CHAR_FOLD_utf8_safe_part2_
-    is_MULTI_CHAR_FOLD_utf8_safe_part3_
     LC_ADDRESS_AVAIL_
     LC_COLLATE_AVAIL_
     LC_CTYPE_AVAIL_
@@ -2249,14 +2219,6 @@ my %unresolved_visibility_overrides = map { $_ => 1 } qw(
     utf8_safe_assert_
     UTF_FIRST_CONT_BYTE_110000_
     UTF_START_BYTE_110000_
-    what_MULTI_CHAR_FOLD_utf8_safe_part0_
-    what_MULTI_CHAR_FOLD_utf8_safe_part1_
-    what_MULTI_CHAR_FOLD_utf8_safe_part2_
-    what_MULTI_CHAR_FOLD_utf8_safe_part3_
-    what_MULTI_CHAR_FOLD_utf8_safe_part4_
-    what_MULTI_CHAR_FOLD_utf8_safe_part5_
-    what_MULTI_CHAR_FOLD_utf8_safe_part6_
-    what_MULTI_CHAR_FOLD_utf8_safe_part7_
     withinCOUNT_KNOWN_VALID_
     WRAP_U8_LC_
     XPVCV_COMMON_
@@ -2494,8 +2456,12 @@ my @unresolved_visibility_overrides_but_extensions_definitely_need_these =
   );
 
 # Add to main list
-$unresolved_visibility_overrides{$_} = 1
-   for @unresolved_visibility_overrides_but_extensions_definitely_need_these;
+for my $symbol (@unresolved_visibility_overrides_but_extensions_definitely_need_these)
+{
+    die_at_end("$symbol in multiple unresolved lists")
+                         if defined $unresolved_visibility_overrides{$symbol};
+    $unresolved_visibility_overrides{$symbol} = 1;
+}
 
 # The keys of this hash are the header files that aren't automatically pulled
 # in by the typical module which uses: EXTERN.h, perl.h, and XSUB.h.  The
@@ -2866,10 +2832,6 @@ my %needed_by_ext_re = map { $_ => 1 } qw(
     first_upper_bit_set_byte_number
     invlist_intersection_complement_2nd_
     invlist_union_complement_2nd_
-    is_MULTI_CHAR_FOLD_utf8_safe_part4_
-    is_MULTI_CHAR_FOLD_utf8_safe_part5_
-    is_MULTI_CHAR_FOLD_utf8_safe_part6_
-    is_MULTI_CHAR_FOLD_utf8_safe_part7_
     PARSE_IDENT_ERROR_POSITION
     PARSE_IDENT_ERROR_TEXT
     RExC_parse_advance
@@ -2877,10 +2839,6 @@ my %needed_by_ext_re = map { $_ => 1 } qw(
     LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8
     SURSOLIDUM
     WARN_HELPER_
-    what_MULTI_CHAR_FOLD_utf8_safe_part8_
-    what_MULTI_CHAR_FOLD_utf8_safe_part9_
-    what_MULTI_CHAR_FOLD_utf8_safe_part10_
-    what_MULTI_CHAR_FOLD_utf8_safe_part11_
 );
 
 # This is a list of symbols that are needed by various ext/ modules, and are
@@ -3586,13 +3544,6 @@ my $visibility_flags = "$visible_outside_core_flags$never_visible_flags";
 my $visibility_flags_re = qr/[$visibility_flags]/;
 
 my $discard_non_visibility_flags_re = qr/[^$visibility_flags]/;
-
-my $error_count = 0;
-sub die_at_end ($) { # Keeps going for now, but makes sure the regen doesn't
-                     # succeed.
-    warn shift;
-    $error_count++;
-}
 
 sub full_name ($$) { # Returns the function name with potentially the
                      # prefixes 'S_' or 'Perl_'
@@ -5502,7 +5453,7 @@ sub find_undefs {
         delete $always_undefs{$name};   # No need to #undef it
 
         if (   $flags_visibility
-            && $flags_visibility !~ /E/
+            && $flags_visibility !~ /[EQ]/
             && ! defined $visibility{$name}{flags_implicit})
         {
             push @warnings, "'$name' cannot actually be seen outside of"
