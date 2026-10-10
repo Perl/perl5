@@ -6910,7 +6910,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case KEEPS: /*   \K  */
             /* update the startpoint */
-            st->u.keeper.val = RXp_OFFS_START(rex,0);
+            st->u.keeper.offset = RXp_OFFS_START(rex,0);
             RXp_OFFSp(rex)[0].start = locinput - reginfo->strbeg;
             PUSH_STATE_GOTO(KEEPS_next, next, locinput, loceol,
                             script_run_begin);
@@ -6918,7 +6918,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case KEEPS_next_fail:
             /* rollback the start point change */
-            RXp_OFFSp(rex)[0].start = st->u.keeper.val;
+            RXp_OFFSp(rex)[0].start = st->u.keeper.offset;
             sayNO_SILENT;
             NOT_REACHED; /* NOTREACHED */
 

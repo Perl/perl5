@@ -1023,7 +1023,7 @@ typedef struct regmatch_state {
         } mark;
 
         struct {
-            int val;
+            SSize_t offset;
         } keeper;
 
         /* quantifiers - these members are used for storing state for
