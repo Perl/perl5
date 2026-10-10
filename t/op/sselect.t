@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('.', '../lib');
-    $hires = eval 'use Time::HiResx "time"; 1';
+    $hires = eval 'use Time::HiRes "time"; 1';
 }
 
 skip_all("Win32 miniperl has no socket select")
