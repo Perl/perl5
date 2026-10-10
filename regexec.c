@@ -3582,19 +3582,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                     distance = bmh_shift[uc[bmh_minlen - 1]];
                                 }
 
-                                /* For shifts zero and one, a start-map miss
-                                 * proves independently that no literal starts
-                                 * here.  The helper checks each later start
+                                /* A start-map miss proves that no literal
+                                 * starts here, regardless of the BMH shift.
+                                 * The helper checks each later start
                                  * until it has a full rejected word.  Equal
                                  * following words repeat those rejected
                                  * octets, so they cannot contain a start.
                                  * UTF-8 continuation octets cannot be starts
-                                 * either.  This proof does not depend on the
-                                 * BMH shift.  We use it for small shifts to
-                                 * avoid walking repeated input one octet at
-                                 * a time. */
-                                if (distance <= 1
-                                    && !(start_map[*uc] & start_mask))
+                                 * either.  The checked window therefore lets
+                                 * us skip equal windows without consulting
+                                 * their BMH anchors. */
+                                if (!(start_map[*uc] & start_mask))
                                 {
                                     /* The helper consumes at least the
                                      * rejected octet at uc. */
