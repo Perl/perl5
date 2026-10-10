@@ -2282,6 +2282,12 @@ x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 \x{e0}+j	\x{e0}\x{e9}\x{e0}j	y	$&	\x{e0}j
 \x{e0}+j	\x{e0}\x{e9}\x{e0}\x{e0}j	y	$&	\x{e0}\x{e0}j
 
+# GH #24926
+(?:x??\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by CURLY
+(?:(x)??\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by CURLYN
+(?:x+?\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by PLUS
+(?:x*?\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by STAR
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
