@@ -1437,16 +1437,26 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 #define PUSH_MULTICALL(the_cv) \
     PUSH_MULTICALL_FLAGS(the_cv, 0)
 
+/* The _PREFIX_ variants allow the dMULTICALL variables to be fields
+ * within a struct, with the prefix param intended to be something like
+ * 'foo->'. For core use only; not API. */
+
+/* expands to no text */
+#define PERL_MULTICALL_EMPTY_
+
 /* Like PUSH_MULTICALL, but allows you to specify extra flags
  * for the CX stack entry (this isn't part of the public API) */
 
 #define PUSH_MULTICALL_FLAGS(the_cv, flags) \
+        PUSH_MULTICALL_FLAGS_PREFIX_(the_cv, flags, PERL_MULTICALL_EMPTY_)
+
+#define PUSH_MULTICALL_FLAGS_PREFIX_(the_cv, flags, prefix) \
     STMT_START {							\
         PERL_CONTEXT *cx;						\
         CV * const nOnclAshIngNamE_ = the_cv;				\
         CV * const cv = nOnclAshIngNamE_;				\
         PADLIST * const padlist = CvPADLIST(cv);			\
-        multicall_oldcatch = CATCH_GET;					\
+        prefix multicall_oldcatch = CATCH_GET;				\
         CATCH_SET(TRUE);						\
         PUSHSTACKi(PERLSI_MULTICALL);					\
         cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), (U8)gimme,     \
@@ -1458,16 +1468,22 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         if (CvDEPTH(cv) >= 2)  						\
             Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
         PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
-        multicall_cop = CvSTART(cv);					\
+        prefix multicall_cop = CvSTART(cv);				\
     } STMT_END
 
 #define MULTICALL \
+        MULTICALL_PREFIX_(PERL_MULTICALL_EMPTY_)
+
+#define MULTICALL_PREFIX_(prefix) \
     STMT_START {							\
-        PL_op = multicall_cop;						\
+        PL_op = prefix multicall_cop;					\
         CALLRUNOPS(aTHX);						\
     } STMT_END
 
 #define POP_MULTICALL \
+        POP_MULTICALL_PREFIX_(PERL_MULTICALL_EMPTY_)
+
+#define POP_MULTICALL_PREFIX_(prefix) \
     STMT_START {							\
         PERL_CONTEXT *cx;						\
         cx = CX_CUR();					                \
@@ -1478,7 +1494,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         cx_popblock(cx);				   		\
         CX_POP(cx);                                                     \
         POPSTACK;							\
-        CATCH_SET(multicall_oldcatch);					\
+        CATCH_SET(prefix multicall_oldcatch);				\
         SPAGAIN;							\
     } STMT_END
 
@@ -1486,6 +1502,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  * (this isn't part of the public API) */
 
 #define CHANGE_MULTICALL_FLAGS(the_cv, flags) \
+        CHANGE_MULTICALL_FLAGS_PREFIX_(the_cv, flags, PERL_MULTICALL_EMPTY_)
+
+#define CHANGE_MULTICALL_FLAGS_PREFIX_(the_cv, flags, prefix) \
     STMT_START {							\
         CV * const nOnclAshIngNamE_ = the_cv;				\
         CV * const cv = nOnclAshIngNamE_;				\
@@ -1500,8 +1519,10 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         if (CvDEPTH(cv) >= 2)  						\
             Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
         PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
-        multicall_cop = CvSTART(cv);					\
+        prefix multicall_cop = CvSTART(cv);				\
     } STMT_END
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
