@@ -1150,6 +1150,58 @@ START_EXTERN_C
 #include "regnodes.h"
 #endif
 
+/* Predicates for the plain and UTF-8-required exact opcode pairs. */
+#define IS_EXACT_OR_NF(op) ((op) == EXACT || (op) == EXACT_NF)
+#define IS_EXACT_REQ8_OR_NF_REQ8(op) \
+    ((op) == EXACT_REQ8 || (op) == EXACT_NF_REQ8)
+#define ANY_EXACT_NF(op) ((op) == EXACT_NF || (op) == EXACT_NF_REQ8)
+
+#define TRIE_TYPE(op) ( ( NOTHING == (op) || ANY_EXACT_NF(op) )           \
+                       ? (op)                                              \
+                       : ( (op) == EXACT || (op) == EXACT_REQ8 )           \
+                         ? EXACT                                           \
+                         : (     EXACTFU == (op)                           \
+                              || EXACTFU_REQ8 == (op)                      \
+                              || EXACTFUP == (op) )                        \
+                           ? EXACTFU                                       \
+                             : ( EXACTFAA == (op) )                        \
+                               ? EXACTFAA                                  \
+                             : ( EXACTL == (op) )                          \
+                               ? EXACTL                                    \
+                             : ( EXACTFLU8 == (op) )                       \
+                               ? EXACTFLU8                                 \
+                             : 0 )
+
+/* Finalize an accumulator of non-folding text as the ordinary exact trie
+ * family.  A wide word must not make a shared ASCII prefix require UTF-8. */
+#define TRIE_FINAL_TYPE(type)                                              \
+    ( ANY_EXACT_NF(type) ? EXACT : (type) )
+
+/* Combine normalized trie types, or return 0 when they are incompatible.
+ * NOTHING and non-folding exact types impose no matching family.  Keep the
+ * non-folding marker until a folded or ordinary exact type supplies one.
+ * Unlike joining strings, combining alternatives does not require every
+ * word to be UTF-8 just because one word is.  make_trie() handles each word's
+ * source encoding separately.
+ */
+#define TRIE_COMPATIBLE_TYPE(type_a, type_b)                               \
+    ( (type_a) == NOTHING                                                  \
+        ? (type_b)                                                         \
+        : (type_b) == NOTHING                                              \
+          ? (type_a)                                                       \
+          : ANY_EXACT_NF(type_a)                                          \
+            ? ANY_EXACT_NF(type_b)                                        \
+                ? ((type_a) == EXACT_NF_REQ8                              \
+                   || (type_b) == EXACT_NF_REQ8)                          \
+                    ? EXACT_NF_REQ8                                       \
+                    : EXACT_NF                                            \
+                : (type_b)                                                 \
+            : ANY_EXACT_NF(type_b)                                        \
+              ? (type_a)                                                   \
+              : (type_a) == (type_b)                                       \
+                ? (type_a)                                                 \
+                : 0 )
+
 #ifndef PLUGGABLE_RE_EXTENSION
 #ifndef DOINIT
 EXTCONST regexp_engine PL_core_reg_engine;
