@@ -952,6 +952,7 @@ MICROCORE_SRC	=		\
 		..\utf8.c	\
 		..\dump.c	\
 		..\hv.c		\
+		..\attributes.c	\
 		..\av.c		\
 		..\builtin.c	\
 		..\caretx.c	\
@@ -995,6 +996,7 @@ WIN32_SRC	=		\
 		.\fcrypt.c
 
 CORE_NOCFG_H	=		\
+		..\attributes.h	\
 		..\av.h		\
 		..\cop.h	\
 		..\cv.h		\

@@ -662,6 +662,7 @@ NULL		=
 DEL		= del
 
 MICROCORE_SRC	=		\
+		..\attributes.c	\
 		..\av.c		\
 		..\caretx.c	\
 		..\class.c	\
@@ -724,6 +725,7 @@ WIN32_SRC	=		\
 		.\fcrypt.c
 
 CORE_NOCFG_H	=		\
+		..\attributes.h	\
 		..\av.h		\
 		..\cop.h	\
 		..\cv.h		\

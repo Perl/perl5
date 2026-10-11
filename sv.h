@@ -39,16 +39,23 @@ The types are:
     SVt_PVFM
     SVt_PVIO
     SVt_PVOBJ
+    SVt_INTERNAL
 
 These are most easily explained from the bottom up.
+
+C<SVt_INTERNAL> is for use by interpreter or XS module internals, where values
+need to be wrapped in SV structures because they need to be referred in places
+that can only store SVs (such as in HVs or the PADLIST of a CV), but which
+ought not be directly observable by Perl code.  It should be considered an
+error if such a value is ever directly operated on by regular PP funcs.
 
 C<SVt_PVOBJ> is for object instances of the new `use feature 'class'` kind.
 C<SVt_PVIO> is for I/O objects, C<SVt_PVFM> for formats, C<SVt_PVCV> for
 subroutines, C<SVt_PVHV> for hashes and C<SVt_PVAV> for arrays.
 
 All the others are scalar types, that is, things that can be bound to a
-C<$> variable.  For these, the internal types are mostly orthogonal to
-types in the Perl language.
+C<$> variable.  For these, the specific SV structure types are mostly
+orthogonal to types in the Perl language.
 
 Hence, checking C<< SvTYPE(sv) < SVt_PVAV >> is the best way to see whether
 something is a scalar.
@@ -128,6 +135,9 @@ Type flag for I/O objects.  See L</svtype>.
 =for apidoc AmnUx||SVt_PVOBJ
 Type flag for object instances.  See L</svtype>.
 
+=for apidoc AmnUx||SVt_INTERNAL
+Type flag for interpreter-internal structures.  See L</svtype>.
+
 =cut
 
   These are ordered so that the simpler types have a lower value; SvUPGRADE
@@ -158,7 +168,9 @@ typedef enum {
         SVt_PVFM,	/* 14 */
         SVt_PVIO,	/* 15 */
         SVt_PVOBJ,      /* 16 */
-                        /* 17-31: Unused, though one should be reserved for a
+        SVt_INTERNAL,   /* 17; but keep this one last, add other perl-visible
+                           values above it */
+                        /* 18-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
@@ -228,6 +240,7 @@ typedef struct hek HEK;
         GP*	svu_gp;			\
         PerlIO *svu_fp;			\
         SV**    svu_fields;             \
+        const void *svu_cvptr;          \
     }	sv_u				\
     SV_HEAD_DEBUG_
 
@@ -3004,6 +3017,27 @@ typedef struct {
 #define PL_sv_reftype_lookup_MAX 14
 extern const sv_reftype_entry PL_sv_reftype_lookup[PL_sv_reftype_lookup_MAX];
 #endif
+
+/* Accessors on SVt_INTERNAL */
+struct PerlInternalSVMetadata {
+    const char *name;
+    /* TODO(leonerd): maybe some flags, some free/clone management callback
+     * functions, etc... it's almost like we're recreating magic ;)
+     */
+};
+
+/*
+=for apidoc Cm|const struct PerlInternalSVMetadata *|SviMETA|NN SV *sv
+Returns the metadata pointer from an C<SVt_INTERNAL> SV.
+
+=for apidoc Cm|void *|SviPTR|NN SV *sv
+Returns the opaque internal data pointer from an C<SVt_INTERNAL> SV.
+
+=cut
+*/
+
+#define  SviMETA(sv) ((const struct PerlInternalSVMetadata *)(SvANY(sv)))
+#define  SviPTR(sv)  (sv->sv_u.svu_cvptr)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
