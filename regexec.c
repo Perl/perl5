@@ -1694,24 +1694,20 @@ Perl_re_intuit_start(pTHX_
          * in that range. if neither, then look for the start class in the
          * whole rest of the string */
 
-        /* XXX DAPM it's not clear what the minlen test is for, and why
-         * it's not used in the floating case. Nothing in the test suite
-         * causes minlen == 0 here. See <20140313134639.GS12844@iabyn.com>.
-         * Here are some old comments, which may or may not be correct:
-         *
-         *   minlen == 0 is possible if regstclass is \b or \B,
-         *   and the fixed substr is ''$.
-         *   Since minlen is already taken into account, rx_origin+1 is
-         *   before strend; accidentally, minlen >= 1 guaranties no false
-         *   positives at rx_origin + 1 even for \b or \B.  But (minlen? 1 :
-         *   0) below assumes that regstclass does not come from lookahead...
-         *   If regstclass takes bytelength more than 1: If charlength == 1, OK.
-         *   This leaves EXACTF-ish only, which are dealt with in
-         *   find_byclass().
-         */
-
         if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos = HOP3clim(rx_origin, (prog->minlen ? cl_l : 0), strend);
+            /* Note: for a long time, the second argument here was
+             *    (prog->minlen ? cl_l : 0)
+             * but it wasn't clear what the purpose of that check was
+             * and nothing in the test harness exercised it.
+             * (Old, old comments did refer to \b or \B and lookahead,
+             * please refer to the git history if those are needed.)
+             *
+             * It did eventually turn out to be involved in a bug
+             * (GH#24944) where this failed to match as it should:
+             *     "a" =~ /\A^\ba*\z/m
+             * That was fixed - and nothing has thus far been seen to
+             * break - by just passing cl_l as the second argument. */
+            endpos = HOP3clim(rx_origin, cl_l, strend);
         else if (prog->float_substr || prog->float_utf8) {
             rx_max_float = HOP3c(check_at, -start_shift, strbeg);
             endpos = HOP3clim(rx_max_float, cl_l, strend);
