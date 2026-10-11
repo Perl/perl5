@@ -1888,7 +1888,8 @@ Perl_re_intuit_start(pTHX_
                  trie_latin_utf8_fold, trie_utf8_exactfa_fold,              \
                  trie_latin_utf8_exactfa_fold,                              \
                  trie_utf8l, trie_flu8, trie_flu8_latin }                   \
-                    trie_type = ((FLAGS(scan) == EXACT)                     \
+                    trie_type = ((IS_EXACT_OR_NF(FLAGS(scan))              \
+                                  || IS_EXACT_REQ8_OR_NF_REQ8(FLAGS(scan))) \
                                  ? (utf8_target ? trie_utf8 : trie_plain)   \
                                  : (FLAGS(scan) == EXACTL)                  \
                                     ? (utf8_target ? trie_utf8l : trie_plain)\
@@ -7438,12 +7439,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG_(locinput, reginfo->strend);
             }
             goto do_exact;
+        case EXACT_NF_REQ8:
         case EXACT_REQ8:
             if (! utf8_target) {
                 sayNO;
             }
             /* FALLTHROUGH */
 
+        case EXACT_NF:         /* non-folding text */
         case EXACT:             /*  /abc/        */
           do_exact:
             s = STRINGs(scan);
@@ -10772,6 +10775,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
       case EXACT_REQ8_tb:
+      case EXACT_NF_REQ8_tb:
       case LEXACT_REQ8_tb:
       case EXACTFU_REQ8_tb:
         break;
@@ -10791,12 +10795,15 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case EXACT_REQ8_t8:
+      case EXACT_NF_REQ8_t8:
       case LEXACT_REQ8_t8:
       case EXACTFU_REQ8_t8:
       case LEXACT_t8:
       case LEXACT_tb:
       case EXACT_t8:
       case EXACT_tb:
+      case EXACT_NF_t8:
+      case EXACT_NF_tb:
       case EXACTF_t8:
       case EXACTF_tb:
       case EXACTFAA_NO_TRIE_t8:

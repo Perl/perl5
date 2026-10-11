@@ -332,7 +332,11 @@ BRANCH           node 1     Match this alternative, or the next...
 
 # Literals
 EXACT            str        Match this string (flags field is the
-                            length).
+                            length).  The text is matched exactly as
+                            is, without folding.  Nodes of this type
+                            can only be safely merged with other EXACT
+                            nodes or with EXACT_NF, but not with any
+                            folding types like EXACTFU.
 
 # In a long string node, the U32 argument is the length, and is immediately
 # followed by the string.
@@ -340,6 +344,20 @@ LEXACT           len:str 1  Match this long string (preceded by length;
                             flags unused).
 EXACTL           str        Like EXACT, but /l is in effect (used so
                             locale-related warnings can be checked for)
+EXACT_NF         str        Match this string of non-folding
+                            codepoints, meaning codepoints which do not
+                            change under any folding function (flags
+                            field is the length). For example, the '.'
+                            character is non-folding.  This node type
+                            is for the most part handled just like
+                            EXACT nodes, but EXACT_NF nodes have the
+                            additional special property that they may
+                            be safely merged with any other node type,
+                            and provided the result ends up with the
+                            other nodes type then it will still match
+                            correctly.
+EXACT_NF_REQ8    str        Like EXACT_NF, but only UTF-8 encoded
+                            targets can match
 EXACTF           str        Like EXACT, but match using /id rules;
                             (string not UTF-8, ASCII folded; non-ASCII
                             not)

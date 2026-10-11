@@ -770,7 +770,11 @@ return {
                   "arg_spec" => "str",
                   "str_arg" => 1,
                 },
-              "desc" => "Match this string (flags field is the length).",
+              "desc" => "Match this string (flags field is the length).  The " .
+                        "text is matched exactly as is, without folding.  Nodes " .
+                        "of this type can only be safely merged with other EXACT " .
+                        "nodes or with EXACT_NF, but not with any folding types " .
+                        "like EXACTFU.",
               "line" => __LINE__,
             },
             {
@@ -801,6 +805,35 @@ return {
               "desc" =>
                 "Like EXACT, but /l is in effect (used so " .
                 "locale-related warnings can be checked for)",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACT_NF",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Match this string of non-folding codepoints, " .
+                "meaning codepoints which do not change under any folding " .
+                "function (flags field is the length). ".  
+                "For example, the '.' character is non-folding.  This node type is for " .
+                "the most part handled just like EXACT nodes, but EXACT_NF nodes have " .
+                "the additional special property that they may be safely merged " .
+                "with any other node type, and provided the result ends up with the other " .
+                "nodes type then it will still match correctly.",
+              "line" => __LINE__,
+            },
+            {
+              "NAME" => "EXACT_NF_REQ8",
+              "TYPE" => "EXACT",
+              "attr" => {
+                  "arg_spec" => "str",
+                  "str_arg" => 1,
+                },
+              "desc" =>
+                "Like EXACT_NF, but only UTF-8 encoded targets can match",
               "line" => __LINE__,
             },
             {

@@ -433,8 +433,9 @@ is the recommended Unicode-aware way of saying
  * must not be identified as UTF-8 merely because their octets happen to form
  * a valid UTF-8 sequence. */
 #define TRIE_SOURCE_UTF8(noper)                                             \
-    (UTF || OP(noper) == EXACT_REQ8 || OP(noper) == EXACTFU_REQ8            \
-        || OP(noper) == EXACTL || OP(noper) == EXACTFLU8)
+    (UTF || OP(noper) == EXACT_REQ8 || OP(noper) == EXACT_NF_REQ8          \
+        || OP(noper) == EXACTFU_REQ8 || OP(noper) == EXACTL                 \
+        || OP(noper) == EXACTFLU8)
 
 PERL_STATIC_INLINE void
 S_trie_list_push(reg_trie_data *trie, const U32 state, const U32 octet,
@@ -601,7 +602,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     PERL_UNUSED_ARG(depth);
 #endif
     switch (flags) {
-        case EXACT: case EXACT_REQ8: case EXACTL: break;
+        case EXACT: case EXACT_REQ8: case EXACT_NF: case EXACT_NF_REQ8:
+        case EXACTL: break;
         case EXACTFAA:
         case EXACTFUP:
         case EXACTFU:
@@ -734,10 +736,10 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             }
 
             if (    noper < tail
-                && (    OP(noper) == flags
-                    || (flags == EXACT && OP(noper) == EXACT_REQ8)
-                    || (flags == EXACTFU && (   OP(noper) == EXACTFU_REQ8
-                                              || OP(noper) == EXACTFUP))))
+                && TRIE_TYPE(flags)
+                && TRIE_COMPATIBLE_TYPE(TRIE_TYPE(flags),
+                                        TRIE_TYPE(OP(noper)))
+                   == TRIE_TYPE(flags))
             {
                 const U8 *uc= (U8*)STRING(noper);
                 const U8 *e= uc + STR_LEN(noper);

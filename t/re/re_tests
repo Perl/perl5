@@ -2313,6 +2313,17 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 \A(?=(?=a)b*)[a-z]a\z	aa	y	$&	aa	-	zero-length body with a required nested assertion
 \A(?=(?=a)b*)[a-z]a\z	ba	n	-	-	-	required nested assertion must still be checked
 
+# GH #19953: non-folding cleanup must respect scoped folding rules.
+(?:(?iaa:[\x{FB00}])(?iu:ab)|z)\z	\x{FB00}ab	y	$&	\x{FB00}ab	-	/aa ligature before /u folded literal
+(?:(?iaa:[\x{FB00}])(?iu:ab)|z)\z	ffab	n	-	-	-	/aa ligature does not fold to ASCII
+(?:(?iu:ab)(?iaa:[\x{FB00}])|z)\z	ab\x{FB00}	y	$&	ab\x{FB00}	-	/aa ligature after /u folded literal
+(?:(?iu:ab)(?iaa:[\x{FB00}])|z)\z	abff	n	-	-	-	/aa ligature does not fold after /u literal
+(?i:[\x{2029}][:])\z	\x{2029}:	y	$&	\x{2029}:	-	wide non-folding before narrow non-folding
+(?i:[:][\x{2029}])\z	:\x{2029}	y	$&	:\x{2029}	-	wide non-folding after narrow non-folding
+(?i:_\x{2029}|_#)\z	_#	y	$&	_#	-	a wide alternative does not make the shared prefix require UTF-8
+(?i:_\x{2029}|_#)\z	_\x{2029}	y	$&	_\x{2029}	-	wide non-folding trie word after shared prefix
+(?i:\x{2029}|_)\z	_	y	$&	_	-	narrow non-folding trie word alongside wide word
+
 # GH #24945: captures from failed iterations of nested fixed-width quantifiers
 (?:(aa){2})*	aa	y	${\(defined($1) ? $1 : q(undef))}	undef	-	failed first outer iteration must not leave a capture
 (?:([ab]{2}){2})*	aabbaa	y	$&-$1	aabb-bb	-	failed next outer iteration must restore the last completed capture
