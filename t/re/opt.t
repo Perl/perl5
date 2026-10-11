@@ -287,3 +287,8 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 
 # Nested branches that should not be flattened
 (?:(?:(?:|x)|(?:|y))|(?:(?:|z)|w))q	1	-	0:1+q	-	empty alternatives; prefix is zero-width, literal floats
+
+# LNBREAK does get its own start class
+\R	1	-	-	stclass=LNBREAK	\R start class
+\Rfoo	4	-	1:2+foo	stclass=LNBREAK	\R start class with floating substr
+\R+foo	4	-	1+foo	skip,stclass=LNBREAK	\R+ start class with PLUS and floating substr
