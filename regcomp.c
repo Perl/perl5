@@ -2075,6 +2075,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             first = REGNODE_AFTER(first);
             goto again;
         }
+        else if (REGNODE_TYPE(OP(first)) == LNBREAK)
+            RExC_rxi->regstclass = first;
         else if (OP(first) == GPOS) {
             RExC_rx->intflags |= PREGf_ANCH_GPOS;
             first = REGNODE_AFTER_type(first,tregnode_GPOS);
