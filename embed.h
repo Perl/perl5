@@ -2059,7 +2059,7 @@
 #     define invlist_highest_range_start        S_invlist_highest_range_start
 #     define invlist_is_iterating               S_invlist_is_iterating
 #     define invlist_lowest                     S_invlist_lowest
-#     define join_exact(a,b,c,d,e,f,g)          Perl_join_exact(aTHX_ a,b,c,d,e,f,g)
+#     define join_exact(a,b,c,d,e,f,g,h,i)      Perl_join_exact(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define make_trie(a,b,c,d,e,f,g,h,i)       Perl_make_trie(aTHX_ a,b,c,d,e,f,g,h,i)
 #     define populate_anyof_bitmap_from_invlist(a,b) Perl_populate_anyof_bitmap_from_invlist(aTHX_ a,b)
 #     define reg_add_data                       Perl_reg_add_data

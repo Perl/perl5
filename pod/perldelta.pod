@@ -89,7 +89,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Case-insensitive literal alternatives such as C<foo|bar|a_word|_qux> can
+compile into a single trie again.  Characters that do not participate in
+Unicode case folding can join neighboring folded literals after the
+optimizer records their fixed substrings.
+L<[GH #19953]|https://github.com/Perl/perl5/issues/19953>
 
 =back
 

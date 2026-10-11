@@ -5711,7 +5711,9 @@ Ep	|U32	|join_exact	|NN RExC_state_t *pRExC_state		\
 				|NN bool *unfolded_multi_char		\
 				|U32 flags				\
 				|NULLOK regnode *val			\
-				|U32 depth
+				|U32 depth				\
+				|bool allow_non_folding 		\
+				|bool merge_first_two_only
 Ep	|I32	|make_trie	|NN RExC_state_t *pRExC_state		\
 				|NN regnode *startbranch		\
 				|NN regnode *first			\

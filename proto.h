@@ -15006,7 +15006,7 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode *n)
         __attribute__warn_unused_result__
         __attribute__visibility__("hidden");
 PERL_CALLCONV U32
-Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *unfolded_multi_char, U32 flags, regnode *val, U32 depth)
+Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *unfolded_multi_char, U32 flags, regnode *val, U32 depth, bool allow_non_folding, bool merge_first_two_only)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2)
