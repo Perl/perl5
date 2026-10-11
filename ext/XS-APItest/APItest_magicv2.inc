@@ -194,3 +194,11 @@ static const struct MagicFunctions *S_magicfuncs_by_name(pTHX_ SV *name)
     if(strEQ(namepv, "value"))           return (struct MagicFunctions *)&magicfuncs_value;
     croak("Unrecognised magicfuncs name %" SVf, SVfARG(name));
 }
+
+/*
+ * Local variables:
+ * mode: c
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 et ft=c:
+ */
