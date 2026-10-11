@@ -198,3 +198,11 @@ signal_thread_start(void *arg) {
 #else
 #  define hwm_checks_enabled() false
 #endif
+
+/*
+ * Local variables:
+ * mode: c
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 et ft=c:
+ */

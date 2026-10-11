@@ -37,5 +37,5 @@ CAT2(sv_setsv_cow_hashkey_, SUFFIX) () {
  * mode: c
  * End:
  *
- * ex: set ts=8 sts=4 sw=4 et:
+ * ex: set ts=8 sts=4 sw=4 et ft=c:
  */

@@ -244,3 +244,11 @@ rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
  * just have it without initializer, since it should get
  * zero-initialized. */
 static MGVTBL rmagical_b;
+
+/*
+ * Local variables:
+ * mode: c
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 et ft=c:
+ */

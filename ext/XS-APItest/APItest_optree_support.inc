@@ -254,3 +254,11 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
         return padop;
     }
 }
+
+/*
+ * Local variables:
+ * mode: c
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 et ft=c:
+ */
