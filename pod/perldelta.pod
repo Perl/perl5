@@ -497,6 +497,14 @@ contained a C<(*SKIP)> and was initially unsuccessful.
 
 =item *
 
+A anchored regular expression needing zero (or more) characters for a
+successful match could have failed because the search space was
+incorrectly truncated.
+
+[GH #24944]
+
+=item *
+
 In some cases warnings that occurred while using unpack on an invalid
 UTF-8 marked string would result in an invalid free.  [GH #24913]
 

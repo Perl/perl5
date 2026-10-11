@@ -1694,24 +1694,23 @@ Perl_re_intuit_start(pTHX_
          * in that range. if neither, then look for the start class in the
          * whole rest of the string */
 
-        /* XXX DAPM it's not clear what the minlen test is for, and why
-         * it's not used in the floating case. Nothing in the test suite
-         * causes minlen == 0 here. See <20140313134639.GS12844@iabyn.com>.
-         * Here are some old comments, which may or may not be correct:
+        /* Keep in mind that endpos limits the scan, not the match itself.
+         * Even when minlen == 0, a zero-width start class such as \b must
+         * examine the character at rx_origin. Using rx_origin as the
+         * limit would skip that check and treat this position as the end
+         * of the string (GH#24944).
          *
-         *   minlen == 0 is possible if regstclass is \b or \B,
-         *   and the fixed substr is ''$.
-         *   Since minlen is already taken into account, rx_origin+1 is
-         *   before strend; accidentally, minlen >= 1 guaranties no false
-         *   positives at rx_origin + 1 even for \b or \B.  But (minlen? 1 :
-         *   0) below assumes that regstclass does not come from lookahead...
-         *   If regstclass takes bytelength more than 1: If charlength == 1, OK.
-         *   This leaves EXACTF-ish only, which are dealt with in
-         *   find_byclass().
+         * Allow the scan to examine cl_l characters, clamped to the real
+         * string end, so empty matches there are preserved.
+         *
+         * \b or other ZW assertions may report a false positive at this
+         * artificial endpoint but that is harmless here as a successful
+         * scan leaves rx_origin unchanged, and the full matcher checks
+         * the pattern a second time before returning success.
          */
 
         if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos = HOP3clim(rx_origin, (prog->minlen ? cl_l : 0), strend);
+            endpos = HOP3clim(rx_origin, cl_l, strend);
         else if (prog->float_substr || prog->float_utf8) {
             rx_max_float = HOP3c(check_at, -start_shift, strbeg);
             endpos = HOP3clim(rx_max_float, cl_l, strend);
@@ -1816,8 +1815,9 @@ Perl_re_intuit_start(pTHX_
 
         if (rx_origin != s) {
             DEBUG_EXECUTE_r(re_printf(
-                        "  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(rx_origin - strbeg), (long)(s - strbeg))
+                        "  STCLASS scan returned offset %ld"
+                        " (rx_origin kept at %ld)\n",
+                                  (long)(s - strbeg), (long)(rx_origin - strbeg))
                    );
         }
         else {
