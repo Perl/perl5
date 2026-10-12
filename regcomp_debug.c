@@ -633,9 +633,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
                     (IV)trie->before_paren,(IV)trie->after_paren);
     } else if (k == CURLY) {
-        U32 lo = ARG1i(o), hi = ARG2i(o);
-        if (ARG3u(o)) /* check both ARG3a and ARG3b at the same time */
-            sv_catpvf(sv, "<%d:%d>", ARG3a(o),ARG3b(o)); /* paren before, paren after */
+        U32 lo = CURLY_MIN_REPEAT(o), hi = CURLY_MAX_REPEAT(o);
+        if (CURLY_HAS_CAPTURES(o))
+            sv_catpvf(sv, "<%d:%d>", CURLY_FIRST_CAPTURE(o),
+                                   CURLY_LAST_CAPTURE(o));
         if (op == CURLYM || op == CURLYN || op == CURLYX)
             sv_catpvf(sv, "[%d]", FLAGS(o)); /* Parenth number */
         sv_catpvf(sv, "{%u,", (unsigned) lo);

@@ -184,7 +184,7 @@ static const char non_utf8_target_but_utf8_required[]
     OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                               \
     OP(rn) == PLUS || OP(rn) == MINMOD ||                                   \
     OP(rn) == KEEPS ||                                                      \
-    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1i(rn) > 0)                        \
+    (REGNODE_TYPE(OP(rn)) == CURLY && CURLY_MIN_REPEAT(rn) > 0)            \
 )
 #define IS_EXACT(rn) (REGNODE_TYPE(OP(rn)) == EXACT)
 
@@ -9254,10 +9254,10 @@ NULL
 
             assert(cur_curlyx); /* keep Coverity happy */
 
-            min = ARG1i(cur_curlyx->u.curlyx.me);
-            max = ARG2i(cur_curlyx->u.curlyx.me);
-            /* first_paren = ARG3a(cur_curlyx->u.curlyx.me); */
-            /* last_paren = ARG3b(cur_curlyx->u.curlyx.me);  */
+            min = CURLY_MIN_REPEAT(cur_curlyx->u.curlyx.me);
+            max = CURLY_MAX_REPEAT(cur_curlyx->u.curlyx.me);
+            /* first_paren = CURLY_FIRST_CAPTURE(cur_curlyx->u.curlyx.me); */
+            /* last_paren = CURLY_LAST_CAPTURE(cur_curlyx->u.curlyx.me);  */
             A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
@@ -9399,12 +9399,12 @@ NULL
 
             if (cur_curlyx->u.curlyx.minmod) {
                 if (!cur_curlyx->u.curlyx.count
-                    && ARG3a(cur_curlyx->u.curlyx.me))
+                    && CURLY_HAS_CAPTURES(cur_curlyx->u.curlyx.me))
                 {
                     ST.cp = regcppush(rex, 0, maxopenparen);
                     REGCP_SET(ST.lastcp);
-                    CAPTURE_CLEAR(ARG3a(cur_curlyx->u.curlyx.me),
-                                  ARG3b(cur_curlyx->u.curlyx.me),
+                    CAPTURE_CLEAR(CURLY_FIRST_CAPTURE(cur_curlyx->u.curlyx.me),
+                                  CURLY_LAST_CAPTURE(cur_curlyx->u.curlyx.me),
                                   "WHILEM zero repetitions");
                 }
                 ST.save_curlyx = cur_curlyx;
@@ -9442,7 +9442,7 @@ NULL
             seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
             if (!cur_curlyx->u.curlyx.count
-                && ARG3a(cur_curlyx->u.curlyx.me))
+                && CURLY_HAS_CAPTURES(cur_curlyx->u.curlyx.me))
             {
                 REGCP_UNWIND(ST.lastcp);
                 regcppop(rex, &maxopenparen);
@@ -9475,12 +9475,12 @@ NULL
              * as CURLYN and CURLYM do. Save the incoming values so that
              * backtracking can try the body with its original capture state. */
             if (!cur_curlyx->u.curlyx.count
-                && ARG3a(cur_curlyx->u.curlyx.me))
+                && CURLY_HAS_CAPTURES(cur_curlyx->u.curlyx.me))
             {
                 ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);
-                CAPTURE_CLEAR(ARG3a(cur_curlyx->u.curlyx.me),
-                              ARG3b(cur_curlyx->u.curlyx.me),
+                CAPTURE_CLEAR(CURLY_FIRST_CAPTURE(cur_curlyx->u.curlyx.me),
+                              CURLY_LAST_CAPTURE(cur_curlyx->u.curlyx.me),
                               "WHILEM zero repetitions");
             }
             ST.save_curlyx = cur_curlyx;
@@ -9495,13 +9495,15 @@ NULL
             seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
             if (!cur_curlyx->u.curlyx.count
-                && ARG3a(cur_curlyx->u.curlyx.me))
+                && CURLY_HAS_CAPTURES(cur_curlyx->u.curlyx.me))
             {
                 REGCP_UNWIND(ST.lastcp);
                 regcppop(rex, &maxopenparen);
             }
 
-            if (cur_curlyx->u.curlyx.count >= /*max*/ARG2i(cur_curlyx->u.curlyx.me)) {
+            if (cur_curlyx->u.curlyx.count
+                >= CURLY_MAX_REPEAT(cur_curlyx->u.curlyx.me))
+            {
                 /* Maximum greed exceeded */
                 cur_curlyx->u.curlyx.count--;
                 CACHEsayNO;
@@ -9639,7 +9641,8 @@ NULL
             ST.Binfo.count = -1;
             REGCP_SET(ST.cp);
 
-            if (!(ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me))) /* min/max */
+            if (!(ST.minmod ? CURLY_MIN_REPEAT(ST.me)
+                           : CURLY_MAX_REPEAT(ST.me)))
                 goto curlym_do_B;
 
           curlym_do_A: /* execute the A in /A{m,n}B/  */
@@ -9662,7 +9665,8 @@ NULL
                     ST.alen = locinput - st->locinput;
                 }
                 if (ST.alen == 0)
-                    ST.count = ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me);
+                    ST.count = ST.minmod ? CURLY_MIN_REPEAT(ST.me)
+                                        : CURLY_MAX_REPEAT(ST.me);
             }
             DEBUG_EXECUTE_r(
                 re_exec_indentf("CURLYM now matched %" IVdf " times, len = %" IVdf "...\n",
@@ -9682,7 +9686,8 @@ NULL
 
 
             if (!is_accepted) {
-                I32 max = (ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me));
+                I32 max = (ST.minmod ? CURLY_MIN_REPEAT(ST.me)
+                                    : CURLY_MAX_REPEAT(ST.me));
                 if ( max == REG_INFTY || ST.count < max )
                     goto curlym_do_A; /* try to match another A */
             }
@@ -9692,7 +9697,7 @@ NULL
             REGCP_UNWIND(ST.cp);
 
 
-            if (ST.minmod || ST.count < ARG1i(ST.me) /* min*/
+            if (ST.minmod || ST.count < CURLY_MIN_REPEAT(ST.me)
                 || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
                 sayNO;
 
@@ -9773,13 +9778,13 @@ NULL
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             if (ST.minmod) {
-                I32 max = ARG2i(ST.me);
+                I32 max = CURLY_MAX_REPEAT(ST.me);
                 if (max != REG_INFTY && ST.count == max)
                     sayNO;
                 goto curlym_do_A; /* try to match a further A */
             }
             /* backtrack one A */
-            if (ST.count == ARG1i(ST.me) /* min */)
+            if (ST.count == CURLY_MIN_REPEAT(ST.me))
                 sayNO;
             ST.count--;
             SET_locinput(HOPc(locinput, -ST.alen));
@@ -9821,8 +9826,8 @@ NULL
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             if (ST.paren > maxopenparen)
                 maxopenparen = ST.paren;
-            ST.min = ARG1i(scan);  /* min to match */
-            ST.max = ARG2i(scan);  /* max to match */
+            ST.min = CURLY_MIN_REPEAT(scan);
+            ST.max = CURLY_MAX_REPEAT(scan);
             scan = regnext(REGNODE_AFTER_type(scan, tregnode_CURLYN));
 
             /* handle the single-char capture called as a GOSUB etc */
@@ -9841,8 +9846,8 @@ NULL
 
         case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
             ST.paren = 0;
-            ST.min = ARG1i(scan);  /* min to match */
-            ST.max = ARG2i(scan);  /* max to match */
+            ST.min = CURLY_MIN_REPEAT(scan);
+            ST.max = CURLY_MAX_REPEAT(scan);
             scan = REGNODE_AFTER_type(scan, tregnode_CURLY);
           repeat:
             /*
