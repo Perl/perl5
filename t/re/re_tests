@@ -2295,6 +2295,24 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 (?:x+?\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by PLUS
 (?:x*?\x{100})*a+	aaaa	y	$&	aaaa	-	minmod cleared by STAR
 
+# GH #24943
+\A(?=a*)[0-9]a\z	0a	y	$&	0a	-	nullable lookahead must not restrict the start class
+\A(?=a*?)[0-9]a\z	0a	y	$&	0a	-	lazy nullable lookahead
+\A(?=a?)[0-9]a\z	0a	y	$&	0a	-	optional lookahead body
+\A(?=a{0,3})[0-9]a\z	0a	y	$&	0a	-	bounded nullable lookahead
+\A(?=(?:ab)*)[0-9]a\z	0a	y	$&	0a	-	nullable multi-character lookahead
+\A(?=(?:a|))[0-9]a\z	0a	y	$&	0a	-	lookahead with an empty alternative
+\A(?=(?=a*)b*)[0-9]a\z	0a	y	$&	0a	-	nested nullable lookahead
+(?=a*)[0-9]a	zz0a	y	$&	0a	-	unanchored nullable lookahead
+\A(?=a*)[0-9]a\z	ba	n	-	-	-	consuming class must still be checked
+\A(?=a+)[0-9]a\z	0a	n	-	-	-	nonnullable lookahead must still be checked
+\A(?=a*b)[0-9]a\z	0a	n	-	-	-	nonnullable suffix in lookahead
+\A(?=a*)[a-z]a\z	ba	y	$&	ba	-	consuming class partly overlaps the nullable body
+\A(?=\x{100}*)[0-9]a\z	0a	y	$&	0a	-	nullable Unicode lookahead
+\A(?=a*)\x{100}a\z	\x{100}a	y	$&	\x{100}a	-	Unicode consuming node after nullable lookahead
+\A(?=(?=a)b*)[a-z]a\z	aa	y	$&	aa	-	zero-length body with a required nested assertion
+\A(?=(?=a)b*)[a-z]a\z	ba	n	-	-	-	required nested assertion must still be checked
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

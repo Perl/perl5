@@ -3258,6 +3258,12 @@ Perl_study_chunk(pTHX_
                                       recursed_depth, NULL, f, depth+1,
                                       mutate_ok);
 
+                /* A lookahead body which can match without consuming any
+                 * characters cannot restrict the next input character to
+                 * its consuming paths.  Treat its start class as anything. */
+                if ((f & SCF_DO_STCLASS_AND) && minnext == 0)
+                    ssc_init(pRExC_state, &intrnl);
+
                 if (FLAGS(scan)) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
@@ -3376,6 +3382,8 @@ Perl_study_chunk(pTHX_
                                         &deltanext, last, &data_fake,
                                         stopparen, recursed_depth, NULL,
                                         f, depth+1, mutate_ok);
+                if ((f & SCF_DO_STCLASS_AND) && *minnextp == 0)
+                    ssc_init(pRExC_state, &intrnl);
                 if (FLAGS(scan)) {
                     assert(0);  /* This code has never been tested since this
                                    is normally not compiled */

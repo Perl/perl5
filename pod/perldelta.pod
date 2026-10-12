@@ -426,6 +426,14 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+The regular expression optimizer no longer rejects valid matches when a
+positive lookahead can match an empty string. For example,
+C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
+
+[GH #24943]
+
+=item *
+
 Line number information is stored rather than discarded when an anonymous
 subroutine is encountered during compilation. This should improve the
 accuracy of line numbers emitted by diagnostic messages and `caller()`
