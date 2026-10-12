@@ -2313,6 +2313,20 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 \A(?=(?=a)b*)[a-z]a\z	aa	y	$&	aa	-	zero-length body with a required nested assertion
 \A(?=(?=a)b*)[a-z]a\z	ba	n	-	-	-	required nested assertion must still be checked
 
+# GH #24945: captures from failed iterations of nested fixed-width quantifiers
+(?:(aa){2})*	aa	y	${\(defined($1) ? $1 : q(undef))}	undef	-	failed first outer iteration must not leave a capture
+(?:([ab]{2}){2})*	aabbaa	y	$&-$1	aabb-bb	-	failed next outer iteration must restore the last completed capture
+\A(?:([a-d]{2}){2})*ccdd\z	aabbccdd	y	$1	bb	-	backtracking an outer iteration must restore the capture
+\A(?:([a-d]{2}){2})*?ccdd\z	aabbccdd	y	$1	bb	-	lazy outer quantifier with a nested capture
+\A(?:([a-d]{2}){2}){0,2}ccdd\z	aabbccdd	y	$1	bb	-	bounded outer quantifier must restore the capture
+\A(?:(aa){2})*aa\z	aa	y	${\(defined($1) ? $1 : q(undef))}	undef	-	tail succeeds after a failed first iteration
+\A(?:([ab]){4})*aa\z	aabbaa	y	$1	b	-	nested CURLYN capture must be restored
+\A(?:([ab]{2}){2})*\1\z	aabbbb	y	$1	bb	-	backreference uses the last completed iteration
+\A((?:([a-d]{2}){2})*)ccdd\z	aabbccdd	y	$1-$2	aabb-bb	-	outer capture around a nested quantifier
+\A(?:((aa){2}))*aa\z	aa	y	${\(defined($1) || defined($2) ? q(set) : q(undef))}	undef	-	multiple captures in a failed first iteration
+(?:(\x{100}\x{101}){2})*	\x{100}\x{101}	y	${\(defined($1) ? $1 : q(undef))}	undef	-	failed UTF-8 iteration must not leave a capture
+\A(?:([\x{100}-\x{103}]{2}){2})*\x{102}\x{102}\x{103}\x{103}\z	\x{100}\x{100}\x{101}\x{101}\x{102}\x{102}\x{103}\x{103}	y	$1	\x{101}\x{101}	-	UTF-8 backtracking restores the capture
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

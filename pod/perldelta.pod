@@ -434,6 +434,16 @@ C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
 
 =item *
 
+The regular expression optimizer no longer uses the fixed-width repeat
+optimization for a body containing captures inside nested quantifiers.
+This prevents failed or backtracked iterations from leaving incorrect
+capture values. For example, C<"aa" =~ /(?:(aa){2})*/> now leaves C<$1>
+undefined.
+
+[GH #24945]
+
+=item *
+
 Line number information is stored rather than discarded when an anonymous
 subroutine is encountered during compilation. This should improve the
 accuracy of line numbers emitted by diagnostic messages and `caller()`
