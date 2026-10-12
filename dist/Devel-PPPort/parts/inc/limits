@@ -356,5 +356,5 @@ ok(&Devel::PPPort::uv_type());
 ok(&Devel::PPPort::size_t_max());
 ok(&Devel::PPPort::ssize_t_max());
 ok(&Devel::PPPort::strlen_max());
-is((&Devel::PPPort::size_t_max()-1)/2, &Devel::PPPort::ssize_t_max());
+is(&Devel::PPPort::size_t_max()>>1, &Devel::PPPort::ssize_t_max());
 is(&Devel::PPPort::size_t_max(), &Devel::PPPort::strlen_max());
