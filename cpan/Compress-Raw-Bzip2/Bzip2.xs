@@ -1,5 +1,5 @@
 /* Filename: Bzip2.xs
- * Author  : Paul Marquess, <pmqs@cpan.org>
+ * Author  : Paul Marquess, <pmqs@outlook.com>
  * Created : 5th October 2005
  * Version : 2.000
  *
