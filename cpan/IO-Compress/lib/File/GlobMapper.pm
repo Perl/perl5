@@ -683,7 +683,7 @@ L<File::Glob|File::Glob>
 
 =head1 AUTHOR
 
-The I<File::GlobMapper> module was written by Paul Marquess, F<pmqs@cpan.org>.
+The I<File::GlobMapper> module was written by Paul Marquess, F<pmqs@outlook.com>.
 
 =head1 COPYRIGHT AND LICENSE
 

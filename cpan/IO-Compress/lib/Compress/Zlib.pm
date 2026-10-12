@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.224 ;
-use Compress::Raw::Zlib 2.224 ;
-use IO::Compress::Gzip 2.224 ;
-use IO::Uncompress::Gunzip 2.224 ;
+use IO::Compress::Base::Common 2.225 ;
+use Compress::Raw::Zlib 2.225 ;
+use IO::Compress::Gzip 2.225 ;
+use IO::Uncompress::Gunzip 2.225 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.224 ;
+use IO::Compress::Gzip::Constants 2.225 ;
 
 sub memGzip($)
 {
@@ -1501,7 +1501,7 @@ The primary site for gzip is L<http://www.gzip.org>.
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 
