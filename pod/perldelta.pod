@@ -434,6 +434,14 @@ C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
 
 =item *
 
+Negative lookahead and lookbehind assertions restore capture buffers after
+evaluating their bodies. Captures from failed assertion attempts no longer
+appear in a successful match or affect later backreferences and conditions.
+
+[GH #14387] [GH #24946]
+
+=item *
+
 The regular expression optimizer no longer uses the fixed-width repeat
 optimization for a body containing captures inside nested quantifiers.
 This prevents failed or backtracked iterations from leaving incorrect

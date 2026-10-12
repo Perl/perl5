@@ -2327,6 +2327,29 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 (?:(\x{100}\x{101}){2})*	\x{100}\x{101}	y	${\(defined($1) ? $1 : q(undef))}	undef	-	failed UTF-8 iteration must not leave a capture
 \A(?:([\x{100}-\x{103}]{2}){2})*\x{102}\x{102}\x{103}\x{103}\z	\x{100}\x{100}\x{101}\x{101}\x{102}\x{102}\x{103}\x{103}	y	$1	\x{101}\x{101}	-	UTF-8 backtracking restores the capture
 
+# GH #14387, GH #24946: negative assertions must discard their captures
+\A(?!(a)b)a\z	a	y	${\(defined($1) ? $1 : q(undef))}	undef	-	partial negative lookahead body
+\A(?!(a)b)\1\z	a	n	-	-	-	backreference must not use a failed assertion capture
+\A(?!(?:(a)b|z))\1\z	a	n	-	-	-	negative assertion with an impossible alternative
+\A(?!(a)b)(?(1)a|b)\z	a	n	-	-	-	conditional must not see a failed assertion capture
+\A(?!(a)b)(?(1)a|b)\z	b	y	$&	b	-	conditional sees an unset assertion capture
+\A(a)(?!(b)c)b\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef	-	capture before the assertion is preserved
+\A(?!(?=(a))b)a\z	a	y	${\(defined($1) ? $1 : q(undef))}	undef	-	nested positive assertion in a negative body
+\A(?!((a))b)a\z	a	y	${\(defined($1) || defined($2) ? q(set) : q(undef))}	undef	-	nested captures in a negative body
+\A..(?<!(a)b)c\z	aac	y	${\(defined($1) ? $1 : q(undef))}	undef	-	partial fixed-width negative lookbehind body
+\A..(?<!(a)b)\1\z	aaa	n	-	-	-	backreference must not use a failed lookbehind capture
+\A..(?<!(a)b)c\z	abc	n	-	-	-	matching negative lookbehind body rejects the subject
+\A(?!(a))a\z	a	n	-	-	-	matching negative lookahead body rejects the subject
+\A(?=(a))a\z	a	y	$1	a	-	positive assertions retain successful captures
+\A(?>(a))\z	a	y	$1	a	-	atomic groups retain successful captures
+\A(?!(\x{100})b)\x{100}\z	\x{100}	y	${\(defined($1) ? $1 : q(undef))}	undef	-	Unicode negative lookahead body
+\A..(?<!(\x{100})b)c\z	\x{100}\x{100}c	y	${\(defined($1) ? $1 : q(undef))}	undef	-	Unicode fixed-width negative lookbehind
+/a*?(?!a()).a/s	a\na	y	${\(defined($1) ? q(defined) : q(undef))}	undef	-	GH #24946: captures from a rejected assertion attempt
+\A(a)(?!(b)c)b\z	ab	y	$1-$^N-$+	a-a-a	-	negative assertion restores last-capture bookkeeping
+\A(?<X>[ab])(?!(?&X)c)b\z	ab	y	$1	a	-	negative assertion restores a capture changed by recursion
+\A(?(?!(a)b)a|b)\z	a	y	${\(defined($1) ? $1 : q(undef))}	undef	-	negative assertion used as a condition
+\A...(?<!(a{1,2})b)c\z	aaac	y	${\(defined($1) ? $1 : q(undef))}	undef	-	variable-length negative lookbehind restores each attempt
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

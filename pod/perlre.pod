@@ -1770,6 +1770,9 @@ will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
 match.  Use lookbehind instead (see below).
 
+Captures made inside a negative lookahead are discarded before matching
+continues. Captures made before the assertion retain their incoming values.
+
 =item C<(?<=I<pattern>)>
 
 =item C<\K>
@@ -1869,8 +1872,9 @@ has been reduced, and experimental warnings will only be produced when
 the construct contains capturing parentheses. The warnings will be
 raised at pattern compilation time, unless turned off, in the
 C<experimental::vlb> category.  This is to warn you that the exact
-contents of capturing buffers in a variable length negative lookbehind
-is not well defined and is subject to change in a future release of perl.
+contents of capturing buffers while evaluating a variable length negative
+lookbehind is not well defined and is subject to change in a future release
+of perl.
 
 Currently if you use capture buffers inside of a negative variable length
 lookbehind the result may not be what you expect, for instance:
@@ -1880,23 +1884,24 @@ lookbehind the result may not be what you expect, for instance:
 will output the following:
 
     a
-    no
+    n
 
 which does not make sense as this should print out "ax" as the "a" does
-not line up at the correct place. Another example would be:
+not line up at the correct place. Captures made inside a negative
+lookbehind are discarded before matching continues. For example:
 
     say "yes: '$1-$2'" if "aayfoo"=~/(?=foo)(?<!(a|aa)(a|aa)x)/;
 
 will output the following:
 
-    yes: 'aa-a'
+    yes: '-'
 
-It is possible in a future release of perl we will change this behavior
-so both of these examples produced more reasonable output.
+It is possible in a future release of perl we will change which capture
+values are visible to embedded code while evaluating the assertion.
 
 Note that we are confident that the construct will match and reject
 patterns appropriately, the undefined behavior strictly relates to the
-value of the capture buffer during or after matching.
+value of the capture buffer while evaluating the assertion.
 
 There is a technique that can be used to handle variable length
 lookbehind on earlier releases, and longer than 255 characters.  It is
