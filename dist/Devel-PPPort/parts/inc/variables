@@ -409,6 +409,7 @@ other_variables()
                 ppp_TESTVAR(PL_sv_arenaroot);
                 ppp_TESTVAR(PL_tainted);
                 ppp_TESTVAR(PL_tainting);
+                ppp_TESTVAR(PL_ppaddr);
 
                 ppp_PARSERVAR(ppp_expect_t, PL_expect);
                 ppp_PARSERVAR(line_t, PL_copline);
@@ -435,8 +436,9 @@ no_dummy_parser_vars(check)
 int
 dummy_parser_warning()
 
-=tests plan => 52
+=tests plan => 53
 
+use Config;
 ok(Devel::PPPort::compare_PL_signals());
 
 ok(!defined(&Devel::PPPort::PL_sv_undef()));
@@ -448,7 +450,17 @@ ok(defined &Devel::PPPort::PL_tokenbuf());
 ok(ivers($]) >= ivers("5.009005") || &Devel::PPPort::PL_parser());
 ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
 ok(defined &Devel::PPPort::PL_hints());
-is(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
+
+{
+  if (defined &Internals::stack_refcounted
+      && (Internals::stack_refcounted() & 1)) {
+    # testutils skip doesn't "last SKIP"
+    skip "Can't easily call pp func with RC STACK", 1;
+  }
+  else {
+    is(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
+  }
+}
 
 for (&Devel::PPPort::other_variables()) {
   ok($_ != 0);
