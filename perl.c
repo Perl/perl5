@@ -360,7 +360,7 @@ perl_construct(pTHXx)
 #ifdef USE_ITHREADS
     /* First entry is a list of empty elements. It needs to be initialised
        else all hell breaks loose in S_find_uninit_var().  */
-    Perl_av_create_and_push(aTHX_ &PL_regex_padav, newSVpvs(""));
+    av_create_and_push(&PL_regex_padav, newSVpvs(""));
     PL_regex_pad = AvARRAY(PL_regex_padav);
     Newxz(PL_stashpad, PL_stashpadmax, HV *);
 #endif
@@ -2227,7 +2227,7 @@ S_moreswitch_m(pTHX_ char option, const char *s)
         sv_catpvn(sv, s, end - s);
         sv_catpvs(sv,  "\0)");
     }
-    Perl_av_create_and_push(aTHX_ &PL_preambleav, sv);
+    av_create_and_push(&PL_preambleav, sv);
     return end;
 }
 
@@ -2402,7 +2402,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                                          "(qw%c%s%c)", 0, s, 0);
                     s += strlen(s);
                 }
-                Perl_av_create_and_push(aTHX_ &PL_preambleav, opts_prog);
+                av_create_and_push(&PL_preambleav, opts_prog);
                 /* don't look for script or read stdin */
                 scriptname = BIT_BUCKET;
                 goto reswitch;
@@ -2544,8 +2544,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         if (inc0) {
             /* if lib/buildcustomize.pl exists, it should not fail. If it does,
                it should be reported immediately as a build failure.  */
-            (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 newSVpvf(
+            (void)av_create_and_unshift_one(&PL_preambleav,
+                                            newSVpvf(
                 "BEGIN { my $f = q%c%s%" SVf "/buildcustomize.pl%c; "
                         "do {local $!; -f $f }"
                         " and do $f || die $@ || qq '$f: $!' }",
@@ -2560,8 +2560,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             SV *sitelib_sv = mayberelocate(raw_sitelib, strlen(raw_sitelib),
                                            INCPUSH_CAN_RELOCATE);
             const char *const sitelib = SvPVX(sitelib_sv);
-            (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-                                                 newSVpvf(
+            (void)av_create_and_unshift_one(&PL_preambleav,
+                                            newSVpvf(
                 "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} &&"
                          " do q%c%s/sitecustomize.pl%c }",
                          0, sitelib, 0,
@@ -5395,15 +5395,15 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
         if (PL_savebegin) {
             if (paramList == PL_beginav) {
                 /* save PL_beginav for compiler */
-                Perl_av_create_and_push(aTHX_ &PL_beginav_save, MUTABLE_SV(cv));
+                av_create_and_push(&PL_beginav_save, MUTABLE_SV(cv));
             }
             else if (paramList == PL_checkav) {
                 /* save PL_checkav for compiler */
-                Perl_av_create_and_push(aTHX_ &PL_checkav_save, MUTABLE_SV(cv));
+                av_create_and_push(&PL_checkav_save, MUTABLE_SV(cv));
             }
             else if (paramList == PL_unitcheckav) {
                 /* save PL_unitcheckav for compiler */
-                Perl_av_create_and_push(aTHX_ &PL_unitcheckav_save, MUTABLE_SV(cv));
+                av_create_and_push(&PL_unitcheckav_save, MUTABLE_SV(cv));
             }
         } else {
             SAVEFREESV(cv);
