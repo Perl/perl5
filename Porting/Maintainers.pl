@@ -219,8 +219,8 @@ our %Modules = (
     },
 
     'Compress::Raw::Bzip2' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.224.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Mon Aug 31 18:35:30 2026',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.225.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Oct 12 14:17:28 2026',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},

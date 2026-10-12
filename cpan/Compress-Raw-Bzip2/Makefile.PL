@@ -41,7 +41,7 @@ WriteMakefile(
     ),
 
     ABSTRACT_FROM => 'lib/Compress/Raw/Bzip2.pm',
-    AUTHOR       => 'Paul Marquess <pmqs@cpan.org>',
+    AUTHOR       => 'Paul Marquess <pmqs@outlook.com>',
 
     INSTALLDIRS => ($] > 5.010  && $] < 5.011 ? 'perl' : 'site'),
 

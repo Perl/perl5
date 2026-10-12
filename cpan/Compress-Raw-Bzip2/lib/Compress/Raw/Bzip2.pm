@@ -11,7 +11,7 @@ use Carp ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -376,7 +376,7 @@ See the module L<Compress::Bzip2|Compress::Bzip2>
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 
