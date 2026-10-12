@@ -938,10 +938,10 @@ CTp	|void	|atfork_unlock
 Cop	|SV **	|av_arylen_p	|NN AV *av
 Adp	|void	|av_clear	|NN AV *av
 ARdip	|Size_t |av_count	|NN AV *av
-Adeop	|void	|av_create_and_push					\
+Adp	|void	|av_create_and_push					\
 				|NN AV ** const avp			\
 				|NN SV * const val
-Adeop	|SV **	|av_create_and_unshift_one				\
+Adp	|SV **	|av_create_and_unshift_one				\
 				|NN AV ** const avp			\
 				|NN SV * const val
 Adp	|SV *	|av_delete	|NN AV *av				\
