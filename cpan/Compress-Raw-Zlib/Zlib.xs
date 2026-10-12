@@ -1,5 +1,5 @@
 /* Filename: Zlib.xs
- * Author  : Paul Marquess, <pmqs@cpan.org>
+ * Author  : Paul Marquess, <pmqs@outlook.com>
  * Created : 22nd January 1996
  * Version : 2.000
  *

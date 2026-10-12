@@ -104,7 +104,7 @@ my %WriteMakefileArgs = (
     OPTIMIZE     => $OPTIMIZE,
     LICENSE      => 'perl',
     ABSTRACT     => 'Perl interface to zlib/zlib-ng compression libraries',
-    AUTHOR       => 'Paul Marquess <pmqs@cpan.org>',
+    AUTHOR       => 'Paul Marquess <pmqs@outlook.com>',
     depend       => { Makefile     => 'config.in',
                       manifypods   => 'READMEmd'
                     },
