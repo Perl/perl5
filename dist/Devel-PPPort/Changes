@@ -3,6 +3,7 @@ Revision history for Devel-PPPort
 3.75
 
  * add sv_set_undef
+ * fix a test failure with SSize_t_MAX with -Duselongdouble (#24939)
 
 3.74
 
