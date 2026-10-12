@@ -997,15 +997,14 @@ sub run_tests {
     }
 
     {
-        local $::TODO = "[perl #38133]";
-
         "A" =~ /(((?:A))?)+/;
         my $first = $2;
 
         "A" =~ /(((A))?)+/;
         my $second = $2;
 
-        is($first, $second);
+        is($first, $second,
+           "GH #8267: zero repetitions clear nested captures consistently");
     }    
 
     {

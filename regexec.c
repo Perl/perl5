@@ -9398,6 +9398,15 @@ NULL
             /* Prefer B over A for minimal matching. */
 
             if (cur_curlyx->u.curlyx.minmod) {
+                if (!cur_curlyx->u.curlyx.count
+                    && ARG3a(cur_curlyx->u.curlyx.me))
+                {
+                    ST.cp = regcppush(rex, 0, maxopenparen);
+                    REGCP_SET(ST.lastcp);
+                    CAPTURE_CLEAR(ARG3a(cur_curlyx->u.curlyx.me),
+                                  ARG3b(cur_curlyx->u.curlyx.me),
+                                  "WHILEM zero repetitions");
+                }
                 ST.save_curlyx = cur_curlyx;
                 cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
                 ST.saved_seen_nonregular = seen_nonregular;
@@ -9432,6 +9441,12 @@ NULL
         case WHILEM_B_max_fail: /* just failed to match B in a maximal match */
             seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
+            if (!cur_curlyx->u.curlyx.count
+                && ARG3a(cur_curlyx->u.curlyx.me))
+            {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex, &maxopenparen);
+            }
             cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
             cur_curlyx->u.curlyx.count--;
             CACHEsayNO;
@@ -9456,6 +9471,18 @@ NULL
 
           do_whilem_B_max:
             /* now try B */
+            /* Zero repetitions leave the captures in this body unset, just
+             * as CURLYN and CURLYM do. Save the incoming values so that
+             * backtracking can try the body with its original capture state. */
+            if (!cur_curlyx->u.curlyx.count
+                && ARG3a(cur_curlyx->u.curlyx.me))
+            {
+                ST.cp = regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+                CAPTURE_CLEAR(ARG3a(cur_curlyx->u.curlyx.me),
+                              ARG3b(cur_curlyx->u.curlyx.me),
+                              "WHILEM zero repetitions");
+            }
             ST.save_curlyx = cur_curlyx;
             cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
             ST.saved_seen_nonregular = seen_nonregular;
@@ -9467,6 +9494,12 @@ NULL
         case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
             seen_nonregular |= ST.saved_seen_nonregular;
             cur_curlyx = ST.save_curlyx;
+            if (!cur_curlyx->u.curlyx.count
+                && ARG3a(cur_curlyx->u.curlyx.me))
+            {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex, &maxopenparen);
+            }
 
             if (cur_curlyx->u.curlyx.count >= /*max*/ARG2i(cur_curlyx->u.curlyx.me)) {
                 /* Maximum greed exceeded */
