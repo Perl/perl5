@@ -1721,6 +1721,7 @@ test_harness test-harness: test_prep
 test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
 
+# intended as a quick build/test when you have already done test-prep
 test_reonly test-reonly: test_prep_reonly
 	TEST_ARGS='re/*.t ../ext/re/t/*.t' PERL_TEST_HARNESS_ASAP=1 TESTFILE=harness $(RUN_TESTS) choose
 
