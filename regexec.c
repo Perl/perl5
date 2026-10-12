@@ -10225,6 +10225,14 @@ NULL
             ST.logical = logical;
             logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 
+            /* A negative assertion never contributes captures to the match.
+             * Restore the incoming state after each attempt, including when
+             * failure of the body makes the assertion succeed. */
+            if (!ST.wanted && rex->nparens) {
+                (void)regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+            }
+
             /* execute body of (?...A) */
             PUSH_YES_STATE_GOTO(IFMATCH_A, REGNODE_AFTER(scan), ST.start,
                                 ST.end, script_run_begin);
@@ -10234,7 +10242,18 @@ NULL
             bool matched;
 
         case IFMATCH_A_fail: /* body of (?...A) failed */
-            if (! ST.logical && ST.count > 1) {
+            matched = false;
+            goto ifmatch_done;
+
+        case IFMATCH_A: /* body of (?...A) succeeded */
+            matched = true;
+          ifmatch_done:
+            if (!ST.wanted && rex->nparens) {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex, &maxopenparen);
+            }
+
+            if (!matched && ! ST.logical && ST.count > 1) {
 
                 /* It isn't a real failure until we've tried all starting
                  * positions.  Move to the next starting position and retry */
@@ -10245,13 +10264,6 @@ NULL
                 goto do_ifmatch;
             }
 
-            /* Here, all starting positions have been tried. */
-            matched = false;
-            goto ifmatch_done;
-
-        case IFMATCH_A: /* body of (?...A) succeeded */
-            matched = true;
-          ifmatch_done:
             sw = matched == ST.wanted;
             match_end = ST.prev_match_end;
             if (! ST.logical && !sw) {

@@ -1007,6 +1007,7 @@ typedef struct regmatch_state {
             struct regmatch_state *prev_yes_state;
             I32     wanted;
             I32     logical;    /* saved copy of 'logical' var */
+            CHECKPOINT lastcp;  /* capture state before a negative assertion */
             U8      count;      /* number of beginning positions */
             char    *start;
             char    *end;
