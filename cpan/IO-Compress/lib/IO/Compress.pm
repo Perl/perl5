@@ -1,6 +1,6 @@
 package IO::Compress;
 
-our $VERSION = '2.224' ;
+our $VERSION = '2.225' ;
 
 =head1 NAME
 
@@ -12,7 +12,7 @@ This is a stub module. It contains no code.
 
 =head1 AUTHOR
 
-Paul Marquess F<pmqs@cpan.org>.
+Paul Marquess F<pmqs@outlook.com>.
 
 =head1 COPYRIGHT
 

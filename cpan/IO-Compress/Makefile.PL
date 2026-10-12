@@ -4,9 +4,9 @@ use strict ;
 use warnings;
 require 5.008 ;
 
-$::VERSION = '2.224' ;
-$::DEP_ZLIB_VERSION = '2.224';
-$::DEP_BZIP2_VERSION = '2.224';
+$::VERSION = '2.225' ;
+$::DEP_ZLIB_VERSION = '2.225';
+$::DEP_BZIP2_VERSION = '2.225';
 
 use lib '.';
 use private::MakeUtil;
@@ -38,7 +38,7 @@ WriteMakefile(
     ),
 
     ABSTRACT => 'IO Interface to compressed data files/buffers',
-    AUTHOR   => 'Paul Marquess <pmqs@cpan.org>',
+    AUTHOR   => 'Paul Marquess <pmqs@outlook.com>',
 
     INSTALLDIRS => ($] >= 5.009 && $] < 5.011 ? 'perl' : 'site'),
 

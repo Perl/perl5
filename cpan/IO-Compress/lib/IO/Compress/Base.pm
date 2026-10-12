@@ -4,7 +4,7 @@ package IO::Compress::Base ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.224 ;
+use IO::Compress::Base::Common 2.225 ;
 
 use IO::File ();
 use Scalar::Util ();
@@ -18,7 +18,7 @@ use Symbol();
 our (@ISA, $VERSION);
 @ISA    = qw(IO::File Exporter);
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -1041,7 +1041,7 @@ L<IO::Zlib|IO::Zlib>
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 

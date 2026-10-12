@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib 2.224 ;
-use IO::Compress::Base::Common  2.224 qw(:Status );
+use Compress::Raw::Zlib 2.225 ;
+use IO::Compress::Base::Common  2.225 qw(:Status );
 
-use IO::Uncompress::Base  2.224 ;
-use IO::Uncompress::Adapter::Inflate  2.224 ;
+use IO::Uncompress::Base  2.225 ;
+use IO::Uncompress::Adapter::Inflate  2.225 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 $RawInflateError = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
@@ -1130,7 +1130,7 @@ The primary site for gzip is L<http://www.gzip.org>.
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 

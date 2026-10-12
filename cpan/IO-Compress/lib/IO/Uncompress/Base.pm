@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(IO::File Exporter);
 
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.224 ;
+use IO::Compress::Base::Common 2.225 ;
 
 use IO::File ;
 use Symbol;
@@ -194,6 +194,32 @@ sub smartWrite
 sub smartReadExact
 {
     return $_[0]->smartRead($_[1], $_[2]) == $_[2];
+}
+
+sub smartReadToDelim
+{
+    my $self = shift ;
+    my $out = shift ;
+    my $delim = shift ;
+    my $max_size = shift || 64 * 1024  ; # 64k
+
+    $$out = '' ;
+    my $got = '';
+
+    my $status = $self->smartRead(\$got, $max_size) >= 0
+        or return STATUS_ERROR ;
+
+    if ((my $ix = index($got, $delim)) >= 0)
+    {
+        $$out .= substr($got, 0, $ix + length($delim)) ;
+        $self->pushBack(substr($got, $ix + length($delim) )) ;
+    }
+    else
+    {
+        $$out = $got ;
+    }
+
+    return length $$out;
 }
 
 sub smartEof
@@ -1559,7 +1585,7 @@ L<IO::Zlib|IO::Zlib>
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 

@@ -6,12 +6,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.224 ;
+use IO::Uncompress::RawInflate 2.225 ;
 
-use Compress::Raw::Zlib 2.224 () ;
-use IO::Compress::Base::Common 2.224 qw(:Status );
-use IO::Compress::Gzip::Constants 2.224 ;
-use IO::Compress::Zlib::Extra 2.224 ;
+use Compress::Raw::Zlib 2.225 () ;
+use IO::Compress::Base::Common 2.225 qw(:Status );
+use IO::Compress::Gzip::Constants 2.225 ;
+use IO::Compress::Zlib::Extra 2.225 ;
 
 require Exporter ;
 
@@ -25,7 +25,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.224';
+$VERSION = '2.225';
 
 sub new
 {
@@ -44,7 +44,10 @@ sub gunzip
 
 sub getExtraParams
 {
-    return ( 'parseextra' => [IO::Compress::Base::Common::Parse_boolean,  0] ) ;
+    return (
+        'parseextra'    => [IO::Compress::Base::Common::Parse_boolean,  0],
+        'newstreamhook' => [IO::Compress::Base::Common::Parse_code,     undef],
+        ) ;
 }
 
 sub ckParams
@@ -54,6 +57,8 @@ sub ckParams
 
     # gunzip always needs crc32
     $got->setValue('crc32' => 1);
+
+    *$self->{'newstreamhook'} = $got->getValue('newstreamhook');
 
     return 1;
 }
@@ -185,14 +190,16 @@ sub _readGzipHeader($)
 
     my $origname ;
     if ($flag & GZIP_FLG_FNAME) {
-        $origname = "" ;
-        while (1) {
-            $self->smartReadExact(\$buffer, 1)
-                or return $self->TruncatedHeader("FNAME");
-            last if $buffer eq GZIP_NULL_BYTE ;
-            $origname .= $buffer
-        }
-        $keep .= $origname . GZIP_NULL_BYTE ;
+        $self->smartReadToDelim(\$origname, GZIP_NULL_BYTE) != STATUS_ERROR
+            or return $self->TruncatedHeader("FNAME");
+
+        $keep .= $origname  ;
+
+        return $self->HeaderError("No NULL termination found in FNAME")
+            if  substr($origname, -1, 1) ne GZIP_NULL_BYTE ;
+
+        # remove the terminating GZIP_NULL_BYTE
+        $origname = substr($origname, 0, -1);
 
         return $self->HeaderError("Non ISO 8859-1 Character found in Name")
             if *$self->{Strict} && $origname =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
@@ -200,14 +207,16 @@ sub _readGzipHeader($)
 
     my $comment ;
     if ($flag & GZIP_FLG_FCOMMENT) {
-        $comment = "";
-        while (1) {
-            $self->smartReadExact(\$buffer, 1)
-                or return $self->TruncatedHeader("FCOMMENT");
-            last if $buffer eq GZIP_NULL_BYTE ;
-            $comment .= $buffer
-        }
-        $keep .= $comment . GZIP_NULL_BYTE ;
+        $self->smartReadToDelim(\$comment, GZIP_NULL_BYTE) != STATUS_ERROR
+            or return $self->TruncatedHeader("FCOMMENT");
+
+        $keep .= $comment  ;
+
+        return $self->HeaderError("No NULL termination found in FCOMMENT")
+            if  substr($comment, -1, 1) ne GZIP_NULL_BYTE ;
+
+        # remove the terminating GZIP_NULL_BYTE
+        $comment = substr($comment, 0, -1);
 
         return $self->HeaderError("Non ISO 8859-1 Character found in Comment")
             if *$self->{Strict} && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o ;
@@ -232,7 +241,7 @@ sub _readGzipHeader($)
 
     *$self->{Type} = 'rfc1952';
 
-    return {
+    my $info = {
         'Type'          => 'rfc1952',
         'FingerprintLength'  => 2,
         'HeaderLength'  => length $keep,
@@ -263,7 +272,15 @@ sub _readGzipHeader($)
         #'CompSize'=> $compsize,
         #'CRC32'=> $CRC32,
         #'OrigSize'=> $ISIZE,
-      }
+      };
+
+    if (*$self->{'newstreamhook'})
+    {
+        my $cb = *$self->{'newstreamhook'} ;
+        $cb->($info);
+    }
+
+    return $info;
 }
 
 
@@ -754,6 +771,15 @@ will be overwritten by the uncompressed data.
 
 Defaults to 0.
 
+=item C<< NewStreamHook => \&hook >>
+The C<hook> sub will only be invoked when the C<MultiStream> option is enabled and the
+code has detected a new gzip header.
+
+Ther equivalent data that is returned by C<getHeaderInfo>will be passed into C<hook>
+
+A single parameter is passed into the C<hook> sub that consists of the data returned by
+running the C<getHeaderInfo> method on th enew gzip stream.
+
 =item C<< Strict => 0|1 >>
 
 This option controls whether the extra checks defined below are used when
@@ -1127,7 +1153,7 @@ The primary site for gzip is L<http://www.gzip.org>.
 
 =head1 AUTHOR
 
-This module was written by Paul Marquess, C<pmqs@cpan.org>.
+This module was written by Paul Marquess, C<pmqs@outlook.com>.
 
 =head1 MODIFICATION HISTORY
 
