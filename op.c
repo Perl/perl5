@@ -5034,7 +5034,7 @@ Perl_blockhook_register(pTHX_ BHK *hk)
 {
     PERL_ARGS_ASSERT_BLOCKHOOK_REGISTER;
 
-    Perl_av_create_and_push(aTHX_ &PL_blockhooks, newSViv(PTR2IV(hk)));
+    av_create_and_push(&PL_blockhooks, newSViv(PTR2IV(hk)));
 }
 
 void
@@ -12618,7 +12618,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             SAVECOPLINE(&PL_compiling);
 
             DEBUG_x( dump_sub(gv) );
-            Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
+            av_create_and_push(&PL_beginav, MUTABLE_SV(cv));
             GvCV_set(gv,0);		/* cv has been hijacked */
             call_list(oldscope, PL_beginav);
 
@@ -12632,13 +12632,13 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
         if (*name == 'E') {
             if (strEQ(name, "END")) {
                 DEBUG_x( dump_sub(gv) );
-                Perl_av_create_and_unshift_one(aTHX_ &PL_endav, MUTABLE_SV(cv));
+                av_create_and_unshift_one(&PL_endav, MUTABLE_SV(cv));
             } else
                 return FALSE;
         } else if (*name == 'U') {
             if (strEQ(name, "UNITCHECK")) {
                 /* It's never too late to run a unitcheck block */
-                Perl_av_create_and_unshift_one(aTHX_ &PL_unitcheckav, MUTABLE_SV(cv));
+                av_create_and_unshift_one(&PL_unitcheckav, MUTABLE_SV(cv));
             }
             else
                 return FALSE;
@@ -12648,7 +12648,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                     /* diag_listed_as: Too late to run %s block */
                     ck_warner(packWARN(WARN_VOID),
                               "Too late to run CHECK block");
-                Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
+                av_create_and_unshift_one(&PL_checkav, MUTABLE_SV(cv));
             }
             else
                 return FALSE;
@@ -12686,7 +12686,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                     SAVEFREESV(cv);
                 }
                 else
-                    Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
+                    av_create_and_push(&PL_initav, MUTABLE_SV(cv));
             }
             else
                 return FALSE;
