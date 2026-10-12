@@ -2508,8 +2508,8 @@ Perl_study_chunk(pTHX_
                     mincount = 1;
                     maxcount = 1;
                 } else {
-                    mincount = ARG1i(scan);
-                    maxcount = ARG2i(scan);
+                    mincount = CURLY_MIN_REPEAT(scan);
+                    maxcount = CURLY_MAX_REPEAT(scan);
                 }
                 next = regnext(scan);
                 if (OP(scan) == CURLYX) {
@@ -2707,9 +2707,10 @@ Perl_study_chunk(pTHX_
                      /* CURLYM can emulate a capture around its whole body,
                       * but cannot restore captures inside a nested quantifier
                       * when an iteration fails or is backtracked. */
-                     && (!ARG3a(oscan)
+                     && (!CURLY_HAS_CAPTURES(oscan)
                          || ((data->flags & SF_IN_PAR)
-                             && ARG3a(oscan) == ARG3b(oscan)
+                             && CURLY_FIRST_CAPTURE(oscan)
+                                == CURLY_LAST_CAPTURE(oscan)
                              && OP(REGNODE_AFTER_type(oscan,
                                                 tregnode_CURLYX)) == OPEN))
                      && !deltanext     /* atom is fixed width */

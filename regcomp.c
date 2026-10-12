@@ -2030,7 +2030,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 /* An OR of *one* alternative - should not happen now. */
                 (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
                 /* An {n,m} with n > 0 */
-                (REGNODE_TYPE(OP(first)) == CURLY && ARG1i(first) > 0) ||
+                (REGNODE_TYPE(OP(first)) == CURLY
+                    && CURLY_MIN_REPEAT(first) > 0) ||
                 (OP(first) == NOTHING && REGNODE_TYPE(OP(first_next)) != END)
             )){
                 break;
@@ -5216,18 +5217,18 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Finish up the CURLY/CURLYX case */
     FLAGS(REGNODE_p(ret)) = 0;
 
-    ARG1i_SET(REGNODE_p(ret), min);
-    ARG2i_SET(REGNODE_p(ret), max);
+    CURLY_MIN_REPEAT_SET(REGNODE_p(ret), min);
+    CURLY_MAX_REPEAT_SET(REGNODE_p(ret), max);
 
     /* if we had a npar_after then we need to increment npar_before,
      * we want to track the range of parens we need to reset each iteration
      */
     if (npar_after!=npar_before) {
-        ARG3a_SET(REGNODE_p(ret), (U16)npar_before+1);
-        ARG3b_SET(REGNODE_p(ret), (U16)npar_after);
+        CURLY_FIRST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_before+1);
+        CURLY_LAST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_after);
     } else {
-        ARG3a_SET(REGNODE_p(ret), 0);
-        ARG3b_SET(REGNODE_p(ret), 0);
+        CURLY_FIRST_CAPTURE_SET(REGNODE_p(ret), 0);
+        CURLY_LAST_CAPTURE_SET(REGNODE_p(ret), 0);
     }
 
   done_main_op:

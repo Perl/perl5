@@ -318,10 +318,10 @@ struct regnode_2 {
  * 32 bit value, or two 16 bit values. The first fields must match regnode_2.
  * The extra field can be accessed as (U32)ARG3u() (I32)ARG3i() or (U16)ARG3a()
  * and (U16)ARG3b().
- * Currently used for the CURLY style regops used to represent quantifers,
- * storing the min and of the quantifier via ARG1i() and ARG2i(), along with
- * ARG3a() and ARG3b() which are used to store information about the number of
- * parens before and inside the quantified expression. */
+ * Currently used for the CURLY style regops used to represent quantifiers,
+ * storing the repeat bounds via CURLY_MIN_REPEAT() and CURLY_MAX_REPEAT(),
+ * along with CURLY_FIRST_CAPTURE() and CURLY_LAST_CAPTURE() which store the
+ * range of captures inside the quantified expression. */
 struct regnode_3 {
     union regnode_head head;
     union regnode_arg arg1;
@@ -486,6 +486,21 @@ struct regnode_ssc {
 #define ARG3b_SET(p, val) ARG__SET(ARG3b_LOC(p), (val))
 
 #define ARGp_SET(p, val) ARGp_SET_inline((p),(val))
+
+/* Repeat bounds for CURLY, CURLYN, CURLYM and CURLYX. STAR and PLUS have
+ * implicit bounds and do not have these fields. */
+#define CURLY_MIN_REPEAT(p) ARG1i(p)
+#define CURLY_MAX_REPEAT(p) ARG2i(p)
+#define CURLY_MIN_REPEAT_SET(p, val) ARG1i_SET((p), (val))
+#define CURLY_MAX_REPEAT_SET(p, val) ARG2i_SET((p), (val))
+
+/* Inclusive capture range in a quantified body. Both fields are zero when
+ * the body contains no captures. */
+#define CURLY_FIRST_CAPTURE(p) ARG3a(p)
+#define CURLY_LAST_CAPTURE(p)  ARG3b(p)
+#define CURLY_HAS_CAPTURES(p)  (ARG3u(p) != 0)
+#define CURLY_FIRST_CAPTURE_SET(p, val) ARG3a_SET((p), (val))
+#define CURLY_LAST_CAPTURE_SET(p, val)  ARG3b_SET((p), (val))
 
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0
