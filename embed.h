@@ -1538,7 +1538,7 @@
 #     define mro_get_linear_isa_dfs(a,b)        S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #   endif
 #   if defined(PERL_IN_OP_C)
-#     define apply_attrs_my(a,b,c,d)            S_apply_attrs_my(aTHX_ a,b,c,d)
+#     define apply_attrs_my(a,b,c)              S_apply_attrs_my(aTHX_ a,b,c)
 #     define assignment_type(a)                 S_assignment_type(aTHX_ a)
 #     define bad_type_gv(a,b,c,d)               S_bad_type_gv(aTHX_ a,b,c,d)
 #     define bad_type_pv(a,b,c,d)               S_bad_type_pv(aTHX_ a,b,c,d)
@@ -2243,6 +2243,9 @@
 # if !defined(PERL_IMPLICIT_SYS)
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
+# endif
+# if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C)
+#   define store_attr_in_padname(a,b)           Perl_store_attr_in_padname(aTHX_ a,b)
 # endif
 # if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
      defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \

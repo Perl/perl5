@@ -4661,6 +4661,11 @@ p	|void	|apply_attribute_writer 				\
 				|NULLOK SV *attrvalue			\
 				|NULLOK void *data
 #endif
+#if defined(PERL_IN_ATTRIBUTES_C) || defined(PERL_IN_OP_C)
+Cp	|void	|store_attr_in_padname					\
+				|NN PADNAME *pn 			\
+				|NN OP *attr
+#endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif
@@ -5291,8 +5296,7 @@ Sd	|AV *	|mro_get_linear_isa_dfs 				\
 				|U32 level
 #endif
 #if defined(PERL_IN_OP_C)
-S	|void	|apply_attrs_my |NN HV *stash				\
-				|NN OP *target				\
+S	|void	|apply_attrs_my |NN OP *target				\
 				|NULLOK OP *attrs			\
 				|NN OP **import_opsp
 RS	|I32	|assignment_type|NULLOK const OP *o
