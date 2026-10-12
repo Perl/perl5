@@ -2704,6 +2704,14 @@ Perl_study_chunk(pTHX_
                                                             non optimistic eval is seen
                                                             anywhere.*/
                      && !(data->flags & SF_HAS_PAR) /* no parens! */
+                     /* CURLYM can emulate a capture around its whole body,
+                      * but cannot restore captures inside a nested quantifier
+                      * when an iteration fails or is backtracked. */
+                     && (!ARG3a(oscan)
+                         || ((data->flags & SF_IN_PAR)
+                             && ARG3a(oscan) == ARG3b(oscan)
+                             && OP(REGNODE_AFTER_type(oscan,
+                                                tregnode_CURLYX)) == OPEN))
                      && !deltanext     /* atom is fixed width */
                      && minnext != 0  /* CURLYM can't handle zero width */
                          /* Nor characters whose fold at run-time may be
