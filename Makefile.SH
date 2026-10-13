@@ -1399,7 +1399,7 @@ _mopup:
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs $(generated_pods) uni.data $(mini_only_objs) pod/roffitall
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
-	-rm -f *perl.xok
+	-rm -f *perl.xok .done_test_prep
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.*
 	-rm -f config.arch config.over $(DTRACE_H)
@@ -1560,7 +1560,7 @@ depend: makedependfile makedepend $(DTRACE_H) $(generated_headers)
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
-	test_harness test_harness_notty minitest test-reonly _test
+	test_harness test_harness_notty minitest test_reonly test-reonly _test
 
 # The _test target is there just for Test::Smoke, which does a make test_prep
 # always before invoking this target, thus preventing checking again
@@ -1580,6 +1580,7 @@ case "$targethost" in
 test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
 	$(dynamic_ext) $(TEST_PERL_DLL) runtests $(generated_pods) common_build
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
+	touch .done_test_prep
 
 !NO!SUBS!
 ;;
@@ -1631,6 +1632,7 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to \$(PERL_EXE)
 	cd t && (rm -f \$(PERL_EXE); \$(LNS) ../\$(PERL_EXE) \$(PERL_EXE)) && cd ..
 	$to t/\$(PERL_EXE)
+	touch .done_test_prep
 
 !GROK!THIS!
 ;;
@@ -1721,7 +1723,13 @@ test_harness test-harness: test_prep
 test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
 
-test_reonly test-reonly: test_prep_reonly
+# The stamp records full preparation once between cleans.  We deliberately
+# avoid checking unrelated extensions during regex engine development.
+.done_test_prep:
+	$(MAKE) test_prep
+
+test_reonly test-reonly: .done_test_prep
+	$(MAKE) test_prep_reonly
 	TEST_ARGS='re/*.t ../ext/re/t/*.t' PERL_TEST_HARNESS_ASAP=1 TESTFILE=harness $(RUN_TESTS) choose
 
 

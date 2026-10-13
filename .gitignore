@@ -105,6 +105,7 @@ MYMETA.*
 /generate_uudmap
 /ugenerate_uudmap
 /uni.data
+/.done_test_prep
 /uudmap.h
 /uuudmap.h
 /bitcount.h

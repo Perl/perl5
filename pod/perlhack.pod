@@ -1003,6 +1003,23 @@ systems.
 This runs some basic sanity tests on the source tree and helps catch
 basic errors before you submit a patch.
 
+=item * test_reonly test-reonly
+
+Run the regex engine tests.  On Unix, these are the tests in F<t/re> and
+F<ext/re/t>.  This target runs C<make test_prep> if F<.done_test_prep> is
+absent, to build the test framework dependencies and necessary Unicode
+data files.  Successful C<make test_prep> runs update this file, and
+C<make clean> removes it.  Normal test targets run C<test_prep> as before.
+On Windows, use the C<test-reonly> and C<test-prep> spellings from F<win32>.
+
+Subsequent runs rebuild the interpreter and the C<re> extension without
+rebuilding unrelated extensions.  The regex engine is built into both
+the interpreter and C<re> with different options, and is used via
+F<miniperl> to build all our extensions.  A broken regex engine can
+therefore break other parts of the build.  This target lets us check
+that the engine is safe enough for a full build first.  To refresh the
+full test environment, run C<make test_prep> explicitly.
+
 =item * minitest
 
 Run F<miniperl> on F<t/base>, F<t/comp>, F<t/cmd>, F<t/run>, F<t/io>,
