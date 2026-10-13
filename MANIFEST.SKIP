@@ -7,4 +7,5 @@
 ^\.agents/
 ^AGENTS\.md$
 ^CLAUDE\.md$
+^\.done_test_prep$
 ^Porting/check-ws-only-change

@@ -1339,6 +1339,7 @@ test-prep : all utils ../pod/perltoc.pod
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	set PERL_STATIC_EXT=$(STATIC_EXT)
+	@echo done> ..\.done_test_prep
 
 test : test-prep
 	cd ..\t
@@ -1350,7 +1351,12 @@ test_porting : test-prep
 	perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 	cd ..\win32
 
-test-reonly : reonly utils
+# Prepare the full test environment once between cleans.
+..\.done_test_prep :
+	$(MAKE) test-prep
+
+test-reonly : ..\.done_test_prep
+	$(MAKE) reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
@@ -1412,6 +1418,7 @@ _test :
        cd ..\win32
 
 _clean :
+	-@$(DEL) ..\.done_test_prep
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)
 	-@$(DEL) perlglob$(o)
