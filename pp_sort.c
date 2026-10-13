@@ -877,7 +877,7 @@ PP(pp_sort)
 
     copytmps = cBOOL(PL_sortcop);
     for (i=max; i > 0 ; i--) {
-        SV *sv = *p2++;
+        SV *sv = *p2;
         if (sv) {                    /* Weed out nulls. */
             if (copytmps && SvPADTMP(sv)) {
                 SV *nsv = sv_mortalcopy(sv);
@@ -909,11 +909,24 @@ PP(pp_sort)
                 if (SvAMAGIC(sv))
                     overloading = 1;
             }
+            /* Stack unwinding, following a fatalized warning or other
+             * fatal event, should not encounter the same SV* in its
+             * new position and - if not overwritten - its old position.
+             * In RC_STACK builds, that would result in the SV having
+             * its refcount decremented twice over instead of once.
+             * See GH #24961 for one such example. */
+            if (p1 != p2)
+                *p2 = NULL;
             *p1++ = sv;
         }
         else
             max--;
+        p2++;
     }
+
+    /* Adjust PL_stack_sp to point to the top of live SV*s.
+     * (The shuffle above could have left a run of NULLs.) */
+    PL_stack_sp = p1 - 1;
 
     if (max > 1) {
         SV **start;

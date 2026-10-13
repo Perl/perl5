@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 206);
+plan(tests => 210);
 use Tie::Array; # we need to test sorting tied arrays
 
 # these shouldn't hang
@@ -1247,3 +1247,15 @@ SKIP:
 
 my sub lexcmp { $a <=> $b }
 is join('', sort lexcmp 3,4,1,2), "1234", "lexical sort sub" ;
+
+# GH #24961: Stack unwinding does not double-decrement SV*s
+#     [Needs: -DPERL_RC_STACK -DDEBUGGING -DDEBUG_LEAKING_SCALARS]
+{
+   use warnings FATAL => 'all';
+   my @x; $x[0]=4; $x[2]=3; $x[3]="z";
+   eval { @x = sort { $a <=> $b } @x };
+   is $x[0], 4, 'GH #24961: $x[0] is still alive';
+   is $x[1], undef, 'GH #24961: $x[1] is undef';
+   is $x[2], 3, 'GH #24961: $x[2] is still alive';
+   is $x[3], "z", 'GH #24961: $x[3] is still alive';
+}
