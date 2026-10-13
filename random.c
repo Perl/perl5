@@ -61,10 +61,10 @@ Perl_pcg64_seed_r(pcg64_random_t *state, U64 seed)
     PERL_ARGS_ASSERT_PCG64_SEED_R;
 
     U64 seed1 = splitmix64(&seed);
-    U64 seed2 = splitmix64(&seed1);
+    U64 seed2 = splitmix64(&seed);
 
     state->state = seed1;
-    state->inc   = seed2;
+    state->inc   = seed2 | 1;
 
     //DEBUG_U(PerlIO_printf(Perl_error_log, "PCG64 Seed : %20lu => %20lu / %20lu\n", seed, state->state, state->inc));
 }
