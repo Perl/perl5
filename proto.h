@@ -1851,7 +1851,7 @@ PERL_CALLCONV Size_t
 Perl_expected_size(UV size);
 #define PERL_ARGS_ASSERT_EXPECTED_SIZE
 
-PERL_CALLCONV void
+PERL_CALLCONV PADOFFSET
 Perl_export_lexical(pTHX_ SV *name, SV *sv)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)

@@ -1440,7 +1440,8 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
 CTmpx	|Size_t |expected_size	|UV size
-Adp	|void	|export_lexical |NN SV *name				\
+Adp	|PADOFFSET|export_lexical					\
+				|NN SV *name				\
 				|NN SV *sv
 ATdmp	|bool	|extended_utf8_to_uv					\
 				|SPTR const U8 * const s		\
