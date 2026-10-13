@@ -3156,7 +3156,8 @@ Perl_prepare_export_lexical(pTHX)
 Adds an entry into the lexical scope of the code which called this. In order
 to have any effect this must be while the surrounding code is still being
 compiled; usually by being invoked as part of a C<BEGIN> block (or the one
-implied by a C<use> statement.)
+implied by a C<use> statement.) Returns the pad offset of the newly-added
+lexical.
 
 Calls to this function must be wrapped between a pair of calls to
 L</prepare_export_lexical> and L</finish_export_lexical>, between which may be
@@ -3170,7 +3171,7 @@ placed one or more calls to C<export_lexical> itself.
 
 =cut
 */
-void
+PADOFFSET
 Perl_export_lexical(pTHX_ SV *name, SV *sv)
 {
     PERL_ARGS_ASSERT_EXPORT_LEXICAL;
@@ -3178,6 +3179,8 @@ Perl_export_lexical(pTHX_ SV *name, SV *sv)
     PADOFFSET off = pad_add_name_sv(name, padadd_STATE, 0, 0);
     SvREFCNT_dec(PL_curpad[off]);
     PL_curpad[off] = SvREFCNT_inc(sv);
+
+    return off;
 }
 
 /*
