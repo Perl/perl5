@@ -4862,7 +4862,6 @@ struct Perl_OpDumpContext;
 #endif
 
 #include "sv.h"
-#include "regexp.h"
 #include "util.h"
 #include "form.h"
 #include "gv.h"
@@ -4872,6 +4871,7 @@ struct Perl_OpDumpContext;
 #include "op.h"
 #include "hv.h"
 #include "cop.h"
+#include "regexp.h"
 #include "av.h"
 #include "mg.h"
 #include "scope.h"

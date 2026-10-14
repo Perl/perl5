@@ -851,6 +851,8 @@ typedef struct {
     CV *caller_cv;       /* who called us: a cached find_runcv(NULL) */
     CV *last_pushed_cv;  /* most recently called (?{...}) CV */
     PAD* last_pad;       /* pad used for last (?{...}) execution */
+    /* vars holding private state between MULTICALLs */
+    dMULTICALL;
 } regmatch_info;
 
 
