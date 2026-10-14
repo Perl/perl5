@@ -1203,8 +1203,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = cBOOL(flags & padadd_STALEOK);
     const bool fieldok = cBOOL(flags & padfind_FIELD_OK);
+    const bool no_inner_capture = flags & padfind_NO_INNER_CAPTURE;
 
-    flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
+    flags &= ~(padadd_STALEOK|padfind_FIELD_OK|padfind_NO_INNER_CAPTURE); /* one-shot flags */
     if (flags)
         croak("panic: pad_findlex illegal flag bits 0x%" UVxf,
                    (UV)flags);
@@ -1393,6 +1394,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             croak("Field %" SVf " of %" HvNAMEf_QUOTEDPREFIX " is not accessible in a method of %" HvNAMEf_QUOTEDPREFIX,
                 SVfARG(PadnameSV(*out_name)), HvNAMEfARG(fieldstash), HvNAMEfARG(PL_curstash));
     }
+
+    if(no_inner_capture)
+        return offset;
 
     /* found in an outer CV. Add appropriate fake entry to this pad */
 
