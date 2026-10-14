@@ -7234,7 +7234,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                      type such as \1 or (??{...}. For more
                                      details, see
                                      L<perlreguts/The super-linear cache> */
-    dMULTICALL;
     U8 gimme = G_SCALAR;
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
@@ -7262,10 +7261,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     reginfo->last_pushed_cv = NULL;
     reginfo->caller_cv      = NULL;
     reginfo->last_pad       = NULL;
-
-    /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
-    multicall_oldcatch = 0;
-    PERL_UNUSED_VAR(multicall_cop);
 
     st = PL_regmatch_state;
 
@@ -9092,10 +9087,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                             ? CXp_SUB_RE_FAKE : 0));
                     SAVECOMPPAD();
                     if (reginfo->last_pushed_cv) {
-                        CHANGE_MULTICALL_FLAGS(newcv, flags);
+                        CHANGE_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
                     }
                     else {
-                        PUSH_MULTICALL_FLAGS(newcv, flags);
+                        PUSH_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
                     }
                     /* see notes above */
                     CX_CUR()->blk_oldsaveix = orig_savestack_ix;
@@ -9105,7 +9100,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 else {
                     /* these assignments are just to silence compiler
                      * warnings */
-                    multicall_cop = NULL;
+                    reginfo->multicall_cop = NULL;
                 }
                 reginfo->last_pad = PL_comppad;
 
@@ -11073,7 +11068,7 @@ NULL
         /* see "Some notes about MULTICALL" above, especially how
          * the POP_MULTICALL does the equivalent of the LEAVE_SCOPE
          * for us, so no need to do it explicitly. */
-        POP_MULTICALL;
+        POP_MULTICALL_PREFIX_(reginfo->);
         PERL_UNUSED_VAR(SP);
     }
     else {
