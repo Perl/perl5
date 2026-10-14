@@ -510,6 +510,8 @@
 # define pad_add_name_pvn(a,b,c,d,e)            Perl_pad_add_name_pvn(aTHX_ a,b,c,d,e)
 # define pad_add_name_sv(a,b,c,d)               Perl_pad_add_name_sv(aTHX_ a,b,c,d)
 # define pad_alloc(a,b)                         Perl_pad_alloc(aTHX_ a,b)
+# define pad_fetchmy_pvn(a,b,c,d)               Perl_pad_fetchmy_pvn(aTHX_ a,b,c,d)
+# define pad_fetchmy_sv(a,b,c)                  Perl_pad_fetchmy_sv(aTHX_ a,b,c)
 # define pad_findmy_pv(a,b)                     Perl_pad_findmy_pv(aTHX_ a,b)
 # define pad_findmy_pvn(a,b,c)                  Perl_pad_findmy_pvn(aTHX_ a,b,c)
 # define pad_findmy_sv(a,b)                     Perl_pad_findmy_sv(aTHX_ a,b)
