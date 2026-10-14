@@ -6603,6 +6603,245 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
     return wb;
 }
 
+
+/* S_run_code_block(): helper function for S_regmatch().
+ *
+ * Execute the perl code within a (?{...}) code block or similar.
+ *
+ * Returns an SV which is the processed return value of the code block:
+ * that includes anything which must be done before restoring PL_op,
+ * parens etc, so that (??{  undef }) warns in the right place and
+ * (??{ $1 }) gets the right capture value.
+ *
+ * The return value may be either a string or a REGEXP object.
+ * For a condition (logical==1), the return value is NULL or non-NULL
+ * depending on whether the code block's return value was SvTRUE().
+ *
+ * Params:
+ *
+ * orig_savestack_ix is the stack index at the start of the match.
+ *
+ * logical is 0/1/2 indicating (?{...}),  (?(?{...})X|Y),  (??{ ... })
+ *
+ * n is the value of ARG1u(scan) and is used as an index into the
+ * regex internal data to get the data for this EVAL's code block.
+ */
+
+static REGEXP *
+S_run_code_block(pTHX_ regexp *rex, regmatch_info *reginfo,
+                    I32 orig_savestack_ix, int logical, U32 n)
+
+{
+    /* execute the code in the {...} */
+
+    dSP;
+    IV before;
+    OP * const oop = PL_op;
+    COP * const ocurcop = PL_curcop;
+    OP *nop;
+    CV *newcv;
+    SV *ret;
+    U8 gimme = G_SCALAR;
+    RXi_GET_DECL(rex, rexi);
+
+#ifdef DEBUGGING
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
+#endif
+
+    if (!reginfo->caller_cv)
+        reginfo->caller_cv = find_runcv(NULL);
+
+    if (rexi->data->what[n] == 'r') { /* code from an external qr */
+        newcv = (ReANY(
+                        (REGEXP*)(rexi->data->data[n])
+                ))->qr_anoncv;
+        nop = (OP*)rexi->data->data[n+1];
+    }
+    else if (rexi->data->what[n] == 'l') { /* literal code */
+        newcv = reginfo->caller_cv;
+        nop = (OP*)rexi->data->data[n];
+        assert(CvDEPTH(newcv));
+    }
+    else {
+        /* literal with own CV */
+        assert(rexi->data->what[n] == 'L');
+        newcv = rex->qr_anoncv;
+        nop = (OP*)rexi->data->data[n];
+    }
+
+    /* Some notes about MULTICALL and the context and save stacks.
+     *
+     * In something like
+     *   /...(?{ my $x)}...(?{ my $y)}...(?{ my $z)}.../
+     * since codeblocks don't introduce a new scope (so that
+     * local() etc accumulate), at the end of a successful
+     * match there will be a SAVEt_CLEARSV on the savestack
+     * for each of $x, $y, $z. If the three code blocks above
+     * happen to have come from different CVs (e.g. via
+     * embedded qr//s), then we must ensure that during any
+     * savestack unwinding, PL_comppad always points to the
+     * right pad at each moment. We achieve this by
+     * interleaving SAVEt_COMPPAD's on the savestack whenever
+     * there is a change of pad.
+     * In theory whenever we call a code block, we should
+     * push a CXt_SUB context, then pop it on return from
+     * that code block. This causes a bit of an issue in that
+     * normally popping a context also clears the savestack
+     * back to cx->blk_oldsaveix, but here we specifically
+     * don't want to clear the save stack on exit from the
+     * code block.
+     * Also for efficiency we don't want to keep pushing and
+     * popping the single SUB context as we backtrack etc.
+     * So instead, we push a single context the first time
+     * we need, it, then hang onto it until the end of this
+     * function. Whenever we encounter a new code block, we
+     * update the CV etc if that's changed. During the times
+     * in this function where we're not executing a code
+     * block, having the SUB context still there is a bit
+     * naughty - but we hope that no-one notices.
+     * When the SUB context is initially pushed, we fake up
+     * cx->blk_oldsaveix to be as if we'd pushed this context
+     * on first entry to S_regmatch rather than at some random
+     * point during the regexe execution. That way if we
+     * croak, popping the context stack will ensure that
+     * *everything* SAVEd by this function is undone and then
+     * the context popped, rather than e.g., popping the
+     * context (and restoring the original PL_comppad) then
+     * popping more of the savestack and restoring a bad
+     * PL_comppad.
+     */
+
+    /* If this is the first EVAL, push a MULTICALL. On
+     * subsequent calls, if we're executing a different CV, or
+     * if PL_comppad has got messed up from backtracking
+     * through SAVECOMPPADs, then refresh the context.
+     */
+    if (   newcv      != reginfo->last_pushed_cv
+        || PL_comppad != reginfo->last_pad)
+    {
+        U8 flags = (CXp_SUB_RE |
+                    ((newcv == reginfo->caller_cv)
+                                ? CXp_SUB_RE_FAKE : 0));
+        SAVECOMPPAD();
+        if (reginfo->last_pushed_cv) {
+            CHANGE_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
+        }
+        else {
+            PUSH_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
+        }
+        /* see notes above */
+        CX_CUR()->blk_oldsaveix = orig_savestack_ix;
+
+        reginfo->last_pushed_cv = newcv;
+    }
+    else {
+        /* these assignments are just to silence compiler
+         * warnings */
+        reginfo->multicall_cop = NULL;
+    }
+    reginfo->last_pad = PL_comppad;
+
+    /* the initial nextstate you would normally execute
+     * at the start of an eval (which would cause error
+     * messages to come from the eval), may be optimised
+     * away from the execution path in the regex code blocks;
+     * so manually set PL_curcop to it initially */
+    {
+        OP *o = cUNOPx(nop)->op_first;
+        assert(o->op_type == OP_NULL);
+        if (o->op_targ == OP_SCOPE) {
+            o = cUNOPo->op_first;
+        }
+        else {
+            assert(o->op_targ == OP_LEAVE);
+            o = cUNOPo->op_first;
+            assert(o->op_type == OP_ENTER);
+            o = OpSIBLING(o);
+        }
+
+        if (o->op_type != OP_STUB) {
+            assert(OP_TYPE_IS_COP_NN(o)
+                    || (o->op_type == OP_NULL
+                        &&  (  o->op_targ == OP_NEXTSTATE
+                            || o->op_targ == OP_DBSTATE
+                            )
+                        )
+            );
+            PL_curcop = (COP*)o;
+        }
+    }
+    nop = nop->op_next;
+
+    DEBUG_STATE_r( re_printf(
+        "  re EVAL PL_op = 0x%" UVxf "\n", PTR2UV(nop)) );
+
+    /* we don't use MULTICALL here as we want to call the
+     * first op of the block of interest, rather than the
+     * first op of the sub. Also, we don't want to free
+     * the savestack frame */
+    before = (IV)(SP-PL_stack_base);
+    PL_op = nop;
+    CALLRUNOPS(aTHX);			/* Scalar context. */
+    SPAGAIN;
+    if ((IV)(SP-PL_stack_base) == before)
+        ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
+    else {
+        ret = POPs;
+        PUTBACK;
+    }
+
+    /* before restoring everything, evaluate the returned
+     * value, so that 'uninit' warnings don't use the wrong
+     * PL_op or pad. Also need to process any magic vars
+     * (e.g. $1) *before* parentheses are restored */
+
+    PL_op = NULL;
+
+    if (logical == 0) {       /* /(?{ ... })/ and /(*{ ... })/ */
+        SV *replsv = save_scalar(PL_replgv);
+        sv_setsv(replsv, ret); /* $^R */
+        SvSETMAGIC(replsv);
+    }
+    else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
+        if (!SvTRUE_NN(ret))
+            ret = NULL;
+    }
+    else {                   /*  /(??{ ... })  */
+        /*  if its overloaded, let the regex compiler handle
+         *  it; otherwise extract regex, or stringify  */
+        if (SvGMAGICAL(ret))
+            ret = sv_mortalcopy(ret);
+        if (!SvAMAGIC(ret)) {
+            MAGIC *mg;
+            SV *sv = ret;
+            if (SvROK(sv))
+                sv = SvRV(sv);
+
+            if (SvTYPE(sv) == SVt_REGEXP)
+                ret = sv;
+            else if (   SvSMAGICAL(ret)
+                     && ((mg = mg_find(ret, PERL_MAGIC_qr))))
+
+                ret = mg->mg_obj;
+            else if (!SvPOK(ret) && !SvNIOK(ret)) {
+                /* force any undef warnings here */
+                ret = sv_mortalcopy(ret);
+                (void) SvPV_force_nolen(ret);
+            }
+        }
+    }
+
+    /* *** Note that at this point we don't restore
+     * PL_comppad, (or pop the CxSUB) on the assumption it may
+     * be used again soon. This is safe as long as nothing
+     * in the regexp code uses the pad ! */
+    PL_op = oop;
+    PL_curcop = ocurcop;
+
+    return (REGEXP*)ret;
+}
+
+
 /* Macros for regmatch(), using its internal variables */
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
 #define NEXTCHR_IS_EOS (nextbyte < 0)
@@ -6907,7 +7146,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                      type such as \1 or (??{...}. For more
                                      details, see
                                      L<perlreguts/The super-linear cache> */
-    U8 gimme = G_SCALAR;
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     char_class_number_ classnum;
@@ -8600,210 +8838,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sv_setsv(sv_mrk, sv_yes_mark);
             }
 
-            {
-                /* execute the code in the {...} */
+                /* execute the (?{...}) code block and do some basic
+                 * processing of the return value */
+                re_sv = S_run_code_block(aTHX_ rex, reginfo,
+                                orig_savestack_ix, logical, ARG1u(scan));
 
-                dSP;
-                IV before;
-                OP * const oop = PL_op;
-                COP * const ocurcop = PL_curcop;
-                OP *nop;
-                CV *newcv;
-                SV *ret;
-                U32 n = ARG1u(scan);
-
-                if (!reginfo->caller_cv)
-                    reginfo->caller_cv = find_runcv(NULL);
-
-                if (rexi->data->what[n] == 'r') { /* code from an external qr */
-                    newcv = (ReANY(
-                                    (REGEXP*)(rexi->data->data[n])
-                            ))->qr_anoncv;
-                    nop = (OP*)rexi->data->data[n+1];
-                }
-                else if (rexi->data->what[n] == 'l') { /* literal code */
-                    newcv = reginfo->caller_cv;
-                    nop = (OP*)rexi->data->data[n];
-                    assert(CvDEPTH(newcv));
-                }
-                else {
-                    /* literal with own CV */
-                    assert(rexi->data->what[n] == 'L');
-                    newcv = rex->qr_anoncv;
-                    nop = (OP*)rexi->data->data[n];
-                }
-
-                /* Some notes about MULTICALL and the context and save stacks.
-                 *
-                 * In something like
-                 *   /...(?{ my $x)}...(?{ my $y)}...(?{ my $z)}.../
-                 * since codeblocks don't introduce a new scope (so that
-                 * local() etc accumulate), at the end of a successful
-                 * match there will be a SAVEt_CLEARSV on the savestack
-                 * for each of $x, $y, $z. If the three code blocks above
-                 * happen to have come from different CVs (e.g. via
-                 * embedded qr//s), then we must ensure that during any
-                 * savestack unwinding, PL_comppad always points to the
-                 * right pad at each moment. We achieve this by
-                 * interleaving SAVEt_COMPPAD's on the savestack whenever
-                 * there is a change of pad.
-                 * In theory whenever we call a code block, we should
-                 * push a CXt_SUB context, then pop it on return from
-                 * that code block. This causes a bit of an issue in that
-                 * normally popping a context also clears the savestack
-                 * back to cx->blk_oldsaveix, but here we specifically
-                 * don't want to clear the save stack on exit from the
-                 * code block.
-                 * Also for efficiency we don't want to keep pushing and
-                 * popping the single SUB context as we backtrack etc.
-                 * So instead, we push a single context the first time
-                 * we need, it, then hang onto it until the end of this
-                 * function. Whenever we encounter a new code block, we
-                 * update the CV etc if that's changed. During the times
-                 * in this function where we're not executing a code
-                 * block, having the SUB context still there is a bit
-                 * naughty - but we hope that no-one notices.
-                 * When the SUB context is initially pushed, we fake up
-                 * cx->blk_oldsaveix to be as if we'd pushed this context
-                 * on first entry to S_regmatch rather than at some random
-                 * point during the regexe execution. That way if we
-                 * croak, popping the context stack will ensure that
-                 * *everything* SAVEd by this function is undone and then
-                 * the context popped, rather than e.g., popping the
-                 * context (and restoring the original PL_comppad) then
-                 * popping more of the savestack and restoring a bad
-                 * PL_comppad.
-                 */
-
-                /* If this is the first EVAL, push a MULTICALL. On
-                 * subsequent calls, if we're executing a different CV, or
-                 * if PL_comppad has got messed up from backtracking
-                 * through SAVECOMPPADs, then refresh the context.
-                 */
-                if (   newcv      != reginfo->last_pushed_cv
-                    || PL_comppad != reginfo->last_pad)
-                {
-                    U8 flags = (CXp_SUB_RE |
-                                ((newcv == reginfo->caller_cv)
-                                            ? CXp_SUB_RE_FAKE : 0));
-                    SAVECOMPPAD();
-                    if (reginfo->last_pushed_cv) {
-                        CHANGE_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
-                    }
-                    else {
-                        PUSH_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
-                    }
-                    /* see notes above */
-                    CX_CUR()->blk_oldsaveix = orig_savestack_ix;
-
-                    reginfo->last_pushed_cv = newcv;
-                }
-                else {
-                    /* these assignments are just to silence compiler
-                     * warnings */
-                    reginfo->multicall_cop = NULL;
-                }
-                reginfo->last_pad = PL_comppad;
-
-                /* the initial nextstate you would normally execute
-                 * at the start of an eval (which would cause error
-                 * messages to come from the eval), may be optimised
-                 * away from the execution path in the regex code blocks;
-                 * so manually set PL_curcop to it initially */
-                {
-                    OP *o = cUNOPx(nop)->op_first;
-                    assert(o->op_type == OP_NULL);
-                    if (o->op_targ == OP_SCOPE) {
-                        o = cUNOPo->op_first;
-                    }
-                    else {
-                        assert(o->op_targ == OP_LEAVE);
-                        o = cUNOPo->op_first;
-                        assert(o->op_type == OP_ENTER);
-                        o = OpSIBLING(o);
-                    }
-
-                    if (o->op_type != OP_STUB) {
-                        assert(OP_TYPE_IS_COP_NN(o)
-                                || (o->op_type == OP_NULL
-                                    &&  (  o->op_targ == OP_NEXTSTATE
-                                        || o->op_targ == OP_DBSTATE
-                                        )
-                                    )
-                        );
-                        PL_curcop = (COP*)o;
-                    }
-                }
-                nop = nop->op_next;
-
-                DEBUG_STATE_r( re_printf(
-                    "  re EVAL PL_op = 0x%" UVxf "\n", PTR2UV(nop)) );
-
-                /* we don't use MULTICALL here as we want to call the
-                 * first op of the block of interest, rather than the
-                 * first op of the sub. Also, we don't want to free
-                 * the savestack frame */
-                before = (IV)(SP-PL_stack_base);
-                PL_op = nop;
-                CALLRUNOPS(aTHX);			/* Scalar context. */
-                SPAGAIN;
-                if ((IV)(SP-PL_stack_base) == before)
-                    ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
-                else {
-                    ret = POPs;
-                    PUTBACK;
-                }
-
-                /* before restoring everything, evaluate the returned
-                 * value, so that 'uninit' warnings don't use the wrong
-                 * PL_op or pad. Also need to process any magic vars
-                 * (e.g. $1) *before* parentheses are restored */
-
-                PL_op = NULL;
-
-                if (logical == 0) {       /* /(?{ ... })/ and /(*{ ... })/ */
-                    SV *replsv = save_scalar(PL_replgv);
-                    sv_setsv(replsv, ret); /* $^R */
-                    SvSETMAGIC(replsv);
-                }
-                else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
-                    if (!SvTRUE_NN(ret))
-                        ret = NULL;
-                }
-                else {                   /*  /(??{ ... })  */
-                    /*  if its overloaded, let the regex compiler handle
-                     *  it; otherwise extract regex, or stringify  */
-                    if (SvGMAGICAL(ret))
-                        ret = sv_mortalcopy(ret);
-                    if (!SvAMAGIC(ret)) {
-                        MAGIC *mg;
-                        SV *sv = ret;
-                        if (SvROK(sv))
-                            sv = SvRV(sv);
-
-                        if (SvTYPE(sv) == SVt_REGEXP)
-                            ret = sv;
-                        else if (   SvSMAGICAL(ret)
-                                 && ((mg = mg_find(ret, PERL_MAGIC_qr))))
-
-                            ret = mg->mg_obj;
-                        else if (!SvPOK(ret) && !SvNIOK(ret)) {
-                            /* force any undef warnings here */
-                            ret = sv_mortalcopy(ret);
-                            (void) SvPV_force_nolen(ret);
-                        }
-                    }
-                }
-
-                re_sv = (REGEXP*)ret;
-
-                /* *** Note that at this point we don't restore
-                 * PL_comppad, (or pop the CxSUB) on the assumption it may
-                 * be used again soon. This is safe as long as nothing
-                 * in the regexp code uses the pad ! */
-                PL_op = oop;
-
-                PL_curcop = ocurcop;
+                /* restore paren state */
                 regcp_restore(rex, ST.lastcp, &maxopenparen);
                 PL_curpm_under = PL_curpm;
                 PL_curpm = PL_reg_curpm;
@@ -8817,7 +8857,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                     script_run_begin);
                     /* NOTREACHED */
                 }
-            }
 
                 /* only /(??{ ... })/  from now on */
                 logical = 0;
@@ -10662,9 +10701,10 @@ NULL
 
     if (reginfo->last_pushed_cv) {
         dSP;
-        /* see "Some notes about MULTICALL" above, especially how
-         * the POP_MULTICALL does the equivalent of the LEAVE_SCOPE
-         * for us, so no need to do it explicitly. */
+        /* see "Some notes about MULTICALL" in S_run_code_block,
+         * especially how the POP_MULTICALL does the equivalent of the
+         * LEAVE_SCOPE for us, so no need to do it explicitly. */
+        U8 gimme;
         POP_MULTICALL_PREFIX_(reginfo->);
         PERL_UNUSED_VAR(SP);
     }
