@@ -1076,6 +1076,7 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 /*
 =for apidoc      pad_fetchmy_pvn
 =for apidoc_item pad_fetchmy_sv
+=for apidoc_flag padfind_NO_INNER_CAPTURE
 
 Given the name of a lexical variable, including its leading sigil, these find
 it in the currently compiling pad, returning that offset and setting its
@@ -1099,6 +1100,14 @@ caller must make sure C<namepv> contains at least C<namelen> bytes.
 
 In C<pad_fetchmy_sv>, the variable name is taken from the SV parameter using
 C<L</SvPVutf8>()>.
+
+If C<flags> has the C<padfind_NO_INNER_CAPTURE> bit set, no capture of outer
+values into inner pads is performed. As soon as the lookup finds the requested
+lexical name, its value is captured into the C<svp> and no additions are made
+to inner pads. In this case, the returned pad offset gives the offset in
+I<whichever pad contained it>. The caller is unlikely to be able to make use
+of this value and therefore the only meaningful behaviour when this flag is
+used is to compare it against C<NOT_IN_PAD>.
 
 =cut
 */
@@ -1203,8 +1212,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = cBOOL(flags & padadd_STALEOK);
     const bool fieldok = cBOOL(flags & padfind_FIELD_OK);
+    const bool no_inner_capture = flags & padfind_NO_INNER_CAPTURE;
 
-    flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
+    flags &= ~(padadd_STALEOK|padfind_FIELD_OK|padfind_NO_INNER_CAPTURE); /* one-shot flags */
     if (flags)
         croak("panic: pad_findlex illegal flag bits 0x%" UVxf,
                    (UV)flags);
@@ -1393,6 +1403,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             croak("Field %" SVf " of %" HvNAMEf_QUOTEDPREFIX " is not accessible in a method of %" HvNAMEf_QUOTEDPREFIX,
                 SVfARG(PadnameSV(*out_name)), HvNAMEfARG(fieldstash), HvNAMEfARG(PL_curstash));
     }
+
+    if(no_inner_capture)
+        return offset;
 
     /* found in an outer CV. Add appropriate fake entry to this pad */
 
