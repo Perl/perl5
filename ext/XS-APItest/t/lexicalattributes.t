@@ -20,6 +20,26 @@ BEGIN {
         ':red attribute applied to package subroutine' );
 }
 
+# Attributes on lexical subs
+{
+    my sub lexsub :red(c-arg) { }
+
+    my $refaddr = builtin::refaddr \&lexsub;
+
+    ## TODO(leonerd): find out why this is raw hex address and not `my &lexsub`
+    is( $ATTRIBUTES_APPLIED{sprintf "red/%x", $refaddr}, "c-arg",
+        ':red attribute applied to lexical subroutine' );
+}
+
+# Attributes on anonymous subs
+{
+    my $code = sub :red(c-arg) { };
+
+    my $refaddr = builtin::refaddr $code;
+    is( $ATTRIBUTES_APPLIED{sprintf "red/%x", $refaddr}, "c-arg",
+        ':red attribute applied to anonymous subroutine' );
+}
+
 # Attributes on package variables
 {
     our $SCALAR :red(s-arg);

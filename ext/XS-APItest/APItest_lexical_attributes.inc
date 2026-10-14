@@ -1,3 +1,31 @@
+/* At compiletime of `my sub` or anon subs, we only see the protocv when we
+ * apply attributes to it. But during runtime of the associated .t test file
+ * in pureperl, it can only see the runtime-cloned CV. Thus, we need this
+ * extra piece of magic to copy the attribute application from the protocv to
+ * the cloned CV so the test can see it.
+ */
+
+/* TODO: ideally this would be MGv2s_CODE */
+static int magic_copyattr_copy(pTHX_ SV *sv, MAGIC *mg, SV *nsv, const char *name, I32 namlen)
+{
+    PERL_UNUSED_ARG(name);
+    PERL_UNUSED_ARG(namlen);
+
+    SV *attrvalue = mg->mg_obj;
+
+    SV *keysv = newSVpvs_flags("red/", SVs_TEMP);
+    sv_catpvf(keysv, "%" UVxf, PTR2UV(nsv));
+
+    HV *applied_hv = get_hv("main::ATTRIBUTES_APPLIED", GV_ADD);
+    hv_store_ent(applied_hv, keysv, newSVsv(attrvalue), 0);
+
+    return 1;
+}
+
+static MGVTBL vtbl_copyattr = {
+    .svt_copy = &magic_copyattr_copy,
+};
+
 static void
 S_apply_attribute_red(pTHX_
     struct PerlAttributeTarget *target,
@@ -16,6 +44,12 @@ S_apply_attribute_red(pTHX_
             }
             else
                 sv_catpvf(keysv, "%" UVxf, PTR2UV(sv));
+
+            if (SvTYPE(sv) == SVt_PVCV && CvCLONE(sv)) {
+                MAGIC *mg = sv_magicext(sv, newSVsv(attrvalue),
+                        PERL_MAGIC_ext, &vtbl_copyattr, NULL, 0);
+                mg->mg_flags |= MGf_COPY; /* tell perl we have the svt_copy trigger */
+            }
             break;
         }
 
