@@ -158,6 +158,11 @@ typedef enum {
 #define padadd_FIELD            0x10       /* set PADNAMEt_FIELD */
 #define padfind_FIELD_OK        0x20       /* pad_findlex is permitted to see fields */
 
+/* add new flags in enums so they don't corrupt the #define macro namespace */
+enum {
+    padfind_NO_INNER_CAPTURE  = 0x40,      /* don't perform a CvOUTER capture into inner pads */
+};
+
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
  * active values */
