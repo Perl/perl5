@@ -2771,6 +2771,15 @@ p	|void	|pad_add_weakref|NN CV *func
 Adpx	|PADOFFSET|pad_alloc	|I32 optype				\
 				|U32 tmptype
 dp	|void	|pad_block_start|int full
+Adp	|PADOFFSET|pad_fetchmy_pvn					\
+				|NN const char *namepv			\
+				|STRLEN namelen 			\
+				|U32 flags				\
+				|NULLOK SV **svp
+Adp	|PADOFFSET|pad_fetchmy_sv					\
+				|NN SV *name				\
+				|U32 flags				\
+				|NULLOK SV **svp
 Adp	|PADOFFSET|pad_findmy_pv|NN const char *name			\
 				|U32 flags
 Adp	|PADOFFSET|pad_findmy_pvn					\

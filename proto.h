@@ -6135,6 +6135,24 @@ Perl_pad_block_start(pTHX_ int full)
     } STMT_END
 
 PERL_CALLCONV PADOFFSET
+Perl_pad_fetchmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags, SV **svp)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_PAD_FETCHMY_PVN        \
+    STMT_START { Perl_assert_aTHX; assert(namepv);     \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV PADOFFSET
+Perl_pad_fetchmy_sv(pTHX_ SV *name, U32 flags, SV **svp)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_PAD_FETCHMY_SV         \
+    STMT_START { Perl_assert_aTHX; assert(name);       \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV PADOFFSET
 Perl_pad_findmy_pv(pTHX_ const char *name, U32 flags)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
