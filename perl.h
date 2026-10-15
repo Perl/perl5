@@ -2799,7 +2799,6 @@ You probably want to be using L<C</INT2PTR>> instead.
 #ifdef USE_LONG_DOUBLE
 #  if LONG_DOUBLESIZE == DOUBLESIZE
 #    define LONG_DOUBLE_EQUALS_DOUBLE
-#    undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
 #endif
 
