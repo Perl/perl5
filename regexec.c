@@ -8843,124 +8843,124 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sv_setsv(sv_mrk, sv_yes_mark);
             }
 
-                /* execute the (?{...}) code block and do some basic
-                 * processing of the return value */
-                re_sv = S_run_code_block(aTHX_ rex, reginfo,
-                                orig_savestack_ix, logical, ARG1u(scan));
+            /* execute the (?{...}) code block and do some basic
+             * processing of the return value */
+            re_sv = S_run_code_block(aTHX_ rex, reginfo,
+                            orig_savestack_ix, logical, ARG1u(scan));
 
-                /* restore paren state */
-                regcp_restore(rex, ST.lastcp, &maxopenparen);
-                PL_curpm_under = PL_curpm;
-                PL_curpm = PL_reg_curpm;
+            /* restore paren state */
+            regcp_restore(rex, ST.lastcp, &maxopenparen);
+            PL_curpm_under = PL_curpm;
+            PL_curpm = PL_reg_curpm;
 
-                if (logical != 2) {
-                    if (logical == 1) {
-                        sw = !!re_sv;
-                        logical = 0;
-                    }
-                    PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol,
-                                    script_run_begin);
-                    /* NOTREACHED */
+            if (logical != 2) {
+                if (logical == 1) {
+                    sw = !!re_sv;
+                    logical = 0;
                 }
+                PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol,
+                                script_run_begin);
+                /* NOTREACHED */
+            }
 
-                /* only /(??{ ... })/  from now on */
-                logical = 0;
-                {
-                    /* extract RE object from returned value; compiling if
-                     * necessary */
+            /* only /(??{ ... })/  from now on */
+            logical = 0;
+            {
+                /* extract RE object from returned value; compiling if
+                 * necessary */
 
-                    if (SvTYPE(re_sv) == SVt_REGEXP) {
-                        re_sv = reg_temp_copy(NULL, re_sv);
-                    }
-                    else {
-                        U32 pm_flags = 0;
-                        SV *ret = (SV*)re_sv;
-
-                        if (SvUTF8(ret) && IN_BYTES) {
-                            /* In use 'bytes': make a copy of the octet
-                             * sequence, but without the flag on */
-                            STRLEN len;
-                            const char *const p = SvPV(ret, len);
-                            ret = newSVpvn_flags(p, len, SVs_TEMP);
-                        }
-                        if (rex->intflags & PREGf_USE_RE_EVAL)
-                            pm_flags |= PMf_USE_RE_EVAL;
-
-                        /* if we got here, it should be an engine which
-                         * supports compiling code blocks and stuff */
-                        assert(rex->engine && rex->engine->op_comp);
-                        assert(!(FLAGS(scan) & ~RXf_PMf_COMPILETIME));
-                        re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
-                                    rex->engine, NULL, NULL,
-                                    /* copy /msixn etc to inner pattern */
-                                    ARG2i(scan),
-                                    pm_flags);
-
-                        if (!(SvFLAGS(ret)
-                              & (SVs_TEMP | SVs_GMG | SVf_ROK))
-                         && (!SvPADTMP(ret) || SvREADONLY(ret))) {
-                            /* This isn't a first class regexp. Instead, it's
-                               caching a regexp onto an existing, Perl visible
-                               scalar.  */
-                            sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
-                        }
-                    }
-                    SAVEFREESV(re_sv);
-                    re = ReANY(re_sv);
+                if (SvTYPE(re_sv) == SVt_REGEXP) {
+                    re_sv = reg_temp_copy(NULL, re_sv);
                 }
+                else {
+                    U32 pm_flags = 0;
+                    SV *ret = (SV*)re_sv;
 
-                RXp_MATCH_COPIED_off(re);
-                RXp_SUBBEG(re) = RXp_SUBBEG(rex);
-                RXp_SUBLEN(re) = RXp_SUBLEN(rex);
-                RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
-                RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
-                RXp_LASTPAREN(re) = 0;
-                RXp_LASTCLOSEPAREN(re) = 0;
-                rei = RXi_GET(re);
-                DEBUG_EXECUTE_r(
-                    debug_start_match(re_sv, utf8_target, locinput,
-                                    reginfo->strend, "EVAL/GOSUB: Matching embedded");
-                );
-                startpoint = rei->program + 1;
-                EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
-                                             * close_paren only for GOSUB */
-                ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
+                    if (SvUTF8(ret) && IN_BYTES) {
+                        /* In use 'bytes': make a copy of the octet
+                         * sequence, but without the flag on */
+                        STRLEN len;
+                        const char *const p = SvPV(ret, len);
+                        ret = newSVpvn_flags(p, len, SVs_TEMP);
+                    }
+                    if (rex->intflags & PREGf_USE_RE_EVAL)
+                        pm_flags |= PMf_USE_RE_EVAL;
 
-                /* note we saved the paren state earlier:
-                ST.cp = regcppush(rex, 0, maxopenparen);
-                REGCP_SET(ST.lastcp);
-                */
-                /* and set maxopenparen to 0, since we are starting a "fresh" match */
-                maxopenparen = 0;
-                /* run the pattern returned from (??{...}) */
+                    /* if we got here, it should be an engine which
+                     * supports compiling code blocks and stuff */
+                    assert(rex->engine && rex->engine->op_comp);
+                    assert(!(FLAGS(scan) & ~RXf_PMf_COMPILETIME));
+                    re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
+                                rex->engine, NULL, NULL,
+                                /* copy /msixn etc to inner pattern */
+                                ARG2i(scan),
+                                pm_flags);
 
-              eval_recurse_doit: /* Share code with GOSUB below this line
-                            * At this point we expect the stack context to be
-                            * set up correctly */
+                    if (!(SvFLAGS(ret)
+                          & (SVs_TEMP | SVs_GMG | SVf_ROK))
+                     && (!SvPADTMP(ret) || SvREADONLY(ret))) {
+                        /* This isn't a first class regexp. Instead, it's
+                           caching a regexp onto an existing, Perl visible
+                           scalar.  */
+                        sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
+                    }
+                }
+                SAVEFREESV(re_sv);
+                re = ReANY(re_sv);
+            }
 
-                seen_nonregular = true;
+            RXp_MATCH_COPIED_off(re);
+            RXp_SUBBEG(re) = RXp_SUBBEG(rex);
+            RXp_SUBLEN(re) = RXp_SUBLEN(rex);
+            RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
+            RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
+            RXp_LASTPAREN(re) = 0;
+            RXp_LASTCLOSEPAREN(re) = 0;
+            rei = RXi_GET(re);
+            DEBUG_EXECUTE_r(
+                debug_start_match(re_sv, utf8_target, locinput,
+                                reginfo->strend, "EVAL/GOSUB: Matching embedded");
+            );
+            startpoint = rei->program + 1;
+            EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
+                                         * close_paren only for GOSUB */
+            ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
 
-                /* the new regexp might have a different is_utf8_pat than we do */
-                is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
+            /* note we saved the paren state earlier:
+            ST.cp = regcppush(rex, 0, maxopenparen);
+            REGCP_SET(ST.lastcp);
+            */
+            /* and set maxopenparen to 0, since we are starting a "fresh" match */
+            maxopenparen = 0;
+            /* run the pattern returned from (??{...}) */
 
-                ST.prev_rex = rex_sv;
-                ST.prev_curlyx = cur_curlyx;
-                rex_sv = re_sv;
-                S_set_reg_curpm(aTHX_ rex_sv, reginfo);
-                rex = re;
-                rexi = rei;
-                cur_curlyx = NULL;
-                ST.B = next;
-                ST.prev_eval = cur_eval;
-                cur_eval = st;
-                DEBUG_STACK_r({
-                    re_exec_indentf("EVAL/GOSUB: set cur_eval = %p; was %p\n",
-                        depth, cur_eval, ST.prev_eval);
-                });
-                /* now continue from first node in postoned RE */
-                PUSH_YES_STATE_GOTO(EVAL_postponed_A, startpoint, locinput,
-                                    loceol, script_run_begin);
-                NOT_REACHED; /* NOTREACHED */
+          eval_recurse_doit: /* Share code with GOSUB below this line
+                        * At this point we expect the stack context to be
+                        * set up correctly */
+
+            seen_nonregular = true;
+
+            /* the new regexp might have a different is_utf8_pat than we do */
+            is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
+
+            ST.prev_rex = rex_sv;
+            ST.prev_curlyx = cur_curlyx;
+            rex_sv = re_sv;
+            S_set_reg_curpm(aTHX_ rex_sv, reginfo);
+            rex = re;
+            rexi = rei;
+            cur_curlyx = NULL;
+            ST.B = next;
+            ST.prev_eval = cur_eval;
+            cur_eval = st;
+            DEBUG_STACK_r({
+                re_exec_indentf("EVAL/GOSUB: set cur_eval = %p; was %p\n",
+                    depth, cur_eval, ST.prev_eval);
+            });
+            /* now continue from first node in postoned RE */
+            PUSH_YES_STATE_GOTO(EVAL_postponed_A, startpoint, locinput,
+                                loceol, script_run_begin);
+            NOT_REACHED; /* NOTREACHED */
         }
 
         case EVAL_postponed_A: /* cleanup the A part after a
