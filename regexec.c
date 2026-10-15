@@ -8912,7 +8912,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
-                        reginfo->strend, "EVAL/GOSUB: Matching embedded");
+                        reginfo->strend, "deferred EVAL: Matching embedded");
                 );
                 startpoint = rei->program + 1;
                 ST.prev_rex = rex_sv;
