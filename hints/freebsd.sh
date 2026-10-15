@@ -374,6 +374,15 @@ EOCBU
   ;;
 esac
 
+# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=222258
+# kernel version bump 1300011 was to indicate fix for this
+# the fix was also merged to 12-stable in
+# https://cgit.freebsd.org/src/commit/?id=3fc4df5693d0a86142f2d0234f3c550893c3d11f
+# but I'm not sure it's worth the trouble
+if  [ $FREEBSD_KERNEL_VERSION -lt 1300011 ] then
+    d_renameat='undef'
+fi
+
 # This function on this box has weird behavior.  See
 # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=255646
 # This has allegedly been fixed, but we can't be sure because of
