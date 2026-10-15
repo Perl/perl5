@@ -8907,19 +8907,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 SAVEFREESV(re_sv);
                 re = ReANY(re_sv);
 
-            RXp_MATCH_COPIED_off(re);
-            RXp_SUBBEG(re) = RXp_SUBBEG(rex);
-            RXp_SUBLEN(re) = RXp_SUBLEN(rex);
-            RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
-            RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
-            RXp_LASTPAREN(re) = 0;
-            RXp_LASTCLOSEPAREN(re) = 0;
-            rei = RXi_GET(re);
-            DEBUG_EXECUTE_r(
-                debug_start_match(re_sv, utf8_target, locinput,
-                                reginfo->strend, "EVAL/GOSUB: Matching embedded");
-            );
-            startpoint = rei->program + 1;
+                RXp_MATCH_COPIED_off(re);
+                RXp_SUBBEG(re) = RXp_SUBBEG(rex);
+                RXp_SUBLEN(re) = RXp_SUBLEN(rex);
+                RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
+                RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
+                RXp_LASTPAREN(re) = 0;
+                RXp_LASTCLOSEPAREN(re) = 0;
+                rei = RXi_GET(re);
+                DEBUG_EXECUTE_r(
+                    debug_start_match(re_sv, utf8_target, locinput,
+                        reginfo->strend, "EVAL/GOSUB: Matching embedded");
+                );
+                startpoint = rei->program + 1;
                 ST.prev_rex = rex_sv;
                 rex_sv = re_sv;
                 rex = re;
