@@ -1695,18 +1695,19 @@ Perl_re_intuit_start(pTHX_
          * whole rest of the string */
 
         if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            /* Note: for a long time, the second argument here was
-             *    (prog->minlen ? cl_l : 0)
-             * but it wasn't clear what the purpose of that check was
-             * and nothing in the test harness exercised it.
-             * (Old, old comments did refer to \b or \B and lookahead,
-             * please refer to the git history if those are needed.)
+            /* Keep in mind that endpos limits the scan, not the match itself.
+             * Even when minlen == 0, a zero-width start class such as \b
+             * must examine the character at rx_origin. Using rx_origin
+             * as the limit would skip that check and treat this position
+             * as end of string (GH#24944).
              *
-             * It did eventually turn out to be involved in a bug
-             * (GH#24944) where this failed to match as it should:
-             *     "a" =~ /\A^\ba*\z/m
-             * That was fixed - and nothing has thus far been seen to
-             * break - by just passing cl_l as the second argument. */
+             * Allow the scan to examine cl_l characters, clamped to the
+             * real string end so empty matches there are preserved.
+             * \b or other ZW assertions may report a false positive at this
+             * artificial endpoint but that is harmless here as a successful
+             * scan leaves rx_origin unchanged, and the full matcher
+             * checks the pattern a second time before returning success.
+             */
             endpos = HOP3clim(rx_origin, cl_l, strend);
         else if (prog->float_substr || prog->float_utf8) {
             rx_max_float = HOP3c(check_at, -start_shift, strbeg);
