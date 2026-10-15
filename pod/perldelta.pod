@@ -506,6 +506,13 @@ incorrectly truncated.
 
 =item *
 
+A regular expression performing a case insensitive match with Unicode
+rules could fail to match correctly when the ability of folding
+characters to both decrease I<minlen> and increase I<maxlen> at the
+same time was not taken into account.
+
+=item *
+
 The offset of a \K is no longer narrowed on rollback at an offset >2GiB.
 
 =item *

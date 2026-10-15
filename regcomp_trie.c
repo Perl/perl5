@@ -884,11 +884,16 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 trie->minlen = minchars;
                 trie->maxlen = maxchars;
             }
-            else if (minchars < trie->minlen) {
-                trie->minlen = minchars;
-            }
-            else if (maxchars > trie->maxlen) {
-                trie->maxlen = maxchars;
+            else {
+                /* The same piece of a pattern could alter both minlen and maxlen.
+                 * For example, in /(?iu)(?:AASAS|SSASSA.../
+                 *     AASAS first gives us minlen == maxlen == 5
+                 *     SSASSA could be 4, 5, or 6 characters, so minlen drops to
+                 *         4 and maxlen increases to 6. */
+                if (minchars < trie->minlen)
+                    trie->minlen = minchars;
+                if (maxchars > trie->maxlen)
+                    trie->maxlen = maxchars;
             }
             {
                 U32 dupe = trie->states[state].wordnum;
