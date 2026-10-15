@@ -8764,8 +8764,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         {
             REGEXP *re_sv;
-            regexp *re;
-            regexp_internal *rei;
             regnode *startpoint;
             U32 arg;
 
@@ -8779,9 +8777,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             } else {
                 nochange_depth = 0;
             }
-            re_sv = rex_sv;
-            re = rex;
-            rei = rexi;
             startpoint = scan + ARG2i(scan);
             EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
@@ -8814,6 +8809,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Save all the positions seen so far. */
             ST.cp = regcppush(rex, 0, maxopenparen);
             REGCP_SET(ST.lastcp);
+            ST.prev_rex = rex_sv;
 
             /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
@@ -8866,6 +8862,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* only /(??{ ... })/  from now on */
             logical = 0;
             {
+                regexp *re;
+                regexp_internal *rei;
+
                 /* extract RE object from returned value; compiling if
                  * necessary */
 
@@ -8907,7 +8906,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
                 SAVEFREESV(re_sv);
                 re = ReANY(re_sv);
-            }
 
             RXp_MATCH_COPIED_off(re);
             RXp_SUBBEG(re) = RXp_SUBBEG(rex);
@@ -8922,6 +8920,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                 reginfo->strend, "EVAL/GOSUB: Matching embedded");
             );
             startpoint = rei->program + 1;
+                ST.prev_rex = rex_sv;
+                rex_sv = re_sv;
+                rex = re;
+                rexi = rei;
+            }
+
             EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
                                          * close_paren only for GOSUB */
             ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
@@ -8941,14 +8945,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             seen_nonregular = true;
 
             /* the new regexp might have a different is_utf8_pat than we do */
-            is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
+            is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 
-            ST.prev_rex = rex_sv;
             ST.prev_curlyx = cur_curlyx;
-            rex_sv = re_sv;
             S_set_reg_curpm(aTHX_ rex_sv, reginfo);
-            rex = re;
-            rexi = rei;
             cur_curlyx = NULL;
             ST.B = next;
             ST.prev_eval = cur_eval;
