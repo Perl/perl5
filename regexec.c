@@ -1813,8 +1813,9 @@ Perl_re_intuit_start(pTHX_
 
         if (rx_origin != s) {
             DEBUG_EXECUTE_r(re_printf(
-                        "  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(rx_origin - strbeg), (long)(s - strbeg))
+                        "  STCLASS scan returned offset %ld"
+                        " (rx_origin kept at %ld)\n",
+                                  (long)(s - strbeg), (long)(rx_origin - strbeg))
                    );
         }
         else {
