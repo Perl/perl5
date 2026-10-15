@@ -395,9 +395,13 @@ Perl_newSV_type(pTHX_ const svtype type)
     new_SV(sv);
     SvFLAGS(sv) = type;
     assert(!SvOK(sv));
-    /* Clear the sv_u slot, regardless of what
-     * might actually be stored inside it. */
+    /* Clear all bits in the sv_u, regardless of what
+     * might actually get stored inside it. */
+#if PTRSIZE >= IVSIZE
     sv->sv_u.svu_rv = NULL;
+#else
+    sv->sv_u.svu_iv = 0;
+#endif
 
     void*      new_body;
     const struct body_details *type_details;
