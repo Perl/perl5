@@ -8757,13 +8757,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #define ST st->u.eval
 #define CUR_EVAL cur_eval->u.eval
 
-        {
-            REGEXP *re_sv;
-            regnode *startpoint;
-            U32 arg;
-
         case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-            arg = ARG1u(scan);
+        {
+            U32 arg = ARG1u(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     croak(
@@ -8772,7 +8768,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             } else {
                 nochange_depth = 0;
             }
-            startpoint = scan + ARG2i(scan);
+            scan += ARG2i(scan);
             EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
              *
@@ -8809,6 +8805,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
             /* NOTREACHED */
+        }
 
         case EVAL:  /*   /(?{...})B/   /(??{A})B/  and  /(?(?{...})X|Y)B/   */
             if (logical == 2 && cur_eval && cur_eval->locinput == locinput) {
@@ -8834,9 +8831,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sv_setsv(sv_mrk, sv_yes_mark);
             }
 
+            {
             /* execute the (?{...}) code block and do some basic
              * processing of the return value */
-            re_sv = S_run_code_block(aTHX_ rex, reginfo,
+            REGEXP *re_sv = S_run_code_block(aTHX_ rex, reginfo,
                             orig_savestack_ix, logical, ARG1u(scan));
 
             /* restore paren state */
@@ -8856,10 +8854,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             /* only /(??{ ... })/  from now on */
             logical = 0;
-            {
-                regexp *re;
-                regexp_internal *rei;
-
                 /* extract RE object from returned value; compiling if
                  * necessary */
 
@@ -8900,7 +8894,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
                 }
                 SAVEFREESV(re_sv);
-                re = ReANY(re_sv);
+                regexp *re = ReANY(re_sv);
 
                 RXp_MATCH_COPIED_off(re);
                 RXp_SUBBEG(re) = RXp_SUBBEG(rex);
@@ -8909,12 +8903,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
                 RXp_LASTPAREN(re) = 0;
                 RXp_LASTCLOSEPAREN(re) = 0;
-                rei = RXi_GET(re);
+                regexp_internal *rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
                         reginfo->strend, "deferred EVAL: Matching embedded");
                 );
-                startpoint = rei->program + 1;
+                scan = rei->program + 1;
                 ST.prev_rex = rex_sv;
                 rex_sv = re_sv;
                 rex = re;
@@ -8953,10 +8947,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     depth, cur_eval, ST.prev_eval);
             });
             /* now continue from first node in postoned RE */
-            PUSH_YES_STATE_GOTO(EVAL_postponed_A, startpoint, locinput,
+            PUSH_YES_STATE_GOTO(EVAL_postponed_A, scan, locinput,
                                 loceol, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
-        }
 
         case EVAL_postponed_A: /* cleanup the A part after a
                                   successful (??{A})B */
