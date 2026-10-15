@@ -1069,19 +1069,22 @@ S_ssc_clear_locale(regnode_ssc *ssc)
 U32
 Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                    UV *min_subtract, bool *unfolded_multi_char,
-                   U32 flags, regnode *val, U32 depth)
+                   U32 flags, regnode *val, U32 depth,
+                   bool allow_non_folding, bool merge_first_two_only)
 {
     PERL_ARGS_ASSERT_JOIN_EXACT;
 
-    /* Merge several consecutive EXACTish nodes into one. */
+    /* Merge consecutive EXACTish nodes into one.  The initial study leaves
+     * non-folding pieces separate so fixed-substring analysis can see them.
+     * The later cleanup allows them to join, one pair per study iteration. */
 
     regnode *n = regnext(scan);
-    U32 stringok = 1;
+    U32 stringok = allow_non_folding || ! ANY_EXACT_NF(OP(scan));
     regnode *next = REGNODE_AFTER_varies(scan);
     U32 stopnow = 0;
+    regnode *stop = scan;
 #ifdef DEBUGGING
     U32 merged = 0;
-    regnode *stop = scan;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #else
     PERL_UNUSED_ARG(depth);
@@ -1099,13 +1102,27 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
      * EXACT ones that are mergeable to the current one. */
     while (    n
            && (    REGNODE_TYPE(OP(n)) == NOTHING
-               || (stringok && REGNODE_TYPE(OP(n)) == EXACT))
+               || (stringok && REGNODE_TYPE(OP(n)) == EXACT
+                   && (allow_non_folding
+                       || ! ANY_EXACT_NF(OP(n)))))
            && NEXT_OFF(n)
            && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX)
     {
 
-        if (OP(n) == TAIL || n > next)
+        if (OP(n) == TAIL)
             stringok = 0;
+        else if (n > next) {
+            regnode *gap = next;
+
+            /* A previous merge can leave padding between scan and n.
+             * Only cross storage that a join has marked as consumed. */
+            while (gap < n && OP(gap) == OPTIMIZED)
+            {
+                gap = REGNODE_AFTER_varies(gap);
+            }
+            if (gap != n)
+                stringok = 0;
+        }
         if (REGNODE_TYPE(OP(n)) == NOTHING) {
             DEBUG_PEEP("skip:", n, depth, 0);
             NEXT_OFF_set(scan, NEXT_OFF(scan) + NEXT_OFF(n));
@@ -1127,13 +1144,35 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
 
-            /* Joining something that requires UTF-8 with something that
-             * doesn't, means the result requires UTF-8. */
-            if (OP(scan) == EXACT && (OP(n) == EXACT_REQ8)) {
-                OP(scan) = EXACT_REQ8;
+            /* Preserve the non-folding marker only if both pieces have it, and
+             * preserve the UTF-8 requirement if either piece has it. */
+            if ((IS_EXACT_OR_NF(OP(scan))
+                 || IS_EXACT_REQ8_OR_NF_REQ8(OP(scan)))
+                && (IS_EXACT_OR_NF(OP(n))
+                    || IS_EXACT_REQ8_OR_NF_REQ8(OP(n))))
+            {
+                const bool requires_utf8 =
+                    IS_EXACT_REQ8_OR_NF_REQ8(OP(scan))
+                    || IS_EXACT_REQ8_OR_NF_REQ8(OP(n));
+                const bool both_non_folding =
+                    ANY_EXACT_NF(OP(scan)) && ANY_EXACT_NF(OP(n));
+
+                OP(scan) = both_non_folding
+                    ? (requires_utf8 ? EXACT_NF_REQ8 : EXACT_NF)
+                    : (requires_utf8 ? EXACT_REQ8 : EXACT);
             }
-            else if (OP(scan) == EXACT_REQ8 && (OP(n) == EXACT)) {
-                ;   /* join is compatible, no need to change OP */
+            /* Non-folding text can join a folded node in either direction.
+             * Use the folded node's semantics and retain any UTF-8
+             * requirement.  Only globally non-folding text gets this marker. */
+            else if (ANY_EXACT_NF(OP(scan))) {
+                const bool requires_utf8 = OP(scan) == EXACT_NF_REQ8;
+                OP(scan) = OP(n);
+                if (requires_utf8 && OP(scan) == EXACTFU)
+                    OP(scan) = EXACTFU_REQ8;
+            }
+            else if (ANY_EXACT_NF(OP(n))) {
+                if (OP(n) == EXACT_NF_REQ8 && OP(scan) == EXACTFU)
+                    OP(scan) = EXACTFU_REQ8;
             }
             else if ((OP(scan) == EXACTFU) && (OP(n) == EXACTFU_REQ8)) {
                 OP(scan) = EXACTFU_REQ8;
@@ -1237,11 +1276,9 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             setSTR_LEN(scan, (U8)(STR_LEN(scan) + STR_LEN(n)));
             /* Now we can overwrite *n : */
             Move(STRING(n), STRING(scan) + oldl, STR_LEN(n), char);
-#ifdef DEBUGGING
             stop = next - 1;
-#endif
             n = nnext;
-            if (stopnow) break;
+            if (stopnow || merge_first_two_only) break;
         }
 
 #ifdef EXPERIMENTAL_INPLACESCAN
@@ -1272,7 +1309,10 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
      * this final joining, sequences could have been split over boundaries, and
      * hence missed).  The sequences only happen in folding, hence for any
      * non-EXACT EXACTish node */
-    if (OP(scan) != EXACT && OP(scan) != EXACT_REQ8 && OP(scan) != EXACTL) {
+    if (! IS_EXACT_OR_NF(OP(scan))
+        && ! IS_EXACT_REQ8_OR_NF_REQ8(OP(scan))
+        && OP(scan) != EXACTL)
+    {
         U8* s0 = (U8*) STRING(scan);
         U8* s = s0;
         U8* s_end = s0 + STR_LEN(scan);
@@ -1460,9 +1500,9 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         }
     }
 
-#ifdef DEBUGGING
-    /* Allow dumping but overwriting the collection of skipped
-     * ops and/or strings with fake optimized ops */
+    /* Mark consumed storage in all builds.  Later pairwise joins must be
+     * able to cross this padding without interpreting old string bytes as
+     * node headers.  This also makes the program safe to dump. */
     n = REGNODE_AFTER_varies(scan);
     while (n <= stop) {
         OP(n) = OPTIMIZED;
@@ -1470,7 +1510,6 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         NEXT_OFF_set(n, 0);
         n++;
     }
-#endif
     DEBUG_OPTIMISE_r(if (merged){DEBUG_PEEP("finl", scan, depth, 0);});
     return stopnow;
 }
@@ -1507,6 +1546,8 @@ Perl_study_chunk(pTHX_
     /* vars about the regnodes we are working with */
     regnode *scan = *scanp; /* the current opcode we are inspecting */
     regnode *next = NULL;   /* the next opcode beyond scan, tmp var */
+    regnode *prev_exact = NULL; /* Previous EXACTish node in this scan */
+    bool merge_left = false;
     regnode *first_non_open = scan; /* FIXME: should this init to NULL?
                                        the first non open regop, if the init
                                        val IS an OPEN then we will skip past
@@ -1551,6 +1592,8 @@ Perl_study_chunk(pTHX_
     }
 
   fake_study_recurse:
+    prev_exact = NULL;
+    merge_left = false;
     DEBUG_r(
         RExC_study_chunk_recursed_count++;
     );
@@ -1590,23 +1633,24 @@ Perl_study_chunk(pTHX_
          * enframed handling for a GOSUB: the outermost level will handle it.
          */
         bool mutate_ok = was_mutate_ok && !(frame && frame->in_gosub);
+        if (REGNODE_TYPE(OP(scan)) != EXACT) {
+            prev_exact = NULL;
+            merge_left = false;
+        }
         /* Peephole optimizer: */
         DEBUG_STUDYDATA("Peep", data, depth, is_inf, min, stopmin, delta);
         DEBUG_PEEP("Peep", scan, depth, flags);
 
-
-        /* The reason we do this here is that we need to deal with things like
-         * /(?:f)(?:o)(?:o)/ which cant be dealt with by the normal EXACT
-         * parsing code, as each (?:..) is handled by a different invocation of
-         * reg() -- Yves
-         */
+        /* Folded EXACT nodes need joining before their length is analyzed.
+         * Non-folding nodes are left for the pairwise join below. */
         if (REGNODE_TYPE(OP(scan)) == EXACT
             && OP(scan) != LEXACT
             && OP(scan) != LEXACT_REQ8
-            && mutate_ok
-        ) {
-            join_exact(pRExC_state, scan, &min_subtract, &unfolded_multi_char,
-                    0, NULL, depth + 1);
+            && mutate_ok)
+        {
+            join_exact(pRExC_state, scan, &min_subtract,
+                       &unfolded_multi_char, 0, NULL, depth + 1,
+                       false, false);
         }
 
         /* Follow the next-chain of the current node and optimize
@@ -1908,14 +1952,15 @@ Perl_study_chunk(pTHX_
                             necessarily mean the first node is the start of the
                             alternation).
 
-                            TRIE_TYPE(X) is a define which maps the optype to a
-                            trietype.
+                            TRIE_TYPE(X) maps an opcode to a trie type.
 
                                 optype          |  trietype
                                 ----------------+-----------
                                 NOTHING         | NOTHING
                                 EXACT           | EXACT
                                 EXACT_REQ8      | EXACT
+                                EXACT_NF       | EXACT_NF
+                                EXACT_NF_REQ8  | EXACT_NF_REQ8
                                 EXACTFU         | EXACTFU
                                 EXACTFU_REQ8    | EXACTFU
                                 EXACTFUP        | EXACTFU
@@ -1925,22 +1970,6 @@ Perl_study_chunk(pTHX_
 
 
                         */
-#define TRIE_TYPE(X) ( ( NOTHING == (X) )                                   \
-                       ? NOTHING                                            \
-                       : ( EXACT == (X) || EXACT_REQ8 == (X) )             \
-                         ? EXACT                                            \
-                         : (     EXACTFU == (X)                             \
-                              || EXACTFU_REQ8 == (X)                       \
-                              || EXACTFUP == (X) )                          \
-                           ? EXACTFU                                        \
-                             : ( EXACTFAA == (X) )                          \
-                               ? EXACTFAA                                   \
-                             : ( EXACTL == (X) )                            \
-                               ? EXACTL                                     \
-                             : ( EXACTFLU8 == (X) )                         \
-                               ? EXACTFLU8                                  \
-                             : 0 )
-
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode * const noper = REGNODE_AFTER( cur );
@@ -1949,6 +1978,17 @@ Perl_study_chunk(pTHX_
                             regnode * const noper_next = regnext( noper );
                             U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
                             U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) :0;
+                            U8 noper_branch_trietype = noper_trietype == NOTHING
+                                ? noper_next_type
+                                    ? TRIE_COMPATIBLE_TYPE(noper_trietype,
+                                                           noper_next_trietype)
+                                    : NOTHING
+                                : noper_trietype;
+                            U8 compatible_trietype = trietype
+                                ? TRIE_COMPATIBLE_TYPE(trietype, noper_trietype)
+                                : noper_trietype == NOTHING
+                                    ? NOTHING
+                                    : noper_branch_trietype;
                             const bool noper_next_is_trie =
                                 noper_next && noper_next < tail
                                 && REGNODE_TYPE(noper_next_type) == TRIE;
@@ -1973,19 +2013,15 @@ Perl_study_chunk(pTHX_
                                 }
                                 re_printf("(First == %d,Last == %d,Cur == %d,tt == %s,ntt == %s,nntt == %s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
-                                   REGNODE_NAME(trietype), REGNODE_NAME(noper_trietype), REGNODE_NAME(noper_next_trietype)
+                                   REGNODE_NAME(trietype), REGNODE_NAME(noper_trietype),
+                                   REGNODE_NAME(noper_next_trietype)
                                 );
                             });
 
                             /* Is noper a trieable nodetype that can be merged
                              * with the current trie (if there is one)? */
                             if ( noper_trietype
-                                  &&
-                                  (
-                                        ( noper_trietype == NOTHING )
-                                        || ( trietype == NOTHING )
-                                        || ( trietype == noper_trietype )
-                                  )
+                                  && compatible_trietype
                                   /* Do not replace a common first node when
                                    * its branches continue with a different
                                    * trie type.  The octet-trie construction
@@ -1996,7 +2032,9 @@ Perl_study_chunk(pTHX_
                                    * attached to that trie. */
                                   && !noper_next_is_trie
                                   && ( !noper_next_trietype
-                                       || noper_next_trietype == noper_trietype
+                                       || TRIE_COMPATIBLE_TYPE(
+                                                noper_trietype,
+                                                noper_next_trietype)
                                        || noper_trietype == NOTHING )
 #ifdef NOJUMPTRIE
                                   && noper_next >= tail
@@ -2017,7 +2055,9 @@ Perl_study_chunk(pTHX_
 #endif
 
                                         if ( noper_next_trietype ) {
-                                            trietype = noper_next_trietype;
+                                            trietype = TRIE_COMPATIBLE_TYPE(
+                                                noper_trietype,
+                                                noper_next_trietype);
                                         } else if (noper_next_type)  {
                                             /* a NOTHING regop is 1 regop wide.
                                              * We need at least two for a trie
@@ -2028,8 +2068,7 @@ Perl_study_chunk(pTHX_
                                         trietype = noper_trietype;
                                     }
                                 } else {
-                                    if ( trietype == NOTHING )
-                                        trietype = noper_trietype;
+                                    trietype = compatible_trietype;
                                     prev = cur;
                                 }
                                 if (first) {
@@ -2055,7 +2094,8 @@ Perl_study_chunk(pTHX_
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail,
                                                 word_count, octet_count,
-                                                trietype, depth+1 );
+                                                TRIE_FINAL_TYPE(trietype),
+                                                depth+1 );
                                     prev = NULL; /* note: we clear/update
                                                     first, trietype etc below,
                                                     so we dont do it here */
@@ -2073,7 +2113,7 @@ Perl_study_chunk(pTHX_
                                     word_count = 1;
                                     octet_count = noper_octets;
                                     first = cur;
-                                    trietype = noper_trietype;
+                                    trietype = noper_branch_trietype;
                                 } else if (first) {
                                     /* if we already saw a first but the
                                      * current node is not triable then we have
@@ -2101,7 +2141,8 @@ Perl_study_chunk(pTHX_
                                  * outside of the loop */
                                 made = make_trie( pRExC_state, startbranch,
                                                  first, scan, tail, word_count,
-                                                 octet_count, trietype,
+                                                 octet_count,
+                                                 TRIE_FINAL_TYPE(trietype),
                                                  depth+1 );
 #ifdef TRIE_STUDY_OPT
                                 if ( ((made == MADE_EXACT_TRIE)
@@ -2345,11 +2386,16 @@ Perl_study_chunk(pTHX_
              * with the mask set to the complement of the bit that differs
              * between upper and lower case, and the lowest code point of the
              * pair (which the '&' forces) */
+            /* Keep the folded node intact when cleanup can join it to the
+             * preceding literal or the following non-folding node. */
             if (     bytelen == 1
                 &&   isALPHA_A(*s)
                 &&  (         OP(scan) == EXACTFAA
                      || (     OP(scan) == EXACTFU
                          && ! HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(*s)))
+                &&   !(regnext(scan)
+                       && ANY_EXACT_NF(OP(regnext(scan))))
+                &&   !merge_left
                 &&   mutate_ok
             ) {
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
@@ -3685,6 +3731,40 @@ Perl_study_chunk(pTHX_
         else if (OP(scan) == REGEX_SET) {
             croak("panic: %s regnode should be resolved"
                              " before optimization", REGNODE_NAME(REGEX_SET));
+        }
+
+        /* Record fixed substrings and lengths before absorbing this node.
+         * Once a non-folding piece has joined its predecessor, keep trying to
+         * join left on later iterations.  Its opcode may now be folded, but
+         * the next compatible piece belongs in the same literal. */
+        if (REGNODE_TYPE(OP(scan)) == EXACT) {
+            const bool scan_is_non_folding = ANY_EXACT_NF(OP(scan));
+            if (mutate_ok && prev_exact
+                && (merge_left || scan_is_non_folding)
+                && OP(prev_exact) != LEXACT
+                && OP(prev_exact) != LEXACT_REQ8
+                && OP(scan) != LEXACT
+                && OP(scan) != LEXACT_REQ8)
+            {
+                regnode * const prev = prev_exact;
+                regnode * const scan_next = regnext(scan);
+                join_exact(pRExC_state, prev, &min_subtract,
+                           &unfolded_multi_char, 0, NULL, depth + 1,
+                           true, true);
+                if (regnext(prev) == scan_next) {
+                    scan = prev;
+                    prev_exact = prev;
+                    merge_left = merge_left || scan_is_non_folding;
+                }
+                else {
+                    prev_exact = scan;
+                    merge_left = scan_is_non_folding;
+                }
+            }
+            else {
+                prev_exact = scan;
+                merge_left = scan_is_non_folding;
+            }
         }
 
         /* Else: zero-length, ignore. */

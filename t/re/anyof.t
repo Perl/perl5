@@ -717,8 +717,8 @@ my @tests = (
     '(?8)(?i)[\x{410}]' => 'EXACTFU_REQ8 <\x{430}>',
     '(?8)(?i)[\x{399}]' => 'EXACTFU_REQ8 <\x{3b9}>',
     '(?8)(?i)[\x{345}\x{399}\x{3B9}\x{1FBE}]' => 'EXACTFU_REQ8 <\x{3b9}>',
-    '(?i)[\x{2b9}]' => 'EXACT_REQ8 <\x{2b9}>',           # Doesn't participate in a fold
-    '(?8)(?i)[\x{2b9}]' => 'EXACT_REQ8 <\x{2b9}>',
+    '(?i)[\x{2b9}]' => 'EXACT_NF_REQ8 <\x{2b9}>',      # Doesn't participate in a fold
+    '(?8)(?i)[\x{2b9}]' => 'EXACT_NF_REQ8 <\x{2b9}>',
     '(?i)[\x{2bc}]' => 'EXACTFU_REQ8 <\x{2bc}>', # Part of a multi-char fold, ASCII component
     '(?i)[\x{390}]' => 'EXACTFU_REQ8 <\x{3b9}\x{308}\x{301}>', # Part of a multi-char fold, no ASCII component
 
@@ -735,6 +735,9 @@ my @tests = (
     '(?i)[\x{FB06}]' => 'EXACTFU <st>',
 
     '[a][b]' => 'EXACT <ab>',
+    '(?i)[:][\x{f7}]' => 'EXACT_NF <:\x{f7}>',
+    '(?i)[:][\x{2029}]' => 'EXACT_NF_REQ8 <:\x{2029}>',
+    '(?i)[\x{2029}][:]' => 'EXACT_NF_REQ8 <\x{2029}:>',
     '[a]\x{100}' => 'EXACT_REQ8 <a\x{100}>',
     '(?8)[\x{100}]a' => 'EXACT_REQ8 <\x{100}a>',
     '(?i)[b][c]' => 'EXACTFU <bc>',
@@ -842,8 +845,8 @@ for my $char (@single_chars_to_test) {
                         $op = ($charset eq 'l')
                                 ? 'EXACTL'
                                 : ($cp < 256)
-                                ? 'EXACT'
-                                : 'EXACT_REQ8';
+                                ? ($fold ? 'EXACT_NF' : 'EXACT')
+                                : ($fold ? 'EXACT_NF_REQ8' : 'EXACT_REQ8');
                     }
                     else {
                         $op = ($charset eq 'aa')

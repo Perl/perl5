@@ -9,6 +9,12 @@ my @tests=(
   'q'=>'[q]',
   "path_sep:\t8490" => '^(\\S{1,9}):\\s*(\\d+)$',
   '' => '(?(DEFINE)(?<foo>foo))(?(DEFINE)(?<bar>(?&foo)bar))(?(DEFINE)(?<baz>(?&bar)baz))(?(DEFINE)(?<bop>(?&baz)bop))',
+  'xfoo_bar_bazfoo_bar_baz' => '/x(?:foo_bar_baz|bloop_er)foo_bar_baz/i',
+  'xfoo_bar_bazfoo_bar_baz' => 'x(?:foo_bar_baz|bloop_er)foo_bar_baz',
+  'a_word' => '/foo|bar|a_word|_qux/i',
+  '_' => '/_|#/i',
+  '\x{00DF}_' => '/(?a:[\x{1E9E}_]_)/i',
+  '_a' => '/_a|_b/i',
 );
 while (@tests) {
     my ($str,$pat)=splice @tests,0,2;

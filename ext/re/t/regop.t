@@ -55,7 +55,7 @@ foreach my $testout ( @tests ) {
 # that the tests for this result set are finished.
 # If you add a test make sure you update $NUM_SECTS
 # the commented output is just for legacy/debugging purposes
-BEGIN{ $NUM_SECTS= 8 }
+BEGIN{ $NUM_SECTS= 14 }
 
 __END__
 #Compiling REx "X(A|[B]Q||C|D)Y"
@@ -314,3 +314,46 @@ minlen 0
 #Match successful!
 %MATCHED%
 #Freeing REx: "(?(DEFINE)(?<foo>foo))(?(DEFINE)(?<bar>(?&foo)bar))(?(DEFINE"...
+---
+#Compiling REx "x(?:foo_bar_baz|bloop_er)foo_bar_baz"
+TRIE-EXACTFU
+<foo_bar_baz>
+<bloop_er>
+EXACTFU <foo_bar_baz>
+%MATCHED%
+---
+#Compiling REx "x(?:foo_bar_baz|bloop_er)foo_bar_baz"
+EXACT <x>
+TRIE-EXACT
+<foo_bar_baz>
+<bloop_er>
+EXACT <foo_bar_baz>
+%MATCHED%
+---
+#Compiling REx "foo|bar|a_word|_qux"
+TRIE-EXACTFU
+<foo>
+<bar>
+<a_word>
+<_qux>
+stclass AHOCORASICK-EXACTFU
+%MATCHED%
+---
+#Compiling REx "_|#"
+TRIE-EXACT
+<_>
+<#>
+%MATCHED%
+---
+#Compiling REx "(?a:[\x{1E9E}_]_)"
+TRIE-EXACTFU
+<ss>
+<_>
+EXACT_NF <_>
+%MATCHED%
+---
+#Compiling REx "_a|_b"
+TRIE-EXACTFU
+<_a>
+<_b>
+%MATCHED%
