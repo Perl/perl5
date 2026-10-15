@@ -8832,31 +8832,31 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
             {
-            /* execute the (?{...}) code block and do some basic
-             * processing of the return value */
-            REGEXP *re_sv = S_run_code_block(aTHX_ rex, reginfo,
-                            orig_savestack_ix, logical, ARG1u(scan));
+                /* execute the (?{...}) code block and do some basic
+                 * processing of the return value */
+                REGEXP *re_sv = S_run_code_block(aTHX_ rex, reginfo,
+                                orig_savestack_ix, logical, ARG1u(scan));
 
-            /* restore paren state */
-            regcp_restore(rex, ST.lastcp, &maxopenparen);
-            PL_curpm_under = PL_curpm;
-            PL_curpm = PL_reg_curpm;
+                /* restore paren state */
+                regcp_restore(rex, ST.lastcp, &maxopenparen);
+                PL_curpm_under = PL_curpm;
+                PL_curpm = PL_reg_curpm;
 
-            if (logical != 2) {
-                if (logical == 1) {
-                    sw = !!re_sv;
-                    logical = 0;
+                if (logical != 2) {
+                    if (logical == 1) {
+                        sw = !!re_sv;
+                        logical = 0;
+                    }
+                    PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol,
+                                    script_run_begin);
+                    /* NOTREACHED */
                 }
-                PUSH_STATE_GOTO(EVAL_B, next, locinput, loceol,
-                                script_run_begin);
-                /* NOTREACHED */
-            }
 
-            /* only /(??{ ... })/  from now on */
-            logical = 0;
+                /* only /(??{ ... })/  from now on */
+                logical = 0;
+
                 /* extract RE object from returned value; compiling if
                  * necessary */
-
                 if (SvTYPE(re_sv) == SVt_REGEXP) {
                     re_sv = reg_temp_copy(NULL, re_sv);
                 }
@@ -8893,6 +8893,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
                     }
                 }
+
                 SAVEFREESV(re_sv);
                 regexp *re = ReANY(re_sv);
 
