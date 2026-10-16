@@ -108,6 +108,10 @@ includes their possible folds.  They do not use the shift tables, because
 folding can change encoded lengths.  Locale-dependent folding uses the
 existing scanner.
 
+The scanner also reduces the cost of tracking match positions, especially
+for case-sensitive matching against non-UTF-8 targets, and avoids repeated
+alignment checks while finding a rejected block of octets.
+
 =back
 
 =head1 Modules and Pragmata
