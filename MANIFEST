@@ -5986,6 +5986,7 @@ Porting/acknowledgements.pl			Generate perldelta acknowledgements text
 Porting/add-package.pl				Add/Update CPAN modules that are part of Core
 Porting/add-pod-file				Utility to add new pod/*.pod file to core distribution
 Porting/bench.pl				Run benchmarks against t/perf/benchmarks
+Porting/bench-trie.pl				Compare trie corpus scans across Perl builds
 Porting/bisect.pl				A tool to make bisecting easy
 Porting/bisect-example.sh			Example script to use with git bisect run
 Porting/bisect-runner.pl			Tool to be called by git bisect run
@@ -6759,6 +6760,8 @@ t/re/subst_wamp.t			See if substitution works with $& present
 t/re/substT.t				See if substitution works with -T
 t/re/trie_bench.pl			Shared trie benchmark and regression cases
 t/re/trie_bench.t			Trie benchmark regression tests
+t/re/trie_bench_corpus.pl		Frozen corpora for trie scanning benchmarks
+t/re/trie_bench_corpus.t		Test trie corpus generation and scan validation
 t/re/trie_byte.t			Test byte-oriented trie construction
 t/re/uniprops01.t			Test unicode \p{} regex constructs
 t/re/uniprops02.t			Test unicode \p{} regex constructs
