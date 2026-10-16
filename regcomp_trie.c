@@ -2141,9 +2141,9 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         SvREFCNT_dec(first_folds);
         DEBUG_TRIE_COMPILE_r(S_dump_ac_prefilters(aTHX_ aho, depth));
     }
-    /* The breadth-first work queue can contain each state at most once, so
-     * numstates entries suffice.  q_read and q_write address it as a
-     * circular queue while q_write advances monotonically. */
+    /* Each non-root trie state has exactly one parent and is enqueued once.
+     * Thus the entire breadth-first traversal fits in numstates entries;
+     * both indexes can advance linearly without wrapping or division. */
     Newx( q, numstates, U32);
     aho->fail = (U32 *) PerlMemShared_calloc( numstates, sizeof(U32) );
     fail = aho->fail;
@@ -2160,6 +2160,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
               octet <= trie->states[1].max_octet; octet++ ) {
             const U32 newstate = S_trie_trans_state(trie, 1, base, octet, 0);
             if ( newstate ) {
+                assert(q_write < numstates);
                 q[ q_write ] = newstate;
                 /* set to point at the root */
                 fail[ q[ q_write++ ] ]=1;
@@ -2167,7 +2168,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         }
     }
     while ( q_read < q_write) {
-        const U32 cur = q[ q_read++ % numstates ];
+        const U32 cur = q[ q_read++ ];
         base = trie->states[ cur ].trans.base;
 
         if (base) {
@@ -2191,7 +2192,8 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
                     {
                             aho->states[ ch_state ].wordnum =  aho->states[ fail_state ].wordnum;
                     }
-                    q[ q_write++ % numstates] = ch_state;
+                    assert(q_write < numstates);
+                    q[ q_write++ ] = ch_state;
                 }
             }
         }
