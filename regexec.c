@@ -2886,17 +2886,21 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
              * that would require us to go beyond the end of the string */
             e = HOP3c(strend, -((SSize_t)lnc), s);
 
-            /* XXX Note that we could recalculate e to stop the loop earlier,
-             * as the worst case expansion above will rarely be met, and as we
-             * go along we would usually find that e moves further to the left.
+            /* Convert inclusive e to an exclusive limit capped at strend.
+             * HOP3c can clamp e to s == strend, where a nonempty folded
+             * literal cannot match and UTF8_SAFE_SKIP returns zero,
+             * preventing loop progress. */
+            const char * const scan_end = e < strend ? e + 1 : strend;
+
+            /* XXX Note that we could recalculate scan_end to stop the loop
+             * earlier, as the worst case expansion above will rarely be met,
+             * and as we go along we would usually find that scan_end moves
+             * further to the left.
              * This would happen only after we reached the point in the loop
              * where if there were no expansion we should fail.  Unclear if
              * worth the expense */
 
-            /* HOP3c clamps e to s when too few characters remain.  A
-             * nonempty folded literal cannot match at strend, where
-             * UTF8_SAFE_SKIP returns zero and cannot advance the loop. */
-            while (s < strend && s <= e) {
+            while (s < scan_end) {
                 char *my_strend= (char *)strend;
                 if (   foldEQ_utf8_flags(s, &my_strend, 0,  utf8_target,
                                          pat_string, NULL, ln, is_utf8_pat,
