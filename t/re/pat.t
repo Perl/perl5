@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 2217;  # Update this when adding/deleting tests.
+plan tests => 2289 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -36,6 +36,123 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    {
+        # Vary the offsets of rejected windows and their lengths around the
+        # machine-word boundary, including truncated windows near the end.
+        my $pattern = 'aaaa|bbbbbb|ccccccccccc';
+        my ( $plain, $trie );
+        { local ${^RE_TRIE_MAXBUF} = -1;    $plain = qr/$pattern/; }
+        { local ${^RE_TRIE_MAXBUF} = 65536; $trie  = qr/$pattern/; }
+        for my $encoding (qw(native utf8-latin1 utf8-wide)) {
+            for my $lead ( 0 .. 2 * $Config{uvsize} - 1 ) {
+                my ( @expected, @actual );
+                for my $gap ( 0 .. 3 * $Config{uvsize} ) {
+                    my $noise = $gap % 2 ? ' ' : "\t\x{e9}";
+                    $noise .= "\x{100}" if $encoding eq 'utf8-wide';
+                    my $text =
+                        ( '!' x $lead ) . 'aaaa'
+                      . ( $noise x $gap )
+                      . 'bbbbbb'
+                      . ( $noise x ( 2 * $Config{uvsize} + $gap ) )
+                      . 'cccccccccccccc';
+                    utf8::upgrade($text) if $encoding ne 'native';
+                    my @results;
+                    for my $re ( $plain, $trie ) {
+                        pos($text) = 0;
+                        my @spans;
+                        push @spans,   "$-[0]:$+[0]" while $text =~ /$re/g;
+                        push @results, join( ',', @spans );
+                    }
+                    push @expected, "$gap=$results[0]";
+                    push @actual,   "$gap=$results[1]";
+                }
+                is(
+                    join( ';', @actual ),
+                    join( ';', @expected ),
+                    "AC rejected windows: $encoding, leading offset $lead"
+                );
+            }
+        }
+    }
+    {
+        my @cases = (
+            [ 'failure links',  'abac|bac',        'ababacbac' ],
+            [ 'Latin-1 octets', "\x{e9}x|\x{f1}y", "\x{e9}\x{e9}x\x{f1}y" ],
+            [ 'wide octets', "\x{100}x|\x{200}y",  "\x{100}\x{100}x\x{200}y" ],
+            [ 'fold expansions',  'ssx|ffiy',      "\x{df}\x{df}x\x{fb03}y" ],
+            [ 'accepting states', 'ab|bcd',        'xabcdab' ],
+            [
+                'extracted prefix', "\x{100}x|\x{100}y",
+                "\x{100}z\x{100}x\x{100}y"
+            ],
+            [ 'empty alternative',      "\x{100}x|",         'abc' ],
+            [ 'wide-only alternatives', "\x{100}x|\x{200}y", 'plain' ],
+            [ 'mixed alternatives',     "\x{100}x|cat",      'catcat' ],
+            [ 'ring wraps', 'aaaaab|baaaac', ( 'a' x 100 ) . 'baaaac' ],
+            [ 'short word after wraps', 'abababx|babc', ( 'ab' x 100 ) . 'c' ],
+            [
+                'Latin-1 ring wraps',
+                ( "\x{e9}" x 5 ) . 'x|' . ( "\x{f1}" x 4 ) . 'y',
+                ( "\x{e9}" x 100 ) . 'x'
+            ],
+            [
+                'folded ring wraps', 'ssssssX|ffiffiY',
+                ( "\x{df}" x 100 ) . 'X'
+            ],
+            [
+                'heap ring wraps',
+                ( 'a' x 40 ) . 'b|b' . ( 'a' x 39 ) . 'c',
+                ( 'a' x 160 ) . 'b' . ( 'a' x 39 ) . 'c'
+            ],
+            [
+                'heap ring short word',
+                'aaaaab|b' . ( 'a' x 39 ) . 'c',
+                ( 'a' x 160 ) . 'b' . ( 'a' x 39 ) . 'c'
+            ],
+            [
+                'rejected candidate',
+                'aaaaab(?=X)|baaaac(?=Y)',
+                ( 'a' x 100 ) . 'bZbaaaacY'
+            ],
+            [ 'accepting prefix continuation', 'ab(?=X)|abcd', 'abcdabX' ],
+            [
+                'Latin-1 continuation', "\x{e9}x(?=A)|\x{f1}y(?=B)",
+                "\x{e9}xZ\x{f1}yB"
+            ],
+        );
+
+        for my $case (@cases) {
+            my ( $name, $pattern, $input ) = @$case;
+            for my $mods ( 'u', 'iu' ) {
+                my ( $trie_re, $plain_re );
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/(?$mods:$pattern)(?#AC positions)/;
+                }
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/(?$mods:$pattern)(?#branch positions)/;
+                }
+                for my $upgrade ( 0, 1 ) {
+                    my $target = $input;
+                    utf8::upgrade($target) if $upgrade;
+                    my ( @expected, @got );
+                    while ( $target =~ /$plain_re/g ) {
+                        push @expected, "$-[0]:$+[0]";
+                    }
+                    while ( $target =~ /$trie_re/g ) {
+                        push @got, "$-[0]:$+[0]";
+                    }
+                    is(
+                        join( ',', @got ),
+                        join( ',', @expected ),
+"AC match positions agree with branches: $name, /$mods, upgrade=$upgrade"
+                    );
+                }
+            }
+        }
+    }
+
     {
         my @folded_starts = (
             ['ssx', "sSx"],
