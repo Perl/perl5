@@ -24,6 +24,13 @@ Program to facilitate addition of new F<.pod> files to F<pod/>.
 
 Do performance analysis on the code snippets in F<t/perf/benchmarks>.
 
+=head2 F<bench-trie.pl>
+
+Compare regex scanning across Perl builds using frozen HTML, prose, Perl
+source and FASTA corpora in byte and UTF-8 representations. Extends
+F<t/re/trie_bench.pl> and exports workloads for instruction profiling with
+F<bench.pl>. See the script's POD for usage and measurement details.
+
 =head2 F<bisect-example.sh>, F<bisect.pl> and F<bisect-runner.pl>
 
 Use C<git bisect> to pinpoint changes.

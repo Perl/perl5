@@ -6,6 +6,16 @@ use Cwd            qw(abs_path);
 use File::Basename qw(dirname);
 use File::Spec;
 
+if ( !caller && @ARGV && $ARGV[0] eq '--corpus' ) {
+    shift @ARGV;
+
+    my $root = dirname( dirname( dirname( abs_path($0) ) ) );
+    require File::Spec->catfile( $root, 't', 're', 'trie_bench_corpus.pl' );
+
+    TrieBenchCorpus::main( $root, @ARGV );
+    exit;
+}
+
 my $has_octet_trie;
 
 BEGIN {
@@ -58,6 +68,7 @@ sub numeric_case {
 
 sub benchmark_case {
     my ( $name, $re, $inputs, $expected, $repeats ) = @_;
+
     return [ $name, $re, $inputs, $expected, undef, $repeats ];
 }
 
