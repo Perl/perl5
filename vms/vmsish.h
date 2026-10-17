@@ -783,6 +783,9 @@ long int lroundl(long double __x);
 
 #define NO_ENVIRON_ARRAY
 
+/* Don't go reading from /dev/urandom */
+#define PERL_NO_DEV_RANDOM
+
 /* RMSEXPAND options */
 #define PERL_RMSEXPAND_M_VMS		0x02 /* Force output to VMS format */
 #define PERL_RMSEXPAND_M_LONG		0x04 /* Expand to long name format */
