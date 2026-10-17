@@ -1,15 +1,9 @@
 use warnings;
 use strict;
-use Config;
-
 
 BEGIN {
   unless (my $port = getservbyname('echo', 'tcp')) {
     print "1..0 \# Skip: no echo port\n";
-    exit;
-  }
-  unless ($Config{d_getpbyname}) {
-    print "1..0 \# Skip: no getprotobyname\n";
     exit;
   }
 }
