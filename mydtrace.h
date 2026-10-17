@@ -33,9 +33,13 @@
     if (PERL_OP_ENTRY_ENABLED())                    \
         Perl_dtrace_probe_op(aTHX_ op);
 
-#  define PERL_DTRACE_PROBE_PHASE(phase)            \
-    if (PERL_PHASE_CHANGE_ENABLED())                    \
-        Perl_dtrace_probe_phase(aTHX_ phase);
+#  define PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(old_phase)            \
+    if (PERL_PHASE_CHANGE_ENTRY_ENABLED())                    \
+        PERL_PHASE_CHANGE_ENTRY(old_phase);
+
+#  define PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(new_phase)            \
+    if (PERL_PHASE_CHANGE_RETURN_ENABLED())                    \
+        PERL_PHASE_CHANGE_RETURN(new_phase);
 
 #else
 
@@ -45,7 +49,8 @@
 #  define PERL_DTRACE_PROBE_FILE_LOADING(cv)
 #  define PERL_DTRACE_PROBE_FILE_LOADED(cv)
 #  define PERL_DTRACE_PROBE_OP(op)
-#  define PERL_DTRACE_PROBE_PHASE(phase)
+#  define PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(old_phase)
+#  define PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(new_phase)
 
 #endif
 

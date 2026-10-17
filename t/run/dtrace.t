@@ -57,8 +57,9 @@ dtrace_like(
 
 dtrace_like(
     '1',
-    'phase-change { printf("%s -> %s; ", copyinstr(arg1), copyinstr(arg0)) }',
-    qr/START -> RUN; RUN -> DESTRUCT;/,
+    'phase-change-entry { self->entry = arg0 }
+    phase-change-return { printf("%s -> %s; ", copyinstr(self->entry), copyinstr(arg0)) }',
+    qr/CONSTRUCT -> START; INIT -> RUN; END -> DESTRUCT/,
     'phase changes of a simple script',
 );
 
@@ -82,7 +83,8 @@ dtrace_like(<< 'MAGIC_OP',
     END { $x++ }
 MAGIC_OP
 
-    'phase-change { printf("%s -> %s; ", copyinstr(arg1), copyinstr(arg0)) }',
+    'phase-change-entry { self->entry = arg0 }
+    phase-change-return { printf("%s -> %s; ", copyinstr(self->entry), copyinstr(arg0)) }',
 
      qr/START -> CHECK; CHECK -> INIT; INIT -> RUN; RUN -> END; END -> DESTRUCT;/,
 
@@ -103,9 +105,9 @@ PHASES
     '
     BEGIN { starting = 1 }
 
-    phase-change                            { phase    = arg0 }
-    phase-change /copyinstr(arg0) == "RUN"/ { starting = 0 }
-    phase-change /copyinstr(arg0) == "END"/ { ending   = 1 }
+    phase-change-return                            { phase    = arg0 }
+    phase-change-return /copyinstr(arg0) == "RUN"/ { starting = 0 }
+    phase-change-return /copyinstr(arg0) == "END"/ { ending   = 1 }
 
     sub-entry /copyinstr(arg0) != copyinstr(phase) && (starting || ending)/ {
         printf("%s during %s; ", copyinstr(arg0), copyinstr(phase));
