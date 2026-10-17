@@ -6,6 +6,7 @@ use warnings;
 use warnings FATAL => 'all';
 use Data::Dumper;
 $Data::Dumper::Useqq= 1;
+use charnames qw();
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -100,12 +101,12 @@ to see if it is acceptable.
 
 =item C<what_WHATEVER_FOO(arg1, ...)>
 
-A variant form of each of the C<is_> macro types described above can be generated, in
-which the code point and not the length is returned by the macro.  These have
-the same caveat as L</what_len_WHATEVER_FOO(arg1, ..., len)>, plus they should
-not be used where the set contains a NULL, as 0 is returned for two different
-cases: a) the set doesn't include the input code point; b) the set does
-include it, and it is a NULL.
+A variant form of each of the C<is_> macro types described above can be
+generated, in which the code point and not the length is returned by the
+macro.  These have the same caveat as L</what_len_WHATEVER_FOO(arg1, ...,
+len)>, plus they should not be used where the set contains a NULL, as 0 is
+returned for two different cases: a) the set doesn't include the input code
+point; b) the set does include it, and it is a NULL.
 
 =back
 
@@ -137,6 +138,37 @@ You may distribute under the terms of either the GNU General Public
 License or the Artistic License, as specified in the README file.
 
 =cut
+
+# Here are some variables that are used below to share documenation snippets
+# between similar macros.
+my $nonchar_overview = <<EOT;
+Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
+and are guaranteed never to be, so that an application can treat them as
+reserved for its internal use.
+EOT
+
+my $nonchar_length_overview = <<EOT;
+All noncharacter code points can be represented in UTF-8 by sequences of bytes
+consisting of either of two lengths: a shorter length, and a longer one.
+(The actual count is different on ASCII versus EBCDIC platforms.)
+
+This macro exists because it is sometimes convenient to consider the two sets
+individually.
+EOT
+
+my $multi_overview = <<EOT;
+The casefold of some Unicode characters expands to two or three characters.
+EOT
+
+my $three_overview = <<EOT;
+The casefold of a few Unicode characters expands to three characters.
+EOT
+
+my $problematic_overview= <<EOT;
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+EOT
+
 
 # Sub naming convention:
 # __func : private subroutine, can not be called as a method
@@ -369,6 +401,7 @@ my %n2a;        # Inversion of a2n, for each character set
 my %I8_2_utf;
 my %utf_2_I8;   # Inversion of I8_2_utf, for each EBCDIC character set
 my @identity = (0..255);
+my %seen;       # Only display items in this hash once
 
 sub new {
     my $class= shift;
@@ -382,6 +415,8 @@ sub new {
     my $self= bless {
         op    => $opt{op},
         title => $opt{title} || '',
+        overview => $opt{overview} || '',
+        charcount => $opt{charcount} || 1,
     }, $class;
 
     my $charset = $opt{charset};
@@ -1370,7 +1405,8 @@ sub _combine {
 # _render()
 # recursively convert an optree to text with reasonably neat formatting
 sub _render {
-    my ( $self, $op, $combine, $brace, $opts_ref, $def, $submacros )= @_;
+    my ( $self, $op, $combine, $left_indent, $brace, $opts_ref, $def,
+         $submacros )= @_;
     return 0 if ! defined $op;  # The set is empty
     if ( !ref $op ) {
         return $op;
@@ -1378,12 +1414,12 @@ sub _render {
     my $cond= $self->_cond_as_str( $op, $combine, $opts_ref );
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
-    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref, $def,
-                                                                    $submacros);
+    my $yes= $self->_render( $op->{yes}, $combine, $left_indent, 1, $opts_ref,
+                             $def, $submacros);
     return $yes if $cond eq '1';
 
-    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref, $def,
-                                                                    $submacros);
+    my $no= $self->_render( $op->{no},   $combine, $left_indent, 0, $opts_ref,
+                            $def, $submacros);
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
     return "$lb$cond ? $yes : $no$rb"
@@ -1399,9 +1435,9 @@ sub _render {
 
     my $str= "$lb$cond ?$yes$ind: $no$rb";
     if (length $str > 6000) {
-        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+        push @$submacros, sprintf "#${left_indent}define $def\n( %s )", "_part"
                                   . (my $yes_idx= 0+@$submacros) . "_", $yes;
-        push @$submacros, sprintf "#define $def\n( %s )", "_part"
+        push @$submacros, sprintf "#${left_indent}define $def\n( %s )", "_part"
                                   . (my $no_idx= 0+@$submacros) . "_", $no;
         return sprintf "%s%s ? $def : $def%s", $lb, $cond,
                                     "_part${yes_idx}_", "_part${no_idx}_", $rb;
@@ -1419,25 +1455,38 @@ sub _render {
 sub render {
     my ( $self, $op, $combine, $opts_ref, $def_fmt )= @_;
 
+    my $ret = "";
+    my $left_indent = "";
+    if ($opts_ref->{flags} =~ /([QeE])/) {
+        $ret .= "\n#if defined(PERL_CORE)";
+        if ($opts_ref->{flags} =~ /([QE])/) {
+            $ret .= " || defined(";
+            $ret .= ($1 eq 'E') ? 'PERL_EXT)' : 'PERL_EXT_RE_BUILD)';
+        }
+        $ret .= "\n";
+        $left_indent = "  ";
+    }
+
     my @submacros;
-    my $rendered = $self->_render( $op, $combine, 0, $opts_ref, $def_fmt,
-                                                                 \@submacros);
+    my $rendered = $self->_render( $op, $combine, $left_indent, 0, $opts_ref,
+                                   $def_fmt, \@submacros);
 
     # Wrap length-returning macros in a cast so that ternaries returning
-    # integer constants don't trigger -Wtautological-constant-compare 
+    # integer constants don't trigger -Wtautological-constant-compare
     # when used in boolean context.
     if (($opts_ref->{ret_type} // 'len') eq 'len') {
         $rendered = "(STRLEN)( $rendered )";
     }
-
-    my $macro= sprintf "#define $def_fmt\n( %s )", "", $rendered;
-    return join "\n\n",
-            map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) }
-                                                            @submacros, $macro;
+    my $macro= sprintf "#${left_indent}define $def_fmt\n( %s )", "", $rendered;
+    $ret .= join "\n\n", map {    "/*** GENERATED CODE ***/\n"
+                                . __macro( __clean( $_ ) )
+                             } @submacros, $macro;
+    $ret .= "#endif\n" if $left_indent;
+    return $ret;
 }
 
 # make_macro
-# make a macro of a given type.
+# make a macro and its pod of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
 # type             : 'cp', 'cp_high', 'generic', 'high', 'low', 'latin1',
@@ -1477,6 +1526,7 @@ sub make_macro {
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
+    my $returns_cp = $ret_type eq 'cp';
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1485,10 +1535,159 @@ sub make_macro {
     } else {
         $method= 'optree';
     }
-    my @args= $type =~ /^cp/ ? 'cp' : 's';
-    push @args, "e" if $opts{safe};
-    push @args, "is_utf8" if $type =~ /generic/;
-    push @args, "len" if $ret_type eq 'both';
+
+    my $title = $self->{title};
+    my $overview = $self->{overview};
+    my $charcount = $self->{charcount};
+
+    my @args;
+    my $doc_arglist = "";
+    my $doc_text = "";
+
+    # Autogenerate an apidoc entry for this macro based on what we can glean
+    # from the inputs.  This turns out to do a decent job of it.
+    my $range = $type =~ /low/ ? "ASCII-range"
+              : $type =~ /high/ ? "above-Latin1 range"
+              : $type =~ /latin1/i ? "Latin1-range"
+              : "";
+
+    my $character;      # What spelling of 'character we are to use'
+    if ($charcount > 1) {
+        $character = 'character sequence';
+    }
+    else {
+
+        # 'strs' contains the byte or UTF-8 of each thing matched by this
+        # macro.  Choose one, and see if it has a name.  If not, such as for a
+        # surrogate, we use the term 'code point';
+        my @matches = sort keys $self->{strs}->%*;
+        $character = ( ! @matches
+                      || defined charnames::viacode(ord $matches[0]))
+                    ? 'character' : 'code point';
+    }
+
+    # $overview comes from <DATA>, and is optional.  Use it if furnished, as
+    # it is intended to be documentation.  It will be written so 'such a'
+    # makes sense.
+    my $matched;
+    if ($overview ne "") {
+        $doc_text = $overview . "\n";
+        $matched = "such a $character";
+        if ($range ne "") {
+            $matched .= " that is";
+            $matched .= " entirely" if $charcount > 1;
+            $matched .= " in the $range";
+        }
+    }
+    else {  # No $overview.  Fall back to using the (mandatory) title
+        $matched = "a $range";
+        $matched .= " " if $range ne "";
+        $matched .= "$character that matches $self->{title}";
+    }
+
+    my $otherwise = "Otherwise, it returns zero.\n";
+
+    if ($type =~ /^cp/) {
+        $args[0] = 'cp';
+        $doc_arglist .= "|UV cp";
+        $doc_text .= <<~EOT;
+            This returns non-zero if code point C<cp> is
+            $matched.
+
+            $otherwise
+            EOT
+    }
+    else {  # The input is a string
+        $args[0] = 's';     # The first agrument is always named 's'
+        $doc_arglist .= "|const U8 * s";
+
+        my $back = "";
+        my $sign = '-';
+        if ($opts{backwards}) {
+            $back = "BACK ";
+            $sign = '+';
+        }
+
+        my $sequence_bytes_description;
+        if ($opts{safe}) {
+            push @args, "e";
+            $doc_arglist .= "|const U8 * e";
+            $sequence_bytes_description =
+                "sequence of bytes starting at C<s>, and extending no further"
+              . " ${back}than S<C<e> $sign 1>";
+        }
+        else {
+            $sequence_bytes_description =
+                            "sequence of the next few bytes starting at C<s>";
+        }
+
+        if ($returns_cp) {
+            $doc_text .= <<~EOT;
+                This returns the code point that the input byte(s) form if
+                they match $matched.
+
+                It returns zero otherwise.  Fortunately C<NUL> is not matched
+                by this, or else disambiguation would be required.
+                EOT
+
+                # It's a bit presumptuous to assume that NUL will never be
+                # matched by some new macro coming along, but it is quite
+                # unlikely given that these macros are generally for very
+                # complicated things.
+        }
+        elsif ($type =~ /generic/) {
+            $doc_text .= <<~EOT;
+                This returns non-zero if the input byte(s) form $matched.
+
+                If C<is_utf8> is C<false>, the input is considered to be
+                Latin1, and the single byte at C<*s> is examined.
+
+                If C<is_utf8> is C<true>, the input is considered to be UTF-8,
+                and the
+                $sequence_bytes_description
+                are examined.
+                EOT
+        }
+        else {
+            $doc_text .= <<~EOT;
+                This returns non-zero if the
+                $sequence_bytes_description
+                form a valid UTF-8 representation of $matched.
+                EOT
+        }
+
+        $doc_text .= <<~EOT;
+
+        $otherwise
+        The value returned gives the number of bytes the matched
+        $character actually occupies.
+        EOT
+
+        if (! $opts{safe} && $type !~ /^cp/) {
+            $doc_text .= <<~EOT;
+
+                You need to be sure that the bytes at C<s> comprise at least
+                one complete $character before calling this; otherwise this
+                could read beyond its end.
+                EOT
+        }
+    }
+
+    # Fix any grammar problem of this sort coming from the result of
+    # concatenation
+    $doc_text =~ s/ \b a \  ([aeiou]) /an $1/gx;
+
+    if ($type =~ /generic/) {
+        push @args, "is_utf8";
+        $doc_arglist .= "|bool is_utf8";
+    }
+
+     if ($ret_type eq 'both') {
+        push @args, "len";
+        $doc_arglist .= "|STRLEN len";
+        warn "Generating apidoc for -both is currently unimplemented";
+    }
+
     my $pfx= $ret_type eq 'both'    ? 'what_len_' :
              $ret_type eq 'cp'      ? 'what_'     : 'is_';
     my $ext= $type     =~ /generic/ ? ''          : '_' . lc( $type );
@@ -1497,9 +1696,14 @@ sub make_macro {
     $ext .= "_no_length_checks" if $opts{no_length_checks};
     $ext .= "_backwards" if $opts{backwards};
     my $argstr= join ",", @args;
-    my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
+    my $macro = "$pfx$self->{op}$ext";
+    my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
-    return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
+    my $api_ret = ($returns_cp) ? 'UV' : 'STRLEN';
+    my $pod = "=for apidoc $opts{flags}T|$api_ret|$macro$doc_arglist\n$doc_text";
+
+    return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt ),
+           $pod;
 }
 
 # if we aren't being used as a module (highly likely) then process
@@ -1524,10 +1728,18 @@ WARNING: These macros are for internal Perl core use only, and may be
 changed or removed without notice.
 EOF
     );
-    print $out_fh "\n#ifndef PERL_REGCHARCLASS_H_ /* Guard against nested",
-                  " #includes */\n#define PERL_REGCHARCLASS_H_\n";
 
-    my ( $op, $title, @txt, @types, %mods );
+    print $out_fh <<~EOT;
+        /*
+        =for apidoc_section \$classification
+        */
+
+        #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
+        #  define PERL_REGCHARCLASS_H_
+
+        EOT
+
+    my ( $op, $flags, $title, @txt, @types, %mods, $overview, $charcount);
     my $doit= sub ($) {
         return unless $op;
 
@@ -1537,10 +1749,15 @@ EOF
         return if delete $mods{only_ascii_platform} && $charset !~ /ascii/i;
         return if delete $mods{only_ebcdic_platform} && $charset !~ /ebcdic/i;
 
-        print $out_fh "/*\n\t$op: $title\n\n";
+        print $out_fh "/*\n\t$op: $title for $charset\n\n";
+
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
-        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt,
-                                                        charset => $charset);
+        my $obj= __PACKAGE__->new( op => $op,
+                                   title => $title,
+                                   txt => \@txt,
+                                   overview => $overview,
+                                   charcount => $charcount,
+                                   charset => $charset);
 
         #die Dumper(\@types,\%mods);
 
@@ -1574,7 +1791,7 @@ EOF
                         && ($mod eq 'safe' || $mod eq 'no_length_checks')
                         && grep { 'fast' =~ $_ } @mods;
                 delete $mods{$mod};
-                my $macro= $obj->make_macro(
+                my ($macro, $api) = $obj->make_macro(
                     type     => $type,
                     ret_type => $ret,
                     safe     => $mod eq 'safe' && $type !~ /^cp/,
@@ -1582,40 +1799,80 @@ EOF
                     no_length_checks => $mod eq 'no_length_checks'
                                      && $type !~ /^cp/,
                     backwards => $backwards,
+                    flags => $flags,
                 );
+
+                my $first_line = $api =~ s/\n.*//rs;
+
+                if (! $seen{$first_line}++) {
+                    print $out_fh <<~EOT;
+                        /*
+                        $api
+
+                        =cut
+                        */
+
+                        EOT
+                }
+
                 print $out_fh $macro, "\n";
             }
         }
     };
 
+    my $definition_begin_re = qr/^=>/;
     my @data = <DATA>;
     foreach my $charset (get_supported_code_pages()) {
         my $first_time = 1;
         undef $op;
+        undef $flags;
         undef $title;
         undef @txt;
         undef @types;
         undef %mods;
+        undef $overview;
+        undef $charcount;
+
         print $out_fh "\n", get_conditional_compile_line_start($charset);
-        my @data_copy = @data;
-        for (@data_copy) {
-            s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
-            next unless /\S/;
-            chomp;
-            if ( /^[A-Z]/ ) {
-                $doit->($charset) unless $first_time;  # This starts a new
-                                                       # definition; do the
-                                                       # previous one
+        for (my $i = 0; $i < @data; $i++) {
+            my $line = $data[$i];
+
+            # squeeze out comment and blanks
+            $line =~ s/^ \s* (?: \# .* ) ? $ //x;
+            next unless $line =~ /\S/;
+            chomp $line;
+            if ($line =~ /^[A-Z]/ ) {
+
+                # This starts a new definition; do the previous one
+                $doit->($charset) unless $first_time;
+
                 $first_time = 0;
-                ( $op, $title )= split /\s*:\s*/, $_, 2;
+                ( $op, $flags, $title )= split /\s*:\s*/, $line, 3;
+                $charcount = ($flags =~ s/(\d)//)
+                             ? $1
+                             : 1;
+
                 @txt= ();
-            } elsif ( s/^=>// ) {
-                my ( $type, $modifier )= split /:/, $_;
+                $title =~ s/ \s* \# .* //x;
+
+                # Now get the optional overview, which is all subsequent lines
+                # up to the marker that begins the definition.
+                $overview = "";
+                while ($i < @data - 1) {
+                    last if $data[$i+1] =~ $definition_begin_re;
+                    $i++;
+
+                    my $this_overview_line = $data[$i];
+                    $this_overview_line =~ s/ ^ (\$\w+) /eval $1/xe;
+                    $overview .= $this_overview_line;
+                }
+            } elsif ( $line =~ s/$definition_begin_re// ) {
+                my ( $type, $modifier )= split /:/, $line;
                 @types= split ' ', $type;
                 undef %mods;
                 map { $mods{$_} = 1 } split ' ',  $modifier;
             } else {
-                push @txt, "$_";
+                push @txt, $line;
             }
         }
         $doit->($charset);
@@ -1655,14 +1912,33 @@ EOF
 }
 
 # The form of the input is a series of definitions to make macros for.
-# The first line gives the base name of the macro, followed by a colon, and
-# then text to be used in comments associated with the macro that are its
-# title or description.  In all cases the first (perhaps only) parameter to
-# the macro is a pointer to the first byte of the code point it is to test to
-# see if it is in the class determined by the macro.  In the case of non-UTF8,
-# the code point consists only of a single byte.
 #
-# The second line must begin with a '=>' and be followed by the types of
+# The first line of each definition is of the form
+#       BASE : flags : title
+#
+# BASE is the base name the macro.  Potentially multiple macros can be
+# generated from a single definition.  Their names will all have in common the
+# value given by 'BASE'.  The rest of the names are described in the pod of
+# this file.
+#
+# 'flags' control the visibility of the generated macro and help generated
+# better pod for it.  The visibility ones are the same as listed in embed.fnc.
+# The other possible flags are '1', '2', or '3'.  These give the maximum
+# number of characters the macro can match.  If omitted, '1' is assumed.
+#
+# Finally is 'title' which is output in comments associated with the macro
+# that are its title or description.
+#
+# A line beginning with '=>' begins the definition.  Lines between the first
+# one and it give an optional overview of what the macro does.  If one of
+# those lines begins with a scalar symbol, the code will replace the
+# scalar with its contents.  This allows you to set up variables in the
+# program and then refer to them in these lines.  The impetus would be to
+# easily share text between multiple macros.  The overview is used to create
+# a documentation entry for this macro.  See the existing examples for how
+# this works.
+#
+# The '=>' line contains those two characters followed by the types of
 # macro(s) to be generated; these are specified below.  A colon follows the
 # types, followed by the modifiers, also specified below.  At least one
 # modifier is required.
@@ -1777,41 +2053,56 @@ __DATA__
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
-LNBREAK: Line Break: \R
+LNBREAK: Q2 : Line Break (\R)
+A few Unicode characters or character sequences act as line terminators.
+C<\R> in a regular expression pattern matches them.
 => generic UTF8 LATIN1 : safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 \p{VertSpace}
 
-HORIZWS: Horizontal Whitespace: \h \H
+HORIZWS: C : Horizontal Whitespace (\h, \H)
+A few Unicode characters are treated as horizontal space.
 => high cp_high : fast
 \p{HorizSpace}
 
-VERTWS: Vertical Whitespace: \v \V
+VERTWS: C : Vertical Whitespace (\v, \V)
+A few Unicode characters are treated as vertical space.
 => high cp_high : fast
 \p{VertSpace}
 
-XDIGIT: Hexadecimal digits
+XDIGIT: C : Hexadecimal digits
+A few Unicode characters are treated as hexadecimal digits.
 => high cp_high : fast
 \p{XDigit}
 
-XPERLSPACE: \p{XPerlSpace}
+XPERLSPACE: C : \p{XPerlSpace}
 => high cp_high : fast
 \p{XPerlSpace}
 
-SPACE: Backwards \p{XPerlSpace}
+SPACE: C : Backwards \p{XPerlSpace}
+Some Unicode characters are treated as space, both horizontal and vertical.
 => backwards_UTF8 : safe
 \p{XPerlSpace}
 
-NONCHAR: Non character code points
+NONCHAR: C :  Non character code points
+$nonchar_overview
 => UTF8 :safe
 \p{_Perl_Nchar}
 
-SHORTER_NON_CHARS:  # 3 bytes
+SHORTER_NON_CHARS: e :  # 3 bytes
+$nonchar_overview
+
+$nonchar_length_overview
+It handles the shorter ones.
 => UTF8 :only_ascii_platform fast
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
 
-LARGER_NON_CHARS:   # 4 bytes
+LARGER_NON_CHARS: e : # 4 bytes
+$nonchar_overview
+
+$nonchar_length_overview
+It handles the longer ones.
 => UTF8 :only_ascii_platform fast
 0x1FFFE - 0x1FFFF
 0x2FFFE - 0x2FFFF
@@ -1830,7 +2121,7 @@ LARGER_NON_CHARS:   # 4 bytes
 0xFFFFE - 0xFFFFF
 0x10FFFE - 0x10FFFF
 
-SHORTER_NON_CHARS:  # 4 bytes
+SHORTER_NON_CHARS: e :  # 4 bytes
 => UTF8 :only_ebcdic_platform fast
 0xFDD0 - 0xFDEF
 0xFFFE - 0xFFFF
@@ -1838,7 +2129,7 @@ SHORTER_NON_CHARS:  # 4 bytes
 0x2FFFE - 0x2FFFF
 0x3FFFE - 0x3FFFF
 
-LARGER_NON_CHARS:   # 5 bytes
+LARGER_NON_CHARS: e :   # 5 bytes
 => UTF8 :only_ebcdic_platform fast
 0x4FFFE - 0x4FFFF
 0x5FFFE - 0x5FFFF
@@ -1856,71 +2147,95 @@ LARGER_NON_CHARS:   # 5 bytes
 
 # Note that code in utf8.c is counting on the 'fast' version to look at no
 # more than two bytes
-SURROGATE: Surrogate code points
+SURROGATE: C : Surrogate code points
+Surrogate code points enable UTF-16 to be extended to be able to represent all
+Unicode code points
 => UTF8 :safe fast
 \p{_Perl_Surrogate}
 
-QUOTEMETA: Meta-characters that \Q should quote
+QUOTEMETA: Q : Meta-characters that \Q should quote
+Most characters in a Perl program represent themselves, but there are a few
+"meta-characters" which mean something else unless escaped in some way.
 => high :fast
 \p{_Perl_Quotemeta}
 
-MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: Q3 : multi-char strings that are folded to by a single character
+$multi_overview
 => UTF8 UTF8-cp :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 
-MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+MULTI_CHAR_FOLD: Q3 : multi-char strings that are folded to by a single character
+$multi_overview
 => LATIN1 LATIN1-cp : safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 
-THREE_CHAR_FOLD: A three-character multi-char fold
+THREE_CHAR_FOLD: Q3 : A three-character multi-char fold
+$three_overview
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', '3')
 
-THREE_CHAR_FOLD: A three-character multi-char fold
+THREE_CHAR_FOLD: Q3 : A three-character multi-char fold
+$three_overview
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', '3')
 
-THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: Q2 : The first two of three-character multi-char folds
+$three_overview
+Sometimes we are interested in just the first two of these.
 => UTF8 :safe
 %regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 
-THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+THREE_CHAR_FOLD_HEAD: Q2 : The first two of three-character multi-char folds
+$three_overview
+Sometimes we are interested in just the first two of these.
 => LATIN1 :safe
 %regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 #
-#THREE_CHAR_FOLD_NON_FINAL: The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: Q : The first or middle character of multi-char folds
 #=> UTF8 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('u', 'fm')
 #
-#THREE_CHAR_FOLD_NON_FINAL: The first or middle character of multi-char folds
+#THREE_CHAR_FOLD_NON_FINAL: Q : The first or middle character of multi-char folds
 #=> LATIN1 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('l', 'fm')
 
-FOLDS_TO_MULTI: characters that fold to multi-char strings
+FOLDS_TO_MULTI: Q : characters that fold to multi-char strings
+$multi_overview
 => UTF8 :fast
 \p{_Perl_Folds_To_Multi_Char}
 
-PROBLEMATIC_LOCALE_FOLD : characters whose fold is problematic under locale
+PROBLEMATIC_LOCALE_FOLD : Q : characters whose fold is problematic under locale
+$problematic_overview
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Folds}
 
-PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are problematic under locale
+PROBLEMATIC_LOCALE_FOLDEDS_START : Q : The first folded character of folds which are problematic under locale
+$problematic_overview
+Some times we are interested in just the first character of those that fold to
+a sequence of more than one.
 => UTF8 cp :fast
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
-PATWS: pattern white space
+PATWS: Q : pattern white space
+Not all characters that are nominally space characters in Unicode are
+considered as such in regular expression patterns.  Sometimes we need to
+consider just the latter.
 => generic : safe
 \p{_Perl_PatWS}
 
-HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+HANGUL_ED: C : Hangul syllables whose first UTF-8 byte is \xED
+For convenience of the implementation, certain Korean Hangul syllable characters
+have to be treated specially.
 => UTF8 :only_ascii_platform safe
 0xD000 - 0xD7FF
 
-HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+HANGUL_ED: C : Hangul syllables whose first UTF-8 byte is \xED
 => UTF8 :only_ebcdic_platform safe
 0x1 - 0x0
 # Always fails on EBCDIC; there are no ED Hanguls there
 
-WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+WORD_BUT_NONCONT: Q : Word characters that perhaps surprisingly are forbidden in names
+Some Unicode characters that match C<\w> can't be used in Perl names (such as
+identifiers and labels).
 => generic : safe
 \p{_Perl_Word_But_NonCont}

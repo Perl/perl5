@@ -41,7 +41,6 @@
 #   undef F_sqrt_amg
 #   undef GET_aTHX_if_NULL
 #   undef HASATTRIBUTE_UNINITIALIZED
-#   undef is_WORD_BUT_NONCONT_safe
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
 #   undef KEY_equ
@@ -82,10 +81,6 @@
 #     undef first_upper_bit_set_byte_number
 #     undef invlist_intersection_complement_2nd_
 #     undef invlist_union_complement_2nd_
-#     undef is_MULTI_CHAR_FOLD_utf8_safe_part4_
-#     undef is_MULTI_CHAR_FOLD_utf8_safe_part5_
-#     undef is_MULTI_CHAR_FOLD_utf8_safe_part6_
-#     undef is_MULTI_CHAR_FOLD_utf8_safe_part7_
 #     undef LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S
 #     undef LATIN_SMALL_LIGATURE_LONG_S_WITH_DESCENDER_S_UTF8
 #     undef PARSE_IDENT_ERROR_POSITION
@@ -93,10 +88,6 @@
 #     undef RExC_parse_advance
 #     undef SURSOLIDUM
 #     undef WARN_HELPER_
-#     undef what_MULTI_CHAR_FOLD_utf8_safe_part10_
-#     undef what_MULTI_CHAR_FOLD_utf8_safe_part11_
-#     undef what_MULTI_CHAR_FOLD_utf8_safe_part8_
-#     undef what_MULTI_CHAR_FOLD_utf8_safe_part9_
 #   endif /* !defined(PERL_EXT_RE_BUILD) */
 # endif /* !defined(PERL_CORE) */
 #else /* if !defined(PERL_DO_UNDEFS) */

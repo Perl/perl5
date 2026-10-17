@@ -14,19 +14,49 @@
  * changed or removed without notice.
  */
 
+/*
+=for apidoc_section $classification
+*/
 
 #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
-#define PERL_REGCHARCLASS_H_
+#  define PERL_REGCHARCLASS_H_
+
 
 #if 'A' == 65 /* ASCII/Latin1 */
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break (\R) for ASCII/Latin1
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
 */
+/*
+=for apidoc QT|STRLEN|is_LNBREAK_safe|const U8 * s|const U8 * e|bool is_utf8
+A few Unicode characters or character sequences act as line terminators.
+C<\R> in a regular expression pattern matches them.
+
+This returns non-zero if the input byte(s) form such a character sequence.
+
+If C<is_utf8> is C<false>, the input is considered to be
+Latin1, and the single byte at C<*s> is examined.
+
+If C<is_utf8> is C<true>, the input is considered to be UTF-8,
+and the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+are examined.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_safe(s,e,is_utf8)                                        \
+#  define is_LNBREAK_safe(s,e,is_utf8)                                      \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\n', '\f') ) ? 1            \
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -49,9 +79,30 @@
 	( 0x85 == ((const U8*)s)[0] )                                       \
     : 0 )                                                                   \
 : 0 ) )
+#endif
 
+/*
+=for apidoc QT|STRLEN|is_LNBREAK_utf8_safe|const U8 * s|const U8 * e
+A few Unicode characters or character sequences act as line terminators.
+C<\R> in a regular expression pattern matches them.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_utf8_safe(s,e)                                           \
+#  define is_LNBREAK_utf8_safe(s,e)                                         \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\n', '\f') ) ? 1            \
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -67,9 +118,30 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\n', '\r') )                  \
 : 0 ) )
+#endif
 
+/*
+=for apidoc QT|STRLEN|is_LNBREAK_latin1_safe|const U8 * s|const U8 * e
+A few Unicode characters or character sequences act as line terminators.
+C<\R> in a regular expression pattern matches them.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence that is entirely in the Latin1-range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_latin1_safe(s,e)                                         \
+#  define is_LNBREAK_latin1_safe(s,e)                                       \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\n', '\f') || 0x85 == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -78,12 +150,34 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\n', '\r') || 0x85 == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace (\h, \H) for ASCII/Latin1
 
 	\p{HorizSpace}
 */
+/*
+=for apidoc CT|STRLEN|is_HORIZWS_high|const U8 * s
+A few Unicode characters are treated as horizontal space.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_HORIZWS_high(s)                                                  \
 ( (STRLEN)( ( 0xE1 == ((const U8*)s)[0] ) ?                                 \
@@ -94,6 +188,20 @@
     : ( ( 0x81 == ((const U8*)s)[1] ) && ( 0x9F == ((const U8*)s)[2] ) ) ? 3 : 0 )\
 : ( ( ( 0xE3 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( 0x80 == ((const U8*)s)[2] ) ) ? 3 : 0 ) )
 
+/*
+=for apidoc CT|STRLEN|is_HORIZWS_cp_high|UV cp
+A few Unicode characters are treated as horizontal space.
+
+This returns non-zero if code point C<cp> is
+such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_HORIZWS_cp_high(cp)                                              \
 ( (STRLEN)( 0x1680 == cp || ( 0x1680 < cp &&                                \
@@ -102,23 +210,79 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace (\v, \V) for ASCII/Latin1
 
 	\p{VertSpace}
 */
+/*
+=for apidoc CT|STRLEN|is_VERTWS_high|const U8 * s
+A few Unicode characters are treated as vertical space.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_VERTWS_high(s)                                                   \
 ( (STRLEN)( ( ( ( 0xE2 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xA8, 0xA9) ) ) ? 3 : 0 ) )
+
+/*
+=for apidoc CT|STRLEN|is_VERTWS_cp_high|UV cp
+A few Unicode characters are treated as vertical space.
+
+This returns non-zero if code point C<cp> is
+such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
 
 /*** GENERATED CODE ***/
 #define is_VERTWS_cp_high(cp)                                               \
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for ASCII/Latin1
 
 	\p{XDigit}
 */
+/*
+=for apidoc CT|STRLEN|is_XDIGIT_high|const U8 * s
+A few Unicode characters are treated as hexadecimal digits.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_XDIGIT_high(s)                                                   \
 ( (STRLEN)( ( 0xEF == ((const U8*)s)[0] ) ?                                 \
@@ -127,16 +291,49 @@
     : ( ( 0xBD == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x81, 0x86) ) ) ? 3 : 0 )\
 : 0 ) )
 
+/*
+=for apidoc CT|STRLEN|is_XDIGIT_cp_high|UV cp
+A few Unicode characters are treated as hexadecimal digits.
+
+This returns non-zero if code point C<cp> is
+such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_XDIGIT_cp_high(cp)                                               \
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0xFF10, 0xFF19) || ( 0xFF19 < cp &&     \
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for ASCII/Latin1
 
 	\p{XPerlSpace}
 */
+/*
+=for apidoc CT|STRLEN|is_XPERLSPACE_high|const U8 * s
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of an above-Latin1 range character that matches \p{XPerlSpace}.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_XPERLSPACE_high(s)                                               \
 ( (STRLEN)( ( 0xE1 == ((const U8*)s)[0] ) ?                                 \
@@ -147,6 +344,18 @@
     : ( ( 0x81 == ((const U8*)s)[1] ) && ( 0x9F == ((const U8*)s)[2] ) ) ? 3 : 0 )\
 : ( ( ( 0xE3 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( 0x80 == ((const U8*)s)[2] ) ) ? 3 : 0 ) )
 
+/*
+=for apidoc CT|STRLEN|is_XPERLSPACE_cp_high|UV cp
+This returns non-zero if code point C<cp> is
+an above-Latin1 range character that matches \p{XPerlSpace}.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_XPERLSPACE_cp_high(cp)                                           \
 ( (STRLEN)( 0x1680 == cp || ( 0x1680 < cp &&                                \
@@ -156,10 +365,27 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for ASCII/Latin1
 
 	\p{XPerlSpace}
 */
+/*
+=for apidoc CT|STRLEN|is_SPACE_utf8_safe_backwards|const U8 * s|const U8 * e
+Some Unicode characters are treated as space, both horizontal and vertical.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further BACK than S<C<e> + 1>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_SPACE_utf8_safe_backwards(s,e)                                   \
 ( (STRLEN)( ((s) - (e) > 2) ?                                               \
@@ -185,10 +411,30 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for ASCII/Latin1
 
 	\p{_Perl_Nchar}
 */
+/*
+=for apidoc CT|STRLEN|is_NONCHAR_utf8_safe|const U8 * s|const U8 * e
+Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
+and are guaranteed never to be, so that an application can treat them as
+reserved for its internal use.
+
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a code point.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+code point actually occupies.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_NONCHAR_utf8_safe(s,e)                                           \
 ( (STRLEN)( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xEF == ((const U8*)s)[0] ) ?\
@@ -202,21 +448,57 @@
 	: ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 3 bytes
+	SHORTER_NON_CHARS:  for ASCII/Latin1
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
 */
+/*
+=for apidoc eT|STRLEN|is_SHORTER_NON_CHARS_utf8|const U8 * s
+Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
+and are guaranteed never to be, so that an application can treat them as
+reserved for its internal use.
+
+
+All noncharacter code points can be represented in UTF-8 by sequences of bytes
+consisting of either of two lengths: a shorter length, and a longer one.
+(The actual count is different on ASCII versus EBCDIC platforms.)
+
+This macro exists because it is sometimes convenient to consider the two sets
+individually.
+
+It handles the shorter ones.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a code point.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+code point actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete code point before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+#  define is_SHORTER_NON_CHARS_utf8(s)                                      \
 ( (STRLEN)( ( 0xEF == ((const U8*)s)[0] ) ?                                 \
     ( ( 0xB7 == ((const U8*)s)[1] ) ?                                       \
 	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x90, 0xAF) ) ? 3 : 0 )  \
     : ( ( 0xBF == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xBE, 0xBF) ) ) ? 3 : 0 )\
 : 0 ) )
+#endif
 
 /*
-	LARGER_NON_CHARS: # 4 bytes
+	LARGER_NON_CHARS:  for ASCII/Latin1
 
 	0x1FFFE - 0x1FFFF
 	0x2FFFE - 0x2FFFF
@@ -235,34 +517,134 @@
 	0xFFFFE - 0xFFFFF
 	0x10FFFE - 0x10FFFF
 */
+/*
+=for apidoc eT|STRLEN|is_LARGER_NON_CHARS_utf8|const U8 * s
+Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
+and are guaranteed never to be, so that an application can treat them as
+reserved for its internal use.
+
+
+All noncharacter code points can be represented in UTF-8 by sequences of bytes
+consisting of either of two lengths: a shorter length, and a longer one.
+(The actual count is different on ASCII versus EBCDIC platforms.)
+
+This macro exists because it is sometimes convenient to consider the two sets
+individually.
+
+It handles the longer ones.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a code point.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+code point actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete code point before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_LARGER_NON_CHARS_utf8(s)                                         \
+#  define is_LARGER_NON_CHARS_utf8(s)                                       \
 ( (STRLEN)( ( 0xF0 == ((const U8*)s)[0] ) ?                                 \
     ( ( ( ( ((const U8*)s)[1] == 0x9F || ( ( ((const U8*)s)[1] & 0xEF ) == 0xAF ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 )\
 : ( inRANGE_helper_(U8, ((const U8*)s)[0], 0xF1, 0xF3) ) ?                  \
     ( ( ( ( ( ((const U8*)s)[1] & 0xCF ) == 0x8F ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for ASCII/Latin1
 
 	\p{_Perl_Surrogate}
 */
+/*
+=for apidoc CT|STRLEN|is_SURROGATE_utf8|const U8 * s
+Surrogate code points enable UTF-16 to be extended to be able to represent all
+Unicode code points
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a code point.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+code point actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete code point before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8(s)                                                \
 ( (STRLEN)( ( ( 0xED == ((const U8*)s)[0] ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) ? 3 : 0 ) )
+
+/*
+=for apidoc CT|STRLEN|is_SURROGATE_utf8_safe|const U8 * s|const U8 * e
+Surrogate code points enable UTF-16 to be extended to be able to represent all
+Unicode code points
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a code point.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+code point actually occupies.
+
+
+=cut
+*/
 
 /*** GENERATED CODE ***/
 #define is_SURROGATE_utf8_safe(s,e)                                         \
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for ASCII/Latin1
 
 	\p{_Perl_Quotemeta}
 */
+/*
+=for apidoc QT|STRLEN|is_QUOTEMETA_high|const U8 * s
+Most characters in a Perl program represent themselves, but there are a few
+"meta-characters" which mean something else unless escaped in some way.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character that is in the above-Latin1 range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high(s)                                                \
+#  define is_QUOTEMETA_high(s)                                              \
 ( (STRLEN)( ( 0xCD == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x8F == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xD8 == ((const U8*)s)[0] ) ?                                           \
@@ -310,21 +692,42 @@
 	( ( ( 0xB2 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xA0, 0xA3) ) ) ? 4 : 0 )\
     : ( ( ( 0x9D == ((const U8*)s)[1] ) && ( 0x85 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xB3, 0xBA) ) ) ? 4 : 0 )\
 : ( ( 0xF3 == ((const U8*)s)[0] ) && ( 0xA0 == ((const U8*)s)[1] ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
+/*
+=for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
+The casefold of some Unicode characters expands to two or three characters.
+
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                                 \
 	    ( ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ? 3 : 2 )\
 	: ( ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ) ? 2 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'H' ) ?                                 \
 	( ( ( 0xCC == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'I' ) ?                             \
@@ -399,7 +802,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -456,7 +859,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -488,7 +891,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -552,9 +955,32 @@
 	: ( ( ( ( 0xBD == ((const U8*)s)[1] ) && ( ( ( ((const U8*)s)[2] & 0xF8 ) == 0xA0 ) || ( ( ((const U8*)s)[2] & 0xFB ) == 0xB0 ) || ((const U8*)s)[2] == 0xBC ) ) && ( 0xCE == ((const U8*)s)[3] ) ) && ( 0xB9 == ((const U8*)s)[4] ) ) ? 5 : 0 )\
     : 0 )                                                                   \
 : ((e)-(s) > 3) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) ) )
+#endif
 
+/*
+=for apidoc QT|UV|what_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
+The casefold of some Unicode characters expands to two or three characters.
+
+
+This returns the code point that the input byte(s) form if
+they match such a character sequence.
+
+It returns zero otherwise.  Fortunately C<NUL> is not matched
+by this, or else disambiguation would be required.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                        \
 ( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
@@ -581,7 +1007,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                        \
 ( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
 	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
@@ -653,7 +1079,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                        \
 ( ( 0x81 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xCC == ((const U8*)s)[2] ) && ( 0x93 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x85 == ((const U8*)s)[1] ) ?                                   \
@@ -668,7 +1094,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                        \
 ( ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
 	( ( 0xA5 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( ( 0xD6 == ((const U8*)s)[2] ) && ( 0x82 == ((const U8*)s)[3] ) ) ? 0x587 : 0 )\
@@ -740,7 +1166,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -814,7 +1240,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                        \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -859,7 +1285,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                                 \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -923,7 +1349,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                        \
 ( ((e)-(s) > 4) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) ?                             \
 	( ( ( 0xCA == ((const U8*)s)[1] ) && ( 0xBE == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -976,16 +1402,37 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+#  define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                               \
 ( ((e)-(s) > 5) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
+/*
+=for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
+The casefold of some Unicode characters expands to two or three characters.
+
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence that is entirely in the Latin1-range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
@@ -997,9 +1444,32 @@
 	( ( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) || ( ( ((const U8*)s)[1] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[1] & 0xDF ) == 'L' ) ) ? 2 : 0 )\
     : ( ( ( ((const U8*)s)[0] & 0xDF ) == 'S' ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 'S', 'T') || inRANGE_helper_(U8, ((const U8*)s)[1], 's', 't') ) ) ? 2 : 0 )\
 : 0 ) )
+#endif
 
+/*
+=for apidoc QT|UV|what_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
+The casefold of some Unicode characters expands to two or three characters.
+
+
+This returns the code point that the input byte(s) form if
+they match such a character sequence that is entirely in the Latin1-range.
+
+It returns zero otherwise.  Fortunately C<NUL> is not matched
+by this, or else disambiguation would be required.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+#  define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                             \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ?                         \
@@ -1021,14 +1491,35 @@
 	: ( ( ((const U8*)s)[1] & 0xDF ) == 'T' ) ? 0xFB05 : 0 )            \
     : 0 )                                                                   \
 : 0 )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
+/*
+=for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
+The casefold of a few Unicode characters expands to three characters.
+
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
 	( ( ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) && ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ) ? 3 : 0 )\
@@ -1046,23 +1537,66 @@
 	: ( ( ( ( ( 0x89 == ((const U8*)s)[1] ) && ( 0xCD == ((const U8*)s)[2] ) ) && ( 0x82 == ((const U8*)s)[3] ) ) && ( 0xCE == ((const U8*)s)[4] ) ) && ( 0xB9 == ((const U8*)s)[5] ) ) ? 6 : 0 )\
     : 0 )                                                                   \
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ) && ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ) && ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
+/*
+=for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
+The casefold of a few Unicode characters expands to three characters.
+
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence that is entirely in the Latin1-range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_THREE_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ) && ( ( ((const U8*)s)[1] & 0xDF ) == 'F' ) ) && ( ( ( ((const U8*)s)[2] & 0xDF ) == 'I' ) || ( ( ((const U8*)s)[2] & 0xDF ) == 'L' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
+/*
+=for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_utf8_safe|const U8 * s|const U8 * e
+The casefold of a few Unicode characters expands to three characters.
+
+Sometimes we are interested in just the first two of these.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
+#  define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                            \
 ( (STRLEN)( ((e)-(s) > 3) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) || ( ( ((const U8*)s)[0] & 0xDE ) == 'H' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) || ( ( ((const U8*)s)[0] & 0xDB ) == 'S' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -1127,14 +1661,36 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) || ( ( ((const U8*)s)[0] & 0xDE ) == 'H' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) || ( ( ((const U8*)s)[0] & 0xDB ) == 'S' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) )\
 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for ASCII/Latin1
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
+/*
+=for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_latin1_safe|const U8 * s|const U8 * e
+The casefold of a few Unicode characters expands to three characters.
+
+Sometimes we are interested in just the first two of these.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character sequence that is entirely in the Latin1-range.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character sequence actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
+#  define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                          \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) || ( ( ((const U8*)s)[0] & 0xDE ) == 'H' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) || ( ( ((const U8*)s)[0] & 0xDB ) == 'S' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) ?                             \
@@ -1143,14 +1699,39 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xDF ) == 'A' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'F' ) || ( ( ((const U8*)s)[0] & 0xDE ) == 'H' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'J' ) || ( ( ((const U8*)s)[0] & 0xDB ) == 'S' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'T' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'Y' ) )\
 : 0 ) )
+#endif
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for ASCII/Latin1
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
+/*
+=for apidoc QT|STRLEN|is_FOLDS_TO_MULTI_utf8|const U8 * s
+The casefold of some Unicode characters expands to two or three characters.
+
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_FOLDS_TO_MULTI_utf8(s)                                           \
+#  define is_FOLDS_TO_MULTI_utf8(s)                                         \
 ( (STRLEN)( ( 0xC3 == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x9F == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xC4 == ((const U8*)s)[0] || 0xC7 == ((const U8*)s)[0] ) ?              \
@@ -1172,14 +1753,40 @@
 : ( 0xEF == ((const U8*)s)[0] ) ?                                           \
     ( ( ( 0xAC == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0x86) || inRANGE_helper_(U8, ((const U8*)s)[2], 0x93, 0x97) ) ) ? 3 : 0 )\
 : ( ( ( ( 0xF0 == ((const U8*)s)[0] ) && ( 0x9D == ((const U8*)s)[1] ) ) && ( 0xBE == ((const U8*)s)[2] ) ) && ( 0x95 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for ASCII/Latin1
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
+/*
+=for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_utf8|const U8 * s
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                  \
+#  define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                \
 ( (STRLEN)( ( ((const U8*)s)[0] <= 0x7F ) ? 1                               \
 : ( inRANGE_helper_(U8, ((const U8*)s)[0], 0xC2, 0xC3) ) ?                  \
     2                                                                       \
@@ -1200,9 +1807,28 @@
 : ( 0xEF == ((const U8*)s)[0] ) ?                                           \
     ( ( ( 0xAC == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0x86) ) ) ? 3 : 0 )\
 : ( ( ( ( 0xF0 == ((const U8*)s)[0] ) && ( 0x9D == ((const U8*)s)[1] ) ) && ( 0xBE == ((const U8*)s)[2] ) ) && ( 0x95 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+/*
+=for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_cp|UV cp
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+
+
+This returns non-zero if code point C<cp> is
+such a character.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
+#  define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                 \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -1216,14 +1842,42 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for ASCII/Latin1
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
+/*
+=for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8|const U8 * s
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+
+Some times we are interested in just the first character of those that fold to
+a sequence of more than one.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                         \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                       \
 ( (STRLEN)( ( ((const U8*)s)[0] <= 0x7F ) ? 1                               \
 : ( inRANGE_helper_(U8, ((const U8*)s)[0], 0xC2, 0xC3) ) ?                  \
     2                                                                       \
@@ -1244,9 +1898,30 @@
 : ( 0xEF == ((const U8*)s)[0] ) ?                                           \
     ( ( ( 0xAC == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0x86) ) ) ? 3 : 0 )\
 : ( ( ( ( 0xF0 == ((const U8*)s)[0] ) && ( 0x9D == ((const U8*)s)[1] ) ) && ( 0xBE == ((const U8*)s)[2] ) ) && ( 0x95 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+/*
+=for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp|UV cp
+The casefold of most Unicode characters is straight forward, but for some, it
+is problematic in some way.
+
+Some times we are interested in just the first character of those that fold to
+a sequence of more than one.
+
+This returns non-zero if code point C<cp> is
+such a character.
+
+Otherwise, it returns zero.
+
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                        \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -1260,14 +1935,42 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for ASCII/Latin1
 
 	\p{_Perl_PatWS}
 */
+/*
+=for apidoc QT|STRLEN|is_PATWS_safe|const U8 * s|const U8 * e|bool is_utf8
+Not all characters that are nominally space characters in Unicode are
+considered as such in regular expression patterns.  Sometimes we need to
+consider just the latter.
+
+This returns non-zero if the input byte(s) form such a character.
+
+If C<is_utf8> is C<false>, the input is considered to be
+Latin1, and the single byte at C<*s> is examined.
+
+If C<is_utf8> is C<true>, the input is considered to be UTF-8,
+and the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+are examined.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PATWS_safe(s,e,is_utf8)                                          \
+#  define is_PATWS_safe(s,e,is_utf8)                                        \
 ( (STRLEN)( ( LIKELY((e) > (s)) ) ?                                         \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\t', '\r') || ' ' == ((const U8*)s)[0] ) ? 1\
     : (! is_utf8 ) ?                                                        \
@@ -1278,23 +1981,68 @@
 	    : ( ( ( 0xE2 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x8E, 0x8F) || inRANGE_helper_(U8, ((const U8*)s)[2], 0xA8, 0xA9) ) ) ? 3 : 0 )\
 	: 0 )                                                               \
 : 0 ) )
+#endif
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for ASCII/Latin1
 
 	0xD000 - 0xD7FF
 */
+/*
+=for apidoc CT|STRLEN|is_HANGUL_ED_utf8_safe|const U8 * s|const U8 * e
+For convenience of the implementation, certain Korean Hangul syllable characters
+have to be treated specially.
+
+This returns non-zero if the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+
+=cut
+*/
+
 /*** GENERATED CODE ***/
 #define is_HANGUL_ED_utf8_safe(s,e)                                         \
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x80, 0x9F) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for ASCII/Latin1
 
 	\p{_Perl_Word_But_NonCont}
 */
+/*
+=for apidoc QT|STRLEN|is_WORD_BUT_NONCONT_safe|const U8 * s|const U8 * e|bool is_utf8
+Some Unicode characters that match C<\w> can't be used in Perl names (such as
+identifiers and labels).
+
+This returns non-zero if the input byte(s) form such a character.
+
+If C<is_utf8> is C<false>, the input is considered to be
+Latin1, and the single byte at C<*s> is examined.
+
+If C<is_utf8> is C<true>, the input is considered to be UTF-8,
+and the
+sequence of bytes starting at C<s>, and extending no further than S<C<e> - 1>
+are examined.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+#  define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                             \
 ( (STRLEN)( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xCD == ((const U8*)s)[0] ) ?\
 	    ( ( 0xBA == ((const U8*)s)[1] ) ? 2 : 0 )                       \
 	: ( 0xD2 == ((const U8*)s)[0] ) ?                                   \
@@ -1322,6 +2070,7 @@
 		: ( 0x85 == ((const U8*)s)[2] ) ?                           \
 		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x80, 0x89) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x90, 0xA9) || inRANGE_helper_(U8, ((const U8*)s)[3], 0xB0, 0xBF) ) ? 4 : 0 )\
 		: ( ( 0x86 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x80, 0x89) ) ) ? 4 : 0 ) : 0 ) : 0 ) )
+#endif
 
 #endif	/* ASCII/Latin1 */
 
@@ -1330,13 +2079,15 @@
      && '^' == 95 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 21
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break (\R) for EBCDIC 1047
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_safe(s,e,is_utf8)                                        \
+#  define is_LNBREAK_safe(s,e,is_utf8)                                      \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -1350,9 +2101,12 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_utf8_safe(s,e)                                           \
+#  define is_LNBREAK_utf8_safe(s,e)                                         \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -1366,9 +2120,12 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_latin1_safe(s,e)                                         \
+#  define is_LNBREAK_latin1_safe(s,e)                                       \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -1377,9 +2134,10 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace (\h, \H) for EBCDIC 1047
 
 	\p{HorizSpace}
 */
@@ -1403,7 +2161,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace (\v, \V) for EBCDIC 1047
 
 	\p{VertSpace}
 */
@@ -1416,7 +2174,7 @@
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for EBCDIC 1047
 
 	\p{XDigit}
 */
@@ -1432,7 +2190,7 @@
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for EBCDIC 1047
 
 	\p{XPerlSpace}
 */
@@ -1457,7 +2215,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for EBCDIC 1047
 
 	\p{XPerlSpace}
 */
@@ -1486,7 +2244,7 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for EBCDIC 1047
 
 	\p{_Perl_Nchar}
 */
@@ -1507,7 +2265,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 4 bytes
+	SHORTER_NON_CHARS:  for EBCDIC 1047
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -1515,8 +2273,10 @@
 	0x2FFFE - 0x2FFFF
 	0x3FFFE - 0x3FFFF
 */
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+#  define is_SHORTER_NON_CHARS_utf8(s)                                      \
 ( (STRLEN)( ( 0xDD == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x73 == ((const U8*)s)[1] ) ?                                       \
 	( ( 0x55 == ((const U8*)s)[2] ) ?                                   \
@@ -1526,9 +2286,10 @@
 	: ( ( 0x73 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 )\
     : 0 )                                                                   \
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	LARGER_NON_CHARS: # 5 bytes
+	LARGER_NON_CHARS:  for EBCDIC 1047
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -1544,14 +2305,17 @@
 	0xFFFFE - 0xFFFFF
 	0x10FFFE - 0x10FFFF
 */
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_LARGER_NON_CHARS_utf8(s)                                         \
+#  define is_LARGER_NON_CHARS_utf8(s)                                       \
 ( (STRLEN)( ( 0xED == ((const U8*)s)[0] ) ?                                 \
     ( ( ( ( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF9 ) == 0xA9 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF1 ) == 0xB1 ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 )\
 : ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) )
+#endif
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for EBCDIC 1047
 
 	\p{_Perl_Surrogate}
 */
@@ -1564,12 +2328,14 @@
 ( (STRLEN)( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x65, 0x66) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for EBCDIC 1047
 
 	\p{_Perl_Quotemeta}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high(s)                                                \
+#  define is_QUOTEMETA_high(s)                                              \
 ( (STRLEN)( ( 0xB1 == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x56 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xB8 == ((const U8*)s)[0] ) ?                                           \
@@ -1631,19 +2397,22 @@
 	( ( ( 0x46 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x44) ) ) ? 4 : 0 )\
     : ( ( ( 0x63 == ((const U8*)s)[1] ) && ( 0x52 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x69) ) ) ? 4 : 0 )\
 : ( ( ( 0xED == ((const U8*)s)[0] ) && ( 0x70 == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x44) ) ) ? 5 : 0 ) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( ( 0xAF == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 3 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( 0x8F == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x73 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x8F == ((const U8*)s)[2] ) ?                               \
@@ -1718,7 +2487,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -1775,7 +2544,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ((e)-(s) > 3) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -1858,7 +2627,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -1870,9 +2639,12 @@
 	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )\
 : ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                        \
 ( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
 		( ( ( ( 0xB8 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
@@ -1886,7 +2658,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                        \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -1947,7 +2719,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                        \
 ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
 	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
 	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
@@ -1956,7 +2728,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
 	( ( ( 0xB0 == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
@@ -2038,7 +2810,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                        \
 ( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xAF == ((const U8*)s)[2] ) && ( 0x62 == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
@@ -2053,7 +2825,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                        \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x67 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -2114,7 +2886,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -2179,7 +2951,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                        \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -2225,7 +2997,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+#  define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                               \
 ( ((e)-(s) > 5) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAB == ((const U8*)s)[1] ) && ( 0x72 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -2281,14 +3053,17 @@
 	: ( ( ( 0x68 == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
     : ( 0xB5 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e) )\
 : ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
@@ -2300,9 +3075,12 @@
 	( ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ) ? 2 : 0 )\
     : ( ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) && ( ( ((const U8*)s)[1] & 0xBE ) == 's' ) ) ? 2 : 0 )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+#  define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                             \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
@@ -2324,14 +3102,17 @@
 	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
     : 0 )                                                                   \
 : 0 )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 )\
@@ -2349,23 +3130,29 @@
 	: ( ( ( ( ( 0x4A == ((const U8*)s)[1] ) && ( 0xB1 == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) && ( 0xB4 == ((const U8*)s)[4] ) ) && ( 0x68 == ((const U8*)s)[5] ) ) ? 6 : 0 )\
     : 0 )                                                                   \
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_THREE_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
+#  define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                            \
 ( (STRLEN)( ((e)-(s) > 3) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -2428,14 +3215,17 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0x9F ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) )\
 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 1047
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
+#  define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                          \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -2444,14 +3234,17 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0x9F ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) )\
 : 0 ) )
+#endif
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 1047
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_FOLDS_TO_MULTI_utf8(s)                                           \
+#  define is_FOLDS_TO_MULTI_utf8(s)                                         \
 ( (STRLEN)( ( 0x8A == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x73 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8D == ((const U8*)s)[0] || 0x9C == ((const U8*)s)[0] || inRANGE_helper_(U8, ((const U8*)s)[0], 0xB3, 0xB4) ) ?\
@@ -2475,14 +3268,17 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x72 == ((const U8*)s)[1] ) && ( 0x67 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x47) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x66) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x66 == ((const U8*)s)[1] ) ) && ( 0x70 == ((const U8*)s)[2] ) ) && ( 0x64 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for EBCDIC 1047
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                  \
+#  define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                \
 ( (STRLEN)( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0x80 ) == 0x00 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xE0 ) == 0x80 ) ) ? 1\
 : ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[0]), 0xC5, 0xC7) ) ?\
     2                                                                       \
@@ -2505,9 +3301,12 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x72 == ((const U8*)s)[1] ) && ( 0x67 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x47) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x66 == ((const U8*)s)[1] ) ) && ( 0x70 == ((const U8*)s)[2] ) ) && ( 0x64 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
+#  define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                 \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -2521,14 +3320,17 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for EBCDIC 1047
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                         \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                       \
 ( (STRLEN)( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0x80 ) == 0x00 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xE0 ) == 0x80 ) ) ? 1\
 : ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[0]), 0xC5, 0xC7) ) ?\
     2                                                                       \
@@ -2549,9 +3351,12 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x72 == ((const U8*)s)[1] ) && ( 0x67 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x47) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x66 == ((const U8*)s)[1] ) ) && ( 0x70 == ((const U8*)s)[2] ) ) && ( 0x64 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                        \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -2565,23 +3370,27 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for EBCDIC 1047
 
 	\p{_Perl_PatWS}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PATWS_safe(s,e,is_utf8)                                          \
+#  define is_PATWS_safe(s,e,is_utf8)                                        \
 ( (STRLEN)( ( LIKELY((e) > (s)) ) ?                                         \
     ( ( '\t' == ((const U8*)s)[0] || inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || '\n' == ((const U8*)s)[0] || 0x25 == ((const U8*)s)[0] || ' ' == ((const U8*)s)[0] ) ? 1\
     : ( ( is_utf8 && LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) && ( 0xCA == ((const U8*)s)[0] ) ) ? ( ( 0x41 == ((const U8*)s)[1] ) ?\
 		    ( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x55, 0x56) ) ? 3 : 0 )\
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 ) )
+#endif
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for EBCDIC 1047
 
 	0x1 - 0x0
 */
@@ -2590,12 +3399,14 @@
 ( (STRLEN)( 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for EBCDIC 1047
 
 	\p{_Perl_Word_But_NonCont}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+#  define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                             \
 ( (STRLEN)( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xB2 == ((const U8*)s)[0] ) ?\
 	    ( ( 0x69 == ((const U8*)s)[1] ) ? 2 : 0 )                       \
 	: ( 0xB8 == ((const U8*)s)[0] ) ?                                   \
@@ -2631,6 +3442,7 @@
 		: ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x52) ) ?  \
 		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x73) ) ? 4 : 0 )\
 		: ( ( 0x53 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) ) ) ? 4 : 0 ) : 0 ) : 0 ) )
+#endif
 
 #endif	/* EBCDIC 1047 */
 
@@ -2639,13 +3451,15 @@
      && '^' == 176 && '~' == 161 && '!' == 90 && '#' == 123 && '|' == 79 \
      && '$' == 91 && '@' == 124 && '`' == 121 && '\n' == 37
 /*
-	LNBREAK: Line Break: \R
+	LNBREAK: Line Break (\R) for EBCDIC 037
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
 	\p{VertSpace}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_safe(s,e,is_utf8)                                        \
+#  define is_LNBREAK_safe(s,e,is_utf8)                                      \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -2659,9 +3473,12 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_utf8_safe(s,e)                                           \
+#  define is_LNBREAK_utf8_safe(s,e)                                         \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -2675,9 +3492,12 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_LNBREAK_latin1_safe(s,e)                                         \
+#  define is_LNBREAK_latin1_safe(s,e)                                       \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\f') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] ) ? 1\
     : ( '\r' == ((const U8*)s)[0] ) ?                                       \
@@ -2686,9 +3506,10 @@
 : ((e)-(s) > 0) ?                                                           \
     ( inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] )\
 : 0 ) )
+#endif
 
 /*
-	HORIZWS: Horizontal Whitespace: \h \H
+	HORIZWS: Horizontal Whitespace (\h, \H) for EBCDIC 037
 
 	\p{HorizSpace}
 */
@@ -2712,7 +3533,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) )
 
 /*
-	VERTWS: Vertical Whitespace: \v \V
+	VERTWS: Vertical Whitespace (\v, \V) for EBCDIC 037
 
 	\p{VertSpace}
 */
@@ -2725,7 +3546,7 @@
 ( (STRLEN)( inRANGE_helper_(UV, cp, 0x2028, 0x2029) ) )
 
 /*
-	XDIGIT: Hexadecimal digits
+	XDIGIT: Hexadecimal digits for EBCDIC 037
 
 	\p{XDigit}
 */
@@ -2741,7 +3562,7 @@
 ( inRANGE_helper_(UV, cp, 0xFF21, 0xFF26) || inRANGE_helper_(UV, cp, 0xFF41, 0xFF46) ) ) ) )
 
 /*
-	XPERLSPACE: \p{XPerlSpace}
+	XPERLSPACE: \p{XPerlSpace} for EBCDIC 037
 
 	\p{XPerlSpace}
 */
@@ -2766,7 +3587,7 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) )
 
 /*
-	SPACE: Backwards \p{XPerlSpace}
+	SPACE: Backwards \p{XPerlSpace} for EBCDIC 037
 
 	\p{XPerlSpace}
 */
@@ -2795,7 +3616,7 @@
 : 0 ) )
 
 /*
-	NONCHAR: Non character code points
+	NONCHAR: Non character code points for EBCDIC 037
 
 	\p{_Perl_Nchar}
 */
@@ -2816,7 +3637,7 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) : 0 ) )
 
 /*
-	SHORTER_NON_CHARS: # 4 bytes
+	SHORTER_NON_CHARS:  for EBCDIC 037
 
 	0xFDD0 - 0xFDEF
 	0xFFFE - 0xFFFF
@@ -2824,8 +3645,10 @@
 	0x2FFFE - 0x2FFFF
 	0x3FFFE - 0x3FFFF
 */
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+#  define is_SHORTER_NON_CHARS_utf8(s)                                      \
 ( (STRLEN)( ( 0xDD == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x72 == ((const U8*)s)[1] ) ?                                       \
 	( ( 0x55 == ((const U8*)s)[2] ) ?                                   \
@@ -2835,9 +3658,10 @@
 	: ( ( 0x72 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 )\
     : 0 )                                                                   \
 : ( ( ( ( ((const U8*)s)[0] == 0xDF || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xFD ) == 0xF5 ) ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	LARGER_NON_CHARS: # 5 bytes
+	LARGER_NON_CHARS:  for EBCDIC 037
 
 	0x4FFFE - 0x4FFFF
 	0x5FFFE - 0x5FFFF
@@ -2853,14 +3677,17 @@
 	0xFFFFE - 0xFFFFF
 	0x10FFFE - 0x10FFFF
 */
+
+#if defined(PERL_CORE)
 /*** GENERATED CODE ***/
-#define is_LARGER_NON_CHARS_utf8(s)                                         \
+#  define is_LARGER_NON_CHARS_utf8(s)                                       \
 ( (STRLEN)( ( 0xED == ((const U8*)s)[0] ) ?                                 \
     ( ( ( ( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF9 ) == 0xA9 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF1 ) == 0xB1 ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 )\
 : ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) )
+#endif
 
 /*
-	SURROGATE: Surrogate code points
+	SURROGATE: Surrogate code points for EBCDIC 037
 
 	\p{_Perl_Surrogate}
 */
@@ -2873,12 +3700,14 @@
 ( (STRLEN)( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x64, 0x65) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 ) )
 
 /*
-	QUOTEMETA: Meta-characters that \Q should quote
+	QUOTEMETA: Meta-characters that \Q should quote for EBCDIC 037
 
 	\p{_Perl_Quotemeta}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_QUOTEMETA_high(s)                                                \
+#  define is_QUOTEMETA_high(s)                                              \
 ( (STRLEN)( ( 0xAF == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x56 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0xB7 == ((const U8*)s)[0] ) ?                                           \
@@ -2940,19 +3769,22 @@
 	( ( ( 0x46 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x44) ) ) ? 4 : 0 )\
     : ( ( ( 0x62 == ((const U8*)s)[1] ) && ( 0x52 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xB3, 0xBA) ) ) ? 4 : 0 )\
 : ( ( ( 0xED == ((const U8*)s)[0] ) && ( 0x6A == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x44) ) ) ? 5 : 0 ) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
 ( ( ( 0xAD == ((const U8*)s)[1] ) && ( 0x48 == ((const U8*)s)[2] ) ) ? 3 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
 ( ( 0x8E == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x72 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x8E == ((const U8*)s)[2] ) ?                               \
@@ -3027,7 +3859,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -3084,7 +3916,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                            \
+#  define is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
 ( ((e)-(s) > 3) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -3167,7 +3999,7 @@
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
@@ -3179,9 +4011,12 @@
 	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e) )\
 : ((e)-(s) > 4) ? is_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e) ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part0_(s,e)                        \
 ( ( 0x52 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( 0x46 == ((const U8*)s)[2] ) ?                               \
 		( ( ( ( 0xB7 == ((const U8*)s)[3] ) && ( 0x53 == ((const U8*)s)[4] ) ) && ( 0x43 == ((const U8*)s)[5] ) ) ? 0x587 : 0 )\
@@ -3195,7 +4030,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part1_(s,e)                        \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -3256,7 +4091,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part2_(s,e)                        \
 ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                                 \
 	    ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) ? 0xFB03              \
 	    : ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ? 0xFB04 : 0xFB00 )   \
@@ -3265,7 +4100,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part3_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'h' ) ?                                 \
 	( ( ( 0xAE == ((const U8*)s)[1] ) && ( 0x58 == ((const U8*)s)[2] ) ) ? 0x1E96 : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'i' ) ?                             \
@@ -3347,7 +4182,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e)                        \
 ( ( 0x42 == ((const U8*)s)[1] ) ?                                           \
 	    ( ( ( 0xAD == ((const U8*)s)[2] ) && ( 0x5F == ((const U8*)s)[3] ) ) ? 0x1FE4 : 0 )\
 	: ( 0x46 == ((const U8*)s)[1] ) ?                                   \
@@ -3362,7 +4197,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e)                        \
 ( ( 0xBF == ((const U8*)s)[0] ) ?                                           \
 	( ( 0x66 == ((const U8*)s)[1] ) ?                                   \
 	    ( ( 0x41 == ((const U8*)s)[2] ) ?                               \
@@ -3423,7 +4258,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e)                        \
 ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                                 \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -3488,7 +4323,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                          \
+#  define what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e)                        \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -3534,7 +4369,7 @@
 
 
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                                 \
+#  define what_MULTI_CHAR_FOLD_utf8_safe(s,e)                               \
 ( ((e)-(s) > 5) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'a' ) ?                             \
 	( ( ( 0xAA == ((const U8*)s)[1] ) && ( 0x71 == ((const U8*)s)[2] ) ) ? 0x1E9A : 0 )\
@@ -3590,14 +4425,17 @@
 	: ( ( ( 0x67 == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) ? 0x1FD6 : 0 )\
     : ( 0xB4 == ((const U8*)s)[0] ) ? what_MULTI_CHAR_FOLD_utf8_safe_part4_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part5_(s,e) )\
 : ((e)-(s) > 3) ? what_MULTI_CHAR_FOLD_utf8_safe_part6_(s,e) : what_MULTI_CHAR_FOLD_utf8_safe_part7_(s,e) )
+#endif
 
 /*
-	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ((e)-(s) > 2) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
@@ -3609,9 +4447,12 @@
 	( ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[1] & 0xBF ) == 'l' ) ) ? 2 : 0 )\
     : ( ( ( ((const U8*)s)[0] & 0xBF ) == 's' ) && ( ( ((const U8*)s)[1] & 0xBE ) == 's' ) ) ? 2 : 0 )\
 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                               \
+#  define what_MULTI_CHAR_FOLD_latin1_safe(s,e)                             \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ?                         \
@@ -3633,14 +4474,17 @@
 	: ( ( ((const U8*)s)[1] & 0xBF ) == 't' ) ? 0xFB05 : 0 )            \
     : 0 )                                                                   \
 : 0 )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                   \
+#  define is_THREE_CHAR_FOLD_utf8_safe(s,e)                                 \
 ( (STRLEN)( ((e)-(s) > 5) ?                                                 \
     ( ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
 	( ( ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 )\
@@ -3658,23 +4502,29 @@
 	: ( ( ( ( ( 0x4A == ((const U8*)s)[1] ) && ( 0xAF == ((const U8*)s)[2] ) ) && ( 0x43 == ((const U8*)s)[3] ) ) && ( 0xB3 == ((const U8*)s)[4] ) ) && ( 0x67 == ((const U8*)s)[5] ) ) ? 6 : 0 )\
     : 0 )                                                                   \
 : ( ( ( ((e)-(s) > 2) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD: A three-character multi-char fold
+	THREE_CHAR_FOLD: A three-character multi-char fold for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_latin1_safe(s,e)                                 \
+#  define is_THREE_CHAR_FOLD_latin1_safe(s,e)                               \
 ( (STRLEN)( ( ( ( ( ((e) - (s)) >= 3 ) && ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ) && ( ( ((const U8*)s)[1] & 0xBF ) == 'f' ) ) && ( ( ( ((const U8*)s)[2] & 0xBF ) == 'i' ) || ( ( ((const U8*)s)[2] & 0xBF ) == 'l' ) ) ) ? 3 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                              \
+#  define is_THREE_CHAR_FOLD_HEAD_utf8_safe(s,e)                            \
 ( (STRLEN)( ((e)-(s) > 3) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -3737,14 +4587,17 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0x9F ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) )\
 : 0 ) )
+#endif
 
 /*
-	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds
+	THREE_CHAR_FOLD_HEAD: The first two of three-character multi-char folds for EBCDIC 037
 
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                            \
+#  define is_THREE_CHAR_FOLD_HEAD_latin1_safe(s,e)                          \
 ( (STRLEN)( ((e)-(s) > 1) ?                                                 \
     ( ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'w' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) ) ? 1\
     : ( ( ((const U8*)s)[0] & 0xBF ) == 'f' ) ?                             \
@@ -3753,14 +4606,17 @@
 : ((e)-(s) > 0) ?                                                           \
     ( ( ( ((const U8*)s)[0] & 0xAF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0x9F ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xBE ) == 's' ) || ( ( ((const U8*)s)[0] & 0xBF ) == 'y' ) )\
 : 0 ) )
+#endif
 
 /*
-	FOLDS_TO_MULTI: characters that fold to multi-char strings
+	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 037
 
 	\p{_Perl_Folds_To_Multi_Char}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_FOLDS_TO_MULTI_utf8(s)                                           \
+#  define is_FOLDS_TO_MULTI_utf8(s)                                         \
 ( (STRLEN)( ( 0x80 == ((const U8*)s)[0] ) ?                                 \
     ( ( 0x72 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
 : ( 0x8C == ((const U8*)s)[0] || 0x9B == ((const U8*)s)[0] || inRANGE_helper_(U8, ((const U8*)s)[0], 0xB2, 0xB3) ) ?\
@@ -3784,14 +4640,17 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x71 == ((const U8*)s)[1] ) && ( 0x66 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xA6) || inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xB3, 0xB7) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x65 == ((const U8*)s)[1] ) ) && ( 0x6A == ((const U8*)s)[2] ) ) && ( 0x63 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale for EBCDIC 037
 
 	\p{_Perl_Problematic_Locale_Folds}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                  \
+#  define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                \
 ( (STRLEN)( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0x80 ) == 0x00 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xE0 ) == 0x80 ) ) ? 1\
 : ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[0]), 0xC5, 0xC7) ) ?\
     2                                                                       \
@@ -3814,9 +4673,12 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x71 == ((const U8*)s)[1] ) && ( 0x66 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x47) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x65 == ((const U8*)s)[1] ) ) && ( 0x6A == ((const U8*)s)[2] ) ) && ( 0x63 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
+#  define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                 \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -3830,14 +4692,17 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale for EBCDIC 037
 
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                         \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                       \
 ( (STRLEN)( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0x80 ) == 0x00 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[0]) & 0xE0 ) == 0x80 ) ) ? 1\
 : ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[0]), 0xC5, 0xC7) ) ?\
     2                                                                       \
@@ -3858,9 +4723,12 @@
 : ( 0xDD == ((const U8*)s)[0] ) ?                                           \
     ( ( ( ( 0x71 == ((const U8*)s)[1] ) && ( 0x66 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x47) ) ) ? 4 : 0 )\
 : ( ( ( ( 0xDF == ((const U8*)s)[0] ) && ( 0x65 == ((const U8*)s)[1] ) ) && ( 0x6A == ((const U8*)s)[2] ) ) && ( 0x63 == ((const U8*)s)[3] ) ) ? 4 : 0 ) )
+#endif
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
+#  define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                        \
 ( (STRLEN)( cp <= 0xFF || ( 0xFF < cp &&                                    \
 ( inRANGE_helper_(UV, cp, 0x130, 0x131) || ( 0x131 < cp &&                  \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
@@ -3874,23 +4742,27 @@
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
 ( inRANGE_helper_(UV, cp, 0x212A, 0x212B) || ( 0x212B < cp &&               \
 ( inRANGE_helper_(UV, cp, 0xFB00, 0xFB06) || 0x1DF95 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+#endif
 
 /*
-	PATWS: pattern white space
+	PATWS: pattern white space for EBCDIC 037
 
 	\p{_Perl_PatWS}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_PATWS_safe(s,e,is_utf8)                                          \
+#  define is_PATWS_safe(s,e,is_utf8)                                        \
 ( (STRLEN)( ( LIKELY((e) > (s)) ) ?                                         \
     ( ( '\t' == ((const U8*)s)[0] || inRANGE_helper_(U8, ((const U8*)s)[0], '\v', '\r') || 0x15 == ((const U8*)s)[0] || '\n' == ((const U8*)s)[0] || ' ' == ((const U8*)s)[0] ) ? 1\
     : ( ( is_utf8 && LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) && ( 0xCA == ((const U8*)s)[0] ) ) ? ( ( 0x41 == ((const U8*)s)[1] ) ?\
 		    ( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x55, 0x56) ) ? 3 : 0 )\
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 ) )
+#endif
 
 /*
-	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED for EBCDIC 037
 
 	0x1 - 0x0
 */
@@ -3899,12 +4771,14 @@
 ( (STRLEN)( 0 ) )
 
 /*
-	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names
+	WORD_BUT_NONCONT: Word characters that perhaps surprisingly are forbidden in names for EBCDIC 037
 
 	\p{_Perl_Word_But_NonCont}
 */
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /*** GENERATED CODE ***/
-#define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                               \
+#  define is_WORD_BUT_NONCONT_safe(s,e,is_utf8)                             \
 ( (STRLEN)( ( ( LIKELY((e) > (s)) ) && ( LIKELY(((e) - (s)) >= UTF8SKIP(s)) ) ) ? ( ( 0xB1 == ((const U8*)s)[0] ) ?\
 	    ( ( 0x68 == ((const U8*)s)[1] ) ? 2 : 0 )                       \
 	: ( 0xB7 == ((const U8*)s)[0] ) ?                                   \
@@ -3940,6 +4814,7 @@
 		: ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x51, 0x52) ) ?  \
 		    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || 0x5F == ((const U8*)s)[3] || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x72) ) ? 4 : 0 )\
 		: ( ( 0x53 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) ) ) ? 4 : 0 ) : 0 ) : 0 ) )
+#endif
 
 #endif	/* EBCDIC 037 */
 
@@ -4003,6 +4878,6 @@
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * cad98ca9e7be21f5f2a127f4f6304302e3ea1de98295124986eabd91ab2e9643 regen/regcharclass.pl
+ * 6f2138d6540593d5132aa1f3ff92bb6a69e674acf39bbe1f6d72532e1ebdb2d2 regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
