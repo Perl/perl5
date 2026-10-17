@@ -4,6 +4,8 @@
 # could not go in this file, and were farmed out to other .t's, where they
 # remain
 #
+# For test output driven by this file the line number and test number should match.
+#
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 #
 # This __END__ stops me getting screenfulls of syntax errors every time I
@@ -2384,6 +2386,15 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 /\A^\ba*\z/m	a	y	$&	a	-	MBOL and SBOL and BOUND start class should match
 
 (?iu)(?:AASAS|SSASSA|AA|SSS)	SSASSAAK	y	$&	SSASSA	-	same pre-TRIE node modifies minlen & maxlen
+
+# NOTE - This file contains multiple sections, identified by "\n\n#" (a blank
+# line before a comment.) When adding new tests randomly select one to be
+# where you insert your new tests which will greatly reduce the chance of
+# rebase conflicts with other PR's. Don't just add new ones at the bottom. If
+# everyone does that we conflict.
+#
+# Be aware that the test infra counts blank lines and comment lines as a passing
+# test. Thus the test number corresponds to the line in the file.
 
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
