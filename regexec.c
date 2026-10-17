@@ -1912,6 +1912,7 @@ Perl_re_intuit_start(pTHX_
                              octet_buffer)                                 \
 STMT_START {                                                                \
     STRLEN skiplen;                                                         \
+    const U8 *trie_bytes;                                                   \
     if (TRIE_RAW_INPUT_MODE(trie, utf8_target)) {                            \
         uvc = (U8)*uc;                                                       \
         octet = uvc;                                                         \
@@ -1935,11 +1936,11 @@ STMT_START {                                                                \
     case trie_utf8_fold:                                                    \
       do_trie_utf8_fold:                                                    \
         if ( foldlen > 0 ) {                                                \
-            (void) utf8_to_uv_flags( (const U8*) uscan, uscan + foldlen,    \
-                                    &uvc, &len,                             \
-                                    (uniflags|UTF8_DIE_IF_MALFORMED));      \
-            foldlen -= len;                                                 \
-            uscan += len;                                                   \
+            trie_bytes = uscan;                                             \
+            skiplen = UTF8SKIP(trie_bytes);                                 \
+            DEBUG_TRIE_EXECUTE_r(uvc = valid_utf8_to_uv(trie_bytes, NULL)); \
+            foldlen -= skiplen;                                             \
+            uscan += skiplen;                                               \
             len = 0;                                                        \
         } else {                                                            \
             uvc = toFOLD_utf8_flags_( (const U8*) uc, uc_end, foldbuf,      \
@@ -1948,6 +1949,7 @@ STMT_START {                                                                \
             skiplen = UVCHR_SKIP( uvc );                                    \
             foldlen -= skiplen;                                             \
             uscan = foldbuf + skiplen;                                      \
+            trie_bytes = foldbuf;                                           \
         }                                                                   \
         break;                                                              \
     case trie_flu8_latin:                                                   \
@@ -1959,11 +1961,11 @@ STMT_START {                                                                \
     case trie_latin_utf8_fold:                                              \
       do_trie_latin_utf8_fold:                                              \
         if ( foldlen > 0 ) {                                                \
-            (void) utf8_to_uv_flags( (const U8*) uscan, uscan + foldlen,    \
-                                    &uvc, &len,                             \
-                                    (uniflags|UTF8_DIE_IF_MALFORMED));      \
-            foldlen -= len;                                                 \
-            uscan += len;                                                   \
+            trie_bytes = uscan;                                             \
+            skiplen = UTF8SKIP(trie_bytes);                                 \
+            DEBUG_TRIE_EXECUTE_r(uvc = valid_utf8_to_uv(trie_bytes, NULL)); \
+            foldlen -= skiplen;                                             \
+            uscan += skiplen;                                               \
             len = 0;                                                        \
         } else {                                                            \
             len = 1;                                                        \
@@ -1971,6 +1973,7 @@ STMT_START {                                                                \
             skiplen = UVCHR_SKIP( uvc );                                    \
             foldlen -= skiplen;                                             \
             uscan = foldbuf + skiplen;                                      \
+            trie_bytes = foldbuf;                                           \
         }                                                                   \
         break;                                                              \
     case trie_utf8l:                                                        \
@@ -1982,29 +1985,26 @@ STMT_START {                                                                \
     case trie_utf8:                                                         \
         (void) utf8_to_uv_flags( (const U8*) uc, uc_end, &uvc, &len,        \
                                  (uniflags|UTF8_DIE_IF_MALFORMED));         \
+        skiplen = uvchr_to_utf8(octet_buffer, uvc) - octet_buffer;          \
+        trie_bytes = octet_buffer;                                          \
         break;                                                              \
-    case trie_plain:                                                        \
+    case trie_plain: {                                                      \
+        const native_octet_utf8_t *native_octet;                            \
         uvc = (UV)*uc;                                                      \
         len = 1;                                                            \
+        native_octet = &PL_native_octet_utf8[(U8)uvc];                      \
+        trie_bytes = native_octet->bytes;                                   \
+        skiplen = native_octet->len;                                        \
+        break;                                                              \
     }                                                                       \
-    {                                                                       \
-        const native_octet_utf8_t *native_octet;                            \
-        U8 *end;                                                            \
-        if (!utf8_target && FITS_IN_8_BITS(uvc)) {                          \
-            /* Non-UTF-8 input is a native octet.  Use its cached UTF-8     \
-             * representation for the trie transition stream. */            \
-            native_octet = &PL_native_octet_utf8[(U8)uvc];                 \
-            octet = native_octet->bytes[0];                                 \
-            octet_scan = native_octet->bytes + 1;                           \
-            octets_remaining = native_octet->len - 1;                       \
-        } else {                                                            \
-            end = uvchr_to_utf8(octet_buffer, uvc);                         \
-            octet = octet_buffer[0];                                        \
-            octet_scan = octet_buffer + 1;                                  \
-            octets_remaining = (STRLEN)(end - octet_buffer - 1);            \
-        }                                                                   \
     }                                                                       \
-    }                                                                        \
+    /* Folded characters use the folder's UTF-8 bytes directly. */          \
+    /* Keep pending characters separate so foldlen tracks multichar */      \
+    /* expansions. */                                                       \
+    octet = trie_bytes[0];                                                  \
+    octet_scan = trie_bytes + 1;                                            \
+    octets_remaining = skiplen - 1;                                         \
+    }                                                                       \
 } STMT_END
 
 #define DUMP_EXEC_POS(li,s,doutf8,depth)                    \
@@ -3491,12 +3491,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 #ifndef DEBUGGING
             const U32 root_base = aho->states[1].trans.base;
 #endif
-            /* Native, non-folded characters each occupy one target byte.
-             * An accepting state follows a complete encoded character, so
-             * uc - wordlen gives the original start even when reading that
-             * character required several trie octets.  UTF-8 and folded
-             * targets need a ring mapping characters to target positions. */
-            const bool need_points = utf8_target || TRIE_IS_FOLDED(trie);
+            /* Non-folded words have fixed target byte lengths: character
+             * counts for native input and trie octet counts for UTF-8.
+             * Folded words need a ring because expansions change lengths. */
+            const bool need_points = TRIE_IS_FOLDED(trie);
             U8 **points;
 
             /* For a shorter maxlen, points are stored in a stack buffer. */
@@ -3635,8 +3633,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         && (!utf8_target || !UTF8_IS_CONTINUATION(*uc));
 
                     if ( word ) {
-                        const STRLEN wordlen = trie->wordinfo[word].len;
-                        assert(wordlen <= maxlen);
+                        const STRLEN wordlen = !need_points && utf8_target
+                            ? trie->wordinfo[word].u.len_utf8
+                            : trie->wordinfo[word].len;
+                        assert(trie->wordinfo[word].len <= maxlen);
                         U8 *lpos = !need_points ? uc - wordlen
                             : points[pointpos >= wordlen
                                      ? pointpos - wordlen
@@ -3749,9 +3749,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
                 if ( aho->states[ state ].wordnum ) {
-                    const STRLEN wordlen
-                        = trie->wordinfo[aho->states[state].wordnum].len;
-                    assert(wordlen <= maxlen);
+                    const U32 word = aho->states[state].wordnum;
+                    const STRLEN wordlen = !need_points && utf8_target
+                        ? trie->wordinfo[word].u.len_utf8
+                        : trie->wordinfo[word].len;
+                    assert(trie->wordinfo[word].len <= maxlen);
                     U8 *lpos = !need_points ? uc - wordlen
                         : points[pointpos >= wordlen
                                  ? pointpos - wordlen
@@ -7569,9 +7571,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         while (foldlen) {
                             if (!--chars)
                                 break;
-                            (void) utf8_to_uv_flags((U8*)uscan,
-                                              uscan + foldlen, &uvc, &len,
-                                              uniflags|UTF8_DIE_IF_MALFORMED);
+                            /* The folder produces valid UTF-8.  Only its
+                             * character boundaries are needed here. */
+                            len = UTF8SKIP(uscan);
                             uscan += len;
                             foldlen -= len;
                         }

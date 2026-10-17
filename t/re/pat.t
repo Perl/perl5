@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 2290 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 2438 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -88,6 +88,20 @@ sub run_tests {
             [ 'empty alternative',      "\x{100}x|",         'abc' ],
             [ 'wide-only alternatives', "\x{100}x|\x{200}y", 'plain' ],
             [ 'mixed alternatives',     "\x{100}x|cat",      'catcat' ],
+            [ 'UTF-8 failure suffix', "\x{100}ab|b\x{1f600}",
+                "\x{100}ab\x{100}acb\x{1f600}" ],
+            [ 'UTF-8 unequal byte lengths', "\x{e9}x|\x{100}x|\x{1f600}x",
+                "\x{1f600}x\x{e9}x\x{100}x" ],
+            [ 'UTF-8 accepting suffix', "\x{100}x|x\x{1f600}|\x{1f600}",
+                "\x{100}x\x{1f600}\x{1f600}" ],
+            [ 'UTF-8 duplicate paths', "\x{100}x(?=A)|\x{100}x(?=B)|\x{200}y",
+                "\x{100}xZ\x{100}xB\x{200}y" ],
+            [ 'UTF-8 heap length',
+                ("\x{100}" x 40) . 'b|b' . ("\x{1f600}" x 39) . 'c',
+                ("\x{100}" x 160) . 'b' . ("\x{1f600}" x 39) . 'c' ],
+            [ 'UTF-8 embedded NUL', "\x{100}\0x|\x{200}\0y",
+                "\x{100}\0Z\x{200}\0y\x{100}\0x" ],
+            [ 'UTF-8 invariant target suffix', "\x{100}abc|bc|cat", 'zzabccat' ],
             [ 'ring wraps', 'aaaaab|baaaac', ( 'a' x 100 ) . 'baaaac' ],
             [ 'short word after wraps', 'abababx|babc', ( 'ab' x 100 ) . 'c' ],
             [
@@ -154,6 +168,39 @@ sub run_tests {
     }
 
     {
+        my @folded_backtracks = (
+            ['ss', "\x{df}"],
+            ['ffi', "\x{fb03}"],
+            ["\x{3b9}\x{308}\x{301}", "\x{390}"],
+            ["\x{565}\x{582}", "\x{587}"],
+            ["\x{3b9}\x{308}\x{301}\x{565}\x{582}", "\x{390}\x{587}"],
+        );
+        for my $case (@folded_backtracks) {
+            my ($literal, $input) = @$case;
+            my $pattern = "${literal}x(?=NO)|${literal}xy(?=YES)|${literal}xyz|zoo";
+            for my $charset ('u', 'a', 'aa', 'd') {
+                my ($trie_re, $plain_re);
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/\A(?i$charset:$pattern)(?#folded backtracking trie)/;
+                }
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/\A(?i$charset:$pattern)(?#folded backtracking branches)/;
+                }
+                for my $upgrade (0, 1) {
+                    my $target = "${input}xyYES";
+                    utf8::upgrade($target) if $upgrade;
+                    my $expected = $target =~ $plain_re ? "$-[0]:$+[0]" : 'no match';
+                    my $got = $target =~ $trie_re ? "$-[0]:$+[0]" : 'no match';
+                    is($got, $expected,
+                       "folded trie backtracking agrees with branches: /$charset, upgrade=$upgrade");
+                }
+            }
+        }
+    }
+
+    {
         my @folded_starts = (
             ['ssx', "sSx"],
             ['ssx', "\x{df}x"],
@@ -167,6 +214,12 @@ sub run_tests {
             ["\x{3b9}\x{308}\x{301}x", "\x{390}x"],
             ['sx', "\x{df}x"],
             ['ssx', "s\x{df}x"],
+            ["\x{17f}\x{17f}tail", "\x{df}tail"],
+            ["\x{565}\x{582}tail", "\x{587}tail"],
+            ["\x{10428}tail", "\x{10400}tail"],
+            ["\x{565}\x{582}\x{10428}tail", "\x{587}\x{10400}tail"],
+            ["\x{3b9}\x{308}\x{301}\x{565}\x{582}tail",
+             "\x{390}\x{587}tail"],
         );
 
         for my $case (@folded_starts) {

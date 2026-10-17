@@ -1271,7 +1271,10 @@ typedef struct {
                  * accepted word is #2, and the previous accepted
                  * word is #3 */
     U32 len;	/* how many chars long is this word? */
-    U32 accept;	/* accept state for this word */
+    union {
+        U32 accept;     /* accept state while building acceptance chains */
+        U32 len_utf8;   /* non-folded word length in trie octets after building */
+    } u;
 } reg_trie_wordinfo;
 
 

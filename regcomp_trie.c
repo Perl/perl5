@@ -919,7 +919,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     latin1_word_count++;
                 trie->wordinfo[curword].prev = 0;
                 trie->wordinfo[curword].len = wordlen;
-                trie->wordinfo[curword].accept = state;
+                trie->wordinfo[curword].u.accept = state;
 
                 /* If this branch continues past its exact node, preserve the
                  * continuation and the capture-state values associated with
@@ -1710,7 +1710,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             prev = 0;
             if (trie->wordinfo[word].prev)
                 continue;
-            state = trie->wordinfo[word].accept;
+            state = trie->wordinfo[word].u.accept;
             while (state) {
                 state = prev_states[state];
                 if (!state)
@@ -1720,6 +1720,26 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     break;
             }
             trie->wordinfo[word].prev = prev;
+        }
+        if (!TRIE_IS_FOLDED(trie)) {
+            /* Repurpose the per-word accept slot to store UTF-8 octet
+             * lengths now that we have finished building acceptance chains.
+             * We reuse the predecessor array for path depths, which give
+             * the octet lengths.  Each state follows its parent in allocation
+             * order, so we can replace the predecessors in place.
+             *
+             * AC conversion excludes tries with an extracted prefix, so its
+             * word lengths can include the complete path from state 1.
+             */
+            prev_states[1] = 0;
+            for (state = 2; state < trie->statecount; state++) {
+                assert(prev_states[state] < state);
+                prev_states[state] = prev_states[prev_states[state]] + 1;
+            }
+            for (word = 1; word <= trie->wordcount; word++) {
+                const U32 accept = trie->wordinfo[word].u.accept;
+                trie->wordinfo[word].u.len_utf8 = prev_states[accept];
+            }
         }
         Safefree(prev_states);
     }
