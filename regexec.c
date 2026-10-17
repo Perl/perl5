@@ -2385,6 +2385,64 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in)
 #define getWB_VAL_UTF8(pos, strend)                                            \
     generic_GET_BREAK_VAL_UTF8_(getWB_VAL_CP, pos, strend)
 
+/* After checking a full UV-sized window of rejected starts, use that window
+ * as a seek word.  Identical following words can be skipped without checking
+ * their starts again. */
+static const U8 *
+S_scan_repeated_uv_blocks(const U8 *p, const U8 *end, const U8 *last_start,
+                          const U8 *start_map, const U8 start_mask,
+                          const bool utf8_target)
+{
+    const STRLEN block_size = sizeof(UV);
+    const U8 * const start_limit = last_start + 1;
+    /* The next aligned point with a complete rejected window behind it
+     * is between block_size and 2 * block_size - 1 octets away.  Bound
+     * that initial scan once, instead of testing alignment at every octet.
+     * Clamp the count before pointer arithmetic near the target's end. */
+    const STRLEN checked_len = MIN((STRLEN)(start_limit - p),
+        block_size + (block_size - PTR2UV(p) % block_size) % block_size);
+    const U8 * const checked_end = p + checked_len;
+    UV pattern;
+    UV value;
+
+    /* The caller has already rejected p. */
+    p++;
+    while (p < checked_end) {
+        if ((start_map[*p] & start_mask)
+            && (!utf8_target || !UTF8_IS_CONTINUATION(*p)))
+        {
+            return p;
+        }
+        p++;
+    }
+
+    if (p >= start_limit)
+        return p;
+
+    /* The preceding window has been checked, so an equal word is safe to
+     * skip.  A differing word is left for the normal scanner. */
+    if ((STRLEN)(end - p) < block_size)
+        return p;
+
+    /* These fixed-size copies should compile to the same word loads as
+     * dereferencing aligned UV pointers.  memcpy avoids C aliasing issues
+     * when reading the octet buffer as a UV. */
+    memcpy(&pattern, p - block_size, block_size);
+    memcpy(&value, p, block_size);
+    if (pattern != value)
+        return p;
+
+    p += block_size;
+    while (p < start_limit && (STRLEN)(end - p) >= block_size) {
+        memcpy(&value, p, block_size);
+        if (value != pattern)
+            return p;
+        p += block_size;
+    }
+
+    return p;
+}
+
 /* We know what class REx starts with.  Try to find this position... */
 /* if reginfo->intuit, its a dryrun */
 /* annoyingly all the vars in this routine have different names from their counterparts
@@ -2828,14 +2886,21 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
              * that would require us to go beyond the end of the string */
             e = HOP3c(strend, -((SSize_t)lnc), s);
 
-            /* XXX Note that we could recalculate e to stop the loop earlier,
-             * as the worst case expansion above will rarely be met, and as we
-             * go along we would usually find that e moves further to the left.
+            /* Convert inclusive e to an exclusive limit capped at strend.
+             * HOP3c can clamp e to s == strend, where a nonempty folded
+             * literal cannot match and UTF8_SAFE_SKIP returns zero,
+             * preventing loop progress. */
+            const char * const scan_end = e < strend ? e + 1 : strend;
+
+            /* XXX Note that we could recalculate scan_end to stop the loop
+             * earlier, as the worst case expansion above will rarely be met,
+             * and as we go along we would usually find that scan_end moves
+             * further to the left.
              * This would happen only after we reached the point in the loop
              * where if there were no expansion we should fail.  Unclear if
              * worth the expense */
 
-            while (s <= e) {
+            while (s < scan_end) {
                 char *my_strend= (char *)strend;
                 if (   foldEQ_utf8_flags(s, &my_strend, 0,  utf8_target,
                                          pat_string, NULL, ln, is_utf8_pat,
@@ -3385,17 +3450,54 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             /* what trie are we using right now */
             reg_ac_data *aho = (reg_ac_data*)progi->data->data[ TRIE_DATA_SLOT(c) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[aho->trie];
+            const U8 * const prefilter = aho->prefilter;
+            const U8 *start_map = prefilter
+                ? prefilter + REG_AC_PREFILTER_MAP_OFFSET : NULL;
+            const U8 *bmh_shift = prefilter
+                ? prefilter + (utf8_target
+                    ? REG_AC_PREFILTER_UTF8_BMH_OFFSET
+                    : REG_AC_PREFILTER_LATIN1_BMH_OFFSET) : NULL;
+            const U8 bmh_minlen = utf8_target ? aho->utf8_minlen
+                                               : aho->latin1_minlen;
+            const U8 start_mask = utf8_target ? REG_AC_PREFILTER_UTF8_MASK
+                                               : REG_AC_PREFILTER_LATIN1_MASK;
+            const bool has_bmh = prefilter && bmh_minlen;
 
+            /* Every literal path requires a codepoint above Latin-1, so
+             * an unflagged target cannot match this start-of-program trie.
+             * Test that uncommon property before checking the trie shape.
+             * The startstate and prefix checks defensively record AC
+             * eligibility: an extracted prefix precedes the trie, so the
+             * trie cannot be first and is not a candidate for AC conversion.
+             * An accepting root denotes an empty alternative; such an
+             * alternative already prevents NO_LATIN1_WORDS from being set. */
+            if (!utf8_target && FLAGS(c) == EXACT
+                && (trie->prop_flags & TRIE_CP_NO_LATIN1_WORDS)
+                && trie->startstate == 1
+                && !trie->states[1].wordnum
+                && !trie->prefixlen_octets && !trie->prefixlen_chars)
+            {
+                break;
+            }
+
+            /* trie->minlen counts characters.  Subtracting that many octets
+             * gives a conservative start limit for UTF-8.  The BMH loop
+             * checks its encoding's octet length before reading an anchor. */
             const char *last_start = strend - trie->minlen;
 #ifdef DEBUGGING
             const char *real_start = s;
 #endif
             STRLEN maxlen = trie->maxlen;
-            U8 **points; /* map of where we were in the input string
-                            when reading a given char. For ASCII this
-                            is unnecessary overhead as the relationship
-                            is always 1:1, but for Unicode, especially
-                            case folded Unicode this is not true. */
+#ifndef DEBUGGING
+            const U32 root_base = aho->states[1].trans.base;
+#endif
+            /* Native, non-folded characters each occupy one target byte.
+             * An accepting state follows a complete encoded character, so
+             * uc - wordlen gives the original start even when reading that
+             * character required several trie octets.  UTF-8 and folded
+             * targets need a ring mapping characters to target positions. */
+            const bool need_points = utf8_target || TRIE_IS_FOLDED(trie);
+            U8 **points;
 
             /* For a shorter maxlen, points are stored in a stack buffer. */
             /* The choice of STACK_POINTS_MAX here is rather arbitrary.
@@ -3415,7 +3517,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
             DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-            if (maxlen <= STACK_POINTS_MAX) {
+            if (!need_points) {
+                points = NULL;
+            } else if (maxlen <= STACK_POINTS_MAX) {
                 points = points_stack;
             } else {
                 used_heap = true;
@@ -3427,8 +3531,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 points = points_heap;
             }
 
-            /* Trie start-byte filtering is temporarily disabled while the
-             * post-prefix-extraction start state is being validated. */
             /* this is the Aho-Corasick algorithm modified a touch
                to include special handling for long "unknown char" sequences.
                The basic idea being that we use AC as long as we are dealing
@@ -3458,20 +3560,87 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 #ifdef DEBUGGING
                 U32 accepted_word = 0;
 #endif
-                U32 pointpos = 0;
+                /* Index of the next slot in the character-position ring.
+                 * Keep it below maxlen so writes need no runtime division. */
+                STRLEN pointpos = 0;
 
                 while (state && (foldlen || octets_remaining
                                  || uc < (U8*)strend)) {
                     bool failed = false;
+                    bool transitioned_from_root = false;
                     U32 word = aho->states[ state ].wordnum;
+                    U8 *point;
+                    bool point_may_be_start;
 
                     if( state == 1 ) {
                         if (uc >(U8*)last_start) break;
+
+                        /* A prefilter may skip only from the AC root.  Once
+                         * AC has consumed a prefix, its failure state must
+                         * retain that partial-match information. */
+                        if (prefilter && !foldlen && !octets_remaining) {
+                            /* BMH positions its anchor by encoded octet
+                             * length.  Folded tries have no BMH table and
+                             * use only the map of original target starts.
+                             * Both require character boundaries in UTF-8. */
+                            while (uc < (U8*)strend && uc <= (U8*)last_start) {
+                                U8 distance = 0;
+
+                                if (utf8_target && UTF8_IS_CONTINUATION(*uc)) {
+                                    uc++;
+                                    pointpos = 0;
+                                    continue;
+                                }
+                                if (has_bmh) {
+                                    if ((STRLEN)((U8*)strend - uc) < bmh_minlen)
+                                        break;
+                                    distance = bmh_shift[uc[bmh_minlen - 1]];
+                                }
+
+                                /* A start-map miss proves that no literal
+                                 * starts here, regardless of the BMH shift.
+                                 * The helper checks each later start
+                                 * until it has a full rejected word.  Equal
+                                 * following words repeat those rejected
+                                 * octets, so they cannot contain a start.
+                                 * UTF-8 continuation octets cannot be starts
+                                 * either.  The checked window therefore lets
+                                 * us skip equal windows without consulting
+                                 * their BMH anchors. */
+                                if (!(start_map[*uc] & start_mask))
+                                {
+                                    /* The helper consumes at least the
+                                     * rejected octet at uc. */
+                                    uc = (U8 *)S_scan_repeated_uv_blocks(
+                                        uc, (U8*)strend,
+                                        MIN((U8*)last_start, (U8*)strend - 1),
+                                        start_map, start_mask, utf8_target);
+                                    pointpos = 0;
+                                    continue;
+                                }
+                                if (!distance)
+                                    break;
+                                uc += distance;
+                                pointpos = 0;
+                            }
+                            if (uc >= (U8*)strend || uc > (U8*)last_start)
+                                break;
+                        }
                     }
 
+                    /* The prefilter may have moved uc to a later candidate.
+                     * Record that position if the root transition succeeds. */
+                    point = uc;
+                    point_may_be_start = need_points && !octets_remaining
+                        && (!utf8_target || !UTF8_IS_CONTINUATION(*uc));
+
                     if ( word ) {
-                        U8 *lpos= points[ (pointpos - trie->wordinfo[word].len)
-                                                                    % maxlen ];
+                        const STRLEN wordlen = trie->wordinfo[word].len;
+                        assert(wordlen <= maxlen);
+                        U8 *lpos = !need_points ? uc - wordlen
+                            : points[pointpos >= wordlen
+                                     ? pointpos - wordlen
+                                     : maxlen - (wordlen - pointpos)];
                         if (!leftmost || lpos < leftmost) {
                             DEBUG_r(accepted_word = word);
                             leftmost = lpos;
@@ -3479,27 +3648,43 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         if (base == 0) break;
 
                     }
-                    if (!octets_remaining \
-                            && (!utf8_target || !UTF8_IS_CONTINUATION(*uc)))
-                        points[pointpos++ % maxlen]= uc;
                     REXEC_TRIE_READ_CHAR(trie_type, trie, uc,
                                          (U8 *) strend, uscan, len, uvc,
                                          octet, foldlen, foldbuf,
                                          uniflags, octet_scan,
                                          octets_remaining, octet_buffer);
+
                     DEBUG_TRIE_EXECUTE_r({
                         dump_exec_pos( (char *)uc, c, strend,
                                     real_start, s, utf8_target, 0);
                         re_printf(
                             "%sAHOC: Octet:0x%-2" UVXf " CP:0x%-4" UVXf " ",
-                             PL_colors[4], (UV)octet, uvc);
+                             PL_colors[4], (UV)octet, (UV)uvc);
                         if (isPRINT_A(uvc))
                             re_printf("'%c' ", (int)uvc );
                         else
-                            re_printf("    " ); /* four spaces to match "'x' " */
+                            re_printf("    " );
                     });
 
-
+#ifndef DEBUGGING
+                    if (state == 1) {
+                        /* Root misses are the common case for sparse tries.
+                         * They have no failure link to follow. */
+                        if (root_base
+                            && trie->trans[root_base + octet].check == 1)
+                        {
+                            transitioned_from_root = true;
+                            state = trie->trans[root_base + octet].next;
+                        }
+                        else {
+                            uc += len;
+                            if (leftmost)
+                                break;
+                            continue;
+                        }
+                    }
+                    else
+#endif
                     do {
 #ifdef DEBUGGING
                         word = aho->states[ state ].wordnum;
@@ -3520,6 +3705,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             const U32 offset = base + octet;
                             if (trie->trans[offset].check == state)
                             {
+                                if (state == 1)
+                                    transitioned_from_root = true;
                                 failed = false;
                                 state = trie->trans[offset].next;
                                 DEBUG_TRIE_EXECUTE_r(
@@ -3543,6 +3730,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             break;
                         }
                     } while(state);
+                    /* A root miss is not part of an active candidate, so it
+                     * must not enter the point ring.  A successful root
+                     * transition starts a fresh candidate history; successful
+                     * transitions from other states extend that history. */
+                    if (!failed && state && point_may_be_start) {
+                        if (transitioned_from_root)
+                            pointpos = 0;
+                        points[pointpos] = point;
+                        if (++pointpos == maxlen)
+                            pointpos = 0;
+                    }
                     uc += len;
                     if (failed) {
                         if (leftmost)
@@ -3551,9 +3749,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
                 if ( aho->states[ state ].wordnum ) {
-                    U8 *lpos = points[ (pointpos
-                                      - trie->wordinfo[aho->states[ state ]
-                                                    .wordnum].len) % maxlen ];
+                    const STRLEN wordlen
+                        = trie->wordinfo[aho->states[state].wordnum].len;
+                    assert(wordlen <= maxlen);
+                    U8 *lpos = !need_points ? uc - wordlen
+                        : points[pointpos >= wordlen
+                                 ? pointpos - wordlen
+                                 : maxlen - (wordlen - pointpos)];
                     if (!leftmost || lpos < leftmost) {
                         DEBUG_r(accepted_word = aho->states[ state ].wordnum);
                         leftmost = lpos;
@@ -7108,6 +7310,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 /* what trie are we using right now */
                 reg_trie_data * const trie
                     = (reg_trie_data*)rexi->data->data[ TRIE_DATA_SLOT(scan) ];
+
+                /* These literal paths all require codepoints that cannot
+                 * occur in a non-UTF-8 target.  NO_LATIN1_WORDS describes the
+                 * complete source literals, including any extracted prefix.
+                 * Thus this test needs no restriction on startstate: even
+                 * if that state accepts an empty suffix, the prefix still
+                 * had to match.  An original empty alternative would have
+                 * prevented NO_LATIN1_WORDS from being set. */
+                if (!utf8_target
+                    && (FLAGS(scan) == EXACT || FLAGS(scan) == EXACT_REQ8)
+                    && (trie->prop_flags & TRIE_CP_NO_LATIN1_WORDS))
+                {
+                    sayNO;
+                }
+
                 ST.before_paren = trie->before_paren;
                 ST.after_paren = trie->after_paren;
                 assert(ST.before_paren <= rex->nparens);
@@ -7129,9 +7346,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                                                reginfo->strend);
                     }
                 }
-                /* Start-class filtering is disabled while trie prefix
-                 * extraction is being brought into alignment with the
-                 * executable start state. */
+                /* The AC start maps describe unprefixed tries rooted at state
+                 * 1: an extracted prefix precedes the trie and prevents AC
+                 * conversion.  Filtering here would need a map for the
+                 * executable trie->startstate, which can follow a prefix,
+                 * and must allow an accepting start state.  For example,
+                 * extracting "ab" from (?:ab|abc) leaves an empty suffix as
+                 * one alternative, so rejecting the next octet could discard
+                 * a match that needs no more input. */
 
             {
                 U8 *uc = ( U8* )locinput;
