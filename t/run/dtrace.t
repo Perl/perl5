@@ -2,6 +2,8 @@
 
 my $Perl;
 my $dtrace;
+my @prefix;
+
 
 BEGIN {
     chdir 't' if -d 't';
@@ -16,8 +18,11 @@ BEGIN {
 
     `$dtrace -V` or skip_all("$dtrace unavailable");
 
-    my $result = `$dtrace -qnBEGIN -c'$Perl -e 1' 2>&1`;
-    $? && skip_all("Apparently can't probe using $dtrace (perhaps you need root?): $result");
+    @prefix = split ' ', $ENV{PERL_DTRACE_SUDO}
+      if $ENV{PERL_DTRACE_SUDO};
+
+    my $result = `@prefix $dtrace -qnBEGIN -c'$Perl -e 1' 2>&1`;
+    $? && skip_all("Apparently can't probe using @prefix $dtrace (perhaps you need root?): $result");
 }
 
 use strict;
@@ -161,6 +166,7 @@ sub dtrace_like {
     my ($reader, $writer);
 
     my $pid = open2($reader, $writer,
+        @prefix,
         $dtrace,
         '-q',
         '-n', 'BEGIN { trace("ready!\n") }', # necessary! see below
