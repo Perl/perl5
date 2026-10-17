@@ -54,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.86";
+$VERSION = "2.87";
 
 fileparse_set_fstype($^O);
 
@@ -64,12 +64,13 @@ fileparse_set_fstype($^O);
 =item C<fileparse>
 X<fileparse>
 
-    my($filename, $dirs, $suffix) = fileparse($path);
+    my($filename, $dirs, undef)   = fileparse($path);
     my($filename, $dirs, $suffix) = fileparse($path, @suffixes);
     my $filename                  = fileparse($path, @suffixes);
 
-The C<fileparse()> routine divides a file path into its $dirs, $filename
-and (optionally) the filename $suffix.
+The  C<fileparse()> routine  divides a  file path  into its  $dirs and
+$filename.  If the  optional parameter  C<@suffixes> was  specified it
+also returns the file suffix (see below for details).
 
 $dirs contains everything up to and including the last
 directory separator in the $path including the volume (if applicable).
@@ -91,12 +92,12 @@ portion is removed and becomes the $suffix.
      # On Unix returns ("baz", "/foo/bar/", ".txt")
      fileparse("/foo/bar/baz.txt", qr/\.[^.]*/);
 
+     # Without suffix patterns returns ("baz.txt", "/foo/bar/", "")
+     fileparse("/foo/bar/baz.txt");
+
 If type is non-Unix (see L</fileparse_set_fstype>) then the pattern
 matching for suffix removal is performed case-insensitively, since
 those systems are not case-sensitive when opening existing files.
-
-You are guaranteed that C<$dirs . $filename . $suffix> will
-denote the same location as the original $path.
 
 =cut
 
