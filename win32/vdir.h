@@ -188,10 +188,17 @@ void VDir::Init(VDir* pDirCloneFrom)
 int VDir::SetDirA(char const *pPath, int index)
 {
     char chr, *ptr;
-    int length = 0;
+    unsigned int length = 0;
+    Size_t raw_len;
     WCHAR wBuffer[MAX_PATH+1];
+    WCHAR * pwBuffer = (WCHAR *) wBuffer;
+    WCHAR ** ppdirTableW;
+    int pwBufferLen = C_ARRAY_LENGTH(wBuffer);
     if (index < driveCount && pPath != NULL) {
-        length = strlen(pPath);
+        raw_len = strlen(pPath);
+        if(raw_len > (0xFFFF-2))
+            croak_no_mem_ext(STR_WITH_LEN("VDir::SetDirA"));
+        length = (unsigned int)raw_len;
         pMem->Free(dirTableA[index]);
         ptr = dirTableA[index] = (char*)pMem->Malloc(length+2);
         if (ptr != NULL) {
@@ -202,13 +209,20 @@ int VDir::SetDirA(char const *pPath, int index)
                 *ptr++ = '\\';
                 *ptr = '\0';
             }
-            MultiByteToWideChar(CP_ACP, 0, dirTableA[index], -1,
-                    wBuffer, (sizeof(wBuffer)/sizeof(WCHAR)));
-            length = wcslen(wBuffer);
-            pMem->Free(dirTableW[index]);
-            dirTableW[index] = (WCHAR*)pMem->Malloc((length+1)*2);
-            if (dirTableW[index] != NULL) {
-                wcscpy(dirTableW[index], wBuffer);
+            if(length+2>=pwBufferLen) {
+              pwBufferLen = (length+2+1);
+              pwBuffer = (WCHAR *)alloca(pwBufferLen*sizeof(WCHAR));
+            }
+            length = MultiByteToWideChar(CP_ACP, 0, dirTableA[index], -1,
+                    pwBuffer, pwBufferLen);
+            ppdirTableW = &dirTableW[index];
+            pMem->Free(*ppdirTableW);
+            *ppdirTableW = (WCHAR*)pMem->Malloc((length?length:1)*sizeof(WCHAR));
+            if (*ppdirTableW != NULL) {
+                if(length)
+                  Move(pwBuffer, *ppdirTableW, length, WCHAR);
+                else /* syscall failed */
+                    (*ppdirTableW)[0] = '\0';
             }
         }
     }
