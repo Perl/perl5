@@ -1544,18 +1544,18 @@ subscripted
 				$$ = build_typeglob_element ($target, $selector);
 			}
 	|	term_postfixed_arrow_typeglob_element
-	|	scalar                      [array]
+	/* $array[$element] */
+	|	scalar                      [target]
 		subscript_index             [selector]
-		/* $array[$element] */
 			{
-				$$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
+				$$ = newBINOP(OP_AELEM, 0, oopsAV($target), scalar($selector));
 			}
-	|	subscriptable_reference     [array_reference]
+	/* $ref->[..]; $foo{$bar}[..] */
+	|	subscriptable_reference     [target]
 		subscript_index             [selector]
-		/* $ref->[..]; $foo{$bar}[..] */
 			{
 				$$ = newBINOP(OP_AELEM, 0,
-					ref(newAVREF($array_reference),OP_RV2AV),
+					ref(newAVREF($target),OP_RV2AV),
 					scalar($selector));
 			}
 	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
