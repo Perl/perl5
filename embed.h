@@ -131,6 +131,8 @@
 # define atfork_unlock                          Perl_atfork_unlock
 # define av_clear(a)                            Perl_av_clear(aTHX_ a)
 # define av_count(a)                            Perl_av_count(aTHX_ a)
+# define av_create_and_push(a,b)                Perl_av_create_and_push(aTHX_ a,b)
+# define av_create_and_unshift_one(a,b)         Perl_av_create_and_unshift_one(aTHX_ a,b)
 # define av_delete(a,b,c)                       Perl_av_delete(aTHX_ a,b,c)
 # define av_dump(a)                             Perl_av_dump(aTHX_ a)
 # define av_exists(a,b)                         Perl_av_exists(aTHX_ a,b)

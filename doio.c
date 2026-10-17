@@ -1355,8 +1355,8 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
         IoFLAGS(io) &= ~IOf_START;
         if (PL_inplace) {
             assert(PL_defoutgv);
-            Perl_av_create_and_push(aTHX_ &PL_argvout_stack,
-                                    SvREFCNT_inc_simple_NN(PL_defoutgv));
+            av_create_and_push(&PL_argvout_stack,
+                               SvREFCNT_inc_simple_NN(PL_defoutgv));
         }
     }
 
