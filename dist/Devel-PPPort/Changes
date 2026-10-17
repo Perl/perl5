@@ -3,6 +3,8 @@ Revision history for Devel-PPPort
 3.75
 
  * add sv_set_undef
+ * on PERL_RC_STACK builds skip a test that's hard to make
+   working with RC stack (GH #24938)
  * fix a test failure with SSize_t_MAX with -Duselongdouble (#24939)
 
 3.74
