@@ -153,3 +153,27 @@ void
 test_mortal_svfunc_x(SV *args)
     CODE:
         MORTALSVFUNC_X(&destruct_test,args);
+
+void
+utf8_magic(SV *sv)
+    PPCODE:
+        /* returns:
+           - an empty list if no magic
+           - (len) if magic and no cache
+           - (len, cache[0..3]) if magic and cache
+           - len can be undef if no length value stored
+        */
+        MAGIC *mg;
+        if (SvMAGICAL(sv) && (mg = mg_find(sv, PERL_MAGIC_utf8))) {
+            EXTEND(SP, 5);
+            if (mg->mg_len != -1)
+                PUSHs(sv_2mortal(newSVuv((STRLEN)mg->mg_len)));
+            else
+                PUSHs(&PL_sv_undef);
+            if (mg->mg_ptr) {
+                STRLEN *cache = (STRLEN *)mg->mg_ptr;
+                int i;
+                for (i = 0; i < 4; ++i)
+                    PUSHs(sv_2mortal(newSVuv(cache[i])));
+            }
+        }
