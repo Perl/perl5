@@ -783,6 +783,7 @@ is runperl(prog => 'delete $::{qq-\cH-}; ${^OPEN}=foo; print qq-ok\n-'),
   'deleting $::{"\cH"}';
 
 # Tests for some non-magic names:
+{ no warnings;
 is ${^MPE}, undef, '${^MPE} starts undefined';
 is ++${^MPE}, 1, '${^MPE} can be incremented';
 
@@ -790,6 +791,7 @@ is ++${^MPE}, 1, '${^MPE} can be incremented';
 is ${^MPEN}, undef, '${^MPEN} starts undefined';
 # This one used to croak due to that missing break:
 is ++${^MPEN}, 1, '${^MPEN} can be incremented';
+}
 
 {
     no warnings 'deprecated';
