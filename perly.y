@@ -130,6 +130,7 @@
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
 %type <opval> term_postfixed_arrow_typeglob_element
+%type <opval> term_postfixed_arrow_typeglob_postderef
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -906,6 +907,19 @@ term_postfixed_arrow_typeglob_element
 					newGVREF (0, $target),
 					$selector
 				);
+			}
+	;
+
+term_postfixed_arrow_typeglob_postderef
+	/* Matches:
+	 * - target->**
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_STAR
+		PERLY_STAR
+			{
+				$$ = build_typeglob ($target);
 			}
 	;
 
@@ -1745,6 +1759,7 @@ term[product]	:	termbinop
 			{ $$ = $ary; }
 	|	arylen 	%prec PERLY_PAREN_OPEN                    /* $#x, $#{ something } */
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
+	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
 	|	sliceme subscript_index[selector]                     /* array slice */
@@ -1837,14 +1852,6 @@ term[product]	:	termbinop
 					scalar (newCVREF ($PERLY_AMPERSAND, $code_reference)),
 					NULL
 				);
-			}
-	|	term                        [target]
-		ARROW
-		PERLY_STAR
-		PERLY_STAR
-		%prec PERLY_PAREN_OPEN
-			{
-                $$ = build_typeglob ($target);
 			}
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
