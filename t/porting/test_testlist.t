@@ -9,11 +9,41 @@ use warnings;
 use File::Find;
 use File::Spec;
 
-#use Data::Dumper;$Data::Dumper::Indent=1;
+##### Tests in this group adapted from those in perl-5.45.3 and earlier #####
+
+my (%th, %tt, %all);
+$ENV{PERL_TORTURE_TEST} = 1;
+$ENV{PERL_TEST_MEMORY} = 1;
+$ENV{PERL_BENCHMARK} = 1;
 
 my $THISPERL = "$^X -Ilib";
 
-# Once 'make' has run, there should be generated test files in
+for my $file (`$THISPERL t/harness -dumptests`) {
+    chomp $file;
+    $all{$file}++;
+    $th{$file}++;
+}
+
+for my $file (`$THISPERL t/TEST -dumptests`) {
+    chomp $file;
+    $all{$file}++;
+    delete $th{$file} or $tt{$file}++;
+}
+
+is(0+keys(%th), 0, "t/harness will not test anything that t/TEST does not")
+    or print STDERR map { "# t/harness: $_\n" } sort keys %th;
+is(0+keys(%tt), 0, "t/TEST will not test anything that t/harness does not")
+    or print STDERR map { "# t/TEST: $_\n" } sort keys %tt;
+
+my $missing = find_in_manifest_but_missing(\%all);
+is(0+keys(%$missing), 0, "Nothing in MANIFEST that we wouldn't test")
+    or print STDERR map { "# $_\n" } sort keys %$missing;
+
+%th = (); %tt = (); %all = ();
+
+##### #####
+
+# Once 'make' has been run, there should be generated test files in
 # ../dist/Devel-PPPort/t.  Find them, format their names relative to ./t/,
 # sort them, then use that list as arguments to TEST, harness and runtests.
 
@@ -31,38 +61,31 @@ TODO: {
 
     test_via_harness( qw| op/args.t op/bool.t ../lib/vars.t | );
     test_via_harness('base/cond.t', @ppport_tests);
-}
-
-TODO: {
-    todo_skip("test_via_runtests() causes file to hang during 'make test_porting'", 2);
 
     test_via_runtests( qw| op/args.t op/bool.t ../lib/vars.t | );
     test_via_runtests('base/cond.t', @ppport_tests);
 }
 
-my (%th, %tt, %all);
-$ENV{PERL_TORTURE_TEST} = 1;
-$ENV{PERL_TEST_MEMORY} = 1;
-$ENV{PERL_BENCHMARK} = 1;
+#   ./perl -lib t/harness -dumptests
+#
+#       should dump the same number of test as:
+#
+#   ./perl -Ilib t/TEST   -dumptests
 
-#   ./perl -lib t/harness -dump_tests
-# should be equal to the number of "manifested tests" dumped via
-#   ./perl -Ilib t/TEST   -dump_manifested_tests
-
-for my $file (`$THISPERL t/TEST -dump_manifested_tests`) {
+for my $file (`$THISPERL t/TEST -dumptests`) {
     chomp $file;
     $all{$file}++;
     $tt{$file}++;
 }
 
-for my $file (`$THISPERL t/harness -dump_tests`) {
+for my $file (`$THISPERL t/harness -dumptests`) {
     chomp $file;
     $all{$file}++;
     $th{$file}++;
 }
 
 cmp_ok(scalar keys %tt, '==', scalar keys %th,
-    "Count of manifested test files found by t/TEST matches count of test files found by t/harness");
+    "Count of test files found by t/TEST matches count of test files found by t/harness");
 
 my (@missing_from_th, @missing_from_tt);
 for my $k (keys %th) {
@@ -80,33 +103,6 @@ for my $k (keys %tt) {
 }
 is(scalar @missing_from_tt, 0,
     "No files found by t/harness missing from t/TEST");
-
-# Tests below here were in perl-5.45.3 and earlier
-%th = (); %tt = (); %all = ();
-$ENV{PERL_TORTURE_TEST} = 1;
-$ENV{PERL_TEST_MEMORY} = 1;
-$ENV{PERL_BENCHMARK} = 1;
-
-for my $file (`$THISPERL t/harness -dump_tests`) {
-    chomp $file;
-    $all{$file}++;
-    $th{$file}++;
-}
-
-for my $file (`$THISPERL t/TEST -dump_manifested_tests`) {
-    chomp $file;
-    $all{$file}++;
-    delete $th{$file} or $tt{$file}++;
-}
-
-is(0+keys(%th), 0, "t/harness will not test anything that t/TEST does not")
-    or print STDERR map { "# t/harness: $_\n" } sort keys %th;
-is(0+keys(%tt), 0, "t/TEST will not test anything that t/harness does not")
-    or print STDERR map { "# t/TEST: $_\n" } sort keys %tt;
-
-my $missing = find_in_manifest_but_missing(\%all);
-is(0+keys(%$missing), 0, "Nothing in manifest that we wouldn't test")
-    or print STDERR map { "# $_\n" } sort keys %$missing;
 
 done_testing();
 
