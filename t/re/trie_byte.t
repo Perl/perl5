@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 35;
+plan tests => 39;
 
 my $trie = qr/(?:ab|ac|ad|ae)/;
 
@@ -140,3 +140,54 @@ ok('KELVIN' =~ $unicode_fold,
    'Unicode fold trie matches the Kelvin alternative');
 ok('strasse' =~ $unicode_fold,
    'Unicode fold trie matches the sharp-s expansion alternative');
+
+# Compare match positions with trie compilation disabled.  Vary the rejected
+# prefix and its length so skipping cannot hide a later match or read past
+# a short target.  Include periods which span several machine words.
+for my $folded (0, 1) {
+    for my $upgraded (0, 1) {
+        my $failure = '';
+        CASE:
+        for my $distance (0 .. 6) {
+            my $word = ('C' x (7 - $distance)) . 'A' . ('C' x $distance);
+            my $source = "$word|DDDDDDDD";
+            $source = "(?i:$source)" if $folded;
+            my ($with_trie, $without_trie);
+            {
+                local ${^RE_TRIE_MAXBUF} = 65536;
+                $with_trie = qr/$source/;
+            }
+            {
+                local ${^RE_TRIE_MAXBUF} = -1;
+                $without_trie = qr/$source/;
+            }
+            for my $length (0 .. 80) {
+                for my $repeat ('A', 'AB', 'Aab', 'Aabef', 'Aabefg',
+                                'Aabefgh', chr(0x2000)) {
+                    next if !$upgraded && $repeat eq chr(0x2000);
+                    my $head = substr($repeat x ($length + 1), 0, $length);
+                    for my $tail ('', $word, "${word}xDDDDDDDD", "A$word") {
+                        my $target = $head . $tail;
+                        $target = lc $target if $folded;
+                        utf8::upgrade($target) if $upgraded;
+                        my @positions;
+                        for my $re ($with_trie, $without_trie) {
+                            my @spans;
+                            while ($target =~ /$re/g) {
+                                push @spans, "$-[0]:$+[0]";
+                            }
+                            push @positions, join ',', @spans;
+                        }
+                        if ($positions[0] ne $positions[1]) {
+                            $failure = "distance=$distance length=$length: "
+                                     . "$positions[0] versus $positions[1]";
+                            last CASE;
+                        }
+                    }
+                }
+            }
+        }
+        is($failure, '',
+           "AC skips preserve match positions: folded=$folded UTF-8=$upgraded");
+    }
+}
