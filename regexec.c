@@ -7498,6 +7498,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     CAPTURE_CLEAR(ST.before_paren+1, ST.after_paren, "TRIE_next_fail");
                 }
             }
+          trie_next_word:
             if (!--ST.accepted) {
                 DEBUG_EXECUTE_r({
                     re_exec_indentf("%sTRIE failed...%s\n",
@@ -7569,13 +7570,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         uvc = to_uni_fold(uvc, foldbuf, &foldlen);
                         uscan = foldbuf;
                         while (foldlen) {
-                            if (!--chars)
-                                break;
-                            /* The folder produces valid UTF-8.  Only its
+                            /* The folder produces valid UTF-8. Only its
                              * character boundaries are needed here. */
                             len = UTF8SKIP(uscan);
                             uscan += len;
                             foldlen -= len;
+                            if (!--chars) {
+                                /* A word ending inside this input
+                                 * character's fold is not a match. Try
+                                 * the next word before running its tail. */
+                                if (foldlen)
+                                    goto trie_next_word;
+                                break;
+                            }
                         }
                     }
                 }

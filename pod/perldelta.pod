@@ -456,6 +456,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+A case-insensitive regex trie no longer accepts a word ending partway through
+an input character's fold. For example, C</s|zoo/iu> no longer matches a
+sharp-s, whose full fold is C<ss>. Later alternatives are tried in order.
+
+=item *
+
 A folded regex trie now updates its minimum and maximum lengths independently.
 An alternative which changes both bounds could previously cause a valid
 match to be missed or an assertion failure during Aho-Corasick scanning.
