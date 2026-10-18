@@ -65,7 +65,7 @@ $::do_nothing = $::do_nothing = 1;
 require './TEST';
 our $Valgrind_Log;
 
-# The -v, -dump_tests, and -torture switches are also found in t/TEST
+# The -v, -dumptests, and -torture switches are also found in t/TEST
 my $Verbose = 0;
 $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 
@@ -74,7 +74,7 @@ my $htoolnm;
 my $hgrind_ct;
 
 my $dump_tests = 0;
-if ($ARGV[0] && $ARGV[0] =~ /^-?-dump_tests$/) {
+if ($ARGV[0] && $ARGV[0] =~ /^-?-dumptests$/) {
     shift;
     $dump_tests = 1;
 }
@@ -431,9 +431,9 @@ for (@tests) {
 # dump_tests() is defined in t/TEST
 # Assuming that no individual tests have been passed on the command-line as
 # arguments to t/harness, the number of tests dumped below via
-#   ./perl -lib t/harness -dump_tests
-# should be equal to the number of "manifested tests" dumped via
-#   ./perl -Ilib t/TEST   -dump_manifested_tests
+#   ./perl -lib t/harness -dumptests
+# should be equal to the number of tests" dumped via
+#   ./perl -Ilib t/TEST   -dumptests
 
 dump_tests(\@tests) if $dump_tests;
 
