@@ -994,6 +994,7 @@
 #   define boot_core_UNIVERSAL()                Perl_boot_core_UNIVERSAL(aTHX)
 #   define boot_core_builtin()                  Perl_boot_core_builtin(aTHX)
 #   define boot_core_mro()                      Perl_boot_core_mro(aTHX)
+#   define build_array_element(a,b)             Perl_build_array_element(aTHX_ a,b)
 #   define build_function_invocation(a,b,c)     Perl_build_function_invocation(aTHX_ a,b,c)
 #   define build_infix_plugin(a,b,c)            Perl_build_infix_plugin(aTHX_ a,b,c)
 #   define build_method_invocation(a,b,c)       Perl_build_method_invocation(aTHX_ a,b,c)

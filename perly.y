@@ -1548,15 +1548,19 @@ subscripted
 	|	scalar                      [target]
 		subscript_index             [selector]
 			{
-				$$ = newBINOP(OP_AELEM, 0, oopsAV($target), scalar($selector));
+				$$ = build_array_element (
+					oopsAV ($target),
+					$selector
+				);
 			}
 	/* $ref->[..]; $foo{$bar}[..] */
 	|	subscriptable_reference     [target]
 		subscript_index             [selector]
 			{
-				$$ = newBINOP(OP_AELEM, 0,
-					ref(newAVREF($target),OP_RV2AV),
-					scalar($selector));
+				$$ = build_array_element (
+					ref (newAVREF ($target), OP_RV2AV),
+					$selector
+				);
 			}
 	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
