@@ -59,7 +59,6 @@
 #     4261
 #     4370
 #     5959
-#     8267
 #     8945
 #     8952
 #     9010
@@ -152,18 +151,6 @@ TODO: {
     is($^W, 1, '$^W value prior to localization is restored; GH 5835');
     $^W = $prev_w;
 
-}
-
-TODO: {
-    local $TODO = "[GH 8267]";
-
-    "A" =~ /(((?:A))?)+/;
-    my $first = $2;
-
-    "A" =~ /(((A))?)+/;
-    my $second = $2;
-
-    is($first, $second, "[GH 8267]");
 }
 
 TODO: {
