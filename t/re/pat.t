@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 2438 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 2630 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -162,6 +162,47 @@ sub run_tests {
                         join( ',', @expected ),
 "AC match positions agree with branches: $name, /$mods, upgrade=$upgrade"
                     );
+                }
+            }
+        }
+    }
+
+    {
+        my @cases = (
+            ['ssx|sy', "\x{df}x!"],
+            ['sssx|ssy', "s\x{df}x!"],
+            ['ffix|fy', "\x{fb03}x!"],
+            ['ffix|ffy', "\x{fb03}x!"],
+            ["\x{3b9}\x{308}\x{301}x|\x{3b9}y", "\x{390}x!"],
+            ["\x{565}\x{582}x|\x{565}y", "\x{587}x!"],
+        );
+        for my $case (@cases) {
+            for my $charset ('u', 'a', 'aa', 'd') {
+                for my $jump (0, 1) {
+                    my $pattern = join '|', map {
+                        $_ . ($jump ? '([!]?)' : '')
+                    } split /\|/, $case->[0];
+                    for my $pattern_utf8 (0, 1) {
+                        my $source = "(?i$charset:$pattern)";
+                        utf8::upgrade($source) if $pattern_utf8;
+                        my ($plain, $trie);
+                        { local ${^RE_TRIE_MAXBUF} = -1;
+                          $plain = qr/$source(?#whole fold branches)/; }
+                        { local ${^RE_TRIE_MAXBUF} = 65536;
+                          $trie = qr/$source(?#whole fold trie)/; }
+                        for my $target_utf8 (0, 1) {
+                            my $target = '??' . $case->[1];
+                            utf8::upgrade($target) if $target_utf8;
+                            my @result;
+                            for my $re ($plain, $trie) {
+                                push @result, $target =~ $re
+                                    ? join(':', map { defined $_ ? $_ : '-' } @-, @+)
+                                    : 'no match';
+                            }
+                            is($result[1], $result[0],
+                               "trie prefix preserves folds: /$charset, jump=$jump, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
+                        }
+                    }
                 }
             }
         }

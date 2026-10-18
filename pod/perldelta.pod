@@ -456,6 +456,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Case-insensitive trie prefix extraction no longer splits a multi-character
+fold between regex nodes. For example, a UTF-8 flagged C<ssx|sy> pattern
+under C</iu> now matches C<"\x{df}x">.
+
+=item *
+
 The regular expression optimizer no longer rejects valid matches when a
 positive lookahead can match an empty string. For example,
 C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
