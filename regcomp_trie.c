@@ -871,10 +871,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         U8 encoded[UTF8_MAXBYTES + 1];
 
                         if (!is_utf8 && FITS_IN_8_BITS(uvc)) {
-                            const native_octet_utf8_t * const octet =
-                                &PL_native_octet_utf8[(U8)uvc];
-                            bp = octet->bytes;
-                            ep = bp + octet->len;
+                            const native_octet_utf8_t octet
+                                = PL_native_octet_utf8[(U8)uvc];
+                            encoded[0] = (U8)octet;
+                            encoded[1] = (U8)(octet >> 8);
+                            bp = encoded;
+                            ep = bp + (octet > 0xFF ? 2 : 1);
                         }
                         else {
                             /* YJO: KHW says this should not be NATIVE_TO_UNI(uvc) */

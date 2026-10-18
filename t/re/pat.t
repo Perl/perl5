@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 2726 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6822 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -239,6 +239,35 @@ sub run_tests {
                         }
                         is($result[1], $result[0],
                            "trie acceptance ends at a complete fold: /$charset, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        for my $c (0 .. 255) {
+            my $d = $c ^ 128;
+            my $pattern = quotemeta(chr($c)) . 'X|'
+                        . quotemeta(chr($d)) . 'Y';
+            for my $pattern_utf8 (0, 1) {
+                my $source = $pattern;
+                utf8::upgrade($source) if $pattern_utf8;
+                my ($plain, $trie);
+                { local ${^RE_TRIE_MAXBUF} = -1;
+                  $plain = qr/$source(?#native octet branches)/; }
+                { local ${^RE_TRIE_MAXBUF} = 65536;
+                  $trie = qr/$source(?#native octet trie)/; }
+                for my $target_utf8 (0, 1) {
+                    for my $body (chr($c).'X', chr($d).'Y', chr($c).'Y', 'ZZ') {
+                        my $target = '??' . $body . '!';
+                        utf8::upgrade($target) if $target_utf8;
+                        my $expected = $target =~ $plain
+                            ? "$-[0]:$+[0]" : 'no match';
+                        my $got = $target =~ $trie
+                            ? "$-[0]:$+[0]" : 'no match';
+                        is($got, $expected,
+                           "trie native octet $c: pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
                     }
                 }
             }

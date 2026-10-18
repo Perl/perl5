@@ -1989,12 +1989,14 @@ STMT_START {                                                                \
         trie_bytes = octet_buffer;                                          \
         break;                                                              \
     case trie_plain: {                                                      \
-        const native_octet_utf8_t *native_octet;                            \
+        native_octet_utf8_t native_octet;                                   \
         uvc = (UV)*uc;                                                      \
         len = 1;                                                            \
-        native_octet = &PL_native_octet_utf8[(U8)uvc];                      \
-        trie_bytes = native_octet->bytes;                                   \
-        skiplen = native_octet->len;                                        \
+        native_octet = PL_native_octet_utf8[(U8)uvc];                       \
+        octet_buffer[0] = (U8)native_octet;                                 \
+        octet_buffer[1] = (U8)(native_octet >> 8);                          \
+        trie_bytes = octet_buffer;                                          \
+        skiplen = native_octet > 0xFF ? 2 : 1;                              \
         break;                                                              \
     }                                                                       \
     }                                                                       \
