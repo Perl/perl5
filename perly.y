@@ -1785,8 +1785,8 @@ term[product]	:	termbinop
 			{ $$ = $hsh; }
 	|	ary 	%prec PERLY_PAREN_OPEN
 			{ $$ = $ary; }
+	/* $#x, $#{ something } */
 	|	arylen                          %prec PERLY_PAREN_OPEN
-		/* $#x, $#{ something } */
 			{
 				$$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));
 			}
@@ -2118,16 +2118,16 @@ hsh	:	PERLY_PERCENT_SIGN indirob
 
 arylen
 	:	DOLSHARP
-		indirob
+		indirob                     [target]
 			{
-				$$ = newAVREF($indirob);
+				$$ = newAVREF($target);
 			}
-	|	term
+	|	term                        [target]
 		ARROW
 		DOLSHARP
 		PERLY_STAR
 			{
-				$$ = newAVREF($term);
+				$$ = newAVREF($target);
 			}
 	;
 
