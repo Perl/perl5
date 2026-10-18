@@ -1607,18 +1607,18 @@ subscripted
 				);
 			}
 	|	term_postfixed_arrow_array_element
-	|	scalar                      [hash]
+	/* $foo{bar();} */
+	|	scalar                      [target]
 		subscript_keys              [selector]
-		/* $foo{bar();} */
 			{
-				$$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
+				$$ = newBINOP(OP_HELEM, 0, oopsHV($target), jmaybe($selector));
 			}
-	|	subscriptable_reference     [hash_reference]
+	/* $foo->[bar]->{baz;} */
+	|	subscriptable_reference     [target]
 		subscript_keys              [selector]
-		/* $foo->[bar]->{baz;} */
 			{
 				$$ = newBINOP(OP_HELEM, 0,
-					ref(newHVREF($hash_reference),OP_RV2HV),
+					ref(newHVREF($target),OP_RV2HV),
 					jmaybe($selector));
 			}
 	/* $subref->(@args); $foo->{bar}(@args) */
