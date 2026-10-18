@@ -312,7 +312,7 @@ sub _compute_tests_and_ordering($) {
     return \@seq;
 }
 
-my @tests = (); 
+my @tests = ();
 if (@ARGV) {
     # If you want these run in speed order, just use prove
 
