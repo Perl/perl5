@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 2630 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 2726 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -202,6 +202,43 @@ sub run_tests {
                             is($result[1], $result[0],
                                "trie prefix preserves folds: /$charset, jump=$jump, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        my @cases = (
+            ['s|zoo', "\x{df}!"],
+            ['s([!]?)|ss([!]?)', "\x{df}!"],
+            ['f([!]?)|ffi([!]?)', "\x{fb03}!"],
+            ['ff([!]?)|ffi([!]?)', "\x{fb03}!"],
+            ['ss([!]?)|s([!]?)', "\x{df}!"],
+            ["\x{3b9}\x{308}([!]?)|\x{3b9}\x{308}\x{301}([!]?)",
+             "\x{390}!"],
+        );
+        for my $case (@cases) {
+            for my $charset ('u', 'a', 'aa', 'd') {
+                for my $pattern_utf8 (0, 1) {
+                    my $source = "\\A(?i$charset:$case->[0])";
+                    utf8::upgrade($source) if $pattern_utf8;
+                    my ($plain, $trie);
+                    { local ${^RE_TRIE_MAXBUF} = -1;
+                      $plain = qr/$source(?#fold endpoints branches)/; }
+                    { local ${^RE_TRIE_MAXBUF} = 65536;
+                      $trie = qr/$source(?#fold endpoints trie)/; }
+                    for my $target_utf8 (0, 1) {
+                        my $target = $case->[1];
+                        utf8::upgrade($target) if $target_utf8;
+                        my @result;
+                        for my $re ($plain, $trie) {
+                            push @result, $target =~ $re
+                                ? join(':', map { defined $_ ? $_ : '-' } @-, @+)
+                                : 'no match';
+                        }
+                        is($result[1], $result[0],
+                           "trie acceptance ends at a complete fold: /$charset, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
                     }
                 }
             }
