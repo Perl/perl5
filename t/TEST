@@ -655,11 +655,6 @@ unless (@XARGV) {
 
 dump_tests(\@XARGV) if $dump_tests;
 
-# This is where we would have to calculate a list of generated tests
-# if we were to support subroutine dump_all_tests() and command-line switch
-# -dump_all_tests.
-
-
 filter_taint_tests(\@XARGV);
 
 if ($::deparse) {
