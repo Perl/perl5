@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1314;  # Update this when adding/deleting tests.
+plan tests => 1315;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2744,6 +2744,15 @@ PROG
         use strict;
         my ($prevDecade, $decade, $year) = (0, 1, 2);
         qr/\A(?:1[0-9][0-9]{2}|20[0-$prevDecade][0-9]|20$decade[0-$year])\Z/o;
+        PROG
+    }
+
+    {   # GH 16250
+        fresh_perl_is(<<~'PROG', "undef:de567\nundef:de567", {}, "content in capture buffer");
+        "abcde5678" =~ / b (*pla:.*(*plb:(*plb:(.{4}))? (.{5})).$)/x;
+        print $1 // "undef", ":", $2 // "undef", "\n";
+        "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
+        print $1 // "undef", ":", $2 // "undef", "\n";
         PROG
     }
 

@@ -255,17 +255,6 @@ TODO: {
 }
 
 TODO: {
-    local $TODO = "GH 16250";
-    fresh_perl_is(<<~'EOF',
-        "abcde5678" =~ / b (*pla:.*(*plb:(*plb:(.{4}))? (.{5})).$)/x;
-        print $1 // "undef", ":", $2 // "undef", "\n";
-        "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
-        print $1 // "undef", ":", $2 // "undef", "\n";
-        EOF
-    "undef:de567\nundef:de567", { eval $switches }, "GH 16250");
-}
-
-TODO: {
     local $::TODO = 'GH 16364';
 
     my @arr;
