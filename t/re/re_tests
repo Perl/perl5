@@ -2277,6 +2277,24 @@ z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	extra sibling before 
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	abc	y	$&	abc	-	lookahead continuation in first trie word
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	ade	y	$&	ade	-	lookahead continuation in second trie word
 
+# GH #16250: skipped optional lookbehind clears captures from earlier attempts
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookahead and lookbehind
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookbehind without lookahead
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookahead and lookbehind using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookbehind without lookahead using long syntax
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 
