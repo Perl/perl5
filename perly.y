@@ -131,6 +131,7 @@
 %type <opval> subscriptable_reference
 %type <opval> term_postfixed_arrow_array_element
 %type <opval> term_postfixed_arrow_array_length
+%type <opval> term_postfixed_arrow_array_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
 
@@ -921,6 +922,19 @@ term_postfixed_arrow_array_length
 		PERLY_STAR
 			{
 				$$ = build_array_length ($target);
+			}
+	;
+
+term_postfixed_arrow_array_postderef
+	/* Matches:
+	 * - target->@*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_SNAIL
+		PERLY_STAR
+			{
+				$$ = newAVREF ($target);
 			}
 	;
 
@@ -1880,13 +1894,7 @@ term[product]	:	termbinop
 			}
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
 			{ $$ = newSVREF($operand); }
-	|	term                        [target]
-		ARROW
-		PERLY_SNAIL
-		PERLY_STAR
-			{
-				$$ = newAVREF($target);
-			}
+	|	term_postfixed_arrow_array_postderef
 	|	term[operand] ARROW PERLY_PERCENT_SIGN PERLY_STAR
 			{ $$ = newHVREF($operand); }
 	|	term                        [code_reference]
