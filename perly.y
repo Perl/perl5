@@ -1784,8 +1784,11 @@ term[product]	:	termbinop
 			{ $$ = $hsh; }
 	|	ary 	%prec PERLY_PAREN_OPEN
 			{ $$ = $ary; }
-	|	arylen 	%prec PERLY_PAREN_OPEN                    /* $#x, $#{ something } */
-			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
+	|	arylen                          %prec PERLY_PAREN_OPEN
+		/* $#x, $#{ something } */
+			{
+				$$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));
+			}
 	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
@@ -2112,10 +2115,19 @@ hsh	:	PERLY_PERCENT_SIGN indirob
 			}
 	;
 
-arylen	:	DOLSHARP indirob
-			{ $$ = newAVREF($indirob); }
-	|	term ARROW DOLSHARP PERLY_STAR
-			{ $$ = newAVREF($term); }
+arylen
+	:	DOLSHARP
+		indirob
+			{
+				$$ = newAVREF($indirob);
+			}
+	|	term
+		ARROW
+		DOLSHARP
+		PERLY_STAR
+			{
+				$$ = newAVREF($term);
+			}
 	;
 
 star	:	PERLY_STAR indirob
