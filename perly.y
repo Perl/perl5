@@ -1880,12 +1880,12 @@ term[product]	:	termbinop
 			}
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
 			{ $$ = newSVREF($operand); }
-	|	term                        [operand]
+	|	term                        [target]
 		ARROW
 		PERLY_SNAIL
 		PERLY_STAR
 			{
-				$$ = newAVREF($operand);
+				$$ = newAVREF($target);
 			}
 	|	term[operand] ARROW PERLY_PERCENT_SIGN PERLY_STAR
 			{ $$ = newHVREF($operand); }
