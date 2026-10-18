@@ -4795,6 +4795,14 @@ Perl_seed(pTHX)
     }
 #endif
 
+#if defined(__VMS) && __VMS_VER >= 90200000
+    /* Use the native entropy if available. Can supply up to 256 bytes
+     * in one call. */
+    if ($VMS_STATUS_SUCCESS(sys$get_entropy(&seed, sizeof(seed)))) {
+        return seed;
+    }
+#endif
+
     /* We only get this far if /dev/urandom is not available or the read fails.
      * Grab several state variables and hash those for randomness instead. */
 
