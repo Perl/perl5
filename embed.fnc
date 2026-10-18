@@ -1024,6 +1024,9 @@ dp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\
 				|NULLOK OP *arguments
+dp	|OP *	|build_hash_element					\
+				|NN OP *target				\
+				|NN OP *selector
 p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
@@ -1036,6 +1039,9 @@ dp	|OP *	|build_method_invocation_arguments			\
 				|NN OP *target				\
 				|NULLOK OP *arguments
 dp	|OP *	|build_typeglob |NN OP *target
+dp	|OP *	|build_typeglob_element 				\
+				|NN OP *target				\
+				|NN OP *selector
 dp	|OP *	|build_typeglob_element 				\
 				|NN OP *target				\
 				|NN OP *selector

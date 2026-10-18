@@ -1611,15 +1611,19 @@ subscripted
 	|	scalar                      [target]
 		subscript_keys              [selector]
 			{
-				$$ = newBINOP(OP_HELEM, 0, oopsHV($target), jmaybe($selector));
+				$$ = build_hash_element (
+					oopsHV ($target),
+					$selector
+				);
 			}
 	/* $foo->[bar]->{baz;} */
 	|	subscriptable_reference     [target]
 		subscript_keys              [selector]
 			{
-				$$ = newBINOP(OP_HELEM, 0,
-					ref(newHVREF($target),OP_RV2HV),
-					jmaybe($selector));
+				$$ = build_hash_element (
+					ref (newHVREF ($target), OP_RV2HV),
+					$selector
+				);
 			}
 	/* $subref->(@args); $foo->{bar}(@args) */
 	/* $subref->(); $foo->{bar}() */

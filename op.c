@@ -4999,6 +4999,31 @@ Perl_build_typeglob_element (pTHX_ OP *target, OP *selector)
 }
 
 /*
+=for apidoc build_hash_element
+
+    build_hash_element ($target, $selector);
+
+Builds C<OP *> representing an element of a hash.
+
+Represents:
+
+    $hash{$key}
+    $term->{$key}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_hash_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_HASH_ELEMENT;
+
+    return newBINOP (OP_HELEM, 0, target, jmaybe (selector));
+}
+
+/*
 =for apidoc build_method_invocation
 
     build_method_invocation ($target, $method, $arguments);
