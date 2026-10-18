@@ -588,6 +588,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
      * the same representation in both modes; awkward and high codepoints
      * require processed mode. */
     bool trie_needs_codepoint_processing;
+    bool unsafe_prefix[256] = { FALSE };
 
     /* Store the trie and, in debugging builds, its word list. */
 #ifdef DEBUGGING
@@ -804,6 +805,22 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         /* Raw data, will be folded later if needed. */
                         uvc = (U32)*uc;
                         len = 1;
+                    }
+                    /* An input character can fold to several source
+                     * characters. Do not extract a prefix ending inside
+                     * that fold, including overlapping folds in "sss". */
+                    if (folder && UTF && wordlen < 256) {
+                        const STRLEN folded_octets
+                            = is_MULTI_CHAR_FOLD_utf8_safe(uc, e);
+                        if (folded_octets) {
+                            const U32 folded_chars
+                                = is_THREE_CHAR_FOLD_HEAD_utf8_safe(
+                                    uc, uc + folded_octets)
+                                ? 3 : 2;
+                            for (U32 i = 1; i < folded_chars
+                                    && wordlen - 1 + i < 256; i++)
+                                unsafe_prefix[wordlen - 1 + i] = TRUE;
+                        }
                     }
                     TRIE_CHARCOUNT(trie)++;
 
@@ -1473,9 +1490,12 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     octets++;
                     state = next_state;
                     if (!need) {
-                        complete_state = state;
-                        complete_octets = octets;
-                        complete_chars = ++chars;
+                        chars++;
+                        if (!unsafe_prefix[chars]) {
+                            complete_state = state;
+                            complete_octets = octets;
+                            complete_chars = chars;
+                        }
                     }
                 }
                 state = complete_state;

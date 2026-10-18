@@ -431,6 +431,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Case-insensitive trie prefix extraction no longer splits a multi-character
+fold between regex nodes. For example, a UTF-8 flagged C<ssx|sy> pattern
+under C</iu> now matches C<"\x{df}x">.
+
+=item *
+
 A case-insensitive regular expression with a folded literal start class
 could loop indefinitely when searching at the end of a UTF-8 string.
 This could occur on a subsequent C</g> match after a successful match.
