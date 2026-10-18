@@ -130,6 +130,7 @@
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
 %type <opval> term_postfixed_arrow_array_element
+%type <opval> term_postfixed_arrow_array_length
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
 
@@ -907,6 +908,19 @@ term_postfixed_arrow_array_element
 					ref (newAVREF ($target), OP_RV2AV),
 					$selector
 				);
+			}
+	;
+
+term_postfixed_arrow_array_length
+	/* Matches:
+	 * - array->$#*
+	 */
+	:	term                        [target]
+		ARROW
+		DOLSHARP
+		PERLY_STAR
+			{
+				$$ = build_array_length ($target);
 			}
 	;
 
@@ -1786,6 +1800,7 @@ term[product]	:	termbinop
 			{ $$ = $ary; }
 	/* $#x, $#{ something } */
 	|	arylen                                  %prec PERLY_PAREN_OPEN
+	|	term_postfixed_arrow_array_length       %prec PERLY_PAREN_OPEN
 	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
@@ -2115,13 +2130,6 @@ hsh	:	PERLY_PERCENT_SIGN indirob
 arylen
 	:	DOLSHARP
 		indirob                     [target]
-			{
-				$$ = build_array_length ($target);
-			}
-	|	term                        [target]
-		ARROW
-		DOLSHARP
-		PERLY_STAR
 			{
 				$$ = build_array_length ($target);
 			}
