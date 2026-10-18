@@ -2445,13 +2445,12 @@ S_scan_repeated_uv_blocks(const U8 *p, const U8 *end, const U8 *last_start,
     if (pattern != value)
         return p;
 
-    p += block_size;
-    while (p < start_limit && (STRLEN)(end - p) >= block_size) {
-        memcpy(&value, p, block_size);
-        if (value != pattern)
-            return p;
+    do {
         p += block_size;
-    }
+        if (p >= start_limit || (STRLEN)(end - p) < block_size)
+            return p;
+        Copy(p, &value, block_size, U8);
+    } while (value == pattern);
 
     return p;
 }
