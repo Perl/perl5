@@ -97,6 +97,12 @@ L<[GH #19953]|https://github.com/Perl/perl5/issues/19953>
 
 =item *
 
+Non-folded trie matching against native byte strings now consumes a
+character's encoded octets in one iteration. This reduces reader bookkeeping
+when the character requires two UTF-8 or UTF-EBCDIC octets.
+
+=item *
+
 The Aho-Corasick regex scanner uses Boyer-Moore-Horspool shift tables to skip
 positions where no literal alternative can start.  It can also skip repeated
 blocks of octets that cannot start an alternative.  These filters apply to
