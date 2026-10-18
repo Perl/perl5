@@ -1024,6 +1024,9 @@ Rdp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\
 				|NULLOK OP *arguments
+Rdp	|OP *	|build_hash_element					\
+				|NN OP *target				\
+				|NN OP *selector
 p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\

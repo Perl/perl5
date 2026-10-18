@@ -1008,6 +1008,7 @@
 #   define build_array_element(a,b)             Perl_build_array_element(aTHX_ a,b)
 #   define build_array_length(a)                Perl_build_array_length(aTHX_ a)
 #   define build_function_invocation(a,b,c)     Perl_build_function_invocation(aTHX_ a,b,c)
+#   define build_hash_element(a,b)              Perl_build_hash_element(aTHX_ a,b)
 #   define build_infix_plugin(a,b,c)            Perl_build_infix_plugin(aTHX_ a,b,c)
 #   define build_method_invocation(a,b,c)       Perl_build_method_invocation(aTHX_ a,b,c)
 #   define build_method_invocation_arguments(a,b) Perl_build_method_invocation_arguments(aTHX_ a,b)

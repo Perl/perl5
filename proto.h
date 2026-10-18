@@ -594,6 +594,18 @@ Perl_build_function_invocation(pTHX_ I32 flags, OP *code, OP *arguments)
     } STMT_END
 
 PERL_CALLCONV OP *
+Perl_build_hash_element(pTHX_ OP *target, OP *selector)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_HASH_ELEMENT     \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(selector);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
+PERL_CALLCONV OP *
 Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
