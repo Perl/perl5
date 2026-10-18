@@ -431,6 +431,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+A folded regex trie now updates its minimum and maximum lengths independently.
+An alternative which changes both bounds could previously cause a valid
+match to be missed or an assertion failure during Aho-Corasick scanning.
+
+=item *
+
 Case-insensitive trie prefix extraction no longer splits a multi-character
 fold between regex nodes. For example, a UTF-8 flagged C<ssx|sy> pattern
 under C</iu> now matches C<"\x{df}x">.
