@@ -130,7 +130,7 @@ my @XARGV = @ARGV;
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
-my $dump_manifested_tests = 0;
+my $dump_tests = 0;
 
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
 # can't rely on require working.
@@ -143,7 +143,7 @@ my $dump_manifested_tests = 0;
         utf8      => \$::with_utf8,
         utf16     => \$::with_utf16,
         taintwarn => \$::taintwarn,
-        dump_manifested_tests => \$dump_manifested_tests,
+        dumptests => \$dump_tests,
     );
 
     my @argv = ();
@@ -653,7 +653,7 @@ unless (@XARGV) {
     } @XARGV;
 };
 
-dump_tests(\@XARGV) if $dump_manifested_tests;
+dump_tests(\@XARGV) if $dump_tests;
 
 # This is where we would have to calculate a list of generated tests
 # if we were to support subroutine dump_all_tests() and command-line switch
