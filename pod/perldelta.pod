@@ -99,6 +99,12 @@ There may well be none in a stable release.
 
 =item *
 
+Non-folded trie matching against native byte strings now consumes a
+character's encoded octets in one iteration. This reduces reader bookkeeping
+when the character requires two UTF-8 or UTF-EBCDIC octets.
+
+=item *
+
 Changes have been made to the "super-linear cache", which is used to avoid
 excessive backtracking in some regexes which include quantifiers on
 variable-length sub-patterns, such as C<(a|bc)*> and C<(ab+){2,}>. This

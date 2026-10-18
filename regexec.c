@@ -2013,6 +2013,24 @@ STMT_START {                                                                \
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
                 startpos, doutf8, depth)
 
+#define REXEC_TRIE_TRACE(pos, from, via, to, word, kind, octet, cp) \
+    DEBUG_TRIE_EXECUTE_r(                                           \
+        DUMP_EXEC_POS((char *)(pos), scan, utf8_target, depth);     \
+        re_printf("%sTRIE: %s:0x%-2" UVXf " CP:0x%-4" UVXf " ",     \
+                  PL_colors[4], (kind), (UV)(octet), (UV)(cp));     \
+        if (isPRINT_A(cp))                                          \
+            re_printf("'%c' ", (int)(cp));                          \
+        else                                                        \
+            re_printf("    ");                                      \
+        re_printf("St:0x%-4" UVXf " W:0x%-2" UVXf                   \
+                  " - %s -> St: 0x%-4" UVXf,                        \
+                  (UV)(from), (UV)(word), (to) ? "good" : "fail",   \
+                  (UV)(to));                                        \
+        if (via)                                                    \
+            re_printf(" via St:0x%" UVXf, (UV)(via));               \
+        re_printf("%s\n", PL_colors[5]);                            \
+    )
+
 #define GET_ANYOFH_INVLIST(prog, n)                                         \
                         GET_REGCLASS_AUX_DATA(prog, n, true, 0, NULL, NULL)
 
@@ -7380,6 +7398,75 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.longfold = false; /* char longer if folded => it's harder */
                 ST.nextword = 0;
 
+                /* Native input needs at most two encoded octets. Consume
+                 * both transitions here instead of revisiting the general
+                 * reader for the second octet. No accepting word can end
+                 * between the octets of one encoded character. */
+                const bool native_encoded = !utf8_target && !TRIE_IS_FOLDED(trie)
+                    && (trie->prop_flags & TRIE_CP_WIDE);
+                if (native_encoded) {
+                    DEBUG_TRIE_EXECUTE_r(re_exec_indentf(
+                        "TRIE: native input, fused octet transitions\n", depth));
+                    while (state) {
+                        PERL_DEB(U32 old_state = state);
+                        PERL_DEB(U32 middle_state = 0);
+                        const U32 wordnum = trie->states[state].wordnum;
+                        U32 base = trie->states[state].trans.base;
+                        if (wordnum) {
+                            if (!accepted) {
+                                accepted = 1;
+                                ST.firstpos = uc;
+                                ST.firstchars = (U32)(uc - (U8 *)locinput);
+                            }
+                            if (!ST.nextword || wordnum < ST.nextword)
+                                ST.nextword = wordnum;
+                            ST.topword = wordnum;
+                        }
+                        /* Stop at a leaf or the end of the input. */
+                        if (!base || uc >= (U8 *)loceol) {
+                            REXEC_TRIE_TRACE(uc, state, 0, 0, wordnum,
+                                             "Char", 0, 0);
+                            break;
+                        }
+
+                        /* A U16 packs the native byte's UTF octets, low first. */
+                        const native_octet_utf8_t encoded
+                            = PL_native_octet_utf8[*uc];
+                        U32 offset = base + (U8)encoded;
+
+                        /* Shared slots must belong to the current state. */
+                        if (trie->trans[offset].check != state) {
+                            REXEC_TRIE_TRACE(uc + 1, old_state, 0, 0, wordnum,
+                                             "Char", *uc, *uc);
+                            break;
+                        }
+                        state = trie->trans[offset].next;
+                        assert(state && state < trie->statecount);
+
+                        /* A nonzero high octet means a two-octet UTF encoding. */
+                        if (encoded > 0xFF) {
+                            PERL_DEB(middle_state = state);
+                            base = trie->states[state].trans.base;
+                            offset = base + (encoded >> 8);
+                            if (!base || trie->trans[offset].check != state) {
+                                REXEC_TRIE_TRACE(uc + 1, old_state,
+                                                 middle_state, 0, wordnum,
+                                                 "Char", *uc, *uc);
+                                break;
+                            }
+                            state = trie->trans[offset].next;
+                            assert(state && state < trie->statecount);
+                        }
+
+                        /* Both transitions consume just one native character. */
+                        uc++;
+                        REXEC_TRIE_TRACE(uc, old_state, middle_state,
+                                         state, wordnum,
+                                         "Char", uc[-1], uc[-1]);
+                    }
+                    goto trie_traversed;
+                }
+
                 /* fully traverse the TRIE; note the position of the
                    shortest accept state and the wordnum of the longest
                    accept state */
@@ -7439,24 +7526,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     else {
                         state = 0;
                     }
-                    DEBUG_TRIE_EXECUTE_r(
-                        DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
-                        re_printf(
-                            "%sTRIE: Octet:0x%-2" UVXf " CP:0x%-4" UVXf " ",
-                            PL_colors[4], (UV)octet, uvc);
-                        if (isPRINT_A(uvc))
-                            re_printf("'%c' ", (int)uvc );
-                        else
-                            re_printf("    " ); /* four spaces to match "'x' " */
-                        re_printf(
-                                "St:0x%-4" UVXf " W:0x%-2" UVXf " - %s -> St: 0x%-4" UVXf "%s\n",
-                                (UV)old_state, (UV)wordnum,
-                                state ? "good" : "fail",
-                                (UV)state, PL_colors[5]
-
-                        );
-                    );
+                    REXEC_TRIE_TRACE(uc, old_state, 0, state, wordnum,
+                                     "Octet", octet, uvc);
                 }
+              trie_traversed:
                 if (!accepted)
                    sayNO;
 
