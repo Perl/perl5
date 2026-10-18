@@ -132,6 +132,7 @@
 %type <opval> term_postfixed_arrow_array_element
 %type <opval> term_postfixed_arrow_array_length
 %type <opval> term_postfixed_arrow_array_postderef
+%type <opval> term_postfixed_arrow_hash_element
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
 
@@ -938,6 +939,21 @@ term_postfixed_arrow_array_postderef
 			}
 	;
 
+term_postfixed_arrow_hash_element
+	/* Matches:
+	 * - target->{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		subscript_keys              [selector]
+			{
+				$$ = build_hash_element (
+					ref (newHVREF ($target), OP_RV2HV),
+					$selector
+				);
+			}
+	;
+
 term_postfixed_arrow_typeglob_element
 	/* Matches:
 	 * - target->*{selector}
@@ -1617,7 +1633,7 @@ subscripted
 				);
 			}
 	/* $foo->[bar]->{baz;} */
-	|	subscriptable_reference     [target]
+	|	subscripted                 [target]
 		subscript_keys              [selector]
 			{
 				$$ = build_hash_element (
@@ -1625,6 +1641,7 @@ subscripted
 					$selector
 				);
 			}
+	|	term_postfixed_arrow_hash_element
 	/* $subref->(@args); $foo->{bar}(@args) */
 	/* $subref->(); $foo->{bar}() */
 	|	subscriptable_reference     [code_reference]
