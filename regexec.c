@@ -2405,6 +2405,86 @@ S_get_break_val_cp_checked(SV* const invlist, const UV cp_in)
 #define getWB_VAL_UTF8(pos, strend)                                            \
     generic_GET_BREAK_VAL_UTF8_(getWB_VAL_CP, pos, strend)
 
+/* The ordinary word comparison has failed.  Try periods which need several
+ * UVs to return to the same position in the repeating sequence.  Keep this
+ * fallback separate so GCC can inline the smaller ordinary scanner. */
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((noinline))
+#endif
+static const U8 *
+S_scan_repeated_short_periods(const U8 *p, const U8 *end,
+                             const U8 *start_limit, const U8 *start_map,
+                             const U8 start_mask, const bool utf8_target,
+                             const UV first_word)
+{
+    static const U8 periods[] = { 3, 5, 6, 7 };
+    const U8 * const seed = p - sizeof(UV);
+    U32 candidate;
+
+    for (candidate = 0; candidate < C_ARRAY_LENGTH(periods); candidate++) {
+        const STRLEN period = periods[candidate];
+        /* Three UVs cover period six on both 32-bit and 64-bit builds.
+         * The odd periods need as many UVs as their period. */
+        const STRLEN words = period == 6 ? 3 : period;
+        const STRLEN bytes = words * sizeof(UV);
+        UV seek[7];
+        UV value;
+        STRLEN i;
+        STRLEN phase;
+        const U8 *scan;
+
+        /* These overlapping words test the proposed period before we build
+         * its seek block.  The second word ends period octets beyond p. */
+        if ((STRLEN)(end - p) < bytes || seed[0] != seed[period])
+            continue;
+        memcpy(&value, seed + period, sizeof(UV));
+        if (value != first_word)
+            continue;
+
+        /* A 32-bit UV does not cover every octet of periods five to seven.
+         * Check the rest of the seed before using it to skip any starts. */
+        if (sizeof(UV) < 8) {
+            for (i = sizeof(UV); i < period; i++) {
+                if ((start_map[seed[i]] & start_mask)
+                    && (!utf8_target || !UTF8_IS_CONTINUATION(seed[i])))
+                {
+                    return seed + i;
+                }
+            }
+        }
+
+        /* Check the whole first block before building its seek words.
+         * This avoids setup for short runs which pass the initial probe. */
+        if (memcmp(seed, seed + period, sizeof(UV) + bytes - period))
+            continue;
+
+        /* Start at p's position within the period.  A complete seek block
+         * returns to this phase, so every subsequent block uses the same UVs.
+         * Writing through U8 preserves native byte order and avoids aliasing. */
+        phase = sizeof(UV) % period;
+        for (i = 0; i < bytes; i++) {
+            ((U8 *)seek)[i] = seed[phase];
+            if (++phase == period)
+                phase = 0;
+        }
+
+        scan = p + bytes;
+        while (scan < start_limit && (STRLEN)(end - scan) >= bytes) {
+            for (i = 0; i < words; i++) {
+                memcpy(&value, scan + i * sizeof(UV), sizeof(UV));
+                if (value != seek[i])
+                    break;
+            }
+            if (i != words)
+                break;
+            scan += bytes;
+        }
+        return scan;
+    }
+
+    return p;
+}
+
 /* After checking a full UV-sized window of rejected starts, use that window
  * as a seek word.  Identical following words can be skipped without checking
  * their starts again. */
@@ -2449,8 +2529,20 @@ S_scan_repeated_uv_blocks(const U8 *p, const U8 *end, const U8 *last_start,
      * when reading the octet buffer as a UV. */
     memcpy(&pattern, p - block_size, block_size);
     memcpy(&value, p, block_size);
-    if (pattern != value)
-        return p;
+    if (pattern != value) {
+        const U8 * const seed = p - block_size;
+
+        /* Every new period needs at least three UVs.  Reject impossible
+         * periods by their first octet before calling the larger fallback. */
+        if ((STRLEN)(end - p) < 3 * block_size
+            || (seed[0] != seed[3] && seed[0] != seed[5]
+                && seed[0] != seed[6] && seed[0] != seed[7]))
+        {
+            return p;
+        }
+        return S_scan_repeated_short_periods(p, end, start_limit, start_map,
+                                            start_mask, utf8_target, pattern);
+    }
 
     do {
         p += block_size;
@@ -3469,6 +3561,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             /* what trie are we using right now */
             reg_ac_data *aho = (reg_ac_data*)progi->data->data[ TRIE_DATA_SLOT(c) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[aho->trie];
+            /* We layer three shortcuts in front of AC.  BMH uses an anchor
+             * octet to skip positions where no word can match.  The start
+             * map rejects impossible first octets.  The repeat scanner skips
+             * repeated blocks after checking that they contain no starts.
+             * These shortcuts run only at the root.  After consuming a
+             * prefix, AC transitions and failure links track possible matches.
+             * Folded tries use the start map but have no BMH table. */
             const U8 * const prefilter = aho->prefilter;
             const U8 *start_map = prefilter
                 ? prefilter + REG_AC_PREFILTER_MAP_OFFSET : NULL;
