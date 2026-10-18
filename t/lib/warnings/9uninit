@@ -959,7 +959,7 @@ $v = atan2($m1,$g1);
 $v = sin $m1;
 $v = cos $m1;
 $v = rand $m1;
-$v = srand $m1;
+# srand undef no longer warns as of v5.45.4: it requests automatic seeding.
 $v = exp $m1;
 $v = eval {log $m1};
 $v = sqrt $m1;
@@ -973,7 +973,6 @@ Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in sin at - line 6.
 Use of uninitialized value $m1 in cos at - line 7.
 Use of uninitialized value $m1 in rand at - line 8.
-Use of uninitialized value $m1 in srand at - line 9.
 Use of uninitialized value $m1 in exp at - line 10.
 Use of uninitialized value $m1 in log at - line 11.
 Use of uninitialized value $m1 in sqrt at - line 12.

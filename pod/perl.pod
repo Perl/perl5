@@ -95,6 +95,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlop              Perl expressions: operators, precedence, string literals
     perlsub             Perl subroutines
     perlfunc            Perl built-in functions
+    perlrng             Perl random-number providers
     perlpod             Perl plain old documentation
     perlpodspec         Perl plain old documentation format specification
     perldocstyle        Perl style guide for core docs
@@ -489,4 +490,3 @@ how many more is left as an exercise to the reader.
 
 The three principal virtues of a programmer are Laziness,
 Impatience, and Hubris.  See the Camel Book for why.
-

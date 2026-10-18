@@ -694,6 +694,16 @@ it's a VAX).
 (F) Your machine doesn't support NaN ("not a number") as a numeric value
 (probably because it's a VAX).
 
+=item builtin::rand_bytes() count is too large
+
+(F) The requested byte count cannot be represented by the size type used for
+Perl strings on this platform.
+
+=item builtin::rand_bytes() count must be a non-negative integer
+
+(F) The argument to C<builtin::rand_bytes> was undefined, non-numeric,
+negative, non-integral, infinite, or NaN.
+
 =item Builtin version bundle "%s" is not supported by Perl
 
 (F) You attempted to C<use builtin :ver> for a version number that is either
@@ -875,6 +885,11 @@ Perl code, but are only used internally.
 executing the current method, and therefore it can only be placed inside an
 actual method (or method-like expression, such as a field initializer
 expression).
+
+=item Cannot use a redacted RNG seed
+
+(F) A redacted C<RNG::Seed> was passed to C<srand>.  Redacted seeds do not
+contain material which can reproduce an RNG initialization.
 
 =item Cannot use declared reference iterator variables in foreach loop past the 24th variable
 
@@ -3328,14 +3343,11 @@ transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
 
-=item Integer overflow in srand
+=item Integer overflow in srand(): only using the low 32 bits
 
-(S overflow) The number you have passed to srand is too big to fit
-in your architecture's integer representation.  The number has been
-replaced with the largest integer supported (0xFFFFFFFF on 32-bit
-architectures).  This means you may be getting less randomness than
-you expect, because different random seeds above the maximum will
-return the same sequence of random numbers.
+(S overflow) The numeric seed passed to the built-in C<srand> is wider than
+the 32-bit seed accepted by its C<drand48> implementation.  Perl discards the
+high bits and uses the low 32 bits.
 
 =item Integer overflow in version
 
@@ -5918,6 +5930,35 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
+=item RNG fast provider address must be an integer
+
+(F) C<get_rand_U01_XS_func_addr> or C<get_rand_U01_XS_state_addr> returned
+something other than C<undef>, zero, or an integer address.  An XS provider
+must return its callback and state addresses using Perl's established XS
+pointer-address convention.
+
+=item RNG provider did not return exactly one value
+
+(F) The custom random number generator installed in C<${^RNG}> returned more
+than one value, or did not return a value.  A provider must return exactly one
+value each time it is called.
+
+=item RNG provider rand_bytes() did not return a byte string
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return a byte string.
+
+=item RNG provider rand_bytes() did not return the requested byte count
+
+(F) The C<rand_bytes> method or callback of the custom random number generator
+installed in C<${^RNG}> did not return exactly the number of bytes requested.
+
+
+=item ${^RNG} must be an RNG::Provider object or undef
+
+(F) The value assigned to C<${^RNG}> was neither a C<RNG::Provider> object
+nor C<undef>.
+
 =item Ranges of ASCII printables should be some subset of "0-9", "A-Z", or
 "a-z" in regex; marked by S<<-- HERE> in m/%s/
 
@@ -6495,6 +6536,27 @@ buffer.
 large" means that it needs at least 2 gigabytes to store. Unfortunately,
 Perl doesn't yet handle such large hash keys. You should
 reconsider your design to avoid hashing such a long string directly.
+
+=item srand() argument is a reference without string overloading
+
+(W misc) A reference passed to C<srand> did not provide string overloading.
+Perl used the reference's address as the seed instead. That address will
+normally differ from run to run, so the RNG initialization will not be stable
+across runs. If that is what you want then you should call C<srand()> with no
+argument instead, which will produce a better quality initialization. If that
+is not what you want then you should use a constant string or numeric argument
+instead.
+
+=item RNG::Seed for built-in Drand48 must contain exactly 4 octets
+
+(F) Raw C<RNG::Seed> material for the built-in C<drand48> generator must be
+exactly four octets long.
+
+=item RNG::SeedBase::bytes() did not return seed octets
+
+(F) The C<bytes> method of an C<RNG::SeedBase> implementation did not return
+raw seed octets.  The method must return a string containing the provider's
+exact-width seed material.
 
 =item sort is now a reserved word
 

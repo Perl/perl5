@@ -1257,6 +1257,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Pod\Perldoc rmdir /s /q $(LIBDIR)\Pod\Perldoc
 	-if exist $(LIBDIR)\Pod\Simple rmdir /s /q $(LIBDIR)\Pod\Simple
 	-if exist $(LIBDIR)\Pod\Text rmdir /s /q $(LIBDIR)\Pod\Text
+	-if exist $(LIBDIR)\RNG rmdir /s /q $(LIBDIR)\RNG
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Search rmdir /s /q $(LIBDIR)\Search
 	-if exist $(LIBDIR)\Sub rmdir /s /q $(LIBDIR)\Sub

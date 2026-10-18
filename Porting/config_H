@@ -4252,6 +4252,10 @@
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned decimal integer.
  */
+/* U64uf:
+ *	This symbol defines the format string used for printing a U64
+ *	as an unsigned decimal integer.
+ */
 /* UVof:
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned octal integer.
@@ -4278,6 +4282,7 @@
  */
 #define IVdf		"ld"		/**/
 #define UVuf		"lu"		/**/
+#define U64uf	"lu"		/**/
 #define UVof		"lo"		/**/
 #define UVxf		"lx"		/**/
 #define UVXf		"lX"		/**/

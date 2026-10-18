@@ -1448,10 +1448,11 @@ Perl may be built to ignore this variable.
 =item PERL_RAND_SEED
 X<PERL_RAND_SEED>
 
-When set to an integer value this value will be used to seed the perl
-internal random number generator used for C<rand()> when it is used
+When set to a nonzero integer value this value will be used to seed the
+perl internal random number generator used for C<rand()> when it is used
 without an explicit C<srand()> call or for when an explicit no-argument
-C<srand()> call is made.
+C<srand()> call is made. A value of zero has the same effect as leaving
+C<PERL_RAND_SEED> unset.
 
 Normally calling C<rand()> prior to calling C<srand()> or calling
 C<srand()> explicitly with no arguments should result in the random
