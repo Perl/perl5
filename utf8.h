@@ -463,10 +463,9 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 /* UTF-8 representations of native octets.  Every native octet represents a
  * Unicode code point no greater than U+00FF, so its representation is at most
  * two octets on both UTF-8 and UTF-EBCDIC platforms. */
-typedef struct {
-    U8 len;
-    U8 bytes[2];
-} native_octet_utf8_t;
+/* The low octet is emitted first. A zero high octet denotes a one-octet
+ * encoding, since continuation octets are nonzero on both platforms. */
+typedef U16 native_octet_utf8_t;
 
 /* This defines the 1-bits that are to be in the first byte of a multi-byte
  * UTF-8 encoded character that mark it as a start byte and give the number of

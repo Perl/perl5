@@ -1977,14 +1977,19 @@ STMT_START {                                                                \
         }                                                                   \
         break;                                                              \
     case trie_plain: {                                                      \
-        const native_octet_utf8_t *native_octet;                            \
         /* Non-folded UTF-8 input takes the raw-octet path above. */         \
         assert(!utf8_target);                                               \
         uvc = (UV)*uc;                                                      \
         len = 1;                                                            \
-        native_octet = &PL_native_octet_utf8[(U8)uvc];                      \
-        trie_bytes = native_octet->bytes;                                   \
-        skiplen = native_octet->len;                                        \
+        if (UVCHR_IS_INVARIANT(uvc)) {                                      \
+            octet_buffer[0] = (U8)uvc;                                      \
+            skiplen = 1;                                                    \
+        } else {                                                            \
+            octet_buffer[0] = UTF8_EIGHT_BIT_HI(uvc);                       \
+            octet_buffer[1] = UTF8_EIGHT_BIT_LO(uvc);                       \
+            skiplen = 2;                                                    \
+        }                                                                   \
+        trie_bytes = octet_buffer;                                          \
         break;                                                              \
     }                                                                       \
     }                                                                       \
