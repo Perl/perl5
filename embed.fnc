@@ -1018,6 +1018,8 @@ p	|void	|boot_core_UNIVERSAL
 dp	|OP *	|build_array_element					\
 				|NN OP *target				\
 				|NN OP *selector
+dp	|OP *	|build_array_length					\
+				|NN OP *array
 dp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\

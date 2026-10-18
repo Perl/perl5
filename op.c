@@ -4918,6 +4918,41 @@ Perl_build_array_element (pTHX_ OP *target, OP *selector)
 }
 
 /*
+=for apidoc build_array_length
+
+Returns a C<OP *> representing OP_AV2ARYLEN.
+
+Designed to handle syntax:
+- C<< $#array >>
+- C<< $#{ array } >>
+- C<< $arrayref->$#* >>
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_array_length (pTHX_ OP *array)
+{
+    PERL_ARGS_ASSERT_BUILD_ARRAY_LENGTH;
+
+    /* Collected actions from:
+     * arylen:
+     *   { $$ = newAVREF($indirob); }
+     *   { $$ = newAVREF($term); }
+     * term:
+     * { $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
+     */
+
+    return newUNOP (
+        OP_AV2ARYLEN,
+        0,
+        ref (newAVREF (array), OP_AV2ARYLEN)
+    );
+}
+
+/*
 =for apidoc build_function_invocation
 
     build_function_invocation (flags, $function, $arguments);

@@ -571,6 +571,16 @@ Perl_build_array_element(pTHX_ OP *target, OP *selector)
     } STMT_END
 
 PERL_CALLCONV OP *
+Perl_build_array_length(pTHX_ OP *array)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_ARRAY_LENGTH     \
+    STMT_START { Perl_assert_aTHX; assert(array);      \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+PERL_CALLCONV OP *
 Perl_build_function_invocation(pTHX_ I32 flags, OP *code, OP *arguments)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)

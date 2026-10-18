@@ -1785,10 +1785,7 @@ term[product]	:	termbinop
 	|	ary 	%prec PERLY_PAREN_OPEN
 			{ $$ = $ary; }
 	/* $#x, $#{ something } */
-	|	arylen                          %prec PERLY_PAREN_OPEN
-			{
-				$$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));
-			}
+	|	arylen                                  %prec PERLY_PAREN_OPEN
 	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
@@ -2119,14 +2116,14 @@ arylen
 	:	DOLSHARP
 		indirob                     [target]
 			{
-				$$ = newAVREF($target);
+				$$ = build_array_length ($target);
 			}
 	|	term                        [target]
 		ARROW
 		DOLSHARP
 		PERLY_STAR
 			{
-				$$ = newAVREF($target);
+				$$ = build_array_length ($target);
 			}
 	;
 
