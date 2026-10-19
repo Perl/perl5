@@ -133,6 +133,7 @@
 %type <opval> term_postfixed_arrow_array_length
 %type <opval> term_postfixed_arrow_array_postderef
 %type <opval> term_postfixed_arrow_hash_element
+%type <opval> term_postfixed_arrow_hash_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
 
@@ -951,6 +952,19 @@ term_postfixed_arrow_hash_element
 					ref (newHVREF ($target), OP_RV2HV),
 					$selector
 				);
+			}
+	;
+
+term_postfixed_arrow_hash_postderef
+	/* Matches:
+	 * - target->%*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		PERLY_STAR
+			{
+				$$ = newHVREF($target);
 			}
 	;
 
@@ -1923,13 +1937,7 @@ term[product]	:	termbinop
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
 			{ $$ = newSVREF($operand); }
 	|	term_postfixed_arrow_array_postderef
-	|	term                        [target]
-		ARROW
-		PERLY_PERCENT_SIGN
-		PERLY_STAR
-			{
-				$$ = newHVREF($target);
-			}
+	|	term_postfixed_arrow_hash_postderef
 	|	term                        [code_reference]
 		ARROW
 		PERLY_AMPERSAND
