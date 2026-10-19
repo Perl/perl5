@@ -136,6 +136,7 @@
 %type <opval> term_postfixed_arrow_hash_element
 %type <opval> term_postfixed_arrow_hash_postderef
 %type <opval> term_postfixed_arrow_list_slice_array
+%type <opval> term_postfixed_arrow_list_slice_hash
 %type <opval> term_postfixed_arrow_scalar_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
@@ -150,7 +151,7 @@
 %type <opval> condition
 %type <opval> catch_paren
 %type <opval> empty
-%type <opval> sliceme kvslice gelem
+%type <opval> kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
@@ -998,6 +999,22 @@ term_postfixed_arrow_list_slice_array
 		subscript_index             [selector]
 			{
 				$$ = build_list_slice_array (
+					newAVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_hash
+	/* Matches:
+	 * - target->@{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_SNAIL
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_hash (
 					newAVREF ($target),
 					$selector
 				);
@@ -1910,7 +1927,7 @@ term[product]	:	termbinop
 	|       subscripted
 			{ $$ = $subscripted; }
 	/* array slice */
-	|	sliceme                     [target]
+	|	ary                         [target]
 		subscript_index             [selector]
 			{
 				$$ = build_list_slice_array ($target, $selector);
@@ -1927,11 +1944,12 @@ term[product]	:	termbinop
 				  $kvslice->op_private & OPpSLICEWARNING;
 			}
 	/* @hash{@keys} */
-	|	sliceme                     [target]
+	|	ary                         [target]
 		subscript_keys              [selector]
 			{
 				$$ = build_list_slice_hash ($target, $selector);
 			}
+	|	term_postfixed_arrow_list_slice_hash
 	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
 				newOP(OP_PUSHMARK, 0),
@@ -2222,15 +2240,6 @@ arylen
 
 star	:	PERLY_STAR indirob
 			{ $$ = build_typeglob ($indirob); }
-	;
-
-sliceme	:	ary
-	|	term                        [target]
-		ARROW
-		PERLY_SNAIL
-			{
-				$$ = newAVREF($target);
-			}
 	;
 
 kvslice	:	hsh
