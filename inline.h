@@ -4838,7 +4838,9 @@ Perl_mortal_getenv(const char * str)
      * should be running, so no need to lock things, and this may be during a
      * phase when locking isn't even available */
     if (UNLIKELY(PL_scopestack_ix == 0)) {
+        MSVC_DIAG_IGNORE(4996)
         return getenv(str);
+        MSVC_DIAG_RESTORE
     }
 
 #ifdef PERL_MEM_LOG
@@ -4901,7 +4903,9 @@ Perl_mortal_getenv(const char * str)
 
     /* Here we are in a critical section.  As explained above, we do our own
      * getenv(PERL_MEM_LOG), saving the result safely. */
+    MSVC_DIAG_IGNORE(4996)
     ret = getenv("PERL_MEM_LOG");
+    MSVC_DIAG_RESTORE
     if (ret == NULL) {  /* No logging active */
 
         /* Return that immediately if called from the logging code */
@@ -4975,7 +4979,9 @@ Perl_mortal_getenv(const char * str)
 #endif
 
     /* Now get the value of the real desired variable, and save a copy */
+    MSVC_DIAG_IGNORE(4996)
     ret = getenv(str);
+    MSVC_DIAG_RESTORE
 
     if (ret != NULL) {
         ret = SvPVX( newSVpvn_flags(ret, strlen(ret) ,SVs_TEMP) );
