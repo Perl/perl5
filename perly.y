@@ -1934,8 +1934,13 @@ term[product]	:	termbinop
 					$arguments
 				);
 			}
-	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
-			{ $$ = newSVREF($operand); }
+	|	term[operand]
+		ARROW
+		PERLY_DOLLAR
+		PERLY_STAR
+			{
+				$$ = newSVREF($operand);
+			}
 	|	term_postfixed_arrow_array_postderef
 	|	term_postfixed_arrow_hash_postderef
 	|	term                        [code_reference]
