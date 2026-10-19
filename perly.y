@@ -1923,12 +1923,12 @@ term[product]	:	termbinop
 	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
 			{ $$ = newSVREF($operand); }
 	|	term_postfixed_arrow_array_postderef
-	|	term                        [operand]
+	|	term                        [target]
 		ARROW
 		PERLY_PERCENT_SIGN
 		PERLY_STAR
 			{
-				$$ = newHVREF($operand);
+				$$ = newHVREF($target);
 			}
 	|	term                        [code_reference]
 		ARROW
