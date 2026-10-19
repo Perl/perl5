@@ -1926,21 +1926,11 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $kvslice->op_private & OPpSLICEWARNING;
 			}
-	|	sliceme
 	/* @hash{@keys} */
 	|	sliceme                     [target]
 		subscript_keys              [selector]
 			{
-				$$ = op_prepend_elem(OP_HSLICE,
-					newOP(OP_PUSHMARK, 0),
-					newLISTOP(OP_HSLICE, 0,
-						list($selector),
-						ref(oopsHV($target), OP_HSLICE)
-					)
-				);
-				if ($$ && $target)
-					$$->op_private |=
-						$target->op_private & OPpSLICEWARNING;
+				$$ = build_list_slice_hash ($target, $selector);
 			}
 	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,

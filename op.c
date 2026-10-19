@@ -5083,6 +5083,31 @@ Perl_build_list_slice_array (pTHX_ OP *target, OP *selector)
 }
 
 /*
+=for apidoc build_list_slice_hash
+
+    build_list_slice_hash ($target, $selector);
+
+Builds C<OP *> representing value slice of a hash.
+
+Represents:
+
+    @hash{@keys}
+    $term->@{@keys}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_hash (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_HASH;
+
+    return build_list_slice (OP_HSLICE, oopsHV (target), selector);
+}
+
+/*
 =for apidoc build_method_invocation
 
     build_method_invocation ($target, $method, $arguments);
