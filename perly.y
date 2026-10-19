@@ -1964,15 +1964,18 @@ term[product]	:	termbinop
 				$$ = build_list_slice_hash ($target, $selector);
 			}
 	|	term_postfixed_arrow_list_slice_hash
-	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
-			{ $$ = op_prepend_elem(OP_KVHSLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_KVHSLICE, 0,
-					list($selector),
-					ref($kvslice, OP_KVHSLICE)));
-			  if ($$ && $kvslice)
-			      $$->op_private |=
-				  $kvslice->op_private & OPpSLICEWARNING;
+	|	kvslice
+		subscript_keys              [selector]
+		/* %hash{@keys} */
+			{
+				$$ = op_prepend_elem(OP_KVHSLICE,
+					newOP(OP_PUSHMARK, 0),
+					newLISTOP(OP_KVHSLICE, 0,
+						list($selector),
+						ref($kvslice, OP_KVHSLICE)));
+				if ($$ && $kvslice)
+					$$->op_private |=
+						$kvslice->op_private & OPpSLICEWARNING;
 			}
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
