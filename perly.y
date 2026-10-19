@@ -1893,15 +1893,18 @@ term[product]	:	termbinop
 	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
-	|	sliceme subscript_index[selector]                     /* array slice */
-			{ $$ = op_prepend_elem(OP_ASLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_ASLICE, 0,
-					list($selector),
-					ref($sliceme, OP_ASLICE)));
-			  if ($$ && $sliceme)
-			      $$->op_private |=
-				  $sliceme->op_private & OPpSLICEWARNING;
+	|	sliceme
+		subscript_index             [selector]
+		/* array slice */
+			{
+				$$ = op_prepend_elem(OP_ASLICE,
+					newOP(OP_PUSHMARK, 0),
+					newLISTOP(OP_ASLICE, 0,
+						list($selector),
+						ref($sliceme, OP_ASLICE)));
+				if ($$ && $sliceme)
+					$$->op_private |=
+						$sliceme->op_private & OPpSLICEWARNING;
 			}
 	|	kvslice subscript_index[selector]                 /* array key/value slice */
 			{ $$ = op_prepend_elem(OP_KVASLICE,
@@ -2216,8 +2219,12 @@ star	:	PERLY_STAR indirob
 	;
 
 sliceme	:	ary
-	|	term ARROW PERLY_SNAIL
-			{ $$ = newAVREF($term); }
+	|	term
+		ARROW
+		PERLY_SNAIL
+			{
+				$$ = newAVREF($term);
+			}
 	;
 
 kvslice	:	hsh
