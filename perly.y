@@ -1934,12 +1934,12 @@ term[product]	:	termbinop
 					$arguments
 				);
 			}
-	|	term[operand]
+	|	term                        [target]
 		ARROW
 		PERLY_DOLLAR
 		PERLY_STAR
 			{
-				$$ = newSVREF($operand);
+				$$ = newSVREF($target);
 			}
 	|	term_postfixed_arrow_array_postderef
 	|	term_postfixed_arrow_hash_postderef
