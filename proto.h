@@ -614,6 +614,28 @@ Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
     } STMT_END
 
 PERL_CALLCONV OP *
+Perl_build_list_slice(pTHX_ I32 operation, OP *target, OP *selector)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_LIST_SLICE       \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(selector);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
+PERL_CALLCONV OP *
+Perl_build_list_slice_array(pTHX_ OP *target, OP *selector)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_LIST_SLICE_ARRAY \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(selector);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
+PERL_CALLCONV OP *
 Perl_build_method_invocation(pTHX_ OP *target, OP *method, OP *arguments)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)

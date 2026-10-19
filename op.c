@@ -5024,6 +5024,65 @@ Perl_build_hash_element (pTHX_ OP *target, OP *selector)
 }
 
 /*
+=for apidoc build_list_slice
+
+    build_list_slice (operation, $target, $selector);
+
+Generic C<OP *> builder for list slices.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice (pTHX_ I32 operation, OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE;
+
+    OP *op = op_prepend_elem (
+        operation,
+        newOP (OP_PUSHMARK, 0),
+        newLISTOP (
+            operation,
+            0,
+            list (selector),
+            ref (target, operation)
+        )
+    );
+
+    if (op && target)
+        op->op_private |= target->op_private & OPpSLICEWARNING;
+
+    return op;
+}
+
+/*
+=for apidoc build_list_slice_array
+
+    build_list_slice_array ($target, $selector);
+
+Builds C<OP *> representing value slice of an array.
+
+Represents:
+
+    @array[@indexes]
+    $term->@[@indexes]
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_array (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_ARRAY;
+
+    return build_list_slice (OP_ASLICE, target, selector);
+}
+
+/*
 =for apidoc build_method_invocation
 
     build_method_invocation ($target, $method, $arguments);

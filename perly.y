@@ -1896,14 +1896,7 @@ term[product]	:	termbinop
 	|	sliceme                     [target]
 		subscript_index             [selector]
 			{
-				$$ = op_prepend_elem(OP_ASLICE,
-					newOP(OP_PUSHMARK, 0),
-					newLISTOP(OP_ASLICE, 0,
-						list($selector),
-						ref($target, OP_ASLICE)));
-				if ($$ && $target)
-					$$->op_private |=
-						$target->op_private & OPpSLICEWARNING;
+				$$ = build_list_slice_array ($target, $selector);
 			}
 	|	kvslice subscript_index[selector]                 /* array key/value slice */
 			{ $$ = op_prepend_elem(OP_KVASLICE,
