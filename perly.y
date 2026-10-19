@@ -1951,14 +1951,14 @@ term[product]	:	termbinop
 	|	term_postfixed_arrow_scalar_postderef
 	|	term_postfixed_arrow_array_postderef
 	|	term_postfixed_arrow_hash_postderef
-	|	term                        [code_reference]
+	|	term                        [target]
 		ARROW
 		PERLY_AMPERSAND
 		PERLY_STAR
 			{
 				$$ = build_function_invocation (
 					0,
-					scalar (newCVREF ($PERLY_AMPERSAND, $code_reference)),
+					scalar (newCVREF ($PERLY_AMPERSAND, $target)),
 					NULL
 				);
 			}
