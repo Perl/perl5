@@ -1038,6 +1038,9 @@ Rdp	|OP *	|build_list_slice					\
 Rdp	|OP *	|build_list_slice_array 				\
 				|NN OP *target				\
 				|NN OP *selector
+Rdp	|OP *	|build_list_slice_hash					\
+				|NN OP *target				\
+				|NN OP *selector
 Rdp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\
