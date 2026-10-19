@@ -132,6 +132,7 @@
 %type <opval> term_postfixed_arrow_array_element
 %type <opval> term_postfixed_arrow_array_length
 %type <opval> term_postfixed_arrow_array_postderef
+%type <opval> term_postfixed_arrow_code_postderef
 %type <opval> term_postfixed_arrow_hash_element
 %type <opval> term_postfixed_arrow_hash_postderef
 %type <opval> term_postfixed_arrow_scalar_postderef
@@ -938,6 +939,23 @@ term_postfixed_arrow_array_postderef
 		PERLY_STAR
 			{
 				$$ = newAVREF ($target);
+			}
+	;
+
+term_postfixed_arrow_code_postderef
+	/* Matches:
+	 * - target->&*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_AMPERSAND
+		PERLY_STAR
+			{
+				$$ = build_function_invocation (
+					0,
+					scalar (newCVREF ($PERLY_AMPERSAND, $target)),
+					NULL
+				);
 			}
 	;
 
@@ -1951,17 +1969,7 @@ term[product]	:	termbinop
 	|	term_postfixed_arrow_scalar_postderef
 	|	term_postfixed_arrow_array_postderef
 	|	term_postfixed_arrow_hash_postderef
-	|	term                        [target]
-		ARROW
-		PERLY_AMPERSAND
-		PERLY_STAR
-			{
-				$$ = build_function_invocation (
-					0,
-					scalar (newCVREF ($PERLY_AMPERSAND, $target)),
-					NULL
-				);
-			}
+	|	term_postfixed_arrow_code_postderef
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
