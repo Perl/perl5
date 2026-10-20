@@ -1933,18 +1933,18 @@ term[product]	:	termbinop
 				$$ = build_list_slice_array ($target, $selector);
 			}
 	|	term_postfixed_arrow_list_slice_array
-	|	kvslice
+	/* array key/value slice */
+	|	kvslice                     [target]
 		subscript_index             [selector]
-		/* array key/value slice */
 			{
 				$$ = op_prepend_elem(OP_KVASLICE,
 					newOP(OP_PUSHMARK, 0),
 					newLISTOP(OP_KVASLICE, 0,
 						list($selector),
-						ref(oopsAV($kvslice), OP_KVASLICE)));
-				if ($$ && $kvslice)
+						ref(oopsAV($target), OP_KVASLICE)));
+				if ($$ && $target)
 					$$->op_private |=
-						$kvslice->op_private & OPpSLICEWARNING;
+						$target->op_private & OPpSLICEWARNING;
 			}
 	/* @hash{@keys} */
 	|	ary                         [target]
@@ -2246,11 +2246,11 @@ star	:	PERLY_STAR indirob
 	;
 
 kvslice	:	hsh
-	|	term
+	|	term                        [target]
 		ARROW
 		PERLY_PERCENT_SIGN
 			{
-				$$ = newHVREF($term);
+				$$ = newHVREF($target);
 			}
 	;
 
