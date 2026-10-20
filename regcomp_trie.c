@@ -2169,11 +2169,10 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
             for (UV cp = start; cp <= end; cp++) {
                 U8 folded[UTF8_MAXBYTES_CASE + 1];
                 STRLEN folded_len;
-                const UV native_cp = UNI_TO_NATIVE(cp);
-                const UV initial = to_uni_fold(native_cp, folded, &folded_len);
+                const UV initial = to_uni_fold(cp, folded, &folded_len);
 
                 if (first_folds && invlist_contains_cp_(first_folds, initial))
-                    S_ac_map_start_codepoint(aTHX_ start_map, native_cp);
+                    S_ac_map_start_codepoint(aTHX_ start_map, cp);
             }
         }
         SvREFCNT_dec(first_folds);
