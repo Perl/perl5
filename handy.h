@@ -1248,10 +1248,10 @@ There is no C<toUPPER_L1> nor C<toUPPER_LATIN1> as the uppercase of some code
 points in the 0..255 range is above that range or consists of multiple
 characters.  Instead use C<toUPPER_uvchr>.
 
-C<toUPPER_uvchr> returns the uppercase of any Unicode code point.  The return
-value is identical to that of C<toUPPER_A> for input code points in the ASCII
-range.  The uppercase of the vast majority of Unicode code points is the same
-as the code point itself.  For these, and for code points above the legal
+C<toUPPER_uvchr> returns the uppercase of any native-Unicode code point.  The
+return value is identical to that of C<toUPPER_A> for input code points in the
+ASCII range.  The uppercase of the vast majority of Unicode code points is the
+same as the code point itself.  For these, and for code points above the legal
 Unicode maximum, this returns the input code point unchanged.  It additionally
 stores the UTF-8 of the result into the buffer beginning at C<s>, and its
 length in bytes into C<*lenp>.  The caller must have made C<s> large enough to
@@ -1302,14 +1302,19 @@ There is no C<toFOLD_L1> nor C<toFOLD_LATIN1> as the foldcase of some code
 points in the 0..255 range is above that range or consists of multiple
 characters.  Instead use C<toFOLD_uvchr>.
 
-C<toFOLD_uvchr> returns the foldcase of any Unicode code point.  The return
-value is identical to that of C<toFOLD_A> for input code points in the ASCII
-range.  The foldcase of the vast majority of Unicode code points is the same
-as the code point itself.  For these, and for code points above the legal
+C<toFOLD_uvchr> returns the foldcase of any native-Unicode code point.  The
+return value is identical to that of C<toFOLD_A> for input code points in the
+ASCII range.  The foldcase of the vast majority of Unicode code points is the
+same as the code point itself.  For these, and for code points above the legal
 Unicode maximum, this returns the input code point unchanged.  It additionally
 stores the UTF-8 of the result into the buffer beginning at C<s>, and its
 length in bytes into C<*lenp>.  The caller must have made C<s> large enough to
 contain at least C<UTF8_MAXBYTES_CASE+1> bytes to avoid possible overflow.
+
+The return value is also a native-Unicode code point.  Native-Unicode and
+Unicode code point values are the same on ASCII platforms, but can differ below
+256 on EBCDIC platforms.  The older name C<to_uni_fold> uses native-Unicode
+code points as well.
 
 NOTE: the foldcase of a code point may be more than one code point.  The
 return value of this function is only the first of these.  The entire foldcase
@@ -1359,10 +1364,10 @@ C<toLOWER_LC> returns the lowercase of the input code point according to the
 rules of the current POSIX locale.  Input code points outside the range 0..255
 are returned unchanged.
 
-C<toLOWER_uvchr> returns the lowercase of any Unicode code point.  The return
-value is identical to that of C<toLOWER_L1> for input code points in the 0..255
-range.  The lowercase of the vast majority of Unicode code points is the same
-as the code point itself.  For these, and for code points above the legal
+C<toLOWER_uvchr> returns the lowercase of any native-Unicode code point.  The
+return value is identical to that of C<toLOWER_L1> for input code points in the
+0..255 range.  The lowercase of the vast majority of Unicode code points is the
+same as the code point itself.  For these, and for code points above the legal
 Unicode maximum, this returns the input code point unchanged.  It additionally
 stores the UTF-8 of the result into the buffer beginning at C<s>, and its
 length in bytes into C<*lenp>.  The caller must have made C<s> large enough to
@@ -1409,10 +1414,10 @@ There is no C<toTITLE_L1> nor C<toTITLE_LATIN1> as the titlecase of some code
 points in the 0..255 range is above that range or consists of multiple
 characters.  Instead use C<toTITLE_uvchr>.
 
-C<toTITLE_uvchr> returns the titlecase of any Unicode code point.  The return
-value is identical to that of C<toTITLE_A> for input code points in the ASCII
-range.  The titlecase of the vast majority of Unicode code points is the same
-as the code point itself.  For these, and for code points above the legal
+C<toTITLE_uvchr> returns the titlecase of any native-Unicode code point.  The
+return value is identical to that of C<toTITLE_A> for input code points in the
+ASCII range.  The titlecase of the vast majority of Unicode code points is the
+same as the code point itself.  For these, and for code points above the legal
 Unicode maximum, this returns the input code point unchanged.  It additionally
 stores the UTF-8 of the result into the buffer beginning at C<s>, and its
 length in bytes into C<*lenp>.  The caller must have made C<s> large enough to

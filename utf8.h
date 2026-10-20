@@ -19,6 +19,14 @@
  * outside some of the macros in this this file, the differences are hopefully
  * invisible at the semantic level.
  *
+ * "Native-Unicode" is Perl's code point numbering: values from 0 through 255
+ * use the platform's native character set, and values above 255 use Unicode
+ * numbering.  For example, the native-Unicode value of 'A' is 65 on ASCII
+ * platforms and 193 on EBCDIC platforms, while U+0100 is 256 on both.
+ * UNI_TO_NATIVE and NATIVE_TO_UNI convert between standard Unicode and
+ * native-Unicode numbers.  The encoders and decoders translate between these
+ * numbers and UTF-8, or UTF-EBCDIC on EBCDIC platforms.
+ *
  * UTF-EBCDIC has an isomorphic translation named I8 (for "Intermediate eight")
  * which differs from UTF-8 only in a few details.  It is often useful to
  * translate UTF-EBCDIC into this form for processing.  In general, macros and
@@ -275,6 +283,9 @@ the implementation.
 For conversion of code points potentially larger than will fit in a character,
 use L</NATIVE_TO_UNI>.
 
+The result can be used, for example, to look up a character in a table indexed
+by Latin-1 code point.
+
 =for apidoc Am|U8|LATIN1_TO_NATIVE|U8 ch
 
 Returns the native  equivalent of the input Latin-1 code point (including ASCII
@@ -287,21 +298,74 @@ the implementation.
 For conversion of code points potentially larger than will fit in a character,
 use L</UNI_TO_NATIVE>.
 
+This is useful for character constants written as Latin-1 numbers.  For
+example, C<LATIN1_TO_NATIVE(0xDF)> gives the native code point for LATIN SMALL
+LETTER SHARP S.  Character constants such as C<'A'> already have their native
+values, so no conversion is needed for them.
+
 =for apidoc Am|UV|NATIVE_TO_UNI|UV ch
 
-Returns the Unicode  equivalent of the input native code point given by C<ch>.
-Thus, C<NATIVE_TO_UNI(195)> on EBCDIC platforms returns 67.  These each
-represent the character C<"C"> on their respective platforms.  On ASCII
-platforms no conversion is needed, so this macro expands to just its input,
-adding no time nor space requirements to the implementation.
+Converts C<ch> from Perl's native-Unicode code point numbering to standard
+Unicode code point numbering.  Native-Unicode uses the platform's native
+character numbers for 0..255 and standard Unicode numbers for values above
+255.  Thus, C<NATIVE_TO_UNI(195)> on EBCDIC platforms returns 67; both numbers
+represent C<"C"> in their respective numbering conventions.  Values above 255
+are returned unchanged.  On ASCII platforms no conversion is needed, so this
+macro expands to just its input, adding no time nor space requirements to the
+implementation.
+
+This is useful when comparing a character with a code point number from the
+Unicode Standard, or when passing it to a library that uses Unicode code point
+numbers.  For example, C<NATIVE_TO_UNI('A')> is 0x41 on both ASCII and EBCDIC
+platforms, even though the value of C<'A'> differs between them.
+
+It is generally unnecessary between Perl character APIs that already use
+native-Unicode numbering, including L</toUPPER_uvchr> and L</toFOLD_uvchr>.
+Check both APIs' contracts before adding a conversion.  This macro converts
+a code point number, not an encoded string.  See L</UNI_TO_NATIVE> for the
+reverse conversion.
 
 =for apidoc Am|UV|UNI_TO_NATIVE|UV ch
 
-Returns the native  equivalent of the input Unicode code point  given by C<ch>.
-Thus, C<UNI_TO_NATIVE(68)> on EBCDIC platforms returns 196.  These each
-represent the character C<"D"> on their respective platforms.  On ASCII
-platforms no conversion is needed, so this macro expands to just its input,
-adding no time nor space requirements to the implementation.
+Converts C<ch> from standard Unicode code point numbering to Perl's
+native-Unicode numbering.  Native-Unicode uses the platform's native character
+numbers for 0..255 and standard Unicode numbers for values above 255.  Thus,
+C<UNI_TO_NATIVE(68)> on EBCDIC platforms returns 196; both numbers represent
+C<"D"> in their respective numbering conventions.  Values above 255 are
+returned unchanged.  On ASCII platforms no conversion is needed, so this
+macro expands to just its input, adding no time nor space requirements to the
+implementation.
+
+This is useful when a character is specified by its Unicode code point number.
+For example, the Unicode code point for LATIN SMALL LETTER SHARP S is 0xDF.
+The following writes that character in UTF-8 on an ASCII platform, or
+UTF-EBCDIC on an EBCDIC platform:
+
+    U8 encoded[UTF8_MAXBYTES + 1];
+    UV sharp_s = UNI_TO_NATIVE(0xDF);
+    uvchr_to_utf8(encoded, sharp_s);
+
+Most Perl character-handling functions already use native-Unicode code points.
+For example, C<valid_utf8_to_uv> returns the native-Unicode code point that
+C<uvchr_to_utf8> expects.  Passing that result through C<UNI_TO_NATIVE> would
+treat the native-Unicode value as a standard Unicode number, possibly changing
+the character on EBCDIC platforms.  Such a mistake has no effect on ASCII
+platforms, where the native-Unicode and standard Unicode code point values are
+the same.
+
+Some older function names contain C<uni>, such as C<to_uni_fold>, even though
+they too work with native-Unicode code points.  Their results can be passed
+directly to other functions that take native-Unicode code points, without
+conversion.  For example, to uppercase Unicode U+00DF:
+
+    U8 result[UTF8_MAXBYTES_CASE + 1];
+    STRLEN length;
+    UV first = toUPPER_uvchr(UNI_TO_NATIVE(0xDF), result, &length);
+
+C<first> uses native-Unicode numbering, and C<result> contains the complete
+uppercase mapping in native UTF-8 (UTF-8 on ASCII platforms, UTF-EBCDIC on
+EBCDIC platforms).  See L</NATIVE_TO_UNI> for the reverse numbering conversion.
+Neither macro encodes or decodes a string.
 
 =cut
 */
@@ -613,8 +677,8 @@ regen/charset_translations.pl. */
 
 =for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
 returns the number of bytes required to represent the code point C<cp> when
-encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
-255; a Unicode code point otherwise.
+encoded as UTF-8.  C<cp> uses native-Unicode numbering: a native (ASCII or
+EBCDIC) code point if less than 256; a Unicode code point otherwise.
 
 =cut
  */
