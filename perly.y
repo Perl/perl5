@@ -1968,14 +1968,7 @@ term[product]	:	termbinop
 	|	kvslice                     [target]
 		subscript_keys              [selector]
 			{
-				$$ = op_prepend_elem(OP_KVHSLICE,
-					newOP(OP_PUSHMARK, 0),
-					newLISTOP(OP_KVHSLICE, 0,
-						list($selector),
-						ref($target, OP_KVHSLICE)));
-				if ($$ && $target)
-					$$->op_private |=
-						$target->op_private & OPpSLICEWARNING;
+				$$ = build_list_slice_kv_hash ($target, $selector);
 			}
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }

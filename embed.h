@@ -1003,6 +1003,7 @@
 #   define build_list_slice_array(a,b)          Perl_build_list_slice_array(aTHX_ a,b)
 #   define build_list_slice_hash(a,b)           Perl_build_list_slice_hash(aTHX_ a,b)
 #   define build_list_slice_kv_array(a,b)       Perl_build_list_slice_kv_array(aTHX_ a,b)
+#   define build_list_slice_kv_hash(a,b)        Perl_build_list_slice_kv_hash(aTHX_ a,b)
 #   define build_method_invocation(a,b,c)       Perl_build_method_invocation(aTHX_ a,b,c)
 #   define build_method_invocation_arguments(a,b) Perl_build_method_invocation_arguments(aTHX_ a,b)
 #   define build_typeglob(a)                    Perl_build_typeglob(aTHX_ a)
