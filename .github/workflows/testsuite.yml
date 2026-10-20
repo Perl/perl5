@@ -305,7 +305,7 @@ jobs:
 
   linux-i386:
     name: "linux i386/debian"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     needs: sanity_check
     if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_linux_i386 == 'true'))
