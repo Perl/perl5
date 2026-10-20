@@ -5368,6 +5368,40 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
  * private use must be set using malloc'd pointers.
  */
 
+/*
+=for apidoc_section $filters
+=for apidoc filter_add
+
+Adds a new source code filter function. The return value is one of:
+
+=over
+
+=item *
+
+A pointer to C<datasv> (if passed as the second argument)
+
+=item *
+
+A new C<datasv> (if C<NULL> was passed as the second argument)
+
+=item *
+
+C<NULL> (no parser state exists or C<NULL> passed as the filter)
+
+=back
+
+Only valid during compilation: no filter can be added when the
+interpreter has reached the execution phase, except when the
+compilation phase is re-entered (such as for a string eval).
+
+Callers I<should> check the return value; if C<NULL>, then any
+C<datasv> passed as the second argument will be unmodified. It
+will not have been upgraded to a C<PVIO> and will not have been
+initialized.
+
+=cut
+*/
+
 SV *
 Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
@@ -5440,7 +5474,10 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 =for apidoc_section $filters
 =for apidoc filter_del
 
-Delete most recently added instance of the filter function argument
+Delete most recently added instance of the filter function argument.
+
+Only valid during compilation: the function immediately returns
+without doing anything if there is no valid parser state.
 
 =cut
 */
@@ -5472,6 +5509,20 @@ Perl_filter_del(pTHX_ filter_t funcp)
 
 /* Invoke the idxth filter function for the current rsfp.	 */
 /* maxlen 0 = read one text line */
+
+/*
+=for apidoc_section $filters
+=for apidoc filter_read
+
+Invokes the filter function identified by index I<idx>.
+
+Only valid during compilation: the function immediately returns -1
+without doing anything if there is no valid parser state or no filters
+installed.
+
+=cut
+*/
+
 I32
 Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
