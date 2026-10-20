@@ -9226,20 +9226,37 @@ S_strftime8(pTHX_ const char * fmt,
         locale_utf8ness = LOCALE_NOT_UTF8;
         break;
 
-      case UTF8NESS_YES:    /* Known to be UTF-8; must be UTF-8 locale if can't
-                               downgrade. */
+      case UTF8NESS_YES:
+
+        /* Here, the format is known to be UTF-8.  If the locale also is UTF-8,
+         * it should all work fine */
         if (is_locale_utf8(locale)) {
             locale_utf8ness = LOCALE_IS_UTF8;
         }
-        else {
-            locale_utf8ness = LOCALE_NOT_UTF8;
+        else if (isNAME_C_OR_POSIX(locale)) {
 
+            /* But it is arguable what to do if the locale is C.  To preserve
+             * backward compatibility, all non-ASCII bytes are just considered
+             * raw bytes and are passed through as-is.  At least some libc
+             * strftime() implementations handle this gracefully.  See GH
+             * #23307.  So pretend for this purpose that the locale is UTF-8 */
+            locale_utf8ness = LOCALE_IS_UTF8;
+        }
+        else {
+            /* Here the locale isn't UTF8.  Try to convert the UTF-8 to Latin1
+             * */
             Size_t fmt_len = strlen(fmt);
-            if (! utf8_to_bytes_new_pv((const U8 **) &fmt, &fmt_len, &free_me))
+            if (! utf8_to_bytes_new_pv((const U8 **)
+                                       &fmt, &fmt_len, &free_me))
             {
                 SET_EINVAL;
                 return false;
             }
+
+            /* Here, successfully translated to Latin1.  XXX But if the actual
+             * locale isn't Latin1, strftime is not necessarily going to work
+             * properly.  For now assume is Latin1 */
+            locale_utf8ness = LOCALE_NOT_UTF8;
         }
 
         break;
