@@ -512,8 +512,9 @@ sub run_tests {
         ok($very_long_haystack !~ $very_long_re,
            'AC BMH prefilter rejects a 300-octet near miss');
 
+        my @letters = 'a' .. 'z';
         my @many_literals = map {
-            chr(ord('a') + $_ % 26) . sprintf('%06d', $_)
+            $letters[$_ % @letters] . sprintf('%06d', $_)
         } 0 .. 255;
         my $many_pattern = join '|', map { quotemeta($_) } @many_literals;
         my $many_re = qr/(?:$many_pattern)/;
