@@ -137,6 +137,7 @@
 %type <opval> term_postfixed_arrow_hash_postderef
 %type <opval> term_postfixed_arrow_list_slice_array
 %type <opval> term_postfixed_arrow_list_slice_hash
+%type <opval> term_postfixed_arrow_list_slice_kv_array
 %type <opval> term_postfixed_arrow_scalar_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
@@ -1016,6 +1017,22 @@ term_postfixed_arrow_list_slice_hash
 			{
 				$$ = build_list_slice_hash (
 					newAVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_kv_array
+	/* Matches:
+	 * - target->%[selector]
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		subscript_index             [selector]
+			{
+				$$ = build_list_slice_kv_array (
+					newHVREF ($target),
 					$selector
 				);
 			}
@@ -1933,8 +1950,9 @@ term[product]	:	termbinop
 				$$ = build_list_slice_array ($target, $selector);
 			}
 	|	term_postfixed_arrow_list_slice_array
+	|	term_postfixed_arrow_list_slice_kv_array
 	/* array key/value slice */
-	|	kvslice                     [target]
+	|	hsh                         [target]
 		subscript_index             [selector]
 			{
 				$$ = build_list_slice_kv_array ($target, $selector);
