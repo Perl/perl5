@@ -1074,12 +1074,12 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 {
     PERL_ARGS_ASSERT_JOIN_EXACT;
 
-    /* Merge consecutive EXACTish nodes into one.  The initial study leaves
-     * non-folding pieces separate so fixed-substring analysis can see them.
+    /* Merge consecutive EXACTish nodes into one.  The initial study joins
+     * non-folding pieces only to each other so substring analysis sees them.
      * The later cleanup allows them to join, one pair per study iteration. */
 
     regnode *n = regnext(scan);
-    U32 stringok = allow_non_folding || ! ANY_EXACT_NF(OP(scan));
+    U32 stringok = 1;
     regnode *next = REGNODE_AFTER_varies(scan);
     U32 stopnow = 0;
     regnode *stop = scan;
@@ -1104,7 +1104,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
            && (    REGNODE_TYPE(OP(n)) == NOTHING
                || (stringok && REGNODE_TYPE(OP(n)) == EXACT
                    && (allow_non_folding
-                       || ! ANY_EXACT_NF(OP(n)))))
+                       || (ANY_EXACT_NF(OP(scan)) == ANY_EXACT_NF(OP(n))))))
            && NEXT_OFF(n)
            && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX)
     {
