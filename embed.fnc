@@ -1041,6 +1041,9 @@ dp	|OP *	|build_list_slice_array 				\
 dp	|OP *	|build_list_slice_hash					\
 				|NN OP *target				\
 				|NN OP *selector
+dp	|OP *	|build_list_slice_kv_array				\
+				|NN OP *target				\
+				|NN OP *selector
 dp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\

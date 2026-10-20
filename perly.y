@@ -1937,14 +1937,7 @@ term[product]	:	termbinop
 	|	kvslice                     [target]
 		subscript_index             [selector]
 			{
-				$$ = op_prepend_elem(OP_KVASLICE,
-					newOP(OP_PUSHMARK, 0),
-					newLISTOP(OP_KVASLICE, 0,
-						list($selector),
-						ref(oopsAV($target), OP_KVASLICE)));
-				if ($$ && $target)
-					$$->op_private |=
-						$target->op_private & OPpSLICEWARNING;
+				$$ = build_list_slice_kv_array ($target, $selector);
 			}
 	/* @hash{@keys} */
 	|	ary                         [target]
