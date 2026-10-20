@@ -1079,7 +1079,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
      * The later cleanup allows them to join, one pair per study iteration. */
 
     regnode *n = regnext(scan);
-    U32 stringok = 1;
+    bool stringok = true;
     regnode *next = REGNODE_AFTER_varies(scan);
     U32 stopnow = 0;
     regnode *stop = scan;
@@ -1110,7 +1110,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     {
 
         if (OP(n) == TAIL)
-            stringok = 0;
+            stringok = false;
         else if (n > next) {
             regnode *gap = next;
 
@@ -1121,7 +1121,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 gap = REGNODE_AFTER_varies(gap);
             }
             if (gap != n)
-                stringok = 0;
+                stringok = false;
         }
         if (REGNODE_TYPE(OP(n)) == NOTHING) {
             DEBUG_PEEP("skip:", n, depth, 0);
