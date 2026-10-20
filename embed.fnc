@@ -1044,6 +1044,9 @@ Rdp	|OP *	|build_list_slice_hash					\
 Rdp	|OP *	|build_list_slice_kv_array				\
 				|NN OP *target				\
 				|NN OP *selector
+Rdp	|OP *	|build_list_slice_kv_hash				\
+				|NN OP *target				\
+				|NN OP *selector
 Rdp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\
