@@ -204,6 +204,7 @@ diagnostic messages, see L<perldiag>.
 XXX New or changed warnings emitted by the core's C<C> code go here. Also
 include any changes in L<perldiag> that reconcile it to the C<C> code.
 
+
 =head2 New Diagnostics
 
 XXX Newly added diagnostic messages go under here, separated into L</New Errors>
@@ -220,6 +221,17 @@ XXX L<message|perldiag/"message">
 =back
 
 =head3 New Warnings
+
+Two warnings in C<malloc.c> which were not previously documented have been
+added to L<perldiag>.
+
+=over 4
+
+=item L<Unaligned "next" pointer in the free chain 0x% at 0x%|perldiag/"Unaligned "next" pointer in the free chain 0x% at 0x%">
+
+=item L<Unaligned pointer in the free chain 0x%|perldiag/"Unaligned pointer in the free chain 0x%">
+
+=back
 
 =over 4
 
