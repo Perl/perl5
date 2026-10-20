@@ -58,6 +58,15 @@ strings.  For the uninitiated, this is a method of representing arbitrary
 Unicode characters as a variable number of bytes, in such a way that
 characters in the ASCII range are unmodified, and a zero byte never appears
 within non-zero characters.
+
+On EBCDIC platforms, UTF-8 in this file means UTF-EBCDIC.  The code point
+arguments and results generally use Perl's "native-Unicode" numbering:
+values from 0 through 255 use the platform's native character set, and values
+above 255 use Unicode numbering.  Thus 'A' is 65 on ASCII platforms and 193 on
+EBCDIC platforms, while U+0100 is 256 on both.  UNI_TO_NATIVE and NATIVE_TO_UNI
+convert between standard Unicode and native-Unicode numbers, as described in
+utf8.h.  The encoding and decoding functions translate between native-Unicode
+numbers and UTF-8 or UTF-EBCDIC strings.
 */
 
 void
@@ -3688,23 +3697,25 @@ Perl_to_upper_title_latin1_(pTHX_ const U8 c, U8* p, STRLEN *lenp,
                                          "foldcase")
 
 UV
-Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
+Perl_to_uni_upper(pTHX_ UV uv, U8* p, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
-    /* Convert the Unicode character whose ordinal is <c> to its uppercase
-     * version and store that in UTF-8 in <p> and its length in bytes in <lenp>.
-     * Note that the <p> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
-     * the changed version may be longer than the original character.
+    /* Convert the character whose native-Unicode code point is <uv> to its
+     * uppercase version and store that in UTF-8 (UTF-EBCDIC on EBCDIC platforms)
+     * in <p> and its length in bytes in <lenp>. Note that the <p> needs to be
+     * at least UTF8_MAXBYTES_CASE+1 bytes since the changed version may be
+     * longer than the original
+     * character.
      *
      * The ordinal of the first character of the changed version is returned
      * (but note, as explained above, that there may be more.) */
 
-    if (c < 256) {
-        return to_upper_title_latin1_((U8) c, p, lenp, 'S');
+    if (uv < 256) {
+        return to_upper_title_latin1_((U8) uv, p, lenp, 'S');
     }
 
-    return CALL_UPPER_CASE(c, NULL, p, lenp);
+    return CALL_UPPER_CASE(uv, NULL, p, lenp);
 }
 
 UV

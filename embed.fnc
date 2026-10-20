@@ -4022,7 +4022,7 @@ Cp	|UV	|to_uni_lower	|UV c					\
 Cp	|UV	|to_uni_title	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
-Cp	|UV	|to_uni_upper	|UV c					\
+Cp	|UV	|to_uni_upper	|UV uv					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
 Cp	|UV	|to_utf8_fold_flags_					\
