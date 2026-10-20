@@ -3233,6 +3233,21 @@ $api{hdr} = <<"_EOB_";
 |the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy a different
 |number of bytes than in UTF-8.
 |
+|To abstract away platform differences such as EBCDIC, many Perl string APIs
+|use Perl's "native-Unicode" code point numbering.  Values from 0 through 255
+|use the platform's native character numbers, and values above 255 use Unicode
+|numbering.  For example, the native-Unicode value of C<'A'> is 65 on ASCII
+|platforms and 193 on EBCDIC platforms, while LATIN CAPITAL LETTER A WITH
+|MACRON (U+0100) is 256 on both.
+|
+|C<NATIVE_TO_UNI> and C<UNI_TO_NATIVE> convert between native-Unicode and
+|standard Unicode code point numbers.  Most internal Perl code should not
+|need these conversions.  They are usually needed when exchanging code points
+|with an external interface or storage format.  Some older API names contain
+|C<uni> even though their arguments and results use native-Unicode numbering.
+|Other APIs use standard Unicode numbering.  See L<perlguts/Unicode Support>
+|and the individual API descriptions for details.
+|
 |The organization of this document is tentative and subject to change.
 |Suggestions and patches welcome
 |L<perl5-porters\@perl.org|mailto:perl5-porters\@perl.org>.
