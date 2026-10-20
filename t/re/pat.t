@@ -36,6 +36,13 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    # Convert the fixture characters before composing patterns and subjects.
+    # Numeric escapes below 0x100 otherwise select native codepoints.
+    my $e_acute = uni_to_native("\x{e9}");
+    my $n_tilde = uni_to_native("\x{f1}");
+    my $sharp_s_native = uni_to_native("\x{df}");
+    my $micro_sign_native = uni_to_native("\x{b5}");
+
     {
         # Vary the offsets of rejected windows and their lengths around the
         # machine-word boundary, including truncated windows near the end.
@@ -47,7 +54,7 @@ sub run_tests {
             for my $lead ( 0 .. 2 * $Config{uvsize} - 1 ) {
                 my ( @expected, @actual );
                 for my $gap ( 0 .. 3 * $Config{uvsize} ) {
-                    my $noise = $gap % 2 ? ' ' : "\t\x{e9}";
+                    my $noise = $gap % 2 ? ' ' : "\t${e_acute}";
                     $noise .= "\x{100}" if $encoding eq 'utf8-wide';
                     my $text =
                         ( '!' x $lead ) . 'aaaa'
@@ -77,9 +84,10 @@ sub run_tests {
     {
         my @cases = (
             [ 'failure links',  'abac|bac',        'ababacbac' ],
-            [ 'Latin-1 octets', "\x{e9}x|\x{f1}y", "\x{e9}\x{e9}x\x{f1}y" ],
+            [ 'Latin-1 octets', "${e_acute}x|${n_tilde}y",
+                "${e_acute}${e_acute}x${n_tilde}y" ],
             [ 'wide octets', "\x{100}x|\x{200}y",  "\x{100}\x{100}x\x{200}y" ],
-            [ 'fold expansions',  'ssx|ffiy',      "\x{df}\x{df}x\x{fb03}y" ],
+            [ 'fold expansions',  'ssx|ffiy',      "${sharp_s_native}${sharp_s_native}x\x{fb03}y" ],
             [ 'accepting states', 'ab|bcd',        'xabcdab' ],
             [
                 'extracted prefix', "\x{100}x|\x{100}y",
@@ -90,8 +98,8 @@ sub run_tests {
             [ 'mixed alternatives',     "\x{100}x|cat",      'catcat' ],
             [ 'UTF-8 failure suffix', "\x{100}ab|b\x{1f600}",
                 "\x{100}ab\x{100}acb\x{1f600}" ],
-            [ 'UTF-8 unequal byte lengths', "\x{e9}x|\x{100}x|\x{1f600}x",
-                "\x{1f600}x\x{e9}x\x{100}x" ],
+            [ 'UTF-8 unequal byte lengths', "${e_acute}x|\x{100}x|\x{1f600}x",
+                "\x{1f600}x${e_acute}x\x{100}x" ],
             [ 'UTF-8 accepting suffix', "\x{100}x|x\x{1f600}|\x{1f600}",
                 "\x{100}x\x{1f600}\x{1f600}" ],
             [ 'UTF-8 duplicate paths', "\x{100}x(?=A)|\x{100}x(?=B)|\x{200}y",
@@ -106,12 +114,12 @@ sub run_tests {
             [ 'short word after wraps', 'abababx|babc', ( 'ab' x 100 ) . 'c' ],
             [
                 'Latin-1 ring wraps',
-                ( "\x{e9}" x 5 ) . 'x|' . ( "\x{f1}" x 4 ) . 'y',
-                ( "\x{e9}" x 100 ) . 'x'
+                ( "${e_acute}" x 5 ) . 'x|' . ( "${n_tilde}" x 4 ) . 'y',
+                ( "${e_acute}" x 100 ) . 'x'
             ],
             [
                 'folded ring wraps', 'ssssssX|ffiffiY',
-                ( "\x{df}" x 100 ) . 'X'
+                ( "${sharp_s_native}" x 100 ) . 'X'
             ],
             [
                 'heap ring wraps',
@@ -130,8 +138,8 @@ sub run_tests {
             ],
             [ 'accepting prefix continuation', 'ab(?=X)|abcd', 'abcdabX' ],
             [
-                'Latin-1 continuation', "\x{e9}x(?=A)|\x{f1}y(?=B)",
-                "\x{e9}xZ\x{f1}yB"
+                'Latin-1 continuation', "${e_acute}x(?=A)|${n_tilde}y(?=B)",
+                "${e_acute}xZ${n_tilde}yB"
             ],
         );
 
@@ -169,8 +177,8 @@ sub run_tests {
 
     {
         my @cases = (
-            ['ssx|sy', "\x{df}x!"],
-            ['sssx|ssy', "s\x{df}x!"],
+            ['ssx|sy', "${sharp_s_native}x!"],
+            ['sssx|ssy', "s${sharp_s_native}x!"],
             ['ffix|fy', "\x{fb03}x!"],
             ['ffix|ffy', "\x{fb03}x!"],
             ["\x{3b9}\x{308}\x{301}x|\x{3b9}y", "\x{390}x!"],
@@ -210,11 +218,11 @@ sub run_tests {
 
     {
         my @cases = (
-            ['s|zoo', "\x{df}!"],
-            ['s([!]?)|ss([!]?)', "\x{df}!"],
+            ['s|zoo', "${sharp_s_native}!"],
+            ['s([!]?)|ss([!]?)', "${sharp_s_native}!"],
             ['f([!]?)|ffi([!]?)', "\x{fb03}!"],
             ['ff([!]?)|ffi([!]?)', "\x{fb03}!"],
-            ['ss([!]?)|s([!]?)', "\x{df}!"],
+            ['ss([!]?)|s([!]?)', "${sharp_s_native}!"],
             ["\x{3b9}\x{308}([!]?)|\x{3b9}\x{308}\x{301}([!]?)",
              "\x{390}!"],
         );
@@ -276,7 +284,7 @@ sub run_tests {
 
     {
         my @folded_backtracks = (
-            ['ss', "\x{df}"],
+            ['ss', "${sharp_s_native}"],
             ['ffi', "\x{fb03}"],
             ["\x{3b9}\x{308}\x{301}", "\x{390}"],
             ["\x{565}\x{582}", "\x{587}"],
@@ -310,18 +318,18 @@ sub run_tests {
     {
         my @folded_starts = (
             ['ssx', "sSx"],
-            ['ssx', "\x{df}x"],
+            ['ssx', "${sharp_s_native}x"],
             ['ssx', "\x{17f}sx"],
             ['ssx', "\x{1e9e}x"],
             ['ssx', "\x{1df95}x"],
             ['kx', "\x{212a}x"],
-            ["\x{b5}x", "\x{39c}x"],
+            ["${micro_sign_native}x", "\x{39c}x"],
             ['ffx', "\x{fb00}x"],
             ['ffix', "\x{fb03}x"],
             ["\x{3b9}\x{308}\x{301}x", "\x{390}x"],
-            ['sx', "\x{df}x"],
-            ['ssx', "s\x{df}x"],
-            ["\x{17f}\x{17f}tail", "\x{df}tail"],
+            ['sx', "${sharp_s_native}x"],
+            ['ssx', "s${sharp_s_native}x"],
+            ["\x{17f}\x{17f}tail", "${sharp_s_native}tail"],
             ["\x{565}\x{582}tail", "\x{587}tail"],
             ["\x{10428}tail", "\x{10400}tail"],
             ["\x{565}\x{582}\x{10428}tail", "\x{587}\x{10400}tail"],
@@ -376,10 +384,10 @@ sub run_tests {
     {
         for my $trie_limit (65536, -1) {
             local ${^RE_TRIE_MAXBUF} = $trie_limit;
-            my $pattern = "\\x{df}\\x{10000}\\x{100}|\\x{df}\\x{e9}a"
+            my $pattern = "${sharp_s_native}\\x{10000}\\x{100}|${sharp_s_native}${e_acute}a"
                         . "(?#trie limit $trie_limit)";
             my $re = qr/$pattern/i;
-            my $target = ("\x{df}" x 3) . "\x{10000}\x{100}";
+            my $target = ("${sharp_s_native}" x 3) . "\x{10000}\x{100}";
             my @matches;
 
             while ($target =~ /$re/g) {
@@ -564,21 +572,21 @@ sub run_tests {
         ok($latin1_trie_haystack =~ $mixed_trie_re && $-[0] == 5000,
            'Trie wide-literal shortcut preserves Latin-1 alternatives');
 
-        my $utf8_haystack = ("\x{e9}" x 5000) . "\x{e9}cat";
+        my $utf8_haystack = ("${e_acute}" x 5000) . "${e_acute}cat";
         utf8::upgrade($utf8_haystack);
-        ok($utf8_haystack =~ /\x{e9}cat|zebra/,
+        ok($utf8_haystack =~ /${e_acute}cat|zebra/,
            'UTF-8 AC finds a multi-byte literal after rejected input');
 
-        my $latin1_haystack = ("\xE9" x 5000) . "\xE9cat";
-        ok($latin1_haystack =~ /\x{e9}cat|zebra/,
+        my $latin1_haystack = ("${e_acute}" x 5000) . "${e_acute}cat";
+        ok($latin1_haystack =~ /${e_acute}cat|zebra/,
            'Latin-1 AC preserves matching for an awkward code point');
 
         for my $encoding ('Latin-1', 'UTF-8') {
             # The shortest word occupies two Latin-1 octets or three UTF-8
             # octets.  Check both alternatives with each target encoding.
-            my $different_lengths_re = qr/\x{e9}a|zbc/;
+            my $different_lengths_re = qr/${e_acute}a|zbc/;
 
-            for my $suffix ("\x{e9}a", 'zbc') {
+            for my $suffix ("${e_acute}a", 'zbc') {
                 my $target = ('Q' x 17) . $suffix;
                 utf8::upgrade($target) if $encoding eq 'UTF-8';
 
@@ -623,9 +631,9 @@ sub run_tests {
 
             # Folded tries use only the start map.  One sharp s contributes
             # two folded characters, so ring offsets count original input.
-            for my $case (["\x{df}x", 0, 2],
-                          ["s\x{df}x", 1, 3],
-                          ["s\x{df}ssx", 2, 5])
+            for my $case (["${sharp_s_native}x", 0, 2],
+                          ["s${sharp_s_native}x", 1, 3],
+                          ["s${sharp_s_native}ssx", 2, 5])
             {
                 my ($target, $start, $end) = @$case;
                 utf8::upgrade($target) if $encoding eq 'UTF-8';
@@ -634,7 +642,7 @@ sub run_tests {
                    "AC keeps folded character offsets after root restarts in $encoding");
             }
 
-            my $partial_fold = "\x{df}x";
+            my $partial_fold = "${sharp_s_native}x";
             utf8::upgrade($partial_fold) if $encoding eq 'UTF-8';
 
             ok($partial_fold !~ /sx|ab/iu,
@@ -723,14 +731,14 @@ sub run_tests {
         ok($wide_minimum_target =~ /\x{100}x|abcdefghi/ && $-[0] == 17,
            'AC uses the wide alternative that sets the UTF-8 minimum');
 
-        my $wide_fallback_target = "\x{e9}abc\x{100}du";
-        ok($wide_fallback_target =~ /\x{e9}abcdefg|c\x{100}du/
+        my $wide_fallback_target = "${e_acute}abc\x{100}du";
+        ok($wide_fallback_target =~ /${e_acute}abcdefg|c\x{100}du/
            && $-[0] == 3 && $+[0] == 7,
            'AC retains character offsets across a wide suffix failure transition');
 
         # The UTF-8 prefixes exceed the 255-octet cap.  Their capped anchor
         # lies on a continuation octet, which is valid for a BMH lookup.
-        my $long_latin1_word = 'a' . ("\x{e9}" x 150);
+        my $long_latin1_word = 'a' . ("${e_acute}" x 150);
         my $long_wide_word = 'b' . ("\x{100}" x 150);
         my $long_encoded_re = qr/\Q$long_latin1_word\E|\Q$long_wide_word\E/;
 
@@ -742,7 +750,7 @@ sub run_tests {
                && $+[0] == length($target),
                "AC long encoded literals match a Latin-1 word in $encoding");
 
-            $target = ('Q' x 17) . 'a' . ("\x{e9}" x 149) . 'z';
+            $target = ('Q' x 17) . 'a' . ("${e_acute}" x 149) . 'z';
             utf8::upgrade($target) if $encoding eq 'UTF-8';
 
             ok($target !~ $long_encoded_re,
