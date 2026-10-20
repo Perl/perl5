@@ -1795,24 +1795,22 @@ S_ac_path_as_latin1(const U8 *path, const U32 path_len, const U32 source_chars,
     if (path_len < source_chars)
         return FALSE;
 
-    {
-        U32 pos = 0;
-        U32 out = 0;
+    U32 pos = 0;
+    U32 out = 0;
 
-        while (pos < path_len) {
-            STRLEN char_len = 0;
-            const UV cp = valid_utf8_to_uv(path + pos, &char_len);
+    while (pos < path_len) {
+        STRLEN char_len = 0;
+        const UV cp = valid_utf8_to_uv(path + pos, &char_len);
 
-            if (cp > 255 || !char_len || char_len > path_len - pos)
-                return FALSE;
-            latin1_path[out++] = (U8)cp;
-            pos += (U32)char_len;
-        }
-
-        if (out != source_chars)
+        if (cp > 255 || !char_len || char_len > path_len - pos)
             return FALSE;
-        *latin1_len = out;
+        latin1_path[out++] = (U8)cp;
+        pos += (U32)char_len;
     }
+
+    if (out != source_chars)
+        return FALSE;
+    *latin1_len = out;
 
     return TRUE;
 }
