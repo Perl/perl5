@@ -7118,6 +7118,16 @@ use it to restrict permissions for yourself (EXPR & 0700).
 (F) You asked UNIVERSAL to export something, but UNIVERSAL is the
 base class for all classes and contains no exportable symbols.
 
+=item Unaligned "next" pointer in the free chain 0x% at 0x%
+
+(W malloc) In a perl built with C<-Dusemymalloc>, there was a problem when
+removing an item from a linked list.
+
+=item Unaligned pointer in the free chain 0x%
+
+(W malloc) In a perl built with C<-Dusemymalloc>, there was a problem when
+removing an item from a linked list.
+
 =item Unbalanced context: %d more PUSHes than POPs
 
 (S internal) The exit code detected an internal inconsistency in how
