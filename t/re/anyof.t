@@ -735,7 +735,9 @@ my @tests = (
     '(?i)[\x{FB06}]' => 'EXACTFU <st>',
 
     '[a][b]' => 'EXACT <ab>',
-    '(?i)[:][\x{f7}]' => 'EXACT_NF <:\x{f7}>',
+    # 0xB6 is the non-folding PILCROW SIGN on both ASCII and supported EBCDIC
+    # platforms, so this tests a non-ASCII character portably.
+    '(?i)[:][\x{b6}]' => 'EXACT_NF <:\x{b6}>',
     '(?i)[:][\x{2029}]' => 'EXACT_NF_REQ8 <:\x{2029}>',
     '(?i)[\x{2029}][:]' => 'EXACT_NF_REQ8 <\x{2029}:>',
     '[a]\x{100}' => 'EXACT_REQ8 <a\x{100}>',
