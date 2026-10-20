@@ -9226,20 +9226,41 @@ S_strftime8(pTHX_ const char * fmt,
         locale_utf8ness = LOCALE_NOT_UTF8;
         break;
 
-      case UTF8NESS_YES:    /* Known to be UTF-8; must be UTF-8 locale if can't
-                               downgrade. */
+      case UTF8NESS_YES:
+
+        /* Here, the format is known to be UTF-8.  If the locale also is UTF-8,
+         * it should all work fine */
         if (is_locale_utf8(locale)) {
             locale_utf8ness = LOCALE_IS_UTF8;
         }
         else {
-            locale_utf8ness = LOCALE_NOT_UTF8;
 
-            Size_t fmt_len = strlen(fmt);
-            if (! utf8_to_bytes_new_pv((const U8 **) &fmt, &fmt_len, &free_me))
-            {
+            /* If the locale is unsupported, things could go wrong if we
+             * actually call strftime(), such as with shift states, so just
+             * return an empty result, setting errno.  Such a locale would be
+             * a non-UTF-8 multi-byte locale. */
+            PERL_MB_CUR_MAX_LOCK;
+            const int mb_cur_max = MB_CUR_MAX;
+            PERL_MB_CUR_MAX_UNLOCK;
+
+            /* (Comments elsewhere in this file talk about the unreliability of
+             * the libc MB_CUR_MAX when the locale is C.) */
+            if (mb_cur_max > 1 && ! isNAME_C_OR_POSIX(locale)) {
                 SET_EINVAL;
                 return false;
             }
+
+            /* strftime() implementations copy the input format string
+             * parameter to the output unchanged, except for any sequences
+             * beginning with '%' that it recognizes as special.  Those are
+             * instead replaced by their documented values, based on the
+             * current locale.  All the special sequences are ASCII-only,
+             * hence the same whether the format is UTF-8 or not.  This means
+             * that the locale's UTF8ness and the format's UTF8ness being
+             * mismatched are irrelevant to strftime().  See GH #23307.  But
+             * the result shouldn't be considered as UTF-8, just bytes,
+             * because this isn't a UTF-8 locale. */
+            locale_utf8ness = LOCALE_NOT_UTF8;
         }
 
         break;
