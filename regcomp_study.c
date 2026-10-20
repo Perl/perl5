@@ -1114,8 +1114,8 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         else if (n > next) {
             regnode *gap = next;
 
-            /* A previous merge can leave padding between scan and n.
-             * Only cross storage that a join has marked as consumed. */
+            /* A previous merge can leave unused regnode units between scan
+             * and n.  Only cross them if the join marked each as OPTIMIZED. */
             while (gap < n && OP(gap) == OPTIMIZED)
             {
                 gap = REGNODE_AFTER_varies(gap);
