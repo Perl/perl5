@@ -128,11 +128,11 @@
 %type <opval> parenthesised_list
 %type <opval> subscript_index
 %type <opval> subscript_keys
-%type <opval> subscriptable_reference
 %type <opval> term_postfixed_arrow_array_element
 %type <opval> term_postfixed_arrow_array_length
 %type <opval> term_postfixed_arrow_array_postderef
 %type <opval> term_postfixed_arrow_code_postderef
+%type <opval> term_postfixed_arrow_function_invocation
 %type <opval> term_postfixed_arrow_hash_element
 %type <opval> term_postfixed_arrow_hash_postderef
 %type <opval> term_postfixed_arrow_list_slice_array
@@ -893,18 +893,6 @@ subscript_keys
 		}
 	;
 
-subscriptable_reference
-	/* Expression that is treated by `subscript` nonterminal as a reference
-	 * Produces: reference expression
-	 */
-	:	subscripted
-	|	term
-		ARROW
-		{
-			$$ = $term;
-		}
-	;
-
 term_postfixed_arrow_array_element
 	/* Matches:
 	 * - target->[selector]
@@ -960,6 +948,25 @@ term_postfixed_arrow_code_postderef
 					scalar (newCVREF ($PERLY_AMPERSAND, $target)),
 					NULL
 				);
+			}
+	;
+
+term_postfixed_arrow_function_invocation
+	/* Matches
+	 * - term->()
+	 * - term->(arguments)
+	 */
+	:	term                        [target]
+		ARROW
+		parenthesised_expression    [arguments]
+			{
+				$$ = build_function_invocation (
+					OPf_STACKED,
+					newCVREF (0, scalar ($target)),
+					$arguments
+				);
+				if (parser->expect == XBLOCK)
+					parser->expect = XOPERATOR;
 			}
 	;
 
@@ -1756,9 +1763,10 @@ subscripted
 				);
 			}
 	|	term_postfixed_arrow_hash_element
-	/* $subref->(@args); $foo->{bar}(@args) */
-	/* $subref->(); $foo->{bar}() */
-	|	subscriptable_reference     [target]
+	|	term_postfixed_arrow_function_invocation
+	/* $foo->{bar}(@args) */
+	/* $foo->{bar}() */
+	|	subscripted                 [target]
 		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
