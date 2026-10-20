@@ -285,7 +285,26 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Fix some build noise and technical undefined behaviour with
+C<-Duselongdouble> builds on ARM64:
+
+=over
+
+=item *
+
+C<Configure> would detect C<double> format strings rather than the
+correct correct long double format string as the correct format string
+for NV when NV was long double, resulting in C<-Wformat> warnings.
+
+=item *
+
+F<perl.h> would disable C<USE_LONG_DOUBLE> when C<double> and C<long
+double> were the same size leaving NV as C<long double>.  This would
+result in calls to a C library function that expected a C<double>
+pointer being supplied a <long double> pointer, resulting in type
+mismatch warnings.
+
+=back
 
 =back
 
