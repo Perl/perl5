@@ -1857,9 +1857,9 @@ S_ac_map_folded_starts(pTHX_ const reg_trie_data *trie, const U32 state,
             const UV initial = to_uni_fold(cp, folded, &folded_len);
             const Size_t count = inverse_folds_(initial, &first, &remaining);
 
-            /* Unicode closure is a safe superset for /d and /aa.  Extra
-             * candidates reach AC, which applies the actual folding rules.
-             * Keep the literal itself and native /d's paired character too. */
+            /* Unicode folding, together with native /d fold pairs, covers all
+             * possible starts under /d and /aa.  It may admit false positives,
+             * but that is fine as AC rejects them using the actual folding rules. */
             S_ac_map_start_codepoint(aTHX_ map, cp);
             if (cp <= 255 && (trie->prop_flags & TRIE_FOLD_NATIVE))
                 S_ac_map_start_codepoint(aTHX_ map, PL_fold[(U8)cp]);
