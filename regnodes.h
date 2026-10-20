@@ -641,7 +641,7 @@ typedef struct regnode                           tregnode_WHILEM;
    For example, the '.' character is non-folding.  This node type is for the
    most part handled just like EXACT nodes, but EXACT_NF nodes have the
    additional special property that they may be safely merged with any other
-   node type, and provided the result ends up with the other nodes type then
+   node type, and provided the result ends up with the other node's type then
    it will still match correctly. */
 #define EXACT_NF                    (EXACTL + 1)
 #define EXACT_NF_tb                 ((EXACT_NF) * 2)

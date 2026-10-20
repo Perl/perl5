@@ -354,7 +354,7 @@ EXACT_NF         str        Match this string of non-folding
                             additional special property that they may
                             be safely merged with any other node type,
                             and provided the result ends up with the
-                            other nodes type then it will still match
+                            other node's type then it will still match
                             correctly.
 EXACT_NF_REQ8    str        Like EXACT_NF, but only UTF-8 encoded
                             targets can match
