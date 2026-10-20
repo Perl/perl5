@@ -1,4 +1,5 @@
 use re Debug=>qw(DUMP EXECUTE TRIEC TEST);
+require '../../t/charset_tools.pl';
 my @tests=(
   XY     =>  'X(A|[B]Q||C|D)Y' ,
   foobar =>  '[f][o][o][b][a][r]',
@@ -13,7 +14,7 @@ my @tests=(
   'xfoo_bar_bazfoo_bar_baz' => 'x(?:foo_bar_baz|bloop_er)foo_bar_baz',
   'a_word' => '/foo|bar|a_word|_qux/i',
   '_' => '/_|#/i',
-  '\x{00DF}_' => '/(?a:[\x{1E9E}_]_)/i',
+  uni_to_native("\x{00DF}") . '_' => '/(?a:[\x{1E9E}_]_)/i',
   '_a' => '/_a|_b/i',
 );
 while (@tests) {
