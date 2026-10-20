@@ -138,6 +138,7 @@
 %type <opval> term_postfixed_arrow_list_slice_array
 %type <opval> term_postfixed_arrow_list_slice_hash
 %type <opval> term_postfixed_arrow_list_slice_kv_array
+%type <opval> term_postfixed_arrow_list_slice_kv_hash
 %type <opval> term_postfixed_arrow_scalar_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
@@ -152,7 +153,7 @@
 %type <opval> condition
 %type <opval> catch_paren
 %type <opval> empty
-%type <opval> kvslice gelem
+%type <opval> gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
@@ -1032,6 +1033,22 @@ term_postfixed_arrow_list_slice_kv_array
 		subscript_index             [selector]
 			{
 				$$ = build_list_slice_kv_array (
+					newHVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_kv_hash
+	/* Matches:
+	 * - target->%{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_kv_hash (
 					newHVREF ($target),
 					$selector
 				);
@@ -1965,11 +1982,12 @@ term[product]	:	termbinop
 			}
 	|	term_postfixed_arrow_list_slice_hash
 	/* %hash{@keys} */
-	|	kvslice                     [target]
+	|	hsh                         [target]
 		subscript_keys              [selector]
 			{
 				$$ = build_list_slice_kv_hash ($target, $selector);
 			}
+	|	term_postfixed_arrow_list_slice_kv_hash
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
 	|	/* &foo; */
@@ -2250,15 +2268,6 @@ arylen
 
 star	:	PERLY_STAR indirob
 			{ $$ = build_typeglob ($indirob); }
-	;
-
-kvslice	:	hsh
-	|	term                        [target]
-		ARROW
-		PERLY_PERCENT_SIGN
-			{
-				$$ = newHVREF($target);
-			}
 	;
 
 gelem	:	star
