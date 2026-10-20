@@ -18,7 +18,7 @@
 
 /*
 =for apidoc_section $casting
-=for apidoc BCmnU|type|Null|type
+=for apidoc BCm|type|Null|type
 
 Null pointer of type C<type>
 
