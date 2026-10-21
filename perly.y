@@ -120,6 +120,7 @@
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
 %type <ival>  implicit_semicolon
+%type <opval> parentheses_empty
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -772,6 +773,17 @@ implicit_semicolon
 	 * Token is required by LALR(1) parser; can be omitted for GLR parser
 	 */
 	:	PERLY_SEMICOLON
+	;
+
+parentheses_empty
+	/* Matches:
+	 * - ()
+	 */
+	:	PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = NULL;
+			}
 	;
 
 subscript_index
@@ -1493,8 +1505,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			}
 	/* $subref->(); $foo->{bar}() */
 	|	subscriptable_reference     [code_reference]
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+		parentheses_empty
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1509,8 +1520,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
 	/* empty list slice! */
-	|	PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+	|	parentheses_empty
 		subscript_index             [selector]
 			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
@@ -1683,8 +1693,7 @@ term[product]	:	termbinop
 			{ $$ = sawparens($expr); }
 	|	QWLIST
 			{ $$ = $QWLIST; }
-	|	PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+	|	parentheses_empty
 			{
 				$$ = sawparens(newNULLLIST());
 			}
@@ -1753,8 +1762,7 @@ term[product]	:	termbinop
 			}
 	|	/* &foo() or foo() */
 		amper                       [function]
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+		parentheses_empty
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1842,16 +1850,14 @@ term[product]	:	termbinop
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP($FUNC0, 0); }
 	|	FUNC0
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+		parentheses_empty
 			{
 				$$ = newOP($FUNC0, 0);
 			}
 	|	FUNC0OP       /* Same as above, but op created in toke.c */
 			{ $$ = $FUNC0OP; }
 	|	FUNC0OP
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+		parentheses_empty
 			{
 				$$ = $FUNC0OP;
 			}
@@ -1866,8 +1872,7 @@ term[product]	:	termbinop
 			}
 	/* not () */
 	|	FUNC1
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+		parentheses_empty
 			{
 				$$ = ($FUNC1 == OP_NOT)
 					? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
@@ -1908,8 +1913,7 @@ myattrterm
 /* Things that can be "my"'d */
 myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 			{ $$ = sawparens($expr); }
-	|	PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
+	|	parentheses_empty
 			{
 				$$ = sawparens(newNULLLIST());
 			}
