@@ -368,6 +368,11 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+L<perlfunc/caller> is better able to identify the correct call site when
+multiple branches of an C<if>/C<elsif>/C<else> chain call the same function.
+
 =back
 
 =head1 Known Problems
