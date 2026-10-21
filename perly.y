@@ -1489,8 +1489,8 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
-	|	/* $subref->(@args); $foo->{bar}(@args) */
-		subscriptable_reference     [code_reference]
+	/* $subref->(@args); $foo->{bar}(@args) */
+	|	subscriptable_reference     [code_reference]
 		PERLY_PAREN_OPEN
 		expr                        [arguments]
 		PERLY_PAREN_CLOSE
@@ -1515,11 +1515,11 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
+	/* list slice */
 	|	PERLY_PAREN_OPEN
 		expr                        [list]
 		PERLY_PAREN_CLOSE
 		subscript_index             [selector]
-		/* list slice */
 			{
 				$$ = newSLICEOP(0, $selector, $list);
 			}
@@ -1696,10 +1696,10 @@ term[product]	:	termbinop
 	|	KW_LOCAL term[operand]	%prec UNIOP
 			{ $$ = localize($operand,0); }
 	|	PERLY_PAREN_OPEN
-		expr
+		expr                        [list]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = sawparens($expr);
+				$$ = sawparens($list);
 			}
 	|	QWLIST
 			{ $$ = $QWLIST; }
@@ -1780,8 +1780,8 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	/* &foo(@args) or foo(@args) */
-		amper                       [function]
+	/* &foo(@args) or foo(@args) */
+	|	amper                       [function]
 		PERLY_PAREN_OPEN
 		expr                        [arguments]
 		PERLY_PAREN_CLOSE
@@ -1888,13 +1888,13 @@ term[product]	:	termbinop
 					? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
 					: newOP($FUNC1, OPf_SPECIAL);
 			}
+	/* not($foo) */
 	|	FUNC1
 		PERLY_PAREN_OPEN
-		expr
+		expr                        [arguments]
 		PERLY_PAREN_CLOSE
-		/* not($foo) */
 			{
-				$$ = newUNOP($FUNC1, 0, $expr);
+				$$ = newUNOP($FUNC1, 0, $arguments);
 			}
 	|	PMFUNC /* m//, s///, qr//, tr/// */
 			{
@@ -1929,10 +1929,10 @@ myattrterm
 /* Things that can be "my"'d */
 myterm
 	:	PERLY_PAREN_OPEN
-		expr
+		expr                        [list]
 		PERLY_PAREN_CLOSE
 			{
-				$$ = sawparens($expr);
+				$$ = sawparens($list);
 			}
 	|	parentheses_empty
 			{
