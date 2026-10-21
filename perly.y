@@ -119,6 +119,7 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <ival>  implicit_semicolon
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -766,6 +767,13 @@ bare_statement_yadayada
 		}
 	;
 
+implicit_semicolon
+	/* Implicit token PERLY_SEMICOLON injected by tokeniser
+	 * Token is required by LALR(1) parser; can be omitted for GLR parser
+	 */
+	:	PERLY_SEMICOLON
+	;
+
 subscript_index
 	/* Array/list access subscript: [ selector expression ]
 	 * Value of nonterminal: selector expression
@@ -785,7 +793,7 @@ subscript_keys
 	/* { expression } */
 	:	PERLY_BRACE_OPEN
 		expr
-		PERLY_SEMICOLON
+		implicit_semicolon
 		PERLY_BRACE_CLOSE
 		{
 			$$ = $expr;
@@ -1453,8 +1461,6 @@ methodname:	METHCALL0
 
 /* Some kind of subscripted expression */
 subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
-                        /* In this and all the hash accessors, PERLY_SEMICOLON is
-                         * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
@@ -1630,7 +1636,7 @@ termunop : PERLY_MINUS term %prec UMINUS                       /* -$x */
 anonymous
 	:	PERLY_BRACKET_OPEN optexpr PERLY_BRACKET_CLOSE
 			{ $$ = newANONLIST($optexpr); }
-	|	HASHBRACK optexpr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
+	|	HASHBRACK optexpr implicit_semicolon PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
 			{ $$ = newANONHASH($optexpr); }
 	|	KW_SUB_anon     startanonsub proto subattrlist subbody    %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
