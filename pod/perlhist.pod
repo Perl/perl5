@@ -856,6 +856,7 @@ the strings?).
  Paul E     5.45.1       2026-Jul-21
  Ether      5.45.2       2026-Aug-20
  Philippe   5.45.3       2026-Sep-24
+ Eric       5.45.4       2026-Oct-22
 
 =head2 SELECTED RELEASE SIZES
 
