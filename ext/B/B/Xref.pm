@@ -1,6 +1,6 @@
 package B::Xref;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 =head1 NAME
 
@@ -215,6 +215,20 @@ sub load_pad {
     }
 }
 
+# The pp_nextstate sub will update $file, $line, and $top for any live
+# nextstate OPs. This sub checks for and handles ex-nextstate OPs.
+sub cop_or_ex_cop {
+    my $op = shift;
+    return if (!$op || $op->isa('B::NULL') || $op->name eq 'enter');
+    return unless $op->name eq 'scope';
+    $op = $op->first;
+    if ($op->name eq 'null' && $op->isa('B::COP')) {
+        $file = $op->file;
+        $line = $op->line;
+        $top = UNKNOWN;
+    }
+}
+
 sub xref {
     my $start = shift;
     my $op;
@@ -224,7 +238,13 @@ sub xref {
 	warn peekop($op), "\n" if $debug_op;
 	my $opname = $op->name;
 	if ($opname =~ /^(or|and|mapwhile|grepwhile|range|cond_expr)$/) {
+            my $op_true = $op->first->sibling;
+            cop_or_ex_cop($op_true);
 	    xref($op->other);
+            unless ($op_true->isa('B::NULL')) {
+                my $op_false = $op_true->sibling;
+                cop_or_ex_cop($op_false);
+            }
 	} elsif ($opname eq "match" || $opname eq "subst") {
 	    xref($op->pmreplstart);
 	} elsif ($opname eq "substcont") {

@@ -373,6 +373,10 @@ XXX
 L<perlfunc/caller> is better able to identify the correct call site when
 multiple branches of an C<if>/C<elsif>/C<else> chain call the same function.
 
+=item *
+
+L<B::Xref> is able to use line numbers stored within nulled COPs. [GH #7947]
+
 =back
 
 =head1 Known Problems
