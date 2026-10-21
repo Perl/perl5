@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1315;  # Update this when adding/deleting tests.
+plan tests => 6822 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -36,6 +36,733 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    # Convert the fixture characters before composing patterns and subjects.
+    # Numeric escapes below 0x100 otherwise select native codepoints.
+    my $e_acute = uni_to_native("\x{e9}");
+    my $n_tilde = uni_to_native("\x{f1}");
+    my $sharp_s_native = uni_to_native("\x{df}");
+    my $micro_sign_native = uni_to_native("\x{b5}");
+
+    {
+        # Vary the offsets of rejected windows and their lengths around the
+        # machine-word boundary, including truncated windows near the end.
+        my $pattern = 'aaaa|bbbbbb|ccccccccccc';
+        my ( $plain, $trie );
+        { local ${^RE_TRIE_MAXBUF} = -1;    $plain = qr/$pattern/; }
+        { local ${^RE_TRIE_MAXBUF} = 65536; $trie  = qr/$pattern/; }
+        for my $encoding (qw(native utf8-latin1 utf8-wide)) {
+            for my $lead ( 0 .. 2 * $Config{uvsize} - 1 ) {
+                my ( @expected, @actual );
+                for my $gap ( 0 .. 3 * $Config{uvsize} ) {
+                    my $noise = $gap % 2 ? ' ' : "\t${e_acute}";
+                    $noise .= "\x{100}" if $encoding eq 'utf8-wide';
+                    my $text =
+                        ( '!' x $lead ) . 'aaaa'
+                      . ( $noise x $gap )
+                      . 'bbbbbb'
+                      . ( $noise x ( 2 * $Config{uvsize} + $gap ) )
+                      . 'cccccccccccccc';
+                    utf8::upgrade($text) if $encoding ne 'native';
+                    my @results;
+                    for my $re ( $plain, $trie ) {
+                        pos($text) = 0;
+                        my @spans;
+                        push @spans,   "$-[0]:$+[0]" while $text =~ /$re/g;
+                        push @results, join( ',', @spans );
+                    }
+                    push @expected, "$gap=$results[0]";
+                    push @actual,   "$gap=$results[1]";
+                }
+                is(
+                    join( ';', @actual ),
+                    join( ';', @expected ),
+                    "AC rejected windows: $encoding, leading offset $lead"
+                );
+            }
+        }
+    }
+    {
+        my @cases = (
+            [ 'failure links',  'abac|bac',        'ababacbac' ],
+            [ 'Latin-1 octets', "${e_acute}x|${n_tilde}y",
+                "${e_acute}${e_acute}x${n_tilde}y" ],
+            [ 'wide octets', "\x{100}x|\x{200}y",  "\x{100}\x{100}x\x{200}y" ],
+            [ 'fold expansions',  'ssx|ffiy',      "${sharp_s_native}${sharp_s_native}x\x{fb03}y" ],
+            [ 'accepting states', 'ab|bcd',        'xabcdab' ],
+            [
+                'extracted prefix', "\x{100}x|\x{100}y",
+                "\x{100}z\x{100}x\x{100}y"
+            ],
+            [ 'empty alternative',      "\x{100}x|",         'abc' ],
+            [ 'wide-only alternatives', "\x{100}x|\x{200}y", 'plain' ],
+            [ 'mixed alternatives',     "\x{100}x|cat",      'catcat' ],
+            [ 'UTF-8 failure suffix', "\x{100}ab|b\x{1f600}",
+                "\x{100}ab\x{100}acb\x{1f600}" ],
+            [ 'UTF-8 unequal byte lengths', "${e_acute}x|\x{100}x|\x{1f600}x",
+                "\x{1f600}x${e_acute}x\x{100}x" ],
+            [ 'UTF-8 accepting suffix', "\x{100}x|x\x{1f600}|\x{1f600}",
+                "\x{100}x\x{1f600}\x{1f600}" ],
+            [ 'UTF-8 duplicate paths', "\x{100}x(?=A)|\x{100}x(?=B)|\x{200}y",
+                "\x{100}xZ\x{100}xB\x{200}y" ],
+            [ 'UTF-8 heap length',
+                ("\x{100}" x 40) . 'b|b' . ("\x{1f600}" x 39) . 'c',
+                ("\x{100}" x 160) . 'b' . ("\x{1f600}" x 39) . 'c' ],
+            [ 'UTF-8 embedded NUL', "\x{100}\0x|\x{200}\0y",
+                "\x{100}\0Z\x{200}\0y\x{100}\0x" ],
+            [ 'UTF-8 invariant target suffix', "\x{100}abc|bc|cat", 'zzabccat' ],
+            [ 'ring wraps', 'aaaaab|baaaac', ( 'a' x 100 ) . 'baaaac' ],
+            [ 'short word after wraps', 'abababx|babc', ( 'ab' x 100 ) . 'c' ],
+            [
+                'Latin-1 ring wraps',
+                ( "${e_acute}" x 5 ) . 'x|' . ( "${n_tilde}" x 4 ) . 'y',
+                ( "${e_acute}" x 100 ) . 'x'
+            ],
+            [
+                'folded ring wraps', 'ssssssX|ffiffiY',
+                ( "${sharp_s_native}" x 100 ) . 'X'
+            ],
+            [
+                'heap ring wraps',
+                ( 'a' x 40 ) . 'b|b' . ( 'a' x 39 ) . 'c',
+                ( 'a' x 160 ) . 'b' . ( 'a' x 39 ) . 'c'
+            ],
+            [
+                'heap ring short word',
+                'aaaaab|b' . ( 'a' x 39 ) . 'c',
+                ( 'a' x 160 ) . 'b' . ( 'a' x 39 ) . 'c'
+            ],
+            [
+                'rejected candidate',
+                'aaaaab(?=X)|baaaac(?=Y)',
+                ( 'a' x 100 ) . 'bZbaaaacY'
+            ],
+            [ 'accepting prefix continuation', 'ab(?=X)|abcd', 'abcdabX' ],
+            [
+                'Latin-1 continuation', "${e_acute}x(?=A)|${n_tilde}y(?=B)",
+                "${e_acute}xZ${n_tilde}yB"
+            ],
+        );
+
+        for my $case (@cases) {
+            my ( $name, $pattern, $input ) = @$case;
+            for my $mods ( 'u', 'iu' ) {
+                my ( $trie_re, $plain_re );
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/(?$mods:$pattern)(?#AC positions)/;
+                }
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/(?$mods:$pattern)(?#branch positions)/;
+                }
+                for my $upgrade ( 0, 1 ) {
+                    my $target = $input;
+                    utf8::upgrade($target) if $upgrade;
+                    my ( @expected, @got );
+                    while ( $target =~ /$plain_re/g ) {
+                        push @expected, "$-[0]:$+[0]";
+                    }
+                    while ( $target =~ /$trie_re/g ) {
+                        push @got, "$-[0]:$+[0]";
+                    }
+                    is(
+                        join( ',', @got ),
+                        join( ',', @expected ),
+"AC match positions agree with branches: $name, /$mods, upgrade=$upgrade"
+                    );
+                }
+            }
+        }
+    }
+
+    {
+        my @cases = (
+            ['ssx|sy', "${sharp_s_native}x!"],
+            ['sssx|ssy', "s${sharp_s_native}x!"],
+            ['ffix|fy', "\x{fb03}x!"],
+            ['ffix|ffy', "\x{fb03}x!"],
+            ["\x{3b9}\x{308}\x{301}x|\x{3b9}y", "\x{390}x!"],
+            ["\x{565}\x{582}x|\x{565}y", "\x{587}x!"],
+        );
+        for my $case (@cases) {
+            for my $charset ('u', 'a', 'aa', 'd') {
+                for my $jump (0, 1) {
+                    my $pattern = join '|', map {
+                        $_ . ($jump ? '([!]?)' : '')
+                    } split /\|/, $case->[0];
+                    for my $pattern_utf8 (0, 1) {
+                        my $source = "(?i$charset:$pattern)";
+                        utf8::upgrade($source) if $pattern_utf8;
+                        my ($plain, $trie);
+                        { local ${^RE_TRIE_MAXBUF} = -1;
+                          $plain = qr/$source(?#whole fold branches)/; }
+                        { local ${^RE_TRIE_MAXBUF} = 65536;
+                          $trie = qr/$source(?#whole fold trie)/; }
+                        for my $target_utf8 (0, 1) {
+                            my $target = '??' . $case->[1];
+                            utf8::upgrade($target) if $target_utf8;
+                            my @result;
+                            for my $re ($plain, $trie) {
+                                push @result, $target =~ $re
+                                    ? join(':', map { defined $_ ? $_ : '-' } @-, @+)
+                                    : 'no match';
+                            }
+                            is($result[1], $result[0],
+                               "trie prefix preserves folds: /$charset, jump=$jump, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        my @cases = (
+            ['s|zoo', "${sharp_s_native}!"],
+            ['s([!]?)|ss([!]?)', "${sharp_s_native}!"],
+            ['f([!]?)|ffi([!]?)', "\x{fb03}!"],
+            ['ff([!]?)|ffi([!]?)', "\x{fb03}!"],
+            ['ss([!]?)|s([!]?)', "${sharp_s_native}!"],
+            ["\x{3b9}\x{308}([!]?)|\x{3b9}\x{308}\x{301}([!]?)",
+             "\x{390}!"],
+        );
+        for my $case (@cases) {
+            for my $charset ('u', 'a', 'aa', 'd') {
+                for my $pattern_utf8 (0, 1) {
+                    my $source = "\\A(?i$charset:$case->[0])";
+                    utf8::upgrade($source) if $pattern_utf8;
+                    my ($plain, $trie);
+                    { local ${^RE_TRIE_MAXBUF} = -1;
+                      $plain = qr/$source(?#fold endpoints branches)/; }
+                    { local ${^RE_TRIE_MAXBUF} = 65536;
+                      $trie = qr/$source(?#fold endpoints trie)/; }
+                    for my $target_utf8 (0, 1) {
+                        my $target = $case->[1];
+                        utf8::upgrade($target) if $target_utf8;
+                        my @result;
+                        for my $re ($plain, $trie) {
+                            push @result, $target =~ $re
+                                ? join(':', map { defined $_ ? $_ : '-' } @-, @+)
+                                : 'no match';
+                        }
+                        is($result[1], $result[0],
+                           "trie acceptance ends at a complete fold: /$charset, pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        for my $c (0 .. 255) {
+            my $d = $c ^ 128;
+            my $pattern = quotemeta(chr($c)) . 'X|'
+                        . quotemeta(chr($d)) . 'Y';
+            for my $pattern_utf8 (0, 1) {
+                my $source = $pattern;
+                utf8::upgrade($source) if $pattern_utf8;
+                my ($plain, $trie);
+                { local ${^RE_TRIE_MAXBUF} = -1;
+                  $plain = qr/$source(?#native octet branches)/; }
+                { local ${^RE_TRIE_MAXBUF} = 65536;
+                  $trie = qr/$source(?#native octet trie)/; }
+                for my $target_utf8 (0, 1) {
+                    for my $body (chr($c).'X', chr($d).'Y', chr($c).'Y', 'ZZ') {
+                        my $target = '??' . $body . '!';
+                        utf8::upgrade($target) if $target_utf8;
+                        my $expected = $target =~ $plain
+                            ? "$-[0]:$+[0]" : 'no match';
+                        my $got = $target =~ $trie
+                            ? "$-[0]:$+[0]" : 'no match';
+                        is($got, $expected,
+                           "trie native octet $c: pattern_utf8=$pattern_utf8, target_utf8=$target_utf8");
+                    }
+                }
+            }
+        }
+    }
+
+    {
+        my @folded_backtracks = (
+            ['ss', "${sharp_s_native}"],
+            ['ffi', "\x{fb03}"],
+            ["\x{3b9}\x{308}\x{301}", "\x{390}"],
+            ["\x{565}\x{582}", "\x{587}"],
+            ["\x{3b9}\x{308}\x{301}\x{565}\x{582}", "\x{390}\x{587}"],
+        );
+        for my $case (@folded_backtracks) {
+            my ($literal, $input) = @$case;
+            my $pattern = "${literal}x(?=NO)|${literal}xy(?=YES)|${literal}xyz|zoo";
+            for my $charset ('u', 'a', 'aa', 'd') {
+                my ($trie_re, $plain_re);
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/\A(?i$charset:$pattern)(?#folded backtracking trie)/;
+                }
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/\A(?i$charset:$pattern)(?#folded backtracking branches)/;
+                }
+                for my $upgrade (0, 1) {
+                    my $target = "${input}xyYES";
+                    utf8::upgrade($target) if $upgrade;
+                    my $expected = $target =~ $plain_re ? "$-[0]:$+[0]" : 'no match';
+                    my $got = $target =~ $trie_re ? "$-[0]:$+[0]" : 'no match';
+                    is($got, $expected,
+                       "folded trie backtracking agrees with branches: /$charset, upgrade=$upgrade");
+                }
+            }
+        }
+    }
+
+    {
+        my @folded_starts = (
+            ['ssx', "sSx"],
+            ['ssx', "${sharp_s_native}x"],
+            ['ssx', "\x{17f}sx"],
+            ['ssx', "\x{1e9e}x"],
+            ['ssx', "\x{1df95}x"],
+            ['kx', "\x{212a}x"],
+            ["${micro_sign_native}x", "\x{39c}x"],
+            ['ffx', "\x{fb00}x"],
+            ['ffix', "\x{fb03}x"],
+            ["\x{3b9}\x{308}\x{301}x", "\x{390}x"],
+            ['sx', "${sharp_s_native}x"],
+            ['ssx', "s${sharp_s_native}x"],
+            ["\x{17f}\x{17f}tail", "${sharp_s_native}tail"],
+            ["\x{565}\x{582}tail", "\x{587}tail"],
+            ["\x{10428}tail", "\x{10400}tail"],
+            ["\x{565}\x{582}\x{10428}tail", "\x{587}\x{10400}tail"],
+            ["\x{3b9}\x{308}\x{301}\x{565}\x{582}tail",
+             "\x{390}\x{587}tail"],
+        );
+
+        for my $case (@folded_starts) {
+            my ($literal, $input) = @$case;
+            my $case_name = join(' ', map { sprintf '%X', ord $_ }
+                                      split //, "$literal:$input");
+
+            for my $charset ('u', 'a', 'aa', 'd') {
+                my ($trie_re, $plain_re);
+
+                {
+                    local ${^RE_TRIE_MAXBUF} = 65536;
+                    $trie_re = qr/(?i$charset:$literal|zoo)(?#with trie)/;
+                }
+
+                {
+                    local ${^RE_TRIE_MAXBUF} = -1;
+                    $plain_re = qr/(?i$charset:$literal|zoo)(?#without trie)/;
+                }
+
+                for my $upgrade (0, 1) {
+                    my $target = ('Q' x 31) . $input;
+                    utf8::upgrade($target) if $upgrade;
+                    my @expected;
+                    my @got;
+
+                    while ($target =~ /$plain_re/g) {
+                        push @expected, "$-[0]:$+[0]";
+                    }
+
+                    while ($target =~ /$trie_re/g) {
+                        push @got, "$-[0]:$+[0]";
+                    }
+
+                    is(join(',', @got), join(',', @expected),
+                       "folded start map agrees with branches under /i$charset, upgrade=$upgrade, case=$case_name");
+
+                    my $miss = 'Q' x 77;
+                    utf8::upgrade($miss) if $upgrade;
+                    ok($miss !~ /$trie_re/,
+                       "folded start map rejects a repeated run under /i$charset, upgrade=$upgrade, case=$case_name");
+                }
+            }
+        }
+    }
+
+    {
+        for my $trie_limit (65536, -1) {
+            local ${^RE_TRIE_MAXBUF} = $trie_limit;
+            my $pattern = "${sharp_s_native}\\x{10000}\\x{100}|${sharp_s_native}${e_acute}a"
+                        . "(?#trie limit $trie_limit)";
+            my $re = qr/$pattern/i;
+            my $target = ("${sharp_s_native}" x 3) . "\x{10000}\x{100}";
+            my @matches;
+
+            while ($target =~ /$re/g) {
+                push @matches, "$-[0]:$+[0]";
+            }
+
+            is(join(',', @matches), '2:5',
+               "folded global match terminates at UTF-8 end, trie limit $trie_limit");
+
+            pos($target) = length($target);
+            ok($target !~ /$re/g,
+               "folded start class rejects UTF-8 end, trie limit $trie_limit");
+
+            my $empty = '';
+            utf8::upgrade($empty);
+            ok($empty !~ /$re/,
+               "folded start class rejects empty UTF-8 target, trie limit $trie_limit");
+        }
+    }
+
+    {
+        my $haystack = ("A" x 5000) . "cat";
+        ok($haystack =~ /walrus|cat/, 'AC finds a literal after a long rejected run');
+
+        $haystack = ("A" x 5000) . "dog";
+        ok($haystack !~ /walrus|cat/, 'AC rejects a long run with no literal');
+
+        my $zero_shift_match = "cacc" . ("c" x 5000);
+        ok($zero_shift_match =~ /acc|zdd/ && $-[0] == 1,
+           'AC zero-shift rejection does not skip a later match');
+
+        my $zero_shift_run = ("c" x 5000) . "acc";
+        ok($zero_shift_run =~ /acc|zdd/ && $-[0] == 5000,
+           'AC zero-shift map rejection skips a repeated octet run');
+
+        utf8::upgrade($zero_shift_run);
+        ok($zero_shift_run =~ /acc|zdd/ && $-[0] == 5000,
+           'AC zero-shift map rejection skips an ASCII run in UTF-8');
+
+        $zero_shift_run = "c" x 5000;
+        ok($zero_shift_run !~ /acc|zdd/,
+           'AC zero-shift map rejection handles a run ending at string end');
+
+        my $shift_one_run = ("e" x 5000) . "fghijY";
+        ok($shift_one_run =~ /abcdeX|fghijY/ && $-[0] == 5000,
+           'AC repeated-sequence scan handles rejected starts with shift one');
+
+        utf8::upgrade($shift_one_run);
+        ok($shift_one_run =~ /abcdeX|fghijY/ && $-[0] == 5000,
+           'AC shift-one repeated-sequence scan handles UTF-8 targets');
+
+        $shift_one_run = "e" x 5000;
+        ok($shift_one_run !~ /abcdeX|fghijY/,
+           'AC shift-one repeated-sequence scan rejects a long non-match');
+
+        my $alternating_run = ("AB" x 5001) . "barB";
+        ok($alternating_run =~ /fooA|barB/ && $-[0] == 10002,
+           'AC skips repeated UV blocks with rejected alternating starts');
+
+        for my $offset (0 .. 7) {
+            my $aligned_run = ("X" x $offset) . ("AB" x 5000) . "barB";
+            ok($aligned_run =~ /fooA|barB/ && $-[0] == $offset + 10000,
+               "AC repeated-block scan finds the match at offset $offset");
+        }
+
+        utf8::upgrade($alternating_run);
+        ok($alternating_run =~ /fooA|barB/ && $-[0] == 10002,
+           'AC skips repeated UV blocks in a UTF-8 target');
+
+        for my $offset (0 .. 7) {
+            my $aligned_run = ("X" x $offset) . ("AB" x 5000) . "barB";
+            utf8::upgrade($aligned_run);
+            ok($aligned_run =~ /fooA|barB/ && $-[0] == $offset + 10000,
+               "AC UTF-8 repeated-block scan finds offset $offset");
+        }
+
+        my $wide_alternating_run = ("\x{100}" x 5001) . "ba\x{200}";
+        ok($wide_alternating_run =~ /fo\x{100}|ba\x{200}/
+           && $-[0] == 5001,
+           'AC skips repeated UTF-8 character blocks at character boundaries');
+
+        $wide_alternating_run = "\x{100}" x 5001;
+        ok($wide_alternating_run !~ /fo\x{100}|ba\x{200}/,
+           'AC rejects repeated UTF-8 character blocks without a match');
+
+        $haystack = ("A" x 5000) . "cat";
+        ok($haystack =~ /(?:|walrus|cat)/ && $-[0] == 0 && $+[0] == 0,
+           'AC with an empty alternative keeps the earliest empty match');
+
+        my $six_octet_haystack = ("A" x 5000) . "catcat";
+        ok($six_octet_haystack =~ /walruswalrus|catcat/,
+           'AC combined prefilter handles six-octet literals');
+
+        $six_octet_haystack = ("A" x 5000) . "dogdog";
+        ok($six_octet_haystack !~ /walruswalrus|catcat/,
+           'AC combined prefilter rejects a six-octet near miss');
+
+        my $seven_octet_haystack = ("A" x 5000) . "catcatx";
+        ok($seven_octet_haystack =~ /walrusx|catcatx/,
+           'AC combined prefilter handles seven-octet literals');
+
+        $seven_octet_haystack = ("x" x 5000);
+        ok($seven_octet_haystack !~ /walrusx|catcatx/,
+           'AC BMH prefilter handles frequent anchor-octet candidates');
+
+        my $long_haystack = ("A" x 5000) . "catcatcatcat";
+        ok($long_haystack =~ /walruswalruswalruswalrus|catcatcatcat/,
+           'AC BMH prefilter finds a long literal after rejected input');
+
+        $long_haystack = ("A" x 5000) . "dogdogdogdog";
+        ok($long_haystack !~ /walruswalruswalruswalrus|catcatcatcat/,
+           'AC BMH prefilter rejects a long run with no literal');
+
+        my $very_long_a = "walrus" x 50;
+        my $very_long_b = "cat" x 100;
+        my $very_long_re = qr/\Q$very_long_a\E|\Q$very_long_b\E/;
+        my $very_long_haystack = ("A" x 5000) . $very_long_b;
+        ok($very_long_haystack =~ $very_long_re,
+           'AC BMH prefilter finds a 300-octet literal with capped shifts');
+
+        $very_long_haystack = ("A" x 5000) . ("dog" x 100);
+        ok($very_long_haystack !~ $very_long_re,
+           'AC BMH prefilter rejects a 300-octet near miss');
+
+        my @letters = 'a' .. 'z';
+        my @many_literals = map {
+            $letters[$_ % @letters] . sprintf('%06d', $_)
+        } 0 .. 255;
+        my $many_pattern = join '|', map { quotemeta($_) } @many_literals;
+        my $many_re = qr/(?:$many_pattern)/;
+        my $many_haystack = ("Z" x 5000) . $many_literals[-1];
+        ok($many_haystack =~ $many_re && $-[0] == 5000,
+           'AC high-alternative-count prefilter finds a late match');
+
+        $many_haystack = "Z" x 5000;
+        ok($many_haystack !~ $many_re,
+           'AC high-alternative-count prefilter rejects a non-match');
+
+        my $overlap_haystack = ("A" x 5000) . "abcdefghijk";
+        ok($overlap_haystack =~ /abcdefghij|defghijk/ && $-[0] == 5000
+           && $+[0] == 5010,
+           'AC BMH preserves the leftmost overlapping match');
+
+        my $utf8_ascii_haystack = ("A" x 5000) . "cat";
+        utf8::upgrade($utf8_ascii_haystack);
+        ok($utf8_ascii_haystack =~ /walrus|cat/ && $-[0] == 5000,
+           'AC start-octet table works for UTF-8 invariant literals');
+
+        my $latin1_ascii_haystack = ("A" x 5000) . "cat";
+        utf8::downgrade($latin1_ascii_haystack, 1);
+        ok($latin1_ascii_haystack =~ /walrus|cat/ && $-[0] == 5000,
+           'AC start-octet table works for Latin-1 invariant literals');
+
+        my $wide_only_re = qr/\x{400}foo|\x{800}bar/;
+        my $latin1_wide_haystack = "A" x 5000;
+        ok($latin1_wide_haystack !~ $wide_only_re,
+           'AC with only wide literals rejects a Latin-1 target');
+
+        my $utf8_wide_haystack = ("A" x 5000) . "\x{800}bar";
+        utf8::upgrade($utf8_wide_haystack);
+        ok($utf8_wide_haystack =~ $wide_only_re && $-[0] == 5000,
+           'AC with only wide literals still matches a UTF-8 target');
+
+        my $mixed_wide_re = qr/\x{400}foo|cat/;
+        $latin1_wide_haystack .= "cat";
+        ok($latin1_wide_haystack =~ $mixed_wide_re && $-[0] == 5000,
+           'AC wide-literal shortcut preserves Latin-1 alternatives');
+
+        ok("abc" =~ /(?:|\x{400}foo)/ && $-[0] == 0 && $+[0] == 0,
+           'AC wide-literal shortcut preserves an empty alternative');
+
+        my $trie_wide_re = qr/common\x{400}foo|common\x{800}bar/;
+        my $latin1_trie_haystack = ("X" x 5000) . "common";
+        ok($latin1_trie_haystack !~ $trie_wide_re,
+           'Trie with only wide suffixes rejects a Latin-1 target');
+
+        my $utf8_trie_haystack = ("X" x 5000) . "common\x{800}bar";
+        utf8::upgrade($utf8_trie_haystack);
+        ok($utf8_trie_haystack =~ $trie_wide_re && $-[0] == 5000,
+           'Trie with only wide suffixes still matches a UTF-8 target');
+        my $mixed_trie_re = qr/common\x{400}foo|commoncat/;
+        $latin1_trie_haystack .= "cat";
+        ok($latin1_trie_haystack =~ $mixed_trie_re && $-[0] == 5000,
+           'Trie wide-literal shortcut preserves Latin-1 alternatives');
+
+        my $utf8_haystack = ("${e_acute}" x 5000) . "${e_acute}cat";
+        utf8::upgrade($utf8_haystack);
+        ok($utf8_haystack =~ /${e_acute}cat|zebra/,
+           'UTF-8 AC finds a multi-byte literal after rejected input');
+
+        my $latin1_haystack = ("${e_acute}" x 5000) . "${e_acute}cat";
+        ok($latin1_haystack =~ /${e_acute}cat|zebra/,
+           'Latin-1 AC preserves matching for an awkward code point');
+
+        for my $encoding ('Latin-1', 'UTF-8') {
+            # The shortest word occupies two Latin-1 octets or three UTF-8
+            # octets.  Check both alternatives with each target encoding.
+            my $different_lengths_re = qr/${e_acute}a|zbc/;
+
+            for my $suffix ("${e_acute}a", 'zbc') {
+                my $target = ('Q' x 17) . $suffix;
+                utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                ok($target =~ $different_lengths_re && $-[0] == 17
+                   && $+[0] == length($target),
+                   "AC uses the effective literal length for $encoding");
+            }
+
+            # Excluding the wide word gives a nine-octet Latin-1 minimum.
+            # Including it gives a three-octet UTF-8 minimum.
+            my $mixed_lengths_re = qr/\x{100}x|abcdefghi/;
+            my $mixed_target = ('x' x 17) . 'abcdefghi';
+            utf8::upgrade($mixed_target) if $encoding eq 'UTF-8';
+
+            ok($mixed_target =~ $mixed_lengths_re && $-[0] == 17,
+               "AC mixed wide alternatives find a narrow word in $encoding");
+
+            $mixed_target = 'x' x 17;
+            utf8::upgrade($mixed_target) if $encoding eq 'UTF-8';
+
+            ok($mixed_target !~ $mixed_lengths_re,
+               "AC mixed wide alternatives reject a short miss in $encoding");
+
+            my $root_restart = ('a' x 17) . 'de';
+            utf8::upgrade($root_restart) if $encoding eq 'UTF-8';
+
+            ok($root_restart =~ /abc|de/ && $-[0] == 17 && $+[0] == 19,
+               "AC resets the point ring on repeated root transitions in $encoding");
+
+            my $fallback_target = 'abcdgu';
+            utf8::upgrade($fallback_target) if $encoding eq 'UTF-8';
+
+            ok($fallback_target =~ /abcdefg|cdgu/
+               && $-[0] == 2 && $+[0] == 6,
+               "AC keeps the point ring across a suffix failure transition in $encoding");
+
+            my $retry_target = 'abcdX';
+            utf8::upgrade($retry_target) if $encoding eq 'UTF-8';
+
+            ok($retry_target =~ /(?:abc|bcd)X/ && $-[0] == 1 && $+[0] == 5,
+               "AC retries an overlapping start after full-match rejection in $encoding");
+
+            # Folded tries use only the start map.  One sharp s contributes
+            # two folded characters, so ring offsets count original input.
+            for my $case (["${sharp_s_native}x", 0, 2],
+                          ["s${sharp_s_native}x", 1, 3],
+                          ["s${sharp_s_native}ssx", 2, 5])
+            {
+                my ($target, $start, $end) = @$case;
+                utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                ok($target =~ /ssx|ab/iu && $-[0] == $start && $+[0] == $end,
+                   "AC keeps folded character offsets after root restarts in $encoding");
+            }
+
+            my $partial_fold = "${sharp_s_native}x";
+            utf8::upgrade($partial_fold) if $encoding eq 'UTF-8';
+
+            ok($partial_fold !~ /sx|ab/iu,
+               "AC rejects a match starting inside a multi-character fold in $encoding");
+
+            # Each unit's octets are rejected by the start map, but occur at
+            # BMH anchors.  Vary the alignment and the repeated word content.
+            for my $unit ('A', 'AB', 'AABB', 'AAAABBBB') {
+                for my $offset (0 .. 7) {
+                    my $run = ('X' x $offset) . ($unit x 8);
+                    my $late_match = $run . 'barB';
+                    utf8::upgrade($late_match) if $encoding eq 'UTF-8';
+
+                    ok($late_match =~ /fooA|barB/
+                       && $-[0] == length($run)
+                       && $+[0] == length($late_match),
+                       "AC $encoding repeated '$unit' finds a match at alignment $offset");
+
+                    utf8::upgrade($run) if $encoding eq 'UTF-8';
+
+                    ok($run !~ /fooA|barB/,
+                       "AC $encoding repeated '$unit' rejects a miss at alignment $offset");
+                }
+            }
+
+            # These rejected octets have the maximum BMH shift.  The start
+            # map independently permits repeated-window scanning, including
+            # when the shift reaches the 255-octet cap.
+            my $long_first = 'a' . ('Z' x 254);
+            my $long_second = 'b' . ('Y' x 254);
+            my $long_re = qr/\Q$long_first\E|\Q$long_second\E/;
+
+            for my $case ([3, qr/walrus|cat/, 'cat'],
+                          [8, qr/abcdefgh|ijklmnop/, 'ijklmnop'],
+                          [255, $long_re, $long_second])
+            {
+                my ($shift, $re, $word) = @$case;
+
+                for my $unit ('Q', 'QR', 'QQRR', 'QQQQRRRR') {
+                    for my $offset (0 .. 7) {
+                        my $run = ('X' x $offset) . ($unit x 320);
+                        my $target = $run . $word;
+                        utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                        ok($target =~ /$re/ && $-[0] == length($run)
+                           && $+[0] == length($target),
+                           "AC $encoding shift $shift repeated '$unit' finds the match at alignment $offset");
+
+                        utf8::upgrade($run) if $encoding eq 'UTF-8';
+
+                        ok($run !~ /$re/,
+                           "AC $encoding shift $shift repeated '$unit' rejects a miss at alignment $offset");
+                    }
+                }
+
+                # Differing windows must return to ordinary scanning without
+                # losing a viable start inside the next window.
+                for my $offset (0 .. 7) {
+                    my $run = ('Q' x 320) . ('R' x $offset);
+                    my $target = $run . $word;
+                    utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+                    ok($target =~ /$re/ && $-[0] == length($run),
+                       "AC $encoding shift $shift finds a start in a differing window at offset $offset");
+                }
+            }
+
+            # Include runs shorter than a UV and tails shorter than a UV.
+            # The helper must not read beyond the buffer or miss its last start.
+            for my $run_length (0 .. 15) {
+                my $short_run = 'A' x $run_length;
+                my $last_match = $short_run . 'barB';
+                utf8::upgrade($last_match) if $encoding eq 'UTF-8';
+
+                ok($last_match =~ /fooA|barB/ && $-[0] == $run_length,
+                   "AC $encoding short repeated run of length $run_length finds the last start");
+
+                utf8::upgrade($short_run) if $encoding eq 'UTF-8';
+
+                ok($short_run !~ /fooA|barB/,
+                   "AC $encoding short repeated run of length $run_length rejects a miss");
+            }
+        }
+
+        my $wide_minimum_target = ('x' x 17) . "\x{100}x";
+        ok($wide_minimum_target =~ /\x{100}x|abcdefghi/ && $-[0] == 17,
+           'AC uses the wide alternative that sets the UTF-8 minimum');
+
+        my $wide_fallback_target = "${e_acute}abc\x{100}du";
+        ok($wide_fallback_target =~ /${e_acute}abcdefg|c\x{100}du/
+           && $-[0] == 3 && $+[0] == 7,
+           'AC retains character offsets across a wide suffix failure transition');
+
+        # The UTF-8 prefixes exceed the 255-octet cap.  Their capped anchor
+        # lies on a continuation octet, which is valid for a BMH lookup.
+        my $long_latin1_word = 'a' . ("${e_acute}" x 150);
+        my $long_wide_word = 'b' . ("\x{100}" x 150);
+        my $long_encoded_re = qr/\Q$long_latin1_word\E|\Q$long_wide_word\E/;
+
+        for my $encoding ('Latin-1', 'UTF-8') {
+            my $target = ('Q' x 17) . $long_latin1_word;
+            utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+            ok($target =~ $long_encoded_re && $-[0] == 17
+               && $+[0] == length($target),
+               "AC long encoded literals match a Latin-1 word in $encoding");
+
+            $target = ('Q' x 17) . 'a' . ("${e_acute}" x 149) . 'z';
+            utf8::upgrade($target) if $encoding eq 'UTF-8';
+
+            ok($target !~ $long_encoded_re,
+               "AC long encoded literals reject a near miss in $encoding");
+        }
+
+        my $long_wide_target = ('Q' x 17) . $long_wide_word;
+        ok($long_wide_target =~ $long_encoded_re && $-[0] == 17,
+           'AC capped shifts find a long wide word through continuation anchors');
+    }
+
     {
         # see https://github.com/Perl/perl5/issues/12948
         my $string="ABCDEFGHIJKL";

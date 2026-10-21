@@ -1049,6 +1049,9 @@ PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 PERLVAR(I, AboveLatin1,	SV *)
 PERLVAR(I, Assigned_invlist, SV *)
 PERLVAR(I, GCB_invlist, SV *)
+/* Inversion list of characters whose full case fold has more than one
+ * character.  The code points use native-Unicode numbering, as in the other
+ * property lists. */
 PERLVAR(I, HasMultiCharFold,   SV *)
 PERLVAR(I, InMultiCharFold,   SV *)
 PERLVAR(I, Latin1,	SV *)

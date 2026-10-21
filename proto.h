@@ -9912,7 +9912,7 @@ Perl_to_uni_title(pTHX_ UV c, U8 *p, STRLEN *lenp)
     } STMT_END
 
 PERL_CALLCONV UV
-Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp)
+Perl_to_uni_upper(pTHX_ UV ncp, U8 *p, STRLEN *lenp)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3);

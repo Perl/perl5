@@ -112,10 +112,12 @@ S_init_native_octet_utf8(pTHX)
      * another interpreter is constructed.  It depends only on the character
      * set selected at compile time. */
     for (i = 0; i < 256; i++) {
-        U8 * const end = uv_to_utf8_flags(
-            PL_native_octet_utf8[i].bytes, i, 0);
-        PL_native_octet_utf8[i].len = (U8)(end -
-                                          PL_native_octet_utf8[i].bytes);
+        U8 encoded[UTF8_MAXBYTES + 1];
+        U8 * const end = uv_to_utf8_flags(encoded, i, 0);
+        assert(end - encoded == 1 || end - encoded == 2);
+        assert(end - encoded == 1 || encoded[1]);
+        PL_native_octet_utf8[i] = encoded[0]
+            | (end - encoded == 2 ? (U16)encoded[1] << 8 : 0);
     }
 }
 

@@ -4,6 +4,8 @@
 # could not go in this file, and were farmed out to other .t's, where they
 # remain
 #
+# For test output driven by this file the line number and test number should match.
+#
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 #
 # This __END__ stops me getting screenfulls of syntax errors every time I
@@ -2275,6 +2277,24 @@ z|(?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	extra sibling before 
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	abc	y	$&	abc	-	lookahead continuation in first trie word
 (?:(?:ab(?=c)c|ad(?=e)e)|af)|x(*THEN)y|a	ade	y	$&	ade	-	lookahead continuation in second trie word
 
+# GH #16250: skipped optional lookbehind clears captures from earlier attempts
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookahead and lookbehind
+b(?=.*(?<=(?<=(.{4}))?(.{5})).$)	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookahead and lookbehind
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookbehind without lookahead
+b.*(?<=(?<=(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookbehind without lookahead
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookahead and lookbehind using long syntax
+b(*pla:.*(*plb:(*plb:(.{4}))?(.{5})).$)	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookahead and lookbehind using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcd5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:cd567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$2	undef:de567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookbehind without lookahead using long syntax
+b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookbehind without lookahead using long syntax
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 
@@ -2327,6 +2347,12 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 (?:(\x{100}\x{101}){2})*	\x{100}\x{101}	y	${\(defined($1) ? $1 : q(undef))}	undef	-	failed UTF-8 iteration must not leave a capture
 \A(?:([\x{100}-\x{103}]{2}){2})*\x{102}\x{102}\x{103}\x{103}\z	\x{100}\x{100}\x{101}\x{101}\x{102}\x{102}\x{103}\x{103}	y	$1	\x{101}\x{101}	-	UTF-8 backtracking restores the capture
 
+# Folded alternatives can lower the minimum and raise the maximum together
+/eeeeee|a\xB5\xDFSss/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:8	-	AC ring covers the longest folded alternative
+/eeeeee|a\xB5\xDFSss|eeeeee/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:8	-	AC ring covers the longest folded alternative
+/eeeeee|a\xB5\xDFSss([a-z]?)/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:9	-	AC ring covers the longest folded alternative
+/a\xB5\xDFSss|eeeeee/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:8	-	AC ring covers the longest folded alternative
+
 # GH #14387, GH #24946: negative assertions must discard their captures
 \A(?!(a)b)a\z	a	y	${\(defined($1) ? $1 : q(undef))}	undef	-	partial negative lookahead body
 \A(?!(a)b)\1\z	a	n	-	-	-	backreference must not use a failed assertion capture
@@ -2373,6 +2399,15 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 /\A^\ba*\z/m	a	y	$&	a	-	MBOL and SBOL and BOUND start class should match
 
 (?iu)(?:AASAS|SSASSA|AA|SSS)	SSASSAAK	y	$&	SSASSA	-	same pre-TRIE node modifies minlen & maxlen
+
+# NOTE - This file contains multiple sections, identified by "\n\n#" (a blank
+# line before a comment.) When adding new tests randomly select one to be
+# where you insert your new tests which will greatly reduce the chance of
+# rebase conflicts with other PR's. Don't just add new ones at the bottom. If
+# everyone does that we conflict.
+#
+# Be aware that the test infra counts blank lines and comment lines as a passing
+# test. Thus the test number corresponds to the line in the file.
 
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment

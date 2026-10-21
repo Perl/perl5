@@ -99,6 +99,12 @@ There may well be none in a stable release.
 
 =item *
 
+Non-folded trie matching against native byte strings now consumes a
+character's encoded octets in one iteration. This reduces reader bookkeeping
+when the character requires two UTF-8 or UTF-EBCDIC octets.
+
+=item *
+
 Changes have been made to the "super-linear cache", which is used to avoid
 excessive backtracking in some regexes which include quantifiers on
 variable-length sub-patterns, such as C<(a|bc)*> and C<(ab+){2,}>. This
@@ -109,6 +115,23 @@ reduce the amount of temporary memory used for the cache.
 
 C<substr()> now updates the UTF-8 position cache correctly, avoiding
 repeated scans when accessing the same part of a string. [GH #24531]
+
+=item *
+
+The Aho-Corasick regex scanner uses Boyer-Moore-Horspool shift tables to skip
+positions where no literal alternative can start.  It can also skip repeated
+blocks of octets that cannot start an alternative.  These filters apply to
+eligible case-sensitive literals, with separate shift tables for Latin-1 and
+UTF-8 targets.
+
+Eligible case-insensitive literal alternatives use a start-octet map that
+includes their possible folds.  They do not use the shift tables, because
+folding can change encoded lengths.  Locale-dependent folding uses the
+existing scanner.
+
+The scanner also reduces the cost of tracking match positions, especially
+for case-sensitive matching against non-UTF-8 targets, and avoids repeated
+alignment checks while finding a rejected block of octets.
 
 =back
 
@@ -439,9 +462,33 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+A case-insensitive regex trie no longer accepts a word ending partway through
+an input character's fold. For example, C</s|zoo/iu> no longer matches a
+sharp-s, whose full fold is C<ss>. Later alternatives are tried in order.
+
+=item *
+
+A folded regex trie now updates its minimum and maximum lengths independently.
+An alternative which changes both bounds could previously cause a valid
+match to be missed or an assertion failure during Aho-Corasick scanning.
+
+=item *
+
+Case-insensitive trie prefix extraction no longer splits a multi-character
+fold between regex nodes. For example, a UTF-8 flagged C<ssx|sy> pattern
+under C</iu> now matches C<"\x{df}x">.
+
+=item *
+
 The regular expression optimizer no longer rejects valid matches when a
 positive lookahead can match an empty string. For example,
 C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
+
+=item *
+
+A case-insensitive regular expression with a folded literal start class
+could loop indefinitely when searching at the end of a UTF-8 string.
+This could occur on a subsequent C</g> match after a successful match.
 
 [GH #24943]
 
