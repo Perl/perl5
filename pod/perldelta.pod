@@ -541,6 +541,10 @@ values. This has been fixed. [GH #19987]
 
 C<goto> within a defer block should now work more consistently. [GH #19240]
 
+=item *
+
+L<B::Xref> is able to use line numbers stored within nulled COPs. [GH #7947]
+
 =back
 
 =head1 Known Problems

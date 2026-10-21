@@ -12,7 +12,7 @@ BEGIN {
 use strict;
 use warnings;
 no warnings 'once';
-use Test::More tests => 14;
+use Test::More tests => 16;
 
 # line 50
 use_ok( 'B::Xref' );
@@ -102,6 +102,17 @@ is(
     '1001', 'glob FOO used in subroutine foo'
 );
 
+# GH #7974 (Xref ignores nulled COPs)
+is(
+    $xreftable{$thisfile}{'Testing::Xref::baz'}{'main'}{'*STDOUT'}, '1005',
+    'STDOUT used at line 1005 in subroutine baz'
+);
+
+is(
+    $xreftable{$thisfile}{'Testing::Xref::baz'}{'main'}{'*STDERR'}, '1007',
+    'STDERR used at line 1007 in subroutine baz'
+);
+
 END {
     1 while unlink $file;
 }
@@ -113,4 +124,11 @@ END {
 package Testing::Xref;
 sub foo { print FOO %::xreftable; }
 sub bar { print FOO foo; }
+sub baz {
+    if ($_[0]) {
+        print STDOUT "This line shouldn't be misreported\n";
+    } else {
+        print STDERR "Nor this one\n";
+    }
+}
 
