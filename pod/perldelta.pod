@@ -35,7 +35,7 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
-=head2 CVE-2026-107401 (title TBD)
+=head2 CVE-2026-107401 Regex engine incorrectly skipped UTF8 characters
 
 A regular expression performing a greedy match of a UTF8 character could
 have incorrectly failed if the first attempt at a match was unsuccessful.
