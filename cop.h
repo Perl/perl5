@@ -873,6 +873,7 @@ struct block_sub {
     /* Above here is the same for sub and format.  */
     I32		olddepth;
     AV  	*savearray;
+    OP          *callop; /* calling OP, for use by caller() */
 };
 
 

@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 126 ); # some tests are run in a BEGIN block
+    plan( tests => 127 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -479,3 +479,19 @@ END
     sub scalar_gives_filename { (caller 0)[0,1] }
     like scalar scalar_gives_filename(), qr![/\\]caller\.t$!, "Optimized caller lslice in runtime scalar context";
 }
+
+fresh_perl_is(<<'END', "4 at - line 1.\n6 at - line 1.\n8 at - line 1.", {},
+    sub bogocarp { my ($fi, $pa, $line) = caller; warn $line; }
+    sub t {
+        if ($_[0] == 0) {
+            bogocarp();
+        } elsif ($_[0] == 1) {
+            bogocarp();
+        } else {
+            bogocarp();
+        }
+    }
+    t(0); t(1); t(2);
+END
+    'caller differentiates between branches calling the same function');
+    

@@ -4143,6 +4143,7 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
     cx->blk_sub.prevcomppad = PL_comppad;
     cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;
     cx->blk_sub.retop = retop;
+    cx->blk_sub.callop = PL_op;
     SvREFCNT_inc_simple_void_NN(cv);
     cx->blk_u16 = PL_op->op_private & (phlags|OPpDEREF);
 }
