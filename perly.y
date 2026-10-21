@@ -1491,7 +1491,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
-	|	subscriptable_reference [code_reference]
+	|	subscriptable_reference     [code_reference]
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
 		/* $subref->(); $foo->{bar}() */
@@ -1508,7 +1508,10 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			{ $$ = newSLICEOP(0, $selector, $list); }
 	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE subscript_index[selector]                 /* empty list slice! */
+	|	PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+		subscript_index             [selector]
+		/* empty list slice! */
 			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
 
@@ -1680,8 +1683,11 @@ term[product]	:	termbinop
 			{ $$ = sawparens($expr); }
 	|	QWLIST
 			{ $$ = $QWLIST; }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = sawparens(newNULLLIST()); }
+	|	PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = sawparens(newNULLLIST());
+			}
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	star	%prec PERLY_PAREN_OPEN
@@ -1835,12 +1841,20 @@ term[product]	:	termbinop
 			}
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP($FUNC0, 0); }
-	|	FUNC0 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = newOP($FUNC0, 0);}
+	|	FUNC0
+		PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = newOP($FUNC0, 0);
+			}
 	|	FUNC0OP       /* Same as above, but op created in toke.c */
 			{ $$ = $FUNC0OP; }
-	|	FUNC0OP PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = $FUNC0OP; }
+	|	FUNC0OP
+		PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = $FUNC0OP;
+			}
 	|	/* Sub treated as nullop */
 		FUNC0SUB                    [function]
 			{
@@ -1850,10 +1864,15 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	FUNC1 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                        /* not () */
-			{ $$ = ($FUNC1 == OP_NOT)
-                          ? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
-                          : newOP($FUNC1, OPf_SPECIAL); }
+	|	FUNC1
+		PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+		/* not () */
+			{
+				$$ = ($FUNC1 == OP_NOT)
+					? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
+					: newOP($FUNC1, OPf_SPECIAL);
+			}
 	|	FUNC1 PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE                   /* not($foo) */
 			{ $$ = newUNOP($FUNC1, 0, $expr); }
 	|	PMFUNC /* m//, s///, qr//, tr/// */
@@ -1889,9 +1908,11 @@ myattrterm
 /* Things that can be "my"'d */
 myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 			{ $$ = sawparens($expr); }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = sawparens(newNULLLIST()); }
-
+	|	PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = sawparens(newNULLLIST());
+			}
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	hsh 	%prec PERLY_PAREN_OPEN
