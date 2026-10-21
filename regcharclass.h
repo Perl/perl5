@@ -14,10 +14,6 @@
  * changed or removed without notice.
  */
 
-/*
-=for apidoc_section $classification
-*/
-
 #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
 #  define PERL_REGCHARCLASS_H_
 
@@ -30,6 +26,7 @@
 	\p{VertSpace}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_LNBREAK_safe|const U8 * s|const U8 * e|bool is_utf8
 A few Unicode characters or character sequences act as line terminators.
 C<\R> in a regular expression pattern matches them.
@@ -48,6 +45,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -82,6 +80,7 @@ character sequence actually occupies.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_LNBREAK_utf8_safe|const U8 * s|const U8 * e
 A few Unicode characters or character sequences act as line terminators.
 C<\R> in a regular expression pattern matches them.
@@ -94,6 +93,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -121,6 +121,7 @@ character sequence actually occupies.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_LNBREAK_latin1_safe|const U8 * s|const U8 * e
 A few Unicode characters or character sequences act as line terminators.
 C<\R> in a regular expression pattern matches them.
@@ -133,6 +134,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -158,6 +160,7 @@ character sequence actually occupies.
 	\p{HorizSpace}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_HORIZWS_high|const U8 * s
 A few Unicode characters are treated as horizontal space.
 
@@ -175,6 +178,7 @@ one complete character before calling this; otherwise this
 could read beyond its end.
 
 
+
 =cut
 */
 
@@ -189,6 +193,7 @@ could read beyond its end.
 : ( ( ( 0xE3 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( 0x80 == ((const U8*)s)[2] ) ) ? 3 : 0 ) )
 
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_HORIZWS_cp_high|UV cp
 A few Unicode characters are treated as horizontal space.
 
@@ -196,6 +201,7 @@ This returns non-zero if code point C<cp> is
 such a character that is in the above-Latin1 range.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -215,6 +221,7 @@ Otherwise, it returns zero.
 	\p{VertSpace}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_VERTWS_high|const U8 * s
 A few Unicode characters are treated as vertical space.
 
@@ -232,6 +239,7 @@ one complete character before calling this; otherwise this
 could read beyond its end.
 
 
+
 =cut
 */
 
@@ -240,6 +248,7 @@ could read beyond its end.
 ( (STRLEN)( ( ( ( 0xE2 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xA8, 0xA9) ) ) ? 3 : 0 ) )
 
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_VERTWS_cp_high|UV cp
 A few Unicode characters are treated as vertical space.
 
@@ -247,6 +256,7 @@ This returns non-zero if code point C<cp> is
 such a character that is in the above-Latin1 range.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -263,6 +273,7 @@ Otherwise, it returns zero.
 	\p{XDigit}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_XDIGIT_high|const U8 * s
 A few Unicode characters are treated as hexadecimal digits.
 
@@ -280,6 +291,7 @@ one complete character before calling this; otherwise this
 could read beyond its end.
 
 
+
 =cut
 */
 
@@ -292,6 +304,7 @@ could read beyond its end.
 : 0 ) )
 
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_XDIGIT_cp_high|UV cp
 A few Unicode characters are treated as hexadecimal digits.
 
@@ -299,6 +312,7 @@ This returns non-zero if code point C<cp> is
 such a character that is in the above-Latin1 range.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -316,6 +330,7 @@ Otherwise, it returns zero.
 	\p{XPerlSpace}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_XPERLSPACE_high|const U8 * s
 This returns non-zero if the
 sequence of the next few bytes starting at C<s>
@@ -329,6 +344,7 @@ character actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete character before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -345,11 +361,13 @@ could read beyond its end.
 : ( ( ( 0xE3 == ((const U8*)s)[0] ) && ( 0x80 == ((const U8*)s)[1] ) ) && ( 0x80 == ((const U8*)s)[2] ) ) ? 3 : 0 ) )
 
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_XPERLSPACE_cp_high|UV cp
 This returns non-zero if code point C<cp> is
 an above-Latin1 range character that matches \p{XPerlSpace}.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -370,6 +388,7 @@ Otherwise, it returns zero.
 	\p{XPerlSpace}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_SPACE_utf8_safe_backwards|const U8 * s|const U8 * e
 Some Unicode characters are treated as space, both horizontal and vertical.
 
@@ -381,6 +400,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character actually occupies.
+
 
 
 =cut
@@ -416,6 +436,7 @@ character actually occupies.
 	\p{_Perl_Nchar}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_NONCHAR_utf8_safe|const U8 * s|const U8 * e
 Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
 and are guaranteed never to be, so that an application can treat them as
@@ -430,6 +451,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 code point actually occupies.
+
 
 
 =cut
@@ -454,6 +476,7 @@ code point actually occupies.
 	0xFFFE - 0xFFFF
 */
 /*
+=for apidoc_section $classification
 =for apidoc eT|STRLEN|is_SHORTER_NON_CHARS_utf8|const U8 * s
 Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
 and are guaranteed never to be, so that an application can treat them as
@@ -481,6 +504,7 @@ code point actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete code point before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -518,6 +542,7 @@ could read beyond its end.
 	0x10FFFE - 0x10FFFF
 */
 /*
+=for apidoc_section $classification
 =for apidoc eT|STRLEN|is_LARGER_NON_CHARS_utf8|const U8 * s
 Unicode has 66 noncharacter codepoints.  These are not assigned to characters,
 and are guaranteed never to be, so that an application can treat them as
@@ -547,6 +572,7 @@ one complete code point before calling this; otherwise this
 could read beyond its end.
 
 
+
 =cut
 */
 
@@ -567,6 +593,7 @@ could read beyond its end.
 	\p{_Perl_Surrogate}
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_SURROGATE_utf8|const U8 * s
 Surrogate code points enable UTF-16 to be extended to be able to represent all
 Unicode code points
@@ -585,6 +612,7 @@ one complete code point before calling this; otherwise this
 could read beyond its end.
 
 
+
 =cut
 */
 
@@ -593,6 +621,7 @@ could read beyond its end.
 ( (STRLEN)( ( ( 0xED == ((const U8*)s)[0] ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) ? 3 : 0 ) )
 
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_SURROGATE_utf8_safe|const U8 * s|const U8 * e
 Surrogate code points enable UTF-16 to be extended to be able to represent all
 Unicode code points
@@ -605,6 +634,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 code point actually occupies.
+
 
 
 =cut
@@ -620,6 +650,7 @@ code point actually occupies.
 	\p{_Perl_Quotemeta}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_QUOTEMETA_high|const U8 * s
 Most characters in a Perl program represent themselves, but there are a few
 "meta-characters" which mean something else unless escaped in some way.
@@ -636,6 +667,7 @@ character actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete character before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -700,6 +732,7 @@ could read beyond its end.
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -712,6 +745,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -958,6 +992,7 @@ character sequence actually occupies.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|UV|what_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -972,6 +1007,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1412,6 +1448,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1424,6 +1461,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1447,6 +1485,7 @@ character sequence actually occupies.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|UV|what_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1461,6 +1500,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1499,6 +1539,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1511,6 +1552,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1545,6 +1587,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1557,6 +1600,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1575,6 +1619,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_utf8_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1588,6 +1633,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1669,6 +1715,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_latin1_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1682,6 +1729,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character sequence actually occupies.
+
 
 
 =cut
@@ -1707,6 +1755,7 @@ character sequence actually occupies.
 	\p{_Perl_Folds_To_Multi_Char}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_FOLDS_TO_MULTI_utf8|const U8 * s
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1723,6 +1772,7 @@ character actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete character before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -1761,6 +1811,7 @@ could read beyond its end.
 	\p{_Perl_Problematic_Locale_Folds}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_utf8|const U8 * s
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1778,6 +1829,7 @@ character actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete character before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -1810,6 +1862,7 @@ could read beyond its end.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_cp|UV cp
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1819,6 +1872,7 @@ This returns non-zero if code point C<cp> is
 such a character.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -1850,6 +1904,7 @@ Otherwise, it returns zero.
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8|const U8 * s
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1869,6 +1924,7 @@ character actually occupies.
 You need to be sure that the bytes at C<s> comprise at least
 one complete character before calling this; otherwise this
 could read beyond its end.
+
 
 
 =cut
@@ -1901,6 +1957,7 @@ could read beyond its end.
 #endif
 
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp|UV cp
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1912,6 +1969,7 @@ This returns non-zero if code point C<cp> is
 such a character.
 
 Otherwise, it returns zero.
+
 
 
 
@@ -1943,6 +2001,7 @@ Otherwise, it returns zero.
 	\p{_Perl_PatWS}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_PATWS_safe|const U8 * s|const U8 * e|bool is_utf8
 Not all characters that are nominally space characters in Unicode are
 considered as such in regular expression patterns.  Sometimes we need to
@@ -1962,6 +2021,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character actually occupies.
+
 
 
 =cut
@@ -1989,6 +2049,7 @@ character actually occupies.
 	0xD000 - 0xD7FF
 */
 /*
+=for apidoc_section $classification
 =for apidoc CT|STRLEN|is_HANGUL_ED_utf8_safe|const U8 * s|const U8 * e
 For convenience of the implementation, certain Korean Hangul syllable characters
 have to be treated specially.
@@ -2001,6 +2062,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character actually occupies.
+
 
 
 =cut
@@ -2016,6 +2078,7 @@ character actually occupies.
 	\p{_Perl_Word_But_NonCont}
 */
 /*
+=for apidoc_section $classification
 =for apidoc QT|STRLEN|is_WORD_BUT_NONCONT_safe|const U8 * s|const U8 * e|bool is_utf8
 Some Unicode characters that match C<\w> can't be used in Perl names (such as
 identifiers and labels).
@@ -2034,6 +2097,7 @@ Otherwise, it returns zero.
 
 The value returned gives the number of bytes the matched
 character actually occupies.
+
 
 
 =cut
@@ -4878,6 +4942,6 @@ character actually occupies.
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 6f2138d6540593d5132aa1f3ff92bb6a69e674acf39bbe1f6d72532e1ebdb2d2 regen/regcharclass.pl
+ * 1a3589a581e9b3c9ad4c13efdcf71d8953df2f63cf06a081a6b209640ed1799e regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */

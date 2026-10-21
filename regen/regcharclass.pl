@@ -1700,7 +1700,12 @@ sub make_macro {
     my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
     my $api_ret = ($returns_cp) ? 'UV' : 'STRLEN';
-    my $pod = "=for apidoc $opts{flags}T|$api_ret|$macro$doc_arglist\n$doc_text";
+    my $apidoc_section = '$classification';
+    my $pod = <<~EOT;
+        =for apidoc_section $apidoc_section
+        =for apidoc $opts{flags}T|$api_ret|$macro$doc_arglist
+        $doc_text
+        EOT
 
     return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt ),
            $pod;
@@ -1730,10 +1735,6 @@ EOF
     );
 
     print $out_fh <<~EOT;
-        /*
-        =for apidoc_section \$classification
-        */
-
         #ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */
         #  define PERL_REGCHARCLASS_H_
 
@@ -1802,9 +1803,8 @@ EOF
                     flags => $flags,
                 );
 
-                my $first_line = $api =~ s/\n.*//rs;
-
-                if (! $seen{$first_line}++) {
+                $api =~ m/(=for apidoc .*)/;
+                if (! $seen{$1}++) {
                     print $out_fh <<~EOT;
                         /*
                         $api
