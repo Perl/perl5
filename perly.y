@@ -139,6 +139,7 @@
 %type <opval> term_postfixed_arrow_list_slice_hash
 %type <opval> term_postfixed_arrow_list_slice_kv_array
 %type <opval> term_postfixed_arrow_list_slice_kv_hash
+%type <opval> term_postfixed_arrow_method_invocation
 %type <opval> term_postfixed_arrow_scalar_postderef
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
@@ -1062,6 +1063,26 @@ term_postfixed_arrow_list_slice_kv_hash
 			}
 	;
 
+term_postfixed_arrow_method_invocation
+	/* Matches
+	 * - $foo->bar(list)
+	 * - $foo->bar
+	 * - $foo->&bar(list)
+	 * - $foo->&bar
+	 */
+	:	term                        [target]
+		ARROW
+		clause_method_direct        [method]
+		clause_arguments            [arguments]
+			{
+				$$ = build_method_invocation (
+					scalar ($target),
+					$method,
+					$arguments
+				);
+			}
+	;
+
 term_postfixed_arrow_scalar_postderef
 	/* Matches:
 	 * - target->$*
@@ -1638,21 +1659,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	/* $foo->bar(list) */
-	/* $foo->bar */
-	/* $foo->&bar(list) */
-	/* $foo->&bar */
-	|	term                        [target]
-		ARROW
-		clause_method_direct        [method]
-		clause_arguments            [arguments]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					$method,
-					$arguments
-				);
-			}
+	|	term_postfixed_arrow_method_invocation
 	|	/* new Class @args */
 		METHCALL0                   [method]
 		indirob                     [target]
