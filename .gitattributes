@@ -24,9 +24,9 @@ opnames.h linguist-generated
 overload.h linguist-generated
 overload.inc linguist-generated
 packsizetables.inc linguist-generated
-perly.act linguist-generated
-perly.h linguist-generated
-perly.tab linguist-generated
+perly.act linguist-generated merge=regen-driver
+perly.h   linguist-generated merge=regen-driver
+perly.tab linguist-generated merge=regen-driver
 pp_proto.h linguist-generated
 proto.h linguist-generated
 reentr.c linguist-generated

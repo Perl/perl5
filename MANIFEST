@@ -6018,6 +6018,7 @@ Porting/findrfuncs				Find reentrant variants of functions used in an executable
 Porting/git-deltatool				Mark commits for perldelta in git notes
 Porting/git-find-p4-change			Find the change for a p4 change number
 Porting/git-make-p4-refs			Output git refs for each p4 change number, suitable for appending to .git/packed-refs
+Porting/git-merge-regen				Automatically regenerate generated files on git merge
 Porting/Glossary				Glossary of config.sh variables
 Porting/harness-timer-report.pl			Analyze the timings from the test harness
 Porting/how_to_write_a_perldelta.pod		Bluffer's guide to writing a perldelta.
@@ -6050,6 +6051,7 @@ Porting/release_managers_guide.pod		Release Manager's Guide
 Porting/release_schedule.pod			Schedule for future releases
 Porting/rt_list_patches				A tool to help you apply patches from RT
 Porting/security_template.pod			Template for vulnerability announcements
+Porting/setup-git-merge-regen			Configure git to use git-merge-regen
 Porting/sort_perldiag.pl			Keep our diagnostics orderly
 Porting/sync-with-cpan				Sync with CPAN
 Porting/test-dist-modules.pl			Test dist/ modules on currently active perl (used for CI)

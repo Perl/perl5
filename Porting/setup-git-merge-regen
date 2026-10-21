@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+git config --local merge.regen-driver.name   "Automatically run make regen on conflict"
+git config --local merge.regen-driver.driver "./Porting/git-merge-regen %O %A %B %P"

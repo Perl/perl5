@@ -62,11 +62,13 @@ Porting/corelist.pl
 Porting/expand-macro.pl
 Porting/harness-timer-report.pl
 Porting/findrfuncs
+Porting/git-merge-regen
 Porting/makerel
 Porting/make_dot_patch.pl
 Porting/mksample
 Porting/newtests-perldelta.pl
 Porting/perlhist_calculate.pl
+Porting/setup-git-merge-regen
 Porting/sort_perldiag.pl
 Porting/sync-with-cpan
 Porting/updateAUTHORS.pl

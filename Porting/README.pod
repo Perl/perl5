@@ -177,6 +177,11 @@ id.
 
 This script creates a tag for every p4raw-id.
 
+=head2 F<git-merge-regen>
+
+Git merge driver, used when merging conflicting generated files. It runs
+C<make regen> and C<make regen_perly> and stages the regenerated files.
+
 =head2 F<Glossary>
 
 This file is built by F<metaconfig>. This file contains a description of all
@@ -340,6 +345,11 @@ Shell script to list patches in RT.
 
 Template to guide writers of a perl 5 security vulnerability
 announcement.
+
+=head2 F<setup-git-merge-regen>
+
+Configures the local git repository to use F<git-merge-regen> as a merge
+driver for C<regen> and C<perly> generated files.
 
 =head2 F<sort_perldiag.pl>
 

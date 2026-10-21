@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Git passes %O, %A, %B, %P, but for a global generator,
+# we often just need to let Git do a base merge or discard them
+# and run the master generation command.
+
+echo ">>> Conflict detected in generated files. Regenating ..."
+
+# 1. Run your global generator command
+make regen
+make regen_perly
+
+# 2. Since 'make regen' updates all generated files in the working directory,
+# we can stage all files that are currently marked as 'linguist-generated'
+# or use git status to find modified files matching your pattern.
+# Adjust the pattern or git command to match your project layout:
+git status --porcelain | grep '^UU ' | cut -c4- | while read -r file; do
+    if git check-attr linguist-generated "$file" | grep -q "set"; then
+        echo "Staging auto-resolved generated file: $file"
+        git add "$file"
+    fi
+done
+
+# Alternatively, if you want to stage all modified generated files in a folder:
+# git add path/to/generated/*
+
+exit 0
