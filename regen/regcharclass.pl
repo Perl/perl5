@@ -1700,7 +1700,13 @@ sub make_macro {
     my $def_fmt="$macro%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
     my $api_ret = ($returns_cp) ? 'UV' : 'STRLEN';
-    my $apidoc_section = '$classification';
+
+    # So far, the generated macros should go only in these two api pod
+    # sections, and this rule works as to which.  If and when more flexibility
+    # is needed this can be changed, or syntax created to specify the section
+    # in each macro's specification in <DATA>
+    my $apidoc_section = ($macro =~ /FOLD/) ? '$casing' : '$classification';
+
     my $pod = <<~EOT;
         =for apidoc_section $apidoc_section
         =for apidoc $opts{flags}T|$api_ret|$macro$doc_arglist
