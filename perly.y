@@ -1491,10 +1491,10 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
+	/* $subref->(); $foo->{bar}() */
 	|	subscriptable_reference     [code_reference]
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
-		/* $subref->(); $foo->{bar}() */
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1508,10 +1508,10 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 			{ $$ = newSLICEOP(0, $selector, $list); }
 	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
+	/* empty list slice! */
 	|	PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
 		subscript_index             [selector]
-		/* empty list slice! */
 			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
 
@@ -1864,10 +1864,10 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
+	/* not () */
 	|	FUNC1
 		PERLY_PAREN_OPEN
 		PERLY_PAREN_CLOSE
-		/* not () */
 			{
 				$$ = ($FUNC1 == OP_NOT)
 					? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
