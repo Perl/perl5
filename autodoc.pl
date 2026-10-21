@@ -292,7 +292,14 @@ my %valid_sections = (
     $AV_scn => {},
     $callback_scn => {},
     $casting_scn => {},
-    $casing_scn => {},
+    $casing_scn => {
+        intern_header => <<~'EOT',
+            These internal macros and functions help their callers deal with
+            the rather complicated Unicode rules for finding a different
+            upper/lower/title/fold case for their inputs.
+
+            EOT
+    },
     $classification_scn => {
         intern_header => <<~'EOT',
             Some of these internal macros and functions are helpers for public

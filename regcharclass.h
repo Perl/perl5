@@ -732,7 +732,7 @@ could read beyond its end.
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'a')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -992,7 +992,7 @@ character sequence actually occupies.
 #endif
 
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|UV|what_MULTI_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1448,7 +1448,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'a')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1485,7 +1485,7 @@ character sequence actually occupies.
 #endif
 
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|UV|what_MULTI_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1539,7 +1539,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('u', '3')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_utf8_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1587,7 +1587,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', '3')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_latin1_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1619,7 +1619,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('u', 'h')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_utf8_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1715,7 +1715,7 @@ character sequence actually occupies.
 	%regcharclass_multi_char_folds::multi_char_folds('l', 'h')
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_THREE_CHAR_FOLD_HEAD_latin1_safe|const U8 * s|const U8 * e
 The casefold of a few Unicode characters expands to three characters.
 
@@ -1755,7 +1755,7 @@ character sequence actually occupies.
 	\p{_Perl_Folds_To_Multi_Char}
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_FOLDS_TO_MULTI_utf8|const U8 * s
 The casefold of some Unicode characters expands to two or three characters.
 
@@ -1811,7 +1811,7 @@ could read beyond its end.
 	\p{_Perl_Problematic_Locale_Folds}
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_utf8|const U8 * s
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1862,7 +1862,7 @@ could read beyond its end.
 #endif
 
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLD_cp|UV cp
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1904,7 +1904,7 @@ Otherwise, it returns zero.
 	\p{_Perl_Problematic_Locale_Foldeds_Start}
 */
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8|const U8 * s
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -1957,7 +1957,7 @@ could read beyond its end.
 #endif
 
 /*
-=for apidoc_section $classification
+=for apidoc_section $casing
 =for apidoc QT|STRLEN|is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp|UV cp
 The casefold of most Unicode characters is straight forward, but for some, it
 is problematic in some way.
@@ -4942,6 +4942,6 @@ character actually occupies.
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 1a3589a581e9b3c9ad4c13efdcf71d8953df2f63cf06a081a6b209640ed1799e regen/regcharclass.pl
+ * 2f36f8fba175fbda370ce07b6539a26ede81b6c1489df04e62f74ca9c3cecef1 regen/regcharclass.pl
  * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
