@@ -21526,6 +21526,8 @@ $define)
         dtraceobject=$define
         ;;
     ' '|'')
+        dtraceobject=$undef
+    if test "X$bin_ELF" = "X$define"; then
         $cat >try.c <<EOM
 #include "perldtrace.h"
 int main(void) {
@@ -21533,13 +21535,13 @@ int main(void) {
     return 0;
 }
 EOM
-        dtraceobject=$undef
         if $cc -c -o try.o $optimize $ccflags try.c \
-                    && $dtrace -G $xnolibs -s ../perldtrace.d try.o >/dev/null 2>&1; then
+                    && $dtrace -G $xnolibs -s ../perldtrace.d try.o; then
                 dtraceobject=$define
             echo "Your dtrace builds an object file"
         fi
-        ;;
+    fi
+    ;;
     *) dtraceobject=$undef ;;
     esac
     $rm_try perldtrace.o perldtrace.h
