@@ -4126,6 +4126,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     regmatch_info *const reginfo = &reginfo_buf;
     regexp_paren_pair *swap = NULL;
     bool offs_spare_used = FALSE;
+    bool intuit_success = FALSE;
     I32 oldsave;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -4219,6 +4220,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                                     flags, NULL);
         if (!s)
             return 0;
+        intuit_success = TRUE;
 
         if (prog->extflags & RXf_CHECK_ALL) {
             /* we can match based purely on the result of INTUIT.
@@ -4614,13 +4616,23 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         else
             last1 = s - 1;	/* bogus */
 
-        /* XXXX check_substr already used to find "s", can optimize if
-           check_substr == must. */
+        bool skip_first_search = intuit_success
+                                 && (prog->anchored_substr || prog->anchored_utf8);
         dontbother = 0;
-        while ( (s <= last) &&
-                (s = fbm_instr((unsigned char*)HOP4c(s, back_min, strbeg,  strend),
-                                  (unsigned char*)strend, must,
-                                  multiline ? FBMrf_MULTILINE : 0)) ) {
+        while (s <= last) {
+            if (skip_first_search) {
+                skip_first_search = FALSE;
+                s = HOP4c(s, back_min, strbeg, strend);
+                assert(memEQ(s, SvPVX_const(must),
+                             SvCUR(must) - cBOOL(SvTAIL(must))));
+            }
+            else {
+                s = fbm_instr((unsigned char*)HOP4c(s, back_min, strbeg, strend),
+                              (unsigned char*)strend, must,
+                              multiline ? FBMrf_MULTILINE : 0);
+                if (!s)
+                    break;
+            }
             DEBUG_EXECUTE_r( did_match = 1 );
             if (HOPc(s, -back_max) > last1) {
                 last1 = HOPc(s, -back_min);
