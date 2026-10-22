@@ -1545,11 +1545,17 @@ subscripted
 			}
 	/* - target->*{selector} */
 	|	term_postfixed_arrow_typeglob_element
-	|	scalar[array] subscript_index[selector]          /* $array[$element] */
-			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
+	|	scalar                      [array]
+		subscript_index             [selector]
+		/* $array[$element] */
+			{
+				$$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
 			}
-	|	subscriptable_reference[array_reference] subscript_index[selector]    /* $ref->[..]; $foo{$bar}[..] */
-			{ $$ = newBINOP(OP_AELEM, 0,
+	|	subscriptable_reference     [array_reference]
+		subscript_index             [selector]
+		/* $ref->[..]; $foo{$bar}[..] */
+			{
+				$$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($selector));
 			}
