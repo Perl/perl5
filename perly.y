@@ -123,6 +123,7 @@
 %type <opval> parentheses_empty
 %type <opval> parentheses_non_empty
 %type <opval> parenthesised_expression
+%type <opval> parenthesised_list
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -813,6 +814,17 @@ parenthesised_expression
 	 */
 	:	parentheses_empty
 	|	parentheses_non_empty
+	;
+
+parenthesised_list
+	/* Matches optional epxression(s) surrounded by parentheses.
+	 * Provides:
+	 * - OP* - non-NULL list OP marked as `sawparens`
+	 */
+	:	parenthesised_expression    [expr]
+			{
+				$$ = sawparens ($expr ? $expr : newNULLLIST ());
+			}
 	;
 
 subscript_index
@@ -1703,16 +1715,9 @@ term[product]	:	termbinop
 			{ $$ = $myattrterm; }
 	|	KW_LOCAL term[operand]	%prec UNIOP
 			{ $$ = localize($operand,0); }
-	|	parentheses_non_empty       [list]
-			{
-				$$ = sawparens($list);
-			}
+	|	parenthesised_list              %prec PERLY_PAREN_OPEN
 	|	QWLIST
 			{ $$ = $QWLIST; }
-	|	parentheses_empty
-			{
-				$$ = sawparens(newNULLLIST());
-			}
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	star	%prec PERLY_PAREN_OPEN
@@ -1922,14 +1927,7 @@ myattrterm
 
 /* Things that can be "my"'d */
 myterm
-	:	parentheses_non_empty       [list]
-			{
-				$$ = sawparens($list);
-			}
-	|	parentheses_empty
-			{
-				$$ = sawparens(newNULLLIST());
-			}
+	:	parenthesised_list              %prec PERLY_PAREN_OPEN
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	hsh 	%prec PERLY_PAREN_OPEN
