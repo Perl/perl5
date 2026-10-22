@@ -1506,11 +1506,11 @@ methodname:	METHCALL0
 
 /* Some kind of subscripted expression */
 subscripted
-	:	gelem
+	/* *main::{something} */
+	:	gelem                       [target]
 		subscript_keys              [selector]
-		/* *main::{something} */
 			{
-				$$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector));
+				$$ = newBINOP(OP_GELEM, 0, $target, scalar($selector));
 			}
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
