@@ -466,6 +466,7 @@ sub changes_between {
     5.045002 => '2026-08-20',
     5.045003 => '2026-09-24',
     5.045004 => '2026-10-22',
+    5.045005 => '2026-11-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -25484,6 +25485,15 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.045005 => {
+        delta_from => 5.045004,
+        changed => {
+            'B::Op_private'         => '5.045005',
+            'Config'                => '5.045005',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -27293,6 +27303,13 @@ sub is_core
     },
     5.045004 => {
         delta_from => 5.045003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.045005 => {
+        delta_from => 5.045004,
         changed => {
         },
         removed => {
