@@ -1505,8 +1505,13 @@ methodname:	METHCALL0
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
-			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
+subscripted
+	:	gelem
+		subscript_keys              [selector]
+		/* *main::{something} */
+			{
+				$$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector));
+			}
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
 			}
@@ -2070,8 +2075,12 @@ kvslice	:	hsh
 	;
 
 gelem	:	star
-	|	term ARROW PERLY_STAR
-			{ $$ = newGVREF(0,$term); }
+	|	term
+		ARROW
+		PERLY_STAR
+			{
+				$$ = newGVREF(0,$term);
+			}
 	;
 
 /* Indirect objects */
