@@ -87,6 +87,13 @@ my $item_flags_re = qr/[B dD fF mM nN oO pT uU Wx;]/xx;
 # Only certain flags are acceptable for apidoc_flag
 my $flag_flags_re = qr/[ A C dD eE h m n p Q u X ] /xx;
 
+my %visibility_name = (
+                         C => "Everywhere",
+                         E => "Core and extensions only",
+                         Q => "Core and ext/re only",
+                         e => "Core only",
+                      );
+
 # Certain functions have plain and no_context versions, and meet the criteria
 # stated here.  Each of their pods has been modified to have a marker line
 # which this program replaces by this wording.  This way we can tweak the
@@ -1878,6 +1885,8 @@ sub docout ($fh, $section_name, $element_name, $docref) {
     my @experimental;
     my @back_compat;
     my @xrefs;
+    my %visibility;
+    $visibility{longest_name} = 0;
 
     for (my $i = 0; $i < @items; $i++) {
         last if $docref->{'xref_only'}; # Place holder
@@ -1895,6 +1904,27 @@ sub docout ($fh, $section_name, $element_name, $docref) {
             push @deprecated,   "C<$name>" if $item->{flags} =~ /D/;
             push @experimental, "C<$name>" if $item->{flags} =~ /x/;
             push @back_compat, "C<$name>" if $item->{flags} =~ /B/;
+
+            # Find the visibility of this element.  Also keep track of which
+            # element in the group has the longest name (for printf
+            # alignment).  For later convenience, keep two lists, one gives
+            # the visibility for the element; the other is a list of elements
+            # that have a given visibility type
+            my $this_visibility;
+            my $length = length $name;
+            $visibility{longest_name} = $length
+                                       if $length > $visibility{longest_name};
+
+            if ($item->{flags} =~ /([CEeQ])/) {
+                $this_visibility = $visibility_name{$1};
+            }
+            elsif ($item->{flags} !~ /A/) {
+                $this_visibility = $visibility_name{e};
+            }
+            if ($this_visibility) {
+                push $visibility{by_type}{$this_visibility}->@*, $name;
+                $visibility{by_name}{$name} = $this_visibility;
+            }
         }
 
         # While we're going though the items, construct a nice list of where
@@ -2431,6 +2461,63 @@ sub docout ($fh, $section_name, $element_name, $docref) {
         print $fh "\n=over $usage_indent\n\n";
         print $fh join "", @usage;
         print $fh "\n=back\n";
+    }
+
+    if (defined $visibility{by_name}) {
+        print $fh "\nVisibility:";
+
+        # If there is only one type of visibility, output just it
+        if (keys $visibility{by_type}->%* == 1) {
+            print $fh " ", keys $visibility{by_type}->%*, "\n";
+        }
+        else {
+
+            # But if there is more than one, each element is listed separately
+            # with its visibility.
+            print $fh "\n\n=over 4\n\n";
+            my $most_items_count = 0;
+            my $most_items_type;
+
+            # Except if several symbols share the same type, group them all
+            # together as "Rest:".  First find which type has the most symbols
+            # sharing it.
+            foreach my $type (keys $visibility{by_type}->%*) {
+                my $this_count = $visibility{by_type}{$type}->@*;
+                if ($this_count > $most_items_count) {
+                    $most_items_type = $type;
+                    $most_items_count = $this_count;
+                }
+            }
+
+            # If there aren't at least this many symbols in the type, it isn't
+            # worth separating out.
+            $most_items_type = "" if $most_items_count < 3;
+
+            # Now list every symbol in the group with its visibility.
+            foreach my $name (sort dictionary_order
+                              keys $visibility{by_name}->%*)
+            {
+                my $type = $visibility{by_name}{$name};
+
+                # Skip this symbol if it is part of the remainder list
+                next if $type eq $most_items_type;
+
+                printf $fh " %-*s %s\n",
+                           $visibility{longest_name} + 1,
+                           "$name:",
+                           $type;
+            }
+
+            # And output the remainder
+            if ($most_items_type) {
+                printf $fh " %-*s %s\n",
+                            $visibility{longest_name} + 1,
+                            "Rest:",
+                            $most_items_type;
+            }
+
+            print $fh "\n=back\n";
+        }
     }
 
     print $fh "\n=back\n";
@@ -3205,8 +3292,46 @@ $intern{hdr} = <<"_EOB_";
 |format but are not marked as part of the Perl API.  In other words,
 |B<they are not for use in extensions>!
 
-|It has the same sections as L<perlapi>, though some may be empty.
+|It has the same general form as L<perlapi>, though some sections may be
+|empty.
 |
+|Since the elements described here are not for general use, they may not even
+|be accessible to most or all XS modules.  This accessibility is given at the
+|end of each group under the title "Visibility" with values as follows:
+|
+|=over 4
+|
+|=item $visibility_name{e}
+|
+|The element is not visible, and hence not accessible to code outside the Perl
+|core.
+|
+|=item $visibility_name{Q}
+|
+|The element is visible to the Perl core, and to the F<ext/re> modules, but
+|nowhere else.
+|
+|=item $visibility_name{E}
+|
+|The element is visible to the Perl core, and to any Perl extension, but
+|nowhere else.  A module declares itself to be a Perl extension by including a
+|line like this in its source
+|
+| #define PERL_EXT
+|
+|=item $visibility_name{C}
+|
+|The element is actually accessible everywhere, even though it is not designed
+|for general use.  A typical instance of this is when the element is a helper
+|function, macro, I<etc>., called in the expansion of an API macro.
+|
+|All such elements can be considered pollutants of the XS module's namespace.
+|See L<perlhacktips/Symbol visibility> for further discussion.
+|
+|=back
+|
+|Since all API elements are always visible everywhere, there is no equivalent
+|of this visibility information in L<perlapi>.
 _EOB_
 
 $intern{footer} = <<"_EOE_";
