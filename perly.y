@@ -120,6 +120,7 @@
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
 %type <opval> clause_arguments
+%type <opval> clause_method_direct
 %type <ival>  implicit_semicolon
 %type <opval> parentheses_empty
 %type <opval> parentheses_non_empty
@@ -782,6 +783,21 @@ clause_arguments
 	|	parenthesised_expression
 	;
 
+clause_method_direct
+		/* What can be used as a method in direct method call
+		 * Produces: OP* suitable for `build_method_invocation`
+		 */
+	:	methodname
+			{
+				$$ = newMETHOP (OP_METHOD, 0, $methodname);
+			}
+	|	PERLY_AMPERSAND
+		subname
+			{
+				$$ = newCVREF (0, $subname);
+			}
+	;
+
 implicit_semicolon
 	/* Implicit token PERLY_SEMICOLON injected by tokeniser
 	 * Token is required by LALR(1) parser; can be omitted for GLR parser
@@ -1412,28 +1428,16 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			}
 	/* $foo->bar(list) */
 	/* $foo->bar */
-	|	term                        [target]
-		ARROW
-		methodname                  [method]
-		clause_arguments            [arguments]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newMETHOP (OP_METHOD, 0, $method),
-					$arguments
-				);
-			}
 	/* $foo->&bar(list) */
 	/* $foo->&bar */
 	|	term                        [target]
 		ARROW
-		PERLY_AMPERSAND
-		subname                     [method]
+		clause_method_direct        [method]
 		clause_arguments            [arguments]
 			{
 				$$ = build_method_invocation (
 					scalar ($target),
-					newCVREF (0, $method),
+					$method,
 					$arguments
 				);
 			}
