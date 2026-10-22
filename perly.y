@@ -1838,8 +1838,14 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	term[operand] ARROW PERLY_STAR PERLY_STAR	%prec PERLY_PAREN_OPEN
-			{ $$ = newGVREF(0,$operand); }
+	|	term[operand]
+		ARROW
+		PERLY_STAR
+		PERLY_STAR
+		%prec PERLY_PAREN_OPEN
+			{
+				$$ = newGVREF(0,$operand);
+			}
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
