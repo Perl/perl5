@@ -119,6 +119,7 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <opval> clause_arguments
 %type <ival>  implicit_semicolon
 %type <opval> parentheses_empty
 %type <opval> parentheses_non_empty
@@ -771,6 +772,16 @@ bare_statement_yadayada
 		}
 	;
 
+clause_arguments
+	/* Matches:
+	 * Expression representing parenthesised arguments of function / direct method call. Can be
+	 * - empty
+	 * - nonempty parenthesised expression
+	 */
+	:	empty
+	|	parenthesised_expression
+	;
+
 implicit_semicolon
 	/* Implicit token PERLY_SEMICOLON injected by tokeniser
 	 * Token is required by LALR(1) parser; can be omitted for GLR parser
@@ -1400,51 +1411,30 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
 	/* $foo->bar(list) */
+	/* $foo->bar */
 	|	term                        [target]
 		ARROW
 		methodname                  [method]
-		parenthesised_expression    [arguments]
+		clause_arguments            [arguments]
 			{
 				$$ = build_method_invocation (
 					scalar ($target),
 					newMETHOP (OP_METHOD, 0, $method),
 					$arguments
-				);
-			}
-	|	/* $foo->bar */
-		term                        [target]
-		ARROW
-		methodname                  [method]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newMETHOP (OP_METHOD, 0, $method),
-					NULL
 				);
 			}
 	/* $foo->&bar(list) */
+	/* $foo->&bar */
 	|	term                        [target]
 		ARROW
 		PERLY_AMPERSAND
 		subname                     [method]
-		parenthesised_expression    [arguments]
+		clause_arguments            [arguments]
 			{
 				$$ = build_method_invocation (
 					scalar ($target),
 					newCVREF (0, $method),
 					$arguments
-				);
-			}
-	|	/* $foo->&bar */
-		term                        [target]
-		ARROW
-		PERLY_AMPERSAND
-		subname                     [method]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newCVREF (0, $method),
-					NULL
 				);
 			}
 	|	/* new Class @args */
