@@ -12,6 +12,17 @@ release.
 If you are upgrading from an earlier release such as 5.45.2, first read
 L<perl5453delta>, which describes differences between 5.45.2 and 5.45.3.
 
+=head2 The C</p> regexp modifier is not needed any more
+
+Since their creation, the availability of C<${^PREMATCH}>, C<${^MATCH}>,
+and C<${^POSTMATCH}> was controlled by the use of the C</p> match operator
+flag on the corresponding regular expression. Since Perl 5.20, using
+the match variables has not had the performance impact it used to have,
+but C</p> was still required for them to be populated.
+
+The match variables are now always populated, regardless of the presence
+of the C<p> modifier on regular expressions.
+
 =head1 Security
 
 =head2 CVE-2026-107401 Regex engine incorrectly skipped UTF8 characters
