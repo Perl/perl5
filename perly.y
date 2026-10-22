@@ -129,6 +129,7 @@
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
+%type <opval> term_postfixed_arrow_array_element
 %type <opval> term_postfixed_arrow_typeglob_element
 %type <opval> term_postfixed_arrow_typeglob_postderef
 
@@ -894,6 +895,21 @@ subscriptable_reference
 		}
 	;
 
+term_postfixed_arrow_array_element
+	/* Matches:
+	 * - target->[selector]
+	 */
+	:	term                        [target]
+		ARROW
+		subscript_index             [selector]
+			{
+				$$ = build_array_element (
+					ref (newAVREF ($target), OP_RV2AV),
+					$selector
+				);
+			}
+	;
+
 term_postfixed_arrow_typeglob_element
 	/* Matches:
 	 * - target->*{selector}
@@ -1554,7 +1570,7 @@ subscripted
 				);
 			}
 	/* $ref->[..]; $foo{$bar}[..] */
-	|	subscriptable_reference     [target]
+	|	subscripted                 [target]
 		subscript_index             [selector]
 			{
 				$$ = build_array_element (
@@ -1562,6 +1578,7 @@ subscripted
 					$selector
 				);
 			}
+	|	term_postfixed_arrow_array_element
 	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
 			}
