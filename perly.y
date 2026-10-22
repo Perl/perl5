@@ -122,6 +122,7 @@
 %type <ival>  implicit_semicolon
 %type <opval> parentheses_empty
 %type <opval> parentheses_non_empty
+%type <opval> parenthesised_expression
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -799,6 +800,21 @@ parentheses_non_empty
 			}
 	;
 
+parenthesised_expression
+	/* Matches:
+	 * - ()
+	 * - (expr)
+	 * Produces:
+	 * - OP * for non-empty list
+	 * - NULL for empty list
+	 * Note:
+	 *   nonterminal doesn't use `optexpr` to avoid shift/reduce conflicts
+	 *   caused by its empty list action after PERLY_PAREN_OPEN
+	 */
+	:	parentheses_empty
+	|	parentheses_non_empty
+	;
+
 subscript_index
 	/* Array/list access subscript: [ selector expression ]
 	 * Value of nonterminal: selector expression
@@ -1371,13 +1387,11 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	|	/* $foo->bar(list) */
-		term                        [target]
+	/* $foo->bar(list) */
+	|	term                        [target]
 		ARROW
 		methodname                  [method]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_method_invocation (
 					scalar ($target),
@@ -1396,14 +1410,12 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					NULL
 				);
 			}
-	|	/* $foo->&bar(list) */
-		term                        [target]
+	/* $foo->&bar(list) */
+	|	term                        [target]
 		ARROW
 		PERLY_AMPERSAND
 		subname                     [method]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_method_invocation (
 					scalar ($target),
@@ -1434,12 +1446,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					$arguments
 				);
 			}
-	|	/* method $object (@args) */
-		METHCALL                    [method]
+	/* method $object (@args) */
+	|	METHCALL                    [method]
 		indirob                     [target]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_method_invocation (
 					$target,
@@ -1449,13 +1459,11 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($LSTOP, 0, $optlistexpr); }
+	/* print (@args) */
 	|	FUNC
-		PERLY_PAREN_OPEN
-		optexpr
-		PERLY_PAREN_CLOSE
-		/* print (@args) */
+		parenthesised_expression    [arguments]
 			{
-				$$ = op_convert_list($FUNC, 0, $optexpr);
+				$$ = op_convert_list($FUNC, 0, $arguments);
 			}
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
@@ -1509,8 +1517,9 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($selector)); }
 	/* $subref->(@args); $foo->{bar}(@args) */
+	/* $subref->(); $foo->{bar}() */
 	|	subscriptable_reference     [code_reference]
-		parentheses_non_empty       [arguments]
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1520,30 +1529,14 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
-	/* $subref->(); $foo->{bar}() */
-	|	subscriptable_reference     [code_reference]
-		parentheses_empty
-			{
-				$$ = build_function_invocation (
-					OPf_STACKED,
-					newCVREF (0, scalar ($code_reference)),
-					NULL
-				);
-				if (parser->expect == XBLOCK)
-					parser->expect = XOPERATOR;
-			}
 	/* list slice */
-	|	parentheses_non_empty       [list]
+	|	parenthesised_expression    [list]
 		subscript_index             [selector]
 			{
 				$$ = newSLICEOP(0, $selector, $list);
 			}
 	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
-	/* empty list slice! */
-	|	parentheses_empty
-		subscript_index             [selector]
-			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
 
 /* Binary operators between terms */
@@ -1783,19 +1776,11 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	/* &foo() or foo() */
-		amper                       [function]
-		parentheses_empty
-			{
-				$$ = build_function_invocation (
-					OPf_STACKED,
-					scalar ($function),
-					NULL
-				);
-			}
+	/* &foo() or foo() */
 	/* &foo(@args) or foo(@args) */
+	/* &foo() or foo() */
 	|	amper                       [function]
-		parentheses_non_empty       [arguments]
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
