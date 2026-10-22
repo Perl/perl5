@@ -1965,7 +1965,7 @@ case 2: /* @1: %empty  */
   case 306: /* term: term ARROW PERLY_STAR PERLY_STAR  */
 #line 1846 "perly.y"
                         {
-				(yyval.opval) = newGVREF(0,(ps[-3].val.opval));
+                (yyval.opval) = build_typeglob ((ps[-3].val.opval));
 			}
 
     break;
@@ -2314,7 +2314,7 @@ case 2: /* @1: %empty  */
 
   case 369: /* star: PERLY_STAR indirob  */
 #line 2088 "perly.y"
-                        { (yyval.opval) = newGVREF(0,(ps[0].val.opval)); }
+                        { (yyval.opval) = build_typeglob ((ps[0].val.opval)); }
 
     break;
 
@@ -2361,6 +2361,6 @@ case 2: /* @1: %empty  */
     
 
 /* Generated from:
- * ad50a623bccdbc70cbeb7d7c9626cb200f73c4b632541ba656688903873f8bd7 perly.y
+ * f62b143c97fb53c4a85ea31596c5c77959ff48f84b971857c95e73e391160da0 perly.y
  * ba173fe7f0e9b6b5465fb5d0705af3290ac7d8b511f0eead585307eb6c68918d regen_perly.pl
  * ex: set ro ft=c: */

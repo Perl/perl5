@@ -1844,7 +1844,7 @@ term[product]	:	termbinop
 		PERLY_STAR
 		%prec PERLY_PAREN_OPEN
 			{
-				$$ = newGVREF(0,$target);
+                $$ = build_typeglob ($target);
 			}
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
@@ -2085,7 +2085,7 @@ arylen	:	DOLSHARP indirob
 	;
 
 star	:	PERLY_STAR indirob
-			{ $$ = newGVREF(0,$indirob); }
+			{ $$ = build_typeglob ($indirob); }
 	;
 
 sliceme	:	ary

@@ -5024,6 +5024,29 @@ Perl_build_method_invocation_arguments (pTHX_ OP *target, OP *arguments)
 }
 
 /*
+=for apidoc build_typeglob
+
+Returns a C<OP *> representing typeglob dereference.
+
+Designed to handle syntax:
+- C<< *target >>
+- C<< *{ target } >>
+- C<< $target->** >>
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_typeglob (pTHX_ OP *target)
+{
+    PERL_ARGS_ASSERT_BUILD_TYPEGLOB;
+
+    return newGVREF (0, target);
+}
+
+/*
 =for apidoc new_block_statement
 
 Returns a C<OP *> representing block as statement.

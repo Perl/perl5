@@ -1030,6 +1030,7 @@ dp	|OP *	|build_method_invocation				\
 dp	|OP *	|build_method_invocation_arguments			\
 				|NN OP *target				\
 				|NULLOK OP *arguments
+dp	|OP *	|build_typeglob |NN OP *target
 dp	|OP *	|build_typeglob_element 				\
 				|NN OP *target				\
 				|NN OP *selector

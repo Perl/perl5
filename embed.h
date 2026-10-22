@@ -998,6 +998,7 @@
 #   define build_infix_plugin(a,b,c)            Perl_build_infix_plugin(aTHX_ a,b,c)
 #   define build_method_invocation(a,b,c)       Perl_build_method_invocation(aTHX_ a,b,c)
 #   define build_method_invocation_arguments(a,b) Perl_build_method_invocation_arguments(aTHX_ a,b)
+#   define build_typeglob(a)                    Perl_build_typeglob(aTHX_ a)
 #   define build_typeglob_element(a,b)          Perl_build_typeglob_element(aTHX_ a,b)
 #   define cando(a,b,c)                         Perl_cando(aTHX_ a,b,c)
 #   define check_utf8_print(a,b)                Perl_check_utf8_print(aTHX_ a,b)
