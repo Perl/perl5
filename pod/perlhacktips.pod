@@ -388,7 +388,7 @@ POSIX also reserves many symbols.  See Section 2.2.2 in
 L<https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html>.
 Perl also has conflicts with that.
 
-Perl reserves for its use any symbol whose name matches the pattern 
+Perl reserves for its use any symbol whose name matches the pattern
 C<$names_reserved_for_perl_use_re> found in F<regen/embed.pl>.  The
 details are complicated, but, simplified, come down to things beginning
 with C<Perl>, C<perl>, or C<PL_>, or ending with C<_pl_>.
@@ -465,7 +465,7 @@ applied to your function without any effort on your part.
 =item Macros
 
 You can put an entry for it in F<embed.fnc>, just like a function, but
-adding the C<m> (for macro) flag. 
+adding the C<m> (for macro) flag.
 
 But it is often more convenient to specify the visibility at the place
 where the macro is documented via C<=for apidoc> lines.  The same flags
@@ -488,7 +488,11 @@ surrounding them, like
      typedef enum { ... } my_enum;
  # endif
 
-Use C<PERL_EXT> to restrict the visibilty to perl extensions.
+Use
+
+ # if defined(PERL_CORE) || defined(PERL_EXT)
+
+to restrict the visibilty to core and perl extensions.
 
 =back
 
