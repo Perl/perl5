@@ -6515,11 +6515,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * place first time through; otherwise it would stop too early */
             U32 upper_fill = max_string_len + 1;
 
-            /* We start out as an EXACT node, even if under /i, until we find a
-             * character which is in a fold.  The algorithm now segregates into
-             * separate nodes, characters that fold from those that don't under
-             * /i.  (This hopefully will create nodes that are fixed strings
-             * even under /i, giving the optimizer something to grab on to.)
+            /* We start out as an EXACT node, even if under /i, until we
+             * classify the first character.  The algorithm now segregates
+             * into separate nodes, characters that fold from those that don't
+             * under /i.  Non-folding text is marked EXACT_NF, giving the
+             * optimizer something to grab on to.
              * So, if a node has something in it and the next character is in
              * the opposite category, that node is closed up, and the function
              * returns.  Then regatom is called again, and a new node is
@@ -7056,13 +7056,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      *
                      * Start a new node if previous characters in the node were
                      * folded */
-                    if (len && node_type != EXACT) {
+                    if (len && ! IS_EXACT_OR_NF(node_type)) {
                         p = oldp;
                         goto loopdone;
                     }
 
                     /* Here, continuing a node with non-folded characters.  Add
                      * this one */
+                    if (! LOC && ! len) {
+                        node_type = EXACT_NF;
+                    }
                     goto not_fold_common;
                 }
                 else {  /* Here, does participate in some fold */
@@ -7074,7 +7077,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     if (! len) {
                         node_type = compute_EXACTish(pRExC_state);
                     }
-                    else if (node_type == EXACT) {
+                    else if (IS_EXACT_OR_NF(node_type)) {
                         p = oldp;
                         goto loopdone;
                     }
@@ -7728,14 +7731,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
             else {
 
-                /* If the node type is EXACT here, check to see if it
-                 * should be EXACTL, or EXACT_REQ8. */
-                if (node_type == EXACT) {
+                /* If the node type is EXACT or EXACT_NF here, check whether
+                 * it requires a UTF-8 target. */
+                if (IS_EXACT_OR_NF(node_type)) {
                     if (LOC) {
                         node_type = EXACTL;
                     }
                     else if (requires_utf8_target) {
-                        node_type = EXACT_REQ8;
+                        node_type = node_type == EXACT_NF
+                                    ? EXACT_NF_REQ8
+                                    : EXACT_REQ8;
                     }
                 }
                 else if (node_type == LEXACT) {
@@ -11838,10 +11843,10 @@ S_optimize_regclass(pTHX_
      * LATIN SMALL LETTER N PRECEDED BY APOSTROPHE.  And so even though there
      * is no simple fold that includes \X{02BC}, there is a multi-char fold
      * that does, and so the node generated for it must be an EXACTFish one.
-     * On the other hand qr/:/i should generate a plain EXACT node since the
-     * colon participates in no fold whatsoever, and having it be EXACT tells
-     * the optimizer the target string cannot match unless it has a colon in
-     * it. */
+     * On the other hand qr/:/i should generate an EXACT_NF node since the
+     * colon participates in no fold whatsoever, and marking it EXACT_NF
+     * tells the optimizer the target string cannot match unless it has a
+     * colon in it. */
     if (   ! posixl
         && ! *invert
 
@@ -11875,11 +11880,11 @@ S_optimize_regclass(pTHX_
                                           small */
 
                 /* Under /i, it gets a little tricky.  A code point that
-                 * doesn't participate in a fold should be an EXACT node.  We
-                 * know this one isn't the result of a simple fold, or there'd
+                 * doesn't participate in a fold should be an EXACT_NF node.
+                 * We know this one isn't the result of a simple fold, or there'd
                  * be more than one code point in the list, but it could be
                  * part of a multi-character fold.  In that case we better not
-                 * create an EXACT node, as we would wrongly be telling the
+                 * create an EXACT_NF node, as we would wrongly be telling the
                  * optimizer that this code point must be in the target string,
                  * and that is wrong.  This is because if the sequence around
                  * this code point forms a multi-char fold, what needs to be in
@@ -11891,14 +11896,19 @@ S_optimize_regclass(pTHX_
                  * above-256 one */
                 op = IS_IN_SOME_FOLD_L1(lowest_cp)
                      ? EXACTFU
-                     : EXACT;
+                     : EXACT_NF;
             }
             else {  /* /i, larger code point.  Since we are under /i, and have
                        just this code point, we know that it can't fold to
                        something else, so PL_InMultiCharFold applies to it */
                 op = (invlist_contains_cp_(PL_InMultiCharFold, lowest_cp))
                          ? EXACTFU_REQ8
-                         : EXACT_REQ8;
+                         : invlist_contains_cp_(PL_in_some_fold, lowest_cp)
+                           ? EXACT_REQ8
+                           : EXACT_NF_REQ8;
+                /* A fold excluded by /aa does not make the character
+                 * globally non-folding.  Keep EXACT_REQ8 so a join with a
+                 * neighboring /u node cannot change its matching rules. */
                 }
 
                 value = lowest_cp;
@@ -13544,7 +13554,8 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         if (REGNODE_TYPE(OP(REGNODE_p(scan))) == EXACT) {
             bool unfolded_multi_char;	/* Unexamined in this routine */
             if (join_exact(pRExC_state, scan, &min,
-                           &unfolded_multi_char, 1, REGNODE_p(val), depth+1))
+                           &unfolded_multi_char, 1, REGNODE_p(val), depth+1,
+                           false, false))
                 return true; /* Was return EXACT */
         }
 #endif

@@ -30,6 +30,14 @@ the same first I<byte> were skipped.
 
 =item *
 
+Case-insensitive literal alternatives such as C<foo|bar|a_word|_qux> can
+compile into a single trie again.  Characters that do not participate in
+Unicode case folding can join neighboring folded literals after the
+optimizer records their fixed substrings.
+L<[GH #19953]|https://github.com/Perl/perl5/issues/19953>
+
+=item *
+
 Changes have been made to the "super-linear cache", which is used to avoid
 excessive backtracking in some regexes which include quantifiers on
 variable-length sub-patterns, such as C<(a|bc)*> and C<(ab+){2,}>. This
