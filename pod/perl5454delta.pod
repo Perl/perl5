@@ -1,0 +1,348 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5454delta - what is new for perl v5.45.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.45.3 release and the 5.45.4
+release.
+
+If you are upgrading from an earlier release such as 5.45.2, first read
+L<perl5453delta>, which describes differences between 5.45.2 and 5.45.3.
+
+=head1 Security
+
+=head2 CVE-2026-107401 Regex engine incorrectly skipped UTF8 characters
+
+A regular expression performing a greedy match of a UTF8 character could
+have incorrectly failed if the first attempt at a match was unsuccessful.
+Instead of skipping over all consecutive instances of that I<character>
+associated with the first attempt, all consecutive characters that had
+the same first I<byte> were skipped.
+
+[L<GH #24916|https://github.com/Perl/perl5/issues/24916>]
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Changes have been made to the "super-linear cache", which is used to avoid
+excessive backtracking in some regexes which include quantifiers on
+variable-length sub-patterns, such as C<(a|bc)*> and C<(ab+){2,}>. This
+change may reduce the amount of backtracking that takes place, and may
+reduce the amount of temporary memory used for the cache.
+
+=item *
+
+C<substr()> now updates the UTF-8 position cache correctly, avoiding
+repeated scans when accessing the same part of a string. [L<GH #24531|https://github.com/Perl/perl5/issues/24531>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 3.12 to 3.14.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.224 to 2.225.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.224 to 2.225.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.38 to 2.41.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.74 to 3.75.
+
+=item *
+
+L<ExtUtils::PL2Bat> has been upgraded from version 0.005 to 0.006.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.224 to 2.225.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20260924 to 5.20261022.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.26 to 2.27.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages. For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+Two warnings in C<malloc.c> which were not previously documented have been
+added to L<perldiag>.
+
+=over 4
+
+=item L<Unaligned "next" pointer in the free chain 0x% at 0x%|perldiag/"Unaligned "next" pointer in the free chain 0x% at 0x%">
+
+=item L<Unaligned pointer in the free chain 0x%|perldiag/"Unaligned pointer in the free chain 0x%">
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+The C<Perl_seed> function will now use the native entropy source
+C<sys$get_entropy> when available (OpenVMS 9.2 and later).
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Locale thread-safety is now enabled by default for the next few v5.45
+development releases.
+
+This feature, introduced with default-off in v5.45.3, is never turned on
+for builds that don't have threads, and on platforms where perl believes
+that the locale handling is natively thread-safe.
+
+Otherwise, the feature is on by default during a portion of the
+remaining 5.45 development cycle, so as to test it in the field, but the
+intention is to make it opt-in for the official 5.46 release.  To turn
+it off, pass this to F<Configure>:
+
+ -Accflags=-DNO_EMULATE_THREAD_SAFE_LOCALES
+
+See L<perllocale/Multi-threaded operation>.
+
+
+=item *
+
+The inline function C<Perl_newSV_type> now only handles the SV types most
+commonly seen at runtime. C<Perl_newSV_type_generic> has been added as
+a non-inline function that can handle all SV types. This change reduces
+binary bloating and increases the chances of C<Perl_newSV_type> being
+successfully inlined.
+
+=item *
+
+When a shifted array is unshifted, C<Perl_av_extend_guts> used to perform
+a C<(key > *maxp - 10)> check and always reallocate. That check dates from
+Perl 3.0 and the rationale for it seems to have been lost to time. (It may
+have been to encourage array growth, but the general levers for doing so
+have changed significantly over time.)
+
+Always reallocating when it is not strictly necessary could cause Perl
+applications that repeatedly perform a mixture of C<shift>/C<push> operations
+(or similar) to suffer from unnecessary allocator thrashing.
+C<Perl_av_extend_guts> will now only reallocate if the array really is out
+of space and must be extended.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The regular expression optimizer no longer rejects valid matches when a
+positive lookahead can match an empty string. For example,
+C</\A(?=a*)[0-9]a\z/> now matches C<"0a">.
+
+[L<GH #24943|https://github.com/Perl/perl5/issues/24943>]
+
+=item *
+
+General regular expression repeats clear captures in their bodies when
+matching zero repetitions, as optimized repeats do. Adding a no-op
+C<(?{})> code block no longer changes whether a backreference to a skipped
+optional group matches.
+
+[L<GH #8267|https://github.com/Perl/perl5/issues/8267>] [L<GH #18865|https://github.com/Perl/perl5/issues/18865>]
+
+=item *
+
+Negative lookahead and lookbehind assertions restore capture buffers after
+evaluating their bodies. Captures from failed assertion attempts no longer
+appear in a successful match or affect later backreferences and conditions.
+
+[L<GH #14387|https://github.com/Perl/perl5/issues/14387>] [L<GH #24946|https://github.com/Perl/perl5/issues/24946>]
+
+=item *
+
+The regular expression optimizer no longer uses the fixed-width repeat
+optimization for a body containing captures inside nested quantifiers.
+This prevents failed or backtracked iterations from leaving incorrect
+capture values. For example, C<"aa" =~ /(?:(aa){2})*/> now leaves C<$1>
+undefined.
+
+[L<GH #24945|https://github.com/Perl/perl5/issues/24945>]
+
+=item *
+
+Line number information is stored rather than discarded when an anonymous
+subroutine is encountered during compilation. This should improve the
+accuracy of line numbers emitted by diagnostic messages and `caller()`
+for code following an anonymous subroutine declaration.
+
+Note that (i) this change could break any tests that hardcode the
+less-accurate line numbers (ii) further improvements to line number
+accuracy may follow within this development cycle.
+
+[L<GH #24396|https://github.com/Perl/perl5/issues/24396>]
+
+=item *
+
+Regular expression compilation could have mistaken the width of a
+quantified subpattern (e.g. C<b{2}>) when a potentially infinite
+qualifier (e.g. C<+>) occurred earlier in the pattern. This could lead to
+viable match candidates at the start of the target string being missed.
+
+[L<GH #24915|https://github.com/Perl/perl5/issues/24915>]
+
+=item *
+
+Following an unsuccessful earlier non-greedy match, a regular expression
+intended to perform a separate I<greedy> match could have instead
+performed a I<non-greedy> match because of skipped flag clearance.
+
+[L<GH #24926|https://github.com/Perl/perl5/issues/24926>]
+
+=item *
+
+An anchored regular expressions starting with a repeating character could
+have incorrectly skipped later instances of that character if the match
+contained a C<(*SKIP)> and was initially unsuccessful.
+
+=item *
+
+A anchored regular expression needing zero (or more) characters for a
+successful match could have failed because the search space was
+incorrectly truncated.
+
+[L<GH #24944|https://github.com/Perl/perl5/issues/24944>]
+
+=item *
+
+A regular expression performing a case insensitive match with Unicode
+rules could fail to match correctly when the ability of folding
+characters to both decrease I<minlen> and increase I<maxlen> at the
+same time was not taken into account.
+
+=item *
+
+The offset of a \K is no longer narrowed on rollback at an offset >2GiB.
+
+=item *
+
+In some cases warnings that occurred while using unpack on an invalid
+UTF-8 marked string would result in an invalid free.  [L<GH #24913|https://github.com/Perl/perl5/issues/24913>]
+
+=item *
+
+Builds with C<PERL_NO_COW> could crash when modifying or freeing boolean
+values. This has been fixed. [L<GH #19987|https://github.com/Perl/perl5/issues/19987>]
+
+=item *
+
+C<goto> within a defer block should now work more consistently. [L<GH #19240|https://github.com/Perl/perl5/issues/19240>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.45.4 represents approximately 4 weeks of development since Perl
+5.45.3 and contains approximately 12,000 lines of changes across 210 files
+from 27 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 5,600 lines of changes to 120 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.45.4:
+
+Alin Iacob, Andreas König, Andrew Hewus Fresh, Brad Smith, Branislav
+Zahradník, Chris 'BinGOs' Williams, Craig A. Berry, Cyncrovee, Dan Book,
+Darafei Praliaskouski, David Mitchell, Eric Herman, Frank,
+GlobalTechStrategics, James E Keenan, Karl Williamson, Leon Timmermans,
+Lukas Mai, Paul Evans, Paul Marquess, Philippe Bruhat (BooK), Richard Leach,
+Sevan Janiyan, TAKAI Kousuke, Tigranuhy Grigoryan, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
