@@ -1030,6 +1030,9 @@ dp	|OP *	|build_method_invocation				\
 dp	|OP *	|build_method_invocation_arguments			\
 				|NN OP *target				\
 				|NULLOK OP *arguments
+dp	|OP *	|build_typeglob_element 				\
+				|NN OP *target				\
+				|NN OP *selector
 EXp	|const char *|byte_dump_string_ 				\
 				|NULLOK const U8 * const start		\
 				|const STRLEN len			\

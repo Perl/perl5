@@ -602,6 +602,17 @@ Perl_build_method_invocation_arguments(pTHX_ OP *target, OP *arguments)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;       \
     } STMT_END
 
+PERL_CALLCONV OP *
+Perl_build_typeglob_element(pTHX_ OP *target, OP *selector)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_TYPEGLOB_ELEMENT \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(selector);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
 PERL_CALLCONV const char *
 Perl_byte_dump_string_(pTHX_ const U8 * const start, const STRLEN len, const bool format)
         Perl_attribute_nonnull_aTHX;

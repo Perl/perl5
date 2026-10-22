@@ -1510,7 +1510,7 @@ subscripted
 	:	gelem                       [target]
 		subscript_keys              [selector]
 			{
-				$$ = newBINOP(OP_GELEM, 0, $target, scalar($selector));
+				$$ = build_typeglob_element ($target, $selector);
 			}
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));

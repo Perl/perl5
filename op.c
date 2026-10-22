@@ -4916,6 +4916,29 @@ Perl_build_function_invocation (pTHX_ I32 flags, OP *code, OP *arguments)
 }
 
 /*
+=for apidoc build_typeglob_element
+
+    build_typeglob_element ($target, $selector);
+
+Build C<OP *> matching grammar:
+
+    *target:: {selector}
+    target->$* {selector}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_typeglob_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_TYPEGLOB_ELEMENT;
+
+    return newBINOP (OP_GELEM, 0, target, scalar (selector));
+}
+
+/*
 =for apidoc build_method_invocation
 
     build_method_invocation ($target, $method, $arguments);
