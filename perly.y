@@ -1449,8 +1449,14 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($LSTOP, 0, $optlistexpr); }
-	|	FUNC PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE                 /* print (@args) */
-			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
+	|	FUNC
+		PERLY_PAREN_OPEN
+		optexpr
+		PERLY_PAREN_CLOSE
+		/* print (@args) */
+			{
+				$$ = op_convert_list($FUNC, 0, $optexpr);
+			}
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	/* sub f(&@);   f { foo } ... */
