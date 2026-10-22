@@ -121,6 +121,7 @@
 %type <opval> bare_statement_yadayada
 %type <ival>  implicit_semicolon
 %type <opval> parentheses_empty
+%type <opval> parentheses_non_empty
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
@@ -783,6 +784,18 @@ parentheses_empty
 		PERLY_PAREN_CLOSE
 			{
 				$$ = NULL;
+			}
+	;
+
+parentheses_non_empty
+	/* Matches:
+	 * - (expr)
+	 */
+	:	PERLY_PAREN_OPEN
+		expr
+		PERLY_PAREN_CLOSE
+			{
+				$$ = $expr;
 			}
 	;
 
@@ -1491,9 +1504,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 					jmaybe($selector)); }
 	/* $subref->(@args); $foo->{bar}(@args) */
 	|	subscriptable_reference     [code_reference]
-		PERLY_PAREN_OPEN
-		expr                        [arguments]
-		PERLY_PAREN_CLOSE
+		parentheses_non_empty       [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1516,9 +1527,7 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
 					parser->expect = XOPERATOR;
 			}
 	/* list slice */
-	|	PERLY_PAREN_OPEN
-		expr                        [list]
-		PERLY_PAREN_CLOSE
+	|	parentheses_non_empty       [list]
 		subscript_index             [selector]
 			{
 				$$ = newSLICEOP(0, $selector, $list);
@@ -1695,9 +1704,7 @@ term[product]	:	termbinop
 			{ $$ = $myattrterm; }
 	|	KW_LOCAL term[operand]	%prec UNIOP
 			{ $$ = localize($operand,0); }
-	|	PERLY_PAREN_OPEN
-		expr                        [list]
-		PERLY_PAREN_CLOSE
+	|	parentheses_non_empty       [list]
 			{
 				$$ = sawparens($list);
 			}
@@ -1782,9 +1789,7 @@ term[product]	:	termbinop
 			}
 	/* &foo(@args) or foo(@args) */
 	|	amper                       [function]
-		PERLY_PAREN_OPEN
-		expr                        [arguments]
-		PERLY_PAREN_CLOSE
+		parentheses_non_empty       [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1890,9 +1895,7 @@ term[product]	:	termbinop
 			}
 	/* not($foo) */
 	|	FUNC1
-		PERLY_PAREN_OPEN
-		expr                        [arguments]
-		PERLY_PAREN_CLOSE
+		parentheses_non_empty       [arguments]
 			{
 				$$ = newUNOP($FUNC1, 0, $arguments);
 			}
@@ -1928,9 +1931,7 @@ myattrterm
 
 /* Things that can be "my"'d */
 myterm
-	:	PERLY_PAREN_OPEN
-		expr                        [list]
-		PERLY_PAREN_CLOSE
+	:	parentheses_non_empty       [list]
 			{
 				$$ = sawparens($list);
 			}
