@@ -17,7 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.45.3 - Jasper Fforde - Shades of Grey                    
+=head2 v5.45.4 - Leonard Nimoy - You and I have Learned
+
+L<Announced on 2026-10-22 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2026/10/msg271322.html>
+
+
+  The miracle is this
+  The more we share ...
+  The more
+  We have
+
+=head2 v5.45.3 - Jasper Fforde - Shades of Grey
 
 L<Announced on 2026-09-24 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2026/09/msg271247.html>
 
