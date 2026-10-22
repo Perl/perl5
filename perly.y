@@ -129,6 +129,7 @@
 %type <opval> subscript_index
 %type <opval> subscript_keys
 %type <opval> subscriptable_reference
+%type <opval> term_postfixed_arrow_typeglob_element
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -892,6 +893,22 @@ subscriptable_reference
 		}
 	;
 
+term_postfixed_arrow_typeglob_element
+	/* Matches:
+	 * - target->*{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_STAR
+		subscript_keys              [selector]
+			{
+				$$ = build_typeglob_element (
+					newGVREF (0, $target),
+					$selector
+				);
+			}
+	;
+
 /* Either a signatured 'sub' or 'method' keyword */
 sigsub_or_method_named
 	:	KW_SUB_named_sig
@@ -1512,6 +1529,7 @@ subscripted
 			{
 				$$ = build_typeglob_element ($target, $selector);
 			}
+	|	term_postfixed_arrow_typeglob_element
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
 			}
@@ -2075,12 +2093,6 @@ kvslice	:	hsh
 	;
 
 gelem	:	star
-	|	term
-		ARROW
-		PERLY_STAR
-			{
-				$$ = newGVREF(0,$term);
-			}
 	;
 
 /* Indirect objects */
