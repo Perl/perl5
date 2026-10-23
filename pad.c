@@ -1074,6 +1074,73 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 }
 
 /*
+=for apidoc      pad_fetchmy_pvn
+=for apidoc_item pad_fetchmy_sv
+=for apidoc_flag padfind_NO_INNER_CAPTURE
+
+Given the name of a lexical variable, including its leading sigil, these find
+it in the currently compiling pad, returning that offset and setting its
+pointer value into the C<SV *> variable pointed at by C<svp>, or returns
+C<NOT_IN_PAD> if no such lexical is in scope.
+
+If it is not in the current pad but appears in the pad of any lexically
+enclosing scope, then a pseudo-entry for it is added in the current pad. In
+this case, note that the SV returned in the C<svp> pointer is the outer-most
+one that was found, not the copy that was added in inner pads. This makes it
+subtly different from calling L</pad_findmy_pvn> and looking up the resulting
+offset in the C<PL_curpad> array in some cases (such as when compiling an
+anonymous or lexical sub, which have late binding of outer captures).
+
+The forms differ only in how the variable's name is specified.
+
+In C<pad_fetchmy_pvn>, C<namepv> points to the first byte of the name (which
+better be its sigil), and an additional parameter, C<namelen>, specifies its
+length in bytes. Hence, C<namepv> may contain embedded-NUL characters. The
+caller must make sure C<namepv> contains at least C<namelen> bytes.
+
+In C<pad_fetchmy_sv>, the variable name is taken from the SV parameter using
+C<L</SvPVutf8>()>.
+
+If C<flags> has the C<padfind_NO_INNER_CAPTURE> bit set, no capture of outer
+values into inner pads is performed. As soon as the lookup finds the requested
+lexical name, its value is captured into the C<svp> and no additions are made
+to inner pads. In this case, the returned pad offset gives the offset in
+I<whichever pad contained it>. The caller is unlikely to be able to make use
+of this value and therefore the only meaningful behaviour when this flag is
+used is to compare it against C<NOT_IN_PAD>.
+
+=cut
+*/
+
+PADOFFSET
+Perl_pad_fetchmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags,
+        SV **svp)
+{
+    PERL_ARGS_ASSERT_PAD_FETCHMY_PVN;
+
+    /* compilation errors can zero PL_compcv */
+    if (!PL_compcv)
+        return NOT_IN_PAD;
+
+    PADNAME *out_pn;
+    int out_flags;
+    PADOFFSET offset = pad_findlex(namepv, namelen, flags,
+            PL_compcv, PL_cop_seqmax, 1, svp, &out_pn, &out_flags);
+
+    return offset;
+}
+
+PADOFFSET
+Perl_pad_fetchmy_sv(pTHX_ SV *name, U32 flags, SV **svp)
+{
+    PERL_ARGS_ASSERT_PAD_FETCHMY_SV;
+
+    STRLEN namelen;
+    char *namepv = SvPVutf8(name, namelen);
+    return pad_fetchmy_pvn(namepv, namelen, flags, svp);
+}
+
+/*
 =for apidoc find_rundefsv
 
 Returns the global variable C<$_>.
@@ -1145,8 +1212,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = cBOOL(flags & padadd_STALEOK);
     const bool fieldok = cBOOL(flags & padfind_FIELD_OK);
+    const bool no_inner_capture = flags & padfind_NO_INNER_CAPTURE;
 
-    flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
+    flags &= ~(padadd_STALEOK|padfind_FIELD_OK|padfind_NO_INNER_CAPTURE); /* one-shot flags */
     if (flags)
         croak("panic: pad_findlex illegal flag bits 0x%" UVxf,
                    (UV)flags);
@@ -1335,6 +1403,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             croak("Field %" SVf " of %" HvNAMEf_QUOTEDPREFIX " is not accessible in a method of %" HvNAMEf_QUOTEDPREFIX,
                 SVfARG(PadnameSV(*out_name)), HvNAMEfARG(fieldstash), HvNAMEfARG(PL_curstash));
     }
+
+    if(no_inner_capture)
+        return offset;
 
     /* found in an outer CV. Add appropriate fake entry to this pad */
 
