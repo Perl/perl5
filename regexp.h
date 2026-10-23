@@ -844,6 +844,14 @@ typedef struct {
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */
     bool warned; /* we have issued a recursion warning; no need for more */
+
+    /* Some state cached between calls to (?{...}) to potentially
+     * make further calls more efficient */
+    CV *caller_cv;       /* who called us: a cached find_runcv(NULL) */
+    CV *last_pushed_cv;  /* most recently called (?{...}) CV */
+    PAD* last_pad;       /* pad used for last (?{...}) execution */
+    /* vars holding private state between MULTICALLs */
+    dMULTICALL;
 } regmatch_info;
 
 

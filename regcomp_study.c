@@ -1677,7 +1677,8 @@ Perl_study_chunk(pTHX_
                 while (OP(scan) == code) {
                     SSize_t deltanext, minnext, fake_last_close = 0;
                     regnode *fake_last_close_op = NULL;
-                    U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
+                    U32 f = (flags & (SCF_TRIE_DOING_RESTUDY
+                                     |SCF_WHILEM_VISITED_POS));
                     regnode_ssc this_class;
 
                     DEBUG_PEEP("Branch", scan, depth, flags);
@@ -1703,8 +1704,6 @@ Perl_study_chunk(pTHX_
                         data_fake.start_class = &this_class;
                         f |= SCF_DO_STCLASS_AND;
                     }
-                    if (flags & SCF_WHILEM_VISITED_POS)
-                        f |= SCF_WHILEM_VISITED_POS;
 
                     /* we suppose the run is continuous, last = next...*/
                     /* recurse study_chunk() for each BRANCH in an alternation */
@@ -3231,7 +3230,8 @@ Perl_study_chunk(pTHX_
                 regnode *cur_last_close_op;
                 regnode *nscan;
                 regnode_ssc intrnl;
-                U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
+                U32 f = (flags & (SCF_TRIE_DOING_RESTUDY
+                                 |SCF_WHILEM_VISITED_POS));
 
                 StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                 if (data) {
@@ -3256,8 +3256,7 @@ Perl_study_chunk(pTHX_
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
                 }
-                if (flags & SCF_WHILEM_VISITED_POS)
-                    f |= SCF_WHILEM_VISITED_POS;
+
                 next = regnext(scan);
                 nscan = REGNODE_AFTER(scan);
 
@@ -3345,7 +3344,8 @@ Perl_study_chunk(pTHX_
                 regnode *last_close_op = NULL;
                 regnode *nscan;
                 regnode_ssc intrnl;
-                U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
+                U32 f = (flags & (SCF_TRIE_DOING_RESTUDY
+                                 |SCF_WHILEM_VISITED_POS));
                 /* We use SAVEFREEPV so that when the full compile
                     is finished perl will clean up the allocated
                     minlens when it's all done. This way we don't
@@ -3381,8 +3381,6 @@ Perl_study_chunk(pTHX_
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
                 }
-                if (flags & SCF_WHILEM_VISITED_POS)
-                    f |= SCF_WHILEM_VISITED_POS;
                 next = regnext(scan);
                 nscan = REGNODE_AFTER(scan);
 
@@ -3545,7 +3543,8 @@ Perl_study_chunk(pTHX_
                 for ( word = 1 ; word <= trie->wordcount ; word++)
                 {
                     SSize_t deltanext = 0, minnext = 0;
-                    U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
+                    U32 f = (flags & (SCF_TRIE_DOING_RESTUDY
+                                     |SCF_WHILEM_VISITED_POS));
                     SSize_t fake_last_close = 0;
                     regnode *fake_last_close_op = NULL;
                     regnode_ssc this_class;
@@ -3565,8 +3564,6 @@ Perl_study_chunk(pTHX_
                         data_fake.start_class = &this_class;
                         f |= SCF_DO_STCLASS_AND;
                     }
-                    if (flags & SCF_WHILEM_VISITED_POS)
-                        f |= SCF_WHILEM_VISITED_POS;
 
                     if (trie->jump[word]) {
                         if (!nextbranch)
