@@ -334,6 +334,14 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item FreeBSD
+
+Removed the workaround for FreeBSD renameat() bug
+L<222258|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=222258>
+which was fixed in FreeBSD 13.  On older releases we simply disable
+renameat() and fallback to another implementation that doesn't handle
+race conditions as well.
+
 =back
 
 =head1 Internal Changes
