@@ -6772,8 +6772,6 @@ EXop	|void	|dtrace_probe_load					\
 				|NN const char *name			\
 				|bool is_loading
 EXop	|void	|dtrace_probe_op|NN const OP *op
-EXop	|void	|dtrace_probe_phase					\
-				|enum perl_phase phase
 #endif
 #if defined(USE_ITHREADS)
 Adpx	|PADOFFSET|alloccopstash|NN HV *hv

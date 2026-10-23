@@ -7,7 +7,8 @@ provider perl {
     probe sub__entry(const char *, const char *, int, const char *);
     probe sub__return(const char *, const char *, int, const char *);
 
-    probe phase__change(const char *, const char *);
+    probe phase__change__entry(const char *);
+    probe phase__change__return(const char *);
 
     probe op__entry(const char *);
 
