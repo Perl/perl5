@@ -93,11 +93,6 @@ The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
 C<G_SCALAR> or C<G_LIST> for void, scalar or list context,
 respectively.  See L<perlcall> for a usage example.
 
-=for apidoc AmnD|U32|GIMME
-A backward-compatible version of C<GIMME_V> which can only return
-C<G_SCALAR> or C<G_LIST>; in a void context, it returns C<G_SCALAR>.
-Deprecated.  Use C<GIMME_V> instead.
-
 =cut
 */
 
@@ -176,16 +171,6 @@ Deprecated.  Use C<GIMME_V> instead.
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
-
-#if !defined(PERL_CORE) && !defined(PERL_EXT)
-#  define GIMME \
-          (PL_op->op_flags & OPf_WANT					\
-           ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
-              ? G_LIST							\
-              : G_SCALAR)						\
-           : dowantarray())
-#endif
-
 
 /* NOTE: OPp* flags are now auto-generated and defined in opcode.h,
  *       from data in regen/op_private */
