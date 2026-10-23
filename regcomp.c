@@ -16635,6 +16635,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
             if (cp_start == all_names_start) {
                 *prop_definition = add_cp_to_invlist(*prop_definition, 0);
+                found_matches = true;
                 continue;
             }
 
