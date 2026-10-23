@@ -11207,6 +11207,15 @@ Perl_sv_has_valuemagic(pTHX_ const SV *sv)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+PERL_CALLCONV void
+Perl_sv_magicv2_remove_by_shape(pTHX_ SV *sv, enum MagicShape shape)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+# define PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_SHAPE \
+     STMT_START { Perl_assert_aTHX; assert(sv);         \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 # if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV void
 Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
