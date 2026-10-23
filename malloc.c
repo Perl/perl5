@@ -2332,7 +2332,7 @@ Perl_dump_mstats(pTHX_ const char *s)
 #   ifdef PERL_SBRK_VIA_MALLOC
 
 /* it may seem schizophrenic to use perl's malloc and let it call system */
-/* malloc, the reason for that is only the 3.2 version of the OS that had */
+/* malloc, the reason for that is historically NeXTSTEP 3.2 had */
 /* frequent core dumps within nxzonefreenolock. This sbrk routine put an */
 /* end to the cores */
 
