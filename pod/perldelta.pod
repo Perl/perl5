@@ -1290,6 +1290,23 @@ that field being released when the method exited.  The next access to
 that field could result in a crash or an assertion, or if the freed SV
 had been re-used, random data.  Discussed in [L<GH #24187|https://github.com/Perl/perl5/issues/24187>]
 
+=item *
+
+Perl 5.44.0 introduced some internal changes that broke uses of C<substr> when
+the string argument it is operating on was itself a special lvalue scalar
+created by another C<substr> call. This would cause debugging assertions or
+invalid C<free()> crashes from code that had a structure such as the following
+examples:
+
+    my $ref = \substr($str, $offset);
+    substr($$ref, 0, 1, "replacement");
+
+Z<>
+
+    substr(substr($str, $offset), 0, 1, "replacement");
+
+This bug has now been fixed. [GH #24933]
+
 =back
 
 =head1 Known Problems

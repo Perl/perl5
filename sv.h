@@ -996,7 +996,7 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
                                                   SVp_IOK|SVp_NOK|SVf_IVisUV))
 
 #define assert_scalar_or_IO_(sv) \
-                                assert_((SvTYPE(sv) <= SVt_PVMG) || (SvTYPE(sv) == SVt_PVIO))
+                                assert_(SvTYPE(sv) <= SVt_PVMG || SvTYPE(sv) == SVt_PVLV || SvTYPE(sv) == SVt_PVIO)
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
@@ -1122,6 +1122,7 @@ Returns the vstring magic, or NULL if none
  * up using it despite being an SVt_PVIO. So we accept those cases as well.
  */
 #define SvOOK(sv)		((SvTYPE(sv) <= SVt_PVMG ||         /* regular scalars */ \
+                                        SvTYPE(sv) == SVt_PVLV ||   /* PVLV is a regular scalar too */ \
                                         SvTYPE(sv) == SVt_PVHV ||   /* hashes */          \
                                         SvTYPE(sv) == SVt_PVIO) &&  /* IOs */             \
                                     ((SvFLAGS(sv) & (SVf_ROK|SVf_OOK)) == SVf_OOK))

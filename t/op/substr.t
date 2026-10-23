@@ -22,7 +22,8 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(400);
+# We can't use done_testing() at the end because of odd interactions with t/op/substr_thr.t
+plan(401);
 
 run_tests() unless caller;
 
@@ -916,6 +917,16 @@ fresh_perl_is('$0 = "/usr/bin/perl"; substr($0, 0, 0, $0)', '', {}, "(perl #1293
     \$h{foo} = \(my $bar = "baz");
     substr delete $h{foo}, 1, 1, o=>;
     is $bar, boz => 'first arg to 4-arg substr is loose lvalue context';
+}
+
+# [perl GH24933]
+{
+    # Under this bug, this would cause an assertion failure or double-free().
+    # The mere fact it doesn't crash is sufficient to test for absence of the
+    # bug.
+    my $s = "abcdef";
+    substr(substr($s, 3), 0, 1, "");
+    pass "substr(substr()) does not crash";
 }
 
 1;
