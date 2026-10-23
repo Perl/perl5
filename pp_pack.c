@@ -308,7 +308,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, U8 *buf, SSize_t buf_len,
          * */
         if (this_msgs) {
             while (av_count(this_msgs) > 0) {
-                Perl_av_create_and_push(aTHX_ &msgs, av_shift(this_msgs));
+                av_create_and_push(&msgs, av_shift(this_msgs));
             }
 
             SvREFCNT_dec(this_msgs);
