@@ -10246,28 +10246,6 @@ if $test X"$d_longdbl" = X"$define"; then
 
 echo "Checking how to print long doubles..." >&4
 
-if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  double d = 123.456;
-  printf("%.3f\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
-			sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
-			echo "We will use %f."
-			;;
-		esac
-	fi
-fi
-
 if $test X"$sPRIfldbl" = X; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
@@ -10285,6 +10263,28 @@ EOCP
 			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
 			sPRIFUldbl='"LF"'; sPRIGUldbl='"LG"'; sPRIEUldbl='"LE"';
 			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  double d = 123.456;
+  printf("%.3f\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
+			sPRIFUldbl='"F"'; sPRIGUldbl='"G"'; sPRIEUldbl='"E"';
+			echo "We will use %f."
 			;;
 		esac
 	fi
