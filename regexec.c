@@ -1332,7 +1332,10 @@ Perl_re_intuit_start(pTHX_
             }
         }
 
-        check_at = fbm_instr( start_point, end_point,
+        check_at = (SvCUR(check) == 1 && !SvTAIL(check))
+                ? (char *)memchr(start_point, *(const U8 *)SvPVX_const(check),
+                      end_point - start_point)
+                : fbm_instr( start_point, end_point,
                       check, multiline ? FBMrf_MULTILINE : 0);
 
         DEBUG_EXECUTE_r(re_printf(
@@ -1495,7 +1498,11 @@ Perl_re_intuit_start(pTHX_
                 ));
             }
             else {
-                s = fbm_instr(
+                s = (SvCUR(must) == 1 && !SvTAIL(must))
+                    ? (char *)memchr( (unsigned char*)from,
+                                      *(const U8 *)SvPVX_const(must),
+                                      (unsigned char*)to - (unsigned char*)from)
+                    : fbm_instr(
                     (unsigned char*)from,
                     (unsigned char*)to,
                     must,
