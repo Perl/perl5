@@ -119,9 +119,30 @@
 %type <opval> bare_statement_when
 %type <opval> bare_statement_while
 %type <opval> bare_statement_yadayada
+%type <opval> clause_arguments
+%type <opval> clause_method_direct
+%type <ival>  implicit_semicolon
+%type <opval> parentheses_empty
+%type <opval> parentheses_non_empty
+%type <opval> parenthesised_expression
+%type <opval> parenthesised_list
 %type <opval> subscript_index
 %type <opval> subscript_keys
-%type <opval> subscriptable_reference
+%type <opval> term_postfixed_arrow_array_element
+%type <opval> term_postfixed_arrow_array_length
+%type <opval> term_postfixed_arrow_array_postderef
+%type <opval> term_postfixed_arrow_code_postderef
+%type <opval> term_postfixed_arrow_function_invocation
+%type <opval> term_postfixed_arrow_hash_element
+%type <opval> term_postfixed_arrow_hash_postderef
+%type <opval> term_postfixed_arrow_list_slice_array
+%type <opval> term_postfixed_arrow_list_slice_hash
+%type <opval> term_postfixed_arrow_list_slice_kv_array
+%type <opval> term_postfixed_arrow_list_slice_kv_hash
+%type <opval> term_postfixed_arrow_method_invocation
+%type <opval> term_postfixed_arrow_scalar_postderef
+%type <opval> term_postfixed_arrow_typeglob_element
+%type <opval> term_postfixed_arrow_typeglob_postderef
 
 %type <ival>  startsub startanonsub startanonmethod startformsub
 
@@ -133,7 +154,7 @@
 %type <opval> condition
 %type <opval> catch_paren
 %type <opval> empty
-%type <opval> sliceme kvslice gelem
+%type <opval> gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
@@ -766,6 +787,87 @@ bare_statement_yadayada
 		}
 	;
 
+clause_arguments
+	/* Matches:
+	 * Expression representing parenthesised arguments of function / direct method call. Can be
+	 * - empty
+	 * - nonempty parenthesised expression
+	 */
+	:	empty
+	|	parenthesised_expression
+	;
+
+clause_method_direct
+		/* What can be used as a method in direct method call
+		 * Produces: OP* suitable for `build_method_invocation`
+		 */
+	:	methodname
+			{
+				$$ = newMETHOP (OP_METHOD, 0, $methodname);
+			}
+	|	PERLY_AMPERSAND
+		subname
+			{
+				$$ = newCVREF (0, $subname);
+			}
+	;
+
+implicit_semicolon
+	/* Implicit token PERLY_SEMICOLON injected by tokeniser
+	 * Token is required by LALR(1) parser; can be omitted for GLR parser
+	 */
+	:	PERLY_SEMICOLON
+	;
+
+parentheses_empty
+	/* Matches:
+	 * - ()
+	 */
+	:	PERLY_PAREN_OPEN
+		PERLY_PAREN_CLOSE
+			{
+				$$ = NULL;
+			}
+	;
+
+parentheses_non_empty
+	/* Matches:
+	 * - (expr)
+	 */
+	:	PERLY_PAREN_OPEN
+		expr
+		PERLY_PAREN_CLOSE
+			{
+				$$ = $expr;
+			}
+	;
+
+parenthesised_expression
+	/* Matches:
+	 * - ()
+	 * - (expr)
+	 * Produces:
+	 * - OP * for non-empty list
+	 * - NULL for empty list
+	 * Note:
+	 *   nonterminal doesn't use `optexpr` to avoid shift/reduce conflicts
+	 *   caused by its empty list action after PERLY_PAREN_OPEN
+	 */
+	:	parentheses_empty
+	|	parentheses_non_empty
+	;
+
+parenthesised_list
+	/* Matches optional epxression(s) surrounded by parentheses.
+	 * Provides:
+	 * - OP* - non-NULL list OP marked as `sawparens`
+	 */
+	:	parenthesised_expression    [expr]
+			{
+				$$ = sawparens ($expr ? $expr : newNULLLIST ());
+			}
+	;
+
 subscript_index
 	/* Array/list access subscript: [ selector expression ]
 	 * Value of nonterminal: selector expression
@@ -785,23 +887,242 @@ subscript_keys
 	/* { expression } */
 	:	PERLY_BRACE_OPEN
 		expr
-		PERLY_SEMICOLON
+		implicit_semicolon
 		PERLY_BRACE_CLOSE
 		{
 			$$ = $expr;
 		}
 	;
 
-subscriptable_reference
-	/* Expression that is treated by `subscript` nonterminal as a reference
-	 * Produces: reference expression
+term_postfixed_arrow_array_element
+	/* Matches:
+	 * - target->[selector]
 	 */
-	:	subscripted
-	|	term
+	:	term                        [target]
 		ARROW
-		{
-			$$ = $term;
-		}
+		subscript_index             [selector]
+			{
+				$$ = build_array_element (
+					ref (newAVREF ($target), OP_RV2AV),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_array_length
+	/* Matches:
+	 * - array->$#*
+	 */
+	:	term                        [target]
+		ARROW
+		DOLSHARP
+		PERLY_STAR
+			{
+				$$ = build_array_length ($target);
+			}
+	;
+
+term_postfixed_arrow_array_postderef
+	/* Matches:
+	 * - target->@*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_SNAIL
+		PERLY_STAR
+			{
+				$$ = newAVREF ($target);
+			}
+	;
+
+term_postfixed_arrow_code_postderef
+	/* Matches:
+	 * - target->&*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_AMPERSAND
+		PERLY_STAR
+			{
+				$$ = build_function_invocation (
+					0,
+					scalar (newCVREF ($PERLY_AMPERSAND, $target)),
+					NULL
+				);
+			}
+	;
+
+term_postfixed_arrow_function_invocation
+	/* Matches
+	 * - term->()
+	 * - term->(arguments)
+	 */
+	:	term                        [target]
+		ARROW
+		parenthesised_expression    [arguments]
+			{
+				$$ = build_function_invocation (
+					OPf_STACKED,
+					newCVREF (0, scalar ($target)),
+					$arguments
+				);
+				if (parser->expect == XBLOCK)
+					parser->expect = XOPERATOR;
+			}
+	;
+
+term_postfixed_arrow_hash_element
+	/* Matches:
+	 * - target->{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		subscript_keys              [selector]
+			{
+				$$ = build_hash_element (
+					ref (newHVREF ($target), OP_RV2HV),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_hash_postderef
+	/* Matches:
+	 * - target->%*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		PERLY_STAR
+			{
+				$$ = newHVREF($target);
+			}
+	;
+
+term_postfixed_arrow_list_slice_array
+	/* Matches:
+	 * - target->@[selector]
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_SNAIL
+		subscript_index             [selector]
+			{
+				$$ = build_list_slice_array (
+					newAVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_hash
+	/* Matches:
+	 * - target->@{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_SNAIL
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_hash (
+					newAVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_kv_array
+	/* Matches:
+	 * - target->%[selector]
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		subscript_index             [selector]
+			{
+				$$ = build_list_slice_kv_array (
+					newHVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_list_slice_kv_hash
+	/* Matches:
+	 * - target->%{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_PERCENT_SIGN
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_kv_hash (
+					newHVREF ($target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_method_invocation
+	/* Matches
+	 * - $foo->bar(list)
+	 * - $foo->bar
+	 * - $foo->&bar(list)
+	 * - $foo->&bar
+	 */
+	:	term                        [target]
+		ARROW
+		clause_method_direct        [method]
+		clause_arguments            [arguments]
+			{
+				$$ = build_method_invocation (
+					scalar ($target),
+					$method,
+					$arguments
+				);
+			}
+	;
+
+term_postfixed_arrow_scalar_postderef
+	/* Matches:
+	 * - target->$*
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_DOLLAR
+		PERLY_STAR
+			{
+				$$ = newSVREF ($target);
+			}
+	;
+
+term_postfixed_arrow_typeglob_element
+	/* Matches:
+	 * - target->*{selector}
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_STAR
+		subscript_keys              [selector]
+			{
+				$$ = build_typeglob_element (
+					newGVREF (0, $target),
+					$selector
+				);
+			}
+	;
+
+term_postfixed_arrow_typeglob_postderef
+	/* Matches:
+	 * - target->**
+	 */
+	:	term                        [target]
+		ARROW
+		PERLY_STAR
+		PERLY_STAR
+			{
+				$$ = build_typeglob ($target);
+			}
 	;
 
 /* Either a signatured 'sub' or 'method' keyword */
@@ -1338,58 +1659,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	|	/* $foo->bar(list) */
-		term                        [target]
-		ARROW
-		methodname                  [method]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newMETHOP (OP_METHOD, 0, $method),
-					$arguments
-				);
-			}
-	|	/* $foo->bar */
-		term                        [target]
-		ARROW
-		methodname                  [method]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newMETHOP (OP_METHOD, 0, $method),
-					NULL
-				);
-			}
-	|	/* $foo->&bar(list) */
-		term                        [target]
-		ARROW
-		PERLY_AMPERSAND
-		subname                     [method]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newCVREF (0, $method),
-					$arguments
-				);
-			}
-	|	/* $foo->&bar */
-		term                        [target]
-		ARROW
-		PERLY_AMPERSAND
-		subname                     [method]
-			{
-				$$ = build_method_invocation (
-					scalar ($target),
-					newCVREF (0, $method),
-					NULL
-				);
-			}
+	|	term_postfixed_arrow_method_invocation
 	|	/* new Class @args */
 		METHCALL0                   [method]
 		indirob                     [target]
@@ -1401,12 +1671,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 					$arguments
 				);
 			}
-	|	/* method $object (@args) */
-		METHCALL                    [method]
+	/* method $object (@args) */
+	|	METHCALL                    [method]
 		indirob                     [target]
-		PERLY_PAREN_OPEN
-		optexpr                     [arguments]
-		PERLY_PAREN_CLOSE
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_method_invocation (
 					$target,
@@ -1416,8 +1684,12 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($LSTOP, 0, $optlistexpr); }
-	|	FUNC PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE                 /* print (@args) */
-			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
+	/* print (@args) */
+	|	FUNC
+		parenthesised_expression    [arguments]
+			{
+				$$ = op_convert_list($FUNC, 0, $arguments);
+			}
 	|	FUNC SUBLEXSTART optexpr SUBLEXEND          /* uc($arg) from "\U..." */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	/* sub f(&@);   f { foo } ... */
@@ -1452,58 +1724,74 @@ methodname:	METHCALL0
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
-                        /* In this and all the hash accessors, PERLY_SEMICOLON is
-                         * provided by the tokeniser */
-			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
-	|	scalar[array] subscript_index[selector]          /* $array[$element] */
-			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($selector));
+subscripted
+	/* *main::{something} */
+	:	gelem                       [target]
+		subscript_keys              [selector]
+			{
+				$$ = build_typeglob_element ($target, $selector);
 			}
-	|	subscriptable_reference[array_reference] subscript_index[selector]    /* $ref->[..]; $foo{$bar}[..] */
-			{ $$ = newBINOP(OP_AELEM, 0,
-					ref(newAVREF($array_reference),OP_RV2AV),
-					scalar($selector));
+	|	term_postfixed_arrow_typeglob_element
+	/* $array[$element] */
+	|	scalar                      [target]
+		subscript_index             [selector]
+			{
+				$$ = build_array_element (
+					oopsAV ($target),
+					$selector
+				);
 			}
-	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
-			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($selector));
+	/* $ref->[..]; $foo{$bar}[..] */
+	|	subscripted                 [target]
+		subscript_index             [selector]
+			{
+				$$ = build_array_element (
+					ref (newAVREF ($target), OP_RV2AV),
+					$selector
+				);
 			}
-	|	subscriptable_reference[hash_reference] subscript_keys[selector] /* $foo->[bar]->{baz;} */
-			{ $$ = newBINOP(OP_HELEM, 0,
-					ref(newHVREF($hash_reference),OP_RV2HV),
-					jmaybe($selector)); }
-	|	/* $subref->(@args); $foo->{bar}(@args) */
-		subscriptable_reference [code_reference]
-		PERLY_PAREN_OPEN
-		expr                    [arguments]
-		PERLY_PAREN_CLOSE
+	|	term_postfixed_arrow_array_element
+	/* $foo{bar();} */
+	|	scalar                      [target]
+		subscript_keys              [selector]
+			{
+				$$ = build_hash_element (
+					oopsHV ($target),
+					$selector
+				);
+			}
+	/* $foo->[bar]->{baz;} */
+	|	subscripted                 [target]
+		subscript_keys              [selector]
+			{
+				$$ = build_hash_element (
+					ref (newHVREF ($target), OP_RV2HV),
+					$selector
+				);
+			}
+	|	term_postfixed_arrow_hash_element
+	|	term_postfixed_arrow_function_invocation
+	/* $foo->{bar}(@args) */
+	/* $foo->{bar}() */
+	|	subscripted                 [target]
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
-					newCVREF (0, scalar ($code_reference)),
+					newCVREF (0, scalar ($target)),
 					$arguments
 				);
 				if (parser->expect == XBLOCK)
 					parser->expect = XOPERATOR;
 			}
-	|	subscriptable_reference [code_reference]
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
-		/* $subref->(); $foo->{bar}() */
+	/* list slice */
+	|	parenthesised_expression    [list]
+		subscript_index             [selector]
 			{
-				$$ = build_function_invocation (
-					OPf_STACKED,
-					newCVREF (0, scalar ($code_reference)),
-					NULL
-				);
-				if (parser->expect == XBLOCK)
-					parser->expect = XOPERATOR;
+				$$ = newSLICEOP(0, $selector, $list);
 			}
-	|	PERLY_PAREN_OPEN expr[list] PERLY_PAREN_CLOSE subscript_index[selector]            /* list slice */
-			{ $$ = newSLICEOP(0, $selector, $list); }
 	|	QWLIST subscript_index[selector]            /* list literal slice */
 			{ $$ = newSLICEOP(0, $selector, $QWLIST); }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE subscript_index[selector]                 /* empty list slice! */
-			{ $$ = newSLICEOP(0, $selector, NULL); }
     ;
 
 /* Binary operators between terms */
@@ -1630,7 +1918,7 @@ termunop : PERLY_MINUS term %prec UMINUS                       /* -$x */
 anonymous
 	:	PERLY_BRACKET_OPEN optexpr PERLY_BRACKET_CLOSE
 			{ $$ = newANONLIST($optexpr); }
-	|	HASHBRACK optexpr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
+	|	HASHBRACK optexpr implicit_semicolon PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
 			{ $$ = newANONHASH($optexpr); }
 	|	KW_SUB_anon     startanonsub proto subattrlist subbody    %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
@@ -1670,12 +1958,9 @@ term[product]	:	termbinop
 			{ $$ = $myattrterm; }
 	|	KW_LOCAL term[operand]	%prec UNIOP
 			{ $$ = localize($operand,0); }
-	|	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
-			{ $$ = sawparens($expr); }
+	|	parenthesised_list              %prec PERLY_PAREN_OPEN
 	|	QWLIST
 			{ $$ = $QWLIST; }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = sawparens(newNULLLIST()); }
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	star	%prec PERLY_PAREN_OPEN
@@ -1684,50 +1969,40 @@ term[product]	:	termbinop
 			{ $$ = $hsh; }
 	|	ary 	%prec PERLY_PAREN_OPEN
 			{ $$ = $ary; }
-	|	arylen 	%prec PERLY_PAREN_OPEN                    /* $#x, $#{ something } */
-			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
+	/* $#x, $#{ something } */
+	|	arylen                                  %prec PERLY_PAREN_OPEN
+	|	term_postfixed_arrow_array_length       %prec PERLY_PAREN_OPEN
+	|	term_postfixed_arrow_typeglob_postderef %prec PERLY_PAREN_OPEN
 	|       subscripted
 			{ $$ = $subscripted; }
-	|	sliceme subscript_index[selector]                     /* array slice */
-			{ $$ = op_prepend_elem(OP_ASLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_ASLICE, 0,
-					list($selector),
-					ref($sliceme, OP_ASLICE)));
-			  if ($$ && $sliceme)
-			      $$->op_private |=
-				  $sliceme->op_private & OPpSLICEWARNING;
+	/* array slice */
+	|	ary                         [target]
+		subscript_index             [selector]
+			{
+				$$ = build_list_slice_array ($target, $selector);
 			}
-	|	kvslice subscript_index[selector]                 /* array key/value slice */
-			{ $$ = op_prepend_elem(OP_KVASLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_KVASLICE, 0,
-					list($selector),
-					ref(oopsAV($kvslice), OP_KVASLICE)));
-			  if ($$ && $kvslice)
-			      $$->op_private |=
-				  $kvslice->op_private & OPpSLICEWARNING;
+	|	term_postfixed_arrow_list_slice_array
+	|	term_postfixed_arrow_list_slice_kv_array
+	/* array key/value slice */
+	|	hsh                         [target]
+		subscript_index             [selector]
+			{
+				$$ = build_list_slice_kv_array ($target, $selector);
 			}
-	|	sliceme subscript_keys[selector]                 /* @hash{@keys} */
-			{ $$ = op_prepend_elem(OP_HSLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_HSLICE, 0,
-					list($selector),
-					ref(oopsHV($sliceme), OP_HSLICE)));
-			  if ($$ && $sliceme)
-			      $$->op_private |=
-				  $sliceme->op_private & OPpSLICEWARNING;
+	/* @hash{@keys} */
+	|	ary                         [target]
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_hash ($target, $selector);
 			}
-	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
-			{ $$ = op_prepend_elem(OP_KVHSLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_KVHSLICE, 0,
-					list($selector),
-					ref($kvslice, OP_KVHSLICE)));
-			  if ($$ && $kvslice)
-			      $$->op_private |=
-				  $kvslice->op_private & OPpSLICEWARNING;
+	|	term_postfixed_arrow_list_slice_hash
+	/* %hash{@keys} */
+	|	hsh                         [target]
+		subscript_keys              [selector]
+			{
+				$$ = build_list_slice_kv_hash ($target, $selector);
 			}
+	|	term_postfixed_arrow_list_slice_kv_hash
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
 	|	/* &foo; */
@@ -1739,22 +2014,11 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	/* &foo() or foo() */
-		amper                       [function]
-		PERLY_PAREN_OPEN
-		PERLY_PAREN_CLOSE
-			{
-				$$ = build_function_invocation (
-					OPf_STACKED,
-					scalar ($function),
-					NULL
-				);
-			}
-	|	/* &foo(@args) or foo(@args) */
-		amper                       [function]
-		PERLY_PAREN_OPEN
-		expr                        [arguments]
-		PERLY_PAREN_CLOSE
+	/* &foo() or foo() */
+	/* &foo(@args) or foo(@args) */
+	/* &foo() or foo() */
+	|	amper                       [function]
+		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
@@ -1773,25 +2037,10 @@ term[product]	:	termbinop
 					$arguments
 				);
 			}
-	|	term[operand] ARROW PERLY_DOLLAR PERLY_STAR
-			{ $$ = newSVREF($operand); }
-	|	term[operand] ARROW PERLY_SNAIL PERLY_STAR
-			{ $$ = newAVREF($operand); }
-	|	term[operand] ARROW PERLY_PERCENT_SIGN PERLY_STAR
-			{ $$ = newHVREF($operand); }
-	|	term                        [code_reference]
-		ARROW
-		PERLY_AMPERSAND
-		PERLY_STAR
-			{
-				$$ = build_function_invocation (
-					0,
-					scalar (newCVREF ($PERLY_AMPERSAND, $code_reference)),
-					NULL
-				);
-			}
-	|	term[operand] ARROW PERLY_STAR PERLY_STAR	%prec PERLY_PAREN_OPEN
-			{ $$ = newGVREF(0,$operand); }
+	|	term_postfixed_arrow_scalar_postderef
+	|	term_postfixed_arrow_array_postderef
+	|	term_postfixed_arrow_hash_postderef
+	|	term_postfixed_arrow_code_postderef
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
@@ -1829,12 +2078,18 @@ term[product]	:	termbinop
 			}
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP($FUNC0, 0); }
-	|	FUNC0 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = newOP($FUNC0, 0);}
+	|	FUNC0
+		parentheses_empty
+			{
+				$$ = newOP($FUNC0, 0);
+			}
 	|	FUNC0OP       /* Same as above, but op created in toke.c */
 			{ $$ = $FUNC0OP; }
-	|	FUNC0OP PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = $FUNC0OP; }
+	|	FUNC0OP
+		parentheses_empty
+			{
+				$$ = $FUNC0OP;
+			}
 	|	/* Sub treated as nullop */
 		FUNC0SUB                    [function]
 			{
@@ -1844,12 +2099,20 @@ term[product]	:	termbinop
 					NULL
 				);
 			}
-	|	FUNC1 PERLY_PAREN_OPEN PERLY_PAREN_CLOSE                        /* not () */
-			{ $$ = ($FUNC1 == OP_NOT)
-                          ? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
-                          : newOP($FUNC1, OPf_SPECIAL); }
-	|	FUNC1 PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE                   /* not($foo) */
-			{ $$ = newUNOP($FUNC1, 0, $expr); }
+	/* not () */
+	|	FUNC1
+		parentheses_empty
+			{
+				$$ = ($FUNC1 == OP_NOT)
+					? newUNOP($FUNC1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
+					: newOP($FUNC1, OPf_SPECIAL);
+			}
+	/* not($foo) */
+	|	FUNC1
+		parentheses_non_empty       [arguments]
+			{
+				$$ = newUNOP($FUNC1, 0, $arguments);
+			}
 	|	PMFUNC /* m//, s///, qr//, tr/// */
 			{
 			    if (   $PMFUNC->op_type != OP_TRANS
@@ -1881,11 +2144,8 @@ myattrterm
 	;
 
 /* Things that can be "my"'d */
-myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
-			{ $$ = sawparens($expr); }
-	|	PERLY_PAREN_OPEN PERLY_PAREN_CLOSE
-			{ $$ = sawparens(newNULLLIST()); }
-
+myterm
+	:	parenthesised_list              %prec PERLY_PAREN_OPEN
 	|	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = $scalar; }
 	|	hsh 	%prec PERLY_PAREN_OPEN
@@ -2013,29 +2273,19 @@ hsh	:	PERLY_PERCENT_SIGN indirob
 			}
 	;
 
-arylen	:	DOLSHARP indirob
-			{ $$ = newAVREF($indirob); }
-	|	term ARROW DOLSHARP PERLY_STAR
-			{ $$ = newAVREF($term); }
+arylen
+	:	DOLSHARP
+		indirob                     [target]
+			{
+				$$ = build_array_length ($target);
+			}
 	;
 
 star	:	PERLY_STAR indirob
-			{ $$ = newGVREF(0,$indirob); }
-	;
-
-sliceme	:	ary
-	|	term ARROW PERLY_SNAIL
-			{ $$ = newAVREF($term); }
-	;
-
-kvslice	:	hsh
-	|	term ARROW PERLY_PERCENT_SIGN
-			{ $$ = newHVREF($term); }
+			{ $$ = build_typeglob ($indirob); }
 	;
 
 gelem	:	star
-	|	term ARROW PERLY_STAR
-			{ $$ = newGVREF(0,$term); }
 	;
 
 /* Indirect objects */
