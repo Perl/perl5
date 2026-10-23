@@ -162,12 +162,6 @@ case "$osvers" in
     ;;
 esac
 
-case "$ccdlflags" in		# If passed in from command line, presume user knows best
-'')
-   cccdlflags=' '; # space, not empty, because otherwise we get -fpic
-;;
-esac
-
 # Allow the user to override ld, but modify it as necessary below
 case "$ld" in
     '') case "$cc" in
