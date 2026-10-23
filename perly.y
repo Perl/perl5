@@ -1758,12 +1758,12 @@ subscripted
 	|	term_postfixed_arrow_hash_element
 	/* $subref->(@args); $foo->{bar}(@args) */
 	/* $subref->(); $foo->{bar}() */
-	|	subscriptable_reference     [code_reference]
+	|	subscriptable_reference     [target]
 		parenthesised_expression    [arguments]
 			{
 				$$ = build_function_invocation (
 					OPf_STACKED,
-					newCVREF (0, scalar ($code_reference)),
+					newCVREF (0, scalar ($target)),
 					$arguments
 				);
 				if (parser->expect == XBLOCK)
