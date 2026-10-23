@@ -6,28 +6,25 @@ BEGIN {
 
 use strict;
 use warnings;
+use File::Find;
+use File::Spec;
 
-# Test that t/TEST and t/harness test the same files, and that all the
-# test files (.t files) listed in MANIFEST are tested by both.
-#
-# We enabled the various special tests as this simplifies our MANIFEST
-# parsing.  In theory if someone adds a new test directory this should
-# tell us if one of the files does not know about it.
-
-plan tests => 3;
+##### Tests in this group adapted from those in perl-5.45.3 and earlier #####
 
 my (%th, %tt, %all);
 $ENV{PERL_TORTURE_TEST} = 1;
 $ENV{PERL_TEST_MEMORY} = 1;
 $ENV{PERL_BENCHMARK} = 1;
 
-for my $file (`"$^X" t/harness -dumptests`) {
+my $THISPERL = "$^X -Ilib";
+
+for my $file (`$THISPERL t/harness -dumptests`) {
     chomp $file;
     $all{$file}++;
     $th{$file}++;
 }
 
-for my $file (`"$^X" t/TEST -dumptests`) {
+for my $file (`$THISPERL t/TEST -dumptests`) {
     chomp $file;
     $all{$file}++;
     delete $th{$file} or $tt{$file}++;
@@ -37,6 +34,147 @@ is(0+keys(%th), 0, "t/harness will not test anything that t/TEST does not")
     or print STDERR map { "# t/harness: $_\n" } sort keys %th;
 is(0+keys(%tt), 0, "t/TEST will not test anything that t/harness does not")
     or print STDERR map { "# t/TEST: $_\n" } sort keys %tt;
+
+my $missing = find_in_manifest_but_missing(\%all);
+is(0+keys(%$missing), 0, "Nothing in MANIFEST that we wouldn't test")
+    or print STDERR map { "# $_\n" } sort keys %$missing;
+
+%th = (); %tt = (); %all = ();
+
+##### #####
+
+# Once 'make' has been run, there should be generated test files in
+# ../dist/Devel-PPPort/t.  Find them, format their names relative to ./t/,
+# sort them, then use that list as arguments to TEST, harness and runtests.
+
+my @raw_ppport_tests = ();
+sub wanted { $_ =~ m{\.t$} and push @raw_ppport_tests, (
+    File::Spec->catfile('..', 'dist', 'Devel-PPPort', 't', $_),
+); }
+find(\&wanted, ( './dist/Devel-PPPort/t' ));
+my @ppport_tests = sort @raw_ppport_tests;
+
+TODO: {
+    todo_skip "MSWin32 problems", 4 if $^O eq "MSWin32";
+    test_via_TEST( qw| op/args.t op/bool.t ../lib/vars.t | );
+    test_via_TEST('base/cond.t', @ppport_tests);
+
+    test_via_harness( qw| op/args.t op/bool.t ../lib/vars.t | );
+    test_via_harness('base/cond.t', @ppport_tests);
+
+    test_via_runtests( qw| op/args.t op/bool.t ../lib/vars.t | );
+    test_via_runtests('base/cond.t', @ppport_tests);
+}
+
+#   ./perl -lib t/harness -dumptests
+#
+#       should dump the same number of test as:
+#
+#   ./perl -Ilib t/TEST   -dumptests
+
+for my $file (`$THISPERL t/TEST -dumptests`) {
+    chomp $file;
+    $all{$file}++;
+    $tt{$file}++;
+}
+
+for my $file (`$THISPERL t/harness -dumptests`) {
+    chomp $file;
+    $all{$file}++;
+    $th{$file}++;
+}
+
+cmp_ok(scalar keys %tt, '==', scalar keys %th,
+    "Count of test files found by t/TEST matches count of test files found by t/harness");
+
+my (@missing_from_th, @missing_from_tt);
+for my $k (keys %th) {
+    unless ($tt{$k}) {
+        push @missing_from_tt, $k;
+    }
+}
+is(scalar @missing_from_th, 0,
+    "No files found by t/TEST missing from t/harness");
+
+for my $k (keys %tt) {
+    unless ($th{$k}) {
+        push @missing_from_th, $k;
+    }
+}
+is(scalar @missing_from_tt, 0,
+    "No files found by t/harness missing from t/TEST");
+
+done_testing();
+
+##### SUBROUTINES #####
+
+sub test_via_TEST {
+    my @these_tests = @_;
+    my $test_lookup = get_TEST_reporting_names(@these_tests);
+
+    my @output = `$THISPERL t/TEST @these_tests`;
+    for my $l (@output) {
+        chomp $l;
+        next unless $l =~ m{^t/};
+        my $root = (split /\s+/, $l)[0];
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via t/TEST");
+    }
+}
+
+sub get_TEST_reporting_names {
+    my @these_tests = @_;
+    my $test_lookup = {};
+    for my $arg (@these_tests) {
+        my ($stem) = $arg =~ m{^(.*)\.t$};
+        my $startdir = 't';
+        my $lookup = File::Spec->catfile($startdir, $stem);
+        $test_lookup->{$lookup} = $arg;
+    }
+    return $test_lookup;
+}
+
+sub test_via_harness {
+    my @these_tests = @_;
+    my $test_lookup = get_harness_reporting_names(@these_tests);
+
+    my @output = `$THISPERL t/harness @these_tests`;
+    for my $l (@output) {
+        chomp $l;
+        my $root = (split /\s+/, $l)[0] // '';
+        next unless $root =~ m/\.t$/;
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via t/harness");
+    }
+}
+
+sub get_harness_reporting_names {
+    my @these_tests = @_;
+    my $test_lookup = {};
+    for my $arg (@these_tests) {
+        $test_lookup->{$arg} = $arg;
+    }
+    return $test_lookup;
+}
+
+sub test_via_runtests {
+    my @these_tests = @_;
+    # ./runtests choose produces output with test names formatted in
+    # same way as t/TEST
+    my $test_lookup = get_TEST_reporting_names(@these_tests);
+
+    ok(-f './runtests', "runtests is found in top level directory");
+    ok(-e './runtests', "runtests is executable");
+    my $TEST_FILES = join ' ' => @these_tests;
+    my @output = `TEST_FILES="$TEST_FILES" ./runtests choose`;
+    for my $l (@output) {
+        chomp $l;
+        next unless $l =~ m{^t/};
+        my $root = (split /\s+/, $l)[0];
+        ok($test_lookup->{$root},
+            "$test_lookup->{$root} was tested via ./runtests");
+    }
+}
 
 sub get_extensions {
     my %extensions;
@@ -67,6 +205,7 @@ sub get_extensions {
 }
 
 sub find_in_manifest_but_missing {
+    my $allref = shift;
     my $extension = get_extensions();
     my %missing;
     my $is_os2 = $^O eq "os2";
@@ -84,11 +223,9 @@ sub find_in_manifest_but_missing {
             my $path = $1;
             next unless $extension->{$path};
         }
-        $missing{$file}++ unless $all{$file};
+        $missing{$file}++ unless $allref->{$file};
     }
     close $ifh;
     return \%missing;
 }
-my $missing = find_in_manifest_but_missing();
-is(0+keys(%$missing), 0, "Nothing in manifest that we wouldn't test")
-    or print STDERR map { "# $_\n" } sort keys %$missing;
+

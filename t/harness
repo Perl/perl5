@@ -65,6 +65,7 @@ $::do_nothing = $::do_nothing = 1;
 require './TEST';
 our $Valgrind_Log;
 
+# The -v, -dumptests, and -torture switches are also found in t/TEST
 my $Verbose = 0;
 $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 
@@ -87,7 +88,7 @@ if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
 # which live dual lives on CPAN.
 $ENV{PERL_CORE} = 1;
 
-my (@tests, @re, @anti_re);
+my (@re, @anti_re);
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
@@ -100,7 +101,8 @@ while ($ARGV[0] && $ARGV[0]=~/^-?-(n?)re/) {
         while (@ARGV and $ARGV[0] !~ /^-/) {
             push @$ary, shift @ARGV;
         }
-    } else {
+    }
+    else {
         push @$ary, (split/=/,shift @ARGV)[1];
     }
 }
@@ -124,8 +126,12 @@ if ($ENV{HARNESS_OPTIONS}) {
 
 $jobs ||= 1;
 
-my %total_time;
 sub _compute_tests_and_ordering($) {
+    my %total_time;
+    my sub sort_by_execution_order {
+        # Directories, ordered by total time descending then name ascending
+        return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
+    }
     my @tests = $_[0]->@*;
 
     my %dir;
@@ -306,11 +312,7 @@ sub _compute_tests_and_ordering($) {
     return \@seq;
 }
 
-sub sort_by_execution_order {
-    # Directories, ordered by total time descending then name ascending
-    return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
-}
-
+my @tests = ();
 if (@ARGV) {
     # If you want these run in speed order, just use prove
 
@@ -318,10 +320,12 @@ if (@ARGV) {
     # because arguments might be passed in via the TEST_ARGS
     # env var where they wont be expanded by the shell.
     @tests = map(glob($_),@ARGV);
+    # After this point we are no longer manipulating @ARGV.
     # This is a hack to force config_heavy.pl to be loaded, before the
     # prep work for running a test changes directory.
     1 if $Config{d_fork};
-} else {
+}
+else {
     # Ideally we'd get somewhere close to Tux's Oslo rules
     # my $rules = {
     #     par => [
@@ -360,12 +364,20 @@ if (@ARGV) {
 
         @last = map { glob ("$_/*.t") } @last;
 
+        # _tests_from_manifest() is defined in t/TEST
         my ($non_ext, @ext_from_manifest)=
             _tests_from_manifest($Config{extensions}, $Config{known_extensions}, "all");
         push @last, @ext_from_manifest;
 
         push @seq, _compute_tests_and_ordering(\@last)->@*;
         push @tests, @last;
+
+        # _just_find_tests() is defined in t/TEST.
+        # If we're not passing specific tests on the command line, then we do
+        # not locate generated tests or run them.
+        my @generated_tests = ();
+        push @generated_tests, _just_find_tests('../dist/Devel-PPPort');
+        push @tests, @generated_tests;
 
         $rules = { seq => \@seq };
 
@@ -392,7 +404,8 @@ if (@re or @anti_re) {
             foreach my $re (@re) {
                 $keep = 1 if $test=~/$re/;
             }
-        } else {
+        }
+        else {
             $keep = 1;
         }
         if (@anti_re) {
@@ -404,7 +417,7 @@ if (@re or @anti_re) {
             push @keepers, $test;
         }
     }
-    @tests= @keepers;
+    @tests = @keepers;
 }
 
 # Allow e.g., ./perl t/harness t/op/lc.t
@@ -415,8 +428,16 @@ for (@tests) {
     }
 }
 
+# dump_tests() is defined in t/TEST
+# Assuming that no individual tests have been passed on the command-line as
+# arguments to t/harness, the number of tests dumped below via
+#   ./perl -lib t/harness -dumptests
+# should be equal to the number of tests" dumped via
+#   ./perl -Ilib t/TEST   -dumptests
+
 dump_tests(\@tests) if $dump_tests;
 
+# filter_taint_tests() is defined in t/TEST
 filter_taint_tests(\@tests);
 
 my %options;
