@@ -430,23 +430,25 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
-/* Make sure the buffer pointed to by *buf is at least as large as 'min_len';
+/* Make sure the buffer pointed to by *buf is at least as large as 'min_len'.
+ * Each element of **buf is of type 'type'.
+ *
  * *buf_size is the size of 'buf' upon entry; it will be updated to the new
  * size on exit.  'buf_size' being NULL is to be used when this is a single
  * use buffer, which will shortly be freed by the caller. */
-#define set_save_buffer_min_size(min_len, buf, buf_size)                    \
+#define set_save_buffer_min_size(min_len, buf, buf_size, type)              \
     STMT_START {                                                            \
         ASSERT_IS_PTR(buf); ASSERT_IS_PTR(*buf); ASSERT_IS_PTR(buf_size);   \
                                                                             \
         if (buf_size == NULL) {                                             \
-            Newx(*buf, min_len, char);                                      \
+            Newx(*buf, min_len, type);                                      \
         }                                                                   \
         else if (*buf_size == 0) {                                          \
-            Newx(*buf, min_len, char);                                      \
+            Newx(*buf, min_len, type);                                      \
             *buf_size = min_len;                                            \
         }                                                                   \
         else if (min_len > *buf_size) {                                     \
-            Renew(*buf, min_len, char),                                     \
+            Renew(*buf, min_len, type),                                     \
             *buf_size = min_len;                                            \
         }                                                                   \
     } STMT_END
@@ -3600,7 +3602,8 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
         if (returning == WANT_PL_setlocale_buf) {
             set_save_buffer_min_size(total_len,
                                      &PL_setlocale_buf,
-                                     &PL_setlocale_bufsize);
+                                     &PL_setlocale_bufsize,
+                                     char);
             constructed = PL_setlocale_buf;
         }
         else {  /* Otherwise we need new memory to hold the calculated value. */
@@ -5585,7 +5588,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
     }
 
     Size_t string_size = strlen(string) + 1;
-    set_save_buffer_min_size(string_size, buf, buf_size);
+    set_save_buffer_min_size(string_size, buf, buf_size, char);
 
 #  ifdef DEBUGGING
 
