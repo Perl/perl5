@@ -11806,7 +11806,7 @@ static void
 S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 {
     regmatch_info_aux *aux = (regmatch_info_aux *) arg;
-    regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
+    regmatch_info_aux_eval *eval_state;
     regexp_internal *rexi = aux->rexi;
     regmatch_slab *s;
 
@@ -11833,7 +11833,8 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
             Safefree(slc);
     }
 
-    if (eval_state) {
+    eval_state =  aux->info_aux_eval;
+    if (UNLIKELY(eval_state)) {
 
         /* undo the effects of S_setup_eval_state() */
 
