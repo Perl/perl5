@@ -815,6 +815,7 @@ typedef struct {
     struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
     struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
     struct slc_cache_item *slc; /* current super-liner cache array */
+    struct regexp *offs_spare_prog; /* prog is using the offs_spare */
 } regmatch_info_aux;
 
 
