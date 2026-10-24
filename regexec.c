@@ -3777,18 +3777,6 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
     }
 }
 
-
-
-
-static void
-S_clear_offs_spare(pTHX_ void *arg)
-{
-    PERL_ARGS_ASSERT_CLEAR_OFFS_SPARE;
-
-    regexp *prog = (regexp *)arg;
-    prog->offs_spare_used = FALSE;
-}
-
 /*
  - regexec_flags - match a regexp against a string
  */
@@ -4033,6 +4021,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         reginfo->info_aux->old_regmatch_state = old_regmatch_state;
         reginfo->info_aux->old_regmatch_slab  = old_regmatch_slab;
         reginfo->info_aux->rexi = progi;
+        reginfo->info_aux->offs_spare_prog = NULL;
 
         SAVEDESTRUCTOR_X(S_cleanup_regmatch_info_aux, reginfo->info_aux);
 
@@ -4090,9 +4079,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
              * does not do a calloc+free in every loop iteration.*/
             regexp_paren_pair * const old_offs_spare = prog->offs_spare;
             prog->offs_spare = swap; /* Stash the successful match offs */
+
+            /* S_cleanup_regmatch_info_aux() later clears this */
+            reginfo->info_aux->offs_spare_prog = prog;
+
             prog->offs_spare_used = TRUE;
             offs_spare_used = TRUE;
-            SAVEDESTRUCTOR_X(S_clear_offs_spare, prog);
 
             if (old_offs_spare) {
                 /* Nice! There is already a buffer ready to use. */
@@ -11820,6 +11812,10 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 
     assert(rexi->depth > 0);
     rexi->depth--;
+
+    /* the offs_spare allocation is available for reuse */
+    if (aux->offs_spare_prog)
+        aux->offs_spare_prog->offs_spare_used = FALSE;
 
     /* free any allocated super-linear caches */
     if (aux->slc) {
