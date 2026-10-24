@@ -13022,13 +13022,6 @@ S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size)
        STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-static void
-S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size)
-        Perl_attribute_nonnull_aTHX;
-#   define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE \
-       STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_STATIC_NO_RET void
 S_setlocale_failure_panic_via_i(pTHX_ const locale_category_index cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)
         Perl_attribute_nonnull_aTHX

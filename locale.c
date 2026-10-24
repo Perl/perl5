@@ -430,6 +430,27 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
+/* Make sure the buffer pointed to by *buf is at least as large as 'min_len';
+ * *buf_size is the size of 'buf' upon entry; it will be updated to the new
+ * size on exit.  'buf_size' being NULL is to be used when this is a single
+ * use buffer, which will shortly be freed by the caller. */
+#define set_save_buffer_min_size(min_len, buf, buf_size)                    \
+    STMT_START {                                                            \
+        ASSERT_IS_PTR(buf); ASSERT_IS_PTR(*buf); ASSERT_IS_PTR(buf_size);   \
+                                                                            \
+        if (buf_size == NULL) {                                             \
+            Newx(*buf, min_len, char);                                      \
+        }                                                                   \
+        else if (*buf_size == 0) {                                          \
+            Newx(*buf, min_len, char);                                      \
+            *buf_size = min_len;                                            \
+        }                                                                   \
+        else if (min_len > *buf_size) {                                     \
+            Renew(*buf, min_len, char),                                     \
+            *buf_size = min_len;                                            \
+        }                                                                   \
+    } STMT_END
+
 /* Some platforms require LC_CTYPE to be congruent with the category we are
  * looking for.  XXX This still presumes that we have to match COLLATE and
  * CTYPE even on platforms that apparently handle this. */
@@ -5527,31 +5548,6 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 }
 
 #  endif
-
-static void
-S_set_save_buffer_min_size(pTHX_ Size_t min_len,
-                                 char **buf,
-                                 Size_t * buf_cursize)
-{
-    PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE;
-
-    /* Make sure the buffer pointed to by *buf is at least as large 'min_len';
-     * *buf_cursize is the size of 'buf' upon entry; it will be updated to the
-     * new size on exit.  'buf_cursize' being NULL is to be used when this is a
-     * single use buffer, which will shortly be freed by the caller. */
-
-    if (buf_cursize == NULL) {
-        Newx(*buf, min_len, char);
-    }
-    else if (*buf_cursize == 0) {
-        Newx(*buf, min_len, char);
-        *buf_cursize = min_len;
-    }
-    else if (min_len > *buf_cursize) {
-        Renew(*buf, min_len, char);
-        *buf_cursize = min_len;
-    }
-}
 
 static const char *
 S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
