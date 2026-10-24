@@ -294,7 +294,8 @@ If enabled by the C<try> feature, the following may also be used
     try BLOCK catch (VAR) BLOCK
     try BLOCK catch (VAR) BLOCK finally BLOCK
 
-The experimental C<given> statement is I<not automatically enabled>; see
+The experimental C<given> statement is I<not automatically enabled 
+and in fact is schedued for removal, see below.>; see
 L</"Switch Statements"> below for how to do so, and the attendant caveats.
 
 Unlike in C and Pascal, in Perl these are all defined in terms of BLOCKs,
