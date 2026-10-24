@@ -11819,15 +11819,19 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 
     /* free any allocated super-linear caches */
     if (aux->slc) {
+        struct slc_cache_item * const slc = aux->slc;
+        const U8 slc_count = rexi->slc_whilem_seen;
         U8 i;
-        for (i = 0; i < rexi->slc_whilem_seen; i++) {
-            Safefree(aux->slc[i].slc_bitmap);
-            aux->slc[i].slc_bitmap = NULL;
+        for (i = 0; i < slc_count; i++) {
+            if (slc[i].slc_bitmap) {
+                Safefree(slc[i].slc_bitmap);
+                slc[i].slc_bitmap = NULL;
+            }
         }
+        /* free the cache array too if it was used during recursion */
+        if (rexi->depth)
+            Safefree(slc);
     }
-    /* free the cache array too if it was used during recursion */
-    if (rexi->depth)
-            Safefree(aux->slc);
 
     if (eval_state) {
 
