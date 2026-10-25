@@ -1,5 +1,5 @@
 package ok;
-our $VERSION = '1.302225';
+our $VERSION = '1.302226';
 
 use strict;
 use Test::More ();
@@ -37,7 +37,18 @@ and they will be executed at C<BEGIN> time.
 
 Please see L<Test::use::ok> for the full description.
 
-=head1 CC0 1.0 Universal
+=head1 COPYRIGHT AND LICENSE
+
+Originally written by Audrey Tang (唐鳳) and released under CC0 1.0 Universal.
+With her permission (L<https://github.com/Test-More/test-more/issues/1092>),
+it is now distributed under the same terms as Perl itself.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See L<https://dev.perl.org/licenses/>
+
+=head2 Original license: CC0 1.0 Universal
 
 To the extent possible under law, 唐鳳 has waived all copyright and related
 or neighboring rights to L<Test::use::ok>.

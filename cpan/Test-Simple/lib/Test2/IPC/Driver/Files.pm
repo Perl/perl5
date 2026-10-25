@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302225';
+our $VERSION = '1.302226';
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
@@ -84,8 +84,8 @@ sub add_hub {
         if -e $hfile;
 
     open(my $fh, '>', $hfile) or $self->abort_trace("Could not create hub file '$hid': $!");
-    print $fh "$$\n" . get_tid() . "\n";
-    close($fh);
+    print $fh "$$\n" . get_tid() . "\n" or $self->abort_trace("Could not write hub file '$hid': $!");
+    close($fh) or $self->abort_trace("Could not write hub file '$hid': $!");
 }
 
 sub drop_hub {
@@ -101,6 +101,9 @@ sub drop_hub {
     open(my $fh, '<', $hfile) or $self->abort_trace("Could not open hub file '$hid': $!");
     my ($pid, $tid) = <$fh>;
     close($fh);
+
+    $self->abort_trace("File for hub '$hid' is empty or truncated, it was not fully written when the hub was created")
+        unless defined($pid) && defined($tid);
 
     $self->abort_trace("A hub file can only be closed by the process that started it\nExpected $pid, got $$")
         unless $pid == $$;

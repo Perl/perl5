@@ -2778,6 +2778,7 @@ cpan/Test-Simple/t/AI/modules/Compare/Base.t					Test-Simple
 cpan/Test-Simple/t/AI/regression/1073-done-testing-return.t			Test-Simple
 cpan/Test-Simple/t/AI/regression/1075-subtest-exception.t			Test-Simple
 cpan/Test-Simple/t/AI/regression/1086-all-items-with-end.t			Test-Simple
+cpan/Test-Simple/t/AI/Test2/modules/IPC/Driver/Files-hub-file.t			Test-Simple
 cpan/Test-Simple/t/behavior/async_trace.t					Test-Simple
 cpan/Test-Simple/t/behavior/filtering.t						Test-Simple
 cpan/Test-Simple/t/behavior/Mocking.t						Test-Simple

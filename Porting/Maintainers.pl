@@ -1136,8 +1136,8 @@ our %Modules = (
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302225.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Sat Sep  5 07:50:20 2026',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302226.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Oct 24 20:40:40 2026',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},

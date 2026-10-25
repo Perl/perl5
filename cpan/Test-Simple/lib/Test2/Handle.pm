@@ -2,7 +2,7 @@ package Test2::Handle;
 use strict;
 use warnings;
 
-our $VERSION = '1.302225';
+our $VERSION = '1.302226';
 
 require Carp;
 require Test2::Util;
