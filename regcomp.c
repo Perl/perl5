@@ -2343,6 +2343,19 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (RExC_rx->minlen < minlen)
         RExC_rx->minlen = minlen;
 
+    /* Pre-compute the number of characters matched by a start class.
+     * For (potential) use by Perl_re_intuit_start. */
+    if (RExC_rxi->regstclass
+        && REGNODE_TYPE(OP(RExC_rxi->regstclass)) == EXACT) {
+        const regnode * const stclass = RExC_rxi->regstclass;
+        const U8 * const str = (U8 *) STRING(stclass);
+        RExC_rxi->regstclass_len = RExC_utf8
+            ? (U8) utf8_distance(str + STR_LEN(stclass), str)
+            : (U8) STR_LEN(stclass);
+    } else {
+        RExC_rxi->regstclass_len = 1;
+    }
+
     if (RExC_seen & REG_RECURSE_SEEN ) {
         RExC_rx->intflags |= PREGf_RECURSE_SEEN;
         Newx(RExC_rx->recurse_locinput, RExC_rx->nparens + 1, char *);
@@ -14300,6 +14313,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 
 
     reti->name_list_idx = ri->name_list_idx;
+    reti->regstclass_len = ri->regstclass_len;
     reti->slc_whilem_seen = ri->slc_whilem_seen;
     reti->slc             = NULL; /* will be alloced if/when needed */
     reti->depth           = 0;

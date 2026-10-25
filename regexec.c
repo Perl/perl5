@@ -1673,14 +1673,8 @@ Perl_re_intuit_start(pTHX_
      * leave it to regmatch itself) */
 
     if (progi->regstclass && REGNODE_TYPE(OP(progi->regstclass))!=TRIE) {
-        const U8* const str = (U8*)STRING(progi->regstclass);
-
-        /* XXX this value could be pre-computed */
-        const SSize_t cl_l = (REGNODE_TYPE(OP(progi->regstclass)) == EXACT
-                    ?  (reginfo->is_utf8_pat
-                        ? (SSize_t)utf8_distance(str + STR_LEN(progi->regstclass), str)
-                        : (SSize_t)STR_LEN(progi->regstclass))
-                    : 1);
+        /* number of characters the start class matches */
+        const SSize_t cl_l = (SSize_t) progi->regstclass_len;
         char * endpos;
         char *s;
         /* latest pos that a matching float substr constrains rx start to */
