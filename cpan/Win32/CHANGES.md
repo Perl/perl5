@@ -1,5 +1,11 @@
 # Revision history for the Perl extension Win32
 
+## 0.65 [2026-10-20]
+
+- fix Win32::SetChildShowWindow() on Cygwin overwriting a value on the
+  caller's stack, such as the list element before the call or a foreach
+  loop variable [#67](https://github.com/perl-libwin32/win32/pull/67)
+
 ## 0.64 [2026-08-11]
 
 - ship the CPAN tarball with LF line endings again; releases 0.60
