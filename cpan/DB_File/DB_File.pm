@@ -1,6 +1,6 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB
 #
-# Written by Paul Marquess (pmqs@cpan.org)
+# Written by Paul Marquess (pmqs@outlook.com)
 #
 #     Copyright (c) 1995-2026 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -165,7 +165,7 @@ use Carp;
 # Module not thread safe, so don't clone
 sub CLONE_SKIP { 1 }
 
-$VERSION = "1.860" ;
+$VERSION = "1.861" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
@@ -2343,6 +2343,6 @@ L<perldbmfilter>, L<DBM_Filter>
 =head1 AUTHOR
 
 The DB_File interface was written by Paul Marquess
-E<lt>pmqs@cpan.orgE<gt>.
+E<lt>pmqs@outlook.comE<gt>.
 
 =cut

@@ -359,8 +359,8 @@ our %Modules = (
     },
 
     'DB_File' => {
-        'DISTRIBUTION' => 'PMQS/DB_File-1.860.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Feb 11 13:27:52 2026',
+        'DISTRIBUTION' => 'PMQS/DB_File-1.861.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Oct 24 20:50:43 2026',
         'FILES'        => q[cpan/DB_File],
         'EXCLUDED'     => [
             qr{^patches/},

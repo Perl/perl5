@@ -2,7 +2,7 @@
 
  version.c -- Perl 5 interface to Berkeley DB
 
- written by Paul Marquess <pmqs@cpan.org>
+ written by Paul Marquess <pmqs@outlook.com>
  last modified 2nd Jan 2002
  version 1.802
 

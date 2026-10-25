@@ -2,7 +2,7 @@
 
  DB_File.xs -- Perl 5 interface to Berkeley DB
 
- Written by Paul Marquess <pmqs@cpan.org>
+ Written by Paul Marquess <pmqs@outlook.com>
 
  All comments/suggestions/problems are welcome
 

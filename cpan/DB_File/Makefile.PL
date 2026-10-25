@@ -61,7 +61,7 @@ WriteMakefile(
     (
     $] >= 5.005
         ? (ABSTRACT_FROM => 'DB_File.pm',
-            AUTHOR       => 'Paul Marquess <pmqs@cpan.org>')
+            AUTHOR       => 'Paul Marquess <pmqs@outlook.com>')
         : ()
     ),
 
