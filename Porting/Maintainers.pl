@@ -539,7 +539,7 @@ our %Modules = (
     },
 
     'ExtUtils::ParseXS' => {
-        'DISTRIBUTION' => 'LEONT/ExtUtils-ParseXS-3.63.tar.gz',
+        'DISTRIBUTION' => 'LEONT/ExtUtils-ParseXS-3.65.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
     },
 
@@ -882,7 +882,7 @@ our %Modules = (
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.76.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.78.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
             qr{^\.[awc]},
