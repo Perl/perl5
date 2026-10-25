@@ -97,6 +97,6 @@ is keys %contacted, 2,
   '2 servers did not acknowledge our ping'
   or diag sort keys %contacted;
 delete $contacted{$_}
-    foreach ("$fail_ip:80","$fail_ip:443", 'www.about.com:443');
+    foreach ("$fail_ip:80","$fail_ip:443", 'www.duckduckgo.com:443');
 is keys %contacted, 0,
     'The servers that did not acknowledge our ping were correct';
