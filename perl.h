@@ -8298,7 +8298,7 @@ typedef struct am_table_short AMTS;
  * It remains undefined on machines without that behavior, to catch mistakes in
  * using it wrongly. */
 #if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-#  ifndef USE_THREADS
+#  if ! defined(USE_THREADS) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 #    define WSETLOCALE_LOCK    NOOP
 #    define WSETLOCALE_UNLOCK  NOOP
 #  else

@@ -5148,13 +5148,13 @@ S	|const char *|less_dicey_setlocale_r				\
 				|NULLOK const char *locale
 #   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-ST	|wchar_t *|Win_byte_string_to_wstring				\
+S	|const wchar_t *|Win_byte_string_to_wstring			\
 				|const UINT code_page			\
 				|NULLOK const char *byte_string
 S	|const char *|win32_setlocale					\
 				|int category				\
 				|NULLOK const char *locale
-ST	|char * |Win_wstring_to_byte_string				\
+S	|const char *|Win_wstring_to_byte_string			\
 				|const UINT code_page			\
 				|NULLOK const wchar_t *wstring
 S	|const char *|wrap_wsetlocale					\
@@ -6924,7 +6924,7 @@ Tdp	|bool	|quadmath_format_valid					\
 #endif
 #if defined(USE_THREADS)
 Apx	|void	|thread_locale_init
-Apx	|void	|thread_locale_term
+Aptx	|void	|thread_locale_term
 #endif
 #if defined(VMS) || defined(WIN32)
 Cp	|int	|do_aspawn	|NULLOK SV *really			\
@@ -6935,8 +6935,6 @@ Cp	|int	|do_spawn_nowait|NN char *cmd
 #endif
 #if defined(WIN32)
 CRTdp	|void * |get_context
-p	|bool	|get_win32_message_utf8ness				\
-				|NULLOK const char *string
 Teor	|void	|win32_croak_not_implemented				\
 				|NN const char *fname
 #else
@@ -6944,6 +6942,10 @@ p	|bool	|do_exec3	|NN const char *incmd			\
 				|int fd 				\
 				|int do_report
 CRTdip	|void * |get_context
+#endif
+#if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
+p	|bool	|get_win32_message_utf8ness				\
+				|NULLOK const char *string
 #endif
 
 : ex: set ts=8 sts=4 sw=4 noet:

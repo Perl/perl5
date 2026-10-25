@@ -1478,8 +1478,8 @@
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #       endif
 #       if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-#         define Win_byte_string_to_wstring     S_Win_byte_string_to_wstring
-#         define Win_wstring_to_byte_string     S_Win_wstring_to_byte_string
+#         define Win_byte_string_to_wstring(a,b) S_Win_byte_string_to_wstring(aTHX_ a,b)
+#         define Win_wstring_to_byte_string(a,b) S_Win_wstring_to_byte_string(aTHX_ a,b)
 #         define win32_setlocale(a,b)           S_win32_setlocale(aTHX_ a,b)
 #         define wrap_wsetlocale(a,b)           S_wrap_wsetlocale(aTHX_ a,b)
 #       endif
@@ -1888,10 +1888,11 @@
 #   else
 #     define Perl_sv_2num(a)                    sv_2num(a)
 #   endif
-#   if defined(WIN32)
-#     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
-#   else
+#   if !defined(WIN32)
 #     define do_exec3(a,b,c)                    Perl_do_exec3(aTHX_ a,b,c)
+#   endif
+#   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
+#     define get_win32_message_utf8ness(a)      Perl_get_win32_message_utf8ness(aTHX_ a)
 #   endif
 # else /* if !defined(PERL_CORE) */
 /* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to

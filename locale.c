@@ -468,6 +468,13 @@ static int debug_initialization = 0;
 #  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)
 #endif
 
+ /* The main errno that gets used is this one, on platforms that support it */
+#ifdef EINVAL
+#  define SET_EINVAL  SETERRNO(EINVAL, LIB_INVARG)
+#else
+#  define SET_EINVAL
+#endif
+
 #ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
    /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
@@ -486,15 +493,72 @@ static int debug_initialization = 0;
 #  undef CURRENCY_SYMBOL
 #  define CP_UTF8 -1
 #  undef _configthreadlocale
-#  define _configthreadlocale(arg) NOOP
+#  define _configthreadlocale(arg) 1
+#  define _DISABLE_PER_THREAD_LOCALE 0
+#  define _ENABLE_PER_THREAD_LOCALE  1
+#  define ERROR_INSUFFICIENT_BUFFER 10001
+#  define GetLastError()  errno
 
-#  define MultiByteToWideChar(cp, flags, byte_string, m1, wstring, req_size) \
-                    (PERL_UNUSED_ARG(cp),                                    \
-                     mbsrtowcs(wstring, &(byte_string), req_size, NULL) + 1)
-#  define WideCharToMultiByte(cp, flags, wstring, m1, byte_string,          \
-                              req_size, default_char, found_default_char)   \
-                    (PERL_UNUSED_ARG(cp),                                   \
-                     wcsrtombs(byte_string, &(wstring), req_size, NULL) + 1)
+static int
+MultiByteToWideChar(UV cp, U32 flags,
+                    const char * bstring, int bstring_len,
+                    wchar_t * wstring, int wstring_size)
+{
+    PERL_UNUSED_ARG(cp);
+    assert(flags == 0);
+    assert(bstring_len == -1);
+
+    /* Windows uses the dest length being 0 to indicate to return the needed
+     * length; instead mbstowcs uses the destination buffer being NULL. */
+    wchar_t * dest = (wstring_size == 0) ? NULL : wstring;
+
+    int converted_count = (int) mbstowcs(dest, bstring, wstring_size);
+    if (converted_count == -1) {
+        errno = EINVAL;
+        return 0;
+    }
+    
+    if (dest == NULL || wstring_size >= converted_count + 1) {
+        SETERRNO(0, 0);
+        return converted_count + 1;
+    }
+
+    SETERRNO(ERROR_INSUFFICIENT_BUFFER, ERROR_INSUFFICIENT_BUFFER);
+    return 0;
+}
+
+static int
+WideCharToMultiByte(UV cp, U32 flags,
+                    const wchar_t * wstring, int wstring_len,
+                    char * bstring, int bstring_size,
+                    const char * defaultchar,
+                    const bool * use_defaultchar)
+{
+    
+    PERL_UNUSED_ARG(cp);
+    assert(flags == 0);
+    assert(wstring_len == -1);
+    PERL_UNUSED_ARG(defaultchar);
+    PERL_UNUSED_ARG(use_defaultchar);
+
+    /* Windows uses the dest length being 0 to indicate to return the needed
+     * length; instead wcstombs uses the destination buffer being NULL. */
+    char * dest = (bstring_size == 0) ? NULL : bstring;
+
+    int converted_count = (int) wcstombs(dest, wstring, bstring_size);
+    if (converted_count == -1) {
+        SET_EINVAL;
+        return 0;
+    }
+    
+    if (dest == NULL || bstring_size >= converted_count + 1) {
+        SETERRNO(0, 0);
+        return converted_count + 1;
+    }
+
+    SETERRNO(ERROR_INSUFFICIENT_BUFFER, ERROR_INSUFFICIENT_BUFFER);
+    return 0;
+}
 
 #  ifdef USE_LOCALE
 
@@ -516,25 +580,56 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
      * to plain 'char*', calls plain setlocale(), and converts the result back
      * to 'wchar_t*' */
 
+    dTHX;
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "wsetlocale entry: category=%d, locale=%ls, bstring=%s, wstring=%ls\n", category, wlocale, PL_win_bstring, PL_win_wstring));
     const char * byte_locale = NULL;
     if (wlocale) {
+        const char * copy = savepv(PL_win_bstring);
+
         byte_locale = Win_wstring_to_byte_string(CP_UTF8, wlocale);
+
+        if (copy) {
+            my_strlcpy(PL_win_bstring, copy, PL_win_bstring_size);
+            Safefree(copy);
+        }
+        else {
+            PL_win_bstring = NULL;
+            PL_win_bstring_size = 0;
+        }
     }
 
     const char * byte_result = setlocale(category, byte_locale);
-    Safefree(byte_locale);
     if (byte_result == NULL) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "wsetlocale exit: returning failure, bstring=%s, wstring=%ls\n", PL_win_bstring, PL_win_wstring));
         return NULL;
+    }
+
+    wchar_t *copy = NULL;
+    if (PL_win_wstring) {
+        const STRLEN pvlen = wcslen(PL_win_wstring)+1;
+        Newx(copy, pvlen, wchar_t);
+        wcscpy(copy, PL_win_wstring);
     }
 
     const wchar_t * wresult = Win_byte_string_to_wstring(CP_UTF8, byte_result);
 
+    if (copy) {
+        wcscpy(PL_win_wstring, copy);
+        Safefree(copy);
+    }
+    else {
+        //assert(0);
+        PL_win_wstring = NULL;
+        PL_win_wstring_size = 0;
+    }
+
     if (! wresult) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "wsetlocale exit: returning failure, bstring=%s, wstring=%ls\n", PL_win_bstring, PL_win_wstring));
         return NULL;
     }
 
     /* Emulate a global static memory return from wsetlocale().  This currently
-     * leaks at process end; would require changing LOCALE_TERM to fix that */
+     * XXX appears to be fixed; leaks at process end; would require changing LOCALE_TERM to fix that */
     Size_t string_size = wcslen(wresult) + 1;
 
     if (wsetlocale_buf_size == 0) {
@@ -543,7 +638,6 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
 
 #  ifdef MULTIPLICITY
 
-        dTHX;
         wsetlocale_buf_aTHX = aTHX;
 
 #  endif
@@ -555,8 +649,8 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
     }
 
     Copy(wresult, wsetlocale_buf, string_size, wchar_t);
-    Safefree(wresult);
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "wsetlocale exit: returning=%s, bstring=%s, wstring=%ls\n", wsetlocale_buf, PL_win_bstring, PL_win_wstring));
     return wsetlocale_buf;
 }
 
@@ -678,13 +772,6 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
 #endif
 #ifdef I_WCTYPE
 #  include <wctype.h>
-#endif
-
- /* The main errno that gets used is this one, on platforms that support it */
-#ifdef EINVAL
-#  define SET_EINVAL  SETERRNO(EINVAL, LIB_INVARG)
-#else
-#  define SET_EINVAL
 #endif
 
 /* This is a starting guess as to when this is true.  It definititely isn't
@@ -4746,57 +4833,114 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
 
 #  ifdef WIN32
 
-static wchar_t *
-S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
+static const wchar_t *
+S_Win_byte_string_to_wstring(pTHX_ const UINT code_page,
+                                   const char * byte_string)
 {
     PERL_ARGS_ASSERT_WIN_BYTE_STRING_TO_WSTRING;
 
-    /* Caller must arrange to free the returned string */
+    /* Returns a pointer to a per-thread static buffer which will be
+     * overwritten on the next call.  Caller must copy it if persistence
+     * desired */
 
-    int req_size = MultiByteToWideChar(code_page, 0, byte_string, -1, NULL, 0);
-    if (! req_size) {
-        SET_EINVAL;
-        return NULL;
+    bool tried_once = false;
+
+    /* Calculate space needed if first time or the function has failed due to
+     * lack of space and jumped to the label */
+    if (UNLIKELY(PL_win_wstring == NULL)) {
+     redo:
+        int req_size = MultiByteToWideChar(code_page,
+                                           0,           /* No flags */
+                                           byte_string,
+                                           -1,   /* byte_string length is
+                                                    unknown */
+                                           NULL, /* Unused */
+                                           0     /* Calculate needed length */
+                                          );
+        /* Allocate sufficient memory if needed */
+        set_save_buffer_min_size((Size_t) req_size,
+                                 &PL_win_wstring,
+                                 &PL_win_wstring_size,
+                                 wchar_t);
     }
 
-    wchar_t *wstring;
-    Newx(wstring, req_size, wchar_t);
-
-    if (! MultiByteToWideChar(code_page, 0, byte_string, -1, wstring, req_size))
+    /* Do the conversion assuming there is enough space to succeed */
+    if (MultiByteToWideChar(code_page,
+                            0,              /* No flags */
+                            byte_string,
+                            -1,    /* byte_string length is unknown */
+                            PL_win_wstring,
+                            PL_win_wstring_size))
     {
-        Safefree(wstring);
-        SET_EINVAL;
-        return NULL;
+        return PL_win_wstring;
     }
 
-    return wstring;
+    /* If failed because the buffer is too small, call again to find what size
+     * is needed, resize to that amount, and retry.  'tried_once' is a
+     * safeguard against an unlikely infinite loop */
+    if (! tried_once && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+        tried_once = true;
+        goto redo;
+    }
+
+    return NULL;
 }
 
 #    define Win_utf8_string_to_wstring(s)                                   \
                                     Win_byte_string_to_wstring(CP_UTF8, (s))
 
-static char *
-S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
+static const char *
+S_Win_wstring_to_byte_string(pTHX_ const UINT code_page,
+                                   const wchar_t * wstring)
 {
     PERL_ARGS_ASSERT_WIN_WSTRING_TO_BYTE_STRING;
 
-    /* Caller must arrange to free the returned string */
+    /* Returns a pointer to a per-thread static buffer which will be
+     * overwritten on the next call.  Caller must copy it if persistence
+     * desired */
 
-    int req_size =
-            WideCharToMultiByte(code_page, 0, wstring, -1, NULL, 0, NULL, NULL);
+    bool tried_once = false;
 
-    char *byte_string;
-    Newx(byte_string, req_size, char);
-
-    if (! WideCharToMultiByte(code_page, 0, wstring, -1, byte_string,
-                                                         req_size, NULL, NULL))
-    {
-        Safefree(byte_string);
-        SET_EINVAL;
-        return NULL;
+    /* Calculate space needed if first time or the function has failed due to
+     * lack of space and jumped to the label */
+    if (UNLIKELY(PL_win_bstring == NULL)) {
+      redo:
+        int req_size = WideCharToMultiByte(code_page,
+                                           0,
+                                           wstring,
+                                           -1,
+                                           NULL,
+                                           0,  /* calculate req size */
+                                           NULL,
+                                           NULL);
+        set_save_buffer_min_size((Size_t) req_size,
+                                 &PL_win_bstring, &PL_win_bstring_size,
+                                 char);
     }
 
-    return byte_string;
+    /* Do the conversion assuming there is enough space to succeed */
+    if (WideCharToMultiByte(code_page,
+                            0,      /* No flags */
+                            wstring,
+                            -1,      /* wstring length is unknown */
+                            PL_win_bstring,
+                            PL_win_bstring_size,
+                            NULL,   /* No default char specified */
+                            NULL)) /* Don't care if a default char was
+                                        substituted */
+    {
+        return PL_win_bstring;
+    }
+
+    /* If failed because the buffer is too small, call again to find what size
+     * is needed, resize to that amount, and retry.  'tried_once' is a
+     * safeguard against an unlikely infinite loop */
+    if (! tried_once && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+        tried_once = true;
+        goto redo;
+    }
+
+    return NULL;
 }
 
 #    define Win_wstring_to_utf8_string(ws)                                  \
@@ -4810,8 +4954,9 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     /* Calls _wsetlocale(), converting the parameters/return to/from
      * Perl-expected forms as if plain setlocale() were being called instead.
      *
-     * Caller must arrange for the returned PV to be freed.
-     */
+     * The returned PV points to per-thread static storage which will be
+     * overwritten on the next call.  The caller must make a copy if longer
+     * persistance is needed */
 
     const wchar_t * wlocale = NULL;
 
@@ -4827,14 +4972,12 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
 
     if (! wresult) {
         WSETLOCALE_UNLOCK;
-        Safefree(wlocale);
         return NULL;
     }
 
     const char * result = Win_wstring_to_utf8_string(wresult);
     WSETLOCALE_UNLOCK;
 
-    Safefree(wlocale);
     return result;
 }
 
@@ -4874,29 +5017,21 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
     save_to_buffer(result, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
-#    ifndef USE_PL_CUR_LC_ALL
-
-    Safefree(result);
-
-#  else
+#    ifdef USE_PL_CUR_LC_ALL
 
     /* Here, we need to keep track of LC_ALL, so store the new value.  but if
      * the input locale is NULL, we were just querying, so the original value
      * hasn't changed */
-    if (locale == NULL) {
-        Safefree(result);
-    }
-    else {
+    if (locale != NULL) {
 
         /* If we set LC_ALL directly above, we already know its new value; but
          * if we changed just an individual category, find the new LC_ALL */
         if (category != LC_ALL) {
-            Safefree(result);
             result = wrap_wsetlocale(LC_ALL, NULL);
         }
 
         Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = result;
+        PL_cur_LC_ALL = savepv(result);
     }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "new PL_cur_LC_ALL=%s\n",
