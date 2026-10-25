@@ -926,8 +926,8 @@ XS(w32_SetChildShowWindow)
      * inside the thread_intern structure, the MSWin32 implementation
      * lives in win32/win32.c in the core Perl distribution.
      */
-    dSP;
-    I32 ax = POPMARK;
+    dXSARGS;
+    PERL_UNUSED_VAR(items);
     EXTEND(SP,1);
     XSRETURN_UNDEF;
 }
