@@ -23,6 +23,12 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.44
 
 </div>
 
+<div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
+
+<commit votes="jkeenan" id="1e4eb1ca98a6d1277bad0c0deaf819d4dcdcf239" issue="24933" pull="25000" desc="permit SVt_PVLV in the SvOOK macros because substr() uses it"/>
+
+</div>
+
 <div><h3>Regression Fixes</h3>
 
 </div>
