@@ -293,7 +293,14 @@ my %valid_sections = (
     $callback_scn => {},
     $casting_scn => {},
     $casing_scn => {},
-    $classification_scn => {},
+    $classification_scn => {
+        intern_header => <<~'EOT',
+            Some of these internal macros and functions are helpers for public
+            API elements that classify characters.  Others are used for
+            checking if the characters passed to them require special handling
+            of some sort.
+            EOT
+    },
     $scope_scn => {},
     $compiler_scn => {},
     $directives_scn => {},
@@ -2640,8 +2647,21 @@ sub output ($destpod) {  # Output a complete pod file
 
         my $has_entries = $section_info && keys $section_info->%*;
         if ($has_entries || $has_list) {
-            print $fh "\n", $valid_sections{$section_name}{header}, "\n"
-                 if defined $valid_sections{$section_name}{header};
+            my $which_header;
+            if ($podname =~ /api/) {
+                $which_header = $valid_sections{$section_name}{api_header};
+            }
+            elsif ($podname =~ /intern/) {
+                $which_header = $valid_sections{$section_name}{intern_header};
+            }
+            else {
+                die "Unexpected destination pod '$podname'";
+            }
+
+            $which_header = $valid_sections{$section_name}{header}
+                                                 unless defined $which_header;
+
+            print $fh "\n", $which_header, "\n" if defined $which_header;
 
             # Output any heading-level documentation and delete so won't get in
             # the way later
