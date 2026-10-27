@@ -634,6 +634,20 @@ struct regnode_ssc {
     REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
 } STMT_END
 
+#define CURLY_CAPTURE_PARENS(p)                                               \
+    (assert(OP(p) == CURLYN || OP(p) == CURLYM), PREVENT_LVALUE(FLAGS(p)))
+#define CURLY_CAPTURE_PARENS_SET(p, val) STMT_START {                         \
+    assert(OP(p) == CURLYN || OP(p) == CURLYM);                               \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define CURLYX_CAPTURE_FLOOR(p)                                               \
+    (assert(OP(p) == CURLYX), PREVENT_LVALUE(FLAGS(p)))
+#define CURLYX_CAPTURE_FLOOR_SET(p, val) STMT_START {                         \
+    assert(OP(p) == CURLYX);                                                  \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define LOGICAL_MODE(p)                                                       \
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \

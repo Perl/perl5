@@ -635,8 +635,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (CURLY_HAS_CAPTURES(o))
             sv_catpvf(sv, "<%d:%d>", CURLY_FIRST_CAPTURE(o),
                                    CURLY_LAST_CAPTURE(o));
-        if (op == CURLYM || op == CURLYN || op == CURLYX)
-            sv_catpvf(sv, "[%d]", FLAGS(o)); /* Parenth number */
+        if (op == CURLYM || op == CURLYN)
+            sv_catpvf(sv, "[%d]", CURLY_CAPTURE_PARENS(o));
+        else if (op == CURLYX)
+            sv_catpvf(sv, "[%d]", CURLYX_CAPTURE_FLOOR(o));
         sv_catpvf(sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
