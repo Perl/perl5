@@ -3173,7 +3173,7 @@ Perl_study_chunk(pTHX_
                     /* FALLTHROUGH */
 
                 case POSIXL:
-                    namedclass = classnum_to_namedclass(FLAGS(scan)) + invert;
+                    namedclass = classnum_to_namedclass(POSIX_CLASS(scan)) + invert;
                     if (flags & SCF_DO_STCLASS_AND) {
                         bool was_there = cBOOL(
                                           ANYOF_POSIXL_TEST(data->start_class,
@@ -3213,7 +3213,7 @@ Perl_study_chunk(pTHX_
                     invert = 1;
                     /* FALLTHROUGH */
                 case POSIXA:
-                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)], NULL);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[POSIX_CLASS(scan)], NULL);
                     goto join_posix_and_ascii;
 
                 case NPOSIXD:
@@ -3222,7 +3222,7 @@ Perl_study_chunk(pTHX_
                     /* FALLTHROUGH */
                 case POSIXD:
                 case POSIXU:
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)], NULL);
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[POSIX_CLASS(scan)], NULL);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is

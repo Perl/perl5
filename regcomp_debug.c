@@ -1026,7 +1026,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SvREFCNT_dec(cp_list);
     }
     else if (k == POSIXD || k == NPOSIXD) {
-        U8 index = FLAGS(o) * 2;
+        U8 index = POSIX_CLASS(o) * 2;
         if (index < C_ARRAY_LENGTH(anyofs)) {
             if (*anyofs[index] != '[')  {
                 sv_catpvs(sv, "[");

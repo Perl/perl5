@@ -2410,7 +2410,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
              * See rt #122761 for more details. -- Yves */
             RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
-                 && REGNODE_TYPE(nop) == POSIXD && FLAGS(next) == CC_SPACE_
+                 && REGNODE_TYPE(nop) == POSIXD && POSIX_CLASS(next) == CC_SPACE_
                  && OP(regnext(first)) == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
@@ -11778,7 +11778,7 @@ S_optimize_regclass(pTHX_
 
                 op = POSIXL + *invert * (NPOSIXL - POSIXL);
                 *ret = reg_node(pRExC_state, op);
-                FLAGS(REGNODE_p(*ret)) = classnum;
+                POSIX_CLASS_SET(REGNODE_p(*ret), classnum);
                 return op;
             }
         }
@@ -12396,7 +12396,7 @@ S_optimize_regclass(pTHX_
                             ? type + NPOSIXA - POSIXA
                             : type;
                         *ret = reg_node(pRExC_state, op);
-                        FLAGS(REGNODE_p(*ret)) = posix_class;
+                        POSIX_CLASS_SET(REGNODE_p(*ret), posix_class);
                         SvREFCNT_dec(d_invlist);
                         SvREFCNT_dec(intersection);
                         return op;
