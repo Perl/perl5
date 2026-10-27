@@ -3258,10 +3258,9 @@ Perl_study_chunk(pTHX_
             scan_commit(pRExC_state, data, minlenp, is_inf);
 
         }
-        else if (  REGNODE_TYPE(OP(scan)) == BRANCHJ
+        else if (  (OP(scan) == IFMATCH || OP(scan) == UNLESSM)
                  /* Lookbehind, or need to calculate parens/evals/stclass: */
-                   && (FLAGS(scan) || data || (flags & SCF_DO_STCLASS))
-                   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
+                   && (IS_LOOKBEHIND(scan) || data || (flags & SCF_DO_STCLASS)))
         {
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY
                 || OP(scan) == UNLESSM )
@@ -3296,7 +3295,7 @@ Perl_study_chunk(pTHX_
                 cur_last_close_op = *(data_fake.last_close_opp);
 
                 data_fake.pos_delta = delta;
-                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
+                if ( flags & SCF_DO_STCLASS && !LOOKBEHIND_MAX_CHARS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3319,7 +3318,7 @@ Perl_study_chunk(pTHX_
                 if ((f & SCF_DO_STCLASS_AND) && minnext == 0)
                     ssc_init(pRExC_state, &intrnl);
 
-                if (FLAGS(scan)) {
+                if (LOOKBEHIND_MAX_CHARS(scan)) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
                         || minnext > (I32)U8_MAX
@@ -3335,7 +3334,7 @@ Perl_study_chunk(pTHX_
                      * matches to avoid breakage for those not using this
                      * extension) */
                     if (deltanext)  {
-                        NEXT_OFF_set(scan, deltanext);
+                        LOOKBEHIND_EXTRA_STARTS_SET(scan, deltanext);
                         if (
                             /* See a CLOSE op inside this lookbehind? */
                             cur_last_close_op != *(data_fake.last_close_opp)
@@ -3350,7 +3349,7 @@ Perl_study_chunk(pTHX_
                                 is_positive ? "positive" : "negative");
                         }
                     }
-                    FLAGS(scan) = (U8)minnext + deltanext;
+                    LOOKBEHIND_MAX_CHARS_SET(scan, (U8)minnext + deltanext);
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -3406,7 +3405,7 @@ Perl_study_chunk(pTHX_
                     StructCopy(data, &data_fake, scan_data_t);
                     if ((flags & SCF_DO_SUBSTR) && data->last_found) {
                         f |= SCF_DO_SUBSTR;
-                        if (FLAGS(scan))
+                        if (LOOKBEHIND_MAX_CHARS(scan))
                             scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
                         data_fake.last_found = newSVsv(data->last_found);
                     }
@@ -3421,7 +3420,7 @@ Perl_study_chunk(pTHX_
                 data_fake.pos_delta = delta;
                 if (is_inf)
                     data_fake.flags |= SF_IS_INF;
-                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
+                if ( flags & SCF_DO_STCLASS && !LOOKBEHIND_MAX_CHARS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3439,7 +3438,7 @@ Perl_study_chunk(pTHX_
                                         f, depth+1, mutate_ok);
                 if ((f & SCF_DO_STCLASS_AND) && *minnextp == 0)
                     ssc_init(pRExC_state, &intrnl);
-                if (FLAGS(scan)) {
+                if (LOOKBEHIND_MAX_CHARS(scan)) {
                     assert(0);  /* This code has never been tested since this
                                    is normally not compiled */
                     if (   deltanext < 0
@@ -3452,9 +3451,9 @@ Perl_study_chunk(pTHX_
                     }
 
                     if (deltanext) {
-                        NEXT_OFF_set(scan, deltanext);
+                        LOOKBEHIND_EXTRA_STARTS_SET(scan, deltanext);
                     }
-                    FLAGS(scan) = (U8)*minnextp + deltanext;
+                    LOOKBEHIND_MAX_CHARS_SET(scan, (U8)*minnextp + deltanext);
                 }
 
                 *minnextp += min;
@@ -3483,7 +3482,7 @@ Perl_study_chunk(pTHX_
                                             data_fake.substrs[i].max_offset;
                                 data->substrs[i].minlenp =
                                             data_fake.substrs[i].minlenp;
-                                data->substrs[i].lookbehind += FLAGS(scan);
+                                data->substrs[i].lookbehind += LOOKBEHIND_MAX_CHARS(scan);
                             }
                         }
                     }

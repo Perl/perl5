@@ -1051,14 +1051,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
     else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
-        sv_catpvf(sv, "[%d", -(FLAGS(o)));
-        if (NEXT_OFF(o)) {
-            sv_catpvf(sv, "..-%d", FLAGS(o) - NEXT_OFF(o));
+        sv_catpvf(sv, "[%d", -(LOOKBEHIND_MAX_CHARS(o)));
+        if (LOOKBEHIND_EXTRA_STARTS(o)) {
+            sv_catpvf(sv, "..-%d", LOOKBEHIND_MAX_CHARS(o) - LOOKBEHIND_EXTRA_STARTS(o));
         }
         sv_catpvf(sv, "]");
     }
     else if (op == SBOL)
-        sv_catpvf(sv, " /%s/", FLAGS(o) ? "\\A" : "^");
+        sv_catpvf(sv, " /%s/", SBOL_IS_ABSOLUTE(o) ? "\\A" : "^");
     else if (op == EVAL) {
         if (EVAL_IS_OPTIMISTIC(o))
             sv_catpvf(sv, " optimistic");

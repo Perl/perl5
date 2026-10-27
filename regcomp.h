@@ -655,6 +655,13 @@ struct regnode_ssc {
     FLAGS(p) = (val);                                                         \
 } STMT_END
 
+#define LOOKBEHIND_MAX_CHARS(p)                                               \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM), PREVENT_LVALUE(FLAGS(p)))
+#define LOOKBEHIND_MAX_CHARS_SET(p, val) STMT_START {                         \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM);                             \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define LOGICAL_MODE(p)                                                       \
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
@@ -694,6 +701,22 @@ struct regnode_ssc {
         EVAL_OPTIMISTIC_FLAG : 0);                                            \
 } STMT_END
 
+#define SBOL_IS_ABSOLUTE(p)                                                   \
+    (assert(OP(p) == SBOL), PREVENT_LVALUE(FLAGS(p) != 0))
+#define SBOL_IS_ABSOLUTE_SET(p, val) STMT_START {                             \
+    assert(OP(p) == SBOL);                                                    \
+    FLAGS(p) = cBOOL(val);                                                    \
+} STMT_END
+
+#define LOOKBEHIND_EXTRA_STARTS(p)                                            \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM),                            \
+        PREVENT_LVALUE(NEXT_OFF(p)))
+#define LOOKBEHIND_EXTRA_STARTS_SET(p, val) STMT_START {                      \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM);                             \
+    NEXT_OFF_set((p), (val));                                                 \
+} STMT_END
+
+#define IS_LOOKBEHIND(p) (LOOKBEHIND_MAX_CHARS(p) != 0)
 
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0
