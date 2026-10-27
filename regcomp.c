@@ -2941,7 +2941,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                            : REFFN),
                     num, RExC_nestroot);
     if (RExC_nestroot && num >= (U32)RExC_nestroot)
-        FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
+        REF_IS_VOLATILE_SET(REGNODE_p(ret), TRUE);
     *flagp |= HASWIDTH;
 
     nextchar(pRExC_state);
@@ -6446,7 +6446,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                        : REFF),
                                 num, RExC_nestroot);
                 if (RExC_nestroot && num >= RExC_nestroot)
-                    FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
+                    REF_IS_VOLATILE_SET(REGNODE_p(ret), TRUE);
                 if (OP(REGNODE_p(ret)) == REFF) {
                     RExC_seen_d_op = true;
                 }

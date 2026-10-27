@@ -652,7 +652,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         AV *name_list= NULL;
         U32 parno = (op == ACCEPT)              ? ARG2u(o) :
                    (op == OPEN || op == CLOSE) ? PARNO(o) :
-                                                 ARG1u(o);
+                   (k == GROUPP) ? GROUPP_CAPTURE(o) :
+                   (op >= REFN) ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list = MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -704,10 +705,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         }
         if ( k == REF ) {
-            sv_catpvf(sv, " <%" IVdf ">", (IV)ARG2i(o));
+            sv_catpvf(sv, " <%" IVdf ">", (IV)REF_CAPTURE_SAVE_START(o));
         }
         if ( k == REF && reginfo) {
-            U32 n = ARG1u(o);  /* which paren pair */
+            U32 n = op >= REFN ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
             I32 ln = RXp_OFFS_START(prog,n);
             if (RXp_LASTPAREN(prog) < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
                 sv_catpvf(sv, ": FAIL");
