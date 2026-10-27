@@ -2401,8 +2401,8 @@ Perl_study_chunk(pTHX_
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
 
                 OP(scan) = ANYOFM;
-                ARG1u_SET(scan, *s & mask);
-                FLAGS(scan) = mask;
+                ANYOFM_MATCH_VALUE_SET(scan, *s & mask);
+                ANYOFM_MASK_SET(scan, mask);
                 /* We're not EXACTFish any more, so restudy.
                  * Search for "restudy" in this file to find
                  * a comment with details. */
@@ -2528,8 +2528,8 @@ Perl_study_chunk(pTHX_
                     * case, and the lowest code point of the
                     * pair (which the '&' forces) */
                     OP(next) = ANYOFM;
-                    ARG1u_SET(next, *STRING(next) & mask);
-                    FLAGS(next) = mask;
+                    ANYOFM_MATCH_VALUE_SET(next, *STRING(next) & mask);
+                    ANYOFM_MASK_SET(next, mask);
                 }
 
                 if (flags & SCF_DO_STCLASS) {

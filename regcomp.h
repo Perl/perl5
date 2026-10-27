@@ -620,6 +620,13 @@ struct regnode_ssc {
     ARG1u_SET((p), (val));                                                    \
 } STMT_END
 
+#define ANYOFM_MATCH_VALUE(p)                                                 \
+    (assert(OP(p) == ANYOFM || OP(p) == NANYOFM), PREVENT_LVALUE(ARG1u(p)))
+#define ANYOFM_MATCH_VALUE_SET(p, val) STMT_START {                           \
+    assert(OP(p) == ANYOFM || OP(p) == NANYOFM);                              \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
 #define NEXACTb_BYTE(p)                                                       \
     (assert(OP(p) == NEXACTb), PREVENT_LVALUE(ARG1u(p)))
 #define NEXACTb_BYTE_SET(p, val) STMT_START {                                 \
@@ -688,6 +695,13 @@ struct regnode_ssc {
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
     assert(OP(p) == LOGICAL);                                                 \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define ANYOFM_MASK(p)                                                        \
+    (assert(OP(p) == ANYOFM || OP(p) == NANYOFM), PREVENT_LVALUE(FLAGS(p)))
+#define ANYOFM_MASK_SET(p, val) STMT_START {                                  \
+    assert(OP(p) == ANYOFM || OP(p) == NANYOFM);                              \
     FLAGS(p) = (val);                                                         \
 } STMT_END
 

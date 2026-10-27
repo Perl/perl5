@@ -12256,7 +12256,7 @@ S_optimize_regclass(pTHX_
 
                     /* The argument is the lowest code point */
                     *ret = reg1node(pRExC_state, op, lowest_cp);
-                    FLAGS(REGNODE_p(*ret)) = ANYOFM_mask;
+                    ANYOFM_MASK_SET(REGNODE_p(*ret), ANYOFM_mask);
                 }
             }
 
@@ -13612,15 +13612,15 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n)
      * ANYOFM/NANYOFM node 'n' */
 
     SV * cp_list = new_invlist_(-1);
-    const U8 lowest = (U8) ARG1u(n);
+    const U8 lowest = (U8) ANYOFM_MATCH_VALUE(n);
     unsigned int i;
     U8 count = 0;
-    U8 needed = 1U << PL_bitcount[ (U8) ~ FLAGS(n)];
+    U8 needed = 1U << PL_bitcount[ (U8) ~ ANYOFM_MASK(n)];
 
     /* Starting with the lowest code point, any code point that ANDed with the
      * mask yields the lowest code point is in the set */
     for (i = lowest; i <= 0xFF; i++) {
-        if ((i & FLAGS(n)) == ARG1u(n)) {
+        if ((i & ANYOFM_MASK(n)) == ANYOFM_MATCH_VALUE(n)) {
             cp_list = add_cp_to_invlist(cp_list, i);
             count++;
 

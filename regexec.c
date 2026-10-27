@@ -2637,10 +2637,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-      case ANYOFM_tb_pb: /* ARG1u() is the base byte; FLAGS() the mask byte */
+      case ANYOFM_tb_pb: /* ANYOFM_MATCH_VALUE() is the base byte; ANYOFM_MASK() the mask byte */
       case ANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case ANYOFM_t8_pb:
@@ -2649,13 +2649,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * we do anyway for performance reasons, as otherwise we would have to
          * examine all the continuation characters */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NANYOFM_tb_pb:
       case NANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NANYOFM_t8_pb:
@@ -2663,7 +2663,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                   variants. */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
             (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
-                                        (U8) ARG1u(c), FLAGS(c)));
+                                        (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NEXACTb_tb_pb:
@@ -8349,7 +8349,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) != ARG1u(scan)
+                || (UCHARAT(locinput) & ANYOFM_MASK(scan)) != ANYOFM_MATCH_VALUE(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -8359,7 +8359,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) == ARG1u(scan)
+                || (UCHARAT(locinput) & ANYOFM_MASK(scan)) == ANYOFM_MATCH_VALUE(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -11399,13 +11399,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFM_tb:
         scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) this_eol,
-                                           (U8) ARG1u(p), FLAGS(p));
+                                           (U8) ANYOFM_MATCH_VALUE(p), ANYOFM_MASK(p));
         break;
 
       case NANYOFM_t8:
         while (     hardcount < max
                &&   scan < this_eol
-               &&  (*scan & FLAGS(p)) != ARG1u(p))
+               &&  (*scan & ANYOFM_MASK(p)) != ANYOFM_MATCH_VALUE(p))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -11414,7 +11414,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NANYOFM_tb:
         scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol,
-                                         (U8) ARG1u(p), FLAGS(p));
+                                         (U8) ANYOFM_MATCH_VALUE(p), ANYOFM_MASK(p));
         break;
 
       case NEXACTb_t8:
