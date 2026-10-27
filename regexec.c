@@ -6635,13 +6635,10 @@ S_run_code_block(pTHX_ regexp *rex, regmatch_info *reginfo,
     /* execute the code in the {...} */
 
     dSP;
-    IV before;
     OP * const oop = PL_op;
     COP * const ocurcop = PL_curcop;
     OP *nop;
     CV *newcv;
-    SV *ret;
-    U8 gimme = G_SCALAR;
     RXi_GET_DECL(rex, rexi);
 
 #ifdef DEBUGGING
@@ -6727,6 +6724,7 @@ S_run_code_block(pTHX_ regexp *rex, regmatch_info *reginfo,
             CHANGE_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
         }
         else {
+            const U8 gimme = G_SCALAR;
             PUSH_MULTICALL_FLAGS_PREFIX_(newcv, flags, reginfo->);
         }
         /* see notes above */
@@ -6779,11 +6777,12 @@ S_run_code_block(pTHX_ regexp *rex, regmatch_info *reginfo,
      * first op of the block of interest, rather than the
      * first op of the sub. Also, we don't want to free
      * the savestack frame */
-    before = (IV)(SP-PL_stack_base);
+    const ptrdiff_t before = SP-PL_stack_base;
     PL_op = nop;
     CALLRUNOPS(aTHX);			/* Scalar context. */
     SPAGAIN;
-    if ((IV)(SP-PL_stack_base) == before)
+    SV *ret;
+    if (SP-PL_stack_base == before)
         ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
     else {
         ret = POPs;
@@ -6807,6 +6806,7 @@ S_run_code_block(pTHX_ regexp *rex, regmatch_info *reginfo,
             ret = NULL;
     }
     else {                   /*  /(??{ ... })  */
+        assert(logical == 2);
         /*  if its overloaded, let the regex compiler handle
          *  it; otherwise extract regex, or stringify  */
         if (SvGMAGICAL(ret))
