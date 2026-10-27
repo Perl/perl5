@@ -525,6 +525,51 @@ struct regnode_ssc {
     else ARG2b_SET((p), (val));                                               \
 } STMT_END
 
+#define REF_CAPTURE(p)                                                        \
+    (assert(REGNODE_TYPE(OP(p)) == REF && OP(p) < REFN),                      \
+        PREVENT_LVALUE(ARG1u(p)))
+#define REF_CAPTURE_SET(p, val) STMT_START {                                  \
+    assert(REGNODE_TYPE(OP(p)) == REF && OP(p) < REFN);                       \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define NAMED_CAPTURE_LIST_SLOT(p)                                            \
+    (assert((REGNODE_TYPE(OP(p)) == REF && OP(p) >= REFN) || OP(p) ==         \
+        GROUPPN), PREVENT_LVALUE(ARG1u(p)))
+#define NAMED_CAPTURE_LIST_SLOT_SET(p, val) STMT_START {                      \
+    assert((REGNODE_TYPE(OP(p)) == REF && OP(p) >= REFN) || OP(p) == GROUPPN);\
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define REF_CAPTURE_SAVE_START(p)                                             \
+    (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE(ARG2u(p)))
+#define REF_CAPTURE_SAVE_START_SET(p, val) STMT_START {                       \
+    assert(REGNODE_TYPE(OP(p)) == REF);                                       \
+    ARG2u_SET((p), (val));                                                    \
+} STMT_END
+
+#define GROUPP_CAPTURE(p)                                                     \
+    (assert(OP(p) == GROUPP), PREVENT_LVALUE(ARG1u(p)))
+#define GROUPP_CAPTURE_SET(p, val) STMT_START {                               \
+    assert(OP(p) == GROUPP);                                                  \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define INSUBP_CAPTURE(p)                                                     \
+    (assert(OP(p) == INSUBP), PREVENT_LVALUE(ARG1u(p)))
+#define INSUBP_CAPTURE_SET(p, val) STMT_START {                               \
+    assert(OP(p) == INSUBP);                                                  \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define REF_IS_VOLATILE(p)                                                    \
+    (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE((FLAGS(p) &           \
+        VOLATILE_REF) != 0))
+#define REF_IS_VOLATILE_SET(p, val) STMT_START {                              \
+    assert(REGNODE_TYPE(OP(p)) == REF);                                       \
+    FLAGS(p) = (val) ? VOLATILE_REF : 0;                                      \
+} STMT_END
+
 
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0

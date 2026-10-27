@@ -5126,7 +5126,7 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 
     I32 n;
     RXi_GET_DECL(rex,rexi);
-    SV *sv_dat= MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+    SV *sv_dat= MUTABLE_SV(rexi->data->data[ NAMED_CAPTURE_LIST_SLOT( scan ) ]);
     I32 *nums = (I32*)SvPVX(sv_dat);
 
     for ( n = 0; n < SvIVX(sv_dat); n++ ) {
@@ -8815,7 +8815,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           do_ref:
             type = OP(scan);
-            n = ARG1u(scan);  /* which paren pair */
+            n = REF_CAPTURE(scan);  /* which paren pair */
             if (rex->logical_to_parno) {
                 /* The compiler has already mapped this from logical to
                  * physical; only search the other physical buffers sharing
@@ -8889,8 +8889,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             locinput += ln;
         }
         ref_yes:
-            if (FLAGS(scan)) { /* == VOLATILE_REF but only other value is 0 */
-                ST.cp = regcppush(rex, ARG2u(scan) - 1, maxopenparen);
+            if (REF_IS_VOLATILE(scan)) { /* == VOLATILE_REF but only other value is 0 */
+                ST.cp = regcppush(rex, REF_CAPTURE_SAVE_START(scan) - 1, maxopenparen);
                 REGCP_SET(ST.lastcp);
                 PUSH_STATE_GOTO(REF_next, next, locinput, loceol,
                                 script_run_begin);
@@ -9461,7 +9461,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
 
         case GROUPP:  /*  (?(1))  */
-            n = ARG1u(scan);  /* which paren pair */
+            n = GROUPP_CAPTURE(scan);  /* which paren pair */
             sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) != -1);
             break;
 
@@ -9471,7 +9471,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case INSUBP:   /*  (?(R))  */
-            n = ARG1u(scan);
+            n = INSUBP_CAPTURE(scan);
             /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
              * of SCAN is already set up as matches a eval.close_paren */
             sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
