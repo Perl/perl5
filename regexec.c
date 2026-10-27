@@ -202,8 +202,8 @@ static const char non_utf8_target_but_utf8_required[]
         else if (type == PLUS)                                              \
             rn = REGNODE_AFTER_type(rn,tregnode_PLUS);                      \
         else if (type == IFMATCH)                                           \
-            rn = (FLAGS(rn) == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) \
-                                  : rn + ARG1u(rn);                         \
+            rn = (!IS_LOOKBEHIND(rn)) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) \
+                                  : rn + SUBPATTERN_CONTINUE_OFFSET(rn);                         \
         else rn += NEXT_OFF(rn);                                            \
     }                                                                       \
 } STMT_END
@@ -10603,10 +10603,10 @@ NULL
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
             ST.prev_match_end= match_end;
-            ST.count = NEXT_OFF(scan) + 1; /* next_off repurposed to be
+            ST.count = LOOKBEHIND_EXTRA_STARTS(scan) + 1; /* next_off repurposed to be
                                               lookbehind count, requires
                                               non-zero flags */
-            if (! FLAGS(scan)) {    /* 'flags' zero means lookahed */
+            if (! LOOKBEHIND_MAX_CHARS(scan)) {    /* 'flags' zero means lookahed */
 
                 /* Lookahead starts here and ends at the normal place */
                 ST.start = locinput;
@@ -10614,7 +10614,7 @@ NULL
                 match_end = NULL;
             }
             else {
-                PERL_UINT_FAST8_T back_count = FLAGS(scan);
+                PERL_UINT_FAST8_T back_count = LOOKBEHIND_MAX_CHARS(scan);
                 char * s;
                 match_end = locinput;
 

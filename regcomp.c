@@ -2016,7 +2016,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (OP(first) == OPEN)
                 sawopen = 1;
             else
-            if (OP(first) == IFMATCH && !FLAGS(first))
+            if (OP(first) == IFMATCH && !IS_LOOKBEHIND(first))
                 /* for now we can't handle lookbehind IFMATCH */
                 sawlookahead = 1;
             else
@@ -2402,7 +2402,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          */
         if (REGNODE_TYPE(fop) == NOTHING && nop == END)
             RExC_rx->extflags |= RXf_NULL;
-        else if ((fop == MBOL || (fop == SBOL && !FLAGS(first))) && nop == END)
+        else if ((fop == MBOL || (fop == SBOL && !SBOL_IS_ABSOLUTE(first))) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
              * produced by parsing /\A/, and not when parsing /^/. This is
              * very important for the split code as there we want to
@@ -4707,7 +4707,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             reginsert(pRExC_state, node, ret, depth+1);
-            FLAGS(REGNODE_p(ret)) = flag;
+            if (node != SUSPEND)
+                LOOKBEHIND_MAX_CHARS_SET(REGNODE_p(ret), flag);
             if (! REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL)))
             {
                 REQUIRE_BRANCHJ(flagp, 0);
@@ -5967,7 +5968,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, SBOL);
                 /* SBOL is shared with /^/ so we set the flags so we can tell
                  * /\A/ from /^/ in split. */
-                FLAGS(REGNODE_p(ret)) = 1;
+                SBOL_IS_ABSOLUTE_SET(REGNODE_p(ret), TRUE);
             }
             goto finish_meta_pat;
         case 'G':
