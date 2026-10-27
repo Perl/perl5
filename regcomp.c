@@ -4097,7 +4097,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if (is_logical) {
                     regnode_offset eval;
                     ret = reg_node(pRExC_state, LOGICAL);
-                    FLAGS(REGNODE_p(ret)) = 2;
+                    LOGICAL_MODE_SET(REGNODE_p(ret), 2);
 
                     eval = reg2node(pRExC_state, EVAL,
                                        n,
@@ -4106,14 +4106,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                         * return value */
                                        RExC_flags & RXf_PMf_COMPILETIME
                                       );
-                    FLAGS(REGNODE_p(eval)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+                    EVAL_IS_OPTIMISTIC_SET(REGNODE_p(eval), is_optimistic);
                     if (! REGTAIL(pRExC_state, ret, eval)) {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
                     return ret;
                 }
                 ret = reg2node(pRExC_state, EVAL, n, 0);
-                FLAGS(REGNODE_p(ret)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+                EVAL_IS_OPTIMISTIC_SET(REGNODE_p(ret), is_optimistic);
 
                 return ret;
             }
@@ -4158,7 +4158,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     regnode_offset tail;
 
                     ret = reg_node(pRExC_state, LOGICAL);
-                    FLAGS(REGNODE_p(ret)) = 1;
+                    LOGICAL_MODE_SET(REGNODE_p(ret), 1);
 
                     tail = reg(pRExC_state, 1, &flag, depth+1);
                     RETURN_FAIL_ON_RESTART(flag, flagp);

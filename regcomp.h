@@ -583,12 +583,49 @@ struct regnode_ssc {
     ARG2i_SET((p), (val));                                                    \
 } STMT_END
 
+#define EVAL_CODE_DATA_SLOT(p)                                                \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(ARG1u(p)))
+#define EVAL_CODE_DATA_SLOT_SET(p, val) STMT_START {                          \
+    assert(OP(p) == EVAL);                                                    \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define EVAL_COMPILE_FLAGS(p)                                                 \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(ARG2i(p)))
+#define EVAL_COMPILE_FLAGS_SET(p, val) STMT_START {                           \
+    assert(OP(p) == EVAL);                                                    \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
+#define LOGICAL_MODE(p)                                                       \
+    (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
+#define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
+    assert(OP(p) == LOGICAL);                                                 \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define REF_IS_VOLATILE(p)                                                    \
     (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE((FLAGS(p) &           \
         VOLATILE_REF) != 0))
 #define REF_IS_VOLATILE_SET(p, val) STMT_START {                              \
     assert(REGNODE_TYPE(OP(p)) == REF);                                       \
     FLAGS(p) = (val) ? VOLATILE_REF : 0;                                      \
+} STMT_END
+
+#define EVAL_NODE_FLAGS(p)                                                    \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(FLAGS(p)))
+#define EVAL_NODE_FLAGS_SET(p, val) STMT_START {                              \
+    assert(OP(p) == EVAL);                                                    \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define EVAL_IS_OPTIMISTIC(p)                                                 \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE((FLAGS(p) & EVAL_OPTIMISTIC_FLAG)  \
+        != 0))
+#define EVAL_IS_OPTIMISTIC_SET(p, val) STMT_START {                           \
+    assert(OP(p) == EVAL);                                                    \
+    FLAGS(p) = (FLAGS(p) & ~EVAL_OPTIMISTIC_FLAG) | ((val) ?                  \
+        EVAL_OPTIMISTIC_FLAG : 0);                                            \
 } STMT_END
 
 

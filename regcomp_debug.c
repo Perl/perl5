@@ -753,7 +753,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
-        sv_catpvf(sv, "[%d]", FLAGS(o));
+        sv_catpvf(sv, "[%d]", LOGICAL_MODE(o));
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         U8 * bitmap;
@@ -1058,7 +1058,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (op == SBOL)
         sv_catpvf(sv, " /%s/", FLAGS(o) ? "\\A" : "^");
     else if (op == EVAL) {
-        if (FLAGS(o) & EVAL_OPTIMISTIC_FLAG)
+        if (EVAL_IS_OPTIMISTIC(o))
             sv_catpvf(sv, " optimistic");
     }
 
